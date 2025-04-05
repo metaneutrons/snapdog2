@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="256" cy="256" r="248" fill="#3498DB" stroke="#2980B9" stroke-width="8"/>
+
+  <!-- Dog Ear Left -->
+  <path d="M145 135C125 100 95 90 85 130C75 170 115 180 145 165V135Z" fill="#E67E22" stroke="#D35400" stroke-width="8"/>
+
+  <!-- Dog Ear Right -->
+  <path d="M367 135C387 100 417 90 427 130C437 170 397 180 367 165V135Z" fill="#E67E22" stroke="#D35400" stroke-width="8"/>
+
+  <!-- Dog Face -->
+  <ellipse cx="256" cy="270" rx="160" ry="150" fill="#F39C12" stroke="#E67E22" stroke-width="12"/>
+
+  <!-- Dog Snout -->
+  <ellipse cx="256" cy="310" rx="75" ry="65" fill="#E67E22" stroke="#D35400" stroke-width="8"/>
+
+  <!-- Dog Nose -->
+  <ellipse cx="256" cy="290" rx="30" ry="20" fill="#34495E" stroke="#2C3E50" stroke-width="6"/>
+
+  <!-- Eyes -->
+  <circle cx="190" cy="230" r="22" fill="white" stroke="#34495E" stroke-width="6"/>
+  <circle cx="322" cy="230" r="22" fill="white" stroke="#34495E" stroke-width="6"/>
+
+  <!-- Pupils -->
+  <circle cx="190" cy="230" r="10" fill="#34495E"/>
+  <circle cx="322" cy="230" r="10" fill="#34495E"/>
+
+  <!-- Sound Wave Left -->
+  <path d="M115 220C85 220 65 260 85 290" stroke="#ECF0F1" stroke-width="12" stroke-linecap="round"/>
+  <path d="M85 190C40 200 25 260 55 320" stroke="#ECF0F1" stroke-width="12" stroke-linecap="round"/>
+
+  <!-- Sound Wave Right -->
+  <path d="M397 220C427 220 447 260 427 290" stroke="#ECF0F1" stroke-width="12" stroke-linecap="round"/>
+  <path d="M427 190C472 200 487 260 457 320" stroke="#ECF0F1" stroke-width="12" stroke-linecap="round"/>
+
+</svg>
