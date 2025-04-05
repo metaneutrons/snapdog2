@@ -1,0 +1,12 @@
+<Project>
+  <PropertyGroup>
+    <GitVersion_SemVer>0.1.0</GitVersion_SemVer>
+    <GitVersion_MajorMinorPatch>0.1.0</GitVersion_MajorMinorPatch>
+    <GitVersion_PreReleaseLabel></GitVersion_PreReleaseLabel>
+    <GitVersion_PreReleaseNumber>0</GitVersion_PreReleaseNumber>
+    <GitVersion_PreReleaseTagWithDash></GitVersion_PreReleaseTagWithDash>
+    <GitVersion_AssemblySemVer>0.1.0.0</GitVersion_AssemblySemVer>
+    <GitVersion_AssemblySemFileVer>0.1.0.0</GitVersion_AssemblySemFileVer>
+    <GitVersion_InformationalVersion>0.1.0</GitVersion_InformationalVersion>
+  </PropertyGroup>
+</Project>
