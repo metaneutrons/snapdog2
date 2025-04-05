@@ -1,0 +1,58 @@
+{
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  "editor.rulers": [
+    120
+  ],
+  "editor.renderWhitespace": "all",
+  "editor.tabSize": 4,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "csharp.testCodeLens.enabled": true,
+  "omnisharp.enableRoslynAnalyzers": true,
+  "omnisharp.enableEditorConfigSupport": true,
+  "omnisharp.useEditorFormattingSettings": true,
+  "dotnet.completion.showCompletionItemsFromUnimportedNamespaces": true,
+  "dotnet.server.useOmnisharp": true,
+  "[csharp]": {
+    "editor.defaultFormatter": "ms-dotnettools.csharp"
+  },
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/bin": true,
+    "**/obj": true
+  },
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/**": true,
+    "**/bin/**": true,
+    "**/obj/**": true
+  },
+  "dotnet.codeLens.enableReferencesCodeLens": true,
+  "cSpell.words": [
+    "APIKEY",
+    "datapoints",
+    "MediatR",
+    "Newtonsoft",
+    "prometheus",
+    "Schmieder",
+    "Serilog",
+    "snapcast",
+    "Snapcast",
+    "snapdog",
+    "Snapdog",
+    "SNAPDOG",
+    "snapsinks",
+    "Swashbuckle"
+  ]
+}

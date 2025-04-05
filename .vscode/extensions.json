@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "ms-dotnettools.csharp",
+    "ms-dotnettools.vscode-dotnet-runtime",
+    "formulahendry.dotnet-test-explorer",
+    "kreativ-software.csharpextensions",
+    "ryanluker.vscode-coverage-gutters",
+    "josefpihrt-vscode.roslynator",
+    "editorconfig.editorconfig",
+    "streetsidesoftware.code-spell-checker",
+  ]
+}
