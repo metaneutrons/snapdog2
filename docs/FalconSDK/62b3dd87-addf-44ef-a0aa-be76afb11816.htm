@@ -1,0 +1,104 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1
+id="deploy-falcon-with-your-application">Deploy Falcon with your
+application</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+How to deploy Falcon SDK together with your application
+
+### Procedure title
+
+1.  If you are deploying for the .NET Framework the following software
+    must be installed on the target system:
+
+    - .NET Framework 4.8 (or higher)
+
+    When deploying as a .NET 6 (or higher) Application you have the
+    option to deploy as a framework dependent application (FDD) or as a
+    self-contained application (SCD). For FDD application the .NET
+    runtime must be installed on the target system. An SCD application
+    does not need any framework to be installed. For more Information
+    see <span class="media">![External
+    Link](../media/ExternalLink.png)</span><a href="https://learn.microsoft.com/en-us/dotnet/core/deploying/"
+    target="_blank" rel="noopener noreferrer">Microsoft documentation</a>
+
+2.  The following Falcon SDK files must be installed on the target
+    system in the application directory:
+
+    - Knx.Falcon.Sdk.dll
+
+    - Knx.Falcon.dll
+
+    - Knx.Falcon.ApplicationData.dll (if used)
+
+    - knx\_interfaces.xml (if USB shall be used)
+
+    - knx\_master.xml in schema version 2.3 (optional)
+
+    In addition, the following dependencies might be required:
+
+    - <a href="https://www.nuget.org/packages/Portable.BouncyCastle/1.9.0"
+      target="_blank" rel="noopener noreferrer">Bouncy Castle 1.9.0</a>
+      (required only if KNX Point API is used)
+    - <a href="https://www.nuget.org/packages/log4net/2.0.12" target="_blank"
+      rel="noopener noreferrer">log4net 2.0.12</a> (required only if
+      [logging](e73c9fc8-1834-4088-80a5-1d8e41f7fcaf.htm) is configured
+      to use log4net)
+    - <a
+      href="https://www.nuget.org/packages/Microsoft.Bcl.AsyncInterfaces/7.0.0"
+      target="_blank" rel="noopener noreferrer">Microsoft.Bcl.AsyncInterfaces
+      7.0.0</a> (required only for .NET Framework)
+    - MeaMod.DNS.dll - a signed version of
+      <a href="https://www.nuget.org/packages/MeaMod.DNS/1.0.70"
+      target="_blank" rel="noopener noreferrer">MeaMod.DNS 1.0.70</a>
+      (required only if KNX Point API is used)
+    - <a href="https://www.nuget.org/packages/Microsoft.Win32.Registry/5.0.0"
+      target="_blank" rel="noopener noreferrer">Microsoft.Win32.Registry
+      5.0.0</a> (required only for .NET 6 or higher on Windows)
+    - <a href="https://www.nuget.org/packages/Newtonsoft.Json/13.0.3"
+      target="_blank" rel="noopener noreferrer">Newtonsoft.Json 13.0.3</a>
+      (required only if KNX Point API is used)
+    - <a href="https://www.nuget.org/packages/System.Formats.Cbor/7.0.0"
+      target="_blank" rel="noopener noreferrer">System.Formats.Cbor 7.0.0</a>
+      (required only if KNX Point API is used)
+    - <a href="https://www.nuget.org/packages/System.Memory/4.5.5"
+      target="_blank" rel="noopener noreferrer">System.Memory 4.5.5</a>
+    - <a href="https://www.nuget.org/packages/System.Net.Http/4.3.4"
+      target="_blank" rel="noopener noreferrer">System.Net.Http 4.3.4</a>
+      (required only if KNX Point API is used)
+    - <a
+      href="https://www.nuget.org/packages/System.Runtime.CompilerServices.Unsafe/6.0.0"
+      target="_blank"
+      rel="noopener noreferrer">System.Runtime.CompilerServices.Unsafe
+      6.0.0</a>
+    - <a
+      href="https://www.nuget.org/packages/System.Security.Cryptography.ProtectedData/7.0.0"
+      target="_blank"
+      rel="noopener noreferrer">System.Security.Cryptography.ProtectedData
+      7.0.0</a>
+    - <a
+      href="https://www.nuget.org/packages/System.Security.Cryptography.Xml/7.0.0"
+      target="_blank"
+      rel="noopener noreferrer">System.Security.Cryptography.Xml 7.0.0</a>
+    - <a href="https://www.nuget.org/packages/System.Threading.Channels/5.0.0"
+      target="_blank" rel="noopener noreferrer">System.Threading.Channels
+      5.0.0</a>
+    - <a
+      href="https://www.nuget.org/packages/System.Threading.Tasks.Dataflow/7.0.0"
+      target="_blank"
+      rel="noopener noreferrer">System.Threading.Tasks.Dataflow 7.0.0</a>
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

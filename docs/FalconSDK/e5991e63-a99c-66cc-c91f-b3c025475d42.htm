@@ -1,0 +1,586 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1
+id="usbconnectorparameters-class">UsbConnectorParameters Class</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+This class provides parameters used to open a bus connection via a KNX
+USB interface.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Inheritance Hierarchy</span>
+
+<span class="nolink">System<span id="LSTB461DA1D_0"></span></span>
+
+Object  
+  [Knx.Falcon.Configuration<span id="LSTB461DA1D_1"></span>](a00d43d8-ca1f-e911-2f70-bea37d855086.htm)
+
+ConnectorParameters  
+    <span class="selflink">Knx.Falcon.Configuration<span id="LSTB461DA1D_2"></span></span>
+
+UsbConnectorParameters  
+
+**Namespace:**
+ [Knx.Falcon.Configuration](8057f884-553e-ad7e-77ee-8d8d0f07a343.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID1EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID1EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public sealed class UsbConnectorParameters : ConnectorParameters
+
+    Public NotInheritable Class UsbConnectorParameters
+        Inherits ConnectorParameters
+
+    public ref class UsbConnectorParameters sealed : public ConnectorParameters
+
+    [<SealedAttribute>]
+    type UsbConnectorParameters =  
+        class
+            inherit ConnectorParameters
+        end
+
+The <span class="selflink">UsbConnectorParameters</span> type exposes
+the following members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />Constructors</span>
+
+<table id="constructorList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="b23ffdf3-404d-c50c-efc4-2019d02dfb31.htm">UsbConnectorParameters</a></td>
+<td><div class="summary">
+Initializes a new instance of the <span
+class="selflink">UsbConnectorParameters</span> class.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID4RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID4RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID4RBToggle"
+class="collapseToggle" />Properties</span>
+
+<table id="propertyList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="7fcdd66f-ddee-1cf5-07a9-be75886db28d.htm">AutoReconnect</a></td>
+<td><div class="summary">
+When set to <span class="keyword"><span
+id="LSTB461DA1D_3"></span></span>
+, Falcon tries to re-establish a broken connection cyclically. Default
+value: <span class="keyword"><span id="LSTB461DA1D_4"></span></span>
+.
+</div>
+(Inherited from <a
+href="a00d43d8-ca1f-e911-2f70-bea37d855086.htm">ConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="fefecde0-ced9-b326-6a15-10374f2fc4fa.htm">DevicePath</a></td>
+<td><div class="summary">
+The device (HID) path to open. Default value: <span
+class="keyword"><span id="LSTB461DA1D_5"></span></span>
+.
+</div></td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="d7e36e27-46ed-f990-2b51-9b7313ca8557.htm">IsSecure</a></td>
+<td><div class="summary">
+Gets a value indicating if transport security is actually used (only for
+<a
+href="aa3cdbe5-ff2c-32b3-ce3d-ced14b71157a.htm">IpRoutingConnectorParameters</a>,
+<a
+href="4305d8f0-2c63-674a-cad7-aa0046c8ae3d.htm">IpTunnelingConnectorParameters</a>,
+and <a
+href="8904df95-0e73-fe8c-9db8-435ab3005170.htm">IpDeviceManagementConnectorParameters</a>)
+</div>
+(Inherited from <a
+href="a00d43d8-ca1f-e911-2f70-bea37d855086.htm">ConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="1b024cac-92e3-434a-e6cd-48bcf0f36a8f.htm">KnxManufacturerId</a></td>
+<td><div class="summary">
+The KNX Manufacturer Id read from knx_interfaces.xml (informative). May
+be <span class="keyword"><span id="LSTB461DA1D_6"></span></span>
+.
+</div></td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="4bf73440-af33-299f-96e4-06a27570a63d.htm">Name</a></td>
+<td><div class="summary">
+Gets or sets the name of the interface (informative). Default value:
+<span class="keyword"><span id="LSTB461DA1D_7"></span></span>
+.
+</div>
+(Inherited from <a
+href="a00d43d8-ca1f-e911-2f70-bea37d855086.htm">ConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="dafdde8f-a87f-4eb4-23df-1e9c15703f1e.htm">PreferredAddressToOpen</a></td>
+<td><div class="summary">
+The preferred Individual Address to open. Default value: <span
+class="keyword"><span id="LSTB461DA1D_8"></span></span>
+.
+</div></td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="4a653407-14c9-9619-db02-6c42562f93d9.htm">PromiscuousMode</a></td>
+<td><div class="summary">
+Only for USB Busmon mode: When set to <span class="keyword"><span
+id="LSTB461DA1D_9"></span></span>
+, Falcon does not filter by domain address. Default value: <span
+class="keyword"><span id="LSTB461DA1D_10"></span></span>
+.
+</div>
+(Inherited from <a
+href="a00d43d8-ca1f-e911-2f70-bea37d855086.htm">ConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="ea7c2355-6e32-0e97-62e2-35f869a882f0.htm">RFMulti</a></td>
+<td><div class="summary">
+Indicates whether the KNX RF USB interface is configured as "KNX RF
+Multi" (<span class="keyword"><span id="LSTB461DA1D_11"></span></span>
+) or "KNX RF Ready" (<span class="keyword"><span
+id="LSTB461DA1D_12"></span></span>
+) or left unchanged (<span class="keyword"><span
+id="LSTB461DA1D_13"></span></span>
+). Default value: <span class="keyword"><span
+id="LSTB461DA1D_14"></span></span>
+.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="3b1c2517-947a-0d6a-cf97-4ee17d9b6175.htm">SerialNumber</a></td>
+<td><div class="summary">
+The preferred KNX serial number to open. Default value: <a
+href="44f0792f-441d-4c8f-4ece-24cff24b35b2.htm">None</a>.
+</div></td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="ecac272f-022b-9cfa-3c1b-53a997cfd2d7.htm">SupportsSecurity</a></td>
+<td><div class="summary">
+Gets a value indicating if this connector type supports transport
+security (routing and IP unicast connectors)
+</div>
+(Inherited from <a
+href="a00d43d8-ca1f-e911-2f70-bea37d855086.htm">ConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="f9e76ba2-d616-b283-314a-37ad625ddd29.htm">Type</a></td>
+<td><div class="summary">
+Always returns <a
+href="05dec6a9-abcf-6b73-4f02-7df0119e2e7b.htm">Usb</a>, as this is the
+USB specific parameter class.
+</div>
+(Overrides <a
+href="22a22073-4dc2-16d3-45d4-695c6223c596.htm">ConnectorParameters<span
+id="LSTB461DA1D_15"></span></a>
+Type.)</td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID5RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID5RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID5RBToggle"
+class="collapseToggle" />Methods</span>
+
+<table id="methodList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="0dac58fc-65ae-bd64-aa39-1254491f47c2.htm">Equals(ConnectorParameters)</a></td>
+<td><div class="summary">
+Indicates whether the current object is equal to another object of the
+same type.
+</div>
+(Inherited from <a
+href="a00d43d8-ca1f-e911-2f70-bea37d855086.htm">ConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="803434b4-1f80-33d3-de1a-fa2d609f4e8e.htm">Equals(Object)</a></td>
+<td><div class="summary">
+Determines whether the specified object is equal to the current object.
+</div>
+(Overrides <a
+href="a1b4dd64-32d2-0351-41bb-78486e0ebb2c.htm">ConnectorParameters<span
+id="LSTB461DA1D_16"></span></a>
+Equals(Object).)</td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="c5878a71-9d81-9039-3aa5-c2616e3af5ac.htm">FromAddress</a></td>
+<td><div class="summary">
+Constructs a <span class="selflink">UsbConnectorParameters</span> object
+which is used to opens the USB interface with the specified individual
+address.
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="b8ad971c-6c14-e4f0-935d-dcbff1adb613.htm">FromDiscovery</a></td>
+<td><div class="summary">
+Constructs a <span class="selflink">UsbConnectorParameters</span> object
+from the result of <a
+href="feded26f-c529-fd31-0102-ad0c60eb19d8.htm">GetAttachedUsbDevices<span
+id="LSTB461DA1D_17"></span></a>
+.
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="8236ecb4-2a18-34be-272e-372f52116ac6.htm">FromSerialNumber</a></td>
+<td><div class="summary">
+Constructs a <span class="selflink">UsbConnectorParameters</span> object
+which is used to opens the USB interface with the specified individual
+address.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="28eb5941-224a-0143-b77a-f07c95ecab7f.htm">GetHashCode</a></td>
+<td><div class="summary">
+Serves as the default hash function.
+</div>
+(Overrides <a
+href="ade7edc2-3b89-0a63-0a8f-76239bdc4744.htm">ConnectorParameters<span
+id="LSTB461DA1D_18"></span></a>
+GetHashCode<span id="LSTB461DA1D_19"></span>
+.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">GetType</span></td>
+<td><div class="summary">
+Gets the <span class="nolink">Type</span> of the current instance.
+</div>
+(Inherited from <span class="nolink">Object</span>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="1375888f-f171-4348-0667-272cbb0dcb25.htm">IsSameInterface</a></td>
+<td><div class="summary">
+Determines whether the specified <a
+href="a00d43d8-ca1f-e911-2f70-bea37d855086.htm">ConnectorParameters</a>
+object refers to the same interface as the current <a
+href="a00d43d8-ca1f-e911-2f70-bea37d855086.htm">ConnectorParameters</a>
+object.
+</div>
+(Overrides <a
+href="9ac2b0c6-8742-fc92-b102-f2a07fb7cb40.htm">ConnectorParameters<span
+id="LSTB461DA1D_20"></span></a>
+IsSameInterface(ConnectorParameters).)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="d18e278b-37d3-6c90-6a0f-0a47c17784fe.htm">LoadSecurityDataAsync(Stream,
+SecureString)</a></td>
+<td><div class="summary">
+Load the security configuration from a keyring file (*.knxkeys) exported
+from ETS.
+</div>
+(Inherited from <a
+href="a00d43d8-ca1f-e911-2f70-bea37d855086.htm">ConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="7e728d5b-2ade-9d9b-9068-0700b83df9a4.htm">LoadSecurityDataAsync(String,
+SecureString)</a></td>
+<td><div class="summary">
+Load the security configuration from a keyring file (*.knxkeys) exported
+from ETS.
+</div>
+(Inherited from <a
+href="a00d43d8-ca1f-e911-2f70-bea37d855086.htm">ConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="d4bda8f9-6aa8-d776-9db2-bf6085e37f8e.htm">LoadSecurityDataAsync(Stream,
+SecureString, Boolean)</a></td>
+<td><div class="summary">
+Load the security configuration from a keyring file (*.knxkeys) exported
+from ETS.
+</div>
+(Inherited from <a
+href="a00d43d8-ca1f-e911-2f70-bea37d855086.htm">ConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="86136476-8b63-86ac-1bee-c3e76effbb95.htm">ToConnectionString<span
+id="LSTB461DA1D_21"></span></a></td>
+<td><div class="summary">
+Returns a string representation of the <a
+href="a00d43d8-ca1f-e911-2f70-bea37d855086.htm">ConnectorParameters</a>
+object. This can be converted back to a parameter object using <a
+href="b00770e9-c0af-1de2-89d2-2b36f0884e61.htm">FromConnectionString(String)</a>.
+</div>
+(Inherited from <a
+href="a00d43d8-ca1f-e911-2f70-bea37d855086.htm">ConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="e122a924-cd4f-bd61-5e98-263378a914b6.htm">ToConnectionString(SecureString)</a></td>
+<td><div class="summary">
+Returns a string representation of the <a
+href="a00d43d8-ca1f-e911-2f70-bea37d855086.htm">ConnectorParameters</a>
+object where the security relevant parameters are included encrypted
+with a password. This can be converted back to a parameter object using
+<a
+href="2c3f6110-f08f-75ce-c807-552b3cb15545.htm">FromConnectionString(String,
+SecureString)</a>.
+</div>
+(Inherited from <a
+href="a00d43d8-ca1f-e911-2f70-bea37d855086.htm">ConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="19d45236-7740-28bd-ad48-c6cee0dc9c4c.htm">ToString</a></td>
+<td><div class="summary">
+Returns a string that represents the current object.
+</div>
+(Inherited from <a
+href="a00d43d8-ca1f-e911-2f70-bea37d855086.htm">ConnectorParameters</a>.)</td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID6RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID6RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID6RBToggle"
+class="collapseToggle" />Remarks</span>
+
+The parameters are used in the following way to determine which USB
+connection shall be opened:
+
+- If [DevicePath](fefecde0-ced9-b326-6a15-10374f2fc4fa.htm) is set, it
+  is first tried to open the USB interface with this USB device path. If
+  this fails, the algorithm continues with the next step.
+- If [SerialNumber](3b1c2517-947a-0d6a-cf97-4ee17d9b6175.htm) is not
+  [None](44f0792f-441d-4c8f-4ece-24cff24b35b2.htm), the connected USB
+  interface with this KNX serial number is opened. If no USB interfaces
+  with this KNX serial number is found, opening fails.
+- If [PreferredAddressToOpen](dafdde8f-a87f-4eb4-23df-1e9c15703f1e.htm)
+  is set, the connected USB interface with this individual address is
+  opened. If no or multiple USB interfaces with this individual address
+  are found, opening fails.
+- The first available USB interface is opened.
+
+**Connection string support**
+
+Connection String
+
+<a href="#" id="ID1EAFCABA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID1EAFCABA&#39;);return false;"
+title="Copy">Copy</a>
+
+    "Type=Usb;DevicePath=usbpath"
+
+Connection String
+
+<a href="#" id="ID1EAECABA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID1EAECABA&#39;);return false;"
+title="Copy">Copy</a>
+
+    "Type=Usb;PreferredAddressToOpen=indaddr"
+    e.g. "Type=USB;PreferredAddressToOpen=1.1.250"
+
+Connection String
+
+<a href="#" id="ID1EADCABA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID1EADCABA&#39;);return false;"
+title="Copy">Copy</a>
+
+    "Type=Usb;SerialNumber=serno"
+    e.g. "Type=USB;SerialNumber=00FA:01020304"
+
+Connection String
+
+<a href="#" id="ID1EACCABA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID1EACCABA&#39;);return false;"
+title="Copy">Copy</a>
+
+    "Type=Usb;...;RFMulti=/"
+
+Connection String
+
+<a href="#" id="ID1EABCABA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID1EABCABA&#39;);return false;"
+title="Copy">Copy</a>
+
+    "Type=Usb;...;AutoReconnect=/"
+
+If parts of the connection string are omitted, the default values of the
+corresponding properties are used.
+
+**Additional information**
+
+On Linux, the user running Falcon must be granted read and write access
+to the USB HID device, e.g. using
+
+Shell
+
+<a href="#" id="ID1EAAAABA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID1EAAAABA&#39;);return false;"
+title="Copy">Copy</a>
+
+    sudo chmod a+rw /dev/hidraw0
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID7RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID7RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID7RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[Knx.Falcon.Configuration
+Namespace](8057f884-553e-ad7e-77ee-8d8d0f07a343.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

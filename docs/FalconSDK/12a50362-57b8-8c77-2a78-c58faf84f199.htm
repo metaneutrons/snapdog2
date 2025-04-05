@@ -1,0 +1,118 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn">IndividualAddress<span
+id="LST812E80CE_0"></span>
+TryParseExact Method</td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Parse the individual address string.
+
+**Namespace:**  [Knx.Falcon](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public static bool TryParseExact(
+        string addressString,
+        string format,
+        out IndividualAddress individualAddress
+    )
+
+    Public Shared Function TryParseExact ( 
+        addressString As String,
+        format As String,
+        <OutAttribute> ByRef individualAddress As IndividualAddress
+    ) As Boolean
+
+    public:
+    static bool TryParseExact(
+        String^ addressString, 
+        String^ format, 
+        [OutAttribute] IndividualAddress% individualAddress
+    )
+
+    static member TryParseExact : 
+            addressString : string * 
+            format : string * 
+            individualAddress : IndividualAddress byref -> bool 
+
+#### Parameters
+
+<span class="parameter">addressString</span>  
+Type: <span class="nolink">System<span id="LST812E80CE_1"></span></span>
+
+String  
+The address string; see [ParseExact(String,
+String)](4009bb04-b82a-7f38-d1c0-2588c50c6878.htm) for accepted formats.
+
+<span class="parameter">format</span>  
+Type: <span class="nolink">System<span id="LST812E80CE_2"></span></span>
+
+String  
+The accepted format
+
+<span class="parameter">individualAddress</span>  
+Type: [Knx.Falcon<span id="LST812E80CE_3"></span>](96a1c930-0f99-d67e-b5de-24b4e417e173.htm)
+
+IndividualAddress<span id="LST812E80CE_4"></span>
+
+  
+The individual address.
+
+#### Return Value
+
+Type: <span class="nolink">Boolean</span>  
+<span class="keyword"><span id="LST812E80CE_5"></span></span>
+
+if it is possible to parse the individual address string into
+IndividualAddress; otherwise,
+<span class="keyword"><span id="LST812E80CE_6"></span></span>
+
+.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[IndividualAddress Structure](96a1c930-0f99-d67e-b5de-24b4e417e173.htm)
+
+[Knx.Falcon Namespace](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

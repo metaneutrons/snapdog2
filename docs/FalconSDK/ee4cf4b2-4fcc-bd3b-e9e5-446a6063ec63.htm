@@ -1,0 +1,109 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn">InstallationId<span id="LST54BB0873_0"></span>
+Parse Method</td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Parses the specified string into an InstallationId.
+
+**Namespace:**  [Knx.Falcon](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public static InstallationId Parse(
+        string installationIdString
+    )
+
+    Public Shared Function Parse ( 
+        installationIdString As String
+    ) As InstallationId
+
+    public:
+    static InstallationId Parse(
+        String^ installationIdString
+    )
+
+    static member Parse : 
+            installationIdString : string -> InstallationId 
+
+#### Parameters
+
+<span class="parameter">installationIdString</span>  
+Type: <span class="nolink">System<span id="LST54BB0873_1"></span></span>
+
+String  
+The number as hexadecimal string, with optional ':' separators.
+
+#### Return Value
+
+Type: [InstallationId](58358939-20bb-253a-561d-bd467c757f9f.htm)  
+The InstallationId object.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Exceptions</span>
+
+<table>
+<thead>
+<tr>
+<th>Exception</th>
+<th>Condition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="nolink">FormatException</span></td>
+<td>if the specified string does not match the accepted format.</td>
+</tr>
+</tbody>
+</table>
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[InstallationId Structure](58358939-20bb-253a-561d-bd467c757f9f.htm)
+
+[Knx.Falcon Namespace](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

@@ -1,0 +1,310 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="knxdate-class">KnxDate Class</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Value representation for DPT 11
+([Dpt11](ebcb9d30-b226-7a71-8514-7e43d374b592.htm)).
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Inheritance Hierarchy</span>
+
+<span class="nolink">System<span id="LST8A5E821B_0"></span></span>
+
+Object  
+  <span class="selflink">Knx.Falcon.ApplicationData<span id="LST8A5E821B_1"></span></span>
+
+KnxDate  
+
+**Namespace:**
+ [Knx.Falcon.ApplicationData](0568debf-ec6f-5a30-5f9c-95b44ae4374c.htm)  
+**Assembly:**  Knx.Falcon.ApplicationData (in
+Knx.Falcon.ApplicationData.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID1EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID1EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public sealed class KnxDate : IEquatable<KnxDate>, 
+        IFormattable
+
+    Public NotInheritable Class KnxDate
+        Implements IEquatable(Of KnxDate), IFormattable
+
+    public ref class KnxDate sealed : IEquatable<KnxDate^>, 
+        IFormattable
+
+    [<SealedAttribute>]
+    type KnxDate =  
+        class
+            interface IEquatable<KnxDate>
+            interface IFormattable
+        end
+
+The <span class="selflink">KnxDate</span> type exposes the following
+members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />Constructors</span>
+
+<table id="constructorList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="d12f9e70-f418-38a4-ef6d-1d7f91fcb48f.htm">KnxDate<span
+id="LST8A5E821B_2"></span></a></td>
+<td><div class="summary">
+Initializes a new instance of the <span class="selflink">KnxDate</span>
+class using the current date
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="b372caef-cd33-e942-8758-5addbde60a1e.htm">KnxDate(DateTime)</a></td>
+<td><div class="summary">
+Initializes a new instance of the <span class="selflink">KnxDate</span>
+class.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID4RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID4RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID4RBToggle"
+class="collapseToggle" />Properties</span>
+
+<table id="propertyList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="2844a314-f553-89a9-002c-4ea783fdd30a.htm">Date</a></td>
+<td><div class="summary">
+Gets the value as <span class="nolink">DateTime</span>
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID5RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID5RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID5RBToggle"
+class="collapseToggle" />Methods</span>
+
+<table id="methodList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="6ed9b072-8384-89d2-517c-4e5ea22d4c8f.htm">Equals(KnxDate)</a></td>
+<td><div class="summary">
+Indicates whether the current object is equal to another object of the
+same type.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="f44042ee-0717-a25d-857a-47846ebea755.htm">Equals(Object)</a></td>
+<td><div class="summary">
+Determines whether the specified object is equal to the current object.
+</div>
+(Overrides <span class="nolink">Object<span
+id="LST8A5E821B_3"></span></span>
+Equals(Object).)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="49ca2238-7727-e95b-03c1-630fa1891c84.htm">GetHashCode</a></td>
+<td><div class="summary">
+Serves as the default hash function.
+</div>
+(Overrides <span class="nolink">Object<span
+id="LST8A5E821B_4"></span></span>
+GetHashCode<span id="LST8A5E821B_5"></span>
+.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">GetType</span></td>
+<td><div class="summary">
+Gets the <span class="nolink">Type</span> of the current instance.
+</div>
+(Inherited from <span class="nolink">Object</span>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="398a4aed-ef39-19cf-447e-3fc17cc108d5.htm">ToString<span
+id="LST8A5E821B_6"></span></a></td>
+<td><div class="summary">
+Returns a string that represents the current object.
+</div>
+(Overrides <span class="nolink">Object<span
+id="LST8A5E821B_7"></span></span>
+ToString<span id="LST8A5E821B_8"></span>
+.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="dfb25f2b-917a-de73-3463-aab6eee46cd8.htm">ToString(String,
+IFormatProvider)</a></td>
+<td><div class="summary">
+Formats the value of the current instance using the specified format.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID6RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID6RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID6RBToggle"
+class="collapseToggle" />Operators</span>
+
+<table id="operatorList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="d40cbedd-251e-8520-de0a-b99daf548d53.htm"><span
+id="LST8A5E821B_9"></span></a>
+(DateTime to KnxDate)</td>
+<td><div class="summary">
+Converts a <span class="nolink">DateTime</span> value to a <span
+class="selflink">KnxDate</span>
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="601a4c56-a453-378e-11d5-d26712fbf86c.htm"><span
+id="LST8A5E821B_10"></span></a>
+(KnxDate to DateTime)</td>
+<td><div class="summary">
+Converts a <span class="selflink">KnxDate</span> value to a <span
+class="nolink">DateTime</span>
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID7RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID7RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID7RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[Knx.Falcon.ApplicationData
+Namespace](0568debf-ec6f-5a30-5f9c-95b44ae4374c.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

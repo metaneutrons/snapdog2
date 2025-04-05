@@ -1,0 +1,138 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1
+id="iotoscoreaccesstoken-properties">IoTOscoreAccessToken
+Properties</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+The [IoTOscoreAccessToken](fbe06edc-b405-2bae-963a-a7aabb55030a.htm)
+type exposes the following members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Properties</span>
+
+<table id="propertyList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="fa796172-2299-a251-0a3d-f4571b1e62f7.htm">Audience</a></td>
+<td>(Inherited from <a
+href="9e083f2b-8ddd-eb50-3219-20661917bebe.htm">IoTAccessToken</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="2779fca0-ef69-3240-1bc6-6433a89b0a7b.htm">GroupAddresses</a></td>
+<td><div class="summary">
+In the case of this being a Group Access token.
+<p>This contains the group address this access token applies to. The
+Master secret will be the group key</p>
+</div>
+(Inherited from <a
+href="9e083f2b-8ddd-eb50-3219-20661917bebe.htm">IoTAccessToken</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="37a01c3d-47ef-4bb6-6809-5176274007f1.htm">Id</a></td>
+<td><div class="summary">
+An access token id. It is used for update and deleting an item on a
+device. The id is unique on a device and should be unique in an
+installation.
+</div>
+(Inherited from <a
+href="9e083f2b-8ddd-eb50-3219-20661917bebe.htm">IoTAccessToken</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="7c754a8f-5019-3f8b-a7bb-0cbee3969122.htm">KeyConfiguration</a></td>
+<td><div class="summary">
+Confirmation key. For example with a symmetric proof of-possession key
+[RFC 8392]
+</div>
+(Inherited from <a
+href="9e083f2b-8ddd-eb50-3219-20661917bebe.htm">IoTAccessToken</a>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="b41d94ec-7257-18cb-b04c-876ed2459547.htm">OscoreKeyConfiguration</a></td>
+<td></td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="170f2d87-0da7-08eb-8f7d-461174305da0.htm">Profile</a></td>
+<td><div class="summary">
+IoTProfile
+<ol>
+<li>"coap_dtls" for X.509 certificates [RFC 8392] or,</li>
+<li>"coap_oscore" for OSCORE</li>
+</ol>
+</div>
+(Inherited from <a
+href="9e083f2b-8ddd-eb50-3219-20661917bebe.htm">IoTAccessToken</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="68ba333a-7f33-f940-da04-4bc963ced048.htm">Scope</a></td>
+<td><div class="summary">
+In the case of this being a Tool Access token.
+<p>Access Scope. A list of interfaces that define the access scope. As
+defined in [RFC 8392]</p>
+<p>The master secret will be the tool key.</p>
+</div>
+(Inherited from <a
+href="9e083f2b-8ddd-eb50-3219-20661917bebe.htm">IoTAccessToken</a>.)</td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[IoTOscoreAccessToken Class](fbe06edc-b405-2bae-963a-a7aabb55030a.htm)
+
+[Knx.Falcon.IoT Namespace](77c5abf9-f1d0-343a-2fc0-68ccbbf9a056.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

@@ -1,0 +1,121 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn">DptValueConverter<span
+id="LST98EE9E86_0"></span>
+WriteUnsigned Method</td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Writes an unsigned integer byte-aligned into a buffer
+
+**Namespace:**
+ [Knx.Falcon.ApplicationData.DatapointTypes](4524760b-44ef-f645-eb89-57d78a179600.htm)  
+**Assembly:**  Knx.Falcon.ApplicationData (in
+Knx.Falcon.ApplicationData.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public static void WriteUnsigned(
+        ulong value,
+        byte[] buffer,
+        int offset,
+        int length
+    )
+
+    Public Shared Sub WriteUnsigned ( 
+        value As ULong,
+        buffer As Byte(),
+        offset As Integer,
+        length As Integer
+    )
+
+    public:
+    static void WriteUnsigned(
+        unsigned long long value, 
+        array<unsigned char>^ buffer, 
+        int offset, 
+        int length
+    )
+
+    static member WriteUnsigned : 
+            value : uint64 * 
+            buffer : byte[] * 
+            offset : int * 
+            length : int -> unit 
+
+#### Parameters
+
+<span class="parameter">value</span>  
+Type: <span class="nolink">System<span id="LST98EE9E86_1"></span></span>
+
+UInt64  
+The value to write
+
+<span class="parameter">buffer</span>  
+Type: <span id="LST98EE9E86_2"></span>
+
+<span class="nolink">System<span id="LST98EE9E86_3"></span></span>
+
+Byte<span id="LST98EE9E86_4"></span>
+
+  
+The raw data buffer
+
+<span class="parameter">offset</span>  
+Type: <span class="nolink">System<span id="LST98EE9E86_5"></span></span>
+
+Int32  
+The offset within <span class="parameter">buffer</span>
+
+<span class="parameter">length</span>  
+Type: <span class="nolink">System<span id="LST98EE9E86_6"></span></span>
+
+Int32  
+The length in bytes; must be between 1 and 8
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[DptValueConverter Class](54ee1d6b-4087-b801-740f-2c6fa13da37f.htm)
+
+[Knx.Falcon.ApplicationData.DatapointTypes
+Namespace](4524760b-44ef-f645-eb89-57d78a179600.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

@@ -1,0 +1,121 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn">KnxDevice<span id="LSTEB672F98_0"></span>
+ReadPropertyDescriptionByIndexAsync Method</td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Reads an interface object property description given its index
+
+**Namespace:**
+ [Knx.Falcon.Sdk](ddc84507-eccd-b692-8467-e3956feec382.htm)  
+**Assembly:**  Knx.Falcon.Sdk (in Knx.Falcon.Sdk.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public Task<PropertyDescription> ReadPropertyDescriptionByIndexAsync(
+        byte objectIndex,
+        byte propertyIndex,
+        CancellationToken cancellationToken = default
+    )
+
+    Public Function ReadPropertyDescriptionByIndexAsync ( 
+        objectIndex As Byte,
+        propertyIndex As Byte,
+        Optional cancellationToken As CancellationToken = Nothing
+    ) As Task(Of PropertyDescription)
+
+    public:
+    Task<PropertyDescription^>^ ReadPropertyDescriptionByIndexAsync(
+        unsigned char objectIndex, 
+        unsigned char propertyIndex, 
+        CancellationToken cancellationToken = CancellationToken()
+    )
+
+    member ReadPropertyDescriptionByIndexAsync : 
+            objectIndex : byte * 
+            propertyIndex : byte * 
+            ?cancellationToken : CancellationToken 
+    (* Defaults:
+            let _cancellationToken = defaultArg cancellationToken new CancellationToken()
+    *)
+    -> Task<PropertyDescription> 
+
+#### Parameters
+
+<span class="parameter">objectIndex</span>  
+Type: <span class="nolink">System<span id="LSTEB672F98_1"></span></span>
+
+Byte  
+The interface object index
+
+<span class="parameter">propertyIndex</span>  
+Type: <span class="nolink">System<span id="LSTEB672F98_2"></span></span>
+
+Byte  
+The property index
+
+<span class="parameter">cancellationToken</span> (Optional)  
+Type: <span class="nolink">System.Threading<span id="LSTEB672F98_3"></span></span>
+
+CancellationToken  
+Can be used to cancel the operation
+
+#### Return Value
+
+Type: <span class="nolink">Task</span><span id="LSTEB672F98_4"></span>
+
+[PropertyDescription](891585f6-6578-38bb-73fd-4e40b70a1423.htm)<span id="LSTEB672F98_5"></span>
+
+  
+A [PropertyDescription](891585f6-6578-38bb-73fd-4e40b70a1423.htm) object
+containing the property description or
+<span class="keyword"><span id="LSTEB672F98_6"></span></span>
+
+if the property description is not available.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[KnxDevice Class](a8ee86c3-a3f4-2ace-fc78-4d70c73eb95d.htm)
+
+[Knx.Falcon.Sdk Namespace](ddc84507-eccd-b692-8467-e3956feec382.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

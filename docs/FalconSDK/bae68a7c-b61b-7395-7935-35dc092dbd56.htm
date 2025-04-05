@@ -1,0 +1,142 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn">KnxDevice<span id="LSTE9A6A95_0"></span>
+FunctionPropertyExtendedStateReadAsync Method</td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Reads a function property state using extended property services
+
+**Namespace:**
+ [Knx.Falcon.Sdk](ddc84507-eccd-b692-8467-e3956feec382.htm)  
+**Assembly:**  Knx.Falcon.Sdk (in Knx.Falcon.Sdk.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public Task<FunctionPropertyResult> FunctionPropertyExtendedStateReadAsync(
+        ushort objectType,
+        ushort instance,
+        ushort propertyId,
+        byte[] data,
+        CancellationToken cancellationToken = default
+    )
+
+    Public Function FunctionPropertyExtendedStateReadAsync ( 
+        objectType As UShort,
+        instance As UShort,
+        propertyId As UShort,
+        data As Byte(),
+        Optional cancellationToken As CancellationToken = Nothing
+    ) As Task(Of FunctionPropertyResult)
+
+    public:
+    Task<FunctionPropertyResult^>^ FunctionPropertyExtendedStateReadAsync(
+        unsigned short objectType, 
+        unsigned short instance, 
+        unsigned short propertyId, 
+        array<unsigned char>^ data, 
+        CancellationToken cancellationToken = CancellationToken()
+    )
+
+    member FunctionPropertyExtendedStateReadAsync : 
+            objectType : uint16 * 
+            instance : uint16 * 
+            propertyId : uint16 * 
+            data : byte[] * 
+            ?cancellationToken : CancellationToken 
+    (* Defaults:
+            let _cancellationToken = defaultArg cancellationToken new CancellationToken()
+    *)
+    -> Task<FunctionPropertyResult> 
+
+#### Parameters
+
+<span class="parameter">objectType</span>  
+Type: <span class="nolink">System<span id="LSTE9A6A95_1"></span></span>
+
+UInt16  
+The interface object type
+
+<span class="parameter">instance</span>  
+Type: <span class="nolink">System<span id="LSTE9A6A95_2"></span></span>
+
+UInt16  
+The interface object instance (1-based)
+
+<span class="parameter">propertyId</span>  
+Type: <span class="nolink">System<span id="LSTE9A6A95_3"></span></span>
+
+UInt16  
+The property Id
+
+<span class="parameter">data</span>  
+Type: <span id="LSTE9A6A95_4"></span>
+
+<span class="nolink">System<span id="LSTE9A6A95_5"></span></span>
+
+Byte<span id="LSTE9A6A95_6"></span>
+
+  
+The data to pass to the read command
+
+<span class="parameter">cancellationToken</span> (Optional)  
+Type: <span class="nolink">System.Threading<span id="LSTE9A6A95_7"></span></span>
+
+CancellationToken  
+Can be used to cancel the operation
+
+#### Return Value
+
+Type: <span class="nolink">Task</span><span id="LSTE9A6A95_8"></span>
+
+[FunctionPropertyResult](437721a8-5818-54b0-cf67-7c88149ad530.htm)<span id="LSTE9A6A95_9"></span>
+
+  
+A [FunctionPropertyResult](437721a8-5818-54b0-cf67-7c88149ad530.htm)
+object containing the return code and additional data from the response
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[KnxDevice Class](a8ee86c3-a3f4-2ace-fc78-4d70c73eb95d.htm)
+
+[Knx.Falcon.Sdk Namespace](ddc84507-eccd-b692-8467-e3956feec382.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

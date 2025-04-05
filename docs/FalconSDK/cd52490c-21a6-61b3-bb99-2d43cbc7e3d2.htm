@@ -1,0 +1,160 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1
+id="iiotsecurityextensions-class">IIoTSecurityExtensions Class</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+This class provides several methods for easier access of actions on a
+[IIoTSecurity](a2c7b8a2-2736-d8dc-4d13-b4acfcb73f7f.htm) object. The
+policies used are chosen to be suitable for the respective functions.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Inheritance Hierarchy</span>
+
+<span class="nolink">System<span id="LST1E202C34_0"></span></span>
+
+Object  
+  <span class="selflink">Knx.Falcon<span id="LST1E202C34_1"></span></span>
+
+IIoTSecurityExtensions  
+
+**Namespace:**  [Knx.Falcon](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID1EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID1EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public static class IIoTSecurityExtensions
+
+    <ExtensionAttribute>
+    Public NotInheritable Class IIoTSecurityExtensions
+
+    [ExtensionAttribute]
+    public ref class IIoTSecurityExtensions abstract sealed
+
+    [<AbstractClassAttribute>]
+    [<SealedAttribute>]
+    [<ExtensionAttribute>]
+    type IIoTSecurityExtensions =  class end
+
+The <span class="selflink">IIoTSecurityExtensions</span> type exposes
+the following members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />Methods</span>
+
+<table id="methodList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="99e508a6-9a70-37c4-b362-a8ee66cd887c.htm">AuthenticateDeviceAsync</a></td>
+<td><div class="summary">
+Use a password to establish a temporary secure connection that will then
+be used to write the given Tool Key to the IoT Device.
+<p>After calling this method other methods can be used to configure the
+IoT device securely with messages encrypted using the provided tool
+key.</p>
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="7c22211c-9fb5-d67c-a3c6-2298dc6e5c85.htm">ReadAccessTokenItemAsync</a></td>
+<td><div class="summary">
+Determines a <a
+href="9e083f2b-8ddd-eb50-3219-20661917bebe.htm">IoTAccessToken</a> with
+a specific access token id from a device.
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="dd00b684-20c0-6033-c41c-210044586835.htm">ReadAuthenticationTableAsync</a></td>
+<td><div class="summary">
+Determines the authentication table of a device.
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="6f95c38e-c649-5873-64e8-c0a9e09e8240.htm">WriteAuthenticationTableAsync</a></td>
+<td><div class="summary">
+Sends a request to a device, requesting to alter the authentication
+table.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID4RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID4RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID4RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[Knx.Falcon Namespace](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

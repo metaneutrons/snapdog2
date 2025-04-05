@@ -1,0 +1,105 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn">ApduLengthRestriction<span
+id="LST67AC520_0"></span>
+Min Method</td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Determines the strongest of a number of
+[ApduLengthRestriction](68893c22-8ef3-f486-1ec2-e4bddcc3c0e1.htm)s.
+
+**Namespace:**  [Knx.Falcon](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public static ApduLengthRestriction Min(
+        ApduLengthRestriction first,
+        params ApduLengthRestriction[] other
+    )
+
+    Public Shared Function Min ( 
+        first As ApduLengthRestriction,
+        ParamArray other As ApduLengthRestriction()
+    ) As ApduLengthRestriction
+
+    public:
+    static ApduLengthRestriction^ Min(
+        ApduLengthRestriction^ first, 
+        ... array<ApduLengthRestriction^>^ other
+    )
+
+    static member Min : 
+            first : ApduLengthRestriction * 
+            other : ApduLengthRestriction[] -> ApduLengthRestriction 
+
+#### Parameters
+
+<span class="parameter">first</span>  
+Type: [Knx.Falcon<span id="LST67AC520_1"></span>](68893c22-8ef3-f486-1ec2-e4bddcc3c0e1.htm)
+
+ApduLengthRestriction  
+The first restriction
+
+<span class="parameter">other</span>  
+Type: <span id="LST67AC520_2"></span>
+
+[Knx.Falcon<span id="LST67AC520_3"></span>](68893c22-8ef3-f486-1ec2-e4bddcc3c0e1.htm)
+
+ApduLengthRestriction<span id="LST67AC520_4"></span>
+
+  
+The other restrictions
+
+#### Return Value
+
+Type: [ApduLengthRestriction](68893c22-8ef3-f486-1ec2-e4bddcc3c0e1.htm)  
+The restriction with the lowest
+[MaxApduLength](31bc23ec-95c8-7d7c-7983-e798bf5f480c.htm)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[ApduLengthRestriction Class](68893c22-8ef3-f486-1ec2-e4bddcc3c0e1.htm)
+
+[Knx.Falcon Namespace](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

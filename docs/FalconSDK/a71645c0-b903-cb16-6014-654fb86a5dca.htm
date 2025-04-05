@@ -1,0 +1,175 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn">KnxEditableValue<span id="LSTC7EC5CBA_0"></span>
+CopyTo Method</td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Copies the elements of the
+<span class="nolink">ICollection<span id="LSTC7EC5CBA_1"></span></span>
+
+T<span id="LSTC7EC5CBA_2"></span>
+
+to an <span class="nolink">Array</span>, starting at a particular
+<span class="nolink">Array</span> index.
+
+**Namespace:**
+ [Knx.Falcon.ApplicationData.Editing](672c11e2-8db5-468d-aa18-0f7ca05387b9.htm)  
+**Assembly:**  Knx.Falcon.ApplicationData (in
+Knx.Falcon.ApplicationData.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public void CopyTo(
+        KeyValuePair<string, Object>[] array,
+        int arrayIndex
+    )
+
+    Public Sub CopyTo ( 
+        array As KeyValuePair(Of String, Object)(),
+        arrayIndex As Integer
+    )
+
+    public:
+    virtual void CopyTo(
+        array<KeyValuePair<String^, Object^>>^ array, 
+        int arrayIndex
+    ) sealed
+
+    abstract CopyTo : 
+            array : KeyValuePair<string, Object>[] * 
+            arrayIndex : int -> unit 
+    override CopyTo : 
+            array : KeyValuePair<string, Object>[] * 
+            arrayIndex : int -> unit 
+
+#### Parameters
+
+<span class="parameter">array</span>  
+Type: <span id="LSTC7EC5CBA_3"></span>
+
+<span class="nolink">System.Collections.Generic<span id="LSTC7EC5CBA_4"></span></span>
+
+KeyValuePair<span id="LSTC7EC5CBA_5"></span>
+
+<span class="nolink">String</span>,
+<span class="nolink">Object</span><span id="LSTC7EC5CBA_6"></span>
+
+<span id="LSTC7EC5CBA_7"></span>
+
+  
+The one-dimensional <span class="nolink">Array</span> that is the
+destination of the elements copied from
+<span class="nolink">ICollection<span id="LSTC7EC5CBA_8"></span></span>
+
+T<span id="LSTC7EC5CBA_9"></span>
+
+. The <span class="nolink">Array</span> must have zero-based indexing.
+
+<span class="parameter">arrayIndex</span>  
+Type: <span class="nolink">System<span id="LSTC7EC5CBA_10"></span></span>
+
+Int32  
+The zero-based index in <span class="parameter">array</span> at which
+copying begins.
+
+#### Implements
+
+<span class="nolink">ICollection<span id="LSTC7EC5CBA_11"></span></span>
+
+T<span id="LSTC7EC5CBA_12"></span>
+
+<span id="LSTC7EC5CBA_13"></span>
+
+CopyTo(<span id="LSTC7EC5CBA_14"></span>
+
+T<span id="LSTC7EC5CBA_15"></span>
+
+, Int32)  
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Exceptions</span>
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Exception</th>
+<th>Condition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="nolink">ArgumentNullException</span></td>
+<td><span class="parameter">array</span> is <span class="keyword"><span
+id="LSTC7EC5CBA_16"></span></span>
+.</td>
+</tr>
+<tr>
+<td><span class="nolink">ArgumentOutOfRangeException</span></td>
+<td><span class="parameter">arrayIndex</span> is less than 0.</td>
+</tr>
+<tr>
+<td><span class="nolink">ArgumentException</span></td>
+<td>The number of elements in the source <span
+class="nolink">ICollection<span id="LSTC7EC5CBA_17"></span></span>
+T<span id="LSTC7EC5CBA_18"></span>
+is greater than the available space from <span
+class="parameter">arrayIndex</span> to the end of the destination <span
+class="parameter">array</span>.</td>
+</tr>
+</tbody>
+</table>
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[KnxEditableValue Class](611e2410-d141-3d27-fa1d-5a0c3312debd.htm)
+
+[Knx.Falcon.ApplicationData.Editing
+Namespace](672c11e2-8db5-468d-aa18-0f7ca05387b9.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

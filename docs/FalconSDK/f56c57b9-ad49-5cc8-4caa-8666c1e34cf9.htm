@@ -1,0 +1,430 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="knxcompoundvalue-class">KnxCompoundValue
+Class</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Generic representation of a compound datapoint value; used by
+[DptCompoundGeneric](58917df4-7245-3968-6e3e-773fc3113ae7.htm).
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Inheritance Hierarchy</span>
+
+<span class="nolink">System<span id="LST77D9BFB3_0"></span></span>
+
+Object  
+  <span class="selflink">Knx.Falcon.ApplicationData<span id="LST77D9BFB3_1"></span></span>
+
+KnxCompoundValue  
+
+**Namespace:**
+ [Knx.Falcon.ApplicationData](0568debf-ec6f-5a30-5f9c-95b44ae4374c.htm)  
+**Assembly:**  Knx.Falcon.ApplicationData (in
+Knx.Falcon.ApplicationData.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID1EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID1EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public sealed class KnxCompoundValue : IDictionary<string, Object>, 
+        ICollection<KeyValuePair<string, Object>>, IEnumerable<KeyValuePair<string, Object>>, 
+        IEnumerable, IEquatable<KnxCompoundValue>
+
+    Public NotInheritable Class KnxCompoundValue
+        Implements IDictionary(Of String, Object), 
+        ICollection(Of KeyValuePair(Of String, Object)), IEnumerable(Of KeyValuePair(Of String, Object)), 
+        IEnumerable, IEquatable(Of KnxCompoundValue)
+
+    public ref class KnxCompoundValue sealed : IDictionary<String^, Object^>, 
+        ICollection<KeyValuePair<String^, Object^>>, IEnumerable<KeyValuePair<String^, Object^>>, 
+        IEnumerable, IEquatable<KnxCompoundValue^>
+
+    [<SealedAttribute>]
+    type KnxCompoundValue =  
+        class
+            interface IDictionary<string, Object>
+            interface ICollection<KeyValuePair<string, Object>>
+            interface IEnumerable<KeyValuePair<string, Object>>
+            interface IEnumerable
+            interface IEquatable<KnxCompoundValue>
+        end
+
+The <span class="selflink">KnxCompoundValue</span> type exposes the
+following members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />Constructors</span>
+
+<table id="constructorList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="f610d3e0-d1a8-1c1e-a580-ee1f03c9cada.htm">KnxCompoundValue</a></td>
+<td><div class="summary">
+Initializes a new instance of the <span
+class="selflink">KnxCompoundValue</span> class
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID4RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID4RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID4RBToggle"
+class="collapseToggle" />Properties</span>
+
+<table id="propertyList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="c174bc1a-4a56-4d38-7861-6d5112f02aea.htm">Count</a></td>
+<td><div class="summary">
+Gets the number of elements contained in the <span
+class="nolink">ICollection<span id="LST77D9BFB3_2"></span></span>
+T<span id="LST77D9BFB3_3"></span>
+.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="03809de6-7851-fef6-4531-f6f5116b3929.htm">IsReadOnly</a></td>
+<td><div class="summary">
+Gets a value indicating whether the <span
+class="nolink">ICollection<span id="LST77D9BFB3_4"></span></span>
+T<span id="LST77D9BFB3_5"></span>
+is read-only.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="3b9c843f-80d2-1781-397b-e41a52b0849a.htm">Item<span
+id="LST77D9BFB3_6"></span></a>
+Int32<span id="LST77D9BFB3_7"></span></td>
+<td><div class="summary">
+Gets a field value by its index
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="31b21282-cca6-11ed-6994-a6622d84f2a7.htm">Item<span
+id="LST77D9BFB3_8"></span></a>
+String<span id="LST77D9BFB3_9"></span></td>
+<td><div class="summary">
+Gets a field value by its name
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="098a772a-ead4-3ad6-ec16-b05471d9ea84.htm">Keys</a></td>
+<td><div class="summary">
+Gets an <span class="nolink">ICollection<span
+id="LST77D9BFB3_10"></span></span>
+T<span id="LST77D9BFB3_11"></span>
+containing the keys of the <span class="nolink">IDictionary<span
+id="LST77D9BFB3_12"></span></span>
+TKey, TValue<span id="LST77D9BFB3_13"></span>
+.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="b6319499-6f7c-fe15-e772-16df6111558e.htm">Values</a></td>
+<td><div class="summary">
+Gets an <span class="nolink">ICollection<span
+id="LST77D9BFB3_14"></span></span>
+T<span id="LST77D9BFB3_15"></span>
+containing the values in the <span class="nolink">IDictionary<span
+id="LST77D9BFB3_16"></span></span>
+TKey, TValue<span id="LST77D9BFB3_17"></span>
+.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID5RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID5RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID5RBToggle"
+class="collapseToggle" />Methods</span>
+
+<table id="methodList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="45b00eba-1aff-f5c3-75c7-829c8e8668cf.htm">Add(KeyValuePair<span
+id="LST77D9BFB3_18"></span></a>
+String, Object<span id="LST77D9BFB3_19"></span>
+)</td>
+<td><div class="summary">
+Adds an item to the <span class="nolink">ICollection<span
+id="LST77D9BFB3_20"></span></span>
+T<span id="LST77D9BFB3_21"></span>
+.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="58d9c870-491a-21bb-9cd0-76d6e7e404b3.htm">Add(String,
+Object)</a></td>
+<td><div class="summary">
+Adds an element with the provided key and value to the <span
+class="nolink">IDictionary<span id="LST77D9BFB3_22"></span></span>
+TKey, TValue<span id="LST77D9BFB3_23"></span>
+.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="dc191877-8f99-4a3d-169a-a9ac8104bf44.htm">Clear</a></td>
+<td><div class="summary">
+Removes all items from the <span class="nolink">ICollection<span
+id="LST77D9BFB3_24"></span></span>
+T<span id="LST77D9BFB3_25"></span>
+.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="ee082255-73de-cf48-eac9-1e605b5cf8a7.htm">Contains</a></td>
+<td><div class="summary">
+Determines whether the <span class="nolink">ICollection<span
+id="LST77D9BFB3_26"></span></span>
+T<span id="LST77D9BFB3_27"></span>
+contains a specific value.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="cd44d49c-1960-7be8-354d-8d3456a555fd.htm">ContainsKey</a></td>
+<td><div class="summary">
+Determines whether the <span class="nolink">IDictionary<span
+id="LST77D9BFB3_28"></span></span>
+TKey, TValue<span id="LST77D9BFB3_29"></span>
+contains an element with the specified key.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="d83ca58c-c449-a5f2-e8a4-41fc7979a691.htm">CopyTo</a></td>
+<td><div class="summary">
+Copies the elements of the <span class="nolink">ICollection<span
+id="LST77D9BFB3_30"></span></span>
+T<span id="LST77D9BFB3_31"></span>
+to an <span class="nolink">Array</span>, starting at a particular <span
+class="nolink">Array</span> index.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="7362184f-90af-d2b6-4e70-a275528238a1.htm">Equals(KnxCompoundValue)</a></td>
+<td><div class="summary">
+Indicates whether the current object is equal to another object of the
+same type.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="df1e2ded-280c-1352-3451-b714c204f0ca.htm">Equals(Object)</a></td>
+<td><div class="summary">
+Determines whether the specified object is equal to the current object.
+</div>
+(Overrides <span class="nolink">Object<span
+id="LST77D9BFB3_32"></span></span>
+Equals(Object).)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="2e249ac0-cb2f-bcb0-b1ed-2262ee76ba35.htm">GetEnumerator</a></td>
+<td><div class="summary">
+Returns an enumerator that iterates through the collection.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="8d78c26c-2c65-3caa-c03b-3cacc8f31239.htm">GetHashCode</a></td>
+<td><div class="summary">
+Serves as the default hash function.
+</div>
+(Overrides <span class="nolink">Object<span
+id="LST77D9BFB3_33"></span></span>
+GetHashCode<span id="LST77D9BFB3_34"></span>
+.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">GetType</span></td>
+<td><div class="summary">
+Gets the <span class="nolink">Type</span> of the current instance.
+</div>
+(Inherited from <span class="nolink">Object</span>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="5f8b06e9-a3a0-8d05-94eb-67e9796f8a74.htm">Remove(KeyValuePair<span
+id="LST77D9BFB3_35"></span></a>
+String, Object<span id="LST77D9BFB3_36"></span>
+)</td>
+<td><div class="summary">
+Removes the first occurrence of a specific object from the <span
+class="nolink">ICollection<span id="LST77D9BFB3_37"></span></span>
+T<span id="LST77D9BFB3_38"></span>
+.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="1bfc6399-abd7-c3e5-f9ce-43c021035f71.htm">Remove(String)</a></td>
+<td><div class="summary">
+Removes the element with the specified key from the <span
+class="nolink">IDictionary<span id="LST77D9BFB3_39"></span></span>
+TKey, TValue<span id="LST77D9BFB3_40"></span>
+.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="6bc61c7f-2848-fcbf-0e54-08c74b542948.htm">ToString</a></td>
+<td><div class="summary">
+Returns a string that represents the current object.
+</div>
+(Overrides <span class="nolink">Object<span
+id="LST77D9BFB3_41"></span></span>
+ToString<span id="LST77D9BFB3_42"></span>
+.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="396e8276-8bcf-3efa-a3e2-c5a447b5a737.htm">TryGetValue</a></td>
+<td><div class="summary">
+Gets the value associated with the specified key.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID6RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID6RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID6RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[Knx.Falcon.ApplicationData
+Namespace](0568debf-ec6f-5a30-5f9c-95b44ae4374c.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

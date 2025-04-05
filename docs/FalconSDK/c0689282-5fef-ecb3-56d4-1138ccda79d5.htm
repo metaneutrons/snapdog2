@@ -1,0 +1,282 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1
+id="iotrouterknxclassicsecurityinfo-class">IoTRouterKnxClassicSecurityInfo
+Class</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+This object contains any necessary information to perform group
+communication on the KNX Classic side of an IoT Router.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Inheritance Hierarchy</span>
+
+<span class="nolink">System<span id="LST6B1AFE27_0"></span></span>
+
+Object  
+  <span class="selflink">Knx.Falcon.IoT<span id="LST6B1AFE27_1"></span></span>
+
+IoTRouterKnxClassicSecurityInfo  
+
+**Namespace:**
+ [Knx.Falcon.IoT](77c5abf9-f1d0-343a-2fc0-68ccbbf9a056.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID1EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID1EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public class IoTRouterKnxClassicSecurityInfo : IEquatable<IoTRouterKnxClassicSecurityInfo>
+
+    Public Class IoTRouterKnxClassicSecurityInfo
+        Implements IEquatable(Of IoTRouterKnxClassicSecurityInfo)
+
+    public ref class IoTRouterKnxClassicSecurityInfo : IEquatable<IoTRouterKnxClassicSecurityInfo^>
+
+    type IoTRouterKnxClassicSecurityInfo =  
+        class
+            interface IEquatable<IoTRouterKnxClassicSecurityInfo>
+        end
+
+The <span class="selflink">IoTRouterKnxClassicSecurityInfo</span> type
+exposes the following members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />Constructors</span>
+
+<table id="constructorList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="5c063853-86ab-89df-b99a-02e1844f87ad.htm">IoTRouterKnxClassicSecurityInfo</a></td>
+<td><div class="summary">
+Initializes a new instance of the <span
+class="selflink">IoTRouterKnxClassicSecurityInfo</span> class
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID4RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID4RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID4RBToggle"
+class="collapseToggle" />Properties</span>
+
+<table id="propertyList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="37dada3b-d1bc-8505-e781-b9bacda2653d.htm">GroupKey</a></td>
+<td><div class="summary">
+If for this group address KNX Classic security is used then this
+specifies the group key which the gateway shall use to communicate on
+the KNX Classic side.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="389e2e3b-8965-cc9d-03c8-b65edf4e344e.htm">SecuritySettings</a></td>
+<td><div class="summary">
+Specifies KNX Classic security settings.
+<p>In particular the following things are determined:</p>
+<ul>
+<li>Shall Authentication be used?</li>
+</ul>
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID5RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID5RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID5RBToggle"
+class="collapseToggle" />Methods</span>
+
+<table id="methodList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="cf9b89fc-2372-801f-dc24-40f1cc9927ce.htm">Equals(IoTRouterKnxClassicSecurityInfo)</a></td>
+<td></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="daf006eb-1d5b-925b-05cb-d2c3b7c1ccf4.htm">Equals(Object)</a></td>
+<td>(Overrides <span class="nolink">Object<span
+id="LST6B1AFE27_2"></span></span>
+Equals(Object).)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="13cd15e8-ca1d-475e-8bfb-6a4e12c3b364.htm">GetHashCode</a></td>
+<td>(Overrides <span class="nolink">Object<span
+id="LST6B1AFE27_3"></span></span>
+GetHashCode<span id="LST6B1AFE27_4"></span>
+.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">GetType</span></td>
+<td><div class="summary">
+Gets the <span class="nolink">Type</span> of the current instance.
+</div>
+(Inherited from <span class="nolink">Object</span>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="6b441f7a-fee8-d0fb-c591-42c951ede3f0.htm">ToString</a></td>
+<td>(Overrides <span class="nolink">Object<span
+id="LST6B1AFE27_5"></span></span>
+ToString<span id="LST6B1AFE27_6"></span>
+.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="84642430-3cf8-8e63-b271-0dadfcff5d9c.htm">ToStringCompact</a></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID6RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID6RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID6RBToggle"
+class="collapseToggle" />Operators</span>
+
+<table id="operatorList" class="members">
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="972fb211-4288-9fa5-3d2b-22047acce547.htm">Equality</a></td>
+<td></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="153a91e4-f25e-99d8-be4c-c0dae37f9cc3.htm">Inequality</a></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID7RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID7RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID7RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[Knx.Falcon.IoT Namespace](77c5abf9-f1d0-343a-2fc0-68ccbbf9a056.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

@@ -1,0 +1,193 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn">ISpake2PlusConfirmer<span
+id="LSTEF643E59_0"></span>
+ComputeProtocolTranscript Method</td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Compute the combined share secret entropy source protocol transcript TT
+
+**Namespace:**
+ [Knx.Falcon.IoT.Stack.Pase](8ad29354-f2ff-12d3-42e8-af248d7a4219.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    byte[] ComputeProtocolTranscript(
+        string context,
+        byte[] idProver,
+        byte[] idVerifier,
+        byte[] shareP,
+        byte[] shareV,
+        byte[] z,
+        byte[] v,
+        byte[] w0
+    )
+
+    Function ComputeProtocolTranscript ( 
+        context As String,
+        idProver As Byte(),
+        idVerifier As Byte(),
+        shareP As Byte(),
+        shareV As Byte(),
+        z As Byte(),
+        v As Byte(),
+        w0 As Byte()
+    ) As Byte()
+
+    array<unsigned char>^ ComputeProtocolTranscript(
+        String^ context, 
+        array<unsigned char>^ idProver, 
+        array<unsigned char>^ idVerifier, 
+        array<unsigned char>^ shareP, 
+        array<unsigned char>^ shareV, 
+        array<unsigned char>^ z, 
+        array<unsigned char>^ v, 
+        array<unsigned char>^ w0
+    )
+
+    abstract ComputeProtocolTranscript : 
+            context : string * 
+            idProver : byte[] * 
+            idVerifier : byte[] * 
+            shareP : byte[] * 
+            shareV : byte[] * 
+            z : byte[] * 
+            v : byte[] * 
+            w0 : byte[] -> byte[] 
+
+#### Parameters
+
+<span class="parameter">context</span>  
+Type: <span class="nolink">System<span id="LSTEF643E59_1"></span></span>
+
+String  
+Context in which the SPAKE2+ is performed.
+
+<span class="parameter">idProver</span>  
+Type: <span id="LSTEF643E59_2"></span>
+
+<span class="nolink">System<span id="LSTEF643E59_3"></span></span>
+
+Byte<span id="LSTEF643E59_4"></span>
+
+  
+Identifier for the prover.
+
+<span class="parameter">idVerifier</span>  
+Type: <span id="LSTEF643E59_5"></span>
+
+<span class="nolink">System<span id="LSTEF643E59_6"></span></span>
+
+Byte<span id="LSTEF643E59_7"></span>
+
+  
+identifier for the verifier.
+
+<span class="parameter">shareP</span>  
+Type: <span id="LSTEF643E59_8"></span>
+
+<span class="nolink">System<span id="LSTEF643E59_9"></span></span>
+
+Byte<span id="LSTEF643E59_10"></span>
+
+  
+Share value of the Prover.
+
+<span class="parameter">shareV</span>  
+Type: <span id="LSTEF643E59_11"></span>
+
+<span class="nolink">System<span id="LSTEF643E59_12"></span></span>
+
+Byte<span id="LSTEF643E59_13"></span>
+
+  
+Share value of the Verifier.
+
+<span class="parameter">z</span>  
+Type: <span id="LSTEF643E59_14"></span>
+
+<span class="nolink">System<span id="LSTEF643E59_15"></span></span>
+
+Byte<span id="LSTEF643E59_16"></span>
+
+  
+Shared Secret value Z.
+
+<span class="parameter">v</span>  
+Type: <span id="LSTEF643E59_17"></span>
+
+<span class="nolink">System<span id="LSTEF643E59_18"></span></span>
+
+Byte<span id="LSTEF643E59_19"></span>
+
+  
+Shared Secret value V.
+
+<span class="parameter">w0</span>  
+Type: <span id="LSTEF643E59_20"></span>
+
+<span class="nolink">System<span id="LSTEF643E59_21"></span></span>
+
+Byte<span id="LSTEF643E59_22"></span>
+
+  
+Password derived private key w0.
+
+#### Return Value
+
+Type: <span id="LSTEF643E59_23"></span>
+
+<span class="nolink">Byte</span><span id="LSTEF643E59_24"></span>
+
+  
+The combined share secret entropy source protocol transcript TT.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[ISpake2PlusConfirmer
+Interface](dc74949c-8198-e22a-f480-e891c5bfca61.htm)
+
+[Knx.Falcon.IoT.Stack.Pase
+Namespace](8ad29354-f2ff-12d3-42e8-af248d7a4219.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

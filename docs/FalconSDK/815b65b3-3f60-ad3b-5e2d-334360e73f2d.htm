@@ -1,0 +1,355 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="dptbase-class">DptBase Class</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Base class for all datapoint type classes
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Inheritance Hierarchy</span>
+
+<span class="nolink">System<span id="LSTC7EBBFB8_0"></span></span>
+
+Object  
+  <span class="selflink">Knx.Falcon.ApplicationData.DatapointTypes<span id="LSTC7EBBFB8_1"></span></span>
+
+DptBase  
+    [Knx.Falcon.ApplicationData.DatapointTypes<span id="LSTC7EBBFB8_2"></span>](58917df4-7245-3968-6e3e-773fc3113ae7.htm)
+
+DptCompoundGeneric  
+    [Knx.Falcon.ApplicationData.DatapointTypes<span id="LSTC7EBBFB8_3"></span>](a897d182-e4b1-8fc3-c0d8-f93a4315e2b2.htm)
+
+DptRaw  
+    [Knx.Falcon.ApplicationData.DatapointTypes<span id="LSTC7EBBFB8_4"></span>](d772982a-c79d-6092-d33f-6fe123c493af.htm)
+
+DptSimple  
+
+**Namespace:**
+ [Knx.Falcon.ApplicationData.DatapointTypes](4524760b-44ef-f645-eb89-57d78a179600.htm)  
+**Assembly:**  Knx.Falcon.ApplicationData (in
+Knx.Falcon.ApplicationData.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID1EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID1EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public abstract class DptBase
+
+    Public MustInherit Class DptBase
+
+    public ref class DptBase abstract
+
+    [<AbstractClassAttribute>]
+    type DptBase =  class end
+
+The <span class="selflink">DptBase</span> type exposes the following
+members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />Properties</span>
+
+<table id="propertyList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="a5bb0bbe-7f97-fb0c-fd2a-32f4b81101f1.htm">CanonicalType</a></td>
+<td><div class="summary">
+The CLR type to and from which the converter translates.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="ac307994-fd7f-053f-f2fd-88544a6185df.htm">DatapointSubtype</a></td>
+<td><div class="summary">
+Returns the datapoint subtype information
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="0ca263df-bef2-a65c-a825-4bebcf2b9f23.htm">DatapointType</a></td>
+<td><div class="summary">
+Returns the datapoint type information
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="e8d91532-1407-b096-2ad7-83aa4e5f4144.htm">IsVariableLength</a></td>
+<td><div class="summary">
+<span class="keyword"><span id="LSTC7EBBFB8_5"></span></span>
+is this DPT is variable-length
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="4b92ae3c-96ff-e73f-b508-3143d064b422.htm">MainNumber</a></td>
+<td><div class="summary">
+Main number of the datapoint type; 0 if only size is given
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="76504fd5-6255-f2fa-bae9-c79108d7ad58.htm">Name</a></td>
+<td><div class="summary">
+Name of the datapoint type
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="1999b03f-825f-a85b-93a3-b30c9fa65c35.htm">Number</a></td>
+<td></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="8e472010-d2e2-d8e8-a98b-bcb4514c605d.htm">SizeInBit</a></td>
+<td><div class="summary">
+Size in bits of the datapoint type
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="06bc435a-4ce6-80a9-4e84-9810f5a59064.htm">SubNumber</a></td>
+<td><div class="summary">
+Sub number of the datapoint type; -1 for main types
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="8cba7e3b-7eb9-bc22-14bd-0e6e5b967472.htm">Text</a></td>
+<td><div class="summary">
+Name of the datapoint type
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID4RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID4RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID4RBToggle"
+class="collapseToggle" />Methods</span>
+
+<table id="methodList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="cb5026ee-a110-b8e5-7d26-931a446dfc6b.htm">AsCompoundValue</a></td>
+<td><div class="summary">
+Creates a <a
+href="f56c57b9-ad49-5cc8-4caa-8666c1e34cf9.htm">KnxCompoundValue</a>
+from a group value according to the fields defined for a datapoint
+subtype
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="ce9fafca-558a-be2f-b81c-75c96dadb1c1.htm">CanConvertToValue</a></td>
+<td><div class="summary">
+Checks if <span class="parameter">groupValue</span> can be converted.
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="156877cb-ce9e-ef36-eb11-b5ecf6c48966.htm">CompoundValueToGroupValue</a></td>
+<td><div class="summary">
+Creates a <a
+href="cfefd12c-88f9-89e7-b457-f55df2d98718.htm">GroupValue</a> from a <a
+href="f56c57b9-ad49-5cc8-4caa-8666c1e34cf9.htm">KnxCompoundValue</a>
+according to the fields defined for a datapoint subtype
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="9b25ba43-e2ae-ffb6-b28a-88dfe60ee2ab.htm">CreateSampleValue</a></td>
+<td><div class="summary">
+Creates a valid sample value
+</div></td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">Equals</span></td>
+<td><div class="summary">
+Determines whether the specified object is equal to the current object.
+</div>
+(Inherited from <span class="nolink">Object</span>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="a1db5e7d-3c93-1529-e233-2f0f02f7fb6f.htm">Format</a></td>
+<td><div class="summary">
+Converts the raw value to a suitable string representation
+</div></td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">GetHashCode</span></td>
+<td><div class="summary">
+Serves as the default hash function.
+</div>
+(Inherited from <span class="nolink">Object</span>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">GetType</span></td>
+<td><div class="summary">
+Gets the <span class="nolink">Type</span> of the current instance.
+</div>
+(Inherited from <span class="nolink">Object</span>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="ab5656c3-30b3-bb72-4bef-669ce283b7ee.htm">IsCompatibleSize</a></td>
+<td><div class="summary">
+Checks that the input group value matches the expected size
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="f774bf49-b22b-1ec0-92e1-eb888a5d3d3b.htm">ToGroupValue</a></td>
+<td><div class="summary">
+Converts a "friendly" value to the raw value
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="51c23cba-5458-d9cd-1b99-9a6ff44b2fe2.htm">ToString</a></td>
+<td><div class="summary">
+Returns a string that represents the current object.
+</div>
+(Overrides <span class="nolink">Object<span
+id="LSTC7EBBFB8_6"></span></span>
+ToString<span id="LSTC7EBBFB8_7"></span>
+.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="5805f3b5-7f9d-96c6-f7ba-780965bb881f.htm">ToValue</a></td>
+<td><div class="summary">
+Converts the raw value to a suitable "friendly" representation
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="7617563f-93bf-3c5f-f594-389df2bee846.htm">VerifySize</a></td>
+<td><div class="summary">
+Verifies that the input group value matches the expected size
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID5RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID5RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID5RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[Knx.Falcon.ApplicationData.DatapointTypes
+Namespace](4524760b-44ef-f645-eb89-57d78a179600.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

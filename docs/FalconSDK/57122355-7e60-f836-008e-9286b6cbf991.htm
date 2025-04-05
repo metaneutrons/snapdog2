@@ -1,0 +1,336 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1
+id="connectorexceptioncause-enumeration">ConnectorExceptionCause
+Enumeration</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+The enum describes the causes of bus connector problems; see
+[ConnectorException](6707b643-ebc4-e3a8-f85f-45d567e677fa.htm).
+
+**Namespace:**  [Knx.Falcon](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public enum ConnectorExceptionCause
+
+    Public Enumeration ConnectorExceptionCause
+
+    public enum class ConnectorExceptionCause
+
+    type ConnectorExceptionCause
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Members</span>
+
+<table id="enumMemberList" class="members">
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Member name</th>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.ConnectorExceptionCause.OpenConnectorFailed"><span
+class="selflink">OpenConnectorFailed</span></td>
+<td>0</td>
+<td>Opening the connector failed (generic error)</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.ConnectorExceptionCause.KnxMediumFailure"><span
+class="selflink">KnxMediumFailure</span></td>
+<td>1</td>
+<td>The interface can be accessed from the computer but is reports a
+medium connection failure.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.ConnectorExceptionCause.AlreadyOpenedInDifferentMode"><span
+class="selflink">AlreadyOpenedInDifferentMode</span></td>
+<td>2</td>
+<td>The interface has already been opened in a different <span
+class="nolink">ConnectorMode</span>.</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.ConnectorExceptionCause.ModeNotSupported"><span
+class="selflink">ModeNotSupported</span></td>
+<td>3</td>
+<td>The interface does not support the requested <span
+class="nolink">ConnectorMode</span>.</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.ConnectorExceptionCause.ConnectionBroken"><span
+class="selflink">ConnectionBroken</span></td>
+<td>4</td>
+<td>Connection currently broken.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.ConnectorExceptionCause.UsbInterfaceNotFound"><span
+class="selflink">UsbInterfaceNotFound</span></td>
+<td>5</td>
+<td>The specified USB interface device is not attached.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.ConnectorExceptionCause.UsbInterfaceInUse"><span
+class="selflink">UsbInterfaceInUse</span></td>
+<td>6</td>
+<td>The USB interface is in use by another operation or client.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.ConnectorExceptionCause.UsbInterfaceOpenFailed"><span
+class="selflink">UsbInterfaceOpenFailed</span></td>
+<td>7</td>
+<td>The USB interface could not be opened.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.ConnectorExceptionCause.UsbCommunicationError"><span
+class="selflink">UsbCommunicationError</span></td>
+<td>8</td>
+<td>An error on USB communication level occurred</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.ConnectorExceptionCause.NoResponseDuringSessionHandshake"><span
+class="selflink">NoResponseDuringSessionHandshake</span></td>
+<td>9</td>
+<td>Timeout while trying to establish a session.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.ConnectorExceptionCause.IpConnectionRefusedOrReset"><span
+class="selflink">IpConnectionRefusedOrReset</span></td>
+<td>10</td>
+<td>The IP connection was refused or closed by the interface.</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.ConnectorExceptionCause.IpNetworkError"><span
+class="selflink">IpNetworkError</span></td>
+<td>11</td>
+<td>There was a problem with the IP network.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.ConnectorExceptionCause.HostNotFoundOrUnreachable"><span
+class="selflink">HostNotFoundOrUnreachable</span></td>
+<td>12</td>
+<td>No such host is known or there is no network route to the specified
+host.</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.ConnectorExceptionCause.OtherIpError"><span
+class="selflink">OtherIpError</span></td>
+<td>13</td>
+<td>Any other IP problem.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.ConnectorExceptionCause.ConnectionTypeIsNotSupported"><span
+class="selflink">ConnectionTypeIsNotSupported</span></td>
+<td>14</td>
+<td>The requested KNXnet/IP connection type is not supported.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.ConnectorExceptionCause.ConnectionOptionIsNotSupported"><span
+class="selflink">ConnectionOptionIsNotSupported</span></td>
+<td>15</td>
+<td>The requested KNXnet/IP connection options are not supported.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.ConnectorExceptionCause.NoMoreConnections"><span
+class="selflink">NoMoreConnections</span></td>
+<td>16</td>
+<td>The server cannot accept the new data connection because its maximum
+amount of concurrent connections is already used.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.ConnectorExceptionCause.NoMoreUniqueConnections"><span
+class="selflink">NoMoreUniqueConnections</span></td>
+<td>17</td>
+<td>The interface device cannot accept the new data connection because
+there are connections available but no more unique address can be
+assigned. Usd by IP Unicast [E_NO_MORE_UNIQUE_CONNECTIONS]</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.ConnectorExceptionCause.ServiceIsSecured"><span
+class="selflink">ServiceIsSecured</span></td>
+<td>18</td>
+<td>The KNXnet/IP service is secured but no UserPassword is given in the
+connection parameters.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.ConnectorExceptionCause.ServerValidationFailed"><span
+class="selflink">ServerValidationFailed</span></td>
+<td>19</td>
+<td>A secure connection cannot be established since the
+DeviceAuthenticationCode sent by the target could not be validated by
+the client. Used by IP Unicast [DeviceAuthenticationCode mismatch]</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.ConnectorExceptionCause.UserLoginFailed"><span
+class="selflink">UserLoginFailed</span></td>
+<td>20</td>
+<td>A secure connection cannot be established since the provided UserId
+and/or Password (hash) are not accepted by the target device. Used by IP
+Unicast [STATUS_AUTHENTICATION_FAILED]</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.ConnectorExceptionCause.NoTunnelingAddress"><span
+class="selflink">NoTunnelingAddress</span></td>
+<td>21</td>
+<td>The requested address is not available for tunneling. Used by IP
+Tunneling (E_NO_TUNNELLING_ADDRESS)</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.ConnectorExceptionCause.TunnelingConnectionInUse"><span
+class="selflink">TunnelingConnectionInUse</span></td>
+<td>22</td>
+<td>The requested address is not available (E_CONNECTION_IN_USE)</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.ConnectorExceptionCause.TunnelingNotAuthorized"><span
+class="selflink">TunnelingNotAuthorized</span></td>
+<td>23</td>
+<td>The Client is not authorized to use the requested IA in the Extended
+CRI. Used by IP Tunneling (E_AUTHORISATION_ERROR)</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.ConnectorExceptionCause.UnknownErrorFromServer"><span
+class="selflink">UnknownErrorFromServer</span></td>
+<td>24</td>
+<td>Unknown error from server. Used by IP Unicast</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.ConnectorExceptionCause.NoResponsePingSucceeded"><span
+class="selflink">NoResponsePingSucceeded</span></td>
+<td>25</td>
+<td>The target IP device did not respond to KNXnet/IP description
+request on the given port, but could be pinged successfully. Either the
+port was not the correct control endpoint or this is no KNXnet/IP at
+all.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.ConnectorExceptionCause.ReadFeatureValueFailed"><span
+class="selflink">ReadFeatureValueFailed</span></td>
+<td>26</td>
+<td>ReadFeatureValue failed</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.ConnectorExceptionCause.WriteFeatureValueFailed"><span
+class="selflink">WriteFeatureValueFailed</span></td>
+<td>27</td>
+<td>WriteFeatureValue failed</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.ConnectorExceptionCause.LocalServiceNotSupported"><span
+class="selflink">LocalServiceNotSupported</span></td>
+<td>28</td>
+<td>Trying to write a service not supported by the interface.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.ConnectorExceptionCause.LocalWriteVerifyFailed"><span
+class="selflink">LocalWriteVerifyFailed</span></td>
+<td>29</td>
+<td>Verify error when writing to the local interface.</td>
+</tr>
+</tbody>
+</table>
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[Knx.Falcon Namespace](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

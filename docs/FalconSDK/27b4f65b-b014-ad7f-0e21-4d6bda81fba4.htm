@@ -1,0 +1,149 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn">IIoTDeviceExtensions<span
+id="LST78CB9E15_0"></span>
+ReadPublisherTableAsync Method</td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Determines all [IoTPublisher](aabfb543-ad5e-4747-da4f-41c4349a8e4b.htm)s
+of a device.
+
+**Namespace:**  [Knx.Falcon](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public static Task<IEnumerable<IoTPublisher>> ReadPublisherTableAsync(
+        this IIoTDevice iotDevice,
+        IoTOperationToken token
+    )
+
+    <ExtensionAttribute>
+    Public Shared Function ReadPublisherTableAsync ( 
+        iotDevice As IIoTDevice,
+        token As IoTOperationToken
+    ) As Task(Of IEnumerable(Of IoTPublisher))
+
+    public:
+    [ExtensionAttribute]
+    static Task<IEnumerable<IoTPublisher^>^>^ ReadPublisherTableAsync(
+        IIoTDevice^ iotDevice, 
+        IoTOperationToken token
+    )
+
+    [<ExtensionAttribute>]
+    static member ReadPublisherTableAsync : 
+            iotDevice : IIoTDevice * 
+            token : IoTOperationToken -> Task<IEnumerable<IoTPublisher>> 
+
+#### Parameters
+
+<span class="parameter">iotDevice</span>  
+Type: [Knx.Falcon<span id="LST78CB9E15_1"></span>](7ae1ff5c-5ee9-13bb-d217-66a14aa99a1f.htm)
+
+IIoTDevice  
+Device to perform the function upon
+
+<span class="parameter">token</span>  
+Type: [Knx.Falcon<span id="LST78CB9E15_2"></span>](5a5ed07c-3178-9b0e-ac93-a12aea609e34.htm)
+
+IoTOperationToken  
+A token for tracking and potentially aborting the current operation.
+
+#### Return Value
+
+Type: <span class="nolink">Task</span><span id="LST78CB9E15_3"></span>
+
+<span class="nolink">IEnumerable</span><span id="LST78CB9E15_4"></span>
+
+[IoTPublisher](aabfb543-ad5e-4747-da4f-41c4349a8e4b.htm)<span id="LST78CB9E15_5"></span>
+
+<span id="LST78CB9E15_6"></span>
+
+  
+All [IoTPublisher](aabfb543-ad5e-4747-da4f-41c4349a8e4b.htm)s in the
+publisher table of the device.
+
+#### Usage Note
+
+In Visual Basic and C#, you can call this method as an instance method
+on any object of type
+[IIoTDevice](7ae1ff5c-5ee9-13bb-d217-66a14aa99a1f.htm). When you use
+instance method syntax to call this method, omit the first parameter.
+For more information, see <a
+href="https://docs.microsoft.com/dotnet/visual-basic/programming-guide/language-features/procedures/extension-methods"
+target="_blank" rel="noopener noreferrer">Extension Methods (Visual
+Basic)</a> or <a
+href="https://docs.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/extension-methods"
+target="_blank" rel="noopener noreferrer">Extension Methods (C#
+Programming Guide)</a>.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Exceptions</span>
+
+<table>
+<thead>
+<tr>
+<th>Exception</th>
+<th>Condition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a
+href="4dc8cc5a-a0a5-fd21-c8e4-01c5d054961a.htm">IoTException</a></td>
+<td>Thrown when the device could not successfully perform the action or
+the device was unreachable.</td>
+</tr>
+</tbody>
+</table>
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[IIoTDeviceExtensions Class](345c62d3-b7a0-d107-61f4-878cf0225707.htm)
+
+[Knx.Falcon Namespace](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

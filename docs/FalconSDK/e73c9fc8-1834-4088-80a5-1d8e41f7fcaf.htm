@@ -1,0 +1,93 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="logging">Logging</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Logging is an invaluable tool when it comes to diagnosing problems.
+Falcon logging can be adapted to integrate into any existing logging
+system already in place in the client application.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Pre-defined logging systems</span>
+
+#### No Logging
+
+In the rare case that logging is not wanted, it can be completely
+switched off by using the following code before accessing any other
+Falcon class:
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDAABACAAA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDAABACAAA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDAABACAAA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDAABACAAA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDAABACAAA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDAABACAAA&#39;);return false;"
+title="Copy">Copy</a>
+
+    Logger.Factory = new NullLoggerFactory();
+
+    Logger.Factory = New NullLoggerFactory()
+
+No code example is currently available or this language may not be
+supported.
+
+No code example is currently available or this language may not be
+supported.
+
+#### log4net Logging
+
+<span class="media">![External
+Link](../media/ExternalLink.png)</span><a href="https://logging.apache.org/log4net/" target="_blank"
+rel="noopener noreferrer">log4net</a> is a popular logging system which
+is highly configurable and provides output to a rich set of targets,
+including files, databases, and network protocols.
+
+To use log4net, you need to initialize and configure it in your
+application before Falcon is used. See the log4net documentation on how
+to do this.
+
+This is the default setting. Falcon uses log4net v2.0.8.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Custom Logging Provider</span>
+
+You may also provide your own logging facility:
+
+- Create a class implementing the
+  [IFalconLogger](7e425923-e1cc-8dc4-632e-b44b6df61ef0.htm) interface.
+
+- Create a class implementing the
+  [IFalconLoggerFactory](3f8b1fe4-f3e8-7798-0d3a-f702c52391b4.htm)
+  interface.
+
+- Register an instance of the latter class as
+  [Factory](eca21355-b095-72cc-deba-523a01d68f96.htm) before accessing
+  any other Falcon class.
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

@@ -1,0 +1,268 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="iiotnetwork-interface">IIoTNetwork
+Interface</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Provides access to KNX IoT network management procedures.
+
+It provides the following network facilities:
+
+- General Scan - Find any device and get serial number or individual
+  address e.g. [DiscoverDeviceInfosOfAllDevicesAsync(IoTOperationPolicy,
+  IoTOperationToken)](5a88917f-cae4-0c3a-6548-8f3a375b1782.htm)
+- Filtered Scan - Find devices with some restriction e.g.
+  [ScanIndividualAddressRangeAsync(IndividualAddress, IndividualAddress,
+  IProgress<span id="LST2ADAE71C_0"></span>](31fd2ace-67dd-8645-8da8-72b648c394b1.htm)
+  Int32<span id="LST2ADAE71C_1"></span>
+  , IoTOperationToken)
+- Programming Mode Scan - Find all devices in Programming mode e.g.
+  [ReadDeviceInfoByProgrammingModeAsync(IoTOperationPolicy,
+  IoTOperationToken)](24069d70-27b4-702e-3257-7a1afe221b23.htm)
+- Ping - Check if a device is reachable / individual address is occupied
+  e.g. [PingIndividualAddressAsync(IndividualAddress,
+  IoTOperationPolicy,
+  IoTOperationToken)](e143433d-deba-33c1-22bf-720879c6aa80.htm)
+- Conversion - Convert between Individual Address and Serial number e.g.
+  [ReadSerialNumberByIndividualAddressAsync(IndividualAddress,
+  IoTOperationPolicy,
+  IoTOperationToken)](d54ba913-94ef-3071-f0b4-e375b579bf96.htm)
+
+**Namespace:**  [Knx.Falcon](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public interface IIoTNetwork : IDisposable, 
+        IAsyncDisposable
+
+    Public Interface IIoTNetwork
+        Inherits IDisposable, IAsyncDisposable
+
+    public interface class IIoTNetwork : IDisposable, 
+        IAsyncDisposable
+
+    type IIoTNetwork =  
+        interface
+            interface IDisposable
+            interface IAsyncDisposable
+        end
+
+The <span class="selflink">IIoTNetwork</span> type exposes the following
+members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Methods</span>
+
+<table id="methodList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="5a88917f-cae4-0c3a-6548-8f3a375b1782.htm">DiscoverDeviceInfosOfAllDevicesAsync</a></td>
+<td><div class="summary">
+Discovers all reachable devices and yields their device info in an async
+stream as soon as they become available.
+</div></td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">Dispose</span></td>
+<td><div class="summary">
+Performs application-defined tasks associated with freeing, releasing,
+or resetting unmanaged resources.
+</div>
+(Inherited from <span class="nolink">IDisposable</span>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">DisposeAsync</span></td>
+<td>(Inherited from <span class="nolink">IAsyncDisposable</span>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="e143433d-deba-33c1-22bf-720879c6aa80.htm">PingIndividualAddressAsync</a></td>
+<td><div class="summary">
+Sends a discovery request to check if a device with a certain individual
+address is reachable.
+<p>This is useful to check if a certain individual address is already
+occupied in the process of individualization.</p>
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="ee6241fc-d8ac-6002-bf29-1bc631022209.htm">PingSerialNumberAsync</a></td>
+<td><div class="summary">
+Sends a discovery request to check if a device with a certain serial
+number is reachable.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="e672b362-c149-043a-6489-e8261ca57ddb.htm">ReadDeviceInfoByPartialDeviceInfoAsync</a></td>
+<td><div class="summary">
+Reads the device info for a device given its serial number or individual
+address and installation id
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="24069d70-27b4-702e-3257-7a1afe221b23.htm">ReadDeviceInfoByProgrammingModeAsync</a></td>
+<td><div class="summary">
+Discovers all reachable devices in Programming Mode and yields their
+device info in an async stream as soon as they become available.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="9c189813-bcdb-9785-2c8d-0c835064f431.htm">ReadIndividualAddressBySerialNumberAsync</a></td>
+<td><div class="summary">
+Determines the individual address of a device given its serial number.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="d54ba913-94ef-3071-f0b4-e375b579bf96.htm">ReadSerialNumberByIndividualAddressAsync</a></td>
+<td><div class="summary">
+Determines the serial number of a device given its individual address.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="31fd2ace-67dd-8645-8da8-72b648c394b1.htm">ScanIndividualAddressRangeAsync</a></td>
+<td><div class="summary">
+Scans the specified individual address range and yields their individual
+addresses in an async stream as soon as they become available.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />Events</span>
+
+<table id="eventList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubevent.gif" title="Public event"
+alt="Public event" /></td>
+<td><a href="016657ff-7cf4-5934-ac0c-24f5b922e433.htm">Disposed</a></td>
+<td><div class="summary">
+This event is fired when the object is disposed
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID4RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID4RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID4RBToggle"
+class="collapseToggle" />Remarks</span>
+
+The class <span class="nolink">IIoTNetworkExtensions</span> provides
+overloads for the functions of this interface that do not require an
+[IoTOperationPolicy](f88614d5-4a6b-ace3-0b47-ac466d123ebf.htm) to be
+specified and use a default policy instead that is appropriate for the
+respective actions. If a custom policy is provided by the user care
+should be taken since too short timeouts may cause failures and some
+functions are not suitable for retrying.
+
+Note that the network object should be disposed as soon as it is no
+longer needed.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID5RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID5RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID5RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[Knx.Falcon Namespace](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

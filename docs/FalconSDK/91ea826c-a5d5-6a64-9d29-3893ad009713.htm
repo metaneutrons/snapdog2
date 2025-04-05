@@ -1,0 +1,94 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn">Dpt18<span id="LST402022DA_0"></span>
+ToTypedValue Method</td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Converts the raw value to a value of type
+<span class="typeparameter">T</span>
+
+**Namespace:**
+ [Knx.Falcon.ApplicationData.DatapointTypes](4524760b-44ef-f645-eb89-57d78a179600.htm)  
+**Assembly:**  Knx.Falcon.ApplicationData (in
+Knx.Falcon.ApplicationData.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public override KnxSceneControl ToTypedValue(
+        GroupValue groupValue
+    )
+
+    Public Overrides Function ToTypedValue ( 
+        groupValue As GroupValue
+    ) As KnxSceneControl
+
+    public:
+    virtual KnxSceneControl^ ToTypedValue(
+        GroupValue^ groupValue
+    ) override
+
+    abstract ToTypedValue : 
+            groupValue : GroupValue -> KnxSceneControl 
+    override ToTypedValue : 
+            groupValue : GroupValue -> KnxSceneControl 
+
+#### Parameters
+
+<span class="parameter">groupValue</span>  
+Type: [Knx.Falcon<span id="LST402022DA_1"></span>](cfefd12c-88f9-89e7-b457-f55df2d98718.htm)
+
+GroupValue  
+The raw value
+
+#### Return Value
+
+Type: [KnxSceneControl](538e3322-c7b9-3ba3-c47b-1db46e3baf0a.htm)  
+Value converted to type <span class="typeparameter">T</span>.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[Dpt18 Class](270c44a4-4232-e6e5-0ee1-a2ad08864d16.htm)
+
+[Knx.Falcon.ApplicationData.DatapointTypes
+Namespace](4524760b-44ef-f645-eb89-57d78a179600.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

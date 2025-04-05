@@ -1,0 +1,126 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn">DeviceCommunicationSecurity<span
+id="LST49289530_0"></span>
+Load Method (Stream, SecureString, IndividualAddress)</td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Load point-to-point keys from a keyring file (\*.knxkeys) exported from
+ETS.
+
+**Namespace:**
+ [Knx.Falcon.DataSecurity](8e78c9eb-f0d7-da55-a0f1-4da2dd7668c4.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public static DeviceCommunicationSecurity Load(
+        Stream stream,
+        SecureString password,
+        IndividualAddress interfaceAddress
+    )
+
+    Public Shared Function Load ( 
+        stream As Stream,
+        password As SecureString,
+        interfaceAddress As IndividualAddress
+    ) As DeviceCommunicationSecurity
+
+    public:
+    static DeviceCommunicationSecurity^ Load(
+        Stream^ stream, 
+        SecureString^ password, 
+        IndividualAddress interfaceAddress
+    )
+
+    static member Load : 
+            stream : Stream * 
+            password : SecureString * 
+            interfaceAddress : IndividualAddress -> DeviceCommunicationSecurity 
+
+#### Parameters
+
+<span class="parameter">stream</span>  
+Type: <span class="nolink">System.IO<span id="LST49289530_1"></span></span>
+
+Stream  
+The data from the knxkeys file
+
+<span class="parameter">password</span>  
+Type: <span class="nolink">System.Security<span id="LST49289530_2"></span></span>
+
+SecureString  
+Password for the knxkeys file
+
+<span class="parameter">interfaceAddress</span>  
+Type: [Knx.Falcon<span id="LST49289530_3"></span>](96a1c930-0f99-d67e-b5de-24b4e417e173.htm)
+
+IndividualAddress  
+The individual address of the interface to use
+
+#### Return Value
+
+Type: [DeviceCommunicationSecurity](2805c385-fc93-6c5b-7817-aaca7428f1f8.htm)  
+The read
+[DeviceCommunicationSecurity](2805c385-fc93-6c5b-7817-aaca7428f1f8.htm)
+data
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Remarks</span>
+
+ETS 5.6 currently does not support configuring P2P keys and thus the
+knxkeys file exported by ETS 5.6 will not contain any P2P keys.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[DeviceCommunicationSecurity
+Class](2805c385-fc93-6c5b-7817-aaca7428f1f8.htm)
+
+[Load Overload](08fa6042-b4a4-cdac-f157-ae8c373dcc5b.htm)
+
+[Knx.Falcon.DataSecurity
+Namespace](8e78c9eb-f0d7-da55-a0f1-4da2dd7668c4.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

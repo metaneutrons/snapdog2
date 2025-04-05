@@ -1,0 +1,199 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="knx-device-management">KNX Device
+Management</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Falcon SDK allows to access individual devices of the KNX installation.
+
+Each device is identified by its
+[IndividualAddress](96a1c930-0f99-d67e-b5de-24b4e417e173.htm). This must
+be unique in the KNX installation and its sub-network part
+([SubnetAddress](72e4cb00-c44a-70e0-6878-f5507f151ab2.htm) must match
+the actual sub-network it is connected to). Also, any couplers/routers
+between the interface and the device must have been properly configured.
+If these prerequisites are not fulfilled, no communication with the
+device will be possible.
+
+Depending on the basic management model and the concrete product
+implementation, different services are provided by a device. This
+section lists the most important ones.
+
+The device management methods are located in the
+[KnxDevice](a8ee86c3-a3f4-2ace-fc78-4d70c73eb95d.htm) class.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Connection-oriented vs. connection-less</span>
+
+Communication with the device might either be connection-oriented or
+connection-less.
+
+- Connection-oriented communication is designed for reliable delivery of
+  messages, but has a higher overhead.
+
+- Connection-less communication is designed for best efficiency if
+  absolute transport reliability is not needed.
+
+Depending on the device, not all services might be available in both
+modes.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Message length restrictions</span>
+
+While all KNX interfaces, couplers/routers and devices support a message
+(APDU) length of 15 bytes, most of them have a higher limit. Using
+longer messages increases the efficiency of services transporting lots
+of data, and is even a requirement when using [security](#Security).
+
+The process of determining the maximum APDU length that can be used for
+a connection has to take into account:
+
+- Any restriction by the KNX interface (e.g. USB or IP Tunneling
+  interface). This value is available as property
+  [MaxApduLength](2b1452a7-84f8-6dc6-4ea0-1a5f132a43a2.htm) and is taken
+  automatically into account when a device connection is established.
+
+- The restriction by the target device. This value is automatically read
+  from the device when connecting and is taken automatically into
+  account.
+
+- Any restrictions by couplers/routers in the installation between the
+  interface and the target device. As Falcon does not have this context
+  knowledge, it is up to the Falcon client to provide this information
+  using a
+  [DeterminePathApduLength](f4e3d603-5673-9839-7207-f6be421bd8ed.htm)
+  delegate. Usual choices are:
+
+  - The pre-defined
+    [PessimisticPathRestriction](e09a1c81-da07-bc90-e816-131bffed70be.htm)
+    always uses 15 bytes. This is appropriate if the intended operations
+    do not involve longer messages.
+
+  - The pre-defined
+    [OptimisticPathRestriction](c41ce03d-d1c1-5d23-2688-5a341bb63ac9.htm)
+    always uses the minimum of the interface and device restrictions,
+    not taking into account any couplers/router in between. This is
+    appropriate only if the installation does not contain
+    couplers/router or if the client is able to cope with errors arising
+    from couplers/router not routing longer messages.
+
+  - The method
+    [QueryRoutersPathRestriction](724df41f-02d3-7b6c-0aa5-cf5c7f5d05d0.htm)
+    constructs a
+    [DeterminePathApduLength](f4e3d603-5673-9839-7207-f6be421bd8ed.htm)
+    delegate which will query the capabilities of the couplers/routers
+    with the given individual addresses. This is appropriate if the
+    client has the knowledge of the KNX bus topology to provide this
+    information.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Security</span>
+
+KNX devices might be configured with KNX Data Security. If for such
+device security is enabled, most resources are be accessible only with a
+suitable 128-bit key. The client proves knowledge of this key by
+encrypting the communication with the device with it.
+
+Another access control mechanism is based on 32-bit access keys, with no
+encryption on the bus.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />Device Descriptor</span>
+
+The device descriptor type 0 (also known as "mask version") is a 16-bit
+value providing information about the basic device management model.
+Example: 0012h is the mask version of a TP1 BCU1, 2920h the mask version
+of a TP1/RF media coupler. See
+[DeviceDescriptor0](f664e17a-4b04-c116-a68e-913023c7f741.htm).
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID4RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID4RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID4RBToggle"
+class="collapseToggle" />Memory Services</span>
+
+Most devices support reading and writing device memory. As the location
+and interpretation of memory content varies from device to device,
+intimate knowledge of the product is needed to make use of these
+services.
+
+See [Memory
+Access](7b9f86c9-c896-4a80-a577-e479b643ea5e.htm#MemoryAccess) on how to
+use Device Memory with Falcon.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID5RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID5RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID5RBToggle"
+class="collapseToggle" />Property Services</span>
+
+Most device models support <span class="term">interface objects</span>
+and their properties. These provide convenient access to standard
+resources as well as application-defined resources.
+
+An interface object can be addressed either via its 0-based index, or
+via the object type. Common object type identifiers - as well as
+property IDs - can be looked up in the "3/5/1 Resources" chapter of the
+KNX Handbook.
+
+Each property is of a specific, standardized <span class="term">Property
+Data Type</span> (PDT). Falcon contains [PDT
+Converters](fb3cf115-c09e-4dc4-8782-69654a7ac5e3.htm#PDT) to easily
+translate between raw data and types more suitable for handling in
+applications.
+
+A property might be a <span class="term">scalar</span> (i.e. contain a
+single value) or an <span class="term">array</span> of values.
+
+Discovery and description services allow to get the available interface
+objects, properties and their description (e.g. type and maximum array
+size) from the device.
+
+See [Property
+Access](7b9f86c9-c896-4a80-a577-e479b643ea5e.htm#PropertyAccess) on how
+to use Device Properties with Falcon.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID6RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID6RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID6RBToggle"
+class="collapseToggle" />Miscellaneous Services</span>
+
+[ReadAdcAsync](3c6fa216-3ad5-8093-645a-c7e427c7c483.htm) allows to
+measure e.g. the bus voltage.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID7RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID7RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID7RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Other Resources
+
+[Access KNX Devices](7b9f86c9-c896-4a80-a577-e479b643ea5e.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

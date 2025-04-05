@@ -1,0 +1,159 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="iotrecipient-properties">IoTRecipient
+Properties</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+The [IoTRecipient](9fbd0be6-055a-bff6-7c39-f594ab865bc1.htm) type
+exposes the following members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Properties</span>
+
+<table id="propertyList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="7ee20d08-ce7d-8d18-e311-ab72517dde84.htm">GroupAddresses</a></td>
+<td><div class="summary">
+A list of group addresses which shall be sent to the configured
+recipient.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="2ba45bee-e5eb-ae0a-6b41-b54d69b24089.htm">GroupId</a></td>
+<td></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="d3dfac19-8f6b-4069-f443-bd0d721e1cef.htm">Id</a></td>
+<td><div class="summary">
+ID of the Function Point Recipient Table Entry.
+<div class="collapsibleAreaRegion">
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse(&#39;ID0RB&#39;)"
+onkeypress="SectionExpandCollapse_CheckKey(&#39;ID0RB&#39;, event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Remarks</span>
+</div>
+<div id="ID0RBSection" class="collapsibleSection">
+This ID shall be unique with respect to the table.
+</div>
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="d58b7c76-d1b6-47d7-b6aa-37f86ba60ded.htm">IndividualAddress</a></td>
+<td><div class="summary">
+The individual address identifying the endpoint of the recipient.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="93bb37ed-0303-8aa4-9cc7-dd51972f622e.htm">InstallationId</a></td>
+<td><div class="summary">
+KNX Installation ID of the recipient.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="3b9ccf00-264a-5a56-ab48-89b37b832cc0.htm">MaximumRetransmissions</a></td>
+<td><div class="summary">
+Defines the amount of allowed retransmissions for sending group
+messages.
+<p>If this property is omitted then the following values are used:</p>
+<ul>
+<li>For <em>not confirmed</em> messages: <strong>0</strong>
+retransmissions</li>
+<li>For <em>confirmed</em> messages: <strong>4</strong>
+retransmissions</li>
+</ul>
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="d2c5fdf5-fc93-8157-8df6-c239655566da.htm">NonConfirmable</a></td>
+<td><div class="summary">
+Defines if group messages shall be confirmed.
+<p>Per default this is set to <span class="code">false</span> indicating
+that group messages shall be confirmed.</p>
+<p>If this is <span class="code">true</span> then non-confirmable
+requests will be sent. Retransmissions will not be possible in this
+case. (see also: <a
+href="3b9ccf00-264a-5a56-ab48-89b37b832cc0.htm">MaximumRetransmissions</a>)</p>
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="e2ef41ff-91fd-3a85-352f-4f1579a951db.htm">Path</a></td>
+<td><div class="summary">
+The resource path of the recipient used for sending group messages.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="862bcc91-9121-383e-1153-18e29aec630d.htm">Url</a></td>
+<td><div class="summary">
+The url identifying the endpoint of the recipient.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[IoTRecipient Class](9fbd0be6-055a-bff6-7c39-f594ab865bc1.htm)
+
+[Knx.Falcon Namespace](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

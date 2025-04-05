@@ -1,0 +1,237 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="access-knx-devices">Access KNX
+Devices</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+This section provides examples on how to access an individual device in
+the installation. See [KNX Device
+Management](7a396799-e706-4295-8200-b8e27b2b70e6.htm) for a general
+introduction.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Device Property access</span>
+
+Falcon supports the full set of both standard and extended property
+services. The difference between both is:
+
+- Standard property services address a property by the interface object
+  index and the property ID. Property IDs are restricted to 8 bit, array
+  property are accessed with a 12 bit index and 4 bit count.
+
+- Extended property services address a property by the interface object
+  type and instance, and the property ID. Property IDs are restricted to
+  12 bit, array property are accessed with a 16 bit index and 8 bit
+  count.
+
+### How to read property values
+
+- To read a property value, use the methods
+  [ReadPropertyValueAsync](9b795f89-6c34-b9b3-56d8-d4d74dfc1561.htm) /
+  [ReadPropertyExtendedValueAsync](27f4fe09-d3b8-8785-d6a7-bee4c5743d7a.htm).
+
+  <a href="#"
+  onclick="javascript:ChangeTab(&#39;ID0EDAAAADACAAA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+  <a href="#"
+  onclick="javascript:ChangeTab(&#39;ID0EDAAAADACAAA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+  <a href="#"
+  onclick="javascript:ChangeTab(&#39;ID0EDAAAADACAAA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+  <a href="#"
+  onclick="javascript:ChangeTab(&#39;ID0EDAAAADACAAA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+  <a href="#" id="ID0EDAAAADACAAA_copyCode" class="copyCodeSnippet"
+  onclick="javascript:CopyToClipboard(&#39;ID0EDAAAADACAAA&#39;);return false;"
+  title="Copy">Copy</a>
+
+      // read the scalar property 12 (PID_MANUFACTURER_ID) in the device object (object index 0)
+      var readBytes = await device.ReadPropertyValueAsync(0, 12);
+
+      // read the whole array property with ID 212 (element size: 2 byte) in the object index 10
+      var count = await device.ReadPropertyElementCountAsync(10, 212);
+      if (count > 0)
+      {
+          var readArrayProp = await device.ReadPropertyValueAsync(10, 212, 1, count, 2);
+      }
+
+      // read the scalar property 58 (PID_MAX_ROUTER_APDULENGTH) in the first router object (object type 6)
+      var readBytesExt = await device.ReadPropertyExtendedValueAsync(6, 1, 58);
+
+      // read the whole array property 53 (PID_ADDITIONAL_INDIVIDUAL_ADDRESSES) in the IP object (object type 11)
+      var countExt = await device.ReadPropertyExtendedElementCountAsync(11, 1, 53);
+      if (countExt > 0)
+      {
+          var readArrayPropExt = await device.ReadPropertyExtendedValueAsync(11, 1, 53, count, 2, 2);
+      }
+
+      ' read the scalar property 12 (PID_MANUFACTURER_ID) in the device object (object index 0)
+      Dim readBytes = Await device.ReadPropertyValueAsync(0, 12)
+
+      'read the whole array property with ID 212 (element size: 2 byte) in the object index 10
+      Dim count = Await device.ReadPropertyElementCountAsync(10, 212)
+      If count > 0 Then
+          Dim readArrayProp = Await device.ReadPropertyValueAsync(10, 212, 1, count, 2)
+      End If
+      ' read the scalar property 58 (PID_MAX_ROUTER_APDULENGTH) in the first router object (object type 6)
+      Dim readBytesExt = Await device.ReadPropertyExtendedValueAsync(6, 1, 58)
+
+      ' read the whole array property 53 (PID_ADDITIONAL_INDIVIDUAL_ADDRESSES) in the IP object (object type 11)
+      Dim countExt = Await device.ReadPropertyExtendedElementCountAsync(11, 1, 53)
+      If countExt > 0 Then
+          Dim readArrayPropExt = Await device.ReadPropertyExtendedValueAsync(11, 1, 53, count, 2, 2)
+      End If
+
+  No code example is currently available or this language may not be
+  supported.
+
+  No code example is currently available or this language may not be
+  supported.
+
+### How to write property values
+
+- To write a property value, use the methods
+  [WritePropertyValueAsync](74d857df-2638-eb7d-e30e-94b848c396c9.htm) /
+  [WritePropertyExtendedValueAsync](c354e971-a916-f697-e496-7619789768a7.htm).
+
+  <a href="#"
+  onclick="javascript:ChangeTab(&#39;ID0EDAAAACACAAA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+  <a href="#"
+  onclick="javascript:ChangeTab(&#39;ID0EDAAAACACAAA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+  <a href="#"
+  onclick="javascript:ChangeTab(&#39;ID0EDAAAACACAAA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+  <a href="#"
+  onclick="javascript:ChangeTab(&#39;ID0EDAAAACACAAA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+  <a href="#" id="ID0EDAAAACACAAA_copyCode" class="copyCodeSnippet"
+  onclick="javascript:CopyToClipboard(&#39;ID0EDAAAACACAAA&#39;);return false;"
+  title="Copy">Copy</a>
+
+      // write the scalar property 211 in the object index 10
+      await device.WritePropertyValueAsync(10, 211, new byte[] { 0x00, 0x01 });
+
+      // write some elements of the array property with ID 212 (element size: 2 byte) in the object index 10
+      await device.WritePropertyValueAsync(10, 212, 4, 1, new byte[] { 0x00, 0x01 });
+
+      // write the scalar property 211 in the second object of type 50100
+      await device.WritePropertyExtendedValueAsync(50100, 2, 211, new byte[] { 0x00, 0x01 });
+
+      ' write the scalar property 211 in the object index 10
+      Await device.WritePropertyValueAsync(10, 211, New Byte() {&H0, &H1})
+
+      ' write some elements of the array property with ID 212 (element size 2 byte) in the object index 10
+      Await device.WritePropertyValueAsync(10, 212, 4, 1, New Byte() {&H0, &H1})
+
+      ' write the scalar property 211 in the second object of type 50100
+      Await device.WritePropertyExtendedValueAsync(50100, 2, 211, New Byte() {&H0, &H1})
+
+  No code example is currently available or this language may not be
+  supported.
+
+  No code example is currently available or this language may not be
+  supported.
+
+### Hot to read a property description
+
+- To query the property description, use the methods
+  [ReadPropertyDescriptionByIdAsync](9d30946c-c2a0-4725-09df-4eacfebde4f1.htm)
+  /
+  [ReadPropertyExtendedDescriptionByIdAsync](6accf3c5-1f1d-d7e0-39aa-c7dd0beeadcb.htm).
+
+  To discover the available properties of an interface object, use the
+  methods
+  [ReadPropertyDescriptionByIndexAsync](8704b386-a44d-71fd-d287-f9d6d90880f8.htm)
+  /
+  [ReadPropertyExtendedDescriptionByIndexAsync](f36b792e-28c7-d0fa-114f-40b0f25389bb.htm)
+  in a loop with increasing property index until it returns
+  <span class="code">null</span>.
+
+### How to discover interface objects
+
+- To discover all existing interface objects, use one of the following
+  methods:
+
+  - You might try to read the PID\_IO\_LIST property in the device
+    object (object index 0). Not all devices support this property,
+    however, so in case this method fails, fall back to the second
+    method:
+
+  - Call
+    [ReadPropertyDescriptionByIdAsync](9d30946c-c2a0-4725-09df-4eacfebde4f1.htm)
+    with propertyId = PID\_OBJECT\_TYPE in a loop with increasing object
+    index until it returns <span class="code">null</span>.
+
+  If the device does not support extended property services, you might
+  need to discover the object index of an interface object with given
+  object type and instance. The method
+  [LocateInterfaceObjectAsync](03a1b6bd-22e4-68e7-7298-0903a44f6225.htm)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Device Memory access</span>
+
+### How to read device memory
+
+- To read device memory data, use the method
+  [ReadMemoryAsync](0e4ccfb9-e188-f6e7-2e61-4768facf0549.htm)
+
+  <a href="#"
+  onclick="javascript:ChangeTab(&#39;ID0EDAAAAABBAAA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+  <a href="#"
+  onclick="javascript:ChangeTab(&#39;ID0EDAAAAABBAAA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+  <a href="#"
+  onclick="javascript:ChangeTab(&#39;ID0EDAAAAABBAAA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+  <a href="#"
+  onclick="javascript:ChangeTab(&#39;ID0EDAAAAABBAAA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+  <a href="#" id="ID0EDAAAAABBAAA_copyCode" class="copyCodeSnippet"
+  onclick="javascript:CopyToClipboard(&#39;ID0EDAAAAABBAAA&#39;);return false;"
+  title="Copy">Copy</a>
+
+      // read 10 bytes starting at address 0x4000
+      var readBytes = await device.ReadMemoryAsync(0x4000, 10);
+
+      ' read 10 bytes starting at address &H4000
+      Dim readBytes = Await device.ReadMemoryAsync(&H4000, 10)
+
+  No code example is currently available or this language may not be
+  supported.
+
+  No code example is currently available or this language may not be
+  supported.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Other Resources
+
+[KNX Device Management](7a396799-e706-4295-8200-b8e27b2b70e6.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

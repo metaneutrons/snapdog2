@@ -1,0 +1,308 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1
+id="iotoscoreaccesstoken-class">IoTOscoreAccessToken Class</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+\[Missing &lt;summary&gt; documentation for
+"T:Knx.Falcon.IoT.IoTOscoreAccessToken"\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Inheritance Hierarchy</span>
+
+<span class="nolink">System<span id="LST8835F667_0"></span></span>
+
+Object  
+  [Knx.Falcon<span id="LST8835F667_1"></span>](9e083f2b-8ddd-eb50-3219-20661917bebe.htm)
+
+IoTAccessToken  
+    <span class="selflink">Knx.Falcon.IoT<span id="LST8835F667_2"></span></span>
+
+IoTOscoreAccessToken  
+
+**Namespace:**
+ [Knx.Falcon.IoT](77c5abf9-f1d0-343a-2fc0-68ccbbf9a056.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID1EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID1EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public class IoTOscoreAccessToken : IoTAccessToken
+
+    Public Class IoTOscoreAccessToken
+        Inherits IoTAccessToken
+
+    public ref class IoTOscoreAccessToken : public IoTAccessToken
+
+    type IoTOscoreAccessToken =  
+        class
+            inherit IoTAccessToken
+        end
+
+The <span class="selflink">IoTOscoreAccessToken</span> type exposes the
+following members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />Properties</span>
+
+<table id="propertyList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="fa796172-2299-a251-0a3d-f4571b1e62f7.htm">Audience</a></td>
+<td>(Inherited from <a
+href="9e083f2b-8ddd-eb50-3219-20661917bebe.htm">IoTAccessToken</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="2779fca0-ef69-3240-1bc6-6433a89b0a7b.htm">GroupAddresses</a></td>
+<td><div class="summary">
+In the case of this being a Group Access token.
+<p>This contains the group address this access token applies to. The
+Master secret will be the group key</p>
+</div>
+(Inherited from <a
+href="9e083f2b-8ddd-eb50-3219-20661917bebe.htm">IoTAccessToken</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="37a01c3d-47ef-4bb6-6809-5176274007f1.htm">Id</a></td>
+<td><div class="summary">
+An access token id. It is used for update and deleting an item on a
+device. The id is unique on a device and should be unique in an
+installation.
+</div>
+(Inherited from <a
+href="9e083f2b-8ddd-eb50-3219-20661917bebe.htm">IoTAccessToken</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="7c754a8f-5019-3f8b-a7bb-0cbee3969122.htm">KeyConfiguration</a></td>
+<td><div class="summary">
+Confirmation key. For example with a symmetric proof of-possession key
+[RFC 8392]
+</div>
+(Inherited from <a
+href="9e083f2b-8ddd-eb50-3219-20661917bebe.htm">IoTAccessToken</a>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="b41d94ec-7257-18cb-b04c-876ed2459547.htm">OscoreKeyConfiguration</a></td>
+<td></td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="170f2d87-0da7-08eb-8f7d-461174305da0.htm">Profile</a></td>
+<td><div class="summary">
+IoTProfile
+<ol>
+<li>"coap_dtls" for X.509 certificates [RFC 8392] or,</li>
+<li>"coap_oscore" for OSCORE</li>
+</ol>
+</div>
+(Inherited from <a
+href="9e083f2b-8ddd-eb50-3219-20661917bebe.htm">IoTAccessToken</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="68ba333a-7f33-f940-da04-4bc963ced048.htm">Scope</a></td>
+<td><div class="summary">
+In the case of this being a Tool Access token.
+<p>Access Scope. A list of interfaces that define the access scope. As
+defined in [RFC 8392]</p>
+<p>The master secret will be the tool key.</p>
+</div>
+(Inherited from <a
+href="9e083f2b-8ddd-eb50-3219-20661917bebe.htm">IoTAccessToken</a>.)</td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID4RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID4RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID4RBToggle"
+class="collapseToggle" />Methods</span>
+
+<table id="methodList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="acae0e3f-0502-f12b-40dd-accf95ac72fe.htm">Equals(IoTAccessToken)</a></td>
+<td>(Inherited from <a
+href="9e083f2b-8ddd-eb50-3219-20661917bebe.htm">IoTAccessToken</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="bee708ca-562b-95e3-ddc3-a3db9b0a2823.htm">Equals(Object)</a></td>
+<td>(Inherited from <a
+href="9e083f2b-8ddd-eb50-3219-20661917bebe.htm">IoTAccessToken</a>.)</td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="47221fc1-831a-a8d9-a56c-fc90691fa7ac.htm">FromGroupKey</a></td>
+<td></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="ec5b6ebc-ba51-7319-4c64-20f3c8bdbb12.htm">FromToolKey</a></td>
+<td></td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="c23e06b0-44b1-500e-5469-b5db7851c55a.htm">GetCollectionResourcePath</a></td>
+<td>(Inherited from <a
+href="9e083f2b-8ddd-eb50-3219-20661917bebe.htm">IoTAccessToken</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="e3cdfd89-9829-3ca2-0768-81f57f067a2e.htm">GetHashCode</a></td>
+<td>(Inherited from <a
+href="9e083f2b-8ddd-eb50-3219-20661917bebe.htm">IoTAccessToken</a>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="1de15ce6-f0d4-0b0f-11bd-b0c578b5eec1.htm">GetObjectRepresentationData</a></td>
+<td>(Overrides <a
+href="a8ff518c-66e3-18e4-1758-88a0e8d55bfc.htm">IoTAccessToken<span
+id="LST8835F667_3"></span></a>
+GetObjectRepresentationData(ObjectRepresentationConversionContext).)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="55702464-9527-8032-c4ec-6cab0e32960a.htm">GetResourcePath</a></td>
+<td>(Inherited from <a
+href="9e083f2b-8ddd-eb50-3219-20661917bebe.htm">IoTAccessToken</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="7b42eca4-35c4-d297-5089-4555291820b3.htm">GetTransmissionMethod</a></td>
+<td>(Inherited from <a
+href="9e083f2b-8ddd-eb50-3219-20661917bebe.htm">IoTAccessToken</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">GetType</span></td>
+<td><div class="summary">
+Gets the <span class="nolink">Type</span> of the current instance.
+</div>
+(Inherited from <span class="nolink">Object</span>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="1c79afea-53c7-aee8-42d3-d47a694fb574.htm">ToString</a></td>
+<td>(Inherited from <a
+href="9e083f2b-8ddd-eb50-3219-20661917bebe.htm">IoTAccessToken</a>.)</td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID5RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID5RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID5RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[Knx.Falcon.IoT Namespace](77c5abf9-f1d0-343a-2fc0-68ccbbf9a056.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

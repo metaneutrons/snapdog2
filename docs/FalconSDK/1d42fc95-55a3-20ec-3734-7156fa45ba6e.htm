@@ -1,0 +1,109 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn">DomainAddress<span id="LSTB3D05460_0"></span>
+TryParse Method</td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Parses the provided domain address string into a
+[DomainAddress](48279f92-0b69-8038-18e8-13f20aaea621.htm) object.
+
+**Namespace:**  [Knx.Falcon](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public static bool TryParse(
+        string addressString,
+        out DomainAddress domainAddress
+    )
+
+    Public Shared Function TryParse ( 
+        addressString As String,
+        <OutAttribute> ByRef domainAddress As DomainAddress
+    ) As Boolean
+
+    public:
+    static bool TryParse(
+        String^ addressString, 
+        [OutAttribute] DomainAddress% domainAddress
+    )
+
+    static member TryParse : 
+            addressString : string * 
+            domainAddress : DomainAddress byref -> bool 
+
+#### Parameters
+
+<span class="parameter">addressString</span>  
+Type: <span class="nolink">System<span id="LSTB3D05460_1"></span></span>
+
+String  
+The domain address string; see
+[Parse(String)](b49442b1-21b5-551f-d7e4-9baafd6cbedc.htm) for accepted
+formats.
+
+<span class="parameter">domainAddress</span>  
+Type: [Knx.Falcon<span id="LSTB3D05460_2"></span>](48279f92-0b69-8038-18e8-13f20aaea621.htm)
+
+DomainAddress<span id="LSTB3D05460_3"></span>
+
+  
+The domain address.
+
+#### Return Value
+
+Type: <span class="nolink">Boolean</span>  
+<span class="keyword"><span id="LSTB3D05460_4"></span></span>
+
+if it is possible to parse the provided string into a
+[DomainAddress](48279f92-0b69-8038-18e8-13f20aaea621.htm); otherwise,
+<span class="keyword"><span id="LSTB3D05460_5"></span></span>
+
+.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[DomainAddress Structure](48279f92-0b69-8038-18e8-13f20aaea621.htm)
+
+[Knx.Falcon Namespace](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

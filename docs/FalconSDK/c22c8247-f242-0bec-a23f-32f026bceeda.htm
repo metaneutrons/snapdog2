@@ -1,0 +1,151 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn">KnxDevice<span id="LST4B7B7537_0"></span>
+WritePropertyValueAsync Method (Byte, Byte, ReadOnlyMemory`1<span
+id="LST4B7B7537_1"></span>
+Byte<span id="LST4B7B7537_2"></span>
+, Boolean, CancellationToken)</td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Writes a (scalar) interface object property value
+
+**Namespace:**
+ [Knx.Falcon.Sdk](ddc84507-eccd-b692-8467-e3956feec382.htm)  
+**Assembly:**  Knx.Falcon.Sdk (in Knx.Falcon.Sdk.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public Task WritePropertyValueAsync(
+        byte objectIndex,
+        byte propertyId,
+        ReadOnlyMemory<byte> data,
+        bool verify = true,
+        CancellationToken cancellationToken = default
+    )
+
+    Public Function WritePropertyValueAsync ( 
+        objectIndex As Byte,
+        propertyId As Byte,
+        data As ReadOnlyMemory(Of Byte),
+        Optional verify As Boolean = true,
+        Optional cancellationToken As CancellationToken = Nothing
+    ) As Task
+
+    public:
+    Task^ WritePropertyValueAsync(
+        unsigned char objectIndex, 
+        unsigned char propertyId, 
+        ReadOnlyMemory<unsigned char> data, 
+        bool verify = true, 
+        CancellationToken cancellationToken = CancellationToken()
+    )
+
+    member WritePropertyValueAsync : 
+            objectIndex : byte * 
+            propertyId : byte * 
+            data : ReadOnlyMemory<byte> * 
+            ?verify : bool * 
+            ?cancellationToken : CancellationToken 
+    (* Defaults:
+            let _verify = defaultArg verify true
+            let _cancellationToken = defaultArg cancellationToken new CancellationToken()
+    *)
+    -> Task 
+
+#### Parameters
+
+<span class="parameter">objectIndex</span>  
+Type: <span class="nolink">System<span id="LST4B7B7537_3"></span></span>
+
+Byte  
+The interface object index
+
+<span class="parameter">propertyId</span>  
+Type: <span class="nolink">System<span id="LST4B7B7537_4"></span></span>
+
+Byte  
+The property Id
+
+<span class="parameter">data</span>  
+Type: <span class="nolink">ReadOnlyMemory</span><span id="LST4B7B7537_5"></span>
+
+<span class="nolink">Byte</span><span id="LST4B7B7537_6"></span>
+
+  
+The data to write
+
+<span class="parameter">verify</span> (Optional)  
+Type: <span class="nolink">System<span id="LST4B7B7537_7"></span></span>
+
+Boolean  
+Whether or not the written data shall be verified
+
+<span class="parameter">cancellationToken</span> (Optional)  
+Type: <span class="nolink">System.Threading<span id="LST4B7B7537_8"></span></span>
+
+CancellationToken  
+Can be used to cancel the operation
+
+#### Return Value
+
+Type: <span class="nolink">Task</span>  
+A task that represents the asynchronous operation.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Remarks</span>
+
+This method implements the device management procedure
+DM\_InterfaceObject\_Write according to 3/5/2 clause 3.22.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[KnxDevice Class](a8ee86c3-a3f4-2ace-fc78-4d70c73eb95d.htm)
+
+[WritePropertyValueAsync
+Overload](74d857df-2638-eb7d-e30e-94b848c396c9.htm)
+
+[Knx.Falcon.Sdk Namespace](ddc84507-eccd-b692-8467-e3956feec382.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

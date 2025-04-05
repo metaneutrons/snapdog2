@@ -1,0 +1,128 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn">IIoTNetwork<span id="LSTE0DD48DA_0"></span>
+ScanIndividualAddressRangeAsync Method</td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Scans the specified individual address range and yields their individual
+addresses in an async stream as soon as they become available.
+
+**Namespace:**  [Knx.Falcon](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    IAsyncEnumerable<IoTDeviceInfo> ScanIndividualAddressRangeAsync(
+        IndividualAddress startAddress,
+        IndividualAddress endAddress,
+        IProgress<int>? progress,
+        IoTOperationToken token
+    )
+
+    Function ScanIndividualAddressRangeAsync ( 
+        startAddress As IndividualAddress,
+        endAddress As IndividualAddress,
+        progress As IProgress(Of Integer),
+        token As IoTOperationToken
+    ) As IAsyncEnumerable(Of IoTDeviceInfo)
+
+    IAsyncEnumerable<IoTDeviceInfo>^ ScanIndividualAddressRangeAsync(
+        IndividualAddress startAddress, 
+        IndividualAddress endAddress, 
+        IProgress<int>^ progress, 
+        IoTOperationToken token
+    )
+
+    abstract ScanIndividualAddressRangeAsync : 
+            startAddress : IndividualAddress * 
+            endAddress : IndividualAddress * 
+            progress : IProgress<int> * 
+            token : IoTOperationToken -> IAsyncEnumerable<IoTDeviceInfo> 
+
+#### Parameters
+
+<span class="parameter">startAddress</span>  
+Type: [Knx.Falcon<span id="LSTE0DD48DA_1"></span>](96a1c930-0f99-d67e-b5de-24b4e417e173.htm)
+
+IndividualAddress  
+The starting address.
+
+<span class="parameter">endAddress</span>  
+Type: [Knx.Falcon<span id="LSTE0DD48DA_2"></span>](96a1c930-0f99-d67e-b5de-24b4e417e173.htm)
+
+IndividualAddress  
+The end address of the scan.
+
+<span class="parameter">progress</span>  
+Type: <span class="nolink">System<span id="LSTE0DD48DA_3"></span></span>
+
+IProgress<span id="LSTE0DD48DA_4"></span>
+
+<span class="nolink">Int32</span><span id="LSTE0DD48DA_5"></span>
+
+  
+An optional progress callback (in percent). Note that this may be called
+on any thread, so make sure the implementation is thread-safe. The
+implementation should execute as fast as possible and must not block.
+
+<span class="parameter">token</span>  
+Type: [Knx.Falcon<span id="LSTE0DD48DA_6"></span>](5a5ed07c-3178-9b0e-ac93-a12aea609e34.htm)
+
+IoTOperationToken  
+A token for tracking and potentially aborting the current operation.
+
+#### Return Value
+
+Type: <span class="nolink">IAsyncEnumerable</span><span id="LSTE0DD48DA_7"></span>
+
+[IoTDeviceInfo](105982c1-2147-e7f3-2c70-eebe70a8a1ff.htm)<span id="LSTE0DD48DA_8"></span>
+
+  
+Async stream of iot device Infos
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[IIoTNetwork Interface](9cbcca6d-c360-e2ef-25f9-ebc349129e2a.htm)
+
+[Knx.Falcon Namespace](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

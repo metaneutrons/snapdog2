@@ -1,0 +1,135 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn">ConnectorParameters<span
+id="LST1D5B47AB_0"></span>
+FromConnectionString Method (String)</td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Returns a
+[ConnectorParameters](a00d43d8-ca1f-e911-2f70-bea37d855086.htm) object
+object from its string representation as created by
+[ToConnectionString<span id="LST1D5B47AB_1"></span>](86136476-8b63-86ac-1bee-c3e76effbb95.htm)
+
+.
+
+**Namespace:**
+ [Knx.Falcon.Configuration](8057f884-553e-ad7e-77ee-8d8d0f07a343.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public static ConnectorParameters FromConnectionString(
+        string connectionString
+    )
+
+    Public Shared Function FromConnectionString ( 
+        connectionString As String
+    ) As ConnectorParameters
+
+    public:
+    static ConnectorParameters^ FromConnectionString(
+        String^ connectionString
+    )
+
+    static member FromConnectionString : 
+            connectionString : string -> ConnectorParameters 
+
+#### Parameters
+
+<span class="parameter">connectionString</span>  
+Type: <span class="nolink">System<span id="LST1D5B47AB_2"></span></span>
+
+String  
+The parameters as connection sting
+
+#### Return Value
+
+Type: [ConnectorParameters](a00d43d8-ca1f-e911-2f70-bea37d855086.htm)  
+The parameter object
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Exceptions</span>
+
+<table>
+<thead>
+<tr>
+<th>Exception</th>
+<th>Condition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="nolink">ArgumentException</span></td>
+<td>If the connection string is not in the correct format</td>
+</tr>
+<tr>
+<td><span class="nolink">FormatException</span></td>
+<td>If some data in the connection string could not be interpreted</td>
+</tr>
+</tbody>
+</table>
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />Remarks</span>
+
+Security relevant parameters are ignored. If you want to load also
+security relevant parameters, use the [FromConnectionString(String,
+SecureString)](2c3f6110-f08f-75ce-c807-552b3cb15545.htm) overload
+instead.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID4RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID4RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID4RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[ConnectorParameters Class](a00d43d8-ca1f-e911-2f70-bea37d855086.htm)
+
+[FromConnectionString
+Overload](0db86bbe-ca1b-b5f2-f5a2-cbc12dc39df6.htm)
+
+[Knx.Falcon.Configuration
+Namespace](8057f884-553e-ad7e-77ee-8d8d0f07a343.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

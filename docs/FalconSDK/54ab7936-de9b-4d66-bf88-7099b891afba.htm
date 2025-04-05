@@ -1,0 +1,90 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="requirements">Requirements</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+This chapter explains what is needed to work with Falcon SDK
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Development Environment</span>
+
+Any development environment suitable for producing code for .NET
+Framework 4.8 (or higher) and/or .NET 6 (or higher) can be used. This
+includes:
+
+- An IDE like Microsoft Visual Studio 2019 (or higher)
+
+- An arbitrary code editor (from Notepad to Microsoft Visual Studio
+  Code) plus a .NET Framework SDK or .NET 6 SDK for the necessary tools
+
+All .NET programming languages are supported; examples in this
+documentation are given in C# and VB only.
+
+If there is a choice, we recommend using C# 8.0 or higher as this make
+using some of the features in Falcon very easy.
+
+Hint on using C# 8 with .NET Framework and Visual Studio (this is not
+necessary with .NET 6):
+
+- To specify C# 8.0, you may need to manually edit the project (csproj)
+  file: add the line
+  <span class="code">&lt;LangVersion&gt;8.0&lt;/LangVersion&gt;</span>
+  to the first PropertyGroup (where also TargetFrameworkVersion is
+  specified).
+
+- Add the nuget package Microsoft.Bcl.AsyncInterfaces
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Runtime Environment</span>
+
+Falcon SDK is compatible with the following runtime environments and
+platforms
+
+- .NET Framework 4.8 or higher (Windows)
+
+- .NET 6 (Windows, Linux, macOS, Android, iOS)
+
+Depending on the platform and underlying hardware, some features may not
+be available. E.g. USB support is currently limited to Windows and
+Linux.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Hardware</span>
+
+To actually access the KNX bus, some interface hardware is required.
+
+- For the KNX medium "IP", access is provided by the network interface
+  of the device Falcon is running on. As the KNXnet/IP routing protocol
+  is based on IP multicast, a suitable network infrastructure (e.g.
+  network routers supporting IGMP) is required.
+
+- KNX USB interfaces are available for KNX media "TP", "RF" and "PL".
+  These are connected via an USB cable to the device Falcon is running
+  on.
+
+- For the KNX medium "TP", IP Tunneling interfaces are available (often
+  combined with KNX IP Routers). These are connected via an IP network
+  to the device Falcon is running on.
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

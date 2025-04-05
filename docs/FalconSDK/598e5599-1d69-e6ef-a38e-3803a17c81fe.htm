@@ -1,0 +1,127 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1
+id="iotoperationpolicy-properties">IoTOperationPolicy
+Properties</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+The [IoTOperationPolicy](f88614d5-4a6b-ace3-0b47-ac466d123ebf.htm) type
+exposes the following members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Properties</span>
+
+<table id="propertyList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="cdc81a82-55c8-a877-b402-1cea7437c769.htm">ActiveWaitingMaximumTimeout</a></td>
+<td><div class="summary">
+The time after which the active waiting is aborted. During this time
+period every <a
+href="2996ee2e-88b8-f732-31dd-31dbf1d56f73.htm">ActiveWaitingRefreshDelay</a>
+the current state is polled.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="2996ee2e-88b8-f732-31dd-31dbf1d56f73.htm">ActiveWaitingRefreshDelay</a></td>
+<td><div class="summary">
+This time is the interval between retries when actively waiting e.g. for
+a state change.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="0c9c8c78-9801-226b-676e-df6436679e2d.htm">MaximumTimeout</a></td>
+<td><div class="summary">
+The given time after which any individual operation is canceled. Take
+note that some operations consist of multiple steps so this timeout will
+be used for each step.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="2d9e6845-15a2-1671-2301-dd22e0a8e1d8.htm">MinimumDuration</a></td>
+<td><div class="summary">
+This timespan takes effect on operations such as discovery that wait for
+results to arrive for a set timespan.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="669ebfb0-ab15-d0a5-1504-4b10a54009c2.htm">NumberOfAttempts</a></td>
+<td><div class="summary">
+The number of attempts determines the total number of attempts
+performed. This number shall always be at least 1.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="eb68a136-6911-91f3-0605-211a9ad58f48.htm">NumberOfInnerAttempts</a></td>
+<td><div class="summary">
+The number of attempts determines the number of attempts performed for
+operations that constitutes a partial step within the completion of
+another operation. An example would be an operation for reading a group
+objectTable, this value then determines how many attempts may be
+performed for reading each group value. This number shall always be at
+least 1.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[IoTOperationPolicy Class](f88614d5-4a6b-ace3-0b47-ac466d123ebf.htm)
+
+[Knx.Falcon Namespace](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

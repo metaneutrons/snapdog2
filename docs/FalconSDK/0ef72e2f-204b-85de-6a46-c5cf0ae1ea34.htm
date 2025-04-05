@@ -1,0 +1,187 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn">KnxDevice<span id="LST275056A9_0"></span>
+ReadPropertyValueAsync Method (Byte, Byte, UInt16, UInt16, UInt16,
+IProgress<span id="LST275056A9_1"></span>
+Int32<span id="LST275056A9_2"></span>
+, CancellationToken)</td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Reads (part of) an interface object property value array
+
+**Namespace:**
+ [Knx.Falcon.Sdk](ddc84507-eccd-b692-8467-e3956feec382.htm)  
+**Assembly:**  Knx.Falcon.Sdk (in Knx.Falcon.Sdk.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public Task<byte[]> ReadPropertyValueAsync(
+        byte objectIndex,
+        byte propertyId,
+        ushort startIndex,
+        ushort count,
+        ushort elementSize,
+        IProgress<int> progress = null,
+        CancellationToken cancellationToken = default
+    )
+
+    Public Function ReadPropertyValueAsync ( 
+        objectIndex As Byte,
+        propertyId As Byte,
+        startIndex As UShort,
+        count As UShort,
+        elementSize As UShort,
+        Optional progress As IProgress(Of Integer) = Nothing,
+        Optional cancellationToken As CancellationToken = Nothing
+    ) As Task(Of Byte())
+
+    public:
+    Task<array<unsigned char>^>^ ReadPropertyValueAsync(
+        unsigned char objectIndex, 
+        unsigned char propertyId, 
+        unsigned short startIndex, 
+        unsigned short count, 
+        unsigned short elementSize, 
+        IProgress<int>^ progress = nullptr, 
+        CancellationToken cancellationToken = CancellationToken()
+    )
+
+    member ReadPropertyValueAsync : 
+            objectIndex : byte * 
+            propertyId : byte * 
+            startIndex : uint16 * 
+            count : uint16 * 
+            elementSize : uint16 * 
+            ?progress : IProgress<int> * 
+            ?cancellationToken : CancellationToken 
+    (* Defaults:
+            let _progress = defaultArg progress null
+            let _cancellationToken = defaultArg cancellationToken new CancellationToken()
+    *)
+    -> Task<byte[]> 
+
+#### Parameters
+
+<span class="parameter">objectIndex</span>  
+Type: <span class="nolink">System<span id="LST275056A9_3"></span></span>
+
+Byte  
+The interface object index
+
+<span class="parameter">propertyId</span>  
+Type: <span class="nolink">System<span id="LST275056A9_4"></span></span>
+
+Byte  
+The property Id
+
+<span class="parameter">startIndex</span>  
+Type: <span class="nolink">System<span id="LST275056A9_5"></span></span>
+
+UInt16  
+The index of the first element to read (1-based)
+
+<span class="parameter">count</span>  
+Type: <span class="nolink">System<span id="LST275056A9_6"></span></span>
+
+UInt16  
+The number of elements to read
+
+<span class="parameter">elementSize</span>  
+Type: <span class="nolink">System<span id="LST275056A9_7"></span></span>
+
+UInt16  
+The element size in bytes; this is necessary to calculate the response
+length and split the read into chunks if necessary
+
+<span class="parameter">progress</span> (Optional)  
+Type: <span class="nolink">System<span id="LST275056A9_8"></span></span>
+
+IProgress<span id="LST275056A9_9"></span>
+
+<span class="nolink">Int32</span><span id="LST275056A9_10"></span>
+
+  
+An optional progress callback (in percent). Note that this may be called
+on any thread, so make sure the implementation is thread-safe. The
+implementation should execute as fast as possible and must not block.
+
+<span class="parameter">cancellationToken</span> (Optional)  
+Type: <span class="nolink">System.Threading<span id="LST275056A9_11"></span></span>
+
+CancellationToken  
+Can be used to cancel the operation
+
+#### Return Value
+
+Type: <span class="nolink">Task</span><span id="LST275056A9_12"></span>
+
+<span id="LST275056A9_13"></span>
+
+<span class="nolink">Byte</span><span id="LST275056A9_14"></span>
+
+<span id="LST275056A9_15"></span>
+
+  
+The read data
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Remarks</span>
+
+This method implements the device management procedure
+DM\_InterfaceObject\_Read according to 3/5/2 clause 3.24.
+
+The read operation is automatically split in chunks fitting in
+[ApduLengthRestriction](8604654d-f177-8822-d311-b70f6920e039.htm).
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[KnxDevice Class](a8ee86c3-a3f4-2ace-fc78-4d70c73eb95d.htm)
+
+[ReadPropertyValueAsync
+Overload](9b795f89-6c34-b9b3-56d8-d4d74dfc1561.htm)
+
+[Knx.Falcon.Sdk Namespace](ddc84507-eccd-b692-8467-e3956feec382.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

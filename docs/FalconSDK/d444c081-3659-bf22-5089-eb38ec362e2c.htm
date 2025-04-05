@@ -1,0 +1,128 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="knxdevice-properties">KnxDevice
+Properties</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+The [KnxDevice](a8ee86c3-a3f4-2ace-fc78-4d70c73eb95d.htm) type exposes
+the following members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Properties</span>
+
+<table id="propertyList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="8604654d-f177-8822-d311-b70f6920e039.htm">ApduLengthRestriction</a></td>
+<td><div class="summary">
+Gets the APDU length restriction
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="db539252-5724-4786-665d-13e958dba43d.htm">ApplicationLayerResponseTimeout</a></td>
+<td><div class="summary">
+Gets or sets the timeout on application layer; the default value is 8
+seconds.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="f04d3dd4-ba91-b463-e0ff-98e41e07f860.htm">ApplicationLayerRetries</a></td>
+<td><div class="summary">
+Gets or sets the number of retries on application layer; the default
+value is 0 for connection-oriented and 1 for connection-less.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="a23d9139-5e45-0133-3d45-a72886389d67.htm">CurrentAccessLevel</a></td>
+<td><div class="summary">
+The current access level reached by the last <a
+href="37507056-09bb-7d3f-9c9c-84b0c79f7365.htm">AuthorizeAsync(UInt32,
+CancellationToken)</a> call.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="f664e17a-4b04-c116-a68e-913023c7f741.htm">DeviceDescriptor0</a></td>
+<td><div class="summary">
+Returns the device descriptor type 0 (also known as mask version)
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="a36ba252-d2c4-e05b-e8fc-910320083f4b.htm">LimitApduLength</a></td>
+<td><div class="summary">
+If this property is not 0, it limits the maximum used APDU length.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="04d2ec2e-2c70-caae-ed6e-092f1842b4b5.htm">LimitMemoryServicesCount</a></td>
+<td><div class="summary">
+Limits the count field for memory read/write services. For devices
+supporting APDU Lengths &gt; 15 but only a maximum of e.g. 12 bytes per
+memory read/write.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[KnxDevice Class](a8ee86c3-a3f4-2ace-fc78-4d70c73eb95d.htm)
+
+[Knx.Falcon.Sdk Namespace](ddc84507-eccd-b692-8467-e3956feec382.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

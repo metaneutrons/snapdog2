@@ -1,0 +1,121 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="rfmultisend-constructor">RfMultiSend
+Constructor</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Initializes a new instance of the
+[RfMultiSend](e0d5ba84-6fd8-09c6-af66-09ccc27a7a30.htm) class.
+
+**Namespace:**
+ [Knx.Falcon.RfMulti](a09f439d-1f5d-d82a-c38d-0b99e9622415.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public RfMultiSend(
+        bool sendReady,
+        IEnumerable<byte> expectedAcksFast,
+        IEnumerable<byte> expectedAcksSlow
+    )
+
+    Public Sub New ( 
+        sendReady As Boolean,
+        expectedAcksFast As IEnumerable(Of Byte),
+        expectedAcksSlow As IEnumerable(Of Byte)
+    )
+
+    public:
+    RfMultiSend(
+        bool sendReady, 
+        IEnumerable<unsigned char>^ expectedAcksFast, 
+        IEnumerable<unsigned char>^ expectedAcksSlow
+    )
+
+    new : 
+            sendReady : bool * 
+            expectedAcksFast : IEnumerable<byte> * 
+            expectedAcksSlow : IEnumerable<byte> -> RfMultiSend
+
+#### Parameters
+
+<span class="parameter">sendReady</span>  
+Type: <span class="nolink">System<span id="LST8C8D131B_0"></span></span>
+
+Boolean  
+The group message shall be sent on Ready
+
+<span class="parameter">expectedAcksFast</span>  
+Type: <span class="nolink">System.Collections.Generic<span id="LST8C8D131B_1"></span></span>
+
+IEnumerable<span id="LST8C8D131B_2"></span>
+
+<span class="nolink">Byte</span><span id="LST8C8D131B_3"></span>
+
+  
+The expected ACK slots on Multi Fast, or
+<span class="keyword"><span id="LST8C8D131B_4"></span></span>
+
+to not send on Multi Fast. To send on Multi Fast without requesting ACK,
+pass an empty sequence.
+
+<span class="parameter">expectedAcksSlow</span>  
+Type: <span class="nolink">System.Collections.Generic<span id="LST8C8D131B_5"></span></span>
+
+IEnumerable<span id="LST8C8D131B_6"></span>
+
+<span class="nolink">Byte</span><span id="LST8C8D131B_7"></span>
+
+  
+The expected ACK slots on Multi Slow, or
+<span class="keyword"><span id="LST8C8D131B_8"></span></span>
+
+to not send on Multi Slow. To send on Multi Slow without requesting ACK,
+pass an empty sequence.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[RfMultiSend Class](e0d5ba84-6fd8-09c6-af66-09ccc27a7a30.htm)
+
+[Knx.Falcon.RfMulti Namespace](a09f439d-1f5d-d82a-c38d-0b99e9622415.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

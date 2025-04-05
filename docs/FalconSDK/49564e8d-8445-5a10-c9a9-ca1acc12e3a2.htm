@@ -1,0 +1,114 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn">IpRoutingConnectorParameters<span
+id="LSTE8C74D0F_0"></span>
+FromDiscovery Method</td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Creates
+[IpRoutingConnectorParameters](aa3cdbe5-ff2c-32b3-ce3d-ced14b71157a.htm)
+from a
+[IpDeviceDiscoveryResult](b1e74f6b-227b-8225-b03b-98afbf18d090.htm)
+
+**Namespace:**
+ [Knx.Falcon.Configuration](8057f884-553e-ad7e-77ee-8d8d0f07a343.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public static IpRoutingConnectorParameters FromDiscovery(
+        IpDeviceDiscoveryResult info
+    )
+
+    Public Shared Function FromDiscovery ( 
+        info As IpDeviceDiscoveryResult
+    ) As IpRoutingConnectorParameters
+
+    public:
+    static IpRoutingConnectorParameters^ FromDiscovery(
+        IpDeviceDiscoveryResult^ info
+    )
+
+    static member FromDiscovery : 
+            info : IpDeviceDiscoveryResult -> IpRoutingConnectorParameters 
+
+#### Parameters
+
+<span class="parameter">info</span>  
+Type: [Knx.Falcon.Discovery<span id="LSTE8C74D0F_1"></span>](b1e74f6b-227b-8225-b03b-98afbf18d090.htm)
+
+IpDeviceDiscoveryResult  
+The result of a KNXnet/IP Discovery search.
+
+#### Return Value
+
+Type: [IpRoutingConnectorParameters](aa3cdbe5-ff2c-32b3-ce3d-ced14b71157a.htm)  
+A
+[IpRoutingConnectorParameters](aa3cdbe5-ff2c-32b3-ce3d-ced14b71157a.htm)
+object containing the information from the discovery, or
+<span class="keyword"><span id="LSTE8C74D0F_2"></span></span>
+
+if the described device does not support routing.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Remarks</span>
+
+The <span class="parameter">info</span> object must support
+[Routing](fcd21ee1-21f2-9e6b-db36-e5496eabe9ff.htm) (at least version 1)
+or include [IP](992617b8-4cd5-e630-558a-334eae8a868d.htm) in the
+KnxMediumCode field of the Device Info DIB. Otherwise,
+<span class="keyword"><span id="LSTE8C74D0F_3"></span></span>
+
+is returned.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[IpRoutingConnectorParameters
+Class](aa3cdbe5-ff2c-32b3-ce3d-ced14b71157a.htm)
+
+[Knx.Falcon.Configuration
+Namespace](8057f884-553e-ad7e-77ee-8d8d0f07a343.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

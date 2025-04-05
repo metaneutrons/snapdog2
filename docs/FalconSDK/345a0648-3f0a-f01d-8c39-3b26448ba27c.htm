@@ -1,0 +1,142 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn">ISpake2PlusConfirmer<span
+id="LSTEC2572B1_0"></span>
+ComputeKeySchedule Method</td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Calculate the Key Schedule, meaning the shared secret along with
+confirmation values that allow checking mutual authentication between
+Prover and Verifier.
+
+**Namespace:**
+ [Knx.Falcon.IoT.Stack.Pase](8ad29354-f2ff-12d3-42e8-af248d7a4219.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    (byte[] , byte[] , byte[] ) ComputeKeySchedule(
+        byte[] protocolTranscript,
+        byte[] shareP,
+        byte[] shareV
+    )
+
+    Function ComputeKeySchedule ( 
+        protocolTranscript As Byte(),
+        shareP As Byte(),
+        shareV As Byte()
+    ) As ( As Byte(),  As Byte(),  As Byte())
+
+    ValueTuple<array<unsigned char>^, array<unsigned char>^, array<unsigned char>^> ComputeKeySchedule(
+        array<unsigned char>^ protocolTranscript, 
+        array<unsigned char>^ shareP, 
+        array<unsigned char>^ shareV
+    )
+
+    abstract ComputeKeySchedule : 
+            protocolTranscript : byte[] * 
+            shareP : byte[] * 
+            shareV : byte[] -> ValueTuple<byte[], byte[], byte[]> 
+
+#### Parameters
+
+<span class="parameter">protocolTranscript</span>  
+Type: <span id="LSTEC2572B1_1"></span>
+
+<span class="nolink">System<span id="LSTEC2572B1_2"></span></span>
+
+Byte<span id="LSTEC2572B1_3"></span>
+
+  
+The combined share secret entropy source protocol transcript TT.
+
+<span class="parameter">shareP</span>  
+Type: <span id="LSTEC2572B1_4"></span>
+
+<span class="nolink">System<span id="LSTEC2572B1_5"></span></span>
+
+Byte<span id="LSTEC2572B1_6"></span>
+
+  
+Share value of the Prover.
+
+<span class="parameter">shareV</span>  
+Type: <span id="LSTEC2572B1_7"></span>
+
+<span class="nolink">System<span id="LSTEC2572B1_8"></span></span>
+
+Byte<span id="LSTEC2572B1_9"></span>
+
+  
+Share value of the Verifier.
+
+#### Return Value
+
+Type: <span class="nolink">ValueTuple</span><span id="LSTEC2572B1_10"></span>
+
+<span id="LSTEC2572B1_11"></span>
+
+<span class="nolink">Byte</span><span id="LSTEC2572B1_12"></span>
+
+, <span id="LSTEC2572B1_13"></span>
+
+<span class="nolink">Byte</span><span id="LSTEC2572B1_14"></span>
+
+, <span id="LSTEC2572B1_15"></span>
+
+<span class="nolink">Byte</span><span id="LSTEC2572B1_16"></span>
+
+<span id="LSTEC2572B1_17"></span>
+
+  
+The Shared Secret, The confirmation value of the Prover ConfirmP, The
+Confirmation value of the Verifier ConfirmV.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[ISpake2PlusConfirmer
+Interface](dc74949c-8198-e22a-f480-e891c5bfca61.htm)
+
+[Knx.Falcon.IoT.Stack.Pase
+Namespace](8ad29354-f2ff-12d3-42e8-af248d7a4219.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

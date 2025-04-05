@@ -1,0 +1,313 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1
+id="ipdevicemanagementconnectorparameters-properties">IpDeviceManagementConnectorParameters
+Properties</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+The
+[IpDeviceManagementConnectorParameters](8904df95-0e73-fe8c-9db8-435ab3005170.htm)
+type exposes the following members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Properties</span>
+
+<table id="propertyList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="7fcdd66f-ddee-1cf5-07a9-be75886db28d.htm">AutoReconnect</a></td>
+<td><div class="summary">
+When set to <span class="keyword"><span
+id="LST9D652B60_0"></span></span>
+, Falcon tries to re-establish a broken connection cyclically. Default
+value: <span class="keyword"><span id="LST9D652B60_1"></span></span>
+.
+</div>
+(Inherited from <a
+href="a00d43d8-ca1f-e911-2f70-bea37d855086.htm">ConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /><img src="../icons/CodeExample.png"
+title="Code example" alt="Code example" /></td>
+<td><a
+href="384c5bc9-96fb-1415-80a1-b00296b36f25.htm">CloudApiEndpoint</a></td>
+<td><div class="summary">
+Gets or sets the URL of the Cloud Connect API server, e.g.
+"https://connect.company.com"
+</div>
+(Inherited from <a
+href="bbcbcc92-4f38-c4d5-15f5-961e55e8f48f.htm">IpUnicastConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="5f47cea4-2fdc-6f11-2792-ae0536250336.htm">CloudAuthorization</a></td>
+<td><div class="summary">
+Access key or access token to authorize against the Cloud Connect API
+server
+</div>
+(Inherited from <a
+href="bbcbcc92-4f38-c4d5-15f5-961e55e8f48f.htm">IpUnicastConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="2e2a4351-a51f-c2f9-b07a-7a1d45b5030c.htm">CloudConnectorId</a></td>
+<td><div class="summary">
+Gets or sets the connector ID (serial number of the connector device)
+</div>
+(Inherited from <a
+href="bbcbcc92-4f38-c4d5-15f5-961e55e8f48f.htm">IpUnicastConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="ce357d58-4e72-489b-d8d0-9cd3c5fee80a.htm">DeviceAuthenticationCodeHash</a></td>
+<td><div class="summary">
+Device authentication code hash. Default value: <span
+class="keyword"><span id="LST9D652B60_2"></span></span>
+</div>
+(Inherited from <a
+href="bbcbcc92-4f38-c4d5-15f5-961e55e8f48f.htm">IpUnicastConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="be75f761-4534-fc02-eae0-10a8c2c7cd6d.htm">HostAddress</a></td>
+<td><div class="summary">
+Gets or sets the host IP address or host name. Default value: <span
+class="keyword"><span id="LST9D652B60_3"></span></span>
+.
+</div>
+(Inherited from <a
+href="bbcbcc92-4f38-c4d5-15f5-961e55e8f48f.htm">IpUnicastConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="f39b5bb4-f303-4a08-1fdf-bbf8e478f5da.htm">IpPort</a></td>
+<td><div class="summary">
+Gets or sets the IP port of the control endpoint. Default value: 3671.
+</div>
+(Inherited from <a
+href="bbcbcc92-4f38-c4d5-15f5-961e55e8f48f.htm">IpUnicastConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="28b53066-8d34-eba6-75ea-d230046b181c.htm">IsSecure</a></td>
+<td><div class="summary">
+Gets a value indicating if transport security is actually used (only for
+<a
+href="aa3cdbe5-ff2c-32b3-ce3d-ced14b71157a.htm">IpRoutingConnectorParameters</a>,
+<a
+href="4305d8f0-2c63-674a-cad7-aa0046c8ae3d.htm">IpTunnelingConnectorParameters</a>,
+and <a
+href="8904df95-0e73-fe8c-9db8-435ab3005170.htm">IpDeviceManagementConnectorParameters</a>)
+</div>
+(Inherited from <a
+href="bbcbcc92-4f38-c4d5-15f5-961e55e8f48f.htm">IpUnicastConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="ba4683c4-b01b-2acf-1d73-845ce634569d.htm">MacAddress</a></td>
+<td><div class="summary">
+Gets or sets the optional MAC address used to find the device if <a
+href="be75f761-4534-fc02-eae0-10a8c2c7cd6d.htm">HostAddress</a> is not
+given or the host addressed by <a
+href="be75f761-4534-fc02-eae0-10a8c2c7cd6d.htm">HostAddress</a> cannot
+be contacted. Default value: <span class="keyword"><span
+id="LST9D652B60_4"></span></span>
+.
+</div>
+(Inherited from <a
+href="bbcbcc92-4f38-c4d5-15f5-961e55e8f48f.htm">IpUnicastConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="4bf73440-af33-299f-96e4-06a27570a63d.htm">Name</a></td>
+<td><div class="summary">
+Gets or sets the name of the interface (informative). Default value:
+<span class="keyword"><span id="LST9D652B60_5"></span></span>
+.
+</div>
+(Inherited from <a
+href="a00d43d8-ca1f-e911-2f70-bea37d855086.htm">ConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="4a653407-14c9-9619-db02-6c42562f93d9.htm">PromiscuousMode</a></td>
+<td><div class="summary">
+Only for USB Busmon mode: When set to <span class="keyword"><span
+id="LST9D652B60_6"></span></span>
+, Falcon does not filter by domain address. Default value: <span
+class="keyword"><span id="LST9D652B60_7"></span></span>
+.
+</div>
+(Inherited from <a
+href="a00d43d8-ca1f-e911-2f70-bea37d855086.htm">ConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="2df81d91-6628-8e8a-19c1-70df4dd22e00.htm">ProtocolType</a></td>
+<td><div class="summary">
+Gets or sets a value indicating which IP protocol to use. Default value:
+<a href="93e40b5e-1eef-6518-29f6-4b8ae350fcb5.htm">Auto</a>, i.e.
+determine by supported KNXnet/IP Core version.
+</div>
+(Inherited from <a
+href="bbcbcc92-4f38-c4d5-15f5-961e55e8f48f.htm">IpUnicastConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="fddb8bf7-e530-f086-5703-906e3e795679.htm">RequiresSecurity</a></td>
+<td><div class="summary">
+Gets a value indicating if it is already known from discovery that this
+interface requires security
+</div>
+(Inherited from <a
+href="bbcbcc92-4f38-c4d5-15f5-961e55e8f48f.htm">IpUnicastConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="842688bc-84b5-515c-7fcc-713b341bb4e0.htm">SerialNumber</a></td>
+<td><div class="summary">
+Gets or sets the optional serial number used to find the device if <a
+href="be75f761-4534-fc02-eae0-10a8c2c7cd6d.htm">HostAddress</a> is not
+given or the host addressed by <a
+href="be75f761-4534-fc02-eae0-10a8c2c7cd6d.htm">HostAddress</a> cannot
+be contacted. Default value: <a
+href="44f0792f-441d-4c8f-4ece-24cff24b35b2.htm">None</a>.
+</div>
+(Inherited from <a
+href="bbcbcc92-4f38-c4d5-15f5-961e55e8f48f.htm">IpUnicastConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="c3497f54-5363-0ea4-0028-eed4e5c1c41e.htm">SupportsSecurity</a></td>
+<td><div class="summary">
+Gets a value indicating if this connector type supports transport
+security (routing and IP unicast connectors)
+</div>
+(Inherited from <a
+href="bbcbcc92-4f38-c4d5-15f5-961e55e8f48f.htm">IpUnicastConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="9cfbaa7a-24c2-9a34-3113-38271b63fee3.htm">Type</a></td>
+<td><div class="summary">
+Always returns <a
+href="05dec6a9-abcf-6b73-4f02-7df0119e2e7b.htm">IpDeviceManagement</a>,
+as this is the KNX/IP device management specific parameter class.
+</div>
+(Overrides <a
+href="22a22073-4dc2-16d3-45d4-695c6223c596.htm">ConnectorParameters<span
+id="LST9D652B60_8"></span></a>
+Type.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="b7455ccf-571f-6f94-9213-c4aed4666c88.htm">UseNat</a></td>
+<td><div class="summary">
+Gets or sets a value indicating whether NAT mode is used (UDP only).
+Default value: <span class="keyword"><span
+id="LST9D652B60_9"></span></span>
+.
+</div>
+(Inherited from <a
+href="bbcbcc92-4f38-c4d5-15f5-961e55e8f48f.htm">IpUnicastConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="c47bcab5-d145-6a8b-7d04-e21e55a334cd.htm">UserId</a></td>
+<td><div class="summary">
+User id for authentication to the server (together with
+UserPasswordHash). Default value: 1.
+</div>
+(Inherited from <a
+href="bbcbcc92-4f38-c4d5-15f5-961e55e8f48f.htm">IpUnicastConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="85b8e143-a07c-d13b-c811-667260a59062.htm">UserPasswordHash</a></td>
+<td><div class="summary">
+Password hash for authentication to the server (together with UserId).
+Default value: hash of the empty string
+(e9c304b914a35175fd7d1c673ab52fe1).
+</div>
+(Inherited from <a
+href="bbcbcc92-4f38-c4d5-15f5-961e55e8f48f.htm">IpUnicastConnectorParameters</a>.)</td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[IpDeviceManagementConnectorParameters
+Class](8904df95-0e73-fe8c-9db8-435ab3005170.htm)
+
+[Knx.Falcon.Configuration
+Namespace](8057f884-553e-ad7e-77ee-8d8d0f07a343.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

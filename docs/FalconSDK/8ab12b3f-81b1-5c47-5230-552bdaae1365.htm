@@ -1,0 +1,329 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="iotparameter-class">IoTParameter
+Class</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Represents an IoT Parameter.
+
+An parameter consists of the following components:
+
+- An Href that identifies the parameter
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Inheritance Hierarchy</span>
+
+<span class="nolink">System<span id="LST9B065105_0"></span></span>
+
+Object  
+  <span class="selflink">Knx.Falcon<span id="LST9B065105_1"></span></span>
+
+IoTParameter  
+
+**Namespace:**  [Knx.Falcon](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID1EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID1EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public class IoTParameter : IEquatable<IoTParameter>, 
+        IObjectRepresentationSerializable
+
+    Public Class IoTParameter
+        Implements IEquatable(Of IoTParameter), IObjectRepresentationSerializable
+
+    public ref class IoTParameter : IEquatable<IoTParameter^>, 
+        IObjectRepresentationSerializable
+
+    type IoTParameter =  
+        class
+            interface IEquatable<IoTParameter>
+            interface IObjectRepresentationSerializable
+        end
+
+The <span class="selflink">IoTParameter</span> type exposes the
+following members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />Constructors</span>
+
+<table id="constructorList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="5d7bfb48-e24c-3dd1-14af-4e94eff09be9.htm">IoTParameter</a></td>
+<td><div class="summary">
+Creates a new <span class="selflink">IoTParameter</span> object.
+<p>Example:</p>
+<div class="codeSnippetContainer">
+<div class="codeSnippetContainerCodeContainer">
+<div class="codeSnippetToolBar">
+<div class="codeSnippetToolBarText">
+<a href="#" id="ID1EAAAALCDA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID1EAAAALCDA&#39;);return false;"
+title="Copy">Copy</a>
+</div>
+</div>
+<div id="ID1EAAAALCDA_code_Div1" class="codeSnippetContainerCode"
+style="display: block">
+<pre xml:space="preserve"><code>new IoTParameter(&quot;/p/1&quot;, new IoTValue(7));</code></pre>
+</div>
+</div>
+</div>
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID4RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID4RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID4RBToggle"
+class="collapseToggle" />Properties</span>
+
+<table id="propertyList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="92ebb53b-702f-d917-b01f-1e2f5649af5b.htm">Href</a></td>
+<td><div class="summary">
+Defines the point path of a IoT parameter.
+<p>This is a combination of the following:<br />
+{base-path} + "/p/" + {property-id}</p>
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="d8e23f6b-ed1e-3b6c-b827-7dd181e39df5.htm">Value</a></td>
+<td><div class="summary">
+Represents the value of the IoT parameter.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID5RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID5RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID5RBToggle"
+class="collapseToggle" />Methods</span>
+
+<table id="methodList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="52687bee-91ae-8c49-97e9-04c20c613c34.htm">Equals(IoTParameter)</a></td>
+<td></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="7c17c8b7-59ce-07e8-3ddc-e2ba2bda64a9.htm">Equals(Object)</a></td>
+<td>(Overrides <span class="nolink">Object<span
+id="LST9B065105_2"></span></span>
+Equals(Object).)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="ebb70e37-321b-d4b6-bb20-337f95c94bd2.htm">GetAbsoluteResourcePath</a></td>
+<td><div class="summary">
+The Absolute Resource Path at which to Address the Parameter
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="4c213557-2720-068e-edea-dec02324877c.htm">GetHashCode</a></td>
+<td>(Overrides <span class="nolink">Object<span
+id="LST9B065105_3"></span></span>
+GetHashCode<span id="LST9B065105_4"></span>
+.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="2fa57cb5-ba0d-df93-984d-2842207ad446.htm">GetObjectRepresentationData</a></td>
+<td></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="04eed1fa-a8cd-d5c8-a05e-129f4b3f76b3.htm">GetQuery</a></td>
+<td><div class="summary">
+If the parameter is meant to be written as specific meta data for a
+point, then the parameter should be addressed with a Query. In this case
+the Query part is split off from the resource path. Example
+/p/path?m=cov has the query m=cov.
+</div></td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">GetType</span></td>
+<td><div class="summary">
+Gets the <span class="nolink">Type</span> of the current instance.
+</div>
+(Inherited from <span class="nolink">Object</span>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="d1e36dd0-be19-4648-71b7-ac039cd91f68.htm">ToString</a></td>
+<td>(Overrides <span class="nolink">Object<span
+id="LST9B065105_5"></span></span>
+ToString<span id="LST9B065105_6"></span>
+.)</td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID6RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID6RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID6RBToggle"
+class="collapseToggle" />Operators</span>
+
+<table id="operatorList" class="members">
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="f2a6a215-b986-a9c0-8c77-0b2c93b1b57f.htm">Equality</a></td>
+<td></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="1de3d4a3-cc66-ea8c-4bd1-fea21050bd61.htm">Inequality</a></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID7RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID7RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID7RBToggle"
+class="collapseToggle" />Remarks</span>
+
+A parameter as opposed to a group object is of a more permanent nature.
+
+It gets written during the configuration and may enable the device to
+activate or deactivate.
+
+Certain facilities and to modify the device behaviour in some way.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID8RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID8RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID8RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[Knx.Falcon Namespace](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

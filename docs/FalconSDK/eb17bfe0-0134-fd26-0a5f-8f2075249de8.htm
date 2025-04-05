@@ -1,0 +1,110 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn">IIoTGroupCommunication<span
+id="LST3BB24841_0"></span>
+ObserveAsync Method</td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Adds group Ids to the list of group ids to be observed.
+
+**Namespace:**  [Knx.Falcon](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    Task ObserveAsync(
+        IEnumerable<GroupId> groupIds
+    )
+
+    Function ObserveAsync ( 
+        groupIds As IEnumerable(Of GroupId)
+    ) As Task
+
+    Task^ ObserveAsync(
+        IEnumerable<GroupId>^ groupIds
+    )
+
+    abstract ObserveAsync : 
+            groupIds : IEnumerable<GroupId> -> Task 
+
+#### Parameters
+
+<span class="parameter">groupIds</span>  
+Type: <span class="nolink">System.Collections.Generic<span id="LST3BB24841_1"></span></span>
+
+IEnumerable<span id="LST3BB24841_2"></span>
+
+[GroupId](9fa78920-8b5f-95a7-71ef-e71ab17fde03.htm)<span id="LST3BB24841_3"></span>
+
+  
+The group ids to add to the list
+
+#### Return Value
+
+Type: <span class="nolink">Task</span>  
+
+\[Missing &lt;returns&gt; documentation for
+"M:Knx.Falcon.IIoTGroupCommunication.ObserveAsync(System.Collections.Generic.IEnumerable{Knx.Falcon.GroupId})"\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Remarks</span>
+
+Only group addresses in this list will be observed and reported by the
+[GroupMessageReceived](713ca50c-1e39-1a2f-e35a-0acdb2db6622.htm) event.
+
+The method can be called multiple times, the group addresses will be
+added to the existing list. If a group address is already in the list,
+it will not be added a second time.
+
+The registration will be revoked when the object is disposed.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[IIoTGroupCommunication
+Interface](44c71c0c-8366-8e96-17a2-a0806756c4e5.htm)
+
+[Knx.Falcon Namespace](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

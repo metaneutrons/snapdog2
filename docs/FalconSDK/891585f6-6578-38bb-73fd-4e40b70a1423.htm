@@ -1,0 +1,300 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1
+id="propertydescription-class">PropertyDescription Class</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+The property description class describes an interface object property.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Inheritance Hierarchy</span>
+
+<span class="nolink">System<span id="LSTED1A4462_0"></span></span>
+
+Object  
+  <span class="selflink">Knx.Falcon<span id="LSTED1A4462_1"></span></span>
+
+PropertyDescription  
+
+**Namespace:**  [Knx.Falcon](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID1EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID1EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public sealed class PropertyDescription : IEquatable<PropertyDescription>
+
+    Public NotInheritable Class PropertyDescription
+        Implements IEquatable(Of PropertyDescription)
+
+    public ref class PropertyDescription sealed : IEquatable<PropertyDescription^>
+
+    [<SealedAttribute>]
+    type PropertyDescription =  
+        class
+            interface IEquatable<PropertyDescription>
+        end
+
+The <span class="selflink">PropertyDescription</span> type exposes the
+following members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />Properties</span>
+
+<table id="propertyList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="0140852d-77c4-03cf-0940-b891c222dfd9.htm">Instance</a></td>
+<td><div class="summary">
+Gets the occurrence index of the interface object. The first occurrence
+of a specific object type has Instance=1.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="b5ba6572-5671-ac7f-a29a-00b214239c13.htm">MainDPT</a></td>
+<td><div class="summary">
+Gets the main DPT number
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="e9469a02-f3b3-24c2-f0fb-d41f08a5d68a.htm">MaxSize</a></td>
+<td><div class="summary">
+Gets the maximum number of array elements.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="9c378c6f-55fd-8f2b-2aed-0fca5fb28305.htm">ObjectIndex</a></td>
+<td><div class="summary">
+Gets the index of the interface object if known. This is only valid if
+<a href="0140852d-77c4-03cf-0940-b891c222dfd9.htm">Instance</a> == 0.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="c1bf9c62-d732-d745-b703-eafc6cc615a6.htm">ObjectType</a></td>
+<td><div class="summary">
+Gets the type of the interface object if known. This is only valid if <a
+href="0140852d-77c4-03cf-0940-b891c222dfd9.htm">Instance</a> &gt; 0.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="03ff5879-a215-ba81-1e42-fe7006a979f1.htm">PropertyDataType</a></td>
+<td><div class="summary">
+Gets the type of the property data, see also <a
+href="03ff5879-a215-ba81-1e42-fe7006a979f1.htm">PropertyDataType</a>.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="18d6f653-4436-0031-cf89-860ab3193939.htm">PropertyId</a></td>
+<td><div class="summary">
+Gets the Id of the interface object property.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="c62d73af-f5c3-a446-7a21-b950b4f69789.htm">PropertyIndex</a></td>
+<td><div class="summary">
+Gets the index of the interface object property.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="e66112cc-c54b-9d3f-d392-3a083261901b.htm">ReadRights</a></td>
+<td><div class="summary">
+Gets the property read access rights.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="6fe9824d-d0d8-caa9-48fe-052f3fe0417c.htm">SubDPT</a></td>
+<td><div class="summary">
+Gets the sub DPT number
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="8bd05ceb-753e-337d-c26e-01e91b8fb6d0.htm">WriteEnabled</a></td>
+<td><div class="summary">
+Gets a value indicating whether the KNX object is [write enabled].
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="b3032f67-f5d1-4a9e-147a-48e7607c5658.htm">WriteRights</a></td>
+<td><div class="summary">
+Gets the property write access rights.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID4RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID4RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID4RBToggle"
+class="collapseToggle" />Methods</span>
+
+<table id="methodList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="3fc3a798-c1fb-9bc9-fa9f-cd143d6b2107.htm">Equals(Object)</a></td>
+<td><div class="summary">
+Determines whether the specified object is equal to the current object.
+</div>
+(Overrides <span class="nolink">Object<span
+id="LSTED1A4462_2"></span></span>
+Equals(Object).)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="72a66161-f709-46be-6baf-4e0efd625137.htm">Equals(PropertyDescription)</a></td>
+<td><div class="summary">
+Indicates whether the current object is equal to another object of the
+same type.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="4ee65147-eced-e3ab-17f4-1c7e2779ec1c.htm">GetHashCode</a></td>
+<td><div class="summary">
+Serves as the default hash function.
+</div>
+(Overrides <span class="nolink">Object<span
+id="LSTED1A4462_3"></span></span>
+GetHashCode<span id="LSTED1A4462_4"></span>
+.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">GetType</span></td>
+<td><div class="summary">
+Gets the <span class="nolink">Type</span> of the current instance.
+</div>
+(Inherited from <span class="nolink">Object</span>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="b2a7126d-ea08-2b2e-236c-54ef7a83134c.htm">ToString</a></td>
+<td><div class="summary">
+Returns a string that represents the current object.
+</div>
+(Overrides <span class="nolink">Object<span
+id="LSTED1A4462_5"></span></span>
+ToString<span id="LSTED1A4462_6"></span>
+.)</td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID5RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID5RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID5RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[Knx.Falcon Namespace](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

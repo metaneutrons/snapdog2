@@ -1,0 +1,409 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="knxdevice-methods">KnxDevice
+Methods</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+The [KnxDevice](a8ee86c3-a3f4-2ace-fc78-4d70c73eb95d.htm) type exposes
+the following members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Methods</span>
+
+<table id="methodList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="191b8f72-a039-6c27-aa7c-c41b263579d2.htm">Authorize</a></td>
+<td><div class="summary">
+Authorize the connection with the given access key, blocking until the
+operation completes.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="37507056-09bb-7d3f-9c9c-84b0c79f7365.htm">AuthorizeAsync</a></td>
+<td><div class="summary">
+Authorize the connection with the given access key
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="b3c77a61-0152-625c-2d85-ecf2ff69f7d1.htm">Dispose</a></td>
+<td><div class="summary">
+Frees local resources held by the device object. Consider using <a
+href="9111d682-5111-f726-6b21-fbc6dac6bb0b.htm">DisposeAsync<span
+id="LSTBB6F14FC_0"></span></a>
+for a full clean-up.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="9111d682-5111-f726-6b21-fbc6dac6bb0b.htm">DisposeAsync</a></td>
+<td><div class="summary">
+Closes connections and frees all resources.
+</div></td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">Equals</span></td>
+<td><div class="summary">
+Determines whether the specified object is equal to the current object.
+</div>
+(Inherited from <span class="nolink">Object</span>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="bae68a7c-b61b-7395-7935-35dc092dbd56.htm">FunctionPropertyExtendedStateReadAsync</a></td>
+<td><div class="summary">
+Reads a function property state using extended property services
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="13b48543-20d2-400a-9d11-0e5ef0d9d3cc.htm">FunctionPropertyStateReadAsync</a></td>
+<td><div class="summary">
+Reads a function property state
+</div></td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">GetHashCode</span></td>
+<td><div class="summary">
+Serves as the default hash function.
+</div>
+(Inherited from <span class="nolink">Object</span>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">GetType</span></td>
+<td><div class="summary">
+Gets the <span class="nolink">Type</span> of the current instance.
+</div>
+(Inherited from <span class="nolink">Object</span>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="03a1b6bd-22e4-68e7-7298-0903a44f6225.htm">LocateInterfaceObjectAsync</a></td>
+<td><div class="summary">
+Determines the object index of an interface object
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="3c6fa216-3ad5-8093-645a-c7e427c7c483.htm">ReadAdcAsync</a></td>
+<td><div class="summary">
+Reads out the device's A/D converter
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="d3f19dab-3b25-fc4b-e017-58571d6a7fba.htm">ReadDeviceDescriptor0Async</a></td>
+<td><div class="summary">
+Read the device descriptor type 0, also known as mask version. This
+method actually reads from the device; the information is also available
+in cached form as property <a
+href="f664e17a-4b04-c116-a68e-913023c7f741.htm">DeviceDescriptor0</a>.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="a9216190-2515-2cda-28a1-90c3dcdb0d9a.htm">ReadDeviceDescriptorAsync</a></td>
+<td><div class="summary">
+Read the device descriptor with type != 0.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="a2a7e66e-b949-a114-775e-8f10d60f23df.htm">ReadExtendedMemoryAsync</a></td>
+<td><div class="summary">
+Reads device memory using extended memory services
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="e4aa68bc-8391-28bf-3e0c-680edaa24501.htm">ReadInterfaceObjectTypeAsync</a></td>
+<td><div class="summary">
+Reads the object type of the interface object with a given index
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="0e4ccfb9-e188-f6e7-2e61-4768facf0549.htm">ReadMemoryAsync</a></td>
+<td><div class="summary">
+Reads device memory.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="9d30946c-c2a0-4725-09df-4eacfebde4f1.htm">ReadPropertyDescriptionByIdAsync</a></td>
+<td><div class="summary">
+Reads an interface object property description given its property ID
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="8704b386-a44d-71fd-d287-f9d6d90880f8.htm">ReadPropertyDescriptionByIndexAsync</a></td>
+<td><div class="summary">
+Reads an interface object property description given its index
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="7a3298b7-31ab-fb8f-7cd7-92669e7e0080.htm">ReadPropertyElementCountAsync</a></td>
+<td><div class="summary">
+Reads the number of array elements of an interface object property
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="6accf3c5-1f1d-d7e0-39aa-c7dd0beeadcb.htm">ReadPropertyExtendedDescriptionByIdAsync</a></td>
+<td><div class="summary">
+Reads an interface object property description given its property ID
+using extended property services
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="f36b792e-28c7-d0fa-114f-40b0f25389bb.htm">ReadPropertyExtendedDescriptionByIndexAsync</a></td>
+<td><div class="summary">
+Reads an interface object property description given its property index
+using extended property services
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="eec7d31c-4e0a-2275-0f15-a6363c4a80bc.htm">ReadPropertyExtendedElementCountAsync</a></td>
+<td><div class="summary">
+Reads the number of array elements of an interface object property using
+extended property services
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="8a36a7ae-2bbb-3e47-d1ab-36564e19bb67.htm">ReadPropertyExtendedValueAsync(UInt16,
+UInt16, UInt16, CancellationToken)</a></td>
+<td><div class="summary">
+Reads a (scalar) interface object property value using extended property
+services
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="0a0aa303-5085-8555-bf7c-972c0fdee2e9.htm">ReadPropertyExtendedValueAsync(UInt16,
+UInt16, UInt16, UInt16, UInt16, UInt16, IProgress<span
+id="LSTBB6F14FC_1"></span></a>
+Int32<span id="LSTBB6F14FC_2"></span>
+, CancellationToken)</td>
+<td><div class="summary">
+Reads (part of) an interface object property value array using extended
+property services
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="b2d626b3-5eb4-8a55-2d2d-5f748ae04a72.htm">ReadPropertyValueAsync(Byte,
+Byte, CancellationToken)</a></td>
+<td><div class="summary">
+Reads a (scalar) interface object property value
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="0ef72e2f-204b-85de-6a46-c5cf0ae1ea34.htm">ReadPropertyValueAsync(Byte,
+Byte, UInt16, UInt16, UInt16, IProgress<span
+id="LSTBB6F14FC_3"></span></a>
+Int32<span id="LSTBB6F14FC_4"></span>
+, CancellationToken)</td>
+<td><div class="summary">
+Reads (part of) an interface object property value array
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="57aa42df-dee5-a7f1-993b-28c0468c9de5.htm">ReadRouterMemoryAsync</a></td>
+<td><div class="summary">
+Reads router memory
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="40bf049f-061b-c2a2-173e-b0ee605cd5ed.htm">ReadRoutingTableMemoryAsync</a></td>
+<td><div class="summary">
+Reads routing table memory
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="68049b99-b65d-45f6-9a1c-fedd9c998e43.htm">ReadUserMemoryAsync</a></td>
+<td><div class="summary">
+Reads device user memory
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="1a10a175-036b-c99c-1f11-9d5abab1f7e1.htm">ToString</a></td>
+<td><div class="summary">
+Returns a string that represents the current object.
+</div>
+(Overrides <span class="nolink">Object<span
+id="LSTBB6F14FC_5"></span></span>
+ToString<span id="LSTBB6F14FC_6"></span>
+.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="0e4f1061-ad49-daaf-f8d7-f1959a904d83.htm">WritePropertyExtendedValueAsync(UInt16,
+UInt16, UInt16, ReadOnlyMemory<span id="LSTBB6F14FC_7"></span></a>
+Byte<span id="LSTBB6F14FC_8"></span>
+, Boolean, CancellationToken)</td>
+<td><div class="summary">
+Writes a (scalar) interface object property value using extended
+property services
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="c6eb1336-6a22-8d0a-1d83-a607730b8ea1.htm">WritePropertyExtendedValueAsync(UInt16,
+UInt16, UInt16, UInt16, UInt16, ReadOnlyMemory<span
+id="LSTBB6F14FC_9"></span></a>
+Byte<span id="LSTBB6F14FC_10"></span>
+, Boolean, IProgress<span id="LSTBB6F14FC_11"></span>
+Int32<span id="LSTBB6F14FC_12"></span>
+, CancellationToken)</td>
+<td><div class="summary">
+Writes (part of) an interface object property value array using extended
+property services
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="c22c8247-f242-0bec-a23f-32f026bceeda.htm">WritePropertyValueAsync(Byte,
+Byte, ReadOnlyMemory<span id="LSTBB6F14FC_13"></span></a>
+Byte<span id="LSTBB6F14FC_14"></span>
+, Boolean, CancellationToken)</td>
+<td><div class="summary">
+Writes a (scalar) interface object property value
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="11a828cb-771d-c9f5-112f-069783b5ff87.htm">WritePropertyValueAsync(Byte,
+Byte, UInt16, UInt16, ReadOnlyMemory<span
+id="LSTBB6F14FC_15"></span></a>
+Byte<span id="LSTBB6F14FC_16"></span>
+, Boolean, IProgress<span id="LSTBB6F14FC_17"></span>
+Int32<span id="LSTBB6F14FC_18"></span>
+, CancellationToken)</td>
+<td><div class="summary">
+Writes (part of) an interface object property value array
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[KnxDevice Class](a8ee86c3-a3f4-2ace-fc78-4d70c73eb95d.htm)
+
+[Knx.Falcon.Sdk Namespace](ddc84507-eccd-b692-8467-e3956feec382.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

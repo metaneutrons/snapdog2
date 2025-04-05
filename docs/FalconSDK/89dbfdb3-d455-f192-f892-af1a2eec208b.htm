@@ -1,0 +1,336 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1
+id="invalidknxmessageexception-class">InvalidKnxMessageException
+Class</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+The exception raised when a a received KNX message is not correct, e.g.
+has not the correct length.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Inheritance Hierarchy</span>
+
+<span class="nolink">System<span id="LSTEEF99860_0"></span></span>
+
+Object  
+  <span class="nolink">System<span id="LSTEEF99860_1"></span></span>
+
+Exception  
+    <span class="selflink">Knx.Falcon<span id="LSTEEF99860_2"></span></span>
+
+InvalidKnxMessageException  
+
+**Namespace:**  [Knx.Falcon](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID1EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID1EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    [SerializableAttribute]
+    public class InvalidKnxMessageException : Exception
+
+    <SerializableAttribute>
+    Public Class InvalidKnxMessageException
+        Inherits Exception
+
+    [SerializableAttribute]
+    public ref class InvalidKnxMessageException : public Exception
+
+    [<SerializableAttribute>]
+    type InvalidKnxMessageException =  
+        class
+            inherit Exception
+        end
+
+The <span class="selflink">InvalidKnxMessageException</span> type
+exposes the following members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />Properties</span>
+
+<table id="propertyList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><span class="nolink">Data</span></td>
+<td><div class="summary">
+Gets a collection of key/value pairs that provide additional
+user-defined information about the exception.
+</div>
+(Inherited from <span class="nolink">Exception</span>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><span class="nolink">HelpLink</span></td>
+<td><div class="summary">
+Gets or sets a link to the help file associated with this exception.
+</div>
+(Inherited from <span class="nolink">Exception</span>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><span class="nolink">HResult</span></td>
+<td><div class="summary">
+Gets or sets HRESULT, a coded numerical value that is assigned to a
+specific exception.
+</div>
+(Inherited from <span class="nolink">Exception</span>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><span class="nolink">InnerException</span></td>
+<td><div class="summary">
+Gets the <span class="nolink">Exception</span> instance that caused the
+current exception.
+</div>
+(Inherited from <span class="nolink">Exception</span>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><span class="nolink">Message</span></td>
+<td><div class="summary">
+Gets a message that describes the current exception.
+</div>
+(Inherited from <span class="nolink">Exception</span>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="a5d6fe3b-8b5a-7d43-d4fa-3f784c152a3d.htm">MessageData</a></td>
+<td><div class="summary">
+The raw message data
+</div></td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><span class="nolink">Source</span></td>
+<td><div class="summary">
+Gets or sets the name of the application or the object that causes the
+error.
+</div>
+(Inherited from <span class="nolink">Exception</span>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><span class="nolink">StackTrace</span></td>
+<td><div class="summary">
+Gets a string representation of the immediate frames on the call stack.
+</div>
+(Inherited from <span class="nolink">Exception</span>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><span class="nolink">TargetSite</span></td>
+<td><div class="summary">
+Gets the method that throws the current exception.
+</div>
+(Inherited from <span class="nolink">Exception</span>.)</td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID4RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID4RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID4RBToggle"
+class="collapseToggle" />Methods</span>
+
+<table id="methodList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">Equals</span></td>
+<td><div class="summary">
+Determines whether the specified object is equal to the current object.
+</div>
+(Inherited from <span class="nolink">Object</span>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">GetBaseException</span></td>
+<td><div class="summary">
+When overridden in a derived class, returns the <span
+class="nolink">Exception</span> that is the root cause of one or more
+subsequent exceptions.
+</div>
+(Inherited from <span class="nolink">Exception</span>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">GetHashCode</span></td>
+<td><div class="summary">
+Serves as the default hash function.
+</div>
+(Inherited from <span class="nolink">Object</span>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">GetObjectData</span></td>
+<td><div class="summary">
+When overridden in a derived class, sets the <span
+class="nolink">SerializationInfo</span> with information about the
+exception.
+</div>
+(Inherited from <span class="nolink">Exception</span>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">GetType</span></td>
+<td><div class="summary">
+Gets the runtime type of the current instance.
+</div>
+(Inherited from <span class="nolink">Exception</span>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">ToString</span></td>
+<td><div class="summary">
+Creates and returns a string representation of the current exception.
+</div>
+(Inherited from <span class="nolink">Exception</span>.)</td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID5RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID5RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID5RBToggle"
+class="collapseToggle" />Extension Methods</span>
+
+<table id="extensionMethodList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubextension.gif" title="Public Extension Method"
+alt="Public Extension Method" /></td>
+<td><a
+href="737a26aa-c67a-17c4-b4db-e7f60b1f13f4.htm">GetDiagEvents</a></td>
+<td><div class="summary">
+Extracts falcon diagnostic information from an <span
+class="nolink">Exception</span> object
+</div>
+(Defined by <a
+href="11e81075-8207-8973-be6b-fdd0dd0ecc41.htm">ExceptionExtensions</a>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubextension.gif" title="Public Extension Method"
+alt="Public Extension Method" /></td>
+<td><a
+href="1d9919ef-e694-785d-a3e7-51edb36bea16.htm">GetStatistics</a></td>
+<td><div class="summary">
+Extracts falcon statistical information from an <span
+class="nolink">Exception</span> object
+</div>
+(Defined by <a
+href="11e81075-8207-8973-be6b-fdd0dd0ecc41.htm">ExceptionExtensions</a>.)</td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID6RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID6RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID6RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[Knx.Falcon Namespace](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

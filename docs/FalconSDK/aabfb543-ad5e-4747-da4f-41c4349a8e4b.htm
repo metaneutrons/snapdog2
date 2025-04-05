@@ -1,0 +1,447 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="iotpublisher-class">IoTPublisher
+Class</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Entry in the Publisher table of a KNX IoT device.
+
+The publisher table fulfills the purpose of determining from which
+endpoints to receive group communication
+
+The required Information is:
+
+- [Id](57dfe23f-a1b1-46e2-9888-2adf3e59eeb9.htm) - ID of entry unique
+  with respect to the table
+- [GroupAddresses](9ceef224-24f7-e3e4-8716-f57ef96667c7.htm) - Group
+  Addresses for which to message the specified recipient
+
+And either of these can then be used to uniquely identify the publisher
+endpoint:
+
+- The [Url](2a22f535-40d9-2b37-65ce-9c49e3fe4200.htm) - Defines a url
+  including IPv6 address and port to tell the device from which
+  publishers to receive.
+- The [IndividualAddress](8bfcf431-54ae-3eb4-c144-c8b5f1fb09b8.htm) and
+  [InstallationId](000eef7a-d83c-e742-0b7d-ebabdb6d9069.htm) - Define
+  the individual address and installation id of the target device which
+  the device can use to determine IPv6 address and port.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Inheritance Hierarchy</span>
+
+<span class="nolink">System<span id="LST4513C675_0"></span></span>
+
+Object  
+  <span class="selflink">Knx.Falcon<span id="LST4513C675_1"></span></span>
+
+IoTPublisher  
+
+**Namespace:**  [Knx.Falcon](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID1EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID1EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public class IoTPublisher : IEquatable<IoTPublisher>, 
+        IObjectRepresentationSerializable
+
+    Public Class IoTPublisher
+        Implements IEquatable(Of IoTPublisher), IObjectRepresentationSerializable
+
+    public ref class IoTPublisher : IEquatable<IoTPublisher^>, 
+        IObjectRepresentationSerializable
+
+    type IoTPublisher =  
+        class
+            interface IEquatable<IoTPublisher>
+            interface IObjectRepresentationSerializable
+        end
+
+The <span class="selflink">IoTPublisher</span> type exposes the
+following members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />Constructors</span>
+
+<table id="constructorList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="5206e841-5162-256f-2f03-650b24d0bdb9.htm">IoTPublisher(Int32,
+IEnumerable<span id="LST4513C675_2"></span></a>
+GroupAddress<span id="LST4513C675_3"></span>
+, GroupId)</td>
+<td><div class="summary">
+Initializes a new instance of the <span
+class="selflink">IoTPublisher</span> class
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="4ff8592d-de2b-fdc3-914c-8c09eec578f3.htm">IoTPublisher(Int32,
+IEnumerable<span id="LST4513C675_4"></span></a>
+GroupAddress<span id="LST4513C675_5"></span>
+, Uri)</td>
+<td><div class="summary">
+Initializes a new instance of the <span
+class="selflink">IoTPublisher</span> class
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="c4128a88-8487-f941-a999-3b5b9187d86c.htm">IoTPublisher(Int32,
+IEnumerable<span id="LST4513C675_6"></span></a>
+GroupAddress<span id="LST4513C675_7"></span>
+, InstallationId, IndividualAddress)</td>
+<td><div class="summary">
+Initializes a new instance of the <span
+class="selflink">IoTPublisher</span> class
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID5RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID5RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID5RBToggle"
+class="collapseToggle" />Properties</span>
+
+<table id="propertyList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="9ceef224-24f7-e3e4-8716-f57ef96667c7.htm">GroupAddresses</a></td>
+<td><div class="summary">
+A list of group addresses which shall be received from the configured
+publisher.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="3de44b5e-4557-fd6e-ebd8-a9d6260e019c.htm">GroupId</a></td>
+<td></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="57dfe23f-a1b1-46e2-9888-2adf3e59eeb9.htm">Id</a></td>
+<td><div class="summary">
+ID of the Function Point Publisher Table Entry.
+<div class="collapsibleAreaRegion">
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse(&#39;ID4RB&#39;)"
+onkeypress="SectionExpandCollapse_CheckKey(&#39;ID4RB&#39;, event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID4RBToggle"
+class="collapseToggle" />Remarks</span>
+</div>
+<div id="ID4RBSection" class="collapsibleSection">
+This ID shall be unique with respect to the table.
+</div>
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="8bfcf431-54ae-3eb4-c144-c8b5f1fb09b8.htm">IndividualAddress</a></td>
+<td><div class="summary">
+The individual address identifying the endpoint of the publisher.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="000eef7a-d83c-e742-0b7d-ebabdb6d9069.htm">InstallationId</a></td>
+<td><div class="summary">
+KNX Installation ID of the publisher.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="3e0f214c-364c-6323-55ce-fcf396d5d107.htm">Path</a></td>
+<td><div class="summary">
+The resource path of the publisher.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="2a22f535-40d9-2b37-65ce-9c49e3fe4200.htm">Url</a></td>
+<td><div class="summary">
+The url identifying the endpoint of the publisher.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID6RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID6RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID6RBToggle"
+class="collapseToggle" />Methods</span>
+
+<table id="methodList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="3bce26f4-5327-311e-8966-c14bfadb65fc.htm">Equals(IoTPublisher)</a></td>
+<td></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="735b28b8-d8b6-a1b4-3c9d-ea490c26697d.htm">Equals(Object)</a></td>
+<td>(Overrides <span class="nolink">Object<span
+id="LST4513C675_8"></span></span>
+Equals(Object).)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="082b84a9-862d-9c0f-fc21-c97fb8fa49e3.htm">GetCollectionResourcePath</a></td>
+<td></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="db9ccd02-db81-9a5a-accd-a8b52039c469.htm">GetHashCode</a></td>
+<td>(Overrides <span class="nolink">Object<span
+id="LST4513C675_9"></span></span>
+GetHashCode<span id="LST4513C675_10"></span>
+.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="e0b22b06-5894-7c3c-1cdd-0e8675d38719.htm">GetObjectRepresentationData</a></td>
+<td></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="01586be9-1a86-257f-cb37-92b1d55dec9c.htm">GetResourcePath</a></td>
+<td></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="1db3e23b-eb21-dd3f-db99-4c64f79f4e21.htm">GetTransmissionMethod</a></td>
+<td></td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">GetType</span></td>
+<td><div class="summary">
+Gets the <span class="nolink">Type</span> of the current instance.
+</div>
+(Inherited from <span class="nolink">Object</span>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="f2009aab-c406-1763-c235-58059069a49b.htm">ToString</a></td>
+<td>(Overrides <span class="nolink">Object<span
+id="LST4513C675_11"></span></span>
+ToString<span id="LST4513C675_12"></span>
+.)</td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID7RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID7RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID7RBToggle"
+class="collapseToggle" />Operators</span>
+
+<table id="operatorList" class="members">
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="f3d695bf-f3aa-0294-90d9-6d12d0ea2646.htm">Equality</a></td>
+<td></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="cb8615bb-03a5-1a41-893d-969b8e3dc432.htm">Inequality</a></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID8RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID8RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID8RBToggle"
+class="collapseToggle" />Fields</span>
+
+<table id="fieldList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubfield.gif" title="Public field"
+alt="Public field" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="d1bddf9e-4643-fccd-c3fc-67b68204fcaf.htm">DefaultPath</a></td>
+<td><div class="summary">
+Default path for S-Mode group communication.
+<p>If no is defined then this is used as the default.</p>
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID9RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID9RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID9RBToggle"
+class="collapseToggle" />Remarks</span>
+
+Note that when sending a <span class="selflink">IoTPublisher</span>
+entry to an IoT Device that then existing elements will be replaced and
+non existing elements will be added.
+
+Also see [IoTRecipient](9fbd0be6-055a-bff6-7c39-f594ab865bc1.htm) for
+additional details.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID10RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID10RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID10RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[Knx.Falcon Namespace](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

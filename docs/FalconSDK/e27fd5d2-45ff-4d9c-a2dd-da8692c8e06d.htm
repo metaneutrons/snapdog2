@@ -1,0 +1,534 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1
+id="propertydatatype-enumeration">PropertyDataType Enumeration</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Property data types as described in the KNX handbook, volume 3/7/3
+
+**Namespace:**  [Knx.Falcon](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public enum PropertyDataType
+
+    Public Enumeration PropertyDataType
+
+    public enum class PropertyDataType
+
+    type PropertyDataType
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Members</span>
+
+<table id="enumMemberList" class="members">
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Member name</th>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_CONTROL"><span
+class="selflink">PDT_CONTROL</span></td>
+<td>0</td>
+<td>Type length: 1 octet read/10 octet write, Format: usage
+dependent</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_CHAR"><span
+class="selflink">PDT_CHAR</span></td>
+<td>1</td>
+<td>Type length: 1 octet, Format: V8 / DPT 6.010</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_UNSIGNED_CHAR"><span
+class="selflink">PDT_UNSIGNED_CHAR</span></td>
+<td>2</td>
+<td>Type length: 1 octet, Format: U8/ DPT 5.010</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_INT"><span
+class="selflink">PDT_INT</span></td>
+<td>3</td>
+<td>Type length: 2 octets, Format: V16 / DPT 8.001</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_UNSIGNED_INT"><span
+class="selflink">PDT_UNSIGNED_INT</span></td>
+<td>4</td>
+<td>Type length: 2 octets, Format: U16 / DPT 7.001</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_KNX_FLOAT"><span
+class="selflink">PDT_KNX_FLOAT</span></td>
+<td>5</td>
+<td>Type length: 2 octets, Format: F16 / DPT 9</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_DATE"><span
+class="selflink">PDT_DATE</span></td>
+<td>6</td>
+<td>Type length: 3 octets, Format: r3N5r4N4r1U7 / DPT 11</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_TIME"><span
+class="selflink">PDT_TIME</span></td>
+<td>7</td>
+<td>Type length: 3 octets, Format: N3N5r2N6r2N6 / DPT 10</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_LONG"><span
+class="selflink">PDT_LONG</span></td>
+<td>8</td>
+<td>Type length: 4 octets, Format: V32 / DPT 13.001</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_UNSIGNED_LONG"><span
+class="selflink">PDT_UNSIGNED_LONG</span></td>
+<td>9</td>
+<td>Type length: 4 octets, Format: U32 / DPT 12.001</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_FLOAT"><span
+class="selflink">PDT_FLOAT</span></td>
+<td>10</td>
+<td>Type length: 4 octets, Format: F32 / DPT 14</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_DOUBLE"><span
+class="selflink">PDT_DOUBLE</span></td>
+<td>11</td>
+<td>Type length: 8 octets, Format: F64</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_CHAR_BLOCK"><span
+class="selflink">PDT_CHAR_BLOCK</span></td>
+<td>12</td>
+<td>Type length: 10 octets, Format: A[10]</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_POLL_GROUP_SETTINGS"><span
+class="selflink">PDT_POLL_GROUP_SETTINGS</span></td>
+<td>13</td>
+<td>Type length: 3 octets, Format: U16U8</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_SHORT_CHAR_BLOCK"><span
+class="selflink">PDT_SHORT_CHAR_BLOCK</span></td>
+<td>14</td>
+<td>Type length: 5 octets, Format: A[5]</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_DATE_TIME"><span
+class="selflink">PDT_DATE_TIME</span></td>
+<td>15</td>
+<td>Type length: 8 octets, Format: U8[r4U4][r3U5][U3U5][r2U6][r2U6]B16 /
+DPT 19.001</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_VARIABLE_LENGTH"><span
+class="selflink">PDT_VARIABLE_LENGTH</span></td>
+<td>16</td>
+<td>Type length: variable, Format: undefined</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_GENERIC_01"><span
+class="selflink">PDT_GENERIC_01</span></td>
+<td>17</td>
+<td>Type length: 1 octet, Format: undefined</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_GENERIC_02"><span
+class="selflink">PDT_GENERIC_02</span></td>
+<td>18</td>
+<td>Type length: 2 octets, Format: undefined</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_GENERIC_03"><span
+class="selflink">PDT_GENERIC_03</span></td>
+<td>19</td>
+<td>Type length: 3 octets, Format: undefined</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_GENERIC_04"><span
+class="selflink">PDT_GENERIC_04</span></td>
+<td>20</td>
+<td>Type length: 4 octets, Format: undefined</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_GENERIC_05"><span
+class="selflink">PDT_GENERIC_05</span></td>
+<td>21</td>
+<td>Type length: 5 octets, Format: undefined</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_GENERIC_06"><span
+class="selflink">PDT_GENERIC_06</span></td>
+<td>22</td>
+<td>Type length: 6 octets, Format: undefined</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_GENERIC_07"><span
+class="selflink">PDT_GENERIC_07</span></td>
+<td>23</td>
+<td>Type length: 7 octets, Format: undefined</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_GENERIC_08"><span
+class="selflink">PDT_GENERIC_08</span></td>
+<td>24</td>
+<td>Type length: 8 octets, Format: undefined</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_GENERIC_09"><span
+class="selflink">PDT_GENERIC_09</span></td>
+<td>25</td>
+<td>Type length: 9 octets, Format: undefined</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_GENERIC_10"><span
+class="selflink">PDT_GENERIC_10</span></td>
+<td>26</td>
+<td>Type length: 10 octets, Format: undefined</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_GENERIC_11"><span
+class="selflink">PDT_GENERIC_11</span></td>
+<td>27</td>
+<td>Type length: 11 octets, Format: undefined</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_GENERIC_12"><span
+class="selflink">PDT_GENERIC_12</span></td>
+<td>28</td>
+<td>Type length: 12 octets, Format: undefined</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_GENERIC_13"><span
+class="selflink">PDT_GENERIC_13</span></td>
+<td>29</td>
+<td>Type length: 13 octets, Format: undefined</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_GENERIC_14"><span
+class="selflink">PDT_GENERIC_14</span></td>
+<td>30</td>
+<td>Type length: 14 octets, Format: undefined</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_GENERIC_15"><span
+class="selflink">PDT_GENERIC_15</span></td>
+<td>31</td>
+<td>Type length: 15 octets, Format: undefined</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_GENERIC_16"><span
+class="selflink">PDT_GENERIC_16</span></td>
+<td>32</td>
+<td>Type length: 16 octets, Format: undefined</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_GENERIC_17"><span
+class="selflink">PDT_GENERIC_17</span></td>
+<td>33</td>
+<td>Type length: 17 octets, Format: undefined</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_GENERIC_18"><span
+class="selflink">PDT_GENERIC_18</span></td>
+<td>34</td>
+<td>Type length: 18 octets, Format: undefined</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_GENERIC_19"><span
+class="selflink">PDT_GENERIC_19</span></td>
+<td>35</td>
+<td>Type length: 19 octets, Format: undefined</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_GENERIC_20"><span
+class="selflink">PDT_GENERIC_20</span></td>
+<td>36</td>
+<td>Type length: 20 octets, Format: undefined</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_RESERVED_25"><span
+class="selflink">PDT_RESERVED_25</span></td>
+<td>37</td>
+<td>Reserved</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_RESERVED_26"><span
+class="selflink">PDT_RESERVED_26</span></td>
+<td>38</td>
+<td>Reserved</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_RESERVED_27"><span
+class="selflink">PDT_RESERVED_27</span></td>
+<td>39</td>
+<td>Reserved</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_RESERVED_28"><span
+class="selflink">PDT_RESERVED_28</span></td>
+<td>40</td>
+<td>Reserved</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_RESERVED_29"><span
+class="selflink">PDT_RESERVED_29</span></td>
+<td>41</td>
+<td>Reserved</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_RESERVED_2A"><span
+class="selflink">PDT_RESERVED_2A</span></td>
+<td>42</td>
+<td>Reserved</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_RESERVED_2B"><span
+class="selflink">PDT_RESERVED_2B</span></td>
+<td>43</td>
+<td>Reserved</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_RESERVED_2C"><span
+class="selflink">PDT_RESERVED_2C</span></td>
+<td>44</td>
+<td>Reserved</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_RESERVED_2D"><span
+class="selflink">PDT_RESERVED_2D</span></td>
+<td>45</td>
+<td>Reserved</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_RESERVED_2E"><span
+class="selflink">PDT_RESERVED_2E</span></td>
+<td>46</td>
+<td>Reserved</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_UTF8"><span
+class="selflink">PDT_UTF8</span></td>
+<td>47</td>
+<td>Type length: variable, Format: DPT 28.001</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_VERSION"><span
+class="selflink">PDT_VERSION</span></td>
+<td>48</td>
+<td>Type length: 2 octets, Format: U5U5U6 / DPT 217.001</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_ALARM_INFO"><span
+class="selflink">PDT_ALARM_INFO</span></td>
+<td>49</td>
+<td>Type length: 6 octets, Format: U8N8N8N8B8B8 / DPT 219.001</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_BINARY_INFORMATION"><span
+class="selflink">PDT_BINARY_INFORMATION</span></td>
+<td>50</td>
+<td>Type length: 1 bit, Format: B1 / DPT 1</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_BITSET8"><span
+class="selflink">PDT_BITSET8</span></td>
+<td>51</td>
+<td>Type length: 1 octet, Format: B8 / DPT 21</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_BITSET16"><span
+class="selflink">PDT_BITSET16</span></td>
+<td>52</td>
+<td>Type length: 2 octets, Format: B16 / DPT 22</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_ENUM8"><span
+class="selflink">PDT_ENUM8</span></td>
+<td>53</td>
+<td>Type length: 1 octet, Format: N8 / DPT 20</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_SCALING"><span
+class="selflink">PDT_SCALING</span></td>
+<td>54</td>
+<td>Type length: 1 octet, Format: U8 / DPT 5.001</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_RESERVED_37"><span
+class="selflink">PDT_RESERVED_37</span></td>
+<td>55</td>
+<td>Reserved</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_RESERVED_38"><span
+class="selflink">PDT_RESERVED_38</span></td>
+<td>56</td>
+<td>Reserved</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_RESERVED_39"><span
+class="selflink">PDT_RESERVED_39</span></td>
+<td>57</td>
+<td>Reserved</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_RESERVED_3A"><span
+class="selflink">PDT_RESERVED_3A</span></td>
+<td>58</td>
+<td>Reserved</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_RESERVED_3B"><span
+class="selflink">PDT_RESERVED_3B</span></td>
+<td>59</td>
+<td>Reserved</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_NE_VL"><span
+class="selflink">PDT_NE_VL</span></td>
+<td>60</td>
+<td>Type length: variable, Format: undefined</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_NE_FL"><span
+class="selflink">PDT_NE_FL</span></td>
+<td>61</td>
+<td>Type length: undefined but fixed, Format: undefined</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_FUNCTION"><span
+class="selflink">PDT_FUNCTION</span></td>
+<td>62</td>
+<td>Type length: usage dependent, Format: usage dependent</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.PropertyDataType.PDT_ESCAPE"><span
+class="selflink">PDT_ESCAPE</span></td>
+<td>63</td>
+<td>Type length: undefined</td>
+</tr>
+</tbody>
+</table>
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[Knx.Falcon Namespace](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

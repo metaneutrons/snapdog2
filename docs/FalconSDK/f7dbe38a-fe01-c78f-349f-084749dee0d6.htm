@@ -1,0 +1,182 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1
+id="iotsoftwareupdateresult-enumeration">IoTSoftwareUpdateResult
+Enumeration</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Result of a device software update
+
+**Namespace:**
+ [Knx.Falcon.IoT](77c5abf9-f1d0-343a-2fc0-68ccbbf9a056.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public enum IoTSoftwareUpdateResult
+
+    Public Enumeration IoTSoftwareUpdateResult
+
+    public enum class IoTSoftwareUpdateResult
+
+    type IoTSoftwareUpdateResult
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Members</span>
+
+<table id="enumMemberList" class="members">
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Member name</th>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.IoT.IoTSoftwareUpdateResult.InitialValue"><span
+class="selflink">InitialValue</span></td>
+<td>0</td>
+<td>Indicates no result being ready yet
+<p>The device returns this result right after a download or upgrade has
+been initiated.</p>
+<p>Meaning that this indicates that a download / upgrade is currently
+still in progress.</p></td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.IoT.IoTSoftwareUpdateResult.SoftwareUpdatedSuccessfully"><span
+class="selflink">SoftwareUpdatedSuccessfully</span></td>
+<td>1</td>
+<td>Indicate the software having been upgraded successfully.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.IoT.IoTSoftwareUpdateResult.NotEnoughFlashMemoryForSoftwarePackage"><span
+class="selflink">NotEnoughFlashMemoryForSoftwarePackage</span></td>
+<td>2</td>
+<td>Indicates that during the software update the device ran out of
+flash memory for the software package.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.IoT.IoTSoftwareUpdateResult.OutOfRamDuringDownload"><span
+class="selflink">OutOfRamDuringDownload</span></td>
+<td>3</td>
+<td>Indicates that during the software update the device ran out of RAM
+during the download.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.IoT.IoTSoftwareUpdateResult.ConnectionLostDuringDownload"><span
+class="selflink">ConnectionLostDuringDownload</span></td>
+<td>4</td>
+<td>Indicates that the connection the the server was lost during the
+package download.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.IoT.IoTSoftwareUpdateResult.IntegrityCheckFailureForSoftwarePackage"><span
+class="selflink">IntegrityCheckFailureForSoftwarePackage</span></td>
+<td>5</td>
+<td>Indicates that the device refused to perform an upgrade due to it
+failing the integrity check.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.IoT.IoTSoftwareUpdateResult.UnsupportedPackageType"><span
+class="selflink">UnsupportedPackageType</span></td>
+<td>6</td>
+<td>Indicates that the manufacturer specific package type was
+incompatible with the device or is currently not supported.</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.IoT.IoTSoftwareUpdateResult.InvalidUrl"><span
+class="selflink">InvalidUrl</span></td>
+<td>7</td>
+<td>Indicates that the url provided for finding a software update was
+invalid i.e. the server could not be reached.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.IoT.IoTSoftwareUpdateResult.SoftwareUpdateFailed"><span
+class="selflink">SoftwareUpdateFailed</span></td>
+<td>8</td>
+<td>Indicates that the upgrading of the software failed due to an
+unspecified reason.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.IoT.IoTSoftwareUpdateResult.UnsupportedProtocol"><span
+class="selflink">UnsupportedProtocol</span></td>
+<td>9</td>
+<td>Indicates that the device has been instructed to use a protocol for
+downloading the software update package that it does not support.</td>
+</tr>
+</tbody>
+</table>
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[Knx.Falcon.IoT Namespace](77c5abf9-f1d0-343a-2fc0-68ccbbf9a056.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

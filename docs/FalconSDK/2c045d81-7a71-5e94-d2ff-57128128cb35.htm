@@ -1,0 +1,132 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn">GroupCommunicationSecurityBuilder<span
+id="LST931419A8_0"></span>
+AddKey Method (GroupAddress, <span id="LST931419A8_1"></span>
+Byte<span id="LST931419A8_2"></span>
+)</td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Adds, updates or deletes the security data for the given group address.
+
+**Namespace:**
+ [Knx.Falcon.DataSecurity](8e78c9eb-f0d7-da55-a0f1-4da2dd7668c4.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public GroupCommunicationSecurityBuilder AddKey(
+        GroupAddress groupAddress,
+        byte[] key
+    )
+
+    Public Function AddKey ( 
+        groupAddress As GroupAddress,
+        key As Byte()
+    ) As GroupCommunicationSecurityBuilder
+
+    public:
+    GroupCommunicationSecurityBuilder^ AddKey(
+        GroupAddress groupAddress, 
+        array<unsigned char>^ key
+    )
+
+    member AddKey : 
+            groupAddress : GroupAddress * 
+            key : byte[] -> GroupCommunicationSecurityBuilder 
+
+#### Parameters
+
+<span class="parameter">groupAddress</span>  
+Type: [Knx.Falcon<span id="LST931419A8_3"></span>](0ffb286f-6b36-38cf-1840-0b7b53633047.htm)
+
+GroupAddress  
+The group address
+
+<span class="parameter">key</span>  
+Type: <span id="LST931419A8_4"></span>
+
+<span class="nolink">System<span id="LST931419A8_5"></span></span>
+
+Byte<span id="LST931419A8_6"></span>
+
+  
+The new key, or
+<span class="keyword"><span id="LST931419A8_7"></span></span>
+
+to clear the security information
+
+#### Return Value
+
+Type: [GroupCommunicationSecurityBuilder](ea50b169-b584-ab11-b842-4791bc53bca1.htm)  
+The same
+[GroupCommunicationSecurityBuilder](ea50b169-b584-ab11-b842-4791bc53bca1.htm)
+instance is returned. This allows adding multiple keys in one statement
+("fluent interface"); see example.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Remarks</span>
+
+Important security hint: byte arrays containing unencrypted keys present
+a security risk because an attacker might be able to extract the keys
+from the computer memory or a memory dump. Be sure to clear the content
+of the array reference by <span class="parameter">key</span> after use.
+The [SecureBuffer](64b092c3-5f18-0890-2333-8f6813734e19.htm) makes this
+easy. If you need to keep the key for a longer time, use the
+[EncryptedBuffer](15cde597-e7bb-8286-1621-3ce2cceccd0d.htm) class and
+consider using the [AddKey(GroupAddress,
+EncryptedBuffer)](d1468a4b-2c70-f605-d978-3388eb80ec43.htm) overload.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[GroupCommunicationSecurityBuilder
+Class](ea50b169-b584-ab11-b842-4791bc53bca1.htm)
+
+[AddKey Overload](8a8e105f-6c45-a42e-920e-c9ce76718585.htm)
+
+[Knx.Falcon.DataSecurity
+Namespace](8e78c9eb-f0d7-da55-a0f1-4da2dd7668c4.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

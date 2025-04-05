@@ -1,0 +1,129 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn">DptBase<span id="LST3FEC3E38_0"></span>
+AsCompoundValue Method</td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Creates a [KnxCompoundValue](f56c57b9-ad49-5cc8-4caa-8666c1e34cf9.htm)
+from a group value according to the fields defined for a datapoint
+subtype
+
+**Namespace:**
+ [Knx.Falcon.ApplicationData.DatapointTypes](4524760b-44ef-f645-eb89-57d78a179600.htm)  
+**Assembly:**  Knx.Falcon.ApplicationData (in
+Knx.Falcon.ApplicationData.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public static IDictionary<string, Object> AsCompoundValue(
+        GroupValue groupValue,
+        DatapointSubtype datapointSubtype
+    )
+
+    Public Shared Function AsCompoundValue ( 
+        groupValue As GroupValue,
+        datapointSubtype As DatapointSubtype
+    ) As IDictionary(Of String, Object)
+
+    public:
+    static IDictionary<String^, Object^>^ AsCompoundValue(
+        GroupValue^ groupValue, 
+        DatapointSubtype^ datapointSubtype
+    )
+
+    static member AsCompoundValue : 
+            groupValue : GroupValue * 
+            datapointSubtype : DatapointSubtype -> IDictionary<string, Object> 
+
+#### Parameters
+
+<span class="parameter">groupValue</span>  
+Type: [Knx.Falcon<span id="LST3FEC3E38_1"></span>](cfefd12c-88f9-89e7-b457-f55df2d98718.htm)
+
+GroupValue  
+The group value
+
+<span class="parameter">datapointSubtype</span>  
+Type: [Knx.Falcon.ApplicationData.MasterData<span id="LST3FEC3E38_2"></span>](310d0918-5033-52b5-227e-060e3bb11cd3.htm)
+
+DatapointSubtype  
+The datapoint subtype
+
+#### Return Value
+
+Type: <span class="nolink">IDictionary</span><span id="LST3FEC3E38_3"></span>
+
+<span class="nolink">String</span>,
+<span class="nolink">Object</span><span id="LST3FEC3E38_4"></span>
+
+  
+The compound value as key-value pairs
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Exceptions</span>
+
+<table>
+<thead>
+<tr>
+<th>Exception</th>
+<th>Condition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="nolink">ArgumentException</span></td>
+<td>If any of the fields cannot be converted</td>
+</tr>
+</tbody>
+</table>
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[DptBase Class](815b65b3-3f60-ad3b-5e2d-334360e73f2d.htm)
+
+[Knx.Falcon.ApplicationData.DatapointTypes
+Namespace](4524760b-44ef-f645-eb89-57d78a179600.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

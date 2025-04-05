@@ -1,0 +1,198 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn">KnxDevice<span id="LSTFA6501CD_0"></span>
+ReadPropertyExtendedValueAsync Method (UInt16, UInt16, UInt16, UInt16,
+UInt16, UInt16, IProgress<span id="LSTFA6501CD_1"></span>
+Int32<span id="LSTFA6501CD_2"></span>
+, CancellationToken)</td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Reads (part of) an interface object property value array using extended
+property services
+
+**Namespace:**
+ [Knx.Falcon.Sdk](ddc84507-eccd-b692-8467-e3956feec382.htm)  
+**Assembly:**  Knx.Falcon.Sdk (in Knx.Falcon.Sdk.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public Task<byte[]> ReadPropertyExtendedValueAsync(
+        ushort objectType,
+        ushort instance,
+        ushort propertyId,
+        ushort startIndex,
+        ushort count,
+        ushort elementSize,
+        IProgress<int> progress = null,
+        CancellationToken cancellationToken = default
+    )
+
+    Public Function ReadPropertyExtendedValueAsync ( 
+        objectType As UShort,
+        instance As UShort,
+        propertyId As UShort,
+        startIndex As UShort,
+        count As UShort,
+        elementSize As UShort,
+        Optional progress As IProgress(Of Integer) = Nothing,
+        Optional cancellationToken As CancellationToken = Nothing
+    ) As Task(Of Byte())
+
+    public:
+    Task<array<unsigned char>^>^ ReadPropertyExtendedValueAsync(
+        unsigned short objectType, 
+        unsigned short instance, 
+        unsigned short propertyId, 
+        unsigned short startIndex, 
+        unsigned short count, 
+        unsigned short elementSize, 
+        IProgress<int>^ progress = nullptr, 
+        CancellationToken cancellationToken = CancellationToken()
+    )
+
+    member ReadPropertyExtendedValueAsync : 
+            objectType : uint16 * 
+            instance : uint16 * 
+            propertyId : uint16 * 
+            startIndex : uint16 * 
+            count : uint16 * 
+            elementSize : uint16 * 
+            ?progress : IProgress<int> * 
+            ?cancellationToken : CancellationToken 
+    (* Defaults:
+            let _progress = defaultArg progress null
+            let _cancellationToken = defaultArg cancellationToken new CancellationToken()
+    *)
+    -> Task<byte[]> 
+
+#### Parameters
+
+<span class="parameter">objectType</span>  
+Type: <span class="nolink">System<span id="LSTFA6501CD_3"></span></span>
+
+UInt16  
+The interface object type
+
+<span class="parameter">instance</span>  
+Type: <span class="nolink">System<span id="LSTFA6501CD_4"></span></span>
+
+UInt16  
+The interface object instance (1-based)
+
+<span class="parameter">propertyId</span>  
+Type: <span class="nolink">System<span id="LSTFA6501CD_5"></span></span>
+
+UInt16  
+The property Id
+
+<span class="parameter">startIndex</span>  
+Type: <span class="nolink">System<span id="LSTFA6501CD_6"></span></span>
+
+UInt16  
+The index of the first element to read (1-based)
+
+<span class="parameter">count</span>  
+Type: <span class="nolink">System<span id="LSTFA6501CD_7"></span></span>
+
+UInt16  
+The number of elements to read
+
+<span class="parameter">elementSize</span>  
+Type: <span class="nolink">System<span id="LSTFA6501CD_8"></span></span>
+
+UInt16  
+The element size in bytes; this is necessary to calculate the response
+length and split the read into chunks if necessary
+
+<span class="parameter">progress</span> (Optional)  
+Type: <span class="nolink">System<span id="LSTFA6501CD_9"></span></span>
+
+IProgress<span id="LSTFA6501CD_10"></span>
+
+<span class="nolink">Int32</span><span id="LSTFA6501CD_11"></span>
+
+  
+An optional progress callback (in percent). Note that this may be called
+on any thread, so make sure the implementation is thread-safe. The
+implementation should execute as fast as possible and must not block.
+
+<span class="parameter">cancellationToken</span> (Optional)  
+Type: <span class="nolink">System.Threading<span id="LSTFA6501CD_12"></span></span>
+
+CancellationToken  
+Can be used to cancel the operation
+
+#### Return Value
+
+Type: <span class="nolink">Task</span><span id="LSTFA6501CD_13"></span>
+
+<span id="LSTFA6501CD_14"></span>
+
+<span class="nolink">Byte</span><span id="LSTFA6501CD_15"></span>
+
+<span id="LSTFA6501CD_16"></span>
+
+  
+The read data
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Remarks</span>
+
+This method implements the device management procedure
+DMP\_ExtInterfaceObjectRead\_R according to AN163 clause 3.4.1.3.1.
+
+The read operation is automatically split in chunks fitting in
+[ApduLengthRestriction](8604654d-f177-8822-d311-b70f6920e039.htm).
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[KnxDevice Class](a8ee86c3-a3f4-2ace-fc78-4d70c73eb95d.htm)
+
+[ReadPropertyExtendedValueAsync
+Overload](27f4fe09-d3b8-8785-d6a7-bee4c5743d7a.htm)
+
+[Knx.Falcon.Sdk Namespace](ddc84507-eccd-b692-8467-e3956feec382.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

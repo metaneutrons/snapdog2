@@ -1,0 +1,219 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1
+id="connectionstatuscode-enumeration">ConnectionStatusCode
+Enumeration</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+The defined connection status codes
+
+**Namespace:**
+ [Knx.Falcon.KnxnetIp](328dd48a-27bb-1def-162c-3383359ce8b4.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public enum ConnectionStatusCode
+
+    Public Enumeration ConnectionStatusCode
+
+    public enum class ConnectionStatusCode
+
+    type ConnectionStatusCode
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Members</span>
+
+<table id="enumMemberList" class="members">
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Member name</th>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.KnxnetIp.ConnectionStatusCode.E_NO_ERROR"><span
+class="selflink">E_NO_ERROR</span></td>
+<td>0</td>
+<td>The connection is established successfully.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.KnxnetIp.ConnectionStatusCode.E_HOST_PROTOCOL_TYPE"><span
+class="selflink">E_HOST_PROTOCOL_TYPE</span></td>
+<td>1</td>
+<td>The requested host protocol is not supported by the KNXnet/IP
+device.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.KnxnetIp.ConnectionStatusCode.E_VERSION_NOT_SUPPORTED"><span
+class="selflink">E_VERSION_NOT_SUPPORTED</span></td>
+<td>2</td>
+<td>The the requested host protocol is not supported by the KNXnet/IP
+device.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.KnxnetIp.ConnectionStatusCode.E_SEQUENCE_NUMBER"><span
+class="selflink">E_SEQUENCE_NUMBER</span></td>
+<td>4</td>
+<td>The received sequence number is out of order.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.KnxnetIp.ConnectionStatusCode.E_CONNECTION_ID"><span
+class="selflink">E_CONNECTION_ID</span></td>
+<td>33</td>
+<td>The KNXnet/IP server device cannot find an active data connection
+with the specified ID.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.KnxnetIp.ConnectionStatusCode.E_CONNECTION_TYPE"><span
+class="selflink">E_CONNECTION_TYPE</span></td>
+<td>34</td>
+<td>The KNXnet/IP server device does not support the requested
+connection type.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.KnxnetIp.ConnectionStatusCode.E_CONNECTION_OPTION"><span
+class="selflink">E_CONNECTION_OPTION</span></td>
+<td>35</td>
+<td>The KNXnet/IP server device does not support one or more requested
+connection options.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.KnxnetIp.ConnectionStatusCode.E_NO_MORE_CONNECTIONS"><span
+class="selflink">E_NO_MORE_CONNECTIONS</span></td>
+<td>36</td>
+<td>The KNXnet/IP server device cannot accept the new data connection
+because its maximum amount of concurrent connections is already
+used.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.KnxnetIp.ConnectionStatusCode.E_NO_MORE_UNIQUE_CONNECTIONS"><span
+class="selflink">E_NO_MORE_UNIQUE_CONNECTIONS</span></td>
+<td>37</td>
+<td>The KNXnet/IP server device cannot accept the new data connection
+because there are tunneling connections available, but the assigned
+address would not be unique (same address exists multiple times in
+additional addresses array property).</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.KnxnetIp.ConnectionStatusCode.E_DATA_CONNECTION"><span
+class="selflink">E_DATA_CONNECTION</span></td>
+<td>38</td>
+<td>The KNXnet/IP server device detects an error concerning the data
+connection with the specified ID.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.KnxnetIp.ConnectionStatusCode.E_KNX_CONNECTION"><span
+class="selflink">E_KNX_CONNECTION</span></td>
+<td>39</td>
+<td>The interface detected an error concerning the KNX medium
+connection.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.KnxnetIp.ConnectionStatusCode.E_AUTHORISATION_ERROR"><span
+class="selflink">E_AUTHORISATION_ERROR</span></td>
+<td>40</td>
+<td>The Client is not authorised to use the requested IA in the Extended
+CRI.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.KnxnetIp.ConnectionStatusCode.E_TUNNELING_LAYER"><span
+class="selflink">E_TUNNELING_LAYER</span></td>
+<td>41</td>
+<td>The requested layer is not supported.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.KnxnetIp.ConnectionStatusCode.E_NO_TUNNELLING_ADDRESS"><span
+class="selflink">E_NO_TUNNELLING_ADDRESS</span></td>
+<td>45</td>
+<td>The IA requested in the Extended CRI is not a Tunneling IA.</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.KnxnetIp.ConnectionStatusCode.E_CONNECTION_IN_USE"><span
+class="selflink">E_CONNECTION_IN_USE</span></td>
+<td>46</td>
+<td>The IA requested for this connection is in use.</td>
+</tr>
+</tbody>
+</table>
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[Knx.Falcon.KnxnetIp
+Namespace](328dd48a-27bb-1def-162c-3383359ce8b4.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

@@ -1,0 +1,350 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1
+id="iotgroupaddressmapping-class">IoTGroupAddressMapping Class</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+A Group address mapping is an entry in a table of a KNX IoT to/from KNX
+Classic Gateway that gives the necessary information for the gateway to
+translate the group communication.
+
+For this the following information can be provided.
+
+- Group address to which this mapping applies.
+- Datapoint type including the subtype of the messages exchanged via the
+  group address.
+- Additional information for the KNX Classic side of the gateway
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Inheritance Hierarchy</span>
+
+<span class="nolink">System<span id="LSTBDD02C8A_0"></span></span>
+
+Object  
+  <span class="selflink">Knx.Falcon<span id="LSTBDD02C8A_1"></span></span>
+
+IoTGroupAddressMapping  
+
+**Namespace:**  [Knx.Falcon](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID1EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID1EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public class IoTGroupAddressMapping : IEquatable<IoTGroupAddressMapping>, 
+        IObjectRepresentationSerializable
+
+    Public Class IoTGroupAddressMapping
+        Implements IEquatable(Of IoTGroupAddressMapping), IObjectRepresentationSerializable
+
+    public ref class IoTGroupAddressMapping : IEquatable<IoTGroupAddressMapping^>, 
+        IObjectRepresentationSerializable
+
+    type IoTGroupAddressMapping =  
+        class
+            interface IEquatable<IoTGroupAddressMapping>
+            interface IObjectRepresentationSerializable
+        end
+
+The <span class="selflink">IoTGroupAddressMapping</span> type exposes
+the following members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />Constructors</span>
+
+<table id="constructorList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="9a04df03-cf4d-5b3d-40fe-06aed339a33d.htm">IoTGroupAddressMapping(UInt32,
+<span id="LSTBDD02C8A_2"></span></a>
+GroupAddress<span id="LSTBDD02C8A_3"></span>
+, IoTDatapointTypeInfo)</td>
+<td><div class="summary">
+Initializes a new instance of the <span
+class="selflink">IoTGroupAddressMapping</span> class
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="bea26a0d-ca69-cb64-8bf8-0801c2d61dfe.htm">IoTGroupAddressMapping(UInt32,
+<span id="LSTBDD02C8A_4"></span></a>
+GroupAddress<span id="LSTBDD02C8A_5"></span>
+, IoTDatapointTypeInfo, IoTRouterKnxClassicSecurityInfo)</td>
+<td><div class="summary">
+Initializes a new instance of the <span
+class="selflink">IoTGroupAddressMapping</span> class
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID4RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID4RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID4RBToggle"
+class="collapseToggle" />Properties</span>
+
+<table id="propertyList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="ba4d3d23-8702-f690-37d8-c1a4353b61d4.htm">DatapointType</a></td>
+<td><div class="summary">
+Datapoint type including the subtype of the messages exchanged via the
+group address.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="d958189c-0787-1d7f-c9a6-d1c5d99a9d42.htm">GroupAddresses</a></td>
+<td><div class="summary">
+The Group address to which this entry relates
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="dbb41297-ef4b-c580-9052-49740ccefc67.htm">Id</a></td>
+<td></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="ef8165a0-694c-441c-871b-d7b948e0cdf9.htm">KnxClassicSecurityInfo</a></td>
+<td><div class="summary">
+Contains additional information that the gateway can use for (secure)
+group communication on the KNX Classic side of the gateway.
+<p>In particular this may be a differing group address, a group key as
+well as settings as to whether authentication and confidentiality shall
+be used.</p>
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID5RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID5RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID5RBToggle"
+class="collapseToggle" />Methods</span>
+
+<table id="methodList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="5e12992a-431b-fc21-9ac9-ce30a7466a73.htm">Equals(IoTGroupAddressMapping)</a></td>
+<td></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="c7472f31-f635-81cd-48d8-fca4a812f6c7.htm">Equals(Object)</a></td>
+<td>(Overrides <span class="nolink">Object<span
+id="LSTBDD02C8A_6"></span></span>
+Equals(Object).)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="6c9e0399-a8de-9336-0c22-33afdc4e2065.htm">GetCollectionResourcePath</a></td>
+<td></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="9c5a7832-6f58-7418-98af-73666037d3ea.htm">GetHashCode</a></td>
+<td>(Overrides <span class="nolink">Object<span
+id="LSTBDD02C8A_7"></span></span>
+GetHashCode<span id="LSTBDD02C8A_8"></span>
+.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="329d0231-c0ea-99f1-87ed-d080890faa70.htm">GetObjectRepresentationData</a></td>
+<td></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="c012bac2-0f3b-44df-4667-93f8b774ae0e.htm">GetResourcePath</a></td>
+<td></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="782f6b90-aa5a-2602-d597-a981b65ebb24.htm">GetTransmissionMethod</a></td>
+<td></td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">GetType</span></td>
+<td><div class="summary">
+Gets the <span class="nolink">Type</span> of the current instance.
+</div>
+(Inherited from <span class="nolink">Object</span>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="24e4c4e8-fe60-ef2c-c18e-fc2d21219bb9.htm">ToString</a></td>
+<td>(Overrides <span class="nolink">Object<span
+id="LSTBDD02C8A_9"></span></span>
+ToString<span id="LSTBDD02C8A_10"></span>
+.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="213f97b3-64ff-85f4-c9f3-363dae366de0.htm">ToStringCompact</a></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID6RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID6RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID6RBToggle"
+class="collapseToggle" />Operators</span>
+
+<table id="operatorList" class="members">
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="5c82757d-12ac-0e04-c194-8eaedc8b0498.htm">Equality</a></td>
+<td></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="27fd9c57-463e-06c2-5811-6e58177dacb9.htm">Inequality</a></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID7RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID7RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID7RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[Knx.Falcon Namespace](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

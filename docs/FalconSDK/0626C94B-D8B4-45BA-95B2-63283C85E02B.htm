@@ -1,0 +1,73 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="use-falcon-from-powershell">Use Falcon
+from Powershell</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+It is possible to use Falcon SDK from a <span class="media">![External
+Link](../media/ExternalLink.png)</span><a href="https://docs.microsoft.com/en-us/powershell/" target="_blank"
+rel="noopener noreferrer">PowerShell</a> script.
+
+With the current Powershell versions, the following Falcon features
+require special attention:
+
+- There is no direct support for cleaning up of disposable objects, so
+  you need to call Dispose() manually in a finally.
+- There is no support for asynchronous methods, so you need to use
+  options 2 or 3 in [Use Falcon from non-async
+  code](2c3cb26b-0759-4796-93a6-6ad269585682.htm) to circumvent this.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Example</span>
+
+The following example shows how to connect to the bus and do some group
+communication
+
+PowerShell
+
+<a href="#" id="ID0EAABAAA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EAABAAA&#39;);return false;"
+title="Copy">Copy</a>
+
+    $bus = [Knx.Falcon.ManufacturerSdk.KnxBus]::New("Type=USB")
+    try {
+        Write-Host "Connecting"
+        $bus.Connect()
+
+        # Send the 1-bit group value '1' to group address 1/1/1
+        Write-Host "Sending group value 1 to 1/1/1"
+        $bus.WriteGroupValue("1/1/1", $true)
+
+        # Register an event handler so we get informed if some group message is received
+        Write-Host "Listening to group messages"
+        Register-ObjectEvent -InputObject $bus -EventName GroupMessageReceived -SourceIdentifier "GroupMessageReceived" | Out-Null
+
+        while ($true) {
+           $event = Wait-Event -SourceIdentifier "GroupMessageReceived" 
+           if ($event.SourceArgs.Value -ne $null) {
+               Write-Host $EventArgs.EventType, $EventArgs.DestinationAddress, $EventArgs.Value
+           }
+        }
+    }
+    finally {
+        Write-Host "Cleaning up"
+        Unregister-Event -SourceIdentifier "GroupMessageReceived" 
+        $bus.Dispose()
+    }
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

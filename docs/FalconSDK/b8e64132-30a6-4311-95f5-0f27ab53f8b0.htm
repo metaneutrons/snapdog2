@@ -1,0 +1,155 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="configure-bus-connections">Configure Bus
+Connections</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Falcon supports different types bus connection technologies, each with
+its own set of configuration settings. This article explains how bus
+connections are configured in Falcon SDK
+
+### Configure Bus Connections in general
+
+1.  Create an instance of one of the classes derived from
+    [ConnectorParameters](a00d43d8-ca1f-e911-2f70-bea37d855086.htm)
+    using one of these methods:
+
+    - Either by creating it explicitly, i.e using the
+      <span class="code">new</span> operator.
+
+    - Or by constructing it from a connection string using
+      [FromConnectionString](0db86bbe-ca1b-b5f2-f5a2-cbc12dc39df6.htm).
+      The connection string approach is useful if the configuration is
+      persisted e.g. in a configuration file.
+
+    - For USB and IP interfaces, the configuration object can also be
+      constructed from the discovery results
+      ([UsbDeviceDiscoveryResult](e3caec7e-c518-4e30-d834-39b8d1495fc7.htm)
+      /
+      [IpDeviceDiscoveryResult](b1e74f6b-227b-8225-b03b-98afbf18d090.htm)).
+
+2.  For secure routing or tunneling connections, you may load the
+    necessary keys from a keyring file (\*.knxkeys) exported from ETS
+    using
+    [LoadSecurityDataAsync](aafd3a26-0081-ca9e-dd40-cfcceb6f0434.htm).
+
+3.  If wanted, set any additional properties of the object by code or by
+    binding to UI elements.
+
+4.  Pass the object to the
+    [KnxBus](90b417c9-fc19-1801-cb29-6d2b637ee99c.htm) constructor.
+
+    With the connection string approach, the connection string can also
+    be passed directly to the
+    [KnxBus](073700b5-de6c-7a68-b933-9b5a6ec1b60a.htm) constructor
+    without the need to construct a
+    [ConnectorParameters](a00d43d8-ca1f-e911-2f70-bea37d855086.htm)
+    object first.
+
+### USB Bus Connection
+
+- Create an
+  [UsbConnectorParameters](e5991e63-a99c-66cc-c91f-b3c025475d42.htm)
+  object.
+
+  In the common case that only a single USB interface is attached, no
+  further configuration is required.
+
+  Otherwise, the USB interface to be used has to be specified by one of
+  the following settings (listed here in order of precedence):
+
+  - Set the [DevicePath](fefecde0-ced9-b326-6a15-10374f2fc4fa.htm) to
+    the USB device path (on Windows this might e.g. look something like
+    "\\?\hid#vid\_1234&pid\_5678#1&23456789&0&0000#{12345678-1234-5678-1234-0123456789AB}").
+    This path is assigned by the operating system according to the
+    self-description of the USB device and is guaranteed to be unique on
+    the system.
+
+  - Set the [SerialNumber](3b1c2517-947a-0d6a-cf97-4ee17d9b6175.htm) to
+    the KNX serial number of the interface. Note that not all USB
+    interfaces support this property.
+
+  - Set the
+    [PreferredAddressToOpen](dafdde8f-a87f-4eb4-23df-1e9c15703f1e.htm)
+    to the individual address of the interface.
+
+### IP Tunneling Bus Connection
+
+- Create an
+  [IpTunnelingConnectorParameters](4305d8f0-2c63-674a-cad7-aa0046c8ae3d.htm)
+  object.
+
+  The IP interface device to be used has to be specified by one of the
+  following settings (listed here in order of precedence):
+
+  - Set the [HostAddress](be75f761-4534-fc02-eae0-10a8c2c7cd6d.htm) to
+    the IP Address or host name of the IP Interface. This is not useful
+    if the IP address is not fixed and there is no host name that can be
+    resolved by DNS.
+
+  - Set the [SerialNumber](842688bc-84b5-515c-7fcc-713b341bb4e0.htm) to
+    the KNX serial number of the interface. Consider using this if
+    HostName cannot be used.
+
+  - Set the [MacAddress](ba4683c4-b01b-2acf-1d73-845ce634569d.htm) to
+    the MAC address of the interface. Consider using this if HostName
+    cannot be used. If both SerialNumber and MacAddress are given, both
+    have to match.
+
+  If the tunneling server requires a password, configure security on the
+  IpTunnelingConnectorParameters object, either by importing a keyring
+  file (see
+  [LoadSecurityDataAsync](aafd3a26-0081-ca9e-dd40-cfcceb6f0434.htm)) or
+  by explicitly setting
+  [UserId](c47bcab5-d145-6a8b-7d04-e21e55a334cd.htm) and
+  [UserPasswordHash](85b8e143-a07c-d13b-c811-667260a59062.htm).
+
+  Usually, an IP interface device offers multiple tunneling slots. If
+  not specified further, the IP interface device will select the
+  tunneling slot. If the IP interface supports Tunneling v2, this can be
+  influenced by setting
+  [IndividualAddress](a193faf7-9cc9-ba31-d223-dee65722eede.htm) to the
+  individual address of the requested slot.
+
+### Connection via a KNX Cloud Interface
+
+- Create an
+  [IpTunnelingConnectorParameters](4305d8f0-2c63-674a-cad7-aa0046c8ae3d.htm)
+  object and configure it as follows:
+
+  - Set the [CloudApiEndpoint](384c5bc9-96fb-1415-80a1-b00296b36f25.htm)
+    to the URL of the Could Connect API server.
+
+  - Set the [CloudConnectorId](2e2a4351-a51f-c2f9-b07a-7a1d45b5030c.htm)
+    to the Cloud interface ID (KNX serial number of the cloud interface)
+
+  - Set the
+    [CloudAuthorization](5f47cea4-2fdc-6f11-2792-ae0536250336.htm) to
+    the authorization string (access key or access token).
+
+  - If a KNXnet/IP server different from the Cloud interface itself
+    shall be addressed, set the
+    [SerialNumber](842688bc-84b5-515c-7fcc-713b341bb4e0.htm) to its
+    serial number.
+
+  As only secure KNXnet/IP communication is supported, configure
+  security on the IpTunnelingConnectorParameters object, either by
+  importing a keyring file (see
+  [LoadSecurityDataAsync](aafd3a26-0081-ca9e-dd40-cfcceb6f0434.htm)) or
+  by explicitly setting
+  [UserId](c47bcab5-d145-6a8b-7d04-e21e55a334cd.htm) and
+  [UserPasswordHash](85b8e143-a07c-d13b-c811-667260a59062.htm).
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

@@ -1,0 +1,402 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="knxaddress-structure">KnxAddress
+Structure</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Represents either a
+[IndividualAddress](96a1c930-0f99-d67e-b5de-24b4e417e173.htm) or a
+[GroupAddress](0ffb286f-6b36-38cf-1840-0b7b53633047.htm).
+
+**Namespace:**  [Knx.Falcon](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public struct KnxAddress : IEquatable<KnxAddress>, 
+        IComparable<KnxAddress>, IComparable
+
+    Public Structure KnxAddress
+        Implements IEquatable(Of KnxAddress), IComparable(Of KnxAddress), 
+        IComparable
+
+    public value class KnxAddress : IEquatable<KnxAddress>, 
+        IComparable<KnxAddress>, IComparable
+
+    [<SealedAttribute>]
+    type KnxAddress =  
+        struct
+            interface IEquatable<KnxAddress>
+            interface IComparable<KnxAddress>
+            interface IComparable
+        end
+
+The <span class="selflink">KnxAddress</span> type exposes the following
+members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Constructors</span>
+
+<table id="constructorList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="07285055-2835-ec21-9002-b95618767071.htm">KnxAddress(GroupAddress)</a></td>
+<td><div class="summary">
+Initializes a new instance of the <span
+class="selflink">KnxAddress</span> struct representing a group address.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="0db4325d-ad35-3ee3-0cbd-ad17fdef0cf0.htm">KnxAddress(IndividualAddress)</a></td>
+<td><div class="summary">
+Initializes a new instance of the <span
+class="selflink">KnxAddress</span> struct representing an individual
+address.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />Properties</span>
+
+<table id="propertyList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="c0d91206-b356-edd0-90df-83eee398b5b4.htm">IsGroup</a></td>
+<td><div class="summary">
+Gets the flag specifying whether this is a group address or broadcast.
+This flag is mutually exclusive to <a
+href="06115e2a-badb-49df-0d62-346d2f2efa99.htm">IsIndividual</a>.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="06115e2a-badb-49df-0d62-346d2f2efa99.htm">IsIndividual</a></td>
+<td><div class="summary">
+Gets or sets the flag specifying whether this is an individual address.
+This flag is mutually exclusive to <a
+href="c0d91206-b356-edd0-90df-83eee398b5b4.htm">IsGroup</a>.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="ab31089f-8bae-4649-1d8d-c72d3b0753b9.htm">Value</a></td>
+<td><div class="summary">
+Gets the address as numerical value
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID4RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID4RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID4RBToggle"
+class="collapseToggle" />Methods</span>
+
+<table id="methodList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="511120f9-e8cc-cb3a-6a29-4464230444c2.htm">CompareTo(KnxAddress)</a></td>
+<td><div class="summary">
+Compares the current instance with another object of the same type and
+returns an integer that indicates whether the current instance precedes,
+follows, or occurs in the same position in the sort order as the other
+object.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="e4f76a93-d4ee-ca90-90fc-1b938e87bdd5.htm">CompareTo(Object)</a></td>
+<td><div class="summary">
+Compares the current instance with another object of the same type and
+returns an integer that indicates whether the current instance precedes,
+follows, or occurs in the same position in the sort order as the other
+object.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="98443d23-bbb3-7d5a-c5f7-bda692d0ed6a.htm">Equals(KnxAddress)</a></td>
+<td><div class="summary">
+Indicates whether the current object is equal to another object of the
+same type.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="3ef65883-3a5a-55d8-987f-c2bf0f054a01.htm">Equals(Object)</a></td>
+<td><div class="summary">
+Indicates whether this instance and a specified object are equal.
+</div>
+(Overrides <span class="nolink">ValueType<span
+id="LSTC641198A_0"></span></span>
+Equals(Object).)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="434bb3c5-f8fa-5ba6-1243-a3f0133f62d7.htm">GetBytes</a></td>
+<td><div class="summary">
+Gets the address as bytes in network order
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="841c56be-a182-5c98-d90e-f64553f4c6a9.htm">GetHashCode</a></td>
+<td><div class="summary">
+Returns the hash code for this instance.
+</div>
+(Overrides <span class="nolink">ValueType<span
+id="LSTC641198A_1"></span></span>
+GetHashCode<span id="LSTC641198A_2"></span>
+.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">GetType</span></td>
+<td><div class="summary">
+Gets the <span class="nolink">Type</span> of the current instance.
+</div>
+(Inherited from <span class="nolink">Object</span>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="c78c1ee2-8711-e585-5089-efb515fa9bde.htm">ToString</a></td>
+<td><div class="summary">
+Returns the fully qualified type name of this instance.
+</div>
+(Overrides <span class="nolink">ValueType<span
+id="LSTC641198A_3"></span></span>
+ToString<span id="LSTC641198A_4"></span>
+.)</td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID5RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID5RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID5RBToggle"
+class="collapseToggle" />Operators</span>
+
+<table id="operatorList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="e7d9960e-ecb1-80f1-d48e-04d5061337da.htm">Equality</a></td>
+<td><div class="summary">
+Implements the operator == (equals).
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="ececaf43-2279-42a0-eaaa-4497e9fc11a7.htm"><span
+id="LSTC641198A_5"></span></a>
+(KnxAddress to GroupAddress)</td>
+<td><div class="summary">
+Performs an explicit conversion from <span
+class="selflink">KnxAddress</span> to <a
+href="0ffb286f-6b36-38cf-1840-0b7b53633047.htm">GroupAddress</a>.
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="2f916499-9bc0-bf6e-27f9-c4863b16f41a.htm"><span
+id="LSTC641198A_6"></span></a>
+(KnxAddress to IndividualAddress)</td>
+<td><div class="summary">
+Performs an explicit conversion from <span
+class="selflink">KnxAddress</span> to <a
+href="96a1c930-0f99-d67e-b5de-24b4e417e173.htm">IndividualAddress</a>.
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="caeaf8ea-075a-b8fe-6cf8-3a9b2d97525b.htm"><span
+id="LSTC641198A_7"></span></a>
+(GroupAddress to KnxAddress)</td>
+<td><div class="summary">
+Performs an implicit conversion from <a
+href="0ffb286f-6b36-38cf-1840-0b7b53633047.htm">GroupAddress</a> to
+<span class="selflink">KnxAddress</span>.
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="7cdd7ff5-3697-36bc-538e-27d264166d21.htm"><span
+id="LSTC641198A_8"></span></a>
+(IndividualAddress to KnxAddress)</td>
+<td><div class="summary">
+Performs an implicit conversion from <a
+href="96a1c930-0f99-d67e-b5de-24b4e417e173.htm">IndividualAddress</a> to
+<span class="selflink">KnxAddress</span>.
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="b1680887-fc3c-723a-2c22-5641df725a4a.htm"><span
+id="LSTC641198A_9"></span></a>
+(KnxAddress to UInt16)</td>
+<td><div class="summary">
+Performs an implicit conversion from <span
+class="selflink">KnxAddress</span> to <span
+class="nolink">UInt16</span>.
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="512488b9-a1fe-e9a6-2512-58ff4f193dc7.htm">Inequality</a></td>
+<td><div class="summary">
+Implements the operator != (not equal).
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID6RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID6RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID6RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[Knx.Falcon Namespace](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

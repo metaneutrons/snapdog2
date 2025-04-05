@@ -1,0 +1,226 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn">KnxDateTime Constructor (DateTime, Nullable<span
+id="LSTEFC1F592_0"></span>
+DayOfWeek<span id="LSTEFC1F592_1"></span>
+, Boolean, Nullable<span id="LSTEFC1F592_2"></span>
+Boolean<span id="LSTEFC1F592_3"></span>
+, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean)</td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Initializes a new instance of the
+[KnxDateTime](dc474438-1fdf-7ba7-210c-a794527c028e.htm) class.
+
+**Namespace:**
+ [Knx.Falcon.ApplicationData](0568debf-ec6f-5a30-5f9c-95b44ae4374c.htm)  
+**Assembly:**  Knx.Falcon.ApplicationData (in
+Knx.Falcon.ApplicationData.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public KnxDateTime(
+        DateTime dateTime,
+        DayOfWeek? dayOfWeek,
+        bool fault,
+        bool? workingDay,
+        bool yearValid,
+        bool monthAndDayValid,
+        bool dayOfWeekValid,
+        bool timeValid,
+        bool daylightSavingTime,
+        bool clockSyncSignal
+    )
+
+    Public Sub New ( 
+        dateTime As DateTime,
+        dayOfWeek As DayOfWeek?,
+        fault As Boolean,
+        workingDay As Boolean?,
+        yearValid As Boolean,
+        monthAndDayValid As Boolean,
+        dayOfWeekValid As Boolean,
+        timeValid As Boolean,
+        daylightSavingTime As Boolean,
+        clockSyncSignal As Boolean
+    )
+
+    public:
+    KnxDateTime(
+        DateTime dateTime, 
+        Nullable<DayOfWeek> dayOfWeek, 
+        bool fault, 
+        Nullable<bool> workingDay, 
+        bool yearValid, 
+        bool monthAndDayValid, 
+        bool dayOfWeekValid, 
+        bool timeValid, 
+        bool daylightSavingTime, 
+        bool clockSyncSignal
+    )
+
+    new : 
+            dateTime : DateTime * 
+            dayOfWeek : Nullable<DayOfWeek> * 
+            fault : bool * 
+            workingDay : Nullable<bool> * 
+            yearValid : bool * 
+            monthAndDayValid : bool * 
+            dayOfWeekValid : bool * 
+            timeValid : bool * 
+            daylightSavingTime : bool * 
+            clockSyncSignal : bool -> KnxDateTime
+
+#### Parameters
+
+<span class="parameter">dateTime</span>  
+Type: <span class="nolink">System<span id="LSTEFC1F592_4"></span></span>
+
+DateTime  
+The date and time information
+
+<span class="parameter">dayOfWeek</span>  
+Type: <span class="nolink">System<span id="LSTEFC1F592_5"></span></span>
+
+Nullable<span id="LSTEFC1F592_6"></span>
+
+<span class="nolink">DayOfWeek</span><span id="LSTEFC1F592_7"></span>
+
+  
+The weekday information,
+<span class="keyword"><span id="LSTEFC1F592_8"></span></span>
+
+for "any day".
+
+<span class="parameter">fault</span>  
+Type: <span class="nolink">System<span id="LSTEFC1F592_9"></span></span>
+
+Boolean  
+<span class="keyword"><span id="LSTEFC1F592_10"></span></span>
+
+for Normal operation,
+<span class="keyword"><span id="LSTEFC1F592_11"></span></span>
+
+for Fault
+
+<span class="parameter">workingDay</span>  
+Type: <span class="nolink">System<span id="LSTEFC1F592_12"></span></span>
+
+Nullable<span id="LSTEFC1F592_13"></span>
+
+<span class="nolink">Boolean</span><span id="LSTEFC1F592_14"></span>
+
+  
+<span class="keyword"><span id="LSTEFC1F592_15"></span></span>
+
+is this is a bank holiday,
+<span class="keyword"><span id="LSTEFC1F592_16"></span></span>
+
+is this is a working day,
+<span class="keyword"><span id="LSTEFC1F592_17"></span></span>
+
+if this information is not available.
+
+<span class="parameter">yearValid</span>  
+Type: <span class="nolink">System<span id="LSTEFC1F592_18"></span></span>
+
+Boolean  
+<span class="keyword"><span id="LSTEFC1F592_19"></span></span>
+
+if the <span class="nolink">Year</span> part of
+<span class="parameter">dateTime</span> is valid.
+
+<span class="parameter">monthAndDayValid</span>  
+Type: <span class="nolink">System<span id="LSTEFC1F592_20"></span></span>
+
+Boolean  
+<span class="keyword"><span id="LSTEFC1F592_21"></span></span>
+
+if the <span class="nolink">Month</span> and
+<span class="nolink">Day</span> parts of
+<span class="parameter">dateTime</span> are valid.
+
+<span class="parameter">dayOfWeekValid</span>  
+Type: <span class="nolink">System<span id="LSTEFC1F592_22"></span></span>
+
+Boolean  
+<span class="keyword"><span id="LSTEFC1F592_23"></span></span>
+
+if the <span class="parameter">dayOfWeek</span> is valid.
+
+<span class="parameter">timeValid</span>  
+Type: <span class="nolink">System<span id="LSTEFC1F592_24"></span></span>
+
+Boolean  
+<span class="keyword"><span id="LSTEFC1F592_25"></span></span>
+
+if the <span class="nolink">TimeOfDay</span> part of
+<span class="parameter">dateTime</span> is valid.
+
+<span class="parameter">daylightSavingTime</span>  
+Type: <span class="nolink">System<span id="LSTEFC1F592_26"></span></span>
+
+Boolean  
+<span class="keyword"><span id="LSTEFC1F592_27"></span></span>
+
+for Standard time,
+<span class="keyword"><span id="LSTEFC1F592_28"></span></span>
+
+for Daylight Saving Time
+
+<span class="parameter">clockSyncSignal</span>  
+Type: <span class="nolink">System<span id="LSTEFC1F592_29"></span></span>
+
+Boolean  
+<span class="keyword"><span id="LSTEFC1F592_30"></span></span>
+
+if the clock has an external clock signal.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[KnxDateTime Class](dc474438-1fdf-7ba7-210c-a794527c028e.htm)
+
+[KnxDateTime Overload](09b6971f-3a99-f0f6-3869-81c25ec98260.htm)
+
+[Knx.Falcon.ApplicationData
+Namespace](0568debf-ec6f-5a30-5f9c-95b44ae4374c.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

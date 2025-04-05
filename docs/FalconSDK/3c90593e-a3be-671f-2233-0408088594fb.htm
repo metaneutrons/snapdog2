@@ -1,0 +1,132 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn">KnxBus<span id="LSTF721BC1E_0"></span>
+WriteIoTGroupValueAsync Method</td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Writes a group value to the bus with the specified priority.
+
+**Namespace:**
+ [Knx.Falcon.Sdk](ddc84507-eccd-b692-8467-e3956feec382.htm)  
+**Assembly:**  Knx.Falcon.Sdk (in Knx.Falcon.Sdk.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public Task WriteIoTGroupValueAsync(
+        GroupAddress groupAddress,
+        GroupId groupId,
+        IoTGroupValue value
+    )
+
+    Public Function WriteIoTGroupValueAsync ( 
+        groupAddress As GroupAddress,
+        groupId As GroupId,
+        value As IoTGroupValue
+    ) As Task
+
+    public:
+    Task^ WriteIoTGroupValueAsync(
+        GroupAddress groupAddress, 
+        GroupId groupId, 
+        IoTGroupValue^ value
+    )
+
+    member WriteIoTGroupValueAsync : 
+            groupAddress : GroupAddress * 
+            groupId : GroupId * 
+            value : IoTGroupValue -> Task 
+
+#### Parameters
+
+<span class="parameter">groupAddress</span>  
+Type: [Knx.Falcon<span id="LSTF721BC1E_1"></span>](0ffb286f-6b36-38cf-1840-0b7b53633047.htm)
+
+GroupAddress  
+The group address
+
+<span class="parameter">groupId</span>  
+Type: [Knx.Falcon<span id="LSTF721BC1E_2"></span>](9fa78920-8b5f-95a7-71ef-e71ab17fde03.htm)
+
+GroupId  
+Group Id for which to send the request, e.g. this may be the group id
+specified for a certain IoT line. This groupId will be automatically
+added to the list of observed GroupIds
+([ObserveIoTGroupIdsAsync(IEnumerable<span id="LSTF721BC1E_3"></span>](c02b6db6-2f1f-fb17-a5c5-fb040bc44cc6.htm)
+
+GroupId<span id="LSTF721BC1E_4"></span>
+
+)).
+
+<span class="parameter">value</span>  
+Type: [Knx.Falcon<span id="LSTF721BC1E_5"></span>](97b60e61-57d5-649c-0edd-2b2d9a73c802.htm)
+
+IoTGroupValue  
+The value to write
+
+#### Return Value
+
+Type: <span class="nolink">Task</span>  
+
+\[Missing &lt;returns&gt; documentation for
+"M:Knx.Falcon.Sdk.KnxBus.WriteIoTGroupValueAsync(Knx.Falcon.GroupAddress,Knx.Falcon.GroupId,Knx.Falcon.IoTGroupValue)"\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Remarks</span>
+
+This method is only usable when connected to the IoT connector
+([IoTConnectorParameters](66782dde-4a8c-a94b-5671-a7573e49e223.htm)).
+
+Important: before calling any of the IoTGroup methods, all group keys
+must be registered in
+[GroupCommunicationSecurity](20dcc0af-1ec0-c4ee-7aab-94d67f39375c.htm),
+e.g. by loading a keyring file.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[KnxBus Class](ada1239a-6384-eadd-a0d4-263e34da83f7.htm)
+
+[Knx.Falcon.Sdk Namespace](ddc84507-eccd-b692-8467-e3956feec382.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

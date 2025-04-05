@@ -1,0 +1,83 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="knx-application-layer-data">KNX
+Application-Layer Data</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Falcon SDK provides a rich set of conversion facilities for most of the
+standardized KNX datapoint types and property data types.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Conversion</span>
+
+Within the Falcon API, group values are represented as
+[GroupValue](cfefd12c-88f9-89e7-b457-f55df2d98718.htm) objects, and
+interface object property values simply as byte arrays. The semantics of
+these values is given implicitly by the datapoint type (DPT) / property
+data type (PDT) meta data. The conversion facilities in the
+[Knx.Falcon.ApplicationData](0568debf-ec6f-5a30-5f9c-95b44ae4374c.htm)
+namespace allow co easily convert this internal representation to data
+types more suitable for representing the values.
+
+The implementation relies of the data provided in the knx\_master.xml
+file (in schema version 2.3) which therefore must be present in either
+%commonappdata%/KNX/XML/project-23 (%localappdata% usually maps to
+C:\ProgramData on Windows and /usr/share on Linux and macOS) or the
+application base directory. If both are present, the one with the higher
+version is used.
+
+#### Datapoint types (DPT)
+
+A rich set of DPT converters (classes derived from
+[DptBase](815b65b3-3f60-ad3b-5e2d-334360e73f2d.htm)) allow to convert
+between [GroupValue](cfefd12c-88f9-89e7-b457-f55df2d98718.htm) and the
+canonical data type suitable for representing the semantic meaning.
+
+The converter may either be instantiated directly (e.g. as
+<span class="code">new Dpt6()</span>, or better by using one of the
+factory methods in
+[DptFactory](094b4984-5cba-dd2f-23d9-2ac3c96d5729.htm).
+
+#### Property data types (PDT)
+
+A rich set of PDT converters (classes derived from
+[PdtBase](f234e59f-8a32-153a-47ab-39626909c11b.htm)) allow to convert
+between the raw byte array and the canonical data type suitable for
+representing the semantic meaning.
+
+The converter may either be instantiated directly (e.g. as
+<span class="code">new PdtDouble()</span>, or better by using one of the
+factory methods in
+[PdtFactory](2119053a-fbdc-b1be-7f72-a46e2291e10d.htm).
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Generic editing helpers</span>
+
+The .NET framework supports implementation of generic editors by the
+<span class="media">![External Link](../media/ExternalLink.png)</span><a
+href="https://docs.microsoft.com/en-us/dotnet/api/system.componentmodel.typedescriptor"
+target="_blank" rel="noopener noreferrer">TypeDescriptor</a>
+infrastructure. The
+[KnxEditableValue](611e2410-d141-3d27-fa1d-5a0c3312debd.htm) class is a
+wrapper class cooperating with the [DPT converters](#DPT) providing this
+feature.
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

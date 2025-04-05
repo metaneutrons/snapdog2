@@ -1,0 +1,84 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="knx-group-communication">KNX Group
+Communication</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Falcon SDK allows to communicate with the KNX installation using group
+messages.
+
+Each runtime function in KNX is identified by its
+[GroupAddress](0ffb286f-6b36-38cf-1840-0b7b53633047.htm). There are
+three services (Write\_Group\_Value, Read\_Group\_Value,
+Respond\_Group\_Value) using group addresses which are all supported by
+Falcon both for sending and receiving.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Optional section title</span>
+
+Add one or more sections with content
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Security</span>
+
+Add one or more sections with content
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Group Values</span>
+
+On the bus, group values are raw, untyped bit streams. KNX messages
+represent short values (up to 6 bits) in a different, more compact
+format.
+
+For interoperability, different <span class="term">datapoint
+types</span> (DPT) are defined in the KNX Handbook (chapter "3/7/2
+Datapoint Types"). Falcon contains [DPT
+Converters](fb3cf115-c09e-4dc4-8782-69654a7ac5e3.htm#DPT) to easily
+translate between raw bits and types more suitable for handling in
+applications.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />RF Multi</span>
+
+If Falcon is connected to the installation via an RF Multi USB
+interface, the necessary information about channels and acknowledge
+slots needs to be configured.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID4RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID4RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID4RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Other Resources
+
+[Communicate via Group
+Messages](9f0274e4-5698-4a60-87af-5da04a4e4401.htm)
+
+[KNX Application-Layer Data](fb3cf115-c09e-4dc4-8782-69654a7ac5e3.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

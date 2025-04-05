@@ -1,0 +1,88 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="discover-usb-interfaces">Discover USB
+Interfaces</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+The [UsbDeviceDiscovery](878be22e-9b20-50f2-3287-9d5dedf1827a.htm) class
+allows to discover the currently attached USB devices.
+
+### Discover attached USB interfaces
+
+1.  Call
+    [GetAttachedUsbDevices](feded26f-c529-fd31-0102-ad0c60eb19d8.htm) to
+    enumerate USB devices.
+
+2.  The enumerated
+    [UsbDeviceDiscoveryResult](e3caec7e-c518-4e30-d834-39b8d1495fc7.htm)
+    objects can be used to display a list in the UI.
+
+    It is also possible to create a
+    [UsbConnectorParameters](e5991e63-a99c-66cc-c91f-b3c025475d42.htm)
+    object or the equivalent connection string from it.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Example</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDAFAAA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDAFAAA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDAFAAA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDAFAAA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDAFAAA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDAFAAA&#39;);return false;"
+title="Copy">Copy</a>
+
+    foreach (var usb in KnxBus.GetAttachedUsbDevices())
+    {
+        Console.WriteLine(usb);
+
+        // convert to a connection string
+        var connectionString = usb.ToConnectionString();
+        Console.WriteLine(connectionString);
+
+        // or directly to a USBConnectorParameters object
+        var connectorParameter = UsbConnectorParameters.FromDiscovery(usb);
+    }
+
+    For Each usb In KnxBus.GetAttachedUsbDevices()
+        Console.WriteLine(usb)
+
+        ' convert to a connection string
+        Dim connectionString = usb.ToConnectionString()
+        Console.WriteLine(connectionString)
+
+        ' or directly to a USBConnectorParameters object
+        Dim connectorParameter = UsbConnectorParameters.FromDiscovery(usb)
+    Next
+
+No code example is currently available or this language may not be
+supported.
+
+    KnxBus.GetAttachedUsbDevices() 
+        |> Seq.map(fun usb -> usb.ToConnectionString())
+        |> Seq.iter(printf "%s")
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

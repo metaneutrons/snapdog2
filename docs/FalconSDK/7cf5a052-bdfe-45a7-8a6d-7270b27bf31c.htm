@@ -1,0 +1,131 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="discover-ip-devices">Discover IP
+Devices</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+The [IpDeviceDiscovery](44392259-70db-c441-6184-88c3c14c7564.htm) class
+allows to discover the currently reachable KNXnet/IP devices.
+
+### Discover IP devices
+
+1.  Construct a
+    [IpDeviceDiscovery](44392259-70db-c441-6184-88c3c14c7564.htm)
+    object. If multiple networks are available, you may restrict the
+    networks where IP devices shall be searched by using the relevant
+    constructor.
+
+2.  Optionally, set the properties of the
+    [IpDeviceDiscovery](44392259-70db-c441-6184-88c3c14c7564.htm) object
+    to specify details of the search process (e.g. the TTL to use).
+
+3.  Call [DiscoverAsync](6c502c09-cd9b-8701-f650-d39ff8f19f7f.htm) to
+    start enumerating KNXnet/IP devices. Note that the result is an
+    <span class="media">![External
+    Link](../media/ExternalLink.png)</span><a
+    href="https://docs.microsoft.com/en-us/dotnet/csharp/tutorials/generate-consume-asynchronous-stream"
+    target="_blank" rel="noopener noreferrer">"async stream"</a>, i.e.
+    the enumeration is done asynchronously.
+
+4.  The enumerated
+    [IpDeviceDiscoveryResult](b1e74f6b-227b-8225-b03b-98afbf18d090.htm)
+    objects can be used to display a list in the UI.
+
+    It is also possible to create a
+    [IpTunnelingConnectorParameters](4305d8f0-2c63-674a-cad7-aa0046c8ae3d.htm)
+    or
+    [IpDeviceManagementConnectorParameters](8904df95-0e73-fe8c-9db8-435ab3005170.htm)
+    object or the equivalent connection string from it. Be sure to check
+    the supported services first, so do not try to construct an
+    IpTunnelingConnectorParameters object if the device does not support
+    tunneling services.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Example</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDAFAAA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDAFAAA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDAFAAA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDAFAAA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDAFAAA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDAFAAA&#39;);return false;"
+title="Copy">Copy</a>
+
+    // ---- C# 8.0 ----
+    var discovery = new IpDeviceDiscovery();
+    await foreach (var ip in KnxBus.DiscoverIpDevicesAsync())
+    {
+        Console.WriteLine(ip);
+
+        // convert to a connection string
+        var connectionString = ip.ToConnectionString();
+        Console.WriteLine(connectionString);
+
+        // or directly to a IPTunnelingConnectorParameters object
+        if (ip.Supports(ServiceFamily.Tunneling, 1))
+        {
+            var connectorParameter = IpTunnelingConnectorParameters.FromDiscovery(ip);
+        }
+    }
+
+    // ---- C# < 8.0 ----
+    await Async.ForEach(discovery.DiscoverAsync(CancellationToken.None), ip =>
+    {
+        Console.WriteLine(ip);
+
+        // convert to a connection string
+        var connectionString = ip.ToConnectionString();
+        Console.WriteLine(connectionString);
+
+        // or directly to a IPTunnelingConnectorParameters object
+        if (ip.Supports(ServiceFamily.Tunneling, 1))
+        {
+            var connectorParameter = IpTunnelingConnectorParameters.FromDiscovery(ip);
+        }
+    });
+
+    Dim discovery = New IpDeviceDiscovery()
+    Await Async.ForEach(KnxBus.DiscoverIpDevicesAsync(),
+                        Sub(ip)
+                            Console.WriteLine(ip)
+
+                            ' convert to a connection string
+                            Dim connectionString = ip.ToConnectionString()
+                            Console.WriteLine(connectionString)
+
+                            ' or directly to a USBConnectorParameters object
+                            If ip.Supports(ServiceFamily.Tunneling, 1) Then
+                                Dim connectorParameter = IpTunnelingConnectorParameters.FromDiscovery(ip)
+                            End If
+                        End Sub)
+
+No code example is currently available or this language may not be
+supported.
+
+No code example is currently available or this language may not be
+supported.
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

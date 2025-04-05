@@ -1,0 +1,104 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="connection-lifetime">Connection
+Lifetime</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Connection Lifetime
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />The KnxBus object</span>
+
+The [KnxBus](ada1239a-6384-eadd-a0d4-263e34da83f7.htm) object represents
+a specific connection to the bus.
+
+#### Configure
+
+All configuration information for a connection (i.e. the type of the
+connection and any type-dependent parameters) are contained in one of
+the classes derived from
+[ConnectorParameters](a00d43d8-ca1f-e911-2f70-bea37d855086.htm).
+
+For easy persistence (e.g. in configuration settings), this information
+can be transformed to a Connection String using
+[ToConnectionString](1b43f4fc-9170-f6e4-af32-2426730a1166.htm) and
+re-created from it using
+[FromConnectionString](0db86bbe-ca1b-b5f2-f5a2-cbc12dc39df6.htm).
+
+The currently available connections may be discovered using the
+[UsbDeviceDiscovery](878be22e-9b20-50f2-3287-9d5dedf1827a.htm) and
+[IpDeviceDiscovery](44392259-70db-c441-6184-88c3c14c7564.htm) classes.
+
+#### Connect
+
+After constructing the
+[KnxBus](ada1239a-6384-eadd-a0d4-263e34da83f7.htm), it has to be
+connected using
+[ConnectAsync](84578e5d-5ed7-9ded-4f79-45200d7d76d7.htm).
+
+For environments not supporting asynchronous methods, the blocking
+[Connect](8bf67014-2988-d208-11f7-2fb1b1865e7f.htm) method is provided.
+
+#### Connection State
+
+After a successful connect, the property
+[ConnectionState](9d3409e5-8dee-07b2-979e-ed3595b9787b.htm) will be
+[Connected](6773bb88-ea02-01c0-cb2b-1b2288f93ae5.htm).
+
+If Falcon detects a problem with the connection,
+[ConnectionState](9d3409e5-8dee-07b2-979e-ed3595b9787b.htm) will change
+to [Broken](6773bb88-ea02-01c0-cb2b-1b2288f93ae5.htm) (connection to the
+interface broken) or
+[MediumFailure](6773bb88-ea02-01c0-cb2b-1b2288f93ae5.htm) (problem with
+the connection from the interface to the KNX medium). This state change
+will be reported by the
+[ConnectionStateChanged](b3acc3ab-545c-5f57-e7c9-d5866132c19a.htm)
+event.
+
+What happens if the
+[ConnectionState](9d3409e5-8dee-07b2-979e-ed3595b9787b.htm) is
+[Broken](6773bb88-ea02-01c0-cb2b-1b2288f93ae5.htm) depends on the
+[AutoReconnect](7fcdd66f-ddee-1cf5-07a9-be75886db28d.htm) property of
+the connection configuration. If <span class="code">true</span>, Falcon
+tries to re-establish the connection and when this succeeds sets the
+connection state to
+[Connected](6773bb88-ea02-01c0-cb2b-1b2288f93ae5.htm) again (this change
+is also reported by the reported by the
+[ConnectionStateChanged](b3acc3ab-545c-5f57-e7c9-d5866132c19a.htm)
+event). If <span class="code">false</span>, the
+[KnxBus](ada1239a-6384-eadd-a0d4-263e34da83f7.htm) object has to be
+re-created and re-connected by the client.
+
+#### Clean-up
+
+It is important to properly clean up a connection when no longer needed.
+Without this, operating system resources might not get release. Even
+more important, the interface hardware will not be properly
+de-initialized and will not be available for other use unless some
+timeouts expire.
+
+To release a [KnxBus](ada1239a-6384-eadd-a0d4-263e34da83f7.htm) object,
+call the [DisposeAsync](92e532d3-a6d7-b715-206f-a193d302cd19.htm)
+method. If the [KnxBus](ada1239a-6384-eadd-a0d4-263e34da83f7.htm) object
+is used only within a single method, the C# 8.0
+<span class="media">![External Link](../media/ExternalLink.png)</span><a
+href="https://docs.microsoft.com/en-us/dotnet/api/system.iasyncdisposable"
+target="_blank" rel="noopener noreferrer">await using</a> syntax comes
+in handy.
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

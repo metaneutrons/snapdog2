@@ -1,0 +1,200 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1
+id="configurationflags-enumeration">ConfigurationFlags
+Enumeration</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Information flags that determine which operations may be performed on a
+certain group object.
+
+They are written by the management client to the device and stored in
+the group object table. they determine the behaviour of the respective
+devices.
+
+**Namespace:**
+ [Knx.Falcon.IoT](77c5abf9-f1d0-343a-2fc0-68ccbbf9a056.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    [FlagsAttribute]
+    public enum ConfigurationFlags
+
+    <FlagsAttribute>
+    Public Enumeration ConfigurationFlags
+
+    [FlagsAttribute]
+    public enum class ConfigurationFlags
+
+    [<FlagsAttribute>]
+    type ConfigurationFlags
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Members</span>
+
+<table id="enumMemberList" class="members">
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Member name</th>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.IoT.ConfigurationFlags.None"><span
+class="selflink">None</span></td>
+<td>0</td>
+<td>No operations can be performed on the group object</td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.IoT.ConfigurationFlags.Read"><span
+class="selflink">Read</span></td>
+<td>8</td>
+<td>Determines whether the group object may be read.
+<p>Depending on whether or not the flag is set the following behaviour
+is possible:</p>
+<ul>
+<li><span class="code">false</span> = Group Object value can
+<strong>not</strong> be read.</li>
+<li><span class="code">true</span> = When a read command to the Group
+Object occurs, the device responds with the value of this Group
+Object.</li>
+</ul></td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.IoT.ConfigurationFlags.Write"><span
+class="selflink">Write</span></td>
+<td>16</td>
+<td>Determines whether the group object may be written to.
+<p>Depending on whether or not the flag is set the following behaviour
+is possible:</p>
+<ul>
+<li><span class="code">false</span> = Group Object value can
+<strong>not</strong> be written.</li>
+<li><span class="code">true</span> = When a read command to the Group
+Object occurs, the device responds with the value of this Group
+Object.</li>
+</ul></td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.IoT.ConfigurationFlags.Initialize"><span
+class="selflink">Initialize</span></td>
+<td>32</td>
+<td>Determines whether the group object may be read after
+initialization.
+<p>Depending on whether or not the flag is set the following behaviour
+is possible:</p>
+<ul>
+<li><span class="code">false</span> = Group Object value can
+<strong>not</strong> be read after initialization.</li>
+<li><span class="code">true</span> = Group Object read request after
+initialization (e.g., power up) are permitted.<br />
+To get a response the r-Flag on the producer side is expected to be r =
+true.</li>
+</ul></td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.IoT.ConfigurationFlags.Transmit"><span
+class="selflink">Transmit</span></td>
+<td>64</td>
+<td>Determines whether the group object may be transmitted.
+<p>Depending on whether or not the flag is set the following behaviour
+is possible:</p>
+<ul>
+<li><span class="code">false</span> = Group Object value is
+<strong>not</strong> transmitted.</li>
+<li><span class="code">true</span> = In the case of CoV, an event or
+heartbeat, the device sends its Group Object value.<br />
+This is the default behaviour for outputs such as sensors (e.g. a push
+button).</li>
+</ul></td>
+</tr>
+<tr>
+<td></td>
+<td target="F:Knx.Falcon.IoT.ConfigurationFlags.Update"><span
+class="selflink">Update</span></td>
+<td>128</td>
+<td>Determines whether the group object may updated.
+<p>Depending on whether or not the flag is set the following behaviour
+is possible:</p>
+<ul>
+<li><span class="code">false</span> = Group Object value is
+<strong>not</strong> updated.</li>
+<li><span class="code">true</span> = The Group Object value is updated
+with a group value response message if the flag Write = <span
+class="code">true</span>.</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />Remarks</span>
+
+Note that the Communication Flag = 4 is not used in IoT since it is a
+logical disjunction of the other Flags.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID4RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID4RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID4RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[Knx.Falcon.IoT Namespace](77c5abf9-f1d0-343a-2fc0-68ccbbf9a056.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

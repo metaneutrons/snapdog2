@@ -1,0 +1,169 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1
+id="oscoreencryptionsettings-enumeration">OscoreEncryptionSettings
+Enumeration</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Options for influencing the way the OSCORE message is encrypted.
+
+**Namespace:**
+ [Knx.Falcon.IoT.Stack.Oscore.Utility](72ec55f4-df7c-df2d-439e-0b9f145b0176.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    [FlagsAttribute]
+    public enum OscoreEncryptionSettings
+
+    <FlagsAttribute>
+    Public Enumeration OscoreEncryptionSettings
+
+    [FlagsAttribute]
+    public enum class OscoreEncryptionSettings
+
+    [<FlagsAttribute>]
+    type OscoreEncryptionSettings
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />Members</span>
+
+<table id="enumMemberList" class="members">
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Member name</th>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.IoT.Stack.Oscore.Utility.OscoreEncryptionSettings.None"><span
+class="selflink">None</span></td>
+<td>0</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.IoT.Stack.Oscore.Utility.OscoreEncryptionSettings.OmitKeyIdentifier"><span
+class="selflink">OmitKeyIdentifier</span></td>
+<td>1</td>
+<td>Indicates that the Response should be sent without the kid field in
+the oscore option</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.IoT.Stack.Oscore.Utility.OscoreEncryptionSettings.OmitKeyIdentifierContext"><span
+class="selflink">OmitKeyIdentifierContext</span></td>
+<td>2</td>
+<td>Indicates that the Message should be sent without the kid_context
+field in the oscore option</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.IoT.Stack.Oscore.Utility.OscoreEncryptionSettings.OmitPartialIv"><span
+class="selflink">OmitPartialIv</span></td>
+<td>4</td>
+<td>Indicates that the Message should be sent without the partial IV
+field in the oscore option</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.IoT.Stack.Oscore.Utility.OscoreEncryptionSettings.UseRequestAeadNonce"><span
+class="selflink">UseRequestAeadNonce</span></td>
+<td>12</td>
+<td>Indicates that the encryption of the response should reuse the
+request AEAD Nonce
+<div class="collapsibleAreaRegion">
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse(&#39;ID2RB&#39;)"
+onkeypress="SectionExpandCollapse_CheckKey(&#39;ID2RB&#39;, event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Remarks</span>
+</div>
+<div id="ID2RBSection" class="collapsibleSection">
+Note: This will always result in the Partial IV also being omitted.
+</div></td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.IoT.Stack.Oscore.Utility.OscoreEncryptionSettings.StrictHostAndUriProcessing"><span
+class="selflink">StrictHostAndUriProcessing</span></td>
+<td>16</td>
+<td>Indicates that Strict Host and URI processing is necessary (requires
+providing the destination endpoint)</td>
+</tr>
+<tr>
+<td></td>
+<td
+target="F:Knx.Falcon.IoT.Stack.Oscore.Utility.OscoreEncryptionSettings.DoNotIncrementSenderSequenceNumber"><span
+class="selflink">DoNotIncrementSenderSequenceNumber</span></td>
+<td>32</td>
+<td>Indicates that the Sender Sequence Number Should not be
+incremented</td>
+</tr>
+</tbody>
+</table>
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID4RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID4RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID4RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[Knx.Falcon.IoT.Stack.Oscore.Utility
+Namespace](72ec55f4-df7c-df2d-439e-0b9f145b0176.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

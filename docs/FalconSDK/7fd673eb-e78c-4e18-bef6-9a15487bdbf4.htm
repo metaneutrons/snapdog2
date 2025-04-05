@@ -1,0 +1,204 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1
+id="usbconnectorparameters-properties">UsbConnectorParameters
+Properties</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+The [UsbConnectorParameters](e5991e63-a99c-66cc-c91f-b3c025475d42.htm)
+type exposes the following members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Properties</span>
+
+<table id="propertyList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="7fcdd66f-ddee-1cf5-07a9-be75886db28d.htm">AutoReconnect</a></td>
+<td><div class="summary">
+When set to <span class="keyword"><span
+id="LST9B01E094_0"></span></span>
+, Falcon tries to re-establish a broken connection cyclically. Default
+value: <span class="keyword"><span id="LST9B01E094_1"></span></span>
+.
+</div>
+(Inherited from <a
+href="a00d43d8-ca1f-e911-2f70-bea37d855086.htm">ConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="fefecde0-ced9-b326-6a15-10374f2fc4fa.htm">DevicePath</a></td>
+<td><div class="summary">
+The device (HID) path to open. Default value: <span
+class="keyword"><span id="LST9B01E094_2"></span></span>
+.
+</div></td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="d7e36e27-46ed-f990-2b51-9b7313ca8557.htm">IsSecure</a></td>
+<td><div class="summary">
+Gets a value indicating if transport security is actually used (only for
+<a
+href="aa3cdbe5-ff2c-32b3-ce3d-ced14b71157a.htm">IpRoutingConnectorParameters</a>,
+<a
+href="4305d8f0-2c63-674a-cad7-aa0046c8ae3d.htm">IpTunnelingConnectorParameters</a>,
+and <a
+href="8904df95-0e73-fe8c-9db8-435ab3005170.htm">IpDeviceManagementConnectorParameters</a>)
+</div>
+(Inherited from <a
+href="a00d43d8-ca1f-e911-2f70-bea37d855086.htm">ConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="1b024cac-92e3-434a-e6cd-48bcf0f36a8f.htm">KnxManufacturerId</a></td>
+<td><div class="summary">
+The KNX Manufacturer Id read from knx_interfaces.xml (informative). May
+be <span class="keyword"><span id="LST9B01E094_3"></span></span>
+.
+</div></td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="4bf73440-af33-299f-96e4-06a27570a63d.htm">Name</a></td>
+<td><div class="summary">
+Gets or sets the name of the interface (informative). Default value:
+<span class="keyword"><span id="LST9B01E094_4"></span></span>
+.
+</div>
+(Inherited from <a
+href="a00d43d8-ca1f-e911-2f70-bea37d855086.htm">ConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="dafdde8f-a87f-4eb4-23df-1e9c15703f1e.htm">PreferredAddressToOpen</a></td>
+<td><div class="summary">
+The preferred Individual Address to open. Default value: <span
+class="keyword"><span id="LST9B01E094_5"></span></span>
+.
+</div></td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="4a653407-14c9-9619-db02-6c42562f93d9.htm">PromiscuousMode</a></td>
+<td><div class="summary">
+Only for USB Busmon mode: When set to <span class="keyword"><span
+id="LST9B01E094_6"></span></span>
+, Falcon does not filter by domain address. Default value: <span
+class="keyword"><span id="LST9B01E094_7"></span></span>
+.
+</div>
+(Inherited from <a
+href="a00d43d8-ca1f-e911-2f70-bea37d855086.htm">ConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="ea7c2355-6e32-0e97-62e2-35f869a882f0.htm">RFMulti</a></td>
+<td><div class="summary">
+Indicates whether the KNX RF USB interface is configured as "KNX RF
+Multi" (<span class="keyword"><span id="LST9B01E094_8"></span></span>
+) or "KNX RF Ready" (<span class="keyword"><span
+id="LST9B01E094_9"></span></span>
+) or left unchanged (<span class="keyword"><span
+id="LST9B01E094_10"></span></span>
+). Default value: <span class="keyword"><span
+id="LST9B01E094_11"></span></span>
+.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="3b1c2517-947a-0d6a-cf97-4ee17d9b6175.htm">SerialNumber</a></td>
+<td><div class="summary">
+The preferred KNX serial number to open. Default value: <a
+href="44f0792f-441d-4c8f-4ece-24cff24b35b2.htm">None</a>.
+</div></td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="ecac272f-022b-9cfa-3c1b-53a997cfd2d7.htm">SupportsSecurity</a></td>
+<td><div class="summary">
+Gets a value indicating if this connector type supports transport
+security (routing and IP unicast connectors)
+</div>
+(Inherited from <a
+href="a00d43d8-ca1f-e911-2f70-bea37d855086.htm">ConnectorParameters</a>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="f9e76ba2-d616-b283-314a-37ad625ddd29.htm">Type</a></td>
+<td><div class="summary">
+Always returns <a
+href="05dec6a9-abcf-6b73-4f02-7df0119e2e7b.htm">Usb</a>, as this is the
+USB specific parameter class.
+</div>
+(Overrides <a
+href="22a22073-4dc2-16d3-45d4-695c6223c596.htm">ConnectorParameters<span
+id="LST9B01E094_12"></span></a>
+Type.)</td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[UsbConnectorParameters Class](e5991e63-a99c-66cc-c91f-b3c025475d42.htm)
+
+[Knx.Falcon.Configuration
+Namespace](8057f884-553e-ad7e-77ee-8d8d0f07a343.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

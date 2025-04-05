@@ -1,0 +1,50 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="perform-knx-network-management">Perform
+KNX Network Management</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+This section provides examples on how to perform KNX network management
+operations. See [KNX Network
+Management](86a4e1ab-ee86-441c-9bb5-4fc69e902e06.htm) for a general
+introduction.
+
+### How to check if an individual address can be reached
+
+1.  Create and connect a
+    [KnxBus](ada1239a-6384-eadd-a0d4-263e34da83f7.htm) object.
+
+2.  Use [GetNetworkAsync](e061680f-2469-45b2-51d2-7bba1fe95dc2.htm) to
+    get a [KnxNetwork](e64cdf86-a7cc-51aa-3acf-342bb005b0c5.htm) object.
+
+3.  Use
+    [PingIndividualAddressAsync](5c2a3646-80e0-9812-adc9-4f729e3f943c.htm)
+    to check if the address can be reached.
+
+4.  When done, don't forget to dispose the
+    [KnxNetwork](e64cdf86-a7cc-51aa-3acf-342bb005b0c5.htm) and
+    [KnxBus](ada1239a-6384-eadd-a0d4-263e34da83f7.htm) objects.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Other Resources
+
+[KNX Device Management](7a396799-e706-4295-8200-b8e27b2b70e6.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

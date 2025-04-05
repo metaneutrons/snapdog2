@@ -1,0 +1,169 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn">IIoTSecurityExtensions<span
+id="LSTF4161B42_0"></span>
+AuthenticateDeviceAsync Method</td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Use a password to establish a temporary secure connection that will then
+be used to write the given Tool Key to the IoT Device.
+
+After calling this method other methods can be used to configure the IoT
+device securely with messages encrypted using the provided tool key.
+
+**Namespace:**  [Knx.Falcon](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public static Task AuthenticateDeviceAsync(
+        this IIoTSecurity security,
+        string password,
+        Func<SecureKey, Task<SecureKey?>>? getNewToolKeyAfterSuccessfulPaseAsync,
+        IoTOperationToken token
+    )
+
+    <ExtensionAttribute>
+    Public Shared Function AuthenticateDeviceAsync ( 
+        security As IIoTSecurity,
+        password As String,
+        getNewToolKeyAfterSuccessfulPaseAsync As Func(Of SecureKey, Task(Of SecureKey)),
+        token As IoTOperationToken
+    ) As Task
+
+    public:
+    [ExtensionAttribute]
+    static Task^ AuthenticateDeviceAsync(
+        IIoTSecurity^ security, 
+        String^ password, 
+        Func<SecureKey^, Task<SecureKey^>^>^ getNewToolKeyAfterSuccessfulPaseAsync, 
+        IoTOperationToken token
+    )
+
+    [<ExtensionAttribute>]
+    static member AuthenticateDeviceAsync : 
+            security : IIoTSecurity * 
+            password : string * 
+            getNewToolKeyAfterSuccessfulPaseAsync : Func<SecureKey, Task<SecureKey>> * 
+            token : IoTOperationToken -> Task 
+
+#### Parameters
+
+<span class="parameter">security</span>  
+Type: [Knx.Falcon<span id="LSTF4161B42_1"></span>](a2c7b8a2-2736-d8dc-4d13-b4acfcb73f7f.htm)
+
+IIoTSecurity  
+IoT Security Object
+
+<span class="parameter">password</span>  
+Type: <span class="nolink">System<span id="LSTF4161B42_2"></span></span>
+
+String  
+Password which has been shared out of band.
+
+<span class="parameter">getNewToolKeyAfterSuccessfulPaseAsync</span>  
+Type: <span class="nolink">System<span id="LSTF4161B42_3"></span></span>
+
+Func<span id="LSTF4161B42_4"></span>
+
+[SecureKey](4d7955c2-4791-a72f-1e37-5757d7e5586c.htm),
+<span class="nolink">Task</span><span id="LSTF4161B42_5"></span>
+
+[SecureKey](4d7955c2-4791-a72f-1e37-5757d7e5586c.htm)<span id="LSTF4161B42_6"></span>
+
+<span id="LSTF4161B42_7"></span>
+
+  
+Function that is called upon a successful PASE (Password Authenticated
+Session Establishment). If desired it can provide a changed tool key.
+E.g. if the previously loaded tool key was associated with a past
+configuration and loaded to check if access is possible Then this
+callback might query the user and generate a new tool key or cancel
+depending on the feedback. A <span class="code">null</span> return value
+indicates that the present tool key should continue to be used. The
+passed parameter will be the key that has been negotiated during the
+SPAKE2+ sequence.
+
+<span class="parameter">token</span>  
+Type: [Knx.Falcon<span id="LSTF4161B42_8"></span>](5a5ed07c-3178-9b0e-ac93-a12aea609e34.htm)
+
+IoTOperationToken  
+A token for tracking and potentially aborting the current operation.
+
+#### Return Value
+
+Type: <span class="nolink">Task</span>  
+
+\[Missing &lt;returns&gt; documentation for
+"M:Knx.Falcon.IIoTSecurityExtensions.AuthenticateDeviceAsync(Knx.Falcon.IIoTSecurity,System.String,System.Func{Knx.Falcon.DataSecurity.SecureKey,System.Threading.Tasks.Task{Knx.Falcon.DataSecurity.SecureKey}},Knx.Falcon.IoTOperationToken)"\]
+
+#### Usage Note
+
+In Visual Basic and C#, you can call this method as an instance method
+on any object of type
+[IIoTSecurity](a2c7b8a2-2736-d8dc-4d13-b4acfcb73f7f.htm). When you use
+instance method syntax to call this method, omit the first parameter.
+For more information, see <a
+href="https://docs.microsoft.com/dotnet/visual-basic/programming-guide/language-features/procedures/extension-methods"
+target="_blank" rel="noopener noreferrer">Extension Methods (Visual
+Basic)</a> or <a
+href="https://docs.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/extension-methods"
+target="_blank" rel="noopener noreferrer">Extension Methods (C#
+Programming Guide)</a>.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Remarks</span>
+
+**Note:** Use [FromToolKey(SerialNumber, IoTAccessScope,
+SecureKey)](ec5b6ebc-ba51-7319-4c64-20f3c8bdbb12.htm) to get a tool key
+object.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[IIoTSecurityExtensions Class](cd52490c-21a6-61b3-bb99-2d43cbc7e3d2.htm)
+
+[Knx.Falcon Namespace](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

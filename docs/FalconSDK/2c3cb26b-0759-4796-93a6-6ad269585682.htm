@@ -1,0 +1,83 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="use-falcon-from-non-async-code">Use
+Falcon from non-async code</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+All Falcon methods involving I/O are provided as
+<span class="media">![External Link](../media/ExternalLink.png)</span><a
+href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/async"
+target="_blank" rel="noopener noreferrer">async</a> methods. This
+section describes some of your options if an existing application should
+be modified to use Falcon 6 and this application does not (yet) use the
+async pattern. Recommended reading for these aspects:
+<span class="media">![External Link](../media/ExternalLink.png)</span><a
+href="https://docs.microsoft.com/en-us/archive/msdn-magazine/2015/july/async-programming-brownfield-async-development"
+target="_blank" rel="noopener noreferrer">Async Programming - Brownfield
+Async Development</a>.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Option 1: Make relevant parts of your
+application async</span>
+
+This requires identifying those parts of your application this call
+Falcon code directly or indirectly up to the user interface and
+modifying or refactoring it to also use the async pattern.
+
+This is the technically better option but might be not possible due to
+the amount of required code changes.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Option 2: Use the synchronous alternative
+methods</span>
+
+The most used methods are provided also as synchronous method, e.g.
+[RequestGroupValue](b5a4e58c-6246-afe4-8952-92e666b85234.htm). This is
+just a shortcut to the option 3 described below and the same deadlock
+warning applies.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />Option 3: Wait for async methods to
+finish</span>
+
+This basically runs the async Falcon method and blocks until it is
+finished.
+
+Care must be taken to avoid deadlocks (your method waits for the Falcon
+method to finish and the Falcon method waits e.g. for the UI thread to
+be available in order to post progress information. The recommended
+approach to avoid deadlocks is what is described as "Thread Pool Hack"
+in the "Brownfield Async Development" paper linked above.
+
+Example: Read a group value and block until the response arrives:
+
+C#
+
+<a href="#" id="ID2EAAAABAAA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID2EAAAABAAA&#39;);return false;"
+title="Copy">Copy</a>
+
+    var value = Task.Run(() => bus.ReadGroupValueAsync("1/1/1")).GetAwaiter().GetResult();
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

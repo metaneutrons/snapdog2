@@ -1,0 +1,523 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="iotrecipient-class">IoTRecipient
+Class</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Entry in the Recipient table of a KNX IoT device.
+
+The recipient table fulfills the purpose of determining to which
+endpoints group messages shall be sent to.
+
+The required Information is:
+
+- [Id](d3dfac19-8f6b-4069-f443-bd0d721e1cef.htm) - ID of entry unique
+  with respect to the table
+- [GroupAddresses](7ee20d08-ce7d-8d18-e311-ab72517dde84.htm) - Group
+  Addresses for which to message the specified recipient
+
+And either of these can then be used to uniquely identify the recipient
+endpoint:
+
+- The [Url](862bcc91-9121-383e-1153-18e29aec630d.htm) - Defines a url
+  including IPv6 address and port to tell the device how to reach the
+  recipient.
+- The [IndividualAddress](d58b7c76-d1b6-47d7-b6aa-37f86ba60ded.htm) and
+  [InstallationId](93bb37ed-0303-8aa4-9cc7-dd51972f622e.htm) - Defines
+  the individual address and installation id of the target device which
+  the device can use to determine IPv6 address and port.
+
+Some additional configuration is possible such as making messages
+non-confirmable (see
+[NonConfirmable](d2c5fdf5-fc93-8157-8df6-c239655566da.htm)) or
+specifying the maximum amount of retransmissions (see
+[MaximumRetransmissions](3b9ccf00-264a-5a56-ab48-89b37b832cc0.htm)) or
+changing the the path used for group communication to something other
+than .knx (see [Path](e2ef41ff-91fd-3a85-352f-4f1579a951db.htm)).
+
+The following outlines the steps in which recipient tables are used:
+
+1.  **Checking the point value**
+
+    Check if one of the following situations have occurred:
+
+    - A Point value has changed **and** the elapsed time since the last
+      update is greater than the minimum repetition time.
+    - The elapsed time since the last update is greater than the
+      heartbeat
+
+2.  **Checking group object configuration flags**
+
+    The KNX IoT device checks the group object configuration flags to
+    see if the respective Point value shall be published.
+
+3.  **Checking recipient table items**
+
+    The KNX IoT device searches group object table items and Functional
+    Point recipient table items that have the same group address
+    configured.
+
+4.  **Send group message to recipient**
+
+    The KNX IoT device sends a group message to the network.
+
+5.  **Update the last sent time stamp**
+
+    If the message was sent to the network, then the device updates the
+    last sent time stamp.  
+    *This step is only applicable if heartbeat or minimum repetition
+    timeout can be configured.*
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Inheritance Hierarchy</span>
+
+<span class="nolink">System<span id="LSTE07D74C6_0"></span></span>
+
+Object  
+  <span class="selflink">Knx.Falcon<span id="LSTE07D74C6_1"></span></span>
+
+IoTRecipient  
+
+**Namespace:**  [Knx.Falcon](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID1EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID1EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public class IoTRecipient : IEquatable<IoTRecipient>, 
+        IObjectRepresentationSerializable
+
+    Public Class IoTRecipient
+        Implements IEquatable(Of IoTRecipient), IObjectRepresentationSerializable
+
+    public ref class IoTRecipient : IEquatable<IoTRecipient^>, 
+        IObjectRepresentationSerializable
+
+    type IoTRecipient =  
+        class
+            interface IEquatable<IoTRecipient>
+            interface IObjectRepresentationSerializable
+        end
+
+The <span class="selflink">IoTRecipient</span> type exposes the
+following members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />Constructors</span>
+
+<table id="constructorList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="441ff3a8-fc33-f46a-51d7-9f21b670d0a8.htm">IoTRecipient(Int32,
+IEnumerable<span id="LSTE07D74C6_2"></span></a>
+GroupAddress<span id="LSTE07D74C6_3"></span>
+, GroupId)</td>
+<td><div class="summary">
+Initializes a new instance of the <span
+class="selflink">IoTRecipient</span> class
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="404f7e4f-2513-5ad4-f0f3-30e409cac2cf.htm">IoTRecipient(Int32,
+IEnumerable<span id="LSTE07D74C6_4"></span></a>
+GroupAddress<span id="LSTE07D74C6_5"></span>
+, Uri)</td>
+<td><div class="summary">
+Creates a Recipient Table Entry where the recipient is uniquely
+identified by its url.
+<p>Example:</p>
+<div class="codeSnippetContainer">
+<div class="codeSnippetContainerCodeContainer">
+<div class="codeSnippetToolBar">
+<div class="codeSnippetToolBarText">
+<a href="#" id="ID1EAAAAFTCDA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID1EAAAAFTCDA&#39;);return false;"
+title="Copy">Copy</a>
+</div>
+</div>
+<div id="ID1EAAAAFTCDA_code_Div1" class="codeSnippetContainerCode"
+style="display: block">
+<pre xml:space="preserve"><code>new IoTRecipient(id: 3, groupAddresses: new List&lt;GroupAddress&gt;{ 2305, 2306, 2307, 2308 }, url: &quot;coap://&lt;IP multicast / unicast address or fqdn&gt;:&lt;port&gt;&quot;);</code></pre>
+</div>
+</div>
+</div>
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="28f2beec-44e2-a46d-df8e-fd6651f0b5b8.htm">IoTRecipient(Int32,
+IEnumerable<span id="LSTE07D74C6_6"></span></a>
+GroupAddress<span id="LSTE07D74C6_7"></span>
+, InstallationId, IndividualAddress)</td>
+<td><div class="summary">
+Initializes a new instance of the <span
+class="selflink">IoTRecipient</span> class
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID5RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID5RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID5RBToggle"
+class="collapseToggle" />Properties</span>
+
+<table id="propertyList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="7ee20d08-ce7d-8d18-e311-ab72517dde84.htm">GroupAddresses</a></td>
+<td><div class="summary">
+A list of group addresses which shall be sent to the configured
+recipient.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="2ba45bee-e5eb-ae0a-6b41-b54d69b24089.htm">GroupId</a></td>
+<td></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="d3dfac19-8f6b-4069-f443-bd0d721e1cef.htm">Id</a></td>
+<td><div class="summary">
+ID of the Function Point Recipient Table Entry.
+<div class="collapsibleAreaRegion">
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse(&#39;ID4RB&#39;)"
+onkeypress="SectionExpandCollapse_CheckKey(&#39;ID4RB&#39;, event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID4RBToggle"
+class="collapseToggle" />Remarks</span>
+</div>
+<div id="ID4RBSection" class="collapsibleSection">
+This ID shall be unique with respect to the table.
+</div>
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="d58b7c76-d1b6-47d7-b6aa-37f86ba60ded.htm">IndividualAddress</a></td>
+<td><div class="summary">
+The individual address identifying the endpoint of the recipient.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="93bb37ed-0303-8aa4-9cc7-dd51972f622e.htm">InstallationId</a></td>
+<td><div class="summary">
+KNX Installation ID of the recipient.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="3b9ccf00-264a-5a56-ab48-89b37b832cc0.htm">MaximumRetransmissions</a></td>
+<td><div class="summary">
+Defines the amount of allowed retransmissions for sending group
+messages.
+<p>If this property is omitted then the following values are used:</p>
+<ul>
+<li>For <em>not confirmed</em> messages: <strong>0</strong>
+retransmissions</li>
+<li>For <em>confirmed</em> messages: <strong>4</strong>
+retransmissions</li>
+</ul>
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="d2c5fdf5-fc93-8157-8df6-c239655566da.htm">NonConfirmable</a></td>
+<td><div class="summary">
+Defines if group messages shall be confirmed.
+<p>Per default this is set to <span class="code">false</span> indicating
+that group messages shall be confirmed.</p>
+<p>If this is <span class="code">true</span> then non-confirmable
+requests will be sent. Retransmissions will not be possible in this
+case. (see also: <a
+href="3b9ccf00-264a-5a56-ab48-89b37b832cc0.htm">MaximumRetransmissions</a>)</p>
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="e2ef41ff-91fd-3a85-352f-4f1579a951db.htm">Path</a></td>
+<td><div class="summary">
+The resource path of the recipient used for sending group messages.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="862bcc91-9121-383e-1153-18e29aec630d.htm">Url</a></td>
+<td><div class="summary">
+The url identifying the endpoint of the recipient.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID6RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID6RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID6RBToggle"
+class="collapseToggle" />Methods</span>
+
+<table id="methodList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="dda1e12c-3cc8-9408-86db-3fbe84f2114e.htm">Equals(IoTRecipient)</a></td>
+<td></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="799c7f27-af3c-8ba1-dac4-eb5d66c167d3.htm">Equals(Object)</a></td>
+<td>(Overrides <span class="nolink">Object<span
+id="LSTE07D74C6_8"></span></span>
+Equals(Object).)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="60a944a0-86e3-6363-5222-3f846597b028.htm">GetCollectionResourcePath</a></td>
+<td></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="14376989-aedf-33a1-b177-5bb285e4bced.htm">GetHashCode</a></td>
+<td>(Overrides <span class="nolink">Object<span
+id="LSTE07D74C6_9"></span></span>
+GetHashCode<span id="LSTE07D74C6_10"></span>
+.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="7e0bf828-4cc3-c3ae-7284-d5eae11f8a79.htm">GetObjectRepresentationData</a></td>
+<td></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="e088a974-6a08-4841-bdcb-dcfde16acdf1.htm">GetResourcePath</a></td>
+<td></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="9d5c011f-2553-69e3-f7f8-a9a8bc3e4b74.htm">GetTransmissionMethod</a></td>
+<td></td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">GetType</span></td>
+<td><div class="summary">
+Gets the <span class="nolink">Type</span> of the current instance.
+</div>
+(Inherited from <span class="nolink">Object</span>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="6c1e47bd-5e19-01a5-6621-860098062822.htm">ToString</a></td>
+<td>(Overrides <span class="nolink">Object<span
+id="LSTE07D74C6_11"></span></span>
+ToString<span id="LSTE07D74C6_12"></span>
+.)</td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID7RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID7RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID7RBToggle"
+class="collapseToggle" />Operators</span>
+
+<table id="operatorList" class="members">
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="c2cec136-7b6d-3f12-3783-40ca7308d844.htm">Equality</a></td>
+<td></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="8e017b66-ef35-a27e-6b3f-13bded2ca7b8.htm">Inequality</a></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID8RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID8RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID8RBToggle"
+class="collapseToggle" />Fields</span>
+
+<table id="fieldList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubfield.gif" title="Public field"
+alt="Public field" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="5b616907-7f97-56d1-6f8c-13eb92ff86a8.htm">DefaultPath</a></td>
+<td><div class="summary">
+Default path for S-Mode group communication.
+<p>If no is defined then this is used as the default.</p>
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID9RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID9RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID9RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[Knx.Falcon Namespace](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

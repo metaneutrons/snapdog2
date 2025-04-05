@@ -1,0 +1,186 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="knxbus-properties">KnxBus
+Properties</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+The [KnxBus](ada1239a-6384-eadd-a0d4-263e34da83f7.htm) type exposes the
+following members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Properties</span>
+
+<table id="propertyList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="2bc2ead4-2cd2-7bf4-920e-1e0e40849dd7.htm">AcceptHighSecureSeqNr</a></td>
+<td><div class="summary">
+Determines the behavior when receiving an unusually high expected
+sequence number from the S-A_Sync service.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="9d3409e5-8dee-07b2-979e-ed3595b9787b.htm">ConnectionState</a></td>
+<td><div class="summary">
+Gets information about the current state of the connection.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="d49df955-3396-57c0-2254-9821a5f5430b.htm">ConnectorType</a></td>
+<td><div class="summary">
+Gets the connector type.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="b4215e94-c94c-94f3-0a5b-7d69eb3ad25c.htm">DeviceCommunicationSecurity</a></td>
+<td><div class="summary">
+Provides the necessary information for secure device communication to
+remote devices.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="20dcc0af-1ec0-c4ee-7aab-94d67f39375c.htm">GroupCommunicationSecurity</a></td>
+<td><div class="summary">
+Provides the necessary information for secure group communication.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="857d86e9-8740-706f-0e6f-0ea70b8d0ac9.htm">InterfaceConfiguration</a></td>
+<td><div class="summary">
+Gets information about the current configuration of the connected
+interface.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="c0af3f87-adc0-8b70-8b0a-cafaa8e10595.htm">InterfaceFeatures</a></td>
+<td><div class="summary">
+Gets information about the features of the connected interface
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="0e4edcda-a791-0edd-66c1-84102fe305dc.htm">LimitApduLength</a></td>
+<td><div class="summary">
+If this property is not 0, it limits the maximum used APDU length for
+all communication.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="dce26676-53c0-63e9-0676-6a237d1d47da.htm">MinTimeBetweenSend</a></td>
+<td><div class="summary">
+If not <span class="nolink">Zero</span>, at least this time has to
+elapse after the previously sent message before the next one can be
+sent. This property can only be set when connected.
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="c41ce03d-d1c1-5d23-2688-5a341bb63ac9.htm">OptimisticPathRestriction</a></td>
+<td><div class="summary">
+For use as getPathRestriction parameter in <a
+href="78b3ca3d-cdc9-e06b-f58c-8b8ce68c6a2e.htm">OpenConnectionAsync(IndividualAddress,
+DeterminePathApduLength, CancellationToken)</a> and <a
+href="78b3ca3d-cdc9-e06b-f58c-8b8ce68c6a2e.htm">OpenConnectionAsync(IndividualAddress,
+DeterminePathApduLength, CancellationToken)</a>; optimistic version:
+always return the minimum of interface and device MaxApduLength, so not
+checking any routers in between.
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="e09a1c81-da07-bc90-e816-131bffed70be.htm">PessimisticPathRestriction</a></td>
+<td><div class="summary">
+For use as getPathRestriction parameter in <a
+href="78b3ca3d-cdc9-e06b-f58c-8b8ce68c6a2e.htm">OpenConnectionAsync(IndividualAddress,
+DeterminePathApduLength, CancellationToken)</a> and <a
+href="78b3ca3d-cdc9-e06b-f58c-8b8ce68c6a2e.htm">OpenConnectionAsync(IndividualAddress,
+DeterminePathApduLength, CancellationToken)</a>; pessimistic version:
+always return the minimum possible value 15
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="765fdf38-4e00-becf-6cf0-bf1dd2b868b0.htm">RfMultiGroupConfiguration</a></td>
+<td><div class="summary">
+Provides the necessary information for RF Multi group communication.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[KnxBus Class](ada1239a-6384-eadd-a0d4-263e34da83f7.htm)
+
+[Knx.Falcon.Sdk Namespace](ddc84507-eccd-b692-8467-e3956feec382.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

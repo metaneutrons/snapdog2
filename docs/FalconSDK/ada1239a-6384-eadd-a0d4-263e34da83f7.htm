@@ -1,0 +1,822 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="knxbus-class">KnxBus Class</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Represents a specific connection to the KNX bus
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Inheritance Hierarchy</span>
+
+<span class="nolink">System<span id="LSTD4455CF4_0"></span></span>
+
+Object  
+  <span class="selflink">Knx.Falcon.Sdk<span id="LSTD4455CF4_1"></span></span>
+
+KnxBus  
+
+**Namespace:**
+ [Knx.Falcon.Sdk](ddc84507-eccd-b692-8467-e3956feec382.htm)  
+**Assembly:**  Knx.Falcon.Sdk (in Knx.Falcon.Sdk.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID1EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID1EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public sealed class KnxBus : IDisposable, 
+        IAsyncDisposable
+
+    Public NotInheritable Class KnxBus
+        Implements IDisposable, IAsyncDisposable
+
+    public ref class KnxBus sealed : IDisposable, 
+        IAsyncDisposable
+
+    [<SealedAttribute>]
+    type KnxBus =  
+        class
+            interface IDisposable
+            interface IAsyncDisposable
+        end
+
+The <span class="selflink">KnxBus</span> type exposes the following
+members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />Constructors</span>
+
+<table id="constructorList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="90b417c9-fc19-1801-cb29-6d2b637ee99c.htm">KnxBus(ConnectorParameters)</a></td>
+<td><div class="summary">
+Initializes a new instance of the <span class="selflink">KnxBus</span>
+class without connecting it yet.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="073700b5-de6c-7a68-b933-9b5a6ec1b60a.htm">KnxBus(String)</a></td>
+<td><div class="summary">
+Initializes a new instance of the <span class="selflink">KnxBus</span>
+class without connecting it yet.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID4RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID4RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID4RBToggle"
+class="collapseToggle" />Properties</span>
+
+<table id="propertyList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="2bc2ead4-2cd2-7bf4-920e-1e0e40849dd7.htm">AcceptHighSecureSeqNr</a></td>
+<td><div class="summary">
+Determines the behavior when receiving an unusually high expected
+sequence number from the S-A_Sync service.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="9d3409e5-8dee-07b2-979e-ed3595b9787b.htm">ConnectionState</a></td>
+<td><div class="summary">
+Gets information about the current state of the connection.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="d49df955-3396-57c0-2254-9821a5f5430b.htm">ConnectorType</a></td>
+<td><div class="summary">
+Gets the connector type.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="b4215e94-c94c-94f3-0a5b-7d69eb3ad25c.htm">DeviceCommunicationSecurity</a></td>
+<td><div class="summary">
+Provides the necessary information for secure device communication to
+remote devices.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="20dcc0af-1ec0-c4ee-7aab-94d67f39375c.htm">GroupCommunicationSecurity</a></td>
+<td><div class="summary">
+Provides the necessary information for secure group communication.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="857d86e9-8740-706f-0e6f-0ea70b8d0ac9.htm">InterfaceConfiguration</a></td>
+<td><div class="summary">
+Gets information about the current configuration of the connected
+interface.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="c0af3f87-adc0-8b70-8b0a-cafaa8e10595.htm">InterfaceFeatures</a></td>
+<td><div class="summary">
+Gets information about the features of the connected interface
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="0e4edcda-a791-0edd-66c1-84102fe305dc.htm">LimitApduLength</a></td>
+<td><div class="summary">
+If this property is not 0, it limits the maximum used APDU length for
+all communication.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="dce26676-53c0-63e9-0676-6a237d1d47da.htm">MinTimeBetweenSend</a></td>
+<td><div class="summary">
+If not <span class="nolink">Zero</span>, at least this time has to
+elapse after the previously sent message before the next one can be
+sent. This property can only be set when connected.
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="c41ce03d-d1c1-5d23-2688-5a341bb63ac9.htm">OptimisticPathRestriction</a></td>
+<td><div class="summary">
+For use as getPathRestriction parameter in <a
+href="78b3ca3d-cdc9-e06b-f58c-8b8ce68c6a2e.htm">OpenConnectionAsync(IndividualAddress,
+DeterminePathApduLength, CancellationToken)</a> and <a
+href="78b3ca3d-cdc9-e06b-f58c-8b8ce68c6a2e.htm">OpenConnectionAsync(IndividualAddress,
+DeterminePathApduLength, CancellationToken)</a>; optimistic version:
+always return the minimum of interface and device MaxApduLength, so not
+checking any routers in between.
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="e09a1c81-da07-bc90-e816-131bffed70be.htm">PessimisticPathRestriction</a></td>
+<td><div class="summary">
+For use as getPathRestriction parameter in <a
+href="78b3ca3d-cdc9-e06b-f58c-8b8ce68c6a2e.htm">OpenConnectionAsync(IndividualAddress,
+DeterminePathApduLength, CancellationToken)</a> and <a
+href="78b3ca3d-cdc9-e06b-f58c-8b8ce68c6a2e.htm">OpenConnectionAsync(IndividualAddress,
+DeterminePathApduLength, CancellationToken)</a>; pessimistic version:
+always return the minimum possible value 15
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="765fdf38-4e00-becf-6cf0-bf1dd2b868b0.htm">RfMultiGroupConfiguration</a></td>
+<td><div class="summary">
+Provides the necessary information for RF Multi group communication.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID5RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID5RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID5RBToggle"
+class="collapseToggle" />Methods</span>
+
+<table id="methodList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="8bf67014-2988-d208-11f7-2fb1b1865e7f.htm">Connect</a></td>
+<td><div class="summary">
+Connects to the bus interface, blocking until the operation completes.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="84578e5d-5ed7-9ded-4f79-45200d7d76d7.htm">ConnectAsync</a></td>
+<td><div class="summary">
+Connects to the bus interface
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="95d2fae3-2bd4-c984-c729-545ec0423092.htm">DiscoverIpDevices</a></td>
+<td><div class="summary">
+Discovers KNX/IP devices synchronously.
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="590c33a6-dd30-892e-60b7-6b49e91539fc.htm">DiscoverIpDevicesAsync</a></td>
+<td><div class="summary">
+Discovers KNX/IP devices asynchronously.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="83bd104d-9840-bbd6-a78c-79579a8a79ab.htm">Dispose</a></td>
+<td><div class="summary">
+Performs application-defined tasks associated with freeing, releasing,
+or resetting unmanaged resources.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="92e532d3-a6d7-b715-206f-a193d302cd19.htm">DisposeAsync</a></td>
+<td><div class="summary">
+Releases the <span class="selflink">KnxBus</span> object and frees all
+resources asynchronously.
+</div></td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">Equals</span></td>
+<td><div class="summary">
+Determines whether the specified object is equal to the current object.
+</div>
+(Inherited from <span class="nolink">Object</span>.)</td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="274f56ec-4cf5-9137-2238-e119d63b0d24.htm">GetAttachedUsbDevices</a></td>
+<td><div class="summary">
+Gets the currently attached KNX USB interfaces
+</div></td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">GetHashCode</span></td>
+<td><div class="summary">
+Serves as the default hash function.
+</div>
+(Inherited from <span class="nolink">Object</span>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="88695a50-8d15-68d0-f69e-5cdfa11a5e3e.htm">GetNetwork</a></td>
+<td><div class="summary">
+Creates a <a
+href="e64cdf86-a7cc-51aa-3acf-342bb005b0c5.htm">KnxNetwork</a> object
+allowing to perform various KNX network management procedures, blocking
+until the operation completes.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="95eb9255-408c-a786-5b32-6e1e5c8c4390.htm">GetNetworkAsync(CancellationToken)</a></td>
+<td><div class="summary">
+Creates a <a
+href="e64cdf86-a7cc-51aa-3acf-342bb005b0c5.htm">KnxNetwork</a> object
+allowing to perform various KNX network management procedures
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="43eb6ac4-be2a-d21b-55c7-a90f0fbddda1.htm">GetNetworkAsync(CommunicationOptions,
+CancellationToken)</a></td>
+<td><div class="summary">
+Creates a <a
+href="e64cdf86-a7cc-51aa-3acf-342bb005b0c5.htm">KnxNetwork</a> object
+allowing to perform various KNX network management procedures
+</div></td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">GetType</span></td>
+<td><div class="summary">
+Gets the <span class="nolink">Type</span> of the current instance.
+</div>
+(Inherited from <span class="nolink">Object</span>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="e7752182-e096-8472-7e29-bb61d0729d7f.htm">IsIndividualAddressFree</a></td>
+<td><div class="summary">
+Determine if a given individual address is most likely free. Used to
+check before assigning a local address, blocking until the operation
+completes.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="e4a9339c-519e-d96d-85d2-ad582c575d6c.htm">IsIndividualAddressFreeAsync</a></td>
+<td><div class="summary">
+Determine if a given individual address is most likely free. Used to
+check before assigning a local address.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="c02b6db6-2f1f-fb17-a5c5-fb040bc44cc6.htm">ObserveIoTGroupIdsAsync</a></td>
+<td><div class="summary">
+Adds group Ids to the list of group Ids to be observed.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /><img src="../icons/CodeExample.png"
+title="Code example" alt="Code example" /></td>
+<td><a
+href="80020be0-367f-4cad-06a8-863a4c16d952.htm">OpenConnection</a></td>
+<td><div class="summary">
+Opens a connection-oriented connection to a KNX device, blocking until
+the operation completes.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /><img src="../icons/CodeExample.png"
+title="Code example" alt="Code example" /></td>
+<td><a
+href="78b3ca3d-cdc9-e06b-f58c-8b8ce68c6a2e.htm">OpenConnectionAsync</a></td>
+<td><div class="summary">
+Opens a connection-oriented connection to a KNX device
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /><img src="../icons/CodeExample.png"
+title="Code example" alt="Code example" /></td>
+<td><a
+href="6502fad9-53fc-6629-4fad-e757cd40ce7a.htm">OpenConnectionless</a></td>
+<td><div class="summary">
+Opens a connection-less connection to a KNX device, blocking until the
+operation completes.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /><img src="../icons/CodeExample.png"
+title="Code example" alt="Code example" /></td>
+<td><a
+href="af754d39-27af-88e2-1668-75440973fd25.htm">OpenConnectionlessAsync(IndividualAddress,
+DeterminePathApduLength, CancellationToken)</a></td>
+<td><div class="summary">
+Opens a connection-less connection to a KNX device
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /><img src="../icons/CodeExample.png"
+title="Code example" alt="Code example" /></td>
+<td><a
+href="1492c81b-5d64-119d-e745-e1bc4754cb52.htm">OpenConnectionlessAsync(IndividualAddress,
+DeterminePathApduLength, Boolean, CommunicationOptions,
+CancellationToken)</a></td>
+<td><div class="summary">
+Opens a connection-less connection to a KNX device
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="724df41f-02d3-7b6c-0aa5-cf5c7f5d05d0.htm">QueryRoutersPathRestriction</a></td>
+<td><div class="summary">
+For use as getPathRestriction parameter in <a
+href="78b3ca3d-cdc9-e06b-f58c-8b8ce68c6a2e.htm">OpenConnectionAsync(IndividualAddress,
+DeterminePathApduLength, CancellationToken)</a> and <a
+href="78b3ca3d-cdc9-e06b-f58c-8b8ce68c6a2e.htm">OpenConnectionAsync(IndividualAddress,
+DeterminePathApduLength, CancellationToken)</a>; check routers.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="4c866c03-7de4-df85-d6b0-7ea768724c45.htm">ReadGroupValueAsync(GroupAddress,
+MessagePriority, CancellationToken)</a></td>
+<td><div class="summary">
+Reads a group value from the bus with the specified priority and a
+timeout of 3 seconds.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="9caba4cb-07b7-cc26-8cbc-378054d6aec2.htm">ReadGroupValueAsync(GroupAddress,
+TimeSpan, MessagePriority, CancellationToken)</a></td>
+<td><div class="summary">
+Reads a group value from the bus with the specified priority and
+timeout.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="b5a4e58c-6246-afe4-8952-92e666b85234.htm">RequestGroupValue</a></td>
+<td><div class="summary">
+Sends a group value read request to the bus with the specified priority
+without waiting for a response, blocking until the operation completes.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="052ef483-f4c8-47d8-7014-800fab467ecc.htm">RequestGroupValueAsync</a></td>
+<td><div class="summary">
+Sends a group value read request to the bus with the specified priority
+without waiting for a response.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="64fb24b0-81b4-2b1b-cb0b-cdfb92816275.htm">RequestIoTGroupValueAsync</a></td>
+<td><div class="summary">
+Sends an IoT group value request on the specified group address.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="86f57549-2343-89af-9d21-f99d461352dc.htm">RespondGroupValue</a></td>
+<td><div class="summary">
+Sends a group value as response to the bus with the specified priority,
+blocking until the operation completes.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="f000b87d-2bf2-765d-262c-b3639f0ce1b2.htm">RespondGroupValueAsync</a></td>
+<td><div class="summary">
+Sends a group value as response to the bus with the specified priority.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="752d16bb-dd0c-8e4b-9106-aa729fc6674a.htm">SetInterfaceConfiguration</a></td>
+<td><div class="summary">
+Changes the configuration of the interface, blocking until the operation
+completes.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="3c66f5bd-4ed5-2f37-8867-222f67c60f2b.htm">SetInterfaceConfigurationAsync</a></td>
+<td><div class="summary">
+Changes the configuration of the interface
+</div></td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">ToString</span></td>
+<td><div class="summary">
+Returns a string that represents the current object.
+</div>
+(Inherited from <span class="nolink">Object</span>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="cc9b59e3-a2d6-012f-c5be-a061d721078f.htm">WriteGroupValue</a></td>
+<td><div class="summary">
+Writes a group value to the bus with the specified priority, blocking
+until the operation completes.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="e9455624-0e69-4eb1-8402-d405b4dce994.htm">WriteGroupValueAsync</a></td>
+<td><div class="summary">
+Writes a group value to the bus with the specified priority.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="3c90593e-a3be-671f-2233-0408088594fb.htm">WriteIoTGroupValueAsync</a></td>
+<td><div class="summary">
+Writes a group value to the bus with the specified priority.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID6RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID6RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID6RBToggle"
+class="collapseToggle" />Events</span>
+
+<table id="eventList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubevent.gif" title="Public event"
+alt="Public event" /></td>
+<td><a
+href="b3acc3ab-545c-5f57-e7c9-d5866132c19a.htm">ConnectionStateChanged</a></td>
+<td><div class="summary">
+This event is raised whenever <a
+href="9d3409e5-8dee-07b2-979e-ed3595b9787b.htm">ConnectionState</a>
+changed
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubevent.gif" title="Public event"
+alt="Public event" /></td>
+<td><a
+href="d1deccb4-e4ad-6169-cbd2-131170be5490.htm">GroupMessageReceived</a></td>
+<td><div class="summary">
+This event is raised when a group message is received from the bus.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubevent.gif" title="Public event"
+alt="Public event" /></td>
+<td><a
+href="8e2e1d45-50f3-7ffb-f2fa-366239109744.htm">InterfaceConfigurationChanged</a></td>
+<td><div class="summary">
+This event is raised whenever <a
+href="857d86e9-8740-706f-0e6f-0ea70b8d0ac9.htm">InterfaceConfiguration</a>
+changed
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubevent.gif" title="Public event"
+alt="Public event" /></td>
+<td><a
+href="4fa6e97b-d2af-b879-6528-fd1826b1e607.htm">IoTGroupMessageReceived</a></td>
+<td><div class="summary">
+This event is raised when a group message is received from the bus from
+an IoT device.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID7RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID7RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID7RBToggle"
+class="collapseToggle" />Remarks</span>
+
+A <span class="selflink">KnxBus</span> object uses a specific method to
+connect to the KNX bus. The method and its details are configured either
+via a [ConnectorParameters](a00d43d8-ca1f-e911-2f70-bea37d855086.htm)
+object or via a connection string; see [Configure Bus
+Connections](b8e64132-30a6-4311-95f5-0f27ab53f8b0.htm) for details.
+
+Constructing and connecting is a two-step process. This allows to
+fine-tune some settings and to subscribe to events before actually
+connecting to the bus.
+
+When no longer needed, use the
+[DisposeAsync<span id="LSTD4455CF4_2"></span>](92e532d3-a6d7-b715-206f-a193d302cd19.htm)
+
+method to free resources held by the object or - equivalently - wrap
+into an <span class="code">await using</span> statement (C# version 8 or
+higher). Using
+[Dispose<span id="LSTD4455CF4_3"></span>](83bd104d-9840-bbd6-a78c-79579a8a79ab.htm)
+
+or - equivalently - a <span class="keyword">using</span> statement is
+also possible, but should be avoided as it might block for some time.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID8RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID8RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID8RBToggle"
+class="collapseToggle" />Examples</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDAABA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDAABA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDAABA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDAABA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID1EDAABA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID1EDAABA&#39;);return false;"
+title="Copy">Copy</a>
+
+    // C# 8 or higher
+    await using (var bus = new KnxBus("Type=USB"))
+    {
+        await bus.ConnectAsync(CancellationToken.None);
+        // more...
+    }
+
+    // C# 7 or less (using the Async helper methods)
+    await Async.Using(new KnxBus("Type=USB"), async bus =>
+    {
+        await bus.ConnectAsync(CancellationToken.None);
+        // more...
+    });
+
+    // C# 7 or less (using try ... finally)
+    var bus1 = new KnxBus("Type=USB");
+    try
+    {
+        await bus1.ConnectAsync(CancellationToken.None);
+    }
+    finally
+    {
+        await bus1.DisposeAsync();
+    }
+
+    ' Using the Async helper methods
+    Await Async.Using(New KnxBus("Type=USB"),
+                      Async Function(bus)
+                          Await bus.ConnectAsync(CancellationToken.None)
+                          ' more...
+                      End Function
+    )
+
+No code example is currently available or this language may not be
+supported.
+
+    async {
+        // Unfortunately there is currently no support for IAsyncDisposable in F#
+        // So we are using Dispose() by the "use" binding instead
+        use bus = new KnxBus("Type=USB")
+        bus.ConnectAsync(CancellationToken.None) |> Async.AwaitTask |> ignore
+        // more...
+    }
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID9RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID9RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID9RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[Knx.Falcon.Sdk Namespace](ddc84507-eccd-b692-8467-e3956feec382.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

@@ -1,0 +1,67 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="use-falcon-from-unmanaged-code">Use
+Falcon from unmanaged code</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+How to use Falcon from unmanaged code
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />General information</span>
+
+Falcon is a .NET class library which can be used "out-of-the-box" by
+.NET applications.
+
+Using standard .NET interop techniques, it is possible also for
+unmanaged (i.e. non-.NET) applications to access the required Falcon
+functionality. KNX does not provide such an API, but this section will
+give some hints how to create it.
+
+If this is not possible, you could wrap Falcon in a separate executable
+and perform any form of inter-process communication (IPC) to couple your
+application with this wrapper. An example is available from KNX support.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />COM clients</span>
+
+If the client is able to use COM objects, a
+<span class="media">![External
+Link](../media/ExternalLink.png)</span><a href="https://msdn.microsoft.com/en-us/library/f07c8z1c.aspx"
+target="_blank" rel="noopener noreferrer">"COM callable wrapper"</a> has
+to be implemented. See the linked Microsoft documentation for details.
+
+Create a .NET class library containing the classes to be used from the
+COM client. See <span class="media">![External
+Link](../media/ExternalLink.png)</span><a href="https://msdn.microsoft.com/en-us/library/zsfww439.aspx"
+target="_blank" rel="noopener noreferrer">"Exposing .NET Framework
+Components to COM"</a> on how to do this. Implement the functionality by
+calling the Falcon SDK methods.
+
+You will need to either register the COM classes in the Windows registry
+using the Regasm.exe tool or use a technique called "registration-free
+COM". See this blog post <span class="media">![External
+Link](../media/ExternalLink.png)</span><a href="http://blogs.msdn.com/b/junfeng/archive/2006/04/20/579748.aspx"
+target="_blank" rel="noopener noreferrer">Part1</a> and <a
+href="http://blogs.msdn.com/b/junfeng/archive/2006/05/17/registration-free-com-net-interop.aspx"
+target="_blank" rel="noopener noreferrer">Part2</a> on how to use it
+with COM/.NET interop.
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

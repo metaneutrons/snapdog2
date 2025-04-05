@@ -1,0 +1,417 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="serialnumber-structure">SerialNumber
+Structure</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Represents a KNX device serial number.
+
+**Namespace:**  [Knx.Falcon](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public readonly struct SerialNumber : IEquatable<SerialNumber>, 
+        IFormattable
+
+    Public Structure SerialNumber
+        Implements IEquatable(Of SerialNumber), IFormattable
+
+    public value class SerialNumber : IEquatable<SerialNumber>, 
+        IFormattable
+
+    [<SealedAttribute>]
+    type SerialNumber =  
+        struct
+            interface IEquatable<SerialNumber>
+            interface IFormattable
+        end
+
+The <span class="selflink">SerialNumber</span> type exposes the
+following members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Constructors</span>
+
+<table id="constructorList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="eb98b92e-8426-db3b-43df-c3a653f64240.htm">SerialNumber(<span
+id="LST5B1AFF9F_0"></span></a>
+Byte<span id="LST5B1AFF9F_1"></span>
+)</td>
+<td><div class="summary">
+Initializes a new instance of the <span
+class="selflink">SerialNumber</span> struct.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="e4193dc4-168e-41de-8b83-bcecfb60c8e7.htm">SerialNumber(ReadOnlySpan<span
+id="LST5B1AFF9F_2"></span></a>
+Byte<span id="LST5B1AFF9F_3"></span>
+)</td>
+<td><div class="summary">
+Initializes a new instance of the <span
+class="selflink">SerialNumber</span> struct.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="72beb527-f920-98cc-0f46-8e664babb4b1.htm">SerialNumber(String)</a></td>
+<td><div class="summary">
+Initializes a new instance of the <span
+class="selflink">SerialNumber</span> struct.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="1b61e73a-cf57-c51e-7718-3be11f6a6051.htm">SerialNumber(UInt64)</a></td>
+<td><div class="summary">
+Initializes a new instance of the <span
+class="selflink">SerialNumber</span> struct.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />Methods</span>
+
+<table id="methodList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="0e4daa76-81e4-1fd2-3dba-5ac3729dba9c.htm">Equals(Object)</a></td>
+<td><div class="summary">
+Indicates whether this instance and a specified object are equal.
+</div>
+(Overrides <span class="nolink">ValueType<span
+id="LST5B1AFF9F_4"></span></span>
+Equals(Object).)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="934784e4-80fb-7153-66d6-67ebe4360090.htm">Equals(SerialNumber)</a></td>
+<td><div class="summary">
+Indicates whether the current object is equal to another object of the
+same type.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="105543e6-22b5-6800-4fed-d8c925bdb175.htm">GetBytes</a></td>
+<td><div class="summary">
+Gets the serial number as byte array.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="b60f004e-12f3-797b-c703-4adbdfc2002d.htm">GetHashCode</a></td>
+<td><div class="summary">
+Returns the hash code for this instance.
+</div>
+(Overrides <span class="nolink">ValueType<span
+id="LST5B1AFF9F_5"></span></span>
+GetHashCode<span id="LST5B1AFF9F_6"></span>
+.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">GetType</span></td>
+<td><div class="summary">
+Gets the <span class="nolink">Type</span> of the current instance.
+</div>
+(Inherited from <span class="nolink">Object</span>.)</td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="17bf5255-84b2-b5e7-7841-87cf0b8cc01e.htm">Parse</a></td>
+<td><div class="summary">
+Parses the specified serial number string into a serial number.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="e5eafb3f-5e06-674f-a5ef-4f3d96849773.htm">ToString<span
+id="LST5B1AFF9F_7"></span></a></td>
+<td><div class="summary">
+Returns the fully qualified type name of this instance.
+</div>
+(Overrides <span class="nolink">ValueType<span
+id="LST5B1AFF9F_8"></span></span>
+ToString<span id="LST5B1AFF9F_9"></span>
+.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="0ab59fff-af03-869d-4311-7a9238ca90a9.htm">ToString(String,
+IFormatProvider)</a></td>
+<td><div class="summary">
+Formats the value of the current instance using the specified format.
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="e2aad163-69a3-54be-84da-d0ed6a21c282.htm">TryParse</a></td>
+<td><div class="summary">
+Tries to parse a string into a serial number.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID4RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID4RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID4RBToggle"
+class="collapseToggle" />Operators</span>
+
+<table id="operatorList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="3b46e407-4bad-1148-f3d7-9263139184e9.htm">Equality</a></td>
+<td><div class="summary">
+Implements the operator ==.
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="50838353-88a3-0316-ead7-217352ab3c0b.htm"><span
+id="LST5B1AFF9F_10"></span></a>
+(<span id="LST5B1AFF9F_11"></span>
+Byte<span id="LST5B1AFF9F_12"></span>
+to SerialNumber)</td>
+<td><div class="summary">
+Performs an implicit conversion from Byte[] to <span
+class="selflink">SerialNumber</span>.
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="5e16b659-f09c-1451-7b87-6d0a64950c43.htm"><span
+id="LST5B1AFF9F_13"></span></a>
+(SerialNumber to <span id="LST5B1AFF9F_14"></span>
+Byte<span id="LST5B1AFF9F_15"></span>
+)</td>
+<td><div class="summary">
+Performs an implicit conversion from <span
+class="selflink">SerialNumber</span> to Byte[].
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="d5d13e7c-f27a-ec85-d7ea-7106af3812f7.htm"><span
+id="LST5B1AFF9F_16"></span></a>
+(SerialNumber to String)</td>
+<td><div class="summary">
+Performs an implicit conversion from <span
+class="selflink">SerialNumber</span> to <span
+class="nolink">String</span>.
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="a7095b6d-fadd-562c-8ba8-d24e10d9499f.htm"><span
+id="LST5B1AFF9F_17"></span></a>
+(SerialNumber to UInt64)</td>
+<td><div class="summary">
+Performs an implicit conversion from <span
+class="selflink">SerialNumber</span> to <span
+class="nolink">UInt64</span>.
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="2a466c9a-7237-d11d-02ba-e6d70ee4e826.htm"><span
+id="LST5B1AFF9F_18"></span></a>
+(String to SerialNumber)</td>
+<td><div class="summary">
+Performs an implicit conversion from <span class="nolink">String</span>
+to <span class="selflink">SerialNumber</span>.
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="cbbaf89d-d7f3-014d-24f2-24a40e4eef33.htm">Inequality</a></td>
+<td><div class="summary">
+Implements the operator !=.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID5RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID5RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID5RBToggle"
+class="collapseToggle" />Fields</span>
+
+<table id="fieldList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubfield.gif" title="Public field"
+alt="Public field" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="44f0792f-441d-4c8f-4ece-24cff24b35b2.htm">None</a></td>
+<td><div class="summary">
+Empty serial number
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubfield.gif" title="Public field"
+alt="Public field" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="350dc530-5007-9956-c8bb-95c48995a75f.htm">Size</a></td>
+<td><div class="summary">
+Gets the size in bytes.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID6RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID6RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID6RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[Knx.Falcon Namespace](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

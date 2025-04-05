@@ -1,0 +1,477 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="domainaddress-structure">DomainAddress
+Structure</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Represents a domain address of a KNX device on an open medium (PL, RF,
+IP).
+
+**Namespace:**  [Knx.Falcon](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public readonly struct DomainAddress : IEquatable<DomainAddress>
+
+    Public Structure DomainAddress
+        Implements IEquatable(Of DomainAddress)
+
+    public value class DomainAddress : IEquatable<DomainAddress>
+
+    [<SealedAttribute>]
+    type DomainAddress =  
+        struct
+            interface IEquatable<DomainAddress>
+        end
+
+The <span class="selflink">DomainAddress</span> type exposes the
+following members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Properties</span>
+
+<table id="propertyList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="eb571e82-3dc3-9866-f0cf-68a426920efe.htm">Length</a></td>
+<td><div class="summary">
+Returns the length in byte.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />Methods</span>
+
+<table id="methodList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="06800712-737c-9d18-b5f2-60a0dc7d2628.htm">Equals(DomainAddress)</a></td>
+<td><div class="summary">
+Indicates whether the current object is equal to another object of the
+same type.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="ca3802d1-5428-cd41-9043-d2229b27f36b.htm">Equals(Object)</a></td>
+<td><div class="summary">
+Determines whether the specified <span class="nolink">Object</span> is
+equal to this instance.
+</div>
+(Overrides <span class="nolink">ValueType<span
+id="LST99E6C264_0"></span></span>
+Equals(Object).)</td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="858d9e57-f0c6-c9fe-281b-001ce23b8afc.htm">FromBuffer</a></td>
+<td><div class="summary">
+Constructs a DomainAddress from a byte buffer
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="259d5d86-34e0-df18-605b-b0ceb23d55a2.htm">GetBytes</a></td>
+<td><div class="summary">
+Converts the domain address to a byte array. Note: for IP security, the
+Backbone key will be included in plain!
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="b9c9188f-d353-c2a9-afaa-4a417cbb3ab4.htm">GetHashCode</a></td>
+<td><div class="summary">
+Returns a hash code for this instance.
+</div>
+(Overrides <span class="nolink">ValueType<span
+id="LST99E6C264_1"></span></span>
+GetHashCode<span id="LST99E6C264_2"></span>
+.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">GetType</span></td>
+<td><div class="summary">
+Gets the <span class="nolink">Type</span> of the current instance.
+</div>
+(Inherited from <span class="nolink">Object</span>.)</td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="980b2348-4176-6454-5515-124d413edf1c.htm">IoTGroupId</a></td>
+<td><div class="summary">
+Creates a IoT GroupId as <span class="selflink">DomainAddress</span>
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="c348bb9b-1f94-49c4-8310-0ea0ebf026d0.htm">IP(IPAddress)</a></td>
+<td><div class="summary">
+Creates a plain IP <span class="selflink">DomainAddress</span>
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="7ce96a65-f561-bb52-8bc1-ffa62edddffb.htm">IP(IPAddress,
+EncryptedBuffer, Byte)</a></td>
+<td><div class="summary">
+Creates a secure IP <span class="selflink">DomainAddress</span>
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="b49442b1-21b5-551f-d7e4-9baafd6cbedc.htm">Parse</a></td>
+<td><div class="summary">
+Parses the specified address string to a DomainAddress object.
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="631f6bcf-95a1-1936-dd83-43ce17b154a3.htm">PL</a></td>
+<td><div class="summary">
+Creates a PL <span class="selflink">DomainAddress</span>
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="be93e6d7-50be-aeb9-bd89-4666f0ec4978.htm">RF</a></td>
+<td><div class="summary">
+Creates a RF <span class="selflink">DomainAddress</span>
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="c1093908-63f2-63a1-1475-9bcb5df3e62a.htm">ToString</a></td>
+<td><div class="summary">
+Returns a <span class="nolink">String</span> that represents this
+instance.
+</div>
+(Overrides <span class="nolink">ValueType<span
+id="LST99E6C264_3"></span></span>
+ToString<span id="LST99E6C264_4"></span>
+.)</td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="1d42fc95-55a3-20ec-3734-7156fa45ba6e.htm">TryParse</a></td>
+<td><div class="summary">
+Parses the provided domain address string into a <span
+class="selflink">DomainAddress</span> object.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="add8167d-8717-74cd-010f-48ff8b88122d.htm">WriteToBuffer</a></td>
+<td><div class="summary">
+Writes the domain address as bytes to a buffer. Note: for IP security,
+the Backbone key will be written in plain!
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID4RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID4RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID4RBToggle"
+class="collapseToggle" />Operators</span>
+
+<table id="operatorList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="5657c1c4-c952-7e44-3fbe-5e1f364f20b2.htm">Equality</a></td>
+<td><div class="summary">
+Implements the operator == (equal).
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="cf723e54-d9f2-e0b4-65b5-ca37ee92e65a.htm"><span
+id="LST99E6C264_5"></span></a>
+(DomainAddress to GroupId)</td>
+<td><div class="summary">
+Performs an explicit conversion from <span
+class="selflink">DomainAddress</span> to <a
+href="9fa78920-8b5f-95a7-71ef-e71ab17fde03.htm">GroupId</a>.
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="c3cf58b7-dbeb-d113-4415-ada673df1d5e.htm"><span
+id="LST99E6C264_6"></span></a>
+(DomainAddress to IPAddress)</td>
+<td><div class="summary">
+Performs an explicit conversion from <span
+class="selflink">DomainAddress</span> to <span
+class="nolink">IPAddress</span> for an IP DomainAddress.
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="766ad638-a14f-010f-8c66-58fb8a70e54c.htm"><span
+id="LST99E6C264_7"></span></a>
+(DomainAddress to UInt16)</td>
+<td><div class="summary">
+Performs an explicit conversion from <span
+class="selflink">DomainAddress</span> to <span
+class="nolink">UInt16</span> for a PL DomainAddress.
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="45658442-cf64-0862-bd2f-be2bd04a3104.htm"><span
+id="LST99E6C264_8"></span></a>
+(DomainAddress to UInt64)</td>
+<td><div class="summary">
+Performs an explicit conversion from <span
+class="selflink">DomainAddress</span> to <span
+class="nolink">UInt64</span>. for an RF DomainAddress.
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="abe2e77f-e4ca-61be-c55b-01e91db0256e.htm"><span
+id="LST99E6C264_9"></span></a>
+(DomainAddress to String)</td>
+<td><div class="summary">
+Performs an implicit conversion from <span
+class="selflink">DomainAddress</span> to <span
+class="nolink">String</span>.
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="dc7ce848-efa9-20bf-bc0f-12db5a7534dc.htm">Inequality</a></td>
+<td><div class="summary">
+Implements the operator != (not equal).
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID5RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID5RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID5RBToggle"
+class="collapseToggle" />Fields</span>
+
+<table id="fieldList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubfield.gif" title="Public field"
+alt="Public field" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="b1bc2d2e-aa95-05f1-9419-dfd1b6d1d606.htm">LengthIoTGroupId</a></td>
+<td><div class="summary">
+The length of an IoT Group Id
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubfield.gif" title="Public field"
+alt="Public field" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="b550606c-554d-bded-741e-fe8498353d61.htm">LengthIPPlain</a></td>
+<td><div class="summary">
+The length of an IP domain address without backbone security
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubfield.gif" title="Public field"
+alt="Public field" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="2f322dfc-9b09-d572-a21a-64ee99e83f9a.htm">LengthIPSecure</a></td>
+<td><div class="summary">
+The length of an IP domain address with backbone security
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubfield.gif" title="Public field"
+alt="Public field" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="034d56af-ca33-feeb-c7d0-61ad9347dea4.htm">LengthPL</a></td>
+<td><div class="summary">
+The length of a PL domain address
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubfield.gif" title="Public field"
+alt="Public field" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="0a285348-b550-bdfb-0222-14bcbe5e5e88.htm">LengthRF</a></td>
+<td><div class="summary">
+The length of a RF domain address
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubfield.gif" title="Public field"
+alt="Public field" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="36b9a66e-f46f-a24c-4c33-853b01947d90.htm">None</a></td>
+<td><div class="summary">
+Represents "no domain address"
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID6RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID6RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID6RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[Knx.Falcon Namespace](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

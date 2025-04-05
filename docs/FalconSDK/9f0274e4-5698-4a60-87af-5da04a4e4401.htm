@@ -1,0 +1,248 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1
+id="communicate-via-group-messages">Communicate via Group
+Messages</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+This article explains how Falcon SDK is used to send and receive KNX
+group messages.
+
+### How to write a group value
+
+1.  Create and connect a
+    [KnxBus](ada1239a-6384-eadd-a0d4-263e34da83f7.htm) object.
+
+2.  If KNX data security shall be used, set the
+    [GroupCommunicationSecurity](20dcc0af-1ec0-c4ee-7aab-94d67f39375c.htm)
+    property to specify the group keys to be used. Note that recipients
+    will only accept the group message if the individual address of the
+    interface is in their list of allowed senders.
+
+3.  If an RF Multi USB interface is used, set the
+    [RfMultiGroupConfiguration](765fdf38-4e00-becf-6cf0-bf1dd2b868b0.htm)
+    property to specify the RF Multi channels to be used.
+
+4.  Prepare a [GroupValue](cfefd12c-88f9-89e7-b457-f55df2d98718.htm)
+    object representing the value to be sent.
+
+5.  Send the message using
+    [WriteGroupValueAsync](e9455624-0e69-4eb1-8402-d405b4dce994.htm).
+
+    For environments not supporting asynchronous methods, the blocking
+    [WriteGroupValue](cc9b59e3-a2d6-012f-c5be-a061d721078f.htm) method
+    is provided.
+
+### How to read a group value
+
+1.  Create and connect a
+    [KnxBus](ada1239a-6384-eadd-a0d4-263e34da83f7.htm) object.
+
+2.  If KNX data security shall be used, set the
+    [GroupCommunicationSecurity](20dcc0af-1ec0-c4ee-7aab-94d67f39375c.htm)
+    property to specify the group keys to be used. Note that recipients
+    will only accept the group message if the individual address of the
+    interface is in their list of allowed senders.
+
+3.  If an RF Multi USB interface is used, set the
+    [RfMultiGroupConfiguration](765fdf38-4e00-becf-6cf0-bf1dd2b868b0.htm)
+    property to specify the RF Multi channels to be used.
+
+4.  Read the group value using
+    [ReadGroupValueAsync](f84f3852-a6aa-6640-2e60-cdf998093c94.htm).
+    This methods wait for the response and returns the value.
+
+    Alternatively, you could send the read message without waiting using
+    [RequestGroupValueAsync](052ef483-f4c8-47d8-7014-800fab467ecc.htm)
+    and receive the response via the
+    [GroupMessageReceived](d1deccb4-e4ad-6169-cbd2-131170be5490.htm)
+    event as described below.
+
+    For environments not supporting asynchronous methods, the blocking
+    [RequestGroupValue](b5a4e58c-6246-afe4-8952-92e666b85234.htm) method
+    is provided.
+
+### How to receive group messages
+
+1.  Create and connect a
+    [KnxBus](ada1239a-6384-eadd-a0d4-263e34da83f7.htm) object.
+
+2.  If KNX data security shall be used, set the
+    [GroupCommunicationSecurity](20dcc0af-1ec0-c4ee-7aab-94d67f39375c.htm)
+    property to specify the group keys to be used.
+
+3.  If an RF Multi USB interface is used, use
+    [SetInterfaceConfigurationAsync(BusInterfaceConfiguration,
+    CancellationToken)](3c66f5bd-4ed5-2f37-8867-222f67c60f2b.htm)
+    property to specify the RF Multi channels on which to listen and the
+    Fast ACK slots to be served by the interface.
+
+4.  Attach an event handler to the
+    [GroupMessageReceived](d1deccb4-e4ad-6169-cbd2-131170be5490.htm)
+    event.
+
+5.  In the event handler, differentiate the possible message types using
+    [EventType](2772edd9-4055-46c9-d83d-6da55eb8d232.htm) and react
+    accordingly.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Example</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDAFAAA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDAFAAA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDAFAAA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDAFAAA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDAFAAA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDAFAAA&#39;);return false;"
+title="Copy">Copy</a>
+
+    // If KNX data security shall be used, load the necessary keys from keyring file (*.knxkeys)
+    var security = GroupCommunicationSecurity.Load(keyringFile, keyringPassword);
+    if (File.Exists(seqCtrFile))
+    {
+        // Also load the current sequence counters from any previous run
+        security.LoadDeviceSequenceCounters(seqCtrFile, seqCtrPassword);
+    }
+    bus.GroupCommunicationSecurity = security;
+
+    // If an RF Multi USB interface is used, provide the necessary information regarding channels and ack slots
+    bus.RfMultiGroupConfiguration = RfMultiGroupConfiguration.Load(keyringFile, keyringPassword);
+    // .. or programmatically:
+    //var rfMulti = new RfMultiGroupConfigurationBuilder()
+    //    .SendFast("1/1/1", new byte[] { 1, 2})
+    //    .SendFast("1/1/2", new byte[] { 4 })
+    //    .AckFast("1/1/2", 5);
+    //bus.RfMultiGroupConfiguration = rfMulti.ToRfMultiGroupConfiguration();
+
+    // Send the 1-bit group value '1' to group address 1/1/1
+    await bus.WriteGroupValueAsync("1/1/1", new GroupValue(true));
+
+    // Read the value from group address 1/1/2
+    var value = await bus.ReadGroupValueAsync("1/1/2");
+    if (value != null)
+    {
+        Console.WriteLine("Value of 1/1/2 is {0}", value);
+    }
+
+    // Register an event handler so we get informed if some group message is received
+    bus.GroupMessageReceived += (s, e) =>
+    {
+        if (e.EventType == GroupEventType.ValueWrite || e.EventType == GroupEventType.ValueWrite)
+            Console.WriteLine("{0} {1} = {2}", e.EventType, e.DestinationAddress, e.Value);
+    };
+
+    // Send a read request
+    await bus.RequestGroupValueAsync("1/1/2");
+
+    // ................
+
+    // When finished, save the current KNX data security sequence counters for the next run
+    if (bus.GroupCommunicationSecurity != null)
+    {
+        bus.GroupCommunicationSecurity.SaveDeviceSequenceCounters(seqCtrFile, seqCtrPassword);
+    }
+
+    ' If KNX data security shall be used, load the necessary keys from keyring file (*.knxkeys)
+    Dim security = GroupCommunicationSecurity.Load(keyringFile, keyringPassword)
+    If File.Exists(seqCtrFile) Then
+        ' Also load the current sequence counters from any previous run
+        security.LoadDeviceSequenceCounters(seqCtrFile, seqCtrPassword)
+    End If
+    bus.GroupCommunicationSecurity = security
+
+    ' If an RF Multi USB interface is used, provide the necessary information regarding channels and ack slots
+    bus.RfMultiGroupConfiguration = RfMultiGroupConfiguration.Load(keyringFile, keyringPassword)
+    ' .. or programmatically:
+    'Dim rfMulti = New RfMultiGroupConfigurationBuilder().
+    '        SendFast("1/1/1", {1, 2}).
+    '        SendFast("1/1/2", {4}).
+    '        AckFast("1/1/2", 5)
+    'bus.RfMultiGroupConfiguration = rfMulti.ToRfMultiGroupConfiguration()
+
+    ' Send the 1-bit group value '1' to group address 1/1/1
+    Await bus.WriteGroupValueAsync("1/1/1", New GroupValue(True))
+
+    ' Read the value from group address 1/1/2
+    Dim value = Await bus.ReadGroupValueAsync("1/1/2")
+    If value IsNot Nothing Then
+        Console.WriteLine("Value of 1/1/2 is {0}", value)
+    End If
+
+    ' Register an event handler so we get informed if some group message is received
+    AddHandler bus.GroupMessageReceived, Sub(s, e)
+                                             If e.EventType = GroupEventType.ValueWrite OrElse e.EventType = GroupEventType.ValueWrite Then
+                                                 Console.WriteLine("{0} {1} = {2}", e.EventType, e.DestinationAddress, e.Value)
+                                             End If
+                                         End Sub
+
+    ' Send a read request
+    Await bus.RequestGroupValueAsync("1/1/2")
+
+    ' ................
+
+    ' When finished, save the current KNX data security sequence counters for the next run
+    If bus.GroupCommunicationSecurity IsNot Nothing Then
+        bus.GroupCommunicationSecurity.SaveDeviceSequenceCounters(seqCtrFile, seqCtrPassword)
+    End If
+
+No code example is currently available or this language may not be
+supported.
+
+                // If KNX data security shall be used, load the necessary keys from keyring file (*.knxkeys)
+                let security = GroupCommunicationSecurity.Load(keyringFile, keyringPassword);
+                if File.Exists(seqCtrFile) then 
+                    // Also load the current sequence counters from any previous run
+                    security.LoadDeviceSequenceCounters(seqCtrFile, seqCtrPassword);
+                bus.GroupCommunicationSecurity <- security;
+
+                // If an RF Multi USB interface is used, provide the necessary information regarding channels and ack slots
+                bus.RfMultiGroupConfiguration <- RfMultiGroupConfiguration.Load(keyringFile, keyringPassword);
+
+                // Send the 1-bit group value '1' to group address 1/1/1
+                bus.WriteGroupValueAsync(GroupAddress.Parse("1/1/1"), new GroupValue(true)) |> Async.AwaitTask |> ignore
+
+                // Read the value from group address 1/1/2
+                let! value = bus.ReadGroupValueAsync(GroupAddress.Parse("1/1/2")) |> Async.AwaitTask
+                match value with
+                    | null -> printfn "Value of 1/1/2 is unknown"
+                    | _ -> printfn "Value of 1/1/2 is %O" value
+
+                // Register an event handler so we get informed if some group message is received
+                bus.GroupMessageReceived.Add(fun e ->
+                    match e.EventType with
+                    | GroupEventType.ValueWrite -> printfn "ValueWrite %O %O" e.DestinationAddress e.Value
+                    | GroupEventType.ValueResponse -> printfn "ValueWrite %O %O" e.DestinationAddress e.Value
+                    | GroupEventType.ValueRead -> printfn "ValueRead %O" e.DestinationAddress)
+
+                // Send a read request
+                bus.RequestGroupValueAsync(GroupAddress.Parse("1/1/2")) |> Async.AwaitTask |> ignore
+
+                // ................
+
+                // When finished, save the current KNX data security sequence counters for the next run
+                bus.GroupCommunicationSecurity.SaveDeviceSequenceCounters(seqCtrFile, seqCtrPassword)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

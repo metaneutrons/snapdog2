@@ -1,0 +1,170 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1
+id="knx.falcon.configuration-namespace">Knx.Falcon.Configuration
+Namespace</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+This namespace contains the classes used for configuring bus access,
+i.e. the ConnectorParameters class ans its derived classes.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Classes</span>
+
+<table id="classList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Class</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="class; public">
+<td><img src="../icons/pubclass.gif" title="Public class"
+alt="Public class" /></td>
+<td><a
+href="a00d43d8-ca1f-e911-2f70-bea37d855086.htm">ConnectorParameters</a></td>
+<td><div class="summary">
+This is the base class for all connector specific configuration
+parameters.
+</div></td>
+</tr>
+<tr data="class; public">
+<td><img src="../icons/pubclass.gif" title="Public class"
+alt="Public class" /></td>
+<td><a
+href="52daa5b6-dcb7-4390-8845-d80dc452563c.htm">EiblibConnectorParameters</a></td>
+<td><div class="summary">
+This class provides parameters used to open a bus connection via a
+device supporting the legacy Eiblib protocol.
+</div></td>
+</tr>
+<tr data="class; public">
+<td><img src="../icons/pubclass.gif" title="Public class"
+alt="Public class" /></td>
+<td><a
+href="66782dde-4a8c-a94b-5671-a7573e49e223.htm">IoTConnectorParameters</a></td>
+<td><div class="summary">
+This class provides parameters used to open a bus connection via the KNX
+IoT Point API.
+</div></td>
+</tr>
+<tr data="class; public">
+<td><img src="../icons/pubclass.gif" title="Public class"
+alt="Public class" /></td>
+<td><a
+href="8904df95-0e73-fe8c-9db8-435ab3005170.htm">IpDeviceManagementConnectorParameters</a></td>
+<td><div class="summary">
+This class provides parameters used to access a KNXnet/IP device
+directly via a Local Transport Layer connection (Device Management v2)
+or local MProp services (Device Management v1).
+</div></td>
+</tr>
+<tr data="class; public">
+<td><img src="../icons/pubclass.gif" title="Public class"
+alt="Public class" /></td>
+<td><a
+href="aa3cdbe5-ff2c-32b3-ce3d-ced14b71157a.htm">IpRoutingConnectorParameters</a></td>
+<td><div class="summary">
+This class provides parameters used to open a bus connection via the
+KNXnet/IP Routing backbone.
+</div></td>
+</tr>
+<tr data="class; public">
+<td><img src="../icons/pubclass.gif" title="Public class"
+alt="Public class" /></td>
+<td><a
+href="4305d8f0-2c63-674a-cad7-aa0046c8ae3d.htm">IpTunnelingConnectorParameters</a></td>
+<td><div class="summary">
+This class provides parameters used to open a bus connection via a
+KNXnet/IP Tunneling interface.
+</div></td>
+</tr>
+<tr data="class; public">
+<td><img src="../icons/pubclass.gif" title="Public class"
+alt="Public class" /></td>
+<td><a
+href="bbcbcc92-4f38-c4d5-15f5-961e55e8f48f.htm">IpUnicastConnectorParameters</a></td>
+<td><div class="summary">
+This class is the base class for KNXnet/IP connector parameters used to
+open a KNXnet/IP tunneling or device management connection.
+</div></td>
+</tr>
+<tr data="class; public">
+<td><img src="../icons/pubclass.gif" title="Public class"
+alt="Public class" /></td>
+<td><a
+href="e5991e63-a99c-66cc-c91f-b3c025475d42.htm">UsbConnectorParameters</a></td>
+<td><div class="summary">
+This class provides parameters used to open a bus connection via a KNX
+USB interface.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Enumerations</span>
+
+<table id="enumerationList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Enumeration</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="enumeration; public">
+<td><img src="../icons/pubenumeration.gif" title="Public enumeration"
+alt="Public enumeration" /></td>
+<td><a
+href="05dec6a9-abcf-6b73-4f02-7df0119e2e7b.htm">ConnectorType</a></td>
+<td><div class="summary">
+This enumeration lists the supported connector types
+</div></td>
+</tr>
+<tr data="enumeration; public">
+<td><img src="../icons/pubenumeration.gif" title="Public enumeration"
+alt="Public enumeration" /></td>
+<td><a
+href="8e7dd2ee-7d2c-ae12-a7fb-aeabbe5297e7.htm">SecureBackboneTimerTrust</a></td>
+<td><div class="summary">
+The ConnectMode specifies the behavior of Bus.Connect() regarding
+synchronizing the multicast group-timer with other devices in the
+network.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

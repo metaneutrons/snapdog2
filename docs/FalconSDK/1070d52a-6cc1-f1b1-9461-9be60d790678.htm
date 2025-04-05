@@ -1,0 +1,126 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn">DptFactory<span id="LST5991661_0"></span>
+Get Method (Int32, Int32)</td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Factory method to get a datapoint type converter by datapoint type
+number and sub-type number
+
+**Namespace:**
+ [Knx.Falcon.ApplicationData.DatapointTypes](4524760b-44ef-f645-eb89-57d78a179600.htm)  
+**Assembly:**  Knx.Falcon.ApplicationData (in
+Knx.Falcon.ApplicationData.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public DptBase Get(
+        int mainNumber,
+        int subNumber
+    )
+
+    Public Function Get ( 
+        mainNumber As Integer,
+        subNumber As Integer
+    ) As DptBase
+
+    public:
+    DptBase^ Get(
+        int mainNumber, 
+        int subNumber
+    )
+
+    member Get : 
+            mainNumber : int * 
+            subNumber : int -> DptBase 
+
+#### Parameters
+
+<span class="parameter">mainNumber</span>  
+Type: <span class="nolink">System<span id="LST5991661_1"></span></span>
+
+Int32  
+Main number
+
+<span class="parameter">subNumber</span>  
+Type: <span class="nolink">System<span id="LST5991661_2"></span></span>
+
+Int32  
+Sub number; or -1 if no sub number is available
+
+#### Return Value
+
+Type: [DptBase](815b65b3-3f60-ad3b-5e2d-334360e73f2d.htm)  
+The data point value converter, or
+<span class="keyword"><span id="LST5991661_3"></span></span>
+
+if the datapoint type is unknown or no converter for the datapoint type
+exists.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Remarks</span>
+
+This method first tries an exact match of
+<span class="parameter">mainNumber</span> and
+<span class="parameter">subNumber</span>. If no such datapoint subtype
+is found, only the <span class="parameter">mainNumber</span> is taken
+into account. If not even the main type is found, the method returns
+<span class="keyword"><span id="LST5991661_4"></span></span>
+
+.
+
+For better performance and memory usage, the created converters are
+cached.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[DptFactory Class](094b4984-5cba-dd2f-23d9-2ac3c96d5729.htm)
+
+[Get Overload](042243e7-232d-7cbd-8b3d-0064a7c5365d.htm)
+
+[Knx.Falcon.ApplicationData.DatapointTypes
+Namespace](4524760b-44ef-f645-eb89-57d78a179600.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

@@ -1,0 +1,155 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="iiotnetwork-methods">IIoTNetwork
+Methods</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+The [IIoTNetwork](9cbcca6d-c360-e2ef-25f9-ebc349129e2a.htm) type exposes
+the following members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Methods</span>
+
+<table id="methodList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="5a88917f-cae4-0c3a-6548-8f3a375b1782.htm">DiscoverDeviceInfosOfAllDevicesAsync</a></td>
+<td><div class="summary">
+Discovers all reachable devices and yields their device info in an async
+stream as soon as they become available.
+</div></td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">Dispose</span></td>
+<td><div class="summary">
+Performs application-defined tasks associated with freeing, releasing,
+or resetting unmanaged resources.
+</div>
+(Inherited from <span class="nolink">IDisposable</span>.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">DisposeAsync</span></td>
+<td>(Inherited from <span class="nolink">IAsyncDisposable</span>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="e143433d-deba-33c1-22bf-720879c6aa80.htm">PingIndividualAddressAsync</a></td>
+<td><div class="summary">
+Sends a discovery request to check if a device with a certain individual
+address is reachable.
+<p>This is useful to check if a certain individual address is already
+occupied in the process of individualization.</p>
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="ee6241fc-d8ac-6002-bf29-1bc631022209.htm">PingSerialNumberAsync</a></td>
+<td><div class="summary">
+Sends a discovery request to check if a device with a certain serial
+number is reachable.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="e672b362-c149-043a-6489-e8261ca57ddb.htm">ReadDeviceInfoByPartialDeviceInfoAsync</a></td>
+<td><div class="summary">
+Reads the device info for a device given its serial number or individual
+address and installation id
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="24069d70-27b4-702e-3257-7a1afe221b23.htm">ReadDeviceInfoByProgrammingModeAsync</a></td>
+<td><div class="summary">
+Discovers all reachable devices in Programming Mode and yields their
+device info in an async stream as soon as they become available.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="9c189813-bcdb-9785-2c8d-0c835064f431.htm">ReadIndividualAddressBySerialNumberAsync</a></td>
+<td><div class="summary">
+Determines the individual address of a device given its serial number.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="d54ba913-94ef-3071-f0b4-e375b579bf96.htm">ReadSerialNumberByIndividualAddressAsync</a></td>
+<td><div class="summary">
+Determines the serial number of a device given its individual address.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="31fd2ace-67dd-8645-8da8-72b648c394b1.htm">ScanIndividualAddressRangeAsync</a></td>
+<td><div class="summary">
+Scans the specified individual address range and yields their individual
+addresses in an async stream as soon as they become available.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[IIoTNetwork Interface](9cbcca6d-c360-e2ef-25f9-ebc349129e2a.htm)
+
+[Knx.Falcon Namespace](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

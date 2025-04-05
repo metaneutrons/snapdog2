@@ -1,0 +1,358 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1 id="knxdatetime-class">KnxDateTime
+Class</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Value representation for DPT 19
+([Dpt19](6527fd1e-09b6-c9fa-437c-2dd26d6ef468.htm)).
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Inheritance Hierarchy</span>
+
+<span class="nolink">System<span id="LSTD0BE2F24_0"></span></span>
+
+Object  
+  <span class="selflink">Knx.Falcon.ApplicationData<span id="LSTD0BE2F24_1"></span></span>
+
+KnxDateTime  
+
+**Namespace:**
+ [Knx.Falcon.ApplicationData](0568debf-ec6f-5a30-5f9c-95b44ae4374c.htm)  
+**Assembly:**  Knx.Falcon.ApplicationData (in
+Knx.Falcon.ApplicationData.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID1EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID1EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public sealed class KnxDateTime : IEquatable<KnxDateTime>
+
+    Public NotInheritable Class KnxDateTime
+        Implements IEquatable(Of KnxDateTime)
+
+    public ref class KnxDateTime sealed : IEquatable<KnxDateTime^>
+
+    [<SealedAttribute>]
+    type KnxDateTime =  
+        class
+            interface IEquatable<KnxDateTime>
+        end
+
+The <span class="selflink">KnxDateTime</span> type exposes the following
+members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />Constructors</span>
+
+<table id="constructorList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="bcb8096b-2eed-3fe9-81ab-08b59bfa2051.htm">KnxDateTime<span
+id="LSTD0BE2F24_2"></span></a></td>
+<td><div class="summary">
+Initializes a new instance of the <span
+class="selflink">KnxDateTime</span> class with the current date and time
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="f3557a0d-3065-6ee2-7e72-5139895c8628.htm">KnxDateTime(DateTime,
+Nullable<span id="LSTD0BE2F24_3"></span></a>
+DayOfWeek<span id="LSTD0BE2F24_4"></span>
+, Boolean, Nullable<span id="LSTD0BE2F24_5"></span>
+Boolean<span id="LSTD0BE2F24_6"></span>
+, Boolean, Boolean, Boolean, Boolean, Boolean, Boolean)</td>
+<td><div class="summary">
+Initializes a new instance of the <span
+class="selflink">KnxDateTime</span> class.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID4RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID4RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID4RBToggle"
+class="collapseToggle" />Properties</span>
+
+<table id="propertyList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="fb961fc9-5d64-3aba-9d38-1875f543dd8c.htm">ClockSyncSignal</a></td>
+<td><div class="summary">
+<span class="keyword"><span id="LSTD0BE2F24_7"></span></span>
+if the clock has an external clock signal.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="61bd5d95-069a-4468-b5e0-09e9c99e64ed.htm">DateTime</a></td>
+<td><div class="summary">
+The date and time information
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="0b2cca33-56dd-f37d-f53c-963f158016de.htm">DaylightSavingTime</a></td>
+<td><div class="summary">
+<span class="keyword"><span id="LSTD0BE2F24_8"></span></span>
+for Standard time, <span class="keyword"><span
+id="LSTD0BE2F24_9"></span></span>
+for Daylight Saving Time
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="1af8b23a-dada-7e41-fd83-fe6c5a6b6d7f.htm">DayOfWeek</a></td>
+<td><div class="summary">
+The weekday information, <span class="keyword"><span
+id="LSTD0BE2F24_10"></span></span>
+for "any day" wildcard (for use in for instance scheduling information).
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="b25de3d9-7b2a-3cdb-4274-adead8243eef.htm">DayOfWeekValid</a></td>
+<td><div class="summary">
+<span class="keyword"><span id="LSTD0BE2F24_11"></span></span>
+if the <a
+href="b25de3d9-7b2a-3cdb-4274-adead8243eef.htm">DayOfWeekValid</a> is
+valid.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="ab686c8c-710f-093e-7039-53c05e56b669.htm">Fault</a></td>
+<td><div class="summary">
+<span class="keyword"><span id="LSTD0BE2F24_12"></span></span>
+for Normal operation, <span class="keyword"><span
+id="LSTD0BE2F24_13"></span></span>
+for Fault
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="e2232f8b-a3ca-c6c9-8aaa-cdb92e00c0c9.htm">MonthAndDayValid</a></td>
+<td><div class="summary">
+<span class="keyword"><span id="LSTD0BE2F24_14"></span></span>
+if the <span class="nolink">Month</span> and <span
+class="nolink">Day</span> part of <a
+href="61bd5d95-069a-4468-b5e0-09e9c99e64ed.htm">DateTime</a> is valid.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="90d602f5-1f08-a3a3-a309-145affe0bbf4.htm">TimeValid</a></td>
+<td><div class="summary">
+<span class="keyword"><span id="LSTD0BE2F24_15"></span></span>
+if the <span class="nolink">TimeOfDay</span> part of <a
+href="61bd5d95-069a-4468-b5e0-09e9c99e64ed.htm">DateTime</a> is valid.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="ef245846-903b-6b34-4caf-fa85f4e53957.htm">WorkingDay</a></td>
+<td><div class="summary">
+<span class="keyword"><span id="LSTD0BE2F24_16"></span></span>
+is this is a bank holiday, <span class="keyword"><span
+id="LSTD0BE2F24_17"></span></span>
+is this is a working day, <span class="keyword"><span
+id="LSTD0BE2F24_18"></span></span>
+if this information is not available.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="17b2226e-aa87-1aea-8293-7f067f02eea6.htm">YearValid</a></td>
+<td><div class="summary">
+<span class="keyword"><span id="LSTD0BE2F24_19"></span></span>
+if the <span class="nolink">Year</span> part of <a
+href="61bd5d95-069a-4468-b5e0-09e9c99e64ed.htm">DateTime</a> is valid.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID5RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID5RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID5RBToggle"
+class="collapseToggle" />Methods</span>
+
+<table id="methodList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="d42a8107-cf8f-f26e-19ef-c31bd6734328.htm">Equals(KnxDateTime)</a></td>
+<td><div class="summary">
+Indicates whether the current object is equal to another object of the
+same type.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="0e77e376-31c6-9015-a0a8-35faeb854d70.htm">Equals(Object)</a></td>
+<td><div class="summary">
+Determines whether the specified object is equal to the current object.
+</div>
+(Overrides <span class="nolink">Object<span
+id="LSTD0BE2F24_20"></span></span>
+Equals(Object).)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="2286e9c6-f0e9-9776-6640-c191eb457e6e.htm">GetHashCode</a></td>
+<td><div class="summary">
+Serves as the default hash function.
+</div>
+(Overrides <span class="nolink">Object<span
+id="LSTD0BE2F24_21"></span></span>
+GetHashCode<span id="LSTD0BE2F24_22"></span>
+.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">GetType</span></td>
+<td><div class="summary">
+Gets the <span class="nolink">Type</span> of the current instance.
+</div>
+(Inherited from <span class="nolink">Object</span>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="a91eb9b9-d0cf-70db-034c-31aaf03ef95c.htm">ToString</a></td>
+<td><div class="summary">
+Returns a string that represents the current object.
+</div>
+(Overrides <span class="nolink">Object<span
+id="LSTD0BE2F24_23"></span></span>
+ToString<span id="LSTD0BE2F24_24"></span>
+.)</td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID6RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID6RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID6RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[Knx.Falcon.ApplicationData
+Namespace](0568debf-ec6f-5a30-5f9c-95b44ae4374c.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

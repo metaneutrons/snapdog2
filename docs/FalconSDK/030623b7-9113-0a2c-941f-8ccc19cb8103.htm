@@ -1,0 +1,116 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn">DeviceCommunicationSecurity<span
+id="LSTE5C13C42_0"></span>
+SaveDeviceSequenceCounters Method (Stream, SecureString)</td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Save the last valid sequence counters of secure devices to an XML stream
+
+**Namespace:**
+ [Knx.Falcon.DataSecurity](8e78c9eb-f0d7-da55-a0f1-4da2dd7668c4.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public void SaveDeviceSequenceCounters(
+        Stream stream,
+        SecureString password
+    )
+
+    Public Sub SaveDeviceSequenceCounters ( 
+        stream As Stream,
+        password As SecureString
+    )
+
+    public:
+    void SaveDeviceSequenceCounters(
+        Stream^ stream, 
+        SecureString^ password
+    )
+
+    member SaveDeviceSequenceCounters : 
+            stream : Stream * 
+            password : SecureString -> unit 
+
+#### Parameters
+
+<span class="parameter">stream</span>  
+Type: <span class="nolink">System.IO<span id="LSTE5C13C42_1"></span></span>
+
+Stream  
+An XML stream containing the sequence counters
+
+<span class="parameter">password</span>  
+Type: <span class="nolink">System.Security<span id="LSTE5C13C42_2"></span></span>
+
+SecureString  
+Password for creating a signature of the data. If
+<span class="keyword"><span id="LSTE5C13C42_3"></span></span>
+
+, no signature is created; use this only for test purposes because
+manipulated sequence counters may lead to a denial of service.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Remarks</span>
+
+To prevent replay attacks it is important that the last valid sequence
+numbers of all communication partners are kept up-to date and persisted
+across runs. The former is handled automatically by Falcon's Bus object.
+For the latter, it is advised to call the SaveDeviceSequenceCounters
+method regularly to save the current sequence counters to a file.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[DeviceCommunicationSecurity
+Class](2805c385-fc93-6c5b-7817-aaca7428f1f8.htm)
+
+[SaveDeviceSequenceCounters
+Overload](7d406c1f-0565-2274-1df5-6e3f5998b4b2.htm)
+
+[Knx.Falcon.DataSecurity
+Namespace](8e78c9eb-f0d7-da55-a0f1-4da2dd7668c4.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

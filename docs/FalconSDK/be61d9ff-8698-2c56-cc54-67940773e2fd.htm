@@ -1,0 +1,100 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn">Format<span id="LSTB5DE69F9_0"></span>
+GetTranslatedText Method</td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Gets the localized text in the given language
+
+**Namespace:**
+ [Knx.Falcon.ApplicationData.MasterData](beda390a-3e2f-94ca-e1d8-5047e2a4330b.htm)  
+**Assembly:**  Knx.Falcon.ApplicationData (in
+Knx.Falcon.ApplicationData.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public string GetTranslatedText(
+        string language
+    )
+
+    Public Function GetTranslatedText ( 
+        language As String
+    ) As String
+
+    public:
+    String^ GetTranslatedText(
+        String^ language
+    )
+
+    member GetTranslatedText : 
+            language : string -> string 
+
+#### Parameters
+
+<span class="parameter">language</span>  
+Type: <span class="nolink">System<span id="LSTB5DE69F9_1"></span></span>
+
+String  
+Specifies the language
+
+#### Return Value
+
+Type: <span class="nolink">String</span>  
+The localized text if present, otherwise the english text.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Remarks</span>
+
+Translations are not available when run in a globalization-invariant
+environment
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[Format Class](ca3487ef-ce9a-b717-60ea-9315fdfd97f6.htm)
+
+[Knx.Falcon.ApplicationData.MasterData
+Namespace](beda390a-3e2f-94ca-e1d8-5047e2a4330b.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

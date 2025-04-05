@@ -1,0 +1,345 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1
+id="usbdevicediscoveryresult-class">UsbDeviceDiscoveryResult
+Class</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Contains the information about a KNX USB HID device.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Inheritance Hierarchy</span>
+
+<span class="nolink">System<span id="LSTCE0D3B8C_0"></span></span>
+
+Object  
+  <span class="selflink">Knx.Falcon.Discovery<span id="LSTCE0D3B8C_1"></span></span>
+
+UsbDeviceDiscoveryResult  
+
+**Namespace:**
+ [Knx.Falcon.Discovery](5805e7c7-b21e-0331-8688-ee65017aeb51.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID1EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID1EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public sealed class UsbDeviceDiscoveryResult : IEquatable<UsbDeviceDiscoveryResult>
+
+    Public NotInheritable Class UsbDeviceDiscoveryResult
+        Implements IEquatable(Of UsbDeviceDiscoveryResult)
+
+    public ref class UsbDeviceDiscoveryResult sealed : IEquatable<UsbDeviceDiscoveryResult^>
+
+    [<SealedAttribute>]
+    type UsbDeviceDiscoveryResult =  
+        class
+            interface IEquatable<UsbDeviceDiscoveryResult>
+        end
+
+The <span class="selflink">UsbDeviceDiscoveryResult</span> type exposes
+the following members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />Properties</span>
+
+<table id="propertyList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="d06fa8be-5546-a1ef-c0c0-b44038fcb973.htm">ConfigurationIsVolatile</a></td>
+<td><div class="summary">
+Flag indicating if the interface device does not persist the configured
+individual address.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="eebfedd8-9d72-a988-05f0-b7b1ace0c4f6.htm">DevicePath</a></td>
+<td><div class="summary">
+The HID device path; format depends on operating-system.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="4d44731a-5767-f393-3041-3f6dd81f530d.htm">DisplayName</a></td>
+<td><div class="summary">
+The display name provided by the manufacturer, looked up from
+knx_interfaces.xml.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="47a2d174-1cfe-4c71-df00-d3c96a6f84dc.htm">GetLocalizedDisplayName</a></td>
+<td><div class="summary">
+The display name provided by the manufacturer, looked up from
+knx_interfaces.xml.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="b8b8aa34-73b7-c040-1271-11d88ad8276c.htm">KnxManufacturerId</a></td>
+<td><div class="summary">
+The KNX Manufacturer ID read from knx_interfaces.xml.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="4c24bdfd-0404-84a8-f1d5-12bc9ca0e820.htm">KnxManufacturerName</a></td>
+<td><div class="summary">
+The KNX Manufacturer name read from knx_master.xml.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="27adc78e-e02e-1d26-9e76-ccca51bdad19.htm">KnxUsbFixRequired</a></td>
+<td><div class="summary">
+Flag indicating that for this interface the KnxUsbFix (available for
+Windows only) is required but not installed.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="68d4f572-3033-62da-c08a-ab8cf26ef3bc.htm">MediumType</a></td>
+<td><div class="summary">
+Gets the KNX medium type
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="9978b2ea-a82b-3e88-6c94-b407e7bc2c96.htm">ProductId</a></td>
+<td><div class="summary">
+The USB product ID.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="06672991-fda8-cb30-7f9f-ce3dd3c91393.htm">RequiresKnxUsbFix</a></td>
+<td><div class="summary">
+Flag indicating if the interface device requires the KnxUsbFix on
+Windows 8 or newer
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="4292c5a3-fb75-7d7f-b3e9-e6cd7449564f.htm">Timing</a></td>
+<td><div class="summary">
+Used to modify the timing; <span class="keyword"><span
+id="LSTCE0D3B8C_2"></span></span>
+=default timing
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a href="17ed4208-0f67-16a4-00fe-a468eb34b75a.htm">VendorId</a></td>
+<td><div class="summary">
+The USB vendor ID.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID4RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID4RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID4RBToggle"
+class="collapseToggle" />Methods</span>
+
+<table id="methodList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="9711a3b9-fb1b-aefe-8f2a-fb0ecb7d060d.htm">Equals(Object)</a></td>
+<td><div class="summary">
+Determines whether the specified object is equal to the current object.
+</div>
+(Overrides <span class="nolink">Object<span
+id="LSTCE0D3B8C_3"></span></span>
+Equals(Object).)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="92fb86e9-b9f5-d79a-46d2-3e8020d67bda.htm">Equals(UsbDeviceDiscoveryResult)</a></td>
+<td><div class="summary">
+Indicates whether the current object is equal to another object of the
+same type.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="d84abb8b-fc5e-cb7c-e4e9-c1dd781c1dac.htm">GetHashCode</a></td>
+<td><div class="summary">
+Serves as the default hash function.
+</div>
+(Overrides <span class="nolink">Object<span
+id="LSTCE0D3B8C_4"></span></span>
+GetHashCode<span id="LSTCE0D3B8C_5"></span>
+.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">GetType</span></td>
+<td><div class="summary">
+Gets the <span class="nolink">Type</span> of the current instance.
+</div>
+(Inherited from <span class="nolink">Object</span>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="5c2b9f42-c8ef-7158-7777-ba5e650c9f22.htm">ReadDomainAddressAsync</a></td>
+<td><div class="summary">
+Reads the current domain address of the interface
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="26318afe-0398-d5ef-555a-0cdcda111e0e.htm">ReadIndividualAddressAsync</a></td>
+<td><div class="summary">
+Reads the current individual address of the interface
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="359b75e4-ddf5-3f4a-524a-3eb4311fa879.htm">ReadSerialNumberAsync</a></td>
+<td><div class="summary">
+Reads the KNX serial number of the interface
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="10ab480a-3399-8898-adcd-91888c19bf74.htm">ToConnectionString</a></td>
+<td><div class="summary">
+Returns the connection string <a
+href="e5991e63-a99c-66cc-c91f-b3c025475d42.htm">UsbConnectorParameters</a>.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="ee87d77f-e31f-07b6-3d79-00d956617942.htm">ToString</a></td>
+<td><div class="summary">
+Returns a string that represents the current object.
+</div>
+(Overrides <span class="nolink">Object<span
+id="LSTCE0D3B8C_6"></span></span>
+ToString<span id="LSTCE0D3B8C_7"></span>
+.)</td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID5RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID5RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID5RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[Knx.Falcon.Discovery
+Namespace](5805e7c7-b21e-0331-8688-ee65017aeb51.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

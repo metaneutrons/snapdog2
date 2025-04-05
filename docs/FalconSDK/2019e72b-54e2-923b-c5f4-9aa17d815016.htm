@@ -1,0 +1,317 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1
+id="projectinstallationid-structure">ProjectInstallationId
+Structure</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Represents the combination of project number and installation number of
+a KNX installation.
+
+**Namespace:**
+ [Knx.Falcon.KnxnetIp](328dd48a-27bb-1def-162c-3383359ce8b4.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public readonly struct ProjectInstallationId : IEquatable<ProjectInstallationId>
+
+    Public Structure ProjectInstallationId
+        Implements IEquatable(Of ProjectInstallationId)
+
+    public value class ProjectInstallationId : IEquatable<ProjectInstallationId>
+
+    [<SealedAttribute>]
+    type ProjectInstallationId =  
+        struct
+            interface IEquatable<ProjectInstallationId>
+        end
+
+The <span class="selflink">ProjectInstallationId</span> type exposes the
+following members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Constructors</span>
+
+<table id="constructorList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="6746a4cc-e7eb-eade-0298-bd256fa81f4b.htm">ProjectInstallationId(UInt16)</a></td>
+<td><div class="summary">
+Initializes a new instance of the <span
+class="selflink">ProjectInstallationId</span> struct.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="2e0b6446-1bcb-be21-c054-244dd2a4fcbf.htm">ProjectInstallationId(UInt16,
+Byte)</a></td>
+<td><div class="summary">
+Initializes a new instance of the <span
+class="selflink">ProjectInstallationId</span> struct.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />Properties</span>
+
+<table id="propertyList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="b3807961-825d-76b6-fda5-4444437e71f1.htm">InstallationNumber</a></td>
+<td><div class="summary">
+Gets the installation number.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="ed8b8474-f9e5-45d5-f1ba-1a0e7216f947.htm">ProjectNumber</a></td>
+<td><div class="summary">
+Gets the project number.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID4RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID4RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID4RBToggle"
+class="collapseToggle" />Methods</span>
+
+<table id="methodList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="3a7e7584-4899-4859-16f1-e6f1a600c30d.htm">Equals(Object)</a></td>
+<td><div class="summary">
+Indicates whether this instance and a specified object are equal.
+</div>
+(Overrides <span class="nolink">ValueType<span
+id="LST29FF47EC_0"></span></span>
+Equals(Object).)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="6c3b3dd4-e527-cabd-dcce-35ef447bdf8b.htm">Equals(ProjectInstallationId)</a></td>
+<td><div class="summary">
+Indicates whether the current object is equal to another object of the
+same type.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="483ab17d-3887-814b-869c-ffef7cffb7b5.htm">GetHashCode</a></td>
+<td><div class="summary">
+Returns the hash code for this instance.
+</div>
+(Overrides <span class="nolink">ValueType<span
+id="LST29FF47EC_1"></span></span>
+GetHashCode<span id="LST29FF47EC_2"></span>
+.)</td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">GetType</span></td>
+<td><div class="summary">
+Gets the <span class="nolink">Type</span> of the current instance.
+</div>
+(Inherited from <span class="nolink">Object</span>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="63413ece-9bbd-c924-50b6-93fa4b35f4f4.htm">ToString</a></td>
+<td><div class="summary">
+Returns a <span class="nolink">String</span> that represents this
+instance.
+</div>
+(Overrides <span class="nolink">ValueType<span
+id="LST29FF47EC_3"></span></span>
+ToString<span id="LST29FF47EC_4"></span>
+.)</td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID5RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID5RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID5RBToggle"
+class="collapseToggle" />Operators</span>
+
+<table id="operatorList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="3d014cdb-99ca-edbc-4df3-adb23fdb97cf.htm">Equality</a></td>
+<td><div class="summary">
+Implements the operator == (equal).
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="e82e5266-556c-1ca3-cde8-6d3a43ac2b1e.htm"><span
+id="LST29FF47EC_5"></span></a>
+(ProjectInstallationId to UInt16)</td>
+<td><div class="summary">
+Performs an implicit conversion from <span
+class="selflink">ProjectInstallationId</span> to <span
+class="nolink">UInt16</span>.
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a href="2dc18321-35ab-8b48-6e94-b13a61b3ab41.htm"><span
+id="LST29FF47EC_6"></span></a>
+(UInt16 to ProjectInstallationId)</td>
+<td><div class="summary">
+Performs an implicit conversion from <span class="nolink">UInt16</span>
+to <span class="selflink">ProjectInstallationId</span>.
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/puboperator.gif" title="Public operator"
+alt="Public operator" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="b982076d-fa55-0433-14b9-3f5c8cbf7b83.htm">Inequality</a></td>
+<td><div class="summary">
+Implements the operator != (not equal).
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID6RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID6RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID6RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[Knx.Falcon.KnxnetIp
+Namespace](328dd48a-27bb-1def-162c-3383359ce8b4.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

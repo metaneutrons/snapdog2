@@ -1,0 +1,185 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1
+id="businterfacefeatures-properties">BusInterfaceFeatures
+Properties</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+The [BusInterfaceFeatures](d99c0bc2-45f6-067f-3d54-b82f89cfed14.htm)
+type exposes the following members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Properties</span>
+
+<table id="propertyList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="65542ce0-ff9c-bc47-5359-de553c3c5b34.htm">BusmonRelativeTimeBase</a></td>
+<td><div class="summary">
+If not 0, gives the time unit for the <span
+class="nolink">Timestamp</span> in nanoseconds.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="7bcf18d9-e979-26fe-59d2-a6845d39db74.htm">DeviceDescriptor</a></td>
+<td><div class="summary">
+Gets the local device descriptor (mask version), or 0 if not applicable.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="2b1452a7-84f8-6dc6-4ea0-1a5f132a43a2.htm">MaxApduLength</a></td>
+<td><div class="summary">
+Returns the maximum APDU length supported by the interface.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="f5817dea-f49c-dfb4-235f-0fe6912724e0.htm">MediumType</a></td>
+<td><div class="summary">
+The connected KNX medium.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="05646f4c-4630-e28b-3e20-32918197d82f.htm">RfMultiPhysicalFeatures</a></td>
+<td><div class="summary">
+Represents the RF multi physical capabilities of the interface
+(PID_RF_MULTI_PHYSICAL_FEATURES). Valid only if <a
+href="6e743e09-88bb-abdc-15d1-12028d19a74d.htm">SupportsRfMulti</a> is
+<span class="keyword"><span id="LSTC03F6A6B_0"></span></span>
+.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="601671f3-ff39-c1e0-7a97-f07611fa26a6.htm">SerialNumber</a></td>
+<td><div class="summary">
+Gets the KNX serial number of the interface device, or <a
+href="44f0792f-441d-4c8f-4ece-24cff24b35b2.htm">None</a> if not
+applicable.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="aa14c9ef-e376-f7e6-bfdf-96bb3f67d334.htm">SupportedCommModes</a></td>
+<td><div class="summary">
+Returns the communication modes supported by the interface, or <a
+href="dce8b93b-c9f9-7da9-c16b-215ba925c658.htm">Unknown</a> if not
+known.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="3bf760df-60d9-2233-496a-fdd0197786d0.htm">SupportedFilteringModes</a></td>
+<td><div class="summary">
+Returns the RF filtering modes supported by the interface, or <a
+href="85ff2de6-30e6-6e71-ad0b-20aeb37409a0.htm">None</a> if not
+supported.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="6ed58f4b-c9ff-837e-bc7c-b26400fc98eb.htm">SupportsDomainAddress</a></td>
+<td><div class="summary">
+Flag returning <span class="keyword"><span
+id="LSTC03F6A6B_1"></span></span>
+if the interface supports a DomainAddress.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="6ef32a13-c491-8423-7405-b6a3243085f4.htm">SupportsLocalProgrammingMode</a></td>
+<td><div class="summary">
+Returns <span class="keyword"><span id="LSTC03F6A6B_2"></span></span>
+if the interface supports local programming mode detection
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="1584ee74-d3b7-85b8-1746-c888ed5d7bc5.htm">SupportsPlRepeater</a></td>
+<td><div class="summary">
+Flag returning <span class="keyword"><span
+id="LSTC03F6A6B_3"></span></span>
+if the interface supports the PL Repeater flag.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="6e743e09-88bb-abdc-15d1-12028d19a74d.htm">SupportsRfMulti</a></td>
+<td><div class="summary">
+Returns <span class="keyword"><span id="LSTC03F6A6B_4"></span></span>
+if the interface supports RF Multi
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[BusInterfaceFeatures Class](d99c0bc2-45f6-067f-3d54-b82f89cfed14.htm)
+
+[Knx.Falcon Namespace](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

@@ -1,0 +1,187 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn">ConnectorParameters<span
+id="LST79D29BB4_0"></span>
+LoadSecurityDataAsync Method (String, SecureString)</td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Load the security configuration from a keyring file (\*.knxkeys)
+exported from ETS.
+
+**Namespace:**
+ [Knx.Falcon.Configuration](8057f884-553e-ad7e-77ee-8d8d0f07a343.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public Task<bool> LoadSecurityDataAsync(
+        string fileName,
+        SecureString password
+    )
+
+    Public Function LoadSecurityDataAsync ( 
+        fileName As String,
+        password As SecureString
+    ) As Task(Of Boolean)
+
+    public:
+    Task<bool>^ LoadSecurityDataAsync(
+        String^ fileName, 
+        SecureString^ password
+    )
+
+    member LoadSecurityDataAsync : 
+            fileName : string * 
+            password : SecureString -> Task<bool> 
+
+#### Parameters
+
+<span class="parameter">fileName</span>  
+Type: <span class="nolink">System<span id="LST79D29BB4_1"></span></span>
+
+String  
+Path of the knxkeys file
+
+<span class="parameter">password</span>  
+Type: <span class="nolink">System.Security<span id="LST79D29BB4_2"></span></span>
+
+SecureString  
+Password for the knxkeys file
+
+#### Return Value
+
+Type: <span class="nolink">Task</span><span id="LST79D29BB4_3"></span>
+
+<span class="nolink">Boolean</span><span id="LST79D29BB4_4"></span>
+
+  
+<span class="keyword"><span id="LST79D29BB4_5"></span></span>
+
+if any data relevant for this configuration has been found
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Remarks</span>
+
+The following data is loaded from an ETS keyring file:
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Connector Type</th>
+<th>Data</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a
+href="aa3cdbe5-ff2c-32b3-ce3d-ced14b71157a.htm">IpRoutingConnectorParameters</a></td>
+<td><ul>
+<li><a
+href="84b76fb2-32ed-b509-9472-d4e952c46776.htm">MulticastAddress</a>: If
+set in the parameter object to a value not equal to <a
+href="c81d17a7-51c1-827c-21af-2916e9997028.htm">DefaultMulticastAddress</a>,
+the value is compared to the value in the keyring file; on mismatch, the
+method returns <span class="keyword"><span
+id="LST79D29BB4_6"></span></span>
+and the parameter object is left unchanged. Otherwise, the value is set
+to the value from the keyring file.</li>
+<li><a
+href="b703550a-cb6f-1ad5-bf28-fef3badf47a1.htm">BackboneKey</a></li>
+</ul></td>
+</tr>
+<tr>
+<td><a
+href="4305d8f0-2c63-674a-cad7-aa0046c8ae3d.htm">IpTunnelingConnectorParameters</a></td>
+<td>At least the property <a
+href="a193faf7-9cc9-ba31-d223-dee65722eede.htm">IndividualAddress</a>
+must be set before calling this method to determine the tunneling slot
+to be used.
+<ul>
+<li><a href="c47bcab5-d145-6a8b-7d04-e21e55a334cd.htm">UserId</a>: If
+set in the parameter object to a value greater than 1, the security data
+for the specified user is loaded; if the UserId is not configured for
+this tunneling slot, the method returns <span class="keyword"><span
+id="LST79D29BB4_7"></span></span>
+and the parameter object is left unchanged. Otherwise, the value is set
+to the lowest UserId from the keyring file configured for this tunneling
+slot.</li>
+<li><a
+href="85b8e143-a07c-d13b-c811-667260a59062.htm">UserPasswordHash</a></li>
+<li><a
+href="ce357d58-4e72-489b-d8d0-9cd3c5fee80a.htm">DeviceAuthenticationCodeHash</a></li>
+</ul></td>
+</tr>
+<tr>
+<td><a
+href="8904df95-0e73-fe8c-9db8-435ab3005170.htm">IpDeviceManagementConnectorParameters</a></td>
+<td>At least the property <a
+href="be75f761-4534-fc02-eae0-10a8c2c7cd6d.htm">HostAddress</a> must be
+set before calling this method. The method will read the device
+description so the device must be reachable via the network.
+<ul>
+<li><a
+href="85b8e143-a07c-d13b-c811-667260a59062.htm">UserPasswordHash</a></li>
+<li><a
+href="ce357d58-4e72-489b-d8d0-9cd3c5fee80a.htm">DeviceAuthenticationCodeHash</a></li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[ConnectorParameters Class](a00d43d8-ca1f-e911-2f70-bea37d855086.htm)
+
+[LoadSecurityDataAsync
+Overload](aafd3a26-0081-ca9e-dd40-cfcceb6f0434.htm)
+
+[Knx.Falcon.Configuration
+Namespace](8057f884-553e-ad7e-77ee-8d8d0f07a343.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

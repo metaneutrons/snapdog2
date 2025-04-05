@@ -1,0 +1,467 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn"><h1
+id="ipdevicediscoveryresult-class">IpDeviceDiscoveryResult
+Class</h1></td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+This class provides the result of an IP discovery search
+([DiscoverAsync(CancellationToken)](6c502c09-cd9b-8701-f650-d39ff8f19f7f.htm).
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID0RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID0RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID0RBToggle"
+class="collapseToggle" />Inheritance Hierarchy</span>
+
+<span class="nolink">System<span id="LST907606A0_0"></span></span>
+
+Object  
+  <span class="selflink">Knx.Falcon.Discovery<span id="LST907606A0_1"></span></span>
+
+IpDeviceDiscoveryResult  
+
+**Namespace:**
+ [Knx.Falcon.Discovery](5805e7c7-b21e-0331-8688-ee65017aeb51.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID1EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID1EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID1EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public sealed class IpDeviceDiscoveryResult : IEquatable<IpDeviceDiscoveryResult>
+
+    Public NotInheritable Class IpDeviceDiscoveryResult
+        Implements IEquatable(Of IpDeviceDiscoveryResult)
+
+    public ref class IpDeviceDiscoveryResult sealed : IEquatable<IpDeviceDiscoveryResult^>
+
+    [<SealedAttribute>]
+    type IpDeviceDiscoveryResult =  
+        class
+            interface IEquatable<IpDeviceDiscoveryResult>
+        end
+
+The <span class="selflink">IpDeviceDiscoveryResult</span> type exposes
+the following members.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />Properties</span>
+
+<table id="propertyList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="5656c95f-3478-c7f6-8077-49a12eba6773.htm">CommunicationImpossible</a></td>
+<td><div class="summary">
+Gets the COMMUNICATION_IMPOSSIBLE bit from the medium status if the
+device supports extended device information or <span
+class="keyword"><span id="LST907606A0_2"></span></span>
+if not.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="54b6b81b-dcf0-7404-5029-59331b56afa2.htm">ControlEndpoint</a></td>
+<td><div class="summary">
+Gets the control endpoint of the discovered device
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="80d0013c-c9bb-6e91-e53b-c99e0fc5d482.htm">DiscoveryEndpoint</a></td>
+<td><div class="summary">
+Gets the discovery endpoint
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="70252601-df7c-221e-d7a9-f4eac00775d3.htm">FriendlyName</a></td>
+<td><div class="summary">
+Gets the friendly name of the discovered IP device.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="0bcd7de3-c41e-489a-6627-953ddd8a8134.htm">HostDeviceDeviceDescriptorType0</a></td>
+<td><div class="summary">
+Gets the device descriptor type 0 (mask version) if known from discovery
+or 0 if not.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="d85403d0-a06b-cc92-72c9-ee1501adb9ec.htm">IndividualAddress</a></td>
+<td><div class="summary">
+Gets the host <a
+href="d85403d0-a06b-cc92-72c9-ee1501adb9ec.htm">IndividualAddress</a> of
+the discovered IP device.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="d6ab5c41-30ed-22b1-1bfa-a2f0c72a3351.htm">IsExtensionOf</a></td>
+<td><div class="summary">
+When reported by the asynchronous discovery method: if the extended
+response arrives after the V1 response, this points from the extended
+response to the V1 response. Can be used to filter out duplicates.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="e941030c-fda0-f377-3d23-89a6666ceeac.htm">IsInProgrammingMode</a></td>
+<td><div class="summary">
+Gets a value indicating whether the device is in programming mode.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="ddc0b9fa-5824-61ff-d820-3d68b96f8ace.htm">LocalIPAddress</a></td>
+<td><div class="summary">
+Gets the local IP address which has been used to discover the device.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="fa9c8d07-40fa-fe3a-4700-005426ae7775.htm">MacAddress</a></td>
+<td><div class="summary">
+Gets the MAC address of the discovered IP device.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="d351e6ad-ee68-624f-0345-cd036c0c364e.htm">MaxLocalApduLength</a></td>
+<td><div class="summary">
+Gets the maximum local (i.e. device management) APDU length if known
+from discovery or 0 if not.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="662428cc-5f78-e0c8-284c-c22e551544a5.htm">MaxTunnelingApduLength</a></td>
+<td><div class="summary">
+Gets the maximum tunneling APDU length if known from discovery or 0 if
+not.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="afaf3397-740d-0775-7876-e646aafd549a.htm">MediumStatus</a></td>
+<td><div class="summary">
+Gets the medium status if the device supports extended device
+information or <span class="keyword"><span
+id="LST907606A0_3"></span></span>
+if not.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="71533f8c-8325-502e-8ae4-fb2fa15d1843.htm">MediumType</a></td>
+<td><div class="summary">
+Gets the medium type of the IP device.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="f0fb3b7e-8538-f23b-97f9-9f28c62f3792.htm">MulticastAddress</a></td>
+<td><div class="summary">
+Gets the KNXnet/IP routing multicast address of discovered IP device.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="1c800b11-9781-2be2-f113-92e2521ed653.htm">NetworkAdapterInfo</a></td>
+<td><div class="summary">
+Gets information about the network adapter which has been used to
+discover the device. Might be <span class="keyword"><span
+id="LST907606A0_4"></span></span>
+.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="080cd8e0-70f5-2cb7-07e4-73ffd3a4834f.htm">ProjectInstallationIdentifier</a></td>
+<td><div class="summary">
+Gets the project installation identifier.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="4f8fad4b-67d8-c5b6-ddf9-e11005197d3b.htm">SecuredServiceFamilies</a></td>
+<td><div class="summary">
+Gets information about the security for supported KNXnet/IP services.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="14395c2d-0e61-73cc-1b77-4760ae82dd16.htm">SerialNumber</a></td>
+<td><div class="summary">
+Gets the KNX SerialNumber of the discovered IP device.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="3ef0c3d5-b1c9-5945-b087-b2dadae0c378.htm">SupportedServiceFamilies</a></td>
+<td><div class="summary">
+Gets the supported KNXnet/IP service families.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubproperty.gif" title="Public property"
+alt="Public property" /></td>
+<td><a
+href="a05f911a-db5d-1b57-4769-454a3d5def68.htm">TunnelingSlots</a></td>
+<td><div class="summary">
+Gets the available tunneling slots of the discovered IP device.
+</div></td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID4RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID4RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID4RBToggle"
+class="collapseToggle" />Methods</span>
+
+<table id="methodList" class="members">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th class="iconColumn"> </th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="251a7507-7298-c8c7-db27-c2e680caab0f.htm">Equals(IpDeviceDiscoveryResult)</a></td>
+<td><div class="summary">
+Indicates whether the current object is equal to another object of the
+same type.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="0476da12-45dc-52ba-0386-df38e1a2c485.htm">Equals(Object)</a></td>
+<td><div class="summary">
+Determines whether the specified object is equal to the current object.
+</div>
+(Overrides <span class="nolink">Object<span
+id="LST907606A0_5"></span></span>
+Equals(Object).)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="0c2d3cd8-eb01-6383-258b-e6b31a7f115a.htm">GetHashCode</a></td>
+<td><div class="summary">
+Serves as the default hash function.
+</div>
+(Overrides <span class="nolink">Object<span
+id="LST907606A0_6"></span></span>
+GetHashCode<span id="LST907606A0_7"></span>
+.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="75304ef7-88f5-a857-7b14-40d2131a99d0.htm">GetTunnelingConnections</a></td>
+<td><div class="summary">
+Returns a list of possible tunneling connections
+</div></td>
+</tr>
+<tr data="public;inherited;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><span class="nolink">GetType</span></td>
+<td><div class="summary">
+Gets the <span class="nolink">Type</span> of the current instance.
+</div>
+(Inherited from <span class="nolink">Object</span>.)</td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="341f0bb2-b3a4-7d4e-2ae7-3f95bf8c0531.htm">HasSecuredServiceFamilies(<span
+id="LST907606A0_8"></span></a>
+SecuredServiceFamily<span id="LST907606A0_9"></span>
+)</td>
+<td><div class="summary">
+Verifies that all given service families are secured in at least the
+given version
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="c75ccfa2-cd74-e88a-14d2-e2c151abeddb.htm">HasSecuredServiceFamilies(<span
+id="LST907606A0_10"></span></a>
+ServiceFamily<span id="LST907606A0_11"></span>
+)</td>
+<td><div class="summary">
+Verifies that all given service families are secured in at least version
+1
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="589f6d8a-baca-a68f-de5e-244b7059c686.htm">Supports</a></td>
+<td><div class="summary">
+Checks if a given service family is supported
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a
+href="f0883952-cc9b-bb67-1f4e-c5183171f0c7.htm">ToConnectionString</a></td>
+<td><div class="summary">
+Returns a suitable connection string if the device is a tunneling
+server.
+</div></td>
+</tr>
+<tr data="public;static;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /><img src="../icons/static.gif"
+title="Static member" alt="Static member" /></td>
+<td><a
+href="952ceeb8-6ea2-2309-4c2c-ab7fe71fdee0.htm">ToMediumType</a></td>
+<td><div class="summary">
+Converts a <a
+href="992617b8-4cd5-e630-558a-334eae8a868d.htm">KnxMediumTypes</a> value
+to the first contained <a
+href="ddac3ef6-38cb-a7fd-9315-737c7744e6f0.htm">KnxMediumType</a> value.
+</div></td>
+</tr>
+<tr data="public;declared;notNetfw;">
+<td><img src="../icons/pubmethod.gif" title="Public method"
+alt="Public method" /></td>
+<td><a href="d67580eb-3342-b133-038c-15304020f9d2.htm">ToString</a></td>
+<td><div class="summary">
+Returns a string that represents the current object.
+</div>
+(Overrides <span class="nolink">Object<span
+id="LST907606A0_12"></span></span>
+ToString<span id="LST907606A0_13"></span>
+.)</td>
+</tr>
+</tbody>
+</table>
+
+[Top](#PageHeader)
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID5RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID5RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID5RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[Knx.Falcon.Discovery
+Namespace](5805e7c7-b21e-0331-8688-ee65017aeb51.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium

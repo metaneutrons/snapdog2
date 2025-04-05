@@ -1,0 +1,248 @@
+KNX Falcon SDK
+
+<table class="titleTable">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td class="logoColumn"><img src="../icons/Help.png" /></td>
+<td class="titleColumn">ApplicationLayerException<span
+id="LST9FDEEAC6_0"></span>
+Resource Property</td>
+</tr>
+</tbody>
+</table>
+
+<span class="introStyle"></span>
+
+Gets the addressed device resource (if available)
+
+**Namespace:**  [Knx.Falcon](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)  
+**Assembly:**  Knx.Falcon (in Knx.Falcon.dll) Version: 6.3.0
+\[2024-12-07|33a4f8ce8366fff4f9e3f5340a78dd8664732dba|origin/releases/6.3-profiterole\]
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID1RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID1RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID1RBToggle"
+class="collapseToggle" />Syntax</span>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cs&#39;,&#39;1&#39;,&#39;4&#39;);return false;">C#</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;vb&#39;,&#39;2&#39;,&#39;4&#39;);return false;">VB</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;cpp&#39;,&#39;3&#39;,&#39;4&#39;);return false;">C++</a>
+
+<a href="#"
+onclick="javascript:ChangeTab(&#39;ID0EDCA&#39;,&#39;fs&#39;,&#39;4&#39;,&#39;4&#39;);return false;">F#</a>
+
+<a href="#" id="ID0EDCA_copyCode" class="copyCodeSnippet"
+onclick="javascript:CopyToClipboard(&#39;ID0EDCA&#39;);return false;"
+title="Copy">Copy</a>
+
+    public string Resource { get; }
+
+    Public ReadOnly Property Resource As String
+        Get
+
+    public:
+    property String^ Resource {
+        String^ get ();
+    }
+
+    member Resource : string with get
+
+#### Property Value
+
+Type: <span class="nolink">String</span>  
+The device resource indication.
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID2RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID2RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID2RBToggle"
+class="collapseToggle" />Remarks</span>
+
+This is only relevant if
+[Cause](9354d43d-c750-c799-eebb-7e0c0b10acea.htm) is one of
+[ReadResourceFailed](9abb52c7-60f4-f185-422a-1945fde3abe5.htm),
+[WriteResourceFailed](9abb52c7-60f4-f185-422a-1945fde3abe5.htm),
+[VerifyWriteFailed](9abb52c7-60f4-f185-422a-1945fde3abe5.htm). The
+content formatted as follows:
+
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr>
+<td><span class="code">memtype</span>(<span class="code">addr</span>,
+<span class="code">len</span>)</td>
+<td><div class="tableSection">
+<table>
+<tbody>
+<tr>
+<td><span class="code">memtype</span></td>
+<td>Memory, UserMemory, RouterMemory, RoutingTableMemory,
+MemoryExtended</td>
+</tr>
+<tr>
+<td><span class="code">addr</span></td>
+<td>The start address (hexadecimal)</td>
+</tr>
+<tr>
+<td><span class="code">len</span></td>
+<td>The length in byte (decimal)</td>
+</tr>
+</tbody>
+</table>
+</div></td>
+</tr>
+<tr>
+<td>Property(<span class="code">oidx</span>/<span
+class="code">pid</span>, <span class="code">start</span>, <span
+class="code">count</span>)</td>
+<td><div class="tableSection">
+<table>
+<tbody>
+<tr>
+<td><span class="code">oidx</span></td>
+<td>The interface object index (decimal)</td>
+</tr>
+<tr>
+<td><span class="code">pid</span></td>
+<td>The property ID (decimal)</td>
+</tr>
+<tr>
+<td><span class="code">start</span></td>
+<td>The start element index (decimal)</td>
+</tr>
+<tr>
+<td><span class="code">count</span></td>
+<td>The number of elements (decimal)</td>
+</tr>
+</tbody>
+</table>
+</div></td>
+</tr>
+<tr>
+<td>PropertyExtended(<span class="code">ot</span>*<span
+class="code">inst</span>/<span class="code">pid</span>, <span
+class="code">start</span>, <span class="code">count</span>)</td>
+<td><div class="tableSection">
+<table>
+<tbody>
+<tr>
+<td><span class="code">ot</span></td>
+<td>The interface object type (decimal)</td>
+</tr>
+<tr>
+<td><span class="code">inst</span></td>
+<td>The 1-based instance index (decimal)</td>
+</tr>
+<tr>
+<td><span class="code">pid</span></td>
+<td>The property ID (decimal)</td>
+</tr>
+<tr>
+<td><span class="code">start</span></td>
+<td>The start element index (decimal)</td>
+</tr>
+<tr>
+<td><span class="code">count</span></td>
+<td>The number of elements (decimal)</td>
+</tr>
+</tbody>
+</table>
+</div></td>
+</tr>
+<tr>
+<td>FunctionProperty(<span class="code">oidx</span>/<span
+class="code">pid</span>, <span class="code">data</span>)</td>
+<td><div class="tableSection">
+<table>
+<tbody>
+<tr>
+<td><span class="code">oidx</span></td>
+<td>The interface object index (decimal)</td>
+</tr>
+<tr>
+<td><span class="code">pid</span></td>
+<td>The function property ID (decimal)</td>
+</tr>
+<tr>
+<td><span class="code">data</span></td>
+<td>The command data (hexadecimal)</td>
+</tr>
+</tbody>
+</table>
+</div></td>
+</tr>
+<tr>
+<td>FunctionPropertyExtended(<span class="code">ot</span>*<span
+class="code">inst</span>/<span class="code">pid</span>, <span
+class="code">data</span>)</td>
+<td><div class="tableSection">
+<table>
+<tbody>
+<tr>
+<td><span class="code">ot</span></td>
+<td>The interface object type (decimal)</td>
+</tr>
+<tr>
+<td><span class="code">inst</span></td>
+<td>The 1-based instance index (decimal)</td>
+</tr>
+<tr>
+<td><span class="code">pid</span></td>
+<td>The function property ID (decimal)</td>
+</tr>
+<tr>
+<td><span class="code">data</span></td>
+<td>The command data (hexadecimal)</td>
+</tr>
+</tbody>
+</table>
+</div></td>
+</tr>
+<tr>
+<td>ADC(<span class="code">ch</span>, <span
+class="code">count</span>)</td>
+<td><div class="tableSection">
+<table>
+<tbody>
+<tr>
+<td><span class="code">ch</span></td>
+<td>The ADC channel (decimal)</td>
+</tr>
+<tr>
+<td><span class="code">count</span></td>
+<td>The read count (decimal)</td>
+</tr>
+</tbody>
+</table>
+</div></td>
+</tr>
+</tbody>
+</table>
+
+<span class="collapsibleRegionTitle"
+onclick="SectionExpandCollapse('ID3RB')"
+onkeypress="SectionExpandCollapse_CheckKey('ID3RB', event)"
+tabindex="0"><img src="../icons/SectionExpanded.png" id="ID3RBToggle"
+class="collapseToggle" />See Also</span>
+
+#### Reference
+
+[ApplicationLayerException
+Class](930146f9-220f-7316-ed9b-8b5849a04101.htm)
+
+[Knx.Falcon Namespace](66ba7652-21f2-64b2-fc69-32efe3178fc7.htm)
+
+Copyright © 2010-2024 KNX Association cvba, Brussels, Belgium
