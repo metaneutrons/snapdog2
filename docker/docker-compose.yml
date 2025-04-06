@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  snapdog:
+    build:
+      context: ..
+      dockerfile: docker/snapdog/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      - mosquitto
+      - snapcast-server
+  snapcast-server:
+    build: ./snapcast-server
+    ports:
+      - "127.0.0.1:1704:1704"
+      - "127.0.0.1:1705:1705"
+      - "127.0.0.1:1780:1780"
+      - "127.0.0.1:5555:5555"
+      - "127.0.0.1:5556:5556"
+      - "127.0.0.1:5353:5353"
+    env_file:
+      - .env
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:1883:1883"
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/passwd:/mosquitto/config/passwd
+
+  # Optional metrics and telemetry containers
+  # These services will be automatically enabled if you set ENABLE_METRICS=true
+  # Run with: ENABLE_METRICS=true docker-compose --profile metrics up -d
+  
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    restart: unless-stopped
+    ports:
+      - "16686:16686"  # UI port
+      - "14268:14268"  # Collector port
+    profiles: ["metrics"]
+
+  prometheus:
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    profiles: ["metrics"]
+
+  grafana:
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    profiles: ["metrics"]
