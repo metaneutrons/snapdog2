@@ -1,0 +1,94 @@
+{
+    admin off
+}
+
+:80 {
+    # Main landing page
+    @not_server {
+        not path /server*
+        not path /snapcast*
+        not path /clients*
+    }
+
+    handle @not_server {
+        root * /srv
+        file_server
+        try_files {path} /index.html
+    }
+
+    # Snapcast server - redirect /server to /server/ for proper relative paths
+    @server_exact {
+        path /server
+        path_regexp server ^/server$
+    }
+
+    handle @server_exact {
+        redir * /server/ 301
+    }
+
+    # API endpoints (must come before the general server handler)
+    handle /server/api/v1/* {
+        reverse_proxy http://snapcast-server:1780
+    }
+
+    # Snapcast server with trailing slash
+    handle /server/* {
+        uri strip_prefix /server
+        reverse_proxy http://snapcast-server:1780
+    }
+
+    # WebSocket connections to Snapcast server - direct forward for websocket
+    handle /server/jsonrpc {
+        reverse_proxy http://snapcast-server:1780 {
+            header_up Host {host}
+            header_up Connection {http.request.header.Connection}
+            header_up Upgrade {http.request.header.Upgrade}
+        }
+    }
+
+    # WebSocket connections for control interface
+    handle /snapcast* {
+        uri strip_prefix /snapcast
+        reverse_proxy http://snapcast-server:1705
+    }
+
+    # Redirect for clients
+    @client1_exact {
+        path /clients/1
+        path_regexp client1 ^/clients/1$
+    }
+
+    @client2_exact {
+        path /clients/2
+        path_regexp client2 ^/clients/2$
+    }
+
+    @client3_exact {
+        path /clients/3
+        path_regexp client3 ^/clients/3$
+    }
+
+    handle @client1_exact {
+        redir * /clients/1/ 301
+    }
+
+    handle @client2_exact {
+        redir * /clients/2/ 301
+    }
+
+    # Clients with trailing slashes
+    handle /clients/1/* {
+        uri strip_prefix /clients/1
+        reverse_proxy http://snapcast-client-1:1780
+    }
+
+    handle /clients/2/* {
+        uri strip_prefix /clients/2
+        reverse_proxy http://snapcast-client-2:1780
+    }
+
+    log {
+        output stdout
+        format console
+    }
+}

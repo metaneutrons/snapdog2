@@ -1,0 +1,156 @@
+services:
+  snapdog-dev:
+    image: mcr.microsoft.com/devcontainers/dotnet:9.0
+    volumes:
+      - ..:/workspaces/snapdog:cached
+      - ~/.ssh:/home/vscode/.ssh:ro
+    command: sleep infinity
+    ports:
+      - "5000:5000" # Debugging port
+    depends_on:
+      - mosquitto
+      - snapcast-server
+    env_file:
+      - ./.env
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+      - DOTNET_USE_POLLING_FILE_WATCHER=true
+    entrypoint: /bin/sh -c "while sleep 1000; do :; done"
+    networks:
+      snapdog:
+        ipv4_address: 172.20.0.2
+
+  # MQTT broker
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    restart: unless-stopped
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./mosquitto/passwd:/mosquitto/config/passwd
+      - mosquitto-data:/mosquitto/data
+    ports:
+      - "1883:1883" # MQTT port
+    networks:
+      snapdog:
+        ipv4_address: 172.20.0.3
+
+  # Caddy reverse proxy with landing page
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "8000:80" # Map to port 8000 on host
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy/site:/srv # Mount the landing page site
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - snapcast-server
+      - snapcast-client-1
+      - snapcast-client-2
+      - snapcast-client-3
+    networks:
+      snapdog:
+        ipv4_address: 172.20.0.4
+
+  # Modified Snapcast server without host networking
+  snapcast-server:
+    build:
+      context: ./snapcast-server
+    restart: unless-stopped
+    hostname: snapcast-server
+    container_name: snapcast-server
+    networks:
+      snapdog:
+        ipv4_address: 172.20.0.5
+    ports:
+      - "1704:1704" # Snapcast server port
+      - "1705:1705" # Control port
+      - "1780:1780" # Web interface
+    env_file:
+      - ./.env
+
+  # Base Snapcast client configuration (not directly instantiated)
+  snapcast-client: &snapcast-client-base
+    build:
+      context: ./snapcast-client
+    restart: unless-stopped
+    depends_on:
+      - snapcast-server
+    environment:
+      - SNAPSERVER_HOST=172.20.0.5 # IP address of snapcast-server
+
+  # Living room client
+  snapcast-client-1:
+    <<: *snapcast-client-base
+    environment:
+      - CLIENT_ID=living-room
+      - FIXED_MAC_ADDRESS=02:42:ac:11:00:10
+    networks:
+      snapdog:
+        ipv4_address: 172.20.0.6
+        mac_address: 02:42:ac:11:00:10
+
+  # Kitchen client
+  snapcast-client-2:
+    <<: *snapcast-client-base
+    environment:
+      - CLIENT_ID=kitchen
+      - FIXED_MAC_ADDRESS=02:42:ac:11:00:11
+    networks:
+      snapdog:
+        ipv4_address: 172.20.0.7
+        mac_address: 02:42:ac:11:00:11
+
+  # Bedroom client
+  snapcast-client-3:
+    <<: *snapcast-client-base
+    environment:
+      - CLIENT_ID=bedroom
+      - FIXED_MAC_ADDRESS=02:42:ac:11:00:12
+    networks:
+      snapdog:
+        ipv4_address: 172.20.0.8
+        mac_address: 02:42:ac:11:00:12
+
+  # Optional metrics and telemetry containers
+  # These services will be automatically enabled if you set ENABLE_METRICS=true
+  # Run with: ENABLE_METRICS=true docker-compose --profile metrics up -d
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    restart: unless-stopped
+    ports:
+      - "16686:16686"  # UI port
+      - "14268:14268"  # Collector port
+    profiles: ["metrics"]
+
+  prometheus:
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    profiles: ["metrics"]
+
+  grafana:
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    profiles: ["metrics"]
+
+
+volumes:
+  mosquitto-data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  snapdog:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

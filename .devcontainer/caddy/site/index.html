@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnapDog - Multi-room Audio System</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-dog fa-3x"></i>
+                <h1>SnapDog</h1>
+            </div>
+            <p class="subtitle">Smart Multi-room Audio System</p>
+        </header>
+
+        <main>
+            <div class="cards">
+                <a href="/server/" class="card server-card">
+                    <div class="card-icon">
+                        <i class="fas fa-server fa-3x"></i>
+                    </div>
+                    <h2>Snapcast Server</h2>
+                    <p>Manage your multi-room audio server, configure streams, and monitor system status.</p>
+                    <div class="card-footer">
+                        <span class="access-now">Access Now <i class="fas fa-arrow-right"></i></span>
+                    </div>
+                </a>
+
+                <a href="/clients/1/" class="card client-card">
+                    <div class="card-icon">
+                        <i class="fas fa-music fa-3x"></i>
+                    </div>
+                    <h2>Living Room</h2>
+                    <p>Control the client in your living room, adjust volume, and configure audio settings.</p>
+                    <div class="card-footer">
+                        <span class="access-now">Access Now <i class="fas fa-arrow-right"></i></span>
+                    </div>
+                </a>
+
+                <a href="/clients/2/" class="card client-card">
+                    <div class="card-icon">
+                        <i class="fas fa-utensils fa-3x"></i>
+                    </div>
+                    <h2>Kitchen</h2>
+                    <p>Control the client in your kitchen, adjust volume, and configure audio settings.</p>
+                    <div class="card-footer">
+                        <span class="access-now">Access Now <i class="fas fa-arrow-right"></i></span>
+                    </div>
+                </a>
+            </div>
+
+            <div class="info-section">
+                <div class="info-card">
+                    <h3><i class="fas fa-info-circle"></i> About SnapDog</h3>
+                    <p>SnapDog is a smart multi-room audio control system built on top of Snapcast. It provides seamless
+                        audio synchronization across multiple rooms, integration with smart home platforms, and rich
+                        media control features.</p>
+                </div>
+
+                <div class="info-card">
+                    <h3><i class="fas fa-code"></i> Development Environment</h3>
+                    <p>This is a development container with preconfigured services for SnapDog development. Use the links above to access 
+                       the Snapcast server and client interfaces.</p>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>SnapDog Development Docker Container - &copy; 2025 Fabian Schmieder - <a
+                    href="https://github.com/metaneutrons/SnapDog" target="_blank">GitHub Repository</a></p>
+        </footer>
+    </div>
+
+    <script src="scripts.js"></script>
+</body>
+
+</html>
