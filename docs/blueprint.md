@@ -30,8 +30,6 @@ SnapDog2 is designed to address several common smart home audio scenarios:
 * **Centralized Entertainment Hub**: Acting as the primary control point for music playback, accessible through various smart home interfaces (wall panels using MQTT/KNX, mobile apps via the REST API, voice assistants via custom integrations).
 * **IoT & Programmatic Audio Control**: Allowing other applications or scripts on the local network to control audio playback programmatically using well-defined protocols (MQTT, REST API), enabling custom integrations or advanced automation scenarios beyond typical smart home platforms.
 
----
-
 # 2 Coding Style & Conventions
 
 ## 2.1 Overview
@@ -514,8 +512,6 @@ Enforced via `stylecop.json` / build: Public API Docs (SA1600+), File Headers (S
 }
 ```
 
----
-
 # 3 System Architecture
 
 ## 3.1 High-Level Architecture
@@ -716,8 +712,6 @@ The application's entry point and composition root. Depends on all other layers 
 * **DI Extensions (`/Worker/DI`)**: Static classes with extension methods (e.g., `AddCoreServices`, `AddInfrastructureServices`, `AddApiServices`, `AddCommandProcessing`) to organize service registration.
 * **`GlobalUsings.cs`**: Defines global using directives for common namespaces.
 
----
-
 # 4 Core Components & State Management
 
 ## 4.1 Core Structure Overview
@@ -899,8 +893,6 @@ Relies on:
 3. **Resilience Policies**: Polly for external calls (Sec 7).
 4. **Graceful Degradation**: Attempt to function if optional services fail. Log critical failures robustly.
 5. **Error Notifications**: `ERROR_STATUS` via MediatR/MQTT for critical system issues (Sec 9.2).
-
----
 
 # 5 Cross-Cutting Concerns
 
@@ -1230,8 +1222,6 @@ These cross-cutting concerns interact seamlessly:
 * **Validation (Sec 5.4) & Result (Sec 5.1):** `ValidationBehavior` runs early in the MediatR pipeline. If validation fails, it throws `ValidationException`, preventing the command handler from executing. This exception does *not* typically result in a `Result.Failure` directly from the handler but is handled by higher-level middleware to produce an appropriate error response.
 * **Logging (Sec 5.2) & Telemetry (Sec 13):** Logs are automatically enriched with `TraceId` and `SpanId` from the current OpenTelemetry `Activity`. Events like resilience retries, validation failures, command handling start/end, and `Result` failures are logged with structured context.
 * **Metrics (Sec 13) & Handlers/Behaviors:** The `PerformanceBehavior` (Sec 6.4.3) uses `IMetricsService` to record durations and success/failure counts of MediatR requests. Other specific metrics can be recorded directly where relevant actions occur.
-
----
 
 # 6 MediatR Implementation (Server Layer)
 
@@ -1821,8 +1811,6 @@ Adapters (API Controllers, MQTT Service, KNX Service) convert external inputs in
 
 Core Managers (`/Server/Managers`) or Services (`/Server/Features`) publish `INotification` objects via `IMediator.Publish()` after successfully changing state. Infrastructure Handlers (`/Infrastructure/*` or `/Server/*`) subscribe to these notifications to push updates externally (MQTT, KNX, SignalR etc.)
 
----
-
 # 7 Fault Tolerance Implementation (Infrastructure Layer)
 
 ## 7.1 Overview
@@ -2116,8 +2104,6 @@ public static class ResilienceExtensions
 Resilience policies are primarily configured during DI setup using `HttpClientFactory` extensions or defined within services that utilize them directly (injecting `ILogger` for the policy's use).
 
 By implementing these patterns, SnapDog2 gains robustness against common transient issues, leading to improved stability and user experience. Failures that persist after resilience attempts are converted to `Result.Failure`, allowing higher-level logic to handle them gracefully.
-
----
 
 # 8 Security Implementation (API Layer)
 
@@ -2563,8 +2549,6 @@ public partial class SecurityLogger : ISecurityLogger
 Register in DI: `services.AddSingleton<ISecurityLogger, SecurityLogger>();`
 
 This security implementation provides essential API protection suitable for the intended trusted network environment, incorporating standard security practices and allowing for future enhancements if needed.
-
----
 
 # 9 Command Framework
 
@@ -3045,8 +3029,6 @@ Published to `{clientBaseTopic}/state`.
   "timestamp": "2025-04-05T21:30:00Z"
 }
 ```
-
----
 
 # 10 Configuration System
 
@@ -3576,8 +3558,6 @@ public static partial class ConfigurationValidator
 }
 ```
 
----
-
 # 11 API Specification
 
 ## 11.1 API Design Philosophy
@@ -3823,8 +3803,6 @@ Responses *may* include a `_links` object with hypermedia controls for related a
 * Generate OpenAPI specification automatically from code (controllers, DTOs, XML comments).
 * Expose interactive Swagger UI at `/swagger/index.html`.
 * Configure Swashbuckle in `/Worker/DI/ApiExtensions.cs` or `Program.cs` to include XML comments, describe security schemes (API Key), etc.
-
----
 
 # 12 Infrastructure Services Implementation
 
@@ -4074,8 +4052,6 @@ Implements `IMediaPlayerService` using **`LibVLCSharp` (3.8.2)**.
   * Implements `StopAsync`, `PauseAsync` by calling corresponding `mediaPlayer` methods.
   * Subscribes to `MediaPlayer` events (`EndReached`, `EncounteredError`). Event handlers publish MediatR notifications (e.g., `TrackEndedNotification`, `PlaybackErrorNotification`).
   * Implements `IAsyncDisposable` to stop all players and dispose `MediaPlayer` and `LibVLC` instances.
-
----
 
 # 13 Metrics and Telemetry (Infrastructure Layer)
 
@@ -4462,8 +4438,6 @@ public partial class SubsonicService : ISubsonicService
 
 Ensure Serilog (or chosen logging provider) is configured with OpenTelemetry integration (`loggingBuilder.AddOpenTelemetry(...)` in DI setup) and output templates include `{TraceId}` and `{SpanId}`. This automatically links logs to the currently active trace span.
 
----
-
 # 14 Zone-to-Client Mapping Strategy (Server Layer)
 
 ## 14.1 Overview
@@ -4604,8 +4578,6 @@ public static class CoreServicesExtensions
 ```
 
 This detailed strategy ensures SnapDog2 maintains its own logical view of zones and clients while staying synchronized with the underlying Snapcast server state in an adaptive manner.
-
----
 
 # 15 Development Environment
 
@@ -5013,8 +4985,6 @@ Continuous Integration ensures code quality and produces build artifacts. A typi
 9. **(Optional - Separate Workflow/Job) Container Build**: Build production Docker image (See Section 17).
 10. **(Optional - Separate Workflow/Job) Publish**: Push Docker image to registry (e.g., Docker Hub, GHCR).
 
----
-
 # 16 Dependencies
 
 This section meticulously documents the external software dependencies required by the SnapDog2 project, including the .NET framework version, essential NuGet packages, and necessary native libraries or external services. Managing these dependencies effectively is crucial for application stability, security, and maintainability.
@@ -5226,8 +5196,6 @@ These are required at runtime in the execution environment (e.g., within the Doc
 * **KNX Interface**: Requires a compatible physical KNX gateway (IP Tunneling/Routing) or USB Interface connected to the network or host machine accessible by SnapDog2. Appropriate OS-level drivers may be required for USB interfaces.
 * **`knxd` (Testing Only):** Required **for running KNX integration tests** without physical hardware. Should be run within a Docker container managed by Testcontainers during the test execution lifecycle.
 
----
-
 # 17 Docker Infrastructure
 
 SnapDog2 is designed primarily for containerized deployment using Docker and Docker Compose. This approach provides process isolation, simplifies dependency management (especially for native libraries like LibVLC and external services like Snapcast/MQTT), ensures environment consistency, and facilitates scalable deployments.
@@ -5310,20 +5278,20 @@ graph TD
 
 ## 17.2 `snapserver` Container Customization
 
-A standard Snapcast server image might not suffice. A customized image (e.g., built from `/docker/snapserver/Dockerfile`) is recommended to implement the required zone-to-sink architecture.
+A standard Snapcast server image is usualy not sufficent. A customized image (built from `/docker/snapserver/Dockerfile`) is recommended to implement the required zone-to-sink architecture.
 
 **Key Customizations:**
 
 1. **Named Pipe (FIFO) Sinks:** The Snapcast server configuration (`snapserver.conf`) must define `pipe` sources, one for each configured SnapDog2 zone. The paths for these pipes must match the `SNAPDOG_ZONE_n_SINK` environment variables used by the `snapdog` application (e.g., `/snapsinks/zone1`, `/snapsinks/zone2`). These paths should typically be mounted as a volume shared between the `snapdog` and `snapserver` containers or exist within the `snapserver` container where the `snapdog` container can write to them (less common).
 
     ```ini
-    # Example section in snapserver.conf (generated dynamically potentially)
+    # Example section in snapserver.conf (generated dynamically from env vars)
     [stream]
-    source = pipe:///snapsinks/zone1?name=Zone 1 FIFO&sampleformat=48000:16:2
+    source = pipe:///snapsinks/zone1?name=Zone1&sampleformat=48000:16:2
     # ... other stream settings ...
 
     [stream]
-    source = pipe:///snapsinks/zone2?name=Zone 2 FIFO&sampleformat=48000:16:2
+    source = pipe:///snapsinks/zone2?name=Zone2&sampleformat=48000:16:2
     # ... other stream settings ...
     ```
 
@@ -5572,8 +5540,6 @@ Run commands:
 * Core + Media: `docker compose --profile media up -d`
 * Core + Media + Metrics: `docker compose --profile media --profile metrics up -d`
 
----
-
 # 18 Testing Strategy
 
 A comprehensive, multi-layered testing strategy is essential for ensuring the quality, correctness, reliability, and maintainability of the SnapDog2 application. This strategy emphasizes testing components at different levels of integration, providing fast feedback during development while also verifying end-to-end functionality. The tests will reside initially within a single test project (`/tests/SnapDog2.Tests`), potentially organized into subfolders based on the test type (`/Unit`, `/Integration`, `/Api`).
@@ -5648,8 +5614,6 @@ The strategy follows the principles of the testing pyramid/trophy, prioritizing 
   * Run Unit & Internal Integration tests on every commit/PR.
   * Run Testcontainer Integration & API tests nightly or on merge to main branches (due to longer execution time).
   * Fail build on test failures. Report coverage changes.
-
----
 
 # 19 Deployment and Operations
 
@@ -5866,8 +5830,6 @@ Comprehensive monitoring is crucial for ensuring reliable operation.
 * **Environment Variables:** Primary mechanism for passing secrets (API Keys, passwords). Load from `.env` file (ensure `.env` is not committed to Git) or orchestration platform secrets (Docker Swarm Secrets, Kubernetes Secrets).
 * **Avoid Hardcoding:** Never store secrets directly in configuration files (`stylecop.json`, `appsettings.json`, `docker-compose.yml`) or source code.
 
----
-
 # 20 Appendices
 
 This section contains supplementary information, including a glossary of terms, references to external systems and design patterns, and specific technical details like KNX Datapoint mappings.
@@ -6048,8 +6010,6 @@ This table lists application-specific `ErrorCode` strings used within the `Error
 | `API_`            | API Layer           | `API_BAD_REQUEST`, `API_UNAUTHORIZED`, `API_NOT_FOUND`, `API_VALIDATION` | Errors originating from API request handling |
 | `INTERNAL_`       | General/Core        | `INTERNAL_UNHANDLED_EXCEPTION`, `INTERNAL_MAPPING_ERROR` | Unexpected or internal application errors   |
 
----
-
 # 21 Implementation Plan
 
 ## 21.1 Overview
@@ -6170,8 +6130,6 @@ This implementation plan outlines a phased approach for developing SnapDog2, pri
 * `[ ]` **8.3:** Write comprehensive user documentation: Setup instructions (Docker, potentially bare metal), detailed configuration guide, API usage examples, MQTT topic/payload reference, KNX GA usage guide, basic troubleshooting steps.
 * `[ ]` **8.4:** Update project README with overview, features, build/run instructions, link to full documentation.
 * `[ ]` **8.5:** Tag final release version in Git. Create release artifacts (e.g., Docker images published to registry).
-
----
 
 # 22 Achieving High-Quality Code (AI & Human Collaboration)
 
