@@ -22,11 +22,6 @@ The development of SnapDog2 is guided by the following fundamental objectives:
 SnapDog2 is designed to address several common smart home audio scenarios:
 
 * **Multi-Room Audio Playback**: Enabling users to play the same music perfectly synchronized across multiple rooms (e.g., party mode) or play different audio streams independently in different zones (e.g., news in the kitchen, music in the living room) using Snapcast clients (like Raspberry Pis with DACs connected to amplifiers/speakers).
-* **Smart Home Scene Integration**: Integrating audio control directly into home automation routines. Examples include:
-  * Automatically playing a "Welcome Home" playlist in specific zones when the user arrives.
-  * Including "Pause Audio" actions in "Movie Night" scenes.
-  * Gradually increasing volume in the bedroom as part of a "Wake Up" alarm sequence.
-  * Muting audio zones automatically when a doorbell or phone call is detected (via MQTT/KNX events).
 * **Centralized Entertainment Hub**: Acting as the primary control point for music playback, accessible through various smart home interfaces (wall panels using MQTT/KNX, mobile apps via the REST API, voice assistants via custom integrations).
 * **IoT & Programmatic Audio Control**: Allowing other applications or scripts on the local network to control audio playback programmatically using well-defined protocols (MQTT, REST API), enabling custom integrations or advanced automation scenarios beyond typical smart home platforms.
 
