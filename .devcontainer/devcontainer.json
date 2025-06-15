@@ -1,6 +1,6 @@
 {
   "name": "SnapDog2 Development",
-  "dockerComposeFile": "../docker-compose.dev.yml",
+  "dockerComposeFile": "docker-compose.yml",
   "service": "devcontainer",
   "workspaceFolder": "/workspace",
   "customizations": {
@@ -29,22 +29,16 @@
   },
   "remoteUser": "vscode",
   "shutdownAction": "stopCompose",
-  // Port forwarding from host to container
-  // 5001 -> 5000: API port (changed from 5000 to avoid conflicts with AirPlay on macOS)
-  // 16686: Jaeger UI (when metrics enabled)
-  // 9090: Prometheus (when metrics enabled)
-  // 3000: Grafana (when metrics enabled)
+  "postCreateCommand": "dotnet restore",
   "forwardPorts": [
     5001,
     16686,
     9090,
     3000
   ],
-  // The ENABLE_METRICS environment variable can be used to automatically uncomment
-  // the metrics containers in docker-compose.dev.yml
   "remoteEnv": {
     "DOTNET_ENVIRONMENT": "Development",
     "ASPNETCORE_ENVIRONMENT": "Development",
-    "ENABLE_METRICS": "true" // Uncomment to enable metrics containers
+    "ENABLE_METRICS": "true"
   }
 }

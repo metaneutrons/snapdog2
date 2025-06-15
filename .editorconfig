@@ -7,9 +7,10 @@ indent_style = space
 indent_size = 4
 insert_final_newline = true
 trim_trailing_whitespace = true
+max_line_length = 120
 
 # Microsoft .NET properties
-csharp_new_line_before_members_in_object_initializers = false
+csharp_new_line_before_members_in_object_initializers = true
 csharp_preferred_modifier_order = private, public, async, internal, file, new, protected, override, abstract, sealed, virtual, static, extern, unsafe, volatile, readonly, required:suggestion
 csharp_preserve_single_line_blocks = true
 csharp_using_directive_placement = inside_namespace:silent
@@ -17,41 +18,6 @@ dotnet_style_qualification_for_event = true:suggestion
 dotnet_style_qualification_for_field = true:suggestion
 dotnet_style_qualification_for_method = true:suggestion
 dotnet_style_qualification_for_property = true:suggestion
-
-# ReSharper properties
-resharper_blank_lines_around_single_line_auto_property = 1
-resharper_blank_lines_before_single_line_comment = 1
-resharper_braces_for_for = required
-resharper_braces_for_foreach = required
-resharper_braces_for_ifelse = not_required
-resharper_braces_redundant = false
-resharper_csharp_insert_final_newline = true
-resharper_csharp_keep_blank_lines_in_code = 1
-resharper_csharp_keep_blank_lines_in_declarations = 1
-resharper_csharp_keep_existing_enum_arrangement = false
-resharper_csharp_max_line_length = 169
-resharper_csharp_wrap_after_declaration_lpar = true
-resharper_csharp_wrap_arguments_style = chop_if_long
-resharper_csharp_wrap_parameters_style = chop_if_long
-resharper_fsharp_insert_final_newline = false
-resharper_html_insert_final_newline = false
-resharper_keep_existing_declaration_block_arrangement = false
-resharper_keep_existing_declaration_parens_arrangement = false
-resharper_keep_existing_primary_constructor_declaration_parens_arrangement = false
-resharper_parentheses_redundancy_style = remove
-resharper_place_accessorholder_attribute_on_same_line = false
-resharper_place_expr_accessor_on_single_line = true
-resharper_place_expr_property_on_single_line = true
-resharper_place_simple_initializer_on_single_line = false
-resharper_resx_insert_final_newline = false
-resharper_shaderlab_insert_final_newline = false
-resharper_T4_insert_final_newline = false
-resharper_vb_insert_final_newline = false
-resharper_wrap_array_initializer_style = chop_if_long
-resharper_wrap_object_and_collection_initializer_style = chop_always
-resharper_wrap_primary_constructor_parameters_style = chop_always
-resharper_xmldoc_insert_final_newline = false
-resharper_xml_insert_final_newline = false
 
 [*.cs]
 # C# formatting rules
@@ -73,20 +39,21 @@ dotnet_naming_style.interface_style.required_prefix = I
 # Private field naming
 dotnet_naming_rule.private_field_naming.symbols = private_field_symbol
 dotnet_naming_rule.private_field_naming.style = private_field_style
-dotnet_naming_rule.private_field_naming.severity = suggestion
+dotnet_naming_rule.private_field_naming.severity = warning
 dotnet_naming_symbols.private_field_symbol.applicable_kinds = field
-dotnet_naming_symbols.private_field_symbol.applicable_accessibilities = private
+dotnet_naming_symbols.private_field_symbol.applicable_accessibilities = private, protected, protected_internal
 dotnet_naming_style.private_field_style.capitalization = camel_case
+dotnet_naming_style.private_field_style.required_prefix = _
 
 # Constant naming
 dotnet_naming_rule.constant_naming.symbols = constant_symbol
 dotnet_naming_rule.constant_naming.style = pascal_case_style
-dotnet_naming_rule.constant_naming.severity = suggestion
+dotnet_naming_rule.constant_naming.severity = warning
 dotnet_naming_symbols.constant_symbol.applicable_kinds = field
 dotnet_naming_symbols.constant_symbol.required_modifiers = const
 
 # Code style
-csharp_prefer_braces = true:silent
+csharp_prefer_braces = true:warning
 csharp_style_expression_bodied_methods = false:silent
 csharp_style_expression_bodied_constructors = false:silent
 csharp_style_expression_bodied_properties = true:silent
@@ -126,9 +93,11 @@ csharp_indent_braces = false
 # Static readonly fields
 dotnet_naming_rule.static_readonly_fields.severity = suggestion
 dotnet_naming_rule.static_readonly_fields.symbols = static_readonly_fields
-dotnet_naming_rule.static_readonly_fields.style = pascal_case_style
+dotnet_naming_rule.static_readonly_fields.style = static_readonly_style
 dotnet_naming_symbols.static_readonly_fields.applicable_kinds = field
 dotnet_naming_symbols.static_readonly_fields.required_modifiers = static, readonly
+dotnet_naming_style.static_readonly_style.capitalization = camel_case
+dotnet_naming_style.static_readonly_style.required_prefix = _
 
 [*.{json,yml,yaml,xml,csproj,props,targets}]
 indent_size = 2
