@@ -4964,11 +4964,11 @@ Utilizes standard .NET CLI tooling, enhanced by scripts or IDE tasks for conveni
 
 These commands are run within the Dev Container's terminal:
 
-1. **Restore Dependencies**: `dotnet restore src/SnapDog2.sln` (or project file). Usually run automatically by `postCreateCommand` or the IDE.
-2. **Build**: `dotnet build src/SnapDog2.sln` (builds in `Debug` configuration by default). Use `dotnet build src/SnapDog2.sln -c Release` for Release build checks.
-3. **Run Tests**: `dotnet test tests/SnapDog2.Tests/SnapDog2.Tests.csproj` (or solution file). Runs all tests discovered in the specified project/solution. Add `-c Release` for Release config.
-4. **Format Code**: `dotnet format src/SnapDog2.sln` Checks formatting against `.editorconfig`. Use `--verify-no-changes` in CI.
-5. **Run Application**: `dotnet run --project src/SnapDog2/SnapDog2.csproj`. Starts the main application using Kestrel, listening on the port defined by `ASPNETCORE_URLS` (e.g., 8080 inside the container).
+1. **Restore Dependencies**: `dotnet restore SnapDog2.sln` (or project file). Usually run automatically by `postCreateCommand` or the IDE.
+2. **Build**: `dotnet build SnapDog2.sln` (builds in `Debug` configuration by default). Use `dotnet build SnapDog2.sln -c Release` for Release build checks.
+3. **Run Tests**: `dotnet test SnapDog2.Tests/SnapDog2.Tests.csproj` (or solution file). Runs all tests discovered in the specified project/solution. Add `-c Release` for Release config.
+4. **Format Code**: `dotnet format SnapDog2.sln` Checks formatting against `.editorconfig`. Use `--verify-no-changes` in CI.
+5. **Run Application**: `dotnet run --project SnapDog2/SnapDog2.csproj`. Starts the main application using Kestrel, listening on the port defined by `ASPNETCORE_URLS` (e.g., 8080 inside the container).
 
 ### 15.3.2 Build Automation (CI/CD - e.g., GitHub Actions)
 
@@ -5320,7 +5320,7 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS build
 WORKDIR /src
 
 # Copy project and solution files
-COPY ["src/SnapDog2/SnapDog2.csproj", "src/SnapDog2/"]
+COPY ["SnapDog2/SnapDog2.csproj", "src/SnapDog2/"]
 # Add COPY commands for other projects if structure differs (.Core, .Server, .Infrastructure, etc.)
 COPY ["Directory.Packages.props", "./"]
 COPY ["NuGet.config", "./"]
@@ -5332,7 +5332,7 @@ RUN dotnet restore "src/SnapDog2/SnapDog2.csproj"
 COPY . .
 
 # Build and publish application
-WORKDIR "/src/src/SnapDog2"
+WORKDIR "/src/SnapDog2"
 RUN dotnet publish "SnapDog2.csproj" -c Release -o /app/publish --no-restore /p:UseAppHost=false
 
 # Stage 2: Final Runtime Image
@@ -5542,18 +5542,18 @@ Run commands:
 
 # 18 Testing Strategy
 
-A comprehensive, multi-layered testing strategy is essential for ensuring the quality, correctness, reliability, and maintainability of the SnapDog2 application. This strategy emphasizes testing components at different levels of integration, providing fast feedback during development while also verifying end-to-end functionality. The tests will reside initially within a single test project (`/tests/SnapDog2.Tests`), potentially organized into subfolders based on the test type (`/Unit`, `/Integration`, `/Api`).
+A comprehensive, multi-layered testing strategy is essential for ensuring the quality, correctness, reliability, and maintainability of the SnapDog2 application. This strategy emphasizes testing components at different levels of integration, providing fast feedback during development while also verifying end-to-end functionality. The tests will reside initially within a single test project (`SnapDog2.Tests`), potentially organized into subfolders based on the test type (`/Unit`, `/Integration`, `/Api`).
 
 ## 18.1 Test Types and Goals
 
 The strategy follows the principles of the testing pyramid/trophy, prioritizing different types of tests based on their scope, speed, and purpose:
 
-1. **Unit Tests (`/tests/SnapDog2.Tests/Unit/`)**
+1. **Unit Tests (`SnapDog2.Tests/Unit/`)**
     * **Goal:** Verify the correctness of the smallest testable parts of the software (individual classes or methods) in complete isolation from their dependencies. These tests should be very fast, stable, and provide immediate feedback to developers as they write code. The target is high code coverage for critical business logic.
     * **Scope:** Focuses on classes within the `/Core` layer (e.g., utility functions, model validation if any) and especially the `/Server` layer (MediatR Handlers, Managers like `ZoneManager`, `ClientManager`, `PlaylistManager`, Validators, individual `ZoneService` logic). Simple logic within `/Infrastructure` or `/Api` layers can also be unit tested if isolated.
     * **Technique:** Utilize the xUnit testing framework. All external dependencies (interfaces from `/Core/Abstractions`, `ILogger`, `IMediator`) **must** be mocked using a mocking framework like Moq. Tests focus on verifying the internal logic of the unit under test: conditional paths, calculations, state transitions (for stateful services tested in isolation), validation rule enforcement, handling of input parameters, edge cases (nulls, empty collections, boundary values), and correct return values (including `Result` states). Assertions are made using a fluent assertion library like FluentAssertions for readability.
 
-2. **Integration Tests (`/tests/SnapDog2.Tests/Integration/`)**
+2. **Integration Tests (`SnapDog2.Tests/Integration/`)**
     * **Goal:** Verify the interaction and collaboration *between* different internal components of SnapDog2 or between SnapDog2 and real (or simulated via containers) external dependencies. These tests ensure that components work together correctly through their defined interfaces or message contracts (MediatR). They are slower than unit tests but provide higher confidence in component integration.
     * **Scope & Technique - Sub-Types:**
         * **Internal Component Integration Tests:** Verify interactions within the application boundary, such as the MediatR pipeline flow or the collaboration between a MediatR handler and a Core Manager. Use the .NET `IServiceCollection`/`ServiceProvider` to build a limited DI container for the test, registering real implementations of the components under test (e.g., the handler, the manager, pipeline behaviors) but mocking the outermost infrastructure *interfaces* (`ISnapcastService`, `IKnxService`, `IMqttService`, `ISubsonicService`). This validates the internal wiring and logic flow without hitting actual external systems.
@@ -5564,7 +5564,7 @@ The strategy follows the principles of the testing pyramid/trophy, prioritizing 
             * **Snapcast (Optional/Complex):** Testing `SnapcastService` against a containerized Snapcast server is possible but might be complex to automate state verification fully. An alternative is more thorough mocking of `ISnapcastService` in internal integration tests, combined with focused manual testing against a real Snapcast server during development.
     * **Tools:** xUnit, Testcontainers-dotnet (for Mosquitto, Navidrome, knxd), Moq (for mocking boundaries not covered by containers), FluentAssertions.
 
-3. **API / Functional Tests (`/tests/SnapDog2.Tests/Api/`)**
+3. **API / Functional Tests (`SnapDog2.Tests/Api/`)**
     * **Goal:** Verify end-to-end functionality and application behavior from the perspective of an external API client, simulating real user interactions or system integrations. These are the slowest tests but provide the highest confidence that the system meets functional requirements.
     * **Scope:** Treat the fully deployed application stack (SnapDog2 application + dependent services like MQTT, Snapcast, Subsonic, running via `docker compose`) as a black box. Interact *exclusively* through the defined REST API endpoints (Section 11).
     * **Technique:**
@@ -6021,8 +6021,8 @@ This implementation plan outlines a phased approach for developing SnapDog2, pri
 *Goal: Establish the basic solution structure, tooling, configurations, and CI pipeline.*
 
 * `[ ]` **0.1:** Initialize Git repository with a standard .NET `.gitignore` file.
-* `[ ]` **0.2:** Create solution (`SnapDog2.sln`) using `dotnet new sln`. Create the main web API project (`dotnet new webapi -n SnapDog2 -o src/SnapDog2 --framework net9.0`). Create the test project (`dotnet new xunit -n SnapDog2.Tests -o tests/SnapDog2.Tests --framework net9.0`). Add both projects to the solution.
-* `[ ]` **0.3:** Establish the primary folder structure within `src/SnapDog2`: `/Core`, `/Server`, `/Infrastructure`, `/Api`, `/Worker`. Create subfolders as needed (e.g., `/Core/Abstractions`, `/Core/Models`, `/Server/Features`, `/Infrastructure/Snapcast`). Add initial `.gitkeep` files to empty folders if required.
+* `[ ]` **0.2:** Create solution (`SnapDog2.sln`) using `dotnet new sln`. Create the main web API project (`dotnet new webapi -n SnapDog2 -o SnapDog2 --framework net9.0`). Create the test project (`dotnet new xunit -n SnapDog2.Tests -o SnapDog2.Tests --framework net9.0`). Add both projects to the solution.
+* `[ ]` **0.3:** Establish the primary folder structure within `SnapDog2`: `/Core`, `/Server`, `/Infrastructure`, `/Api`, `/Worker`. Create subfolders as needed (e.g., `/Core/Abstractions`, `/Core/Models`, `/Server/Features`, `/Infrastructure/Snapcast`). Add initial `.gitkeep` files to empty folders if required.
 * `[ ]` **0.4:** Create and configure `.editorconfig` and `stylecop.json` files at the solution root with rules specified in Section 1. Update `SnapDog2.csproj` to enable Nullable context (`<Nullable>enable</Nullable>`) and XML documentation file generation (`<GenerateDocumentationFile>true</GenerateDocumentationFile>`), suppressing warning `1591` initially.
 * `[ ]` **0.5:** Create `Directory.Packages.props` at the solution root. Enable Central Package Management (`<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>`). Add initial `<PackageVersion>` entries for core dependencies: `Microsoft.Extensions.Hosting`, `MediatR`, `Serilog.AspNetCore`, `StyleCop.Analyzers`, `SonarAnalyzer.CSharp`, `Microsoft.CodeAnalysis.NetAnalyzers`. Reference analyzers in `SnapDog2.csproj` using `<PackageReference Include="..." Version="" PrivateAssets="all" />`.
 * `[ ]` **0.6:** Implement `/Worker/Program.cs` with minimal `WebApplication.CreateBuilder` and `app.Run()`. Configure Serilog via `builder.Host.UseSerilog()` using the basic Console sink setup from Section 5.2. Create `/Worker/GlobalUsings.cs` and add common `System.*` namespaces.
