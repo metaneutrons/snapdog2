@@ -28,6 +28,7 @@ These packages provide fundamental application building blocks and utility funct
 | `System.Reactive`                 | `6.0.1`          | Reactive Extensions library                    | *(Only if explicitly used for complex event processing)* |
 | `MediatR`                         | `12.5.0`         | Mediator pattern implementation (CQRS)         | Core to application architecture      |
 | `FluentValidation.AspNetCore`     | `11.11.0`        | Validation library & ASP.NET Core integration   | Used by ValidationBehavior & API    |
+| `EnvoyConfig`                     | `1.0.5`          | Environment variable configuration binding      | Replaces custom EnvConfigHelper     |
 
 ### 16.2.2 Resilience
 
@@ -121,6 +122,7 @@ All NuGet package versions listed above **must** be defined centrally in the `Di
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.3" />
     <PackageVersion Include="MediatR" Version="12.5.0" />
     <PackageVersion Include="FluentValidation.AspNetCore" Version="11.11.0" />
+    <PackageVersion Include="EnvoyConfig" Version="1.0.0" />
     <!-- Resilience -->
     <PackageVersion Include="Polly" Version="8.5.2" />
     <PackageVersion Include="Polly.Extensions.Http" Version="3.0.0" />

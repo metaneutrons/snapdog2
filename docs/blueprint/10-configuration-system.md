@@ -1,527 +1,761 @@
 # Configuration System
 
-SnapDog2 is designed for flexible deployment, primarily within containerized environments like Docker. Consequently, its configuration is managed predominantly through **environment variables**. This approach aligns well with container orchestration platforms and simplifies setup across different systems.
+SnapDog2 is designed for flexible deployment within containerized environments. Its configuration system leverages **EnvoyConfig**, a modern .NET configuration library that provides attribute-based environment variable binding, automatic validation, nested object mapping, and custom type conversion.
 
-Configuration values provided via environment variables are loaded at application startup into strongly-typed C# record classes located in the `/Core/Configuration` folder/namespace. This ensures type safety and provides easy access to configuration settings throughout the application via Dependency Injection (typically using the `IOptions<T>` pattern or direct singleton registration).
+The configuration follows a **unified nested architecture** where all settings are organized into a single root [`SnapDogConfiguration`](SnapDogConfiguration.cs:1) class with strongly-typed nested objects for different subsystems. This eliminates configuration fragmentation while providing comprehensive type safety and validation.
 
-This section details the environment variables used, the structure of the corresponding configuration classes, the helper methods for loading values, and the mandatory startup validation process.
+## 10.1 Architecture Overview
 
-## 10.1 Environment Variables Overview
+### 10.1.1 Unified Configuration Structure
 
-Configuration follows a consistent naming convention: `SNAPDOG_{COMPONENT}_{SETTING}`. The following table provides a comprehensive list of all available environment variables, their purpose, and default values used if the variable is not explicitly set. For indexed configurations (Zones and Clients), `{n}` represents the zone number (starting from 1) and `{m}` represents the client number (starting from 1).
-
-**(Table 10.1.1: Comprehensive Environment Variable List)**
-
-| Environment Variable                       | Default Value             | Description                                          | Component / Notes                  |
-| :----------------------------------------- | :------------------------ | :----------------------------------------------------- | :--------------------------------- |
-| **System Configuration**                   |                           |                                                        | `Worker` / `Core`                  |
-| `SNAPDOG_LOG_LEVEL`                        | `Information`             | Logging level (Trace, Debug, Info, Warn, Error, Critical) | Logging                            |
-| **Telemetry Configuration**                |                           |                                                        | `Infrastructure.Observability`     |
-| `SNAPDOG_TELEMETRY_ENABLED`                | `false`                   | Enable OpenTelemetry integration                       | OTel Setup                         |
-| `SNAPDOG_TELEMETRY_SERVICE_NAME`           | `SnapDog2`                | Service name for telemetry                           | OTel Setup                         |
-| `SNAPDOG_TELEMETRY_SAMPLING_RATE`          | `1.0`                     | Trace sampling rate (0.0-1.0)                      | OTel Tracing                     |
-| `SNAPDOG_TELEMETRY_OTLP_ENDPOINT`          | `http://localhost:4317`   | OTLP Exporter Endpoint (gRPC default)                | OTel OTLP Exporter               |
-| `SNAPDOG_TELEMETRY_OTLP_PROTOCOL`          | `grpc`                    | OTLP Protocol (`grpc` or `HttpProtobuf`)           | OTel OTLP Exporter               |
-| `SNAPDOG_TELEMETRY_OTLP_HEADERS`           | *N/A (Optional)*          | Optional OTLP headers (e.g., `Auth=...`)             | OTel OTLP Exporter               |
-| **Prometheus Configuration**               |                           |                                                        | `Infrastructure.Observability`     |
-| `SNAPDOG_PROMETHEUS_ENABLED`               | `false`                   | Enable Prometheus exporter                           | OTel Metrics                     |
-| `SNAPDOG_PROMETHEUS_PATH`                  | `/metrics`                | Prometheus scrape endpoint path                      | API Endpoint Mapping             |
-| **API Authentication**                     |                           |                                                        | `Api.Auth`                         |
-| `SNAPDOG_API_AUTH_ENABLED`                 | `true`                    | Enable API key authentication                        | API Security                     |
-| `SNAPDOG_API_APIKEY_{n}`                   | *N/A (Req. if Enabled)* | API key for requests (n = 1, 2...)                     | API Security                     |
-| **Snapcast Configuration**                 |                           |                                                        | `Infrastructure.Snapcast`        |
-| `SNAPDOG_SNAPCAST_HOST`                    | `localhost`               | Hostname or IP of Snapcast server                      | Snapcast Service                 |
-| `SNAPDOG_SNAPCAST_CONTROL_PORT`            | `1705`                    | Snapcast JSON-RPC control port                         | Snapcast Service                 |
-| `SNAPDOG_SNAPCAST_STREAM_PORT`             | `1704`                    | Snapcast Stream port (Informational)                 | (Not directly used by Service) |
-| `SNAPDOG_SNAPCAST_HTTP_PORT`               | `1780`                    | Snapcast HTTP port (Informational)                   | (Not directly used by Service) |
-| **Subsonic Configuration**                 |                           |                                                        | `Infrastructure.Subsonic`        |
-| `SNAPDOG_SUBSONIC_ENABLED`                 | `false`                   | Enable Subsonic integration                            | Subsonic Service                 |
-| `SNAPDOG_SUBSONIC_SERVER`                  | `http://localhost:4533`   | Subsonic server URL                                      | Subsonic Service                 |
-| `SNAPDOG_SUBSONIC_USERNAME`                | `admin`                   | Subsonic username                                        | Subsonic Service                 |
-| `SNAPDOG_SUBSONIC_PASSWORD`                | *N/A (Req. if Needed)*    | Subsonic password                                        | Subsonic Service                 |
-| `SNAPDOG_SUBSONIC_TIMEOUT`                 | `10000`                   | Subsonic API request timeout (ms)                      | Subsonic Service / HttpClient    |
-| **Radio Configuration**                    |                           |                                                        | `Server.Managers.PlaylistManager`|
-| `SNAPDOG_RADIO_PLAYLISTNAME`               | `Radio`                   | Display name for the Radio playlist                      | Radio Configuration Loader       |
-| `SNAPDOG_RADIO_{n}_NAME`                   | *N/A (Required)*          | Display name for Radio Station `n` (n=1, 2...)           | Radio Configuration Loader       |
-| `SNAPDOG_RADIO_{n}_URL`                    | *N/A (Required)*          | **Streaming URL** for Radio Station `n`                  | Radio Configuration Loader       |
-| `SNAPDOG_RADIO_{n}_IMAGE_URL`              | *N/A (Optional)*          | Icon/Logo URL for Radio Station `n`                      | Radio Configuration Loader       |
-| **MQTT Configuration**                     |                           |                                                        | `Infrastructure.Mqtt`            |
-| `SNAPDOG_MQTT_ENABLED`                     | `true`                    | Enable MQTT integration                                | Mqtt Service                     |
-| `SNAPDOG_MQTT_SERVER`                      | `localhost`               | MQTT broker hostname or IP                             | Mqtt Service                     |
-| `SNAPDOG_MQTT_PORT`                        | `1883`                    | MQTT broker port                                         | Mqtt Service                     |
-| `SNAPDOG_MQTT_USERNAME`                    | *N/A (Optional)*          | MQTT broker username                                     | Mqtt Service                     |
-| `SNAPDOG_MQTT_PASSWORD`                    | *N/A (Optional)*          | MQTT broker password                                     | Mqtt Service                     |
-| `SNAPDOG_MQTT_BASE_TOPIC`                  | `snapdog`                 | Base topic for all MQTT messages                       | Mqtt Service                     |
-| `SNAPDOG_MQTT_CLIENT_ID`                   | `snapdog-server`          | Client ID for MQTT connection                          | Mqtt Service                     |
-| `SNAPDOG_MQTT_USE_TLS`                     | `false`                   | Use TLS for MQTT connection                            | Mqtt Service                     |
-| **System-wide MQTT Topics**                |                           | *(Relative to Base Topic)*                              | `Infrastructure.Mqtt`            |
-| `SNAPDOG_MQTT_STATUS_TOPIC`                | `status`                  | System status topic                                      | Mqtt Service                     |
-| `SNAPDOG_MQTT_ERROR_TOPIC`                 | `error`                   | System errors topic                                      | Mqtt Service                     |
-| `SNAPDOG_MQTT_VERSION_TOPIC`               | `version`                 | System version topic                                     | Mqtt Service                     |
-| `SNAPDOG_MQTT_STATS_TOPIC`                 | `stats`                   | System statistics topic                                  | Mqtt Service                     |
-| **KNX Configuration**                      |                           |                                                        | `Infrastructure.Knx`             |
-| `SNAPDOG_KNX_ENABLED`                      | `false`                   | Enable KNX integration                                 | Knx Service                      |
-| `SNAPDOG_KNX_CONNECTION_TYPE`              | `IpRouting`               | KNX connection type (`IpTunneling`, `IpRouting`, `Usb`)  | Knx Service                      |
-| `SNAPDOG_KNX_GATEWAY_IP`                   | *N/A (Optional)*          | KNX gateway IP address (for IpTunneling)               | Knx Service                      |
-| `SNAPDOG_KNX_PORT`                         | `3671`                    | KNX gateway port (for IpTunneling)                       | Knx Service                      |
-| `SNAPDOG_KNX_DEVICE_ADDRESS`               | `15.15.250`               | KNX physical address for SnapDog2                        | Knx Service                      |
-| `SNAPDOG_KNX_RETRY_COUNT`                  | `3`                       | Retry attempts for KNX commands                        | Knx Service / Polly            |
-| `SNAPDOG_KNX_RETRY_INTERVAL`               | `1000`                    | Interval between KNX retries (ms)                      | Knx Service / Polly            |
-| **Zone Configuration (`_n_`)**            |                           |                                                        | `Server.Managers.ZoneManager`      |
-| `SNAPDOG_ZONE_{n}_NAME`                    | `Zone {n}`                | Name of zone {n} (n=1, 2...)                             | Zone Config Loader               |
-| `SNAPDOG_ZONE_{n}_MQTT_BASETOPIC`          | `snapdog/zones/{n}`       | Base MQTT topic for zone {n}                             | Zone Config Loader               |
-| `SNAPDOG_ZONE_{n}_SINK`                    | `/snapsinks/zone{n}`      | Snapcast sink path for zone {n}                          | Zone Config / Media Player       |
-| **MQTT Zone Topics (`_n_`)**               |                           | *(Relative to Zone Base Topic)*                       | `Infrastructure.Mqtt`            |
-| *(See Table 10.1.1.1)*                  | *(Defaults vary)*         | Zone MQTT command/status topics                      | MqttZoneConfig                   |
-| **KNX Zone Configuration (`_n_`)**         |                           | *(Group Addresses)*                                   | `Infrastructure.Knx`             |
-| `SNAPDOG_ZONE_{n}_KNX_ENABLED`             | `false`                   | Enable KNX for zone {n}                                  | KnxZoneConfig                    |
-| *(See Table 10.1.1.2)*                  | *N/A (Req. if Enabled)*   | Zone KNX Group Addresses                             | KnxZoneConfig                    |
-| **Client Configuration (`_m_`)**           |                           |                                                        | `Server.Managers.ClientManager`      |
-| `SNAPDOG_CLIENT_{m}_NAME`                  | `Client {m}`              | Name of client {m} (m=1, 2...)                           | Client Config Loader             |
-| `SNAPDOG_CLIENT_{m}_MAC`                   | *N/A (Optional)*          | MAC address of client {m}                              | Client Config Loader             |
-| `SNAPDOG_CLIENT_{m}_MQTT_BASETOPIC`        | `snapdog/clients/{m}`     | Base MQTT topic for client {m}                         | Client Config Loader             |
-| `SNAPDOG_CLIENT_{m}_DEFAULT_ZONE`          | `1`                       | Default zone ID (**1-based**) for client {m}         | Client Config / Client Manager |
-| **MQTT Client Topics (`_m_`)**             |                           | *(Relative to Client Base Topic)*                     | `Infrastructure.Mqtt`            |
-| *(See Table 10.1.1.3)*                  | *(Defaults vary)*         | Client MQTT command/status topics                    | MqttClientConfig                 |
-| **KNX Client Configuration (`_m_`)**       |                           | *(Group Addresses)*                                   | `Infrastructure.Knx`             |
-| `SNAPDOG_CLIENT_{m}_KNX_ENABLED`           | `false`                   | Enable KNX for client {m}                              | KnxClientConfig                  |
-| *(See Section 9.4.3)*                   | *N/A (Req. if Enabled)*   | Client KNX Group Addresses                           | KnxClientConfig                  |
-
-### 10.1.1 Extracted Topic/GA Variable Tables
-
-#### 10.1.1.1 MQTT Zone Topic Variables
-
-*(Relative to `SNAPDOG_ZONE_{n}_MQTT_BASETOPIC`)*
-
-| Env Var Suffix                             | Default Value          | Maps To Command/Status                  | Direction |
-| :----------------------------------------- | :--------------------- | :-------------------------------------- | :-------- |
-| **Commands**                               |                        |                                         |           |
-| `_STATE_SET_TOPIC`                         | `state/set`            | `PLAY`/`PAUSE`/`STOP`/Modes via payload | Command   |
-| `_TRACK_SET_TOPIC`                         | `track/set`            | `TRACK`                                 | Command   |
-| `_PLAYLIST_SET_TOPIC`                      | `playlist/set`         | `PLAYLIST`                              | Command   |
-| `_TRACK_REPEAT_SET_TOPIC`                  | `track_repeat/set`     | `TRACK_REPEAT`, `TRACK_REPEAT_TOGGLE`   | Command   |
-| `_PLAYLIST_REPEAT_SET_TOPIC`               | `playlist_repeat/set`  | `PLAYLIST_REPEAT`, `PLAYLIST_REPEAT_TOGGLE`| Command   |
-| `_PLAYLIST_SHUFFLE_SET_TOPIC`              | `playlist_shuffle/set` | `PLAYLIST_SHUFFLE`, `PLAYLIST_SHUFFLE_TOGGLE`| Command |
-| `_VOLUME_SET_TOPIC`                        | `volume/set`           | `VOLUME`, `VOLUME_UP`, `VOLUME_DOWN`      | Command   |
-| `_MUTE_SET_TOPIC`                          | `mute/set`             | `MUTE`, `MUTE_TOGGLE`                   | Command   |
-| **Status**                                 |                        |                                         |           |
-| `_STATE_TOPIC`                             | `state`                | `PLAYBACK_STATE`, `TRACK_REPEAT_STATUS`, `PLAYLIST_REPEAT_STATUS`, `PLAYLIST_SHUFFLE_STATUS`, `MUTE_STATUS` | Status    |
-| `_VOLUME_TOPIC`                            | `volume`               | `VOLUME_STATUS`                         | Status    |
-| `_MUTE_TOPIC`                              | `mute`                 | `MUTE_STATUS` (explicit bool)           | Status    |
-| `_TRACK_TOPIC`                             | `track`                | `TRACK_INDEX`                           | Status    |
-| `_PLAYLIST_TOPIC`                          | `playlist`             | `PLAYLIST_INDEX`                        | Status    |
-| `_STATE_TOPIC`                             | `state`                | `ZONE_STATE` (Full JSON)                | Status    |
-| `_TRACK_INFO_TOPIC`                        | `track/info`           | `TRACK_INFO` (JSON)                     | Status    |
-| `_PLAYLIST_INFO_TOPIC`                     | `playlist/info`        | `PLAYLIST_INFO` (JSON)                  | Status    |
-| `_TRACK_REPEAT_TOPIC`                      | `track_repeat`         | `TRACK_REPEAT_STATUS` (explicit bool)   | Status    |
-| `_PLAYLIST_REPEAT_TOPIC`                   | `playlist_repeat`    | `PLAYLIST_REPEAT_STATUS` (explicit bool)| Status    |
-| `_PLAYLIST_SHUFFLE_TOPIC`                  | `playlist_shuffle`   | `PLAYLIST_SHUFFLE_STATUS` (explicit bool)| Status    |
-
-#### 10.1.1.2 KNX Zone Group Address Variables
-
-*(Format: `SNAPDOG_ZONE_{n}_KNX_{SUFFIX}`. Value: KNX Group Address `x/y/z`. Required if `SNAPDOG_ZONE_{n}_KNX_ENABLED=true` and functionality needed)*
-
-| Suffix                         | Maps To Command/Status          | Direction | DPT (See Appendix 20.3) |
-| :----------------------------- | :------------------------------ | :-------- | :---------------------- |
-| **Commands**                   |                                 |           |                         |
-| `_PLAY`                        | `PLAY`, `PAUSE`                 | Command   | 1.001                   |
-| `_STOP`                        | `STOP`                          | Command   | 1.001                   |
-| `_TRACK_NEXT`                  | `TRACK_NEXT`                    | Command   | 1.007                   |
-| `_TRACK_PREVIOUS`              | `TRACK_PREVIOUS`                | Command   | 1.007                   |
-| `_TRACK_REPEAT`                | `TRACK_REPEAT`                  | Command   | 1.001                   |
-| `_TRACK_REPEAT_TOGGLE`         | `TRACK_REPEAT_TOGGLE`           | Command   | 1.001                   |
-| `_TRACK`                       | `TRACK`                         | Command   | 5.010                   |
-| `_PLAYLIST`                    | `PLAYLIST`                      | Command   | 5.010                   |
-| `_PLAYLIST_NEXT`               | `PLAYLIST_NEXT`                 | Command   | 1.007                   |
-| `_PLAYLIST_PREVIOUS`           | `PLAYLIST_PREVIOUS`             | Command   | 1.007                   |
-| `_PLAYLIST_SHUFFLE`            | `PLAYLIST_SHUFFLE`              | Command   | 1.001                   |
-| `_PLAYLIST_SHUFFLE_TOGGLE`     | `PLAYLIST_SHUFFLE_TOGGLE`       | Command   | 1.001                   |
-| `_PLAYLIST_REPEAT`             | `PLAYLIST_REPEAT`               | Command   | 1.001                   |
-| `_PLAYLIST_REPEAT_TOGGLE`      | `PLAYLIST_REPEAT_TOGGLE`        | Command   | 1.001                   |
-| `_KNX_VOLUME`                  | `VOLUME`                        | Command   | 5.001                   |
-| `_KNX_VOLUME_DIM`              | `VOLUME_UP`, `VOLUME_DOWN`      | Command   | 3.007                   |
-| `_KNX_MUTE`                    | `MUTE`                          | Command   | 1.001                   |
-| `_KNX_MUTE_TOGGLE`             | `MUTE_TOGGLE`                   | Command   | 1.001                   |
-| **Status**                     |                                 |           |                         |
-| `_KNX_PLAYBACK_STATUS`         | `PLAYBACK_STATE`                | Status    | 1.001                   |
-| `_KNX_TRACK_REPEAT_STATUS`     | `TRACK_REPEAT_STATUS`           | Status    | 1.001                   |
-| `_KNX_TRACK_STATUS`            | `TRACK_INDEX`                   | Status    | 5.010                   |
-| `_KNX_PLAYLIST_STATUS`         | `PLAYLIST_INDEX`                | Status    | 5.010                   |
-| `_KNX_PLAYLIST_SHUFFLE_STATUS` | `PLAYLIST_SHUFFLE_STATUS`       | Status    | 1.001                   |
-| `_KNX_PLAYLIST_REPEAT_STATUS`  | `PLAYLIST_REPEAT_STATUS`        | Status    | 1.001                   |
-| `_KNX_VOLUME_STATUS`           | `VOLUME_STATUS`                 | Status    | 5.001                   |
-| `_KNX_MUTE_STATUS`             | `MUTE_STATUS`                   | Status    | 1.001                   |
-
-#### 10.1.1.3 MQTT Client Topic Variables
-
-*(Relative to `SNAPDOG_CLIENT_{m}_MQTT_BASETOPIC`)*
-
-| Env Var Suffix             | Default Value | Maps To Command/Status          | Direction |
-| :------------------------- | :------------ | :------------------------------ | :-------- |
-| **Commands**               |               |                                 |           |
-| `_VOLUME_SET_TOPIC`        | `volume/set`  | `CLIENT_VOLUME`                 | Command   |
-| `_MUTE_SET_TOPIC`          | `mute/set`    | `CLIENT_MUTE`, `CLIENT_MUTE_TOGGLE` | Command   |
-| `_LATENCY_SET_TOPIC`       | `latency/set` | `CLIENT_LATENCY`                | Command   |
-| `_ZONE_SET_TOPIC`          | `zone/set`    | `CLIENT_ZONE`                   | Command   |
-| **Status**                 |               |                                 |           |
-| `_CONNECTED_TOPIC`         | `connected`   | `CLIENT_CONNECTED`              | Status    |
-| `_VOLUME_TOPIC`            | `volume`      | `CLIENT_VOLUME_STATUS`          | Status    |
-| `_MUTE_TOPIC`              | `mute`        | `CLIENT_MUTE_STATUS`            | Status    |
-| `_LATENCY_TOPIC`           | `latency`     | `CLIENT_LATENCY_STATUS`         | Status    |
-| `_ZONE_TOPIC`              | `zone`        | `CLIENT_ZONE_STATUS`            | Status    |
-| `_STATE_TOPIC`             | `state`       | `CLIENT_STATE`                  | Status    |
-
-## 10.2 Configuration Classes
-
-Load using `/Infrastructure/EnvConfigHelper`. Use `init;`. **Parsing errors handled by Validator.** Use `Knx.Falcon.GroupAddress?`. Define `OtlpProtocol`/`KnxConnectionType` Enums.
-
-### 10.2.1 Base Helper (`EnvConfigHelper`)
-
-```csharp
-// Located in /Infrastructure or /Core/Configuration
-namespace SnapDog2.Infrastructure;
-
-using System;
-using Knx.Falcon; // Use SDK's GroupAddress
-
-/// <summary>
-/// Helper methods for retrieving configuration values from environment variables.
-/// These methods attempt parsing but defer strict validation.
-/// </summary>
-public static class EnvConfigHelper
-{
-    /// <summary> Gets string value or default. </summary>
-    public static string GetValue(string name, string defaultValue) =>
-        Environment.GetEnvironmentVariable(name) ?? defaultValue;
-
-    /// <summary> Gets specific convertible type or default. Logs warning on conversion failure. </summary>
-    public static T GetValue<T>(string name, T defaultValue) where T : IConvertible
-    {
-        var value = Environment.GetEnvironmentVariable(name);
-        if (string.IsNullOrEmpty(value)) return defaultValue;
-        try {
-            return (T)Convert.ChangeType(value, typeof(T), System.Globalization.CultureInfo.InvariantCulture);
-        } catch (Exception ex) {
-             // Log warning about conversion failure to console error (real logger not available here)
-             Console.Error.WriteLine($"WARN: Config load failed to convert env var '{name}' value '{value}' to type {typeof(T)}. Using default '{defaultValue}'. Ex: {ex.Message}");
-            return defaultValue;
-        }
+```mermaid
+classDiagram
+    class SnapDogConfiguration {
+        +SystemConfig System
+        +TelemetryConfig Telemetry
+        +ApiConfig Api
+        +ServicesConfig Services
+        +List~ZoneConfig~ Zones
+        +List~ClientConfig~ Clients
+        +List~RadioStationConfig~ RadioStations
     }
 
-    /// <summary> Gets bool, recognizing true/1/yes (case-insensitive). </summary>
-    public static bool GetBool(string name, bool defaultValue)
-    {
-        var value = Environment.GetEnvironmentVariable(name)?.ToLowerInvariant();
-        if (string.IsNullOrEmpty(value)) return defaultValue;
-        return value == "true" || value == "1" || value == "yes";
+    class SystemConfig {
+        +string LogLevel
+        +string Environment
     }
 
-    /// <summary> Attempts to parse GroupAddress, returns null if unset or invalid format. </summary>
-    public static GroupAddress? TryParseGroupAddress(string name)
-    {
-        var value = Environment.GetEnvironmentVariable(name);
-        if (string.IsNullOrWhiteSpace(value)) return null;
-        if (GroupAddress.TryParse(value, out var ga)) return ga;
-
-        Console.Error.WriteLine($"WARN: Config load found invalid KNX Group Address format for env var '{name}': '{value}'. Format should be e.g., '1/2/3'.");
-        return null; // Return null, validator MUST check if this GA was required.
+    class TelemetryConfig {
+        +bool Enabled
+        +string ServiceName
+        +double SamplingRate
+        +OtlpConfig Otlp
+        +PrometheusConfig Prometheus
     }
 
-    /// <summary> Attempts to parse Enum (case-insensitive), returns default if unset or invalid format. </summary>
-    public static TEnum TryParseEnum<TEnum>(string name, TEnum defaultValue) where TEnum : struct, Enum
-    {
-         var value = Environment.GetEnvironmentVariable(name);
-         if (string.IsNullOrWhiteSpace(value)) return defaultValue;
-         if(Enum.TryParse<TEnum>(value, ignoreCase: true, out var result)) return result;
-
-         Console.Error.WriteLine($"WARN: Config load found invalid Enum value for env var '{name}': '{value}'. Expected one of {string.Join(", ", Enum.GetNames<TEnum>())}. Using default '{defaultValue}'.");
-         return defaultValue; // Return default, validator MUST check if default is acceptable.
+    class ServicesConfig {
+        +SnapcastConfig Snapcast
+        +MqttConfig Mqtt
+        +KnxConfig Knx
+        +SubsonicConfig Subsonic
     }
-}
+
+    class ZoneConfig {
+        +string Name
+        +string Sink
+        +ZoneMqttConfig Mqtt
+        +ZoneKnxConfig Knx
+    }
+
+    class ClientConfig {
+        +string Name
+        +string Mac
+        +int DefaultZone
+        +ClientMqttConfig Mqtt
+        +ClientKnxConfig Knx
+    }
+
+    SnapDogConfiguration --> SystemConfig
+    SnapDogConfiguration --> TelemetryConfig
+    SnapDogConfiguration --> ServicesConfig
+    SnapDogConfiguration --> ZoneConfig
+    SnapDogConfiguration --> ClientConfig
 ```
 
-### 10.2.2 Service-Specific Configuration Classes
+### 10.1.2 EnvoyConfig Features Utilized
 
-These classes (`/Core/Configuration`) use the helper methods to load configuration values during application startup.
+- **`[Env]` Attribute**: Maps properties to environment variables with options for defaults, validation, and type conversion
+- **`NestedListPrefix`**: Enables indexed configurations like `SNAPDOG_ZONE_1_*`, `SNAPDOG_CLIENT_2_*`
+- **`NestedPrefix`**: Maps nested objects like `SNAPDOG_ZONE_1_MQTT_*` to sub-configuration classes
+- **`MapPrefix`**: Handles key-value configurations like Snapcast settings
+- **`ListPrefix`**: Maps numbered environment variables to lists (e.g., API keys)
+- **Custom Type Converters**: Handle domain-specific types like [`KnxAddress`](KnxAddress.cs:1)
+- **Built-in Validation**: Automatic validation with [`IValidateOptions<T>`](IValidateOptions.cs:1) for business logic
 
-```csharp
-// --- /Core/Configuration/TelemetryOptions.cs ---
-namespace SnapDog2.Core.Configuration;
-using SnapDog2.Infrastructure;
-/// <summary> OTLP Exporter Protocol options. </summary>
-public enum OtlpProtocol { Unknown, Grpc, HttpProtobuf }
-/// <summary> Telemetry configuration root. </summary>
-public class TelemetryOptions {
-     public bool Enabled { get; init; } = EnvConfigHelper.GetBool("SNAPDOG_TELEMETRY_ENABLED", false);
-     public string ServiceName { get; init; } = EnvConfigHelper.GetValue("SNAPDOG_TELEMETRY_SERVICE_NAME", "SnapDog2");
-     public double SamplingRate { get; init; } = EnvConfigHelper.GetValue("SNAPDOG_TELEMETRY_SAMPLING_RATE", 1.0);
-     public OtlpExporterOptions OtlpExporter { get; init; } = OtlpExporterOptions.Load();
-     public PrometheusOptions Prometheus { get; init; } = PrometheusOptions.Load();
-}
-/// <summary> OTLP exporter specific options. </summary>
-public class OtlpExporterOptions {
-     public string Endpoint { get; init; }
-     public OtlpProtocol Protocol { get; init; }
-     public string? Headers { get; init; }
-     public static OtlpExporterOptions Load() => new() {
-         Endpoint = EnvConfigHelper.GetValue("SNAPDOG_TELEMETRY_OTLP_ENDPOINT", "http://localhost:4317"),
-         Protocol = EnvConfigHelper.TryParseEnum<OtlpProtocol>("SNAPDOG_TELEMETRY_OTLP_PROTOCOL", OtlpProtocol.Grpc),
-         Headers = EnvConfigHelper.GetValue("SNAPDOG_TELEMETRY_OTLP_HEADERS", (string?)null)
-     };
-}
-/// <summary> Prometheus exporter specific options. </summary>
-public class PrometheusOptions {
-     public bool Enabled { get; init; }
-     public string Path { get; init; }
-     public static PrometheusOptions Load() => new() {
-         Enabled = EnvConfigHelper.GetBool("SNAPDOG_PROMETHEUS_ENABLED", false),
-         Path = EnvConfigHelper.GetValue("SNAPDOG_PROMETHEUS_PATH", "/metrics")
-     };
-}
+## 10.2 Environment Variable Structure
 
-// --- /Core/Configuration/KnxOptions.cs ---
-namespace SnapDog2.Core.Configuration;
-using SnapDog2.Infrastructure;
-using Knx.Falcon; // For GroupAddress type used internally by KnxZone/Client Config
-/// <summary> KNX Connection Types. </summary>
-public enum KnxConnectionType { Unknown, IpTunneling, IpRouting, Usb }
-/// <summary> General KNX configuration. </summary>
-public class KnxOptions {
-    public bool Enabled { get; init; } = EnvConfigHelper.GetBool("SNAPDOG_KNX_ENABLED", false);
-    public KnxConnectionType ConnectionType { get; init; } = EnvConfigHelper.TryParseEnum<KnxConnectionType>("SNAPDOG_KNX_CONNECTION_TYPE", KnxConnectionType.IpRouting);
-    public string? GatewayIp { get; init; } = EnvConfigHelper.GetValue("SNAPDOG_KNX_GATEWAY_IP", (string?)null);
-    public int Port { get; init; } = EnvConfigHelper.GetValue("SNAPDOG_KNX_PORT", 3671);
-    public string DeviceAddress { get; init; } = EnvConfigHelper.GetValue("SNAPDOG_KNX_DEVICE_ADDRESS", "15.15.250");
-    public int RetryCount { get; init; } = EnvConfigHelper.GetValue("SNAPDOG_KNX_RETRY_COUNT", 3);
-    public int RetryInterval { get; init; } = EnvConfigHelper.GetValue("SNAPDOG_KNX_RETRY_INTERVAL", 1000);
-}
+All environment variables use the global prefix `SNAPDOG_` and follow a hierarchical naming convention that maps directly to the nested configuration classes.
 
-// --- /Core/Configuration/KnxZoneConfig.cs ---
-namespace SnapDog2.Core.Configuration;
-using Knx.Falcon; // Use SDK's GroupAddress
-using SnapDog2.Infrastructure;
-/// <summary> Holds KNX Group Addresses for a specific Zone. </summary>
-public class KnxZoneConfig {
-     public int ZoneId { get; init; }
-     public bool Enabled { get; init; }
-     // Nullable GroupAddress properties loaded using TryParseGroupAddress
-     public GroupAddress? PlayAddress { get; init; }
-     public GroupAddress? StopAddress { get; init; }
-     public GroupAddress? PlaybackStatusAddress { get; init; }
-     public GroupAddress? TrackNextAddress { get; init; }
-     public GroupAddress? TrackPreviousAddress { get; init; }
-     public GroupAddress? TrackRepeatAddress { get; init; }
-     public GroupAddress? TrackRepeatToggleAddress { get; init; }
-     public GroupAddress? TrackRepeatStatusAddress { get; init; }
-     public GroupAddress? TrackAddress { get; init; }
-     public GroupAddress? TrackStatusAddress { get; init; }
-     public GroupAddress? PlaylistAddress { get; init; }
-     public GroupAddress? PlaylistStatusAddress { get; init; }
-     public GroupAddress? PlaylistNextAddress { get; init; }
-     public GroupAddress? PlaylistPreviousAddress { get; init; }
-     public GroupAddress? PlaylistShuffleAddress { get; init; }
-     public GroupAddress? PlaylistShuffleToggleAddress { get; init; }
-     public GroupAddress? PlaylistShuffleStatusAddress { get; init; }
-     public GroupAddress? PlaylistRepeatAddress { get; init; }
-     public GroupAddress? PlaylistRepeatToggleAddress { get; init; }
-     public GroupAddress? PlaylistRepeatStatusAddress { get; init; }
-     public GroupAddress? VolumeAddress { get; init; }
-     public GroupAddress? VolumeDimAddress { get; init; } // For Up/Down
-     public GroupAddress? VolumeStatusAddress { get; init; }
-     public GroupAddress? MuteAddress { get; init; }
-     public GroupAddress? MuteToggleAddress { get; init; }
-     public GroupAddress? MuteStatusAddress { get; init; }
+### 10.2.1 System Configuration
 
-     // Factory method to load from environment
-     public static KnxZoneConfig Load(int zoneId) {
-         var config = new KnxZoneConfig { ZoneId = zoneId };
-         var prefix = $"SNAPDOG_ZONE_{zoneId}_KNX";
-         config = config with { Enabled = EnvConfigHelper.GetBool($"{prefix}_ENABLED", false) };
-         if(!config.Enabled) return config;
-
-         // Load all properties using TryParseGroupAddress
-         config = config with { PlayAddress = EnvConfigHelper.TryParseGroupAddress($"{prefix}_PLAY") };
-         config = config with { StopAddress = EnvConfigHelper.TryParseGroupAddress($"{prefix}_STOP") };
-         config = config with { PlaybackStatusAddress = EnvConfigHelper.TryParseGroupAddress($"{prefix}_PLAYBACK_STATUS") };
-         config = config with { TrackNextAddress = EnvConfigHelper.TryParseGroupAddress($"{prefix}_TRACK_NEXT") };
-         config = config with { TrackPreviousAddress = EnvConfigHelper.TryParseGroupAddress($"{prefix}_TRACK_PREVIOUS") };
-         config = config with { TrackRepeatAddress = EnvConfigHelper.TryParseGroupAddress($"{prefix}_TRACK_REPEAT") };
-         config = config with { TrackRepeatToggleAddress = EnvConfigHelper.TryParseGroupAddress($"{prefix}_TRACK_REPEAT_TOGGLE") };
-         config = config with { TrackRepeatStatusAddress = EnvConfigHelper.TryParseGroupAddress($"{prefix}_TRACK_REPEAT_STATUS") };
-         config = config with { TrackAddress = EnvConfigHelper.TryParseGroupAddress($"{prefix}_TRACK") };
-         config = config with { TrackStatusAddress = EnvConfigHelper.TryParseGroupAddress($"{prefix}_TRACK_STATUS") };
-         config = config with { PlaylistAddress = EnvConfigHelper.TryParseGroupAddress($"{prefix}_PLAYLIST") };
-         config = config with { PlaylistStatusAddress = EnvConfigHelper.TryParseGroupAddress($"{prefix}_PLAYLIST_STATUS") };
-         config = config with { PlaylistNextAddress = EnvConfigHelper.TryParseGroupAddress($"{prefix}_PLAYLIST_NEXT") };
-         config = config with { PlaylistPreviousAddress = EnvConfigHelper.TryParseGroupAddress($"{prefix}_PLAYLIST_PREVIOUS") };
-         config = config with { PlaylistShuffleAddress = EnvConfigHelper.TryParseGroupAddress($"{prefix}_PLAYLIST_SHUFFLE") };
-         config = config with { PlaylistShuffleToggleAddress = EnvConfigHelper.TryParseGroupAddress($"{prefix}_PLAYLIST_SHUFFLE_TOGGLE") };
-         config = config with { PlaylistShuffleStatusAddress = EnvConfigHelper.TryParseGroupAddress($"{prefix}_PLAYLIST_SHUFFLE_STATUS") };
-         config = config with { PlaylistRepeatAddress = EnvConfigHelper.TryParseGroupAddress($"{prefix}_PLAYLIST_REPEAT") };
-         config = config with { PlaylistRepeatToggleAddress = EnvConfigHelper.TryParseGroupAddress($"{prefix}_PLAYLIST_REPEAT_TOGGLE") };
-         config = config with { PlaylistRepeatStatusAddress = EnvConfigHelper.TryParseGroupAddress($"{prefix}_PLAYLIST_REPEAT_STATUS") };
-         config = config with { VolumeAddress = EnvConfigHelper.TryParseGroupAddress($"{prefix}_VOLUME") };
-         config = config with { VolumeDimAddress = EnvConfigHelper.TryParseGroupAddress($"{prefix}_VOLUME_DIM") };
-         config = config with { VolumeStatusAddress = EnvConfigHelper.TryParseGroupAddress($"{prefix}_VOLUME_STATUS") };
-         config = config with { MuteAddress = EnvConfigHelper.TryParseGroupAddress($"{prefix}_MUTE") };
-         config = config with { MuteToggleAddress = EnvConfigHelper.TryParseGroupAddress($"{prefix}_MUTE_TOGGLE") };
-         config = config with { MuteStatusAddress = EnvConfigHelper.TryParseGroupAddress($"{prefix}_MUTE_STATUS") };
-         // Add any missing GAs here...
-         return config;
-     }
-}
-
-// --- Other Config classes (ClientConfiguration, MqttZoneConfiguration, etc.) defined similarly ---
+```bash
+# Basic system settings
+SNAPDOG_SYSTEM_LOG_LEVEL=Information          # Default: Information
+SNAPDOG_SYSTEM_ENVIRONMENT=Production         # Default: Development
 ```
 
-## 10.3 Configuration Validation (`/Worker/ConfigurationValidator.cs`)
+### 10.2.2 Telemetry Configuration
 
-**Mandatory startup step.** Runs after DI build. Retrieves loaded configs (`IOptions<T>`, lists, singletons). **Throws `InvalidOperationException` on critical errors** (missing required vars, invalid required GAs/Enums). Logs warnings.
+```bash
+# Core telemetry settings
+SNAPDOG_TELEMETRY_ENABLED=true                # Default: false
+SNAPDOG_TELEMETRY_SERVICE_NAME=snapdog        # Default: SnapDog2
+SNAPDOG_TELEMETRY_SAMPLING_RATE=1.0           # Default: 1.0
+
+# OTLP exporter configuration
+SNAPDOG_TELEMETRY_OTLP_ENABLED=true                # Default: false
+SNAPDOG_TELEMETRY_OTLP_ENDPOINT=http://jaeger:4317  # Default: http://localhost:4317
+SNAPDOG_TELEMETRY_OTLP_PROTOCOL=grpc               # Default: grpc
+SNAPDOG_TELEMETRY_OTLP_HEADERS=Auth=Bearer-token   # Optional
+
+# Prometheus metrics configuration
+SNAPDOG_TELEMETRY_PROMETHEUS_ENABLED=true     # Default: false
+SNAPDOG_TELEMETRY_PROMETHEUS_PORT=9090        # Default: 9090
+SNAPDOG_TELEMETRY_PROMETHEUS_PATH=/metrics    # Default: /metrics
+```
+
+### 10.2.3 API Configuration
+
+```bash
+# API authentication
+SNAPDOG_API_AUTH_ENABLED=true                 # Default: true
+SNAPDOG_API_APIKEY_1=secret-key-1             # Required if auth enabled
+SNAPDOG_API_APIKEY_2=secret-key-2             # Additional keys as needed
+SNAPDOG_API_APIKEY_3=secret-key-3
+```
+
+### 10.2.4 Services Configuration
+
+```bash
+# Snapcast integration
+SNAPDOG_SERVICES_SNAPCAST_HOST=snapcast-server     # Default: localhost
+SNAPDOG_SERVICES_SNAPCAST_CONTROL_PORT=1705        # Default: 1705
+SNAPDOG_SERVICES_SNAPCAST_STREAM_PORT=1704         # Default: 1704
+SNAPDOG_SERVICES_SNAPCAST_HTTP_PORT=1780           # Default: 1780
+
+# MQTT integration
+SNAPDOG_SERVICES_MQTT_ENABLED=true                 # Default: true
+SNAPDOG_SERVICES_MQTT_SERVER=mosquitto             # Default: localhost
+SNAPDOG_SERVICES_MQTT_PORT=1883                    # Default: 1883
+SNAPDOG_SERVICES_MQTT_USERNAME=snapdog             # Optional
+SNAPDOG_SERVICES_MQTT_PASSWORD=snapdog             # Optional
+SNAPDOG_SERVICES_MQTT_BASE_TOPIC=snapdog           # Default: snapdog
+SNAPDOG_SERVICES_MQTT_CLIENT_ID=snapdog-server     # Default: snapdog-server
+SNAPDOG_SERVICES_MQTT_USE_TLS=false                # Default: false
+
+# KNX integration
+SNAPDOG_SERVICES_KNX_ENABLED=true                  # Default: false
+SNAPDOG_SERVICES_KNX_CONNECTION_TYPE=IpTunneling   # Default: IpRouting
+SNAPDOG_SERVICES_KNX_GATEWAY_IP=192.168.1.100     # Required for IpTunneling
+SNAPDOG_SERVICES_KNX_PORT=3671                     # Default: 3671
+SNAPDOG_SERVICES_KNX_DEVICE_ADDRESS=15.15.250     # Default: 15.15.250
+SNAPDOG_SERVICES_KNX_RETRY_COUNT=3                 # Default: 3
+SNAPDOG_SERVICES_KNX_RETRY_INTERVAL=1000           # Default: 1000ms
+
+# Subsonic integration
+SNAPDOG_SERVICES_SUBSONIC_ENABLED=false           # Default: false
+SNAPDOG_SERVICES_SUBSONIC_SERVER=http://subsonic:4533  # Required if enabled
+SNAPDOG_SERVICES_SUBSONIC_USERNAME=admin          # Required if enabled
+SNAPDOG_SERVICES_SUBSONIC_PASSWORD=password       # Required if enabled
+SNAPDOG_SERVICES_SUBSONIC_TIMEOUT=10000           # Default: 10000ms
+```
+
+### 10.2.5 Zone Configuration (Nested Lists)
+
+```bash
+# Zone 1 Configuration
+SNAPDOG_ZONE_1_NAME=Living Room                    # Required
+SNAPDOG_ZONE_1_SINK=/snapsinks/living-room        # Required
+
+# Zone 1 MQTT Configuration
+SNAPDOG_ZONE_1_MQTT_BASE_TOPIC=snapdog/zones/living-room
+SNAPDOG_ZONE_1_MQTT_STATE_SET_TOPIC=state/set     # Default: state/set
+SNAPDOG_ZONE_1_MQTT_TRACK_SET_TOPIC=track/set     # Default: track/set
+SNAPDOG_ZONE_1_MQTT_PLAYLIST_SET_TOPIC=playlist/set   # Default: playlist/set
+SNAPDOG_ZONE_1_MQTT_VOLUME_SET_TOPIC=volume/set   # Default: volume/set
+SNAPDOG_ZONE_1_MQTT_MUTE_SET_TOPIC=mute/set       # Default: mute/set
+SNAPDOG_ZONE_1_MQTT_STATE_TOPIC=state             # Default: state
+SNAPDOG_ZONE_1_MQTT_VOLUME_TOPIC=volume           # Default: volume
+SNAPDOG_ZONE_1_MQTT_MUTE_TOPIC=mute               # Default: mute
+SNAPDOG_ZONE_1_MQTT_TRACK_TOPIC=track             # Default: track
+SNAPDOG_ZONE_1_MQTT_PLAYLIST_TOPIC=playlist       # Default: playlist
+
+# Zone 1 KNX Configuration
+SNAPDOG_ZONE_1_KNX_ENABLED=true                   # Default: false
+SNAPDOG_ZONE_1_KNX_PLAY=1/1/1                     # Optional KNX addresses
+SNAPDOG_ZONE_1_KNX_PAUSE=1/1/2
+SNAPDOG_ZONE_1_KNX_STOP=1/1/3
+SNAPDOG_ZONE_1_KNX_TRACK_NEXT=1/1/4
+SNAPDOG_ZONE_1_KNX_TRACK_PREVIOUS=1/1/5
+SNAPDOG_ZONE_1_KNX_VOLUME=1/2/1
+SNAPDOG_ZONE_1_KNX_VOLUME_STATUS=1/2/2
+SNAPDOG_ZONE_1_KNX_VOLUME_UP=1/2/3
+SNAPDOG_ZONE_1_KNX_VOLUME_DOWN=1/2/4
+SNAPDOG_ZONE_1_KNX_MUTE=1/2/5
+SNAPDOG_ZONE_1_KNX_MUTE_STATUS=1/2/6
+SNAPDOG_ZONE_1_KNX_MUTE_TOGGLE=1/2/7
+
+# Zone 2 Configuration
+SNAPDOG_ZONE_2_NAME=Kitchen
+SNAPDOG_ZONE_2_SINK=/snapsinks/kitchen
+SNAPDOG_ZONE_2_MQTT_BASE_TOPIC=snapdog/zones/kitchen
+SNAPDOG_ZONE_2_KNX_ENABLED=false
+```
+
+### 10.2.6 Client Configuration (Nested Lists)
+
+```bash
+# Client 1 Configuration
+SNAPDOG_CLIENT_1_NAME=Living Room Speaker         # Required
+SNAPDOG_CLIENT_1_MAC=AA:BB:CC:DD:EE:FF            # Optional
+SNAPDOG_CLIENT_1_DEFAULT_ZONE=1                   # Default: 1
+
+# Client 1 MQTT Configuration
+SNAPDOG_CLIENT_1_MQTT_BASE_TOPIC=snapdog/clients/living-room
+SNAPDOG_CLIENT_1_MQTT_VOLUME_SET_TOPIC=volume/set     # Default: volume/set
+SNAPDOG_CLIENT_1_MQTT_MUTE_SET_TOPIC=mute/set         # Default: mute/set
+SNAPDOG_CLIENT_1_MQTT_LATENCY_SET_TOPIC=latency/set   # Default: latency/set
+SNAPDOG_CLIENT_1_MQTT_ZONE_SET_TOPIC=zone/set         # Default: zone/set
+SNAPDOG_CLIENT_1_MQTT_CONNECTED_TOPIC=connected       # Default: connected
+SNAPDOG_CLIENT_1_MQTT_VOLUME_TOPIC=volume             # Default: volume
+SNAPDOG_CLIENT_1_MQTT_MUTE_TOPIC=mute                 # Default: mute
+SNAPDOG_CLIENT_1_MQTT_LATENCY_TOPIC=latency           # Default: latency
+SNAPDOG_CLIENT_1_MQTT_ZONE_TOPIC=zone                 # Default: zone
+SNAPDOG_CLIENT_1_MQTT_STATE_TOPIC=state               # Default: state
+
+# Client 1 KNX Configuration
+SNAPDOG_CLIENT_1_KNX_ENABLED=true                     # Default: false
+SNAPDOG_CLIENT_1_KNX_VOLUME=2/1/1                     # Optional KNX addresses
+SNAPDOG_CLIENT_1_KNX_VOLUME_STATUS=2/1/2
+SNAPDOG_CLIENT_1_KNX_VOLUME_UP=2/1/3
+SNAPDOG_CLIENT_1_KNX_VOLUME_DOWN=2/1/4
+SNAPDOG_CLIENT_1_KNX_MUTE=2/1/5
+SNAPDOG_CLIENT_1_KNX_MUTE_STATUS=2/1/6
+SNAPDOG_CLIENT_1_KNX_MUTE_TOGGLE=2/1/7
+SNAPDOG_CLIENT_1_KNX_LATENCY=2/1/8
+SNAPDOG_CLIENT_1_KNX_ZONE=2/1/9
+SNAPDOG_CLIENT_1_KNX_CONNECTED_STATUS=2/1/10
+
+# Client 2 Configuration
+SNAPDOG_CLIENT_2_NAME=Kitchen Speaker
+SNAPDOG_CLIENT_2_DEFAULT_ZONE=2
+SNAPDOG_CLIENT_2_MQTT_BASE_TOPIC=snapdog/clients/kitchen
+SNAPDOG_CLIENT_2_KNX_ENABLED=false
+```
+
+### 10.2.7 Radio Station Configuration (Nested Lists)
+
+```bash
+# Radio Station 1
+SNAPDOG_RADIO_1_NAME=BBC Radio 1
+SNAPDOG_RADIO_1_URL=http://stream.live.vc.bbcmedia.co.uk/bbc_radio_one
+
+# Radio Station 2
+SNAPDOG_RADIO_2_NAME=Jazz FM
+SNAPDOG_RADIO_2_URL=http://jazz-wr04.ice.infomaniak.ch/jazz-wr04.mp3
+
+# Radio Station 3
+SNAPDOG_RADIO_3_NAME=Classical Radio
+SNAPDOG_RADIO_3_URL=https://stream.srg-ssr.ch/rsc_de/aacp_96.m3u
+```
+
+## 10.3 Configuration Classes
+
+All configuration classes are located in [`/Core/Configuration`](/Core/Configuration:1) and use EnvoyConfig attributes for automatic environment variable binding.
+
+### 10.3.1 Root Configuration Class
 
 ```csharp
-// In /Worker/ConfigurationValidator.cs
-namespace SnapDog2.Worker;
+// --- /Core/Configuration/SnapDogConfiguration.cs ---
+namespace SnapDog2.Core.Configuration;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using SnapDog2.Core.Configuration;
-using Knx.Falcon; // For GroupAddress checks
+using System.ComponentModel.DataAnnotations;
+using EnvoyConfig.Attributes;
 
 /// <summary>
-/// Performs validation of loaded application configuration at startup.
+/// Root configuration class for the SnapDog2 application.
+/// Maps all environment variables starting with SNAPDOG_ to nested configuration objects.
 /// </summary>
-public static partial class ConfigurationValidator
+public class SnapDogConfiguration
 {
-    // Logger Messages
-    [LoggerMessage(1, LogLevel.Critical, "Configuration validation failed: {ErrorMessage}")]
-    private static partial void LogValidationErrorCritical(ILogger logger, string errorMessage);
-    [LoggerMessage(2, LogLevel.Warning, "Configuration validation warning: {WarningMessage}")]
-    private static partial void LogValidationWarning(ILogger logger, string warningMessage);
-    [LoggerMessage(3, LogLevel.Information, "Configuration validated successfully.")]
-    private static partial void LogValidationSuccess(ILogger logger);
+    /// <summary>
+    /// Basic system configuration settings.
+    /// Maps environment variables with prefix: SNAPDOG_SYSTEM_*
+    /// </summary>
+    [Env(NestedPrefix = "SYSTEM_")]
+    public SystemConfig System { get; set; } = new();
 
     /// <summary>
-    /// Validates the application configuration retrieved from the service provider.
+    /// Telemetry and observability configuration.
+    /// Maps environment variables with prefix: SNAPDOG_TELEMETRY_*
     /// </summary>
-    /// <param name="services">The service provider.</param>
-    /// <returns>True if configuration is valid, False otherwise.</returns>
-    public static bool Validate(IServiceProvider services)
-    {
-        var logger = services.GetRequiredService<ILoggerFactory>().CreateLogger("ConfigurationValidation");
-        var validationErrors = new List<string>();
-        var validationWarnings = new List<string>();
+    [Env(NestedPrefix = "TELEMETRY_")]
+    public TelemetryConfig Telemetry { get; set; } = new();
 
-        try {
-            // Retrieve configurations using GetRequiredService or IOptions
-            var knxOptions = services.GetRequiredService<IOptions<KnxOptions>>().Value;
-            var zones = services.GetRequiredService<List<ZoneConfig>>();
-            var clients = services.GetRequiredService<List<ClientConfig>>();
-            var apiAuth = services.GetRequiredService<ApiAuthConfiguration>();
-            var mqttOptions = services.GetRequiredService<IOptions<MqttOptions>>().Value;
-            var snapcastOptions = services.GetRequiredService<IOptions<SnapcastOptions>>().Value;
-            var subsonicOptions = services.GetRequiredService<IOptions<SubsonicOptions>>().Value;
-            var telemetryOptions = services.GetRequiredService<IOptions<TelemetryOptions>>().Value;
+    /// <summary>
+    /// API authentication and security configuration.
+    /// Maps environment variables with prefix: SNAPDOG_API_*
+    /// </summary>
+    [Env(NestedPrefix = "API_")]
+    public ApiConfig Api { get; set; } = new();
 
-            // --- Validate KNX Options ---
-            if (knxOptions.Enabled) {
-                if (knxOptions.ConnectionType == KnxConnectionType.Unknown) {
-                    validationErrors.Add($"Invalid or missing 'SNAPDOG_KNX_CONNECTION_TYPE'. Value '{Environment.GetEnvironmentVariable("SNAPDOG_KNX_CONNECTION_TYPE")}' is not valid. Must be one of {string.Join(", ", Enum.GetNames<KnxConnectionType>())}.");
-                }
-                if (knxOptions.ConnectionType == KnxConnectionType.IpTunneling && string.IsNullOrWhiteSpace(knxOptions.GatewayIp)) {
-                     validationWarnings.Add("'SNAPDOG_KNX_CONNECTION_TYPE' is IpTunneling, but 'SNAPDOG_KNX_GATEWAY_IP' not set; relying solely on discovery.");
-                }
-                 // Validate required GAs within zones/clients IF KNX is enabled for them
-                 foreach(var zone in zones.Where(z => z.Knx != null && z.Knx.Enabled)) {
-                      ValidateRequiredGa(validationErrors, $"SNAPDOG_ZONE_{zone.Id}_KNX_VOLUME_STATUS", zone.Knx.VolumeStatusAddress);
-                      ValidateRequiredGa(validationErrors, $"SNAPDOG_ZONE_{zone.Id}_KNX_PLAYBACK_STATUS", zone.Knx.PlaybackStatusAddress);
-                      // Add more ValidateRequiredGa calls for GAs essential for basic function...
-                 }
-                 foreach(var client in clients.Where(c => c.Knx != null && c.Knx.Enabled)) {
-                      ValidateRequiredGa(validationErrors, $"SNAPDOG_CLIENT_{client.Id}_KNX_VOLUME_STATUS", client.Knx.VolumeStatusAddress);
-                      // Add more ValidateRequiredGa calls...
-                 }
-            }
+    /// <summary>
+    /// External services configuration (Snapcast, MQTT, KNX, Subsonic).
+    /// Maps environment variables with prefix: SNAPDOG_SERVICES_*
+    /// </summary>
+    [Env(NestedPrefix = "SERVICES_")]
+    public ServicesConfig Services { get; set; } = new();
 
-             // --- Validate API Auth ---
-             if(apiAuth.Enabled && apiAuth.ApiKeys.Count == 0) {
-                  validationErrors.Add("API Authentication is enabled via SNAPDOG_API_AUTH_ENABLED, but no API keys (SNAPDOG_API_APIKEY_n) were configured.");
-             }
+    /// <summary>
+    /// List of audio zone configurations.
+    /// Maps environment variables with pattern: SNAPDOG_ZONE_X_*
+    /// Where X is the zone index (1, 2, 3, etc.)
+    /// </summary>
+    [Env(NestedListPrefix = "ZONE_", NestedListSuffix = "_")]
+    public List<ZoneConfig> Zones { get; set; } = [];
 
-             // --- Validate Telemetry ---
-             if(telemetryOptions.Enabled && telemetryOptions.OtlpExporter.Protocol == OtlpProtocol.Unknown) {
-                  validationErrors.Add($"Invalid or missing 'SNAPDOG_TELEMETRY_OTLP_PROTOCOL'. Value '{Environment.GetEnvironmentVariable("SNAPDOG_TELEMETRY_OTLP_PROTOCOL")}' is not valid. Must be one of {string.Join(", ", Enum.GetNames<OtlpProtocol>())}.");
-             }
+    /// <summary>
+    /// List of client device configurations.
+    /// Maps environment variables with pattern: SNAPDOG_CLIENT_X_*
+    /// Where X is the client index (1, 2, 3, etc.)
+    /// </summary>
+    [Env(NestedListPrefix = "CLIENT_", NestedListSuffix = "_")]
+    public List<ClientConfig> Clients { get; set; } = [];
 
-            // --- Validate Zones and Clients ---
-            if (!zones.Any()) { validationErrors.Add("No zones configured via 'SNAPDOG_ZONE_{n}_NAME'. At least one zone is required."); }
-            if (!clients.Any()) { validationWarnings.Add("No clients configured via 'SNAPDOG_CLIENT_{m}_NAME'. Playback will not be possible."); }
-            // Check for duplicate zone sinks
-             var duplicateSinks = zones.GroupBy(z => z.SnapcastSink).Where(g => g.Count() > 1).Select(g => g.Key);
-             if (duplicateSinks.Any()) {
-                  validationErrors.Add($"Duplicate Snapcast sinks configured in SNAPDOG_ZONE_n_SINK: {string.Join(", ", duplicateSinks)}");
-             }
-             // Check client default zones exist
-             var zoneIds = zones.Select(z => z.Id).ToHashSet();
-             foreach (var client in clients) {
-                 if (!zoneIds.Contains(client.DefaultZoneId)) {
-                      validationErrors.Add($"Client '{client.Name}' (ID: {client.Id}) configured with 'SNAPDOG_CLIENT_{client.Id}_DEFAULT_ZONE={client.DefaultZoneId}' references a non-existent zone ID.");
-                 }
-             }
-
-             // --- Validate MQTT ---
-             if (mqttOptions.Enabled) {
-                  if (string.IsNullOrWhiteSpace(mqttOptions.Server)) { validationErrors.Add("MQTT is enabled but 'SNAPDOG_MQTT_SERVER' is not set."); }
-             }
-             // --- Validate Snapcast ---
-             if (string.IsNullOrWhiteSpace(snapcastOptions.Host)) { validationErrors.Add("'SNAPDOG_SNAPCAST_HOST' is required."); }
-             // --- Validate Subsonic ---
-             if (subsonicOptions.Enabled) {
-                  if (string.IsNullOrWhiteSpace(subsonicOptions.Server)) { validationErrors.Add("Subsonic is enabled but 'SNAPDOG_SUBSONIC_SERVER' is not set."); }
-                  if (string.IsNullOrWhiteSpace(subsonicOptions.Username)) { validationErrors.Add("Subsonic is enabled but 'SNAPDOG_SUBSONIC_USERNAME' is not set."); }
-                  // Password might be optional
-             }
-
-
-        } catch (Exception ex) {
-             // Catch errors during retrieval from DI (e.g., missing registrations)
-             validationErrors.Add($"Critical error retrieving configuration from DI: {ex.Message}");
-             LogValidationErrorCritical(logger, validationErrors.Last(), ex);
-             return false; // Cannot proceed
-        }
-
-        // Log warnings
-        foreach(var warning in validationWarnings) LogValidationWarning(logger, warning);
-
-        // Log errors and return validation result
-        if (validationErrors.Any()) {
-            logger.LogError("Configuration validation failed with {ErrorCount} errors.", validationErrors.Count);
-            foreach(var error in validationErrors) LogValidationErrorCritical(logger, error);
-            // Throw an aggregate exception to halt startup clearly
-            throw new AggregateException("Configuration validation failed. See logs for details.",
-                validationErrors.Select(e => new InvalidOperationException(e)));
-            // return false; // Or just return false
-        }
-
-        LogValidationSuccess(logger);
-        return true; // Indicate success
-    }
-
-     /// <summary>
-     /// Helper for validating required Group Addresses were parsed correctly.
-     /// </summary>
-     private static void ValidateRequiredGa(List<string> errors, string envVarName, GroupAddress? ga) {
-          var envVarValue = Environment.GetEnvironmentVariable(envVarName);
-          if(string.IsNullOrWhiteSpace(envVarValue)) {
-               // Variable was not set, but it's required
-               errors.Add($"Required KNX Group Address environment variable '{envVarName}' is not set.");
-          } else if (ga == null) {
-               // Variable was set, but EnvConfigHelper failed to parse it (warning already logged)
-               errors.Add($"Required KNX Group Address environment variable '{envVarName}' has an invalid format: '{envVarValue}'. Use e.g., '1/2/3'.");
-          }
-     }
+    /// <summary>
+    /// List of radio station configurations.
+    /// Maps environment variables with pattern: SNAPDOG_RADIO_X_*
+    /// Where X is the radio station index (1, 2, 3, etc.)
+    /// </summary>
+    [Env(NestedListPrefix = "RADIO_", NestedListSuffix = "_")]
+    public List<RadioStationConfig> RadioStations { get; set; } = [];
 }
 ```
+
+### 10.3.2 System Configuration
+
+```csharp
+// --- /Core/Configuration/SystemConfig.cs ---
+namespace SnapDog2.Core.Configuration;
+
+using EnvoyConfig.Attributes;
+
+/// <summary>
+/// Basic system configuration settings.
+/// </summary>
+public class SystemConfig
+{
+    /// <summary>
+    /// Logging level for the application.
+    /// Maps to: SNAPDOG_SYSTEM_LOG_LEVEL
+    /// </summary>
+    [Env(Key = "LOG_LEVEL", Default = "Information")]
+    public string LogLevel { get; set; } = "Information";
+
+    /// <summary>
+    /// Application environment (Development, Staging, Production).
+    /// Maps to: SNAPDOG_SYSTEM_ENVIRONMENT
+    /// </summary>
+    [Env(Key = "ENVIRONMENT", Default = "Development")]
+    public string Environment { get; set; } = "Development";
+}
+```
+
+### 10.3.3 Zone Configuration
+
+```csharp
+// --- /Core/Configuration/ZoneConfig.cs ---
+namespace SnapDog2.Core.Configuration;
+
+using System.ComponentModel.DataAnnotations;
+using EnvoyConfig.Attributes;
+
+/// <summary>
+/// Configuration for an individual audio zone.
+/// Maps environment variables like SNAPDOG_ZONE_X_* to properties.
+/// </summary>
+public class ZoneConfig
+{
+    /// <summary>
+    /// Display name of the zone.
+    /// Maps to: SNAPDOG_ZONE_X_NAME
+    /// </summary>
+    [Env(Key = "NAME")]
+    [Required]
+    public string Name { get; set; } = null!;
+
+    /// <summary>
+    /// Snapcast sink path for this zone.
+    /// Maps to: SNAPDOG_ZONE_X_SINK
+    /// </summary>
+    [Env(Key = "SINK")]
+    [Required]
+    public string Sink { get; set; } = null!;
+
+    /// <summary>
+    /// MQTT configuration for this zone.
+    /// Maps environment variables with prefix: SNAPDOG_ZONE_X_MQTT_*
+    /// </summary>
+    [Env(NestedPrefix = "MQTT_")]
+    public ZoneMqttConfig Mqtt { get; set; } = new();
+
+    /// <summary>
+    /// KNX configuration for this zone.
+    /// Maps environment variables with prefix: SNAPDOG_ZONE_X_KNX_*
+    /// </summary>
+    [Env(NestedPrefix = "KNX_")]
+    public ZoneKnxConfig Knx { get; set; } = new();
+}
+```
+
+### 10.3.4 Client Configuration
+
+```csharp
+// --- /Core/Configuration/ClientConfig.cs ---
+namespace SnapDog2.Core.Configuration;
+
+using System.ComponentModel.DataAnnotations;
+using EnvoyConfig.Attributes;
+
+/// <summary>
+/// Configuration for an individual client device.
+/// Maps environment variables like SNAPDOG_CLIENT_X_* to properties.
+/// </summary>
+public class ClientConfig
+{
+    /// <summary>
+    /// Display name of the client.
+    /// Maps to: SNAPDOG_CLIENT_X_NAME
+    /// </summary>
+    [Env(Key = "NAME")]
+    [Required]
+    public string Name { get; set; } = null!;
+
+    /// <summary>
+    /// MAC address of the client device.
+    /// Maps to: SNAPDOG_CLIENT_X_MAC
+    /// </summary>
+    [Env(Key = "MAC")]
+    [RegularExpression(@"^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$",
+        ErrorMessage = "MAC address must be in format XX:XX:XX:XX:XX:XX")]
+    public string? Mac { get; set; }
+
+    /// <summary>
+    /// Default zone ID for this client (1-based).
+    /// Maps to: SNAPDOG_CLIENT_X_DEFAULT_ZONE
+    /// </summary>
+    [Env(Key = "DEFAULT_ZONE", Default = 1)]
+    [Range(1, 100)]
+    public int DefaultZone { get; set; } = 1;
+
+    /// <summary>
+    /// MQTT configuration for this client.
+    /// Maps environment variables with prefix: SNAPDOG_CLIENT_X_MQTT_*
+    /// </summary>
+    [Env(NestedPrefix = "MQTT_")]
+    public ClientMqttConfig Mqtt { get; set; } = new();
+
+    /// <summary>
+    /// KNX configuration for this client.
+    /// Maps environment variables with prefix: SNAPDOG_CLIENT_X_KNX_*
+    /// </summary>
+    [Env(NestedPrefix = "KNX_")]
+    public ClientKnxConfig Knx { get; set; } = new();
+}
+```
+
+## 10.4 Custom Type Converters
+
+### 10.4.1 KNX Address Converter
+
+```csharp
+// --- /Core/Configuration/Converters/KnxAddressConverter.cs ---
+namespace SnapDog2.Core.Configuration.Converters;
+
+using System;
+using EnvoyConfig.Conversion;
+using EnvoyConfig.Logging;
+using SnapDog2.Core.Models;
+
+/// <summary>
+/// Custom type converter for KnxAddress to integrate with EnvoyConfig.
+/// Converts between string environment variable values and KnxAddress instances.
+/// </summary>
+public class KnxAddressConverter : ITypeConverter
+{
+    /// <summary>
+    /// Converts a string value from an environment variable to a KnxAddress.
+    /// </summary>
+    /// <param name="value">The string value to convert.</param>
+    /// <param name="targetType">The target type (KnxAddress or KnxAddress?).</param>
+    /// <param name="logger">Optional logger for warnings and errors.</param>
+    /// <returns>A KnxAddress instance if conversion is successful; otherwise, null.</returns>
+    public object? Convert(string? value, Type targetType, IEnvLogSink? logger)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            // Handle nullable KnxAddress
+            if (targetType == typeof(KnxAddress?))
+                return null;
+
+            // For non-nullable, this will be handled by EnvoyConfig's validation
+            return null;
+        }
+
+        if (KnxAddress.TryParse(value, out var result))
+            return result;
+
+        // Log the conversion error if logger is available
+        logger?.Log(
+            EnvLogLevel.Error,
+            $"Failed to parse KNX address '{value}'. Expected format: 'Main/Middle/Sub' (e.g., '2/1/1')."
+        );
+
+        // Return null for invalid values - EnvoyConfig will handle the error appropriately
+        return null;
+    }
+}
+```
+
+## 10.5 Configuration Validation
+
+### 10.5.1 Business Logic Validation
+
+```csharp
+// --- /Core/Configuration/Validation/SnapDogConfigurationValidator.cs ---
+namespace SnapDog2.Core.Configuration.Validation;
+
+using Microsoft.Extensions.Options;
+using SnapDog2.Core.Configuration;
+
+/// <summary>
+/// Validates SnapDogConfiguration for business logic constraints.
+/// </summary>
+public class SnapDogConfigurationValidator : IValidateOptions<SnapDogConfiguration>
+{
+    public ValidateOptionsResult Validate(string? name, SnapDogConfiguration options)
+    {
+        var failures = new List<string>();
+
+        // Validate zone constraints
+        ValidateZones(options.Zones, failures);
+
+        // Validate client constraints
+        ValidateClients(options.Clients, options.Zones, failures);
+
+        // Validate radio stations
+        ValidateRadioStations(options.RadioStations, failures);
+
+        return failures.Count > 0
+            ? ValidateOptionsResult.Fail(failures)
+            : ValidateOptionsResult.Success;
+    }
+
+    private static void ValidateZones(List<ZoneConfig> zones, List<string> failures)
+    {
+        if (zones.Count == 0)
+        {
+            failures.Add("At least one zone must be configured.");
+            return;
+        }
+
+        // Check for unique zone names
+        var duplicateNames = zones
+            .GroupBy(z => z.Name, StringComparer.OrdinalIgnoreCase)
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key);
+
+        foreach (var duplicateName in duplicateNames)
+        {
+            failures.Add($"Duplicate zone name found: '{duplicateName}'. Zone names must be unique.");
+        }
+
+        // Check for unique sinks
+        var duplicateSinks = zones
+            .GroupBy(z => z.Sink, StringComparer.OrdinalIgnoreCase)
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key);
+
+        foreach (var duplicateSink in duplicateSinks)
+        {
+            failures.Add($"Duplicate zone sink found: '{duplicateSink}'. Zone sinks must be unique.");
+        }
+
+        // Validate KNX configuration for each zone
+        foreach (var zone in zones.Where(z => z.Knx.Enabled))
+        {
+            if (zone.Knx.Volume == null && zone.Knx.VolumeStatus == null)
+            {
+                failures.Add($"Zone '{zone.Name}' has KNX enabled but no volume control addresses configured.");
+            }
+        }
+    }
+
+    private static void ValidateClients(List<ClientConfig> clients, List<ZoneConfig> zones, List<string> failures)
+    {
+        if (clients.Count == 0)
+        {
+            failures.Add("At least one client must be configured.");
+            return;
+        }
+
+        // Check for unique client names
+        var duplicateNames = clients
+            .GroupBy(c => c.Name, StringComparer.OrdinalIgnoreCase)
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key);
+
+        foreach (var duplicateName in duplicateNames)
+        {
+            failures.Add($"Duplicate client name found: '{duplicateName}'. Client names must be unique.");
+        }
+
+        // Check for unique MAC addresses (if provided)
+        var duplicateMacs = clients
+            .Where(c => !string.IsNullOrEmpty(c.Mac))
+            .GroupBy(c => c.Mac!, StringComparer.OrdinalIgnoreCase)
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key);
+
+        foreach (var duplicateMac in duplicateMacs)
+        {
+            failures.Add($"Duplicate client MAC address found: '{duplicateMac}'. MAC addresses must be unique.");
+        }
+
+        // Validate default zone references
+        var maxZoneIndex = zones.Count;
+        var invalidZoneClients = clients.Where(c => c.DefaultZone < 1 || c.DefaultZone > maxZoneIndex);
+
+        foreach (var client in invalidZoneClients)
+        {
+            failures.Add($"Client '{client.Name}' references invalid default zone {client.DefaultZone}. Valid range: 1-{maxZoneIndex}.");
+        }
+    }
+
+    private static void ValidateRadioStations(List<RadioStationConfig> stations, List<string> failures)
+    {
+        // Check for unique radio station names
+        var duplicateNames = stations
+            .GroupBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key);
+
+        foreach (var duplicateName in duplicateNames)
+        {
+            failures.Add($"Duplicate radio station name found: '{duplicateName}'. Radio station names must be unique.");
+        }
+
+        // Validate URLs
+        foreach (var station in stations)
+        {
+            if (!Uri.TryCreate(station.Url, UriKind.Absolute, out var uri) ||
+                (uri.Scheme != "http" && uri.Scheme != "https"))
+            {
+                failures.Add($"Radio station '{station.Name}' has invalid URL: '{station.Url}'. Must be a valid HTTP/HTTPS URL.");
+            }
+        }
+    }
+}
+```
+
+## 10.6 Dependency Injection Setup
+
+### 10.6.1 Configuration Registration
+
+```csharp
+// --- /Worker/Program.cs ---
+namespace SnapDog2.Worker;
+
+using EnvoyConfig;
+using EnvoyConfig.Conversion;
+using Microsoft.Extensions.Options;
+using SnapDog2.Core.Configuration;
+using SnapDog2.Core.Configuration.Converters;
+using SnapDog2.Core.Configuration.Validation;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Set global prefix for all EnvoyConfig environment variables
+EnvConfig.GlobalPrefix = "SNAPDOG_";
+
+// Register custom type converters
+TypeConverterRegistry.RegisterConverter(typeof(KnxAddress), new KnxAddressConverter());
+TypeConverterRegistry.RegisterConverter(typeof(KnxAddress?), new KnxAddressConverter());
+
+// Register the root configuration
+var snapDogConfig = EnvConfig.Get<SnapDogConfiguration>();
+builder.Services.AddSingleton(snapDogConfig);
+
+// Register individual configuration sections for easier injection
+builder.Services.AddSingleton(snapDogConfig.System);
+builder.Services.AddSingleton(snapDogConfig.Telemetry);
+builder.Services.AddSingleton(snapDogConfig.Api);
+builder.Services.AddSingleton(snapDogConfig.Services);
+
+// Register configuration validators
+builder.Services.AddSingleton<IValidateOptions<SnapDogConfiguration>, SnapDogConfigurationValidator>();
+
+// Validate configuration at startup
+builder.Services.AddOptions<SnapDogConfiguration>()
+    .Configure(options =>
+    {
+        // Copy values from the EnvoyConfig instance
+        options.System = snapDogConfig.System;
+        options.Telemetry = snapDogConfig.Telemetry;
+        options.Api = snapDogConfig.Api;
+        options.Services = snapDogConfig.Services;
+        options.Zones = snapDogConfig.Zones;
+        options.Clients = snapDogConfig.Clients;
+        options.RadioStations = snapDogConfig.RadioStations;
+    })
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+var app = builder.Build();
+
+// Additional startup validation
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
+try
+{
+    var config = app.Services.GetRequiredService<SnapDogConfiguration>();
+    var validator = app.Services.GetRequiredService<IValidateOptions<SnapDogConfiguration>>();
+
+    var validationResult = validator.Validate(null, config);
+    if (validationResult.Failed)
+    {
+        throw new InvalidOperationException($"Configuration validation failed: {string.Join("; ", validationResult.Failures)}");
+    }
+
+    logger.LogInformation("Configuration validation completed successfully. Loaded {ZoneCount} zones, {ClientCount} clients, and {RadioStationCount} radio stations.",
+        config.Zones.Count, config.Clients.Count, config.RadioStations.Count);
+}
+catch (Exception ex)
+{
+    logger.LogCritical(ex, "Configuration validation failed");
+    throw;
+}
+
+app.Run();
+```
+
+## 10.7 Configuration Benefits
+
+### 10.7.1 Type Safety & Validation
+
+- **Compile-time checking**: Configuration properties are strongly typed
+- **Automatic validation**: Data annotations and custom validators catch errors early
+- **Null safety**: Nullable reference types prevent null reference exceptions
+- **Range validation**: Numeric properties have range constraints
+
+### 10.7.2 Developer Experience
+
+- **IntelliSense support**: Full IDE support for configuration properties
+- **Self-documenting**: XML documentation on all configuration classes
+- **Clear structure**: Hierarchical organization mirrors environment variable structure
+- **Easy testing**: Configuration objects can be easily mocked and tested
+
+### 10.7.3 Operational Benefits
+
+- **Fail-fast startup**: Configuration errors are caught immediately during application startup
+- **Clear error messages**: Detailed validation messages for troubleshooting
+- **Container optimized**: Static configuration perfect for containerized deployments
+- **Environment agnostic**: Same configuration structure works across all environments
+
+### 10.7.4 Maintainability
+
+- **Single source of truth**: All configuration in one unified structure
+- **Extensible**: Easy to add new configuration properties without breaking existing code
+- **Backward compatible**: EnvoyConfig handles missing environment variables gracefully
+- **Version controlled**: Configuration schema evolves with the codebase
+
+This modern configuration system provides a robust foundation for SnapDog2's deployment and operational requirements while maintaining developer productivity and system reliability.
