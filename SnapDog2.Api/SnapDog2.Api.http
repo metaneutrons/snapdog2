@@ -1,0 +1,52 @@
+@SnapDog2Api_HostAddress = https://localhost:7001
+@ApiKey = dev-key-12345
+
+###
+# Get API Root Information
+GET {{SnapDog2Api_HostAddress}}/
+Accept: application/json
+
+###
+# System Health Check
+GET {{SnapDog2Api_HostAddress}}/api/system/health
+Accept: application/json
+X-API-Key: {{ApiKey}}
+
+###
+# System Status
+GET {{SnapDog2Api_HostAddress}}/api/system/status
+Accept: application/json
+X-API-Key: {{ApiKey}}
+
+###
+# System Ping
+GET {{SnapDog2Api_HostAddress}}/api/system/ping
+Accept: application/json
+X-API-Key: {{ApiKey}}
+
+###
+# System Information
+GET {{SnapDog2Api_HostAddress}}/api/system/info
+Accept: application/json
+X-API-Key: {{ApiKey}}
+
+###
+# Test Invalid API Key (should return 401)
+GET {{SnapDog2Api_HostAddress}}/api/system/health
+Accept: application/json
+X-API-Key: invalid-key
+
+###
+# Test Missing API Key (should return 401)
+GET {{SnapDog2Api_HostAddress}}/api/system/health
+Accept: application/json
+
+###
+# Swagger Documentation
+GET {{SnapDog2Api_HostAddress}}/swagger
+Accept: text/html
+
+###
+# OpenAPI Specification
+GET {{SnapDog2Api_HostAddress}}/swagger/v1/swagger.json
+Accept: application/json
