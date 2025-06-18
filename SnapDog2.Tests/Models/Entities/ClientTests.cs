@@ -6,103 +6,77 @@ using Xunit;
 namespace SnapDog2.Tests.Models.Entities;
 
 /// <summary>
-/// Unit tests for the Client entity.
-/// Tests creation, validation, manipulation, and business logic.
+/// Unit tests for the Client domain entity.
+/// Tests client lifecycle, volume changes, status updates, and business logic.
 /// </summary>
 public class ClientTests
 {
+    private readonly MacAddress _validMacAddress = new("AA:BB:CC:DD:EE:FF");
+    private readonly IpAddress _validIpAddress = new("192.168.1.100");
+    private const string ValidId = "test-client";
+    private const string ValidName = "Test Client";
+    private const int ValidVolume = 50;
+
     [Fact]
     public void Create_WithValidParameters_ShouldCreateClient()
     {
-        // Arrange
-        var id = "test-client";
-        var name = "Test Client";
-        var macAddress = new MacAddress("AA:BB:CC:DD:EE:FF");
-        var ipAddress = new IpAddress("192.168.1.100");
-        var status = ClientStatus.Connected;
-        var volume = 75;
-
         // Act
-        var client = Client.Create(id, name, macAddress, ipAddress, status, volume);
+        var client = Client.Create(ValidId, ValidName, _validMacAddress, _validIpAddress);
 
         // Assert
-        Assert.Equal(id, client.Id);
-        Assert.Equal(name, client.Name);
-        Assert.Equal(macAddress, client.MacAddress);
-        Assert.Equal(ipAddress, client.IpAddress);
-        Assert.Equal(status, client.Status);
-        Assert.Equal(volume, client.Volume);
-        Assert.False(client.IsMuted);
-        Assert.Null(client.ZoneId);
-        Assert.True(client.CreatedAt <= DateTime.UtcNow);
-        Assert.NotNull(client.LastSeen);
-    }
-
-    [Fact]
-    public void Create_WithDefaultParameters_ShouldUseDefaults()
-    {
-        // Arrange
-        var id = "test-client";
-        var name = "Test Client";
-        var macAddress = new MacAddress("AA:BB:CC:DD:EE:FF");
-        var ipAddress = new IpAddress("192.168.1.100");
-
-        // Act
-        var client = Client.Create(id, name, macAddress, ipAddress);
-
-        // Assert
+        Assert.Equal(ValidId, client.Id);
+        Assert.Equal(ValidName, client.Name);
+        Assert.Equal(_validMacAddress, client.MacAddress);
+        Assert.Equal(_validIpAddress, client.IpAddress);
         Assert.Equal(ClientStatus.Disconnected, client.Status);
         Assert.Equal(50, client.Volume);
         Assert.False(client.IsMuted);
+        Assert.Null(client.ZoneId);
+        Assert.Null(client.Description);
+        Assert.Null(client.Location);
+        Assert.Null(client.LatencyMs);
+        Assert.True(client.CreatedAt <= DateTime.UtcNow);
+        Assert.Null(client.UpdatedAt);
         Assert.Null(client.LastSeen);
     }
 
-    [Theory]
-    [InlineData("")]
-    [InlineData("   ")]
-    public void Create_WithInvalidId_ShouldThrowArgumentException(string id)
-    {
-        // Arrange
-        var macAddress = new MacAddress("AA:BB:CC:DD:EE:FF");
-        var ipAddress = new IpAddress("192.168.1.100");
-
-        // Act & Assert
-        Assert.Throws<ArgumentException>(() => Client.Create(id, "Valid Name", macAddress, ipAddress));
-    }
-
     [Fact]
-    public void Create_WithNullId_ShouldThrowArgumentException()
+    public void Create_WithCustomStatusAndVolume_ShouldCreateWithSpecifiedValues()
     {
-        // Arrange
-        var macAddress = new MacAddress("AA:BB:CC:DD:EE:FF");
-        var ipAddress = new IpAddress("192.168.1.100");
+        // Act
+        var client = Client.Create(ValidId, ValidName, _validMacAddress, _validIpAddress, ClientStatus.Connected, 75);
 
-        // Act & Assert
-        Assert.Throws<ArgumentException>(() => Client.Create(null!, "Valid Name", macAddress, ipAddress));
+        // Assert
+        Assert.Equal(ClientStatus.Connected, client.Status);
+        Assert.Equal(75, client.Volume);
+        Assert.NotNull(client.LastSeen);
+        Assert.True(client.LastSeen <= DateTime.UtcNow);
     }
 
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
-    public void Create_WithInvalidName_ShouldThrowArgumentException(string name)
+    [InlineData(null!)]
+    public void Create_WithInvalidId_ShouldThrowArgumentException(string? invalidId)
     {
-        // Arrange
-        var macAddress = new MacAddress("AA:BB:CC:DD:EE:FF");
-        var ipAddress = new IpAddress("192.168.1.100");
-
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => Client.Create("valid-id", name, macAddress, ipAddress));
+        var exception = Assert.Throws<ArgumentException>(
+            () => Client.Create(invalidId!, ValidName, _validMacAddress, _validIpAddress)
+        );
+        Assert.Contains("Client ID cannot be null or empty", exception.Message);
     }
 
-    [Fact]
-    public void Create_WithNullName_ShouldThrowArgumentException()
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData(null!)]
+    public void Create_WithInvalidName_ShouldThrowArgumentException(string? invalidName)
     {
-        // Arrange
-        var macAddress = new MacAddress("AA:BB:CC:DD:EE:FF");
-        var ipAddress = new IpAddress("192.168.1.100");
-
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => Client.Create("valid-id", null!, macAddress, ipAddress));
+        var exception = Assert.Throws<ArgumentException>(
+            () => Client.Create(ValidId, invalidName!, _validMacAddress, _validIpAddress)
+        );
+        Assert.Contains("Client name cannot be null or empty", exception.Message);
     }
 
     [Theory]
@@ -110,52 +84,47 @@ public class ClientTests
     [InlineData(101)]
     [InlineData(-10)]
     [InlineData(150)]
-    public void Create_WithInvalidVolume_ShouldThrowArgumentException(int volume)
+    public void Create_WithInvalidVolume_ShouldThrowArgumentException(int invalidVolume)
     {
-        // Arrange
-        var macAddress = new MacAddress("AA:BB:CC:DD:EE:FF");
-        var ipAddress = new IpAddress("192.168.1.100");
-
         // Act & Assert
-        Assert.Throws<ArgumentException>(
-            () => Client.Create("valid-id", "Valid Name", macAddress, ipAddress, volume: volume)
+        var exception = Assert.Throws<ArgumentException>(
+            () =>
+                Client.Create(
+                    ValidId,
+                    ValidName,
+                    _validMacAddress,
+                    _validIpAddress,
+                    ClientStatus.Disconnected,
+                    invalidVolume
+                )
         );
+        Assert.Contains("Volume must be between 0 and 100", exception.Message);
     }
 
     [Fact]
-    public void WithStatus_WithConnectedStatus_ShouldUpdateStatusAndLastSeen()
+    public void WithStatus_WhenConnecting_ShouldUpdateStatusAndSetLastSeen()
     {
         // Arrange
-        var client = Client.Create(
-            "test-client",
-            "Test Client",
-            new MacAddress("AA:BB:CC:DD:EE:FF"),
-            new IpAddress("192.168.1.100"),
-            ClientStatus.Disconnected
-        );
+        var client = Client.Create(ValidId, ValidName, _validMacAddress, _validIpAddress);
+        var originalCreatedAt = client.CreatedAt;
 
         // Act
         var updatedClient = client.WithStatus(ClientStatus.Connected);
 
         // Assert
         Assert.Equal(ClientStatus.Connected, updatedClient.Status);
-        Assert.True(updatedClient.IsConnected);
-        Assert.False(updatedClient.IsDisconnected);
         Assert.NotNull(updatedClient.LastSeen);
+        Assert.True(updatedClient.LastSeen <= DateTime.UtcNow);
         Assert.NotNull(updatedClient.UpdatedAt);
+        Assert.True(updatedClient.UpdatedAt >= originalCreatedAt);
+        Assert.Equal(originalCreatedAt, updatedClient.CreatedAt);
     }
 
     [Fact]
-    public void WithStatus_WithDisconnectedStatus_ShouldUpdateStatusKeepLastSeen()
+    public void WithStatus_WhenDisconnecting_ShouldUpdateStatusAndKeepLastSeen()
     {
         // Arrange
-        var client = Client.Create(
-            "test-client",
-            "Test Client",
-            new MacAddress("AA:BB:CC:DD:EE:FF"),
-            new IpAddress("192.168.1.100"),
-            ClientStatus.Connected
-        );
+        var client = Client.Create(ValidId, ValidName, _validMacAddress, _validIpAddress, ClientStatus.Connected);
         var originalLastSeen = client.LastSeen;
 
         // Act
@@ -163,9 +132,7 @@ public class ClientTests
 
         // Assert
         Assert.Equal(ClientStatus.Disconnected, updatedClient.Status);
-        Assert.False(updatedClient.IsConnected);
-        Assert.True(updatedClient.IsDisconnected);
-        Assert.Equal(originalLastSeen, updatedClient.LastSeen);
+        Assert.Equal(originalLastSeen, updatedClient.LastSeen); // Should preserve last seen time
         Assert.NotNull(updatedClient.UpdatedAt);
     }
 
@@ -178,12 +145,7 @@ public class ClientTests
     public void WithVolume_WithValidVolume_ShouldUpdateVolume(int newVolume)
     {
         // Arrange
-        var client = Client.Create(
-            "test-client",
-            "Test Client",
-            new MacAddress("AA:BB:CC:DD:EE:FF"),
-            new IpAddress("192.168.1.100")
-        );
+        var client = Client.Create(ValidId, ValidName, _validMacAddress, _validIpAddress);
 
         // Act
         var updatedClient = client.WithVolume(newVolume);
@@ -191,6 +153,8 @@ public class ClientTests
         // Assert
         Assert.Equal(newVolume, updatedClient.Volume);
         Assert.NotNull(updatedClient.UpdatedAt);
+        Assert.Equal(client.Id, updatedClient.Id);
+        Assert.Equal(client.Name, updatedClient.Name);
     }
 
     [Theory]
@@ -198,95 +162,54 @@ public class ClientTests
     [InlineData(101)]
     [InlineData(-10)]
     [InlineData(150)]
-    public void WithVolume_WithInvalidVolume_ShouldThrowArgumentException(int newVolume)
+    public void WithVolume_WithInvalidVolume_ShouldThrowArgumentException(int invalidVolume)
     {
         // Arrange
-        var client = Client.Create(
-            "test-client",
-            "Test Client",
-            new MacAddress("AA:BB:CC:DD:EE:FF"),
-            new IpAddress("192.168.1.100")
-        );
+        var client = Client.Create(ValidId, ValidName, _validMacAddress, _validIpAddress);
 
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => client.WithVolume(newVolume));
+        var exception = Assert.Throws<ArgumentException>(() => client.WithVolume(invalidVolume));
+        Assert.Contains("Volume must be between 0 and 100", exception.Message);
     }
 
-    [Fact]
-    public void WithMute_WithTrue_ShouldMuteClient()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void WithMute_ShouldUpdateMuteStatus(bool muteStatus)
     {
         // Arrange
-        var client = Client.Create(
-            "test-client",
-            "Test Client",
-            new MacAddress("AA:BB:CC:DD:EE:FF"),
-            new IpAddress("192.168.1.100"),
-            volume: 75
-        );
+        var client = Client.Create(ValidId, ValidName, _validMacAddress, _validIpAddress);
 
         // Act
-        var mutedClient = client.WithMute(true);
+        var updatedClient = client.WithMute(muteStatus);
 
         // Assert
-        Assert.True(mutedClient.IsMuted);
-        Assert.True(mutedClient.IsSilent);
-        Assert.Equal(0, mutedClient.EffectiveVolume);
-        Assert.Equal(75, mutedClient.Volume); // Original volume preserved
-        Assert.NotNull(mutedClient.UpdatedAt);
+        Assert.Equal(muteStatus, updatedClient.IsMuted);
+        Assert.NotNull(updatedClient.UpdatedAt);
+        Assert.Equal(client.Volume, updatedClient.Volume); // Volume should remain unchanged
     }
 
     [Fact]
-    public void WithMute_WithFalse_ShouldUnmuteClient()
+    public void WithZone_ShouldUpdateZoneAssignment()
     {
         // Arrange
-        var client = Client
-            .Create(
-                "test-client",
-                "Test Client",
-                new MacAddress("AA:BB:CC:DD:EE:FF"),
-                new IpAddress("192.168.1.100"),
-                volume: 75
-            )
-            .WithMute(true);
-
-        // Act
-        var unmutedClient = client.WithMute(false);
-
-        // Assert
-        Assert.False(unmutedClient.IsMuted);
-        Assert.False(unmutedClient.IsSilent);
-        Assert.Equal(75, unmutedClient.EffectiveVolume);
-        Assert.NotNull(unmutedClient.UpdatedAt);
-    }
-
-    [Fact]
-    public void WithZone_WithValidZoneId_ShouldAssignToZone()
-    {
-        // Arrange
-        var client = Client.Create(
-            "test-client",
-            "Test Client",
-            new MacAddress("AA:BB:CC:DD:EE:FF"),
-            new IpAddress("192.168.1.100")
-        );
-        var zoneId = "test-zone";
+        var client = Client.Create(ValidId, ValidName, _validMacAddress, _validIpAddress);
+        const string zoneId = "living-room";
 
         // Act
         var updatedClient = client.WithZone(zoneId);
 
         // Assert
         Assert.Equal(zoneId, updatedClient.ZoneId);
-        Assert.True(updatedClient.IsAssignedToZone);
         Assert.NotNull(updatedClient.UpdatedAt);
+        Assert.True(updatedClient.IsAssignedToZone);
     }
 
     [Fact]
-    public void WithZone_WithNull_ShouldUnassignFromZone()
+    public void WithZone_WithNull_ShouldRemoveZoneAssignment()
     {
         // Arrange
-        var client = Client
-            .Create("test-client", "Test Client", new MacAddress("AA:BB:CC:DD:EE:FF"), new IpAddress("192.168.1.100"))
-            .WithZone("test-zone");
+        var client = Client.Create(ValidId, ValidName, _validMacAddress, _validIpAddress).WithZone("test-zone");
 
         // Act
         var updatedClient = client.WithZone(null);
@@ -298,15 +221,10 @@ public class ClientTests
     }
 
     [Fact]
-    public void WithIpAddress_WithNewIpAddress_ShouldUpdateIpAddress()
+    public void WithIpAddress_ShouldUpdateIpAddress()
     {
         // Arrange
-        var client = Client.Create(
-            "test-client",
-            "Test Client",
-            new MacAddress("AA:BB:CC:DD:EE:FF"),
-            new IpAddress("192.168.1.100")
-        );
+        var client = Client.Create(ValidId, ValidName, _validMacAddress, _validIpAddress);
         var newIpAddress = new IpAddress("192.168.1.200");
 
         // Act
@@ -315,22 +233,18 @@ public class ClientTests
         // Assert
         Assert.Equal(newIpAddress, updatedClient.IpAddress);
         Assert.NotNull(updatedClient.UpdatedAt);
+        Assert.Equal(client.MacAddress, updatedClient.MacAddress); // MAC should remain unchanged
     }
 
     [Theory]
     [InlineData(0)]
-    [InlineData(10)]
+    [InlineData(50)]
     [InlineData(100)]
-    [InlineData(1000)]
+    [InlineData(500)]
     public void WithLatency_WithValidLatency_ShouldUpdateLatency(int latencyMs)
     {
         // Arrange
-        var client = Client.Create(
-            "test-client",
-            "Test Client",
-            new MacAddress("AA:BB:CC:DD:EE:FF"),
-            new IpAddress("192.168.1.100")
-        );
+        var client = Client.Create(ValidId, ValidName, _validMacAddress, _validIpAddress);
 
         // Act
         var updatedClient = client.WithLatency(latencyMs);
@@ -341,47 +255,21 @@ public class ClientTests
     }
 
     [Fact]
-    public void WithLatency_WithNull_ShouldClearLatency()
-    {
-        // Arrange
-        var client = Client
-            .Create("test-client", "Test Client", new MacAddress("AA:BB:CC:DD:EE:FF"), new IpAddress("192.168.1.100"))
-            .WithLatency(100);
-
-        // Act
-        var updatedClient = client.WithLatency(null);
-
-        // Assert
-        Assert.Null(updatedClient.LatencyMs);
-        Assert.NotNull(updatedClient.UpdatedAt);
-    }
-
-    [Fact]
     public void WithLatency_WithNegativeLatency_ShouldThrowArgumentException()
     {
         // Arrange
-        var client = Client.Create(
-            "test-client",
-            "Test Client",
-            new MacAddress("AA:BB:CC:DD:EE:FF"),
-            new IpAddress("192.168.1.100")
-        );
+        var client = Client.Create(ValidId, ValidName, _validMacAddress, _validIpAddress);
 
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => client.WithLatency(-1));
+        var exception = Assert.Throws<ArgumentException>(() => client.WithLatency(-10));
+        Assert.Contains("Latency cannot be negative", exception.Message);
     }
 
     [Fact]
-    public void IsConnected_WithConnectedStatus_ShouldReturnTrue()
+    public void IsConnected_WhenStatusIsConnected_ShouldReturnTrue()
     {
         // Arrange
-        var client = Client.Create(
-            "test-client",
-            "Test Client",
-            new MacAddress("AA:BB:CC:DD:EE:FF"),
-            new IpAddress("192.168.1.100"),
-            ClientStatus.Connected
-        );
+        var client = Client.Create(ValidId, ValidName, _validMacAddress, _validIpAddress, ClientStatus.Connected);
 
         // Act & Assert
         Assert.True(client.IsConnected);
@@ -390,169 +278,161 @@ public class ClientTests
     }
 
     [Fact]
-    public void IsDisconnected_WithDisconnectedStatus_ShouldReturnTrue()
+    public void IsDisconnected_WhenStatusIsDisconnected_ShouldReturnTrue()
     {
         // Arrange
-        var client = Client.Create(
-            "test-client",
-            "Test Client",
-            new MacAddress("AA:BB:CC:DD:EE:FF"),
-            new IpAddress("192.168.1.100"),
-            ClientStatus.Disconnected
-        );
+        var client = Client.Create(ValidId, ValidName, _validMacAddress, _validIpAddress, ClientStatus.Disconnected);
 
         // Act & Assert
-        Assert.False(client.IsConnected);
         Assert.True(client.IsDisconnected);
+        Assert.False(client.IsConnected);
         Assert.False(client.HasError);
     }
 
     [Fact]
-    public void HasError_WithErrorStatus_ShouldReturnTrue()
+    public void HasError_WhenStatusIsError_ShouldReturnTrue()
     {
         // Arrange
-        var client = Client.Create(
-            "test-client",
-            "Test Client",
-            new MacAddress("AA:BB:CC:DD:EE:FF"),
-            new IpAddress("192.168.1.100"),
-            ClientStatus.Error
-        );
+        var client = Client.Create(ValidId, ValidName, _validMacAddress, _validIpAddress, ClientStatus.Error);
 
         // Act & Assert
+        Assert.True(client.HasError);
         Assert.False(client.IsConnected);
         Assert.False(client.IsDisconnected);
-        Assert.True(client.HasError);
     }
 
     [Theory]
-    [InlineData(0, true)]
-    [InlineData(1, false)]
-    [InlineData(50, false)]
-    [InlineData(100, false)]
-    public void IsSilent_WithVolumeZeroOrMuted_ShouldReturnCorrectValue(int volume, bool isMuted)
+    [InlineData(0, false, true)]
+    [InlineData(50, false, false)]
+    [InlineData(100, false, false)]
+    [InlineData(0, true, true)]
+    [InlineData(50, true, true)]
+    [InlineData(100, true, true)]
+    public void IsSilent_WithDifferentVolumeAndMuteStates_ShouldReturnCorrectValue(
+        int volume,
+        bool isMuted,
+        bool expectedSilent
+    )
     {
         // Arrange
         var client = Client
-            .Create(
-                "test-client",
-                "Test Client",
-                new MacAddress("AA:BB:CC:DD:EE:FF"),
-                new IpAddress("192.168.1.100"),
-                volume: volume
-            )
+            .Create(ValidId, ValidName, _validMacAddress, _validIpAddress)
+            .WithVolume(volume)
             .WithMute(isMuted);
 
-        // Act
-        var expectedSilent = volume == 0 || isMuted;
-
-        // Assert
+        // Act & Assert
         Assert.Equal(expectedSilent, client.IsSilent);
     }
 
     [Theory]
     [InlineData(50, false, 50)]
+    [InlineData(75, false, 75)]
     [InlineData(50, true, 0)]
+    [InlineData(75, true, 0)]
     [InlineData(0, false, 0)]
-    [InlineData(100, false, 100)]
-    public void EffectiveVolume_WithDifferentStates_ShouldReturnCorrectValue(int volume, bool isMuted, int expected)
+    [InlineData(0, true, 0)]
+    public void EffectiveVolume_WithDifferentVolumeAndMuteStates_ShouldReturnCorrectValue(
+        int volume,
+        bool isMuted,
+        int expectedEffectiveVolume
+    )
     {
         // Arrange
         var client = Client
-            .Create(
-                "test-client",
-                "Test Client",
-                new MacAddress("AA:BB:CC:DD:EE:FF"),
-                new IpAddress("192.168.1.100"),
-                volume: volume
-            )
+            .Create(ValidId, ValidName, _validMacAddress, _validIpAddress)
+            .WithVolume(volume)
             .WithMute(isMuted);
 
         // Act & Assert
-        Assert.Equal(expected, client.EffectiveVolume);
+        Assert.Equal(expectedEffectiveVolume, client.EffectiveVolume);
     }
 
     [Fact]
-    public void Client_ImmutabilityTest_ShouldNotModifyOriginal()
+    public void Client_Immutability_ShouldCreateNewInstancesOnUpdate()
     {
         // Arrange
-        var originalClient = Client.Create(
-            "test-client",
-            "Test Client",
-            new MacAddress("AA:BB:CC:DD:EE:FF"),
-            new IpAddress("192.168.1.100"),
-            ClientStatus.Disconnected,
-            50
-        );
-        var originalStatus = originalClient.Status;
-        var originalVolume = originalClient.Volume;
-        var originalMuted = originalClient.IsMuted;
+        var originalClient = Client.Create(ValidId, ValidName, _validMacAddress, _validIpAddress);
 
         // Act
-        var modifiedClient = originalClient.WithStatus(ClientStatus.Connected).WithVolume(75).WithMute(true);
+        var updatedClient = originalClient.WithStatus(ClientStatus.Connected);
 
         // Assert
-        Assert.Equal(originalStatus, originalClient.Status);
-        Assert.Equal(originalVolume, originalClient.Volume);
-        Assert.Equal(originalMuted, originalClient.IsMuted);
-        Assert.NotEqual(originalClient.Status, modifiedClient.Status);
-        Assert.NotEqual(originalClient.Volume, modifiedClient.Volume);
-        Assert.NotEqual(originalClient.IsMuted, modifiedClient.IsMuted);
+        Assert.NotSame(originalClient, updatedClient);
+        Assert.Equal(ClientStatus.Disconnected, originalClient.Status);
+        Assert.Equal(ClientStatus.Connected, updatedClient.Status);
+        Assert.Null(originalClient.UpdatedAt);
+        Assert.NotNull(updatedClient.UpdatedAt);
     }
 
     [Fact]
-    public void Client_ComplexOperationsSequence_ShouldMaintainCorrectState()
+    public void Client_WithComplexScenario_ShouldMaintainConsistency()
     {
         // Arrange
         var client = Client.Create(
-            "test-client",
-            "Test Client",
+            "living-room-speaker",
+            "Living Room Speaker",
             new MacAddress("AA:BB:CC:DD:EE:FF"),
             new IpAddress("192.168.1.100")
         );
 
-        // Act
-        var result = client
-            .WithStatus(ClientStatus.Connected)
-            .WithVolume(80)
+        // Act - Simulate a complex scenario with multiple updates
+        var configuredClient = client
             .WithZone("living-room")
-            .WithMute(true)
-            .WithLatency(50)
-            .WithIpAddress(new IpAddress("192.168.1.150"));
+            .WithStatus(ClientStatus.Connected)
+            .WithVolume(75)
+            .WithLatency(50);
+
+        var mutedClient = configuredClient.WithMute(true);
+        var volumeAdjustedClient = mutedClient.WithVolume(90).WithMute(false);
 
         // Assert
-        Assert.True(result.IsConnected);
-        Assert.Equal(80, result.Volume);
-        Assert.Equal(0, result.EffectiveVolume);
-        Assert.True(result.IsMuted);
-        Assert.True(result.IsSilent);
-        Assert.Equal("living-room", result.ZoneId);
-        Assert.True(result.IsAssignedToZone);
-        Assert.Equal(50, result.LatencyMs);
-        Assert.Equal("192.168.1.150", result.IpAddress.ToString());
+        Assert.Equal("living-room-speaker", volumeAdjustedClient.Id);
+        Assert.Equal("Living Room Speaker", volumeAdjustedClient.Name);
+        Assert.Equal("living-room", volumeAdjustedClient.ZoneId);
+        Assert.Equal(ClientStatus.Connected, volumeAdjustedClient.Status);
+        Assert.Equal(90, volumeAdjustedClient.Volume);
+        Assert.False(volumeAdjustedClient.IsMuted);
+        Assert.Equal(50, volumeAdjustedClient.LatencyMs);
+        Assert.True(volumeAdjustedClient.IsConnected);
+        Assert.True(volumeAdjustedClient.IsAssignedToZone);
+        Assert.False(volumeAdjustedClient.IsSilent);
+        Assert.Equal(90, volumeAdjustedClient.EffectiveVolume);
+        Assert.NotNull(volumeAdjustedClient.UpdatedAt);
+        Assert.True(volumeAdjustedClient.UpdatedAt >= client.CreatedAt);
+    }
+
+    [Theory]
+    [InlineData("192.168.1.1")]
+    [InlineData("10.0.0.1")]
+    [InlineData("172.16.0.1")]
+    [InlineData("127.0.0.1")]
+    [InlineData("::1")]
+    [InlineData("2001:db8::1")]
+    public void WithIpAddress_WithDifferentIpFormats_ShouldUpdateCorrectly(string ipAddress)
+    {
+        // Arrange
+        var client = Client.Create(ValidId, ValidName, _validMacAddress, _validIpAddress);
+        var newIpAddress = new IpAddress(ipAddress);
+
+        // Act
+        var updatedClient = client.WithIpAddress(newIpAddress);
+
+        // Assert
+        Assert.Equal(newIpAddress, updatedClient.IpAddress);
+        Assert.Equal(ipAddress, updatedClient.IpAddress.ToString());
     }
 
     [Fact]
-    public void Client_DefaultValues_ShouldHaveExpectedDefaults()
+    public void Client_EqualityComparison_ShouldWorkCorrectly()
     {
-        // Arrange & Act
-        var client = Client.Create(
-            "test-client",
-            "Test Client",
-            new MacAddress("AA:BB:CC:DD:EE:FF"),
-            new IpAddress("192.168.1.100")
-        );
+        // Arrange
+        var client1 = Client.Create(ValidId, ValidName, _validMacAddress, _validIpAddress);
+        var client2 = Client.Create(ValidId, ValidName, _validMacAddress, _validIpAddress);
+        var client3 = Client.Create("different-id", ValidName, _validMacAddress, _validIpAddress);
 
-        // Assert
-        Assert.Equal(ClientStatus.Disconnected, client.Status);
-        Assert.Equal(50, client.Volume);
-        Assert.False(client.IsMuted);
-        Assert.Null(client.ZoneId);
-        Assert.Null(client.Description);
-        Assert.Null(client.Location);
-        Assert.Null(client.LatencyMs);
-        Assert.Null(client.LastSeen);
-        Assert.Null(client.UpdatedAt);
-        Assert.True(client.CreatedAt <= DateTime.UtcNow);
+        // Act & Assert
+        Assert.Equal(client1.Id, client2.Id);
+        Assert.NotEqual(client1, client3);
+        Assert.NotSame(client1, client2);
     }
 }

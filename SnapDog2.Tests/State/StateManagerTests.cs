@@ -63,7 +63,7 @@ public class StateManagerTests : IDisposable
     }
 
     [Fact]
-    public void Constructor_WithInvalidInitialState_ShouldThrowInvalidOperationException()
+    public async Task Constructor_WithInvalidInitialState_ShouldThrowInvalidOperationException()
     {
         // Arrange
         var invalidState = SnapDogState.CreateEmpty() with
@@ -72,7 +72,7 @@ public class StateManagerTests : IDisposable
         }; // Invalid version
 
         // Act & Assert
-        Assert.ThrowsAsync<InvalidOperationException>(
+        await Assert.ThrowsAsync<InvalidOperationException>(
             async () => await Task.Run(() => new StateManager(_mockLogger.Object, invalidState))
         );
     }

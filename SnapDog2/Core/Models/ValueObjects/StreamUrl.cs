@@ -182,7 +182,7 @@ public readonly struct StreamUrl : IEquatable<StreamUrl>
     /// Returns the string representation of the stream URL.
     /// </summary>
     /// <returns>The absolute URL string.</returns>
-    public override string ToString() => Value.AbsoluteUri;
+    public override string? ToString() => Value?.AbsoluteUri;
 
     /// <summary>
     /// Determines whether the specified object is equal to the current <see cref="StreamUrl"/>.
@@ -196,7 +196,7 @@ public readonly struct StreamUrl : IEquatable<StreamUrl>
     /// </summary>
     /// <param name="other">The <see cref="StreamUrl"/> to compare.</param>
     /// <returns>True if the URLs are equal; otherwise, false.</returns>
-    public bool Equals(StreamUrl other) => Value.Equals(other.Value);
+    public bool Equals(StreamUrl other) => Value?.Equals(other.Value) ?? (other.Value == null);
 
     /// <summary>
     /// Returns the hash code for the current <see cref="StreamUrl"/>.
@@ -233,7 +233,7 @@ public readonly struct StreamUrl : IEquatable<StreamUrl>
     /// </summary>
     /// <param name="streamUrl">The stream URL.</param>
     /// <returns>The string representation of the URL.</returns>
-    public static implicit operator string(StreamUrl streamUrl) => streamUrl.ToString();
+    public static implicit operator string(StreamUrl streamUrl) => streamUrl.ToString() ?? string.Empty;
 
     /// <summary>
     /// Implicitly converts a URI to a <see cref="StreamUrl"/>.

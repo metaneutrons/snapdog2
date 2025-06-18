@@ -1,3 +1,4 @@
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Moq;
 using SnapDog2.Core.Events;
@@ -8,43 +9,47 @@ namespace SnapDog2.Tests.Events;
 
 /// <summary>
 /// Unit tests for the InMemoryEventPublisher class.
-/// Tests event publishing, subscription, and async handling capabilities.
+/// Tests event publishing capabilities through MediatR.
 /// </summary>
-public class EventPublisherTests : IDisposable
+public class EventPublisherTests
 {
+    private readonly Mock<IMediator> _mockMediator;
     private readonly Mock<ILogger<InMemoryEventPublisher>> _mockLogger;
     private readonly InMemoryEventPublisher _eventPublisher;
 
     public EventPublisherTests()
     {
+        _mockMediator = new Mock<IMediator>();
         _mockLogger = new Mock<ILogger<InMemoryEventPublisher>>();
-        _eventPublisher = new InMemoryEventPublisher(_mockLogger.Object);
-    }
-
-    public void Dispose()
-    {
-        _eventPublisher?.Dispose();
+        _eventPublisher = new InMemoryEventPublisher(_mockMediator.Object, _mockLogger.Object);
     }
 
     [Fact]
-    public void Constructor_WithValidLogger_ShouldCreateEventPublisher()
+    public void Constructor_WithValidParameters_ShouldCreateEventPublisher()
     {
         // Arrange & Act
-        using var eventPublisher = new InMemoryEventPublisher(_mockLogger.Object);
+        var eventPublisher = new InMemoryEventPublisher(_mockMediator.Object, _mockLogger.Object);
 
         // Assert
         Assert.NotNull(eventPublisher);
     }
 
     [Fact]
-    public void Constructor_WithNullLogger_ShouldThrowArgumentNullException()
+    public void Constructor_WithNullMediator_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new InMemoryEventPublisher(null!));
+        Assert.Throws<ArgumentNullException>(() => new InMemoryEventPublisher(null!, _mockLogger.Object));
     }
 
     [Fact]
-    public async Task PublishAsync_WithValidEvent_ShouldPublishSuccessfully()
+    public void Constructor_WithNullLogger_ShouldThrowArgumentNullException()
+    {
+        // Act & Assert
+        Assert.Throws<ArgumentNullException>(() => new InMemoryEventPublisher(_mockMediator.Object, null!));
+    }
+
+    [Fact]
+    public async Task PublishAsync_WithValidEvent_ShouldCallMediatorPublish()
     {
         // Arrange
         var testEvent = ClientConnectedEvent.Create(
@@ -54,19 +59,26 @@ public class EventPublisherTests : IDisposable
             new IpAddress("192.168.1.100")
         );
 
-        // Act & Assert - Should not throw
+        _mockMediator
+            .Setup(m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        // Act
         await _eventPublisher.PublishAsync(testEvent);
+
+        // Assert
+        _mockMediator.Verify(m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
     public async Task PublishAsync_WithNullEvent_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        await Assert.ThrowsAsync<ArgumentNullException>(() => _eventPublisher.PublishAsync(null!));
+        await Assert.ThrowsAsync<ArgumentNullException>(() => _eventPublisher.PublishAsync((IDomainEvent)null!));
     }
 
     [Fact]
-    public async Task PublishAsync_WithMultipleEvents_ShouldPublishAllEvents()
+    public async Task PublishAsync_WithEventCollection_ShouldCallMediatorForEachEvent()
     {
         // Arrange
         var events = new List<IDomainEvent>
@@ -85,18 +97,28 @@ public class EventPublisherTests : IDisposable
             ),
         };
 
-        // Act & Assert - Should not throw
+        _mockMediator
+            .Setup(m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        // Act
         await _eventPublisher.PublishAsync(events);
+
+        // Assert
+        _mockMediator.Verify(m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
     }
 
     [Fact]
-    public async Task PublishAsync_WithEmptyEventCollection_ShouldNotThrow()
+    public async Task PublishAsync_WithEmptyEventCollection_ShouldNotCallMediator()
     {
         // Arrange
         var events = new List<IDomainEvent>();
 
-        // Act & Assert - Should not throw
+        // Act
         await _eventPublisher.PublishAsync(events);
+
+        // Assert
+        _mockMediator.Verify(m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -109,76 +131,63 @@ public class EventPublisherTests : IDisposable
     }
 
     [Fact]
-    public async Task PublishAndWaitAsync_WithValidEvent_ShouldPublishAndWait()
+    public async Task PublishAndWaitAsync_WithValidEvent_ShouldCallMediatorPublish()
     {
         // Arrange
         var testEvent = VolumeChangedEvent.CreateForClient("test-client", "Test Client", 50, 75);
 
-        // Act & Assert - Should not throw
+        _mockMediator
+            .Setup(m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        // Act
         await _eventPublisher.PublishAndWaitAsync(testEvent);
+
+        // Assert
+        _mockMediator.Verify(m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
     public async Task PublishAndWaitAsync_WithNullEvent_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        await Assert.ThrowsAsync<ArgumentNullException>(() => _eventPublisher.PublishAndWaitAsync(null!));
+        await Assert.ThrowsAsync<ArgumentNullException>(() => _eventPublisher.PublishAndWaitAsync((IDomainEvent)null!));
     }
 
     [Fact]
-    public async Task Subscribe_WithValidHandler_ShouldSubscribeSuccessfully()
+    public async Task PublishAndWaitAsync_WithEventCollection_ShouldCallMediatorForEachEvent()
     {
         // Arrange
-        var eventsReceived = new List<ClientConnectedEvent>();
-
-        void EventHandler(ClientConnectedEvent evt)
+        var events = new List<IDomainEvent>
         {
-            eventsReceived.Add(evt);
-        }
+            VolumeChangedEvent.CreateForClient("client-1", "Client 1", 50, 75),
+            VolumeChangedEvent.CreateForClient("client-2", "Client 2", 60, 80),
+        };
+
+        _mockMediator
+            .Setup(m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
 
         // Act
-        _eventPublisher.Subscribe<ClientConnectedEvent>(EventHandler);
-
-        var testEvent = ClientConnectedEvent.Create(
-            "test-client",
-            "Test Client",
-            new MacAddress("AA:BB:CC:DD:EE:FF"),
-            new IpAddress("192.168.1.100")
-        );
-
-        await _eventPublisher.PublishAsync(testEvent);
-
-        // Give some time for async processing
-        await Task.Delay(100);
+        await _eventPublisher.PublishAndWaitAsync(events);
 
         // Assert
-        Assert.Single(eventsReceived);
-        Assert.Equal("test-client", eventsReceived[0].ClientId);
+        _mockMediator.Verify(m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
     }
 
     [Fact]
-    public void Subscribe_WithNullHandler_ShouldThrowArgumentNullException()
+    public async Task PublishAndWaitAsync_WithNullEventCollection_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => _eventPublisher.Subscribe<ClientConnectedEvent>(null!));
+        await Assert.ThrowsAsync<ArgumentNullException>(
+            () => _eventPublisher.PublishAndWaitAsync((IEnumerable<IDomainEvent>)null!)
+        );
     }
 
     [Fact]
-    public async Task Unsubscribe_WithValidHandler_ShouldUnsubscribeSuccessfully()
+    public async Task PublishAsync_WhenMediatorThrowsException_ShouldPropagateException()
     {
         // Arrange
-        var eventsReceived = new List<ClientConnectedEvent>();
-
-        void EventHandler(ClientConnectedEvent evt)
-        {
-            eventsReceived.Add(evt);
-        }
-
-        _eventPublisher.Subscribe<ClientConnectedEvent>(EventHandler);
-
-        // Act
-        _eventPublisher.Unsubscribe<ClientConnectedEvent>(EventHandler);
-
         var testEvent = ClientConnectedEvent.Create(
             "test-client",
             "Test Client",
@@ -186,171 +195,51 @@ public class EventPublisherTests : IDisposable
             new IpAddress("192.168.1.100")
         );
 
-        await _eventPublisher.PublishAsync(testEvent);
-        await Task.Delay(100);
-
-        // Assert
-        Assert.Empty(eventsReceived);
-    }
-
-    [Fact]
-    public void Unsubscribe_WithNullHandler_ShouldThrowArgumentNullException()
-    {
-        // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => _eventPublisher.Unsubscribe<ClientConnectedEvent>(null!));
-    }
-
-    [Fact]
-    public async Task EventPublisher_WithMultipleSubscribers_ShouldNotifyAllSubscribers()
-    {
-        // Arrange
-        var subscriber1Events = new List<VolumeChangedEvent>();
-        var subscriber2Events = new List<VolumeChangedEvent>();
-
-        void Handler1(VolumeChangedEvent evt) => subscriber1Events.Add(evt);
-        void Handler2(VolumeChangedEvent evt) => subscriber2Events.Add(evt);
-
-        _eventPublisher.Subscribe<VolumeChangedEvent>(Handler1);
-        _eventPublisher.Subscribe<VolumeChangedEvent>(Handler2);
-
-        var testEvent = VolumeChangedEvent.CreateForClient("test-client", "Test Client", 50, 75);
-
-        // Act
-        await _eventPublisher.PublishAsync(testEvent);
-        await Task.Delay(100);
-
-        // Assert
-        Assert.Single(subscriber1Events);
-        Assert.Single(subscriber2Events);
-        Assert.Equal("test-client", subscriber1Events[0].EntityId);
-        Assert.Equal("test-client", subscriber2Events[0].EntityId);
-    }
-
-    [Fact]
-    public async Task EventPublisher_AfterDispose_ShouldThrowObjectDisposedException()
-    {
-        // Arrange
-        var eventPublisher = new InMemoryEventPublisher(_mockLogger.Object);
-        var testEvent = ClientConnectedEvent.Create(
-            "test-client",
-            "Test Client",
-            new MacAddress("AA:BB:CC:DD:EE:FF"),
-            new IpAddress("192.168.1.100")
-        );
-
-        eventPublisher.Dispose();
+        var expectedException = new InvalidOperationException("Test exception");
+        _mockMediator
+            .Setup(m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(expectedException);
 
         // Act & Assert
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => eventPublisher.PublishAsync(testEvent));
-    }
-
-    [Fact]
-    public void EventPublisher_DoubleDispose_ShouldNotThrow()
-    {
-        // Arrange
-        var eventPublisher = new InMemoryEventPublisher(_mockLogger.Object);
-
-        // Act & Assert - Should not throw
-        eventPublisher.Dispose();
-        eventPublisher.Dispose();
-    }
-
-    [Fact]
-    public async Task EventPublisher_ConcurrentPublishing_ShouldHandleCorrectly()
-    {
-        // Arrange
-        var eventsReceived = new List<ClientConnectedEvent>();
-        var lockObject = new object();
-
-        void EventHandler(ClientConnectedEvent evt)
-        {
-            lock (lockObject)
-            {
-                eventsReceived.Add(evt);
-            }
-        }
-
-        _eventPublisher.Subscribe<ClientConnectedEvent>(EventHandler);
-
-        var tasks = new List<Task>();
-        for (int i = 0; i < 10; i++)
-        {
-            int clientIndex = i;
-            tasks.Add(
-                Task.Run(async () =>
-                {
-                    var evt = ClientConnectedEvent.Create(
-                        $"client-{clientIndex}",
-                        $"Client {clientIndex}",
-                        new MacAddress($"AA:BB:CC:DD:EE:{clientIndex:X2}"),
-                        new IpAddress($"192.168.1.{100 + clientIndex}")
-                    );
-                    await _eventPublisher.PublishAsync(evt);
-                })
-            );
-        }
-
-        // Act
-        await Task.WhenAll(tasks);
-        await Task.Delay(200); // Allow time for event processing
-
-        // Assert
-        Assert.Equal(10, eventsReceived.Count);
-        Assert.Equal(10, eventsReceived.Select(e => e.ClientId).Distinct().Count());
-    }
-
-    [Fact]
-    public async Task EventPublisher_WithEventCorrelation_ShouldMaintainCorrelationIds()
-    {
-        // Arrange
-        var correlationId = Guid.NewGuid().ToString();
-        var eventsReceived = new List<ClientConnectedEvent>();
-
-        void EventHandler(ClientConnectedEvent evt)
-        {
-            eventsReceived.Add(evt);
-        }
-
-        _eventPublisher.Subscribe<ClientConnectedEvent>(EventHandler);
-
-        var testEvent = ClientConnectedEvent.Create(
-            "test-client",
-            "Test Client",
-            new MacAddress("AA:BB:CC:DD:EE:FF"),
-            new IpAddress("192.168.1.100"),
-            correlationId: correlationId
+        var actualException = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _eventPublisher.PublishAsync(testEvent)
         );
 
-        // Act
-        await _eventPublisher.PublishAsync(testEvent);
-        await Task.Delay(100);
-
-        // Assert
-        Assert.Single(eventsReceived);
-        Assert.Equal(correlationId, eventsReceived[0].CorrelationId);
+        Assert.Equal(expectedException.Message, actualException.Message);
     }
 
     [Fact]
-    public async Task EventPublisher_WithExceptionInHandler_ShouldContinueProcessing()
+    public async Task PublishAndWaitAsync_WithCollectionAndException_ShouldThrowAggregateException()
     {
         // Arrange
-        var successfulEvents = new List<ClientConnectedEvent>();
-        var exceptionThrown = false;
-
-        void ThrowingHandler(ClientConnectedEvent evt)
+        var events = new List<IDomainEvent>
         {
-            exceptionThrown = true;
-            throw new InvalidOperationException("Test exception");
-        }
+            ClientConnectedEvent.Create(
+                "client-1",
+                "Client 1",
+                new MacAddress("AA:BB:CC:DD:EE:01"),
+                new IpAddress("192.168.1.101")
+            ),
+            ClientConnectedEvent.Create(
+                "client-2",
+                "Client 2",
+                new MacAddress("AA:BB:CC:DD:EE:02"),
+                new IpAddress("192.168.1.102")
+            ),
+        };
 
-        void SuccessfulHandler(ClientConnectedEvent evt)
-        {
-            successfulEvents.Add(evt);
-        }
+        _mockMediator
+            .Setup(m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("Test exception"));
 
-        _eventPublisher.Subscribe<ClientConnectedEvent>(ThrowingHandler);
-        _eventPublisher.Subscribe<ClientConnectedEvent>(SuccessfulHandler);
+        // Act & Assert
+        await Assert.ThrowsAsync<AggregateException>(() => _eventPublisher.PublishAndWaitAsync(events));
+    }
 
+    [Fact]
+    public async Task PublishAsync_WithCancellationToken_ShouldPassTokenToMediator()
+    {
+        // Arrange
         var testEvent = ClientConnectedEvent.Create(
             "test-client",
             "Test Client",
@@ -358,12 +247,15 @@ public class EventPublisherTests : IDisposable
             new IpAddress("192.168.1.100")
         );
 
+        var cancellationToken = new CancellationToken();
+        _mockMediator
+            .Setup(m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
         // Act
-        await _eventPublisher.PublishAsync(testEvent);
-        await Task.Delay(100);
+        await _eventPublisher.PublishAsync(testEvent, cancellationToken);
 
         // Assert
-        Assert.True(exceptionThrown);
-        Assert.Single(successfulEvents); // Successful handler should still receive the event
+        _mockMediator.Verify(m => m.Publish(It.IsAny<IDomainEvent>(), cancellationToken), Times.Once);
     }
 }

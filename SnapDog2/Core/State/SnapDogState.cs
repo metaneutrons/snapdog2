@@ -436,6 +436,12 @@ public sealed record SnapDogState
     {
         try
         {
+            // Basic validation
+            if (Version <= 0)
+            {
+                return false;
+            }
+
             // Validate that all zone client references exist
             foreach (var zone in Zones.Values)
             {

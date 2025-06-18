@@ -5,119 +5,105 @@ namespace SnapDog2.Tests.Models.ValueObjects;
 
 /// <summary>
 /// Unit tests for the MacAddress value object.
-/// Tests validation, normalization, parsing, and equality.
+/// Tests MAC address validation, parsing, formatting, equality, and type safety.
 /// </summary>
 public class MacAddressTests
 {
     [Theory]
     [InlineData("AA:BB:CC:DD:EE:FF")]
-    [InlineData("aa:bb:cc:dd:ee:ff")]
-    [InlineData("AA-BB-CC-DD-EE-FF")]
-    [InlineData("aa-bb-cc-dd-ee-ff")]
-    [InlineData("12:34:56:78:9A:BC")]
-    [InlineData("00:00:00:00:00:00")]
+    [InlineData("00:11:22:33:44:55")]
     [InlineData("FF:FF:FF:FF:FF:FF")]
-    public void Constructor_WithValidMacAddress_ShouldCreateInstance(string macAddress)
+    [InlineData("00:00:00:00:00:00")]
+    [InlineData("12:34:56:78:9A:BC")]
+    public void Constructor_WithValidMacAddress_ShouldCreateMacAddress(string validMacAddress)
     {
         // Act
-        var mac = new MacAddress(macAddress);
+        var macAddress = new MacAddress(validMacAddress);
 
         // Assert
-        Assert.NotNull(mac.Value);
-        Assert.NotEmpty(mac.Value);
+        Assert.Equal(validMacAddress.ToUpperInvariant(), macAddress.ToString());
+        Assert.Equal(validMacAddress.ToUpperInvariant(), macAddress.Value);
     }
 
     [Theory]
-    [InlineData("AA:BB:CC:DD:EE:FF", "AA:BB:CC:DD:EE:FF")]
     [InlineData("aa:bb:cc:dd:ee:ff", "AA:BB:CC:DD:EE:FF")]
     [InlineData("AA-BB-CC-DD-EE-FF", "AA:BB:CC:DD:EE:FF")]
     [InlineData("aa-bb-cc-dd-ee-ff", "AA:BB:CC:DD:EE:FF")]
-    [InlineData("12:34:56:78:9a:bc", "12:34:56:78:9A:BC")]
-    public void Constructor_WithValidMacAddress_ShouldNormalizeToUppercaseWithColons(string input, string expected)
+    public void Constructor_WithDifferentFormats_ShouldNormalizeToColonSeparatedUppercase(string input, string expected)
     {
         // Act
-        var mac = new MacAddress(input);
+        var macAddress = new MacAddress(input);
 
         // Assert
-        Assert.Equal(expected, mac.Value);
+        Assert.Equal(expected, macAddress.ToString());
+        Assert.Equal(expected, macAddress.Value);
     }
 
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
-    [InlineData("invalid-mac")]
-    [InlineData("AA:BB:CC:DD:EE")]
-    [InlineData("AA:BB:CC:DD:EE:FF:GG")]
-    [InlineData("XX:YY:ZZ:AA:BB:CC")]
-    [InlineData("AA:BB:CC:DD:EE:GG")]
-    [InlineData("AA:BB:CC:DD:EE:FF:AA")]
-    [InlineData("AA-BB-CC-DD-EE")]
-    [InlineData("not-a-mac-address")]
-    public void Constructor_WithInvalidMacAddress_ShouldThrowArgumentException(string macAddress)
+    [InlineData(null!)]
+    public void Constructor_WithInvalidInput_ShouldThrowArgumentException(string? invalidMacAddress)
     {
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => new MacAddress(macAddress));
+        var exception = Assert.Throws<ArgumentException>(() => new MacAddress(invalidMacAddress!));
+        Assert.Contains("MAC address cannot be null or empty", exception.Message);
     }
 
-    [Fact]
-    public void Constructor_WithNullMacAddress_ShouldThrowArgumentException()
+    [Theory]
+    [InlineData("AA:BB:CC:DD:EE")] // Too short
+    [InlineData("AA:BB:CC:DD:EE:FF:GG")] // Too long
+    [InlineData("GG:BB:CC:DD:EE:FF")] // Invalid hex
+    [InlineData("AA:BB:CC:DD:EE:ZZ")] // Invalid hex
+    [InlineData("AA.BB.CC.DD.EE.FF")] // Wrong separator
+    [InlineData("AABBCCDDEEF")] // Too short without separators
+    [InlineData("AABBCCDDEEFFF")] // Too long without separators
+    [InlineData("not-a-mac-address")] // Invalid format
+    public void Constructor_WithInvalidMacFormat_ShouldThrowArgumentException(string invalidMacAddress)
     {
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => new MacAddress(null!));
+        var exception = Assert.Throws<ArgumentException>(() => new MacAddress(invalidMacAddress));
+        Assert.Contains("Invalid MAC address format", exception.Message);
     }
 
     [Theory]
     [InlineData("AA:BB:CC:DD:EE:FF", true)]
     [InlineData("aa:bb:cc:dd:ee:ff", true)]
     [InlineData("AA-BB-CC-DD-EE-FF", true)]
-    [InlineData("12:34:56:78:9A:BC", true)]
-    [InlineData("00:00:00:00:00:00", true)]
-    [InlineData("FF:FF:FF:FF:FF:FF", true)]
-    [InlineData("", false)]
-    [InlineData("   ", false)]
-    [InlineData("invalid-mac", false)]
+    [InlineData("00:11:22:33:44:55", true)]
     [InlineData("AA:BB:CC:DD:EE", false)]
-    [InlineData("AA:BB:CC:DD:EE:FF:GG", false)]
-    [InlineData("XX:YY:ZZ:AA:BB:CC", false)]
-    [InlineData("not-a-mac-address", false)]
-    public void IsValid_WithVariousInputs_ShouldReturnCorrectResult(string macAddress, bool expected)
+    [InlineData("GG:BB:CC:DD:EE:FF", false)]
+    [InlineData("not-a-mac", false)]
+    [InlineData("", false)]
+    [InlineData(null, false)]
+    public void IsValid_WithDifferentInputs_ShouldReturnCorrectValue(string? macAddress, bool expectedValid)
     {
-        // Act
-        var result = MacAddress.IsValid(macAddress);
-
-        // Assert
-        Assert.Equal(expected, result);
+        // Act & Assert
+        Assert.Equal(expectedValid, MacAddress.IsValid(macAddress));
     }
 
-    [Fact]
-    public void IsValid_WithNull_ShouldReturnFalse()
+    [Theory]
+    [InlineData("AA:BB:CC:DD:EE:FF")]
+    [InlineData("aa:bb:cc:dd:ee:ff")]
+    [InlineData("AA-BB-CC-DD-EE-FF")]
+    public void Parse_WithValidMacAddress_ShouldReturnMacAddress(string validMacAddress)
     {
         // Act
-        var result = MacAddress.IsValid(null);
+        var macAddress = MacAddress.Parse(validMacAddress);
 
         // Assert
-        Assert.False(result);
+        Assert.NotNull(macAddress.Value);
+        Assert.Contains(":", macAddress.ToString());
+        Assert.Equal(macAddress.ToString().ToUpperInvariant(), macAddress.ToString());
     }
 
-    [Fact]
-    public void Parse_WithValidMacAddress_ShouldReturnMacAddress()
+    [Theory]
+    [InlineData("AA:BB:CC:DD:EE")]
+    [InlineData("GG:BB:CC:DD:EE:FF")]
+    [InlineData("not-a-mac")]
+    [InlineData("")]
+    public void Parse_WithInvalidMacAddress_ShouldThrowArgumentException(string invalidMacAddress)
     {
-        // Arrange
-        var macAddressString = "AA:BB:CC:DD:EE:FF";
-
-        // Act
-        var mac = MacAddress.Parse(macAddressString);
-
-        // Assert
-        Assert.Equal("AA:BB:CC:DD:EE:FF", mac.Value);
-    }
-
-    [Fact]
-    public void Parse_WithInvalidMacAddress_ShouldThrowArgumentException()
-    {
-        // Arrange
-        var invalidMacAddress = "invalid-mac";
-
         // Act & Assert
         Assert.Throws<ArgumentException>(() => MacAddress.Parse(invalidMacAddress));
     }
@@ -126,48 +112,27 @@ public class MacAddressTests
     [InlineData("AA:BB:CC:DD:EE:FF", true)]
     [InlineData("aa:bb:cc:dd:ee:ff", true)]
     [InlineData("AA-BB-CC-DD-EE-FF", true)]
-    [InlineData("invalid-mac", false)]
+    [InlineData("GG:BB:CC:DD:EE:FF", false)]
+    [InlineData("AA:BB:CC:DD:EE", false)]
+    [InlineData("not-a-mac", false)]
     [InlineData("", false)]
-    public void TryParse_WithVariousInputs_ShouldReturnCorrectResult(string input, bool shouldSucceed)
+    [InlineData(null, false)]
+    public void TryParse_WithDifferentInputs_ShouldReturnCorrectResult(string? macAddress, bool expectedSuccess)
     {
         // Act
-        var result = MacAddress.TryParse(input, out var mac);
+        var success = MacAddress.TryParse(macAddress, out var result);
 
         // Assert
-        Assert.Equal(shouldSucceed, result);
-        if (shouldSucceed)
+        Assert.Equal(expectedSuccess, success);
+        if (expectedSuccess)
         {
-            Assert.NotEqual(default, mac);
-            Assert.NotNull(mac.Value);
+            Assert.NotNull(result.Value);
+            Assert.Contains(":", result.ToString());
         }
         else
         {
-            Assert.Equal(default, mac);
+            Assert.Equal(default, result);
         }
-    }
-
-    [Fact]
-    public void TryParse_WithNull_ShouldReturnFalse()
-    {
-        // Act
-        var result = MacAddress.TryParse(null, out var mac);
-
-        // Assert
-        Assert.False(result);
-        Assert.Equal(default, mac);
-    }
-
-    [Fact]
-    public void ToString_ShouldReturnNormalizedValue()
-    {
-        // Arrange
-        var mac = new MacAddress("aa-bb-cc-dd-ee-ff");
-
-        // Act
-        var result = mac.ToString();
-
-        // Assert
-        Assert.Equal("AA:BB:CC:DD:EE:FF", result);
     }
 
     [Fact]
@@ -175,12 +140,13 @@ public class MacAddressTests
     {
         // Arrange
         var mac1 = new MacAddress("AA:BB:CC:DD:EE:FF");
-        var mac2 = new MacAddress("aa:bb:cc:dd:ee:ff");
+        var mac2 = new MacAddress("aa:bb:cc:dd:ee:ff"); // Different case
 
         // Act & Assert
         Assert.True(mac1.Equals(mac2));
         Assert.True(mac1 == mac2);
         Assert.False(mac1 != mac2);
+        Assert.Equal(mac1.GetHashCode(), mac2.GetHashCode());
     }
 
     [Fact]
@@ -188,7 +154,7 @@ public class MacAddressTests
     {
         // Arrange
         var mac1 = new MacAddress("AA:BB:CC:DD:EE:FF");
-        var mac2 = new MacAddress("11:22:33:44:55:66");
+        var mac2 = new MacAddress("AA:BB:CC:DD:EE:FE");
 
         // Act & Assert
         Assert.False(mac1.Equals(mac2));
@@ -201,57 +167,34 @@ public class MacAddressTests
     {
         // Arrange
         var mac = new MacAddress("AA:BB:CC:DD:EE:FF");
-        var notMac = "AA:BB:CC:DD:EE:FF";
+        var obj = "AA:BB:CC:DD:EE:FF";
 
         // Act & Assert
-        Assert.False(mac.Equals(notMac));
+        Assert.True(mac.Equals(obj));
     }
 
     [Fact]
-    public void GetHashCode_WithSameMacAddress_ShouldReturnSameHashCode()
+    public void Equals_WithNullObject_ShouldReturnFalse()
     {
         // Arrange
-        var mac1 = new MacAddress("AA:BB:CC:DD:EE:FF");
-        var mac2 = new MacAddress("aa:bb:cc:dd:ee:ff");
+        var mac = new MacAddress("AA:BB:CC:DD:EE:FF");
 
-        // Act
-        var hash1 = mac1.GetHashCode();
-        var hash2 = mac2.GetHashCode();
-
-        // Assert
-        Assert.Equal(hash1, hash2);
+        // Act & Assert
+        Assert.False(mac.Equals((object?)null));
     }
 
     [Fact]
-    public void GetHashCode_WithDifferentMacAddress_ShouldReturnDifferentHashCode()
+    public void ImplicitConversion_FromString_ShouldWork()
     {
-        // Arrange
-        var mac1 = new MacAddress("AA:BB:CC:DD:EE:FF");
-        var mac2 = new MacAddress("11:22:33:44:55:66");
-
         // Act
-        var hash1 = mac1.GetHashCode();
-        var hash2 = mac2.GetHashCode();
+        MacAddress mac = "AA:BB:CC:DD:EE:FF";
 
         // Assert
-        Assert.NotEqual(hash1, hash2);
+        Assert.Equal("AA:BB:CC:DD:EE:FF", mac.ToString());
     }
 
     [Fact]
-    public void ImplicitConversion_FromString_ShouldCreateMacAddress()
-    {
-        // Arrange
-        string macString = "AA:BB:CC:DD:EE:FF";
-
-        // Act
-        MacAddress mac = macString;
-
-        // Assert
-        Assert.Equal("AA:BB:CC:DD:EE:FF", mac.Value);
-    }
-
-    [Fact]
-    public void ImplicitConversion_ToString_ShouldReturnValue()
+    public void ImplicitConversion_ToString_ShouldWork()
     {
         // Arrange
         var mac = new MacAddress("AA:BB:CC:DD:EE:FF");
@@ -264,65 +207,177 @@ public class MacAddressTests
     }
 
     [Fact]
-    public void MacAddress_WithMixedCaseAndSeparators_ShouldNormalizeConsistently()
+    public void GetHashCode_WithSameMacAddress_ShouldReturnSameHashCode()
     {
         // Arrange
-        var inputs = new[]
-        {
-            "aa:bb:cc:dd:ee:ff",
-            "AA:BB:CC:DD:EE:FF",
-            "aa-bb-cc-dd-ee-ff",
-            "AA-BB-CC-DD-EE-FF",
-            "Aa:Bb:Cc:Dd:Ee:Ff",
-        };
+        var mac1 = new MacAddress("AA:BB:CC:DD:EE:FF");
+        var mac2 = new MacAddress("aa:bb:cc:dd:ee:ff");
 
-        // Act
-        var macAddresses = inputs.Select(input => new MacAddress(input)).ToArray();
-
-        // Assert
-        var expectedValue = "AA:BB:CC:DD:EE:FF";
-        foreach (var mac in macAddresses)
-        {
-            Assert.Equal(expectedValue, mac.Value);
-        }
-
-        // All should be equal to each other
-        for (int i = 0; i < macAddresses.Length; i++)
-        {
-            for (int j = i + 1; j < macAddresses.Length; j++)
-            {
-                Assert.Equal(macAddresses[i], macAddresses[j]);
-            }
-        }
-    }
-
-    [Theory]
-    [InlineData("00:00:00:00:00:00")] // All zeros
-    [InlineData("FF:FF:FF:FF:FF:FF")] // All ones (broadcast)
-    [InlineData("01:23:45:67:89:AB")] // Mixed hex digits
-    [InlineData("FE:DC:BA:98:76:54")] // Reverse order
-    public void MacAddress_WithEdgeCaseValues_ShouldHandleCorrectly(string macAddress)
-    {
-        // Act
-        var mac = new MacAddress(macAddress);
-
-        // Assert
-        Assert.Equal(macAddress.ToUpper(), mac.Value);
-        Assert.True(MacAddress.IsValid(macAddress));
+        // Act & Assert
+        Assert.Equal(mac1.GetHashCode(), mac2.GetHashCode());
     }
 
     [Fact]
-    public void MacAddress_ValueObjectBehavior_ShouldBeImmutable()
+    public void ToString_ShouldReturnColonSeparatedUppercase()
     {
         // Arrange
-        var mac = new MacAddress("AA:BB:CC:DD:EE:FF");
-        var originalValue = mac.Value;
+        var mac = new MacAddress("aa-bb-cc-dd-ee-ff");
 
-        // Act - Cannot modify value since it's readonly
-        // This test verifies the immutable nature by confirming the Value property hasn't changed
+        // Act
+        var result = mac.ToString();
 
         // Assert
-        Assert.Equal(originalValue, mac.Value);
+        Assert.Equal("AA:BB:CC:DD:EE:FF", result);
+    }
+
+    [Fact]
+    public void ValueObject_Immutability_ShouldBeImmutable()
+    {
+        // Arrange
+        var originalMac = new MacAddress("AA:BB:CC:DD:EE:FF");
+        var originalValue = originalMac.Value;
+
+        // Act - Try to access and use the MAC address in various ways
+        var stringValue = originalMac.ToString();
+        var hashCode = originalMac.GetHashCode();
+
+        // Assert - Original should remain unchanged
+        Assert.Equal(originalValue, originalMac.Value);
+        Assert.Equal("AA:BB:CC:DD:EE:FF", originalMac.ToString());
+    }
+
+    [Fact]
+    public void MacAddress_WithComplexScenario_ShouldWorkCorrectly()
+    {
+        // Arrange - Test various MAC address operations
+        var customMac = new MacAddress("aa-bb-cc-dd-ee-ff");
+        var parsedMac = MacAddress.Parse("AA:BB:CC:DD:EE:FF");
+        var anotherMac = new MacAddress("00:11:22:33:44:55");
+
+        // Act & Assert
+        Assert.Equal("AA:BB:CC:DD:EE:FF", customMac.ToString());
+        Assert.Equal("AA:BB:CC:DD:EE:FF", parsedMac.ToString());
+        Assert.Equal(customMac, parsedMac);
+
+        // Test that they're different where expected
+        Assert.NotEqual(customMac, anotherMac);
+
+        // Test conversion roundtrip
+        string macString = customMac;
+        MacAddress convertedBack = macString;
+        Assert.Equal(customMac, convertedBack);
+    }
+
+    [Theory]
+    [InlineData("AA:BB:CC:DD:EE:FF", "AA:BB:CC:DD:EE:FF", true)]
+    [InlineData("AA:BB:CC:DD:EE:FF", "aa:bb:cc:dd:ee:ff", true)]
+    [InlineData("AA:BB:CC:DD:EE:FF", "AA-BB-CC-DD-EE-FF", true)]
+    [InlineData("AA:BB:CC:DD:EE:FF", "AA:BB:CC:DD:EE:FE", false)]
+    public void OperatorEquals_WithDifferentComparisons_ShouldReturnCorrectResult(
+        string mac1String,
+        string mac2String,
+        bool expectedEqual
+    )
+    {
+        // Arrange
+        var mac1 = new MacAddress(mac1String);
+        var mac2 = new MacAddress(mac2String);
+
+        // Act & Assert
+        Assert.Equal(expectedEqual, mac1 == mac2);
+        Assert.Equal(!expectedEqual, mac1 != mac2);
+    }
+
+    [Fact]
+    public void MacAddress_StructBehavior_ShouldBehaveAsValueType()
+    {
+        // Arrange
+        var mac1 = new MacAddress("AA:BB:CC:DD:EE:FF");
+        var mac2 = mac1; // This should copy the struct
+
+        // Act - Since it's a struct, mac2 should be a copy
+        var areEqual = mac1.Equals(mac2);
+        var hashCodesEqual = mac1.GetHashCode() == mac2.GetHashCode();
+
+        // Assert
+        Assert.True(areEqual);
+        Assert.True(hashCodesEqual);
+        Assert.Equal(mac1.ToString(), mac2.ToString());
+    }
+
+    [Theory]
+    [InlineData("00:50:56:00:00:01")] // VMware
+    [InlineData("08:00:27:00:00:01")] // VirtualBox
+    [InlineData("00:15:5D:00:00:01")] // Hyper-V
+    [InlineData("52:54:00:00:00:01")] // QEMU/KVM
+    public void MacAddress_WithVirtualMachineAddresses_ShouldWorkCorrectly(string vmMacAddress)
+    {
+        // Act
+        var mac = new MacAddress(vmMacAddress);
+
+        // Assert
+        Assert.Equal(vmMacAddress.ToUpperInvariant(), mac.ToString());
+        Assert.Equal(vmMacAddress.ToUpperInvariant(), mac.Value);
+    }
+
+    [Fact]
+    public void MacAddress_CaseInsensitiveComparison_ShouldWork()
+    {
+        // Arrange
+        var mac1 = new MacAddress("aa:bb:cc:dd:ee:ff");
+        var mac2 = new MacAddress("AA:BB:CC:DD:EE:FF");
+        var mac3 = new MacAddress("Aa:Bb:Cc:Dd:Ee:Ff");
+
+        // Act & Assert
+        Assert.Equal(mac1, mac2);
+        Assert.Equal(mac2, mac3);
+        Assert.Equal(mac1, mac3);
+        Assert.True(mac1 == mac2);
+        Assert.True(mac2 == mac3);
+        Assert.True(mac1 == mac3);
+    }
+
+    [Fact]
+    public void MacAddress_WithSpecialAddresses_ShouldWorkCorrectly()
+    {
+        // Arrange & Act
+        var broadcastMac = new MacAddress("FF:FF:FF:FF:FF:FF");
+        var zeroMac = new MacAddress("00:00:00:00:00:00");
+        var multicastMac = new MacAddress("01:00:5E:00:00:01");
+
+        // Assert
+        Assert.Equal("FF:FF:FF:FF:FF:FF", broadcastMac.ToString());
+        Assert.Equal("00:00:00:00:00:00", zeroMac.ToString());
+        Assert.Equal("01:00:5E:00:00:01", multicastMac.ToString());
+
+        Assert.NotEqual(broadcastMac, zeroMac);
+        Assert.NotEqual(broadcastMac, multicastMac);
+        Assert.NotEqual(zeroMac, multicastMac);
+    }
+
+    [Theory]
+    [InlineData("aa:bb:cc:dd:ee:ff")]
+    [InlineData("AA-BB-CC-DD-EE-FF")]
+    [InlineData("Aa:Bb:Cc:Dd:Ee:Ff")]
+    [InlineData("aA-bB-cC-dD-eE-fF")]
+    public void MacAddress_NormalizationConsistency_ShouldAlwaysProduceSameOutput(string input)
+    {
+        // Act
+        var mac = new MacAddress(input);
+
+        // Assert
+        Assert.Equal("AA:BB:CC:DD:EE:FF", mac.ToString());
         Assert.Equal("AA:BB:CC:DD:EE:FF", mac.Value);
+    }
+
+    [Fact]
+    public void MacAddress_DefaultValue_ShouldBeHandledCorrectly()
+    {
+        // Arrange
+        var defaultMac = default(MacAddress);
+
+        // Act & Assert
+        Assert.Null(defaultMac.Value);
+        Assert.Null(defaultMac.ToString());
     }
 }

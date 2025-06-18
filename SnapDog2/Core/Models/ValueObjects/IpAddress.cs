@@ -135,7 +135,7 @@ public readonly struct IpAddress : IEquatable<IpAddress>
     /// Returns the string representation of the IP address.
     /// </summary>
     /// <returns>The IP address string.</returns>
-    public override string ToString() => Value.ToString();
+    public override string ToString() => Value?.ToString() ?? string.Empty;
 
     /// <summary>
     /// Determines whether the specified object is equal to the current <see cref="IpAddress"/>.
@@ -149,7 +149,7 @@ public readonly struct IpAddress : IEquatable<IpAddress>
     /// </summary>
     /// <param name="other">The <see cref="IpAddress"/> to compare.</param>
     /// <returns>True if the IP addresses are equal; otherwise, false.</returns>
-    public bool Equals(IpAddress other) => Value.Equals(other.Value);
+    public bool Equals(IpAddress other) => Value?.Equals(other.Value) ?? (other.Value == null);
 
     /// <summary>
     /// Returns the hash code for the current <see cref="IpAddress"/>.
