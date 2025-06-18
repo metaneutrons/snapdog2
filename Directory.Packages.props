@@ -13,14 +13,25 @@
     <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
     <!-- Snapcast Integration -->
     <!-- Resilience Policies -->
-    <PackageVersion Include="Polly" Version="8.3.0" />
-    <PackageVersion Include="Polly.Extensions.Http" Version="3.0.0" />
+    <PackageVersion Include="Polly" Version="8.4.1" />
+    <PackageVersion Include="Polly.Extensions" Version="8.4.1" />
+    <PackageVersion Include="Microsoft.Extensions.Http.Polly" Version="8.0.11" />
     <PackageVersion Include="snapcast-net" Version="0.0.4" />
     <!-- Analyzers -->
     <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.556" />
     <PackageVersion Include="SonarAnalyzer.CSharp" Version="9.21.0.86780" />
     <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="8.0.0" />
     <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.10.48" />
+    <!-- Entity Framework Core -->
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.6" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.6" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.6" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.6" />
+    <!-- Health Checks -->
+    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore"
+      Version="9.0.0" />
+    <PackageVersion Include="AspNetCore.HealthChecks.Network" Version="8.0.1" />
     <!-- Configuration -->
     <PackageVersion Include="EnvoyConfig" Version="0.1.0-beta.81" />
     <!-- Test -->
