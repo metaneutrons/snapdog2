@@ -355,16 +355,25 @@ public class SnapcastControllerIntegrationTests : IClassFixture<TestWebApplicati
         // Arrange
         _mockMediator
             .Setup(m => m.Send(It.IsAny<GetSnapcastServerStatusQuery>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new OperationCanceledException());
+            .Returns(async (GetSnapcastServerStatusQuery query, CancellationToken ct) =>
+            {
+                // Simulate work that can be cancelled
+                await Task.Delay(TimeSpan.FromSeconds(5), ct); // Increased delay to ensure cancellation can occur
+                ct.ThrowIfCancellationRequested();
+                // If not cancelled, return a dummy status. This part might not be reached if cancellation is quick.
+                return """{"server": {"host": "localhost", "snapserver": {"version": "0.26.0"}}}""";
+            });
 
         _client.DefaultRequestHeaders.Remove("X-API-Key");
         _client.DefaultRequestHeaders.Add("X-API-Key", "test-api-key");
 
-        using var cts = new CancellationTokenSource();
-        cts.Cancel();
+        // Shorten the CTS delay to ensure it cancels before the mock's Task.Delay completes
+        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100)); // Cancel after 100ms
 
         // Act & Assert
-        await Assert.ThrowsAsync<TaskCanceledException>(async () => // HttpClient throws TaskCanceledException for timeouts/cancellations
+        // HttpClient will throw TaskCanceledException when its own token is cancelled
+        // or if the underlying connection is aborted due to OperationCanceledException from the server-side handler.
+        await Assert.ThrowsAsync<TaskCanceledException>(async () =>
         {
             await _client.GetAsync("/api/snapcast/status", cts.Token);
         });

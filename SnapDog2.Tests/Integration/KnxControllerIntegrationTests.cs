@@ -16,6 +16,8 @@ using SnapDog2.Infrastructure.Services.Models;
 using SnapDog2.Server.Features.Knx.Commands;
 using SnapDog2.Server.Features.Knx.Queries;
 using Xunit;
+using FluentValidation; // For ValidationException
+using FluentValidation.Results; // For ValidationFailure
 
 namespace SnapDog2.Tests.Integration;
 
@@ -219,7 +221,7 @@ public class KnxControllerIntegrationTests : IClassFixture<TestWebApplicationFac
     public async Task WriteGroupValue_WithInvalidAddress_ShouldReturnBadRequest()
     {
         // Arrange - This will fail validation due to invalid address format
-        var invalidJson = """{"Address": "invalid", "Value": [1], "Description": "Test"}""";
+        var invalidJson = """{"Address": "invalid", "Value": "AQ==", "Description": "Test"}"""; // Value: [1] -> "AQ=="
         var content = new StringContent(invalidJson, Encoding.UTF8, "application/json");
 
         _client.DefaultRequestHeaders.Remove("X-API-Key");
@@ -489,7 +491,7 @@ public class KnxControllerIntegrationTests : IClassFixture<TestWebApplicationFac
     public async Task WriteGroupValue_WithInvalidAddressRange_ShouldReturnBadRequest(string address)
     {
         // Arrange
-        var invalidJson = $$"""{"Address": "{{address}}", "Value": [1], "Description": "Test"}""";
+        var invalidJson = $$"""{"Address": "{{address}}", "Value": "AQ==", "Description": "Test"}"""; // Value: [1] -> "AQ=="
         var content = new StringContent(invalidJson, Encoding.UTF8, "application/json");
 
         _client.DefaultRequestHeaders.Remove("X-API-Key");
@@ -507,11 +509,26 @@ public class KnxControllerIntegrationTests : IClassFixture<TestWebApplicationFac
     public async Task WriteGroupValue_WithEmptyValue_ShouldReturnBadRequest()
     {
         // Arrange
-        var invalidJson = """{"Address": "1/1/1", "Value": [], "Description": "Test"}""";
-        var content = new StringContent(invalidJson, Encoding.UTF8, "application/json");
+        var requestDto = new WriteKnxValueRequest
+        {
+            Address = "1/1/1",
+            Value = "", // This will result in an empty byte[] after Convert.FromBase64String
+            Description = "Test empty value"
+        };
+
+        // Simulate FluentValidation failure for a command with an empty byte[] Value
+        _mockMediator
+            .Setup(m => m.Send(It.Is<WriteGroupValueCommand>(cmd => cmd.Address.ToString() == "1/1/1" && cmd.Value != null && cmd.Value.Length == 0), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new FluentValidation.ValidationException("Validation failed", new[]
+            {
+                new ValidationFailure("Value", "Value cannot be empty.")
+            }));
 
         _client.DefaultRequestHeaders.Remove("X-API-Key");
         _client.DefaultRequestHeaders.Add("X-API-Key", "test-api-key");
+
+        var json = JsonSerializer.Serialize(requestDto);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
 
         // Act
         var response = await _client.PostAsync("/api/knx/write", content);
@@ -623,7 +640,7 @@ public class KnxControllerIntegrationTests : IClassFixture<TestWebApplicationFac
     public async Task WriteGroupValue_WithMissingRequiredField_ShouldReturnBadRequest()
     {
         // Arrange - Missing Address field
-        var invalidJson = """{"Value": [1], "Description": "Test"}""";
+        var invalidJson = """{"Value": "AQ==", "Description": "Test"}"""; // Value: [1] -> "AQ=="
         var content = new StringContent(invalidJson, Encoding.UTF8, "application/json");
 
         _client.DefaultRequestHeaders.Remove("X-API-Key");

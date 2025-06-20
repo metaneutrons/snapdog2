@@ -254,16 +254,26 @@ public class MqttControllerIntegrationTests : IClassFixture<TestWebApplicationFa
         // Arrange
         _mockMediator
             .Setup(m => m.Send(It.IsAny<GetMqttConnectionStatusQuery>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new OperationCanceledException());
+            .Returns(async (GetMqttConnectionStatusQuery query, CancellationToken ct) =>
+            {
+                // Simulate work that can be cancelled
+                await Task.Delay(TimeSpan.FromSeconds(5), ct); // Increased delay to ensure cancellation can occur
+                ct.ThrowIfCancellationRequested();
+                // If not cancelled, return a dummy status. This part might not be reached if cancellation is quick.
+                return new MqttConnectionStatusResponse { IsConnected = true, BrokerHost = "simulated", ClientId = "simulated-client", BrokerPort = 1883 };
+            });
 
         _client.DefaultRequestHeaders.Remove("X-API-Key");
         _client.DefaultRequestHeaders.Add("X-API-Key", "test-api-key");
 
-        using var cts = new CancellationTokenSource();
-        cts.Cancel();
+        // Shorten the CTS delay to ensure it cancels before the mock's Task.Delay completes
+        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100)); // Cancel after 100ms
+
 
         // Act & Assert
-        await Assert.ThrowsAsync<TaskCanceledException>(async () => // HttpClient throws TaskCanceledException for timeouts/cancellations
+        // HttpClient will throw TaskCanceledException when its own token is cancelled
+        // or if the underlying connection is aborted due to OperationCanceledException from the server-side handler.
+        await Assert.ThrowsAsync<TaskCanceledException>(async () =>
         {
             await _client.GetAsync("/api/mqtt/status", cts.Token);
         });
