@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Infrastructure.HealthChecks;
+using SnapDog2.Infrastructure.Services;
 
 namespace SnapDog2.Infrastructure;
 
@@ -99,7 +100,6 @@ public static class ServiceCollectionExtensions
 
     /// <summary>
     /// Adds external service abstractions to the service collection.
-    /// This method is a placeholder for future external service registration.
     /// </summary>
     /// <param name="services">The service collection to add services to.</param>
     /// <param name="servicesConfig">The services configuration.</param>
@@ -112,11 +112,43 @@ public static class ServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(servicesConfig);
 
-        // External service implementations would be registered here
-        // Example:
-        // services.AddScoped<ISnapcastService, SnapcastService>();
-        // services.AddScoped<IMqttService, MqttService>();
-        // services.AddScoped<IKnxService, KnxService>();
+        // Configure Snapcast service
+        services.Configure<SnapcastConfiguration>(config =>
+        {
+            config.Host = servicesConfig.Snapcast.Host;
+            config.Port = servicesConfig.Snapcast.Port;
+            config.TimeoutSeconds = servicesConfig.Snapcast.TimeoutSeconds;
+            config.ReconnectIntervalSeconds = servicesConfig.Snapcast.ReconnectIntervalSeconds;
+            config.AutoReconnect = servicesConfig.Snapcast.AutoReconnect;
+        });
+
+        // Configure MQTT service
+        services.Configure<MqttConfiguration>(config =>
+        {
+            config.Broker = servicesConfig.Mqtt.Broker;
+            config.Port = servicesConfig.Mqtt.Port;
+            config.Username = servicesConfig.Mqtt.Username;
+            config.Password = servicesConfig.Mqtt.Password;
+            config.ClientId = servicesConfig.Mqtt.ClientId;
+            config.SslEnabled = servicesConfig.Mqtt.SslEnabled;
+            config.KeepAliveSeconds = servicesConfig.Mqtt.KeepAliveSeconds;
+        });
+
+        // Configure KNX service
+        services.Configure<KnxConfiguration>(config =>
+        {
+            config.Enabled = servicesConfig.Knx.Enabled;
+            config.Gateway = servicesConfig.Knx.Gateway;
+            config.Port = servicesConfig.Knx.Port;
+            config.TimeoutSeconds = servicesConfig.Knx.TimeoutSeconds;
+            config.AutoReconnect = servicesConfig.Knx.AutoReconnect;
+        });
+
+        // Register external services
+        services.AddScoped<ISnapcastService, SnapcastService>();
+        services.AddScoped<IMqttService, MqttService>();
+        services.AddScoped<MqttDomainEventPublisher>();
+        services.AddScoped<IKnxService, KnxService>();
 
         return services;
     }

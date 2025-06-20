@@ -29,8 +29,8 @@ public class ConfigurationTests
         try
         {
             // Register custom type converters
-            TypeConverterRegistry.RegisterConverter(typeof(KnxAddress), new KnxAddressConverter());
-            TypeConverterRegistry.RegisterConverter(typeof(KnxAddress?), new KnxAddressConverter());
+            // TypeConverterRegistry.RegisterConverter(typeof(KnxAddress), new KnxAddressConverter()); // Temporarily commented out
+            // TypeConverterRegistry.RegisterConverter(typeof(KnxAddress?), new KnxAddressConverter()); // Temporarily commented out
 
             // Set the global prefix for EnvoyConfig
             EnvConfig.GlobalPrefix = "SNAPDOG_";

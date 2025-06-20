@@ -16,6 +16,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     <PackageReference Include="MediatR" />
     <PackageReference Include="Moq" />
     <PackageReference Include="xunit" />
@@ -25,5 +26,6 @@
 
   <ItemGroup>
     <ProjectReference Include="../SnapDog2/SnapDog2.csproj" />
+    <ProjectReference Include="../SnapDog2.Api/SnapDog2.Api.csproj" />
   </ItemGroup>
 </Project>

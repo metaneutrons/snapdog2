@@ -14,6 +14,11 @@
     <PackageVersion Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
     <!-- Snapcast Integration -->
+    <!-- MQTT Integration -->
+    <PackageVersion Include="MQTTnet" Version="4.3.7.1207" />
+    <PackageVersion Include="MQTTnet.Extensions.ManagedClient" Version="4.3.7.1207" />
+    <!-- KNX Integration -->
+    <PackageVersion Include="Knx.Falcon.Sdk" Version="6.3.7959" />
     <!-- Resilience Policies -->
     <PackageVersion Include="Polly" Version="8.4.1" />
     <PackageVersion Include="Polly.Extensions" Version="8.4.1" />
@@ -46,6 +51,7 @@
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.6" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.15" />
     <PackageVersion Include="Moq" Version="4.20.72" />
     <PackageVersion Include="SubSonicMedia" Version="1.0.5-beta.1" />
     <PackageVersion Include="xunit" Version="2.9.3" />

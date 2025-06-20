@@ -30,7 +30,7 @@ public interface IKnxService
     /// <param name="value">The value to write as byte array</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>True if write operation was successful, false otherwise</returns>
-    Task<bool> WriteGroupValueAsync(KnxAddress address, byte[] value, CancellationToken cancellationToken = default);
+    Task<bool> WriteGroupValueAsync(KnxAddress? address, byte[] value, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Reads a value from a specific KNX group address.
@@ -38,7 +38,7 @@ public interface IKnxService
     /// <param name="address">The KNX group address to read from</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The value read as byte array, or null if read failed</returns>
-    Task<byte[]?> ReadGroupValueAsync(KnxAddress address, CancellationToken cancellationToken = default);
+    Task<byte[]?> ReadGroupValueAsync(KnxAddress? address, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Subscribes to value changes on a specific KNX group address.
@@ -46,7 +46,7 @@ public interface IKnxService
     /// <param name="address">The KNX group address to monitor</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>True if subscription was successful, false otherwise</returns>
-    Task<bool> SubscribeToGroupAsync(KnxAddress address, CancellationToken cancellationToken = default);
+    Task<bool> SubscribeToGroupAsync(KnxAddress? address, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Unsubscribes from value changes on a specific KNX group address.
@@ -54,7 +54,7 @@ public interface IKnxService
     /// <param name="address">The KNX group address to stop monitoring</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>True if unsubscription was successful, false otherwise</returns>
-    Task<bool> UnsubscribeFromGroupAsync(KnxAddress address, CancellationToken cancellationToken = default);
+    Task<bool> UnsubscribeFromGroupAsync(KnxAddress? address, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Event raised when a group value is received from a subscribed address.

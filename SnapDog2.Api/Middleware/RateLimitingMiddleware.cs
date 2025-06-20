@@ -1,5 +1,4 @@
 using System.Net;
-using AspNetCoreRateLimit;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using SnapDog2.Api.Configuration;
@@ -152,23 +151,41 @@ public class RateLimitingMiddleware
     /// <returns>True if the IP is in range; otherwise, false.</returns>
     private bool IsIpInRange(string ipAddress, string range)
     {
+        _logger.LogDebug("DIAGNOSTIC: Checking IP range - IP: '{IpAddress}', Range: '{Range}'", ipAddress, range);
+
+        if (string.Equals(ipAddress, "unknown", StringComparison.OrdinalIgnoreCase))
+        {
+            _logger.LogDebug("DIAGNOSTIC: Cannot check IP range for 'unknown' IP address - returning false");
+            return false;
+        }
+
         try
         {
             if (!range.Contains('/'))
             {
+                _logger.LogDebug(
+                    "DIAGNOSTIC: Single IP comparison - IP: '{IpAddress}' == Range: '{Range}' = {Result}",
+                    ipAddress,
+                    range,
+                    ipAddress == range
+                );
                 return ipAddress == range;
             }
 
             var parts = range.Split('/');
             var networkIp = IPAddress.Parse(parts[0]);
             var prefixLength = int.Parse(parts[1]);
+
+            _logger.LogDebug("DIAGNOSTIC: About to parse request IP: '{IpAddress}'", ipAddress);
             var requestIp = IPAddress.Parse(ipAddress);
 
-            return IsInSubnet(requestIp, networkIp, prefixLength);
+            var result = IsInSubnet(requestIp, networkIp, prefixLength);
+            _logger.LogDebug("DIAGNOSTIC: Subnet check result: {Result}", result);
+            return result;
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Error checking IP range {Range} for IP {IpAddress}", range, ipAddress);
+            _logger.LogWarning(ex, "DIAGNOSTIC: Error checking IP range {Range} for IP {IpAddress}", range, ipAddress);
             return false;
         }
     }

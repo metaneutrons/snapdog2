@@ -1,4 +1,3 @@
-using AspNetCoreRateLimit;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,6 +7,7 @@ using SnapDog2.Api.Authorization;
 using SnapDog2.Api.Configuration;
 using SnapDog2.Api.Extensions;
 using SnapDog2.Api.Middleware;
+using SnapDog2.Core.Configuration; // Added for KnxAddressConverter
 using SnapDog2.Infrastructure;
 using SnapDog2.Server.Extensions;
 
@@ -27,7 +27,13 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container
-        builder.Services.AddControllers();
+        builder
+            .Services.AddControllers()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new KnxAddressConverter());
+                // Add other converters here if needed in the future
+            });
 
         // Add API documentation
         builder.Services.AddEndpointsApiExplorer();
@@ -107,33 +113,14 @@ public class Program
             ?? InputValidationOptions.CreateDefault();
         builder.Services.AddSingleton(validationOptions);
 
-        // Configure rate limiting
-        builder.Services.Configure<IpRateLimitOptions>(options =>
-        {
-            var rateLimitOptions = rateLimitingConfig.ToIpRateLimitOptions();
-            options.EnableEndpointRateLimiting = rateLimitOptions.EnableEndpointRateLimiting;
-            options.StackBlockedRequests = rateLimitOptions.StackBlockedRequests;
-            options.HttpStatusCode = rateLimitOptions.HttpStatusCode;
-            options.RealIpHeader = rateLimitOptions.RealIpHeader;
-            options.ClientIdHeader = rateLimitOptions.ClientIdHeader;
-            options.GeneralRules = rateLimitOptions.GeneralRules;
-            options.IpWhitelist = rateLimitOptions.IpWhitelist;
-            options.ClientWhitelist = rateLimitOptions.ClientWhitelist;
-            options.QuotaExceededResponse = rateLimitOptions.QuotaExceededResponse;
-        });
-
-        builder.Services.Configure<IpRateLimitPolicies>(policies =>
-        {
-            var rateLimitPolicies = rateLimitingConfig.ToIpRateLimitPolicies();
-            policies.IpRules = rateLimitPolicies.IpRules;
-        });
-        builder.Services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
-        builder.Services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
-        builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
-        builder.Services.AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>();
+        // Custom rate limiting configuration (AspNetCoreRateLimit services removed to avoid conflicts)
 
         // TODO: Add infrastructure layer services when repositories are implemented
         // For now, we'll register minimal services to get the API running
+
+        // Register API Authentication Configuration
+        var apiAuthConfig = ApiAuthConfiguration.LoadFromEnvironment();
+        builder.Services.AddSingleton(apiAuthConfig);
 
         // Add basic MediatR for controllers (without server layer dependencies for now)
         builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
@@ -143,6 +130,7 @@ public class Program
         builder.Services.AddScoped<IAuthorizationHandler, ResourceOwnershipHandler>();
 
         // Add API security (authentication, authorization, CORS, security headers)
+        // AddApiSecurity now relies on ApiAuthConfiguration being pre-registered.
         builder.Services.AddApiSecurity();
         builder.Services.AddSecurityHeaders();
         builder.Services.AddApiCors();
@@ -182,13 +170,12 @@ public class Program
 
         // 3. Rate limiting (after logging, before expensive operations)
         app.UseMiddleware<RateLimitingMiddleware>();
-        app.UseIpRateLimiting(); // AspNetCoreRateLimit middleware
 
-        // 4. Security headers and CORS
-        app.UseApiSecurity();
-
-        // 5. Standard middleware
+        // 4. Standard middleware
         app.UseRouting();
+
+        // 5. Security headers and CORS (includes Authentication and Authorization)
+        app.UseApiSecurity();
 
         // Map controllers
         app.MapControllers();

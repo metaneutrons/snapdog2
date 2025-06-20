@@ -31,6 +31,23 @@ public interface IMqttService
     Task<bool> PublishAsync(string topic, string payload, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Publishes a message to a specific MQTT topic with specified QoS and retain flag.
+    /// </summary>
+    /// <param name="topic">The topic to publish to</param>
+    /// <param name="payload">The message payload</param>
+    /// <param name="qos">Quality of service level</param>
+    /// <param name="retain">Whether to retain the message</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>True if message was published successfully, false otherwise</returns>
+    Task<bool> PublishAsync(
+        string topic,
+        string payload,
+        MQTTnet.Protocol.MqttQualityOfServiceLevel qos,
+        bool retain,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     /// Subscribes to messages matching a topic pattern.
     /// </summary>
     /// <param name="topicPattern">The topic pattern to subscribe to (supports wildcards)</param>

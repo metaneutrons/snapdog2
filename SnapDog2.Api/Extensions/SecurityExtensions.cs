@@ -17,9 +17,9 @@ public static class SecurityExtensions
     /// <returns>The service collection for method chaining.</returns>
     public static IServiceCollection AddApiSecurity(this IServiceCollection services)
     {
-        // Load API authentication configuration
-        var authConfig = ApiAuthConfiguration.LoadFromEnvironment();
-        services.AddSingleton(authConfig);
+        // API authentication configuration should be registered prior to calling this.
+        // Program.cs will register the production configuration.
+        // TestWebApplicationFactory will register the test-specific configuration.
 
         // Add authentication with API Key scheme
         services

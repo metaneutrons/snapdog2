@@ -33,6 +33,9 @@
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" />
     <PackageReference Include="AspNetCore.HealthChecks.Network" />
+    <PackageReference Include="MQTTnet" />
+    <PackageReference Include="MQTTnet.Extensions.ManagedClient" />
+    <PackageReference Include="Knx.Falcon.Sdk" />
   </ItemGroup>
 
   <!-- EnvoyConfig will be added as NuGet package when available -->

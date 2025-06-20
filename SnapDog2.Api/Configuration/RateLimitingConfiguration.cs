@@ -1,5 +1,3 @@
-using AspNetCoreRateLimit;
-
 namespace SnapDog2.Api.Configuration;
 
 /// <summary>
@@ -137,38 +135,25 @@ public class RateLimitingConfiguration
             ClientIdHeader = "X-ClientId",
         };
     }
+}
+
+/// <summary>
+/// Represents a rate limiting rule.
+/// </summary>
+public class RateLimitRule
+{
+    /// <summary>
+    /// Gets or sets the endpoint pattern that this rule applies to.
+    /// </summary>
+    public string Endpoint { get; set; } = "*";
 
     /// <summary>
-    /// Converts to AspNetCoreRateLimit IpRateLimitOptions.
+    /// Gets or sets the time period for the rate limit (e.g., "1m", "1h", "1d").
     /// </summary>
-    /// <returns>IpRateLimitOptions configuration.</returns>
-    public IpRateLimitOptions ToIpRateLimitOptions()
-    {
-        return new IpRateLimitOptions
-        {
-            EnableEndpointRateLimiting = true,
-            StackBlockedRequests = StackBlockedRequests,
-            HttpStatusCode = HttpStatusCode,
-            RealIpHeader = RealIpHeader,
-            ClientIdHeader = ClientIdHeader,
-            GeneralRules = DefaultRules.Concat(EndpointRules).ToList(),
-            IpWhitelist = IpWhitelist.ToList(),
-            ClientWhitelist = ClientWhitelist.ToList(),
-            QuotaExceededResponse = new QuotaExceededResponse
-            {
-                Content = QuotaExceededMessage,
-                ContentType = "application/json",
-                StatusCode = HttpStatusCode,
-            },
-        };
-    }
+    public string Period { get; set; } = "1m";
 
     /// <summary>
-    /// Converts to AspNetCoreRateLimit IpRateLimitPolicies.
+    /// Gets or sets the maximum number of requests allowed in the period.
     /// </summary>
-    /// <returns>IpRateLimitPolicies configuration.</returns>
-    public IpRateLimitPolicies ToIpRateLimitPolicies()
-    {
-        return new IpRateLimitPolicies { IpRules = new List<IpRateLimitPolicy>() };
-    }
+    public long Limit { get; set; } = 100;
 }

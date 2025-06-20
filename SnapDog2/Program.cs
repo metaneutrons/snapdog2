@@ -84,8 +84,8 @@ static IHostBuilder CreateHostBuilder(string[] args) =>
 /// </summary>
 static void ConfigureEnvoyConfig()
 {
-    TypeConverterRegistry.RegisterConverter(typeof(KnxAddress), new KnxAddressConverter());
-    TypeConverterRegistry.RegisterConverter(typeof(KnxAddress?), new KnxAddressConverter());
+    // TypeConverterRegistry.RegisterConverter(typeof(KnxAddress), new KnxAddressConverter()); // Temporarily commented out due to type mismatch
+    // TypeConverterRegistry.RegisterConverter(typeof(KnxAddress?), new KnxAddressConverter()); // Temporarily commented out due to type mismatch
     EnvConfig.GlobalPrefix = "SNAPDOG_";
 }
 
