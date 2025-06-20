@@ -34,6 +34,7 @@ public class KnxControllerIntegrationTests : IClassFixture<TestWebApplicationFac
     public KnxControllerIntegrationTests(TestWebApplicationFactory<SnapDog2.Api.Program> factory)
     {
         _factory = factory;
+        _factory.ResetMocks(); // Reset mocks before each test run (or rather, before the class is used by tests)
         _mockKnxService = factory.MockKnxService;
         _mockMediator = factory.MockMediator;
         _client = _factory.CreateClient();
