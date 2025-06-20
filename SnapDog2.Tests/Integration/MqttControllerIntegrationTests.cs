@@ -14,6 +14,8 @@ using SnapDog2.Infrastructure.Services;
 using SnapDog2.Server.Features.Mqtt.Commands;
 using SnapDog2.Server.Features.Mqtt.Queries;
 using Xunit;
+using FluentValidation; // For ValidationException
+using FluentValidation.Results; // For ValidationFailure
 
 namespace SnapDog2.Tests.Integration;
 
@@ -131,6 +133,14 @@ public class MqttControllerIntegrationTests : IClassFixture<TestWebApplicationFa
             Payload = "Hello World",
             Retain = false,
         };
+
+        // Setup the mock Mediator to throw ValidationException for this command
+        _mockMediator
+            .Setup(m => m.Send(It.Is<PublishMqttMessageCommand>(cmd => cmd.Topic == ""), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new ValidationException("Validation failed", new[]
+            {
+                new ValidationFailure("Topic", "Topic is required")
+            }));
 
         _client.DefaultRequestHeaders.Remove("X-API-Key");
         _client.DefaultRequestHeaders.Add("X-API-Key", "test-api-key");

@@ -196,7 +196,10 @@ public class SnapcastService : ISnapcastService, IDisposable, IAsyncDisposable
     )
     {
         ThrowIfDisposed();
-        ArgumentException.ThrowIfNullOrEmpty(clientId);
+        if (string.IsNullOrWhiteSpace(clientId))
+        {
+            throw new ArgumentException("Client ID cannot be null or whitespace.", nameof(clientId));
+        }
 
         if (volume < 0 || volume > 100)
         {
@@ -296,40 +299,14 @@ public class SnapcastService : ISnapcastService, IDisposable, IAsyncDisposable
     {
         ThrowIfDisposed();
 
-        _logger.LogDebug(
-            "DIAGNOSTIC: SetGroupStreamAsync called with groupId='{GroupId}', streamId='{StreamId}'",
-            groupId,
-            streamId
-        );
-
-        try
+        if (string.IsNullOrWhiteSpace(groupId))
         {
-            ArgumentException.ThrowIfNullOrEmpty(groupId);
-            _logger.LogDebug("DIAGNOSTIC: groupId validation passed");
-        }
-        catch (ArgumentException ex)
-        {
-            _logger.LogDebug(
-                "DIAGNOSTIC: groupId validation failed with {ExceptionType}: {Message}",
-                ex.GetType().Name,
-                ex.Message
-            );
-            throw;
+            throw new ArgumentException("Group ID cannot be null or whitespace.", nameof(groupId));
         }
 
-        try
+        if (string.IsNullOrWhiteSpace(streamId))
         {
-            ArgumentException.ThrowIfNullOrEmpty(streamId);
-            _logger.LogDebug("DIAGNOSTIC: streamId validation passed");
-        }
-        catch (ArgumentException ex)
-        {
-            _logger.LogDebug(
-                "DIAGNOSTIC: streamId validation failed with {ExceptionType}: {Message}",
-                ex.GetType().Name,
-                ex.Message
-            );
-            throw;
+            throw new ArgumentException("Stream ID cannot be null or whitespace.", nameof(streamId));
         }
 
         return await ExecuteWithResilienceAsync(

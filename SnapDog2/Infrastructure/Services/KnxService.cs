@@ -144,7 +144,10 @@ public class KnxService : IKnxService, IDisposable, IAsyncDisposable
                 _knxBus.GroupMessageReceived -= OnGroupMessageReceived;
 
                 // Dispose the bus (which disconnects)
-                await _knxBus.DisposeAsync();
+                if (_knxBus != null) // Added null check
+                {
+                    await _knxBus.DisposeAsync();
+                }
 
                 _logger.LogInformation("Disconnected from KNX gateway");
             }

@@ -10,6 +10,8 @@ using SnapDog2.Api.Middleware;
 using SnapDog2.Core.Configuration; // Added for KnxAddressConverter
 using SnapDog2.Infrastructure;
 using SnapDog2.Server.Extensions;
+using Microsoft.AspNetCore.Diagnostics; // Required for IExceptionHandlerPathFeature
+// Removed: using SnapDog2.Api.Exceptions;
 
 namespace SnapDog2.Api;
 
@@ -123,7 +125,8 @@ public class Program
         builder.Services.AddSingleton(apiAuthConfig);
 
         // Add basic MediatR for controllers (without server layer dependencies for now)
-        builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+        // builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly)); // Replaced by AddServerLayer
+        builder.Services.AddServerLayer(); // Registers MediatR, validators, and behaviors from SnapDog2.Server
 
         // Add authorization services
         builder.Services.AddSingleton<IAuthorizationPolicyProvider, ApiAuthorizationPolicyProvider>();
@@ -148,6 +151,34 @@ public class Program
         var app = builder.Build();
 
         // Configure the HTTP request pipeline
+
+        // VERY FIRST: Global Exception Handler
+        app.UseExceptionHandler(exceptionHandlerApp =>
+        {
+            exceptionHandlerApp.Run(async context =>
+            {
+                var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
+                var exception = exceptionHandlerPathFeature?.Error;
+                var loggerFactory = context.RequestServices.GetService<ILoggerFactory>();
+                var logger = loggerFactory?.CreateLogger("GlobalExceptionHandler");
+
+                if (exception is FluentValidation.ValidationException validationException) // Reverted to FluentValidation.ValidationException
+                {
+                    // No logging in this path for extreme simplification
+                    context.Response.StatusCode = (int)System.Net.HttpStatusCode.BadRequest;
+                    context.Response.ContentType = "application/json";
+                    await context.Response.WriteAsync("{\"title\":\"Validation Error\",\"status\":400}");
+                }
+                else
+                {
+                    // No logging for extreme simplification here either for the moment
+                    context.Response.StatusCode = (int)System.Net.HttpStatusCode.InternalServerError;
+                    context.Response.ContentType = "application/json"; // Simplified for consistency
+                    await context.Response.WriteAsync("{\"title\":\"Internal Server Error\",\"status\":500}");
+                }
+            });
+        });
+
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
@@ -161,6 +192,7 @@ public class Program
         }
 
         // Security and infrastructure middleware pipeline (order matters!)
+        // FluentValidationExceptionHandlerMiddleware was removed. InputValidationMiddleware is next.
 
         // 1. Input validation and sanitization (first line of defense)
         app.UseMiddleware<InputValidationMiddleware>();

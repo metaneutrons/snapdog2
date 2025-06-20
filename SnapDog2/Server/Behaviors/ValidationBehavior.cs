@@ -2,6 +2,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Common;
+// Removed: using SnapDog2.Api.Exceptions;
 
 namespace SnapDog2.Server.Behaviors;
 
@@ -93,7 +94,7 @@ public sealed class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<
             }
 
             // For other response types, throw validation exception
-            throw new ValidationException(failures);
+            throw new ValidationException(failures); // Reverted to standard ValidationException
         }
 
         _logger.LogDebug("Validation passed for request: {RequestName}", requestName);

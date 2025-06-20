@@ -112,11 +112,8 @@ public class KnxServiceIntegrationTests : IDisposable
         using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(2));
         var address = new KnxAddress(1, 2, 3);
 
-        // Act
-        var result = await _knxService.SubscribeToGroupAsync(address, cancellationTokenSource.Token);
-
-        // Assert
-        Assert.False(result);
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _knxService.SubscribeToGroupAsync(address, cancellationTokenSource.Token));
     }
 
     [Fact]
@@ -324,7 +321,8 @@ public class KnxServiceIntegrationTests : IDisposable
         // Try to disconnect (should not throw even if not connected or if connect failed)
         // DisconnectAsync is designed to be safe to call multiple times or if not connected.
         // Simply awaiting it will cause the test to fail if an unexpected exception is thrown.
-        await _knxService.DisconnectAsync(cancellationTokenSource.Token);
+        // Use a new CancellationToken for DisconnectAsync to avoid issues if the original token timed out.
+        await _knxService.DisconnectAsync(new CancellationTokenSource(TimeSpan.FromSeconds(2)).Token);
     }
 
     [Theory]
@@ -338,8 +336,7 @@ public class KnxServiceIntegrationTests : IDisposable
         var address = new KnxAddress(main, middle, sub);
 
         // Act & Assert - Should not throw validation errors (will fail due to no connection)
-        var subscribeResult = await _knxService.SubscribeToGroupAsync(address, cancellationTokenSource.Token);
-        Assert.False(subscribeResult); // Expected to fail due to no gateway connection
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _knxService.SubscribeToGroupAsync(address, cancellationTokenSource.Token));
     }
 
     [Fact]
@@ -358,7 +355,7 @@ public class KnxServiceIntegrationTests : IDisposable
         // However, these tests are likely running without a connection by default.
         // For now, keeping InvalidOperationException as it's the more likely path in current test setup.
         // A more robust test suite would separate "no connection" from "invalid value when connected".
-        await Assert.ThrowsAsync<InvalidOperationException>( // Reverted: Test likely hits "no connection" first.
+        await Assert.ThrowsAsync<ArgumentException>(
             () => _knxService.WriteGroupValueAsync(address, value, cancellationTokenSource.Token)
         );
     }

@@ -1,3 +1,4 @@
+using FluentValidation; // Added for ValidationException
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -46,16 +47,29 @@ public class MqttController : ApiControllerBase
     {
         Logger.LogInformation("Publishing MQTT message to topic: {Topic}", command.Topic);
 
-        var result = await Mediator.Send(command, cancellationToken);
-
-        if (result)
+        try
         {
-            return Ok(
-                ApiResponse<object>.Ok(new { message = "Message published successfully", topic = command.Topic })
-            );
-        }
+            var result = await Mediator.Send(command, cancellationToken);
 
-        return ErrorResponse<object>("Failed to publish MQTT message", 500);
+            if (result)
+            {
+                return Ok(
+                    ApiResponse<object>.Ok(new { message = "Message published successfully", topic = command.Topic })
+                );
+            }
+
+            // If result is false, but no exception, it's a generic failure from the handler not throwing.
+            // The existing ErrorResponse handles this generic case.
+            // However, the problem implies ValidationException should be thrown by MediatR pipeline.
+            return ErrorResponse<object>("Failed to publish MQTT message. The operation returned false without specific errors.", 500);
+        }
+        catch (ValidationException ex)
+        {
+            Logger.LogWarning(ex, "Validation failed for PublishMqttMessageCommand: {ValidationErrors}", string.Join(", ", ex.Errors.Select(e => e.ErrorMessage)));
+            var errorMessages = ex.Errors.Select(e => e.ErrorMessage).ToList();
+            return BadRequest(ApiResponse<object>.Fail("Validation failed.", errorMessages));
+        }
+        // Other exceptions will be handled by global handlers or result in a 500 if not caught by UseExceptionHandler.
     }
 
     /// <summary>

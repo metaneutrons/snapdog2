@@ -6,6 +6,7 @@ using SnapDog2.Core.Configuration;
 using SnapDog2.Infrastructure.Services.Models;
 using SnapDog2.Server.Features.Knx.Commands;
 using SnapDog2.Server.Features.Knx.Queries;
+using System; // For ArgumentOutOfRangeException
 
 namespace SnapDog2.Api.Controllers;
 
@@ -133,6 +134,20 @@ public class KnxController : ApiControllerBase
             );
             return ErrorResponse<bool>(
                 $"Invalid request format: {ex.Message}",
+                (int)System.Net.HttpStatusCode.BadRequest
+            );
+        }
+        catch (ArgumentOutOfRangeException ex) // Specific handler for oversized values
+        {
+            Logger.LogWarning(
+                ex,
+                "Argument out of range for KNX write request. Address: {Address}, Value: {Value}. Error: {ErrorMessage}",
+                request.Address,
+                request.Value,
+                ex.Message
+            );
+            return ErrorResponse<bool>( // Using ErrorResponse helper
+                $"Invalid request argument: {ex.Message}",
                 (int)System.Net.HttpStatusCode.BadRequest
             );
         }

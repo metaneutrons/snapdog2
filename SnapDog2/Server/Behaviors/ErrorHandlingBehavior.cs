@@ -91,11 +91,15 @@ public sealed class ErrorHandlingBehavior<TRequest, TResponse> : IPipelineBehavi
             return (T)(object)failureResult;
         }
 
-        // For other response types, re-throw the exception
-        // This should not happen in a well-designed system using Result patterns
+        // For other response types, re-throw the original exception
+        // if it's a ValidationException, otherwise wrap.
+        if (exception is ValidationException)
+        {
+            throw exception; // Re-throw the original ValidationException
+        }
+        // Fallback for other exceptions with non-Result types
         throw new InvalidOperationException(
-            $"Cannot handle exception for response type {typeof(T).Name}. "
-                + "Consider using Result or Result<T> for consistent error handling.",
+            $"Unhandled exception for response type {typeof(T).Name} which is not Result/Result<T>. Original error: {exception.Message}",
             exception
         );
     }

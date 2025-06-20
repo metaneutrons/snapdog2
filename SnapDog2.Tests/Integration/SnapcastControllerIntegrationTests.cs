@@ -14,6 +14,7 @@ using SnapDog2.Infrastructure.Services;
 using SnapDog2.Server.Features.Snapcast.Commands;
 using SnapDog2.Server.Features.Snapcast.Queries;
 using Xunit;
+using System; // For ArgumentOutOfRangeException
 
 namespace SnapDog2.Tests.Integration;
 
@@ -184,6 +185,10 @@ public class SnapcastControllerIntegrationTests : IClassFixture<TestWebApplicati
         var clientId = "client1";
         var invalidVolume = 150; // Invalid volume > 100
         var requestBody = new { Volume = invalidVolume }; // Assuming VolumeRequest has a Volume property
+
+        _mockMediator
+            .Setup(m => m.Send(It.Is<SetClientVolumeCommand>(cmd => cmd.ClientId == clientId && cmd.Volume == invalidVolume), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new ArgumentOutOfRangeException("volume", "Volume must be between 0 and 100."));
 
         _client.DefaultRequestHeaders.Remove("X-API-Key");
         _client.DefaultRequestHeaders.Add("X-API-Key", "test-api-key");

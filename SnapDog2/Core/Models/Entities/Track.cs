@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Globalization;
 
 namespace SnapDog2.Core.Models.Entities;
 
@@ -326,7 +327,7 @@ public sealed record Track
                 counter++;
             }
 
-            return $"{size:0.##} {suffixes[counter]}";
+            return $"{size.ToString("0.##", CultureInfo.InvariantCulture)} {suffixes[counter]}";
         }
     }
 

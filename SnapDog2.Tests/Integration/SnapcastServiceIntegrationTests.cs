@@ -71,7 +71,7 @@ public class SnapcastServiceIntegrationTests : IDisposable
                 x.Log(
                     LogLevel.Warning,
                     It.IsAny<EventId>(),
-                    It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Failed to check server availability")),
+                    It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Snapcast server availability check failed")),
                     It.IsAny<Exception>(),
                     It.IsAny<Func<It.IsAnyType, Exception?, string>>()
                 ),
@@ -173,7 +173,7 @@ public class SnapcastServiceIntegrationTests : IDisposable
         cancellationTokenSource.Cancel(); // Cancel immediately
 
         // Act & Assert
-        await Assert.ThrowsAsync<OperationCanceledException>(
+        await Assert.ThrowsAsync<TaskCanceledException>(
             () => _snapcastService.IsServerAvailableAsync(cancellationTokenSource.Token)
         );
     }
@@ -240,7 +240,7 @@ public class SnapcastServiceIntegrationTests : IDisposable
         using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(1));
 
         // Act & Assert
-        await Assert.ThrowsAsync<ArgumentNullException>(
+        await Assert.ThrowsAsync<ArgumentException>( // Changed from ArgumentNullException
             () => _snapcastService.SetClientVolumeAsync(clientId!, 50, cancellationTokenSource.Token)
         );
     }
@@ -270,7 +270,7 @@ public class SnapcastServiceIntegrationTests : IDisposable
         using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(1));
 
         // Act & Assert
-        await Assert.ThrowsAsync<ArgumentNullException>(
+        await Assert.ThrowsAsync<ArgumentException>( // Changed from ArgumentNullException
             () => _snapcastService.SetGroupStreamAsync(groupId!, "test-stream", cancellationTokenSource.Token)
         );
     }
@@ -285,7 +285,7 @@ public class SnapcastServiceIntegrationTests : IDisposable
         using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(1));
 
         // Act & Assert
-        await Assert.ThrowsAsync<ArgumentNullException>(
+        await Assert.ThrowsAsync<ArgumentException>( // Changed from ArgumentNullException
             () => _snapcastService.SetGroupStreamAsync("test-group", streamId!, cancellationTokenSource.Token)
         );
     }

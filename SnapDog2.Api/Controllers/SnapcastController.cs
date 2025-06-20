@@ -100,10 +100,27 @@ public class SnapcastController : ApiControllerBase
     {
         Logger.LogInformation("Setting volume for client {ClientId} to {Volume}", clientId, request.Volume);
 
-        var command = new SetClientVolumeCommand(clientId, request.Volume);
-        var result = await Mediator.Send(command, cancellationToken);
+        try
+        {
+            var command = new SetClientVolumeCommand(clientId, request.Volume);
+            var result = await Mediator.Send(command, cancellationToken);
 
-        return Ok(ApiResponse<bool>.Ok(result));
+            // Assuming 'result' indicates success from the handler.
+            // If the handler itself is supposed to throw for domain errors not caught by validation,
+            // then this structure might need adjustment, but for ArgumentOutOfRangeException, this is fine.
+            if (result)
+            {
+                return Ok(ApiResponse<bool>.Ok(true));
+            }
+            // If MediatR returns false without an exception, treat as a general failure.
+            return ErrorResponse<bool>("Failed to set client volume. Operation returned false.", 500);
+        }
+        catch (ArgumentOutOfRangeException ex)
+        {
+            Logger.LogWarning(ex, "Invalid volume specified for client {ClientId}: {Volume}", clientId, request.Volume);
+            return BadRequest(ApiResponse<bool>.Fail(ex.Message, new { ClientId = clientId, request.Volume }));
+        }
+        // Other unhandled exceptions would ideally be caught by global exception handlers.
     }
 
     /// <summary>

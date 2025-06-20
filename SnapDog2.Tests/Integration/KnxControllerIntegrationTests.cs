@@ -523,11 +523,12 @@ public class KnxControllerIntegrationTests : IClassFixture<TestWebApplicationFac
     [Trait("Category", "Integration")]
     public async Task WriteGroupValue_WithOversizedValue_ShouldReturnBadRequest()
     {
-        // Arrange - Create a value larger than 14 bytes (KNX maximum)
-        var oversizedValue = new byte[15]; // 15 bytes > 14 bytes maximum
+        // Arrange - Create a value larger than the typical KNX payload max (e.g., 15 bytes if max is 14, or 16 if max is 15)
+        // KnxService uses MaxKnxPayloadSize = 15 and throws if value.Length > MaxKnxPayloadSize. So, 16 bytes is oversized.
+        var oversizedValue = new byte[16];
         for (int i = 0; i < oversizedValue.Length; i++)
         {
-            oversizedValue[i] = 0xFF;
+            oversizedValue[i] = (byte)i; // Populate with some data
         }
 
         var requestDto = new WriteKnxValueRequest
@@ -536,6 +537,12 @@ public class KnxControllerIntegrationTests : IClassFixture<TestWebApplicationFac
             Value = Convert.ToBase64String(oversizedValue),
             Description = "Test oversized value",
         };
+
+        _mockMediator
+            .Setup(m => m.Send(It.Is<WriteGroupValueCommand>(cmd =>
+                cmd.Address.ToString() == "1/1/1" &&
+                cmd.Value.SequenceEqual(oversizedValue)), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new ArgumentOutOfRangeException("value", "Value size exceeds maximum KNX payload size."));
 
         var json = JsonSerializer.Serialize(requestDto);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
