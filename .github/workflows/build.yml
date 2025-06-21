@@ -91,7 +91,7 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Publish application
-        run: dotnet publish ./SnapDog2/Server/SnapDog2.Server/SnapDog2.Server.csproj --configuration Release --no-build -o ./publish
+        run: dotnet publish ./SnapDog2/SnapDog2.csproj --configuration Release --no-build -o ./publish
 
       - name: Upload published app
         uses: actions/upload-artifact@v4
