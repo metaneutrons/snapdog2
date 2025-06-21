@@ -1,4 +1,4 @@
-name: Create GitHub Release and Package
+name: Create GitHub Release
 
 on:
   push:
@@ -7,15 +7,15 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: 'Branch to release from (e.g., main, develop, feature/xyz, fix/abc)'
+        description: "Branch to release from (e.g., main, develop, feature/xyz, fix/abc)"
         required: true
-        default: 'main'
+        default: "main"
       is_prerelease_override:
-        description: 'Manually mark as prerelease (true/false). If empty, auto-detect based on branch/GitVersion.'
+        description: "Manually mark as prerelease (true/false). If empty, auto-detect based on branch/GitVersion."
         required: false
         type: boolean
       specific_version:
-        description: 'Optional: Specify an exact version to use (e.g., 1.2.3-beta.1). Overrides GitVersion branch calculation.'
+        description: "Optional: Specify an exact version to use (e.g., 1.2.3-beta.1). Overrides GitVersion branch calculation."
         required: false
 
 permissions:
@@ -137,15 +137,11 @@ jobs:
           echo "is_prerelease=${IS_PRERELEASE}" >> $GITHUB_OUTPUT
           echo "Determined is_prerelease: ${IS_PRERELEASE}"
 
-
       - name: Restore dependencies
         run: dotnet restore
 
       - name: Build Release
-        run: dotnet build --configuration Release --no-restore /p:Version=${{ steps.gitversion.outputs.semVer }} /p:PackageVersion=${{ steps.gitversion.outputs.nuGetVersion }}
-
-      - name: Pack NuGet package
-        run: dotnet pack --configuration Release --no-build -o ./artifacts /p:Version=${{ steps.gitversion.outputs.semVer }} /p:PackageVersion=${{ steps.gitversion.outputs.nuGetVersion }}
+        run: dotnet build --configuration Release --no-restore /p:Version=${{ steps.gitversion.outputs.semVer }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
@@ -159,67 +155,10 @@ jobs:
             **Version Details:**
             - SemVer: `${{ steps.gitversion.outputs.semVer }}`
             - FullSemVer: `${{ steps.gitversion.outputs.fullSemVer }}`
-            - NuGetVersion: `${{ steps.gitversion.outputs.nuGetVersion }}`
             - Pre-release Tag: `${{ steps.gitversion.outputs.preReleaseTag || 'N/A' }}`
-          files: |
-            ./artifacts/*.nupkg
-            ./artifacts/*.snupkg
           draft: false
           prerelease: ${{ steps.determine_prerelease_flag.outputs.is_prerelease == 'true' }}
           # Generate release notes only for actual tag pushes to avoid issues with dispatch/manual tags
           generate_release_notes: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload NuGet Package as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: nuget-package-${{ steps.gitversion.outputs.semVer }}
-          path: |
-            ./artifacts/*.nupkg
-            ./artifacts/*.snupkg
-          retention-days: 30
-
-  call-docker-build:
-    name: Build and Push Docker Image
-    needs: release # Depends on the successful completion of the release job
-    runs-on: ubuntu-latest
-    # Ensure this job runs only if the 'release' job succeeded and produced a version.
-    if: always() && needs.release.result == 'success' && needs.release.outputs.version
-    # Pass secrets required by the callable workflow
-    secrets: inherit # This will pass DOCKER_USERNAME and DOCKER_PASSWORD if defined in the environment or repo secrets
-
-    steps:
-      - name: Determine Docker Tags
-        id: docker_tags
-        run: |
-          VERSION="${{ needs.release.outputs.version }}"
-          IS_PRERELEASE="${{ needs.release.outputs.is_prerelease }}"
-          ADDITIONAL_TAGS=""
-
-          # For full releases (non-prerelease, typically from main)
-          if [[ "$IS_PRERELEASE" == "false" ]]; then
-            ADDITIONAL_TAGS="latest" # Add 'latest' tag
-            # Add 'major.minor' and 'major' tags
-            MAJOR_MINOR=$(echo "$VERSION" | awk -F. '{print $1"."$2}')
-            MAJOR=$(echo "$VERSION" | awk -F. '{print $1}')
-            if [ -n "$MAJOR_MINOR" ]; then ADDITIONAL_TAGS="$ADDITIONAL_TAGS,$MAJOR_MINOR"; fi
-            if [ -n "$MAJOR" ]; then ADDITIONAL_TAGS="$ADDITIONAL_TAGS,$MAJOR"; fi
-          fi
-          echo "Base version tag: $VERSION"
-          echo "Calculated additional tags: $ADDITIONAL_TAGS"
-          # Store for use in the next step
-          echo "additional_tags_list=$ADDITIONAL_TAGS" >> $GITHUB_OUTPUT
-
-      - name: Call Build and Push Image Workflow
-        uses: ./.github/workflows/build-and-push-image.yml
-        with:
-          image_name: 'metaneutrons/snapdog' # Replace with your actual image name
-          version: ${{ needs.release.outputs.version }} # This is the SemVer from the release job
-          additional_tags: ${{ steps.docker_tags.outputs.additional_tags_list }}
-          # dockerfile_path and context_path use defaults from callable workflow
-        # Secrets are passed via 'secrets: inherit' on the job level
-        # If specific secrets mapping is needed:
-        # secrets:
-        #   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME_REPO_LEVEL_OR_ENV }}
-        #   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD_REPO_LEVEL_OR_ENV }}
