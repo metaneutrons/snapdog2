@@ -84,18 +84,18 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
 
-      - name: Build
-        run: dotnet build --configuration Release --no-restore
-
       - name: Run code style checks
         run: dotnet build /p:TreatWarningsAsErrors=true
 
-      - name: Pack NuGet package
-        run: dotnet pack --configuration Release --no-build -o ./artifacts
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
 
-      - name: Upload NuGet Package
+      - name: Publish application
+        run: dotnet publish ./SnapDog2/Server/SnapDog2.Server/SnapDog2.Server.csproj --configuration Release --no-build -o ./publish
+
+      - name: Upload published app
         uses: actions/upload-artifact@v4
         with:
-          name: nuget-package
-          path: ./artifacts/*.nupkg
+          name: published-app
+          path: ./publish/**
           retention-days: 7

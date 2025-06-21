@@ -17,6 +17,9 @@ on:
       specific_version:
         description: "Optional: Specify an exact version to use (e.g., 1.2.3-beta.1). Overrides GitVersion branch calculation."
         required: false
+      extra_docker_tag:
+        description: "Optional: Add an extra Docker tag (e.g., prod, staging, custom). Will be appended to the Docker additional_tags."
+        required: false
 
 permissions:
   contents: write # Needed for creating GitHub releases and potentially pushing tags
@@ -162,3 +165,40 @@ jobs:
           generate_release_notes: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  set-docker-tags:
+    needs: release
+    runs-on: ubuntu-latest
+    outputs:
+      additional_tags: ${{ steps.set_tags.outputs.additional_tags }}
+    steps:
+      - name: Set Docker additional_tags
+        id: set_tags
+        run: |
+          if [ "${{ needs.release.outputs.is_prerelease }}" = "false" ]; then
+            echo "additional_tags=latest" >> $GITHUB_OUTPUT
+          else
+            # Use preReleaseTag from GitVersion output (e.g., alpha, beta, rc)
+            tag="${{ needs.release.outputs.version }}"
+            pre="${{ needs.release.outputs.version }}"
+            # Extract pre-release label (e.g., beta from 1.2.3-beta.1)
+            if [[ "$tag" =~ -([a-zA-Z]+) ]]; then
+              pre="${BASH_REMATCH[1]}"
+              echo "additional_tags=$pre" >> $GITHUB_OUTPUT
+            else
+              echo "additional_tags=prerelease" >> $GITHUB_OUTPUT
+            fi
+          fi
+          # Append extra Docker tag if provided
+          if [ -n "${{ github.event.inputs.extra_docker_tag }}" ]; then
+            echo "Appending extra Docker tag: ${{ github.event.inputs.extra_docker_tag }}"
+            echo "additional_tags=${{ steps.set_tags.outputs.additional_tags }},${{ github.event.inputs.extra_docker_tag }}" >> $GITHUB_OUTPUT
+          fi
+
+  docker:
+    needs: [release, set-docker-tags]
+    uses: ./.github/workflows/docker.yml
+    with:
+      version: ${{ needs.release.outputs.version }}
+      additional_tags: ${{ needs.set-docker-tags.outputs.additional_tags }}
+    secrets: inherit

@@ -1,4 +1,4 @@
-name: Build and Push Develop Docker Image
+name: Build and Push Docker
 
 workflow_call:
   inputs:
@@ -6,30 +6,18 @@ workflow_call:
       description: "The primary version tag for the image (e.g., 1.2.3, 1.2.3-beta.1)"
       required: true
       type: string
-    image_name:
-      description: "Name of the Docker image (e.g., metaneutrons/snapdog)"
-      required: true
-      type: string
     additional_tags:
       description: "Comma-separated list of additional tags (e.g., latest, major.minor)"
       required: false
       type: string
-    dockerfile_path:
-      description: "Path to the Dockerfile"
-      required: false
-      type: string
-      default: "docker/Dockerfile"
-    context_path:
-      description: "Build context path for Docker"
-      required: false
-      type: string
-      default: "."
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  TITLE: "SnapDog2 - Smart Home Audio System"
+  DESCRIPTION: "Snapcast-based Smart Home Audio System with MQTT & KNX integration"
 
 jobs:
-  build-and-push-develop-image:
+  build-and-push-image:
     runs-on: ubuntu-latest
     permissions:
       contents: read # To checkout code
@@ -89,8 +77,8 @@ jobs:
             # Tag with 'edge' for develop branch
             type=raw,value=edge
           labels: |
-            org.opencontainers.image.title=SnapDog2
-            org.opencontainers.image.description=SnapDog2 Audio Streaming Platform
+            org.opencontainers.image.title=${{ env.TITLE }}
+            org.opencontainers.image.description=${{ env.DESCRIPTION }}
             org.opencontainers.image.vendor=${{ github.repository_owner }}
             org.opencontainers.image.version=${{ steps.gitversion.outputs.semVer }}
             org.label-schema.version=${{ steps.gitversion.outputs.semVer }}
@@ -102,7 +90,9 @@ jobs:
           file: docker/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: |
+            ${{ steps.meta.outputs.tags }}
+            ${{ inputs.additional_tags && inputs.additional_tags || '' }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
