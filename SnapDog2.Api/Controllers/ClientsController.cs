@@ -35,7 +35,7 @@ public class ClientsController : ApiControllerBase
     [HttpGet]
     [ProducesResponseType(typeof(ApiResponse<IEnumerable<ClientResponse>>), 200)]
     [ProducesResponseType(typeof(ApiResponse), 400)]
-    public async Task<ActionResult<ApiResponse<IEnumerable<ClientResponse>>>> GetAllClients(
+    public ActionResult<ApiResponse<IEnumerable<ClientResponse>>> GetAllClients(
         [FromQuery] bool includeDisconnected = true,
         [FromQuery] bool includeDetails = true,
         CancellationToken cancellationToken = default
@@ -66,7 +66,7 @@ public class ClientsController : ApiControllerBase
     [ProducesResponseType(typeof(ApiResponse<ClientResponse>), 200)]
     [ProducesResponseType(typeof(ApiResponse), 404)]
     [ProducesResponseType(typeof(ApiResponse), 400)]
-    public async Task<ActionResult<ApiResponse<ClientResponse>>> GetClientById(
+    public ActionResult<ApiResponse<ClientResponse>> GetClientById(
         string id,
         CancellationToken cancellationToken = default
     )
@@ -95,7 +95,7 @@ public class ClientsController : ApiControllerBase
     [HttpGet("status/{status}")]
     [ProducesResponseType(typeof(ApiResponse<IEnumerable<ClientResponse>>), 200)]
     [ProducesResponseType(typeof(ApiResponse), 400)]
-    public async Task<ActionResult<ApiResponse<IEnumerable<ClientResponse>>>> GetClientsByStatus(
+    public ActionResult<ApiResponse<IEnumerable<ClientResponse>>> GetClientsByStatus(
         string status,
         CancellationToken cancellationToken = default
     )
@@ -136,7 +136,7 @@ public class ClientsController : ApiControllerBase
     [ProducesResponseType(typeof(ApiResponse<ClientResponse>), 200)]
     [ProducesResponseType(typeof(ApiResponse), 404)]
     [ProducesResponseType(typeof(ApiResponse), 400)]
-    public async Task<ActionResult<ApiResponse<ClientResponse>>> SetClientVolume(
+    public ActionResult<ApiResponse<ClientResponse>> SetClientVolume(
         string id,
         [FromBody] SetVolumeRequest request,
         CancellationToken cancellationToken = default
@@ -182,7 +182,7 @@ public class ClientsController : ApiControllerBase
     [ProducesResponseType(typeof(ApiResponse<ClientResponse>), 200)]
     [ProducesResponseType(typeof(ApiResponse), 404)]
     [ProducesResponseType(typeof(ApiResponse), 400)]
-    public async Task<ActionResult<ApiResponse<ClientResponse>>> AssignClientToZone(
+    public ActionResult<ApiResponse<ClientResponse>> AssignClientToZone(
         string id,
         [FromBody] AssignZoneRequest request,
         CancellationToken cancellationToken = default

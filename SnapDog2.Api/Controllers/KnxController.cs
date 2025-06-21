@@ -95,7 +95,7 @@ public class KnxController : ApiControllerBase
     /// <summary>
     /// Writes a value to a specific KNX group address.
     /// </summary>
-    /// <param name="command">The write group value command containing address, value, and options.</param>
+    /// <param name="request">The write group value request containing address, value, and options.</param>
     /// <param name="cancellationToken">Cancellation token for the operation.</param>
     /// <returns>Success response if value was written successfully.</returns>
     /// <response code="200">Value written successfully</response>

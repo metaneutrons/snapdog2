@@ -35,7 +35,7 @@ public class PlaylistsController : ApiControllerBase
     [HttpGet]
     [ProducesResponseType(typeof(ApiResponse<IEnumerable<PlaylistResponse>>), 200)]
     [ProducesResponseType(typeof(ApiResponse), 400)]
-    public async Task<ActionResult<ApiResponse<IEnumerable<PlaylistResponse>>>> GetAllPlaylists(
+    public ActionResult<ApiResponse<IEnumerable<PlaylistResponse>>> GetAllPlaylists(
         [FromQuery] bool includePrivate = false,
         [FromQuery] bool includeSystem = true,
         [FromQuery] string? owner = null,
@@ -73,7 +73,7 @@ public class PlaylistsController : ApiControllerBase
     [ProducesResponseType(typeof(ApiResponse<PlaylistResponse>), 200)]
     [ProducesResponseType(typeof(ApiResponse), 404)]
     [ProducesResponseType(typeof(ApiResponse), 400)]
-    public async Task<ActionResult<ApiResponse<PlaylistResponse>>> GetPlaylistById(
+    public ActionResult<ApiResponse<PlaylistResponse>> GetPlaylistById(
         string id,
         CancellationToken cancellationToken = default
     )
@@ -103,7 +103,7 @@ public class PlaylistsController : ApiControllerBase
     [ProducesResponseType(typeof(ApiResponse<IEnumerable<TrackResponse>>), 200)]
     [ProducesResponseType(typeof(ApiResponse), 404)]
     [ProducesResponseType(typeof(ApiResponse), 400)]
-    public async Task<ActionResult<ApiResponse<IEnumerable<TrackResponse>>>> GetPlaylistTracks(
+    public ActionResult<ApiResponse<IEnumerable<TrackResponse>>> GetPlaylistTracks(
         string id,
         CancellationToken cancellationToken = default
     )
@@ -133,7 +133,7 @@ public class PlaylistsController : ApiControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(ApiResponse<PlaylistResponse>), 201)]
     [ProducesResponseType(typeof(ApiResponse), 400)]
-    public async Task<ActionResult<ApiResponse<PlaylistResponse>>> CreatePlaylist(
+    public ActionResult<ApiResponse<PlaylistResponse>> CreatePlaylist(
         [FromBody] CreatePlaylistRequest request,
         CancellationToken cancellationToken = default
     )
@@ -176,7 +176,7 @@ public class PlaylistsController : ApiControllerBase
     [ProducesResponseType(typeof(ApiResponse<PlaylistResponse>), 200)]
     [ProducesResponseType(typeof(ApiResponse), 404)]
     [ProducesResponseType(typeof(ApiResponse), 400)]
-    public async Task<ActionResult<ApiResponse<PlaylistResponse>>> UpdatePlaylist(
+    public ActionResult<ApiResponse<PlaylistResponse>> UpdatePlaylist(
         string id,
         [FromBody] UpdatePlaylistRequest request,
         CancellationToken cancellationToken = default
@@ -219,7 +219,7 @@ public class PlaylistsController : ApiControllerBase
     [ProducesResponseType(typeof(ApiResponse), 204)]
     [ProducesResponseType(typeof(ApiResponse), 404)]
     [ProducesResponseType(typeof(ApiResponse), 400)]
-    public async Task<ActionResult<ApiResponse>> DeletePlaylist(
+    public ActionResult<ApiResponse> DeletePlaylist(
         string id,
         CancellationToken cancellationToken = default
     )
@@ -258,7 +258,7 @@ public class PlaylistsController : ApiControllerBase
     [ProducesResponseType(typeof(ApiResponse<PlaylistResponse>), 200)]
     [ProducesResponseType(typeof(ApiResponse), 404)]
     [ProducesResponseType(typeof(ApiResponse), 400)]
-    public async Task<ActionResult<ApiResponse<PlaylistResponse>>> AddTrackToPlaylist(
+    public ActionResult<ApiResponse<PlaylistResponse>> AddTrackToPlaylist(
         string id,
         [FromBody] AddTrackRequest request,
         CancellationToken cancellationToken = default
@@ -309,7 +309,7 @@ public class PlaylistsController : ApiControllerBase
     [ProducesResponseType(typeof(ApiResponse<PlaylistResponse>), 200)]
     [ProducesResponseType(typeof(ApiResponse), 404)]
     [ProducesResponseType(typeof(ApiResponse), 400)]
-    public async Task<ActionResult<ApiResponse<PlaylistResponse>>> RemoveTrackFromPlaylist(
+    public ActionResult<ApiResponse<PlaylistResponse>> RemoveTrackFromPlaylist(
         string id,
         string trackId,
         CancellationToken cancellationToken = default

@@ -34,7 +34,7 @@ public class ZonesController : ApiControllerBase
     [HttpGet]
     [ProducesResponseType(typeof(ApiResponse<IEnumerable<ZoneResponse>>), 200)]
     [ProducesResponseType(typeof(ApiResponse), 400)]
-    public async Task<ActionResult<ApiResponse<IEnumerable<ZoneResponse>>>> GetAllZones(
+    public ActionResult<ApiResponse<IEnumerable<ZoneResponse>>> GetAllZones(
         [FromQuery] bool includeDisabled = true,
         [FromQuery] bool includeDetails = true,
         CancellationToken cancellationToken = default
@@ -65,7 +65,7 @@ public class ZonesController : ApiControllerBase
     [ProducesResponseType(typeof(ApiResponse<ZoneResponse>), 200)]
     [ProducesResponseType(typeof(ApiResponse), 404)]
     [ProducesResponseType(typeof(ApiResponse), 400)]
-    public async Task<ActionResult<ApiResponse<ZoneResponse>>> GetZoneById(
+    public ActionResult<ApiResponse<ZoneResponse>> GetZoneById(
         string id,
         CancellationToken cancellationToken = default
     )
@@ -95,7 +95,7 @@ public class ZonesController : ApiControllerBase
     [ProducesResponseType(typeof(ApiResponse<IEnumerable<ClientResponse>>), 200)]
     [ProducesResponseType(typeof(ApiResponse), 404)]
     [ProducesResponseType(typeof(ApiResponse), 400)]
-    public async Task<ActionResult<ApiResponse<IEnumerable<ClientResponse>>>> GetZoneClients(
+    public ActionResult<ApiResponse<IEnumerable<ClientResponse>>> GetZoneClients(
         string id,
         CancellationToken cancellationToken = default
     )
@@ -125,7 +125,7 @@ public class ZonesController : ApiControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(ApiResponse<ZoneResponse>), 201)]
     [ProducesResponseType(typeof(ApiResponse), 400)]
-    public async Task<ActionResult<ApiResponse<ZoneResponse>>> CreateZone(
+    public ActionResult<ApiResponse<ZoneResponse>> CreateZone(
         [FromBody] CreateZoneRequest request,
         CancellationToken cancellationToken = default
     )
@@ -165,7 +165,7 @@ public class ZonesController : ApiControllerBase
     [ProducesResponseType(typeof(ApiResponse<ZoneResponse>), 200)]
     [ProducesResponseType(typeof(ApiResponse), 404)]
     [ProducesResponseType(typeof(ApiResponse), 400)]
-    public async Task<ActionResult<ApiResponse<ZoneResponse>>> UpdateZone(
+    public ActionResult<ApiResponse<ZoneResponse>> UpdateZone(
         string id,
         [FromBody] UpdateZoneRequest request,
         CancellationToken cancellationToken = default
@@ -213,7 +213,7 @@ public class ZonesController : ApiControllerBase
     [ProducesResponseType(typeof(ApiResponse), 204)]
     [ProducesResponseType(typeof(ApiResponse), 404)]
     [ProducesResponseType(typeof(ApiResponse), 400)]
-    public async Task<ActionResult<ApiResponse>> DeleteZone(string id, CancellationToken cancellationToken = default)
+    public ActionResult<ApiResponse> DeleteZone(string id, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(id))
         {

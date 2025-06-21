@@ -56,40 +56,40 @@ public class ApiAuthorizationPolicyProvider : IAuthorizationPolicyProvider
         if (policyName.StartsWith("ResourceOwnership.", StringComparison.OrdinalIgnoreCase))
         {
             var resourceType = policyName.Substring("ResourceOwnership.".Length);
-            return Task.FromResult(CreateResourceOwnershipPolicy(resourceType));
+            return Task.FromResult<AuthorizationPolicy?>(CreateResourceOwnershipPolicy(resourceType));
         }
 
         // Handle role-based policies
         if (policyName.StartsWith("RequireRole.", StringComparison.OrdinalIgnoreCase))
         {
             var role = policyName.Substring("RequireRole.".Length);
-            return Task.FromResult(CreateRolePolicy(role));
+            return Task.FromResult<AuthorizationPolicy?>(CreateRolePolicy(role));
         }
 
         // Handle permission-based policies
         if (policyName.StartsWith("RequirePermission.", StringComparison.OrdinalIgnoreCase))
         {
             var permission = policyName.Substring("RequirePermission.".Length);
-            return Task.FromResult(CreatePermissionPolicy(permission));
+            return Task.FromResult<AuthorizationPolicy?>(CreatePermissionPolicy(permission));
         }
 
         // Handle API key scope policies
         if (policyName.StartsWith("RequireScope.", StringComparison.OrdinalIgnoreCase))
         {
             var scope = policyName.Substring("RequireScope.".Length);
-            return Task.FromResult(CreateScopePolicy(scope));
+            return Task.FromResult<AuthorizationPolicy?>(CreateScopePolicy(scope));
         }
 
         // Handle admin-only policies
         if (policyName.Equals("AdminOnly", StringComparison.OrdinalIgnoreCase))
         {
-            return Task.FromResult(CreateAdminOnlyPolicy());
+            return Task.FromResult<AuthorizationPolicy?>(CreateAdminOnlyPolicy());
         }
 
         // Handle read-only policies
         if (policyName.Equals("ReadOnly", StringComparison.OrdinalIgnoreCase))
         {
-            return Task.FromResult(CreateReadOnlyPolicy());
+            return Task.FromResult<AuthorizationPolicy?>(CreateReadOnlyPolicy());
         }
 
         // Fall back to default provider

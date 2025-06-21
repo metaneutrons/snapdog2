@@ -40,7 +40,15 @@ public class SnapcastController : ApiControllerBase
         var result = await Mediator.Send(query, cancellationToken);
 
         // Parse the JSON string to return as object
-        var statusObject = System.Text.Json.JsonSerializer.Deserialize<object>(result);
+        var statusObject = System.Text.Json.JsonSerializer.Deserialize<object>(result ?? string.Empty);
+
+        if (statusObject == null)
+        {
+            // Handle the case where deserialization results in null,
+            // perhaps by returning an error or a default object.
+            // For now, let's assume an empty object is acceptable if result was null or empty.
+            return Ok(ApiResponse<object>.Ok(new object()));
+        }
 
         return Ok(ApiResponse<object>.Ok(statusObject));
     }
