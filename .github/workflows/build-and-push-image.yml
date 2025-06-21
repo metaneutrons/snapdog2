@@ -1,0 +1,86 @@
+name: Build and Push Docker Image (Callable)
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: 'The primary version tag for the image (e.g., 1.2.3, 1.2.3-beta.1)'
+        required: true
+        type: string
+      image_name:
+        description: 'Name of the Docker image (e.g., metaneutrons/snapdog)'
+        required: true
+        type: string
+      additional_tags:
+        description: 'Comma-separated list of additional tags (e.g., latest, major.minor)'
+        required: false
+        type: string
+      dockerfile_path:
+        description: 'Path to the Dockerfile'
+        required: false
+        type: string
+        default: 'docker/Dockerfile'
+      context_path:
+        description: 'Build context path for Docker'
+        required: false
+        type: string
+        default: '.'
+    secrets:
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_PASSWORD:
+        required: true
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        # No need to fetch full history if version is passed in.
+        # If Dockerfile relies on GitVersion info internally, this might need fetch-depth: 0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Prepare image tags
+        id: prep_tags
+        run: |
+          TAGS="${{ inputs.image_name }}:${{ inputs.version }}"
+          if [ -n "${{ inputs.additional_tags }}" ]; then
+            IFS=',' read -ra ADDTL_TAGS <<< "${{ inputs.additional_tags }}"
+            for tag in "${ADDTL_TAGS[@]}"; do
+              # trim whitespace
+              TRIMMED_TAG=$(echo "$tag" | xargs)
+              if [ -n "$TRIMMED_TAG" ]; then
+                TAGS="$TAGS,${{ inputs.image_name }}:$TRIMMED_TAG"
+              fi
+            done
+          fi
+          echo "Final tags: $TAGS"
+          echo "tags_list=$TAGS" >> $GITHUB_OUTPUT
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ inputs.context_path }}
+          file: ${{ inputs.dockerfile_path }}
+          push: true
+          tags: ${{ steps.prep_tags.outputs.tags_list }}
+          # Using GitVersion_SemVer (inputs.version) in labels is good.
+          # For other labels, consider what's most useful.
+          labels: |
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ inputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          # Pass the version as a build argument if your Dockerfile needs it
+          build-args: |
+            APP_VERSION=${{ inputs.version }}

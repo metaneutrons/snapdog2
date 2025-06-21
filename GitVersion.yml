@@ -32,5 +32,11 @@ branches:
     increment: Patch
     source-branches: ['main']
 
+  fix:
+    regex: ^fix/
+    label: alpha
+    increment: Patch # Or Inherit, depending on desired behavior from develop
+    source-branches: ['develop']
+
 ignore:
   sha: []

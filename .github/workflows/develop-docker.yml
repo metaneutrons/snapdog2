@@ -1,0 +1,63 @@
+name: Build and Push Develop Docker Image
+
+on:
+  push:
+    branches:
+      - 'develop'
+    paths-ignore: # Optional: ignore paths that don't affect the Docker image
+      - 'docs/**'
+      - '**.md'
+
+jobs:
+  build-and-push-develop-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # To checkout code
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for GitVersion
+
+      - name: Setup .NET (for GitVersion tool)
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.301" # Ensure this can run GitVersion CLI
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0.10.2
+        with:
+          versionSpec: "6.x"
+
+      - name: Determine version
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v0.10.2
+        with:
+          useConfigFile: true
+          # No need to update assembly info for this Docker-only build
+
+      - name: Display GitVersion outputs for develop build
+        run: |
+          echo "Branch: ${{ github.ref_name }}"
+          echo "SemVer: ${{ steps.gitversion.outputs.semVer }}"
+          echo "FullSemVer: ${{ steps.gitversion.outputs.fullSemVer }}"
+          echo "NuGetVersion: ${{ steps.gitversion.outputs.nuGetVersion }}"
+          echo "InformationalVersion: ${{ steps.gitversion.outputs.informationalVersion }}"
+
+      - name: Call Build and Push Image Workflow
+        uses: ./.github/workflows/build-and-push-image.yml
+        with:
+          image_name: 'metaneutrons/snapdog' # Replace with your actual image name
+          # For develop, we often use FullSemVer or InformationalVersion to ensure uniqueness and traceability
+          # SemVer might be something like 1.2.0-beta.1, FullSemVer could be 1.2.0-beta.1+5
+          # Let's use InformationalVersion as it's designed for display and often includes commit hash or height.
+          # Or use FullSemVer if you prefer a cleaner '+' notation for metadata.
+          # The user asked for "semversioning from gitversion for all ... docker images"
+          # For develop branch, this means something like myapp:1.2.3-beta.1 or myapp:1.2.3-beta.1.ci.5 (if using nuGetVersionV2)
+          # GitVersion's SemVer for a develop branch will be like '1.2.0-beta.1'. This is appropriate.
+          version: ${{ steps.gitversion.outputs.semVer }}
+          # No additional tags like 'latest' for develop builds
+        secrets:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
