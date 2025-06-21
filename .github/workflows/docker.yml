@@ -1,13 +1,29 @@
 name: Build and Push Develop Docker Image
 
-on:
-  push:
-    branches:
-      - "develop"
-    paths-ignore: # Optional: ignore paths that don't affect the Docker image
-      - "docs/**"
-      - "**.md"
-
+workflow_call:
+  inputs:
+    version:
+      description: "The primary version tag for the image (e.g., 1.2.3, 1.2.3-beta.1)"
+      required: true
+      type: string
+    image_name:
+      description: "Name of the Docker image (e.g., metaneutrons/snapdog)"
+      required: true
+      type: string
+    additional_tags:
+      description: "Comma-separated list of additional tags (e.g., latest, major.minor)"
+      required: false
+      type: string
+    dockerfile_path:
+      description: "Path to the Dockerfile"
+      required: false
+      type: string
+      default: "docker/Dockerfile"
+    context_path:
+      description: "Build context path for Docker"
+      required: false
+      type: string
+      default: "."
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
