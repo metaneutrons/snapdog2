@@ -45,4 +45,4 @@ dotnet test
 
 ## License
 
-This project is licensed under the GNU GPL v3.0. See [LICENSE](LICENSE) for details.
+This project is licensed under the GNU LGPL v3.0. See [LICENSE](LICENSE) for details.
