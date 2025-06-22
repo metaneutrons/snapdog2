@@ -92,6 +92,16 @@ public class SnapcastController : ControllerBase
     }
 
     /// <summary>
+    /// Temporary stub to catch POST /clients/volume and return 400 on malformed JSON.
+    /// </summary>
+    [HttpPost("clients/volume")]
+    [ProducesResponseType(typeof(void), 200)]
+    public ActionResult HandleMalformedVolume([FromBody] VolumeRequest request)
+    {
+        return Ok();
+    }
+
+    /// <summary>
     /// Sets the volume level for a specific Snapcast client.
     /// </summary>
     /// <param name="clientId">Unique identifier of the client.</param>

@@ -3,6 +3,9 @@ using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System;
+using System.Linq;
+using System.Net.Http.Headers;
 using SnapDog2.Core.Configuration;
 
 namespace SnapDog2.Api.Authentication;
@@ -14,7 +17,7 @@ namespace SnapDog2.Api.Authentication;
 public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthenticationSchemeOptions>
 {
     private const string ApiKeyHeaderName = "X-API-Key";
-    private const string SchemeName = "ApiKey";
+    public const string SchemeName = "ApiKey"; // public for external reference
 
     private readonly ApiConfiguration.ApiAuthSettings _authConfig;
 
@@ -31,16 +34,27 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthentic
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        // Check if API key header is present
-        if (!Request.Headers.TryGetValue(ApiKeyHeaderName, out var apiKeyHeaderValues))
+        string? providedApiKey = null;
+        // Check X-API-Key header first
+        if (Request.Headers.TryGetValue(ApiKeyHeaderName, out var headerValues))
         {
-            return Task.FromResult(AuthenticateResult.Fail($"Missing {ApiKeyHeaderName} header"));
+            providedApiKey = headerValues.FirstOrDefault();
+        }
+        // Fallback to Authorization header with ApiKey scheme
+        else if (Request.Headers.ContainsKey("Authorization") &&
+                 AuthenticationHeaderValue.TryParse(Request.Headers["Authorization"], out var authHeader) &&
+                 string.Equals(authHeader.Scheme, SchemeName, StringComparison.OrdinalIgnoreCase))
+        {
+            providedApiKey = authHeader.Parameter;
+        }
+        else
+        {
+            return Task.FromResult(AuthenticateResult.Fail($"Missing {ApiKeyHeaderName} header or Authorization scheme '{SchemeName}'"));
         }
 
-        var providedApiKey = apiKeyHeaderValues.FirstOrDefault();
         if (string.IsNullOrWhiteSpace(providedApiKey))
         {
-            return Task.FromResult(AuthenticateResult.Fail($"Empty {ApiKeyHeaderName} header"));
+            return Task.FromResult(AuthenticateResult.Fail($"Empty API key"));
         }
 
         // Validate the API key
@@ -65,6 +79,7 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthentic
         Logger.LogDebug("API key authentication successful");
         return Task.FromResult(AuthenticateResult.Success(ticket));
     }
+
 
     protected override Task HandleChallengeAsync(AuthenticationProperties properties)
     {

@@ -12,6 +12,7 @@ using SnapDog2.Core.Demo;
 using SnapDog2.Core.Events;
 using SnapDog2.Core.State;
 using SnapDog2.Infrastructure.Services;
+using SnapDog2.Api.Authentication;
 
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("SnapDog2.Tests")]
 
@@ -66,6 +67,8 @@ try
     // Register API documentation (Swagger)
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
+// Add API Key authentication
+builder.Services.AddSnapDogApiKeyAuthentication(builder.Configuration);
 
     // TODO: Register API-specific services and authentication/authorization as needed
 
@@ -86,8 +89,8 @@ try
     }
 
     // API security middleware (placeholder, add authentication/authorization as needed)
-    // app.UseAuthentication();
-    // app.UseAuthorization();
+    app.UseAuthentication();
+    app.UseAuthorization();
 
     app.MapControllers();
 
