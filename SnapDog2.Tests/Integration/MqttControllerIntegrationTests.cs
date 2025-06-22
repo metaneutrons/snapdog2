@@ -31,7 +31,7 @@ public class MqttControllerIntegrationTests : IClassFixture<TestWebApplicationFa
     private readonly Mock<IMqttService> _mockMqttService;
     private readonly Mock<IMediator> _mockMediator;
 
-    internal MqttControllerIntegrationTests(TestWebApplicationFactory<Program> factory)
+    public MqttControllerIntegrationTests(TestWebApplicationFactory<Program> factory)
     {
         _factory = factory;
         _mockMqttService = factory.MockMqttService;

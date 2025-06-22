@@ -30,7 +30,7 @@ public class SnapcastControllerIntegrationTests : IClassFixture<TestWebApplicati
     private readonly Mock<ISnapcastService> _mockSnapcastService;
     private readonly Mock<IMediator> _mockMediator;
 
-    internal SnapcastControllerIntegrationTests(TestWebApplicationFactory<Program> factory)
+    public SnapcastControllerIntegrationTests(TestWebApplicationFactory<Program> factory)
     {
         _factory = factory;
         _mockSnapcastService = factory.MockSnapcastService;

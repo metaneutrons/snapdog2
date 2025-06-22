@@ -33,7 +33,7 @@ public class KnxControllerIntegrationTests : IClassFixture<TestWebApplicationFac
     private readonly Mock<IKnxService> _mockKnxService;
     private readonly Mock<IMediator> _mockMediator;
 
-    internal KnxControllerIntegrationTests(TestWebApplicationFactory<Program> factory)
+    public KnxControllerIntegrationTests(TestWebApplicationFactory<Program> factory)
     {
         _factory = factory;
         _factory.ResetMocks(); // Reset mocks before each test run (or rather, before the class is used by tests)
