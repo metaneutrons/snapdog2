@@ -1,36 +1,84 @@
-# Build Error Analysis - EventPublisher Tests
+# GitHub CI NuGet Packaging Error - Diagnostic Analysis
 
-## Identified Issues
+## Problem Statement
 
-### 1. Constructor Parameter Mismatch
+GitHub CI fails with error: `NU5104: Warning As Error: A stable release of a package should not have a prerelease dependency. Either modify the version spec of dependency "EnvoyConfig [0.1.0-beta.81, )" or update the version field in the nuspec.`
 
-- **Error**: CS7036 - Missing "logger" parameter
-- **Root Cause**: Tests call `new InMemoryEventPublisher(_mockLogger.Object)` but constructor requires `(IMediator, ILogger)`
-- **Lines**: 21, 33, 43, etc.
+## Analysis Summary
 
-### 2. Missing IDisposable Implementation
+### Current Configuration Status
 
-- **Error**: CS1061 - No 'Dispose' method found
-- **Root Cause**: Tests expect IDisposable but InMemoryEventPublisher doesn't implement it
-- **Lines**: 26, 241, 254, 255
+1. **Project Version (GitVersion.props)**: `0.1.0` (stable version)
+2. **Branch**: `main` (configured as release branch in GitVersion.yml)
+3. **GitVersion Configuration**: `main` branch has `is-release-branch: true` and `label: ''` (empty = stable)
+4. **Prerelease Dependencies Found**:
+   - `EnvoyConfig: 0.1.0-beta.81` (Directory.Packages.props line 51)
+   - `SubSonicMedia: 1.0.5-beta.1` (Directory.Packages.props line 58)
 
-### 3. Missing Subscribe/Unsubscribe Methods
+### Root Cause Analysis
 
-- **Error**: CS1061 - No 'Subscribe'/'Unsubscribe' methods found
-- **Root Cause**: Tests expect observer pattern but implementation uses MediatR
-- **Lines**: 140, 163, 177, 180, 200, 213, 214, 273, 314, 351, 352
+#### Primary Issue (Confirmed)
 
-### 4. Method Ambiguity
+**Version Mismatch between Project and Dependencies**
 
-- **Error**: CS0121 - Ambiguous method calls
-- **Root Cause**: Compiler confusion between single event and collection overloads
-- **Lines**: 65, 125
+- The project is configured to generate **stable version** `0.1.0` on `main` branch
+- But it depends on **prerelease packages**: `EnvoyConfig 0.1.0-beta.81` and `SubSonicMedia 1.0.5-beta.1`
+- NuGet enforces the rule: stable releases cannot depend on prerelease packages
 
-### 5. Async Test Pattern Error
+#### Secondary Issues Identified
 
-- **Error**: xUnit2021 - Assert.ThrowsAsync not awaited
-- **Root Cause**: Missing await in StateManagerTests.cs line 75
+1. **Default Packaging Behavior**: .NET projects automatically attempt to create NuGet packages during CI builds when certain conditions are met
+2. **GitVersion Configuration**: The `main` branch is configured as a release branch, forcing stable versions
 
-## Diagnosis
+## Evidence Supporting Diagnosis
 
-The tests were written for a different EventPublisher API design than what was implemented.
+### From Directory.Packages.props
+
+```xml
+<PackageVersion Include="EnvoyConfig" Version="0.1.0-beta.81" />  <!-- PRERELEASE -->
+<PackageVersion Include="SubSonicMedia" Version="1.0.5-beta.1" />  <!-- PRERELEASE -->
+```
+
+### From GitVersion.props
+
+```xml
+<GitVersion_SemVer>0.1.0</GitVersion_SemVer>  <!-- STABLE VERSION -->
+<GitVersion_PreReleaseLabel></GitVersion_PreReleaseLabel>  <!-- EMPTY = STABLE -->
+```
+
+### From GitVersion.yml
+
+```yaml
+branches:
+  main:
+    regex: ^main$
+    label: ''  # Empty label = stable versions
+    is-release-branch: true  # Generates stable versions
+```
+
+## Validation Commands Run
+
+- ✅ Confirmed current branch: `main`
+- ✅ Verified project structure and packaging configuration
+- ✅ Identified prerelease dependencies in central package management
+- ✅ Confirmed GitVersion generates stable versions on main branch
+
+## Recommended Solutions (Priority Order)
+
+### Option 1: Switch to Prerelease Versions (Recommended)
+
+- Modify GitVersion configuration to generate prerelease versions on main branch
+- This maintains dependency compatibility while allowing development to continue
+
+### Option 2: Update Dependencies to Stable Versions
+
+- Update `EnvoyConfig` from `0.1.0-beta.81` to stable version (if available)
+- Update `SubSonicMedia` from `1.0.5-beta.1` to stable version (if available)
+
+### Option 3: Disable Packaging
+
+- Add `<IsPackable>false</IsPackable>` to project files to prevent package creation
+
+## Status: Ready for User Confirmation
+
+Waiting for user confirmation of diagnosis before proceeding with fix.

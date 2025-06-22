@@ -1,8 +1,9 @@
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using SnapDog2.Api.Configuration;
+using SnapDog2.Core.Configuration;
 
 namespace SnapDog2.Api.Authentication;
 
@@ -15,13 +16,13 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthentic
     private const string ApiKeyHeaderName = "X-API-Key";
     private const string SchemeName = "ApiKey";
 
-    private readonly ApiAuthConfiguration _authConfig;
+    private readonly ApiConfiguration.ApiAuthSettings _authConfig;
 
     public ApiKeyAuthenticationHandler(
         IOptionsMonitor<ApiKeyAuthenticationSchemeOptions> options,
         ILoggerFactory logger,
         UrlEncoder encoder,
-        ApiAuthConfiguration authConfig
+        ApiConfiguration.ApiAuthSettings authConfig
     )
         : base(options, logger, encoder)
     {
@@ -43,7 +44,7 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthentic
         }
 
         // Validate the API key
-        if (!_authConfig.IsValidApiKey(providedApiKey))
+        if (_authConfig.ApiKeys == null || !_authConfig.ApiKeys.Contains(providedApiKey))
         {
             Logger.LogWarning("Invalid API key provided: {ApiKey}", providedApiKey);
             return Task.FromResult(AuthenticateResult.Fail("Invalid API key"));
@@ -68,7 +69,7 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthentic
     protected override Task HandleChallengeAsync(AuthenticationProperties properties)
     {
         Response.StatusCode = 401;
-        Response.Headers.Append("WWW-Authenticate", $"{SchemeName} realm=\"SnapDog2 API\"");
+        Response.Headers["WWW-Authenticate"] = $"{SchemeName} realm=\"SnapDog2 API\"";
         return Task.CompletedTask;
     }
 

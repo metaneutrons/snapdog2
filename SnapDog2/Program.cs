@@ -1,6 +1,8 @@
 using EnvoyConfig;
 using EnvoyConfig.Conversion;
 using MediatR;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -9,6 +11,9 @@ using SnapDog2.Core.Configuration;
 using SnapDog2.Core.Demo;
 using SnapDog2.Core.Events;
 using SnapDog2.Core.State;
+using SnapDog2.Infrastructure.Services;
+
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("SnapDog2.Tests")]
 
 // Configure Serilog early
 Log.Logger = new LoggerConfiguration()
@@ -19,65 +24,95 @@ Log.Logger = new LoggerConfiguration()
 
 try
 {
-    Log.Information("=== SnapDog2 Phase 1 Demo Application Starting ===");
+    Log.Information("=== SnapDog2 Unified Server + API Host Starting ===");
 
-    // Create and configure the host
-    using var host = CreateHostBuilder(args).Build();
+    var builder = WebApplication.CreateBuilder(args);
 
-    // Get the demo orchestrator
-    var demoOrchestrator = host.Services.GetRequiredService<DemoOrchestrator>();
+    // Use Serilog for logging
+    builder.Host.UseSerilog();
 
-    // Run the comprehensive demo
-    await demoOrchestrator.RunComprehensiveDemoAsync();
+    // Configure EnvoyConfig for configuration loading
+    ConfigureEnvoyConfig();
 
-    Log.Information("=== SnapDog2 Phase 1 Demo Application Completed Successfully ===");
+    // Load configuration
+    var configuration = LoadConfiguration();
+    builder.Services.AddSingleton(configuration);
+
+    // Register MediatR
+    builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+
+    // Register core services
+    builder.Services.AddSingleton<IEventPublisher, InMemoryEventPublisher>();
+    builder.Services.AddSingleton<IStateManager, StateManager>();
+
+    // Register infrastructure services as singletons for unified in-memory access
+    builder.Services.AddSingleton<IKnxService, KnxService>();
+    builder.Services.AddSingleton<IMqttService, MqttService>();
+    builder.Services.AddSingleton<ISnapcastService, SnapcastService>();
+
+    // Register demo classes
+    builder.Services.AddTransient<DomainEntitiesDemo>();
+    builder.Services.AddTransient<StateManagementDemo>();
+    builder.Services.AddTransient<EventsDemo>();
+    builder.Services.AddTransient<ValidationDemo>();
+    builder.Services.AddTransient<DemoOrchestrator>();
+
+    // Register validators (FluentValidation auto-registration could be used in real scenarios)
+    RegisterValidators(builder.Services);
+
+    // Register API controllers (placeholder, actual controllers to be added)
+    builder.Services.AddControllers();
+
+    // Register API documentation (Swagger)
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen();
+
+    // TODO: Register API-specific services and authentication/authorization as needed
+
+    var app = builder.Build();
+
+    // Configure middleware pipeline
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage();
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+    else
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+        // app.UseExceptionHandler("/error"); // Uncomment and implement as needed
+    }
+
+    // API security middleware (placeholder, add authentication/authorization as needed)
+    // app.UseAuthentication();
+    // app.UseAuthorization();
+
+    app.MapControllers();
+
+    // Optionally run the demo orchestrator on startup (for legacy demo)
+    using (var scope = app.Services.CreateScope())
+    {
+        var demoOrchestrator = scope.ServiceProvider.GetService<DemoOrchestrator>();
+        if (demoOrchestrator != null)
+        {
+            demoOrchestrator.RunComprehensiveDemoAsync().GetAwaiter().GetResult();
+        }
+    }
+
+    Log.Information("=== SnapDog2 Unified Server + API Host Running ===");
+    app.Run();
 }
 catch (Exception ex)
 {
-    Log.Fatal(ex, "SnapDog2 Demo Application terminated unexpectedly");
+    Log.Fatal(ex, "SnapDog2 Unified Host terminated unexpectedly");
     throw;
 }
 finally
 {
     Log.CloseAndFlush();
 }
-
-/// <summary>
-/// Creates and configures the host builder with all necessary services.
-/// </summary>
-/// <param name="args">Command line arguments.</param>
-/// <returns>Configured host builder.</returns>
-static IHostBuilder CreateHostBuilder(string[] args) =>
-    Host.CreateDefaultBuilder(args)
-        .UseSerilog()
-        .ConfigureServices(
-            (context, services) =>
-            {
-                // Configure EnvoyConfig for configuration loading
-                ConfigureEnvoyConfig();
-
-                // Load configuration
-                var configuration = LoadConfiguration();
-                services.AddSingleton(configuration);
-
-                // Register MediatR
-                services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
-
-                // Register core services
-                services.AddSingleton<IEventPublisher, InMemoryEventPublisher>();
-                services.AddSingleton<IStateManager, StateManager>();
-
-                // Register demo classes
-                services.AddTransient<DomainEntitiesDemo>();
-                services.AddTransient<StateManagementDemo>();
-                services.AddTransient<EventsDemo>();
-                services.AddTransient<ValidationDemo>();
-                services.AddTransient<DemoOrchestrator>();
-
-                // Register validators (FluentValidation auto-registration could be used in real scenarios)
-                RegisterValidators(services);
-            }
-        );
 
 /// <summary>
 /// Configures EnvoyConfig with custom type converters.

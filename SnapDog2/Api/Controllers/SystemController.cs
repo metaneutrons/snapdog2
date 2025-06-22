@@ -1,7 +1,7 @@
 using System.Reflection;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SnapDog2.Api.Models;
+using Microsoft.Extensions.Logging;
 
 namespace SnapDog2.Api.Controllers;
 
@@ -26,8 +26,8 @@ public class SystemController : ControllerBase
     /// </summary>
     /// <returns>Health status information.</returns>
     [HttpGet("health")]
-    [ProducesResponseType(typeof(ApiResponse<SystemHealthDto>), 200)]
-    public ActionResult<ApiResponse<SystemHealthDto>> GetHealth()
+    [ProducesResponseType(typeof(SystemHealthDto), 200)]
+    public ActionResult<SystemHealthDto> GetHealth()
     {
         _logger.LogInformation("Health check requested");
 
@@ -40,7 +40,7 @@ public class SystemController : ControllerBase
             Environment = GetEnvironmentName(),
         };
 
-        return Ok(ApiResponse<SystemHealthDto>.Ok(health));
+        return Ok(health);
     }
 
     /// <summary>
@@ -48,8 +48,8 @@ public class SystemController : ControllerBase
     /// </summary>
     /// <returns>Detailed system status.</returns>
     [HttpGet("status")]
-    [ProducesResponseType(typeof(ApiResponse<SystemStatusDto>), 200)]
-    public ActionResult<ApiResponse<SystemStatusDto>> GetStatus()
+    [ProducesResponseType(typeof(SystemStatusDto), 200)]
+    public ActionResult<SystemStatusDto> GetStatus()
     {
         _logger.LogInformation("System status requested");
 
@@ -67,7 +67,7 @@ public class SystemController : ControllerBase
             ThreadCount = System.Diagnostics.Process.GetCurrentProcess().Threads.Count,
         };
 
-        return Ok(ApiResponse<SystemStatusDto>.Ok(status));
+        return Ok(status);
     }
 
     /// <summary>
@@ -75,8 +75,8 @@ public class SystemController : ControllerBase
     /// </summary>
     /// <returns>Pong response.</returns>
     [HttpGet("ping")]
-    [ProducesResponseType(typeof(ApiResponse<PingResponseDto>), 200)]
-    public ActionResult<ApiResponse<PingResponseDto>> Ping()
+    [ProducesResponseType(typeof(PingResponseDto), 200)]
+    public ActionResult<PingResponseDto> Ping()
     {
         var response = new PingResponseDto
         {
@@ -85,7 +85,7 @@ public class SystemController : ControllerBase
             RequestId = HttpContext.TraceIdentifier,
         };
 
-        return Ok(ApiResponse<PingResponseDto>.Ok(response));
+        return Ok(response);
     }
 
     /// <summary>
@@ -93,8 +93,8 @@ public class SystemController : ControllerBase
     /// </summary>
     /// <returns>System information.</returns>
     [HttpGet("info")]
-    [ProducesResponseType(typeof(ApiResponse<SystemInfoDto>), 200)]
-    public ActionResult<ApiResponse<SystemInfoDto>> GetSystemInfo()
+    [ProducesResponseType(typeof(SystemInfoDto), 200)]
+    public ActionResult<SystemInfoDto> GetSystemInfo()
     {
         _logger.LogInformation("System information requested");
 
@@ -112,7 +112,7 @@ public class SystemController : ControllerBase
             Endpoints = GetAvailableEndpoints(),
         };
 
-        return Ok(ApiResponse<SystemInfoDto>.Ok(info));
+        return Ok(info);
     }
 
     private string GetApiVersion()

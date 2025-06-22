@@ -26,6 +26,5 @@
 
   <ItemGroup>
     <ProjectReference Include="../SnapDog2/SnapDog2.csproj" />
-    <ProjectReference Include="../SnapDog2.Api/SnapDog2.Api.csproj" />
   </ItemGroup>
 </Project>

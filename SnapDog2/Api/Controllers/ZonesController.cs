@@ -1,7 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SnapDog2.Api.Models;
+using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Models.Entities;
 
 namespace SnapDog2.Api.Controllers;
@@ -14,15 +14,21 @@ namespace SnapDog2.Api.Controllers;
 [Authorize]
 [Route("api/[controller]")]
 [Produces("application/json")]
-public class ZonesController : ApiControllerBase
+public class ZonesController : ControllerBase
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="ZonesController"/> class.
     /// </summary>
     /// <param name="mediator">The MediatR instance for handling commands and queries.</param>
     /// <param name="logger">The logger instance for this controller.</param>
+    private readonly IMediator _mediator;
+    private readonly ILogger<ZonesController> _logger;
+
     public ZonesController(IMediator mediator, ILogger<ZonesController> logger)
-        : base(mediator, logger) { }
+    {
+        _mediator = mediator;
+        _logger = logger;
+    }
 
     /// <summary>
     /// Gets all zones in the system.
@@ -32,15 +38,15 @@ public class ZonesController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A list of all zones.</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(ApiResponse<IEnumerable<ZoneResponse>>), 200)]
-    [ProducesResponseType(typeof(ApiResponse), 400)]
-    public ActionResult<ApiResponse<IEnumerable<ZoneResponse>>> GetAllZones(
+    [ProducesResponseType(typeof(IEnumerable<ZoneResponse>), 200)]
+    [ProducesResponseType(typeof(void), 400)]
+    public ActionResult<IEnumerable<ZoneResponse>> GetAllZones(
         [FromQuery] bool includeDisabled = true,
         [FromQuery] bool includeDetails = true,
         CancellationToken cancellationToken = default
     )
     {
-        Logger.LogInformation(
+        _logger.LogInformation(
             "Getting all zones with filters: includeDisabled={IncludeDisabled}, includeDetails={IncludeDetails}",
             includeDisabled,
             includeDetails
@@ -52,7 +58,7 @@ public class ZonesController : ApiControllerBase
 
         // Temporary implementation - return empty list
         var emptyZones = new List<ZoneResponse>();
-        return SuccessResponse(emptyZones.AsEnumerable());
+        return Ok(emptyZones.AsEnumerable());
     }
 
     /// <summary>
@@ -62,27 +68,24 @@ public class ZonesController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The zone with the specified ID.</returns>
     [HttpGet("{id}")]
-    [ProducesResponseType(typeof(ApiResponse<ZoneResponse>), 200)]
-    [ProducesResponseType(typeof(ApiResponse), 404)]
-    [ProducesResponseType(typeof(ApiResponse), 400)]
-    public ActionResult<ApiResponse<ZoneResponse>> GetZoneById(
-        string id,
-        CancellationToken cancellationToken = default
-    )
+    [ProducesResponseType(typeof(ZoneResponse), 200)]
+    [ProducesResponseType(typeof(void), 404)]
+    [ProducesResponseType(typeof(void), 400)]
+    public ActionResult<ZoneResponse> GetZoneById(string id, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(id))
         {
-            return BadRequest(ApiResponse<ZoneResponse>.Fail("Zone ID cannot be empty."));
+            return BadRequest("Zone ID cannot be empty.");
         }
 
-        Logger.LogInformation("Getting zone by ID: {ZoneId}", id);
+        _logger.LogInformation("Getting zone by ID: {ZoneId}", id);
 
         // TODO: Implement GetZoneByIdQuery when Server layer features are created
         // var query = new GetZoneByIdQuery(id);
         // return await HandleRequestAsync(query, cancellationToken);
 
         // Temporary implementation - return not found
-        return NotFound(ApiResponse<ZoneResponse>.Fail("Zone not found."));
+        return NotFound("Zone not found.");
     }
 
     /// <summary>
@@ -92,20 +95,20 @@ public class ZonesController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A list of clients in the specified zone.</returns>
     [HttpGet("{id}/clients")]
-    [ProducesResponseType(typeof(ApiResponse<IEnumerable<ClientResponse>>), 200)]
-    [ProducesResponseType(typeof(ApiResponse), 404)]
-    [ProducesResponseType(typeof(ApiResponse), 400)]
-    public ActionResult<ApiResponse<IEnumerable<ClientResponse>>> GetZoneClients(
+    [ProducesResponseType(typeof(IEnumerable<ClientResponse>), 200)]
+    [ProducesResponseType(typeof(void), 404)]
+    [ProducesResponseType(typeof(void), 400)]
+    public ActionResult<IEnumerable<ClientResponse>> GetZoneClients(
         string id,
         CancellationToken cancellationToken = default
     )
     {
         if (string.IsNullOrWhiteSpace(id))
         {
-            return BadRequest(ApiResponse<IEnumerable<ClientResponse>>.Fail("Zone ID cannot be empty."));
+            return BadRequest("Zone ID cannot be empty.");
         }
 
-        Logger.LogInformation("Getting clients for zone: {ZoneId}", id);
+        _logger.LogInformation("Getting clients for zone: {ZoneId}", id);
 
         // TODO: Implement GetZoneClientsQuery when Server layer features are created
         // var query = new GetZoneClientsQuery(id);
@@ -113,7 +116,7 @@ public class ZonesController : ApiControllerBase
 
         // Temporary implementation - return empty list
         var emptyClients = new List<ClientResponse>();
-        return SuccessResponse(emptyClients.AsEnumerable());
+        return Ok(emptyClients.AsEnumerable());
     }
 
     /// <summary>
@@ -123,19 +126,19 @@ public class ZonesController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The created zone.</returns>
     [HttpPost]
-    [ProducesResponseType(typeof(ApiResponse<ZoneResponse>), 201)]
-    [ProducesResponseType(typeof(ApiResponse), 400)]
-    public ActionResult<ApiResponse<ZoneResponse>> CreateZone(
+    [ProducesResponseType(typeof(ZoneResponse), 201)]
+    [ProducesResponseType(typeof(void), 400)]
+    public ActionResult<ZoneResponse> CreateZone(
         [FromBody] CreateZoneRequest request,
         CancellationToken cancellationToken = default
     )
     {
         if (request == null)
         {
-            return BadRequest(ApiResponse<ZoneResponse>.Fail("Request body cannot be null."));
+            return BadRequest("Request body cannot be null.");
         }
 
-        Logger.LogInformation("Creating new zone: {ZoneName}", request.Name);
+        _logger.LogInformation("Creating new zone: {ZoneName}", request.Name);
 
         // TODO: Implement CreateZoneCommand when Server layer features are created
         // var command = new CreateZoneCommand(request.Name, request.Description)
@@ -151,7 +154,7 @@ public class ZonesController : ApiControllerBase
         // return await HandleRequestAsync(command, cancellationToken);
 
         // Temporary implementation - return bad request
-        return BadRequest(ApiResponse<ZoneResponse>.Fail("Zone creation not yet implemented."));
+        return BadRequest("Zone creation not yet implemented.");
     }
 
     /// <summary>
@@ -162,10 +165,10 @@ public class ZonesController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The updated zone.</returns>
     [HttpPut("{id}")]
-    [ProducesResponseType(typeof(ApiResponse<ZoneResponse>), 200)]
-    [ProducesResponseType(typeof(ApiResponse), 404)]
-    [ProducesResponseType(typeof(ApiResponse), 400)]
-    public ActionResult<ApiResponse<ZoneResponse>> UpdateZone(
+    [ProducesResponseType(typeof(ZoneResponse), 200)]
+    [ProducesResponseType(typeof(void), 404)]
+    [ProducesResponseType(typeof(void), 400)]
+    public ActionResult<ZoneResponse> UpdateZone(
         string id,
         [FromBody] UpdateZoneRequest request,
         CancellationToken cancellationToken = default
@@ -173,15 +176,15 @@ public class ZonesController : ApiControllerBase
     {
         if (string.IsNullOrWhiteSpace(id))
         {
-            return BadRequest(ApiResponse<ZoneResponse>.Fail("Zone ID cannot be empty."));
+            return BadRequest("Zone ID cannot be empty.");
         }
 
         if (request == null)
         {
-            return BadRequest(ApiResponse<ZoneResponse>.Fail("Request body cannot be null."));
+            return BadRequest("Request body cannot be null.");
         }
 
-        Logger.LogInformation("Updating zone: {ZoneId}", id);
+        _logger.LogInformation("Updating zone: {ZoneId}", id);
 
         // TODO: Implement UpdateZoneCommand when Server layer features are created
         // var command = new UpdateZoneCommand(id)
@@ -200,7 +203,7 @@ public class ZonesController : ApiControllerBase
         // return await HandleRequestAsync(command, cancellationToken);
 
         // Temporary implementation - return not found
-        return NotFound(ApiResponse<ZoneResponse>.Fail("Zone not found."));
+        return NotFound("Zone not found.");
     }
 
     /// <summary>
@@ -210,17 +213,17 @@ public class ZonesController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Success response if the zone was deleted.</returns>
     [HttpDelete("{id}")]
-    [ProducesResponseType(typeof(ApiResponse), 204)]
-    [ProducesResponseType(typeof(ApiResponse), 404)]
-    [ProducesResponseType(typeof(ApiResponse), 400)]
-    public ActionResult<ApiResponse> DeleteZone(string id, CancellationToken cancellationToken = default)
+    [ProducesResponseType(typeof(void), 204)]
+    [ProducesResponseType(typeof(void), 404)]
+    [ProducesResponseType(typeof(void), 400)]
+    public IActionResult DeleteZone(string id, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(id))
         {
-            return BadRequest(ApiResponse.Fail("Zone ID cannot be empty."));
+            return BadRequest("Zone ID cannot be empty.");
         }
 
-        Logger.LogInformation("Deleting zone: {ZoneId}", id);
+        _logger.LogInformation("Deleting zone: {ZoneId}", id);
 
         // TODO: Implement DeleteZoneCommand when Server layer features are created
         // var command = new DeleteZoneCommand(id)
@@ -235,7 +238,7 @@ public class ZonesController : ApiControllerBase
         // return result;
 
         // Temporary implementation - return not found
-        return NotFound(ApiResponse.Fail("Zone not found."));
+        return NotFound("Zone not found.");
     }
 }
 

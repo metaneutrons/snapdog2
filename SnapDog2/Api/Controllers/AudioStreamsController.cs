@@ -1,14 +1,15 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SnapDog2.Api.Models;
+using Microsoft.Extensions.Logging;
+using SnapDog2.Core.Models.Entities;
 using SnapDog2.Core.Models.Enums;
 using SnapDog2.Core.Models.ValueObjects;
+using SnapDog2.Core.State;
+using SnapDog2.Infrastructure.Services;
 using SnapDog2.Server.Features.AudioStreams.Commands;
 using SnapDog2.Server.Features.AudioStreams.Queries;
 using SnapDog2.Server.Models;
-
-namespace SnapDog2.Api.Controllers;
 
 /// <summary>
 /// Audio streams management endpoints for creating, configuring, and controlling audio streams.
@@ -18,15 +19,36 @@ namespace SnapDog2.Api.Controllers;
 [Authorize]
 [Route("api/[controller]")]
 [Produces("application/json")]
-public class AudioStreamsController : ApiControllerBase
+public class AudioStreamsController : ControllerBase
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="AudioStreamsController"/> class.
     /// </summary>
     /// <param name="mediator">The MediatR instance for handling commands and queries.</param>
     /// <param name="logger">The logger instance for this controller.</param>
-    public AudioStreamsController(IMediator mediator, ILogger<AudioStreamsController> logger)
-        : base(mediator, logger) { }
+    private readonly IKnxService _knxService;
+    private readonly IMqttService _mqttService;
+    private readonly ISnapcastService _snapcastService;
+    private readonly IStateManager _stateManager;
+    private readonly IMediator _mediator;
+    private readonly ILogger<AudioStreamsController> _logger;
+
+    public AudioStreamsController(
+        IMediator mediator,
+        ILogger<AudioStreamsController> logger,
+        IKnxService knxService,
+        IMqttService mqttService,
+        ISnapcastService snapcastService,
+        IStateManager stateManager
+    )
+    {
+        _mediator = mediator;
+        _logger = logger;
+        _knxService = knxService;
+        _mqttService = mqttService;
+        _snapcastService = snapcastService;
+        _stateManager = stateManager;
+    }
 
     /// <summary>
     /// Gets all audio streams in the system.
@@ -40,9 +62,9 @@ public class AudioStreamsController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A list of all audio streams.</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(ApiResponse<IEnumerable<AudioStreamResponse>>), 200)]
-    [ProducesResponseType(typeof(ApiResponse), 400)]
-    public async Task<ActionResult<ApiResponse<IEnumerable<AudioStreamResponse>>>> GetAllAudioStreams(
+    [ProducesResponseType(typeof(IEnumerable<AudioStreamResponse>), 200)]
+    [ProducesResponseType(typeof(void), 400)]
+    public async Task<ActionResult<IEnumerable<AudioStreamResponse>>> GetAllAudioStreams(
         [FromQuery] bool includeInactive = true,
         [FromQuery] bool includeDetails = true,
         [FromQuery] int? limit = null,
@@ -52,7 +74,7 @@ public class AudioStreamsController : ApiControllerBase
         CancellationToken cancellationToken = default
     )
     {
-        Logger.LogInformation(
+        _logger.LogInformation(
             "Getting all audio streams with filters: includeInactive={IncludeInactive}, includeDetails={IncludeDetails}",
             includeInactive,
             includeDetails
@@ -68,7 +90,8 @@ public class AudioStreamsController : ApiControllerBase
             Descending = descending,
         };
 
-        return await HandleRequestAsync(query, cancellationToken);
+        var result = await _mediator.Send(query, cancellationToken);
+        return Ok(result);
     }
 
     /// <summary>
@@ -78,23 +101,24 @@ public class AudioStreamsController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The audio stream with the specified ID.</returns>
     [HttpGet("{id}")]
-    [ProducesResponseType(typeof(ApiResponse<AudioStreamResponse>), 200)]
-    [ProducesResponseType(typeof(ApiResponse), 404)]
-    [ProducesResponseType(typeof(ApiResponse), 400)]
-    public async Task<ActionResult<ApiResponse<AudioStreamResponse>>> GetAudioStreamById(
+    [ProducesResponseType(typeof(AudioStreamResponse), 200)]
+    [ProducesResponseType(typeof(void), 404)]
+    [ProducesResponseType(typeof(void), 400)]
+    public async Task<ActionResult<AudioStreamResponse>> GetAudioStreamById(
         string id,
         CancellationToken cancellationToken = default
     )
     {
         if (string.IsNullOrWhiteSpace(id))
         {
-            return BadRequest(ApiResponse<AudioStreamResponse>.Fail("Stream ID cannot be empty."));
+            return BadRequest("Stream ID cannot be empty.");
         }
 
-        Logger.LogInformation("Getting audio stream by ID: {StreamId}", id);
+        _logger.LogInformation("Getting audio stream by ID: {StreamId}", id);
 
         var query = new GetAudioStreamByIdQuery(id);
-        return await HandleRequestAsync(query, cancellationToken);
+        var result = await _mediator.Send(query, cancellationToken);
+        return Ok(result);
     }
 
     /// <summary>
@@ -103,16 +127,17 @@ public class AudioStreamsController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A list of active audio streams.</returns>
     [HttpGet("active")]
-    [ProducesResponseType(typeof(ApiResponse<IEnumerable<AudioStreamResponse>>), 200)]
-    [ProducesResponseType(typeof(ApiResponse), 400)]
-    public async Task<ActionResult<ApiResponse<IEnumerable<AudioStreamResponse>>>> GetActiveAudioStreams(
+    [ProducesResponseType(typeof(IEnumerable<AudioStreamResponse>), 200)]
+    [ProducesResponseType(typeof(void), 400)]
+    public async Task<ActionResult<IEnumerable<AudioStreamResponse>>> GetActiveAudioStreams(
         CancellationToken cancellationToken = default
     )
     {
-        Logger.LogInformation("Getting active audio streams");
+        _logger.LogInformation("Getting active audio streams");
 
         var query = new GetActiveAudioStreamsQuery();
-        return await HandleRequestAsync(query, cancellationToken);
+        var result = await _mediator.Send(query, cancellationToken);
+        return Ok(result);
     }
 
     /// <summary>
@@ -122,31 +147,28 @@ public class AudioStreamsController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A list of audio streams using the specified codec.</returns>
     [HttpGet("codec/{codec}")]
-    [ProducesResponseType(typeof(ApiResponse<IEnumerable<AudioStreamResponse>>), 200)]
-    [ProducesResponseType(typeof(ApiResponse), 400)]
-    public async Task<ActionResult<ApiResponse<IEnumerable<AudioStreamResponse>>>> GetStreamsByCodec(
+    [ProducesResponseType(typeof(IEnumerable<AudioStreamResponse>), 200)]
+    [ProducesResponseType(typeof(void), 400)]
+    public async Task<ActionResult<IEnumerable<AudioStreamResponse>>> GetStreamsByCodec(
         string codec,
         CancellationToken cancellationToken = default
     )
     {
         if (string.IsNullOrWhiteSpace(codec))
         {
-            return BadRequest(ApiResponse<IEnumerable<AudioStreamResponse>>.Fail("Codec cannot be empty."));
+            return BadRequest("Codec cannot be empty.");
         }
 
         if (!Enum.TryParse<AudioCodec>(codec, true, out var audioCodec))
         {
-            return BadRequest(
-                ApiResponse<IEnumerable<AudioStreamResponse>>.Fail(
-                    $"Invalid codec: {codec}. Valid values are: PCM, FLAC, MP3, AAC, OGG."
-                )
-            );
+            return BadRequest($"Invalid codec: {codec}. Valid values are: PCM, FLAC, MP3, AAC, OGG.");
         }
 
-        Logger.LogInformation("Getting audio streams by codec: {Codec}", audioCodec);
+        _logger.LogInformation("Getting audio streams by codec: {Codec}", audioCodec);
 
         var query = new GetStreamsByCodecQuery(audioCodec);
-        return await HandleRequestAsync(query, cancellationToken);
+        var result = await _mediator.Send(query, cancellationToken);
+        return Ok(result);
     }
 
     /// <summary>
@@ -156,19 +178,19 @@ public class AudioStreamsController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The created audio stream.</returns>
     [HttpPost]
-    [ProducesResponseType(typeof(ApiResponse<AudioStreamResponse>), 201)]
-    [ProducesResponseType(typeof(ApiResponse), 400)]
-    public async Task<ActionResult<ApiResponse<AudioStreamResponse>>> CreateAudioStream(
+    [ProducesResponseType(typeof(AudioStreamResponse), 201)]
+    [ProducesResponseType(typeof(void), 400)]
+    public async Task<ActionResult<AudioStreamResponse>> CreateAudioStream(
         [FromBody] CreateAudioStreamRequest request,
         CancellationToken cancellationToken = default
     )
     {
         if (request == null)
         {
-            return BadRequest(ApiResponse<AudioStreamResponse>.Fail("Request body cannot be null."));
+            return BadRequest("Request body cannot be null.");
         }
 
-        Logger.LogInformation("Creating new audio stream: {StreamName}", request.Name);
+        _logger.LogInformation("Creating new audio stream: {StreamName}", request.Name);
 
         try
         {
@@ -187,23 +209,19 @@ public class AudioStreamsController : ApiControllerBase
                 RequestedBy = HttpContext.User?.Identity?.Name ?? "API",
             };
 
-            var result = await Mediator.Send(command, cancellationToken);
+            var result = await _mediator.Send(command, cancellationToken);
 
             if (result.IsSuccess)
             {
                 var response = AudioStreamResponse.FromEntity(result.Value!);
-                return CreatedAtAction(
-                    nameof(GetAudioStreamById),
-                    new { id = result.Value!.Id },
-                    ApiResponse<AudioStreamResponse>.Ok(response)
-                );
+                return CreatedAtAction(nameof(GetAudioStreamById), new { id = result.Value!.Id }, response);
             }
 
-            return BadRequest(ApiResponse<AudioStreamResponse>.Fail(result.Error ?? "Failed to create audio stream"));
+            return BadRequest(result.Error ?? "Failed to create audio stream");
         }
         catch (ArgumentException ex)
         {
-            return BadRequest(ApiResponse<AudioStreamResponse>.Fail($"Invalid request: {ex.Message}"));
+            return BadRequest($"Invalid request: {ex.Message}");
         }
     }
 
@@ -214,24 +232,26 @@ public class AudioStreamsController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Success response if the stream was started.</returns>
     [HttpPut("{id}/start")]
-    [ProducesResponseType(typeof(ApiResponse), 200)]
-    [ProducesResponseType(typeof(ApiResponse), 404)]
-    [ProducesResponseType(typeof(ApiResponse), 400)]
-    public async Task<ActionResult<ApiResponse>> StartAudioStream(
-        string id,
-        CancellationToken cancellationToken = default
-    )
+    [ProducesResponseType(typeof(void), 200)]
+    [ProducesResponseType(typeof(void), 404)]
+    [ProducesResponseType(typeof(void), 400)]
+    public async Task<IActionResult> StartAudioStream(string id, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(id))
         {
-            return BadRequest(ApiResponse.Fail("Stream ID cannot be empty."));
+            return BadRequest("Stream ID cannot be empty.");
         }
 
-        Logger.LogInformation("Starting audio stream: {StreamId}", id);
+        _logger.LogInformation("Starting audio stream: {StreamId}", id);
 
         var command = new StartAudioStreamCommand(id) { RequestedBy = HttpContext.User?.Identity?.Name ?? "API" };
 
-        return await HandleRequestAsync(command, cancellationToken);
+        var result = await _mediator.Send(command, cancellationToken);
+        if (result.IsSuccess)
+        {
+            return Ok();
+        }
+        return BadRequest(result.Error ?? "Failed to start audio stream");
     }
 
     /// <summary>
@@ -241,24 +261,26 @@ public class AudioStreamsController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Success response if the stream was stopped.</returns>
     [HttpPut("{id}/stop")]
-    [ProducesResponseType(typeof(ApiResponse), 200)]
-    [ProducesResponseType(typeof(ApiResponse), 404)]
-    [ProducesResponseType(typeof(ApiResponse), 400)]
-    public async Task<ActionResult<ApiResponse>> StopAudioStream(
-        string id,
-        CancellationToken cancellationToken = default
-    )
+    [ProducesResponseType(typeof(void), 200)]
+    [ProducesResponseType(typeof(void), 404)]
+    [ProducesResponseType(typeof(void), 400)]
+    public async Task<IActionResult> StopAudioStream(string id, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(id))
         {
-            return BadRequest(ApiResponse.Fail("Stream ID cannot be empty."));
+            return BadRequest("Stream ID cannot be empty.");
         }
 
-        Logger.LogInformation("Stopping audio stream: {StreamId}", id);
+        _logger.LogInformation("Stopping audio stream: {StreamId}", id);
 
         var command = new StopAudioStreamCommand(id) { RequestedBy = HttpContext.User?.Identity?.Name ?? "API" };
 
-        return await HandleRequestAsync(command, cancellationToken);
+        var result = await _mediator.Send(command, cancellationToken);
+        if (result.IsSuccess)
+        {
+            return Ok();
+        }
+        return BadRequest(result.Error ?? "Failed to stop audio stream");
     }
 
     /// <summary>
@@ -268,31 +290,28 @@ public class AudioStreamsController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Success response if the stream was deleted.</returns>
     [HttpDelete("{id}")]
-    [ProducesResponseType(typeof(ApiResponse), 204)]
-    [ProducesResponseType(typeof(ApiResponse), 404)]
-    [ProducesResponseType(typeof(ApiResponse), 400)]
-    public async Task<ActionResult<ApiResponse>> DeleteAudioStream(
-        string id,
-        CancellationToken cancellationToken = default
-    )
+    [ProducesResponseType(typeof(void), 204)]
+    [ProducesResponseType(typeof(void), 404)]
+    [ProducesResponseType(typeof(void), 400)]
+    public async Task<IActionResult> DeleteAudioStream(string id, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(id))
         {
-            return BadRequest(ApiResponse.Fail("Stream ID cannot be empty."));
+            return BadRequest("Stream ID cannot be empty.");
         }
 
-        Logger.LogInformation("Deleting audio stream: {StreamId}", id);
+        _logger.LogInformation("Deleting audio stream: {StreamId}", id);
 
         var command = new DeleteAudioStreamCommand(id) { RequestedBy = HttpContext.User?.Identity?.Name ?? "API" };
 
-        var result = await HandleRequestAsync(command, cancellationToken);
+        var result = await _mediator.Send(command, cancellationToken);
 
-        if (result.Value?.Success == true)
+        if (result.IsSuccess)
         {
             return NoContent();
         }
 
-        return result;
+        return BadRequest(result.Error ?? "Failed to delete audio stream");
     }
 }
 

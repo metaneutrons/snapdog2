@@ -1,7 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SnapDog2.Api.Models;
+using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Models.Entities;
 
 namespace SnapDog2.Api.Controllers;
@@ -14,15 +14,21 @@ namespace SnapDog2.Api.Controllers;
 [Authorize]
 [Route("api/[controller]")]
 [Produces("application/json")]
-public class PlaylistsController : ApiControllerBase
+public class PlaylistsController : ControllerBase
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="PlaylistsController"/> class.
     /// </summary>
     /// <param name="mediator">The MediatR instance for handling commands and queries.</param>
     /// <param name="logger">The logger instance for this controller.</param>
+    private readonly IMediator _mediator;
+    private readonly ILogger<PlaylistsController> _logger;
+
     public PlaylistsController(IMediator mediator, ILogger<PlaylistsController> logger)
-        : base(mediator, logger) { }
+    {
+        _mediator = mediator;
+        _logger = logger;
+    }
 
     /// <summary>
     /// Gets all playlists in the system.
@@ -33,16 +39,16 @@ public class PlaylistsController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A list of all playlists.</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(ApiResponse<IEnumerable<PlaylistResponse>>), 200)]
-    [ProducesResponseType(typeof(ApiResponse), 400)]
-    public ActionResult<ApiResponse<IEnumerable<PlaylistResponse>>> GetAllPlaylists(
+    [ProducesResponseType(typeof(IEnumerable<PlaylistResponse>), 200)]
+    [ProducesResponseType(typeof(void), 400)]
+    public ActionResult<IEnumerable<PlaylistResponse>> GetAllPlaylists(
         [FromQuery] bool includePrivate = false,
         [FromQuery] bool includeSystem = true,
         [FromQuery] string? owner = null,
         CancellationToken cancellationToken = default
     )
     {
-        Logger.LogInformation(
+        _logger.LogInformation(
             "Getting all playlists with filters: includePrivate={IncludePrivate}, includeSystem={IncludeSystem}, owner={Owner}",
             includePrivate,
             includeSystem,
@@ -60,7 +66,7 @@ public class PlaylistsController : ApiControllerBase
 
         // Temporary implementation - return empty list
         var emptyPlaylists = new List<PlaylistResponse>();
-        return SuccessResponse(emptyPlaylists.AsEnumerable());
+        return Ok(emptyPlaylists.AsEnumerable());
     }
 
     /// <summary>
@@ -70,27 +76,24 @@ public class PlaylistsController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The playlist with the specified ID.</returns>
     [HttpGet("{id}")]
-    [ProducesResponseType(typeof(ApiResponse<PlaylistResponse>), 200)]
-    [ProducesResponseType(typeof(ApiResponse), 404)]
-    [ProducesResponseType(typeof(ApiResponse), 400)]
-    public ActionResult<ApiResponse<PlaylistResponse>> GetPlaylistById(
-        string id,
-        CancellationToken cancellationToken = default
-    )
+    [ProducesResponseType(typeof(PlaylistResponse), 200)]
+    [ProducesResponseType(typeof(void), 404)]
+    [ProducesResponseType(typeof(void), 400)]
+    public ActionResult<PlaylistResponse> GetPlaylistById(string id, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(id))
         {
-            return BadRequest(ApiResponse<PlaylistResponse>.Fail("Playlist ID cannot be empty."));
+            return BadRequest("Playlist ID cannot be empty.");
         }
 
-        Logger.LogInformation("Getting playlist by ID: {PlaylistId}", id);
+        _logger.LogInformation("Getting playlist by ID: {PlaylistId}", id);
 
         // TODO: Implement GetPlaylistByIdQuery when Server layer features are created
         // var query = new GetPlaylistByIdQuery(id);
         // return await HandleRequestAsync(query, cancellationToken);
 
         // Temporary implementation - return not found
-        return NotFound(ApiResponse<PlaylistResponse>.Fail("Playlist not found."));
+        return NotFound("Playlist not found.");
     }
 
     /// <summary>
@@ -100,20 +103,20 @@ public class PlaylistsController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A list of tracks in the specified playlist.</returns>
     [HttpGet("{id}/tracks")]
-    [ProducesResponseType(typeof(ApiResponse<IEnumerable<TrackResponse>>), 200)]
-    [ProducesResponseType(typeof(ApiResponse), 404)]
-    [ProducesResponseType(typeof(ApiResponse), 400)]
-    public ActionResult<ApiResponse<IEnumerable<TrackResponse>>> GetPlaylistTracks(
+    [ProducesResponseType(typeof(IEnumerable<TrackResponse>), 200)]
+    [ProducesResponseType(typeof(void), 404)]
+    [ProducesResponseType(typeof(void), 400)]
+    public ActionResult<IEnumerable<TrackResponse>> GetPlaylistTracks(
         string id,
         CancellationToken cancellationToken = default
     )
     {
         if (string.IsNullOrWhiteSpace(id))
         {
-            return BadRequest(ApiResponse<IEnumerable<TrackResponse>>.Fail("Playlist ID cannot be empty."));
+            return BadRequest("Playlist ID cannot be empty.");
         }
 
-        Logger.LogInformation("Getting tracks for playlist: {PlaylistId}", id);
+        _logger.LogInformation("Getting tracks for playlist: {PlaylistId}", id);
 
         // TODO: Implement GetPlaylistTracksQuery when Server layer features are created
         // var query = new GetPlaylistTracksQuery(id);
@@ -121,7 +124,7 @@ public class PlaylistsController : ApiControllerBase
 
         // Temporary implementation - return empty list
         var emptyTracks = new List<TrackResponse>();
-        return SuccessResponse(emptyTracks.AsEnumerable());
+        return Ok(emptyTracks.AsEnumerable());
     }
 
     /// <summary>
@@ -131,19 +134,19 @@ public class PlaylistsController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The created playlist.</returns>
     [HttpPost]
-    [ProducesResponseType(typeof(ApiResponse<PlaylistResponse>), 201)]
-    [ProducesResponseType(typeof(ApiResponse), 400)]
-    public ActionResult<ApiResponse<PlaylistResponse>> CreatePlaylist(
+    [ProducesResponseType(typeof(PlaylistResponse), 201)]
+    [ProducesResponseType(typeof(void), 400)]
+    public ActionResult<PlaylistResponse> CreatePlaylist(
         [FromBody] CreatePlaylistRequest request,
         CancellationToken cancellationToken = default
     )
     {
         if (request == null)
         {
-            return BadRequest(ApiResponse<PlaylistResponse>.Fail("Request body cannot be null."));
+            return BadRequest("Request body cannot be null.");
         }
 
-        Logger.LogInformation("Creating new playlist: {PlaylistName}", request.Name);
+        _logger.LogInformation("Creating new playlist: {PlaylistName}", request.Name);
 
         // TODO: Implement CreatePlaylistCommand when Server layer features are created
         // var command = new CreatePlaylistCommand(request.Name, request.Description)
@@ -162,7 +165,7 @@ public class PlaylistsController : ApiControllerBase
         // return result;
 
         // Temporary implementation - return bad request
-        return BadRequest(ApiResponse<PlaylistResponse>.Fail("Playlist creation not yet implemented."));
+        return BadRequest("Playlist creation not yet implemented.");
     }
 
     /// <summary>
@@ -173,10 +176,10 @@ public class PlaylistsController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The updated playlist.</returns>
     [HttpPut("{id}")]
-    [ProducesResponseType(typeof(ApiResponse<PlaylistResponse>), 200)]
-    [ProducesResponseType(typeof(ApiResponse), 404)]
-    [ProducesResponseType(typeof(ApiResponse), 400)]
-    public ActionResult<ApiResponse<PlaylistResponse>> UpdatePlaylist(
+    [ProducesResponseType(typeof(PlaylistResponse), 200)]
+    [ProducesResponseType(typeof(void), 404)]
+    [ProducesResponseType(typeof(void), 400)]
+    public ActionResult<PlaylistResponse> UpdatePlaylist(
         string id,
         [FromBody] UpdatePlaylistRequest request,
         CancellationToken cancellationToken = default
@@ -184,15 +187,15 @@ public class PlaylistsController : ApiControllerBase
     {
         if (string.IsNullOrWhiteSpace(id))
         {
-            return BadRequest(ApiResponse<PlaylistResponse>.Fail("Playlist ID cannot be empty."));
+            return BadRequest("Playlist ID cannot be empty.");
         }
 
         if (request == null)
         {
-            return BadRequest(ApiResponse<PlaylistResponse>.Fail("Request body cannot be null."));
+            return BadRequest("Request body cannot be null.");
         }
 
-        Logger.LogInformation("Updating playlist: {PlaylistId}", id);
+        _logger.LogInformation("Updating playlist: {PlaylistId}", id);
 
         // TODO: Implement UpdatePlaylistCommand when Server layer features are created
         // var command = new UpdatePlaylistCommand(id)
@@ -206,7 +209,7 @@ public class PlaylistsController : ApiControllerBase
         // return await HandleRequestAsync(command, cancellationToken);
 
         // Temporary implementation - return not found
-        return NotFound(ApiResponse<PlaylistResponse>.Fail("Playlist not found."));
+        return NotFound("Playlist not found.");
     }
 
     /// <summary>
@@ -216,20 +219,17 @@ public class PlaylistsController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Success response if the playlist was deleted.</returns>
     [HttpDelete("{id}")]
-    [ProducesResponseType(typeof(ApiResponse), 204)]
-    [ProducesResponseType(typeof(ApiResponse), 404)]
-    [ProducesResponseType(typeof(ApiResponse), 400)]
-    public ActionResult<ApiResponse> DeletePlaylist(
-        string id,
-        CancellationToken cancellationToken = default
-    )
+    [ProducesResponseType(typeof(void), 204)]
+    [ProducesResponseType(typeof(void), 404)]
+    [ProducesResponseType(typeof(void), 400)]
+    public IActionResult DeletePlaylist(string id, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(id))
         {
-            return BadRequest(ApiResponse.Fail("Playlist ID cannot be empty."));
+            return BadRequest("Playlist ID cannot be empty.");
         }
 
-        Logger.LogInformation("Deleting playlist: {PlaylistId}", id);
+        _logger.LogInformation("Deleting playlist: {PlaylistId}", id);
 
         // TODO: Implement DeletePlaylistCommand when Server layer features are created
         // var command = new DeletePlaylistCommand(id)
@@ -244,7 +244,7 @@ public class PlaylistsController : ApiControllerBase
         // return result;
 
         // Temporary implementation - return not found
-        return NotFound(ApiResponse.Fail("Playlist not found."));
+        return NotFound("Playlist not found.");
     }
 
     /// <summary>
@@ -255,10 +255,10 @@ public class PlaylistsController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Success response if the track was added.</returns>
     [HttpPost("{id}/tracks")]
-    [ProducesResponseType(typeof(ApiResponse<PlaylistResponse>), 200)]
-    [ProducesResponseType(typeof(ApiResponse), 404)]
-    [ProducesResponseType(typeof(ApiResponse), 400)]
-    public ActionResult<ApiResponse<PlaylistResponse>> AddTrackToPlaylist(
+    [ProducesResponseType(typeof(PlaylistResponse), 200)]
+    [ProducesResponseType(typeof(void), 404)]
+    [ProducesResponseType(typeof(void), 400)]
+    public ActionResult<PlaylistResponse> AddTrackToPlaylist(
         string id,
         [FromBody] AddTrackRequest request,
         CancellationToken cancellationToken = default
@@ -266,20 +266,20 @@ public class PlaylistsController : ApiControllerBase
     {
         if (string.IsNullOrWhiteSpace(id))
         {
-            return BadRequest(ApiResponse<PlaylistResponse>.Fail("Playlist ID cannot be empty."));
+            return BadRequest("Playlist ID cannot be empty.");
         }
 
         if (request == null)
         {
-            return BadRequest(ApiResponse<PlaylistResponse>.Fail("Request body cannot be null."));
+            return BadRequest("Request body cannot be null.");
         }
 
         if (string.IsNullOrWhiteSpace(request.TrackId))
         {
-            return BadRequest(ApiResponse<PlaylistResponse>.Fail("Track ID cannot be empty."));
+            return BadRequest("Track ID cannot be empty.");
         }
 
-        Logger.LogInformation(
+        _logger.LogInformation(
             "Adding track {TrackId} to playlist {PlaylistId} at position {Position}",
             request.TrackId,
             id,
@@ -295,7 +295,7 @@ public class PlaylistsController : ApiControllerBase
         // return await HandleRequestAsync(command, cancellationToken);
 
         // Temporary implementation - return not found
-        return NotFound(ApiResponse<PlaylistResponse>.Fail("Playlist not found."));
+        return NotFound("Playlist not found.");
     }
 
     /// <summary>
@@ -306,10 +306,10 @@ public class PlaylistsController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Success response if the track was removed.</returns>
     [HttpDelete("{id}/tracks/{trackId}")]
-    [ProducesResponseType(typeof(ApiResponse<PlaylistResponse>), 200)]
-    [ProducesResponseType(typeof(ApiResponse), 404)]
-    [ProducesResponseType(typeof(ApiResponse), 400)]
-    public ActionResult<ApiResponse<PlaylistResponse>> RemoveTrackFromPlaylist(
+    [ProducesResponseType(typeof(PlaylistResponse), 200)]
+    [ProducesResponseType(typeof(void), 404)]
+    [ProducesResponseType(typeof(void), 400)]
+    public ActionResult<PlaylistResponse> RemoveTrackFromPlaylist(
         string id,
         string trackId,
         CancellationToken cancellationToken = default
@@ -317,15 +317,15 @@ public class PlaylistsController : ApiControllerBase
     {
         if (string.IsNullOrWhiteSpace(id))
         {
-            return BadRequest(ApiResponse<PlaylistResponse>.Fail("Playlist ID cannot be empty."));
+            return BadRequest("Playlist ID cannot be empty.");
         }
 
         if (string.IsNullOrWhiteSpace(trackId))
         {
-            return BadRequest(ApiResponse<PlaylistResponse>.Fail("Track ID cannot be empty."));
+            return BadRequest("Track ID cannot be empty.");
         }
 
-        Logger.LogInformation("Removing track {TrackId} from playlist {PlaylistId}", trackId, id);
+        _logger.LogInformation("Removing track {TrackId} from playlist {PlaylistId}", trackId, id);
 
         // TODO: Implement RemoveTrackFromPlaylistCommand when Server layer features are created
         // var command = new RemoveTrackFromPlaylistCommand(id, trackId)
@@ -335,7 +335,7 @@ public class PlaylistsController : ApiControllerBase
         // return await HandleRequestAsync(command, cancellationToken);
 
         // Temporary implementation - return not found
-        return NotFound(ApiResponse<PlaylistResponse>.Fail("Playlist or track not found."));
+        return NotFound("Playlist or track not found.");
     }
 }
 

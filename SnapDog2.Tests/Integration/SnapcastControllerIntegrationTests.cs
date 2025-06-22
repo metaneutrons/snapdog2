@@ -1,3 +1,4 @@
+using System; // For ArgumentOutOfRangeException
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
@@ -8,13 +9,12 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
-using SnapDog2.Api;
-using SnapDog2.Api.Models;
+using SnapDog2;
+using SnapDog2.Core.Models;
 using SnapDog2.Infrastructure.Services;
 using SnapDog2.Server.Features.Snapcast.Commands;
 using SnapDog2.Server.Features.Snapcast.Queries;
 using Xunit;
-using System; // For ArgumentOutOfRangeException
 
 namespace SnapDog2.Tests.Integration;
 
@@ -23,14 +23,14 @@ namespace SnapDog2.Tests.Integration;
 /// Tests authentication, validation, and proper MediatR integration.
 /// </summary>
 [Trait("Category", "Integration")]
-public class SnapcastControllerIntegrationTests : IClassFixture<TestWebApplicationFactory<SnapDog2.Api.Program>>
+public class SnapcastControllerIntegrationTests : IClassFixture<TestWebApplicationFactory<Program>>
 {
-    private readonly TestWebApplicationFactory<SnapDog2.Api.Program> _factory;
+    private readonly TestWebApplicationFactory<Program> _factory;
     private readonly HttpClient _client;
     private readonly Mock<ISnapcastService> _mockSnapcastService;
     private readonly Mock<IMediator> _mockMediator;
 
-    public SnapcastControllerIntegrationTests(TestWebApplicationFactory<SnapDog2.Api.Program> factory)
+    internal SnapcastControllerIntegrationTests(TestWebApplicationFactory<Program> factory)
     {
         _factory = factory;
         _mockSnapcastService = factory.MockSnapcastService;
@@ -67,14 +67,10 @@ public class SnapcastControllerIntegrationTests : IClassFixture<TestWebApplicati
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var content = await response.Content.ReadAsStringAsync();
-        var apiResponse = JsonSerializer.Deserialize<ApiResponse<object>>(
-            content,
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-        );
 
-        Assert.NotNull(apiResponse);
-        Assert.True(apiResponse.Success);
-        Assert.NotNull(apiResponse.Data);
+        // Since ApiResponse wrapper was removed, we expect direct JSON content
+        Assert.NotNull(content);
+        Assert.NotEmpty(content);
     }
 
     [Fact]
@@ -96,13 +92,10 @@ public class SnapcastControllerIntegrationTests : IClassFixture<TestWebApplicati
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var content = await response.Content.ReadAsStringAsync();
-        var apiResponse = JsonSerializer.Deserialize<ApiResponse<object>>(
-            content,
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-        );
 
-        Assert.NotNull(apiResponse);
-        Assert.True(apiResponse.Success);
+        // Since ApiResponse wrapper was removed, we expect direct JSON content
+        Assert.NotNull(content);
+        Assert.NotEmpty(content);
     }
 
     [Fact]
@@ -127,13 +120,10 @@ public class SnapcastControllerIntegrationTests : IClassFixture<TestWebApplicati
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var content = await response.Content.ReadAsStringAsync();
-        var apiResponse = JsonSerializer.Deserialize<ApiResponse<object>>(
-            content,
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-        );
 
-        Assert.NotNull(apiResponse);
-        Assert.True(apiResponse.Success);
+        // Since ApiResponse wrapper was removed, we expect direct JSON content
+        Assert.NotNull(content);
+        Assert.NotEmpty(content);
     }
 
     [Fact]
@@ -187,7 +177,12 @@ public class SnapcastControllerIntegrationTests : IClassFixture<TestWebApplicati
         var requestBody = new { Volume = invalidVolume }; // Assuming VolumeRequest has a Volume property
 
         _mockMediator
-            .Setup(m => m.Send(It.Is<SetClientVolumeCommand>(cmd => cmd.ClientId == clientId && cmd.Volume == invalidVolume), It.IsAny<CancellationToken>()))
+            .Setup(m =>
+                m.Send(
+                    It.Is<SetClientVolumeCommand>(cmd => cmd.ClientId == clientId && cmd.Volume == invalidVolume),
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .ThrowsAsync(new ArgumentOutOfRangeException("volume", "Volume must be between 0 and 100."));
 
         _client.DefaultRequestHeaders.Remove("X-API-Key");
@@ -355,14 +350,16 @@ public class SnapcastControllerIntegrationTests : IClassFixture<TestWebApplicati
         // Arrange
         _mockMediator
             .Setup(m => m.Send(It.IsAny<GetSnapcastServerStatusQuery>(), It.IsAny<CancellationToken>()))
-            .Returns(async (GetSnapcastServerStatusQuery query, CancellationToken ct) =>
-            {
-                // Simulate work that can be cancelled
-                await Task.Delay(TimeSpan.FromSeconds(5), ct); // Increased delay to ensure cancellation can occur
-                ct.ThrowIfCancellationRequested();
-                // If not cancelled, return a dummy status. This part might not be reached if cancellation is quick.
-                return """{"server": {"host": "localhost", "snapserver": {"version": "0.26.0"}}}""";
-            });
+            .Returns(
+                async (GetSnapcastServerStatusQuery query, CancellationToken ct) =>
+                {
+                    // Simulate work that can be cancelled
+                    await Task.Delay(TimeSpan.FromSeconds(5), ct); // Increased delay to ensure cancellation can occur
+                    ct.ThrowIfCancellationRequested();
+                    // If not cancelled, return a dummy status. This part might not be reached if cancellation is quick.
+                    return """{"server": {"host": "localhost", "snapserver": {"version": "0.26.0"}}}""";
+                }
+            );
 
         _client.DefaultRequestHeaders.Remove("X-API-Key");
         _client.DefaultRequestHeaders.Add("X-API-Key", "test-api-key");

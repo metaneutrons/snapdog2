@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Text;
 using Microsoft.Extensions.Logging;
+using SnapDog2.Core.Configuration;
 
 namespace SnapDog2.Api.Middleware;
 
@@ -11,7 +12,7 @@ public class RequestResponseLoggingMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<RequestResponseLoggingMiddleware> _logger;
-    private readonly RequestResponseLoggingOptions _options;
+    private readonly ApiConfiguration.ApiLoggingSettings _options;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RequestResponseLoggingMiddleware"/> class.
@@ -22,7 +23,7 @@ public class RequestResponseLoggingMiddleware
     public RequestResponseLoggingMiddleware(
         RequestDelegate next,
         ILogger<RequestResponseLoggingMiddleware> logger,
-        RequestResponseLoggingOptions options
+        ApiConfiguration.ApiLoggingSettings options
     )
     {
         _next = next ?? throw new ArgumentNullException(nameof(next));
@@ -421,62 +422,4 @@ public class RequestResponseLoggingMiddleware
     }
 }
 
-/// <summary>
-/// Configuration options for request/response logging middleware.
-/// </summary>
-public class RequestResponseLoggingOptions
-{
-    /// <summary>
-    /// Gets or sets a value indicating whether logging is enabled.
-    /// </summary>
-    public bool Enabled { get; set; } = true;
-
-    /// <summary>
-    /// Gets or sets a value indicating whether to log request bodies.
-    /// </summary>
-    public bool LogRequestBody { get; set; } = true;
-
-    /// <summary>
-    /// Gets or sets a value indicating whether to log response bodies.
-    /// </summary>
-    public bool LogResponseBody { get; set; } = true;
-
-    /// <summary>
-    /// Gets or sets a value indicating whether to log headers.
-    /// </summary>
-    public bool LogHeaders { get; set; } = true;
-
-    /// <summary>
-    /// Gets or sets the maximum body size to log (in bytes).
-    /// </summary>
-    public int MaxBodySize { get; set; } = 4096; // 4KB
-
-    /// <summary>
-    /// Gets or sets the correlation ID header name.
-    /// </summary>
-    public string CorrelationIdHeader { get; set; } = "X-Correlation-ID";
-
-    /// <summary>
-    /// Gets or sets the paths to exclude from logging.
-    /// </summary>
-    public IList<string> ExcludedPaths { get; set; } =
-        new List<string> { "/swagger", "/health", "/metrics", "/favicon.ico" };
-
-    /// <summary>
-    /// Creates default logging options.
-    /// </summary>
-    /// <returns>Default logging options.</returns>
-    public static RequestResponseLoggingOptions CreateDefault()
-    {
-        return new RequestResponseLoggingOptions
-        {
-            Enabled = true,
-            LogRequestBody = true,
-            LogResponseBody = true,
-            LogHeaders = true,
-            MaxBodySize = 4096,
-            CorrelationIdHeader = "X-Correlation-ID",
-            ExcludedPaths = new List<string> { "/swagger", "/health", "/metrics", "/favicon.ico" },
-        };
-    }
-}
+/* This file is now obsolete. All request/response logging configuration has been merged into ApiConfiguration. */

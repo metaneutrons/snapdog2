@@ -2,22 +2,22 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using FluentValidation; // For ValidationException
+using FluentValidation.Results; // For ValidationFailure
 using MediatR;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
-using SnapDog2.Api;
-using SnapDog2.Api.Models;
+using SnapDog2;
 using SnapDog2.Core.Configuration;
+using SnapDog2.Core.Models;
 using SnapDog2.Infrastructure.Services;
 using SnapDog2.Infrastructure.Services.Models;
 using SnapDog2.Server.Features.Knx.Commands;
 using SnapDog2.Server.Features.Knx.Queries;
 using Xunit;
-using FluentValidation; // For ValidationException
-using FluentValidation.Results; // For ValidationFailure
 
 namespace SnapDog2.Tests.Integration;
 
@@ -26,14 +26,14 @@ namespace SnapDog2.Tests.Integration;
 /// Tests authentication, validation, and proper MediatR integration.
 /// </summary>
 [Trait("Category", "Integration")]
-public class KnxControllerIntegrationTests : IClassFixture<TestWebApplicationFactory<SnapDog2.Api.Program>>
+public class KnxControllerIntegrationTests : IClassFixture<TestWebApplicationFactory<Program>>
 {
-    private readonly TestWebApplicationFactory<SnapDog2.Api.Program> _factory;
+    private readonly TestWebApplicationFactory<Program> _factory;
     private readonly HttpClient _client;
     private readonly Mock<IKnxService> _mockKnxService;
     private readonly Mock<IMediator> _mockMediator;
 
-    public KnxControllerIntegrationTests(TestWebApplicationFactory<SnapDog2.Api.Program> factory)
+    internal KnxControllerIntegrationTests(TestWebApplicationFactory<Program> factory)
     {
         _factory = factory;
         _factory.ResetMocks(); // Reset mocks before each test run (or rather, before the class is used by tests)
@@ -78,14 +78,10 @@ public class KnxControllerIntegrationTests : IClassFixture<TestWebApplicationFac
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var content = await response.Content.ReadAsStringAsync();
-        var apiResponse = JsonSerializer.Deserialize<ApiResponse<object>>(
-            content,
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-        );
 
-        Assert.NotNull(apiResponse);
-        Assert.True(apiResponse.Success);
-        Assert.NotNull(apiResponse.Data);
+        // Since ApiResponse wrapper was removed, we expect direct JSON content
+        Assert.NotNull(content);
+        Assert.NotEmpty(content);
     }
 
     [Fact]
@@ -116,14 +112,10 @@ public class KnxControllerIntegrationTests : IClassFixture<TestWebApplicationFac
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var content = await response.Content.ReadAsStringAsync();
-        var apiResponse = JsonSerializer.Deserialize<ApiResponse<object>>(
-            content,
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-        );
 
-        Assert.NotNull(apiResponse);
-        Assert.True(apiResponse.Success);
-        Assert.NotNull(apiResponse.Data);
+        // Since ApiResponse wrapper was removed, we expect direct JSON content
+        Assert.NotNull(content);
+        Assert.NotEmpty(content);
     }
 
     [Fact]
@@ -513,16 +505,25 @@ public class KnxControllerIntegrationTests : IClassFixture<TestWebApplicationFac
         {
             Address = "1/1/1",
             Value = "", // This will result in an empty byte[] after Convert.FromBase64String
-            Description = "Test empty value"
+            Description = "Test empty value",
         };
 
         // Simulate FluentValidation failure for a command with an empty byte[] Value
         _mockMediator
-            .Setup(m => m.Send(It.Is<WriteGroupValueCommand>(cmd => cmd.Address.ToString() == "1/1/1" && cmd.Value != null && cmd.Value.Length == 0), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new FluentValidation.ValidationException("Validation failed", new[]
-            {
-                new ValidationFailure("Value", "Value cannot be empty.")
-            }));
+            .Setup(m =>
+                m.Send(
+                    It.Is<WriteGroupValueCommand>(cmd =>
+                        cmd.Address.ToString() == "1/1/1" && cmd.Value != null && cmd.Value.Length == 0
+                    ),
+                    It.IsAny<CancellationToken>()
+                )
+            )
+            .ThrowsAsync(
+                new FluentValidation.ValidationException(
+                    "Validation failed",
+                    new[] { new ValidationFailure("Value", "Value cannot be empty.") }
+                )
+            );
 
         _client.DefaultRequestHeaders.Remove("X-API-Key");
         _client.DefaultRequestHeaders.Add("X-API-Key", "test-api-key");
@@ -557,9 +558,14 @@ public class KnxControllerIntegrationTests : IClassFixture<TestWebApplicationFac
         };
 
         _mockMediator
-            .Setup(m => m.Send(It.Is<WriteGroupValueCommand>(cmd =>
-                cmd.Address.ToString() == "1/1/1" &&
-                cmd.Value.SequenceEqual(oversizedValue)), It.IsAny<CancellationToken>()))
+            .Setup(m =>
+                m.Send(
+                    It.Is<WriteGroupValueCommand>(cmd =>
+                        cmd.Address.ToString() == "1/1/1" && cmd.Value.SequenceEqual(oversizedValue)
+                    ),
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .ThrowsAsync(new ArgumentOutOfRangeException("value", "Value size exceeds maximum KNX payload size."));
 
         var json = JsonSerializer.Serialize(requestDto);

@@ -1,7 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SnapDog2.Api.Models;
+using Microsoft.Extensions.Logging;
 using SnapDog2.Server.Features.Snapcast.Commands;
 using SnapDog2.Server.Features.Snapcast.Queries;
 
@@ -14,15 +14,21 @@ namespace SnapDog2.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class SnapcastController : ApiControllerBase
+public class SnapcastController : ControllerBase
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="SnapcastController"/> class.
     /// </summary>
     /// <param name="mediator">The MediatR mediator.</param>
     /// <param name="logger">The logger.</param>
+    private readonly IMediator _mediator;
+    private readonly ILogger<SnapcastController> _logger;
+
     public SnapcastController(IMediator mediator, ILogger<SnapcastController> logger)
-        : base(mediator, logger) { }
+    {
+        _mediator = mediator;
+        _logger = logger;
+    }
 
     /// <summary>
     /// Gets the current status of the Snapcast server.
@@ -30,27 +36,23 @@ public class SnapcastController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Server status information.</returns>
     [HttpGet("status")]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<object>>> GetServerStatus(CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(object), 200)]
+    [ProducesResponseType(typeof(void), 500)]
+    public async Task<ActionResult<object>> GetServerStatus(CancellationToken cancellationToken)
     {
-        Logger.LogInformation("Getting Snapcast server status");
+        _logger.LogInformation("Getting Snapcast server status");
 
         var query = new GetSnapcastServerStatusQuery();
-        var result = await Mediator.Send(query, cancellationToken);
+        var result = await _mediator.Send(query, cancellationToken);
 
-        // Parse the JSON string to return as object
         var statusObject = System.Text.Json.JsonSerializer.Deserialize<object>(result ?? string.Empty);
 
         if (statusObject == null)
         {
-            // Handle the case where deserialization results in null,
-            // perhaps by returning an error or a default object.
-            // For now, let's assume an empty object is acceptable if result was null or empty.
-            return Ok(ApiResponse<object>.Ok(new object()));
+            return Ok(new object());
         }
 
-        return Ok(ApiResponse<object>.Ok(statusObject));
+        return Ok(statusObject);
     }
 
     /// <summary>
@@ -59,16 +61,16 @@ public class SnapcastController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Collection of group identifiers.</returns>
     [HttpGet("groups")]
-    [ProducesResponseType(typeof(ApiResponse<IEnumerable<string>>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<IEnumerable<string>>>> GetGroups(CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(IEnumerable<string>), 200)]
+    [ProducesResponseType(typeof(void), 500)]
+    public async Task<ActionResult<IEnumerable<string>>> GetGroups(CancellationToken cancellationToken)
     {
-        Logger.LogInformation("Getting Snapcast groups");
+        _logger.LogInformation("Getting Snapcast groups");
 
         var query = new GetSnapcastGroupsQuery();
-        var result = await Mediator.Send(query, cancellationToken);
+        var result = await _mediator.Send(query, cancellationToken);
 
-        return Ok(ApiResponse<IEnumerable<string>>.Ok(result));
+        return Ok(result);
     }
 
     /// <summary>
@@ -77,16 +79,16 @@ public class SnapcastController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Collection of client identifiers.</returns>
     [HttpGet("clients")]
-    [ProducesResponseType(typeof(ApiResponse<IEnumerable<string>>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<IEnumerable<string>>>> GetClients(CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(IEnumerable<string>), 200)]
+    [ProducesResponseType(typeof(void), 500)]
+    public async Task<ActionResult<IEnumerable<string>>> GetClients(CancellationToken cancellationToken)
     {
-        Logger.LogInformation("Getting Snapcast clients");
+        _logger.LogInformation("Getting Snapcast clients");
 
         var query = new GetSnapcastClientsQuery();
-        var result = await Mediator.Send(query, cancellationToken);
+        var result = await _mediator.Send(query, cancellationToken);
 
-        return Ok(ApiResponse<IEnumerable<string>>.Ok(result));
+        return Ok(result);
     }
 
     /// <summary>
@@ -97,38 +99,38 @@ public class SnapcastController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Success status.</returns>
     [HttpPut("clients/{clientId}/volume")]
-    [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<bool>>> SetClientVolume(
+    [ProducesResponseType(typeof(bool), 200)]
+    [ProducesResponseType(typeof(void), 400)]
+    [ProducesResponseType(typeof(void), 500)]
+    public async Task<IActionResult> SetClientVolume(
         string clientId,
         [FromBody] VolumeRequest request,
         CancellationToken cancellationToken
     )
     {
-        Logger.LogInformation("Setting volume for client {ClientId} to {Volume}", clientId, request.Volume);
+        _logger.LogInformation("Setting volume for client {ClientId} to {Volume}", clientId, request.Volume);
 
         try
         {
             var command = new SetClientVolumeCommand(clientId, request.Volume);
-            var result = await Mediator.Send(command, cancellationToken);
+            var result = await _mediator.Send(command, cancellationToken);
 
-            // Assuming 'result' indicates success from the handler.
-            // If the handler itself is supposed to throw for domain errors not caught by validation,
-            // then this structure might need adjustment, but for ArgumentOutOfRangeException, this is fine.
             if (result)
             {
-                return Ok(ApiResponse<bool>.Ok(true));
+                return Ok(true);
             }
-            // If MediatR returns false without an exception, treat as a general failure.
-            return ErrorResponse<bool>("Failed to set client volume. Operation returned false.", 500);
+            return StatusCode(500, "Failed to set client volume. Operation returned false.");
         }
         catch (ArgumentOutOfRangeException ex)
         {
-            Logger.LogWarning(ex, "Invalid volume specified for client {ClientId}: {Volume}", clientId, request.Volume);
-            return BadRequest(ApiResponse<bool>.Fail(ex.Message, new { ClientId = clientId, request.Volume }));
+            _logger.LogWarning(
+                ex,
+                "Invalid volume specified for client {ClientId}: {Volume}",
+                clientId,
+                request.Volume
+            );
+            return BadRequest(ex.Message);
         }
-        // Other unhandled exceptions would ideally be caught by global exception handlers.
     }
 
     /// <summary>
@@ -139,21 +141,21 @@ public class SnapcastController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Success status.</returns>
     [HttpPut("clients/{clientId}/mute")]
-    [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<bool>>> SetClientMute(
+    [ProducesResponseType(typeof(bool), 200)]
+    [ProducesResponseType(typeof(void), 400)]
+    [ProducesResponseType(typeof(void), 500)]
+    public async Task<IActionResult> SetClientMute(
         string clientId,
         [FromBody] MuteRequest request,
         CancellationToken cancellationToken
     )
     {
-        Logger.LogInformation("Setting mute state for client {ClientId} to {Muted}", clientId, request.Muted);
+        _logger.LogInformation("Setting mute state for client {ClientId} to {Muted}", clientId, request.Muted);
 
         var command = new SetClientMuteCommand(clientId, request.Muted);
-        var result = await Mediator.Send(command, cancellationToken);
+        var result = await _mediator.Send(command, cancellationToken);
 
-        return Ok(ApiResponse<bool>.Ok(result));
+        return Ok(result);
     }
 
     /// <summary>
@@ -164,21 +166,21 @@ public class SnapcastController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Success status.</returns>
     [HttpPut("groups/{groupId}/stream")]
-    [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<bool>>> SetGroupStream(
+    [ProducesResponseType(typeof(bool), 200)]
+    [ProducesResponseType(typeof(void), 400)]
+    [ProducesResponseType(typeof(void), 500)]
+    public async Task<IActionResult> SetGroupStream(
         string groupId,
         [FromBody] StreamRequest request,
         CancellationToken cancellationToken
     )
     {
-        Logger.LogInformation("Setting stream {StreamId} for group {GroupId}", request.StreamId, groupId);
+        _logger.LogInformation("Setting stream {StreamId} for group {GroupId}", request.StreamId, groupId);
 
         var command = new SetGroupStreamCommand(groupId, request.StreamId);
-        var result = await Mediator.Send(command, cancellationToken);
+        var result = await _mediator.Send(command, cancellationToken);
 
-        return Ok(ApiResponse<bool>.Ok(result));
+        return Ok(result);
     }
 }
 

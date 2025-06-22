@@ -2,20 +2,20 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using FluentValidation; // For ValidationException
+using FluentValidation.Results; // For ValidationFailure
 using MediatR;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
-using SnapDog2.Api;
-using SnapDog2.Api.Models;
+using SnapDog2;
+using SnapDog2.Core.Models;
 using SnapDog2.Infrastructure.Services;
 using SnapDog2.Server.Features.Mqtt.Commands;
 using SnapDog2.Server.Features.Mqtt.Queries;
 using Xunit;
-using FluentValidation; // For ValidationException
-using FluentValidation.Results; // For ValidationFailure
 
 namespace SnapDog2.Tests.Integration;
 
@@ -24,14 +24,14 @@ namespace SnapDog2.Tests.Integration;
 /// Tests authentication, validation, and proper MediatR integration.
 /// </summary>
 [Trait("Category", "Integration")]
-public class MqttControllerIntegrationTests : IClassFixture<TestWebApplicationFactory<SnapDog2.Api.Program>>
+public class MqttControllerIntegrationTests : IClassFixture<TestWebApplicationFactory<Program>>
 {
-    private readonly TestWebApplicationFactory<SnapDog2.Api.Program> _factory;
+    private readonly TestWebApplicationFactory<Program> _factory;
     private readonly HttpClient _client;
     private readonly Mock<IMqttService> _mockMqttService;
     private readonly Mock<IMediator> _mockMediator;
 
-    public MqttControllerIntegrationTests(TestWebApplicationFactory<SnapDog2.Api.Program> factory)
+    internal MqttControllerIntegrationTests(TestWebApplicationFactory<Program> factory)
     {
         _factory = factory;
         _mockMqttService = factory.MockMqttService;
@@ -74,14 +74,10 @@ public class MqttControllerIntegrationTests : IClassFixture<TestWebApplicationFa
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var content = await response.Content.ReadAsStringAsync();
-        var apiResponse = JsonSerializer.Deserialize<ApiResponse<object>>(
-            content,
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-        );
 
-        Assert.NotNull(apiResponse);
-        Assert.True(apiResponse.Success);
-        Assert.NotNull(apiResponse.Data);
+        // Since ApiResponse wrapper was removed, we expect direct JSON content
+        Assert.NotNull(content);
+        Assert.NotEmpty(content);
     }
 
     [Fact]
@@ -137,10 +133,12 @@ public class MqttControllerIntegrationTests : IClassFixture<TestWebApplicationFa
         // Setup the mock Mediator to throw ValidationException for this command
         _mockMediator
             .Setup(m => m.Send(It.Is<PublishMqttMessageCommand>(cmd => cmd.Topic == ""), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new ValidationException("Validation failed", new[]
-            {
-                new ValidationFailure("Topic", "Topic is required")
-            }));
+            .ThrowsAsync(
+                new ValidationException(
+                    "Validation failed",
+                    new[] { new ValidationFailure("Topic", "Topic is required") }
+                )
+            );
 
         _client.DefaultRequestHeaders.Remove("X-API-Key");
         _client.DefaultRequestHeaders.Add("X-API-Key", "test-api-key");
@@ -254,21 +252,28 @@ public class MqttControllerIntegrationTests : IClassFixture<TestWebApplicationFa
         // Arrange
         _mockMediator
             .Setup(m => m.Send(It.IsAny<GetMqttConnectionStatusQuery>(), It.IsAny<CancellationToken>()))
-            .Returns(async (GetMqttConnectionStatusQuery query, CancellationToken ct) =>
-            {
-                // Simulate work that can be cancelled
-                await Task.Delay(TimeSpan.FromSeconds(5), ct); // Increased delay to ensure cancellation can occur
-                ct.ThrowIfCancellationRequested();
-                // If not cancelled, return a dummy status. This part might not be reached if cancellation is quick.
-                return new MqttConnectionStatusResponse { IsConnected = true, BrokerHost = "simulated", ClientId = "simulated-client", BrokerPort = 1883 };
-            });
+            .Returns(
+                async (GetMqttConnectionStatusQuery query, CancellationToken ct) =>
+                {
+                    // Simulate work that can be cancelled
+                    await Task.Delay(TimeSpan.FromSeconds(5), ct); // Increased delay to ensure cancellation can occur
+                    ct.ThrowIfCancellationRequested();
+                    // If not cancelled, return a dummy status. This part might not be reached if cancellation is quick.
+                    return new MqttConnectionStatusResponse
+                    {
+                        IsConnected = true,
+                        BrokerHost = "simulated",
+                        ClientId = "simulated-client",
+                        BrokerPort = 1883,
+                    };
+                }
+            );
 
         _client.DefaultRequestHeaders.Remove("X-API-Key");
         _client.DefaultRequestHeaders.Add("X-API-Key", "test-api-key");
 
         // Shorten the CTS delay to ensure it cancels before the mock's Task.Delay completes
         using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100)); // Cancel after 100ms
-
 
         // Act & Assert
         // HttpClient will throw TaskCanceledException when its own token is cancelled

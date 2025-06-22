@@ -1,7 +1,7 @@
 using System.Net;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
-using SnapDog2.Api.Configuration;
+using SnapDog2.Core.Configuration;
 
 namespace SnapDog2.Api.Middleware;
 
@@ -12,7 +12,7 @@ public class RateLimitingMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<RateLimitingMiddleware> _logger;
-    private readonly RateLimitingConfiguration _config;
+    private readonly ApiConfiguration.ApiRateLimitingSettings _config;
     private readonly IMemoryCache _cache;
 
     /// <summary>
@@ -25,13 +25,13 @@ public class RateLimitingMiddleware
     public RateLimitingMiddleware(
         RequestDelegate next,
         ILogger<RateLimitingMiddleware> logger,
-        RateLimitingConfiguration config,
+        SnapDogConfiguration config,
         IMemoryCache cache
     )
     {
         _next = next ?? throw new ArgumentNullException(nameof(next));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _config = config ?? throw new ArgumentNullException(nameof(config));
+        _config = config?.Api?.RateLimiting ?? throw new ArgumentNullException(nameof(config));
         _cache = cache ?? throw new ArgumentNullException(nameof(cache));
     }
 
@@ -297,9 +297,9 @@ public class RateLimitingMiddleware
     /// </summary>
     /// <param name="endpoint">The endpoint key.</param>
     /// <returns>The applicable rules.</returns>
-    private IEnumerable<RateLimitRule> GetApplicableRules(string endpoint)
+    private IEnumerable<ApiConfiguration.ApiRateLimitRule> GetApplicableRules(string endpoint)
     {
-        var rules = new List<RateLimitRule>();
+        var rules = new List<ApiConfiguration.ApiRateLimitRule>();
 
         // Add default rules
         rules.AddRange(_config.DefaultRules);
@@ -498,7 +498,7 @@ public class RateLimitResult
     /// <summary>
     /// Gets or sets the rule that was violated (if any).
     /// </summary>
-    public RateLimitRule? Rule { get; set; }
+    public ApiConfiguration.ApiRateLimitRule? Rule { get; set; }
 
     /// <summary>
     /// Gets or sets the rate limit.

@@ -15,6 +15,21 @@ namespace SnapDog2.Core.Configuration;
 public class ApiConfiguration
 {
     /// <summary>
+    /// Gets or sets the authentication configuration.
+    /// </summary>
+    public ApiAuthSettings Auth { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the rate limiting configuration.
+    /// </summary>
+    public ApiRateLimitingSettings RateLimiting { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the request/response logging configuration.
+    /// </summary>
+    public ApiLoggingSettings Logging { get; set; } = new();
+
+    /// <summary>
     /// Gets or sets the API listening port.
     /// Maps to: SNAPDOG_API_PORT
     /// </summary>
@@ -130,4 +145,57 @@ public class ApiConfiguration
     /// </summary>
     [Env(Key = "SWAGGER_PATH", Default = "/swagger")]
     public string SwaggerPath { get; set; } = "/swagger";
+
+    /// <summary>
+    /// Authentication settings for the API.
+    /// </summary>
+    public class ApiAuthSettings
+    {
+        public bool Enabled { get; set; } = false;
+        public List<string> ApiKeys { get; set; } = new();
+    }
+
+    /// <summary>
+    /// Rate limiting settings for the API.
+    /// </summary>
+    public class ApiRateLimitingSettings
+    {
+        public bool Enabled { get; set; } = true;
+        public IList<ApiRateLimitRule> DefaultRules { get; set; } = new List<ApiRateLimitRule>();
+        public IList<ApiRateLimitRule> EndpointRules { get; set; } = new List<ApiRateLimitRule>();
+        public IList<string> IpWhitelist { get; set; } = new List<string>();
+        public IList<string> ClientWhitelist { get; set; } = new List<string>();
+        public int HttpStatusCode { get; set; } = 429;
+        public string QuotaExceededMessage { get; set; } = "API rate limit exceeded. Please try again later.";
+        public bool EnableRateLimitHeaders { get; set; } = true;
+        public bool StackBlockedRequests { get; set; } = false;
+        public string RateLimitCounterPrefix { get; set; } = "snapdog2_rl";
+        public string RealIpHeader { get; set; } = "X-Real-IP";
+        public string ClientIdHeader { get; set; } = "X-ClientId";
+    }
+
+    /// <summary>
+    /// Represents a rate limiting rule.
+    /// </summary>
+    public class ApiRateLimitRule
+    {
+        public string Endpoint { get; set; } = "*";
+        public string Period { get; set; } = "1m";
+        public long Limit { get; set; } = 100;
+    }
+
+    /// <summary>
+    /// Logging settings for the API.
+    /// </summary>
+    public class ApiLoggingSettings
+    {
+        public bool Enabled { get; set; } = true;
+        public bool LogRequestBody { get; set; } = true;
+        public bool LogResponseBody { get; set; } = true;
+        public bool LogHeaders { get; set; } = true;
+        public int MaxBodySize { get; set; } = 4096;
+        public string CorrelationIdHeader { get; set; } = "X-Correlation-ID";
+        public IList<string> ExcludedPaths { get; set; } =
+            new List<string> { "/swagger", "/health", "/metrics", "/favicon.ico" };
+    }
 }

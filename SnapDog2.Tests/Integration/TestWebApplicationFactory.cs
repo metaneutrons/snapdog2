@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using SnapDog2.Api.Configuration;
+using SnapDog2.Core.Configuration;
 using SnapDog2.Infrastructure.Services;
 
 namespace SnapDog2.Tests.Integration;
@@ -71,11 +71,11 @@ public class TestWebApplicationFactory<TProgram> : WebApplicationFactory<TProgra
             services.AddSingleton(_mockMediator.Object);
 
             // Ensure we have the required authentication configuration
-            var authConfig = new ApiAuthConfiguration
+            var authConfig = new ApiConfiguration.ApiAuthSettings
             {
                 ApiKeys = new List<string> { "test-api-key", "admin-key" },
             };
-            services.RemoveAll<ApiAuthConfiguration>();
+            services.RemoveAll<ApiConfiguration.ApiAuthSettings>();
             services.AddSingleton(authConfig);
 
             // Configure logging for tests

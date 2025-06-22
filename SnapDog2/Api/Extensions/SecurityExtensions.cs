@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 using SnapDog2.Api.Authentication;
-using SnapDog2.Api.Configuration;
 
 namespace SnapDog2.Api.Extensions;
 
@@ -58,7 +59,7 @@ public static class SecurityExtensions
                 builder =>
                 {
                     builder
-                        .WithOrigins("https://snapdog.local", "https://admin.snapdog.local")
+                        .WithOrigins("https://snapdog.local", "https://admin.snapdog.local") // FIXME: Replace with actual production origins
                         .WithMethods("GET", "POST", "PUT", "DELETE")
                         .WithHeaders("Content-Type", "Authorization", "X-API-Key")
                         .AllowCredentials();
@@ -95,18 +96,15 @@ public static class SecurityExtensions
                 var isDevelopment = app.Environment.IsDevelopment();
 
                 // Basic security headers
-                response.Headers.Append("X-Content-Type-Options", "nosniff");
-                response.Headers.Append("X-Frame-Options", "DENY");
-                response.Headers.Append("X-XSS-Protection", "1; mode=block");
-                response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+                response.Headers["X-Content-Type-Options"] = "nosniff";
+                response.Headers["X-Frame-Options"] = "DENY";
+                response.Headers["X-XSS-Protection"] = "1; mode=block";
+                response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
 
                 // Strict Transport Security (only for HTTPS)
                 if (context.Request.IsHttps)
                 {
-                    response.Headers.Append(
-                        "Strict-Transport-Security",
-                        "max-age=31536000; includeSubDomains; preload"
-                    );
+                    response.Headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload";
                 }
 
                 // Content Security Policy - more permissive for development
@@ -127,18 +125,16 @@ public static class SecurityExtensions
                         + "base-uri 'self'; "
                         + "form-action 'self'";
 
-                response.Headers.Append("Content-Security-Policy", csp);
+                response.Headers["Content-Security-Policy"] = csp;
 
                 // Permissions Policy (formerly Feature Policy)
-                response.Headers.Append(
-                    "Permissions-Policy",
-                    "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
-                );
+                response.Headers["Permissions-Policy"] =
+                    "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()";
 
                 // Cross-Origin policies
-                response.Headers.Append("Cross-Origin-Embedder-Policy", "require-corp");
-                response.Headers.Append("Cross-Origin-Opener-Policy", "same-origin");
-                response.Headers.Append("Cross-Origin-Resource-Policy", "cross-origin");
+                response.Headers["Cross-Origin-Embedder-Policy"] = "require-corp";
+                response.Headers["Cross-Origin-Opener-Policy"] = "same-origin";
+                response.Headers["Cross-Origin-Resource-Policy"] = "cross-origin";
 
                 // Remove potentially revealing headers
                 response.Headers.Remove("Server");
@@ -147,8 +143,8 @@ public static class SecurityExtensions
                 response.Headers.Remove("X-AspNetMvc-Version");
 
                 // Add custom security headers for API
-                response.Headers.Append("X-API-Version", "1.0");
-                response.Headers.Append("X-Rate-Limit-Policy", "enabled");
+                response.Headers["X-API-Version"] = "1.0";
+                response.Headers["X-Rate-Limit-Policy"] = "enabled";
 
                 await next();
             }

@@ -2,8 +2,9 @@ using FluentValidation; // Added for ValidationException
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using MQTTnet.Protocol;
-using SnapDog2.Api.Models;
+using SnapDog2.Core.Models.Entities;
 using SnapDog2.Server.Features.Mqtt.Commands;
 using SnapDog2.Server.Features.Mqtt.Queries;
 
@@ -15,15 +16,16 @@ namespace SnapDog2.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class MqttController : ApiControllerBase
+public class MqttController : ControllerBase
 {
-    /// <summary>
-    /// Initializes a new instance of the MqttController.
-    /// </summary>
-    /// <param name="mediator">The MediatR mediator instance.</param>
-    /// <param name="logger">The logger instance.</param>
+    private readonly IMediator _mediator;
+    private readonly ILogger<MqttController> _logger;
+
     public MqttController(IMediator mediator, ILogger<MqttController> logger)
-        : base(mediator, logger) { }
+    {
+        _mediator = mediator;
+        _logger = logger;
+    }
 
     /// <summary>
     /// Publishes a message to an MQTT topic.
@@ -36,38 +38,40 @@ public class MqttController : ApiControllerBase
     /// <response code="401">Unauthorized access</response>
     /// <response code="500">Internal server error or MQTT service unavailable</response>
     [HttpPost("publish")]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<object>>> PublishMessage(
+    [ProducesResponseType(typeof(object), 200)]
+    [ProducesResponseType(typeof(void), 400)]
+    [ProducesResponseType(typeof(void), 401)]
+    [ProducesResponseType(typeof(void), 500)]
+    public async Task<ActionResult<object>> PublishMessage(
         [FromBody] PublishMqttMessageCommand command,
         CancellationToken cancellationToken = default
     )
     {
-        Logger.LogInformation("Publishing MQTT message to topic: {Topic}", command.Topic);
+        _logger.LogInformation("Publishing MQTT message to topic: {Topic}", command.Topic);
 
         try
         {
-            var result = await Mediator.Send(command, cancellationToken);
+            var result = await _mediator.Send(command, cancellationToken);
 
             if (result)
             {
-                return Ok(
-                    ApiResponse<object>.Ok(new { message = "Message published successfully", topic = command.Topic })
-                );
+                return Ok(new { message = "Message published successfully", topic = command.Topic });
             }
 
-            // If result is false, but no exception, it's a generic failure from the handler not throwing.
-            // The existing ErrorResponse handles this generic case.
-            // However, the problem implies ValidationException should be thrown by MediatR pipeline.
-            return ErrorResponse<object>("Failed to publish MQTT message. The operation returned false without specific errors.", 500);
+            return StatusCode(
+                500,
+                "Failed to publish MQTT message. The operation returned false without specific errors."
+            );
         }
         catch (ValidationException ex)
         {
-            Logger.LogWarning(ex, "Validation failed for PublishMqttMessageCommand: {ValidationErrors}", string.Join(", ", ex.Errors.Select(e => e.ErrorMessage)));
+            _logger.LogWarning(
+                ex,
+                "Validation failed for PublishMqttMessageCommand: {ValidationErrors}",
+                string.Join(", ", ex.Errors.Select(e => e.ErrorMessage))
+            );
             var errorMessages = ex.Errors.Select(e => e.ErrorMessage).ToList();
-            return BadRequest(ApiResponse<object>.Fail("Validation failed.", errorMessages));
+            return BadRequest(new { message = "Validation failed.", errors = errorMessages });
         }
         // Other exceptions will be handled by global handlers or result in a 500 if not caught by UseExceptionHandler.
     }
@@ -83,29 +87,25 @@ public class MqttController : ApiControllerBase
     /// <response code="401">Unauthorized access</response>
     /// <response code="500">Internal server error or MQTT service unavailable</response>
     [HttpPost("subscribe")]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<object>>> SubscribeToTopic(
+    [ProducesResponseType(typeof(object), 200)]
+    [ProducesResponseType(typeof(void), 400)]
+    [ProducesResponseType(typeof(void), 401)]
+    [ProducesResponseType(typeof(void), 500)]
+    public async Task<ActionResult<object>> SubscribeToTopic(
         [FromBody] SubscribeToMqttTopicCommand command,
         CancellationToken cancellationToken = default
     )
     {
-        Logger.LogInformation("Subscribing to MQTT topic pattern: {TopicPattern}", command.TopicPattern);
+        _logger.LogInformation("Subscribing to MQTT topic pattern: {TopicPattern}", command.TopicPattern);
 
-        var result = await Mediator.Send(command, cancellationToken);
+        var result = await _mediator.Send(command, cancellationToken);
 
         if (result)
         {
-            return Ok(
-                ApiResponse<object>.Ok(
-                    new { message = "Subscription created successfully", topicPattern = command.TopicPattern }
-                )
-            );
+            return Ok(new { message = "Subscription created successfully", topicPattern = command.TopicPattern });
         }
 
-        return ErrorResponse<object>("Failed to subscribe to MQTT topic", 500);
+        return StatusCode(500, "Failed to subscribe to MQTT topic");
     }
 
     /// <summary>
@@ -119,29 +119,25 @@ public class MqttController : ApiControllerBase
     /// <response code="401">Unauthorized access</response>
     /// <response code="500">Internal server error or MQTT service unavailable</response>
     [HttpPost("unsubscribe")]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<object>>> UnsubscribeFromTopic(
+    [ProducesResponseType(typeof(object), 200)]
+    [ProducesResponseType(typeof(void), 400)]
+    [ProducesResponseType(typeof(void), 401)]
+    [ProducesResponseType(typeof(void), 500)]
+    public async Task<ActionResult<object>> UnsubscribeFromTopic(
         [FromBody] UnsubscribeFromMqttTopicCommand command,
         CancellationToken cancellationToken = default
     )
     {
-        Logger.LogInformation("Unsubscribing from MQTT topic pattern: {TopicPattern}", command.TopicPattern);
+        _logger.LogInformation("Unsubscribing from MQTT topic pattern: {TopicPattern}", command.TopicPattern);
 
-        var result = await Mediator.Send(command, cancellationToken);
+        var result = await _mediator.Send(command, cancellationToken);
 
         if (result)
         {
-            return Ok(
-                ApiResponse<object>.Ok(
-                    new { message = "Unsubscription successful", topicPattern = command.TopicPattern }
-                )
-            );
+            return Ok(new { message = "Unsubscription successful", topicPattern = command.TopicPattern });
         }
 
-        return ErrorResponse<object>("Failed to unsubscribe from MQTT topic", 500);
+        return StatusCode(500, "Failed to unsubscribe from MQTT topic");
     }
 
     /// <summary>
@@ -153,19 +149,19 @@ public class MqttController : ApiControllerBase
     /// <response code="401">Unauthorized access</response>
     /// <response code="500">Internal server error</response>
     [HttpGet("status")]
-    [ProducesResponseType(typeof(ApiResponse<MqttConnectionStatusResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<MqttConnectionStatusResponse>>> GetConnectionStatus(
+    [ProducesResponseType(typeof(MqttConnectionStatusResponse), 200)]
+    [ProducesResponseType(typeof(void), 401)]
+    [ProducesResponseType(typeof(void), 500)]
+    public async Task<ActionResult<MqttConnectionStatusResponse>> GetConnectionStatus(
         CancellationToken cancellationToken = default
     )
     {
-        Logger.LogInformation("Getting MQTT connection status");
+        _logger.LogInformation("Getting MQTT connection status");
 
         var query = new GetMqttConnectionStatusQuery();
-        var result = await Mediator.Send(query, cancellationToken);
+        var result = await _mediator.Send(query, cancellationToken);
 
-        return Ok(ApiResponse<MqttConnectionStatusResponse>.Ok(result));
+        return Ok(result);
     }
 
     /// <summary>
@@ -180,11 +176,11 @@ public class MqttController : ApiControllerBase
     /// <response code="401">Unauthorized access</response>
     /// <response code="500">Internal server error or MQTT service unavailable</response>
     [HttpPost("publish/simple")]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ApiResponse<object>>> PublishSimpleMessage(
+    [ProducesResponseType(typeof(object), 200)]
+    [ProducesResponseType(typeof(void), 400)]
+    [ProducesResponseType(typeof(void), 401)]
+    [ProducesResponseType(typeof(void), 500)]
+    public async Task<ActionResult<object>> PublishSimpleMessage(
         [FromQuery] string topic,
         [FromBody] string message,
         CancellationToken cancellationToken = default
@@ -192,15 +188,15 @@ public class MqttController : ApiControllerBase
     {
         if (string.IsNullOrWhiteSpace(topic))
         {
-            return BadRequest(ApiResponse<object>.Fail("Topic cannot be empty"));
+            return BadRequest("Topic cannot be empty");
         }
 
         if (string.IsNullOrWhiteSpace(message))
         {
-            return BadRequest(ApiResponse<object>.Fail("Message cannot be empty"));
+            return BadRequest("Message cannot be empty");
         }
 
-        Logger.LogInformation("Publishing simple MQTT message to topic: {Topic}", topic);
+        _logger.LogInformation("Publishing simple MQTT message to topic: {Topic}", topic);
 
         var command = new PublishMqttMessageCommand
         {
@@ -210,13 +206,13 @@ public class MqttController : ApiControllerBase
             Retain = false,
         };
 
-        var result = await Mediator.Send(command, cancellationToken);
+        var result = await _mediator.Send(command, cancellationToken);
 
         if (result)
         {
-            return Ok(ApiResponse<object>.Ok(new { message = "Simple message published successfully", topic = topic }));
+            return Ok(new { message = "Simple message published successfully", topic = topic });
         }
 
-        return ErrorResponse<object>("Failed to publish simple MQTT message", 500);
+        return StatusCode(500, "Failed to publish simple MQTT message");
     }
 }
