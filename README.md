@@ -22,6 +22,9 @@ SnapDog2 is an open-source .NET-based smart home automation API and controller p
 - [x] Phase 3: Server Layer & Business Logic
 - [x] Phase 4: API Layer & Security
 - [x] Phase 5: Integration Protocols
+  - [x] KNX Integration
+  - [x] MQTT Integration
+  - [x] Snapcast Integration
   - [ ] Subsonic Integration
 - [ ] Phase 6: Observability & Operations
 - [ ] Phase 7: Advanced Features & Optimization
