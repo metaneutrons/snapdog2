@@ -1,6 +1,6 @@
 # SnapDog2
 
-![SnapDog2 Logo](assets/icons/snapdog-icon.svg)
+![SnapDog2 Logo](assets/icons/png/snapdog-128.png)
 
 ## Overview
 
