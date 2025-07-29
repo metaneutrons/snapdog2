@@ -19,6 +19,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     <PackageReference Include="MediatR" />
     <PackageReference Include="Moq" />
+    <PackageReference Include="Testcontainers" />
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio" />
     <PackageReference Include="coverlet.collector" />
