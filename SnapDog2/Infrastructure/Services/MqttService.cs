@@ -1,4 +1,6 @@
+using System.Collections.Concurrent;
 using System.Text;
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MQTTnet;
@@ -8,6 +10,8 @@ using MQTTnet.Protocol;
 using Polly;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Infrastructure.Resilience;
+using MediatR;
+using SnapDog2.Core.Events;
 
 namespace SnapDog2.Infrastructure.Services;
 
@@ -21,8 +25,11 @@ public class MqttService : IMqttService, IDisposable, IAsyncDisposable
     private readonly MqttConfiguration _config;
     private readonly IAsyncPolicy _resiliencePolicy;
     private readonly ILogger<MqttService> _logger;
+    private readonly IMediator _mediator;
     private readonly IManagedMqttClient _mqttClient;
     private readonly SemaphoreSlim _connectionSemaphore = new(1, 1);
+    private readonly JsonSerializerOptions _jsonOptions;
+    private readonly ConcurrentDictionary<string, List<Func<string, string, Task>>> _topicHandlers = new();
     private bool _disposed;
 
     /// <summary>
@@ -35,10 +42,12 @@ public class MqttService : IMqttService, IDisposable, IAsyncDisposable
     /// </summary>
     /// <param name="config">The MQTT configuration options.</param>
     /// <param name="logger">The logger instance.</param>
-    public MqttService(IOptions<MqttConfiguration> config, ILogger<MqttService> logger)
+    /// <param name="mediator">The mediator for publishing events.</param>
+    public MqttService(IOptions<MqttConfiguration> config, ILogger<MqttService> logger, IMediator mediator)
     {
         _config = config?.Value ?? throw new ArgumentNullException(nameof(config));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
 
         _resiliencePolicy = PolicyFactory.CreateFromConfiguration(
             retryAttempts: 3,
@@ -47,6 +56,12 @@ public class MqttService : IMqttService, IDisposable, IAsyncDisposable
             defaultTimeout: TimeSpan.FromSeconds(30),
             logger: _logger
         );
+
+        _jsonOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            WriteIndented = false
+        };
 
         // Create managed MQTT client
         var factory = new MqttFactory();
@@ -378,14 +393,14 @@ public class MqttService : IMqttService, IDisposable, IAsyncDisposable
     /// </summary>
     /// <param name="eventArgs">The message received event arguments.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    private Task OnMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs eventArgs)
+    private async Task OnMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs eventArgs)
     {
         try
         {
             var topic = eventArgs.ApplicationMessage.Topic;
             var payload = Encoding.UTF8.GetString(eventArgs.ApplicationMessage.PayloadSegment);
 
-            _logger.LogDebug("Received message on topic {Topic}", topic);
+            _logger.LogDebug("Received message on topic {Topic}: {Payload}", topic, payload);
 
             var args = new MqttMessageReceivedEventArgs
             {
@@ -395,13 +410,194 @@ public class MqttService : IMqttService, IDisposable, IAsyncDisposable
             };
 
             MessageReceived?.Invoke(this, args);
+
+            // Process command messages and publish domain events
+            await ProcessCommandMessageAsync(topic, payload);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error processing received MQTT message");
+            _logger.LogError(ex, "Error processing received MQTT message on topic {Topic}", eventArgs.ApplicationMessage.Topic);
         }
+    }
 
-        return Task.CompletedTask;
+    /// <summary>
+    /// Processes MQTT command messages and publishes appropriate domain events.
+    /// </summary>
+    /// <param name="topic">The MQTT topic</param>
+    /// <param name="payload">The message payload</param>
+    private async Task ProcessCommandMessageAsync(string topic, string payload)
+    {
+        try
+        {
+            // Parse topic structure: {baseTopic}/{component}/{id}/{command}
+            var baseTopic = _config.BaseTopic;
+            if (!topic.StartsWith(baseTopic))
+            {
+                return; // Not a command topic for this service
+            }
+
+            var topicParts = topic.Substring(baseTopic.Length + 1).Split('/');
+            if (topicParts.Length < 3)
+            {
+                return; // Invalid topic structure
+            }
+
+            var component = topicParts[0].ToUpperInvariant();
+            var id = topicParts[1];
+            var command = topicParts[2].ToUpperInvariant();
+
+            _logger.LogDebug("Processing MQTT command: {Component}/{Id}/{Command}", component, id, command);
+
+            switch (component)
+            {
+                case "ZONE":
+                    await ProcessZoneCommandAsync(id, command, payload);
+                    break;
+
+                case "CLIENT":
+                    await ProcessClientCommandAsync(id, command, payload);
+                    break;
+
+                case "STREAM":
+                    await ProcessStreamCommandAsync(id, command, payload);
+                    break;
+
+                case "SYSTEM":
+                    await ProcessSystemCommandAsync(command, payload);
+                    break;
+
+                default:
+                    _logger.LogTrace("Unhandled MQTT component: {Component}", component);
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error processing MQTT command message: {Topic}", topic);
+        }
+    }
+
+    /// <summary>
+    /// Processes zone-related MQTT commands.
+    /// </summary>
+    private async Task ProcessZoneCommandAsync(string zoneId, string command, string payload)
+    {
+        switch (command)
+        {
+            case "VOLUME":
+                if (int.TryParse(payload, out var volume))
+                {
+                    await _mediator.Publish(new MqttZoneVolumeCommandEvent(int.Parse(zoneId), volume));
+                    _logger.LogDebug("Published zone volume command event: Zone={ZoneId}, Volume={Volume}", zoneId, volume);
+                }
+                break;
+
+            case "MUTE":
+                if (bool.TryParse(payload, out var muted))
+                {
+                    await _mediator.Publish(new MqttZoneMuteCommandEvent(int.Parse(zoneId), muted));
+                    _logger.LogDebug("Published zone mute command event: Zone={ZoneId}, Muted={Muted}", zoneId, muted);
+                }
+                break;
+
+            case "STREAM":
+                if (int.TryParse(payload, out var streamId))
+                {
+                    await _mediator.Publish(new MqttZoneStreamCommandEvent(int.Parse(zoneId), streamId));
+                    _logger.LogDebug("Published zone stream command event: Zone={ZoneId}, Stream={StreamId}", zoneId, streamId);
+                }
+                break;
+
+            default:
+                _logger.LogTrace("Unhandled zone command: {Command}", command);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Processes client-related MQTT commands.
+    /// </summary>
+    private async Task ProcessClientCommandAsync(string clientId, string command, string payload)
+    {
+        switch (command)
+        {
+            case "VOLUME":
+                if (int.TryParse(payload, out var volume))
+                {
+                    await _mediator.Publish(new MqttClientVolumeCommandEvent(clientId, volume));
+                    _logger.LogDebug("Published client volume command event: Client={ClientId}, Volume={Volume}", clientId, volume);
+                }
+                break;
+
+            case "MUTE":
+                if (bool.TryParse(payload, out var muted))
+                {
+                    await _mediator.Publish(new MqttClientMuteCommandEvent(clientId, muted));
+                    _logger.LogDebug("Published client mute command event: Client={ClientId}, Muted={Muted}", clientId, muted);
+                }
+                break;
+
+            default:
+                _logger.LogTrace("Unhandled client command: {Command}", command);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Processes stream-related MQTT commands.
+    /// </summary>
+    private async Task ProcessStreamCommandAsync(string streamId, string command, string payload)
+    {
+        switch (command)
+        {
+            case "START":
+                if (int.TryParse(streamId, out var startStreamId))
+                {
+                    await _mediator.Publish(new MqttStreamStartCommandEvent(startStreamId));
+                    _logger.LogDebug("Published stream start command event: Stream={StreamId}", streamId);
+                }
+                break;
+
+            case "STOP":
+                if (int.TryParse(streamId, out var stopStreamId))
+                {
+                    await _mediator.Publish(new MqttStreamStopCommandEvent(stopStreamId));
+                    _logger.LogDebug("Published stream stop command event: Stream={StreamId}", streamId);
+                }
+                break;
+
+            default:
+                _logger.LogTrace("Unhandled stream command: {Command}", command);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Processes system-related MQTT commands.
+    /// </summary>
+    private async Task ProcessSystemCommandAsync(string command, string payload)
+    {
+        switch (command)
+        {
+            case "SHUTDOWN":
+                await _mediator.Publish(new MqttSystemShutdownCommandEvent());
+                _logger.LogDebug("Published system shutdown command event");
+                break;
+
+            case "RESTART":
+                await _mediator.Publish(new MqttSystemRestartCommandEvent());
+                _logger.LogDebug("Published system restart command event");
+                break;
+
+            case "SYNC":
+                await _mediator.Publish(new MqttSystemSyncCommandEvent());
+                _logger.LogDebug("Published system sync command event");
+                break;
+
+            default:
+                _logger.LogTrace("Unhandled system command: {Command}", command);
+                break;
+        }
     }
 
     /// <summary>
@@ -444,6 +640,137 @@ public class MqttService : IMqttService, IDisposable, IAsyncDisposable
         _logger.LogError(eventArgs.Exception, "MQTT client connection failed");
         return Task.CompletedTask;
     }
+
+    #region Command Framework Methods
+
+    /// <summary>
+    /// Publishes a stream status update to MQTT.
+    /// </summary>
+    /// <param name="streamId">The stream identifier</param>
+    /// <param name="status">The stream status</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>True if published successfully, false otherwise</returns>
+    public async Task<bool> PublishStreamStatusAsync(int streamId, string status, CancellationToken cancellationToken = default)
+    {
+        var topic = $"{_config.BaseTopic}/STREAM/{streamId}/STATUS";
+        var payload = JsonSerializer.Serialize(new
+        {
+            streamId,
+            status,
+            timestamp = DateTime.UtcNow
+        }, _jsonOptions);
+
+        return await PublishAsync(topic, payload, MqttQualityOfServiceLevel.AtLeastOnce, true, cancellationToken);
+    }
+
+    /// <summary>
+    /// Publishes a zone volume update to MQTT.
+    /// </summary>
+    /// <param name="zoneId">The zone identifier</param>
+    /// <param name="volume">The volume level (0-100)</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>True if published successfully, false otherwise</returns>
+    public async Task<bool> PublishZoneVolumeAsync(int zoneId, int volume, CancellationToken cancellationToken = default)
+    {
+        var topic = $"{_config.BaseTopic}/ZONE/{zoneId}/VOLUME";
+        var payload = volume.ToString();
+
+        return await PublishAsync(topic, payload, MqttQualityOfServiceLevel.AtLeastOnce, true, cancellationToken);
+    }
+
+    /// <summary>
+    /// Publishes a client volume update to MQTT.
+    /// </summary>
+    /// <param name="clientId">The client identifier</param>
+    /// <param name="volume">The volume level (0-100)</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>True if published successfully, false otherwise</returns>
+    public async Task<bool> PublishClientVolumeAsync(string clientId, int volume, CancellationToken cancellationToken = default)
+    {
+        var topic = $"{_config.BaseTopic}/CLIENT/{clientId}/VOLUME";
+        var payload = volume.ToString();
+
+        return await PublishAsync(topic, payload, MqttQualityOfServiceLevel.AtLeastOnce, true, cancellationToken);
+    }
+
+    /// <summary>
+    /// Publishes a client connection status to MQTT.
+    /// </summary>
+    /// <param name="clientId">The client identifier</param>
+    /// <param name="connected">Whether the client is connected</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>True if published successfully, false otherwise</returns>
+    public async Task<bool> PublishClientStatusAsync(string clientId, bool connected, CancellationToken cancellationToken = default)
+    {
+        var topic = $"{_config.BaseTopic}/CLIENT/{clientId}/STATUS";
+        var payload = JsonSerializer.Serialize(new
+        {
+            clientId,
+            connected,
+            timestamp = DateTime.UtcNow
+        }, _jsonOptions);
+
+        return await PublishAsync(topic, payload, MqttQualityOfServiceLevel.AtLeastOnce, true, cancellationToken);
+    }
+
+    /// <summary>
+    /// Subscribes to all command topics for the SnapDog system.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>True if subscriptions were successful, false otherwise</returns>
+    public async Task<bool> SubscribeToCommandsAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            // Subscribe to all command topics
+            var commandTopics = new[]
+            {
+                $"{_config.BaseTopic}/+/COMMAND/+",
+                $"{_config.BaseTopic}/ZONE/+/+",
+                $"{_config.BaseTopic}/CLIENT/+/+",
+                $"{_config.BaseTopic}/STREAM/+/+",
+                $"{_config.BaseTopic}/SYSTEM/+"
+            };
+
+            var success = true;
+            foreach (var topic in commandTopics)
+            {
+                var result = await SubscribeAsync(topic, MqttQualityOfServiceLevel.AtLeastOnce, cancellationToken);
+                if (!result)
+                {
+                    _logger.LogWarning("Failed to subscribe to command topic: {Topic}", topic);
+                    success = false;
+                }
+                else
+                {
+                    _logger.LogInformation("Subscribed to MQTT command topic: {Topic}", topic);
+                }
+            }
+
+            return success;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to subscribe to MQTT command topics");
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Publishes system health information to MQTT.
+    /// </summary>
+    /// <param name="healthData">The health data object</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>True if published successfully, false otherwise</returns>
+    public async Task<bool> PublishSystemHealthAsync(object healthData, CancellationToken cancellationToken = default)
+    {
+        var topic = $"{_config.BaseTopic}/SYSTEM/HEALTH";
+        var payload = JsonSerializer.Serialize(healthData, _jsonOptions);
+
+        return await PublishAsync(topic, payload, MqttQualityOfServiceLevel.AtLeastOnce, true, cancellationToken);
+    }
+
+    #endregion
 
     /// <summary>
     /// Disposes the MQTT service and releases all resources.

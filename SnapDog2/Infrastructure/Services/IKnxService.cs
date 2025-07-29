@@ -60,6 +60,35 @@ public interface IKnxService
     /// Event raised when a group value is received from a subscribed address.
     /// </summary>
     event EventHandler<KnxGroupValueEventArgs> GroupValueReceived;
+
+    // DPT-Specific Convenience Methods
+    
+    /// <summary>
+    /// Sends a boolean command to a KNX group address using DPT 1.001 (Switch).
+    /// </summary>
+    /// <param name="address">The KNX group address</param>
+    /// <param name="value">The boolean value to send</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>True if successful, false otherwise</returns>
+    Task<bool> SendBooleanCommandAsync(KnxAddress address, bool value, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Sends a volume command to a KNX group address using DPT 5.001 (Scaling).
+    /// </summary>
+    /// <param name="address">The KNX group address</param>
+    /// <param name="volume">The volume percentage (0-100)</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>True if successful, false otherwise</returns>
+    Task<bool> SendVolumeCommandAsync(KnxAddress address, int volume, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Sends a playback state command to a KNX group address using DPT 1.001 (Switch).
+    /// </summary>
+    /// <param name="address">The KNX group address</param>
+    /// <param name="playing">True for playing, false for stopped</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>True if successful, false otherwise</returns>
+    Task<bool> SendPlaybackCommandAsync(KnxAddress address, bool playing, CancellationToken cancellationToken = default);
 }
 
 /// <summary>

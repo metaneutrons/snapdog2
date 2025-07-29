@@ -61,4 +61,11 @@ public interface ISnapcastService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>True if operation was successful, false otherwise</returns>
     Task<bool> SetGroupStreamAsync(string groupId, string streamId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Synchronizes the current server state and publishes events for changes.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Task representing the synchronization operation</returns>
+    Task SynchronizeServerStateAsync(CancellationToken cancellationToken = default);
 }

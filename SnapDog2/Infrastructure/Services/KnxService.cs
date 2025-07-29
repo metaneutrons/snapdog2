@@ -4,6 +4,9 @@ using Microsoft.Extensions.Options;
 using Polly;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Infrastructure.Resilience;
+using SnapDog2.Infrastructure.Services.Models;
+using MediatR;
+using SnapDog2.Core.Events;
 using KnxCore = Knx.Falcon;
 using KnxSdk = Knx.Falcon.Sdk;
 
@@ -19,6 +22,7 @@ public class KnxService : IKnxService, IDisposable, IAsyncDisposable
     private readonly KnxConfiguration _config;
     private readonly IAsyncPolicy _resiliencePolicy;
     private readonly ILogger<KnxService> _logger;
+    private readonly IMediator _mediator;
     private readonly SemaphoreSlim _connectionSemaphore = new(1, 1);
     private KnxSdk.KnxBus? _knxBus;
     private bool _disposed;
@@ -35,10 +39,12 @@ public class KnxService : IKnxService, IDisposable, IAsyncDisposable
     /// </summary>
     /// <param name="config">The KNX configuration options.</param>
     /// <param name="logger">The logger instance.</param>
-    public KnxService(IOptions<KnxConfiguration> config, ILogger<KnxService> logger)
+    /// <param name="mediator">The mediator for publishing events.</param>
+    public KnxService(IOptions<KnxConfiguration> config, ILogger<KnxService> logger, IMediator mediator)
     {
         _config = config?.Value ?? throw new ArgumentNullException(nameof(config));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
 
         _resiliencePolicy = PolicyFactory.CreateFromConfiguration(
             retryAttempts: 3,
@@ -483,6 +489,19 @@ public class KnxService : IKnxService, IDisposable, IAsyncDisposable
                     };
 
                     GroupValueReceived?.Invoke(this, eventArgs);
+                    
+                    // Publish domain event for protocol coordination
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await _mediator.Publish(new KnxGroupValueReceivedEvent(knxAddress, value));
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Error publishing KNX group value received event");
+                        }
+                    });
                 }
             }
         }
@@ -491,6 +510,120 @@ public class KnxService : IKnxService, IDisposable, IAsyncDisposable
             _logger.LogError(ex, "Error handling KNX group message");
         }
     }
+
+    #region DPT-Specific Convenience Methods
+
+    /// <summary>
+    /// Sends a boolean command to a KNX group address using DPT 1.001 (Switch).
+    /// </summary>
+    /// <param name="address">The KNX group address</param>
+    /// <param name="value">The boolean value to send</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>True if successful, false otherwise</returns>
+    public async Task<bool> SendBooleanCommandAsync(
+        SnapDog2.Core.Configuration.KnxAddress address,
+        bool value,
+        CancellationToken cancellationToken = default)
+    {
+        var data = KnxDptConverter.BooleanToDpt1001(value);
+        return await WriteGroupValueAsync(address, data, cancellationToken);
+    }
+
+    /// <summary>
+    /// Sends a volume command to a KNX group address using DPT 5.001 (Scaling).
+    /// </summary>
+    /// <param name="address">The KNX group address</param>
+    /// <param name="volume">The volume percentage (0-100)</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>True if successful, false otherwise</returns>
+    public async Task<bool> SendVolumeCommandAsync(
+        SnapDog2.Core.Configuration.KnxAddress address,
+        int volume,
+        CancellationToken cancellationToken = default)
+    {
+        if (volume < 0 || volume > 100)
+        {
+            throw new ArgumentOutOfRangeException(nameof(volume), "Volume must be between 0 and 100");
+        }
+
+        var data = KnxDptConverter.PercentToDpt5001(volume);
+        return await WriteGroupValueAsync(address, data, cancellationToken);
+    }
+
+    /// <summary>
+    /// Sends a playback state command to a KNX group address using DPT 1.001 (Switch).
+    /// </summary>
+    /// <param name="address">The KNX group address</param>
+    /// <param name="playing">True for playing, false for stopped</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>True if successful, false otherwise</returns>
+    public async Task<bool> SendPlaybackCommandAsync(
+        SnapDog2.Core.Configuration.KnxAddress address,
+        bool playing,
+        CancellationToken cancellationToken = default)
+    {
+        return await SendBooleanCommandAsync(address, playing, cancellationToken);
+    }
+
+    /// <summary>
+    /// Sends a temperature value to a KNX group address using DPT 9.001 (Temperature).
+    /// </summary>
+    /// <param name="address">The KNX group address</param>
+    /// <param name="temperature">The temperature in Celsius</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>True if successful, false otherwise</returns>
+    public async Task<bool> SendTemperatureAsync(
+        SnapDog2.Core.Configuration.KnxAddress address,
+        float temperature,
+        CancellationToken cancellationToken = default)
+    {
+        var data = KnxDptConverter.FloatToDpt9001(temperature);
+        return await WriteGroupValueAsync(address, data, cancellationToken);
+    }
+
+    /// <summary>
+    /// Reads a boolean value from a KNX group address using DPT 1.001 (Switch).
+    /// </summary>
+    /// <param name="address">The KNX group address</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The boolean value, or null if read failed</returns>
+    public async Task<bool?> ReadBooleanValueAsync(
+        SnapDog2.Core.Configuration.KnxAddress address,
+        CancellationToken cancellationToken = default)
+    {
+        var data = await ReadGroupValueAsync(address, cancellationToken);
+        return data != null ? KnxDptConverter.Dpt1001ToBoolean(data) : null;
+    }
+
+    /// <summary>
+    /// Reads a percentage value from a KNX group address using DPT 5.001 (Scaling).
+    /// </summary>
+    /// <param name="address">The KNX group address</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The percentage value (0-100), or null if read failed</returns>
+    public async Task<int?> ReadPercentageValueAsync(
+        SnapDog2.Core.Configuration.KnxAddress address,
+        CancellationToken cancellationToken = default)
+    {
+        var data = await ReadGroupValueAsync(address, cancellationToken);
+        return data != null ? KnxDptConverter.Dpt5001ToPercent(data) : null;
+    }
+
+    /// <summary>
+    /// Reads a temperature value from a KNX group address using DPT 9.001 (Temperature).
+    /// </summary>
+    /// <param name="address">The KNX group address</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The temperature in Celsius, or null if read failed</returns>
+    public async Task<float?> ReadTemperatureValueAsync(
+        SnapDog2.Core.Configuration.KnxAddress address,
+        CancellationToken cancellationToken = default)
+    {
+        var data = await ReadGroupValueAsync(address, cancellationToken);
+        return data != null ? KnxDptConverter.Dpt9001ToFloat(data) : null;
+    }
+
+    #endregion
 
     /// <summary>
     /// Disposes the KNX service and releases resources.

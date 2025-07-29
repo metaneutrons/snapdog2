@@ -7,6 +7,8 @@ using Polly;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Infrastructure.Resilience;
 using SnapDog2.Infrastructure.Services.Models;
+using MediatR;
+using SnapDog2.Core.Events;
 
 namespace SnapDog2.Infrastructure.Services;
 
@@ -20,22 +22,27 @@ public class SnapcastService : ISnapcastService, IDisposable, IAsyncDisposable
     private readonly SnapcastConfiguration _config;
     private readonly IAsyncPolicy _resiliencePolicy;
     private readonly ILogger<SnapcastService> _logger;
+    private readonly IMediator _mediator;
     private readonly JsonSerializerOptions _jsonOptions;
     private TcpClient? _tcpClient;
     private NetworkStream? _networkStream;
     private int _requestId;
     private bool _disposed;
     private readonly SemaphoreSlim _connectionSemaphore = new(1, 1);
+    private Task? _eventListenerTask;
+    private readonly CancellationTokenSource _eventListenerCts = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SnapcastService"/> class.
     /// </summary>
     /// <param name="config">The Snapcast configuration options.</param>
     /// <param name="logger">The logger instance.</param>
-    public SnapcastService(IOptions<SnapcastConfiguration> config, ILogger<SnapcastService> logger)
+    /// <param name="mediator">The mediator for publishing events.</param>
+    public SnapcastService(IOptions<SnapcastConfiguration> config, ILogger<SnapcastService> logger, IMediator mediator)
     {
         _config = config?.Value ?? throw new ArgumentNullException(nameof(config));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
 
         _resiliencePolicy = PolicyFactory.CreateFromConfiguration(
             retryAttempts: 3,
@@ -341,6 +348,217 @@ public class SnapcastService : ISnapcastService, IDisposable, IAsyncDisposable
     }
 
     /// <summary>
+    /// Synchronizes the current server state and publishes events for changes.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Task representing the synchronization operation</returns>
+    public async Task SynchronizeServerStateAsync(CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+
+        await ExecuteWithResilienceAsync(
+            async () =>
+            {
+                _logger.LogDebug("Synchronizing Snapcast server state");
+
+                var statusJson = await GetServerStatusAsync(cancellationToken);
+                var status = JsonSerializer.Deserialize<SnapcastServerStatus>(statusJson, _jsonOptions);
+
+                if (status?.Server != null)
+                {
+                    // Publish synchronized state event
+                    await _mediator.Publish(new SnapcastStateSynchronizedEvent(status.Server), cancellationToken);
+                    _logger.LogDebug("Published Snapcast state synchronization event");
+                }
+
+                return Task.CompletedTask;
+            },
+            "SynchronizeServerState",
+            cancellationToken
+        );
+    }
+
+    /// <summary>
+    /// Listens for real-time events from the Snapcast server.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token</param>
+    private async Task ListenForEventsAsync(CancellationToken cancellationToken)
+    {
+        var buffer = new byte[8192];
+        var eventBuilder = new StringBuilder();
+
+        try
+        {
+            while (!cancellationToken.IsCancellationRequested && _networkStream != null)
+            {
+                try
+                {
+                    var bytesRead = await _networkStream.ReadAsync(buffer, cancellationToken);
+                    if (bytesRead == 0)
+                    {
+                        _logger.LogWarning("Snapcast server connection closed unexpectedly");
+                        break;
+                    }
+
+                    var chunk = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                    eventBuilder.Append(chunk);
+
+                    // Process complete events
+                    var eventText = eventBuilder.ToString();
+                    var lines = eventText.Split('\n');
+                    
+                    for (int i = 0; i < lines.Length - 1; i++)
+                    {
+                        var line = lines[i].Trim();
+                        if (!string.IsNullOrEmpty(line))
+                        {
+                            await ProcessSnapcastEventAsync(line, cancellationToken);
+                        }
+                    }
+
+                    // Keep the last incomplete line
+                    eventBuilder.Clear();
+                    if (lines.Length > 0 && !string.IsNullOrEmpty(lines[^1]))
+                    {
+                        eventBuilder.Append(lines[^1]);
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error listening for Snapcast events");
+                    await Task.Delay(1000, cancellationToken); // Wait before retrying
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogDebug("Snapcast event listener cancelled");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Snapcast event listener terminated with error");
+        }
+    }
+
+    /// <summary>
+    /// Processes a single Snapcast event message.
+    /// </summary>
+    /// <param name="eventMessage">The event message JSON</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    private async Task ProcessSnapcastEventAsync(string eventMessage, CancellationToken cancellationToken)
+    {
+        try
+        {
+            _logger.LogTrace("Processing Snapcast event: {Event}", eventMessage);
+
+            var eventData = JsonSerializer.Deserialize<JsonElement>(eventMessage, _jsonOptions);
+            
+            if (!eventData.TryGetProperty("method", out var methodElement))
+            {
+                return; // Not an event, probably a response
+            }
+
+            var method = methodElement.GetString();
+            if (!eventData.TryGetProperty("params", out var paramsElement))
+            {
+                return;
+            }
+
+            switch (method)
+            {
+                case "Client.OnVolumeChanged":
+                    await HandleClientVolumeChangedAsync(paramsElement, cancellationToken);
+                    break;
+
+                case "Client.OnConnect":
+                    await HandleClientConnectedAsync(paramsElement, cancellationToken);
+                    break;
+
+                case "Client.OnDisconnect":
+                    await HandleClientDisconnectedAsync(paramsElement, cancellationToken);
+                    break;
+
+                case "Group.OnStreamChanged":
+                    await HandleGroupStreamChangedAsync(paramsElement, cancellationToken);
+                    break;
+
+                default:
+                    _logger.LogTrace("Unhandled Snapcast event method: {Method}", method);
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error processing Snapcast event: {EventMessage}", eventMessage);
+        }
+    }
+
+    /// <summary>
+    /// Handles client volume changed events.
+    /// </summary>
+    private async Task HandleClientVolumeChangedAsync(JsonElement paramsElement, CancellationToken cancellationToken)
+    {
+        if (paramsElement.TryGetProperty("id", out var idElement) &&
+            paramsElement.TryGetProperty("volume", out var volumeElement))
+        {
+            var clientId = idElement.GetString() ?? string.Empty;
+            var volume = volumeElement.TryGetProperty("percent", out var percentElement) ? percentElement.GetInt32() : 0;
+            var muted = volumeElement.TryGetProperty("muted", out var mutedElement) && mutedElement.GetBoolean();
+
+            await _mediator.Publish(new SnapcastClientVolumeChangedEvent(clientId, volume, muted), cancellationToken);
+            _logger.LogDebug("Published client volume changed event for {ClientId}: Volume={Volume}, Muted={Muted}", 
+                clientId, volume, muted);
+        }
+    }
+
+    /// <summary>
+    /// Handles client connected events.
+    /// </summary>
+    private async Task HandleClientConnectedAsync(JsonElement paramsElement, CancellationToken cancellationToken)
+    {
+        if (paramsElement.TryGetProperty("client", out var clientElement) &&
+            clientElement.TryGetProperty("id", out var idElement))
+        {
+            var clientId = idElement.GetString() ?? string.Empty;
+            await _mediator.Publish(new SnapcastClientConnectedEvent(clientId), cancellationToken);
+            _logger.LogDebug("Published client connected event for {ClientId}", clientId);
+        }
+    }
+
+    /// <summary>
+    /// Handles client disconnected events.
+    /// </summary>
+    private async Task HandleClientDisconnectedAsync(JsonElement paramsElement, CancellationToken cancellationToken)
+    {
+        if (paramsElement.TryGetProperty("client", out var clientElement) &&
+            clientElement.TryGetProperty("id", out var idElement))
+        {
+            var clientId = idElement.GetString() ?? string.Empty;
+            await _mediator.Publish(new SnapcastClientDisconnectedEvent(clientId), cancellationToken);
+            _logger.LogDebug("Published client disconnected event for {ClientId}", clientId);
+        }
+    }
+
+    /// <summary>
+    /// Handles group stream changed events.
+    /// </summary>
+    private async Task HandleGroupStreamChangedAsync(JsonElement paramsElement, CancellationToken cancellationToken)
+    {
+        if (paramsElement.TryGetProperty("id", out var idElement) &&
+            paramsElement.TryGetProperty("stream_id", out var streamElement))
+        {
+            var groupId = idElement.GetString() ?? string.Empty;
+            var streamId = streamElement.GetString() ?? string.Empty;
+            await _mediator.Publish(new SnapcastGroupStreamChangedEvent(groupId, streamId), cancellationToken);
+            _logger.LogDebug("Published group stream changed event for {GroupId}: Stream={StreamId}", groupId, streamId);
+        }
+    }
+
+    /// <summary>
     /// Ensures a connection to the Snapcast server is established.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token</param>
@@ -361,6 +579,9 @@ public class SnapcastService : ISnapcastService, IDisposable, IAsyncDisposable
             _tcpClient = new TcpClient();
             await _tcpClient.ConnectAsync(_config.Host, _config.Port, cancellationToken);
             _networkStream = _tcpClient.GetStream();
+            
+            // Start event listener task
+            _eventListenerTask = Task.Run(() => ListenForEventsAsync(_eventListenerCts.Token), _eventListenerCts.Token);
 
             _logger.LogInformation("Connected to Snapcast server at {Host}:{Port}", _config.Host, _config.Port);
         }
@@ -514,6 +735,25 @@ public class SnapcastService : ISnapcastService, IDisposable, IAsyncDisposable
     {
         try
         {
+            // Stop event listener
+            if (!_eventListenerCts.Token.IsCancellationRequested)
+            {
+                _eventListenerCts.Cancel();
+            }
+
+            if (_eventListenerTask != null)
+            {
+                try
+                {
+                    await _eventListenerTask.WaitAsync(TimeSpan.FromSeconds(5));
+                }
+                catch (TimeoutException)
+                {
+                    _logger.LogWarning("Event listener task did not complete within timeout");
+                }
+                _eventListenerTask = null;
+            }
+
             if (_networkStream != null)
             {
                 await _networkStream.DisposeAsync();
