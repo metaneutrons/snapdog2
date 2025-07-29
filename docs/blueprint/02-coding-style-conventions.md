@@ -1,6 +1,6 @@
-# Coding Style & Conventions
+# 2. Coding Style & Conventions
 
-## 2.1 Overview
+## 2.1. Overview
 
 This foundational chapter meticulously defines the mandatory coding standards, style guidelines, and development conventions for the SnapDog2 project. Adherence to these standards is paramount to ensure a high degree of code consistency, maintainability, readability, and overall quality throughout the application's lifecycle. SnapDog2 is built utilizing the **.NET 9.0 framework** and embraces the **latest stable C# language features** where they enhance clarity, performance, and developer productivity.
 
@@ -12,7 +12,7 @@ Code quality and style consistency are rigorously enforced through a multi-prong
 * **Documentation**: Comprehensive API documentation is **mandatory**. All public types (classes, interfaces, structs, records, enums, delegates) and public members (methods, properties, events, fields) **must** include well-formed XML documentation comments (`<summary>`, `<param>`, `<returns>`, `<typeparam>`, etc.). This requirement is enforced programmatically by setting the `<GenerateDocumentationFile>true</GenerateDocumentationFile>` property in the `SnapDog2.csproj` file and enabling relevant StyleCop documentation rules (SA1600+). The build process should treat missing documentation warnings as errors unless an explicit suppression with clear justification is provided.
 * **Automated Formatting**: A root `.editorconfig` file, located at the solution level, defines and enforces fundamental code formatting rules, including indentation style, line endings, spacing preferences, and more. Developers are required to utilize automated code formatting tools integrated into their IDE (e.g., Visual Studio's Format Document feature, Rider's cleanup profiles) or command-line tools like `dotnet format` to ensure submitted code strictly adheres to these formatting standards.
 
-## 2.2 General Conventions
+## 2.2. General Conventions
 
 These overarching principles guide the development process and architectural choices:
 
@@ -26,7 +26,7 @@ These overarching principles guide the development process and architectural cho
 * **Null Handling**: Enable nullable reference types project-wide via `<Nullable>enable</Nullable>` in `SnapDog2.csproj`. All code must be null-aware. Eliminate compiler warnings related to nullability by explicitly handling potential `null` values using appropriate checks (`is not null`), pattern matching (`is { }`), null-conditional operators (`?.`), null-coalescing operators (`??`), or parameter/property validation. Use the `required` modifier for non-nullable properties in DTOs and configuration classes where initialization is mandatory. Avoid using the null-forgiving operator (`!`) unless it is absolutely necessary and its safety can be guaranteed and justified with a code comment.
 * **Encapsulation**: Design components within logical layers (folders) to be highly cohesive (related responsibilities grouped together) and loosely coupled (interactions through interfaces/messages). Strictly adhere to the dependency rule: code should only depend inwards towards the `/Core` layer. `/Infrastructure` depends on `/Core`. `/Server` depends on `/Core`. `/Api` depends on `/Server` and `/Core`. `/Worker` depends on all other layers for composition. Use the `internal` access modifier for types and members that are not intended to be used outside their defining logical component or layer (assembly in this single-project case) to minimize the public API surface and enforce boundaries.
 
-## 2.3 Formatting and Layout
+## 2.3. Formatting and Layout
 
 These rules ensure visual consistency and readability. Primarily enforced by `.editorconfig` and StyleCop Analyzers.
 
@@ -103,7 +103,7 @@ These rules ensure visual consistency and readability. Primarily enforced by `.e
 * **File Organization**: Strictly one public type (class, interface, struct, enum, record, delegate) per file (SA1402). The filename must match the public type name exactly, including casing (SA1649). Use **file-scoped namespaces** (`namespace MyNamespace;`) as the default (C# 10+).
 * **Blank Lines**: Use single blank lines judiciously to separate logical blocks of code (e.g., between methods, between property definitions, between fields and constructors, within methods to separate complex steps). Avoid multiple consecutive blank lines (SA1516, SA1517). Follow specific StyleCop rules for blank lines around braces and comments (SA1505, SA1508, SA1512, SA1513, etc.).
 
-## 2.4 Naming Conventions
+## 2.4. Naming Conventions
 
 Consistent naming is crucial for readability and understanding code intent.
 
@@ -127,7 +127,7 @@ Consistent naming is crucial for readability and understanding code intent.
   * Incorrect: `HTMLParser`, `GetZoneID`, `UseAPIAuth`.
 * **Hungarian Notation**: Strictly forbidden for all identifiers (variables, fields, parameters, etc.) (SA1305, SA1309). Do not use prefixes indicating type (e.g., `strName`, `iCount`, `bEnabled`).
 
-## 2.5 Logging (LoggerMessage Source Generator Pattern)
+## 2.5. Logging (LoggerMessage Source Generator Pattern)
 
 Logging is performed exclusively through the `Microsoft.Extensions.Logging.ILogger<T>` interface, injected via constructor. The **LoggerMessage Source Generator pattern is mandatory** for defining log messages to ensure high performance and compile-time validation.
 
@@ -319,7 +319,7 @@ public partial class ClientManager : IClientManager, // Implements Core abstract
 }
 ```
 
-## 2.6 Disposal Pattern
+## 2.6. Disposal Pattern
 
 Use `IAsyncDisposable`/`IDisposable`. Check state using `ObjectDisposedException.ThrowIf`.
 
@@ -434,11 +434,11 @@ public partial class KnxService : IAsyncDisposable // Partial for logging
 }
 ```
 
-## 2.7 StyleCop Enforcement Summary
+## 2.7. StyleCop Enforcement Summary
 
 Enforced via `stylecop.json` / build: Public API Docs (SA1600+), File Headers (SA1633), Usings inside namespace (SA1200), Member Order (SA1201+), Naming (SA13xx, SX1309), Spacing (SA10xx), Readability (SA11xx, SX1101), Layout/Braces (SA15xx), Maintainability (SA14xx).
 
-## 2.8 StyleCop Configuration (`stylecop.json`)
+## 2.8. StyleCop Configuration (`stylecop.json`)
 
 ```json
 {

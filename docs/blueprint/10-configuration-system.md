@@ -1,12 +1,12 @@
-# Configuration System
+# 10. Configuration System
 
 SnapDog2 is designed for flexible deployment within containerized environments. Its configuration system leverages **EnvoyConfig**, a modern .NET configuration library that provides attribute-based environment variable binding, automatic validation, nested object mapping, and custom type conversion.
 
 The configuration follows a **unified nested architecture** where all settings are organized into a single root [`SnapDogConfiguration`](SnapDogConfiguration.cs:1) class with strongly-typed nested objects for different subsystems. This eliminates configuration fragmentation while providing comprehensive type safety and validation.
 
-## 10.1 Architecture Overview
+## 10.1. Architecture Overview
 
-### 10.1.1 Unified Configuration Structure
+### 10.1.1. Unified Configuration Structure
 
 ```mermaid
 classDiagram
@@ -62,7 +62,7 @@ classDiagram
     SnapDogConfiguration --> ClientConfig
 ```
 
-### 10.1.2 EnvoyConfig Features Utilized
+### 10.1.2. EnvoyConfig Features Utilized
 
 - **`[Env]` Attribute**: Maps properties to environment variables with options for defaults, validation, and type conversion
 - **`NestedListPrefix`**: Enables indexed configurations like `SNAPDOG_ZONE_1_*`, `SNAPDOG_CLIENT_2_*`
@@ -72,11 +72,11 @@ classDiagram
 - **Custom Type Converters**: Handle domain-specific types like [`KnxAddress`](KnxAddress.cs:1)
 - **Built-in Validation**: Automatic validation with [`IValidateOptions<T>`](IValidateOptions.cs:1) for business logic
 
-## 10.2 Environment Variable Structure
+## 10.2. Environment Variable Structure
 
 All environment variables use the global prefix `SNAPDOG_` and follow a hierarchical naming convention that maps directly to the nested configuration classes.
 
-### 10.2.1 System Configuration
+### 10.2.1. System Configuration
 
 ```bash
 # Basic system settings
@@ -84,7 +84,7 @@ SNAPDOG_SYSTEM_LOG_LEVEL=Information          # Default: Information
 SNAPDOG_SYSTEM_ENVIRONMENT=Production         # Default: Development
 ```
 
-### 10.2.2 Telemetry Configuration
+### 10.2.2. Telemetry Configuration
 
 ```bash
 # Core telemetry settings
@@ -104,7 +104,7 @@ SNAPDOG_TELEMETRY_PROMETHEUS_PORT=9090        # Default: 9090
 SNAPDOG_TELEMETRY_PROMETHEUS_PATH=/metrics    # Default: /metrics
 ```
 
-### 10.2.3 API Configuration
+### 10.2.3. API Configuration
 
 ```bash
 # API authentication
@@ -114,7 +114,7 @@ SNAPDOG_API_APIKEY_2=secret-key-2             # Additional keys as needed
 SNAPDOG_API_APIKEY_3=secret-key-3
 ```
 
-### 10.2.4 Services Configuration
+### 10.2.4. Services Configuration
 
 ```bash
 # Snapcast integration
@@ -150,7 +150,7 @@ SNAPDOG_SERVICES_SUBSONIC_PASSWORD=password       # Required if enabled
 SNAPDOG_SERVICES_SUBSONIC_TIMEOUT=10000           # Default: 10000ms
 ```
 
-### 10.2.5 Zone Configuration (Nested Lists)
+### 10.2.5. Zone Configuration (Nested Lists)
 
 ```bash
 # Zone 1 Configuration
@@ -192,7 +192,7 @@ SNAPDOG_ZONE_2_MQTT_BASE_TOPIC=snapdog/zones/kitchen
 SNAPDOG_ZONE_2_KNX_ENABLED=false
 ```
 
-### 10.2.6 Client Configuration (Nested Lists)
+### 10.2.6. Client Configuration (Nested Lists)
 
 ```bash
 # Client 1 Configuration
@@ -233,7 +233,7 @@ SNAPDOG_CLIENT_2_MQTT_BASE_TOPIC=snapdog/clients/kitchen
 SNAPDOG_CLIENT_2_KNX_ENABLED=false
 ```
 
-### 10.2.7 Radio Station Configuration (Nested Lists)
+### 10.2.7. Radio Station Configuration (Nested Lists)
 
 ```bash
 # Radio Station 1
@@ -249,11 +249,11 @@ SNAPDOG_RADIO_3_NAME=Classical Radio
 SNAPDOG_RADIO_3_URL=https://stream.srg-ssr.ch/rsc_de/aacp_96.m3u
 ```
 
-## 10.3 Configuration Classes
+## 10.3. Configuration Classes
 
 All configuration classes are located in [`/Core/Configuration`](/Core/Configuration:1) and use EnvoyConfig attributes for automatic environment variable binding.
 
-### 10.3.1 Root Configuration Class
+### 10.3.1. Root Configuration Class
 
 ```csharp
 // --- /Core/Configuration/SnapDogConfiguration.cs ---
@@ -322,7 +322,7 @@ public class SnapDogConfiguration
 }
 ```
 
-### 10.3.2 System Configuration
+### 10.3.2. System Configuration
 
 ```csharp
 // --- /Core/Configuration/SystemConfig.cs ---
@@ -351,7 +351,7 @@ public class SystemConfig
 }
 ```
 
-### 10.3.3 Zone Configuration
+### 10.3.3. Zone Configuration
 
 ```csharp
 // --- /Core/Configuration/ZoneConfig.cs ---
@@ -398,7 +398,7 @@ public class ZoneConfig
 }
 ```
 
-### 10.3.4 Client Configuration
+### 10.3.4. Client Configuration
 
 ```csharp
 // --- /Core/Configuration/ClientConfig.cs ---
@@ -454,9 +454,9 @@ public class ClientConfig
 }
 ```
 
-## 10.4 Custom Type Converters
+## 10.4. Custom Type Converters
 
-### 10.4.1 KNX Address Converter
+### 10.4.1. KNX Address Converter
 
 ```csharp
 // --- /Core/Configuration/Converters/KnxAddressConverter.cs ---
@@ -507,9 +507,9 @@ public class KnxAddressConverter : ITypeConverter
 }
 ```
 
-## 10.5 Configuration Validation
+## 10.5. Configuration Validation
 
-### 10.5.1 Business Logic Validation
+### 10.5.1. Business Logic Validation
 
 ```csharp
 // --- /Core/Configuration/Validation/SnapDogConfigurationValidator.cs ---
@@ -648,9 +648,9 @@ public class SnapDogConfigurationValidator : IValidateOptions<SnapDogConfigurati
 }
 ```
 
-## 10.6 Dependency Injection Setup
+## 10.6. Dependency Injection Setup
 
-### 10.6.1 Configuration Registration
+### 10.6.1. Configuration Registration
 
 ```csharp
 // --- /Worker/Program.cs ---
@@ -728,30 +728,30 @@ catch (Exception ex)
 app.Run();
 ```
 
-## 10.7 Configuration Benefits
+## 10.7. Configuration Benefits
 
-### 10.7.1 Type Safety & Validation
+### 10.7.1. Type Safety & Validation
 
 - **Compile-time checking**: Configuration properties are strongly typed
 - **Automatic validation**: Data annotations and custom validators catch errors early
 - **Null safety**: Nullable reference types prevent null reference exceptions
 - **Range validation**: Numeric properties have range constraints
 
-### 10.7.2 Developer Experience
+### 10.7.2. Developer Experience
 
 - **IntelliSense support**: Full IDE support for configuration properties
 - **Self-documenting**: XML documentation on all configuration classes
 - **Clear structure**: Hierarchical organization mirrors environment variable structure
 - **Easy testing**: Configuration objects can be easily mocked and tested
 
-### 10.7.3 Operational Benefits
+### 10.7.3. Operational Benefits
 
 - **Fail-fast startup**: Configuration errors are caught immediately during application startup
 - **Clear error messages**: Detailed validation messages for troubleshooting
 - **Container optimized**: Static configuration perfect for containerized deployments
 - **Environment agnostic**: Same configuration structure works across all environments
 
-### 10.7.4 Maintainability
+### 10.7.4. Maintainability
 
 - **Single source of truth**: All configuration in one unified structure
 - **Extensible**: Easy to add new configuration properties without breaking existing code

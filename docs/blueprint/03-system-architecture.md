@@ -1,6 +1,6 @@
-# System Architecture
+# 3. System Architecture
 
-## 3.1 High-Level Architecture
+## 3.1. High-Level Architecture
 
 SnapDog2 employs a **modular, service-oriented architecture** designed for maintainability, testability, and extensibility, contained within a **single .NET project structure** (`SnapDog2.csproj`). Logical separation between concerns is achieved through disciplined use of folders and namespaces (`Core`, `Server`, `Infrastructure`, `Api`, `Worker`). The architecture leverages the **Command Query Responsibility Segregation (CQRS)** pattern, facilitated by the **MediatR** library, to decouple command/query dispatch from handling logic. This approach coordinates the various services and infrastructure adapters required to manage multi-zone audio playback via Snapcast and integrate with external systems like Subsonic, MQTT, and KNX.
 
@@ -12,7 +12,7 @@ The key architectural principles guiding the design are:
 * **Asynchronous Communication**: The system relies heavily on `async`/`await` for I/O operations. MediatR facilitates asynchronous command/query handling. Internal eventing and state propagation between loosely coupled components occur via MediatR `INotification` messages.
 * **Clear State Management**: A distinction is made between SnapDog2's internal application state (`ClientState`, `ZoneState` records managed by `/Server` components) and the raw, last-known state received from the Snapcast server (held in the `SnapcastStateRepository` within `/Infrastructure`). See Section 4 for details.
 
-### 3.1.1 Component Diagram (Logical Layers in Single Project)
+### 3.1.1. Component Diagram (Logical Layers in Single Project)
 
 This diagram illustrates the logical separation and dependencies between the different parts of the application, even though they reside within a single project.
 
@@ -93,7 +93,7 @@ graph TD
     classDef extern fill:#EFEFEF,stroke:#666
 ```
 
-### 3.1.2 Communication Flow Example (MQTT Play Command)
+### 3.1.2. Communication Flow Example (MQTT Play Command)
 
 This sequence illustrates how an external command flows through the layers:
 
@@ -148,9 +148,9 @@ sequenceDiagram
     MqttSvc->>MqttBroker: Publish(...)
 ```
 
-## 3.2 Key Components (Roles within Folders)
+## 3.2. Key Components (Roles within Folders)
 
-### 3.2.1 `/Core` Layer
+### 3.2.1. `/Core` Layer
 
 Contains the foundational, dependency-free elements of the application.
 
@@ -159,7 +159,7 @@ Contains the foundational, dependency-free elements of the application.
 * **Configuration Models (`/Core/Configuration`)**: Defines strongly-typed `record` or `class` structures (`SnapcastOptions`, `KnxOptions`, `ZoneConfig`, etc.) used to load configuration settings (See Section 10).
 * **Enums (`/Core/Enums`)**: Defines application-specific enumerations (e.g., `PlaybackStatus`, `CommandSource`, `KnxConnectionType`).
 
-### 3.2.2 `/Server` Layer
+### 3.2.2. `/Server` Layer
 
 Contains the core application logic, orchestration, and features. Depends only on `/Core`.
 
@@ -169,7 +169,7 @@ Contains the core application logic, orchestration, and features. Depends only o
 * **Pipeline Behaviors (`/Server/Behaviors`)**: Implement `IPipelineBehavior<,>` for cross-cutting concerns like Logging, Validation, Performance Monitoring applied to MediatR requests.
 * **Validation (`/Server/Features/.../Validators`)**: Contains FluentValidation `AbstractValidator<T>` classes for specific MediatR commands or API request DTOs.
 
-### 3.2.3 `/Infrastructure` Layer
+### 3.2.3. `/Infrastructure` Layer
 
 Provides concrete implementations for `/Core` abstractions and handles all external interactions. Depends only on `/Core` and external libraries.
 
@@ -180,7 +180,7 @@ Provides concrete implementations for `/Core` abstractions and handles all exter
 * **Logging (`/Infrastructure/Logging`)**: Potentially custom Serilog enrichers or sinks if needed (though configuration is usually in `/Worker`).
 * **Helpers (`/Infrastructure`)**: Utility classes like `EnvConfigHelper` for configuration loading.
 
-### 3.2.4 `/Api` Layer
+### 3.2.4. `/Api` Layer
 
 Handles HTTP requests and responses. Depends on `/Server` and `/Core`.
 
@@ -189,7 +189,7 @@ Handles HTTP requests and responses. Depends on `/Server` and `/Core`.
 * **Authentication (`/Api/Auth`)**: Implementation of `ApiKeyAuthenticationHandler`.
 * **Middleware/Filters**: Custom ASP.NET Core middleware or filters if needed (e.g., global exception handling formatting errors as `ApiResponse`).
 
-### 3.2.5 `/Worker` Layer
+### 3.2.5. `/Worker` Layer
 
 The application's entry point and composition root. Depends on all other layers for setup.
 

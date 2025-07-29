@@ -1,8 +1,8 @@
-# Metrics and Telemetry (Infrastructure Layer)
+# 13. Metrics and Telemetry (Infrastructure Layer)
 
 This chapter details the strategy and implementation for observability within SnapDog2, encompassing metrics, distributed tracing, and correlated logging. The primary framework used is **OpenTelemetry**, leveraging the standard .NET abstractions (`System.Diagnostics.ActivitySource`, `System.Diagnostics.Metrics.Meter`) and configured exporters. Observability components reside primarily within the `/Infrastructure/Observability` folder.
 
-## 13.1 Overview
+## 13.1. Overview
 
 Comprehensive observability is crucial for understanding application behavior, diagnosing issues, and monitoring performance, even in a single-server home application. SnapDog2 adopts OpenTelemetry as the standard framework to achieve this, providing:
 
@@ -10,7 +10,7 @@ Comprehensive observability is crucial for understanding application behavior, d
 * **Metrics:** To quantify application performance, resource usage, and key operational counts (e.g., commands processed, errors).
 * **Correlated Logging:** To link log events directly to the specific trace and span that generated them, significantly simplifying debugging.
 
-## 13.2 Scope
+## 13.2. Scope
 
 OpenTelemetry instrumentation aims to cover critical paths and components:
 
@@ -21,7 +21,7 @@ OpenTelemetry instrumentation aims to cover critical paths and components:
   * Manual instrumentation (creating specific `Activity` spans) is applied within key methods of infrastructure services (`SnapcastService`, `KnxService`, `MqttService`, `MediaPlayerService`) for significant operations or external interactions not covered automatically.
 * **Custom Metrics:** Key application events and performance indicators are measured using custom `Meter` instruments.
 
-## 13.3 Telemetry Types
+## 13.3. Telemetry Types
 
 1. **Metrics:**
     * **Goal:** Provide quantitative data on application health and performance.
@@ -37,7 +37,7 @@ OpenTelemetry instrumentation aims to cover critical paths and components:
     * **Implementation:** Uses `Microsoft.Extensions.Logging.ILogger<T>` with Serilog backend and **LoggerMessage Source Generators**.
     * **Correlation:** OpenTelemetry logging integration (configured in `Program.cs`) automatically enriches log events with the `TraceId` and `SpanId` of the current `Activity`. Serilog output templates are configured to include these IDs (Section 5.2).
 
-## 13.4 OpenTelemetry Setup (DI / `/Worker/DI/ObservabilityExtensions.cs`)
+## 13.4. OpenTelemetry Setup (DI / `/Worker/DI/ObservabilityExtensions.cs`)
 
 OpenTelemetry pipelines for tracing, metrics, and logging are configured during application startup using Dependency Injection.
 
@@ -223,7 +223,7 @@ public static class ObservabilityExtensions
 }
 ```
 
-## 13.5 Custom Metrics (`IMetricsService` / `OpenTelemetryMetricsService`)
+## 13.5. Custom Metrics (`IMetricsService` / `OpenTelemetryMetricsService`)
 
 Define application-specific metrics using `System.Diagnostics.Metrics.Meter` via a dedicated service abstraction (`IMetricsService`) implemented in `/Infrastructure/Observability`.
 
@@ -333,7 +333,7 @@ public class OpenTelemetryMetricsService : IMetricsService
 
 Inject `IMetricsService` into components (like MediatR Behaviors, Infrastructure Services) where metrics need to be recorded.
 
-## 13.6 Manual Tracing Instrumentation
+## 13.6. Manual Tracing Instrumentation
 
 Use the shared `ActivitySource` (`ObservabilityExtensions.SnapDogActivitySource`) to manually create Activities (spans) for important operations not covered by automatic instrumentation. Use `using var activity = _activitySource.StartActivity(...)`, add relevant tags (`activity.SetTag`), record exceptions (`activity.RecordException`), and set status (`activity.SetStatus`).
 
@@ -379,6 +379,6 @@ public partial class SubsonicService : ISubsonicService
 // ... set tags, status, record exceptions based on handler outcome ...
 ```
 
-## 13.7 Logging Correlation
+## 13.7. Logging Correlation
 
 Ensure Serilog (or chosen logging provider) is configured with OpenTelemetry integration (`loggingBuilder.AddOpenTelemetry(...)` in DI setup) and output templates include `{TraceId}` and `{SpanId}`. This automatically links logs to the currently active trace span.

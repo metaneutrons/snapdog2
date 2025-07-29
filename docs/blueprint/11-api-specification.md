@@ -1,6 +1,6 @@
-# API Specification
+# 11. API Specification
 
-## 11.1 API Design Philosophy
+## 11.1. API Design Philosophy
 
 The SnapDog2 Application Programming Interface (API) is designed as a modern, **RESTful HTTP interface** providing comprehensive programmatic control over the audio management system. It serves as a primary integration point for web UIs, mobile applications, third-party services, and custom scripts operating within the local network.
 
@@ -18,7 +18,7 @@ Key design principles underpinning the API are:
 4. **Statelessness**: The API is stateless. Each request from a client must contain all the information needed to understand and process the request. The server does not maintain client session state between requests. Authentication is handled per-request via API keys.
 5. **Clear Versioning**: Uses URI path versioning (`/api/v1/`) to manage changes and ensure backward compatibility where possible.
 
-## 11.2 Authentication and Authorization
+## 11.2. Authentication and Authorization
 
 Given SnapDog2's typical deployment within a trusted local network, the primary security mechanism focuses on preventing unauthorized *control* rather than complex user management or data protection.
 
@@ -26,11 +26,11 @@ Given SnapDog2's typical deployment within a trusted local network, the primary 
 * **Authorization**: Currently basic. Successful authentication grants access to all authorized endpoints. Finer-grained authorization (e.g., specific keys only allowed to control certain zones) is **not implemented** in the current scope but could be a future enhancement. A failed authorization check (if implemented later) would result in a `403 Forbidden` response.
 * *(Future Considerations)*: While Bearer Tokens (JWT) or OAuth2 could be added later for more complex scenarios or third-party integrations, they are outside the current MVP scope.
 
-## 11.3 API Structure (`/api/v1/`)
+## 11.3. API Structure (`/api/v1/`)
 
 Base path: `/api/v1`. All endpoints below assume this prefix.
 
-### 11.3.1 Global Endpoints
+### 11.3.1. Global Endpoints
 
 Endpoints for accessing system-wide information.
 
@@ -43,7 +43,7 @@ Endpoints for accessing system-wide information.
 
 *(Note: DTO structures match Core Models where appropriate)*
 
-### 11.3.2 Zone Endpoints
+### 11.3.2. Zone Endpoints
 
 Endpoints for interacting with configured audio zones. **Zone creation/deletion/rename is not supported via API** as zones are defined via environment variables. **Indices are 1-based.**
 
@@ -101,7 +101,7 @@ public record ClientInfo(int Id, string Name, bool Connected, int? ZoneId);
 // Full GET /clients/{id} uses Core.Models.ClientState
 ```
 
-### 11.3.3 Client Endpoints
+### 11.3.3. Client Endpoints
 
 Endpoints for interacting with discovered Snapcast clients.
 
@@ -121,7 +121,7 @@ Endpoints for interacting with discovered Snapcast clients.
 | `GET`  | `/clients/{clientId}/settings/zone`     | `CLIENT_ZONE_STATUS`   | Get client assigned zone   | Path: `{clientId}`            | `object` { int? ZoneId }    | 200 OK      |
 | `PUT`  | `/clients/{clientId}/settings/name`     | `RENAME_CLIENT`        | Rename client in Snapcast  | Path: `{clientId}`; Body: `RenameRequest`{ string Name } | `object` { string Name }      | 200 OK      |
 
-### 11.3.4 Media Management Endpoints
+### 11.3.4. Media Management Endpoints
 
 Endpoints for browsing available media sources (initially Subsonic and Radio).
 
@@ -135,9 +135,9 @@ Endpoints for browsing available media sources (initially Subsonic and Radio).
 
 *(Note: `playlistIdOrIndex` accepts `1` or `"radio"` for the Radio playlist, `2+` or Subsonic IDs for others. `trackId` format depends on the source.)*
 
-## 11.4 Request and Response Format
+## 11.4. Request and Response Format
 
-### 11.4.1 Standard Response Wrapper (`ApiResponse<T>`)
+### 11.4.1. Standard Response Wrapper (`ApiResponse<T>`)
 
 All API responses use a consistent JSON wrapper.
 
@@ -168,7 +168,7 @@ public class ApiError { public string Code { get; set; } public string Message {
 
 *(Success/Error examples remain as previously defined)*
 
-## 11.5 HTTP Status Codes
+## 11.5. HTTP Status Codes
 
 Standard HTTP status codes are used:
 
@@ -178,7 +178,7 @@ Standard HTTP status codes are used:
 
 Error responses include the `ApiError` structure in the response body.
 
-## 11.6 Pagination, Filtering, and Sorting
+## 11.6. Pagination, Filtering, and Sorting
 
 Endpoints returning collections support standard query parameters:
 
@@ -200,7 +200,7 @@ Paginated responses include metadata:
 }
 ```
 
-## 11.7 Webhooks and Event Streams (Optional / Future)
+## 11.7. Webhooks and Event Streams (Optional / Future)
 
 Mechanisms for pushing real-time updates from SnapDog2:
 
@@ -209,7 +209,7 @@ Mechanisms for pushing real-time updates from SnapDog2:
 
 *(Implementation details deferred)*
 
-## 11.8 HATEOAS Links (Optional)
+## 11.8. HATEOAS Links (Optional)
 
 Responses *may* include a `_links` object with hypermedia controls for related actions.
 
@@ -224,7 +224,7 @@ Responses *may* include a `_links` object with hypermedia controls for related a
 
 *(Implementation details deferred)*
 
-## 11.9 API Implementation Notes
+## 11.9. API Implementation Notes
 
 * Implemented using ASP.NET Core Minimal APIs or MVC Controllers within the `/Api` folder.
 * Controllers/Endpoints act as thin layers, translating HTTP to MediatR requests (`_mediator.Send(...)`).
@@ -232,12 +232,12 @@ Responses *may* include a `_links` object with hypermedia controls for related a
 * Leverage ASP.NET Core middleware for exception handling (converting to `ApiResponse`), authentication, authorization, rate limiting, security headers.
 * Use built-in model binding and validation, potentially enhanced by FluentValidation integration.
 
-## 11.10 API Versioning
+## 11.10. API Versioning
 
 * Uses URI path versioning (`/api/v1/`).
 * Maintain backward compatibility within `v1.x`. Introduce breaking changes only in new major versions (`v2`).
 
-## 11.11 API Documentation (Swagger/OpenAPI)
+## 11.11. API Documentation (Swagger/OpenAPI)
 
 * Uses **Swashbuckle.AspNetCore** NuGet package.
 * Generate OpenAPI specification automatically from code (controllers, DTOs, XML comments).

@@ -1,12 +1,12 @@
-# Fault Tolerance Implementation (Infrastructure Layer)
+# 7. Fault Tolerance Implementation (Infrastructure Layer)
 
-## 7.1 Overview
+## 7.1. Overview
 
 Modern distributed systems and interactions with external services (like Snapcast servers, MQTT brokers, Subsonic APIs, KNX gateways) are inherently prone to transient failures, network issues, or temporary unavailability. SnapDog2 implements a comprehensive fault tolerance strategy to handle these situations gracefully, ensuring application stability and providing a more robust user experience.
 
 The primary tool used for implementing resilience patterns is **Polly**, the standard and highly flexible .NET resilience and transient-fault-handling library. Polly policies are defined centrally and applied strategically within the **Infrastructure Layer** (`/Infrastructure`) services where interactions with external dependencies occur. This ensures that the core application logic (`/Server` layer) remains largely unaware of transient faults, dealing primarily with the final outcomes represented by the **Result Pattern** (Section 5.1).
 
-## 7.2 Polly Integration and Policy Definitions
+## 7.2. Polly Integration and Policy Definitions
 
 Polly provides a fluent API to define various resilience strategies. Common policies are defined in a central static class (`/Infrastructure/Resilience/ResiliencePolicies.cs`) for consistency and reuse. These policies incorporate logging (using LoggerMessage source generators) and OpenTelemetry tracing within their `onRetry` or `onBreak` delegates for observability.
 
@@ -200,29 +200,29 @@ namespace Polly.Extensions.Http {
 }
 ```
 
-## 7.2 Resilience Strategies for Key Components
+## 7.3. Resilience Strategies for Key Components
 
 Specific policies are applied based on the nature of the interaction.
 
-### 7.2.1 Snapcast Service Resilience (`SnapcastService`)
+### 7.3.1. Snapcast Service Resilience (`SnapcastService`)
 
 * **Connection (`InitializeAsync`, Reconnects):** Uses `GetGeneralRetryPolicy` configured for **indefinite retries** (`retryCount = -1`) with capped exponential backoff (e.g., max 60s delay). This ensures SnapDog2 persistently tries to reconnect to the essential Snapcast server. The operation key passed is "SnapcastConnect".
 * **Operations (`SetClientVolumeAsync`, `AssignClientToGroupAsync`, etc.):** Uses `GetGeneralRetryPolicy` configured for a **limited number of retries** (e.g., `retryCount = 2`) with a shorter backoff period. This prevents hanging indefinitely on simple command failures but handles brief network glitches. The operation key passed reflects the operation name (e.g., "SnapcastSetVolume").
 * **Timeout:** A short `GetTimeoutPolicy` (e.g., 5-10 seconds) wraps individual operations to prevent hangs.
 
-### 7.2.2 MQTT Service Resilience (`MqttService`)
+### 7.3.2. MQTT Service Resilience (`MqttService`)
 
 * **Connection (`ConnectAsync`):** Uses **Polly `GetGeneralRetryPolicy`** for the *initial* connection attempt (e.g., `retryCount = 5`, `maxDelaySeconds = 30`, key "MqttInitialConnect") to handle cases where the broker isn't ready immediately at startup.
 * **Reconnection:** Relies primarily on **MQTTnet v5's built-in auto-reconnect mechanism**, configured via `MqttClientOptionsBuilder` (`WithAutoReconnectDelay`). Polly is *not* used for automatic reconnections triggered by the `DisconnectedAsync` event.
 * **Publishing (`PublishAsync`):** Optionally wraps the `_mqttClient.PublishAsync` call with a very short, limited retry policy (`GetGeneralRetryPolicy` with `retryCount = 1` or `2`, short delay, key "MqttPublish") if transient publish errors under load are observed, though often not strictly necessary with QoS 1+.
 
-### 7.2.3 KNX Service Resilience (`KnxService`)
+### 7.3.3. KNX Service Resilience (`KnxService`)
 
 * **Connection (`ConnectInternalAsync` within `InitializeAsync`):** Uses `GetGeneralRetryPolicy` configured for **indefinite retries** (`retryCount = -1`) with capped exponential backoff (e.g., max 30s delay), using operation key "KnxConnect". This handles both direct connection attempts and discovery retries.
 * **Operations (`WriteToKnxAsync` called by `SendStatusAsync`):** Uses `GetGeneralRetryPolicy` configured with values from `KnxOptions` (`RetryCount`, `RetryInterval`) using operation key "KnxOperation".
 * **Timeout:** A suitable `GetTimeoutPolicy` (e.g., matching `RetryInterval * RetryCount` + buffer) wraps individual KNX write/read operations.
 
-### 7.2.4 HTTP Client Resilience (Subsonic, etc.)
+### 7.3.4. HTTP Client Resilience (Subsonic, etc.)
 
 Configured via `HttpClientFactory` extensions (`/Worker/DI/ResilienceExtensions.cs`). A standard pipeline is applied:
 
@@ -286,7 +286,7 @@ public static class ResilienceExtensions
 }
 ```
 
-## 7.3 Resilience Registration in DI Container
+## 7.4. Resilience Registration in DI Container
 
 Resilience policies are primarily configured during DI setup using `HttpClientFactory` extensions or defined within services that utilize them directly (injecting `ILogger` for the policy's use).
 

@@ -1,8 +1,8 @@
-# Testing Strategy
+# 18. Testing Strategy
 
 A comprehensive, multi-layered testing strategy is essential for ensuring the quality, correctness, reliability, and maintainability of the SnapDog2 application. This strategy emphasizes testing components at different levels of integration, providing fast feedback during development while also verifying end-to-end functionality. The tests will reside initially within a single test project (`SnapDog2.Tests`), potentially organized into subfolders based on the test type (`/Unit`, `/Integration`, `/Api`).
 
-## 18.1 Test Types and Goals
+## 18.1. Test Types and Goals
 
 The strategy follows the principles of the testing pyramid/trophy, prioritizing different types of tests based on their scope, speed, and purpose:
 
@@ -35,7 +35,7 @@ The strategy follows the principles of the testing pyramid/trophy, prioritizing 
             * (If feasible in test setup) Query the `ISnapcastStateRepository` or specific API status endpoints to confirm state changes post-command.
     * **Tools:** xUnit, `HttpClient`, `WebApplicationFactory<TEntryPoint>` (where `TEntryPoint` is often `Program` or `Startup`), FluentAssertions, optionally MQTTnet or other client libraries for side-effect verification.
 
-## 18.2 Specific Component Testing Approaches
+## 18.2. Specific Component Testing Approaches
 
 * **MediatR Handlers (`/Server/Features/*`) (Unit):** Mock all injected dependencies (`ILogger`, `IZoneManager`, `ISnapcastService`, `IMediator` etc.). Provide command/query/notification. Assert mock interactions (`Verify`) and returned `Result`/`Result<T>`. Test all logic paths within the handler.
 * **MediatR Behaviors (`/Server/Behaviors`) (Integration - Internal):** Test via DI setup. Send request through pipeline. Assert behavior's specific actions (logs created, validation exception thrown, performance metrics recorded via mocked `IMetricsService`, downstream handler called/not called).
@@ -47,7 +47,7 @@ The strategy follows the principles of the testing pyramid/trophy, prioritizing 
 * **API Controllers (`/Api/Controllers`) (API/Functional):** Test primarily via `WebApplicationFactory` or `HttpClient`. Focus on request routing, model binding/validation, authentication/authorization, response status codes, and `ApiResponse<T>` structure. Minimal unit testing needed.
 * **Configuration Loading/Validation (Integration):** Test `ConfigurationValidator` logic by manipulating environment variables within the test process (`Environment.SetEnvironmentVariable`) and running the validation against a test `ServiceProvider`. Assert that it passes/fails correctly based on valid/invalid/missing required settings. Test `EnvConfigHelper` parsing logic via Unit tests.
 
-## 18.3 Specific Test Scenario Examples
+## 18.3. Specific Test Scenario Examples
 
 * **Unit Test `PlaylistManager`:**
   * `GetPlaylistsAsync`: Given Radio configured & Subsonic mock returns 2 playlists, assert result list contains 3 items, with Radio details first (ID "radio", correct name/count), followed by mapped Subsonic playlists.
@@ -61,7 +61,7 @@ The strategy follows the principles of the testing pyramid/trophy, prioritizing 
   * `Auth`: Send request to `GET /zones` without `X-API-Key`; assert 401 Unauthorized. Send with invalid key; assert 401. Send with valid key; assert 200 OK.
   * `End-to-End Play`: Send `PUT /zones/1/playlist` body `{"index": 1}` (Radio). Assert 202. Send `POST /zones/1/commands/play` body `{"trackIndex": 2}`. Assert 202. Send `GET /zones/1`. Assert 200 OK, body shows `playback_state: "play"`, `playlist.id: "radio"`, `track.index: 2`, `track.title` matches second radio station name. Subscribe to `snapdog/zones/1/state` via MQTT Test Client; assert JSON payload reflects these changes.
 
-## 18.4 Supporting Strategies
+## 18.4. Supporting Strategies
 
 * **Mocking Framework:** Moq.
 * **Assertion Library:** FluentAssertions.

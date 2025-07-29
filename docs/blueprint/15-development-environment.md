@@ -1,16 +1,16 @@
-# Development Environment
+# 15. Development Environment
 
-## 15.1 Overview
+## 15.1. Overview
 
 To ensure a consistent, reproducible, and dependency-managed development experience for all contributors across different operating systems (Windows, macOS, Linux), SnapDog2 mandates the use of **Visual Studio Code Development Containers (Dev Containers)**. This approach utilizes Docker containers to encapsulate the entire development environment, including the required .NET SDK, native dependencies (like LibVLC), necessary development tools (Git, formatters), pre-configured services (Snapcast Server, MQTT Broker, Subsonic Server), and IDE settings/extensions.
 
 Developers only need Docker Desktop (or a compatible Docker engine) and Visual Studio Code with the "Dev Containers" extension installed on their host machine. Opening the project folder in VS Code will prompt the user to reopen it inside the configured container, automatically building the image (if necessary) and starting the associated services defined in Docker Compose.
 
-## 15.2 Dev Container Setup
+## 15.2. Dev Container Setup
 
 The configuration resides within the `.devcontainer` folder at the root of the repository.
 
-### 15.2.1 Configuration Files
+### 15.2.1. Configuration Files
 
 * **`.devcontainer/devcontainer.json`**: The primary configuration file read by the VS Code Dev Containers extension. It defines the container setup, services, VS Code settings, extensions, post-create commands, and environment variables specific to the development container.
 * **`.devcontainer/Dockerfile`**: Defines the instructions to build the custom Docker image for the main `app` service where the SnapDog2 code runs and development occurs. This image includes the .NET SDK, LibVLC native dependencies, and other necessary tools.
@@ -18,7 +18,7 @@ The configuration resides within the `.devcontainer` folder at the root of the r
 * **`.devcontainer/snapserver.conf`**: (Example) A specific configuration file for the Snapcast server used *only* during development within the container.
 * **`.devcontainer/mosquitto.conf`**: (Example) A specific configuration file for the Mosquitto broker used *only* during development.
 
-### 15.2.2 `.devcontainer/devcontainer.json`
+### 15.2.2. `.devcontainer/devcontainer.json`
 
 This file orchestrates the Dev Container setup for VS Code.
 
@@ -142,7 +142,7 @@ This file orchestrates the Dev Container setup for VS Code.
 }
 ```
 
-### 15.2.3 `.devcontainer/docker-compose.yml` (Dev Environment)
+### 15.2.3. `.devcontainer/docker-compose.yml` (Dev Environment)
 
 Defines the interconnected services for the development environment, using a **shared Docker network** (`snapdog_dev_net`) for easy service discovery via container names.
 
@@ -310,7 +310,7 @@ volumes:
 
 ```
 
-### 15.2.4 `.devcontainer/Dockerfile` (Dev Image)
+### 15.2.4. `.devcontainer/Dockerfile` (Dev Image)
 
 Builds the image for the `app` service, including SDK, tools, and native dependencies.
 
@@ -367,7 +367,7 @@ ENV PATH="/home/vscode/.dotnet/tools:${PATH}"
 EXPOSE 8080
 ```
 
-### 15.2.5 Dev Container Benefits
+### 15.2.5. Dev Container Benefits
 
 1. **Consistency**: Guarantees every developer uses identical SDK versions, native libraries (LibVLC), external services (Snapcast, MQTT, Subsonic versions defined in compose file), tools, and IDE settings. Eliminates "works on my machine" issues.
 2. **Pre-configured Services**: Development dependencies (Snapcast server, MQTT broker, Subsonic server, optional OTel stack) are automatically started, configured (via mounted dev configs), and networked for immediate use by the application container.
@@ -375,11 +375,11 @@ EXPOSE 8080
 4. **Isolation**: Development occurs entirely within containers, preventing conflicts with libraries or tools installed on the host operating system and keeping the host clean.
 5. **Simplified Onboarding**: New developers only need Docker and VS Code. Cloning the repository and reopening in the container provides the complete, ready-to-run development environment in minutes, drastically reducing setup time and complexity.
 
-## 15.3 Building the Application
+## 15.3. Building the Application
 
 Utilizes standard .NET CLI tooling, enhanced by scripts or IDE tasks for convenience.
 
-### 15.3.1 Local Build Steps (Inside Dev Container)
+### 15.3.1. Local Build Steps (Inside Dev Container)
 
 These commands are run within the Dev Container's terminal:
 
@@ -389,7 +389,7 @@ These commands are run within the Dev Container's terminal:
 4. **Format Code**: `dotnet format SnapDog2.sln` Checks formatting against `.editorconfig`. Use `--verify-no-changes` in CI.
 5. **Run Application**: `dotnet run --project SnapDog2/SnapDog2.csproj`. Starts the main application using Kestrel, listening on the port defined by `ASPNETCORE_URLS` (e.g., 8080 inside the container).
 
-### 15.3.2 Build Automation (CI/CD - e.g., GitHub Actions)
+### 15.3.2. Build Automation (CI/CD - e.g., GitHub Actions)
 
 Continuous Integration ensures code quality and produces build artifacts. A typical workflow (`.github/workflows/build-test.yml`) includes:
 

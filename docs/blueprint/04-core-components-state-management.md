@@ -1,6 +1,6 @@
-# Core Components & State Management
+# 4. Core Components & State Management
 
-## 4.1 Core Structure Overview
+## 4.1. Core Structure Overview
 
 SnapDog2, while residing within a single primary project (`SnapDog2.csproj`), is architecturally designed with distinct logical layers achieved through disciplined folder and namespace organization (`/Core`, `/Server`, `/Infrastructure`, `/Api`, `/Worker`). The application's execution lifecycle and core service orchestration are managed by the **.NET Generic Host**, configured and launched from `/Worker/Program.cs`.
 
@@ -36,11 +36,11 @@ Key structural components and their roles within the logical layers:
 
 This layered structure, maintained through disciplined folder organization and namespace usage within the single project, facilitates separation of concerns, testability, and maintainability.
 
-## 4.2 State Management
+## 4.2. State Management
 
 SnapDog2 employs a robust state management strategy centered around immutability and clear ownership, distinguishing between the raw state received from external systems and the application's internal, potentially derived state.
 
-### 4.2.1 Immutable State Objects (Canonical Definitions)
+### 4.2.1. Immutable State Objects (Canonical Definitions)
 
 All state representations, whether raw external state models or SnapDog2's internal models, should ideally be immutable. C# `record` types with `init`-only properties are the preferred mechanism.
 
@@ -78,7 +78,7 @@ public record ServerStats(/* ... */);
 // --- being exposed to or managed by the Server layer.
 ```Updates to state held within services (like `ZoneService._currentState`) are achieved by creating a *new* record instance using a `with` expression, ensuring the state object itself is never mutated.
 
-### 4.2.2 Thread Synchronization
+### 4.2.2. Thread Synchronization
 
 State modifications must be thread-safe.
 
@@ -109,7 +109,7 @@ private async Task Internal_UpdatePlaybackStatus(PlaybackStatus newStatus)
 }
 ```
 
-### 4.2.3 State Types Managed & Ownership
+### 4.2.3. State Types Managed & Ownership
 
 1. **Raw External State (e.g., Snapcast Server State):**
     * **Representation:** Uses models directly from the external library (e.g., `Sturd.SnapcastNet.Models.Client`, `Group`, `Stream`).
@@ -125,7 +125,7 @@ private async Task Internal_UpdatePlaybackStatus(PlaybackStatus newStatus)
 
 This separation ensures that Infrastructure deals with raw external data, while the Server layer works with SnapDog2's consistent domain model. Mapping occurs at the boundary, often within Managers or Query Handlers.
 
-### 4.2.4 State Change Flow
+### 4.2.4. State Change Flow
 
 The flow maintains unidirectional data updates and clear responsibility:
 
@@ -140,7 +140,7 @@ The flow maintains unidirectional data updates and clear responsibility:
 
 This ensures changes flow from external -> infrastructure repo -> internal notification -> server state -> external notification -> external systems.
 
-## 4.3 Event-Driven Architecture
+## 4.3. Event-Driven Architecture
 
 Internal communication relies heavily on MediatR notifications (`INotification`).
 
@@ -148,7 +148,7 @@ Internal communication relies heavily on MediatR notifications (`INotification`)
 * **Events Handled By:** `/Server` layer components (Managers, other Services) to update their internal state based on external changes, and by `/Infrastructure` Notification Handlers (`MqttStatusNotifier`, `KnxStatusNotifier`) to propagate SnapDog2 state changes outwards.
 * **Benefits:** Decouples components, allowing different parts of the system to react to events without direct dependencies.
 
-## 4.4 Startup Sequence
+## 4.4. Startup Sequence
 
 Managed by `/Worker/Program.cs` and the main `IHostedService`.
 
@@ -170,7 +170,7 @@ Managed by `/Worker/Program.cs` and the main `IHostedService`.
     * Publish initial state to MQTT (retain=true) / KNX status GAs.
 8. `IHostedService.ExecuteAsync` runs (e.g., `await Task.Delay(Timeout.Infinite, stoppingToken)`).
 
-## 4.5 Error Handling Strategy
+## 4.5. Error Handling Strategy
 
 Relies on:
 

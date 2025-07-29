@@ -1,8 +1,8 @@
-# Cross-Cutting Concerns
+# 5. Cross-Cutting Concerns
 
 This chapter details essential concepts and patterns that permeate multiple layers and components of the SnapDog2 application. These cross-cutting concerns ensure consistency, reliability, and maintainability throughout the codebase. They include the standardized approach to error handling, the logging strategy, integration with observability tools, and input validation mechanisms.
 
-## 5.1 Error Handling Strategy
+## 5.1. Error Handling Strategy
 
 SnapDog2 employs a strict and consistent error handling strategy centered around the **Result Pattern**. This pattern is **mandatory** for all operations within the `/Server` and `/Infrastructure` layers that can encounter predictable failures (e.g., business rule violations, external service unavailability after retries, resource not found).
 
@@ -14,7 +14,7 @@ SnapDog2 employs a strict and consistent error handling strategy centered around
 4. **Propagation & Handling:** Callers (e.g., MediatR handlers in `/Server`, other services) **must** check the `IsSuccess` or `IsFailure` property of the returned `Result` object. If `IsFailure` is true, the caller should handle the failure appropriately (e.g., log a warning/error, return the failure `Result` further up the stack, potentially publish an `ErrorNotification`). The `Value` property of `Result<T>` should only be accessed if `IsSuccess` is true.
 5. **API Layer Exception Handling:** The `/Api` layer translates `Result.Failure` outcomes received from MediatR handlers into appropriate HTTP error responses (e.g., 400 Bad Request, 404 Not Found, 500 Internal Server Error) using the standard `ApiResponse` structure (Section 11.4.1). Unhandled exceptions bubbling up to the API layer should be caught by global exception handling middleware, logged critically, and result in a generic 500 Internal Server Error response.
 
-### 5.1.1 Result Pattern Implementation (Canonical Definition)
+### 5.1.1. Result Pattern Implementation (Canonical Definition)
 
 These records provide the standard way to represent operation outcomes throughout the application.
 
@@ -189,7 +189,7 @@ public class Result<T> : Result // Inherits properties from non-generic Result
 }
 ```
 
-### 5.1.2 Usage in Services
+### 5.1.2. Usage in Services
 
 All service methods in `/Server` and `/Infrastructure` that perform operations which might fail operationally (network calls, business logic checks, finding resources) must return `Task<Result>` or `Task<Result<T>>`.
 
@@ -227,7 +227,7 @@ public async Task<Result> Handle(SomeZoneCommand request, CancellationToken canc
 }
 ```
 
-## 5.2 Logging Strategy
+## 5.2. Logging Strategy
 
 Logging uses the `Microsoft.Extensions.Logging.ILogger<T>` abstraction throughout the application. The concrete implementation is provided by **Serilog**, configured during application startup (`/Worker/Program.cs`).
 
@@ -271,7 +271,7 @@ Log.Logger = new LoggerConfiguration()
 // builder.Host.UseSerilog();
 ```
 
-## 5.3 Instrumentation and Metrics
+## 5.3. Instrumentation and Metrics
 
 Observability is achieved using **OpenTelemetry**.
 
@@ -280,7 +280,7 @@ Observability is achieved using **OpenTelemetry**.
 
 (See Section 13 for detailed OpenTelemetry setup and usage).
 
-## 5.4 Validation
+## 5.4. Validation
 
 Input validation is primarily handled using the **FluentValidation** library.
 
@@ -318,7 +318,7 @@ public class SetZoneVolumeCommandValidator : AbstractValidator<SetZoneVolumeComm
 }
 ```
 
-## 5.5 Interplay
+## 5.5. Interplay
 
 These cross-cutting concerns interact seamlessly:
 
