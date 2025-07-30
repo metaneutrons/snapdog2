@@ -15,8 +15,11 @@ using SnapDog2.Core.Events;
 using SnapDog2.Infrastructure.Services;
 using SnapDog2.Infrastructure.Services.Models;
 using SnapDog2.Infrastructure.Repositories;
+using SnapDog2.Tests.Helpers;
 using Xunit;
 using Xunit.Abstractions;
+using Moq.Protected;
+using SnapDog2.Core.Models;
 
 namespace SnapDog2.Tests.Performance;
 
@@ -96,12 +99,15 @@ public class Phase5PerformanceAndResilienceTests
         throughput.Should().BeGreaterThan(50, "Throughput should meet minimum requirements");
     }
 
+
+
+    #endregion
+
     [Fact]
     public async Task ProtocolCoordination_WithConcurrentMultiProtocolOperations_ShouldBeThreadSafe()
     {
         // Arrange
         const int concurrentOperations = 100;
-        const int operationsPerType = 25;
         
         var coordinator = _serviceProvider.GetRequiredService<IProtocolCoordinator>();
         await coordinator.StartAsync();
@@ -131,12 +137,12 @@ public class Phase5PerformanceAndResilienceTests
                             taskIndex % 2 == 0, 
                             "Snapcast"),
                         2 => await coordinator.SynchronizeZoneVolumeChangeAsync(
-                            taskIndex % 3 + 1, 
+                            (taskIndex % 3 + 1).ToString(),
                             taskIndex % 101, 
                             "KNX"),
                         3 => await coordinator.SynchronizePlaybackCommandAsync(
                             taskIndex % 2 == 0 ? "PLAY" : "STOP", 
-                            taskIndex % 5 + 1, 
+                            (taskIndex % 5 + 1).ToString(),
                             "Snapcast"),
                         _ => throw new InvalidOperationException("Invalid operation type")
                     };
@@ -164,11 +170,8 @@ public class Phase5PerformanceAndResilienceTests
         
         // At least most operations should succeed (allowing for some debouncing)
         var successCount = results.Count(r => r);
-        successCount.Should().BeGreaterThan(concurrentOperations * 0.7, 
-            "Most operations should succeed despite concurrency");
+        successCount.Should().BeGreaterThan((int)(concurrentOperations * 0.7));
     }
-
-    #endregion
 
     #region Snapcast Service Performance Tests
 
@@ -378,12 +381,10 @@ public class Phase5PerformanceAndResilienceTests
         _output.WriteLine($"Average Processing Time: {averageProcessingTime:F2}ms");
 
         // Valid messages should be processed successfully
-        processedCount.Should().BeGreaterOrEqualTo(validMessageCount * 0.9, 
-            "Most valid messages should be processed");
+        processedCount.Should().BeGreaterThanOrEqualTo((int)(validMessageCount * 0.9));
         
         // Malformed messages should be handled without crashing
-        errorCount.Should().BeGreaterOrEqualTo(malformedMessageCount * 0.8, 
-            "Malformed messages should be detected and handled");
+        errorCount.Should().BeGreaterThanOrEqualTo((int)(malformedMessageCount * 0.8));
         
         // Processing time should remain reasonable even with errors
         averageProcessingTime.Should().BeLessThan(20, 
@@ -427,8 +428,8 @@ public class Phase5PerformanceAndResilienceTests
                     
                 case 2: // DPT 7.001
                     var ushortValue = (ushort)(i % 65536);
-                    var ushortBytes = KnxDptConverter.UShortToDpt7001(ushortValue);
-                    var ushortResult = KnxDptConverter.Dpt7001ToUShort(ushortBytes);
+                    var ushortBytes = KnxDptConverter.UInt16ToDpt7001(ushortValue);
+                    var ushortResult = KnxDptConverter.Dpt7001ToUInt16(ushortBytes);
                     break;
                     
                 case 3: // DPT 9.001
@@ -545,13 +546,16 @@ public class Phase5PerformanceAndResilienceTests
         
         // Setup mock HTTP responses
         var authResponse = CreateSubsonicAuthResponse(true);
-        mockHttpHandler.Protected()
-            .Setup<Task<HttpResponseMessage>>("SendAsync",
+        mockHttpHandler
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK)
+                ItExpr.IsAny<CancellationToken>()
+            )
+            .ReturnsAsync(new HttpResponseMessage
             {
-                Content = new StringContent(authResponse, Encoding.UTF8, "application/xml")
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(authResponse, Encoding.UTF8, "application/xml"),
             });
 
         var httpClient = new HttpClient(mockHttpHandler.Object);
@@ -566,7 +570,11 @@ public class Phase5PerformanceAndResilienceTests
         
         var options = Options.Create(config);
         var logger = new Mock<ILogger<SubsonicService>>();
-        var subsonicService = new SubsonicService(httpClient, options, logger.Object);
+        var mediator = new Mock<IMediator>();
+        var factory = new Mock<IHttpClientFactory>();
+        factory.Setup(_ => _.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+        var subsonicService = new SubsonicService(options, logger.Object, mediator.Object, factory.Object);
 
         var stopwatch = Stopwatch.StartNew();
 
@@ -766,7 +774,7 @@ public class Phase5PerformanceAndResilienceTests
             {
                 tasks.Add(coordinator.SynchronizeVolumeChangeAsync($"{i % 5 + 1}", i % 101, "MQTT"));
                 tasks.Add(coordinator.SynchronizeMuteChangeAsync($"{i % 5 + 1}", i % 2 == 0, "Snapcast"));
-                tasks.Add(coordinator.SynchronizeZoneVolumeChangeAsync(i % 3 + 1, i % 101, "KNX"));
+                tasks.Add(coordinator.SynchronizeZoneVolumeChangeAsync((i % 3 + 1).ToString(), i % 101, "KNX"));
             }
             
             await Task.WhenAll(tasks);
@@ -803,88 +811,51 @@ public class Phase5PerformanceAndResilienceTests
     private IServiceProvider BuildServiceProvider()
     {
         var services = new ServiceCollection();
-        
+
         // Add configuration
         var config = new SnapDogConfiguration
         {
-            Snapcast = new SnapcastConfiguration { Enabled = true },
-            Mqtt = new MqttConfiguration { Enabled = true },
-            Knx = new KnxConfiguration { Enabled = true },
-            Subsonic = new SubsonicConfiguration { Enabled = true }
+            Services = new ServicesConfiguration
+            {
+                Snapcast = new SnapcastConfiguration { Enabled = true },
+                Mqtt = new MqttConfiguration { Enabled = true },
+                Knx = new KnxConfiguration { Enabled = true },
+                Subsonic = new SubsonicConfiguration { Enabled = true }
+            }
         };
         services.AddSingleton(Options.Create(config));
-        
+
         // Add logging
-        services.AddLogging(builder => builder.AddConsole().SetMinimumLevel(LogLevel.Warning));
-        
-        // Add mocked services
-        services.AddSingleton(CreateMockSnapcastService());
-        services.AddSingleton(CreateMockMqttService());
-        services.AddSingleton(CreateMockKnxService());
-        services.AddSingleton(CreateMockSubsonicService());
-        services.AddSingleton(CreateMockClientRepository());
-        services.AddSingleton(CreateMockZoneRepository());
-        
-        // Add protocol coordinator
+        services.AddLogging(builder => builder.AddXUnit(_output).SetMinimumLevel(LogLevel.Debug));
+
+        // Add MediatR
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ProtocolCoordinator).Assembly));
+
+        // Add application services
         services.AddSingleton<IProtocolCoordinator, ProtocolCoordinator>();
-        
+        services.AddSingleton<ISnapcastService, SnapcastService>();
+        services.AddSingleton<IMqttService, MqttService>();
+        services.AddSingleton<IKnxService, KnxService>();
+        services.AddSingleton<ISubsonicService, SubsonicService>();
+        services.AddSingleton<IClientRepository, ClientRepository>();
+        services.AddSingleton<IZoneRepository, ZoneRepository>();
+        services.AddHttpClient();
+
         return services.BuildServiceProvider();
-    }
-
-    private ISnapcastService CreateMockSnapcastService()
-    {
-        var mock = new Mock<ISnapcastService>();
-        mock.Setup(x => x.SetClientVolumeAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
-        mock.Setup(x => x.SetClientMuteAsync(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
-        mock.Setup(x => x.IsServerAvailableAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
-        return mock.Object;
-    }
-
-    private IMqttService CreateMockMqttService()
-    {
-        var mock = new Mock<IMqttService>();
-        mock.Setup(x => x.SubscribeToCommandsAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
-        mock.Setup(x => x.PublishClientVolumeAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
-        mock.Setup(x => x.PublishZoneVolumeAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
-        mock.Setup(x => x.PublishClientStatusAsync(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
-        return mock.Object;
-    }
-
-    private IKnxService CreateMockKnxService()
-    {
-        var mock = new Mock<IKnxService>();
-        mock.Setup(x => x.SendVolumeCommandAsync(It.IsAny<KnxAddress>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
-        mock.Setup(x => x.SendBooleanCommandAsync(It.IsAny<KnxAddress>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
-        return mock.Object;
-    }
-
-    private ISubsonicService CreateMockSubsonicService()
-    {
-        var mock = new Mock<ISubsonicService>();
-        mock.Setup(x => x.IsServerAvailableAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
-        return mock.Object;
     }
 
     private IClientRepository CreateMockClientRepository()
     {
         var mock = new Mock<IClientRepository>();
-        mock.Setup(x => x.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((int id, CancellationToken ct) => new Client
+        mock.Setup(x => x.GetByIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((string id, CancellationToken ct) => new Client
             {
                 Id = id,
                 Name = $"Test Client {id}",
-                KnxVolumeGroupAddress = KnxAddress.Parse("1/2/3"),
-                KnxMuteGroupAddress = KnxAddress.Parse("1/2/4")
+                MacAddress = "00:00:00:00:00:00",
+                IpAddress = "127.0.0.1",
+                Status = SnapDog2.Core.Models.Enums.ClientStatus.Connected,
+                Volume = 50
             });
         return mock.Object;
     }
@@ -892,12 +863,12 @@ public class Phase5PerformanceAndResilienceTests
     private IZoneRepository CreateMockZoneRepository()
     {
         var mock = new Mock<IZoneRepository>();
-        mock.Setup(x => x.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((int id, CancellationToken ct) => new Zone
+        mock.Setup(x => x.GetByIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((string id, CancellationToken ct) => new Zone
             {
                 Id = id,
                 Name = $"Test Zone {id}",
-                KnxVolumeGroupAddress = KnxAddress.Parse("2/3/4")
+                KnxVolumeGroupAddress = "2/3/4"
             });
         return mock.Object;
     }

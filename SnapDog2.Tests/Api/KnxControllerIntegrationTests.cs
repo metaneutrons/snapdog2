@@ -56,14 +56,7 @@ public class KnxControllerIntegrationTests : IClassFixture<TestWebApplicationFac
     public async Task GetConnectionStatus_WithValidAuthentication_ShouldReturnOk()
     {
         // Arrange
-        var expectedStatus = new KnxConnectionStatus
-        {
-            IsConnected = true,
-            Gateway = "192.168.1.100",
-            Port = 3671,
-            ConnectionState = "Connected",
-            LastSuccessfulConnection = DateTime.UtcNow,
-        };
+        var expectedStatus = new KnxConnectionStatus { IsConnected = true };
         _mockMediator
             .Setup(m => m.Send(It.IsAny<GetKnxConnectionStatusQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedStatus);
@@ -90,12 +83,9 @@ public class KnxControllerIntegrationTests : IClassFixture<TestWebApplicationFac
         // Arrange
         var expectedDevices = new List<KnxDeviceInfo>
         {
-            new KnxDeviceInfo
+            new()
             {
-                IndividualAddress = "1.1.1",
-                DeviceType = "Light Switch",
-                ManufacturerId = 123,
-                IsProgrammingMode = false,
+                IndividualAddress = "1.1.1"
             },
         };
         _mockMediator
@@ -133,12 +123,12 @@ public class KnxControllerIntegrationTests : IClassFixture<TestWebApplicationFac
             .Setup(m =>
                 m.Send(
                     It.Is<WriteGroupValueCommand>(c =>
-                        c.Address.ToString() == "1/1/1" && c.Value.SequenceEqual(new byte[] { 0x01 })
+                        c.Address == "1/1/1" && c.Value.SequenceEqual(new byte[] { 0x01 })
                     ),
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(true);
+            .Returns(Task.FromResult(true));
 
         _client.DefaultRequestHeaders.Remove("X-API-Key");
         _client.DefaultRequestHeaders.Add("X-API-Key", "test-api-key");
@@ -170,20 +160,20 @@ public class KnxControllerIntegrationTests : IClassFixture<TestWebApplicationFac
     public async Task ReadGroupValue_WithValidRequest_ShouldReturnOk()
     {
         // Arrange
-        var requestDto = new ReadKnxValueRequest // Changed from ReadGroupValueCommand
+        var requestDto = new ReadKnxValueRequest
         {
-            Address = "1/1/1", // Address as string
+            Address = "1/1/1",
             Description = "Read light status",
         };
 
         _mockMediator
             .Setup(m =>
                 m.Send(
-                    It.Is<ReadGroupValueCommand>(c => c.Address.ToString() == "1/1/1"),
+                    It.Is<ReadGroupValueCommand>(c => c.Address == "1/1/1"),
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(new byte[] { 0x01 });
+            .Returns(Task.FromResult<byte[]?>(new byte[] { 0x01 }));
 
         _client.DefaultRequestHeaders.Remove("X-API-Key");
         _client.DefaultRequestHeaders.Add("X-API-Key", "test-api-key");
@@ -283,20 +273,20 @@ public class KnxControllerIntegrationTests : IClassFixture<TestWebApplicationFac
     public async Task SubscribeToGroup_WithValidRequest_ShouldReturnOk()
     {
         // Arrange
-        var requestDto = new SubscribeKnxRequest // Changed from SubscribeToGroupCommand
+        var requestDto = new SubscribeKnxRequest
         {
-            Address = "1/1/1", // Address as string
+            Address = "1/1/1",
             Description = "Subscribe to light switch",
         };
 
         _mockMediator
             .Setup(m =>
                 m.Send(
-                    It.Is<SubscribeToGroupCommand>(c => c.Address.ToString() == "1/1/1"),
+                    It.Is<SubscribeToGroupCommand>(c => c.Address == "1/1/1"),
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(true);
+            .Returns(Task.FromResult(true));
 
         _client.DefaultRequestHeaders.Remove("X-API-Key");
         _client.DefaultRequestHeaders.Add("X-API-Key", "test-api-key");
@@ -378,20 +368,20 @@ public class KnxControllerIntegrationTests : IClassFixture<TestWebApplicationFac
     public async Task UnsubscribeFromGroup_WithValidRequest_ShouldReturnOk()
     {
         // Arrange
-        var requestDto = new UnsubscribeKnxRequest // Changed from UnsubscribeFromGroupCommand
+        var requestDto = new UnsubscribeKnxRequest
         {
-            Address = "1/1/1", // Address as string
+            Address = "1/1/1",
             Description = "Unsubscribe from light switch",
         };
 
         _mockMediator
             .Setup(m =>
                 m.Send(
-                    It.Is<UnsubscribeFromGroupCommand>(c => c.Address.ToString() == "1/1/1"),
+                    It.Is<UnsubscribeFromGroupCommand>(c => c.Address == "1/1/1"),
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(true);
+            .Returns(Task.FromResult(true));
 
         _client.DefaultRequestHeaders.Remove("X-API-Key");
         _client.DefaultRequestHeaders.Add("X-API-Key", "test-api-key");

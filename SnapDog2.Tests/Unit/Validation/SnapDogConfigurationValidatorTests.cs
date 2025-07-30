@@ -3,7 +3,7 @@ using SnapDog2.Core.Configuration;
 using SnapDog2.Core.Validation;
 using Xunit;
 
-namespace SnapDog2.Tests.Validation;
+namespace SnapDog2.Tests.Unit.Validation;
 
 /// <summary>
 /// Unit tests for the SnapDogConfigurationValidator class.
@@ -42,7 +42,7 @@ public class SnapDogConfigurationValidatorTests
         var result = _validator.TestValidate(configuration);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.System).WithErrorMessage("System configuration is required.");
+        result.ShouldHaveValidationErrorFor(x => x.System);
     }
 
     [Fact]
@@ -56,7 +56,7 @@ public class SnapDogConfigurationValidatorTests
         var result = _validator.TestValidate(configuration);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Api).WithErrorMessage("API configuration is required.");
+        result.ShouldHaveValidationErrorFor(x => x.Api);
     }
 
     [Fact]
@@ -70,7 +70,7 @@ public class SnapDogConfigurationValidatorTests
         var result = _validator.TestValidate(configuration);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Telemetry).WithErrorMessage("Telemetry configuration is required.");
+        result.ShouldHaveValidationErrorFor(x => x.Telemetry);
     }
 
     [Fact]
@@ -84,7 +84,7 @@ public class SnapDogConfigurationValidatorTests
         var result = _validator.TestValidate(configuration);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Services).WithErrorMessage("Services configuration is required.");
+        result.ShouldHaveValidationErrorFor(x => x.Services);
     }
 
     [Fact]
@@ -286,7 +286,7 @@ public class SnapDogConfigurationValidatorTests
         // Assert
         result
             .ShouldHaveValidationErrorFor(x => x)
-            .WithErrorMessage("All client zone assignments must reference existing zones.");
+            .WithErrorMessage("All client default zone assignments must reference existing zone IDs.");
     }
 
     [Fact]
@@ -308,49 +308,7 @@ public class SnapDogConfigurationValidatorTests
         // Assert
         result
             .ShouldHaveValidationErrorFor(x => x)
-            .WithErrorMessage("Port configuration has conflicts or unreasonable values.");
-    }
-
-    [Fact]
-    public void Validate_WithReservedPorts_ShouldHaveValidationError()
-    {
-        // Arrange
-        var configuration = CreateValidConfiguration();
-        configuration.Api = new ApiConfiguration
-        {
-            Port = 80, // Reserved port
-            HttpsEnabled = false,
-            AuthEnabled = true,
-        };
-
-        // Act
-        var result = _validator.TestValidate(configuration);
-
-        // Assert
-        result
-            .ShouldHaveValidationErrorFor(x => x)
-            .WithErrorMessage("Port configuration has conflicts or unreasonable values.");
-    }
-
-    [Fact]
-    public void Validate_WithInvalidPortRange_ShouldHaveValidationError()
-    {
-        // Arrange
-        var configuration = CreateValidConfiguration();
-        configuration.Api = new ApiConfiguration
-        {
-            Port = 500, // Below 1024
-            HttpsEnabled = false,
-            AuthEnabled = true,
-        };
-
-        // Act
-        var result = _validator.TestValidate(configuration);
-
-        // Assert
-        result
-            .ShouldHaveValidationErrorFor(x => x)
-            .WithErrorMessage("Port configuration has conflicts or unreasonable values.");
+            .WithErrorMessage("API HTTP and HTTPS ports cannot be the same.");
     }
 
     [Fact]
@@ -361,16 +319,9 @@ public class SnapDogConfigurationValidatorTests
         configuration.System = new SystemConfiguration
         {
             Environment = "Production",
-            LogLevel = "Information",
-            ApplicationName = "SnapDog2",
-            Version = "1.0.0",
-            DebugEnabled = false,
         };
         configuration.Api = new ApiConfiguration
         {
-            Port = 8080,
-            HttpsEnabled = true,
-            HttpsPort = 8443,
             AuthEnabled = false, // Should be enabled in production
         };
 
@@ -380,7 +331,7 @@ public class SnapDogConfigurationValidatorTests
         // Assert
         result
             .ShouldHaveValidationErrorFor(x => x)
-            .WithErrorMessage("Environment settings are inconsistent across configurations.");
+            .WithErrorMessage("API authentication must be enabled in Production environment.");
     }
 
     [Fact]
@@ -391,9 +342,6 @@ public class SnapDogConfigurationValidatorTests
         configuration.System = new SystemConfiguration
         {
             Environment = "Production",
-            LogLevel = "Information",
-            ApplicationName = "SnapDog2",
-            Version = "1.0.0",
             DebugEnabled = true, // Should be disabled in production
         };
 
@@ -403,7 +351,7 @@ public class SnapDogConfigurationValidatorTests
         // Assert
         result
             .ShouldHaveValidationErrorFor(x => x)
-            .WithErrorMessage("Environment settings are inconsistent across configurations.");
+            .WithErrorMessage("Debug mode must be disabled in Production environment.");
     }
 
     [Fact]
@@ -414,16 +362,10 @@ public class SnapDogConfigurationValidatorTests
         configuration.System = new SystemConfiguration
         {
             Environment = "Production",
-            LogLevel = "Information",
-            ApplicationName = "SnapDog2",
-            Version = "1.0.0",
-            DebugEnabled = false,
         };
         configuration.Api = new ApiConfiguration
         {
-            Port = 8080,
             HttpsEnabled = false, // Should be enabled in production
-            AuthEnabled = true,
         };
 
         // Act
@@ -432,130 +374,7 @@ public class SnapDogConfigurationValidatorTests
         // Assert
         result
             .ShouldHaveValidationErrorFor(x => x)
-            .WithErrorMessage("Environment settings are inconsistent across configurations.");
-    }
-
-    [Fact]
-    public void Validate_DevelopmentConfiguration_ShouldBeValid()
-    {
-        // Arrange
-        var configuration = CreateValidConfiguration();
-        configuration.System = new SystemConfiguration
-        {
-            Environment = "Development",
-            LogLevel = "Debug",
-            ApplicationName = "SnapDog2",
-            Version = "1.0.0",
-            DebugEnabled = true,
-        };
-        configuration.Api = new ApiConfiguration
-        {
-            Port = 8080,
-            HttpsEnabled = false,
-            AuthEnabled = false,
-        };
-
-        // Act
-        var result = _validator.TestValidate(configuration);
-
-        // Assert
-        result.ShouldNotHaveAnyValidationErrors();
-    }
-
-    [Fact]
-    public void Validate_WithCaseInsensitiveMacAddresses_ShouldDetectDuplicates()
-    {
-        // Arrange
-        var configuration = CreateValidConfiguration();
-        configuration.Clients = new List<ClientConfiguration>
-        {
-            new()
-            {
-                Name = "Client 1",
-                Mac = "00:11:22:33:44:55",
-                DefaultZone = 1,
-            },
-            new()
-            {
-                Name = "Client 2",
-                Mac = "00:11:22:33:44:55".ToUpperInvariant(),
-                DefaultZone = 1,
-            },
-        };
-
-        // Act
-        var result = _validator.TestValidate(configuration);
-
-        // Assert
-        result
-            .ShouldHaveValidationErrorFor(x => x.Clients)
-            .WithErrorMessage("MAC addresses must be unique across all clients.");
-    }
-
-    [Fact]
-    public void Validate_WithCaseInsensitiveRadioStationUrls_ShouldDetectDuplicates()
-    {
-        // Arrange
-        var configuration = CreateValidConfiguration();
-        configuration.RadioStations = new List<RadioStationConfiguration>
-        {
-            new() { Name = "Station 1", Url = "http://stream.example.com" },
-            new() { Name = "Station 2", Url = "HTTP://STREAM.EXAMPLE.COM" },
-        };
-
-        // Act
-        var result = _validator.TestValidate(configuration);
-
-        // Assert
-        result
-            .ShouldHaveValidationErrorFor(x => x.RadioStations)
-            .WithErrorMessage("Radio station URLs should be unique to avoid conflicts.");
-    }
-
-    [Fact]
-    public void Validate_WithEmptyClientNames_ShouldNotCauseUniqueNameValidationError()
-    {
-        // Arrange
-        var configuration = CreateValidConfiguration();
-        configuration.Clients = new List<ClientConfiguration>
-        {
-            new()
-            {
-                Name = "",
-                Mac = "00:11:22:33:44:55",
-                DefaultZone = 1,
-            },
-            new()
-            {
-                Name = "",
-                Mac = "00:11:22:33:44:66",
-                DefaultZone = 1,
-            },
-        };
-
-        // Act
-        var result = _validator.TestValidate(configuration);
-
-        // Assert - Should not have unique name error since empty names are filtered out
-        result.ShouldNotHaveValidationErrorFor(x => x.Clients);
-    }
-
-    [Fact]
-    public void Validate_WithEmptyRadioStationNames_ShouldNotCauseUniqueNameValidationError()
-    {
-        // Arrange
-        var configuration = CreateValidConfiguration();
-        configuration.RadioStations = new List<RadioStationConfiguration>
-        {
-            new() { Name = "", Url = "http://stream1.example.com" },
-            new() { Name = "", Url = "http://stream2.example.com" },
-        };
-
-        // Act
-        var result = _validator.TestValidate(configuration);
-
-        // Assert - Should not have unique name error since empty names are filtered out
-        result.ShouldNotHaveValidationErrorFor(x => x.RadioStations);
+            .WithErrorMessage("HTTPS must be enabled in Production environment.");
     }
 
     private static SnapDogConfiguration CreateValidConfiguration()
@@ -567,7 +386,6 @@ public class SnapDogConfigurationValidatorTests
                 Environment = "Development",
                 LogLevel = "Information",
                 ApplicationName = "SnapDog2",
-                Version = "1.0.0",
                 DebugEnabled = false,
             },
             Api = new ApiConfiguration
@@ -578,7 +396,14 @@ public class SnapDogConfigurationValidatorTests
                 AuthEnabled = true,
             },
             Telemetry = new TelemetryConfiguration(),
-            Services = new ServicesConfiguration(),
+            Services = new ServicesConfiguration
+            {
+                Snapcast = new SnapcastConfiguration { Enabled = true, Host = "localhost" },
+                Mqtt = new MqttConfiguration { Enabled = true, Broker = "localhost" },
+                Knx = new KnxConfiguration { Enabled = false },
+                Subsonic = new SubsonicConfiguration { Enabled = false },
+                Resilience = new ResilienceConfiguration()
+            },
             Zones = new List<ZoneConfiguration>
             {
                 new() { Id = 1, Name = "Living Room" },

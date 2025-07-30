@@ -24,6 +24,7 @@ public class KnxServiceIntegrationTests : IDisposable
     public KnxServiceIntegrationTests()
     {
         var services = new ServiceCollection();
+        var mockMediator = new Mock<MediatR.IMediator>();
 
         // Setup logging
         _mockLogger = new Mock<ILogger<KnxService>>();
@@ -42,9 +43,10 @@ public class KnxServiceIntegrationTests : IDisposable
         _mockOptions.Setup(x => x.Value).Returns(knxConfig);
 
         services.AddSingleton(_mockOptions.Object);
+        services.AddSingleton(mockMediator.Object);
 
         _serviceProvider = services.BuildServiceProvider();
-        _knxService = new KnxService(_mockOptions.Object, _mockLogger.Object);
+        _knxService = new KnxService(_mockOptions.Object, _mockLogger.Object, mockMediator.Object);
     }
 
     public void Dispose()
@@ -160,14 +162,21 @@ public class KnxServiceIntegrationTests : IDisposable
     public void Constructor_WithNullConfiguration_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new KnxService(null!, _mockLogger.Object));
+        Assert.Throws<ArgumentNullException>(() => new KnxService(null!, _mockLogger.Object, new Mock<MediatR.IMediator>().Object));
     }
 
     [Fact]
     public void Constructor_WithNullLogger_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new KnxService(_mockOptions.Object, null!));
+        Assert.Throws<ArgumentNullException>(() => new KnxService(_mockOptions.Object, null!, new Mock<MediatR.IMediator>().Object));
+    }
+
+    [Fact]
+    public void Constructor_WithNullMediator_ShouldThrowArgumentNullException()
+    {
+        // Act & Assert
+        Assert.Throws<ArgumentNullException>(() => new KnxService(_mockOptions.Object, _mockLogger.Object, null!));
     }
 
     [Fact]
@@ -226,7 +235,7 @@ public class KnxServiceIntegrationTests : IDisposable
         var mockOptions = new Mock<IOptions<KnxConfiguration>>();
         mockOptions.Setup(x => x.Value).Returns(config);
 
-        var service = new KnxService(mockOptions.Object, _mockLogger.Object);
+        var service = new KnxService(mockOptions.Object, _mockLogger.Object, new Mock<MediatR.IMediator>().Object);
 
         // Act
         service.Dispose();
