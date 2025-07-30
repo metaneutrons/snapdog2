@@ -1,11 +1,9 @@
-version: "3.8"
-
 services:
   # SnapDog2 application - container-only development with full debugging
   snapdog:
     build:
       context: .
-      dockerfile: docker/Dockerfile
+      dockerfile: ./Dockerfile
       target: development # Multi-stage development target
     volumes:
       - .:/app:cached # Mount source code for hot reload
@@ -39,8 +37,8 @@ services:
     ports:
       - "8000:80" # Only exposed port!
     volumes:
-      - devcontainer/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
-      - devcontainer/caddy/site:/srv:ro
+      - ./devcontainer/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./devcontainer/caddy/site:/srv:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
@@ -59,7 +57,7 @@ services:
   # Snapcast Server - NO HOST PORTS
   snapcast-server:
     build:
-      context: devcontainer/snapcast-server
+      context: ./devcontainer/snapcast-server
     container_name: snapdog-snapcast-server
     hostname: snapcast-server
     networks:
@@ -70,7 +68,7 @@ services:
   # Base Snapcast client configuration (not directly instantiated)
   snapcast-client: &snapcast-client-base
     build:
-      context: devcontainer/snapcast-client
+      context: ./devcontainer/snapcast-client
     restart: unless-stopped
     depends_on:
       - snapcast-server
@@ -118,7 +116,7 @@ services:
     image: eclipse-mosquitto:2.0
     container_name: snapdog-mqtt
     volumes:
-      - devcontainer/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./devcontainer/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
       - mqtt_data:/mosquitto/data
       - mqtt_logs:/mosquitto/log
     networks:
@@ -138,7 +136,7 @@ services:
       ND_DATAFOLDER: /data
       ND_BASEURL: "/music" # Configure for reverse proxy
     volumes:
-      - ./music:/music:ro
+      - ./devcontainer/music:/music:ro
       - navidrome_data:/data
     networks:
       snapdog-dev:
