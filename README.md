@@ -53,36 +53,90 @@ make dev
 
 ## Architecture
 
-```plaintext
-┌─────────────────────────────────────────────────────────────────┐
-│                 Docker Network: 172.20.0.0/16                   │
-│                                                                 │
-│  ┌─────────────┐  ┌──────────────────────────────────────────┐  │
-│  │ Caddy       │◄─┤         Single Port Access               │  │
-│  │ 172.20.0.4  │  │         http://localhost:8000            │  │
-│  │ :8000       │  └──────────────────────────────────────────┘  │
-│  └─────────────┘                                                │
-│         │                                                       │
-│         ▼                                                       │
-│  ┌─────────────┐  ┌──────────────┐  ┌─────────────────────────┐ │
-│  │ SnapDog2    │  │ Snapcast     │  │    Snapcast Clients     │ │
-│  │ 172.20.0.2  │◄─┤ Server       │◄─┤ Living│Kitchen│Bedroom  │ │
-│  │ :5000       │  │ 172.20.0.5   │  │ .0.6  │ .0.7  │ .0.8    │ │
-│  └─────────────┘  │ :1704/:1780  │  │ :1780 │ :1780 │ :1780   │ │
-│         │         └──────────────┘  └─────────────────────────┘ │
-│         ▼                                                       │
-│  ┌─────────────┐  ┌──────────────┐  ┌─────────────────────────┐ │
-│  │ Navidrome   │  │ MQTT Broker  │  │ KNX Gateway             │ │
-│  │ 172.20.0.9  │  │ 172.20.0.3   │  │ 172.20.0.10             │ │
-│  │ :4533       │  │ :1883        │  │ :6720                   │ │
-│  └─────────────┘  └──────────────┘  └─────────────────────────┘ │
-│                                                                 │
-│  ┌─────────────┐  ┌──────────────┐  ┌─────────────────────────┐ │
-│  │ Jaeger      │  │ Prometheus   │  │ Grafana                 │ │
-│  │ 172.20.0.11 │  │ 172.20.0.12  │  │ 172.20.0.13             │ │
-│  │ :16686      │  │ :9090        │  │ :3000                   │ │
-│  └─────────────┘  └──────────────┘  └─────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph "Docker Network: 172.20.0.0/16"
+        subgraph "External Access"
+            HOST[Host: localhost:8000]
+        end
+        
+        subgraph "Reverse Proxy"
+            CADDY["🌐 Caddy<br/>172.20.0.4:8000"]
+        end
+        
+        subgraph "Application Layer"
+            APP["🎵 SnapDog2<br/>172.20.0.2:5000"]
+        end
+        
+        subgraph "Audio Services"
+            SNAPSERVER["📻 Snapcast Server<br/>172.20.0.5<br/>:1704 (JSON-RPC)<br/>:1780 (Web UI)"]
+            NAVIDROME["💿 Navidrome<br/>172.20.0.9:4533"]
+        end
+        
+        subgraph "Snapcast Clients"
+            LIVING["🛋️ Living Room<br/>172.20.0.6:1780"]
+            KITCHEN["🍽️ Kitchen<br/>172.20.0.7:1780"]
+            BEDROOM["🛏️ Bedroom<br/>172.20.0.8:1780"]
+        end
+        
+        subgraph "IoT & Protocol Services"
+            MQTT["📡 MQTT Broker<br/>172.20.0.3:1883"]
+            KNX["🏠 KNX Gateway<br/>172.20.0.10:6720"]
+        end
+        
+        subgraph "Observability"
+            JAEGER["🔍 Jaeger<br/>172.20.0.11:16686"]
+            PROMETHEUS["📈 Prometheus<br/>172.20.0.12:9090"]
+            GRAFANA["📊 Grafana<br/>172.20.0.13:3000"]
+        end
+    end
+    
+    %% External connections
+    HOST --> CADDY
+    
+    %% Caddy reverse proxy routes
+    CADDY --> APP
+    CADDY --> SNAPSERVER
+    CADDY --> NAVIDROME
+    CADDY --> LIVING
+    CADDY --> KITCHEN
+    CADDY --> BEDROOM
+    CADDY --> JAEGER
+    CADDY --> PROMETHEUS
+    CADDY --> GRAFANA
+    
+    %% Application connections
+    APP --> SNAPSERVER
+    APP --> MQTT
+    APP --> NAVIDROME
+    APP --> KNX
+    APP --> JAEGER
+    
+    %% Audio streaming
+    SNAPSERVER --> LIVING
+    SNAPSERVER --> KITCHEN
+    SNAPSERVER --> BEDROOM
+    
+    %% Monitoring flows
+    APP --> PROMETHEUS
+    PROMETHEUS --> GRAFANA
+    
+    %% Styling
+    classDef external fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef proxy fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef app fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
+    classDef audio fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    classDef client fill:#fce4ec,stroke:#ad1457,stroke-width:2px
+    classDef iot fill:#f1f8e9,stroke:#558b2f,stroke-width:2px
+    classDef monitoring fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    
+    class HOST external
+    class CADDY proxy
+    class APP app
+    class SNAPSERVER,NAVIDROME audio
+    class LIVING,KITCHEN,BEDROOM client
+    class MQTT,KNX iot
+    class JAEGER,PROMETHEUS,GRAFANA monitoring
 ```
 
 ## Service Access
