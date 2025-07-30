@@ -1,0 +1,133 @@
+{
+    admin off
+}
+
+:80 {
+    # Main landing page
+    @not_server {
+        not path /server*
+        not path /snapcast*
+        not path /clients*
+        not path /music*
+        not path /tracing*
+        not path /grafana*
+        not path /prometheus*
+    }
+
+    handle @not_server {
+        root * /srv
+        file_server
+        try_files {path} /index.html
+    }
+
+    # Snapcast server - redirect /server to /server/ for proper relative paths
+    @server_exact {
+        path /server
+        path_regexp server ^/server$
+    }
+
+    handle @server_exact {
+        redir * /server/ 301
+    }
+
+    # API endpoints (must come before the general server handler)
+    handle /server/api/v1/* {
+        reverse_proxy http://snapcast-server:1780
+    }
+
+    # Snapcast server with trailing slash
+    handle /server/* {
+        uri strip_prefix /server
+        reverse_proxy http://snapcast-server:1780
+    }
+
+    # WebSocket connections to Snapcast server - direct forward for websocket
+    handle /server/jsonrpc {
+        reverse_proxy http://snapcast-server:1780 {
+            header_up Host {host}
+            header_up Connection {http.request.header.Connection}
+            header_up Upgrade {http.request.header.Upgrade}
+        }
+    }
+
+    # WebSocket connections for control interface
+    handle /snapcast* {
+        uri strip_prefix /snapcast
+        reverse_proxy http://snapcast-server:1705
+    }
+
+    # Navidrome music server
+    handle /music* {
+        uri strip_prefix /music
+        reverse_proxy http://navidrome:4533
+    }
+
+    # Jaeger tracing
+    handle /tracing* {
+        uri strip_prefix /tracing
+        reverse_proxy http://jaeger:16686
+    }
+
+    # Grafana monitoring
+    handle /grafana* {
+        reverse_proxy http://grafana:3000 {
+            header_up Host {host}
+        }
+    }
+
+    # Prometheus metrics
+    handle /prometheus* {
+        reverse_proxy http://prometheus:9090 {
+            header_up Host {host}
+        }
+    }
+
+    # Redirect for clients
+    @client_living_room_exact {
+        path /clients/living-room
+        path_regexp client_lr ^/clients/living-room$
+    }
+
+    @client_kitchen_exact {
+        path /clients/kitchen
+        path_regexp client_k ^/clients/kitchen$
+    }
+
+    @client_bedroom_exact {
+        path /clients/bedroom
+        path_regexp client_b ^/clients/bedroom$
+    }
+
+    handle @client_living_room_exact {
+        redir * /clients/living-room/ 301
+    }
+
+    handle @client_kitchen_exact {
+        redir * /clients/kitchen/ 301
+    }
+
+    handle @client_bedroom_exact {
+        redir * /clients/bedroom/ 301
+    }
+
+    # Clients with trailing slashes (mapped to our service names)
+    handle /clients/living-room/* {
+        uri strip_prefix /clients/living-room
+        reverse_proxy http://snapcast-client-living-room:1780
+    }
+
+    handle /clients/kitchen/* {
+        uri strip_prefix /clients/kitchen
+        reverse_proxy http://snapcast-client-kitchen:1780
+    }
+
+    handle /clients/bedroom/* {
+        uri strip_prefix /clients/bedroom
+        reverse_proxy http://snapcast-client-bedroom:1780
+    }
+
+    log {
+        output stdout
+        format console
+    }
+}

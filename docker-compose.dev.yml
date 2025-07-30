@@ -1,0 +1,212 @@
+version: "3.8"
+
+services:
+  # SnapDog2 application - container-only development with full debugging
+  snapdog:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: development # Multi-stage development target
+    volumes:
+      - .:/app:cached # Mount source code for hot reload
+      - ~/.nuget/packages:/home/vscode/.nuget/packages:cached # NuGet cache
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+      - DOTNET_USE_POLLING_FILE_WATCHER=true
+      - DOTNET_WATCH_RESTART_ON_RUDE_EDIT=true
+      # Internal networking - no localhost needed!
+      - SNAPDOG_SERVICES_SNAPCAST_HOST=snapcast-server
+      - SNAPDOG_SERVICES_SNAPCAST_PORT=1704
+      - SNAPDOG_SERVICES_MQTT_BROKER=mqtt:1883
+      - SNAPDOG_SERVICES_SUBSONIC_SERVER_URL=http://navidrome:4533
+      - SNAPDOG_TELEMETRY_JAEGER_ENDPOINT=http://jaeger:14268
+      - SNAPDOG_SERVICES_KNX_GATEWAY=knx-simulator:6720
+    depends_on:
+      - snapcast-server
+      - mqtt
+      - navidrome
+    networks:
+      snapdog-dev:
+        ipv4_address: 172.20.0.2
+    # Enable debugger
+    stdin_open: true
+    tty: true
+
+  # Caddy reverse proxy with dashboard - SINGLE PORT TO HOST
+  caddy:
+    image: caddy:2-alpine
+    container_name: snapdog-caddy
+    ports:
+      - "8000:80" # Only exposed port!
+    volumes:
+      - devcontainer/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - devcontainer/caddy/site:/srv:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - snapdog
+      - snapcast-server
+      - snapcast-client-living-room
+      - snapcast-client-kitchen
+      - snapcast-client-bedroom
+      - navidrome
+      - jaeger
+    networks:
+      snapdog-dev:
+        ipv4_address: 172.20.0.4
+    restart: unless-stopped
+
+  # Snapcast Server - NO HOST PORTS
+  snapcast-server:
+    build:
+      context: devcontainer/snapcast-server
+    container_name: snapdog-snapcast-server
+    hostname: snapcast-server
+    networks:
+      snapdog-dev:
+        ipv4_address: 172.20.0.5
+    restart: unless-stopped
+
+  # Base Snapcast client configuration (not directly instantiated)
+  snapcast-client: &snapcast-client-base
+    build:
+      context: devcontainer/snapcast-client
+    restart: unless-stopped
+    depends_on:
+      - snapcast-server
+    environment:
+      - SNAPSERVER_HOST=172.20.0.5 # IP address of snapcast-server
+
+  # Living room client
+  snapcast-client-living-room:
+    <<: *snapcast-client-base
+    environment:
+      - SNAPSERVER_HOST=172.20.0.5
+      - CLIENT_ID=living-room
+      - FIXED_MAC_ADDRESS=02:42:ac:11:00:10
+    networks:
+      snapdog-dev:
+        ipv4_address: 172.20.0.6
+        mac_address: 02:42:ac:11:00:10
+
+  # Kitchen client
+  snapcast-client-kitchen:
+    <<: *snapcast-client-base
+    environment:
+      - SNAPSERVER_HOST=172.20.0.5
+      - CLIENT_ID=kitchen
+      - FIXED_MAC_ADDRESS=02:42:ac:11:00:11
+    networks:
+      snapdog-dev:
+        ipv4_address: 172.20.0.7
+        mac_address: 02:42:ac:11:00:11
+
+  # Bedroom client
+  snapcast-client-bedroom:
+    <<: *snapcast-client-base
+    environment:
+      - SNAPSERVER_HOST=172.20.0.5
+      - CLIENT_ID=bedroom
+      - FIXED_MAC_ADDRESS=02:42:ac:11:00:12
+    networks:
+      snapdog-dev:
+        ipv4_address: 172.20.0.8
+        mac_address: 02:42:ac:11:00:12
+
+  # MQTT Broker - NO HOST PORTS (internal only)
+  mqtt:
+    image: eclipse-mosquitto:2.0
+    container_name: snapdog-mqtt
+    volumes:
+      - devcontainer/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - mqtt_data:/mosquitto/data
+      - mqtt_logs:/mosquitto/log
+    networks:
+      snapdog-dev:
+        ipv4_address: 172.20.0.3
+    restart: unless-stopped
+
+  # Navidrome - NO HOST PORTS (via Caddy)
+  navidrome:
+    image: deluan/navidrome:latest
+    container_name: snapdog-navidrome
+    environment:
+      ND_SCANSCHEDULE: "1h"
+      ND_LOGLEVEL: info
+      ND_SESSIONTIMEOUT: "24h"
+      ND_MUSICFOLDER: /music
+      ND_DATAFOLDER: /data
+      ND_BASEURL: "/music" # Configure for reverse proxy
+    volumes:
+      - ./music:/music:ro
+      - navidrome_data:/data
+    networks:
+      snapdog-dev:
+        ipv4_address: 172.20.0.9
+    restart: unless-stopped
+
+  # KNX Gateway Simulator - NO HOST PORTS (internal only)
+  knx-simulator:
+    image: michelmu/knxd-docker:latest
+    container_name: snapdog-knx-simulator
+    environment:
+      - ADDRESS=1.1.128 # KNX daemon address
+      - CLIENT_ADDRESS=1.1.129:8 # Client address range
+      - INTERFACE=dummy # Use dummy interface for simulation
+      - DEBUG_ERROR_LEVEL=info # Debug level
+      - FILTERS=single # Filter configuration
+    networks:
+      snapdog-dev:
+        ipv4_address: 172.20.0.10
+    restart: unless-stopped
+
+  # Jaeger - NO HOST PORTS (via Caddy)
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: snapdog-jaeger
+    environment:
+      COLLECTOR_OTLP_ENABLED: true
+    networks:
+      snapdog-dev:
+        ipv4_address: 172.20.0.11
+    restart: unless-stopped
+
+  # Optional: Prometheus for metrics - NO HOST PORTS
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: snapdog-prometheus
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      snapdog-dev:
+        ipv4_address: 172.20.0.12
+    profiles: ["monitoring"]
+    restart: unless-stopped
+
+  # Optional: Grafana for visualization - NO HOST PORTS
+  grafana:
+    image: grafana/grafana:latest
+    container_name: snapdog-grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: snapdog-dev
+      GF_SERVER_ROOT_URL: http://localhost:8000/grafana/
+      GF_SERVER_SERVE_FROM_SUB_PATH: true
+    networks:
+      snapdog-dev:
+        ipv4_address: 172.20.0.13
+    profiles: ["monitoring"]
+    restart: unless-stopped
+
+volumes:
+  mqtt_data:
+  mqtt_logs:
+  navidrome_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  snapdog-dev:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
