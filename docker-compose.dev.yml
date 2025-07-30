@@ -1,6 +1,6 @@
 services:
   # SnapDog2 application - container-only development with full debugging
-  app:
+  snapdog-app:
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -41,7 +41,7 @@ services:
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
-      - snapdog
+      - snapdog-app
       - snapcast-server
       - snapcast-client-living-room
       - snapcast-client-kitchen
@@ -113,7 +113,7 @@ services:
   mqtt:
     image: eclipse-mosquitto:2.0
     volumes:
-      - ./devcontainer/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./devcontainer/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
       - mqtt_data:/mosquitto/data
       - mqtt_logs:/mosquitto/log
     networks:
