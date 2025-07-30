@@ -1,6 +1,6 @@
 services:
   # SnapDog2 application - container-only development with full debugging
-  snapdog:
+  app:
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -33,7 +33,6 @@ services:
   # Caddy reverse proxy with dashboard - SINGLE PORT TO HOST
   caddy:
     image: caddy:2-alpine
-    container_name: snapdog-caddy
     ports:
       - "8000:80" # Only exposed port!
     volumes:
@@ -58,7 +57,6 @@ services:
   snapcast-server:
     build:
       context: ./devcontainer/snapcast-server
-    container_name: snapdog-snapcast-server
     hostname: snapcast-server
     networks:
       snapdog-dev:
@@ -114,7 +112,6 @@ services:
   # MQTT Broker - NO HOST PORTS (internal only)
   mqtt:
     image: eclipse-mosquitto:2.0
-    container_name: snapdog-mqtt
     volumes:
       - ./devcontainer/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
       - mqtt_data:/mosquitto/data
@@ -127,7 +124,6 @@ services:
   # Navidrome - NO HOST PORTS (via Caddy)
   navidrome:
     image: deluan/navidrome:latest
-    container_name: snapdog-navidrome
     environment:
       ND_SCANSCHEDULE: "1h"
       ND_LOGLEVEL: info
@@ -146,7 +142,6 @@ services:
   # KNX Gateway Simulator - NO HOST PORTS (internal only)
   knx-simulator:
     image: michelmu/knxd-docker:latest
-    container_name: snapdog-knx-simulator
     environment:
       - ADDRESS=1.1.128 # KNX daemon address
       - CLIENT_ADDRESS=1.1.129:8 # Client address range
@@ -161,7 +156,6 @@ services:
   # Jaeger - NO HOST PORTS (via Caddy)
   jaeger:
     image: jaegertracing/all-in-one:latest
-    container_name: snapdog-jaeger
     environment:
       COLLECTOR_OTLP_ENABLED: true
     networks:
@@ -172,7 +166,6 @@ services:
   # Optional: Prometheus for metrics - NO HOST PORTS
   prometheus:
     image: prom/prometheus:latest
-    container_name: snapdog-prometheus
     volumes:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     networks:
@@ -184,7 +177,6 @@ services:
   # Optional: Grafana for visualization - NO HOST PORTS
   grafana:
     image: grafana/grafana:latest
-    container_name: snapdog-grafana
     environment:
       GF_SECURITY_ADMIN_PASSWORD: snapdog-dev
       GF_SERVER_ROOT_URL: http://localhost:8000/grafana/

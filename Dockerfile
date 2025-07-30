@@ -25,8 +25,9 @@ COPY --chown=vscode:vscode Directory.*.props ./
 COPY --chown=vscode:vscode global.json ./
 COPY --chown=vscode:vscode */*.csproj ./
 
-# Organize project files
-RUN for file in $(ls *.csproj); do mkdir -p ${file%.*}/ && mv $file ${file%.*}/; done
+# Organize project files and fix permissions
+RUN for file in $(ls *.csproj); do mkdir -p ${file%.*}/ && mv $file ${file%.*}/; done && \
+    chown -R vscode:vscode /app
 
 # Restore dependencies as vscode user
 USER vscode

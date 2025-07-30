@@ -40,7 +40,7 @@ dev-setup:
 	@echo "✅ Development environment ready!"
 	@echo ""
 	@echo "Next step:"
-	@echo "  make dev        # Start full development environment"
+	@echo "  make dev-start  # Start full development environment"
 
 # Start full development environment
 dev-start:
