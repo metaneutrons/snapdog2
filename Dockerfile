@@ -2,7 +2,7 @@
 # Supports both development (with debugging) and production builds
 
 # Development stage - for debugging and hot reload
-FROM mcr.microsoft.com/dotnet/sdk:9.0 as development
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS development
 WORKDIR /app
 
 # Install development tools for container debugging
