@@ -118,13 +118,24 @@ finally
 }
 
 /// <summary>
-/// Configures EnvoyConfig with custom type converters.
+/// Configures EnvoyConfig with custom type converters and .env file support.
 /// </summary>
 static void ConfigureEnvoyConfig()
 {
-    // TypeConverterRegistry.RegisterConverter(typeof(KnxAddress), new KnxAddressConverter()); // Temporarily commented out due to type mismatch
-    // TypeConverterRegistry.RegisterConverter(typeof(KnxAddress?), new KnxAddressConverter()); // Temporarily commented out due to type mismatch
+    // Set global prefix for all environment variables
     EnvConfig.GlobalPrefix = "SNAPDOG_";
+    
+    // Register custom type converters for KNX addresses
+    try
+    {
+        TypeConverterRegistry.RegisterConverter(typeof(KnxAddress), new KnxAddressConverter());
+        TypeConverterRegistry.RegisterConverter(typeof(KnxAddress?), new KnxAddressConverter());
+        Log.Information("Successfully registered KnxAddress type converters");
+    }
+    catch (Exception ex)
+    {
+        Log.Warning(ex, "Failed to register KnxAddress type converters, KNX addresses may not load correctly");
+    }
 }
 
 /// <summary>

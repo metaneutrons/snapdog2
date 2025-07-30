@@ -139,4 +139,221 @@ public class ZoneConfiguration
     /// </summary>
     [Env(Key = "GROUPING_ENABLED", Default = true)]
     public bool GroupingEnabled { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets the Snapcast sink path for this zone.
+    /// Maps to: SNAPDOG_ZONE_X_SINK
+    /// </summary>
+    [Env(Key = "SINK", Default = "")]
+    public string Sink { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the base MQTT topic for this zone.
+    /// Maps to: SNAPDOG_ZONE_X_MQTT_BASETOPIC
+    /// </summary>
+    [Env(Key = "MQTT_BASETOPIC", Default = "")]
+    public string MqttBaseTopic { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the MQTT configuration for this zone.
+    /// Maps environment variables with prefix: SNAPDOG_ZONE_X_MQTT_*
+    /// </summary>
+    [Env(NestedPrefix = "MQTT_")]
+    public MqttZoneConfiguration Mqtt { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the KNX configuration for this zone.
+    /// Maps environment variables with prefix: SNAPDOG_ZONE_X_KNX_*
+    /// </summary>
+    [Env(NestedPrefix = "KNX_")]
+    public KnxZoneConfiguration Knx { get; set; } = new();
+}
+
+/// <summary>
+/// MQTT configuration for a zone.
+/// Maps environment variables like SNAPDOG_ZONE_X_MQTT_* to properties.
+/// </summary>
+public class MqttZoneConfiguration
+{
+    /// <summary>
+    /// Gets or sets the MQTT topic for control commands.
+    /// Maps to: SNAPDOG_ZONE_X_MQTT_CONTROL_SET_TOPIC
+    /// </summary>
+    [Env(Key = "CONTROL_SET_TOPIC", Default = "")]
+    public string ControlSetTopic { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the MQTT topic for track control.
+    /// Maps to: SNAPDOG_ZONE_X_MQTT_TRACK_SET_TOPIC
+    /// </summary>
+    [Env(Key = "TRACK_SET_TOPIC", Default = "")]
+    public string TrackSetTopic { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the MQTT topic for playlist control.
+    /// Maps to: SNAPDOG_ZONE_X_MQTT_PLAYLIST_SET_TOPIC
+    /// </summary>
+    [Env(Key = "PLAYLIST_SET_TOPIC", Default = "")]
+    public string PlaylistSetTopic { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the MQTT topic for volume control.
+    /// Maps to: SNAPDOG_ZONE_X_MQTT_VOLUME_SET_TOPIC
+    /// </summary>
+    [Env(Key = "VOLUME_SET_TOPIC", Default = "")]
+    public string VolumeSetTopic { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the MQTT topic for mute control.
+    /// Maps to: SNAPDOG_ZONE_X_MQTT_MUTE_SET_TOPIC
+    /// </summary>
+    [Env(Key = "MUTE_SET_TOPIC", Default = "")]
+    public string MuteSetTopic { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the MQTT topic for control status.
+    /// Maps to: SNAPDOG_ZONE_X_MQTT_CONTROL_TOPIC
+    /// </summary>
+    [Env(Key = "CONTROL_TOPIC", Default = "")]
+    public string ControlTopic { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the MQTT topic for track status.
+    /// Maps to: SNAPDOG_ZONE_X_MQTT_TRACK_TOPIC
+    /// </summary>
+    [Env(Key = "TRACK_TOPIC", Default = "")]
+    public string TrackTopic { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the MQTT topic for playlist status.
+    /// Maps to: SNAPDOG_ZONE_X_MQTT_PLAYLIST_TOPIC
+    /// </summary>
+    [Env(Key = "PLAYLIST_TOPIC", Default = "")]
+    public string PlaylistTopic { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the MQTT topic for volume status.
+    /// Maps to: SNAPDOG_ZONE_X_MQTT_VOLUME_TOPIC
+    /// </summary>
+    [Env(Key = "VOLUME_TOPIC", Default = "")]
+    public string VolumeTopic { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the MQTT topic for mute status.
+    /// Maps to: SNAPDOG_ZONE_X_MQTT_MUTE_TOPIC
+    /// </summary>
+    [Env(Key = "MUTE_TOPIC", Default = "")]
+    public string MuteTopic { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the MQTT topic for general state information.
+    /// Maps to: SNAPDOG_ZONE_X_MQTT_STATE_TOPIC
+    /// </summary>
+    [Env(Key = "STATE_TOPIC", Default = "")]
+    public string StateTopic { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// KNX configuration for a zone.
+/// Maps environment variables like SNAPDOG_ZONE_X_KNX_* to properties.
+/// </summary>
+public class KnxZoneConfiguration
+{
+    /// <summary>
+    /// Gets or sets whether KNX integration is enabled for this zone.
+    /// Maps to: SNAPDOG_ZONE_X_KNX_ENABLED
+    /// </summary>
+    [Env(Key = "ENABLED", Default = false)]
+    public bool Enabled { get; set; } = false;
+
+    /// <summary>
+    /// Gets or sets the KNX group address for play command.
+    /// Maps to: SNAPDOG_ZONE_X_KNX_PLAY
+    /// </summary>
+    [Env(Key = "PLAY")]
+    public KnxAddress? Play { get; set; }
+
+    /// <summary>
+    /// Gets or sets the KNX group address for pause command.
+    /// Maps to: SNAPDOG_ZONE_X_KNX_PAUSE
+    /// </summary>
+    [Env(Key = "PAUSE")]
+    public KnxAddress? Pause { get; set; }
+
+    /// <summary>
+    /// Gets or sets the KNX group address for stop command.
+    /// Maps to: SNAPDOG_ZONE_X_KNX_STOP
+    /// </summary>
+    [Env(Key = "STOP")]
+    public KnxAddress? Stop { get; set; }
+
+    /// <summary>
+    /// Gets or sets the KNX group address for control status.
+    /// Maps to: SNAPDOG_ZONE_X_KNX_CONTROL_STATUS
+    /// </summary>
+    [Env(Key = "CONTROL_STATUS")]
+    public KnxAddress? ControlStatus { get; set; }
+
+    /// <summary>
+    /// Gets or sets the KNX group address for next track command.
+    /// Maps to: SNAPDOG_ZONE_X_KNX_NEXT
+    /// </summary>
+    [Env(Key = "NEXT")]
+    public KnxAddress? Next { get; set; }
+
+    /// <summary>
+    /// Gets or sets the KNX group address for previous track command.
+    /// Maps to: SNAPDOG_ZONE_X_KNX_PREVIOUS
+    /// </summary>
+    [Env(Key = "PREVIOUS")]
+    public KnxAddress? Previous { get; set; }
+
+    /// <summary>
+    /// Gets or sets the KNX group address for volume control.
+    /// Maps to: SNAPDOG_ZONE_X_KNX_VOLUME
+    /// </summary>
+    [Env(Key = "VOLUME")]
+    public KnxAddress? Volume { get; set; }
+
+    /// <summary>
+    /// Gets or sets the KNX group address for volume status.
+    /// Maps to: SNAPDOG_ZONE_X_KNX_VOLUME_STATUS
+    /// </summary>
+    [Env(Key = "VOLUME_STATUS")]
+    public KnxAddress? VolumeStatus { get; set; }
+
+    /// <summary>
+    /// Gets or sets the KNX group address for volume up command.
+    /// Maps to: SNAPDOG_ZONE_X_KNX_VOLUME_UP
+    /// </summary>
+    [Env(Key = "VOLUME_UP")]
+    public KnxAddress? VolumeUp { get; set; }
+
+    /// <summary>
+    /// Gets or sets the KNX group address for volume down command.
+    /// Maps to: SNAPDOG_ZONE_X_KNX_VOLUME_DOWN
+    /// </summary>
+    [Env(Key = "VOLUME_DOWN")]
+    public KnxAddress? VolumeDown { get; set; }
+
+    /// <summary>
+    /// Gets or sets the KNX group address for mute control.
+    /// Maps to: SNAPDOG_ZONE_X_KNX_MUTE
+    /// </summary>
+    [Env(Key = "MUTE")]
+    public KnxAddress? Mute { get; set; }
+
+    /// <summary>
+    /// Gets or sets the KNX group address for mute status.
+    /// Maps to: SNAPDOG_ZONE_X_KNX_MUTE_STATUS
+    /// </summary>
+    [Env(Key = "MUTE_STATUS")]
+    public KnxAddress? MuteStatus { get; set; }
+
+    /// <summary>
+    /// Gets or sets the KNX group address for mute toggle command.
+    /// Maps to: SNAPDOG_ZONE_X_KNX_MUTE_TOGGLE
+    /// </summary>
+    [Env(Key = "MUTE_TOGGLE")]
+    public KnxAddress? MuteToggle { get; set; }
 }
