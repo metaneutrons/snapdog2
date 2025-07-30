@@ -56,9 +56,7 @@ public class MqttControllerIntegrationTests : IClassFixture<TestWebApplicationFa
         var expectedStatus = new MqttConnectionStatusResponse
         {
             IsConnected = true,
-            BrokerHost = "localhost",
-            BrokerPort = 1883,
-            ClientId = "test-client",
+            BrokerHost = "localhost"
         };
         _mockMediator
             .Setup(m => m.Send(It.IsAny<GetMqttConnectionStatusQuery>(), It.IsAny<CancellationToken>()))

@@ -23,6 +23,7 @@ public class MqttServiceIntegrationTests : IDisposable
     public MqttServiceIntegrationTests()
     {
         var services = new ServiceCollection();
+        var mockMediator = new Mock<MediatR.IMediator>();
 
         // Setup logging
         _mockLogger = new Mock<ILogger<MqttService>>();
@@ -41,9 +42,10 @@ public class MqttServiceIntegrationTests : IDisposable
         _mockOptions.Setup(x => x.Value).Returns(mqttConfig);
 
         services.AddSingleton(_mockOptions.Object);
+        services.AddSingleton(mockMediator.Object);
 
         _serviceProvider = services.BuildServiceProvider();
-        _mqttService = new MqttService(_mockOptions.Object, _mockLogger.Object);
+        _mqttService = new MqttService(_mockOptions.Object, _mockLogger.Object, mockMediator.Object);
     }
 
     public void Dispose()
@@ -140,14 +142,21 @@ public class MqttServiceIntegrationTests : IDisposable
     public void Constructor_WithNullConfiguration_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new MqttService(null!, _mockLogger.Object));
+        Assert.Throws<ArgumentNullException>(() => new MqttService(null!, _mockLogger.Object, new Mock<MediatR.IMediator>().Object));
     }
 
     [Fact]
     public void Constructor_WithNullLogger_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new MqttService(_mockOptions.Object, null!));
+        Assert.Throws<ArgumentNullException>(() => new MqttService(_mockOptions.Object, null!, new Mock<MediatR.IMediator>().Object));
+    }
+
+    [Fact]
+    public void Constructor_WithNullMediator_ShouldThrowArgumentNullException()
+    {
+        // Act & Assert
+        Assert.Throws<ArgumentNullException>(() => new MqttService(_mockOptions.Object, _mockLogger.Object, null!));
     }
 
     [Fact]
@@ -206,7 +215,7 @@ public class MqttServiceIntegrationTests : IDisposable
         var mockOptions = new Mock<IOptions<SnapDog2.Core.Configuration.MqttConfiguration>>();
         mockOptions.Setup(x => x.Value).Returns(config);
 
-        var service = new MqttService(mockOptions.Object, _mockLogger.Object);
+        var service = new MqttService(mockOptions.Object, _mockLogger.Object, new Mock<MediatR.IMediator>().Object);
 
         // Act
         service.Dispose();
