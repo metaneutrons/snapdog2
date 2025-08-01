@@ -21,15 +21,15 @@ for var in "${!SNAPDOG_ZONE_@}"; do
         ## Set sink to environment variable or default
         SINK="/snapsinks/zone$ZONE"
         eval SINK_VAR="\$SNAPDOG_ZONE_${ZONE}_SINK"
-        if [[ -z "${SINK_VAR}" ]]; then
+        if [[ -n "${SINK_VAR}" ]]; then
             SINK=$SINK_VAR
         fi
-        echo -e with sink: $SINK
+        echo -e "with sink: $SINK"
 
         ## Set codec to environment variable or default
         CODEC='flac'
         eval CODEC_VAR="\$SNAPDOG_SNAPCAST_CODEC"
-        if [[ -z "${CODEC_VAR}" ]]; then
+        if [[ -n "${CODEC_VAR}" ]]; then
             CODEC=$CODEC_VAR
         fi
         echo -e "with codec: $CODEC"
@@ -37,7 +37,7 @@ for var in "${!SNAPDOG_ZONE_@}"; do
         ## Set sampleformat to environment variable or default
         SAMPLEFORMAT="48000:16:2"
         eval SAMPLEFORMAT_VAR="\$SNAPDOG_SNAPCAST_SAMPLEFORMAT"
-        if [[ -z "${SAMPLEFORMAT_VAR}" ]]; then
+        if [[ -n "${SAMPLEFORMAT_VAR}" ]]; then
             SAMPLEFORMAT=$SAMPLEFORMAT_VAR
         fi
         echo -e "with sample format: $SAMPLEFORMAT"
@@ -69,7 +69,7 @@ echo -e 'bind_to_address = 0.0.0.0' >>/etc/snapserver.conf
 ## set port to environment variable or default
 PORT="1780"
 eval PORT_VAR="\$SNAPDOG_SNAPCAST_WEBSERVER_PORT"
-if [[ -z "${PORT_VAR}" ]]; then
+if [[ -n "${PORT_VAR}" ]]; then
     PORT=$PORT_VAR
 fi
 
@@ -87,7 +87,7 @@ echo -e 'bind_to_address = 0.0.0.0' >>/etc/snapserver.conf
 ## set port to environment variable or default
 PORT="1704"
 eval PORT_VAR="\$SNAPDOG_SNAPCAST_WEBSOCKET_PORT"
-if [[ -z "${PORT_VAR}" ]]; then
+if [[ -n "${PORT_VAR}" ]]; then
     PORT=$PORT_VAR
 fi
 

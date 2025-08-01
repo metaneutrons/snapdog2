@@ -8,6 +8,8 @@ services:
     volumes:
       - .:/app:cached # Mount source code for hot reload
       - ~/.nuget/packages:/home/vscode/.nuget/packages:cached # NuGet cache
+    env_file:
+      - ./devcontainer/.env
     environment:
       - DOTNET_ENVIRONMENT=Development
       - DOTNET_USE_POLLING_FILE_WATCHER=true
@@ -51,6 +53,8 @@ services:
     build:
       context: ./devcontainer/snapcast-server
     hostname: snapcast-server
+    env_file:
+      - ./devcontainer/.env
     networks:
       snapdog-dev:
         ipv4_address: 172.20.0.5
