@@ -91,12 +91,12 @@ try
             );
         }
 
-        if (snapDogConfig.Services.ServicesMqtt.Enabled)
+        if (snapDogConfig.Services.Mqtt.Enabled)
         {
             healthChecksBuilder.AddTcpHealthCheck(
                 options =>
                 {
-                    options.AddHost(snapDogConfig.Services.ServicesMqtt.BrokerAddress, snapDogConfig.Services.ServicesMqtt.Port);
+                    options.AddHost(snapDogConfig.Services.Mqtt.BrokerAddress, snapDogConfig.Services.Mqtt.Port);
                 },
                 name: "mqtt",
                 tags: ["ready"]
@@ -203,10 +203,10 @@ static void PrintConfiguration(SnapDogConfiguration config)
         Log.Information("  Prometheus Path: {PrometheusPath}", config.Telemetry.Prometheus.Path);
         Log.Information("  Prometheus Port: {PrometheusPort}", config.Telemetry.Prometheus.Port);
     }
-    Log.Information("  TelemetrySeq Enabled: {SeqEnabled}", config.Telemetry.TelemetrySeq.Enabled);
-    if (config.Telemetry.TelemetrySeq.Enabled && !string.IsNullOrEmpty(config.Telemetry.TelemetrySeq.Url))
+    Log.Information("  Seq Enabled: {SeqEnabled}", config.Telemetry.Seq.Enabled);
+    if (config.Telemetry.Seq.Enabled && !string.IsNullOrEmpty(config.Telemetry.Seq.Url))
     {
-        Log.Information("  TelemetrySeq URL: {SeqUrl}", config.Telemetry.TelemetrySeq.Url);
+        Log.Information("  Seq URL: {SeqUrl}", config.Telemetry.Seq.Url);
     }
 
     // API Configuration
@@ -242,48 +242,48 @@ static void PrintConfiguration(SnapDogConfiguration config)
 
     // MQTT
     Log.Information("  MQTT:");
-    Log.Information("    Enabled: {MqttEnabled}", config.Services.ServicesMqtt.Enabled);
-    if (config.Services.ServicesMqtt.Enabled)
+    Log.Information("    Enabled: {MqttEnabled}", config.Services.Mqtt.Enabled);
+    if (config.Services.Mqtt.Enabled)
     {
         Log.Information(
             "    Broker: {MqttBroker}:{MqttPort}",
-            config.Services.ServicesMqtt.BrokerAddress,
-            config.Services.ServicesMqtt.Port
+            config.Services.Mqtt.BrokerAddress,
+            config.Services.Mqtt.Port
         );
-        Log.Information("    Client ID: {MqttClientId}", config.Services.ServicesMqtt.ClientId);
-        Log.Information("    SSL Enabled: {MqttSslEnabled}", config.Services.ServicesMqtt.SslEnabled);
+        Log.Information("    Client ID: {MqttClientId}", config.Services.Mqtt.ClientId);
+        Log.Information("    SSL Enabled: {MqttSslEnabled}", config.Services.Mqtt.SslEnabled);
         Log.Information(
             "    Username: {MqttUsername}",
-            string.IsNullOrEmpty(config.Services.ServicesMqtt.Username) ? "Not configured" : "***"
+            string.IsNullOrEmpty(config.Services.Mqtt.Username) ? "Not configured" : "***"
         );
-        Log.Information("    Keep Alive: {MqttKeepAlive}s", config.Services.ServicesMqtt.KeepAlive);
+        Log.Information("    Keep Alive: {MqttKeepAlive}s", config.Services.Mqtt.KeepAlive);
     }
 
     // KNX
     Log.Information("  KNX:");
-    Log.Information("    Enabled: {KnxEnabled}", config.Services.ServicesKnx.Enabled);
-    if (config.Services.ServicesKnx.Enabled)
+    Log.Information("    Enabled: {KnxEnabled}", config.Services.Knx.Enabled);
+    if (config.Services.Knx.Enabled)
     {
         Log.Information(
             "    Gateway: {KnxGateway}:{KnxPort}",
-            config.Services.ServicesKnx.Gateway ?? "Not configured",
-            config.Services.ServicesKnx.Port
+            config.Services.Knx.Gateway ?? "Not configured",
+            config.Services.Knx.Port
         );
-        Log.Information("    Timeout: {KnxTimeout}s", config.Services.ServicesKnx.Timeout);
-        Log.Information("    Auto Reconnect: {KnxAutoReconnect}", config.Services.ServicesKnx.AutoReconnect);
+        Log.Information("    Timeout: {KnxTimeout}s", config.Services.Knx.Timeout);
+        Log.Information("    Auto Reconnect: {KnxAutoReconnect}", config.Services.Knx.AutoReconnect);
     }
 
-    // ServicesSubsonic
-    Log.Information("  ServicesSubsonic:");
-    Log.Information("    Enabled: {SubsonicEnabled}", config.Services.ServicesSubsonic.Enabled);
-    if (config.Services.ServicesSubsonic.Enabled)
+    // Subsonic
+    Log.Information("  Subsonic:");
+    Log.Information("    Enabled: {SubsonicEnabled}", config.Services.Subsonic.Enabled);
+    if (config.Services.Subsonic.Enabled)
     {
-        Log.Information("    URL: {SubsonicUrl}", config.Services.ServicesSubsonic.Url ?? "Not configured");
+        Log.Information("    URL: {SubsonicUrl}", config.Services.Subsonic.Url ?? "Not configured");
         Log.Information(
             "    Username: {SubsonicUsername}",
-            string.IsNullOrEmpty(config.Services.ServicesSubsonic.Username) ? "Not configured" : "***"
+            string.IsNullOrEmpty(config.Services.Subsonic.Username) ? "Not configured" : "***"
         );
-        Log.Information("    Timeout: {SubsonicTimeout}ms", config.Services.ServicesSubsonic.Timeout);
+        Log.Information("    Timeout: {SubsonicTimeout}ms", config.Services.Subsonic.Timeout);
     }
 
     // Snapcast Server Configuration
