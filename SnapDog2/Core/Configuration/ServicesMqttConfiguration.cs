@@ -5,7 +5,7 @@ namespace SnapDog2.Core.Configuration;
 /// <summary>
 /// MQTT broker configuration.
 /// </summary>
-public class MqttConfiguration
+public class ServicesMqttConfiguration
 {
     /// <summary>
     /// Gets or sets the MQTT broker hostname or IP address.
@@ -62,11 +62,4 @@ public class MqttConfiguration
     /// </summary>
     [Env(Key = "ENABLED", Default = true)]
     public bool Enabled { get; set; } = true;
-
-    /// <summary>
-    /// Gets the base topic for MQTT messages from system configuration.
-    /// This is a temporary property for backward compatibility.
-    /// TODO: Update MqttService to use SystemMqttConfiguration directly.
-    /// </summary>
-    public string BaseTopic { get; set; } = "snapdog";
 }

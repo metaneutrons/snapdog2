@@ -122,7 +122,7 @@ public static class ServiceCollectionExtensions
         });
 
         // Configure MQTT service
-        services.Configure<MqttConfiguration>(config =>
+        services.Configure<ServicesMqttConfiguration>(config =>
         {
             config.Broker = servicesConfig.Mqtt.Broker;
             config.Port = servicesConfig.Mqtt.Port;

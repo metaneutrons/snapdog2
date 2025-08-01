@@ -45,7 +45,7 @@ public class ProtocolCoordinatorUnitTests : IDisposable
             Services = new ServicesConfiguration
             {
                 Snapcast = new SnapcastConfiguration { Enabled = true },
-                Mqtt = new MqttConfiguration { Enabled = true },
+                Mqtt = new ServicesMqttConfiguration { Enabled = true },
                 Knx = new KnxConfiguration { Enabled = true },
                 Subsonic = new SubsonicConfiguration { Enabled = true },
             },

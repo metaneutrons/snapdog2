@@ -22,7 +22,7 @@ namespace SnapDog2.Infrastructure.Services;
 /// </summary>
 public class MqttService : IMqttService, IDisposable, IAsyncDisposable
 {
-    private readonly MqttConfiguration _config;
+    private readonly ServicesMqttConfiguration _config;
     private readonly IAsyncPolicy _resiliencePolicy;
     private readonly ILogger<MqttService> _logger;
     private readonly IMediator _mediator;
@@ -43,7 +43,7 @@ public class MqttService : IMqttService, IDisposable, IAsyncDisposable
     /// <param name="config">The MQTT configuration options.</param>
     /// <param name="logger">The logger instance.</param>
     /// <param name="mediator">The mediator for publishing events.</param>
-    public MqttService(IOptions<MqttConfiguration> config, ILogger<MqttService> logger, IMediator mediator)
+    public MqttService(IOptions<ServicesMqttConfiguration> config, ILogger<MqttService> logger, IMediator mediator)
     {
         _config = config?.Value ?? throw new ArgumentNullException(nameof(config));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));

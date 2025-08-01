@@ -349,7 +349,7 @@ public class SnapDogConfigurationValidatorTests
             Services = new ServicesConfiguration
             {
                 Snapcast = new SnapcastConfiguration { Enabled = true, Host = "localhost" },
-                Mqtt = new MqttConfiguration { Enabled = true, Broker = "localhost" },
+                Mqtt = new ServicesMqttConfiguration { Enabled = true, Broker = "localhost" },
                 Knx = new KnxConfiguration { Enabled = false },
                 Subsonic = new SubsonicConfiguration { Enabled = false },
                 Resilience = new ResilienceConfiguration(),

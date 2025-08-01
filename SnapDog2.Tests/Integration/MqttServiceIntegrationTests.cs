@@ -16,7 +16,7 @@ namespace SnapDog2.Tests.Integration;
 public class MqttServiceIntegrationTests : IDisposable
 {
     private readonly Mock<ILogger<MqttService>> _mockLogger;
-    private readonly Mock<IOptions<SnapDog2.Core.Configuration.MqttConfiguration>> _mockOptions;
+    private readonly Mock<IOptions<SnapDog2.Core.Configuration.ServicesMqttConfiguration>> _mockOptions;
     private readonly MqttService _mqttService;
     private readonly ServiceProvider _serviceProvider;
 
@@ -30,7 +30,7 @@ public class MqttServiceIntegrationTests : IDisposable
         services.AddSingleton(_mockLogger.Object);
 
         // Setup configuration for testing
-        var mqttConfig = new SnapDog2.Core.Configuration.MqttConfiguration
+        var mqttConfig = new SnapDog2.Core.Configuration.ServicesMqttConfiguration
         {
             Broker = "localhost",
             Port = 1883,
@@ -38,7 +38,7 @@ public class MqttServiceIntegrationTests : IDisposable
             Password = "",
         };
 
-        _mockOptions = new Mock<IOptions<SnapDog2.Core.Configuration.MqttConfiguration>>();
+        _mockOptions = new Mock<IOptions<SnapDog2.Core.Configuration.ServicesMqttConfiguration>>();
         _mockOptions.Setup(static x => x.Value).Returns(mqttConfig);
 
         services.AddSingleton(_mockOptions.Object);
@@ -210,13 +210,13 @@ public class MqttServiceIntegrationTests : IDisposable
     public void ServiceDisposal_ShouldCleanupResourcesProperly()
     {
         // Arrange
-        var config = new SnapDog2.Core.Configuration.MqttConfiguration
+        var config = new SnapDog2.Core.Configuration.ServicesMqttConfiguration
         {
             Broker = "localhost",
             Port = 1883,
             Username = "test-client-disposal",
         };
-        var mockOptions = new Mock<IOptions<SnapDog2.Core.Configuration.MqttConfiguration>>();
+        var mockOptions = new Mock<IOptions<SnapDog2.Core.Configuration.ServicesMqttConfiguration>>();
         mockOptions.Setup(static x => x.Value).Returns(config);
 
         var service = new MqttService(mockOptions.Object, _mockLogger.Object, new Mock<MediatR.IMediator>().Object);

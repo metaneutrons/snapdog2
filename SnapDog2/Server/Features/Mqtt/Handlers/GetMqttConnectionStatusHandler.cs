@@ -14,7 +14,7 @@ public class GetMqttConnectionStatusHandler
     : IRequestHandler<GetMqttConnectionStatusQuery, MqttConnectionStatusResponse>
 {
     private readonly IMqttService _mqttService;
-    private readonly MqttConfiguration _config;
+    private readonly ServicesMqttConfiguration _config;
     private readonly ILogger<GetMqttConnectionStatusHandler> _logger;
 
     /// <summary>
@@ -25,7 +25,7 @@ public class GetMqttConnectionStatusHandler
     /// <param name="logger">The logger.</param>
     public GetMqttConnectionStatusHandler(
         IMqttService mqttService,
-        IOptions<MqttConfiguration> config,
+        IOptions<ServicesMqttConfiguration> config,
         ILogger<GetMqttConnectionStatusHandler> logger
     )
     {

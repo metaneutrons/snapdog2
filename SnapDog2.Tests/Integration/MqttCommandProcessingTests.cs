@@ -25,7 +25,7 @@ public class MqttCommandProcessingTests : IDisposable
     private readonly Mock<IManagedMqttClient> _mockMqttClient;
     private readonly Mock<IMediator> _mockMediator;
     private readonly Mock<ILogger<MqttService>> _mockLogger;
-    private readonly MqttConfiguration _config;
+    private readonly ServicesMqttConfiguration _config;
     private readonly MqttService _mqttService;
 
     public MqttCommandProcessingTests()
@@ -35,7 +35,7 @@ public class MqttCommandProcessingTests : IDisposable
         _mockMediator = new Mock<IMediator>();
         _mockLogger = new Mock<ILogger<MqttService>>();
 
-        _config = new MqttConfiguration
+        _config = new ServicesMqttConfiguration
         {
             Enabled = true,
             Broker = "localhost",

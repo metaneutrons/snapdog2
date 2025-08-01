@@ -14,7 +14,7 @@ namespace SnapDog2.Infrastructure.Services;
 public class MqttDomainEventPublisher : IDisposable
 {
     private readonly IMqttService _mqttService;
-    private readonly MqttConfiguration _config;
+    private readonly ServicesMqttConfiguration _config;
     private readonly ILogger<MqttDomainEventPublisher> _logger;
     private readonly JsonSerializerOptions _jsonOptions;
     private bool _disposed;
@@ -27,7 +27,7 @@ public class MqttDomainEventPublisher : IDisposable
     /// <param name="logger">The logger.</param>
     public MqttDomainEventPublisher(
         IMqttService mqttService,
-        IOptions<MqttConfiguration> config,
+        IOptions<ServicesMqttConfiguration> config,
         ILogger<MqttDomainEventPublisher> logger
     )
     {
