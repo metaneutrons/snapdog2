@@ -314,7 +314,7 @@ services:
     ports:
       - "127.0.0.1:3000:3000"
     volumes:
-      - ./config/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./devcontainer/grafana/provisioning:/etc/grafana/provisioning:ro
       - grafana_data:/var/lib/grafana
     env_file:
       - .env # Load GF_* variables
