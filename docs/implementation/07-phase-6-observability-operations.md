@@ -222,7 +222,6 @@ services:
       - SNAPDOG_LOG_LEVEL=Information
       - SNAPCAST_SERVER_HOST=snapcast-server
       - MQTT_BROKER_HOST=mosquitto
-      - DATABASE_CONNECTION_STRING=Server=sqlserver;Database=SnapDog;User=sa;Password=YourStrong@Passw0rd;
       - JAEGER_ENDPOINT=http://jaeger:14268
     depends_on:
       - sqlserver
@@ -526,7 +525,6 @@ SnapDog Production Deployment Status
    └── CPU Usage: 35% avg (target <50%)
 
 🟢 Health Checks     - All systems green
-   ├── Database: ✅   - Response time 12ms
    ├── External APIs: ✅ - All reachable
    ├── Protocol Services: ✅ - All connected
    └── System Resources: ✅ - Within limits

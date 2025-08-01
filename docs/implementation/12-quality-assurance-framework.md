@@ -101,7 +101,7 @@ public class AudioStreamServiceTests
 
 #### Integration Tests
 
-**Scope**: Cross-layer interactions, database operations, external service integration
+**Scope**: Cross-layer interactions, external service integration
 **Performance**: Complete in < 500ms per test
 **Environment**: Use TestContainers for external dependencies
 

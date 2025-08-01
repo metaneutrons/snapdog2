@@ -84,6 +84,12 @@ SNAPDOG_SYSTEM_LOG_LEVEL=Information                  # Default: Information
 SNAPDOG_SYSTEM_ENVIRONMENT=Production                 # Default: Development
 SNAPDOG_SYSTEM_DEBUG_ENABLED=true                     # Default: false
 
+# Health Check Configuration
+SNAPDOG_SYSTEM_HEALTH_CHECKS_ENABLED=true             # Default: true
+SNAPDOG_SYSTEM_HEALTH_CHECKS_TIMEOUT=30               # Default: 30 seconds
+SNAPDOG_SYSTEM_HEALTH_CHECKS_EXTERNAL_SERVICE_TIMEOUT=10 # Default: 10 seconds
+SNAPDOG_SYSTEM_HEALTH_CHECKS_TAGS=ready,live          # Default: ready,live
+
 # System-wide MQTT Topics
 SNAPDOG_SYSTEM_MQTT_BASE_TOPIC=snapdog                 # Default: snapdog
 SNAPDOG_SYSTEM_MQTT_STATUS_TOPIC=status               # Default: status
@@ -204,15 +210,31 @@ SNAPDOG_ZONE_1_KNX_ENABLED=true                       # Default: false
 SNAPDOG_ZONE_1_KNX_PLAY=1/1/1                         # Optional KNX addresses
 SNAPDOG_ZONE_1_KNX_PAUSE=1/1/2
 SNAPDOG_ZONE_1_KNX_STOP=1/1/3
+SNAPDOG_ZONE_1_KNX_CONTROL_STATUS=1/1/10              # Control status feedback
 SNAPDOG_ZONE_1_KNX_TRACK_NEXT=1/1/4
 SNAPDOG_ZONE_1_KNX_TRACK_PREVIOUS=1/1/5
+SNAPDOG_ZONE_1_KNX_TRACK=1/3/1                        # Track selection
+SNAPDOG_ZONE_1_KNX_TRACK_STATUS=1/3/2                 # Track status feedback
+SNAPDOG_ZONE_1_KNX_TRACK_REPEAT=1/3/3                 # Track repeat control
+SNAPDOG_ZONE_1_KNX_TRACK_REPEAT_STATUS=1/3/4          # Track repeat status
+SNAPDOG_ZONE_1_KNX_TRACK_REPEAT_TOGGLE=1/3/5          # Track repeat toggle
+SNAPDOG_ZONE_1_KNX_PLAYLIST=1/4/1                     # Playlist selection
+SNAPDOG_ZONE_1_KNX_PLAYLIST_STATUS=1/4/2              # Playlist status feedback
+SNAPDOG_ZONE_1_KNX_PLAYLIST_NEXT=1/4/3                # Next playlist
+SNAPDOG_ZONE_1_KNX_PLAYLIST_PREVIOUS=1/4/4            # Previous playlist
+SNAPDOG_ZONE_1_KNX_SHUFFLE=1/4/5                      # Shuffle control
+SNAPDOG_ZONE_1_KNX_SHUFFLE_TOGGLE=1/4/7               # Shuffle toggle
+SNAPDOG_ZONE_1_KNX_SHUFFLE_STATUS=1/4/6               # Shuffle status feedback
+SNAPDOG_ZONE_1_KNX_REPEAT=1/4/8                       # Playlist repeat control
+SNAPDOG_ZONE_1_KNX_REPEAT_TOGGLE=1/4/10               # Playlist repeat toggle
+SNAPDOG_ZONE_1_KNX_REPEAT_STATUS=1/4/9                # Playlist repeat status
 SNAPDOG_ZONE_1_KNX_VOLUME=1/2/1
-SNAPDOG_ZONE_1_KNX_VOLUME_STATUS=1/2/2
 SNAPDOG_ZONE_1_KNX_VOLUME_UP=1/2/3
 SNAPDOG_ZONE_1_KNX_VOLUME_DOWN=1/2/4
+SNAPDOG_ZONE_1_KNX_VOLUME_STATUS=1/2/2
 SNAPDOG_ZONE_1_KNX_MUTE=1/2/5
-SNAPDOG_ZONE_1_KNX_MUTE_STATUS=1/2/6
 SNAPDOG_ZONE_1_KNX_MUTE_TOGGLE=1/2/7
+SNAPDOG_ZONE_1_KNX_MUTE_STATUS=1/2/6
 
 # Zone 2 Configuration
 SNAPDOG_ZONE_2_NAME=Kitchen
