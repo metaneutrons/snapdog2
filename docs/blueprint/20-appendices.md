@@ -30,7 +30,6 @@ This glossary defines key terms used throughout the SnapDog2 blueprint for clari
 | **Group** (Snapcast)    | A set of Snapcast clients synchronized to play the same audio stream from a specific Snapcast sink. Managed 1:1 with SnapDog2 Zones. |
 | **Handler** (MediatR)   | A class implementing `IRequestHandler<TRequest, TResponse>` or `INotificationHandler<TNotification>` responsible for processing a specific Command, Query, or Notification. Resides in `/Server/Features`. |
 | **Hosted Service**      | A .NET background service implementing `IHostedService`, managed by the Generic Host, used for long-running tasks or application startup orchestration (`/Worker/Worker.cs`). |
-| **HTTPS**               | Hypertext Transfer Protocol Secure. Mandatory for secure API communication in production. |
 | **Idempotency**         | An operation that can be applied multiple times without changing the result beyond the initial application (e.g., `DELETE /resource/123`, `PUT /resource/123`). |
 | **Infrastructure Layer**| The logical layer (`/Infrastructure` folder) containing concrete implementations of Core abstractions. Handles interactions with external libraries and systems (databases, network protocols, file system, etc.). |
 | **Integration Test**    | A test verifying the interaction between multiple components or between the application and external dependencies (often using Testcontainers). |

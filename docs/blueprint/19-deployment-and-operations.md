@@ -198,7 +198,6 @@ Comprehensive monitoring is crucial for ensuring reliable operation.
 ### 19.4.1. Network Security
 
 * **Exposure:** Expose only necessary ports externally (typically the API port, maybe Snapweb). Use a reverse proxy (Nginx, Traefik, Caddy) in front of the API.
-* **TLS:** Enforce HTTPS for the API via the reverse proxy or Kestrel configuration. Configure TLS for MQTT (`SNAPDOG_SYSTEM_MQTT_USE_TLS`) if the broker supports it and network isn't fully trusted.
 * **Firewall/Network Policies:** Restrict network access between containers and from external sources to only necessary ports/protocols.
 
 ### 19.4.2. Authentication and Authorization

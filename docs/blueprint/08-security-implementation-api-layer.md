@@ -354,7 +354,6 @@ public class StatusController : ControllerBase
 
 In addition to API Key Authentication, SnapDog2 incorporates:
 
-1. **HTTPS Enforcement:** Production deployments **must** be configured to serve the API over HTTPS using a reverse proxy (like Nginx or Traefik) or Kestrel HTTPS configuration with valid certificates. Traffic within the Docker network might be HTTP, but external access must be encrypted.
 2. **Input Validation:** All API request models and command payloads are validated using FluentValidation (Section 5.4) to prevent injection attacks, ensure data integrity, and handle malformed requests gracefully.
 3. **Rate Limiting:** Implementing rate limiting middleware (e.g., `AspNetCoreRateLimit` NuGet package) is recommended for production deployments to mitigate denial-of-service and brute-force attacks against the API. Configuration should be done in `Program.cs`.
 4. **Security Headers:** Standard security headers (`X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Content-Security-Policy`, `Referrer-Policy`, `Permissions-Policy`, etc.) should be configured in the ASP.NET Core middleware pipeline (`Program.cs`) to enhance browser-level security for potential future web interfaces or direct API interactions.

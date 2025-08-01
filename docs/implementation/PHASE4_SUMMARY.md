@@ -299,7 +299,6 @@ SnapDog2.Api/
 **Security Headers Applied**:
 
 - **Content Security Policy (CSP)**: Environment-specific policies
-- **Strict Transport Security (HSTS)**: HTTPS enforcement
 - **X-Frame-Options**: Clickjacking protection
 - **X-Content-Type-Options**: MIME type sniffing prevention
 - **Permissions Policy**: Feature access control
@@ -583,11 +582,10 @@ sequenceDiagram
 
 ### Production Deployment Considerations
 
-1. **HTTPS Enforcement**: Required for HSTS headers and secure authentication
-2. **API Key Rotation**: Regular rotation of API keys for security
-3. **Rate Limit Tuning**: Adjust limits based on actual traffic patterns
-4. **Log Management**: Configure appropriate retention and monitoring
-5. **Security Monitoring**: Set up alerts for security violations
+1. **API Key Rotation**: Regular rotation of API keys for security
+2. **Rate Limit Tuning**: Adjust limits based on actual traffic patterns
+3. **Log Management**: Configure appropriate retention and monitoring
+4. **Security Monitoring**: Set up alerts for security violations
 
 ---
 

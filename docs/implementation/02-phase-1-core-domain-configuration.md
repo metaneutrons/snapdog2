@@ -483,9 +483,6 @@ public class SnapDogConfiguration
     [Env(Key = "SNAPDOG_API_PORT", Default = 5000)]
     public int ApiPort { get; set; } = 5000;
 
-    [Env(Key = "SNAPDOG_API_HTTPS_PORT", Default = 5001)]
-    public int ApiHttpsPort { get; set; } = 5001;
-
     // Snapcast server configuration
     [Env(Key = "SNAPCAST_SERVER_HOST", Default = "localhost")]
     public string SnapcastServerHost { get; set; } = "localhost";

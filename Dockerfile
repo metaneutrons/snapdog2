@@ -36,7 +36,7 @@ RUN dotnet restore
 # Switch back to root for remaining setup
 USER root
 
-# Expose only HTTP port (no HTTPS in container)
+# Expose only HTTP port
 EXPOSE 5000
 
 # Development entrypoint with hot reload (HTTP only for internal networking)
