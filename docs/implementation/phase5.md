@@ -48,18 +48,20 @@ Phase 5 provides the complete multi-protocol integration foundation for Phase 6 
    - MediatR integration for protocol coordination
 
 3. **Real-Time Capabilities**:
+
    ```csharp
    // Volume change synchronization
    await _mediator.Publish(new SnapcastClientVolumeChangedEvent(clientId, volume, muted));
-   
+
    // Client connection events
    await _mediator.Publish(new SnapcastClientConnectedEvent(clientId));
-   
+
    // Stream assignment changes
    await _mediator.Publish(new SnapcastGroupStreamChangedEvent(groupId, streamId));
    ```
 
 **New Event Classes Created**:
+
 - [`SnapcastStateSynchronizedEvent`](SnapDog2/Core/Events/SnapcastStateSynchronizedEvent.cs)
 - [`SnapcastClientVolumeChangedEvent`](SnapDog2/Core/Events/SnapcastClientVolumeChangedEvent.cs)
 - [`SnapcastClientConnectedEvent`](SnapDog2/Core/Events/SnapcastClientConnectedEvent.cs)
@@ -85,13 +87,14 @@ Phase 5 provides the complete multi-protocol integration foundation for Phase 6 
    - **DPT 19.001** (Date Time): Timestamp handling
 
 2. **[`KnxService.cs`](SnapDog2/Infrastructure/Services/KnxService.cs)** - Enhanced with DPT convenience methods:
+
    ```csharp
    // Volume control with DPT 5.001
    await knxService.SendVolumeCommandAsync(address, volume);
-   
+
    // Boolean commands with DPT 1.001
    await knxService.SendPlaybackCommandAsync(address, playing);
-   
+
    // Temperature values with DPT 9.001
    await knxService.SendTemperatureAsync(address, temperature);
    ```
@@ -102,6 +105,7 @@ Phase 5 provides the complete multi-protocol integration foundation for Phase 6 
    - [`KnxGroupValueReceivedEvent`](SnapDog2/Core/Events/KnxGroupValueReceivedEvent.cs) for real-time synchronization
 
 **DPT Conversion Examples**:
+
 ```csharp
 // Volume conversion (0-100% to 0-255)
 var knxValue = KnxDptConverter.PercentToDpt5001(75); // [191]
@@ -124,16 +128,17 @@ var knxValue = KnxDptConverter.FloatToDpt9001(21.5f); // [0x0C, 0xD7]
 **Key Features Implemented**:
 
 1. **[`MqttService.cs`](SnapDog2/Infrastructure/Services/MqttService.cs)** - Enhanced with command processing:
-   - Structured topic parsing: `{baseTopic}/{component}/{id}/{command}`
+   - Structured topic parsing: `{BaseTopic}/{component}/{id}/{command}`
    - Real-time command processing with domain event publishing
    - Comprehensive error handling and resilience policies
    - JSON serialization for complex payloads
 
 2. **Command Framework Architecture**:
+
    ```csharp
    // Topic structure examples:
    // snapdog/ZONE/1/VOLUME → Zone volume control
-   // snapdog/CLIENT/living-room/MUTE → Client mute control  
+   // snapdog/CLIENT/living-room/MUTE → Client mute control
    // snapdog/STREAM/2/START → Stream control
    // snapdog/SYSTEM/SYNC → System commands
    ```
@@ -144,18 +149,20 @@ var knxValue = KnxDptConverter.FloatToDpt9001(21.5f); // [0x0C, 0xD7]
    - Automatic domain event publishing for protocol coordination
 
 4. **Convenience Methods for Status Publishing**:
+
    ```csharp
    // Stream status updates
    await mqttService.PublishStreamStatusAsync(streamId, "playing");
-   
+
    // Volume synchronization
    await mqttService.PublishClientVolumeAsync(clientId, volume);
-   
+
    // Health monitoring
    await mqttService.PublishSystemHealthAsync(healthData);
    ```
 
 **MQTT Command Event Classes**:
+
 - [`MqttCommandEvents.cs`](SnapDog2/Core/Events/MqttCommandEvents.cs) - Complete command event hierarchy
 - Zone, client, stream, and system command events
 - Automatic parsing and validation of MQTT command payloads
@@ -184,6 +191,7 @@ var knxValue = KnxDptConverter.FloatToDpt9001(21.5f); // [0x0C, 0xD7]
    - **Resilience**: Comprehensive error handling with Polly policies
 
 3. **[`SubsonicConfiguration.cs`](SnapDog2/Core/Configuration/SubsonicConfiguration.cs)** - Complete configuration system:
+
    ```csharp
    {
      "Subsonic": {
@@ -198,6 +206,7 @@ var knxValue = KnxDptConverter.FloatToDpt9001(21.5f); // [0x0C, 0xD7]
    ```
 
 **Subsonic Integration Features**:
+
 ```csharp
 // Playlist management
 var playlists = await subsonicService.GetPlaylistsAsync();
@@ -212,6 +221,7 @@ var searchResults = await subsonicService.SearchAsync("jazz piano");
 ```
 
 **Subsonic Event Classes**:
+
 - [`SubsonicEvents.cs`](SnapDog2/Core/Events/SubsonicEvents.cs) - Complete event hierarchy
 - Authentication, streaming, and playlist management events
 - Integration with protocol coordination system
@@ -239,19 +249,21 @@ var searchResults = await subsonicService.SearchAsync("jazz piano");
    - **Health Monitoring**: Real-time health status for all integrated protocols
 
 3. **Coordination Architecture**:
+
    ```csharp
    // Volume change synchronization
    // Source: MQTT → Sync to: Snapcast, KNX (but not MQTT)
    await coordinator.SynchronizeVolumeChangeAsync(clientId, volume, "MQTT");
-   
+
    // Playback command coordination
    // Source: Snapcast → Broadcast to: MQTT, KNX status updates
    await coordinator.SynchronizePlaybackCommandAsync("PLAY", streamId, "Snapcast");
    ```
 
 **Event Handler Integration**:
+
 - `INotificationHandler<SnapcastClientVolumeChangedEvent>` - Snapcast event processing
-- `INotificationHandler<KnxGroupValueReceivedEvent>` - KNX event processing  
+- `INotificationHandler<KnxGroupValueReceivedEvent>` - KNX event processing
 - `INotificationHandler<MqttZoneVolumeCommandEvent>` - MQTT command processing
 - Automatic bidirectional synchronization between all protocols
 
@@ -289,6 +301,7 @@ var searchResults = await subsonicService.SearchAsync("jazz piano");
 **Test Coverage Areas**:
 
 1. **Synchronization Testing**:
+
    ```csharp
    [Fact]
    public async Task SynchronizeVolumeChangeAsync_ShouldSyncToAllProtocols_ExceptSource()
@@ -299,8 +312,9 @@ var searchResults = await subsonicService.SearchAsync("jazz piano");
    ```
 
 2. **Event Processing Testing**:
+
    ```csharp
-   [Fact] 
+   [Fact]
    public async Task ProtocolCoordinator_ShouldHandleEventNotifications()
    {
        // Verifies MediatR event handling triggers protocol synchronization
@@ -309,6 +323,7 @@ var searchResults = await subsonicService.SearchAsync("jazz piano");
    ```
 
 3. **Resilience Testing**:
+
    ```csharp
    [Fact]
    public async Task SynchronizeVolumeChangeAsync_ShouldHandlePartialFailures()
@@ -319,6 +334,7 @@ var searchResults = await subsonicService.SearchAsync("jazz piano");
    ```
 
 **Real-Time Performance Metrics**:
+
 - **Event Processing Latency**: < 50ms for protocol coordination
 - **Synchronization Speed**: < 200ms for multi-protocol volume changes
 - **Health Check Response**: < 100ms for all protocol health status
@@ -397,24 +413,28 @@ sequenceDiagram
 ### Protocol-Specific Implementation Details
 
 #### Snapcast Integration
+
 - **Connection**: Persistent TCP connection with JSON-RPC
 - **Events**: Real-time server notifications (volume, connections, streams)
 - **Synchronization**: Bidirectional with automatic state discovery
 - **Performance**: < 10ms latency for RPC calls
 
-#### KNX Integration  
+#### KNX Integration
+
 - **Connection**: IP tunneling to KNX gateway
 - **DPT Support**: 8 major DPT types with automatic conversion
 - **Group Addresses**: Dynamic subscription with event processing
 - **Performance**: < 50ms for group value operations
 
 #### MQTT Integration
+
 - **Connection**: Managed client with auto-reconnection
 - **Topics**: Structured hierarchy for commands and status
 - **QoS**: Configurable quality of service with retain options
 - **Performance**: < 5ms for message publishing
 
 #### Subsonic Integration
+
 - **Authentication**: MD5 salt-based with automatic token refresh
 - **Streaming**: Direct URL generation with bitrate control
 - **API Coverage**: Complete playlist and search functionality
@@ -468,6 +488,7 @@ sequenceDiagram
 ### Protocol Health Monitoring
 
 **Health Check Integration**:
+
 ```csharp
 {
   "Snapcast": true,     // Connected and responding
@@ -510,6 +531,7 @@ sequenceDiagram
 ### Event Processing Performance
 
 **Real-Time Event Metrics**:
+
 - **Event Latency**: Average 15ms from external system to domain event
 - **Coordination Latency**: Average 25ms from domain event to protocol sync
 - **Total Round-Trip**: Average 150ms for complete multi-protocol synchronization
@@ -523,10 +545,11 @@ sequenceDiagram
 ### Integration Test Coverage ✅
 
 **Test Suite Results**:
+
 ```
 Protocol Integration Tests: 12/12 passed
 ├── Snapcast Integration: 4/4 passed
-├── KNX Protocol Tests: 3/3 passed  
+├── KNX Protocol Tests: 3/3 passed
 ├── MQTT Command Tests: 3/3 passed
 ├── Subsonic Integration: 2/2 passed
 └── Protocol Coordination: 8/8 passed
@@ -547,6 +570,7 @@ Performance Tests: All benchmarks met
 ### Error Handling Coverage ✅
 
 **Resilience Implementation**:
+
 - **Connection Failures**: Automatic retry with exponential backoff
 - **Protocol Timeouts**: Graceful degradation with health monitoring
 - **Partial Sync Failures**: Comprehensive error reporting and recovery
@@ -567,12 +591,14 @@ Performance Tests: All benchmarks met
 4. **Subsonic**: MD5 salt-based authentication with token rotation
 
 **Data Protection**:
+
 - **In-Transit**: TLS encryption support for all HTTP-based protocols
 - **Credentials**: Secure storage with configuration encryption support
 - **Logging**: Sensitive data redaction in all log outputs
 - **Validation**: Input validation and sanitization for all protocol inputs
 
 **Network Security**:
+
 - **Firewall Rules**: Documented port requirements for all protocols
 - **Network Segmentation**: Support for isolated protocol networks
 - **Certificate Validation**: Configurable SSL/TLS certificate verification
@@ -585,24 +611,28 @@ Performance Tests: All benchmarks met
 ### Production Deployment Features ✅
 
 **Health Monitoring**:
+
 - Real-time health checks for all external systems
 - Detailed protocol status with connection diagnostics
 - Performance metrics collection and reporting
 - Automatic alerting for protocol failures
 
 **Configuration Management**:
+
 - Environment-specific configuration support
 - Runtime configuration validation
 - Hot-reload support for non-critical settings
 - Configuration template generation
 
 **Logging & Diagnostics**:
+
 - Structured logging with correlation IDs
 - Protocol-specific log categories
 - Performance timing for all operations
 - Error correlation across protocol boundaries
 
 **Scalability Considerations**:
+
 - Async/await throughout for non-blocking operations
 - Connection pooling for HTTP-based protocols
 - Event batching for high-throughput scenarios
@@ -637,6 +667,7 @@ Performance Tests: All benchmarks met
 ### Docker Integration Readiness ✅
 
 **Containerization Support**:
+
 - Health check endpoints for all protocol services
 - Graceful shutdown handling for all connections
 - Configuration via environment variables
@@ -649,6 +680,7 @@ Performance Tests: All benchmarks met
 ### New Protocol Service Files
 
 **Snapcast Enhancements**:
+
 - Enhanced [`SnapcastService.cs`](SnapDog2/Infrastructure/Services/SnapcastService.cs) with real-time events
 - [`SnapcastStateSynchronizedEvent.cs`](SnapDog2/Core/Events/SnapcastStateSynchronizedEvent.cs)
 - [`SnapcastClientVolumeChangedEvent.cs`](SnapDog2/Core/Events/SnapcastClientVolumeChangedEvent.cs)
@@ -657,25 +689,30 @@ Performance Tests: All benchmarks met
 - [`SnapcastGroupStreamChangedEvent.cs`](SnapDog2/Core/Events/SnapcastGroupStreamChangedEvent.cs)
 
 **KNX Protocol Integration**:
+
 - Enhanced [`KnxService.cs`](SnapDog2/Infrastructure/Services/KnxService.cs) with DPT methods
 - [`KnxDptConverter.cs`](SnapDog2/Infrastructure/Services/Models/KnxDptConverter.cs) - Complete DPT library
 - [`KnxGroupValueReceivedEvent.cs`](SnapDog2/Core/Events/KnxGroupValueReceivedEvent.cs)
 
 **MQTT Command Framework**:
+
 - Enhanced [`MqttService.cs`](SnapDog2/Infrastructure/Services/MqttService.cs) with command processing
 - [`MqttCommandEvents.cs`](SnapDog2/Core/Events/MqttCommandEvents.cs) - Complete event hierarchy
 
 **Subsonic Integration**:
+
 - [`ISubsonicService.cs`](SnapDog2/Infrastructure/Services/ISubsonicService.cs) - Complete interface
 - [`SubsonicService.cs`](SnapDog2/Infrastructure/Services/SubsonicService.cs) - Full implementation
 - [`SubsonicConfiguration.cs`](SnapDog2/Core/Configuration/SubsonicConfiguration.cs)
 - [`SubsonicEvents.cs`](SnapDog2/Core/Events/SubsonicEvents.cs)
 
 **Protocol Coordination**:
+
 - [`IProtocolCoordinator.cs`](SnapDog2/Infrastructure/Services/IProtocolCoordinator.cs)
 - [`ProtocolCoordinator.cs`](SnapDog2/Infrastructure/Services/ProtocolCoordinator.cs)
 
 **Integration Tests**:
+
 - [`ProtocolCoordinatorIntegrationTests.cs`](SnapDog2.Tests/Integration/ProtocolCoordinatorIntegrationTests.cs)
 
 ---
@@ -695,12 +732,14 @@ Phase 5 provides the complete multi-protocol integration foundation for Phase 6 
 ### Production Deployment Readiness ✅
 
 **Infrastructure Preparation**:
+
 - Container-ready services with health checks
 - Environment-specific configuration support
 - Graceful shutdown and startup procedures
 - Network configuration for all protocols
 
 **Operational Excellence**:
+
 - Comprehensive error handling and recovery
 - Real-time performance monitoring
 - Automated health checking

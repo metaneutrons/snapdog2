@@ -632,7 +632,7 @@ public class ConfigurationValidator : AbstractValidator<SnapDogConfiguration>
                 .InclusiveBetween(1, 65535)
                 .WithMessage("MQTT broker port must be between 1 and 65535");
 
-            RuleFor(x => x.MqttBaseTopic)
+            RuleFor(x => x.MqttBaseTopic())
                 .NotEmpty()
                 .WithMessage("MQTT base topic must be specified when MQTT is configured");
         });
