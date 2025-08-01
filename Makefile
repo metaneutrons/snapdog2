@@ -44,7 +44,7 @@ dev-setup:
 # Start full development environment
 dev-start:
 	@echo "🐳 Starting SnapDog2 development environment..."
-	@docker compose -f docker-compose.dev.yml --env-file devcontainer/.env up -d
+	@docker compose -f docker-compose.dev.yml --env-file devcontainer/.env up -d --remove-orphans
 	@echo "⏳ Waiting for services to be ready..."
 	@sleep 5
 	@make dev-status
