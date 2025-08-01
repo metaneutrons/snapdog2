@@ -1,3 +1,5 @@
+using System.Reflection;
+using EnvoyConfig;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Serilog;
 using Serilog.Events;
@@ -5,28 +7,22 @@ using SnapDog2.Core.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Load configuration from environment variables
-var snapDogConfig = new SnapDogConfiguration();
+// Load .env file if it exists
+LoadDotEnvFile();
 
-// Simple configuration loading - we'll implement EnvoyConfig properly later
-snapDogConfig.System.LogLevel = Environment.GetEnvironmentVariable("SNAPDOG_SYSTEM_LOG_LEVEL") ?? "Information";
-snapDogConfig.System.Environment = Environment.GetEnvironmentVariable("SNAPDOG_SYSTEM_ENVIRONMENT") ?? "Development";
-snapDogConfig.System.DebugEnabled = bool.Parse(Environment.GetEnvironmentVariable("SNAPDOG_SYSTEM_DEBUG_ENABLED") ?? "false");
-snapDogConfig.System.HealthChecksEnabled = bool.Parse(Environment.GetEnvironmentVariable("SNAPDOG_SYSTEM_HEALTH_CHECKS_ENABLED") ?? "true");
+// Set global prefix for all EnvoyConfig environment variables
+EnvConfig.GlobalPrefix = "SNAPDOG_";
 
-snapDogConfig.Services.Snapcast.Enabled = bool.Parse(Environment.GetEnvironmentVariable("SNAPDOG_SERVICES_SNAPCAST_ENABLED") ?? "true");
-snapDogConfig.Services.Snapcast.Address = Environment.GetEnvironmentVariable("SNAPDOG_SERVICES_SNAPCAST_ADDRESS") ?? "localhost";
-snapDogConfig.Services.Snapcast.Port = int.Parse(Environment.GetEnvironmentVariable("SNAPDOG_SERVICES_SNAPCAST_PORT") ?? "1705");
-
-snapDogConfig.Services.Mqtt.Enabled = bool.Parse(Environment.GetEnvironmentVariable("SNAPDOG_SERVICES_MQTT_ENABLED") ?? "true");
-snapDogConfig.Services.Mqtt.BrokerAddress = Environment.GetEnvironmentVariable("SNAPDOG_SERVICES_MQTT_BROKER_ADDRESS") ?? "localhost";
-snapDogConfig.Services.Mqtt.Port = int.Parse(Environment.GetEnvironmentVariable("SNAPDOG_SERVICES_MQTT_PORT") ?? "1883");
-
-snapDogConfig.Api.AuthEnabled = bool.Parse(Environment.GetEnvironmentVariable("SNAPDOG_API_AUTH_ENABLED") ?? "true");
-var apiKey1 = Environment.GetEnvironmentVariable("SNAPDOG_API_APIKEY_1");
-if (!string.IsNullOrEmpty(apiKey1))
+// Load configuration from environment variables using EnvoyConfig
+SnapDogConfiguration snapDogConfig;
+try
 {
-    snapDogConfig.Api.ApiKeys.Add(apiKey1);
+    snapDogConfig = EnvConfig.Load<SnapDogConfiguration>();
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Failed to load configuration: {ex.Message}");
+    throw;
 }
 
 // Configure Serilog based on configuration
@@ -50,7 +46,7 @@ Log.Logger = new LoggerConfiguration()
 try
 {
     Log.Information("Starting SnapDog2 application");
-    
+
     // Print configuration on startup
     PrintConfiguration(snapDogConfig);
 
@@ -63,6 +59,7 @@ try
     builder.Services.AddSingleton(snapDogConfig.Telemetry);
     builder.Services.AddSingleton(snapDogConfig.Api);
     builder.Services.AddSingleton(snapDogConfig.Services);
+    builder.Services.AddSingleton(snapDogConfig.SnapcastServer);
 
     // Add services to the container
     builder.Services.AddControllers();
@@ -73,25 +70,37 @@ try
     if (snapDogConfig.System.HealthChecksEnabled)
     {
         var healthChecksBuilder = builder.Services.AddHealthChecks();
-        
+
         // Add basic application health check
-        healthChecksBuilder.AddCheck("self", () => HealthCheckResult.Healthy("Application is running"), tags: ["ready", "live"]);
-        
+        healthChecksBuilder.AddCheck(
+            "self",
+            () => HealthCheckResult.Healthy("Application is running"),
+            tags: ["ready", "live"]
+        );
+
         // Add external service health checks based on configuration
         if (snapDogConfig.Services.Snapcast.Enabled)
         {
-            healthChecksBuilder.AddTcpHealthCheck(options =>
-            {
-                options.AddHost(snapDogConfig.Services.Snapcast.Address, snapDogConfig.Services.Snapcast.Port);
-            }, name: "snapcast", tags: ["ready"]);
+            healthChecksBuilder.AddTcpHealthCheck(
+                options =>
+                {
+                    options.AddHost(snapDogConfig.Services.Snapcast.Address, snapDogConfig.Services.Snapcast.Port);
+                },
+                name: "snapcast",
+                tags: ["ready"]
+            );
         }
 
-        if (snapDogConfig.Services.Mqtt.Enabled)
+        if (snapDogConfig.Services.ServicesMqtt.Enabled)
         {
-            healthChecksBuilder.AddTcpHealthCheck(options =>
-            {
-                options.AddHost(snapDogConfig.Services.Mqtt.BrokerAddress, snapDogConfig.Services.Mqtt.Port);
-            }, name: "mqtt", tags: ["ready"]);
+            healthChecksBuilder.AddTcpHealthCheck(
+                options =>
+                {
+                    options.AddHost(snapDogConfig.Services.ServicesMqtt.BrokerAddress, snapDogConfig.Services.ServicesMqtt.Port);
+                },
+                name: "mqtt",
+                tags: ["ready"]
+            );
         }
     }
 
@@ -108,7 +117,7 @@ try
     app.MapControllers();
 
     Log.Information("SnapDog2 application configured successfully");
-    
+
     await app.RunAsync();
 }
 catch (Exception ex)
@@ -121,10 +130,47 @@ finally
     await Log.CloseAndFlushAsync();
 }
 
+static void LoadDotEnvFile()
+{
+    var envFile = ".env";
+    if (!File.Exists(envFile))
+        return;
+
+    Console.WriteLine($"Loading environment variables from {envFile}");
+
+    foreach (var line in File.ReadAllLines(envFile))
+    {
+        var trimmedLine = line.Trim();
+
+        // Skip empty lines and comments
+        if (string.IsNullOrEmpty(trimmedLine) || trimmedLine.StartsWith('#'))
+            continue;
+
+        var parts = trimmedLine.Split('=', 2);
+        if (parts.Length == 2)
+        {
+            var key = parts[0].Trim();
+            var value = parts[1].Trim();
+
+            // Remove quotes if present
+            if ((value.StartsWith('"') && value.EndsWith('"')) || (value.StartsWith('\'') && value.EndsWith('\'')))
+            {
+                value = value[1..^1];
+            }
+
+            // Only set if not already set (environment variables take precedence)
+            if (Environment.GetEnvironmentVariable(key) == null)
+            {
+                Environment.SetEnvironmentVariable(key, value);
+            }
+        }
+    }
+}
+
 static void PrintConfiguration(SnapDogConfiguration config)
 {
     Log.Information("=== SnapDog2 Configuration ===");
-    
+
     // System Configuration
     Log.Information("System Configuration:");
     Log.Information("  Environment: {Environment}", config.System.Environment);
@@ -133,6 +179,8 @@ static void PrintConfiguration(SnapDogConfiguration config)
     Log.Information("  Health Checks Enabled: {HealthChecksEnabled}", config.System.HealthChecksEnabled);
     Log.Information("  Health Checks Timeout: {HealthChecksTimeout}s", config.System.HealthChecksTimeout);
     Log.Information("  Health Checks Tags: {HealthChecksTags}", config.System.HealthChecksTags);
+    Log.Information("  MQTT Base Topic: {MqttBaseTopic}", config.System.MqttBaseTopic);
+    Log.Information("  MQTT Status Topic: {MqttStatusTopic}", config.System.MqttStatusTopic);
 
     // Telemetry Configuration
     Log.Information("Telemetry Configuration:");
@@ -143,13 +191,22 @@ static void PrintConfiguration(SnapDogConfiguration config)
     if (config.Telemetry.Otlp.Enabled)
     {
         Log.Information("  OTLP Endpoint: {OtlpEndpoint}", config.Telemetry.Otlp.Endpoint);
-        Log.Information("  OTLP Agent: {OtlpAgent}:{OtlpPort}", config.Telemetry.Otlp.AgentAddress, config.Telemetry.Otlp.AgentPort);
+        Log.Information(
+            "  OTLP Agent: {OtlpAgent}:{OtlpPort}",
+            config.Telemetry.Otlp.AgentAddress,
+            config.Telemetry.Otlp.AgentPort
+        );
     }
     Log.Information("  Prometheus Enabled: {PrometheusEnabled}", config.Telemetry.Prometheus.Enabled);
     if (config.Telemetry.Prometheus.Enabled)
     {
         Log.Information("  Prometheus Path: {PrometheusPath}", config.Telemetry.Prometheus.Path);
         Log.Information("  Prometheus Port: {PrometheusPort}", config.Telemetry.Prometheus.Port);
+    }
+    Log.Information("  TelemetrySeq Enabled: {SeqEnabled}", config.Telemetry.TelemetrySeq.Enabled);
+    if (config.Telemetry.TelemetrySeq.Enabled && !string.IsNullOrEmpty(config.Telemetry.TelemetrySeq.Url))
+    {
+        Log.Information("  TelemetrySeq URL: {SeqUrl}", config.Telemetry.TelemetrySeq.Url);
     }
 
     // API Configuration
@@ -159,45 +216,145 @@ static void PrintConfiguration(SnapDogConfiguration config)
 
     // Services Configuration
     Log.Information("Services Configuration:");
-    
+
     // Snapcast
     Log.Information("  Snapcast:");
     Log.Information("    Enabled: {SnapcastEnabled}", config.Services.Snapcast.Enabled);
     if (config.Services.Snapcast.Enabled)
     {
-        Log.Information("    Address: {SnapcastAddress}:{SnapcastPort}", config.Services.Snapcast.Address, config.Services.Snapcast.Port);
+        Log.Information(
+            "    Address: {SnapcastAddress}:{SnapcastPort}",
+            config.Services.Snapcast.Address,
+            config.Services.Snapcast.Port
+        );
+        Log.Information("    HTTP Port: {SnapcastHttpPort}", config.Services.Snapcast.HttpPort);
+        Log.Information(
+            "    Base URL: {SnapcastBaseUrl}",
+            string.IsNullOrEmpty(config.Services.Snapcast.BaseUrl) ? "(empty)" : config.Services.Snapcast.BaseUrl
+        );
         Log.Information("    Timeout: {SnapcastTimeout}s", config.Services.Snapcast.Timeout);
         Log.Information("    Auto Reconnect: {SnapcastAutoReconnect}", config.Services.Snapcast.AutoReconnect);
-        Log.Information("    Reconnect Interval: {SnapcastReconnectInterval}s", config.Services.Snapcast.ReconnectInterval);
+        Log.Information(
+            "    Reconnect Interval: {SnapcastReconnectInterval}s",
+            config.Services.Snapcast.ReconnectInterval
+        );
     }
 
     // MQTT
     Log.Information("  MQTT:");
-    Log.Information("    Enabled: {MqttEnabled}", config.Services.Mqtt.Enabled);
-    if (config.Services.Mqtt.Enabled)
+    Log.Information("    Enabled: {MqttEnabled}", config.Services.ServicesMqtt.Enabled);
+    if (config.Services.ServicesMqtt.Enabled)
     {
-        Log.Information("    Broker: {MqttBroker}:{MqttPort}", config.Services.Mqtt.BrokerAddress, config.Services.Mqtt.Port);
-        Log.Information("    Client ID: {MqttClientId}", config.Services.Mqtt.ClientId);
+        Log.Information(
+            "    Broker: {MqttBroker}:{MqttPort}",
+            config.Services.ServicesMqtt.BrokerAddress,
+            config.Services.ServicesMqtt.Port
+        );
+        Log.Information("    Client ID: {MqttClientId}", config.Services.ServicesMqtt.ClientId);
+        Log.Information("    SSL Enabled: {MqttSslEnabled}", config.Services.ServicesMqtt.SslEnabled);
+        Log.Information(
+            "    Username: {MqttUsername}",
+            string.IsNullOrEmpty(config.Services.ServicesMqtt.Username) ? "Not configured" : "***"
+        );
+        Log.Information("    Keep Alive: {MqttKeepAlive}s", config.Services.ServicesMqtt.KeepAlive);
     }
 
     // KNX
     Log.Information("  KNX:");
-    Log.Information("    Enabled: {KnxEnabled}", config.Services.Knx.Enabled);
-    if (config.Services.Knx.Enabled)
+    Log.Information("    Enabled: {KnxEnabled}", config.Services.ServicesKnx.Enabled);
+    if (config.Services.ServicesKnx.Enabled)
     {
-        Log.Information("    Gateway: {KnxGateway}:{KnxPort}", config.Services.Knx.Gateway ?? "Not configured", config.Services.Knx.Port);
+        Log.Information(
+            "    Gateway: {KnxGateway}:{KnxPort}",
+            config.Services.ServicesKnx.Gateway ?? "Not configured",
+            config.Services.ServicesKnx.Port
+        );
+        Log.Information("    Timeout: {KnxTimeout}s", config.Services.ServicesKnx.Timeout);
+        Log.Information("    Auto Reconnect: {KnxAutoReconnect}", config.Services.ServicesKnx.AutoReconnect);
     }
 
-    // Subsonic
-    Log.Information("  Subsonic:");
-    Log.Information("    Enabled: {SubsonicEnabled}", config.Services.Subsonic.Enabled);
-    if (config.Services.Subsonic.Enabled)
+    // ServicesSubsonic
+    Log.Information("  ServicesSubsonic:");
+    Log.Information("    Enabled: {SubsonicEnabled}", config.Services.ServicesSubsonic.Enabled);
+    if (config.Services.ServicesSubsonic.Enabled)
     {
-        Log.Information("    URL: {SubsonicUrl}", config.Services.Subsonic.Url ?? "Not configured");
-        Log.Information("    Username: {SubsonicUsername}", string.IsNullOrEmpty(config.Services.Subsonic.Username) ? "Not configured" : "***");
+        Log.Information("    URL: {SubsonicUrl}", config.Services.ServicesSubsonic.Url ?? "Not configured");
+        Log.Information(
+            "    Username: {SubsonicUsername}",
+            string.IsNullOrEmpty(config.Services.ServicesSubsonic.Username) ? "Not configured" : "***"
+        );
+        Log.Information("    Timeout: {SubsonicTimeout}ms", config.Services.ServicesSubsonic.Timeout);
+    }
+
+    // Snapcast Server Configuration
+    Log.Information("Snapcast Server Configuration:");
+    Log.Information("  Codec: {SnapcastCodec}", config.SnapcastServer.Codec);
+    Log.Information("  Sample Format: {SnapcastSampleFormat}", config.SnapcastServer.SampleFormat);
+    Log.Information("  Web Server Port: {SnapcastWebServerPort}", config.SnapcastServer.WebServerPort);
+    Log.Information("  WebSocket Port: {SnapcastWebSocketPort}", config.SnapcastServer.WebSocketPort);
+
+    // Zones Configuration
+    Log.Information("Zones Configuration:");
+    Log.Information("  Zone Count: {ZoneCount}", config.Zones.Count);
+    foreach (var (zone, index) in config.Zones.Select((z, i) => (z, i + 1)))
+    {
+        Log.Information("  Zone {ZoneIndex}: {ZoneName} -> {ZoneSink}", index, zone.Name, zone.Sink);
+        if (!string.IsNullOrEmpty(zone.Mqtt.BaseTopic))
+        {
+            Log.Information("    MQTT Base Topic: {ZoneMqttBaseTopic}", zone.Mqtt.BaseTopic);
+        }
+        if (zone.Knx.Enabled)
+        {
+            Log.Information(
+                "    KNX Enabled with {KnxAddressCount} addresses configured",
+                CountNonNullKnxAddresses(zone.Knx)
+            );
+        }
+    }
+
+    // Clients Configuration
+    Log.Information("Clients Configuration:");
+    Log.Information("  Client Count: {ClientCount}", config.Clients.Count);
+    foreach (var (client, index) in config.Clients.Select((c, i) => (c, i + 1)))
+    {
+        Log.Information(
+            "  Client {ClientIndex}: {ClientName} (Zone {DefaultZone})",
+            index,
+            client.Name,
+            client.DefaultZone
+        );
+        if (!string.IsNullOrEmpty(client.Mac))
+        {
+            Log.Information("    MAC: {ClientMac}", client.Mac);
+        }
+        if (!string.IsNullOrEmpty(client.Mqtt.BaseTopic))
+        {
+            Log.Information("    MQTT Base Topic: {ClientMqttBaseTopic}", client.Mqtt.BaseTopic);
+        }
+        if (client.Knx.Enabled)
+        {
+            Log.Information("    KNX Enabled");
+        }
+    }
+
+    // Radio Stations Configuration
+    Log.Information("Radio Stations Configuration:");
+    Log.Information("  Radio Station Count: {RadioStationCount}", config.RadioStations.Count);
+    foreach (var (station, index) in config.RadioStations.Select((s, i) => (s, i + 1)))
+    {
+        Log.Information("  Radio {RadioIndex}: {RadioName} -> {RadioUrl}", index, station.Name, station.Url);
     }
 
     Log.Information("=== End Configuration ===");
+}
+
+static int CountNonNullKnxAddresses(ZoneKnxConfig knx)
+{
+    var properties = typeof(ZoneKnxConfig)
+        .GetProperties()
+        .Where(p => p.PropertyType == typeof(string) && p.Name != "Enabled");
+
+    return properties.Count(p => !string.IsNullOrEmpty((string?)p.GetValue(knx)));
 }
 
 // Make Program class accessible to tests

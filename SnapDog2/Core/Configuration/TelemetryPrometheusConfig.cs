@@ -1,11 +1,9 @@
 namespace SnapDog2.Core.Configuration;
 
-using EnvoyConfig.Attributes;
-
 /// <summary>
 /// Prometheus configuration.
 /// </summary>
-public class PrometheusConfig
+public class TelemetryPrometheusConfig
 {
     /// <summary>
     /// Whether Prometheus metrics are enabled.

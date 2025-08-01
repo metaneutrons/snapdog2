@@ -68,8 +68,8 @@ public class SnapDogConfigurationTests
 
         // Assert
         config.Snapcast.Should().NotBeNull();
-        config.Mqtt.Should().NotBeNull();
-        config.Knx.Should().NotBeNull();
-        config.Subsonic.Should().NotBeNull();
+        config.ServicesMqtt.Should().NotBeNull();
+        config.ServicesKnx.Should().NotBeNull();
+        config.ServicesSubsonic.Should().NotBeNull();
     }
 }

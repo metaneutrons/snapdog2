@@ -1,7 +1,5 @@
 namespace SnapDog2.Core.Configuration;
 
-using EnvoyConfig.Attributes;
-
 /// <summary>
 /// Snapcast service configuration.
 /// </summary>
@@ -48,4 +46,18 @@ public class SnapcastConfig
     /// </summary>
     [Env(Key = "AUTO_RECONNECT", Default = true)]
     public bool AutoReconnect { get; set; } = true;
+
+    /// <summary>
+    /// Snapcast HTTP port.
+    /// Maps to: SNAPDOG_SERVICES_SNAPCAST_HTTP_PORT
+    /// </summary>
+    [Env(Key = "HTTP_PORT", Default = 1780)]
+    public int HttpPort { get; set; } = 1780;
+
+    /// <summary>
+    /// Snapcast base URL for reverse proxy support.
+    /// Maps to: SNAPDOG_SERVICES_SNAPCAST_BASE_URL
+    /// </summary>
+    [Env(Key = "BASE_URL", Default = "")]
+    public string BaseUrl { get; set; } = "";
 }

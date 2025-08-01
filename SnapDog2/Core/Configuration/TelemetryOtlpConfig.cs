@@ -1,11 +1,9 @@
 namespace SnapDog2.Core.Configuration;
 
-using EnvoyConfig.Attributes;
-
 /// <summary>
 /// OTLP configuration for Jaeger integration.
 /// </summary>
-public class OtlpConfig
+public class TelemetryOtlpConfig
 {
     /// <summary>
     /// Whether OTLP export is enabled.

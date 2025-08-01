@@ -1,7 +1,5 @@
 namespace SnapDog2.Core.Configuration;
 
-using EnvoyConfig.Attributes;
-
 /// <summary>
 /// Telemetry and observability configuration.
 /// </summary>
@@ -41,4 +39,11 @@ public class TelemetryConfig
     /// </summary>
     [Env(NestedPrefix = "PROMETHEUS_")]
     public PrometheusConfig Prometheus { get; set; } = new();
+
+    /// <summary>
+    /// TelemetrySeq configuration.
+    /// Maps environment variables with prefix: SNAPDOG_TELEMETRY_SEQ_*
+    /// </summary>
+    [Env(NestedPrefix = "SEQ_")]
+    public TelemetrySeqConfig TelemetrySeq { get; set; } = new();
 }

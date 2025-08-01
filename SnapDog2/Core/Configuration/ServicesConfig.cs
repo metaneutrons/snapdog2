@@ -1,7 +1,5 @@
 namespace SnapDog2.Core.Configuration;
 
-using EnvoyConfig.Attributes;
-
 /// <summary>
 /// External services configuration.
 /// </summary>
@@ -19,19 +17,19 @@ public class ServicesConfig
     /// Maps environment variables with prefix: SNAPDOG_SERVICES_MQTT_*
     /// </summary>
     [Env(NestedPrefix = "MQTT_")]
-    public MqttConfig Mqtt { get; set; } = new();
+    public ServicesMqttConfig ServicesMqtt { get; set; } = new();
 
     /// <summary>
     /// KNX integration configuration.
     /// Maps environment variables with prefix: SNAPDOG_SERVICES_KNX_*
     /// </summary>
     [Env(NestedPrefix = "KNX_")]
-    public KnxConfig Knx { get; set; } = new();
+    public ServicesKnxConfig ServicesKnx { get; set; } = new();
 
     /// <summary>
-    /// Subsonic integration configuration.
+    /// ServicesSubsonic integration configuration.
     /// Maps environment variables with prefix: SNAPDOG_SERVICES_SUBSONIC_*
     /// </summary>
     [Env(NestedPrefix = "SUBSONIC_")]
-    public SubsonicConfig Subsonic { get; set; } = new();
+    public ServicesSubsonicConfig ServicesSubsonic { get; set; } = new();
 }
