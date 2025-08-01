@@ -179,16 +179,25 @@ SNAPDOG_ZONE_1_SINK=/snapsinks/living-room            # Required
 
 # Zone 1 MQTT Configuration
 SNAPDOG_ZONE_1_MQTT_BASE_TOPIC=snapdog/zones/living-room
-SNAPDOG_ZONE_1_MQTT_STATE_SET_TOPIC=state/set         # Default: state/set
-SNAPDOG_ZONE_1_MQTT_TRACK_SET_TOPIC=track/set         # Default: track/set
-SNAPDOG_ZONE_1_MQTT_PLAYLIST_SET_TOPIC=playlist/set.  # Default: playlist/set
-SNAPDOG_ZONE_1_MQTT_VOLUME_SET_TOPIC=volume/set       # Default: volume/set
-SNAPDOG_ZONE_1_MQTT_MUTE_SET_TOPIC=mute/set           # Default: mute/set
-SNAPDOG_ZONE_1_MQTT_STATE_TOPIC=state                 # Default: state
-SNAPDOG_ZONE_1_MQTT_VOLUME_TOPIC=volume               # Default: volume
-SNAPDOG_ZONE_1_MQTT_MUTE_TOPIC=mute                   # Default: mute
-SNAPDOG_ZONE_1_MQTT_TRACK_TOPIC=track                 # Default: track
-SNAPDOG_ZONE_1_MQTT_PLAYLIST_TOPIC=playlist           # Default: playlist
+SNAPDOG_ZONE_1_MQTT_CONTROL_SET_TOPIC=control/set         # Default: control/set
+SNAPDOG_ZONE_1_MQTT_TRACK_SET_TOPIC=track/set             # Default: track/set
+SNAPDOG_ZONE_1_MQTT_TRACK_REPEAT_SET_TOPIC=track_repeat/set # Default: track_repeat/set
+SNAPDOG_ZONE_1_MQTT_PLAYLIST_SET_TOPIC=playlist/set       # Default: playlist/set
+SNAPDOG_ZONE_1_MQTT_PLAYLIST_REPEAT_SET_TOPIC=playlist_repeat/set # Default: playlist_repeat/set
+SNAPDOG_ZONE_1_MQTT_PLAYLIST_SHUFFLE_SET_TOPIC=playlist_shuffle/set # Default: playlist_shuffle/set
+SNAPDOG_ZONE_1_MQTT_VOLUME_SET_TOPIC=volume/set           # Default: volume/set
+SNAPDOG_ZONE_1_MQTT_MUTE_SET_TOPIC=mute/set               # Default: mute/set
+SNAPDOG_ZONE_1_MQTT_CONTROL_TOPIC=control                 # Default: control
+SNAPDOG_ZONE_1_MQTT_TRACK_TOPIC=track                     # Default: track
+SNAPDOG_ZONE_1_MQTT_TRACK_INFO_TOPIC=track/info           # Default: track/info
+SNAPDOG_ZONE_1_MQTT_TRACK_REPEAT_TOPIC=track_repeat       # Default: track_repeat
+SNAPDOG_ZONE_1_MQTT_PLAYLIST_TOPIC=playlist               # Default: playlist
+SNAPDOG_ZONE_1_MQTT_PLAYLIST_INFO_TOPIC=playlist/info     # Default: playlist/info
+SNAPDOG_ZONE_1_MQTT_PLAYLIST_REPEAT_TOPIC=playlist_repeat # Default: playlist_repeat
+SNAPDOG_ZONE_1_MQTT_PLAYLIST_SHUFFLE_TOPIC=playlist_shuffle # Default: playlist_shuffle
+SNAPDOG_ZONE_1_MQTT_VOLUME_TOPIC=volume                   # Default: volume
+SNAPDOG_ZONE_1_MQTT_MUTE_TOPIC=mute                       # Default: mute
+SNAPDOG_ZONE_1_MQTT_STATE_TOPIC=state                     # Default: state
 
 # Zone 1 KNX Configuration
 SNAPDOG_ZONE_1_KNX_ENABLED=true                       # Default: false

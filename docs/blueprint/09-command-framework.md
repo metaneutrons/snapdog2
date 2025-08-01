@@ -130,7 +130,7 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 
 | Command ID                | Env Var Suffix           | Default Rel. Topic   | Example Payloads                               | Notes                            |
 | :------------------------ | :----------------------- | :--------------------- | :--------------------------------------------- | :------------------------------- |
-| `PLAY`/`PAUSE`/`STOP` etc.| `_STATE_TOPIC`     | `state/set`              | `"play"`, `"pause"`, `"next"`, `"shuffle_on"` | **See 9.3.2.3 for full payload list** |
+| `PLAY`/`PAUSE`/`STOP` etc.| `_CONTROL_SET_TOPIC`     | `control/set`              | `"play"`, `"pause"`, `"next"`, `"shuffle_on"` | **See 9.3.2.3 for full payload list** |
 
 **Track Management**
 
@@ -159,11 +159,15 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 
 #### 9.3.2.2. Zone Status Topics (Read-Only)
 
+**Important Topic Distinction:**
+- **`control`** - Publishes simple string status values for current playback state and modes (e.g., `"play"`, `"mute_on"`)
+- **`state`** - Publishes complete JSON zone state object with all information (see Section 9.5.1)
+
 **Playback/Mode State**
 
 | Status ID                 | Env Var Suffix         | Default Rel. Topic | Example Payload                      | Retained | Notes                      |
 | :------------------------ | :--------------------- | :----------------- | :----------------------------------- | :------- | :------------------------- |
-| `PLAYBACK_STATE` + Modes  | `_STATE_TOPIC`       | `state`          | `"play"`, `"track_repeat_on"`, etc. | Yes      | Reports multiple states    |
+| `PLAYBACK_STATE` + Modes  | `_CONTROL_TOPIC`       | `control`          | `"play"`, `"track_repeat_on"`, etc. | Yes      | Simple string status values    |
 
 **Track Management**
 
