@@ -40,7 +40,7 @@ For each level, this section defines:
 
 ### 9.2.2. Global MQTT Implementation
 
-Base topic: `SNAPDOG_MQTT_BASE_TOPIC` (default: `snapdog`). System topics relative to base, configurable via `SNAPDOG_MQTT_*_TOPIC` vars (Sec 10).
+Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics relative to base, configurable via `SNAPDOG_SYSTEM_MQTT_*_TOPIC` vars (Sec 10).
 
 | Status ID         | Default Relative Topic | Retained | Example Payload (JSON - aligned with Records)                         |
 | :---------------- | :--------------------- | :------- | :-------------------------------------------------------------------- |
@@ -51,7 +51,7 @@ Base topic: `SNAPDOG_MQTT_BASE_TOPIC` (default: `snapdog`). System topics relati
 
 ### 9.2.3. Global MQTT Last Will and Testament (LWT)
 
-* **Topic:** `{BaseTopic}/{StatusTopic}` (e.g., `snapdog/status`)
+* **Topic:** `{BASE_TOPIC}/{StatusTopic}` (e.g., `snapdog/status`)
 * **Payload:** `{"status": 0}`
 * **Retained:** `true`
 * **QoS:** `1` (AtLeastOnce)
@@ -122,7 +122,7 @@ Base topic: `SNAPDOG_MQTT_BASE_TOPIC` (default: `snapdog`). System topics relati
 
 ### 9.3.2. Zone MQTT Implementation
 
-Base topic: `SNAPDOG_ZONE_n_MQTT_BASETOPIC` (default: `snapdog/zones/{n}/`). **Indices are 1-based.** Relative topic paths configured via `SNAPDOG_ZONE_{n}_MQTT_{SUFFIX}` variables (Sec 10).
+* Base topic: `SNAPDOG_ZONE_n_MQTT_BASE_TOPIC` (default: `snapdog/zones/{n}/`). **Indices are 1-based.** Relative topic paths configured via `SNAPDOG_ZONE_{n}_MQTT_{SUFFIX}` variables (Sec 10).
 
 #### 9.3.2.1. Zone Command Topics
 
@@ -195,11 +195,11 @@ Base topic: `SNAPDOG_ZONE_n_MQTT_BASETOPIC` (default: `snapdog/zones/{n}/`). **I
 | :---------------- | :------------- | :----------------- | :------------------------------- | :------- | :-------------------- |
 | `ZONE_STATE`      | `_STATE_TOPIC` | `state`            | **Full JSON object (see 9.5.1)** | Yes      | Includes all status |
 
-#### 9.3.2.3. Payloads for `{zoneBaseTopic}control/set`
+#### 9.3.2.3. Payloads for `{zoneBASE_TOPIC}control/set`
 
 This topic accepts various string payloads to control multiple aspects:
 
-| Command Functionality     | `{zoneBaseTopic}control/set` Payload |
+| Command Functionality     | `{zoneBASE_TOPIC}control/set` Payload |
 | :------------------------ | :----------------------------------- |
 | `PLAY`                    | `play`, `play url <url>`             |
 | `PAUSE`                   | `pause`                              |
@@ -222,11 +222,11 @@ This topic accepts various string payloads to control multiple aspects:
 | `VOLUME_UP`               | `volume_up`, `volume +<step>`        |
 | `VOLUME_DOWN`             | `volume_down`, `volume -<step>`      |
 
-#### 9.3.2.4. Status Values for `{zoneBaseTopic}control`
+#### 9.3.2.4. Status Values for `{zoneBASE_TOPIC}control`
 
 This topic publishes simple string representations for various states:
 
-| Status Functionality    | `{zoneBaseTopic}control` Status Value         |
+| Status Functionality    | `{zoneBASE_TOPIC}control` Status Value         |
 | :---------------------- | :-------------------------------------------- |
 | `PLAYBACK_STATE`        | `play`, `pause`, `stop`                       |
 | `TRACK_REPEAT_STATUS`   | `track_repeat_on`, `track_repeat_off`         |
@@ -336,7 +336,7 @@ Uses `Knx.Falcon.GroupAddress`. GAs configured via `SNAPDOG_ZONE_{n}_KNX_{SUFFIX
 
 ### 9.4.2. Client MQTT Implementation
 
-Base topic: `SNAPDOG_CLIENT_m_MQTT_BASETOPIC` (default: `snapdog/clients/{m}/`).
+Base topic: `SNAPDOG_CLIENT_m_MQTT_BASE_TOPIC` (default: `snapdog/clients/{m}/`).
 
 #### 9.4.2.1. Client Command Topics (`/set`)
 
@@ -415,7 +415,7 @@ Uses `Knx.Falcon.GroupAddress`. GAs configured via `SNAPDOG_CLIENT_{m}_KNX_{SUFF
 
 ### 9.5.1. Complete Zone State (JSON)
 
-Published to `{zoneBaseTopic}/state`.
+Published to `{zoneBASE_TOPIC}/state`.
 
 ```json
 {
@@ -453,7 +453,7 @@ Published to `{zoneBaseTopic}/state`.
 
 ### 9.5.2. Complete Client State (JSON)
 
-Published to `{clientBaseTopic}/state`.
+Published to `{clientBASE_TOPIC}/state`.
 
 ```json
 {

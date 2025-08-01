@@ -80,37 +80,48 @@ All environment variables use the global prefix `SNAPDOG_` and follow a hierarch
 
 ```bash
 # Basic system settings
-SNAPDOG_SYSTEM_LOG_LEVEL=Information          # Default: Information
-SNAPDOG_SYSTEM_ENVIRONMENT=Production         # Default: Development
+SNAPDOG_SYSTEM_LOG_LEVEL=Information                  # Default: Information
+SNAPDOG_SYSTEM_ENVIRONMENT=Production                 # Default: Development
+
+# System-wide MQTT Topics
+SNAPDOG_SYSTEM_MQTT_BASE_TOPIC=snapdog                 # Default: snapdog
+SNAPDOG_SYSTEM_MQTT_STATUS_TOPIC=status               # Default: status
+SNAPDOG_SYSTEM_MQTT_ERROR_TOPIC=error                 # Default: error
+SNAPDOG_SYSTEM_MQTT_VERSION_TOPIC=version             # Default: version
+SNAPDOG_SYSTEM_MQTT_STATS_TOPIC=stats                 # Default: stats
 ```
 
 ### 10.2.2. Telemetry Configuration
 
 ```bash
 # Core telemetry settings
-SNAPDOG_TELEMETRY_ENABLED=true                # Default: false
-SNAPDOG_TELEMETRY_SERVICE_NAME=snapdog        # Default: SnapDog2
-SNAPDOG_TELEMETRY_SAMPLING_RATE=1.0           # Default: 1.0
+SNAPDOG_TELEMETRY_ENABLED=true                        # Default: false
+SNAPDOG_TELEMETRY_SERVICE_NAME=snapdog                # Default: SnapDog2
+SNAPDOG_TELEMETRY_SAMPLING_RATE=1.0                   # Default: 1.0
 
-# OTLP exporter configuration
-SNAPDOG_TELEMETRY_OTLP_ENABLED=true                # Default: false
-SNAPDOG_TELEMETRY_OTLP_ENDPOINT=http://jaeger:4317  # Default: http://localhost:4317
-SNAPDOG_TELEMETRY_OTLP_PROTOCOL=grpc               # Default: grpc
-SNAPDOG_TELEMETRY_OTLP_HEADERS=Auth=Bearer-token   # Optional
+# Jaeger exporter configuration (Docker environment)
+SNAPDOG_TELEMETRY_OTLP_ENABLED=true                   # Default: false
+SNAPDOG_TELEMETRY_OTLP_ENDPOINT=http://jaeger:14268   # Default: http://localhost:14268
+SNAPDOG_TELEMETRY_OTLP_AGENT_ADDRESS=jaeger           # Default: localhost
+SNAPDOG_TELEMETRY_OTLP_AGENT_PORT=6831                # Default: 6831
 
 # Prometheus metrics configuration
-SNAPDOG_TELEMETRY_PROMETHEUS_ENABLED=true     # Default: false
-SNAPDOG_TELEMETRY_PROMETHEUS_PORT=9090        # Default: 9090
-SNAPDOG_TELEMETRY_PROMETHEUS_PATH=/metrics    # Default: /metrics
+SNAPDOG_TELEMETRY_PROMETHEUS_ENABLED=true             # Default: false
+SNAPDOG_TELEMETRY_PROMETHEUS_PORT=9090                # Default: 9090
+SNAPDOG_TELEMETRY_PROMETHEUS_PATH=/metrics            # Default: /metrics
+
+# Seq integration (Recommended for Logging)
+SNAPDOG_TELEMETRY_SEQ_ENABLED=true                    # Default: true
+SNAPDOG_TELEMETRY_SEQ_URL=http://seq:5341             # Required if enabled
 ```
 
 ### 10.2.3. API Configuration
 
 ```bash
 # API authentication
-SNAPDOG_API_AUTH_ENABLED=true                 # Default: true
-SNAPDOG_API_APIKEY_1=secret-key-1             # Required if auth enabled
-SNAPDOG_API_APIKEY_2=secret-key-2             # Additional keys as needed
+SNAPDOG_API_AUTH_ENABLED=true                         # Default: true
+SNAPDOG_API_APIKEY_1=secret-key-1                     # Required if auth enabled
+SNAPDOG_API_APIKEY_2=secret-key-2                     # Additional keys as needed
 SNAPDOG_API_APIKEY_3=secret-key-3
 ```
 
@@ -118,65 +129,70 @@ SNAPDOG_API_APIKEY_3=secret-key-3
 
 ```bash
 # Snapcast integration
-SNAPDOG_SERVICES_SNAPCAST_HOST=snapcast-server     # Default: localhost
-SNAPDOG_SERVICES_SNAPCAST_CONTROL_PORT=1705        # Default: 1705
-SNAPDOG_SERVICES_SNAPCAST_STREAM_PORT=1704         # Default: 1704
-SNAPDOG_SERVICES_SNAPCAST_HTTP_PORT=1780           # Default: 1780
+SNAPDOG_SERVICES_SNAPCAST_ENABLED=true                # Default: true
+SNAPDOG_SERVICES_SNAPCAST_ADDRESS=snapcast-server     # Default: localhost
+SNAPDOG_SERVICES_SNAPCAST_CONTROL_PORT=1705           # Default: 1705
+SNAPDOG_SERVICES_SNAPCAST_HTTP_PORT=1780              # Default: 1780
+SNAPDOG_SERVICES_SNAPCAST_BASE_URL=                   # Default: "" (for reverse proxy support)
+SNAPDOG_SERVICES_SNAPCAST_PORT=1704                   # Default: 1704 (JSON-RPC port)
+SNAPDOG_SERVICES_SNAPCAST_TIMEOUT=30                  # Default: 30 (connection timeout)
+SNAPDOG_SERVICES_SNAPCAST_RECONNECT_INTERVAL=5        # Default: 5 (reconnect interval)
+SNAPDOG_SERVICES_SNAPCAST_AUTO_RECONNECT=true         # Default: true
+
+# Snapcast server configuration (for container setup)
+SNAPDOG_SNAPCAST_CODEC=flac                           # Default: flac (audio codec)
+SNAPDOG_SNAPCAST_SAMPLEFORMAT=48000:16:2              # Default: 48000:16:2 (sample rate:bit depth:channels)
+SNAPDOG_SNAPCAST_WEBSERVER_PORT=1780                  # Default: 1780 (SnapWeb HTTP port)
+SNAPDOG_SNAPCAST_WEBSOCKET_PORT=1704                  # Default: 1704 (JSON-RPC WebSocket port)
 
 # MQTT integration
-SNAPDOG_SERVICES_MQTT_ENABLED=true                 # Default: true
-SNAPDOG_SERVICES_MQTT_SERVER=mosquitto             # Default: localhost
-SNAPDOG_SERVICES_MQTT_PORT=1883                    # Default: 1883
-SNAPDOG_SERVICES_MQTT_USERNAME=snapdog             # Optional
-SNAPDOG_SERVICES_MQTT_PASSWORD=snapdog             # Optional
-SNAPDOG_SERVICES_MQTT_BASE_TOPIC=snapdog           # Default: snapdog
-SNAPDOG_SERVICES_MQTT_CLIENT_ID=snapdog-server     # Default: snapdog-server
-SNAPDOG_SERVICES_MQTT_USE_TLS=false                # Default: false
+SNAPDOG_SERVICES_MQTT_ENABLED=true                    # Default: true
+SNAPDOG_SERVICES_MQTT_BROKER_ADDRESS=mosquitto        # Default: localhost
+SNAPDOG_SERVICES_MQTT_PORT=1883                       # Default: 1883
+SNAPDOG_SERVICES_MQTT_SSL_ENABLED=false               # Default: false
+SNAPDOG_SERVICES_MQTT_USERNAME=snapdog                # Optional
+SNAPDOG_SERVICES_MQTT_PASSWORD=snapdog                # Optional
+SNAPDOG_SERVICES_MQTT_CLIENT_ID=snapdog-server        # Default: snapdog-server
+SNAPDOG_SERVICES_MQTT_KEEP_ALIVE=60                   # Default: 60
 
 # KNX integration
-SNAPDOG_SERVICES_KNX_ENABLED=true                  # Default: false
-SNAPDOG_SERVICES_KNX_CONNECTION_TYPE=IpTunneling   # Default: IpRouting
-SNAPDOG_SERVICES_KNX_GATEWAY_IP=192.168.1.100     # Required for IpTunneling
-SNAPDOG_SERVICES_KNX_PORT=3671                     # Default: 3671
-SNAPDOG_SERVICES_KNX_DEVICE_ADDRESS=15.15.250     # Default: 15.15.250
-SNAPDOG_SERVICES_KNX_RETRY_COUNT=3                 # Default: 3
-SNAPDOG_SERVICES_KNX_RETRY_INTERVAL=1000           # Default: 1000ms
+SNAPDOG_SERVICES_KNX_ENABLED=false                    # Default: false
+SNAPDOG_SERVICES_KNX_GATEWAY=192.168.1.100            # Required for connection
+SNAPDOG_SERVICES_KNX_PORT=3671                        # Default: 3671
+SNAPDOG_SERVICES_KNX_TIMEOUT=10                       # Default: 10 (seconds)
+SNAPDOG_SERVICES_KNX_AUTO_RECONNECT=true              # Default: true
 
 # Subsonic integration
-SNAPDOG_SERVICES_SUBSONIC_ENABLED=false           # Default: false
-SNAPDOG_SERVICES_SUBSONIC_SERVER=http://subsonic:4533  # Required if enabled
-SNAPDOG_SERVICES_SUBSONIC_USERNAME=admin          # Required if enabled
-SNAPDOG_SERVICES_SUBSONIC_PASSWORD=password       # Required if enabled
-SNAPDOG_SERVICES_SUBSONIC_TIMEOUT=10000           # Default: 10000ms
-
-# Seq integration (Recommended for Logging)
-SNAPDOG_SERVICES_SEQ_ENABLED=true # Default: true
-SNAPDOG_SERVICES_SEQ_URL=http://seq:5341 # Required if enabled
+SNAPDOG_SERVICES_SUBSONIC_ENABLED=false               # Default: false
+SNAPDOG_SERVICES_SUBSONIC_URL=http://subsonic:4533.   # Required if enabled
+SNAPDOG_SERVICES_SUBSONIC_USERNAME=admin              # Required if enabled
+SNAPDOG_SERVICES_SUBSONIC_PASSWORD=password           # Required if enabled
+SNAPDOG_SERVICES_SUBSONIC_TIMEOUT=10000               # Default: 10000ms
 ```
 
 ### 10.2.5. Zone Configuration (Nested Lists)
 
 ```bash
 # Zone 1 Configuration
-SNAPDOG_ZONE_1_NAME=Living Room                    # Required
-SNAPDOG_ZONE_1_SINK=/snapsinks/living-room        # Required
+SNAPDOG_ZONE_1_NAME=Living Room                       # Required
+SNAPDOG_ZONE_1_SINK=/snapsinks/living-room            # Required
 
 # Zone 1 MQTT Configuration
 SNAPDOG_ZONE_1_MQTT_BASE_TOPIC=snapdog/zones/living-room
-SNAPDOG_ZONE_1_MQTT_STATE_SET_TOPIC=state/set     # Default: state/set
-SNAPDOG_ZONE_1_MQTT_TRACK_SET_TOPIC=track/set     # Default: track/set
-SNAPDOG_ZONE_1_MQTT_PLAYLIST_SET_TOPIC=playlist/set   # Default: playlist/set
-SNAPDOG_ZONE_1_MQTT_VOLUME_SET_TOPIC=volume/set   # Default: volume/set
-SNAPDOG_ZONE_1_MQTT_MUTE_SET_TOPIC=mute/set       # Default: mute/set
-SNAPDOG_ZONE_1_MQTT_STATE_TOPIC=state             # Default: state
-SNAPDOG_ZONE_1_MQTT_VOLUME_TOPIC=volume           # Default: volume
-SNAPDOG_ZONE_1_MQTT_MUTE_TOPIC=mute               # Default: mute
-SNAPDOG_ZONE_1_MQTT_TRACK_TOPIC=track             # Default: track
-SNAPDOG_ZONE_1_MQTT_PLAYLIST_TOPIC=playlist       # Default: playlist
+SNAPDOG_ZONE_1_MQTT_STATE_SET_TOPIC=state/set         # Default: state/set
+SNAPDOG_ZONE_1_MQTT_TRACK_SET_TOPIC=track/set         # Default: track/set
+SNAPDOG_ZONE_1_MQTT_PLAYLIST_SET_TOPIC=playlist/set.  # Default: playlist/set
+SNAPDOG_ZONE_1_MQTT_VOLUME_SET_TOPIC=volume/set       # Default: volume/set
+SNAPDOG_ZONE_1_MQTT_MUTE_SET_TOPIC=mute/set           # Default: mute/set
+SNAPDOG_ZONE_1_MQTT_STATE_TOPIC=state                 # Default: state
+SNAPDOG_ZONE_1_MQTT_VOLUME_TOPIC=volume               # Default: volume
+SNAPDOG_ZONE_1_MQTT_MUTE_TOPIC=mute                   # Default: mute
+SNAPDOG_ZONE_1_MQTT_TRACK_TOPIC=track                 # Default: track
+SNAPDOG_ZONE_1_MQTT_PLAYLIST_TOPIC=playlist           # Default: playlist
 
 # Zone 1 KNX Configuration
-SNAPDOG_ZONE_1_KNX_ENABLED=true                   # Default: false
-SNAPDOG_ZONE_1_KNX_PLAY=1/1/1                     # Optional KNX addresses
+SNAPDOG_ZONE_1_KNX_ENABLED=true                       # Default: false
+SNAPDOG_ZONE_1_KNX_PLAY=1/1/1                         # Optional KNX addresses
 SNAPDOG_ZONE_1_KNX_PAUSE=1/1/2
 SNAPDOG_ZONE_1_KNX_STOP=1/1/3
 SNAPDOG_ZONE_1_KNX_TRACK_NEXT=1/1/4
@@ -200,9 +216,9 @@ SNAPDOG_ZONE_2_KNX_ENABLED=false
 
 ```bash
 # Client 1 Configuration
-SNAPDOG_CLIENT_1_NAME=Living Room Speaker         # Required
-SNAPDOG_CLIENT_1_MAC=AA:BB:CC:DD:EE:FF            # Optional
-SNAPDOG_CLIENT_1_DEFAULT_ZONE=1                   # Default: 1
+SNAPDOG_CLIENT_1_NAME=Living Room Speaker             # Required
+SNAPDOG_CLIENT_1_MAC=AA:BB:CC:DD:EE:FF                # Optional
+SNAPDOG_CLIENT_1_DEFAULT_ZONE=1                       # Default: 1
 
 # Client 1 MQTT Configuration
 SNAPDOG_CLIENT_1_MQTT_BASE_TOPIC=snapdog/clients/living-room

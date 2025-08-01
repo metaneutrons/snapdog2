@@ -198,13 +198,13 @@ Comprehensive monitoring is crucial for ensuring reliable operation.
 ### 19.4.1. Network Security
 
 * **Exposure:** Expose only necessary ports externally (typically the API port, maybe Snapweb). Use a reverse proxy (Nginx, Traefik, Caddy) in front of the API.
-* **TLS:** Enforce HTTPS for the API via the reverse proxy or Kestrel configuration. Configure TLS for MQTT (`SNAPDOG_MQTT_USE_TLS`) if the broker supports it and network isn't fully trusted.
+* **TLS:** Enforce HTTPS for the API via the reverse proxy or Kestrel configuration. Configure TLS for MQTT (`SNAPDOG_SYSTEM_MQTT_USE_TLS`) if the broker supports it and network isn't fully trusted.
 * **Firewall/Network Policies:** Restrict network access between containers and from external sources to only necessary ports/protocols.
 
 ### 19.4.2. Authentication and Authorization
 
 * **API:** Use strong, unique API keys (`SNAPDOG_API_APIKEY_*`) as configured. Ensure API Key authentication is enabled (`SNAPDOG_API_AUTH_ENABLED=true`).
-* **MQTT:** Configure username/password authentication on the Mosquitto broker and set `SNAPDOG_MQTT_USERNAME`/`PASSWORD` accordingly. Use ACLs on the broker to restrict SnapDog2's topic access if needed.
+* **MQTT:** Configure username/password authentication on the Mosquitto broker and set `SNAPDOG_SYSTEM_MQTT_USERNAME`/`PASSWORD` accordingly. Use ACLs on the broker to restrict SnapDog2's topic access if needed.
 * **Subsonic:** Use strong credentials (`SNAPDOG_SUBSONIC_USERNAME`/`PASSWORD`).
 * **KNX:** KNX security features (IP Secure, Data Secure) are handled by the Falcon SDK and gateway configuration, outside the scope of SnapDog2's direct implementation, but ensure the gateway is secured appropriately.
 
