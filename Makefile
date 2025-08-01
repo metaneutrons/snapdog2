@@ -33,7 +33,7 @@ dev-setup:
 	@echo "🚀 Setting up SnapDog2 development environment..."
 	@mkdir -p audio music config/grafana/dashboards config/grafana/datasources
 	@echo "📦 Pulling Docker images..."
-	@docker compose -f docker-compose.dev.yml pull
+	@docker compose -f docker-compose.dev.yml --env-file devcontainer/.env pull
 	@echo "📦 Restoring .NET packages..."
 	@dotnet restore
 	@dotnet tool restore
@@ -45,7 +45,7 @@ dev-setup:
 # Start full development environment
 dev-start:
 	@echo "🐳 Starting SnapDog2 development environment..."
-	@docker compose -f docker-compose.dev.yml up -d
+	@docker compose -f docker-compose.dev.yml --env-file devcontainer/.env up -d
 	@echo "⏳ Waiting for services to be ready..."
 	@sleep 5
 	@make dev-status
@@ -62,7 +62,7 @@ dev-start:
 # Start monitoring stack
 monitoring-start:
 	@echo "📊 Starting monitoring stack..."
-	@docker compose -f docker-compose.dev.yml --profile monitoring up -d
+	@docker compose -f docker-compose.dev.yml --env-file devcontainer/.env --profile monitoring up -d
 	@echo "✅ Monitoring services started!"
 	@echo "Grafana: http://localhost:8000/grafana/ (admin/snapdog-dev)"
 	@echo "Prometheus: http://localhost:8000/prometheus/"
@@ -70,34 +70,34 @@ monitoring-start:
 # Stop monitoring stack
 monitoring-stop:
 	@echo "📊 Stopping monitoring stack..."
-	@docker compose -f docker-compose.dev.yml --profile monitoring down
+	@docker compose -f docker-compose.dev.yml --env-file devcontainer/.env --profile monitoring down
 
 # Stop development services
 dev-stop:
 	@echo "🛑 Stopping SnapDog2 development services..."
-	@docker compose -f docker-compose.dev.yml down
+	@docker compose -f docker-compose.dev.yml --env-file devcontainer/.env down
 	@echo "✅ Services stopped"
 
 # Show service status
 dev-status:
 	@echo "📊 SnapDog2 Development Services Status:"
-	@docker compose -f docker-compose.dev.yml ps
+	@docker compose -f docker-compose.dev.yml --env-file devcontainer/.env ps
 
 # Show service logs
 dev-logs:
-	@docker compose -f docker-compose.dev.yml logs -f
+	@docker compose -f docker-compose.dev.yml --env-file devcontainer/.env logs -f
 
 # Clean up everything
 clean:
 	@echo "🧹 Cleaning up development environment..."
-	@docker compose -f docker-compose.dev.yml down -v --remove-orphans
+	@docker compose -f docker-compose.dev.yml --env-file devcontainer/.env down -v --remove-orphans
 	@docker system prune -f
 	@echo "✅ Environment cleaned"
 
 # Run tests with services
 test:
 	@echo "🧪 Running tests with development services..."
-	@docker compose -f docker-compose.dev.yml up -d
+	@docker compose -f docker-compose.dev.yml --env-file devcontainer/.env up -d
 	@sleep 3
 	@dotnet test --verbosity normal
 	@echo "✅ Tests completed"
