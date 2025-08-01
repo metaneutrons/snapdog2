@@ -107,6 +107,7 @@ services:
     image: eclipse-mosquitto:2.0
     volumes:
       - ./devcontainer/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./devcontainer/mosquitto/passwd:/mosquitto/config/passwd
       - mqtt_data:/mosquitto/data
       - mqtt_logs:/mosquitto/log
     networks:
