@@ -4,7 +4,9 @@ This chapter details the strategy and implementation for observability within Sn
 
 ## 13.1. Overview
 
-Comprehensive observability is crucial for understanding application behavior, diagnosing issues, and monitoring performance, even in a single-server home application. SnapDog2 adopts OpenTelemetry as the standard framework to achieve this, providing:
+For a self-hosted application like SnapDog2, observability should be powerful yet resource-efficient. While a full Prometheus + Grafana + Jaeger stack is supported as an advanced option, it can be overkill. **The recommended approach is a logging-first strategy using a centralized log server like Seq**, which provides excellent diagnostic capabilities with minimal overhead.
+
+The application is instrumented with OpenTelemetry to provide all three signals (logs, traces, metrics), allowing the user to choose the desired backend. The three pillars of observability are:
 
 * **Distributed Tracing:** To track the flow of requests and operations across different logical components (API, MediatR Handlers, Infrastructure Services).
 * **Metrics:** To quantify application performance, resource usage, and key operational counts (e.g., commands processed, errors).

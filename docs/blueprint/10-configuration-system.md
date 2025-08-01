@@ -148,6 +148,10 @@ SNAPDOG_SERVICES_SUBSONIC_SERVER=http://subsonic:4533  # Required if enabled
 SNAPDOG_SERVICES_SUBSONIC_USERNAME=admin          # Required if enabled
 SNAPDOG_SERVICES_SUBSONIC_PASSWORD=password       # Required if enabled
 SNAPDOG_SERVICES_SUBSONIC_TIMEOUT=10000           # Default: 10000ms
+
+# Seq integration (Recommended for Logging)
+SNAPDOG_SERVICES_SEQ_ENABLED=true # Default: true
+SNAPDOG_SERVICES_SEQ_URL=http://seq:5341 # Required if enabled
 ```
 
 ### 10.2.5. Zone Configuration (Nested Lists)

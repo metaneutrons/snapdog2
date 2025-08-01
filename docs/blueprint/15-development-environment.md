@@ -142,7 +142,17 @@ This file orchestrates the Dev Container setup for VS Code.
 }
 ```
 
-### 15.2.3. `.devcontainer/docker-compose.yml` (Dev Environment)
+### 15.2.3. Observability Configuration
+
+Simplified observability is enabled by default in the development environment. The Seq container is configured to collect and visualize logs:
+
+* **Seq Integration:**
+  * `SNAPDOG_SERVICES_SEQ_ENABLED=true`
+  * `SNAPDOG_SERVICES_SEQ_URL=http://seq:5341`
+
+Advanced telemetry exporters (Prometheus, Jaeger) are disabled by default to reduce resource usage.
+
+### 15.2.4. `.devcontainer/docker-compose.yml` (Dev Environment)
 
 Defines the interconnected services for the development environment, using a **shared Docker network** (`snapdog_dev_net`) for easy service discovery via container names.
 
