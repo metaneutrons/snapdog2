@@ -45,7 +45,7 @@ public class StateManagerTests : IDisposable
     public void Constructor_WithNullLogger_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new StateManager(null!));
+        Assert.Throws<ArgumentNullException>(static () => new StateManager(null!));
     }
 
     [Fact]
@@ -106,7 +106,7 @@ public class StateManagerTests : IDisposable
         var originalVersion = originalState.Version;
 
         // Act
-        var updatedState = _stateManager.UpdateState(state => state.WithSystemStatus(SystemStatus.Running));
+        var updatedState = _stateManager.UpdateState(static state => state.WithSystemStatus(SystemStatus.Running));
 
         // Assert
         Assert.NotNull(updatedState);
@@ -174,7 +174,7 @@ public class StateManagerTests : IDisposable
 
         // Act
         var result = _stateManager.TryUpdateState(
-            state => state.WithSystemStatus(SystemStatus.Running),
+            static state => state.WithSystemStatus(SystemStatus.Running),
             out var updatedState
         );
 
@@ -200,7 +200,7 @@ public class StateManagerTests : IDisposable
     public void TryUpdateState_WithInvalidUpdate_ShouldReturnFalse()
     {
         // Act
-        var result = _stateManager.TryUpdateState(state => state with { Version = -1 }, out var updatedState);
+        var result = _stateManager.TryUpdateState(static state => state with { Version = -1 }, out var updatedState);
 
         // Assert
         Assert.False(result);
@@ -214,7 +214,9 @@ public class StateManagerTests : IDisposable
         var originalVersion = _stateManager.GetCurrentVersion();
 
         // Act
-        var updatedState = _stateManager.UpdateStateWithRetry(state => state.WithSystemStatus(SystemStatus.Running));
+        var updatedState = _stateManager.UpdateStateWithRetry(static state =>
+            state.WithSystemStatus(SystemStatus.Running)
+        );
 
         // Assert
         Assert.NotNull(updatedState);
@@ -243,7 +245,7 @@ public class StateManagerTests : IDisposable
     public void ResetState_ShouldResetToEmptyState()
     {
         // Arrange
-        _stateManager.UpdateState(state => state.WithSystemStatus(SystemStatus.Running));
+        _stateManager.UpdateState(static state => state.WithSystemStatus(SystemStatus.Running));
 
         // Act
         var resetState = _stateManager.ResetState();

@@ -303,10 +303,10 @@ public class ValidationDemo
         // Invalid zone scenarios
         var invalidZoneScenarios = new List<(string Scenario, Func<Zone> CreateAction)>
         {
-            ("Empty ID", () => Zone.Create("", "Valid Name")),
-            ("Null ID", () => Zone.Create(null!, "Valid Name")),
-            ("Empty Name", () => Zone.Create("valid-id", "")),
-            ("Null Name", () => Zone.Create("valid-id", null!)),
+            ("Empty ID", static () => Zone.Create("", "Valid Name")),
+            ("Null ID", static () => Zone.Create(null!, "Valid Name")),
+            ("Empty Name", static () => Zone.Create("valid-id", "")),
+            ("Null Name", static () => Zone.Create("valid-id", null!)),
         };
 
         foreach (var (scenario, createAction) in invalidZoneScenarios)
@@ -367,15 +367,17 @@ public class ValidationDemo
         {
             (
                 "Empty ID",
-                () => Client.Create("", "Valid Name", new MacAddress("AA:BB:CC:DD:EE:FF"), new IpAddress("192.168.1.1"))
+                static () =>
+                    Client.Create("", "Valid Name", new MacAddress("AA:BB:CC:DD:EE:FF"), new IpAddress("192.168.1.1"))
             ),
             (
                 "Empty Name",
-                () => Client.Create("valid-id", "", new MacAddress("AA:BB:CC:DD:EE:FF"), new IpAddress("192.168.1.1"))
+                static () =>
+                    Client.Create("valid-id", "", new MacAddress("AA:BB:CC:DD:EE:FF"), new IpAddress("192.168.1.1"))
             ),
             (
                 "Invalid Volume (-1)",
-                () =>
+                static () =>
                     Client.Create(
                         "valid-id",
                         "Valid Name",
@@ -386,7 +388,7 @@ public class ValidationDemo
             ),
             (
                 "Invalid Volume (101)",
-                () =>
+                static () =>
                     Client.Create(
                         "valid-id",
                         "Valid Name",
@@ -442,20 +444,22 @@ public class ValidationDemo
         {
             (
                 "Empty ID",
-                () => AudioStream.Create("", "Valid Name", new StreamUrl("http://example.com"), AudioCodec.MP3, 320)
+                static () =>
+                    AudioStream.Create("", "Valid Name", new StreamUrl("http://example.com"), AudioCodec.MP3, 320)
             ),
             (
                 "Empty Name",
-                () => AudioStream.Create("valid-id", "", new StreamUrl("http://example.com"), AudioCodec.MP3, 320)
+                static () =>
+                    AudioStream.Create("valid-id", "", new StreamUrl("http://example.com"), AudioCodec.MP3, 320)
             ),
             (
                 "Invalid Bitrate (0)",
-                () =>
+                static () =>
                     AudioStream.Create("valid-id", "Valid Name", new StreamUrl("http://example.com"), AudioCodec.MP3, 0)
             ),
             (
                 "Invalid Bitrate (-1)",
-                () =>
+                static () =>
                     AudioStream.Create(
                         "valid-id",
                         "Valid Name",
@@ -503,10 +507,10 @@ public class ValidationDemo
         // Invalid playlist scenarios
         var invalidPlaylistScenarios = new List<(string Scenario, Func<Playlist> CreateAction)>
         {
-            ("Empty ID", () => Playlist.Create("", "Valid Name")),
-            ("Empty Name", () => Playlist.Create("valid-id", "")),
-            ("Null ID", () => Playlist.Create(null!, "Valid Name")),
-            ("Null Name", () => Playlist.Create("valid-id", null!)),
+            ("Empty ID", static () => Playlist.Create("", "Valid Name")),
+            ("Empty Name", static () => Playlist.Create("valid-id", "")),
+            ("Null ID", static () => Playlist.Create(null!, "Valid Name")),
+            ("Null Name", static () => Playlist.Create("valid-id", null!)),
         };
 
         foreach (var (scenario, createAction) in invalidPlaylistScenarios)
@@ -546,10 +550,10 @@ public class ValidationDemo
         // Invalid track scenarios
         var invalidTrackScenarios = new List<(string Scenario, Func<Track> CreateAction)>
         {
-            ("Empty ID", () => Track.Create("", "Valid Title")),
-            ("Empty Title", () => Track.Create("valid-id", "")),
-            ("Null ID", () => Track.Create(null!, "Valid Title")),
-            ("Null Title", () => Track.Create("valid-id", null!)),
+            ("Empty ID", static () => Track.Create("", "Valid Title")),
+            ("Empty Title", static () => Track.Create("valid-id", "")),
+            ("Null ID", static () => Track.Create(null!, "Valid Title")),
+            ("Null Title", static () => Track.Create("valid-id", null!)),
         };
 
         foreach (var (scenario, createAction) in invalidTrackScenarios)
@@ -597,19 +601,20 @@ public class ValidationDemo
         {
             (
                 "Empty ID",
-                () => RadioStation.Create("", "Valid Name", new StreamUrl("http://example.com"), AudioCodec.MP3)
+                static () => RadioStation.Create("", "Valid Name", new StreamUrl("http://example.com"), AudioCodec.MP3)
             ),
             (
                 "Empty Name",
-                () => RadioStation.Create("valid-id", "", new StreamUrl("http://example.com"), AudioCodec.MP3)
+                static () => RadioStation.Create("valid-id", "", new StreamUrl("http://example.com"), AudioCodec.MP3)
             ),
             (
                 "Null ID",
-                () => RadioStation.Create(null!, "Valid Name", new StreamUrl("http://example.com"), AudioCodec.MP3)
+                static () =>
+                    RadioStation.Create(null!, "Valid Name", new StreamUrl("http://example.com"), AudioCodec.MP3)
             ),
             (
                 "Null Name",
-                () => RadioStation.Create("valid-id", null!, new StreamUrl("http://example.com"), AudioCodec.MP3)
+                static () => RadioStation.Create("valid-id", null!, new StreamUrl("http://example.com"), AudioCodec.MP3)
             ),
         };
 
@@ -639,13 +644,8 @@ public class ValidationDemo
         // Test basic configuration validation
         var config = new SnapDogConfiguration
         {
-            System = new SystemConfiguration
-            {
-                ApplicationName = "SnapDog2 Demo",
-                Environment = "Demo",
-                LogLevel = "Information",
-            },
-            Api = new ApiConfiguration { Port = 5000, HttpsEnabled = false },
+            System = new SystemConfiguration { Environment = "Demo", LogLevel = "Information" },
+            Api = new ApiConfiguration { Port = 5000 },
             Telemetry = new TelemetryConfiguration { Enabled = true, ServiceName = "snapdog2-demo" },
         };
 

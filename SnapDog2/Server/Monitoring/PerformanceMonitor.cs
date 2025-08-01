@@ -90,8 +90,8 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
         ThrowIfDisposed();
 
         var allMetrics = _requestMetrics
-            .Values.Select(data => data.ToPerformanceMetrics())
-            .OrderBy(m => m.RequestName)
+            .Values.Select(static data => data.ToPerformanceMetrics())
+            .OrderBy(static m => m.RequestName)
             .ToList();
 
         return Task.FromResult<IEnumerable<PerformanceMetrics>>(allMetrics);
@@ -211,11 +211,11 @@ public sealed class PerformanceMonitor : IPerformanceMonitor, IDisposable
 
         var stats = new SystemPerformanceStats
         {
-            TotalRequests = allMetrics.Sum(m => m.TotalRequests),
-            SuccessfulRequests = allMetrics.Sum(m => m.SuccessfulRequests),
-            AverageExecutionTime = allMetrics.Count > 0 ? allMetrics.Average(m => m.AverageExecutionTime) : 0.0,
+            TotalRequests = allMetrics.Sum(static m => m.TotalRequests),
+            SuccessfulRequests = allMetrics.Sum(static m => m.SuccessfulRequests),
+            AverageExecutionTime = allMetrics.Count > 0 ? allMetrics.Average(static m => m.AverageExecutionTime) : 0.0,
             MonitoredRequestTypes = allMetrics.Count,
-            TotalSlowRequests = allMetrics.Sum(m => m.SlowRequests),
+            TotalSlowRequests = allMetrics.Sum(static m => m.SlowRequests),
             GeneratedAt = DateTime.UtcNow,
             TimeWindow = _options.MetricsRetentionPeriod,
         };
@@ -370,7 +370,7 @@ internal sealed class RequestMetricsData
     {
         lock (_lock)
         {
-            var sortedTimes = _executionTimes.OrderBy(t => t).ToList();
+            var sortedTimes = _executionTimes.OrderBy(static t => t).ToList();
 
             return new PerformanceMetrics
             {

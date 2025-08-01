@@ -81,13 +81,7 @@ public class KnxControllerIntegrationTests : IClassFixture<TestWebApplicationFac
     public async Task GetDevices_WithValidAuthentication_ShouldReturnOk()
     {
         // Arrange
-        var expectedDevices = new List<KnxDeviceInfo>
-        {
-            new()
-            {
-                IndividualAddress = "1.1.1"
-            },
-        };
+        var expectedDevices = new List<KnxDeviceInfo> { new() { IndividualAddress = "1.1.1" } };
         _mockMediator
             .Setup(m => m.Send(It.IsAny<GetKnxDevicesQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedDevices);
@@ -160,19 +154,10 @@ public class KnxControllerIntegrationTests : IClassFixture<TestWebApplicationFac
     public async Task ReadGroupValue_WithValidRequest_ShouldReturnOk()
     {
         // Arrange
-        var requestDto = new ReadKnxValueRequest
-        {
-            Address = "1/1/1",
-            Description = "Read light status",
-        };
+        var requestDto = new ReadKnxValueRequest { Address = "1/1/1", Description = "Read light status" };
 
         _mockMediator
-            .Setup(m =>
-                m.Send(
-                    It.Is<ReadGroupValueCommand>(c => c.Address == "1/1/1"),
-                    It.IsAny<CancellationToken>()
-                )
-            )
+            .Setup(m => m.Send(It.Is<ReadGroupValueCommand>(c => c.Address == "1/1/1"), It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult<byte[]?>(new byte[] { 0x01 }));
 
         _client.DefaultRequestHeaders.Remove("X-API-Key");
@@ -273,18 +258,11 @@ public class KnxControllerIntegrationTests : IClassFixture<TestWebApplicationFac
     public async Task SubscribeToGroup_WithValidRequest_ShouldReturnOk()
     {
         // Arrange
-        var requestDto = new SubscribeKnxRequest
-        {
-            Address = "1/1/1",
-            Description = "Subscribe to light switch",
-        };
+        var requestDto = new SubscribeKnxRequest { Address = "1/1/1", Description = "Subscribe to light switch" };
 
         _mockMediator
             .Setup(m =>
-                m.Send(
-                    It.Is<SubscribeToGroupCommand>(c => c.Address == "1/1/1"),
-                    It.IsAny<CancellationToken>()
-                )
+                m.Send(It.Is<SubscribeToGroupCommand>(c => c.Address == "1/1/1"), It.IsAny<CancellationToken>())
             )
             .Returns(Task.FromResult(true));
 
@@ -368,18 +346,11 @@ public class KnxControllerIntegrationTests : IClassFixture<TestWebApplicationFac
     public async Task UnsubscribeFromGroup_WithValidRequest_ShouldReturnOk()
     {
         // Arrange
-        var requestDto = new UnsubscribeKnxRequest
-        {
-            Address = "1/1/1",
-            Description = "Unsubscribe from light switch",
-        };
+        var requestDto = new UnsubscribeKnxRequest { Address = "1/1/1", Description = "Unsubscribe from light switch" };
 
         _mockMediator
             .Setup(m =>
-                m.Send(
-                    It.Is<UnsubscribeFromGroupCommand>(c => c.Address == "1/1/1"),
-                    It.IsAny<CancellationToken>()
-                )
+                m.Send(It.Is<UnsubscribeFromGroupCommand>(c => c.Address == "1/1/1"), It.IsAny<CancellationToken>())
             )
             .Returns(Task.FromResult(true));
 

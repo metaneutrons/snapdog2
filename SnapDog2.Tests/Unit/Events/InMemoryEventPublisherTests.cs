@@ -54,14 +54,17 @@ public class InMemoryEventPublisherTests
         var testEvent = new TestDomainEvent();
 
         _mockMediator
-            .Setup(m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()))
+            .Setup(static m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
         // Act
         await _eventPublisher.PublishAsync(testEvent);
 
         // Assert
-        _mockMediator.Verify(m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()), Times.Once);
+        _mockMediator.Verify(
+            static m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()),
+            Times.Once
+        );
     }
 
     [Fact]
@@ -135,7 +138,7 @@ public class InMemoryEventPublisherTests
         var testEvent = new TestDomainEvent();
 
         _mockMediator
-            .Setup(m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()))
+            .Setup(static m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
         // Act
@@ -155,7 +158,10 @@ public class InMemoryEventPublisherTests
         await _eventPublisher.PublishAsync(events);
 
         // Assert
-        _mockMediator.Verify(m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()), Times.Never);
+        _mockMediator.Verify(
+            static m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()),
+            Times.Never
+        );
     }
 
     [Fact]
@@ -165,14 +171,17 @@ public class InMemoryEventPublisherTests
         var events = new List<IDomainEvent> { new TestDomainEvent(), new TestDomainEvent(), new TestDomainEvent() };
 
         _mockMediator
-            .Setup(m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()))
+            .Setup(static m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
         // Act
         await _eventPublisher.PublishAsync(events);
 
         // Assert
-        _mockMediator.Verify(m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()), Times.Exactly(3));
+        _mockMediator.Verify(
+            static m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()),
+            Times.Exactly(3)
+        );
     }
 
     [Fact]
@@ -227,14 +236,17 @@ public class InMemoryEventPublisherTests
         var testEvent = new TestDomainEvent();
 
         _mockMediator
-            .Setup(m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()))
+            .Setup(static m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
         // Act
         await _eventPublisher.PublishAndWaitAsync(testEvent);
 
         // Assert
-        _mockMediator.Verify(m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()), Times.Once);
+        _mockMediator.Verify(
+            static m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()),
+            Times.Once
+        );
     }
 
     [Fact]
@@ -256,7 +268,10 @@ public class InMemoryEventPublisherTests
         await _eventPublisher.PublishAndWaitAsync(events);
 
         // Assert
-        _mockMediator.Verify(m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()), Times.Never);
+        _mockMediator.Verify(
+            static m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()),
+            Times.Never
+        );
     }
 
     [Fact]
@@ -266,14 +281,17 @@ public class InMemoryEventPublisherTests
         var events = new List<IDomainEvent> { new TestDomainEvent(), new TestDomainEvent() };
 
         _mockMediator
-            .Setup(m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()))
+            .Setup(static m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
         // Act
         await _eventPublisher.PublishAndWaitAsync(events);
 
         // Assert
-        _mockMediator.Verify(m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
+        _mockMediator.Verify(
+            static m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()),
+            Times.Exactly(2)
+        );
     }
 
     [Fact]
@@ -283,7 +301,7 @@ public class InMemoryEventPublisherTests
         var events = new List<IDomainEvent> { new TestDomainEvent() };
 
         _mockMediator
-            .Setup(m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()))
+            .Setup(static m => m.Publish(It.IsAny<IDomainEvent>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
         // Act

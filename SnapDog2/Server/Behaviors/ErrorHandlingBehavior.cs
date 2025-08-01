@@ -147,7 +147,7 @@ public sealed class ErrorHandlingBehavior<TRequest, TResponse> : IPipelineBehavi
     {
         if (validationException.Errors?.Any() == true)
         {
-            var errors = validationException.Errors.Select(e => e.ErrorMessage);
+            var errors = validationException.Errors.Select(static e => e.ErrorMessage);
             return $"Validation failed: {string.Join("; ", errors)}";
         }
 

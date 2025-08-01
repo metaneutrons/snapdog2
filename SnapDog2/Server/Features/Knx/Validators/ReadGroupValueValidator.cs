@@ -10,6 +10,6 @@ public class ReadGroupValueValidator : AbstractValidator<ReadGroupValueCommand>
 {
     public ReadGroupValueValidator()
     {
-        RuleFor(x => x.Address).NotNull().WithMessage("KNX address is required");
+        RuleFor(static x => x.Address).NotNull().WithMessage("KNX address is required");
     }
 }

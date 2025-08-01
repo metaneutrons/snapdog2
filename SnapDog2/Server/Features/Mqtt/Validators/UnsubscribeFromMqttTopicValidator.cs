@@ -13,7 +13,7 @@ public class UnsubscribeFromMqttTopicValidator : AbstractValidator<UnsubscribeFr
     /// </summary>
     public UnsubscribeFromMqttTopicValidator()
     {
-        RuleFor(x => x.TopicPattern)
+        RuleFor(static x => x.TopicPattern)
             .NotEmpty()
             .WithMessage("Topic pattern is required")
             .MaximumLength(1000)

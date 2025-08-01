@@ -44,7 +44,7 @@ public class MqttCommandProcessingTests : IDisposable
             ClientId = "snapdog-test",
             Username = "testuser",
             Password = "testpass",
-            KeepAliveSeconds = 60
+            KeepAliveSeconds = 60,
         };
 
         var options = Options.Create(_config);

@@ -225,22 +225,28 @@ public sealed class GetStreamsByCodecHandler
         if (string.IsNullOrWhiteSpace(orderBy))
         {
             // Default sorting by bitrate (highest quality first)
-            return streams.OrderByDescending(s => s.BitrateKbps).ThenByDescending(s => s.SampleRateHz);
+            return streams.OrderByDescending(static s => s.BitrateKbps).ThenByDescending(static s => s.SampleRateHz);
         }
 
         var sortedStreams = orderBy.ToLowerInvariant() switch
         {
-            "name" => descending ? streams.OrderByDescending(s => s.Name) : streams.OrderBy(s => s.Name),
+            "name" => descending ? streams.OrderByDescending(static s => s.Name) : streams.OrderBy(static s => s.Name),
             "bitrate" => descending
-                ? streams.OrderByDescending(s => s.BitrateKbps)
-                : streams.OrderBy(s => s.BitrateKbps),
+                ? streams.OrderByDescending(static s => s.BitrateKbps)
+                : streams.OrderBy(static s => s.BitrateKbps),
             "samplerate" => descending
-                ? streams.OrderByDescending(s => s.SampleRateHz)
-                : streams.OrderBy(s => s.SampleRateHz),
-            "created" => descending ? streams.OrderByDescending(s => s.CreatedAt) : streams.OrderBy(s => s.CreatedAt),
-            "status" => descending ? streams.OrderByDescending(s => s.Status) : streams.OrderBy(s => s.Status),
-            "channels" => descending ? streams.OrderByDescending(s => s.Channels) : streams.OrderBy(s => s.Channels),
-            _ => streams.OrderByDescending(s => s.BitrateKbps).ThenByDescending(s => s.SampleRateHz),
+                ? streams.OrderByDescending(static s => s.SampleRateHz)
+                : streams.OrderBy(static s => s.SampleRateHz),
+            "created" => descending
+                ? streams.OrderByDescending(static s => s.CreatedAt)
+                : streams.OrderBy(static s => s.CreatedAt),
+            "status" => descending
+                ? streams.OrderByDescending(static s => s.Status)
+                : streams.OrderBy(static s => s.Status),
+            "channels" => descending
+                ? streams.OrderByDescending(static s => s.Channels)
+                : streams.OrderBy(static s => s.Channels),
+            _ => streams.OrderByDescending(static s => s.BitrateKbps).ThenByDescending(static s => s.SampleRateHz),
         };
 
         return sortedStreams;

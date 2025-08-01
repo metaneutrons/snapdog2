@@ -40,7 +40,7 @@ public class KnxServiceIntegrationTests : IDisposable
         };
 
         _mockOptions = new Mock<IOptions<KnxConfiguration>>();
-        _mockOptions.Setup(x => x.Value).Returns(knxConfig);
+        _mockOptions.Setup(static x => x.Value).Returns(knxConfig);
 
         services.AddSingleton(_mockOptions.Object);
         services.AddSingleton(mockMediator.Object);
@@ -115,7 +115,9 @@ public class KnxServiceIntegrationTests : IDisposable
         var address = new KnxAddress(1, 2, 3);
 
         // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() => _knxService.SubscribeToGroupAsync(address, cancellationTokenSource.Token));
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _knxService.SubscribeToGroupAsync(address, cancellationTokenSource.Token)
+        );
     }
 
     [Fact]
@@ -162,14 +164,18 @@ public class KnxServiceIntegrationTests : IDisposable
     public void Constructor_WithNullConfiguration_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new KnxService(null!, _mockLogger.Object, new Mock<MediatR.IMediator>().Object));
+        Assert.Throws<ArgumentNullException>(
+            () => new KnxService(null!, _mockLogger.Object, new Mock<MediatR.IMediator>().Object)
+        );
     }
 
     [Fact]
     public void Constructor_WithNullLogger_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new KnxService(_mockOptions.Object, null!, new Mock<MediatR.IMediator>().Object));
+        Assert.Throws<ArgumentNullException>(
+            () => new KnxService(_mockOptions.Object, null!, new Mock<MediatR.IMediator>().Object)
+        );
     }
 
     [Fact]
@@ -233,7 +239,7 @@ public class KnxServiceIntegrationTests : IDisposable
             TimeoutSeconds = 1,
         };
         var mockOptions = new Mock<IOptions<KnxConfiguration>>();
-        mockOptions.Setup(x => x.Value).Returns(config);
+        mockOptions.Setup(static x => x.Value).Returns(config);
 
         var service = new KnxService(mockOptions.Object, _mockLogger.Object, new Mock<MediatR.IMediator>().Object);
 
@@ -345,7 +351,9 @@ public class KnxServiceIntegrationTests : IDisposable
         var address = new KnxAddress(main, middle, sub);
 
         // Act & Assert - Should not throw validation errors (will fail due to no connection)
-        await Assert.ThrowsAsync<InvalidOperationException>(() => _knxService.SubscribeToGroupAsync(address, cancellationTokenSource.Token));
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _knxService.SubscribeToGroupAsync(address, cancellationTokenSource.Token)
+        );
     }
 
     [Fact]

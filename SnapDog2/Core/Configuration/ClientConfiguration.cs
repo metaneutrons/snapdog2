@@ -10,7 +10,7 @@ namespace SnapDog2.Core.Configuration;
 /// Examples:
 /// - SNAPDOG_CLIENT_1_NAME → Name
 /// - SNAPDOG_CLIENT_1_MAC → Mac
-/// - SNAPDOG_CLIENT_1_MQTT_BASETOPIC → MqttBaseTopic
+/// - SNAPDOG_CLIENT_1_MQTT_BASE_TOPIC → MqttBaseTopic
 /// - SNAPDOG_CLIENT_1_MQTT_VOLUME_SET_TOPIC → Mqtt.VolumeSetTopic
 /// - SNAPDOG_CLIENT_1_KNX_ENABLED → Knx.Enabled
 /// - SNAPDOG_CLIENT_1_KNX_VOLUME → Knx.Volume
@@ -33,9 +33,9 @@ public class ClientConfiguration
 
     /// <summary>
     /// Gets or sets the base MQTT topic for this client.
-    /// Maps to: SNAPDOG_CLIENT_X_MQTT_BASETOPIC
+    /// Maps to: SNAPDOG_CLIENT_X_MQTT_BASE_TOPIC
     /// </summary>
-    [Env(Key = "MQTT_BASETOPIC", Default = "")]
+    [Env(Key = "MQTT_BASE_TOPIC", Default = "")]
     public string MqttBaseTopic { get; set; } = string.Empty;
 
     /// <summary>

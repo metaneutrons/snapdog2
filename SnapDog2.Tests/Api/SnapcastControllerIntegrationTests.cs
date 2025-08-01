@@ -54,7 +54,7 @@ public class SnapcastControllerIntegrationTests : IClassFixture<TestWebApplicati
         // Arrange
         var expectedStatus = """{"server": {"host": "localhost", "snapserver": {"version": "0.26.0"}}}""";
         _mockMediator
-            .Setup(m => m.Send(It.IsAny<GetSnapcastServerStatusQuery>(), It.IsAny<CancellationToken>()))
+            .Setup(static m => m.Send(It.IsAny<GetSnapcastServerStatusQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedStatus);
 
         _client.DefaultRequestHeaders.Remove("X-API-Key");
@@ -79,7 +79,7 @@ public class SnapcastControllerIntegrationTests : IClassFixture<TestWebApplicati
         // Arrange
         var expectedGroups = new List<string> { """{"id": "group1", "name": "Living Room", "clients": []}""" };
         _mockMediator
-            .Setup(m => m.Send(It.IsAny<GetSnapcastGroupsQuery>(), It.IsAny<CancellationToken>()))
+            .Setup(static m => m.Send(It.IsAny<GetSnapcastGroupsQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedGroups);
 
         _client.DefaultRequestHeaders.Remove("X-API-Key");
@@ -107,7 +107,7 @@ public class SnapcastControllerIntegrationTests : IClassFixture<TestWebApplicati
             """{"id": "client1", "host": {"name": "device1"}, "connected": true}""",
         };
         _mockMediator
-            .Setup(m => m.Send(It.IsAny<GetSnapcastClientsQuery>(), It.IsAny<CancellationToken>()))
+            .Setup(static m => m.Send(It.IsAny<GetSnapcastClientsQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedClients);
 
         _client.DefaultRequestHeaders.Remove("X-API-Key");

@@ -42,7 +42,7 @@ public class SnapDogConfigurationValidatorTests
         var result = _validator.TestValidate(configuration);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.System);
+        result.ShouldHaveValidationErrorFor(static x => x.System);
     }
 
     [Fact]
@@ -56,7 +56,7 @@ public class SnapDogConfigurationValidatorTests
         var result = _validator.TestValidate(configuration);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Api);
+        result.ShouldHaveValidationErrorFor(static x => x.Api);
     }
 
     [Fact]
@@ -70,7 +70,7 @@ public class SnapDogConfigurationValidatorTests
         var result = _validator.TestValidate(configuration);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Telemetry);
+        result.ShouldHaveValidationErrorFor(static x => x.Telemetry);
     }
 
     [Fact]
@@ -84,7 +84,7 @@ public class SnapDogConfigurationValidatorTests
         var result = _validator.TestValidate(configuration);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Services);
+        result.ShouldHaveValidationErrorFor(static x => x.Services);
     }
 
     [Fact]
@@ -98,7 +98,7 @@ public class SnapDogConfigurationValidatorTests
         var result = _validator.TestValidate(configuration);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Zones).WithErrorMessage("Zones collection cannot be null.");
+        result.ShouldHaveValidationErrorFor(static x => x.Zones).WithErrorMessage("Zones collection cannot be null.");
     }
 
     [Fact]
@@ -112,7 +112,9 @@ public class SnapDogConfigurationValidatorTests
         var result = _validator.TestValidate(configuration);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Zones).WithErrorMessage("At least one zone must be configured.");
+        result
+            .ShouldHaveValidationErrorFor(static x => x.Zones)
+            .WithErrorMessage("At least one zone must be configured.");
     }
 
     [Fact]
@@ -131,7 +133,7 @@ public class SnapDogConfigurationValidatorTests
 
         // Assert
         result
-            .ShouldHaveValidationErrorFor(x => x.Zones)
+            .ShouldHaveValidationErrorFor(static x => x.Zones)
             .WithErrorMessage("Zone IDs must be unique across all zones.");
     }
 
@@ -146,7 +148,9 @@ public class SnapDogConfigurationValidatorTests
         var result = _validator.TestValidate(configuration);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Clients).WithErrorMessage("Clients collection cannot be null.");
+        result
+            .ShouldHaveValidationErrorFor(static x => x.Clients)
+            .WithErrorMessage("Clients collection cannot be null.");
     }
 
     [Fact]
@@ -175,7 +179,7 @@ public class SnapDogConfigurationValidatorTests
 
         // Assert
         result
-            .ShouldHaveValidationErrorFor(x => x.Clients)
+            .ShouldHaveValidationErrorFor(static x => x.Clients)
             .WithErrorMessage("Client names must be unique across all clients.");
     }
 
@@ -205,7 +209,7 @@ public class SnapDogConfigurationValidatorTests
 
         // Assert
         result
-            .ShouldHaveValidationErrorFor(x => x.Clients)
+            .ShouldHaveValidationErrorFor(static x => x.Clients)
             .WithErrorMessage("MAC addresses must be unique across all clients.");
     }
 
@@ -221,7 +225,7 @@ public class SnapDogConfigurationValidatorTests
 
         // Assert
         result
-            .ShouldHaveValidationErrorFor(x => x.RadioStations)
+            .ShouldHaveValidationErrorFor(static x => x.RadioStations)
             .WithErrorMessage("Radio stations collection cannot be null.");
     }
 
@@ -241,7 +245,7 @@ public class SnapDogConfigurationValidatorTests
 
         // Assert
         result
-            .ShouldHaveValidationErrorFor(x => x.RadioStations)
+            .ShouldHaveValidationErrorFor(static x => x.RadioStations)
             .WithErrorMessage("Radio station names must be unique across all stations.");
     }
 
@@ -261,7 +265,7 @@ public class SnapDogConfigurationValidatorTests
 
         // Assert
         result
-            .ShouldHaveValidationErrorFor(x => x.RadioStations)
+            .ShouldHaveValidationErrorFor(static x => x.RadioStations)
             .WithErrorMessage("Radio station URLs should be unique to avoid conflicts.");
     }
 
@@ -285,30 +289,8 @@ public class SnapDogConfigurationValidatorTests
 
         // Assert
         result
-            .ShouldHaveValidationErrorFor(x => x)
+            .ShouldHaveValidationErrorFor(static x => x)
             .WithErrorMessage("All client default zone assignments must reference existing zone IDs.");
-    }
-
-    [Fact]
-    public void Validate_WithConflictingPorts_ShouldHaveValidationError()
-    {
-        // Arrange
-        var configuration = CreateValidConfiguration();
-        configuration.Api = new ApiConfiguration
-        {
-            Port = 8080,
-            HttpsEnabled = true,
-            HttpsPort = 8080, // Same as HTTP port
-            AuthEnabled = true,
-        };
-
-        // Act
-        var result = _validator.TestValidate(configuration);
-
-        // Assert
-        result
-            .ShouldHaveValidationErrorFor(x => x)
-            .WithErrorMessage("API HTTP and HTTPS ports cannot be the same.");
     }
 
     [Fact]
@@ -316,10 +298,7 @@ public class SnapDogConfigurationValidatorTests
     {
         // Arrange
         var configuration = CreateValidConfiguration();
-        configuration.System = new SystemConfiguration
-        {
-            Environment = "Production",
-        };
+        configuration.System = new SystemConfiguration { Environment = "Production" };
         configuration.Api = new ApiConfiguration
         {
             AuthEnabled = false, // Should be enabled in production
@@ -330,7 +309,7 @@ public class SnapDogConfigurationValidatorTests
 
         // Assert
         result
-            .ShouldHaveValidationErrorFor(x => x)
+            .ShouldHaveValidationErrorFor(static x => x)
             .WithErrorMessage("API authentication must be enabled in Production environment.");
     }
 
@@ -350,33 +329,11 @@ public class SnapDogConfigurationValidatorTests
 
         // Assert
         result
-            .ShouldHaveValidationErrorFor(x => x)
+            .ShouldHaveValidationErrorFor(static x => x)
             .WithErrorMessage("Debug mode must be disabled in Production environment.");
     }
 
     [Fact]
-    public void Validate_ProductionWithoutHttps_ShouldHaveValidationError()
-    {
-        // Arrange
-        var configuration = CreateValidConfiguration();
-        configuration.System = new SystemConfiguration
-        {
-            Environment = "Production",
-        };
-        configuration.Api = new ApiConfiguration
-        {
-            HttpsEnabled = false, // Should be enabled in production
-        };
-
-        // Act
-        var result = _validator.TestValidate(configuration);
-
-        // Assert
-        result
-            .ShouldHaveValidationErrorFor(x => x)
-            .WithErrorMessage("HTTPS must be enabled in Production environment.");
-    }
-
     private static SnapDogConfiguration CreateValidConfiguration()
     {
         return new SnapDogConfiguration
@@ -385,16 +342,9 @@ public class SnapDogConfigurationValidatorTests
             {
                 Environment = "Development",
                 LogLevel = "Information",
-                ApplicationName = "SnapDog2",
                 DebugEnabled = false,
             },
-            Api = new ApiConfiguration
-            {
-                Port = 8080,
-                HttpsEnabled = true,
-                HttpsPort = 8443,
-                AuthEnabled = true,
-            },
+            Api = new ApiConfiguration { Port = 8080, AuthEnabled = true },
             Telemetry = new TelemetryConfiguration(),
             Services = new ServicesConfiguration
             {
@@ -402,7 +352,7 @@ public class SnapDogConfigurationValidatorTests
                 Mqtt = new MqttConfiguration { Enabled = true, Broker = "localhost" },
                 Knx = new KnxConfiguration { Enabled = false },
                 Subsonic = new SubsonicConfiguration { Enabled = false },
-                Resilience = new ResilienceConfiguration()
+                Resilience = new ResilienceConfiguration(),
             },
             Zones = new List<ZoneConfiguration>
             {

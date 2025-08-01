@@ -196,7 +196,7 @@ public class ApiAuthorizationPolicyProvider : IAuthorizationPolicyProvider
         var policy = new AuthorizationPolicyBuilder()
             .RequireAuthenticatedUser()
             .AddAuthenticationSchemes("ApiKey")
-            .RequireAssertion(context =>
+            .RequireAssertion(static context =>
             {
                 // Allow if user has read permission or any write permission
                 return context.User.HasClaim("permission", "read")

@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Text;
 using System.Text.Json;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MQTTnet;
@@ -9,9 +10,8 @@ using MQTTnet.Extensions.ManagedClient;
 using MQTTnet.Protocol;
 using Polly;
 using SnapDog2.Core.Configuration;
-using SnapDog2.Infrastructure.Resilience;
-using MediatR;
 using SnapDog2.Core.Events;
+using SnapDog2.Infrastructure.Resilience;
 
 namespace SnapDog2.Infrastructure.Services;
 
@@ -60,7 +60,7 @@ public class MqttService : IMqttService, IDisposable, IAsyncDisposable
         _jsonOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            WriteIndented = false
+            WriteIndented = false,
         };
 
         // Create managed MQTT client
@@ -416,7 +416,11 @@ public class MqttService : IMqttService, IDisposable, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error processing received MQTT message on topic {Topic}", eventArgs.ApplicationMessage.Topic);
+            _logger.LogError(
+                ex,
+                "Error processing received MQTT message on topic {Topic}",
+                eventArgs.ApplicationMessage.Topic
+            );
         }
     }
 
@@ -429,14 +433,14 @@ public class MqttService : IMqttService, IDisposable, IAsyncDisposable
     {
         try
         {
-            // Parse topic structure: {baseTopic}/{component}/{id}/{command}
-            var baseTopic = _config.BaseTopic;
-            if (!topic.StartsWith(baseTopic))
+            // Parse topic structure: {BaseTopic}/{component}/{id}/{command}
+            var BaseTopic = _config.BaseTopic;
+            if (!topic.StartsWith(BaseTopic))
             {
                 return; // Not a command topic for this service
             }
 
-            var topicParts = topic.Substring(baseTopic.Length + 1).Split('/');
+            var topicParts = topic.Substring(BaseTopic.Length + 1).Split('/');
             if (topicParts.Length < 3)
             {
                 return; // Invalid topic structure
@@ -488,7 +492,11 @@ public class MqttService : IMqttService, IDisposable, IAsyncDisposable
                 if (int.TryParse(payload, out var volume))
                 {
                     await _mediator.Publish(new MqttZoneVolumeCommandEvent(int.Parse(zoneId), volume));
-                    _logger.LogDebug("Published zone volume command event: Zone={ZoneId}, Volume={Volume}", zoneId, volume);
+                    _logger.LogDebug(
+                        "Published zone volume command event: Zone={ZoneId}, Volume={Volume}",
+                        zoneId,
+                        volume
+                    );
                 }
                 break;
 
@@ -504,7 +512,11 @@ public class MqttService : IMqttService, IDisposable, IAsyncDisposable
                 if (int.TryParse(payload, out var streamId))
                 {
                     await _mediator.Publish(new MqttZoneStreamCommandEvent(int.Parse(zoneId), streamId));
-                    _logger.LogDebug("Published zone stream command event: Zone={ZoneId}, Stream={StreamId}", zoneId, streamId);
+                    _logger.LogDebug(
+                        "Published zone stream command event: Zone={ZoneId}, Stream={StreamId}",
+                        zoneId,
+                        streamId
+                    );
                 }
                 break;
 
@@ -525,7 +537,11 @@ public class MqttService : IMqttService, IDisposable, IAsyncDisposable
                 if (int.TryParse(payload, out var volume))
                 {
                     await _mediator.Publish(new MqttClientVolumeCommandEvent(clientId, volume));
-                    _logger.LogDebug("Published client volume command event: Client={ClientId}, Volume={Volume}", clientId, volume);
+                    _logger.LogDebug(
+                        "Published client volume command event: Client={ClientId}, Volume={Volume}",
+                        clientId,
+                        volume
+                    );
                 }
                 break;
 
@@ -533,7 +549,11 @@ public class MqttService : IMqttService, IDisposable, IAsyncDisposable
                 if (bool.TryParse(payload, out var muted))
                 {
                     await _mediator.Publish(new MqttClientMuteCommandEvent(clientId, muted));
-                    _logger.LogDebug("Published client mute command event: Client={ClientId}, Muted={Muted}", clientId, muted);
+                    _logger.LogDebug(
+                        "Published client mute command event: Client={ClientId}, Muted={Muted}",
+                        clientId,
+                        muted
+                    );
                 }
                 break;
 
@@ -650,15 +670,22 @@ public class MqttService : IMqttService, IDisposable, IAsyncDisposable
     /// <param name="status">The stream status</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>True if published successfully, false otherwise</returns>
-    public async Task<bool> PublishStreamStatusAsync(int streamId, string status, CancellationToken cancellationToken = default)
+    public async Task<bool> PublishStreamStatusAsync(
+        int streamId,
+        string status,
+        CancellationToken cancellationToken = default
+    )
     {
         var topic = $"{_config.BaseTopic}/STREAM/{streamId}/STATUS";
-        var payload = JsonSerializer.Serialize(new
-        {
-            streamId,
-            status,
-            timestamp = DateTime.UtcNow
-        }, _jsonOptions);
+        var payload = JsonSerializer.Serialize(
+            new
+            {
+                streamId,
+                status,
+                timestamp = DateTime.UtcNow,
+            },
+            _jsonOptions
+        );
 
         return await PublishAsync(topic, payload, MqttQualityOfServiceLevel.AtLeastOnce, true, cancellationToken);
     }
@@ -670,7 +697,11 @@ public class MqttService : IMqttService, IDisposable, IAsyncDisposable
     /// <param name="volume">The volume level (0-100)</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>True if published successfully, false otherwise</returns>
-    public async Task<bool> PublishZoneVolumeAsync(int zoneId, int volume, CancellationToken cancellationToken = default)
+    public async Task<bool> PublishZoneVolumeAsync(
+        int zoneId,
+        int volume,
+        CancellationToken cancellationToken = default
+    )
     {
         var topic = $"{_config.BaseTopic}/ZONE/{zoneId}/VOLUME";
         var payload = volume.ToString();
@@ -685,7 +716,11 @@ public class MqttService : IMqttService, IDisposable, IAsyncDisposable
     /// <param name="volume">The volume level (0-100)</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>True if published successfully, false otherwise</returns>
-    public async Task<bool> PublishClientVolumeAsync(string clientId, int volume, CancellationToken cancellationToken = default)
+    public async Task<bool> PublishClientVolumeAsync(
+        string clientId,
+        int volume,
+        CancellationToken cancellationToken = default
+    )
     {
         var topic = $"{_config.BaseTopic}/CLIENT/{clientId}/VOLUME";
         var payload = volume.ToString();
@@ -700,15 +735,22 @@ public class MqttService : IMqttService, IDisposable, IAsyncDisposable
     /// <param name="connected">Whether the client is connected</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>True if published successfully, false otherwise</returns>
-    public async Task<bool> PublishClientStatusAsync(string clientId, bool connected, CancellationToken cancellationToken = default)
+    public async Task<bool> PublishClientStatusAsync(
+        string clientId,
+        bool connected,
+        CancellationToken cancellationToken = default
+    )
     {
         var topic = $"{_config.BaseTopic}/CLIENT/{clientId}/STATUS";
-        var payload = JsonSerializer.Serialize(new
-        {
-            clientId,
-            connected,
-            timestamp = DateTime.UtcNow
-        }, _jsonOptions);
+        var payload = JsonSerializer.Serialize(
+            new
+            {
+                clientId,
+                connected,
+                timestamp = DateTime.UtcNow,
+            },
+            _jsonOptions
+        );
 
         return await PublishAsync(topic, payload, MqttQualityOfServiceLevel.AtLeastOnce, true, cancellationToken);
     }
@@ -729,7 +771,7 @@ public class MqttService : IMqttService, IDisposable, IAsyncDisposable
                 $"{_config.BaseTopic}/ZONE/+/+",
                 $"{_config.BaseTopic}/CLIENT/+/+",
                 $"{_config.BaseTopic}/STREAM/+/+",
-                $"{_config.BaseTopic}/SYSTEM/+"
+                $"{_config.BaseTopic}/SYSTEM/+",
             };
 
             var success = true;

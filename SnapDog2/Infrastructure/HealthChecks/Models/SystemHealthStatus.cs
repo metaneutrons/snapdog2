@@ -43,19 +43,19 @@ public class SystemHealthStatus
     /// Gets the number of healthy components.
     /// </summary>
     [JsonPropertyName("healthyCount")]
-    public int HealthyCount => Results.Values.Count(r => r.Status == "Healthy");
+    public int HealthyCount => Results.Values.Count(static r => r.Status == "Healthy");
 
     /// <summary>
     /// Gets the number of unhealthy components.
     /// </summary>
     [JsonPropertyName("unhealthyCount")]
-    public int UnhealthyCount => Results.Values.Count(r => r.Status == "Unhealthy");
+    public int UnhealthyCount => Results.Values.Count(static r => r.Status == "Unhealthy");
 
     /// <summary>
     /// Gets the number of degraded components.
     /// </summary>
     [JsonPropertyName("degradedCount")]
-    public int DegradedCount => Results.Values.Count(r => r.Status == "Degraded");
+    public int DegradedCount => Results.Values.Count(static r => r.Status == "Degraded");
 
     /// <summary>
     /// Gets the total number of components checked.

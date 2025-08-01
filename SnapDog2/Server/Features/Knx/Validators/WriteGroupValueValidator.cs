@@ -10,14 +10,14 @@ public class WriteGroupValueValidator : AbstractValidator<WriteGroupValueCommand
 {
     public WriteGroupValueValidator()
     {
-        RuleFor(x => x.Address).NotNull().WithMessage("KNX address is required");
+        RuleFor(static x => x.Address).NotNull().WithMessage("KNX address is required");
 
-        RuleFor(x => x.Value)
+        RuleFor(static x => x.Value)
             .NotNull()
             .WithMessage("Value is required")
-            .Must(value => value.Length > 0)
+            .Must(static value => value.Length > 0)
             .WithMessage("Value cannot be empty")
-            .Must(value => value.Length <= 14)
+            .Must(static value => value.Length <= 14)
             .WithMessage("Value cannot exceed 14 bytes for KNX group communication");
     }
 }

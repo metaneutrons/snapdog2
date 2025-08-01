@@ -15,7 +15,7 @@ public sealed class PlaylistValidator : AbstractValidator<Playlist>
     public PlaylistValidator()
     {
         // Required string properties
-        RuleFor(x => x.Id)
+        RuleFor(static x => x.Id)
             .NotEmpty()
             .WithMessage("Playlist ID is required.")
             .MaximumLength(100)
@@ -23,7 +23,7 @@ public sealed class PlaylistValidator : AbstractValidator<Playlist>
             .Matches(@"^[a-zA-Z0-9_-]+$")
             .WithMessage("Playlist ID can only contain alphanumeric characters, underscores, and hyphens.");
 
-        RuleFor(x => x.Name)
+        RuleFor(static x => x.Name)
             .NotEmpty()
             .WithMessage("Playlist name is required.")
             .MaximumLength(200)
@@ -32,7 +32,7 @@ public sealed class PlaylistValidator : AbstractValidator<Playlist>
             .WithMessage("Playlist name must be at least 1 character long.");
 
         // Track IDs validation
-        RuleFor(x => x.TrackIds)
+        RuleFor(static x => x.TrackIds)
             .NotNull()
             .WithMessage("Track IDs collection cannot be null.")
             .Must(HaveUniqueTrackIds)
@@ -40,7 +40,7 @@ public sealed class PlaylistValidator : AbstractValidator<Playlist>
             .Must(HaveValidTrackIdFormat)
             .WithMessage("All track IDs must be valid format.");
 
-        RuleForEach(x => x.TrackIds)
+        RuleForEach(static x => x.TrackIds)
             .NotEmpty()
             .WithMessage("Track ID cannot be empty.")
             .MaximumLength(100)
@@ -49,91 +49,94 @@ public sealed class PlaylistValidator : AbstractValidator<Playlist>
             .WithMessage("Track ID can only contain alphanumeric characters, underscores, and hyphens.");
 
         // Optional description validation
-        RuleFor(x => x.Description)
+        RuleFor(static x => x.Description)
             .MaximumLength(1000)
             .WithMessage("Description cannot exceed 1000 characters.")
-            .When(x => !string.IsNullOrEmpty(x.Description));
+            .When(static x => !string.IsNullOrEmpty(x.Description));
 
         // Optional owner validation
-        RuleFor(x => x.Owner)
+        RuleFor(static x => x.Owner)
             .MaximumLength(100)
             .WithMessage("Owner cannot exceed 100 characters.")
-            .When(x => !string.IsNullOrEmpty(x.Owner));
+            .When(static x => !string.IsNullOrEmpty(x.Owner));
 
         // Optional tags validation
-        RuleFor(x => x.Tags)
+        RuleFor(static x => x.Tags)
             .MaximumLength(500)
             .WithMessage("Tags cannot exceed 500 characters.")
-            .When(x => !string.IsNullOrEmpty(x.Tags));
+            .When(static x => !string.IsNullOrEmpty(x.Tags));
 
         // Optional cover art path validation
-        RuleFor(x => x.CoverArtPath)
+        RuleFor(static x => x.CoverArtPath)
             .MaximumLength(500)
             .WithMessage("Cover art path cannot exceed 500 characters.")
             .Must(BeValidPath)
             .WithMessage("Cover art path must be a valid file path or URL.")
-            .When(x => !string.IsNullOrEmpty(x.CoverArtPath));
+            .When(static x => !string.IsNullOrEmpty(x.CoverArtPath));
 
         // Total duration validation
-        RuleFor(x => x.TotalDurationSeconds)
+        RuleFor(static x => x.TotalDurationSeconds)
             .GreaterThanOrEqualTo(0)
             .WithMessage("Total duration cannot be negative.")
             .LessThanOrEqualTo(86400) // 24 hours max
             .WithMessage("Total duration cannot exceed 24 hours (86400 seconds).")
-            .When(x => x.TotalDurationSeconds.HasValue);
+            .When(static x => x.TotalDurationSeconds.HasValue);
 
         // Play count validation
-        RuleFor(x => x.PlayCount)
+        RuleFor(static x => x.PlayCount)
             .GreaterThanOrEqualTo(0)
             .WithMessage("Play count cannot be negative.")
             .LessThanOrEqualTo(1000000)
             .WithMessage("Play count cannot exceed 1,000,000.");
 
         // Timestamp validations
-        RuleFor(x => x.CreatedAt)
+        RuleFor(static x => x.CreatedAt)
             .NotEmpty()
             .WithMessage("Created timestamp is required.")
             .LessThanOrEqualTo(DateTime.UtcNow.AddMinutes(5))
             .WithMessage("Created timestamp cannot be in the future.");
 
-        RuleFor(x => x.UpdatedAt)
-            .GreaterThanOrEqualTo(x => x.CreatedAt)
+        RuleFor(static x => x.UpdatedAt)
+            .GreaterThanOrEqualTo(static x => x.CreatedAt)
             .WithMessage("Updated timestamp must be after or equal to created timestamp.")
             .LessThanOrEqualTo(DateTime.UtcNow.AddMinutes(5))
             .WithMessage("Updated timestamp cannot be in the future.")
-            .When(x => x.UpdatedAt.HasValue);
+            .When(static x => x.UpdatedAt.HasValue);
 
-        RuleFor(x => x.LastPlayedAt)
-            .GreaterThanOrEqualTo(x => x.CreatedAt)
+        RuleFor(static x => x.LastPlayedAt)
+            .GreaterThanOrEqualTo(static x => x.CreatedAt)
             .WithMessage("Last played timestamp must be after or equal to created timestamp.")
             .LessThanOrEqualTo(DateTime.UtcNow.AddMinutes(5))
             .WithMessage("Last played timestamp cannot be in the future.")
-            .When(x => x.LastPlayedAt.HasValue);
+            .When(static x => x.LastPlayedAt.HasValue);
 
         // Business rules
-        RuleFor(x => x.TrackIds)
+        RuleFor(static x => x.TrackIds)
             .Must(NotExceedMaximumTracks)
             .WithMessage("Playlist cannot contain more than 10,000 tracks.");
 
         // Business rule: System playlists have specific constraints
-        RuleFor(x => x.Owner)
+        RuleFor(static x => x.Owner)
             .Equal("system")
             .WithMessage("System playlists must have 'system' as the owner.")
-            .When(x => x.IsSystem);
+            .When(static x => x.IsSystem);
 
-        RuleFor(x => x.IsPublic).Equal(true).WithMessage("System playlists must be public.").When(x => x.IsSystem);
+        RuleFor(static x => x.IsPublic)
+            .Equal(true)
+            .WithMessage("System playlists must be public.")
+            .When(static x => x.IsSystem);
 
         // Business rule: Play count consistency
-        RuleFor(x => x.LastPlayedAt)
+        RuleFor(static x => x.LastPlayedAt)
             .NotNull()
             .WithMessage("Playlists with play count > 0 must have a last played timestamp.")
-            .When(x => x.PlayCount > 0);
+            .When(static x => x.PlayCount > 0);
 
         // Business rule: Duration consistency with track count
-        RuleFor(x => x)
+        RuleFor(static x => x)
             .Must(HaveReasonableDurationForTrackCount)
             .WithMessage("Total duration seems unreasonable for the number of tracks.")
-            .When(x => x.TotalDurationSeconds.HasValue && x.TrackIds.Count > 0);
+            .When(static x => x.TotalDurationSeconds.HasValue && x.TrackIds.Count > 0);
     }
 
     /// <summary>

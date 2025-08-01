@@ -213,7 +213,7 @@ public sealed record Playlist
             throw new ArgumentNullException(nameof(trackIds));
         }
 
-        var validTrackIds = trackIds.Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
+        var validTrackIds = trackIds.Where(static id => !string.IsNullOrWhiteSpace(id)).ToList();
 
         return this with
         {

@@ -158,7 +158,7 @@ public class KnxController : ControllerBase
                 request.Address,
                 ex.Errors
             );
-            return BadRequest(string.Join("; ", ex.Errors.Select(e => e.ErrorMessage)));
+            return BadRequest(string.Join("; ", ex.Errors.Select(static e => e.ErrorMessage)));
         }
         catch (Exception ex)
         {
@@ -210,7 +210,7 @@ public class KnxController : ControllerBase
                 request.Address,
                 ex.Errors
             );
-            return BadRequest(string.Join("; ", ex.Errors.Select(e => e.ErrorMessage)));
+            return BadRequest(string.Join("; ", ex.Errors.Select(static e => e.ErrorMessage)));
         }
         catch (Exception ex)
         {
@@ -262,7 +262,7 @@ public class KnxController : ControllerBase
                 request.Address,
                 ex.Errors
             );
-            return BadRequest(string.Join("; ", ex.Errors.Select(e => e.ErrorMessage)));
+            return BadRequest(string.Join("; ", ex.Errors.Select(static e => e.ErrorMessage)));
         }
         catch (Exception ex)
         {
@@ -314,7 +314,7 @@ public class KnxController : ControllerBase
                 request.Address,
                 ex.Errors
             );
-            return BadRequest(string.Join("; ", ex.Errors.Select(e => e.ErrorMessage)));
+            return BadRequest(string.Join("; ", ex.Errors.Select(static e => e.ErrorMessage)));
         }
         catch (Exception ex)
         {

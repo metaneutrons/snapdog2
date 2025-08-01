@@ -16,7 +16,7 @@ public sealed class RadioStationValidator : AbstractValidator<RadioStation>
     public RadioStationValidator()
     {
         // Required string properties
-        RuleFor(x => x.Id)
+        RuleFor(static x => x.Id)
             .NotEmpty()
             .WithMessage("Radio station ID is required.")
             .MaximumLength(100)
@@ -24,7 +24,7 @@ public sealed class RadioStationValidator : AbstractValidator<RadioStation>
             .Matches(@"^[a-zA-Z0-9_-]+$")
             .WithMessage("Radio station ID can only contain alphanumeric characters, underscores, and hyphens.");
 
-        RuleFor(x => x.Name)
+        RuleFor(static x => x.Name)
             .NotEmpty()
             .WithMessage("Radio station name is required.")
             .MaximumLength(200)
@@ -33,167 +33,167 @@ public sealed class RadioStationValidator : AbstractValidator<RadioStation>
             .WithMessage("Radio station name must be at least 1 character long.");
 
         // URL validation (using the StreamUrl value object validation)
-        RuleFor(x => x.Url).NotNull().WithMessage("Radio station URL is required.");
+        RuleFor(static x => x.Url).NotNull().WithMessage("Radio station URL is required.");
 
         // Codec validation
-        RuleFor(x => x.Codec).IsInEnum().WithMessage("Invalid audio codec specified.");
+        RuleFor(static x => x.Codec).IsInEnum().WithMessage("Invalid audio codec specified.");
 
         // Optional metadata validations
-        RuleFor(x => x.Description)
+        RuleFor(static x => x.Description)
             .MaximumLength(1000)
             .WithMessage("Description cannot exceed 1000 characters.")
-            .When(x => !string.IsNullOrEmpty(x.Description));
+            .When(static x => !string.IsNullOrEmpty(x.Description));
 
-        RuleFor(x => x.Genre)
+        RuleFor(static x => x.Genre)
             .MaximumLength(100)
             .WithMessage("Genre cannot exceed 100 characters.")
-            .When(x => !string.IsNullOrEmpty(x.Genre));
+            .When(static x => !string.IsNullOrEmpty(x.Genre));
 
-        RuleFor(x => x.Country)
+        RuleFor(static x => x.Country)
             .MaximumLength(100)
             .WithMessage("Country cannot exceed 100 characters.")
             .Matches(@"^[a-zA-Z\s\-'\.]+$")
             .WithMessage("Country can only contain letters, spaces, hyphens, apostrophes, and periods.")
-            .When(x => !string.IsNullOrEmpty(x.Country));
+            .When(static x => !string.IsNullOrEmpty(x.Country));
 
-        RuleFor(x => x.Language)
+        RuleFor(static x => x.Language)
             .MaximumLength(50)
             .WithMessage("Language cannot exceed 50 characters.")
             .Matches(@"^[a-zA-Z\s\-]+$")
             .WithMessage("Language can only contain letters, spaces, and hyphens.")
-            .When(x => !string.IsNullOrEmpty(x.Language));
+            .When(static x => !string.IsNullOrEmpty(x.Language));
 
         // Audio technical specifications
-        RuleFor(x => x.BitrateKbps)
+        RuleFor(static x => x.BitrateKbps)
             .GreaterThan(0)
             .WithMessage("Bitrate must be greater than 0 kbps.")
             .LessThanOrEqualTo(1411)
             .WithMessage("Bitrate cannot exceed 1411 kbps (CD quality limit).")
             .Must(BeValidBitrateForCodec)
             .WithMessage("Bitrate is not valid for the specified codec.")
-            .When(x => x.BitrateKbps.HasValue);
+            .When(static x => x.BitrateKbps.HasValue);
 
-        RuleFor(x => x.SampleRateHz)
+        RuleFor(static x => x.SampleRateHz)
             .GreaterThan(0)
             .WithMessage("Sample rate must be greater than 0 Hz.")
             .LessThanOrEqualTo(192000)
             .WithMessage("Sample rate cannot exceed 192000 Hz.")
             .Must(BeValidSampleRate)
             .WithMessage("Sample rate must be a standard audio sample rate.")
-            .When(x => x.SampleRateHz.HasValue);
+            .When(static x => x.SampleRateHz.HasValue);
 
-        RuleFor(x => x.Channels)
+        RuleFor(static x => x.Channels)
             .GreaterThan(0)
             .WithMessage("Number of channels must be greater than 0.")
             .LessThanOrEqualTo(8)
             .WithMessage("Number of channels cannot exceed 8.")
-            .When(x => x.Channels.HasValue);
+            .When(static x => x.Channels.HasValue);
 
         // Website URL validation
-        RuleFor(x => x.Website)
+        RuleFor(static x => x.Website)
             .MaximumLength(500)
             .WithMessage("Website URL cannot exceed 500 characters.")
             .Must(BeValidWebsiteUrl)
             .WithMessage("Website must be a valid HTTP or HTTPS URL.")
-            .When(x => !string.IsNullOrEmpty(x.Website));
+            .When(static x => !string.IsNullOrEmpty(x.Website));
 
         // Logo URL validation
-        RuleFor(x => x.LogoUrl)
+        RuleFor(static x => x.LogoUrl)
             .MaximumLength(500)
             .WithMessage("Logo URL cannot exceed 500 characters.")
             .Must(BeValidImageUrl)
             .WithMessage("Logo URL must be a valid HTTP or HTTPS URL pointing to an image.")
-            .When(x => !string.IsNullOrEmpty(x.LogoUrl));
+            .When(static x => !string.IsNullOrEmpty(x.LogoUrl));
 
         // Tags validation
-        RuleFor(x => x.Tags)
+        RuleFor(static x => x.Tags)
             .MaximumLength(500)
             .WithMessage("Tags cannot exceed 500 characters.")
-            .When(x => !string.IsNullOrEmpty(x.Tags));
+            .When(static x => !string.IsNullOrEmpty(x.Tags));
 
         // Priority validation
-        RuleFor(x => x.Priority)
+        RuleFor(static x => x.Priority)
             .GreaterThanOrEqualTo(1)
             .WithMessage("Priority must be at least 1.")
             .LessThanOrEqualTo(10)
             .WithMessage("Priority cannot exceed 10.");
 
         // Authentication validations
-        RuleFor(x => x.Username)
+        RuleFor(static x => x.Username)
             .NotEmpty()
             .WithMessage("Username is required when authentication is enabled.")
             .MaximumLength(100)
             .WithMessage("Username cannot exceed 100 characters.")
-            .When(x => x.RequiresAuth);
+            .When(static x => x.RequiresAuth);
 
-        RuleFor(x => x.Password)
+        RuleFor(static x => x.Password)
             .NotEmpty()
             .WithMessage("Password is required when authentication is enabled.")
             .MaximumLength(200)
             .WithMessage("Password cannot exceed 200 characters.")
-            .When(x => x.RequiresAuth);
+            .When(static x => x.RequiresAuth);
 
-        RuleFor(x => x.Username)
+        RuleFor(static x => x.Username)
             .Null()
             .WithMessage("Username should not be set when authentication is not required.")
-            .When(x => !x.RequiresAuth);
+            .When(static x => !x.RequiresAuth);
 
-        RuleFor(x => x.Password)
+        RuleFor(static x => x.Password)
             .Null()
             .WithMessage("Password should not be set when authentication is not required.")
-            .When(x => !x.RequiresAuth);
+            .When(static x => !x.RequiresAuth);
 
         // Play count validation
-        RuleFor(x => x.PlayCount)
+        RuleFor(static x => x.PlayCount)
             .GreaterThanOrEqualTo(0)
             .WithMessage("Play count cannot be negative.")
             .LessThanOrEqualTo(1000000)
             .WithMessage("Play count cannot exceed 1,000,000.");
 
         // Timestamp validations
-        RuleFor(x => x.CreatedAt)
+        RuleFor(static x => x.CreatedAt)
             .NotEmpty()
             .WithMessage("Created timestamp is required.")
             .LessThanOrEqualTo(DateTime.UtcNow.AddMinutes(5))
             .WithMessage("Created timestamp cannot be in the future.");
 
-        RuleFor(x => x.UpdatedAt)
-            .GreaterThanOrEqualTo(x => x.CreatedAt)
+        RuleFor(static x => x.UpdatedAt)
+            .GreaterThanOrEqualTo(static x => x.CreatedAt)
             .WithMessage("Updated timestamp must be after or equal to created timestamp.")
             .LessThanOrEqualTo(DateTime.UtcNow.AddMinutes(5))
             .WithMessage("Updated timestamp cannot be in the future.")
-            .When(x => x.UpdatedAt.HasValue);
+            .When(static x => x.UpdatedAt.HasValue);
 
-        RuleFor(x => x.LastPlayedAt)
-            .GreaterThanOrEqualTo(x => x.CreatedAt)
+        RuleFor(static x => x.LastPlayedAt)
+            .GreaterThanOrEqualTo(static x => x.CreatedAt)
             .WithMessage("Last played timestamp must be after or equal to created timestamp.")
             .LessThanOrEqualTo(DateTime.UtcNow.AddMinutes(5))
             .WithMessage("Last played timestamp cannot be in the future.")
-            .When(x => x.LastPlayedAt.HasValue);
+            .When(static x => x.LastPlayedAt.HasValue);
 
-        RuleFor(x => x.LastCheckedAt)
-            .GreaterThanOrEqualTo(x => x.CreatedAt)
+        RuleFor(static x => x.LastCheckedAt)
+            .GreaterThanOrEqualTo(static x => x.CreatedAt)
             .WithMessage("Last checked timestamp must be after or equal to created timestamp.")
             .LessThanOrEqualTo(DateTime.UtcNow.AddMinutes(5))
             .WithMessage("Last checked timestamp cannot be in the future.")
-            .When(x => x.LastCheckedAt.HasValue);
+            .When(static x => x.LastCheckedAt.HasValue);
 
         // Business rules
-        RuleFor(x => x.LastPlayedAt)
+        RuleFor(static x => x.LastPlayedAt)
             .NotNull()
             .WithMessage("Radio stations with play count > 0 must have a last played timestamp.")
-            .When(x => x.PlayCount > 0);
+            .When(static x => x.PlayCount > 0);
 
         // Business rule: Online status should have recent check
-        RuleFor(x => x.LastCheckedAt)
+        RuleFor(static x => x.LastCheckedAt)
             .NotNull()
             .WithMessage("Radio stations with online status must have a last checked timestamp.")
             .Must(BeRecentTimestamp)
             .WithMessage("Online status check must be recent (within 24 hours).")
-            .When(x => x.IsOnline.HasValue);
+            .When(static x => x.IsOnline.HasValue);
 
         // Business rule: Codec-specific validations
-        RuleFor(x => x)
+        RuleFor(static x => x)
             .Must(HaveValidCodecConfiguration)
             .WithMessage("Radio station configuration is not valid for the specified codec.");
     }

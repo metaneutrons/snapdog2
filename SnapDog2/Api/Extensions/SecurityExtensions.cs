@@ -25,10 +25,10 @@ public static class SecurityExtensions
         // Add authentication with API Key scheme
         services
             .AddAuthentication("ApiKey")
-            .AddScheme<ApiKeyAuthenticationSchemeOptions, ApiKeyAuthenticationHandler>("ApiKey", options => { });
+            .AddScheme<ApiKeyAuthenticationSchemeOptions, ApiKeyAuthenticationHandler>("ApiKey", static options => { });
 
         // Add authorization
-        services.AddAuthorization(options =>
+        services.AddAuthorization(static options =>
         {
             options.DefaultPolicy = new AuthorizationPolicyBuilder()
                 .RequireAuthenticatedUser()
@@ -46,9 +46,9 @@ public static class SecurityExtensions
     /// <returns>The service collection for method chaining.</returns>
     public static IServiceCollection AddApiCors(this IServiceCollection services)
     {
-        services.AddCors(options =>
+        services.AddCors(static options =>
         {
-            options.AddDefaultPolicy(builder =>
+            options.AddDefaultPolicy(static builder =>
             {
                 builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
             });
@@ -56,7 +56,7 @@ public static class SecurityExtensions
             // Add a more restrictive policy for production
             options.AddPolicy(
                 "Production",
-                builder =>
+                static builder =>
                 {
                     builder
                         .WithOrigins("https://snapdog.local", "https://admin.snapdog.local") // FIXME: Replace with actual production origins
@@ -100,12 +100,6 @@ public static class SecurityExtensions
                 response.Headers["X-Frame-Options"] = "DENY";
                 response.Headers["X-XSS-Protection"] = "1; mode=block";
                 response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
-
-                // Strict Transport Security (only for HTTPS)
-                if (context.Request.IsHttps)
-                {
-                    response.Headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload";
-                }
 
                 // Content Security Policy - more permissive for development
                 var csp = isDevelopment

@@ -39,7 +39,7 @@ public static class HealthCheckStartupExtensions
             "/health/ready",
             new HealthCheckOptions
             {
-                Predicate = check => check.Tags.Contains("ready"),
+                Predicate = static check => check.Tags.Contains("ready"),
                 ResponseWriter = WriteHealthCheckResponse,
                 ResultStatusCodes =
                 {
@@ -55,7 +55,7 @@ public static class HealthCheckStartupExtensions
             "/health/live",
             new HealthCheckOptions
             {
-                Predicate = check => check.Tags.Contains("live"),
+                Predicate = static check => check.Tags.Contains("live"),
                 ResponseWriter = WriteHealthCheckResponse,
                 ResultStatusCodes =
                 {
@@ -100,8 +100,8 @@ public static class HealthCheckStartupExtensions
             totalDuration = report.TotalDuration.TotalMilliseconds,
             timestamp = DateTime.UtcNow,
             results = report.Entries.ToDictionary(
-                entry => entry.Key,
-                entry => new
+                static entry => entry.Key,
+                static entry => new
                 {
                     status = entry.Value.Status.ToString(),
                     duration = entry.Value.Duration.TotalMilliseconds,
@@ -135,8 +135,8 @@ public static class HealthCheckStartupExtensions
             TotalDurationMs = (long)report.TotalDuration.TotalMilliseconds,
             Timestamp = DateTime.UtcNow,
             Results = report.Entries.ToDictionary(
-                entry => entry.Key,
-                entry => new HealthCheckResponse
+                static entry => entry.Key,
+                static entry => new HealthCheckResponse
                 {
                     Name = entry.Key,
                     Status = entry.Value.Status.ToString(),
@@ -145,7 +145,7 @@ public static class HealthCheckStartupExtensions
                     Error = entry.Value.Exception?.Message,
                     Data =
                         entry.Value.Data.Count > 0
-                            ? entry.Value.Data.ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
+                            ? entry.Value.Data.ToDictionary(static kvp => kvp.Key, static kvp => kvp.Value)
                             : null,
                     Timestamp = DateTime.UtcNow,
                     Tags = entry.Value.Tags,
@@ -192,7 +192,7 @@ public static class HealthCheckStartupExtensions
         HealthCheckConfiguration healthCheckConfig
     )
     {
-        services.Configure<HealthCheckOptions>(options =>
+        services.Configure<HealthCheckOptions>(static options =>
         {
             options.AllowCachingResponses = false;
             options.ResponseWriter = WriteDetailedHealthCheckResponse;
@@ -211,18 +211,18 @@ public static class HealthCheckStartupExtensions
         // Register named health check options for different endpoints
         services.Configure<HealthCheckOptions>(
             "readiness",
-            options =>
+            static options =>
             {
-                options.Predicate = check => check.Tags.Contains("ready");
+                options.Predicate = static check => check.Tags.Contains("ready");
                 options.ResponseWriter = WriteHealthCheckResponse;
             }
         );
 
         services.Configure<HealthCheckOptions>(
             "liveness",
-            options =>
+            static options =>
             {
-                options.Predicate = check => check.Tags.Contains("live");
+                options.Predicate = static check => check.Tags.Contains("live");
                 options.ResponseWriter = WriteHealthCheckResponse;
             }
         );

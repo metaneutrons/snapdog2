@@ -157,23 +157,25 @@ public sealed class GetSystemStatusHandler : IRequestHandler<GetSystemStatusQuer
             var allStreams = await _audioStreamRepository.GetAllAsync(cancellationToken);
             var activeStreams = await _audioStreamRepository.GetActiveStreamsAsync(cancellationToken);
 
-            var codecBreakdown = allStreams.GroupBy(s => s.Codec.ToString()).ToDictionary(g => g.Key, g => g.Count());
+            var codecBreakdown = allStreams
+                .GroupBy(static s => s.Codec.ToString())
+                .ToDictionary(static g => g.Key, static g => g.Count());
 
             var bitrateBreakdown = allStreams
-                .GroupBy(s => GetBitrateRange(s.BitrateKbps))
-                .ToDictionary(g => g.Key, g => g.Count());
+                .GroupBy(static s => GetBitrateRange(s.BitrateKbps))
+                .ToDictionary(static g => g.Key, static g => g.Count());
 
             return new AudioStreamStatistics
             {
                 TotalCount = allStreams.Count(),
                 ActiveCount = activeStreams.Count(),
-                StoppedCount = allStreams.Count(s => s.Status == Core.Models.Enums.StreamStatus.Stopped),
-                ErrorCount = allStreams.Count(s => s.Status == Core.Models.Enums.StreamStatus.Error),
+                StoppedCount = allStreams.Count(static s => s.Status == Core.Models.Enums.StreamStatus.Stopped),
+                ErrorCount = allStreams.Count(static s => s.Status == Core.Models.Enums.StreamStatus.Error),
                 CodecBreakdown = codecBreakdown,
                 BitrateBreakdown = bitrateBreakdown,
-                LastStreamCreated = allStreams.OrderByDescending(s => s.CreatedAt).FirstOrDefault()?.CreatedAt,
+                LastStreamCreated = allStreams.OrderByDescending(static s => s.CreatedAt).FirstOrDefault()?.CreatedAt,
                 LastStreamStarted = activeStreams
-                    .OrderByDescending(s => s.UpdatedAt ?? s.CreatedAt)
+                    .OrderByDescending(static s => s.UpdatedAt ?? s.CreatedAt)
                     .FirstOrDefault()
                     ?.UpdatedAt,
             };
@@ -282,8 +284,8 @@ public sealed class GetSystemStatusHandler : IRequestHandler<GetSystemStatusQuer
             var allClients = await _clientRepository.GetAllAsync(cancellationToken);
             var allZones = await _zoneRepository.GetAllAsync(cancellationToken);
 
-            var activeClients = allClients.Where(c => c.IsConnected).ToList();
-            var activeZones = allZones.Where(z => z.IsActive).ToList();
+            var activeClients = allClients.Where(static c => c.IsConnected).ToList();
+            var activeZones = allZones.Where(static z => z.IsActive).ToList();
 
             return new ClientConnectionInfo
             {
@@ -292,9 +294,12 @@ public sealed class GetSystemStatusHandler : IRequestHandler<GetSystemStatusQuer
                 TotalZones = allZones.Count(),
                 ActiveZones = activeZones.Count,
                 PlatformBreakdown = activeClients
-                    .GroupBy(c => "Unknown") // TODO: Add Platform property to Client entity
-                    .ToDictionary(g => g.Key, g => g.Count()),
-                LastClientConnected = activeClients.OrderByDescending(c => c.LastSeen).FirstOrDefault()?.LastSeen,
+                    .GroupBy(static c => "Unknown") // TODO: Add Platform property to Client entity
+                    .ToDictionary(static g => g.Key, static g => g.Count()),
+                LastClientConnected = activeClients
+                    .OrderByDescending(static c => c.LastSeen)
+                    .FirstOrDefault()
+                    ?.LastSeen,
                 AverageConnectionDuration = TimeSpan.FromMinutes(45), // Placeholder calculation
             };
         }

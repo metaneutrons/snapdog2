@@ -7,12 +7,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using SnapDog2.Api.Authentication;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Core.Demo;
 using SnapDog2.Core.Events;
 using SnapDog2.Core.State;
+using SnapDog2.Infrastructure;
+using SnapDog2.Infrastructure.HealthChecks;
 using SnapDog2.Infrastructure.Services;
-using SnapDog2.Api.Authentication;
 
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("SnapDog2.Tests")]
 
@@ -40,7 +42,7 @@ try
     builder.Services.AddSingleton(configuration);
 
     // Register MediatR
-    builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+    builder.Services.AddMediatR(static cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
     // Register core services
     builder.Services.AddSingleton<IEventPublisher, InMemoryEventPublisher>();
@@ -50,6 +52,9 @@ try
     builder.Services.AddSingleton<IKnxService, KnxService>();
     builder.Services.AddSingleton<IMqttService, MqttService>();
     builder.Services.AddSingleton<ISnapcastService, SnapcastService>();
+
+    // Register SnapDog infrastructure services (includes health checks if enabled)
+    builder.Services.AddSnapDogInfrastructure(configuration.System);
 
     // Register demo classes
     builder.Services.AddTransient<DomainEntitiesDemo>();
@@ -67,8 +72,8 @@ try
     // Register API documentation (Swagger)
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
-// Add API Key authentication
-builder.Services.AddSnapDogApiKeyAuthentication(builder.Configuration);
+    // Add API Key authentication
+    builder.Services.AddSnapDogApiKeyAuthentication(builder.Configuration);
 
     // TODO: Register API-specific services and authentication/authorization as needed
 
@@ -91,6 +96,9 @@ builder.Services.AddSnapDogApiKeyAuthentication(builder.Configuration);
     // API security middleware (placeholder, add authentication/authorization as needed)
     app.UseAuthentication();
     app.UseAuthorization();
+
+    // Map health check endpoints
+    app.MapSnapDogHealthChecks(configuration.System.HealthChecks);
 
     app.MapControllers();
 
@@ -124,7 +132,7 @@ static void ConfigureEnvoyConfig()
 {
     // Set global prefix for all environment variables
     EnvConfig.GlobalPrefix = "SNAPDOG_";
-    
+
     // Register custom type converters for KNX addresses
     try
     {
@@ -166,7 +174,7 @@ static void RegisterValidators(IServiceCollection services)
     // Register all validators from the validation namespace
     var validatorTypes = typeof(Program)
         .Assembly.GetTypes()
-        .Where(t => t.Name.EndsWith("Validator") && !t.IsAbstract && !t.IsInterface)
+        .Where(static t => t.Name.EndsWith("Validator") && !t.IsAbstract && !t.IsInterface)
         .ToList();
 
     foreach (var validatorType in validatorTypes)
@@ -256,9 +264,8 @@ public class DemoOrchestrator
         _logger.LogInformation("=== Configuration Demo ===");
 
         _logger.LogInformation(
-            "Application: {ApplicationName} v{Version}",
-            _configuration.System.ApplicationName,
-            _configuration.System.Version
+            "SnapDog2 Application Environment: {Environment}",
+            _configuration.System.Environment
         );
         _logger.LogInformation("Environment: {Environment}", _configuration.System.Environment);
         _logger.LogInformation("API Port: {Port}", _configuration.Api.Port);

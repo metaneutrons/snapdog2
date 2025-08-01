@@ -13,7 +13,7 @@ public class SetClientMuteValidator : AbstractValidator<SetClientMuteCommand>
     /// </summary>
     public SetClientMuteValidator()
     {
-        RuleFor(x => x.ClientId)
+        RuleFor(static x => x.ClientId)
             .NotEmpty()
             .WithMessage("Client ID is required")
             .MaximumLength(100)

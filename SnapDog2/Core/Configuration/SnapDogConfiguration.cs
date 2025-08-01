@@ -45,7 +45,6 @@ public class SnapDogConfiguration
     ///
     /// Examples:
     /// - SNAPDOG_API_PORT → Api.Port
-    /// - SNAPDOG_API_HTTPS_ENABLED → Api.HttpsEnabled
     /// - SNAPDOG_API_AUTH_ENABLED → Api.AuthEnabled
     /// </summary>
     [Env(NestedPrefix = "API_")]
@@ -56,8 +55,8 @@ public class SnapDogConfiguration
     /// Maps environment variables with prefix: SNAPDOG_SERVICES_*
     ///
     /// Examples:
-    /// - SNAPDOG_SERVICES_SNAPCAST_HOST → Services.Snapcast.Host
-    /// - SNAPDOG_SERVICES_MQTT_BROKER → Services.Mqtt.Broker
+    /// - SNAPDOG_SERVICES_SNAPCAST_ADDRESS → Services.Snapcast.Host
+    /// - SNAPDOG_SERVICES_MQTT_BROKER_ADDRESS → Services.Mqtt.Broker
     /// - SNAPDOG_SERVICES_KNX_GATEWAY → Services.Knx.Gateway
     /// </summary>
     [Env(NestedPrefix = "SERVICES_")]
@@ -84,7 +83,7 @@ public class SnapDogConfiguration
     /// Examples:
     /// - SNAPDOG_CLIENT_1_NAME → Clients[0].Name
     /// - SNAPDOG_CLIENT_1_MAC → Clients[0].Mac
-    /// - SNAPDOG_CLIENT_1_MQTT_BASETOPIC → Clients[0].MqttBaseTopic
+    /// - SNAPDOG_CLIENT_1_MQTT_BASE_TOPIC → Clients[0].MqttBaseTopic
     /// - SNAPDOG_CLIENT_1_MQTT_VOLUME_SET_TOPIC → Clients[0].Mqtt.VolumeSetTopic
     /// - SNAPDOG_CLIENT_1_KNX_ENABLED → Clients[0].Knx.Enabled
     /// - SNAPDOG_CLIENT_1_KNX_VOLUME → Clients[0].Knx.Volume

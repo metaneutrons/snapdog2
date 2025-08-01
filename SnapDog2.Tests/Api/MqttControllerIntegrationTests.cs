@@ -53,13 +53,9 @@ public class MqttControllerIntegrationTests : IClassFixture<TestWebApplicationFa
     public async Task GetConnectionStatus_WithValidAuthentication_ShouldReturnOk()
     {
         // Arrange
-        var expectedStatus = new MqttConnectionStatusResponse
-        {
-            IsConnected = true,
-            BrokerHost = "localhost"
-        };
+        var expectedStatus = new MqttConnectionStatusResponse { IsConnected = true, BrokerHost = "localhost" };
         _mockMediator
-            .Setup(m => m.Send(It.IsAny<GetMqttConnectionStatusQuery>(), It.IsAny<CancellationToken>()))
+            .Setup(static m => m.Send(It.IsAny<GetMqttConnectionStatusQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedStatus);
 
         _client.DefaultRequestHeaders.Remove("X-API-Key");
@@ -90,7 +86,7 @@ public class MqttControllerIntegrationTests : IClassFixture<TestWebApplicationFa
         };
 
         _mockMediator
-            .Setup(m => m.Send(It.IsAny<PublishMqttMessageCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(static m => m.Send(It.IsAny<PublishMqttMessageCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
         _client.DefaultRequestHeaders.Remove("X-API-Key");
@@ -106,9 +102,9 @@ public class MqttControllerIntegrationTests : IClassFixture<TestWebApplicationFa
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         _mockMediator.Verify(
-            m =>
+            static m =>
                 m.Send(
-                    It.Is<PublishMqttMessageCommand>(c =>
+                    It.Is<PublishMqttMessageCommand>(static c =>
                         c.Topic == "test/topic" && c.Payload == "Hello World" && c.Retain == false
                     ),
                     It.IsAny<CancellationToken>()
@@ -130,7 +126,9 @@ public class MqttControllerIntegrationTests : IClassFixture<TestWebApplicationFa
 
         // Setup the mock Mediator to throw ValidationException for this command
         _mockMediator
-            .Setup(m => m.Send(It.Is<PublishMqttMessageCommand>(cmd => cmd.Topic == ""), It.IsAny<CancellationToken>()))
+            .Setup(static m =>
+                m.Send(It.Is<PublishMqttMessageCommand>(static cmd => cmd.Topic == ""), It.IsAny<CancellationToken>())
+            )
             .ThrowsAsync(
                 new ValidationException(
                     "Validation failed",
@@ -158,7 +156,7 @@ public class MqttControllerIntegrationTests : IClassFixture<TestWebApplicationFa
         var command = new SubscribeToMqttTopicCommand { TopicPattern = "sensors/+/temperature" };
 
         _mockMediator
-            .Setup(m => m.Send(It.IsAny<SubscribeToMqttTopicCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(static m => m.Send(It.IsAny<SubscribeToMqttTopicCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
         _client.DefaultRequestHeaders.Remove("X-API-Key");
@@ -174,9 +172,9 @@ public class MqttControllerIntegrationTests : IClassFixture<TestWebApplicationFa
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         _mockMediator.Verify(
-            m =>
+            static m =>
                 m.Send(
-                    It.Is<SubscribeToMqttTopicCommand>(c => c.TopicPattern == "sensors/+/temperature"),
+                    It.Is<SubscribeToMqttTopicCommand>(static c => c.TopicPattern == "sensors/+/temperature"),
                     It.IsAny<CancellationToken>()
                 ),
             Times.Once
@@ -190,7 +188,7 @@ public class MqttControllerIntegrationTests : IClassFixture<TestWebApplicationFa
         var command = new UnsubscribeFromMqttTopicCommand { TopicPattern = "sensors/+/temperature" };
 
         _mockMediator
-            .Setup(m => m.Send(It.IsAny<UnsubscribeFromMqttTopicCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(static m => m.Send(It.IsAny<UnsubscribeFromMqttTopicCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
         _client.DefaultRequestHeaders.Remove("X-API-Key");
@@ -206,9 +204,9 @@ public class MqttControllerIntegrationTests : IClassFixture<TestWebApplicationFa
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         _mockMediator.Verify(
-            m =>
+            static m =>
                 m.Send(
-                    It.Is<UnsubscribeFromMqttTopicCommand>(c => c.TopicPattern == "sensors/+/temperature"),
+                    It.Is<UnsubscribeFromMqttTopicCommand>(static c => c.TopicPattern == "sensors/+/temperature"),
                     It.IsAny<CancellationToken>()
                 ),
             Times.Once

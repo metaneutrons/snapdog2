@@ -16,7 +16,7 @@ public sealed class ClientValidator : AbstractValidator<Client>
     public ClientValidator()
     {
         // Required string properties
-        RuleFor(x => x.Id)
+        RuleFor(static x => x.Id)
             .NotEmpty()
             .WithMessage("Client ID is required.")
             .MaximumLength(100)
@@ -24,7 +24,7 @@ public sealed class ClientValidator : AbstractValidator<Client>
             .Matches(@"^[a-zA-Z0-9_-]+$")
             .WithMessage("Client ID can only contain alphanumeric characters, underscores, and hyphens.");
 
-        RuleFor(x => x.Name)
+        RuleFor(static x => x.Name)
             .NotEmpty()
             .WithMessage("Client name is required.")
             .MaximumLength(200)
@@ -33,93 +33,93 @@ public sealed class ClientValidator : AbstractValidator<Client>
             .WithMessage("Client name must be at least 1 character long.");
 
         // MAC address validation (using the MacAddress value object validation)
-        RuleFor(x => x.MacAddress).NotNull().WithMessage("Client MAC address is required.");
+        RuleFor(static x => x.MacAddress).NotNull().WithMessage("Client MAC address is required.");
 
         // IP address validation (using the IpAddress value object validation)
-        RuleFor(x => x.IpAddress).NotNull().WithMessage("Client IP address is required.");
+        RuleFor(static x => x.IpAddress).NotNull().WithMessage("Client IP address is required.");
 
         // Status validation
-        RuleFor(x => x.Status).IsInEnum().WithMessage("Invalid client status specified.");
+        RuleFor(static x => x.Status).IsInEnum().WithMessage("Invalid client status specified.");
 
         // Volume validation
-        RuleFor(x => x.Volume).InclusiveBetween(0, 100).WithMessage("Volume must be between 0 and 100.");
+        RuleFor(static x => x.Volume).InclusiveBetween(0, 100).WithMessage("Volume must be between 0 and 100.");
 
         // Zone ID validation
-        RuleFor(x => x.ZoneId)
+        RuleFor(static x => x.ZoneId)
             .MaximumLength(100)
             .WithMessage("Zone ID cannot exceed 100 characters.")
             .Matches(@"^[a-zA-Z0-9_-]+$")
             .WithMessage("Zone ID can only contain alphanumeric characters, underscores, and hyphens.")
-            .When(x => !string.IsNullOrEmpty(x.ZoneId));
+            .When(static x => !string.IsNullOrEmpty(x.ZoneId));
 
         // Optional description validation
-        RuleFor(x => x.Description)
+        RuleFor(static x => x.Description)
             .MaximumLength(1000)
             .WithMessage("Description cannot exceed 1000 characters.")
-            .When(x => !string.IsNullOrEmpty(x.Description));
+            .When(static x => !string.IsNullOrEmpty(x.Description));
 
         // Optional location validation
-        RuleFor(x => x.Location)
+        RuleFor(static x => x.Location)
             .MaximumLength(200)
             .WithMessage("Location cannot exceed 200 characters.")
-            .When(x => !string.IsNullOrEmpty(x.Location));
+            .When(static x => !string.IsNullOrEmpty(x.Location));
 
         // Optional latency validation
-        RuleFor(x => x.LatencyMs)
+        RuleFor(static x => x.LatencyMs)
             .GreaterThanOrEqualTo(0)
             .WithMessage("Latency cannot be negative.")
             .LessThanOrEqualTo(5000)
             .WithMessage("Latency cannot exceed 5000 milliseconds (5 seconds).")
-            .When(x => x.LatencyMs.HasValue);
+            .When(static x => x.LatencyMs.HasValue);
 
         // Timestamp validations
-        RuleFor(x => x.CreatedAt)
+        RuleFor(static x => x.CreatedAt)
             .NotEmpty()
             .WithMessage("Created timestamp is required.")
             .LessThanOrEqualTo(DateTime.UtcNow.AddMinutes(5))
             .WithMessage("Created timestamp cannot be in the future.");
 
-        RuleFor(x => x.UpdatedAt)
-            .GreaterThanOrEqualTo(x => x.CreatedAt)
+        RuleFor(static x => x.UpdatedAt)
+            .GreaterThanOrEqualTo(static x => x.CreatedAt)
             .WithMessage("Updated timestamp must be after or equal to created timestamp.")
             .LessThanOrEqualTo(DateTime.UtcNow.AddMinutes(5))
             .WithMessage("Updated timestamp cannot be in the future.")
-            .When(x => x.UpdatedAt.HasValue);
+            .When(static x => x.UpdatedAt.HasValue);
 
-        RuleFor(x => x.LastSeen)
-            .GreaterThanOrEqualTo(x => x.CreatedAt)
+        RuleFor(static x => x.LastSeen)
+            .GreaterThanOrEqualTo(static x => x.CreatedAt)
             .WithMessage("Last seen timestamp must be after or equal to created timestamp.")
             .LessThanOrEqualTo(DateTime.UtcNow.AddMinutes(5))
             .WithMessage("Last seen timestamp cannot be in the future.")
-            .When(x => x.LastSeen.HasValue);
+            .When(static x => x.LastSeen.HasValue);
 
         // Business rule: Connected clients should have a recent LastSeen timestamp
-        RuleFor(x => x.LastSeen)
+        RuleFor(static x => x.LastSeen)
             .NotNull()
             .WithMessage("Connected clients must have a last seen timestamp.")
             .Must(BeRecentTimestamp)
             .WithMessage("Connected clients must have been seen within the last 24 hours.")
-            .When(x => x.Status == ClientStatus.Connected);
+            .When(static x => x.Status == ClientStatus.Connected);
 
         // Business rule: Disconnected clients should not be assigned to zones
-        RuleFor(x => x.ZoneId)
+        RuleFor(static x => x.ZoneId)
             .Null()
             .WithMessage("Disconnected clients cannot be assigned to a zone.")
-            .When(x => x.Status == ClientStatus.Disconnected);
+            .When(static x => x.Status == ClientStatus.Disconnected);
 
         // Business rule: Volume consistency with mute status
-        RuleFor(x => x)
+        RuleFor(static x => x)
             .Must(HaveConsistentVolumeAndMuteStatus)
             .WithMessage("Client volume and mute status must be consistent.")
-            .When(x => x.IsMuted);
+            .When(static x => x.IsMuted);
 
         // Business rule: IP address should be valid for network communication
-        RuleFor(x => x.IpAddress)
+        RuleFor(static x => x.IpAddress)
             .Must(BeValidNetworkAddress)
             .WithMessage(
                 "IP address must be a valid network address (not localhost or multicast for production clients)."
             )
-            .When(x => x.Status == ClientStatus.Connected);
+            .When(static x => x.Status == ClientStatus.Connected);
     }
 
     /// <summary>

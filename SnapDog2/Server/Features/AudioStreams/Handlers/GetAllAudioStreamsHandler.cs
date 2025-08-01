@@ -60,7 +60,7 @@ public sealed class GetAllAudioStreamsHandler
 
             if (!request.IncludeInactive)
             {
-                filteredStreams = filteredStreams.Where(s =>
+                filteredStreams = filteredStreams.Where(static s =>
                     s.IsPlaying || s.Status == Core.Models.Enums.StreamStatus.Starting
                 );
                 _logger.LogDebug("Filtered out inactive streams, remaining count: {Count}", filteredStreams.Count());
@@ -126,16 +126,22 @@ public sealed class GetAllAudioStreamsHandler
 
         var sortedStreams = orderBy.ToLowerInvariant() switch
         {
-            "name" => descending ? streams.OrderByDescending(s => s.Name) : streams.OrderBy(s => s.Name),
-            "created" => descending ? streams.OrderByDescending(s => s.CreatedAt) : streams.OrderBy(s => s.CreatedAt),
-            "status" => descending ? streams.OrderByDescending(s => s.Status) : streams.OrderBy(s => s.Status),
-            "codec" => descending ? streams.OrderByDescending(s => s.Codec) : streams.OrderBy(s => s.Codec),
+            "name" => descending ? streams.OrderByDescending(static s => s.Name) : streams.OrderBy(static s => s.Name),
+            "created" => descending
+                ? streams.OrderByDescending(static s => s.CreatedAt)
+                : streams.OrderBy(static s => s.CreatedAt),
+            "status" => descending
+                ? streams.OrderByDescending(static s => s.Status)
+                : streams.OrderBy(static s => s.Status),
+            "codec" => descending
+                ? streams.OrderByDescending(static s => s.Codec)
+                : streams.OrderBy(static s => s.Codec),
             "bitrate" => descending
-                ? streams.OrderByDescending(s => s.BitrateKbps)
-                : streams.OrderBy(s => s.BitrateKbps),
+                ? streams.OrderByDescending(static s => s.BitrateKbps)
+                : streams.OrderBy(static s => s.BitrateKbps),
             "samplerate" => descending
-                ? streams.OrderByDescending(s => s.SampleRateHz)
-                : streams.OrderBy(s => s.SampleRateHz),
+                ? streams.OrderByDescending(static s => s.SampleRateHz)
+                : streams.OrderBy(static s => s.SampleRateHz),
             _ => streams,
         };
 

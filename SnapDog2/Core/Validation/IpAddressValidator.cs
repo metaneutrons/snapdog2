@@ -16,14 +16,14 @@ public sealed class IpAddressValidator : AbstractValidator<IpAddress>
     public IpAddressValidator()
     {
         // Value validation - IP address format
-        RuleFor(x => x.Value)
+        RuleFor(static x => x.Value)
             .NotNull()
             .WithMessage("IP address value is required.")
             .Must(BeValidIpAddress)
             .WithMessage("IP address must be a valid IPv4 or IPv6 address.");
 
         // Business rules
-        RuleFor(x => x)
+        RuleFor(static x => x)
             .Must(NotBeReservedAddress)
             .WithMessage("IP address cannot be a reserved system address.")
             .Must(NotBeMulticastAddress)
@@ -32,16 +32,16 @@ public sealed class IpAddressValidator : AbstractValidator<IpAddress>
             .WithMessage("IP address should be appropriate for network communication.");
 
         // IPv4 specific validations
-        RuleFor(x => x)
+        RuleFor(static x => x)
             .Must(BeValidIPv4Range)
             .WithMessage("IPv4 address is not in a valid range for client communication.")
-            .When(x => x.IsIPv4);
+            .When(static x => x.IsIPv4);
 
         // IPv6 specific validations
-        RuleFor(x => x)
+        RuleFor(static x => x)
             .Must(BeValidIPv6Type)
             .WithMessage("IPv6 address type is not appropriate for client communication.")
-            .When(x => x.IsIPv6);
+            .When(static x => x.IsIPv6);
     }
 
     /// <summary>

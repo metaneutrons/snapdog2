@@ -11,7 +11,10 @@ public class FluentValidationExceptionHandlerMiddleware
     private readonly RequestDelegate _next;
     private readonly ILogger<FluentValidationExceptionHandlerMiddleware> _logger;
 
-    public FluentValidationExceptionHandlerMiddleware(RequestDelegate next, ILogger<FluentValidationExceptionHandlerMiddleware> logger)
+    public FluentValidationExceptionHandlerMiddleware(
+        RequestDelegate next,
+        ILogger<FluentValidationExceptionHandlerMiddleware> logger
+    )
     {
         _next = next;
         _logger = logger;
@@ -25,30 +28,41 @@ public class FluentValidationExceptionHandlerMiddleware
         }
         catch (ValidationException ex) // Specifically FluentValidation.ValidationException
         {
-            _logger.LogWarning(ex, "Validation error occurred: {ValidationErrors}", string.Join(", ", ex.Errors.Select(e => e.ErrorMessage)));
+            _logger.LogWarning(
+                ex,
+                "Validation error occurred: {ValidationErrors}",
+                string.Join(", ", ex.Errors.Select(static e => e.ErrorMessage))
+            );
 
             context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
             context.Response.ContentType = "application/json";
 
-            var errors = ex.Errors.Select(e => new {
+            var errors = ex.Errors.Select(static e => new
+            {
                 e.PropertyName,
                 e.ErrorMessage,
-                e.AttemptedValue
+                e.AttemptedValue,
             });
 
             // Consistent problem details format
-            var problemDetails = new {
+            var problemDetails = new
+            {
                 type = "https://tools.ietf.org/html/rfc7231#section-6.5.1", // Link to RFC for 400 Bad Request
                 title = "One or more validation errors occurred.",
                 status = (int)HttpStatusCode.BadRequest,
-                errors // Using the structured errors
+                errors, // Using the structured errors
             };
 
-            await context.Response.WriteAsync(JsonSerializer.Serialize(problemDetails, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
-            }));
+            await context.Response.WriteAsync(
+                JsonSerializer.Serialize(
+                    problemDetails,
+                    new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
+                    }
+                )
+            );
         }
     }
 }

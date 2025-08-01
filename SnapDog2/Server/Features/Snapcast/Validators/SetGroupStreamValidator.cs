@@ -13,13 +13,13 @@ public class SetGroupStreamValidator : AbstractValidator<SetGroupStreamCommand>
     /// </summary>
     public SetGroupStreamValidator()
     {
-        RuleFor(x => x.GroupId)
+        RuleFor(static x => x.GroupId)
             .NotEmpty()
             .WithMessage("Group ID is required")
             .MaximumLength(100)
             .WithMessage("Group ID must not exceed 100 characters");
 
-        RuleFor(x => x.StreamId)
+        RuleFor(static x => x.StreamId)
             .NotEmpty()
             .WithMessage("Stream ID is required")
             .MaximumLength(100)

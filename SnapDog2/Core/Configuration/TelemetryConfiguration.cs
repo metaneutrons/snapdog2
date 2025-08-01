@@ -10,7 +10,7 @@ namespace SnapDog2.Core.Configuration;
 /// - SNAPDOG_TELEMETRY_ENABLED → Enabled
 /// - SNAPDOG_TELEMETRY_SERVICE_NAME → ServiceName
 /// - SNAPDOG_TELEMETRY_PROMETHEUS_ENABLED → PrometheusEnabled
-/// - SNAPDOG_TELEMETRY_JAEGER_ENDPOINT → JaegerEndpoint
+/// - SNAPDOG_TELEMETRY_OTLP_ENDPOINT → JaegerEndpoint
 /// </summary>
 public class TelemetryConfiguration
 {
@@ -58,28 +58,28 @@ public class TelemetryConfiguration
 
     /// <summary>
     /// Gets or sets whether Jaeger tracing is enabled.
-    /// Maps to: SNAPDOG_TELEMETRY_JAEGER_ENABLED
+    /// Maps to: SNAPDOG_TELEMETRY_OTLP_ENABLED
     /// </summary>
     [Env(Key = "JAEGER_ENABLED", Default = true)]
     public bool JaegerEnabled { get; set; } = true;
 
     /// <summary>
     /// Gets or sets the Jaeger collector endpoint.
-    /// Maps to: SNAPDOG_TELEMETRY_JAEGER_ENDPOINT
+    /// Maps to: SNAPDOG_TELEMETRY_OTLP_ENDPOINT
     /// </summary>
     [Env(Key = "JAEGER_ENDPOINT", Default = "http://jaeger:14268")]
     public string JaegerEndpoint { get; set; } = "http://jaeger:14268";
 
     /// <summary>
     /// Gets or sets the Jaeger agent host.
-    /// Maps to: SNAPDOG_TELEMETRY_JAEGER_AGENT_HOST
+    /// Maps to: SNAPDOG_TELEMETRY_OTLP_AGENT_ADDRESS
     /// </summary>
     [Env(Key = "JAEGER_AGENT_HOST", Default = "jaeger")]
     public string JaegerAgentHost { get; set; } = "jaeger";
 
     /// <summary>
     /// Gets or sets the Jaeger agent port.
-    /// Maps to: SNAPDOG_TELEMETRY_JAEGER_AGENT_PORT
+    /// Maps to: SNAPDOG_TELEMETRY_OTLP_AGENT_PORT
     /// </summary>
     [Env(Key = "JAEGER_AGENT_PORT", Default = 6831)]
     public int JaegerAgentPort { get; set; } = 6831;

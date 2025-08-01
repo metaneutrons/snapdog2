@@ -33,8 +33,8 @@ public sealed class AudioStreamRepository : RepositoryBase<AudioStream, string>,
     public async Task<IEnumerable<AudioStream>> GetActiveStreamsAsync(CancellationToken cancellationToken = default)
     {
         return await GetQueryableNoTracking()
-            .Where(stream => stream.Status == StreamStatus.Playing || stream.Status == StreamStatus.Starting)
-            .OrderBy(stream => stream.Name)
+            .Where(static stream => stream.Status == StreamStatus.Playing || stream.Status == StreamStatus.Starting)
+            .OrderBy(static stream => stream.Name)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
     }

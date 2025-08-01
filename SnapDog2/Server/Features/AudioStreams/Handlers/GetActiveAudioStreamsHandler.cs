@@ -63,7 +63,7 @@ public sealed class GetActiveAudioStreamsHandler
             if (!request.IncludeStarting)
             {
                 // Only include fully playing streams, exclude starting ones
-                filteredStreams = filteredStreams.Where(s => s.Status == StreamStatus.Playing);
+                filteredStreams = filteredStreams.Where(static s => s.Status == StreamStatus.Playing);
                 _logger.LogDebug("Filtered out starting streams, remaining count: {Count}", filteredStreams.Count());
             }
 
@@ -135,24 +135,28 @@ public sealed class GetActiveAudioStreamsHandler
         if (string.IsNullOrWhiteSpace(orderBy))
         {
             // Default sorting by last started (most recently started first)
-            return streams.OrderByDescending(s => s.UpdatedAt ?? s.CreatedAt);
+            return streams.OrderByDescending(static s => s.UpdatedAt ?? s.CreatedAt);
         }
 
         var sortedStreams = orderBy.ToLowerInvariant() switch
         {
-            "name" => descending ? streams.OrderByDescending(s => s.Name) : streams.OrderBy(s => s.Name),
+            "name" => descending ? streams.OrderByDescending(static s => s.Name) : streams.OrderBy(static s => s.Name),
             "started" => descending
-                ? streams.OrderByDescending(s => s.UpdatedAt ?? s.CreatedAt)
-                : streams.OrderBy(s => s.UpdatedAt ?? s.CreatedAt),
-            "codec" => descending ? streams.OrderByDescending(s => s.Codec) : streams.OrderBy(s => s.Codec),
+                ? streams.OrderByDescending(static s => s.UpdatedAt ?? s.CreatedAt)
+                : streams.OrderBy(static s => s.UpdatedAt ?? s.CreatedAt),
+            "codec" => descending
+                ? streams.OrderByDescending(static s => s.Codec)
+                : streams.OrderBy(static s => s.Codec),
             "bitrate" => descending
-                ? streams.OrderByDescending(s => s.BitrateKbps)
-                : streams.OrderBy(s => s.BitrateKbps),
+                ? streams.OrderByDescending(static s => s.BitrateKbps)
+                : streams.OrderBy(static s => s.BitrateKbps),
             "samplerate" => descending
-                ? streams.OrderByDescending(s => s.SampleRateHz)
-                : streams.OrderBy(s => s.SampleRateHz),
-            "status" => descending ? streams.OrderByDescending(s => s.Status) : streams.OrderBy(s => s.Status),
-            _ => streams.OrderByDescending(s => s.UpdatedAt ?? s.CreatedAt),
+                ? streams.OrderByDescending(static s => s.SampleRateHz)
+                : streams.OrderBy(static s => s.SampleRateHz),
+            "status" => descending
+                ? streams.OrderByDescending(static s => s.Status)
+                : streams.OrderBy(static s => s.Status),
+            _ => streams.OrderByDescending(static s => s.UpdatedAt ?? s.CreatedAt),
         };
 
         return sortedStreams;

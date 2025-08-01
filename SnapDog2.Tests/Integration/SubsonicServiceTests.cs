@@ -30,7 +30,7 @@ public class SubsonicServiceTests : IDisposable
         _mockHttpHandler = new Mock<HttpMessageHandler>();
         _mockLogger = new Mock<ILogger<SubsonicService>>();
         var mockMediator = new Mock<MediatR.IMediator>();
-        
+
         _config = new SubsonicConfiguration
         {
             ServerUrl = "http://localhost:4040",
@@ -39,15 +39,20 @@ public class SubsonicServiceTests : IDisposable
             ClientId = "SnapDog2-Test",
             ApiVersion = "1.16.1",
             MaxBitRate = 192,
-            TimeoutSeconds = 30
+            TimeoutSeconds = 30,
         };
 
         _httpClient = new HttpClient(_mockHttpHandler.Object);
         var options = Options.Create(_config);
         var mockHttpClientFactory = new Mock<IHttpClientFactory>();
-        mockHttpClientFactory.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(_httpClient);
-        
-        _subsonicService = new SubsonicService(options, _mockLogger.Object, mockMediator.Object, mockHttpClientFactory.Object);
+        mockHttpClientFactory.Setup(static x => x.CreateClient(It.IsAny<string>())).Returns(_httpClient);
+
+        _subsonicService = new SubsonicService(
+            options,
+            _mockLogger.Object,
+            mockMediator.Object,
+            mockHttpClientFactory.Object
+        );
     }
 
     #region Authentication Tests
@@ -58,7 +63,8 @@ public class SubsonicServiceTests : IDisposable
         // Arrange
         var salt = "randomsalt123";
         var expectedToken = ComputeMd5Hash($"{_config.Password}{salt}");
-        var responseXml = $@"<?xml version=""1.0"" encoding=""UTF-8""?>
+        var responseXml =
+            $@"<?xml version=""1.0"" encoding=""UTF-8""?>
             <subsonic-response xmlns=""http://subsonic.org/restapi"" status=""ok"" version=""1.16.1"">
                 <license valid=""true""/>
             </subsonic-response>";
@@ -70,21 +76,25 @@ public class SubsonicServiceTests : IDisposable
 
         // Assert
         result.Should().BeTrue();
-        VerifyHttpRequest("ping", request =>
-        {
-            request.RequestUri!.Query.Should().Contain($"u={_config.Username}");
-            request.RequestUri.Query.Should().Contain($"s={salt}");
-            request.RequestUri.Query.Should().Contain($"t={expectedToken}");
-            request.RequestUri.Query.Should().Contain($"c={_config.ClientId}");
-            request.RequestUri.Query.Should().Contain($"v={_config.ApiVersion}");
-        });
+        VerifyHttpRequest(
+            "ping",
+            request =>
+            {
+                request.RequestUri!.Query.Should().Contain($"u={_config.Username}");
+                request.RequestUri.Query.Should().Contain($"s={salt}");
+                request.RequestUri.Query.Should().Contain($"t={expectedToken}");
+                request.RequestUri.Query.Should().Contain($"c={_config.ClientId}");
+                request.RequestUri.Query.Should().Contain($"v={_config.ApiVersion}");
+            }
+        );
     }
 
     [Fact]
     public async Task AuthenticateAsync_WithInvalidCredentials_ShouldReturnFailure()
     {
         // Arrange
-        var responseXml = @"<?xml version=""1.0"" encoding=""UTF-8""?>
+        var responseXml =
+            @"<?xml version=""1.0"" encoding=""UTF-8""?>
             <subsonic-response xmlns=""http://subsonic.org/restapi"" status=""failed"" version=""1.16.1"">
                 <error code=""40"" message=""Wrong username or password""/>
             </subsonic-response>";
@@ -120,10 +130,13 @@ public class SubsonicServiceTests : IDisposable
     public async Task AuthenticateAsync_WithNetworkTimeout_ShouldReturnFailure()
     {
         // Arrange
-        _mockHttpHandler.Protected()
-            .Setup<Task<HttpResponseMessage>>("SendAsync",
+        _mockHttpHandler
+            .Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>())
+                ItExpr.IsAny<CancellationToken>()
+            )
             .ThrowsAsync(new TaskCanceledException("Request timeout"));
 
         // Act
@@ -142,7 +155,8 @@ public class SubsonicServiceTests : IDisposable
     public async Task IsServerAvailableAsync_WithHealthyServer_ShouldReturnTrue()
     {
         // Arrange
-        var responseXml = @"<?xml version=""1.0"" encoding=""UTF-8""?>
+        var responseXml =
+            @"<?xml version=""1.0"" encoding=""UTF-8""?>
             <subsonic-response xmlns=""http://subsonic.org/restapi"" status=""ok"" version=""1.16.1"">
                 <license valid=""true""/>
             </subsonic-response>";
@@ -180,7 +194,8 @@ public class SubsonicServiceTests : IDisposable
     public async Task GetPlaylistsAsync_WithValidResponse_ShouldReturnPlaylists()
     {
         // Arrange
-        var responseXml = @"<?xml version=""1.0"" encoding=""UTF-8""?>
+        var responseXml =
+            @"<?xml version=""1.0"" encoding=""UTF-8""?>
             <subsonic-response xmlns=""http://subsonic.org/restapi"" status=""ok"" version=""1.16.1"">
                 <playlists>
                     <playlist id=""1"" name=""Rock Favorites"" comment=""Best rock songs"" owner=""admin"" public=""true"" songCount=""25"" duration=""6035"" created=""2023-01-15T10:30:00"" changed=""2023-01-20T15:45:00""/>
@@ -195,19 +210,20 @@ public class SubsonicServiceTests : IDisposable
 
         // Assert
         result.Should().HaveCount(2);
-        
-        var rockPlaylist = result.First(p => p.Name == "Rock Favorites");
+
+        var rockPlaylist = result.First(static p => p.Name == "Rock Favorites");
         rockPlaylist.Id.Should().Be("1");
         rockPlaylist.Owner.Should().Be("admin");
 
-        var jazzPlaylist = result.First(p => p.Name == "Jazz Collection");
+        var jazzPlaylist = result.First(static p => p.Name == "Jazz Collection");
     }
 
     [Fact]
     public async Task GetPlaylistsAsync_WithEmptyResponse_ShouldReturnEmptyList()
     {
         // Arrange
-        var responseXml = @"<?xml version=""1.0"" encoding=""UTF-8""?>
+        var responseXml =
+            @"<?xml version=""1.0"" encoding=""UTF-8""?>
             <subsonic-response xmlns=""http://subsonic.org/restapi"" status=""ok"" version=""1.16.1"">
                 <playlists/>
             </subsonic-response>";
@@ -227,7 +243,8 @@ public class SubsonicServiceTests : IDisposable
         // Arrange
         var playlistName = "New Test Playlist";
         var trackIds = new[] { "track1", "track2", "track3" };
-        var responseXml = @"<?xml version=""1.0"" encoding=""UTF-8""?>
+        var responseXml =
+            @"<?xml version=""1.0"" encoding=""UTF-8""?>
             <subsonic-response xmlns=""http://subsonic.org/restapi"" status=""ok"" version=""1.16.1"">
                 <playlist id=""123"" name=""New Test Playlist"" owner=""admin"" public=""false"" songCount=""3"" duration=""720"" created=""2023-03-15T14:30:00"" changed=""2023-03-15T14:30:00""/>
             </subsonic-response>";
@@ -239,14 +256,17 @@ public class SubsonicServiceTests : IDisposable
 
         // Assert
         result.Should().Be("123");
-        VerifyHttpRequest("createPlaylist", request =>
-        {
-            request.RequestUri!.Query.Should().Contain($"name={Uri.EscapeDataString(playlistName)}");
-            foreach (var trackId in trackIds)
+        VerifyHttpRequest(
+            "createPlaylist",
+            request =>
             {
-                request.RequestUri.Query.Should().Contain($"songId={trackId}");
+                request.RequestUri!.Query.Should().Contain($"name={Uri.EscapeDataString(playlistName)}");
+                foreach (var trackId in trackIds)
+                {
+                    request.RequestUri.Query.Should().Contain($"songId={trackId}");
+                }
             }
-        });
+        );
     }
 
     [Theory]
@@ -259,8 +279,7 @@ public class SubsonicServiceTests : IDisposable
 
         // Act & Assert
         var act = () => _subsonicService.CreatePlaylistAsync(invalidName, trackIds);
-        await act.Should().ThrowAsync<ArgumentException>()
-            .WithMessage("*playlist name*");
+        await act.Should().ThrowAsync<ArgumentException>().WithMessage("*playlist name*");
     }
 
     [Fact]
@@ -272,8 +291,7 @@ public class SubsonicServiceTests : IDisposable
 
         // Act & Assert
         var act = () => _subsonicService.CreatePlaylistAsync(playlistName, emptyTrackIds);
-        await act.Should().ThrowAsync<ArgumentException>()
-            .WithMessage("*track IDs*");
+        await act.Should().ThrowAsync<ArgumentException>().WithMessage("*track IDs*");
     }
 
     [Fact]
@@ -281,7 +299,8 @@ public class SubsonicServiceTests : IDisposable
     {
         // Arrange
         var playlistId = "123";
-        var responseXml = @"<?xml version=""1.0"" encoding=""UTF-8""?>
+        var responseXml =
+            @"<?xml version=""1.0"" encoding=""UTF-8""?>
             <subsonic-response xmlns=""http://subsonic.org/restapi"" status=""ok"" version=""1.16.1""/>";
 
         SetupHttpResponse(HttpStatusCode.OK, responseXml);
@@ -291,10 +310,13 @@ public class SubsonicServiceTests : IDisposable
 
         // Assert
         result.Should().BeTrue();
-        VerifyHttpRequest("deletePlaylist", request =>
-        {
-            request.RequestUri!.Query.Should().Contain($"id={playlistId}");
-        });
+        VerifyHttpRequest(
+            "deletePlaylist",
+            request =>
+            {
+                request.RequestUri!.Query.Should().Contain($"id={playlistId}");
+            }
+        );
     }
 
     [Fact]
@@ -302,7 +324,8 @@ public class SubsonicServiceTests : IDisposable
     {
         // Arrange
         var playlistId = "999";
-        var responseXml = @"<?xml version=""1.0"" encoding=""UTF-8""?>
+        var responseXml =
+            @"<?xml version=""1.0"" encoding=""UTF-8""?>
             <subsonic-response xmlns=""http://subsonic.org/restapi"" status=""failed"" version=""1.16.1"">
                 <error code=""70"" message=""Playlist not found""/>
             </subsonic-response>";
@@ -325,7 +348,8 @@ public class SubsonicServiceTests : IDisposable
     {
         // Arrange
         var query = "rock music";
-        var responseXml = @"<?xml version=""1.0"" encoding=""UTF-8""?>
+        var responseXml =
+            @"<?xml version=""1.0"" encoding=""UTF-8""?>
             <subsonic-response xmlns=""http://subsonic.org/restapi"" status=""ok"" version=""1.16.1"">
                 <searchResult3>
                     <artist id=""art1"" name=""Rock Band"" albumCount=""5""/>
@@ -355,7 +379,8 @@ public class SubsonicServiceTests : IDisposable
     {
         // Arrange
         var query = "nonexistent music";
-        var responseXml = @"<?xml version=""1.0"" encoding=""UTF-8""?>
+        var responseXml =
+            @"<?xml version=""1.0"" encoding=""UTF-8""?>
             <subsonic-response xmlns=""http://subsonic.org/restapi"" status=""ok"" version=""1.16.1"">
                 <searchResult3/>
             </subsonic-response>";
@@ -376,8 +401,7 @@ public class SubsonicServiceTests : IDisposable
     {
         // Act & Assert
         var act = () => _subsonicService.SearchAsync(invalidQuery);
-        await act.Should().ThrowAsync<ArgumentException>()
-            .WithMessage("*search query*");
+        await act.Should().ThrowAsync<ArgumentException>().WithMessage("*search query*");
     }
 
     #endregion
@@ -425,8 +449,7 @@ public class SubsonicServiceTests : IDisposable
     {
         // Act & Assert
         var act = () => _subsonicService.GetStreamUrlAsync(invalidTrackId);
-        await act.Should().ThrowAsync<ArgumentException>()
-            .WithMessage("*track ID*");
+        await act.Should().ThrowAsync<ArgumentException>().WithMessage("*track ID*");
     }
 
     [Theory]
@@ -440,8 +463,7 @@ public class SubsonicServiceTests : IDisposable
 
         // Act & Assert
         var act = () => _subsonicService.GetStreamUrlAsync(trackId, invalidBitRate);
-        await act.Should().ThrowAsync<ArgumentOutOfRangeException>()
-            .WithMessage("*bitrate*");
+        await act.Should().ThrowAsync<ArgumentOutOfRangeException>().WithMessage("*bitrate*");
     }
 
     [Fact]
@@ -450,7 +472,7 @@ public class SubsonicServiceTests : IDisposable
         // Arrange
         var trackId = "track123";
         var audioData = Encoding.UTF8.GetBytes("fake audio data");
-        
+
         SetupHttpResponse(HttpStatusCode.OK, audioData, "audio/mpeg");
 
         // Act
@@ -459,7 +481,7 @@ public class SubsonicServiceTests : IDisposable
         // Assert
         result.Should().NotBeNull();
         result.CanRead.Should().BeTrue();
-        
+
         // Verify the stream contains the expected data
         var buffer = new byte[audioData.Length];
         var bytesRead = await result.ReadAsync(buffer, 0, buffer.Length);
@@ -479,17 +501,21 @@ public class SubsonicServiceTests : IDisposable
 
         // Act & Assert
         var act = () => new SubsonicService(options, _mockLogger.Object, new Mock<MediatR.IMediator>().Object, null!);
-        act.Should().Throw<ArgumentNullException>()
-            .WithParameterName("httpClientFactory");
+        act.Should().Throw<ArgumentNullException>().WithParameterName("httpClientFactory");
     }
 
     [Fact]
     public void Constructor_WithNullConfiguration_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        var act = () => new SubsonicService(null!, _mockLogger.Object, new Mock<MediatR.IMediator>().Object, new Mock<IHttpClientFactory>().Object);
-        act.Should().Throw<ArgumentNullException>()
-            .WithParameterName("configuration");
+        var act = () =>
+            new SubsonicService(
+                null!,
+                _mockLogger.Object,
+                new Mock<MediatR.IMediator>().Object,
+                new Mock<IHttpClientFactory>().Object
+            );
+        act.Should().Throw<ArgumentNullException>().WithParameterName("configuration");
     }
 
     [Fact]
@@ -499,9 +525,14 @@ public class SubsonicServiceTests : IDisposable
         var options = Options.Create(_config);
 
         // Act & Assert
-        var act = () => new SubsonicService(options, null!, new Mock<MediatR.IMediator>().Object, new Mock<IHttpClientFactory>().Object);
-        act.Should().Throw<ArgumentNullException>()
-            .WithParameterName("logger");
+        var act = () =>
+            new SubsonicService(
+                options,
+                null!,
+                new Mock<MediatR.IMediator>().Object,
+                new Mock<IHttpClientFactory>().Object
+            );
+        act.Should().Throw<ArgumentNullException>().WithParameterName("logger");
     }
 
     [Fact]
@@ -512,8 +543,7 @@ public class SubsonicServiceTests : IDisposable
 
         // Act & Assert
         var act = () => new SubsonicService(options, _mockLogger.Object, null!, new Mock<IHttpClientFactory>().Object);
-        act.Should().Throw<ArgumentNullException>()
-            .WithParameterName("mediator");
+        act.Should().Throw<ArgumentNullException>().WithParameterName("mediator");
     }
 
     #endregion
@@ -572,7 +602,7 @@ public class SubsonicServiceTests : IDisposable
         var trackId = "large-track";
         var largeAudioData = new byte[10 * 1024 * 1024]; // 10MB
         new Random().NextBytes(largeAudioData);
-        
+
         SetupHttpResponse(HttpStatusCode.OK, largeAudioData, "audio/mpeg");
 
         // Act
@@ -581,19 +611,19 @@ public class SubsonicServiceTests : IDisposable
         // Assert
         result.Should().NotBeNull();
         result.CanRead.Should().BeTrue();
-        
+
         // Verify streaming works in chunks
         var buffer = new byte[1024];
         var totalBytesRead = 0;
         int bytesRead;
-        
+
         while ((bytesRead = await result.ReadAsync(buffer, 0, buffer.Length)) > 0)
         {
             totalBytesRead += bytesRead;
             if (totalBytesRead > 1024 * 1024) // Stop after 1MB to avoid long test
                 break;
         }
-        
+
         totalBytesRead.Should().BeGreaterThan(1024 * 1024);
     }
 
@@ -605,62 +635,75 @@ public class SubsonicServiceTests : IDisposable
     {
         var response = new HttpResponseMessage(statusCode)
         {
-            Content = new StringContent(content, Encoding.UTF8, contentType)
+            Content = new StringContent(content, Encoding.UTF8, contentType),
         };
 
-        _mockHttpHandler.Protected()
-            .Setup<Task<HttpResponseMessage>>("SendAsync",
+        _mockHttpHandler
+            .Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>())
+                ItExpr.IsAny<CancellationToken>()
+            )
             .ReturnsAsync(response);
     }
 
     private void SetupHttpResponse(HttpStatusCode statusCode, byte[] content, string contentType)
     {
-        var response = new HttpResponseMessage(statusCode)
-        {
-            Content = new ByteArrayContent(content)
-        };
+        var response = new HttpResponseMessage(statusCode) { Content = new ByteArrayContent(content) };
         response.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(contentType);
 
-        _mockHttpHandler.Protected()
-            .Setup<Task<HttpResponseMessage>>("SendAsync",
+        _mockHttpHandler
+            .Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>())
+                ItExpr.IsAny<CancellationToken>()
+            )
             .ReturnsAsync(response);
     }
 
     private void VerifyHttpRequest(string expectedEndpoint, Action<HttpRequestMessage>? additionalVerification = null)
     {
-        _mockHttpHandler.Protected()
-            .Verify("SendAsync", Times.Once(),
-                ItExpr.Is<HttpRequestMessage>(req => 
-                    req.RequestUri!.AbsolutePath.Contains(expectedEndpoint)),
-                ItExpr.IsAny<CancellationToken>());
+        _mockHttpHandler
+            .Protected()
+            .Verify(
+                "SendAsync",
+                Times.Once(),
+                ItExpr.Is<HttpRequestMessage>(req => req.RequestUri!.AbsolutePath.Contains(expectedEndpoint)),
+                ItExpr.IsAny<CancellationToken>()
+            );
 
         if (additionalVerification != null)
         {
-            _mockHttpHandler.Protected()
-                .Verify("SendAsync", Times.Once(),
-                    ItExpr.Is<HttpRequestMessage>(req => 
+            _mockHttpHandler
+                .Protected()
+                .Verify(
+                    "SendAsync",
+                    Times.Once(),
+                    ItExpr.Is<HttpRequestMessage>(req =>
                     {
                         additionalVerification(req);
                         return true;
                     }),
-                    ItExpr.IsAny<CancellationToken>());
+                    ItExpr.IsAny<CancellationToken>()
+                );
         }
     }
 
     private void VerifyLoggerError(string expectedMessage)
     {
         _mockLogger.Verify(
-            x => x.Log(
-                LogLevel.Error,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains(expectedMessage)),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
-            Times.Once);
+            x =>
+                x.Log(
+                    LogLevel.Error,
+                    It.IsAny<EventId>(),
+                    It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains(expectedMessage)),
+                    It.IsAny<Exception>(),
+                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()
+                ),
+            Times.Once
+        );
     }
 
     private static string ComputeMd5Hash(string input)
@@ -687,13 +730,17 @@ public class SubsonicServiceTests : IDisposable
         // Generate albums
         for (int i = 1; i <= albumCount; i++)
         {
-            xml.AppendLine($@"<album id=""alb{i}"" name=""Album {i}"" artist=""Artist {i % artistCount + 1}"" artistId=""art{i % artistCount + 1}"" songCount=""{i % 15 + 5}"" duration=""{2000 + i * 10}"" created=""2020-01-01T00:00:00""/>");
+            xml.AppendLine(
+                $@"<album id=""alb{i}"" name=""Album {i}"" artist=""Artist {i % artistCount + 1}"" artistId=""art{i % artistCount + 1}"" songCount=""{i % 15 + 5}"" duration=""{2000 + i * 10}"" created=""2020-01-01T00:00:00""/>"
+            );
         }
 
         // Generate songs
         for (int i = 1; i <= songCount; i++)
         {
-            xml.AppendLine($@"<song id=""song{i}"" parent=""alb{i % albumCount + 1}"" title=""Song {i}"" album=""Album {i % albumCount + 1}"" artist=""Artist {i % artistCount + 1}"" track=""{i % 12 + 1}"" year=""2020"" genre=""Rock"" size=""{4000000 + i * 1000}"" contentType=""audio/mpeg"" suffix=""mp3"" duration=""{180 + i % 120}"" bitRate=""192"" path=""Artist {i % artistCount + 1}/Album {i % albumCount + 1}/{i:D2} - Song {i}.mp3"" isVideo=""false"" created=""2020-01-01T00:00:00"" albumId=""alb{i % albumCount + 1}"" artistId=""art{i % artistCount + 1}"" type=""music""/>");
+            xml.AppendLine(
+                $@"<song id=""song{i}"" parent=""alb{i % albumCount + 1}"" title=""Song {i}"" album=""Album {i % albumCount + 1}"" artist=""Artist {i % artistCount + 1}"" track=""{i % 12 + 1}"" year=""2020"" genre=""Rock"" size=""{4000000 + i * 1000}"" contentType=""audio/mpeg"" suffix=""mp3"" duration=""{180 + i % 120}"" bitRate=""192"" path=""Artist {i % artistCount + 1}/Album {i % albumCount + 1}/{i:D2} - Song {i}.mp3"" isVideo=""false"" created=""2020-01-01T00:00:00"" albumId=""alb{i % albumCount + 1}"" artistId=""art{i % artistCount + 1}"" type=""music""/>"
+            );
         }
 
         xml.AppendLine("</searchResult3>");

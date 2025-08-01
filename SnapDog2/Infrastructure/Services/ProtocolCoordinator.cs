@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using MediatR;
 using SnapDog2.Core.Common;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Core.Events;
@@ -13,13 +13,15 @@ namespace SnapDog2.Infrastructure.Services;
 /// Implementation of protocol coordination that synchronizes state changes
 /// between Snapcast, KNX, MQTT, and Subsonic protocols.
 /// </summary>
-public class ProtocolCoordinator : IProtocolCoordinator, IDisposable,
-    INotificationHandler<SnapcastClientVolumeChangedEvent>,
-    INotificationHandler<SnapcastClientConnectedEvent>,
-    INotificationHandler<SnapcastClientDisconnectedEvent>,
-    INotificationHandler<KnxGroupValueReceivedEvent>,
-    INotificationHandler<MqttZoneVolumeCommandEvent>,
-    INotificationHandler<MqttClientVolumeCommandEvent>
+public class ProtocolCoordinator
+    : IProtocolCoordinator,
+        IDisposable,
+        INotificationHandler<SnapcastClientVolumeChangedEvent>,
+        INotificationHandler<SnapcastClientConnectedEvent>,
+        INotificationHandler<SnapcastClientDisconnectedEvent>,
+        INotificationHandler<KnxGroupValueReceivedEvent>,
+        INotificationHandler<MqttZoneVolumeCommandEvent>,
+        INotificationHandler<MqttClientVolumeCommandEvent>
 {
     private readonly ISnapcastService _snapcastService;
     private readonly IMqttService _mqttService;
@@ -46,7 +48,8 @@ public class ProtocolCoordinator : IProtocolCoordinator, IDisposable,
         IClientRepository clientRepository,
         IZoneRepository zoneRepository,
         IOptions<SnapDogConfiguration> config,
-        ILogger<ProtocolCoordinator> logger)
+        ILogger<ProtocolCoordinator> logger
+    )
     {
         _snapcastService = snapcastService ?? throw new ArgumentNullException(nameof(snapcastService));
         _mqttService = mqttService ?? throw new ArgumentNullException(nameof(mqttService));
@@ -135,7 +138,12 @@ public class ProtocolCoordinator : IProtocolCoordinator, IDisposable,
     /// <summary>
     /// Synchronizes a volume change across all connected protocols.
     /// </summary>
-    public async Task<Result> SynchronizeVolumeChangeAsync(string clientId, int volume, string sourceProtocol, CancellationToken cancellationToken = default)
+    public async Task<Result> SynchronizeVolumeChangeAsync(
+        string clientId,
+        int volume,
+        string sourceProtocol,
+        CancellationToken cancellationToken = default
+    )
     {
         if (_disposed || !_started)
             return Result.Failure("Protocol coordinator not started");
@@ -147,8 +155,12 @@ public class ProtocolCoordinator : IProtocolCoordinator, IDisposable,
             return Result.Success();
         }
 
-        _logger.LogInformation("Synchronizing volume change for client {ClientId} to {Volume}% from {Source}",
-            clientId, volume, sourceProtocol);
+        _logger.LogInformation(
+            "Synchronizing volume change for client {ClientId} to {Volume}% from {Source}",
+            clientId,
+            volume,
+            sourceProtocol
+        );
 
         var syncTasks = new List<Task<Result>>();
 
@@ -165,36 +177,59 @@ public class ProtocolCoordinator : IProtocolCoordinator, IDisposable,
             // Sync to Snapcast if not the source
             if (sourceProtocol != "Snapcast" && _config.Services.Snapcast.Enabled)
             {
-                syncTasks.Add(Task.Run(async () =>
-                {
-                    var success = await _snapcastService.SetClientVolumeAsync(clientId, volume, cancellationToken);
-                    return success ? Result.Success() : Result.Failure("Snapcast volume sync failed");
-                }, cancellationToken));
+                syncTasks.Add(
+                    Task.Run(
+                        async () =>
+                        {
+                            var success = await _snapcastService.SetClientVolumeAsync(
+                                clientId,
+                                volume,
+                                cancellationToken
+                            );
+                            return success ? Result.Success() : Result.Failure("Snapcast volume sync failed");
+                        },
+                        cancellationToken
+                    )
+                );
             }
 
             // Sync to MQTT if not the source
             if (sourceProtocol != "MQTT" && _config.Services.Mqtt.Enabled)
             {
-                syncTasks.Add(Task.Run(async () =>
-                {
-                    // TODO: Implement PublishClientVolumeAsync method in MQTT service
-                    await Task.CompletedTask;
-                    var success = true;
-                    return success ? Result.Success() : Result.Failure("MQTT volume sync failed");
-                }, cancellationToken));
+                syncTasks.Add(
+                    Task.Run(
+                        async () =>
+                        {
+                            // TODO: Implement PublishClientVolumeAsync method in MQTT service
+                            await Task.CompletedTask;
+                            var success = true;
+                            return success ? Result.Success() : Result.Failure("MQTT volume sync failed");
+                        },
+                        cancellationToken
+                    )
+                );
             }
 
             // Sync to KNX if not the source and client has KNX configuration
             // TODO: Add KNX configuration properties to Client entity
             if (sourceProtocol != "KNX" && _config.Services.Knx.Enabled)
             {
-                syncTasks.Add(Task.Run(async () =>
-                {
-                    // TODO: Get KNX group address from client configuration
-                    var groupAddress = "1/1/1"; // Placeholder
-                    var success = await _knxService.SendVolumeCommandAsync(groupAddress, volume, cancellationToken);
-                    return success ? Result.Success() : Result.Failure("KNX volume sync failed");
-                }, cancellationToken));
+                syncTasks.Add(
+                    Task.Run(
+                        async () =>
+                        {
+                            // TODO: Get KNX group address from client configuration
+                            var groupAddress = "1/1/1"; // Placeholder
+                            var success = await _knxService.SendVolumeCommandAsync(
+                                groupAddress,
+                                volume,
+                                cancellationToken
+                            );
+                            return success ? Result.Success() : Result.Failure("KNX volume sync failed");
+                        },
+                        cancellationToken
+                    )
+                );
             }
 
             // Wait for all synchronization tasks to complete
@@ -203,8 +238,10 @@ public class ProtocolCoordinator : IProtocolCoordinator, IDisposable,
 
             if (failures.Any())
             {
-                _logger.LogWarning("Some protocol synchronizations failed: {Errors}",
-                    string.Join(", ", failures.Select(f => f.Error)));
+                _logger.LogWarning(
+                    "Some protocol synchronizations failed: {Errors}",
+                    string.Join(", ", failures.Select(f => f.Error))
+                );
                 return Result.Failure($"Partial sync failure: {failures.Count}/{results.Length} failed");
             }
 
@@ -221,7 +258,12 @@ public class ProtocolCoordinator : IProtocolCoordinator, IDisposable,
     /// <summary>
     /// Synchronizes a mute state change across all connected protocols.
     /// </summary>
-    public async Task<Result> SynchronizeMuteChangeAsync(string clientId, bool muted, string sourceProtocol, CancellationToken cancellationToken = default)
+    public async Task<Result> SynchronizeMuteChangeAsync(
+        string clientId,
+        bool muted,
+        string sourceProtocol,
+        CancellationToken cancellationToken = default
+    )
     {
         if (_disposed || !_started)
             return Result.Failure("Protocol coordinator not started");
@@ -232,8 +274,12 @@ public class ProtocolCoordinator : IProtocolCoordinator, IDisposable,
             return Result.Success();
         }
 
-        _logger.LogInformation("Synchronizing mute change for client {ClientId} to {Muted} from {Source}",
-            clientId, muted, sourceProtocol);
+        _logger.LogInformation(
+            "Synchronizing mute change for client {ClientId} to {Muted} from {Source}",
+            clientId,
+            muted,
+            sourceProtocol
+        );
 
         var syncTasks = new List<Task<Result>>();
 
@@ -248,30 +294,44 @@ public class ProtocolCoordinator : IProtocolCoordinator, IDisposable,
             // Sync to Snapcast if not the source
             if (sourceProtocol != "Snapcast" && _config.Services.Snapcast.Enabled)
             {
-                syncTasks.Add(Task.Run(async () =>
-                {
-                    var success = await _snapcastService.SetClientMuteAsync(clientId, muted, cancellationToken);
-                    return success ? Result.Success() : Result.Failure("Snapcast mute sync failed");
-                }, cancellationToken));
+                syncTasks.Add(
+                    Task.Run(
+                        async () =>
+                        {
+                            var success = await _snapcastService.SetClientMuteAsync(clientId, muted, cancellationToken);
+                            return success ? Result.Success() : Result.Failure("Snapcast mute sync failed");
+                        },
+                        cancellationToken
+                    )
+                );
             }
 
             // Sync to KNX if not the source and client has KNX configuration
             // TODO: Add KNX mute configuration properties to Client entity
             if (sourceProtocol != "KNX" && _config.Services.Knx.Enabled)
             {
-                syncTasks.Add(Task.Run(async () =>
-                {
-                    // TODO: Get KNX mute group address from client configuration
-                    var groupAddress = "1/1/2"; // Placeholder
-                    var success = await _knxService.SendBooleanCommandAsync(groupAddress, muted, cancellationToken);
-                    return success ? Result.Success() : Result.Failure("KNX mute sync failed");
-                }, cancellationToken));
+                syncTasks.Add(
+                    Task.Run(
+                        async () =>
+                        {
+                            // TODO: Get KNX mute group address from client configuration
+                            var groupAddress = "1/1/2"; // Placeholder
+                            var success = await _knxService.SendBooleanCommandAsync(
+                                groupAddress,
+                                muted,
+                                cancellationToken
+                            );
+                            return success ? Result.Success() : Result.Failure("KNX mute sync failed");
+                        },
+                        cancellationToken
+                    )
+                );
             }
 
             var results = await Task.WhenAll(syncTasks);
             var failures = results.Where(r => r.IsFailure).ToList();
 
-            return failures.Any() 
+            return failures.Any()
                 ? Result.Failure($"Partial sync failure: {failures.Count}/{results.Length} failed")
                 : Result.Success();
         }
@@ -285,7 +345,12 @@ public class ProtocolCoordinator : IProtocolCoordinator, IDisposable,
     /// <summary>
     /// Synchronizes a zone volume change across all connected protocols.
     /// </summary>
-    public async Task<Result> SynchronizeZoneVolumeChangeAsync(int zoneId, int volume, string sourceProtocol, CancellationToken cancellationToken = default)
+    public async Task<Result> SynchronizeZoneVolumeChangeAsync(
+        int zoneId,
+        int volume,
+        string sourceProtocol,
+        CancellationToken cancellationToken = default
+    )
     {
         if (_disposed || !_started)
             return Result.Failure("Protocol coordinator not started");
@@ -296,8 +361,12 @@ public class ProtocolCoordinator : IProtocolCoordinator, IDisposable,
             return Result.Success();
         }
 
-        _logger.LogInformation("Synchronizing zone volume change for zone {ZoneId} to {Volume}% from {Source}",
-            zoneId, volume, sourceProtocol);
+        _logger.LogInformation(
+            "Synchronizing zone volume change for zone {ZoneId} to {Volume}% from {Source}",
+            zoneId,
+            volume,
+            sourceProtocol
+        );
 
         try
         {
@@ -312,33 +381,47 @@ public class ProtocolCoordinator : IProtocolCoordinator, IDisposable,
             // Sync to MQTT if not the source
             if (sourceProtocol != "MQTT" && _config.Services.Mqtt.Enabled)
             {
-                syncTasks.Add(Task.Run(async () =>
-                {
-                    // TODO: Implement PublishZoneVolumeAsync method in MQTT service
-                    // await _mqttService.PublishZoneVolumeAsync(zoneId, volume, cancellationToken);
-                    await Task.CompletedTask;
-                    var success = true;
-                    return success ? Result.Success() : Result.Failure("MQTT zone volume sync failed");
-                }, cancellationToken));
+                syncTasks.Add(
+                    Task.Run(
+                        async () =>
+                        {
+                            // TODO: Implement PublishZoneVolumeAsync method in MQTT service
+                            // await _mqttService.PublishZoneVolumeAsync(zoneId, volume, cancellationToken);
+                            await Task.CompletedTask;
+                            var success = true;
+                            return success ? Result.Success() : Result.Failure("MQTT zone volume sync failed");
+                        },
+                        cancellationToken
+                    )
+                );
             }
 
             // Sync to KNX if not the source and zone has KNX configuration
             // TODO: Add KNX configuration properties to Zone entity
             if (sourceProtocol != "KNX" && _config.Services.Knx.Enabled)
             {
-                syncTasks.Add(Task.Run(async () =>
-                {
-                    // TODO: Get KNX group address from zone configuration
-                    var groupAddress = "1/2/1"; // Placeholder
-                    var success = await _knxService.SendVolumeCommandAsync(groupAddress, volume, cancellationToken);
-                    return success ? Result.Success() : Result.Failure("KNX zone volume sync failed");
-                }, cancellationToken));
+                syncTasks.Add(
+                    Task.Run(
+                        async () =>
+                        {
+                            // TODO: Get KNX group address from zone configuration
+                            var groupAddress = "1/2/1"; // Placeholder
+                            var success = await _knxService.SendVolumeCommandAsync(
+                                groupAddress,
+                                volume,
+                                cancellationToken
+                            );
+                            return success ? Result.Success() : Result.Failure("KNX zone volume sync failed");
+                        },
+                        cancellationToken
+                    )
+                );
             }
 
             var results = await Task.WhenAll(syncTasks);
             var failures = results.Where(r => r.IsFailure).ToList();
 
-            return failures.Any() 
+            return failures.Any()
                 ? Result.Failure($"Partial sync failure: {failures.Count}/{results.Length} failed")
                 : Result.Success();
         }
@@ -352,7 +435,12 @@ public class ProtocolCoordinator : IProtocolCoordinator, IDisposable,
     /// <summary>
     /// Synchronizes a playback command across all connected protocols.
     /// </summary>
-    public async Task<Result> SynchronizePlaybackCommandAsync(string command, int? streamId, string sourceProtocol, CancellationToken cancellationToken = default)
+    public async Task<Result> SynchronizePlaybackCommandAsync(
+        string command,
+        int? streamId,
+        string sourceProtocol,
+        CancellationToken cancellationToken = default
+    )
     {
         if (_disposed || !_started)
             return Result.Failure("Protocol coordinator not started");
@@ -363,8 +451,12 @@ public class ProtocolCoordinator : IProtocolCoordinator, IDisposable,
             return Result.Success();
         }
 
-        _logger.LogInformation("Synchronizing playback command {Command} for stream {StreamId} from {Source}",
-            command, streamId, sourceProtocol);
+        _logger.LogInformation(
+            "Synchronizing playback command {Command} for stream {StreamId} from {Source}",
+            command,
+            streamId,
+            sourceProtocol
+        );
 
         try
         {
@@ -378,17 +470,22 @@ public class ProtocolCoordinator : IProtocolCoordinator, IDisposable,
                     "PLAY" => "playing",
                     "STOP" => "stopped",
                     "PAUSE" => "paused",
-                    _ => "unknown"
+                    _ => "unknown",
                 };
 
-                syncTasks.Add(Task.Run(async () =>
-                {
-                    // TODO: Implement PublishStreamStatusAsync method in MQTT service
-                    // await _mqttService.PublishStreamStatusAsync(streamId.Value, status, cancellationToken);
-                    await Task.CompletedTask;
-                    var success = true;
-                    return success ? Result.Success() : Result.Failure("MQTT playback sync failed");
-                }, cancellationToken));
+                syncTasks.Add(
+                    Task.Run(
+                        static async () =>
+                        {
+                            // TODO: Implement PublishStreamStatusAsync method in MQTT service
+                            // await _mqttService.PublishStreamStatusAsync(streamId.Value, status, cancellationToken);
+                            await Task.CompletedTask;
+                            var success = true;
+                            return success ? Result.Success() : Result.Failure("MQTT playback sync failed");
+                        },
+                        cancellationToken
+                    )
+                );
             }
 
             // Broadcast to KNX if there's a stream configuration with KNX playback address
@@ -399,9 +496,9 @@ public class ProtocolCoordinator : IProtocolCoordinator, IDisposable,
             }
 
             var results = await Task.WhenAll(syncTasks);
-            var failures = results.Where(r => r.IsFailure).ToList();
+            var failures = results.Where(static r => r.IsFailure).ToList();
 
-            return failures.Any() 
+            return failures.Any()
                 ? Result.Failure($"Partial sync failure: {failures.Count}/{results.Length} failed")
                 : Result.Success();
         }
@@ -415,7 +512,12 @@ public class ProtocolCoordinator : IProtocolCoordinator, IDisposable,
     /// <summary>
     /// Synchronizes a stream assignment change across all connected protocols.
     /// </summary>
-    public async Task<Result> SynchronizeStreamAssignmentAsync(string groupId, string streamId, string sourceProtocol, CancellationToken cancellationToken = default)
+    public async Task<Result> SynchronizeStreamAssignmentAsync(
+        string groupId,
+        string streamId,
+        string sourceProtocol,
+        CancellationToken cancellationToken = default
+    )
     {
         if (_disposed || !_started)
             return Result.Failure("Protocol coordinator not started");
@@ -426,8 +528,12 @@ public class ProtocolCoordinator : IProtocolCoordinator, IDisposable,
             return Result.Success();
         }
 
-        _logger.LogInformation("Synchronizing stream assignment for group {GroupId} to stream {StreamId} from {Source}",
-            groupId, streamId, sourceProtocol);
+        _logger.LogInformation(
+            "Synchronizing stream assignment for group {GroupId} to stream {StreamId} from {Source}",
+            groupId,
+            streamId,
+            sourceProtocol
+        );
 
         try
         {
@@ -436,17 +542,28 @@ public class ProtocolCoordinator : IProtocolCoordinator, IDisposable,
             // Sync to Snapcast if not the source
             if (sourceProtocol != "Snapcast" && _config.Services.Snapcast.Enabled)
             {
-                syncTasks.Add(Task.Run(async () =>
-                {
-                    var success = await _snapcastService.SetGroupStreamAsync(groupId, streamId, cancellationToken);
-                    return success ? Result.Success() : Result.Failure("Snapcast stream assignment sync failed");
-                }, cancellationToken));
+                syncTasks.Add(
+                    Task.Run(
+                        async () =>
+                        {
+                            var success = await _snapcastService.SetGroupStreamAsync(
+                                groupId,
+                                streamId,
+                                cancellationToken
+                            );
+                            return success
+                                ? Result.Success()
+                                : Result.Failure("Snapcast stream assignment sync failed");
+                        },
+                        cancellationToken
+                    )
+                );
             }
 
             var results = await Task.WhenAll(syncTasks);
             var failures = results.Where(r => r.IsFailure).ToList();
 
-            return failures.Any() 
+            return failures.Any()
                 ? Result.Failure($"Partial sync failure: {failures.Count}/{results.Length} failed")
                 : Result.Success();
         }
@@ -460,7 +577,12 @@ public class ProtocolCoordinator : IProtocolCoordinator, IDisposable,
     /// <summary>
     /// Synchronizes client connection status across all connected protocols.
     /// </summary>
-    public async Task<Result> SynchronizeClientStatusAsync(string clientId, bool connected, string sourceProtocol, CancellationToken cancellationToken = default)
+    public async Task<Result> SynchronizeClientStatusAsync(
+        string clientId,
+        bool connected,
+        string sourceProtocol,
+        CancellationToken cancellationToken = default
+    )
     {
         if (_disposed || !_started)
             return Result.Failure("Protocol coordinator not started");
@@ -471,8 +593,12 @@ public class ProtocolCoordinator : IProtocolCoordinator, IDisposable,
             return Result.Success();
         }
 
-        _logger.LogInformation("Synchronizing client status for {ClientId}: {Connected} from {Source}",
-            clientId, connected ? "connected" : "disconnected", sourceProtocol);
+        _logger.LogInformation(
+            "Synchronizing client status for {ClientId}: {Connected} from {Source}",
+            clientId,
+            connected ? "connected" : "disconnected",
+            sourceProtocol
+        );
 
         try
         {
@@ -481,20 +607,25 @@ public class ProtocolCoordinator : IProtocolCoordinator, IDisposable,
             // Sync to MQTT if not the source
             if (sourceProtocol != "MQTT" && _config.Services.Mqtt.Enabled)
             {
-                syncTasks.Add(Task.Run(async () =>
-                {
-                    // TODO: Implement PublishClientStatusAsync method in MQTT service
-                    // await _mqttService.PublishClientStatusAsync(clientId, connected, cancellationToken);
-                    await Task.CompletedTask;
-                    var success = true;
-                    return success ? Result.Success() : Result.Failure("MQTT client status sync failed");
-                }, cancellationToken));
+                syncTasks.Add(
+                    Task.Run(
+                        static async () =>
+                        {
+                            // TODO: Implement PublishClientStatusAsync method in MQTT service
+                            // await _mqttService.PublishClientStatusAsync(clientId, connected, cancellationToken);
+                            await Task.CompletedTask;
+                            var success = true;
+                            return success ? Result.Success() : Result.Failure("MQTT client status sync failed");
+                        },
+                        cancellationToken
+                    )
+                );
             }
 
             var results = await Task.WhenAll(syncTasks);
-            var failures = results.Where(r => r.IsFailure).ToList();
+            var failures = results.Where(static r => r.IsFailure).ToList();
 
-            return failures.Any() 
+            return failures.Any()
                 ? Result.Failure($"Partial sync failure: {failures.Count}/{results.Length} failed")
                 : Result.Success();
         }
@@ -571,7 +702,7 @@ public class ProtocolCoordinator : IProtocolCoordinator, IDisposable,
     {
         // Process KNX group value changes and sync to other protocols
         _logger.LogTrace("Processing KNX group value for address {Address}", notification.Address);
-        
+
         // This would require mapping KNX addresses to clients/zones - simplified for now
         // Implementation would lookup the client/zone associated with the KNX address
         // and then call the appropriate synchronization method
@@ -628,7 +759,7 @@ public class ProtocolCoordinator : IProtocolCoordinator, IDisposable,
     private bool ShouldSync(string syncKey)
     {
         var now = DateTime.UtcNow;
-        
+
         if (_lastSyncTimes.TryGetValue(syncKey, out var lastSync))
         {
             if (now - lastSync < _syncDebounceInterval)
@@ -662,7 +793,7 @@ public class ProtocolCoordinator : IProtocolCoordinator, IDisposable,
 
         _coordinationSemaphore?.Dispose();
         _disposed = true;
-        
+
         _logger.LogDebug("Protocol coordinator disposed");
         GC.SuppressFinalize(this);
     }

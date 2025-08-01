@@ -63,7 +63,6 @@ public static class ServiceCollectionExtensions
         }
 
         // Register health check implementations
-        services.AddTransient<DatabaseHealthCheck>();
         services.AddTransient<SnapcastServiceHealthCheck>();
         services.AddTransient<MqttServiceHealthCheck>();
         services.AddTransient<KnxServiceHealthCheck>();

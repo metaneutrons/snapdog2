@@ -456,7 +456,7 @@ public class StateExtensionsTests
         var clientsInZone = _testState.GetClientsInZone(zone.Id).ToList();
         Assert.Single(clientsInZone);
 
-        var connectedClientsInZone = clientsInZone.Where(c => c.IsConnected).ToList();
+        var connectedClientsInZone = clientsInZone.Where(static c => c.IsConnected).ToList();
         Assert.Single(connectedClientsInZone);
 
         var currentStream = _testState.GetCurrentStreamForZone(zone.Id);
@@ -475,7 +475,7 @@ public class StateExtensionsTests
         // Test various filtering scenarios
         var allStreams = _testState.AudioStreams.Values;
         var playingStreams = _testState.GetPlayingStreams().ToList();
-        var stoppedStreams = allStreams.Where(s => s.Status == StreamStatus.Stopped).ToList();
+        var stoppedStreams = allStreams.Where(static s => s.Status == StreamStatus.Stopped).ToList();
 
         Assert.Equal(2, allStreams.Count());
         Assert.Single(playingStreams);
@@ -483,7 +483,7 @@ public class StateExtensionsTests
 
         var allClients = _testState.Clients.Values;
         var connectedClients = _testState.GetConnectedClients().ToList();
-        var disconnectedClients = allClients.Where(c => !c.IsConnected).ToList();
+        var disconnectedClients = allClients.Where(static c => !c.IsConnected).ToList();
 
         Assert.Equal(2, allClients.Count());
         Assert.Single(connectedClients);

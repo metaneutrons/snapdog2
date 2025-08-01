@@ -21,7 +21,7 @@ public class ClientConfiguration : IEntityTypeConfiguration<Client>
         // Table configuration with check constraints
         builder.ToTable(
             "Clients",
-            t =>
+            static t =>
             {
                 t.HasCheckConstraint("CK_Clients_Volume", "Volume >= 0 AND Volume <= 100");
                 t.HasCheckConstraint("CK_Clients_LatencyMs", "LatencyMs IS NULL OR LatencyMs >= 0");
@@ -29,65 +29,65 @@ public class ClientConfiguration : IEntityTypeConfiguration<Client>
         );
 
         // Primary key
-        builder.HasKey(x => x.Id);
-        builder.Property(x => x.Id).HasMaxLength(100).IsRequired();
+        builder.HasKey(static x => x.Id);
+        builder.Property(static x => x.Id).HasMaxLength(100).IsRequired();
 
         // Required properties
-        builder.Property(x => x.Name).HasMaxLength(200).IsRequired();
+        builder.Property(static x => x.Name).HasMaxLength(200).IsRequired();
 
-        builder.Property(x => x.Volume).IsRequired();
+        builder.Property(static x => x.Volume).IsRequired();
 
         // MacAddress value object conversion
         builder
-            .Property(x => x.MacAddress)
-            .HasConversion(v => v.Value, v => new MacAddress(v))
+            .Property(static x => x.MacAddress)
+            .HasConversion(static v => v.Value, static v => new MacAddress(v))
             .HasColumnName("MacAddress")
             .HasMaxLength(17)
             .IsRequired();
 
         // IpAddress value object conversion
         builder
-            .Property(x => x.IpAddress)
-            .HasConversion(v => v.Value.ToString(), v => new IpAddress(v))
+            .Property(static x => x.IpAddress)
+            .HasConversion(static v => v.Value.ToString(), static v => new IpAddress(v))
             .HasColumnName("IpAddress")
             .HasMaxLength(45) // IPv6 max length
             .IsRequired();
 
         // Enum conversions
-        builder.Property(x => x.Status).HasConversion<string>().HasMaxLength(50).IsRequired();
+        builder.Property(static x => x.Status).HasConversion<string>().HasMaxLength(50).IsRequired();
 
         // Boolean properties
-        builder.Property(x => x.IsMuted).IsRequired().HasDefaultValue(false);
+        builder.Property(static x => x.IsMuted).IsRequired().HasDefaultValue(false);
 
         // Optional properties
-        builder.Property(x => x.ZoneId).HasMaxLength(100).IsRequired(false);
+        builder.Property(static x => x.ZoneId).HasMaxLength(100).IsRequired(false);
 
-        builder.Property(x => x.Description).HasMaxLength(1000).IsRequired(false);
+        builder.Property(static x => x.Description).HasMaxLength(1000).IsRequired(false);
 
-        builder.Property(x => x.Location).HasMaxLength(200).IsRequired(false);
+        builder.Property(static x => x.Location).HasMaxLength(200).IsRequired(false);
 
-        builder.Property(x => x.LatencyMs).IsRequired(false);
+        builder.Property(static x => x.LatencyMs).IsRequired(false);
 
-        builder.Property(x => x.LastSeen).IsRequired(false);
+        builder.Property(static x => x.LastSeen).IsRequired(false);
 
         // Timestamp properties
-        builder.Property(x => x.CreatedAt).IsRequired().HasDefaultValueSql("CURRENT_TIMESTAMP");
+        builder.Property(static x => x.CreatedAt).IsRequired().HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-        builder.Property(x => x.UpdatedAt).IsRequired(false);
+        builder.Property(static x => x.UpdatedAt).IsRequired(false);
 
         // Indexes for performance
-        builder.HasIndex(x => x.Name).HasDatabaseName("IX_Clients_Name");
+        builder.HasIndex(static x => x.Name).HasDatabaseName("IX_Clients_Name");
 
-        builder.HasIndex(x => x.MacAddress).IsUnique().HasDatabaseName("IX_Clients_MacAddress");
+        builder.HasIndex(static x => x.MacAddress).IsUnique().HasDatabaseName("IX_Clients_MacAddress");
 
-        builder.HasIndex(x => x.IpAddress).HasDatabaseName("IX_Clients_IpAddress");
+        builder.HasIndex(static x => x.IpAddress).HasDatabaseName("IX_Clients_IpAddress");
 
-        builder.HasIndex(x => x.Status).HasDatabaseName("IX_Clients_Status");
+        builder.HasIndex(static x => x.Status).HasDatabaseName("IX_Clients_Status");
 
-        builder.HasIndex(x => x.ZoneId).HasDatabaseName("IX_Clients_ZoneId");
+        builder.HasIndex(static x => x.ZoneId).HasDatabaseName("IX_Clients_ZoneId");
 
-        builder.HasIndex(x => x.CreatedAt).HasDatabaseName("IX_Clients_CreatedAt");
+        builder.HasIndex(static x => x.CreatedAt).HasDatabaseName("IX_Clients_CreatedAt");
 
-        builder.HasIndex(x => x.LastSeen).HasDatabaseName("IX_Clients_LastSeen");
+        builder.HasIndex(static x => x.LastSeen).HasDatabaseName("IX_Clients_LastSeen");
     }
 }

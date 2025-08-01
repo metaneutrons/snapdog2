@@ -40,7 +40,7 @@ public class SnapcastServiceIntegrationTests : IDisposable
         };
 
         _mockOptions = new Mock<IOptions<SnapDog2.Core.Configuration.SnapcastConfiguration>>();
-        _mockOptions.Setup(x => x.Value).Returns(snapcastConfig);
+        _mockOptions.Setup(static x => x.Value).Returns(snapcastConfig);
 
         services.AddSingleton(_mockOptions.Object);
         services.AddSingleton(mockMediator.Object);
@@ -69,11 +69,13 @@ public class SnapcastServiceIntegrationTests : IDisposable
 
         // Verify logging
         _mockLogger.Verify(
-            x =>
+            static x =>
                 x.Log(
                     LogLevel.Warning,
                     It.IsAny<EventId>(),
-                    It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Snapcast server availability check failed")),
+                    It.Is<It.IsAnyType>(
+                        static (v, t) => v.ToString()!.Contains("Snapcast server availability check failed")
+                    ),
                     It.IsAny<Exception>(),
                     It.IsAny<Func<It.IsAnyType, Exception?, string>>()
                 ),
@@ -157,14 +159,18 @@ public class SnapcastServiceIntegrationTests : IDisposable
     public void Constructor_WithNullConfiguration_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new SnapcastService(null!, _mockLogger.Object, new Mock<MediatR.IMediator>().Object));
+        Assert.Throws<ArgumentNullException>(
+            () => new SnapcastService(null!, _mockLogger.Object, new Mock<MediatR.IMediator>().Object)
+        );
     }
 
     [Fact]
     public void Constructor_WithNullLogger_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new SnapcastService(_mockOptions.Object, null!, new Mock<MediatR.IMediator>().Object));
+        Assert.Throws<ArgumentNullException>(
+            () => new SnapcastService(_mockOptions.Object, null!, new Mock<MediatR.IMediator>().Object)
+        );
     }
 
     [Fact]
@@ -228,7 +234,7 @@ public class SnapcastServiceIntegrationTests : IDisposable
             TimeoutSeconds = 1,
         };
         var mockOptions = new Mock<IOptions<SnapDog2.Core.Configuration.SnapcastConfiguration>>();
-        mockOptions.Setup(x => x.Value).Returns(config);
+        mockOptions.Setup(static x => x.Value).Returns(config);
 
         var service = new SnapcastService(mockOptions.Object, _mockLogger.Object, new Mock<MediatR.IMediator>().Object);
 

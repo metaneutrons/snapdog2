@@ -8,7 +8,6 @@ namespace SnapDog2.Core.Configuration;
 ///
 /// Examples:
 /// - SNAPDOG_API_PORT → Port
-/// - SNAPDOG_API_HTTPS_ENABLED → HttpsEnabled
 /// - SNAPDOG_API_AUTH_ENABLED → AuthEnabled
 /// - SNAPDOG_API_APIKEY_1 → ApiKeys[0]
 /// </summary>
@@ -35,20 +34,6 @@ public class ApiConfiguration
     /// </summary>
     [Env(Key = "PORT", Default = 5000)]
     public int Port { get; set; } = 5000;
-
-    /// <summary>
-    /// Gets or sets whether HTTPS is enabled.
-    /// Maps to: SNAPDOG_API_HTTPS_ENABLED
-    /// </summary>
-    [Env(Key = "HTTPS_ENABLED", Default = false)]
-    public bool HttpsEnabled { get; set; } = false;
-
-    /// <summary>
-    /// Gets or sets the HTTPS port.
-    /// Maps to: SNAPDOG_API_HTTPS_PORT
-    /// </summary>
-    [Env(Key = "HTTPS_PORT", Default = 5001)]
-    public int HttpsPort { get; set; } = 5001;
 
     /// <summary>
     /// Gets or sets the SSL certificate path.

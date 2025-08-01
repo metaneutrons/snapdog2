@@ -37,7 +37,7 @@ public class SnapcastServiceEnhancedTests : IDisposable
         _mockLogger = new Mock<ILogger<SnapcastService>>();
         _responseStream = new MemoryStream();
         _writeStream = new MemoryStream();
-        
+
         _config = new SnapcastConfiguration
         {
             Enabled = true,
@@ -46,21 +46,30 @@ public class SnapcastServiceEnhancedTests : IDisposable
             AutoReconnect = true,
             ReconnectDelaySeconds = 5,
             TimeoutSeconds = 10,
-            MaxReconnectAttempts = 3
+            MaxReconnectAttempts = 3,
         };
 
         // Setup network stream mocks
         _mockNetworkStream.Setup(x => x.CanRead).Returns(true);
         _mockNetworkStream.Setup(x => x.CanWrite).Returns(true);
-        _mockNetworkStream.Setup(x => x.ReadAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .Returns<byte[], int, int, CancellationToken>((buffer, offset, count, ct) => 
-                _responseStream.ReadAsync(buffer, offset, count, ct));
-        _mockNetworkStream.Setup(x => x.WriteAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .Returns<byte[], int, int, CancellationToken>((buffer, offset, count, ct) =>
-            {
-                _writeStream.Write(buffer, offset, count);
-                return Task.CompletedTask;
-            });
+        _mockNetworkStream
+            .Setup(x =>
+                x.ReadAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>())
+            )
+            .Returns<byte[], int, int, CancellationToken>(
+                (buffer, offset, count, ct) => _responseStream.ReadAsync(buffer, offset, count, ct)
+            );
+        _mockNetworkStream
+            .Setup(x =>
+                x.WriteAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>())
+            )
+            .Returns<byte[], int, int, CancellationToken>(
+                (buffer, offset, count, ct) =>
+                {
+                    _writeStream.Write(buffer, offset, count);
+                    return Task.CompletedTask;
+                }
+            );
 
         _mockTcpClient.Setup(x => x.GetStream()).Returns(_mockNetworkStream.Object);
         _mockTcpClient.Setup(x => x.Connected).Returns(true);
@@ -88,7 +97,7 @@ public class SnapcastServiceEnhancedTests : IDisposable
     public async Task IsServerAvailableAsync_WithDisconnectedClient_ShouldReturnFalse()
     {
         // Arrange
-        _mockTcpClient.Setup(x => x.Connected).Returns(false);
+        _mockTcpClient.Setup(static x => x.Connected).Returns(false);
 
         // Act
         var result = await _snapcastService.IsServerAvailableAsync();
@@ -142,8 +151,7 @@ public class SnapcastServiceEnhancedTests : IDisposable
 
         // Act & Assert
         var act = () => _snapcastService.GetServerStatusAsync(new CancellationToken());
-        await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*Method not found*");
+        await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*Method not found*");
     }
 
     [Fact]
@@ -190,8 +198,7 @@ public class SnapcastServiceEnhancedTests : IDisposable
 
         // Act & Assert
         var act = () => _snapcastService.SetClientVolumeAsync(clientId, invalidVolume);
-        await act.Should().ThrowAsync<ArgumentOutOfRangeException>()
-            .WithMessage("*volume*");
+        await act.Should().ThrowAsync<ArgumentOutOfRangeException>().WithMessage("*volume*");
     }
 
     [Theory]
@@ -201,8 +208,7 @@ public class SnapcastServiceEnhancedTests : IDisposable
     {
         // Act & Assert
         var act = () => _snapcastService.SetClientVolumeAsync(invalidClientId, 50);
-        await act.Should().ThrowAsync<ArgumentException>()
-            .WithMessage("*clientId*");
+        await act.Should().ThrowAsync<ArgumentException>().WithMessage("*clientId*");
     }
 
     [Fact]
@@ -221,7 +227,6 @@ public class SnapcastServiceEnhancedTests : IDisposable
         result.Should().BeTrue();
         VerifyRpcRequestSent("Client.SetVolume", new { id = clientId, volume = new { muted = muted } });
     }
-
 
     #endregion
 
@@ -243,7 +248,6 @@ public class SnapcastServiceEnhancedTests : IDisposable
         result.Should().BeTrue();
         VerifyRpcRequestSent("Group.SetStream", new { id = groupId, streamId = streamId });
     }
-
 
     [Fact]
     public async Task GetGroupsAsync_WithValidServer_ShouldReturnGroups()
@@ -276,9 +280,10 @@ public class SnapcastServiceEnhancedTests : IDisposable
         await _snapcastService.SynchronizeServerStateAsync();
 
         // Assert
-        _mockMediator.Verify(x => x.Publish(
-            It.IsAny<SnapcastStateSynchronizedEvent>(),
-            It.IsAny<CancellationToken>()), Times.Once);
+        _mockMediator.Verify(
+            static x => x.Publish(It.IsAny<SnapcastStateSynchronizedEvent>(), It.IsAny<CancellationToken>()),
+            Times.Once
+        );
         VerifyRpcRequestSent("Server.GetStatus");
     }
 
@@ -293,10 +298,11 @@ public class SnapcastServiceEnhancedTests : IDisposable
         await _snapcastService.SynchronizeServerStateAsync();
 
         // Assert
-        _mockMediator.Verify(x => x.Publish(
-            It.IsAny<SnapcastStateSynchronizedEvent>(),
-            It.IsAny<CancellationToken>()), Times.Once);
-        
+        _mockMediator.Verify(
+            static x => x.Publish(It.IsAny<SnapcastStateSynchronizedEvent>(), It.IsAny<CancellationToken>()),
+            Times.Once
+        );
+
         // Should log information about synchronized clients
         VerifyLoggerInfo("Synchronized server state");
     }
@@ -322,7 +328,10 @@ public class SnapcastServiceEnhancedTests : IDisposable
     public async Task GetServerStatusAsync_WithNetworkFailure_ShouldRetryAndEventuallyFail()
     {
         // Arrange
-        _mockNetworkStream.Setup(x => x.WriteAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+        _mockNetworkStream
+            .Setup(x =>
+                x.WriteAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>())
+            )
             .ThrowsAsync(new IOException("Network failure"));
 
         // Act & Assert
@@ -336,7 +345,10 @@ public class SnapcastServiceEnhancedTests : IDisposable
     public async Task ListenForEventsAsync_WithStreamInterruption_ShouldHandleGracefully()
     {
         // Arrange
-        _mockNetworkStream.Setup(x => x.ReadAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+        _mockNetworkStream
+            .Setup(static x =>
+                x.ReadAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>())
+            )
             .ThrowsAsync(new IOException("Stream interrupted"));
 
         // Act
@@ -353,8 +365,11 @@ public class SnapcastServiceEnhancedTests : IDisposable
         // Arrange
         var clientId = "timeout-client";
         var volume = 50;
-        
-        _mockNetworkStream.Setup(x => x.WriteAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+
+        _mockNetworkStream
+            .Setup(static x =>
+                x.WriteAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>())
+            )
             .Returns(Task.Delay(TimeSpan.FromSeconds(_config.TimeoutSeconds + 1)));
 
         // Act
@@ -364,7 +379,6 @@ public class SnapcastServiceEnhancedTests : IDisposable
         result.Should().BeFalse();
         VerifyLoggerError("Request timeout");
     }
-
 
     #endregion
 
@@ -376,7 +390,7 @@ public class SnapcastServiceEnhancedTests : IDisposable
         // Arrange
         const int eventCount = 1000;
         var events = new List<string>();
-        
+
         for (int i = 0; i < eventCount; i++)
         {
             events.Add(CreateVolumeChangeNotification($"client{i % 10}", i % 101, i % 2 == 0));
@@ -395,8 +409,10 @@ public class SnapcastServiceEnhancedTests : IDisposable
 
         // Assert
         stopwatch.ElapsedMilliseconds.Should().BeLessThan(5000);
-        _mockMediator.Verify(x => x.Publish(It.IsAny<INotification>(), It.IsAny<CancellationToken>()), 
-            Times.AtLeast(eventCount / 2)); // Allow for some processing variance
+        _mockMediator.Verify(
+            x => x.Publish(It.IsAny<INotification>(), It.IsAny<CancellationToken>()),
+            Times.AtLeast(eventCount / 2)
+        ); // Allow for some processing variance
     }
 
     [Fact]
@@ -420,9 +436,12 @@ public class SnapcastServiceEnhancedTests : IDisposable
         var results = await Task.WhenAll(tasks);
 
         // Assert
-        results.Should().AllSatisfy(result => result.Should().BeTrue());
-        _mockNetworkStream.Verify(x => x.WriteAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), 
-            Times.Exactly(requestCount));
+        results.Should().AllSatisfy(static result => result.Should().BeTrue());
+        _mockNetworkStream.Verify(
+            static x =>
+                x.WriteAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()),
+            Times.Exactly(requestCount)
+        );
     }
 
     #endregion
@@ -448,16 +467,21 @@ public class SnapcastServiceEnhancedTests : IDisposable
     private void SetupContinuousEventStream(string repeatingEvent)
     {
         var eventBytes = Encoding.UTF8.GetBytes(repeatingEvent + "\n");
-        _mockNetworkStream.Setup(x => x.ReadAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .Returns<byte[], int, int, CancellationToken>((buffer, offset, count, ct) =>
-            {
-                if (ct.IsCancellationRequested)
-                    return Task.FromCanceled<int>(ct);
-                
-                var bytesToCopy = Math.Min(count, eventBytes.Length);
-                Array.Copy(eventBytes, 0, buffer, offset, bytesToCopy);
-                return Task.FromResult(bytesToCopy);
-            });
+        _mockNetworkStream
+            .Setup(x =>
+                x.ReadAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>())
+            )
+            .Returns<byte[], int, int, CancellationToken>(
+                (buffer, offset, count, ct) =>
+                {
+                    if (ct.IsCancellationRequested)
+                        return Task.FromCanceled<int>(ct);
+
+                    var bytesToCopy = Math.Min(count, eventBytes.Length);
+                    Array.Copy(eventBytes, 0, buffer, offset, bytesToCopy);
+                    return Task.FromResult(bytesToCopy);
+                }
+            );
     }
 
     private void SetupSuccessfulServerStatusResponse()
@@ -468,164 +492,204 @@ public class SnapcastServiceEnhancedTests : IDisposable
 
     private string CreateSuccessResponse()
     {
-        return JsonSerializer.Serialize(new { jsonrpc = "2.0", id = 1, result = new { } });
+        return JsonSerializer.Serialize(
+            new
+            {
+                jsonrpc = "2.0",
+                id = 1,
+                result = new { },
+            }
+        );
     }
 
     private string CreateErrorResponse(int code, string message)
     {
-        return JsonSerializer.Serialize(new 
-        { 
-            jsonrpc = "2.0", 
-            id = 1, 
-            error = new { code = code, message = message } 
-        });
+        return JsonSerializer.Serialize(
+            new
+            {
+                jsonrpc = "2.0",
+                id = 1,
+                error = new { code = code, message = message },
+            }
+        );
     }
 
     private string CreateServerStatusResponse()
     {
-        return JsonSerializer.Serialize(new
-        {
-            jsonrpc = "2.0",
-            id = 1,
-            result = new
+        return JsonSerializer.Serialize(
+            new
             {
-                server = new
+                jsonrpc = "2.0",
+                id = 1,
+                result = new
                 {
-                    host = new { arch = "x86_64", ip = "127.0.0.1", mac = "00:11:22:33:44:55", name = "TestHost", os = "Linux" },
-                    snapserver = new { name = "Snapserver", version = "0.26.0" }
-                },
-                groups = new[]
-                {
-                    new
+                    server = new
                     {
-                        id = "group1",
-                        name = "Test Group",
-                        stream_id = "stream1",
-                        muted = false,
-                        clients = new[]
+                        host = new
                         {
-                            new
+                            arch = "x86_64",
+                            ip = "127.0.0.1",
+                            mac = "00:11:22:33:44:55",
+                            name = "TestHost",
+                            os = "Linux",
+                        },
+                        snapserver = new { name = "Snapserver", version = "0.26.0" },
+                    },
+                    groups = new[]
+                    {
+                        new
+                        {
+                            id = "group1",
+                            name = "Test Group",
+                            stream_id = "stream1",
+                            muted = false,
+                            clients = new[]
                             {
-                                id = "client1",
-                                host = new { name = "TestClient", ip = "192.168.1.100" },
-                                config = new { name = "Living Room", volume = new { percent = 75, muted = false } },
-                                connected = true
-                            }
-                        }
-                    }
-                }
+                                new
+                                {
+                                    id = "client1",
+                                    host = new { name = "TestClient", ip = "192.168.1.100" },
+                                    config = new { name = "Living Room", volume = new { percent = 75, muted = false } },
+                                    connected = true,
+                                },
+                            },
+                        },
+                    },
+                },
             }
-        });
+        );
     }
 
     private string CreateServerStatusWithMultipleClients()
     {
-        return JsonSerializer.Serialize(new
-        {
-            jsonrpc = "2.0",
-            id = 1,
-            result = new
+        return JsonSerializer.Serialize(
+            new
             {
-                server = new { },
-                groups = new[]
+                jsonrpc = "2.0",
+                id = 1,
+                result = new
                 {
-                    new
+                    server = new { },
+                    groups = new[]
                     {
-                        id = "group1",
-                        clients = new[]
+                        new
                         {
-                            new { id = "client1", connected = true, config = new { volume = new { percent = 75, muted = false } } },
-                            new { id = "client2", connected = true, config = new { volume = new { percent = 80, muted = true } } },
-                            new { id = "client3", connected = false, config = new { volume = new { percent = 60, muted = false } } }
-                        }
-                    }
-                }
+                            id = "group1",
+                            clients = new[]
+                            {
+                                new
+                                {
+                                    id = "client1",
+                                    connected = true,
+                                    config = new { volume = new { percent = 75, muted = false } },
+                                },
+                                new
+                                {
+                                    id = "client2",
+                                    connected = true,
+                                    config = new { volume = new { percent = 80, muted = true } },
+                                },
+                                new
+                                {
+                                    id = "client3",
+                                    connected = false,
+                                    config = new { volume = new { percent = 60, muted = false } },
+                                },
+                            },
+                        },
+                    },
+                },
             }
-        });
+        );
     }
 
     private string CreateClientVolumeResponse(int volume, bool muted)
     {
-        return JsonSerializer.Serialize(new
-        {
-            jsonrpc = "2.0",
-            id = 1,
-            result = new
+        return JsonSerializer.Serialize(
+            new
             {
-                client = new
-                {
-                    config = new { volume = new { percent = volume, muted = muted } }
-                }
+                jsonrpc = "2.0",
+                id = 1,
+                result = new { client = new { config = new { volume = new { percent = volume, muted = muted } } } },
             }
-        });
+        );
     }
 
     private string CreateGroupsResponse()
     {
-        return JsonSerializer.Serialize(new
-        {
-            jsonrpc = "2.0",
-            id = 1,
-            result = new
+        return JsonSerializer.Serialize(
+            new
             {
-                groups = new[]
+                jsonrpc = "2.0",
+                id = 1,
+                result = new
                 {
-                    new { id = "group1", name = "Group 1", stream_id = "stream1" },
-                    new { id = "group2", name = "Group 2", stream_id = "stream2" }
-                }
+                    groups = new[]
+                    {
+                        new
+                        {
+                            id = "group1",
+                            name = "Group 1",
+                            stream_id = "stream1",
+                        },
+                        new
+                        {
+                            id = "group2",
+                            name = "Group 2",
+                            stream_id = "stream2",
+                        },
+                    },
+                },
             }
-        });
+        );
     }
 
     private string CreateVolumeChangeNotification(string clientId, int volume, bool muted)
     {
-        return JsonSerializer.Serialize(new
-        {
-            jsonrpc = "2.0",
-            method = "Client.OnVolumeChanged",
-            @params = new
+        return JsonSerializer.Serialize(
+            new
             {
-                id = clientId,
-                volume = new { percent = volume, muted = muted }
+                jsonrpc = "2.0",
+                method = "Client.OnVolumeChanged",
+                @params = new { id = clientId, volume = new { percent = volume, muted = muted } },
             }
-        });
+        );
     }
 
     private string CreateClientConnectionNotification(string clientId, bool connected)
     {
-        return JsonSerializer.Serialize(new
-        {
-            jsonrpc = "2.0",
-            method = connected ? "Client.OnConnect" : "Client.OnDisconnect",
-            @params = new
+        return JsonSerializer.Serialize(
+            new
             {
-                client = new { id = clientId }
+                jsonrpc = "2.0",
+                method = connected ? "Client.OnConnect" : "Client.OnDisconnect",
+                @params = new { client = new { id = clientId } },
             }
-        });
+        );
     }
 
     private string CreateStreamChangeNotification(string groupId, string streamId)
     {
-        return JsonSerializer.Serialize(new
-        {
-            jsonrpc = "2.0",
-            method = "Group.OnStreamChanged",
-            @params = new
+        return JsonSerializer.Serialize(
+            new
             {
-                id = groupId,
-                stream_id = streamId
+                jsonrpc = "2.0",
+                method = "Group.OnStreamChanged",
+                @params = new { id = groupId, stream_id = streamId },
             }
-        });
+        );
     }
 
     private string CreateUnknownNotification()
     {
-        return JsonSerializer.Serialize(new
-        {
-            jsonrpc = "2.0",
-            method = "Unknown.Method",
-            @params = new { }
-        });
+        return JsonSerializer.Serialize(
+            new
+            {
+                jsonrpc = "2.0",
+                method = "Unknown.Method",
+                @params = new { },
+            }
+        );
     }
 
     private void VerifyRpcRequestSent(string method, object? parameters = null)
@@ -646,37 +710,46 @@ public class SnapcastServiceEnhancedTests : IDisposable
     private void VerifyLoggerError(string expectedMessage)
     {
         _mockLogger.Verify(
-            x => x.Log(
-                LogLevel.Error,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains(expectedMessage)),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
-            Times.AtLeastOnce);
+            x =>
+                x.Log(
+                    LogLevel.Error,
+                    It.IsAny<EventId>(),
+                    It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains(expectedMessage)),
+                    It.IsAny<Exception>(),
+                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()
+                ),
+            Times.AtLeastOnce
+        );
     }
 
     private void VerifyLoggerWarning(string expectedMessage)
     {
         _mockLogger.Verify(
-            x => x.Log(
-                LogLevel.Warning,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains(expectedMessage)),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
-            Times.AtLeastOnce);
+            x =>
+                x.Log(
+                    LogLevel.Warning,
+                    It.IsAny<EventId>(),
+                    It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains(expectedMessage)),
+                    It.IsAny<Exception>(),
+                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()
+                ),
+            Times.AtLeastOnce
+        );
     }
 
     private void VerifyLoggerInfo(string expectedMessage)
     {
         _mockLogger.Verify(
-            x => x.Log(
-                LogLevel.Information,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains(expectedMessage)),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
-            Times.AtLeastOnce);
+            x =>
+                x.Log(
+                    LogLevel.Information,
+                    It.IsAny<EventId>(),
+                    It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains(expectedMessage)),
+                    It.IsAny<Exception>(),
+                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()
+                ),
+            Times.AtLeastOnce
+        );
     }
 
     #endregion

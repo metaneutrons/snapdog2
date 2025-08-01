@@ -1,15 +1,15 @@
+using System.Collections.Immutable;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using System.Security.Cryptography;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Polly;
 using SnapDog2.Core.Configuration;
+using SnapDog2.Core.Events;
 using SnapDog2.Core.Models.Entities;
 using SnapDog2.Infrastructure.Resilience;
-using MediatR;
-using SnapDog2.Core.Events;
-using System.Collections.Immutable;
 
 namespace SnapDog2.Infrastructure.Services;
 
@@ -41,12 +41,13 @@ public class SubsonicService : ISubsonicService, IDisposable
         IOptions<SubsonicConfiguration> config,
         ILogger<SubsonicService> logger,
         IMediator mediator,
-        IHttpClientFactory httpClientFactory)
+        IHttpClientFactory httpClientFactory
+    )
     {
         _config = config?.Value ?? throw new ArgumentNullException(nameof(config));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
-        
+
         _httpClient = httpClientFactory.CreateClient(nameof(SubsonicService));
         _httpClient.BaseAddress = new Uri(_config.ServerUrl);
         _httpClient.Timeout = TimeSpan.FromSeconds(_config.TimeoutSeconds);
@@ -62,7 +63,7 @@ public class SubsonicService : ISubsonicService, IDisposable
         _jsonOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            PropertyNameCaseInsensitive = true
+            PropertyNameCaseInsensitive = true,
         };
 
         _logger.LogDebug("Subsonic service initialized for server {ServerUrl}", _config.ServerUrl);
@@ -87,7 +88,7 @@ public class SubsonicService : ISubsonicService, IDisposable
 
             var isAvailable = response.IsSuccessStatusCode;
             _logger.LogDebug("Subsonic server availability check result: {IsAvailable}", isAvailable);
-            
+
             return isAvailable;
         }
         catch (Exception ex)
@@ -119,12 +120,12 @@ public class SubsonicService : ISubsonicService, IDisposable
                 _logger.LogInformation("Authenticating with Subsonic server {ServerUrl}", _config.ServerUrl);
 
                 var response = await _httpClient.GetAsync("/rest/ping.view" + GetAuthParameters(), cancellationToken);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync(cancellationToken);
                     var subsonicResponse = JsonSerializer.Deserialize<SubsonicResponse>(content, _jsonOptions);
-                    
+
                     if (subsonicResponse?.Response?.Status == "ok")
                     {
                         _authenticated = true;
@@ -161,18 +162,19 @@ public class SubsonicService : ISubsonicService, IDisposable
         {
             _logger.LogDebug("Retrieving playlists from Subsonic server");
 
-            var response = await _httpClient.GetAsync("/rest/getPlaylists.view" + GetAuthParameters(), cancellationToken);
-            
+            var response = await _httpClient.GetAsync(
+                "/rest/getPlaylists.view" + GetAuthParameters(),
+                cancellationToken
+            );
+
             if (response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync(cancellationToken);
                 var subsonicResponse = JsonSerializer.Deserialize<SubsonicPlaylistsResponse>(content, _jsonOptions);
-                
+
                 if (subsonicResponse?.Response?.Playlists?.Playlist != null)
                 {
-                    var playlists = subsonicResponse.Response.Playlists.Playlist
-                        .Select(ConvertToPlaylist)
-                        .ToList();
+                    var playlists = subsonicResponse.Response.Playlists.Playlist.Select(ConvertToPlaylist).ToList();
 
                     _logger.LogDebug("Retrieved {PlaylistCount} playlists from Subsonic server", playlists.Count);
                     return playlists;
@@ -204,13 +206,16 @@ public class SubsonicService : ISubsonicService, IDisposable
         {
             _logger.LogDebug("Retrieving playlist {PlaylistId} from Subsonic server", playlistId);
 
-            var response = await _httpClient.GetAsync($"/rest/getPlaylist.view?id={playlistId}" + GetAuthParameters(), cancellationToken);
-            
+            var response = await _httpClient.GetAsync(
+                $"/rest/getPlaylist.view?id={playlistId}" + GetAuthParameters(),
+                cancellationToken
+            );
+
             if (response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync(cancellationToken);
                 var subsonicResponse = JsonSerializer.Deserialize<SubsonicPlaylistResponse>(content, _jsonOptions);
-                
+
                 if (subsonicResponse?.Response?.Playlist != null)
                 {
                     var playlist = ConvertToPlaylist(subsonicResponse.Response.Playlist);
@@ -227,11 +232,15 @@ public class SubsonicService : ISubsonicService, IDisposable
     /// <summary>
     /// Retrieves tracks for a specific playlist.
     /// </summary>
-    public async Task<IEnumerable<Track>> GetPlaylistTracksAsync(string playlistId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Track>> GetPlaylistTracksAsync(
+        string playlistId,
+        CancellationToken cancellationToken = default
+    )
     {
         var playlist = await GetPlaylistAsync(playlistId, cancellationToken);
-        if (playlist == null) return Enumerable.Empty<Track>();
-        
+        if (playlist == null)
+            return Enumerable.Empty<Track>();
+
         // Note: This implementation returns track IDs only. Full track objects would need to be fetched separately.
         return Enumerable.Empty<Track>();
     }
@@ -257,18 +266,19 @@ public class SubsonicService : ISubsonicService, IDisposable
             _logger.LogDebug("Searching Subsonic server for: {Query}", query);
 
             var encodedQuery = Uri.EscapeDataString(query);
-            var response = await _httpClient.GetAsync($"/rest/search3.view?query={encodedQuery}" + GetAuthParameters(), cancellationToken);
-            
+            var response = await _httpClient.GetAsync(
+                $"/rest/search3.view?query={encodedQuery}" + GetAuthParameters(),
+                cancellationToken
+            );
+
             if (response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync(cancellationToken);
                 var subsonicResponse = JsonSerializer.Deserialize<SubsonicSearchResponse>(content, _jsonOptions);
-                
+
                 if (subsonicResponse?.Response?.SearchResult3?.Song != null)
                 {
-                    var tracks = subsonicResponse.Response.SearchResult3.Song
-                        .Select(ConvertToTrack)
-                        .ToList();
+                    var tracks = subsonicResponse.Response.SearchResult3.Song.Select(ConvertToTrack).ToList();
 
                     _logger.LogDebug("Found {TrackCount} tracks for query: {Query}", tracks.Count, query);
                     return tracks;
@@ -283,7 +293,11 @@ public class SubsonicService : ISubsonicService, IDisposable
     /// <summary>
     /// Gets the streaming URL for a specific track.
     /// </summary>
-    public async Task<string?> GetStreamUrlAsync(string trackId, int? maxBitRate = null, CancellationToken cancellationToken = default)
+    public async Task<string?> GetStreamUrlAsync(
+        string trackId,
+        int? maxBitRate = null,
+        CancellationToken cancellationToken = default
+    )
     {
         if (_disposed)
             throw new ObjectDisposedException(nameof(SubsonicService));
@@ -301,9 +315,9 @@ public class SubsonicService : ISubsonicService, IDisposable
             var baseUrl = _config.ServerUrl.TrimEnd('/');
             var authParams = GetAuthParameters();
             var bitrateParam = maxBitRate.HasValue ? $"&maxBitRate={maxBitRate}" : "";
-            
+
             var streamUrl = $"{baseUrl}/rest/stream.view?id={trackId}{authParams}{bitrateParam}";
-            
+
             _logger.LogDebug("Generated stream URL for track {TrackId}", trackId);
             return streamUrl;
         }
@@ -317,7 +331,11 @@ public class SubsonicService : ISubsonicService, IDisposable
     /// <summary>
     /// Gets a stream for a specific track.
     /// </summary>
-    public async Task<Stream?> GetTrackStreamAsync(string trackId, int? maxBitRate = null, CancellationToken cancellationToken = default)
+    public async Task<Stream?> GetTrackStreamAsync(
+        string trackId,
+        int? maxBitRate = null,
+        CancellationToken cancellationToken = default
+    )
     {
         if (_disposed)
             throw new ObjectDisposedException(nameof(SubsonicService));
@@ -332,17 +350,20 @@ public class SubsonicService : ISubsonicService, IDisposable
             _logger.LogDebug("Getting stream for track {TrackId}", trackId);
 
             var bitrateParam = maxBitRate.HasValue ? $"&maxBitRate={maxBitRate}" : "";
-            var response = await _httpClient.GetAsync($"/rest/stream.view?id={trackId}{GetAuthParameters()}{bitrateParam}", 
-                HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-            
+            var response = await _httpClient.GetAsync(
+                $"/rest/stream.view?id={trackId}{GetAuthParameters()}{bitrateParam}",
+                HttpCompletionOption.ResponseHeadersRead,
+                cancellationToken
+            );
+
             if (response.IsSuccessStatusCode)
             {
                 var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
                 _logger.LogDebug("Successfully retrieved stream for track {TrackId}", trackId);
-                
+
                 // Publish streaming event
                 await _mediator.Publish(new SubsonicTrackStreamedEvent(trackId), cancellationToken);
-                
+
                 return stream;
             }
 
@@ -354,7 +375,11 @@ public class SubsonicService : ISubsonicService, IDisposable
     /// <summary>
     /// Creates a new playlist on the Subsonic server.
     /// </summary>
-    public async Task<Playlist?> CreatePlaylistAsync(string name, IEnumerable<string>? trackIds = null, CancellationToken cancellationToken = default)
+    public async Task<Playlist?> CreatePlaylistAsync(
+        string name,
+        IEnumerable<string>? trackIds = null,
+        CancellationToken cancellationToken = default
+    )
     {
         if (_disposed)
             throw new ObjectDisposedException(nameof(SubsonicService));
@@ -373,20 +398,26 @@ public class SubsonicService : ISubsonicService, IDisposable
 
             var encodedName = Uri.EscapeDataString(name);
             var trackIdsParam = trackIds != null ? $"&songId={string.Join("&songId=", trackIds)}" : "";
-            
-            var response = await _httpClient.GetAsync($"/rest/createPlaylist.view?name={encodedName}{trackIdsParam}" + GetAuthParameters(), cancellationToken);
-            
+
+            var response = await _httpClient.GetAsync(
+                $"/rest/createPlaylist.view?name={encodedName}{trackIdsParam}" + GetAuthParameters(),
+                cancellationToken
+            );
+
             if (response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync(cancellationToken);
                 var subsonicResponse = JsonSerializer.Deserialize<SubsonicPlaylistResponse>(content, _jsonOptions);
-                
+
                 if (subsonicResponse?.Response?.Playlist != null)
                 {
                     var playlist = ConvertToPlaylist(subsonicResponse.Response.Playlist);
                     _logger.LogDebug("Successfully created playlist {PlaylistName}", name);
-                    
-                    await _mediator.Publish(new SubsonicPlaylistCreatedEvent(int.Parse(playlist.Id), name), cancellationToken);
+
+                    await _mediator.Publish(
+                        new SubsonicPlaylistCreatedEvent(int.Parse(playlist.Id), name),
+                        cancellationToken
+                    );
                     return playlist;
                 }
             }
@@ -399,7 +430,12 @@ public class SubsonicService : ISubsonicService, IDisposable
     /// <summary>
     /// Updates an existing playlist on the Subsonic server.
     /// </summary>
-    public async Task<bool> UpdatePlaylistAsync(string playlistId, string? name = null, IEnumerable<string>? trackIds = null, CancellationToken cancellationToken = default)
+    public async Task<bool> UpdatePlaylistAsync(
+        string playlistId,
+        string? name = null,
+        IEnumerable<string>? trackIds = null,
+        CancellationToken cancellationToken = default
+    )
     {
         if (_disposed)
             throw new ObjectDisposedException(nameof(SubsonicService));
@@ -418,9 +454,12 @@ public class SubsonicService : ISubsonicService, IDisposable
 
             var nameParam = !string.IsNullOrWhiteSpace(name) ? $"&name={Uri.EscapeDataString(name)}" : "";
             var trackIdsParam = trackIds != null ? $"&songIdToAdd={string.Join("&songIdToAdd=", trackIds)}" : "";
-            
-            var response = await _httpClient.GetAsync($"/rest/updatePlaylist.view?playlistId={playlistId}{nameParam}{trackIdsParam}" + GetAuthParameters(), cancellationToken);
-            
+
+            var response = await _httpClient.GetAsync(
+                $"/rest/updatePlaylist.view?playlistId={playlistId}{nameParam}{trackIdsParam}" + GetAuthParameters(),
+                cancellationToken
+            );
+
             if (response.IsSuccessStatusCode)
             {
                 _logger.LogDebug("Successfully updated playlist {PlaylistId}", playlistId);
@@ -453,8 +492,11 @@ public class SubsonicService : ISubsonicService, IDisposable
         {
             _logger.LogDebug("Deleting playlist {PlaylistId} from Subsonic server", playlistId);
 
-            var response = await _httpClient.GetAsync($"/rest/deletePlaylist.view?id={playlistId}" + GetAuthParameters(), cancellationToken);
-            
+            var response = await _httpClient.GetAsync(
+                $"/rest/deletePlaylist.view?id={playlistId}" + GetAuthParameters(),
+                cancellationToken
+            );
+
             if (response.IsSuccessStatusCode)
             {
                 _logger.LogDebug("Successfully deleted playlist {PlaylistId}", playlistId);
@@ -485,7 +527,7 @@ public class SubsonicService : ISubsonicService, IDisposable
     {
         var salt = GenerateRandomSalt();
         var token = ComputeMD5Hash(_config.Password + salt);
-        
+
         return $"?u={Uri.EscapeDataString(_config.Username)}&t={token}&s={salt}&v=1.16.1&c=SnapDog&f=json";
     }
 
@@ -515,8 +557,12 @@ public class SubsonicService : ISubsonicService, IDisposable
     /// </summary>
     private static Playlist ConvertToPlaylist(SubsonicPlaylist subsonicPlaylist)
     {
-        var trackIds = subsonicPlaylist.Entry?.Select(e => e.Id ?? string.Empty).Where(id => !string.IsNullOrEmpty(id)).ToList() ?? new List<string>();
-        
+        var trackIds =
+            subsonicPlaylist
+                .Entry?.Select(static e => e.Id ?? string.Empty)
+                .Where(static id => !string.IsNullOrEmpty(id))
+                .ToList() ?? new List<string>();
+
         return new Playlist
         {
             Id = subsonicPlaylist.Id ?? "0",
@@ -527,7 +573,7 @@ public class SubsonicService : ISubsonicService, IDisposable
             IsPublic = subsonicPlaylist.Public ?? false,
             Owner = subsonicPlaylist.Owner ?? string.Empty,
             CreatedAt = subsonicPlaylist.Created ?? DateTime.UtcNow,
-            UpdatedAt = subsonicPlaylist.Changed ?? DateTime.UtcNow
+            UpdatedAt = subsonicPlaylist.Changed ?? DateTime.UtcNow,
         };
     }
 
@@ -548,7 +594,7 @@ public class SubsonicService : ISubsonicService, IDisposable
             Genre = subsonicSong.Genre,
             BitrateKbps = subsonicSong.BitRate,
             CreatedAt = subsonicSong.Created ?? DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            UpdatedAt = DateTime.UtcNow,
         };
     }
 
@@ -563,7 +609,7 @@ public class SubsonicService : ISubsonicService, IDisposable
         _httpClient?.Dispose();
         _connectionSemaphore?.Dispose();
         _disposed = true;
-        
+
         _logger.LogDebug("Subsonic service disposed");
         GC.SuppressFinalize(this);
     }

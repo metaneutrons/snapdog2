@@ -31,8 +31,8 @@ public sealed class ZoneRepository : RepositoryBase<Zone, string>, IZoneReposito
     public async Task<IEnumerable<Zone>> GetZonesWithClientsAsync(CancellationToken cancellationToken = default)
     {
         return await GetQueryableNoTracking()
-            .Where(zone => zone.ClientIds.Count > 0)
-            .OrderBy(zone => zone.Name)
+            .Where(static zone => zone.ClientIds.Count > 0)
+            .OrderBy(static zone => zone.Name)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
     }
@@ -64,9 +64,9 @@ public sealed class ZoneRepository : RepositoryBase<Zone, string>, IZoneReposito
     public async Task<IEnumerable<Zone>> GetActiveZonesAsync(CancellationToken cancellationToken = default)
     {
         return await GetQueryableNoTracking()
-            .Where(zone => zone.IsEnabled && zone.ClientIds.Count > 0)
-            .OrderByDescending(zone => zone.Priority)
-            .ThenBy(zone => zone.Name)
+            .Where(static zone => zone.IsEnabled && zone.ClientIds.Count > 0)
+            .OrderByDescending(static zone => zone.Priority)
+            .ThenBy(static zone => zone.Name)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
     }

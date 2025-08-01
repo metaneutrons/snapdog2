@@ -150,12 +150,15 @@ public static class StateManagerExample
 
         // Query related entities
         var clientsInZone = currentState.GetClientsInZone("zone-1").ToList();
-        logger.LogInformation("Clients in zone: {ClientNames}", string.Join(", ", clientsInZone.Select(c => c.Name)));
+        logger.LogInformation(
+            "Clients in zone: {ClientNames}",
+            string.Join(", ", clientsInZone.Select(static c => c.Name))
+        );
 
         var tracksInPlaylist = currentState.GetTracksInPlaylist("playlist-1").ToList();
         logger.LogInformation(
             "Tracks in playlist: {TrackTitles}",
-            string.Join(", ", tracksInPlaylist.Select(t => t.Title))
+            string.Join(", ", tracksInPlaylist.Select(static t => t.Title))
         );
 
         // Query by status

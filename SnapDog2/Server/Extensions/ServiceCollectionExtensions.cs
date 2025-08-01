@@ -23,7 +23,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddServerLayer(this IServiceCollection services)
     {
         // Register MediatR with assembly scanning (using MediatR 12.x built-in registration)
-        services.AddMediatR(config =>
+        services.AddMediatR(static config =>
         {
             // Register handlers from the current assembly (Server layer)
             config.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
@@ -53,7 +53,7 @@ public static class ServiceCollectionExtensions
     /// <returns>The configured service collection for method chaining.</returns>
     public static IServiceCollection AddBasicMediatR(this IServiceCollection services)
     {
-        services.AddMediatR(config =>
+        services.AddMediatR(static config =>
         {
             config.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
         });
@@ -198,7 +198,7 @@ public static class ServiceCollectionExtensions
 
         // Find all registered MediatR handlers
         var mediatRServices = services
-            .Where(s =>
+            .Where(static s =>
                 s.ServiceType.IsGenericType
                 && (
                     s.ServiceType.GetGenericTypeDefinition() == typeof(IRequestHandler<,>)

@@ -7,8 +7,8 @@ namespace SnapDog2.Core.Configuration;
 /// Maps environment variables with SNAPDOG_SERVICES_ prefix.
 ///
 /// Examples:
-/// - SNAPDOG_SERVICES_SNAPCAST_HOST → Snapcast.Host
-/// - SNAPDOG_SERVICES_MQTT_BROKER → Mqtt.Broker
+/// - SNAPDOG_SERVICES_SNAPCAST_ADDRESS → Snapcast.Host
+/// - SNAPDOG_SERVICES_MQTT_BROKER_ADDRESS → Mqtt.Broker
 /// - SNAPDOG_SERVICES_KNX_GATEWAY → Knx.Gateway
 /// - SNAPDOG_SERVICES_SUBSONIC_URL → Subsonic.Url
 /// </summary>
@@ -19,7 +19,7 @@ public class ServicesConfiguration
     /// Maps environment variables with prefix: SNAPDOG_SERVICES_SNAPCAST_*
     ///
     /// Examples:
-    /// - SNAPDOG_SERVICES_SNAPCAST_HOST → Snapcast.Host
+    /// - SNAPDOG_SERVICES_SNAPCAST_ADDRESS → Snapcast.Host
     /// - SNAPDOG_SERVICES_SNAPCAST_PORT → Snapcast.Port
     /// - SNAPDOG_SERVICES_SNAPCAST_TIMEOUT → Snapcast.TimeoutSeconds
     /// </summary>
@@ -31,7 +31,7 @@ public class ServicesConfiguration
     /// Maps environment variables with prefix: SNAPDOG_SERVICES_MQTT_*
     ///
     /// Examples:
-    /// - SNAPDOG_SERVICES_MQTT_BROKER → Mqtt.Broker
+    /// - SNAPDOG_SERVICES_MQTT_BROKER_ADDRESS → Mqtt.Broker
     /// - SNAPDOG_SERVICES_MQTT_PORT → Mqtt.Port
     /// - SNAPDOG_SERVICES_MQTT_USERNAME → Mqtt.Username
     /// </summary>
@@ -82,9 +82,9 @@ public class SnapcastConfiguration
 {
     /// <summary>
     /// Gets or sets the Snapcast server hostname or IP address.
-    /// Maps to: SNAPDOG_SERVICES_SNAPCAST_HOST
+    /// Maps to: SNAPDOG_SERVICES_SNAPCAST_ADDRESS
     /// </summary>
-    [Env(Key = "HOST", Default = "localhost")]
+    [Env(Key = "ADDRESS", Default = "localhost")]
     public string Host { get; set; } = "localhost";
 
     /// <summary>
@@ -144,7 +144,7 @@ public class MqttConfiguration
 {
     /// <summary>
     /// Gets or sets the MQTT broker hostname or IP address.
-    /// Maps to: SNAPDOG_SERVICES_MQTT_BROKER
+    /// Maps to: SNAPDOG_SERVICES_MQTT_BROKER_ADDRESS
     /// </summary>
     [Env(Key = "BROKER", Default = "localhost")]
     public string Broker { get; set; } = "localhost";
@@ -192,18 +192,18 @@ public class MqttConfiguration
     public int KeepAliveSeconds { get; set; } = 60;
 
     /// <summary>
-    /// Gets or sets the base topic for MQTT messages.
-    /// Maps to: SNAPDOG_SERVICES_MQTT_BASE_TOPIC
-    /// </summary>
-    [Env(Key = "BASE_TOPIC", Default = "snapdog")]
-    public string BaseTopic { get; set; } = "snapdog";
-
-    /// <summary>
     /// Gets or sets whether MQTT integration is enabled.
     /// Maps to: SNAPDOG_SERVICES_MQTT_ENABLED
     /// </summary>
     [Env(Key = "ENABLED", Default = true)]
     public bool Enabled { get; set; } = true;
+
+    /// <summary>
+    /// Gets the base topic for MQTT messages from system configuration.
+    /// This is a temporary property for backward compatibility.
+    /// TODO: Update MqttService to use SystemMqttConfiguration directly.
+    /// </summary>
+    public string BaseTopic { get; set; } = "snapdog";
 }
 
 /// <summary>
@@ -334,11 +334,11 @@ public class SubsonicConfiguration
     /// </summary>
     public bool IsValid()
     {
-        return !string.IsNullOrWhiteSpace(ServerUrl) &&
-               !string.IsNullOrWhiteSpace(Username) &&
-               !string.IsNullOrWhiteSpace(Password) &&
-               TimeoutSeconds > 0 &&
-               Uri.TryCreate(ServerUrl, UriKind.Absolute, out _);
+        return !string.IsNullOrWhiteSpace(ServerUrl)
+            && !string.IsNullOrWhiteSpace(Username)
+            && !string.IsNullOrWhiteSpace(Password)
+            && TimeoutSeconds > 0
+            && Uri.TryCreate(ServerUrl, UriKind.Absolute, out _);
     }
 
     /// <summary>

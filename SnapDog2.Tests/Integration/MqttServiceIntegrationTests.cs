@@ -39,7 +39,7 @@ public class MqttServiceIntegrationTests : IDisposable
         };
 
         _mockOptions = new Mock<IOptions<SnapDog2.Core.Configuration.MqttConfiguration>>();
-        _mockOptions.Setup(x => x.Value).Returns(mqttConfig);
+        _mockOptions.Setup(static x => x.Value).Returns(mqttConfig);
 
         services.AddSingleton(_mockOptions.Object);
         services.AddSingleton(mockMediator.Object);
@@ -68,11 +68,11 @@ public class MqttServiceIntegrationTests : IDisposable
 
         // Verify logging
         _mockLogger.Verify(
-            x =>
+            static x =>
                 x.Log(
                     LogLevel.Error, // Corrected to Error based on actual logs
                     It.IsAny<EventId>(),
-                    It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Failed to connect to MQTT broker")),
+                    It.Is<It.IsAnyType>(static (v, t) => v.ToString()!.Contains("Failed to connect to MQTT broker")),
                     It.IsAny<Exception>(), // Exception is logged
                     It.IsAny<Func<It.IsAnyType, Exception?, string>>()
                 ),
@@ -142,14 +142,18 @@ public class MqttServiceIntegrationTests : IDisposable
     public void Constructor_WithNullConfiguration_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new MqttService(null!, _mockLogger.Object, new Mock<MediatR.IMediator>().Object));
+        Assert.Throws<ArgumentNullException>(
+            () => new MqttService(null!, _mockLogger.Object, new Mock<MediatR.IMediator>().Object)
+        );
     }
 
     [Fact]
     public void Constructor_WithNullLogger_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new MqttService(_mockOptions.Object, null!, new Mock<MediatR.IMediator>().Object));
+        Assert.Throws<ArgumentNullException>(
+            () => new MqttService(_mockOptions.Object, null!, new Mock<MediatR.IMediator>().Object)
+        );
     }
 
     [Fact]
@@ -213,7 +217,7 @@ public class MqttServiceIntegrationTests : IDisposable
             Username = "test-client-disposal",
         };
         var mockOptions = new Mock<IOptions<SnapDog2.Core.Configuration.MqttConfiguration>>();
-        mockOptions.Setup(x => x.Value).Returns(config);
+        mockOptions.Setup(static x => x.Value).Returns(config);
 
         var service = new MqttService(mockOptions.Object, _mockLogger.Object, new Mock<MediatR.IMediator>().Object);
 

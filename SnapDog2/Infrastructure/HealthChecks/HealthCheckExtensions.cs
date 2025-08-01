@@ -34,14 +34,6 @@ public static class HealthCheckExtensions
 
         var builder = services.AddHealthChecks();
 
-        // Add database health check
-        builder.AddCheck<DatabaseHealthCheck>(
-            name: "database",
-            failureStatus: HealthStatus.Unhealthy,
-            tags: new[] { "ready", "live", "database" },
-            timeout: healthCheckConfig.DatabaseTimeout
-        );
-
         // Add Snapcast service health check
         builder.AddCheck<SnapcastServiceHealthCheck>(
             name: "snapcast",
@@ -85,13 +77,7 @@ public static class HealthCheckExtensions
     )
     {
         return services
-            .AddSnapDogHealthChecks(healthCheckConfig)
-            .AddTypeActivatedCheck<DatabaseHealthCheck>(
-                name: "database-readiness",
-                failureStatus: HealthStatus.Unhealthy,
-                tags: new[] { "ready" },
-                timeout: healthCheckConfig.DatabaseTimeout
-            );
+            .AddSnapDogHealthChecks(healthCheckConfig);
     }
 
     /// <summary>
@@ -106,13 +92,7 @@ public static class HealthCheckExtensions
     )
     {
         return services
-            .AddHealthChecks()
-            .AddTypeActivatedCheck<DatabaseHealthCheck>(
-                name: "database-liveness",
-                failureStatus: HealthStatus.Unhealthy,
-                tags: new[] { "live" },
-                timeout: TimeSpan.FromSeconds(5)
-            ); // Shorter timeout for liveness
+            .AddHealthChecks(); // Basic liveness check
     }
 
     /// <summary>

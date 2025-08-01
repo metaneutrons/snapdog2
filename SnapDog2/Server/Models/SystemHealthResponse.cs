@@ -147,7 +147,7 @@ public sealed record SystemHealthResponse
     /// <returns>A collection of unhealthy component names.</returns>
     public IEnumerable<string> GetUnhealthyComponents()
     {
-        return Results.Where(kvp => kvp.Value.Status == "Unhealthy").Select(kvp => kvp.Key);
+        return Results.Where(static kvp => kvp.Value.Status == "Unhealthy").Select(static kvp => kvp.Key);
     }
 
     /// <summary>
@@ -156,7 +156,7 @@ public sealed record SystemHealthResponse
     /// <returns>A collection of degraded component names.</returns>
     public IEnumerable<string> GetDegradedComponents()
     {
-        return Results.Where(kvp => kvp.Value.Status == "Degraded").Select(kvp => kvp.Key);
+        return Results.Where(static kvp => kvp.Value.Status == "Degraded").Select(static kvp => kvp.Key);
     }
 
     /// <summary>

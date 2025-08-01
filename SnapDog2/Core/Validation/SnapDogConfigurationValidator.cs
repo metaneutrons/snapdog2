@@ -15,31 +15,31 @@ public sealed class SnapDogConfigurationValidator : AbstractValidator<SnapDogCon
     public SnapDogConfigurationValidator()
     {
         // System configuration validation
-        RuleFor(x => x.System)
+        RuleFor(static x => x.System)
             .NotNull()
             .WithMessage("System configuration is required.")
             .SetValidator(new SystemConfigurationValidator());
 
         // API configuration validation
-        RuleFor(x => x.Api)
+        RuleFor(static x => x.Api)
             .NotNull()
             .WithMessage("API configuration is required.")
             .SetValidator(new ApiConfigurationValidator());
 
         // Telemetry configuration validation
-        RuleFor(x => x.Telemetry)
+        RuleFor(static x => x.Telemetry)
             .NotNull()
             .WithMessage("Telemetry configuration is required.")
             .SetValidator(new TelemetryConfigurationValidator());
 
         // Services configuration validation
-        RuleFor(x => x.Services)
+        RuleFor(static x => x.Services)
             .NotNull()
             .WithMessage("Services configuration is required.")
             .SetValidator(new ServicesConfigurationValidator());
 
         // Zones validation
-        RuleFor(x => x.Zones)
+        RuleFor(static x => x.Zones)
             .NotNull()
             .WithMessage("Zones collection cannot be null.")
             .Must(HaveUniqueZoneIds)
@@ -47,10 +47,10 @@ public sealed class SnapDogConfigurationValidator : AbstractValidator<SnapDogCon
             .Must(HaveAtLeastOneZone)
             .WithMessage("At least one zone must be configured.");
 
-        RuleForEach(x => x.Zones).SetValidator(new ZoneConfigurationValidator());
+        RuleForEach(static x => x.Zones).SetValidator(new ZoneConfigurationValidator());
 
         // Clients validation
-        RuleFor(x => x.Clients)
+        RuleFor(static x => x.Clients)
             .NotNull()
             .WithMessage("Clients collection cannot be null.")
             .Must(HaveUniqueClientNames)
@@ -58,10 +58,10 @@ public sealed class SnapDogConfigurationValidator : AbstractValidator<SnapDogCon
             .Must(HaveUniqueMacAddresses)
             .WithMessage("MAC addresses must be unique across all clients.");
 
-        RuleForEach(x => x.Clients).SetValidator(new ClientConfigurationValidator());
+        RuleForEach(static x => x.Clients).SetValidator(new ClientConfigurationValidator());
 
         // Radio stations validation
-        RuleFor(x => x.RadioStations)
+        RuleFor(static x => x.RadioStations)
             .NotNull()
             .WithMessage("Radio stations collection cannot be null.")
             .Must(HaveUniqueRadioStationNames)
@@ -69,10 +69,10 @@ public sealed class SnapDogConfigurationValidator : AbstractValidator<SnapDogCon
             .Must(HaveUniqueRadioStationUrls)
             .WithMessage("Radio station URLs should be unique to avoid conflicts.");
 
-        RuleForEach(x => x.RadioStations).SetValidator(new RadioStationConfigurationValidator());
+        RuleForEach(static x => x.RadioStations).SetValidator(new RadioStationConfigurationValidator());
 
         // Cross-configuration business rules
-        RuleFor(x => x)
+        RuleFor(static x => x)
             .Must(HaveValidClientZoneAssignments)
             .WithMessage("All client zone assignments must reference existing zones.")
             .Must(HaveReasonablePortConfiguration)
@@ -82,10 +82,10 @@ public sealed class SnapDogConfigurationValidator : AbstractValidator<SnapDogCon
     }
 
     /// <summary>
-    /// Validates that all zone IDs are unique.
+    /// Validates that all zone names are unique.
     /// </summary>
     /// <param name="zones">The zones to validate.</param>
-    /// <returns>True if all zone IDs are unique; otherwise, false.</returns>
+    /// <returns>True if all zone names are unique; otherwise, false.</returns>
     private static bool HaveUniqueZoneIds(List<ZoneConfiguration> zones)
     {
         if (zones == null)
@@ -93,8 +93,8 @@ public sealed class SnapDogConfigurationValidator : AbstractValidator<SnapDogCon
             return true;
         }
 
-        var zoneIds = zones.Select(z => z.Id).ToList();
-        return zoneIds.Count == zoneIds.Distinct().Count();
+        var zoneNames = zones.Select(static z => z.Name).Where(static name => !string.IsNullOrEmpty(name)).ToList();
+        return zoneNames.Count == zoneNames.Distinct().Count();
     }
 
     /// <summary>
@@ -119,7 +119,7 @@ public sealed class SnapDogConfigurationValidator : AbstractValidator<SnapDogCon
             return true;
         }
 
-        var clientNames = clients.Where(c => !string.IsNullOrEmpty(c.Name)).Select(c => c.Name).ToList();
+        var clientNames = clients.Where(static c => !string.IsNullOrEmpty(c.Name)).Select(static c => c.Name).ToList();
         return clientNames.Count == clientNames.Distinct().Count();
     }
 
@@ -136,8 +136,8 @@ public sealed class SnapDogConfigurationValidator : AbstractValidator<SnapDogCon
         }
 
         var macAddresses = clients
-            .Where(c => !string.IsNullOrEmpty(c.Mac))
-            .Select(c => c.Mac.ToUpperInvariant())
+            .Where(static c => !string.IsNullOrEmpty(c.Mac))
+            .Select(static c => c.Mac.ToUpperInvariant())
             .ToList();
         return macAddresses.Count == macAddresses.Distinct().Count();
     }
@@ -154,7 +154,10 @@ public sealed class SnapDogConfigurationValidator : AbstractValidator<SnapDogCon
             return true;
         }
 
-        var stationNames = radioStations.Where(r => !string.IsNullOrEmpty(r.Name)).Select(r => r.Name).ToList();
+        var stationNames = radioStations
+            .Where(static r => !string.IsNullOrEmpty(r.Name))
+            .Select(static r => r.Name)
+            .ToList();
         return stationNames.Count == stationNames.Distinct().Count();
     }
 
@@ -171,8 +174,8 @@ public sealed class SnapDogConfigurationValidator : AbstractValidator<SnapDogCon
         }
 
         var urls = radioStations
-            .Where(r => !string.IsNullOrEmpty(r.Url))
-            .Select(r => r.Url.ToLowerInvariant())
+            .Where(static r => !string.IsNullOrEmpty(r.Url))
+            .Select(static r => r.Url.ToLowerInvariant())
             .ToList();
         return urls.Count == urls.Distinct().Count();
     }
@@ -189,11 +192,11 @@ public sealed class SnapDogConfigurationValidator : AbstractValidator<SnapDogCon
             return true;
         }
 
-        var validZoneIds = configuration.Zones.Select(z => z.Id).ToHashSet();
+        var maxZoneIndex = configuration.Zones.Count;
 
         foreach (var client in configuration.Clients)
         {
-            if (!validZoneIds.Contains(client.DefaultZone))
+            if (client.DefaultZone < 1 || client.DefaultZone > maxZoneIndex)
             {
                 return false;
             }
@@ -216,26 +219,15 @@ public sealed class SnapDogConfigurationValidator : AbstractValidator<SnapDogCon
 
         var api = configuration.Api;
 
-        // Check that HTTP and HTTPS ports are different
-        if (api.HttpsEnabled && api.Port == api.HttpsPort)
-        {
-            return false;
-        }
-
         // Check for reasonable port ranges
         if (api.Port < 1024 || api.Port > 65535)
         {
             return false; // Avoid well-known ports and invalid ranges
         }
 
-        if (api.HttpsEnabled && (api.HttpsPort < 1024 || api.HttpsPort > 65535))
-        {
-            return false;
-        }
-
         // Check that ports are not commonly reserved
         var reservedPorts = new[] { 22, 23, 25, 53, 80, 110, 143, 443, 993, 995 };
-        if (reservedPorts.Contains(api.Port) || (api.HttpsEnabled && reservedPorts.Contains(api.HttpsPort)))
+        if (reservedPorts.Contains(api.Port))
         {
             return false;
         }
@@ -271,12 +263,6 @@ public sealed class SnapDogConfigurationValidator : AbstractValidator<SnapDogCon
             {
                 return false;
             }
-
-            // HTTPS should be enabled in production
-            if (configuration.Api != null && !configuration.Api.HttpsEnabled)
-            {
-                return false;
-            }
         }
 
         return true;
@@ -291,29 +277,17 @@ public sealed class SystemConfigurationValidator : AbstractValidator<SystemConfi
 {
     public SystemConfigurationValidator()
     {
-        RuleFor(x => x.Environment)
+        RuleFor(static x => x.Environment)
             .NotEmpty()
             .WithMessage("Environment is required.")
             .Must(BeValidEnvironment)
             .WithMessage("Environment must be Development, Staging, or Production.");
 
-        RuleFor(x => x.LogLevel)
+        RuleFor(static x => x.LogLevel)
             .NotEmpty()
             .WithMessage("Log level is required.")
             .Must(BeValidLogLevel)
             .WithMessage("Log level must be a valid Serilog level.");
-
-        RuleFor(x => x.ApplicationName)
-            .NotEmpty()
-            .WithMessage("Application name is required.")
-            .MaximumLength(100)
-            .WithMessage("Application name cannot exceed 100 characters.");
-
-        RuleFor(x => x.Version)
-            .NotEmpty()
-            .WithMessage("Version is required.")
-            .Matches(@"^\d+\.\d+\.\d+")
-            .WithMessage("Version must follow semantic versioning (x.y.z).");
     }
 
     private static bool BeValidEnvironment(string environment)
@@ -333,11 +307,7 @@ public sealed class ApiConfigurationValidator : AbstractValidator<ApiConfigurati
 {
     public ApiConfigurationValidator()
     {
-        RuleFor(x => x.Port).InclusiveBetween(1024, 65535).WithMessage("Port must be between 1024 and 65535.");
-
-        RuleFor(x => x.HttpsPort)
-            .InclusiveBetween(1024, 65535)
-            .WithMessage("HTTPS port must be between 1024 and 65535.");
+        RuleFor(static x => x.Port).InclusiveBetween(1024, 65535).WithMessage("Port must be between 1024 and 65535.");
     }
 }
 

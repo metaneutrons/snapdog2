@@ -10,6 +10,6 @@ public class SubscribeToGroupValidator : AbstractValidator<SubscribeToGroupComma
 {
     public SubscribeToGroupValidator()
     {
-        RuleFor(x => x.Address).NotNull().WithMessage("KNX address is required");
+        RuleFor(static x => x.Address).NotNull().WithMessage("KNX address is required");
     }
 }

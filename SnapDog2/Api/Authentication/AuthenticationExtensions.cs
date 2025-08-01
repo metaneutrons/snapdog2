@@ -8,30 +8,41 @@ namespace SnapDog2.Api.Authentication
 {
     public static class AuthenticationExtensions
     {
-        public static IServiceCollection AddSnapDogApiKeyAuthentication(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddSnapDogApiKeyAuthentication(
+            this IServiceCollection services,
+            IConfiguration configuration
+        )
         {
             var authSection = configuration.GetSection("ApiAuthentication");
-            #pragma warning disable CS8601 // Possible null reference assignment
-            var authConfig = authSection.Get<ApiConfiguration.ApiAuthSettings>() ?? new ApiConfiguration.ApiAuthSettings();
+#pragma warning disable CS8601 // Possible null reference assignment
+            var authConfig =
+                authSection.Get<ApiConfiguration.ApiAuthSettings>() ?? new ApiConfiguration.ApiAuthSettings();
 #pragma warning restore CS8601
 
             if (authConfig.Enabled && authConfig.ApiKeys?.Any() == true)
             {
                 services.AddSingleton(authConfig);
-                services.AddAuthentication(options =>
-                {
-                    options.DefaultAuthenticateScheme = ApiKeyAuthenticationHandler.SchemeName;
-                    options.DefaultChallengeScheme = ApiKeyAuthenticationHandler.SchemeName;
-                })
-                    .AddScheme<ApiKeyAuthenticationSchemeOptions, ApiKeyAuthenticationHandler>("ApiKey", options => { });
-
-                services.AddAuthorization(options =>
-                {
-                    options.AddPolicy("ApiKeyPolicy", policy =>
+                services
+                    .AddAuthentication(static options =>
                     {
-                        policy.AddAuthenticationSchemes("ApiKey");
-                        policy.RequireAuthenticatedUser();
-                    });
+                        options.DefaultAuthenticateScheme = ApiKeyAuthenticationHandler.SchemeName;
+                        options.DefaultChallengeScheme = ApiKeyAuthenticationHandler.SchemeName;
+                    })
+                    .AddScheme<ApiKeyAuthenticationSchemeOptions, ApiKeyAuthenticationHandler>(
+                        "ApiKey",
+                        static options => { }
+                    );
+
+                services.AddAuthorization(static options =>
+                {
+                    options.AddPolicy(
+                        "ApiKeyPolicy",
+                        static policy =>
+                        {
+                            policy.AddAuthenticationSchemes("ApiKey");
+                            policy.RequireAuthenticatedUser();
+                        }
+                    );
                     options.DefaultPolicy = options.GetPolicy("ApiKeyPolicy")!; // non-null asserted
                     options.FallbackPolicy = options.GetPolicy("ApiKeyPolicy")!; // non-null asserted
                 });

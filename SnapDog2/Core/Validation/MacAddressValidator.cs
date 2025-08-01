@@ -15,7 +15,7 @@ public sealed class MacAddressValidator : AbstractValidator<MacAddress>
     public MacAddressValidator()
     {
         // Value validation - MAC address format
-        RuleFor(x => x.Value)
+        RuleFor(static x => x.Value)
             .NotEmpty()
             .WithMessage("MAC address value is required.")
             .Matches(@"^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$")
@@ -32,7 +32,7 @@ public sealed class MacAddressValidator : AbstractValidator<MacAddress>
             .WithMessage("MAC address cannot be the null address (00:00:00:00:00:00).");
 
         // Business rules
-        RuleFor(x => x)
+        RuleFor(static x => x)
             .Must(BeUnicastAddress)
             .WithMessage("MAC address should be a unicast address for individual devices.")
             .Must(NotBeVirtualMachineAddress)

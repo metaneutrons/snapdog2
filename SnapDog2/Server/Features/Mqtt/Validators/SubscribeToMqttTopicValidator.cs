@@ -13,7 +13,7 @@ public class SubscribeToMqttTopicValidator : AbstractValidator<SubscribeToMqttTo
     /// </summary>
     public SubscribeToMqttTopicValidator()
     {
-        RuleFor(x => x.TopicPattern)
+        RuleFor(static x => x.TopicPattern)
             .NotEmpty()
             .WithMessage("Topic pattern is required")
             .MaximumLength(1000)
@@ -21,7 +21,9 @@ public class SubscribeToMqttTopicValidator : AbstractValidator<SubscribeToMqttTo
             .Must(BeValidMqttTopicFilter)
             .WithMessage("Topic pattern contains invalid characters or format");
 
-        RuleFor(x => x.QoS).IsInEnum().WithMessage("QoS must be a valid MQTT quality of service level (0, 1, or 2)");
+        RuleFor(static x => x.QoS)
+            .IsInEnum()
+            .WithMessage("QoS must be a valid MQTT quality of service level (0, 1, or 2)");
     }
 
     /// <summary>

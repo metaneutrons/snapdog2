@@ -66,11 +66,8 @@ public class ConfigurationTests
         // Check default values
         Assert.Equal("Development", config.System.Environment);
         Assert.Equal("Information", config.System.LogLevel);
-        Assert.Equal("SnapDog2", config.System.ApplicationName);
         Assert.True(config.Telemetry.Enabled);
-        Assert.Equal("snapdog2", config.Telemetry.ServiceName);
         Assert.Equal(5000, config.Api.Port);
-        Assert.False(config.Api.HttpsEnabled);
     }
 
     [Fact]
@@ -82,12 +79,7 @@ public class ConfigurationTests
         // Assert
         Assert.Equal("Development", config.Environment);
         Assert.Equal("Information", config.LogLevel);
-        Assert.Equal("SnapDog2", config.ApplicationName);
-        Assert.Equal("1.0.0", config.Version);
         Assert.False(config.DebugEnabled);
-        Assert.Equal("./data", config.DataPath);
-        Assert.Equal("./config", config.ConfigPath);
-        Assert.Equal("./logs", config.LogsPath);
     }
 
     [Fact]
@@ -117,7 +109,6 @@ public class ConfigurationTests
 
         // Assert
         Assert.Equal(5000, config.Port);
-        Assert.False(config.HttpsEnabled);
         Assert.Equal(string.Empty, config.ApiKey);
         Assert.False(config.AuthEnabled);
         Assert.True(config.CorsEnabled);
@@ -245,7 +236,7 @@ public class ConfigurationTests
             { "SNAPDOG_SYSTEM_LOG_LEVEL", "Warning" },
             { "SNAPDOG_TELEMETRY_ENABLED", "false" },
             { "SNAPDOG_API_PORT", "8080" },
-            { "SNAPDOG_SERVICES_SNAPCAST_HOST", "snapcast.example.com" },
+            { "SNAPDOG_SERVICES_SNAPCAST_ADDRESS", "snapcast.example.com" },
         };
 
         // Act
@@ -267,7 +258,7 @@ public class ConfigurationTests
         {
             { "SNAPDOG_CLIENT_1_NAME", "Living Room" },
             { "SNAPDOG_CLIENT_1_MAC", "aa:bb:cc:dd:ee:ff" },
-            { "SNAPDOG_CLIENT_1_MQTT_BASETOPIC", "snapdog/livingroom" },
+            { "SNAPDOG_CLIENT_1_MQTT_BASE_TOPIC", "snapdog/livingroom" },
             { "SNAPDOG_CLIENT_1_DEFAULT_ZONE", "2" },
             { "SNAPDOG_CLIENT_1_KNX_ENABLED", "true" },
             { "SNAPDOG_CLIENT_1_KNX_VOLUME", "2/1/1" },

@@ -49,8 +49,8 @@ public sealed class ClientRepository : RepositoryBase<Client, string>, IClientRe
     public async Task<IEnumerable<Client>> GetConnectedClientsAsync(CancellationToken cancellationToken = default)
     {
         return await GetQueryableNoTracking()
-            .Where(client => client.Status == ClientStatus.Connected)
-            .OrderBy(client => client.Name)
+            .Where(static client => client.Status == ClientStatus.Connected)
+            .OrderBy(static client => client.Name)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
     }

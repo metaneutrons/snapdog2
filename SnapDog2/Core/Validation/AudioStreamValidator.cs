@@ -16,7 +16,7 @@ public sealed class AudioStreamValidator : AbstractValidator<AudioStream>
     public AudioStreamValidator()
     {
         // Required string properties
-        RuleFor(x => x.Id)
+        RuleFor(static x => x.Id)
             .NotEmpty()
             .WithMessage("Audio stream ID is required.")
             .MaximumLength(100)
@@ -24,7 +24,7 @@ public sealed class AudioStreamValidator : AbstractValidator<AudioStream>
             .Matches(@"^[a-zA-Z0-9_-]+$")
             .WithMessage("Audio stream ID can only contain alphanumeric characters, underscores, and hyphens.");
 
-        RuleFor(x => x.Name)
+        RuleFor(static x => x.Name)
             .NotEmpty()
             .WithMessage("Audio stream name is required.")
             .MaximumLength(200)
@@ -33,13 +33,13 @@ public sealed class AudioStreamValidator : AbstractValidator<AudioStream>
             .WithMessage("Audio stream name must be at least 1 character long.");
 
         // URL validation (using the StreamUrl value object validation)
-        RuleFor(x => x.Url).NotNull().WithMessage("Audio stream URL is required.");
+        RuleFor(static x => x.Url).NotNull().WithMessage("Audio stream URL is required.");
 
         // Codec validation
-        RuleFor(x => x.Codec).IsInEnum().WithMessage("Invalid audio codec specified.");
+        RuleFor(static x => x.Codec).IsInEnum().WithMessage("Invalid audio codec specified.");
 
         // Bitrate validation
-        RuleFor(x => x.BitrateKbps)
+        RuleFor(static x => x.BitrateKbps)
             .GreaterThan(0)
             .WithMessage("Bitrate must be greater than 0 kbps.")
             .LessThanOrEqualTo(1411) // CD quality FLAC max
@@ -48,60 +48,60 @@ public sealed class AudioStreamValidator : AbstractValidator<AudioStream>
             .WithMessage("Bitrate is not valid for the specified codec.");
 
         // Status validation
-        RuleFor(x => x.Status).IsInEnum().WithMessage("Invalid stream status specified.");
+        RuleFor(static x => x.Status).IsInEnum().WithMessage("Invalid stream status specified.");
 
         // Optional sample rate validation
-        RuleFor(x => x.SampleRateHz)
+        RuleFor(static x => x.SampleRateHz)
             .GreaterThan(0)
             .WithMessage("Sample rate must be greater than 0 Hz.")
             .LessThanOrEqualTo(192000)
             .WithMessage("Sample rate cannot exceed 192000 Hz.")
             .Must(BeValidSampleRate)
             .WithMessage("Sample rate must be a standard audio sample rate.")
-            .When(x => x.SampleRateHz.HasValue);
+            .When(static x => x.SampleRateHz.HasValue);
 
         // Optional channels validation
-        RuleFor(x => x.Channels)
+        RuleFor(static x => x.Channels)
             .GreaterThan(0)
             .WithMessage("Number of channels must be greater than 0.")
             .LessThanOrEqualTo(8)
             .WithMessage("Number of channels cannot exceed 8.")
-            .When(x => x.Channels.HasValue);
+            .When(static x => x.Channels.HasValue);
 
         // Optional description validation
-        RuleFor(x => x.Description)
+        RuleFor(static x => x.Description)
             .MaximumLength(1000)
             .WithMessage("Description cannot exceed 1000 characters.")
-            .When(x => !string.IsNullOrEmpty(x.Description));
+            .When(static x => !string.IsNullOrEmpty(x.Description));
 
         // Optional tags validation
-        RuleFor(x => x.Tags)
+        RuleFor(static x => x.Tags)
             .MaximumLength(500)
             .WithMessage("Tags cannot exceed 500 characters.")
-            .When(x => !string.IsNullOrEmpty(x.Tags));
+            .When(static x => !string.IsNullOrEmpty(x.Tags));
 
         // Timestamp validations
-        RuleFor(x => x.CreatedAt)
+        RuleFor(static x => x.CreatedAt)
             .NotEmpty()
             .WithMessage("Created timestamp is required.")
             .LessThanOrEqualTo(DateTime.UtcNow.AddMinutes(5))
             .WithMessage("Created timestamp cannot be in the future.");
 
-        RuleFor(x => x.UpdatedAt)
-            .GreaterThanOrEqualTo(x => x.CreatedAt)
+        RuleFor(static x => x.UpdatedAt)
+            .GreaterThanOrEqualTo(static x => x.CreatedAt)
             .WithMessage("Updated timestamp must be after or equal to created timestamp.")
             .LessThanOrEqualTo(DateTime.UtcNow.AddMinutes(5))
             .WithMessage("Updated timestamp cannot be in the future.")
-            .When(x => x.UpdatedAt.HasValue);
+            .When(static x => x.UpdatedAt.HasValue);
 
         // Business rule: Stereo content validation
-        RuleFor(x => x)
+        RuleFor(static x => x)
             .Must(HaveValidStereoConfiguration)
             .WithMessage("Stereo streams must have at least 2 channels.")
-            .When(x => x.Channels.HasValue);
+            .When(static x => x.Channels.HasValue);
 
         // Business rule: Codec-specific validations
-        RuleFor(x => x)
+        RuleFor(static x => x)
             .Must(HaveValidCodecConfiguration)
             .WithMessage("Stream configuration is not valid for the specified codec.");
     }

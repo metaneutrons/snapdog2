@@ -9,7 +9,7 @@ namespace SnapDog2.Core.Configuration;
 /// Examples:
 /// - SNAPDOG_SYSTEM_ENVIRONMENT → Environment
 /// - SNAPDOG_SYSTEM_LOG_LEVEL → LogLevel
-/// - SNAPDOG_SYSTEM_APPLICATION_NAME → ApplicationName
+/// - SNAPDOG_SYSTEM_MQTT_BASE_TOPIC → Mqtt.BaseTopic
 /// </summary>
 public class SystemConfiguration
 {
@@ -28,20 +28,6 @@ public class SystemConfiguration
     public string LogLevel { get; set; } = "Information";
 
     /// <summary>
-    /// Gets or sets the application name for identification.
-    /// Maps to: SNAPDOG_SYSTEM_APPLICATION_NAME
-    /// </summary>
-    [Env(Key = "APPLICATION_NAME", Default = "SnapDog2")]
-    public string ApplicationName { get; set; } = "SnapDog2";
-
-    /// <summary>
-    /// Gets or sets the application version.
-    /// Maps to: SNAPDOG_SYSTEM_VERSION
-    /// </summary>
-    [Env(Key = "VERSION", Default = "1.0.0")]
-    public string Version { get; set; } = "1.0.0";
-
-    /// <summary>
     /// Gets or sets whether debug mode is enabled.
     /// Maps to: SNAPDOG_SYSTEM_DEBUG_ENABLED
     /// </summary>
@@ -49,30 +35,58 @@ public class SystemConfiguration
     public bool DebugEnabled { get; set; } = false;
 
     /// <summary>
-    /// Gets or sets the data directory path.
-    /// Maps to: SNAPDOG_SYSTEM_DATA_PATH
+    /// Gets or sets the system-wide MQTT configuration.
+    /// Maps environment variables with prefix: SNAPDOG_SYSTEM_MQTT_*
     /// </summary>
-    [Env(Key = "DATA_PATH", Default = "./data")]
-    public string DataPath { get; set; } = "./data";
-
-    /// <summary>
-    /// Gets or sets the configuration file path.
-    /// Maps to: SNAPDOG_SYSTEM_CONFIG_PATH
-    /// </summary>
-    [Env(Key = "CONFIG_PATH", Default = "./config")]
-    public string ConfigPath { get; set; } = "./config";
-
-    /// <summary>
-    /// Gets or sets the logs directory path.
-    /// Maps to: SNAPDOG_SYSTEM_LOGS_PATH
-    /// </summary>
-    [Env(Key = "LOGS_PATH", Default = "./logs")]
-    public string LogsPath { get; set; } = "./logs";
+    [Env(NestedPrefix = "MQTT_")]
+    public SystemMqttConfiguration Mqtt { get; set; } = new();
 
     /// <summary>
     /// Gets or sets the health check configuration.
     /// </summary>
     public HealthCheckConfiguration HealthChecks { get; init; } = new();
+}
+
+/// <summary>
+/// System-wide MQTT topic configuration.
+/// Maps environment variables with SNAPDOG_SYSTEM_MQTT_ prefix.
+/// </summary>
+public class SystemMqttConfiguration
+{
+    /// <summary>
+    /// Gets or sets the base topic for system-wide MQTT messages.
+    /// Maps to: SNAPDOG_SYSTEM_MQTT_BASE_TOPIC
+    /// </summary>
+    [Env(Key = "BASE_TOPIC", Default = "snapdog")]
+    public string BaseTopic { get; set; } = "snapdog";
+
+    /// <summary>
+    /// Gets or sets the topic for system status messages.
+    /// Maps to: SNAPDOG_SYSTEM_MQTT_STATUS_TOPIC
+    /// </summary>
+    [Env(Key = "STATUS_TOPIC", Default = "status")]
+    public string StatusTopic { get; set; } = "status";
+
+    /// <summary>
+    /// Gets or sets the topic for system error messages.
+    /// Maps to: SNAPDOG_SYSTEM_MQTT_ERROR_TOPIC
+    /// </summary>
+    [Env(Key = "ERROR_TOPIC", Default = "error")]
+    public string ErrorTopic { get; set; } = "error";
+
+    /// <summary>
+    /// Gets or sets the topic for system version information.
+    /// Maps to: SNAPDOG_SYSTEM_MQTT_VERSION_TOPIC
+    /// </summary>
+    [Env(Key = "VERSION_TOPIC", Default = "version")]
+    public string VersionTopic { get; set; } = "version";
+
+    /// <summary>
+    /// Gets or sets the topic for system statistics.
+    /// Maps to: SNAPDOG_SYSTEM_MQTT_STATS_TOPIC
+    /// </summary>
+    [Env(Key = "STATS_TOPIC", Default = "stats")]
+    public string StatsTopic { get; set; } = "stats";
 }
 
 /// <summary>
@@ -92,15 +106,8 @@ public record HealthCheckConfiguration
     /// Gets or sets the default timeout for health checks.
     /// Maps to: SNAPDOG_SYSTEM_HEALTH_CHECKS_TIMEOUT
     /// </summary>
-    [Env(Key = "HEALTH_CHECKS_TIMEOUT", Default = "00:00:30")]
+    [Env(Key = "HEALTH_CHECKS_TIMEOUT", Default = 30)]
     public TimeSpan Timeout { get; init; } = TimeSpan.FromSeconds(30);
-
-    /// <summary>
-    /// Gets or sets the timeout for database health checks.
-    /// Maps to: SNAPDOG_SYSTEM_HEALTH_CHECKS_DATABASE_TIMEOUT
-    /// </summary>
-    [Env(Key = "HEALTH_CHECKS_DATABASE_TIMEOUT", Default = "00:00:05")]
-    public TimeSpan DatabaseTimeout { get; init; } = TimeSpan.FromSeconds(5);
 
     /// <summary>
     /// Gets or sets the timeout for external service health checks.

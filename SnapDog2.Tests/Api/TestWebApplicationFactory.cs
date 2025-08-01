@@ -6,9 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Moq;
+using SnapDog2.Api.Authentication; // for authentication handler and options
 using SnapDog2.Core.Configuration;
 using SnapDog2.Infrastructure.Services;
-using SnapDog2.Api.Authentication; // for authentication handler and options
 
 namespace SnapDog2.Tests.Integration;
 
@@ -81,30 +81,37 @@ public class TestWebApplicationFactory<TProgram> : WebApplicationFactory<TProgra
             services.AddSingleton(authConfig);
 
             // Configure logging for tests
-                    services.AddLogging(builder =>
-                    {
-                        builder.SetMinimumLevel(LogLevel.Warning); // Reduce log noise in tests
-                        builder.AddFilter("Microsoft.AspNetCore", LogLevel.Error);
-                        builder.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Error);
-                    });
+            services.AddLogging(builder =>
+            {
+                builder.SetMinimumLevel(LogLevel.Warning); // Reduce log noise in tests
+                builder.AddFilter("Microsoft.AspNetCore", LogLevel.Error);
+                builder.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Error);
+            });
 
-                    // Add API Key authentication and authorization for tests
-                    services.AddAuthentication(options =>
+            // Add API Key authentication and authorization for tests
+            services
+                .AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = ApiKeyAuthenticationHandler.SchemeName;
+                    options.DefaultChallengeScheme = ApiKeyAuthenticationHandler.SchemeName;
+                })
+                .AddScheme<ApiKeyAuthenticationSchemeOptions, ApiKeyAuthenticationHandler>(
+                    ApiKeyAuthenticationHandler.SchemeName,
+                    _ => { }
+                );
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy(
+                    "ApiKeyPolicy",
+                    policy =>
                     {
-                        options.DefaultAuthenticateScheme = ApiKeyAuthenticationHandler.SchemeName;
-                        options.DefaultChallengeScheme = ApiKeyAuthenticationHandler.SchemeName;
-                    })
-                    .AddScheme<ApiKeyAuthenticationSchemeOptions, ApiKeyAuthenticationHandler>(ApiKeyAuthenticationHandler.SchemeName, _ => { });
-                    services.AddAuthorization(options =>
-                    {
-                        options.AddPolicy("ApiKeyPolicy", policy =>
-                        {
-                            policy.AddAuthenticationSchemes(ApiKeyAuthenticationHandler.SchemeName);
-                            policy.RequireAuthenticatedUser();
-                        });
-                        options.DefaultPolicy = options.GetPolicy("ApiKeyPolicy")!; // non-null asserted
-                        options.FallbackPolicy = options.GetPolicy("ApiKeyPolicy")!; // non-null asserted
-                    });
+                        policy.AddAuthenticationSchemes(ApiKeyAuthenticationHandler.SchemeName);
+                        policy.RequireAuthenticatedUser();
+                    }
+                );
+                options.DefaultPolicy = options.GetPolicy("ApiKeyPolicy")!; // non-null asserted
+                options.FallbackPolicy = options.GetPolicy("ApiKeyPolicy")!; // non-null asserted
+            });
             services.AddLogging(builder =>
             {
                 builder.SetMinimumLevel(LogLevel.Warning); // Reduce log noise in tests
@@ -113,15 +120,16 @@ public class TestWebApplicationFactory<TProgram> : WebApplicationFactory<TProgra
             });
         });
 
-        builder.UseEnvironment("Test")
-    .CaptureStartupErrors(true)
-    .UseSetting("detailedErrors", "true")
-    .ConfigureLogging(logging =>
-    {
-        logging.ClearProviders();
-        logging.AddConsole();
-        logging.SetMinimumLevel(LogLevel.Debug);
-    });
+        builder
+            .UseEnvironment("Test")
+            .CaptureStartupErrors(true)
+            .UseSetting("detailedErrors", "true")
+            .ConfigureLogging(logging =>
+            {
+                logging.ClearProviders();
+                logging.AddConsole();
+                logging.SetMinimumLevel(LogLevel.Debug);
+            });
     }
 
     /// <summary>
@@ -131,7 +139,7 @@ public class TestWebApplicationFactory<TProgram> : WebApplicationFactory<TProgra
     /// <param name="services">The service collection</param>
     private static void RemoveService<T>(IServiceCollection services)
     {
-        var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(T));
+        var descriptor = services.SingleOrDefault(static d => d.ServiceType == typeof(T));
         if (descriptor != null)
         {
             services.Remove(descriptor);

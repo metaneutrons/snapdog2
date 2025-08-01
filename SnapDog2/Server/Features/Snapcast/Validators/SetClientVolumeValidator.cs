@@ -13,12 +13,12 @@ public class SetClientVolumeValidator : AbstractValidator<SetClientVolumeCommand
     /// </summary>
     public SetClientVolumeValidator()
     {
-        RuleFor(x => x.ClientId)
+        RuleFor(static x => x.ClientId)
             .NotEmpty()
             .WithMessage("Client ID is required")
             .MaximumLength(100)
             .WithMessage("Client ID must not exceed 100 characters");
 
-        RuleFor(x => x.Volume).InclusiveBetween(0, 100).WithMessage("Volume must be between 0 and 100");
+        RuleFor(static x => x.Volume).InclusiveBetween(0, 100).WithMessage("Volume must be between 0 and 100");
     }
 }

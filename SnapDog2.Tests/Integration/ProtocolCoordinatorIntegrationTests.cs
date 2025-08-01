@@ -44,10 +44,10 @@ namespace SnapDog2.Tests.Integration
             var services = new ServiceCollection();
 
             // Add MediatR
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<ProtocolCoordinator>());
+            services.AddMediatR(static cfg => cfg.RegisterServicesFromAssemblyContaining<ProtocolCoordinator>());
 
             // Add logging
-            services.AddLogging(builder => builder.AddConsole());
+            services.AddLogging(static builder => builder.AddConsole());
 
             // Add configuration
             var config = new SnapDogConfiguration
@@ -57,19 +57,16 @@ namespace SnapDog2.Tests.Integration
                     Snapcast = new SnapcastConfiguration { Enabled = true },
                     Mqtt = new MqttConfiguration { Enabled = true },
                     Knx = new KnxConfiguration { Enabled = true },
-                    Subsonic = new SubsonicConfiguration { Enabled = true }
+                    Subsonic = new SubsonicConfiguration { Enabled = true },
                 },
                 Clients = new List<ClientConfiguration>
                 {
                     new()
                     {
                         Mac = "00:00:00:00:00:00",
-                        Knx = new KnxClientConfiguration
-                        {
-                            Volume = KnxAddress.Parse("1/2/3")
-                        }
-                    }
-                }
+                        Knx = new KnxClientConfiguration { Volume = KnxAddress.Parse("1/2/3") },
+                    },
+                },
             };
             services.AddSingleton(Options.Create(config));
 
@@ -92,9 +89,11 @@ namespace SnapDog2.Tests.Integration
         public async Task StartAsync_ShouldInitializeSuccessfully()
         {
             // Arrange
-            _mockMqttService.Setup(x => x.SubscribeAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            _mockMqttService
+                .Setup(static x => x.SubscribeAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
-            _mockSnapcastService.Setup(x => x.SynchronizeServerStateAsync(It.IsAny<CancellationToken>()))
+            _mockSnapcastService
+                .Setup(static x => x.SynchronizeServerStateAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
             // Act
@@ -102,7 +101,10 @@ namespace SnapDog2.Tests.Integration
 
             // Assert
             Assert.True(result.IsSuccess);
-            _mockMqttService.Verify(x => x.SubscribeAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.AtLeastOnce);
+            _mockMqttService.Verify(
+                static x => x.SubscribeAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()),
+                Times.AtLeastOnce
+            );
         }
 
         [Fact]
@@ -121,40 +123,56 @@ namespace SnapDog2.Tests.Integration
                 IpAddress = IpAddress.Parse("127.0.0.1"),
                 Status = ClientStatus.Connected,
                 Volume = 50,
-                ZoneId = "1"
+                ZoneId = "1",
             };
 
-            var zone = new Zone
-            {
-                Id = "1",
-                Name = "Test Zone"
-            };
+            var zone = new Zone { Id = "1", Name = "Test Zone" };
 
-            _mockClientRepository.Setup(x => x.GetByIdAsync(clientId, It.IsAny<CancellationToken>()))
+            _mockClientRepository
+                .Setup(static x => x.GetByIdAsync(clientId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(client);
-            _mockZoneRepository.Setup(x => x.GetByIdAsync("1", It.IsAny<CancellationToken>()))
+            _mockZoneRepository
+                .Setup(static x => x.GetByIdAsync("1", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(zone);
-            _mockSnapcastService.Setup(x => x.SetClientVolumeAsync(clientId, volume, It.IsAny<CancellationToken>()))
+            _mockSnapcastService
+                .Setup(static x => x.SetClientVolumeAsync(clientId, volume, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
-            _mockKnxService.Setup(x => x.SendVolumeCommandAsync(It.IsAny<KnxAddress>(), volume, It.IsAny<CancellationToken>()))
+            _mockKnxService
+                .Setup(static x =>
+                    x.SendVolumeCommandAsync(It.IsAny<KnxAddress>(), volume, It.IsAny<CancellationToken>())
+                )
                 .ReturnsAsync(true);
 
             await _protocolCoordinator.StartAsync(CancellationToken.None);
 
             // Act
-            var result = await _protocolCoordinator.SynchronizeVolumeChangeAsync(clientId, volume, sourceProtocol, CancellationToken.None);
+            var result = await _protocolCoordinator.SynchronizeVolumeChangeAsync(
+                clientId,
+                volume,
+                sourceProtocol,
+                CancellationToken.None
+            );
 
             // Assert
             Assert.True(result.IsSuccess);
 
             // Should sync to Snapcast (not source)
-            _mockSnapcastService.Verify(x => x.SetClientVolumeAsync(clientId, volume, It.IsAny<CancellationToken>()), Times.Once);
+            _mockSnapcastService.Verify(
+                static x => x.SetClientVolumeAsync(clientId, volume, It.IsAny<CancellationToken>()),
+                Times.Once
+            );
 
             // Should sync to KNX (not source)
-            _mockKnxService.Verify(x => x.SendVolumeCommandAsync(It.IsAny<KnxAddress>(), volume, It.IsAny<CancellationToken>()), Times.Once);
+            _mockKnxService.Verify(
+                static x => x.SendVolumeCommandAsync(It.IsAny<KnxAddress>(), volume, It.IsAny<CancellationToken>()),
+                Times.Once
+            );
 
             // Should NOT sync to MQTT (is source)
-            _mockMqttService.Verify(x => x.PublishAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+            _mockMqttService.Verify(
+                static x => x.PublishAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
+                Times.Never
+            );
         }
 
         [Fact]
@@ -165,30 +183,50 @@ namespace SnapDog2.Tests.Integration
             const int volume = 80;
             const string sourceProtocol = "KNX";
 
-            var zone = new Zone
-            {
-                Id = zoneId,
-                Name = "Test Zone"
-            };
+            var zone = new Zone { Id = zoneId, Name = "Test Zone" };
 
-            _mockZoneRepository.Setup(x => x.GetByIdAsync(zoneId, It.IsAny<CancellationToken>()))
+            _mockZoneRepository
+                .Setup(static x => x.GetByIdAsync(zoneId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(zone);
-            _mockMqttService.Setup(x => x.PublishAsync(It.Is<string>(s => s.Contains("volume")), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            _mockMqttService
+                .Setup(static x =>
+                    x.PublishAsync(
+                        It.Is<string>(static s => s.Contains("volume")),
+                        It.IsAny<string>(),
+                        It.IsAny<CancellationToken>()
+                    )
+                )
                 .ReturnsAsync(true);
 
             await _protocolCoordinator.StartAsync(CancellationToken.None);
 
             // Act
-            var result = await _protocolCoordinator.SynchronizeZoneVolumeChangeAsync(zoneId, volume, sourceProtocol, CancellationToken.None);
+            var result = await _protocolCoordinator.SynchronizeZoneVolumeChangeAsync(
+                zoneId,
+                volume,
+                sourceProtocol,
+                CancellationToken.None
+            );
 
             // Assert
             Assert.True(result.IsSuccess);
 
             // Should sync to MQTT (not source)
-            _mockMqttService.Verify(x => x.PublishAsync(It.Is<string>(s => s.Contains("volume")), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
+            _mockMqttService.Verify(
+                static x =>
+                    x.PublishAsync(
+                        It.Is<string>(static s => s.Contains("volume")),
+                        It.IsAny<string>(),
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once
+            );
 
             // Should NOT sync to KNX (is source)
-            _mockKnxService.Verify(x => x.SendVolumeCommandAsync(It.IsAny<KnxAddress>(), volume, It.IsAny<CancellationToken>()), Times.Never);
+            _mockKnxService.Verify(
+                static x => x.SendVolumeCommandAsync(It.IsAny<KnxAddress>(), volume, It.IsAny<CancellationToken>()),
+                Times.Never
+            );
         }
 
         [Fact]
@@ -199,28 +237,50 @@ namespace SnapDog2.Tests.Integration
             const string streamId = "test-stream";
             const string sourceProtocol = "Snapcast";
 
-            _mockMqttService.Setup(x => x.PublishAsync(It.Is<string>(s => s.Contains("status")), "playing", It.IsAny<CancellationToken>()))
+            _mockMqttService
+                .Setup(static x =>
+                    x.PublishAsync(
+                        It.Is<string>(static s => s.Contains("status")),
+                        "playing",
+                        It.IsAny<CancellationToken>()
+                    )
+                )
                 .ReturnsAsync(true);
 
             await _protocolCoordinator.StartAsync(CancellationToken.None);
 
             // Act
-            var result = await _protocolCoordinator.SynchronizePlaybackCommandAsync(command, streamId, sourceProtocol, CancellationToken.None);
+            var result = await _protocolCoordinator.SynchronizePlaybackCommandAsync(
+                command,
+                streamId,
+                sourceProtocol,
+                CancellationToken.None
+            );
 
             // Assert
             Assert.True(result.IsSuccess);
 
             // Should publish to MQTT
-            _mockMqttService.Verify(x => x.PublishAsync(It.Is<string>(s => s.Contains("status")), "playing", It.IsAny<CancellationToken>()), Times.Once);
+            _mockMqttService.Verify(
+                static x =>
+                    x.PublishAsync(
+                        It.Is<string>(static s => s.Contains("status")),
+                        "playing",
+                        It.IsAny<CancellationToken>()
+                    ),
+                Times.Once
+            );
         }
 
         [Fact]
         public async Task GetProtocolHealthAsync_ShouldReturnHealthStatusForAllProtocols()
         {
             // Arrange
-            _mockSnapcastService.Setup(x => x.IsServerAvailableAsync(It.IsAny<CancellationToken>()))
+            _mockSnapcastService
+                .Setup(static x => x.IsServerAvailableAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
-            _mockSubsonicService.Setup(x => x.IsServerAvailableAsync(It.IsAny<CancellationToken>()))
+            _mockSubsonicService
+                .Setup(static x => x.IsServerAvailableAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(false);
 
             // Act
@@ -249,22 +309,24 @@ namespace SnapDog2.Tests.Integration
                 IpAddress = IpAddress.Parse("127.0.0.1"),
                 Status = ClientStatus.Connected,
                 Volume = 50,
-                ZoneId = "1"
+                ZoneId = "1",
             };
 
-            var zone = new Zone
-            {
-                Id = "1",
-                Name = "Test Zone"
-            };
+            var zone = new Zone { Id = "1", Name = "Test Zone" };
 
-            _mockClientRepository.Setup(x => x.GetByIdAsync("test-client", It.IsAny<CancellationToken>()))
+            _mockClientRepository
+                .Setup(static x => x.GetByIdAsync("test-client", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(client);
-            _mockZoneRepository.Setup(x => x.GetByIdAsync("1", It.IsAny<CancellationToken>()))
+            _mockZoneRepository
+                .Setup(static x => x.GetByIdAsync("1", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(zone);
-            _mockMqttService.Setup(x => x.PublishAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            _mockMqttService
+                .Setup(static x =>
+                    x.PublishAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>())
+                )
                 .ReturnsAsync(true);
-            _mockKnxService.Setup(x => x.SendVolumeCommandAsync(It.IsAny<KnxAddress>(), 50, It.IsAny<CancellationToken>()))
+            _mockKnxService
+                .Setup(static x => x.SendVolumeCommandAsync(It.IsAny<KnxAddress>(), 50, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
             await _protocolCoordinator.StartAsync(CancellationToken.None);
@@ -276,8 +338,14 @@ namespace SnapDog2.Tests.Integration
             await Task.Delay(100);
 
             // Assert
-            _mockMqttService.Verify(x => x.PublishAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
-            _mockKnxService.Verify(x => x.SendVolumeCommandAsync(It.IsAny<KnxAddress>(), 50, It.IsAny<CancellationToken>()), Times.Once);
+            _mockMqttService.Verify(
+                static x => x.PublishAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
+                Times.Once
+            );
+            _mockKnxService.Verify(
+                static x => x.SendVolumeCommandAsync(It.IsAny<KnxAddress>(), 50, It.IsAny<CancellationToken>()),
+                Times.Once
+            );
         }
 
         [Fact]
@@ -296,28 +364,35 @@ namespace SnapDog2.Tests.Integration
                 IpAddress = IpAddress.Parse("127.0.0.1"),
                 Status = ClientStatus.Connected,
                 Volume = 50,
-                ZoneId = "1"
+                ZoneId = "1",
             };
 
-            var zone = new Zone
-            {
-                Id = "1",
-                Name = "Test Zone"
-            };
+            var zone = new Zone { Id = "1", Name = "Test Zone" };
 
-            _mockClientRepository.Setup(x => x.GetByIdAsync(clientId, It.IsAny<CancellationToken>()))
+            _mockClientRepository
+                .Setup(static x => x.GetByIdAsync(clientId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(client);
-            _mockZoneRepository.Setup(x => x.GetByIdAsync("1", It.IsAny<CancellationToken>()))
+            _mockZoneRepository
+                .Setup(static x => x.GetByIdAsync("1", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(zone);
-            _mockSnapcastService.Setup(x => x.SetClientVolumeAsync(clientId, volume, It.IsAny<CancellationToken>()))
+            _mockSnapcastService
+                .Setup(static x => x.SetClientVolumeAsync(clientId, volume, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
-            _mockKnxService.Setup(x => x.SendVolumeCommandAsync(It.IsAny<KnxAddress>(), volume, It.IsAny<CancellationToken>()))
+            _mockKnxService
+                .Setup(static x =>
+                    x.SendVolumeCommandAsync(It.IsAny<KnxAddress>(), volume, It.IsAny<CancellationToken>())
+                )
                 .ReturnsAsync(false); // Simulate failure
 
             await _protocolCoordinator.StartAsync(CancellationToken.None);
 
             // Act
-            var result = await _protocolCoordinator.SynchronizeVolumeChangeAsync(clientId, volume, sourceProtocol, CancellationToken.None);
+            var result = await _protocolCoordinator.SynchronizeVolumeChangeAsync(
+                clientId,
+                volume,
+                sourceProtocol,
+                CancellationToken.None
+            );
 
             // Assert
             Assert.False(result.IsSuccess);

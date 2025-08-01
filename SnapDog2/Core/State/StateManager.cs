@@ -246,7 +246,7 @@ public sealed class StateManager : IStateManager, IDisposable
     {
         ThrowIfDisposed();
 
-        return UpdateState(currentState => new SnapDogState
+        return UpdateState(static currentState => new SnapDogState
         {
             LastUpdated = DateTime.UtcNow,
             Version = currentState.Version + 1,

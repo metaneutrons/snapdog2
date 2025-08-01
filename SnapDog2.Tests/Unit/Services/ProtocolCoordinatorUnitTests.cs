@@ -47,8 +47,8 @@ public class ProtocolCoordinatorUnitTests : IDisposable
                 Snapcast = new SnapcastConfiguration { Enabled = true },
                 Mqtt = new MqttConfiguration { Enabled = true },
                 Knx = new KnxConfiguration { Enabled = true },
-                Subsonic = new SubsonicConfiguration { Enabled = true }
-            }
+                Subsonic = new SubsonicConfiguration { Enabled = true },
+            },
         };
 
         var options = Options.Create(_config);
@@ -60,7 +60,8 @@ public class ProtocolCoordinatorUnitTests : IDisposable
             _mockClientRepository.Object,
             _mockZoneRepository.Object,
             options,
-            _mockLogger.Object);
+            _mockLogger.Object
+        );
     }
 
     #region Constructor and Initialization Tests
@@ -72,36 +73,38 @@ public class ProtocolCoordinatorUnitTests : IDisposable
         var options = Options.Create(_config);
 
         // Act & Assert
-        var act = () => new ProtocolCoordinator(
-            null!,
-            _mockMqttService.Object,
-            _mockKnxService.Object,
-            _mockSubsonicService.Object,
-            _mockClientRepository.Object,
-            _mockZoneRepository.Object,
-            options,
-            _mockLogger.Object);
+        var act = () =>
+            new ProtocolCoordinator(
+                null!,
+                _mockMqttService.Object,
+                _mockKnxService.Object,
+                _mockSubsonicService.Object,
+                _mockClientRepository.Object,
+                _mockZoneRepository.Object,
+                options,
+                _mockLogger.Object
+            );
 
-        act.Should().Throw<ArgumentNullException>()
-            .WithParameterName("snapcastService");
+        act.Should().Throw<ArgumentNullException>().WithParameterName("snapcastService");
     }
 
     [Fact]
     public void Constructor_WithNullConfiguration_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        var act = () => new ProtocolCoordinator(
-            _mockSnapcastService.Object,
-            _mockMqttService.Object,
-            _mockKnxService.Object,
-            _mockSubsonicService.Object,
-            _mockClientRepository.Object,
-            _mockZoneRepository.Object,
-            null!,
-            _mockLogger.Object);
+        var act = () =>
+            new ProtocolCoordinator(
+                _mockSnapcastService.Object,
+                _mockMqttService.Object,
+                _mockKnxService.Object,
+                _mockSubsonicService.Object,
+                _mockClientRepository.Object,
+                _mockZoneRepository.Object,
+                null!,
+                _mockLogger.Object
+            );
 
-        act.Should().Throw<ArgumentNullException>()
-            .WithParameterName("config");
+        act.Should().Throw<ArgumentNullException>().WithParameterName("config");
     }
 
     [Fact]
@@ -116,16 +119,21 @@ public class ProtocolCoordinatorUnitTests : IDisposable
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        _mockMqttService.Verify(x => x.SubscribeAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
+        _mockMqttService.Verify(
+            static x => x.SubscribeAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()),
+            Times.Once
+        );
     }
 
     [Fact]
     public async Task StartAsync_WithMqttSubscriptionFailure_ShouldStillStartSuccessfully()
     {
         // Arrange
-        _mockMqttService.Setup(x => x.SubscribeAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _mockMqttService
+            .Setup(static x => x.SubscribeAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
-        _mockSnapcastService.Setup(x => x.SynchronizeServerStateAsync(It.IsAny<CancellationToken>()))
+        _mockSnapcastService
+            .Setup(static x => x.SynchronizeServerStateAsync(It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
         // Act
@@ -162,11 +170,11 @@ public class ProtocolCoordinatorUnitTests : IDisposable
         await _protocolCoordinator.StartAsync();
 
         var client = CreateTestClient(clientId);
-        _mockClientRepository.Setup(x => x.GetByIdAsync(clientId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(client);
+        _mockClientRepository.Setup(x => x.GetByIdAsync(clientId, It.IsAny<CancellationToken>())).ReturnsAsync(client);
 
         var zone = CreateTestZone("1");
-        _mockZoneRepository.Setup(x => x.GetByIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _mockZoneRepository
+            .Setup(x => x.GetByIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(zone);
 
         SetupSuccessfulProtocolResponses();
@@ -178,20 +186,36 @@ public class ProtocolCoordinatorUnitTests : IDisposable
         result.IsSuccess.Should().BeTrue();
 
         // Should sync to Snapcast (not source)
-        _mockSnapcastService.Verify(x => x.SetClientVolumeAsync(clientId, volume, It.IsAny<CancellationToken>()), Times.Once);
+        _mockSnapcastService.Verify(
+            x => x.SetClientVolumeAsync(clientId, volume, It.IsAny<CancellationToken>()),
+            Times.Once
+        );
 
         // Should sync to KNX (not source)
-        _mockKnxService.Verify(x => x.SendVolumeCommandAsync(It.IsAny<string>(), volume, It.IsAny<CancellationToken>()), Times.Once);
+        _mockKnxService.Verify(
+            x => x.SendVolumeCommandAsync(It.IsAny<string>(), volume, It.IsAny<CancellationToken>()),
+            Times.Once
+        );
 
         // Should NOT sync to MQTT (is source)
-        _mockMqttService.Verify(x => x.PublishAsync(It.Is<string>(s => s.Contains("volume")), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        _mockMqttService.Verify(
+            x =>
+                x.PublishAsync(
+                    It.Is<string>(s => s.Contains("volume")),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()
+                ),
+            Times.Never
+        );
     }
 
     [Theory]
     [InlineData("Snapcast")]
     [InlineData("KNX")]
     [InlineData("MQTT")]
-    public async Task SynchronizeVolumeChangeAsync_WithDifferentSourceProtocols_ShouldExcludeSource(string sourceProtocol)
+    public async Task SynchronizeVolumeChangeAsync_WithDifferentSourceProtocols_ShouldExcludeSource(
+        string sourceProtocol
+    )
     {
         // Arrange
         var clientId = "1";
@@ -201,11 +225,11 @@ public class ProtocolCoordinatorUnitTests : IDisposable
         await _protocolCoordinator.StartAsync();
 
         var client = CreateTestClient(clientId);
-        _mockClientRepository.Setup(x => x.GetByIdAsync(clientId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(client);
-        
+        _mockClientRepository.Setup(x => x.GetByIdAsync(clientId, It.IsAny<CancellationToken>())).ReturnsAsync(client);
+
         var zone = CreateTestZone("1");
-        _mockZoneRepository.Setup(x => x.GetByIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _mockZoneRepository
+            .Setup(x => x.GetByIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(zone);
 
         SetupSuccessfulProtocolResponses();
@@ -220,13 +244,27 @@ public class ProtocolCoordinatorUnitTests : IDisposable
         switch (sourceProtocol)
         {
             case "Snapcast":
-                _mockSnapcastService.Verify(x => x.SetClientVolumeAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+                _mockSnapcastService.Verify(
+                    x => x.SetClientVolumeAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()),
+                    Times.Never
+                );
                 break;
             case "KNX":
-                _mockKnxService.Verify(x => x.SendVolumeCommandAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+                _mockKnxService.Verify(
+                    x => x.SendVolumeCommandAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()),
+                    Times.Never
+                );
                 break;
             case "MQTT":
-                _mockMqttService.Verify(x => x.PublishAsync(It.Is<string>(s => s.Contains("volume")), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+                _mockMqttService.Verify(
+                    x =>
+                        x.PublishAsync(
+                            It.Is<string>(s => s.Contains("volume")),
+                            It.IsAny<string>(),
+                            It.IsAny<CancellationToken>()
+                        ),
+                    Times.Never
+                );
                 break;
         }
     }
@@ -242,7 +280,8 @@ public class ProtocolCoordinatorUnitTests : IDisposable
         SetupMockServices();
         await _protocolCoordinator.StartAsync();
 
-        _mockClientRepository.Setup(x => x.GetByIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _mockClientRepository
+            .Setup(static x => x.GetByIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((Client)null!);
 
         // Act
@@ -265,17 +304,19 @@ public class ProtocolCoordinatorUnitTests : IDisposable
         await _protocolCoordinator.StartAsync();
 
         var client = CreateTestClient(clientId);
-        _mockClientRepository.Setup(x => x.GetByIdAsync(clientId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(client);
+        _mockClientRepository.Setup(x => x.GetByIdAsync(clientId, It.IsAny<CancellationToken>())).ReturnsAsync(client);
 
         var zone = CreateTestZone("1");
-        _mockZoneRepository.Setup(x => x.GetByIdAsync(client.ZoneId!, It.IsAny<CancellationToken>()))
+        _mockZoneRepository
+            .Setup(x => x.GetByIdAsync(client.ZoneId!, It.IsAny<CancellationToken>()))
             .ReturnsAsync(zone);
 
         // Setup Snapcast to succeed, KNX to fail
-        _mockSnapcastService.Setup(x => x.SetClientVolumeAsync(clientId, volume, It.IsAny<CancellationToken>()))
+        _mockSnapcastService
+            .Setup(x => x.SetClientVolumeAsync(clientId, volume, It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
-        _mockKnxService.Setup(x => x.SendVolumeCommandAsync(zone.KnxVolumeGroupAddress!, volume, It.IsAny<CancellationToken>()))
+        _mockKnxService
+            .Setup(x => x.SendVolumeCommandAsync(zone.KnxVolumeGroupAddress!, volume, It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
         // Act
@@ -300,14 +341,20 @@ public class ProtocolCoordinatorUnitTests : IDisposable
 
         var client = CreateTestClient(clientId);
 
-        _mockClientRepository.Setup(x => x.GetByIdAsync(clientId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(client);
+        _mockClientRepository.Setup(x => x.GetByIdAsync(clientId, It.IsAny<CancellationToken>())).ReturnsAsync(client);
 
-        var zone = new Zone { Id = "1", Name = "Test Zone", KnxVolumeGroupAddress = null };
-        _mockZoneRepository.Setup(x => x.GetByIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        var zone = new Zone
+        {
+            Id = "1",
+            Name = "Test Zone",
+            KnxVolumeGroupAddress = null,
+        };
+        _mockZoneRepository
+            .Setup(x => x.GetByIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(zone);
 
-        _mockSnapcastService.Setup(x => x.SetClientVolumeAsync(clientId, volume, It.IsAny<CancellationToken>()))
+        _mockSnapcastService
+            .Setup(x => x.SetClientVolumeAsync(clientId, volume, It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
         // Act
@@ -317,10 +364,16 @@ public class ProtocolCoordinatorUnitTests : IDisposable
         result.IsSuccess.Should().BeTrue();
 
         // Should sync to Snapcast
-        _mockSnapcastService.Verify(x => x.SetClientVolumeAsync(clientId, volume, It.IsAny<CancellationToken>()), Times.Once);
+        _mockSnapcastService.Verify(
+            x => x.SetClientVolumeAsync(clientId, volume, It.IsAny<CancellationToken>()),
+            Times.Once
+        );
 
         // Should NOT attempt KNX sync (no configuration)
-        _mockKnxService.Verify(x => x.SendVolumeCommandAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+        _mockKnxService.Verify(
+            x => x.SendVolumeCommandAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()),
+            Times.Never
+        );
     }
 
     #endregion
@@ -339,10 +392,16 @@ public class ProtocolCoordinatorUnitTests : IDisposable
         await _protocolCoordinator.StartAsync();
 
         var zone = CreateTestZone(zoneId);
-        _mockZoneRepository.Setup(x => x.GetByIdAsync(zoneId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(zone);
+        _mockZoneRepository.Setup(x => x.GetByIdAsync(zoneId, It.IsAny<CancellationToken>())).ReturnsAsync(zone);
 
-        _mockMqttService.Setup(x => x.PublishAsync(It.Is<string>(s => s.Contains("volume")), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _mockMqttService
+            .Setup(x =>
+                x.PublishAsync(
+                    It.Is<string>(s => s.Contains("volume")),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .ReturnsAsync(true);
 
         // Act
@@ -352,10 +411,21 @@ public class ProtocolCoordinatorUnitTests : IDisposable
         result.IsSuccess.Should().BeTrue();
 
         // Should sync to MQTT (not source)
-        _mockMqttService.Verify(x => x.PublishAsync(It.Is<string>(s => s.Contains("volume")), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
+        _mockMqttService.Verify(
+            x =>
+                x.PublishAsync(
+                    It.Is<string>(s => s.Contains("volume")),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()
+                ),
+            Times.Once
+        );
 
         // Should NOT sync to KNX (is source)
-        _mockKnxService.Verify(x => x.SendVolumeCommandAsync(It.IsAny<string>(), volume, It.IsAny<CancellationToken>()), Times.Never);
+        _mockKnxService.Verify(
+            x => x.SendVolumeCommandAsync(It.IsAny<string>(), volume, It.IsAny<CancellationToken>()),
+            Times.Never
+        );
     }
 
     [Fact]
@@ -369,8 +439,7 @@ public class ProtocolCoordinatorUnitTests : IDisposable
         SetupMockServices();
         await _protocolCoordinator.StartAsync();
 
-        _mockZoneRepository.Setup(x => x.GetByIdAsync(zoneId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Zone)null!);
+        _mockZoneRepository.Setup(x => x.GetByIdAsync(zoneId, It.IsAny<CancellationToken>())).ReturnsAsync((Zone)null!);
 
         // Act
         var result = await _protocolCoordinator.SynchronizeZoneVolumeChangeAsync(zoneId, volume, sourceProtocol);
@@ -396,14 +465,15 @@ public class ProtocolCoordinatorUnitTests : IDisposable
         await _protocolCoordinator.StartAsync();
 
         var client = CreateTestClient(clientId);
-        _mockClientRepository.Setup(x => x.GetByIdAsync(clientId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(client);
+        _mockClientRepository.Setup(x => x.GetByIdAsync(clientId, It.IsAny<CancellationToken>())).ReturnsAsync(client);
 
         var zone = CreateTestZone("1");
-        _mockZoneRepository.Setup(x => x.GetByIdAsync(client.ZoneId!, It.IsAny<CancellationToken>()))
+        _mockZoneRepository
+            .Setup(x => x.GetByIdAsync(client.ZoneId!, It.IsAny<CancellationToken>()))
             .ReturnsAsync(zone);
 
-        _mockKnxService.Setup(x => x.SendBooleanCommandAsync(zone.KnxMuteGroupAddress!, muted, It.IsAny<CancellationToken>()))
+        _mockKnxService
+            .Setup(x => x.SendBooleanCommandAsync(zone.KnxMuteGroupAddress!, muted, It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
         // Act
@@ -413,10 +483,16 @@ public class ProtocolCoordinatorUnitTests : IDisposable
         result.IsSuccess.Should().BeTrue();
 
         // Should sync to KNX (not source)
-        _mockKnxService.Verify(x => x.SendBooleanCommandAsync(zone.KnxMuteGroupAddress!, muted, It.IsAny<CancellationToken>()), Times.Once);
+        _mockKnxService.Verify(
+            x => x.SendBooleanCommandAsync(zone.KnxMuteGroupAddress!, muted, It.IsAny<CancellationToken>()),
+            Times.Once
+        );
 
         // Should NOT sync to Snapcast (is source)
-        _mockSnapcastService.Verify(x => x.SetClientMuteAsync(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Never);
+        _mockSnapcastService.Verify(
+            x => x.SetClientMuteAsync(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()),
+            Times.Never
+        );
     }
 
     [Fact]
@@ -432,11 +508,16 @@ public class ProtocolCoordinatorUnitTests : IDisposable
 
         var client = CreateTestClient(clientId);
 
-        _mockClientRepository.Setup(x => x.GetByIdAsync(clientId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(client);
+        _mockClientRepository.Setup(x => x.GetByIdAsync(clientId, It.IsAny<CancellationToken>())).ReturnsAsync(client);
 
-        var zone = new Zone { Id = "1", Name = "Test Zone", KnxMuteGroupAddress = null };
-        _mockZoneRepository.Setup(x => x.GetByIdAsync(client.ZoneId!, It.IsAny<CancellationToken>()))
+        var zone = new Zone
+        {
+            Id = "1",
+            Name = "Test Zone",
+            KnxMuteGroupAddress = null,
+        };
+        _mockZoneRepository
+            .Setup(x => x.GetByIdAsync(client.ZoneId!, It.IsAny<CancellationToken>()))
             .ReturnsAsync(zone);
 
         // Act
@@ -446,7 +527,10 @@ public class ProtocolCoordinatorUnitTests : IDisposable
         result.IsSuccess.Should().BeTrue();
 
         // Should NOT attempt KNX sync (no mute address)
-        _mockKnxService.Verify(x => x.SendBooleanCommandAsync(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Never);
+        _mockKnxService.Verify(
+            x => x.SendBooleanCommandAsync(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()),
+            Times.Never
+        );
     }
 
     #endregion
@@ -464,7 +548,14 @@ public class ProtocolCoordinatorUnitTests : IDisposable
         SetupMockServices();
         await _protocolCoordinator.StartAsync();
 
-        _mockMqttService.Setup(x => x.PublishAsync(It.Is<string>(s => s.Contains("status")), "playing", It.IsAny<CancellationToken>()))
+        _mockMqttService
+            .Setup(static x =>
+                x.PublishAsync(
+                    It.Is<string>(static s => s.Contains("status")),
+                    "playing",
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .ReturnsAsync(true);
 
         // Act
@@ -472,7 +563,15 @@ public class ProtocolCoordinatorUnitTests : IDisposable
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        _mockMqttService.Verify(x => x.PublishAsync(It.Is<string>(s => s.Contains("status")), "playing", It.IsAny<CancellationToken>()), Times.Once);
+        _mockMqttService.Verify(
+            static x =>
+                x.PublishAsync(
+                    It.Is<string>(static s => s.Contains("status")),
+                    "playing",
+                    It.IsAny<CancellationToken>()
+                ),
+            Times.Once
+        );
     }
 
     [Theory]
@@ -480,7 +579,10 @@ public class ProtocolCoordinatorUnitTests : IDisposable
     [InlineData("STOP", "stopped")]
     [InlineData("PAUSE", "paused")]
     [InlineData("UNKNOWN", "unknown")]
-    public async Task SynchronizePlaybackCommandAsync_WithDifferentCommands_ShouldMapStatusCorrectly(string command, string expectedStatus)
+    public async Task SynchronizePlaybackCommandAsync_WithDifferentCommands_ShouldMapStatusCorrectly(
+        string command,
+        string expectedStatus
+    )
     {
         // Arrange
         var streamId = 1;
@@ -489,7 +591,10 @@ public class ProtocolCoordinatorUnitTests : IDisposable
         SetupMockServices();
         await _protocolCoordinator.StartAsync();
 
-        _mockMqttService.Setup(x => x.PublishAsync(It.Is<string>(s => s.Contains("status")), expectedStatus, It.IsAny<CancellationToken>()))
+        _mockMqttService
+            .Setup(x =>
+                x.PublishAsync(It.Is<string>(s => s.Contains("status")), expectedStatus, It.IsAny<CancellationToken>())
+            )
             .ReturnsAsync(true);
 
         // Act
@@ -497,7 +602,11 @@ public class ProtocolCoordinatorUnitTests : IDisposable
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        _mockMqttService.Verify(x => x.PublishAsync(It.Is<string>(s => s.Contains("status")), expectedStatus, It.IsAny<CancellationToken>()), Times.Once);
+        _mockMqttService.Verify(
+            x =>
+                x.PublishAsync(It.Is<string>(s => s.Contains("status")), expectedStatus, It.IsAny<CancellationToken>()),
+            Times.Once
+        );
     }
 
     [Fact]
@@ -516,7 +625,10 @@ public class ProtocolCoordinatorUnitTests : IDisposable
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        _mockMqttService.Verify(x => x.PublishAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        _mockMqttService.Verify(
+            static x => x.PublishAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
+            Times.Never
+        );
     }
 
     #endregion
@@ -534,7 +646,8 @@ public class ProtocolCoordinatorUnitTests : IDisposable
         SetupMockServices();
         await _protocolCoordinator.StartAsync();
 
-        _mockSnapcastService.Setup(x => x.SetGroupStreamAsync(groupId, streamId, It.IsAny<CancellationToken>()))
+        _mockSnapcastService
+            .Setup(x => x.SetGroupStreamAsync(groupId, streamId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
         // Act
@@ -542,7 +655,10 @@ public class ProtocolCoordinatorUnitTests : IDisposable
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        _mockSnapcastService.Verify(x => x.SetGroupStreamAsync(groupId, streamId, It.IsAny<CancellationToken>()), Times.Once);
+        _mockSnapcastService.Verify(
+            x => x.SetGroupStreamAsync(groupId, streamId, It.IsAny<CancellationToken>()),
+            Times.Once
+        );
     }
 
     [Fact]
@@ -561,7 +677,10 @@ public class ProtocolCoordinatorUnitTests : IDisposable
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        _mockSnapcastService.Verify(x => x.SetGroupStreamAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        _mockSnapcastService.Verify(
+            static x => x.SetGroupStreamAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
+            Times.Never
+        );
     }
 
     #endregion
@@ -579,7 +698,14 @@ public class ProtocolCoordinatorUnitTests : IDisposable
         SetupMockServices();
         await _protocolCoordinator.StartAsync();
 
-        _mockMqttService.Setup(x => x.PublishAsync(It.Is<string>(s => s.Contains("status")), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _mockMqttService
+            .Setup(static x =>
+                x.PublishAsync(
+                    It.Is<string>(static s => s.Contains("status")),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .ReturnsAsync(true);
 
         // Act
@@ -587,7 +713,15 @@ public class ProtocolCoordinatorUnitTests : IDisposable
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        _mockMqttService.Verify(x => x.PublishAsync(It.Is<string>(s => s.Contains("status")), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
+        _mockMqttService.Verify(
+            static x =>
+                x.PublishAsync(
+                    It.Is<string>(static s => s.Contains("status")),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()
+                ),
+            Times.Once
+        );
     }
 
     [Fact]
@@ -606,7 +740,10 @@ public class ProtocolCoordinatorUnitTests : IDisposable
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        _mockMqttService.Verify(x => x.PublishAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        _mockMqttService.Verify(
+            static x => x.PublishAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
+            Times.Never
+        );
     }
 
     #endregion
@@ -617,9 +754,11 @@ public class ProtocolCoordinatorUnitTests : IDisposable
     public async Task GetProtocolHealthAsync_WithAllProtocolsEnabled_ShouldCheckAllServices()
     {
         // Arrange
-        _mockSnapcastService.Setup(x => x.IsServerAvailableAsync(It.IsAny<CancellationToken>()))
+        _mockSnapcastService
+            .Setup(static x => x.IsServerAvailableAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
-        _mockSubsonicService.Setup(x => x.IsServerAvailableAsync(It.IsAny<CancellationToken>()))
+        _mockSubsonicService
+            .Setup(static x => x.IsServerAvailableAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
         // Act
@@ -657,7 +796,8 @@ public class ProtocolCoordinatorUnitTests : IDisposable
     public async Task GetProtocolHealthAsync_WithHealthCheckException_ShouldHandleGracefully()
     {
         // Arrange
-        _mockSnapcastService.Setup(x => x.IsServerAvailableAsync(It.IsAny<CancellationToken>()))
+        _mockSnapcastService
+            .Setup(static x => x.IsServerAvailableAsync(It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("Service error"));
 
         // Act
@@ -683,11 +823,11 @@ public class ProtocolCoordinatorUnitTests : IDisposable
         await _protocolCoordinator.StartAsync();
 
         var client = CreateTestClient(clientId);
-        _mockClientRepository.Setup(x => x.GetByIdAsync(clientId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(client);
+        _mockClientRepository.Setup(x => x.GetByIdAsync(clientId, It.IsAny<CancellationToken>())).ReturnsAsync(client);
 
         var zone = CreateTestZone("1");
-        _mockZoneRepository.Setup(x => x.GetByIdAsync(client.ZoneId!, It.IsAny<CancellationToken>()))
+        _mockZoneRepository
+            .Setup(x => x.GetByIdAsync(client.ZoneId!, It.IsAny<CancellationToken>()))
             .ReturnsAsync(zone);
 
         SetupSuccessfulProtocolResponses();
@@ -722,10 +862,8 @@ public class ProtocolCoordinatorUnitTests : IDisposable
         var client1 = CreateTestClient("1");
         var client2 = CreateTestClient("2");
 
-        _mockClientRepository.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(client1);
-        _mockClientRepository.Setup(x => x.GetByIdAsync(2, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(client2);
+        _mockClientRepository.Setup(static x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(client1);
+        _mockClientRepository.Setup(static x => x.GetByIdAsync(2, It.IsAny<CancellationToken>())).ReturnsAsync(client2);
 
         SetupSuccessfulProtocolResponses();
 
@@ -736,7 +874,7 @@ public class ProtocolCoordinatorUnitTests : IDisposable
         var results = await Task.WhenAll(task1, task2);
 
         // Assert
-        results.Should().AllSatisfy(r => r.IsSuccess.Should().BeTrue());
+        results.Should().AllSatisfy(static r => r.IsSuccess.Should().BeTrue());
     }
 
     #endregion
@@ -755,8 +893,7 @@ public class ProtocolCoordinatorUnitTests : IDisposable
         await _protocolCoordinator.StartAsync();
 
         var client = CreateTestClient(clientId);
-        _mockClientRepository.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(client);
+        _mockClientRepository.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(client);
 
         SetupSuccessfulProtocolResponses();
 
@@ -764,8 +901,19 @@ public class ProtocolCoordinatorUnitTests : IDisposable
         await _protocolCoordinator.Handle(volumeEvent, CancellationToken.None);
 
         // Assert
-        _mockMqttService.Verify(x => x.PublishAsync(It.Is<string>(s => s.Contains("volume")), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
-        _mockKnxService.Verify(x => x.SendVolumeCommandAsync(It.IsAny<string>(), volume, It.IsAny<CancellationToken>()), Times.Once);
+        _mockMqttService.Verify(
+            x =>
+                x.PublishAsync(
+                    It.Is<string>(s => s.Contains("volume")),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()
+                ),
+            Times.Once
+        );
+        _mockKnxService.Verify(
+            x => x.SendVolumeCommandAsync(It.IsAny<string>(), volume, It.IsAny<CancellationToken>()),
+            Times.Once
+        );
     }
 
     [Fact]
@@ -778,14 +926,29 @@ public class ProtocolCoordinatorUnitTests : IDisposable
         SetupMockServices();
         await _protocolCoordinator.StartAsync();
 
-        _mockMqttService.Setup(x => x.PublishAsync(It.Is<string>(s => s.Contains("status")), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _mockMqttService
+            .Setup(static x =>
+                x.PublishAsync(
+                    It.Is<string>(static s => s.Contains("status")),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .ReturnsAsync(true);
 
         // Act
         await _protocolCoordinator.Handle(connectedEvent, CancellationToken.None);
 
         // Assert
-        _mockMqttService.Verify(x => x.PublishAsync(It.Is<string>(s => s.Contains("status")), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
+        _mockMqttService.Verify(
+            static x =>
+                x.PublishAsync(
+                    It.Is<string>(static s => s.Contains("status")),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()
+                ),
+            Times.Once
+        );
     }
 
     [Fact]
@@ -798,14 +961,29 @@ public class ProtocolCoordinatorUnitTests : IDisposable
         SetupMockServices();
         await _protocolCoordinator.StartAsync();
 
-        _mockMqttService.Setup(x => x.PublishAsync(It.Is<string>(s => s.Contains("status")), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _mockMqttService
+            .Setup(static x =>
+                x.PublishAsync(
+                    It.Is<string>(static s => s.Contains("status")),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()
+                )
+            )
             .ReturnsAsync(true);
 
         // Act
         await _protocolCoordinator.Handle(disconnectedEvent, CancellationToken.None);
 
         // Assert
-        _mockMqttService.Verify(x => x.PublishAsync(It.Is<string>(s => s.Contains("status")), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
+        _mockMqttService.Verify(
+            static x =>
+                x.PublishAsync(
+                    It.Is<string>(static s => s.Contains("status")),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()
+                ),
+            Times.Once
+        );
     }
 
     [Fact]
@@ -820,17 +998,20 @@ public class ProtocolCoordinatorUnitTests : IDisposable
         await _protocolCoordinator.StartAsync();
 
         var zone = CreateTestZone(zoneId);
-        _mockZoneRepository.Setup(x => x.GetByIdAsync(zoneId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(zone);
+        _mockZoneRepository.Setup(x => x.GetByIdAsync(zoneId, It.IsAny<CancellationToken>())).ReturnsAsync(zone);
 
-        _mockKnxService.Setup(x => x.SendVolumeCommandAsync(zone.KnxVolumeGroupAddress!, volume, It.IsAny<CancellationToken>()))
+        _mockKnxService
+            .Setup(x => x.SendVolumeCommandAsync(zone.KnxVolumeGroupAddress!, volume, It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
         // Act
         await _protocolCoordinator.Handle(zoneVolumeEvent, CancellationToken.None);
 
         // Assert
-        _mockKnxService.Verify(x => x.SendVolumeCommandAsync(zone.KnxVolumeGroupAddress!, volume, It.IsAny<CancellationToken>()), Times.Once);
+        _mockKnxService.Verify(
+            x => x.SendVolumeCommandAsync(zone.KnxVolumeGroupAddress!, volume, It.IsAny<CancellationToken>()),
+            Times.Once
+        );
     }
 
     [Fact]
@@ -845,18 +1026,21 @@ public class ProtocolCoordinatorUnitTests : IDisposable
         await _protocolCoordinator.StartAsync();
 
         var client = CreateTestClient(clientId);
-        _mockClientRepository.Setup(x => x.GetByIdAsync(clientId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(client);
+        _mockClientRepository.Setup(x => x.GetByIdAsync(clientId, It.IsAny<CancellationToken>())).ReturnsAsync(client);
 
         var zone = CreateTestZone("1");
-        _mockZoneRepository.Setup(x => x.GetByIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _mockZoneRepository
+            .Setup(x => x.GetByIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(zone);
 
         // Act
         await _protocolCoordinator.Handle(clientVolumeEvent, CancellationToken.None);
 
         // Assert
-        _mockSnapcastService.Verify(s => s.SetClientVolumeAsync(clientId, volume, It.IsAny<CancellationToken>()), Times.Once);
+        _mockSnapcastService.Verify(
+            s => s.SetClientVolumeAsync(clientId, volume, It.IsAny<CancellationToken>()),
+            Times.Once
+        );
     }
 
     #endregion
@@ -901,7 +1085,8 @@ public class ProtocolCoordinatorUnitTests : IDisposable
         SetupMockServices();
         await _protocolCoordinator.StartAsync();
 
-        _mockClientRepository.Setup(x => x.GetByIdAsync(clientId, It.IsAny<CancellationToken>()))
+        _mockClientRepository
+            .Setup(x => x.GetByIdAsync(clientId, It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("Database error"));
 
         // Act
@@ -931,12 +1116,14 @@ public class ProtocolCoordinatorUnitTests : IDisposable
         {
             var clientId = (i % 5 + 1).ToString(); // Use 5 different clients
             var client = CreateTestClient(clientId);
-            _mockClientRepository.Setup(x => x.GetByIdAsync(clientId, It.IsAny<CancellationToken>()))
+            _mockClientRepository
+                .Setup(x => x.GetByIdAsync(clientId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(client);
         }
-        
+
         var zone = CreateTestZone("1");
-        _mockZoneRepository.Setup(x => x.GetByIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _mockZoneRepository
+            .Setup(x => x.GetByIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(zone);
 
         SetupSuccessfulProtocolResponses();
@@ -965,27 +1152,45 @@ public class ProtocolCoordinatorUnitTests : IDisposable
 
     private void SetupMockServices()
     {
-        _mockMqttService.Setup(x => x.SubscribeAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _mockMqttService
+            .Setup(static x => x.SubscribeAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
-        _mockSnapcastService.Setup(x => x.SynchronizeServerStateAsync(It.IsAny<CancellationToken>()))
+        _mockSnapcastService
+            .Setup(static x => x.SynchronizeServerStateAsync(It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
     }
 
     private void SetupSuccessfulProtocolResponses()
     {
-        _mockSnapcastService.Setup(x => x.SetClientVolumeAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+        _mockSnapcastService
+            .Setup(static x =>
+                x.SetClientVolumeAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>())
+            )
             .ReturnsAsync(true);
-        _mockSnapcastService.Setup(x => x.SetClientMuteAsync(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+        _mockSnapcastService
+            .Setup(static x =>
+                x.SetClientMuteAsync(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())
+            )
             .ReturnsAsync(true);
-        _mockSnapcastService.Setup(x => x.SetGroupStreamAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _mockSnapcastService
+            .Setup(static x =>
+                x.SetGroupStreamAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>())
+            )
             .ReturnsAsync(true);
 
-        _mockMqttService.Setup(x => x.PublishAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        _mockMqttService
+            .Setup(static x => x.PublishAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
-        _mockKnxService.Setup(x => x.SendVolumeCommandAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+        _mockKnxService
+            .Setup(static x =>
+                x.SendVolumeCommandAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>())
+            )
             .ReturnsAsync(true);
-        _mockKnxService.Setup(x => x.SendBooleanCommandAsync(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+        _mockKnxService
+            .Setup(static x =>
+                x.SendBooleanCommandAsync(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<CancellationToken>())
+            )
             .ReturnsAsync(true);
     }
 
@@ -999,7 +1204,7 @@ public class ProtocolCoordinatorUnitTests : IDisposable
             IpAddress = "127.0.0.1",
             Status = SnapDog2.Core.Models.Enums.ClientStatus.Connected,
             Volume = 50,
-            ZoneId = "1"
+            ZoneId = "1",
         };
     }
 
@@ -1010,44 +1215,53 @@ public class ProtocolCoordinatorUnitTests : IDisposable
             Id = id,
             Name = $"Test Zone {id}",
             KnxVolumeGroupAddress = "2/3/4",
-            KnxMuteGroupAddress = "2/3/5"
+            KnxMuteGroupAddress = "2/3/5",
         };
     }
 
     private void VerifyLoggerError(string expectedMessage)
     {
         _mockLogger.Verify(
-            x => x.Log(
-                LogLevel.Error,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains(expectedMessage)),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
-            Times.AtLeastOnce);
+            x =>
+                x.Log(
+                    LogLevel.Error,
+                    It.IsAny<EventId>(),
+                    It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains(expectedMessage)),
+                    It.IsAny<Exception>(),
+                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()
+                ),
+            Times.AtLeastOnce
+        );
     }
 
     private void VerifyLoggerWarning(string expectedMessage)
     {
         _mockLogger.Verify(
-            x => x.Log(
-                LogLevel.Warning,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains(expectedMessage)),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
-            Times.AtLeastOnce);
+            x =>
+                x.Log(
+                    LogLevel.Warning,
+                    It.IsAny<EventId>(),
+                    It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains(expectedMessage)),
+                    It.IsAny<Exception>(),
+                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()
+                ),
+            Times.AtLeastOnce
+        );
     }
 
     private void VerifyLoggerInfo(string expectedMessage)
     {
         _mockLogger.Verify(
-            x => x.Log(
-                LogLevel.Information,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains(expectedMessage)),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
-            Times.AtLeastOnce);
+            x =>
+                x.Log(
+                    LogLevel.Information,
+                    It.IsAny<EventId>(),
+                    It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains(expectedMessage)),
+                    It.IsAny<Exception>(),
+                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()
+                ),
+            Times.AtLeastOnce
+        );
     }
 
     #endregion

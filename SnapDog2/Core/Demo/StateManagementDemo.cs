@@ -63,7 +63,7 @@ public class StateManagementDemo
         );
 
         // Add some entities
-        var updatedState = _stateManager.UpdateState(state =>
+        var updatedState = _stateManager.UpdateState(static state =>
         {
             var zone = Zone.Create("demo-zone", "Demo Zone", "Demo zone for testing");
             var client = Client.Create(
@@ -112,7 +112,7 @@ public class StateManagementDemo
 
         // Test valid state update
         var validUpdate = _stateManager.TryUpdateState(
-            state =>
+            static state =>
             {
                 var zone = Zone.Create("valid-zone", "Valid Zone");
                 var client = Client.Create(
@@ -151,7 +151,7 @@ public class StateManagementDemo
         _logger.LogInformation("--- State Transitions Demo ---");
 
         // Simulate client connection sequence
-        _stateManager.UpdateState(state =>
+        _stateManager.UpdateState(static state =>
         {
             var client = state.Clients.Values.FirstOrDefault();
             if (client != null)
@@ -166,7 +166,7 @@ public class StateManagementDemo
 
         await Task.Delay(500);
 
-        _stateManager.UpdateState(state =>
+        _stateManager.UpdateState(static state =>
         {
             var client = state.Clients.Values.FirstOrDefault();
             if (client != null)
@@ -180,7 +180,7 @@ public class StateManagementDemo
         _logger.LogInformation("Client reconnected");
 
         // Simulate stream status changes
-        _stateManager.UpdateState(state =>
+        _stateManager.UpdateState(static state =>
         {
             var stream = state.AudioStreams.Values.FirstOrDefault();
             if (stream != null)
@@ -195,7 +195,7 @@ public class StateManagementDemo
 
         await Task.Delay(1000);
 
-        _stateManager.UpdateState(state =>
+        _stateManager.UpdateState(static state =>
         {
             var stream = state.AudioStreams.Values.FirstOrDefault();
             if (stream != null)
@@ -220,7 +220,7 @@ public class StateManagementDemo
 
         // Test retry mechanism
         var retryResult = _stateManager.UpdateStateWithRetry(
-            state =>
+            static state =>
             {
                 // Simulate a potentially conflicting update
                 var zone = state.Zones.Values.FirstOrDefault();
@@ -266,7 +266,7 @@ public class StateManagementDemo
         _logger.LogInformation("  - Has errors: {HasError}", currentState.HasError);
 
         // Demonstrate metadata usage
-        _stateManager.UpdateState(state =>
+        _stateManager.UpdateState(static state =>
             state
                 .WithMetadata("demo-timestamp", DateTime.UtcNow)
                 .WithMetadata("demo-operation", "state-extensions-demo")
@@ -330,7 +330,7 @@ public class StateManagementDemo
     {
         // Quick state update for performance testing
         _stateManager.TryUpdateState(
-            state => state.WithMetadata($"benchmark-{Guid.NewGuid()}", DateTime.UtcNow.Ticks),
+            static state => state.WithMetadata($"benchmark-{Guid.NewGuid()}", DateTime.UtcNow.Ticks),
             out _
         );
 
@@ -357,7 +357,7 @@ public class StateManagementDemo
         // Test update function that returns null
         try
         {
-            _stateManager.UpdateState(_ => null!);
+            _stateManager.UpdateState(static _ => null!);
         }
         catch (InvalidOperationException ex)
         {

@@ -91,7 +91,7 @@ public class IpAddressTests
     public void Constructor_WithNullIPAddressInstance_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new IpAddress((System.Net.IPAddress)null!));
+        Assert.Throws<ArgumentNullException>(static () => new IpAddress((System.Net.IPAddress)null!));
     }
 
     [Theory]

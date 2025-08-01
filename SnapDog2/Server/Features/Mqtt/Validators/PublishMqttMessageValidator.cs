@@ -13,7 +13,7 @@ public class PublishMqttMessageValidator : AbstractValidator<PublishMqttMessageC
     /// </summary>
     public PublishMqttMessageValidator()
     {
-        RuleFor(x => x.Topic)
+        RuleFor(static x => x.Topic)
             .NotEmpty()
             .WithMessage("Topic is required")
             .MaximumLength(1000)
@@ -23,13 +23,15 @@ public class PublishMqttMessageValidator : AbstractValidator<PublishMqttMessageC
                 "Topic contains invalid characters. MQTT topics cannot contain wildcards (+, #) when publishing"
             );
 
-        RuleFor(x => x.Payload)
+        RuleFor(static x => x.Payload)
             .NotNull()
             .WithMessage("Payload cannot be null")
             .MaximumLength(268435456) // 256 MB limit
             .WithMessage("Payload cannot exceed 256 MB");
 
-        RuleFor(x => x.QoS).IsInEnum().WithMessage("QoS must be a valid MQTT quality of service level (0, 1, or 2)");
+        RuleFor(static x => x.QoS)
+            .IsInEnum()
+            .WithMessage("QoS must be a valid MQTT quality of service level (0, 1, or 2)");
     }
 
     /// <summary>

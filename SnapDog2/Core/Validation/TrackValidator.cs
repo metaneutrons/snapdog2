@@ -15,7 +15,7 @@ public sealed class TrackValidator : AbstractValidator<Track>
     public TrackValidator()
     {
         // Required string properties
-        RuleFor(x => x.Id)
+        RuleFor(static x => x.Id)
             .NotEmpty()
             .WithMessage("Track ID is required.")
             .MaximumLength(100)
@@ -23,7 +23,7 @@ public sealed class TrackValidator : AbstractValidator<Track>
             .Matches(@"^[a-zA-Z0-9_-]+$")
             .WithMessage("Track ID can only contain alphanumeric characters, underscores, and hyphens.");
 
-        RuleFor(x => x.Title)
+        RuleFor(static x => x.Title)
             .NotEmpty()
             .WithMessage("Track title is required.")
             .MaximumLength(500)
@@ -32,147 +32,147 @@ public sealed class TrackValidator : AbstractValidator<Track>
             .WithMessage("Track title must be at least 1 character long.");
 
         // Optional metadata validations
-        RuleFor(x => x.Artist)
+        RuleFor(static x => x.Artist)
             .MaximumLength(300)
             .WithMessage("Artist name cannot exceed 300 characters.")
-            .When(x => !string.IsNullOrEmpty(x.Artist));
+            .When(static x => !string.IsNullOrEmpty(x.Artist));
 
-        RuleFor(x => x.Album)
+        RuleFor(static x => x.Album)
             .MaximumLength(300)
             .WithMessage("Album name cannot exceed 300 characters.")
-            .When(x => !string.IsNullOrEmpty(x.Album));
+            .When(static x => !string.IsNullOrEmpty(x.Album));
 
-        RuleFor(x => x.Genre)
+        RuleFor(static x => x.Genre)
             .MaximumLength(100)
             .WithMessage("Genre cannot exceed 100 characters.")
-            .When(x => !string.IsNullOrEmpty(x.Genre));
+            .When(static x => !string.IsNullOrEmpty(x.Genre));
 
-        RuleFor(x => x.AlbumArtist)
+        RuleFor(static x => x.AlbumArtist)
             .MaximumLength(300)
             .WithMessage("Album artist cannot exceed 300 characters.")
-            .When(x => !string.IsNullOrEmpty(x.AlbumArtist));
+            .When(static x => !string.IsNullOrEmpty(x.AlbumArtist));
 
-        RuleFor(x => x.Composer)
+        RuleFor(static x => x.Composer)
             .MaximumLength(300)
             .WithMessage("Composer cannot exceed 300 characters.")
-            .When(x => !string.IsNullOrEmpty(x.Composer));
+            .When(static x => !string.IsNullOrEmpty(x.Composer));
 
-        RuleFor(x => x.Conductor)
+        RuleFor(static x => x.Conductor)
             .MaximumLength(200)
             .WithMessage("Conductor cannot exceed 200 characters.")
-            .When(x => !string.IsNullOrEmpty(x.Conductor));
+            .When(static x => !string.IsNullOrEmpty(x.Conductor));
 
-        RuleFor(x => x.Label)
+        RuleFor(static x => x.Label)
             .MaximumLength(200)
             .WithMessage("Label cannot exceed 200 characters.")
-            .When(x => !string.IsNullOrEmpty(x.Label));
+            .When(static x => !string.IsNullOrEmpty(x.Label));
 
         // Year validation
-        RuleFor(x => x.Year)
+        RuleFor(static x => x.Year)
             .GreaterThanOrEqualTo(1900)
             .WithMessage("Year must be 1900 or later.")
             .LessThanOrEqualTo(DateTime.UtcNow.Year + 1)
             .WithMessage("Year cannot be more than one year in the future.")
-            .When(x => x.Year.HasValue);
+            .When(static x => x.Year.HasValue);
 
         // Track number validations
-        RuleFor(x => x.TrackNumber)
+        RuleFor(static x => x.TrackNumber)
             .GreaterThan(0)
             .WithMessage("Track number must be greater than 0.")
             .LessThanOrEqualTo(999)
             .WithMessage("Track number cannot exceed 999.")
-            .When(x => x.TrackNumber.HasValue);
+            .When(static x => x.TrackNumber.HasValue);
 
-        RuleFor(x => x.TotalTracks)
+        RuleFor(static x => x.TotalTracks)
             .GreaterThan(0)
             .WithMessage("Total tracks must be greater than 0.")
             .LessThanOrEqualTo(999)
             .WithMessage("Total tracks cannot exceed 999.")
-            .When(x => x.TotalTracks.HasValue);
+            .When(static x => x.TotalTracks.HasValue);
 
         // Cross-validation for track numbers
-        RuleFor(x => x.TrackNumber)
-            .LessThanOrEqualTo(x => x.TotalTracks)
+        RuleFor(static x => x.TrackNumber)
+            .LessThanOrEqualTo(static x => x.TotalTracks)
             .WithMessage("Track number cannot be greater than total tracks.")
-            .When(x => x.TrackNumber.HasValue && x.TotalTracks.HasValue);
+            .When(static x => x.TrackNumber.HasValue && x.TotalTracks.HasValue);
 
         // Duration validation
-        RuleFor(x => x.DurationSeconds)
+        RuleFor(static x => x.DurationSeconds)
             .GreaterThan(0)
             .WithMessage("Duration must be greater than 0 seconds.")
             .LessThanOrEqualTo(7200) // 2 hours max
             .WithMessage("Duration cannot exceed 2 hours (7200 seconds).")
-            .When(x => x.DurationSeconds.HasValue);
+            .When(static x => x.DurationSeconds.HasValue);
 
         // File path validation
-        RuleFor(x => x.FilePath)
+        RuleFor(static x => x.FilePath)
             .MaximumLength(1000)
             .WithMessage("File path cannot exceed 1000 characters.")
             .Must(BeValidPath)
             .WithMessage("File path must be a valid file path or URL.")
-            .When(x => !string.IsNullOrEmpty(x.FilePath));
+            .When(static x => !string.IsNullOrEmpty(x.FilePath));
 
         // File size validation
-        RuleFor(x => x.FileSizeBytes)
+        RuleFor(static x => x.FileSizeBytes)
             .GreaterThan(0)
             .WithMessage("File size must be greater than 0 bytes.")
             .LessThanOrEqualTo(5368709120L) // 5 GB max
             .WithMessage("File size cannot exceed 5 GB.")
-            .When(x => x.FileSizeBytes.HasValue);
+            .When(static x => x.FileSizeBytes.HasValue);
 
         // Audio technical specifications
-        RuleFor(x => x.BitrateKbps)
+        RuleFor(static x => x.BitrateKbps)
             .GreaterThan(0)
             .WithMessage("Bitrate must be greater than 0 kbps.")
             .LessThanOrEqualTo(9216) // DSD max
             .WithMessage("Bitrate cannot exceed 9216 kbps.")
-            .When(x => x.BitrateKbps.HasValue);
+            .When(static x => x.BitrateKbps.HasValue);
 
-        RuleFor(x => x.SampleRateHz)
+        RuleFor(static x => x.SampleRateHz)
             .GreaterThan(0)
             .WithMessage("Sample rate must be greater than 0 Hz.")
             .LessThanOrEqualTo(2822400) // DSD256 max
             .WithMessage("Sample rate cannot exceed 2822400 Hz.")
             .Must(BeValidSampleRate)
             .WithMessage("Sample rate must be a standard audio sample rate.")
-            .When(x => x.SampleRateHz.HasValue);
+            .When(static x => x.SampleRateHz.HasValue);
 
-        RuleFor(x => x.Channels)
+        RuleFor(static x => x.Channels)
             .GreaterThan(0)
             .WithMessage("Number of channels must be greater than 0.")
             .LessThanOrEqualTo(8)
             .WithMessage("Number of channels cannot exceed 8.")
-            .When(x => x.Channels.HasValue);
+            .When(static x => x.Channels.HasValue);
 
         // Format validation
-        RuleFor(x => x.Format)
+        RuleFor(static x => x.Format)
             .MaximumLength(20)
             .WithMessage("Format cannot exceed 20 characters.")
             .Must(BeValidAudioFormat)
             .WithMessage("Format must be a valid audio format.")
-            .When(x => !string.IsNullOrEmpty(x.Format));
+            .When(static x => !string.IsNullOrEmpty(x.Format));
 
         // ISRC validation (International Standard Recording Code)
-        RuleFor(x => x.ISRC)
+        RuleFor(static x => x.ISRC)
             .Length(12)
             .WithMessage("ISRC must be exactly 12 characters.")
             .Matches(@"^[A-Z]{2}[A-Z0-9]{3}[0-9]{7}$")
             .WithMessage("ISRC must follow the format: 2 letters + 3 alphanumeric + 7 digits.")
-            .When(x => !string.IsNullOrEmpty(x.ISRC));
+            .When(static x => !string.IsNullOrEmpty(x.ISRC));
 
         // MusicBrainz ID validations (UUID format)
-        RuleFor(x => x.MusicBrainzTrackId)
+        RuleFor(static x => x.MusicBrainzTrackId)
             .Must(BeValidGuid)
             .WithMessage("MusicBrainz Track ID must be a valid GUID.")
-            .When(x => !string.IsNullOrEmpty(x.MusicBrainzTrackId));
+            .When(static x => !string.IsNullOrEmpty(x.MusicBrainzTrackId));
 
-        RuleFor(x => x.MusicBrainzRecordingId)
+        RuleFor(static x => x.MusicBrainzRecordingId)
             .Must(BeValidGuid)
             .WithMessage("MusicBrainz Recording ID must be a valid GUID.")
-            .When(x => !string.IsNullOrEmpty(x.MusicBrainzRecordingId));
+            .When(static x => !string.IsNullOrEmpty(x.MusicBrainzRecordingId));
 
         // Tags validation
-        RuleFor(x => x.Tags)
+        RuleFor(static x => x.Tags)
             .NotNull()
             .WithMessage("Tags collection cannot be null.")
             .Must(HaveValidTagKeys)
@@ -181,52 +181,52 @@ public sealed class TrackValidator : AbstractValidator<Track>
             .WithMessage("Tag values cannot exceed 500 characters.");
 
         // Artwork path validation
-        RuleFor(x => x.ArtworkPath)
+        RuleFor(static x => x.ArtworkPath)
             .MaximumLength(1000)
             .WithMessage("Artwork path cannot exceed 1000 characters.")
             .Must(BeValidPath)
             .WithMessage("Artwork path must be a valid file path or URL.")
-            .When(x => !string.IsNullOrEmpty(x.ArtworkPath));
+            .When(static x => !string.IsNullOrEmpty(x.ArtworkPath));
 
         // Lyrics validation
-        RuleFor(x => x.Lyrics)
+        RuleFor(static x => x.Lyrics)
             .MaximumLength(50000)
             .WithMessage("Lyrics cannot exceed 50,000 characters.")
-            .When(x => !string.IsNullOrEmpty(x.Lyrics));
+            .When(static x => !string.IsNullOrEmpty(x.Lyrics));
 
         // Play count validation
-        RuleFor(x => x.PlayCount)
+        RuleFor(static x => x.PlayCount)
             .GreaterThanOrEqualTo(0)
             .WithMessage("Play count cannot be negative.")
             .LessThanOrEqualTo(1000000)
             .WithMessage("Play count cannot exceed 1,000,000.");
 
         // Timestamp validations
-        RuleFor(x => x.CreatedAt)
+        RuleFor(static x => x.CreatedAt)
             .NotEmpty()
             .WithMessage("Created timestamp is required.")
             .LessThanOrEqualTo(DateTime.UtcNow.AddMinutes(5))
             .WithMessage("Created timestamp cannot be in the future.");
 
-        RuleFor(x => x.UpdatedAt)
-            .GreaterThanOrEqualTo(x => x.CreatedAt)
+        RuleFor(static x => x.UpdatedAt)
+            .GreaterThanOrEqualTo(static x => x.CreatedAt)
             .WithMessage("Updated timestamp must be after or equal to created timestamp.")
             .LessThanOrEqualTo(DateTime.UtcNow.AddMinutes(5))
             .WithMessage("Updated timestamp cannot be in the future.")
-            .When(x => x.UpdatedAt.HasValue);
+            .When(static x => x.UpdatedAt.HasValue);
 
-        RuleFor(x => x.LastPlayedAt)
-            .GreaterThanOrEqualTo(x => x.CreatedAt)
+        RuleFor(static x => x.LastPlayedAt)
+            .GreaterThanOrEqualTo(static x => x.CreatedAt)
             .WithMessage("Last played timestamp must be after or equal to created timestamp.")
             .LessThanOrEqualTo(DateTime.UtcNow.AddMinutes(5))
             .WithMessage("Last played timestamp cannot be in the future.")
-            .When(x => x.LastPlayedAt.HasValue);
+            .When(static x => x.LastPlayedAt.HasValue);
 
         // Business rule: Play count consistency
-        RuleFor(x => x.LastPlayedAt)
+        RuleFor(static x => x.LastPlayedAt)
             .NotNull()
             .WithMessage("Tracks with play count > 0 must have a last played timestamp.")
-            .When(x => x.PlayCount > 0);
+            .When(static x => x.PlayCount > 0);
     }
 
     /// <summary>
@@ -344,7 +344,7 @@ public sealed class TrackValidator : AbstractValidator<Track>
     /// <returns>True if all tag keys are valid; otherwise, false.</returns>
     private static bool HaveValidTagKeys(System.Collections.Immutable.ImmutableDictionary<string, string> tags)
     {
-        return tags.Keys.All(key => !string.IsNullOrEmpty(key) && key.Length <= 100);
+        return tags.Keys.All(static key => !string.IsNullOrEmpty(key) && key.Length <= 100);
     }
 
     /// <summary>
@@ -354,6 +354,6 @@ public sealed class TrackValidator : AbstractValidator<Track>
     /// <returns>True if all tag values are valid; otherwise, false.</returns>
     private static bool HaveValidTagValues(System.Collections.Immutable.ImmutableDictionary<string, string> tags)
     {
-        return tags.Values.All(value => value == null || value.Length <= 500);
+        return tags.Values.All(static value => value == null || value.Length <= 500);
     }
 }

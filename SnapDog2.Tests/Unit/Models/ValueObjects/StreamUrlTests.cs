@@ -83,7 +83,7 @@ public class StreamUrlTests
     public void Constructor_WithNullUri_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new StreamUrl((Uri)null!));
+        Assert.Throws<ArgumentNullException>(static () => new StreamUrl((Uri)null!));
     }
 
     [Theory]

@@ -101,7 +101,7 @@ public sealed class PlaylistRepository : RepositoryBase<Playlist, string>, IPlay
         }
 
         return await GetQueryableNoTracking()
-            .OrderByDescending(playlist => playlist.UpdatedAt ?? playlist.CreatedAt)
+            .OrderByDescending(static playlist => playlist.UpdatedAt ?? playlist.CreatedAt)
             .Take(count)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);

@@ -64,13 +64,13 @@ public readonly struct Result : IEquatable<Result>
     /// <returns>A successful result if all results are successful; otherwise, a failed result with combined errors.</returns>
     public static Result Combine(params Result[] results)
     {
-        var failures = results.Where(r => r.IsFailure).ToArray();
+        var failures = results.Where(static r => r.IsFailure).ToArray();
         if (failures.Length == 0)
         {
             return Success();
         }
 
-        var errors = failures.Select(f => f.Error).Where(e => !string.IsNullOrEmpty(e));
+        var errors = failures.Select(static f => f.Error).Where(static e => !string.IsNullOrEmpty(e));
         return Failure(errors!);
     }
 

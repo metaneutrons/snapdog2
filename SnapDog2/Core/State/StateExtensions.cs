@@ -157,7 +157,7 @@ public static class StateExtensions
     /// <returns>An enumerable of connected clients.</returns>
     public static IEnumerable<Client> GetConnectedClients(this SnapDogState state)
     {
-        return state.Clients.Values.Where(client => client.IsConnected);
+        return state.Clients.Values.Where(static client => client.IsConnected);
     }
 
     /// <summary>
@@ -167,7 +167,7 @@ public static class StateExtensions
     /// <returns>An enumerable of active zones.</returns>
     public static IEnumerable<Zone> GetActiveZones(this SnapDogState state)
     {
-        return state.Zones.Values.Where(zone => zone.IsActive);
+        return state.Zones.Values.Where(static zone => zone.IsActive);
     }
 
     /// <summary>
@@ -177,7 +177,7 @@ public static class StateExtensions
     /// <returns>An enumerable of enabled radio stations.</returns>
     public static IEnumerable<RadioStation> GetEnabledRadioStations(this SnapDogState state)
     {
-        return state.RadioStations.Values.Where(station => station.IsEnabled);
+        return state.RadioStations.Values.Where(static station => station.IsEnabled);
     }
 
     /// <summary>
@@ -187,7 +187,7 @@ public static class StateExtensions
     /// <returns>An enumerable of playing audio streams.</returns>
     public static IEnumerable<AudioStream> GetPlayingStreams(this SnapDogState state)
     {
-        return state.AudioStreams.Values.Where(stream => stream.IsPlaying);
+        return state.AudioStreams.Values.Where(static stream => stream.IsPlaying);
     }
 
     /// <summary>
@@ -210,7 +210,7 @@ public static class StateExtensions
     /// <returns>True if the zone has any connected clients; otherwise, false.</returns>
     public static bool HasConnectedClients(this SnapDogState state, string zoneId)
     {
-        return state.GetClientsInZone(zoneId).Any(client => client.IsConnected);
+        return state.GetClientsInZone(zoneId).Any(static client => client.IsConnected);
     }
 
     /// <summary>

@@ -21,7 +21,7 @@ public class ZoneConfiguration : IEntityTypeConfiguration<Zone>
         // Table configuration with check constraints
         builder.ToTable(
             "Zones",
-            t =>
+            static t =>
             {
                 t.HasCheckConstraint("CK_Zones_DefaultVolume", "DefaultVolume >= 0 AND DefaultVolume <= 100");
                 t.HasCheckConstraint("CK_Zones_MinVolume", "MinVolume >= 0 AND MinVolume <= 100");
@@ -31,18 +31,18 @@ public class ZoneConfiguration : IEntityTypeConfiguration<Zone>
         );
 
         // Primary key
-        builder.HasKey(x => x.Id);
-        builder.Property(x => x.Id).HasMaxLength(100).IsRequired();
+        builder.HasKey(static x => x.Id);
+        builder.Property(static x => x.Id).HasMaxLength(100).IsRequired();
 
         // Required properties
-        builder.Property(x => x.Name).HasMaxLength(200).IsRequired();
+        builder.Property(static x => x.Name).HasMaxLength(200).IsRequired();
 
         // ClientIds collection conversion to JSON
         builder
-            .Property(x => x.ClientIds)
+            .Property(static x => x.ClientIds)
             .HasConversion(
-                v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
-                v =>
+                static v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                static v =>
                     (
                         JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions?)null) ?? new List<string>()
                     ).ToImmutableList()
@@ -51,51 +51,51 @@ public class ZoneConfiguration : IEntityTypeConfiguration<Zone>
             .HasColumnType("TEXT");
 
         // Optional properties
-        builder.Property(x => x.CurrentStreamId).HasMaxLength(100).IsRequired(false);
+        builder.Property(static x => x.CurrentStreamId).HasMaxLength(100).IsRequired(false);
 
-        builder.Property(x => x.Description).HasMaxLength(1000).IsRequired(false);
+        builder.Property(static x => x.Description).HasMaxLength(1000).IsRequired(false);
 
-        builder.Property(x => x.Location).HasMaxLength(200).IsRequired(false);
+        builder.Property(static x => x.Location).HasMaxLength(200).IsRequired(false);
 
-        builder.Property(x => x.Color).HasMaxLength(7).IsRequired().HasDefaultValue("#007bff");
+        builder.Property(static x => x.Color).HasMaxLength(7).IsRequired().HasDefaultValue("#007bff");
 
-        builder.Property(x => x.Icon).HasMaxLength(50).IsRequired().HasDefaultValue("speaker");
+        builder.Property(static x => x.Icon).HasMaxLength(50).IsRequired().HasDefaultValue("speaker");
 
         // Volume settings
-        builder.Property(x => x.DefaultVolume).IsRequired().HasDefaultValue(50);
+        builder.Property(static x => x.DefaultVolume).IsRequired().HasDefaultValue(50);
 
-        builder.Property(x => x.MaxVolume).IsRequired().HasDefaultValue(100);
+        builder.Property(static x => x.MaxVolume).IsRequired().HasDefaultValue(100);
 
-        builder.Property(x => x.MinVolume).IsRequired().HasDefaultValue(0);
+        builder.Property(static x => x.MinVolume).IsRequired().HasDefaultValue(0);
 
         // Boolean properties
-        builder.Property(x => x.IsEnabled).IsRequired().HasDefaultValue(true);
+        builder.Property(static x => x.IsEnabled).IsRequired().HasDefaultValue(true);
 
-        builder.Property(x => x.StereoEnabled).IsRequired().HasDefaultValue(true);
+        builder.Property(static x => x.StereoEnabled).IsRequired().HasDefaultValue(true);
 
-        builder.Property(x => x.GroupingEnabled).IsRequired().HasDefaultValue(true);
+        builder.Property(static x => x.GroupingEnabled).IsRequired().HasDefaultValue(true);
 
         // Other properties
-        builder.Property(x => x.Priority).IsRequired().HasDefaultValue(1);
+        builder.Property(static x => x.Priority).IsRequired().HasDefaultValue(1);
 
-        builder.Property(x => x.Tags).HasMaxLength(500).IsRequired(false);
+        builder.Property(static x => x.Tags).HasMaxLength(500).IsRequired(false);
 
-        builder.Property(x => x.AudioQuality).HasMaxLength(50).IsRequired().HasDefaultValue("high");
+        builder.Property(static x => x.AudioQuality).HasMaxLength(50).IsRequired().HasDefaultValue("high");
 
         // Timestamp properties
-        builder.Property(x => x.CreatedAt).IsRequired().HasDefaultValueSql("CURRENT_TIMESTAMP");
+        builder.Property(static x => x.CreatedAt).IsRequired().HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-        builder.Property(x => x.UpdatedAt).IsRequired(false);
+        builder.Property(static x => x.UpdatedAt).IsRequired(false);
 
         // Indexes for performance
-        builder.HasIndex(x => x.Name).HasDatabaseName("IX_Zones_Name");
+        builder.HasIndex(static x => x.Name).HasDatabaseName("IX_Zones_Name");
 
-        builder.HasIndex(x => x.IsEnabled).HasDatabaseName("IX_Zones_IsEnabled");
+        builder.HasIndex(static x => x.IsEnabled).HasDatabaseName("IX_Zones_IsEnabled");
 
-        builder.HasIndex(x => x.Priority).HasDatabaseName("IX_Zones_Priority");
+        builder.HasIndex(static x => x.Priority).HasDatabaseName("IX_Zones_Priority");
 
-        builder.HasIndex(x => x.CurrentStreamId).HasDatabaseName("IX_Zones_CurrentStreamId");
+        builder.HasIndex(static x => x.CurrentStreamId).HasDatabaseName("IX_Zones_CurrentStreamId");
 
-        builder.HasIndex(x => x.CreatedAt).HasDatabaseName("IX_Zones_CreatedAt");
+        builder.HasIndex(static x => x.CreatedAt).HasDatabaseName("IX_Zones_CreatedAt");
     }
 }

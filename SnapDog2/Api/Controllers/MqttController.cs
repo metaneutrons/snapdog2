@@ -68,9 +68,9 @@ public class MqttController : ControllerBase
             _logger.LogWarning(
                 ex,
                 "Validation failed for PublishMqttMessageCommand: {ValidationErrors}",
-                string.Join(", ", ex.Errors.Select(e => e.ErrorMessage))
+                string.Join(", ", ex.Errors.Select(static e => e.ErrorMessage))
             );
-            var errorMessages = ex.Errors.Select(e => e.ErrorMessage).ToList();
+            var errorMessages = ex.Errors.Select(static e => e.ErrorMessage).ToList();
             return BadRequest(new { message = "Validation failed.", errors = errorMessages });
         }
         // Other exceptions will be handled by global handlers or result in a 500 if not caught by UseExceptionHandler.

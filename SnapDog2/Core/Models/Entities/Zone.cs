@@ -195,8 +195,11 @@ public sealed record Zone
             throw new ArgumentNullException(nameof(clientIds));
         }
 
-        var validClientIds = clientIds.Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
-        var duplicates = validClientIds.GroupBy(id => id).Where(g => g.Count() > 1).Select(g => g.Key);
+        var validClientIds = clientIds.Where(static id => !string.IsNullOrWhiteSpace(id)).ToList();
+        var duplicates = validClientIds
+            .GroupBy(static id => id)
+            .Where(static g => g.Count() > 1)
+            .Select(static g => g.Key);
 
         if (duplicates.Any())
         {
