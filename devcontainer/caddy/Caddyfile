@@ -58,7 +58,6 @@
 
     # Navidrome music server
     handle /music* {
-        uri strip_prefix /music
         reverse_proxy http://navidrome:4533
     }
 
@@ -75,8 +74,19 @@
         }
     }
 
-    # Prometheus metrics
+    # Prometheus metrics - handle root redirect
+    @prometheus_root {
+        path /prometheus
+        path /prometheus/
+    }
+    
+    handle @prometheus_root {
+        redir * /prometheus/query 301
+    }
+
+    # Prometheus metrics - other paths
     handle /prometheus* {
+        uri strip_prefix /prometheus
         reverse_proxy http://prometheus:9090 {
             header_up Host {host}
         }

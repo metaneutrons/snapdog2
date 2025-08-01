@@ -1,6 +1,6 @@
 services:
   # SnapDog2 application - container-only development with full debugging
-  snapdog-app:
+  app:
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -34,7 +34,7 @@ services:
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
-      - snapdog-app
+      - app
       - snapcast-server
       - snapcast-client-living-room
       - snapcast-client-kitchen
