@@ -51,7 +51,7 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 
 ### 9.2.3. Global MQTT Last Will and Testament (LWT)
 
-* **Topic:** `{BASE_TOPIC}/{StatusTopic}` (e.g., `snapdog/status`)
+* **Topic:** `{BaseTopic}/{StatusTopic}` (e.g., `snapdog/status`)
 * **Payload:** `{"status": 0}`
 * **Retained:** `true`
 * **QoS:** `1` (AtLeastOnce)
@@ -195,11 +195,11 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 | :---------------- | :------------- | :----------------- | :------------------------------- | :------- | :-------------------- |
 | `ZONE_STATE`      | `_STATE_TOPIC` | `state`            | **Full JSON object (see 9.5.1)** | Yes      | Includes all status |
 
-#### 9.3.2.3. Payloads for `{zoneBASE_TOPIC}control/set`
+#### 9.3.2.3. Payloads for `{zoneBaseTopic}control/set`
 
 This topic accepts various string payloads to control multiple aspects:
 
-| Command Functionality     | `{zoneBASE_TOPIC}control/set` Payload |
+| Command Functionality     | `{zoneBaseTopic}control/set` Payload |
 | :------------------------ | :----------------------------------- |
 | `PLAY`                    | `play`, `play url <url>`             |
 | `PAUSE`                   | `pause`                              |
@@ -222,11 +222,11 @@ This topic accepts various string payloads to control multiple aspects:
 | `VOLUME_UP`               | `volume_up`, `volume +<step>`        |
 | `VOLUME_DOWN`             | `volume_down`, `volume -<step>`      |
 
-#### 9.3.2.4. Status Values for `{zoneBASE_TOPIC}control`
+#### 9.3.2.4. Status Values for `{zoneBaseTopic}control`
 
 This topic publishes simple string representations for various states:
 
-| Status Functionality    | `{zoneBASE_TOPIC}control` Status Value         |
+| Status Functionality    | `{zoneBaseTopic}control` Status Value         |
 | :---------------------- | :-------------------------------------------- |
 | `PLAYBACK_STATE`        | `play`, `pause`, `stop`                       |
 | `TRACK_REPEAT_STATUS`   | `track_repeat_on`, `track_repeat_off`         |
@@ -415,7 +415,7 @@ Uses `Knx.Falcon.GroupAddress`. GAs configured via `SNAPDOG_CLIENT_{m}_KNX_{SUFF
 
 ### 9.5.1. Complete Zone State (JSON)
 
-Published to `{zoneBASE_TOPIC}/state`.
+Published to `{zoneBaseTopic}/state`.
 
 ```json
 {
@@ -453,7 +453,7 @@ Published to `{zoneBASE_TOPIC}/state`.
 
 ### 9.5.2. Complete Client State (JSON)
 
-Published to `{clientBASE_TOPIC}/state`.
+Published to `{clientBaseTopic}/state`.
 
 ```json
 {
