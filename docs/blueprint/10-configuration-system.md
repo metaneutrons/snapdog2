@@ -82,6 +82,7 @@ All environment variables use the global prefix `SNAPDOG_` and follow a hierarch
 # Basic system settings
 SNAPDOG_SYSTEM_LOG_LEVEL=Information                  # Default: Information
 SNAPDOG_SYSTEM_ENVIRONMENT=Production                 # Default: Development
+SNAPDOG_SYSTEM_DEBUG_ENABLED=true                     # Default: false
 
 # System-wide MQTT Topics
 SNAPDOG_SYSTEM_MQTT_BASE_TOPIC=snapdog                 # Default: snapdog
@@ -131,10 +132,9 @@ SNAPDOG_API_APIKEY_3=secret-key-3
 # Snapcast integration
 SNAPDOG_SERVICES_SNAPCAST_ENABLED=true                # Default: true
 SNAPDOG_SERVICES_SNAPCAST_ADDRESS=snapcast-server     # Default: localhost
-SNAPDOG_SERVICES_SNAPCAST_CONTROL_PORT=1705           # Default: 1705
+SNAPDOG_SERVICES_SNAPCAST_PORT=1705                   # Default: 1705 (JSON-RPC port)
 SNAPDOG_SERVICES_SNAPCAST_HTTP_PORT=1780              # Default: 1780
 SNAPDOG_SERVICES_SNAPCAST_BASE_URL=                   # Default: "" (for reverse proxy support)
-SNAPDOG_SERVICES_SNAPCAST_PORT=1704                   # Default: 1704 (JSON-RPC port)
 SNAPDOG_SERVICES_SNAPCAST_TIMEOUT=30                  # Default: 30 (connection timeout)
 SNAPDOG_SERVICES_SNAPCAST_RECONNECT_INTERVAL=5        # Default: 5 (reconnect interval)
 SNAPDOG_SERVICES_SNAPCAST_AUTO_RECONNECT=true         # Default: true
@@ -143,7 +143,7 @@ SNAPDOG_SERVICES_SNAPCAST_AUTO_RECONNECT=true         # Default: true
 SNAPDOG_SNAPCAST_CODEC=flac                           # Default: flac (audio codec)
 SNAPDOG_SNAPCAST_SAMPLEFORMAT=48000:16:2              # Default: 48000:16:2 (sample rate:bit depth:channels)
 SNAPDOG_SNAPCAST_WEBSERVER_PORT=1780                  # Default: 1780 (SnapWeb HTTP port)
-SNAPDOG_SNAPCAST_WEBSOCKET_PORT=1704                  # Default: 1704 (JSON-RPC WebSocket port)
+SNAPDOG_SNAPCAST_WEBSOCKET_PORT=1705                  # Default: 1705 (JSON-RPC WebSocket port)
 
 # MQTT integration
 SNAPDOG_SERVICES_MQTT_ENABLED=true                    # Default: true
@@ -368,6 +368,13 @@ public class SystemConfig
     /// </summary>
     [Env(Key = "ENVIRONMENT", Default = "Development")]
     public string Environment { get; set; } = "Development";
+
+    /// <summary>
+    /// Whether debug mode is enabled.
+    /// Maps to: SNAPDOG_SYSTEM_DEBUG_ENABLED
+    /// </summary>
+    [Env(Key = "DEBUG_ENABLED", Default = false)]
+    public bool DebugEnabled { get; set; } = false;
 }
 ```
 
