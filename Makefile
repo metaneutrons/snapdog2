@@ -31,7 +31,6 @@ help:
 # Development environment setup
 dev-setup:
 	@echo "🚀 Setting up SnapDog2 development environment..."
-	@mkdir -p audio music config/grafana/dashboards config/grafana/datasources
 	@echo "📦 Pulling Docker images..."
 	@docker compose -f docker-compose.dev.yml --env-file devcontainer/.env pull
 	@echo "📦 Restoring .NET packages..."
@@ -133,31 +132,13 @@ urls:
 	@echo ""
 	@echo "🔧 Internal Services (container-only):"
 	@echo "  MQTT Broker:       mqtt:1883 (internal)"
-	@echo "  KNX Gateway:       knx-simulator:6720 (internal)"
-	@echo "  Snapcast JSON-RPC: snapcast-server:1704 (internal)"
+	@echo "  KNX Gateway:       knx-simulator:3671 (internal)"
+	@echo "  Snapcast JSON-RPC: snapcast-server:1705 (internal)"
 	@echo ""
 	@echo "🏠 Test Client IPs:"
 	@echo "  Living Room:       172.20.0.6 (02:42:ac:11:00:10)"
 	@echo "  Kitchen:           172.20.0.7 (02:42:ac:11:00:11)"
 	@echo "  Bedroom:           172.20.0.8 (02:42:ac:11:00:12)"
-
-# Create config files
-config:
-	@echo "📝 Creating configuration files..."
-	@mkdir -p config config/grafana/dashboards config/grafana/datasources
-	@echo "# Snapserver configuration" > config/snapserver.conf
-	@echo "stream = pipe:///tmp/snapfifo?name=default" >> config/snapserver.conf
-	@echo "# MQTT configuration" > config/mosquitto.conf
-	@echo "listener 1883" >> config/mosquitto.conf
-	@echo "allow_anonymous true" >> config/mosquitto.conf
-	@echo "# Prometheus configuration" > config/prometheus.yml
-	@echo "global:" >> config/prometheus.yml
-	@echo "  scrape_interval: 15s" >> config/prometheus.yml
-	@echo "scrape_configs:" >> config/prometheus.yml
-	@echo "  - job_name: 'snapdog'" >> config/prometheus.yml
-	@echo "    static_configs:" >> config/prometheus.yml
-	@echo "      - targets: ['host.docker.internal:5000']" >> config/prometheus.yml
-	@echo "✅ Configuration files created"
 
 # Development workflow
 dev: dev-setup dev-start urls
