@@ -47,6 +47,27 @@ public static class CortexMediatorConfiguration
         services.AddScoped<SnapDog2.Server.Features.Global.Handlers.GetVersionInfoQueryHandler>();
         services.AddScoped<SnapDog2.Server.Features.Global.Handlers.GetServerStatsQueryHandler>();
 
+        // Zone command handlers
+        services.AddScoped<SnapDog2.Server.Features.Zones.Handlers.PlayCommandHandler>();
+        services.AddScoped<SnapDog2.Server.Features.Zones.Handlers.PauseCommandHandler>();
+        services.AddScoped<SnapDog2.Server.Features.Zones.Handlers.StopCommandHandler>();
+        services.AddScoped<SnapDog2.Server.Features.Zones.Handlers.SetZoneVolumeCommandHandler>();
+        services.AddScoped<SnapDog2.Server.Features.Zones.Handlers.VolumeUpCommandHandler>();
+        services.AddScoped<SnapDog2.Server.Features.Zones.Handlers.VolumeDownCommandHandler>();
+        services.AddScoped<SnapDog2.Server.Features.Zones.Handlers.SetZoneMuteCommandHandler>();
+        services.AddScoped<SnapDog2.Server.Features.Zones.Handlers.ToggleZoneMuteCommandHandler>();
+        services.AddScoped<SnapDog2.Server.Features.Zones.Handlers.SetTrackCommandHandler>();
+        services.AddScoped<SnapDog2.Server.Features.Zones.Handlers.NextTrackCommandHandler>();
+        services.AddScoped<SnapDog2.Server.Features.Zones.Handlers.PreviousTrackCommandHandler>();
+        services.AddScoped<SnapDog2.Server.Features.Zones.Handlers.SetPlaylistCommandHandler>();
+        services.AddScoped<SnapDog2.Server.Features.Zones.Handlers.NextPlaylistCommandHandler>();
+
+        // Zone query handlers
+        services.AddScoped<SnapDog2.Server.Features.Zones.Handlers.GetZoneStateQueryHandler>();
+        services.AddScoped<SnapDog2.Server.Features.Zones.Handlers.GetAllZoneStatesQueryHandler>();
+        services.AddScoped<SnapDog2.Server.Features.Zones.Handlers.GetZonePlaybackStateQueryHandler>();
+        services.AddScoped<SnapDog2.Server.Features.Zones.Handlers.GetZoneVolumeQueryHandler>();
+
         // Automatically register all FluentValidation AbstractValidator<> implementations
         // found in the specified assembly. These are used by the ValidationBehavior.
         services.AddValidatorsFromAssembly(serverAssembly, ServiceLifetime.Transient);

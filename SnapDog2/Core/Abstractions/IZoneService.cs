@@ -1,0 +1,174 @@
+namespace SnapDog2.Core.Abstractions;
+
+using SnapDog2.Core.Models;
+
+/// <summary>
+/// Service for controlling a specific audio zone.
+/// </summary>
+public interface IZoneService
+{
+    /// <summary>
+    /// Gets the zone ID.
+    /// </summary>
+    int ZoneId { get; }
+
+    /// <summary>
+    /// Gets the current zone state.
+    /// </summary>
+    /// <returns>The current zone state.</returns>
+    Task<Result<ZoneState>> GetStateAsync();
+
+    // Playback Control
+    /// <summary>
+    /// Starts or resumes playback.
+    /// </summary>
+    /// <returns>Result of the operation.</returns>
+    Task<Result> PlayAsync();
+
+    /// <summary>
+    /// Plays a specific track by index.
+    /// </summary>
+    /// <param name="trackIndex">The track index (1-based).</param>
+    /// <returns>Result of the operation.</returns>
+    Task<Result> PlayTrackAsync(int trackIndex);
+
+    /// <summary>
+    /// Plays media from a URL.
+    /// </summary>
+    /// <param name="mediaUrl">The media URL.</param>
+    /// <returns>Result of the operation.</returns>
+    Task<Result> PlayUrlAsync(string mediaUrl);
+
+    /// <summary>
+    /// Pauses playback.
+    /// </summary>
+    /// <returns>Result of the operation.</returns>
+    Task<Result> PauseAsync();
+
+    /// <summary>
+    /// Stops playback.
+    /// </summary>
+    /// <returns>Result of the operation.</returns>
+    Task<Result> StopAsync();
+
+    // Volume Control
+    /// <summary>
+    /// Sets the zone volume.
+    /// </summary>
+    /// <param name="volume">The volume level (0-100).</param>
+    /// <returns>Result of the operation.</returns>
+    Task<Result> SetVolumeAsync(int volume);
+
+    /// <summary>
+    /// Increases the zone volume.
+    /// </summary>
+    /// <param name="step">The volume step to increase.</param>
+    /// <returns>Result of the operation.</returns>
+    Task<Result> VolumeUpAsync(int step = 5);
+
+    /// <summary>
+    /// Decreases the zone volume.
+    /// </summary>
+    /// <param name="step">The volume step to decrease.</param>
+    /// <returns>Result of the operation.</returns>
+    Task<Result> VolumeDownAsync(int step = 5);
+
+    /// <summary>
+    /// Sets the zone mute state.
+    /// </summary>
+    /// <param name="enabled">Whether to mute the zone.</param>
+    /// <returns>Result of the operation.</returns>
+    Task<Result> SetMuteAsync(bool enabled);
+
+    /// <summary>
+    /// Toggles the zone mute state.
+    /// </summary>
+    /// <returns>Result of the operation.</returns>
+    Task<Result> ToggleMuteAsync();
+
+    // Track Management
+    /// <summary>
+    /// Sets a specific track.
+    /// </summary>
+    /// <param name="trackIndex">The track index (1-based).</param>
+    /// <returns>Result of the operation.</returns>
+    Task<Result> SetTrackAsync(int trackIndex);
+
+    /// <summary>
+    /// Plays the next track.
+    /// </summary>
+    /// <returns>Result of the operation.</returns>
+    Task<Result> NextTrackAsync();
+
+    /// <summary>
+    /// Plays the previous track.
+    /// </summary>
+    /// <returns>Result of the operation.</returns>
+    Task<Result> PreviousTrackAsync();
+
+    /// <summary>
+    /// Sets track repeat mode.
+    /// </summary>
+    /// <param name="enabled">Whether to enable track repeat.</param>
+    /// <returns>Result of the operation.</returns>
+    Task<Result> SetTrackRepeatAsync(bool enabled);
+
+    /// <summary>
+    /// Toggles track repeat mode.
+    /// </summary>
+    /// <returns>Result of the operation.</returns>
+    Task<Result> ToggleTrackRepeatAsync();
+
+    // Playlist Management
+    /// <summary>
+    /// Sets a specific playlist by index.
+    /// </summary>
+    /// <param name="playlistIndex">The playlist index (1-based).</param>
+    /// <returns>Result of the operation.</returns>
+    Task<Result> SetPlaylistAsync(int playlistIndex);
+
+    /// <summary>
+    /// Sets a specific playlist by ID.
+    /// </summary>
+    /// <param name="playlistId">The playlist ID.</param>
+    /// <returns>Result of the operation.</returns>
+    Task<Result> SetPlaylistAsync(string playlistId);
+
+    /// <summary>
+    /// Plays the next playlist.
+    /// </summary>
+    /// <returns>Result of the operation.</returns>
+    Task<Result> NextPlaylistAsync();
+
+    /// <summary>
+    /// Plays the previous playlist.
+    /// </summary>
+    /// <returns>Result of the operation.</returns>
+    Task<Result> PreviousPlaylistAsync();
+
+    /// <summary>
+    /// Sets playlist shuffle mode.
+    /// </summary>
+    /// <param name="enabled">Whether to enable playlist shuffle.</param>
+    /// <returns>Result of the operation.</returns>
+    Task<Result> SetPlaylistShuffleAsync(bool enabled);
+
+    /// <summary>
+    /// Toggles playlist shuffle mode.
+    /// </summary>
+    /// <returns>Result of the operation.</returns>
+    Task<Result> TogglePlaylistShuffleAsync();
+
+    /// <summary>
+    /// Sets playlist repeat mode.
+    /// </summary>
+    /// <param name="enabled">Whether to enable playlist repeat.</param>
+    /// <returns>Result of the operation.</returns>
+    Task<Result> SetPlaylistRepeatAsync(bool enabled);
+
+    /// <summary>
+    /// Toggles playlist repeat mode.
+    /// </summary>
+    /// <returns>Result of the operation.</returns>
+    Task<Result> TogglePlaylistRepeatAsync();
+}
