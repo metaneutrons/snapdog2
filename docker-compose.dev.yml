@@ -114,6 +114,8 @@ services:
       - ./devcontainer/mosquitto/passwd:/mosquitto/config/passwd
       - mqtt_data:/mosquitto/data
       - mqtt_logs:/mosquitto/log
+    ports:
+      - "1883:1883" # MQTT port
     networks:
       snapdog-dev:
         ipv4_address: 172.20.0.3
