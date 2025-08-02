@@ -588,6 +588,124 @@ public class ZoneController : ControllerBase
             return StatusCode(500, new { error = "Internal server error" });
         }
     }
+
+    /// <summary>
+    /// Gets all zones with their states.
+    /// </summary>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>Collection of all zone states.</returns>
+    [HttpGet("all")]
+    [ProducesResponseType(typeof(IEnumerable<ZoneState>), 200)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult<IEnumerable<ZoneState>>> GetAllZones(CancellationToken cancellationToken)
+    {
+        try
+        {
+            _logger.LogDebug("Getting all zones");
+
+            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetAllZonesQueryHandler>();
+            if (handler == null)
+            {
+                _logger.LogError("GetAllZonesQueryHandler not found in DI container");
+                return StatusCode(500, new { error = "Handler not available" });
+            }
+
+            var result = await handler.Handle(new GetAllZonesQuery(), cancellationToken);
+
+            if (result.IsSuccess && result.Value != null)
+            {
+                return Ok(result.Value);
+            }
+
+            _logger.LogWarning("Failed to get all zones: {Error}", result.ErrorMessage);
+            return StatusCode(500, new { error = result.ErrorMessage ?? "Failed to retrieve zones" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting all zones");
+            return StatusCode(500, new { error = "Internal server error" });
+        }
+    }
+
+    /// <summary>
+    /// Gets the current track information for a zone.
+    /// </summary>
+    /// <param name="zoneId">The zone ID.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The current track information.</returns>
+    [HttpGet("{zoneId:int}/track")]
+    [ProducesResponseType(typeof(TrackInfo), 200)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult<TrackInfo>> GetZoneTrackInfo([Range(1, int.MaxValue)] int zoneId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            _logger.LogDebug("Getting track info for zone {ZoneId}", zoneId);
+
+            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetZoneTrackInfoQueryHandler>();
+            if (handler == null)
+            {
+                _logger.LogError("GetZoneTrackInfoQueryHandler not found in DI container");
+                return StatusCode(500, new { error = "Handler not available" });
+            }
+
+            var result = await handler.Handle(new GetZoneTrackInfoQuery { ZoneId = zoneId }, cancellationToken);
+
+            if (result.IsSuccess && result.Value != null)
+            {
+                return Ok(result.Value);
+            }
+
+            _logger.LogWarning("Failed to get track info for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            return NotFound(new { error = result.ErrorMessage ?? "Track information not found" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting track info for zone {ZoneId}", zoneId);
+            return StatusCode(500, new { error = "Internal server error" });
+        }
+    }
+
+    /// <summary>
+    /// Gets the current playlist information for a zone.
+    /// </summary>
+    /// <param name="zoneId">The zone ID.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The current playlist information.</returns>
+    [HttpGet("{zoneId:int}/playlist")]
+    [ProducesResponseType(typeof(PlaylistInfo), 200)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult<PlaylistInfo>> GetZonePlaylistInfo([Range(1, int.MaxValue)] int zoneId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            _logger.LogDebug("Getting playlist info for zone {ZoneId}", zoneId);
+
+            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetZonePlaylistInfoQueryHandler>();
+            if (handler == null)
+            {
+                _logger.LogError("GetZonePlaylistInfoQueryHandler not found in DI container");
+                return StatusCode(500, new { error = "Handler not available" });
+            }
+
+            var result = await handler.Handle(new GetZonePlaylistInfoQuery { ZoneId = zoneId }, cancellationToken);
+
+            if (result.IsSuccess && result.Value != null)
+            {
+                return Ok(result.Value);
+            }
+
+            _logger.LogWarning("Failed to get playlist info for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            return NotFound(new { error = result.ErrorMessage ?? "Playlist information not found" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting playlist info for zone {ZoneId}", zoneId);
+            return StatusCode(500, new { error = "Internal server error" });
+        }
+    }
 }
 
 // Request DTOs

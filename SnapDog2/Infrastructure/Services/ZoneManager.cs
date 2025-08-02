@@ -56,6 +56,40 @@ public partial class ZoneManager : IZoneManager
         return Result<IEnumerable<IZoneService>>.Success(_zones.Values);
     }
 
+    public async Task<Result<ZoneState>> GetZoneStateAsync(int zoneId)
+    {
+        LogGettingZone(zoneId);
+
+        await Task.Delay(1); // Simulate async operation
+
+        if (_zones.TryGetValue(zoneId, out var zone))
+        {
+            return await zone.GetStateAsync().ConfigureAwait(false);
+        }
+
+        LogZoneNotFound(zoneId);
+        return Result<ZoneState>.Failure($"Zone {zoneId} not found");
+    }
+
+    public async Task<Result<List<ZoneState>>> GetAllZoneStatesAsync()
+    {
+        LogGettingAllZones();
+
+        await Task.Delay(1); // Simulate async operation
+
+        var states = new List<ZoneState>();
+        foreach (var zone in _zones.Values)
+        {
+            var stateResult = await zone.GetStateAsync().ConfigureAwait(false);
+            if (stateResult.IsSuccess)
+            {
+                states.Add(stateResult.Value!);
+            }
+        }
+
+        return Result<List<ZoneState>>.Success(states);
+    }
+
     public async Task<bool> ZoneExistsAsync(int zoneId)
     {
         await Task.Delay(1); // Simulate async operation

@@ -75,6 +75,9 @@ try
     
     // Client management services (placeholder implementations)
     builder.Services.AddScoped<SnapDog2.Core.Abstractions.IClientManager, SnapDog2.Infrastructure.Services.ClientManager>();
+    
+    // Playlist management services (placeholder implementations)
+    builder.Services.AddScoped<SnapDog2.Core.Abstractions.IPlaylistManager, SnapDog2.Infrastructure.Services.PlaylistManager>();
 
     // Add services to the container
     builder.Services.AddControllers();
