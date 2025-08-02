@@ -68,6 +68,7 @@ try
     // Register placeholder services
     builder.Services.AddScoped<SnapDog2.Core.Abstractions.ISystemStatusService, SnapDog2.Infrastructure.Services.SystemStatusService>();
     builder.Services.AddScoped<SnapDog2.Core.Abstractions.IMetricsService, SnapDog2.Infrastructure.Services.MetricsService>();
+    builder.Services.AddScoped<SnapDog2.Server.Services.Abstractions.IGlobalStatusService, SnapDog2.Server.Services.GlobalStatusService>();
 
     // Add services to the container
     builder.Services.AddControllers();

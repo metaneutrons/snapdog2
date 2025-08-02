@@ -41,6 +41,12 @@ public static class CortexMediatorConfiguration
             }
         );
 
+        // Manually register query handlers since auto-discovery isn't working
+        services.AddScoped<SnapDog2.Server.Features.Global.Handlers.GetSystemStatusQueryHandler>();
+        services.AddScoped<SnapDog2.Server.Features.Global.Handlers.GetErrorStatusQueryHandler>();
+        services.AddScoped<SnapDog2.Server.Features.Global.Handlers.GetVersionInfoQueryHandler>();
+        services.AddScoped<SnapDog2.Server.Features.Global.Handlers.GetServerStatsQueryHandler>();
+
         // Automatically register all FluentValidation AbstractValidator<> implementations
         // found in the specified assembly. These are used by the ValidationBehavior.
         services.AddValidatorsFromAssembly(serverAssembly, ServiceLifetime.Transient);
