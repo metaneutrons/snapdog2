@@ -21,10 +21,7 @@
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
     <PackageReference Include="FluentValidation.AspNetCore" />
     <PackageReference Include="MediatR" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\snapcast-net\src\snapcast-net\snapcast-net.csproj" />
+    <PackageReference Include="SnapCastNet" />
   </ItemGroup>
 
 </Project>

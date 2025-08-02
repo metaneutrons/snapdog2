@@ -19,16 +19,7 @@
     <!-- SubSonic Integration -->
     <PackageVersion Include="SubSonicMedia" Version="1.0.5" />
     <!-- Snapcast Integration -->
-    <!-- MQTT Integration -->
-    <PackageVersion Include="MQTTnet" Version="5.0.1.1416" />
-    <PackageVersion Include="MQTTnet.Extensions.ManagedClient" Version="5.0.1.1416" />
-    <!-- KNX Integration -->
-    <PackageVersion Include="Knx.Falcon.Sdk" Version="6.3.7959" />
-    <!-- Resilience Policies -->
-    <PackageVersion Include="Polly" Version="8.6.2" />
-    <PackageVersion Include="Polly.Extensions" Version="8.6.2" />
-    <PackageVersion Include="Microsoft.Extensions.Http.Polly" Version="9.0.7" />
-    <PackageVersion Include="snapcast-net" Version="0.0.4" />
+    <PackageVersion Include="SnapCastNet" Version="1.0.0" />
     <!-- Analyzers -->
     <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.556" />
     <PackageVersion Include="SonarAnalyzer.CSharp" Version="9.21.0.86780" />

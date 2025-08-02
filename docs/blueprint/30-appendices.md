@@ -74,7 +74,7 @@ This glossary defines key terms used throughout the SnapDog2 blueprint for clari
 ### 25.2.1. External Systems & Libraries
 
 * **Snapcast Server:** [badaix/snapcast (GitHub)](https://github.com/badaix/snapcast)
-* **Snapcast Client Library:** [Sturd.SnapcastNet (GitLab)](https://gitlab.com/sturd/snapcast-net) / [NuGet](https://www.nuget.org/packages/Sturd.SnapcastNet/) (v0.0.4+)
+* **Snapcast Client Library:** [SnapCastNet (GitHub)](https://github.com/metaneutrons/snapcast-net) / [GitHub Packages](https://github.com/metaneutrons/snapcast-net/packages) (v1.0.0+)
 * **Subsonic API:** [Official Specification (Requires account?)](http://www.subsonic.org/pages/api.jsp) / [Navidrome Implementation](https://www.navidrome.org/docs/api/)
 * **Subsonic Client Library:** [SubSonicMedia (NuGet)](https://www.nuget.org/packages/SubSonicMedia/) (v1.0.4-beta.1+)
 * **Navidrome (Example Server):** [navidrome.org](https://www.navidrome.org/)
