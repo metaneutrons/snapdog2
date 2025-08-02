@@ -1,9 +1,10 @@
 #!/bin/bash
 
-# Create fake music library structure for Navidrome with proper metadata
+# Create fake music library structure for Navidrome with proper metadata and album covers
 # Using white-noise.m4a as the base file for all tracks
 
 BASE_FILE="white-noise.m4a"
+COVERS_DIR="album_covers"
 
 # Check if base file exists
 if [ ! -f "$BASE_FILE" ]; then
@@ -18,9 +19,155 @@ if ! command -v ffmpeg &> /dev/null; then
     exit 1
 fi
 
-echo "Creating music library structure with metadata..."
+# Check if curl is available
+if ! command -v curl &> /dev/null; then
+    echo "Error: curl is required but not installed!"
+    exit 1
+fi
 
-# Function to create track with metadata
+echo "🎵 Creating music library structure with metadata and album covers..."
+echo ""
+
+# Create covers directory
+mkdir -p "$COVERS_DIR"
+
+# Function to get cover URL for an album
+get_cover_url() {
+    local safe_artist="$1"
+    local safe_album="$2"
+    
+    case "${safe_artist}_${safe_album}" in
+        "Pink_Floyd_The_Dark_Side_of_the_Moon")
+            echo "https://upload.wikimedia.org/wikipedia/en/3/3b/Dark_Side_of_the_Moon.png"
+            ;;
+        "The_Beatles_Abbey_Road")
+            echo "https://upload.wikimedia.org/wikipedia/en/4/42/Beatles_-_Abbey_Road.jpg"
+            ;;
+        "Michael_Jackson_Thriller")
+            echo "https://upload.wikimedia.org/wikipedia/en/5/55/Michael_Jackson_-_Thriller.png"
+            ;;
+        "Led_Zeppelin_Led_Zeppelin_IV")
+            echo "https://upload.wikimedia.org/wikipedia/en/2/26/Led_Zeppelin_-_Led_Zeppelin_IV.jpg"
+            ;;
+        "Nirvana_Nevermind")
+            echo "https://upload.wikimedia.org/wikipedia/en/b/b7/NirvanaNevermindalbumcover.jpg"
+            ;;
+        "AC_DC_Back_in_Black")
+            echo "https://upload.wikimedia.org/wikipedia/commons/8/84/ACDC_Back_in_Black.png"
+            ;;
+        "Eagles_Hotel_California")
+            echo "https://upload.wikimedia.org/wikipedia/en/4/49/Hotelcalifornia.jpg"
+            ;;
+        "Dr__Dre_The_Chronic")
+            echo "https://upload.wikimedia.org/wikipedia/en/1/19/Dr._Dre_-_The_Chronic_CD_cover.jpg"
+            ;;
+        "Nas_Illmatic")
+            echo "https://upload.wikimedia.org/wikipedia/en/2/27/IllmaticNas.jpg"
+            ;;
+        "The_Notorious_B_I_G__Ready_to_Die")
+            echo "https://upload.wikimedia.org/wikipedia/en/f/f5/Ready_to_Die.jpg"
+            ;;
+        *)
+            echo ""
+            ;;
+    esac
+}
+
+# Function to download album cover with fallback
+download_cover() {
+    local artist="$1"
+    local album="$2"
+    local cover_file="$3"
+    
+    # Create safe key by replacing spaces and special chars with underscores
+    local safe_artist=$(echo "$artist" | sed 's/[^a-zA-Z0-9]/_/g')
+    local safe_album=$(echo "$album" | sed 's/[^a-zA-Z0-9]/_/g')
+    
+    echo "  🖼️  Downloading album cover..."
+    
+    # Try primary URL
+    local primary_url=$(get_cover_url "$safe_artist" "$safe_album")
+    if [ -n "$primary_url" ]; then
+        echo "    📥 Trying: $primary_url"
+        
+        if curl -s -L -A "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)" \
+            --max-time 15 --max-filesize 10M \
+            "$primary_url" -o "$cover_file" 2>/dev/null; then
+            
+            # Verify it's a valid image file
+            if file "$cover_file" | grep -q -E "(JPEG|PNG|image)"; then
+                local file_size=$(stat -f%z "$cover_file" 2>/dev/null || stat -c%s "$cover_file" 2>/dev/null)
+                if [ "$file_size" -gt 1000 ]; then  # At least 1KB
+                    echo "    ✅ Cover downloaded successfully (${file_size} bytes)"
+                    return 0
+                fi
+            fi
+            rm -f "$cover_file"
+        fi
+    fi
+    
+    echo "    🔄 Trying fallback sources..."
+    
+    # Try MusicBrainz/Cover Art Archive approach
+    local search_query=$(echo "${artist} ${album}" | sed 's/ /+/g' | sed 's/[^a-zA-Z0-9+]//g')
+    local musicbrainz_url="https://musicbrainz.org/ws/2/release-group/?query=artist:${search_query}&fmt=json&limit=1"
+    
+    local mb_result=$(curl -s --max-time 10 -A "MusicLibraryScript/1.0" "$musicbrainz_url" 2>/dev/null)
+    if [ -n "$mb_result" ]; then
+        local mbid=$(echo "$mb_result" | grep -o '"id":"[^"]*"' | head -1 | cut -d'"' -f4)
+        if [ -n "$mbid" ]; then
+            local cover_url="https://coverartarchive.org/release-group/${mbid}/front-500"
+            echo "    📥 Trying Cover Art Archive: $mbid"
+            
+            if curl -s -L --max-time 10 --max-filesize 5M "$cover_url" -o "$cover_file" 2>/dev/null; then
+                if file "$cover_file" | grep -q -E "(JPEG|PNG|image)"; then
+                    local file_size=$(stat -f%z "$cover_file" 2>/dev/null || stat -c%s "$cover_file" 2>/dev/null)
+                    if [ "$file_size" -gt 1000 ]; then
+                        echo "    ✅ Cover downloaded from Cover Art Archive (${file_size} bytes)"
+                        return 0
+                    fi
+                fi
+                rm -f "$cover_file"
+            fi
+        fi
+    fi
+    
+    # If all else fails, create a simple placeholder
+    echo "    ⚠️  Could not download cover, creating placeholder..."
+    create_placeholder_cover "$artist" "$album" "$cover_file"
+    return 1
+}
+
+# Function to create a simple placeholder cover
+create_placeholder_cover() {
+    local artist="$1"
+    local album="$2"
+    local cover_file="$3"
+    
+    # Ensure the covers directory exists
+    mkdir -p "$(dirname "$cover_file")"
+    
+    # Create a simple colored square as placeholder using ImageMagick if available
+    if command -v convert &> /dev/null; then
+        # Generate a color based on album name hash
+        local color_hash=$(echo "$album" | shasum | cut -c1-6 2>/dev/null || echo "$album" | md5sum | cut -c1-6 2>/dev/null || echo "4a90e2")
+        convert -size 400x400 "xc:#${color_hash}" \
+            -gravity center \
+            -pointsize 24 \
+            -fill white \
+            -stroke black \
+            -strokewidth 1 \
+            -annotate +0-30 "$artist" \
+            -annotate +0+30 "$album" \
+            "$cover_file" 2>/dev/null && return 0
+    fi
+    
+    # Fallback: create a simple text file as placeholder
+    echo "Album: $album by $artist" > "${cover_file%.jpg}.txt"
+    return 1
+}
+
+# Function to create track with metadata and embedded cover
 create_track() {
     local track_num="$1"
     local title="$2"
@@ -29,226 +176,144 @@ create_track() {
     local year="$5"
     local genre="$6"
     local filename="$7"
-
-    ffmpeg -i "../../$BASE_FILE" \
-        -metadata track="$track_num" \
-        -metadata title="$title" \
-        -metadata artist="$artist" \
-        -metadata album="$album" \
-        -metadata date="$year" \
-        -metadata genre="$genre" \
-        -codec copy \
-        -y "$filename" 2>/dev/null
-
-    if [ $? -eq 0 ]; then
-        echo "  ✓ Created: $filename"
+    local cover_file="$8"
+    
+    # Build ffmpeg command
+    local ffmpeg_cmd="ffmpeg -i ../../$BASE_FILE"
+    
+    # Add cover art if available
+    if [ -f "$cover_file" ] && file "$cover_file" | grep -q -E "(JPEG|PNG|image)"; then
+        ffmpeg_cmd="$ffmpeg_cmd -i $cover_file -map 0:0 -map 1:0 -c:v copy -disposition:v:0 attached_pic"
+    fi
+    
+    # Add metadata and output
+    ffmpeg_cmd="$ffmpeg_cmd -metadata track=\"$track_num\" -metadata title=\"$title\" -metadata artist=\"$artist\" -metadata album=\"$album\" -metadata date=\"$year\" -metadata genre=\"$genre\" -codec:a copy -y \"$filename\""
+    
+    # Execute ffmpeg command
+    if eval "$ffmpeg_cmd" 2>/dev/null; then
+        if [ -f "$cover_file" ] && file "$cover_file" | grep -q -E "(JPEG|PNG|image)"; then
+            echo "  ✅ Created: $filename (with cover art)"
+        else
+            echo "  ✅ Created: $filename"
+        fi
     else
-        echo "  ✗ Failed: $filename"
+        echo "  ❌ Failed: $filename"
     fi
 }
 
+# Function to process an album
+process_album() {
+    local artist="$1"
+    local album="$2"
+    local year="$3"
+    local genre="$4"
+    local folder="$5"
+    shift 5
+    local tracks=("$@")
+    
+    echo "🎼 Creating $artist - $album ($year)..."
+    mkdir -p "$folder"
+    cd "$folder"
+    
+    # Download cover art
+    local safe_artist=$(echo "$artist" | sed 's/[^a-zA-Z0-9]/_/g')
+    local safe_album=$(echo "$album" | sed 's/[^a-zA-Z0-9]/_/g')
+    local cover_file="../../$COVERS_DIR/${safe_artist}_${safe_album}.jpg"
+    download_cover "$artist" "$album" "$cover_file"
+    
+    # Create tracks
+    local track_num=1
+    for track in "${tracks[@]}"; do
+        create_track "$track_num" "$track" "$artist" "$album" "$year" "$genre" "$(printf "%02d - %s.m4a" $track_num "$track")" "$cover_file"
+        ((track_num++))
+    done
+    
+    cd ../..
+    echo ""
+}
+
+# Album processing
+echo "Starting album creation process..."
+echo ""
+
 # Album 1: Pink Floyd - The Dark Side of the Moon (1973)
-echo "Creating Pink Floyd - The Dark Side of the Moon (1973)..."
-mkdir -p "Pink Floyd/The Dark Side of the Moon (1973)"
-cd "Pink Floyd/The Dark Side of the Moon (1973)"
-
-create_track "1" "Speak to Me" "Pink Floyd" "The Dark Side of the Moon" "1973" "Progressive Rock" "01 - Speak to Me.m4a"
-create_track "2" "Breathe (In the Air)" "Pink Floyd" "The Dark Side of the Moon" "1973" "Progressive Rock" "02 - Breathe (In the Air).m4a"
-create_track "3" "On the Run" "Pink Floyd" "The Dark Side of the Moon" "1973" "Progressive Rock" "03 - On the Run.m4a"
-create_track "4" "Time" "Pink Floyd" "The Dark Side of the Moon" "1973" "Progressive Rock" "04 - Time.m4a"
-create_track "5" "The Great Gig in the Sky" "Pink Floyd" "The Dark Side of the Moon" "1973" "Progressive Rock" "05 - The Great Gig in the Sky.m4a"
-create_track "6" "Money" "Pink Floyd" "The Dark Side of the Moon" "1973" "Progressive Rock" "06 - Money.m4a"
-create_track "7" "Us and Them" "Pink Floyd" "The Dark Side of the Moon" "1973" "Progressive Rock" "07 - Us and Them.m4a"
-create_track "8" "Any Colour You Like" "Pink Floyd" "The Dark Side of the Moon" "1973" "Progressive Rock" "08 - Any Colour You Like.m4a"
-create_track "9" "Brain Damage" "Pink Floyd" "The Dark Side of the Moon" "1973" "Progressive Rock" "09 - Brain Damage.m4a"
-create_track "10" "Eclipse" "Pink Floyd" "The Dark Side of the Moon" "1973" "Progressive Rock" "10 - Eclipse.m4a"
-
-cd ../..
+process_album "Pink Floyd" "The Dark Side of the Moon" "1973" "Progressive Rock" "Pink Floyd/The Dark Side of the Moon (1973)" \
+    "Speak to Me" "Breathe (In the Air)" "On the Run" "Time" "The Great Gig in the Sky" \
+    "Money" "Us and Them" "Any Colour You Like" "Brain Damage" "Eclipse"
 
 # Album 2: The Beatles - Abbey Road (1969)
-echo "Creating The Beatles - Abbey Road (1969)..."
-mkdir -p "The Beatles/Abbey Road (1969)"
-cd "The Beatles/Abbey Road (1969)"
+process_album "The Beatles" "Abbey Road" "1969" "Rock" "The Beatles/Abbey Road (1969)" \
+    "Come Together" "Something" "Maxwell's Silver Hammer" "Oh! Darling" "Octopus's Garden" \
+    "I Want You (She's So Heavy)" "Here Comes the Sun" "Because" "You Never Give Me Your Money" \
+    "Sun King" "Mean Mr. Mustard" "Polythene Pam" "She Came in Through the Bathroom Window" \
+    "Golden Slumbers" "Carry That Weight" "The End" "Her Majesty"
 
-create_track "1" "Come Together" "The Beatles" "Abbey Road" "1969" "Rock" "01 - Come Together.m4a"
-create_track "2" "Something" "The Beatles" "Abbey Road" "1969" "Rock" "02 - Something.m4a"
-create_track "3" "Maxwell's Silver Hammer" "The Beatles" "Abbey Road" "1969" "Rock" "03 - Maxwell's Silver Hammer.m4a"
-create_track "4" "Oh! Darling" "The Beatles" "Abbey Road" "1969" "Rock" "04 - Oh! Darling.m4a"
-create_track "5" "Octopus's Garden" "The Beatles" "Abbey Road" "1969" "Rock" "05 - Octopus's Garden.m4a"
-create_track "6" "I Want You (She's So Heavy)" "The Beatles" "Abbey Road" "1969" "Rock" "06 - I Want You (She's So Heavy).m4a"
-create_track "7" "Here Comes the Sun" "The Beatles" "Abbey Road" "1969" "Rock" "07 - Here Comes the Sun.m4a"
-create_track "8" "Because" "The Beatles" "Abbey Road" "1969" "Rock" "08 - Because.m4a"
-create_track "9" "You Never Give Me Your Money" "The Beatles" "Abbey Road" "1969" "Rock" "09 - You Never Give Me Your Money.m4a"
-create_track "10" "Sun King" "The Beatles" "Abbey Road" "1969" "Rock" "10 - Sun King.m4a"
-create_track "11" "Mean Mr. Mustard" "The Beatles" "Abbey Road" "1969" "Rock" "11 - Mean Mr. Mustard.m4a"
-create_track "12" "Polythene Pam" "The Beatles" "Abbey Road" "1969" "Rock" "12 - Polythene Pam.m4a"
-create_track "13" "She Came in Through the Bathroom Window" "The Beatles" "Abbey Road" "1969" "Rock" "13 - She Came in Through the Bathroom Window.m4a"
-create_track "14" "Golden Slumbers" "The Beatles" "Abbey Road" "1969" "Rock" "14 - Golden Slumbers.m4a"
-create_track "15" "Carry That Weight" "The Beatles" "Abbey Road" "1969" "Rock" "15 - Carry That Weight.m4a"
-create_track "16" "The End" "The Beatles" "Abbey Road" "1969" "Rock" "16 - The End.m4a"
-create_track "17" "Her Majesty" "The Beatles" "Abbey Road" "1969" "Rock" "17 - Her Majesty.m4a"
-
-cd ../..
 # Album 3: Michael Jackson - Thriller (1982)
-echo "Creating Michael Jackson - Thriller (1982)..."
-mkdir -p "Michael Jackson/Thriller (1982)"
-cd "Michael Jackson/Thriller (1982)"
-
-create_track "1" "Wanna Be Startin' Somethin'" "Michael Jackson" "Thriller" "1982" "Pop" "01 - Wanna Be Startin' Somethin'.m4a"
-create_track "2" "Baby Be Mine" "Michael Jackson" "Thriller" "1982" "Pop" "02 - Baby Be Mine.m4a"
-create_track "3" "The Girl Is Mine" "Michael Jackson" "Thriller" "1982" "Pop" "03 - The Girl Is Mine.m4a"
-create_track "4" "Thriller" "Michael Jackson" "Thriller" "1982" "Pop" "04 - Thriller.m4a"
-create_track "5" "Beat It" "Michael Jackson" "Thriller" "1982" "Pop" "05 - Beat It.m4a"
-create_track "6" "Billie Jean" "Michael Jackson" "Thriller" "1982" "Pop" "06 - Billie Jean.m4a"
-create_track "7" "Human Nature" "Michael Jackson" "Thriller" "1982" "Pop" "07 - Human Nature.m4a"
-create_track "8" "P.Y.T. (Pretty Young Thing)" "Michael Jackson" "Thriller" "1982" "Pop" "08 - P.Y.T. (Pretty Young Thing).m4a"
-create_track "9" "The Lady in My Life" "Michael Jackson" "Thriller" "1982" "Pop" "09 - The Lady in My Life.m4a"
-
-cd ../..
+process_album "Michael Jackson" "Thriller" "1982" "Pop" "Michael Jackson/Thriller (1982)" \
+    "Wanna Be Startin' Somethin'" "Baby Be Mine" "The Girl Is Mine" "Thriller" "Beat It" \
+    "Billie Jean" "Human Nature" "P.Y.T. (Pretty Young Thing)" "The Lady in My Life"
 
 # Album 4: Led Zeppelin - Led Zeppelin IV (1971)
-echo "Creating Led Zeppelin - Led Zeppelin IV (1971)..."
-mkdir -p "Led Zeppelin/Led Zeppelin IV (1971)"
-cd "Led Zeppelin/Led Zeppelin IV (1971)"
+process_album "Led Zeppelin" "Led Zeppelin IV" "1971" "Hard Rock" "Led Zeppelin/Led Zeppelin IV (1971)" \
+    "Black Dog" "Rock and Roll" "The Battle of Evermore" "Stairway to Heaven" \
+    "Misty Mountain Hop" "Four Sticks" "Going to California" "When the Levee Breaks"
 
-create_track "1" "Black Dog" "Led Zeppelin" "Led Zeppelin IV" "1971" "Hard Rock" "01 - Black Dog.m4a"
-create_track "2" "Rock and Roll" "Led Zeppelin" "Led Zeppelin IV" "1971" "Hard Rock" "02 - Rock and Roll.m4a"
-create_track "3" "The Battle of Evermore" "Led Zeppelin" "Led Zeppelin IV" "1971" "Hard Rock" "03 - The Battle of Evermore.m4a"
-create_track "4" "Stairway to Heaven" "Led Zeppelin" "Led Zeppelin IV" "1971" "Hard Rock" "04 - Stairway to Heaven.m4a"
-create_track "5" "Misty Mountain Hop" "Led Zeppelin" "Led Zeppelin IV" "1971" "Hard Rock" "05 - Misty Mountain Hop.m4a"
-create_track "6" "Four Sticks" "Led Zeppelin" "Led Zeppelin IV" "1971" "Hard Rock" "06 - Four Sticks.m4a"
-create_track "7" "Going to California" "Led Zeppelin" "Led Zeppelin IV" "1971" "Hard Rock" "07 - Going to California.m4a"
-create_track "8" "When the Levee Breaks" "Led Zeppelin" "Led Zeppelin IV" "1971" "Hard Rock" "08 - When the Levee Breaks.m4a"
-
-cd ../..
 # Album 5: Nirvana - Nevermind (1991)
-echo "Creating Nirvana - Nevermind (1991)..."
-mkdir -p "Nirvana/Nevermind (1991)"
-cd "Nirvana/Nevermind (1991)"
-
-create_track "1" "Smells Like Teen Spirit" "Nirvana" "Nevermind" "1991" "Grunge" "01 - Smells Like Teen Spirit.m4a"
-create_track "2" "In Bloom" "Nirvana" "Nevermind" "1991" "Grunge" "02 - In Bloom.m4a"
-create_track "3" "Come as You Are" "Nirvana" "Nevermind" "1991" "Grunge" "03 - Come as You Are.m4a"
-create_track "4" "Breed" "Nirvana" "Nevermind" "1991" "Grunge" "04 - Breed.m4a"
-create_track "5" "Lithium" "Nirvana" "Nevermind" "1991" "Grunge" "05 - Lithium.m4a"
-create_track "6" "Polly" "Nirvana" "Nevermind" "1991" "Grunge" "06 - Polly.m4a"
-create_track "7" "Territorial Pissings" "Nirvana" "Nevermind" "1991" "Grunge" "07 - Territorial Pissings.m4a"
-create_track "8" "Drain You" "Nirvana" "Nevermind" "1991" "Grunge" "08 - Drain You.m4a"
-create_track "9" "Lounge Act" "Nirvana" "Nevermind" "1991" "Grunge" "09 - Lounge Act.m4a"
-create_track "10" "Stay Away" "Nirvana" "Nevermind" "1991" "Grunge" "10 - Stay Away.m4a"
-create_track "11" "On a Plain" "Nirvana" "Nevermind" "1991" "Grunge" "11 - On a Plain.m4a"
-create_track "12" "Something in the Way" "Nirvana" "Nevermind" "1991" "Grunge" "12 - Something in the Way.m4a"
-
-cd ../..
+process_album "Nirvana" "Nevermind" "1991" "Grunge" "Nirvana/Nevermind (1991)" \
+    "Smells Like Teen Spirit" "In Bloom" "Come as You Are" "Breed" "Lithium" "Polly" \
+    "Territorial Pissings" "Drain You" "Lounge Act" "Stay Away" "On a Plain" "Something in the Way"
 
 # Album 6: AC/DC - Back in Black (1980)
-echo "Creating AC/DC - Back in Black (1980)..."
-mkdir -p "AC DC/Back in Black (1980)"
-cd "AC DC/Back in Black (1980)"
+process_album "AC/DC" "Back in Black" "1980" "Hard Rock" "AC DC/Back in Black (1980)" \
+    "Hells Bells" "Shoot to Thrill" "What Do You Do for Money Honey" "Given the Dog a Bone" \
+    "Let Me Put My Love into You" "Back in Black" "You Shook Me All Night Long" \
+    "Have a Drink on Me" "Shake a Leg" "Rock and Roll Ain't Noise Pollution"
 
-create_track "1" "Hells Bells" "AC/DC" "Back in Black" "1980" "Hard Rock" "01 - Hells Bells.m4a"
-create_track "2" "Shoot to Thrill" "AC/DC" "Back in Black" "1980" "Hard Rock" "02 - Shoot to Thrill.m4a"
-create_track "3" "What Do You Do for Money Honey" "AC/DC" "Back in Black" "1980" "Hard Rock" "03 - What Do You Do for Money Honey.m4a"
-create_track "4" "Given the Dog a Bone" "AC/DC" "Back in Black" "1980" "Hard Rock" "04 - Given the Dog a Bone.m4a"
-create_track "5" "Let Me Put My Love into You" "AC/DC" "Back in Black" "1980" "Hard Rock" "05 - Let Me Put My Love into You.m4a"
-create_track "6" "Back in Black" "AC/DC" "Back in Black" "1980" "Hard Rock" "06 - Back in Black.m4a"
-create_track "7" "You Shook Me All Night Long" "AC/DC" "Back in Black" "1980" "Hard Rock" "07 - You Shook Me All Night Long.m4a"
-create_track "8" "Have a Drink on Me" "AC/DC" "Back in Black" "1980" "Hard Rock" "08 - Have a Drink on Me.m4a"
-create_track "9" "Shake a Leg" "AC/DC" "Back in Black" "1980" "Hard Rock" "09 - Shake a Leg.m4a"
-create_track "10" "Rock and Roll Ain't Noise Pollution" "AC/DC" "Back in Black" "1980" "Hard Rock" "10 - Rock and Roll Ain't Noise Pollution.m4a"
-
-cd ../..
 # Album 7: Eagles - Hotel California (1976)
-echo "Creating Eagles - Hotel California (1976)..."
-mkdir -p "Eagles/Hotel California (1976)"
-cd "Eagles/Hotel California (1976)"
-
-create_track "1" "Hotel California" "Eagles" "Hotel California" "1976" "Rock" "01 - Hotel California.m4a"
-create_track "2" "New Kid in Town" "Eagles" "Hotel California" "1976" "Rock" "02 - New Kid in Town.m4a"
-create_track "3" "Life in the Fast Lane" "Eagles" "Hotel California" "1976" "Rock" "03 - Life in the Fast Lane.m4a"
-create_track "4" "Wasted Time" "Eagles" "Hotel California" "1976" "Rock" "04 - Wasted Time.m4a"
-create_track "5" "Wasted Time (Reprise)" "Eagles" "Hotel California" "1976" "Rock" "05 - Wasted Time (Reprise).m4a"
-create_track "6" "Victim of Love" "Eagles" "Hotel California" "1976" "Rock" "06 - Victim of Love.m4a"
-create_track "7" "Pretty Maids All in a Row" "Eagles" "Hotel California" "1976" "Rock" "07 - Pretty Maids All in a Row.m4a"
-create_track "8" "Try and Love Again" "Eagles" "Hotel California" "1976" "Rock" "08 - Try and Love Again.m4a"
-create_track "9" "The Last Resort" "Eagles" "Hotel California" "1976" "Rock" "09 - The Last Resort.m4a"
-
-cd ../..
+process_album "Eagles" "Hotel California" "1976" "Rock" "Eagles/Hotel California (1976)" \
+    "Hotel California" "New Kid in Town" "Life in the Fast Lane" "Wasted Time" \
+    "Wasted Time (Reprise)" "Victim of Love" "Pretty Maids All in a Row" \
+    "Try and Love Again" "The Last Resort"
 
 # Album 8: Dr. Dre - The Chronic (1992)
-echo "Creating Dr. Dre - The Chronic (1992)..."
-mkdir -p "Dr. Dre/The Chronic (1992)"
-cd "Dr. Dre/The Chronic (1992)"
+process_album "Dr. Dre" "The Chronic" "1992" "Hip-Hop" "Dr. Dre/The Chronic (1992)" \
+    "The Chronic (Intro)" "Fuck wit Dre Day (And Everybody's Celebratin')" "Let Me Ride" \
+    "The Day the Niggaz Took Over" "Nuthin' but a 'G' Thang" "Deeez Nuuuts" "Lil' Ghetto Boy" \
+    "A Nigga Witta Gun" "Rat-Tat-Tat-Tat" "The \$20 Sack Pyramid" "Lyrical Gangbang" \
+    "High Powered" "The Doctor's Office" "Stranded on Death Row" "The Roach (The Chronic Outro)" \
+    "Bitches Ain't Shit"
 
-create_track "1" "The Chronic (Intro)" "Dr. Dre" "The Chronic" "1992" "Hip-Hop" "01 - The Chronic (Intro).m4a"
-create_track "2" "Fuck wit Dre Day (And Everybody's Celebratin')" "Dr. Dre" "The Chronic" "1992" "Hip-Hop" "02 - Fuck wit Dre Day (And Everybody's Celebratin').m4a"
-create_track "3" "Let Me Ride" "Dr. Dre" "The Chronic" "1992" "Hip-Hop" "03 - Let Me Ride.m4a"
-create_track "4" "The Day the Niggaz Took Over" "Dr. Dre" "The Chronic" "1992" "Hip-Hop" "04 - The Day the Niggaz Took Over.m4a"
-create_track "5" "Nuthin' but a 'G' Thang" "Dr. Dre" "The Chronic" "1992" "Hip-Hop" "05 - Nuthin' but a 'G' Thang.m4a"
-create_track "6" "Deeez Nuuuts" "Dr. Dre" "The Chronic" "1992" "Hip-Hop" "06 - Deeez Nuuuts.m4a"
-create_track "7" "Lil' Ghetto Boy" "Dr. Dre" "The Chronic" "1992" "Hip-Hop" "07 - Lil' Ghetto Boy.m4a"
-create_track "8" "A Nigga Witta Gun" "Dr. Dre" "The Chronic" "1992" "Hip-Hop" "08 - A Nigga Witta Gun.m4a"
-create_track "9" "Rat-Tat-Tat-Tat" "Dr. Dre" "The Chronic" "1992" "Hip-Hop" "09 - Rat-Tat-Tat-Tat.m4a"
-create_track "10" "The $20 Sack Pyramid" "Dr. Dre" "The Chronic" "1992" "Hip-Hop" "10 - The $20 Sack Pyramid.m4a"
-create_track "11" "Lyrical Gangbang" "Dr. Dre" "The Chronic" "1992" "Hip-Hop" "11 - Lyrical Gangbang.m4a"
-create_track "12" "High Powered" "Dr. Dre" "The Chronic" "1992" "Hip-Hop" "12 - High Powered.m4a"
-create_track "13" "The Doctor's Office" "Dr. Dre" "The Chronic" "1992" "Hip-Hop" "13 - The Doctor's Office.m4a"
-create_track "14" "Stranded on Death Row" "Dr. Dre" "The Chronic" "1992" "Hip-Hop" "14 - Stranded on Death Row.m4a"
-create_track "15" "The Roach (The Chronic Outro)" "Dr. Dre" "The Chronic" "1992" "Hip-Hop" "15 - The Roach (The Chronic Outro).m4a"
-create_track "16" "Bitches Ain't Shit" "Dr. Dre" "The Chronic" "1992" "Hip-Hop" "16 - Bitches Ain't Shit.m4a"
-
-cd ../..
 # Album 9: Nas - Illmatic (1994)
-echo "Creating Nas - Illmatic (1994)..."
-mkdir -p "Nas/Illmatic (1994)"
-cd "Nas/Illmatic (1994)"
-
-create_track "1" "The Genesis" "Nas" "Illmatic" "1994" "Hip-Hop" "01 - The Genesis.m4a"
-create_track "2" "N.Y. State of Mind" "Nas" "Illmatic" "1994" "Hip-Hop" "02 - N.Y. State of Mind.m4a"
-create_track "3" "Life's a Bitch" "Nas" "Illmatic" "1994" "Hip-Hop" "03 - Life's a Bitch.m4a"
-create_track "4" "The World Is Yours" "Nas" "Illmatic" "1994" "Hip-Hop" "04 - The World Is Yours.m4a"
-create_track "5" "Halftime" "Nas" "Illmatic" "1994" "Hip-Hop" "05 - Halftime.m4a"
-create_track "6" "Memory Lane (Sittin' in da Park)" "Nas" "Illmatic" "1994" "Hip-Hop" "06 - Memory Lane (Sittin' in da Park).m4a"
-create_track "7" "One Love" "Nas" "Illmatic" "1994" "Hip-Hop" "07 - One Love.m4a"
-create_track "8" "One Time 4 Your Mind" "Nas" "Illmatic" "1994" "Hip-Hop" "08 - One Time 4 Your Mind.m4a"
-create_track "9" "Represent" "Nas" "Illmatic" "1994" "Hip-Hop" "09 - Represent.m4a"
-create_track "10" "It Ain't Hard to Tell" "Nas" "Illmatic" "1994" "Hip-Hop" "10 - It Ain't Hard to Tell.m4a"
-
-cd ../..
+process_album "Nas" "Illmatic" "1994" "Hip-Hop" "Nas/Illmatic (1994)" \
+    "The Genesis" "N.Y. State of Mind" "Life's a Bitch" "The World Is Yours" "Halftime" \
+    "Memory Lane (Sittin' in da Park)" "One Love" "One Time 4 Your Mind" "Represent" \
+    "It Ain't Hard to Tell"
 
 # Album 10: The Notorious B.I.G. - Ready to Die (1994)
-echo "Creating The Notorious B.I.G. - Ready to Die (1994)..."
-mkdir -p "The Notorious B.I.G/Ready to Die (1994)"
-cd "The Notorious B.I.G/Ready to Die (1994)"
+process_album "The Notorious B.I.G." "Ready to Die" "1994" "Hip-Hop" "The Notorious B.I.G/Ready to Die (1994)" \
+    "Intro" "Things Done Changed" "Gimme the Loot" "Machine Gun Funk" "Warning" "Ready to Die" \
+    "One More Chance" "Fuck Me (Interlude)" "The What" "Juicy" "Everyday Struggle" \
+    "Me & My Bitch" "Big Poppa" "Respect" "Friend of Mine" "Unbelievable" "Suicidal Thoughts"
 
-create_track "1" "Intro" "The Notorious B.I.G." "Ready to Die" "1994" "Hip-Hop" "01 - Intro.m4a"
-create_track "2" "Things Done Changed" "The Notorious B.I.G." "Ready to Die" "1994" "Hip-Hop" "02 - Things Done Changed.m4a"
-create_track "3" "Gimme the Loot" "The Notorious B.I.G." "Ready to Die" "1994" "Hip-Hop" "03 - Gimme the Loot.m4a"
-create_track "4" "Machine Gun Funk" "The Notorious B.I.G." "Ready to Die" "1994" "Hip-Hop" "04 - Machine Gun Funk.m4a"
-create_track "5" "Warning" "The Notorious B.I.G." "Ready to Die" "1994" "Hip-Hop" "05 - Warning.m4a"
-create_track "6" "Ready to Die" "The Notorious B.I.G." "Ready to Die" "1994" "Hip-Hop" "06 - Ready to Die.m4a"
-create_track "7" "One More Chance" "The Notorious B.I.G." "Ready to Die" "1994" "Hip-Hop" "07 - One More Chance.m4a"
-create_track "8" "Fuck Me (Interlude)" "The Notorious B.I.G." "Ready to Die" "1994" "Hip-Hop" "08 - Fuck Me (Interlude).m4a"
-create_track "9" "The What" "The Notorious B.I.G." "Ready to Die" "1994" "Hip-Hop" "09 - The What.m4a"
-create_track "10" "Juicy" "The Notorious B.I.G." "Ready to Die" "1994" "Hip-Hop" "10 - Juicy.m4a"
-create_track "11" "Everyday Struggle" "The Notorious B.I.G." "Ready to Die" "1994" "Hip-Hop" "11 - Everyday Struggle.m4a"
-create_track "12" "Me & My Bitch" "The Notorious B.I.G." "Ready to Die" "1994" "Hip-Hop" "12 - Me & My Bitch.m4a"
-create_track "13" "Big Poppa" "The Notorious B.I.G." "Ready to Die" "1994" "Hip-Hop" "13 - Big Poppa.m4a"
-create_track "14" "Respect" "The Notorious B.I.G." "Ready to Die" "1994" "Hip-Hop" "14 - Respect.m4a"
-create_track "15" "Friend of Mine" "The Notorious B.I.G." "Ready to Die" "1994" "Hip-Hop" "15 - Friend of Mine.m4a"
-create_track "16" "Unbelievable" "The Notorious B.I.G." "Ready to Die" "1994" "Hip-Hop" "16 - Unbelievable.m4a"
-create_track "17" "Suicidal Thoughts" "The Notorious B.I.G." "Ready to Die" "1994" "Hip-Hop" "17 - Suicidal Thoughts.m4a"
-
-cd ../..
-
+echo "🎉 Music library with metadata and album covers created successfully!"
 echo ""
-echo "🎵 Music library with metadata created successfully!"
-echo "📊 Total albums: 10"
-echo "🎤 Artists: Pink Floyd, The Beatles, Michael Jackson, Led Zeppelin, Nirvana, AC/DC, Eagles, Dr. Dre, Nas, The Notorious B.I.G."
-echo "🎧 Total tracks: 119 with complete metadata"
+echo "📊 Summary:"
+echo "   🎼 Total albums: 10"
+echo "   🎤 Artists: Pink Floyd, The Beatles, Michael Jackson, Led Zeppelin, Nirvana, AC/DC, Eagles, Dr. Dre, Nas, The Notorious B.I.G."
+echo "   🎧 Total tracks: 119 with complete metadata"
+echo "   🖼️  Album covers: Downloaded and embedded where possible"
 echo ""
 echo "📁 Directory structure:"
 find . -type d -name "*(*)" | sort
 echo ""
-echo "🔍 Sample metadata check:"
-echo "Run: ffprobe -v quiet -show_format -show_streams 'Pink Floyd/The Dark Side of the Moon (1973)/01 - Speak to Me.m4a'"
+echo "🖼️  Downloaded covers:"
+ls -la "$COVERS_DIR"/ 2>/dev/null || echo "   No covers directory found"
+echo ""
+echo "🔍 Sample metadata check (with cover art):"
+echo "   ffprobe -v quiet -show_streams 'Pink Floyd/The Dark Side of the Moon (1973)/01 - Speak to Me.m4a'"
+echo ""
+echo "💡 Tips:"
+echo "   - Covers are cached in '$COVERS_DIR' directory"
+echo "   - Re-run script to retry failed cover downloads"
+echo "   - Install ImageMagick for better placeholder covers: brew install imagemagick"
+echo "   - Script uses Wikipedia Commons for reliable cover sources"
