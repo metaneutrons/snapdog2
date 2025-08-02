@@ -19,10 +19,10 @@ For each level, this section defines:
 **Key Conventions within this Framework:**
 
 * **Targeting:** Commands and status related to Zones or Clients logically require a `ZoneId` or `ClientId` to identify the target. This ID is often implicit in specific implementations (e.g., API URL path, method called on an object instance) but is explicitly listed in the Functionality tables as essential information.
-* **Indexing:** All **Playlist and Track indices** referenced in external interfaces (MQTT, KNX, API) are **1-based**. Playlist index `1` is reserved for the configured Radio stations (See Section 10.2.2 for Radio Configuration).
+* **Indexing:** All **Playlist and Track indices** referenced in external interfaces (MQTT, KNX, API) are **1-based**. Playlist index `1` is reserved for the configured Radio stations (see Section 10 for configuration details).
 * **Internal Mapping:** The internal application logic (e.g., within `/Server` layer components like `PlaylistManager`) is responsible for mapping these 1-based external indices to 0-based internal list indices where necessary.
 * **KNX Limits:** For KNX DPT 5.010 (used for Track/Playlist indices), values greater than 255 cannot be represented. In such cases, the corresponding KNX Status GA **must** report `0`.
-* **Cortex.Mediator:** Conceptual commands map to Cortex.Mediator `IRequest<Result>` or `IQuery<Result<T>>` objects, while status updates often correspond to Cortex.Mediator `INotification` publications handled by relevant infrastructure adapters. See Section 6 for Cortex.Mediator implementation details.
+* **Cortex.Mediator:** Conceptual commands map to Cortex.Mediator `ICommand<Result<T>>` or `IQuery<Result<T>>` objects, while status updates correspond to Cortex.Mediator `INotification` publications handled by relevant infrastructure adapters. See Section 16 for Cortex.Mediator implementation details.
 * **Configuration:** MQTT Topic structures and KNX Group Addresses are configurable via environment variables detailed in Section 10. The tables below list the default relative topic paths and environment variable *suffixes*.
 
 ## 13.2. Global Commands and Status
@@ -36,7 +36,7 @@ For each level, this section defines:
 | `VERSION_INFO`    | Software version information| `VersionDetails` object (`Core.Models`) | Status (Publish) | Contains version, build date etc. |
 | `SERVER_STATS`    | Server performance stats    | `ServerStats` object (`Core.Models`)  | Status (Publish) | CPU, Memory, Uptime             |
 
-*(See Section 10.2.1 for detailed C# Record definitions of `ErrorDetails`, `VersionDetails`, `ServerStats`)*
+*(The C# Record definitions for `ErrorDetails`, `VersionDetails`, `ServerStats` are implemented in `SnapDog2.Core.Models` namespace)*
 
 ### 13.2.2. Global MQTT Implementation
 
@@ -130,7 +130,7 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 
 | Command ID                | Env Var Suffix           | Default Rel. Topic   | Example Payloads                               | Notes                            |
 | :------------------------ | :----------------------- | :--------------------- | :--------------------------------------------- | :------------------------------- |
-| `PLAY`/`PAUSE`/`STOP` etc.| `_CONTROL_SET_TOPIC`     | `control/set`              | `"play"`, `"pause"`, `"next"`, `"shuffle_on"` | **See 9.3.2.3 for full payload list** |
+| `PLAY`/`PAUSE`/`STOP` etc.| `_CONTROL_SET_TOPIC`     | `control/set`              | `"play"`, `"pause"`, `"next"`, `"shuffle_on"` | **See 13.3.2.3 for full payload list** |
 
 **Track Management**
 
@@ -161,7 +161,7 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 
 **Important Topic Distinction:**
 - **`control`** - Publishes simple string status values for current playback state and modes (e.g., `"play"`, `"mute_on"`)
-- **`state`** - Publishes complete JSON zone state object with all information (see Section 9.5.1)
+- **`state`** - Publishes complete JSON zone state object with all information (see Section 13.5.1 below)
 
 **Playback/Mode State**
 
@@ -197,7 +197,7 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 
 | Status ID         | Env Var Suffix | Default Rel. Topic | Example Payload                  | Retained | Notes                 |
 | :---------------- | :------------- | :----------------- | :------------------------------- | :------- | :-------------------- |
-| `ZONE_STATE`      | `_STATE_TOPIC` | `state`            | **Full JSON object (see 9.5.1)** | Yes      | Includes all status |
+| `ZONE_STATE`      | `_STATE_TOPIC` | `state`            | **Full JSON object (see 13.5.1)** | Yes      | Includes all status |
 
 #### 13.3.2.3. Payloads for `{zoneBaseTopic}control/set`
 
@@ -240,7 +240,7 @@ This topic publishes simple string representations for various states:
 
 ### 13.3.3. Zone KNX Implementation
 
-Uses `Knx.Falcon.GroupAddress`. GAs configured via `SNAPDOG_ZONE_{n}_KNX_{SUFFIX}` Env Vars (Sec 10). DPT Value Mapping in Appendix 20.3. **Indices 1-based.** Report `0` on Status GA if > 255.
+Uses `Knx.Falcon.GroupAddress`. GAs configured via `SNAPDOG_ZONE_{n}_KNX_{SUFFIX}` Env Vars (Sec 10). DPT Value Mapping follows standard KNX conventions (see Section 20 for dependencies). **Indices 1-based.** Report `0` on Status GA if > 255.
 
 #### 13.3.3.1. KNX Zone Command Group Addresses
 
@@ -375,11 +375,11 @@ Base topic: `SNAPDOG_CLIENT_m_MQTT_BASE_TOPIC` (default: `snapdog/clients/{m}/`)
 | `CLIENT_CONNECTED`      | `_CONNECTED_TOPIC`     | `connected`            | `true` / `false`, `1` / `0` | Yes      |
 | `CLIENT_LATENCY_STATUS` | `_LATENCY_TOPIC`       | `latency`              | `20`                      | Yes      |
 | `CLIENT_ZONE_STATUS`    | `_ZONE_TOPIC`          | `zone`                 | `1`                       | Yes      |
-| `CLIENT_STATE`          | `_STATE_TOPIC`         | `state`                | Full JSON object (9.5.2)  | Yes      |
+| `CLIENT_STATE`          | `_STATE_TOPIC`         | `state`                | Full JSON object (13.5.2)  | Yes      |
 
 ### 13.4.3. Client KNX Implementation
 
-Uses `Knx.Falcon.GroupAddress`. GAs configured via `SNAPDOG_CLIENT_{m}_KNX_{SUFFIX}` Env Vars (Sec 10). DPT Value Mapping in Appendix 20.3. **Zone indices 1-based.** Report `0` on Status GA if index > 255.
+Uses `Knx.Falcon.GroupAddress`. GAs configured via `SNAPDOG_CLIENT_{m}_KNX_{SUFFIX}` Env Vars (Sec 10). DPT Value Mapping follows standard KNX conventions (see Section 20 for dependencies). **Zone indices 1-based.** Report `0` on Status GA if index > 255.
 
 #### 13.4.3.1. KNX Client Command Group Addresses
 
