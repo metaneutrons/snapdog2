@@ -264,3 +264,133 @@ public record NextPlaylistCommand : ICommand<Result>
     /// </summary>
     public CommandSource Source { get; init; } = CommandSource.Internal;
 }
+/// <summary>
+/// Command to play the previous playlist in a zone.
+/// </summary>
+public record PreviousPlaylistCommand : ICommand<Result>
+{
+    /// <summary>
+    /// Gets the ID of the target zone.
+    /// </summary>
+    public required int ZoneId { get; init; }
+
+    /// <summary>
+    /// Gets the source that initiated the command.
+    /// </summary>
+    public CommandSource Source { get; init; } = CommandSource.Internal;
+}
+
+// Track Repeat Commands
+
+/// <summary>
+/// Command to set track repeat mode.
+/// </summary>
+public record SetTrackRepeatCommand : ICommand<Result>
+{
+    /// <summary>
+    /// Gets the ID of the target zone.
+    /// </summary>
+    public required int ZoneId { get; init; }
+
+    /// <summary>
+    /// Gets whether to enable track repeat.
+    /// </summary>
+    public required bool Enabled { get; init; }
+
+    /// <summary>
+    /// Gets the source that initiated the command.
+    /// </summary>
+    public CommandSource Source { get; init; } = CommandSource.Internal;
+}
+
+/// <summary>
+/// Command to toggle track repeat mode.
+/// </summary>
+public record ToggleTrackRepeatCommand : ICommand<Result>
+{
+    /// <summary>
+    /// Gets the ID of the target zone.
+    /// </summary>
+    public required int ZoneId { get; init; }
+
+    /// <summary>
+    /// Gets the source that initiated the command.
+    /// </summary>
+    public CommandSource Source { get; init; } = CommandSource.Internal;
+}
+
+// Playlist Shuffle and Repeat Commands
+
+/// <summary>
+/// Command to set playlist shuffle mode.
+/// </summary>
+public record SetPlaylistShuffleCommand : ICommand<Result>
+{
+    /// <summary>
+    /// Gets the ID of the target zone.
+    /// </summary>
+    public required int ZoneId { get; init; }
+
+    /// <summary>
+    /// Gets whether to enable playlist shuffle.
+    /// </summary>
+    public required bool Enabled { get; init; }
+
+    /// <summary>
+    /// Gets the source that initiated the command.
+    /// </summary>
+    public CommandSource Source { get; init; } = CommandSource.Internal;
+}
+
+/// <summary>
+/// Command to toggle playlist shuffle mode.
+/// </summary>
+public record TogglePlaylistShuffleCommand : ICommand<Result>
+{
+    /// <summary>
+    /// Gets the ID of the target zone.
+    /// </summary>
+    public required int ZoneId { get; init; }
+
+    /// <summary>
+    /// Gets the source that initiated the command.
+    /// </summary>
+    public CommandSource Source { get; init; } = CommandSource.Internal;
+}
+
+/// <summary>
+/// Command to set playlist repeat mode.
+/// </summary>
+public record SetPlaylistRepeatCommand : ICommand<Result>
+{
+    /// <summary>
+    /// Gets the ID of the target zone.
+    /// </summary>
+    public required int ZoneId { get; init; }
+
+    /// <summary>
+    /// Gets whether to enable playlist repeat.
+    /// </summary>
+    public required bool Enabled { get; init; }
+
+    /// <summary>
+    /// Gets the source that initiated the command.
+    /// </summary>
+    public CommandSource Source { get; init; } = CommandSource.Internal;
+}
+
+/// <summary>
+/// Command to toggle playlist repeat mode.
+/// </summary>
+public record TogglePlaylistRepeatCommand : ICommand<Result>
+{
+    /// <summary>
+    /// Gets the ID of the target zone.
+    /// </summary>
+    public required int ZoneId { get; init; }
+
+    /// <summary>
+    /// Gets the source that initiated the command.
+    /// </summary>
+    public CommandSource Source { get; init; } = CommandSource.Internal;
+}

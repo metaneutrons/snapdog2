@@ -153,7 +153,7 @@ public partial class ZoneService : IZoneService
         LogZoneAction(ZoneId, _zoneName, $"Play track {trackIndex}");
         await Task.Delay(10); // Simulate async operation
         
-        var newTrack = _currentState.Track with 
+        var newTrack = _currentState.Track! with 
         { 
             Index = trackIndex, 
             Title = $"Track {trackIndex}" 
@@ -172,7 +172,7 @@ public partial class ZoneService : IZoneService
         LogZoneAction(ZoneId, _zoneName, $"Play URL: {mediaUrl}");
         await Task.Delay(10); // Simulate async operation
         
-        var newTrack = _currentState.Track with { Title = "Stream" };
+        var newTrack = _currentState.Track! with { Title = "Stream" };
         _currentState = _currentState with 
         { 
             PlaybackState = "playing",
@@ -251,7 +251,7 @@ public partial class ZoneService : IZoneService
         LogZoneAction(ZoneId, _zoneName, $"Set track to {trackIndex}");
         await Task.Delay(10); // Simulate async operation
         
-        var newTrack = _currentState.Track with 
+        var newTrack = _currentState.Track! with 
         { 
             Index = trackIndex, 
             Title = $"Track {trackIndex}" 
@@ -266,8 +266,8 @@ public partial class ZoneService : IZoneService
         LogZoneAction(ZoneId, _zoneName, "Next track");
         await Task.Delay(10); // Simulate async operation
         
-        var currentIndex = _currentState.Track?.Index ?? 1;
-        var newTrack = _currentState.Track with 
+        var currentIndex = _currentState.Track!?.Index ?? 1;
+        var newTrack = _currentState.Track! with 
         { 
             Index = currentIndex + 1, 
             Title = $"Track {currentIndex + 1}" 
@@ -282,9 +282,9 @@ public partial class ZoneService : IZoneService
         LogZoneAction(ZoneId, _zoneName, "Previous track");
         await Task.Delay(10); // Simulate async operation
         
-        var currentIndex = _currentState.Track?.Index ?? 1;
+        var currentIndex = _currentState.Track!?.Index ?? 1;
         var newIndex = Math.Max(1, currentIndex - 1);
-        var newTrack = _currentState.Track with 
+        var newTrack = _currentState.Track! with 
         { 
             Index = newIndex, 
             Title = $"Track {newIndex}" 
@@ -318,7 +318,7 @@ public partial class ZoneService : IZoneService
         LogZoneAction(ZoneId, _zoneName, $"Set playlist to {playlistIndex}");
         await Task.Delay(10); // Simulate async operation
         
-        var newPlaylist = _currentState.Playlist with 
+        var newPlaylist = _currentState.Playlist! with 
         { 
             Index = playlistIndex, 
             Name = $"Playlist {playlistIndex}" 
@@ -333,7 +333,7 @@ public partial class ZoneService : IZoneService
         LogZoneAction(ZoneId, _zoneName, $"Set playlist to {playlistId}");
         await Task.Delay(10); // Simulate async operation
         
-        var newPlaylist = _currentState.Playlist with { Name = playlistId };
+        var newPlaylist = _currentState.Playlist! with { Name = playlistId };
         _currentState = _currentState with { Playlist = newPlaylist };
         return Result.Success();
     }
@@ -343,8 +343,8 @@ public partial class ZoneService : IZoneService
         LogZoneAction(ZoneId, _zoneName, "Next playlist");
         await Task.Delay(10); // Simulate async operation
         
-        var currentIndex = _currentState.Playlist?.Index ?? 1;
-        var newPlaylist = _currentState.Playlist with 
+        var currentIndex = _currentState.Playlist!?.Index ?? 1;
+        var newPlaylist = _currentState.Playlist! with 
         { 
             Index = currentIndex + 1, 
             Name = $"Playlist {currentIndex + 1}" 
@@ -359,9 +359,9 @@ public partial class ZoneService : IZoneService
         LogZoneAction(ZoneId, _zoneName, "Previous playlist");
         await Task.Delay(10); // Simulate async operation
         
-        var currentIndex = _currentState.Playlist?.Index ?? 1;
+        var currentIndex = _currentState.Playlist!?.Index ?? 1;
         var newIndex = Math.Max(1, currentIndex - 1);
-        var newPlaylist = _currentState.Playlist with 
+        var newPlaylist = _currentState.Playlist! with 
         { 
             Index = newIndex, 
             Name = $"Playlist {newIndex}" 

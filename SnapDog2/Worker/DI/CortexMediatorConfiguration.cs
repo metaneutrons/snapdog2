@@ -61,6 +61,13 @@ public static class CortexMediatorConfiguration
         services.AddScoped<SnapDog2.Server.Features.Zones.Handlers.PreviousTrackCommandHandler>();
         services.AddScoped<SnapDog2.Server.Features.Zones.Handlers.SetPlaylistCommandHandler>();
         services.AddScoped<SnapDog2.Server.Features.Zones.Handlers.NextPlaylistCommandHandler>();
+        services.AddScoped<SnapDog2.Server.Features.Zones.Handlers.PreviousPlaylistCommandHandler>();
+        services.AddScoped<SnapDog2.Server.Features.Zones.Handlers.SetTrackRepeatCommandHandler>();
+        services.AddScoped<SnapDog2.Server.Features.Zones.Handlers.ToggleTrackRepeatCommandHandler>();
+        services.AddScoped<SnapDog2.Server.Features.Zones.Handlers.SetPlaylistShuffleCommandHandler>();
+        services.AddScoped<SnapDog2.Server.Features.Zones.Handlers.TogglePlaylistShuffleCommandHandler>();
+        services.AddScoped<SnapDog2.Server.Features.Zones.Handlers.SetPlaylistRepeatCommandHandler>();
+        services.AddScoped<SnapDog2.Server.Features.Zones.Handlers.TogglePlaylistRepeatCommandHandler>();
 
         // Zone query handlers
         services.AddScoped<SnapDog2.Server.Features.Zones.Handlers.GetZoneStateQueryHandler>();

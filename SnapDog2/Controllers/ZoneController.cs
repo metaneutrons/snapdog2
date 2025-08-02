@@ -253,6 +253,341 @@ public class ZoneController : ControllerBase
             return StatusCode(500, new { error = "Internal server error" });
         }
     }
+
+    /// <summary>
+    /// Stops playback in a zone.
+    /// </summary>
+    /// <param name="zoneId">The zone ID.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>Result of the operation.</returns>
+    [HttpPost("{zoneId:int}/stop")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    public async Task<IActionResult> Stop([Range(1, int.MaxValue)] int zoneId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            _logger.LogDebug("Stopping playback for zone {ZoneId}", zoneId);
+
+            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.StopCommandHandler>();
+            if (handler == null)
+            {
+                _logger.LogError("StopCommandHandler not found in DI container");
+                return StatusCode(500, new { error = "Handler not available" });
+            }
+
+            var command = new StopCommand
+            {
+                ZoneId = zoneId,
+                Source = CommandSource.Api
+            };
+
+            var result = await handler.Handle(command, cancellationToken);
+
+            if (result.IsSuccess)
+            {
+                return Ok(new { message = "Playback stopped successfully" });
+            }
+
+            _logger.LogWarning("Failed to stop zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            return BadRequest(new { error = result.ErrorMessage ?? "Failed to stop playback" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error stopping playback for zone {ZoneId}", zoneId);
+            return StatusCode(500, new { error = "Internal server error" });
+        }
+    }
+
+    /// <summary>
+    /// Plays the next track in a zone.
+    /// </summary>
+    /// <param name="zoneId">The zone ID.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>Result of the operation.</returns>
+    [HttpPost("{zoneId:int}/next-track")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    public async Task<IActionResult> NextTrack([Range(1, int.MaxValue)] int zoneId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            _logger.LogDebug("Playing next track for zone {ZoneId}", zoneId);
+
+            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.NextTrackCommandHandler>();
+            if (handler == null)
+            {
+                _logger.LogError("NextTrackCommandHandler not found in DI container");
+                return StatusCode(500, new { error = "Handler not available" });
+            }
+
+            var command = new NextTrackCommand
+            {
+                ZoneId = zoneId,
+                Source = CommandSource.Api
+            };
+
+            var result = await handler.Handle(command, cancellationToken);
+
+            if (result.IsSuccess)
+            {
+                return Ok(new { message = "Next track started successfully" });
+            }
+
+            _logger.LogWarning("Failed to play next track for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            return BadRequest(new { error = result.ErrorMessage ?? "Failed to play next track" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error playing next track for zone {ZoneId}", zoneId);
+            return StatusCode(500, new { error = "Internal server error" });
+        }
+    }
+
+    /// <summary>
+    /// Plays the previous track in a zone.
+    /// </summary>
+    /// <param name="zoneId">The zone ID.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>Result of the operation.</returns>
+    [HttpPost("{zoneId:int}/previous-track")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    public async Task<IActionResult> PreviousTrack([Range(1, int.MaxValue)] int zoneId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            _logger.LogDebug("Playing previous track for zone {ZoneId}", zoneId);
+
+            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.PreviousTrackCommandHandler>();
+            if (handler == null)
+            {
+                _logger.LogError("PreviousTrackCommandHandler not found in DI container");
+                return StatusCode(500, new { error = "Handler not available" });
+            }
+
+            var command = new PreviousTrackCommand
+            {
+                ZoneId = zoneId,
+                Source = CommandSource.Api
+            };
+
+            var result = await handler.Handle(command, cancellationToken);
+
+            if (result.IsSuccess)
+            {
+                return Ok(new { message = "Previous track started successfully" });
+            }
+
+            _logger.LogWarning("Failed to play previous track for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            return BadRequest(new { error = result.ErrorMessage ?? "Failed to play previous track" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error playing previous track for zone {ZoneId}", zoneId);
+            return StatusCode(500, new { error = "Internal server error" });
+        }
+    }
+
+    /// <summary>
+    /// Sets track repeat mode for a zone.
+    /// </summary>
+    /// <param name="zoneId">The zone ID.</param>
+    /// <param name="request">The repeat request.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>Result of the operation.</returns>
+    [HttpPost("{zoneId:int}/track-repeat")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    public async Task<IActionResult> SetTrackRepeat([Range(1, int.MaxValue)] int zoneId, [FromBody] RepeatRequest request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            _logger.LogDebug("Setting track repeat for zone {ZoneId} to {Enabled}", zoneId, request.Enabled);
+
+            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.SetTrackRepeatCommandHandler>();
+            if (handler == null)
+            {
+                _logger.LogError("SetTrackRepeatCommandHandler not found in DI container");
+                return StatusCode(500, new { error = "Handler not available" });
+            }
+
+            var command = new SetTrackRepeatCommand
+            {
+                ZoneId = zoneId,
+                Enabled = request.Enabled,
+                Source = CommandSource.Api
+            };
+
+            var result = await handler.Handle(command, cancellationToken);
+
+            if (result.IsSuccess)
+            {
+                return Ok(new { message = "Track repeat set successfully" });
+            }
+
+            _logger.LogWarning("Failed to set track repeat for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            return BadRequest(new { error = result.ErrorMessage ?? "Failed to set track repeat" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error setting track repeat for zone {ZoneId}", zoneId);
+            return StatusCode(500, new { error = "Internal server error" });
+        }
+    }
+
+    /// <summary>
+    /// Toggles track repeat mode for a zone.
+    /// </summary>
+    /// <param name="zoneId">The zone ID.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>Result of the operation.</returns>
+    [HttpPost("{zoneId:int}/toggle-track-repeat")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    public async Task<IActionResult> ToggleTrackRepeat([Range(1, int.MaxValue)] int zoneId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            _logger.LogDebug("Toggling track repeat for zone {ZoneId}", zoneId);
+
+            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.ToggleTrackRepeatCommandHandler>();
+            if (handler == null)
+            {
+                _logger.LogError("ToggleTrackRepeatCommandHandler not found in DI container");
+                return StatusCode(500, new { error = "Handler not available" });
+            }
+
+            var command = new ToggleTrackRepeatCommand
+            {
+                ZoneId = zoneId,
+                Source = CommandSource.Api
+            };
+
+            var result = await handler.Handle(command, cancellationToken);
+
+            if (result.IsSuccess)
+            {
+                return Ok(new { message = "Track repeat toggled successfully" });
+            }
+
+            _logger.LogWarning("Failed to toggle track repeat for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            return BadRequest(new { error = result.ErrorMessage ?? "Failed to toggle track repeat" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error toggling track repeat for zone {ZoneId}", zoneId);
+            return StatusCode(500, new { error = "Internal server error" });
+        }
+    }
+
+    /// <summary>
+    /// Sets playlist shuffle mode for a zone.
+    /// </summary>
+    /// <param name="zoneId">The zone ID.</param>
+    /// <param name="request">The shuffle request.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>Result of the operation.</returns>
+    [HttpPost("{zoneId:int}/playlist-shuffle")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    public async Task<IActionResult> SetPlaylistShuffle([Range(1, int.MaxValue)] int zoneId, [FromBody] ShuffleRequest request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            _logger.LogDebug("Setting playlist shuffle for zone {ZoneId} to {Enabled}", zoneId, request.Enabled);
+
+            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.SetPlaylistShuffleCommandHandler>();
+            if (handler == null)
+            {
+                _logger.LogError("SetPlaylistShuffleCommandHandler not found in DI container");
+                return StatusCode(500, new { error = "Handler not available" });
+            }
+
+            var command = new SetPlaylistShuffleCommand
+            {
+                ZoneId = zoneId,
+                Enabled = request.Enabled,
+                Source = CommandSource.Api
+            };
+
+            var result = await handler.Handle(command, cancellationToken);
+
+            if (result.IsSuccess)
+            {
+                return Ok(new { message = "Playlist shuffle set successfully" });
+            }
+
+            _logger.LogWarning("Failed to set playlist shuffle for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            return BadRequest(new { error = result.ErrorMessage ?? "Failed to set playlist shuffle" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error setting playlist shuffle for zone {ZoneId}", zoneId);
+            return StatusCode(500, new { error = "Internal server error" });
+        }
+    }
+
+    /// <summary>
+    /// Sets playlist repeat mode for a zone.
+    /// </summary>
+    /// <param name="zoneId">The zone ID.</param>
+    /// <param name="request">The repeat request.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>Result of the operation.</returns>
+    [HttpPost("{zoneId:int}/playlist-repeat")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    public async Task<IActionResult> SetPlaylistRepeat([Range(1, int.MaxValue)] int zoneId, [FromBody] RepeatRequest request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            _logger.LogDebug("Setting playlist repeat for zone {ZoneId} to {Enabled}", zoneId, request.Enabled);
+
+            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.SetPlaylistRepeatCommandHandler>();
+            if (handler == null)
+            {
+                _logger.LogError("SetPlaylistRepeatCommandHandler not found in DI container");
+                return StatusCode(500, new { error = "Handler not available" });
+            }
+
+            var command = new SetPlaylistRepeatCommand
+            {
+                ZoneId = zoneId,
+                Enabled = request.Enabled,
+                Source = CommandSource.Api
+            };
+
+            var result = await handler.Handle(command, cancellationToken);
+
+            if (result.IsSuccess)
+            {
+                return Ok(new { message = "Playlist repeat set successfully" });
+            }
+
+            _logger.LogWarning("Failed to set playlist repeat for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            return BadRequest(new { error = result.ErrorMessage ?? "Failed to set playlist repeat" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error setting playlist repeat for zone {ZoneId}", zoneId);
+            return StatusCode(500, new { error = "Internal server error" });
+        }
+    }
 }
 
 // Request DTOs
@@ -260,4 +595,14 @@ public record VolumeRequest
 {
     [Range(0, 100)]
     public required int Volume { get; init; }
+}
+
+public record RepeatRequest
+{
+    public required bool Enabled { get; init; }
+}
+
+public record ShuffleRequest
+{
+    public required bool Enabled { get; init; }
 }

@@ -33,7 +33,7 @@ public class PlayCommandHandler : ICommandHandler<PlayCommand, Result>
             return zoneResult;
         }
 
-        var zone = zoneResult.Value;
+        var zone = zoneResult.Value!;
 
         if (request.TrackIndex.HasValue)
         {
@@ -75,7 +75,7 @@ public class PauseCommandHandler : ICommandHandler<PauseCommand, Result>
             return zoneResult;
         }
 
-        var zone = zoneResult.Value;
+        var zone = zoneResult.Value!;
         return await zone.PauseAsync().ConfigureAwait(false);
     }
 }
@@ -105,7 +105,7 @@ public class StopCommandHandler : ICommandHandler<StopCommand, Result>
             return zoneResult;
         }
 
-        var zone = zoneResult.Value;
+        var zone = zoneResult.Value!;
         return await zone.StopAsync().ConfigureAwait(false);
     }
 }
@@ -135,7 +135,7 @@ public class SetZoneVolumeCommandHandler : ICommandHandler<SetZoneVolumeCommand,
             return zoneResult;
         }
 
-        var zone = zoneResult.Value;
+        var zone = zoneResult.Value!;
         return await zone.SetVolumeAsync(request.Volume).ConfigureAwait(false);
     }
 }
@@ -165,7 +165,7 @@ public class VolumeUpCommandHandler : ICommandHandler<VolumeUpCommand, Result>
             return zoneResult;
         }
 
-        var zone = zoneResult.Value;
+        var zone = zoneResult.Value!;
         return await zone.VolumeUpAsync(request.Step).ConfigureAwait(false);
     }
 }
@@ -195,7 +195,7 @@ public class VolumeDownCommandHandler : ICommandHandler<VolumeDownCommand, Resul
             return zoneResult;
         }
 
-        var zone = zoneResult.Value;
+        var zone = zoneResult.Value!;
         return await zone.VolumeDownAsync(request.Step).ConfigureAwait(false);
     }
 }
@@ -225,7 +225,7 @@ public class SetZoneMuteCommandHandler : ICommandHandler<SetZoneMuteCommand, Res
             return zoneResult;
         }
 
-        var zone = zoneResult.Value;
+        var zone = zoneResult.Value!;
         return await zone.SetMuteAsync(request.Enabled).ConfigureAwait(false);
     }
 }
@@ -255,7 +255,7 @@ public class ToggleZoneMuteCommandHandler : ICommandHandler<ToggleZoneMuteComman
             return zoneResult;
         }
 
-        var zone = zoneResult.Value;
+        var zone = zoneResult.Value!;
         return await zone.ToggleMuteAsync().ConfigureAwait(false);
     }
 }
@@ -285,7 +285,7 @@ public class SetTrackCommandHandler : ICommandHandler<SetTrackCommand, Result>
             return zoneResult;
         }
 
-        var zone = zoneResult.Value;
+        var zone = zoneResult.Value!;
         return await zone.SetTrackAsync(request.TrackIndex).ConfigureAwait(false);
     }
 }
@@ -315,7 +315,7 @@ public class NextTrackCommandHandler : ICommandHandler<NextTrackCommand, Result>
             return zoneResult;
         }
 
-        var zone = zoneResult.Value;
+        var zone = zoneResult.Value!;
         return await zone.NextTrackAsync().ConfigureAwait(false);
     }
 }
@@ -345,7 +345,7 @@ public class PreviousTrackCommandHandler : ICommandHandler<PreviousTrackCommand,
             return zoneResult;
         }
 
-        var zone = zoneResult.Value;
+        var zone = zoneResult.Value!;
         return await zone.PreviousTrackAsync().ConfigureAwait(false);
     }
 }
@@ -375,7 +375,7 @@ public class SetPlaylistCommandHandler : ICommandHandler<SetPlaylistCommand, Res
             return zoneResult;
         }
 
-        var zone = zoneResult.Value;
+        var zone = zoneResult.Value!;
 
         if (request.PlaylistIndex.HasValue)
         {
@@ -415,7 +415,216 @@ public class NextPlaylistCommandHandler : ICommandHandler<NextPlaylistCommand, R
             return zoneResult;
         }
 
-        var zone = zoneResult.Value;
+        var zone = zoneResult.Value!;
         return await zone.NextPlaylistAsync().ConfigureAwait(false);
+    }
+}
+/// <summary>
+/// Handles the PreviousPlaylistCommand.
+/// </summary>
+public class PreviousPlaylistCommandHandler : ICommandHandler<PreviousPlaylistCommand, Result>
+{
+    private readonly IZoneManager _zoneManager;
+    private readonly ILogger<PreviousPlaylistCommandHandler> _logger;
+
+    public PreviousPlaylistCommandHandler(IZoneManager zoneManager, ILogger<PreviousPlaylistCommandHandler> logger)
+    {
+        _zoneManager = zoneManager;
+        _logger = logger;
+    }
+
+    public async Task<Result> Handle(PreviousPlaylistCommand request, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Playing previous playlist for Zone {ZoneId} from {Source}", request.ZoneId, request.Source);
+
+        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        if (zoneResult.IsFailure)
+        {
+            _logger.LogWarning("Zone {ZoneId} not found for PreviousPlaylistCommand", request.ZoneId);
+            return zoneResult;
+        }
+
+        var zone = zoneResult.Value!;
+        return await zone.PreviousPlaylistAsync().ConfigureAwait(false);
+    }
+}
+
+/// <summary>
+/// Handles the SetTrackRepeatCommand.
+/// </summary>
+public class SetTrackRepeatCommandHandler : ICommandHandler<SetTrackRepeatCommand, Result>
+{
+    private readonly IZoneManager _zoneManager;
+    private readonly ILogger<SetTrackRepeatCommandHandler> _logger;
+
+    public SetTrackRepeatCommandHandler(IZoneManager zoneManager, ILogger<SetTrackRepeatCommandHandler> logger)
+    {
+        _zoneManager = zoneManager;
+        _logger = logger;
+    }
+
+    public async Task<Result> Handle(SetTrackRepeatCommand request, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Setting track repeat for Zone {ZoneId} to {Enabled} from {Source}", request.ZoneId, request.Enabled, request.Source);
+
+        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        if (zoneResult.IsFailure)
+        {
+            _logger.LogWarning("Zone {ZoneId} not found for SetTrackRepeatCommand", request.ZoneId);
+            return zoneResult;
+        }
+
+        var zone = zoneResult.Value!;
+        return await zone.SetTrackRepeatAsync(request.Enabled).ConfigureAwait(false);
+    }
+}
+
+/// <summary>
+/// Handles the ToggleTrackRepeatCommand.
+/// </summary>
+public class ToggleTrackRepeatCommandHandler : ICommandHandler<ToggleTrackRepeatCommand, Result>
+{
+    private readonly IZoneManager _zoneManager;
+    private readonly ILogger<ToggleTrackRepeatCommandHandler> _logger;
+
+    public ToggleTrackRepeatCommandHandler(IZoneManager zoneManager, ILogger<ToggleTrackRepeatCommandHandler> logger)
+    {
+        _zoneManager = zoneManager;
+        _logger = logger;
+    }
+
+    public async Task<Result> Handle(ToggleTrackRepeatCommand request, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Toggling track repeat for Zone {ZoneId} from {Source}", request.ZoneId, request.Source);
+
+        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        if (zoneResult.IsFailure)
+        {
+            _logger.LogWarning("Zone {ZoneId} not found for ToggleTrackRepeatCommand", request.ZoneId);
+            return zoneResult;
+        }
+
+        var zone = zoneResult.Value!;
+        return await zone.ToggleTrackRepeatAsync().ConfigureAwait(false);
+    }
+}
+
+/// <summary>
+/// Handles the SetPlaylistShuffleCommand.
+/// </summary>
+public class SetPlaylistShuffleCommandHandler : ICommandHandler<SetPlaylistShuffleCommand, Result>
+{
+    private readonly IZoneManager _zoneManager;
+    private readonly ILogger<SetPlaylistShuffleCommandHandler> _logger;
+
+    public SetPlaylistShuffleCommandHandler(IZoneManager zoneManager, ILogger<SetPlaylistShuffleCommandHandler> logger)
+    {
+        _zoneManager = zoneManager;
+        _logger = logger;
+    }
+
+    public async Task<Result> Handle(SetPlaylistShuffleCommand request, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Setting playlist shuffle for Zone {ZoneId} to {Enabled} from {Source}", request.ZoneId, request.Enabled, request.Source);
+
+        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        if (zoneResult.IsFailure)
+        {
+            _logger.LogWarning("Zone {ZoneId} not found for SetPlaylistShuffleCommand", request.ZoneId);
+            return zoneResult;
+        }
+
+        var zone = zoneResult.Value!;
+        return await zone.SetPlaylistShuffleAsync(request.Enabled).ConfigureAwait(false);
+    }
+}
+
+/// <summary>
+/// Handles the TogglePlaylistShuffleCommand.
+/// </summary>
+public class TogglePlaylistShuffleCommandHandler : ICommandHandler<TogglePlaylistShuffleCommand, Result>
+{
+    private readonly IZoneManager _zoneManager;
+    private readonly ILogger<TogglePlaylistShuffleCommandHandler> _logger;
+
+    public TogglePlaylistShuffleCommandHandler(IZoneManager zoneManager, ILogger<TogglePlaylistShuffleCommandHandler> logger)
+    {
+        _zoneManager = zoneManager;
+        _logger = logger;
+    }
+
+    public async Task<Result> Handle(TogglePlaylistShuffleCommand request, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Toggling playlist shuffle for Zone {ZoneId} from {Source}", request.ZoneId, request.Source);
+
+        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        if (zoneResult.IsFailure)
+        {
+            _logger.LogWarning("Zone {ZoneId} not found for TogglePlaylistShuffleCommand", request.ZoneId);
+            return zoneResult;
+        }
+
+        var zone = zoneResult.Value!;
+        return await zone.TogglePlaylistShuffleAsync().ConfigureAwait(false);
+    }
+}
+
+/// <summary>
+/// Handles the SetPlaylistRepeatCommand.
+/// </summary>
+public class SetPlaylistRepeatCommandHandler : ICommandHandler<SetPlaylistRepeatCommand, Result>
+{
+    private readonly IZoneManager _zoneManager;
+    private readonly ILogger<SetPlaylistRepeatCommandHandler> _logger;
+
+    public SetPlaylistRepeatCommandHandler(IZoneManager zoneManager, ILogger<SetPlaylistRepeatCommandHandler> logger)
+    {
+        _zoneManager = zoneManager;
+        _logger = logger;
+    }
+
+    public async Task<Result> Handle(SetPlaylistRepeatCommand request, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Setting playlist repeat for Zone {ZoneId} to {Enabled} from {Source}", request.ZoneId, request.Enabled, request.Source);
+
+        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        if (zoneResult.IsFailure)
+        {
+            _logger.LogWarning("Zone {ZoneId} not found for SetPlaylistRepeatCommand", request.ZoneId);
+            return zoneResult;
+        }
+
+        var zone = zoneResult.Value!;
+        return await zone.SetPlaylistRepeatAsync(request.Enabled).ConfigureAwait(false);
+    }
+}
+
+/// <summary>
+/// Handles the TogglePlaylistRepeatCommand.
+/// </summary>
+public class TogglePlaylistRepeatCommandHandler : ICommandHandler<TogglePlaylistRepeatCommand, Result>
+{
+    private readonly IZoneManager _zoneManager;
+    private readonly ILogger<TogglePlaylistRepeatCommandHandler> _logger;
+
+    public TogglePlaylistRepeatCommandHandler(IZoneManager zoneManager, ILogger<TogglePlaylistRepeatCommandHandler> logger)
+    {
+        _zoneManager = zoneManager;
+        _logger = logger;
+    }
+
+    public async Task<Result> Handle(TogglePlaylistRepeatCommand request, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Toggling playlist repeat for Zone {ZoneId} from {Source}", request.ZoneId, request.Source);
+
+        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        if (zoneResult.IsFailure)
+        {
+            _logger.LogWarning("Zone {ZoneId} not found for TogglePlaylistRepeatCommand", request.ZoneId);
+            return zoneResult;
+        }
+
+        var zone = zoneResult.Value!;
+        return await zone.TogglePlaylistRepeatAsync().ConfigureAwait(false);
     }
 }

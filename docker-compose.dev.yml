@@ -123,6 +123,7 @@ services:
   navidrome:
     image: deluan/navidrome:latest
     environment:
+      ND_ENABLEINSIGHTSCOLLECTOR: "false" # Disable insights collector
       ND_SCANSCHEDULE: "1h"
       ND_LOGLEVEL: info
       ND_SESSIONTIMEOUT: "24h"

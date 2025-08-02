@@ -31,10 +31,10 @@ public class GetZoneStateQueryHandler : IQueryHandler<GetZoneStateQuery, Result<
         if (zoneResult.IsFailure)
         {
             _logger.LogWarning("Zone {ZoneId} not found for GetZoneStateQuery", request.ZoneId);
-            return Result<ZoneState>.Failure(zoneResult.ErrorMessage);
+            return Result<ZoneState>.Failure(zoneResult.ErrorMessage ?? "Zone not found");
         }
 
-        var zone = zoneResult.Value;
+        var zone = zoneResult.Value!;
         return await zone.GetStateAsync().ConfigureAwait(false);
     }
 }
@@ -60,10 +60,10 @@ public class GetAllZoneStatesQueryHandler : IQueryHandler<GetAllZoneStatesQuery,
         var zonesResult = await _zoneManager.GetAllZonesAsync().ConfigureAwait(false);
         if (zonesResult.IsFailure)
         {
-            return Result<IEnumerable<ZoneState>>.Failure(zonesResult.ErrorMessage);
+            return Result<IEnumerable<ZoneState>>.Failure(zonesResult.ErrorMessage ?? "Failed to get zones");
         }
 
-        var zones = zonesResult.Value;
+        var zones = zonesResult.Value!;
         var states = new List<ZoneState>();
 
         foreach (var zone in zones)
@@ -71,7 +71,7 @@ public class GetAllZoneStatesQueryHandler : IQueryHandler<GetAllZoneStatesQuery,
             var stateResult = await zone.GetStateAsync().ConfigureAwait(false);
             if (stateResult.IsSuccess)
             {
-                states.Add(stateResult.Value);
+                states.Add(stateResult.Value!);
             }
         }
 
@@ -101,18 +101,18 @@ public class GetZonePlaybackStateQueryHandler : IQueryHandler<GetZonePlaybackSta
         if (zoneResult.IsFailure)
         {
             _logger.LogWarning("Zone {ZoneId} not found for GetZonePlaybackStateQuery", request.ZoneId);
-            return Result<PlaybackStatus>.Failure(zoneResult.ErrorMessage);
+            return Result<PlaybackStatus>.Failure(zoneResult.ErrorMessage ?? "Zone not found");
         }
 
-        var zone = zoneResult.Value;
+        var zone = zoneResult.Value!;
         var stateResult = await zone.GetStateAsync().ConfigureAwait(false);
         
         if (stateResult.IsFailure)
         {
-            return Result<PlaybackStatus>.Failure(stateResult.ErrorMessage);
+            return Result<PlaybackStatus>.Failure(stateResult.ErrorMessage ?? "Failed to get zone state");
         }
 
-        return Result<PlaybackStatus>.Success(Enum.Parse<PlaybackStatus>(stateResult.Value.PlaybackState, true));
+        return Result<PlaybackStatus>.Success(Enum.Parse<PlaybackStatus>(stateResult.Value!.PlaybackState, true));
     }
 }
 
@@ -138,17 +138,17 @@ public class GetZoneVolumeQueryHandler : IQueryHandler<GetZoneVolumeQuery, Resul
         if (zoneResult.IsFailure)
         {
             _logger.LogWarning("Zone {ZoneId} not found for GetZoneVolumeQuery", request.ZoneId);
-            return Result<int>.Failure(zoneResult.ErrorMessage);
+            return Result<int>.Failure(zoneResult.ErrorMessage ?? "Zone not found");
         }
 
-        var zone = zoneResult.Value;
+        var zone = zoneResult.Value!;
         var stateResult = await zone.GetStateAsync().ConfigureAwait(false);
         
         if (stateResult.IsFailure)
         {
-            return Result<int>.Failure(stateResult.ErrorMessage);
+            return Result<int>.Failure(stateResult.ErrorMessage ?? "Failed to get zone state");
         }
 
-        return Result<int>.Success(stateResult.Value.Volume);
+        return Result<int>.Success(stateResult.Value!.Volume);
     }
 }

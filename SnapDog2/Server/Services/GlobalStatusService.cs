@@ -74,6 +74,7 @@ public class GlobalStatusService : IGlobalStatusService
         {
             // TODO: Publish error notification to external systems (MQTT, KNX)
             _logger.LogDebug("Error status to publish: {ErrorCode}", errorDetails.ErrorCode);
+            await Task.CompletedTask;
         }
         catch (Exception ex)
         {
