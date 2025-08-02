@@ -36,7 +36,11 @@ public interface IMqttService : IAsyncDisposable
     /// <param name="state">Client state to publish.</param>
     /// <param name="cancellationToken">Cancellation token for the operation.</param>
     /// <returns>Result indicating success or failure.</returns>
-    Task<Result> PublishClientStateAsync(string clientId, ClientState state, CancellationToken cancellationToken = default);
+    Task<Result> PublishClientStateAsync(
+        string clientId,
+        ClientState state,
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     /// Publishes a custom message to a specific topic.
@@ -46,7 +50,12 @@ public interface IMqttService : IAsyncDisposable
     /// <param name="retain">Whether to retain the message.</param>
     /// <param name="cancellationToken">Cancellation token for the operation.</param>
     /// <returns>Result indicating success or failure.</returns>
-    Task<Result> PublishAsync(string topic, string payload, bool retain = false, CancellationToken cancellationToken = default);
+    Task<Result> PublishAsync(
+        string topic,
+        string payload,
+        bool retain = false,
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     /// Subscribes to additional MQTT topics at runtime.

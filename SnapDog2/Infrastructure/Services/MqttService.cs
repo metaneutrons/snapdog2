@@ -31,10 +31,10 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     private readonly ILogger<MqttService> _logger;
     private readonly List<ZoneConfig> _zoneConfigs;
     private readonly List<ClientConfig> _clientConfigs;
-    
+
     private readonly ConcurrentDictionary<int, ZoneMqttTopics> _zoneTopics = new();
     private readonly ConcurrentDictionary<string, ClientMqttTopics> _clientTopics = new();
-    
+
     private IMqttClient? _mqttClient;
     private bool _initialized = false;
     private bool _disposed = false;
@@ -44,7 +44,8 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         IOptions<List<ZoneConfig>> zoneConfigOptions,
         IOptions<List<ClientConfig>> clientConfigOptions,
         IServiceProvider serviceProvider,
-        ILogger<MqttService> logger)
+        ILogger<MqttService> logger
+    )
     {
         _config = configOptions.Value.Mqtt;
         _serviceProvider = serviceProvider;
@@ -90,7 +91,8 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
 
     #region Helper Methods
 
-    private async Task PublishNotificationAsync<T>(T notification) where T : INotification
+    private async Task PublishNotificationAsync<T>(T notification)
+        where T : INotification
     {
         try
         {
@@ -115,7 +117,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             _zoneTopics.TryAdd(zoneId, topics);
         }
 
-        // Build client topic configurations  
+        // Build client topic configurations
         for (int i = 0; i < _clientConfigs.Count; i++)
         {
             var clientConfig = _clientConfigs[i];
@@ -186,7 +188,11 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         }
     }
 
-    public async Task<Result> PublishZoneStateAsync(int zoneId, ZoneState state, CancellationToken cancellationToken = default)
+    public async Task<Result> PublishZoneStateAsync(
+        int zoneId,
+        ZoneState state,
+        CancellationToken cancellationToken = default
+    )
     {
         if (!IsConnected)
             return Result.Failure("MQTT client is not connected");
@@ -197,7 +203,10 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         try
         {
             // Publish comprehensive state as JSON
-            var stateJson = JsonSerializer.Serialize(state, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+            var stateJson = JsonSerializer.Serialize(
+                state,
+                new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
+            );
             await PublishAsync(topics.Status.State, stateJson, retain: true, cancellationToken);
 
             return Result.Success();
@@ -209,7 +218,11 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         }
     }
 
-    public async Task<Result> PublishClientStateAsync(string clientId, ClientState state, CancellationToken cancellationToken = default)
+    public async Task<Result> PublishClientStateAsync(
+        string clientId,
+        ClientState state,
+        CancellationToken cancellationToken = default
+    )
     {
         if (!IsConnected)
             return Result.Failure("MQTT client is not connected");
@@ -220,7 +233,10 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         try
         {
             // Publish comprehensive state as JSON
-            var stateJson = JsonSerializer.Serialize(state, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+            var stateJson = JsonSerializer.Serialize(
+                state,
+                new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
+            );
             await PublishAsync(topics.Status.State, stateJson, retain: true, cancellationToken);
 
             return Result.Success();
@@ -232,7 +248,12 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         }
     }
 
-    public async Task<Result> PublishAsync(string topic, string payload, bool retain = false, CancellationToken cancellationToken = default)
+    public async Task<Result> PublishAsync(
+        string topic,
+        string payload,
+        bool retain = false,
+        CancellationToken cancellationToken = default
+    )
     {
         if (!IsConnected)
             return Result.Failure("MQTT client is not connected");
@@ -276,7 +297,10 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         }
     }
 
-    public async Task<Result> UnsubscribeAsync(IEnumerable<string> topics, CancellationToken cancellationToken = default)
+    public async Task<Result> UnsubscribeAsync(
+        IEnumerable<string> topics,
+        CancellationToken cancellationToken = default
+    )
     {
         if (!IsConnected)
             return Result.Failure("MQTT client is not connected");
@@ -320,18 +344,21 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         try
         {
             var topic = args.ApplicationMessage.Topic;
-            var payload = args.ApplicationMessage.Payload.Length > 0
-                ? Encoding.UTF8.GetString(args.ApplicationMessage.Payload.IsSingleSegment 
-                    ? args.ApplicationMessage.Payload.FirstSpan 
-                    : args.ApplicationMessage.Payload.ToArray())
-                : string.Empty;
-            
+            var payload =
+                args.ApplicationMessage.Payload.Length > 0
+                    ? Encoding.UTF8.GetString(
+                        args.ApplicationMessage.Payload.IsSingleSegment
+                            ? args.ApplicationMessage.Payload.FirstSpan
+                            : args.ApplicationMessage.Payload.ToArray()
+                    )
+                    : string.Empty;
+
             var eventArgs = new MqttMessageReceivedEventArgs
             {
                 Topic = topic,
                 Payload = payload,
                 Retained = args.ApplicationMessage.Retain,
-                QoS = (int)args.ApplicationMessage.QualityOfServiceLevel
+                QoS = (int)args.ApplicationMessage.QualityOfServiceLevel,
             };
             MessageReceived?.Invoke(this, eventArgs);
 
@@ -350,10 +377,10 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         // This will map MQTT topics to Cortex.Mediator commands
         // For now, just log the received message
         _logger.LogDebug("Received MQTT message on topic {Topic}: {Payload}", topic, payload);
-        
+
         // Placeholder await to satisfy async pattern - will be replaced with actual command processing
         await Task.CompletedTask;
-        
+
         // Example of how this would work:
         // var command = MapTopicToCommand(topic, payload);
         // if (command != null)

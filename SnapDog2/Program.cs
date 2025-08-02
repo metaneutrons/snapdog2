@@ -74,8 +74,7 @@ try
     // Add MQTT services
     if (snapDogConfig.Services.Mqtt.Enabled)
     {
-        builder.Services.AddMqttServices()
-                        .ValidateMqttConfiguration();
+        builder.Services.AddMqttServices().ValidateMqttConfiguration();
     }
 
     // Register placeholder services

@@ -17,7 +17,7 @@ public static class MqttConfigurationExtensions
     {
         ArgumentNullException.ThrowIfNull(zoneConfig);
         ArgumentNullException.ThrowIfNull(zoneConfig.Mqtt);
-        
+
         var baseTopic = zoneConfig.Mqtt.BaseTopic?.TrimEnd('/') ?? string.Empty;
 
         return new ZoneMqttTopics
@@ -47,7 +47,7 @@ public static class MqttConfigurationExtensions
                 Volume = $"{baseTopic}/{zoneConfig.Mqtt.VolumeTopic}",
                 Mute = $"{baseTopic}/{zoneConfig.Mqtt.MuteTopic}",
                 State = $"{baseTopic}/{zoneConfig.Mqtt.StateTopic}",
-            }
+            },
         };
     }
 
@@ -60,7 +60,7 @@ public static class MqttConfigurationExtensions
     {
         ArgumentNullException.ThrowIfNull(clientConfig);
         ArgumentNullException.ThrowIfNull(clientConfig.Mqtt);
-        
+
         var baseTopic = clientConfig.Mqtt.BaseTopic?.TrimEnd('/') ?? string.Empty;
 
         return new ClientMqttTopics
@@ -81,7 +81,7 @@ public static class MqttConfigurationExtensions
                 Latency = $"{baseTopic}/{clientConfig.Mqtt.LatencyTopic}",
                 Zone = $"{baseTopic}/{clientConfig.Mqtt.ZoneTopic}",
                 State = $"{baseTopic}/{clientConfig.Mqtt.StateTopic}",
-            }
+            },
         };
     }
 
