@@ -116,6 +116,9 @@ services:
       - mqtt_logs:/mosquitto/log
     ports:
       - "1883:1883" # MQTT port
+    environment:
+      - MOSQUITTO_LOG_LEVEL=debug
+    command: ["/usr/sbin/mosquitto", "-c", "/mosquitto/config/mosquitto.conf", "-v"]
     networks:
       snapdog-dev:
         ipv4_address: 172.20.0.3

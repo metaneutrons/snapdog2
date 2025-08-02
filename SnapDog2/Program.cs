@@ -31,6 +31,10 @@ Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Is(Enum.Parse<LogEventLevel>(snapDogConfig.System.LogLevel, true))
     .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
     .MinimumLevel.Override("System", LogEventLevel.Warning)
+    // Ensure our integration services are visible
+    .MinimumLevel.Override("SnapDog2.Infrastructure.Services.SnapcastService", LogEventLevel.Information)
+    .MinimumLevel.Override("SnapDog2.Infrastructure.Services.MqttService", LogEventLevel.Information)
+    .MinimumLevel.Override("SnapDog2.Worker.Services.IntegrationServicesHostedService", LogEventLevel.Information)
     .Enrich.FromLogContext()
     .WriteTo.Console(
         outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}"
@@ -65,6 +69,15 @@ try
     // Add Command Processing (Cortex.Mediator)
     builder.Services.AddCommandProcessing();
 
+    // Register configuration for IOptions pattern
+    builder.Services.Configure<SnapDog2.Core.Configuration.ServicesConfig>(options =>
+    {
+        options.Snapcast = snapDogConfig.Services.Snapcast;
+        options.Mqtt = snapDogConfig.Services.Mqtt;
+        options.Knx = snapDogConfig.Services.Knx;
+        options.Subsonic = snapDogConfig.Services.Subsonic;
+    });
+
     // Add Snapcast services
     if (snapDogConfig.Services.Snapcast.Enabled)
     {
@@ -76,6 +89,9 @@ try
     {
         builder.Services.AddMqttServices().ValidateMqttConfiguration();
     }
+
+    // Add hosted service to initialize integration services on startup
+    builder.Services.AddHostedService<SnapDog2.Worker.Services.IntegrationServicesHostedService>();
 
     // Register placeholder services
     builder.Services.AddScoped<
