@@ -82,7 +82,8 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     /// <summary>
     /// Gets IMediator from service provider using a scope to avoid lifetime issues.
     /// </summary>
-    private async Task PublishNotificationAsync<T>(T notification) where T : INotification
+    private async Task PublishNotificationAsync<T>(T notification)
+        where T : INotification
     {
         try
         {
@@ -425,7 +426,9 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
                 return Task.FromResult(Result<string>.Failure($"Client {clientIdArray[0]} not found"));
 
             // This is a simplified implementation - in practice, you'd need to handle group creation differently
-            return Task.FromResult(Result<string>.Failure("Group creation not yet implemented in SnapcastClient library"));
+            return Task.FromResult(
+                Result<string>.Failure("Group creation not yet implemented in SnapcastClient library")
+            );
         }
         catch (Exception ex)
         {
@@ -684,7 +687,9 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
                 propertiesDict["metadata"] = properties.Properties.Metadata;
             }
 
-            _ = PublishNotificationAsync(new SnapcastStreamPropertiesChangedNotification(properties.Id, propertiesDict));
+            _ = PublishNotificationAsync(
+                new SnapcastStreamPropertiesChangedNotification(properties.Id, propertiesDict)
+            );
         }
         catch (Exception ex)
         {
