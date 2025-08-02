@@ -142,7 +142,7 @@ try
         healthChecksBuilder.AddTcpHealthCheck(
             options =>
             {
-                options.AddHost(snapDogConfig.Services.Snapcast.Address, snapDogConfig.Services.Snapcast.Port);
+                options.AddHost(snapDogConfig.Services.Snapcast.Address, snapDogConfig.Services.Snapcast.JsonRpcPort);
             },
             name: "snapcast",
             tags: ["ready"]
@@ -279,7 +279,7 @@ static void PrintConfiguration(SnapDogConfiguration config)
     Log.Information(
         "    Address: {SnapcastAddress}:{SnapcastPort}",
         config.Services.Snapcast.Address,
-        config.Services.Snapcast.Port
+        config.Services.Snapcast.JsonRpcPort
     );
     Log.Information("    HTTP Port: {SnapcastHttpPort}", config.Services.Snapcast.HttpPort);
     Log.Information(

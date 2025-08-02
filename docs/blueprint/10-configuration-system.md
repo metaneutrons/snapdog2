@@ -137,7 +137,7 @@ SNAPDOG_API_APIKEY_3=secret-key-3
 ```bash
 # Snapcast integration
 SNAPDOG_SERVICES_SNAPCAST_ADDRESS=snapcast-server     # Default: localhost
-SNAPDOG_SERVICES_SNAPCAST_PORT=1705                   # Default: 1705 (JSON-RPC port)
+SNAPDOG_SERVICES_SNAPCAST_JSONRPC_PORT=1705                   # Default: 1705 (JSON-RPC port)
 SNAPDOG_SERVICES_SNAPCAST_HTTP_PORT=1780              # Default: 1780
 SNAPDOG_SERVICES_SNAPCAST_BASE_URL=                   # Default: "" (for reverse proxy support)
 SNAPDOG_SERVICES_SNAPCAST_TIMEOUT=30                  # Default: 30 (connection timeout)

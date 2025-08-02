@@ -8,6 +8,7 @@
     <PackageReference Include="Cortex.Mediator" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="SnapcastClient" />
     <PackageReference Include="Swashbuckle.AspNetCore" />
     <PackageReference Include="EnvoyConfig" />
     <PackageReference Include="Serilog.AspNetCore" />
@@ -19,7 +20,6 @@
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
     <PackageReference Include="FluentValidation.AspNetCore" />
     <PackageReference Include="MediatR" />
-    <PackageReference Include="SnapcastClient" />
     <PackageReference Include="MQTTnet" />
   </ItemGroup>
 </Project>

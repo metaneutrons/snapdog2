@@ -50,10 +50,10 @@ public class SnapcastConfig
 
     /// <summary>
     /// Snapcast server port.
-    /// Maps to: SNAPDOG_SERVICES_SNAPCAST_PORT
+    /// Maps to: SNAPDOG_SERVICES_SNAPCAST_JSONRPC_PORT
     /// </summary>
     [Env(Key = "PORT", Default = 1705)]
-    public int Port { get; set; } = 1705;
+    public int JsonRpcPort { get; set; } = 1705;
 
     /// <summary>
     /// Connection timeout in seconds.

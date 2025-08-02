@@ -43,7 +43,7 @@ public static class SnapcastServiceConfiguration
             var connectionLogger = serviceProvider.GetService<ILogger<SnapcastClient.ResilientTcpConnection>>();
             var connection = new SnapcastClient.ResilientTcpConnection(
                 config.Address,
-                config.Port,
+                config.JsonRpcPort,
                 options,
                 connectionLogger
             );
@@ -70,7 +70,7 @@ public static class SnapcastServiceConfiguration
             return false;
         }
 
-        if (config.Port <= 0 || config.Port > 65535)
+        if (config.JsonRpcPort <= 0 || config.JsonRpcPort > 65535)
         {
             return false;
         }

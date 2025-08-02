@@ -109,7 +109,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         if (_initialized)
             return Result.Success();
 
-        LogInitializing(_config.Address, _config.Port);
+        LogInitializing(_config.Address, _config.JsonRpcPort);
 
         try
         {
@@ -120,14 +120,8 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
                     return Result.Success();
 
                 // The enterprise SnapcastClient client handles connection automatically
-                // We just need to get the initial server status to populate our state repository
-                var statusResult = await GetServerStatusAsync(cancellationToken).ConfigureAwait(false);
-                if (statusResult.IsFailure)
-                {
-                    LogInitializationFailed(new InvalidOperationException(statusResult.ErrorMessage));
-                    return Result.Failure($"Failed to get initial server status: {statusResult.ErrorMessage}");
-                }
-
+                // We mark as initialized immediately and let the client handle connection in the background
+                // The state repository will be updated via event handlers once connection is established
                 _initialized = true;
                 LogConnectionEstablished();
 

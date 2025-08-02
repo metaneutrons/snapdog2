@@ -52,20 +52,32 @@ for var in "${!SNAPDOG_ZONE_@}"; do
 done
 
 # Create the snapserver config directory and remove old config
-mkdir -p /etc/snapserver
-rm -f /etc/snapserver/snapserver.conf
+rm -f /etc/snapserver.conf
 
 # Create the snapserver settings directory
 mkdir -p /root/.config/snapserver
 chown snapcast:snapcast /root/.config/snapserver
 
-echo -e '[server]' >>/etc/snapserver/snapserver.conf
-echo -e 'user = snapcast' >>/etc/snapserver/snapserver.conf
-echo -e 'group = snapcast' >>/etc/snapserver/snapserver.conf
-echo -e 'datadir = /var/lib/snapserver/' >>/etc/snapserver/snapserver.conf
-echo -e '[http]' >>/etc/snapserver/snapserver.conf
-echo -e 'enabled = true' >>/etc/snapserver/snapserver.conf
-echo -e 'bind_to_address = 0.0.0.0' >>/etc/snapserver/snapserver.conf
+echo -e '[server]' >>/etc/snapserver.conf
+echo -e 'user = snapcast' >>/etc/snapserver.conf
+echo -e 'group = snapcast' >>/etc/snapserver.conf
+echo -e 'datadir = /var/lib/snapserver/' >>/etc/snapserver.conf
+echo -e '[tcp]' >>/etc/snapserver.conf
+echo -e 'enabled = true' >>/etc/snapserver.conf
+echo -e 'bind_to_address = ::' >>/etc/snapserver.conf
+
+## set port to environment variable or default
+PORT="1705"
+eval PORT_VAR="\$SNAPDOG_SNAPCAST_JSONRPC_PORT"
+if [[ -n "${PORT_VAR}" ]]; then
+    PORT=$PORT_VAR
+fi
+
+echo -e "port = $PORT" >>/etc/snapserver.conf
+
+echo -e '[http]' >>/etc/snapserver.conf
+echo -e 'enabled = true' >>/etc/snapserver.conf
+echo -e 'bind_to_address = ::' >>/etc/snapserver.conf
 
 ## set port to environment variable or default
 PORT="1780"
@@ -74,9 +86,9 @@ if [[ -n "${PORT_VAR}" ]]; then
     PORT=$PORT_VAR
 fi
 
-echo -e "port = $PORT" >>/etc/snapserver/snapserver.conf
-echo -e 'doc_root = /usr/share/snapserver/snapweb/' >>/etc/snapserver/snapserver.conf
-echo -e 'host = snapdog' >>/etc/snapserver/snapserver.conf
+echo -e "port = $PORT" >>/etc/snapserver.conf
+echo -e 'doc_root = /usr/share/snapserver/snapweb/' >>/etc/snapserver.conf
+echo -e 'host = snapdog' >>/etc/snapserver.conf
 
 ## set base_url for reverse proxy support (SnapWeb PR #20)
 BASE_URL=""
@@ -84,15 +96,13 @@ eval BASE_URL_VAR="\$SNAPDOG_SERVICES_SNAPCAST_BASE_URL"
 if [[ -n "${BASE_URL_VAR}" ]]; then
     BASE_URL=$BASE_URL_VAR
 fi
-echo -e "base_url = $BASE_URL" >>/etc/snapserver/snapserver.conf
+echo -e "base_url = $BASE_URL" >>/etc/snapserver.conf
 
-echo -e '[tcp]' >>/etc/snapserver/snapserver.conf
-echo -e 'enabled = disabled' >>/etc/snapserver/snapserver.conf
-echo -e '[logging]' >>/etc/snapserver/snapserver.conf
-echo -e 'sink = stdout' >>/etc/snapserver/snapserver.conf
-echo -e 'filter = *:info' >>/etc/snapserver/snapserver.conf
-echo -e '[stream]' >>/etc/snapserver/snapserver.conf
-echo -e 'bind_to_address = 0.0.0.0' >>/etc/snapserver/snapserver.conf
+echo -e '[logging]' >>/etc/snapserver.conf
+echo -e 'sink = stdout' >>/etc/snapserver.conf
+echo -e 'filter = *:info' >>/etc/snapserver.conf
+echo -e '[stream]' >>/etc/snapserver.conf
+echo -e 'bind_to_address = ::' >>/etc/snapserver.conf
 
 ## set port to environment variable or default
 PORT="1704"
@@ -101,16 +111,16 @@ if [[ -n "${PORT_VAR}" ]]; then
     PORT=$PORT_VAR
 fi
 
-echo -e "port = $PORT" >>/etc/snapserver/snapserver.conf
-echo -e "sampleformat = $SAMPLEFORMAT" >>/etc/snapserver/snapserver.conf
-echo -e 'codec = flac' >>/etc/snapserver/snapserver.conf
-echo -e 'chunk_ms = 26' >>/etc/snapserver/snapserver.conf
-echo -e 'buffer = 1000' >>/etc/snapserver/snapserver.conf
-echo -e 'send_to_muted = false' >>/etc/snapserver/snapserver.conf
+echo -e "port = $PORT" >>/etc/snapserver.conf
+echo -e "sampleformat = $SAMPLEFORMAT" >>/etc/snapserver.conf
+echo -e 'codec = flac' >>/etc/snapserver.conf
+echo -e 'chunk_ms = 26' >>/etc/snapserver.conf
+echo -e 'buffer = 1000' >>/etc/snapserver.conf
+echo -e 'send_to_muted = false' >>/etc/snapserver.conf
 
 ESC_SNAPSERVER=$(printf '%s\n' "$SNAPSERVER" | sed -e 's/[\/&]/\\&/g')
 
-echo -e $SNAPSERVER >>/etc/snapserver/snapserver.conf
+echo -e $SNAPSERVER >>/etc/snapserver.conf
 echo "------------------------------------"
 echo "Snapserver configuration:"
 echo
