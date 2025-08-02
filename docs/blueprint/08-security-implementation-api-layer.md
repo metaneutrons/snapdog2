@@ -1,6 +1,6 @@
-# 8. Security Implementation (API Layer)
+# 13. Security Implementation (API Layer)
 
-## 8.1. Security Philosophy & Threat Model
+## 13.1. Security Philosophy & Threat Model
 
 SnapDog2 is designed primarily for operation within a **trusted private local area network (LAN)**, such as a typical home network. The primary security goal for the exposed REST API (defined in Section 11) is **authentication and basic authorization** to prevent accidental or unauthorized control by other devices or users on the same network, rather than defending against sophisticated external threats common to internet-facing applications.
 
@@ -8,11 +8,11 @@ The threat model assumes the network itself is reasonably secure and focuses on 
 
 Given this context, a simple but effective **API Key authentication** mechanism is employed as the primary security measure for the API layer (`/Api`).
 
-## 8.2. API Key Authentication
+## 13.2. API Key Authentication
 
 Access to the SnapDog2 REST API is controlled via mandatory API Keys. Any client attempting to communicate with protected API endpoints **must** include a valid, pre-configured API key in the `X-API-Key` HTTP request header.
 
-### 8.2.1. API Key Configuration
+### 13.2.1. API Key Configuration
 
 API keys are managed securely outside the application code, loaded at startup from environment variables. This allows keys to be easily provisioned, rotated, or revoked without code changes.
 
@@ -82,7 +82,7 @@ public class ApiAuthConfiguration
 }
 ```
 
-### 8.2.2. API Key Authentication Implementation (ASP.NET Core)
+### 13.2.2. API Key Authentication Implementation (ASP.NET Core)
 
 Authentication is handled by a custom `AuthenticationHandler` registered with the ASP.NET Core authentication middleware. This handler intercepts incoming requests, checks for the `X-API-Key` header, and validates the provided key against the loaded configuration.
 
@@ -233,7 +233,7 @@ public class ApiKeyAuthenticationOptions : AuthenticationSchemeOptions
 }
 ```
 
-### 8.2.3. API Security Registration (ASP.NET Core)
+### 13.2.3. API Security Registration (ASP.NET Core)
 
 Authentication and Authorization services are configured in `Program.cs` via DI extension methods (`/Worker/DI/ApiAuthExtensions.cs`).
 
@@ -350,7 +350,7 @@ public class StatusController : ControllerBase
      public IActionResult GetStatus() { /*...*/ return Ok(); }
 }```
 
-## 8.3. Security Best Practices Applied
+## 13.3. Security Best Practices Applied
 
 In addition to API Key Authentication, SnapDog2 incorporates:
 
@@ -362,7 +362,7 @@ In addition to API Key Authentication, SnapDog2 incorporates:
 7. **Dependency Scanning:** The CI/CD pipeline includes automated checks for known vulnerabilities in NuGet dependencies using tools like `dotnet list package --vulnerable` or GitHub Dependabot.
 8. **Logging:** Security-relevant events (authentication success/failure, authorization failures) are explicitly logged using the `ISecurityLogger` interface (Section 8.4) for auditing and monitoring purposes.
 
-## 8.4. Security Logging (`ISecurityLogger` / `SecurityLogger`)
+## 13.4. Security Logging (`ISecurityLogger` / `SecurityLogger`)
 
 Provides dedicated logging for security-related events.
 

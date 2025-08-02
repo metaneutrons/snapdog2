@@ -1,12 +1,12 @@
-# 12. Infrastructure Services Implementation
+# 17. Infrastructure Services Implementation
 
 This chapter details the concrete implementations of the infrastructure services responsible for bridging the gap between SnapDog2's core application logic (`/Server` layer) and the external world (libraries, protocols, servers). These services reside within the `/Infrastructure` folder and implement the abstractions defined in `/Core/Abstractions`. They encapsulate the complexities of external interactions, apply resilience patterns, handle protocol-specific details, and integrate with the application's logging, configuration, and state management systems.
 
-## 12.1. Snapcast Integration (`/Infrastructure/Snapcast/`)
+## 17.1. Snapcast Integration (`/Infrastructure/Snapcast/`)
 
 This component handles all direct communication with the Snapcast server.
 
-### 12.1.1. `SnapcastService`
+### 17.1.1. `SnapcastService`
 
 * **Implements:** `SnapDog2.Core.Abstractions.ISnapcastService`
 * **Purpose:** Manages the connection to the Snapcast server's control port, wraps the underlying library calls, handles server events, and keeps the raw state repository updated.
@@ -107,7 +107,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
 }
 ```
 
-### 12.1.2. `SnapcastStateRepository`
+### 17.1.2. `SnapcastStateRepository`
 
 * **Implements:** `SnapDog2.Core.Abstractions.ISnapcastStateRepository`
 * **Purpose:** Provides a thread-safe, in-memory store for the *latest known raw state* received from the Snapcast server. This acts as a cache reflecting the server's perspective, updated by `SnapcastService` based on events and status pulls.
@@ -183,7 +183,7 @@ public partial class SnapcastStateRepository : ISnapcastStateRepository
 }
 ```
 
-## 12.2. KNX Integration (`/Infrastructure/Knx/KnxService.cs`)
+## 17.2. KNX Integration (`/Infrastructure/Knx/KnxService.cs`)
 
 Implements `IKnxService` using **`Knx.Falcon.Sdk` (6.3.x)**.
 
@@ -200,7 +200,7 @@ Implements `IKnxService` using **`Knx.Falcon.Sdk` (6.3.x)**.
   * `SendStatusAsync`: Takes Status ID, Target ID, and value. Uses helper `GetStatusGroupAddress` to find the configured GA string. Parses GA string to `Knx.Falcon.GroupAddress`. Uses helper `WriteToKnxAsync` to convert the value based on expected DPT and call the correct `KnxBus.WriteXyzAsync` method, wrapped in Polly `_operationPolicy`. Handles the 1-based indexing and >255 reporting rule for relevant DPTs.
   * **Disposal:** Implements `IAsyncDisposable`.
 
-## 12.3. MQTT Integration (`/Infrastructure/Mqtt/MqttService.cs`)
+## 17.3. MQTT Integration (`/Infrastructure/Mqtt/MqttService.cs`)
 
 Implements `IMqttService` using **`MQTTnet` v5 (5.0.1+)**.
 
@@ -216,7 +216,7 @@ Implements `IMqttService` using **`MQTTnet` v5 (5.0.1+)**.
   * Implements `SubscribeAsync`/`UnsubscribeAsync`.
   * Implements `DisposeAsync`.
 
-## 12.4. Subsonic Integration (`/Infrastructure/Subsonic/SubsonicService.cs`)
+## 17.4. Subsonic Integration (`/Infrastructure/Subsonic/SubsonicService.cs`)
 
 Implements `ISubsonicService` using **`SubSonicMedia` (1.0.4-beta.1)**.
 
@@ -228,7 +228,7 @@ Implements `ISubsonicService` using **`SubSonicMedia` (1.0.4-beta.1)**.
   * Performs **mapping** from `SubSonicMedia.Models` (e.g., `Playlist`, `Song`) to `SnapDog2.Core.Models` (`PlaylistInfo`, `TrackInfo`, `PlaylistWithTracks`). This mapping logic resides within this service.
   * Wraps library calls in `try/catch`, returns `Result`/`Result<T>`. Resilience is handled by the injected `HttpClient`.
 
-## 12.5. Media Playback (`/Infrastructure/Media/MediaPlayerService.cs`)
+## 17.5. Media Playback (`/Infrastructure/Media/MediaPlayerService.cs`)
 
 Implements `IMediaPlayerService` using **`LibVLCSharp` (3.8.2)**.
 
