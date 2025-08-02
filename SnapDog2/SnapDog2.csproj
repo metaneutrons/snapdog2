@@ -23,4 +23,8 @@
     <PackageReference Include="MediatR" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\snapcast-net\src\snapcast-net\snapcast-net.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -46,6 +46,8 @@
     <PackageVersion Include="AspNetCore.HealthChecks.Network" Version="9.0.0" />
     <!-- Configuration -->
     <PackageVersion Include="EnvoyConfig" Version="1.0.0" />
+    <!-- JSON Serialization -->
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <!-- Test -->
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
