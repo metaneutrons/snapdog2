@@ -10,19 +10,19 @@ This component handles all direct communication with the Snapcast server.
 
 * **Implements:** `SnapDog2.Core.Abstractions.ISnapcastService`
 * **Purpose:** Manages the connection to the Snapcast server's control port, wraps the underlying library calls, handles server events, and keeps the raw state repository updated.
-* **Key Library:** `Sturd.SnapcastNet` (v0.0.4) - Uses `SnapcastClient` for communication.
+* **Key Library:** `SnapcastClient` (v0.3.1) - Uses `SnapcastClient` for communication.
 * **Dependencies:** `IOptions<SnapcastOptions>`, `IMediator`, `ISnapcastStateRepository`, `ILogger<SnapcastService>`.
 * **Core Logic:**
   * **Connection Management:** Implements `InitializeAsync` to establish a connection using `SnapcastClient.ConnectAsync`. Applies the `_reconnectionPolicy` (Polly indefinite retry with backoff, Sec 7.1) for initial connection and automatic reconnection triggered by the library's `Disconnected` event. Uses `SemaphoreSlim` to prevent concurrent connection attempts.
   * **Operation Wrapping:** Implements methods defined in `ISnapcastService` (e.g., `GetStatusAsync`, `SetClientGroupAsync`, `SetClientVolumeAsync`, `SetClientNameAsync`, `CreateGroupAsync`, `DeleteGroupAsync`, etc.). Each wrapper method:
     * Checks disposal status using `ObjectDisposedException.ThrowIf`.
-    * Applies the `_operationPolicy` (Polly limited retry, Sec 7.1) around the call to the corresponding `Sturd.SnapcastNet.SnapcastClient` method (e.g., `_client.SetClientVolumeAsync(...)`).
+    * Applies the `_operationPolicy` (Polly limited retry, Sec 7.1) around the call to the corresponding `SnapcastClient.SnapcastClient` method (e.g., `_client.SetClientVolumeAsync(...)`).
     * Uses `try/catch` around the policy execution to capture final exceptions after retries are exhausted.
     * Logs operations and errors using the LoggerMessage pattern.
     * Returns `Result` or `Result<T>` indicating success or failure, converting exceptions to `Result.Failure(ex)`.
-  * **Event Handling:** Subscribes to events exposed by `Sturd.SnapcastNet.SnapcastClient` (e.g., `ClientConnected`, `ClientDisconnected`, `GroupChanged`, `ClientVolumeChanged`, `Disconnected`). Event handlers perform two main actions:
+  * **Event Handling:** Subscribes to events exposed by `SnapcastClient.SnapcastClient` (e.g., `ClientConnected`, `ClientDisconnected`, `GroupChanged`, `ClientVolumeChanged`, `Disconnected`). Event handlers perform two main actions:
         1. **Update State Repository:** Call the appropriate method on the injected `ISnapcastStateRepository` to update the raw in-memory state (e.g., `_stateRepository.UpdateClient(eventArgs.Client)`).
-        2. **Publish Cortex.Mediator Notification:** Publish a corresponding internal notification (defined in `/Server/Notifications`, e.g., `SnapcastClientConnectedNotification(eventArgs.Client)`) using the injected `IMediator`. These notifications carry the raw `Sturd.SnapcastNet` model data received in the event.
+        2. **Publish Cortex.Mediator Notification:** Publish a corresponding internal notification (defined in `/Server/Notifications`, e.g., `SnapcastClientConnectedNotification(eventArgs.Client)`) using the injected `IMediator`. These notifications carry the raw `SnapcastClient` model data received in the event.
   * **State Synchronization:** On initial successful connection (`InitializeAsync`) and potentially periodically or after reconnection, calls `_client.GetStatusAsync` to fetch the complete server state and populates the `ISnapcastStateRepository` using `_stateRepository.UpdateServerState`.
   * **Disposal:** Implements `IAsyncDisposable` to unhook event handlers, gracefully disconnect the `SnapcastClient`, and dispose resources.
 
@@ -30,8 +30,8 @@ This component handles all direct communication with the Snapcast server.
 // Example Snippet: /Infrastructure/Snapcast/SnapcastService.cs
 namespace SnapDog2.Infrastructure.Snapcast;
 
-using Sturd.SnapcastNet;
-using Sturd.SnapcastNet.Models;
+using SnapcastClient;
+using SnapcastClient.Models;
 // ... other usings (Core Abstractions, Models, Config, Logging, Cortex.Mediator, Polly) ...
 
 public partial class SnapcastService : ISnapcastService, IAsyncDisposable
@@ -67,7 +67,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     public async Task<Result> SetClientVolumeAsync(string snapcastClientId, int volumePercent)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        var volumeData = new ClientVolume { Percent = volumePercent, Muted = volumePercent == 0 }; // Using Sturd.SnapcastNet model
+        var volumeData = new ClientVolume { Percent = volumePercent, Muted = volumePercent == 0 }; // Using SnapcastClient model
         var policyResult = await _operationPolicy.ExecuteAndCaptureAsync(
           async ct => await _client.SetClientVolumeAsync(snapcastClientId, volumeData, ct).ConfigureAwait(false)
         ).ConfigureAwait(false);

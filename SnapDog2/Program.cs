@@ -65,6 +65,12 @@ try
     // Add Command Processing (Cortex.Mediator)
     builder.Services.AddCommandProcessing();
 
+    // Add Snapcast services
+    if (snapDogConfig.Services.Snapcast.Enabled)
+    {
+        builder.Services.AddSnapcastServices();
+    }
+
     // Register placeholder services
     builder.Services.AddScoped<
         SnapDog2.Core.Abstractions.ISystemStatusService,

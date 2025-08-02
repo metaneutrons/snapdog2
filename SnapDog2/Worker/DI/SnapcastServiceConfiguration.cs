@@ -1,0 +1,85 @@
+namespace SnapDog2.Worker.DI;
+
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using SnapcastClient;
+using SnapDog2.Core.Abstractions;
+using SnapDog2.Core.Configuration;
+using SnapDog2.Infrastructure.Services;
+
+/// <summary>
+/// Extension methods for configuring Snapcast services.
+/// </summary>
+public static class SnapcastServiceConfiguration
+{
+    /// <summary>
+    /// Adds Snapcast services to the service collection.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <returns>The service collection for chaining.</returns>
+    public static IServiceCollection AddSnapcastServices(this IServiceCollection services)
+    {
+        // Register the state repository as singleton since it holds shared state
+        services.AddSingleton<ISnapcastStateRepository, SnapcastStateRepository>();
+
+        // Register the enterprise SnapcastClient client
+        // We need to register it as a factory since we need access to configuration
+        services.AddSingleton<SnapcastClient.IClient>(serviceProvider =>
+        {
+            var config = serviceProvider.GetRequiredService<IOptions<ServicesConfig>>().Value.Snapcast;
+            var logger = serviceProvider.GetService<ILogger<SnapcastClient.Client>>();
+
+            // Create the options
+            var options = new SnapcastClient.SnapcastClientOptions
+            {
+                EnableAutoReconnect = config.AutoReconnect,
+                MaxRetryAttempts = 5,
+                ConnectionTimeoutMs = config.Timeout * 1000,
+                HealthCheckIntervalMs = 30000,
+                ReconnectDelayMs = config.ReconnectInterval * 1000,
+            };
+
+            // Create the connection
+            var connectionLogger = serviceProvider.GetService<ILogger<SnapcastClient.ResilientTcpConnection>>();
+            var connection = new SnapcastClient.ResilientTcpConnection(
+                config.Address,
+                config.Port,
+                options,
+                connectionLogger
+            );
+
+            // Create and return the client
+            return new SnapcastClient.Client(connection, logger);
+        });
+
+        // Register our Snapcast service as singleton
+        services.AddSingleton<ISnapcastService, SnapcastService>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Validates Snapcast configuration.
+    /// </summary>
+    /// <param name="config">The Snapcast configuration to validate.</param>
+    /// <returns>True if configuration is valid, false otherwise.</returns>
+    public static bool ValidateSnapcastConfiguration(SnapcastConfig config)
+    {
+        if (!config.Enabled)
+            return true; // If disabled, no validation needed
+
+        if (string.IsNullOrWhiteSpace(config.Address))
+            return false;
+
+        if (config.Port <= 0 || config.Port > 65535)
+            return false;
+
+        if (config.Timeout <= 0)
+            return false;
+
+        if (config.ReconnectInterval <= 0)
+            return false;
+
+        return true;
+    }
+}

@@ -11,6 +11,21 @@ public record VersionDetails
     public required string Version { get; init; }
 
     /// <summary>
+    /// Gets the major version number.
+    /// </summary>
+    public int Major { get; init; }
+
+    /// <summary>
+    /// Gets the minor version number.
+    /// </summary>
+    public int Minor { get; init; }
+
+    /// <summary>
+    /// Gets the patch version number.
+    /// </summary>
+    public int Patch { get; init; }
+
+    /// <summary>
     /// Gets the UTC timestamp when the version info was generated.
     /// </summary>
     public DateTime TimestampUtc { get; init; } = DateTime.UtcNow;
