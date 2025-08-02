@@ -1,8 +1,10 @@
 namespace SnapDog2.Controllers;
 
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Threading.Tasks;
+using Cortex.Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -10,6 +12,7 @@ using SnapDog2.Core.Enums;
 using SnapDog2.Core.Models;
 using SnapDog2.Server.Features.Zones.Commands;
 using SnapDog2.Server.Features.Zones.Queries;
+using SnapDog2.Server.Features.Shared.Notifications;
 
 /// <summary>
 /// Controller for zone management operations.
@@ -703,6 +706,49 @@ public class ZoneController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting playlist info for zone {ZoneId}", zoneId);
+            return StatusCode(500, new { error = "Internal server error" });
+        }
+    }
+
+    /// <summary>
+    /// Test endpoint to publish a zone volume change notification.
+    /// </summary>
+    /// <param name="zoneId">The zone ID.</param>
+    /// <param name="volume">The new volume level.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>Success message.</returns>
+    [HttpPost("{zoneId:int}/test-notification")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult> TestZoneNotification(
+        [Range(1, int.MaxValue)] int zoneId, 
+        [FromQuery] [Range(0, 100)] int volume = 75,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger.LogDebug("Publishing test zone volume notification for Zone {ZoneId} with volume {Volume}", zoneId, volume);
+
+            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Shared.Handlers.ZoneStateNotificationHandler>();
+            if (handler == null)
+            {
+                _logger.LogError("ZoneStateNotificationHandler not found in DI container");
+                return StatusCode(500, new { error = "Handler not available" });
+            }
+
+            var notification = new ZoneVolumeChangedNotification
+            {
+                ZoneId = zoneId,
+                Volume = volume
+            };
+
+            await handler.Handle(notification, cancellationToken);
+
+            return Ok(new { message = $"Test notification published for Zone {zoneId} with volume {volume}" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error publishing test notification for zone {ZoneId}", zoneId);
             return StatusCode(500, new { error = "Internal server error" });
         }
     }

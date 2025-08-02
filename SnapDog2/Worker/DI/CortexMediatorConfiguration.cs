@@ -92,6 +92,10 @@ public static class CortexMediatorConfiguration
         services.AddScoped<SnapDog2.Server.Features.Clients.Handlers.GetClientQueryHandler>();
         services.AddScoped<SnapDog2.Server.Features.Clients.Handlers.GetClientsByZoneQueryHandler>();
 
+        // Notification handlers
+        services.AddScoped<SnapDog2.Server.Features.Shared.Handlers.ZoneStateNotificationHandler>();
+        services.AddScoped<SnapDog2.Server.Features.Shared.Handlers.ClientStateNotificationHandler>();
+
         // Automatically register all FluentValidation AbstractValidator<> implementations
         // found in the specified assembly. These are used by the ValidationBehavior.
         services.AddValidatorsFromAssembly(serverAssembly, ServiceLifetime.Transient);
