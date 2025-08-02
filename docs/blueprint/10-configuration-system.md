@@ -136,7 +136,6 @@ SNAPDOG_API_APIKEY_3=secret-key-3
 
 ```bash
 # Snapcast integration
-SNAPDOG_SERVICES_SNAPCAST_ENABLED=true                # Default: true
 SNAPDOG_SERVICES_SNAPCAST_ADDRESS=snapcast-server     # Default: localhost
 SNAPDOG_SERVICES_SNAPCAST_PORT=1705                   # Default: 1705 (JSON-RPC port)
 SNAPDOG_SERVICES_SNAPCAST_HTTP_PORT=1780              # Default: 1780

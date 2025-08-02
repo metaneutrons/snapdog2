@@ -90,4 +90,11 @@ public class SystemConfig
     /// </summary>
     [Env(Key = "MQTT_STATS_TOPIC", Default = "stats")]
     public string MqttStatsTopic { get; set; } = "stats";
+
+    /// <summary>
+    /// Optional log file path. If not set, file logging is disabled.
+    /// Maps to: SNAPDOG_SYSTEM_LOG_FILE
+    /// </summary>
+    [Env(Key = "LOG_FILE")]
+    public string? LogFile { get; set; }
 }

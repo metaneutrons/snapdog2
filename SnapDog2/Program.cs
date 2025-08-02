@@ -27,26 +27,28 @@ catch (Exception ex)
 }
 
 // Configure Serilog based on configuration
-Log.Logger = new LoggerConfiguration()
+var loggerConfig = new LoggerConfiguration()
     .MinimumLevel.Is(Enum.Parse<LogEventLevel>(snapDogConfig.System.LogLevel, true))
     .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
     .MinimumLevel.Override("System", LogEventLevel.Warning)
-    // Ensure our integration services are visible
-    .MinimumLevel.Override("SnapDog2.Infrastructure.Services.SnapcastService", LogEventLevel.Information)
-    .MinimumLevel.Override("SnapDog2.Infrastructure.Services.MqttService", LogEventLevel.Information)
-    .MinimumLevel.Override("SnapDog2.Worker.Services.IntegrationServicesHostedService", LogEventLevel.Information)
     .Enrich.FromLogContext()
     .WriteTo.Console(
         outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}"
-    )
-    .WriteTo.File(
-        path: "logs/snapdog-.txt",
+    );
+
+// Add file logging only if log file path is configured
+if (!string.IsNullOrWhiteSpace(snapDogConfig.System.LogFile))
+{
+    loggerConfig.WriteTo.File(
+        path: snapDogConfig.System.LogFile,
         rollingInterval: RollingInterval.Day,
         outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}",
         retainedFileCountLimit: 31,
         fileSizeLimitBytes: 100 * 1024 * 1024
-    )
-    .CreateLogger();
+    );
+}
+
+Log.Logger = loggerConfig.CreateLogger();
 
 try
 {
@@ -79,10 +81,7 @@ try
     });
 
     // Add Snapcast services
-    if (snapDogConfig.Services.Snapcast.Enabled)
-    {
-        builder.Services.AddSnapcastServices();
-    }
+    builder.Services.AddSnapcastServices();
 
     // Add MQTT services
     if (snapDogConfig.Services.Mqtt.Enabled)
@@ -140,17 +139,14 @@ try
         );
 
         // Add external service health checks based on configuration
-        if (snapDogConfig.Services.Snapcast.Enabled)
-        {
-            healthChecksBuilder.AddTcpHealthCheck(
-                options =>
-                {
-                    options.AddHost(snapDogConfig.Services.Snapcast.Address, snapDogConfig.Services.Snapcast.Port);
-                },
-                name: "snapcast",
-                tags: ["ready"]
-            );
-        }
+        healthChecksBuilder.AddTcpHealthCheck(
+            options =>
+            {
+                options.AddHost(snapDogConfig.Services.Snapcast.Address, snapDogConfig.Services.Snapcast.Port);
+            },
+            name: "snapcast",
+            tags: ["ready"]
+        );
 
         if (snapDogConfig.Services.Mqtt.Enabled)
         {
