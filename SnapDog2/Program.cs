@@ -72,6 +72,9 @@ try
     
     // Zone management services (placeholder implementations)
     builder.Services.AddScoped<SnapDog2.Core.Abstractions.IZoneManager, SnapDog2.Infrastructure.Services.ZoneManager>();
+    
+    // Client management services (placeholder implementations)
+    builder.Services.AddScoped<SnapDog2.Core.Abstractions.IClientManager, SnapDog2.Infrastructure.Services.ClientManager>();
 
     // Add services to the container
     builder.Services.AddControllers();
