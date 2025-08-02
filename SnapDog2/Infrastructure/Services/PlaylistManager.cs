@@ -115,11 +115,36 @@ public partial class PlaylistManager : IPlaylistManager
         // Create placeholder playlists with sample tracks
         var playlists = new[]
         {
-            new { Id = "rock_classics", Name = "Rock Classics", Index = 1 },
-            new { Id = "jazz_standards", Name = "Jazz Standards", Index = 2 },
-            new { Id = "electronic_mix", Name = "Electronic Mix", Index = 3 },
-            new { Id = "acoustic_favorites", Name = "Acoustic Favorites", Index = 4 },
-            new { Id = "workout_hits", Name = "Workout Hits", Index = 5 }
+            new
+            {
+                Id = "rock_classics",
+                Name = "Rock Classics",
+                Index = 1,
+            },
+            new
+            {
+                Id = "jazz_standards",
+                Name = "Jazz Standards",
+                Index = 2,
+            },
+            new
+            {
+                Id = "electronic_mix",
+                Name = "Electronic Mix",
+                Index = 3,
+            },
+            new
+            {
+                Id = "acoustic_favorites",
+                Name = "Acoustic Favorites",
+                Index = 4,
+            },
+            new
+            {
+                Id = "workout_hits",
+                Name = "Workout Hits",
+                Index = 5,
+            },
         };
 
         foreach (var playlistInfo in playlists)
@@ -130,7 +155,7 @@ public partial class PlaylistManager : IPlaylistManager
                 Source = "placeholder",
                 Index = playlistInfo.Index,
                 Name = playlistInfo.Name,
-                TrackCount = 10 + (playlistInfo.Index * 5) // Varying track counts
+                TrackCount = 10 + (playlistInfo.Index * 5), // Varying track counts
             };
 
             _playlists[playlistInfo.Id] = playlist;
@@ -150,7 +175,7 @@ public partial class PlaylistManager : IPlaylistManager
                     DurationSec = 180 + (i % 4) * 60, // 3-6 minute tracks in seconds
                     PositionSec = 0,
                     CoverArtUrl = null,
-                    TimestampUtc = DateTime.UtcNow
+                    TimestampUtc = DateTime.UtcNow,
                 };
 
                 tracks.Add(track);

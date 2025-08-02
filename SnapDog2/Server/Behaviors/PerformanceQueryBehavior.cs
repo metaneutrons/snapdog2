@@ -27,7 +27,11 @@ public partial class PerformanceQueryBehavior<TQuery, TResponse> : IQueryPipelin
     }
 
     /// <inheritdoc/>
-    public async Task<TResponse> Handle(TQuery query, QueryHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+    public async Task<TResponse> Handle(
+        TQuery query,
+        QueryHandlerDelegate<TResponse> next,
+        CancellationToken cancellationToken
+    )
     {
         var queryName = typeof(TQuery).Name;
         var stopwatch = Stopwatch.StartNew();

@@ -7,8 +7,8 @@ using Cortex.Mediator.Commands;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Models;
-using SnapDog2.Server.Features.Zones.Commands;
 using SnapDog2.Server.Features.Shared.Notifications;
+using SnapDog2.Server.Features.Zones.Commands;
 
 /// <summary>
 /// Handles the PlayCommand.
@@ -128,7 +128,12 @@ public class SetZoneVolumeCommandHandler : ICommandHandler<SetZoneVolumeCommand,
 
     public async Task<Result> Handle(SetZoneVolumeCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Setting volume for Zone {ZoneId} to {Volume} from {Source}", request.ZoneId, request.Volume, request.Source);
+        _logger.LogInformation(
+            "Setting volume for Zone {ZoneId} to {Volume} from {Source}",
+            request.ZoneId,
+            request.Volume,
+            request.Source
+        );
 
         var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
@@ -158,7 +163,12 @@ public class VolumeUpCommandHandler : ICommandHandler<VolumeUpCommand, Result>
 
     public async Task<Result> Handle(VolumeUpCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Increasing volume for Zone {ZoneId} by {Step} from {Source}", request.ZoneId, request.Step, request.Source);
+        _logger.LogInformation(
+            "Increasing volume for Zone {ZoneId} by {Step} from {Source}",
+            request.ZoneId,
+            request.Step,
+            request.Source
+        );
 
         var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
@@ -188,7 +198,12 @@ public class VolumeDownCommandHandler : ICommandHandler<VolumeDownCommand, Resul
 
     public async Task<Result> Handle(VolumeDownCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Decreasing volume for Zone {ZoneId} by {Step} from {Source}", request.ZoneId, request.Step, request.Source);
+        _logger.LogInformation(
+            "Decreasing volume for Zone {ZoneId} by {Step} from {Source}",
+            request.ZoneId,
+            request.Step,
+            request.Source
+        );
 
         var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
@@ -218,7 +233,12 @@ public class SetZoneMuteCommandHandler : ICommandHandler<SetZoneMuteCommand, Res
 
     public async Task<Result> Handle(SetZoneMuteCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Setting mute for Zone {ZoneId} to {Enabled} from {Source}", request.ZoneId, request.Enabled, request.Source);
+        _logger.LogInformation(
+            "Setting mute for Zone {ZoneId} to {Enabled} from {Source}",
+            request.ZoneId,
+            request.Enabled,
+            request.Source
+        );
 
         var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
@@ -278,7 +298,12 @@ public class SetTrackCommandHandler : ICommandHandler<SetTrackCommand, Result>
 
     public async Task<Result> Handle(SetTrackCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Setting track for Zone {ZoneId} to {TrackIndex} from {Source}", request.ZoneId, request.TrackIndex, request.Source);
+        _logger.LogInformation(
+            "Setting track for Zone {ZoneId} to {TrackIndex} from {Source}",
+            request.ZoneId,
+            request.TrackIndex,
+            request.Source
+        );
 
         var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
@@ -338,7 +363,11 @@ public class PreviousTrackCommandHandler : ICommandHandler<PreviousTrackCommand,
 
     public async Task<Result> Handle(PreviousTrackCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Playing previous track for Zone {ZoneId} from {Source}", request.ZoneId, request.Source);
+        _logger.LogInformation(
+            "Playing previous track for Zone {ZoneId} from {Source}",
+            request.ZoneId,
+            request.Source
+        );
 
         var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
@@ -421,6 +450,7 @@ public class NextPlaylistCommandHandler : ICommandHandler<NextPlaylistCommand, R
         return await zone.NextPlaylistAsync().ConfigureAwait(false);
     }
 }
+
 /// <summary>
 /// Handles the PreviousPlaylistCommand.
 /// </summary>
@@ -437,7 +467,11 @@ public class PreviousPlaylistCommandHandler : ICommandHandler<PreviousPlaylistCo
 
     public async Task<Result> Handle(PreviousPlaylistCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Playing previous playlist for Zone {ZoneId} from {Source}", request.ZoneId, request.Source);
+        _logger.LogInformation(
+            "Playing previous playlist for Zone {ZoneId} from {Source}",
+            request.ZoneId,
+            request.Source
+        );
 
         var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
@@ -467,7 +501,12 @@ public class SetTrackRepeatCommandHandler : ICommandHandler<SetTrackRepeatComman
 
     public async Task<Result> Handle(SetTrackRepeatCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Setting track repeat for Zone {ZoneId} to {Enabled} from {Source}", request.ZoneId, request.Enabled, request.Source);
+        _logger.LogInformation(
+            "Setting track repeat for Zone {ZoneId} to {Enabled} from {Source}",
+            request.ZoneId,
+            request.Enabled,
+            request.Source
+        );
 
         var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
@@ -527,7 +566,12 @@ public class SetPlaylistShuffleCommandHandler : ICommandHandler<SetPlaylistShuff
 
     public async Task<Result> Handle(SetPlaylistShuffleCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Setting playlist shuffle for Zone {ZoneId} to {Enabled} from {Source}", request.ZoneId, request.Enabled, request.Source);
+        _logger.LogInformation(
+            "Setting playlist shuffle for Zone {ZoneId} to {Enabled} from {Source}",
+            request.ZoneId,
+            request.Enabled,
+            request.Source
+        );
 
         var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
@@ -549,7 +593,10 @@ public class TogglePlaylistShuffleCommandHandler : ICommandHandler<TogglePlaylis
     private readonly IZoneManager _zoneManager;
     private readonly ILogger<TogglePlaylistShuffleCommandHandler> _logger;
 
-    public TogglePlaylistShuffleCommandHandler(IZoneManager zoneManager, ILogger<TogglePlaylistShuffleCommandHandler> logger)
+    public TogglePlaylistShuffleCommandHandler(
+        IZoneManager zoneManager,
+        ILogger<TogglePlaylistShuffleCommandHandler> logger
+    )
     {
         _zoneManager = zoneManager;
         _logger = logger;
@@ -557,7 +604,11 @@ public class TogglePlaylistShuffleCommandHandler : ICommandHandler<TogglePlaylis
 
     public async Task<Result> Handle(TogglePlaylistShuffleCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Toggling playlist shuffle for Zone {ZoneId} from {Source}", request.ZoneId, request.Source);
+        _logger.LogInformation(
+            "Toggling playlist shuffle for Zone {ZoneId} from {Source}",
+            request.ZoneId,
+            request.Source
+        );
 
         var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
@@ -587,7 +638,12 @@ public class SetPlaylistRepeatCommandHandler : ICommandHandler<SetPlaylistRepeat
 
     public async Task<Result> Handle(SetPlaylistRepeatCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Setting playlist repeat for Zone {ZoneId} to {Enabled} from {Source}", request.ZoneId, request.Enabled, request.Source);
+        _logger.LogInformation(
+            "Setting playlist repeat for Zone {ZoneId} to {Enabled} from {Source}",
+            request.ZoneId,
+            request.Enabled,
+            request.Source
+        );
 
         var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
@@ -609,7 +665,10 @@ public class TogglePlaylistRepeatCommandHandler : ICommandHandler<TogglePlaylist
     private readonly IZoneManager _zoneManager;
     private readonly ILogger<TogglePlaylistRepeatCommandHandler> _logger;
 
-    public TogglePlaylistRepeatCommandHandler(IZoneManager zoneManager, ILogger<TogglePlaylistRepeatCommandHandler> logger)
+    public TogglePlaylistRepeatCommandHandler(
+        IZoneManager zoneManager,
+        ILogger<TogglePlaylistRepeatCommandHandler> logger
+    )
     {
         _zoneManager = zoneManager;
         _logger = logger;
@@ -617,7 +676,11 @@ public class TogglePlaylistRepeatCommandHandler : ICommandHandler<TogglePlaylist
 
     public async Task<Result> Handle(TogglePlaylistRepeatCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Toggling playlist repeat for Zone {ZoneId} from {Source}", request.ZoneId, request.Source);
+        _logger.LogInformation(
+            "Toggling playlist repeat for Zone {ZoneId} from {Source}",
+            request.ZoneId,
+            request.Source
+        );
 
         var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)

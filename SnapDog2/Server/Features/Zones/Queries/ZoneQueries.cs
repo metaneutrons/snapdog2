@@ -24,9 +24,7 @@ public record GetZoneStateQuery : IQuery<Result<ZoneState>>
 /// <summary>
 /// Query to get the states of all zones.
 /// </summary>
-public record GetAllZoneStatesQuery : IQuery<Result<IEnumerable<ZoneState>>>
-{
-}
+public record GetAllZoneStatesQuery : IQuery<Result<IEnumerable<ZoneState>>> { }
 
 /// <summary>
 /// Query to get the current playback state of a zone.

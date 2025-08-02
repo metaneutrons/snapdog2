@@ -46,8 +46,8 @@ public class HealthController : ControllerBase
                     Duration = entry.Value.Duration.TotalMilliseconds,
                     Description = entry.Value.Description,
                     Data = entry.Value.Data,
-                    Exception = entry.Value.Exception?.Message
-                })
+                    Exception = entry.Value.Exception?.Message,
+                }),
             };
 
             var statusCode = healthReport.Status switch
@@ -55,22 +55,24 @@ public class HealthController : ControllerBase
                 HealthStatus.Healthy => StatusCodes.Status200OK,
                 HealthStatus.Degraded => StatusCodes.Status200OK,
                 HealthStatus.Unhealthy => StatusCodes.Status503ServiceUnavailable,
-                _ => StatusCodes.Status503ServiceUnavailable
+                _ => StatusCodes.Status503ServiceUnavailable,
             };
 
-            _logger.LogInformation("Health check completed with status {Status} in {Duration}ms",
-                healthReport.Status, healthReport.TotalDuration.TotalMilliseconds);
+            _logger.LogInformation(
+                "Health check completed with status {Status} in {Duration}ms",
+                healthReport.Status,
+                healthReport.TotalDuration.TotalMilliseconds
+            );
 
             return StatusCode(statusCode, response);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Health check failed with exception");
-            return StatusCode(StatusCodes.Status503ServiceUnavailable, new
-            {
-                Status = "Unhealthy",
-                Error = "Health check failed"
-            });
+            return StatusCode(
+                StatusCodes.Status503ServiceUnavailable,
+                new { Status = "Unhealthy", Error = "Health check failed" }
+            );
         }
     }
 
@@ -84,7 +86,7 @@ public class HealthController : ControllerBase
         try
         {
             var healthReport = await _healthCheckService.CheckHealthAsync(check => check.Tags.Contains("ready"));
-            
+
             if (healthReport.Status == HealthStatus.Healthy)
             {
                 return Ok(new { Status = "Ready" });
@@ -109,7 +111,7 @@ public class HealthController : ControllerBase
         try
         {
             var healthReport = await _healthCheckService.CheckHealthAsync(check => check.Tags.Contains("live"));
-            
+
             if (healthReport.Status == HealthStatus.Healthy)
             {
                 return Ok(new { Status = "Live" });

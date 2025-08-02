@@ -24,14 +24,19 @@ public partial class ValidationCommandBehavior<TCommand, TResponse> : ICommandPi
     /// <param name="logger">The logger instance.</param>
     public ValidationCommandBehavior(
         IEnumerable<IValidator<TCommand>> validators,
-        ILogger<ValidationCommandBehavior<TCommand, TResponse>> logger)
+        ILogger<ValidationCommandBehavior<TCommand, TResponse>> logger
+    )
     {
         _validators = validators;
         _logger = logger;
     }
 
     /// <inheritdoc/>
-    public async Task<TResponse> Handle(TCommand command, CommandHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+    public async Task<TResponse> Handle(
+        TCommand command,
+        CommandHandlerDelegate<TResponse> next,
+        CancellationToken cancellationToken
+    )
     {
         var commandName = typeof(TCommand).Name;
 
@@ -41,12 +46,11 @@ public partial class ValidationCommandBehavior<TCommand, TResponse> : ICommandPi
 
             var context = new ValidationContext<TCommand>(command);
             var validationResults = await Task.WhenAll(
-                _validators.Select(v => v.ValidateAsync(context, cancellationToken))).ConfigureAwait(false);
+                    _validators.Select(v => v.ValidateAsync(context, cancellationToken))
+                )
+                .ConfigureAwait(false);
 
-            var failures = validationResults
-                .SelectMany(r => r.Errors)
-                .Where(f => f != null)
-                .ToList();
+            var failures = validationResults.SelectMany(r => r.Errors).Where(f => f != null).ToList();
 
             if (failures.Count != 0)
             {

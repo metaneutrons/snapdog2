@@ -20,7 +20,8 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthentic
         IOptionsMonitor<ApiKeyAuthenticationSchemeOptions> options,
         ILoggerFactory logger,
         UrlEncoder encoder,
-        IConfiguration configuration)
+        IConfiguration configuration
+    )
         : base(options, logger, encoder)
     {
         _configuration = configuration;
@@ -46,7 +47,7 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthentic
             var claims = new[]
             {
                 new Claim(ClaimTypes.Name, "ApiKeyUser"),
-                new Claim(ClaimTypes.NameIdentifier, providedApiKey)
+                new Claim(ClaimTypes.NameIdentifier, providedApiKey),
             };
 
             var identity = new ClaimsIdentity(claims, Scheme.Name);
@@ -63,7 +64,7 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthentic
     {
         // Check against configured API keys
         var configuredKeys = new List<string>();
-        
+
         // Load API keys from configuration
         for (int i = 1; i <= 10; i++) // Support up to 10 API keys
         {
@@ -88,6 +89,4 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthentic
 /// <summary>
 /// Options for API key authentication scheme.
 /// </summary>
-public class ApiKeyAuthenticationSchemeOptions : AuthenticationSchemeOptions
-{
-}
+public class ApiKeyAuthenticationSchemeOptions : AuthenticationSchemeOptions { }

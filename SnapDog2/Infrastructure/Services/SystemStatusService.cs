@@ -32,7 +32,7 @@ public partial class SystemStatusService : ISystemStatusService
         var status = new SystemStatus
         {
             IsOnline = true, // TODO: Implement real health checks
-            TimestampUtc = DateTime.UtcNow
+            TimestampUtc = DateTime.UtcNow,
         };
 
         return Task.FromResult(status);
@@ -53,7 +53,7 @@ public partial class SystemStatusService : ISystemStatusService
             BuildDateUtc = GetBuildDate(assembly),
             GitCommit = GetGitCommit(), // TODO: Implement
             GitBranch = GetGitBranch(), // TODO: Implement
-            BuildConfiguration = GetBuildConfiguration()
+            BuildConfiguration = GetBuildConfiguration(),
         };
 
         return Task.FromResult(versionDetails);
@@ -76,7 +76,7 @@ public partial class SystemStatusService : ISystemStatusService
             TotalMemoryMb = GC.GetTotalMemory(false) / (1024.0 * 1024.0), // TODO: Get system memory
             Uptime = uptime,
             ActiveConnections = 0, // TODO: Implement connection tracking
-            ProcessedRequests = 0 // TODO: Implement request counting
+            ProcessedRequests = 0, // TODO: Implement request counting
         };
 
         return Task.FromResult(stats);

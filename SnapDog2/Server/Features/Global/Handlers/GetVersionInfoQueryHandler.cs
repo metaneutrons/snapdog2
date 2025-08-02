@@ -39,7 +39,7 @@ public partial class GetVersionInfoQueryHandler : IQueryHandler<GetVersionInfoQu
             {
                 Version = version,
                 BuildDateUtc = buildDate,
-                BuildConfiguration = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Unknown"
+                BuildConfiguration = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Unknown",
             };
 
             return await Task.FromResult(Result<VersionDetails>.Success(versionDetails)).ConfigureAwait(false);

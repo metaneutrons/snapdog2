@@ -28,11 +28,15 @@ public partial class LoggingQueryBehavior<TQuery, TResponse> : IQueryPipelineBeh
     }
 
     /// <inheritdoc/>
-    public async Task<TResponse> Handle(TQuery query, QueryHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+    public async Task<TResponse> Handle(
+        TQuery query,
+        QueryHandlerDelegate<TResponse> next,
+        CancellationToken cancellationToken
+    )
     {
         var queryName = typeof(TQuery).Name;
         using var activity = ActivitySource.StartActivity($"CortexMediator.Query.{queryName}");
-        
+
         LogQueryStarting(queryName);
         var stopwatch = Stopwatch.StartNew();
 
@@ -40,7 +44,7 @@ public partial class LoggingQueryBehavior<TQuery, TResponse> : IQueryPipelineBeh
         {
             var response = await next().ConfigureAwait(false);
             stopwatch.Stop();
-            
+
             LogQueryCompleted(queryName, stopwatch.ElapsedMilliseconds);
             return response;
         }

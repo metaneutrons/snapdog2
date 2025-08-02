@@ -24,13 +24,13 @@ public static class CortexMediatorConfiguration
 
         // Add Cortex.Mediator using the proper extension method
         services.AddCortexMediator(
-            new ConfigurationBuilder().Build().GetSection("Mediator"), 
-            new[] { typeof(LoggingCommandBehavior<,>) }, 
-            options => 
+            new ConfigurationBuilder().Build().GetSection("Mediator"),
+            new[] { typeof(LoggingCommandBehavior<,>) },
+            options =>
             {
                 // Add default behaviors (logging)
                 options.AddDefaultBehaviors();
-                
+
                 // Add custom pipeline behaviors
                 options.AddOpenCommandPipelineBehavior(typeof(LoggingCommandBehavior<,>));
                 options.AddOpenQueryPipelineBehavior(typeof(LoggingQueryBehavior<,>));

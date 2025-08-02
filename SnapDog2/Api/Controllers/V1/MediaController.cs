@@ -40,7 +40,9 @@ public class MediaController : ControllerBase
     [HttpGet("sources")]
     [ProducesResponseType(typeof(ApiResponse<List<MediaSourceInfo>>), 200)]
     [ProducesResponseType(typeof(ApiResponse), 500)]
-    public async Task<ActionResult<ApiResponse<List<MediaSourceInfo>>>> GetMediaSources(CancellationToken cancellationToken)
+    public async Task<ActionResult<ApiResponse<List<MediaSourceInfo>>>> GetMediaSources(
+        CancellationToken cancellationToken
+    )
     {
         try
         {
@@ -50,7 +52,7 @@ public class MediaController : ControllerBase
             var mediaSources = new List<MediaSourceInfo>
             {
                 new("radio", "Radio", "Internet Radio Streams"),
-                new("subsonic", "Subsonic", "Navidrome Music Library")
+                new("subsonic", "Subsonic", "Navidrome Music Library"),
             };
 
             await Task.CompletedTask; // Satisfy async requirement
@@ -60,7 +62,10 @@ public class MediaController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting media sources");
-            return StatusCode(500, ApiResponse<List<MediaSourceInfo>>.CreateError("INTERNAL_ERROR", "Internal server error"));
+            return StatusCode(
+                500,
+                ApiResponse<List<MediaSourceInfo>>.CreateError("INTERNAL_ERROR", "Internal server error")
+            );
         }
     }
 
@@ -77,17 +82,25 @@ public class MediaController : ControllerBase
     public async Task<ActionResult<ApiResponse<PaginatedResponse<PlaylistInfo>>>> GetPlaylists(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         try
         {
             _logger.LogDebug("Getting playlists - Page: {Page}, PageSize: {PageSize}", page, pageSize);
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetAllPlaylistsQueryHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetAllPlaylistsQueryHandler>();
             if (handler == null)
             {
                 _logger.LogError("GetAllPlaylistsQueryHandler not found in DI container");
-                return StatusCode(500, ApiResponse<PaginatedResponse<PlaylistInfo>>.CreateError("HANDLER_NOT_FOUND", "Playlist handler not available"));
+                return StatusCode(
+                    500,
+                    ApiResponse<PaginatedResponse<PlaylistInfo>>.CreateError(
+                        "HANDLER_NOT_FOUND",
+                        "Playlist handler not available"
+                    )
+                );
             }
 
             var result = await handler.Handle(new GetAllPlaylistsQuery(), cancellationToken);
@@ -95,7 +108,7 @@ public class MediaController : ControllerBase
             if (result.IsSuccess && result.Value != null)
             {
                 var playlists = result.Value;
-                
+
                 // Apply pagination
                 var totalItems = playlists.Count;
                 var totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
@@ -110,20 +123,29 @@ public class MediaController : ControllerBase
                         Page = page,
                         PageSize = pageSize,
                         TotalItems = totalItems,
-                        TotalPages = totalPages
-                    }
+                        TotalPages = totalPages,
+                    },
                 };
 
                 return Ok(ApiResponse<PaginatedResponse<PlaylistInfo>>.CreateSuccess(paginatedResponse));
             }
 
             _logger.LogWarning("Failed to get playlists: {Error}", result.ErrorMessage);
-            return StatusCode(500, ApiResponse<PaginatedResponse<PlaylistInfo>>.CreateError("PLAYLISTS_ERROR", result.ErrorMessage ?? "Failed to retrieve playlists"));
+            return StatusCode(
+                500,
+                ApiResponse<PaginatedResponse<PlaylistInfo>>.CreateError(
+                    "PLAYLISTS_ERROR",
+                    result.ErrorMessage ?? "Failed to retrieve playlists"
+                )
+            );
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting playlists");
-            return StatusCode(500, ApiResponse<PaginatedResponse<PlaylistInfo>>.CreateError("INTERNAL_ERROR", "Internal server error"));
+            return StatusCode(
+                500,
+                ApiResponse<PaginatedResponse<PlaylistInfo>>.CreateError("INTERNAL_ERROR", "Internal server error")
+            );
         }
     }
 
@@ -137,17 +159,27 @@ public class MediaController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<PlaylistWithTracks>), 200)]
     [ProducesResponseType(typeof(ApiResponse), 404)]
     [ProducesResponseType(typeof(ApiResponse), 500)]
-    public async Task<ActionResult<ApiResponse<PlaylistWithTracks>>> GetPlaylist(string playlistIdOrIndex, CancellationToken cancellationToken)
+    public async Task<ActionResult<ApiResponse<PlaylistWithTracks>>> GetPlaylist(
+        string playlistIdOrIndex,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
             _logger.LogDebug("Getting playlist {PlaylistIdOrIndex}", playlistIdOrIndex);
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetPlaylistTracksQueryHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetPlaylistTracksQueryHandler>();
             if (handler == null)
             {
                 _logger.LogError("GetPlaylistTracksQueryHandler not found in DI container");
-                return StatusCode(500, ApiResponse<PlaylistWithTracks>.CreateError("HANDLER_NOT_FOUND", "Playlist tracks handler not available"));
+                return StatusCode(
+                    500,
+                    ApiResponse<PlaylistWithTracks>.CreateError(
+                        "HANDLER_NOT_FOUND",
+                        "Playlist tracks handler not available"
+                    )
+                );
             }
 
             // Try to parse as index first, then use as ID
@@ -166,15 +198,20 @@ public class MediaController : ControllerBase
             if (result.IsSuccess && result.Value != null)
             {
                 // Get playlist info
-                var playlistHandler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetAllPlaylistsQueryHandler>();
+                var playlistHandler =
+                    _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetAllPlaylistsQueryHandler>();
                 if (playlistHandler != null)
                 {
                     var playlistsResult = await playlistHandler.Handle(new GetAllPlaylistsQuery(), cancellationToken);
                     if (playlistsResult.IsSuccess && playlistsResult.Value != null)
                     {
                         PlaylistInfo? playlistInfo = null;
-                        
-                        if (int.TryParse(playlistIdOrIndex, out var idx) && idx > 0 && idx <= playlistsResult.Value.Count)
+
+                        if (
+                            int.TryParse(playlistIdOrIndex, out var idx)
+                            && idx > 0
+                            && idx <= playlistsResult.Value.Count
+                        )
                         {
                             playlistInfo = playlistsResult.Value[idx - 1]; // Convert to 0-based
                         }
@@ -188,7 +225,7 @@ public class MediaController : ControllerBase
                             var playlistWithTracks = new PlaylistWithTracks
                             {
                                 Info = playlistInfo,
-                                Tracks = result.Value
+                                Tracks = result.Value,
                             };
 
                             return Ok(ApiResponse<PlaylistWithTracks>.CreateSuccess(playlistWithTracks));
@@ -202,25 +239,29 @@ public class MediaController : ControllerBase
                     Id = playlistIdOrIndex,
                     Name = $"Playlist {playlistIdOrIndex}",
                     TrackCount = result.Value.Count,
-                    Source = "unknown"
+                    Source = "unknown",
                 };
 
-                var fallbackPlaylist = new PlaylistWithTracks
-                {
-                    Info = fallbackInfo,
-                    Tracks = result.Value
-                };
+                var fallbackPlaylist = new PlaylistWithTracks { Info = fallbackInfo, Tracks = result.Value };
 
                 return Ok(ApiResponse<PlaylistWithTracks>.CreateSuccess(fallbackPlaylist));
             }
 
             _logger.LogWarning("Playlist {PlaylistIdOrIndex} not found", playlistIdOrIndex);
-            return NotFound(ApiResponse<PlaylistWithTracks>.CreateError("PLAYLIST_NOT_FOUND", $"Playlist {playlistIdOrIndex} not found"));
+            return NotFound(
+                ApiResponse<PlaylistWithTracks>.CreateError(
+                    "PLAYLIST_NOT_FOUND",
+                    $"Playlist {playlistIdOrIndex} not found"
+                )
+            );
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting playlist {PlaylistIdOrIndex}", playlistIdOrIndex);
-            return StatusCode(500, ApiResponse<PlaylistWithTracks>.CreateError("INTERNAL_ERROR", "Internal server error"));
+            return StatusCode(
+                500,
+                ApiResponse<PlaylistWithTracks>.CreateError("INTERNAL_ERROR", "Internal server error")
+            );
         }
     }
 
@@ -240,17 +281,30 @@ public class MediaController : ControllerBase
         string playlistIdOrIndex,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         try
         {
-            _logger.LogDebug("Getting tracks for playlist {PlaylistIdOrIndex} - Page: {Page}, PageSize: {PageSize}", playlistIdOrIndex, page, pageSize);
+            _logger.LogDebug(
+                "Getting tracks for playlist {PlaylistIdOrIndex} - Page: {Page}, PageSize: {PageSize}",
+                playlistIdOrIndex,
+                page,
+                pageSize
+            );
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetPlaylistTracksQueryHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetPlaylistTracksQueryHandler>();
             if (handler == null)
             {
                 _logger.LogError("GetPlaylistTracksQueryHandler not found in DI container");
-                return StatusCode(500, ApiResponse<PaginatedResponse<TrackInfo>>.CreateError("HANDLER_NOT_FOUND", "Playlist tracks handler not available"));
+                return StatusCode(
+                    500,
+                    ApiResponse<PaginatedResponse<TrackInfo>>.CreateError(
+                        "HANDLER_NOT_FOUND",
+                        "Playlist tracks handler not available"
+                    )
+                );
             }
 
             // Try to parse as index first, then use as ID
@@ -269,7 +323,7 @@ public class MediaController : ControllerBase
             if (result.IsSuccess && result.Value != null)
             {
                 var tracks = result.Value;
-                
+
                 // Apply pagination
                 var totalItems = tracks.Count;
                 var totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
@@ -284,20 +338,28 @@ public class MediaController : ControllerBase
                         Page = page,
                         PageSize = pageSize,
                         TotalItems = totalItems,
-                        TotalPages = totalPages
-                    }
+                        TotalPages = totalPages,
+                    },
                 };
 
                 return Ok(ApiResponse<PaginatedResponse<TrackInfo>>.CreateSuccess(paginatedResponse));
             }
 
             _logger.LogWarning("Playlist {PlaylistIdOrIndex} not found", playlistIdOrIndex);
-            return NotFound(ApiResponse<PaginatedResponse<TrackInfo>>.CreateError("PLAYLIST_NOT_FOUND", $"Playlist {playlistIdOrIndex} not found"));
+            return NotFound(
+                ApiResponse<PaginatedResponse<TrackInfo>>.CreateError(
+                    "PLAYLIST_NOT_FOUND",
+                    $"Playlist {playlistIdOrIndex} not found"
+                )
+            );
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting tracks for playlist {PlaylistIdOrIndex}", playlistIdOrIndex);
-            return StatusCode(500, ApiResponse<PaginatedResponse<TrackInfo>>.CreateError("INTERNAL_ERROR", "Internal server error"));
+            return StatusCode(
+                500,
+                ApiResponse<PaginatedResponse<TrackInfo>>.CreateError("INTERNAL_ERROR", "Internal server error")
+            );
         }
     }
 
@@ -311,7 +373,10 @@ public class MediaController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<TrackInfo>), 200)]
     [ProducesResponseType(typeof(ApiResponse), 404)]
     [ProducesResponseType(typeof(ApiResponse), 500)]
-    public async Task<ActionResult<ApiResponse<TrackInfo>>> GetTrack(string trackId, CancellationToken cancellationToken)
+    public async Task<ActionResult<ApiResponse<TrackInfo>>> GetTrack(
+        string trackId,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
@@ -329,7 +394,7 @@ public class MediaController : ControllerBase
                 Artist = "Unknown Artist",
                 Album = "Unknown Album",
                 DurationSec = 180, // 3 minutes in seconds
-                Source = "unknown"
+                Source = "unknown",
             };
 
             await Task.CompletedTask; // Satisfy async requirement

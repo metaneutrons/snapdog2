@@ -21,9 +21,7 @@ public class GetErrorStatusQueryHandler : IQueryHandler<GetErrorStatusQuery, Res
     /// </summary>
     /// <param name="logger">The logger instance.</param>
     /// <param name="metricsService">The metrics service instance.</param>
-    public GetErrorStatusQueryHandler(
-        ILogger<GetErrorStatusQueryHandler> logger,
-        IMetricsService metricsService)
+    public GetErrorStatusQueryHandler(ILogger<GetErrorStatusQueryHandler> logger, IMetricsService metricsService)
     {
         _logger = logger;
         _metricsService = metricsService;
@@ -45,11 +43,11 @@ public class GetErrorStatusQueryHandler : IQueryHandler<GetErrorStatusQuery, Res
             // For now, return null indicating no recent errors
             // In a full implementation, this would query an error tracking service
             // that maintains the latest system error information
-            
+
             var errorDetails = await GetLatestErrorAsync(cancellationToken);
-            
+
             _logger.LogDebug("Successfully retrieved error status: {HasError}", errorDetails != null);
-            
+
             return Result<ErrorDetails?>.Success(errorDetails);
         }
         catch (Exception ex)
@@ -67,7 +65,7 @@ public class GetErrorStatusQueryHandler : IQueryHandler<GetErrorStatusQuery, Res
         // - Get from an in-memory error cache
         // - Query from a logging service
         // - Return the most recent error from an error tracking service
-        
+
         await Task.CompletedTask; // Placeholder for async operation
         return null; // No recent errors for now
     }

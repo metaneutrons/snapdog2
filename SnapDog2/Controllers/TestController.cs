@@ -29,10 +29,10 @@ public class TestController : ControllerBase
     public ActionResult<object> GetServices()
     {
         var services = new List<string>();
-        
+
         // Try to find mediator-related services
         var serviceDescriptors = _serviceProvider.GetService<IServiceCollection>();
-        
+
         return Ok(new { message = "Service discovery endpoint", timestamp = DateTime.UtcNow });
     }
 }

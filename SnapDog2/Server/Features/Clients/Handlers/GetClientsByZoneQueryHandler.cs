@@ -20,15 +20,16 @@ public partial class GetClientsByZoneQueryHandler : IQueryHandler<GetClientsByZo
     [LoggerMessage(4201, LogLevel.Information, "Handling GetClientsByZoneQuery for Zone {ZoneId}")]
     private partial void LogHandling(int zoneId);
 
-    public GetClientsByZoneQueryHandler(
-        IClientManager clientManager,
-        ILogger<GetClientsByZoneQueryHandler> logger)
+    public GetClientsByZoneQueryHandler(IClientManager clientManager, ILogger<GetClientsByZoneQueryHandler> logger)
     {
         _clientManager = clientManager;
         _logger = logger;
     }
 
-    public async Task<Result<List<ClientState>>> Handle(GetClientsByZoneQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<ClientState>>> Handle(
+        GetClientsByZoneQuery request,
+        CancellationToken cancellationToken
+    )
     {
         LogHandling(request.ZoneId);
 

@@ -23,7 +23,8 @@ public partial class GetSystemStatusQueryHandler : IQueryHandler<GetSystemStatus
     /// <param name="logger">The logger instance.</param>
     public GetSystemStatusQueryHandler(
         ISystemStatusService systemStatusService,
-        ILogger<GetSystemStatusQueryHandler> logger)
+        ILogger<GetSystemStatusQueryHandler> logger
+    )
     {
         _systemStatusService = systemStatusService;
         _logger = logger;

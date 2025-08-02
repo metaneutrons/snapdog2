@@ -24,10 +24,15 @@ public partial class MetricsService : IMetricsService
     }
 
     /// <inheritdoc/>
-    public void RecordCortexMediatorRequestDuration(string requestType, string requestName, long durationMs, bool success)
+    public void RecordCortexMediatorRequestDuration(
+        string requestType,
+        string requestName,
+        long durationMs,
+        bool success
+    )
     {
         LogRecordingRequestDuration(requestType, requestName, durationMs, success);
-        
+
         // TODO: Implement actual metrics recording (e.g., to Prometheus, Application Insights, etc.)
         // For now, we just log the metrics
     }
@@ -49,7 +54,7 @@ public partial class MetricsService : IMetricsService
             TotalMemoryMb = GetTotalSystemMemory() / (1024.0 * 1024.0), // TODO: Get actual system memory
             Uptime = uptime,
             ActiveConnections = GetActiveConnections(), // TODO: Implement connection tracking
-            ProcessedRequests = GetProcessedRequests() // TODO: Implement request counting
+            ProcessedRequests = GetProcessedRequests(), // TODO: Implement request counting
         };
 
         return Task.FromResult(stats);
@@ -81,8 +86,17 @@ public partial class MetricsService : IMetricsService
         return 0;
     }
 
-    [LoggerMessage(6001, LogLevel.Debug, "Recording {RequestType} request '{RequestName}' duration: {DurationMs}ms, Success: {Success}")]
-    private partial void LogRecordingRequestDuration(string requestType, string requestName, long durationMs, bool success);
+    [LoggerMessage(
+        6001,
+        LogLevel.Debug,
+        "Recording {RequestType} request '{RequestName}' duration: {DurationMs}ms, Success: {Success}"
+    )]
+    private partial void LogRecordingRequestDuration(
+        string requestType,
+        string requestName,
+        long durationMs,
+        bool success
+    );
 
     [LoggerMessage(6002, LogLevel.Debug, "Getting server statistics")]
     private partial void LogGettingServerStats();

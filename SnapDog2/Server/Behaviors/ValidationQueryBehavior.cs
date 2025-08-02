@@ -24,14 +24,19 @@ public partial class ValidationQueryBehavior<TQuery, TResponse> : IQueryPipeline
     /// <param name="logger">The logger instance.</param>
     public ValidationQueryBehavior(
         IEnumerable<IValidator<TQuery>> validators,
-        ILogger<ValidationQueryBehavior<TQuery, TResponse>> logger)
+        ILogger<ValidationQueryBehavior<TQuery, TResponse>> logger
+    )
     {
         _validators = validators;
         _logger = logger;
     }
 
     /// <inheritdoc/>
-    public async Task<TResponse> Handle(TQuery query, QueryHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+    public async Task<TResponse> Handle(
+        TQuery query,
+        QueryHandlerDelegate<TResponse> next,
+        CancellationToken cancellationToken
+    )
     {
         var queryName = typeof(TQuery).Name;
 
@@ -41,12 +46,11 @@ public partial class ValidationQueryBehavior<TQuery, TResponse> : IQueryPipeline
 
             var context = new ValidationContext<TQuery>(query);
             var validationResults = await Task.WhenAll(
-                _validators.Select(v => v.ValidateAsync(context, cancellationToken))).ConfigureAwait(false);
+                    _validators.Select(v => v.ValidateAsync(context, cancellationToken))
+                )
+                .ConfigureAwait(false);
 
-            var failures = validationResults
-                .SelectMany(r => r.Errors)
-                .Where(f => f != null)
-                .ToList();
+            var failures = validationResults.SelectMany(r => r.Errors).Where(f => f != null).ToList();
 
             if (failures.Count != 0)
             {

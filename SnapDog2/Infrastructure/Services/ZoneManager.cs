@@ -147,7 +147,7 @@ public partial class ZoneService : IZoneService
                 Index = 1,
                 Title = "No Track",
                 Artist = "Unknown",
-                Album = "Unknown"
+                Album = "Unknown",
             },
             Playlist = new PlaylistInfo
             {
@@ -155,20 +155,23 @@ public partial class ZoneService : IZoneService
                 Source = "placeholder",
                 Index = 1,
                 Name = "Default Playlist",
-                TrackCount = 0
+                TrackCount = 0,
             },
             Clients = Array.Empty<int>(),
-            TimestampUtc = DateTime.UtcNow
+            TimestampUtc = DateTime.UtcNow,
         };
     }
 
     public async Task<Result<ZoneState>> GetStateAsync()
     {
         await Task.Delay(1); // Simulate async operation
-        
+
         // Update timestamp
-        _currentState = _currentState with { TimestampUtc = DateTime.UtcNow };
-        
+        _currentState = _currentState with
+        {
+            TimestampUtc = DateTime.UtcNow,
+        };
+
         return Result<ZoneState>.Success(_currentState);
     }
 
@@ -177,7 +180,7 @@ public partial class ZoneService : IZoneService
     {
         LogZoneAction(ZoneId, _zoneName, "Play");
         await Task.Delay(10); // Simulate async operation
-        
+
         _currentState = _currentState with { PlaybackState = "playing" };
         return Result.Success();
     }
@@ -186,18 +189,10 @@ public partial class ZoneService : IZoneService
     {
         LogZoneAction(ZoneId, _zoneName, $"Play track {trackIndex}");
         await Task.Delay(10); // Simulate async operation
-        
-        var newTrack = _currentState.Track! with 
-        { 
-            Index = trackIndex, 
-            Title = $"Track {trackIndex}" 
-        };
-        
-        _currentState = _currentState with 
-        { 
-            PlaybackState = "playing",
-            Track = newTrack
-        };
+
+        var newTrack = _currentState.Track! with { Index = trackIndex, Title = $"Track {trackIndex}" };
+
+        _currentState = _currentState with { PlaybackState = "playing", Track = newTrack };
         return Result.Success();
     }
 
@@ -205,13 +200,9 @@ public partial class ZoneService : IZoneService
     {
         LogZoneAction(ZoneId, _zoneName, $"Play URL: {mediaUrl}");
         await Task.Delay(10); // Simulate async operation
-        
+
         var newTrack = _currentState.Track! with { Title = "Stream" };
-        _currentState = _currentState with 
-        { 
-            PlaybackState = "playing",
-            Track = newTrack
-        };
+        _currentState = _currentState with { PlaybackState = "playing", Track = newTrack };
         return Result.Success();
     }
 
@@ -219,7 +210,7 @@ public partial class ZoneService : IZoneService
     {
         LogZoneAction(ZoneId, _zoneName, "Pause");
         await Task.Delay(10); // Simulate async operation
-        
+
         _currentState = _currentState with { PlaybackState = "paused" };
         return Result.Success();
     }
@@ -228,7 +219,7 @@ public partial class ZoneService : IZoneService
     {
         LogZoneAction(ZoneId, _zoneName, "Stop");
         await Task.Delay(10); // Simulate async operation
-        
+
         _currentState = _currentState with { PlaybackState = "stopped" };
         return Result.Success();
     }
@@ -238,7 +229,7 @@ public partial class ZoneService : IZoneService
     {
         LogZoneAction(ZoneId, _zoneName, $"Set volume to {volume}");
         await Task.Delay(10); // Simulate async operation
-        
+
         _currentState = _currentState with { Volume = Math.Clamp(volume, 0, 100) };
         return Result.Success();
     }
@@ -247,7 +238,7 @@ public partial class ZoneService : IZoneService
     {
         LogZoneAction(ZoneId, _zoneName, $"Volume up by {step}");
         await Task.Delay(10); // Simulate async operation
-        
+
         _currentState = _currentState with { Volume = Math.Clamp(_currentState.Volume + step, 0, 100) };
         return Result.Success();
     }
@@ -256,7 +247,7 @@ public partial class ZoneService : IZoneService
     {
         LogZoneAction(ZoneId, _zoneName, $"Volume down by {step}");
         await Task.Delay(10); // Simulate async operation
-        
+
         _currentState = _currentState with { Volume = Math.Clamp(_currentState.Volume - step, 0, 100) };
         return Result.Success();
     }
@@ -265,7 +256,7 @@ public partial class ZoneService : IZoneService
     {
         LogZoneAction(ZoneId, _zoneName, enabled ? "Mute" : "Unmute");
         await Task.Delay(10); // Simulate async operation
-        
+
         _currentState = _currentState with { Mute = enabled };
         return Result.Success();
     }
@@ -274,7 +265,7 @@ public partial class ZoneService : IZoneService
     {
         LogZoneAction(ZoneId, _zoneName, "Toggle mute");
         await Task.Delay(10); // Simulate async operation
-        
+
         _currentState = _currentState with { Mute = !_currentState.Mute };
         return Result.Success();
     }
@@ -284,13 +275,9 @@ public partial class ZoneService : IZoneService
     {
         LogZoneAction(ZoneId, _zoneName, $"Set track to {trackIndex}");
         await Task.Delay(10); // Simulate async operation
-        
-        var newTrack = _currentState.Track! with 
-        { 
-            Index = trackIndex, 
-            Title = $"Track {trackIndex}" 
-        };
-        
+
+        var newTrack = _currentState.Track! with { Index = trackIndex, Title = $"Track {trackIndex}" };
+
         _currentState = _currentState with { Track = newTrack };
         return Result.Success();
     }
@@ -299,14 +286,10 @@ public partial class ZoneService : IZoneService
     {
         LogZoneAction(ZoneId, _zoneName, "Next track");
         await Task.Delay(10); // Simulate async operation
-        
+
         var currentIndex = _currentState.Track!?.Index ?? 1;
-        var newTrack = _currentState.Track! with 
-        { 
-            Index = currentIndex + 1, 
-            Title = $"Track {currentIndex + 1}" 
-        };
-        
+        var newTrack = _currentState.Track! with { Index = currentIndex + 1, Title = $"Track {currentIndex + 1}" };
+
         _currentState = _currentState with { Track = newTrack };
         return Result.Success();
     }
@@ -315,15 +298,11 @@ public partial class ZoneService : IZoneService
     {
         LogZoneAction(ZoneId, _zoneName, "Previous track");
         await Task.Delay(10); // Simulate async operation
-        
+
         var currentIndex = _currentState.Track!?.Index ?? 1;
         var newIndex = Math.Max(1, currentIndex - 1);
-        var newTrack = _currentState.Track! with 
-        { 
-            Index = newIndex, 
-            Title = $"Track {newIndex}" 
-        };
-        
+        var newTrack = _currentState.Track! with { Index = newIndex, Title = $"Track {newIndex}" };
+
         _currentState = _currentState with { Track = newTrack };
         return Result.Success();
     }
@@ -332,7 +311,7 @@ public partial class ZoneService : IZoneService
     {
         LogZoneAction(ZoneId, _zoneName, enabled ? "Enable track repeat" : "Disable track repeat");
         await Task.Delay(10); // Simulate async operation
-        
+
         _currentState = _currentState with { TrackRepeat = enabled };
         return Result.Success();
     }
@@ -341,7 +320,7 @@ public partial class ZoneService : IZoneService
     {
         LogZoneAction(ZoneId, _zoneName, "Toggle track repeat");
         await Task.Delay(10); // Simulate async operation
-        
+
         _currentState = _currentState with { TrackRepeat = !_currentState.TrackRepeat };
         return Result.Success();
     }
@@ -351,13 +330,9 @@ public partial class ZoneService : IZoneService
     {
         LogZoneAction(ZoneId, _zoneName, $"Set playlist to {playlistIndex}");
         await Task.Delay(10); // Simulate async operation
-        
-        var newPlaylist = _currentState.Playlist! with 
-        { 
-            Index = playlistIndex, 
-            Name = $"Playlist {playlistIndex}" 
-        };
-        
+
+        var newPlaylist = _currentState.Playlist! with { Index = playlistIndex, Name = $"Playlist {playlistIndex}" };
+
         _currentState = _currentState with { Playlist = newPlaylist };
         return Result.Success();
     }
@@ -366,7 +341,7 @@ public partial class ZoneService : IZoneService
     {
         LogZoneAction(ZoneId, _zoneName, $"Set playlist to {playlistId}");
         await Task.Delay(10); // Simulate async operation
-        
+
         var newPlaylist = _currentState.Playlist! with { Name = playlistId };
         _currentState = _currentState with { Playlist = newPlaylist };
         return Result.Success();
@@ -376,14 +351,14 @@ public partial class ZoneService : IZoneService
     {
         LogZoneAction(ZoneId, _zoneName, "Next playlist");
         await Task.Delay(10); // Simulate async operation
-        
+
         var currentIndex = _currentState.Playlist!?.Index ?? 1;
-        var newPlaylist = _currentState.Playlist! with 
-        { 
-            Index = currentIndex + 1, 
-            Name = $"Playlist {currentIndex + 1}" 
+        var newPlaylist = _currentState.Playlist! with
+        {
+            Index = currentIndex + 1,
+            Name = $"Playlist {currentIndex + 1}",
         };
-        
+
         _currentState = _currentState with { Playlist = newPlaylist };
         return Result.Success();
     }
@@ -392,15 +367,11 @@ public partial class ZoneService : IZoneService
     {
         LogZoneAction(ZoneId, _zoneName, "Previous playlist");
         await Task.Delay(10); // Simulate async operation
-        
+
         var currentIndex = _currentState.Playlist!?.Index ?? 1;
         var newIndex = Math.Max(1, currentIndex - 1);
-        var newPlaylist = _currentState.Playlist! with 
-        { 
-            Index = newIndex, 
-            Name = $"Playlist {newIndex}" 
-        };
-        
+        var newPlaylist = _currentState.Playlist! with { Index = newIndex, Name = $"Playlist {newIndex}" };
+
         _currentState = _currentState with { Playlist = newPlaylist };
         return Result.Success();
     }
@@ -409,7 +380,7 @@ public partial class ZoneService : IZoneService
     {
         LogZoneAction(ZoneId, _zoneName, enabled ? "Enable playlist shuffle" : "Disable playlist shuffle");
         await Task.Delay(10); // Simulate async operation
-        
+
         _currentState = _currentState with { PlaylistShuffle = enabled };
         return Result.Success();
     }
@@ -418,7 +389,7 @@ public partial class ZoneService : IZoneService
     {
         LogZoneAction(ZoneId, _zoneName, "Toggle playlist shuffle");
         await Task.Delay(10); // Simulate async operation
-        
+
         _currentState = _currentState with { PlaylistShuffle = !_currentState.PlaylistShuffle };
         return Result.Success();
     }
@@ -427,7 +398,7 @@ public partial class ZoneService : IZoneService
     {
         LogZoneAction(ZoneId, _zoneName, enabled ? "Enable playlist repeat" : "Disable playlist repeat");
         await Task.Delay(10); // Simulate async operation
-        
+
         _currentState = _currentState with { PlaylistRepeat = enabled };
         return Result.Success();
     }
@@ -436,7 +407,7 @@ public partial class ZoneService : IZoneService
     {
         LogZoneAction(ZoneId, _zoneName, "Toggle playlist repeat");
         await Task.Delay(10); // Simulate async operation
-        
+
         _currentState = _currentState with { PlaylistRepeat = !_currentState.PlaylistRepeat };
         return Result.Success();
     }

@@ -21,9 +21,7 @@ public partial class GetServerStatsQueryHandler : IQueryHandler<GetServerStatsQu
     /// </summary>
     /// <param name="metricsService">The metrics service.</param>
     /// <param name="logger">The logger instance.</param>
-    public GetServerStatsQueryHandler(
-        IMetricsService metricsService,
-        ILogger<GetServerStatsQueryHandler> logger)
+    public GetServerStatsQueryHandler(IMetricsService metricsService, ILogger<GetServerStatsQueryHandler> logger)
     {
         _metricsService = metricsService;
         _logger = logger;

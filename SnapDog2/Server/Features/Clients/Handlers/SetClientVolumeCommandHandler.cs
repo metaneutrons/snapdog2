@@ -23,9 +23,7 @@ public partial class SetClientVolumeCommandHandler : ICommandHandler<SetClientVo
     [LoggerMessage(3002, LogLevel.Warning, "Client {ClientId} not found for SetClientVolumeCommand")]
     private partial void LogClientNotFound(int clientId);
 
-    public SetClientVolumeCommandHandler(
-        IClientManager clientManager,
-        ILogger<SetClientVolumeCommandHandler> logger)
+    public SetClientVolumeCommandHandler(IClientManager clientManager, ILogger<SetClientVolumeCommandHandler> logger)
     {
         _clientManager = clientManager;
         _logger = logger;

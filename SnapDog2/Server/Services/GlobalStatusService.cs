@@ -34,7 +34,8 @@ public class GlobalStatusService : IGlobalStatusService
         GetErrorStatusQueryHandler errorStatusHandler,
         GetVersionInfoQueryHandler versionInfoHandler,
         GetServerStatsQueryHandler serverStatsHandler,
-        ILogger<GlobalStatusService> logger)
+        ILogger<GlobalStatusService> logger
+    )
     {
         _systemStatusHandler = systemStatusHandler;
         _errorStatusHandler = errorStatusHandler;
@@ -50,7 +51,7 @@ public class GlobalStatusService : IGlobalStatusService
         try
         {
             var result = await _systemStatusHandler.Handle(new GetSystemStatusQuery(), cancellationToken);
-            
+
             if (result.IsSuccess && result.Value != null)
             {
                 // TODO: Publish notification to external systems (MQTT, KNX)
@@ -88,7 +89,7 @@ public class GlobalStatusService : IGlobalStatusService
         try
         {
             var result = await _versionInfoHandler.Handle(new GetVersionInfoQuery(), cancellationToken);
-            
+
             if (result.IsSuccess && result.Value != null)
             {
                 // TODO: Publish version info to external systems (MQTT, KNX)
@@ -111,12 +112,15 @@ public class GlobalStatusService : IGlobalStatusService
         try
         {
             var result = await _serverStatsHandler.Handle(new GetServerStatsQuery(), cancellationToken);
-            
+
             if (result.IsSuccess && result.Value != null)
             {
                 // TODO: Publish server stats to external systems (MQTT, KNX)
-                _logger.LogDebug("Server stats retrieved: CPU={CpuUsage}%, Memory={MemoryUsage}MB", 
-                    result.Value.CpuUsagePercent, result.Value.MemoryUsageMb);
+                _logger.LogDebug(
+                    "Server stats retrieved: CPU={CpuUsage}%, Memory={MemoryUsage}MB",
+                    result.Value.CpuUsagePercent,
+                    result.Value.MemoryUsageMb
+                );
             }
             else
             {
@@ -141,7 +145,7 @@ public class GlobalStatusService : IGlobalStatusService
         // TODO: Implement periodic timers for status updates
         // This would typically publish system status every 30 seconds
         // and server stats every 60 seconds to external systems (MQTT, KNX)
-        
+
         _logger.LogInformation("Periodic global status publishing started");
     }
 
@@ -149,9 +153,9 @@ public class GlobalStatusService : IGlobalStatusService
     public async Task StopPeriodicPublishingAsync()
     {
         _logger.LogInformation("Stopping periodic global status publishing");
-        
+
         _cancellationTokenSource.Cancel();
-        
+
         _logger.LogInformation("Periodic global status publishing stopped");
         await Task.CompletedTask;
     }

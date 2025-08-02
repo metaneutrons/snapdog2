@@ -23,9 +23,7 @@ public partial class SetClientLatencyCommandHandler : ICommandHandler<SetClientL
     [LoggerMessage(3202, LogLevel.Warning, "Client {ClientId} not found for SetClientLatencyCommand")]
     private partial void LogClientNotFound(int clientId);
 
-    public SetClientLatencyCommandHandler(
-        IClientManager clientManager,
-        ILogger<SetClientLatencyCommandHandler> logger)
+    public SetClientLatencyCommandHandler(IClientManager clientManager, ILogger<SetClientLatencyCommandHandler> logger)
     {
         _clientManager = clientManager;
         _logger = logger;

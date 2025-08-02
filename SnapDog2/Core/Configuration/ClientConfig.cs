@@ -22,8 +22,10 @@ public class ClientConfig
     /// Maps to: SNAPDOG_CLIENT_X_MAC
     /// </summary>
     [Env(Key = "MAC")]
-    [RegularExpression(@"^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$",
-        ErrorMessage = "MAC address must be in format XX:XX:XX:XX:XX:XX")]
+    [RegularExpression(
+        @"^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$",
+        ErrorMessage = "MAC address must be in format XX:XX:XX:XX:XX:XX"
+    )]
     public string? Mac { get; set; }
 
     /// <summary>

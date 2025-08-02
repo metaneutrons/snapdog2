@@ -41,7 +41,7 @@ public class ApiResponse<T>
             Success = true,
             Data = data,
             Error = null,
-            RequestId = requestId ?? Activity.Current?.Id ?? Guid.NewGuid().ToString()
+            RequestId = requestId ?? Activity.Current?.Id ?? Guid.NewGuid().ToString(),
         };
     }
 
@@ -53,7 +53,12 @@ public class ApiResponse<T>
     /// <param name="details">Optional error details.</param>
     /// <param name="requestId">Optional request ID.</param>
     /// <returns>An error API response.</returns>
-    public static ApiResponse<T> CreateError(string code, string message, object? details = null, string? requestId = null)
+    public static ApiResponse<T> CreateError(
+        string code,
+        string message,
+        object? details = null,
+        string? requestId = null
+    )
     {
         return new ApiResponse<T>
         {
@@ -63,9 +68,9 @@ public class ApiResponse<T>
             {
                 Code = code,
                 Message = message,
-                Details = details
+                Details = details,
             },
-            RequestId = requestId ?? Activity.Current?.Id ?? Guid.NewGuid().ToString()
+            RequestId = requestId ?? Activity.Current?.Id ?? Guid.NewGuid().ToString(),
         };
     }
 }
@@ -87,7 +92,7 @@ public class ApiResponse : ApiResponse<object>
             Success = true,
             Data = null,
             Error = null,
-            RequestId = requestId ?? Activity.Current?.Id ?? Guid.NewGuid().ToString()
+            RequestId = requestId ?? Activity.Current?.Id ?? Guid.NewGuid().ToString(),
         };
     }
 
@@ -99,7 +104,12 @@ public class ApiResponse : ApiResponse<object>
     /// <param name="details">Optional error details.</param>
     /// <param name="requestId">Optional request ID.</param>
     /// <returns>An error API response.</returns>
-    public static new ApiResponse CreateError(string code, string message, object? details = null, string? requestId = null)
+    public static new ApiResponse CreateError(
+        string code,
+        string message,
+        object? details = null,
+        string? requestId = null
+    )
     {
         return new ApiResponse
         {
@@ -109,9 +119,9 @@ public class ApiResponse : ApiResponse<object>
             {
                 Code = code,
                 Message = message,
-                Details = details
+                Details = details,
             },
-            RequestId = requestId ?? Activity.Current?.Id ?? Guid.NewGuid().ToString()
+            RequestId = requestId ?? Activity.Current?.Id ?? Guid.NewGuid().ToString(),
         };
     }
 }

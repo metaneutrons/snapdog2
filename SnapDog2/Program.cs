@@ -66,18 +66,33 @@ try
     builder.Services.AddCommandProcessing();
 
     // Register placeholder services
-    builder.Services.AddScoped<SnapDog2.Core.Abstractions.ISystemStatusService, SnapDog2.Infrastructure.Services.SystemStatusService>();
-    builder.Services.AddScoped<SnapDog2.Core.Abstractions.IMetricsService, SnapDog2.Infrastructure.Services.MetricsService>();
-    builder.Services.AddScoped<SnapDog2.Server.Services.Abstractions.IGlobalStatusService, SnapDog2.Server.Services.GlobalStatusService>();
-    
+    builder.Services.AddScoped<
+        SnapDog2.Core.Abstractions.ISystemStatusService,
+        SnapDog2.Infrastructure.Services.SystemStatusService
+    >();
+    builder.Services.AddScoped<
+        SnapDog2.Core.Abstractions.IMetricsService,
+        SnapDog2.Infrastructure.Services.MetricsService
+    >();
+    builder.Services.AddScoped<
+        SnapDog2.Server.Services.Abstractions.IGlobalStatusService,
+        SnapDog2.Server.Services.GlobalStatusService
+    >();
+
     // Zone management services (placeholder implementations)
     builder.Services.AddScoped<SnapDog2.Core.Abstractions.IZoneManager, SnapDog2.Infrastructure.Services.ZoneManager>();
-    
+
     // Client management services (placeholder implementations)
-    builder.Services.AddScoped<SnapDog2.Core.Abstractions.IClientManager, SnapDog2.Infrastructure.Services.ClientManager>();
-    
+    builder.Services.AddScoped<
+        SnapDog2.Core.Abstractions.IClientManager,
+        SnapDog2.Infrastructure.Services.ClientManager
+    >();
+
     // Playlist management services (placeholder implementations)
-    builder.Services.AddScoped<SnapDog2.Core.Abstractions.IPlaylistManager, SnapDog2.Infrastructure.Services.PlaylistManager>();
+    builder.Services.AddScoped<
+        SnapDog2.Core.Abstractions.IPlaylistManager,
+        SnapDog2.Infrastructure.Services.PlaylistManager
+    >();
 
     // Add services to the container
     builder.Services.AddControllers();

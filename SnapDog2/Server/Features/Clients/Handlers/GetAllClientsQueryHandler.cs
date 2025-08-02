@@ -24,9 +24,7 @@ public partial class GetAllClientsQueryHandler : IQueryHandler<GetAllClientsQuer
     [LoggerMessage(4002, LogLevel.Error, "Error retrieving all clients: {ErrorMessage}")]
     private partial void LogError(string errorMessage);
 
-    public GetAllClientsQueryHandler(
-        IClientManager clientManager,
-        ILogger<GetAllClientsQueryHandler> logger)
+    public GetAllClientsQueryHandler(IClientManager clientManager, ILogger<GetAllClientsQueryHandler> logger)
     {
         _clientManager = clientManager;
         _logger = logger;

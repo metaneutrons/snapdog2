@@ -66,7 +66,10 @@ public partial class ClientManager : IClientManager
         if (_clientStates.TryGetValue(clientId, out var state))
         {
             // Update timestamp
-            var updatedState = state with { TimestampUtc = DateTime.UtcNow };
+            var updatedState = state with
+            {
+                TimestampUtc = DateTime.UtcNow,
+            };
             _clientStates[clientId] = updatedState;
             return Result<ClientState>.Success(updatedState);
         }
@@ -81,9 +84,7 @@ public partial class ClientManager : IClientManager
 
         await Task.Delay(1); // Simulate async operation
 
-        var allStates = _clientStates.Values
-            .Select(state => state with { TimestampUtc = DateTime.UtcNow })
-            .ToList();
+        var allStates = _clientStates.Values.Select(state => state with { TimestampUtc = DateTime.UtcNow }).ToList();
 
         return Result<List<ClientState>>.Success(allStates);
     }
@@ -94,8 +95,8 @@ public partial class ClientManager : IClientManager
 
         await Task.Delay(1); // Simulate async operation
 
-        var zoneClients = _clientStates.Values
-            .Where(state => state.ZoneId == zoneId)
+        var zoneClients = _clientStates
+            .Values.Where(state => state.ZoneId == zoneId)
             .Select(state => state with { TimestampUtc = DateTime.UtcNow })
             .ToList();
 
@@ -115,12 +116,12 @@ public partial class ClientManager : IClientManager
         }
 
         // Update the client's zone assignment
-        var updatedState = clientState with 
-        { 
+        var updatedState = clientState with
+        {
             ZoneId = zoneId,
-            TimestampUtc = DateTime.UtcNow 
+            TimestampUtc = DateTime.UtcNow,
         };
-        
+
         _clientStates[clientId] = updatedState;
 
         return Result.Success();
@@ -131,9 +132,30 @@ public partial class ClientManager : IClientManager
         // Create placeholder clients matching the Docker setup
         var clients = new[]
         {
-            new { Id = 1, Name = "Living Room", Mac = "02:42:ac:11:00:10", Ip = "172.20.0.6", ZoneId = 1 },
-            new { Id = 2, Name = "Kitchen", Mac = "02:42:ac:11:00:11", Ip = "172.20.0.7", ZoneId = 2 },
-            new { Id = 3, Name = "Bedroom", Mac = "02:42:ac:11:00:12", Ip = "172.20.0.8", ZoneId = 3 }
+            new
+            {
+                Id = 1,
+                Name = "Living Room",
+                Mac = "02:42:ac:11:00:10",
+                Ip = "172.20.0.6",
+                ZoneId = 1,
+            },
+            new
+            {
+                Id = 2,
+                Name = "Kitchen",
+                Mac = "02:42:ac:11:00:11",
+                Ip = "172.20.0.7",
+                ZoneId = 2,
+            },
+            new
+            {
+                Id = 3,
+                Name = "Bedroom",
+                Mac = "02:42:ac:11:00:12",
+                Ip = "172.20.0.8",
+                ZoneId = 3,
+            },
         };
 
         foreach (var clientInfo in clients)
@@ -160,7 +182,7 @@ public partial class ClientManager : IClientManager
                 HostArch = "x86_64",
                 SnapClientVersion = "0.27.0",
                 SnapClientProtocolVersion = 2,
-                TimestampUtc = DateTime.UtcNow
+                TimestampUtc = DateTime.UtcNow,
             };
 
             _clientStates[clientInfo.Id] = clientState;

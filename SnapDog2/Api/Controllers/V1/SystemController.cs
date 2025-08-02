@@ -45,11 +45,15 @@ public class SystemController : ControllerBase
         {
             _logger.LogDebug("Getting system status");
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Global.Handlers.GetSystemStatusQueryHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Global.Handlers.GetSystemStatusQueryHandler>();
             if (handler == null)
             {
                 _logger.LogError("GetSystemStatusQueryHandler not found in DI container");
-                return StatusCode(500, ApiResponse<SystemStatus>.CreateError("HANDLER_NOT_FOUND", "System status handler not available"));
+                return StatusCode(
+                    500,
+                    ApiResponse<SystemStatus>.CreateError("HANDLER_NOT_FOUND", "System status handler not available")
+                );
             }
 
             var result = await handler.Handle(new GetSystemStatusQuery(), cancellationToken);
@@ -60,7 +64,13 @@ public class SystemController : ControllerBase
             }
 
             _logger.LogWarning("Failed to get system status: {Error}", result.ErrorMessage);
-            return StatusCode(500, ApiResponse<SystemStatus>.CreateError("SYSTEM_STATUS_ERROR", result.ErrorMessage ?? "Failed to retrieve system status"));
+            return StatusCode(
+                500,
+                ApiResponse<SystemStatus>.CreateError(
+                    "SYSTEM_STATUS_ERROR",
+                    result.ErrorMessage ?? "Failed to retrieve system status"
+                )
+            );
         }
         catch (Exception ex)
         {
@@ -77,17 +87,26 @@ public class SystemController : ControllerBase
     [HttpGet("errors")]
     [ProducesResponseType(typeof(ApiResponse<List<ErrorDetails>>), 200)]
     [ProducesResponseType(typeof(ApiResponse), 500)]
-    public async Task<ActionResult<ApiResponse<List<ErrorDetails>>>> GetSystemErrors(CancellationToken cancellationToken)
+    public async Task<ActionResult<ApiResponse<List<ErrorDetails>>>> GetSystemErrors(
+        CancellationToken cancellationToken
+    )
     {
         try
         {
             _logger.LogDebug("Getting system errors");
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Global.Handlers.GetErrorStatusQueryHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Global.Handlers.GetErrorStatusQueryHandler>();
             if (handler == null)
             {
                 _logger.LogError("GetErrorStatusQueryHandler not found in DI container");
-                return StatusCode(500, ApiResponse<List<ErrorDetails>>.CreateError("HANDLER_NOT_FOUND", "Error status handler not available"));
+                return StatusCode(
+                    500,
+                    ApiResponse<List<ErrorDetails>>.CreateError(
+                        "HANDLER_NOT_FOUND",
+                        "Error status handler not available"
+                    )
+                );
             }
 
             var result = await handler.Handle(new GetErrorStatusQuery(), cancellationToken);
@@ -95,17 +114,27 @@ public class SystemController : ControllerBase
             if (result.IsSuccess)
             {
                 // Convert single ErrorDetails to List<ErrorDetails>
-                var errorList = result.Value != null ? new List<ErrorDetails> { result.Value } : new List<ErrorDetails>();
+                var errorList =
+                    result.Value != null ? new List<ErrorDetails> { result.Value } : new List<ErrorDetails>();
                 return Ok(ApiResponse<List<ErrorDetails>>.CreateSuccess(errorList));
             }
 
             _logger.LogWarning("Failed to get system errors: {Error}", result.ErrorMessage);
-            return StatusCode(500, ApiResponse<List<ErrorDetails>>.CreateError("ERROR_STATUS_ERROR", result.ErrorMessage ?? "Failed to retrieve system errors"));
+            return StatusCode(
+                500,
+                ApiResponse<List<ErrorDetails>>.CreateError(
+                    "ERROR_STATUS_ERROR",
+                    result.ErrorMessage ?? "Failed to retrieve system errors"
+                )
+            );
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting system errors");
-            return StatusCode(500, ApiResponse<List<ErrorDetails>>.CreateError("INTERNAL_ERROR", "Internal server error"));
+            return StatusCode(
+                500,
+                ApiResponse<List<ErrorDetails>>.CreateError("INTERNAL_ERROR", "Internal server error")
+            );
         }
     }
 
@@ -123,11 +152,15 @@ public class SystemController : ControllerBase
         {
             _logger.LogDebug("Getting version information");
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Global.Handlers.GetVersionInfoQueryHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Global.Handlers.GetVersionInfoQueryHandler>();
             if (handler == null)
             {
                 _logger.LogError("GetVersionInfoQueryHandler not found in DI container");
-                return StatusCode(500, ApiResponse<VersionDetails>.CreateError("HANDLER_NOT_FOUND", "Version info handler not available"));
+                return StatusCode(
+                    500,
+                    ApiResponse<VersionDetails>.CreateError("HANDLER_NOT_FOUND", "Version info handler not available")
+                );
             }
 
             var result = await handler.Handle(new GetVersionInfoQuery(), cancellationToken);
@@ -138,7 +171,13 @@ public class SystemController : ControllerBase
             }
 
             _logger.LogWarning("Failed to get version information: {Error}", result.ErrorMessage);
-            return StatusCode(500, ApiResponse<VersionDetails>.CreateError("VERSION_INFO_ERROR", result.ErrorMessage ?? "Failed to retrieve version information"));
+            return StatusCode(
+                500,
+                ApiResponse<VersionDetails>.CreateError(
+                    "VERSION_INFO_ERROR",
+                    result.ErrorMessage ?? "Failed to retrieve version information"
+                )
+            );
         }
         catch (Exception ex)
         {
@@ -161,11 +200,15 @@ public class SystemController : ControllerBase
         {
             _logger.LogDebug("Getting server statistics");
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Global.Handlers.GetServerStatsQueryHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Global.Handlers.GetServerStatsQueryHandler>();
             if (handler == null)
             {
                 _logger.LogError("GetServerStatsQueryHandler not found in DI container");
-                return StatusCode(500, ApiResponse<ServerStats>.CreateError("HANDLER_NOT_FOUND", "Server stats handler not available"));
+                return StatusCode(
+                    500,
+                    ApiResponse<ServerStats>.CreateError("HANDLER_NOT_FOUND", "Server stats handler not available")
+                );
             }
 
             var result = await handler.Handle(new GetServerStatsQuery(), cancellationToken);
@@ -176,7 +219,13 @@ public class SystemController : ControllerBase
             }
 
             _logger.LogWarning("Failed to get server statistics: {Error}", result.ErrorMessage);
-            return StatusCode(500, ApiResponse<ServerStats>.CreateError("SERVER_STATS_ERROR", result.ErrorMessage ?? "Failed to retrieve server statistics"));
+            return StatusCode(
+                500,
+                ApiResponse<ServerStats>.CreateError(
+                    "SERVER_STATS_ERROR",
+                    result.ErrorMessage ?? "Failed to retrieve server statistics"
+                )
+            );
         }
         catch (Exception ex)
         {

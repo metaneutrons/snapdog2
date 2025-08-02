@@ -9,15 +9,15 @@ using SnapDog2.Server.Features.Shared.Notifications;
 /// <summary>
 /// Handles zone state change notifications to log and process status updates.
 /// </summary>
-public partial class ZoneStateNotificationHandler :
-    INotificationHandler<ZoneVolumeChangedNotification>,
-    INotificationHandler<ZoneMuteChangedNotification>,
-    INotificationHandler<ZonePlaybackStateChangedNotification>,
-    INotificationHandler<ZoneTrackChangedNotification>,
-    INotificationHandler<ZonePlaylistChangedNotification>,
-    INotificationHandler<ZoneRepeatModeChangedNotification>,
-    INotificationHandler<ZoneShuffleModeChangedNotification>,
-    INotificationHandler<ZoneStateChangedNotification>
+public partial class ZoneStateNotificationHandler
+    : INotificationHandler<ZoneVolumeChangedNotification>,
+        INotificationHandler<ZoneMuteChangedNotification>,
+        INotificationHandler<ZonePlaybackStateChangedNotification>,
+        INotificationHandler<ZoneTrackChangedNotification>,
+        INotificationHandler<ZonePlaylistChangedNotification>,
+        INotificationHandler<ZoneRepeatModeChangedNotification>,
+        INotificationHandler<ZoneShuffleModeChangedNotification>,
+        INotificationHandler<ZoneStateChangedNotification>
 {
     private readonly ILogger<ZoneStateNotificationHandler> _logger;
 
@@ -33,10 +33,18 @@ public partial class ZoneStateNotificationHandler :
     [LoggerMessage(6004, LogLevel.Information, "Zone {ZoneId} track changed to {TrackTitle} by {Artist}")]
     private partial void LogTrackChange(int zoneId, string trackTitle, string artist);
 
-    [LoggerMessage(6005, LogLevel.Information, "Zone {ZoneId} playlist changed to {PlaylistName} (Index: {PlaylistIndex})")]
+    [LoggerMessage(
+        6005,
+        LogLevel.Information,
+        "Zone {ZoneId} playlist changed to {PlaylistName} (Index: {PlaylistIndex})"
+    )]
     private partial void LogPlaylistChange(int zoneId, string playlistName, int playlistIndex);
 
-    [LoggerMessage(6006, LogLevel.Information, "Zone {ZoneId} repeat mode changed - Track: {TrackRepeat}, Playlist: {PlaylistRepeat}")]
+    [LoggerMessage(
+        6006,
+        LogLevel.Information,
+        "Zone {ZoneId} repeat mode changed - Track: {TrackRepeat}, Playlist: {PlaylistRepeat}"
+    )]
     private partial void LogRepeatModeChange(int zoneId, bool trackRepeat, bool playlistRepeat);
 
     [LoggerMessage(6007, LogLevel.Information, "Zone {ZoneId} shuffle mode changed to {ShuffleEnabled}")]
@@ -53,7 +61,7 @@ public partial class ZoneStateNotificationHandler :
     public async Task Handle(ZoneVolumeChangedNotification notification, CancellationToken cancellationToken)
     {
         LogVolumeChange(notification.ZoneId, notification.Volume);
-        
+
         // TODO: Publish to external systems (MQTT, KNX) when infrastructure adapters are implemented
         await Task.CompletedTask;
     }
@@ -61,7 +69,7 @@ public partial class ZoneStateNotificationHandler :
     public async Task Handle(ZoneMuteChangedNotification notification, CancellationToken cancellationToken)
     {
         LogMuteChange(notification.ZoneId, notification.IsMuted);
-        
+
         // TODO: Publish to external systems (MQTT, KNX) when infrastructure adapters are implemented
         await Task.CompletedTask;
     }
@@ -70,7 +78,7 @@ public partial class ZoneStateNotificationHandler :
     {
         var playbackStateString = notification.PlaybackState.ToString().ToLowerInvariant();
         LogPlaybackStateChange(notification.ZoneId, playbackStateString);
-        
+
         // TODO: Publish to external systems (MQTT, KNX) when infrastructure adapters are implemented
         await Task.CompletedTask;
     }
@@ -78,7 +86,7 @@ public partial class ZoneStateNotificationHandler :
     public async Task Handle(ZoneTrackChangedNotification notification, CancellationToken cancellationToken)
     {
         LogTrackChange(notification.ZoneId, notification.TrackInfo.Title, notification.TrackInfo.Artist);
-        
+
         // TODO: Publish to external systems (MQTT, KNX) when infrastructure adapters are implemented
         await Task.CompletedTask;
     }
@@ -86,7 +94,7 @@ public partial class ZoneStateNotificationHandler :
     public async Task Handle(ZonePlaylistChangedNotification notification, CancellationToken cancellationToken)
     {
         LogPlaylistChange(notification.ZoneId, notification.PlaylistInfo.Name, notification.PlaylistIndex);
-        
+
         // TODO: Publish to external systems (MQTT, KNX) when infrastructure adapters are implemented
         await Task.CompletedTask;
     }
@@ -94,7 +102,7 @@ public partial class ZoneStateNotificationHandler :
     public async Task Handle(ZoneRepeatModeChangedNotification notification, CancellationToken cancellationToken)
     {
         LogRepeatModeChange(notification.ZoneId, notification.TrackRepeatEnabled, notification.PlaylistRepeatEnabled);
-        
+
         // TODO: Publish to external systems (MQTT, KNX) when infrastructure adapters are implemented
         await Task.CompletedTask;
     }
@@ -102,7 +110,7 @@ public partial class ZoneStateNotificationHandler :
     public async Task Handle(ZoneShuffleModeChangedNotification notification, CancellationToken cancellationToken)
     {
         LogShuffleModeChange(notification.ZoneId, notification.ShuffleEnabled);
-        
+
         // TODO: Publish to external systems (MQTT, KNX) when infrastructure adapters are implemented
         await Task.CompletedTask;
     }
@@ -110,7 +118,7 @@ public partial class ZoneStateNotificationHandler :
     public async Task Handle(ZoneStateChangedNotification notification, CancellationToken cancellationToken)
     {
         LogStateChange(notification.ZoneId);
-        
+
         // TODO: Publish to external systems (MQTT, KNX) when infrastructure adapters are implemented
         await Task.CompletedTask;
     }

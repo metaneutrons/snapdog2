@@ -46,17 +46,25 @@ public class ClientsController : ControllerBase
     public async Task<ActionResult<ApiResponse<PaginatedResponse<ClientInfo>>>> GetClients(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         try
         {
             _logger.LogDebug("Getting clients list - Page: {Page}, PageSize: {PageSize}", page, pageSize);
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Clients.Handlers.GetAllClientsQueryHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Clients.Handlers.GetAllClientsQueryHandler>();
             if (handler == null)
             {
                 _logger.LogError("GetAllClientsQueryHandler not found in DI container");
-                return StatusCode(500, ApiResponse<PaginatedResponse<ClientInfo>>.CreateError("HANDLER_NOT_FOUND", "Client handler not available"));
+                return StatusCode(
+                    500,
+                    ApiResponse<PaginatedResponse<ClientInfo>>.CreateError(
+                        "HANDLER_NOT_FOUND",
+                        "Client handler not available"
+                    )
+                );
             }
 
             var result = await handler.Handle(new GetAllClientsQuery(), cancellationToken);
@@ -64,7 +72,7 @@ public class ClientsController : ControllerBase
             if (result.IsSuccess && result.Value != null)
             {
                 var clients = result.Value.Select(c => new ClientInfo(c.Id, c.Name, c.Connected, c.ZoneId)).ToList();
-                
+
                 // Apply pagination
                 var totalItems = clients.Count;
                 var totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
@@ -79,20 +87,29 @@ public class ClientsController : ControllerBase
                         Page = page,
                         PageSize = pageSize,
                         TotalItems = totalItems,
-                        TotalPages = totalPages
-                    }
+                        TotalPages = totalPages,
+                    },
                 };
 
                 return Ok(ApiResponse<PaginatedResponse<ClientInfo>>.CreateSuccess(paginatedResponse));
             }
 
             _logger.LogWarning("Failed to get clients: {Error}", result.ErrorMessage);
-            return StatusCode(500, ApiResponse<PaginatedResponse<ClientInfo>>.CreateError("CLIENTS_ERROR", result.ErrorMessage ?? "Failed to retrieve clients"));
+            return StatusCode(
+                500,
+                ApiResponse<PaginatedResponse<ClientInfo>>.CreateError(
+                    "CLIENTS_ERROR",
+                    result.ErrorMessage ?? "Failed to retrieve clients"
+                )
+            );
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting clients");
-            return StatusCode(500, ApiResponse<PaginatedResponse<ClientInfo>>.CreateError("INTERNAL_ERROR", "Internal server error"));
+            return StatusCode(
+                500,
+                ApiResponse<PaginatedResponse<ClientInfo>>.CreateError("INTERNAL_ERROR", "Internal server error")
+            );
         }
     }
 
@@ -106,17 +123,24 @@ public class ClientsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<ClientState>), 200)]
     [ProducesResponseType(typeof(ApiResponse), 404)]
     [ProducesResponseType(typeof(ApiResponse), 500)]
-    public async Task<ActionResult<ApiResponse<ClientState>>> GetClient([Range(1, int.MaxValue)] int clientId, CancellationToken cancellationToken)
+    public async Task<ActionResult<ApiResponse<ClientState>>> GetClient(
+        [Range(1, int.MaxValue)] int clientId,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
             _logger.LogDebug("Getting client {ClientId}", clientId);
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Clients.Handlers.GetClientQueryHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Clients.Handlers.GetClientQueryHandler>();
             if (handler == null)
             {
                 _logger.LogError("GetClientQueryHandler not found in DI container");
-                return StatusCode(500, ApiResponse<ClientState>.CreateError("HANDLER_NOT_FOUND", "Client handler not available"));
+                return StatusCode(
+                    500,
+                    ApiResponse<ClientState>.CreateError("HANDLER_NOT_FOUND", "Client handler not available")
+                );
             }
 
             var result = await handler.Handle(new GetClientQuery { ClientId = clientId }, cancellationToken);
@@ -146,7 +170,10 @@ public class ClientsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<ClientState>), 200)]
     [ProducesResponseType(typeof(ApiResponse), 404)]
     [ProducesResponseType(typeof(ApiResponse), 500)]
-    public async Task<ActionResult<ApiResponse<ClientState>>> GetClientState([Range(1, int.MaxValue)] int clientId, CancellationToken cancellationToken)
+    public async Task<ActionResult<ApiResponse<ClientState>>> GetClientState(
+        [Range(1, int.MaxValue)] int clientId,
+        CancellationToken cancellationToken
+    )
     {
         return await GetClient(clientId, cancellationToken);
     }
@@ -165,24 +192,32 @@ public class ClientsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse), 400)]
     [ProducesResponseType(typeof(ApiResponse), 404)]
     [ProducesResponseType(typeof(ApiResponse), 500)]
-    public async Task<ActionResult<ApiResponse<VolumeResponse>>> SetClientVolume([Range(1, int.MaxValue)] int clientId, [FromBody] VolumeSetRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<ApiResponse<VolumeResponse>>> SetClientVolume(
+        [Range(1, int.MaxValue)] int clientId,
+        [FromBody] VolumeSetRequest request,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
             _logger.LogDebug("Setting volume {Volume} for client {ClientId}", request.Level, clientId);
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Clients.Handlers.SetClientVolumeCommandHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Clients.Handlers.SetClientVolumeCommandHandler>();
             if (handler == null)
             {
                 _logger.LogError("SetClientVolumeCommandHandler not found in DI container");
-                return StatusCode(500, ApiResponse<VolumeResponse>.CreateError("HANDLER_NOT_FOUND", "Client volume handler not available"));
+                return StatusCode(
+                    500,
+                    ApiResponse<VolumeResponse>.CreateError("HANDLER_NOT_FOUND", "Client volume handler not available")
+                );
             }
 
             var command = new SetClientVolumeCommand
             {
                 ClientId = clientId,
                 Volume = request.Level,
-                Source = Core.Enums.CommandSource.Api
+                Source = Core.Enums.CommandSource.Api,
             };
 
             var result = await handler.Handle(command, cancellationToken);
@@ -193,7 +228,12 @@ public class ClientsController : ControllerBase
             }
 
             _logger.LogWarning("Failed to set volume for client {ClientId}: {Error}", clientId, result.ErrorMessage);
-            return BadRequest(ApiResponse<VolumeResponse>.CreateError("VOLUME_ERROR", result.ErrorMessage ?? "Failed to set client volume"));
+            return BadRequest(
+                ApiResponse<VolumeResponse>.CreateError(
+                    "VOLUME_ERROR",
+                    result.ErrorMessage ?? "Failed to set client volume"
+                )
+            );
         }
         catch (Exception ex)
         {
@@ -212,17 +252,24 @@ public class ClientsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<VolumeResponse>), 200)]
     [ProducesResponseType(typeof(ApiResponse), 404)]
     [ProducesResponseType(typeof(ApiResponse), 500)]
-    public async Task<ActionResult<ApiResponse<VolumeResponse>>> GetClientVolume([Range(1, int.MaxValue)] int clientId, CancellationToken cancellationToken)
+    public async Task<ActionResult<ApiResponse<VolumeResponse>>> GetClientVolume(
+        [Range(1, int.MaxValue)] int clientId,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
             _logger.LogDebug("Getting volume for client {ClientId}", clientId);
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Clients.Handlers.GetClientQueryHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Clients.Handlers.GetClientQueryHandler>();
             if (handler == null)
             {
                 _logger.LogError("GetClientQueryHandler not found in DI container");
-                return StatusCode(500, ApiResponse<VolumeResponse>.CreateError("HANDLER_NOT_FOUND", "Client handler not available"));
+                return StatusCode(
+                    500,
+                    ApiResponse<VolumeResponse>.CreateError("HANDLER_NOT_FOUND", "Client handler not available")
+                );
             }
 
             var result = await handler.Handle(new GetClientQuery { ClientId = clientId }, cancellationToken);
@@ -233,7 +280,9 @@ public class ClientsController : ControllerBase
             }
 
             _logger.LogWarning("Failed to get volume for client {ClientId}: {Error}", clientId, result.ErrorMessage);
-            return NotFound(ApiResponse<VolumeResponse>.CreateError("CLIENT_NOT_FOUND", result.ErrorMessage ?? "Client not found"));
+            return NotFound(
+                ApiResponse<VolumeResponse>.CreateError("CLIENT_NOT_FOUND", result.ErrorMessage ?? "Client not found")
+            );
         }
         catch (Exception ex)
         {
@@ -256,24 +305,32 @@ public class ClientsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse), 400)]
     [ProducesResponseType(typeof(ApiResponse), 404)]
     [ProducesResponseType(typeof(ApiResponse), 500)]
-    public async Task<ActionResult<ApiResponse<MuteResponse>>> SetClientMute([Range(1, int.MaxValue)] int clientId, [FromBody] MuteSetRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<ApiResponse<MuteResponse>>> SetClientMute(
+        [Range(1, int.MaxValue)] int clientId,
+        [FromBody] MuteSetRequest request,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
             _logger.LogDebug("Setting mute {Enabled} for client {ClientId}", request.Enabled, clientId);
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Clients.Handlers.SetClientMuteCommandHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Clients.Handlers.SetClientMuteCommandHandler>();
             if (handler == null)
             {
                 _logger.LogError("SetClientMuteCommandHandler not found in DI container");
-                return StatusCode(500, ApiResponse<MuteResponse>.CreateError("HANDLER_NOT_FOUND", "Client mute handler not available"));
+                return StatusCode(
+                    500,
+                    ApiResponse<MuteResponse>.CreateError("HANDLER_NOT_FOUND", "Client mute handler not available")
+                );
             }
 
             var command = new SetClientMuteCommand
             {
                 ClientId = clientId,
                 Enabled = request.Enabled,
-                Source = Core.Enums.CommandSource.Api
+                Source = Core.Enums.CommandSource.Api,
             };
 
             var result = await handler.Handle(command, cancellationToken);
@@ -284,7 +341,9 @@ public class ClientsController : ControllerBase
             }
 
             _logger.LogWarning("Failed to set mute for client {ClientId}: {Error}", clientId, result.ErrorMessage);
-            return BadRequest(ApiResponse<MuteResponse>.CreateError("MUTE_ERROR", result.ErrorMessage ?? "Failed to set client mute"));
+            return BadRequest(
+                ApiResponse<MuteResponse>.CreateError("MUTE_ERROR", result.ErrorMessage ?? "Failed to set client mute")
+            );
         }
         catch (Exception ex)
         {
@@ -303,17 +362,24 @@ public class ClientsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<MuteResponse>), 200)]
     [ProducesResponseType(typeof(ApiResponse), 404)]
     [ProducesResponseType(typeof(ApiResponse), 500)]
-    public async Task<ActionResult<ApiResponse<MuteResponse>>> GetClientMute([Range(1, int.MaxValue)] int clientId, CancellationToken cancellationToken)
+    public async Task<ActionResult<ApiResponse<MuteResponse>>> GetClientMute(
+        [Range(1, int.MaxValue)] int clientId,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
             _logger.LogDebug("Getting mute state for client {ClientId}", clientId);
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Clients.Handlers.GetClientQueryHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Clients.Handlers.GetClientQueryHandler>();
             if (handler == null)
             {
                 _logger.LogError("GetClientQueryHandler not found in DI container");
-                return StatusCode(500, ApiResponse<MuteResponse>.CreateError("HANDLER_NOT_FOUND", "Client handler not available"));
+                return StatusCode(
+                    500,
+                    ApiResponse<MuteResponse>.CreateError("HANDLER_NOT_FOUND", "Client handler not available")
+                );
             }
 
             var result = await handler.Handle(new GetClientQuery { ClientId = clientId }, cancellationToken);
@@ -323,8 +389,14 @@ public class ClientsController : ControllerBase
                 return Ok(ApiResponse<MuteResponse>.CreateSuccess(new MuteResponse(result.Value.Mute)));
             }
 
-            _logger.LogWarning("Failed to get mute state for client {ClientId}: {Error}", clientId, result.ErrorMessage);
-            return NotFound(ApiResponse<MuteResponse>.CreateError("CLIENT_NOT_FOUND", result.ErrorMessage ?? "Client not found"));
+            _logger.LogWarning(
+                "Failed to get mute state for client {ClientId}: {Error}",
+                clientId,
+                result.ErrorMessage
+            );
+            return NotFound(
+                ApiResponse<MuteResponse>.CreateError("CLIENT_NOT_FOUND", result.ErrorMessage ?? "Client not found")
+            );
         }
         catch (Exception ex)
         {
@@ -343,34 +415,44 @@ public class ClientsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<MuteResponse>), 200)]
     [ProducesResponseType(typeof(ApiResponse), 404)]
     [ProducesResponseType(typeof(ApiResponse), 500)]
-    public async Task<ActionResult<ApiResponse<MuteResponse>>> ToggleClientMute([Range(1, int.MaxValue)] int clientId, CancellationToken cancellationToken)
+    public async Task<ActionResult<ApiResponse<MuteResponse>>> ToggleClientMute(
+        [Range(1, int.MaxValue)] int clientId,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
             _logger.LogDebug("Toggling mute for client {ClientId}", clientId);
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Clients.Handlers.ToggleClientMuteCommandHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Clients.Handlers.ToggleClientMuteCommandHandler>();
             if (handler == null)
             {
                 _logger.LogError("ToggleClientMuteCommandHandler not found in DI container");
-                return StatusCode(500, ApiResponse<MuteResponse>.CreateError("HANDLER_NOT_FOUND", "Toggle client mute handler not available"));
+                return StatusCode(
+                    500,
+                    ApiResponse<MuteResponse>.CreateError(
+                        "HANDLER_NOT_FOUND",
+                        "Toggle client mute handler not available"
+                    )
+                );
             }
 
-            var command = new ToggleClientMuteCommand
-            {
-                ClientId = clientId,
-                Source = Core.Enums.CommandSource.Api
-            };
+            var command = new ToggleClientMuteCommand { ClientId = clientId, Source = Core.Enums.CommandSource.Api };
 
             var result = await handler.Handle(command, cancellationToken);
 
             if (result.IsSuccess)
             {
                 // Get the new mute state
-                var stateHandler = _serviceProvider.GetService<SnapDog2.Server.Features.Clients.Handlers.GetClientQueryHandler>();
+                var stateHandler =
+                    _serviceProvider.GetService<SnapDog2.Server.Features.Clients.Handlers.GetClientQueryHandler>();
                 if (stateHandler != null)
                 {
-                    var stateResult = await stateHandler.Handle(new GetClientQuery { ClientId = clientId }, cancellationToken);
+                    var stateResult = await stateHandler.Handle(
+                        new GetClientQuery { ClientId = clientId },
+                        cancellationToken
+                    );
                     if (stateResult.IsSuccess && stateResult.Value != null)
                     {
                         return Ok(ApiResponse<MuteResponse>.CreateSuccess(new MuteResponse(stateResult.Value.Mute)));
@@ -381,7 +463,12 @@ public class ClientsController : ControllerBase
             }
 
             _logger.LogWarning("Failed to toggle mute for client {ClientId}: {Error}", clientId, result.ErrorMessage);
-            return BadRequest(ApiResponse<MuteResponse>.CreateError("TOGGLE_MUTE_ERROR", result.ErrorMessage ?? "Failed to toggle client mute"));
+            return BadRequest(
+                ApiResponse<MuteResponse>.CreateError(
+                    "TOGGLE_MUTE_ERROR",
+                    result.ErrorMessage ?? "Failed to toggle client mute"
+                )
+            );
         }
         catch (Exception ex)
         {
@@ -404,24 +491,35 @@ public class ClientsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse), 400)]
     [ProducesResponseType(typeof(ApiResponse), 404)]
     [ProducesResponseType(typeof(ApiResponse), 500)]
-    public async Task<ActionResult<ApiResponse<LatencyResponse>>> SetClientLatency([Range(1, int.MaxValue)] int clientId, [FromBody] LatencySetRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<ApiResponse<LatencyResponse>>> SetClientLatency(
+        [Range(1, int.MaxValue)] int clientId,
+        [FromBody] LatencySetRequest request,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
             _logger.LogDebug("Setting latency {Latency}ms for client {ClientId}", request.Milliseconds, clientId);
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Clients.Handlers.SetClientLatencyCommandHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Clients.Handlers.SetClientLatencyCommandHandler>();
             if (handler == null)
             {
                 _logger.LogError("SetClientLatencyCommandHandler not found in DI container");
-                return StatusCode(500, ApiResponse<LatencyResponse>.CreateError("HANDLER_NOT_FOUND", "Client latency handler not available"));
+                return StatusCode(
+                    500,
+                    ApiResponse<LatencyResponse>.CreateError(
+                        "HANDLER_NOT_FOUND",
+                        "Client latency handler not available"
+                    )
+                );
             }
 
             var command = new SetClientLatencyCommand
             {
                 ClientId = clientId,
                 LatencyMs = request.Milliseconds,
-                Source = Core.Enums.CommandSource.Api
+                Source = Core.Enums.CommandSource.Api,
             };
 
             var result = await handler.Handle(command, cancellationToken);
@@ -432,7 +530,12 @@ public class ClientsController : ControllerBase
             }
 
             _logger.LogWarning("Failed to set latency for client {ClientId}: {Error}", clientId, result.ErrorMessage);
-            return BadRequest(ApiResponse<LatencyResponse>.CreateError("LATENCY_ERROR", result.ErrorMessage ?? "Failed to set client latency"));
+            return BadRequest(
+                ApiResponse<LatencyResponse>.CreateError(
+                    "LATENCY_ERROR",
+                    result.ErrorMessage ?? "Failed to set client latency"
+                )
+            );
         }
         catch (Exception ex)
         {
@@ -451,17 +554,24 @@ public class ClientsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<LatencyResponse>), 200)]
     [ProducesResponseType(typeof(ApiResponse), 404)]
     [ProducesResponseType(typeof(ApiResponse), 500)]
-    public async Task<ActionResult<ApiResponse<LatencyResponse>>> GetClientLatency([Range(1, int.MaxValue)] int clientId, CancellationToken cancellationToken)
+    public async Task<ActionResult<ApiResponse<LatencyResponse>>> GetClientLatency(
+        [Range(1, int.MaxValue)] int clientId,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
             _logger.LogDebug("Getting latency for client {ClientId}", clientId);
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Clients.Handlers.GetClientQueryHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Clients.Handlers.GetClientQueryHandler>();
             if (handler == null)
             {
                 _logger.LogError("GetClientQueryHandler not found in DI container");
-                return StatusCode(500, ApiResponse<LatencyResponse>.CreateError("HANDLER_NOT_FOUND", "Client handler not available"));
+                return StatusCode(
+                    500,
+                    ApiResponse<LatencyResponse>.CreateError("HANDLER_NOT_FOUND", "Client handler not available")
+                );
             }
 
             var result = await handler.Handle(new GetClientQuery { ClientId = clientId }, cancellationToken);
@@ -472,7 +582,9 @@ public class ClientsController : ControllerBase
             }
 
             _logger.LogWarning("Failed to get latency for client {ClientId}: {Error}", clientId, result.ErrorMessage);
-            return NotFound(ApiResponse<LatencyResponse>.CreateError("CLIENT_NOT_FOUND", result.ErrorMessage ?? "Client not found"));
+            return NotFound(
+                ApiResponse<LatencyResponse>.CreateError("CLIENT_NOT_FOUND", result.ErrorMessage ?? "Client not found")
+            );
         }
         catch (Exception ex)
         {
@@ -495,24 +607,32 @@ public class ClientsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse), 400)]
     [ProducesResponseType(typeof(ApiResponse), 404)]
     [ProducesResponseType(typeof(ApiResponse), 500)]
-    public async Task<ActionResult<ApiResponse>> AssignClientToZone([Range(1, int.MaxValue)] int clientId, [FromBody] AssignZoneRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<ApiResponse>> AssignClientToZone(
+        [Range(1, int.MaxValue)] int clientId,
+        [FromBody] AssignZoneRequest request,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
             _logger.LogDebug("Assigning client {ClientId} to zone {ZoneId}", clientId, request.ZoneId);
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Clients.Handlers.AssignClientToZoneCommandHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Clients.Handlers.AssignClientToZoneCommandHandler>();
             if (handler == null)
             {
                 _logger.LogError("AssignClientToZoneCommandHandler not found in DI container");
-                return StatusCode(500, ApiResponse.CreateError("HANDLER_NOT_FOUND", "Client zone assignment handler not available"));
+                return StatusCode(
+                    500,
+                    ApiResponse.CreateError("HANDLER_NOT_FOUND", "Client zone assignment handler not available")
+                );
             }
 
             var command = new AssignClientToZoneCommand
             {
                 ClientId = clientId,
                 ZoneId = request.ZoneId,
-                Source = Core.Enums.CommandSource.Api
+                Source = Core.Enums.CommandSource.Api,
             };
 
             var result = await handler.Handle(command, cancellationToken);
@@ -522,8 +642,18 @@ public class ClientsController : ControllerBase
                 return Accepted(ApiResponse.CreateSuccess());
             }
 
-            _logger.LogWarning("Failed to assign client {ClientId} to zone {ZoneId}: {Error}", clientId, request.ZoneId, result.ErrorMessage);
-            return BadRequest(ApiResponse.CreateError("ZONE_ASSIGNMENT_ERROR", result.ErrorMessage ?? "Failed to assign client to zone"));
+            _logger.LogWarning(
+                "Failed to assign client {ClientId} to zone {ZoneId}: {Error}",
+                clientId,
+                request.ZoneId,
+                result.ErrorMessage
+            );
+            return BadRequest(
+                ApiResponse.CreateError(
+                    "ZONE_ASSIGNMENT_ERROR",
+                    result.ErrorMessage ?? "Failed to assign client to zone"
+                )
+            );
         }
         catch (Exception ex)
         {
@@ -542,33 +672,54 @@ public class ClientsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<ZoneAssignmentResponse>), 200)]
     [ProducesResponseType(typeof(ApiResponse), 404)]
     [ProducesResponseType(typeof(ApiResponse), 500)]
-    public async Task<ActionResult<ApiResponse<ZoneAssignmentResponse>>> GetClientZoneAssignment([Range(1, int.MaxValue)] int clientId, CancellationToken cancellationToken)
+    public async Task<ActionResult<ApiResponse<ZoneAssignmentResponse>>> GetClientZoneAssignment(
+        [Range(1, int.MaxValue)] int clientId,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
             _logger.LogDebug("Getting zone assignment for client {ClientId}", clientId);
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Clients.Handlers.GetClientQueryHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Clients.Handlers.GetClientQueryHandler>();
             if (handler == null)
             {
                 _logger.LogError("GetClientQueryHandler not found in DI container");
-                return StatusCode(500, ApiResponse<ZoneAssignmentResponse>.CreateError("HANDLER_NOT_FOUND", "Client handler not available"));
+                return StatusCode(
+                    500,
+                    ApiResponse<ZoneAssignmentResponse>.CreateError("HANDLER_NOT_FOUND", "Client handler not available")
+                );
             }
 
             var result = await handler.Handle(new GetClientQuery { ClientId = clientId }, cancellationToken);
 
             if (result.IsSuccess && result.Value != null)
             {
-                return Ok(ApiResponse<ZoneAssignmentResponse>.CreateSuccess(new ZoneAssignmentResponse(result.Value.ZoneId)));
+                return Ok(
+                    ApiResponse<ZoneAssignmentResponse>.CreateSuccess(new ZoneAssignmentResponse(result.Value.ZoneId))
+                );
             }
 
-            _logger.LogWarning("Failed to get zone assignment for client {ClientId}: {Error}", clientId, result.ErrorMessage);
-            return NotFound(ApiResponse<ZoneAssignmentResponse>.CreateError("CLIENT_NOT_FOUND", result.ErrorMessage ?? "Client not found"));
+            _logger.LogWarning(
+                "Failed to get zone assignment for client {ClientId}: {Error}",
+                clientId,
+                result.ErrorMessage
+            );
+            return NotFound(
+                ApiResponse<ZoneAssignmentResponse>.CreateError(
+                    "CLIENT_NOT_FOUND",
+                    result.ErrorMessage ?? "Client not found"
+                )
+            );
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting zone assignment for client {ClientId}", clientId);
-            return StatusCode(500, ApiResponse<ZoneAssignmentResponse>.CreateError("INTERNAL_ERROR", "Internal server error"));
+            return StatusCode(
+                500,
+                ApiResponse<ZoneAssignmentResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
+            );
         }
     }
 }

@@ -28,5 +28,5 @@ public enum CommandSource
     /// <summary>
     /// Command originated from WebSocket connection.
     /// </summary>
-    WebSocket
+    WebSocket,
 }

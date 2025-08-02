@@ -30,7 +30,8 @@ public partial class AssignClientToZoneCommandHandler : ICommandHandler<AssignCl
     public AssignClientToZoneCommandHandler(
         IClientManager clientManager,
         IZoneManager zoneManager,
-        ILogger<AssignClientToZoneCommandHandler> logger)
+        ILogger<AssignClientToZoneCommandHandler> logger
+    )
     {
         _clientManager = clientManager;
         _zoneManager = zoneManager;
@@ -58,7 +59,9 @@ public partial class AssignClientToZoneCommandHandler : ICommandHandler<AssignCl
         }
 
         // Perform the assignment
-        var result = await _clientManager.AssignClientToZoneAsync(request.ClientId, request.ZoneId).ConfigureAwait(false);
+        var result = await _clientManager
+            .AssignClientToZoneAsync(request.ClientId, request.ZoneId)
+            .ConfigureAwait(false);
 
         return result;
     }

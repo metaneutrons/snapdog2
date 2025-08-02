@@ -10,9 +10,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Enums;
 using SnapDog2.Core.Models;
+using SnapDog2.Server.Features.Shared.Notifications;
 using SnapDog2.Server.Features.Zones.Commands;
 using SnapDog2.Server.Features.Zones.Queries;
-using SnapDog2.Server.Features.Shared.Notifications;
 
 /// <summary>
 /// Controller for zone management operations.
@@ -46,13 +46,17 @@ public class ZoneController : ControllerBase
     [ProducesResponseType(typeof(ZoneState), 200)]
     [ProducesResponseType(404)]
     [ProducesResponseType(500)]
-    public async Task<ActionResult<ZoneState>> GetZoneState([Range(1, int.MaxValue)] int zoneId, CancellationToken cancellationToken)
+    public async Task<ActionResult<ZoneState>> GetZoneState(
+        [Range(1, int.MaxValue)] int zoneId,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
             _logger.LogDebug("Getting zone state for zone {ZoneId}", zoneId);
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetZoneStateQueryHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetZoneStateQueryHandler>();
             if (handler == null)
             {
                 _logger.LogError("GetZoneStateQueryHandler not found in DI container");
@@ -90,7 +94,8 @@ public class ZoneController : ControllerBase
         {
             _logger.LogDebug("Getting all zone states");
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetAllZoneStatesQueryHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetAllZoneStatesQueryHandler>();
             if (handler == null)
             {
                 _logger.LogError("GetAllZoneStatesQueryHandler not found in DI container");
@@ -138,11 +143,7 @@ public class ZoneController : ControllerBase
                 return StatusCode(500, new { error = "Handler not available" });
             }
 
-            var command = new PlayCommand
-            {
-                ZoneId = zoneId,
-                Source = CommandSource.Api
-            };
+            var command = new PlayCommand { ZoneId = zoneId, Source = CommandSource.Api };
 
             var result = await handler.Handle(command, cancellationToken);
 
@@ -185,11 +186,7 @@ public class ZoneController : ControllerBase
                 return StatusCode(500, new { error = "Handler not available" });
             }
 
-            var command = new PauseCommand
-            {
-                ZoneId = zoneId,
-                Source = CommandSource.Api
-            };
+            var command = new PauseCommand { ZoneId = zoneId, Source = CommandSource.Api };
 
             var result = await handler.Handle(command, cancellationToken);
 
@@ -220,13 +217,18 @@ public class ZoneController : ControllerBase
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     [ProducesResponseType(500)]
-    public async Task<IActionResult> SetVolume([Range(1, int.MaxValue)] int zoneId, [FromBody] VolumeRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> SetVolume(
+        [Range(1, int.MaxValue)] int zoneId,
+        [FromBody] VolumeRequest request,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
             _logger.LogDebug("Setting volume for zone {ZoneId} to {Volume}", zoneId, request.Volume);
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.SetZoneVolumeCommandHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.SetZoneVolumeCommandHandler>();
             if (handler == null)
             {
                 _logger.LogError("SetZoneVolumeCommandHandler not found in DI container");
@@ -237,7 +239,7 @@ public class ZoneController : ControllerBase
             {
                 ZoneId = zoneId,
                 Volume = request.Volume,
-                Source = CommandSource.Api
+                Source = CommandSource.Api,
             };
 
             var result = await handler.Handle(command, cancellationToken);
@@ -281,11 +283,7 @@ public class ZoneController : ControllerBase
                 return StatusCode(500, new { error = "Handler not available" });
             }
 
-            var command = new StopCommand
-            {
-                ZoneId = zoneId,
-                Source = CommandSource.Api
-            };
+            var command = new StopCommand { ZoneId = zoneId, Source = CommandSource.Api };
 
             var result = await handler.Handle(command, cancellationToken);
 
@@ -321,18 +319,15 @@ public class ZoneController : ControllerBase
         {
             _logger.LogDebug("Playing next track for zone {ZoneId}", zoneId);
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.NextTrackCommandHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.NextTrackCommandHandler>();
             if (handler == null)
             {
                 _logger.LogError("NextTrackCommandHandler not found in DI container");
                 return StatusCode(500, new { error = "Handler not available" });
             }
 
-            var command = new NextTrackCommand
-            {
-                ZoneId = zoneId,
-                Source = CommandSource.Api
-            };
+            var command = new NextTrackCommand { ZoneId = zoneId, Source = CommandSource.Api };
 
             var result = await handler.Handle(command, cancellationToken);
 
@@ -362,24 +357,24 @@ public class ZoneController : ControllerBase
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     [ProducesResponseType(500)]
-    public async Task<IActionResult> PreviousTrack([Range(1, int.MaxValue)] int zoneId, CancellationToken cancellationToken)
+    public async Task<IActionResult> PreviousTrack(
+        [Range(1, int.MaxValue)] int zoneId,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
             _logger.LogDebug("Playing previous track for zone {ZoneId}", zoneId);
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.PreviousTrackCommandHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.PreviousTrackCommandHandler>();
             if (handler == null)
             {
                 _logger.LogError("PreviousTrackCommandHandler not found in DI container");
                 return StatusCode(500, new { error = "Handler not available" });
             }
 
-            var command = new PreviousTrackCommand
-            {
-                ZoneId = zoneId,
-                Source = CommandSource.Api
-            };
+            var command = new PreviousTrackCommand { ZoneId = zoneId, Source = CommandSource.Api };
 
             var result = await handler.Handle(command, cancellationToken);
 
@@ -410,13 +405,18 @@ public class ZoneController : ControllerBase
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     [ProducesResponseType(500)]
-    public async Task<IActionResult> SetTrackRepeat([Range(1, int.MaxValue)] int zoneId, [FromBody] RepeatRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> SetTrackRepeat(
+        [Range(1, int.MaxValue)] int zoneId,
+        [FromBody] RepeatRequest request,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
             _logger.LogDebug("Setting track repeat for zone {ZoneId} to {Enabled}", zoneId, request.Enabled);
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.SetTrackRepeatCommandHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.SetTrackRepeatCommandHandler>();
             if (handler == null)
             {
                 _logger.LogError("SetTrackRepeatCommandHandler not found in DI container");
@@ -427,7 +427,7 @@ public class ZoneController : ControllerBase
             {
                 ZoneId = zoneId,
                 Enabled = request.Enabled,
-                Source = CommandSource.Api
+                Source = CommandSource.Api,
             };
 
             var result = await handler.Handle(command, cancellationToken);
@@ -458,24 +458,24 @@ public class ZoneController : ControllerBase
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     [ProducesResponseType(500)]
-    public async Task<IActionResult> ToggleTrackRepeat([Range(1, int.MaxValue)] int zoneId, CancellationToken cancellationToken)
+    public async Task<IActionResult> ToggleTrackRepeat(
+        [Range(1, int.MaxValue)] int zoneId,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
             _logger.LogDebug("Toggling track repeat for zone {ZoneId}", zoneId);
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.ToggleTrackRepeatCommandHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.ToggleTrackRepeatCommandHandler>();
             if (handler == null)
             {
                 _logger.LogError("ToggleTrackRepeatCommandHandler not found in DI container");
                 return StatusCode(500, new { error = "Handler not available" });
             }
 
-            var command = new ToggleTrackRepeatCommand
-            {
-                ZoneId = zoneId,
-                Source = CommandSource.Api
-            };
+            var command = new ToggleTrackRepeatCommand { ZoneId = zoneId, Source = CommandSource.Api };
 
             var result = await handler.Handle(command, cancellationToken);
 
@@ -506,13 +506,18 @@ public class ZoneController : ControllerBase
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     [ProducesResponseType(500)]
-    public async Task<IActionResult> SetPlaylistShuffle([Range(1, int.MaxValue)] int zoneId, [FromBody] ShuffleRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> SetPlaylistShuffle(
+        [Range(1, int.MaxValue)] int zoneId,
+        [FromBody] ShuffleRequest request,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
             _logger.LogDebug("Setting playlist shuffle for zone {ZoneId} to {Enabled}", zoneId, request.Enabled);
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.SetPlaylistShuffleCommandHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.SetPlaylistShuffleCommandHandler>();
             if (handler == null)
             {
                 _logger.LogError("SetPlaylistShuffleCommandHandler not found in DI container");
@@ -523,7 +528,7 @@ public class ZoneController : ControllerBase
             {
                 ZoneId = zoneId,
                 Enabled = request.Enabled,
-                Source = CommandSource.Api
+                Source = CommandSource.Api,
             };
 
             var result = await handler.Handle(command, cancellationToken);
@@ -533,7 +538,11 @@ public class ZoneController : ControllerBase
                 return Ok(new { message = "Playlist shuffle set successfully" });
             }
 
-            _logger.LogWarning("Failed to set playlist shuffle for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            _logger.LogWarning(
+                "Failed to set playlist shuffle for zone {ZoneId}: {Error}",
+                zoneId,
+                result.ErrorMessage
+            );
             return BadRequest(new { error = result.ErrorMessage ?? "Failed to set playlist shuffle" });
         }
         catch (Exception ex)
@@ -555,13 +564,18 @@ public class ZoneController : ControllerBase
     [ProducesResponseType(400)]
     [ProducesResponseType(404)]
     [ProducesResponseType(500)]
-    public async Task<IActionResult> SetPlaylistRepeat([Range(1, int.MaxValue)] int zoneId, [FromBody] RepeatRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> SetPlaylistRepeat(
+        [Range(1, int.MaxValue)] int zoneId,
+        [FromBody] RepeatRequest request,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
             _logger.LogDebug("Setting playlist repeat for zone {ZoneId} to {Enabled}", zoneId, request.Enabled);
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.SetPlaylistRepeatCommandHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.SetPlaylistRepeatCommandHandler>();
             if (handler == null)
             {
                 _logger.LogError("SetPlaylistRepeatCommandHandler not found in DI container");
@@ -572,7 +586,7 @@ public class ZoneController : ControllerBase
             {
                 ZoneId = zoneId,
                 Enabled = request.Enabled,
-                Source = CommandSource.Api
+                Source = CommandSource.Api,
             };
 
             var result = await handler.Handle(command, cancellationToken);
@@ -606,7 +620,8 @@ public class ZoneController : ControllerBase
         {
             _logger.LogDebug("Getting all zones");
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetAllZonesQueryHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetAllZonesQueryHandler>();
             if (handler == null)
             {
                 _logger.LogError("GetAllZonesQueryHandler not found in DI container");
@@ -640,13 +655,17 @@ public class ZoneController : ControllerBase
     [ProducesResponseType(typeof(TrackInfo), 200)]
     [ProducesResponseType(404)]
     [ProducesResponseType(500)]
-    public async Task<ActionResult<TrackInfo>> GetZoneTrackInfo([Range(1, int.MaxValue)] int zoneId, CancellationToken cancellationToken)
+    public async Task<ActionResult<TrackInfo>> GetZoneTrackInfo(
+        [Range(1, int.MaxValue)] int zoneId,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
             _logger.LogDebug("Getting track info for zone {ZoneId}", zoneId);
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetZoneTrackInfoQueryHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetZoneTrackInfoQueryHandler>();
             if (handler == null)
             {
                 _logger.LogError("GetZoneTrackInfoQueryHandler not found in DI container");
@@ -680,13 +699,17 @@ public class ZoneController : ControllerBase
     [ProducesResponseType(typeof(PlaylistInfo), 200)]
     [ProducesResponseType(404)]
     [ProducesResponseType(500)]
-    public async Task<ActionResult<PlaylistInfo>> GetZonePlaylistInfo([Range(1, int.MaxValue)] int zoneId, CancellationToken cancellationToken)
+    public async Task<ActionResult<PlaylistInfo>> GetZonePlaylistInfo(
+        [Range(1, int.MaxValue)] int zoneId,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
             _logger.LogDebug("Getting playlist info for zone {ZoneId}", zoneId);
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetZonePlaylistInfoQueryHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetZonePlaylistInfoQueryHandler>();
             if (handler == null)
             {
                 _logger.LogError("GetZonePlaylistInfoQueryHandler not found in DI container");
@@ -721,26 +744,28 @@ public class ZoneController : ControllerBase
     [ProducesResponseType(200)]
     [ProducesResponseType(500)]
     public async Task<ActionResult> TestZoneNotification(
-        [Range(1, int.MaxValue)] int zoneId, 
+        [Range(1, int.MaxValue)] int zoneId,
         [FromQuery] [Range(0, 100)] int volume = 75,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         try
         {
-            _logger.LogDebug("Publishing test zone volume notification for Zone {ZoneId} with volume {Volume}", zoneId, volume);
+            _logger.LogDebug(
+                "Publishing test zone volume notification for Zone {ZoneId} with volume {Volume}",
+                zoneId,
+                volume
+            );
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Shared.Handlers.ZoneStateNotificationHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Shared.Handlers.ZoneStateNotificationHandler>();
             if (handler == null)
             {
                 _logger.LogError("ZoneStateNotificationHandler not found in DI container");
                 return StatusCode(500, new { error = "Handler not available" });
             }
 
-            var notification = new ZoneVolumeChangedNotification
-            {
-                ZoneId = zoneId,
-                Volume = volume
-            };
+            var notification = new ZoneVolumeChangedNotification { ZoneId = zoneId, Volume = volume };
 
             await handler.Handle(notification, cancellationToken);
 

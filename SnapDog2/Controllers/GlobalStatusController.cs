@@ -24,9 +24,7 @@ public class GlobalStatusController : ControllerBase
     /// </summary>
     /// <param name="serviceProvider">The service provider.</param>
     /// <param name="logger">The logger instance.</param>
-    public GlobalStatusController(
-        IServiceProvider serviceProvider,
-        ILogger<GlobalStatusController> logger)
+    public GlobalStatusController(IServiceProvider serviceProvider, ILogger<GlobalStatusController> logger)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
@@ -48,7 +46,8 @@ public class GlobalStatusController : ControllerBase
             _logger.LogDebug("Getting system status");
 
             // Try to get the handler from DI
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Global.Handlers.GetSystemStatusQueryHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Global.Handlers.GetSystemStatusQueryHandler>();
             if (handler == null)
             {
                 _logger.LogError("GetSystemStatusQueryHandler not found in DI container");
@@ -88,7 +87,8 @@ public class GlobalStatusController : ControllerBase
         {
             _logger.LogDebug("Getting error status");
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Global.Handlers.GetErrorStatusQueryHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Global.Handlers.GetErrorStatusQueryHandler>();
             if (handler == null)
             {
                 _logger.LogError("GetErrorStatusQueryHandler not found in DI container");
@@ -134,7 +134,8 @@ public class GlobalStatusController : ControllerBase
         {
             _logger.LogDebug("Getting version info");
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Global.Handlers.GetVersionInfoQueryHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Global.Handlers.GetVersionInfoQueryHandler>();
             if (handler == null)
             {
                 _logger.LogError("GetVersionInfoQueryHandler not found in DI container");
@@ -173,7 +174,8 @@ public class GlobalStatusController : ControllerBase
         {
             _logger.LogDebug("Getting server stats");
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Global.Handlers.GetServerStatsQueryHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Global.Handlers.GetServerStatsQueryHandler>();
             if (handler == null)
             {
                 _logger.LogError("GetServerStatsQueryHandler not found in DI container");

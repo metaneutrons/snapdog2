@@ -23,9 +23,7 @@ public partial class SetClientMuteCommandHandler : ICommandHandler<SetClientMute
     [LoggerMessage(3012, LogLevel.Warning, "Client {ClientId} not found for SetClientMuteCommand")]
     private partial void LogClientNotFound(int clientId);
 
-    public SetClientMuteCommandHandler(
-        IClientManager clientManager,
-        ILogger<SetClientMuteCommandHandler> logger)
+    public SetClientMuteCommandHandler(IClientManager clientManager, ILogger<SetClientMuteCommandHandler> logger)
     {
         _clientManager = clientManager;
         _logger = logger;

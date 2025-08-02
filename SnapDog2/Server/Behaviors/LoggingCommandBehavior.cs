@@ -28,11 +28,15 @@ public partial class LoggingCommandBehavior<TCommand, TResponse> : ICommandPipel
     }
 
     /// <inheritdoc/>
-    public async Task<TResponse> Handle(TCommand command, CommandHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+    public async Task<TResponse> Handle(
+        TCommand command,
+        CommandHandlerDelegate<TResponse> next,
+        CancellationToken cancellationToken
+    )
     {
         var commandName = typeof(TCommand).Name;
         using var activity = ActivitySource.StartActivity($"CortexMediator.Command.{commandName}");
-        
+
         LogCommandStarting(commandName);
         var stopwatch = Stopwatch.StartNew();
 
@@ -40,7 +44,7 @@ public partial class LoggingCommandBehavior<TCommand, TResponse> : ICommandPipel
         {
             var response = await next().ConfigureAwait(false);
             stopwatch.Stop();
-            
+
             LogCommandCompleted(commandName, stopwatch.ElapsedMilliseconds);
             return response;
         }

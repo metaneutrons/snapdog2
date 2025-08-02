@@ -27,7 +27,11 @@ public partial class PerformanceCommandBehavior<TCommand, TResponse> : ICommandP
     }
 
     /// <inheritdoc/>
-    public async Task<TResponse> Handle(TCommand command, CommandHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+    public async Task<TResponse> Handle(
+        TCommand command,
+        CommandHandlerDelegate<TResponse> next,
+        CancellationToken cancellationToken
+    )
     {
         var commandName = typeof(TCommand).Name;
         var stopwatch = Stopwatch.StartNew();

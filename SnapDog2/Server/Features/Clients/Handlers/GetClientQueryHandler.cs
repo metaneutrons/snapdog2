@@ -19,9 +19,7 @@ public partial class GetClientQueryHandler : IQueryHandler<GetClientQuery, Resul
     [LoggerMessage(4101, LogLevel.Information, "Handling GetClientQuery for Client {ClientId}")]
     private partial void LogHandling(int clientId);
 
-    public GetClientQueryHandler(
-        IClientManager clientManager,
-        ILogger<GetClientQueryHandler> logger)
+    public GetClientQueryHandler(IClientManager clientManager, ILogger<GetClientQueryHandler> logger)
     {
         _clientManager = clientManager;
         _logger = logger;

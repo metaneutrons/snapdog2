@@ -26,9 +26,7 @@ public partial class ToggleClientMuteCommandHandler : ICommandHandler<ToggleClie
     [LoggerMessage(3023, LogLevel.Information, "Toggled mute for Client {ClientId} to {NewMuteState}")]
     private partial void LogToggleResult(int clientId, bool newMuteState);
 
-    public ToggleClientMuteCommandHandler(
-        IClientManager clientManager,
-        ILogger<ToggleClientMuteCommandHandler> logger)
+    public ToggleClientMuteCommandHandler(IClientManager clientManager, ILogger<ToggleClientMuteCommandHandler> logger)
     {
         _clientManager = clientManager;
         _logger = logger;

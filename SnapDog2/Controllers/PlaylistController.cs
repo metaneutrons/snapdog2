@@ -47,7 +47,8 @@ public class PlaylistController : ControllerBase
         {
             _logger.LogDebug("Getting all playlists");
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetAllPlaylistsQueryHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetAllPlaylistsQueryHandler>();
             if (handler == null)
             {
                 _logger.LogError("GetAllPlaylistsQueryHandler not found in DI container");
@@ -81,27 +82,38 @@ public class PlaylistController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<TrackInfo>), 200)]
     [ProducesResponseType(404)]
     [ProducesResponseType(500)]
-    public async Task<ActionResult<IEnumerable<TrackInfo>>> GetPlaylistTracksByPlaylistId(string playlistId, CancellationToken cancellationToken)
+    public async Task<ActionResult<IEnumerable<TrackInfo>>> GetPlaylistTracksByPlaylistId(
+        string playlistId,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
             _logger.LogDebug("Getting tracks for playlist {PlaylistId}", playlistId);
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetPlaylistTracksQueryHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetPlaylistTracksQueryHandler>();
             if (handler == null)
             {
                 _logger.LogError("GetPlaylistTracksQueryHandler not found in DI container");
                 return StatusCode(500, new { error = "Handler not available" });
             }
 
-            var result = await handler.Handle(new GetPlaylistTracksQuery { PlaylistId = playlistId }, cancellationToken);
+            var result = await handler.Handle(
+                new GetPlaylistTracksQuery { PlaylistId = playlistId },
+                cancellationToken
+            );
 
             if (result.IsSuccess && result.Value != null)
             {
                 return Ok(result.Value);
             }
 
-            _logger.LogWarning("Failed to get tracks for playlist {PlaylistId}: {Error}", playlistId, result.ErrorMessage);
+            _logger.LogWarning(
+                "Failed to get tracks for playlist {PlaylistId}: {Error}",
+                playlistId,
+                result.ErrorMessage
+            );
             return NotFound(new { error = result.ErrorMessage ?? "Playlist not found" });
         }
         catch (Exception ex)
@@ -121,27 +133,38 @@ public class PlaylistController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<TrackInfo>), 200)]
     [ProducesResponseType(404)]
     [ProducesResponseType(500)]
-    public async Task<ActionResult<IEnumerable<TrackInfo>>> GetPlaylistTracksByIndex([Range(1, int.MaxValue)] int playlistIndex, CancellationToken cancellationToken)
+    public async Task<ActionResult<IEnumerable<TrackInfo>>> GetPlaylistTracksByIndex(
+        [Range(1, int.MaxValue)] int playlistIndex,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
             _logger.LogDebug("Getting tracks for playlist index {PlaylistIndex}", playlistIndex);
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetPlaylistTracksQueryHandler>();
+            var handler =
+                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetPlaylistTracksQueryHandler>();
             if (handler == null)
             {
                 _logger.LogError("GetPlaylistTracksQueryHandler not found in DI container");
                 return StatusCode(500, new { error = "Handler not available" });
             }
 
-            var result = await handler.Handle(new GetPlaylistTracksQuery { PlaylistIndex = playlistIndex }, cancellationToken);
+            var result = await handler.Handle(
+                new GetPlaylistTracksQuery { PlaylistIndex = playlistIndex },
+                cancellationToken
+            );
 
             if (result.IsSuccess && result.Value != null)
             {
                 return Ok(result.Value);
             }
 
-            _logger.LogWarning("Failed to get tracks for playlist index {PlaylistIndex}: {Error}", playlistIndex, result.ErrorMessage);
+            _logger.LogWarning(
+                "Failed to get tracks for playlist index {PlaylistIndex}: {Error}",
+                playlistIndex,
+                result.ErrorMessage
+            );
             return NotFound(new { error = result.ErrorMessage ?? "Playlist not found" });
         }
         catch (Exception ex)

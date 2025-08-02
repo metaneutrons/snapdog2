@@ -53,9 +53,13 @@ public class Result : IResult
     {
         // Validate consistency: Success implies no error, Failure requires an error.
         if (isSuccess && (!string.IsNullOrEmpty(errorMessage) || exception != null))
-            throw new InvalidOperationException("Assertion failed: A successful result cannot have an error message or exception.");
+            throw new InvalidOperationException(
+                "Assertion failed: A successful result cannot have an error message or exception."
+            );
         if (!isSuccess && string.IsNullOrEmpty(errorMessage) && exception == null)
-            throw new InvalidOperationException("Assertion failed: A failed result requires an error message or an exception.");
+            throw new InvalidOperationException(
+                "Assertion failed: A failed result requires an error message or an exception."
+            );
 
         IsSuccess = isSuccess;
         ErrorMessage = errorMessage;

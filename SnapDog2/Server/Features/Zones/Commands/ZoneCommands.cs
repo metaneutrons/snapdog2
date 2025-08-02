@@ -264,6 +264,7 @@ public record NextPlaylistCommand : ICommand<Result>
     /// </summary>
     public CommandSource Source { get; init; } = CommandSource.Internal;
 }
+
 /// <summary>
 /// Command to play the previous playlist in a zone.
 /// </summary>
