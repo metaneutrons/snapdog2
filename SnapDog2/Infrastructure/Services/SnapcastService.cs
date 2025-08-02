@@ -749,19 +749,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
                 Id = s.Id,
                 Status = s.Status,
                 Uri = s.Uri.Raw,
-                Properties =
-                    s.Properties?.Metadata != null
-                        ? new Dictionary<string, object>
-                        {
-                            ["canControl"] = s.Properties?.CanControl ?? false,
-                            ["canGoNext"] = s.Properties?.CanGoNext ?? false,
-                            ["canGoPrevious"] = s.Properties?.CanGoPrevious ?? false,
-                            ["canPause"] = s.Properties?.CanPause ?? false,
-                            ["canPlay"] = s.Properties?.CanPlay ?? false,
-                            ["canSeek"] = s.Properties?.CanSeek ?? false,
-                            ["metadata"] = s.Properties?.Metadata,
-                        }.AsReadOnly()
-                        : new Dictionary<string, object>().AsReadOnly(),
+                Properties = new Dictionary<string, object>().AsReadOnly(),
             })
             .ToList()
             .AsReadOnly();
