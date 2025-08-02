@@ -65,20 +65,25 @@ public static class SnapcastServiceConfiguration
     /// <returns>True if configuration is valid, false otherwise.</returns>
     public static bool ValidateSnapcastConfiguration(SnapcastConfig config)
     {
-        if (!config.Enabled)
-            return true; // If disabled, no validation needed
-
         if (string.IsNullOrWhiteSpace(config.Address))
+        {
             return false;
+        }
 
         if (config.Port <= 0 || config.Port > 65535)
+        {
             return false;
+        }
 
         if (config.Timeout <= 0)
+        {
             return false;
+        }
 
         if (config.ReconnectInterval <= 0)
+        {
             return false;
+        }
 
         return true;
     }

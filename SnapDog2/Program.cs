@@ -276,26 +276,19 @@ static void PrintConfiguration(SnapDogConfiguration config)
 
     // Snapcast
     Log.Information("  Snapcast:");
-    Log.Information("    Enabled: {SnapcastEnabled}", config.Services.Snapcast.Enabled);
-    if (config.Services.Snapcast.Enabled)
-    {
-        Log.Information(
-            "    Address: {SnapcastAddress}:{SnapcastPort}",
-            config.Services.Snapcast.Address,
-            config.Services.Snapcast.Port
-        );
-        Log.Information("    HTTP Port: {SnapcastHttpPort}", config.Services.Snapcast.HttpPort);
-        Log.Information(
-            "    Base URL: {SnapcastBaseUrl}",
-            string.IsNullOrEmpty(config.Services.Snapcast.BaseUrl) ? "(empty)" : config.Services.Snapcast.BaseUrl
-        );
-        Log.Information("    Timeout: {SnapcastTimeout}s", config.Services.Snapcast.Timeout);
-        Log.Information("    Auto Reconnect: {SnapcastAutoReconnect}", config.Services.Snapcast.AutoReconnect);
-        Log.Information(
-            "    Reconnect Interval: {SnapcastReconnectInterval}s",
-            config.Services.Snapcast.ReconnectInterval
-        );
-    }
+    Log.Information(
+        "    Address: {SnapcastAddress}:{SnapcastPort}",
+        config.Services.Snapcast.Address,
+        config.Services.Snapcast.Port
+    );
+    Log.Information("    HTTP Port: {SnapcastHttpPort}", config.Services.Snapcast.HttpPort);
+    Log.Information(
+        "    Base URL: {SnapcastBaseUrl}",
+        string.IsNullOrEmpty(config.Services.Snapcast.BaseUrl) ? "(empty)" : config.Services.Snapcast.BaseUrl
+    );
+    Log.Information("    Timeout: {SnapcastTimeout}s", config.Services.Snapcast.Timeout);
+    Log.Information("    Auto Reconnect: {SnapcastAutoReconnect}", config.Services.Snapcast.AutoReconnect);
+    Log.Information("    Reconnect Interval: {SnapcastReconnectInterval}s", config.Services.Snapcast.ReconnectInterval);
 
     // MQTT
     Log.Information("  MQTT:");
