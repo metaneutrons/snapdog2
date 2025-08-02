@@ -20,5 +20,6 @@
     <PackageReference Include="FluentValidation.AspNetCore" />
     <PackageReference Include="MediatR" />
     <PackageReference Include="SnapcastClient" />
+    <PackageReference Include="MQTTnet" />
   </ItemGroup>
 </Project>

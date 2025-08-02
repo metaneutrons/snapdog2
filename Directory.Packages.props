@@ -20,6 +20,8 @@
     <PackageVersion Include="SubSonicMedia" Version="1.0.5" />
     <!-- Snapcast Integration -->
     <PackageVersion Include="SnapcastClient" Version="0.3.1" />
+    <!-- MQTT Integration -->
+    <PackageVersion Include="MQTTnet" Version="5.0.1.1416" />
     <!-- Analyzers -->
     <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.556" />
     <PackageVersion Include="SonarAnalyzer.CSharp" Version="9.21.0.86780" />

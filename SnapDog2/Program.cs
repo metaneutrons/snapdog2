@@ -71,6 +71,13 @@ try
         builder.Services.AddSnapcastServices();
     }
 
+    // Add MQTT services
+    if (snapDogConfig.Services.Mqtt.Enabled)
+    {
+        builder.Services.AddMqttServices()
+                        .ValidateMqttConfiguration();
+    }
+
     // Register placeholder services
     builder.Services.AddScoped<
         SnapDog2.Core.Abstractions.ISystemStatusService,
