@@ -1,8 +1,8 @@
-# 18. Client Commands Implementation
+# 17. Client Commands Implementation
 
 This document covers the Cortex.Mediator implementation for Client Commands from Section 9.4.
 
-## 18.1. Client Volume and Mute Commands
+## 17.1. Client Volume and Mute Commands
 
 ```csharp
 // /Server/Features/Clients/Commands/ClientVolumeCommands.cs
@@ -71,7 +71,7 @@ public record ToggleClientMuteCommand : ICommand<Result>
 }
 ```
 
-## 18.2. Client Configuration Commands
+## 17.2. Client Configuration Commands
 
 ```csharp
 // /Server/Features/Clients/Commands/ClientConfigCommands.cs
@@ -124,7 +124,7 @@ public record AssignClientToZoneCommand : ICommand<Result>
 }
 ```
 
-## 18.3. Client Command Validators
+## 17.3. Client Command Validators
 
 ```csharp
 // /Server/Features/Clients/Validators/ClientCommandValidators.cs
@@ -231,7 +231,7 @@ public class AssignClientToZoneCommandValidator : AbstractValidator<AssignClient
 }
 ```
 
-## 18.4. Client Command Handlers
+## 17.4. Client Command Handlers
 
 ```csharp
 // /Server/Features/Clients/Handlers/SetClientVolumeCommandHandler.cs
@@ -405,7 +405,7 @@ public partial class SetClientLatencyCommandHandler : ICommandHandler<SetClientL
 }
 ```
 
-## 18.5. Client Queries
+## 17.5. Client Queries
 
 ```csharp
 // /Server/Features/Clients/Queries/ClientQueries.cs
@@ -443,7 +443,7 @@ public record GetClientsByZoneQuery : IQuery<Result<List<ClientState>>>
 }
 ```
 
-## 18.6. Client Query Handlers
+## 17.6. Client Query Handlers
 
 ```csharp
 // /Server/Features/Clients/Handlers/GetAllClientsQueryHandler.cs

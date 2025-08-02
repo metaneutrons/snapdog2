@@ -1,8 +1,8 @@
-# 21. Docker Infrastructure
+# 24. Docker Infrastructure
 
 SnapDog2 is designed primarily for containerized deployment using Docker and Docker Compose. This approach provides process isolation, simplifies dependency management (especially for native libraries like LibVLC and external services like Snapcast/MQTT), ensures environment consistency, and facilitates scalable deployments.
 
-## 21.1. Container Architecture Overview
+## 24.1. Container Architecture Overview
 
 The recommended production deployment consists of several collaborating containers orchestrated by Docker Compose, running on a shared Docker network (e.g., `snapdog_net`) for inter-service communication.
 
@@ -78,7 +78,7 @@ graph TD
     classDef extern fill:#EFEFEF,stroke:#666
 ```
 
-## 21.2. `snapserver` Container Customization
+## 24.2. `snapserver` Container Customization
 
 A standard Snapcast server image is usualy not sufficent. A customized image (built from `/docker/snapserver/Dockerfile`) is recommended to implement the required zone-to-sink architecture.
 
@@ -105,7 +105,7 @@ A standard Snapcast server image is usualy not sufficent. A customized image (bu
     * The Snapcast configuration needs *additional* `pipe` sources for these AirPlay sinks and potentially `meta` streams to combine the direct FIFO sink and the AirPlay sink for a single zone output group. **Note:** This blueprint assumes AirPlay is managed entirely within the Snapcast/Shairport setup and SnapDog2 does not directly interact with AirPlay streams.
 4. **Process Management:** Use `supervisord` or a similar process manager within the `snapserver` container to manage `snapserver`, `avahi-daemon` (if needed), and multiple `shairport-sync` instances (if needed).
 
-## 21.3. `snapdog` Container (`/docker/snapdog/Dockerfile`)
+## 24.3. `snapdog` Container (`/docker/snapdog/Dockerfile`)
 
 Builds the .NET application for production deployment.
 
@@ -159,7 +159,7 @@ ENTRYPOINT ["dotnet", "SnapDog2.dll"]
 
 *(Note: Alpine package names for VLC might differ slightly or require enabling community repositories)*
 
-## 21.4. Docker Compose Configuration (Production Example)
+## 24.4. Docker Compose Configuration (Production Example)
 
 Uses a base `docker-compose.yml` and optional overrides (e.g., `docker-compose.prod.yml`). Leverages `.env` files for configuration and profiles for optional services.
 
@@ -328,7 +328,7 @@ services:
 #   grafana_data:
 ```
 
-## 21.5. Docker Compose Profiles
+## 24.5. Docker Compose Profiles
 
 Use profiles to manage optional service groups:
 

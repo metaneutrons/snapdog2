@@ -1,10 +1,10 @@
-# 20. Integration and Implementation Summary
+# 19. Integration and Implementation Summary
 
 This document provides integration guidance and summarizes the complete Cortex.Mediator command framework implementation.
 
-## 20.1. Infrastructure Adapter Integration
+## 19.1. Infrastructure Adapter Integration
 
-### 20.1.1. MQTT Service Integration
+### 19.1.1. MQTT Service Integration
 
 The MQTT service maps incoming topics to Cortex.Mediator commands and publishes status notifications as MQTT messages.
 
@@ -203,7 +203,7 @@ public partial class MqttCommandMapper
 }
 ```
 
-### 20.1.2. KNX Service Integration
+### 19.1.2. KNX Service Integration
 
 ```csharp
 // /Infrastructure/Knx/KnxCommandMapper.cs
@@ -309,7 +309,7 @@ public partial class KnxCommandMapper
 }
 ```
 
-### 20.1.3. API Controller Integration
+### 19.1.3. API Controller Integration
 
 ```csharp
 // /Api/Controllers/ZonesController.cs
@@ -424,7 +424,7 @@ public class ZonesController : ControllerBase
 }
 ```
 
-## 20.2. Dependency Injection Configuration
+## 19.2. Dependency Injection Configuration
 
 ```csharp
 // /Worker/DI/CortexMediatorConfiguration.cs
@@ -467,9 +467,9 @@ public static class CortexMediatorConfiguration
 }
 ```
 
-## 20.3. Testing Strategy
+## 19.3. Testing Strategy
 
-### 20.3.1. Unit Tests for Commands and Handlers
+### 19.3.1. Unit Tests for Commands and Handlers
 
 ```csharp
 // /Tests/Unit/Server/Features/Zones/Handlers/SetZoneVolumeCommandHandlerTests.cs
@@ -542,7 +542,7 @@ public class SetZoneVolumeCommandHandlerTests
 }
 ```
 
-### 20.3.2. Integration Tests
+### 19.3.2. Integration Tests
 
 ```csharp
 // /Tests/Integration/Server/Features/ZoneCommandIntegrationTests.cs
@@ -591,7 +591,7 @@ public class ZoneCommandIntegrationTests : IClassFixture<TestServerFixture>
 }
 ```
 
-## 20.4. Overview
+## 19.4. Overview
 
 The complete Cortex.Mediator command framework implementation includes:
 
@@ -618,7 +618,7 @@ The complete Cortex.Mediator command framework implementation includes:
    - FluentValidation validators for all commands
    - Input validation and business rule enforcement
 
-### 20.4.1. Key Benefits
+### 19.4.1. Key Benefits
 
 1. **Type Safety**: Strong typing throughout the command pipeline
 2. **Separation of Concerns**: Clear separation between commands, queries, and notifications
@@ -628,7 +628,7 @@ The complete Cortex.Mediator command framework implementation includes:
 6. **Validation**: Automatic validation of all commands before execution
 7. **Observability**: Built-in logging, metrics, and tracing support
 
-### 20.4.2. Implementation Plan
+### 19.4.2. Implementation Plan
 
 1. **Implementation**: Start implementing the Core abstractions (IZoneManager, IClientManager)
 2. **Infrastructure**: Build the concrete infrastructure services (SnapcastService, MqttService, KnxService)
