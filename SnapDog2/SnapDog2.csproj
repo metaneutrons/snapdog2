@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Cortex.Mediator" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Swashbuckle.AspNetCore" />
     <PackageReference Include="EnvoyConfig" />
     <PackageReference Include="Serilog.AspNetCore" />

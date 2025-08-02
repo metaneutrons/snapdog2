@@ -4,6 +4,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Serilog;
 using Serilog.Events;
 using SnapDog2.Core.Configuration;
+using SnapDog2.Worker.DI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,6 +61,13 @@ try
     builder.Services.AddSingleton(snapDogConfig.Api);
     builder.Services.AddSingleton(snapDogConfig.Services);
     builder.Services.AddSingleton(snapDogConfig.SnapcastServer);
+
+    // Add Command Processing (Cortex.Mediator)
+    builder.Services.AddCommandProcessing();
+
+    // Register placeholder services
+    builder.Services.AddScoped<SnapDog2.Core.Abstractions.ISystemStatusService, SnapDog2.Infrastructure.Services.SystemStatusService>();
+    builder.Services.AddScoped<SnapDog2.Core.Abstractions.IMetricsService, SnapDog2.Infrastructure.Services.MetricsService>();
 
     // Add services to the container
     builder.Services.AddControllers();
