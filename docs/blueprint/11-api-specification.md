@@ -227,7 +227,7 @@ Responses *may* include a `_links` object with hypermedia controls for related a
 ## 11.9. API Implementation Notes
 
 * Implemented using ASP.NET Core Minimal APIs or MVC Controllers within the `/Api` folder.
-* Controllers/Endpoints act as thin layers, translating HTTP to MediatR requests (`_mediator.Send(...)`).
+* Controllers/Endpoints act as thin layers, translating HTTP to Cortex.Mediator requests (`_mediator.Send(...)`).
 * Use `[ApiController]` attributes (for MVC) for standard behaviors.
 * Leverage ASP.NET Core middleware for exception handling (converting to `ApiResponse`), authentication, authorization, rate limiting, security headers.
 * Use built-in model binding and validation, potentially enhanced by FluentValidation integration.

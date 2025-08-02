@@ -34,7 +34,7 @@ The mapping and synchronization logic is primarily implemented within the core m
         * Stores the `SnapcastGroupId` -> `ZoneConfig.Id` mapping.
     4. (Optional Cleanup): Identify any Snapcast groups present on the server (via repository) that do *not* correspond to any `ZoneConfig`. Log a warning about these "unmanaged" groups. Do not delete them automatically.
 * **Lookup:** Provides methods like `GetZoneAsync(int zoneId)`, `GetAllZonesAsync()`, `TryGetZoneIdByGroupId(string snapcastGroupId, out int zoneId)`.
-* **Event Handling:** Handles MediatR `SnapcastGroupChangedNotification` (published by `SnapcastService`). If a *managed* group's name changes externally, logs a warning and potentially calls `_snapcastService.SetGroupNameAsync` to revert it back to the configured name (Authoritative approach for names), or updates the internal `ZoneService.Name` (Adaptive). *Decision: Adopt Adaptive approach for external name changes - update internal state and log.*
+* **Event Handling:** Handles Cortex.Mediator `SnapcastGroupChangedNotification` (published by `SnapcastService`). If a *managed* group's name changes externally, logs a warning and potentially calls `_snapcastService.SetGroupNameAsync` to revert it back to the configured name (Authoritative approach for names), or updates the internal `ZoneService.Name` (Adaptive). *Decision: Adopt Adaptive approach for external name changes - update internal state and log.*
 
 ### 14.3.2. `ClientManager` (/Server/Managers/ClientManager.cs)
 
@@ -70,9 +70,9 @@ The mapping and synchronization logic is primarily implemented within the core m
 * **Responsibilities:** Interface with `Sturd.SnapcastNet`.
 * Listens for library events (`ClientConnected`, `GroupChanged`, etc.).
 * **Updates `ISnapcastStateRepository`** immediately upon receiving events.
-* **Publishes MediatR `INotification`s** containing the **raw `Sturd.SnapcastNet.Models` objects** (e.g., `SnapcastClientConnectedNotification(Client client)`). This allows handlers like `ClientManager` to access the most up-to-date raw information.
+* **Publishes Cortex.Mediator `INotification`s** containing the **raw `Sturd.SnapcastNet.Models` objects** (e.g., `SnapcastClientConnectedNotification(Client client)`). This allows handlers like `ClientManager` to access the most up-to-date raw information.
 
-## 14.4. MediatR Notifications for Synchronization
+## 14.4. Cortex.Mediator Notifications for Synchronization
 
 These notifications, defined in `/Server/Notifications`, facilitate loose coupling between `SnapcastService` and Managers.
 
@@ -80,7 +80,7 @@ These notifications, defined in `/Server/Notifications`, facilitate loose coupli
 namespace SnapDog2.Server.Notifications; // Example namespace
 
 using System;
-using MediatR;
+using Cortex.Mediator;
 using Sturd.SnapcastNet.Models; // Use raw models from library
 
 // Published by SnapcastService when underlying library raises event
@@ -105,7 +105,7 @@ public record StatusChangedNotification(string StatusType, string TargetId, obje
 
 ## 14.6. Registration in DI Container
 
-`ISnapcastService`, `ISnapcastStateRepository`, `IZoneManager`, `IClientManager` are registered as singletons in `/Worker/DI`. Relevant MediatR notification handlers (including those within `ClientManager` and `ZoneManager`) are registered automatically by `services.AddMediatR()`.
+`ISnapcastService`, `ISnapcastStateRepository`, `IZoneManager`, `IClientManager` are registered as singletons in `/Worker/DI`. Relevant Cortex.Mediator notification handlers (including those within `ClientManager` and `ZoneManager`) are registered automatically by `services.AddCortex.Mediator()`.
 
 ```csharp
 // In /Worker/DI/CoreServicesExtensions.cs (Example)

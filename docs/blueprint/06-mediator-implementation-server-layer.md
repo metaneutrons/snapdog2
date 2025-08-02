@@ -1,42 +1,42 @@
-# 6. MediatR Implementation (Server Layer)
+# 6. Cortex.Mediator Implementation (Server Layer)
 
-This chapter details the implementation of the Mediator pattern within SnapDog2's `/Server` layer, utilizing the **MediatR** library. This pattern is central to the application's architecture, enabling a clean separation of concerns, facilitating the Command Query Responsibility Segregation (CQRS) pattern, reducing coupling between components, and providing a robust mechanism for handling cross-cutting concerns via pipeline behaviors.
+This chapter details the implementation of the Mediator pattern within SnapDog2's `/Server` layer, utilizing the **Cortex.Mediator** library. This pattern is central to the application's architecture, enabling a clean separation of concerns, facilitating the Command Query Responsibility Segregation (CQRS) pattern, reducing coupling between components, and providing a robust mechanism for handling cross-cutting concerns via pipeline behaviors.
 
-## 6.1. MediatR Integration and Configuration
+## 6.1. Cortex.Mediator Integration and Configuration
 
-MediatR is integrated into the application's Dependency Injection (DI) container during startup. This involves registering the MediatR services, discovering and registering all command, query, and notification handlers, and configuring the pipeline behaviors in the desired order of execution.
+Cortex.Mediator is integrated into the application's Dependency Injection (DI) container during startup. This involves registering the Cortex.Mediator services, discovering and registering all command, query, and notification handlers, and configuring the pipeline behaviors in the desired order of execution.
 
 This registration typically occurs within a dedicated DI extension method in the `/Worker/DI` folder, called from `Program.cs`.
 
 ```csharp
-// Example: /Worker/DI/MediatRConfiguration.cs
+// Example: /Worker/DI/CortexMediatorConfiguration.cs
 namespace SnapDog2.Worker.DI;
 
 using System.Reflection;
+using Cortex.Mediator; // Cortex.Mediator namespace
 using FluentValidation; // Required for AddValidatorsFromAssembly
-using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using SnapDog2.Server.Behaviors; // Location of pipeline behavior implementations
 
 /// <summary>
-/// Extension methods for configuring MediatR services.
+/// Extension methods for configuring Cortex.Mediator services.
 /// </summary>
-public static class MediatRConfiguration
+public static class CortexMediatorConfiguration
 {
     /// <summary>
-    /// Adds MediatR and related services (handlers, validators, behaviors) to the service collection.
+    /// Adds Cortex.Mediator and related services (handlers, validators, behaviors) to the service collection.
     /// </summary>
     /// <param name="services">The service collection.</param>
     /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddCommandProcessing(this IServiceCollection services)
     {
-        // Determine the assembly containing the MediatR handlers, validators, etc.
+        // Determine the assembly containing the Cortex.Mediator handlers, validators, etc.
         // Assumes these primarily reside in the assembly where Server layer code exists.
         var serverAssembly = typeof(SnapDog2.Server.Behaviors.LoggingBehavior<,>).Assembly; // Get reference to Server assembly
 
-        services.AddMediatR(cfg =>
+        services.AddCortexMediator(cfg =>
         {
-            // Automatically register all IRequestHandler<,>, IRequestHandler<>, INotificationHandler<>
+            // Automatically register all ICommandHandler<,>, IQueryHandler<,>, INotificationHandler<>
             // implementations found in the specified assembly.
             cfg.RegisterServicesFromAssembly(serverAssembly);
 
@@ -60,13 +60,13 @@ public static class MediatRConfiguration
 
 ## 6.2. Command, Query, and Notification Structure
 
-SnapDog2 strictly follows the CQRS pattern facilitated by MediatR:
+SnapDog2 strictly follows the CQRS pattern facilitated by Cortex.Mediator:
 
-* **Commands:** Represent requests to change the system's state. They should be named imperatively (e.g., `SetVolumeCommand`, `AssignClientToZoneCommand`). They implement `IRequest<Result>` or `IRequest<Result<T>>` if they need to return data on success. They do not return queryable data directly.
-* **Queries:** Represent requests to retrieve data without modifying state. They should be named descriptively based on the data requested (e.g., `GetZoneStateQuery`, `GetAllClientsQuery`). They implement `IRequest<Result<TResponse>>` where `TResponse` is the type of data being returned (typically a Core Model or a dedicated read model/DTO).
+* **Commands:** Represent requests to change the system's state. They should be named imperatively (e.g., `SetVolumeCommand`, `AssignClientToZoneCommand`). They implement `ICommand<Result>` or `IQuery<Result<T>>` if they need to return data on success. They do not return queryable data directly.
+* **Queries:** Represent requests to retrieve data without modifying state. They should be named descriptively based on the data requested (e.g., `GetZoneStateQuery`, `GetAllClientsQuery`). They implement `IQuery<Result<TResponse>>` where `TResponse` is the type of data being returned (typically a Core Model or a dedicated read model/DTO).
 * **Notifications:** Represent events that have already occurred within the system (e.g., `PlaybackStateChangedNotification`, `SnapcastClientConnectedNotification`). They implement `INotification`. They are published using `IMediator.Publish()` and can have multiple independent handlers (`INotificationHandler<TNotification>`) that react to the event.
 
-All MediatR message types (Commands, Queries, Notifications) are typically defined as immutable `record` types within the `/Server` layer, often organized by feature or domain area (e.g., `/Server/Features/Zones/Commands`, `/Server/Features/Clients/Queries`, `/Server/Notifications`).
+All Cortex.Mediator message types (Commands, Queries, Notifications) are typically defined as immutable `record` types within the `/Server` layer, often organized by feature or domain area (e.g., `/Server/Features/Zones/Commands`, `/Server/Features/Clients/Queries`, `/Server/Notifications`).
 
 ### 6.2.1. Command Example
 
@@ -74,14 +74,14 @@ All MediatR message types (Commands, Queries, Notifications) are typically defin
 // Defined in /Server/Features/Zones/Commands/SetZoneVolumeCommand.cs
 namespace SnapDog2.Server.Features.Zones.Commands;
 
-using MediatR;
+using Cortex.Mediator;
 using SnapDog2.Core.Models; // For Result
 using SnapDog2.Core.Enums; // For CommandSource if defined in Core
 
 /// <summary>
 /// Command to set the volume for a specific zone.
 /// </summary>
-public record SetZoneVolumeCommand : IRequest<Result> // Returns non-generic Result (success/failure)
+public record SetZoneVolumeCommand : ICommand<Result> // Returns non-generic Result (success/failure)
 {
     /// <summary>
     /// Gets the ID of the target zone.
@@ -104,7 +104,7 @@ namespace SnapDog2.Server.Features.Zones.Commands;
 
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Cortex.Mediator;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Abstractions; // For IZoneManager
 using SnapDog2.Core.Models;
@@ -112,7 +112,7 @@ using SnapDog2.Core.Models;
 /// <summary>
 /// Handles the SetZoneVolumeCommand.
 /// </summary>
-public partial class SetZoneVolumeCommandHandler : IRequestHandler<SetZoneVolumeCommand, Result> // Partial for logging
+public partial class SetZoneVolumeCommandHandler : ICommandHandler<SetZoneVolumeCommand, Result> // Partial for logging
 {
     private readonly IZoneManager _zoneManager; // Inject Core Abstraction
     private readonly ILogger<SetZoneVolumeCommandHandler> _logger;
@@ -164,13 +164,13 @@ public partial class SetZoneVolumeCommandHandler : IRequestHandler<SetZoneVolume
 namespace SnapDog2.Server.Features.Clients.Queries;
 
 using System.Collections.Generic;
-using MediatR;
+using Cortex.Mediator;
 using SnapDog2.Core.Models; // For Result<T> and ClientState
 
 /// <summary>
 /// Query to retrieve the state of all known clients.
 /// </summary>
-public record GetAllClientsQuery : IRequest<Result<List<ClientState>>>; // Response is list of Core models
+public record GetAllClientsQuery : IQuery<Result<List<ClientState>>>; // Response is list of Core models
 
 // Defined in /Server/Features/Clients/Queries/GetAllClientsQueryHandler.cs
 namespace SnapDog2.Server.Features.Clients.Queries;
@@ -180,7 +180,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper; // Optional: For mapping
-using MediatR;
+using Cortex.Mediator;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Abstractions; // For ISnapcastStateRepository, IClientManager
 using SnapDog2.Core.Models;      // For ClientState
@@ -189,7 +189,7 @@ using Sturd.SnapcastNet.Models; // For raw Snapcast Client model
 /// <summary>
 /// Handles the GetAllClientsQuery.
 /// </summary>
-public partial class GetAllClientsQueryHandler : IRequestHandler<GetAllClientsQuery, Result<List<ClientState>>>
+public partial class GetAllClientsQueryHandler : IQueryHandler<GetAllClientsQuery, Result<List<ClientState>>>
 {
     private readonly ISnapcastStateRepository _snapcastStateRepo;
     private readonly IClientManager _clientManager; // For mapping internal ID/Zone Name
@@ -265,7 +265,7 @@ public partial class GetAllClientsQueryHandler : IRequestHandler<GetAllClientsQu
 namespace SnapDog2.Server.Notifications;
 
 using System;
-using MediatR;
+using Cortex.Mediator;
 
 /// <summary>
 /// Notification published when a tracked status changes within the system.
@@ -290,7 +290,7 @@ namespace SnapDog2.Infrastructure.Mqtt; // Example location for handler
 
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Cortex.Mediator;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Abstractions; // For IMqttService
 using SnapDog2.Server.Notifications; // Reference notification definition
@@ -394,14 +394,14 @@ Logs request handling details, duration, and success/failure status using the `I
 ```csharp
 // Located in /Server/Behaviors/LoggingBehavior.cs
 namespace SnapDog2.Server.Behaviors;
-// ... usings (MediatR, Logging, Diagnostics, Core Models) ...
+// ... usings (Cortex.Mediator, Logging, Diagnostics, Core Models) ...
 
 public partial class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : IRequest<TResponse>
+    where TRequest : IMessage<TResponse>
     where TResponse : IResult // Constrain to ensure response has IsSuccess etc.
 {
     private readonly ILogger<LoggingBehavior<TRequest, TResponse>> _logger;
-    private static readonly ActivitySource ActivitySource = new("SnapDog2.MediatR");
+    private static readonly ActivitySource ActivitySource = new("SnapDog2.CortexMediator");
 
     // ... LoggerMessage definitions (LogHandling, LogSuccess, LogFailure, LogException) ...
 
@@ -447,10 +447,10 @@ Executes registered FluentValidation validators for the incoming `TRequest`. **T
 ```csharp
 // Located in /Server/Behaviors/ValidationBehavior.cs
 namespace SnapDog2.Server.Behaviors;
-// ... usings (MediatR, Logging, Diagnostics, FluentValidation) ...
+// ... usings (Cortex.Mediator, Logging, Diagnostics, FluentValidation) ...
 
 public partial class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : IRequest<TResponse>
+    where TRequest : IMessage<TResponse>
     // No IResult constraint here, validation happens before handler execution
 {
     private readonly IEnumerable<IValidator<TRequest>> _validators;
@@ -519,11 +519,11 @@ Measures execution time of the subsequent pipeline stages (Validation + Handler)
 ```csharp
 // Located in /Server/Behaviors/PerformanceBehavior.cs
 namespace SnapDog2.Server.Behaviors;
-// ... usings (MediatR, Logging, Diagnostics, Core Abstractions/Models) ...
+// ... usings (Cortex.Mediator, Logging, Diagnostics, Core Abstractions/Models) ...
 using System.Diagnostics;
 
 public partial class PerformanceBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : IRequest<TResponse>
+    where TRequest : IMessage<TResponse>
 {
     private readonly ILogger<PerformanceBehavior<TRequest, TResponse>> _logger;
     private readonly IMetricsService _metricsService; // Core Abstraction for metrics
@@ -567,7 +567,7 @@ public partial class PerformanceBehavior<TRequest, TResponse> : IPipelineBehavio
             var requestType = requestName.Contains("Query") ? "Query" : "Command";
 
             // Record metric (Implementation in Infrastructure.Observability)
-            _metricsService.RecordMediatrRequestDuration(requestType, requestName, elapsedMilliseconds, success);
+            _metricsService.RecordCortexMediatorRequestDuration(requestType, requestName, elapsedMilliseconds, success);
 
             if (elapsedMilliseconds > LongRunningThresholdMilliseconds)
             {
@@ -580,7 +580,7 @@ public partial class PerformanceBehavior<TRequest, TResponse> : IPipelineBehavio
 
 ## 6.5. Communication Layer Integration
 
-Adapters (API Controllers, MQTT Service, KNX Service) convert external inputs into MediatR `IRequest` objects and dispatch them using `IMediator.Send()`.
+Adapters (API Controllers, MQTT Service, KNX Service) convert external inputs into Cortex.Mediator `ICommand` and `IQuery` objects and dispatch them using `IMediator.Send()`.
 
 ## 6.6. Status Update Mechanism
 

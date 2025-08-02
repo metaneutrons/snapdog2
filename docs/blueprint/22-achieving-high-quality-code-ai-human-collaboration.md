@@ -1,4 +1,4 @@
-# 21. Achieving High-Quality Code (AI & Human Collaboration)
+# 20. Achieving High-Quality Code (AI & Human Collaboration)
 
 This blueprint provides a comprehensive and detailed specification for the SnapDog2 application. However, translating even a detailed blueprint into exceptional, "award-winning" code requires more than just the specification itself. This is particularly true when leveraging AI code generation tools, which excel at implementing patterns but may require guidance for specific logic, edge cases, and overall quality attributes.
 
@@ -23,9 +23,9 @@ This section outlines a recommended collaborative process between human develope
     * **Deconstruct Plan Tasks:** Do not feed high-level implementation plan tasks (e.g., "Implement `KnxService`") directly to the AI. Instead, break these down into smaller, concrete sub-tasks based on the detailed specifications in the blueprint.
     * **Contextual Prompts:** Each prompt should provide sufficient context:
         * **Goal:** Clearly state the objective (e.g., "Implement the `KnxService.OnGroupValueReceived` event handler method").
-        * **References:** Explicitly reference relevant blueprint sections, interfaces, classes, and models (e.g., "This handler should process incoming KNX telegrams as described in Section 12.2. Implement the command mapping logic defined in Section 9.3.3.1 using the `Knx.Falcon.GroupAddress` type. Dispatch the resulting MediatR command (defined in Section 6) using the injected `IMediator`.").
+        * **References:** Explicitly reference relevant blueprint sections, interfaces, classes, and models (e.g., "This handler should process incoming KNX telegrams as described in Section 12.2. Implement the command mapping logic defined in Section 9.3.3.1 using the `Knx.Falcon.GroupAddress` type. Dispatch the resulting Cortex.Mediator command (defined in Section 6) using the injected `IMediator`.").
         * **Inputs/Outputs:** Define expected parameters and return types (e.g., method signature, use of `Result<T>`).
-        * **Key Logic:** Outline essential steps or algorithms if complex (e.g., "First, parse the GroupAddress. Then, look up the corresponding command mapping. Next, convert the GroupValue based on the expected DPT. Finally, create and send the MediatR command.").
+        * **Key Logic:** Outline essential steps or algorithms if complex (e.g., "First, parse the GroupAddress. Then, look up the corresponding command mapping. Next, convert the GroupValue based on the expected DPT. Finally, create and send the Cortex.Mediator command.").
         * **Convention Reminders:** Reiterate critical conventions ("Ensure all logging uses the LoggerMessage pattern", "Implement robust error handling using the Result pattern", "Add XML documentation comments for the method and its parameters").
 
 3. **Test Case Generation & Implementation:**

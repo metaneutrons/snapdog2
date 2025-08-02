@@ -26,7 +26,7 @@ These packages provide fundamental application building blocks and utility funct
 | `Microsoft.Extensions.Hosting`    | `9.0.3`          | Application hosting, DI, Configuration, Logging | Core requirement                    |
 | `Microsoft.AspNetCore.App.Ref`    | `9.0.3`          | ASP.NET Core framework reference (for API Layer) | Metapackage for web functionalities |
 | `System.Reactive`                 | `6.0.1`          | Reactive Extensions library                    | *(Only if explicitly used for complex event processing)* |
-| `MediatR`                         | `12.5.0`         | Mediator pattern implementation (CQRS)         | Core to application architecture      |
+| `Cortex.Mediator`                 | `1.7.0`          | Mediator pattern implementation (CQRS)         | Core to application architecture      |
 | `FluentValidation.AspNetCore`     | `11.11.0`        | Validation library & ASP.NET Core integration   | Used by ValidationBehavior & API    |
 | `EnvoyConfig`                     | `1.0.5`          | Environment variable configuration binding      | Replaces custom EnvConfigHelper     |
 
@@ -120,7 +120,7 @@ All NuGet package versions listed above **must** be defined centrally in the `Di
   <ItemGroup>
     <!-- Framework & Core -->
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.3" />
-    <PackageVersion Include="MediatR" Version="12.5.0" />
+    <PackageVersion Include="Cortex.Mediator" Version="1.7.0" />
     <PackageVersion Include="FluentValidation.AspNetCore" Version="11.11.0" />
     <PackageVersion Include="EnvoyConfig" Version="1.0.0" />
     <!-- Resilience -->
@@ -173,7 +173,7 @@ Project files (`.csproj`) then reference packages without version numbers:
 ```xml
 <!-- Example in SnapDog2.csproj -->
 <ItemGroup>
-  <PackageReference Include="MediatR" />
+  <PackageReference Include="Cortex.Mediator" />
   <PackageReference Include="Serilog.AspNetCore" />
   <PackageReference Include="Sturd.SnapcastNet" />
   <PackageReference Include="Knx.Falcon.Sdk" />

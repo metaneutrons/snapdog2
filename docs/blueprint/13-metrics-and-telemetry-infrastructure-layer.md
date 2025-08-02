@@ -8,7 +8,7 @@ For a self-hosted application like SnapDog2, observability should be powerful ye
 
 The application is instrumented with OpenTelemetry to provide all three signals (logs, traces, metrics), allowing the user to choose the desired backend. The three pillars of observability are:
 
-* **Distributed Tracing:** To track the flow of requests and operations across different logical components (API, MediatR Handlers, Infrastructure Services).
+* **Distributed Tracing:** To track the flow of requests and operations across different logical components (API, Cortex.Mediator Handlers, Infrastructure Services).
 * **Metrics:** To quantify application performance, resource usage, and key operational counts (e.g., commands processed, errors).
 * **Correlated Logging:** To link log events directly to the specific trace and span that generated them, significantly simplifying debugging.
 
@@ -17,7 +17,7 @@ The application is instrumented with OpenTelemetry to provide all three signals 
 OpenTelemetry instrumentation aims to cover critical paths and components:
 
 * **Incoming Requests:** ASP.NET Core instrumentation automatically traces incoming API requests.
-* **Internal Processing:** MediatR pipeline behaviors (`LoggingBehavior`, `PerformanceBehavior`) are instrumented to create spans representing command/query handling.
+* **Internal Processing:** Cortex.Mediator pipeline behaviors (`LoggingBehavior`, `PerformanceBehavior`) are instrumented to create spans representing command/query handling.
 * **External Dependencies:**
   * `HttpClient` instrumentation automatically traces outgoing HTTP requests (e.g., to Subsonic).
   * Manual instrumentation (creating specific `Activity` spans) is applied within key methods of infrastructure services (`SnapcastService`, `KnxService`, `MqttService`, `MediaPlayerService`) for significant operations or external interactions not covered automatically.
@@ -27,11 +27,11 @@ OpenTelemetry instrumentation aims to cover critical paths and components:
 
 1. **Metrics:**
     * **Goal:** Provide quantitative data on application health and performance.
-    * **Implementation:** Uses `System.Diagnostics.Metrics.Meter`. Standard instruments provided by OpenTelemetry (`AspNetCore`, `HttpClient`, `Runtime`, `Process`) are enabled. Custom metrics (e.g., MediatR request counts/duration, playback events) defined via `IMetricsService`.
+    * **Implementation:** Uses `System.Diagnostics.Metrics.Meter`. Standard instruments provided by OpenTelemetry (`AspNetCore`, `HttpClient`, `Runtime`, `Process`) are enabled. Custom metrics (e.g., Cortex.Mediator request counts/duration, playback events) defined via `IMetricsService`.
     * **Export:** Primarily exported in **Prometheus** format via an ASP.NET Core endpoint (`/metrics`), configured via `SNAPDOG_PROMETHEUS_*` variables (Section 10). Console exporter used as fallback/for debugging.
 2. **Tracing:**
     * **Goal:** Visualize the flow and duration of operations across components.
-    * **Implementation:** Uses `System.Diagnostics.ActivitySource`. Automatic instrumentation for ASP.NET Core and HttpClient. Manual instrumentation (`ActivitySource.StartActivity()`) within MediatR behaviors and key infrastructure service methods.
+    * **Implementation:** Uses `System.Diagnostics.ActivitySource`. Automatic instrumentation for ASP.NET Core and HttpClient. Manual instrumentation (`ActivitySource.StartActivity()`) within Cortex.Mediator behaviors and key infrastructure service methods.
     * **Export:** Exported using the **OpenTelemetry Protocol (OTLP)**, configured via `SNAPDOG_TELEMETRY_OTLP_*` variables (Section 10). This allows sending traces to various compatible backends like Jaeger, Tempo, Grafana Cloud Traces, etc. Console exporter used as fallback/for debugging.
     * **Sampling:** Configured via `SNAPDOG_TELEMETRY_SAMPLING_RATE` (default 1.0 = sample all traces).
 3. **Logging:**
@@ -238,7 +238,7 @@ namespace SnapDog2.Core.Abstractions;
 /// </summary>
 public interface IMetricsService
 {
-    void RecordMediatrRequestDuration(string requestType, string requestName, double durationMs, bool success);
+    void RecordCortexMediatorRequestDuration(string requestType, string requestName, double durationMs, bool success);
     void RecordZonePlaybackEvent(int zoneId, string eventType); // e.g., "play", "stop", "pause", "next", "prev"
     void IncrementClientConnectionCounter(bool connected); // True for connect, false for disconnect
     void RecordExternalCallDuration(string serviceName, string operation, double durationMs, bool success);
@@ -259,8 +259,8 @@ using SnapDog2.Worker.DI; // To access the static Meter instance defined in Obse
 public class OpenTelemetryMetricsService : IMetricsService
 {
     // Define instruments using the shared Meter
-    private readonly Counter<long> _mediatrRequestCounter;
-    private readonly Histogram<double>_mediatrRequestDuration;
+    private readonly Counter<long> _cortexMediatorRequestCounter;
+    private readonly Histogram<double>_cortexMediatorRequestDuration;
     private readonly Counter<long> _playbackEventCounter;
     private readonly Counter<long>_clientConnectionCounter;
     private readonly Histogram<double> _externalCallDuration;
@@ -270,14 +270,14 @@ public class OpenTelemetryMetricsService : IMetricsService
         // Use the static Meter defined in ObservabilityExtensions
         var meter = ObservabilityExtensions.SnapDogMeter;
 
-        _mediatrRequestCounter = meter.CreateCounter<long>(
-            "snapdog.mediatr.requests.count",
-            description: "Number of MediatR requests processed.");
+        _cortexMediatorRequestCounter = meter.CreateCounter<long>(
+            "snapdog.cortex_mediator.requests.count",
+            description: "Number of Cortex.Mediator requests processed.");
 
-        _mediatrRequestDuration = meter.CreateHistogram<double>(
-            "snapdog.mediatr.requests.duration",
+        _cortexMediatorRequestDuration = meter.CreateHistogram<double>(
+            "snapdog.cortex_mediator.requests.duration",
             unit: "ms",
-            description: "Duration of MediatR request handling.");
+            description: "Duration of Cortex.Mediator request handling.");
 
         _playbackEventCounter = meter.CreateCounter<long>(
              "snapdog.zone.playback.events.count",
@@ -293,7 +293,7 @@ public class OpenTelemetryMetricsService : IMetricsService
              description: "Duration of calls to external services (Snapcast, Subsonic, KNX, etc.).");
     }
 
-    public void RecordMediatrRequestDuration(string requestType, string requestName, double durationMs, bool success)
+    public void RecordCortexMediatorRequestDuration(string requestType, string requestName, double durationMs, bool success)
     {
         var tags = new TagList // Use TagList for performance
         {
@@ -301,8 +301,8 @@ public class OpenTelemetryMetricsService : IMetricsService
             { "request.name", requestName },
             { "success", success }
          };
-        _mediatrRequestCounter.Add(1, tags);
-        _mediatrRequestDuration.Record(durationMs, tags);
+        _cortexMediatorRequestCounter.Add(1, tags);
+        _cortexMediatorRequestDuration.Record(durationMs, tags);
     }
 
     public void RecordZonePlaybackEvent(int zoneId, string eventType)
@@ -333,7 +333,7 @@ public class OpenTelemetryMetricsService : IMetricsService
 }
 ```
 
-Inject `IMetricsService` into components (like MediatR Behaviors, Infrastructure Services) where metrics need to be recorded.
+Inject `IMetricsService` into components (like Cortex.Mediator Behaviors, Infrastructure Services) where metrics need to be recorded.
 
 ## 13.6. Manual Tracing Instrumentation
 
@@ -376,7 +376,7 @@ public partial class SubsonicService : ISubsonicService
      }
 }
 
-// In MediatR LoggingBehavior (/Server/Behaviors/LoggingBehavior.cs)
+// In Cortex.Mediator LoggingBehavior (/Server/Behaviors/LoggingBehavior.cs)
 // using var activity = _activitySource.StartActivity($"{requestType}:{requestName}", ActivityKind.Internal);
 // ... set tags, status, record exceptions based on handler outcome ...
 ```

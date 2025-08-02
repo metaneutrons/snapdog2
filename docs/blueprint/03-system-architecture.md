@@ -2,14 +2,14 @@
 
 ## 3.1. High-Level Architecture
 
-SnapDog2 employs a **modular, service-oriented architecture** designed for maintainability, testability, and extensibility, contained within a **single .NET project structure** (`SnapDog2.csproj`). Logical separation between concerns is achieved through disciplined use of folders and namespaces (`Core`, `Server`, `Infrastructure`, `Api`, `Worker`). The architecture leverages the **Command Query Responsibility Segregation (CQRS)** pattern, facilitated by the **MediatR** library, to decouple command/query dispatch from handling logic. This approach coordinates the various services and infrastructure adapters required to manage multi-zone audio playback via Snapcast and integrate with external systems like Subsonic, MQTT, and KNX.
+SnapDog2 employs a **modular, service-oriented architecture** designed for maintainability, testability, and extensibility, contained within a **single .NET project structure** (`SnapDog2.csproj`). Logical separation between concerns is achieved through disciplined use of folders and namespaces (`Core`, `Server`, `Infrastructure`, `Api`, `Worker`). The architecture leverages the **Command Query Responsibility Segregation (CQRS)** pattern, facilitated by the **Cortex.Mediator** library, to decouple command/query dispatch from handling logic. This approach coordinates the various services and infrastructure adapters required to manage multi-zone audio playback via Snapcast and integrate with external systems like Subsonic, MQTT, and KNX.
 
 The key architectural principles guiding the design are:
 
-* **Modularity & Encapsulation**: Components are organized into logical layers (folders/namespaces). Interactions occur primarily through interfaces defined in the `Core` layer and via MediatR messages (`IRequest`, `INotification`), minimizing direct dependencies between concrete implementations in different layers. Infrastructure adapters (MQTT, KNX, API, Snapcast, Subsonic) are designed to be potentially replaceable or removable with minimal impact on the core server logic.
-* **Dependency Rule**: Dependencies flow inwards. `Infrastructure`, `Server`, and `Api` layers depend on `Core`. `Server` depends only on `Core` abstractions, not concrete `Infrastructure` implementations. `Api` depends on `Server` (for MediatR messages) and `Core`. `Worker` (the composition root) depends on all layers for registration.
-* **CQRS Pattern**: MediatR is used to separate Commands (actions intended to change state, implementing `IRequest<Result>`) and Queries (requests to retrieve data, implementing `IRequest<Result<T>>`) from their respective Handlers located in the `Server` layer. This simplifies handler logic and promotes separation.
-* **Asynchronous Communication**: The system relies heavily on `async`/`await` for I/O operations. MediatR facilitates asynchronous command/query handling. Internal eventing and state propagation between loosely coupled components occur via MediatR `INotification` messages.
+* **Modularity & Encapsulation**: Components are organized into logical layers (folders/namespaces). Interactions occur primarily through interfaces defined in the `Core` layer and via Cortex.Mediator messages (`ICommand`, `IQuery`, `INotification`), minimizing direct dependencies between concrete implementations in different layers. Infrastructure adapters (MQTT, KNX, API, Snapcast, Subsonic) are designed to be potentially replaceable or removable with minimal impact on the core server logic.
+* **Dependency Rule**: Dependencies flow inwards. `Infrastructure`, `Server`, and `Api` layers depend on `Core`. `Server` depends only on `Core` abstractions, not concrete `Infrastructure` implementations. `Api` depends on `Server` (for Cortex.Mediator messages) and `Core`. `Worker` (the composition root) depends on all layers for registration.
+* **CQRS Pattern**: Cortex.Mediator is used to separate Commands (actions intended to change state, implementing `IRequest<Result>`) and Queries (requests to retrieve data, implementing `IQuery<Result<T>>`) from their respective Handlers located in the `Server` layer. This simplifies handler logic and promotes separation.
+* **Asynchronous Communication**: The system relies heavily on `async`/`await` for I/O operations. Cortex.Mediator facilitates asynchronous command/query handling. Internal eventing and state propagation between loosely coupled components occur via Cortex.Mediator `INotification` messages.
 * **Clear State Management**: A distinction is made between SnapDog2's internal application state (`ClientState`, `ZoneState` records managed by `/Server` components) and the raw, last-known state received from the Snapcast server (held in the `SnapcastStateRepository` within `/Infrastructure`). See Section 4 for details.
 
 ### 3.1.1. Component Diagram (Logical Layers in Single Project)
@@ -35,7 +35,7 @@ graph TD
 
     subgraph "Server Layer (Folder: /Server)"
         style ServerLayer fill:#C9DAF8,stroke:#333
-        MBUS[MediatR Bus]:::server
+        MBUS[Cortex.Mediator Bus]:::server
         Pipeline[Pipeline Behaviors (/Server/Behaviors)]:::server
         Handlers[Cmd/Query/Notif Handlers (/Server/Features)]:::server
         CoreManagers[Core Managers (Zone/Client/Playlist) (/Server/Managers)]:::server
@@ -62,7 +62,7 @@ graph TD
 
     %% Flow Definitions
     ExternalSystems -->|Network Protocols| EntryPoints
-    EntryPoints -->|Send MediatR Request| MBUS
+    EntryPoints -->|Send Cortex.Mediator Request| MBUS
     MBUS -->|Request Handling Pipeline| Pipeline
     Pipeline -->|Dispatch to Handler| Handlers
     Handlers -->|Use Case Logic| CoreManagers
@@ -102,7 +102,7 @@ sequenceDiagram
     participant ClientApp as External MQTT Client
     participant MqttBroker as MQTT Broker
     participant MqttSvc as MqttService (/Infrastructure/Mqtt)
-    participant Med as Mediator (MediatR)
+    participant Med as Mediator (Cortex.Mediator)
     participant LoggingBh as LoggingBehavior (/Server/Behaviors)
     participant ValidationBh as ValidationBehavior (/Server/Behaviors)
     participant PlayCmdH as PlayZoneCommandHandler (/Server/Features/Zones)
@@ -143,7 +143,7 @@ sequenceDiagram
     Med-->>MqttSvc: Result.Success()
 
     %% Notification Handling Flow
-    Med->>NotifyHandler: Handle(PlaybackStateChangedNotification) ## MediatR delivers notification
+    Med->>NotifyHandler: Handle(PlaybackStateChangedNotification) ## Cortex.Mediator delivers notification
     NotifyHandler->>MqttSvc: PublishAsync("snapdog/zones/1/state", "play", retain=true) ## Calls Infra Service
     MqttSvc->>MqttBroker: Publish(...)
 ```
@@ -163,11 +163,11 @@ Contains the foundational, dependency-free elements of the application.
 
 Contains the core application logic, orchestration, and features. Depends only on `/Core`.
 
-* **MediatR Handlers (`/Server/Features/*`)**: Implement `IRequestHandler<TCommand, TResponse>` and `IRequestHandler<TQuery, TResponse>`. Contain the main business logic for executing commands and fulfilling queries. Orchestrate calls to Managers and Infrastructure Abstractions. Organized by feature/domain area (e.g., `/Zones`, `/Clients`). Includes `ZoneService` implementation.
+* **Cortex.Mediator Handlers (`/Server/Features/*`)**: Implement `ICommandHandler<TCommand, TResponse>` and `IQueryHandler<TQuery, TResponse>`. Contain the main business logic for executing commands and fulfilling queries. Orchestrate calls to Managers and Infrastructure Abstractions. Organized by feature/domain area (e.g., `/Zones`, `/Clients`). Includes `ZoneService` implementation.
 * **Core Managers (`/Server/Managers`)**: Classes like `ZoneManager`, `ClientManager`, `PlaylistManager` encapsulate logic related to managing collections of core entities, handling lifecycle events, maintaining internal mappings (e.g., SnapDog ID <-> Snapcast ID), and coordinating complex operations. They interact with Infrastructure via abstractions.
-* **MediatR Messages (`/Server/Features/.../Commands`, `/Server/Features/.../Queries`, `/Server/Notifications`)**: Definitions of the `IRequest` (Commands/Queries) and `INotification` types used for communication via the MediatR bus.
-* **Pipeline Behaviors (`/Server/Behaviors`)**: Implement `IPipelineBehavior<,>` for cross-cutting concerns like Logging, Validation, Performance Monitoring applied to MediatR requests.
-* **Validation (`/Server/Features/.../Validators`)**: Contains FluentValidation `AbstractValidator<T>` classes for specific MediatR commands or API request DTOs.
+* **Cortex.Mediator Messages (`/Server/Features/.../Commands`, `/Server/Features/.../Queries`, `/Server/Notifications`)**: Definitions of the `ICommand`, `IQuery` (Commands/Queries) and `INotification` types used for communication via the Cortex.Mediator bus.
+* **Pipeline Behaviors (`/Server/Behaviors`)**: Implement `IPipelineBehavior<,>` for cross-cutting concerns like Logging, Validation, Performance Monitoring applied to Cortex.Mediator requests.
+* **Validation (`/Server/Features/.../Validators`)**: Contains FluentValidation `AbstractValidator<T>` classes for specific Cortex.Mediator commands or API request DTOs.
 
 ### 3.2.3. `/Infrastructure` Layer
 
@@ -184,8 +184,8 @@ Provides concrete implementations for `/Core` abstractions and handles all exter
 
 Handles HTTP requests and responses. Depends on `/Server` and `/Core`.
 
-* **Controllers (`/Api/Controllers`)**: ASP.NET Core Controllers defining API endpoints. Keep controllers thin: parse requests, create MediatR commands/queries, dispatch via `IMediator`, format `Result` into `ApiResponse<T>`.
-* **DTOs (`/Api/Models`)**: Request models specific to API endpoints (if different from MediatR commands) and potentially response DTOs (though often `/Core/Models` are used directly).
+* **Controllers (`/Api/Controllers`)**: ASP.NET Core Controllers defining API endpoints. Keep controllers thin: parse requests, create Cortex.Mediator commands/queries, dispatch via `IMediator`, format `Result` into `ApiResponse<T>`.
+* **DTOs (`/Api/Models`)**: Request models specific to API endpoints (if different from Cortex.Mediator commands) and potentially response DTOs (though often `/Core/Models` are used directly).
 * **Authentication (`/Api/Auth`)**: Implementation of `ApiKeyAuthenticationHandler`.
 * **Middleware/Filters**: Custom ASP.NET Core middleware or filters if needed (e.g., global exception handling formatting errors as `ApiResponse`).
 

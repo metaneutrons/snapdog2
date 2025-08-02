@@ -1,8 +1,8 @@
-# 20. Appendices
+# 19. Appendices
 
 This section contains supplementary information, including a glossary of terms, references to external systems and design patterns, and specific technical details like KNX Datapoint mappings.
 
-## 20.1. Glossary
+## 19.1. Glossary
 
 This glossary defines key terms used throughout the SnapDog2 blueprint for clarity and consistency.
 
@@ -10,15 +10,15 @@ This glossary defines key terms used throughout the SnapDog2 blueprint for clari
 | :---------------------- | :--------------------------------------------------------------------------------------------------- |
 | **Abstraction**         | An interface or abstract class defined in the `/Core` layer, representing a contract for a service or component implemented in another layer (typically `/Infrastructure`). |
 | **ActivitySource**      | .NET class (`System.Diagnostics.ActivitySource`) used within OpenTelemetry for creating traces and spans. |
-| **API Layer**           | The logical layer (`/Api` folder) responsible for handling incoming HTTP requests, exposing the REST API, performing authentication/authorization, and mapping requests/responses to/from the Server layer (MediatR). |
+| **API Layer**           | The logical layer (`/Api` folder) responsible for handling incoming HTTP requests, exposing the REST API, performing authentication/authorization, and mapping requests/responses to/from the Server layer (Cortex.Mediator). |
 | **Application Layer**   | See **Server Layer**.                                                                                  |
 | **Client** (Snapcast)   | A Snapcast client endpoint device (e.g., a speaker connected to a Raspberry Pi) that receives and plays an audio stream from the Snapcast server. Identified by a unique ID (often MAC address). |
 | **Client** (SnapDog2)   | SnapDog2's internal representation and management object for a Snapcast Client, identified by an internal integer ID and associated with a `ClientState` record. |
-| **Command** (CQRS)      | An instruction (typically an `IRequest<Result>` MediatR message) representing an intent to change the system's state (e.g., Play, Set Volume, Assign Client). Handled by Command Handlers. |
+| **Command** (CQRS)      | An instruction (typically an `IRequest<Result>` Cortex.Mediator message) representing an intent to change the system's state (e.g., Play, Set Volume, Assign Client). Handled by Command Handlers. |
 | **Command Framework**   | The definition (Section 9) of logical commands and status updates supported by SnapDog2 across different interfaces (MQTT, KNX, API). |
 | **Configuration**       | Application settings, primarily loaded from environment variables into strongly-typed classes (Section 10). |
 | **Core Layer**          | The central, innermost logical layer (`/Core` folder) containing abstractions (interfaces), domain models (records), shared patterns (`Result<T>`), enums, and configuration models. Has no dependencies on other layers. |
-| **CQRS**                | Command Query Responsibility Segregation. An architectural pattern separating operations that change state (Commands) from operations that read state (Queries). Implemented via MediatR. |
+| **CQRS**                | Command Query Responsibility Segregation. An architectural pattern separating operations that change state (Commands) from operations that read state (Queries). Implemented via Cortex.Mediator. |
 | **Dev Container**       | A Docker-based development environment configured via `.devcontainer` files for VS Code, ensuring consistency (Section 15). |
 | **DI (Dependency Injection)**| A design pattern where dependencies are provided (injected) into classes rather than created internally, typically managed by a DI container (e.g., .NET's built-in `IServiceProvider`). |
 | **DPT** (KNX)           | Datapoint Type. A KNX standard defining the data structure and interpretation of values transmitted on the bus for specific functions (e.g., DPT 1.001 for On/Off, DPT 5.001 for Percentage). |
@@ -28,7 +28,7 @@ This glossary defines key terms used throughout the SnapDog2 blueprint for clari
 | **FIFO** (Named Pipe)   | A Linux inter-process communication mechanism used as an audio sink for Snapcast streams. SnapDog2's `MediaPlayerService` writes decoded audio to these pipes. |
 | **GA** (KNX)            | Group Address. The logical address on the KNX bus used to link devices for communication (e.g., `1/2/3`). Used to trigger commands or report status. |
 | **Group** (Snapcast)    | A set of Snapcast clients synchronized to play the same audio stream from a specific Snapcast sink. Managed 1:1 with SnapDog2 Zones. |
-| **Handler** (MediatR)   | A class implementing `IRequestHandler<TRequest, TResponse>` or `INotificationHandler<TNotification>` responsible for processing a specific Command, Query, or Notification. Resides in `/Server/Features`. |
+| **Handler** (Cortex.Mediator)   | A class implementing `IMessageHandler<TRequest, TResponse>` or `INotificationHandler<TNotification>` responsible for processing a specific Command, Query, or Notification. Resides in `/Server/Features`. |
 | **Hosted Service**      | A .NET background service implementing `IHostedService`, managed by the Generic Host, used for long-running tasks or application startup orchestration (`/Worker/Worker.cs`). |
 | **Idempotency**         | An operation that can be applied multiple times without changing the result beyond the initial application (e.g., `DELETE /resource/123`, `PUT /resource/123`). |
 | **Infrastructure Layer**| The logical layer (`/Infrastructure` folder) containing concrete implementations of Core abstractions. Handles interactions with external libraries and systems (databases, network protocols, file system, etc.). |
@@ -37,26 +37,26 @@ This glossary defines key terms used throughout the SnapDog2 blueprint for clari
 | **LibVLCSharp**         | .NET bindings for the cross-platform libVLC media player library, used for audio decoding and streaming to Snapcast sinks. |
 | **LWT** (MQTT Last Will)| A feature where the MQTT broker publishes a predefined message on a client's behalf if the client disconnects ungracefully. Used for `SYSTEM_STATUS`. |
 | **Mapping**             | The process of converting data from one model structure to another (e.g., from `Sturd.SnapcastNet.Models.Client` to `SnapDog2.Core.Models.ClientState`). Often done in Managers or Handlers. |
-| **MediatR**             | A popular .NET library implementing the Mediator and CQRS patterns, used for decoupling command/query/notification dispatching and handling. |
-| **MediatR Pipeline**    | A sequence of `IPipelineBehavior` instances that intercept and process MediatR requests before they reach the handler, used for cross-cutting concerns. |
+| **Cortex.Mediator**             | A popular .NET library implementing the Mediator and CQRS patterns, used for decoupling command/query/notification dispatching and handling. |
+| **Cortex.Mediator Pipeline**    | A sequence of `IPipelineBehavior` instances that intercept and process Cortex.Mediator requests before they reach the handler, used for cross-cutting concerns. |
 | **Meter** (OpenTelemetry)| .NET class (`System.Diagnostics.Metrics.Meter`) used to create and record OpenTelemetry metrics (Counters, Histograms, etc.). |
 | **Metrics**             | Quantitative measurements about application performance and behavior (e.g., request duration, error rates). Collected via OpenTelemetry, exported via Prometheus. |
 | **Monolithic Project**  | A software architecture where all application layers and components reside within a single deployable project/assembly (`SnapDog2.csproj`). Logical separation is maintained via folders/namespaces. |
 | **MQTT**                | Message Queuing Telemetry Transport. A lightweight publish/subscribe messaging protocol used for communication with smart home systems and potentially UI clients. |
 | **MQTTnet**             | The .NET library used for MQTT client implementation. |
-| **Notification** (MediatR)| An `INotification` message representing an event that has occurred within the application. Published via `IMediator.Publish` and handled by zero or more `INotificationHandler`s. |
+| **Notification** (Cortex.Mediator)| An `INotification` message representing an event that has occurred within the application. Published via `IMediator.Publish` and handled by zero or more `INotificationHandler`s. |
 | **Observability**       | The ability to understand the internal state and behavior of the system based on its outputs (Logs, Metrics, Traces). Implemented via OpenTelemetry. |
 | **OTLP** (OpenTelemetry Protocol)| The standardized protocol for exporting telemetry data (traces, metrics, logs) from OpenTelemetry-instrumented applications to compatible backends (like Jaeger, Tempo, Prometheus). |
 | **Playlist**            | A collection of tracks. Can originate from Subsonic or be the list of configured Radio stations. |
 | **Polly**               | A .NET library providing resilience and transient-fault-handling capabilities (e.g., Retry, Circuit Breaker, Timeout policies). |
 | **Prometheus**          | An open-source monitoring and alerting toolkit, used as the backend for storing and querying metrics collected via OpenTelemetry. |
-| **Query** (CQRS)        | An instruction (typically an `IRequest<Result<T>>` MediatR message) representing a request to retrieve data without changing system state. Handled by Query Handlers. |
+| **Query** (CQRS)        | An instruction (typically an `IQuery<Result<T>>` Cortex.Mediator message) representing a request to retrieve data without changing system state. Handled by Query Handlers. |
 | **Radio Playlist**      | A special, internally managed playlist (external index `1`) consisting of radio stations configured via environment variables. |
 | **Record** (C#)         | A reference type (or struct) providing simplified syntax for creating immutable objects with value-based equality semantics. Used extensively for models, commands, queries, etc. |
 | **Resilience**          | The ability of a system to handle failures gracefully and recover automatically. See Fault Tolerance. |
 | **Result Pattern**      | A design pattern (using `Result` and `Result<T>` classes) for explicitly representing the success or failure outcome of operations, including error details, without relying on exceptions for control flow. |
 | **Serilog**             | A popular structured logging library for .NET, used as the concrete implementation behind `Microsoft.Extensions.Logging`. |
-| **Server Layer**        | The logical layer (`/Server` folder) containing the core application logic, including MediatR handlers (Features), domain service logic (Managers), validation, and notification definitions. Depends only on `/Core`. |
+| **Server Layer**        | The logical layer (`/Server` folder) containing the core application logic, including Cortex.Mediator handlers (Features), domain service logic (Managers), validation, and notification definitions. Depends only on `/Core`. |
 | **Sink** (Snapcast)     | An audio input source configured in the Snapcast server. For SnapDog2, these are typically named pipes (FIFOs). |
 | **Snapcast Server**     | The external server application responsible for synchronizing audio streams to multiple Snapcast clients. |
 | **SnapcastStateRepository**| An infrastructure component (`/Infrastructure/Snapcast`) holding the last known raw state of the Snapcast server entities (`Client`, `Group`, etc.) in memory. |
@@ -69,9 +69,9 @@ This glossary defines key terms used throughout the SnapDog2 blueprint for clari
 | **Worker Layer**        | The top-level logical layer (`/Worker` folder) containing the application entry point (`Program.cs`), main hosted service, and Dependency Injection setup/composition root. |
 | **Zone** (SnapDog2)     | SnapDog2's logical representation of an audio zone, managing playback state, associated clients, and mapping 1:1 to a Snapcast Group. Identified by an internal integer ID. |
 
-## 20.2. References
+## 19.2. References
 
-### 20.2.1. External Systems & Libraries
+### 19.2.1. External Systems & Libraries
 
 * **Snapcast Server:** [badaix/snapcast (GitHub)](https://github.com/badaix/snapcast)
 * **Snapcast Client Library:** [Sturd.SnapcastNet (GitLab)](https://gitlab.com/sturd/snapcast-net) / [NuGet](https://www.nuget.org/packages/Sturd.SnapcastNet/) (v0.0.4+)
@@ -87,11 +87,11 @@ This glossary defines key terms used throughout the SnapDog2 blueprint for clari
 * **VLC Bindings:** [LibVLCSharp (GitHub)](https://github.com/videolan/libvlcsharp) / [NuGet](https://www.nuget.org/packages/LibVLCSharp/) (v3.8.2)
 * **Native LibVLC Binaries:** [VideoLAN.LibVLC.* (NuGet)](https://www.nuget.org/profiles/VideoLAN)
 
-### 20.2.2. .NET & Core Libraries
+### 19.2.2. .NET & Core Libraries
 
 * **.NET 9:** [Microsoft .NET Documentation](https://learn.microsoft.com/en-us/dotnet/)
 * **ASP.NET Core:** [Microsoft ASP.NET Core Documentation](https://learn.microsoft.com/en-us/aspnet/core/)
-* **MediatR:** [jbogard/MediatR (GitHub)](https://github.com/jbogard/MediatR)
+* **Cortex.Mediator:** [jbogard/Cortex.Mediator (GitHub)](https://github.com/jbogard/Cortex.Mediator)
 * **Polly:** [App-vNext/Polly (GitHub)](https://github.com/App-vNext/Polly)
 * **Serilog:** [serilog.net](https://serilog.net/)
 * **FluentValidation:** [fluentvalidation.net](https://fluentvalidation.net/)
@@ -101,13 +101,13 @@ This glossary defines key terms used throughout the SnapDog2 blueprint for clari
 * **Moq:** [moq/moq4 (GitHub)](https://github.com/moq/moq4)
 * **FluentAssertions:** [fluentassertions.com](https://fluentassertions.com/)
 
-### 20.2.3. Analysis & Style Tools
+### 19.2.3. Analysis & Style Tools
 
 * **StyleCop Analyzers:** [DotNetAnalyzers/StyleCopAnalyzers (GitHub)](https://github.com/DotNetAnalyzers/StyleCopAnalyzers)
 * **SonarAnalyzer for C#:** [SonarSource/sonar-dotnet (GitHub)](https://github.com/SonarSource/sonar-dotnet)
 * **.editorconfig:** [editorconfig.org](https://editorconfig.org/)
 
-### 20.2.4. Design Patterns & Principles
+### 19.2.4. Design Patterns & Principles
 
 * **SOLID Principles:** [Wikipedia](https://en.wikipedia.org/wiki/SOLID)
 * **CQRS (Command Query Responsibility Segregation):** [Martin Fowler's Bliki](https://martinfowler.com/bliki/CQRS.html)
@@ -116,7 +116,7 @@ This glossary defines key terms used throughout the SnapDog2 blueprint for clari
 * **Circuit Breaker Pattern:** [Microsoft Learn](https://learn.microsoft.com/en-us/azure/architecture/patterns/circuit-breaker)
 * **Clean Architecture:** [Uncle Bob Martin Blog (Conceptual)](http://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 
-## 20.3. KNX DPT Value Mapping Summary
+## 19.3. KNX DPT Value Mapping Summary
 
 This section summarizes the mapping between SnapDog2 internal values/states and KNX Datapoint Types (DPTs) used for communication via configured Group Addresses. Implementation occurs in `KnxService`.
 
@@ -159,7 +159,7 @@ This section summarizes the mapping between SnapDog2 internal values/states and 
   * Used for: `CLIENT_CONNECTED` Status (`_KNX_CONNECTED_STATUS`).
   * Mapping: Send `1` for Connected (`true`), `0` for Disconnected (`false`).
 
-## 20.4. Error Codes Reference
+## 19.4. Error Codes Reference
 
 *(This section to be populated during implementation)*
 

@@ -2,7 +2,7 @@
 
 ## 9.1. Overview of Command Structure
 
-The command framework provides a unified approach to controlling SnapDog2 across different communication protocols. It defines the **logical commands (actions) and status information (state)** required by the system, independent of the specific implementation (MQTT, KNX, API, MediatR). This definition serves as the canonical specification for system interactions.
+The command framework provides a unified approach to controlling SnapDog2 across different communication protocols. It defines the **logical commands (actions) and status information (state)** required by the system, independent of the specific implementation (MQTT, KNX, API, Cortex.Mediator). This definition serves as the canonical specification for system interactions.
 
 The framework is organized into three levels:
 
@@ -22,7 +22,7 @@ For each level, this section defines:
 * **Indexing:** All **Playlist and Track indices** referenced in external interfaces (MQTT, KNX, API) are **1-based**. Playlist index `1` is reserved for the configured Radio stations (See Section 10.2.2 for Radio Configuration).
 * **Internal Mapping:** The internal application logic (e.g., within `/Server` layer components like `PlaylistManager`) is responsible for mapping these 1-based external indices to 0-based internal list indices where necessary.
 * **KNX Limits:** For KNX DPT 5.010 (used for Track/Playlist indices), values greater than 255 cannot be represented. In such cases, the corresponding KNX Status GA **must** report `0`.
-* **MediatR:** Conceptual commands map to MediatR `IRequest<Result>` or `IRequest<Result<T>>` objects, while status updates often correspond to MediatR `INotification` publications handled by relevant infrastructure adapters. See Section 6 for MediatR implementation details.
+* **Cortex.Mediator:** Conceptual commands map to Cortex.Mediator `IRequest<Result>` or `IQuery<Result<T>>` objects, while status updates often correspond to Cortex.Mediator `INotification` publications handled by relevant infrastructure adapters. See Section 6 for Cortex.Mediator implementation details.
 * **Configuration:** MQTT Topic structures and KNX Group Addresses are configurable via environment variables detailed in Section 10. The tables below list the default relative topic paths and environment variable *suffixes*.
 
 ## 9.2. Global Commands and Status

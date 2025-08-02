@@ -22,7 +22,7 @@ This component handles all direct communication with the Snapcast server.
     * Returns `Result` or `Result<T>` indicating success or failure, converting exceptions to `Result.Failure(ex)`.
   * **Event Handling:** Subscribes to events exposed by `Sturd.SnapcastNet.SnapcastClient` (e.g., `ClientConnected`, `ClientDisconnected`, `GroupChanged`, `ClientVolumeChanged`, `Disconnected`). Event handlers perform two main actions:
         1. **Update State Repository:** Call the appropriate method on the injected `ISnapcastStateRepository` to update the raw in-memory state (e.g., `_stateRepository.UpdateClient(eventArgs.Client)`).
-        2. **Publish MediatR Notification:** Publish a corresponding internal notification (defined in `/Server/Notifications`, e.g., `SnapcastClientConnectedNotification(eventArgs.Client)`) using the injected `IMediator`. These notifications carry the raw `Sturd.SnapcastNet` model data received in the event.
+        2. **Publish Cortex.Mediator Notification:** Publish a corresponding internal notification (defined in `/Server/Notifications`, e.g., `SnapcastClientConnectedNotification(eventArgs.Client)`) using the injected `IMediator`. These notifications carry the raw `Sturd.SnapcastNet` model data received in the event.
   * **State Synchronization:** On initial successful connection (`InitializeAsync`) and potentially periodically or after reconnection, calls `_client.GetStatusAsync` to fetch the complete server state and populates the `ISnapcastStateRepository` using `_stateRepository.UpdateServerState`.
   * **Disposal:** Implements `IAsyncDisposable` to unhook event handlers, gracefully disconnect the `SnapcastClient`, and dispose resources.
 
@@ -32,7 +32,7 @@ namespace SnapDog2.Infrastructure.Snapcast;
 
 using Sturd.SnapcastNet;
 using Sturd.SnapcastNet.Models;
-// ... other usings (Core Abstractions, Models, Config, Logging, MediatR, Polly) ...
+// ... other usings (Core Abstractions, Models, Config, Logging, Cortex.Mediator, Polly) ...
 
 public partial class SnapcastService : ISnapcastService, IAsyncDisposable
 {
@@ -92,7 +92,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
             var client = _stateRepository.GetClient(e.ClientId);
             if (client != null) { _stateRepository.UpdateClient(client with { Config = client.Config with { Volume = e.Volume }}); }
 
-            // 2. Publish MediatR Notification (using raw event args/models)
+            // 2. Publish Cortex.Mediator Notification (using raw event args/models)
             _ = _mediator.Publish(new SnapcastClientVolumeChangedNotification(e.ClientId, e.Volume)); // Fire-and-forget publish
         } catch(Exception ex) { LogEventHandlerError("ClientVolumeChanged", ex); }
     }
@@ -193,8 +193,8 @@ Implements `IKnxService` using **`Knx.Falcon.Sdk` (6.3.x)**.
   * **Connection/Discovery:** Implements **Option B** logic from Sec 13.2.1 using `KnxIpDeviceDiscovery`, `UsbDeviceDiscovery`, `KnxIpTunnelingConnectorParameters`, `KnxIpRoutingConnectorParameters`, `KnxUsbConnectorParameters`, `KnxBus`, `ConnectAsync`. Uses Polly for connection resilience and a Timer for discovery retries.
   * **Configuration:** Uses `KnxOptions`, `KnxZoneConfig`, `KnxClientConfig`. Performs robust parsing of GAs using `Knx.Falcon.GroupAddress.TryParse` during config loading/validation (handled by Sec 11.3 Validator).
   * **Event Handling:**
-    * `OnGroupValueReceived`: Parses incoming `GroupValueEventArgs`, uses helper `MapGroupAddressToCommand` to convert the GA and value (using DPT knowledge) to a MediatR command (`IRequest<Result>`), then calls `_mediator.Send`.
-    * `OnGroupReadReceived`: Parses incoming `GroupEventArgs`, uses helper `GetStatusInfoFromGroupAddress` to find the corresponding Status ID & DPT. Fetches the current value (via `FetchCurrentValueAsync` which uses `ISnapcastStateRepository` or MediatR queries) and sends a response using `SendKnxResponseAsync` (which calls appropriate `KnxBus.WriteXyzAsync` based on DPT).
+    * `OnGroupValueReceived`: Parses incoming `GroupValueEventArgs`, uses helper `MapGroupAddressToCommand` to convert the GA and value (using DPT knowledge) to a Cortex.Mediator command (`IRequest<Result>`), then calls `_mediator.Send`.
+    * `OnGroupReadReceived`: Parses incoming `GroupEventArgs`, uses helper `GetStatusInfoFromGroupAddress` to find the corresponding Status ID & DPT. Fetches the current value (via `FetchCurrentValueAsync` which uses `ISnapcastStateRepository` or Cortex.Mediator queries) and sends a response using `SendKnxResponseAsync` (which calls appropriate `KnxBus.WriteXyzAsync` based on DPT).
     * `OnConnectionStateChanged`: Triggers reconnection logic (`InitializeAsync`) if state is `Lost`.
   * **Status Publishing:** Implements `INotificationHandler<StatusChangedNotification>`. The `Handle` method calls `SendStatusAsync`.
   * `SendStatusAsync`: Takes Status ID, Target ID, and value. Uses helper `GetStatusGroupAddress` to find the configured GA string. Parses GA string to `Knx.Falcon.GroupAddress`. Uses helper `WriteToKnxAsync` to convert the value based on expected DPT and call the correct `KnxBus.WriteXyzAsync` method, wrapped in Polly `_operationPolicy`. Handles the 1-based indexing and >255 reporting rule for relevant DPTs.
@@ -210,7 +210,7 @@ Implements `IMqttService` using **`MQTTnet` v5 (5.0.1+)**.
   * Uses `MqttClientFactory` and `MqttClientOptionsBuilder` for setup (TLS, Credentials, LWT, Auto-Reconnect).
   * Uses Polly for initial `ConnectAsync`. Relies on MQTTnet internal reconnect thereafter.
   * Handles `ConnectedAsync`, `DisconnectedAsync`, `ApplicationMessageReceivedAsync` events.
-  * `ApplicationMessageReceivedAsync` parses `args.ApplicationMessage`, uses helper `MapTopicToCommand` to convert topic/payload to MediatR command, calls `_mediator.Send`. Handles user-preferred detailed topic structure and `control/set` payloads. Handles 1-based indexing.
+  * `ApplicationMessageReceivedAsync` parses `args.ApplicationMessage`, uses helper `MapTopicToCommand` to convert topic/payload to Cortex.Mediator command, calls `_mediator.Send`. Handles user-preferred detailed topic structure and `control/set` payloads. Handles 1-based indexing.
   * Implements `INotificationHandler<StatusChangedNotification>`. `Handle` method calls `PublishAsync`.
   * `PublishAsync` builds `MqttApplicationMessage` and uses `_mqttClient.PublishAsync`. Publishes to specific status topics AND the comprehensive `state` topic. Handles 1-based indexing.
   * Implements `SubscribeAsync`/`UnsubscribeAsync`.
@@ -244,5 +244,5 @@ Implements `IMediaPlayerService` using **`LibVLCSharp` (3.8.2)**.
     * Calls `mediaPlayer.Play(media)`.
     * Handles potential errors and returns `Result`.
   * Implements `StopAsync`, `PauseAsync` by calling corresponding `mediaPlayer` methods.
-  * Subscribes to `MediaPlayer` events (`EndReached`, `EncounteredError`). Event handlers publish MediatR notifications (e.g., `TrackEndedNotification`, `PlaybackErrorNotification`).
+  * Subscribes to `MediaPlayer` events (`EndReached`, `EncounteredError`). Event handlers publish Cortex.Mediator notifications (e.g., `TrackEndedNotification`, `PlaybackErrorNotification`).
   * Implements `IAsyncDisposable` to stop all players and dispose `MediaPlayer` and `LibVLC` instances.
