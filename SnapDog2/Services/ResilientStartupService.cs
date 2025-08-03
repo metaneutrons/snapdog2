@@ -171,7 +171,7 @@ public class ResilientStartupService : IHostedService
                     _logger.LogWarning(
                         ex,
                         "⚠️  {OperationName}: Attempt {Attempt}/{MaxAttempts} failed. "
-                            + "Retrying in {DelayMs}ms. Error: {ErrorMessage}",
+                            + "Retrying in {DelayMs} ms. Error: {ErrorMessage}",
                         operationName,
                         attempt,
                         MaxRetryAttempts,
@@ -185,7 +185,7 @@ public class ResilientStartupService : IHostedService
                     var errorMessage = GetCleanErrorMessage(ex);
                     _logger.LogWarning(
                         "⚠️  {OperationName}: Attempt {Attempt}/{MaxAttempts} failed. "
-                            + "Retrying in {DelayMs}ms. Error: {ErrorMessage}",
+                            + "Retrying in {DelayMs} ms. Error: {ErrorMessage}",
                         operationName,
                         attempt,
                         MaxRetryAttempts,
