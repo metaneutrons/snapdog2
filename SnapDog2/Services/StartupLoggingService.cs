@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Extensions;
+using SnapDog2.Helpers;
 
 namespace SnapDog2.Services;
 
@@ -26,6 +27,7 @@ public class StartupLoggingService : IHostedService
     {
         LogStartupBanner();
         LogApplicationVersion();
+        LogGitVersionInformation();
         LogRuntimeInformation();
         LogLoadedAssemblies();
         LogEnvironmentInformation();
@@ -49,6 +51,36 @@ public class StartupLoggingService : IHostedService
         _logger.LogInformation("════════════════════════════════");
         _logger.LogInformation("SnapDog2 startup logging done.");
         _logger.LogInformation("════════════════════════════════");
+    }
+
+    private void LogGitVersionInformation()
+    {
+        var gitVersion = GitVersionHelper.GetVersionInfo();
+
+        _logger.LogInformation("📋 GitVersion Information:");
+        _logger.LogInformation("   Version: {SemVer}", gitVersion.SemVer);
+        _logger.LogInformation("   Full Version: {FullSemVer}", gitVersion.FullSemVer);
+        _logger.LogInformation("   Informational Version: {InformationalVersion}", gitVersion.InformationalVersion);
+        _logger.LogInformation("   Assembly Version: {AssemblySemVer}", gitVersion.AssemblySemVer);
+        _logger.LogInformation("   File Version: {AssemblySemFileVer}", gitVersion.AssemblySemFileVer);
+        _logger.LogInformation("   Branch: {BranchName}", gitVersion.BranchName);
+        _logger.LogInformation("   Commit: {ShortSha} ({CommitDate})", gitVersion.ShortSha, gitVersion.CommitDate);
+        _logger.LogInformation(
+            "   Commits Since Version Source: {CommitsSinceVersionSource}",
+            gitVersion.CommitsSinceVersionSource
+        );
+
+        if (!string.IsNullOrEmpty(gitVersion.PreReleaseLabel))
+        {
+            _logger.LogInformation("   Pre-release: {PreReleaseTag}", gitVersion.PreReleaseTag);
+        }
+
+        if (gitVersion.UncommittedChanges > 0)
+        {
+            _logger.LogInformation("   ⚠️  Uncommitted Changes: {UncommittedChanges}", gitVersion.UncommittedChanges);
+        }
+
+        _logger.LogInformation("   Build Metadata: {FullBuildMetaData}", gitVersion.FullBuildMetaData);
     }
 
     private void LogApplicationVersion()

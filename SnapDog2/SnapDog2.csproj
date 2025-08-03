@@ -21,5 +21,7 @@
     <PackageReference Include="FluentValidation.AspNetCore" />
     <PackageReference Include="MediatR" />
     <PackageReference Include="MQTTnet" />
+    <PackageReference Include="GitVersion.MsBuild" PrivateAssets="All" />
+    <PackageReference Include="System.CommandLine" />
   </ItemGroup>
 </Project>

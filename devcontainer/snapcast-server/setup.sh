@@ -122,7 +122,11 @@ ESC_SNAPSERVER=$(printf '%s\n' "$SNAPSERVER" | sed -e 's/[\/&]/\\&/g')
 
 echo -e $SNAPSERVER >>/etc/snapserver.conf
 echo "------------------------------------"
-echo "Snapserver configuration:"
+echo "Sources:"
 echo
 echo -e $SNAPSERVER
+echo "------------------------------------"
+echo "/etc/snapserver.conf:"
+echo
+cat /etc/snapserver.conf
 echo "------------------------------------"

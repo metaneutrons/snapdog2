@@ -3,13 +3,20 @@ using EnvoyConfig;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Serilog;
 using Serilog.Events;
+using SnapDog2.CommandLine;
 using SnapDog2.Core.Configuration;
+using SnapDog2.Extensions;
+using SnapDog2.Hosting;
+using SnapDog2.Middleware;
 using SnapDog2.Worker.DI;
 
-var builder = WebApplication.CreateBuilder(args);
+// Execute command line parsing - this handles help, version, and env file loading
+var options = SnapDogCommandLineParser.ExecuteCommandLine(args);
 
-// Load .env file if it exists
-LoadDotEnvFile();
+// If we get here, it means normal application execution should continue
+// The env file (if specified) has already been loaded by the command line parser
+
+var builder = WebApplication.CreateBuilder(args);
 
 // Set global prefix for all EnvoyConfig environment variables
 EnvConfig.GlobalPrefix = "SNAPDOG_";
@@ -26,11 +33,17 @@ catch (Exception ex)
     throw;
 }
 
+// Determine if debug logging is enabled
+var isDebugLogging =
+    snapDogConfig.System.LogLevel.Equals("Debug", StringComparison.OrdinalIgnoreCase)
+    || snapDogConfig.System.LogLevel.Equals("Trace", StringComparison.OrdinalIgnoreCase);
+
 // Configure Serilog based on configuration
 var loggerConfig = new LoggerConfiguration()
     .MinimumLevel.Is(Enum.Parse<LogEventLevel>(snapDogConfig.System.LogLevel, true))
     .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
     .MinimumLevel.Override("System", LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.Extensions.Hosting.Internal.Host", LogEventLevel.Fatal)
     .Enrich.FromLogContext()
     .WriteTo.Console(
         outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}"
@@ -65,10 +78,27 @@ try
     builder.Services.AddSingleton(snapDogConfig.Services);
     builder.Services.AddSingleton(snapDogConfig.SnapcastServer);
 
+    // Configure resilient web host with port fallback (will be configured later)
+    builder.WebHost.UseKestrel();
+
     // Add Command Processing (Cortex.Mediator)
     builder.Services.AddCommandProcessing();
 
     // Register configuration for IOptions pattern
+    builder.Services.Configure<SnapDogConfiguration>(options =>
+    {
+        // Copy all configuration sections
+        options.System = snapDogConfig.System;
+        options.Telemetry = snapDogConfig.Telemetry;
+        options.Api = snapDogConfig.Api;
+        options.Services = snapDogConfig.Services;
+        options.SnapcastServer = snapDogConfig.SnapcastServer;
+        options.Zones = snapDogConfig.Zones;
+        options.Clients = snapDogConfig.Clients;
+        options.RadioStations = snapDogConfig.RadioStations;
+    });
+
+    // Also register individual sections for backward compatibility
     builder.Services.Configure<SnapDog2.Core.Configuration.ServicesConfig>(options =>
     {
         options.Snapcast = snapDogConfig.Services.Snapcast;
@@ -86,8 +116,11 @@ try
         builder.Services.AddMqttServices().ValidateMqttConfiguration();
     }
 
-    // Add version logging service as first hosted service
+    // Add version logging service as the very first hosted service (show environment info)
     builder.Services.AddHostedService<SnapDog2.Services.StartupLoggingService>();
+
+    // Add resilient startup service as second hosted service (then check if everything is healthy)
+    builder.Services.AddHostedService<SnapDog2.Services.ResilientStartupService>();
 
     // Add hosted service to initialize integration services on startup
     builder.Services.AddHostedService<SnapDog2.Worker.Services.IntegrationServicesHostedService>();
@@ -163,6 +196,9 @@ try
 
     var app = builder.Build();
 
+    // Add global exception handling as the first middleware
+    app.UseGlobalExceptionHandling();
+
     // Configure the HTTP request pipeline
     if (app.Environment.IsDevelopment())
     {
@@ -175,53 +211,25 @@ try
 
     Log.Information("SnapDog2 application configured successfully");
 
-    await app.RunAsync();
+    // Use resilient host wrapper to handle startup exceptions gracefully
+    var resilientHost = app.UseResilientStartup(isDebugLogging);
+    await resilientHost.RunAsync();
 }
 catch (Exception ex)
 {
-    Log.Fatal(ex, "Application terminated unexpectedly");
-    throw;
+    if (isDebugLogging)
+    {
+        Log.Fatal(ex, "Application terminated unexpectedly");
+    }
+    else
+    {
+        Log.Fatal("Application terminated unexpectedly: {ErrorType} - {ErrorMessage}", ex.GetType().Name, ex.Message);
+    }
+    Environment.ExitCode = 3;
 }
 finally
 {
     await Log.CloseAndFlushAsync();
-}
-
-static void LoadDotEnvFile()
-{
-    var envFile = ".env";
-    if (!File.Exists(envFile))
-        return;
-
-    Console.WriteLine($"Loading environment variables from {envFile}");
-
-    foreach (var line in File.ReadAllLines(envFile))
-    {
-        var trimmedLine = line.Trim();
-
-        // Skip empty lines and comments
-        if (string.IsNullOrEmpty(trimmedLine) || trimmedLine.StartsWith('#'))
-            continue;
-
-        var parts = trimmedLine.Split('=', 2);
-        if (parts.Length == 2)
-        {
-            var key = parts[0].Trim();
-            var value = parts[1].Trim();
-
-            // Remove quotes if present
-            if ((value.StartsWith('"') && value.EndsWith('"')) || (value.StartsWith('\'') && value.EndsWith('\'')))
-            {
-                value = value[1..^1];
-            }
-
-            // Only set if not already set (environment variables take precedence)
-            if (Environment.GetEnvironmentVariable(key) == null)
-            {
-                Environment.SetEnvironmentVariable(key, value);
-            }
-        }
-    }
 }
 
 // Make Program class accessible to tests
