@@ -36,7 +36,7 @@ public partial class ZoneManager : IZoneManager
     {
         this.LogGettingZone(zoneId);
 
-        await Task.Delay(1); // Simulate async operation
+        await Task.Delay(1); // TODO: Fix simulation async operation
 
         if (this._zones.TryGetValue(zoneId, out var zone))
         {
@@ -51,7 +51,7 @@ public partial class ZoneManager : IZoneManager
     {
         this.LogGettingAllZones();
 
-        await Task.Delay(1); // Simulate async operation
+        await Task.Delay(1); // TODO: Fix simulation async operation
 
         return Result<IEnumerable<IZoneService>>.Success(this._zones.Values);
     }
@@ -60,7 +60,7 @@ public partial class ZoneManager : IZoneManager
     {
         this.LogGettingZone(zoneId);
 
-        await Task.Delay(1); // Simulate async operation
+        await Task.Delay(1); // TODO: Fix simulation async operation
 
         if (this._zones.TryGetValue(zoneId, out var zone))
         {
@@ -75,7 +75,7 @@ public partial class ZoneManager : IZoneManager
     {
         this.LogGettingAllZones();
 
-        await Task.Delay(1); // Simulate async operation
+        await Task.Delay(1); // TODO: Fix simulation async operation
 
         var states = new List<ZoneState>();
         foreach (var zone in this._zones.Values)
@@ -92,7 +92,7 @@ public partial class ZoneManager : IZoneManager
 
     public async Task<bool> ZoneExistsAsync(int zoneId)
     {
-        await Task.Delay(1); // Simulate async operation
+        await Task.Delay(1); // TODO: Fix simulation async operation
         return this._zones.ContainsKey(zoneId);
     }
 
@@ -164,7 +164,7 @@ public partial class ZoneService : IZoneService
 
     public async Task<Result<ZoneState>> GetStateAsync()
     {
-        await Task.Delay(1); // Simulate async operation
+        await Task.Delay(1); // TODO: Fix simulation async operation
 
         // Update timestamp
         this._currentState = this._currentState with
@@ -179,7 +179,7 @@ public partial class ZoneService : IZoneService
     public async Task<Result> PlayAsync()
     {
         this.LogZoneAction(this.ZoneId, this._zoneName, "Play");
-        await Task.Delay(10); // Simulate async operation
+        await Task.Delay(10); // TODO: Fix simulation async operation
 
         this._currentState = this._currentState with { PlaybackState = "playing" };
         return Result.Success();
@@ -188,7 +188,7 @@ public partial class ZoneService : IZoneService
     public async Task<Result> PlayTrackAsync(int trackIndex)
     {
         this.LogZoneAction(this.ZoneId, this._zoneName, $"Play track {trackIndex}");
-        await Task.Delay(10); // Simulate async operation
+        await Task.Delay(10); // TODO: Fix simulation async operation
 
         var newTrack = this._currentState.Track! with { Index = trackIndex, Title = $"Track {trackIndex}" };
 
@@ -199,7 +199,7 @@ public partial class ZoneService : IZoneService
     public async Task<Result> PlayUrlAsync(string mediaUrl)
     {
         this.LogZoneAction(this.ZoneId, this._zoneName, $"Play URL: {mediaUrl}");
-        await Task.Delay(10); // Simulate async operation
+        await Task.Delay(10); // TODO: Fix simulation async operation
 
         var newTrack = this._currentState.Track! with { Title = "Stream" };
         this._currentState = this._currentState with { PlaybackState = "playing", Track = newTrack };
@@ -209,7 +209,7 @@ public partial class ZoneService : IZoneService
     public async Task<Result> PauseAsync()
     {
         this.LogZoneAction(this.ZoneId, this._zoneName, "Pause");
-        await Task.Delay(10); // Simulate async operation
+        await Task.Delay(10); // TODO: Fix simulation async operation
 
         this._currentState = this._currentState with { PlaybackState = "paused" };
         return Result.Success();
@@ -218,7 +218,7 @@ public partial class ZoneService : IZoneService
     public async Task<Result> StopAsync()
     {
         this.LogZoneAction(this.ZoneId, this._zoneName, "Stop");
-        await Task.Delay(10); // Simulate async operation
+        await Task.Delay(10); // TODO: Fix simulation async operation
 
         this._currentState = this._currentState with { PlaybackState = "stopped" };
         return Result.Success();
@@ -228,7 +228,7 @@ public partial class ZoneService : IZoneService
     public async Task<Result> SetVolumeAsync(int volume)
     {
         this.LogZoneAction(this.ZoneId, this._zoneName, $"Set volume to {volume}");
-        await Task.Delay(10); // Simulate async operation
+        await Task.Delay(10); // TODO: Fix simulation async operation
 
         this._currentState = this._currentState with { Volume = Math.Clamp(volume, 0, 100) };
         return Result.Success();
@@ -237,7 +237,7 @@ public partial class ZoneService : IZoneService
     public async Task<Result> VolumeUpAsync(int step = 5)
     {
         this.LogZoneAction(this.ZoneId, this._zoneName, $"Volume up by {step}");
-        await Task.Delay(10); // Simulate async operation
+        await Task.Delay(10); // TODO: Fix simulation async operation
 
         this._currentState = this._currentState with { Volume = Math.Clamp(this._currentState.Volume + step, 0, 100) };
         return Result.Success();
@@ -246,7 +246,7 @@ public partial class ZoneService : IZoneService
     public async Task<Result> VolumeDownAsync(int step = 5)
     {
         this.LogZoneAction(this.ZoneId, this._zoneName, $"Volume down by {step}");
-        await Task.Delay(10); // Simulate async operation
+        await Task.Delay(10); // TODO: Fix simulation async operation
 
         this._currentState = this._currentState with { Volume = Math.Clamp(this._currentState.Volume - step, 0, 100) };
         return Result.Success();
@@ -255,7 +255,7 @@ public partial class ZoneService : IZoneService
     public async Task<Result> SetMuteAsync(bool enabled)
     {
         this.LogZoneAction(this.ZoneId, this._zoneName, enabled ? "Mute" : "Unmute");
-        await Task.Delay(10); // Simulate async operation
+        await Task.Delay(10); // TODO: Fix simulation async operation
 
         this._currentState = this._currentState with { Mute = enabled };
         return Result.Success();
@@ -264,7 +264,7 @@ public partial class ZoneService : IZoneService
     public async Task<Result> ToggleMuteAsync()
     {
         this.LogZoneAction(this.ZoneId, this._zoneName, "Toggle mute");
-        await Task.Delay(10); // Simulate async operation
+        await Task.Delay(10); // TODO: Fix simulation async operation
 
         this._currentState = this._currentState with { Mute = !this._currentState.Mute };
         return Result.Success();
@@ -274,7 +274,7 @@ public partial class ZoneService : IZoneService
     public async Task<Result> SetTrackAsync(int trackIndex)
     {
         this.LogZoneAction(this.ZoneId, this._zoneName, $"Set track to {trackIndex}");
-        await Task.Delay(10); // Simulate async operation
+        await Task.Delay(10); // TODO: Fix simulation async operation
 
         var newTrack = this._currentState.Track! with { Index = trackIndex, Title = $"Track {trackIndex}" };
 
@@ -285,7 +285,7 @@ public partial class ZoneService : IZoneService
     public async Task<Result> NextTrackAsync()
     {
         this.LogZoneAction(this.ZoneId, this._zoneName, "Next track");
-        await Task.Delay(10); // Simulate async operation
+        await Task.Delay(10); // TODO: Fix simulation async operation
 
         var currentIndex = this._currentState.Track!?.Index ?? 1;
         var newTrack = this._currentState.Track! with { Index = currentIndex + 1, Title = $"Track {currentIndex + 1}" };
@@ -297,7 +297,7 @@ public partial class ZoneService : IZoneService
     public async Task<Result> PreviousTrackAsync()
     {
         this.LogZoneAction(this.ZoneId, this._zoneName, "Previous track");
-        await Task.Delay(10); // Simulate async operation
+        await Task.Delay(10); // TODO: Fix simulation async operation
 
         var currentIndex = this._currentState.Track!?.Index ?? 1;
         var newIndex = Math.Max(1, currentIndex - 1);
@@ -310,7 +310,7 @@ public partial class ZoneService : IZoneService
     public async Task<Result> SetTrackRepeatAsync(bool enabled)
     {
         this.LogZoneAction(this.ZoneId, this._zoneName, enabled ? "Enable track repeat" : "Disable track repeat");
-        await Task.Delay(10); // Simulate async operation
+        await Task.Delay(10); // TODO: Fix simulation async operation
 
         this._currentState = this._currentState with { TrackRepeat = enabled };
         return Result.Success();
@@ -319,7 +319,7 @@ public partial class ZoneService : IZoneService
     public async Task<Result> ToggleTrackRepeatAsync()
     {
         this.LogZoneAction(this.ZoneId, this._zoneName, "Toggle track repeat");
-        await Task.Delay(10); // Simulate async operation
+        await Task.Delay(10); // TODO: Fix simulation async operation
 
         this._currentState = this._currentState with { TrackRepeat = !this._currentState.TrackRepeat };
         return Result.Success();
@@ -329,7 +329,7 @@ public partial class ZoneService : IZoneService
     public async Task<Result> SetPlaylistAsync(int playlistIndex)
     {
         this.LogZoneAction(this.ZoneId, this._zoneName, $"Set playlist to {playlistIndex}");
-        await Task.Delay(10); // Simulate async operation
+        await Task.Delay(10); // TODO: Fix simulation async operation
 
         var newPlaylist = this._currentState.Playlist! with
         {
@@ -344,7 +344,7 @@ public partial class ZoneService : IZoneService
     public async Task<Result> SetPlaylistAsync(string playlistId)
     {
         this.LogZoneAction(this.ZoneId, this._zoneName, $"Set playlist to {playlistId}");
-        await Task.Delay(10); // Simulate async operation
+        await Task.Delay(10); // TODO: Fix simulation async operation
 
         var newPlaylist = this._currentState.Playlist! with { Name = playlistId };
         this._currentState = this._currentState with { Playlist = newPlaylist };
@@ -354,7 +354,7 @@ public partial class ZoneService : IZoneService
     public async Task<Result> NextPlaylistAsync()
     {
         this.LogZoneAction(this.ZoneId, this._zoneName, "Next playlist");
-        await Task.Delay(10); // Simulate async operation
+        await Task.Delay(10); // TODO: Fix simulation async operation
 
         var currentIndex = this._currentState.Playlist!?.Index ?? 1;
         var newPlaylist = this._currentState.Playlist! with
@@ -370,7 +370,7 @@ public partial class ZoneService : IZoneService
     public async Task<Result> PreviousPlaylistAsync()
     {
         this.LogZoneAction(this.ZoneId, this._zoneName, "Previous playlist");
-        await Task.Delay(10); // Simulate async operation
+        await Task.Delay(10); // TODO: Fix simulation async operation
 
         var currentIndex = this._currentState.Playlist!?.Index ?? 1;
         var newIndex = Math.Max(1, currentIndex - 1);
@@ -387,7 +387,7 @@ public partial class ZoneService : IZoneService
             this._zoneName,
             enabled ? "Enable playlist shuffle" : "Disable playlist shuffle"
         );
-        await Task.Delay(10); // Simulate async operation
+        await Task.Delay(10); // TODO: Fix simulation async operation
 
         this._currentState = this._currentState with { PlaylistShuffle = enabled };
         return Result.Success();
@@ -396,7 +396,7 @@ public partial class ZoneService : IZoneService
     public async Task<Result> TogglePlaylistShuffleAsync()
     {
         this.LogZoneAction(this.ZoneId, this._zoneName, "Toggle playlist shuffle");
-        await Task.Delay(10); // Simulate async operation
+        await Task.Delay(10); // TODO: Fix simulation async operation
 
         this._currentState = this._currentState with { PlaylistShuffle = !this._currentState.PlaylistShuffle };
         return Result.Success();
@@ -405,7 +405,7 @@ public partial class ZoneService : IZoneService
     public async Task<Result> SetPlaylistRepeatAsync(bool enabled)
     {
         this.LogZoneAction(this.ZoneId, this._zoneName, enabled ? "Enable playlist repeat" : "Disable playlist repeat");
-        await Task.Delay(10); // Simulate async operation
+        await Task.Delay(10); // TODO: Fix simulation async operation
 
         this._currentState = this._currentState with { PlaylistRepeat = enabled };
         return Result.Success();
@@ -414,7 +414,7 @@ public partial class ZoneService : IZoneService
     public async Task<Result> TogglePlaylistRepeatAsync()
     {
         this.LogZoneAction(this.ZoneId, this._zoneName, "Toggle playlist repeat");
-        await Task.Delay(10); // Simulate async operation
+        await Task.Delay(10); // TODO: Fix simulation async operation
 
         this._currentState = this._currentState with { PlaylistRepeat = !this._currentState.PlaylistRepeat };
         return Result.Success();

@@ -315,15 +315,26 @@ public class StartupInformationService : IHostedService
         // KNX
         if (this._config.Services.Knx.Enabled)
         {
+            var connectionType = string.IsNullOrEmpty(this._config.Services.Knx.Gateway) ? "USB" : "IP Tunneling";
             this._logger.LogInformation(
-                "     KNX: {KnxGateway}:{KnxPort} (Timeout: {KnxTimeout}s)",
-                this._config.Services.Knx.Gateway ?? "Not configured",
+                "     KNX: {ConnectionType} - {KnxGateway}:{KnxPort} (Timeout: {KnxTimeout}s)",
+                connectionType,
+                this._config.Services.Knx.Gateway ?? "Auto-detect USB",
                 this._config.Services.Knx.Port,
                 this._config.Services.Knx.Timeout
             );
             this._logger.LogInformation(
                 "       Auto Reconnect: {KnxAutoReconnect}",
                 this._config.Services.Knx.AutoReconnect
+            );
+
+            // Count KNX-enabled zones and clients
+            var knxZoneCount = this._config.Zones.Count(z => z.Knx.Enabled);
+            var knxClientCount = this._config.Clients.Count(c => c.Knx.Enabled);
+            this._logger.LogInformation(
+                "       KNX Integration: {ZoneCount} zones, {ClientCount} clients",
+                knxZoneCount,
+                knxClientCount
             );
         }
         else

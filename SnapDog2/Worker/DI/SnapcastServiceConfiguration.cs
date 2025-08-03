@@ -26,7 +26,7 @@ public static class SnapcastServiceConfiguration
         // We need to register it as a factory since we need access to configuration
         services.AddSingleton<SnapcastClient.IClient>(serviceProvider =>
         {
-            var config = serviceProvider.GetRequiredService<IOptions<ServicesConfig>>().Value.Snapcast;
+            var config = serviceProvider.GetRequiredService<IOptions<SnapDogConfiguration>>().Value.Services.Snapcast;
             var logger = serviceProvider.GetService<ILogger<Client>>();
 
             // Create the options

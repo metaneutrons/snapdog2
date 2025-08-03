@@ -1,7 +1,7 @@
 # Zone Commands Implementation
 
-**Date:** August 2, 2025  
-**Status:** ✅ Complete  
+**Date:** August 2, 2025
+**Status:** ✅ Complete
 **Related Blueprint:** [16b-zone-commands-implementation.md](../blueprint/16b-zone-commands-implementation.md)
 
 ## Overview
@@ -37,6 +37,7 @@ This document details the implementation of the zone commands system for SnapDog
 Implemented comprehensive command records covering all zone functionality:
 
 #### Playback Control Commands
+
 ```csharp
 public record PlayCommand : ICommand<Result>
 {
@@ -51,6 +52,7 @@ public record StopCommand : ICommand<Result>
 ```
 
 #### Volume Control Commands
+
 ```csharp
 public record SetZoneVolumeCommand : ICommand<Result>
 {
@@ -66,6 +68,7 @@ public record ToggleZoneMuteCommand : ICommand<Result>
 ```
 
 #### Track & Playlist Management Commands
+
 ```csharp
 public record SetTrackCommand : ICommand<Result>
 public record NextTrackCommand : ICommand<Result>
@@ -75,6 +78,7 @@ public record NextPlaylistCommand : ICommand<Result>
 ```
 
 **Key Features:**
+
 - All commands include `ZoneId` for target identification
 - `CommandSource` tracking for audit trails
 - Optional parameters for flexible command usage
@@ -99,6 +103,7 @@ public record GetZoneVolumeQuery : IQuery<Result<int>>
 ```
 
 **Design Decisions:**
+
 - Granular queries for specific state aspects
 - Bulk query for all zones to reduce API calls
 - Proper enum handling for `PlaybackStatus`
@@ -109,6 +114,7 @@ public record GetZoneVolumeQuery : IQuery<Result<int>>
 **Location:** `/Server/Features/Zones/Handlers/`
 
 #### Command Handlers (`ZoneCommandHandlers.cs`)
+
 ```csharp
 public class PlayCommandHandler : ICommandHandler<PlayCommand, Result>
 {
@@ -117,7 +123,7 @@ public class PlayCommandHandler : ICommandHandler<PlayCommand, Result>
 
     public async Task<Result> Handle(PlayCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Starting playback for Zone {ZoneId} from {Source}", 
+        _logger.LogInformation("Starting playback for Zone {ZoneId} from {Source}",
             request.ZoneId, request.Source);
 
         var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId);
@@ -128,7 +134,7 @@ public class PlayCommandHandler : ICommandHandler<PlayCommand, Result>
         }
 
         var zone = zoneResult.Value;
-        
+
         // Handle different play scenarios
         if (request.TrackIndex.HasValue)
             return await zone.PlayTrackAsync(request.TrackIndex.Value);
@@ -141,6 +147,7 @@ public class PlayCommandHandler : ICommandHandler<PlayCommand, Result>
 ```
 
 #### Query Handlers (`ZoneQueryHandlers.cs`)
+
 ```csharp
 public class GetZoneStateQueryHandler : IQueryHandler<GetZoneStateQuery, Result<ZoneState>>
 {
@@ -161,6 +168,7 @@ public class GetZoneStateQueryHandler : IQueryHandler<GetZoneStateQuery, Result<
 ```
 
 **Handler Characteristics:**
+
 - Consistent error handling and logging patterns
 - Proper async/await with cancellation token support
 - Zone existence validation before operations
@@ -172,6 +180,7 @@ public class GetZoneStateQueryHandler : IQueryHandler<GetZoneStateQuery, Result<
 **Location:** `/Core/Abstractions/`
 
 #### IZoneManager Interface
+
 ```csharp
 public interface IZoneManager
 {
@@ -182,33 +191,34 @@ public interface IZoneManager
 ```
 
 #### IZoneService Interface
+
 ```csharp
 public interface IZoneService
 {
     int ZoneId { get; }
     Task<Result<ZoneState>> GetStateAsync();
-    
+
     // Playback Control
     Task<Result> PlayAsync();
     Task<Result> PlayTrackAsync(int trackIndex);
     Task<Result> PlayUrlAsync(string mediaUrl);
     Task<Result> PauseAsync();
     Task<Result> StopAsync();
-    
+
     // Volume Control
     Task<Result> SetVolumeAsync(int volume);
     Task<Result> VolumeUpAsync(int step = 5);
     Task<Result> VolumeDownAsync(int step = 5);
     Task<Result> SetMuteAsync(bool enabled);
     Task<Result> ToggleMuteAsync();
-    
+
     // Track Management
     Task<Result> SetTrackAsync(int trackIndex);
     Task<Result> NextTrackAsync();
     Task<Result> PreviousTrackAsync();
     Task<Result> SetTrackRepeatAsync(bool enabled);
     Task<Result> ToggleTrackRepeatAsync();
-    
+
     // Playlist Management
     Task<Result> SetPlaylistAsync(int playlistIndex);
     Task<Result> SetPlaylistAsync(string playlistId);
@@ -222,6 +232,7 @@ public interface IZoneService
 ```
 
 **Design Principles:**
+
 - Clear separation of zone management vs. individual zone control
 - Comprehensive interface covering all blueprint-specified operations
 - Consistent async patterns with Result<T> returns
@@ -232,6 +243,7 @@ public interface IZoneService
 **Location:** `/Infrastructure/Services/ZoneManager.cs`
 
 #### ZoneManager Implementation
+
 ```csharp
 public partial class ZoneManager : IZoneManager
 {
@@ -255,6 +267,7 @@ public partial class ZoneManager : IZoneManager
 ```
 
 #### ZoneService Implementation
+
 ```csharp
 public partial class ZoneService : IZoneService
 {
@@ -290,8 +303,8 @@ public partial class ZoneService : IZoneService
     public async Task<Result> PlayAsync()
     {
         LogZoneAction(ZoneId, _zoneName, "Play");
-        await Task.Delay(10); // Simulate async operation
-        
+        await Task.Delay(10); // TODO: Fix simulation async operation
+
         _currentState = _currentState with { PlaybackState = "playing" };
         return Result.Success();
     }
@@ -299,6 +312,7 @@ public partial class ZoneService : IZoneService
 ```
 
 **Implementation Features:**
+
 - Realistic zone data matching Docker development environment
 - Proper state management using record types with `with` expressions
 - Simulated async operations for realistic behavior
@@ -331,7 +345,7 @@ public class ZoneController : ControllerBase
             }
 
             var result = await handler.Handle(new GetAllZoneStatesQuery(), cancellationToken);
-            
+
             if (result.IsFailure)
             {
                 _logger.LogWarning("Failed to get all zone states: {Error}", result.ErrorMessage);
@@ -356,13 +370,15 @@ public class ZoneController : ControllerBase
 ```
 
 **API Endpoints:**
+
 - `GET /api/zones/states` - Get all zone states
-- `GET /api/zones/{id}/state` - Get specific zone state  
+- `GET /api/zones/{id}/state` - Get specific zone state
 - `POST /api/zones/{id}/play` - Start playback
 - `POST /api/zones/{id}/pause` - Pause playback
 - `POST /api/zones/{id}/volume` - Set volume (with JSON body)
 
 **Controller Features:**
+
 - Consistent with global status controller pattern
 - Proper HTTP status codes (200, 400, 404, 500)
 - Request validation with data annotations
@@ -372,6 +388,7 @@ public class ZoneController : ControllerBase
 ### 7. Dependency Injection Configuration
 
 #### Handler Registration (`CortexMediatorConfiguration.cs`)
+
 ```csharp
 // Zone command handlers
 services.AddScoped<PlayCommandHandler>();
@@ -396,6 +413,7 @@ services.AddScoped<GetZoneVolumeQueryHandler>();
 ```
 
 #### Service Registration (`Program.cs`)
+
 ```csharp
 // Zone management services (placeholder implementations)
 builder.Services.AddScoped<IZoneManager, ZoneManager>();
@@ -408,6 +426,7 @@ builder.Services.AddScoped<IZoneManager, ZoneManager>();
 All endpoints were successfully tested in the Docker development environment:
 
 #### Get All Zone States
+
 ```bash
 $ docker exec snapdog-app-1 curl -s http://localhost:5000/api/zones/states | jq .
 [
@@ -446,12 +465,13 @@ $ docker exec snapdog-app-1 curl -s http://localhost:5000/api/zones/states | jq 
 ```
 
 #### Zone Commands
+
 ```bash
 # Play command - ✅ Success
 $ docker exec snapdog-app-1 curl -s -X POST http://localhost:5000/api/zones/1/play
 {"message": "Playback started successfully"}
 
-# Pause command - ✅ Success  
+# Pause command - ✅ Success
 $ docker exec snapdog-app-1 curl -s -X POST http://localhost:5000/api/zones/1/pause
 {"message": "Playback paused successfully"}
 
@@ -483,17 +503,20 @@ $ dotnet build
 ## Architecture Consistency
 
 ### ✅ **CQRS Pattern Adherence**
+
 - Clear command/query separation maintained
 - Consistent handler interfaces and implementations
 - Proper Result<T> pattern usage throughout
 
 ### ✅ **Error Handling Consistency**
+
 - Unified error response format
 - Proper HTTP status code mapping
 - Structured logging with contextual information
 - Graceful degradation for missing services
 
 ### ✅ **Code Quality Standards**
+
 - Comprehensive XML documentation
 - Consistent naming conventions
 - Proper async/await patterns
@@ -502,21 +525,26 @@ $ dotnet build
 ## Future Extension Points
 
 ### 🔄 **Ready for Real Implementation**
+
 The placeholder implementations provide clear interfaces for:
+
 - **Snapcast Integration**: Replace `ZoneService` with real Snapcast client communication
 - **MQTT/KNX Integration**: Add external control protocol handlers
 - **State Persistence**: Add database or cache layer for zone state
 - **Event Notifications**: Implement zone state change notifications
 
 ### 🔄 **Additional Commands**
+
 The foundation supports easy addition of:
+
 - Track repeat toggle commands
-- Playlist shuffle toggle commands  
+- Playlist shuffle toggle commands
 - Advanced playlist management
 - Zone grouping operations
 - Client assignment commands
 
 ### 🔄 **API Extensions**
+
 - WebSocket endpoints for real-time state updates
 - Bulk operations for multiple zones
 - Zone configuration endpoints
@@ -525,18 +553,21 @@ The foundation supports easy addition of:
 ## Lessons Learned
 
 ### ✅ **Successful Patterns**
+
 1. **Consistent Architecture**: Following the global status pattern made implementation straightforward
 2. **Placeholder Strategy**: Realistic placeholder implementations enabled full testing
 3. **Manual DI Registration**: Continued approach worked reliably
 4. **Result<T> Pattern**: Provided consistent error handling across all operations
 
 ### ⚠️ **Challenges Addressed**
+
 1. **Model Mapping**: Required careful alignment with existing `ZoneState` model structure
 2. **Enum Handling**: Proper conversion between string and enum types for `PlaybackStatus`
 3. **State Management**: Thread-safe state updates using record types with `with` expressions
 4. **Content Type Issues**: API testing revealed need for proper HTTP content type handling
 
 ### 📋 **Best Practices Established**
+
 1. **Comprehensive Testing**: Test all endpoints in realistic Docker environment
 2. **Structured Logging**: Include zone ID and operation context in all log messages
 3. **Graceful Error Handling**: Proper fallback when services are unavailable
@@ -547,6 +578,7 @@ The foundation supports easy addition of:
 The zone commands implementation successfully extends the SnapDog2 architecture with comprehensive zone control functionality. The implementation maintains consistency with established patterns while providing a solid foundation for future Snapcast integration and external protocol support.
 
 **Key Achievements:**
+
 - ✅ Complete CQRS implementation for zone operations
 - ✅ RESTful API with proper HTTP semantics
 - ✅ Realistic placeholder implementations for development

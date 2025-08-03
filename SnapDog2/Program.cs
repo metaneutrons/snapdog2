@@ -180,15 +180,6 @@ static WebApplication CreateWebApplication(string[] args)
         options.RadioStations = snapDogConfig.RadioStations;
     });
 
-    // Also register individual sections for backward compatibility
-    builder.Services.Configure<ServicesConfig>(options =>
-    {
-        options.Snapcast = snapDogConfig.Services.Snapcast;
-        options.Mqtt = snapDogConfig.Services.Mqtt;
-        options.Knx = snapDogConfig.Services.Knx;
-        options.Subsonic = snapDogConfig.Services.Subsonic;
-    });
-
     // Add Snapcast services
     builder.Services.AddSnapcastServices();
 
@@ -196,6 +187,12 @@ static WebApplication CreateWebApplication(string[] args)
     if (snapDogConfig.Services.Mqtt.Enabled)
     {
         builder.Services.AddMqttServices().ValidateMqttConfiguration();
+    }
+
+    // Add KNX services
+    if (snapDogConfig.Services.Knx.Enabled)
+    {
+        builder.Services.AddKnxService(snapDogConfig);
     }
 
     // Skip hosted services in test environment
@@ -284,6 +281,18 @@ static WebApplication CreateWebApplication(string[] args)
                     options.AddHost(snapDogConfig.Services.Mqtt.BrokerAddress, snapDogConfig.Services.Mqtt.Port);
                 },
                 "mqtt",
+                tags: ["ready"]
+            );
+        }
+
+        if (snapDogConfig.Services.Knx.Enabled && !string.IsNullOrEmpty(snapDogConfig.Services.Knx.Gateway))
+        {
+            healthChecksBuilder.AddTcpHealthCheck(
+                options =>
+                {
+                    options.AddHost(snapDogConfig.Services.Knx.Gateway, snapDogConfig.Services.Knx.Port);
+                },
+                "knx",
                 tags: ["ready"]
             );
         }

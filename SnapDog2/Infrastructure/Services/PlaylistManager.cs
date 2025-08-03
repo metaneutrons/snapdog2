@@ -46,7 +46,7 @@ public partial class PlaylistManager : IPlaylistManager
     {
         this.LogGettingAllPlaylists();
 
-        await Task.Delay(1); // Simulate async operation
+        await Task.Delay(1); // TODO: Fix simulation async operation
 
         var allPlaylists = this._playlists.Values.ToList();
         return Result<List<PlaylistInfo>>.Success(allPlaylists);
@@ -56,7 +56,7 @@ public partial class PlaylistManager : IPlaylistManager
     {
         this.LogGettingTracksByPlaylistId(playlistId);
 
-        await Task.Delay(1); // Simulate async operation
+        await Task.Delay(1); // TODO: Fix simulation async operation
 
         if (this._playlistTracks.TryGetValue(playlistId, out var tracks))
         {
@@ -71,7 +71,7 @@ public partial class PlaylistManager : IPlaylistManager
     {
         this.LogGettingTracksByPlaylistIndex(playlistIndex);
 
-        await Task.Delay(1); // Simulate async operation
+        await Task.Delay(1); // TODO: Fix simulation async operation
 
         var playlist = this._playlists.Values.FirstOrDefault(p => p.Index == playlistIndex);
         if (playlist != null && this._playlistTracks.TryGetValue(playlist.Id, out var tracks))
@@ -85,7 +85,7 @@ public partial class PlaylistManager : IPlaylistManager
 
     public async Task<Result<PlaylistInfo>> GetPlaylistByIdAsync(string playlistId)
     {
-        await Task.Delay(1); // Simulate async operation
+        await Task.Delay(1); // TODO: Fix simulation async operation
 
         if (this._playlists.TryGetValue(playlistId, out var playlist))
         {
@@ -98,7 +98,7 @@ public partial class PlaylistManager : IPlaylistManager
 
     public async Task<Result<PlaylistInfo>> GetPlaylistByIndexAsync(int playlistIndex)
     {
-        await Task.Delay(1); // Simulate async operation
+        await Task.Delay(1); // TODO: Fix simulation async operation
 
         var playlist = this._playlists.Values.FirstOrDefault(p => p.Index == playlistIndex);
         if (playlist != null)

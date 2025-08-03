@@ -46,7 +46,7 @@ public partial class ClientManager : IClientManager
     {
         this.LogGettingClient(clientId);
 
-        await Task.Delay(1); // Simulate async operation
+        await Task.Delay(1); // TODO: Fix simulation async operation
 
         if (this._clients.TryGetValue(clientId, out var client))
         {
@@ -61,7 +61,7 @@ public partial class ClientManager : IClientManager
     {
         this.LogGettingClient(clientId);
 
-        await Task.Delay(1); // Simulate async operation
+        await Task.Delay(1); // TODO: Fix simulation async operation
 
         if (this._clientStates.TryGetValue(clientId, out var state))
         {
@@ -82,7 +82,7 @@ public partial class ClientManager : IClientManager
     {
         this.LogGettingAllClients();
 
-        await Task.Delay(1); // Simulate async operation
+        await Task.Delay(1); // TODO: Fix simulation async operation
 
         var allStates = this
             ._clientStates.Values.Select(state => state with { TimestampUtc = DateTime.UtcNow })
@@ -95,7 +95,7 @@ public partial class ClientManager : IClientManager
     {
         this.LogGettingClientsByZone(zoneId);
 
-        await Task.Delay(1); // Simulate async operation
+        await Task.Delay(1); // TODO: Fix simulation async operation
 
         var zoneClients = this
             ._clientStates.Values.Where(state => state.ZoneId == zoneId)
@@ -109,7 +109,7 @@ public partial class ClientManager : IClientManager
     {
         this.LogAssigningClientToZone(clientId, zoneId);
 
-        await Task.Delay(10); // Simulate async operation
+        await Task.Delay(10); // TODO: Fix simulation async operation
 
         if (!this._clientStates.TryGetValue(clientId, out var clientState))
         {
@@ -216,21 +216,21 @@ public partial class ClientService : IClient
     public async Task<Result> SetVolumeAsync(int volume)
     {
         this.LogClientAction(this.Id, this.Name, $"Set volume to {volume}");
-        await Task.Delay(10); // Simulate async operation
+        await Task.Delay(10); // TODO: Fix simulation async operation
         return Result.Success();
     }
 
     public async Task<Result> SetMuteAsync(bool mute)
     {
         this.LogClientAction(this.Id, this.Name, mute ? "Mute" : "Unmute");
-        await Task.Delay(10); // Simulate async operation
+        await Task.Delay(10); // TODO: Fix simulation async operation
         return Result.Success();
     }
 
     public async Task<Result> SetLatencyAsync(int latencyMs)
     {
         this.LogClientAction(this.Id, this.Name, $"Set latency to {latencyMs}ms");
-        await Task.Delay(10); // Simulate async operation
+        await Task.Delay(10); // TODO: Fix simulation async operation
         return Result.Success();
     }
 }

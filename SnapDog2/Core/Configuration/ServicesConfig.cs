@@ -1,6 +1,7 @@
 namespace SnapDog2.Core.Configuration;
 
 using EnvoyConfig.Attributes;
+using SnapDog2.Core.Enums;
 
 /// <summary>
 /// External services configuration.
@@ -164,6 +165,13 @@ public class KnxConfig
     /// </summary>
     [Env(Key = "ENABLED", Default = false)]
     public bool Enabled { get; set; } = false;
+
+    /// <summary>
+    /// KNX connection type (tunnel, router, usb).
+    /// Maps to: SNAPDOG_SERVICES_KNX_CONNECTION_TYPE
+    /// </summary>
+    [Env(Key = "CONNECTION_TYPE", Default = KnxConnectionType.Tunnel)]
+    public KnxConnectionType ConnectionType { get; set; } = KnxConnectionType.Tunnel;
 
     /// <summary>
     /// KNX gateway address.

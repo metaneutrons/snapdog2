@@ -163,6 +163,7 @@ SNAPDOG_SERVICES_MQTT_KEEP_ALIVE=60                   # Default: 60
 
 # KNX integration
 SNAPDOG_SERVICES_KNX_ENABLED=false                    # Default: false
+SNAPDOG_SERVICES_KNX_CONNECTION_TYPE=tunnel           # Default: tunnel (tunnel|router|usb)
 SNAPDOG_SERVICES_KNX_GATEWAY=192.168.1.100            # Required for connection
 SNAPDOG_SERVICES_KNX_PORT=3671                        # Default: 3671
 SNAPDOG_SERVICES_KNX_TIMEOUT=10                       # Default: 10 (seconds)

@@ -34,26 +34,26 @@ public static class MqttServiceConfiguration
     {
         // Add configuration validation
         services
-            .AddOptions<ServicesConfig>()
+            .AddOptions<SnapDogConfiguration>()
             .Validate(
                 config =>
                 {
-                    if (!config.Mqtt.Enabled)
+                    if (!config.Services.Mqtt.Enabled)
                     {
                         return true; // Skip validation if MQTT is disabled
                     }
 
-                    if (string.IsNullOrWhiteSpace(config.Mqtt.BrokerAddress))
+                    if (string.IsNullOrWhiteSpace(config.Services.Mqtt.BrokerAddress))
                     {
                         return false;
                     }
 
-                    if (config.Mqtt.Port <= 0 || config.Mqtt.Port > 65535)
+                    if (config.Services.Mqtt.Port <= 0 || config.Services.Mqtt.Port > 65535)
                     {
                         return false;
                     }
 
-                    if (string.IsNullOrWhiteSpace(config.Mqtt.ClientId))
+                    if (string.IsNullOrWhiteSpace(config.Services.Mqtt.ClientId))
                     {
                         return false;
                     }

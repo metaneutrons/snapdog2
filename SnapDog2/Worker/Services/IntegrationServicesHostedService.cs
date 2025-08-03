@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Abstractions;
 
 /// <summary>
-/// Hosted service responsible for initializing integration services (Snapcast, MQTT, etc.) on application startup.
+/// Hosted service responsible for initializing integration services (Snapcast, MQTT, KNX, etc.) on application startup.
 /// This ensures that all external integrations are properly connected and ready before the application starts serving requests.
 /// </summary>
 public class IntegrationServicesHostedService : BackgroundService
@@ -54,6 +54,18 @@ public class IntegrationServicesHostedService : BackgroundService
             else
             {
                 this._logger.LogWarning("MQTT service not registered - skipping initialization");
+            }
+
+            // Initialize KNX service if available
+            var knxService = this._serviceProvider.GetService<IKnxService>();
+            if (knxService != null)
+            {
+                this._logger.LogInformation("Initializing KNX service...");
+                initializationTasks.Add(this.InitializeKnxServiceAsync(knxService, stoppingToken));
+            }
+            else
+            {
+                this._logger.LogWarning("KNX service not registered - skipping initialization");
             }
 
             // Wait for all services to initialize
@@ -127,6 +139,29 @@ public class IntegrationServicesHostedService : BackgroundService
         catch (Exception ex)
         {
             this._logger.LogError(ex, "❌ Exception during MQTT service initialization");
+        }
+    }
+
+    private async Task InitializeKnxServiceAsync(IKnxService knxService, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var result = await knxService.InitializeAsync(cancellationToken);
+            if (result.IsSuccess)
+            {
+                this._logger.LogInformation(
+                    "✅ KNX service initialized successfully - Connected: {IsConnected}",
+                    knxService.IsConnected
+                );
+            }
+            else
+            {
+                this._logger.LogError("❌ Failed to initialize KNX service: {ErrorMessage}", result.ErrorMessage);
+            }
+        }
+        catch (Exception ex)
+        {
+            this._logger.LogError(ex, "❌ Exception during KNX service initialization");
         }
     }
 

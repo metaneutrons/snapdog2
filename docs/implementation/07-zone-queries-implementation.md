@@ -1,7 +1,7 @@
 # Zone Queries Implementation
 
-**Date:** 2025-08-02  
-**Status:** ✅ Complete  
+**Date:** 2025-08-02
+**Status:** ✅ Complete
 **Blueprint Reference:** [16d-queries-and-notifications.md](../blueprint/16d-queries-and-notifications.md)
 
 ## Overview
@@ -13,15 +13,18 @@ This document describes the complete implementation of the Zone Queries layer fo
 ### Core Infrastructure Extended
 
 **Enhanced Interfaces:**
+
 - `IZoneManager` - Extended with state query methods
 - `IPlaylistManager` - New playlist management operations interface
 
 **New Service Implementation:**
+
 - `PlaylistManager` - Manages playlist and track information
 
 ### Zone Queries Implemented
 
 **State Queries:**
+
 - `GetAllZonesQuery` - Retrieve all zone states
 - `GetZoneStateQuery` - Retrieve specific zone state (existing, enhanced)
 - `GetAllZoneStatesQuery` - Retrieve all zone states (existing, enhanced)
@@ -29,12 +32,14 @@ This document describes the complete implementation of the Zone Queries layer fo
 - `GetZoneVolumeQuery` - Retrieve zone volume (existing, enhanced)
 
 **Content Queries:**
+
 - `GetZoneTrackInfoQuery` - Retrieve current track information for a zone
 - `GetZonePlaylistInfoQuery` - Retrieve current playlist information for a zone
 
 ### Playlist Queries Implemented
 
 **Playlist Management Queries:**
+
 - `GetAllPlaylistsQuery` - Retrieve all available playlists
 - `GetPlaylistTracksQuery` - Retrieve tracks for a specific playlist (by ID or index)
 
@@ -129,6 +134,7 @@ public record GetPlaylistTracksQuery : IQuery<Result<List<TrackInfo>>>
 All handlers updated with proper structured logging using unique message IDs:
 
 **Message ID Ranges:**
+
 - `GetAllZonesQueryHandler`: 5001-5002
 - `GetZoneStateQueryHandler`: 5101-5102
 - `GetAllZoneStatesQueryHandler`: 5201-5202
@@ -140,6 +146,7 @@ All handlers updated with proper structured logging using unique message IDs:
 - `GetPlaylistTracksQueryHandler`: 5801-5803
 
 **Structured Logging Pattern:**
+
 ```csharp
 [LoggerMessage(5001, LogLevel.Information, "Handling GetAllZonesQuery")]
 private partial void LogHandling();
@@ -149,6 +156,7 @@ private partial void LogError(string errorMessage);
 ```
 
 **Error Handling Pattern:**
+
 ```csharp
 public async Task<Result<List<ZoneState>>> Handle(GetAllZonesQuery request, CancellationToken cancellationToken)
 {
@@ -174,6 +182,7 @@ public async Task<Result<List<ZoneState>>> Handle(GetAllZonesQuery request, Canc
 Comprehensive placeholder implementation with realistic test data:
 
 **Features:**
+
 - 5 placeholder playlists with varying track counts (15-35 tracks)
 - Realistic track data with proper durations and metadata
 - Support for both ID-based and index-based playlist access
@@ -181,6 +190,7 @@ Comprehensive placeholder implementation with realistic test data:
 - Proper error handling for missing playlists
 
 **Playlist Data:**
+
 ```csharp
 var playlists = new[]
 {
@@ -193,6 +203,7 @@ var playlists = new[]
 ```
 
 **Track Generation:**
+
 ```csharp
 var track = new TrackInfo
 {
@@ -220,7 +231,7 @@ public async Task<Result<ZoneState>> GetZoneStateAsync(int zoneId)
 {
     LogGettingZone(zoneId);
 
-    await Task.Delay(1); // Simulate async operation
+    await Task.Delay(1); // TODO: Fix simulation async operation
 
     if (_zones.TryGetValue(zoneId, out var zone))
     {
@@ -235,7 +246,7 @@ public async Task<Result<List<ZoneState>>> GetAllZoneStatesAsync()
 {
     LogGettingAllZones();
 
-    await Task.Delay(1); // Simulate async operation
+    await Task.Delay(1); // TODO: Fix simulation async operation
 
     var states = new List<ZoneState>();
     foreach (var zone in _zones.Values)
@@ -258,11 +269,13 @@ public async Task<Result<List<ZoneState>>> GetAllZoneStatesAsync()
 Added new zone query endpoints:
 
 **New Endpoints:**
+
 - `GET /api/zones/all` - Get all zones with their states
 - `GET /api/zones/{zoneId}/track` - Get current track information for a zone
 - `GET /api/zones/{zoneId}/playlist` - Get current playlist information for a zone
 
 **Response Types:**
+
 ```csharp
 [ProducesResponseType(typeof(IEnumerable<ZoneState>), 200)]
 [ProducesResponseType(500)]
@@ -286,11 +299,13 @@ public async Task<ActionResult<PlaylistInfo>> GetZonePlaylistInfo([Range(1, int.
 Dedicated controller for playlist operations:
 
 **RESTful Endpoints:**
+
 - `GET /api/playlists` - Get all available playlists
 - `GET /api/playlists/{playlistId}/tracks` - Get tracks for a specific playlist by ID
 - `GET /api/playlists/by-index/{playlistIndex}/tracks` - Get tracks for a specific playlist by index
 
 **Error Handling:**
+
 ```csharp
 if (result.IsSuccess && result.Value != null)
 {
@@ -336,6 +351,7 @@ builder.Services.AddScoped<SnapDog2.Core.Abstractions.IPlaylistManager, SnapDog2
 All endpoints tested successfully in the Docker development environment:
 
 **✅ Zone Query Endpoints:**
+
 ```bash
 # Get all zones
 curl http://localhost:5000/api/zones/all
@@ -355,6 +371,7 @@ curl http://localhost:5000/api/zones/1/state
 ```
 
 **✅ Playlist Query Endpoints:**
+
 ```bash
 # Get all playlists
 curl http://localhost:5000/api/playlists
@@ -370,6 +387,7 @@ curl http://localhost:5000/api/playlists/by-index/2/tracks
 ```
 
 **✅ Error Handling:**
+
 ```bash
 # Invalid playlist ID
 curl http://localhost:5000/api/playlists/nonexistent/tracks
@@ -381,9 +399,10 @@ curl http://localhost:5000/api/zones/999/track
 ```
 
 **✅ Structured Logging:**
+
 ```
 [11:04:58 INF] [SnapDog2.Server.Features.Zones.Handlers.GetAllPlaylistsQueryHandler] Handling GetAllPlaylistsQuery
-[11:05:10 INF] [SnapDog2.Server.Features.Zones.Handlers.GetPlaylistTracksQueryHandler] Handling GetPlaylistTracksQuery for PlaylistId: rock_classics, PlaylistIndex: 
+[11:05:10 INF] [SnapDog2.Server.Features.Zones.Handlers.GetPlaylistTracksQueryHandler] Handling GetPlaylistTracksQuery for PlaylistId: rock_classics, PlaylistIndex:
 [11:04:47 INF] [SnapDog2.Server.Features.Zones.Handlers.GetZoneTrackInfoQueryHandler] Handling GetZoneTrackInfoQuery for Zone 1
 [11:04:52 INF] [SnapDog2.Server.Features.Zones.Handlers.GetZonePlaylistInfoQueryHandler] Handling GetZonePlaylistInfoQuery for Zone 2
 ```
@@ -391,6 +410,7 @@ curl http://localhost:5000/api/zones/999/track
 ### Sample Response Data
 
 **Zone State Response:**
+
 ```json
 {
   "id": 1,
@@ -422,6 +442,7 @@ curl http://localhost:5000/api/zones/999/track
 ```
 
 **Playlist Response:**
+
 ```json
 {
   "id": "rock_classics",
@@ -433,6 +454,7 @@ curl http://localhost:5000/api/zones/999/track
 ```
 
 **Track Response:**
+
 ```json
 {
   "index": 1,
@@ -449,24 +471,28 @@ curl http://localhost:5000/api/zones/999/track
 ## Architecture Compliance
 
 ### ✅ CQRS Pattern Implementation
+
 - Clear separation between commands and queries
 - Query handlers only read state, never modify
 - Proper use of `IQuery<T>` and `IQueryHandler<TQuery, TResult>` interfaces
 - Consistent Result pattern usage throughout
 
 ### ✅ Structured Logging Implementation
+
 - Unique message IDs for all log entries (5001-8005 range)
 - Contextual information included in all log messages
 - Performance and behavior tracking implemented
 - Proper use of partial classes and LoggerMessage attributes
 
 ### ✅ Dependency Injection Consistency
+
 - All services properly registered with correct lifetimes
 - Manual registration pattern maintained for handlers
 - Service dependencies correctly resolved
 - Interface-based design maintained
 
 ### ✅ API Design Standards
+
 - RESTful endpoint design following established patterns
 - Proper HTTP status codes (200, 404, 500)
 - Consistent JSON response format
@@ -474,6 +500,7 @@ curl http://localhost:5000/api/zones/999/track
 - Comprehensive error handling and logging
 
 ### ✅ Result Pattern Usage
+
 - All operations return `Result<T>` or `Result`
 - Consistent error handling throughout the stack
 - Proper success/failure state management
@@ -503,12 +530,14 @@ The implementation fully complies with [16d-queries-and-notifications.md](../blu
 ## Performance Considerations
 
 ### ✅ Efficient Query Patterns
+
 - Direct state access through `IZoneManager` interface
 - Minimal data transformation in handlers
 - Proper async/await usage throughout
 - Efficient playlist data structures with dictionary lookups
 
 ### ✅ Memory Management
+
 - Placeholder data initialized once at startup
 - No unnecessary object creation in query paths
 - Proper disposal patterns where applicable
@@ -528,6 +557,7 @@ The foundation is now comprehensive with Zone Commands, Client Commands, and Zon
 ## Files Created/Modified
 
 ### New Files Created (3 files)
+
 ```
 SnapDog2/Core/Abstractions/IPlaylistManager.cs
 SnapDog2/Infrastructure/Services/PlaylistManager.cs
@@ -535,6 +565,7 @@ SnapDog2/Controllers/PlaylistController.cs
 ```
 
 ### Modified Files (5 files)
+
 ```
 SnapDog2/Core/Abstractions/IZoneManager.cs - Added state query methods
 SnapDog2/Server/Features/Zones/Queries/ZoneQueries.cs - Added missing queries

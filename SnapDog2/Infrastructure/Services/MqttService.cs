@@ -40,14 +40,14 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     private bool _disposed = false;
 
     public MqttService(
-        IOptions<ServicesConfig> configOptions,
+        IOptions<SnapDogConfiguration> configOptions,
         IOptions<List<ZoneConfig>> zoneConfigOptions,
         IOptions<List<ClientConfig>> clientConfigOptions,
         IServiceProvider serviceProvider,
         ILogger<MqttService> logger
     )
     {
-        this._config = configOptions.Value.Mqtt;
+        this._config = configOptions.Value.Services.Mqtt;
         this._serviceProvider = serviceProvider;
         this._logger = logger;
         this._zoneConfigs = zoneConfigOptions.Value;

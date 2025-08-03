@@ -22,6 +22,8 @@
     <PackageReference Include="FluentValidation.AspNetCore" />
     <PackageReference Include="MediatR" />
     <PackageReference Include="MQTTnet" />
+    <PackageReference Include="Knx.Falcon.Sdk" />
+    <PackageReference Include="Polly" />
     <PackageReference Include="GitVersion.MsBuild" PrivateAssets="All" />
     <PackageReference Include="System.CommandLine" />
   </ItemGroup>

@@ -23,6 +23,10 @@
     <PackageVersion Include="SnapcastClient" Version="0.3.5" />
     <!-- MQTT Integration -->
     <PackageVersion Include="MQTTnet" Version="5.0.1.1416" />
+    <!-- KNX Integration -->
+    <PackageVersion Include="Knx.Falcon.Sdk" Version="6.3.7959" />
+    <!-- Resilience -->
+    <PackageVersion Include="Polly" Version="8.5.0" />
     <!-- Analyzers -->
     <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.556" />
     <PackageVersion Include="SonarAnalyzer.CSharp" Version="9.21.0.86780" />

@@ -32,14 +32,14 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     private bool _initialized = false;
 
     public SnapcastService(
-        IOptions<ServicesConfig> configOptions,
+        IOptions<SnapDogConfiguration> configOptions,
         IServiceProvider serviceProvider,
         ISnapcastStateRepository stateRepository,
         ILogger<SnapcastService> logger,
         SnapcastClient.IClient snapcastClient
     )
     {
-        this._config = configOptions.Value.Snapcast;
+        this._config = configOptions.Value.Services.Snapcast;
         this._serviceProvider = serviceProvider;
         this._stateRepository = stateRepository;
         this._logger = logger;
