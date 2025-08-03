@@ -36,7 +36,7 @@ USER root
 EXPOSE 5000
 
 # Development entrypoint with hot reload (HTTP only for internal networking)
-ENTRYPOINT ["sh", "-c", "dotnet watch --project SnapDog2 -- --urls http://0.0.0.0:5000"]
+ENTRYPOINT ["sh", "-c", "dotnet watch --project SnapDog2"]
 
 # Build Stage
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
