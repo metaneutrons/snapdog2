@@ -19,7 +19,7 @@
     <!-- SubSonic Integration -->
     <PackageVersion Include="SubSonicMedia" Version="1.0.5" />
     <!-- Snapcast Integration -->
-    <PackageVersion Include="SnapcastClient" Version="0.3.4" />
+    <PackageVersion Include="SnapcastClient" Version="0.3.5" />
     <!-- MQTT Integration -->
     <PackageVersion Include="MQTTnet" Version="5.0.1.1416" />
     <!-- Analyzers -->
