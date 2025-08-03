@@ -14,6 +14,15 @@ using SnapDog2.Worker.DI;
 // System.CommandLine Flow - Command-Line Argument Parsing
 // ═══════════════════════════════════════════════════════════════════════════════
 
+// Check if we're running in a test environment
+if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Testing")
+{
+    // For tests, create the web application directly without command-line parsing
+    var testApp = CreateWebApplication(args);
+    await testApp.RunAsync();
+    return 0;
+}
+
 Option<FileInfo?> envFileOption = new("--env-file", "-e")
 {
     Description = "Path to environment file to load (.env format)",
@@ -54,55 +63,81 @@ if (parseResult.GetValue(envFileOption) is FileInfo parsedFile)
 // Start Services - Original Working Logic
 // ═══════════════════════════════════════════════════════════════════════════════
 
-var builder = WebApplication.CreateBuilder(args);
+var app = CreateWebApplication(args);
 
-// Set global prefix for all EnvoyConfig environment variables
-EnvConfig.GlobalPrefix = "SNAPDOG_";
-
-// Load configuration from environment variables using EnvoyConfig
-SnapDogConfiguration snapDogConfig;
 try
 {
-    snapDogConfig = EnvConfig.Load<SnapDogConfiguration>();
+    Log.Information("SnapDog2 application configured successfully");
+
+    // Use resilient host wrapper to handle startup exceptions gracefully
+    var resilientHost = app.UseResilientStartup(true);
+    await resilientHost.RunAsync();
 }
 catch (Exception ex)
 {
-    Console.WriteLine($"Failed to load configuration: {ex.Message}");
-    throw;
+    Log.Fatal(ex, "Application terminated unexpectedly");
+    Environment.ExitCode = 3;
+}
+finally
+{
+    await Log.CloseAndFlushAsync();
 }
 
-// Determine if debug logging is enabled
-var isDebugLogging =
-    snapDogConfig.System.LogLevel.Equals("Debug", StringComparison.OrdinalIgnoreCase)
-    || snapDogConfig.System.LogLevel.Equals("Trace", StringComparison.OrdinalIgnoreCase);
+return 0;
 
-// Configure Serilog based on configuration
-var loggerConfig = new LoggerConfiguration()
-    .MinimumLevel.Is(Enum.Parse<LogEventLevel>(snapDogConfig.System.LogLevel, true))
-    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-    .MinimumLevel.Override("System", LogEventLevel.Warning)
-    .MinimumLevel.Override("Microsoft.Extensions.Hosting.Internal.Host", LogEventLevel.Fatal)
-    .Enrich.FromLogContext()
-    .WriteTo.Console(
-        outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}"
-    );
+// ═══════════════════════════════════════════════════════════════════════════════
+// Web Application Creation Method (for both normal and test usage)
+// ═══════════════════════════════════════════════════════════════════════════════
 
-// Add file logging only if log file path is configured
-if (!string.IsNullOrWhiteSpace(snapDogConfig.System.LogFile))
+static WebApplication CreateWebApplication(string[] args)
 {
-    loggerConfig.WriteTo.File(
-        snapDogConfig.System.LogFile,
-        rollingInterval: RollingInterval.Day,
-        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}",
-        retainedFileCountLimit: 31,
-        fileSizeLimitBytes: 100 * 1024 * 1024
-    );
-}
+    var builder = WebApplication.CreateBuilder(args);
 
-Log.Logger = loggerConfig.CreateLogger();
+    // Set global prefix for all EnvoyConfig environment variables
+    EnvConfig.GlobalPrefix = "SNAPDOG_";
 
-try
-{
+    // Load configuration from environment variables using EnvoyConfig
+    SnapDogConfiguration snapDogConfig;
+    try
+    {
+        snapDogConfig = EnvConfig.Load<SnapDogConfiguration>();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Failed to load configuration: {ex.Message}");
+        throw;
+    }
+
+    // Determine if debug logging is enabled
+    var isDebugLogging =
+        snapDogConfig.System.LogLevel.Equals("Debug", StringComparison.OrdinalIgnoreCase)
+        || snapDogConfig.System.LogLevel.Equals("Trace", StringComparison.OrdinalIgnoreCase);
+
+    // Configure Serilog based on configuration
+    var loggerConfig = new LoggerConfiguration()
+        .MinimumLevel.Is(Enum.Parse<LogEventLevel>(snapDogConfig.System.LogLevel, true))
+        .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+        .MinimumLevel.Override("System", LogEventLevel.Warning)
+        .MinimumLevel.Override("Microsoft.Extensions.Hosting.Internal.Host", LogEventLevel.Fatal)
+        .Enrich.FromLogContext()
+        .WriteTo.Console(
+            outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}"
+        );
+
+    // Add file logging only if log file path is configured
+    if (!string.IsNullOrWhiteSpace(snapDogConfig.System.LogFile))
+    {
+        loggerConfig.WriteTo.File(
+            snapDogConfig.System.LogFile,
+            rollingInterval: RollingInterval.Day,
+            outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}",
+            retainedFileCountLimit: 31,
+            fileSizeLimitBytes: 100 * 1024 * 1024
+        );
+    }
+
+    Log.Logger = loggerConfig.CreateLogger();
+
     // Configuration will be logged by StartupVersionLoggingService
 
     // Use Serilog for logging
@@ -154,14 +189,18 @@ try
         builder.Services.AddMqttServices().ValidateMqttConfiguration();
     }
 
-    // Add version logging service as the very first hosted service (show environment info)
-    builder.Services.AddHostedService<SnapDog2.Services.StartupInformationService>();
+    // Skip hosted services in test environment
+    if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "Testing")
+    {
+        // Add version logging service as the very first hosted service (show environment info)
+        builder.Services.AddHostedService<SnapDog2.Services.StartupInformationService>();
 
-    // Add resilient startup service as second hosted service (then check if everything is healthy)
-    builder.Services.AddHostedService<SnapDog2.Services.StartupService>();
+        // Add resilient startup service as second hosted service (then check if everything is healthy)
+        builder.Services.AddHostedService<SnapDog2.Services.StartupService>();
 
-    // Add hosted service to initialize integration services on startup
-    builder.Services.AddHostedService<SnapDog2.Worker.Services.IntegrationServicesHostedService>();
+        // Add hosted service to initialize integration services on startup
+        builder.Services.AddHostedService<SnapDog2.Worker.Services.IntegrationServicesHostedService>();
+    }
 
     // Register placeholder services
     builder.Services.AddScoped<
@@ -247,31 +286,8 @@ try
     app.UseRouting();
     app.MapControllers();
 
-    Log.Information("SnapDog2 application configured successfully");
-
-    // Use resilient host wrapper to handle startup exceptions gracefully
-    var resilientHost = app.UseResilientStartup(isDebugLogging);
-    await resilientHost.RunAsync();
+    return app;
 }
-catch (Exception ex)
-{
-    if (isDebugLogging)
-    {
-        Log.Fatal(ex, "Application terminated unexpectedly");
-    }
-    else
-    {
-        Log.Fatal("Application terminated unexpectedly: {ErrorType} - {ErrorMessage}", ex.GetType().Name, ex.Message);
-    }
-
-    Environment.ExitCode = 3;
-}
-finally
-{
-    await Log.CloseAndFlushAsync();
-}
-
-return 0;
 
 // Make Program class accessible to tests
 public partial class Program { }

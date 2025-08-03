@@ -3,14 +3,13 @@ namespace SnapDog2.Tests.Api;
 using System.Net;
 using System.Text.Json;
 using FluentAssertions;
-using Microsoft.AspNetCore.Mvc.Testing;
 
-public class HealthControllerTests : IClassFixture<WebApplicationFactory<Program>>
+public class HealthControllerTests : IClassFixture<CustomWebApplicationFactory>
 {
-    private readonly WebApplicationFactory<Program> _factory;
+    private readonly CustomWebApplicationFactory _factory;
     private readonly HttpClient _client;
 
-    public HealthControllerTests(WebApplicationFactory<Program> factory)
+    public HealthControllerTests(CustomWebApplicationFactory factory)
     {
         this._factory = factory;
         this._client = this._factory.CreateClient();
