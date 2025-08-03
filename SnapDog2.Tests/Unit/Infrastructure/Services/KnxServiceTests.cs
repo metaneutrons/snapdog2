@@ -1,10 +1,12 @@
 namespace SnapDog2.Tests.Unit.Infrastructure.Services;
 
 using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using SnapDog2.Core.Configuration;
+using SnapDog2.Core.Enums;
 using SnapDog2.Infrastructure.Services;
 
 public class KnxServiceTests
@@ -26,12 +28,13 @@ public class KnxServiceTests
         var options = Options.Create(config);
 
         // Act
-        var service = new KnxService(options, _mockMediator.Object, _mockLogger.Object);
+        var mockServiceProvider = new Mock<IServiceProvider>();
+        var service = new KnxService(options, _mockMediator.Object, mockServiceProvider.Object, _mockLogger.Object);
 
         // Assert
         service.Should().NotBeNull();
         service.IsConnected.Should().BeFalse();
-        service.Status.Should().Be(SnapDog2.Core.Models.ServiceStatus.Stopped);
+        service.Status.Should().Be(ServiceStatus.Stopped);
     }
 
     [Fact]
@@ -40,14 +43,15 @@ public class KnxServiceTests
         // Arrange
         var config = CreateTestConfiguration(enabled: false);
         var options = Options.Create(config);
-        var service = new KnxService(options, _mockMediator.Object, _mockLogger.Object);
+        var mockServiceProvider = new Mock<IServiceProvider>();
+        var service = new KnxService(options, _mockMediator.Object, mockServiceProvider.Object, _mockLogger.Object);
 
         // Act
         var result = await service.InitializeAsync();
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        service.Status.Should().Be(SnapDog2.Core.Models.ServiceStatus.Stopped);
+        service.Status.Should().Be(ServiceStatus.Stopped);
     }
 
     [Fact]
@@ -56,7 +60,8 @@ public class KnxServiceTests
         // Arrange
         var config = CreateTestConfiguration(enabled: true);
         var options = Options.Create(config);
-        var service = new KnxService(options, _mockMediator.Object, _mockLogger.Object);
+        var mockServiceProvider = new Mock<IServiceProvider>();
+        var service = new KnxService(options, _mockMediator.Object, mockServiceProvider.Object, _mockLogger.Object);
 
         // Act
         var result = await service.SendStatusAsync("VOLUME", 1, 50);
@@ -72,7 +77,8 @@ public class KnxServiceTests
         // Arrange
         var config = CreateTestConfiguration(enabled: true);
         var options = Options.Create(config);
-        var service = new KnxService(options, _mockMediator.Object, _mockLogger.Object);
+        var mockServiceProvider = new Mock<IServiceProvider>();
+        var service = new KnxService(options, _mockMediator.Object, mockServiceProvider.Object, _mockLogger.Object);
 
         // Act
         var result = await service.WriteGroupValueAsync("1/0/1", true);
@@ -88,7 +94,8 @@ public class KnxServiceTests
         // Arrange
         var config = CreateTestConfiguration(enabled: true);
         var options = Options.Create(config);
-        var service = new KnxService(options, _mockMediator.Object, _mockLogger.Object);
+        var mockServiceProvider = new Mock<IServiceProvider>();
+        var service = new KnxService(options, _mockMediator.Object, mockServiceProvider.Object, _mockLogger.Object);
 
         // Act
         var result = await service.ReadGroupValueAsync("1/0/1");
@@ -104,14 +111,15 @@ public class KnxServiceTests
         // Arrange
         var config = CreateTestConfiguration(enabled: true);
         var options = Options.Create(config);
-        var service = new KnxService(options, _mockMediator.Object, _mockLogger.Object);
+        var mockServiceProvider = new Mock<IServiceProvider>();
+        var service = new KnxService(options, _mockMediator.Object, mockServiceProvider.Object, _mockLogger.Object);
 
         // Act
         var result = await service.StopAsync();
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        service.Status.Should().Be(SnapDog2.Core.Models.ServiceStatus.Stopped);
+        service.Status.Should().Be(ServiceStatus.Stopped);
     }
 
     [Fact]
@@ -120,7 +128,8 @@ public class KnxServiceTests
         // Arrange
         var config = CreateTestConfiguration(enabled: true);
         var options = Options.Create(config);
-        var service = new KnxService(options, _mockMediator.Object, _mockLogger.Object);
+        var mockServiceProvider = new Mock<IServiceProvider>();
+        var service = new KnxService(options, _mockMediator.Object, mockServiceProvider.Object, _mockLogger.Object);
 
         // Act & Assert
         await service.Invoking(s => s.DisposeAsync().AsTask()).Should().NotThrowAsync();
@@ -145,22 +154,21 @@ public class KnxServiceTests
             {
                 new ZoneConfig
                 {
-                    Id = 1,
                     Name = "Living Room",
                     Sink = "living-room",
                     Knx = new ZoneKnxConfig
                     {
                         Enabled = true,
-                        VolumeSetAddress = "1/0/1",
-                        VolumeStatusAddress = "1/0/2",
-                        MuteSetAddress = "1/0/3",
-                        MuteStatusAddress = "1/0/4",
-                        PlayAddress = "1/0/5",
-                        PauseAddress = "1/0/6",
-                        StopAddress = "1/0/7",
-                        NextTrackAddress = "1/0/8",
-                        PrevTrackAddress = "1/0/9",
-                        PlayingStatusAddress = "1/0/10",
+                        Volume = "1/0/1",
+                        VolumeStatus = "1/0/2",
+                        Mute = "1/0/3",
+                        MuteStatus = "1/0/4",
+                        Play = "1/0/5",
+                        Pause = "1/0/6",
+                        Stop = "1/0/7",
+                        TrackNext = "1/0/8",
+                        TrackPrevious = "1/0/9",
+                        ControlStatus = "1/0/10",
                     },
                 },
             },
@@ -168,17 +176,16 @@ public class KnxServiceTests
             {
                 new ClientConfig
                 {
-                    Id = 1,
                     Name = "Living Room Client",
                     DefaultZone = 1,
                     Knx = new ClientKnxConfig
                     {
                         Enabled = true,
-                        VolumeSetAddress = "2/0/1",
-                        VolumeStatusAddress = "2/0/2",
-                        MuteSetAddress = "2/0/3",
-                        MuteStatusAddress = "2/0/4",
-                        ConnectedStatusAddress = "2/0/5",
+                        Volume = "2/0/1",
+                        VolumeStatus = "2/0/2",
+                        Mute = "2/0/3",
+                        MuteStatus = "2/0/4",
+                        ConnectedStatus = "2/0/5",
                     },
                 },
             },

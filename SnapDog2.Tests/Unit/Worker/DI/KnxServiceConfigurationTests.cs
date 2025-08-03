@@ -3,8 +3,10 @@ namespace SnapDog2.Tests.Unit.Worker.DI;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Moq;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Configuration;
+using SnapDog2.Core.Enums;
 using SnapDog2.Worker.DI;
 
 public class KnxServiceConfigurationTests
@@ -26,7 +28,7 @@ public class KnxServiceConfigurationTests
         // Assert
         knxService.Should().NotBeNull();
         knxService.IsConnected.Should().BeFalse();
-        knxService.Status.Should().Be(SnapDog2.Core.Models.ServiceStatus.Disabled);
+        knxService.Status.Should().Be(SnapDog2.Core.Enums.ServiceStatus.Disabled);
     }
 
     [Fact]
@@ -35,6 +37,10 @@ public class KnxServiceConfigurationTests
         // Arrange
         var services = new ServiceCollection();
         services.AddLogging();
+
+        // Add required dependencies
+        var mockMediator = new Mock<Cortex.Mediator.IMediator>();
+        services.AddSingleton(mockMediator.Object);
 
         var configuration = CreateTestConfiguration(enabled: true);
 
@@ -64,7 +70,7 @@ public class KnxServiceConfigurationTests
 
         // Assert
         knxService.Should().NotBeNull();
-        knxService.Status.Should().Be(SnapDog2.Core.Models.ServiceStatus.Disabled);
+        knxService.Status.Should().Be(ServiceStatus.Disabled);
     }
 
     [Fact]
@@ -99,22 +105,21 @@ public class KnxServiceConfigurationTests
             {
                 new ZoneConfig
                 {
-                    Id = 1,
                     Name = "Living Room",
                     Sink = "living-room",
                     Knx = new ZoneKnxConfig
                     {
                         Enabled = enabled,
-                        VolumeSetAddress = "1/0/1",
-                        VolumeStatusAddress = "1/0/2",
-                        MuteSetAddress = "1/0/3",
-                        MuteStatusAddress = "1/0/4",
-                        PlayAddress = "1/0/5",
-                        PauseAddress = "1/0/6",
-                        StopAddress = "1/0/7",
-                        NextTrackAddress = "1/0/8",
-                        PrevTrackAddress = "1/0/9",
-                        PlayingStatusAddress = "1/0/10",
+                        Volume = "1/0/1",
+                        VolumeStatus = "1/0/2",
+                        Mute = "1/0/3",
+                        MuteStatus = "1/0/4",
+                        Play = "1/0/5",
+                        Pause = "1/0/6",
+                        Stop = "1/0/7",
+                        TrackNext = "1/0/8",
+                        TrackPrevious = "1/0/9",
+                        ControlStatus = "1/0/10",
                     },
                 },
             },
@@ -122,17 +127,16 @@ public class KnxServiceConfigurationTests
             {
                 new ClientConfig
                 {
-                    Id = 1,
                     Name = "Living Room Client",
                     DefaultZone = 1,
                     Knx = new ClientKnxConfig
                     {
                         Enabled = enabled,
-                        VolumeSetAddress = "2/0/1",
-                        VolumeStatusAddress = "2/0/2",
-                        MuteSetAddress = "2/0/3",
-                        MuteStatusAddress = "2/0/4",
-                        ConnectedStatusAddress = "2/0/5",
+                        Volume = "2/0/1",
+                        VolumeStatus = "2/0/2",
+                        Mute = "2/0/3",
+                        MuteStatus = "2/0/4",
+                        ConnectedStatus = "2/0/5",
                     },
                 },
             },
@@ -158,16 +162,15 @@ public class KnxServiceConfigurationTests
             {
                 new ZoneConfig
                 {
-                    Id = 1,
                     Name = "Living Room",
                     Sink = "living-room",
                     Knx = new ZoneKnxConfig
                     {
                         Enabled = true,
-                        VolumeSetAddress = "invalid/address/format", // Invalid format
-                        VolumeStatusAddress = "1/0/2",
-                        MuteSetAddress = "1/0/3",
-                        MuteStatusAddress = "1/0/4",
+                        Volume = "invalid/address/format", // Invalid format
+                        VolumeStatus = "1/0/2",
+                        Mute = "1/0/3",
+                        MuteStatus = "1/0/4",
                     },
                 },
             },
