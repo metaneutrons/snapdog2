@@ -3,10 +3,24 @@ namespace SnapDog2.Core.Configuration;
 using EnvoyConfig.Attributes;
 
 /// <summary>
-/// API authentication and security configuration.
+/// API server and authentication configuration.
 /// </summary>
 public class ApiConfig
 {
+    /// <summary>
+    /// Whether the API server is enabled.
+    /// Maps to: SNAPDOG_API_ENABLED
+    /// </summary>
+    [Env(Key = "ENABLED", Default = true)]
+    public bool Enabled { get; set; } = true;
+
+    /// <summary>
+    /// Port number for the API server.
+    /// Maps to: SNAPDOG_API_PORT
+    /// </summary>
+    [Env(Key = "PORT", Default = 5000)]
+    public int Port { get; set; } = 5000;
+
     /// <summary>
     /// Whether API authentication is enabled.
     /// Maps to: SNAPDOG_API_AUTH_ENABLED

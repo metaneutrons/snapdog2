@@ -30,6 +30,9 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                         ["SNAPDOG_SYSTEM__LOGLEVEL"] = "Warning",
                         ["SNAPDOG_SYSTEM__HEALTHCHECKSENABLED"] = "true",
                         ["SNAPDOG_SYSTEM__LOGFILE"] = "",
+                        ["SNAPDOG_API__ENABLED"] = "true", // Enable API for tests
+                        ["SNAPDOG_API__PORT"] = "0", // Use any available port for tests
+                        ["SNAPDOG_API__AUTH_ENABLED"] = "false", // Disable auth for tests
                         ["SNAPDOG_SERVICES__SNAPCAST__ADDRESS"] = "localhost",
                         ["SNAPDOG_SERVICES__SNAPCAST__JSONRPCPORT"] = "1704",
                         ["SNAPDOG_SERVICES__MQTT__ENABLED"] = "false",

@@ -21,6 +21,8 @@ API keys are managed securely outside the application code, loaded at startup fr
 
     ```bash
     # Example Environment Variables
+    SNAPDOG_API_ENABLED=true                           # Default: true
+    SNAPDOG_API_PORT=5000                               # Default: 5000
     SNAPDOG_API_AUTH_ENABLED=true
     SNAPDOG_API_APIKEY_1="sd-key-for-homeassistant-integration-alksjdhfgqwer"
     SNAPDOG_API_APIKEY_2="sd-key-for-mobile-app-zxcvbnm12345"
@@ -28,7 +30,7 @@ API keys are managed securely outside the application code, loaded at startup fr
     # Add as many keys as needed for different clients
     ```
 
-* **Loading:** The `/Core/Configuration/ApiAuthConfiguration.cs` class is responsible for loading these keys from the environment variables into a list used for validation. It should also load the `Enabled` flag.
+* **Loading:** The `/Core/Configuration/ApiConfig.cs` class is responsible for loading these keys from the environment variables into a list used for validation. It should also load the `Enabled` flag and `Port` configuration.
 
 ```csharp
 // Example: /Core/Configuration/ApiAuthConfiguration.cs

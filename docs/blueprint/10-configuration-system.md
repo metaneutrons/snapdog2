@@ -124,10 +124,12 @@ SNAPDOG_TELEMETRY_SEQ_URL=http://seq:5341             # Required if enabled
 ### 8.2.3. API Configuration
 
 ```bash
-# API authentication
-SNAPDOG_API_AUTH_ENABLED=true                         # Default: true
-SNAPDOG_API_APIKEY_1=secret-key-1                     # Required if auth enabled
-SNAPDOG_API_APIKEY_2=secret-key-2                     # Additional keys as needed
+# API server and authentication
+SNAPDOG_API_ENABLED=true                            # Default: true
+SNAPDOG_API_PORT=5000                               # Default: 5000
+SNAPDOG_API_AUTH_ENABLED=true                       # Default: true
+SNAPDOG_API_APIKEY_1=secret-key-1                   # Required if auth enabled
+SNAPDOG_API_APIKEY_2=secret-key-2                   # Additional keys as needed
 SNAPDOG_API_APIKEY_3=secret-key-3
 ```
 
@@ -332,7 +334,7 @@ public class SnapDogConfiguration
     public TelemetryConfig Telemetry { get; set; } = new();
 
     /// <summary>
-    /// API authentication and security configuration.
+    /// API server and authentication configuration.
     /// Maps environment variables with prefix: SNAPDOG_API_*
     /// </summary>
     [Env(NestedPrefix = "API_")]
@@ -371,7 +373,51 @@ public class SnapDogConfiguration
 }
 ```
 
-### 8.3.2. System Configuration
+### 8.3.2. API Configuration
+
+```csharp
+// --- /Core/Configuration/ApiConfig.cs ---
+namespace SnapDog2.Core.Configuration;
+
+using EnvoyConfig.Attributes;
+
+/// <summary>
+/// API server and authentication configuration.
+/// </summary>
+public class ApiConfig
+{
+    /// <summary>
+    /// Whether the API server is enabled.
+    /// Maps to: SNAPDOG_API_ENABLED
+    /// </summary>
+    [Env(Key = "ENABLED", Default = true)]
+    public bool Enabled { get; set; } = true;
+
+    /// <summary>
+    /// Port number for the API server.
+    /// Maps to: SNAPDOG_API_PORT
+    /// </summary>
+    [Env(Key = "PORT", Default = 5000)]
+    public int Port { get; set; } = 5000;
+
+    /// <summary>
+    /// Whether API authentication is enabled.
+    /// Maps to: SNAPDOG_API_AUTH_ENABLED
+    /// </summary>
+    [Env(Key = "AUTH_ENABLED", Default = true)]
+    public bool AuthEnabled { get; set; } = true;
+
+    /// <summary>
+    /// List of API keys for authentication.
+    /// Maps environment variables with pattern: SNAPDOG_API_APIKEY_X
+    /// Where X is the key index (1, 2, 3, etc.)
+    /// </summary>
+    [Env(ListPrefix = "APIKEY_")]
+    public List<string> ApiKeys { get; set; } = [];
+}
+```
+
+### 8.3.3. System Configuration
 
 ```csharp
 // --- /Core/Configuration/SystemConfig.cs ---
@@ -407,7 +453,7 @@ public class SystemConfig
 }
 ```
 
-### 8.3.3. Zone Configuration
+### 8.3.4. Zone Configuration
 
 ```csharp
 // --- /Core/Configuration/ZoneConfig.cs ---
@@ -454,7 +500,7 @@ public class ZoneConfig
 }
 ```
 
-### 8.3.4. Client Configuration
+### 8.3.5. Client Configuration
 
 ```csharp
 // --- /Core/Configuration/ClientConfig.cs ---

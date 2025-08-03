@@ -26,6 +26,27 @@ Given SnapDog2's typical deployment within a trusted local network, the primary 
 * **Authorization**: Currently basic. Successful authentication grants access to all authorized endpoints. Finer-grained authorization (e.g., specific keys only allowed to control certain zones) is **not implemented** in the current scope but could be a future enhancement. A failed authorization check (if implemented later) would result in a `403 Forbidden` response.
 * *(Future Considerations)*: While Bearer Tokens (JWT) or OAuth2 could be added later for more complex scenarios or third-party integrations, they are outside the current MVP scope.
 
+## 9.2.1. Server Configuration
+
+The API server configuration is controlled via environment variables:
+
+* **`SNAPDOG_API_ENABLED`**: Enable/disable the API server entirely (default: true)
+* **`SNAPDOG_API_PORT`**: Port number for the HTTP API server (default: 5000)
+* **`SNAPDOG_API_AUTH_ENABLED`**: Enable/disable API key authentication (default: true)
+* **`SNAPDOG_API_APIKEY_{n}`**: API keys for authentication (where n is 1, 2, 3, etc.)
+
+Example configuration:
+```bash
+SNAPDOG_API_ENABLED=true
+SNAPDOG_API_PORT=5000
+SNAPDOG_API_AUTH_ENABLED=true
+SNAPDOG_API_APIKEY_1=your-secret-api-key-here
+```
+
+When `SNAPDOG_API_ENABLED=false`, the API server is completely disabled - no HTTP endpoints are exposed, no controllers are registered, and no port is opened. This is useful for deployments where only MQTT or KNX control is desired.
+
+The server listens on all network interfaces (`0.0.0.0`) on the configured port, making it accessible from any device on the local network.
+
 ## 9.3. API Structure (`/api/v1/`)
 
 Base path: `/api/v1`. All endpoints below assume this prefix.

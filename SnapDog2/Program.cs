@@ -151,8 +151,19 @@ static WebApplication CreateWebApplication(string[] args)
     builder.Services.AddSingleton(snapDogConfig.Services);
     builder.Services.AddSingleton(snapDogConfig.SnapcastServer);
 
-    // Configure resilient web host with port fallback (will be configured later)
-    builder.WebHost.UseKestrel();
+    // Configure resilient web host with port from configuration
+    if (snapDogConfig.Api.Enabled)
+    {
+        builder.WebHost.UseKestrel(options =>
+        {
+            options.ListenAnyIP(snapDogConfig.Api.Port);
+        });
+    }
+    else
+    {
+        // If API is disabled, still configure Kestrel but don't listen on any ports
+        builder.WebHost.UseKestrel();
+    }
 
     // Add Command Processing (Cortex.Mediator)
     builder.Services.AddCommandProcessing();
@@ -231,10 +242,19 @@ static WebApplication CreateWebApplication(string[] args)
         SnapDog2.Infrastructure.Services.PlaylistManager
     >();
 
-    // Add services to the container
-    builder.Services.AddControllers();
-    builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen();
+    // Add services to the container (conditionally based on API configuration)
+    if (snapDogConfig.Api.Enabled)
+    {
+        builder.Services.AddControllers();
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
+
+        Log.Information("API server enabled on port {Port}", snapDogConfig.Api.Port);
+    }
+    else
+    {
+        Log.Information("API server is disabled via configuration (SNAPDOG_API_ENABLED=false)");
+    }
 
     // Add health checks
     if (snapDogConfig.System.HealthChecksEnabled)
@@ -276,15 +296,18 @@ static WebApplication CreateWebApplication(string[] args)
     // Add global exception handling as the first middleware
     app.UseGlobalExceptionHandling();
 
-    // Configure the HTTP request pipeline
-    if (app.Environment.IsDevelopment())
+    // Configure the HTTP request pipeline (conditionally based on API configuration)
+    if (snapDogConfig.Api.Enabled)
     {
-        app.UseSwagger();
-        app.UseSwaggerUI();
-    }
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseSwagger();
+            app.UseSwaggerUI();
+        }
 
-    app.UseRouting();
-    app.MapControllers();
+        app.UseRouting();
+        app.MapControllers();
+    }
 
     return app;
 }
