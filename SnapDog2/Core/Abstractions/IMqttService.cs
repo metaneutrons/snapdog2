@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using SnapDog2.Core.Models;
 
 /// <summary>
-/// Enterprise-grade MQTT service interface for bi-directional communication.
+/// MQTT service interface for bi-directional communication.
 /// Handles both incoming command processing and outgoing state publishing.
 /// </summary>
 public interface IMqttService : IAsyncDisposable

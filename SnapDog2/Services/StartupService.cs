@@ -10,11 +10,11 @@ using SnapDog2.Core.Configuration;
 namespace SnapDog2.Services;
 
 /// <summary>
-/// Enterprise-grade resilient startup service that handles port conflicts and other startup failures
+/// resilient startup service that handles port conflicts and other startup failures
 /// </summary>
-public class ResilientStartupService : IHostedService
+public class StartupService : IHostedService
 {
-    private readonly ILogger<ResilientStartupService> _logger;
+    private readonly ILogger<StartupService> _logger;
     private readonly IHostApplicationLifetime _applicationLifetime;
     private readonly SnapDogConfiguration _config;
     private readonly IServiceProvider _serviceProvider;
@@ -25,8 +25,8 @@ public class ResilientStartupService : IHostedService
     private const int MaxDelayMs = 30000;
     private const int PortScanRange = 100;
 
-    public ResilientStartupService(
-        ILogger<ResilientStartupService> logger,
+    public StartupService(
+        ILogger<StartupService> logger,
         IHostApplicationLifetime applicationLifetime,
         IOptions<SnapDogConfiguration> config,
         IServiceProvider serviceProvider
@@ -45,7 +45,7 @@ public class ResilientStartupService : IHostedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("🛡️  ResilientStartupService: Initiating enterprise-grade startup sequence");
+        _logger.LogInformation("🛡️ Initiating startup sequence");
 
         try
         {
@@ -67,7 +67,7 @@ public class ResilientStartupService : IHostedService
                 cancellationToken
             );
 
-            _logger.LogInformation("✅ ResilientStartupService: All startup validations completed successfully");
+            _logger.LogInformation("✅ All startup validations completed successfully");
         }
         catch (StartupValidationException ex)
         {
@@ -128,7 +128,7 @@ public class ResilientStartupService : IHostedService
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("🛡️  ResilientStartupService: Graceful shutdown initiated");
+        _logger.LogInformation("🛡️ Graceful shutdown initiated");
         return Task.CompletedTask;
     }
 

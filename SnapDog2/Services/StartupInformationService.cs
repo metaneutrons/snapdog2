@@ -12,12 +12,12 @@ namespace SnapDog2.Services;
 /// <summary>
 /// Service that logs detailed information during application startup
 /// </summary>
-public class StartupLoggingService : IHostedService
+public class StartupInformationService : IHostedService
 {
-    private readonly ILogger<StartupLoggingService> _logger;
+    private readonly ILogger<StartupInformationService> _logger;
     private readonly SnapDogConfiguration _config;
 
-    public StartupLoggingService(ILogger<StartupLoggingService> logger, IOptions<SnapDogConfiguration> config)
+    public StartupInformationService(ILogger<StartupInformationService> logger, IOptions<SnapDogConfiguration> config)
     {
         _logger = logger;
         _config = config.Value;
@@ -245,10 +245,6 @@ public class StartupLoggingService : IHostedService
     private void LogConfiguration()
     {
         _logger.LogInformation("⚙️  SnapDog2 Configuration:");
-
-        // NOTE: EnvoyConfig nested list parsing issue - collections show 0 items despite environment variables being present
-        // Environment variables like SNAPDOG_ZONE_1_NAME, SNAPDOG_CLIENT_1_NAME, SNAPDOG_RADIO_1_NAME exist
-        // but EnvoyConfig NestedListPrefix/NestedListSuffix attributes are not parsing them into collections
 
         // System Configuration
         _logger.LogInformation("   📋 System:");

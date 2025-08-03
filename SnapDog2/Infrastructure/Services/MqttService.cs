@@ -20,7 +20,7 @@ using SnapDog2.Core.Extensions;
 using SnapDog2.Core.Models;
 
 /// <summary>
-/// Enterprise-grade MQTT service implementation using MQTTnet v5.
+/// MQTT service implementation using MQTTnet v5.
 /// Provides bi-directional MQTT communication with automatic reconnection,
 /// configurable topic structure, and comprehensive error handling.
 /// </summary>

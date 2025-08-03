@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Connections;
 namespace SnapDog2.Middleware;
 
 /// <summary>
-/// Enterprise-grade global exception handling middleware
+/// global exception handling middleware
 /// </summary>
 public class GlobalExceptionHandlingMiddleware
 {

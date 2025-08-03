@@ -155,10 +155,10 @@ try
     }
 
     // Add version logging service as the very first hosted service (show environment info)
-    builder.Services.AddHostedService<SnapDog2.Services.StartupLoggingService>();
+    builder.Services.AddHostedService<SnapDog2.Services.StartupInformationService>();
 
     // Add resilient startup service as second hosted service (then check if everything is healthy)
-    builder.Services.AddHostedService<SnapDog2.Services.ResilientStartupService>();
+    builder.Services.AddHostedService<SnapDog2.Services.StartupService>();
 
     // Add hosted service to initialize integration services on startup
     builder.Services.AddHostedService<SnapDog2.Worker.Services.IntegrationServicesHostedService>();
