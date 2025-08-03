@@ -23,15 +23,21 @@ RUN useradd -m -s /bin/bash -u 1000 vscode && \
 COPY --chown=vscode:vscode *.sln ./
 COPY --chown=vscode:vscode Directory.*.props ./
 COPY --chown=vscode:vscode global.json ./
+COPY --chown=vscode:vscode nuget.devcontainer.config ./nuget.config
 COPY --chown=vscode:vscode */*.csproj ./
+
+# Create local-nuget directory for bind mount (will be populated at runtime)
+RUN mkdir -p /app/local-nuget && chown -R vscode:vscode /app/local-nuget
 
 # Organize project files and fix permissions
 RUN for file in $(ls *.csproj); do mkdir -p ${file%.*}/ && mv $file ${file%.*}/; done && \
     chown -R vscode:vscode /app
 
-# Restore dependencies as vscode user
+# Switch to vscode user for development
 USER vscode
-RUN dotnet restore
+
+# Skip restore during build - dotnet watch will handle it at runtime with bind-mounted local packages
+# RUN dotnet restore
 
 # Switch back to root for remaining setup
 USER root
@@ -40,7 +46,7 @@ USER root
 EXPOSE 5000
 
 # Development entrypoint with hot reload (HTTP only for internal networking)
-ENTRYPOINT ["dotnet", "watch", "--project", "SnapDog2", "--", "--urls", "http://0.0.0.0:5000"]
+ENTRYPOINT ["sh", "-c", "cp /app/nuget.docker.config /app/nuget.config && dotnet watch --project SnapDog2 -- --urls http://0.0.0.0:5000"]
 
 # Build Stage
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
@@ -52,6 +58,7 @@ COPY ["Directory.Build.props", "./"]
 COPY ["Directory.Packages.props", "./"]
 COPY ["global.json", "./"]
 COPY ["stylecop.json", "./"]
+COPY ["nuget.production.config", "./nuget.config"]  # Use production config (nuget.org only)
 COPY ["SnapDog2/SnapDog2.csproj", "./SnapDog2/"]
 COPY ["SnapDog2.Tests/SnapDog2.Tests.csproj", "./SnapDog2.Tests/"]
 RUN dotnet restore

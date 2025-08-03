@@ -8,7 +8,7 @@ services:
     volumes:
       - .:/app:cached # Mount source code for hot reload
       - ~/.nuget/packages:/home/vscode/.nuget/packages:cached # NuGet cache
-      - ~/.nuget/local:/home/vscode/.nuget/local:cached # Local NuGet packages
+      - ~/.nuget/local:/app/local-nuget:cached # Local NuGet packages for development
     env_file:
       - ./devcontainer/.env
     environment:
