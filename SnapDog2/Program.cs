@@ -5,6 +5,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Serilog;
 using Serilog.Events;
 using SnapDog2.Core.Configuration;
+using SnapDog2.Extensions;
 using SnapDog2.Helpers;
 using SnapDog2.Hosting;
 using SnapDog2.Middleware;
@@ -154,10 +155,7 @@ static WebApplication CreateWebApplication(string[] args)
     // Configure resilient web host with port from configuration
     if (snapDogConfig.Api.Enabled)
     {
-        builder.WebHost.UseKestrel(options =>
-        {
-            options.ListenAnyIP(snapDogConfig.Api.Port);
-        });
+        builder.WebHost.UseResilientKestrel(snapDogConfig.Api, Log.Logger);
     }
     else
     {
