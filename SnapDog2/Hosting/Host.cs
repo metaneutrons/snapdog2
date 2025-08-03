@@ -7,13 +7,13 @@ namespace SnapDog2.Hosting;
 /// <summary>
 /// Custom host wrapper that handles startup exceptions gracefully
 /// </summary>
-public class ResilientHost : IHost
+public class Host : IHost
 {
     private readonly IHost _innerHost;
-    private readonly ILogger<ResilientHost> _logger;
+    private readonly ILogger<Host> _logger;
     private readonly bool _isDebugMode;
 
-    public ResilientHost(IHost innerHost, ILogger<ResilientHost> logger, bool isDebugMode)
+    public Host(IHost innerHost, ILogger<Host> logger, bool isDebugMode)
     {
         this._innerHost = innerHost;
         this._logger = logger;
@@ -186,7 +186,7 @@ public static class ResilientHostExtensions
     /// </summary>
     public static IHost UseResilientStartup(this IHost host, bool isDebugMode = false)
     {
-        var logger = host.Services.GetRequiredService<ILogger<ResilientHost>>();
-        return new ResilientHost(host, logger, isDebugMode);
+        var logger = host.Services.GetRequiredService<ILogger<Host>>();
+        return new Host(host, logger, isDebugMode);
     }
 }
