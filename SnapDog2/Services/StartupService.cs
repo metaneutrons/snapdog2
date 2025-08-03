@@ -235,8 +235,6 @@ public class StartupService : IHostedService
     {
         var portsToCheck = new[]
         {
-            ("HTTP", 5000),
-            ("HTTPS", 5001),
             ("Snapcast JSON-RPC", _config.Services.Snapcast.JsonRpcPort),
             ("MQTT", _config.Services.Mqtt.Port),
             ("Prometheus", _config.Telemetry.Prometheus.Port),
@@ -274,9 +272,6 @@ public class StartupService : IHostedService
                             serviceName,
                             alternativePort.Value
                         );
-
-                        // TODO: Update configuration with alternative port
-                        // This would require a more sophisticated configuration update mechanism
                     }
                 }
                 else

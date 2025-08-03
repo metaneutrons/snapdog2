@@ -40,6 +40,7 @@
   },
   "dotnet.codeLens.enableReferencesCodeLens": true,
   "cSpell.words": [
+    "accessibilities",
     "APIKEY",
     "ASPNETCORE",
     "audiostream",
@@ -67,6 +68,7 @@
     "flac",
     "grafana",
     "Hwviqd",
+    "initializers",
     "ISRC",
     "jaegertracing",
     "kato",
@@ -76,6 +78,7 @@
     "libvlc",
     "libvlccore",
     "linux",
+    "Liskov",
     "livingroom",
     "Loli",
     "mediatr",
