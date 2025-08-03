@@ -418,12 +418,26 @@ public class StartupInformationService : IHostedService
         }
 
         // API Configuration
-        this._logger.LogInformation("   🔐 API:");
-        this._logger.LogInformation(
-            "     Authentication: {AuthEnabled} ({ApiKeysCount} API keys configured)",
-            this._config.Api.AuthEnabled ? "Enabled" : "Disabled",
-            this._config.Api.ApiKeys.Count
-        );
+        this._logger.LogInformation("   🌐 API Server:");
+        if (this._config.Api.Enabled)
+        {
+            this._logger.LogInformation("     Status: Enabled on port {ApiPort}", this._config.Api.Port);
+            this._logger.LogInformation(
+                "     Authentication: {AuthEnabled} ({ApiKeysCount} API keys configured)",
+                this._config.Api.AuthEnabled ? "Enabled" : "Disabled",
+                this._config.Api.ApiKeys.Count
+            );
+
+            if (this._config.Api.AuthEnabled && this._config.Api.ApiKeys.Count == 0)
+            {
+                this._logger.LogWarning("     ⚠️  Authentication is enabled but no API keys are configured!");
+            }
+        }
+        else
+        {
+            this._logger.LogInformation("     Status: Disabled");
+            this._logger.LogInformation("     No HTTP endpoints will be available");
+        }
 
         // Telemetry Configuration
         if (this._config.Telemetry.Enabled)
