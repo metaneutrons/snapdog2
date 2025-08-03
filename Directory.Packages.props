@@ -5,6 +5,7 @@
   <ItemGroup>
     <!-- Framework and Core Packages -->
     <PackageVersion Include="Cortex.Mediator" Version="1.7.0" />
+    <PackageVersion Include="dotenv.net" Version="4.0.0" />
     <PackageVersion Include="FluentAssertions" Version="8.5.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.7" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.7" />

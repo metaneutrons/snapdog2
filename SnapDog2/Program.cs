@@ -1,20 +1,58 @@
-using System.Reflection;
+using System.CommandLine;
+using dotenv.net;
 using EnvoyConfig;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Serilog;
 using Serilog.Events;
-using SnapDog2.CommandLine;
 using SnapDog2.Core.Configuration;
-using SnapDog2.Extensions;
+using SnapDog2.Helpers;
 using SnapDog2.Hosting;
 using SnapDog2.Middleware;
 using SnapDog2.Worker.DI;
 
-// Execute command line parsing - this handles help, version, and env file loading
-var options = SnapDogCommandLineParser.ExecuteCommandLine(args);
+// ═══════════════════════════════════════════════════════════════════════════════
+// System.CommandLine Flow - Command-Line Argument Parsing
+// ═══════════════════════════════════════════════════════════════════════════════
 
-// If we get here, it means normal application execution should continue
-// The env file (if specified) has already been loaded by the command line parser
+Option<FileInfo?> envFileOption = new("--env-file", "-e")
+{
+    Description = "Path to environment file to load (.env format)",
+};
+
+RootCommand rootCommand = new("SnapDog2 - The Snapcast-based Smart Home Audio System with MQTT & KNX integration")
+{
+    envFileOption,
+};
+
+// Parse and handle commands
+ParseResult parseResult = rootCommand.Parse(args);
+
+// Check if a command line was provided
+var result = parseResult.Invoke();
+if (result != 0 || args.Contains("--help") || args.Contains("-h") || args.Contains("--version"))
+{
+    return result;
+}
+
+// Handle environment file option
+if (parseResult.GetValue(envFileOption) is FileInfo parsedFile)
+{
+    try
+    {
+        Console.WriteLine($"📁 Loading environment file: {parsedFile.FullName}");
+        DotEnv.Fluent().WithExceptions().WithEnvFiles(parsedFile.FullName).WithTrimValues().Load();
+        Console.WriteLine("✅ Environment file loaded successfully");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"❌ Failed to load environment file: {ex.Message}");
+        return 1;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Start Services - Original Working Logic
+// ═══════════════════════════════════════════════════════════════════════════════
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -231,6 +269,8 @@ finally
 {
     await Log.CloseAndFlushAsync();
 }
+
+return 0;
 
 // Make Program class accessible to tests
 public partial class Program { }
