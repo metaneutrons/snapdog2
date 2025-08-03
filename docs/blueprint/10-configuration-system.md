@@ -87,7 +87,6 @@ SNAPDOG_SYSTEM_DEBUG_ENABLED=true                     # Default: false
 # Health Check Configuration
 SNAPDOG_SYSTEM_HEALTH_CHECKS_ENABLED=true             # Default: true
 SNAPDOG_SYSTEM_HEALTH_CHECKS_TIMEOUT=30               # Default: 30 seconds
-SNAPDOG_SYSTEM_HEALTH_CHECKS_EXTERNAL_SERVICE_TIMEOUT=10 # Default: 10 seconds
 SNAPDOG_SYSTEM_HEALTH_CHECKS_TAGS=ready,live          # Default: ready,live
 
 # System-wide MQTT Topics

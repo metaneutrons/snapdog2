@@ -43,13 +43,6 @@ public class SystemConfig
     public int HealthChecksTimeout { get; set; } = 30;
 
     /// <summary>
-    /// External service health check timeout in seconds.
-    /// Maps to: SNAPDOG_SYSTEM_HEALTH_CHECKS_EXTERNAL_SERVICE_TIMEOUT
-    /// </summary>
-    [Env(Key = "HEALTH_CHECKS_EXTERNAL_SERVICE_TIMEOUT", Default = 10)]
-    public int HealthChecksExternalServiceTimeout { get; set; } = 10;
-
-    /// <summary>
     /// Health check tags.
     /// Maps to: SNAPDOG_SYSTEM_HEALTH_CHECKS_TAGS
     /// </summary>

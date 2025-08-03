@@ -30,7 +30,6 @@ public class SnapDogConfigurationTests
         config.DebugEnabled.Should().BeFalse();
         config.HealthChecksEnabled.Should().BeTrue();
         config.HealthChecksTimeout.Should().Be(30);
-        config.HealthChecksExternalServiceTimeout.Should().Be(10);
         config.HealthChecksTags.Should().Be("ready,live");
     }
 
