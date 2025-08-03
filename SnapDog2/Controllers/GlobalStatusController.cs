@@ -26,8 +26,8 @@ public class GlobalStatusController : ControllerBase
     /// <param name="logger">The logger instance.</param>
     public GlobalStatusController(IServiceProvider serviceProvider, ILogger<GlobalStatusController> logger)
     {
-        _serviceProvider = serviceProvider;
-        _logger = logger;
+        this._serviceProvider = serviceProvider;
+        this._logger = logger;
     }
 
     /// <summary>
@@ -43,31 +43,31 @@ public class GlobalStatusController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Getting system status");
+            this._logger.LogDebug("Getting system status");
 
             // Try to get the handler from DI
             var handler =
-                _serviceProvider.GetService<SnapDog2.Server.Features.Global.Handlers.GetSystemStatusQueryHandler>();
+                this._serviceProvider.GetService<Server.Features.Global.Handlers.GetSystemStatusQueryHandler>();
             if (handler == null)
             {
-                _logger.LogError("GetSystemStatusQueryHandler not found in DI container");
-                return StatusCode(500, new { error = "Handler not available" });
+                this._logger.LogError("GetSystemStatusQueryHandler not found in DI container");
+                return this.StatusCode(500, new { error = "Handler not available" });
             }
 
             var result = await handler.Handle(new GetSystemStatusQuery(), cancellationToken);
 
             if (result.IsSuccess && result.Value != null)
             {
-                return Ok(result.Value);
+                return this.Ok(result.Value);
             }
 
-            _logger.LogWarning("Failed to get system status: {Error}", result.ErrorMessage);
-            return BadRequest(new { error = result.ErrorMessage ?? "Failed to get system status" });
+            this._logger.LogWarning("Failed to get system status: {Error}", result.ErrorMessage);
+            return this.BadRequest(new { error = result.ErrorMessage ?? "Failed to get system status" });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Exception while getting system status");
-            return StatusCode(500, new { error = "Internal server error" });
+            this._logger.LogError(ex, "Exception while getting system status");
+            return this.StatusCode(500, new { error = "Internal server error" });
         }
     }
 
@@ -85,14 +85,14 @@ public class GlobalStatusController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Getting error status");
+            this._logger.LogDebug("Getting error status");
 
             var handler =
-                _serviceProvider.GetService<SnapDog2.Server.Features.Global.Handlers.GetErrorStatusQueryHandler>();
+                this._serviceProvider.GetService<Server.Features.Global.Handlers.GetErrorStatusQueryHandler>();
             if (handler == null)
             {
-                _logger.LogError("GetErrorStatusQueryHandler not found in DI container");
-                return StatusCode(500, new { error = "Handler not available" });
+                this._logger.LogError("GetErrorStatusQueryHandler not found in DI container");
+                return this.StatusCode(500, new { error = "Handler not available" });
             }
 
             var result = await handler.Handle(new GetErrorStatusQuery(), cancellationToken);
@@ -101,21 +101,21 @@ public class GlobalStatusController : ControllerBase
             {
                 if (result.Value != null)
                 {
-                    return Ok(result.Value);
+                    return this.Ok(result.Value);
                 }
                 else
                 {
-                    return NoContent(); // No recent errors
+                    return this.NoContent(); // No recent errors
                 }
             }
 
-            _logger.LogWarning("Failed to get error status: {Error}", result.ErrorMessage);
-            return BadRequest(new { error = result.ErrorMessage ?? "Failed to get error status" });
+            this._logger.LogWarning("Failed to get error status: {Error}", result.ErrorMessage);
+            return this.BadRequest(new { error = result.ErrorMessage ?? "Failed to get error status" });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Exception while getting error status");
-            return StatusCode(500, new { error = "Internal server error" });
+            this._logger.LogError(ex, "Exception while getting error status");
+            return this.StatusCode(500, new { error = "Internal server error" });
         }
     }
 
@@ -132,30 +132,30 @@ public class GlobalStatusController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Getting version info");
+            this._logger.LogDebug("Getting version info");
 
             var handler =
-                _serviceProvider.GetService<SnapDog2.Server.Features.Global.Handlers.GetVersionInfoQueryHandler>();
+                this._serviceProvider.GetService<Server.Features.Global.Handlers.GetVersionInfoQueryHandler>();
             if (handler == null)
             {
-                _logger.LogError("GetVersionInfoQueryHandler not found in DI container");
-                return StatusCode(500, new { error = "Handler not available" });
+                this._logger.LogError("GetVersionInfoQueryHandler not found in DI container");
+                return this.StatusCode(500, new { error = "Handler not available" });
             }
 
             var result = await handler.Handle(new GetVersionInfoQuery(), cancellationToken);
 
             if (result.IsSuccess && result.Value != null)
             {
-                return Ok(result.Value);
+                return this.Ok(result.Value);
             }
 
-            _logger.LogWarning("Failed to get version info: {Error}", result.ErrorMessage);
-            return BadRequest(new { error = result.ErrorMessage ?? "Failed to get version info" });
+            this._logger.LogWarning("Failed to get version info: {Error}", result.ErrorMessage);
+            return this.BadRequest(new { error = result.ErrorMessage ?? "Failed to get version info" });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Exception while getting version info");
-            return StatusCode(500, new { error = "Internal server error" });
+            this._logger.LogError(ex, "Exception while getting version info");
+            return this.StatusCode(500, new { error = "Internal server error" });
         }
     }
 
@@ -172,30 +172,30 @@ public class GlobalStatusController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Getting server stats");
+            this._logger.LogDebug("Getting server stats");
 
             var handler =
-                _serviceProvider.GetService<SnapDog2.Server.Features.Global.Handlers.GetServerStatsQueryHandler>();
+                this._serviceProvider.GetService<Server.Features.Global.Handlers.GetServerStatsQueryHandler>();
             if (handler == null)
             {
-                _logger.LogError("GetServerStatsQueryHandler not found in DI container");
-                return StatusCode(500, new { error = "Handler not available" });
+                this._logger.LogError("GetServerStatsQueryHandler not found in DI container");
+                return this.StatusCode(500, new { error = "Handler not available" });
             }
 
             var result = await handler.Handle(new GetServerStatsQuery(), cancellationToken);
 
             if (result.IsSuccess && result.Value != null)
             {
-                return Ok(result.Value);
+                return this.Ok(result.Value);
             }
 
-            _logger.LogWarning("Failed to get server stats: {Error}", result.ErrorMessage);
-            return BadRequest(new { error = result.ErrorMessage ?? "Failed to get server stats" });
+            this._logger.LogWarning("Failed to get server stats: {Error}", result.ErrorMessage);
+            return this.BadRequest(new { error = result.ErrorMessage ?? "Failed to get server stats" });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Exception while getting server stats");
-            return StatusCode(500, new { error = "Internal server error" });
+            this._logger.LogError(ex, "Exception while getting server stats");
+            return this.StatusCode(500, new { error = "Internal server error" });
         }
     }
 }

@@ -28,22 +28,22 @@ public partial class GetAllZonesQueryHandler : IQueryHandler<GetAllZonesQuery, R
 
     public GetAllZonesQueryHandler(IZoneManager zoneManager, ILogger<GetAllZonesQueryHandler> logger)
     {
-        _zoneManager = zoneManager;
-        _logger = logger;
+        this._zoneManager = zoneManager;
+        this._logger = logger;
     }
 
     public async Task<Result<List<ZoneState>>> Handle(GetAllZonesQuery request, CancellationToken cancellationToken)
     {
-        LogHandling();
+        this.LogHandling();
 
         try
         {
-            var result = await _zoneManager.GetAllZoneStatesAsync().ConfigureAwait(false);
+            var result = await this._zoneManager.GetAllZoneStatesAsync().ConfigureAwait(false);
             return result;
         }
         catch (Exception ex)
         {
-            LogError(ex.Message);
+            this.LogError(ex.Message);
             return Result<List<ZoneState>>.Failure(ex.Message ?? "An error occurred while retrieving all zones");
         }
     }
@@ -65,19 +65,19 @@ public partial class GetZoneStateQueryHandler : IQueryHandler<GetZoneStateQuery,
 
     public GetZoneStateQueryHandler(IZoneManager zoneManager, ILogger<GetZoneStateQueryHandler> logger)
     {
-        _zoneManager = zoneManager;
-        _logger = logger;
+        this._zoneManager = zoneManager;
+        this._logger = logger;
     }
 
     public async Task<Result<ZoneState>> Handle(GetZoneStateQuery request, CancellationToken cancellationToken)
     {
-        LogHandling(request.ZoneId);
+        this.LogHandling(request.ZoneId);
 
-        var result = await _zoneManager.GetZoneStateAsync(request.ZoneId).ConfigureAwait(false);
+        var result = await this._zoneManager.GetZoneStateAsync(request.ZoneId).ConfigureAwait(false);
 
         if (result.IsFailure)
         {
-            LogZoneNotFound(request.ZoneId);
+            this.LogZoneNotFound(request.ZoneId);
         }
 
         return result;
@@ -100,8 +100,8 @@ public partial class GetAllZoneStatesQueryHandler : IQueryHandler<GetAllZoneStat
 
     public GetAllZoneStatesQueryHandler(IZoneManager zoneManager, ILogger<GetAllZoneStatesQueryHandler> logger)
     {
-        _zoneManager = zoneManager;
-        _logger = logger;
+        this._zoneManager = zoneManager;
+        this._logger = logger;
     }
 
     public async Task<Result<IEnumerable<ZoneState>>> Handle(
@@ -109,20 +109,21 @@ public partial class GetAllZoneStatesQueryHandler : IQueryHandler<GetAllZoneStat
         CancellationToken cancellationToken
     )
     {
-        LogHandling();
+        this.LogHandling();
 
         try
         {
-            var result = await _zoneManager.GetAllZoneStatesAsync().ConfigureAwait(false);
+            var result = await this._zoneManager.GetAllZoneStatesAsync().ConfigureAwait(false);
             if (result.IsSuccess)
             {
                 return Result<IEnumerable<ZoneState>>.Success(result.Value!.AsEnumerable());
             }
+
             return Result<IEnumerable<ZoneState>>.Failure(result.ErrorMessage ?? "Failed to get zone states");
         }
         catch (Exception ex)
         {
-            LogError(ex.Message);
+            this.LogError(ex.Message);
             return Result<IEnumerable<ZoneState>>.Failure(
                 ex.Message ?? "An error occurred while retrieving all zone states"
             );
@@ -146,8 +147,8 @@ public partial class GetZonePlaybackStateQueryHandler : IQueryHandler<GetZonePla
 
     public GetZonePlaybackStateQueryHandler(IZoneManager zoneManager, ILogger<GetZonePlaybackStateQueryHandler> logger)
     {
-        _zoneManager = zoneManager;
-        _logger = logger;
+        this._zoneManager = zoneManager;
+        this._logger = logger;
     }
 
     public async Task<Result<PlaybackStatus>> Handle(
@@ -155,12 +156,12 @@ public partial class GetZonePlaybackStateQueryHandler : IQueryHandler<GetZonePla
         CancellationToken cancellationToken
     )
     {
-        LogHandling(request.ZoneId);
+        this.LogHandling(request.ZoneId);
 
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            LogZoneNotFound(request.ZoneId);
+            this.LogZoneNotFound(request.ZoneId);
             return Result<PlaybackStatus>.Failure(zoneResult.ErrorMessage ?? "Zone not found");
         }
 
@@ -192,18 +193,18 @@ public partial class GetZoneVolumeQueryHandler : IQueryHandler<GetZoneVolumeQuer
 
     public GetZoneVolumeQueryHandler(IZoneManager zoneManager, ILogger<GetZoneVolumeQueryHandler> logger)
     {
-        _zoneManager = zoneManager;
-        _logger = logger;
+        this._zoneManager = zoneManager;
+        this._logger = logger;
     }
 
     public async Task<Result<int>> Handle(GetZoneVolumeQuery request, CancellationToken cancellationToken)
     {
-        LogHandling(request.ZoneId);
+        this.LogHandling(request.ZoneId);
 
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            LogZoneNotFound(request.ZoneId);
+            this.LogZoneNotFound(request.ZoneId);
             return Result<int>.Failure(zoneResult.ErrorMessage ?? "Zone not found");
         }
 
@@ -235,18 +236,18 @@ public partial class GetZoneTrackInfoQueryHandler : IQueryHandler<GetZoneTrackIn
 
     public GetZoneTrackInfoQueryHandler(IZoneManager zoneManager, ILogger<GetZoneTrackInfoQueryHandler> logger)
     {
-        _zoneManager = zoneManager;
-        _logger = logger;
+        this._zoneManager = zoneManager;
+        this._logger = logger;
     }
 
     public async Task<Result<TrackInfo>> Handle(GetZoneTrackInfoQuery request, CancellationToken cancellationToken)
     {
-        LogHandling(request.ZoneId);
+        this.LogHandling(request.ZoneId);
 
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            LogZoneNotFound(request.ZoneId);
+            this.LogZoneNotFound(request.ZoneId);
             return Result<TrackInfo>.Failure(zoneResult.ErrorMessage ?? "Zone not found");
         }
 
@@ -284,8 +285,8 @@ public partial class GetZonePlaylistInfoQueryHandler : IQueryHandler<GetZonePlay
 
     public GetZonePlaylistInfoQueryHandler(IZoneManager zoneManager, ILogger<GetZonePlaylistInfoQueryHandler> logger)
     {
-        _zoneManager = zoneManager;
-        _logger = logger;
+        this._zoneManager = zoneManager;
+        this._logger = logger;
     }
 
     public async Task<Result<PlaylistInfo>> Handle(
@@ -293,12 +294,12 @@ public partial class GetZonePlaylistInfoQueryHandler : IQueryHandler<GetZonePlay
         CancellationToken cancellationToken
     )
     {
-        LogHandling(request.ZoneId);
+        this.LogHandling(request.ZoneId);
 
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            LogZoneNotFound(request.ZoneId);
+            this.LogZoneNotFound(request.ZoneId);
             return Result<PlaylistInfo>.Failure(zoneResult.ErrorMessage ?? "Zone not found");
         }
 
@@ -336,8 +337,8 @@ public partial class GetAllPlaylistsQueryHandler : IQueryHandler<GetAllPlaylists
 
     public GetAllPlaylistsQueryHandler(IPlaylistManager playlistManager, ILogger<GetAllPlaylistsQueryHandler> logger)
     {
-        _playlistManager = playlistManager;
-        _logger = logger;
+        this._playlistManager = playlistManager;
+        this._logger = logger;
     }
 
     public async Task<Result<List<PlaylistInfo>>> Handle(
@@ -345,16 +346,16 @@ public partial class GetAllPlaylistsQueryHandler : IQueryHandler<GetAllPlaylists
         CancellationToken cancellationToken
     )
     {
-        LogHandling();
+        this.LogHandling();
 
         try
         {
-            var result = await _playlistManager.GetAllPlaylistsAsync().ConfigureAwait(false);
+            var result = await this._playlistManager.GetAllPlaylistsAsync().ConfigureAwait(false);
             return result;
         }
         catch (Exception ex)
         {
-            LogError(ex.Message);
+            this.LogError(ex.Message);
             return Result<List<PlaylistInfo>>.Failure(ex.Message ?? "An error occurred while retrieving all playlists");
         }
     }
@@ -386,8 +387,8 @@ public partial class GetPlaylistTracksQueryHandler : IQueryHandler<GetPlaylistTr
         ILogger<GetPlaylistTracksQueryHandler> logger
     )
     {
-        _playlistManager = playlistManager;
-        _logger = logger;
+        this._playlistManager = playlistManager;
+        this._logger = logger;
     }
 
     public async Task<Result<List<TrackInfo>>> Handle(
@@ -395,28 +396,28 @@ public partial class GetPlaylistTracksQueryHandler : IQueryHandler<GetPlaylistTr
         CancellationToken cancellationToken
     )
     {
-        LogHandling(request.PlaylistId, request.PlaylistIndex);
+        this.LogHandling(request.PlaylistId, request.PlaylistIndex);
 
         try
         {
             if (!string.IsNullOrEmpty(request.PlaylistId))
             {
-                return await _playlistManager.GetPlaylistTracksByIdAsync(request.PlaylistId).ConfigureAwait(false);
+                return await this._playlistManager.GetPlaylistTracksByIdAsync(request.PlaylistId).ConfigureAwait(false);
             }
 
             if (request.PlaylistIndex.HasValue)
             {
-                return await _playlistManager
-                    .GetPlaylistTracksByIndexAsync(request.PlaylistIndex.Value)
+                return await this
+                    ._playlistManager.GetPlaylistTracksByIndexAsync(request.PlaylistIndex.Value)
                     .ConfigureAwait(false);
             }
 
-            LogMissingParameters();
+            this.LogMissingParameters();
             return Result<List<TrackInfo>>.Failure("Either PlaylistId or PlaylistIndex must be provided");
         }
         catch (Exception ex)
         {
-            LogError(ex.Message);
+            this.LogError(ex.Message);
             return Result<List<TrackInfo>>.Failure(ex.Message ?? "An error occurred while retrieving playlist tracks");
         }
     }

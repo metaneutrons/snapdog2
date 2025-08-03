@@ -39,14 +39,14 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         SnapcastClient.IClient snapcastClient
     )
     {
-        _config = configOptions.Value.Snapcast;
-        _serviceProvider = serviceProvider;
-        _stateRepository = stateRepository;
-        _logger = logger;
-        _snapcastClient = snapcastClient;
+        this._config = configOptions.Value.Snapcast;
+        this._serviceProvider = serviceProvider;
+        this._stateRepository = stateRepository;
+        this._logger = logger;
+        this._snapcastClient = snapcastClient;
 
         // Subscribe to client events
-        SubscribeToEvents();
+        this.SubscribeToEvents();
     }
 
     #region Logging
@@ -87,13 +87,13 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     {
         try
         {
-            using var scope = _serviceProvider.CreateScope();
+            using var scope = this._serviceProvider.CreateScope();
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
             await mediator.PublishAsync(notification);
         }
         catch (Exception ex)
         {
-            LogEventProcessingError(typeof(T).Name, ex);
+            this.LogEventProcessingError(typeof(T).Name, ex);
         }
     }
 
@@ -103,41 +103,47 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
 
     public async Task<Result> InitializeAsync(CancellationToken cancellationToken = default)
     {
-        if (_disposed)
+        if (this._disposed)
+        {
             return Result.Failure("Service has been disposed");
+        }
 
-        if (_initialized)
+        if (this._initialized)
+        {
             return Result.Success();
+        }
 
-        LogInitializing(_config.Address, _config.JsonRpcPort);
+        this.LogInitializing(this._config.Address, this._config.JsonRpcPort);
 
         try
         {
-            await _operationLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            await this._operationLock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                if (_initialized)
+                if (this._initialized)
+                {
                     return Result.Success();
+                }
 
                 // The enterprise SnapcastClient client handles connection automatically
                 // We mark as initialized immediately and let the client handle connection in the background
                 // The state repository will be updated via event handlers once connection is established
-                _initialized = true;
-                LogConnectionEstablished();
+                this._initialized = true;
+                this.LogConnectionEstablished();
 
                 // Publish connection established notification
-                await PublishNotificationAsync(new SnapcastConnectionEstablishedNotification());
+                await this.PublishNotificationAsync(new SnapcastConnectionEstablishedNotification());
 
                 return Result.Success();
             }
             finally
             {
-                _operationLock.Release();
+                this._operationLock.Release();
             }
         }
         catch (Exception ex)
         {
-            LogInitializationFailed(ex);
+            this.LogInitializationFailed(ex);
             return Result.Failure(ex);
         }
     }
@@ -148,15 +154,17 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
 
     public async Task<Result<SnapcastServerStatus>> GetServerStatusAsync(CancellationToken cancellationToken = default)
     {
-        if (_disposed)
+        if (this._disposed)
+        {
             return Result<SnapcastServerStatus>.Failure("Service has been disposed");
+        }
 
         try
         {
-            var serverStatus = await _snapcastClient.ServerGetStatusAsync().ConfigureAwait(false);
+            var serverStatus = await this._snapcastClient.ServerGetStatusAsync().ConfigureAwait(false);
 
             // Update our state repository with the raw data
-            _stateRepository.UpdateServerState(serverStatus);
+            this._stateRepository.UpdateServerState(serverStatus);
 
             // Map to our domain model
             var mappedStatus = MapToSnapcastServerStatus(serverStatus);
@@ -165,19 +173,21 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            LogOperationFailed(nameof(GetServerStatusAsync), ex);
+            this.LogOperationFailed(nameof(this.GetServerStatusAsync), ex);
             return Result<SnapcastServerStatus>.Failure(ex);
         }
     }
 
     public async Task<Result<VersionDetails>> GetRpcVersionAsync(CancellationToken cancellationToken = default)
     {
-        if (_disposed)
+        if (this._disposed)
+        {
             return Result<VersionDetails>.Failure("Service has been disposed");
+        }
 
         try
         {
-            var version = await _snapcastClient.ServerGetRpcVersionAsync().ConfigureAwait(false);
+            var version = await this._snapcastClient.ServerGetRpcVersionAsync().ConfigureAwait(false);
 
             var versionDetails = new VersionDetails
             {
@@ -191,7 +201,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            LogOperationFailed(nameof(GetRpcVersionAsync), ex);
+            this.LogOperationFailed(nameof(this.GetRpcVersionAsync), ex);
             return Result<VersionDetails>.Failure(ex);
         }
     }
@@ -206,17 +216,19 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         CancellationToken cancellationToken = default
     )
     {
-        if (_disposed)
+        if (this._disposed)
+        {
             return Result.Failure("Service has been disposed");
+        }
 
         try
         {
-            await _snapcastClient.ClientSetVolumeAsync(snapcastClientId, volumePercent).ConfigureAwait(false);
+            await this._snapcastClient.ClientSetVolumeAsync(snapcastClientId, volumePercent).ConfigureAwait(false);
             return Result.Success();
         }
         catch (Exception ex)
         {
-            LogOperationFailed(nameof(SetClientVolumeAsync), ex);
+            this.LogOperationFailed(nameof(this.SetClientVolumeAsync), ex);
             return Result.Failure(ex);
         }
     }
@@ -227,25 +239,29 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         CancellationToken cancellationToken = default
     )
     {
-        if (_disposed)
+        if (this._disposed)
+        {
             return Result.Failure("Service has been disposed");
+        }
 
         try
         {
             // Get current client to preserve volume when muting/unmuting
-            var client = _stateRepository.GetClient(snapcastClientId);
+            var client = this._stateRepository.GetClient(snapcastClientId);
             if (client == null)
+            {
                 return Result.Failure($"Client {snapcastClientId} not found");
+            }
 
             var currentVolume = client.Value.Config.Volume.Percent;
             var newVolume = muted ? 0 : currentVolume;
 
-            await _snapcastClient.ClientSetVolumeAsync(snapcastClientId, newVolume).ConfigureAwait(false);
+            await this._snapcastClient.ClientSetVolumeAsync(snapcastClientId, newVolume).ConfigureAwait(false);
             return Result.Success();
         }
         catch (Exception ex)
         {
-            LogOperationFailed(nameof(SetClientMuteAsync), ex);
+            this.LogOperationFailed(nameof(this.SetClientMuteAsync), ex);
             return Result.Failure(ex);
         }
     }
@@ -256,17 +272,19 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         CancellationToken cancellationToken = default
     )
     {
-        if (_disposed)
+        if (this._disposed)
+        {
             return Result.Failure("Service has been disposed");
+        }
 
         try
         {
-            await _snapcastClient.ClientSetLatencyAsync(snapcastClientId, latencyMs).ConfigureAwait(false);
+            await this._snapcastClient.ClientSetLatencyAsync(snapcastClientId, latencyMs).ConfigureAwait(false);
             return Result.Success();
         }
         catch (Exception ex)
         {
-            LogOperationFailed(nameof(SetClientLatencyAsync), ex);
+            this.LogOperationFailed(nameof(this.SetClientLatencyAsync), ex);
             return Result.Failure(ex);
         }
     }
@@ -277,17 +295,19 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         CancellationToken cancellationToken = default
     )
     {
-        if (_disposed)
+        if (this._disposed)
+        {
             return Result.Failure("Service has been disposed");
+        }
 
         try
         {
-            await _snapcastClient.ClientSetNameAsync(snapcastClientId, name).ConfigureAwait(false);
+            await this._snapcastClient.ClientSetNameAsync(snapcastClientId, name).ConfigureAwait(false);
             return Result.Success();
         }
         catch (Exception ex)
         {
-            LogOperationFailed(nameof(SetClientNameAsync), ex);
+            this.LogOperationFailed(nameof(this.SetClientNameAsync), ex);
             return Result.Failure(ex);
         }
     }
@@ -298,36 +318,40 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         CancellationToken cancellationToken = default
     )
     {
-        if (_disposed)
+        if (this._disposed)
+        {
             return Result.Failure("Service has been disposed");
+        }
 
         try
         {
-            await _snapcastClient
-                .GroupSetClientsAsync(groupId, new List<string> { snapcastClientId })
+            await this
+                ._snapcastClient.GroupSetClientsAsync(groupId, new List<string> { snapcastClientId })
                 .ConfigureAwait(false);
             return Result.Success();
         }
         catch (Exception ex)
         {
-            LogOperationFailed(nameof(SetClientGroupAsync), ex);
+            this.LogOperationFailed(nameof(this.SetClientGroupAsync), ex);
             return Result.Failure(ex);
         }
     }
 
     public async Task<Result> DeleteClientAsync(string snapcastClientId, CancellationToken cancellationToken = default)
     {
-        if (_disposed)
+        if (this._disposed)
+        {
             return Result.Failure("Service has been disposed");
+        }
 
         try
         {
-            await _snapcastClient.ServerDeleteClientAsync(snapcastClientId).ConfigureAwait(false);
+            await this._snapcastClient.ServerDeleteClientAsync(snapcastClientId).ConfigureAwait(false);
             return Result.Success();
         }
         catch (Exception ex)
         {
-            LogOperationFailed(nameof(DeleteClientAsync), ex);
+            this.LogOperationFailed(nameof(this.DeleteClientAsync), ex);
             return Result.Failure(ex);
         }
     }
@@ -342,17 +366,19 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         CancellationToken cancellationToken = default
     )
     {
-        if (_disposed)
+        if (this._disposed)
+        {
             return Result.Failure("Service has been disposed");
+        }
 
         try
         {
-            await _snapcastClient.GroupSetMuteAsync(groupId, muted).ConfigureAwait(false);
+            await this._snapcastClient.GroupSetMuteAsync(groupId, muted).ConfigureAwait(false);
             return Result.Success();
         }
         catch (Exception ex)
         {
-            LogOperationFailed(nameof(SetGroupMuteAsync), ex);
+            this.LogOperationFailed(nameof(this.SetGroupMuteAsync), ex);
             return Result.Failure(ex);
         }
     }
@@ -363,17 +389,19 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         CancellationToken cancellationToken = default
     )
     {
-        if (_disposed)
+        if (this._disposed)
+        {
             return Result.Failure("Service has been disposed");
+        }
 
         try
         {
-            await _snapcastClient.GroupSetStreamAsync(groupId, streamId).ConfigureAwait(false);
+            await this._snapcastClient.GroupSetStreamAsync(groupId, streamId).ConfigureAwait(false);
             return Result.Success();
         }
         catch (Exception ex)
         {
-            LogOperationFailed(nameof(SetGroupStreamAsync), ex);
+            this.LogOperationFailed(nameof(this.SetGroupStreamAsync), ex);
             return Result.Failure(ex);
         }
     }
@@ -384,17 +412,19 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         CancellationToken cancellationToken = default
     )
     {
-        if (_disposed)
+        if (this._disposed)
+        {
             return Result.Failure("Service has been disposed");
+        }
 
         try
         {
-            await _snapcastClient.GroupSetNameAsync(groupId, name).ConfigureAwait(false);
+            await this._snapcastClient.GroupSetNameAsync(groupId, name).ConfigureAwait(false);
             return Result.Success();
         }
         catch (Exception ex)
         {
-            LogOperationFailed(nameof(SetGroupNameAsync), ex);
+            this.LogOperationFailed(nameof(this.SetGroupNameAsync), ex);
             return Result.Failure(ex);
         }
     }
@@ -404,20 +434,26 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         CancellationToken cancellationToken = default
     )
     {
-        if (_disposed)
+        if (this._disposed)
+        {
             return Task.FromResult(Result<string>.Failure("Service has been disposed"));
+        }
 
         try
         {
             var clientIdArray = clientIds.ToArray();
             if (clientIdArray.Length == 0)
+            {
                 return Task.FromResult(Result<string>.Failure("At least one client ID is required"));
+            }
 
             // For now, we'll use the first client's current group as a template
             // In a real implementation, you might want to create a new group ID
-            var firstClient = _stateRepository.GetClient(clientIdArray[0]);
+            var firstClient = this._stateRepository.GetClient(clientIdArray[0]);
             if (firstClient == null)
+            {
                 return Task.FromResult(Result<string>.Failure($"Client {clientIdArray[0]} not found"));
+            }
 
             // This is a simplified implementation - in practice, you'd need to handle group creation differently
             return Task.FromResult(
@@ -426,15 +462,17 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            LogOperationFailed(nameof(CreateGroupAsync), ex);
+            this.LogOperationFailed(nameof(this.CreateGroupAsync), ex);
             return Task.FromResult(Result<string>.Failure(ex));
         }
     }
 
     public Task<Result> DeleteGroupAsync(string groupId, CancellationToken cancellationToken = default)
     {
-        if (_disposed)
+        if (this._disposed)
+        {
             return Task.FromResult(Result.Failure("Service has been disposed"));
+        }
 
         try
         {
@@ -444,7 +482,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            LogOperationFailed(nameof(DeleteGroupAsync), ex);
+            this.LogOperationFailed(nameof(this.DeleteGroupAsync), ex);
             return Task.FromResult(Result.Failure(ex));
         }
     }
@@ -455,54 +493,54 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
 
     private void SubscribeToEvents()
     {
-        _snapcastClient.OnClientConnect = HandleClientConnect;
-        _snapcastClient.OnClientDisconnect = HandleClientDisconnect;
-        _snapcastClient.OnClientVolumeChanged = HandleClientVolumeChanged;
-        _snapcastClient.OnClientLatencyChanged = HandleClientLatencyChanged;
-        _snapcastClient.OnClientNameChanged = HandleClientNameChanged;
-        _snapcastClient.OnGroupMute = HandleGroupMuteChanged;
-        _snapcastClient.OnGroupStreamChanged = HandleGroupStreamChanged;
-        _snapcastClient.OnGroupNameChanged = HandleGroupNameChanged;
-        _snapcastClient.OnStreamUpdate = HandleStreamUpdateAsync;
-        _snapcastClient.OnStreamProperties = HandleStreamProperties;
-        _snapcastClient.OnServerUpdate = HandleServerUpdate;
+        this._snapcastClient.OnClientConnect = this.HandleClientConnect;
+        this._snapcastClient.OnClientDisconnect = this.HandleClientDisconnect;
+        this._snapcastClient.OnClientVolumeChanged = this.HandleClientVolumeChanged;
+        this._snapcastClient.OnClientLatencyChanged = this.HandleClientLatencyChanged;
+        this._snapcastClient.OnClientNameChanged = this.HandleClientNameChanged;
+        this._snapcastClient.OnGroupMute = this.HandleGroupMuteChanged;
+        this._snapcastClient.OnGroupStreamChanged = this.HandleGroupStreamChanged;
+        this._snapcastClient.OnGroupNameChanged = this.HandleGroupNameChanged;
+        this._snapcastClient.OnStreamUpdate = this.HandleStreamUpdateAsync;
+        this._snapcastClient.OnStreamProperties = this.HandleStreamProperties;
+        this._snapcastClient.OnServerUpdate = this.HandleServerUpdate;
     }
 
     private void HandleClientConnect(SnapClient client)
     {
-        LogProcessingEvent("ClientConnect");
+        this.LogProcessingEvent("ClientConnect");
         try
         {
-            _stateRepository.UpdateClient(client);
-            _ = PublishNotificationAsync(new SnapcastClientConnectedNotification(client));
+            this._stateRepository.UpdateClient(client);
+            _ = this.PublishNotificationAsync(new SnapcastClientConnectedNotification(client));
         }
         catch (Exception ex)
         {
-            LogEventProcessingError("ClientConnect", ex);
+            this.LogEventProcessingError("ClientConnect", ex);
         }
     }
 
     private void HandleClientDisconnect(SnapClient client)
     {
-        LogProcessingEvent("ClientDisconnect");
+        this.LogProcessingEvent("ClientDisconnect");
         try
         {
-            _stateRepository.UpdateClient(client);
-            _ = PublishNotificationAsync(new SnapcastClientDisconnectedNotification(client));
+            this._stateRepository.UpdateClient(client);
+            _ = this.PublishNotificationAsync(new SnapcastClientDisconnectedNotification(client));
         }
         catch (Exception ex)
         {
-            LogEventProcessingError("ClientDisconnect", ex);
+            this.LogEventProcessingError("ClientDisconnect", ex);
         }
     }
 
     private void HandleClientVolumeChanged(ClientSetVolume volumeChange)
     {
-        LogProcessingEvent("ClientVolumeChanged");
+        this.LogProcessingEvent("ClientVolumeChanged");
         try
         {
             // Update the client in our repository
-            var client = _stateRepository.GetClient(volumeChange.Id);
+            var client = this._stateRepository.GetClient(volumeChange.Id);
             if (client != null)
             {
                 var updatedClient = client.Value with
@@ -516,7 +554,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
                         },
                     },
                 };
-                _stateRepository.UpdateClient(updatedClient);
+                this._stateRepository.UpdateClient(updatedClient);
             }
 
             // Convert Params.ClientVolume to Models.ClientVolume for the notification
@@ -525,143 +563,147 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
                 Muted = volumeChange.Volume.Muted,
                 Percent = volumeChange.Volume.Percent,
             };
-            _ = PublishNotificationAsync(new SnapcastClientVolumeChangedNotification(volumeChange.Id, modelVolume));
+            _ = this.PublishNotificationAsync(
+                new SnapcastClientVolumeChangedNotification(volumeChange.Id, modelVolume)
+            );
         }
         catch (Exception ex)
         {
-            LogEventProcessingError("ClientVolumeChanged", ex);
+            this.LogEventProcessingError("ClientVolumeChanged", ex);
         }
     }
 
     private void HandleClientLatencyChanged(ClientSetLatency latencyChange)
     {
-        LogProcessingEvent("ClientLatencyChanged");
+        this.LogProcessingEvent("ClientLatencyChanged");
         try
         {
             // Update the client in our repository
-            var client = _stateRepository.GetClient(latencyChange.Id);
+            var client = this._stateRepository.GetClient(latencyChange.Id);
             if (client != null)
             {
                 var updatedClient = client.Value with
                 {
                     Config = client.Value.Config with { Latency = latencyChange.Latency },
                 };
-                _stateRepository.UpdateClient(updatedClient);
+                this._stateRepository.UpdateClient(updatedClient);
             }
 
-            _ = PublishNotificationAsync(
+            _ = this.PublishNotificationAsync(
                 new SnapcastClientLatencyChangedNotification(latencyChange.Id, latencyChange.Latency)
             );
         }
         catch (Exception ex)
         {
-            LogEventProcessingError("ClientLatencyChanged", ex);
+            this.LogEventProcessingError("ClientLatencyChanged", ex);
         }
     }
 
     private void HandleClientNameChanged(ClientSetName nameChange)
     {
-        LogProcessingEvent("ClientNameChanged");
+        this.LogProcessingEvent("ClientNameChanged");
         try
         {
             // Update the client in our repository
-            var client = _stateRepository.GetClient(nameChange.Id);
+            var client = this._stateRepository.GetClient(nameChange.Id);
             if (client != null)
             {
                 var updatedClient = client.Value with { Config = client.Value.Config with { Name = nameChange.Name } };
-                _stateRepository.UpdateClient(updatedClient);
+                this._stateRepository.UpdateClient(updatedClient);
             }
 
-            _ = PublishNotificationAsync(new SnapcastClientNameChangedNotification(nameChange.Id, nameChange.Name));
+            _ = this.PublishNotificationAsync(
+                new SnapcastClientNameChangedNotification(nameChange.Id, nameChange.Name)
+            );
         }
         catch (Exception ex)
         {
-            LogEventProcessingError("ClientNameChanged", ex);
+            this.LogEventProcessingError("ClientNameChanged", ex);
         }
     }
 
     private void HandleGroupMuteChanged(GroupOnMute muteChange)
     {
-        LogProcessingEvent("GroupMuteChanged");
+        this.LogProcessingEvent("GroupMuteChanged");
         try
         {
             // Update the group in our repository
-            var group = _stateRepository.GetGroup(muteChange.Id);
+            var group = this._stateRepository.GetGroup(muteChange.Id);
             if (group != null)
             {
                 var updatedGroup = group.Value with { Muted = muteChange.Mute };
-                _stateRepository.UpdateGroup(updatedGroup);
+                this._stateRepository.UpdateGroup(updatedGroup);
             }
 
-            _ = PublishNotificationAsync(new SnapcastGroupMuteChangedNotification(muteChange.Id, muteChange.Mute));
+            _ = this.PublishNotificationAsync(new SnapcastGroupMuteChangedNotification(muteChange.Id, muteChange.Mute));
         }
         catch (Exception ex)
         {
-            LogEventProcessingError("GroupMuteChanged", ex);
+            this.LogEventProcessingError("GroupMuteChanged", ex);
         }
     }
 
     private void HandleGroupStreamChanged(GroupOnStreamChanged streamChange)
     {
-        LogProcessingEvent("GroupStreamChanged");
+        this.LogProcessingEvent("GroupStreamChanged");
         try
         {
             // Update the group in our repository
-            var group = _stateRepository.GetGroup(streamChange.Id);
+            var group = this._stateRepository.GetGroup(streamChange.Id);
             if (group != null)
             {
                 var updatedGroup = group.Value with { StreamId = streamChange.StreamId };
-                _stateRepository.UpdateGroup(updatedGroup);
+                this._stateRepository.UpdateGroup(updatedGroup);
             }
 
-            _ = PublishNotificationAsync(
+            _ = this.PublishNotificationAsync(
                 new SnapcastGroupStreamChangedNotification(streamChange.Id, streamChange.StreamId)
             );
         }
         catch (Exception ex)
         {
-            LogEventProcessingError("GroupStreamChanged", ex);
+            this.LogEventProcessingError("GroupStreamChanged", ex);
         }
     }
 
     private void HandleGroupNameChanged(GroupOnNameChanged nameChange)
     {
-        LogProcessingEvent("GroupNameChanged");
+        this.LogProcessingEvent("GroupNameChanged");
         try
         {
             // Update the group in our repository
-            var group = _stateRepository.GetGroup(nameChange.Id);
+            var group = this._stateRepository.GetGroup(nameChange.Id);
             if (group != null)
             {
                 var updatedGroup = group.Value with { Name = nameChange.Name };
-                _stateRepository.UpdateGroup(updatedGroup);
+                this._stateRepository.UpdateGroup(updatedGroup);
             }
 
-            _ = PublishNotificationAsync(new SnapcastGroupNameChangedNotification(nameChange.Id, nameChange.Name));
+            _ = this.PublishNotificationAsync(new SnapcastGroupNameChangedNotification(nameChange.Id, nameChange.Name));
         }
         catch (Exception ex)
         {
-            LogEventProcessingError("GroupNameChanged", ex);
+            this.LogEventProcessingError("GroupNameChanged", ex);
         }
     }
 
     private async Task HandleStreamUpdateAsync(Stream stream)
     {
-        LogProcessingEvent("StreamUpdate");
+        this.LogProcessingEvent("StreamUpdate");
         try
         {
-            _stateRepository.UpdateStream(stream);
-            await PublishNotificationAsync(new SnapcastStreamUpdatedNotification(stream));
+            this._stateRepository.UpdateStream(stream);
+            await this.PublishNotificationAsync(new SnapcastStreamUpdatedNotification(stream));
         }
         catch (Exception ex)
         {
-            LogEventProcessingError("StreamUpdate", ex);
+            this.LogEventProcessingError("StreamUpdate", ex);
         }
     }
 
     private void HandleStreamProperties(StreamOnProperties properties)
     {
-        LogProcessingEvent("StreamProperties");
+        this.LogProcessingEvent("StreamProperties");
         try
         {
             // Convert StreamProperties to Dictionary for the notification
@@ -681,27 +723,27 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
                 propertiesDict["metadata"] = properties.Properties.Metadata;
             }
 
-            _ = PublishNotificationAsync(
+            _ = this.PublishNotificationAsync(
                 new SnapcastStreamPropertiesChangedNotification(properties.Id, propertiesDict)
             );
         }
         catch (Exception ex)
         {
-            LogEventProcessingError("StreamProperties", ex);
+            this.LogEventProcessingError("StreamProperties", ex);
         }
     }
 
     private void HandleServerUpdate(Server server)
     {
-        LogProcessingEvent("ServerUpdate");
+        this.LogProcessingEvent("ServerUpdate");
         try
         {
-            _stateRepository.UpdateServerState(server);
-            _ = PublishNotificationAsync(new SnapcastServerUpdatedNotification(server));
+            this._stateRepository.UpdateServerState(server);
+            _ = this.PublishNotificationAsync(new SnapcastServerUpdatedNotification(server));
         }
         catch (Exception ex)
         {
-            LogEventProcessingError("ServerUpdate", ex);
+            this.LogEventProcessingError("ServerUpdate", ex);
         }
     }
 
@@ -784,45 +826,47 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        if (_disposed)
+        if (this._disposed)
+        {
             return;
+        }
 
-        _disposed = true;
+        this._disposed = true;
 
         try
         {
             // Unsubscribe from events
-            if (_snapcastClient != null)
+            if (this._snapcastClient != null)
             {
-                _snapcastClient.OnClientConnect = null;
-                _snapcastClient.OnClientDisconnect = null;
-                _snapcastClient.OnClientVolumeChanged = null;
-                _snapcastClient.OnClientLatencyChanged = null;
-                _snapcastClient.OnClientNameChanged = null;
-                _snapcastClient.OnGroupMute = null;
-                _snapcastClient.OnGroupStreamChanged = null;
-                _snapcastClient.OnGroupNameChanged = null;
-                _snapcastClient.OnStreamUpdate = null;
-                _snapcastClient.OnStreamProperties = null;
-                _snapcastClient.OnServerUpdate = null;
+                this._snapcastClient.OnClientConnect = null;
+                this._snapcastClient.OnClientDisconnect = null;
+                this._snapcastClient.OnClientVolumeChanged = null;
+                this._snapcastClient.OnClientLatencyChanged = null;
+                this._snapcastClient.OnClientNameChanged = null;
+                this._snapcastClient.OnGroupMute = null;
+                this._snapcastClient.OnGroupStreamChanged = null;
+                this._snapcastClient.OnGroupNameChanged = null;
+                this._snapcastClient.OnStreamUpdate = null;
+                this._snapcastClient.OnStreamProperties = null;
+                this._snapcastClient.OnServerUpdate = null;
 
                 // Dispose the client if it implements IAsyncDisposable
-                if (_snapcastClient is IAsyncDisposable asyncDisposable)
+                if (this._snapcastClient is IAsyncDisposable asyncDisposable)
                 {
                     await asyncDisposable.DisposeAsync().ConfigureAwait(false);
                 }
-                else if (_snapcastClient is IDisposable disposable)
+                else if (this._snapcastClient is IDisposable disposable)
                 {
                     disposable.Dispose();
                 }
             }
 
-            _operationLock?.Dispose();
-            LogServiceDisposed();
+            this._operationLock?.Dispose();
+            this.LogServiceDisposed();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during SnapcastService disposal");
+            this._logger.LogError(ex, "Error during SnapcastService disposal");
         }
     }
 

@@ -24,13 +24,13 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthentic
     )
         : base(options, logger, encoder)
     {
-        _configuration = configuration;
+        this._configuration = configuration;
     }
 
     /// <inheritdoc/>
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        if (!Request.Headers.TryGetValue(ApiKeyHeaderName, out var apiKeyHeaderValues))
+        if (!this.Request.Headers.TryGetValue(ApiKeyHeaderName, out var apiKeyHeaderValues))
         {
             return Task.FromResult(AuthenticateResult.NoResult());
         }
@@ -42,7 +42,7 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthentic
             return Task.FromResult(AuthenticateResult.NoResult());
         }
 
-        if (IsValidApiKey(providedApiKey))
+        if (this.IsValidApiKey(providedApiKey))
         {
             var claims = new[]
             {
@@ -50,9 +50,9 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthentic
                 new Claim(ClaimTypes.NameIdentifier, providedApiKey),
             };
 
-            var identity = new ClaimsIdentity(claims, Scheme.Name);
+            var identity = new ClaimsIdentity(claims, this.Scheme.Name);
             var principal = new ClaimsPrincipal(identity);
-            var ticket = new AuthenticationTicket(principal, Scheme.Name);
+            var ticket = new AuthenticationTicket(principal, this.Scheme.Name);
 
             return Task.FromResult(AuthenticateResult.Success(ticket));
         }
@@ -66,9 +66,9 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthentic
         var configuredKeys = new List<string>();
 
         // Load API keys from configuration
-        for (int i = 1; i <= 10; i++) // Support up to 10 API keys
+        for (var i = 1; i <= 10; i++) // Support up to 10 API keys
         {
-            var key = _configuration[$"SNAPDOG_API_APIKEY_{i}"];
+            var key = this._configuration[$"SNAPDOG_API_APIKEY_{i}"];
             if (!string.IsNullOrEmpty(key))
             {
                 configuredKeys.Add(key);
@@ -78,7 +78,7 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthentic
         // Fallback to default key if none configured
         if (configuredKeys.Count == 0)
         {
-            var defaultKey = _configuration["SNAPDOG_API_APIKEY"] ?? "snapdog-dev-key";
+            var defaultKey = this._configuration["SNAPDOG_API_APIKEY"] ?? "snapdog-dev-key";
             configuredKeys.Add(defaultKey);
         }
 

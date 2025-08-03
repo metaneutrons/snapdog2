@@ -43,12 +43,12 @@ public partial class ClientStateNotificationHandler
 
     public ClientStateNotificationHandler(ILogger<ClientStateNotificationHandler> logger)
     {
-        _logger = logger;
+        this._logger = logger;
     }
 
     public async Task Handle(ClientVolumeChangedNotification notification, CancellationToken cancellationToken)
     {
-        LogVolumeChange(notification.ClientId, notification.Volume);
+        this.LogVolumeChange(notification.ClientId, notification.Volume);
 
         // TODO: Publish to external systems (MQTT, KNX) when infrastructure adapters are implemented
         await Task.CompletedTask;
@@ -56,7 +56,7 @@ public partial class ClientStateNotificationHandler
 
     public async Task Handle(ClientMuteChangedNotification notification, CancellationToken cancellationToken)
     {
-        LogMuteChange(notification.ClientId, notification.IsMuted);
+        this.LogMuteChange(notification.ClientId, notification.IsMuted);
 
         // TODO: Publish to external systems (MQTT, KNX) when infrastructure adapters are implemented
         await Task.CompletedTask;
@@ -64,7 +64,7 @@ public partial class ClientStateNotificationHandler
 
     public async Task Handle(ClientLatencyChangedNotification notification, CancellationToken cancellationToken)
     {
-        LogLatencyChange(notification.ClientId, notification.LatencyMs);
+        this.LogLatencyChange(notification.ClientId, notification.LatencyMs);
 
         // TODO: Publish to external systems (MQTT, KNX) when infrastructure adapters are implemented
         await Task.CompletedTask;
@@ -72,7 +72,7 @@ public partial class ClientStateNotificationHandler
 
     public async Task Handle(ClientZoneAssignmentChangedNotification notification, CancellationToken cancellationToken)
     {
-        LogZoneAssignmentChange(notification.ClientId, notification.PreviousZoneId, notification.ZoneId);
+        this.LogZoneAssignmentChange(notification.ClientId, notification.PreviousZoneId, notification.ZoneId);
 
         // TODO: Publish to external systems (MQTT, KNX) when infrastructure adapters are implemented
         await Task.CompletedTask;
@@ -80,7 +80,7 @@ public partial class ClientStateNotificationHandler
 
     public async Task Handle(ClientConnectionChangedNotification notification, CancellationToken cancellationToken)
     {
-        LogConnectionChange(notification.ClientId, notification.IsConnected);
+        this.LogConnectionChange(notification.ClientId, notification.IsConnected);
 
         // TODO: Publish to external systems (MQTT, KNX) when infrastructure adapters are implemented
         await Task.CompletedTask;
@@ -88,7 +88,7 @@ public partial class ClientStateNotificationHandler
 
     public async Task Handle(ClientStateChangedNotification notification, CancellationToken cancellationToken)
     {
-        LogStateChange(notification.ClientId);
+        this.LogStateChange(notification.ClientId);
 
         // TODO: Publish to external systems (MQTT, KNX) when infrastructure adapters are implemented
         await Task.CompletedTask;

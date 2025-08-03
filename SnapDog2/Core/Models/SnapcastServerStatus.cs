@@ -24,7 +24,7 @@ public record SnapcastServerStatus
     /// <summary>
     /// All clients currently connected to the server.
     /// </summary>
-    public IReadOnlyList<SnapcastClientInfo> Clients => Groups.SelectMany(g => g.Clients).ToList().AsReadOnly();
+    public IReadOnlyList<SnapcastClientInfo> Clients => this.Groups.SelectMany(g => g.Clients).ToList().AsReadOnly();
 }
 
 /// <summary>

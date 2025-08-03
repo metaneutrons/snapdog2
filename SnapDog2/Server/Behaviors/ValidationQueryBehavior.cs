@@ -27,8 +27,8 @@ public partial class ValidationQueryBehavior<TQuery, TResponse> : IQueryPipeline
         ILogger<ValidationQueryBehavior<TQuery, TResponse>> logger
     )
     {
-        _validators = validators;
-        _logger = logger;
+        this._validators = validators;
+        this._logger = logger;
     }
 
     /// <inheritdoc/>
@@ -40,13 +40,13 @@ public partial class ValidationQueryBehavior<TQuery, TResponse> : IQueryPipeline
     {
         var queryName = typeof(TQuery).Name;
 
-        if (_validators.Any())
+        if (this._validators.Any())
         {
-            LogValidatingQuery(queryName);
+            this.LogValidatingQuery(queryName);
 
             var context = new ValidationContext<TQuery>(query);
             var validationResults = await Task.WhenAll(
-                    _validators.Select(v => v.ValidateAsync(context, cancellationToken))
+                    this._validators.Select(v => v.ValidateAsync(context, cancellationToken))
                 )
                 .ConfigureAwait(false);
 
@@ -54,7 +54,7 @@ public partial class ValidationQueryBehavior<TQuery, TResponse> : IQueryPipeline
 
             if (failures.Count != 0)
             {
-                LogValidationFailed(queryName, failures.Count);
+                this.LogValidationFailed(queryName, failures.Count);
                 throw new ValidationException(failures);
             }
         }

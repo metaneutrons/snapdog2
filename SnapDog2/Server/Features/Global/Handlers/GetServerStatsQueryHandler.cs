@@ -23,23 +23,23 @@ public partial class GetServerStatsQueryHandler : IQueryHandler<GetServerStatsQu
     /// <param name="logger">The logger instance.</param>
     public GetServerStatsQueryHandler(IMetricsService metricsService, ILogger<GetServerStatsQueryHandler> logger)
     {
-        _metricsService = metricsService;
-        _logger = logger;
+        this._metricsService = metricsService;
+        this._logger = logger;
     }
 
     /// <inheritdoc/>
     public async Task<Result<ServerStats>> Handle(GetServerStatsQuery request, CancellationToken cancellationToken)
     {
-        LogHandling();
+        this.LogHandling();
 
         try
         {
-            var stats = await _metricsService.GetServerStatsAsync().ConfigureAwait(false);
+            var stats = await this._metricsService.GetServerStatsAsync().ConfigureAwait(false);
             return Result<ServerStats>.Success(stats);
         }
         catch (Exception ex)
         {
-            LogError(ex);
+            this.LogError(ex);
             return Result<ServerStats>.Failure(ex);
         }
     }

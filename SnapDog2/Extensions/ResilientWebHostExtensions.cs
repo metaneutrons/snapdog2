@@ -75,7 +75,7 @@ public static class ResilientWebHostExtensions
         const int maxAttempts = 10;
         var currentPort = preferredPort;
 
-        for (int attempt = 1; attempt <= maxAttempts; attempt++)
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
         {
             try
             {
@@ -142,7 +142,7 @@ public static class ResilientWebHostExtensions
         const int maxAttempts = 10;
         var currentPort = preferredPort;
 
-        for (int attempt = 1; attempt <= maxAttempts; attempt++)
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
         {
             try
             {

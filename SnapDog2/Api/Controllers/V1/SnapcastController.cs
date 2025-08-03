@@ -22,8 +22,8 @@ public class SnapcastController : ControllerBase
 
     public SnapcastController(IServiceProvider serviceProvider, ILogger<SnapcastController> logger)
     {
-        _serviceProvider = serviceProvider;
-        _logger = logger;
+        this._serviceProvider = serviceProvider;
+        this._logger = logger;
     }
 
     /// <summary>
@@ -37,13 +37,13 @@ public class SnapcastController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Getting Snapcast server status");
+            this._logger.LogDebug("Getting Snapcast server status");
 
-            var handler = _serviceProvider.GetService<GetSnapcastServerStatusQueryHandler>();
+            var handler = this._serviceProvider.GetService<GetSnapcastServerStatusQueryHandler>();
             if (handler == null)
             {
-                _logger.LogError("GetSnapcastServerStatusQueryHandler not found in DI container");
-                return StatusCode(
+                this._logger.LogError("GetSnapcastServerStatusQueryHandler not found in DI container");
+                return this.StatusCode(
                     500,
                     ApiResponse<SnapcastServerStatus>.CreateError("HANDLER_ERROR", "Handler not available")
                 );
@@ -54,18 +54,18 @@ public class SnapcastController : ControllerBase
 
             if (result.IsSuccess)
             {
-                return Ok(ApiResponse<SnapcastServerStatus>.CreateSuccess(result.Value!));
+                return this.Ok(ApiResponse<SnapcastServerStatus>.CreateSuccess(result.Value!));
             }
 
-            return StatusCode(
+            return this.StatusCode(
                 500,
                 ApiResponse<SnapcastServerStatus>.CreateError("SNAPCAST_ERROR", result.ErrorMessage ?? "Unknown error")
             );
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting Snapcast server status");
-            return StatusCode(
+            this._logger.LogError(ex, "Error getting Snapcast server status");
+            return this.StatusCode(
                 500,
                 ApiResponse<SnapcastServerStatus>.CreateError("INTERNAL_ERROR", "Internal server error")
             );
@@ -89,13 +89,17 @@ public class SnapcastController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Setting volume for Snapcast client {ClientId} to {Volume}%", clientId, request.Volume);
+            this._logger.LogDebug(
+                "Setting volume for Snapcast client {ClientId} to {Volume}%",
+                clientId,
+                request.Volume
+            );
 
-            var handler = _serviceProvider.GetService<SetSnapcastClientVolumeCommandHandler>();
+            var handler = this._serviceProvider.GetService<SetSnapcastClientVolumeCommandHandler>();
             if (handler == null)
             {
-                _logger.LogError("SetSnapcastClientVolumeCommandHandler not found in DI container");
-                return StatusCode(500, ApiResponse<object>.CreateError("HANDLER_ERROR", "Handler not available"));
+                this._logger.LogError("SetSnapcastClientVolumeCommandHandler not found in DI container");
+                return this.StatusCode(500, ApiResponse<object>.CreateError("HANDLER_ERROR", "Handler not available"));
             }
 
             var command = new SetSnapcastClientVolumeCommand
@@ -109,17 +113,17 @@ public class SnapcastController : ControllerBase
 
             if (result.IsSuccess)
             {
-                return Ok(ApiResponse.CreateSuccess());
+                return this.Ok(ApiResponse.CreateSuccess());
             }
 
-            return BadRequest(
+            return this.BadRequest(
                 ApiResponse<object>.CreateError("VOLUME_ERROR", result.ErrorMessage ?? "Failed to set volume")
             );
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error setting client volume for {ClientId}", clientId);
-            return StatusCode(500, ApiResponse<object>.CreateError("INTERNAL_ERROR", "Internal server error"));
+            this._logger.LogError(ex, "Error setting client volume for {ClientId}", clientId);
+            return this.StatusCode(500, ApiResponse<object>.CreateError("INTERNAL_ERROR", "Internal server error"));
         }
     }
 
@@ -140,13 +144,17 @@ public class SnapcastController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Setting mute state for Snapcast client {ClientId} to {Muted}", clientId, request.Muted);
+            this._logger.LogDebug(
+                "Setting mute state for Snapcast client {ClientId} to {Muted}",
+                clientId,
+                request.Muted
+            );
 
-            var handler = _serviceProvider.GetService<SetSnapcastClientVolumeCommandHandler>();
+            var handler = this._serviceProvider.GetService<SetSnapcastClientVolumeCommandHandler>();
             if (handler == null)
             {
-                _logger.LogError("SetSnapcastClientVolumeCommandHandler not found in DI container");
-                return StatusCode(500, ApiResponse<object>.CreateError("HANDLER_ERROR", "Handler not available"));
+                this._logger.LogError("SetSnapcastClientVolumeCommandHandler not found in DI container");
+                return this.StatusCode(500, ApiResponse<object>.CreateError("HANDLER_ERROR", "Handler not available"));
             }
 
             // For now, we'll implement mute by setting volume to 0
@@ -164,17 +172,17 @@ public class SnapcastController : ControllerBase
 
             if (result.IsSuccess)
             {
-                return Ok(ApiResponse.CreateSuccess());
+                return this.Ok(ApiResponse.CreateSuccess());
             }
 
-            return BadRequest(
+            return this.BadRequest(
                 ApiResponse<object>.CreateError("MUTE_ERROR", result.ErrorMessage ?? "Failed to set mute state")
             );
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error setting client mute for {ClientId}", clientId);
-            return StatusCode(500, ApiResponse<object>.CreateError("INTERNAL_ERROR", "Internal server error"));
+            this._logger.LogError(ex, "Error setting client mute for {ClientId}", clientId);
+            return this.StatusCode(500, ApiResponse<object>.CreateError("INTERNAL_ERROR", "Internal server error"));
         }
     }
 }

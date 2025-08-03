@@ -20,8 +20,8 @@ public partial class SnapcastStateRepository : ISnapcastStateRepository
 
     public SnapcastStateRepository(ILogger<SnapcastStateRepository> logger)
     {
-        _logger = logger;
-        _serverInfo = new Server(); // Initialize with empty server info
+        this._logger = logger;
+        this._serverInfo = new Server(); // Initialize with empty server info
     }
 
     #region Logging
@@ -63,32 +63,32 @@ public partial class SnapcastStateRepository : ISnapcastStateRepository
         var groupCount = server.Groups?.Count ?? 0;
         var streamCount = server.Streams?.Count ?? 0;
 
-        LogUpdatingServerState(groupCount, clientCount, streamCount);
+        this.LogUpdatingServerState(groupCount, clientCount, streamCount);
 
         // Update server info
-        lock (_serverInfoLock)
+        lock (this._serverInfoLock)
         {
-            _serverInfo = server;
+            this._serverInfo = server;
         }
 
         // Update groups
         var newGroups = server.Groups?.ToDictionary(g => g.Id, g => g) ?? new Dictionary<string, Group>();
-        UpdateDictionary(_groups, newGroups);
+        UpdateDictionary(this._groups, newGroups);
 
         // Update clients from all groups
         var newClients = allClients.ToDictionary(c => c.Id, c => c);
-        UpdateDictionary(_clients, newClients);
+        UpdateDictionary(this._clients, newClients);
 
         // Update streams
         var newStreams = server.Streams?.ToDictionary(s => s.Id, s => s) ?? new Dictionary<string, Stream>();
-        UpdateDictionary(_streams, newStreams);
+        UpdateDictionary(this._streams, newStreams);
     }
 
     public Server GetServerInfo()
     {
-        lock (_serverInfoLock)
+        lock (this._serverInfoLock)
         {
-            return _serverInfo;
+            return this._serverInfo;
         }
     }
 
@@ -98,24 +98,24 @@ public partial class SnapcastStateRepository : ISnapcastStateRepository
 
     public void UpdateClient(SnapClient client)
     {
-        LogUpdatingClient(client.Id);
-        _clients[client.Id] = client;
+        this.LogUpdatingClient(client.Id);
+        this._clients[client.Id] = client;
     }
 
     public void RemoveClient(string clientId)
     {
-        LogRemovingClient(clientId);
-        _clients.TryRemove(clientId, out _);
+        this.LogRemovingClient(clientId);
+        this._clients.TryRemove(clientId, out _);
     }
 
     public SnapClient? GetClient(string clientId)
     {
-        return _clients.TryGetValue(clientId, out var client) ? client : null;
+        return this._clients.TryGetValue(clientId, out var client) ? client : null;
     }
 
     public IEnumerable<SnapClient> GetAllClients()
     {
-        return _clients.Values.ToList(); // Return a copy to avoid concurrent modification
+        return this._clients.Values.ToList(); // Return a copy to avoid concurrent modification
     }
 
     #endregion
@@ -124,30 +124,30 @@ public partial class SnapcastStateRepository : ISnapcastStateRepository
 
     public void UpdateGroup(Group group)
     {
-        LogUpdatingGroup(group.Id);
-        _groups[group.Id] = group;
+        this.LogUpdatingGroup(group.Id);
+        this._groups[group.Id] = group;
 
         // Also update all clients in this group
         foreach (var client in group.Clients)
         {
-            UpdateClient(client);
+            this.UpdateClient(client);
         }
     }
 
     public void RemoveGroup(string groupId)
     {
-        LogRemovingGroup(groupId);
-        _groups.TryRemove(groupId, out _);
+        this.LogRemovingGroup(groupId);
+        this._groups.TryRemove(groupId, out _);
     }
 
     public Group? GetGroup(string groupId)
     {
-        return _groups.TryGetValue(groupId, out var group) ? group : null;
+        return this._groups.TryGetValue(groupId, out var group) ? group : null;
     }
 
     public IEnumerable<Group> GetAllGroups()
     {
-        return _groups.Values.ToList(); // Return a copy to avoid concurrent modification
+        return this._groups.Values.ToList(); // Return a copy to avoid concurrent modification
     }
 
     #endregion
@@ -156,24 +156,24 @@ public partial class SnapcastStateRepository : ISnapcastStateRepository
 
     public void UpdateStream(Stream stream)
     {
-        LogUpdatingStream(stream.Id);
-        _streams[stream.Id] = stream;
+        this.LogUpdatingStream(stream.Id);
+        this._streams[stream.Id] = stream;
     }
 
     public void RemoveStream(string streamId)
     {
-        LogRemovingStream(streamId);
-        _streams.TryRemove(streamId, out _);
+        this.LogRemovingStream(streamId);
+        this._streams.TryRemove(streamId, out _);
     }
 
     public Stream? GetStream(string streamId)
     {
-        return _streams.TryGetValue(streamId, out var stream) ? stream : null;
+        return this._streams.TryGetValue(streamId, out var stream) ? stream : null;
     }
 
     public IEnumerable<Stream> GetAllStreams()
     {
-        return _streams.Values.ToList(); // Return a copy to avoid concurrent modification
+        return this._streams.Values.ToList(); // Return a copy to avoid concurrent modification
     }
 
     #endregion

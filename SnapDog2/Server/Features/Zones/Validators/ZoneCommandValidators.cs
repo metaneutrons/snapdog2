@@ -10,11 +10,11 @@ public class SetZoneVolumeCommandValidator : AbstractValidator<SetZoneVolumeComm
 {
     public SetZoneVolumeCommandValidator()
     {
-        RuleFor(x => x.ZoneId).GreaterThan(0).WithMessage("Zone ID must be a positive integer.");
+        this.RuleFor(x => x.ZoneId).GreaterThan(0).WithMessage("Zone ID must be a positive integer.");
 
-        RuleFor(x => x.Volume).InclusiveBetween(0, 100).WithMessage("Volume must be between 0 and 100.");
+        this.RuleFor(x => x.Volume).InclusiveBetween(0, 100).WithMessage("Volume must be between 0 and 100.");
 
-        RuleFor(x => x.Source).IsInEnum().WithMessage("Invalid command source specified.");
+        this.RuleFor(x => x.Source).IsInEnum().WithMessage("Invalid command source specified.");
     }
 }
 
@@ -25,11 +25,11 @@ public class VolumeUpCommandValidator : AbstractValidator<VolumeUpCommand>
 {
     public VolumeUpCommandValidator()
     {
-        RuleFor(x => x.ZoneId).GreaterThan(0).WithMessage("Zone ID must be a positive integer.");
+        this.RuleFor(x => x.ZoneId).GreaterThan(0).WithMessage("Zone ID must be a positive integer.");
 
-        RuleFor(x => x.Step).InclusiveBetween(1, 50).WithMessage("Volume step must be between 1 and 50.");
+        this.RuleFor(x => x.Step).InclusiveBetween(1, 50).WithMessage("Volume step must be between 1 and 50.");
 
-        RuleFor(x => x.Source).IsInEnum().WithMessage("Invalid command source specified.");
+        this.RuleFor(x => x.Source).IsInEnum().WithMessage("Invalid command source specified.");
     }
 }
 
@@ -40,11 +40,11 @@ public class VolumeDownCommandValidator : AbstractValidator<VolumeDownCommand>
 {
     public VolumeDownCommandValidator()
     {
-        RuleFor(x => x.ZoneId).GreaterThan(0).WithMessage("Zone ID must be a positive integer.");
+        this.RuleFor(x => x.ZoneId).GreaterThan(0).WithMessage("Zone ID must be a positive integer.");
 
-        RuleFor(x => x.Step).InclusiveBetween(1, 50).WithMessage("Volume step must be between 1 and 50.");
+        this.RuleFor(x => x.Step).InclusiveBetween(1, 50).WithMessage("Volume step must be between 1 and 50.");
 
-        RuleFor(x => x.Source).IsInEnum().WithMessage("Invalid command source specified.");
+        this.RuleFor(x => x.Source).IsInEnum().WithMessage("Invalid command source specified.");
     }
 }
 
@@ -55,11 +55,11 @@ public class SetTrackCommandValidator : AbstractValidator<SetTrackCommand>
 {
     public SetTrackCommandValidator()
     {
-        RuleFor(x => x.ZoneId).GreaterThan(0).WithMessage("Zone ID must be a positive integer.");
+        this.RuleFor(x => x.ZoneId).GreaterThan(0).WithMessage("Zone ID must be a positive integer.");
 
-        RuleFor(x => x.TrackIndex).GreaterThan(0).WithMessage("Track index must be a positive integer (1-based).");
+        this.RuleFor(x => x.TrackIndex).GreaterThan(0).WithMessage("Track index must be a positive integer (1-based).");
 
-        RuleFor(x => x.Source).IsInEnum().WithMessage("Invalid command source specified.");
+        this.RuleFor(x => x.Source).IsInEnum().WithMessage("Invalid command source specified.");
     }
 }
 
@@ -70,23 +70,23 @@ public class SetPlaylistCommandValidator : AbstractValidator<SetPlaylistCommand>
 {
     public SetPlaylistCommandValidator()
     {
-        RuleFor(x => x.ZoneId).GreaterThan(0).WithMessage("Zone ID must be a positive integer.");
+        this.RuleFor(x => x.ZoneId).GreaterThan(0).WithMessage("Zone ID must be a positive integer.");
 
-        RuleFor(x => x)
+        this.RuleFor(x => x)
             .Must(x => x.PlaylistIndex.HasValue || !string.IsNullOrEmpty(x.PlaylistId))
             .WithMessage("Either PlaylistIndex or PlaylistId must be specified.");
 
-        RuleFor(x => x.PlaylistIndex)
+        this.RuleFor(x => x.PlaylistIndex)
             .GreaterThan(0)
             .When(x => x.PlaylistIndex.HasValue)
             .WithMessage("Playlist index must be a positive integer (1-based).");
 
-        RuleFor(x => x.PlaylistId)
+        this.RuleFor(x => x.PlaylistId)
             .NotEmpty()
             .When(x => !x.PlaylistIndex.HasValue)
             .WithMessage("Playlist ID must not be empty when specified.");
 
-        RuleFor(x => x.Source).IsInEnum().WithMessage("Invalid command source specified.");
+        this.RuleFor(x => x.Source).IsInEnum().WithMessage("Invalid command source specified.");
     }
 }
 
@@ -98,13 +98,13 @@ public abstract class BaseZoneCommandValidator<T> : AbstractValidator<T>
 {
     protected BaseZoneCommandValidator()
     {
-        RuleFor(x => GetZoneId(x)).GreaterThan(0).WithMessage("Zone ID must be a positive integer.");
+        this.RuleFor(x => this.GetZoneId(x)).GreaterThan(0).WithMessage("Zone ID must be a positive integer.");
 
-        RuleFor(x => GetSource(x)).IsInEnum().WithMessage("Invalid command source specified.");
+        this.RuleFor(x => this.GetSource(x)).IsInEnum().WithMessage("Invalid command source specified.");
     }
 
     protected abstract int GetZoneId(T command);
-    protected abstract SnapDog2.Core.Enums.CommandSource GetSource(T command);
+    protected abstract Core.Enums.CommandSource GetSource(T command);
 }
 
 /// <summary>
@@ -114,20 +114,26 @@ public class PlayCommandValidator : BaseZoneCommandValidator<PlayCommand>
 {
     public PlayCommandValidator()
     {
-        RuleFor(x => x.TrackIndex)
+        this.RuleFor(x => x.TrackIndex)
             .GreaterThan(0)
             .When(x => x.TrackIndex.HasValue)
             .WithMessage("Track index must be a positive integer (1-based) when specified.");
 
-        RuleFor(x => x.MediaUrl)
+        this.RuleFor(x => x.MediaUrl)
             .NotEmpty()
             .When(x => !string.IsNullOrEmpty(x.MediaUrl))
             .WithMessage("Media URL must not be empty when specified.");
     }
 
-    protected override int GetZoneId(PlayCommand command) => command.ZoneId;
+    protected override int GetZoneId(PlayCommand command)
+    {
+        return command.ZoneId;
+    }
 
-    protected override SnapDog2.Core.Enums.CommandSource GetSource(PlayCommand command) => command.Source;
+    protected override Core.Enums.CommandSource GetSource(PlayCommand command)
+    {
+        return command.Source;
+    }
 }
 
 /// <summary>
@@ -135,9 +141,15 @@ public class PlayCommandValidator : BaseZoneCommandValidator<PlayCommand>
 /// </summary>
 public class PauseCommandValidator : BaseZoneCommandValidator<PauseCommand>
 {
-    protected override int GetZoneId(PauseCommand command) => command.ZoneId;
+    protected override int GetZoneId(PauseCommand command)
+    {
+        return command.ZoneId;
+    }
 
-    protected override SnapDog2.Core.Enums.CommandSource GetSource(PauseCommand command) => command.Source;
+    protected override Core.Enums.CommandSource GetSource(PauseCommand command)
+    {
+        return command.Source;
+    }
 }
 
 /// <summary>
@@ -145,9 +157,15 @@ public class PauseCommandValidator : BaseZoneCommandValidator<PauseCommand>
 /// </summary>
 public class StopCommandValidator : BaseZoneCommandValidator<StopCommand>
 {
-    protected override int GetZoneId(StopCommand command) => command.ZoneId;
+    protected override int GetZoneId(StopCommand command)
+    {
+        return command.ZoneId;
+    }
 
-    protected override SnapDog2.Core.Enums.CommandSource GetSource(StopCommand command) => command.Source;
+    protected override Core.Enums.CommandSource GetSource(StopCommand command)
+    {
+        return command.Source;
+    }
 }
 
 /// <summary>
@@ -155,9 +173,15 @@ public class StopCommandValidator : BaseZoneCommandValidator<StopCommand>
 /// </summary>
 public class SetZoneMuteCommandValidator : BaseZoneCommandValidator<SetZoneMuteCommand>
 {
-    protected override int GetZoneId(SetZoneMuteCommand command) => command.ZoneId;
+    protected override int GetZoneId(SetZoneMuteCommand command)
+    {
+        return command.ZoneId;
+    }
 
-    protected override SnapDog2.Core.Enums.CommandSource GetSource(SetZoneMuteCommand command) => command.Source;
+    protected override Core.Enums.CommandSource GetSource(SetZoneMuteCommand command)
+    {
+        return command.Source;
+    }
 }
 
 /// <summary>
@@ -165,9 +189,15 @@ public class SetZoneMuteCommandValidator : BaseZoneCommandValidator<SetZoneMuteC
 /// </summary>
 public class ToggleZoneMuteCommandValidator : BaseZoneCommandValidator<ToggleZoneMuteCommand>
 {
-    protected override int GetZoneId(ToggleZoneMuteCommand command) => command.ZoneId;
+    protected override int GetZoneId(ToggleZoneMuteCommand command)
+    {
+        return command.ZoneId;
+    }
 
-    protected override SnapDog2.Core.Enums.CommandSource GetSource(ToggleZoneMuteCommand command) => command.Source;
+    protected override Core.Enums.CommandSource GetSource(ToggleZoneMuteCommand command)
+    {
+        return command.Source;
+    }
 }
 
 /// <summary>
@@ -175,9 +205,15 @@ public class ToggleZoneMuteCommandValidator : BaseZoneCommandValidator<ToggleZon
 /// </summary>
 public class NextTrackCommandValidator : BaseZoneCommandValidator<NextTrackCommand>
 {
-    protected override int GetZoneId(NextTrackCommand command) => command.ZoneId;
+    protected override int GetZoneId(NextTrackCommand command)
+    {
+        return command.ZoneId;
+    }
 
-    protected override SnapDog2.Core.Enums.CommandSource GetSource(NextTrackCommand command) => command.Source;
+    protected override Core.Enums.CommandSource GetSource(NextTrackCommand command)
+    {
+        return command.Source;
+    }
 }
 
 /// <summary>
@@ -185,9 +221,15 @@ public class NextTrackCommandValidator : BaseZoneCommandValidator<NextTrackComma
 /// </summary>
 public class PreviousTrackCommandValidator : BaseZoneCommandValidator<PreviousTrackCommand>
 {
-    protected override int GetZoneId(PreviousTrackCommand command) => command.ZoneId;
+    protected override int GetZoneId(PreviousTrackCommand command)
+    {
+        return command.ZoneId;
+    }
 
-    protected override SnapDog2.Core.Enums.CommandSource GetSource(PreviousTrackCommand command) => command.Source;
+    protected override Core.Enums.CommandSource GetSource(PreviousTrackCommand command)
+    {
+        return command.Source;
+    }
 }
 
 /// <summary>
@@ -195,9 +237,15 @@ public class PreviousTrackCommandValidator : BaseZoneCommandValidator<PreviousTr
 /// </summary>
 public class NextPlaylistCommandValidator : BaseZoneCommandValidator<NextPlaylistCommand>
 {
-    protected override int GetZoneId(NextPlaylistCommand command) => command.ZoneId;
+    protected override int GetZoneId(NextPlaylistCommand command)
+    {
+        return command.ZoneId;
+    }
 
-    protected override SnapDog2.Core.Enums.CommandSource GetSource(NextPlaylistCommand command) => command.Source;
+    protected override Core.Enums.CommandSource GetSource(NextPlaylistCommand command)
+    {
+        return command.Source;
+    }
 }
 
 /// <summary>
@@ -205,9 +253,15 @@ public class NextPlaylistCommandValidator : BaseZoneCommandValidator<NextPlaylis
 /// </summary>
 public class PreviousPlaylistCommandValidator : BaseZoneCommandValidator<PreviousPlaylistCommand>
 {
-    protected override int GetZoneId(PreviousPlaylistCommand command) => command.ZoneId;
+    protected override int GetZoneId(PreviousPlaylistCommand command)
+    {
+        return command.ZoneId;
+    }
 
-    protected override SnapDog2.Core.Enums.CommandSource GetSource(PreviousPlaylistCommand command) => command.Source;
+    protected override Core.Enums.CommandSource GetSource(PreviousPlaylistCommand command)
+    {
+        return command.Source;
+    }
 }
 
 /// <summary>
@@ -215,9 +269,15 @@ public class PreviousPlaylistCommandValidator : BaseZoneCommandValidator<Previou
 /// </summary>
 public class SetTrackRepeatCommandValidator : BaseZoneCommandValidator<SetTrackRepeatCommand>
 {
-    protected override int GetZoneId(SetTrackRepeatCommand command) => command.ZoneId;
+    protected override int GetZoneId(SetTrackRepeatCommand command)
+    {
+        return command.ZoneId;
+    }
 
-    protected override SnapDog2.Core.Enums.CommandSource GetSource(SetTrackRepeatCommand command) => command.Source;
+    protected override Core.Enums.CommandSource GetSource(SetTrackRepeatCommand command)
+    {
+        return command.Source;
+    }
 }
 
 /// <summary>
@@ -225,9 +285,15 @@ public class SetTrackRepeatCommandValidator : BaseZoneCommandValidator<SetTrackR
 /// </summary>
 public class ToggleTrackRepeatCommandValidator : BaseZoneCommandValidator<ToggleTrackRepeatCommand>
 {
-    protected override int GetZoneId(ToggleTrackRepeatCommand command) => command.ZoneId;
+    protected override int GetZoneId(ToggleTrackRepeatCommand command)
+    {
+        return command.ZoneId;
+    }
 
-    protected override SnapDog2.Core.Enums.CommandSource GetSource(ToggleTrackRepeatCommand command) => command.Source;
+    protected override Core.Enums.CommandSource GetSource(ToggleTrackRepeatCommand command)
+    {
+        return command.Source;
+    }
 }
 
 /// <summary>
@@ -235,9 +301,15 @@ public class ToggleTrackRepeatCommandValidator : BaseZoneCommandValidator<Toggle
 /// </summary>
 public class SetPlaylistShuffleCommandValidator : BaseZoneCommandValidator<SetPlaylistShuffleCommand>
 {
-    protected override int GetZoneId(SetPlaylistShuffleCommand command) => command.ZoneId;
+    protected override int GetZoneId(SetPlaylistShuffleCommand command)
+    {
+        return command.ZoneId;
+    }
 
-    protected override SnapDog2.Core.Enums.CommandSource GetSource(SetPlaylistShuffleCommand command) => command.Source;
+    protected override Core.Enums.CommandSource GetSource(SetPlaylistShuffleCommand command)
+    {
+        return command.Source;
+    }
 }
 
 /// <summary>
@@ -245,10 +317,15 @@ public class SetPlaylistShuffleCommandValidator : BaseZoneCommandValidator<SetPl
 /// </summary>
 public class TogglePlaylistShuffleCommandValidator : BaseZoneCommandValidator<TogglePlaylistShuffleCommand>
 {
-    protected override int GetZoneId(TogglePlaylistShuffleCommand command) => command.ZoneId;
+    protected override int GetZoneId(TogglePlaylistShuffleCommand command)
+    {
+        return command.ZoneId;
+    }
 
-    protected override SnapDog2.Core.Enums.CommandSource GetSource(TogglePlaylistShuffleCommand command) =>
-        command.Source;
+    protected override Core.Enums.CommandSource GetSource(TogglePlaylistShuffleCommand command)
+    {
+        return command.Source;
+    }
 }
 
 /// <summary>
@@ -256,9 +333,15 @@ public class TogglePlaylistShuffleCommandValidator : BaseZoneCommandValidator<To
 /// </summary>
 public class SetPlaylistRepeatCommandValidator : BaseZoneCommandValidator<SetPlaylistRepeatCommand>
 {
-    protected override int GetZoneId(SetPlaylistRepeatCommand command) => command.ZoneId;
+    protected override int GetZoneId(SetPlaylistRepeatCommand command)
+    {
+        return command.ZoneId;
+    }
 
-    protected override SnapDog2.Core.Enums.CommandSource GetSource(SetPlaylistRepeatCommand command) => command.Source;
+    protected override Core.Enums.CommandSource GetSource(SetPlaylistRepeatCommand command)
+    {
+        return command.Source;
+    }
 }
 
 /// <summary>
@@ -266,8 +349,13 @@ public class SetPlaylistRepeatCommandValidator : BaseZoneCommandValidator<SetPla
 /// </summary>
 public class TogglePlaylistRepeatCommandValidator : BaseZoneCommandValidator<TogglePlaylistRepeatCommand>
 {
-    protected override int GetZoneId(TogglePlaylistRepeatCommand command) => command.ZoneId;
+    protected override int GetZoneId(TogglePlaylistRepeatCommand command)
+    {
+        return command.ZoneId;
+    }
 
-    protected override SnapDog2.Core.Enums.CommandSource GetSource(TogglePlaylistRepeatCommand command) =>
-        command.Source;
+    protected override Core.Enums.CommandSource GetSource(TogglePlaylistRepeatCommand command)
+    {
+        return command.Source;
+    }
 }

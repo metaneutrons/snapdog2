@@ -20,8 +20,8 @@ public class HealthController : ControllerBase
     /// <param name="logger">The logger.</param>
     public HealthController(HealthCheckService healthCheckService, ILogger<HealthController> logger)
     {
-        _healthCheckService = healthCheckService;
-        _logger = logger;
+        this._healthCheckService = healthCheckService;
+        this._logger = logger;
     }
 
     /// <summary>
@@ -33,7 +33,7 @@ public class HealthController : ControllerBase
     {
         try
         {
-            var healthReport = await _healthCheckService.CheckHealthAsync();
+            var healthReport = await this._healthCheckService.CheckHealthAsync();
 
             var response = new
             {
@@ -58,18 +58,18 @@ public class HealthController : ControllerBase
                 _ => StatusCodes.Status503ServiceUnavailable,
             };
 
-            _logger.LogInformation(
+            this._logger.LogInformation(
                 "Health check completed with status {Status} in {Duration}ms",
                 healthReport.Status,
                 healthReport.TotalDuration.TotalMilliseconds
             );
 
-            return StatusCode(statusCode, response);
+            return this.StatusCode(statusCode, response);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Health check failed with exception");
-            return StatusCode(
+            this._logger.LogError(ex, "Health check failed with exception");
+            return this.StatusCode(
                 StatusCodes.Status503ServiceUnavailable,
                 new { Status = "Unhealthy", Error = "Health check failed" }
             );
@@ -85,19 +85,19 @@ public class HealthController : ControllerBase
     {
         try
         {
-            var healthReport = await _healthCheckService.CheckHealthAsync(check => check.Tags.Contains("ready"));
+            var healthReport = await this._healthCheckService.CheckHealthAsync(check => check.Tags.Contains("ready"));
 
             if (healthReport.Status == HealthStatus.Healthy)
             {
-                return Ok(new { Status = "Ready" });
+                return this.Ok(new { Status = "Ready" });
             }
 
-            return StatusCode(StatusCodes.Status503ServiceUnavailable, new { Status = "Not Ready" });
+            return this.StatusCode(StatusCodes.Status503ServiceUnavailable, new { Status = "Not Ready" });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Ready check failed with exception");
-            return StatusCode(StatusCodes.Status503ServiceUnavailable, new { Status = "Not Ready" });
+            this._logger.LogError(ex, "Ready check failed with exception");
+            return this.StatusCode(StatusCodes.Status503ServiceUnavailable, new { Status = "Not Ready" });
         }
     }
 
@@ -110,19 +110,19 @@ public class HealthController : ControllerBase
     {
         try
         {
-            var healthReport = await _healthCheckService.CheckHealthAsync(check => check.Tags.Contains("live"));
+            var healthReport = await this._healthCheckService.CheckHealthAsync(check => check.Tags.Contains("live"));
 
             if (healthReport.Status == HealthStatus.Healthy)
             {
-                return Ok(new { Status = "Live" });
+                return this.Ok(new { Status = "Live" });
             }
 
-            return StatusCode(StatusCodes.Status503ServiceUnavailable, new { Status = "Not Live" });
+            return this.StatusCode(StatusCodes.Status503ServiceUnavailable, new { Status = "Not Live" });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Live check failed with exception");
-            return StatusCode(StatusCodes.Status503ServiceUnavailable, new { Status = "Not Live" });
+            this._logger.LogError(ex, "Live check failed with exception");
+            return this.StatusCode(StatusCodes.Status503ServiceUnavailable, new { Status = "Not Live" });
         }
     }
 }

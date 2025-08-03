@@ -32,48 +32,48 @@ public class StartupService : IHostedService
         IServiceProvider serviceProvider
     )
     {
-        _logger = logger;
-        _applicationLifetime = applicationLifetime;
-        _config = config.Value;
-        _serviceProvider = serviceProvider;
+        this._logger = logger;
+        this._applicationLifetime = applicationLifetime;
+        this._config = config.Value;
+        this._serviceProvider = serviceProvider;
 
         // Determine if debug logging is enabled
-        _isDebugLoggingEnabled =
-            _config.System.LogLevel.Equals("Debug", StringComparison.OrdinalIgnoreCase)
-            || _config.System.LogLevel.Equals("Trace", StringComparison.OrdinalIgnoreCase);
+        this._isDebugLoggingEnabled =
+            this._config.System.LogLevel.Equals("Debug", StringComparison.OrdinalIgnoreCase)
+            || this._config.System.LogLevel.Equals("Trace", StringComparison.OrdinalIgnoreCase);
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("🛡️ Initiating startup sequence");
+        this._logger.LogInformation("🛡️ Initiating startup sequence");
 
         try
         {
-            await ExecuteWithRetryAsync(
+            await this.ExecuteWithRetryAsync(
                 "Port Availability Check",
-                async () => await ValidatePortAvailabilityAsync(cancellationToken),
+                async () => await this.ValidatePortAvailabilityAsync(cancellationToken),
                 cancellationToken
             );
 
-            await ExecuteWithRetryAsync(
+            await this.ExecuteWithRetryAsync(
                 "Network Connectivity Check",
-                async () => await ValidateNetworkConnectivityAsync(cancellationToken),
+                async () => await this.ValidateNetworkConnectivityAsync(cancellationToken),
                 cancellationToken
             );
 
-            await ExecuteWithRetryAsync(
+            await this.ExecuteWithRetryAsync(
                 "External Dependencies Check",
-                async () => await ValidateExternalDependenciesAsync(cancellationToken),
+                async () => await this.ValidateExternalDependenciesAsync(cancellationToken),
                 cancellationToken
             );
 
-            _logger.LogInformation("✅ All startup validations completed successfully");
+            this._logger.LogInformation("✅ All startup validations completed successfully");
         }
         catch (StartupValidationException ex)
         {
-            if (_isDebugLoggingEnabled)
+            if (this._isDebugLoggingEnabled)
             {
-                _logger.LogCritical(
+                this._logger.LogCritical(
                     ex,
                     "💥 CRITICAL STARTUP FAILURE: {ValidationStep} failed after {MaxAttempts} attempts. "
                         + "Application cannot continue safely. Initiating graceful shutdown.",
@@ -83,7 +83,7 @@ public class StartupService : IHostedService
             }
             else
             {
-                _logger.LogCritical(
+                this._logger.LogCritical(
                     "💥 CRITICAL STARTUP FAILURE: {ValidationStep} failed after {MaxAttempts} attempts. "
                         + "Application cannot continue safely. Reason: {ErrorMessage}",
                     ex.ValidationStep,
@@ -92,17 +92,17 @@ public class StartupService : IHostedService
                 );
             }
 
-            LogStartupFailureDetails(ex);
+            this.LogStartupFailureDetails(ex);
 
             // Trigger graceful shutdown
-            _applicationLifetime.StopApplication();
+            this._applicationLifetime.StopApplication();
             throw;
         }
         catch (Exception ex)
         {
-            if (_isDebugLoggingEnabled)
+            if (this._isDebugLoggingEnabled)
             {
-                _logger.LogCritical(
+                this._logger.LogCritical(
                     ex,
                     "💥 UNEXPECTED STARTUP FAILURE: Unhandled exception during startup validation. "
                         + "Application state is unknown. Initiating emergency shutdown."
@@ -110,7 +110,7 @@ public class StartupService : IHostedService
             }
             else
             {
-                _logger.LogCritical(
+                this._logger.LogCritical(
                     "💥 UNEXPECTED STARTUP FAILURE: Unhandled exception during startup validation. "
                         + "Application state is unknown. Error: {ErrorType} - {ErrorMessage}",
                     ex.GetType().Name,
@@ -118,17 +118,17 @@ public class StartupService : IHostedService
                 );
             }
 
-            LogUnexpectedFailureDetails(ex);
+            this.LogUnexpectedFailureDetails(ex);
 
             // Trigger graceful shutdown
-            _applicationLifetime.StopApplication();
+            this._applicationLifetime.StopApplication();
             throw;
         }
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("🛡️ Graceful shutdown initiated");
+        this._logger.LogInformation("🛡️ Graceful shutdown initiated");
         return Task.CompletedTask;
     }
 
@@ -147,7 +147,7 @@ public class StartupService : IHostedService
 
             try
             {
-                _logger.LogInformation(
+                this._logger.LogInformation(
                     "🔄 {OperationName}: Attempt {Attempt}/{MaxAttempts}",
                     operationName,
                     attempt,
@@ -158,7 +158,11 @@ public class StartupService : IHostedService
 
                 if (attempt > 1)
                 {
-                    _logger.LogInformation("✅ {OperationName}: Succeeded on attempt {Attempt}", operationName, attempt);
+                    this._logger.LogInformation(
+                        "✅ {OperationName}: Succeeded on attempt {Attempt}",
+                        operationName,
+                        attempt
+                    );
                 }
 
                 return; // Success!
@@ -166,9 +170,9 @@ public class StartupService : IHostedService
             catch (Exception ex) when (attempt < MaxRetryAttempts)
             {
                 // Log with or without stack trace based on debug level and exception type
-                if (_isDebugLoggingEnabled || IsUnexpectedException(ex))
+                if (this._isDebugLoggingEnabled || IsUnexpectedException(ex))
                 {
-                    _logger.LogWarning(
+                    this._logger.LogWarning(
                         ex,
                         "⚠️  {OperationName}: Attempt {Attempt}/{MaxAttempts} failed. "
                             + "Retrying in {DelayMs} ms. Error: {ErrorMessage}",
@@ -183,7 +187,7 @@ public class StartupService : IHostedService
                 {
                     // For expected exceptions, show a clean message without stack trace
                     var errorMessage = GetCleanErrorMessage(ex);
-                    _logger.LogWarning(
+                    this._logger.LogWarning(
                         "⚠️  {OperationName}: Attempt {Attempt}/{MaxAttempts} failed. "
                             + "Retrying in {DelayMs} ms. Error: {ErrorMessage}",
                         operationName,
@@ -202,9 +206,9 @@ public class StartupService : IHostedService
             catch (Exception ex)
             {
                 // Final attempt failed - always log with more detail but conditionally include stack trace
-                if (_isDebugLoggingEnabled || IsUnexpectedException(ex))
+                if (this._isDebugLoggingEnabled || IsUnexpectedException(ex))
                 {
-                    _logger.LogError(
+                    this._logger.LogError(
                         ex,
                         "❌ {OperationName}: Final attempt {Attempt}/{MaxAttempts} failed. "
                             + "Operation cannot be completed.",
@@ -215,7 +219,7 @@ public class StartupService : IHostedService
                 }
                 else
                 {
-                    _logger.LogError(
+                    this._logger.LogError(
                         "❌ {OperationName}: Final attempt {Attempt}/{MaxAttempts} failed. "
                             + "Operation cannot be completed. Error: {ErrorType} - {ErrorMessage}",
                         operationName,
@@ -235,9 +239,9 @@ public class StartupService : IHostedService
     {
         var portsToCheck = new[]
         {
-            ("Snapcast JSON-RPC", _config.Services.Snapcast.JsonRpcPort),
-            ("MQTT", _config.Services.Mqtt.Port),
-            ("Prometheus", _config.Telemetry.Prometheus.Port),
+            ("Snapcast JSON-RPC", this._config.Services.Snapcast.JsonRpcPort),
+            ("MQTT", this._config.Services.Mqtt.Port),
+            ("Prometheus", this._config.Telemetry.Prometheus.Port),
         };
 
         var portConflicts = new List<(string Service, int Port, string ConflictDetails)>();
@@ -245,18 +249,20 @@ public class StartupService : IHostedService
         foreach (var (serviceName, port) in portsToCheck)
         {
             if (port <= 0)
+            {
                 continue; // Skip unconfigured ports
+            }
 
             try
             {
-                var isAvailable = await IsPortAvailableAsync(port, cancellationToken);
+                var isAvailable = await this.IsPortAvailableAsync(port, cancellationToken);
 
                 if (!isAvailable)
                 {
-                    var conflictDetails = await GetPortConflictDetailsAsync(port, cancellationToken);
+                    var conflictDetails = await this.GetPortConflictDetailsAsync(port, cancellationToken);
                     portConflicts.Add((serviceName, port, conflictDetails));
 
-                    _logger.LogWarning(
+                    this._logger.LogWarning(
                         "🚫 Port conflict detected: {ServiceName} port {Port} is in use. {ConflictDetails}",
                         serviceName,
                         port,
@@ -264,10 +270,10 @@ public class StartupService : IHostedService
                     );
 
                     // Attempt to find alternative port
-                    var alternativePort = await FindAlternativePortAsync(port, cancellationToken);
+                    var alternativePort = await this.FindAlternativePortAsync(port, cancellationToken);
                     if (alternativePort.HasValue)
                     {
-                        _logger.LogInformation(
+                        this._logger.LogInformation(
                             "🔄 Alternative port found for {ServiceName}: {AlternativePort}",
                             serviceName,
                             alternativePort.Value
@@ -276,14 +282,14 @@ public class StartupService : IHostedService
                 }
                 else
                 {
-                    _logger.LogDebug("✅ Port {Port} ({ServiceName}) is available", port, serviceName);
+                    this._logger.LogDebug("✅ Port {Port} ({ServiceName}) is available", port, serviceName);
                 }
             }
             catch (Exception ex)
             {
-                if (_isDebugLoggingEnabled)
+                if (this._isDebugLoggingEnabled)
                 {
-                    _logger.LogError(
+                    this._logger.LogError(
                         ex,
                         "❌ Failed to check port availability for {ServiceName} on port {Port}",
                         serviceName,
@@ -292,7 +298,7 @@ public class StartupService : IHostedService
                 }
                 else
                 {
-                    _logger.LogError(
+                    this._logger.LogError(
                         "❌ Failed to check port availability for {ServiceName} on port {Port}: {ErrorType} - {ErrorMessage}",
                         serviceName,
                         port,
@@ -300,6 +306,7 @@ public class StartupService : IHostedService
                         ex.Message
                     );
                 }
+
                 throw;
             }
         }
@@ -320,15 +327,17 @@ public class StartupService : IHostedService
     {
         var connectivityChecks = new[]
         {
-            ("Snapcast Server", _config.Services.Snapcast.Address, _config.Services.Snapcast.JsonRpcPort),
-            ("MQTT Broker", _config.Services.Mqtt.BrokerAddress, _config.Services.Mqtt.Port),
-            ("KNX Gateway", _config.Services.Knx.Gateway, _config.Services.Knx.Port),
+            ("Snapcast Server", this._config.Services.Snapcast.Address, this._config.Services.Snapcast.JsonRpcPort),
+            ("MQTT Broker", this._config.Services.Mqtt.BrokerAddress, this._config.Services.Mqtt.Port),
+            ("KNX Gateway", this._config.Services.Knx.Gateway, this._config.Services.Knx.Port),
         };
 
         foreach (var (serviceName, address, port) in connectivityChecks)
         {
             if (string.IsNullOrEmpty(address) || port <= 0)
+            {
                 continue;
+            }
 
             try
             {
@@ -340,7 +349,7 @@ public class StartupService : IHostedService
 
                 if (completedTask == timeoutTask)
                 {
-                    _logger.LogWarning(
+                    this._logger.LogWarning(
                         "⏱️  {ServiceName} connectivity check timed out ({Address}:{Port})",
                         serviceName,
                         address,
@@ -349,7 +358,7 @@ public class StartupService : IHostedService
                 }
                 else if (connectTask.IsFaulted)
                 {
-                    _logger.LogWarning(
+                    this._logger.LogWarning(
                         "🔌 {ServiceName} is not reachable ({Address}:{Port}): {Error}",
                         serviceName,
                         address,
@@ -359,7 +368,7 @@ public class StartupService : IHostedService
                 }
                 else
                 {
-                    _logger.LogDebug(
+                    this._logger.LogDebug(
                         "✅ {ServiceName} connectivity verified ({Address}:{Port})",
                         serviceName,
                         address,
@@ -369,9 +378,9 @@ public class StartupService : IHostedService
             }
             catch (Exception ex)
             {
-                if (_isDebugLoggingEnabled)
+                if (this._isDebugLoggingEnabled)
                 {
-                    _logger.LogWarning(
+                    this._logger.LogWarning(
                         ex,
                         "❌ Failed to verify {ServiceName} connectivity ({Address}:{Port})",
                         serviceName,
@@ -381,7 +390,7 @@ public class StartupService : IHostedService
                 }
                 else
                 {
-                    _logger.LogWarning(
+                    this._logger.LogWarning(
                         "❌ Failed to verify {ServiceName} connectivity ({Address}:{Port}): {ErrorMessage}",
                         serviceName,
                         address,
@@ -411,7 +420,7 @@ public class StartupService : IHostedService
                 if (!Directory.Exists(directory))
                 {
                     Directory.CreateDirectory(directory);
-                    _logger.LogInformation("📁 Created required directory: {Directory}", directory);
+                    this._logger.LogInformation("📁 Created required directory: {Directory}", directory);
                 }
 
                 // Test write permissions
@@ -419,22 +428,23 @@ public class StartupService : IHostedService
                 await File.WriteAllTextAsync(testFile, "test", cancellationToken);
                 File.Delete(testFile);
 
-                _logger.LogDebug("✅ Directory {Directory} is accessible and writable", directory);
+                this._logger.LogDebug("✅ Directory {Directory} is accessible and writable", directory);
             }
             catch (Exception ex)
             {
-                if (_isDebugLoggingEnabled)
+                if (this._isDebugLoggingEnabled)
                 {
-                    _logger.LogError(ex, "❌ Directory {Directory} is not accessible or writable", directory);
+                    this._logger.LogError(ex, "❌ Directory {Directory} is not accessible or writable", directory);
                 }
                 else
                 {
-                    _logger.LogError(
+                    this._logger.LogError(
                         "❌ Directory {Directory} is not accessible or writable: {ErrorMessage}",
                         directory,
                         GetUserFriendlyErrorMessage(ex)
                     );
                 }
+
                 throw new DirectoryAccessException(directory, ex);
             }
         }
@@ -472,13 +482,15 @@ public class StartupService : IHostedService
 
     private async Task<int?> FindAlternativePortAsync(int preferredPort, CancellationToken cancellationToken)
     {
-        for (int offset = 1; offset <= PortScanRange; offset++)
+        for (var offset = 1; offset <= PortScanRange; offset++)
         {
             var candidatePort = preferredPort + offset;
             if (candidatePort > 65535)
+            {
                 break;
+            }
 
-            if (await IsPortAvailableAsync(candidatePort, cancellationToken))
+            if (await this.IsPortAvailableAsync(candidatePort, cancellationToken))
             {
                 return candidatePort;
             }
@@ -489,21 +501,21 @@ public class StartupService : IHostedService
 
     private void LogStartupFailureDetails(StartupValidationException ex)
     {
-        _logger.LogCritical("🚨 STARTUP FAILURE ANALYSIS:");
-        _logger.LogCritical("   Validation Step: {ValidationStep}", ex.ValidationStep);
-        _logger.LogCritical("   Attempts Made: {Attempts}", ex.Attempts);
-        _logger.LogCritical("   Final Error: {ErrorMessage}", GetCleanErrorMessage(ex));
-        _logger.LogCritical("   Timestamp: {Timestamp:yyyy-MM-dd HH:mm:ss.fff} UTC", DateTime.UtcNow);
-        _logger.LogCritical("   Machine: {MachineName}", Environment.MachineName);
-        _logger.LogCritical("   Process ID: {ProcessId}", Environment.ProcessId);
-        _logger.LogCritical("   Working Directory: {WorkingDirectory}", Environment.CurrentDirectory);
+        this._logger.LogCritical("🚨 STARTUP FAILURE ANALYSIS:");
+        this._logger.LogCritical("   Validation Step: {ValidationStep}", ex.ValidationStep);
+        this._logger.LogCritical("   Attempts Made: {Attempts}", ex.Attempts);
+        this._logger.LogCritical("   Final Error: {ErrorMessage}", GetCleanErrorMessage(ex));
+        this._logger.LogCritical("   Timestamp: {Timestamp:yyyy-MM-dd HH:mm:ss.fff} UTC", DateTime.UtcNow);
+        this._logger.LogCritical("   Machine: {MachineName}", Environment.MachineName);
+        this._logger.LogCritical("   Process ID: {ProcessId}", Environment.ProcessId);
+        this._logger.LogCritical("   Working Directory: {WorkingDirectory}", Environment.CurrentDirectory);
 
         if (ex is PortConflictException portEx)
         {
-            _logger.LogCritical("   Port Conflicts:");
+            this._logger.LogCritical("   Port Conflicts:");
             foreach (var conflict in portEx.Conflicts)
             {
-                _logger.LogCritical(
+                this._logger.LogCritical(
                     "     - {Service} on port {Port}: {Details}",
                     conflict.Service,
                     conflict.Port,
@@ -513,31 +525,31 @@ public class StartupService : IHostedService
         }
 
         // Only show detailed stack trace in debug mode
-        if (_isDebugLoggingEnabled && ex.InnerException != null)
+        if (this._isDebugLoggingEnabled && ex.InnerException != null)
         {
-            _logger.LogCritical("   Exception Details: {ExceptionDetails}", ex.InnerException.ToString());
+            this._logger.LogCritical("   Exception Details: {ExceptionDetails}", ex.InnerException.ToString());
         }
     }
 
     private void LogUnexpectedFailureDetails(Exception ex)
     {
-        _logger.LogCritical("🚨 UNEXPECTED FAILURE ANALYSIS:");
-        _logger.LogCritical("   Exception Type: {ExceptionType}", ex.GetType().FullName);
-        _logger.LogCritical("   Error Message: {ErrorMessage}", ex.Message);
-        _logger.LogCritical("   Timestamp: {Timestamp:yyyy-MM-dd HH:mm:ss.fff} UTC", DateTime.UtcNow);
-        _logger.LogCritical("   Machine: {MachineName}", Environment.MachineName);
-        _logger.LogCritical("   Process ID: {ProcessId}", Environment.ProcessId);
+        this._logger.LogCritical("🚨 UNEXPECTED FAILURE ANALYSIS:");
+        this._logger.LogCritical("   Exception Type: {ExceptionType}", ex.GetType().FullName);
+        this._logger.LogCritical("   Error Message: {ErrorMessage}", ex.Message);
+        this._logger.LogCritical("   Timestamp: {Timestamp:yyyy-MM-dd HH:mm:ss.fff} UTC", DateTime.UtcNow);
+        this._logger.LogCritical("   Machine: {MachineName}", Environment.MachineName);
+        this._logger.LogCritical("   Process ID: {ProcessId}", Environment.ProcessId);
 
         // Only show stack trace and inner exceptions in debug mode
-        if (_isDebugLoggingEnabled)
+        if (this._isDebugLoggingEnabled)
         {
-            _logger.LogCritical("   Stack Trace: {StackTrace}", ex.StackTrace);
+            this._logger.LogCritical("   Stack Trace: {StackTrace}", ex.StackTrace);
 
             var innerEx = ex.InnerException;
             var depth = 1;
             while (innerEx != null && depth <= 5)
             {
-                _logger.LogCritical(
+                this._logger.LogCritical(
                     "   Inner Exception {Depth}: {InnerExceptionType} - {InnerMessage}",
                     depth,
                     innerEx.GetType().FullName,
@@ -621,8 +633,8 @@ public class StartupValidationException : Exception
     public StartupValidationException(string validationStep, int attempts, Exception innerException)
         : base($"Startup validation failed for '{validationStep}' after {attempts} attempts", innerException)
     {
-        ValidationStep = validationStep;
-        Attempts = attempts;
+        this.ValidationStep = validationStep;
+        this.Attempts = attempts;
     }
 }
 
@@ -639,7 +651,7 @@ public class PortConflictException : StartupValidationException
     )
         : base("Port Availability Check", 1, new AddressInUseException(message))
     {
-        Conflicts = conflicts.ToList().AsReadOnly();
+        this.Conflicts = conflicts.ToList().AsReadOnly();
     }
 }
 
@@ -653,6 +665,6 @@ public class DirectoryAccessException : StartupValidationException
     public DirectoryAccessException(string directory, Exception innerException)
         : base("External Dependencies Check", 1, innerException)
     {
-        Directory = directory;
+        this.Directory = directory;
     }
 }

@@ -21,15 +21,15 @@ public partial class GetClientQueryHandler : IQueryHandler<GetClientQuery, Resul
 
     public GetClientQueryHandler(IClientManager clientManager, ILogger<GetClientQueryHandler> logger)
     {
-        _clientManager = clientManager;
-        _logger = logger;
+        this._clientManager = clientManager;
+        this._logger = logger;
     }
 
     public async Task<Result<ClientState>> Handle(GetClientQuery request, CancellationToken cancellationToken)
     {
-        LogHandling(request.ClientId);
+        this.LogHandling(request.ClientId);
 
-        var result = await _clientManager.GetClientStateAsync(request.ClientId).ConfigureAwait(false);
+        var result = await this._clientManager.GetClientStateAsync(request.ClientId).ConfigureAwait(false);
         return result;
     }
 }

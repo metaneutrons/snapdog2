@@ -38,7 +38,7 @@ public class Result : IResult
     public bool IsSuccess { get; }
 
     /// <inheritdoc />
-    public bool IsFailure => !IsSuccess;
+    public bool IsFailure => !this.IsSuccess;
 
     /// <inheritdoc />
     public string? ErrorMessage { get; }
@@ -49,28 +49,36 @@ public class Result : IResult
     /// <summary>
     /// Protected constructor to enforce usage of factory methods.
     /// </summary>
-    protected internal Result(bool isSuccess, string? errorMessage, Exception? exception)
+    internal protected Result(bool isSuccess, string? errorMessage, Exception? exception)
     {
         // Validate consistency: Success implies no error, Failure requires an error.
         if (isSuccess && (!string.IsNullOrEmpty(errorMessage) || exception != null))
+        {
             throw new InvalidOperationException(
                 "Assertion failed: A successful result cannot have an error message or exception."
             );
+        }
+
         if (!isSuccess && string.IsNullOrEmpty(errorMessage) && exception == null)
+        {
             throw new InvalidOperationException(
                 "Assertion failed: A failed result requires an error message or an exception."
             );
+        }
 
-        IsSuccess = isSuccess;
-        ErrorMessage = errorMessage;
-        Exception = exception;
+        this.IsSuccess = isSuccess;
+        this.ErrorMessage = errorMessage;
+        this.Exception = exception;
     }
 
     /// <summary>
     /// Creates a successful result.
     /// </summary>
     /// <returns>A successful Result instance.</returns>
-    public static Result Success() => new(true, null, null);
+    public static Result Success()
+    {
+        return new Result(true, null, null);
+    }
 
     /// <summary>
     /// Creates a failed result with the specified error message.
@@ -80,7 +88,7 @@ public class Result : IResult
     public static Result Failure(string errorMessage)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(errorMessage);
-        return new(false, errorMessage, null);
+        return new Result(false, errorMessage, null);
     }
 
     /// <summary>
@@ -92,7 +100,7 @@ public class Result : IResult
     public static Result Failure(Exception exception)
     {
         ArgumentNullException.ThrowIfNull(exception);
-        return new(false, exception.Message, exception);
+        return new Result(false, exception.Message, exception);
     }
 }
 
@@ -115,21 +123,22 @@ public class Result<T> : Result
     {
         get
         {
-            if (IsFailure)
+            if (this.IsFailure)
             {
                 throw new InvalidOperationException("Cannot access the value of a failed result.");
             }
-            return _value!;
+
+            return this._value!;
         }
     }
 
     /// <summary>
     /// Protected constructor to enforce usage of factory methods.
     /// </summary>
-    protected internal Result(bool isSuccess, T? value, string? errorMessage, Exception? exception)
+    internal protected Result(bool isSuccess, T? value, string? errorMessage, Exception? exception)
         : base(isSuccess, errorMessage, exception)
     {
-        _value = value;
+        this._value = value;
     }
 
     /// <summary>
@@ -137,7 +146,10 @@ public class Result<T> : Result
     /// </summary>
     /// <param name="value">The value returned by the operation.</param>
     /// <returns>A successful Result instance containing the value.</returns>
-    public static Result<T> Success(T value) => new(true, value, null, null);
+    public static Result<T> Success(T value)
+    {
+        return new Result<T>(true, value, null, null);
+    }
 
     /// <summary>
     /// Creates a failed result with the specified error message.
@@ -148,7 +160,7 @@ public class Result<T> : Result
     public new static Result<T> Failure(string errorMessage)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(errorMessage);
-        return new(false, default, errorMessage, null);
+        return new Result<T>(false, default, errorMessage, null);
     }
 
     /// <summary>
@@ -161,6 +173,6 @@ public class Result<T> : Result
     public new static Result<T> Failure(Exception exception)
     {
         ArgumentNullException.ThrowIfNull(exception);
-        return new(false, default, exception.Message, exception);
+        return new Result<T>(false, default, exception.Message, exception);
     }
 }

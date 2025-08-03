@@ -104,7 +104,7 @@ public class ApiResponse : ApiResponse<object>
     /// <param name="details">Optional error details.</param>
     /// <param name="requestId">Optional request ID.</param>
     /// <returns>An error API response.</returns>
-    public static new ApiResponse CreateError(
+    public new static ApiResponse CreateError(
         string code,
         string message,
         object? details = null,

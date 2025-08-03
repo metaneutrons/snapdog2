@@ -29,8 +29,8 @@ public class PlaylistController : ControllerBase
     /// <param name="logger">The logger instance.</param>
     public PlaylistController(IServiceProvider serviceProvider, ILogger<PlaylistController> logger)
     {
-        _serviceProvider = serviceProvider;
-        _logger = logger;
+        this._serviceProvider = serviceProvider;
+        this._logger = logger;
     }
 
     /// <summary>
@@ -45,30 +45,30 @@ public class PlaylistController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Getting all playlists");
+            this._logger.LogDebug("Getting all playlists");
 
             var handler =
-                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetAllPlaylistsQueryHandler>();
+                this._serviceProvider.GetService<Server.Features.Zones.Handlers.GetAllPlaylistsQueryHandler>();
             if (handler == null)
             {
-                _logger.LogError("GetAllPlaylistsQueryHandler not found in DI container");
-                return StatusCode(500, new { error = "Handler not available" });
+                this._logger.LogError("GetAllPlaylistsQueryHandler not found in DI container");
+                return this.StatusCode(500, new { error = "Handler not available" });
             }
 
             var result = await handler.Handle(new GetAllPlaylistsQuery(), cancellationToken);
 
             if (result.IsSuccess && result.Value != null)
             {
-                return Ok(result.Value);
+                return this.Ok(result.Value);
             }
 
-            _logger.LogWarning("Failed to get all playlists: {Error}", result.ErrorMessage);
-            return StatusCode(500, new { error = result.ErrorMessage ?? "Failed to retrieve playlists" });
+            this._logger.LogWarning("Failed to get all playlists: {Error}", result.ErrorMessage);
+            return this.StatusCode(500, new { error = result.ErrorMessage ?? "Failed to retrieve playlists" });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting all playlists");
-            return StatusCode(500, new { error = "Internal server error" });
+            this._logger.LogError(ex, "Error getting all playlists");
+            return this.StatusCode(500, new { error = "Internal server error" });
         }
     }
 
@@ -89,14 +89,14 @@ public class PlaylistController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Getting tracks for playlist {PlaylistId}", playlistId);
+            this._logger.LogDebug("Getting tracks for playlist {PlaylistId}", playlistId);
 
             var handler =
-                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetPlaylistTracksQueryHandler>();
+                this._serviceProvider.GetService<Server.Features.Zones.Handlers.GetPlaylistTracksQueryHandler>();
             if (handler == null)
             {
-                _logger.LogError("GetPlaylistTracksQueryHandler not found in DI container");
-                return StatusCode(500, new { error = "Handler not available" });
+                this._logger.LogError("GetPlaylistTracksQueryHandler not found in DI container");
+                return this.StatusCode(500, new { error = "Handler not available" });
             }
 
             var result = await handler.Handle(
@@ -106,20 +106,20 @@ public class PlaylistController : ControllerBase
 
             if (result.IsSuccess && result.Value != null)
             {
-                return Ok(result.Value);
+                return this.Ok(result.Value);
             }
 
-            _logger.LogWarning(
+            this._logger.LogWarning(
                 "Failed to get tracks for playlist {PlaylistId}: {Error}",
                 playlistId,
                 result.ErrorMessage
             );
-            return NotFound(new { error = result.ErrorMessage ?? "Playlist not found" });
+            return this.NotFound(new { error = result.ErrorMessage ?? "Playlist not found" });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting tracks for playlist {PlaylistId}", playlistId);
-            return StatusCode(500, new { error = "Internal server error" });
+            this._logger.LogError(ex, "Error getting tracks for playlist {PlaylistId}", playlistId);
+            return this.StatusCode(500, new { error = "Internal server error" });
         }
     }
 
@@ -140,14 +140,14 @@ public class PlaylistController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Getting tracks for playlist index {PlaylistIndex}", playlistIndex);
+            this._logger.LogDebug("Getting tracks for playlist index {PlaylistIndex}", playlistIndex);
 
             var handler =
-                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetPlaylistTracksQueryHandler>();
+                this._serviceProvider.GetService<Server.Features.Zones.Handlers.GetPlaylistTracksQueryHandler>();
             if (handler == null)
             {
-                _logger.LogError("GetPlaylistTracksQueryHandler not found in DI container");
-                return StatusCode(500, new { error = "Handler not available" });
+                this._logger.LogError("GetPlaylistTracksQueryHandler not found in DI container");
+                return this.StatusCode(500, new { error = "Handler not available" });
             }
 
             var result = await handler.Handle(
@@ -157,20 +157,20 @@ public class PlaylistController : ControllerBase
 
             if (result.IsSuccess && result.Value != null)
             {
-                return Ok(result.Value);
+                return this.Ok(result.Value);
             }
 
-            _logger.LogWarning(
+            this._logger.LogWarning(
                 "Failed to get tracks for playlist index {PlaylistIndex}: {Error}",
                 playlistIndex,
                 result.ErrorMessage
             );
-            return NotFound(new { error = result.ErrorMessage ?? "Playlist not found" });
+            return this.NotFound(new { error = result.ErrorMessage ?? "Playlist not found" });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting tracks for playlist index {PlaylistIndex}", playlistIndex);
-            return StatusCode(500, new { error = "Internal server error" });
+            this._logger.LogError(ex, "Error getting tracks for playlist index {PlaylistIndex}", playlistIndex);
+            return this.StatusCode(500, new { error = "Internal server error" });
         }
     }
 }

@@ -19,8 +19,8 @@ public partial class SetSnapcastClientVolumeCommandHandler : ICommandHandler<Set
         ILogger<SetSnapcastClientVolumeCommandHandler> logger
     )
     {
-        _snapcastService = snapcastService;
-        _logger = logger;
+        this._snapcastService = snapcastService;
+        this._logger = logger;
     }
 
     [LoggerMessage(
@@ -35,17 +35,17 @@ public partial class SetSnapcastClientVolumeCommandHandler : ICommandHandler<Set
 
     public async Task<Result> Handle(SetSnapcastClientVolumeCommand command, CancellationToken cancellationToken)
     {
-        LogSettingClientVolume(command.ClientId, command.Volume, command.Source.ToString());
+        this.LogSettingClientVolume(command.ClientId, command.Volume, command.Source.ToString());
 
         try
         {
-            var result = await _snapcastService
-                .SetClientVolumeAsync(command.ClientId, command.Volume, cancellationToken)
+            var result = await this
+                ._snapcastService.SetClientVolumeAsync(command.ClientId, command.Volume, cancellationToken)
                 .ConfigureAwait(false);
 
             if (result.IsFailure)
             {
-                LogSetClientVolumeFailed(
+                this.LogSetClientVolumeFailed(
                     command.ClientId,
                     new InvalidOperationException(result.ErrorMessage ?? "Unknown error")
                 );
@@ -56,7 +56,7 @@ public partial class SetSnapcastClientVolumeCommandHandler : ICommandHandler<Set
         }
         catch (Exception ex)
         {
-            LogSetClientVolumeFailed(command.ClientId, ex);
+            this.LogSetClientVolumeFailed(command.ClientId, ex);
             return Result.Failure(ex);
         }
     }

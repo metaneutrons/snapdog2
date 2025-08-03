@@ -27,8 +27,8 @@ public partial class ValidationCommandBehavior<TCommand, TResponse> : ICommandPi
         ILogger<ValidationCommandBehavior<TCommand, TResponse>> logger
     )
     {
-        _validators = validators;
-        _logger = logger;
+        this._validators = validators;
+        this._logger = logger;
     }
 
     /// <inheritdoc/>
@@ -40,13 +40,13 @@ public partial class ValidationCommandBehavior<TCommand, TResponse> : ICommandPi
     {
         var commandName = typeof(TCommand).Name;
 
-        if (_validators.Any())
+        if (this._validators.Any())
         {
-            LogValidatingCommand(commandName);
+            this.LogValidatingCommand(commandName);
 
             var context = new ValidationContext<TCommand>(command);
             var validationResults = await Task.WhenAll(
-                    _validators.Select(v => v.ValidateAsync(context, cancellationToken))
+                    this._validators.Select(v => v.ValidateAsync(context, cancellationToken))
                 )
                 .ConfigureAwait(false);
 
@@ -54,7 +54,7 @@ public partial class ValidationCommandBehavior<TCommand, TResponse> : ICommandPi
 
             if (failures.Count != 0)
             {
-                LogValidationFailed(commandName, failures.Count);
+                this.LogValidationFailed(commandName, failures.Count);
                 throw new ValidationException(failures);
             }
         }

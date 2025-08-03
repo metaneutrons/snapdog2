@@ -26,23 +26,23 @@ public partial class GetSystemStatusQueryHandler : IQueryHandler<GetSystemStatus
         ILogger<GetSystemStatusQueryHandler> logger
     )
     {
-        _systemStatusService = systemStatusService;
-        _logger = logger;
+        this._systemStatusService = systemStatusService;
+        this._logger = logger;
     }
 
     /// <inheritdoc/>
     public async Task<Result<SystemStatus>> Handle(GetSystemStatusQuery request, CancellationToken cancellationToken)
     {
-        LogHandling();
+        this.LogHandling();
 
         try
         {
-            var status = await _systemStatusService.GetCurrentStatusAsync().ConfigureAwait(false);
+            var status = await this._systemStatusService.GetCurrentStatusAsync().ConfigureAwait(false);
             return Result<SystemStatus>.Success(status);
         }
         catch (Exception ex)
         {
-            LogError(ex);
+            this.LogError(ex);
             return Result<SystemStatus>.Failure(ex);
         }
     }

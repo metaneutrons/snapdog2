@@ -21,23 +21,23 @@ public class GlobalExceptionHandlingMiddleware
         IHostEnvironment environment
     )
     {
-        _next = next;
-        _logger = logger;
-        _environment = environment;
+        this._next = next;
+        this._logger = logger;
+        this._environment = environment;
 
         // Include stack traces in development or when debug logging is enabled
-        _includeStackTraces = environment.IsDevelopment() || logger.IsEnabled(LogLevel.Debug);
+        this._includeStackTraces = environment.IsDevelopment() || logger.IsEnabled(LogLevel.Debug);
     }
 
     public async Task InvokeAsync(HttpContext context)
     {
         try
         {
-            await _next(context);
+            await this._next(context);
         }
         catch (Exception ex)
         {
-            await HandleExceptionAsync(context, ex);
+            await this.HandleExceptionAsync(context, ex);
         }
     }
 
@@ -50,9 +50,9 @@ public class GlobalExceptionHandlingMiddleware
         var remoteIp = context.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
 
         // Log the exception with comprehensive context
-        if (_includeStackTraces || IsUnexpectedException(exception))
+        if (this._includeStackTraces || IsUnexpectedException(exception))
         {
-            _logger.LogError(
+            this._logger.LogError(
                 exception,
                 "🚨 UNHANDLED EXCEPTION in {RequestMethod} {RequestPath} | "
                     + "CorrelationId: {CorrelationId} | RemoteIP: {RemoteIp} | UserAgent: {UserAgent}",
@@ -65,7 +65,7 @@ public class GlobalExceptionHandlingMiddleware
         }
         else
         {
-            _logger.LogError(
+            this._logger.LogError(
                 "🚨 UNHANDLED EXCEPTION in {RequestMethod} {RequestPath} | "
                     + "CorrelationId: {CorrelationId} | RemoteIP: {RemoteIp} | UserAgent: {UserAgent} | "
                     + "Error: {ExceptionType} - {ExceptionMessage}",
@@ -84,7 +84,7 @@ public class GlobalExceptionHandlingMiddleware
         {
             AddressInUseException => (
                 HttpStatusCode.ServiceUnavailable,
-                CreateErrorResponse(
+                this.CreateErrorResponse(
                     "SERVICE_UNAVAILABLE",
                     "Service is temporarily unavailable due to port conflicts",
                     correlationId,
@@ -94,7 +94,7 @@ public class GlobalExceptionHandlingMiddleware
 
             SocketException => (
                 HttpStatusCode.ServiceUnavailable,
-                CreateErrorResponse(
+                this.CreateErrorResponse(
                     "NETWORK_ERROR",
                     "Network connectivity issue",
                     correlationId,
@@ -104,7 +104,7 @@ public class GlobalExceptionHandlingMiddleware
 
             TimeoutException => (
                 HttpStatusCode.RequestTimeout,
-                CreateErrorResponse(
+                this.CreateErrorResponse(
                     "TIMEOUT",
                     "Request timed out",
                     correlationId,
@@ -114,7 +114,7 @@ public class GlobalExceptionHandlingMiddleware
 
             UnauthorizedAccessException => (
                 HttpStatusCode.Forbidden,
-                CreateErrorResponse(
+                this.CreateErrorResponse(
                     "ACCESS_DENIED",
                     "Access denied",
                     correlationId,
@@ -124,7 +124,7 @@ public class GlobalExceptionHandlingMiddleware
 
             ArgumentException => (
                 HttpStatusCode.BadRequest,
-                CreateErrorResponse(
+                this.CreateErrorResponse(
                     "INVALID_ARGUMENT",
                     "Invalid request parameters",
                     correlationId,
@@ -134,7 +134,7 @@ public class GlobalExceptionHandlingMiddleware
 
             InvalidOperationException => (
                 HttpStatusCode.Conflict,
-                CreateErrorResponse(
+                this.CreateErrorResponse(
                     "INVALID_OPERATION",
                     "Invalid operation",
                     correlationId,
@@ -144,7 +144,7 @@ public class GlobalExceptionHandlingMiddleware
 
             NotImplementedException => (
                 HttpStatusCode.NotImplemented,
-                CreateErrorResponse(
+                this.CreateErrorResponse(
                     "NOT_IMPLEMENTED",
                     "Feature not implemented",
                     correlationId,
@@ -154,7 +154,7 @@ public class GlobalExceptionHandlingMiddleware
 
             _ => (
                 HttpStatusCode.InternalServerError,
-                CreateErrorResponse(
+                this.CreateErrorResponse(
                     "INTERNAL_ERROR",
                     "An unexpected error occurred",
                     correlationId,
@@ -177,14 +177,14 @@ public class GlobalExceptionHandlingMiddleware
             new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                WriteIndented = _environment.IsDevelopment(),
+                WriteIndented = this._environment.IsDevelopment(),
             }
         );
 
         await context.Response.WriteAsync(jsonResponse);
 
         // Log response details
-        _logger.LogInformation(
+        this._logger.LogInformation(
             "🔄 Exception response sent: {StatusCode} {ErrorCode} | CorrelationId: {CorrelationId}",
             (int)statusCode,
             errorResponse.ErrorCode,

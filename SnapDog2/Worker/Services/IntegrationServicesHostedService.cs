@@ -19,13 +19,13 @@ public class IntegrationServicesHostedService : BackgroundService
         ILogger<IntegrationServicesHostedService> logger
     )
     {
-        _serviceProvider = serviceProvider;
-        _logger = logger;
+        this._serviceProvider = serviceProvider;
+        this._logger = logger;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Starting integration services initialization...");
+        this._logger.LogInformation("Starting integration services initialization...");
 
         try
         {
@@ -33,38 +33,38 @@ public class IntegrationServicesHostedService : BackgroundService
             var initializationTasks = new List<Task>();
 
             // Initialize Snapcast service if available
-            var snapcastService = _serviceProvider.GetService<ISnapcastService>();
+            var snapcastService = this._serviceProvider.GetService<ISnapcastService>();
             if (snapcastService != null)
             {
-                _logger.LogInformation("Initializing Snapcast service...");
-                initializationTasks.Add(InitializeSnapcastServiceAsync(snapcastService, stoppingToken));
+                this._logger.LogInformation("Initializing Snapcast service...");
+                initializationTasks.Add(this.InitializeSnapcastServiceAsync(snapcastService, stoppingToken));
             }
             else
             {
-                _logger.LogWarning("Snapcast service not registered - skipping initialization");
+                this._logger.LogWarning("Snapcast service not registered - skipping initialization");
             }
 
             // Initialize MQTT service if available
-            var mqttService = _serviceProvider.GetService<IMqttService>();
+            var mqttService = this._serviceProvider.GetService<IMqttService>();
             if (mqttService != null)
             {
-                _logger.LogInformation("Initializing MQTT service...");
-                initializationTasks.Add(InitializeMqttServiceAsync(mqttService, stoppingToken));
+                this._logger.LogInformation("Initializing MQTT service...");
+                initializationTasks.Add(this.InitializeMqttServiceAsync(mqttService, stoppingToken));
             }
             else
             {
-                _logger.LogWarning("MQTT service not registered - skipping initialization");
+                this._logger.LogWarning("MQTT service not registered - skipping initialization");
             }
 
             // Wait for all services to initialize
             if (initializationTasks.Count > 0)
             {
                 await Task.WhenAll(initializationTasks);
-                _logger.LogInformation("All integration services initialized successfully");
+                this._logger.LogInformation("All integration services initialized successfully");
             }
             else
             {
-                _logger.LogWarning("No integration services found to initialize");
+                this._logger.LogWarning("No integration services found to initialize");
             }
 
             // Keep the service running to maintain connections
@@ -75,11 +75,11 @@ public class IntegrationServicesHostedService : BackgroundService
         }
         catch (OperationCanceledException)
         {
-            _logger.LogInformation("Integration services initialization cancelled");
+            this._logger.LogInformation("Integration services initialization cancelled");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to initialize integration services");
+            this._logger.LogError(ex, "Failed to initialize integration services");
             throw; // Re-throw to stop the application if critical services fail
         }
     }
@@ -94,16 +94,16 @@ public class IntegrationServicesHostedService : BackgroundService
             var result = await snapcastService.InitializeAsync(cancellationToken);
             if (result.IsSuccess)
             {
-                _logger.LogInformation("✅ Snapcast service initialized successfully");
+                this._logger.LogInformation("✅ Snapcast service initialized successfully");
             }
             else
             {
-                _logger.LogError("❌ Failed to initialize Snapcast service: {ErrorMessage}", result.ErrorMessage);
+                this._logger.LogError("❌ Failed to initialize Snapcast service: {ErrorMessage}", result.ErrorMessage);
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ Exception during Snapcast service initialization");
+            this._logger.LogError(ex, "❌ Exception during Snapcast service initialization");
         }
     }
 
@@ -114,26 +114,26 @@ public class IntegrationServicesHostedService : BackgroundService
             var result = await mqttService.InitializeAsync(cancellationToken);
             if (result.IsSuccess)
             {
-                _logger.LogInformation(
+                this._logger.LogInformation(
                     "✅ MQTT service initialized successfully - Connected: {IsConnected}",
                     mqttService.IsConnected
                 );
             }
             else
             {
-                _logger.LogError("❌ Failed to initialize MQTT service: {ErrorMessage}", result.ErrorMessage);
+                this._logger.LogError("❌ Failed to initialize MQTT service: {ErrorMessage}", result.ErrorMessage);
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ Exception during MQTT service initialization");
+            this._logger.LogError(ex, "❌ Exception during MQTT service initialization");
         }
     }
 
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Stopping integration services...");
+        this._logger.LogInformation("Stopping integration services...");
         await base.StopAsync(cancellationToken);
-        _logger.LogInformation("Integration services stopped");
+        this._logger.LogInformation("Integration services stopped");
     }
 }

@@ -20,8 +20,8 @@ public partial class GetSnapcastServerStatusQueryHandler
         ILogger<GetSnapcastServerStatusQueryHandler> logger
     )
     {
-        _snapcastService = snapcastService;
-        _logger = logger;
+        this._snapcastService = snapcastService;
+        this._logger = logger;
     }
 
     [LoggerMessage(2001, LogLevel.Information, "Getting Snapcast server status")]
@@ -35,15 +35,15 @@ public partial class GetSnapcastServerStatusQueryHandler
         CancellationToken cancellationToken
     )
     {
-        LogGettingServerStatus();
+        this.LogGettingServerStatus();
 
         try
         {
-            var result = await _snapcastService.GetServerStatusAsync(cancellationToken).ConfigureAwait(false);
+            var result = await this._snapcastService.GetServerStatusAsync(cancellationToken).ConfigureAwait(false);
 
             if (result.IsFailure)
             {
-                LogGetServerStatusFailed(new InvalidOperationException(result.ErrorMessage ?? "Unknown error"));
+                this.LogGetServerStatusFailed(new InvalidOperationException(result.ErrorMessage ?? "Unknown error"));
                 return Result<SnapcastServerStatus>.Failure(result.ErrorMessage ?? "Unknown error");
             }
 
@@ -51,7 +51,7 @@ public partial class GetSnapcastServerStatusQueryHandler
         }
         catch (Exception ex)
         {
-            LogGetServerStatusFailed(ex);
+            this.LogGetServerStatusFailed(ex);
             return Result<SnapcastServerStatus>.Failure(ex);
         }
     }

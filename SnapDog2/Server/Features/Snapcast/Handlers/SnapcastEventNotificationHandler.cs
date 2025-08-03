@@ -20,7 +20,7 @@ public partial class SnapcastEventNotificationHandler
 
     public SnapcastEventNotificationHandler(ILogger<SnapcastEventNotificationHandler> logger)
     {
-        _logger = logger;
+        this._logger = logger;
     }
 
     #region Logging
@@ -53,7 +53,7 @@ public partial class SnapcastEventNotificationHandler
 
     public Task Handle(SnapcastClientConnectedNotification notification, CancellationToken cancellationToken)
     {
-        LogClientConnected(notification.Client.Id, notification.Client.Config.Name);
+        this.LogClientConnected(notification.Client.Id, notification.Client.Config.Name);
 
         // Here you could:
         // - Update internal client state
@@ -67,7 +67,7 @@ public partial class SnapcastEventNotificationHandler
 
     public Task Handle(SnapcastClientDisconnectedNotification notification, CancellationToken cancellationToken)
     {
-        LogClientDisconnected(notification.Client.Id, notification.Client.Config.Name);
+        this.LogClientDisconnected(notification.Client.Id, notification.Client.Config.Name);
 
         // Here you could:
         // - Update internal client state
@@ -81,7 +81,7 @@ public partial class SnapcastEventNotificationHandler
 
     public Task Handle(SnapcastClientVolumeChangedNotification notification, CancellationToken cancellationToken)
     {
-        LogClientVolumeChanged(notification.ClientId, notification.Volume.Percent, notification.Volume.Muted);
+        this.LogClientVolumeChanged(notification.ClientId, notification.Volume.Percent, notification.Volume.Muted);
 
         // Here you could:
         // - Update internal client state
@@ -99,7 +99,7 @@ public partial class SnapcastEventNotificationHandler
 
     public Task Handle(SnapcastGroupMuteChangedNotification notification, CancellationToken cancellationToken)
     {
-        LogGroupMuteChanged(notification.GroupId, notification.Muted);
+        this.LogGroupMuteChanged(notification.GroupId, notification.Muted);
 
         // Here you could:
         // - Update internal group state
@@ -117,7 +117,7 @@ public partial class SnapcastEventNotificationHandler
 
     public Task Handle(SnapcastConnectionEstablishedNotification notification, CancellationToken cancellationToken)
     {
-        LogConnectionEstablished();
+        this.LogConnectionEstablished();
 
         // Here you could:
         // - Initialize system state
@@ -130,7 +130,7 @@ public partial class SnapcastEventNotificationHandler
 
     public Task Handle(SnapcastConnectionLostNotification notification, CancellationToken cancellationToken)
     {
-        LogConnectionLost(notification.Reason);
+        this.LogConnectionLost(notification.Reason);
 
         // Here you could:
         // - Update connection status

@@ -39,16 +39,24 @@ public static class MqttServiceConfiguration
                 config =>
                 {
                     if (!config.Mqtt.Enabled)
+                    {
                         return true; // Skip validation if MQTT is disabled
+                    }
 
                     if (string.IsNullOrWhiteSpace(config.Mqtt.BrokerAddress))
+                    {
                         return false;
+                    }
 
                     if (config.Mqtt.Port <= 0 || config.Mqtt.Port > 65535)
+                    {
                         return false;
+                    }
 
                     if (string.IsNullOrWhiteSpace(config.Mqtt.ClientId))
+                    {
                         return false;
+                    }
 
                     return true;
                 },

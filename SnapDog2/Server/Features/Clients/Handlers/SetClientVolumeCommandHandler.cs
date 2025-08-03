@@ -25,19 +25,19 @@ public partial class SetClientVolumeCommandHandler : ICommandHandler<SetClientVo
 
     public SetClientVolumeCommandHandler(IClientManager clientManager, ILogger<SetClientVolumeCommandHandler> logger)
     {
-        _clientManager = clientManager;
-        _logger = logger;
+        this._clientManager = clientManager;
+        this._logger = logger;
     }
 
     public async Task<Result> Handle(SetClientVolumeCommand request, CancellationToken cancellationToken)
     {
-        LogHandling(request.ClientId, request.Volume, request.Source);
+        this.LogHandling(request.ClientId, request.Volume, request.Source);
 
         // Get the client
-        var clientResult = await _clientManager.GetClientAsync(request.ClientId).ConfigureAwait(false);
+        var clientResult = await this._clientManager.GetClientAsync(request.ClientId).ConfigureAwait(false);
         if (clientResult.IsFailure)
         {
-            LogClientNotFound(request.ClientId);
+            this.LogClientNotFound(request.ClientId);
             return clientResult;
         }
 

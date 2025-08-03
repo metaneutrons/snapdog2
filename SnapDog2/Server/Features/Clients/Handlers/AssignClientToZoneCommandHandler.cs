@@ -33,34 +33,34 @@ public partial class AssignClientToZoneCommandHandler : ICommandHandler<AssignCl
         ILogger<AssignClientToZoneCommandHandler> logger
     )
     {
-        _clientManager = clientManager;
-        _zoneManager = zoneManager;
-        _logger = logger;
+        this._clientManager = clientManager;
+        this._zoneManager = zoneManager;
+        this._logger = logger;
     }
 
     public async Task<Result> Handle(AssignClientToZoneCommand request, CancellationToken cancellationToken)
     {
-        LogHandling(request.ClientId, request.ZoneId, request.Source);
+        this.LogHandling(request.ClientId, request.ZoneId, request.Source);
 
         // Validate client exists
-        var clientResult = await _clientManager.GetClientAsync(request.ClientId).ConfigureAwait(false);
+        var clientResult = await this._clientManager.GetClientAsync(request.ClientId).ConfigureAwait(false);
         if (clientResult.IsFailure)
         {
-            LogClientNotFound(request.ClientId);
+            this.LogClientNotFound(request.ClientId);
             return clientResult;
         }
 
         // Validate zone exists
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            LogZoneNotFound(request.ZoneId);
+            this.LogZoneNotFound(request.ZoneId);
             return zoneResult;
         }
 
         // Perform the assignment
-        var result = await _clientManager
-            .AssignClientToZoneAsync(request.ClientId, request.ZoneId)
+        var result = await this
+            ._clientManager.AssignClientToZoneAsync(request.ClientId, request.ZoneId)
             .ConfigureAwait(false);
 
         return result;

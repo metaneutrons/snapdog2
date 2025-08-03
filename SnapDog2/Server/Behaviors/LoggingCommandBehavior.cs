@@ -24,7 +24,7 @@ public partial class LoggingCommandBehavior<TCommand, TResponse> : ICommandPipel
     /// <param name="logger">The logger instance.</param>
     public LoggingCommandBehavior(ILogger<LoggingCommandBehavior<TCommand, TResponse>> logger)
     {
-        _logger = logger;
+        this._logger = logger;
     }
 
     /// <inheritdoc/>
@@ -37,7 +37,7 @@ public partial class LoggingCommandBehavior<TCommand, TResponse> : ICommandPipel
         var commandName = typeof(TCommand).Name;
         using var activity = ActivitySource.StartActivity($"CortexMediator.Command.{commandName}");
 
-        LogCommandStarting(commandName);
+        this.LogCommandStarting(commandName);
         var stopwatch = Stopwatch.StartNew();
 
         try
@@ -45,13 +45,13 @@ public partial class LoggingCommandBehavior<TCommand, TResponse> : ICommandPipel
             var response = await next().ConfigureAwait(false);
             stopwatch.Stop();
 
-            LogCommandCompleted(commandName, stopwatch.ElapsedMilliseconds);
+            this.LogCommandCompleted(commandName, stopwatch.ElapsedMilliseconds);
             return response;
         }
         catch (Exception ex)
         {
             stopwatch.Stop();
-            LogCommandFailed(commandName, stopwatch.ElapsedMilliseconds, ex);
+            this.LogCommandFailed(commandName, stopwatch.ElapsedMilliseconds, ex);
             throw;
         }
     }

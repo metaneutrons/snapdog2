@@ -27,8 +27,8 @@ public class SystemController : ControllerBase
     /// </summary>
     public SystemController(IServiceProvider serviceProvider, ILogger<SystemController> logger)
     {
-        _serviceProvider = serviceProvider;
-        _logger = logger;
+        this._serviceProvider = serviceProvider;
+        this._logger = logger;
     }
 
     /// <summary>
@@ -43,14 +43,14 @@ public class SystemController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Getting system status");
+            this._logger.LogDebug("Getting system status");
 
             var handler =
-                _serviceProvider.GetService<SnapDog2.Server.Features.Global.Handlers.GetSystemStatusQueryHandler>();
+                this._serviceProvider.GetService<Server.Features.Global.Handlers.GetSystemStatusQueryHandler>();
             if (handler == null)
             {
-                _logger.LogError("GetSystemStatusQueryHandler not found in DI container");
-                return StatusCode(
+                this._logger.LogError("GetSystemStatusQueryHandler not found in DI container");
+                return this.StatusCode(
                     500,
                     ApiResponse<SystemStatus>.CreateError("HANDLER_NOT_FOUND", "System status handler not available")
                 );
@@ -60,11 +60,11 @@ public class SystemController : ControllerBase
 
             if (result.IsSuccess && result.Value != null)
             {
-                return Ok(ApiResponse<SystemStatus>.CreateSuccess(result.Value));
+                return this.Ok(ApiResponse<SystemStatus>.CreateSuccess(result.Value));
             }
 
-            _logger.LogWarning("Failed to get system status: {Error}", result.ErrorMessage);
-            return StatusCode(
+            this._logger.LogWarning("Failed to get system status: {Error}", result.ErrorMessage);
+            return this.StatusCode(
                 500,
                 ApiResponse<SystemStatus>.CreateError(
                     "SYSTEM_STATUS_ERROR",
@@ -74,8 +74,11 @@ public class SystemController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting system status");
-            return StatusCode(500, ApiResponse<SystemStatus>.CreateError("INTERNAL_ERROR", "Internal server error"));
+            this._logger.LogError(ex, "Error getting system status");
+            return this.StatusCode(
+                500,
+                ApiResponse<SystemStatus>.CreateError("INTERNAL_ERROR", "Internal server error")
+            );
         }
     }
 
@@ -93,14 +96,14 @@ public class SystemController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Getting system errors");
+            this._logger.LogDebug("Getting system errors");
 
             var handler =
-                _serviceProvider.GetService<SnapDog2.Server.Features.Global.Handlers.GetErrorStatusQueryHandler>();
+                this._serviceProvider.GetService<Server.Features.Global.Handlers.GetErrorStatusQueryHandler>();
             if (handler == null)
             {
-                _logger.LogError("GetErrorStatusQueryHandler not found in DI container");
-                return StatusCode(
+                this._logger.LogError("GetErrorStatusQueryHandler not found in DI container");
+                return this.StatusCode(
                     500,
                     ApiResponse<List<ErrorDetails>>.CreateError(
                         "HANDLER_NOT_FOUND",
@@ -116,11 +119,11 @@ public class SystemController : ControllerBase
                 // Convert single ErrorDetails to List<ErrorDetails>
                 var errorList =
                     result.Value != null ? new List<ErrorDetails> { result.Value } : new List<ErrorDetails>();
-                return Ok(ApiResponse<List<ErrorDetails>>.CreateSuccess(errorList));
+                return this.Ok(ApiResponse<List<ErrorDetails>>.CreateSuccess(errorList));
             }
 
-            _logger.LogWarning("Failed to get system errors: {Error}", result.ErrorMessage);
-            return StatusCode(
+            this._logger.LogWarning("Failed to get system errors: {Error}", result.ErrorMessage);
+            return this.StatusCode(
                 500,
                 ApiResponse<List<ErrorDetails>>.CreateError(
                     "ERROR_STATUS_ERROR",
@@ -130,8 +133,8 @@ public class SystemController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting system errors");
-            return StatusCode(
+            this._logger.LogError(ex, "Error getting system errors");
+            return this.StatusCode(
                 500,
                 ApiResponse<List<ErrorDetails>>.CreateError("INTERNAL_ERROR", "Internal server error")
             );
@@ -150,14 +153,14 @@ public class SystemController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Getting version information");
+            this._logger.LogDebug("Getting version information");
 
             var handler =
-                _serviceProvider.GetService<SnapDog2.Server.Features.Global.Handlers.GetVersionInfoQueryHandler>();
+                this._serviceProvider.GetService<Server.Features.Global.Handlers.GetVersionInfoQueryHandler>();
             if (handler == null)
             {
-                _logger.LogError("GetVersionInfoQueryHandler not found in DI container");
-                return StatusCode(
+                this._logger.LogError("GetVersionInfoQueryHandler not found in DI container");
+                return this.StatusCode(
                     500,
                     ApiResponse<VersionDetails>.CreateError("HANDLER_NOT_FOUND", "Version info handler not available")
                 );
@@ -167,11 +170,11 @@ public class SystemController : ControllerBase
 
             if (result.IsSuccess && result.Value != null)
             {
-                return Ok(ApiResponse<VersionDetails>.CreateSuccess(result.Value));
+                return this.Ok(ApiResponse<VersionDetails>.CreateSuccess(result.Value));
             }
 
-            _logger.LogWarning("Failed to get version information: {Error}", result.ErrorMessage);
-            return StatusCode(
+            this._logger.LogWarning("Failed to get version information: {Error}", result.ErrorMessage);
+            return this.StatusCode(
                 500,
                 ApiResponse<VersionDetails>.CreateError(
                     "VERSION_INFO_ERROR",
@@ -181,8 +184,11 @@ public class SystemController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting version information");
-            return StatusCode(500, ApiResponse<VersionDetails>.CreateError("INTERNAL_ERROR", "Internal server error"));
+            this._logger.LogError(ex, "Error getting version information");
+            return this.StatusCode(
+                500,
+                ApiResponse<VersionDetails>.CreateError("INTERNAL_ERROR", "Internal server error")
+            );
         }
     }
 
@@ -198,14 +204,14 @@ public class SystemController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Getting server statistics");
+            this._logger.LogDebug("Getting server statistics");
 
             var handler =
-                _serviceProvider.GetService<SnapDog2.Server.Features.Global.Handlers.GetServerStatsQueryHandler>();
+                this._serviceProvider.GetService<Server.Features.Global.Handlers.GetServerStatsQueryHandler>();
             if (handler == null)
             {
-                _logger.LogError("GetServerStatsQueryHandler not found in DI container");
-                return StatusCode(
+                this._logger.LogError("GetServerStatsQueryHandler not found in DI container");
+                return this.StatusCode(
                     500,
                     ApiResponse<ServerStats>.CreateError("HANDLER_NOT_FOUND", "Server stats handler not available")
                 );
@@ -215,11 +221,11 @@ public class SystemController : ControllerBase
 
             if (result.IsSuccess && result.Value != null)
             {
-                return Ok(ApiResponse<ServerStats>.CreateSuccess(result.Value));
+                return this.Ok(ApiResponse<ServerStats>.CreateSuccess(result.Value));
             }
 
-            _logger.LogWarning("Failed to get server statistics: {Error}", result.ErrorMessage);
-            return StatusCode(
+            this._logger.LogWarning("Failed to get server statistics: {Error}", result.ErrorMessage);
+            return this.StatusCode(
                 500,
                 ApiResponse<ServerStats>.CreateError(
                     "SERVER_STATS_ERROR",
@@ -229,8 +235,11 @@ public class SystemController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting server statistics");
-            return StatusCode(500, ApiResponse<ServerStats>.CreateError("INTERNAL_ERROR", "Internal server error"));
+            this._logger.LogError(ex, "Error getting server statistics");
+            return this.StatusCode(
+                500,
+                ApiResponse<ServerStats>.CreateError("INTERNAL_ERROR", "Internal server error")
+            );
         }
     }
 }

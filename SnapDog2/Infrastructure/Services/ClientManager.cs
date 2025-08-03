@@ -34,69 +34,71 @@ public partial class ClientManager : IClientManager
 
     public ClientManager(ILogger<ClientManager> logger)
     {
-        _logger = logger;
-        _clients = new Dictionary<int, IClient>();
-        _clientStates = new Dictionary<int, ClientState>();
+        this._logger = logger;
+        this._clients = new Dictionary<int, IClient>();
+        this._clientStates = new Dictionary<int, ClientState>();
 
         // Initialize with placeholder clients matching the Docker setup
-        InitializePlaceholderClients();
+        this.InitializePlaceholderClients();
     }
 
     public async Task<Result<IClient>> GetClientAsync(int clientId)
     {
-        LogGettingClient(clientId);
+        this.LogGettingClient(clientId);
 
         await Task.Delay(1); // Simulate async operation
 
-        if (_clients.TryGetValue(clientId, out var client))
+        if (this._clients.TryGetValue(clientId, out var client))
         {
             return Result<IClient>.Success(client);
         }
 
-        LogClientNotFound(clientId);
+        this.LogClientNotFound(clientId);
         return Result<IClient>.Failure($"Client {clientId} not found");
     }
 
     public async Task<Result<ClientState>> GetClientStateAsync(int clientId)
     {
-        LogGettingClient(clientId);
+        this.LogGettingClient(clientId);
 
         await Task.Delay(1); // Simulate async operation
 
-        if (_clientStates.TryGetValue(clientId, out var state))
+        if (this._clientStates.TryGetValue(clientId, out var state))
         {
             // Update timestamp
             var updatedState = state with
             {
                 TimestampUtc = DateTime.UtcNow,
             };
-            _clientStates[clientId] = updatedState;
+            this._clientStates[clientId] = updatedState;
             return Result<ClientState>.Success(updatedState);
         }
 
-        LogClientNotFound(clientId);
+        this.LogClientNotFound(clientId);
         return Result<ClientState>.Failure($"Client {clientId} not found");
     }
 
     public async Task<Result<List<ClientState>>> GetAllClientsAsync()
     {
-        LogGettingAllClients();
+        this.LogGettingAllClients();
 
         await Task.Delay(1); // Simulate async operation
 
-        var allStates = _clientStates.Values.Select(state => state with { TimestampUtc = DateTime.UtcNow }).ToList();
+        var allStates = this
+            ._clientStates.Values.Select(state => state with { TimestampUtc = DateTime.UtcNow })
+            .ToList();
 
         return Result<List<ClientState>>.Success(allStates);
     }
 
     public async Task<Result<List<ClientState>>> GetClientsByZoneAsync(int zoneId)
     {
-        LogGettingClientsByZone(zoneId);
+        this.LogGettingClientsByZone(zoneId);
 
         await Task.Delay(1); // Simulate async operation
 
-        var zoneClients = _clientStates
-            .Values.Where(state => state.ZoneId == zoneId)
+        var zoneClients = this
+            ._clientStates.Values.Where(state => state.ZoneId == zoneId)
             .Select(state => state with { TimestampUtc = DateTime.UtcNow })
             .ToList();
 
@@ -105,13 +107,13 @@ public partial class ClientManager : IClientManager
 
     public async Task<Result> AssignClientToZoneAsync(int clientId, int zoneId)
     {
-        LogAssigningClientToZone(clientId, zoneId);
+        this.LogAssigningClientToZone(clientId, zoneId);
 
         await Task.Delay(10); // Simulate async operation
 
-        if (!_clientStates.TryGetValue(clientId, out var clientState))
+        if (!this._clientStates.TryGetValue(clientId, out var clientState))
         {
-            LogClientNotFound(clientId);
+            this.LogClientNotFound(clientId);
             return Result.Failure($"Client {clientId} not found");
         }
 
@@ -122,7 +124,7 @@ public partial class ClientManager : IClientManager
             TimestampUtc = DateTime.UtcNow,
         };
 
-        _clientStates[clientId] = updatedState;
+        this._clientStates[clientId] = updatedState;
 
         return Result.Success();
     }
@@ -160,8 +162,8 @@ public partial class ClientManager : IClientManager
 
         foreach (var clientInfo in clients)
         {
-            var client = new ClientService(clientInfo.Id, clientInfo.Name, _logger);
-            _clients[clientInfo.Id] = client;
+            var client = new ClientService(clientInfo.Id, clientInfo.Name, this._logger);
+            this._clients[clientInfo.Id] = client;
 
             var clientState = new ClientState
             {
@@ -185,7 +187,7 @@ public partial class ClientManager : IClientManager
                 TimestampUtc = DateTime.UtcNow,
             };
 
-            _clientStates[clientInfo.Id] = clientState;
+            this._clientStates[clientInfo.Id] = clientState;
         }
     }
 }
@@ -206,28 +208,28 @@ public partial class ClientService : IClient
 
     public ClientService(int id, string name, ILogger logger)
     {
-        Id = id;
-        Name = name;
-        _logger = logger;
+        this.Id = id;
+        this.Name = name;
+        this._logger = logger;
     }
 
     public async Task<Result> SetVolumeAsync(int volume)
     {
-        LogClientAction(Id, Name, $"Set volume to {volume}");
+        this.LogClientAction(this.Id, this.Name, $"Set volume to {volume}");
         await Task.Delay(10); // Simulate async operation
         return Result.Success();
     }
 
     public async Task<Result> SetMuteAsync(bool mute)
     {
-        LogClientAction(Id, Name, mute ? "Mute" : "Unmute");
+        this.LogClientAction(this.Id, this.Name, mute ? "Mute" : "Unmute");
         await Task.Delay(10); // Simulate async operation
         return Result.Success();
     }
 
     public async Task<Result> SetLatencyAsync(int latencyMs)
     {
-        LogClientAction(Id, Name, $"Set latency to {latencyMs}ms");
+        this.LogClientAction(this.Id, this.Name, $"Set latency to {latencyMs}ms");
         await Task.Delay(10); // Simulate async operation
         return Result.Success();
     }

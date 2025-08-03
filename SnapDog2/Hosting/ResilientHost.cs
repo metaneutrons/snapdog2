@@ -15,29 +15,29 @@ public class ResilientHost : IHost
 
     public ResilientHost(IHost innerHost, ILogger<ResilientHost> logger, bool isDebugMode)
     {
-        _innerHost = innerHost;
-        _logger = logger;
-        _isDebugMode = isDebugMode;
+        this._innerHost = innerHost;
+        this._logger = logger;
+        this._isDebugMode = isDebugMode;
     }
 
-    public IServiceProvider Services => _innerHost.Services;
+    public IServiceProvider Services => this._innerHost.Services;
 
     public async Task StartAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            await _innerHost.StartAsync(cancellationToken);
+            await this._innerHost.StartAsync(cancellationToken);
         }
         catch (StartupValidationException ex)
         {
             // Handle our custom startup validation exceptions gracefully
-            if (_isDebugMode)
+            if (this._isDebugMode)
             {
-                _logger.LogCritical(ex, "🚨 STARTUP VALIDATION FAILED: {ValidationStep}", ex.ValidationStep);
+                this._logger.LogCritical(ex, "🚨 STARTUP VALIDATION FAILED: {ValidationStep}", ex.ValidationStep);
             }
             else
             {
-                _logger.LogCritical(
+                this._logger.LogCritical(
                     "🚨 STARTUP VALIDATION FAILED: {ValidationStep} - {ErrorMessage}",
                     ex.ValidationStep,
                     GetCleanErrorMessage(ex)
@@ -51,13 +51,17 @@ public class ResilientHost : IHost
         catch (Exception ex) when (IsExpectedStartupException(ex))
         {
             // Handle expected startup exceptions
-            if (_isDebugMode)
+            if (this._isDebugMode)
             {
-                _logger.LogCritical(ex, "🚨 STARTUP FAILED: Expected startup error occurred");
+                this._logger.LogCritical(ex, "🚨 STARTUP FAILED: Expected startup error occurred");
             }
             else
             {
-                _logger.LogCritical("🚨 STARTUP FAILED: {ErrorType} - {ErrorMessage}", ex.GetType().Name, ex.Message);
+                this._logger.LogCritical(
+                    "🚨 STARTUP FAILED: {ErrorType} - {ErrorMessage}",
+                    ex.GetType().Name,
+                    ex.Message
+                );
             }
 
             Environment.ExitCode = 1;
@@ -66,13 +70,13 @@ public class ResilientHost : IHost
         catch (Exception ex)
         {
             // Handle unexpected startup exceptions
-            if (_isDebugMode)
+            if (this._isDebugMode)
             {
-                _logger.LogCritical(ex, "🚨 UNEXPECTED STARTUP FAILURE: Unhandled exception during host startup");
+                this._logger.LogCritical(ex, "🚨 UNEXPECTED STARTUP FAILURE: Unhandled exception during host startup");
             }
             else
             {
-                _logger.LogCritical(
+                this._logger.LogCritical(
                     "🚨 UNEXPECTED STARTUP FAILURE: {ErrorType} - {ErrorMessage}",
                     ex.GetType().Name,
                     ex.Message
@@ -88,17 +92,17 @@ public class ResilientHost : IHost
     {
         try
         {
-            await _innerHost.StopAsync(cancellationToken);
+            await this._innerHost.StopAsync(cancellationToken);
         }
         catch (Exception ex)
         {
-            if (_isDebugMode)
+            if (this._isDebugMode)
             {
-                _logger.LogError(ex, "Error during host shutdown");
+                this._logger.LogError(ex, "Error during host shutdown");
             }
             else
             {
-                _logger.LogError(
+                this._logger.LogError(
                     "Error during host shutdown: {ErrorType} - {ErrorMessage}",
                     ex.GetType().Name,
                     ex.Message
@@ -110,7 +114,7 @@ public class ResilientHost : IHost
 
     public void Dispose()
     {
-        _innerHost?.Dispose();
+        this._innerHost?.Dispose();
     }
 
     private static bool IsExpectedStartupException(Exception ex)
@@ -123,6 +127,7 @@ public class ResilientHost : IHost
             {
                 return true;
             }
+
             currentEx = currentEx.InnerException;
         }
 

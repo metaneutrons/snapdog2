@@ -21,13 +21,13 @@ public partial class SystemStatusService : ISystemStatusService
     /// <param name="logger">The logger instance.</param>
     public SystemStatusService(ILogger<SystemStatusService> logger)
     {
-        _logger = logger;
+        this._logger = logger;
     }
 
     /// <inheritdoc/>
     public Task<SystemStatus> GetCurrentStatusAsync()
     {
-        LogGettingSystemStatus();
+        this.LogGettingSystemStatus();
 
         var status = new SystemStatus
         {
@@ -41,7 +41,7 @@ public partial class SystemStatusService : ISystemStatusService
     /// <inheritdoc/>
     public Task<VersionDetails> GetVersionInfoAsync()
     {
-        LogGettingVersionInfo();
+        this.LogGettingVersionInfo();
 
         var assembly = Assembly.GetExecutingAssembly();
         var version = assembly.GetName().Version?.ToString() ?? "Unknown";
@@ -62,7 +62,7 @@ public partial class SystemStatusService : ISystemStatusService
     /// <inheritdoc/>
     public Task<ServerStats> GetServerStatsAsync()
     {
-        LogGettingServerStats();
+        this.LogGettingServerStats();
 
         // TODO: Implement real performance metrics
         var process = Process.GetCurrentProcess();

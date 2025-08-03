@@ -25,7 +25,7 @@ RootCommand rootCommand = new("SnapDog2 - The Snapcast-based Smart Home Audio Sy
 };
 
 // Parse and handle commands
-ParseResult parseResult = rootCommand.Parse(args);
+var parseResult = rootCommand.Parse(args);
 
 // Check if a command line was provided
 var result = parseResult.Invoke();
@@ -91,7 +91,7 @@ var loggerConfig = new LoggerConfiguration()
 if (!string.IsNullOrWhiteSpace(snapDogConfig.System.LogFile))
 {
     loggerConfig.WriteTo.File(
-        path: snapDogConfig.System.LogFile,
+        snapDogConfig.System.LogFile,
         rollingInterval: RollingInterval.Day,
         outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}",
         retainedFileCountLimit: 31,
@@ -137,7 +137,7 @@ try
     });
 
     // Also register individual sections for backward compatibility
-    builder.Services.Configure<SnapDog2.Core.Configuration.ServicesConfig>(options =>
+    builder.Services.Configure<ServicesConfig>(options =>
     {
         options.Snapcast = snapDogConfig.Services.Snapcast;
         options.Mqtt = snapDogConfig.Services.Mqtt;
@@ -206,7 +206,7 @@ try
         healthChecksBuilder.AddCheck(
             "self",
             () => HealthCheckResult.Healthy("Application is running"),
-            tags: ["ready", "live"]
+            ["ready", "live"]
         );
 
         // Add external service health checks based on configuration
@@ -215,7 +215,7 @@ try
             {
                 options.AddHost(snapDogConfig.Services.Snapcast.Address, snapDogConfig.Services.Snapcast.JsonRpcPort);
             },
-            name: "snapcast",
+            "snapcast",
             tags: ["ready"]
         );
 
@@ -226,7 +226,7 @@ try
                 {
                     options.AddHost(snapDogConfig.Services.Mqtt.BrokerAddress, snapDogConfig.Services.Mqtt.Port);
                 },
-                name: "mqtt",
+                "mqtt",
                 tags: ["ready"]
             );
         }
@@ -263,6 +263,7 @@ catch (Exception ex)
     {
         Log.Fatal("Application terminated unexpectedly: {ErrorType} - {ErrorMessage}", ex.GetType().Name, ex.Message);
     }
+
     Environment.ExitCode = 3;
 }
 finally

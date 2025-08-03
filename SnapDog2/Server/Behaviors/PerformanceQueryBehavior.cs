@@ -23,7 +23,7 @@ public partial class PerformanceQueryBehavior<TQuery, TResponse> : IQueryPipelin
     /// <param name="logger">The logger instance.</param>
     public PerformanceQueryBehavior(ILogger<PerformanceQueryBehavior<TQuery, TResponse>> logger)
     {
-        _logger = logger;
+        this._logger = logger;
     }
 
     /// <inheritdoc/>
@@ -43,7 +43,7 @@ public partial class PerformanceQueryBehavior<TQuery, TResponse> : IQueryPipelin
 
             if (stopwatch.ElapsedMilliseconds > SlowOperationThresholdMs)
             {
-                LogSlowQuery(queryName, stopwatch.ElapsedMilliseconds);
+                this.LogSlowQuery(queryName, stopwatch.ElapsedMilliseconds);
             }
 
             return response;
@@ -51,7 +51,7 @@ public partial class PerformanceQueryBehavior<TQuery, TResponse> : IQueryPipelin
         catch (Exception ex)
         {
             stopwatch.Stop();
-            LogQueryException(queryName, stopwatch.ElapsedMilliseconds, ex);
+            this.LogQueryException(queryName, stopwatch.ElapsedMilliseconds, ex);
             throw;
         }
     }

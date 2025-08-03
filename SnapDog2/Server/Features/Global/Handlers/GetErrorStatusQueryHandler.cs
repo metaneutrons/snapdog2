@@ -23,8 +23,8 @@ public class GetErrorStatusQueryHandler : IQueryHandler<GetErrorStatusQuery, Res
     /// <param name="metricsService">The metrics service instance.</param>
     public GetErrorStatusQueryHandler(ILogger<GetErrorStatusQueryHandler> logger, IMetricsService metricsService)
     {
-        _logger = logger;
-        _metricsService = metricsService;
+        this._logger = logger;
+        this._metricsService = metricsService;
     }
 
     /// <summary>
@@ -37,22 +37,22 @@ public class GetErrorStatusQueryHandler : IQueryHandler<GetErrorStatusQuery, Res
     {
         try
         {
-            _logger.LogDebug("Getting latest system error status");
+            this._logger.LogDebug("Getting latest system error status");
 
             // TODO: Implement error status tracking service
             // For now, return null indicating no recent errors
             // In a full implementation, this would query an error tracking service
             // that maintains the latest system error information
 
-            var errorDetails = await GetLatestErrorAsync(cancellationToken);
+            var errorDetails = await this.GetLatestErrorAsync(cancellationToken);
 
-            _logger.LogDebug("Successfully retrieved error status: {HasError}", errorDetails != null);
+            this._logger.LogDebug("Successfully retrieved error status: {HasError}", errorDetails != null);
 
             return Result<ErrorDetails?>.Success(errorDetails);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to get error status");
+            this._logger.LogError(ex, "Failed to get error status");
             return Result<ErrorDetails?>.Failure("Failed to retrieve error status");
         }
     }

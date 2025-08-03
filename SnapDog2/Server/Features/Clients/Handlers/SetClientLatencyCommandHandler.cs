@@ -25,19 +25,19 @@ public partial class SetClientLatencyCommandHandler : ICommandHandler<SetClientL
 
     public SetClientLatencyCommandHandler(IClientManager clientManager, ILogger<SetClientLatencyCommandHandler> logger)
     {
-        _clientManager = clientManager;
-        _logger = logger;
+        this._clientManager = clientManager;
+        this._logger = logger;
     }
 
     public async Task<Result> Handle(SetClientLatencyCommand request, CancellationToken cancellationToken)
     {
-        LogHandling(request.ClientId, request.LatencyMs, request.Source);
+        this.LogHandling(request.ClientId, request.LatencyMs, request.Source);
 
         // Get the client
-        var clientResult = await _clientManager.GetClientAsync(request.ClientId).ConfigureAwait(false);
+        var clientResult = await this._clientManager.GetClientAsync(request.ClientId).ConfigureAwait(false);
         if (clientResult.IsFailure)
         {
-            LogClientNotFound(request.ClientId);
+            this.LogClientNotFound(request.ClientId);
             return clientResult;
         }
 

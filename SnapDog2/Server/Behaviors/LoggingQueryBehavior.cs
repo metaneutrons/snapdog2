@@ -24,7 +24,7 @@ public partial class LoggingQueryBehavior<TQuery, TResponse> : IQueryPipelineBeh
     /// <param name="logger">The logger instance.</param>
     public LoggingQueryBehavior(ILogger<LoggingQueryBehavior<TQuery, TResponse>> logger)
     {
-        _logger = logger;
+        this._logger = logger;
     }
 
     /// <inheritdoc/>
@@ -37,7 +37,7 @@ public partial class LoggingQueryBehavior<TQuery, TResponse> : IQueryPipelineBeh
         var queryName = typeof(TQuery).Name;
         using var activity = ActivitySource.StartActivity($"CortexMediator.Query.{queryName}");
 
-        LogQueryStarting(queryName);
+        this.LogQueryStarting(queryName);
         var stopwatch = Stopwatch.StartNew();
 
         try
@@ -45,13 +45,13 @@ public partial class LoggingQueryBehavior<TQuery, TResponse> : IQueryPipelineBeh
             var response = await next().ConfigureAwait(false);
             stopwatch.Stop();
 
-            LogQueryCompleted(queryName, stopwatch.ElapsedMilliseconds);
+            this.LogQueryCompleted(queryName, stopwatch.ElapsedMilliseconds);
             return response;
         }
         catch (Exception ex)
         {
             stopwatch.Stop();
-            LogQueryFailed(queryName, stopwatch.ElapsedMilliseconds, ex);
+            this.LogQueryFailed(queryName, stopwatch.ElapsedMilliseconds, ex);
             throw;
         }
     }

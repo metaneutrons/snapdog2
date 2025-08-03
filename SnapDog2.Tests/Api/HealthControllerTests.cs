@@ -12,15 +12,15 @@ public class HealthControllerTests : IClassFixture<WebApplicationFactory<Program
 
     public HealthControllerTests(WebApplicationFactory<Program> factory)
     {
-        _factory = factory;
-        _client = _factory.CreateClient();
+        this._factory = factory;
+        this._client = this._factory.CreateClient();
     }
 
     [Fact]
     public async Task GetHealth_ShouldReturnHealthStatus()
     {
         // Act
-        var response = await _client.GetAsync("/api/health");
+        var response = await this._client.GetAsync("/api/health");
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.ServiceUnavailable);
@@ -53,7 +53,7 @@ public class HealthControllerTests : IClassFixture<WebApplicationFactory<Program
     public async Task GetReady_ShouldReturnReadyStatus()
     {
         // Act
-        var response = await _client.GetAsync("/api/health/ready");
+        var response = await this._client.GetAsync("/api/health/ready");
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.ServiceUnavailable);
@@ -74,7 +74,7 @@ public class HealthControllerTests : IClassFixture<WebApplicationFactory<Program
     public async Task GetLive_ShouldReturnLiveStatus()
     {
         // Act
-        var response = await _client.GetAsync("/api/health/live");
+        var response = await this._client.GetAsync("/api/health/live");
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.ServiceUnavailable);

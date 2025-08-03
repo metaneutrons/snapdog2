@@ -23,7 +23,7 @@ public partial class PerformanceCommandBehavior<TCommand, TResponse> : ICommandP
     /// <param name="logger">The logger instance.</param>
     public PerformanceCommandBehavior(ILogger<PerformanceCommandBehavior<TCommand, TResponse>> logger)
     {
-        _logger = logger;
+        this._logger = logger;
     }
 
     /// <inheritdoc/>
@@ -43,7 +43,7 @@ public partial class PerformanceCommandBehavior<TCommand, TResponse> : ICommandP
 
             if (stopwatch.ElapsedMilliseconds > SlowOperationThresholdMs)
             {
-                LogSlowCommand(commandName, stopwatch.ElapsedMilliseconds);
+                this.LogSlowCommand(commandName, stopwatch.ElapsedMilliseconds);
             }
 
             return response;
@@ -51,7 +51,7 @@ public partial class PerformanceCommandBehavior<TCommand, TResponse> : ICommandP
         catch (Exception ex)
         {
             stopwatch.Stop();
-            LogCommandException(commandName, stopwatch.ElapsedMilliseconds, ex);
+            this.LogCommandException(commandName, stopwatch.ElapsedMilliseconds, ex);
             throw;
         }
     }

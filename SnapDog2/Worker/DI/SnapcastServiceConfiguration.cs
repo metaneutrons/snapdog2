@@ -27,10 +27,10 @@ public static class SnapcastServiceConfiguration
         services.AddSingleton<SnapcastClient.IClient>(serviceProvider =>
         {
             var config = serviceProvider.GetRequiredService<IOptions<ServicesConfig>>().Value.Snapcast;
-            var logger = serviceProvider.GetService<ILogger<SnapcastClient.Client>>();
+            var logger = serviceProvider.GetService<ILogger<Client>>();
 
             // Create the options
-            var options = new SnapcastClient.SnapcastClientOptions
+            var options = new SnapcastClientOptions
             {
                 EnableAutoReconnect = config.AutoReconnect,
                 MaxRetryAttempts = 5,
@@ -40,16 +40,11 @@ public static class SnapcastServiceConfiguration
             };
 
             // Create the connection
-            var connectionLogger = serviceProvider.GetService<ILogger<SnapcastClient.ResilientTcpConnection>>();
-            var connection = new SnapcastClient.ResilientTcpConnection(
-                config.Address,
-                config.JsonRpcPort,
-                options,
-                connectionLogger
-            );
+            var connectionLogger = serviceProvider.GetService<ILogger<ResilientTcpConnection>>();
+            var connection = new ResilientTcpConnection(config.Address, config.JsonRpcPort, options, connectionLogger);
 
             // Create and return the client
-            return new SnapcastClient.Client(connection, logger);
+            return new Client(connection, logger);
         });
 
         // Register our Snapcast service as singleton

@@ -12,14 +12,16 @@ public class StackTraceSuppressionEnricher : ILogEventEnricher
 
     public StackTraceSuppressionEnricher(bool isDebugMode)
     {
-        _isDebugMode = isDebugMode;
+        this._isDebugMode = isDebugMode;
     }
 
     public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
     {
         // Only suppress stack traces in non-debug mode
-        if (_isDebugMode || logEvent.Exception == null)
+        if (this._isDebugMode || logEvent.Exception == null)
+        {
             return;
+        }
 
         // Check if this is an expected exception type
         if (IsExpectedException(logEvent.Exception))

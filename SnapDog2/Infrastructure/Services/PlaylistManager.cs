@@ -34,52 +34,52 @@ public partial class PlaylistManager : IPlaylistManager
 
     public PlaylistManager(ILogger<PlaylistManager> logger)
     {
-        _logger = logger;
-        _playlists = new Dictionary<string, PlaylistInfo>();
-        _playlistTracks = new Dictionary<string, List<TrackInfo>>();
+        this._logger = logger;
+        this._playlists = new Dictionary<string, PlaylistInfo>();
+        this._playlistTracks = new Dictionary<string, List<TrackInfo>>();
 
         // Initialize with placeholder playlists
-        InitializePlaceholderPlaylists();
+        this.InitializePlaceholderPlaylists();
     }
 
     public async Task<Result<List<PlaylistInfo>>> GetAllPlaylistsAsync()
     {
-        LogGettingAllPlaylists();
+        this.LogGettingAllPlaylists();
 
         await Task.Delay(1); // Simulate async operation
 
-        var allPlaylists = _playlists.Values.ToList();
+        var allPlaylists = this._playlists.Values.ToList();
         return Result<List<PlaylistInfo>>.Success(allPlaylists);
     }
 
     public async Task<Result<List<TrackInfo>>> GetPlaylistTracksByIdAsync(string playlistId)
     {
-        LogGettingTracksByPlaylistId(playlistId);
+        this.LogGettingTracksByPlaylistId(playlistId);
 
         await Task.Delay(1); // Simulate async operation
 
-        if (_playlistTracks.TryGetValue(playlistId, out var tracks))
+        if (this._playlistTracks.TryGetValue(playlistId, out var tracks))
         {
             return Result<List<TrackInfo>>.Success(tracks);
         }
 
-        LogPlaylistNotFound(playlistId);
+        this.LogPlaylistNotFound(playlistId);
         return Result<List<TrackInfo>>.Failure($"Playlist {playlistId} not found");
     }
 
     public async Task<Result<List<TrackInfo>>> GetPlaylistTracksByIndexAsync(int playlistIndex)
     {
-        LogGettingTracksByPlaylistIndex(playlistIndex);
+        this.LogGettingTracksByPlaylistIndex(playlistIndex);
 
         await Task.Delay(1); // Simulate async operation
 
-        var playlist = _playlists.Values.FirstOrDefault(p => p.Index == playlistIndex);
-        if (playlist != null && _playlistTracks.TryGetValue(playlist.Id, out var tracks))
+        var playlist = this._playlists.Values.FirstOrDefault(p => p.Index == playlistIndex);
+        if (playlist != null && this._playlistTracks.TryGetValue(playlist.Id, out var tracks))
         {
             return Result<List<TrackInfo>>.Success(tracks);
         }
 
-        LogPlaylistIndexNotFound(playlistIndex);
+        this.LogPlaylistIndexNotFound(playlistIndex);
         return Result<List<TrackInfo>>.Failure($"Playlist at index {playlistIndex} not found");
     }
 
@@ -87,12 +87,12 @@ public partial class PlaylistManager : IPlaylistManager
     {
         await Task.Delay(1); // Simulate async operation
 
-        if (_playlists.TryGetValue(playlistId, out var playlist))
+        if (this._playlists.TryGetValue(playlistId, out var playlist))
         {
             return Result<PlaylistInfo>.Success(playlist);
         }
 
-        LogPlaylistNotFound(playlistId);
+        this.LogPlaylistNotFound(playlistId);
         return Result<PlaylistInfo>.Failure($"Playlist {playlistId} not found");
     }
 
@@ -100,13 +100,13 @@ public partial class PlaylistManager : IPlaylistManager
     {
         await Task.Delay(1); // Simulate async operation
 
-        var playlist = _playlists.Values.FirstOrDefault(p => p.Index == playlistIndex);
+        var playlist = this._playlists.Values.FirstOrDefault(p => p.Index == playlistIndex);
         if (playlist != null)
         {
             return Result<PlaylistInfo>.Success(playlist);
         }
 
-        LogPlaylistIndexNotFound(playlistIndex);
+        this.LogPlaylistIndexNotFound(playlistIndex);
         return Result<PlaylistInfo>.Failure($"Playlist at index {playlistIndex} not found");
     }
 
@@ -155,14 +155,14 @@ public partial class PlaylistManager : IPlaylistManager
                 Source = "placeholder",
                 Index = playlistInfo.Index,
                 Name = playlistInfo.Name,
-                TrackCount = 10 + (playlistInfo.Index * 5), // Varying track counts
+                TrackCount = 10 + playlistInfo.Index * 5, // Varying track counts
             };
 
-            _playlists[playlistInfo.Id] = playlist;
+            this._playlists[playlistInfo.Id] = playlist;
 
             // Create sample tracks for each playlist
             var tracks = new List<TrackInfo>();
-            for (int i = 1; i <= playlist.TrackCount; i++)
+            for (var i = 1; i <= playlist.TrackCount; i++)
             {
                 var track = new TrackInfo
                 {
@@ -172,7 +172,7 @@ public partial class PlaylistManager : IPlaylistManager
                     Title = $"{playlistInfo.Name} Track {i}",
                     Artist = $"Artist {i}",
                     Album = $"{playlistInfo.Name} Album",
-                    DurationSec = 180 + (i % 4) * 60, // 3-6 minute tracks in seconds
+                    DurationSec = 180 + i % 4 * 60, // 3-6 minute tracks in seconds
                     PositionSec = 0,
                     CoverArtUrl = null,
                     TimestampUtc = DateTime.UtcNow,
@@ -181,7 +181,7 @@ public partial class PlaylistManager : IPlaylistManager
                 tracks.Add(track);
             }
 
-            _playlistTracks[playlistInfo.Id] = tracks;
+            this._playlistTracks[playlistInfo.Id] = tracks;
         }
     }
 }

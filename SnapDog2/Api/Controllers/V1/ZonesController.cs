@@ -29,8 +29,8 @@ public class ZonesController : ControllerBase
     /// </summary>
     public ZonesController(IServiceProvider serviceProvider, ILogger<ZonesController> logger)
     {
-        _serviceProvider = serviceProvider;
-        _logger = logger;
+        this._serviceProvider = serviceProvider;
+        this._logger = logger;
     }
 
     /// <summary>
@@ -53,19 +53,18 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            _logger.LogDebug(
+            this._logger.LogDebug(
                 "Getting zones list - Page: {Page}, PageSize: {PageSize}, SortBy: {SortBy}",
                 page,
                 pageSize,
                 sortBy
             );
 
-            var handler =
-                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetAllZonesQueryHandler>();
+            var handler = this._serviceProvider.GetService<Server.Features.Zones.Handlers.GetAllZonesQueryHandler>();
             if (handler == null)
             {
-                _logger.LogError("GetAllZonesQueryHandler not found in DI container");
-                return StatusCode(
+                this._logger.LogError("GetAllZonesQueryHandler not found in DI container");
+                return this.StatusCode(
                     500,
                     ApiResponse<PaginatedResponse<ZoneInfo>>.CreateError(
                         "HANDLER_NOT_FOUND",
@@ -98,11 +97,11 @@ public class ZonesController : ControllerBase
                     },
                 };
 
-                return Ok(ApiResponse<PaginatedResponse<ZoneInfo>>.CreateSuccess(paginatedResponse));
+                return this.Ok(ApiResponse<PaginatedResponse<ZoneInfo>>.CreateSuccess(paginatedResponse));
             }
 
-            _logger.LogWarning("Failed to get zones: {Error}", result.ErrorMessage);
-            return StatusCode(
+            this._logger.LogWarning("Failed to get zones: {Error}", result.ErrorMessage);
+            return this.StatusCode(
                 500,
                 ApiResponse<PaginatedResponse<ZoneInfo>>.CreateError(
                     "ZONES_ERROR",
@@ -112,8 +111,8 @@ public class ZonesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting zones");
-            return StatusCode(
+            this._logger.LogError(ex, "Error getting zones");
+            return this.StatusCode(
                 500,
                 ApiResponse<PaginatedResponse<ZoneInfo>>.CreateError("INTERNAL_ERROR", "Internal server error")
             );
@@ -137,14 +136,13 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Getting zone {ZoneId}", zoneId);
+            this._logger.LogDebug("Getting zone {ZoneId}", zoneId);
 
-            var handler =
-                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetZoneStateQueryHandler>();
+            var handler = this._serviceProvider.GetService<Server.Features.Zones.Handlers.GetZoneStateQueryHandler>();
             if (handler == null)
             {
-                _logger.LogError("GetZoneStateQueryHandler not found in DI container");
-                return StatusCode(
+                this._logger.LogError("GetZoneStateQueryHandler not found in DI container");
+                return this.StatusCode(
                     500,
                     ApiResponse<ZoneState>.CreateError("HANDLER_NOT_FOUND", "Zone state handler not available")
                 );
@@ -154,16 +152,16 @@ public class ZonesController : ControllerBase
 
             if (result.IsSuccess && result.Value != null)
             {
-                return Ok(ApiResponse<ZoneState>.CreateSuccess(result.Value));
+                return this.Ok(ApiResponse<ZoneState>.CreateSuccess(result.Value));
             }
 
-            _logger.LogWarning("Zone {ZoneId} not found", zoneId);
-            return NotFound(ApiResponse<ZoneState>.CreateError("ZONE_NOT_FOUND", $"Zone {zoneId} not found"));
+            this._logger.LogWarning("Zone {ZoneId} not found", zoneId);
+            return this.NotFound(ApiResponse<ZoneState>.CreateError("ZONE_NOT_FOUND", $"Zone {zoneId} not found"));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting zone {ZoneId}", zoneId);
-            return StatusCode(500, ApiResponse<ZoneState>.CreateError("INTERNAL_ERROR", "Internal server error"));
+            this._logger.LogError(ex, "Error getting zone {ZoneId}", zoneId);
+            return this.StatusCode(500, ApiResponse<ZoneState>.CreateError("INTERNAL_ERROR", "Internal server error"));
         }
     }
 
@@ -182,7 +180,7 @@ public class ZonesController : ControllerBase
         CancellationToken cancellationToken
     )
     {
-        return await GetZone(zoneId, cancellationToken);
+        return await this.GetZone(zoneId, cancellationToken);
     }
 
     /// <summary>
@@ -204,13 +202,13 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Playing zone {ZoneId}", zoneId);
+            this._logger.LogDebug("Playing zone {ZoneId}", zoneId);
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.PlayCommandHandler>();
+            var handler = this._serviceProvider.GetService<Server.Features.Zones.Handlers.PlayCommandHandler>();
             if (handler == null)
             {
-                _logger.LogError("PlayCommandHandler not found in DI container");
-                return StatusCode(500, ApiResponse.CreateError("HANDLER_NOT_FOUND", "Play handler not available"));
+                this._logger.LogError("PlayCommandHandler not found in DI container");
+                return this.StatusCode(500, ApiResponse.CreateError("HANDLER_NOT_FOUND", "Play handler not available"));
             }
 
             var command = new PlayCommand
@@ -225,16 +223,16 @@ public class ZonesController : ControllerBase
 
             if (result.IsSuccess)
             {
-                return Accepted(ApiResponse.CreateSuccess());
+                return this.Accepted(ApiResponse.CreateSuccess());
             }
 
-            _logger.LogWarning("Failed to play zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
-            return BadRequest(ApiResponse.CreateError("PLAY_ERROR", result.ErrorMessage ?? "Failed to play zone"));
+            this._logger.LogWarning("Failed to play zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            return this.BadRequest(ApiResponse.CreateError("PLAY_ERROR", result.ErrorMessage ?? "Failed to play zone"));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error playing zone {ZoneId}", zoneId);
-            return StatusCode(500, ApiResponse.CreateError("INTERNAL_ERROR", "Internal server error"));
+            this._logger.LogError(ex, "Error playing zone {ZoneId}", zoneId);
+            return this.StatusCode(500, ApiResponse.CreateError("INTERNAL_ERROR", "Internal server error"));
         }
     }
 
@@ -255,13 +253,16 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Pausing zone {ZoneId}", zoneId);
+            this._logger.LogDebug("Pausing zone {ZoneId}", zoneId);
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.PauseCommandHandler>();
+            var handler = this._serviceProvider.GetService<Server.Features.Zones.Handlers.PauseCommandHandler>();
             if (handler == null)
             {
-                _logger.LogError("PauseCommandHandler not found in DI container");
-                return StatusCode(500, ApiResponse.CreateError("HANDLER_NOT_FOUND", "Pause handler not available"));
+                this._logger.LogError("PauseCommandHandler not found in DI container");
+                return this.StatusCode(
+                    500,
+                    ApiResponse.CreateError("HANDLER_NOT_FOUND", "Pause handler not available")
+                );
             }
 
             var command = new PauseCommand { ZoneId = zoneId, Source = Core.Enums.CommandSource.Api };
@@ -270,16 +271,18 @@ public class ZonesController : ControllerBase
 
             if (result.IsSuccess)
             {
-                return Accepted(ApiResponse.CreateSuccess());
+                return this.Accepted(ApiResponse.CreateSuccess());
             }
 
-            _logger.LogWarning("Failed to pause zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
-            return BadRequest(ApiResponse.CreateError("PAUSE_ERROR", result.ErrorMessage ?? "Failed to pause zone"));
+            this._logger.LogWarning("Failed to pause zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            return this.BadRequest(
+                ApiResponse.CreateError("PAUSE_ERROR", result.ErrorMessage ?? "Failed to pause zone")
+            );
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error pausing zone {ZoneId}", zoneId);
-            return StatusCode(500, ApiResponse.CreateError("INTERNAL_ERROR", "Internal server error"));
+            this._logger.LogError(ex, "Error pausing zone {ZoneId}", zoneId);
+            return this.StatusCode(500, ApiResponse.CreateError("INTERNAL_ERROR", "Internal server error"));
         }
     }
 
@@ -300,13 +303,13 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Stopping zone {ZoneId}", zoneId);
+            this._logger.LogDebug("Stopping zone {ZoneId}", zoneId);
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.StopCommandHandler>();
+            var handler = this._serviceProvider.GetService<Server.Features.Zones.Handlers.StopCommandHandler>();
             if (handler == null)
             {
-                _logger.LogError("StopCommandHandler not found in DI container");
-                return StatusCode(500, ApiResponse.CreateError("HANDLER_NOT_FOUND", "Stop handler not available"));
+                this._logger.LogError("StopCommandHandler not found in DI container");
+                return this.StatusCode(500, ApiResponse.CreateError("HANDLER_NOT_FOUND", "Stop handler not available"));
             }
 
             var command = new StopCommand { ZoneId = zoneId, Source = Core.Enums.CommandSource.Api };
@@ -315,16 +318,16 @@ public class ZonesController : ControllerBase
 
             if (result.IsSuccess)
             {
-                return Accepted(ApiResponse.CreateSuccess());
+                return this.Accepted(ApiResponse.CreateSuccess());
             }
 
-            _logger.LogWarning("Failed to stop zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
-            return BadRequest(ApiResponse.CreateError("STOP_ERROR", result.ErrorMessage ?? "Failed to stop zone"));
+            this._logger.LogWarning("Failed to stop zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            return this.BadRequest(ApiResponse.CreateError("STOP_ERROR", result.ErrorMessage ?? "Failed to stop zone"));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error stopping zone {ZoneId}", zoneId);
-            return StatusCode(500, ApiResponse.CreateError("INTERNAL_ERROR", "Internal server error"));
+            this._logger.LogError(ex, "Error stopping zone {ZoneId}", zoneId);
+            return this.StatusCode(500, ApiResponse.CreateError("INTERNAL_ERROR", "Internal server error"));
         }
     }
 
@@ -345,14 +348,13 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Next track for zone {ZoneId}", zoneId);
+            this._logger.LogDebug("Next track for zone {ZoneId}", zoneId);
 
-            var handler =
-                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.NextTrackCommandHandler>();
+            var handler = this._serviceProvider.GetService<Server.Features.Zones.Handlers.NextTrackCommandHandler>();
             if (handler == null)
             {
-                _logger.LogError("NextTrackCommandHandler not found in DI container");
-                return StatusCode(
+                this._logger.LogError("NextTrackCommandHandler not found in DI container");
+                return this.StatusCode(
                     500,
                     ApiResponse.CreateError("HANDLER_NOT_FOUND", "Next track handler not available")
                 );
@@ -364,18 +366,22 @@ public class ZonesController : ControllerBase
 
             if (result.IsSuccess)
             {
-                return Accepted(ApiResponse.CreateSuccess());
+                return this.Accepted(ApiResponse.CreateSuccess());
             }
 
-            _logger.LogWarning("Failed to go to next track for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
-            return BadRequest(
+            this._logger.LogWarning(
+                "Failed to go to next track for zone {ZoneId}: {Error}",
+                zoneId,
+                result.ErrorMessage
+            );
+            return this.BadRequest(
                 ApiResponse.CreateError("NEXT_TRACK_ERROR", result.ErrorMessage ?? "Failed to go to next track")
             );
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error going to next track for zone {ZoneId}", zoneId);
-            return StatusCode(500, ApiResponse.CreateError("INTERNAL_ERROR", "Internal server error"));
+            this._logger.LogError(ex, "Error going to next track for zone {ZoneId}", zoneId);
+            return this.StatusCode(500, ApiResponse.CreateError("INTERNAL_ERROR", "Internal server error"));
         }
     }
 
@@ -396,14 +402,14 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Previous track for zone {ZoneId}", zoneId);
+            this._logger.LogDebug("Previous track for zone {ZoneId}", zoneId);
 
             var handler =
-                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.PreviousTrackCommandHandler>();
+                this._serviceProvider.GetService<Server.Features.Zones.Handlers.PreviousTrackCommandHandler>();
             if (handler == null)
             {
-                _logger.LogError("PreviousTrackCommandHandler not found in DI container");
-                return StatusCode(
+                this._logger.LogError("PreviousTrackCommandHandler not found in DI container");
+                return this.StatusCode(
                     500,
                     ApiResponse.CreateError("HANDLER_NOT_FOUND", "Previous track handler not available")
                 );
@@ -415,22 +421,22 @@ public class ZonesController : ControllerBase
 
             if (result.IsSuccess)
             {
-                return Accepted(ApiResponse.CreateSuccess());
+                return this.Accepted(ApiResponse.CreateSuccess());
             }
 
-            _logger.LogWarning(
+            this._logger.LogWarning(
                 "Failed to go to previous track for zone {ZoneId}: {Error}",
                 zoneId,
                 result.ErrorMessage
             );
-            return BadRequest(
+            return this.BadRequest(
                 ApiResponse.CreateError("PREVIOUS_TRACK_ERROR", result.ErrorMessage ?? "Failed to go to previous track")
             );
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error going to previous track for zone {ZoneId}", zoneId);
-            return StatusCode(500, ApiResponse.CreateError("INTERNAL_ERROR", "Internal server error"));
+            this._logger.LogError(ex, "Error going to previous track for zone {ZoneId}", zoneId);
+            return this.StatusCode(500, ApiResponse.CreateError("INTERNAL_ERROR", "Internal server error"));
         }
     }
 
@@ -454,13 +460,16 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Setting track {TrackIndex} for zone {ZoneId}", request.Index, zoneId);
+            this._logger.LogDebug("Setting track {TrackIndex} for zone {ZoneId}", request.Index, zoneId);
 
-            var handler = _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.SetTrackCommandHandler>();
+            var handler = this._serviceProvider.GetService<Server.Features.Zones.Handlers.SetTrackCommandHandler>();
             if (handler == null)
             {
-                _logger.LogError("SetTrackCommandHandler not found in DI container");
-                return StatusCode(500, ApiResponse.CreateError("HANDLER_NOT_FOUND", "Set track handler not available"));
+                this._logger.LogError("SetTrackCommandHandler not found in DI container");
+                return this.StatusCode(
+                    500,
+                    ApiResponse.CreateError("HANDLER_NOT_FOUND", "Set track handler not available")
+                );
             }
 
             var command = new SetTrackCommand
@@ -474,16 +483,18 @@ public class ZonesController : ControllerBase
 
             if (result.IsSuccess)
             {
-                return Accepted(ApiResponse.CreateSuccess());
+                return this.Accepted(ApiResponse.CreateSuccess());
             }
 
-            _logger.LogWarning("Failed to set track for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
-            return BadRequest(ApiResponse.CreateError("SET_TRACK_ERROR", result.ErrorMessage ?? "Failed to set track"));
+            this._logger.LogWarning("Failed to set track for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            return this.BadRequest(
+                ApiResponse.CreateError("SET_TRACK_ERROR", result.ErrorMessage ?? "Failed to set track")
+            );
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error setting track for zone {ZoneId}", zoneId);
-            return StatusCode(500, ApiResponse.CreateError("INTERNAL_ERROR", "Internal server error"));
+            this._logger.LogError(ex, "Error setting track for zone {ZoneId}", zoneId);
+            return this.StatusCode(500, ApiResponse.CreateError("INTERNAL_ERROR", "Internal server error"));
         }
     }
 
@@ -507,19 +518,18 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            _logger.LogDebug(
+            this._logger.LogDebug(
                 "Setting playlist for zone {ZoneId} - ID: {PlaylistId}, Index: {PlaylistIndex}",
                 zoneId,
                 request.Id,
                 request.Index
             );
 
-            var handler =
-                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.SetPlaylistCommandHandler>();
+            var handler = this._serviceProvider.GetService<Server.Features.Zones.Handlers.SetPlaylistCommandHandler>();
             if (handler == null)
             {
-                _logger.LogError("SetPlaylistCommandHandler not found in DI container");
-                return StatusCode(
+                this._logger.LogError("SetPlaylistCommandHandler not found in DI container");
+                return this.StatusCode(
                     500,
                     ApiResponse.CreateError("HANDLER_NOT_FOUND", "Set playlist handler not available")
                 );
@@ -537,18 +547,18 @@ public class ZonesController : ControllerBase
 
             if (result.IsSuccess)
             {
-                return Accepted(ApiResponse.CreateSuccess());
+                return this.Accepted(ApiResponse.CreateSuccess());
             }
 
-            _logger.LogWarning("Failed to set playlist for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
-            return BadRequest(
+            this._logger.LogWarning("Failed to set playlist for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            return this.BadRequest(
                 ApiResponse.CreateError("SET_PLAYLIST_ERROR", result.ErrorMessage ?? "Failed to set playlist")
             );
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error setting playlist for zone {ZoneId}", zoneId);
-            return StatusCode(500, ApiResponse.CreateError("INTERNAL_ERROR", "Internal server error"));
+            this._logger.LogError(ex, "Error setting playlist for zone {ZoneId}", zoneId);
+            return this.StatusCode(500, ApiResponse.CreateError("INTERNAL_ERROR", "Internal server error"));
         }
     }
 
@@ -574,14 +584,14 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Setting volume {Volume} for zone {ZoneId}", request.Level, zoneId);
+            this._logger.LogDebug("Setting volume {Volume} for zone {ZoneId}", request.Level, zoneId);
 
             var handler =
-                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.SetZoneVolumeCommandHandler>();
+                this._serviceProvider.GetService<Server.Features.Zones.Handlers.SetZoneVolumeCommandHandler>();
             if (handler == null)
             {
-                _logger.LogError("SetZoneVolumeCommandHandler not found in DI container");
-                return StatusCode(
+                this._logger.LogError("SetZoneVolumeCommandHandler not found in DI container");
+                return this.StatusCode(
                     500,
                     ApiResponse<VolumeResponse>.CreateError("HANDLER_NOT_FOUND", "Volume handler not available")
                 );
@@ -598,18 +608,21 @@ public class ZonesController : ControllerBase
 
             if (result.IsSuccess)
             {
-                return Ok(ApiResponse<VolumeResponse>.CreateSuccess(new VolumeResponse(request.Level)));
+                return this.Ok(ApiResponse<VolumeResponse>.CreateSuccess(new VolumeResponse(request.Level)));
             }
 
-            _logger.LogWarning("Failed to set volume for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
-            return BadRequest(
+            this._logger.LogWarning("Failed to set volume for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            return this.BadRequest(
                 ApiResponse<VolumeResponse>.CreateError("VOLUME_ERROR", result.ErrorMessage ?? "Failed to set volume")
             );
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error setting volume for zone {ZoneId}", zoneId);
-            return StatusCode(500, ApiResponse<VolumeResponse>.CreateError("INTERNAL_ERROR", "Internal server error"));
+            this._logger.LogError(ex, "Error setting volume for zone {ZoneId}", zoneId);
+            return this.StatusCode(
+                500,
+                ApiResponse<VolumeResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
+            );
         }
     }
 
@@ -630,14 +643,13 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Getting volume for zone {ZoneId}", zoneId);
+            this._logger.LogDebug("Getting volume for zone {ZoneId}", zoneId);
 
-            var handler =
-                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetZoneVolumeQueryHandler>();
+            var handler = this._serviceProvider.GetService<Server.Features.Zones.Handlers.GetZoneVolumeQueryHandler>();
             if (handler == null)
             {
-                _logger.LogError("GetZoneVolumeQueryHandler not found in DI container");
-                return StatusCode(
+                this._logger.LogError("GetZoneVolumeQueryHandler not found in DI container");
+                return this.StatusCode(
                     500,
                     ApiResponse<VolumeResponse>.CreateError("HANDLER_NOT_FOUND", "Volume query handler not available")
                 );
@@ -647,18 +659,21 @@ public class ZonesController : ControllerBase
 
             if (result.IsSuccess)
             {
-                return Ok(ApiResponse<VolumeResponse>.CreateSuccess(new VolumeResponse(result.Value)));
+                return this.Ok(ApiResponse<VolumeResponse>.CreateSuccess(new VolumeResponse(result.Value)));
             }
 
-            _logger.LogWarning("Failed to get volume for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
-            return NotFound(
+            this._logger.LogWarning("Failed to get volume for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            return this.NotFound(
                 ApiResponse<VolumeResponse>.CreateError("ZONE_NOT_FOUND", result.ErrorMessage ?? "Zone not found")
             );
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting volume for zone {ZoneId}", zoneId);
-            return StatusCode(500, ApiResponse<VolumeResponse>.CreateError("INTERNAL_ERROR", "Internal server error"));
+            this._logger.LogError(ex, "Error getting volume for zone {ZoneId}", zoneId);
+            return this.StatusCode(
+                500,
+                ApiResponse<VolumeResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
+            );
         }
     }
 
@@ -682,14 +697,14 @@ public class ZonesController : ControllerBase
         try
         {
             var step = request?.Step ?? 5;
-            _logger.LogDebug("Increasing volume by {Step} for zone {ZoneId}", step, zoneId);
+            this._logger.LogDebug("Increasing volume by {Step} for zone {ZoneId}", step, zoneId);
 
             // First get current volume
             var volumeHandler =
-                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetZoneVolumeQueryHandler>();
+                this._serviceProvider.GetService<Server.Features.Zones.Handlers.GetZoneVolumeQueryHandler>();
             if (volumeHandler == null)
             {
-                return StatusCode(
+                return this.StatusCode(
                     500,
                     ApiResponse<VolumeResponse>.CreateError("HANDLER_NOT_FOUND", "Volume query handler not available")
                 );
@@ -701,17 +716,17 @@ public class ZonesController : ControllerBase
             );
             if (currentVolumeResult.IsFailure)
             {
-                return NotFound(ApiResponse<VolumeResponse>.CreateError("ZONE_NOT_FOUND", "Zone not found"));
+                return this.NotFound(ApiResponse<VolumeResponse>.CreateError("ZONE_NOT_FOUND", "Zone not found"));
             }
 
             var newVolume = Math.Min(100, currentVolumeResult.Value + step);
 
             // Set new volume
             var setHandler =
-                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.SetZoneVolumeCommandHandler>();
+                this._serviceProvider.GetService<Server.Features.Zones.Handlers.SetZoneVolumeCommandHandler>();
             if (setHandler == null)
             {
-                return StatusCode(
+                return this.StatusCode(
                     500,
                     ApiResponse<VolumeResponse>.CreateError("HANDLER_NOT_FOUND", "Volume handler not available")
                 );
@@ -728,10 +743,10 @@ public class ZonesController : ControllerBase
 
             if (result.IsSuccess)
             {
-                return Ok(ApiResponse<VolumeResponse>.CreateSuccess(new VolumeResponse(newVolume)));
+                return this.Ok(ApiResponse<VolumeResponse>.CreateSuccess(new VolumeResponse(newVolume)));
             }
 
-            return BadRequest(
+            return this.BadRequest(
                 ApiResponse<VolumeResponse>.CreateError(
                     "VOLUME_ERROR",
                     result.ErrorMessage ?? "Failed to increase volume"
@@ -740,8 +755,11 @@ public class ZonesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error increasing volume for zone {ZoneId}", zoneId);
-            return StatusCode(500, ApiResponse<VolumeResponse>.CreateError("INTERNAL_ERROR", "Internal server error"));
+            this._logger.LogError(ex, "Error increasing volume for zone {ZoneId}", zoneId);
+            return this.StatusCode(
+                500,
+                ApiResponse<VolumeResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
+            );
         }
     }
 
@@ -765,14 +783,14 @@ public class ZonesController : ControllerBase
         try
         {
             var step = request?.Step ?? 5;
-            _logger.LogDebug("Decreasing volume by {Step} for zone {ZoneId}", step, zoneId);
+            this._logger.LogDebug("Decreasing volume by {Step} for zone {ZoneId}", step, zoneId);
 
             // First get current volume
             var volumeHandler =
-                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetZoneVolumeQueryHandler>();
+                this._serviceProvider.GetService<Server.Features.Zones.Handlers.GetZoneVolumeQueryHandler>();
             if (volumeHandler == null)
             {
-                return StatusCode(
+                return this.StatusCode(
                     500,
                     ApiResponse<VolumeResponse>.CreateError("HANDLER_NOT_FOUND", "Volume query handler not available")
                 );
@@ -784,17 +802,17 @@ public class ZonesController : ControllerBase
             );
             if (currentVolumeResult.IsFailure)
             {
-                return NotFound(ApiResponse<VolumeResponse>.CreateError("ZONE_NOT_FOUND", "Zone not found"));
+                return this.NotFound(ApiResponse<VolumeResponse>.CreateError("ZONE_NOT_FOUND", "Zone not found"));
             }
 
             var newVolume = Math.Max(0, currentVolumeResult.Value - step);
 
             // Set new volume
             var setHandler =
-                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.SetZoneVolumeCommandHandler>();
+                this._serviceProvider.GetService<Server.Features.Zones.Handlers.SetZoneVolumeCommandHandler>();
             if (setHandler == null)
             {
-                return StatusCode(
+                return this.StatusCode(
                     500,
                     ApiResponse<VolumeResponse>.CreateError("HANDLER_NOT_FOUND", "Volume handler not available")
                 );
@@ -811,10 +829,10 @@ public class ZonesController : ControllerBase
 
             if (result.IsSuccess)
             {
-                return Ok(ApiResponse<VolumeResponse>.CreateSuccess(new VolumeResponse(newVolume)));
+                return this.Ok(ApiResponse<VolumeResponse>.CreateSuccess(new VolumeResponse(newVolume)));
             }
 
-            return BadRequest(
+            return this.BadRequest(
                 ApiResponse<VolumeResponse>.CreateError(
                     "VOLUME_ERROR",
                     result.ErrorMessage ?? "Failed to decrease volume"
@@ -823,8 +841,11 @@ public class ZonesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error decreasing volume for zone {ZoneId}", zoneId);
-            return StatusCode(500, ApiResponse<VolumeResponse>.CreateError("INTERNAL_ERROR", "Internal server error"));
+            this._logger.LogError(ex, "Error decreasing volume for zone {ZoneId}", zoneId);
+            return this.StatusCode(
+                500,
+                ApiResponse<VolumeResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
+            );
         }
     }
 
@@ -850,14 +871,13 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Setting mute {Enabled} for zone {ZoneId}", request.Enabled, zoneId);
+            this._logger.LogDebug("Setting mute {Enabled} for zone {ZoneId}", request.Enabled, zoneId);
 
-            var handler =
-                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.SetZoneMuteCommandHandler>();
+            var handler = this._serviceProvider.GetService<Server.Features.Zones.Handlers.SetZoneMuteCommandHandler>();
             if (handler == null)
             {
-                _logger.LogError("SetZoneMuteCommandHandler not found in DI container");
-                return StatusCode(
+                this._logger.LogError("SetZoneMuteCommandHandler not found in DI container");
+                return this.StatusCode(
                     500,
                     ApiResponse<MuteResponse>.CreateError("HANDLER_NOT_FOUND", "Mute handler not available")
                 );
@@ -874,18 +894,21 @@ public class ZonesController : ControllerBase
 
             if (result.IsSuccess)
             {
-                return Ok(ApiResponse<MuteResponse>.CreateSuccess(new MuteResponse(request.Enabled)));
+                return this.Ok(ApiResponse<MuteResponse>.CreateSuccess(new MuteResponse(request.Enabled)));
             }
 
-            _logger.LogWarning("Failed to set mute for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
-            return BadRequest(
+            this._logger.LogWarning("Failed to set mute for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            return this.BadRequest(
                 ApiResponse<MuteResponse>.CreateError("MUTE_ERROR", result.ErrorMessage ?? "Failed to set mute")
             );
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error setting mute for zone {ZoneId}", zoneId);
-            return StatusCode(500, ApiResponse<MuteResponse>.CreateError("INTERNAL_ERROR", "Internal server error"));
+            this._logger.LogError(ex, "Error setting mute for zone {ZoneId}", zoneId);
+            return this.StatusCode(
+                500,
+                ApiResponse<MuteResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
+            );
         }
     }
 
@@ -906,14 +929,13 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Getting mute state for zone {ZoneId}", zoneId);
+            this._logger.LogDebug("Getting mute state for zone {ZoneId}", zoneId);
 
-            var handler =
-                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetZoneStateQueryHandler>();
+            var handler = this._serviceProvider.GetService<Server.Features.Zones.Handlers.GetZoneStateQueryHandler>();
             if (handler == null)
             {
-                _logger.LogError("GetZoneStateQueryHandler not found in DI container");
-                return StatusCode(
+                this._logger.LogError("GetZoneStateQueryHandler not found in DI container");
+                return this.StatusCode(
                     500,
                     ApiResponse<MuteResponse>.CreateError("HANDLER_NOT_FOUND", "Zone state handler not available")
                 );
@@ -923,18 +945,21 @@ public class ZonesController : ControllerBase
 
             if (result.IsSuccess && result.Value != null)
             {
-                return Ok(ApiResponse<MuteResponse>.CreateSuccess(new MuteResponse(result.Value.Mute)));
+                return this.Ok(ApiResponse<MuteResponse>.CreateSuccess(new MuteResponse(result.Value.Mute)));
             }
 
-            _logger.LogWarning("Failed to get mute state for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
-            return NotFound(
+            this._logger.LogWarning("Failed to get mute state for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            return this.NotFound(
                 ApiResponse<MuteResponse>.CreateError("ZONE_NOT_FOUND", result.ErrorMessage ?? "Zone not found")
             );
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting mute state for zone {ZoneId}", zoneId);
-            return StatusCode(500, ApiResponse<MuteResponse>.CreateError("INTERNAL_ERROR", "Internal server error"));
+            this._logger.LogError(ex, "Error getting mute state for zone {ZoneId}", zoneId);
+            return this.StatusCode(
+                500,
+                ApiResponse<MuteResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
+            );
         }
     }
 
@@ -955,14 +980,14 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Toggling mute for zone {ZoneId}", zoneId);
+            this._logger.LogDebug("Toggling mute for zone {ZoneId}", zoneId);
 
             var handler =
-                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.ToggleZoneMuteCommandHandler>();
+                this._serviceProvider.GetService<Server.Features.Zones.Handlers.ToggleZoneMuteCommandHandler>();
             if (handler == null)
             {
-                _logger.LogError("ToggleZoneMuteCommandHandler not found in DI container");
-                return StatusCode(
+                this._logger.LogError("ToggleZoneMuteCommandHandler not found in DI container");
+                return this.StatusCode(
                     500,
                     ApiResponse<MuteResponse>.CreateError("HANDLER_NOT_FOUND", "Toggle mute handler not available")
                 );
@@ -976,7 +1001,7 @@ public class ZonesController : ControllerBase
             {
                 // Get the new mute state
                 var stateHandler =
-                    _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetZoneStateQueryHandler>();
+                    this._serviceProvider.GetService<Server.Features.Zones.Handlers.GetZoneStateQueryHandler>();
                 if (stateHandler != null)
                 {
                     var stateResult = await stateHandler.Handle(
@@ -985,16 +1010,18 @@ public class ZonesController : ControllerBase
                     );
                     if (stateResult.IsSuccess && stateResult.Value != null)
                     {
-                        return Ok(ApiResponse<MuteResponse>.CreateSuccess(new MuteResponse(stateResult.Value.Mute)));
+                        return this.Ok(
+                            ApiResponse<MuteResponse>.CreateSuccess(new MuteResponse(stateResult.Value.Mute))
+                        );
                     }
                 }
 
                 // Fallback - assume toggle worked
-                return Ok(ApiResponse<MuteResponse>.CreateSuccess(new MuteResponse(true)));
+                return this.Ok(ApiResponse<MuteResponse>.CreateSuccess(new MuteResponse(true)));
             }
 
-            _logger.LogWarning("Failed to toggle mute for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
-            return BadRequest(
+            this._logger.LogWarning("Failed to toggle mute for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            return this.BadRequest(
                 ApiResponse<MuteResponse>.CreateError(
                     "TOGGLE_MUTE_ERROR",
                     result.ErrorMessage ?? "Failed to toggle mute"
@@ -1003,8 +1030,11 @@ public class ZonesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error toggling mute for zone {ZoneId}", zoneId);
-            return StatusCode(500, ApiResponse<MuteResponse>.CreateError("INTERNAL_ERROR", "Internal server error"));
+            this._logger.LogError(ex, "Error toggling mute for zone {ZoneId}", zoneId);
+            return this.StatusCode(
+                500,
+                ApiResponse<MuteResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
+            );
         }
     }
 
@@ -1030,14 +1060,14 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Setting track repeat {Enabled} for zone {ZoneId}", request.Enabled, zoneId);
+            this._logger.LogDebug("Setting track repeat {Enabled} for zone {ZoneId}", request.Enabled, zoneId);
 
             var handler =
-                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.SetTrackRepeatCommandHandler>();
+                this._serviceProvider.GetService<Server.Features.Zones.Handlers.SetTrackRepeatCommandHandler>();
             if (handler == null)
             {
-                _logger.LogError("SetTrackRepeatCommandHandler not found in DI container");
-                return StatusCode(
+                this._logger.LogError("SetTrackRepeatCommandHandler not found in DI container");
+                return this.StatusCode(
                     500,
                     ApiResponse<TrackRepeatResponse>.CreateError(
                         "HANDLER_NOT_FOUND",
@@ -1057,11 +1087,17 @@ public class ZonesController : ControllerBase
 
             if (result.IsSuccess)
             {
-                return Ok(ApiResponse<TrackRepeatResponse>.CreateSuccess(new TrackRepeatResponse(request.Enabled)));
+                return this.Ok(
+                    ApiResponse<TrackRepeatResponse>.CreateSuccess(new TrackRepeatResponse(request.Enabled))
+                );
             }
 
-            _logger.LogWarning("Failed to set track repeat for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
-            return BadRequest(
+            this._logger.LogWarning(
+                "Failed to set track repeat for zone {ZoneId}: {Error}",
+                zoneId,
+                result.ErrorMessage
+            );
+            return this.BadRequest(
                 ApiResponse<TrackRepeatResponse>.CreateError(
                     "TRACK_REPEAT_ERROR",
                     result.ErrorMessage ?? "Failed to set track repeat"
@@ -1070,8 +1106,8 @@ public class ZonesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error setting track repeat for zone {ZoneId}", zoneId);
-            return StatusCode(
+            this._logger.LogError(ex, "Error setting track repeat for zone {ZoneId}", zoneId);
+            return this.StatusCode(
                 500,
                 ApiResponse<TrackRepeatResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
             );
@@ -1095,14 +1131,14 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Toggling track repeat for zone {ZoneId}", zoneId);
+            this._logger.LogDebug("Toggling track repeat for zone {ZoneId}", zoneId);
 
             var handler =
-                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.ToggleTrackRepeatCommandHandler>();
+                this._serviceProvider.GetService<Server.Features.Zones.Handlers.ToggleTrackRepeatCommandHandler>();
             if (handler == null)
             {
-                _logger.LogError("ToggleTrackRepeatCommandHandler not found in DI container");
-                return StatusCode(
+                this._logger.LogError("ToggleTrackRepeatCommandHandler not found in DI container");
+                return this.StatusCode(
                     500,
                     ApiResponse<TrackRepeatResponse>.CreateError(
                         "HANDLER_NOT_FOUND",
@@ -1119,7 +1155,7 @@ public class ZonesController : ControllerBase
             {
                 // Get the new state
                 var stateHandler =
-                    _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetZoneStateQueryHandler>();
+                    this._serviceProvider.GetService<Server.Features.Zones.Handlers.GetZoneStateQueryHandler>();
                 if (stateHandler != null)
                 {
                     var stateResult = await stateHandler.Handle(
@@ -1128,7 +1164,7 @@ public class ZonesController : ControllerBase
                     );
                     if (stateResult.IsSuccess && stateResult.Value != null)
                     {
-                        return Ok(
+                        return this.Ok(
                             ApiResponse<TrackRepeatResponse>.CreateSuccess(
                                 new TrackRepeatResponse(stateResult.Value.TrackRepeat)
                             )
@@ -1136,11 +1172,15 @@ public class ZonesController : ControllerBase
                     }
                 }
 
-                return Ok(ApiResponse<TrackRepeatResponse>.CreateSuccess(new TrackRepeatResponse(true)));
+                return this.Ok(ApiResponse<TrackRepeatResponse>.CreateSuccess(new TrackRepeatResponse(true)));
             }
 
-            _logger.LogWarning("Failed to toggle track repeat for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
-            return BadRequest(
+            this._logger.LogWarning(
+                "Failed to toggle track repeat for zone {ZoneId}: {Error}",
+                zoneId,
+                result.ErrorMessage
+            );
+            return this.BadRequest(
                 ApiResponse<TrackRepeatResponse>.CreateError(
                     "TOGGLE_TRACK_REPEAT_ERROR",
                     result.ErrorMessage ?? "Failed to toggle track repeat"
@@ -1149,8 +1189,8 @@ public class ZonesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error toggling track repeat for zone {ZoneId}", zoneId);
-            return StatusCode(
+            this._logger.LogError(ex, "Error toggling track repeat for zone {ZoneId}", zoneId);
+            return this.StatusCode(
                 500,
                 ApiResponse<TrackRepeatResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
             );
@@ -1179,14 +1219,14 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Setting playlist repeat {Enabled} for zone {ZoneId}", request.Enabled, zoneId);
+            this._logger.LogDebug("Setting playlist repeat {Enabled} for zone {ZoneId}", request.Enabled, zoneId);
 
             var handler =
-                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.SetPlaylistRepeatCommandHandler>();
+                this._serviceProvider.GetService<Server.Features.Zones.Handlers.SetPlaylistRepeatCommandHandler>();
             if (handler == null)
             {
-                _logger.LogError("SetPlaylistRepeatCommandHandler not found in DI container");
-                return StatusCode(
+                this._logger.LogError("SetPlaylistRepeatCommandHandler not found in DI container");
+                return this.StatusCode(
                     500,
                     ApiResponse<PlaylistRepeatResponse>.CreateError(
                         "HANDLER_NOT_FOUND",
@@ -1206,13 +1246,17 @@ public class ZonesController : ControllerBase
 
             if (result.IsSuccess)
             {
-                return Ok(
+                return this.Ok(
                     ApiResponse<PlaylistRepeatResponse>.CreateSuccess(new PlaylistRepeatResponse(request.Enabled))
                 );
             }
 
-            _logger.LogWarning("Failed to set playlist repeat for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
-            return BadRequest(
+            this._logger.LogWarning(
+                "Failed to set playlist repeat for zone {ZoneId}: {Error}",
+                zoneId,
+                result.ErrorMessage
+            );
+            return this.BadRequest(
                 ApiResponse<PlaylistRepeatResponse>.CreateError(
                     "PLAYLIST_REPEAT_ERROR",
                     result.ErrorMessage ?? "Failed to set playlist repeat"
@@ -1221,8 +1265,8 @@ public class ZonesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error setting playlist repeat for zone {ZoneId}", zoneId);
-            return StatusCode(
+            this._logger.LogError(ex, "Error setting playlist repeat for zone {ZoneId}", zoneId);
+            return this.StatusCode(
                 500,
                 ApiResponse<PlaylistRepeatResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
             );
@@ -1246,14 +1290,14 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Toggling playlist repeat for zone {ZoneId}", zoneId);
+            this._logger.LogDebug("Toggling playlist repeat for zone {ZoneId}", zoneId);
 
             var handler =
-                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.TogglePlaylistRepeatCommandHandler>();
+                this._serviceProvider.GetService<Server.Features.Zones.Handlers.TogglePlaylistRepeatCommandHandler>();
             if (handler == null)
             {
-                _logger.LogError("TogglePlaylistRepeatCommandHandler not found in DI container");
-                return StatusCode(
+                this._logger.LogError("TogglePlaylistRepeatCommandHandler not found in DI container");
+                return this.StatusCode(
                     500,
                     ApiResponse<PlaylistRepeatResponse>.CreateError(
                         "HANDLER_NOT_FOUND",
@@ -1270,7 +1314,7 @@ public class ZonesController : ControllerBase
             {
                 // Get the new state
                 var stateHandler =
-                    _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetZoneStateQueryHandler>();
+                    this._serviceProvider.GetService<Server.Features.Zones.Handlers.GetZoneStateQueryHandler>();
                 if (stateHandler != null)
                 {
                     var stateResult = await stateHandler.Handle(
@@ -1279,7 +1323,7 @@ public class ZonesController : ControllerBase
                     );
                     if (stateResult.IsSuccess && stateResult.Value != null)
                     {
-                        return Ok(
+                        return this.Ok(
                             ApiResponse<PlaylistRepeatResponse>.CreateSuccess(
                                 new PlaylistRepeatResponse(stateResult.Value.PlaylistRepeat)
                             )
@@ -1287,15 +1331,15 @@ public class ZonesController : ControllerBase
                     }
                 }
 
-                return Ok(ApiResponse<PlaylistRepeatResponse>.CreateSuccess(new PlaylistRepeatResponse(true)));
+                return this.Ok(ApiResponse<PlaylistRepeatResponse>.CreateSuccess(new PlaylistRepeatResponse(true)));
             }
 
-            _logger.LogWarning(
+            this._logger.LogWarning(
                 "Failed to toggle playlist repeat for zone {ZoneId}: {Error}",
                 zoneId,
                 result.ErrorMessage
             );
-            return BadRequest(
+            return this.BadRequest(
                 ApiResponse<PlaylistRepeatResponse>.CreateError(
                     "TOGGLE_PLAYLIST_REPEAT_ERROR",
                     result.ErrorMessage ?? "Failed to toggle playlist repeat"
@@ -1304,8 +1348,8 @@ public class ZonesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error toggling playlist repeat for zone {ZoneId}", zoneId);
-            return StatusCode(
+            this._logger.LogError(ex, "Error toggling playlist repeat for zone {ZoneId}", zoneId);
+            return this.StatusCode(
                 500,
                 ApiResponse<PlaylistRepeatResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
             );
@@ -1334,14 +1378,14 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Setting playlist shuffle {Enabled} for zone {ZoneId}", request.Enabled, zoneId);
+            this._logger.LogDebug("Setting playlist shuffle {Enabled} for zone {ZoneId}", request.Enabled, zoneId);
 
             var handler =
-                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.SetPlaylistShuffleCommandHandler>();
+                this._serviceProvider.GetService<Server.Features.Zones.Handlers.SetPlaylistShuffleCommandHandler>();
             if (handler == null)
             {
-                _logger.LogError("SetPlaylistShuffleCommandHandler not found in DI container");
-                return StatusCode(
+                this._logger.LogError("SetPlaylistShuffleCommandHandler not found in DI container");
+                return this.StatusCode(
                     500,
                     ApiResponse<PlaylistShuffleResponse>.CreateError(
                         "HANDLER_NOT_FOUND",
@@ -1361,17 +1405,17 @@ public class ZonesController : ControllerBase
 
             if (result.IsSuccess)
             {
-                return Ok(
+                return this.Ok(
                     ApiResponse<PlaylistShuffleResponse>.CreateSuccess(new PlaylistShuffleResponse(request.Enabled))
                 );
             }
 
-            _logger.LogWarning(
+            this._logger.LogWarning(
                 "Failed to set playlist shuffle for zone {ZoneId}: {Error}",
                 zoneId,
                 result.ErrorMessage
             );
-            return BadRequest(
+            return this.BadRequest(
                 ApiResponse<PlaylistShuffleResponse>.CreateError(
                     "PLAYLIST_SHUFFLE_ERROR",
                     result.ErrorMessage ?? "Failed to set playlist shuffle"
@@ -1380,8 +1424,8 @@ public class ZonesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error setting playlist shuffle for zone {ZoneId}", zoneId);
-            return StatusCode(
+            this._logger.LogError(ex, "Error setting playlist shuffle for zone {ZoneId}", zoneId);
+            return this.StatusCode(
                 500,
                 ApiResponse<PlaylistShuffleResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
             );
@@ -1405,14 +1449,14 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            _logger.LogDebug("Toggling playlist shuffle for zone {ZoneId}", zoneId);
+            this._logger.LogDebug("Toggling playlist shuffle for zone {ZoneId}", zoneId);
 
             var handler =
-                _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.TogglePlaylistShuffleCommandHandler>();
+                this._serviceProvider.GetService<Server.Features.Zones.Handlers.TogglePlaylistShuffleCommandHandler>();
             if (handler == null)
             {
-                _logger.LogError("TogglePlaylistShuffleCommandHandler not found in DI container");
-                return StatusCode(
+                this._logger.LogError("TogglePlaylistShuffleCommandHandler not found in DI container");
+                return this.StatusCode(
                     500,
                     ApiResponse<PlaylistShuffleResponse>.CreateError(
                         "HANDLER_NOT_FOUND",
@@ -1429,7 +1473,7 @@ public class ZonesController : ControllerBase
             {
                 // Get the new state
                 var stateHandler =
-                    _serviceProvider.GetService<SnapDog2.Server.Features.Zones.Handlers.GetZoneStateQueryHandler>();
+                    this._serviceProvider.GetService<Server.Features.Zones.Handlers.GetZoneStateQueryHandler>();
                 if (stateHandler != null)
                 {
                     var stateResult = await stateHandler.Handle(
@@ -1438,7 +1482,7 @@ public class ZonesController : ControllerBase
                     );
                     if (stateResult.IsSuccess && stateResult.Value != null)
                     {
-                        return Ok(
+                        return this.Ok(
                             ApiResponse<PlaylistShuffleResponse>.CreateSuccess(
                                 new PlaylistShuffleResponse(stateResult.Value.PlaylistShuffle)
                             )
@@ -1446,15 +1490,15 @@ public class ZonesController : ControllerBase
                     }
                 }
 
-                return Ok(ApiResponse<PlaylistShuffleResponse>.CreateSuccess(new PlaylistShuffleResponse(true)));
+                return this.Ok(ApiResponse<PlaylistShuffleResponse>.CreateSuccess(new PlaylistShuffleResponse(true)));
             }
 
-            _logger.LogWarning(
+            this._logger.LogWarning(
                 "Failed to toggle playlist shuffle for zone {ZoneId}: {Error}",
                 zoneId,
                 result.ErrorMessage
             );
-            return BadRequest(
+            return this.BadRequest(
                 ApiResponse<PlaylistShuffleResponse>.CreateError(
                     "TOGGLE_PLAYLIST_SHUFFLE_ERROR",
                     result.ErrorMessage ?? "Failed to toggle playlist shuffle"
@@ -1463,8 +1507,8 @@ public class ZonesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error toggling playlist shuffle for zone {ZoneId}", zoneId);
-            return StatusCode(
+            this._logger.LogError(ex, "Error toggling playlist shuffle for zone {ZoneId}", zoneId);
+            return this.StatusCode(
                 500,
                 ApiResponse<PlaylistShuffleResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
             );

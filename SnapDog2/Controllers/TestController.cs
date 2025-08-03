@@ -18,7 +18,7 @@ public class TestController : ControllerBase
     /// <param name="serviceProvider">The service provider.</param>
     public TestController(IServiceProvider serviceProvider)
     {
-        _serviceProvider = serviceProvider;
+        this._serviceProvider = serviceProvider;
     }
 
     /// <summary>
@@ -31,8 +31,8 @@ public class TestController : ControllerBase
         var services = new List<string>();
 
         // Try to find mediator-related services
-        var serviceDescriptors = _serviceProvider.GetService<IServiceCollection>();
+        var serviceDescriptors = this._serviceProvider.GetService<IServiceCollection>();
 
-        return Ok(new { message = "Service discovery endpoint", timestamp = DateTime.UtcNow });
+        return this.Ok(new { message = "Service discovery endpoint", timestamp = DateTime.UtcNow });
     }
 }

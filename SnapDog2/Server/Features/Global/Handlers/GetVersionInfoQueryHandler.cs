@@ -21,13 +21,13 @@ public partial class GetVersionInfoQueryHandler : IQueryHandler<GetVersionInfoQu
     /// <param name="logger">The logger instance.</param>
     public GetVersionInfoQueryHandler(ILogger<GetVersionInfoQueryHandler> logger)
     {
-        _logger = logger;
+        this._logger = logger;
     }
 
     /// <inheritdoc/>
     public async Task<Result<VersionDetails>> Handle(GetVersionInfoQuery request, CancellationToken cancellationToken)
     {
-        LogHandling();
+        this.LogHandling();
 
         try
         {
@@ -46,7 +46,7 @@ public partial class GetVersionInfoQueryHandler : IQueryHandler<GetVersionInfoQu
         }
         catch (Exception ex)
         {
-            LogError(ex);
+            this.LogError(ex);
             return Result<VersionDetails>.Failure(ex);
         }
     }

@@ -26,22 +26,22 @@ public partial class GetAllClientsQueryHandler : IQueryHandler<GetAllClientsQuer
 
     public GetAllClientsQueryHandler(IClientManager clientManager, ILogger<GetAllClientsQueryHandler> logger)
     {
-        _clientManager = clientManager;
-        _logger = logger;
+        this._clientManager = clientManager;
+        this._logger = logger;
     }
 
     public async Task<Result<List<ClientState>>> Handle(GetAllClientsQuery request, CancellationToken cancellationToken)
     {
-        LogHandling();
+        this.LogHandling();
 
         try
         {
-            var result = await _clientManager.GetAllClientsAsync().ConfigureAwait(false);
+            var result = await this._clientManager.GetAllClientsAsync().ConfigureAwait(false);
             return result;
         }
         catch (Exception ex)
         {
-            LogError(ex.Message);
+            this.LogError(ex.Message);
             return Result<List<ClientState>>.Failure(ex.Message ?? "An error occurred while retrieving all clients");
         }
     }

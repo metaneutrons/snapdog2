@@ -20,7 +20,7 @@ public partial class MetricsService : IMetricsService
     /// <param name="logger">The logger instance.</param>
     public MetricsService(ILogger<MetricsService> logger)
     {
-        _logger = logger;
+        this._logger = logger;
     }
 
     /// <inheritdoc/>
@@ -31,7 +31,7 @@ public partial class MetricsService : IMetricsService
         bool success
     )
     {
-        LogRecordingRequestDuration(requestType, requestName, durationMs, success);
+        this.LogRecordingRequestDuration(requestType, requestName, durationMs, success);
 
         // TODO: Implement actual metrics recording (e.g., to Prometheus, Application Insights, etc.)
         // For now, we just log the metrics
@@ -40,7 +40,7 @@ public partial class MetricsService : IMetricsService
     /// <inheritdoc/>
     public Task<ServerStats> GetServerStatsAsync()
     {
-        LogGettingServerStats();
+        this.LogGettingServerStats();
 
         // TODO: Implement real performance metrics collection
         var process = Process.GetCurrentProcess();

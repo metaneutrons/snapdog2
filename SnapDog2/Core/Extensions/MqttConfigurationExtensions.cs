@@ -137,6 +137,7 @@ public static class MqttConfigurationExtensions
                 // This would require additional lookup logic
             }
         }
+
         return null;
     }
 
@@ -160,6 +161,7 @@ public static class MqttConfigurationExtensions
                 }
             }
         }
+
         return null;
     }
 }

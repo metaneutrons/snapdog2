@@ -20,18 +20,22 @@ public class PlayCommandHandler : ICommandHandler<PlayCommand, Result>
 
     public PlayCommandHandler(IZoneManager zoneManager, ILogger<PlayCommandHandler> logger)
     {
-        _zoneManager = zoneManager;
-        _logger = logger;
+        this._zoneManager = zoneManager;
+        this._logger = logger;
     }
 
     public async Task<Result> Handle(PlayCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Starting playback for Zone {ZoneId} from {Source}", request.ZoneId, request.Source);
+        this._logger.LogInformation(
+            "Starting playback for Zone {ZoneId} from {Source}",
+            request.ZoneId,
+            request.Source
+        );
 
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            _logger.LogWarning("Zone {ZoneId} not found for PlayCommand", request.ZoneId);
+            this._logger.LogWarning("Zone {ZoneId} not found for PlayCommand", request.ZoneId);
             return zoneResult;
         }
 
@@ -62,18 +66,18 @@ public class PauseCommandHandler : ICommandHandler<PauseCommand, Result>
 
     public PauseCommandHandler(IZoneManager zoneManager, ILogger<PauseCommandHandler> logger)
     {
-        _zoneManager = zoneManager;
-        _logger = logger;
+        this._zoneManager = zoneManager;
+        this._logger = logger;
     }
 
     public async Task<Result> Handle(PauseCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Pausing playback for Zone {ZoneId} from {Source}", request.ZoneId, request.Source);
+        this._logger.LogInformation("Pausing playback for Zone {ZoneId} from {Source}", request.ZoneId, request.Source);
 
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            _logger.LogWarning("Zone {ZoneId} not found for PauseCommand", request.ZoneId);
+            this._logger.LogWarning("Zone {ZoneId} not found for PauseCommand", request.ZoneId);
             return zoneResult;
         }
 
@@ -92,18 +96,22 @@ public class StopCommandHandler : ICommandHandler<StopCommand, Result>
 
     public StopCommandHandler(IZoneManager zoneManager, ILogger<StopCommandHandler> logger)
     {
-        _zoneManager = zoneManager;
-        _logger = logger;
+        this._zoneManager = zoneManager;
+        this._logger = logger;
     }
 
     public async Task<Result> Handle(StopCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Stopping playback for Zone {ZoneId} from {Source}", request.ZoneId, request.Source);
+        this._logger.LogInformation(
+            "Stopping playback for Zone {ZoneId} from {Source}",
+            request.ZoneId,
+            request.Source
+        );
 
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            _logger.LogWarning("Zone {ZoneId} not found for StopCommand", request.ZoneId);
+            this._logger.LogWarning("Zone {ZoneId} not found for StopCommand", request.ZoneId);
             return zoneResult;
         }
 
@@ -122,23 +130,23 @@ public class SetZoneVolumeCommandHandler : ICommandHandler<SetZoneVolumeCommand,
 
     public SetZoneVolumeCommandHandler(IZoneManager zoneManager, ILogger<SetZoneVolumeCommandHandler> logger)
     {
-        _zoneManager = zoneManager;
-        _logger = logger;
+        this._zoneManager = zoneManager;
+        this._logger = logger;
     }
 
     public async Task<Result> Handle(SetZoneVolumeCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation(
+        this._logger.LogInformation(
             "Setting volume for Zone {ZoneId} to {Volume} from {Source}",
             request.ZoneId,
             request.Volume,
             request.Source
         );
 
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            _logger.LogWarning("Zone {ZoneId} not found for SetZoneVolumeCommand", request.ZoneId);
+            this._logger.LogWarning("Zone {ZoneId} not found for SetZoneVolumeCommand", request.ZoneId);
             return zoneResult;
         }
 
@@ -157,23 +165,23 @@ public class VolumeUpCommandHandler : ICommandHandler<VolumeUpCommand, Result>
 
     public VolumeUpCommandHandler(IZoneManager zoneManager, ILogger<VolumeUpCommandHandler> logger)
     {
-        _zoneManager = zoneManager;
-        _logger = logger;
+        this._zoneManager = zoneManager;
+        this._logger = logger;
     }
 
     public async Task<Result> Handle(VolumeUpCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation(
+        this._logger.LogInformation(
             "Increasing volume for Zone {ZoneId} by {Step} from {Source}",
             request.ZoneId,
             request.Step,
             request.Source
         );
 
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            _logger.LogWarning("Zone {ZoneId} not found for VolumeUpCommand", request.ZoneId);
+            this._logger.LogWarning("Zone {ZoneId} not found for VolumeUpCommand", request.ZoneId);
             return zoneResult;
         }
 
@@ -192,23 +200,23 @@ public class VolumeDownCommandHandler : ICommandHandler<VolumeDownCommand, Resul
 
     public VolumeDownCommandHandler(IZoneManager zoneManager, ILogger<VolumeDownCommandHandler> logger)
     {
-        _zoneManager = zoneManager;
-        _logger = logger;
+        this._zoneManager = zoneManager;
+        this._logger = logger;
     }
 
     public async Task<Result> Handle(VolumeDownCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation(
+        this._logger.LogInformation(
             "Decreasing volume for Zone {ZoneId} by {Step} from {Source}",
             request.ZoneId,
             request.Step,
             request.Source
         );
 
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            _logger.LogWarning("Zone {ZoneId} not found for VolumeDownCommand", request.ZoneId);
+            this._logger.LogWarning("Zone {ZoneId} not found for VolumeDownCommand", request.ZoneId);
             return zoneResult;
         }
 
@@ -227,23 +235,23 @@ public class SetZoneMuteCommandHandler : ICommandHandler<SetZoneMuteCommand, Res
 
     public SetZoneMuteCommandHandler(IZoneManager zoneManager, ILogger<SetZoneMuteCommandHandler> logger)
     {
-        _zoneManager = zoneManager;
-        _logger = logger;
+        this._zoneManager = zoneManager;
+        this._logger = logger;
     }
 
     public async Task<Result> Handle(SetZoneMuteCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation(
+        this._logger.LogInformation(
             "Setting mute for Zone {ZoneId} to {Enabled} from {Source}",
             request.ZoneId,
             request.Enabled,
             request.Source
         );
 
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            _logger.LogWarning("Zone {ZoneId} not found for SetZoneMuteCommand", request.ZoneId);
+            this._logger.LogWarning("Zone {ZoneId} not found for SetZoneMuteCommand", request.ZoneId);
             return zoneResult;
         }
 
@@ -262,18 +270,18 @@ public class ToggleZoneMuteCommandHandler : ICommandHandler<ToggleZoneMuteComman
 
     public ToggleZoneMuteCommandHandler(IZoneManager zoneManager, ILogger<ToggleZoneMuteCommandHandler> logger)
     {
-        _zoneManager = zoneManager;
-        _logger = logger;
+        this._zoneManager = zoneManager;
+        this._logger = logger;
     }
 
     public async Task<Result> Handle(ToggleZoneMuteCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Toggling mute for Zone {ZoneId} from {Source}", request.ZoneId, request.Source);
+        this._logger.LogInformation("Toggling mute for Zone {ZoneId} from {Source}", request.ZoneId, request.Source);
 
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            _logger.LogWarning("Zone {ZoneId} not found for ToggleZoneMuteCommand", request.ZoneId);
+            this._logger.LogWarning("Zone {ZoneId} not found for ToggleZoneMuteCommand", request.ZoneId);
             return zoneResult;
         }
 
@@ -292,23 +300,23 @@ public class SetTrackCommandHandler : ICommandHandler<SetTrackCommand, Result>
 
     public SetTrackCommandHandler(IZoneManager zoneManager, ILogger<SetTrackCommandHandler> logger)
     {
-        _zoneManager = zoneManager;
-        _logger = logger;
+        this._zoneManager = zoneManager;
+        this._logger = logger;
     }
 
     public async Task<Result> Handle(SetTrackCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation(
+        this._logger.LogInformation(
             "Setting track for Zone {ZoneId} to {TrackIndex} from {Source}",
             request.ZoneId,
             request.TrackIndex,
             request.Source
         );
 
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            _logger.LogWarning("Zone {ZoneId} not found for SetTrackCommand", request.ZoneId);
+            this._logger.LogWarning("Zone {ZoneId} not found for SetTrackCommand", request.ZoneId);
             return zoneResult;
         }
 
@@ -327,18 +335,22 @@ public class NextTrackCommandHandler : ICommandHandler<NextTrackCommand, Result>
 
     public NextTrackCommandHandler(IZoneManager zoneManager, ILogger<NextTrackCommandHandler> logger)
     {
-        _zoneManager = zoneManager;
-        _logger = logger;
+        this._zoneManager = zoneManager;
+        this._logger = logger;
     }
 
     public async Task<Result> Handle(NextTrackCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Playing next track for Zone {ZoneId} from {Source}", request.ZoneId, request.Source);
+        this._logger.LogInformation(
+            "Playing next track for Zone {ZoneId} from {Source}",
+            request.ZoneId,
+            request.Source
+        );
 
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            _logger.LogWarning("Zone {ZoneId} not found for NextTrackCommand", request.ZoneId);
+            this._logger.LogWarning("Zone {ZoneId} not found for NextTrackCommand", request.ZoneId);
             return zoneResult;
         }
 
@@ -357,22 +369,22 @@ public class PreviousTrackCommandHandler : ICommandHandler<PreviousTrackCommand,
 
     public PreviousTrackCommandHandler(IZoneManager zoneManager, ILogger<PreviousTrackCommandHandler> logger)
     {
-        _zoneManager = zoneManager;
-        _logger = logger;
+        this._zoneManager = zoneManager;
+        this._logger = logger;
     }
 
     public async Task<Result> Handle(PreviousTrackCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation(
+        this._logger.LogInformation(
             "Playing previous track for Zone {ZoneId} from {Source}",
             request.ZoneId,
             request.Source
         );
 
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            _logger.LogWarning("Zone {ZoneId} not found for PreviousTrackCommand", request.ZoneId);
+            this._logger.LogWarning("Zone {ZoneId} not found for PreviousTrackCommand", request.ZoneId);
             return zoneResult;
         }
 
@@ -391,18 +403,18 @@ public class SetPlaylistCommandHandler : ICommandHandler<SetPlaylistCommand, Res
 
     public SetPlaylistCommandHandler(IZoneManager zoneManager, ILogger<SetPlaylistCommandHandler> logger)
     {
-        _zoneManager = zoneManager;
-        _logger = logger;
+        this._zoneManager = zoneManager;
+        this._logger = logger;
     }
 
     public async Task<Result> Handle(SetPlaylistCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Setting playlist for Zone {ZoneId} from {Source}", request.ZoneId, request.Source);
+        this._logger.LogInformation("Setting playlist for Zone {ZoneId} from {Source}", request.ZoneId, request.Source);
 
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            _logger.LogWarning("Zone {ZoneId} not found for SetPlaylistCommand", request.ZoneId);
+            this._logger.LogWarning("Zone {ZoneId} not found for SetPlaylistCommand", request.ZoneId);
             return zoneResult;
         }
 
@@ -431,18 +443,22 @@ public class NextPlaylistCommandHandler : ICommandHandler<NextPlaylistCommand, R
 
     public NextPlaylistCommandHandler(IZoneManager zoneManager, ILogger<NextPlaylistCommandHandler> logger)
     {
-        _zoneManager = zoneManager;
-        _logger = logger;
+        this._zoneManager = zoneManager;
+        this._logger = logger;
     }
 
     public async Task<Result> Handle(NextPlaylistCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Playing next playlist for Zone {ZoneId} from {Source}", request.ZoneId, request.Source);
+        this._logger.LogInformation(
+            "Playing next playlist for Zone {ZoneId} from {Source}",
+            request.ZoneId,
+            request.Source
+        );
 
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            _logger.LogWarning("Zone {ZoneId} not found for NextPlaylistCommand", request.ZoneId);
+            this._logger.LogWarning("Zone {ZoneId} not found for NextPlaylistCommand", request.ZoneId);
             return zoneResult;
         }
 
@@ -461,22 +477,22 @@ public class PreviousPlaylistCommandHandler : ICommandHandler<PreviousPlaylistCo
 
     public PreviousPlaylistCommandHandler(IZoneManager zoneManager, ILogger<PreviousPlaylistCommandHandler> logger)
     {
-        _zoneManager = zoneManager;
-        _logger = logger;
+        this._zoneManager = zoneManager;
+        this._logger = logger;
     }
 
     public async Task<Result> Handle(PreviousPlaylistCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation(
+        this._logger.LogInformation(
             "Playing previous playlist for Zone {ZoneId} from {Source}",
             request.ZoneId,
             request.Source
         );
 
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            _logger.LogWarning("Zone {ZoneId} not found for PreviousPlaylistCommand", request.ZoneId);
+            this._logger.LogWarning("Zone {ZoneId} not found for PreviousPlaylistCommand", request.ZoneId);
             return zoneResult;
         }
 
@@ -495,23 +511,23 @@ public class SetTrackRepeatCommandHandler : ICommandHandler<SetTrackRepeatComman
 
     public SetTrackRepeatCommandHandler(IZoneManager zoneManager, ILogger<SetTrackRepeatCommandHandler> logger)
     {
-        _zoneManager = zoneManager;
-        _logger = logger;
+        this._zoneManager = zoneManager;
+        this._logger = logger;
     }
 
     public async Task<Result> Handle(SetTrackRepeatCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation(
+        this._logger.LogInformation(
             "Setting track repeat for Zone {ZoneId} to {Enabled} from {Source}",
             request.ZoneId,
             request.Enabled,
             request.Source
         );
 
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            _logger.LogWarning("Zone {ZoneId} not found for SetTrackRepeatCommand", request.ZoneId);
+            this._logger.LogWarning("Zone {ZoneId} not found for SetTrackRepeatCommand", request.ZoneId);
             return zoneResult;
         }
 
@@ -530,18 +546,22 @@ public class ToggleTrackRepeatCommandHandler : ICommandHandler<ToggleTrackRepeat
 
     public ToggleTrackRepeatCommandHandler(IZoneManager zoneManager, ILogger<ToggleTrackRepeatCommandHandler> logger)
     {
-        _zoneManager = zoneManager;
-        _logger = logger;
+        this._zoneManager = zoneManager;
+        this._logger = logger;
     }
 
     public async Task<Result> Handle(ToggleTrackRepeatCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Toggling track repeat for Zone {ZoneId} from {Source}", request.ZoneId, request.Source);
+        this._logger.LogInformation(
+            "Toggling track repeat for Zone {ZoneId} from {Source}",
+            request.ZoneId,
+            request.Source
+        );
 
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            _logger.LogWarning("Zone {ZoneId} not found for ToggleTrackRepeatCommand", request.ZoneId);
+            this._logger.LogWarning("Zone {ZoneId} not found for ToggleTrackRepeatCommand", request.ZoneId);
             return zoneResult;
         }
 
@@ -560,23 +580,23 @@ public class SetPlaylistShuffleCommandHandler : ICommandHandler<SetPlaylistShuff
 
     public SetPlaylistShuffleCommandHandler(IZoneManager zoneManager, ILogger<SetPlaylistShuffleCommandHandler> logger)
     {
-        _zoneManager = zoneManager;
-        _logger = logger;
+        this._zoneManager = zoneManager;
+        this._logger = logger;
     }
 
     public async Task<Result> Handle(SetPlaylistShuffleCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation(
+        this._logger.LogInformation(
             "Setting playlist shuffle for Zone {ZoneId} to {Enabled} from {Source}",
             request.ZoneId,
             request.Enabled,
             request.Source
         );
 
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            _logger.LogWarning("Zone {ZoneId} not found for SetPlaylistShuffleCommand", request.ZoneId);
+            this._logger.LogWarning("Zone {ZoneId} not found for SetPlaylistShuffleCommand", request.ZoneId);
             return zoneResult;
         }
 
@@ -598,22 +618,22 @@ public class TogglePlaylistShuffleCommandHandler : ICommandHandler<TogglePlaylis
         ILogger<TogglePlaylistShuffleCommandHandler> logger
     )
     {
-        _zoneManager = zoneManager;
-        _logger = logger;
+        this._zoneManager = zoneManager;
+        this._logger = logger;
     }
 
     public async Task<Result> Handle(TogglePlaylistShuffleCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation(
+        this._logger.LogInformation(
             "Toggling playlist shuffle for Zone {ZoneId} from {Source}",
             request.ZoneId,
             request.Source
         );
 
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            _logger.LogWarning("Zone {ZoneId} not found for TogglePlaylistShuffleCommand", request.ZoneId);
+            this._logger.LogWarning("Zone {ZoneId} not found for TogglePlaylistShuffleCommand", request.ZoneId);
             return zoneResult;
         }
 
@@ -632,23 +652,23 @@ public class SetPlaylistRepeatCommandHandler : ICommandHandler<SetPlaylistRepeat
 
     public SetPlaylistRepeatCommandHandler(IZoneManager zoneManager, ILogger<SetPlaylistRepeatCommandHandler> logger)
     {
-        _zoneManager = zoneManager;
-        _logger = logger;
+        this._zoneManager = zoneManager;
+        this._logger = logger;
     }
 
     public async Task<Result> Handle(SetPlaylistRepeatCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation(
+        this._logger.LogInformation(
             "Setting playlist repeat for Zone {ZoneId} to {Enabled} from {Source}",
             request.ZoneId,
             request.Enabled,
             request.Source
         );
 
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            _logger.LogWarning("Zone {ZoneId} not found for SetPlaylistRepeatCommand", request.ZoneId);
+            this._logger.LogWarning("Zone {ZoneId} not found for SetPlaylistRepeatCommand", request.ZoneId);
             return zoneResult;
         }
 
@@ -670,22 +690,22 @@ public class TogglePlaylistRepeatCommandHandler : ICommandHandler<TogglePlaylist
         ILogger<TogglePlaylistRepeatCommandHandler> logger
     )
     {
-        _zoneManager = zoneManager;
-        _logger = logger;
+        this._zoneManager = zoneManager;
+        this._logger = logger;
     }
 
     public async Task<Result> Handle(TogglePlaylistRepeatCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation(
+        this._logger.LogInformation(
             "Toggling playlist repeat for Zone {ZoneId} from {Source}",
             request.ZoneId,
             request.Source
         );
 
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            _logger.LogWarning("Zone {ZoneId} not found for TogglePlaylistRepeatCommand", request.ZoneId);
+            this._logger.LogWarning("Zone {ZoneId} not found for TogglePlaylistRepeatCommand", request.ZoneId);
             return zoneResult;
         }
 

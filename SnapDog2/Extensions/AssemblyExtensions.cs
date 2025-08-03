@@ -82,11 +82,15 @@ public static class AssemblyExtensions
         try
         {
             if (assembly.IsDynamic)
+            {
                 return "Dynamic";
+            }
 
             var location = assembly.Location;
             if (string.IsNullOrEmpty(location))
+            {
                 return "In Memory";
+            }
 
             return Path.GetFileName(location);
         }

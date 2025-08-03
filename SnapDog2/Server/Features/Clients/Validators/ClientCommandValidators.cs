@@ -10,11 +10,11 @@ public class SetClientVolumeCommandValidator : AbstractValidator<SetClientVolume
 {
     public SetClientVolumeCommandValidator()
     {
-        RuleFor(x => x.ClientId).GreaterThan(0).WithMessage("Client ID must be a positive integer.");
+        this.RuleFor(x => x.ClientId).GreaterThan(0).WithMessage("Client ID must be a positive integer.");
 
-        RuleFor(x => x.Volume).InclusiveBetween(0, 100).WithMessage("Volume must be between 0 and 100.");
+        this.RuleFor(x => x.Volume).InclusiveBetween(0, 100).WithMessage("Volume must be between 0 and 100.");
 
-        RuleFor(x => x.Source).IsInEnum().WithMessage("Invalid command source specified.");
+        this.RuleFor(x => x.Source).IsInEnum().WithMessage("Invalid command source specified.");
     }
 }
 
@@ -25,9 +25,9 @@ public class SetClientMuteCommandValidator : AbstractValidator<SetClientMuteComm
 {
     public SetClientMuteCommandValidator()
     {
-        RuleFor(x => x.ClientId).GreaterThan(0).WithMessage("Client ID must be a positive integer.");
+        this.RuleFor(x => x.ClientId).GreaterThan(0).WithMessage("Client ID must be a positive integer.");
 
-        RuleFor(x => x.Source).IsInEnum().WithMessage("Invalid command source specified.");
+        this.RuleFor(x => x.Source).IsInEnum().WithMessage("Invalid command source specified.");
     }
 }
 
@@ -38,9 +38,9 @@ public class ToggleClientMuteCommandValidator : AbstractValidator<ToggleClientMu
 {
     public ToggleClientMuteCommandValidator()
     {
-        RuleFor(x => x.ClientId).GreaterThan(0).WithMessage("Client ID must be a positive integer.");
+        this.RuleFor(x => x.ClientId).GreaterThan(0).WithMessage("Client ID must be a positive integer.");
 
-        RuleFor(x => x.Source).IsInEnum().WithMessage("Invalid command source specified.");
+        this.RuleFor(x => x.Source).IsInEnum().WithMessage("Invalid command source specified.");
     }
 }
 
@@ -51,13 +51,13 @@ public class SetClientLatencyCommandValidator : AbstractValidator<SetClientLaten
 {
     public SetClientLatencyCommandValidator()
     {
-        RuleFor(x => x.ClientId).GreaterThan(0).WithMessage("Client ID must be a positive integer.");
+        this.RuleFor(x => x.ClientId).GreaterThan(0).WithMessage("Client ID must be a positive integer.");
 
-        RuleFor(x => x.LatencyMs)
+        this.RuleFor(x => x.LatencyMs)
             .InclusiveBetween(0, 10000)
             .WithMessage("Latency must be between 0 and 10000 milliseconds.");
 
-        RuleFor(x => x.Source).IsInEnum().WithMessage("Invalid command source specified.");
+        this.RuleFor(x => x.Source).IsInEnum().WithMessage("Invalid command source specified.");
     }
 }
 
@@ -68,10 +68,10 @@ public class AssignClientToZoneCommandValidator : AbstractValidator<AssignClient
 {
     public AssignClientToZoneCommandValidator()
     {
-        RuleFor(x => x.ClientId).GreaterThan(0).WithMessage("Client ID must be a positive integer.");
+        this.RuleFor(x => x.ClientId).GreaterThan(0).WithMessage("Client ID must be a positive integer.");
 
-        RuleFor(x => x.ZoneId).GreaterThan(0).WithMessage("Zone ID must be a positive integer.");
+        this.RuleFor(x => x.ZoneId).GreaterThan(0).WithMessage("Zone ID must be a positive integer.");
 
-        RuleFor(x => x.Source).IsInEnum().WithMessage("Invalid command source specified.");
+        this.RuleFor(x => x.Source).IsInEnum().WithMessage("Invalid command source specified.");
     }
 }

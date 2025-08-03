@@ -37,12 +37,12 @@ public class GlobalStatusService : IGlobalStatusService
         ILogger<GlobalStatusService> logger
     )
     {
-        _systemStatusHandler = systemStatusHandler;
-        _errorStatusHandler = errorStatusHandler;
-        _versionInfoHandler = versionInfoHandler;
-        _serverStatsHandler = serverStatsHandler;
-        _logger = logger;
-        _cancellationTokenSource = new CancellationTokenSource();
+        this._systemStatusHandler = systemStatusHandler;
+        this._errorStatusHandler = errorStatusHandler;
+        this._versionInfoHandler = versionInfoHandler;
+        this._serverStatsHandler = serverStatsHandler;
+        this._logger = logger;
+        this._cancellationTokenSource = new CancellationTokenSource();
     }
 
     /// <inheritdoc />
@@ -50,21 +50,21 @@ public class GlobalStatusService : IGlobalStatusService
     {
         try
         {
-            var result = await _systemStatusHandler.Handle(new GetSystemStatusQuery(), cancellationToken);
+            var result = await this._systemStatusHandler.Handle(new GetSystemStatusQuery(), cancellationToken);
 
             if (result.IsSuccess && result.Value != null)
             {
                 // TODO: Publish notification to external systems (MQTT, KNX)
-                _logger.LogDebug("System status retrieved: {IsOnline}", result.Value.IsOnline);
+                this._logger.LogDebug("System status retrieved: {IsOnline}", result.Value.IsOnline);
             }
             else
             {
-                _logger.LogWarning("Failed to get system status for publishing: {Error}", result.ErrorMessage);
+                this._logger.LogWarning("Failed to get system status for publishing: {Error}", result.ErrorMessage);
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to publish system status");
+            this._logger.LogError(ex, "Failed to publish system status");
         }
     }
 
@@ -74,12 +74,12 @@ public class GlobalStatusService : IGlobalStatusService
         try
         {
             // TODO: Publish error notification to external systems (MQTT, KNX)
-            _logger.LogDebug("Error status to publish: {ErrorCode}", errorDetails.ErrorCode);
+            this._logger.LogDebug("Error status to publish: {ErrorCode}", errorDetails.ErrorCode);
             await Task.CompletedTask;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to publish error status");
+            this._logger.LogError(ex, "Failed to publish error status");
         }
     }
 
@@ -88,21 +88,21 @@ public class GlobalStatusService : IGlobalStatusService
     {
         try
         {
-            var result = await _versionInfoHandler.Handle(new GetVersionInfoQuery(), cancellationToken);
+            var result = await this._versionInfoHandler.Handle(new GetVersionInfoQuery(), cancellationToken);
 
             if (result.IsSuccess && result.Value != null)
             {
                 // TODO: Publish version info to external systems (MQTT, KNX)
-                _logger.LogDebug("Version info retrieved: {Version}", result.Value.Version);
+                this._logger.LogDebug("Version info retrieved: {Version}", result.Value.Version);
             }
             else
             {
-                _logger.LogWarning("Failed to get version info for publishing: {Error}", result.ErrorMessage);
+                this._logger.LogWarning("Failed to get version info for publishing: {Error}", result.ErrorMessage);
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to publish version info");
+            this._logger.LogError(ex, "Failed to publish version info");
         }
     }
 
@@ -111,12 +111,12 @@ public class GlobalStatusService : IGlobalStatusService
     {
         try
         {
-            var result = await _serverStatsHandler.Handle(new GetServerStatsQuery(), cancellationToken);
+            var result = await this._serverStatsHandler.Handle(new GetServerStatsQuery(), cancellationToken);
 
             if (result.IsSuccess && result.Value != null)
             {
                 // TODO: Publish server stats to external systems (MQTT, KNX)
-                _logger.LogDebug(
+                this._logger.LogDebug(
                     "Server stats retrieved: CPU={CpuUsage}%, Memory={MemoryUsage}MB",
                     result.Value.CpuUsagePercent,
                     result.Value.MemoryUsageMb
@@ -124,39 +124,39 @@ public class GlobalStatusService : IGlobalStatusService
             }
             else
             {
-                _logger.LogWarning("Failed to get server stats for publishing: {Error}", result.ErrorMessage);
+                this._logger.LogWarning("Failed to get server stats for publishing: {Error}", result.ErrorMessage);
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to publish server stats");
+            this._logger.LogError(ex, "Failed to publish server stats");
         }
     }
 
     /// <inheritdoc />
     public async Task StartPeriodicPublishingAsync(CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Starting periodic global status publishing");
+        this._logger.LogInformation("Starting periodic global status publishing");
 
         // Publish initial status
-        await PublishSystemStatusAsync(cancellationToken);
-        await PublishVersionInfoAsync(cancellationToken);
+        await this.PublishSystemStatusAsync(cancellationToken);
+        await this.PublishVersionInfoAsync(cancellationToken);
 
         // TODO: Implement periodic timers for status updates
         // This would typically publish system status every 30 seconds
         // and server stats every 60 seconds to external systems (MQTT, KNX)
 
-        _logger.LogInformation("Periodic global status publishing started");
+        this._logger.LogInformation("Periodic global status publishing started");
     }
 
     /// <inheritdoc />
     public async Task StopPeriodicPublishingAsync()
     {
-        _logger.LogInformation("Stopping periodic global status publishing");
+        this._logger.LogInformation("Stopping periodic global status publishing");
 
-        _cancellationTokenSource.Cancel();
+        this._cancellationTokenSource.Cancel();
 
-        _logger.LogInformation("Periodic global status publishing stopped");
+        this._logger.LogInformation("Periodic global status publishing stopped");
         await Task.CompletedTask;
     }
 
@@ -165,6 +165,6 @@ public class GlobalStatusService : IGlobalStatusService
     /// </summary>
     public void Dispose()
     {
-        _cancellationTokenSource?.Dispose();
+        this._cancellationTokenSource?.Dispose();
     }
 }

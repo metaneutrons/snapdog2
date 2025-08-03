@@ -22,8 +22,8 @@ public partial class GetClientsByZoneQueryHandler : IQueryHandler<GetClientsByZo
 
     public GetClientsByZoneQueryHandler(IClientManager clientManager, ILogger<GetClientsByZoneQueryHandler> logger)
     {
-        _clientManager = clientManager;
-        _logger = logger;
+        this._clientManager = clientManager;
+        this._logger = logger;
     }
 
     public async Task<Result<List<ClientState>>> Handle(
@@ -31,9 +31,9 @@ public partial class GetClientsByZoneQueryHandler : IQueryHandler<GetClientsByZo
         CancellationToken cancellationToken
     )
     {
-        LogHandling(request.ZoneId);
+        this.LogHandling(request.ZoneId);
 
-        var result = await _clientManager.GetClientsByZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var result = await this._clientManager.GetClientsByZoneAsync(request.ZoneId).ConfigureAwait(false);
         return result;
     }
 }
