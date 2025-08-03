@@ -52,7 +52,7 @@ public class SnapcastConfig
     /// Snapcast server port.
     /// Maps to: SNAPDOG_SERVICES_SNAPCAST_JSONRPC_PORT
     /// </summary>
-    [Env(Key = "PORT", Default = 1705)]
+    [Env(Key = "JSONRPC_PORT", Default = 1705)]
     public int JsonRpcPort { get; set; } = 1705;
 
     /// <summary>

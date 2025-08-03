@@ -33,6 +33,13 @@ public class SnapcastServerConfig
     /// JSON-RPC WebSocket port.
     /// Maps to: SNAPDOG_SNAPCAST_WEBSOCKET_PORT
     /// </summary>
-    [Env(Key = "WEBSOCKET_PORT", Default = 1705)]
-    public int WebSocketPort { get; set; } = 1705;
+    [Env(Key = "WEBSOCKET_PORT", Default = 1704)]
+    public int WebSocketPort { get; set; } = 1704;
+
+    /// <summary>
+    /// JSON-RPC API port.
+    /// Maps to: SNAPDOG_SNAPCAST_JSONRPC_PORT
+    /// </summary>
+    [Env(Key = "JSONRPC_PORT", Default = 1705)]
+    public int JsonRpcPort { get; set; } = 1705;
 }
