@@ -18,7 +18,7 @@ public record ZonePlaybackStateChangedNotification : INotification
     /// <summary>
     /// Gets the new playback state.
     /// </summary>
-    public required PlaybackStatus PlaybackState { get; init; }
+    public required SnapDog2.Core.Enums.PlaybackState PlaybackState { get; init; }
 
     /// <summary>
     /// Gets the UTC timestamp when the state changed.

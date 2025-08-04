@@ -3,7 +3,7 @@ namespace SnapDog2.Core.Enums;
 /// <summary>
 /// Represents the playback state of a zone.
 /// </summary>
-public enum PlaybackStatus
+public enum PlaybackState
 {
     /// <summary>
     /// Playback is stopped.

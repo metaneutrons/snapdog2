@@ -137,6 +137,7 @@
 - [9.3.3 System Configuration](10-configuration-system.md#933-system-configuration)
 - [9.3.4 Zone Configuration](10-configuration-system.md#934-zone-configuration)
 - [9.3.5 Client Configuration](10-configuration-system.md#935-client-configuration)
+- [9.3.6 SoundFlow Configuration](10-configuration-system.md#936-soundflow-configuration)
 - [9.4 Custom Type Converters](10-configuration-system.md#94-custom-type-converters)
 - [9.4.1 KNX Address Converter](10-configuration-system.md#941-knx-address-converter)
 - [9.5 Configuration Validation](10-configuration-system.md#95-configuration-validation)
@@ -177,7 +178,7 @@
 - [11.2 KNX Integration (`/Infrastructure/Knx/KnxService.cs`)](12-infrastructure-services-implementation.md#112-knx-integration-infrastructureknxknxservicecs)
 - [11.3 MQTT Integration (`/Infrastructure/Mqtt/MqttService.cs`)](12-infrastructure-services-implementation.md#113-mqtt-integration-infrastructuremqttmqttservicecs)
 - [11.4 Subsonic Integration (`/Infrastructure/Subsonic/SubsonicService.cs`)](12-infrastructure-services-implementation.md#114-subsonic-integration-infrastructuresubsonicsubsonicservicecs)
-- [11.5 Media Playback (`/Infrastructure/Media/MediaPlayerService.cs`)](12-infrastructure-services-implementation.md#115-media-playback-infrastructuremediamediaplayerservicecs)
+- [11.5 Media Playback (`/Infrastructure/Audio/SoundFlowMediaPlayerService.cs`)](12-infrastructure-services-implementation.md#115-media-playback-infrastructureaudiosoundflowmediaplayerservicecs)
 
 12. [Metrics and Telemetry (Infrastructure Layer)](13-metrics-and-telemetry-infrastructure-layer.md#12-metrics-and-telemetry-infrastructure-layer)
 

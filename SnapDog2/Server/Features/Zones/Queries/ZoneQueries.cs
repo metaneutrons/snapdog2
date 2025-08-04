@@ -29,7 +29,7 @@ public record GetAllZoneStatesQuery : IQuery<Result<IEnumerable<ZoneState>>> { }
 /// <summary>
 /// Query to get the current playback state of a zone.
 /// </summary>
-public record GetZonePlaybackStateQuery : IQuery<Result<PlaybackStatus>>
+public record GetZonePlaybackStateQuery : IQuery<Result<SnapDog2.Core.Enums.PlaybackState>>
 {
     /// <summary>
     /// Gets the ID of the zone to query.

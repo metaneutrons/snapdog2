@@ -134,7 +134,8 @@ public partial class GetAllZoneStatesQueryHandler : IQueryHandler<GetAllZoneStat
 /// <summary>
 /// Handles the GetZonePlaybackStateQuery.
 /// </summary>
-public partial class GetZonePlaybackStateQueryHandler : IQueryHandler<GetZonePlaybackStateQuery, Result<PlaybackStatus>>
+public partial class GetZonePlaybackStateQueryHandler
+    : IQueryHandler<GetZonePlaybackStateQuery, Result<SnapDog2.Core.Enums.PlaybackState>>
 {
     private readonly IZoneManager _zoneManager;
     private readonly ILogger<GetZonePlaybackStateQueryHandler> _logger;
@@ -151,7 +152,7 @@ public partial class GetZonePlaybackStateQueryHandler : IQueryHandler<GetZonePla
         this._logger = logger;
     }
 
-    public async Task<Result<PlaybackStatus>> Handle(
+    public async Task<Result<SnapDog2.Core.Enums.PlaybackState>> Handle(
         GetZonePlaybackStateQuery request,
         CancellationToken cancellationToken
     )
@@ -162,7 +163,9 @@ public partial class GetZonePlaybackStateQueryHandler : IQueryHandler<GetZonePla
         if (zoneResult.IsFailure)
         {
             this.LogZoneNotFound(request.ZoneId);
-            return Result<PlaybackStatus>.Failure(zoneResult.ErrorMessage ?? "Zone not found");
+            return SnapDog2.Core.Models.Result<SnapDog2.Core.Enums.PlaybackState>.Failure(
+                zoneResult.ErrorMessage ?? "Zone not found"
+            );
         }
 
         var zone = zoneResult.Value!;
@@ -170,10 +173,14 @@ public partial class GetZonePlaybackStateQueryHandler : IQueryHandler<GetZonePla
 
         if (stateResult.IsFailure)
         {
-            return Result<PlaybackStatus>.Failure(stateResult.ErrorMessage ?? "Failed to get zone state");
+            return SnapDog2.Core.Models.Result<SnapDog2.Core.Enums.PlaybackState>.Failure(
+                stateResult.ErrorMessage ?? "Failed to get zone state"
+            );
         }
 
-        return Result<PlaybackStatus>.Success(Enum.Parse<PlaybackStatus>(stateResult.Value!.PlaybackState, true));
+        return SnapDog2.Core.Models.Result<SnapDog2.Core.Enums.PlaybackState>.Success(
+            Enum.Parse<SnapDog2.Core.Enums.PlaybackState>(stateResult.Value!.PlaybackState, true)
+        );
     }
 }
 

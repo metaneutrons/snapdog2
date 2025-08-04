@@ -228,21 +228,27 @@ Implements `ISubsonicService` using **`SubSonicMedia` (1.0.5)**.
   * Performs **mapping** from `SubSonicMedia.Models` (e.g., `Playlist`, `Song`) to `SnapDog2.Core.Models` (`PlaylistInfo`, `TrackInfo`, `PlaylistWithTracks`). This mapping logic resides within this service.
   * Wraps library calls in `try/catch`, returns `Result`/`Result<T>`. Resilience is handled by the injected `HttpClient`.
 
-## 11.5. Media Playback (`/Infrastructure/Media/MediaPlayerService.cs`)
+## 11.5. Media Playback (`/Infrastructure/Audio/SoundFlowMediaPlayerService.cs`)
 
-Implements `IMediaPlayerService` using **`LibVLCSharp` (3.8.2)**.
+Implements `IMediaPlayerService` using **SoundFlow**, a powerful cross-platform .NET audio engine.
 
-* **Library:** `LibVLCSharp`. Requires native LibVLC installed (handled by Dockerfile).
-* **Dependencies:** `IEnumerable<ZoneConfig>`, `ILogger<MediaPlayerService>`, `IMediator` (for publishing playback events).
+* **Library:** `SoundFlow` - Pure .NET cross-platform audio engine with native support for Windows, macOS, Linux, Android, iOS, and FreeBSD.
+* **Dependencies:** `IOptions<SoundFlowConfig>`, `IHttpClientFactory`, `ILogger<SoundFlowMediaPlayerService>`, `IMediator` (for publishing playback events), `IEnumerable<ZoneConfig>`.
 * **Core Logic:**
-  * Initializes LibVLC Core (`Core.Initialize()`) once.
-  * Creates and manages a `Dictionary<int, LibVLC>` and `Dictionary<int, MediaPlayer>` (one per ZoneId).
+  * Initializes SoundFlow audio engine with configurable parameters (sample rate, bit depth, channels, buffer size).
+  * Creates and manages a `Dictionary<int, SoundFlowPlayer>` (one per ZoneId) for concurrent multi-zone audio streaming.
   * Implements `PlayAsync(int zoneId, TrackInfo trackInfo)`:
-    * Retrieves `MediaPlayer` for the zone.
-    * Creates `LibVLCSharp.Shared.Media` using `trackInfo.Id` (which contains the stream URL) via `FromType.FromLocation`.
-    * Adds `:sout=#file{dst=...}` option to the `Media` object, using the `zoneConfig.SnapcastSink` path.
-    * Calls `mediaPlayer.Play(media)`.
-    * Handles potential errors and returns `Result`.
-  * Implements `StopAsync`, `PauseAsync` by calling corresponding `mediaPlayer` methods.
-  * Subscribes to `MediaPlayer` events (`EndReached`, `EncounteredError`). Event handlers publish Cortex.Mediator notifications (e.g., `TrackEndedNotification`, `PlaybackErrorNotification`).
-  * Implements `IAsyncDisposable` to stop all players and dispose `MediaPlayer` and `LibVLC` instances.
+    * Retrieves zone configuration and creates HTTP client with resilience policies.
+    * Creates `SoundFlowPlayer` instance with audio processing pipeline:
+      * `HttpStreamSource` - Streams audio from HTTP URLs (Subsonic/radio streams)
+      * `ResampleProcessor` - Converts audio to target format (48000:16:2 by default)
+      * `FileOutputSink` - Writes processed audio data to Snapcast sink file
+    * Builds audio graph: Source → Processor → Sink
+    * Starts real-time audio streaming with configurable thread priority and buffer management.
+    * Publishes `TrackPlaybackStartedNotification` via Cortex.Mediator.
+  * Implements `StopAsync`, `PauseAsync` by stopping the audio graph and cleaning up resources.
+  * Subscribes to SoundFlow audio events and publishes corresponding Cortex.Mediator notifications (e.g., `TrackEndedNotification`, `PlaybackErrorNotification`).
+  * Implements `IAsyncDisposable` to stop all players and dispose SoundFlow resources properly.
+  * **Audio Format Support:** MP3, AAC, FLAC, WAV, OGG Vorbis with automatic format detection.
+  * **Cross-Platform Streaming:** Native HTTP streaming support with configurable timeout and retry policies.
+  * **Real-time Processing:** Low-latency audio pipeline optimized for live streaming to Snapcast.

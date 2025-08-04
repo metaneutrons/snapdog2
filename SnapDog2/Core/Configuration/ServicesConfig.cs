@@ -35,6 +35,13 @@ public class ServicesConfig
     /// </summary>
     [Env(NestedPrefix = "SUBSONIC_")]
     public SubsonicConfig Subsonic { get; set; } = new();
+
+    /// <summary>
+    /// SoundFlow audio engine configuration.
+    /// Maps environment variables with prefix: SNAPDOG_SOUNDFLOW_*
+    /// </summary>
+    [Env(NestedPrefix = "SOUNDFLOW_")]
+    public SoundFlowConfig SoundFlow { get; set; } = new();
 }
 
 /// <summary>

@@ -175,6 +175,17 @@ SNAPDOG_SERVICES_SUBSONIC_URL=http://subsonic:4533.   # Required if enabled
 SNAPDOG_SERVICES_SUBSONIC_USERNAME=admin              # Required if enabled
 SNAPDOG_SERVICES_SUBSONIC_PASSWORD=password           # Required if enabled
 SNAPDOG_SERVICES_SUBSONIC_TIMEOUT=10000               # Default: 10000ms
+
+# SoundFlow audio engine integration
+SNAPDOG_SOUNDFLOW_SAMPLE_RATE=48000                   # Default: 48000 (target sample rate)
+SNAPDOG_SOUNDFLOW_BIT_DEPTH=16                        # Default: 16 (target bit depth)
+SNAPDOG_SOUNDFLOW_CHANNELS=2                          # Default: 2 (target channels)
+SNAPDOG_SOUNDFLOW_BUFFER_SIZE=1024                    # Default: 1024 (buffer size in samples)
+SNAPDOG_SOUNDFLOW_MAX_STREAMS=10                      # Default: 10 (max concurrent streams)
+SNAPDOG_SOUNDFLOW_HTTP_TIMEOUT_SECONDS=30             # Default: 30 (HTTP timeout)
+SNAPDOG_SOUNDFLOW_AUTO_DETECT_FORMAT=true             # Default: true (auto-detect audio format)
+SNAPDOG_SOUNDFLOW_THREAD_PRIORITY=Normal              # Default: Normal (Lowest|BelowNormal|Normal|AboveNormal|Highest)
+SNAPDOG_SOUNDFLOW_REALTIME_PROCESSING=true            # Default: true (enable real-time processing)
 ```
 
 #### 9.2.4.1. Services Resilience Configuration
@@ -627,6 +638,85 @@ public class ClientConfig
     /// </summary>
     [Env(NestedPrefix = "KNX_")]
     public ClientKnxConfig Knx { get; set; } = new();
+}
+```
+
+### 9.3.6. SoundFlow Configuration
+
+```csharp
+// --- /Core/Configuration/SoundFlowConfig.cs ---
+namespace SnapDog2.Core.Configuration;
+
+using EnvoyConfig.Attributes;
+
+/// <summary>
+/// SoundFlow audio engine configuration.
+/// Maps environment variables with prefix: SNAPDOG_SOUNDFLOW_*
+/// </summary>
+public class SoundFlowConfig
+{
+    /// <summary>
+    /// Target sample rate for audio output.
+    /// Maps to: SNAPDOG_SOUNDFLOW_SAMPLE_RATE
+    /// </summary>
+    [Env(Key = "SAMPLE_RATE", Default = 48000)]
+    public int SampleRate { get; set; } = 48000;
+
+    /// <summary>
+    /// Target bit depth for audio output.
+    /// Maps to: SNAPDOG_SOUNDFLOW_BIT_DEPTH
+    /// </summary>
+    [Env(Key = "BIT_DEPTH", Default = 16)]
+    public int BitDepth { get; set; } = 16;
+
+    /// <summary>
+    /// Target number of audio channels.
+    /// Maps to: SNAPDOG_SOUNDFLOW_CHANNELS
+    /// </summary>
+    [Env(Key = "CHANNELS", Default = 2)]
+    public int Channels { get; set; } = 2;
+
+    /// <summary>
+    /// Audio buffer size in samples.
+    /// Maps to: SNAPDOG_SOUNDFLOW_BUFFER_SIZE
+    /// </summary>
+    [Env(Key = "BUFFER_SIZE", Default = 1024)]
+    public int BufferSize { get; set; } = 1024;
+
+    /// <summary>
+    /// Maximum concurrent audio streams.
+    /// Maps to: SNAPDOG_SOUNDFLOW_MAX_STREAMS
+    /// </summary>
+    [Env(Key = "MAX_STREAMS", Default = 10)]
+    public int MaxStreams { get; set; } = 10;
+
+    /// <summary>
+    /// HTTP connection timeout in seconds.
+    /// Maps to: SNAPDOG_SOUNDFLOW_HTTP_TIMEOUT_SECONDS
+    /// </summary>
+    [Env(Key = "HTTP_TIMEOUT_SECONDS", Default = 30)]
+    public int HttpTimeoutSeconds { get; set; } = 30;
+
+    /// <summary>
+    /// Enable audio format auto-detection.
+    /// Maps to: SNAPDOG_SOUNDFLOW_AUTO_DETECT_FORMAT
+    /// </summary>
+    [Env(Key = "AUTO_DETECT_FORMAT", Default = true)]
+    public bool AutoDetectFormat { get; set; } = true;
+
+    /// <summary>
+    /// Audio processing thread priority.
+    /// Maps to: SNAPDOG_SOUNDFLOW_THREAD_PRIORITY
+    /// </summary>
+    [Env(Key = "THREAD_PRIORITY", Default = "Normal")]
+    public string ThreadPriority { get; set; } = "Normal";
+
+    /// <summary>
+    /// Enable real-time audio processing.
+    /// Maps to: SNAPDOG_SOUNDFLOW_REALTIME_PROCESSING
+    /// </summary>
+    [Env(Key = "REALTIME_PROCESSING", Default = true)]
+    public bool RealtimeProcessing { get; set; } = true;
 }
 ```
 
