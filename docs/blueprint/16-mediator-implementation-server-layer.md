@@ -1,8 +1,8 @@
-# 14. Cortex.Mediator Implementation (Server Layer)
+# 15. Cortex.Mediator Implementation (Server Layer)
 
 This chapter details the implementation of the Mediator pattern within SnapDog2's `/Server` layer, utilizing the **Cortex.Mediator** library. This pattern is central to the application's architecture, enabling a clean separation of concerns, facilitating the Command Query Responsibility Segregation (CQRS) pattern, reducing coupling between components, and providing a robust mechanism for handling cross-cutting concerns via pipeline behaviors.
 
-## 14.1. Cortex.Mediator Integration and Configuration
+## 15.1. Cortex.Mediator Integration and Configuration
 
 Cortex.Mediator is integrated into the application's Dependency Injection (DI) container during startup. This involves registering the Cortex.Mediator services, discovering and registering all command, query, and notification handlers, and configuring the pipeline behaviors in the desired order of execution.
 
@@ -58,7 +58,7 @@ public static class CortexMediatorConfiguration
 }
 ```
 
-## 14.2. Command, Query, and Notification Structure
+## 15.2. Command, Query, and Notification Structure
 
 SnapDog2 strictly follows the CQRS pattern facilitated by Cortex.Mediator:
 
@@ -68,7 +68,7 @@ SnapDog2 strictly follows the CQRS pattern facilitated by Cortex.Mediator:
 
 All Cortex.Mediator message types (Commands, Queries, Notifications) are typically defined as immutable `record` types within the `/Server` layer, often organized by feature or domain area (e.g., `/Server/Features/Zones/Commands`, `/Server/Features/Clients/Queries`, `/Server/Notifications`).
 
-### 14.2.1. Command Example
+### 15.2.1. Command Example
 
 ```csharp
 // Defined in /Server/Features/Zones/Commands/SetZoneVolumeCommand.cs
@@ -157,7 +157,7 @@ public partial class SetZoneVolumeCommandHandler : ICommandHandler<SetZoneVolume
 }
 ```
 
-### 14.2.2. Query Example
+### 15.2.2. Query Example
 
 ```csharp
 // Defined in /Server/Features/Clients/Queries/GetAllClientsQuery.cs
@@ -258,7 +258,7 @@ public partial class GetAllClientsQueryHandler : IQueryHandler<GetAllClientsQuer
 }
 ```
 
-### 14.2.3. Notification Example
+### 15.2.3. Notification Example
 
 ```csharp
 // Defined in /Server/Notifications/StatusChangedNotification.cs
@@ -354,7 +354,7 @@ public partial class MqttStatusNotifier : INotificationHandler<StatusChangedNoti
 }
 ```
 
-## 14.3. Command Validation with FluentValidation
+## 15.3. Command Validation with FluentValidation
 
 Validation logic for commands is encapsulated in `AbstractValidator<TCommand>` classes, typically located alongside the command definition (`/Server/Features/.../Commands/XyzCommandValidator.cs`). These validators are automatically executed by the `ValidationBehavior` pipeline stage.
 
@@ -383,11 +383,11 @@ public class SetZoneVolumeCommandValidator : AbstractValidator<SetZoneVolumeComm
 }
 ```
 
-## 14.4. Pipeline Behaviors (`/Server/Behaviors`)
+## 15.4. Pipeline Behaviors (`/Server/Behaviors`)
 
 Implement `IPipelineBehavior<TRequest, TResponse>` to add cross-cutting concerns executed around command/query handlers.
 
-### 14.4.1. Logging Behavior
+### 15.4.1. Logging Behavior
 
 Logs request handling details, duration, and success/failure status using the `IResult` interface. Creates OpenTelemetry Activities for tracing.
 
@@ -440,7 +440,7 @@ public partial class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TR
 }
 ```
 
-### 14.4.2. Validation Behavior
+### 15.4.2. Validation Behavior
 
 Executes registered FluentValidation validators for the incoming `TRequest`. **Throws `ValidationException`** if validation fails, which is expected to be caught by global exception handling middleware (e.g., in the API layer) to return appropriate error responses (e.g., 400 Bad Request or 422 Unprocessable Entity).
 
@@ -512,7 +512,7 @@ public partial class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior
 }
 ```
 
-### 14.4.3. Performance Behavior
+### 15.4.3. Performance Behavior
 
 Measures execution time of the subsequent pipeline stages (Validation + Handler). Reports metrics via `IMetricsService` and logs warnings for slow operations.
 
@@ -578,10 +578,10 @@ public partial class PerformanceBehavior<TRequest, TResponse> : IPipelineBehavio
 }
 ```
 
-## 14.5. Communication Layer Integration
+## 15.5. Communication Layer Integration
 
 Adapters (API Controllers, MQTT Service, KNX Service) convert external inputs into Cortex.Mediator `ICommand` and `IQuery` objects and dispatch them using `IMediator.Send()`.
 
-## 14.6. Status Update Mechanism
+## 15.6. Status Update Mechanism
 
 Core Managers (`/Server/Managers`) or Services (`/Server/Features`) publish `INotification` objects via `IMediator.Publish()` after successfully changing state. Infrastructure Handlers (`/Infrastructure/*` or `/Server/*`) subscribe to these notifications to push updates externally (MQTT, KNX, SignalR etc.)

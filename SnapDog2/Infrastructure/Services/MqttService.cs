@@ -20,6 +20,7 @@ using Polly.Timeout;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Core.Extensions;
+using SnapDog2.Core.Helpers;
 using SnapDog2.Core.Models;
 
 /// <summary>
@@ -128,18 +129,8 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     /// </summary>
     private ResiliencePipeline CreateConnectionPolicy()
     {
-        return new ResiliencePipelineBuilder()
-            .AddRetry(
-                new RetryStrategyOptions
-                {
-                    MaxRetryAttempts = 3,
-                    Delay = TimeSpan.FromSeconds(2),
-                    BackoffType = DelayBackoffType.Exponential,
-                    UseJitter = true,
-                }
-            )
-            .AddTimeout(TimeSpan.FromSeconds(30)) // Default 30 second timeout
-            .Build();
+        var validatedConfig = ResiliencePolicyFactory.ValidateAndNormalize(_config.Resilience.Connection);
+        return ResiliencePolicyFactory.CreatePipeline(validatedConfig, "MQTT-Connection");
     }
 
     /// <summary>
@@ -147,17 +138,8 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     /// </summary>
     private ResiliencePipeline CreateOperationPolicy()
     {
-        return new ResiliencePipelineBuilder()
-            .AddRetry(
-                new RetryStrategyOptions
-                {
-                    MaxRetryAttempts = 2,
-                    Delay = TimeSpan.FromMilliseconds(500),
-                    BackoffType = DelayBackoffType.Linear,
-                }
-            )
-            .AddTimeout(TimeSpan.FromSeconds(10))
-            .Build();
+        var validatedConfig = ResiliencePolicyFactory.ValidateAndNormalize(_config.Resilience.Operation);
+        return ResiliencePolicyFactory.CreatePipeline(validatedConfig, "MQTT-Operation");
     }
 
     private void BuildTopicConfigurations()

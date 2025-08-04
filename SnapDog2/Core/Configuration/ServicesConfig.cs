@@ -64,6 +64,32 @@ public class SnapcastConfig
     public int Timeout { get; set; } = 30;
 
     /// <summary>
+    /// Resilience policy configuration for Snapcast operations.
+    /// Maps environment variables with prefix: SNAPDOG_SERVICES_SNAPCAST_RESILIENCE_*
+    /// </summary>
+    [Env(NestedPrefix = "RESILIENCE_")]
+    public ResilienceConfig Resilience { get; set; } =
+        new()
+        {
+            Connection = new PolicyConfig
+            {
+                MaxRetries = 3,
+                RetryDelayMs = 2000,
+                BackoffType = "Exponential",
+                UseJitter = true,
+                TimeoutSeconds = 30,
+            },
+            Operation = new PolicyConfig
+            {
+                MaxRetries = 2,
+                RetryDelayMs = 500,
+                BackoffType = "Linear",
+                UseJitter = false,
+                TimeoutSeconds = 10,
+            },
+        };
+
+    /// <summary>
     /// Reconnect interval in seconds.
     /// Maps to: SNAPDOG_SERVICES_SNAPCAST_RECONNECT_INTERVAL
     /// </summary>
@@ -152,6 +178,32 @@ public class MqttConfig
     /// </summary>
     [Env(Key = "KEEP_ALIVE", Default = 60)]
     public int KeepAlive { get; set; } = 60;
+
+    /// <summary>
+    /// Resilience policy configuration for MQTT operations.
+    /// Maps environment variables with prefix: SNAPDOG_SERVICES_MQTT_RESILIENCE_*
+    /// </summary>
+    [Env(NestedPrefix = "RESILIENCE_")]
+    public ResilienceConfig Resilience { get; set; } =
+        new()
+        {
+            Connection = new PolicyConfig
+            {
+                MaxRetries = 3,
+                RetryDelayMs = 2000,
+                BackoffType = "Exponential",
+                UseJitter = true,
+                TimeoutSeconds = 30,
+            },
+            Operation = new PolicyConfig
+            {
+                MaxRetries = 2,
+                RetryDelayMs = 500,
+                BackoffType = "Linear",
+                UseJitter = false,
+                TimeoutSeconds = 10,
+            },
+        };
 }
 
 /// <summary>
@@ -200,6 +252,32 @@ public class KnxConfig
     /// </summary>
     [Env(Key = "AUTO_RECONNECT", Default = true)]
     public bool AutoReconnect { get; set; } = true;
+
+    /// <summary>
+    /// Resilience policy configuration for KNX operations.
+    /// Maps environment variables with prefix: SNAPDOG_SERVICES_KNX_RESILIENCE_*
+    /// </summary>
+    [Env(NestedPrefix = "RESILIENCE_")]
+    public ResilienceConfig Resilience { get; set; } =
+        new()
+        {
+            Connection = new PolicyConfig
+            {
+                MaxRetries = 3,
+                RetryDelayMs = 2000,
+                BackoffType = "Exponential",
+                UseJitter = true,
+                TimeoutSeconds = 10, // Use KNX timeout default
+            },
+            Operation = new PolicyConfig
+            {
+                MaxRetries = 2,
+                RetryDelayMs = 500,
+                BackoffType = "Linear",
+                UseJitter = false,
+                TimeoutSeconds = 5,
+            },
+        };
 }
 
 /// <summary>

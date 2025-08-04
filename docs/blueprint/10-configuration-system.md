@@ -1,12 +1,12 @@
-# 8. Configuration System
+# 9. Configuration System
 
 SnapDog2 is designed for flexible deployment within containerized environments. Its configuration system leverages **EnvoyConfig**, a modern .NET configuration library that provides attribute-based environment variable binding, automatic validation, nested object mapping, and custom type conversion.
 
 The configuration follows a **unified nested architecture** where all settings are organized into a single root [`SnapDogConfiguration`](SnapDogConfiguration.cs:1) class with strongly-typed nested objects for different subsystems. This eliminates configuration fragmentation while providing comprehensive type safety and validation.
 
-## 8.1. Architecture Overview
+## 9.1. Architecture Overview
 
-### 8.1.1. Unified Configuration Structure
+### 9.1.1. Unified Configuration Structure
 
 ```mermaid
 classDiagram
@@ -62,7 +62,7 @@ classDiagram
     SnapDogConfiguration --> ClientConfig
 ```
 
-### 8.1.2. EnvoyConfig Features Utilized
+### 9.1.2. EnvoyConfig Features Utilized
 
 - **`[Env]` Attribute**: Maps properties to environment variables with options for defaults, validation, and type conversion
 - **`NestedListPrefix`**: Enables indexed configurations like `SNAPDOG_ZONE_1_*`, `SNAPDOG_CLIENT_2_*`
@@ -72,11 +72,11 @@ classDiagram
 - **Custom Type Converters**: Handle domain-specific types like [`KnxAddress`](KnxAddress.cs:1)
 - **Built-in Validation**: Automatic validation with [`IValidateOptions<T>`](IValidateOptions.cs:1) for business logic
 
-## 8.2. Environment Variable Structure
+## 9.2. Environment Variable Structure
 
 All environment variables use the global prefix `SNAPDOG_` and follow a hierarchical naming convention that maps directly to the nested configuration classes.
 
-### 8.2.1. System Configuration
+### 9.2.1. System Configuration
 
 ```bash
 # Basic system settings
@@ -97,7 +97,7 @@ SNAPDOG_SYSTEM_MQTT_VERSION_TOPIC=version             # Default: version
 SNAPDOG_SYSTEM_MQTT_STATS_TOPIC=stats                 # Default: stats
 ```
 
-### 8.2.2. Telemetry Configuration
+### 9.2.2. Telemetry Configuration
 
 ```bash
 # Core telemetry settings
@@ -121,7 +121,7 @@ SNAPDOG_TELEMETRY_SEQ_ENABLED=true                    # Default: true
 SNAPDOG_TELEMETRY_SEQ_URL=http://seq:5341             # Required if enabled
 ```
 
-### 8.2.3. API Configuration
+### 9.2.3. API Configuration
 
 ```bash
 # API server and authentication
@@ -133,7 +133,7 @@ SNAPDOG_API_APIKEY_2=secret-key-2                   # Additional keys as needed
 SNAPDOG_API_APIKEY_3=secret-key-3
 ```
 
-### 8.2.4. Services Configuration
+### 9.2.4. Services Configuration
 
 ```bash
 # Snapcast integration
@@ -177,7 +177,80 @@ SNAPDOG_SERVICES_SUBSONIC_PASSWORD=password           # Required if enabled
 SNAPDOG_SERVICES_SUBSONIC_TIMEOUT=10000               # Default: 10000ms
 ```
 
-### 8.2.5. Zone Configuration (Nested Lists)
+#### 9.2.4.1. Services Resilience Configuration
+
+SnapDog2 provides comprehensive resilience configuration for all external service integrations using Polly policies. Each service supports separate configuration for connection establishment and individual operations.
+
+**KNX Service Resilience:**
+
+```bash
+# KNX Connection Policy (for establishing connections)
+SNAPDOG_SERVICES_KNX_RESILIENCE_CONNECTION_MAX_RETRIES=3           # Default: 3 (0-10)
+SNAPDOG_SERVICES_KNX_RESILIENCE_CONNECTION_RETRY_DELAY_MS=2000     # Default: 2000 (100-60000)
+SNAPDOG_SERVICES_KNX_RESILIENCE_CONNECTION_BACKOFF_TYPE=Exponential # Default: Exponential (Linear|Exponential|Constant)
+SNAPDOG_SERVICES_KNX_RESILIENCE_CONNECTION_USE_JITTER=true         # Default: true
+SNAPDOG_SERVICES_KNX_RESILIENCE_CONNECTION_JITTER_PERCENTAGE=25    # Default: 25 (0-100)
+SNAPDOG_SERVICES_KNX_RESILIENCE_CONNECTION_TIMEOUT_SECONDS=10      # Default: 10 (1-300)
+
+# KNX Operation Policy (for individual operations)
+SNAPDOG_SERVICES_KNX_RESILIENCE_OPERATION_MAX_RETRIES=2           # Default: 2 (0-10)
+SNAPDOG_SERVICES_KNX_RESILIENCE_OPERATION_RETRY_DELAY_MS=500      # Default: 500 (100-60000)
+SNAPDOG_SERVICES_KNX_RESILIENCE_OPERATION_BACKOFF_TYPE=Linear     # Default: Linear (Linear|Exponential|Constant)
+SNAPDOG_SERVICES_KNX_RESILIENCE_OPERATION_USE_JITTER=false        # Default: false
+SNAPDOG_SERVICES_KNX_RESILIENCE_OPERATION_JITTER_PERCENTAGE=25    # Default: 25 (0-100)
+SNAPDOG_SERVICES_KNX_RESILIENCE_OPERATION_TIMEOUT_SECONDS=5       # Default: 5 (1-300)
+```
+
+**MQTT Service Resilience:**
+
+```bash
+# MQTT Connection Policy
+SNAPDOG_SERVICES_MQTT_RESILIENCE_CONNECTION_MAX_RETRIES=3          # Default: 3 (0-10)
+SNAPDOG_SERVICES_MQTT_RESILIENCE_CONNECTION_RETRY_DELAY_MS=2000    # Default: 2000 (100-60000)
+SNAPDOG_SERVICES_MQTT_RESILIENCE_CONNECTION_BACKOFF_TYPE=Exponential # Default: Exponential (Linear|Exponential|Constant)
+SNAPDOG_SERVICES_MQTT_RESILIENCE_CONNECTION_USE_JITTER=true        # Default: true
+SNAPDOG_SERVICES_MQTT_RESILIENCE_CONNECTION_JITTER_PERCENTAGE=25   # Default: 25 (0-100)
+SNAPDOG_SERVICES_MQTT_RESILIENCE_CONNECTION_TIMEOUT_SECONDS=30     # Default: 30 (1-300)
+
+# MQTT Operation Policy
+SNAPDOG_SERVICES_MQTT_RESILIENCE_OPERATION_MAX_RETRIES=2          # Default: 2 (0-10)
+SNAPDOG_SERVICES_MQTT_RESILIENCE_OPERATION_RETRY_DELAY_MS=500     # Default: 500 (100-60000)
+SNAPDOG_SERVICES_MQTT_RESILIENCE_OPERATION_BACKOFF_TYPE=Linear    # Default: Linear (Linear|Exponential|Constant)
+SNAPDOG_SERVICES_MQTT_RESILIENCE_OPERATION_USE_JITTER=false       # Default: false
+SNAPDOG_SERVICES_MQTT_RESILIENCE_OPERATION_JITTER_PERCENTAGE=25   # Default: 25 (0-100)
+SNAPDOG_SERVICES_MQTT_RESILIENCE_OPERATION_TIMEOUT_SECONDS=10     # Default: 10 (1-300)
+```
+
+**Snapcast Service Resilience:**
+
+```bash
+# Snapcast Connection Policy
+SNAPDOG_SERVICES_SNAPCAST_RESILIENCE_CONNECTION_MAX_RETRIES=3         # Default: 3 (0-10)
+SNAPDOG_SERVICES_SNAPCAST_RESILIENCE_CONNECTION_RETRY_DELAY_MS=2000   # Default: 2000 (100-60000)
+SNAPDOG_SERVICES_SNAPCAST_RESILIENCE_CONNECTION_BACKOFF_TYPE=Exponential # Default: Exponential (Linear|Exponential|Constant)
+SNAPDOG_SERVICES_SNAPCAST_RESILIENCE_CONNECTION_USE_JITTER=true       # Default: true
+SNAPDOG_SERVICES_SNAPCAST_RESILIENCE_CONNECTION_JITTER_PERCENTAGE=25  # Default: 25 (0-100)
+SNAPDOG_SERVICES_SNAPCAST_RESILIENCE_CONNECTION_TIMEOUT_SECONDS=30    # Default: 30 (1-300)
+
+# Snapcast Operation Policy
+SNAPDOG_SERVICES_SNAPCAST_RESILIENCE_OPERATION_MAX_RETRIES=2         # Default: 2 (0-10)
+SNAPDOG_SERVICES_SNAPCAST_RESILIENCE_OPERATION_RETRY_DELAY_MS=500    # Default: 500 (100-60000)
+SNAPDOG_SERVICES_SNAPCAST_RESILIENCE_OPERATION_BACKOFF_TYPE=Linear   # Default: Linear (Linear|Exponential|Constant)
+SNAPDOG_SERVICES_SNAPCAST_RESILIENCE_OPERATION_USE_JITTER=false      # Default: false
+SNAPDOG_SERVICES_SNAPCAST_RESILIENCE_OPERATION_JITTER_PERCENTAGE=25  # Default: 25 (0-100)
+SNAPDOG_SERVICES_SNAPCAST_RESILIENCE_OPERATION_TIMEOUT_SECONDS=10    # Default: 10 (1-300)
+```
+
+**Resilience Configuration Notes:**
+
+- **Connection Policies**: Applied when establishing connections to external services. Typically use exponential backoff with jitter to avoid thundering herd effects.
+- **Operation Policies**: Applied to individual operations after connection is established. Usually use linear backoff for predictable timing.
+- **Validation**: All values are automatically validated and normalized within safe bounds.
+- **Environment-Specific**: Different settings can be applied for development, staging, and production environments.
+
+For detailed resilience configuration documentation, see [6. Resilience Configuration System](06-resilience-configuration.md).
+
+### 9.2.5. Zone Configuration (Nested Lists)
 
 ```bash
 # Zone 1 Configuration
@@ -244,7 +317,7 @@ SNAPDOG_ZONE_2_MQTT_BASE_TOPIC=snapdog/zones/kitchen
 SNAPDOG_ZONE_2_KNX_ENABLED=false
 ```
 
-### 8.2.6. Client Configuration (Nested Lists)
+### 9.2.6. Client Configuration (Nested Lists)
 
 ```bash
 # Client 1 Configuration
@@ -285,7 +358,7 @@ SNAPDOG_CLIENT_2_MQTT_BASE_TOPIC=snapdog/clients/kitchen
 SNAPDOG_CLIENT_2_KNX_ENABLED=false
 ```
 
-### 8.2.7. Radio Station Configuration (Nested Lists)
+### 9.2.7. Radio Station Configuration (Nested Lists)
 
 ```bash
 # Radio Station 1
@@ -301,11 +374,11 @@ SNAPDOG_RADIO_3_NAME=Classical Radio
 SNAPDOG_RADIO_3_URL=https://stream.srg-ssr.ch/rsc_de/aacp_96.m3u
 ```
 
-## 8.3. Configuration Classes
+## 9.3. Configuration Classes
 
 All configuration classes are located in [`/Core/Configuration`](/Core/Configuration:1) and use EnvoyConfig attributes for automatic environment variable binding.
 
-### 8.3.1. Root Configuration Class
+### 9.3.1. Root Configuration Class
 
 ```csharp
 // --- /Core/Configuration/SnapDogConfiguration.cs ---
@@ -374,7 +447,7 @@ public class SnapDogConfiguration
 }
 ```
 
-### 8.3.2. API Configuration
+### 9.3.2. API Configuration
 
 ```csharp
 // --- /Core/Configuration/ApiConfig.cs ---
@@ -418,7 +491,7 @@ public class ApiConfig
 }
 ```
 
-### 8.3.3. System Configuration
+### 9.3.3. System Configuration
 
 ```csharp
 // --- /Core/Configuration/SystemConfig.cs ---
@@ -454,7 +527,7 @@ public class SystemConfig
 }
 ```
 
-### 8.3.4. Zone Configuration
+### 9.3.4. Zone Configuration
 
 ```csharp
 // --- /Core/Configuration/ZoneConfig.cs ---
@@ -501,7 +574,7 @@ public class ZoneConfig
 }
 ```
 
-### 8.3.5. Client Configuration
+### 9.3.5. Client Configuration
 
 ```csharp
 // --- /Core/Configuration/ClientConfig.cs ---
@@ -557,9 +630,9 @@ public class ClientConfig
 }
 ```
 
-## 8.4. Custom Type Converters
+## 9.4. Custom Type Converters
 
-### 8.4.1. KNX Address Converter
+### 9.4.1. KNX Address Converter
 
 ```csharp
 // --- /Core/Configuration/Converters/KnxAddressConverter.cs ---
@@ -610,9 +683,9 @@ public class KnxAddressConverter : ITypeConverter
 }
 ```
 
-## 8.5. Configuration Validation
+## 9.5. Configuration Validation
 
-### 8.5.1. Business Logic Validation
+### 9.5.1. Business Logic Validation
 
 ```csharp
 // --- /Core/Configuration/Validation/SnapDogConfigurationValidator.cs ---
@@ -751,9 +824,9 @@ public class SnapDogConfigurationValidator : IValidateOptions<SnapDogConfigurati
 }
 ```
 
-## 8.6. Dependency Injection Setup
+## 9.6. Dependency Injection Setup
 
-### 8.6.1. Configuration Registration
+### 9.6.1. Configuration Registration
 
 ```csharp
 // --- /Worker/Program.cs ---
@@ -831,30 +904,30 @@ catch (Exception ex)
 app.Run();
 ```
 
-## 8.7. Configuration Benefits
+## 9.7. Configuration Benefits
 
-### 8.7.1. Type Safety & Validation
+### 9.7.1. Type Safety & Validation
 
 - **Compile-time checking**: Configuration properties are strongly typed
 - **Automatic validation**: Data annotations and custom validators catch errors early
 - **Null safety**: Nullable reference types prevent null reference exceptions
 - **Range validation**: Numeric properties have range constraints
 
-### 8.7.2. Developer Experience
+### 9.7.2. Developer Experience
 
 - **IntelliSense support**: Full IDE support for configuration properties
 - **Self-documenting**: XML documentation on all configuration classes
 - **Clear structure**: Hierarchical organization mirrors environment variable structure
 - **Easy testing**: Configuration objects can be easily mocked and tested
 
-### 8.7.3. Operational Benefits
+### 9.7.3. Operational Benefits
 
 - **Fail-fast startup**: Configuration errors are caught immediately during application startup
 - **Clear error messages**: Detailed validation messages for troubleshooting
 - **Container optimized**: Static configuration perfect for containerized deployments
 - **Environment agnostic**: Same configuration structure works across all environments
 
-### 8.7.4. Maintainability
+### 9.7.4. Maintainability
 
 - **Single source of truth**: All configuration in one unified structure
 - **Extensible**: Easy to add new configuration properties without breaking existing code

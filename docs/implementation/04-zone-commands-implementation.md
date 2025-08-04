@@ -1,16 +1,16 @@
-# Zone Commands Implementation
+# 5. Zone Commands Implementation
 
 **Date:** August 2, 2025
 **Status:** ✅ Complete
 **Related Blueprint:** [16b-zone-commands-implementation.md](../blueprint/16b-zone-commands-implementation.md)
 
-## Overview
+## 5.1. Overview
 
 This document details the implementation of the zone commands system for SnapDog2, building upon the successful global status commands foundation. The implementation follows the established CQRS pattern and provides comprehensive zone control functionality including playback, volume, track, and playlist management.
 
-## Implementation Summary
+## 5.2. Implementation Summary
 
-### ✅ **Completed Components**
+### 5.2.1. ✅ **Completed Components**
 
 1. **Zone Command Definitions** - All zone command records with proper validation
 2. **Zone Query Definitions** - Query records for zone state retrieval
@@ -20,7 +20,7 @@ This document details the implementation of the zone commands system for SnapDog
 6. **RESTful API Controller** - HTTP endpoints for zone operations
 7. **Dependency Injection Setup** - Service registration and handler configuration
 
-### 📋 **Architecture Decisions**
+### 5.2.2. 📋 **Architecture Decisions**
 
 - **CQRS Pattern**: Maintained consistency with global status implementation
 - **Result<T> Pattern**: Unified error handling across all operations
@@ -28,15 +28,15 @@ This document details the implementation of the zone commands system for SnapDog
 - **Placeholder Services**: Realistic implementations for development and testing
 - **Controller Pattern**: Same service provider injection as global status controller
 
-## Detailed Implementation
+## 5.3. Detailed Implementation
 
-### 1. Zone Command Definitions
+### 5.3.1. Zone Command Definitions
 
 **Location:** `/Server/Features/Zones/Commands/ZoneCommands.cs`
 
 Implemented comprehensive command records covering all zone functionality:
 
-#### Playback Control Commands
+#### 5.3.1.1. Playback Control Commands
 
 ```csharp
 public record PlayCommand : ICommand<Result>
@@ -51,7 +51,7 @@ public record PauseCommand : ICommand<Result>
 public record StopCommand : ICommand<Result>
 ```
 
-#### Volume Control Commands
+#### 5.3.1.2. Volume Control Commands
 
 ```csharp
 public record SetZoneVolumeCommand : ICommand<Result>
@@ -67,7 +67,7 @@ public record SetZoneMuteCommand : ICommand<Result>
 public record ToggleZoneMuteCommand : ICommand<Result>
 ```
 
-#### Track & Playlist Management Commands
+#### 5.3.1.3. Track & Playlist Management Commands
 
 ```csharp
 public record SetTrackCommand : ICommand<Result>
@@ -84,7 +84,7 @@ public record NextPlaylistCommand : ICommand<Result>
 - Optional parameters for flexible command usage
 - Consistent naming convention following blueprint specifications
 
-### 2. Zone Query Definitions
+### 5.3.2. Zone Query Definitions
 
 **Location:** `/Server/Features/Zones/Queries/ZoneQueries.cs`
 
@@ -109,11 +109,11 @@ public record GetZoneVolumeQuery : IQuery<Result<int>>
 - Proper enum handling for `PlaybackStatus`
 - Consistent Result<T> wrapping
 
-### 3. Command & Query Handlers
+### 5.3.3. Command & Query Handlers
 
 **Location:** `/Server/Features/Zones/Handlers/`
 
-#### Command Handlers (`ZoneCommandHandlers.cs`)
+#### 5.3.3.1. Command Handlers (`ZoneCommandHandlers.cs`)
 
 ```csharp
 public class PlayCommandHandler : ICommandHandler<PlayCommand, Result>
@@ -146,7 +146,7 @@ public class PlayCommandHandler : ICommandHandler<PlayCommand, Result>
 }
 ```
 
-#### Query Handlers (`ZoneQueryHandlers.cs`)
+#### 5.3.3.2. Query Handlers (`ZoneQueryHandlers.cs`)
 
 ```csharp
 public class GetZoneStateQueryHandler : IQueryHandler<GetZoneStateQuery, Result<ZoneState>>
@@ -175,11 +175,11 @@ public class GetZoneStateQueryHandler : IQueryHandler<GetZoneStateQuery, Result<
 - Structured logging with contextual information
 - Result<T> pattern for unified error handling
 
-### 4. Zone Management Abstractions
+### 5.3.4. Zone Management Abstractions
 
 **Location:** `/Core/Abstractions/`
 
-#### IZoneManager Interface
+#### 5.3.4.1. IZoneManager Interface
 
 ```csharp
 public interface IZoneManager
@@ -190,7 +190,7 @@ public interface IZoneManager
 }
 ```
 
-#### IZoneService Interface
+#### 5.3.4.2. IZoneService Interface
 
 ```csharp
 public interface IZoneService
@@ -238,11 +238,11 @@ public interface IZoneService
 - Consistent async patterns with Result<T> returns
 - Flexible playlist selection (by index or ID)
 
-### 5. Placeholder Implementations
+### 5.3.5. Placeholder Implementations
 
 **Location:** `/Infrastructure/Services/ZoneManager.cs`
 
-#### ZoneManager Implementation
+#### 5.3.5.1. ZoneManager Implementation
 
 ```csharp
 public partial class ZoneManager : IZoneManager
@@ -266,7 +266,7 @@ public partial class ZoneManager : IZoneManager
 }
 ```
 
-#### ZoneService Implementation
+#### 5.3.5.2. ZoneService Implementation
 
 ```csharp
 public partial class ZoneService : IZoneService
@@ -319,7 +319,7 @@ public partial class ZoneService : IZoneService
 - Comprehensive logging with structured data
 - Thread-safe state updates
 
-### 6. RESTful API Controller
+### 5.3.6. RESTful API Controller
 
 **Location:** `/Controllers/ZoneController.cs`
 
@@ -385,9 +385,9 @@ public class ZoneController : ControllerBase
 - Structured error responses
 - Comprehensive exception handling
 
-### 7. Dependency Injection Configuration
+### 5.3.7. Dependency Injection Configuration
 
-#### Handler Registration (`CortexMediatorConfiguration.cs`)
+#### 5.3.7.1. Handler Registration (`CortexMediatorConfiguration.cs`)
 
 ```csharp
 // Zone command handlers
@@ -412,20 +412,20 @@ services.AddScoped<GetZonePlaybackStateQueryHandler>();
 services.AddScoped<GetZoneVolumeQueryHandler>();
 ```
 
-#### Service Registration (`Program.cs`)
+#### 5.3.7.2. Service Registration (`Program.cs`)
 
 ```csharp
 // Zone management services (placeholder implementations)
 builder.Services.AddScoped<IZoneManager, ZoneManager>();
 ```
 
-## Testing Results
+## 5.4. Testing Results
 
-### ✅ **API Endpoint Testing**
+### 5.4.1. ✅ **API Endpoint Testing**
 
 All endpoints were successfully tested in the Docker development environment:
 
-#### Get All Zone States
+#### 5.4.1.1. Get All Zone States
 
 ```bash
 $ docker exec snapdog-app-1 curl -s http://localhost:5000/api/zones/states | jq .
@@ -464,7 +464,7 @@ $ docker exec snapdog-app-1 curl -s http://localhost:5000/api/zones/states | jq 
 ]
 ```
 
-#### Zone Commands
+#### 5.4.1.2. Zone Commands
 
 ```bash
 # Play command - ✅ Success
@@ -486,45 +486,45 @@ $ docker exec snapdog-app-1 curl -s http://localhost:5000/api/zones/1/state | jq
 }
 ```
 
-### ✅ **Build Verification**
+### 5.4.2. ✅ **Build Verification**
 
 ```bash
 $ dotnet build
 ✅ Build succeeded with 0 errors, 39 warnings (nullable reference warnings only)
 ```
 
-### ✅ **Development Environment Integration**
+### 5.4.3. ✅ **Development Environment Integration**
 
 - All services running in Docker development environment
 - API accessible within container network
 - Proper logging and tracing integration
 - Ready for Caddy reverse proxy configuration
 
-## Architecture Consistency
+## 5.5. Architecture Consistency
 
-### ✅ **CQRS Pattern Adherence**
+### 5.5.1. ✅ **CQRS Pattern Adherence**
 
 - Clear command/query separation maintained
 - Consistent handler interfaces and implementations
 - Proper Result<T> pattern usage throughout
 
-### ✅ **Error Handling Consistency**
+### 5.5.2. ✅ **Error Handling Consistency**
 
 - Unified error response format
 - Proper HTTP status code mapping
 - Structured logging with contextual information
 - Graceful degradation for missing services
 
-### ✅ **Code Quality Standards**
+### 5.5.3. ✅ **Code Quality Standards**
 
 - Comprehensive XML documentation
 - Consistent naming conventions
 - Proper async/await patterns
 - Thread-safe implementations
 
-## Future Extension Points
+## 5.6. Future Extension Points
 
-### 🔄 **Ready for Real Implementation**
+### 5.6.1. 🔄 **Ready for Real Implementation**
 
 The placeholder implementations provide clear interfaces for:
 
@@ -533,7 +533,7 @@ The placeholder implementations provide clear interfaces for:
 - **State Persistence**: Add database or cache layer for zone state
 - **Event Notifications**: Implement zone state change notifications
 
-### 🔄 **Additional Commands**
+### 5.6.2. 🔄 **Additional Commands**
 
 The foundation supports easy addition of:
 
@@ -543,37 +543,37 @@ The foundation supports easy addition of:
 - Zone grouping operations
 - Client assignment commands
 
-### 🔄 **API Extensions**
+### 5.6.3. 🔄 **API Extensions**
 
 - WebSocket endpoints for real-time state updates
 - Bulk operations for multiple zones
 - Zone configuration endpoints
 - Historical state tracking
 
-## Lessons Learned
+## 5.7. Lessons Learned
 
-### ✅ **Successful Patterns**
+### 5.7.1. ✅ **Successful Patterns**
 
 1. **Consistent Architecture**: Following the global status pattern made implementation straightforward
 2. **Placeholder Strategy**: Realistic placeholder implementations enabled full testing
 3. **Manual DI Registration**: Continued approach worked reliably
 4. **Result<T> Pattern**: Provided consistent error handling across all operations
 
-### ⚠️ **Challenges Addressed**
+### 5.7.2. ⚠️ **Challenges Addressed**
 
 1. **Model Mapping**: Required careful alignment with existing `ZoneState` model structure
 2. **Enum Handling**: Proper conversion between string and enum types for `PlaybackStatus`
 3. **State Management**: Thread-safe state updates using record types with `with` expressions
 4. **Content Type Issues**: API testing revealed need for proper HTTP content type handling
 
-### 📋 **Best Practices Established**
+### 5.7.3. 📋 **Best Practices Established**
 
 1. **Comprehensive Testing**: Test all endpoints in realistic Docker environment
 2. **Structured Logging**: Include zone ID and operation context in all log messages
 3. **Graceful Error Handling**: Proper fallback when services are unavailable
 4. **Documentation**: Complete API documentation with examples
 
-## Conclusion
+## 5.8. Conclusion
 
 The zone commands implementation successfully extends the SnapDog2 architecture with comprehensive zone control functionality. The implementation maintains consistency with established patterns while providing a solid foundation for future Snapcast integration and external protocol support.
 

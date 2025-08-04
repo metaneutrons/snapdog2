@@ -1,12 +1,12 @@
-# Global Status Commands Implementation
+# 4. Global Status Commands Implementation
 
-## Overview
+## 4.1. Overview
 
 This document describes the successful implementation of the Global Status Commands as defined in the Command Framework (Section 15). All four global status types are now fully functional with API endpoints, handlers, and supporting infrastructure.
 
-## Implemented Components
+## 4.2. Implemented Components
 
-### 1. **Core Models** ✅
+### 4.2.1. **Core Models** ✅
 All required models exist in `SnapDog2.Core.Models`:
 - `SystemStatus` - Current system online status
 - `ErrorDetails` - Detailed error information  
@@ -17,42 +17,42 @@ All required models exist in `SnapDog2.Core.Models`:
 - `ZoneState` - Complete zone state (newly created)
 - `ClientState` - Complete client state (newly created)
 
-### 2. **Query Definitions** ✅
+### 4.2.2. **Query Definitions** ✅
 All queries implemented in `SnapDog2.Server.Features.Global.Queries`:
 - `GetSystemStatusQuery` - Returns `Result<SystemStatus>`
 - `GetErrorStatusQuery` - Returns `Result<ErrorDetails?>` (newly created)
 - `GetVersionInfoQuery` - Returns `Result<VersionDetails>`
 - `GetServerStatsQuery` - Returns `Result<ServerStats>`
 
-### 3. **Query Handlers** ✅
+### 4.2.3. **Query Handlers** ✅
 All handlers implemented in `SnapDog2.Server.Features.Global.Handlers`:
 - `GetSystemStatusQueryHandler` - Retrieves current system status
 - `GetErrorStatusQueryHandler` - Retrieves latest error information (newly created)
 - `GetVersionInfoQueryHandler` - Retrieves version information
 - `GetServerStatsQueryHandler` - Retrieves server performance metrics
 
-### 4. **Notification System** ✅
+### 4.2.4. **Notification System** ✅
 Notifications implemented in `SnapDog2.Server.Features.Shared.Notifications`:
 - `SystemStatusChangedNotification` - Published when system status changes
 - `SystemErrorNotification` - Published when errors occur
 - `VersionInfoChangedNotification` - Published when version info is requested (newly created)
 - `ServerStatsChangedNotification` - Published when server stats are updated (newly created)
 
-### 5. **Global Status Service** ✅
+### 4.2.5. **Global Status Service** ✅
 New service `IGlobalStatusService` / `GlobalStatusService`:
 - Coordinates publishing of all global status types
 - Provides methods for periodic status publishing
 - Handles error propagation and logging
 - Ready for MQTT/KNX integration
 
-### 6. **API Endpoints** ✅
+### 4.2.6. **API Endpoints** ✅
 New controller `GlobalStatusController` with endpoints:
 - `GET /api/globalstatus/system` - Current system status
 - `GET /api/globalstatus/error` - Latest error (204 if none)
 - `GET /api/globalstatus/version` - Version information
 - `GET /api/globalstatus/stats` - Server statistics
 
-## API Testing Results
+## 4.3. API Testing Results
 
 All endpoints are functional and returning correct data:
 
@@ -92,9 +92,9 @@ GET /api/globalstatus/stats
 }
 ```
 
-## Technical Implementation Details
+## 4.4. Technical Implementation Details
 
-### Dependency Injection Configuration
+### 4.4.1. Dependency Injection Configuration
 ```csharp
 // In CortexMediatorConfiguration.cs
 services.AddScoped<GetSystemStatusQueryHandler>();
@@ -106,7 +106,7 @@ services.AddScoped<GetServerStatsQueryHandler>();
 builder.Services.AddScoped<IGlobalStatusService, GlobalStatusService>();
 ```
 
-### Handler Pattern
+### 4.4.2. Handler Pattern
 All handlers follow the consistent pattern:
 ```csharp
 public class GetSystemStatusQueryHandler : IQueryHandler<GetSystemStatusQuery, Result<SystemStatus>>
@@ -118,49 +118,49 @@ public class GetSystemStatusQueryHandler : IQueryHandler<GetSystemStatusQuery, R
 }
 ```
 
-### Error Handling
+### 4.4.3. Error Handling
 - All handlers use `Result<T>` pattern for consistent error handling
 - Controllers return appropriate HTTP status codes (200, 204, 400, 500)
 - Comprehensive logging at Debug/Warning/Error levels
 - Exception handling with graceful degradation
 
-## Integration Points
+## 4.5. Integration Points
 
-### Command Framework Alignment
+### 4.5.1. Command Framework Alignment
 - ✅ Follows CQRS pattern with separate queries and handlers
 - ✅ Uses `Result<T>` wrapper for consistent error handling
 - ✅ Implements proper logging and metrics collection
 - ✅ Ready for pipeline behavior integration (validation, performance, logging)
 
-### External System Integration (Ready)
+### 4.5.2. External System Integration (Ready)
 - **MQTT Publishing**: `GlobalStatusService` ready to publish to MQTT topics
 - **KNX Integration**: Status can be mapped to KNX Group Addresses
 - **Notification System**: All status changes trigger notifications for external adapters
 
-## Next Steps
+## 4.6. Next Steps
 
-### 1. **MQTT Integration**
+### 4.6.1. **MQTT Integration**
 Implement MQTT publishing in `GlobalStatusService`:
 ```csharp
 // TODO: Add MQTT client injection
 // TODO: Publish to topics like "snapdog/global/system/status"
 ```
 
-### 2. **KNX Integration**
+### 4.6.2. **KNX Integration**
 Implement KNX Group Address publishing:
 ```csharp
 // TODO: Add KNX client injection  
 // TODO: Map status values to appropriate DPT types
 ```
 
-### 3. **Periodic Publishing**
+### 4.6.3. **Periodic Publishing**
 Implement timer-based periodic status publishing:
 ```csharp
 // TODO: Add Timer for system status (every 30s)
 // TODO: Add Timer for server stats (every 60s)
 ```
 
-### 4. **Error Tracking Service**
+### 4.6.4. **Error Tracking Service**
 Implement proper error tracking for `GetErrorStatusQuery`:
 ```csharp
 // TODO: Create IErrorTrackingService
@@ -168,7 +168,7 @@ Implement proper error tracking for `GetErrorStatusQuery`:
 // TODO: Integrate with logging pipeline
 ```
 
-## Status Summary
+## 4.7. Status Summary
 
 | Component | Status | Notes |
 |-----------|--------|-------|

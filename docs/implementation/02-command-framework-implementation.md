@@ -1,18 +1,18 @@
-# Implementation Status #02: Command Framework (CQRS with Cortex.Mediator)
+# 2. Implementation Status #02: Command Framework (CQRS with Cortex.Mediator)
 
 **Status**: ✅ **COMPLETE**  
 **Date**: 2025-08-02  
 **Blueprint Reference**: [20-command-framework.md](../blueprint/20-command-framework.md)
 
-## Overview
+## 2.1. Overview
 
 The Command Framework has been fully implemented using Cortex.Mediator v1.7.0, providing a complete CQRS (Command Query Responsibility Segregation) pattern implementation. The framework includes queries, handlers, notifications, pipeline behaviors, and dependency injection configuration.
 
-## What Has Been Implemented
+## 2.2. What Has Been Implemented
 
-### ✅ Core Framework Components
+### 2.2.1. ✅ Core Framework Components
 
-#### 1. **Query Pattern Implementation**
+#### 2.2.1.1. **Query Pattern Implementation**
 Located in `SnapDog2/Server/Features/Global/Queries/`:
 
 - **GetSystemStatusQuery.cs** - Query for current system status
@@ -21,7 +21,7 @@ Located in `SnapDog2/Server/Features/Global/Queries/`:
 
 All queries implement `IQuery<TResult>` from `Cortex.Mediator.Queries` namespace.
 
-#### 2. **Query Handlers**
+#### 2.2.1.2. **Query Handlers**
 Located in `SnapDog2/Server/Features/Global/Handlers/`:
 
 - **GetSystemStatusQueryHandler.cs** - Handles system status requests
@@ -30,7 +30,7 @@ Located in `SnapDog2/Server/Features/Global/Handlers/`:
 
 All handlers implement `IQueryHandler<TQuery, TResult>` with proper error handling and logging.
 
-#### 3. **Notification System**
+#### 2.2.1.3. **Notification System**
 Located in `SnapDog2/Server/Features/Shared/Notifications/`:
 
 - **SystemStatusChangedNotification.cs** - Published when system status changes
@@ -38,35 +38,35 @@ Located in `SnapDog2/Server/Features/Shared/Notifications/`:
 
 All notifications implement `INotification` from `Cortex.Mediator.Notifications` namespace.
 
-### ✅ Pipeline Behaviors
+### 2.2.2. ✅ Pipeline Behaviors
 
 Located in `SnapDog2/Server/Behaviors/`, implementing cross-cutting concerns:
 
-#### Command Pipeline Behaviors
+#### 2.2.2.1. Command Pipeline Behaviors
 - **LoggingCommandBehavior.cs** - Logs command execution with OpenTelemetry Activities
 - **PerformanceCommandBehavior.cs** - Monitors command execution time and logs slow operations
 - **ValidationCommandBehavior.cs** - Validates commands using FluentValidation
 
-#### Query Pipeline Behaviors  
+#### 2.2.2.2. Query Pipeline Behaviors
 - **LoggingQueryBehavior.cs** - Logs query execution with OpenTelemetry Activities
 - **PerformanceQueryBehavior.cs** - Monitors query execution time and logs slow operations
 - **ValidationQueryBehavior.cs** - Validates queries using FluentValidation
 
 All behaviors use structured logging with `LoggerMessage` attributes and proper exception handling.
 
-### ✅ Service Implementations
+### 2.2.3. ✅ Service Implementations
 
 Located in `SnapDog2/Infrastructure/Services/`:
 
-#### Core Services
+#### 2.2.3.1. Core Services
 - **SystemStatusService.cs** - Implements `ISystemStatusService` for system health monitoring
 - **MetricsService.cs** - Implements `IMetricsService` for performance metrics collection
 
 Both services include placeholder implementations with TODO comments for future enhancement.
 
-### ✅ Dependency Injection Configuration
+### 2.2.4. ✅ Dependency Injection Configuration
 
-#### CortexMediatorConfiguration.cs
+#### 2.2.4.1. CortexMediatorConfiguration.cs
 Located in `SnapDog2/Worker/DI/CortexMediatorConfiguration.cs`:
 
 - Configures Cortex.Mediator with assembly scanning
@@ -74,14 +74,14 @@ Located in `SnapDog2/Worker/DI/CortexMediatorConfiguration.cs`:
 - Integrates FluentValidation for request validation
 - Uses proper DI lifetime management (Scoped services)
 
-#### Program.cs Integration
+#### 2.2.4.2. Program.cs Integration
 - Registers `ISystemStatusService` and `IMetricsService` implementations
 - Calls `AddCommandProcessing()` extension method for framework setup
 - Maintains clean separation of concerns
 
-## Technical Implementation Details
+## 2.3. Technical Implementation Details
 
-### ✅ API Discovery and Interface Mapping
+### 2.3.1. ✅ API Discovery and Interface Mapping
 
 Successfully resolved Cortex.Mediator v1.7.0 API differences from documentation:
 
@@ -92,7 +92,7 @@ Successfully resolved Cortex.Mediator v1.7.0 API differences from documentation:
 | `INotification` | `INotification` | `Cortex.Mediator.Notifications` |
 | `IPipelineBehavior<,>` | `ICommandPipelineBehavior<,>` / `IQueryPipelineBehavior<,>` | `Cortex.Mediator.Commands` / `Cortex.Mediator.Queries` |
 
-### ✅ Error Resolution Process
+### 2.3.2. ✅ Error Resolution Process
 
 1. **Initial Build Errors**: 23 compilation errors due to incorrect interface names
 2. **API Exploration**: Created runtime exploration tool to discover correct interfaces
@@ -100,25 +100,25 @@ Successfully resolved Cortex.Mediator v1.7.0 API differences from documentation:
 4. **DI Resolution**: Fixed missing service registrations causing runtime failures
 5. **Final Validation**: Confirmed application starts successfully in dev container
 
-### ✅ Architecture Patterns
+### 2.3.3. ✅ Architecture Patterns
 
-#### CQRS Implementation
+#### 2.3.3.1. CQRS Implementation
 - **Queries**: Read-only operations returning data
 - **Commands**: Write operations (ready for future implementation)
 - **Handlers**: Single responsibility for each operation
 - **Notifications**: Event-driven communication
 
-#### Pipeline Pattern
+#### 2.3.3.2. Pipeline Pattern
 - **Logging**: Request/response logging with correlation IDs
 - **Performance**: Execution time monitoring with configurable thresholds
 - **Validation**: FluentValidation integration with detailed error reporting
 
-#### Dependency Injection
+#### 2.3.3.3. Dependency Injection
 - **Scoped Lifetime**: Appropriate for request-scoped operations
 - **Interface Segregation**: Separate concerns (ISystemStatusService, IMetricsService)
 - **Extension Methods**: Clean configuration with `AddCommandProcessing()`
 
-## File Structure
+## 2.4. File Structure
 
 ```
 SnapDog2/
@@ -139,39 +139,39 @@ SnapDog2/
     └── Models/                   # Data models and Result types
 ```
 
-## Integration Points
+## 2.5. Integration Points
 
-### ✅ Existing System Integration
+### 2.5.1. ✅ Existing System Integration
 - **Configuration System**: Uses SnapDogConfiguration for settings
 - **Logging**: Integrates with Serilog structured logging
 - **Health Checks**: SystemStatusService provides health information
 - **Development Environment**: Works with Docker dev container and hot reload
 
-### ✅ Future Extension Points
+### 2.5.2. ✅ Future Extension Points
 - **Command Implementation**: Framework ready for write operations
 - **Additional Queries**: Easy to add new query types following established patterns
 - **Custom Behaviors**: Pipeline extensible for additional cross-cutting concerns
 - **Metrics Enhancement**: MetricsService ready for Prometheus/Application Insights integration
 
-## Testing and Validation
+## 2.6. Testing and Validation
 
-### ✅ Build Verification
+### 2.6.1. ✅ Build Verification
 - **Compilation**: All 23 initial errors resolved
 - **Dependencies**: Correct NuGet packages installed (Cortex.Mediator, FluentValidation)
 - **Hot Reload**: dotnet watch integration working in dev container
 
-### ✅ Runtime Verification  
+### 2.6.2. ✅ Runtime Verification
 - **Application Startup**: Successfully starts without DI errors
 - **Health Endpoint**: Returns HTTP 200 on `/health`
 - **Service Resolution**: All handlers and services properly registered
 - **Logging**: Structured logging working with correlation
 
-### ✅ Development Environment
+### 2.6.3. ✅ Development Environment
 - **Docker Integration**: Works in dev container with `make dev`
 - **Reverse Proxy**: Accessible via `http://localhost:8000`
 - **File Watching**: Changes automatically trigger rebuild and restart
 
-## Next Steps
+## 2.7. Next Steps
 
 The Command Framework is now ready for:
 
@@ -182,7 +182,7 @@ The Command Framework is now ready for:
 5. **Validation Rules**: Add FluentValidation rules for complex business logic
 6. **Integration Testing**: Add tests for end-to-end command/query flows
 
-## Dependencies
+## 2.8. Dependencies
 
 - **Cortex.Mediator** v1.7.0 - CQRS framework
 - **FluentValidation** v11.9.2 - Request validation

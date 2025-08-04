@@ -1,16 +1,16 @@
-# Status Notifications Implementation
+# 9. Status Notifications Implementation
 
 **Date:** 2025-08-02  
 **Status:** ✅ Complete  
 **Blueprint Reference:** [16d-queries-and-notifications.md](../blueprint/16d-queries-and-notifications.md)
 
-## Overview
+## 9.1. Overview
 
 This document describes the complete implementation of the Status Notifications system following the blueprint specification. The implementation includes zone status notifications, client status notifications, generic status change notifications, notification handlers with structured logging, and a test endpoint for verification. All components follow the established CQRS patterns and provide a foundation for future infrastructure adapter integration (MQTT, KNX).
 
-## Implementation Scope
+## 9.2. Implementation Scope
 
-### Core Notification Infrastructure
+### 9.2.1. Core Notification Infrastructure
 
 **Zone Status Notifications:**
 - `ZonePlaybackStateChangedNotification` - Playback state changes
@@ -33,7 +33,7 @@ This document describes the complete implementation of the Status Notifications 
 **Generic Infrastructure:**
 - `StatusChangedNotification` - Protocol-agnostic status updates for infrastructure adapters
 
-### Notification Handlers
+### 9.2.2. Notification Handlers
 
 **Zone Notification Handler:**
 - `ZoneStateNotificationHandler` - Handles all zone-related notifications
@@ -45,9 +45,9 @@ This document describes the complete implementation of the Status Notifications 
 - Structured logging with message IDs 6101-6106
 - Placeholder for future infrastructure adapter integration
 
-## Implementation Details
+## 9.3. Implementation Details
 
-### 1. Zone Status Notifications
+### 9.3.1. Zone Status Notifications
 
 **File:** `SnapDog2/Server/Features/Shared/Notifications/ZoneNotifications.cs`
 
@@ -92,7 +92,7 @@ public record ZoneTrackChangedNotification : INotification
 - Strongly typed with appropriate domain models
 - Consistent naming conventions following blueprint
 
-### 2. Client Status Notifications
+### 9.3.2. Client Status Notifications
 
 **File:** `SnapDog2/Server/Features/Shared/Notifications/ClientNotifications.cs`
 
@@ -127,7 +127,7 @@ public record ClientZoneAssignmentChangedNotification : INotification
 - Connection status monitoring capabilities
 - Complete state change notifications for comprehensive updates
 
-### 3. Generic Status Changed Notification
+### 9.3.3. Generic Status Changed Notification
 
 **File:** `SnapDog2/Server/Features/Shared/Notifications/StatusChangedNotification.cs`
 
@@ -168,7 +168,7 @@ public record StatusChangedNotification : INotification
 - Target ID format: `zone_{id}` or `client_{id}`
 - Ready for MQTT topic mapping and KNX group address mapping
 
-### 4. Zone Notification Handler
+### 9.3.4. Zone Notification Handler
 
 **File:** `SnapDog2/Server/Features/Shared/Handlers/ZoneStateNotificationHandler.cs`
 
@@ -220,7 +220,7 @@ public async Task Handle(ZoneVolumeChangedNotification notification, Cancellatio
 - Client notifications: 6101-6106
 - Unique IDs for each notification type ensure log traceability
 
-### 5. Client Notification Handler
+### 9.3.5. Client Notification Handler
 
 **File:** `SnapDog2/Server/Features/Shared/Handlers/ClientStateNotificationHandler.cs`
 
@@ -248,7 +248,7 @@ private partial void LogZoneAssignmentChange(int clientId, int? previousZoneId, 
 private partial void LogConnectionChange(int clientId, bool isConnected);
 ```
 
-### 6. Dependency Injection Registration
+### 9.3.6. Dependency Injection Registration
 
 **File:** `SnapDog2/Worker/DI/CortexMediatorConfiguration.cs`
 
@@ -262,7 +262,7 @@ services.AddScoped<SnapDog2.Server.Features.Shared.Handlers.ClientStateNotificat
 
 **Service Lifetime:** Scoped - ensures handlers are created per request/operation scope, allowing for proper resource management and dependency injection.
 
-### 7. Test Notification Endpoint
+### 9.3.7. Test Notification Endpoint
 
 **File:** `SnapDog2/Controllers/ZoneController.cs`
 
@@ -287,9 +287,9 @@ public async Task<ActionResult> TestZoneNotification(
 - Proper error handling and logging
 - Query parameter support for easy testing
 
-## Testing Results
+## 9.4. Testing Results
 
-### Docker Environment Testing
+### 9.4.1. Docker Environment Testing
 
 All notification functionality tested successfully in the Docker development environment:
 
@@ -331,39 +331,39 @@ curl -X POST "http://localhost:5000/api/zones/1/test-notification?volume=150"
 - Handlers successfully resolved and invoked
 - No dependency injection errors or missing services
 
-## Architecture Compliance
+## 9.5. Architecture Compliance
 
-### ✅ CQRS Pattern Implementation
+### 9.5.1. ✅ CQRS Pattern Implementation
 - Clear separation between notifications and other concerns
 - Notification handlers follow established handler patterns
 - Proper use of `INotification` and `INotificationHandler<T>` interfaces
 - Consistent with existing command and query implementations
 
-### ✅ Structured Logging Implementation
+### 9.5.2. ✅ Structured Logging Implementation
 - Unique message IDs for all notification types (6001-6106 range)
 - Contextual information included in all log messages
 - Performance and behavior tracking implemented
 - Proper use of partial classes and LoggerMessage attributes
 
-### ✅ Dependency Injection Consistency
+### 9.5.3. ✅ Dependency Injection Consistency
 - All handlers properly registered with correct lifetimes
 - Manual registration pattern maintained for consistency
 - Service dependencies correctly resolved
 - Interface-based design maintained
 
-### ✅ Domain Model Integration
+### 9.5.4. ✅ Domain Model Integration
 - Notifications use existing domain models (ZoneState, ClientState, TrackInfo, PlaylistInfo)
 - Proper enum usage (PlaybackStatus)
 - Consistent property naming and types
 - Strong typing throughout the notification system
 
-### ✅ Error Handling Standards
+### 9.5.5. ✅ Error Handling Standards
 - Comprehensive exception handling in test endpoint
 - Proper HTTP status codes and error responses
 - Graceful degradation when handlers are unavailable
 - Consistent error logging patterns
 
-## Blueprint Compliance
+## 9.6. Blueprint Compliance
 
 The implementation fully complies with [16d-queries-and-notifications.md](../blueprint/16d-queries-and-notifications.md):
 
@@ -376,7 +376,7 @@ The implementation fully complies with [16d-queries-and-notifications.md](../blu
 - ✅ Timestamp tracking implemented
 - ✅ Proper notification interface usage
 
-## Build and Deployment Status
+## 9.7. Build and Deployment Status
 
 - ✅ **Build Status:** Clean build with 0 warnings, 0 errors
 - ✅ **Docker Integration:** Successfully running in development environment
@@ -385,11 +385,11 @@ The implementation fully complies with [16d-queries-and-notifications.md](../blu
 - ✅ **Test Endpoint:** Functional and accessible
 - ✅ **Logging Integration:** Structured logs appearing correctly
 
-## Future Infrastructure Adapter Integration
+## 9.8. Future Infrastructure Adapter Integration
 
 The notification system is designed for easy integration with infrastructure adapters:
 
-### MQTT Integration (Future)
+### 9.8.1. MQTT Integration (Future)
 ```csharp
 // Example future MQTT integration in notification handlers
 public async Task Handle(ZoneVolumeChangedNotification notification, CancellationToken cancellationToken)
@@ -402,7 +402,7 @@ public async Task Handle(ZoneVolumeChangedNotification notification, Cancellatio
 }
 ```
 
-### KNX Integration (Future)
+### 9.8.2. KNX Integration (Future)
 ```csharp
 // Example future KNX integration in notification handlers
 public async Task Handle(ZoneVolumeChangedNotification notification, CancellationToken cancellationToken)
@@ -415,7 +415,7 @@ public async Task Handle(ZoneVolumeChangedNotification notification, Cancellatio
 }
 ```
 
-### Generic Status Publishing (Future)
+### 9.8.3. Generic Status Publishing (Future)
 The `StatusChangedNotification` provides a protocol-agnostic way to publish status changes:
 
 ```csharp
@@ -430,27 +430,27 @@ var statusNotification = new StatusChangedNotification
 await _genericStatusPublisher.PublishAsync(statusNotification, cancellationToken);
 ```
 
-## Performance Considerations
+## 9.9. Performance Considerations
 
-### ✅ Efficient Notification Patterns
+### 9.9.1. ✅ Efficient Notification Patterns
 - Lightweight notification objects with minimal data
 - Direct handler invocation without unnecessary overhead
 - Proper async/await usage throughout
 - No blocking operations in notification handlers
 
-### ✅ Memory Management
+### 9.9.2. ✅ Memory Management
 - Record types provide efficient immutable notifications
 - Minimal object allocation in notification paths
 - Proper disposal patterns where applicable
 - UTC timestamps avoid timezone conversion overhead
 
-### ✅ Logging Performance
+### 9.9.3. ✅ Logging Performance
 - Structured logging with compile-time message generation
 - Minimal string interpolation overhead
 - Appropriate log levels (Information for state changes)
 - Contextual information without excessive verbosity
 
-## Next Steps
+## 9.10. Next Steps
 
 With the Status Notifications implementation complete, the next logical steps following the blueprint are:
 
@@ -462,9 +462,9 @@ With the Status Notifications implementation complete, the next logical steps fo
 
 The foundation is now complete with Zone Commands, Client Commands, Zone Queries, and Status Notifications fully implemented, providing a comprehensive CQRS framework with full observability ready for real Snapcast integration and infrastructure adapter development.
 
-## Files Created/Modified
+## 9.11. Files Created/Modified
 
-### New Files Created (6 files)
+### 9.11.1. New Files Created (6 files)
 ```
 SnapDog2/Server/Features/Shared/Notifications/ZoneNotifications.cs
 SnapDog2/Server/Features/Shared/Notifications/ClientNotifications.cs
@@ -473,7 +473,7 @@ SnapDog2/Server/Features/Shared/Handlers/ZoneStateNotificationHandler.cs
 SnapDog2/Server/Features/Shared/Handlers/ClientStateNotificationHandler.cs
 ```
 
-### Modified Files (2 files)
+### 9.11.2. Modified Files (2 files)
 ```
 SnapDog2/Controllers/ZoneController.cs - Added test notification endpoint and using statements
 SnapDog2/Worker/DI/CortexMediatorConfiguration.cs - Added notification handler registrations
@@ -481,7 +481,7 @@ SnapDog2/Worker/DI/CortexMediatorConfiguration.cs - Added notification handler r
 
 **Total Implementation:** 8 files created/modified for complete Status Notifications system implementation.
 
-## Summary
+## 9.12. Summary
 
 The Status Notifications implementation represents a crucial milestone in the SnapDog2 project, completing the observability layer of the CQRS pattern. The implementation provides:
 

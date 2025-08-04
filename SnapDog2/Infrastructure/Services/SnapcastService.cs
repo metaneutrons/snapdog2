@@ -17,6 +17,7 @@ using SnapcastClient.Params;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Core.Enums;
+using SnapDog2.Core.Helpers;
 using SnapDog2.Core.Models;
 using SnapDog2.Server.Features.Shared.Notifications;
 using SnapDog2.Server.Notifications;
@@ -150,18 +151,8 @@ public partial class SnapcastService
     /// </summary>
     private ResiliencePipeline CreateConnectionPolicy()
     {
-        return new ResiliencePipelineBuilder()
-            .AddRetry(
-                new RetryStrategyOptions
-                {
-                    MaxRetryAttempts = 3,
-                    Delay = TimeSpan.FromSeconds(2),
-                    BackoffType = DelayBackoffType.Exponential,
-                    UseJitter = true,
-                }
-            )
-            .AddTimeout(TimeSpan.FromSeconds(_config.Timeout))
-            .Build();
+        var validatedConfig = ResiliencePolicyFactory.ValidateAndNormalize(_config.Resilience.Connection);
+        return ResiliencePolicyFactory.CreatePipeline(validatedConfig, "Snapcast-Connection");
     }
 
     /// <summary>
@@ -169,17 +160,8 @@ public partial class SnapcastService
     /// </summary>
     private ResiliencePipeline CreateOperationPolicy()
     {
-        return new ResiliencePipelineBuilder()
-            .AddRetry(
-                new RetryStrategyOptions
-                {
-                    MaxRetryAttempts = 2,
-                    Delay = TimeSpan.FromMilliseconds(500),
-                    BackoffType = DelayBackoffType.Linear,
-                }
-            )
-            .AddTimeout(TimeSpan.FromSeconds(10))
-            .Build();
+        var validatedConfig = ResiliencePolicyFactory.ValidateAndNormalize(_config.Resilience.Operation);
+        return ResiliencePolicyFactory.CreatePipeline(validatedConfig, "Snapcast-Operation");
     }
 
     #endregion

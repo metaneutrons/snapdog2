@@ -1,6 +1,6 @@
-# 9. API Specification
+# 10. API Specification
 
-## 9.1. API Design Philosophy
+## 10.1. API Design Philosophy
 
 The SnapDog2 Application Programming Interface (API) is designed as a modern, **RESTful HTTP interface** providing comprehensive programmatic control over the audio management system. It serves as a primary integration point for web UIs, mobile applications, third-party services, and custom scripts operating within the local network.
 
@@ -18,7 +18,7 @@ Key design principles underpinning the API are:
 4. **Statelessness**: The API is stateless. Each request from a client must contain all the information needed to understand and process the request. The server does not maintain client session state between requests. Authentication is handled per-request via API keys.
 5. **Clear Versioning**: Uses URI path versioning (`/api/v1/`) to manage changes and ensure backward compatibility where possible.
 
-## 9.2. Authentication and Authorization
+## 10.2. Authentication and Authorization
 
 Given SnapDog2's typical deployment within a trusted local network, the primary security mechanism focuses on preventing unauthorized *control* rather than complex user management or data protection.
 
@@ -26,7 +26,7 @@ Given SnapDog2's typical deployment within a trusted local network, the primary 
 * **Authorization**: Currently basic. Successful authentication grants access to all authorized endpoints. Finer-grained authorization (e.g., specific keys only allowed to control certain zones) is **not implemented** in the current scope but could be a future enhancement. A failed authorization check (if implemented later) would result in a `403 Forbidden` response.
 * *(Future Considerations)*: While Bearer Tokens (JWT) or OAuth2 could be added later for more complex scenarios or third-party integrations, they are outside the current MVP scope.
 
-## 9.2.1. Server Configuration
+## 10.3. Server Configuration
 
 The API server configuration is controlled via environment variables:
 
@@ -47,11 +47,11 @@ When `SNAPDOG_API_ENABLED=false`, the API server is completely disabled - no HTT
 
 The server listens on all network interfaces (`0.0.0.0`) on the configured port, making it accessible from any device on the local network.
 
-## 9.3. API Structure (`/api/v1/`)
+## 10.4. API Structure (`/api/v1/`)
 
 Base path: `/api/v1`. All endpoints below assume this prefix.
 
-### 9.3.1. Global Endpoints
+### 10.4.1. Global Endpoints
 
 Endpoints for accessing system-wide information.
 
@@ -64,7 +64,7 @@ Endpoints for accessing system-wide information.
 
 *(Note: DTO structures match Core Models where appropriate)*
 
-### 9.3.2. Zone Endpoints
+### 10.4.2. Zone Endpoints
 
 Endpoints for interacting with configured audio zones. **Zone creation/deletion/rename is not supported via API** as zones are defined via environment variables. **Indices are 1-based.**
 
@@ -122,7 +122,7 @@ public record ClientInfo(int Id, string Name, bool Connected, int? ZoneId);
 // Full GET /clients/{id} uses Core.Models.ClientState
 ```
 
-### 9.3.3. Client Endpoints
+### 10.4.3. Client Endpoints
 
 Endpoints for interacting with discovered Snapcast clients.
 
@@ -142,7 +142,7 @@ Endpoints for interacting with discovered Snapcast clients.
 | `GET`  | `/clients/{clientId}/settings/zone`     | `CLIENT_ZONE_STATUS`   | Get client assigned zone   | Path: `{clientId}`            | `object` { int? ZoneId }    | 200 OK      |
 | `PUT`  | `/clients/{clientId}/settings/name`     | `RENAME_CLIENT`        | Rename client in Snapcast  | Path: `{clientId}`; Body: `RenameRequest`{ string Name } | `object` { string Name }      | 200 OK      |
 
-### 9.3.4. Media Management Endpoints
+### 10.4.4. Media Management Endpoints
 
 Endpoints for browsing available media sources (initially Subsonic and Radio).
 
@@ -156,9 +156,9 @@ Endpoints for browsing available media sources (initially Subsonic and Radio).
 
 *(Note: `playlistIdOrIndex` accepts `1` or `"radio"` for the Radio playlist, `2+` or Subsonic IDs for others. `trackId` format depends on the source.)*
 
-## 9.4. Request and Response Format
+## 10.5. Request and Response Format
 
-### 9.4.1. Standard Response Wrapper (`ApiResponse<T>`)
+### 10.5.1. Standard Response Wrapper (`ApiResponse<T>`)
 
 All API responses use a consistent JSON wrapper.
 
@@ -189,7 +189,7 @@ public class ApiError { public string Code { get; set; } public string Message {
 
 *(Success/Error examples remain as previously defined)*
 
-## 9.5. HTTP Status Codes
+## 10.6. HTTP Status Codes
 
 Standard HTTP status codes are used:
 
@@ -199,7 +199,7 @@ Standard HTTP status codes are used:
 
 Error responses include the `ApiError` structure in the response body.
 
-## 9.6. Pagination, Filtering, and Sorting
+## 10.7. Pagination, Filtering, and Sorting
 
 Endpoints returning collections support standard query parameters:
 
@@ -221,7 +221,7 @@ Paginated responses include metadata:
 }
 ```
 
-## 9.7. Webhooks and Event Streams (Optional / Future)
+## 10.8. Webhooks and Event Streams (Optional / Future)
 
 Mechanisms for pushing real-time updates from SnapDog2:
 
@@ -230,7 +230,7 @@ Mechanisms for pushing real-time updates from SnapDog2:
 
 *(Implementation details deferred)*
 
-## 9.8. HATEOAS Links (Optional)
+## 10.9. HATEOAS Links (Optional)
 
 Responses *may* include a `_links` object with hypermedia controls for related actions.
 
@@ -245,7 +245,7 @@ Responses *may* include a `_links` object with hypermedia controls for related a
 
 *(Implementation details deferred)*
 
-## 9.9. API Implementation Notes
+## 10.10. API Implementation Notes
 
 * Implemented using ASP.NET Core Minimal APIs or MVC Controllers within the `/Api` folder.
 * Controllers/Endpoints act as thin layers, translating HTTP to Cortex.Mediator requests (`_mediator.Send(...)`).
@@ -253,12 +253,12 @@ Responses *may* include a `_links` object with hypermedia controls for related a
 * Leverage ASP.NET Core middleware for exception handling (converting to `ApiResponse`), authentication, authorization, rate limiting, security headers.
 * Use built-in model binding and validation, potentially enhanced by FluentValidation integration.
 
-## 9.10. API Versioning
+## 10.11. API Versioning
 
 * Uses URI path versioning (`/api/v1/`).
 * Maintain backward compatibility within `v1.x`. Introduce breaking changes only in new major versions (`v2`).
 
-## 9.11. API Documentation (Swagger/OpenAPI)
+## 10.12. API Documentation (Swagger/OpenAPI)
 
 * Uses **Swashbuckle.AspNetCore** NuGet package.
 * Generate OpenAPI specification automatically from code (controllers, DTOs, XML comments).

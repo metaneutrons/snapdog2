@@ -1,16 +1,16 @@
-# Zone Queries Implementation
+# 8. Zone Queries Implementation
 
 **Date:** 2025-08-02
 **Status:** ✅ Complete
 **Blueprint Reference:** [16d-queries-and-notifications.md](../blueprint/16d-queries-and-notifications.md)
 
-## Overview
+## 8.1. Overview
 
 This document describes the complete implementation of the Zone Queries layer following the blueprint specification. The implementation includes zone state queries, track and playlist information queries, comprehensive playlist management, structured logging, query handlers, and RESTful API endpoints. All components follow the established CQRS patterns and architectural consistency with the Zone Commands and Client Commands implementations.
 
-## Implementation Scope
+## 8.2. Implementation Scope
 
-### Core Infrastructure Extended
+### 8.2.1. Core Infrastructure Extended
 
 **Enhanced Interfaces:**
 
@@ -21,7 +21,7 @@ This document describes the complete implementation of the Zone Queries layer fo
 
 - `PlaylistManager` - Manages playlist and track information
 
-### Zone Queries Implemented
+### 8.2.2. Zone Queries Implemented
 
 **State Queries:**
 
@@ -36,16 +36,16 @@ This document describes the complete implementation of the Zone Queries layer fo
 - `GetZoneTrackInfoQuery` - Retrieve current track information for a zone
 - `GetZonePlaylistInfoQuery` - Retrieve current playlist information for a zone
 
-### Playlist Queries Implemented
+### 8.2.3. Playlist Queries Implemented
 
 **Playlist Management Queries:**
 
 - `GetAllPlaylistsQuery` - Retrieve all available playlists
 - `GetPlaylistTracksQuery` - Retrieve tracks for a specific playlist (by ID or index)
 
-## Implementation Details
+## 8.3. Implementation Details
 
-### 1. Enhanced Core Interfaces
+### 8.3.1. Enhanced Core Interfaces
 
 **File:** `SnapDog2/Core/Abstractions/IZoneManager.cs`
 
@@ -84,7 +84,7 @@ public interface IPlaylistManager
 }
 ```
 
-### 2. Enhanced Query Definitions
+### 8.3.2. Enhanced Query Definitions
 
 **File:** `SnapDog2/Server/Features/Zones/Queries/ZoneQueries.cs`
 
@@ -127,7 +127,7 @@ public record GetPlaylistTracksQuery : IQuery<Result<List<TrackInfo>>>
 }
 ```
 
-### 3. Enhanced Query Handlers with Structured Logging
+### 8.3.3. Enhanced Query Handlers with Structured Logging
 
 **File:** `SnapDog2/Server/Features/Zones/Handlers/ZoneQueryHandlers.cs`
 
@@ -175,7 +175,7 @@ public async Task<Result<List<ZoneState>>> Handle(GetAllZonesQuery request, Canc
 }
 ```
 
-### 4. Playlist Manager Implementation
+### 8.3.4. Playlist Manager Implementation
 
 **File:** `SnapDog2/Infrastructure/Services/PlaylistManager.cs`
 
@@ -220,7 +220,7 @@ var track = new TrackInfo
 };
 ```
 
-### 5. Enhanced ZoneManager Implementation
+### 8.3.5. Enhanced ZoneManager Implementation
 
 **File:** `SnapDog2/Infrastructure/Services/ZoneManager.cs`
 
@@ -262,7 +262,7 @@ public async Task<Result<List<ZoneState>>> GetAllZoneStatesAsync()
 }
 ```
 
-### 6. Enhanced Zone API Controller
+### 8.3.6. Enhanced Zone API Controller
 
 **File:** `SnapDog2/Controllers/ZoneController.cs`
 
@@ -292,7 +292,7 @@ public async Task<ActionResult<TrackInfo>> GetZoneTrackInfo([Range(1, int.MaxVal
 public async Task<ActionResult<PlaylistInfo>> GetZonePlaylistInfo([Range(1, int.MaxValue)] int zoneId, CancellationToken cancellationToken)
 ```
 
-### 7. New Playlist API Controller
+### 8.3.7. New Playlist API Controller
 
 **File:** `SnapDog2/Controllers/PlaylistController.cs`
 
@@ -316,7 +316,7 @@ _logger.LogWarning("Failed to get all playlists: {Error}", result.ErrorMessage);
 return StatusCode(500, new { error = result.ErrorMessage ?? "Failed to retrieve playlists" });
 ```
 
-### 8. Dependency Injection Registration
+### 8.3.8. Dependency Injection Registration
 
 **File:** `SnapDog2/Worker/DI/CortexMediatorConfiguration.cs`
 
@@ -344,9 +344,9 @@ Registered `IPlaylistManager` service:
 builder.Services.AddScoped<SnapDog2.Core.Abstractions.IPlaylistManager, SnapDog2.Infrastructure.Services.PlaylistManager>();
 ```
 
-## Testing Results
+## 8.4. Testing Results
 
-### Docker Environment Testing
+### 8.4.1. Docker Environment Testing
 
 All endpoints tested successfully in the Docker development environment:
 
@@ -407,7 +407,7 @@ curl http://localhost:5000/api/zones/999/track
 [11:04:52 INF] [SnapDog2.Server.Features.Zones.Handlers.GetZonePlaylistInfoQueryHandler] Handling GetZonePlaylistInfoQuery for Zone 2
 ```
 
-### Sample Response Data
+### 8.4.2. Sample Response Data
 
 **Zone State Response:**
 
@@ -468,30 +468,30 @@ curl http://localhost:5000/api/zones/999/track
 }
 ```
 
-## Architecture Compliance
+## 8.5. Architecture Compliance
 
-### ✅ CQRS Pattern Implementation
+### 8.5.1. ✅ CQRS Pattern Implementation
 
 - Clear separation between commands and queries
 - Query handlers only read state, never modify
 - Proper use of `IQuery<T>` and `IQueryHandler<TQuery, TResult>` interfaces
 - Consistent Result pattern usage throughout
 
-### ✅ Structured Logging Implementation
+### 8.5.2. ✅ Structured Logging Implementation
 
 - Unique message IDs for all log entries (5001-8005 range)
 - Contextual information included in all log messages
 - Performance and behavior tracking implemented
 - Proper use of partial classes and LoggerMessage attributes
 
-### ✅ Dependency Injection Consistency
+### 8.5.3. ✅ Dependency Injection Consistency
 
 - All services properly registered with correct lifetimes
 - Manual registration pattern maintained for handlers
 - Service dependencies correctly resolved
 - Interface-based design maintained
 
-### ✅ API Design Standards
+### 8.5.4. ✅ API Design Standards
 
 - RESTful endpoint design following established patterns
 - Proper HTTP status codes (200, 404, 500)
@@ -499,14 +499,14 @@ curl http://localhost:5000/api/zones/999/track
 - Input validation with data annotations
 - Comprehensive error handling and logging
 
-### ✅ Result Pattern Usage
+### 8.5.5. ✅ Result Pattern Usage
 
 - All operations return `Result<T>` or `Result`
 - Consistent error handling throughout the stack
 - Proper success/failure state management
 - Null safety with appropriate null checks
 
-## Blueprint Compliance
+## 8.6. Blueprint Compliance
 
 The implementation fully complies with [16d-queries-and-notifications.md](../blueprint/16d-queries-and-notifications.md):
 
@@ -518,7 +518,7 @@ The implementation fully complies with [16d-queries-and-notifications.md](../blu
 - ✅ Structured logging patterns match specification
 - ✅ Interface design follows specification
 
-## Build and Deployment Status
+## 8.7. Build and Deployment Status
 
 - ✅ **Build Status:** Clean build with 0 warnings, 0 errors
 - ✅ **Docker Integration:** Successfully running in development environment
@@ -527,23 +527,23 @@ The implementation fully complies with [16d-queries-and-notifications.md](../blu
 - ✅ **API Endpoints:** All endpoints accessible and functional
 - ✅ **Backward Compatibility:** Existing endpoints continue to work
 
-## Performance Considerations
+## 8.8. Performance Considerations
 
-### ✅ Efficient Query Patterns
+### 8.8.1. ✅ Efficient Query Patterns
 
 - Direct state access through `IZoneManager` interface
 - Minimal data transformation in handlers
 - Proper async/await usage throughout
 - Efficient playlist data structures with dictionary lookups
 
-### ✅ Memory Management
+### 8.8.2. ✅ Memory Management
 
 - Placeholder data initialized once at startup
 - No unnecessary object creation in query paths
 - Proper disposal patterns where applicable
 - Efficient collection operations
 
-## Next Steps
+## 8.9. Next Steps
 
 With the Zone Queries implementation complete, the next logical steps following the blueprint are:
 
@@ -554,9 +554,9 @@ With the Zone Queries implementation complete, the next logical steps following 
 
 The foundation is now comprehensive with Zone Commands, Client Commands, and Zone Queries fully implemented, providing a complete CQRS framework ready for real Snapcast integration and status notification systems.
 
-## Files Created/Modified
+## 8.10. Files Created/Modified
 
-### New Files Created (3 files)
+### 8.10.1. New Files Created (3 files)
 
 ```
 SnapDog2/Core/Abstractions/IPlaylistManager.cs
@@ -564,7 +564,7 @@ SnapDog2/Infrastructure/Services/PlaylistManager.cs
 SnapDog2/Controllers/PlaylistController.cs
 ```
 
-### Modified Files (5 files)
+### 8.10.2. Modified Files (5 files)
 
 ```
 SnapDog2/Core/Abstractions/IZoneManager.cs - Added state query methods
@@ -578,7 +578,7 @@ SnapDog2/Program.cs - Added IPlaylistManager service registration
 
 **Total Implementation:** 8 files created/modified for complete Zone Queries layer implementation.
 
-## Summary
+## 8.11. Summary
 
 The Zone Queries implementation represents a significant milestone in the SnapDog2 project, completing the read-side of the CQRS pattern. The implementation provides:
 

@@ -1,16 +1,16 @@
-# Client Commands Implementation
+# 7. Client Commands Implementation
 
 **Date:** 2025-08-02  
 **Status:** ✅ Complete  
 **Blueprint Reference:** [16c-client-commands-implementation.md](../blueprint/16c-client-commands-implementation.md)
 
-## Overview
+## 7.1. Overview
 
 This document describes the complete implementation of the Client Commands layer following the blueprint specification. The implementation includes client volume and mute commands, client configuration commands, comprehensive validation, command handlers, query handlers, and RESTful API endpoints. All components follow the established CQRS patterns and architectural consistency with the Zone Commands implementation.
 
-## Implementation Scope
+## 7.2. Implementation Scope
 
-### Core Infrastructure Created
+### 7.2.1. Core Infrastructure Created
 
 **New Interfaces:**
 - `IClientManager` - Client management operations interface
@@ -20,7 +20,7 @@ This document describes the complete implementation of the Client Commands layer
 - `ClientManager` - Manages client state and operations
 - `ClientService` - Individual client control operations
 
-### Client Commands Implemented
+### 7.2.2. Client Commands Implemented
 
 **Volume and Mute Commands:**
 - `SetClientVolumeCommand` - Set client volume (0-100)
@@ -31,16 +31,16 @@ This document describes the complete implementation of the Client Commands layer
 - `SetClientLatencyCommand` - Set client latency (0-10000ms)
 - `AssignClientToZoneCommand` - Assign client to zone
 
-### Client Queries Implemented
+### 7.2.3. Client Queries Implemented
 
 **State Queries:**
 - `GetAllClientsQuery` - Retrieve all client states
 - `GetClientQuery` - Retrieve specific client state
 - `GetClientsByZoneQuery` - Retrieve clients by zone assignment
 
-## Implementation Details
+## 7.3. Implementation Details
 
-### 1. Core Interfaces
+### 7.3.1. Core Interfaces
 
 **File:** `SnapDog2/Core/Abstractions/IClientManager.cs`
 
@@ -74,7 +74,7 @@ public interface IClient
 }
 ```
 
-### 2. Command Definitions
+### 7.3.2. Command Definitions
 
 **File:** `SnapDog2/Server/Features/Clients/Commands/ClientVolumeCommands.cs`
 
@@ -133,7 +133,7 @@ public record AssignClientToZoneCommand : ICommand<Result>
 }
 ```
 
-### 3. Query Definitions
+### 7.3.3. Query Definitions
 
 **File:** `SnapDog2/Server/Features/Clients/Queries/ClientQueries.cs`
 
@@ -160,7 +160,7 @@ public record GetClientsByZoneQuery : IQuery<Result<List<ClientState>>>
 }
 ```
 
-### 4. Validation Layer
+### 7.3.4. Validation Layer
 
 **File:** `SnapDog2/Server/Features/Clients/Validators/ClientCommandValidators.cs`
 
@@ -196,7 +196,7 @@ public class SetClientVolumeCommandValidator : AbstractValidator<SetClientVolume
 - Zone ID validation (positive integers)
 - Command source enum validation
 
-### 5. Command Handlers
+### 7.3.5. Command Handlers
 
 **Structured Logging Pattern:**
 All handlers implement structured logging with unique message IDs:
@@ -235,7 +235,7 @@ public async Task<Result> Handle(SetClientVolumeCommand request, CancellationTok
 }
 ```
 
-### 6. Query Handlers
+### 7.3.6. Query Handlers
 
 **Query Handler Files Created:**
 - `GetAllClientsQueryHandler.cs` (Message IDs: 4001-4002)
@@ -261,7 +261,7 @@ public async Task<Result<List<ClientState>>> Handle(GetAllClientsQuery request, 
 }
 ```
 
-### 7. API Controller
+### 7.3.7. API Controller
 
 **File:** `SnapDog2/Controllers/ClientController.cs`
 
@@ -305,7 +305,7 @@ public record ZoneAssignmentRequest
 }
 ```
 
-### 8. Placeholder Service Implementation
+### 7.3.8. Placeholder Service Implementation
 
 **File:** `SnapDog2/Infrastructure/Services/ClientManager.cs`
 
@@ -340,7 +340,7 @@ var clientState = new ClientState
 };
 ```
 
-### 9. Dependency Injection Registration
+### 7.3.9. Dependency Injection Registration
 
 **File:** `SnapDog2/Worker/DI/CortexMediatorConfiguration.cs`
 
@@ -369,9 +369,9 @@ Registered `IClientManager` service:
 builder.Services.AddScoped<SnapDog2.Core.Abstractions.IClientManager, SnapDog2.Infrastructure.Services.ClientManager>();
 ```
 
-## Testing Results
+## 7.4. Testing Results
 
-### Docker Environment Testing
+### 7.4.1. Docker Environment Testing
 
 All endpoints tested successfully in the Docker development environment:
 
@@ -437,40 +437,40 @@ curl -X POST http://localhost:5000/api/clients/1/volume \
 [10:50:15 INF] [SnapDog2.Infrastructure.Services.ClientManager] Assigning client 1 to zone 2
 ```
 
-## Architecture Compliance
+## 7.5. Architecture Compliance
 
-### ✅ CQRS Pattern Implementation
+### 7.5.1. ✅ CQRS Pattern Implementation
 - Commands and queries properly separated
 - Command handlers modify state, query handlers read state
 - Clear separation of concerns maintained
 
-### ✅ Result Pattern Usage
+### 7.5.2. ✅ Result Pattern Usage
 - All operations return `Result<T>` or `Result`
 - Consistent error handling throughout the stack
 - Proper success/failure state management
 
-### ✅ Validation Pipeline Integration
+### 7.5.3. ✅ Validation Pipeline Integration
 - FluentValidation seamlessly integrated
 - Validation occurs before command execution
 - Detailed validation error messages returned to API consumers
 
-### ✅ Structured Logging Implementation
+### 7.5.4. ✅ Structured Logging Implementation
 - Unique message IDs for all log entries (3001-4201 range)
 - Contextual information included in all log messages
 - Performance and behavior tracking implemented
 
-### ✅ Dependency Injection Consistency
+### 7.5.5. ✅ Dependency Injection Consistency
 - All services properly registered
 - Manual registration pattern maintained
 - Service lifetimes correctly configured (Scoped)
 
-### ✅ API Design Standards
+### 7.5.6. ✅ API Design Standards
 - RESTful endpoint design
 - Proper HTTP status codes (200, 400, 404, 500)
 - Consistent JSON response format
 - Client-specific request DTOs to avoid naming conflicts
 
-## Blueprint Compliance
+## 7.6. Blueprint Compliance
 
 The implementation fully complies with [16c-client-commands-implementation.md](../blueprint/16c-client-commands-implementation.md):
 
@@ -483,7 +483,7 @@ The implementation fully complies with [16c-client-commands-implementation.md](.
 - ✅ Error handling matches specification
 - ✅ Logging patterns match specification
 
-## Build and Deployment Status
+## 7.7. Build and Deployment Status
 
 - ✅ **Build Status:** Clean build with 0 warnings, 0 errors
 - ✅ **Docker Integration:** Successfully running in development environment
@@ -491,7 +491,7 @@ The implementation fully complies with [16c-client-commands-implementation.md](.
 - ✅ **Service Registration:** All dependencies properly resolved
 - ✅ **API Endpoints:** All endpoints accessible and functional
 
-## Next Steps
+## 7.8. Next Steps
 
 With the Client Commands implementation complete, the next logical steps following the blueprint are:
 
@@ -501,9 +501,9 @@ With the Client Commands implementation complete, the next logical steps followi
 
 The foundation is now solid with both Zone Commands and Client Commands fully implemented, providing a complete command and query framework ready for real Snapcast integration.
 
-## Files Created/Modified
+## 7.9. Files Created/Modified
 
-### New Files Created (18 files)
+### 7.9.1. New Files Created (18 files)
 ```
 SnapDog2/Core/Abstractions/IClientManager.cs
 SnapDog2/Core/Abstractions/IClient.cs
@@ -523,7 +523,7 @@ SnapDog2/Controllers/ClientController.cs
 SnapDog2/Infrastructure/Services/ClientManager.cs
 ```
 
-### Modified Files (2 files)
+### 7.9.2. Modified Files (2 files)
 ```
 SnapDog2/Worker/DI/CortexMediatorConfiguration.cs - Added client handler registrations
 SnapDog2/Program.cs - Added IClientManager service registration

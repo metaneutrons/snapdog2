@@ -1,16 +1,16 @@
-# Zone Commands Missing Implementation
+# 6. Zone Commands Missing Implementation
 
 **Date:** 2025-08-02  
 **Status:** ✅ Complete  
 **Blueprint Reference:** [16b-zone-commands-implementation.md](../blueprint/16b-zone-commands-implementation.md)
 
-## Overview
+## 6.1. Overview
 
 This document describes the implementation of the missing zone commands that were identified as gaps between the blueprint specification and the existing implementation. The missing commands include track repeat functionality, playlist shuffle/repeat controls, and additional playlist navigation commands.
 
-## Analysis of Missing Commands
+## 6.2. Analysis of Missing Commands
 
-### Blueprint vs Implementation Gap Analysis
+### 6.2.1. Blueprint vs Implementation Gap Analysis
 
 **Missing Track Management Commands:**
 - `SetTrackRepeatCommand` - Set track repeat mode
@@ -31,9 +31,9 @@ This document describes the implementation of the missing zone commands that wer
 - Several controller endpoints for the new commands
 - Enhanced playback control endpoints (stop, track navigation)
 
-## Implementation Details
+## 6.3. Implementation Details
 
-### 1. Command Definitions
+### 6.3.1. Command Definitions
 
 **File:** `SnapDog2/Server/Features/Zones/Commands/ZoneCommands.cs`
 
@@ -109,7 +109,7 @@ public record TogglePlaylistRepeatCommand : ICommand<Result>
 }
 ```
 
-### 2. Command Handlers
+### 6.3.2. Command Handlers
 
 **File:** `SnapDog2/Server/Features/Zones/Handlers/ZoneCommandHandlers.cs`
 
@@ -157,7 +157,7 @@ public class SetTrackRepeatCommandHandler : ICommandHandler<SetTrackRepeatComman
 - `SetPlaylistRepeatCommandHandler`
 - `TogglePlaylistRepeatCommandHandler`
 
-### 3. Validation Layer
+### 6.3.3. Validation Layer
 
 **File:** `SnapDog2/Server/Features/Zones/Validators/ZoneCommandValidators.cs`
 
@@ -215,7 +215,7 @@ public class SetZoneVolumeCommandValidator : AbstractValidator<SetZoneVolumeComm
 - Command source enum validation
 - Base validator pattern for common validations
 
-### 4. API Controller Extensions
+### 6.3.4. API Controller Extensions
 
 **File:** `SnapDog2/Controllers/ZoneController.cs`
 
@@ -291,7 +291,7 @@ public record ShuffleRequest
 - `POST /api/zones/{id}/playlist-shuffle` - Set playlist shuffle mode
 - `POST /api/zones/{id}/playlist-repeat` - Set playlist repeat mode
 
-### 5. Dependency Injection Configuration
+### 6.3.5. Dependency Injection Configuration
 
 **File:** `SnapDog2/Worker/DI/CortexMediatorConfiguration.cs`
 
@@ -312,7 +312,7 @@ services.AddScoped<SnapDog2.Server.Features.Zones.Handlers.SetPlaylistRepeatComm
 services.AddScoped<SnapDog2.Server.Features.Zones.Handlers.TogglePlaylistRepeatCommandHandler>();
 ```
 
-## Interface Compatibility
+## 6.4. Interface Compatibility
 
 All new commands utilize existing `IZoneService` methods that were already defined in the interface:
 
@@ -331,9 +331,9 @@ Task<Result> TogglePlaylistRepeatAsync();
 
 This confirms that the interface design was already complete and only the command layer implementation was missing.
 
-## Testing Results
+## 6.5. Testing Results
 
-### Development Environment Testing
+### 6.5.1. Development Environment Testing
 
 All endpoints tested successfully in Docker development environment:
 
@@ -366,75 +366,75 @@ $ docker exec snapdog-app-1 curl -s -X POST http://localhost:5000/api/zones/1/pr
 {"message":"Previous track started successfully"}
 ```
 
-### Build Verification
+### 6.5.2. Build Verification
 
 ```bash
 $ cd /Users/fabian/Source/snapdog && dotnet build
 ✅ Build succeeded with 0 errors, 46 warnings (expected nullable reference warnings)
 ```
 
-### Hot Reload Testing
+### 6.5.3. Hot Reload Testing
 
 - ✅ Code changes detected and reloaded automatically
 - ✅ New endpoints available immediately after restart
 - ✅ All handlers properly registered in DI container
 
-## Architecture Compliance
+## 6.6. Architecture Compliance
 
-### CQRS Pattern Adherence
+### 6.6.1. CQRS Pattern Adherence
 - ✅ Commands implement `ICommand<Result>`
 - ✅ Handlers implement `ICommandHandler<TCommand, Result>`
 - ✅ Proper separation of commands and queries
 - ✅ Consistent async/await patterns
 
-### Error Handling
+### 6.6.2. Error Handling
 - ✅ Consistent `Result<T>` pattern usage
 - ✅ Proper error logging with structured logging
 - ✅ HTTP status code mapping (200, 400, 404, 500)
 - ✅ Zone validation and not-found handling
 
-### Logging Standards
+### 6.6.3. Logging Standards
 - ✅ Structured logging with proper log levels
 - ✅ Consistent log message patterns
 - ✅ Error and warning logging for failure cases
 - ✅ Debug logging for request tracking
 
-### Validation Framework
+### 6.6.4. Validation Framework
 - ✅ FluentValidation for all commands
 - ✅ Comprehensive validation rules
 - ✅ Proper error message formatting
 - ✅ Automatic validator discovery
 
-## Performance Considerations
+## 6.7. Performance Considerations
 
-### Handler Performance
+### 6.7.1. Handler Performance
 - Async/await patterns throughout
 - Proper ConfigureAwait(false) usage
 - Minimal allocations in hot paths
 - Efficient zone lookup caching
 
-### Validation Performance
+### 6.7.2. Validation Performance
 - Lightweight validation rules
 - Early validation failures
 - Minimal reflection usage
 - Cached validator instances
 
-## Security Considerations
+## 6.8. Security Considerations
 
-### Input Validation
+### 6.8.1. Input Validation
 - Zone ID range validation
 - Volume range constraints
 - Command source validation
 - Request body validation
 
-### Error Information Disclosure
+### 6.8.2. Error Information Disclosure
 - Generic error messages for external APIs
 - Detailed logging for internal diagnostics
 - No sensitive information in error responses
 
-## Future Integration Points
+## 6.9. Future Integration Points
 
-### Snapcast Integration
+### 6.9.1. Snapcast Integration
 The placeholder `ZoneService` implementations will be replaced with actual Snapcast JSON-RPC calls:
 
 ```csharp
@@ -451,7 +451,7 @@ public async Task<Result> SetTrackRepeatAsync(bool enabled)
 }
 ```
 
-### MQTT/KNX Protocol Support
+### 6.9.2. MQTT/KNX Protocol Support
 Command source tracking is already implemented for future protocol integrations:
 
 ```csharp
@@ -459,7 +459,7 @@ public CommandSource Source { get; init; } = CommandSource.Internal;
 // Future: CommandSource.Mqtt, CommandSource.Knx
 ```
 
-### Enhanced Validation
+### 6.9.3. Enhanced Validation
 Additional validation rules can be added without breaking changes:
 
 ```csharp
@@ -469,40 +469,40 @@ RuleFor(x => x.TrackIndex)
     .WithMessage("Track does not exist in current playlist.");
 ```
 
-## Monitoring and Observability
+## 6.10. Monitoring and Observability
 
-### Metrics Integration
+### 6.10.1. Metrics Integration
 - Command execution metrics via existing telemetry
 - Success/failure rate tracking
 - Response time monitoring
 - Zone operation frequency analysis
 
-### Distributed Tracing
+### 6.10.2. Distributed Tracing
 - Jaeger integration for request tracing
 - Correlation ID propagation
 - Cross-service call tracking
 - Performance bottleneck identification
 
-### Health Checks
+### 6.10.3. Health Checks
 - Zone service availability checks
 - Command handler health monitoring
 - Dependency health verification
 
-## Documentation Updates
+## 6.11. Documentation Updates
 
-### API Documentation
+### 6.11.1. API Documentation
 - OpenAPI/Swagger definitions updated automatically
 - Request/response examples included
 - Error code documentation
 - Rate limiting information
 
-### Developer Documentation
+### 6.11.2. Developer Documentation
 - Command pattern examples
 - Handler implementation guidelines
 - Validation rule patterns
 - Testing strategies
 
-## Conclusion
+## 6.12. Conclusion
 
 The missing zone commands implementation is now complete and fully compliant with the blueprint specification. The implementation:
 
@@ -516,7 +516,7 @@ The missing zone commands implementation is now complete and fully compliant wit
 
 The zone commands system now provides complete coverage of the blueprint specification and is ready for production deployment and integration with actual Snapcast services.
 
-## Next Steps
+## 6.13. Next Steps
 
 1. **Snapcast Integration** - Replace placeholder implementations with actual Snapcast JSON-RPC calls
 2. **Protocol Integration** - Implement MQTT and KNX command sources
