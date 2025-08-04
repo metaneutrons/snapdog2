@@ -99,6 +99,9 @@ public partial class SnapcastService
     [LoggerMessage(1005, LogLevel.Error, "Failed to initialize Snapcast connection")]
     private partial void LogInitializationFailed(Exception ex);
 
+    [LoggerMessage(1013, LogLevel.Error, "Snapcast connection error: {ErrorMessage}")]
+    private partial void LogConnectionErrorMessage(string errorMessage);
+
     [LoggerMessage(1006, LogLevel.Error, "Snapcast operation {Operation} failed")]
     private partial void LogOperationFailed(string operation, Exception ex);
 
@@ -210,7 +213,21 @@ public partial class SnapcastService
         }
         catch (Exception ex)
         {
-            this.LogInitializationFailed(ex);
+            // For common Snapcast connection errors, only log the message without stack trace to reduce noise
+            if (
+                ex is System.Net.Sockets.SocketException
+                || ex is TimeoutException
+                || ex.Message.Contains("connection", StringComparison.OrdinalIgnoreCase)
+                || ex.Message.Contains("refused", StringComparison.OrdinalIgnoreCase)
+                || ex.Message.Contains("timeout", StringComparison.OrdinalIgnoreCase)
+            )
+            {
+                LogConnectionErrorMessage(ex.Message);
+            }
+            else
+            {
+                LogInitializationFailed(ex);
+            }
             return Result.Failure(ex);
         }
     }

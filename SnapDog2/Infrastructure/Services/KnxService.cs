@@ -292,6 +292,8 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
                 return Result.Failure("Failed to create KNX connector parameters");
             }
 
+            LogAttemptingConnection(_config.Gateway ?? "USB", _config.Port);
+
             // Create and configure KNX bus
             _knxBus = new KnxBus(connectorParams);
 
@@ -311,7 +313,15 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
         }
         catch (Exception ex)
         {
-            LogConnectionError(ex);
+            // For KNX connection errors, only log the message without stack trace to reduce noise
+            if (ex is Knx.Falcon.KnxIpConnectorException)
+            {
+                LogConnectionErrorMessage(ex.Message);
+            }
+            else
+            {
+                LogConnectionError(ex);
+            }
             return Result.Failure($"KNX connection failed: {ex.Message}");
         }
     }
@@ -695,7 +705,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
 
     [LoggerMessage(
         8001,
-        LogLevel.Information,
+        LogLevel.Debug,
         "KNX service created with gateway: {Gateway}, port: {Port}, enabled: {Enabled}"
     )]
     private partial void LogServiceCreated(string? gateway, int port, bool enabled);
@@ -703,7 +713,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
     [LoggerMessage(8002, LogLevel.Information, "KNX service is disabled via configuration")]
     private partial void LogServiceDisabled();
 
-    [LoggerMessage(8003, LogLevel.Information, "KNX service already initialized")]
+    [LoggerMessage(8003, LogLevel.Debug, "KNX service already initialized")]
     private partial void LogAlreadyInitialized();
 
     [LoggerMessage(8004, LogLevel.Information, "Starting KNX service initialization")]
@@ -715,10 +725,10 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
     [LoggerMessage(8006, LogLevel.Error, "KNX service initialization failed: {Error}")]
     private partial void LogInitializationFailed(string error);
 
-    [LoggerMessage(8007, LogLevel.Information, "Stopping KNX service")]
+    [LoggerMessage(8007, LogLevel.Debug, "Stopping KNX service")]
     private partial void LogStoppingService();
 
-    [LoggerMessage(8008, LogLevel.Information, "KNX service stopped successfully")]
+    [LoggerMessage(8008, LogLevel.Debug, "KNX service stopped successfully")]
     private partial void LogServiceStopped();
 
     [LoggerMessage(8009, LogLevel.Warning, "Error during KNX disconnection")]
@@ -730,13 +740,19 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
     [LoggerMessage(8011, LogLevel.Error, "KNX connection error")]
     private partial void LogConnectionError(Exception exception);
 
-    [LoggerMessage(8012, LogLevel.Information, "Using KNX IP tunneling connection to {Gateway}:{Port}")]
+    [LoggerMessage(8031, LogLevel.Error, "KNX connection error: {ErrorMessage}")]
+    private partial void LogConnectionErrorMessage(string errorMessage);
+
+    [LoggerMessage(8032, LogLevel.Information, "Attempting KNX connection to {Gateway}:{Port}")]
+    private partial void LogAttemptingConnection(string gateway, int port);
+
+    [LoggerMessage(8012, LogLevel.Debug, "Using KNX IP tunneling connection to {Gateway}:{Port}")]
     private partial void LogUsingIpTunneling(string gateway, int port);
 
-    [LoggerMessage(8013, LogLevel.Information, "Using KNX IP routing connection to {Gateway}")]
+    [LoggerMessage(8013, LogLevel.Debug, "Using KNX IP routing connection to {Gateway}")]
     private partial void LogUsingIpRouting(string gateway);
 
-    [LoggerMessage(8014, LogLevel.Information, "Using KNX USB device: {Device}")]
+    [LoggerMessage(8014, LogLevel.Debug, "Using KNX USB device: {Device}")]
     private partial void LogUsingUsbDevice(string device);
 
     [LoggerMessage(8015, LogLevel.Error, "Gateway address is required for {ConnectionType} connection")]
@@ -781,10 +797,10 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
     [LoggerMessage(8026, LogLevel.Error, "Error handling KNX status notification {StatusId} for target {TargetId}")]
     private partial void LogStatusNotificationError(string statusId, int targetId, Exception exception);
 
-    [LoggerMessage(8027, LogLevel.Information, "KNX reconnect timer started")]
+    [LoggerMessage(8027, LogLevel.Debug, "KNX reconnect timer started")]
     private partial void LogReconnectTimerStarted();
 
-    [LoggerMessage(8028, LogLevel.Information, "Attempting KNX reconnection")]
+    [LoggerMessage(8028, LogLevel.Debug, "Attempting KNX reconnection")]
     private partial void LogAttemptingReconnection();
 
     [LoggerMessage(8029, LogLevel.Warning, "Invalid target ID '{TargetId}' for status '{StatusId}' - expected integer")]

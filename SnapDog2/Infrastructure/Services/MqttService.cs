@@ -86,6 +86,9 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     [LoggerMessage(2005, LogLevel.Error, "Failed to initialize MQTT connection")]
     private partial void LogInitializationFailed(Exception ex);
 
+    [LoggerMessage(2009, LogLevel.Error, "MQTT connection error: {ErrorMessage}")]
+    private partial void LogConnectionErrorMessage(string errorMessage);
+
     [LoggerMessage(2006, LogLevel.Error, "MQTT operation {Operation} failed")]
     private partial void LogOperationFailed(string operation, Exception ex);
 
@@ -237,7 +240,20 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            this.LogInitializationFailed(ex);
+            // For common MQTT connection errors, only log the message without stack trace to reduce noise
+            if (
+                ex is System.Net.Sockets.SocketException
+                || ex is TimeoutException
+                || ex.Message.Contains("connection", StringComparison.OrdinalIgnoreCase)
+                || ex.Message.Contains("broker", StringComparison.OrdinalIgnoreCase)
+            )
+            {
+                LogConnectionErrorMessage(ex.Message);
+            }
+            else
+            {
+                LogInitializationFailed(ex);
+            }
             return Result.Failure($"Failed to initialize MQTT connection: {ex.Message}");
         }
     }
