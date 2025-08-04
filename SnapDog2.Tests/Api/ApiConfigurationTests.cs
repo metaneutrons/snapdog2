@@ -83,17 +83,17 @@ public class ApiDisabledWebApplicationFactory : WebApplicationFactory<Program>
                 config.AddInMemoryCollection(
                     new Dictionary<string, string?>
                     {
-                        ["SNAPDOG_SYSTEM__LOGLEVEL"] = "Warning",
-                        ["SNAPDOG_SYSTEM__HEALTHCHECKSENABLED"] = "false",
-                        ["SNAPDOG_SYSTEM__LOGFILE"] = "",
-                        ["SNAPDOG_API__ENABLED"] = "false", // DISABLE API for this test
-                        ["SNAPDOG_API__PORT"] = "0",
-                        ["SNAPDOG_API__AUTH_ENABLED"] = "false",
-                        ["SNAPDOG_SERVICES__SNAPCAST__ADDRESS"] = "localhost",
-                        ["SNAPDOG_SERVICES__SNAPCAST__JSONRPCPORT"] = "1704",
-                        ["SNAPDOG_SERVICES__MQTT__ENABLED"] = "false",
-                        ["SNAPDOG_SERVICES__KNX__ENABLED"] = "false",
-                        ["SNAPDOG_SERVICES__SUBSONIC__ENABLED"] = "false",
+                        ["SNAPDOG_SYSTEM_LOGLEVEL"] = "Warning",
+                        ["SNAPDOG_SYSTEM_HEALTHCHECKSENABLED"] = "false",
+                        ["SNAPDOG_SYSTEM_LOGFILE"] = "",
+                        ["SNAPDOG_API_ENABLED"] = "false", // DISABLE API for this test
+                        ["SNAPDOG_API_PORT"] = "0",
+                        ["SNAPDOG_API_AUTH_ENABLED"] = "false",
+                        ["SNAPDOG_SERVICES_SNAPCAST_ADDRESS"] = "localhost",
+                        ["SNAPDOG_SERVICES_SNAPCAST_JSONRPCPORT"] = "1704",
+                        ["SNAPDOG_SERVICES_MQTT_ENABLED"] = "false",
+                        ["SNAPDOG_SERVICES_KNX_ENABLED"] = "false",
+                        ["SNAPDOG_SERVICES_SUBSONIC_ENABLED"] = "false",
                     }
                 );
             }

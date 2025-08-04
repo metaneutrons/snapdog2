@@ -27,17 +27,17 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 config.AddInMemoryCollection(
                     new Dictionary<string, string?>
                     {
-                        ["SNAPDOG_SYSTEM__LOGLEVEL"] = "Warning",
-                        ["SNAPDOG_SYSTEM__HEALTHCHECKSENABLED"] = "true",
-                        ["SNAPDOG_SYSTEM__LOGFILE"] = "",
-                        ["SNAPDOG_API__ENABLED"] = "true", // Enable API for tests
-                        ["SNAPDOG_API__PORT"] = "0", // Use any available port for tests
-                        ["SNAPDOG_API__AUTH_ENABLED"] = "false", // Disable auth for tests
-                        ["SNAPDOG_SERVICES__SNAPCAST__ADDRESS"] = "localhost",
-                        ["SNAPDOG_SERVICES__SNAPCAST__JSONRPCPORT"] = "1704",
-                        ["SNAPDOG_SERVICES__MQTT__ENABLED"] = "false",
-                        ["SNAPDOG_SERVICES__KNX__ENABLED"] = "false",
-                        ["SNAPDOG_SERVICES__SUBSONIC__ENABLED"] = "false",
+                        ["SNAPDOG_SYSTEM_LOGLEVEL"] = "Warning",
+                        ["SNAPDOG_SYSTEM_HEALTHCHECKSENABLED"] = "true",
+                        ["SNAPDOG_SYSTEM_LOGFILE"] = "",
+                        ["SNAPDOG_API_ENABLED"] = "true", // Enable API for tests
+                        ["SNAPDOG_API_PORT"] = "0", // Use any available port for tests
+                        ["SNAPDOG_API_AUTH_ENABLED"] = "false", // Disable auth for tests
+                        ["SNAPDOG_SERVICES_SNAPCAST_ADDRESS"] = "localhost",
+                        ["SNAPDOG_SERVICES_SNAPCAST_JSONRPCPORT"] = "1704",
+                        ["SNAPDOG_SERVICES_MQTT_ENABLED"] = "false",
+                        ["SNAPDOG_SERVICES_KNX_ENABLED"] = "false",
+                        ["SNAPDOG_SERVICES_SUBSONIC_ENABLED"] = "false",
                     }
                 );
             }
