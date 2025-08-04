@@ -38,52 +38,12 @@ public static class WebHostExtensions
                     // Configure HTTP endpoint with fallback
                     var actualHttpPort = ConfigureHttpEndpointWithFallback(options, apiConfig.Port, logger);
 
-                    // Update environment variables with actual ports for other services
-                    Environment.SetEnvironmentVariable("SNAPDOG_ACTUAL_HTTP_PORT", actualHttpPort.ToString());
-
                     logger.Information("✅ Kestrel configured successfully");
                     logger.Information("   Actual HTTP port: {ActualHttpPort}", actualHttpPort);
                 }
                 catch (Exception ex)
                 {
                     logger.Fatal(ex, "💥 Failed to configure Kestrel endpoints. No available ports found.");
-                    throw new InvalidOperationException("Unable to bind to any available port", ex);
-                }
-            }
-        );
-    }
-
-    /// <summary>
-    /// Configures Kestrel with resilient port binding and fallback logic (legacy method for backward compatibility)
-    /// </summary>
-    [Obsolete("Use UseResilientKestrel(ApiConfig, ILogger) instead to properly integrate with EnvoyConfig")]
-    public static IWebHostBuilder UseKestrel(this IWebHostBuilder builder, Microsoft.Extensions.Logging.ILogger logger)
-    {
-        return builder.UseKestrel(
-            (context, options) =>
-            {
-                var configuration = context.Configuration;
-
-                // Get preferred ports from configuration or environment
-                var httpPort = GetConfiguredPort(configuration, "HTTP_PORT", 5000);
-
-                logger.LogInformation("🌐 Configuring Kestrel with resilient port binding (legacy method)");
-                logger.LogInformation("   Preferred HTTP port: {HttpPort}", httpPort);
-
-                try
-                {
-                    // Configure HTTP endpoint with fallback
-                    var actualHttpPort = ConfigureHttpEndpointWithFallback(options, httpPort, logger);
-
-                    // Update environment variables with actual ports for other services
-                    Environment.SetEnvironmentVariable("SNAPDOG_ACTUAL_HTTP_PORT", actualHttpPort.ToString());
-
-                    logger.LogInformation("✅ Kestrel configured successfully");
-                    logger.LogInformation("   Actual HTTP port: {ActualHttpPort}", actualHttpPort);
-                }
-                catch (Exception ex)
-                {
-                    logger.LogCritical(ex, "💥 Failed to configure Kestrel endpoints. No available ports found.");
                     throw new InvalidOperationException("Unable to bind to any available port", ex);
                 }
             }

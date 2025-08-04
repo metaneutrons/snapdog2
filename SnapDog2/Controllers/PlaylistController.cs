@@ -5,31 +5,33 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Threading.Tasks;
+using Cortex.Mediator;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using SnapDog2.Api.Models;
 using SnapDog2.Core.Models;
 using SnapDog2.Server.Features.Zones.Queries;
 
 /// <summary>
 /// Controller for playlist and track management operations.
+/// Follows CQRS pattern using Cortex.Mediator for enterprise-grade architecture compliance.
 /// </summary>
 [ApiController]
 [Route("api/playlists")]
 [Produces("application/json")]
 public class PlaylistController : ControllerBase
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IMediator _mediator;
     private readonly ILogger<PlaylistController> _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PlaylistController"/> class.
     /// </summary>
-    /// <param name="serviceProvider">The service provider.</param>
+    /// <param name="mediator">The Cortex.Mediator instance for CQRS command/query dispatch.</param>
     /// <param name="logger">The logger instance.</param>
-    public PlaylistController(IServiceProvider serviceProvider, ILogger<PlaylistController> logger)
+    public PlaylistController(IMediator mediator, ILogger<PlaylistController> logger)
     {
-        this._serviceProvider = serviceProvider;
+        this._mediator = mediator;
         this._logger = logger;
     }
 
@@ -37,38 +39,49 @@ public class PlaylistController : ControllerBase
     /// Gets all available playlists.
     /// </summary>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>Collection of all playlists.</returns>
+    /// <returns>Collection of all playlists wrapped in ApiResponse.</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(IEnumerable<PlaylistInfo>), 200)]
-    [ProducesResponseType(500)]
-    public async Task<ActionResult<IEnumerable<PlaylistInfo>>> GetAllPlaylists(CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<PlaylistInfo>>), 200)]
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<PlaylistInfo>>), 500)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<PlaylistInfo>>>> GetAllPlaylists(
+        CancellationToken cancellationToken
+    )
     {
         try
         {
-            this._logger.LogDebug("Getting all playlists");
+            this._logger.LogDebug("Getting all playlists via CQRS mediator");
 
-            var handler =
-                this._serviceProvider.GetService<Server.Features.Zones.Handlers.GetAllPlaylistsQueryHandler>();
-            if (handler == null)
-            {
-                this._logger.LogError("GetAllPlaylistsQueryHandler not found in DI container");
-                return this.StatusCode(500, new { error = "Handler not available" });
-            }
-
-            var result = await handler.Handle(new GetAllPlaylistsQuery(), cancellationToken);
+            var query = new GetAllPlaylistsQuery();
+            var result = await this._mediator.SendQueryAsync<GetAllPlaylistsQuery, Result<List<PlaylistInfo>>>(
+                query,
+                cancellationToken
+            );
 
             if (result.IsSuccess && result.Value != null)
             {
-                return this.Ok(result.Value);
+                return this.Ok(ApiResponse<IEnumerable<PlaylistInfo>>.CreateSuccess(result.Value));
             }
 
             this._logger.LogWarning("Failed to get all playlists: {Error}", result.ErrorMessage);
-            return this.StatusCode(500, new { error = result.ErrorMessage ?? "Failed to retrieve playlists" });
+            return this.StatusCode(
+                500,
+                ApiResponse<IEnumerable<PlaylistInfo>>.CreateError(
+                    "PLAYLISTS_ERROR",
+                    result.ErrorMessage ?? "Failed to retrieve playlists"
+                )
+            );
         }
         catch (Exception ex)
         {
             this._logger.LogError(ex, "Error getting all playlists");
-            return this.StatusCode(500, new { error = "Internal server error" });
+            return this.StatusCode(
+                500,
+                ApiResponse<IEnumerable<PlaylistInfo>>.CreateError(
+                    "INTERNAL_ERROR",
+                    "An internal server error occurred",
+                    ex.Message
+                )
+            );
         }
     }
 
@@ -77,36 +90,29 @@ public class PlaylistController : ControllerBase
     /// </summary>
     /// <param name="playlistId">The playlist ID.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>Collection of tracks in the playlist.</returns>
+    /// <returns>Collection of tracks in the playlist wrapped in ApiResponse.</returns>
     [HttpGet("{playlistId}/tracks")]
-    [ProducesResponseType(typeof(IEnumerable<TrackInfo>), 200)]
-    [ProducesResponseType(404)]
-    [ProducesResponseType(500)]
-    public async Task<ActionResult<IEnumerable<TrackInfo>>> GetPlaylistTracksByPlaylistId(
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<TrackInfo>>), 200)]
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<TrackInfo>>), 404)]
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<TrackInfo>>), 500)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<TrackInfo>>>> GetPlaylistTracksByPlaylistId(
         string playlistId,
         CancellationToken cancellationToken
     )
     {
         try
         {
-            this._logger.LogDebug("Getting tracks for playlist {PlaylistId}", playlistId);
+            this._logger.LogDebug("Getting tracks for playlist {PlaylistId} via CQRS mediator", playlistId);
 
-            var handler =
-                this._serviceProvider.GetService<Server.Features.Zones.Handlers.GetPlaylistTracksQueryHandler>();
-            if (handler == null)
-            {
-                this._logger.LogError("GetPlaylistTracksQueryHandler not found in DI container");
-                return this.StatusCode(500, new { error = "Handler not available" });
-            }
-
-            var result = await handler.Handle(
-                new GetPlaylistTracksQuery { PlaylistId = playlistId },
+            var query = new GetPlaylistTracksQuery { PlaylistId = playlistId };
+            var result = await this._mediator.SendQueryAsync<GetPlaylistTracksQuery, Result<List<TrackInfo>>>(
+                query,
                 cancellationToken
             );
 
             if (result.IsSuccess && result.Value != null)
             {
-                return this.Ok(result.Value);
+                return this.Ok(ApiResponse<IEnumerable<TrackInfo>>.CreateSuccess(result.Value));
             }
 
             this._logger.LogWarning(
@@ -114,12 +120,24 @@ public class PlaylistController : ControllerBase
                 playlistId,
                 result.ErrorMessage
             );
-            return this.NotFound(new { error = result.ErrorMessage ?? "Playlist not found" });
+            return this.NotFound(
+                ApiResponse<IEnumerable<TrackInfo>>.CreateError(
+                    "PLAYLIST_NOT_FOUND",
+                    result.ErrorMessage ?? "Playlist not found"
+                )
+            );
         }
         catch (Exception ex)
         {
             this._logger.LogError(ex, "Error getting tracks for playlist {PlaylistId}", playlistId);
-            return this.StatusCode(500, new { error = "Internal server error" });
+            return this.StatusCode(
+                500,
+                ApiResponse<IEnumerable<TrackInfo>>.CreateError(
+                    "INTERNAL_ERROR",
+                    "An internal server error occurred",
+                    ex.Message
+                )
+            );
         }
     }
 
@@ -128,36 +146,29 @@ public class PlaylistController : ControllerBase
     /// </summary>
     /// <param name="playlistIndex">The playlist index (1-based).</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>Collection of tracks in the playlist.</returns>
+    /// <returns>Collection of tracks in the playlist wrapped in ApiResponse.</returns>
     [HttpGet("by-index/{playlistIndex:int}/tracks")]
-    [ProducesResponseType(typeof(IEnumerable<TrackInfo>), 200)]
-    [ProducesResponseType(404)]
-    [ProducesResponseType(500)]
-    public async Task<ActionResult<IEnumerable<TrackInfo>>> GetPlaylistTracksByIndex(
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<TrackInfo>>), 200)]
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<TrackInfo>>), 404)]
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<TrackInfo>>), 500)]
+    public async Task<ActionResult<ApiResponse<IEnumerable<TrackInfo>>>> GetPlaylistTracksByIndex(
         [Range(1, int.MaxValue)] int playlistIndex,
         CancellationToken cancellationToken
     )
     {
         try
         {
-            this._logger.LogDebug("Getting tracks for playlist index {PlaylistIndex}", playlistIndex);
+            this._logger.LogDebug("Getting tracks for playlist index {PlaylistIndex} via CQRS mediator", playlistIndex);
 
-            var handler =
-                this._serviceProvider.GetService<Server.Features.Zones.Handlers.GetPlaylistTracksQueryHandler>();
-            if (handler == null)
-            {
-                this._logger.LogError("GetPlaylistTracksQueryHandler not found in DI container");
-                return this.StatusCode(500, new { error = "Handler not available" });
-            }
-
-            var result = await handler.Handle(
-                new GetPlaylistTracksQuery { PlaylistIndex = playlistIndex },
+            var query = new GetPlaylistTracksQuery { PlaylistIndex = playlistIndex };
+            var result = await this._mediator.SendQueryAsync<GetPlaylistTracksQuery, Result<List<TrackInfo>>>(
+                query,
                 cancellationToken
             );
 
             if (result.IsSuccess && result.Value != null)
             {
-                return this.Ok(result.Value);
+                return this.Ok(ApiResponse<IEnumerable<TrackInfo>>.CreateSuccess(result.Value));
             }
 
             this._logger.LogWarning(
@@ -165,12 +176,24 @@ public class PlaylistController : ControllerBase
                 playlistIndex,
                 result.ErrorMessage
             );
-            return this.NotFound(new { error = result.ErrorMessage ?? "Playlist not found" });
+            return this.NotFound(
+                ApiResponse<IEnumerable<TrackInfo>>.CreateError(
+                    "PLAYLIST_NOT_FOUND",
+                    result.ErrorMessage ?? "Playlist not found"
+                )
+            );
         }
         catch (Exception ex)
         {
             this._logger.LogError(ex, "Error getting tracks for playlist index {PlaylistIndex}", playlistIndex);
-            return this.StatusCode(500, new { error = "Internal server error" });
+            return this.StatusCode(
+                500,
+                ApiResponse<IEnumerable<TrackInfo>>.CreateError(
+                    "INTERNAL_ERROR",
+                    "An internal server error occurred",
+                    ex.Message
+                )
+            );
         }
     }
 }

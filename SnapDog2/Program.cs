@@ -157,18 +157,17 @@ static WebApplication CreateWebApplication(string[] args)
     {
         builder.WebHost.UseResilientKestrel(snapDogConfig.Api, Log.Logger);
     }
+    else if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Testing")
+    {
+        // For tests, we still need to configure Kestrel even when API is disabled
+        // so that WebApplicationFactory can create HTTP clients
+        Log.Information("🧪 Test environment detected - configuring minimal Kestrel for testing");
+        builder.WebHost.UseKestrel();
+    }
     else
     {
-        // If API is disabled, configure Kestrel to not listen on any ports
-        builder.WebHost.UseKestrel(options =>
-        {
-            // Don't configure any endpoints - Kestrel won't listen on any ports
-            Log.Information("API server is disabled - Kestrel will not bind to any ports");
-        });
+        Log.Information("🌐 API is disabled - Kestrel will not bind to any ports.");
     }
-
-    // Add Command Processing (Cortex.Mediator)
-    builder.Services.AddCommandProcessing();
 
     // Register configuration for IOptions pattern
     builder.Services.Configure<SnapDogConfiguration>(options =>

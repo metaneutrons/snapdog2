@@ -37,9 +37,6 @@ public partial class ClientManager : IClientManager
         this._logger = logger;
         this._clients = new Dictionary<int, IClient>();
         this._clientStates = new Dictionary<int, ClientState>();
-
-        // Initialize with placeholder clients matching the Docker setup
-        this.InitializePlaceholderClients();
     }
 
     public async Task<Result<IClient>> GetClientAsync(int clientId)
@@ -129,108 +126,46 @@ public partial class ClientManager : IClientManager
         return Result.Success();
     }
 
-    private void InitializePlaceholderClients()
+    /// <summary>
+    /// Placeholder implementation of IClient.
+    /// This will be replaced with actual Snapcast client integration later.
+    /// </summary>
+    public partial class ClientService : IClient
     {
-        // Create placeholder clients matching the Docker setup
-        var clients = new[]
+        private readonly ILogger _logger;
+
+        [LoggerMessage(7101, LogLevel.Information, "Client {ClientId} ({ClientName}): {Action}")]
+        private partial void LogClientAction(int clientId, string clientName, string action);
+
+        public int Id { get; }
+        public string Name { get; }
+
+        public ClientService(int id, string name, ILogger logger)
         {
-            new
-            {
-                Id = 1,
-                Name = "Living Room",
-                Mac = "02:42:ac:11:00:10",
-                Ip = "172.20.0.6",
-                ZoneId = 1,
-            },
-            new
-            {
-                Id = 2,
-                Name = "Kitchen",
-                Mac = "02:42:ac:11:00:11",
-                Ip = "172.20.0.7",
-                ZoneId = 2,
-            },
-            new
-            {
-                Id = 3,
-                Name = "Bedroom",
-                Mac = "02:42:ac:11:00:12",
-                Ip = "172.20.0.8",
-                ZoneId = 3,
-            },
-        };
-
-        foreach (var clientInfo in clients)
-        {
-            var client = new ClientService(clientInfo.Id, clientInfo.Name, this._logger);
-            this._clients[clientInfo.Id] = client;
-
-            var clientState = new ClientState
-            {
-                Id = clientInfo.Id,
-                SnapcastId = $"snapcast_client_{clientInfo.Id}",
-                Name = clientInfo.Name,
-                Mac = clientInfo.Mac,
-                Connected = true,
-                Volume = 50,
-                Mute = false,
-                LatencyMs = 100,
-                ZoneId = clientInfo.ZoneId,
-                ConfiguredSnapcastName = clientInfo.Name,
-                LastSeenUtc = DateTime.UtcNow,
-                HostIpAddress = clientInfo.Ip,
-                HostName = $"{clientInfo.Name.ToLower().Replace(" ", "-")}-client",
-                HostOs = "Linux",
-                HostArch = "x86_64",
-                SnapClientVersion = "0.27.0",
-                SnapClientProtocolVersion = 2,
-                TimestampUtc = DateTime.UtcNow,
-            };
-
-            this._clientStates[clientInfo.Id] = clientState;
+            this.Id = id;
+            this.Name = name;
+            this._logger = logger;
         }
-    }
-}
 
-/// <summary>
-/// Placeholder implementation of IClient.
-/// This will be replaced with actual Snapcast client integration later.
-/// </summary>
-public partial class ClientService : IClient
-{
-    private readonly ILogger _logger;
+        public async Task<Result> SetVolumeAsync(int volume)
+        {
+            this.LogClientAction(this.Id, this.Name, $"Set volume to {volume}");
+            await Task.Delay(10); // TODO: Fix simulation async operation
+            return Result.Success();
+        }
 
-    [LoggerMessage(7101, LogLevel.Information, "Client {ClientId} ({ClientName}): {Action}")]
-    private partial void LogClientAction(int clientId, string clientName, string action);
+        public async Task<Result> SetMuteAsync(bool mute)
+        {
+            this.LogClientAction(this.Id, this.Name, mute ? "Mute" : "Unmute");
+            await Task.Delay(10); // TODO: Fix simulation async operation
+            return Result.Success();
+        }
 
-    public int Id { get; }
-    public string Name { get; }
-
-    public ClientService(int id, string name, ILogger logger)
-    {
-        this.Id = id;
-        this.Name = name;
-        this._logger = logger;
-    }
-
-    public async Task<Result> SetVolumeAsync(int volume)
-    {
-        this.LogClientAction(this.Id, this.Name, $"Set volume to {volume}");
-        await Task.Delay(10); // TODO: Fix simulation async operation
-        return Result.Success();
-    }
-
-    public async Task<Result> SetMuteAsync(bool mute)
-    {
-        this.LogClientAction(this.Id, this.Name, mute ? "Mute" : "Unmute");
-        await Task.Delay(10); // TODO: Fix simulation async operation
-        return Result.Success();
-    }
-
-    public async Task<Result> SetLatencyAsync(int latencyMs)
-    {
-        this.LogClientAction(this.Id, this.Name, $"Set latency to {latencyMs}ms");
-        await Task.Delay(10); // TODO: Fix simulation async operation
-        return Result.Success();
+        public async Task<Result> SetLatencyAsync(int latencyMs)
+        {
+            this.LogClientAction(this.Id, this.Name, $"Set latency to {latencyMs}ms");
+            await Task.Delay(10); // TODO: Fix simulation async operation
+            return Result.Success();
+        }
     }
 }
