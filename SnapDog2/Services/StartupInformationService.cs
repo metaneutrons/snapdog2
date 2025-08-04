@@ -155,7 +155,6 @@ public class StartupInformationService : IHostedService
             "Serilog.AspNetCore",
             "Newtonsoft.Json",
             "FluentValidation",
-            "MediatR",
             "Swashbuckle.AspNetCore",
             "HealthChecks.Network",
             "Cortex.Mediator",

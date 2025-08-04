@@ -3,7 +3,7 @@ namespace SnapDog2.Core.Models;
 using System.Diagnostics.CodeAnalysis;
 
 /// <summary>
-/// Marker interface for Result types, useful for MediatR behaviors and constraints.
+/// Marker interface for Result types, useful for Cortex.Mediator behaviors and constraints.
 /// </summary>
 public interface IResult
 {

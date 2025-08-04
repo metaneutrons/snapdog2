@@ -20,7 +20,6 @@
     <PackageReference Include="FluentValidation" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
     <PackageReference Include="FluentValidation.AspNetCore" />
-    <PackageReference Include="MediatR" />
     <PackageReference Include="MQTTnet" />
     <PackageReference Include="Knx.Falcon.Sdk" />
     <PackageReference Include="Polly" />
