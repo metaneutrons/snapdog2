@@ -20,7 +20,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Testing");
             SetEnvironmentVariable("SNAPDOG_SYSTEM_LOG_LEVEL", "Warning");
             SetEnvironmentVariable("SNAPDOG_SYSTEM_HEALTH_CHECKS_ENABLED", "true");
-            SetEnvironmentVariable("SNAPDOG_SYSTEM_LOG_FILE", "");
+            SetEnvironmentVariable("SNAPDOG_SYSTEM_LOG_FILE", ""); // Disable log file to avoid permission issues
             SetEnvironmentVariable("SNAPDOG_API_ENABLED", "true"); // ENABLE API for tests
             SetEnvironmentVariable("SNAPDOG_API_PORT", "0");
             SetEnvironmentVariable("SNAPDOG_API_AUTH_ENABLED", "false");
@@ -52,6 +52,13 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 logging.ClearProviders();
                 logging.SetMinimumLevel(LogLevel.Warning);
             });
+
+            // Remove hosted services that cause issues in tests
+            var hostedServices = services.Where(d => d.ServiceType == typeof(IHostedService)).ToList();
+            foreach (var service in hostedServices)
+            {
+                services.Remove(service);
+            }
         });
     }
 

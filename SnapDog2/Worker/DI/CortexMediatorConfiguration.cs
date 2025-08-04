@@ -1,11 +1,15 @@
 namespace SnapDog2.Worker.DI;
 
 using System.Reflection;
+using Cortex.Mediator;
 using Cortex.Mediator.DependencyInjection;
+using Cortex.Mediator.Notifications;
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SnapDog2.Core.Abstractions;
 using SnapDog2.Server.Behaviors;
+using SnapDog2.Server.Features.Shared.Notifications;
 
 /// <summary>
 /// Extension methods for configuring Cortex.Mediator services.
@@ -95,6 +99,21 @@ public static class CortexMediatorConfiguration
         // Notification handlers
         services.AddScoped<Server.Features.Shared.Handlers.ZoneStateNotificationHandler>();
         services.AddScoped<Server.Features.Shared.Handlers.ClientStateNotificationHandler>();
+
+        // Register integration services as notification handlers
+        services.AddScoped<INotificationHandler<StatusChangedNotification>>(provider =>
+            provider.GetRequiredService<ISnapcastService>() as INotificationHandler<StatusChangedNotification>
+            ?? throw new InvalidOperationException(
+                "SnapcastService does not implement INotificationHandler<StatusChangedNotification>"
+            )
+        );
+
+        services.AddScoped<INotificationHandler<StatusChangedNotification>>(provider =>
+            provider.GetRequiredService<IKnxService>() as INotificationHandler<StatusChangedNotification>
+            ?? throw new InvalidOperationException(
+                "KnxService does not implement INotificationHandler<StatusChangedNotification>"
+            )
+        );
 
         // Automatically register all FluentValidation AbstractValidator<> implementations
         // found in the specified assembly. These are used by the ValidationBehavior.

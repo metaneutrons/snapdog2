@@ -8,25 +8,35 @@ using Cortex.Mediator.Notifications;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Polly;
+using Polly.Retry;
+using Polly.Timeout;
 using SnapcastClient;
 using SnapcastClient.Models;
 using SnapcastClient.Params;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Configuration;
+using SnapDog2.Core.Enums;
 using SnapDog2.Core.Models;
+using SnapDog2.Server.Features.Shared.Notifications;
 using SnapDog2.Server.Notifications;
 
 /// <summary>
-/// Snapcast service implementation using the enterprise SnapcastClient library.
-/// Manages connection to Snapcast server and provides high-level operations.
+/// Enterprise-grade Snapcast service implementation using SnapcastClient library.
+/// Provides resilient operations with Polly policies and comprehensive Mediator integration.
 /// </summary>
-public partial class SnapcastService : ISnapcastService, IAsyncDisposable
+public partial class SnapcastService
+    : ISnapcastService,
+        INotificationHandler<StatusChangedNotification>,
+        IAsyncDisposable
 {
     private readonly SnapcastConfig _config;
     private readonly IServiceProvider _serviceProvider;
     private readonly ISnapcastStateRepository _stateRepository;
     private readonly ILogger<SnapcastService> _logger;
     private readonly SnapcastClient.IClient _snapcastClient;
+    private readonly ResiliencePipeline _connectionPolicy;
+    private readonly ResiliencePipeline _operationPolicy;
     private readonly SemaphoreSlim _operationLock = new(1, 1);
     private bool _disposed = false;
     private bool _initialized = false;
@@ -45,49 +55,87 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         this._logger = logger;
         this._snapcastClient = snapcastClient;
 
+        // Configure resilience policies
+        this._connectionPolicy = CreateConnectionPolicy();
+        this._operationPolicy = CreateOperationPolicy();
+
         // Subscribe to client events
         this.SubscribeToEvents();
+
+        LogServiceCreated(_config.Address, _config.JsonRpcPort, _config.AutoReconnect);
     }
+
+    /// <inheritdoc />
+    public bool IsConnected => _initialized; // SnapcastClient doesn't expose IsConnected, use initialization status
+
+    /// <inheritdoc />
+    public ServiceStatus Status =>
+        _initialized switch
+        {
+            false => ServiceStatus.Stopped,
+            true when IsConnected => ServiceStatus.Running,
+            true => ServiceStatus.Error,
+        };
 
     #region Logging
 
-    [LoggerMessage(1001, LogLevel.Information, "Initializing Snapcast connection to {Host}:{Port}")]
+    [LoggerMessage(
+        1001,
+        LogLevel.Information,
+        "Snapcast service created for {Host}:{Port}, auto-reconnect: {AutoReconnect}"
+    )]
+    private partial void LogServiceCreated(string host, int port, bool autoReconnect);
+
+    [LoggerMessage(1002, LogLevel.Information, "Initializing Snapcast connection to {Host}:{Port}")]
     private partial void LogInitializing(string host, int port);
 
-    [LoggerMessage(1002, LogLevel.Information, "Snapcast connection established successfully")]
+    [LoggerMessage(1003, LogLevel.Information, "Snapcast connection established successfully")]
     private partial void LogConnectionEstablished();
 
-    [LoggerMessage(1003, LogLevel.Warning, "Snapcast connection lost: {Reason}")]
+    [LoggerMessage(1004, LogLevel.Warning, "Snapcast connection lost: {Reason}")]
     private partial void LogConnectionLost(string reason);
 
-    [LoggerMessage(1004, LogLevel.Error, "Failed to initialize Snapcast connection")]
+    [LoggerMessage(1005, LogLevel.Error, "Failed to initialize Snapcast connection")]
     private partial void LogInitializationFailed(Exception ex);
 
-    [LoggerMessage(1005, LogLevel.Error, "Snapcast operation {Operation} failed")]
+    [LoggerMessage(1006, LogLevel.Error, "Snapcast operation {Operation} failed")]
     private partial void LogOperationFailed(string operation, Exception ex);
 
-    [LoggerMessage(1006, LogLevel.Debug, "Processing Snapcast event: {EventType}")]
+    [LoggerMessage(1007, LogLevel.Debug, "Processing Snapcast event: {EventType}")]
     private partial void LogProcessingEvent(string eventType);
 
-    [LoggerMessage(1007, LogLevel.Error, "Error processing Snapcast event {EventType}")]
+    [LoggerMessage(1008, LogLevel.Error, "Error processing Snapcast event {EventType}")]
     private partial void LogEventProcessingError(string eventType, Exception ex);
 
-    [LoggerMessage(1008, LogLevel.Information, "Snapcast service disposed")]
+    [LoggerMessage(1009, LogLevel.Information, "Snapcast service disposed")]
     private partial void LogServiceDisposed();
+
+    [LoggerMessage(1010, LogLevel.Warning, "Snapcast service not connected for operation: {Operation}")]
+    private partial void LogNotConnected(string operation);
+
+    [LoggerMessage(
+        1011,
+        LogLevel.Error,
+        "Error handling Snapcast status notification {StatusType} for target {TargetId}"
+    )]
+    private partial void LogStatusNotificationError(string statusType, string targetId, Exception exception);
+
+    [LoggerMessage(1012, LogLevel.Information, "Snapcast service stopped successfully")]
+    private partial void LogServiceStopped();
 
     #endregion
 
     #region Helper Methods
 
     /// <summary>
-    /// Gets IMediator from service provider using a scope to avoid lifetime issues.
+    /// Publishes notifications using the injected mediator for better performance and reliability.
     /// </summary>
     private async Task PublishNotificationAsync<T>(T notification)
         where T : INotification
     {
         try
         {
-            using var scope = this._serviceProvider.CreateScope();
+            using var scope = _serviceProvider.CreateScope();
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
             await mediator.PublishAsync(notification);
         }
@@ -95,6 +143,43 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         {
             this.LogEventProcessingError(typeof(T).Name, ex);
         }
+    }
+
+    /// <summary>
+    /// Creates resilience policy for connection operations.
+    /// </summary>
+    private ResiliencePipeline CreateConnectionPolicy()
+    {
+        return new ResiliencePipelineBuilder()
+            .AddRetry(
+                new RetryStrategyOptions
+                {
+                    MaxRetryAttempts = 3,
+                    Delay = TimeSpan.FromSeconds(2),
+                    BackoffType = DelayBackoffType.Exponential,
+                    UseJitter = true,
+                }
+            )
+            .AddTimeout(TimeSpan.FromSeconds(_config.Timeout))
+            .Build();
+    }
+
+    /// <summary>
+    /// Creates resilience policy for operation calls.
+    /// </summary>
+    private ResiliencePipeline CreateOperationPolicy()
+    {
+        return new ResiliencePipelineBuilder()
+            .AddRetry(
+                new RetryStrategyOptions
+                {
+                    MaxRetryAttempts = 2,
+                    Delay = TimeSpan.FromMilliseconds(500),
+                    BackoffType = DelayBackoffType.Linear,
+                }
+            )
+            .AddTimeout(TimeSpan.FromSeconds(10))
+            .Build();
     }
 
     #endregion
@@ -221,15 +306,27 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
             return Result.Failure("Service has been disposed");
         }
 
+        if (!IsConnected)
+        {
+            LogNotConnected(nameof(SetClientVolumeAsync));
+            return Result.Failure("Snapcast service is not connected");
+        }
+
         try
         {
-            await this._snapcastClient.ClientSetVolumeAsync(snapcastClientId, volumePercent).ConfigureAwait(false);
-            return Result.Success();
+            return await _operationPolicy.ExecuteAsync(
+                async (ct) =>
+                {
+                    await _snapcastClient.ClientSetVolumeAsync(snapcastClientId, volumePercent);
+                    return Result.Success();
+                },
+                cancellationToken
+            );
         }
         catch (Exception ex)
         {
             this.LogOperationFailed(nameof(this.SetClientVolumeAsync), ex);
-            return Result.Failure(ex);
+            return Result.Failure($"Failed to set client volume: {ex.Message}");
         }
     }
 
@@ -744,6 +841,134 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         catch (Exception ex)
         {
             this.LogEventProcessingError("ServerUpdate", ex);
+        }
+    }
+
+    private void UnsubscribeFromEvents()
+    {
+        if (_snapcastClient != null)
+        {
+            _snapcastClient.OnClientConnect = null;
+            _snapcastClient.OnClientDisconnect = null;
+            _snapcastClient.OnClientVolumeChanged = null;
+            _snapcastClient.OnClientLatencyChanged = null;
+            _snapcastClient.OnClientNameChanged = null;
+            _snapcastClient.OnGroupMute = null;
+            _snapcastClient.OnGroupStreamChanged = null;
+            _snapcastClient.OnGroupNameChanged = null;
+            _snapcastClient.OnStreamUpdate = null;
+            _snapcastClient.OnStreamProperties = null;
+            _snapcastClient.OnServerUpdate = null;
+        }
+    }
+
+    #endregion
+
+    #region Status Change Notification Handler
+
+    /// <inheritdoc />
+    public async Task Handle(StatusChangedNotification notification, CancellationToken cancellationToken)
+    {
+        if (!IsConnected || !_initialized)
+        {
+            LogNotConnected("Handle StatusChangedNotification");
+            return;
+        }
+
+        try
+        {
+            // Map status changes to Snapcast operations
+            Result result;
+
+            if (notification.StatusType == "VOLUME" && notification.TargetId.StartsWith("client_"))
+            {
+                result = await SetClientVolumeAsync(
+                    notification.TargetId,
+                    Convert.ToInt32(notification.Value),
+                    cancellationToken
+                );
+            }
+            else if (notification.StatusType == "MUTE" && notification.TargetId.StartsWith("client_"))
+            {
+                result = await SetClientMuteAsync(
+                    notification.TargetId,
+                    Convert.ToBoolean(notification.Value),
+                    cancellationToken
+                );
+            }
+            else if (notification.StatusType == "VOLUME" && notification.TargetId.StartsWith("group_"))
+            {
+                result = await SetGroupVolumeAsync(
+                    notification.TargetId,
+                    Convert.ToInt32(notification.Value),
+                    cancellationToken
+                );
+            }
+            else if (notification.StatusType == "MUTE" && notification.TargetId.StartsWith("group_"))
+            {
+                result = await SetGroupMuteAsync(
+                    notification.TargetId,
+                    Convert.ToBoolean(notification.Value),
+                    cancellationToken
+                );
+            }
+            else
+            {
+                result = Result.Success(); // Ignore unknown status types
+            }
+
+            if (!result.IsSuccess)
+            {
+                LogStatusNotificationError(
+                    notification.StatusType,
+                    notification.TargetId,
+                    new Exception(result.ErrorMessage)
+                );
+            }
+        }
+        catch (Exception ex)
+        {
+            LogStatusNotificationError(notification.StatusType, notification.TargetId, ex);
+        }
+    }
+
+    private async Task<Result> SetGroupVolumeAsync(
+        string groupId,
+        int volumePercent,
+        CancellationToken cancellationToken
+    )
+    {
+        if (!IsConnected)
+        {
+            return Result.Failure("Snapcast service is not connected");
+        }
+
+        try
+        {
+            return await _operationPolicy.ExecuteAsync(
+                async (ct) =>
+                {
+                    // Get all clients in the group and set their volume
+                    var group = _stateRepository.GetGroup(groupId);
+                    if (group == null)
+                    {
+                        return Result.Failure($"Group {groupId} not found");
+                    }
+
+                    foreach (var client in group.Value.Clients)
+                    {
+                        await _snapcastClient.ClientSetVolumeAsync(client.Id, volumePercent);
+                    }
+
+                    return Result.Success();
+                },
+                cancellationToken
+            );
+        }
+        catch (Exception ex)
+        {
+            LogOperationFailed(nameof(SetGroupVolumeAsync), ex);
+            return Result.Failure($"Failed to set group volume: {ex.Message}");
         }
     }
 

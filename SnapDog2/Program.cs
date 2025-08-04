@@ -109,11 +109,6 @@ static WebApplication CreateWebApplication(string[] args)
         throw;
     }
 
-    // Determine if debug logging is enabled
-    var isDebugLogging =
-        snapDogConfig.System.LogLevel.Equals("Debug", StringComparison.OrdinalIgnoreCase)
-        || snapDogConfig.System.LogLevel.Equals("Trace", StringComparison.OrdinalIgnoreCase);
-
     // Configure Serilog based on configuration
     var loggerConfig = new LoggerConfiguration()
         .MinimumLevel.Is(Enum.Parse<LogEventLevel>(snapDogConfig.System.LogLevel, true))
@@ -152,23 +147,6 @@ static WebApplication CreateWebApplication(string[] args)
     builder.Services.AddSingleton(snapDogConfig.Services);
     builder.Services.AddSingleton(snapDogConfig.SnapcastServer);
 
-    // Configure resilient web host with port from configuration
-    if (snapDogConfig.Api.Enabled)
-    {
-        builder.WebHost.UseResilientKestrel(snapDogConfig.Api, Log.Logger);
-    }
-    else if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Testing")
-    {
-        // For tests, we still need to configure Kestrel even when API is disabled
-        // so that WebApplicationFactory can create HTTP clients
-        Log.Information("🧪 Test environment detected - configuring minimal Kestrel for testing");
-        builder.WebHost.UseKestrel();
-    }
-    else
-    {
-        Log.Information("🌐 API is disabled - Kestrel will not bind to any ports.");
-    }
-
     // Register configuration for IOptions pattern
     builder.Services.Configure<SnapDogConfiguration>(options =>
     {
@@ -182,6 +160,9 @@ static WebApplication CreateWebApplication(string[] args)
         options.Clients = snapDogConfig.Clients;
         options.RadioStations = snapDogConfig.RadioStations;
     });
+
+    // Add command processing (Mediator, handlers, behaviors)
+    builder.Services.AddCommandProcessing();
 
     // Add Snapcast services
     builder.Services.AddSnapcastServices();
@@ -239,6 +220,23 @@ static WebApplication CreateWebApplication(string[] args)
         SnapDog2.Core.Abstractions.IPlaylistManager,
         SnapDog2.Infrastructure.Services.PlaylistManager
     >();
+
+    // Configure resilient web host with port from configuration
+    if (snapDogConfig.Api.Enabled)
+    {
+        builder.WebHost.UseResilientKestrel(snapDogConfig.Api, Log.Logger);
+    }
+    else if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Testing")
+    {
+        // For tests, we still need to configure Kestrel even when API is disabled
+        // so that WebApplicationFactory can create HTTP clients
+        Log.Information("🧪 Test environment detected - configuring minimal Kestrel for testing");
+        builder.WebHost.UseKestrel();
+    }
+    else
+    {
+        Log.Information("🌐 API is disabled - Kestrel will not bind to any ports.");
+    }
 
     // Add services to the container (conditionally based on API configuration)
     if (snapDogConfig.Api.Enabled)

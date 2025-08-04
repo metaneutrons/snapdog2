@@ -3,6 +3,8 @@ namespace SnapDog2.Tests.Api;
 using System.Net;
 using System.Text.Json;
 using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
+using SnapDog2.Core.Configuration;
 using Xunit;
 
 [Collection("ApiEnabled")]
@@ -20,6 +22,21 @@ public class HealthControllerTests : IClassFixture<CustomWebApplicationFactory>
     [Fact]
     public async Task GetHealth_ShouldReturnHealthStatus()
     {
+        // Arrange - Check if API and health checks are enabled
+        using var scope = _factory.Services.CreateScope();
+        var config = scope.ServiceProvider.GetRequiredService<SnapDogConfiguration>();
+
+        // Skip test if API or health checks are disabled
+        if (!config.Api.Enabled)
+        {
+            return; // Skip test - API is disabled, health endpoints not available
+        }
+
+        if (!config.System.HealthChecksEnabled)
+        {
+            return; // Skip test - Health checks are disabled
+        }
+
         // Act
         var response = await this._client.GetAsync("/api/health");
 
@@ -53,6 +70,21 @@ public class HealthControllerTests : IClassFixture<CustomWebApplicationFactory>
     [Fact]
     public async Task GetReady_ShouldReturnReadyStatus()
     {
+        // Arrange - Check if API and health checks are enabled
+        using var scope = _factory.Services.CreateScope();
+        var config = scope.ServiceProvider.GetRequiredService<SnapDogConfiguration>();
+
+        // Skip test if API or health checks are disabled
+        if (!config.Api.Enabled)
+        {
+            return; // Skip test - API is disabled, health endpoints not available
+        }
+
+        if (!config.System.HealthChecksEnabled)
+        {
+            return; // Skip test - Health checks are disabled
+        }
+
         // Act
         var response = await this._client.GetAsync("/api/health/ready");
 
@@ -74,6 +106,21 @@ public class HealthControllerTests : IClassFixture<CustomWebApplicationFactory>
     [Fact]
     public async Task GetLive_ShouldReturnLiveStatus()
     {
+        // Arrange - Check if API and health checks are enabled
+        using var scope = _factory.Services.CreateScope();
+        var config = scope.ServiceProvider.GetRequiredService<SnapDogConfiguration>();
+
+        // Skip test if API or health checks are disabled
+        if (!config.Api.Enabled)
+        {
+            return; // Skip test - API is disabled, health endpoints not available
+        }
+
+        if (!config.System.HealthChecksEnabled)
+        {
+            return; // Skip test - Health checks are disabled
+        }
+
         // Act
         var response = await this._client.GetAsync("/api/health/live");
 

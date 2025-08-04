@@ -23,13 +23,13 @@ using SnapDog2.Server.Features.Zones.Commands;
 /// <summary>
 /// Enterprise-grade KNX integration service using Knx.Falcon.Sdk.
 /// Provides bi-directional KNX communication with automatic reconnection and command mapping.
+/// Updated to use IServiceProvider to resolve scoped IMediator.
 /// </summary>
 public partial class KnxService : IKnxService, INotificationHandler<StatusChangedNotification>
 {
     private readonly KnxConfig _config;
     private readonly List<ZoneConfig> _zones;
     private readonly List<ClientConfig> _clients;
-    private readonly IMediator _mediator;
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<KnxService> _logger;
     private readonly ResiliencePipeline _connectionPolicy;
@@ -44,7 +44,6 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
 
     public KnxService(
         IOptions<SnapDogConfiguration> configuration,
-        IMediator mediator,
         IServiceProvider serviceProvider,
         ILogger<KnxService> logger
     )
@@ -53,7 +52,6 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
         _config = config.Services.Knx;
         _zones = config.Zones;
         _clients = config.Clients;
-        _mediator = mediator;
         _serviceProvider = serviceProvider;
         _logger = logger;
         _groupAddressCache = new ConcurrentDictionary<string, string>();
@@ -414,29 +412,33 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
     {
         try
         {
+            using var scope = _serviceProvider.CreateScope();
+
             return command switch
             {
                 SetZoneVolumeCommand cmd =>
-                    await GetHandler<Server.Features.Zones.Handlers.SetZoneVolumeCommandHandler>()
+                    await GetHandler<Server.Features.Zones.Handlers.SetZoneVolumeCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
-                SetZoneMuteCommand cmd => await GetHandler<Server.Features.Zones.Handlers.SetZoneMuteCommandHandler>()
+                SetZoneMuteCommand cmd => await GetHandler<Server.Features.Zones.Handlers.SetZoneMuteCommandHandler>(
+                        scope
+                    )
                     .Handle(cmd, cancellationToken),
-                PlayCommand cmd => await GetHandler<Server.Features.Zones.Handlers.PlayCommandHandler>()
+                PlayCommand cmd => await GetHandler<Server.Features.Zones.Handlers.PlayCommandHandler>(scope)
                     .Handle(cmd, cancellationToken),
-                PauseCommand cmd => await GetHandler<Server.Features.Zones.Handlers.PauseCommandHandler>()
+                PauseCommand cmd => await GetHandler<Server.Features.Zones.Handlers.PauseCommandHandler>(scope)
                     .Handle(cmd, cancellationToken),
-                StopCommand cmd => await GetHandler<Server.Features.Zones.Handlers.StopCommandHandler>()
+                StopCommand cmd => await GetHandler<Server.Features.Zones.Handlers.StopCommandHandler>(scope)
                     .Handle(cmd, cancellationToken),
-                NextTrackCommand cmd => await GetHandler<Server.Features.Zones.Handlers.NextTrackCommandHandler>()
+                NextTrackCommand cmd => await GetHandler<Server.Features.Zones.Handlers.NextTrackCommandHandler>(scope)
                     .Handle(cmd, cancellationToken),
                 PreviousTrackCommand cmd =>
-                    await GetHandler<Server.Features.Zones.Handlers.PreviousTrackCommandHandler>()
+                    await GetHandler<Server.Features.Zones.Handlers.PreviousTrackCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
                 SetClientVolumeCommand cmd =>
-                    await GetHandler<Server.Features.Clients.Handlers.SetClientVolumeCommandHandler>()
+                    await GetHandler<Server.Features.Clients.Handlers.SetClientVolumeCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
                 SetClientMuteCommand cmd =>
-                    await GetHandler<Server.Features.Clients.Handlers.SetClientMuteCommandHandler>()
+                    await GetHandler<Server.Features.Clients.Handlers.SetClientMuteCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
                 _ => Result.Failure($"Unknown command type: {command.GetType().Name}"),
             };
@@ -446,17 +448,6 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             LogCommandExecutionError(command.GetType().Name, ex);
             return Result.Failure($"Failed to execute command: {ex.Message}");
         }
-    }
-
-    private T GetHandler<T>()
-        where T : class
-    {
-        var handler = _serviceProvider.GetService<T>();
-        if (handler == null)
-        {
-            throw new InvalidOperationException($"Handler {typeof(T).Name} not found in DI container");
-        }
-        return handler;
     }
 
     private object? MapGroupAddressToCommand(string groupAddress, object value)
@@ -705,6 +696,17 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
 
         _disposed = true;
         GC.SuppressFinalize(this);
+    }
+
+    private T GetHandler<T>(IServiceScope scope)
+        where T : class
+    {
+        var handler = scope.ServiceProvider.GetService<T>();
+        if (handler == null)
+        {
+            throw new InvalidOperationException($"Handler {typeof(T).Name} not found in DI container");
+        }
+        return handler;
     }
 
     #region Logging

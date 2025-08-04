@@ -14,14 +14,17 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MQTTnet;
 using MQTTnet.Protocol;
+using Polly;
+using Polly.Retry;
+using Polly.Timeout;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Core.Extensions;
 using SnapDog2.Core.Models;
 
 /// <summary>
-/// MQTT service implementation using MQTTnet v5.
-/// Provides bi-directional MQTT communication with automatic reconnection,
+/// Enterprise-grade MQTT service implementation using MQTTnet v5.
+/// Provides bi-directional MQTT communication with Polly resilience policies,
 /// configurable topic structure, and comprehensive error handling.
 /// </summary>
 public sealed partial class MqttService : IMqttService, IAsyncDisposable
@@ -31,6 +34,8 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     private readonly ILogger<MqttService> _logger;
     private readonly List<ZoneConfig> _zoneConfigs;
     private readonly List<ClientConfig> _clientConfigs;
+    private readonly ResiliencePipeline _connectionPolicy;
+    private readonly ResiliencePipeline _operationPolicy;
 
     private readonly ConcurrentDictionary<int, ZoneMqttTopics> _zoneTopics = new();
     private readonly ConcurrentDictionary<string, ClientMqttTopics> _clientTopics = new();
@@ -53,29 +58,41 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         this._zoneConfigs = zoneConfigOptions.Value;
         this._clientConfigs = clientConfigOptions.Value;
 
+        // Configure resilience policies
+        this._connectionPolicy = CreateConnectionPolicy();
+        this._operationPolicy = CreateOperationPolicy();
+
         // Build topic configurations
         this.BuildTopicConfigurations();
+
+        LogServiceCreated(_config.BrokerAddress, _config.Port, _config.Enabled);
     }
 
     #region Logging
 
-    [LoggerMessage(2001, LogLevel.Information, "Initializing MQTT connection to {BrokerAddress}:{Port}")]
+    [LoggerMessage(2001, LogLevel.Information, "MQTT service created for {BrokerAddress}:{Port}, enabled: {Enabled}")]
+    private partial void LogServiceCreated(string brokerAddress, int port, bool enabled);
+
+    [LoggerMessage(2002, LogLevel.Information, "Initializing MQTT connection to {BrokerAddress}:{Port}")]
     private partial void LogInitializing(string brokerAddress, int port);
 
-    [LoggerMessage(2002, LogLevel.Information, "MQTT connection established successfully")]
+    [LoggerMessage(2003, LogLevel.Information, "MQTT connection established successfully")]
     private partial void LogConnectionEstablished();
 
-    [LoggerMessage(2003, LogLevel.Warning, "MQTT connection lost: {Reason}")]
+    [LoggerMessage(2004, LogLevel.Warning, "MQTT connection lost: {Reason}")]
     private partial void LogConnectionLost(string reason);
 
-    [LoggerMessage(2004, LogLevel.Error, "Failed to initialize MQTT connection")]
+    [LoggerMessage(2005, LogLevel.Error, "Failed to initialize MQTT connection")]
     private partial void LogInitializationFailed(Exception ex);
 
-    [LoggerMessage(2005, LogLevel.Error, "MQTT operation {Operation} failed")]
+    [LoggerMessage(2006, LogLevel.Error, "MQTT operation {Operation} failed")]
     private partial void LogOperationFailed(string operation, Exception ex);
 
-    [LoggerMessage(2008, LogLevel.Information, "MQTT service disposed")]
+    [LoggerMessage(2007, LogLevel.Information, "MQTT service disposed")]
     private partial void LogServiceDisposed();
+
+    [LoggerMessage(2008, LogLevel.Warning, "MQTT service not connected for operation: {Operation}")]
+    private partial void LogNotConnected(string operation);
 
     #endregion
 
@@ -104,6 +121,43 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         {
             this.LogOperationFailed("PublishNotification", ex);
         }
+    }
+
+    /// <summary>
+    /// Creates resilience policy for connection operations.
+    /// </summary>
+    private ResiliencePipeline CreateConnectionPolicy()
+    {
+        return new ResiliencePipelineBuilder()
+            .AddRetry(
+                new RetryStrategyOptions
+                {
+                    MaxRetryAttempts = 3,
+                    Delay = TimeSpan.FromSeconds(2),
+                    BackoffType = DelayBackoffType.Exponential,
+                    UseJitter = true,
+                }
+            )
+            .AddTimeout(TimeSpan.FromSeconds(30)) // Default 30 second timeout
+            .Build();
+    }
+
+    /// <summary>
+    /// Creates resilience policy for operation calls.
+    /// </summary>
+    private ResiliencePipeline CreateOperationPolicy()
+    {
+        return new ResiliencePipelineBuilder()
+            .AddRetry(
+                new RetryStrategyOptions
+                {
+                    MaxRetryAttempts = 2,
+                    Delay = TimeSpan.FromMilliseconds(500),
+                    BackoffType = DelayBackoffType.Linear,
+                }
+            )
+            .AddTimeout(TimeSpan.FromSeconds(10))
+            .Build();
     }
 
     private void BuildTopicConfigurations()
@@ -153,37 +207,51 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         {
             this.LogInitializing(this._config.BrokerAddress, this._config.Port);
 
-            // Create MQTT client using v5 API
-            var factory = new MqttClientFactory();
-            this._mqttClient = factory.CreateMqttClient();
+            var result = await _connectionPolicy.ExecuteAsync(
+                async (ct) =>
+                {
+                    // Create MQTT client using v5 API
+                    var factory = new MqttClientFactory();
+                    this._mqttClient = factory.CreateMqttClient();
 
-            // Configure client options
-            var optionsBuilder = new MqttClientOptionsBuilder()
-                .WithTcpServer(this._config.BrokerAddress, this._config.Port)
-                .WithClientId(this._config.ClientId)
-                .WithKeepAlivePeriod(TimeSpan.FromSeconds(this._config.KeepAlive))
-                .WithCleanSession(true);
+                    // Configure client options
+                    var optionsBuilder = new MqttClientOptionsBuilder()
+                        .WithTcpServer(this._config.BrokerAddress, this._config.Port)
+                        .WithClientId(this._config.ClientId)
+                        .WithKeepAlivePeriod(TimeSpan.FromSeconds(this._config.KeepAlive))
+                        .WithCleanSession(true);
 
-            // Add authentication if configured
-            if (!string.IsNullOrEmpty(this._config.Username))
+                    // Add authentication if configured
+                    if (!string.IsNullOrEmpty(this._config.Username))
+                    {
+                        optionsBuilder.WithCredentials(this._config.Username, this._config.Password);
+                    }
+
+                    var options = optionsBuilder.Build();
+
+                    // Set up event handlers
+                    this._mqttClient.ConnectedAsync += this.OnConnectedAsync;
+                    this._mqttClient.DisconnectedAsync += this.OnDisconnectedAsync;
+                    this._mqttClient.ApplicationMessageReceivedAsync += this.OnApplicationMessageReceivedAsync;
+
+                    // Connect to broker
+                    await this._mqttClient.ConnectAsync(options, ct);
+
+                    this._initialized = true;
+                    this.LogConnectionEstablished();
+
+                    return Result.Success();
+                },
+                cancellationToken
+            );
+
+            if (result.IsSuccess)
             {
-                optionsBuilder.WithCredentials(this._config.Username, this._config.Password);
+                // Publish connection established notification
+                await this.PublishNotificationAsync(new MqttConnectionEstablishedNotification());
             }
 
-            var options = optionsBuilder.Build();
-
-            // Set up event handlers
-            this._mqttClient.ConnectedAsync += this.OnConnectedAsync;
-            this._mqttClient.DisconnectedAsync += this.OnDisconnectedAsync;
-            this._mqttClient.ApplicationMessageReceivedAsync += this.OnApplicationMessageReceivedAsync;
-
-            // Connect to broker
-            await this._mqttClient.ConnectAsync(options, cancellationToken);
-
-            this._initialized = true;
-            this.LogConnectionEstablished();
-
-            return Result.Success();
+            return result;
         }
         catch (Exception ex)
         {
@@ -269,20 +337,27 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     {
         if (!this.IsConnected)
         {
+            LogNotConnected(nameof(PublishAsync));
             return Result.Failure("MQTT client is not connected");
         }
 
         try
         {
-            var message = new MqttApplicationMessageBuilder()
-                .WithTopic(topic)
-                .WithPayload(payload)
-                .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
-                .WithRetainFlag(retain)
-                .Build();
+            return await _operationPolicy.ExecuteAsync(
+                async (ct) =>
+                {
+                    var message = new MqttApplicationMessageBuilder()
+                        .WithTopic(topic)
+                        .WithPayload(payload)
+                        .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
+                        .WithRetainFlag(retain)
+                        .Build();
 
-            await this._mqttClient!.PublishAsync(message, cancellationToken);
-            return Result.Success();
+                    await this._mqttClient!.PublishAsync(message, ct);
+                    return Result.Success();
+                },
+                cancellationToken
+            );
         }
         catch (Exception ex)
         {

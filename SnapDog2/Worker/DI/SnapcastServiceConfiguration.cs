@@ -1,6 +1,8 @@
 namespace SnapDog2.Worker.DI;
 
+using Cortex.Mediator;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SnapcastClient;
 using SnapDog2.Core.Abstractions;
@@ -29,7 +31,7 @@ public static class SnapcastServiceConfiguration
             var config = serviceProvider.GetRequiredService<IOptions<SnapDogConfiguration>>().Value.Services.Snapcast;
             var logger = serviceProvider.GetService<ILogger<Client>>();
 
-            // Create the options
+            // Create the options with resilience settings
             var options = new SnapcastClientOptions
             {
                 EnableAutoReconnect = config.AutoReconnect,
@@ -39,7 +41,7 @@ public static class SnapcastServiceConfiguration
                 ReconnectDelayMs = config.ReconnectInterval * 1000,
             };
 
-            // Create the connection
+            // Create the connection with resilience
             var connectionLogger = serviceProvider.GetService<ILogger<ResilientTcpConnection>>();
             var connection = new ResilientTcpConnection(config.Address, config.JsonRpcPort, options, connectionLogger);
 
@@ -47,8 +49,16 @@ public static class SnapcastServiceConfiguration
             return new Client(connection, logger);
         });
 
-        // Register our Snapcast service as singleton
-        services.AddSingleton<ISnapcastService, SnapcastService>();
+        // Register our Snapcast service as singleton with mediator injection
+        services.AddSingleton<ISnapcastService>(serviceProvider =>
+        {
+            var config = serviceProvider.GetRequiredService<IOptions<SnapDogConfiguration>>();
+            var stateRepository = serviceProvider.GetRequiredService<ISnapcastStateRepository>();
+            var logger = serviceProvider.GetRequiredService<ILogger<SnapcastService>>();
+            var snapcastClient = serviceProvider.GetRequiredService<SnapcastClient.IClient>();
+
+            return new SnapcastService(config, serviceProvider, stateRepository, logger, snapcastClient);
+        });
 
         return services;
     }
