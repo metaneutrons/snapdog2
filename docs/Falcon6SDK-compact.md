@@ -35,17 +35,17 @@ public async Task<Result> InitializeAsync(CancellationToken cancellationToken = 
     try
     {
         if (_isInitialized) return Result.Success();
-        
+
         var result = await _connectionPolicy.ExecuteAsync(async (ct) =>
         {
             return await ConnectToKnxBusAsync(ct);
         }, cancellationToken);
-        
+
         if (result.IsSuccess)
         {
             _isInitialized = true;
         }
-        
+
         return result;
     }
     finally
@@ -60,6 +60,7 @@ public async Task<Result> InitializeAsync(CancellationToken cancellationToken = 
 ### Connection Setup
 
 #### IP Tunneling Connection
+
 ```csharp
 private ConnectorParameters? CreateConnectorParameters()
 {
@@ -73,13 +74,14 @@ private ConnectorParameters? CreateConnectorParameters()
         // USB Connection - for direct hardware access
         var usbDevices = KnxBus.GetAttachedUsbDevices().ToArray();
         if (usbDevices.Length == 0) return null;
-        
+
         return UsbConnectorParameters.FromDiscovery(usbDevices[0]);
     }
 }
 ```
 
 #### Connection Establishment
+
 ```csharp
 private async Task<Result> ConnectToKnxBusAsync(CancellationToken cancellationToken)
 {
@@ -90,7 +92,7 @@ private async Task<Result> ConnectToKnxBusAsync(CancellationToken cancellationTo
             return Result.Failure("Failed to create KNX connector parameters");
 
         _knxBus = new KnxBus(connectorParams);
-        
+
         // ⚠️ CRITICAL: Subscribe to events BEFORE connecting
         _knxBus.GroupMessageReceived += OnGroupMessageReceived;
 
@@ -111,6 +113,7 @@ private async Task<Result> ConnectToKnxBusAsync(CancellationToken cancellationTo
 ### Event Processing
 
 #### Incoming KNX Messages
+
 ```csharp
 private async void OnGroupMessageReceived(object? sender, GroupEventArgs e)
 {
@@ -118,7 +121,7 @@ private async void OnGroupMessageReceived(object? sender, GroupEventArgs e)
     {
         var address = e.DestinationAddress.ToString();
         var value = e.Value;
-        
+
         // Map KNX group address to application command
         var command = MapGroupAddressToCommand(address, value);
         if (command != null)
@@ -147,6 +150,7 @@ private async void OnGroupMessageReceived(object? sender, GroupEventArgs e)
 ### Group Value Operations
 
 #### Writing Values
+
 ```csharp
 private async Task<Result> WriteToKnxAsync(string groupAddress, object value, CancellationToken cancellationToken)
 {
@@ -155,7 +159,7 @@ private async Task<Result> WriteToKnxAsync(string groupAddress, object value, Ca
         var result = await _operationPolicy.ExecuteAsync(async (ct) =>
         {
             var ga = new GroupAddress(groupAddress);
-            
+
             // Explicit type conversion for GroupValue
             GroupValue groupValue = value switch
             {
@@ -164,7 +168,7 @@ private async Task<Result> WriteToKnxAsync(string groupAddress, object value, Ca
                 int intValue when intValue >= 0 && intValue <= 255 => new GroupValue((byte)intValue),
                 _ => throw new ArgumentException($"Unsupported value type: {value?.GetType()}")
             };
-            
+
             await _knxBus!.WriteGroupValueAsync(ga, groupValue);
             return Result.Success();
         }, cancellationToken);
@@ -179,6 +183,7 @@ private async Task<Result> WriteToKnxAsync(string groupAddress, object value, Ca
 ```
 
 #### Reading Values
+
 ```csharp
 public async Task<Result<object>> ReadGroupValueAsync(string groupAddress, CancellationToken cancellationToken = default)
 {
@@ -206,6 +211,7 @@ public async Task<Result<object>> ReadGroupValueAsync(string groupAddress, Cance
 ## 🛡️ Resilience & Error Handling
 
 ### Polly Integration
+
 ```csharp
 private ResiliencePipeline CreateConnectionPolicy()
 {
@@ -236,6 +242,7 @@ private ResiliencePipeline CreateOperationPolicy()
 ```
 
 ### Auto-Reconnection
+
 ```csharp
 private void StartReconnectTimer()
 {
@@ -249,7 +256,7 @@ private void StartReconnectTimer()
 private async void OnReconnectTimer(object? state)
 {
     if (!_isInitialized || IsConnected) return;
-    
+
     _logger.LogInformation("Attempting KNX reconnection");
     var result = await InitializeAsync();
     if (result.IsSuccess)
@@ -262,6 +269,7 @@ private async void OnReconnectTimer(object? state)
 ## 🏗️ CQRS Integration
 
 ### Command Mapping
+
 ```csharp
 private object? MapGroupAddressToCommand(string groupAddress, object value)
 {
@@ -270,11 +278,11 @@ private object? MapGroupAddressToCommand(string groupAddress, object value)
     {
         var zone = _zones[i];
         var zoneId = i + 1; // 1-based zone ID
-        
+
         if (!zone.Knx.Enabled) continue;
-        
+
         var knxConfig = zone.Knx;
-        
+
         // Volume commands
         if (groupAddress == knxConfig.Volume && value is int volumeValue)
         {
@@ -285,7 +293,7 @@ private object? MapGroupAddressToCommand(string groupAddress, object value)
                 Source = CommandSource.Knx
             };
         }
-        
+
         // Mute commands
         if (groupAddress == knxConfig.Mute && value is bool muteValue)
         {
@@ -296,7 +304,7 @@ private object? MapGroupAddressToCommand(string groupAddress, object value)
                 Source = CommandSource.Knx
             };
         }
-        
+
         // Playback commands
         if (groupAddress == knxConfig.Play && value is bool playValue && playValue)
         {
@@ -307,12 +315,13 @@ private object? MapGroupAddressToCommand(string groupAddress, object value)
             };
         }
     }
-    
+
     return null;
 }
 ```
 
 ### Command Execution
+
 ```csharp
 private async Task<Result> ExecuteCommandAsync(object command, CancellationToken cancellationToken)
 {
@@ -348,6 +357,7 @@ private T GetHandler<T>() where T : class
 ## 📊 Configuration Management
 
 ### Service Configuration
+
 ```csharp
 public class KnxConfig
 {
@@ -360,6 +370,7 @@ public class KnxConfig
 ```
 
 ### Zone/Client Mapping
+
 ```csharp
 public class ZoneKnxConfig
 {
@@ -380,6 +391,7 @@ public class ZoneKnxConfig
 ## 🔍 Structured Logging
 
 ### LoggerMessage Source Generators
+
 ```csharp
 [LoggerMessage(8001, LogLevel.Information, "KNX service created with gateway: {Gateway}, port: {Port}, enabled: {Enabled}")]
 private partial void LogServiceCreated(string? gateway, int port, bool enabled);
@@ -397,9 +409,10 @@ private partial void LogGroupValueWritten(string groupAddress, object value);
 ## 🧪 Testing Strategy
 
 ### Development Environment
+
 ```yaml
 # docker-compose.dev.yml
-knx-simulator:
+knxd:
   image: michelmu/knxd-docker:latest
   environment:
     - ADDRESS=1.1.128
@@ -414,6 +427,7 @@ knx-simulator:
 ```
 
 ### Configuration Example
+
 ```json
 {
   "Services": {
@@ -449,6 +463,7 @@ knx-simulator:
 ## ⚠️ Critical Implementation Notes
 
 ### 1. **Event Handler Registration Timing**
+
 ```csharp
 // ❌ WRONG - Events registered after connection
 await _knxBus.ConnectAsync();
@@ -460,6 +475,7 @@ await _knxBus.ConnectAsync();
 ```
 
 ### 2. **GroupValue Type Handling**
+
 ```csharp
 // ❌ WRONG - Direct assignment
 GroupValue groupValue = value; // Compilation error
@@ -475,6 +491,7 @@ GroupValue groupValue = value switch
 ```
 
 ### 3. **Async Event Processing**
+
 ```csharp
 // ❌ WRONG - Blocking event handler
 private async void OnGroupMessageReceived(object? sender, GroupEventArgs e)
@@ -500,16 +517,17 @@ private async void OnGroupMessageReceived(object? sender, GroupEventArgs e)
 ```
 
 ### 4. **Proper Disposal**
+
 ```csharp
 public async ValueTask DisposeAsync()
 {
     if (_disposed) return;
 
     await StopAsync();
-    
+
     _reconnectTimer.Dispose();
     _connectionSemaphore.Dispose();
-    
+
     _disposed = true;
     GC.SuppressFinalize(this);
 }
@@ -518,6 +536,7 @@ public async ValueTask DisposeAsync()
 ## 🚀 Performance Optimizations
 
 ### 1. **Group Address Caching**
+
 ```csharp
 private readonly ConcurrentDictionary<string, string> _groupAddressCache = new();
 
@@ -529,6 +548,7 @@ private string? GetCachedGroupAddress(string statusId, int targetId)
 ```
 
 ### 2. **Connection State Optimization**
+
 ```csharp
 public bool IsConnected => _knxBus?.ConnectionState == BusConnectionState.Connected;
 
@@ -558,12 +578,14 @@ public ServiceStatus Status => _isInitialized switch
 ## 🎯 Production Deployment
 
 ### Dependency Injection Registration
+
 ```csharp
 services.AddSingleton<IKnxService, KnxService>();
 services.AddHostedService<IntegrationServicesHostedService>();
 ```
 
 ### Health Checks
+
 ```csharp
 services.AddHealthChecks()
     .AddCheck<KnxHealthCheck>("knx");

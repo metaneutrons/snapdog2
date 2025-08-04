@@ -148,21 +148,37 @@ services:
         ipv4_address: 172.20.0.9
     restart: unless-stopped
 
-  # KNX Gateway Simulator
-  knx-simulator:
-    image: michelmu/knxd-docker:latest
+  # KNX Gateway Simulator - Custom Alpine-based container
+  knxd:
+    build:
+      context: ./devcontainer/knxd
+      dockerfile: Dockerfile
     environment:
       - ADDRESS=1.1.128 # KNX daemon address
       - CLIENT_ADDRESS=1.1.129:8 # Client address range
       - INTERFACE=dummy # Use dummy interface for simulation
-      - DEBUG_ERROR_LEVEL=info # Debug level
-      - FILTERS=single # Filter configuration
+      - DEBUG_LEVEL=info # Debug level
+      - FILTERS=single,pace:queue # Filters with queue to avoid warnings
     ports:
-      - "3671:3671/udp" # Expose KNX port (6720 is TCP port for knxd specific protocol)
+      - "3671:3671/udp" # KNX/IP port
+      - "6720:6720/tcp" # KNX daemon TCP port
     networks:
       snapdog-dev:
         ipv4_address: 172.20.0.10
     restart: unless-stopped
+    # Security: Run as non-root with minimal capabilities
+    user: "1000:1000"
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    # Health check
+    healthcheck:
+      test: ["CMD", "netstat", "-ln"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   # Jaeger
   jaeger:

@@ -132,7 +132,7 @@ urls:
 	@echo ""
 	@echo "🔧 Internal Services (container-only):"
 	@echo "  MQTT Broker:       mqtt:1883 (internal)"
-	@echo "  KNX Gateway:       knx-simulator:3671 (internal)"
+	@echo "  KNX Gateway:       knxd:3671 (internal)"
 	@echo "  Snapcast JSON-RPC: snapcast-server:1705 (internal)"
 	@echo ""
 	@echo "🏠 Test Client IPs:"
