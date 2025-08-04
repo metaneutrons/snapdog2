@@ -13,10 +13,10 @@ using SnapDog2.Core.Models;
 /// SoundFlow-based audio player for streaming to Snapcast sinks.
 /// Handles HTTP audio streaming with format conversion and real-time processing.
 /// </summary>
-public sealed partial class SoundFlowPlayer : IAsyncDisposable
+public sealed partial class MediaPlayer : IAsyncDisposable
 {
     private readonly SoundFlowConfig _config;
-    private readonly ILogger<SoundFlowPlayer> _logger;
+    private readonly ILogger<MediaPlayer> _logger;
     private readonly int _zoneId;
     private readonly string _sinkPath;
     private readonly HttpClient _httpClient;
@@ -33,9 +33,9 @@ public sealed partial class SoundFlowPlayer : IAsyncDisposable
     private DateTime? _playbackStartedAt;
     private bool _disposed;
 
-    public SoundFlowPlayer(
+    public MediaPlayer(
         SoundFlowConfig config,
-        ILogger<SoundFlowPlayer> logger,
+        ILogger<MediaPlayer> logger,
         int zoneId,
         string sinkPath,
         HttpClient httpClient

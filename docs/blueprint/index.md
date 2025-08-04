@@ -178,7 +178,7 @@
 - [11.2 KNX Integration (`/Infrastructure/Knx/KnxService.cs`)](12-infrastructure-services-implementation.md#112-knx-integration-infrastructureknxknxservicecs)
 - [11.3 MQTT Integration (`/Infrastructure/Mqtt/MqttService.cs`)](12-infrastructure-services-implementation.md#113-mqtt-integration-infrastructuremqttmqttservicecs)
 - [11.4 Subsonic Integration (`/Infrastructure/Subsonic/SubsonicService.cs`)](12-infrastructure-services-implementation.md#114-subsonic-integration-infrastructuresubsonicsubsonicservicecs)
-- [11.5 Media Playback (`/Infrastructure/Audio/SoundFlowMediaPlayerService.cs`)](12-infrastructure-services-implementation.md#115-media-playback-infrastructureaudiosoundflowmediaplayerservicecs)
+- [11.5 Media Playback (`/Infrastructure/Audio/MediaPlayerService.cs`)](12-infrastructure-services-implementation.md#115-media-playback-infrastructureaudioMediaPlayerServicecs)
 
 12. [Metrics and Telemetry (Infrastructure Layer)](13-metrics-and-telemetry-infrastructure-layer.md#12-metrics-and-telemetry-infrastructure-layer)
 

@@ -17,22 +17,22 @@ using SnapDog2.Server.Notifications;
 /// SoundFlow-based implementation of media player service.
 /// Provides cross-platform audio streaming with native .NET implementation.
 /// </summary>
-public sealed partial class SoundFlowMediaPlayerService : IMediaPlayerService, IAsyncDisposable
+public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisposable
 {
     private readonly SoundFlowConfig _config;
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly ILogger<SoundFlowMediaPlayerService> _logger;
+    private readonly ILogger<MediaPlayerService> _logger;
     private readonly ILoggerFactory _loggerFactory;
     private readonly IMediator _mediator;
     private readonly IEnumerable<ZoneConfig> _zoneConfigs;
 
-    private readonly ConcurrentDictionary<int, SoundFlowPlayer> _players = new();
+    private readonly ConcurrentDictionary<int, MediaPlayer> _players = new();
     private bool _disposed;
 
-    public SoundFlowMediaPlayerService(
+    public MediaPlayerService(
         IOptions<SoundFlowConfig> config,
         IHttpClientFactory httpClientFactory,
-        ILogger<SoundFlowMediaPlayerService> logger,
+        ILogger<MediaPlayerService> logger,
         ILoggerFactory loggerFactory,
         IMediator mediator,
         IEnumerable<ZoneConfig> zoneConfigs
@@ -83,9 +83,9 @@ public sealed partial class SoundFlowMediaPlayerService : IMediaPlayerService, I
             httpClient.Timeout = TimeSpan.FromSeconds(_config.HttpTimeoutSeconds);
 
             // Create SoundFlow player for this zone
-            var player = new SoundFlowPlayer(
+            var player = new MediaPlayer(
                 _config,
-                _loggerFactory.CreateLogger<SoundFlowPlayer>(),
+                _loggerFactory.CreateLogger<MediaPlayer>(),
                 zoneId,
                 zoneConfig.Sink,
                 httpClient

@@ -228,18 +228,18 @@ Implements `ISubsonicService` using **`SubSonicMedia` (1.0.5)**.
   * Performs **mapping** from `SubSonicMedia.Models` (e.g., `Playlist`, `Song`) to `SnapDog2.Core.Models` (`PlaylistInfo`, `TrackInfo`, `PlaylistWithTracks`). This mapping logic resides within this service.
   * Wraps library calls in `try/catch`, returns `Result`/`Result<T>`. Resilience is handled by the injected `HttpClient`.
 
-## 11.5. Media Playback (`/Infrastructure/Audio/SoundFlowMediaPlayerService.cs`)
+## 11.5. Media Playback (`/Infrastructure/Audio/MediaPlayerService.cs`)
 
 Implements `IMediaPlayerService` using **SoundFlow**, a powerful cross-platform .NET audio engine.
 
 * **Library:** `SoundFlow` - Pure .NET cross-platform audio engine with native support for Windows, macOS, Linux, Android, iOS, and FreeBSD.
-* **Dependencies:** `IOptions<SoundFlowConfig>`, `IHttpClientFactory`, `ILogger<SoundFlowMediaPlayerService>`, `IMediator` (for publishing playback events), `IEnumerable<ZoneConfig>`.
+* **Dependencies:** `IOptions<SoundFlowConfig>`, `IHttpClientFactory`, `ILogger<MediaPlayerService>`, `IMediator` (for publishing playback events), `IEnumerable<ZoneConfig>`.
 * **Core Logic:**
   * Initializes SoundFlow audio engine with configurable parameters (sample rate, bit depth, channels, buffer size).
-  * Creates and manages a `Dictionary<int, SoundFlowPlayer>` (one per ZoneId) for concurrent multi-zone audio streaming.
+  * Creates and manages a `Dictionary<int, MediaPlayer>` (one per ZoneId) for concurrent multi-zone audio streaming.
   * Implements `PlayAsync(int zoneId, TrackInfo trackInfo)`:
     * Retrieves zone configuration and creates HTTP client with resilience policies.
-    * Creates `SoundFlowPlayer` instance with audio processing pipeline:
+    * Creates `MediaPlayer` instance with audio processing pipeline:
       * `HttpStreamSource` - Streams audio from HTTP URLs (Subsonic/radio streams)
       * `ResampleProcessor` - Converts audio to target format (48000:16:2 by default)
       * `FileOutputSink` - Writes processed audio data to Snapcast sink file
