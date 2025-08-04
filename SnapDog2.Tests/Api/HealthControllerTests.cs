@@ -3,7 +3,9 @@ namespace SnapDog2.Tests.Api;
 using System.Net;
 using System.Text.Json;
 using FluentAssertions;
+using Xunit;
 
+[Collection("ApiEnabled")]
 public class HealthControllerTests : IClassFixture<CustomWebApplicationFactory>
 {
     private readonly CustomWebApplicationFactory _factory;

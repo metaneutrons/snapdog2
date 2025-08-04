@@ -159,8 +159,12 @@ static WebApplication CreateWebApplication(string[] args)
     }
     else
     {
-        // If API is disabled, still configure Kestrel but don't listen on any ports
-        builder.WebHost.UseKestrel();
+        // If API is disabled, configure Kestrel to not listen on any ports
+        builder.WebHost.UseKestrel(options =>
+        {
+            // Don't configure any endpoints - Kestrel won't listen on any ports
+            Log.Information("API server is disabled - Kestrel will not bind to any ports");
+        });
     }
 
     // Add Command Processing (Cortex.Mediator)

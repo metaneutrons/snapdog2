@@ -7,7 +7,9 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Xunit;
 
+[Collection("ApiDisabled")]
 public class ApiConfigurationTests : IClassFixture<ApiDisabledWebApplicationFactory>
 {
     private readonly ApiDisabledWebApplicationFactory _factory;
@@ -36,6 +38,7 @@ public class ApiConfigurationTests : IClassFixture<ApiDisabledWebApplicationFact
     }
 }
 
+[Collection("ApiEnabled")]
 public class ApiEnabledConfigurationTests : IClassFixture<CustomWebApplicationFactory>
 {
     private readonly CustomWebApplicationFactory _factory;
@@ -65,10 +68,33 @@ public class ApiEnabledConfigurationTests : IClassFixture<CustomWebApplicationFa
 
 public class ApiDisabledWebApplicationFactory : WebApplicationFactory<Program>
 {
+    private readonly Dictionary<string, string?> _originalValues = new();
+    private static readonly object _lock = new object();
+
     public ApiDisabledWebApplicationFactory()
     {
-        // Set the environment variable before any host creation
-        Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Testing");
+        lock (_lock)
+        {
+            // Store original values and set new ones
+            SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Testing");
+            SetEnvironmentVariable("SNAPDOG_SYSTEM_LOG_LEVEL", "Warning");
+            SetEnvironmentVariable("SNAPDOG_SYSTEM_HEALTH_CHECKS_ENABLED", "false");
+            SetEnvironmentVariable("SNAPDOG_SYSTEM_LOG_FILE", "");
+            SetEnvironmentVariable("SNAPDOG_API_ENABLED", "false"); // DISABLE API for this test
+            SetEnvironmentVariable("SNAPDOG_API_PORT", "0");
+            SetEnvironmentVariable("SNAPDOG_API_AUTH_ENABLED", "false");
+            SetEnvironmentVariable("SNAPDOG_SERVICES_SNAPCAST_ADDRESS", "localhost");
+            SetEnvironmentVariable("SNAPDOG_SERVICES_SNAPCAST_JSONRPC_PORT", "1704");
+            SetEnvironmentVariable("SNAPDOG_SERVICES_MQTT_ENABLED", "false");
+            SetEnvironmentVariable("SNAPDOG_SERVICES_KNX_ENABLED", "false");
+            SetEnvironmentVariable("SNAPDOG_SERVICES_SUBSONIC_ENABLED", "false");
+        }
+    }
+
+    private void SetEnvironmentVariable(string name, string value)
+    {
+        _originalValues[name] = Environment.GetEnvironmentVariable(name);
+        Environment.SetEnvironmentVariable(name, value);
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -76,38 +102,22 @@ public class ApiDisabledWebApplicationFactory : WebApplicationFactory<Program>
         // Set environment to Testing to bypass command-line parsing
         builder.UseEnvironment("Testing");
 
-        // Override configuration with test values - API DISABLED
-        builder.ConfigureAppConfiguration(
-            (context, config) =>
-            {
-                config.AddInMemoryCollection(
-                    new Dictionary<string, string?>
-                    {
-                        ["SNAPDOG_SYSTEM_LOGLEVEL"] = "Warning",
-                        ["SNAPDOG_SYSTEM_HEALTHCHECKSENABLED"] = "false",
-                        ["SNAPDOG_SYSTEM_LOGFILE"] = "",
-                        ["SNAPDOG_API_ENABLED"] = "false", // DISABLE API for this test
-                        ["SNAPDOG_API_PORT"] = "0",
-                        ["SNAPDOG_API_AUTH_ENABLED"] = "false",
-                        ["SNAPDOG_SERVICES_SNAPCAST_ADDRESS"] = "localhost",
-                        ["SNAPDOG_SERVICES_SNAPCAST_JSONRPCPORT"] = "1704",
-                        ["SNAPDOG_SERVICES_MQTT_ENABLED"] = "false",
-                        ["SNAPDOG_SERVICES_KNX_ENABLED"] = "false",
-                        ["SNAPDOG_SERVICES_SUBSONIC_ENABLED"] = "false",
-                    }
-                );
-            }
-        );
-
-        // No additional service configuration needed for this test
+        // No additional configuration needed - EnvoyConfig will read from environment variables
     }
 
     protected override void Dispose(bool disposing)
     {
         if (disposing)
         {
-            // Clean up the environment variable
-            Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", null);
+            lock (_lock)
+            {
+                // Restore original environment variable values
+                foreach (var kvp in _originalValues)
+                {
+                    Environment.SetEnvironmentVariable(kvp.Key, kvp.Value);
+                }
+                _originalValues.Clear();
+            }
         }
         base.Dispose(disposing);
     }

@@ -9,39 +9,39 @@ using Microsoft.Extensions.Logging;
 
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
+    private readonly Dictionary<string, string?> _originalValues = new();
+    private static readonly object _lock = new object();
+
     public CustomWebApplicationFactory()
     {
-        // Set the environment variable before any host creation
-        Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Testing");
+        lock (_lock)
+        {
+            // Store original values and set new ones
+            SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Testing");
+            SetEnvironmentVariable("SNAPDOG_SYSTEM_LOG_LEVEL", "Warning");
+            SetEnvironmentVariable("SNAPDOG_SYSTEM_HEALTH_CHECKS_ENABLED", "true");
+            SetEnvironmentVariable("SNAPDOG_SYSTEM_LOG_FILE", "");
+            SetEnvironmentVariable("SNAPDOG_API_ENABLED", "true"); // ENABLE API for tests
+            SetEnvironmentVariable("SNAPDOG_API_PORT", "0");
+            SetEnvironmentVariable("SNAPDOG_API_AUTH_ENABLED", "false");
+            SetEnvironmentVariable("SNAPDOG_SERVICES_SNAPCAST_ADDRESS", "localhost");
+            SetEnvironmentVariable("SNAPDOG_SERVICES_SNAPCAST_JSONRPC_PORT", "1704");
+            SetEnvironmentVariable("SNAPDOG_SERVICES_MQTT_ENABLED", "false");
+            SetEnvironmentVariable("SNAPDOG_SERVICES_KNX_ENABLED", "false");
+            SetEnvironmentVariable("SNAPDOG_SERVICES_SUBSONIC_ENABLED", "false");
+        }
+    }
+
+    private void SetEnvironmentVariable(string name, string value)
+    {
+        _originalValues[name] = Environment.GetEnvironmentVariable(name);
+        Environment.SetEnvironmentVariable(name, value);
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         // Set environment to Testing to bypass command-line parsing
         builder.UseEnvironment("Testing");
-
-        // Override configuration with test values
-        builder.ConfigureAppConfiguration(
-            (context, config) =>
-            {
-                config.AddInMemoryCollection(
-                    new Dictionary<string, string?>
-                    {
-                        ["SNAPDOG_SYSTEM_LOGLEVEL"] = "Warning",
-                        ["SNAPDOG_SYSTEM_HEALTHCHECKSENABLED"] = "true",
-                        ["SNAPDOG_SYSTEM_LOGFILE"] = "",
-                        ["SNAPDOG_API_ENABLED"] = "true", // Enable API for tests
-                        ["SNAPDOG_API_PORT"] = "0", // Use any available port for tests
-                        ["SNAPDOG_API_AUTH_ENABLED"] = "false", // Disable auth for tests
-                        ["SNAPDOG_SERVICES_SNAPCAST_ADDRESS"] = "localhost",
-                        ["SNAPDOG_SERVICES_SNAPCAST_JSONRPCPORT"] = "1704",
-                        ["SNAPDOG_SERVICES_MQTT_ENABLED"] = "false",
-                        ["SNAPDOG_SERVICES_KNX_ENABLED"] = "false",
-                        ["SNAPDOG_SERVICES_SUBSONIC_ENABLED"] = "false",
-                    }
-                );
-            }
-        );
 
         // Configure services for testing
         builder.ConfigureServices(services =>
@@ -59,8 +59,15 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     {
         if (disposing)
         {
-            // Clean up the environment variable
-            Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", null);
+            lock (_lock)
+            {
+                // Restore original environment variable values
+                foreach (var kvp in _originalValues)
+                {
+                    Environment.SetEnvironmentVariable(kvp.Key, kvp.Value);
+                }
+                _originalValues.Clear();
+            }
         }
         base.Dispose(disposing);
     }
