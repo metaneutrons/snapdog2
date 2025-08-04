@@ -218,7 +218,7 @@ Implements `IMqttService` using **`MQTTnet` v5 (5.0.1+)**.
 
 ## 11.4. Subsonic Integration (`/Infrastructure/Subsonic/SubsonicService.cs`)
 
-Implements `ISubsonicService` using **`SubSonicMedia` (1.0.4-beta.1)**.
+Implements `ISubsonicService` using **`SubSonicMedia` (1.0.5)**.
 
 * **Library:** `SubSonicMedia`.
 * **Dependencies:** `HttpClient` (from factory), `IOptions<SubsonicOptions>`, `ILogger<SubsonicService>`. **No `ICacheService`**.
