@@ -1,4 +1,4 @@
-namespace SnapDog2.Models;
+namespace SnapDog2.Core.Models;
 
 /// <summary>
 /// Contains GitVersion information for the application

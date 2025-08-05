@@ -1,5 +1,5 @@
 using System.Reflection;
-using SnapDog2.Models;
+using SnapDog2.Core.Models;
 
 namespace SnapDog2.Helpers;
 
