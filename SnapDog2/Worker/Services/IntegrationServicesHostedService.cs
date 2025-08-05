@@ -1,5 +1,6 @@
 namespace SnapDog2.Worker.Services;
 
+using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -68,11 +69,48 @@ public class IntegrationServicesHostedService : BackgroundService
                 this._logger.LogWarning("KNX service not registered - skipping initialization");
             }
 
-            // Wait for all services to initialize
+            // Wait for all services to initialize and track results
             if (initializationTasks.Count > 0)
             {
                 await Task.WhenAll(initializationTasks);
-                this._logger.LogInformation("All integration services initialized successfully");
+
+                // Check actual service states to provide accurate logging
+                var serviceStates = new List<(string Name, bool IsConnected)>();
+
+                if (snapcastService != null)
+                {
+                    serviceStates.Add(("Snapcast", snapcastService.IsConnected));
+                }
+
+                if (mqttService != null)
+                {
+                    serviceStates.Add(("MQTT", mqttService.IsConnected));
+                }
+
+                if (knxService != null)
+                {
+                    serviceStates.Add(("KNX", knxService.IsConnected));
+                }
+
+                var successfulServices = serviceStates.Where(s => s.IsConnected).ToList();
+                var failedServices = serviceStates.Where(s => !s.IsConnected).ToList();
+
+                if (failedServices.Any())
+                {
+                    this._logger.LogWarning(
+                        "Integration services initialization completed with failures. "
+                            + "Successful: [{SuccessfulServices}], Failed: [{FailedServices}]",
+                        string.Join(", ", successfulServices.Select(s => s.Name)),
+                        string.Join(", ", failedServices.Select(s => s.Name))
+                    );
+                }
+                else
+                {
+                    this._logger.LogInformation(
+                        "✅ All integration services initialized successfully: [{Services}]",
+                        string.Join(", ", successfulServices.Select(s => s.Name))
+                    );
+                }
             }
             else
             {

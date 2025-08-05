@@ -183,6 +183,8 @@ public partial class SnapcastService
                         _ => DelayBackoffType.Exponential,
                     },
                     UseJitter = validatedConfig.UseJitter,
+                    // Explicitly handle all exceptions - Snapcast connection issues should be retried
+                    ShouldHandle = new PredicateBuilder().Handle<Exception>(),
                     OnRetry = args =>
                     {
                         LogConnectionRetryAttempt(

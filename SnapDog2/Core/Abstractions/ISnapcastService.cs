@@ -9,6 +9,11 @@ using SnapDog2.Core.Models;
 public interface ISnapcastService
 {
     /// <summary>
+    /// Gets a value indicating whether the Snapcast service is connected and operational.
+    /// </summary>
+    bool IsConnected { get; }
+
+    /// <summary>
     /// Initializes the connection to the Snapcast server.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>

@@ -164,6 +164,8 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
                         _ => DelayBackoffType.Exponential,
                     },
                     UseJitter = validatedConfig.UseJitter,
+                    // Explicitly handle all exceptions - MQTT connection issues should be retried
+                    ShouldHandle = new PredicateBuilder().Handle<Exception>(),
                     OnRetry = args =>
                     {
                         LogConnectionRetryAttempt(

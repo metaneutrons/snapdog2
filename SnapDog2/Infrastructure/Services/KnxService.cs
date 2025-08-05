@@ -110,26 +110,36 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
                 "Initial attempt"
             );
 
-            var result = await _connectionPolicy.ExecuteAsync(
-                async (ct) =>
+            try
+            {
+                var result = await _connectionPolicy.ExecuteAsync(
+                    async (ct) =>
+                    {
+                        return await ConnectToKnxBusAsync(ct);
+                    },
+                    cancellationToken
+                );
+
+                if (result.IsSuccess)
                 {
-                    return await ConnectToKnxBusAsync(ct);
-                },
-                cancellationToken
-            );
+                    _isInitialized = true;
+                    LogInitializationCompleted();
+                }
+                else
+                {
+                    LogInitializationFailed(result.ErrorMessage ?? "Unknown error");
+                    StartReconnectTimer();
+                }
 
-            if (result.IsSuccess)
-            {
-                _isInitialized = true;
-                LogInitializationCompleted();
+                return result;
             }
-            else
+            catch (Exception ex)
             {
-                LogInitializationFailed(result.ErrorMessage ?? "Unknown error");
+                var errorMessage = $"KNX connection failed: {ex.Message}";
+                LogInitializationFailed(errorMessage);
                 StartReconnectTimer();
+                return Result.Failure(errorMessage);
             }
-
-            return result;
         }
         finally
         {
@@ -299,7 +309,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             var connectorParams = CreateConnectorParameters();
             if (connectorParams == null)
             {
-                return Result.Failure("Failed to create KNX connector parameters");
+                throw new InvalidOperationException("Failed to create KNX connector parameters");
             }
 
             // Create and configure KNX bus
@@ -308,12 +318,12 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             // Subscribe to events before connecting
             _knxBus.GroupMessageReceived += OnGroupMessageReceived;
 
-            // Connect to KNX bus
+            // Connect to KNX bus - this should throw an exception if it fails
             await _knxBus.ConnectAsync();
 
             if (_knxBus.ConnectionState != BusConnectionState.Connected)
             {
-                return Result.Failure("Failed to establish KNX connection");
+                throw new InvalidOperationException($"KNX connection failed - state: {_knxBus.ConnectionState}");
             }
 
             LogConnectionEstablished(_config.Gateway ?? "USB", _config.Port);
@@ -330,7 +340,9 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             {
                 LogConnectionError(ex);
             }
-            return Result.Failure($"KNX connection failed: {ex.Message}");
+
+            // Re-throw the exception so Polly can handle retries
+            throw;
         }
     }
 
@@ -660,6 +672,8 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
                         _ => DelayBackoffType.Exponential,
                     },
                     UseJitter = validatedConfig.UseJitter,
+                    // Explicitly handle all exceptions - KNX connection issues should be retried
+                    ShouldHandle = new PredicateBuilder().Handle<Exception>(),
                     OnRetry = args =>
                     {
                         LogConnectionRetryAttempt(
