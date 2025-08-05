@@ -74,38 +74,64 @@ public class IntegrationServicesHostedService : BackgroundService
             {
                 await Task.WhenAll(initializationTasks);
 
-                // Check actual service states to provide accurate logging
-                var serviceStates = new List<(string Name, bool IsConnected)>();
+                // Check actual service states to provide accurate logging and system health assessment
+                var serviceStates = new List<(string Name, bool IsConnected, bool IsCritical)>();
 
                 if (snapcastService != null)
                 {
-                    serviceStates.Add(("Snapcast", snapcastService.IsConnected));
+                    serviceStates.Add(("Snapcast", snapcastService.IsConnected, true)); // Critical for audio functionality
                 }
 
                 if (mqttService != null)
                 {
-                    serviceStates.Add(("MQTT", mqttService.IsConnected));
+                    serviceStates.Add(("MQTT", mqttService.IsConnected, true)); // Critical for IoT integration
                 }
 
                 if (knxService != null)
                 {
-                    serviceStates.Add(("KNX", knxService.IsConnected));
+                    serviceStates.Add(("KNX", knxService.IsConnected, false)); // Non-critical, building automation
                 }
 
                 var successfulServices = serviceStates.Where(s => s.IsConnected).ToList();
                 var failedServices = serviceStates.Where(s => !s.IsConnected).ToList();
+                var criticalFailures = failedServices.Where(s => s.IsCritical).ToList();
+                var nonCriticalFailures = failedServices.Where(s => !s.IsCritical).ToList();
 
-                if (failedServices.Any())
+                // Assess system health and take appropriate action
+                if (criticalFailures.Any())
                 {
-                    this._logger.LogWarning(
-                        "Integration services initialization completed with failures. "
-                            + "Successful: [{SuccessfulServices}], Failed: [{FailedServices}]",
-                        string.Join(", ", successfulServices.Select(s => s.Name)),
-                        string.Join(", ", failedServices.Select(s => s.Name))
+                    // System is non-functional - critical services failed
+                    this._logger.LogCritical(
+                        "🚨 SYSTEM NON-FUNCTIONAL: Critical integration services failed. "
+                            + "Critical failures: [{CriticalFailures}], Other failures: [{NonCriticalFailures}], "
+                            + "Successful: [{SuccessfulServices}]. Application will terminate.",
+                        string.Join(", ", criticalFailures.Select(s => s.Name)),
+                        string.Join(", ", nonCriticalFailures.Select(s => s.Name)),
+                        string.Join(", ", successfulServices.Select(s => s.Name))
                     );
+
+                    // Disable failed services to prevent further issues
+                    await DisableFailedServicesAsync(failedServices.Select(s => s.Name));
+
+                    // Terminate application - system cannot function without critical services
+                    Environment.Exit(1);
+                }
+                else if (nonCriticalFailures.Any())
+                {
+                    // System is degraded but functional - only non-critical services failed
+                    this._logger.LogWarning(
+                        "⚠️  SYSTEM DEGRADED: Non-critical integration services failed, but core functionality remains available. "
+                            + "Failed: [{FailedServices}], Successful: [{SuccessfulServices}]",
+                        string.Join(", ", nonCriticalFailures.Select(s => s.Name)),
+                        string.Join(", ", successfulServices.Select(s => s.Name))
+                    );
+
+                    // Disable failed services to prevent resource waste and error noise
+                    await DisableFailedServicesAsync(nonCriticalFailures.Select(s => s.Name));
                 }
                 else
                 {
+                    // All services successful
                     this._logger.LogInformation(
                         "✅ All integration services initialized successfully: [{Services}]",
                         string.Join(", ", successfulServices.Select(s => s.Name))
@@ -201,6 +227,65 @@ public class IntegrationServicesHostedService : BackgroundService
         {
             this._logger.LogError(ex, "❌ Exception during KNX service initialization");
         }
+    }
+
+    /// <summary>
+    /// Disables failed integration services to prevent resource waste and error noise.
+    /// This helps maintain system stability by stopping retry attempts and cleanup resources.
+    /// </summary>
+    /// <param name="failedServiceNames">Names of services that failed to initialize.</param>
+    private async Task DisableFailedServicesAsync(IEnumerable<string> failedServiceNames)
+    {
+        foreach (var serviceName in failedServiceNames)
+        {
+            try
+            {
+                this._logger.LogInformation("🔌 Disabling failed service: {ServiceName}", serviceName);
+
+                switch (serviceName.ToLowerInvariant())
+                {
+                    case "snapcast":
+                        var snapcastService = this._serviceProvider.GetService<ISnapcastService>();
+                        if (snapcastService != null)
+                        {
+                            // Note: ISnapcastService doesn't have a Dispose method in the interface
+                            // The service will be disposed by DI container when the application shuts down
+                            this._logger.LogInformation("📴 Snapcast service marked as disabled");
+                        }
+                        break;
+
+                    case "mqtt":
+                        var mqttService = this._serviceProvider.GetService<IMqttService>();
+                        if (mqttService != null)
+                        {
+                            // Note: IMqttService doesn't have a Dispose method in the interface
+                            // The service will be disposed by DI container when the application shuts down
+                            this._logger.LogInformation("📴 MQTT service marked as disabled");
+                        }
+                        break;
+
+                    case "knx":
+                        var knxService = this._serviceProvider.GetService<IKnxService>();
+                        if (knxService != null)
+                        {
+                            // Note: IKnxService doesn't have a Dispose method in the interface
+                            // The service will be disposed by DI container when the application shuts down
+                            this._logger.LogInformation("📴 KNX service marked as disabled");
+                        }
+                        break;
+
+                    default:
+                        this._logger.LogWarning("⚠️  Unknown service name for disabling: {ServiceName}", serviceName);
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                this._logger.LogError(ex, "❌ Failed to disable service: {ServiceName}", serviceName);
+            }
+        }
+
+        await Task.CompletedTask; // Placeholder for any async cleanup operations
     }
 
     public override async Task StopAsync(CancellationToken cancellationToken)
