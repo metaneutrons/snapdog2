@@ -100,6 +100,16 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
 
             LogInitializationStarted();
 
+            // Log first attempt before Polly execution
+            var config = ResiliencePolicyFactory.ValidateAndNormalize(_config.Resilience.Connection);
+            LogConnectionRetryAttempt(
+                _config.Gateway ?? "USB",
+                _config.Port,
+                1,
+                config.MaxRetries + 1,
+                "Initial attempt"
+            );
+
             var result = await _connectionPolicy.ExecuteAsync(
                 async (ct) =>
                 {
@@ -291,8 +301,6 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             {
                 return Result.Failure("Failed to create KNX connector parameters");
             }
-
-            LogAttemptingConnection(_config.Gateway ?? "USB", _config.Port);
 
             // Create and configure KNX bus
             _knxBus = new KnxBus(connectorParams);
@@ -755,7 +763,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
     [LoggerMessage(8003, LogLevel.Debug, "KNX service already initialized")]
     private partial void LogAlreadyInitialized();
 
-    [LoggerMessage(8004, LogLevel.Information, "Starting KNX service initialization")]
+    [LoggerMessage(8004, LogLevel.Information, "🚀 Starting KNX service initialization")]
     private partial void LogInitializationStarted();
 
     [LoggerMessage(8005, LogLevel.Information, "KNX service initialization completed successfully")]
@@ -782,13 +790,10 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
     [LoggerMessage(8031, LogLevel.Error, "KNX connection error: {ErrorMessage}")]
     private partial void LogConnectionErrorMessage(string errorMessage);
 
-    [LoggerMessage(8032, LogLevel.Information, "Attempting KNX connection to {Gateway}:{Port}")]
-    private partial void LogAttemptingConnection(string gateway, int port);
-
     [LoggerMessage(
         8033,
         LogLevel.Information,
-        "Attempting KNX connection to {Gateway}:{Port} (attempt {AttemptNumber}/{MaxAttempts}: {ErrorMessage})"
+        "🚀 Attempting KNX connection to {Gateway}:{Port} (attempt {AttemptNumber}/{MaxAttempts}: {ErrorMessage})"
     )]
     private partial void LogConnectionRetryAttempt(
         string gateway,

@@ -84,7 +84,7 @@ public partial class SnapcastService
     )]
     private partial void LogServiceCreated(string host, int port, bool autoReconnect);
 
-    [LoggerMessage(1002, LogLevel.Information, "Initializing Snapcast connection to {Host}:{Port}")]
+    [LoggerMessage(1002, LogLevel.Information, "🚀 Initializing Snapcast connection to {Host}:{Port}")]
     private partial void LogInitializing(string host, int port);
 
     [LoggerMessage(1003, LogLevel.Information, "Snapcast connection established successfully")]
@@ -102,7 +102,7 @@ public partial class SnapcastService
     [LoggerMessage(
         1014,
         LogLevel.Information,
-        "Attempting Snapcast connection to {Host}:{Port} (attempt {AttemptNumber}/{MaxAttempts}: {ErrorMessage})"
+        "🚀 Attempting Snapcast connection to {Host}:{Port} (attempt {AttemptNumber}/{MaxAttempts}: {ErrorMessage})"
     )]
     private partial void LogConnectionRetryAttempt(
         string host,
@@ -244,7 +244,15 @@ public partial class SnapcastService
                     return Result.Success();
                 }
 
-                LogInitializing(_config.Address, _config.JsonRpcPort);
+                // Log first attempt before Polly execution
+                var config = ResiliencePolicyFactory.ValidateAndNormalize(_config.Resilience.Connection);
+                LogConnectionRetryAttempt(
+                    _config.Address,
+                    _config.JsonRpcPort,
+                    1,
+                    config.MaxRetries + 1,
+                    "Initial attempt"
+                );
 
                 // Use Polly resilience for connection establishment
                 var result = await _connectionPolicy.ExecuteAsync(

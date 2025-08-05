@@ -98,6 +98,19 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     [LoggerMessage(2008, LogLevel.Warning, "MQTT service not connected for operation: {Operation}")]
     private partial void LogNotConnected(string operation);
 
+    [LoggerMessage(
+        2010,
+        LogLevel.Information,
+        "🚀 Attempting MQTT connection to {BrokerAddress}:{Port} (attempt {AttemptNumber}/{MaxAttempts}: {ErrorMessage})"
+    )]
+    private partial void LogConnectionRetryAttempt(
+        string brokerAddress,
+        int port,
+        int attemptNumber,
+        int maxAttempts,
+        string errorMessage
+    );
+
     #endregion
 
     #region Properties
@@ -133,7 +146,46 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     private ResiliencePipeline CreateConnectionPolicy()
     {
         var validatedConfig = ResiliencePolicyFactory.ValidateAndNormalize(_config.Resilience.Connection);
-        return ResiliencePolicyFactory.CreatePipeline(validatedConfig, "MQTT-Connection");
+
+        var builder = new ResiliencePipelineBuilder();
+
+        // Add retry policy with logging
+        if (validatedConfig.MaxRetries > 0)
+        {
+            builder.AddRetry(
+                new RetryStrategyOptions
+                {
+                    MaxRetryAttempts = validatedConfig.MaxRetries,
+                    Delay = TimeSpan.FromMilliseconds(validatedConfig.RetryDelayMs),
+                    BackoffType = validatedConfig.BackoffType?.ToLowerInvariant() switch
+                    {
+                        "linear" => DelayBackoffType.Linear,
+                        "constant" => DelayBackoffType.Constant,
+                        _ => DelayBackoffType.Exponential,
+                    },
+                    UseJitter = validatedConfig.UseJitter,
+                    OnRetry = args =>
+                    {
+                        LogConnectionRetryAttempt(
+                            _config.BrokerAddress,
+                            _config.Port,
+                            args.AttemptNumber + 1,
+                            validatedConfig.MaxRetries + 1,
+                            args.Outcome.Exception?.Message ?? "Unknown error"
+                        );
+                        return ValueTask.CompletedTask;
+                    },
+                }
+            );
+        }
+
+        // Add timeout policy
+        if (validatedConfig.TimeoutSeconds > 0)
+        {
+            builder.AddTimeout(TimeSpan.FromSeconds(validatedConfig.TimeoutSeconds));
+        }
+
+        return builder.Build();
     }
 
     /// <summary>
@@ -191,6 +243,16 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         try
         {
             this.LogInitializing(this._config.BrokerAddress, this._config.Port);
+
+            // Log first attempt before Polly execution
+            var config = ResiliencePolicyFactory.ValidateAndNormalize(_config.Resilience.Connection);
+            LogConnectionRetryAttempt(
+                this._config.BrokerAddress,
+                this._config.Port,
+                1,
+                config.MaxRetries + 1,
+                "Initial attempt"
+            );
 
             var result = await _connectionPolicy.ExecuteAsync(
                 async (ct) =>
@@ -419,7 +481,6 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
 
     private async Task OnConnectedAsync(MqttClientConnectedEventArgs args)
     {
-        this.LogConnectionEstablished();
         this.Connected?.Invoke(this, EventArgs.Empty);
         await this.PublishNotificationAsync(new MqttConnectionEstablishedNotification());
     }
