@@ -60,9 +60,6 @@ public partial class SnapcastService
         this._connectionPolicy = CreateConnectionPolicy();
         this._operationPolicy = CreateOperationPolicy();
 
-        // Subscribe to client events
-        this.SubscribeToEvents();
-
         LogServiceCreated(_config.Address, _config.JsonRpcPort, _config.AutoReconnect);
     }
 
@@ -101,6 +98,19 @@ public partial class SnapcastService
 
     [LoggerMessage(1013, LogLevel.Error, "Snapcast connection error: {ErrorMessage}")]
     private partial void LogConnectionErrorMessage(string errorMessage);
+
+    [LoggerMessage(
+        1014,
+        LogLevel.Information,
+        "Attempting Snapcast connection to {Host}:{Port} (attempt {AttemptNumber}/{MaxAttempts}: {ErrorMessage})"
+    )]
+    private partial void LogConnectionRetryAttempt(
+        string host,
+        int port,
+        int attemptNumber,
+        int maxAttempts,
+        string errorMessage
+    );
 
     [LoggerMessage(1006, LogLevel.Error, "Snapcast operation {Operation} failed")]
     private partial void LogOperationFailed(string operation, Exception ex);
@@ -155,7 +165,46 @@ public partial class SnapcastService
     private ResiliencePipeline CreateConnectionPolicy()
     {
         var validatedConfig = ResiliencePolicyFactory.ValidateAndNormalize(_config.Resilience.Connection);
-        return ResiliencePolicyFactory.CreatePipeline(validatedConfig, "Snapcast-Connection");
+
+        var builder = new ResiliencePipelineBuilder();
+
+        // Add retry policy with logging
+        if (validatedConfig.MaxRetries > 0)
+        {
+            builder.AddRetry(
+                new RetryStrategyOptions
+                {
+                    MaxRetryAttempts = validatedConfig.MaxRetries,
+                    Delay = TimeSpan.FromMilliseconds(validatedConfig.RetryDelayMs),
+                    BackoffType = validatedConfig.BackoffType?.ToLowerInvariant() switch
+                    {
+                        "linear" => DelayBackoffType.Linear,
+                        "constant" => DelayBackoffType.Constant,
+                        _ => DelayBackoffType.Exponential,
+                    },
+                    UseJitter = validatedConfig.UseJitter,
+                    OnRetry = args =>
+                    {
+                        LogConnectionRetryAttempt(
+                            _config.Address,
+                            _config.JsonRpcPort,
+                            args.AttemptNumber + 1,
+                            validatedConfig.MaxRetries + 1,
+                            args.Outcome.Exception?.Message ?? "Unknown error"
+                        );
+                        return ValueTask.CompletedTask;
+                    },
+                }
+            );
+        }
+
+        // Add timeout policy
+        if (validatedConfig.TimeoutSeconds > 0)
+        {
+            builder.AddTimeout(TimeSpan.FromSeconds(validatedConfig.TimeoutSeconds));
+        }
+
+        return builder.Build();
     }
 
     /// <summary>
@@ -195,16 +244,32 @@ public partial class SnapcastService
                     return Result.Success();
                 }
 
-                // The enterprise SnapcastClient client handles connection automatically
-                // We mark as initialized immediately and let the client handle connection in the background
-                // The state repository will be updated via event handlers once connection is established
-                this._initialized = true;
-                this.LogConnectionEstablished();
+                LogInitializing(_config.Address, _config.JsonRpcPort);
 
-                // Publish connection established notification
-                await this.PublishNotificationAsync(new SnapcastConnectionEstablishedNotification());
+                // Use Polly resilience for connection establishment
+                var result = await _connectionPolicy.ExecuteAsync(
+                    async (ct) =>
+                    {
+                        // Test the connection by making a simple RPC call
+                        await _snapcastClient.ServerGetRpcVersionAsync();
+                        return Result.Success();
+                    },
+                    cancellationToken
+                );
 
-                return Result.Success();
+                if (result.IsSuccess)
+                {
+                    this._initialized = true;
+                    this.LogConnectionEstablished();
+
+                    // Subscribe to events after successful connection
+                    this.SubscribeToEvents();
+
+                    // Publish connection established notification
+                    await this.PublishNotificationAsync(new SnapcastConnectionEstablishedNotification());
+                }
+
+                return result;
             }
             finally
             {

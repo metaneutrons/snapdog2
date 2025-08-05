@@ -24,26 +24,15 @@ public static class SnapcastServiceConfiguration
         // Register the state repository as singleton since it holds shared state
         services.AddSingleton<ISnapcastStateRepository, SnapcastStateRepository>();
 
-        // Register the enterprise SnapcastClient client
-        // We need to register it as a factory since we need access to configuration
+        // Register the SnapcastClient client with basic TCP connection
+        // Resilience is handled by Polly in the SnapcastService layer
         services.AddSingleton<SnapcastClient.IClient>(serviceProvider =>
         {
             var config = serviceProvider.GetRequiredService<IOptions<SnapDogConfiguration>>().Value.Services.Snapcast;
             var logger = serviceProvider.GetService<ILogger<Client>>();
 
-            // Create the options with resilience settings
-            var options = new SnapcastClientOptions
-            {
-                EnableAutoReconnect = config.AutoReconnect,
-                MaxRetryAttempts = 5,
-                ConnectionTimeoutMs = config.Timeout * 1000,
-                HealthCheckIntervalMs = 30000,
-                ReconnectDelayMs = config.ReconnectInterval * 1000,
-            };
-
-            // Create the connection with resilience
-            var connectionLogger = serviceProvider.GetService<ILogger<ResilientTcpConnection>>();
-            var connection = new ResilientTcpConnection(config.Address, config.JsonRpcPort, options, connectionLogger);
+            // Create basic TCP connection without built-in resilience
+            var connection = new TcpConnection(config.Address, config.JsonRpcPort);
 
             // Create and return the client
             return new Client(connection, logger);

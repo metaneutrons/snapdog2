@@ -634,7 +634,46 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
     private ResiliencePipeline CreateConnectionPolicy()
     {
         var validatedConfig = ResiliencePolicyFactory.ValidateAndNormalize(_config.Resilience.Connection);
-        return ResiliencePolicyFactory.CreatePipeline(validatedConfig, "KNX-Connection");
+
+        var builder = new ResiliencePipelineBuilder();
+
+        // Add retry policy with logging
+        if (validatedConfig.MaxRetries > 0)
+        {
+            builder.AddRetry(
+                new RetryStrategyOptions
+                {
+                    MaxRetryAttempts = validatedConfig.MaxRetries,
+                    Delay = TimeSpan.FromMilliseconds(validatedConfig.RetryDelayMs),
+                    BackoffType = validatedConfig.BackoffType?.ToLowerInvariant() switch
+                    {
+                        "linear" => DelayBackoffType.Linear,
+                        "constant" => DelayBackoffType.Constant,
+                        _ => DelayBackoffType.Exponential,
+                    },
+                    UseJitter = validatedConfig.UseJitter,
+                    OnRetry = args =>
+                    {
+                        LogConnectionRetryAttempt(
+                            _config.Gateway ?? "USB",
+                            _config.Port,
+                            args.AttemptNumber + 1,
+                            validatedConfig.MaxRetries + 1,
+                            args.Outcome.Exception?.Message ?? "Unknown error"
+                        );
+                        return ValueTask.CompletedTask;
+                    },
+                }
+            );
+        }
+
+        // Add timeout policy
+        if (validatedConfig.TimeoutSeconds > 0)
+        {
+            builder.AddTimeout(TimeSpan.FromSeconds(validatedConfig.TimeoutSeconds));
+        }
+
+        return builder.Build();
     }
 
     private ResiliencePipeline CreateOperationPolicy()
@@ -745,6 +784,19 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
 
     [LoggerMessage(8032, LogLevel.Information, "Attempting KNX connection to {Gateway}:{Port}")]
     private partial void LogAttemptingConnection(string gateway, int port);
+
+    [LoggerMessage(
+        8033,
+        LogLevel.Information,
+        "Attempting KNX connection to {Gateway}:{Port} (attempt {AttemptNumber}/{MaxAttempts}: {ErrorMessage})"
+    )]
+    private partial void LogConnectionRetryAttempt(
+        string gateway,
+        int port,
+        int attemptNumber,
+        int maxAttempts,
+        string errorMessage
+    );
 
     [LoggerMessage(8012, LogLevel.Debug, "Using KNX IP tunneling connection to {Gateway}:{Port}")]
     private partial void LogUsingIpTunneling(string gateway, int port);
