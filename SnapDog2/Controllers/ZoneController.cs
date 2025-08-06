@@ -21,7 +21,7 @@ using SnapDog2.Server.Features.Zones.Queries;
 [ApiController]
 [Route("api/zones")]
 [Produces("application/json")]
-public class ZoneController : ControllerBase
+public partial class ZoneController : ControllerBase
 {
     private readonly IMediator _mediator;
     private readonly ILogger<ZoneController> _logger;
@@ -54,7 +54,7 @@ public class ZoneController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting zone state for zone {ZoneId} via CQRS mediator via CQRS mediator", zoneId);
+            this.LogGettingZoneState(zoneId);
 
             var query = new GetZoneStateQuery { ZoneId = zoneId };
             var result = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(
@@ -67,14 +67,14 @@ public class ZoneController : ControllerBase
                 return this.Ok(ApiResponse<ZoneState>.CreateSuccess(result.Value));
             }
 
-            this._logger.LogWarning("Failed to get zone state for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            this.LogFailedToGetZoneState(zoneId, result.ErrorMessage);
             return this.NotFound(
                 ApiResponse<ZoneState>.CreateError("ZONE_NOT_FOUND", result.ErrorMessage ?? "Zone not found")
             );
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error getting zone state for zone {ZoneId}", zoneId);
+            this.LogErrorGettingZoneState(ex, zoneId);
             return this.StatusCode(
                 500,
                 ApiResponse<ZoneState>.CreateError("INTERNAL_ERROR", "An internal server error occurred", ex.Message)
@@ -96,7 +96,7 @@ public class ZoneController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting all zone states via CQRS mediator");
+            this.LogGettingAllZoneStates();
 
             var query = new GetAllZoneStatesQuery();
             var result = await this._mediator.SendQueryAsync<GetAllZoneStatesQuery, Result<IEnumerable<ZoneState>>>(
@@ -109,7 +109,7 @@ public class ZoneController : ControllerBase
                 return this.Ok(ApiResponse<IEnumerable<ZoneState>>.CreateSuccess(result.Value));
             }
 
-            this._logger.LogWarning("Failed to get all zone states: {Error}", result.ErrorMessage);
+            this.LogFailedToGetAllZoneStates(result.ErrorMessage);
             return this.StatusCode(
                 500,
                 ApiResponse<IEnumerable<ZoneState>>.CreateError(
@@ -120,7 +120,7 @@ public class ZoneController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error getting all zone states");
+            this.LogErrorGettingAllZoneStates(ex);
             return this.StatusCode(
                 500,
                 ApiResponse<IEnumerable<ZoneState>>.CreateError(
@@ -150,7 +150,7 @@ public class ZoneController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Starting playback for zone {ZoneId} via CQRS mediator via CQRS mediator", zoneId);
+            this.LogStartingPlayback(zoneId);
 
             var command = new PlayCommand { ZoneId = zoneId, Source = CommandSource.Api };
             var result = await this._mediator.SendCommandAsync<PlayCommand, Result>(command, cancellationToken);
@@ -160,14 +160,14 @@ public class ZoneController : ControllerBase
                 return this.Ok(ApiResponse.CreateSuccess());
             }
 
-            this._logger.LogWarning("Failed to play zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            this.LogFailedToPlayZone(zoneId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse.CreateError("PLAY_ERROR", result.ErrorMessage ?? "Failed to start playback")
             );
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error starting playback for zone {ZoneId}", zoneId);
+            this.LogErrorStartingPlayback(ex, zoneId);
             return this.StatusCode(
                 500,
                 ApiResponse.CreateError("INTERNAL_ERROR", "An internal server error occurred", ex.Message)
@@ -193,7 +193,7 @@ public class ZoneController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Pausing playback for zone {ZoneId} via CQRS mediator via CQRS mediator", zoneId);
+            this.LogPausingPlayback(zoneId);
 
             var command = new PauseCommand { ZoneId = zoneId, Source = CommandSource.Api };
             var result = await this._mediator.SendCommandAsync<PauseCommand, Result>(command, cancellationToken);
@@ -203,14 +203,14 @@ public class ZoneController : ControllerBase
                 return this.Ok(ApiResponse.CreateSuccess());
             }
 
-            this._logger.LogWarning("Failed to pause zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            this.LogFailedToPauseZone(zoneId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse.CreateError("PAUSE_ERROR", result.ErrorMessage ?? "Failed to pause playback")
             );
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error pausing playback for zone {ZoneId}", zoneId);
+            this.LogErrorPausingPlayback(ex, zoneId);
             return this.StatusCode(
                 500,
                 ApiResponse.CreateError("INTERNAL_ERROR", "An internal server error occurred", ex.Message)
@@ -238,11 +238,7 @@ public class ZoneController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug(
-                "Setting volume for zone {ZoneId} to {Volume} via CQRS mediator",
-                zoneId,
-                request.Volume
-            );
+            this.LogSettingVolume(zoneId, request.Volume);
 
             var command = new SetZoneVolumeCommand
             {
@@ -261,14 +257,14 @@ public class ZoneController : ControllerBase
                 return this.Ok(ApiResponse.CreateSuccess());
             }
 
-            this._logger.LogWarning("Failed to set volume for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            this.LogFailedToSetVolume(zoneId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse.CreateError("VOLUME_SET_ERROR", result.ErrorMessage ?? "Failed to set volume")
             );
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error setting volume for zone {ZoneId}", zoneId);
+            this.LogErrorSettingVolume(ex, zoneId);
             return this.StatusCode(
                 500,
                 ApiResponse.CreateError("INTERNAL_ERROR", "An internal server error occurred", ex.Message)
@@ -294,7 +290,7 @@ public class ZoneController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Stopping playback for zone {ZoneId} via CQRS mediator via CQRS mediator", zoneId);
+            this.LogStoppingPlayback(zoneId);
 
             var command = new StopCommand { ZoneId = zoneId, Source = CommandSource.Api };
             var result = await this._mediator.SendCommandAsync<StopCommand, Result>(command, cancellationToken);
@@ -304,14 +300,14 @@ public class ZoneController : ControllerBase
                 return this.Ok(ApiResponse.CreateSuccess());
             }
 
-            this._logger.LogWarning("Failed to stop zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            this.LogFailedToStopZone(zoneId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse.CreateError("STOP_ERROR", result.ErrorMessage ?? "Failed to stop playback")
             );
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error stopping playback for zone {ZoneId}", zoneId);
+            this.LogErrorStoppingPlayback(ex, zoneId);
             return this.StatusCode(
                 500,
                 ApiResponse.CreateError("INTERNAL_ERROR", "An internal server error occurred", ex.Message)
@@ -337,7 +333,7 @@ public class ZoneController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Playing next track for zone {ZoneId} via CQRS mediator via CQRS mediator", zoneId);
+            this.LogPlayingNextTrack(zoneId);
 
             var command = new NextTrackCommand { ZoneId = zoneId, Source = CommandSource.Api };
             var result = await this._mediator.SendCommandAsync<NextTrackCommand, Result>(command, cancellationToken);
@@ -347,18 +343,14 @@ public class ZoneController : ControllerBase
                 return this.Ok(ApiResponse.CreateSuccess());
             }
 
-            this._logger.LogWarning(
-                "Failed to play next track for zone {ZoneId}: {Error}",
-                zoneId,
-                result.ErrorMessage
-            );
+            this.LogFailedToPlayNextTrack(zoneId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse.CreateError("NEXT_TRACK_ERROR", result.ErrorMessage ?? "Failed to play next track")
             );
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error playing next track for zone {ZoneId}", zoneId);
+            this.LogErrorPlayingNextTrack(ex, zoneId);
             return this.StatusCode(
                 500,
                 ApiResponse.CreateError("INTERNAL_ERROR", "An internal server error occurred", ex.Message)
@@ -384,7 +376,7 @@ public class ZoneController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Playing previous track for zone {ZoneId} via CQRS mediator", zoneId);
+            this.LogPlayingPreviousTrack(zoneId);
             var command = new PreviousTrackCommand { ZoneId = zoneId, Source = CommandSource.Api };
 
             var result = await this._mediator.SendCommandAsync<PreviousTrackCommand, Result>(
@@ -397,18 +389,14 @@ public class ZoneController : ControllerBase
                 return this.Ok(ApiResponse.CreateSuccess());
             }
 
-            this._logger.LogWarning(
-                "Failed to play previous track for zone {ZoneId}: {Error}",
-                zoneId,
-                result.ErrorMessage
-            );
+            this.LogFailedToPlayPreviousTrack(zoneId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse.CreateError("OPERATION_ERROR", result.ErrorMessage ?? "Failed to play previous track")
             );
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error playing previous track for zone {ZoneId}", zoneId);
+            this.LogErrorPlayingPreviousTrack(ex, zoneId);
             return this.StatusCode(
                 500,
                 ApiResponse.CreateError("INTERNAL_ERROR", "An internal server error occurred", ex.Message)
@@ -436,7 +424,7 @@ public class ZoneController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Setting track repeat for zone {ZoneId} to {Enabled}", zoneId, request.Enabled);
+            this.LogSettingTrackRepeat(zoneId, request.Enabled);
             var command = new SetTrackRepeatCommand
             {
                 ZoneId = zoneId,
@@ -454,18 +442,14 @@ public class ZoneController : ControllerBase
                 return this.Ok(ApiResponse.CreateSuccess());
             }
 
-            this._logger.LogWarning(
-                "Failed to set track repeat for zone {ZoneId}: {Error}",
-                zoneId,
-                result.ErrorMessage
-            );
+            this.LogFailedToSetTrackRepeat(zoneId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse.CreateError("OPERATION_ERROR", result.ErrorMessage ?? "Failed to set track repeat")
             );
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error setting track repeat for zone {ZoneId}", zoneId);
+            this.LogErrorSettingTrackRepeat(ex, zoneId);
             return this.StatusCode(
                 500,
                 ApiResponse.CreateError("INTERNAL_ERROR", "An internal server error occurred", ex.Message)
@@ -491,7 +475,7 @@ public class ZoneController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Toggling track repeat for zone {ZoneId} via CQRS mediator", zoneId);
+            this.LogTogglingTrackRepeat(zoneId);
             var command = new ToggleTrackRepeatCommand { ZoneId = zoneId, Source = CommandSource.Api };
 
             var result = await this._mediator.SendCommandAsync<ToggleTrackRepeatCommand, Result>(
@@ -504,18 +488,14 @@ public class ZoneController : ControllerBase
                 return this.Ok(ApiResponse.CreateSuccess());
             }
 
-            this._logger.LogWarning(
-                "Failed to toggle track repeat for zone {ZoneId}: {Error}",
-                zoneId,
-                result.ErrorMessage
-            );
+            this.LogFailedToToggleTrackRepeat(zoneId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse.CreateError("OPERATION_ERROR", result.ErrorMessage ?? "Failed to toggle track repeat")
             );
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error toggling track repeat for zone {ZoneId}", zoneId);
+            this.LogErrorTogglingTrackRepeat(ex, zoneId);
             return this.StatusCode(
                 500,
                 ApiResponse.CreateError("INTERNAL_ERROR", "An internal server error occurred", ex.Message)
@@ -543,7 +523,7 @@ public class ZoneController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Setting playlist shuffle for zone {ZoneId} to {Enabled}", zoneId, request.Enabled);
+            this.LogSettingPlaylistShuffle(zoneId, request.Enabled);
             var command = new SetPlaylistShuffleCommand
             {
                 ZoneId = zoneId,
@@ -561,18 +541,14 @@ public class ZoneController : ControllerBase
                 return this.Ok(ApiResponse.CreateSuccess());
             }
 
-            this._logger.LogWarning(
-                "Failed to set playlist shuffle for zone {ZoneId}: {Error}",
-                zoneId,
-                result.ErrorMessage
-            );
+            this.LogFailedToSetPlaylistShuffle(zoneId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse.CreateError("OPERATION_ERROR", result.ErrorMessage ?? "Failed to set playlist shuffle")
             );
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error setting playlist shuffle for zone {ZoneId}", zoneId);
+            this.LogErrorSettingPlaylistShuffle(ex, zoneId);
             return this.StatusCode(
                 500,
                 ApiResponse.CreateError("INTERNAL_ERROR", "An internal server error occurred", ex.Message)
@@ -600,7 +576,7 @@ public class ZoneController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Setting playlist repeat for zone {ZoneId} to {Enabled}", zoneId, request.Enabled);
+            this.LogSettingPlaylistRepeat(zoneId, request.Enabled);
             var command = new SetPlaylistRepeatCommand
             {
                 ZoneId = zoneId,
@@ -618,18 +594,14 @@ public class ZoneController : ControllerBase
                 return this.Ok(ApiResponse.CreateSuccess());
             }
 
-            this._logger.LogWarning(
-                "Failed to set playlist repeat for zone {ZoneId}: {Error}",
-                zoneId,
-                result.ErrorMessage
-            );
+            this.LogFailedToSetPlaylistRepeat(zoneId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse.CreateError("OPERATION_ERROR", result.ErrorMessage ?? "Failed to set playlist repeat")
             );
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error setting playlist repeat for zone {ZoneId}", zoneId);
+            this.LogErrorSettingPlaylistRepeat(ex, zoneId);
             return this.StatusCode(
                 500,
                 ApiResponse.CreateError("INTERNAL_ERROR", "An internal server error occurred", ex.Message)
@@ -651,7 +623,7 @@ public class ZoneController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting all zones via CQRS mediator");
+            this.LogGettingAllZones();
             var result = await this._mediator.SendQueryAsync<GetAllZonesQuery, Result<List<ZoneState>>>(
                 new GetAllZonesQuery(),
                 cancellationToken
@@ -662,7 +634,7 @@ public class ZoneController : ControllerBase
                 return this.Ok(ApiResponse<IEnumerable<ZoneState>>.CreateSuccess(result.Value));
             }
 
-            this._logger.LogWarning("Failed to get all zones: {Error}", result.ErrorMessage);
+            this.LogFailedToGetAllZones(result.ErrorMessage);
             return this.StatusCode(
                 500,
                 ApiResponse<IEnumerable<ZoneState>>.CreateError(
@@ -673,7 +645,7 @@ public class ZoneController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error getting all zones");
+            this.LogErrorGettingAllZones(ex);
             return this.StatusCode(
                 500,
                 ApiResponse<IEnumerable<ZoneState>>.CreateError(
@@ -702,7 +674,7 @@ public class ZoneController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting track info for zone {ZoneId} via CQRS mediator", zoneId);
+            this.LogGettingTrackInfo(zoneId);
             var result = await this._mediator.SendQueryAsync<GetZoneTrackInfoQuery, Result<TrackInfo>>(
                 new GetZoneTrackInfoQuery { ZoneId = zoneId },
                 cancellationToken
@@ -713,7 +685,7 @@ public class ZoneController : ControllerBase
                 return this.Ok(ApiResponse<TrackInfo>.CreateSuccess(result.Value));
             }
 
-            this._logger.LogWarning("Failed to get track info for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            this.LogFailedToGetTrackInfo(zoneId, result.ErrorMessage);
             return this.NotFound(
                 ApiResponse<TrackInfo>.CreateError(
                     "TRACK_INFO_NOT_FOUND",
@@ -723,7 +695,7 @@ public class ZoneController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error getting track info for zone {ZoneId}", zoneId);
+            this.LogErrorGettingTrackInfo(ex, zoneId);
             return this.StatusCode(
                 500,
                 ApiResponse<TrackInfo>.CreateError("INTERNAL_ERROR", "An internal server error occurred", ex.Message)
@@ -748,7 +720,7 @@ public class ZoneController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting playlist info for zone {ZoneId} via CQRS mediator", zoneId);
+            this.LogGettingPlaylistInfo(zoneId);
             var result = await this._mediator.SendQueryAsync<GetZonePlaylistInfoQuery, Result<PlaylistInfo>>(
                 new GetZonePlaylistInfoQuery { ZoneId = zoneId },
                 cancellationToken
@@ -759,11 +731,7 @@ public class ZoneController : ControllerBase
                 return this.Ok(ApiResponse<PlaylistInfo>.CreateSuccess(result.Value));
             }
 
-            this._logger.LogWarning(
-                "Failed to get playlist info for zone {ZoneId}: {Error}",
-                zoneId,
-                result.ErrorMessage
-            );
+            this.LogFailedToGetPlaylistInfo(zoneId, result.ErrorMessage);
             return this.NotFound(
                 ApiResponse<PlaylistInfo>.CreateError(
                     "PLAYLIST_INFO_NOT_FOUND",
@@ -773,7 +741,7 @@ public class ZoneController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error getting playlist info for zone {ZoneId}", zoneId);
+            this.LogErrorGettingPlaylistInfo(ex, zoneId);
             return this.StatusCode(
                 500,
                 ApiResponse<PlaylistInfo>.CreateError("INTERNAL_ERROR", "An internal server error occurred", ex.Message)
@@ -799,11 +767,7 @@ public class ZoneController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug(
-                "Publishing test zone volume notification for Zone {ZoneId} with volume {Volume} via CQRS mediator",
-                zoneId,
-                volume
-            );
+            this.LogPublishingTestNotification(zoneId, volume);
             var notification = new ZoneVolumeChangedNotification { ZoneId = zoneId, Volume = volume };
 
             await this._mediator.PublishAsync(notification, cancellationToken);
@@ -812,13 +776,259 @@ public class ZoneController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error publishing test notification for zone {ZoneId}", zoneId);
+            this.LogErrorPublishingTestNotification(ex, zoneId);
             return this.StatusCode(
                 500,
                 ApiResponse.CreateError("INTERNAL_ERROR", "An internal server error occurred", ex.Message)
             );
         }
     }
+
+    // LoggerMessage definitions for high-performance logging
+    [LoggerMessage(
+        EventId = 2630,
+        Level = LogLevel.Debug,
+        Message = "Getting zone state for zone {zoneId} via CQRS mediator via CQRS mediator"
+    )]
+    private partial void LogGettingZoneState(int zoneId);
+
+    [LoggerMessage(
+        EventId = 2631,
+        Level = LogLevel.Warning,
+        Message = "Failed to get zone state for zone {zoneId}: {error}"
+    )]
+    private partial void LogFailedToGetZoneState(int zoneId, string? error);
+
+    [LoggerMessage(EventId = 2632, Level = LogLevel.Error, Message = "Error getting zone state for zone {zoneId}")]
+    private partial void LogErrorGettingZoneState(Exception ex, int zoneId);
+
+    [LoggerMessage(EventId = 2633, Level = LogLevel.Debug, Message = "Getting all zone states via CQRS mediator")]
+    private partial void LogGettingAllZoneStates();
+
+    [LoggerMessage(EventId = 2634, Level = LogLevel.Warning, Message = "Failed to get all zone states: {error}")]
+    private partial void LogFailedToGetAllZoneStates(string? error);
+
+    [LoggerMessage(EventId = 2635, Level = LogLevel.Error, Message = "Error getting all zone states")]
+    private partial void LogErrorGettingAllZoneStates(Exception ex);
+
+    [LoggerMessage(
+        EventId = 2636,
+        Level = LogLevel.Debug,
+        Message = "Starting playback for zone {zoneId} via CQRS mediator via CQRS mediator"
+    )]
+    private partial void LogStartingPlayback(int zoneId);
+
+    [LoggerMessage(EventId = 2637, Level = LogLevel.Warning, Message = "Failed to play zone {zoneId}: {error}")]
+    private partial void LogFailedToPlayZone(int zoneId, string? error);
+
+    [LoggerMessage(EventId = 2638, Level = LogLevel.Error, Message = "Error starting playback for zone {zoneId}")]
+    private partial void LogErrorStartingPlayback(Exception ex, int zoneId);
+
+    [LoggerMessage(
+        EventId = 2639,
+        Level = LogLevel.Debug,
+        Message = "Pausing playback for zone {zoneId} via CQRS mediator via CQRS mediator"
+    )]
+    private partial void LogPausingPlayback(int zoneId);
+
+    [LoggerMessage(EventId = 2640, Level = LogLevel.Warning, Message = "Failed to pause zone {zoneId}: {error}")]
+    private partial void LogFailedToPauseZone(int zoneId, string? error);
+
+    [LoggerMessage(EventId = 2641, Level = LogLevel.Error, Message = "Error pausing playback for zone {zoneId}")]
+    private partial void LogErrorPausingPlayback(Exception ex, int zoneId);
+
+    [LoggerMessage(
+        EventId = 2642,
+        Level = LogLevel.Debug,
+        Message = "Setting volume for zone {zoneId} to {volume} via CQRS mediator"
+    )]
+    private partial void LogSettingVolume(int zoneId, int volume);
+
+    [LoggerMessage(
+        EventId = 2643,
+        Level = LogLevel.Warning,
+        Message = "Failed to set volume for zone {zoneId}: {error}"
+    )]
+    private partial void LogFailedToSetVolume(int zoneId, string? error);
+
+    [LoggerMessage(EventId = 2644, Level = LogLevel.Error, Message = "Error setting volume for zone {zoneId}")]
+    private partial void LogErrorSettingVolume(Exception ex, int zoneId);
+
+    [LoggerMessage(
+        EventId = 2645,
+        Level = LogLevel.Debug,
+        Message = "Stopping playback for zone {zoneId} via CQRS mediator via CQRS mediator"
+    )]
+    private partial void LogStoppingPlayback(int zoneId);
+
+    [LoggerMessage(EventId = 2646, Level = LogLevel.Warning, Message = "Failed to stop zone {zoneId}: {error}")]
+    private partial void LogFailedToStopZone(int zoneId, string? error);
+
+    [LoggerMessage(EventId = 2647, Level = LogLevel.Error, Message = "Error stopping playback for zone {zoneId}")]
+    private partial void LogErrorStoppingPlayback(Exception ex, int zoneId);
+
+    [LoggerMessage(
+        EventId = 2648,
+        Level = LogLevel.Debug,
+        Message = "Playing next track for zone {zoneId} via CQRS mediator via CQRS mediator"
+    )]
+    private partial void LogPlayingNextTrack(int zoneId);
+
+    [LoggerMessage(
+        EventId = 2649,
+        Level = LogLevel.Warning,
+        Message = "Failed to play next track for zone {zoneId}: {error}"
+    )]
+    private partial void LogFailedToPlayNextTrack(int zoneId, string? error);
+
+    [LoggerMessage(EventId = 2650, Level = LogLevel.Error, Message = "Error playing next track for zone {zoneId}")]
+    private partial void LogErrorPlayingNextTrack(Exception ex, int zoneId);
+
+    [LoggerMessage(
+        EventId = 2651,
+        Level = LogLevel.Debug,
+        Message = "Playing previous track for zone {zoneId} via CQRS mediator"
+    )]
+    private partial void LogPlayingPreviousTrack(int zoneId);
+
+    [LoggerMessage(
+        EventId = 2652,
+        Level = LogLevel.Warning,
+        Message = "Failed to play previous track for zone {zoneId}: {error}"
+    )]
+    private partial void LogFailedToPlayPreviousTrack(int zoneId, string? error);
+
+    [LoggerMessage(EventId = 2653, Level = LogLevel.Error, Message = "Error playing previous track for zone {zoneId}")]
+    private partial void LogErrorPlayingPreviousTrack(Exception ex, int zoneId);
+
+    [LoggerMessage(
+        EventId = 2654,
+        Level = LogLevel.Debug,
+        Message = "Setting track repeat for zone {zoneId} to {enabled}"
+    )]
+    private partial void LogSettingTrackRepeat(int zoneId, bool enabled);
+
+    [LoggerMessage(
+        EventId = 2655,
+        Level = LogLevel.Warning,
+        Message = "Failed to set track repeat for zone {zoneId}: {error}"
+    )]
+    private partial void LogFailedToSetTrackRepeat(int zoneId, string? error);
+
+    [LoggerMessage(EventId = 2656, Level = LogLevel.Error, Message = "Error setting track repeat for zone {zoneId}")]
+    private partial void LogErrorSettingTrackRepeat(Exception ex, int zoneId);
+
+    [LoggerMessage(
+        EventId = 2657,
+        Level = LogLevel.Debug,
+        Message = "Toggling track repeat for zone {zoneId} via CQRS mediator"
+    )]
+    private partial void LogTogglingTrackRepeat(int zoneId);
+
+    [LoggerMessage(
+        EventId = 2658,
+        Level = LogLevel.Warning,
+        Message = "Failed to toggle track repeat for zone {zoneId}: {error}"
+    )]
+    private partial void LogFailedToToggleTrackRepeat(int zoneId, string? error);
+
+    [LoggerMessage(EventId = 2659, Level = LogLevel.Error, Message = "Error toggling track repeat for zone {zoneId}")]
+    private partial void LogErrorTogglingTrackRepeat(Exception ex, int zoneId);
+
+    [LoggerMessage(
+        EventId = 2660,
+        Level = LogLevel.Debug,
+        Message = "Setting playlist shuffle for zone {zoneId} to {enabled}"
+    )]
+    private partial void LogSettingPlaylistShuffle(int zoneId, bool enabled);
+
+    [LoggerMessage(
+        EventId = 2661,
+        Level = LogLevel.Warning,
+        Message = "Failed to set playlist shuffle for zone {zoneId}: {error}"
+    )]
+    private partial void LogFailedToSetPlaylistShuffle(int zoneId, string? error);
+
+    [LoggerMessage(
+        EventId = 2662,
+        Level = LogLevel.Error,
+        Message = "Error setting playlist shuffle for zone {zoneId}"
+    )]
+    private partial void LogErrorSettingPlaylistShuffle(Exception ex, int zoneId);
+
+    [LoggerMessage(
+        EventId = 2663,
+        Level = LogLevel.Debug,
+        Message = "Setting playlist repeat for zone {zoneId} to {enabled}"
+    )]
+    private partial void LogSettingPlaylistRepeat(int zoneId, bool enabled);
+
+    [LoggerMessage(
+        EventId = 2664,
+        Level = LogLevel.Warning,
+        Message = "Failed to set playlist repeat for zone {zoneId}: {error}"
+    )]
+    private partial void LogFailedToSetPlaylistRepeat(int zoneId, string? error);
+
+    [LoggerMessage(EventId = 2665, Level = LogLevel.Error, Message = "Error setting playlist repeat for zone {zoneId}")]
+    private partial void LogErrorSettingPlaylistRepeat(Exception ex, int zoneId);
+
+    [LoggerMessage(EventId = 2666, Level = LogLevel.Debug, Message = "Getting all zones via CQRS mediator")]
+    private partial void LogGettingAllZones();
+
+    [LoggerMessage(EventId = 2667, Level = LogLevel.Warning, Message = "Failed to get all zones: {error}")]
+    private partial void LogFailedToGetAllZones(string? error);
+
+    [LoggerMessage(EventId = 2668, Level = LogLevel.Error, Message = "Error getting all zones")]
+    private partial void LogErrorGettingAllZones(Exception ex);
+
+    [LoggerMessage(
+        EventId = 2669,
+        Level = LogLevel.Debug,
+        Message = "Getting track info for zone {zoneId} via CQRS mediator"
+    )]
+    private partial void LogGettingTrackInfo(int zoneId);
+
+    [LoggerMessage(
+        EventId = 2670,
+        Level = LogLevel.Warning,
+        Message = "Failed to get track info for zone {zoneId}: {error}"
+    )]
+    private partial void LogFailedToGetTrackInfo(int zoneId, string? error);
+
+    [LoggerMessage(EventId = 2671, Level = LogLevel.Error, Message = "Error getting track info for zone {zoneId}")]
+    private partial void LogErrorGettingTrackInfo(Exception ex, int zoneId);
+
+    [LoggerMessage(
+        EventId = 2672,
+        Level = LogLevel.Debug,
+        Message = "Getting playlist info for zone {zoneId} via CQRS mediator"
+    )]
+    private partial void LogGettingPlaylistInfo(int zoneId);
+
+    [LoggerMessage(
+        EventId = 2673,
+        Level = LogLevel.Warning,
+        Message = "Failed to get playlist info for zone {zoneId}: {error}"
+    )]
+    private partial void LogFailedToGetPlaylistInfo(int zoneId, string? error);
+
+    [LoggerMessage(EventId = 2674, Level = LogLevel.Error, Message = "Error getting playlist info for zone {zoneId}")]
+    private partial void LogErrorGettingPlaylistInfo(Exception ex, int zoneId);
+
+    [LoggerMessage(
+        EventId = 2675,
+        Level = LogLevel.Debug,
+        Message = "Publishing test zone volume notification for Zone {zoneId} with volume {volume} via CQRS mediator"
+    )]
+    private partial void LogPublishingTestNotification(int zoneId, int volume);
+
+    [LoggerMessage(
+        EventId = 2676,
+        Level = LogLevel.Error,
+        Message = "Error publishing test notification for zone {zoneId}"
+    )]
+    private partial void LogErrorPublishingTestNotification(Exception ex, int zoneId);
 }
 
 // Request DTOs

@@ -71,31 +71,31 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
 
     #region Logging
 
-    [LoggerMessage(2001, LogLevel.Information, "MQTT service created for {BrokerAddress}:{Port}, enabled: {Enabled}")]
+    [LoggerMessage(7001, LogLevel.Information, "MQTT service created for {BrokerAddress}:{Port}, enabled: {Enabled}")]
     private partial void LogServiceCreated(string brokerAddress, int port, bool enabled);
 
-    [LoggerMessage(2002, LogLevel.Information, "Initializing MQTT connection to {BrokerAddress}:{Port}")]
+    [LoggerMessage(7002, LogLevel.Information, "Initializing MQTT connection to {BrokerAddress}:{Port}")]
     private partial void LogInitializing(string brokerAddress, int port);
 
-    [LoggerMessage(2003, LogLevel.Information, "MQTT connection established successfully")]
+    [LoggerMessage(7003, LogLevel.Information, "MQTT connection established successfully")]
     private partial void LogConnectionEstablished();
 
-    [LoggerMessage(2004, LogLevel.Warning, "MQTT connection lost: {Reason}")]
+    [LoggerMessage(7004, LogLevel.Warning, "MQTT connection lost: {Reason}")]
     private partial void LogConnectionLost(string reason);
 
-    [LoggerMessage(2005, LogLevel.Error, "Failed to initialize MQTT connection")]
+    [LoggerMessage(7005, LogLevel.Error, "Failed to initialize MQTT connection")]
     private partial void LogInitializationFailed(Exception ex);
 
-    [LoggerMessage(2009, LogLevel.Error, "MQTT connection error: {ErrorMessage}")]
+    [LoggerMessage(7009, LogLevel.Error, "MQTT connection error: {ErrorMessage}")]
     private partial void LogConnectionErrorMessage(string errorMessage);
 
-    [LoggerMessage(2006, LogLevel.Error, "MQTT operation {Operation} failed")]
+    [LoggerMessage(7006, LogLevel.Error, "MQTT operation {Operation} failed")]
     private partial void LogOperationFailed(string operation, Exception ex);
 
-    [LoggerMessage(2007, LogLevel.Information, "MQTT service disposed")]
+    [LoggerMessage(7007, LogLevel.Information, "MQTT service disposed")]
     private partial void LogServiceDisposed();
 
-    [LoggerMessage(2008, LogLevel.Warning, "MQTT service not connected for operation: {Operation}")]
+    [LoggerMessage(7008, LogLevel.Warning, "MQTT service not connected for operation: {Operation}")]
     private partial void LogNotConnected(string operation);
 
     [LoggerMessage(

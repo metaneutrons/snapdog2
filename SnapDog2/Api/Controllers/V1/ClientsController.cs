@@ -19,7 +19,7 @@ using SnapDog2.Server.Features.Clients.Queries;
 [Route("api/v1/clients")]
 [Authorize]
 [Produces("application/json")]
-public class ClientsController : ControllerBase
+public partial class ClientsController : ControllerBase
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<ClientsController> _logger;
@@ -51,13 +51,13 @@ public class ClientsController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting clients list - Page: {Page}, PageSize: {PageSize}", page, pageSize);
+            this.LogGettingClientsList(page, pageSize);
 
             var handler =
                 this._serviceProvider.GetService<Server.Features.Clients.Handlers.GetAllClientsQueryHandler>();
             if (handler == null)
             {
-                this._logger.LogError("GetAllClientsQueryHandler not found in DI container");
+                this.LogCriticalHandlerNotFound("GetAllClientsQueryHandler");
                 return this.StatusCode(
                     500,
                     ApiResponse<PaginatedResponse<ClientInfo>>.CreateError(
@@ -94,7 +94,7 @@ public class ClientsController : ControllerBase
                 return this.Ok(ApiResponse<PaginatedResponse<ClientInfo>>.CreateSuccess(paginatedResponse));
             }
 
-            this._logger.LogWarning("Failed to get clients: {Error}", result.ErrorMessage);
+            this.LogFailedToGetClients(result.ErrorMessage);
             return this.StatusCode(
                 500,
                 ApiResponse<PaginatedResponse<ClientInfo>>.CreateError(
@@ -105,7 +105,7 @@ public class ClientsController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error getting clients");
+            this.LogErrorGettingClients(ex);
             return this.StatusCode(
                 500,
                 ApiResponse<PaginatedResponse<ClientInfo>>.CreateError("INTERNAL_ERROR", "Internal server error")
@@ -130,12 +130,12 @@ public class ClientsController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting client {ClientId}", clientId);
+            this.LogGettingClient(clientId);
 
             var handler = this._serviceProvider.GetService<Server.Features.Clients.Handlers.GetClientQueryHandler>();
             if (handler == null)
             {
-                this._logger.LogError("GetClientQueryHandler not found in DI container");
+                this.LogCriticalHandlerNotFound("GetClientQueryHandler");
                 return this.StatusCode(
                     500,
                     ApiResponse<ClientState>.CreateError("HANDLER_NOT_FOUND", "Client handler not available")
@@ -149,14 +149,14 @@ public class ClientsController : ControllerBase
                 return this.Ok(ApiResponse<ClientState>.CreateSuccess(result.Value));
             }
 
-            this._logger.LogWarning("Client {ClientId} not found", clientId);
+            this.LogClientNotFound(clientId);
             return this.NotFound(
                 ApiResponse<ClientState>.CreateError("CLIENT_NOT_FOUND", $"Client {clientId} not found")
             );
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error getting client {ClientId}", clientId);
+            this.LogErrorGettingClient(clientId, ex);
             return this.StatusCode(
                 500,
                 ApiResponse<ClientState>.CreateError("INTERNAL_ERROR", "Internal server error")
@@ -204,13 +204,13 @@ public class ClientsController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Setting volume {Volume} for client {ClientId}", request.Level, clientId);
+            this.LogSettingClientVolume(clientId, request.Level);
 
             var handler =
                 this._serviceProvider.GetService<Server.Features.Clients.Handlers.SetClientVolumeCommandHandler>();
             if (handler == null)
             {
-                this._logger.LogError("SetClientVolumeCommandHandler not found in DI container");
+                this.LogCriticalHandlerNotFound("SetClientVolumeCommandHandler");
                 return this.StatusCode(
                     500,
                     ApiResponse<VolumeResponse>.CreateError("HANDLER_NOT_FOUND", "Client volume handler not available")
@@ -231,11 +231,7 @@ public class ClientsController : ControllerBase
                 return this.Ok(ApiResponse<VolumeResponse>.CreateSuccess(new VolumeResponse(request.Level)));
             }
 
-            this._logger.LogWarning(
-                "Failed to set volume for client {ClientId}: {Error}",
-                clientId,
-                result.ErrorMessage
-            );
+            this.LogFailedToSetClientVolume(clientId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse<VolumeResponse>.CreateError(
                     "VOLUME_ERROR",
@@ -245,7 +241,7 @@ public class ClientsController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error setting volume for client {ClientId}", clientId);
+            this.LogErrorSettingClientVolume(clientId, ex);
             return this.StatusCode(
                 500,
                 ApiResponse<VolumeResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
@@ -270,12 +266,12 @@ public class ClientsController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting volume for client {ClientId}", clientId);
+            this.LogGettingClientVolume(clientId);
 
             var handler = this._serviceProvider.GetService<Server.Features.Clients.Handlers.GetClientQueryHandler>();
             if (handler == null)
             {
-                this._logger.LogError("GetClientQueryHandler not found in DI container");
+                this.LogCriticalHandlerNotFound("GetClientQueryHandler");
                 return this.StatusCode(
                     500,
                     ApiResponse<VolumeResponse>.CreateError("HANDLER_NOT_FOUND", "Client handler not available")
@@ -289,18 +285,14 @@ public class ClientsController : ControllerBase
                 return this.Ok(ApiResponse<VolumeResponse>.CreateSuccess(new VolumeResponse(result.Value.Volume)));
             }
 
-            this._logger.LogWarning(
-                "Failed to get volume for client {ClientId}: {Error}",
-                clientId,
-                result.ErrorMessage
-            );
+            this.LogFailedToGetClientVolume(clientId, result.ErrorMessage);
             return this.NotFound(
                 ApiResponse<VolumeResponse>.CreateError("CLIENT_NOT_FOUND", result.ErrorMessage ?? "Client not found")
             );
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error getting volume for client {ClientId}", clientId);
+            this.LogErrorGettingClientVolume(clientId, ex);
             return this.StatusCode(
                 500,
                 ApiResponse<VolumeResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
@@ -330,13 +322,13 @@ public class ClientsController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Setting mute {Enabled} for client {ClientId}", request.Enabled, clientId);
+            this.LogSettingClientMute(clientId, request.Enabled);
 
             var handler =
                 this._serviceProvider.GetService<Server.Features.Clients.Handlers.SetClientMuteCommandHandler>();
             if (handler == null)
             {
-                this._logger.LogError("SetClientMuteCommandHandler not found in DI container");
+                this.LogCriticalHandlerNotFound("SetClientMuteCommandHandler");
                 return this.StatusCode(
                     500,
                     ApiResponse<MuteResponse>.CreateError("HANDLER_NOT_FOUND", "Client mute handler not available")
@@ -357,14 +349,14 @@ public class ClientsController : ControllerBase
                 return this.Ok(ApiResponse<MuteResponse>.CreateSuccess(new MuteResponse(request.Enabled)));
             }
 
-            this._logger.LogWarning("Failed to set mute for client {ClientId}: {Error}", clientId, result.ErrorMessage);
+            this.LogFailedToSetClientMute(clientId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse<MuteResponse>.CreateError("MUTE_ERROR", result.ErrorMessage ?? "Failed to set client mute")
             );
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error setting mute for client {ClientId}", clientId);
+            this.LogErrorSettingClientMute(clientId, ex);
             return this.StatusCode(
                 500,
                 ApiResponse<MuteResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
@@ -389,12 +381,12 @@ public class ClientsController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting mute state for client {ClientId}", clientId);
+            this.LogGettingClientMute(clientId);
 
             var handler = this._serviceProvider.GetService<Server.Features.Clients.Handlers.GetClientQueryHandler>();
             if (handler == null)
             {
-                this._logger.LogError("GetClientQueryHandler not found in DI container");
+                this.LogCriticalHandlerNotFound("GetClientQueryHandler");
                 return this.StatusCode(
                     500,
                     ApiResponse<MuteResponse>.CreateError("HANDLER_NOT_FOUND", "Client handler not available")
@@ -408,18 +400,14 @@ public class ClientsController : ControllerBase
                 return this.Ok(ApiResponse<MuteResponse>.CreateSuccess(new MuteResponse(result.Value.Mute)));
             }
 
-            this._logger.LogWarning(
-                "Failed to get mute state for client {ClientId}: {Error}",
-                clientId,
-                result.ErrorMessage
-            );
+            this.LogFailedToGetClientMute(clientId, result.ErrorMessage);
             return this.NotFound(
                 ApiResponse<MuteResponse>.CreateError("CLIENT_NOT_FOUND", result.ErrorMessage ?? "Client not found")
             );
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error getting mute state for client {ClientId}", clientId);
+            this.LogErrorGettingClientMute(clientId, ex);
             return this.StatusCode(
                 500,
                 ApiResponse<MuteResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
@@ -444,13 +432,13 @@ public class ClientsController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Toggling mute for client {ClientId}", clientId);
+            this.LogTogglingClientMute(clientId);
 
             var handler =
                 this._serviceProvider.GetService<Server.Features.Clients.Handlers.ToggleClientMuteCommandHandler>();
             if (handler == null)
             {
-                this._logger.LogError("ToggleClientMuteCommandHandler not found in DI container");
+                this.LogCriticalHandlerNotFound("ToggleClientMuteCommandHandler");
                 return this.StatusCode(
                     500,
                     ApiResponse<MuteResponse>.CreateError(
@@ -486,11 +474,7 @@ public class ClientsController : ControllerBase
                 return this.Ok(ApiResponse<MuteResponse>.CreateSuccess(new MuteResponse(true)));
             }
 
-            this._logger.LogWarning(
-                "Failed to toggle mute for client {ClientId}: {Error}",
-                clientId,
-                result.ErrorMessage
-            );
+            this.LogFailedToToggleClientMute(clientId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse<MuteResponse>.CreateError(
                     "TOGGLE_MUTE_ERROR",
@@ -500,7 +484,7 @@ public class ClientsController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error toggling mute for client {ClientId}", clientId);
+            this.LogErrorTogglingClientMute(clientId, ex);
             return this.StatusCode(
                 500,
                 ApiResponse<MuteResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
@@ -530,13 +514,13 @@ public class ClientsController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Setting latency {Latency}ms for client {ClientId}", request.Milliseconds, clientId);
+            this.LogSettingClientLatency(clientId, request.Milliseconds);
 
             var handler =
                 this._serviceProvider.GetService<Server.Features.Clients.Handlers.SetClientLatencyCommandHandler>();
             if (handler == null)
             {
-                this._logger.LogError("SetClientLatencyCommandHandler not found in DI container");
+                this.LogCriticalHandlerNotFound("SetClientLatencyCommandHandler");
                 return this.StatusCode(
                     500,
                     ApiResponse<LatencyResponse>.CreateError(
@@ -560,11 +544,7 @@ public class ClientsController : ControllerBase
                 return this.Ok(ApiResponse<LatencyResponse>.CreateSuccess(new LatencyResponse(request.Milliseconds)));
             }
 
-            this._logger.LogWarning(
-                "Failed to set latency for client {ClientId}: {Error}",
-                clientId,
-                result.ErrorMessage
-            );
+            this.LogFailedToSetClientLatency(clientId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse<LatencyResponse>.CreateError(
                     "LATENCY_ERROR",
@@ -574,7 +554,7 @@ public class ClientsController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error setting latency for client {ClientId}", clientId);
+            this.LogErrorSettingClientLatency(clientId, ex);
             return this.StatusCode(
                 500,
                 ApiResponse<LatencyResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
@@ -599,12 +579,12 @@ public class ClientsController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting latency for client {ClientId}", clientId);
+            this.LogGettingClientLatency(clientId);
 
             var handler = this._serviceProvider.GetService<Server.Features.Clients.Handlers.GetClientQueryHandler>();
             if (handler == null)
             {
-                this._logger.LogError("GetClientQueryHandler not found in DI container");
+                this.LogCriticalHandlerNotFound("GetClientQueryHandler");
                 return this.StatusCode(
                     500,
                     ApiResponse<LatencyResponse>.CreateError("HANDLER_NOT_FOUND", "Client handler not available")
@@ -618,18 +598,14 @@ public class ClientsController : ControllerBase
                 return this.Ok(ApiResponse<LatencyResponse>.CreateSuccess(new LatencyResponse(result.Value.LatencyMs)));
             }
 
-            this._logger.LogWarning(
-                "Failed to get latency for client {ClientId}: {Error}",
-                clientId,
-                result.ErrorMessage
-            );
+            this.LogFailedToGetClientLatency(clientId, result.ErrorMessage);
             return this.NotFound(
                 ApiResponse<LatencyResponse>.CreateError("CLIENT_NOT_FOUND", result.ErrorMessage ?? "Client not found")
             );
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error getting latency for client {ClientId}", clientId);
+            this.LogErrorGettingClientLatency(clientId, ex);
             return this.StatusCode(
                 500,
                 ApiResponse<LatencyResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
@@ -659,13 +635,13 @@ public class ClientsController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Assigning client {ClientId} to zone {ZoneId}", clientId, request.ZoneId);
+            this.LogSettingClientZone(clientId, request.ZoneId);
 
             var handler =
                 this._serviceProvider.GetService<Server.Features.Clients.Handlers.AssignClientToZoneCommandHandler>();
             if (handler == null)
             {
-                this._logger.LogError("AssignClientToZoneCommandHandler not found in DI container");
+                this.LogCriticalHandlerNotFound("AssignClientToZoneCommandHandler");
                 return this.StatusCode(
                     500,
                     ApiResponse.CreateError("HANDLER_NOT_FOUND", "Client zone assignment handler not available")
@@ -686,12 +662,7 @@ public class ClientsController : ControllerBase
                 return this.Accepted(ApiResponse.CreateSuccess());
             }
 
-            this._logger.LogWarning(
-                "Failed to assign client {ClientId} to zone {ZoneId}: {Error}",
-                clientId,
-                request.ZoneId,
-                result.ErrorMessage
-            );
+            this.LogFailedToSetClientZone(clientId, request.ZoneId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse.CreateError(
                     "ZONE_ASSIGNMENT_ERROR",
@@ -701,7 +672,7 @@ public class ClientsController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error assigning client {ClientId} to zone {ZoneId}", clientId, request.ZoneId);
+            this.LogErrorSettingClientZone(clientId, request.ZoneId, ex);
             return this.StatusCode(500, ApiResponse.CreateError("INTERNAL_ERROR", "Internal server error"));
         }
     }
@@ -723,12 +694,12 @@ public class ClientsController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting zone assignment for client {ClientId}", clientId);
+            this.LogGettingClientZone(clientId);
 
             var handler = this._serviceProvider.GetService<Server.Features.Clients.Handlers.GetClientQueryHandler>();
             if (handler == null)
             {
-                this._logger.LogError("GetClientQueryHandler not found in DI container");
+                this.LogCriticalHandlerNotFound("GetClientQueryHandler");
                 return this.StatusCode(
                     500,
                     ApiResponse<ZoneAssignmentResponse>.CreateError("HANDLER_NOT_FOUND", "Client handler not available")
@@ -744,11 +715,7 @@ public class ClientsController : ControllerBase
                 );
             }
 
-            this._logger.LogWarning(
-                "Failed to get zone assignment for client {ClientId}: {Error}",
-                clientId,
-                result.ErrorMessage
-            );
+            this.LogFailedToGetClientZone(clientId, result.ErrorMessage);
             return this.NotFound(
                 ApiResponse<ZoneAssignmentResponse>.CreateError(
                     "CLIENT_NOT_FOUND",
@@ -758,11 +725,136 @@ public class ClientsController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error getting zone assignment for client {ClientId}", clientId);
+            this.LogErrorGettingClientZone(clientId, ex);
             return this.StatusCode(
                 500,
                 ApiResponse<ZoneAssignmentResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
             );
         }
     }
+
+    #region Logging
+
+    // ARCHITECTURAL PROBLEM - This should never happen in production
+    [LoggerMessage(
+        2501,
+        LogLevel.Critical,
+        "🚨 CRITICAL: Handler {HandlerType} not found in DI container - This is a configuration BUG!"
+    )]
+    private partial void LogCriticalHandlerNotFound(string handlerType);
+
+    // Get All Clients (2510-2519)
+    [LoggerMessage(2510, LogLevel.Debug, "Getting clients list - Page: {Page}, PageSize: {PageSize}")]
+    private partial void LogGettingClientsList(int page, int pageSize);
+
+    [LoggerMessage(2511, LogLevel.Warning, "Failed to get clients: {Error}")]
+    private partial void LogFailedToGetClients(string? error);
+
+    [LoggerMessage(2512, LogLevel.Error, "Error getting clients")]
+    private partial void LogErrorGettingClients(Exception exception);
+
+    // Get Specific Client (2520-2529)
+    [LoggerMessage(2520, LogLevel.Debug, "Getting client {ClientId}")]
+    private partial void LogGettingClient(int clientId);
+
+    [LoggerMessage(2521, LogLevel.Warning, "Failed to get client {ClientId}: {Error}")]
+    private partial void LogFailedToGetClient(int clientId, string error);
+
+    [LoggerMessage(2523, LogLevel.Warning, "Client {ClientId} not found")]
+    private partial void LogClientNotFound(int clientId);
+
+    [LoggerMessage(2522, LogLevel.Error, "Error getting client {ClientId}")]
+    private partial void LogErrorGettingClient(int clientId, Exception exception);
+
+    // Set Client Volume (2540-2549)
+    [LoggerMessage(2540, LogLevel.Debug, "Setting volume for client {ClientId} to {Volume}")]
+    private partial void LogSettingClientVolume(int clientId, int volume);
+
+    [LoggerMessage(2541, LogLevel.Warning, "Failed to set volume for client {ClientId}: {Error}")]
+    private partial void LogFailedToSetClientVolume(int clientId, string? error);
+
+    [LoggerMessage(2542, LogLevel.Error, "Error setting volume for client {ClientId}")]
+    private partial void LogErrorSettingClientVolume(int clientId, Exception exception);
+
+    // Get Client Volume (2550-2559)
+    [LoggerMessage(2550, LogLevel.Debug, "Getting volume for client {ClientId}")]
+    private partial void LogGettingClientVolume(int clientId);
+
+    [LoggerMessage(2551, LogLevel.Warning, "Failed to get volume for client {ClientId}: {Error}")]
+    private partial void LogFailedToGetClientVolume(int clientId, string? error);
+
+    [LoggerMessage(2552, LogLevel.Error, "Error getting volume for client {ClientId}")]
+    private partial void LogErrorGettingClientVolume(int clientId, Exception exception);
+
+    // Set Client Mute (2560-2569)
+    [LoggerMessage(2560, LogLevel.Debug, "Setting mute for client {ClientId} to {Muted}")]
+    private partial void LogSettingClientMute(int clientId, bool muted);
+
+    [LoggerMessage(2561, LogLevel.Warning, "Failed to set mute for client {ClientId}: {Error}")]
+    private partial void LogFailedToSetClientMute(int clientId, string? error);
+
+    [LoggerMessage(2562, LogLevel.Error, "Error setting mute for client {ClientId}")]
+    private partial void LogErrorSettingClientMute(int clientId, Exception exception);
+
+    // Get Client Mute (2570-2579)
+    [LoggerMessage(2570, LogLevel.Debug, "Getting mute status for client {ClientId}")]
+    private partial void LogGettingClientMute(int clientId);
+
+    [LoggerMessage(2571, LogLevel.Warning, "Failed to get mute status for client {ClientId}: {Error}")]
+    private partial void LogFailedToGetClientMute(int clientId, string? error);
+
+    [LoggerMessage(2572, LogLevel.Error, "Error getting mute status for client {ClientId}")]
+    private partial void LogErrorGettingClientMute(int clientId, Exception exception);
+
+    // Toggle Client Mute (2580-2589)
+    [LoggerMessage(2580, LogLevel.Debug, "Toggling mute for client {ClientId}")]
+    private partial void LogTogglingClientMute(int clientId);
+
+    [LoggerMessage(2581, LogLevel.Warning, "Failed to toggle mute for client {ClientId}: {Error}")]
+    private partial void LogFailedToToggleClientMute(int clientId, string? error);
+
+    [LoggerMessage(2582, LogLevel.Error, "Error toggling mute for client {ClientId}")]
+    private partial void LogErrorTogglingClientMute(int clientId, Exception exception);
+
+    // Set Client Latency (2590-2599)
+    [LoggerMessage(2590, LogLevel.Debug, "Setting latency for client {ClientId} to {Latency}ms")]
+    private partial void LogSettingClientLatency(int clientId, int latency);
+
+    [LoggerMessage(2591, LogLevel.Warning, "Failed to set latency for client {ClientId}: {Error}")]
+    private partial void LogFailedToSetClientLatency(int clientId, string? error);
+
+    [LoggerMessage(2592, LogLevel.Error, "Error setting latency for client {ClientId}")]
+    private partial void LogErrorSettingClientLatency(int clientId, Exception exception);
+
+    // Get Client Latency (2600-2609)
+    [LoggerMessage(2600, LogLevel.Debug, "Getting latency for client {ClientId}")]
+    private partial void LogGettingClientLatency(int clientId);
+
+    [LoggerMessage(2601, LogLevel.Warning, "Failed to get latency for client {ClientId}: {Error}")]
+    private partial void LogFailedToGetClientLatency(int clientId, string? error);
+
+    [LoggerMessage(2602, LogLevel.Error, "Error getting latency for client {ClientId}")]
+    private partial void LogErrorGettingClientLatency(int clientId, Exception exception);
+
+    // Set Client Zone (2610-2619)
+    [LoggerMessage(2610, LogLevel.Debug, "Setting zone for client {ClientId} to {ZoneId}")]
+    private partial void LogSettingClientZone(int clientId, int zoneId);
+
+    [LoggerMessage(2611, LogLevel.Warning, "Failed to assign client {ClientId} to zone {ZoneId}: {Error}")]
+    private partial void LogFailedToSetClientZone(int clientId, int zoneId, string? error);
+
+    [LoggerMessage(2612, LogLevel.Error, "Error assigning client {ClientId} to zone {ZoneId}")]
+    private partial void LogErrorSettingClientZone(int clientId, int zoneId, Exception exception);
+
+    // Get Client Zone (2620-2629)
+    [LoggerMessage(2620, LogLevel.Debug, "Getting zone for client {ClientId}")]
+    private partial void LogGettingClientZone(int clientId);
+
+    [LoggerMessage(2621, LogLevel.Warning, "Failed to get zone for client {ClientId}: {Error}")]
+    private partial void LogFailedToGetClientZone(int clientId, string? error);
+
+    [LoggerMessage(2622, LogLevel.Error, "Error getting zone for client {ClientId}")]
+    private partial void LogErrorGettingClientZone(int clientId, Exception exception);
+
+    #endregion
 }

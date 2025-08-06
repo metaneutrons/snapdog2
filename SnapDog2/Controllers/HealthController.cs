@@ -8,7 +8,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-public class HealthController : ControllerBase
+public partial class HealthController : ControllerBase
 {
     private readonly HealthCheckService _healthCheckService;
     private readonly ILogger<HealthController> _logger;
@@ -58,17 +58,13 @@ public class HealthController : ControllerBase
                 _ => StatusCodes.Status503ServiceUnavailable,
             };
 
-            this._logger.LogInformation(
-                "Health check completed with status {Status} in {Duration}ms",
-                healthReport.Status,
-                healthReport.TotalDuration.TotalMilliseconds
-            );
+            this.LogHealthCheckCompleted(healthReport.Status, healthReport.TotalDuration.TotalMilliseconds);
 
             return this.StatusCode(statusCode, response);
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Health check failed with exception");
+            this.LogHealthCheckFailed(ex);
             return this.StatusCode(
                 StatusCodes.Status503ServiceUnavailable,
                 new { Status = "Unhealthy", Error = "Health check failed" }
@@ -96,7 +92,7 @@ public class HealthController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Ready check failed with exception");
+            this.LogReadyCheckFailed(ex);
             return this.StatusCode(StatusCodes.Status503ServiceUnavailable, new { Status = "Not Ready" });
         }
     }
@@ -121,8 +117,27 @@ public class HealthController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Live check failed with exception");
+            this.LogLiveCheckFailed(ex);
             return this.StatusCode(StatusCodes.Status503ServiceUnavailable, new { Status = "Not Live" });
         }
     }
+
+    // LoggerMessage definitions for high-performance logging (ID range: 2805-2808)
+
+    // Health check operations
+    [LoggerMessage(
+        EventId = 2805,
+        Level = LogLevel.Information,
+        Message = "Health check completed with status {status} in {duration}ms"
+    )]
+    private partial void LogHealthCheckCompleted(HealthStatus status, double duration);
+
+    [LoggerMessage(EventId = 2806, Level = LogLevel.Error, Message = "Health check failed with exception")]
+    private partial void LogHealthCheckFailed(Exception ex);
+
+    [LoggerMessage(EventId = 2807, Level = LogLevel.Error, Message = "Ready check failed with exception")]
+    private partial void LogReadyCheckFailed(Exception ex);
+
+    [LoggerMessage(EventId = 2808, Level = LogLevel.Error, Message = "Live check failed with exception")]
+    private partial void LogLiveCheckFailed(Exception ex);
 }

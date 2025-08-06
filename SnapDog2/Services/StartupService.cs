@@ -12,7 +12,7 @@ namespace SnapDog2.Services;
 /// <summary>
 /// resilient startup service that handles port conflicts and other startup failures
 /// </summary>
-public class StartupService : IHostedService
+public partial class StartupService : IHostedService
 {
     private readonly ILogger<StartupService> _logger;
     private readonly IHostApplicationLifetime _applicationLifetime;
@@ -45,7 +45,7 @@ public class StartupService : IHostedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        this._logger.LogInformation("🛡️ Initiating startup sequence");
+        this.LogStartupSequenceInitiated();
 
         try
         {
@@ -67,29 +67,17 @@ public class StartupService : IHostedService
                 cancellationToken
             );
 
-            this._logger.LogInformation("✅ All startup validations completed successfully");
+            this.LogStartupValidationsCompleted();
         }
         catch (StartupValidationException ex)
         {
             if (this._isDebugLoggingEnabled)
             {
-                this._logger.LogCritical(
-                    ex,
-                    "💥 CRITICAL STARTUP FAILURE: {ValidationStep} failed after {MaxAttempts} attempts. "
-                        + "Application cannot continue safely. Initiating graceful shutdown.",
-                    ex.ValidationStep,
-                    MaxRetryAttempts
-                );
+                this.LogCriticalStartupFailureWithException(ex.ValidationStep, MaxRetryAttempts, ex);
             }
             else
             {
-                this._logger.LogCritical(
-                    "💥 CRITICAL STARTUP FAILURE: {ValidationStep} failed after {MaxAttempts} attempts. "
-                        + "Application cannot continue safely. Reason: {ErrorMessage}",
-                    ex.ValidationStep,
-                    MaxRetryAttempts,
-                    GetCleanErrorMessage(ex)
-                );
+                this.LogCriticalStartupFailure(ex.ValidationStep, MaxRetryAttempts, GetCleanErrorMessage(ex));
             }
 
             this.LogStartupFailureDetails(ex);
@@ -102,20 +90,11 @@ public class StartupService : IHostedService
         {
             if (this._isDebugLoggingEnabled)
             {
-                this._logger.LogCritical(
-                    ex,
-                    "💥 UNEXPECTED STARTUP FAILURE: Unhandled exception during startup validation. "
-                        + "Application state is unknown. Initiating emergency shutdown."
-                );
+                this.LogUnexpectedCriticalFailureWithException(ex);
             }
             else
             {
-                this._logger.LogCritical(
-                    "💥 UNEXPECTED STARTUP FAILURE: Unhandled exception during startup validation. "
-                        + "Application state is unknown. Error: {ErrorType} - {ErrorMessage}",
-                    ex.GetType().Name,
-                    ex.Message
-                );
+                this.LogUnexpectedCriticalFailure($"{ex.GetType().Name} - {ex.Message}");
             }
 
             this.LogUnexpectedFailureDetails(ex);
@@ -128,7 +107,7 @@ public class StartupService : IHostedService
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
-        this._logger.LogInformation("🛡️ Graceful shutdown initiated");
+        this.LogGracefulShutdownInitiated();
         return Task.CompletedTask;
     }
 
@@ -147,22 +126,13 @@ public class StartupService : IHostedService
 
             try
             {
-                this._logger.LogInformation(
-                    "🔄 {OperationName}: Attempt {Attempt}/{MaxAttempts}",
-                    operationName,
-                    attempt,
-                    MaxRetryAttempts
-                );
+                this.LogOperationAttempt(operationName, attempt, MaxRetryAttempts);
 
                 await operation();
 
                 if (attempt > 1)
                 {
-                    this._logger.LogInformation(
-                        "✅ {OperationName}: Succeeded on attempt {Attempt}",
-                        operationName,
-                        attempt
-                    );
+                    this.LogOperationSucceededOnRetry(operationName, attempt);
                 }
 
                 return; // Success!
@@ -172,24 +142,20 @@ public class StartupService : IHostedService
                 // Log with or without stack trace based on debug level and exception type
                 if (this._isDebugLoggingEnabled || IsUnexpectedException(ex))
                 {
-                    this._logger.LogWarning(
-                        ex,
-                        "⚠️  {OperationName}: Attempt {Attempt}/{MaxAttempts} failed. "
-                            + "Retrying in {DelayMs} ms. Error: {ErrorMessage}",
+                    this.LogOperationFailedWithRetryAndDelayAndException(
                         operationName,
                         attempt,
                         MaxRetryAttempts,
                         delay,
-                        ex.Message
+                        ex.Message,
+                        ex
                     );
                 }
                 else
                 {
                     // For expected exceptions, show a clean message without stack trace
                     var errorMessage = GetCleanErrorMessage(ex);
-                    this._logger.LogWarning(
-                        "⚠️  {OperationName}: Attempt {Attempt}/{MaxAttempts} failed. "
-                            + "Retrying in {DelayMs} ms. Error: {ErrorMessage}",
+                    this.LogOperationFailedWithRetryAndDelay(
                         operationName,
                         attempt,
                         MaxRetryAttempts,
@@ -208,20 +174,11 @@ public class StartupService : IHostedService
                 // Final attempt failed - always log with more detail but conditionally include stack trace
                 if (this._isDebugLoggingEnabled || IsUnexpectedException(ex))
                 {
-                    this._logger.LogError(
-                        ex,
-                        "❌ {OperationName}: Final attempt {Attempt}/{MaxAttempts} failed. "
-                            + "Operation cannot be completed.",
-                        operationName,
-                        attempt,
-                        MaxRetryAttempts
-                    );
+                    this.LogOperationFinalFailureWithException(operationName, attempt, MaxRetryAttempts, ex);
                 }
                 else
                 {
-                    this._logger.LogError(
-                        "❌ {OperationName}: Final attempt {Attempt}/{MaxAttempts} failed. "
-                            + "Operation cannot be completed. Error: {ErrorType} - {ErrorMessage}",
+                    this.LogOperationFinalFailure(
                         operationName,
                         attempt,
                         MaxRetryAttempts,
@@ -262,49 +219,29 @@ public class StartupService : IHostedService
                     var conflictDetails = await this.GetPortConflictDetailsAsync(port, cancellationToken);
                     portConflicts.Add((serviceName, port, conflictDetails));
 
-                    this._logger.LogWarning(
-                        "🚫 Port conflict detected: {ServiceName} port {Port} is in use. {ConflictDetails}",
-                        serviceName,
-                        port,
-                        conflictDetails
-                    );
+                    this.LogPortConflictDetected(serviceName, port, conflictDetails);
 
                     // Attempt to find alternative port
                     var alternativePort = await this.FindAlternativePortAsync(port, cancellationToken);
                     if (alternativePort.HasValue)
                     {
-                        this._logger.LogInformation(
-                            "🔄 Alternative port found for {ServiceName}: {AlternativePort}",
-                            serviceName,
-                            alternativePort.Value
-                        );
+                        this.LogAlternativePortFound(serviceName, alternativePort.Value);
                     }
                 }
                 else
                 {
-                    this._logger.LogDebug("✅ Port {Port} ({ServiceName}) is available", port, serviceName);
+                    this.LogPortAvailable(port, serviceName);
                 }
             }
             catch (Exception ex)
             {
                 if (this._isDebugLoggingEnabled)
                 {
-                    this._logger.LogError(
-                        ex,
-                        "❌ Failed to check port availability for {ServiceName} on port {Port}",
-                        serviceName,
-                        port
-                    );
+                    this.LogPortAvailabilityCheckFailedWithException(serviceName, port, ex);
                 }
                 else
                 {
-                    this._logger.LogError(
-                        "❌ Failed to check port availability for {ServiceName} on port {Port}: {ErrorType} - {ErrorMessage}",
-                        serviceName,
-                        port,
-                        ex.GetType().Name,
-                        ex.Message
-                    );
+                    this.LogPortAvailabilityCheckFailed(serviceName, port, ex.GetType().Name, ex.Message);
                 }
 
                 throw;
@@ -349,54 +286,31 @@ public class StartupService : IHostedService
 
                 if (completedTask == timeoutTask)
                 {
-                    this._logger.LogWarning(
-                        "⏱️  {ServiceName} connectivity check timed out ({Address}:{Port})",
-                        serviceName,
-                        address,
-                        port
-                    );
+                    this.LogConnectivityCheckTimedOut(serviceName, address, port);
                 }
                 else if (connectTask.IsFaulted)
                 {
-                    this._logger.LogWarning(
-                        "🔌 {ServiceName} is not reachable ({Address}:{Port}): {Error}",
+                    this.LogServiceNotReachable(
                         serviceName,
                         address,
                         port,
-                        connectTask.Exception?.GetBaseException().Message
+                        connectTask.Exception?.GetBaseException().Message ?? "Unknown error"
                     );
                 }
                 else
                 {
-                    this._logger.LogDebug(
-                        "✅ {ServiceName} connectivity verified ({Address}:{Port})",
-                        serviceName,
-                        address,
-                        port
-                    );
+                    this.LogConnectivityVerified(serviceName, address, port);
                 }
             }
             catch (Exception ex)
             {
                 if (this._isDebugLoggingEnabled)
                 {
-                    this._logger.LogWarning(
-                        ex,
-                        "❌ Failed to verify {ServiceName} connectivity ({Address}:{Port})",
-                        serviceName,
-                        address,
-                        port
-                    );
+                    this.LogConnectivityVerificationFailedWithException(serviceName, address, port, ex);
                 }
                 else
                 {
-                    this._logger.LogWarning(
-                        "❌ Failed to verify {ServiceName} connectivity ({Address}:{Port}): {ErrorMessage}",
-                        serviceName,
-                        address,
-                        port,
-                        ex.Message
-                    );
+                    this.LogConnectivityVerificationFailed(serviceName, address, port, ex.Message);
                 }
                 // Don't throw - connectivity issues might be temporary
             }
@@ -420,7 +334,7 @@ public class StartupService : IHostedService
                 if (!Directory.Exists(directory))
                 {
                     Directory.CreateDirectory(directory);
-                    this._logger.LogInformation("📁 Created required directory: {Directory}", directory);
+                    this.LogDirectoryCreated(directory);
                 }
 
                 // Test write permissions
@@ -428,21 +342,17 @@ public class StartupService : IHostedService
                 await File.WriteAllTextAsync(testFile, "test", cancellationToken);
                 File.Delete(testFile);
 
-                this._logger.LogDebug("✅ Directory {Directory} is accessible and writable", directory);
+                this.LogDirectoryAccessible(directory);
             }
             catch (Exception ex)
             {
                 if (this._isDebugLoggingEnabled)
                 {
-                    this._logger.LogError(ex, "❌ Directory {Directory} is not accessible or writable", directory);
+                    this.LogDirectoryNotAccessible(directory, ex);
                 }
                 else
                 {
-                    this._logger.LogError(
-                        "❌ Directory {Directory} is not accessible or writable: {ErrorMessage}",
-                        directory,
-                        GetUserFriendlyErrorMessage(ex)
-                    );
+                    this.LogDirectoryNotAccessibleWithMessage(directory, GetUserFriendlyErrorMessage(ex));
                 }
 
                 throw new DirectoryAccessException(directory, ex);
@@ -501,58 +411,53 @@ public class StartupService : IHostedService
 
     private void LogStartupFailureDetails(StartupValidationException ex)
     {
-        this._logger.LogCritical("🚨 STARTUP FAILURE ANALYSIS:");
-        this._logger.LogCritical("   Validation Step: {ValidationStep}", ex.ValidationStep);
-        this._logger.LogCritical("   Attempts Made: {Attempts}", ex.Attempts);
-        this._logger.LogCritical("   Final Error: {ErrorMessage}", GetCleanErrorMessage(ex));
-        this._logger.LogCritical("   Timestamp: {Timestamp:yyyy-MM-dd HH:mm:ss.fff} UTC", DateTime.UtcNow);
-        this._logger.LogCritical("   Machine: {MachineName}", Environment.MachineName);
-        this._logger.LogCritical("   Process ID: {ProcessId}", Environment.ProcessId);
-        this._logger.LogCritical("   Working Directory: {WorkingDirectory}", Environment.CurrentDirectory);
+        // TODO: Check why this is called in a row
+        this.LogStartupFailureAnalysisHeader();
+        this.LogFailureValidationStep(ex.ValidationStep);
+        this.LogFailureAttempts(ex.Attempts);
+        this.LogFailureFinalError(GetCleanErrorMessage(ex));
+        this.LogFailureTimestamp(DateTime.UtcNow);
+        this.LogFailureMachine(Environment.MachineName);
+        this.LogFailureProcessId(Environment.ProcessId);
+        this.LogFailureWorkingDirectory(Environment.CurrentDirectory);
 
         if (ex is PortConflictException portEx)
         {
-            this._logger.LogCritical("   Port Conflicts:");
+            this.LogFailurePortConflictsHeader();
             foreach (var conflict in portEx.Conflicts)
             {
-                this._logger.LogCritical(
-                    "     - {Service} on port {Port}: {Details}",
-                    conflict.Service,
-                    conflict.Port,
-                    conflict.ConflictDetails
-                );
+                this.LogFailurePortConflict(conflict.Service, conflict.Port, conflict.ConflictDetails);
             }
         }
 
         // Only show detailed stack trace in debug mode
         if (this._isDebugLoggingEnabled && ex.InnerException != null)
         {
-            this._logger.LogCritical("   Exception Details: {ExceptionDetails}", ex.InnerException.ToString());
+            this.LogFailureExceptionDetails(ex.InnerException.ToString());
         }
     }
 
     private void LogUnexpectedFailureDetails(Exception ex)
     {
-        this._logger.LogCritical("🚨 UNEXPECTED FAILURE ANALYSIS:");
-        this._logger.LogCritical("   Exception Type: {ExceptionType}", ex.GetType().FullName);
-        this._logger.LogCritical("   Error Message: {ErrorMessage}", ex.Message);
-        this._logger.LogCritical("   Timestamp: {Timestamp:yyyy-MM-dd HH:mm:ss.fff} UTC", DateTime.UtcNow);
-        this._logger.LogCritical("   Machine: {MachineName}", Environment.MachineName);
-        this._logger.LogCritical("   Process ID: {ProcessId}", Environment.ProcessId);
+        this.LogUnexpectedFailureAnalysisHeader();
+        this.LogUnexpectedFailureExceptionType(ex.GetType().FullName ?? "Unknown");
+        this.LogUnexpectedFailureErrorMessage(ex.Message);
+        this.LogFailureTimestamp(DateTime.UtcNow);
+        this.LogFailureMachine(Environment.MachineName);
+        this.LogFailureProcessId(Environment.ProcessId);
 
         // Only show stack trace and inner exceptions in debug mode
         if (this._isDebugLoggingEnabled)
         {
-            this._logger.LogCritical("   Stack Trace: {StackTrace}", ex.StackTrace);
+            this.LogUnexpectedFailureStackTrace(ex.StackTrace ?? "No stack trace available");
 
             var innerEx = ex.InnerException;
             var depth = 1;
             while (innerEx != null && depth <= 5)
             {
-                this._logger.LogCritical(
-                    "   Inner Exception {Depth}: {InnerExceptionType} - {InnerMessage}",
+                this.LogUnexpectedFailureInnerExceptionWithDepth(
                     depth,
-                    innerEx.GetType().FullName,
+                    innerEx.GetType().FullName ?? "Unknown",
                     innerEx.Message
                 );
                 innerEx = innerEx.InnerException;
@@ -607,6 +512,7 @@ public class StartupService : IHostedService
     /// </summary>
     private static string GetUserFriendlyErrorMessage(Exception ex)
     {
+        // TODO: do we really need this?
         return ex switch
         {
             UnauthorizedAccessException =>
@@ -620,6 +526,384 @@ public class StartupService : IHostedService
             _ => ex.Message,
         };
     }
+
+    #region Logging
+
+    [LoggerMessage(4001, LogLevel.Information, "🛡️ Initiating startup sequence")]
+    private partial void LogStartupSequenceInitiated();
+
+    [LoggerMessage(4002, LogLevel.Information, "✅ All startup validations completed successfully")]
+    private partial void LogStartupValidationsCompleted();
+
+    [LoggerMessage(
+        4003,
+        LogLevel.Critical,
+        "🚨 STARTUP VALIDATION FAILED: {ErrorMessage}. Application will terminate to prevent undefined behavior."
+    )]
+    private partial void LogStartupValidationFailed(string errorMessage);
+
+    [LoggerMessage(
+        4004,
+        LogLevel.Critical,
+        "🚨 STARTUP VALIDATION FAILED: {ErrorMessage}. Application will terminate to prevent undefined behavior."
+    )]
+    private partial void LogStartupValidationFailedWithException(string errorMessage, Exception exception);
+
+    [LoggerMessage(
+        4005,
+        LogLevel.Critical,
+        "🚨 UNEXPECTED STARTUP FAILURE: {ErrorMessage}. Application will terminate."
+    )]
+    private partial void LogUnexpectedStartupFailure(string errorMessage);
+
+    [LoggerMessage(
+        4006,
+        LogLevel.Critical,
+        "🚨 UNEXPECTED STARTUP FAILURE: {ErrorMessage}. Application will terminate."
+    )]
+    private partial void LogUnexpectedStartupFailureWithException(string errorMessage, Exception exception);
+
+    [LoggerMessage(4007, LogLevel.Information, "🛡️ Graceful shutdown initiated")]
+    private partial void LogGracefulShutdownInitiated();
+
+    [LoggerMessage(4008, LogLevel.Information, "🔄 {ValidationStep}: Attempt {AttemptNumber}/{MaxAttempts}")]
+    private partial void LogValidationAttempt(string validationStep, int attemptNumber, int maxAttempts);
+
+    [LoggerMessage(4009, LogLevel.Information, "🔄 {ValidationStep}: Attempt {AttemptNumber}/{MaxAttempts}")]
+    private partial void LogValidationAttemptWithException(
+        string validationStep,
+        int attemptNumber,
+        int maxAttempts,
+        Exception exception
+    );
+
+    [LoggerMessage(
+        4010,
+        LogLevel.Warning,
+        "⚠️  {ValidationStep} failed (attempt {AttemptNumber}/{MaxAttempts}): {ErrorMessage}"
+    )]
+    private partial void LogValidationFailedWithRetry(
+        string validationStep,
+        int attemptNumber,
+        int maxAttempts,
+        string errorMessage
+    );
+
+    [LoggerMessage(
+        4011,
+        LogLevel.Warning,
+        "⚠️  {ValidationStep} failed (attempt {AttemptNumber}/{MaxAttempts}): {ErrorMessage}"
+    )]
+    private partial void LogValidationFailedWithRetryAndException(
+        string validationStep,
+        int attemptNumber,
+        int maxAttempts,
+        string errorMessage,
+        Exception exception
+    );
+
+    [LoggerMessage(4012, LogLevel.Error, "❌ {ValidationStep} failed after {MaxAttempts} attempts: {ErrorMessage}")]
+    private partial void LogValidationFailedFinal(string validationStep, int maxAttempts, string errorMessage);
+
+    [LoggerMessage(4013, LogLevel.Error, "❌ {ValidationStep} failed after {MaxAttempts} attempts: {ErrorMessage}")]
+    private partial void LogValidationFailedFinalWithException(
+        string validationStep,
+        int maxAttempts,
+        string errorMessage,
+        Exception exception
+    );
+
+    [LoggerMessage(4014, LogLevel.Warning, "🔌 Port {Port} ({ServiceName}) is already in use by another process")]
+    private partial void LogPortInUse(int port, string serviceName);
+
+    [LoggerMessage(4015, LogLevel.Information, "🔄 Waiting {DelaySeconds}s before retry...")]
+    private partial void LogRetryDelay(int delaySeconds);
+
+    [LoggerMessage(4016, LogLevel.Debug, "✅ Port {Port} ({ServiceName}) is available")]
+    private partial void LogPortAvailable(int port, string serviceName);
+
+    [LoggerMessage(4017, LogLevel.Error, "❌ Failed to check port {Port} ({ServiceName}): {ErrorMessage}")]
+    private partial void LogPortCheckFailed(int port, string serviceName, string errorMessage);
+
+    [LoggerMessage(4018, LogLevel.Error, "❌ Failed to check port {Port} ({ServiceName}): {ErrorMessage}")]
+    private partial void LogPortCheckFailedWithException(
+        int port,
+        string serviceName,
+        string errorMessage,
+        Exception exception
+    );
+
+    [LoggerMessage(4019, LogLevel.Warning, "🔌 {ServiceName} is not reachable ({Address}:{Port}): {ErrorMessage}")]
+    private partial void LogServiceNotReachable(string serviceName, string address, int port, string errorMessage);
+
+    [LoggerMessage(4020, LogLevel.Warning, "🔌 {ServiceName} is not reachable ({Address}): {ErrorMessage}")]
+    private partial void LogServiceNotReachableNoPort(string serviceName, string address, string errorMessage);
+
+    [LoggerMessage(4021, LogLevel.Debug, "✅ {ServiceName} is reachable ({Address}:{Port})")]
+    private partial void LogServiceReachable(string serviceName, string address, int port);
+
+    [LoggerMessage(
+        4022,
+        LogLevel.Warning,
+        "⚠️  Failed to check connectivity to {ServiceName} ({Address}:{Port}): {ErrorMessage}"
+    )]
+    private partial void LogConnectivityCheckFailed(string serviceName, string address, int port, string errorMessage);
+
+    [LoggerMessage(
+        4023,
+        LogLevel.Warning,
+        "⚠️  Failed to check connectivity to {ServiceName} ({Address}:{Port}): {ErrorMessage}"
+    )]
+    private partial void LogConnectivityCheckFailedWithException(
+        string serviceName,
+        string address,
+        int port,
+        string errorMessage,
+        Exception exception
+    );
+
+    [LoggerMessage(4024, LogLevel.Information, "📁 Created required directory: {Directory}")]
+    private partial void LogDirectoryCreated(string directory);
+
+    [LoggerMessage(4025, LogLevel.Debug, "✅ Directory {Directory} is accessible and writable")]
+    private partial void LogDirectoryAccessible(string directory);
+
+    [LoggerMessage(4026, LogLevel.Error, "❌ Directory {Directory} is not accessible or writable")]
+    private partial void LogDirectoryNotAccessible(string directory, Exception exception);
+
+    [LoggerMessage(4027, LogLevel.Error, "❌ Directory {Directory} is not accessible or writable: {ErrorMessage}")]
+    private partial void LogDirectoryNotAccessibleWithMessage(string directory, string errorMessage);
+
+    [LoggerMessage(4028, LogLevel.Critical, "🚨 STARTUP FAILURE ANALYSIS:")]
+    private partial void LogStartupFailureAnalysisHeader();
+
+    [LoggerMessage(4029, LogLevel.Critical, "   Validation Step: {ValidationStep}")]
+    private partial void LogFailureValidationStep(string validationStep);
+
+    [LoggerMessage(4030, LogLevel.Critical, "   Attempts Made: {Attempts}")]
+    private partial void LogFailureAttempts(int attempts);
+
+    [LoggerMessage(4031, LogLevel.Critical, "   Final Error: {ErrorMessage}")]
+    private partial void LogFailureFinalError(string errorMessage);
+
+    [LoggerMessage(4032, LogLevel.Critical, "   Timestamp: {Timestamp:yyyy-MM-dd HH:mm:ss.fff} UTC")]
+    private partial void LogFailureTimestamp(DateTime timestamp);
+
+    [LoggerMessage(4033, LogLevel.Critical, "   Machine: {MachineName}")]
+    private partial void LogFailureMachine(string machineName);
+
+    [LoggerMessage(4034, LogLevel.Critical, "   Process ID: {ProcessId}")]
+    private partial void LogFailureProcessId(int processId);
+
+    [LoggerMessage(4035, LogLevel.Critical, "   Working Directory: {WorkingDirectory}")]
+    private partial void LogFailureWorkingDirectory(string workingDirectory);
+
+    [LoggerMessage(4036, LogLevel.Critical, "   Port Conflicts:")]
+    private partial void LogFailurePortConflictsHeader();
+
+    [LoggerMessage(4037, LogLevel.Critical, "     - {Service} on port {Port}: {ConflictDetails}")]
+    private partial void LogFailurePortConflict(string service, int port, string conflictDetails);
+
+    [LoggerMessage(4038, LogLevel.Critical, "   Exception Details: {ExceptionDetails}")]
+    private partial void LogFailureExceptionDetails(string exceptionDetails);
+
+    [LoggerMessage(4039, LogLevel.Critical, "🚨 UNEXPECTED FAILURE ANALYSIS:")]
+    private partial void LogUnexpectedFailureAnalysisHeader();
+
+    [LoggerMessage(4040, LogLevel.Critical, "   Exception Type: {ExceptionType}")]
+    private partial void LogUnexpectedFailureExceptionType(string exceptionType);
+
+    [LoggerMessage(4041, LogLevel.Critical, "   Error Message: {ErrorMessage}")]
+    private partial void LogUnexpectedFailureErrorMessage(string errorMessage);
+
+    [LoggerMessage(4042, LogLevel.Critical, "   Stack Trace: {StackTrace}")]
+    private partial void LogUnexpectedFailureStackTrace(string stackTrace);
+
+    [LoggerMessage(4043, LogLevel.Critical, "   Inner Exception {Depth}: {InnerExceptionType} - {InnerMessage}")]
+    private partial void LogUnexpectedFailureInnerExceptionWithDepth(
+        int depth,
+        string innerExceptionType,
+        string innerMessage
+    );
+
+    [LoggerMessage(
+        4044,
+        LogLevel.Critical,
+        "💥 CRITICAL STARTUP FAILURE: {ValidationStep} failed after {MaxAttempts} attempts. Application cannot continue safely. Initiating graceful shutdown."
+    )]
+    private partial void LogCriticalStartupFailureWithException(
+        string validationStep,
+        int maxAttempts,
+        Exception exception
+    );
+
+    [LoggerMessage(
+        4045,
+        LogLevel.Critical,
+        "💥 CRITICAL STARTUP FAILURE: {ValidationStep} failed after {MaxAttempts} attempts. Application cannot continue safely. Reason: {ErrorMessage}"
+    )]
+    private partial void LogCriticalStartupFailure(string validationStep, int maxAttempts, string errorMessage);
+
+    [LoggerMessage(
+        4046,
+        LogLevel.Critical,
+        "💥 UNEXPECTED CRITICAL FAILURE: Application encountered an unexpected error during startup. Initiating emergency shutdown."
+    )]
+    private partial void LogUnexpectedCriticalFailureWithException(Exception exception);
+
+    [LoggerMessage(
+        4047,
+        LogLevel.Critical,
+        "💥 UNEXPECTED CRITICAL FAILURE: {ErrorMessage}. Application cannot continue safely."
+    )]
+    private partial void LogUnexpectedCriticalFailure(string errorMessage);
+
+    [LoggerMessage(4048, LogLevel.Information, "🔄 {OperationName}: Attempt {Attempt}/{MaxAttempts}")]
+    private partial void LogOperationAttempt(string operationName, int attempt, int maxAttempts);
+
+    [LoggerMessage(4049, LogLevel.Information, "✅ {OperationName}: Succeeded on attempt {Attempt}")]
+    private partial void LogOperationSucceededOnRetry(string operationName, int attempt);
+
+    [LoggerMessage(
+        4050,
+        LogLevel.Warning,
+        "⚠️  {OperationName} failed (attempt {Attempt}/{MaxAttempts}): {ErrorMessage}"
+    )]
+    private partial void LogOperationFailedWithRetry(
+        string operationName,
+        int attempt,
+        int maxAttempts,
+        string errorMessage
+    );
+
+    [LoggerMessage(
+        4051,
+        LogLevel.Warning,
+        "⚠️  {OperationName} failed (attempt {Attempt}/{MaxAttempts}): {ErrorMessage}"
+    )]
+    private partial void LogOperationFailedWithRetryAndException(
+        string operationName,
+        int attempt,
+        int maxAttempts,
+        string errorMessage,
+        Exception exception
+    );
+
+    [LoggerMessage(4052, LogLevel.Error, "❌ {OperationName} failed after {MaxAttempts} attempts: {ErrorMessage}")]
+    private partial void LogOperationFailedFinal(string operationName, int maxAttempts, string errorMessage);
+
+    [LoggerMessage(4053, LogLevel.Error, "❌ {OperationName} failed after {MaxAttempts} attempts: {ErrorMessage}")]
+    private partial void LogOperationFailedFinalWithException(
+        string operationName,
+        int maxAttempts,
+        string errorMessage,
+        Exception exception
+    );
+
+    [LoggerMessage(
+        4054,
+        LogLevel.Warning,
+        "⚠️  {OperationName}: Attempt {Attempt}/{MaxAttempts} failed. Retrying in {DelayMs} ms. Error: {ErrorMessage}"
+    )]
+    private partial void LogOperationFailedWithRetryAndDelay(
+        string operationName,
+        int attempt,
+        int maxAttempts,
+        int delayMs,
+        string errorMessage
+    );
+
+    [LoggerMessage(
+        4055,
+        LogLevel.Warning,
+        "⚠️  {OperationName}: Attempt {Attempt}/{MaxAttempts} failed. Retrying in {DelayMs} ms. Error: {ErrorMessage}"
+    )]
+    private partial void LogOperationFailedWithRetryAndDelayAndException(
+        string operationName,
+        int attempt,
+        int maxAttempts,
+        int delayMs,
+        string errorMessage,
+        Exception exception
+    );
+
+    [LoggerMessage(
+        4056,
+        LogLevel.Error,
+        "❌ {OperationName}: Final attempt {Attempt}/{MaxAttempts} failed. Operation cannot be completed."
+    )]
+    private partial void LogOperationFinalFailureWithException(
+        string operationName,
+        int attempt,
+        int maxAttempts,
+        Exception exception
+    );
+
+    [LoggerMessage(
+        4057,
+        LogLevel.Error,
+        "❌ {OperationName}: Final attempt {Attempt}/{MaxAttempts} failed. Operation cannot be completed. Error: {ErrorType} - {ErrorMessage}"
+    )]
+    private partial void LogOperationFinalFailure(
+        string operationName,
+        int attempt,
+        int maxAttempts,
+        string errorType,
+        string errorMessage
+    );
+
+    [LoggerMessage(4058, LogLevel.Error, "❌ Failed to check port availability for {ServiceName} on port {Port}")]
+    private partial void LogPortAvailabilityCheckFailedWithException(string serviceName, int port, Exception exception);
+
+    [LoggerMessage(
+        4059,
+        LogLevel.Error,
+        "❌ Failed to check port availability for {ServiceName} on port {Port}: {ErrorType} - {ErrorMessage}"
+    )]
+    private partial void LogPortAvailabilityCheckFailed(
+        string serviceName,
+        int port,
+        string errorType,
+        string errorMessage
+    );
+
+    [LoggerMessage(4060, LogLevel.Warning, "❌ Failed to verify {ServiceName} connectivity ({Address}:{Port})")]
+    private partial void LogConnectivityVerificationFailedWithException(
+        string serviceName,
+        string address,
+        int port,
+        Exception exception
+    );
+
+    [LoggerMessage(
+        4061,
+        LogLevel.Warning,
+        "❌ Failed to verify {ServiceName} connectivity ({Address}:{Port}): {ErrorMessage}"
+    )]
+    private partial void LogConnectivityVerificationFailed(
+        string serviceName,
+        string address,
+        int port,
+        string errorMessage
+    );
+
+    [LoggerMessage(
+        4062,
+        LogLevel.Warning,
+        "🚫 Port conflict detected: {ServiceName} port {Port} is in use. {ConflictDetails}"
+    )]
+    private partial void LogPortConflictDetected(string serviceName, int port, string conflictDetails);
+
+    [LoggerMessage(4063, LogLevel.Information, "🔄 Alternative port found for {ServiceName}: {AlternativePort}")]
+    private partial void LogAlternativePortFound(string serviceName, int alternativePort);
+
+    [LoggerMessage(4064, LogLevel.Warning, "⏱️  {ServiceName} connectivity check timed out ({Address}:{Port})")]
+    private partial void LogConnectivityCheckTimedOut(string serviceName, string address, int port);
+
+    [LoggerMessage(4065, LogLevel.Debug, "✅ {ServiceName} connectivity verified ({Address}:{Port})")]
+    private partial void LogConnectivityVerified(string serviceName, string address, int port);
+
+    #endregion
 }
 
 /// <summary>

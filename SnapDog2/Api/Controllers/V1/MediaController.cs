@@ -18,7 +18,7 @@ using SnapDog2.Server.Features.Zones.Queries;
 [Route("api/v1/media")]
 [Authorize]
 [Produces("application/json")]
-public class MediaController : ControllerBase
+public partial class MediaController : ControllerBase
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<MediaController> _logger;
@@ -46,7 +46,7 @@ public class MediaController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting media sources");
+            this.LogGettingMediaSources();
 
             // For now, return static media sources based on typical SnapDog configuration
             var mediaSources = new List<MediaSourceInfo>
@@ -61,7 +61,7 @@ public class MediaController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error getting media sources");
+            this.LogErrorGettingMediaSources(ex);
             return this.StatusCode(
                 500,
                 ApiResponse<List<MediaSourceInfo>>.CreateError("INTERNAL_ERROR", "Internal server error")
@@ -87,13 +87,13 @@ public class MediaController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting playlists - Page: {Page}, PageSize: {PageSize}", page, pageSize);
+            this.LogGettingPlaylists(page, pageSize);
 
             var handler =
                 this._serviceProvider.GetService<Server.Features.Zones.Handlers.GetAllPlaylistsQueryHandler>();
             if (handler == null)
             {
-                this._logger.LogError("GetAllPlaylistsQueryHandler not found in DI container");
+                this.LogCriticalHandlerNotFound("GetAllPlaylistsQueryHandler");
                 return this.StatusCode(
                     500,
                     ApiResponse<PaginatedResponse<PlaylistInfo>>.CreateError(
@@ -130,7 +130,7 @@ public class MediaController : ControllerBase
                 return this.Ok(ApiResponse<PaginatedResponse<PlaylistInfo>>.CreateSuccess(paginatedResponse));
             }
 
-            this._logger.LogWarning("Failed to get playlists: {Error}", result.ErrorMessage);
+            this.LogFailedToGetPlaylists(result.ErrorMessage);
             return this.StatusCode(
                 500,
                 ApiResponse<PaginatedResponse<PlaylistInfo>>.CreateError(
@@ -141,7 +141,7 @@ public class MediaController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error getting playlists");
+            this.LogErrorGettingPlaylists(ex);
             return this.StatusCode(
                 500,
                 ApiResponse<PaginatedResponse<PlaylistInfo>>.CreateError("INTERNAL_ERROR", "Internal server error")
@@ -166,13 +166,13 @@ public class MediaController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting playlist {PlaylistIdOrIndex}", playlistIdOrIndex);
+            this.LogGettingPlaylist(playlistIdOrIndex);
 
             var handler =
                 this._serviceProvider.GetService<Server.Features.Zones.Handlers.GetPlaylistTracksQueryHandler>();
             if (handler == null)
             {
-                this._logger.LogError("GetPlaylistTracksQueryHandler not found in DI container");
+                this.LogCriticalHandlerNotFound("GetPlaylistTracksQueryHandler");
                 return this.StatusCode(
                     500,
                     ApiResponse<PlaylistWithTracks>.CreateError(
@@ -247,7 +247,7 @@ public class MediaController : ControllerBase
                 return this.Ok(ApiResponse<PlaylistWithTracks>.CreateSuccess(fallbackPlaylist));
             }
 
-            this._logger.LogWarning("Playlist {PlaylistIdOrIndex} not found", playlistIdOrIndex);
+            this.LogPlaylistNotFound(playlistIdOrIndex);
             return this.NotFound(
                 ApiResponse<PlaylistWithTracks>.CreateError(
                     "PLAYLIST_NOT_FOUND",
@@ -257,7 +257,7 @@ public class MediaController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error getting playlist {PlaylistIdOrIndex}", playlistIdOrIndex);
+            this.LogErrorGettingPlaylist(playlistIdOrIndex, ex);
             return this.StatusCode(
                 500,
                 ApiResponse<PlaylistWithTracks>.CreateError("INTERNAL_ERROR", "Internal server error")
@@ -286,18 +286,13 @@ public class MediaController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug(
-                "Getting tracks for playlist {PlaylistIdOrIndex} - Page: {Page}, PageSize: {PageSize}",
-                playlistIdOrIndex,
-                page,
-                pageSize
-            );
+            this.LogGettingPlaylistTracks(playlistIdOrIndex, page, pageSize);
 
             var handler =
                 this._serviceProvider.GetService<Server.Features.Zones.Handlers.GetPlaylistTracksQueryHandler>();
             if (handler == null)
             {
-                this._logger.LogError("GetPlaylistTracksQueryHandler not found in DI container");
+                this.LogCriticalHandlerNotFound("GetPlaylistTracksQueryHandler");
                 return this.StatusCode(
                     500,
                     ApiResponse<PaginatedResponse<TrackInfo>>.CreateError(
@@ -345,7 +340,7 @@ public class MediaController : ControllerBase
                 return this.Ok(ApiResponse<PaginatedResponse<TrackInfo>>.CreateSuccess(paginatedResponse));
             }
 
-            this._logger.LogWarning("Playlist {PlaylistIdOrIndex} not found", playlistIdOrIndex);
+            this.LogPlaylistNotFound(playlistIdOrIndex);
             return this.NotFound(
                 ApiResponse<PaginatedResponse<TrackInfo>>.CreateError(
                     "PLAYLIST_NOT_FOUND",
@@ -355,7 +350,7 @@ public class MediaController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error getting tracks for playlist {PlaylistIdOrIndex}", playlistIdOrIndex);
+            this.LogErrorGettingPlaylistTracks(playlistIdOrIndex, ex);
             return this.StatusCode(
                 500,
                 ApiResponse<PaginatedResponse<TrackInfo>>.CreateError("INTERNAL_ERROR", "Internal server error")
@@ -380,7 +375,7 @@ public class MediaController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting track {TrackId}", trackId);
+            this.LogGettingTrack(trackId);
 
             // For now, we don't have a direct track lookup handler
             // This would typically query the media source (Subsonic/Navidrome) directly
@@ -403,8 +398,74 @@ public class MediaController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error getting track {TrackId}", trackId);
+            this.LogErrorGettingTrack(trackId, ex);
             return this.StatusCode(500, ApiResponse<TrackInfo>.CreateError("INTERNAL_ERROR", "Internal server error"));
         }
     }
+
+    #region Logging
+
+    // ARCHITECTURAL PROBLEM - This should never happen in production
+    [LoggerMessage(
+        2401,
+        LogLevel.Critical,
+        "🚨 CRITICAL: Handler {HandlerType} not found in DI container - This is a configuration BUG!"
+    )]
+    private partial void LogCriticalHandlerNotFound(string handlerType);
+
+    // Media Sources (2410-2419)
+    [LoggerMessage(2410, LogLevel.Debug, "Getting media sources")]
+    private partial void LogGettingMediaSources();
+
+    [LoggerMessage(2411, LogLevel.Error, "Error getting media sources")]
+    private partial void LogErrorGettingMediaSources(Exception exception);
+
+    // Playlists (2420-2429)
+    [LoggerMessage(2420, LogLevel.Debug, "Getting playlists - Page: {Page}, PageSize: {PageSize}")]
+    private partial void LogGettingPlaylists(int page, int pageSize);
+
+    [LoggerMessage(2421, LogLevel.Warning, "Failed to get playlists: {Error}")]
+    private partial void LogFailedToGetPlaylists(string? error);
+
+    [LoggerMessage(2422, LogLevel.Error, "Error getting playlists")]
+    private partial void LogErrorGettingPlaylists(Exception exception);
+
+    // Specific Playlist (2430-2439)
+    [LoggerMessage(2430, LogLevel.Debug, "Getting playlist {PlaylistId}")]
+    private partial void LogGettingPlaylist(string playlistId);
+
+    [LoggerMessage(2431, LogLevel.Warning, "Failed to get playlist {PlaylistId}: {Error}")]
+    private partial void LogFailedToGetPlaylist(string playlistId, string error);
+
+    [LoggerMessage(2433, LogLevel.Warning, "Playlist {PlaylistId} not found")]
+    private partial void LogPlaylistNotFound(string playlistId);
+
+    [LoggerMessage(2432, LogLevel.Error, "Error getting playlist {PlaylistId}")]
+    private partial void LogErrorGettingPlaylist(string playlistId, Exception exception);
+
+    // Playlist Tracks (2440-2449)
+    [LoggerMessage(
+        2440,
+        LogLevel.Debug,
+        "Getting tracks for playlist {PlaylistId} - Page: {Page}, PageSize: {PageSize}"
+    )]
+    private partial void LogGettingPlaylistTracks(string playlistId, int page, int pageSize);
+
+    [LoggerMessage(2441, LogLevel.Warning, "Failed to get tracks for playlist {PlaylistId}: {Error}")]
+    private partial void LogFailedToGetPlaylistTracks(string playlistId, string error);
+
+    [LoggerMessage(2442, LogLevel.Error, "Error getting tracks for playlist {PlaylistId}")]
+    private partial void LogErrorGettingPlaylistTracks(string playlistId, Exception exception);
+
+    // Track Details (2450-2459)
+    [LoggerMessage(2450, LogLevel.Debug, "Getting track {TrackId}")]
+    private partial void LogGettingTrack(string trackId);
+
+    [LoggerMessage(2451, LogLevel.Warning, "Failed to get track {TrackId}: {Error}")]
+    private partial void LogFailedToGetTrack(string trackId, string error);
+
+    [LoggerMessage(2452, LogLevel.Error, "Error getting track {TrackId}")]
+    private partial void LogErrorGettingTrack(string trackId, Exception exception);
+
+    #endregion
 }

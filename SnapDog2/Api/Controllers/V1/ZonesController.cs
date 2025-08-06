@@ -19,7 +19,7 @@ using SnapDog2.Server.Features.Zones.Queries;
 [Route("api/v1/zones")]
 [Authorize]
 [Produces("application/json")]
-public class ZonesController : ControllerBase
+public partial class ZonesController : ControllerBase
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<ZonesController> _logger;
@@ -53,17 +53,12 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug(
-                "Getting zones list - Page: {Page}, PageSize: {PageSize}, SortBy: {SortBy}",
-                page,
-                pageSize,
-                sortBy
-            );
+            this.LogGettingZonesList(page, pageSize, sortBy);
 
             var handler = this._serviceProvider.GetService<Server.Features.Zones.Handlers.GetAllZonesQueryHandler>();
             if (handler == null)
             {
-                this._logger.LogError("GetAllZonesQueryHandler not found in DI container");
+                this.LogGetAllZonesQueryHandlerNotFound();
                 return this.StatusCode(
                     500,
                     ApiResponse<PaginatedResponse<ZoneInfo>>.CreateError(
@@ -100,7 +95,7 @@ public class ZonesController : ControllerBase
                 return this.Ok(ApiResponse<PaginatedResponse<ZoneInfo>>.CreateSuccess(paginatedResponse));
             }
 
-            this._logger.LogWarning("Failed to get zones: {Error}", result.ErrorMessage);
+            this.LogFailedToGetZones(result.ErrorMessage);
             return this.StatusCode(
                 500,
                 ApiResponse<PaginatedResponse<ZoneInfo>>.CreateError(
@@ -111,7 +106,7 @@ public class ZonesController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error getting zones");
+            this.LogErrorGettingZones(ex);
             return this.StatusCode(
                 500,
                 ApiResponse<PaginatedResponse<ZoneInfo>>.CreateError("INTERNAL_ERROR", "Internal server error")
@@ -136,12 +131,12 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting zone {ZoneId}", zoneId);
+            this.LogGettingZone(zoneId);
 
             var handler = this._serviceProvider.GetService<Server.Features.Zones.Handlers.GetZoneStateQueryHandler>();
             if (handler == null)
             {
-                this._logger.LogError("GetZoneStateQueryHandler not found in DI container");
+                this.LogGetZoneStateQueryHandlerNotFound();
                 return this.StatusCode(
                     500,
                     ApiResponse<ZoneState>.CreateError("HANDLER_NOT_FOUND", "Zone state handler not available")
@@ -155,12 +150,12 @@ public class ZonesController : ControllerBase
                 return this.Ok(ApiResponse<ZoneState>.CreateSuccess(result.Value));
             }
 
-            this._logger.LogWarning("Zone {ZoneId} not found", zoneId);
+            this.LogZoneNotFound(zoneId);
             return this.NotFound(ApiResponse<ZoneState>.CreateError("ZONE_NOT_FOUND", $"Zone {zoneId} not found"));
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error getting zone {ZoneId}", zoneId);
+            this.LogErrorGettingZone(ex, zoneId);
             return this.StatusCode(500, ApiResponse<ZoneState>.CreateError("INTERNAL_ERROR", "Internal server error"));
         }
     }
@@ -202,12 +197,12 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Playing zone {ZoneId}", zoneId);
+            this.LogPlayingZone(zoneId);
 
             var handler = this._serviceProvider.GetService<Server.Features.Zones.Handlers.PlayCommandHandler>();
             if (handler == null)
             {
-                this._logger.LogError("PlayCommandHandler not found in DI container");
+                this.LogPlayCommandHandlerNotFound();
                 return this.StatusCode(500, ApiResponse.CreateError("HANDLER_NOT_FOUND", "Play handler not available"));
             }
 
@@ -226,12 +221,12 @@ public class ZonesController : ControllerBase
                 return this.Accepted(ApiResponse.CreateSuccess());
             }
 
-            this._logger.LogWarning("Failed to play zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            this.LogFailedToPlayZone(zoneId, result.ErrorMessage);
             return this.BadRequest(ApiResponse.CreateError("PLAY_ERROR", result.ErrorMessage ?? "Failed to play zone"));
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error playing zone {ZoneId}", zoneId);
+            this.LogErrorPlayingZone(ex, zoneId);
             return this.StatusCode(500, ApiResponse.CreateError("INTERNAL_ERROR", "Internal server error"));
         }
     }
@@ -253,12 +248,12 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Pausing zone {ZoneId}", zoneId);
+            this.LogPausingZone(zoneId);
 
             var handler = this._serviceProvider.GetService<Server.Features.Zones.Handlers.PauseCommandHandler>();
             if (handler == null)
             {
-                this._logger.LogError("PauseCommandHandler not found in DI container");
+                this.LogPauseCommandHandlerNotFound();
                 return this.StatusCode(
                     500,
                     ApiResponse.CreateError("HANDLER_NOT_FOUND", "Pause handler not available")
@@ -274,14 +269,14 @@ public class ZonesController : ControllerBase
                 return this.Accepted(ApiResponse.CreateSuccess());
             }
 
-            this._logger.LogWarning("Failed to pause zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            this.LogFailedToPauseZone(zoneId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse.CreateError("PAUSE_ERROR", result.ErrorMessage ?? "Failed to pause zone")
             );
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error pausing zone {ZoneId}", zoneId);
+            this.LogErrorPausingZone(ex, zoneId);
             return this.StatusCode(500, ApiResponse.CreateError("INTERNAL_ERROR", "Internal server error"));
         }
     }
@@ -303,12 +298,12 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Stopping zone {ZoneId}", zoneId);
+            this.LogStoppingZone(zoneId);
 
             var handler = this._serviceProvider.GetService<Server.Features.Zones.Handlers.StopCommandHandler>();
             if (handler == null)
             {
-                this._logger.LogError("StopCommandHandler not found in DI container");
+                this.LogStopCommandHandlerNotFound();
                 return this.StatusCode(500, ApiResponse.CreateError("HANDLER_NOT_FOUND", "Stop handler not available"));
             }
 
@@ -321,12 +316,12 @@ public class ZonesController : ControllerBase
                 return this.Accepted(ApiResponse.CreateSuccess());
             }
 
-            this._logger.LogWarning("Failed to stop zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            this.LogFailedToStopZone(zoneId, result.ErrorMessage);
             return this.BadRequest(ApiResponse.CreateError("STOP_ERROR", result.ErrorMessage ?? "Failed to stop zone"));
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error stopping zone {ZoneId}", zoneId);
+            this.LogErrorStoppingZone(ex, zoneId);
             return this.StatusCode(500, ApiResponse.CreateError("INTERNAL_ERROR", "Internal server error"));
         }
     }
@@ -348,12 +343,12 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Next track for zone {ZoneId}", zoneId);
+            this.LogNextTrack(zoneId);
 
             var handler = this._serviceProvider.GetService<Server.Features.Zones.Handlers.NextTrackCommandHandler>();
             if (handler == null)
             {
-                this._logger.LogError("NextTrackCommandHandler not found in DI container");
+                this.LogNextTrackCommandHandlerNotFound();
                 return this.StatusCode(
                     500,
                     ApiResponse.CreateError("HANDLER_NOT_FOUND", "Next track handler not available")
@@ -369,18 +364,14 @@ public class ZonesController : ControllerBase
                 return this.Accepted(ApiResponse.CreateSuccess());
             }
 
-            this._logger.LogWarning(
-                "Failed to go to next track for zone {ZoneId}: {Error}",
-                zoneId,
-                result.ErrorMessage
-            );
+            this.LogFailedToNextTrack(zoneId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse.CreateError("NEXT_TRACK_ERROR", result.ErrorMessage ?? "Failed to go to next track")
             );
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error going to next track for zone {ZoneId}", zoneId);
+            this.LogErrorNextTrack(ex, zoneId);
             return this.StatusCode(500, ApiResponse.CreateError("INTERNAL_ERROR", "Internal server error"));
         }
     }
@@ -402,13 +393,13 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Previous track for zone {ZoneId}", zoneId);
+            this.LogPreviousTrack(zoneId);
 
             var handler =
                 this._serviceProvider.GetService<Server.Features.Zones.Handlers.PreviousTrackCommandHandler>();
             if (handler == null)
             {
-                this._logger.LogError("PreviousTrackCommandHandler not found in DI container");
+                this.LogPreviousTrackCommandHandlerNotFound();
                 return this.StatusCode(
                     500,
                     ApiResponse.CreateError("HANDLER_NOT_FOUND", "Previous track handler not available")
@@ -424,18 +415,14 @@ public class ZonesController : ControllerBase
                 return this.Accepted(ApiResponse.CreateSuccess());
             }
 
-            this._logger.LogWarning(
-                "Failed to go to previous track for zone {ZoneId}: {Error}",
-                zoneId,
-                result.ErrorMessage
-            );
+            this.LogFailedToPreviousTrack(zoneId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse.CreateError("PREVIOUS_TRACK_ERROR", result.ErrorMessage ?? "Failed to go to previous track")
             );
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error going to previous track for zone {ZoneId}", zoneId);
+            this.LogErrorPreviousTrack(ex, zoneId);
             return this.StatusCode(500, ApiResponse.CreateError("INTERNAL_ERROR", "Internal server error"));
         }
     }
@@ -460,12 +447,12 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Setting track {TrackIndex} for zone {ZoneId}", request.Index, zoneId);
+            this.LogSettingTrack(request.Index, zoneId);
 
             var handler = this._serviceProvider.GetService<Server.Features.Zones.Handlers.SetTrackCommandHandler>();
             if (handler == null)
             {
-                this._logger.LogError("SetTrackCommandHandler not found in DI container");
+                this.LogSetTrackCommandHandlerNotFound();
                 return this.StatusCode(
                     500,
                     ApiResponse.CreateError("HANDLER_NOT_FOUND", "Set track handler not available")
@@ -486,14 +473,14 @@ public class ZonesController : ControllerBase
                 return this.Accepted(ApiResponse.CreateSuccess());
             }
 
-            this._logger.LogWarning("Failed to set track for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            this.LogFailedToSetTrack(zoneId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse.CreateError("SET_TRACK_ERROR", result.ErrorMessage ?? "Failed to set track")
             );
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error setting track for zone {ZoneId}", zoneId);
+            this.LogErrorSettingTrack(ex, zoneId);
             return this.StatusCode(500, ApiResponse.CreateError("INTERNAL_ERROR", "Internal server error"));
         }
     }
@@ -518,17 +505,12 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug(
-                "Setting playlist for zone {ZoneId} - ID: {PlaylistId}, Index: {PlaylistIndex}",
-                zoneId,
-                request.Id,
-                request.Index
-            );
+            this.LogSettingPlaylist(zoneId, request.Id, request.Index);
 
             var handler = this._serviceProvider.GetService<Server.Features.Zones.Handlers.SetPlaylistCommandHandler>();
             if (handler == null)
             {
-                this._logger.LogError("SetPlaylistCommandHandler not found in DI container");
+                this.LogSetPlaylistCommandHandlerNotFound();
                 return this.StatusCode(
                     500,
                     ApiResponse.CreateError("HANDLER_NOT_FOUND", "Set playlist handler not available")
@@ -550,14 +532,14 @@ public class ZonesController : ControllerBase
                 return this.Accepted(ApiResponse.CreateSuccess());
             }
 
-            this._logger.LogWarning("Failed to set playlist for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            this.LogFailedToSetPlaylist(zoneId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse.CreateError("SET_PLAYLIST_ERROR", result.ErrorMessage ?? "Failed to set playlist")
             );
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error setting playlist for zone {ZoneId}", zoneId);
+            this.LogErrorSettingPlaylist(ex, zoneId);
             return this.StatusCode(500, ApiResponse.CreateError("INTERNAL_ERROR", "Internal server error"));
         }
     }
@@ -584,13 +566,13 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Setting volume {Volume} for zone {ZoneId}", request.Level, zoneId);
+            this.LogSettingVolume(request.Level, zoneId);
 
             var handler =
                 this._serviceProvider.GetService<Server.Features.Zones.Handlers.SetZoneVolumeCommandHandler>();
             if (handler == null)
             {
-                this._logger.LogError("SetZoneVolumeCommandHandler not found in DI container");
+                this.LogSetZoneVolumeCommandHandlerNotFound();
                 return this.StatusCode(
                     500,
                     ApiResponse<VolumeResponse>.CreateError("HANDLER_NOT_FOUND", "Volume handler not available")
@@ -611,14 +593,14 @@ public class ZonesController : ControllerBase
                 return this.Ok(ApiResponse<VolumeResponse>.CreateSuccess(new VolumeResponse(request.Level)));
             }
 
-            this._logger.LogWarning("Failed to set volume for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            this.LogFailedToSetVolume(zoneId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse<VolumeResponse>.CreateError("VOLUME_ERROR", result.ErrorMessage ?? "Failed to set volume")
             );
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error setting volume for zone {ZoneId}", zoneId);
+            this.LogErrorSettingVolume(ex, zoneId);
             return this.StatusCode(
                 500,
                 ApiResponse<VolumeResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
@@ -643,12 +625,12 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting volume for zone {ZoneId}", zoneId);
+            this.LogGettingVolume(zoneId);
 
             var handler = this._serviceProvider.GetService<Server.Features.Zones.Handlers.GetZoneVolumeQueryHandler>();
             if (handler == null)
             {
-                this._logger.LogError("GetZoneVolumeQueryHandler not found in DI container");
+                this.LogGetZoneVolumeQueryHandlerNotFound();
                 return this.StatusCode(
                     500,
                     ApiResponse<VolumeResponse>.CreateError("HANDLER_NOT_FOUND", "Volume query handler not available")
@@ -662,14 +644,14 @@ public class ZonesController : ControllerBase
                 return this.Ok(ApiResponse<VolumeResponse>.CreateSuccess(new VolumeResponse(result.Value)));
             }
 
-            this._logger.LogWarning("Failed to get volume for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            this.LogFailedToGetVolume(zoneId, result.ErrorMessage);
             return this.NotFound(
                 ApiResponse<VolumeResponse>.CreateError("ZONE_NOT_FOUND", result.ErrorMessage ?? "Zone not found")
             );
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error getting volume for zone {ZoneId}", zoneId);
+            this.LogErrorGettingVolume(ex, zoneId);
             return this.StatusCode(
                 500,
                 ApiResponse<VolumeResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
@@ -697,7 +679,7 @@ public class ZonesController : ControllerBase
         try
         {
             var step = request?.Step ?? 5;
-            this._logger.LogDebug("Increasing volume by {Step} for zone {ZoneId}", step, zoneId);
+            this.LogIncreasingVolume(step, zoneId);
 
             // First get current volume
             var volumeHandler =
@@ -755,7 +737,7 @@ public class ZonesController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error increasing volume for zone {ZoneId}", zoneId);
+            this.LogErrorIncreasingVolume(ex, zoneId);
             return this.StatusCode(
                 500,
                 ApiResponse<VolumeResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
@@ -783,7 +765,7 @@ public class ZonesController : ControllerBase
         try
         {
             var step = request?.Step ?? 5;
-            this._logger.LogDebug("Decreasing volume by {Step} for zone {ZoneId}", step, zoneId);
+            this.LogDecreasingVolume(step, zoneId);
 
             // First get current volume
             var volumeHandler =
@@ -841,7 +823,7 @@ public class ZonesController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error decreasing volume for zone {ZoneId}", zoneId);
+            this.LogErrorDecreasingVolume(ex, zoneId);
             return this.StatusCode(
                 500,
                 ApiResponse<VolumeResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
@@ -871,12 +853,12 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Setting mute {Enabled} for zone {ZoneId}", request.Enabled, zoneId);
+            this.LogSettingMute(request.Enabled, zoneId);
 
             var handler = this._serviceProvider.GetService<Server.Features.Zones.Handlers.SetZoneMuteCommandHandler>();
             if (handler == null)
             {
-                this._logger.LogError("SetZoneMuteCommandHandler not found in DI container");
+                this.LogSetZoneMuteCommandHandlerNotFound();
                 return this.StatusCode(
                     500,
                     ApiResponse<MuteResponse>.CreateError("HANDLER_NOT_FOUND", "Mute handler not available")
@@ -897,14 +879,14 @@ public class ZonesController : ControllerBase
                 return this.Ok(ApiResponse<MuteResponse>.CreateSuccess(new MuteResponse(request.Enabled)));
             }
 
-            this._logger.LogWarning("Failed to set mute for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            this.LogFailedToSetMute(zoneId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse<MuteResponse>.CreateError("MUTE_ERROR", result.ErrorMessage ?? "Failed to set mute")
             );
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error setting mute for zone {ZoneId}", zoneId);
+            this.LogErrorSettingMute(ex, zoneId);
             return this.StatusCode(
                 500,
                 ApiResponse<MuteResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
@@ -929,12 +911,12 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting mute state for zone {ZoneId}", zoneId);
+            this.LogGettingMute(zoneId);
 
             var handler = this._serviceProvider.GetService<Server.Features.Zones.Handlers.GetZoneStateQueryHandler>();
             if (handler == null)
             {
-                this._logger.LogError("GetZoneStateQueryHandler not found in DI container");
+                this.LogGetZoneStateQueryHandlerNotFound();
                 return this.StatusCode(
                     500,
                     ApiResponse<MuteResponse>.CreateError("HANDLER_NOT_FOUND", "Zone state handler not available")
@@ -948,14 +930,14 @@ public class ZonesController : ControllerBase
                 return this.Ok(ApiResponse<MuteResponse>.CreateSuccess(new MuteResponse(result.Value.Mute)));
             }
 
-            this._logger.LogWarning("Failed to get mute state for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            this.LogFailedToGetMute(zoneId, result.ErrorMessage);
             return this.NotFound(
                 ApiResponse<MuteResponse>.CreateError("ZONE_NOT_FOUND", result.ErrorMessage ?? "Zone not found")
             );
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error getting mute state for zone {ZoneId}", zoneId);
+            this.LogErrorGettingMute(ex, zoneId);
             return this.StatusCode(
                 500,
                 ApiResponse<MuteResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
@@ -980,13 +962,13 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Toggling mute for zone {ZoneId}", zoneId);
+            this.LogTogglingMute(zoneId);
 
             var handler =
                 this._serviceProvider.GetService<Server.Features.Zones.Handlers.ToggleZoneMuteCommandHandler>();
             if (handler == null)
             {
-                this._logger.LogError("ToggleZoneMuteCommandHandler not found in DI container");
+                this.LogToggleZoneMuteCommandHandlerNotFound();
                 return this.StatusCode(
                     500,
                     ApiResponse<MuteResponse>.CreateError("HANDLER_NOT_FOUND", "Toggle mute handler not available")
@@ -1020,7 +1002,7 @@ public class ZonesController : ControllerBase
                 return this.Ok(ApiResponse<MuteResponse>.CreateSuccess(new MuteResponse(true)));
             }
 
-            this._logger.LogWarning("Failed to toggle mute for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            this.LogFailedToToggleMute(zoneId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse<MuteResponse>.CreateError(
                     "TOGGLE_MUTE_ERROR",
@@ -1030,7 +1012,7 @@ public class ZonesController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error toggling mute for zone {ZoneId}", zoneId);
+            this.LogErrorTogglingMute(ex, zoneId);
             return this.StatusCode(
                 500,
                 ApiResponse<MuteResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
@@ -1060,13 +1042,13 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Setting track repeat {Enabled} for zone {ZoneId}", request.Enabled, zoneId);
+            this.LogSettingTrackRepeat(request.Enabled, zoneId);
 
             var handler =
                 this._serviceProvider.GetService<Server.Features.Zones.Handlers.SetTrackRepeatCommandHandler>();
             if (handler == null)
             {
-                this._logger.LogError("SetTrackRepeatCommandHandler not found in DI container");
+                this.LogSetTrackRepeatCommandHandlerNotFound();
                 return this.StatusCode(
                     500,
                     ApiResponse<TrackRepeatResponse>.CreateError(
@@ -1092,11 +1074,7 @@ public class ZonesController : ControllerBase
                 );
             }
 
-            this._logger.LogWarning(
-                "Failed to set track repeat for zone {ZoneId}: {Error}",
-                zoneId,
-                result.ErrorMessage
-            );
+            this.LogFailedToSetTrackRepeat(zoneId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse<TrackRepeatResponse>.CreateError(
                     "TRACK_REPEAT_ERROR",
@@ -1106,7 +1084,7 @@ public class ZonesController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error setting track repeat for zone {ZoneId}", zoneId);
+            this.LogErrorSettingTrackRepeat(ex, zoneId);
             return this.StatusCode(
                 500,
                 ApiResponse<TrackRepeatResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
@@ -1131,13 +1109,13 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Toggling track repeat for zone {ZoneId}", zoneId);
+            this.LogTogglingTrackRepeat(zoneId);
 
             var handler =
                 this._serviceProvider.GetService<Server.Features.Zones.Handlers.ToggleTrackRepeatCommandHandler>();
             if (handler == null)
             {
-                this._logger.LogError("ToggleTrackRepeatCommandHandler not found in DI container");
+                this.LogToggleTrackRepeatCommandHandlerNotFound();
                 return this.StatusCode(
                     500,
                     ApiResponse<TrackRepeatResponse>.CreateError(
@@ -1175,11 +1153,7 @@ public class ZonesController : ControllerBase
                 return this.Ok(ApiResponse<TrackRepeatResponse>.CreateSuccess(new TrackRepeatResponse(true)));
             }
 
-            this._logger.LogWarning(
-                "Failed to toggle track repeat for zone {ZoneId}: {Error}",
-                zoneId,
-                result.ErrorMessage
-            );
+            this.LogFailedToToggleTrackRepeat(zoneId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse<TrackRepeatResponse>.CreateError(
                     "TOGGLE_TRACK_REPEAT_ERROR",
@@ -1189,7 +1163,7 @@ public class ZonesController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error toggling track repeat for zone {ZoneId}", zoneId);
+            this.LogErrorTogglingTrackRepeat(ex, zoneId);
             return this.StatusCode(
                 500,
                 ApiResponse<TrackRepeatResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
@@ -1219,13 +1193,13 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Setting playlist repeat {Enabled} for zone {ZoneId}", request.Enabled, zoneId);
+            this.LogSettingPlaylistRepeat(request.Enabled, zoneId);
 
             var handler =
                 this._serviceProvider.GetService<Server.Features.Zones.Handlers.SetPlaylistRepeatCommandHandler>();
             if (handler == null)
             {
-                this._logger.LogError("SetPlaylistRepeatCommandHandler not found in DI container");
+                this.LogSetPlaylistRepeatCommandHandlerNotFound();
                 return this.StatusCode(
                     500,
                     ApiResponse<PlaylistRepeatResponse>.CreateError(
@@ -1251,11 +1225,7 @@ public class ZonesController : ControllerBase
                 );
             }
 
-            this._logger.LogWarning(
-                "Failed to set playlist repeat for zone {ZoneId}: {Error}",
-                zoneId,
-                result.ErrorMessage
-            );
+            this.LogFailedToSetPlaylistRepeat(zoneId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse<PlaylistRepeatResponse>.CreateError(
                     "PLAYLIST_REPEAT_ERROR",
@@ -1265,7 +1235,7 @@ public class ZonesController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error setting playlist repeat for zone {ZoneId}", zoneId);
+            this.LogErrorSettingPlaylistRepeat(ex, zoneId);
             return this.StatusCode(
                 500,
                 ApiResponse<PlaylistRepeatResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
@@ -1290,13 +1260,13 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Toggling playlist repeat for zone {ZoneId}", zoneId);
+            this.LogTogglingPlaylistRepeat(zoneId);
 
             var handler =
                 this._serviceProvider.GetService<Server.Features.Zones.Handlers.TogglePlaylistRepeatCommandHandler>();
             if (handler == null)
             {
-                this._logger.LogError("TogglePlaylistRepeatCommandHandler not found in DI container");
+                this.LogTogglePlaylistRepeatCommandHandlerNotFound();
                 return this.StatusCode(
                     500,
                     ApiResponse<PlaylistRepeatResponse>.CreateError(
@@ -1334,11 +1304,7 @@ public class ZonesController : ControllerBase
                 return this.Ok(ApiResponse<PlaylistRepeatResponse>.CreateSuccess(new PlaylistRepeatResponse(true)));
             }
 
-            this._logger.LogWarning(
-                "Failed to toggle playlist repeat for zone {ZoneId}: {Error}",
-                zoneId,
-                result.ErrorMessage
-            );
+            this.LogFailedToTogglePlaylistRepeat(zoneId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse<PlaylistRepeatResponse>.CreateError(
                     "TOGGLE_PLAYLIST_REPEAT_ERROR",
@@ -1348,7 +1314,7 @@ public class ZonesController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error toggling playlist repeat for zone {ZoneId}", zoneId);
+            this.LogErrorTogglingPlaylistRepeat(ex, zoneId);
             return this.StatusCode(
                 500,
                 ApiResponse<PlaylistRepeatResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
@@ -1378,13 +1344,13 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Setting playlist shuffle {Enabled} for zone {ZoneId}", request.Enabled, zoneId);
+            this.LogSettingPlaylistShuffle(request.Enabled, zoneId);
 
             var handler =
                 this._serviceProvider.GetService<Server.Features.Zones.Handlers.SetPlaylistShuffleCommandHandler>();
             if (handler == null)
             {
-                this._logger.LogError("SetPlaylistShuffleCommandHandler not found in DI container");
+                this.LogSetPlaylistShuffleCommandHandlerNotFound();
                 return this.StatusCode(
                     500,
                     ApiResponse<PlaylistShuffleResponse>.CreateError(
@@ -1410,11 +1376,7 @@ public class ZonesController : ControllerBase
                 );
             }
 
-            this._logger.LogWarning(
-                "Failed to set playlist shuffle for zone {ZoneId}: {Error}",
-                zoneId,
-                result.ErrorMessage
-            );
+            this.LogFailedToSetPlaylistShuffle(zoneId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse<PlaylistShuffleResponse>.CreateError(
                     "PLAYLIST_SHUFFLE_ERROR",
@@ -1424,7 +1386,7 @@ public class ZonesController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error setting playlist shuffle for zone {ZoneId}", zoneId);
+            this.LogErrorSettingPlaylistShuffle(ex, zoneId);
             return this.StatusCode(
                 500,
                 ApiResponse<PlaylistShuffleResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
@@ -1449,13 +1411,13 @@ public class ZonesController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Toggling playlist shuffle for zone {ZoneId}", zoneId);
+            this.LogTogglingPlaylistShuffle(zoneId);
 
             var handler =
                 this._serviceProvider.GetService<Server.Features.Zones.Handlers.TogglePlaylistShuffleCommandHandler>();
             if (handler == null)
             {
-                this._logger.LogError("TogglePlaylistShuffleCommandHandler not found in DI container");
+                this.LogTogglePlaylistShuffleCommandHandlerNotFound();
                 return this.StatusCode(
                     500,
                     ApiResponse<PlaylistShuffleResponse>.CreateError(
@@ -1493,11 +1455,7 @@ public class ZonesController : ControllerBase
                 return this.Ok(ApiResponse<PlaylistShuffleResponse>.CreateSuccess(new PlaylistShuffleResponse(true)));
             }
 
-            this._logger.LogWarning(
-                "Failed to toggle playlist shuffle for zone {ZoneId}: {Error}",
-                zoneId,
-                result.ErrorMessage
-            );
+            this.LogFailedToTogglePlaylistShuffle(zoneId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse<PlaylistShuffleResponse>.CreateError(
                     "TOGGLE_PLAYLIST_SHUFFLE_ERROR",
@@ -1507,11 +1465,424 @@ public class ZonesController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error toggling playlist shuffle for zone {ZoneId}", zoneId);
+            this.LogErrorTogglingPlaylistShuffle(ex, zoneId);
             return this.StatusCode(
                 500,
                 ApiResponse<PlaylistShuffleResponse>.CreateError("INTERNAL_ERROR", "Internal server error")
             );
         }
     }
+
+    // LoggerMessage definitions for high-performance logging (ID range: 2809-2892)
+
+    // Handler not found errors - critical architectural issues
+    [LoggerMessage(
+        EventId = 2809,
+        Level = LogLevel.Error,
+        Message = "GetAllZonesQueryHandler not found in DI container"
+    )]
+    private partial void LogGetAllZonesQueryHandlerNotFound();
+
+    [LoggerMessage(
+        EventId = 2810,
+        Level = LogLevel.Error,
+        Message = "GetZoneStateQueryHandler not found in DI container"
+    )]
+    private partial void LogGetZoneStateQueryHandlerNotFound();
+
+    [LoggerMessage(EventId = 2811, Level = LogLevel.Error, Message = "PlayCommandHandler not found in DI container")]
+    private partial void LogPlayCommandHandlerNotFound();
+
+    [LoggerMessage(EventId = 2812, Level = LogLevel.Error, Message = "PauseCommandHandler not found in DI container")]
+    private partial void LogPauseCommandHandlerNotFound();
+
+    [LoggerMessage(EventId = 2813, Level = LogLevel.Error, Message = "StopCommandHandler not found in DI container")]
+    private partial void LogStopCommandHandlerNotFound();
+
+    [LoggerMessage(
+        EventId = 2814,
+        Level = LogLevel.Error,
+        Message = "NextTrackCommandHandler not found in DI container"
+    )]
+    private partial void LogNextTrackCommandHandlerNotFound();
+
+    [LoggerMessage(
+        EventId = 2815,
+        Level = LogLevel.Error,
+        Message = "PreviousTrackCommandHandler not found in DI container"
+    )]
+    private partial void LogPreviousTrackCommandHandlerNotFound();
+
+    [LoggerMessage(
+        EventId = 2816,
+        Level = LogLevel.Error,
+        Message = "SetTrackCommandHandler not found in DI container"
+    )]
+    private partial void LogSetTrackCommandHandlerNotFound();
+
+    [LoggerMessage(
+        EventId = 2817,
+        Level = LogLevel.Error,
+        Message = "SetPlaylistCommandHandler not found in DI container"
+    )]
+    private partial void LogSetPlaylistCommandHandlerNotFound();
+
+    [LoggerMessage(
+        EventId = 2818,
+        Level = LogLevel.Error,
+        Message = "SetZoneVolumeCommandHandler not found in DI container"
+    )]
+    private partial void LogSetZoneVolumeCommandHandlerNotFound();
+
+    [LoggerMessage(
+        EventId = 2819,
+        Level = LogLevel.Error,
+        Message = "GetZoneVolumeQueryHandler not found in DI container"
+    )]
+    private partial void LogGetZoneVolumeQueryHandlerNotFound();
+
+    [LoggerMessage(
+        EventId = 2820,
+        Level = LogLevel.Error,
+        Message = "SetZoneMuteCommandHandler not found in DI container"
+    )]
+    private partial void LogSetZoneMuteCommandHandlerNotFound();
+
+    [LoggerMessage(
+        EventId = 2821,
+        Level = LogLevel.Error,
+        Message = "ToggleZoneMuteCommandHandler not found in DI container"
+    )]
+    private partial void LogToggleZoneMuteCommandHandlerNotFound();
+
+    [LoggerMessage(
+        EventId = 2822,
+        Level = LogLevel.Error,
+        Message = "SetTrackRepeatCommandHandler not found in DI container"
+    )]
+    private partial void LogSetTrackRepeatCommandHandlerNotFound();
+
+    [LoggerMessage(
+        EventId = 2823,
+        Level = LogLevel.Error,
+        Message = "ToggleTrackRepeatCommandHandler not found in DI container"
+    )]
+    private partial void LogToggleTrackRepeatCommandHandlerNotFound();
+
+    [LoggerMessage(
+        EventId = 2824,
+        Level = LogLevel.Error,
+        Message = "SetPlaylistRepeatCommandHandler not found in DI container"
+    )]
+    private partial void LogSetPlaylistRepeatCommandHandlerNotFound();
+
+    [LoggerMessage(
+        EventId = 2825,
+        Level = LogLevel.Error,
+        Message = "TogglePlaylistRepeatCommandHandler not found in DI container"
+    )]
+    private partial void LogTogglePlaylistRepeatCommandHandlerNotFound();
+
+    [LoggerMessage(
+        EventId = 2826,
+        Level = LogLevel.Error,
+        Message = "SetPlaylistShuffleCommandHandler not found in DI container"
+    )]
+    private partial void LogSetPlaylistShuffleCommandHandlerNotFound();
+
+    [LoggerMessage(
+        EventId = 2827,
+        Level = LogLevel.Error,
+        Message = "TogglePlaylistShuffleCommandHandler not found in DI container"
+    )]
+    private partial void LogTogglePlaylistShuffleCommandHandlerNotFound();
+
+    // Zone listing and state operations
+    [LoggerMessage(
+        EventId = 2828,
+        Level = LogLevel.Debug,
+        Message = "Getting zones list - Page: {page}, PageSize: {pageSize}, SortBy: {sortBy}"
+    )]
+    private partial void LogGettingZonesList(int page, int pageSize, string sortBy);
+
+    [LoggerMessage(EventId = 2829, Level = LogLevel.Warning, Message = "Failed to get zones: {error}")]
+    private partial void LogFailedToGetZones(string? error);
+
+    [LoggerMessage(EventId = 2830, Level = LogLevel.Error, Message = "Error getting zones")]
+    private partial void LogErrorGettingZones(Exception ex);
+
+    [LoggerMessage(EventId = 2831, Level = LogLevel.Debug, Message = "Getting zone {zoneId}")]
+    private partial void LogGettingZone(int zoneId);
+
+    [LoggerMessage(EventId = 2832, Level = LogLevel.Warning, Message = "Zone {zoneId} not found")]
+    private partial void LogZoneNotFound(int zoneId);
+
+    [LoggerMessage(EventId = 2833, Level = LogLevel.Error, Message = "Error getting zone {zoneId}")]
+    private partial void LogErrorGettingZone(Exception ex, int zoneId);
+
+    // Playback control operations
+    [LoggerMessage(EventId = 2834, Level = LogLevel.Debug, Message = "Playing zone {zoneId}")]
+    private partial void LogPlayingZone(int zoneId);
+
+    [LoggerMessage(EventId = 2835, Level = LogLevel.Warning, Message = "Failed to play zone {zoneId}: {error}")]
+    private partial void LogFailedToPlayZone(int zoneId, string? error);
+
+    [LoggerMessage(EventId = 2836, Level = LogLevel.Error, Message = "Error playing zone {zoneId}")]
+    private partial void LogErrorPlayingZone(Exception ex, int zoneId);
+
+    [LoggerMessage(EventId = 2837, Level = LogLevel.Debug, Message = "Pausing zone {zoneId}")]
+    private partial void LogPausingZone(int zoneId);
+
+    [LoggerMessage(EventId = 2838, Level = LogLevel.Warning, Message = "Failed to pause zone {zoneId}: {error}")]
+    private partial void LogFailedToPauseZone(int zoneId, string? error);
+
+    [LoggerMessage(EventId = 2839, Level = LogLevel.Error, Message = "Error pausing zone {zoneId}")]
+    private partial void LogErrorPausingZone(Exception ex, int zoneId);
+
+    [LoggerMessage(EventId = 2840, Level = LogLevel.Debug, Message = "Stopping zone {zoneId}")]
+    private partial void LogStoppingZone(int zoneId);
+
+    [LoggerMessage(EventId = 2841, Level = LogLevel.Warning, Message = "Failed to stop zone {zoneId}: {error}")]
+    private partial void LogFailedToStopZone(int zoneId, string? error);
+
+    [LoggerMessage(EventId = 2842, Level = LogLevel.Error, Message = "Error stopping zone {zoneId}")]
+    private partial void LogErrorStoppingZone(Exception ex, int zoneId);
+
+    // Track navigation operations
+    [LoggerMessage(EventId = 2843, Level = LogLevel.Debug, Message = "Next track for zone {zoneId}")]
+    private partial void LogNextTrack(int zoneId);
+
+    [LoggerMessage(
+        EventId = 2844,
+        Level = LogLevel.Warning,
+        Message = "Failed to go to next track for zone {zoneId}: {error}"
+    )]
+    private partial void LogFailedToNextTrack(int zoneId, string? error);
+
+    [LoggerMessage(EventId = 2845, Level = LogLevel.Error, Message = "Error going to next track for zone {zoneId}")]
+    private partial void LogErrorNextTrack(Exception ex, int zoneId);
+
+    [LoggerMessage(EventId = 2846, Level = LogLevel.Debug, Message = "Previous track for zone {zoneId}")]
+    private partial void LogPreviousTrack(int zoneId);
+
+    [LoggerMessage(
+        EventId = 2847,
+        Level = LogLevel.Warning,
+        Message = "Failed to go to previous track for zone {zoneId}: {error}"
+    )]
+    private partial void LogFailedToPreviousTrack(int zoneId, string? error);
+
+    [LoggerMessage(EventId = 2848, Level = LogLevel.Error, Message = "Error going to previous track for zone {zoneId}")]
+    private partial void LogErrorPreviousTrack(Exception ex, int zoneId);
+
+    // Track and playlist setting operations
+    [LoggerMessage(EventId = 2849, Level = LogLevel.Debug, Message = "Setting track {trackIndex} for zone {zoneId}")]
+    private partial void LogSettingTrack(int trackIndex, int zoneId);
+
+    [LoggerMessage(
+        EventId = 2850,
+        Level = LogLevel.Warning,
+        Message = "Failed to set track for zone {zoneId}: {error}"
+    )]
+    private partial void LogFailedToSetTrack(int zoneId, string? error);
+
+    [LoggerMessage(EventId = 2851, Level = LogLevel.Error, Message = "Error setting track for zone {zoneId}")]
+    private partial void LogErrorSettingTrack(Exception ex, int zoneId);
+
+    [LoggerMessage(
+        EventId = 2852,
+        Level = LogLevel.Debug,
+        Message = "Setting playlist for zone {zoneId} - ID: {playlistId}, Index: {playlistIndex}"
+    )]
+    private partial void LogSettingPlaylist(int zoneId, string? playlistId, int? playlistIndex);
+
+    [LoggerMessage(
+        EventId = 2853,
+        Level = LogLevel.Warning,
+        Message = "Failed to set playlist for zone {zoneId}: {error}"
+    )]
+    private partial void LogFailedToSetPlaylist(int zoneId, string? error);
+
+    [LoggerMessage(EventId = 2854, Level = LogLevel.Error, Message = "Error setting playlist for zone {zoneId}")]
+    private partial void LogErrorSettingPlaylist(Exception ex, int zoneId);
+
+    // Volume operations
+    [LoggerMessage(EventId = 2855, Level = LogLevel.Debug, Message = "Setting volume {level} for zone {zoneId}")]
+    private partial void LogSettingVolume(int level, int zoneId);
+
+    [LoggerMessage(
+        EventId = 2856,
+        Level = LogLevel.Warning,
+        Message = "Failed to set volume for zone {zoneId}: {error}"
+    )]
+    private partial void LogFailedToSetVolume(int zoneId, string? error);
+
+    [LoggerMessage(EventId = 2857, Level = LogLevel.Error, Message = "Error setting volume for zone {zoneId}")]
+    private partial void LogErrorSettingVolume(Exception ex, int zoneId);
+
+    [LoggerMessage(EventId = 2858, Level = LogLevel.Debug, Message = "Getting volume for zone {zoneId}")]
+    private partial void LogGettingVolume(int zoneId);
+
+    [LoggerMessage(
+        EventId = 2859,
+        Level = LogLevel.Warning,
+        Message = "Failed to get volume for zone {zoneId}: {error}"
+    )]
+    private partial void LogFailedToGetVolume(int zoneId, string? error);
+
+    [LoggerMessage(EventId = 2860, Level = LogLevel.Error, Message = "Error getting volume for zone {zoneId}")]
+    private partial void LogErrorGettingVolume(Exception ex, int zoneId);
+
+    [LoggerMessage(EventId = 2861, Level = LogLevel.Debug, Message = "Increasing volume by {step} for zone {zoneId}")]
+    private partial void LogIncreasingVolume(int step, int zoneId);
+
+    [LoggerMessage(EventId = 2862, Level = LogLevel.Error, Message = "Error increasing volume for zone {zoneId}")]
+    private partial void LogErrorIncreasingVolume(Exception ex, int zoneId);
+
+    [LoggerMessage(EventId = 2863, Level = LogLevel.Debug, Message = "Decreasing volume by {step} for zone {zoneId}")]
+    private partial void LogDecreasingVolume(int step, int zoneId);
+
+    [LoggerMessage(EventId = 2864, Level = LogLevel.Error, Message = "Error decreasing volume for zone {zoneId}")]
+    private partial void LogErrorDecreasingVolume(Exception ex, int zoneId);
+
+    // Mute operations
+    [LoggerMessage(EventId = 2865, Level = LogLevel.Debug, Message = "Setting mute {enabled} for zone {zoneId}")]
+    private partial void LogSettingMute(bool enabled, int zoneId);
+
+    [LoggerMessage(EventId = 2866, Level = LogLevel.Warning, Message = "Failed to set mute for zone {zoneId}: {error}")]
+    private partial void LogFailedToSetMute(int zoneId, string? error);
+
+    [LoggerMessage(EventId = 2867, Level = LogLevel.Error, Message = "Error setting mute for zone {zoneId}")]
+    private partial void LogErrorSettingMute(Exception ex, int zoneId);
+
+    [LoggerMessage(EventId = 2868, Level = LogLevel.Debug, Message = "Getting mute state for zone {zoneId}")]
+    private partial void LogGettingMute(int zoneId);
+
+    [LoggerMessage(
+        EventId = 2869,
+        Level = LogLevel.Warning,
+        Message = "Failed to get mute state for zone {zoneId}: {error}"
+    )]
+    private partial void LogFailedToGetMute(int zoneId, string? error);
+
+    [LoggerMessage(EventId = 2870, Level = LogLevel.Error, Message = "Error getting mute state for zone {zoneId}")]
+    private partial void LogErrorGettingMute(Exception ex, int zoneId);
+
+    [LoggerMessage(EventId = 2871, Level = LogLevel.Debug, Message = "Toggling mute for zone {zoneId}")]
+    private partial void LogTogglingMute(int zoneId);
+
+    [LoggerMessage(
+        EventId = 2872,
+        Level = LogLevel.Warning,
+        Message = "Failed to toggle mute for zone {zoneId}: {error}"
+    )]
+    private partial void LogFailedToToggleMute(int zoneId, string? error);
+
+    [LoggerMessage(EventId = 2873, Level = LogLevel.Error, Message = "Error toggling mute for zone {zoneId}")]
+    private partial void LogErrorTogglingMute(Exception ex, int zoneId);
+
+    // Track repeat operations
+    [LoggerMessage(
+        EventId = 2874,
+        Level = LogLevel.Debug,
+        Message = "Setting track repeat {enabled} for zone {zoneId}"
+    )]
+    private partial void LogSettingTrackRepeat(bool enabled, int zoneId);
+
+    [LoggerMessage(
+        EventId = 2875,
+        Level = LogLevel.Warning,
+        Message = "Failed to set track repeat for zone {zoneId}: {error}"
+    )]
+    private partial void LogFailedToSetTrackRepeat(int zoneId, string? error);
+
+    [LoggerMessage(EventId = 2876, Level = LogLevel.Error, Message = "Error setting track repeat for zone {zoneId}")]
+    private partial void LogErrorSettingTrackRepeat(Exception ex, int zoneId);
+
+    [LoggerMessage(EventId = 2877, Level = LogLevel.Debug, Message = "Toggling track repeat for zone {zoneId}")]
+    private partial void LogTogglingTrackRepeat(int zoneId);
+
+    [LoggerMessage(
+        EventId = 2878,
+        Level = LogLevel.Warning,
+        Message = "Failed to toggle track repeat for zone {zoneId}: {error}"
+    )]
+    private partial void LogFailedToToggleTrackRepeat(int zoneId, string? error);
+
+    [LoggerMessage(EventId = 2879, Level = LogLevel.Error, Message = "Error toggling track repeat for zone {zoneId}")]
+    private partial void LogErrorTogglingTrackRepeat(Exception ex, int zoneId);
+
+    // Playlist repeat operations
+    [LoggerMessage(
+        EventId = 2880,
+        Level = LogLevel.Debug,
+        Message = "Setting playlist repeat {enabled} for zone {zoneId}"
+    )]
+    private partial void LogSettingPlaylistRepeat(bool enabled, int zoneId);
+
+    [LoggerMessage(
+        EventId = 2881,
+        Level = LogLevel.Warning,
+        Message = "Failed to set playlist repeat for zone {zoneId}: {error}"
+    )]
+    private partial void LogFailedToSetPlaylistRepeat(int zoneId, string? error);
+
+    [LoggerMessage(EventId = 2882, Level = LogLevel.Error, Message = "Error setting playlist repeat for zone {zoneId}")]
+    private partial void LogErrorSettingPlaylistRepeat(Exception ex, int zoneId);
+
+    [LoggerMessage(EventId = 2883, Level = LogLevel.Debug, Message = "Toggling playlist repeat for zone {zoneId}")]
+    private partial void LogTogglingPlaylistRepeat(int zoneId);
+
+    [LoggerMessage(
+        EventId = 2884,
+        Level = LogLevel.Warning,
+        Message = "Failed to toggle playlist repeat for zone {zoneId}: {error}"
+    )]
+    private partial void LogFailedToTogglePlaylistRepeat(int zoneId, string? error);
+
+    [LoggerMessage(
+        EventId = 2885,
+        Level = LogLevel.Error,
+        Message = "Error toggling playlist repeat for zone {zoneId}"
+    )]
+    private partial void LogErrorTogglingPlaylistRepeat(Exception ex, int zoneId);
+
+    // Playlist shuffle operations
+    [LoggerMessage(
+        EventId = 2886,
+        Level = LogLevel.Debug,
+        Message = "Setting playlist shuffle {enabled} for zone {zoneId}"
+    )]
+    private partial void LogSettingPlaylistShuffle(bool enabled, int zoneId);
+
+    [LoggerMessage(
+        EventId = 2887,
+        Level = LogLevel.Warning,
+        Message = "Failed to set playlist shuffle for zone {zoneId}: {error}"
+    )]
+    private partial void LogFailedToSetPlaylistShuffle(int zoneId, string? error);
+
+    [LoggerMessage(
+        EventId = 2888,
+        Level = LogLevel.Error,
+        Message = "Error setting playlist shuffle for zone {zoneId}"
+    )]
+    private partial void LogErrorSettingPlaylistShuffle(Exception ex, int zoneId);
+
+    [LoggerMessage(EventId = 2889, Level = LogLevel.Debug, Message = "Toggling playlist shuffle for zone {zoneId}")]
+    private partial void LogTogglingPlaylistShuffle(int zoneId);
+
+    [LoggerMessage(
+        EventId = 2890,
+        Level = LogLevel.Warning,
+        Message = "Failed to toggle playlist shuffle for zone {zoneId}: {error}"
+    )]
+    private partial void LogFailedToTogglePlaylistShuffle(int zoneId, string? error);
+
+    [LoggerMessage(
+        EventId = 2891,
+        Level = LogLevel.Error,
+        Message = "Error toggling playlist shuffle for zone {zoneId}"
+    )]
+    private partial void LogErrorTogglingPlaylistShuffle(Exception ex, int zoneId);
 }

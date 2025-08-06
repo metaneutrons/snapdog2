@@ -16,7 +16,7 @@ using SnapDog2.Server.Features.Global.Queries;
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
-public class GlobalStatusController : ControllerBase
+public partial class GlobalStatusController : ControllerBase
 {
     private readonly IMediator _mediator;
     private readonly ILogger<GlobalStatusController> _logger;
@@ -45,7 +45,7 @@ public class GlobalStatusController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting system status via CQRS mediator");
+            this.LogGettingSystemStatus();
 
             var query = new GetSystemStatusQuery();
             var result = await this._mediator.SendQueryAsync<GetSystemStatusQuery, Result<SystemStatus>>(
@@ -58,7 +58,7 @@ public class GlobalStatusController : ControllerBase
                 return this.Ok(ApiResponse<SystemStatus>.CreateSuccess(result.Value));
             }
 
-            this._logger.LogWarning("Failed to get system status: {Error}", result.ErrorMessage);
+            this.LogFailedToGetSystemStatus(result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse<SystemStatus>.CreateError(
                     "SYSTEM_STATUS_ERROR",
@@ -68,7 +68,7 @@ public class GlobalStatusController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Exception while getting system status");
+            this.LogExceptionGettingSystemStatus(ex);
             return this.StatusCode(
                 500,
                 ApiResponse<SystemStatus>.CreateError("INTERNAL_ERROR", "An internal server error occurred", ex.Message)
@@ -90,7 +90,7 @@ public class GlobalStatusController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting error status via CQRS mediator");
+            this.LogGettingErrorStatus();
 
             var query = new GetErrorStatusQuery();
             var result = await this._mediator.SendQueryAsync<GetErrorStatusQuery, Result<ErrorDetails?>>(
@@ -110,7 +110,7 @@ public class GlobalStatusController : ControllerBase
                 }
             }
 
-            this._logger.LogWarning("Failed to get error status: {Error}", result.ErrorMessage);
+            this.LogFailedToGetErrorStatus(result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse<ErrorDetails?>.CreateError(
                     "ERROR_STATUS_ERROR",
@@ -120,7 +120,7 @@ public class GlobalStatusController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Exception while getting error status");
+            this.LogExceptionGettingErrorStatus(ex);
             return this.StatusCode(
                 500,
                 ApiResponse<ErrorDetails?>.CreateError(
@@ -145,7 +145,7 @@ public class GlobalStatusController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting version info via CQRS mediator");
+            this.LogGettingVersionInfo();
 
             var query = new GetVersionInfoQuery();
             var result = await this._mediator.SendQueryAsync<GetVersionInfoQuery, Result<VersionDetails>>(
@@ -158,7 +158,7 @@ public class GlobalStatusController : ControllerBase
                 return this.Ok(ApiResponse<VersionDetails>.CreateSuccess(result.Value));
             }
 
-            this._logger.LogWarning("Failed to get version info: {Error}", result.ErrorMessage);
+            this.LogFailedToGetVersionInfo(result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse<VersionDetails>.CreateError(
                     "VERSION_INFO_ERROR",
@@ -168,7 +168,7 @@ public class GlobalStatusController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Exception while getting version info");
+            this.LogExceptionGettingVersionInfo(ex);
             return this.StatusCode(
                 500,
                 ApiResponse<VersionDetails>.CreateError(
@@ -193,7 +193,7 @@ public class GlobalStatusController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting server stats via CQRS mediator");
+            this.LogGettingServerStats();
 
             var query = new GetServerStatsQuery();
             var result = await this._mediator.SendQueryAsync<GetServerStatsQuery, Result<ServerStats>>(
@@ -206,7 +206,7 @@ public class GlobalStatusController : ControllerBase
                 return this.Ok(ApiResponse<ServerStats>.CreateSuccess(result.Value));
             }
 
-            this._logger.LogWarning("Failed to get server stats: {Error}", result.ErrorMessage);
+            this.LogFailedToGetServerStats(result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse<ServerStats>.CreateError(
                     "SERVER_STATS_ERROR",
@@ -216,11 +216,53 @@ public class GlobalStatusController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Exception while getting server stats");
+            this.LogExceptionGettingServerStats(ex);
             return this.StatusCode(
                 500,
                 ApiResponse<ServerStats>.CreateError("INTERNAL_ERROR", "An internal server error occurred", ex.Message)
             );
         }
     }
+
+    // LoggerMessage definitions for high-performance logging (ID range: 2784-2795)
+
+    // System status operations
+    [LoggerMessage(EventId = 2784, Level = LogLevel.Debug, Message = "Getting system status via CQRS mediator")]
+    private partial void LogGettingSystemStatus();
+
+    [LoggerMessage(EventId = 2785, Level = LogLevel.Warning, Message = "Failed to get system status: {error}")]
+    private partial void LogFailedToGetSystemStatus(string? error);
+
+    [LoggerMessage(EventId = 2786, Level = LogLevel.Error, Message = "Exception while getting system status")]
+    private partial void LogExceptionGettingSystemStatus(Exception ex);
+
+    // Error status operations
+    [LoggerMessage(EventId = 2787, Level = LogLevel.Debug, Message = "Getting error status via CQRS mediator")]
+    private partial void LogGettingErrorStatus();
+
+    [LoggerMessage(EventId = 2788, Level = LogLevel.Warning, Message = "Failed to get error status: {error}")]
+    private partial void LogFailedToGetErrorStatus(string? error);
+
+    [LoggerMessage(EventId = 2789, Level = LogLevel.Error, Message = "Exception while getting error status")]
+    private partial void LogExceptionGettingErrorStatus(Exception ex);
+
+    // Version info operations
+    [LoggerMessage(EventId = 2790, Level = LogLevel.Debug, Message = "Getting version info via CQRS mediator")]
+    private partial void LogGettingVersionInfo();
+
+    [LoggerMessage(EventId = 2791, Level = LogLevel.Warning, Message = "Failed to get version info: {error}")]
+    private partial void LogFailedToGetVersionInfo(string? error);
+
+    [LoggerMessage(EventId = 2792, Level = LogLevel.Error, Message = "Exception while getting version info")]
+    private partial void LogExceptionGettingVersionInfo(Exception ex);
+
+    // Server stats operations
+    [LoggerMessage(EventId = 2793, Level = LogLevel.Debug, Message = "Getting server stats via CQRS mediator")]
+    private partial void LogGettingServerStats();
+
+    [LoggerMessage(EventId = 2794, Level = LogLevel.Warning, Message = "Failed to get server stats: {error}")]
+    private partial void LogFailedToGetServerStats(string? error);
+
+    [LoggerMessage(EventId = 2795, Level = LogLevel.Error, Message = "Exception while getting server stats")]
+    private partial void LogExceptionGettingServerStats(Exception ex);
 }

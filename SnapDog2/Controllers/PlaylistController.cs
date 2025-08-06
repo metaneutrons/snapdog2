@@ -19,7 +19,7 @@ using SnapDog2.Server.Features.Zones.Queries;
 [ApiController]
 [Route("api/playlists")]
 [Produces("application/json")]
-public class PlaylistController : ControllerBase
+public partial class PlaylistController : ControllerBase
 {
     private readonly IMediator _mediator;
     private readonly ILogger<PlaylistController> _logger;
@@ -49,7 +49,7 @@ public class PlaylistController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting all playlists via CQRS mediator");
+            this.LogGettingAllPlaylists();
 
             var query = new GetAllPlaylistsQuery();
             var result = await this._mediator.SendQueryAsync<GetAllPlaylistsQuery, Result<List<PlaylistInfo>>>(
@@ -62,7 +62,7 @@ public class PlaylistController : ControllerBase
                 return this.Ok(ApiResponse<IEnumerable<PlaylistInfo>>.CreateSuccess(result.Value));
             }
 
-            this._logger.LogWarning("Failed to get all playlists: {Error}", result.ErrorMessage);
+            this.LogFailedToGetAllPlaylists(result.ErrorMessage);
             return this.StatusCode(
                 500,
                 ApiResponse<IEnumerable<PlaylistInfo>>.CreateError(
@@ -73,7 +73,7 @@ public class PlaylistController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error getting all playlists");
+            this.LogErrorGettingAllPlaylists(ex);
             return this.StatusCode(
                 500,
                 ApiResponse<IEnumerable<PlaylistInfo>>.CreateError(
@@ -102,7 +102,7 @@ public class PlaylistController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting tracks for playlist {PlaylistId} via CQRS mediator", playlistId);
+            this.LogGettingPlaylistTracksById(playlistId);
 
             var query = new GetPlaylistTracksQuery { PlaylistId = playlistId };
             var result = await this._mediator.SendQueryAsync<GetPlaylistTracksQuery, Result<List<TrackInfo>>>(
@@ -115,11 +115,7 @@ public class PlaylistController : ControllerBase
                 return this.Ok(ApiResponse<IEnumerable<TrackInfo>>.CreateSuccess(result.Value));
             }
 
-            this._logger.LogWarning(
-                "Failed to get tracks for playlist {PlaylistId}: {Error}",
-                playlistId,
-                result.ErrorMessage
-            );
+            this.LogFailedToGetPlaylistTracksById(playlistId, result.ErrorMessage);
             return this.NotFound(
                 ApiResponse<IEnumerable<TrackInfo>>.CreateError(
                     "PLAYLIST_NOT_FOUND",
@@ -129,7 +125,7 @@ public class PlaylistController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error getting tracks for playlist {PlaylistId}", playlistId);
+            this.LogErrorGettingPlaylistTracksById(ex, playlistId);
             return this.StatusCode(
                 500,
                 ApiResponse<IEnumerable<TrackInfo>>.CreateError(
@@ -158,7 +154,7 @@ public class PlaylistController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting tracks for playlist index {PlaylistIndex} via CQRS mediator", playlistIndex);
+            this.LogGettingPlaylistTracksByIndex(playlistIndex);
 
             var query = new GetPlaylistTracksQuery { PlaylistIndex = playlistIndex };
             var result = await this._mediator.SendQueryAsync<GetPlaylistTracksQuery, Result<List<TrackInfo>>>(
@@ -171,11 +167,7 @@ public class PlaylistController : ControllerBase
                 return this.Ok(ApiResponse<IEnumerable<TrackInfo>>.CreateSuccess(result.Value));
             }
 
-            this._logger.LogWarning(
-                "Failed to get tracks for playlist index {PlaylistIndex}: {Error}",
-                playlistIndex,
-                result.ErrorMessage
-            );
+            this.LogFailedToGetPlaylistTracksByIndex(playlistIndex, result.ErrorMessage);
             return this.NotFound(
                 ApiResponse<IEnumerable<TrackInfo>>.CreateError(
                     "PLAYLIST_NOT_FOUND",
@@ -185,7 +177,7 @@ public class PlaylistController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error getting tracks for playlist index {PlaylistIndex}", playlistIndex);
+            this.LogErrorGettingPlaylistTracksByIndex(ex, playlistIndex);
             return this.StatusCode(
                 500,
                 ApiResponse<IEnumerable<TrackInfo>>.CreateError(
@@ -196,4 +188,56 @@ public class PlaylistController : ControllerBase
             );
         }
     }
+
+    // LoggerMessage definitions for high-performance logging (ID range: 2796-2804)
+
+    // Playlist operations
+    [LoggerMessage(EventId = 2796, Level = LogLevel.Debug, Message = "Getting all playlists via CQRS mediator")]
+    private partial void LogGettingAllPlaylists();
+
+    [LoggerMessage(EventId = 2797, Level = LogLevel.Warning, Message = "Failed to get all playlists: {error}")]
+    private partial void LogFailedToGetAllPlaylists(string? error);
+
+    [LoggerMessage(EventId = 2798, Level = LogLevel.Error, Message = "Error getting all playlists")]
+    private partial void LogErrorGettingAllPlaylists(Exception ex);
+
+    // Playlist tracks by ID operations
+    [LoggerMessage(
+        EventId = 2799,
+        Level = LogLevel.Debug,
+        Message = "Getting tracks for playlist {playlistId} via CQRS mediator"
+    )]
+    private partial void LogGettingPlaylistTracksById(string playlistId);
+
+    [LoggerMessage(
+        EventId = 2800,
+        Level = LogLevel.Warning,
+        Message = "Failed to get tracks for playlist {playlistId}: {error}"
+    )]
+    private partial void LogFailedToGetPlaylistTracksById(string playlistId, string? error);
+
+    [LoggerMessage(EventId = 2801, Level = LogLevel.Error, Message = "Error getting tracks for playlist {playlistId}")]
+    private partial void LogErrorGettingPlaylistTracksById(Exception ex, string playlistId);
+
+    // Playlist tracks by index operations
+    [LoggerMessage(
+        EventId = 2802,
+        Level = LogLevel.Debug,
+        Message = "Getting tracks for playlist index {playlistIndex} via CQRS mediator"
+    )]
+    private partial void LogGettingPlaylistTracksByIndex(int playlistIndex);
+
+    [LoggerMessage(
+        EventId = 2803,
+        Level = LogLevel.Warning,
+        Message = "Failed to get tracks for playlist index {playlistIndex}: {error}"
+    )]
+    private partial void LogFailedToGetPlaylistTracksByIndex(int playlistIndex, string? error);
+
+    [LoggerMessage(
+        EventId = 2804,
+        Level = LogLevel.Error,
+        Message = "Error getting tracks for playlist index {playlistIndex}"
+    )]
+    private partial void LogErrorGettingPlaylistTracksByIndex(Exception ex, int playlistIndex);
 }

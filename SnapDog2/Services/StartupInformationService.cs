@@ -141,60 +141,75 @@ public class StartupInformationService : IHostedService
 
     private void LogLoadedAssemblies()
     {
-        this._logger.LogInformation("📚 Key Libraries and Dependencies:");
+        this._logger.LogInformation("📚 Libraries and Dependencies:");
 
-        var keyAssemblies = new[]
-        {
-            "SnapcastClient",
-            "MQTTnet",
-            "Microsoft.AspNetCore.App",
-            "Microsoft.Extensions.Hosting",
-            "Microsoft.Extensions.Logging",
-            "Microsoft.Extensions.DependencyInjection",
-            "Serilog",
-            "Serilog.AspNetCore",
-            "Newtonsoft.Json",
-            "FluentValidation",
-            "Swashbuckle.AspNetCore",
-            "HealthChecks.Network",
-            "Cortex.Mediator",
-            "EnvoyConfig",
-        };
-
-        var loadedAssemblies = AppDomain
+        var assemblies = AppDomain
             .CurrentDomain.GetAssemblies()
             .Where(a => !a.IsDynamic)
             .OrderBy(a => a.GetName().Name)
             .ToList();
 
-        // Log key assemblies first
-        foreach (var assemblyName in keyAssemblies)
-        {
-            var assembly = loadedAssemblies.FirstOrDefault(a =>
-                a.GetName().Name?.StartsWith(assemblyName, StringComparison.OrdinalIgnoreCase) == true
-            );
+        var applicationAssemblies = assemblies.Where(a => a.GetName().Name?.StartsWith("SnapDog") == true).ToList();
 
-            if (assembly != null)
+        var thirdPartyAssemblies = assemblies
+            .Where(a =>
+                !a.GetName().Name?.StartsWith("System") == true
+                && !a.GetName().Name?.StartsWith("Microsoft") == true
+                && !a.GetName().Name?.StartsWith("SnapDog") == true
+            )
+            .ToList();
+
+        var systemAssemblies = assemblies
+            .Where(a =>
+                a.GetName().Name?.StartsWith("System") == true || a.GetName().Name?.StartsWith("Microsoft") == true
+            )
+            .ToList();
+
+        this._logger.LogInformation("  📚 Application Assemblies:");
+
+        if (applicationAssemblies.Count != 0)
+        {
+            foreach (var assembly in applicationAssemblies)
             {
-                this.LogAssemblyInfo(assembly, "🔑");
+                var name = assembly.GetName().Name ?? "Unknown";
+                var version = assembly.GetName().Version?.ToString() ?? "Unknown";
+                var location = string.IsNullOrEmpty(assembly.Location)
+                    ? "In Memory"
+                    : Path.GetFileName(assembly.Location);
+                if (assembly != null)
+                {
+                    this.LogAssemblyInfo(assembly, "     🚀");
+                }
             }
         }
 
-        // Log other loaded assemblies (limited to avoid spam)
-        this._logger.LogInformation("📦 Other Notable Assemblies:");
-        var otherAssemblies = loadedAssemblies
-            .Where(a =>
-                !keyAssemblies.Any(key => a.GetName().Name?.StartsWith(key, StringComparison.OrdinalIgnoreCase) == true)
-            )
-            .Where(a => !IsSystemAssembly(a))
-            .Take(15); // Limit to avoid log spam
-
-        foreach (var assembly in otherAssemblies)
+        if (thirdPartyAssemblies.Any())
         {
-            this.LogAssemblyInfo(assembly, "  ");
+            this._logger.LogInformation("  📚 Third-Party Assemblies:");
+            foreach (var assembly in thirdPartyAssemblies)
+            {
+                var name = assembly.GetName().Name ?? "Unknown";
+                var version = assembly.GetName().Version?.ToString() ?? "Unknown";
+                var location = string.IsNullOrEmpty(assembly.Location)
+                    ? "In Memory"
+                    : Path.GetFileName(assembly.Location);
+                this.LogAssemblyInfo(assembly, "     📱");
+            }
         }
 
-        this._logger.LogInformation("   Total Loaded Assemblies: {TotalCount}", loadedAssemblies.Count);
+        if (systemAssemblies.Any())
+        {
+            this._logger.LogInformation("  📚 System Assemblies:");
+            foreach (var assembly in systemAssemblies.Take(10)) // Limit to first 10 to avoid spam
+            {
+                var name = assembly.GetName().Name ?? "Unknown";
+                var version = assembly.GetName().Version?.ToString() ?? "Unknown";
+                var location = string.IsNullOrEmpty(assembly.Location)
+                    ? "In Memory"
+                    : Path.GetFileName(assembly.Location);
+                this.LogAssemblyInfo(assembly, "     🔧");
+            }
+        }
     }
 
     private void LogAssemblyInfo(Assembly assembly, string prefix)
@@ -226,7 +241,7 @@ public class StartupInformationService : IHostedService
             .OrderBy(entry => entry.Key.ToString())
             .ToList();
 
-        if (snapdogEnvVars.Any())
+        if (snapdogEnvVars.Count != 0)
         {
             this._logger.LogInformation("   SnapDog2 Environment Variables:");
             foreach (var envVar in snapdogEnvVars)
@@ -476,7 +491,7 @@ public class StartupInformationService : IHostedService
                 telemetryTargets.Add($"Seq: {this._config.Telemetry.Seq.Url}");
             }
 
-            if (telemetryTargets.Any())
+            if (telemetryTargets.Count != 0)
             {
                 this._logger.LogInformation("     Targets: {TelemetryTargets}", string.Join(", ", telemetryTargets));
             }

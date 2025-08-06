@@ -10,7 +10,7 @@ using SnapDog2.Core.Abstractions;
 /// Hosted service responsible for initializing integration services (Snapcast, MQTT, KNX, etc.) on application startup.
 /// This ensures that all external integrations are properly connected and ready before the application starts serving requests.
 /// </summary>
-public class IntegrationServicesHostedService : BackgroundService
+public partial class IntegrationServicesHostedService : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<IntegrationServicesHostedService> _logger;
@@ -24,9 +24,88 @@ public class IntegrationServicesHostedService : BackgroundService
         this._logger = logger;
     }
 
+    #region Logging
+
+    [LoggerMessage(5001, LogLevel.Information, "🚀 Starting integration services initialization...")]
+    private partial void LogInitializationStarted();
+
+    [LoggerMessage(5002, LogLevel.Information, "Initializing Snapcast service...")]
+    private partial void LogInitializingSnapcast();
+
+    [LoggerMessage(5003, LogLevel.Warning, "Snapcast service not registered - skipping initialization")]
+    private partial void LogSnapcastNotRegistered();
+
+    [LoggerMessage(5004, LogLevel.Information, "Initializing MQTT service...")]
+    private partial void LogInitializingMqtt();
+
+    [LoggerMessage(5005, LogLevel.Warning, "MQTT service not registered - skipping initialization")]
+    private partial void LogMqttNotRegistered();
+
+    [LoggerMessage(5006, LogLevel.Information, "Initializing KNX service...")]
+    private partial void LogInitializingKnx();
+
+    [LoggerMessage(5007, LogLevel.Warning, "KNX service not registered - skipping initialization")]
+    private partial void LogKnxNotRegistered();
+
+    [LoggerMessage(5008, LogLevel.Information, "✅ Snapcast service initialized successfully")]
+    private partial void LogSnapcastInitialized();
+
+    [LoggerMessage(5009, LogLevel.Information, "✅ MQTT service initialized successfully - Connected: {IsConnected}")]
+    private partial void LogMqttInitialized(bool isConnected);
+
+    [LoggerMessage(5010, LogLevel.Information, "✅ KNX service initialized successfully - Connected: {IsConnected}")]
+    private partial void LogKnxInitialized(bool isConnected);
+
+    [LoggerMessage(5011, LogLevel.Error, "❌ Failed to initialize Snapcast service: {ErrorMessage}")]
+    private partial void LogSnapcastInitializationFailed(string errorMessage);
+
+    [LoggerMessage(5012, LogLevel.Error, "❌ Failed to initialize MQTT service: {ErrorMessage}")]
+    private partial void LogMqttInitializationFailed(string errorMessage);
+
+    [LoggerMessage(5013, LogLevel.Error, "❌ Failed to initialize KNX service: {ErrorMessage}")]
+    private partial void LogKnxInitializationFailed(string errorMessage);
+
+    [LoggerMessage(5014, LogLevel.Information, "✅ All integration services initialized successfully: [{Services}]")]
+    private partial void LogAllServicesInitialized(string services);
+
+    [LoggerMessage(
+        5015,
+        LogLevel.Warning,
+        "⚠️  SYSTEM DEGRADED: Non-critical integration services failed, but core functionality remains available. Failed: [{FailedServices}], Successful: [{SuccessfulServices}]"
+    )]
+    private partial void LogSystemDegraded(string failedServices, string successfulServices);
+
+    [LoggerMessage(
+        5016,
+        LogLevel.Critical,
+        "🚨 SYSTEM NON-FUNCTIONAL: Critical integration services failed. Critical failures: [{CriticalFailures}], Other failures: [{NonCriticalFailures}], Successful: [{SuccessfulServices}]. Application will terminate."
+    )]
+    private partial void LogSystemNonFunctional(
+        string criticalFailures,
+        string nonCriticalFailures,
+        string successfulServices
+    );
+
+    [LoggerMessage(5017, LogLevel.Warning, "No integration services found to initialize")]
+    private partial void LogNoServicesFound();
+
+    [LoggerMessage(5018, LogLevel.Information, "🔌 Disabling failed service: {ServiceName}")]
+    private partial void LogDisablingService(string serviceName);
+
+    [LoggerMessage(5019, LogLevel.Information, "📴 {ServiceName} service marked as disabled")]
+    private partial void LogServiceDisabled(string serviceName);
+
+    [LoggerMessage(5020, LogLevel.Warning, "⚠️  Unknown service name for disabling: {ServiceName}")]
+    private partial void LogUnknownServiceName(string serviceName);
+
+    [LoggerMessage(5021, LogLevel.Error, "❌ Failed to disable service: {ServiceName}")]
+    private partial void LogServiceDisableFailed(string serviceName, Exception exception);
+
+    #endregion
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        this._logger.LogInformation("Starting integration services initialization...");
+        this.LogInitializationStarted();
 
         try
         {
@@ -37,36 +116,36 @@ public class IntegrationServicesHostedService : BackgroundService
             var snapcastService = this._serviceProvider.GetService<ISnapcastService>();
             if (snapcastService != null)
             {
-                this._logger.LogInformation("Initializing Snapcast service...");
+                this.LogInitializingSnapcast();
                 initializationTasks.Add(this.InitializeSnapcastServiceAsync(snapcastService, stoppingToken));
             }
             else
             {
-                this._logger.LogWarning("Snapcast service not registered - skipping initialization");
+                this.LogSnapcastNotRegistered();
             }
 
             // Initialize MQTT service if available
             var mqttService = this._serviceProvider.GetService<IMqttService>();
             if (mqttService != null)
             {
-                this._logger.LogInformation("Initializing MQTT service...");
+                this.LogInitializingMqtt();
                 initializationTasks.Add(this.InitializeMqttServiceAsync(mqttService, stoppingToken));
             }
             else
             {
-                this._logger.LogWarning("MQTT service not registered - skipping initialization");
+                this.LogMqttNotRegistered();
             }
 
             // Initialize KNX service if available
             var knxService = this._serviceProvider.GetService<IKnxService>();
             if (knxService != null)
             {
-                this._logger.LogInformation("Initializing KNX service...");
+                this.LogInitializingKnx();
                 initializationTasks.Add(this.InitializeKnxServiceAsync(knxService, stoppingToken));
             }
             else
             {
-                this._logger.LogWarning("KNX service not registered - skipping initialization");
+                this.LogKnxNotRegistered();
             }
 
             // Wait for all services to initialize and track results
@@ -101,10 +180,7 @@ public class IntegrationServicesHostedService : BackgroundService
                 if (criticalFailures.Any())
                 {
                     // System is non-functional - critical services failed
-                    this._logger.LogCritical(
-                        "🚨 SYSTEM NON-FUNCTIONAL: Critical integration services failed. "
-                            + "Critical failures: [{CriticalFailures}], Other failures: [{NonCriticalFailures}], "
-                            + "Successful: [{SuccessfulServices}]. Application will terminate.",
+                    this.LogSystemNonFunctional(
                         string.Join(", ", criticalFailures.Select(s => s.Name)),
                         string.Join(", ", nonCriticalFailures.Select(s => s.Name)),
                         string.Join(", ", successfulServices.Select(s => s.Name))
@@ -119,9 +195,7 @@ public class IntegrationServicesHostedService : BackgroundService
                 else if (nonCriticalFailures.Any())
                 {
                     // System is degraded but functional - only non-critical services failed
-                    this._logger.LogWarning(
-                        "⚠️  SYSTEM DEGRADED: Non-critical integration services failed, but core functionality remains available. "
-                            + "Failed: [{FailedServices}], Successful: [{SuccessfulServices}]",
+                    this.LogSystemDegraded(
                         string.Join(", ", nonCriticalFailures.Select(s => s.Name)),
                         string.Join(", ", successfulServices.Select(s => s.Name))
                     );
@@ -132,15 +206,12 @@ public class IntegrationServicesHostedService : BackgroundService
                 else
                 {
                     // All services successful
-                    this._logger.LogInformation(
-                        "✅ All integration services initialized successfully: [{Services}]",
-                        string.Join(", ", successfulServices.Select(s => s.Name))
-                    );
+                    this.LogAllServicesInitialized(string.Join(", ", successfulServices.Select(s => s.Name)));
                 }
             }
             else
             {
-                this._logger.LogWarning("No integration services found to initialize");
+                this.LogNoServicesFound();
             }
 
             // Keep the service running to maintain connections
@@ -170,16 +241,16 @@ public class IntegrationServicesHostedService : BackgroundService
             var result = await snapcastService.InitializeAsync(cancellationToken);
             if (result.IsSuccess)
             {
-                this._logger.LogInformation("✅ Snapcast service initialized successfully");
+                this.LogSnapcastInitialized();
             }
             else
             {
-                this._logger.LogError("❌ Failed to initialize Snapcast service: {ErrorMessage}", result.ErrorMessage);
+                this.LogSnapcastInitializationFailed(result.ErrorMessage ?? "Unknown error");
             }
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "❌ Exception during Snapcast service initialization");
+            this.LogSnapcastInitializationFailed(ex.Message);
         }
     }
 
@@ -190,19 +261,16 @@ public class IntegrationServicesHostedService : BackgroundService
             var result = await mqttService.InitializeAsync(cancellationToken);
             if (result.IsSuccess)
             {
-                this._logger.LogInformation(
-                    "✅ MQTT service initialized successfully - Connected: {IsConnected}",
-                    mqttService.IsConnected
-                );
+                this.LogMqttInitialized(mqttService.IsConnected);
             }
             else
             {
-                this._logger.LogError("❌ Failed to initialize MQTT service: {ErrorMessage}", result.ErrorMessage);
+                this.LogMqttInitializationFailed(result.ErrorMessage ?? "Unknown error");
             }
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "❌ Exception during MQTT service initialization");
+            this.LogMqttInitializationFailed(ex.Message);
         }
     }
 
@@ -213,19 +281,16 @@ public class IntegrationServicesHostedService : BackgroundService
             var result = await knxService.InitializeAsync(cancellationToken);
             if (result.IsSuccess)
             {
-                this._logger.LogInformation(
-                    "✅ KNX service initialized successfully - Connected: {IsConnected}",
-                    knxService.IsConnected
-                );
+                this.LogKnxInitialized(knxService.IsConnected);
             }
             else
             {
-                this._logger.LogError("❌ Failed to initialize KNX service: {ErrorMessage}", result.ErrorMessage);
+                this.LogKnxInitializationFailed(result.ErrorMessage ?? "Unknown error");
             }
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "❌ Exception during KNX service initialization");
+            this.LogKnxInitializationFailed(ex.Message);
         }
     }
 
@@ -240,7 +305,7 @@ public class IntegrationServicesHostedService : BackgroundService
         {
             try
             {
-                this._logger.LogInformation("🔌 Disabling failed service: {ServiceName}", serviceName);
+                this.LogDisablingService(serviceName);
 
                 switch (serviceName.ToLowerInvariant())
                 {
@@ -250,7 +315,7 @@ public class IntegrationServicesHostedService : BackgroundService
                         {
                             // Note: ISnapcastService doesn't have a Dispose method in the interface
                             // The service will be disposed by DI container when the application shuts down
-                            this._logger.LogInformation("📴 Snapcast service marked as disabled");
+                            this.LogServiceDisabled("Snapcast");
                         }
                         break;
 
@@ -260,7 +325,7 @@ public class IntegrationServicesHostedService : BackgroundService
                         {
                             // Note: IMqttService doesn't have a Dispose method in the interface
                             // The service will be disposed by DI container when the application shuts down
-                            this._logger.LogInformation("📴 MQTT service marked as disabled");
+                            this.LogServiceDisabled("MQTT");
                         }
                         break;
 
@@ -270,18 +335,18 @@ public class IntegrationServicesHostedService : BackgroundService
                         {
                             // Note: IKnxService doesn't have a Dispose method in the interface
                             // The service will be disposed by DI container when the application shuts down
-                            this._logger.LogInformation("📴 KNX service marked as disabled");
+                            this.LogServiceDisabled("KNX");
                         }
                         break;
 
                     default:
-                        this._logger.LogWarning("⚠️  Unknown service name for disabling: {ServiceName}", serviceName);
+                        this.LogUnknownServiceName(serviceName);
                         break;
                 }
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "❌ Failed to disable service: {ServiceName}", serviceName);
+                this.LogServiceDisableFailed(serviceName, ex);
             }
         }
 

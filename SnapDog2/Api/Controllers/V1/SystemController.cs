@@ -17,7 +17,7 @@ using SnapDog2.Server.Features.Global.Queries;
 [Route("api/v1/system")]
 [Authorize]
 [Produces("application/json")]
-public class SystemController : ControllerBase
+public partial class SystemController : ControllerBase
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<SystemController> _logger;
@@ -43,13 +43,13 @@ public class SystemController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting system status");
+            this.LogGettingSystemStatus();
 
             var handler =
                 this._serviceProvider.GetService<Server.Features.Global.Handlers.GetSystemStatusQueryHandler>();
             if (handler == null)
             {
-                this._logger.LogError("GetSystemStatusQueryHandler not found in DI container");
+                this.LogCriticalHandlerNotFound("GetSystemStatusQueryHandler");
                 return this.StatusCode(
                     500,
                     ApiResponse<SystemStatus>.CreateError("HANDLER_NOT_FOUND", "System status handler not available")
@@ -63,7 +63,7 @@ public class SystemController : ControllerBase
                 return this.Ok(ApiResponse<SystemStatus>.CreateSuccess(result.Value));
             }
 
-            this._logger.LogWarning("Failed to get system status: {Error}", result.ErrorMessage);
+            this.LogFailedToGetSystemStatus(result.ErrorMessage);
             return this.StatusCode(
                 500,
                 ApiResponse<SystemStatus>.CreateError(
@@ -74,7 +74,7 @@ public class SystemController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error getting system status");
+            this.LogErrorGettingSystemStatus(ex);
             return this.StatusCode(
                 500,
                 ApiResponse<SystemStatus>.CreateError("INTERNAL_ERROR", "Internal server error")
@@ -96,13 +96,13 @@ public class SystemController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting system errors");
+            this.LogGettingSystemErrors();
 
             var handler =
                 this._serviceProvider.GetService<Server.Features.Global.Handlers.GetErrorStatusQueryHandler>();
             if (handler == null)
             {
-                this._logger.LogError("GetErrorStatusQueryHandler not found in DI container");
+                this.LogCriticalHandlerNotFound("GetErrorStatusQueryHandler");
                 return this.StatusCode(
                     500,
                     ApiResponse<List<ErrorDetails>>.CreateError(
@@ -122,7 +122,7 @@ public class SystemController : ControllerBase
                 return this.Ok(ApiResponse<List<ErrorDetails>>.CreateSuccess(errorList));
             }
 
-            this._logger.LogWarning("Failed to get system errors: {Error}", result.ErrorMessage);
+            this.LogFailedToGetSystemErrors(result.ErrorMessage);
             return this.StatusCode(
                 500,
                 ApiResponse<List<ErrorDetails>>.CreateError(
@@ -133,7 +133,7 @@ public class SystemController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error getting system errors");
+            this.LogErrorGettingSystemErrors(ex);
             return this.StatusCode(
                 500,
                 ApiResponse<List<ErrorDetails>>.CreateError("INTERNAL_ERROR", "Internal server error")
@@ -153,13 +153,13 @@ public class SystemController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting version information");
+            this.LogGettingSystemVersion();
 
             var handler =
                 this._serviceProvider.GetService<Server.Features.Global.Handlers.GetVersionInfoQueryHandler>();
             if (handler == null)
             {
-                this._logger.LogError("GetVersionInfoQueryHandler not found in DI container");
+                this.LogCriticalHandlerNotFound("GetVersionInfoQueryHandler");
                 return this.StatusCode(
                     500,
                     ApiResponse<VersionDetails>.CreateError("HANDLER_NOT_FOUND", "Version info handler not available")
@@ -173,7 +173,7 @@ public class SystemController : ControllerBase
                 return this.Ok(ApiResponse<VersionDetails>.CreateSuccess(result.Value));
             }
 
-            this._logger.LogWarning("Failed to get version information: {Error}", result.ErrorMessage);
+            this.LogFailedToGetSystemVersion(result.ErrorMessage);
             return this.StatusCode(
                 500,
                 ApiResponse<VersionDetails>.CreateError(
@@ -184,7 +184,7 @@ public class SystemController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error getting version information");
+            this.LogErrorGettingSystemVersion(ex);
             return this.StatusCode(
                 500,
                 ApiResponse<VersionDetails>.CreateError("INTERNAL_ERROR", "Internal server error")
@@ -204,13 +204,13 @@ public class SystemController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting server statistics");
+            this.LogGettingSystemStatistics();
 
             var handler =
                 this._serviceProvider.GetService<Server.Features.Global.Handlers.GetServerStatsQueryHandler>();
             if (handler == null)
             {
-                this._logger.LogError("GetServerStatsQueryHandler not found in DI container");
+                this.LogCriticalHandlerNotFound("GetServerStatsQueryHandler");
                 return this.StatusCode(
                     500,
                     ApiResponse<ServerStats>.CreateError("HANDLER_NOT_FOUND", "Server stats handler not available")
@@ -224,7 +224,7 @@ public class SystemController : ControllerBase
                 return this.Ok(ApiResponse<ServerStats>.CreateSuccess(result.Value));
             }
 
-            this._logger.LogWarning("Failed to get server statistics: {Error}", result.ErrorMessage);
+            this.LogFailedToGetSystemStatistics(result.ErrorMessage);
             return this.StatusCode(
                 500,
                 ApiResponse<ServerStats>.CreateError(
@@ -235,11 +235,63 @@ public class SystemController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error getting server statistics");
+            this.LogErrorGettingSystemStatistics(ex);
             return this.StatusCode(
                 500,
                 ApiResponse<ServerStats>.CreateError("INTERNAL_ERROR", "Internal server error")
             );
         }
     }
+
+    #region Logging
+
+    // ARCHITECTURAL PROBLEM - This should never happen in production
+    [LoggerMessage(
+        2301,
+        LogLevel.Critical,
+        "🚨 CRITICAL: Handler {HandlerType} not found in DI container - This is a configuration BUG!"
+    )]
+    private partial void LogCriticalHandlerNotFound(string handlerType);
+
+    // System Status (2310-2319)
+    [LoggerMessage(2310, LogLevel.Debug, "Getting system status")]
+    private partial void LogGettingSystemStatus();
+
+    [LoggerMessage(2311, LogLevel.Warning, "Failed to get system status: {Error}")]
+    private partial void LogFailedToGetSystemStatus(string? error);
+
+    [LoggerMessage(2312, LogLevel.Error, "Error getting system status")]
+    private partial void LogErrorGettingSystemStatus(Exception exception);
+
+    // System Errors (2320-2329)
+    [LoggerMessage(2320, LogLevel.Debug, "Getting system errors")]
+    private partial void LogGettingSystemErrors();
+
+    [LoggerMessage(2321, LogLevel.Warning, "Failed to get system errors: {Error}")]
+    private partial void LogFailedToGetSystemErrors(string? error);
+
+    [LoggerMessage(2322, LogLevel.Error, "Error getting system errors")]
+    private partial void LogErrorGettingSystemErrors(Exception exception);
+
+    // System Version (2330-2339)
+    [LoggerMessage(2330, LogLevel.Debug, "Getting system version")]
+    private partial void LogGettingSystemVersion();
+
+    [LoggerMessage(2331, LogLevel.Warning, "Failed to get system version: {Error}")]
+    private partial void LogFailedToGetSystemVersion(string? error);
+
+    [LoggerMessage(2332, LogLevel.Error, "Error getting system version")]
+    private partial void LogErrorGettingSystemVersion(Exception exception);
+
+    // System Statistics (2340-2349)
+    [LoggerMessage(2340, LogLevel.Debug, "Getting system statistics")]
+    private partial void LogGettingSystemStatistics();
+
+    [LoggerMessage(2341, LogLevel.Warning, "Failed to get system statistics: {Error}")]
+    private partial void LogFailedToGetSystemStatistics(string? error);
+
+    [LoggerMessage(2342, LogLevel.Error, "Error getting system statistics")]
+    private partial void LogErrorGettingSystemStatistics(Exception exception);
+
+    #endregion
 }

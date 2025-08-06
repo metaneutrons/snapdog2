@@ -15,7 +15,7 @@ using SnapDog2.Server.Features.Snapcast.Queries;
 [ApiController]
 [Route("api/v1/[controller]")]
 [Produces("application/json")]
-public class SnapcastController : ControllerBase
+public partial class SnapcastController : ControllerBase
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<SnapcastController> _logger;
@@ -37,12 +37,12 @@ public class SnapcastController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting Snapcast server status");
+            this.LogGettingSnapcastServerStatus();
 
             var handler = this._serviceProvider.GetService<GetSnapcastServerStatusQueryHandler>();
             if (handler == null)
             {
-                this._logger.LogError("GetSnapcastServerStatusQueryHandler not found in DI container");
+                this.LogCriticalHandlerNotFound(nameof(GetSnapcastServerStatusQueryHandler));
                 return this.StatusCode(
                     500,
                     ApiResponse<SnapcastServerStatus>.CreateError("HANDLER_ERROR", "Handler not available")
@@ -64,7 +64,7 @@ public class SnapcastController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error getting Snapcast server status");
+            this.LogErrorGettingSnapcastServerStatus(ex);
             return this.StatusCode(
                 500,
                 ApiResponse<SnapcastServerStatus>.CreateError("INTERNAL_ERROR", "Internal server error")
@@ -89,16 +89,12 @@ public class SnapcastController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug(
-                "Setting volume for Snapcast client {ClientId} to {Volume}%",
-                clientId,
-                request.Volume
-            );
+            this.LogSettingClientVolume(clientId, request.Volume);
 
             var handler = this._serviceProvider.GetService<SetSnapcastClientVolumeCommandHandler>();
             if (handler == null)
             {
-                this._logger.LogError("SetSnapcastClientVolumeCommandHandler not found in DI container");
+                this.LogCriticalHandlerNotFound(nameof(SetSnapcastClientVolumeCommandHandler));
                 return this.StatusCode(500, ApiResponse<object>.CreateError("HANDLER_ERROR", "Handler not available"));
             }
 
@@ -122,7 +118,7 @@ public class SnapcastController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error setting client volume for {ClientId}", clientId);
+            this.LogErrorSettingClientVolume(clientId, ex);
             return this.StatusCode(500, ApiResponse<object>.CreateError("INTERNAL_ERROR", "Internal server error"));
         }
     }
@@ -144,16 +140,14 @@ public class SnapcastController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug(
-                "Setting mute state for Snapcast client {ClientId} to {Muted}",
-                clientId,
-                request.Muted
-            );
+            this.LogSettingClientMute(clientId, request.Muted);
 
             var handler = this._serviceProvider.GetService<SetSnapcastClientVolumeCommandHandler>();
             if (handler == null)
             {
-                this._logger.LogError("SetSnapcastClientVolumeCommandHandler not found in DI container");
+                this.LogCriticalHandlerNotFound(
+                    "SetSnapcastClientVolumeCommandHandler (used for mute - architectural bug!)"
+                );
                 return this.StatusCode(500, ApiResponse<object>.CreateError("HANDLER_ERROR", "Handler not available"));
             }
 
@@ -181,10 +175,43 @@ public class SnapcastController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error setting client mute for {ClientId}", clientId);
+            this.LogErrorSettingClientMute(clientId, ex);
             return this.StatusCode(500, ApiResponse<object>.CreateError("INTERNAL_ERROR", "Internal server error"));
         }
     }
+
+    #region Logging
+
+    // ARCHITECTURAL PROBLEM - This should never happen in production
+    [LoggerMessage(
+        2201,
+        LogLevel.Critical,
+        "🚨 CRITICAL: Handler {HandlerType} not found in DI container - This is a configuration BUG!"
+    )]
+    private partial void LogCriticalHandlerNotFound(string handlerType);
+
+    // Snapcast Server Status (2210-2219)
+    [LoggerMessage(2210, LogLevel.Debug, "Getting Snapcast server status")]
+    private partial void LogGettingSnapcastServerStatus();
+
+    [LoggerMessage(2211, LogLevel.Error, "Error getting Snapcast server status")]
+    private partial void LogErrorGettingSnapcastServerStatus(Exception exception);
+
+    // Client Volume Control (2220-2229)
+    [LoggerMessage(2220, LogLevel.Debug, "Setting volume for Snapcast client {ClientId} to {Volume}%")]
+    private partial void LogSettingClientVolume(string clientId, int volume);
+
+    [LoggerMessage(2221, LogLevel.Error, "Error setting client volume for {ClientId}")]
+    private partial void LogErrorSettingClientVolume(string clientId, Exception exception);
+
+    // Client Mute Control (2230-2239)
+    [LoggerMessage(2230, LogLevel.Debug, "Setting mute state for Snapcast client {ClientId} to {Muted}")]
+    private partial void LogSettingClientMute(string clientId, bool muted);
+
+    [LoggerMessage(2231, LogLevel.Error, "Error setting client mute for {ClientId}")]
+    private partial void LogErrorSettingClientMute(string clientId, Exception exception);
+
+    #endregion
 }
 
 /// <summary>

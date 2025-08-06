@@ -8,7 +8,7 @@ namespace SnapDog2.Middleware;
 /// <summary>
 /// global exception handling middleware
 /// </summary>
-public class GlobalExceptionHandlingMiddleware
+public partial class GlobalExceptionHandlingMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<GlobalExceptionHandlingMiddleware> _logger;
@@ -52,23 +52,18 @@ public class GlobalExceptionHandlingMiddleware
         // Log the exception with comprehensive context
         if (this._includeStackTraces || IsUnexpectedException(exception))
         {
-            this._logger.LogError(
-                exception,
-                "🚨 UNHANDLED EXCEPTION in {RequestMethod} {RequestPath} | "
-                    + "CorrelationId: {CorrelationId} | RemoteIP: {RemoteIp} | UserAgent: {UserAgent}",
+            this.LogUnhandledExceptionWithStackTrace(
                 requestMethod,
                 requestPath,
                 correlationId,
                 remoteIp,
-                userAgent
+                userAgent,
+                exception
             );
         }
         else
         {
-            this._logger.LogError(
-                "🚨 UNHANDLED EXCEPTION in {RequestMethod} {RequestPath} | "
-                    + "CorrelationId: {CorrelationId} | RemoteIP: {RemoteIp} | UserAgent: {UserAgent} | "
-                    + "Error: {ExceptionType} - {ExceptionMessage}",
+            this.LogUnhandledException(
                 requestMethod,
                 requestPath,
                 correlationId,
@@ -184,12 +179,7 @@ public class GlobalExceptionHandlingMiddleware
         await context.Response.WriteAsync(jsonResponse);
 
         // Log response details
-        this._logger.LogInformation(
-            "🔄 Exception response sent: {StatusCode} {ErrorCode} | CorrelationId: {CorrelationId}",
-            (int)statusCode,
-            errorResponse.ErrorCode,
-            correlationId
-        );
+        this.LogExceptionResponseSent((int)statusCode, errorResponse.ErrorCode, correlationId);
     }
 
     private ErrorResponse CreateErrorResponse(
@@ -233,6 +223,46 @@ public class GlobalExceptionHandlingMiddleware
 
         return !expectedExceptionTypes.Contains(exception.GetType());
     }
+
+    #region Logging
+
+    [LoggerMessage(
+        3001,
+        LogLevel.Error,
+        "🚨 UNHANDLED EXCEPTION in {RequestMethod} {RequestPath} | CorrelationId: {CorrelationId} | RemoteIP: {RemoteIp} | UserAgent: {UserAgent}"
+    )]
+    private partial void LogUnhandledExceptionWithStackTrace(
+        string requestMethod,
+        string requestPath,
+        string correlationId,
+        string remoteIp,
+        string userAgent,
+        Exception exception
+    );
+
+    [LoggerMessage(
+        3002,
+        LogLevel.Error,
+        "🚨 UNHANDLED EXCEPTION in {RequestMethod} {RequestPath} | CorrelationId: {CorrelationId} | RemoteIP: {RemoteIp} | UserAgent: {UserAgent} | Error: {ExceptionType} - {ExceptionMessage}"
+    )]
+    private partial void LogUnhandledException(
+        string requestMethod,
+        string requestPath,
+        string correlationId,
+        string remoteIp,
+        string userAgent,
+        string exceptionType,
+        string exceptionMessage
+    );
+
+    [LoggerMessage(
+        3003,
+        LogLevel.Information,
+        "🔄 Exception response sent: {StatusCode} {ErrorCode} | CorrelationId: {CorrelationId}"
+    )]
+    private partial void LogExceptionResponseSent(int statusCode, string errorCode, string correlationId);
+
+    #endregion
 }
 
 /// <summary>

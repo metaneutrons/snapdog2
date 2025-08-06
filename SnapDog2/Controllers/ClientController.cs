@@ -21,7 +21,7 @@ using SnapDog2.Server.Features.Clients.Queries;
 [ApiController]
 [Route("api/clients")]
 [Produces("application/json")]
-public class ClientController : ControllerBase
+public partial class ClientController : ControllerBase
 {
     private readonly IMediator _mediator;
     private readonly ILogger<ClientController> _logger;
@@ -54,7 +54,7 @@ public class ClientController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting client state for client {ClientId} via CQRS mediator", clientId);
+            this.LogGettingClientState(clientId);
 
             var query = new GetClientQuery { ClientId = clientId };
             var result = await this._mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(
@@ -67,18 +67,14 @@ public class ClientController : ControllerBase
                 return this.Ok(ApiResponse<ClientState>.CreateSuccess(result.Value));
             }
 
-            this._logger.LogWarning(
-                "Failed to get client state for client {ClientId}: {Error}",
-                clientId,
-                result.ErrorMessage
-            );
+            this.LogFailedToGetClientState(clientId, result.ErrorMessage);
             return this.NotFound(
                 ApiResponse<ClientState>.CreateError("CLIENT_NOT_FOUND", result.ErrorMessage ?? "Client not found")
             );
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error getting client state for client {ClientId}", clientId);
+            this.LogErrorGettingClientState(ex, clientId);
             return this.StatusCode(
                 500,
                 ApiResponse<ClientState>.CreateError("INTERNAL_ERROR", "An internal server error occurred", ex.Message)
@@ -100,7 +96,7 @@ public class ClientController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting all client states via CQRS mediator");
+            this.LogGettingAllClientStates();
 
             var query = new GetAllClientsQuery();
             var result = await this._mediator.SendQueryAsync<GetAllClientsQuery, Result<List<ClientState>>>(
@@ -113,7 +109,7 @@ public class ClientController : ControllerBase
                 return this.Ok(ApiResponse<IEnumerable<ClientState>>.CreateSuccess(result.Value));
             }
 
-            this._logger.LogWarning("Failed to get all client states: {Error}", result.ErrorMessage);
+            this.LogFailedToGetAllClientStates(result.ErrorMessage);
             return this.StatusCode(
                 500,
                 ApiResponse<IEnumerable<ClientState>>.CreateError(
@@ -124,7 +120,7 @@ public class ClientController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error getting all client states");
+            this.LogErrorGettingAllClientStates(ex);
             return this.StatusCode(
                 500,
                 ApiResponse<IEnumerable<ClientState>>.CreateError(
@@ -153,7 +149,7 @@ public class ClientController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Getting clients for zone {ZoneId} via CQRS mediator", zoneId);
+            this.LogGettingClientsByZone(zoneId);
 
             var query = new GetClientsByZoneQuery { ZoneId = zoneId };
             var result = await this._mediator.SendQueryAsync<GetClientsByZoneQuery, Result<List<ClientState>>>(
@@ -166,7 +162,7 @@ public class ClientController : ControllerBase
                 return this.Ok(ApiResponse<IEnumerable<ClientState>>.CreateSuccess(result.Value));
             }
 
-            this._logger.LogWarning("Failed to get clients for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+            this.LogFailedToGetClientsByZone(zoneId, result.ErrorMessage);
             return this.NotFound(
                 ApiResponse<IEnumerable<ClientState>>.CreateError(
                     "ZONE_NOT_FOUND",
@@ -176,7 +172,7 @@ public class ClientController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error getting clients for zone {ZoneId}", zoneId);
+            this.LogErrorGettingClientsByZone(ex, zoneId);
             return this.StatusCode(
                 500,
                 ApiResponse<IEnumerable<ClientState>>.CreateError(
@@ -208,11 +204,7 @@ public class ClientController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug(
-                "Setting volume for client {ClientId} to {Volume} via CQRS mediator",
-                clientId,
-                request.Volume
-            );
+            this.LogSettingClientVolume(clientId, request.Volume);
 
             var command = new SetClientVolumeCommand
             {
@@ -231,18 +223,14 @@ public class ClientController : ControllerBase
                 return this.Ok(ApiResponse.CreateSuccess());
             }
 
-            this._logger.LogWarning(
-                "Failed to set volume for client {ClientId}: {Error}",
-                clientId,
-                result.ErrorMessage
-            );
+            this.LogFailedToSetClientVolume(clientId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse.CreateError("VOLUME_SET_ERROR", result.ErrorMessage ?? "Failed to set volume")
             );
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error setting volume for client {ClientId}", clientId);
+            this.LogErrorSettingClientVolume(ex, clientId);
             return this.StatusCode(
                 500,
                 ApiResponse.CreateError("INTERNAL_ERROR", "An internal server error occurred", ex.Message)
@@ -270,11 +258,7 @@ public class ClientController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug(
-                "Setting mute for client {ClientId} to {Enabled} via CQRS mediator",
-                clientId,
-                request.Enabled
-            );
+            this.LogSettingClientMute(clientId, request.Enabled);
 
             var command = new SetClientMuteCommand
             {
@@ -293,14 +277,14 @@ public class ClientController : ControllerBase
                 return this.Ok(ApiResponse.CreateSuccess());
             }
 
-            this._logger.LogWarning("Failed to set mute for client {ClientId}: {Error}", clientId, result.ErrorMessage);
+            this.LogFailedToSetClientMute(clientId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse.CreateError("MUTE_SET_ERROR", result.ErrorMessage ?? "Failed to set mute state")
             );
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error setting mute for client {ClientId}", clientId);
+            this.LogErrorSettingClientMute(ex, clientId);
             return this.StatusCode(
                 500,
                 ApiResponse.CreateError("INTERNAL_ERROR", "An internal server error occurred", ex.Message)
@@ -326,7 +310,7 @@ public class ClientController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug("Toggling mute for client {ClientId} via CQRS mediator", clientId);
+            this.LogTogglingClientMute(clientId);
 
             var command = new ToggleClientMuteCommand { ClientId = clientId, Source = CommandSource.Api };
 
@@ -340,18 +324,14 @@ public class ClientController : ControllerBase
                 return this.Ok(ApiResponse.CreateSuccess());
             }
 
-            this._logger.LogWarning(
-                "Failed to toggle mute for client {ClientId}: {Error}",
-                clientId,
-                result.ErrorMessage
-            );
+            this.LogFailedToToggleClientMute(clientId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse.CreateError("MUTE_TOGGLE_ERROR", result.ErrorMessage ?? "Failed to toggle mute state")
             );
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error toggling mute for client {ClientId}", clientId);
+            this.LogErrorTogglingClientMute(ex, clientId);
             return this.StatusCode(
                 500,
                 ApiResponse.CreateError("INTERNAL_ERROR", "An internal server error occurred", ex.Message)
@@ -379,11 +359,7 @@ public class ClientController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug(
-                "Setting latency for client {ClientId} to {LatencyMs}ms via CQRS mediator",
-                clientId,
-                request.LatencyMs
-            );
+            this.LogSettingClientLatency(clientId, request.LatencyMs);
 
             var command = new SetClientLatencyCommand
             {
@@ -402,18 +378,14 @@ public class ClientController : ControllerBase
                 return this.Ok(ApiResponse.CreateSuccess());
             }
 
-            this._logger.LogWarning(
-                "Failed to set latency for client {ClientId}: {Error}",
-                clientId,
-                result.ErrorMessage
-            );
+            this.LogFailedToSetClientLatency(clientId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse.CreateError("LATENCY_SET_ERROR", result.ErrorMessage ?? "Failed to set latency")
             );
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error setting latency for client {ClientId}", clientId);
+            this.LogErrorSettingClientLatency(ex, clientId);
             return this.StatusCode(
                 500,
                 ApiResponse.CreateError("INTERNAL_ERROR", "An internal server error occurred", ex.Message)
@@ -441,11 +413,7 @@ public class ClientController : ControllerBase
     {
         try
         {
-            this._logger.LogDebug(
-                "Assigning client {ClientId} to zone {ZoneId} via CQRS mediator",
-                clientId,
-                request.ZoneId
-            );
+            this.LogAssigningClientToZone(clientId, request.ZoneId);
 
             var command = new AssignClientToZoneCommand
             {
@@ -464,12 +432,7 @@ public class ClientController : ControllerBase
                 return this.Ok(ApiResponse.CreateSuccess());
             }
 
-            this._logger.LogWarning(
-                "Failed to assign client {ClientId} to zone {ZoneId}: {Error}",
-                clientId,
-                request.ZoneId,
-                result.ErrorMessage
-            );
+            this.LogFailedToAssignClientToZone(clientId, request.ZoneId, result.ErrorMessage);
             return this.BadRequest(
                 ApiResponse.CreateError(
                     "ZONE_ASSIGNMENT_ERROR",
@@ -479,13 +442,156 @@ public class ClientController : ControllerBase
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error assigning client {ClientId} to zone {ZoneId}", clientId, request.ZoneId);
+            this.LogErrorAssigningClientToZone(ex, clientId, request.ZoneId);
             return this.StatusCode(
                 500,
                 ApiResponse.CreateError("INTERNAL_ERROR", "An internal server error occurred", ex.Message)
             );
         }
     }
+
+    // LoggerMessage definitions for high-performance logging (ID range: 2760-2783)
+
+    // Client state operations
+    [LoggerMessage(
+        EventId = 2760,
+        Level = LogLevel.Debug,
+        Message = "Getting client state for client {clientId} via CQRS mediator"
+    )]
+    private partial void LogGettingClientState(int clientId);
+
+    [LoggerMessage(
+        EventId = 2761,
+        Level = LogLevel.Warning,
+        Message = "Failed to get client state for client {clientId}: {error}"
+    )]
+    private partial void LogFailedToGetClientState(int clientId, string? error);
+
+    [LoggerMessage(
+        EventId = 2762,
+        Level = LogLevel.Error,
+        Message = "Error getting client state for client {clientId}"
+    )]
+    private partial void LogErrorGettingClientState(Exception ex, int clientId);
+
+    [LoggerMessage(EventId = 2763, Level = LogLevel.Debug, Message = "Getting all client states via CQRS mediator")]
+    private partial void LogGettingAllClientStates();
+
+    [LoggerMessage(EventId = 2764, Level = LogLevel.Warning, Message = "Failed to get all client states: {error}")]
+    private partial void LogFailedToGetAllClientStates(string? error);
+
+    [LoggerMessage(EventId = 2765, Level = LogLevel.Error, Message = "Error getting all client states")]
+    private partial void LogErrorGettingAllClientStates(Exception ex);
+
+    [LoggerMessage(
+        EventId = 2766,
+        Level = LogLevel.Debug,
+        Message = "Getting clients for zone {zoneId} via CQRS mediator"
+    )]
+    private partial void LogGettingClientsByZone(int zoneId);
+
+    [LoggerMessage(
+        EventId = 2767,
+        Level = LogLevel.Warning,
+        Message = "Failed to get clients for zone {zoneId}: {error}"
+    )]
+    private partial void LogFailedToGetClientsByZone(int zoneId, string? error);
+
+    [LoggerMessage(EventId = 2768, Level = LogLevel.Error, Message = "Error getting clients for zone {zoneId}")]
+    private partial void LogErrorGettingClientsByZone(Exception ex, int zoneId);
+
+    // Client volume operations
+    [LoggerMessage(
+        EventId = 2769,
+        Level = LogLevel.Debug,
+        Message = "Setting volume for client {clientId} to {volume} via CQRS mediator"
+    )]
+    private partial void LogSettingClientVolume(int clientId, int volume);
+
+    [LoggerMessage(
+        EventId = 2770,
+        Level = LogLevel.Warning,
+        Message = "Failed to set volume for client {clientId}: {error}"
+    )]
+    private partial void LogFailedToSetClientVolume(int clientId, string? error);
+
+    [LoggerMessage(EventId = 2771, Level = LogLevel.Error, Message = "Error setting volume for client {clientId}")]
+    private partial void LogErrorSettingClientVolume(Exception ex, int clientId);
+
+    // Client mute operations
+    [LoggerMessage(
+        EventId = 2772,
+        Level = LogLevel.Debug,
+        Message = "Setting mute for client {clientId} to {enabled} via CQRS mediator"
+    )]
+    private partial void LogSettingClientMute(int clientId, bool enabled);
+
+    [LoggerMessage(
+        EventId = 2773,
+        Level = LogLevel.Warning,
+        Message = "Failed to set mute for client {clientId}: {error}"
+    )]
+    private partial void LogFailedToSetClientMute(int clientId, string? error);
+
+    [LoggerMessage(EventId = 2774, Level = LogLevel.Error, Message = "Error setting mute for client {clientId}")]
+    private partial void LogErrorSettingClientMute(Exception ex, int clientId);
+
+    [LoggerMessage(
+        EventId = 2775,
+        Level = LogLevel.Debug,
+        Message = "Toggling mute for client {clientId} via CQRS mediator"
+    )]
+    private partial void LogTogglingClientMute(int clientId);
+
+    [LoggerMessage(
+        EventId = 2776,
+        Level = LogLevel.Warning,
+        Message = "Failed to toggle mute for client {clientId}: {error}"
+    )]
+    private partial void LogFailedToToggleClientMute(int clientId, string? error);
+
+    [LoggerMessage(EventId = 2777, Level = LogLevel.Error, Message = "Error toggling mute for client {clientId}")]
+    private partial void LogErrorTogglingClientMute(Exception ex, int clientId);
+
+    // Client latency operations
+    [LoggerMessage(
+        EventId = 2778,
+        Level = LogLevel.Debug,
+        Message = "Setting latency for client {clientId} to {latencyMs}ms via CQRS mediator"
+    )]
+    private partial void LogSettingClientLatency(int clientId, int latencyMs);
+
+    [LoggerMessage(
+        EventId = 2779,
+        Level = LogLevel.Warning,
+        Message = "Failed to set latency for client {clientId}: {error}"
+    )]
+    private partial void LogFailedToSetClientLatency(int clientId, string? error);
+
+    [LoggerMessage(EventId = 2780, Level = LogLevel.Error, Message = "Error setting latency for client {clientId}")]
+    private partial void LogErrorSettingClientLatency(Exception ex, int clientId);
+
+    // Client zone assignment operations
+    [LoggerMessage(
+        EventId = 2781,
+        Level = LogLevel.Debug,
+        Message = "Assigning client {clientId} to zone {zoneId} via CQRS mediator"
+    )]
+    private partial void LogAssigningClientToZone(int clientId, int zoneId);
+
+    [LoggerMessage(
+        EventId = 2782,
+        Level = LogLevel.Warning,
+        Message = "Failed to assign client {clientId} to zone {zoneId}: {error}"
+    )]
+    private partial void LogFailedToAssignClientToZone(int clientId, int zoneId, string? error);
+
+    [LoggerMessage(
+        EventId = 2783,
+        Level = LogLevel.Error,
+        Message = "Error assigning client {clientId} to zone {zoneId}"
+    )]
+    private partial void LogErrorAssigningClientToZone(Exception ex, int clientId, int zoneId);
 }
 
 // Client-specific Request DTOs

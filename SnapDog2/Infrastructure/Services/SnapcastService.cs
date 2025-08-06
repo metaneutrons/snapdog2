@@ -84,19 +84,19 @@ public partial class SnapcastService
     )]
     private partial void LogServiceCreated(string host, int port, bool autoReconnect);
 
-    [LoggerMessage(1002, LogLevel.Information, "🚀 Initializing Snapcast connection to {Host}:{Port}")]
+    [LoggerMessage(6002, LogLevel.Information, "🚀 Initializing Snapcast connection to {Host}:{Port}")]
     private partial void LogInitializing(string host, int port);
 
-    [LoggerMessage(1003, LogLevel.Information, "Snapcast connection established successfully")]
+    [LoggerMessage(6003, LogLevel.Information, "Snapcast connection established successfully")]
     private partial void LogConnectionEstablished();
 
-    [LoggerMessage(1004, LogLevel.Warning, "Snapcast connection lost: {Reason}")]
+    [LoggerMessage(6004, LogLevel.Warning, "Snapcast connection lost: {Reason}")]
     private partial void LogConnectionLost(string reason);
 
-    [LoggerMessage(1005, LogLevel.Error, "Failed to initialize Snapcast connection")]
+    [LoggerMessage(6005, LogLevel.Error, "Failed to initialize Snapcast connection")]
     private partial void LogInitializationFailed(Exception ex);
 
-    [LoggerMessage(1013, LogLevel.Error, "Snapcast connection error: {ErrorMessage}")]
+    [LoggerMessage(6013, LogLevel.Error, "Snapcast connection error: {ErrorMessage}")]
     private partial void LogConnectionErrorMessage(string errorMessage);
 
     [LoggerMessage(
@@ -112,19 +112,19 @@ public partial class SnapcastService
         string errorMessage
     );
 
-    [LoggerMessage(1006, LogLevel.Error, "Snapcast operation {Operation} failed")]
+    [LoggerMessage(6006, LogLevel.Error, "Snapcast operation {Operation} failed")]
     private partial void LogOperationFailed(string operation, Exception ex);
 
-    [LoggerMessage(1007, LogLevel.Debug, "Processing Snapcast event: {EventType}")]
+    [LoggerMessage(6007, LogLevel.Debug, "Processing Snapcast event: {EventType}")]
     private partial void LogProcessingEvent(string eventType);
 
-    [LoggerMessage(1008, LogLevel.Error, "Error processing Snapcast event {EventType}")]
+    [LoggerMessage(6008, LogLevel.Error, "Error processing Snapcast event {EventType}")]
     private partial void LogEventProcessingError(string eventType, Exception ex);
 
-    [LoggerMessage(1009, LogLevel.Information, "Snapcast service disposed")]
+    [LoggerMessage(6009, LogLevel.Information, "Snapcast service disposed")]
     private partial void LogServiceDisposed();
 
-    [LoggerMessage(1010, LogLevel.Warning, "Snapcast service not connected for operation: {Operation}")]
+    [LoggerMessage(6010, LogLevel.Warning, "Snapcast service not connected for operation: {Operation}")]
     private partial void LogNotConnected(string operation);
 
     [LoggerMessage(
@@ -134,7 +134,7 @@ public partial class SnapcastService
     )]
     private partial void LogStatusNotificationError(string statusType, string targetId, Exception exception);
 
-    [LoggerMessage(1012, LogLevel.Information, "Snapcast service stopped successfully")]
+    [LoggerMessage(6012, LogLevel.Information, "Snapcast service stopped successfully")]
     private partial void LogServiceStopped();
 
     #endregion
