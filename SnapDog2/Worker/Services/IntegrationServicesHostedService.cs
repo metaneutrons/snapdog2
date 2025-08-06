@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Abstractions;
+using SnapDog2.Core.Interfaces;
 
 /// <summary>
 /// Hosted service responsible for initializing integration services (Snapcast, MQTT, KNX, etc.) on application startup.
@@ -47,29 +48,41 @@ public partial class IntegrationServicesHostedService : BackgroundService
     [LoggerMessage(5007, LogLevel.Warning, "KNX service not registered - skipping initialization")]
     private partial void LogKnxNotRegistered();
 
-    [LoggerMessage(5008, LogLevel.Information, "✅ Snapcast service initialized successfully")]
+    [LoggerMessage(5008, LogLevel.Information, "Initializing Subsonic service...")]
+    private partial void LogInitializingSubsonic();
+
+    [LoggerMessage(5009, LogLevel.Warning, "Subsonic service not registered - skipping initialization")]
+    private partial void LogSubsonicNotRegistered();
+
+    [LoggerMessage(5010, LogLevel.Information, "✅ Snapcast service initialized successfully")]
     private partial void LogSnapcastInitialized();
 
-    [LoggerMessage(5009, LogLevel.Information, "✅ MQTT service initialized successfully - Connected: {IsConnected}")]
+    [LoggerMessage(5011, LogLevel.Information, "✅ MQTT service initialized successfully - Connected: {IsConnected}")]
     private partial void LogMqttInitialized(bool isConnected);
 
-    [LoggerMessage(5010, LogLevel.Information, "✅ KNX service initialized successfully - Connected: {IsConnected}")]
+    [LoggerMessage(5012, LogLevel.Information, "✅ KNX service initialized successfully - Connected: {IsConnected}")]
     private partial void LogKnxInitialized(bool isConnected);
 
-    [LoggerMessage(5011, LogLevel.Error, "❌ Failed to initialize Snapcast service: {ErrorMessage}")]
+    [LoggerMessage(5013, LogLevel.Information, "✅ Subsonic service initialized successfully")]
+    private partial void LogSubsonicInitialized();
+
+    [LoggerMessage(5014, LogLevel.Error, "❌ Failed to initialize Snapcast service: {ErrorMessage}")]
     private partial void LogSnapcastInitializationFailed(string errorMessage);
 
-    [LoggerMessage(5012, LogLevel.Error, "❌ Failed to initialize MQTT service: {ErrorMessage}")]
+    [LoggerMessage(5015, LogLevel.Error, "❌ Failed to initialize MQTT service: {ErrorMessage}")]
     private partial void LogMqttInitializationFailed(string errorMessage);
 
-    [LoggerMessage(5013, LogLevel.Error, "❌ Failed to initialize KNX service: {ErrorMessage}")]
+    [LoggerMessage(5016, LogLevel.Error, "❌ Failed to initialize KNX service: {ErrorMessage}")]
     private partial void LogKnxInitializationFailed(string errorMessage);
 
-    [LoggerMessage(5014, LogLevel.Information, "✅ All integration services initialized successfully: [{Services}]")]
+    [LoggerMessage(5017, LogLevel.Error, "❌ Failed to initialize Subsonic service: {ErrorMessage}")]
+    private partial void LogSubsonicInitializationFailed(string errorMessage);
+
+    [LoggerMessage(5018, LogLevel.Information, "✅ All integration services initialized successfully: [{Services}]")]
     private partial void LogAllServicesInitialized(string services);
 
     [LoggerMessage(
-        5015,
+        5019,
         LogLevel.Warning,
         "⚠️  SYSTEM DEGRADED: Non-critical integration services failed, but core functionality remains available. Failed: [{FailedServices}], Successful: [{SuccessfulServices}]"
     )]
@@ -148,6 +161,18 @@ public partial class IntegrationServicesHostedService : BackgroundService
                 this.LogKnxNotRegistered();
             }
 
+            // Initialize Subsonic service if available
+            var subsonicService = this._serviceProvider.GetService<ISubsonicService>();
+            if (subsonicService != null)
+            {
+                this.LogInitializingSubsonic();
+                initializationTasks.Add(this.InitializeSubsonicServiceAsync(subsonicService, stoppingToken));
+            }
+            else
+            {
+                this.LogSubsonicNotRegistered();
+            }
+
             // Wait for all services to initialize and track results
             if (initializationTasks.Count > 0)
             {
@@ -169,6 +194,18 @@ public partial class IntegrationServicesHostedService : BackgroundService
                 if (knxService != null)
                 {
                     serviceStates.Add(("KNX", knxService.IsConnected, false)); // Non-critical, building automation
+                }
+
+                if (subsonicService != null)
+                {
+                    // Subsonic doesn't have IsConnected property, so we assume it's available if registered
+                    serviceStates.Add(("Subsonic", true, false)); // Non-critical, music streaming
+                }
+
+                if (subsonicService != null)
+                {
+                    // Subsonic doesn't have IsConnected property, so we assume it's available if registered
+                    serviceStates.Add(("Subsonic", true, false)); // Non-critical, music streaming
                 }
 
                 var successfulServices = serviceStates.Where(s => s.IsConnected).ToList();
@@ -291,6 +328,29 @@ public partial class IntegrationServicesHostedService : BackgroundService
         catch (Exception ex)
         {
             this.LogKnxInitializationFailed(ex.Message);
+        }
+    }
+
+    private async Task InitializeSubsonicServiceAsync(
+        ISubsonicService subsonicService,
+        CancellationToken cancellationToken
+    )
+    {
+        try
+        {
+            var result = await subsonicService.InitializeAsync(cancellationToken);
+            if (result.IsSuccess)
+            {
+                this.LogSubsonicInitialized();
+            }
+            else
+            {
+                this.LogSubsonicInitializationFailed(result.ErrorMessage ?? "Unknown error");
+            }
+        }
+        catch (Exception ex)
+        {
+            this.LogSubsonicInitializationFailed(ex.Message);
         }
     }
 

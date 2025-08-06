@@ -96,6 +96,15 @@ public static class CortexMediatorConfiguration
         services.AddScoped<Server.Features.Clients.Handlers.GetClientQueryHandler>();
         services.AddScoped<Server.Features.Clients.Handlers.GetClientsByZoneQueryHandler>();
 
+        // Playlist query handlers
+        services.AddScoped<Server.Features.Playlists.Handlers.GetAllPlaylistsQueryHandler>();
+        services.AddScoped<Server.Features.Playlists.Handlers.GetPlaylistQueryHandler>();
+        services.AddScoped<Server.Features.Playlists.Handlers.GetStreamUrlQueryHandler>();
+        services.AddScoped<Server.Features.Playlists.Handlers.TestSubsonicConnectionQueryHandler>();
+        services.AddScoped<Server.Features.Playlists.Handlers.GetPlaylistQueryHandler>();
+        services.AddScoped<Server.Features.Playlists.Handlers.GetStreamUrlQueryHandler>();
+        services.AddScoped<Server.Features.Playlists.Handlers.TestSubsonicConnectionQueryHandler>();
+
         // Notification handlers
         services.AddScoped<Server.Features.Shared.Handlers.ZoneStateNotificationHandler>();
         services.AddScoped<Server.Features.Shared.Handlers.ClientStateNotificationHandler>();

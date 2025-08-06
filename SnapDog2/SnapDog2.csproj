@@ -25,5 +25,6 @@
     <PackageReference Include="Polly" />
     <PackageReference Include="GitVersion.MsBuild" PrivateAssets="All" />
     <PackageReference Include="System.CommandLine" />
+    <PackageReference Include="SubsonicMedia" />
   </ItemGroup>
 </Project>

@@ -172,11 +172,19 @@ static WebApplication CreateWebApplication(string[] args)
     {
         builder.Services.AddMqttServices().ValidateMqttConfiguration();
     }
+    else
+    {
+        Log.Information("MQTT is disabled in configuration (SNAPDOG_SERVICES_MQTT_ENABLED=false)");
+    }
 
     // Add KNX services
     if (snapDogConfig.Services.Knx.Enabled)
     {
         builder.Services.AddKnxService(snapDogConfig);
+    }
+    else
+    {
+        Log.Information("KNX is disabled in configuration (SNAPDOG_SERVICES_KNX_ENABLED=false)");
     }
 
     // Skip hosted services in test environment
@@ -220,6 +228,22 @@ static WebApplication CreateWebApplication(string[] args)
         SnapDog2.Core.Abstractions.IPlaylistManager,
         SnapDog2.Infrastructure.Services.PlaylistManager
     >();
+
+    // Subsonic integration service
+    if (snapDogConfig.Services.Subsonic.Enabled)
+    {
+        builder.Services.AddHttpClient<
+            SnapDog2.Core.Interfaces.ISubsonicService,
+            SnapDog2.Infrastructure.Subsonic.SubsonicService
+        >(client =>
+        {
+            client.Timeout = TimeSpan.FromMilliseconds(snapDogConfig.Services.Subsonic.Timeout);
+        });
+    }
+    else
+    {
+        Log.Information("Subsonic is disabled in configuration (SNAPDOG_SERVICES_SUBSONIC_ENABLED=false)");
+    }
 
     // Configure resilient web host with port from configuration
     if (snapDogConfig.Api.Enabled)

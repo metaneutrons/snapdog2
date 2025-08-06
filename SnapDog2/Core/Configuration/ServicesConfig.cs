@@ -326,4 +326,30 @@ public class SubsonicConfig
     /// </summary>
     [Env(Key = "TIMEOUT", Default = 10000)]
     public int Timeout { get; set; } = 10000;
+
+    /// <summary>
+    /// Resilience policy configuration for Subsonic operations.
+    /// Maps environment variables with prefix: SNAPDOG_SERVICES_SUBSONIC_RESILIENCE_*
+    /// </summary>
+    [Env(NestedPrefix = "RESILIENCE_")]
+    public ResilienceConfig Resilience { get; set; } =
+        new()
+        {
+            Connection = new PolicyConfig
+            {
+                MaxRetries = 3,
+                RetryDelayMs = 1000,
+                BackoffType = "Exponential",
+                UseJitter = true,
+                TimeoutSeconds = 10,
+            },
+            Operation = new PolicyConfig
+            {
+                MaxRetries = 2,
+                RetryDelayMs = 500,
+                BackoffType = "Linear",
+                UseJitter = false,
+                TimeoutSeconds = 30,
+            },
+        };
 }
