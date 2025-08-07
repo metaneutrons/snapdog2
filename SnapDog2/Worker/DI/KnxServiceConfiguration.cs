@@ -53,12 +53,29 @@ public static class KnxServiceConfiguration
 
         logger.LogInformation(
             "Registering KNX service with {ConnectionType} connection",
-            string.IsNullOrEmpty(knxConfig.Gateway) ? "USB" : "IP Tunneling"
+            knxConfig.ConnectionType switch
+            {
+                KnxConnectionType.Tunnel => "IP Tunneling",
+                KnxConnectionType.Router => "IP Routing",
+                KnxConnectionType.Usb => "USB",
+                _ => "Unknown",
+            }
         );
 
         if (!string.IsNullOrEmpty(knxConfig.Gateway))
         {
-            logger.LogInformation("KNX IP Tunneling: {Gateway}:{Port}", knxConfig.Gateway, knxConfig.Port);
+            var connectionTypeText = knxConfig.ConnectionType switch
+            {
+                KnxConnectionType.Tunnel => "IP Tunneling",
+                KnxConnectionType.Router => "IP Routing",
+                _ => "IP Connection",
+            };
+            logger.LogInformation(
+                "KNX {ConnectionType}: {Gateway}:{Port}",
+                connectionTypeText,
+                knxConfig.Gateway,
+                knxConfig.Port
+            );
         }
 
         // Count configured KNX zones and clients

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SnapDog2.Core.Configuration;
+using SnapDog2.Core.Enums;
 using SnapDog2.Extensions;
 using SnapDog2.Helpers;
 
@@ -329,7 +330,13 @@ public class StartupInformationService : IHostedService
         // KNX
         if (this._config.Services.Knx.Enabled)
         {
-            var connectionType = string.IsNullOrEmpty(this._config.Services.Knx.Gateway) ? "USB" : "IP Tunneling";
+            var connectionType = this._config.Services.Knx.ConnectionType switch
+            {
+                KnxConnectionType.Tunnel => "IP Tunneling",
+                KnxConnectionType.Router => "IP Routing",
+                KnxConnectionType.Usb => "USB",
+                _ => "Unknown",
+            };
             this._logger.LogInformation(
                 "     KNX: {ConnectionType} - {KnxGateway}:{KnxPort} (Timeout: {KnxTimeout}s)",
                 connectionType,

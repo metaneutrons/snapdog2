@@ -1,6 +1,7 @@
 namespace SnapDog2.Infrastructure.Services;
 
 using System.Collections.Concurrent;
+using System.Linq;
 using Cortex.Mediator;
 using Cortex.Mediator.Notifications;
 using Knx.Falcon;
@@ -389,8 +390,35 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             return null;
         }
 
-        LogUsingIpRouting(_config.Gateway);
-        return new IpRoutingConnectorParameters(System.Net.IPAddress.Parse(_config.Gateway));
+        try
+        {
+            // Try to parse as IP address first
+            if (System.Net.IPAddress.TryParse(_config.Gateway, out var ipAddress))
+            {
+                LogUsingIpRouting(_config.Gateway);
+                return new IpRoutingConnectorParameters(ipAddress);
+            }
+
+            // If not an IP address, resolve hostname to IP address
+            var hostEntry = System.Net.Dns.GetHostEntry(_config.Gateway);
+            var resolvedIp = hostEntry.AddressList.FirstOrDefault(addr =>
+                addr.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork
+            );
+
+            if (resolvedIp == null)
+            {
+                LogGatewayRequired($"IP Routing (failed to resolve hostname '{_config.Gateway}' to IPv4 address)");
+                return null;
+            }
+
+            LogUsingIpRouting($"{_config.Gateway} ({resolvedIp})");
+            return new IpRoutingConnectorParameters(resolvedIp);
+        }
+        catch (Exception ex)
+        {
+            LogGatewayRequired($"IP Routing (error resolving '{_config.Gateway}': {ex.Message})");
+            return null;
+        }
     }
 
     private ConnectorParameters? CreateUsbConnectorParameters()

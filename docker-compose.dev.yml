@@ -154,10 +154,10 @@ services:
       context: ./devcontainer/knxd
       dockerfile: Dockerfile
     environment:
-      - ADDRESS=1.1.128 # KNX daemon address
-      - CLIENT_ADDRESS=1.1.129:8 # Client address range
+      - ADDRESS=0.0.1 # KNX daemon address (standard format)
+      - CLIENT_ADDRESS=0.0.2:8 # Client address range (start:count)
       - INTERFACE=dummy # Use dummy interface for simulation
-      - DEBUG_LEVEL=info # Debug level
+      - DEBUG_LEVEL=verbose # Debug level (verbose for troubleshooting)
       - FILTERS=single,pace:queue # Filters with queue to avoid warnings
     ports:
       - "3671:3671/udp" # KNX/IP port

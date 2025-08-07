@@ -229,8 +229,8 @@ public class KnxConfig
     /// KNX connection type (tunnel, router, usb).
     /// Maps to: SNAPDOG_SERVICES_KNX_CONNECTION_TYPE
     /// </summary>
-    [Env(Key = "CONNECTION_TYPE", Default = KnxConnectionType.Tunnel)]
-    public KnxConnectionType ConnectionType { get; set; } = KnxConnectionType.Tunnel;
+    [Env(Key = "CONNECTION_TYPE", Default = KnxConnectionType.Router)]
+    public KnxConnectionType ConnectionType { get; set; } = KnxConnectionType.Router;
 
     /// <summary>
     /// KNX gateway address.
