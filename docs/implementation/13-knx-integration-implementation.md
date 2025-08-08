@@ -212,11 +212,13 @@ public class KnxConfig
 ```bash
 # KNX Service Configuration
 SNAPDOG_SERVICES_KNX_ENABLED=true
-SNAPDOG_SERVICES_KNX_CONNECTION_TYPE=tunnel    # tunnel|router|usb
-SNAPDOG_SERVICES_KNX_GATEWAY=192.168.1.100     # Required for IP connections
-SNAPDOG_SERVICES_KNX_PORT=3671                 # Default: 3671
-SNAPDOG_SERVICES_KNX_TIMEOUT=10                # Default: 10 seconds
-SNAPDOG_SERVICES_KNX_AUTO_RECONNECT=true       # Default: true
+SNAPDOG_SERVICES_KNX_CONNECTION_TYPE=router         # tunnel|router|usb (default: router)
+SNAPDOG_SERVICES_KNX_GATEWAY=192.168.1.100          # Required for tunnel connections only
+SNAPDOG_SERVICES_KNX_MULTICAST_ADDRESS=224.0.23.12  # Default: 224.0.23.12 (for router connections)
+SNAPDOG_SERVICES_KNX_USB_DEVICE=                    # Optional USB device identifier (for USB connections)
+SNAPDOG_SERVICES_KNX_PORT=3671                      # Default: 3671
+SNAPDOG_SERVICES_KNX_TIMEOUT=10                     # Default: 10 seconds
+SNAPDOG_SERVICES_KNX_AUTO_RECONNECT=true            # Default: true
 
 # Zone KNX Configuration
 SNAPDOG_ZONE_1_KNX_ENABLED=true
@@ -292,9 +294,10 @@ SNAPDOG_SERVICES_KNX_PORT=3671
 #### 14.3.6.2. **IP Routing (Direct Backbone)**
 
 ```bash
-# For KNX/IP routers with multicast
+# For KNX/IP routers with multicast (recommended default)
 SNAPDOG_SERVICES_KNX_CONNECTION_TYPE=router
-SNAPDOG_SERVICES_KNX_GATEWAY=224.0.23.12  # Multicast address
+SNAPDOG_SERVICES_KNX_MULTICAST_ADDRESS=224.0.23.12  # Standard KNX multicast address (default)
+# Gateway parameter is ignored for router connections
 ```
 
 #### 14.3.6.3. **USB Connection (Hardware Interface)**
@@ -302,8 +305,93 @@ SNAPDOG_SERVICES_KNX_GATEWAY=224.0.23.12  # Multicast address
 ```bash
 # For direct USB KNX interfaces
 SNAPDOG_SERVICES_KNX_CONNECTION_TYPE=usb
-# Gateway not needed - auto-discovers USB devices
+SNAPDOG_SERVICES_KNX_USB_DEVICE=                    # Optional: specific USB device identifier
+# Gateway and multicast address are ignored for USB connections
+# If USB_DEVICE is not specified, first available device is used
 ```
+
+### 14.3.7. **Connection Type Configuration Details**
+
+#### 14.3.7.1. **Router Mode (Multicast) - Recommended Default**
+
+Router mode uses KNX IP Routing with multicast communication, which is the most efficient and widely supported method for KNX integration:
+
+- **Multicast Address**: Uses the standard KNX multicast address `224.0.23.12:3671`
+- **No Gateway Required**: Connects directly to the KNX backbone via multicast
+- **Multiple Applications**: Only one application can bind to the multicast address at a time
+- **Network Requirements**: Requires multicast-enabled network infrastructure
+
+```bash
+SNAPDOG_SERVICES_KNX_CONNECTION_TYPE=router
+SNAPDOG_SERVICES_KNX_MULTICAST_ADDRESS=224.0.23.12  # Default, can be customized
+SNAPDOG_SERVICES_KNX_PORT=3671                      # Standard KNX port
+```
+
+#### 14.3.7.2. **Tunnel Mode (Point-to-Point)**
+
+Tunnel mode creates a dedicated connection to a specific KNX/IP gateway:
+
+- **Gateway Required**: Must specify the IP address of the KNX/IP gateway
+- **Point-to-Point**: Creates a dedicated tunnel connection
+- **Multiple Connections**: Multiple applications can connect to the same gateway
+- **Resource Usage**: Uses more network resources than router mode
+
+```bash
+SNAPDOG_SERVICES_KNX_CONNECTION_TYPE=tunnel
+SNAPDOG_SERVICES_KNX_GATEWAY=192.168.1.100          # Required: KNX/IP gateway address
+SNAPDOG_SERVICES_KNX_PORT=3671                      # Gateway port
+```
+
+#### 14.3.7.3. **USB Mode (Direct Hardware)**
+
+USB mode connects directly to a KNX USB interface:
+
+- **Hardware Connection**: Requires physical USB KNX interface
+- **Auto-Discovery**: Automatically discovers available USB devices
+- **Device Selection**: Optionally specify a specific USB device identifier
+- **No Network**: Does not require network connectivity to KNX bus
+
+```bash
+SNAPDOG_SERVICES_KNX_CONNECTION_TYPE=usb
+SNAPDOG_SERVICES_KNX_USB_DEVICE=MyKNXInterface      # Optional: specific device identifier
+# If USB_DEVICE is empty, first available device is used
+```
+
+#### 14.3.7.4. **Configuration Priority and Validation**
+
+The KNX service validates configuration based on the selected connection type:
+
+1. **Router Mode**: 
+   - `MULTICAST_ADDRESS` is used (defaults to `224.0.23.12`)
+   - `GATEWAY` parameter is ignored
+   - `USB_DEVICE` parameter is ignored
+
+2. **Tunnel Mode**:
+   - `GATEWAY` parameter is required
+   - `MULTICAST_ADDRESS` parameter is ignored
+   - `USB_DEVICE` parameter is ignored
+
+3. **USB Mode**:
+   - `USB_DEVICE` parameter is optional (auto-discovery if not specified)
+   - `GATEWAY` parameter is ignored
+   - `MULTICAST_ADDRESS` parameter is ignored
+
+#### 14.3.7.5. **Error Handling and Troubleshooting**
+
+Common configuration issues and solutions:
+
+**Router Mode Issues:**
+- **"Address already in use"**: Another KNX application is using the multicast address
+- **Solution**: Stop other KNX applications or use tunnel mode instead
+
+**Tunnel Mode Issues:**
+- **"Gateway address required"**: Missing or invalid gateway configuration
+- **Solution**: Set `SNAPDOG_SERVICES_KNX_GATEWAY` to valid KNX/IP gateway address
+
+**USB Mode Issues:**
+- **"No KNX USB devices found"**: No USB KNX interface detected
+- **"Configured USB device not found"**: Specified device identifier not found
+- **Solution**: Check USB connections and device availability
 
 ## 14.4. 📊 **IMPLEMENTATION STATISTICS**
 
@@ -442,10 +530,10 @@ knxd:
 ### 14.7.2. **Production Configuration**
 
 ```bash
-# Enable KNX with IP Tunneling
+# Enable KNX with IP Routing (recommended default)
 SNAPDOG_SERVICES_KNX_ENABLED=true
-SNAPDOG_SERVICES_KNX_CONNECTION_TYPE=tunnel
-SNAPDOG_SERVICES_KNX_GATEWAY=192.168.1.100
+SNAPDOG_SERVICES_KNX_CONNECTION_TYPE=router
+SNAPDOG_SERVICES_KNX_MULTICAST_ADDRESS=224.0.23.12  # Standard KNX multicast (default)
 SNAPDOG_SERVICES_KNX_PORT=3671
 SNAPDOG_SERVICES_KNX_AUTO_RECONNECT=true
 
@@ -591,8 +679,9 @@ private ConnectorParameters? CreateRoutingConnectorParameters()
 
 **Test Configuration:**
 ```bash
-SNAPDOG_SERVICES_KNX_CONNECTION_TYPE=tunnel  # String value
-SNAPDOG_SERVICES_KNX_CONNECTION_TYPE=router  # String value
+SNAPDOG_SERVICES_KNX_CONNECTION_TYPE=tunnel  # String value (requires gateway)
+SNAPDOG_SERVICES_KNX_CONNECTION_TYPE=router  # String value (uses multicast, default)
+SNAPDOG_SERVICES_KNX_CONNECTION_TYPE=usb     # String value (auto-discovers USB devices)
 ```
 
 **Results:**
@@ -644,12 +733,13 @@ SNAPDOG_SERVICES_KNX_CONNECTION_TYPE=router  # String value
 ### 14.10.4. **Development Environment Testing Commands**
 
 ```bash
-# Test tunnel mode
-echo "SNAPDOG_SERVICES_KNX_CONNECTION_TYPE=tunnel" >> devcontainer/.env
+# Test router mode (default, recommended)
+echo "SNAPDOG_SERVICES_KNX_CONNECTION_TYPE=router" >> devcontainer/.env
 docker compose down app && docker compose up app -d
 
-# Test router mode  
-echo "SNAPDOG_SERVICES_KNX_CONNECTION_TYPE=router" >> devcontainer/.env
+# Test tunnel mode
+echo "SNAPDOG_SERVICES_KNX_CONNECTION_TYPE=tunnel" >> devcontainer/.env
+echo "SNAPDOG_SERVICES_KNX_GATEWAY=192.168.1.100" >> devcontainer/.env
 docker compose down app && docker compose up app -d
 
 # Verify environment variable

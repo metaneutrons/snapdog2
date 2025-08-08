@@ -233,14 +233,28 @@ public class KnxConfig
     public KnxConnectionType ConnectionType { get; set; } = KnxConnectionType.Router;
 
     /// <summary>
-    /// KNX gateway address.
+    /// KNX gateway address (required for tunnel connections only).
     /// Maps to: SNAPDOG_SERVICES_KNX_GATEWAY
     /// </summary>
     [Env(Key = "GATEWAY")]
     public string? Gateway { get; set; }
 
     /// <summary>
-    /// KNX gateway port.
+    /// KNX multicast address for router connections (default: 224.0.23.12).
+    /// Maps to: SNAPDOG_SERVICES_KNX_MULTICAST_ADDRESS
+    /// </summary>
+    [Env(Key = "MULTICAST_ADDRESS", Default = "224.0.23.12")]
+    public string MulticastAddress { get; set; } = "224.0.23.12";
+
+    /// <summary>
+    /// KNX USB device identifier for USB connections.
+    /// Maps to: SNAPDOG_SERVICES_KNX_USB_DEVICE
+    /// </summary>
+    [Env(Key = "USB_DEVICE")]
+    public string? UsbDevice { get; set; }
+
+    /// <summary>
+    /// KNX port number (default: 3671).
     /// Maps to: SNAPDOG_SERVICES_KNX_PORT
     /// </summary>
     [Env(Key = "PORT", Default = 3671)]

@@ -384,39 +384,35 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
 
     private ConnectorParameters? CreateRoutingConnectorParameters()
     {
-        if (string.IsNullOrEmpty(_config.Gateway))
-        {
-            LogGatewayRequired("IP Routing");
-            return null;
-        }
+        var multicastAddress = _config.MulticastAddress;
 
         try
         {
             // Try to parse as IP address first
-            if (System.Net.IPAddress.TryParse(_config.Gateway, out var ipAddress))
+            if (System.Net.IPAddress.TryParse(multicastAddress, out var ipAddress))
             {
-                LogUsingIpRouting(_config.Gateway);
+                LogUsingIpRouting(multicastAddress);
                 return new IpRoutingConnectorParameters(ipAddress);
             }
 
             // If not an IP address, resolve hostname to IP address
-            var hostEntry = System.Net.Dns.GetHostEntry(_config.Gateway);
+            var hostEntry = System.Net.Dns.GetHostEntry(multicastAddress);
             var resolvedIp = hostEntry.AddressList.FirstOrDefault(addr =>
                 addr.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork
             );
 
             if (resolvedIp == null)
             {
-                LogGatewayRequired($"IP Routing (failed to resolve hostname '{_config.Gateway}' to IPv4 address)");
+                LogMulticastAddressResolutionFailed(multicastAddress);
                 return null;
             }
 
-            LogUsingIpRouting($"{_config.Gateway} ({resolvedIp})");
+            LogUsingIpRouting($"{multicastAddress} ({resolvedIp})");
             return new IpRoutingConnectorParameters(resolvedIp);
         }
         catch (Exception ex)
         {
-            LogGatewayRequired($"IP Routing (error resolving '{_config.Gateway}': {ex.Message})");
+            LogMulticastAddressError(multicastAddress, ex.Message);
             return null;
         }
     }
@@ -430,6 +426,26 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             return null;
         }
 
+        // If a specific USB device is configured, try to find it
+        if (!string.IsNullOrEmpty(_config.UsbDevice))
+        {
+            var specificDevice = usbDevices.FirstOrDefault(d =>
+                d.ToString().Contains(_config.UsbDevice, StringComparison.OrdinalIgnoreCase)
+            );
+
+            if (specificDevice != null)
+            {
+                LogUsingSpecificUsbDevice(_config.UsbDevice, specificDevice.ToString());
+                return UsbConnectorParameters.FromDiscovery(specificDevice);
+            }
+            else
+            {
+                LogSpecificUsbDeviceNotFound(_config.UsbDevice);
+                // Fall back to first available device
+            }
+        }
+
+        // Use first available USB device
         LogUsingUsbDevice(usbDevices[0].ToString());
         return UsbConnectorParameters.FromDiscovery(usbDevices[0]);
     }
@@ -829,11 +845,11 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
     [LoggerMessage(8011, LogLevel.Error, "KNX connection error")]
     private partial void LogConnectionError(Exception exception);
 
-    [LoggerMessage(8031, LogLevel.Error, "KNX connection error: {ErrorMessage}")]
+    [LoggerMessage(8012, LogLevel.Error, "KNX connection error: {ErrorMessage}")]
     private partial void LogConnectionErrorMessage(string errorMessage);
 
     [LoggerMessage(
-        8033,
+        8013,
         LogLevel.Information,
         "🚀 Attempting KNX connection to {Gateway}:{Port} (attempt {AttemptNumber}/{MaxAttempts}: {ErrorMessage})"
     )]
@@ -845,67 +861,83 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
         string errorMessage
     );
 
-    [LoggerMessage(8012, LogLevel.Debug, "Using KNX IP tunneling connection to {Gateway}:{Port}")]
+    [LoggerMessage(8014, LogLevel.Debug, "Using KNX IP tunneling connection to {Gateway}:{Port}")]
     private partial void LogUsingIpTunneling(string gateway, int port);
 
-    [LoggerMessage(8013, LogLevel.Debug, "Using KNX IP routing connection to {Gateway}")]
+    [LoggerMessage(8015, LogLevel.Debug, "Using KNX IP routing connection to {Gateway}")]
     private partial void LogUsingIpRouting(string gateway);
 
-    [LoggerMessage(8014, LogLevel.Debug, "Using KNX USB device: {Device}")]
+    [LoggerMessage(8016, LogLevel.Debug, "Using KNX USB device: {Device}")]
     private partial void LogUsingUsbDevice(string device);
 
-    [LoggerMessage(8015, LogLevel.Error, "Gateway address is required for {ConnectionType} connection")]
+    [LoggerMessage(8017, LogLevel.Error, "Gateway address is required for {ConnectionType} connection")]
     private partial void LogGatewayRequired(string connectionType);
 
-    [LoggerMessage(8014, LogLevel.Warning, "No KNX USB devices found")]
+    [LoggerMessage(8018, LogLevel.Warning, "No KNX USB devices found")]
     private partial void LogNoUsbDevicesFound();
 
-    [LoggerMessage(8015, LogLevel.Error, "Error creating KNX connector parameters")]
+    [LoggerMessage(8019, LogLevel.Error, "Error creating KNX connector parameters")]
     private partial void LogConnectorParametersError(Exception exception);
 
-    [LoggerMessage(8016, LogLevel.Debug, "KNX group value received: {GroupAddress} = {Value}")]
+    [LoggerMessage(8020, LogLevel.Error, "Failed to resolve multicast address '{MulticastAddress}' to IPv4 address")]
+    private partial void LogMulticastAddressResolutionFailed(string multicastAddress);
+
+    [LoggerMessage(8021, LogLevel.Error, "Error resolving multicast address '{MulticastAddress}': {ErrorMessage}")]
+    private partial void LogMulticastAddressError(string multicastAddress, string errorMessage);
+
+    [LoggerMessage(8022, LogLevel.Debug, "Using specific KNX USB device '{ConfiguredDevice}': {ActualDevice}")]
+    private partial void LogUsingSpecificUsbDevice(string configuredDevice, string actualDevice);
+
+    [LoggerMessage(
+        8023,
+        LogLevel.Warning,
+        "Configured USB device '{ConfiguredDevice}' not found, using first available device"
+    )]
+    private partial void LogSpecificUsbDeviceNotFound(string configuredDevice);
+
+    [LoggerMessage(8024, LogLevel.Debug, "KNX group value received: {GroupAddress} = {Value}")]
     private partial void LogGroupValueReceived(string groupAddress, object value);
 
-    [LoggerMessage(8017, LogLevel.Debug, "KNX command mapped: {GroupAddress} -> {CommandType}")]
+    [LoggerMessage(8025, LogLevel.Debug, "KNX command mapped: {GroupAddress} -> {CommandType}")]
     private partial void LogCommandMapped(string groupAddress, string commandType);
 
-    [LoggerMessage(8018, LogLevel.Error, "Error processing KNX group value from {GroupAddress}")]
+    [LoggerMessage(8026, LogLevel.Error, "Error processing KNX group value from {GroupAddress}")]
     private partial void LogGroupValueProcessingError(string groupAddress, Exception exception);
 
-    [LoggerMessage(8019, LogLevel.Warning, "KNX service not connected for operation: {Operation}")]
+    [LoggerMessage(8027, LogLevel.Warning, "KNX service not connected for operation: {Operation}")]
     private partial void LogNotConnected(string operation);
 
-    [LoggerMessage(8020, LogLevel.Warning, "No KNX group address found for status {StatusId} on target {TargetId}")]
+    [LoggerMessage(8028, LogLevel.Warning, "No KNX group address found for status {StatusId} on target {TargetId}")]
     private partial void LogGroupAddressNotFound(string statusId, int targetId);
 
-    [LoggerMessage(8021, LogLevel.Error, "Error sending KNX status {StatusId} to target {TargetId}")]
+    [LoggerMessage(8029, LogLevel.Error, "Error sending KNX status {StatusId} to target {TargetId}")]
     private partial void LogSendStatusError(string statusId, int targetId, Exception exception);
 
-    [LoggerMessage(8022, LogLevel.Debug, "KNX group value written: {GroupAddress} = {Value}")]
+    [LoggerMessage(8030, LogLevel.Debug, "KNX group value written: {GroupAddress} = {Value}")]
     private partial void LogGroupValueWritten(string groupAddress, object value);
 
-    [LoggerMessage(8023, LogLevel.Error, "Error writing KNX group value {GroupAddress} = {Value}")]
+    [LoggerMessage(8031, LogLevel.Error, "Error writing KNX group value {GroupAddress} = {Value}")]
     private partial void LogWriteGroupValueError(string groupAddress, object value, Exception exception);
 
-    [LoggerMessage(8024, LogLevel.Debug, "KNX group value read: {GroupAddress} = {Value}")]
+    [LoggerMessage(8032, LogLevel.Debug, "KNX group value read: {GroupAddress} = {Value}")]
     private partial void LogGroupValueRead(string groupAddress, object value);
 
-    [LoggerMessage(8025, LogLevel.Error, "Error reading KNX group value from {GroupAddress}")]
+    [LoggerMessage(8033, LogLevel.Error, "Error reading KNX group value from {GroupAddress}")]
     private partial void LogReadGroupValueError(string groupAddress, Exception exception);
 
-    [LoggerMessage(8026, LogLevel.Error, "Error handling KNX status notification {StatusId} for target {TargetId}")]
+    [LoggerMessage(8034, LogLevel.Error, "Error handling KNX status notification {StatusId} for target {TargetId}")]
     private partial void LogStatusNotificationError(string statusId, int targetId, Exception exception);
 
-    [LoggerMessage(8027, LogLevel.Debug, "KNX reconnect timer started")]
+    [LoggerMessage(8035, LogLevel.Debug, "KNX reconnect timer started")]
     private partial void LogReconnectTimerStarted();
 
-    [LoggerMessage(8028, LogLevel.Debug, "Attempting KNX reconnection")]
+    [LoggerMessage(8036, LogLevel.Debug, "Attempting KNX reconnection")]
     private partial void LogAttemptingReconnection();
 
-    [LoggerMessage(8029, LogLevel.Warning, "Invalid target ID '{TargetId}' for status '{StatusId}' - expected integer")]
+    [LoggerMessage(8037, LogLevel.Warning, "Invalid target ID '{TargetId}' for status '{StatusId}' - expected integer")]
     private partial void LogInvalidTargetId(string statusId, string targetId);
 
-    [LoggerMessage(8030, LogLevel.Error, "Error executing KNX command {CommandType}")]
+    [LoggerMessage(8038, LogLevel.Error, "Error executing KNX command {CommandType}")]
     private partial void LogCommandExecutionError(string commandType, Exception exception);
 
     #endregion
