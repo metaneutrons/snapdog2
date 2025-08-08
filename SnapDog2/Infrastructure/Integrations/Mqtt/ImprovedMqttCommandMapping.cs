@@ -13,11 +13,11 @@ using SnapDog2.Server.Features.Zones.Commands.Volume;
 /// Improved MQTT command mapping that follows DRY principles and implements all blueprint commands.
 /// This demonstrates a more elegant approach to command mapping.
 /// </summary>
-public partial class ImprovedMqttCommandMapper
+public partial class MqttCommandMapper
 {
-    private readonly ILogger<ImprovedMqttCommandMapper> _logger;
+    private readonly ILogger<MqttCommandMapper> _logger;
 
-    public ImprovedMqttCommandMapper(ILogger<ImprovedMqttCommandMapper> logger)
+    public MqttCommandMapper(ILogger<MqttCommandMapper> logger)
     {
         this._logger = logger;
     }
