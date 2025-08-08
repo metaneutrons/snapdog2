@@ -214,12 +214,37 @@ services:
     profiles: ["monitoring"]
     restart: unless-stopped
 
+  # KNX Monitor - Visual debugging tool for KNX bus activity
+  knx-monitor:
+    build:
+      context: ./KnxMonitor
+      dockerfile: Dockerfile
+      target: development
+    volumes:
+      - ./KnxMonitor:/app:cached # Mount source code for hot reload
+      - ./Directory.Packages.props:/Directory.Packages.props:ro # Central package management
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+      - DOTNET_USE_POLLING_FILE_WATCHER=true
+      - DOTNET_WATCH_RESTART_ON_RUDE_EDIT=true
+      - KNX_MONITOR_LOGGING_MODE=true # Force logging mode for docker logs
+    command: ["dotnet", "watch", "run", "--", "--gateway", "knxd"]
+    depends_on:
+      - knxd
+    networks:
+      snapdog-dev:
+        ipv4_address: 172.20.0.14
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+
 volumes:
   mqtt_data:
   mqtt_logs:
   navidrome_data:
   caddy_data:
   caddy_config:
+  knx_monitor_nuget:
 
 networks:
   snapdog-dev:
