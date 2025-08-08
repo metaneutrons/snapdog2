@@ -10,7 +10,7 @@ This registration typically occurs within a dedicated DI extension method in the
 
 ```csharp
 // Example: /Worker/DI/CortexMediatorConfiguration.cs
-namespace SnapDog2.Worker.DI;
+namespace SnapDog2.Extensions.DependencyInjection;
 
 using System.Reflection;
 using Cortex.Mediator; // Cortex.Mediator namespace

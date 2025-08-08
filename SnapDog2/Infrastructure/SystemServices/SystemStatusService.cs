@@ -1,4 +1,4 @@
-namespace SnapDog2.Infrastructure.Services;
+namespace SnapDog2.Infrastructure.SystemServices;
 
 using System.Diagnostics;
 using System.Reflection;

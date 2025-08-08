@@ -6,9 +6,9 @@ using Serilog;
 using Serilog.Events;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Extensions;
+using SnapDog2.Extensions.DependencyInjection;
 using SnapDog2.Hosting;
 using SnapDog2.Middleware;
-using SnapDog2.Worker.DI;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // System.CommandLine Flow - Command-Line Argument Parsing
@@ -202,11 +202,11 @@ static WebApplication CreateWebApplication(string[] args)
     // Register placeholder services
     builder.Services.AddScoped<
         SnapDog2.Core.Abstractions.ISystemStatusService,
-        SnapDog2.Infrastructure.Services.SystemStatusService
+        SnapDog2.Infrastructure.SystemServices.SystemStatusService
     >();
     builder.Services.AddScoped<
         SnapDog2.Core.Abstractions.IMetricsService,
-        SnapDog2.Infrastructure.Services.MetricsService
+        SnapDog2.Infrastructure.SystemServices.MetricsService
     >();
     builder.Services.AddScoped<
         SnapDog2.Server.Services.Abstractions.IGlobalStatusService,
@@ -214,18 +214,18 @@ static WebApplication CreateWebApplication(string[] args)
     >();
 
     // Zone management services (placeholder implementations)
-    builder.Services.AddScoped<SnapDog2.Core.Abstractions.IZoneManager, SnapDog2.Infrastructure.Services.ZoneManager>();
+    builder.Services.AddScoped<SnapDog2.Core.Abstractions.IZoneManager, SnapDog2.Infrastructure.Domain.ZoneManager>();
 
     // Client management services (placeholder implementations)
     builder.Services.AddScoped<
         SnapDog2.Core.Abstractions.IClientManager,
-        SnapDog2.Infrastructure.Services.ClientManager
+        SnapDog2.Infrastructure.Domain.ClientManager
     >();
 
     // Playlist management services (placeholder implementations)
     builder.Services.AddScoped<
         SnapDog2.Core.Abstractions.IPlaylistManager,
-        SnapDog2.Infrastructure.Services.PlaylistManager
+        SnapDog2.Infrastructure.Domain.PlaylistManager
     >();
 
     // Subsonic integration service
@@ -233,7 +233,7 @@ static WebApplication CreateWebApplication(string[] args)
     {
         builder.Services.AddHttpClient<
             SnapDog2.Core.Abstractions.ISubsonicService,
-            SnapDog2.Infrastructure.Subsonic.SubsonicService
+            SnapDog2.Infrastructure.Integrations.Subsonic.SubsonicService
         >(client =>
         {
             client.Timeout = TimeSpan.FromMilliseconds(snapDogConfig.Services.Subsonic.Timeout);

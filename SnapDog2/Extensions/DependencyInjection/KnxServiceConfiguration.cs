@@ -1,11 +1,11 @@
-namespace SnapDog2.Worker.DI;
+namespace SnapDog2.Extensions.DependencyInjection;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Core.Enums;
-using SnapDog2.Infrastructure.Services;
+using SnapDog2.Infrastructure.Integrations.Knx;
 
 /// <summary>
 /// Dependency injection configuration for KNX service.

@@ -1,4 +1,4 @@
-namespace SnapDog2.Infrastructure.Services;
+namespace SnapDog2.Infrastructure.Integrations.Mqtt;
 
 using System;
 using System.Buffers;

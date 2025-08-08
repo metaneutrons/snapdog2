@@ -1,4 +1,4 @@
-namespace SnapDog2.Infrastructure.Services;
+namespace SnapDog2.Infrastructure.Domain;
 
 using System.Collections.Generic;
 using System.Linq;

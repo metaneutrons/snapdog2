@@ -1,4 +1,4 @@
-namespace SnapDog2.Tests.Unit.Infrastructure.Services;
+namespace SnapDog2.Tests.Unit.Infrastructure.Integrations.Knx;
 
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 using Moq;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Core.Enums;
-using SnapDog2.Infrastructure.Services;
+using SnapDog2.Infrastructure.Integrations.Knx;
 
 public class KnxServiceTests
 {

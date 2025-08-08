@@ -1,9 +1,9 @@
-namespace SnapDog2.Worker.DI;
+namespace SnapDog2.Extensions.DependencyInjection;
 
 using Microsoft.Extensions.DependencyInjection;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Configuration;
-using SnapDog2.Infrastructure.Services;
+using SnapDog2.Infrastructure.Integrations.Mqtt;
 
 /// <summary>
 /// Dependency injection configuration for enterprise MQTT services.

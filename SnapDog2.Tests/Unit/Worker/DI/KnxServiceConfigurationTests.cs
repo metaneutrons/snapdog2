@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Configuration;
-using SnapDog2.Worker.DI;
+using SnapDog2.Extensions.DependencyInjection;
 
 public class KnxServiceConfigurationTests
 {

@@ -109,7 +109,7 @@ public record StatusChangedNotification(string StatusType, string TargetId, obje
 
 ```csharp
 // In /Worker/DI/CoreServicesExtensions.cs (Example)
-namespace SnapDog2.Worker.DI;
+namespace SnapDog2.Extensions.DependencyInjection;
 
 using Microsoft.Extensions.DependencyInjection;
 using SnapDog2.Core.Abstractions;

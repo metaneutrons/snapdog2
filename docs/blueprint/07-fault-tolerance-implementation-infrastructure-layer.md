@@ -232,7 +232,7 @@ Configured via `HttpClientFactory` extensions (`/Worker/DI/ResilienceExtensions.
 
 ```csharp
 // In /Worker/DI/ResilienceExtensions.cs
-namespace SnapDog2.Worker.DI;
+namespace SnapDog2.Extensions.DependencyInjection;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

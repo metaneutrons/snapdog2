@@ -428,7 +428,7 @@ public class ZonesController : ControllerBase
 
 ```csharp
 // /Worker/DI/CortexMediatorConfiguration.cs
-namespace SnapDog2.Worker.DI;
+namespace SnapDog2.Extensions.DependencyInjection;
 
 using System.Reflection;
 using Cortex.Mediator;

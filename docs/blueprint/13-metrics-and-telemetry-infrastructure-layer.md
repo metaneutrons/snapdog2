@@ -45,7 +45,7 @@ OpenTelemetry pipelines for tracing, metrics, and logging are configured during 
 
 ```csharp
 // Located in /Worker/DI/ObservabilityExtensions.cs
-namespace SnapDog2.Worker.DI;
+namespace SnapDog2.Extensions.DependencyInjection;
 
 using System;
 using System.Diagnostics;
@@ -251,7 +251,7 @@ namespace SnapDog2.Infrastructure.Observability;
 using System.Diagnostics.Metrics;
 using System.Collections.Generic;
 using SnapDog2.Core.Abstractions;
-using SnapDog2.Worker.DI; // To access the static Meter instance defined in ObservabilityExtensions
+using SnapDog2.Extensions.DependencyInjection; // To access the static Meter instance defined in ObservabilityExtensions
 
 /// <summary>
 /// Implements IMetricsService using System.Diagnostics.Metrics for OpenTelemetry.

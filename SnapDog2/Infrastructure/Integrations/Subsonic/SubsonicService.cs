@@ -1,4 +1,4 @@
-namespace SnapDog2.Infrastructure.Subsonic;
+namespace SnapDog2.Infrastructure.Integrations.Subsonic;
 
 using System;
 using System.Collections.Generic;

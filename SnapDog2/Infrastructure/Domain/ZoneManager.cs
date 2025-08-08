@@ -1,4 +1,4 @@
-namespace SnapDog2.Infrastructure.Services;
+namespace SnapDog2.Infrastructure.Domain;
 
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Abstractions;

@@ -1,4 +1,4 @@
-namespace SnapDog2.Infrastructure.Services;
+namespace SnapDog2.Infrastructure.Integrations.Snapcast;
 
 using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;

@@ -1,11 +1,11 @@
-namespace SnapDog2.Infrastructure.Services;
+namespace SnapDog2.Infrastructure.Integrations.Knx;
 
 using System.Collections.Concurrent;
 using System.Linq;
 using Cortex.Mediator.Notifications;
-using Knx.Falcon;
-using Knx.Falcon.Configuration;
-using Knx.Falcon.Sdk;
+using global::Knx.Falcon;
+using global::Knx.Falcon.Configuration;
+using global::Knx.Falcon.Sdk;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -410,7 +410,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
         catch (Exception ex)
         {
             // For KNX connection errors, only log the message without stack trace to reduce noise
-            if (ex is Knx.Falcon.KnxIpConnectorException)
+            if (ex is global::Knx.Falcon.KnxIpConnectorException)
             {
                 this.LogConnectionErrorMessage(ex.Message);
             }

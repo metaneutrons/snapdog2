@@ -1,4 +1,4 @@
-namespace SnapDog2.Worker.DI;
+namespace SnapDog2.Extensions.DependencyInjection;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 using SnapcastClient;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Configuration;
-using SnapDog2.Infrastructure.Services;
+using SnapDog2.Infrastructure.Integrations.Snapcast;
 
 /// <summary>
 /// Extension methods for configuring Snapcast services.

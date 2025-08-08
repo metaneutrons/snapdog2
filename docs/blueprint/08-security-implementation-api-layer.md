@@ -241,7 +241,7 @@ Authentication and Authorization services are configured in `Program.cs` via DI 
 
 ```csharp
 // In /Worker/DI/ApiAuthExtensions.cs
-namespace SnapDog2.Worker.DI;
+namespace SnapDog2.Extensions.DependencyInjection;
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
