@@ -529,22 +529,279 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
 
     private async Task ProcessIncomingMessageAsync(string topic, string payload)
     {
-        // TODO: Implement topic-to-command mapping
-        // This will map MQTT topics to Cortex.Mediator commands
-        // For now, just log the received message
-        this._logger.LogDebug("Received MQTT message on topic {Topic}: {Payload}", topic, payload);
+        try
+        {
+            this._logger.LogDebug("Processing MQTT message on topic {Topic}: {Payload}", topic, payload);
 
-        // Placeholder await to satisfy async pattern - will be replaced with actual command processing
-        await Task.CompletedTask;
+            // Map topic to command and execute via Mediator
+            var command = this.MapTopicToCommand(topic, payload);
+            if (command != null)
+            {
+                using var scope = this._serviceProvider.CreateScope();
+                var mediator = scope.ServiceProvider.GetRequiredService<Cortex.Mediator.IMediator>();
 
-        // Example of how this would work:
-        // var command = MapTopicToCommand(topic, payload);
-        // if (command != null)
-        // {
-        //     using var scope = _serviceProvider.CreateScope();
-        //     var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-        //     await mediator.SendAsync(command);
-        // }
+                // Send the command - the mediator will handle the type resolution
+                switch (command)
+                {
+                    case SnapDog2.Server.Features.Zones.Commands.SetZoneVolumeCommand zoneVolumeCmd:
+                        await mediator.SendCommandAsync<
+                            SnapDog2.Server.Features.Zones.Commands.SetZoneVolumeCommand,
+                            Result
+                        >(zoneVolumeCmd);
+                        break;
+                    case SnapDog2.Server.Features.Zones.Commands.SetZoneMuteCommand zoneMuteCmd:
+                        await mediator.SendCommandAsync<
+                            SnapDog2.Server.Features.Zones.Commands.SetZoneMuteCommand,
+                            Result
+                        >(zoneMuteCmd);
+                        break;
+                    case SnapDog2.Server.Features.Clients.Commands.SetClientVolumeCommand clientVolumeCmd:
+                        await mediator.SendCommandAsync<
+                            SnapDog2.Server.Features.Clients.Commands.SetClientVolumeCommand,
+                            Result
+                        >(clientVolumeCmd);
+                        break;
+                    case SnapDog2.Server.Features.Clients.Commands.SetClientMuteCommand clientMuteCmd:
+                        await mediator.SendCommandAsync<
+                            SnapDog2.Server.Features.Clients.Commands.SetClientMuteCommand,
+                            Result
+                        >(clientMuteCmd);
+                        break;
+                    case SnapDog2.Server.Features.Clients.Commands.SetClientLatencyCommand clientLatencyCmd:
+                        await mediator.SendCommandAsync<
+                            SnapDog2.Server.Features.Clients.Commands.SetClientLatencyCommand,
+                            Result
+                        >(clientLatencyCmd);
+                        break;
+                    default:
+                        this._logger.LogWarning("Unknown command type: {CommandType}", command.GetType().Name);
+                        break;
+                }
+
+                this._logger.LogDebug("Successfully processed MQTT command for topic {Topic}", topic);
+            }
+            else
+            {
+                this._logger.LogDebug("No command mapping found for topic {Topic}", topic);
+            }
+        }
+        catch (Exception ex)
+        {
+            this._logger.LogError(ex, "Failed to process MQTT message on topic {Topic}", topic);
+        }
+    }
+
+    /// <summary>
+    /// Maps MQTT topics to Cortex.Mediator commands based on the topic structure.
+    /// </summary>
+    private object? MapTopicToCommand(string topic, string payload)
+    {
+        try
+        {
+            // Parse the topic structure: snapdog/{zone|client}/{id}/{command}
+            var topicParts = topic.Split('/');
+            if (topicParts.Length < 4 || !topicParts[0].Equals("snapdog", StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+
+            var entityType = topicParts[1].ToLowerInvariant();
+            var entityId = topicParts[2];
+            var command = topicParts[3].ToLowerInvariant();
+
+            // Handle zone commands
+            if (entityType == "zone" && int.TryParse(entityId, out var zoneId))
+            {
+                return this.MapZoneCommand(zoneId, command, payload);
+            }
+
+            // Handle client commands
+            if (entityType == "client")
+            {
+                return this.MapClientCommand(entityId, command, payload);
+            }
+
+            return null;
+        }
+        catch (Exception ex)
+        {
+            this._logger.LogError(ex, "Failed to map topic {Topic} to command", topic);
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Maps zone-specific MQTT commands to Mediator commands.
+    /// </summary>
+    private object? MapZoneCommand(int zoneId, string command, string payload)
+    {
+        // Import zone command types
+        using var scope = this._serviceProvider.CreateScope();
+
+        return command switch
+        {
+            // TODO: Implement these zone commands
+            // "play" => new SnapDog2.Server.Features.Zones.Commands.PlayZoneCommand { ZoneId = zoneId },
+            // "pause" => new SnapDog2.Server.Features.Zones.Commands.PauseZoneCommand { ZoneId = zoneId },
+            // "stop" => new SnapDog2.Server.Features.Zones.Commands.StopZoneCommand { ZoneId = zoneId },
+            "volume" when int.TryParse(payload, out var volume) =>
+                new SnapDog2.Server.Features.Zones.Commands.SetZoneVolumeCommand { ZoneId = zoneId, Volume = volume },
+            "mute" when bool.TryParse(payload, out var mute) =>
+                new SnapDog2.Server.Features.Zones.Commands.SetZoneMuteCommand { ZoneId = zoneId, Enabled = mute },
+            // "track" when int.TryParse(payload, out var trackIndex) =>
+            //     new SnapDog2.Server.Features.Zones.Commands.SetZoneTrackCommand { ZoneId = zoneId, TrackIndex = trackIndex },
+            // "playlist" when int.TryParse(payload, out var playlistIndex) =>
+            //     new SnapDog2.Server.Features.Zones.Commands.SetZonePlaylistCommand { ZoneId = zoneId, PlaylistIndex = playlistIndex },
+            // "next" => new SnapDog2.Server.Features.Zones.Commands.NextZoneTrackCommand { ZoneId = zoneId },
+            // "previous" => new SnapDog2.Server.Features.Zones.Commands.PreviousZoneTrackCommand { ZoneId = zoneId },
+            _ => null,
+        };
+    }
+
+    /// <summary>
+    /// Maps client-specific MQTT commands to Mediator commands.
+    /// </summary>
+    private object? MapClientCommand(string clientId, string command, string payload)
+    {
+        return command switch
+        {
+            "volume" when int.TryParse(payload, out var volume) && int.TryParse(clientId, out var clientIdInt) =>
+                new SnapDog2.Server.Features.Clients.Commands.SetClientVolumeCommand
+                {
+                    ClientId = clientIdInt,
+                    Volume = volume,
+                },
+            "mute" when bool.TryParse(payload, out var mute) && int.TryParse(clientId, out var clientIdInt2) =>
+                new SnapDog2.Server.Features.Clients.Commands.SetClientMuteCommand
+                {
+                    ClientId = clientIdInt2,
+                    Enabled = mute,
+                },
+            "latency" when int.TryParse(payload, out var latency) && int.TryParse(clientId, out var clientIdInt3) =>
+                new SnapDog2.Server.Features.Clients.Commands.SetClientLatencyCommand
+                {
+                    ClientId = clientIdInt3,
+                    LatencyMs = latency,
+                },
+            _ => null,
+        };
+    }
+
+    /// <summary>
+    /// Publishes client status updates to MQTT topics.
+    /// </summary>
+    public async Task<Result> PublishClientStatusAsync<T>(
+        string clientId,
+        string eventType,
+        T payload,
+        CancellationToken cancellationToken = default
+    )
+    {
+        try
+        {
+            if (!this.IsConnected)
+            {
+                return Result.Failure("MQTT client is not connected");
+            }
+
+            // Get client topics for this client
+            if (!this._clientTopics.TryGetValue(clientId, out var topics))
+            {
+                this._logger.LogWarning("No MQTT topics configured for client {ClientId}", clientId);
+                return Result.Success();
+            }
+
+            // Map event type to specific topic
+            var topic = eventType.ToUpperInvariant() switch
+            {
+                "CLIENT_VOLUME" => topics.Status.Volume,
+                "CLIENT_MUTE" => topics.Status.Mute,
+                "CLIENT_LATENCY" => topics.Status.Latency,
+                "CLIENT_CONNECTION" => topics.Status.Connected,
+                "CLIENT_ZONE_ASSIGNMENT" => topics.Status.Zone,
+                "CLIENT_STATE" => topics.Status.State,
+                _ => null,
+            };
+
+            if (topic == null)
+            {
+                this._logger.LogDebug("No MQTT topic mapping for event type {EventType}", eventType);
+                return Result.Success();
+            }
+
+            // Serialize payload
+            var jsonPayload = System.Text.Json.JsonSerializer.Serialize(payload);
+
+            // Publish to MQTT
+            return await this.PublishAsync(topic, jsonPayload, retain: true, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            this._logger.LogError(
+                ex,
+                "Failed to publish client status {EventType} for client {ClientId}",
+                eventType,
+                clientId
+            );
+            return Result.Failure($"Failed to publish client status: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Publishes zone status updates to MQTT topics.
+    /// </summary>
+    public async Task<Result> PublishZoneStatusAsync<T>(
+        int zoneId,
+        string eventType,
+        T payload,
+        CancellationToken cancellationToken = default
+    )
+    {
+        try
+        {
+            if (!this.IsConnected)
+            {
+                return Result.Failure("MQTT client is not connected");
+            }
+
+            // Get zone topics for this zone
+            if (!this._zoneTopics.TryGetValue(zoneId, out var topics))
+            {
+                this._logger.LogWarning("No MQTT topics configured for zone {ZoneId}", zoneId);
+                return Result.Success();
+            }
+
+            // Map event type to specific topic
+            var topic = eventType.ToUpperInvariant() switch
+            {
+                "ZONE_VOLUME" => topics.Status.Volume,
+                "ZONE_MUTE" => topics.Status.Mute,
+                "ZONE_PLAYBACK_STATE" => topics.Status.Control,
+                "ZONE_TRACK" => topics.Status.TrackInfo,
+                "ZONE_PLAYLIST" => topics.Status.PlaylistInfo,
+                "ZONE_REPEAT_MODE" => topics.Status.PlaylistRepeat,
+                "ZONE_SHUFFLE_MODE" => topics.Status.PlaylistShuffle,
+                "ZONE_STATE" => topics.Status.State,
+                _ => null,
+            };
+
+            if (topic == null)
+            {
+                this._logger.LogDebug("No MQTT topic mapping for event type {EventType}", eventType);
+                return Result.Success();
+            }
+
+            // Serialize payload
+            var jsonPayload = System.Text.Json.JsonSerializer.Serialize(payload);
+
+            // Publish to MQTT
+            return await this.PublishAsync(topic, jsonPayload, retain: true, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            this._logger.LogError(ex, "Failed to publish zone status {EventType} for zone {ZoneId}", eventType, zoneId);
+            return Result.Failure($"Failed to publish zone status: {ex.Message}");
+        }
     }
 
     #endregion

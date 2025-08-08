@@ -28,15 +28,6 @@ public static class KnxServiceConfiguration
             .GetRequiredService<ILoggerFactory>()
             .CreateLogger("KnxServiceConfiguration");
 
-        if (!knxConfig.Enabled)
-        {
-            logger.LogInformation("KNX service is disabled via configuration");
-
-            // Register a no-op implementation when disabled
-            services.AddSingleton<IKnxService, NoOpKnxService>();
-            return services;
-        }
-
         // Validate configuration
         var validationResult = ValidateKnxConfiguration(knxConfig, configuration.Zones, configuration.Clients);
         if (!validationResult.IsValid)
@@ -45,10 +36,6 @@ public static class KnxServiceConfiguration
                 "KNX configuration validation failed: {Errors}",
                 string.Join(", ", validationResult.Errors)
             );
-
-            // Register no-op service on validation failure
-            services.AddSingleton<IKnxService, NoOpKnxService>();
-            return services;
         }
 
         logger.LogInformation(
@@ -218,38 +205,4 @@ public static class KnxServiceConfiguration
         public bool IsValid { get; set; }
         public List<string> Errors { get; set; } = new();
     }
-}
-
-/// <summary>
-/// No-operation KNX service implementation used when KNX is disabled or configuration is invalid.
-/// </summary>
-internal class NoOpKnxService : IKnxService
-{
-    public bool IsConnected => false;
-    public ServiceStatus Status => ServiceStatus.Disabled;
-
-    public Task<Result> InitializeAsync(CancellationToken cancellationToken = default) =>
-        Task.FromResult(Result.Success());
-
-    public Task<Result> StopAsync(CancellationToken cancellationToken = default) => Task.FromResult(Result.Success());
-
-    public Task<Result> SendStatusAsync(
-        string statusId,
-        int targetId,
-        object value,
-        CancellationToken cancellationToken = default
-    ) => Task.FromResult(Result.Success());
-
-    public Task<Result> WriteGroupValueAsync(
-        string groupAddress,
-        object value,
-        CancellationToken cancellationToken = default
-    ) => Task.FromResult(Result.Success());
-
-    public Task<Result<object>> ReadGroupValueAsync(
-        string groupAddress,
-        CancellationToken cancellationToken = default
-    ) => Task.FromResult(Result<object>.Failure("KNX service is disabled"));
-
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }

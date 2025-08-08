@@ -12,26 +12,6 @@ using SnapDog2.Worker.DI;
 public class KnxServiceConfigurationTests
 {
     [Fact]
-    public void AddKnxService_WhenDisabled_ShouldRegisterNoOpService()
-    {
-        // Arrange
-        var services = new ServiceCollection();
-        services.AddLogging();
-
-        var configuration = CreateTestConfiguration(enabled: false);
-
-        // Act
-        services.AddKnxService(configuration);
-        var serviceProvider = services.BuildServiceProvider();
-        var knxService = serviceProvider.GetRequiredService<IKnxService>();
-
-        // Assert
-        knxService.Should().NotBeNull();
-        knxService.IsConnected.Should().BeFalse();
-        knxService.Status.Should().Be(SnapDog2.Core.Enums.ServiceStatus.Disabled);
-    }
-
-    [Fact]
     public void AddKnxService_WhenEnabled_ShouldRegisterActualService()
     {
         // Arrange
@@ -52,25 +32,6 @@ public class KnxServiceConfigurationTests
         // Assert
         knxService.Should().NotBeNull();
         knxService.GetType().Name.Should().Be("KnxService");
-    }
-
-    [Fact]
-    public void AddKnxService_WithInvalidConfiguration_ShouldRegisterNoOpService()
-    {
-        // Arrange
-        var services = new ServiceCollection();
-        services.AddLogging();
-
-        var configuration = CreateInvalidTestConfiguration();
-
-        // Act
-        services.AddKnxService(configuration);
-        var serviceProvider = services.BuildServiceProvider();
-        var knxService = serviceProvider.GetRequiredService<IKnxService>();
-
-        // Assert
-        knxService.Should().NotBeNull();
-        knxService.Status.Should().Be(ServiceStatus.Disabled);
     }
 
     [Fact]

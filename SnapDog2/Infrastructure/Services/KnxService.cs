@@ -271,6 +271,81 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
     }
 
     /// <inheritdoc />
+    public async Task<Result> PublishClientStatusAsync<T>(
+        string clientId,
+        string eventType,
+        T payload,
+        CancellationToken cancellationToken = default
+    )
+    {
+        if (!IsConnected)
+        {
+            LogNotConnected("PublishClientStatusAsync");
+            return Result.Failure("KNX service is not connected");
+        }
+
+        try
+        {
+            // Map event type to KNX status ID and convert payload to appropriate KNX value
+            var (statusId, knxValue) = MapClientEventToKnxStatus(eventType, payload);
+            if (statusId == null)
+            {
+                LogDebug($"No KNX mapping for client event type {eventType}");
+                return Result.Success();
+            }
+
+            // For KNX, we need to convert client ID to integer if possible
+            if (int.TryParse(clientId, out var clientIdInt))
+            {
+                return await SendStatusAsync(statusId, clientIdInt, knxValue, cancellationToken);
+            }
+            else
+            {
+                LogInvalidTargetId(statusId, clientId);
+                return Result.Failure($"Invalid client ID for KNX: {clientId}");
+            }
+        }
+        catch (Exception ex)
+        {
+            LogCommandExecutionError($"PublishClientStatus-{eventType}", ex);
+            return Result.Failure($"Failed to publish client status: {ex.Message}");
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task<Result> PublishZoneStatusAsync<T>(
+        int zoneId,
+        string eventType,
+        T payload,
+        CancellationToken cancellationToken = default
+    )
+    {
+        if (!IsConnected)
+        {
+            LogNotConnected("PublishZoneStatusAsync");
+            return Result.Failure("KNX service is not connected");
+        }
+
+        try
+        {
+            // Map event type to KNX status ID and convert payload to appropriate KNX value
+            var (statusId, knxValue) = MapZoneEventToKnxStatus(eventType, payload);
+            if (statusId == null)
+            {
+                LogDebug($"No KNX mapping for zone event type {eventType}");
+                return Result.Success();
+            }
+
+            return await SendStatusAsync(statusId, zoneId, knxValue, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            LogCommandExecutionError($"PublishZoneStatus-{eventType}", ex);
+            return Result.Failure($"Failed to publish zone status: {ex.Message}");
+        }
+    }
+
+    /// <inheritdoc />
     public async Task Handle(StatusChangedNotification notification, CancellationToken cancellationToken)
     {
         if (!IsConnected || !_config.Enabled)
@@ -804,6 +879,85 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             throw new InvalidOperationException($"Handler {typeof(T).Name} not found in DI container");
         }
         return handler;
+    }
+
+    /// <summary>
+    /// Maps client event types to KNX status IDs and converts payloads to KNX-compatible values.
+    /// </summary>
+    private static (string? statusId, object knxValue) MapClientEventToKnxStatus<T>(string eventType, T payload)
+    {
+        return eventType.ToUpperInvariant() switch
+        {
+            "CLIENT_VOLUME" when payload is int volume => ("CLIENT_VOLUME", Math.Clamp(volume, 0, 100)),
+            "CLIENT_MUTE" when payload is bool mute => ("CLIENT_MUTE", mute ? 1 : 0),
+            "CLIENT_LATENCY" when payload is int latency => ("CLIENT_LATENCY", Math.Clamp(latency, 0, 65535)),
+            "CLIENT_CONNECTION" when payload is bool connected => ("CLIENT_CONNECTION", connected ? 1 : 0),
+            _ => (null, payload!),
+        };
+    }
+
+    /// <summary>
+    /// Maps zone event types to KNX status IDs and converts payloads to KNX-compatible values.
+    /// </summary>
+    private static (string? statusId, object knxValue) MapZoneEventToKnxStatus<T>(string eventType, T payload)
+    {
+        return eventType.ToUpperInvariant() switch
+        {
+            "ZONE_VOLUME" when payload is int volume => ("ZONE_VOLUME", Math.Clamp(volume, 0, 100)),
+            "ZONE_MUTE" when payload is bool mute => ("ZONE_MUTE", mute ? 1 : 0),
+            "ZONE_PLAYBACK_STATE" when payload is string state => ("ZONE_PLAYBACK_STATE", MapPlaybackStateToKnx(state)),
+            "ZONE_REPEAT_MODE" when payload is object repeatMode => (
+                "ZONE_REPEAT_MODE",
+                MapRepeatModeToKnx(repeatMode)
+            ),
+            "ZONE_SHUFFLE_MODE" when payload is bool shuffle => ("ZONE_SHUFFLE_MODE", shuffle ? 1 : 0),
+            _ => (null, payload!),
+        };
+    }
+
+    /// <summary>
+    /// Maps playback state strings to KNX values.
+    /// </summary>
+    private static int MapPlaybackStateToKnx(string state)
+    {
+        return state.ToLowerInvariant() switch
+        {
+            "stopped" => 0,
+            "playing" => 1,
+            "paused" => 2,
+            _ => 0,
+        };
+    }
+
+    /// <summary>
+    /// Maps repeat mode objects to KNX values.
+    /// </summary>
+    private static int MapRepeatModeToKnx(object repeatMode)
+    {
+        // For KNX, we'll use a simple encoding: 0=none, 1=track, 2=playlist, 3=both
+        if (repeatMode is { } obj)
+        {
+            var type = obj.GetType();
+            var trackRepeat = type.GetProperty("TrackRepeatEnabled")?.GetValue(obj) as bool? ?? false;
+            var playlistRepeat = type.GetProperty("PlaylistRepeatEnabled")?.GetValue(obj) as bool? ?? false;
+
+            return (trackRepeat, playlistRepeat) switch
+            {
+                (false, false) => 0,
+                (true, false) => 1,
+                (false, true) => 2,
+                (true, true) => 3,
+            };
+        }
+        return 0;
+    }
+
+    /// <summary>
+    /// Helper method for debug logging.
+    /// </summary>
+    private void LogDebug(string message)
+    {
+        _logger.LogDebug(message);
     }
 
     #region Logging

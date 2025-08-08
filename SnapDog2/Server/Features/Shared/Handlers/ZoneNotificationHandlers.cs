@@ -1,9 +1,12 @@
 namespace SnapDog2.Server.Features.Shared.Handlers;
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Cortex.Mediator.Notifications;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using SnapDog2.Core.Abstractions;
 using SnapDog2.Server.Features.Shared.Notifications;
 
 /// <summary>
@@ -19,7 +22,14 @@ public partial class ZoneStateNotificationHandler
         INotificationHandler<ZoneShuffleModeChangedNotification>,
         INotificationHandler<ZoneStateChangedNotification>
 {
+    private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<ZoneStateNotificationHandler> _logger;
+
+    public ZoneStateNotificationHandler(IServiceProvider serviceProvider, ILogger<ZoneStateNotificationHandler> logger)
+    {
+        this._serviceProvider = serviceProvider;
+        this._logger = logger;
+    }
 
     [LoggerMessage(6001, LogLevel.Information, "Zone {ZoneId} volume changed to {Volume}")]
     private partial void LogVolumeChange(int zoneId, int volume);
@@ -53,25 +63,30 @@ public partial class ZoneStateNotificationHandler
     [LoggerMessage(6008, LogLevel.Information, "Zone {ZoneId} complete state changed")]
     private partial void LogStateChange(int zoneId);
 
-    public ZoneStateNotificationHandler(ILogger<ZoneStateNotificationHandler> logger)
-    {
-        this._logger = logger;
-    }
-
     public async Task Handle(ZoneVolumeChangedNotification notification, CancellationToken cancellationToken)
     {
         this.LogVolumeChange(notification.ZoneId, notification.Volume);
 
-        // TODO: Publish to external systems (MQTT, KNX) when infrastructure adapters are implemented
-        await Task.CompletedTask;
+        // Publish to external systems (MQTT, KNX)
+        await this.PublishToExternalSystemsAsync(
+            "ZONE_VOLUME",
+            notification.ZoneId,
+            notification.Volume,
+            cancellationToken
+        );
     }
 
     public async Task Handle(ZoneMuteChangedNotification notification, CancellationToken cancellationToken)
     {
         this.LogMuteChange(notification.ZoneId, notification.IsMuted);
 
-        // TODO: Publish to external systems (MQTT, KNX) when infrastructure adapters are implemented
-        await Task.CompletedTask;
+        // Publish to external systems (MQTT, KNX)
+        await this.PublishToExternalSystemsAsync(
+            "ZONE_MUTE",
+            notification.ZoneId,
+            notification.IsMuted,
+            cancellationToken
+        );
     }
 
     public async Task Handle(ZonePlaybackStateChangedNotification notification, CancellationToken cancellationToken)
@@ -79,24 +94,39 @@ public partial class ZoneStateNotificationHandler
         var playbackStateString = notification.PlaybackState.ToString().ToLowerInvariant();
         this.LogPlaybackStateChange(notification.ZoneId, playbackStateString);
 
-        // TODO: Publish to external systems (MQTT, KNX) when infrastructure adapters are implemented
-        await Task.CompletedTask;
+        // Publish to external systems (MQTT, KNX)
+        await this.PublishToExternalSystemsAsync(
+            "ZONE_PLAYBACK_STATE",
+            notification.ZoneId,
+            playbackStateString,
+            cancellationToken
+        );
     }
 
     public async Task Handle(ZoneTrackChangedNotification notification, CancellationToken cancellationToken)
     {
         this.LogTrackChange(notification.ZoneId, notification.TrackInfo.Title, notification.TrackInfo.Artist);
 
-        // TODO: Publish to external systems (MQTT, KNX) when infrastructure adapters are implemented
-        await Task.CompletedTask;
+        // Publish to external systems (MQTT, KNX)
+        await this.PublishToExternalSystemsAsync(
+            "ZONE_TRACK",
+            notification.ZoneId,
+            notification.TrackInfo,
+            cancellationToken
+        );
     }
 
     public async Task Handle(ZonePlaylistChangedNotification notification, CancellationToken cancellationToken)
     {
         this.LogPlaylistChange(notification.ZoneId, notification.PlaylistInfo.Name, notification.PlaylistIndex);
 
-        // TODO: Publish to external systems (MQTT, KNX) when infrastructure adapters are implemented
-        await Task.CompletedTask;
+        // Publish to external systems (MQTT, KNX)
+        await this.PublishToExternalSystemsAsync(
+            "ZONE_PLAYLIST",
+            notification.ZoneId,
+            new { PlaylistInfo = notification.PlaylistInfo, PlaylistIndex = notification.PlaylistIndex },
+            cancellationToken
+        );
     }
 
     public async Task Handle(ZoneRepeatModeChangedNotification notification, CancellationToken cancellationToken)
@@ -107,23 +137,74 @@ public partial class ZoneStateNotificationHandler
             notification.PlaylistRepeatEnabled
         );
 
-        // TODO: Publish to external systems (MQTT, KNX) when infrastructure adapters are implemented
-        await Task.CompletedTask;
+        // Publish to external systems (MQTT, KNX)
+        await this.PublishToExternalSystemsAsync(
+            "ZONE_REPEAT_MODE",
+            notification.ZoneId,
+            new
+            {
+                TrackRepeatEnabled = notification.TrackRepeatEnabled,
+                PlaylistRepeatEnabled = notification.PlaylistRepeatEnabled,
+            },
+            cancellationToken
+        );
     }
 
     public async Task Handle(ZoneShuffleModeChangedNotification notification, CancellationToken cancellationToken)
     {
         this.LogShuffleModeChange(notification.ZoneId, notification.ShuffleEnabled);
 
-        // TODO: Publish to external systems (MQTT, KNX) when infrastructure adapters are implemented
-        await Task.CompletedTask;
+        // Publish to external systems (MQTT, KNX)
+        await this.PublishToExternalSystemsAsync(
+            "ZONE_SHUFFLE_MODE",
+            notification.ZoneId,
+            notification.ShuffleEnabled,
+            cancellationToken
+        );
     }
 
     public async Task Handle(ZoneStateChangedNotification notification, CancellationToken cancellationToken)
     {
         this.LogStateChange(notification.ZoneId);
 
-        // TODO: Publish to external systems (MQTT, KNX) when infrastructure adapters are implemented
-        await Task.CompletedTask;
+        // Publish to external systems (MQTT, KNX)
+        await this.PublishToExternalSystemsAsync("ZONE_STATE", notification.ZoneId, notification, cancellationToken);
+    }
+
+    /// <summary>
+    /// Publishes zone events to external systems (MQTT, KNX) if they are enabled.
+    /// </summary>
+    private async Task PublishToExternalSystemsAsync<T>(
+        string eventType,
+        int zoneId,
+        T payload,
+        CancellationToken cancellationToken
+    )
+    {
+        try
+        {
+            // Publish to MQTT if enabled
+            var mqttService = this._serviceProvider.GetService<IMqttService>();
+            if (mqttService != null)
+            {
+                await mqttService.PublishZoneStatusAsync(zoneId, eventType, payload, cancellationToken);
+            }
+
+            // Publish to KNX if enabled
+            var knxService = this._serviceProvider.GetService<IKnxService>();
+            if (knxService != null)
+            {
+                await knxService.PublishZoneStatusAsync(zoneId, eventType, payload, cancellationToken);
+            }
+        }
+        catch (Exception ex)
+        {
+            this._logger.LogWarning(
+                ex,
+                "Failed to publish {EventType} for zone {ZoneId} to external systems",
+                eventType,
+                zoneId
+            );
+        }
     }
 }

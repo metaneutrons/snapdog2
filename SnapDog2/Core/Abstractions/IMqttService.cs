@@ -80,6 +80,36 @@ public interface IMqttService : IAsyncDisposable
     bool IsConnected { get; }
 
     /// <summary>
+    /// Publishes client status updates to MQTT topics.
+    /// </summary>
+    /// <param name="clientId">Client identifier.</param>
+    /// <param name="eventType">Type of event (e.g., CLIENT_VOLUME, CLIENT_MUTE).</param>
+    /// <param name="payload">Event payload.</param>
+    /// <param name="cancellationToken">Cancellation token for the operation.</param>
+    /// <returns>Result indicating success or failure.</returns>
+    Task<Result> PublishClientStatusAsync<T>(
+        string clientId,
+        string eventType,
+        T payload,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
+    /// Publishes zone status updates to MQTT topics.
+    /// </summary>
+    /// <param name="zoneId">Zone identifier.</param>
+    /// <param name="eventType">Type of event (e.g., ZONE_VOLUME, ZONE_MUTE).</param>
+    /// <param name="payload">Event payload.</param>
+    /// <param name="cancellationToken">Cancellation token for the operation.</param>
+    /// <returns>Result indicating success or failure.</returns>
+    Task<Result> PublishZoneStatusAsync<T>(
+        int zoneId,
+        string eventType,
+        T payload,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     /// Event fired when MQTT connection is established.
     /// </summary>
     event EventHandler? Connected;

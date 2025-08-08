@@ -63,4 +63,34 @@ public interface IKnxService : IAsyncDisposable
     /// <param name="cancellationToken">Cancellation token for the operation.</param>
     /// <returns>A task representing the asynchronous operation with the read value.</returns>
     Task<Result<object>> ReadGroupValueAsync(string groupAddress, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Publishes client status updates to KNX group addresses.
+    /// </summary>
+    /// <param name="clientId">Client identifier.</param>
+    /// <param name="eventType">Type of event (e.g., CLIENT_VOLUME, CLIENT_MUTE).</param>
+    /// <param name="payload">Event payload.</param>
+    /// <param name="cancellationToken">Cancellation token for the operation.</param>
+    /// <returns>Result indicating success or failure.</returns>
+    Task<Result> PublishClientStatusAsync<T>(
+        string clientId,
+        string eventType,
+        T payload,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
+    /// Publishes zone status updates to KNX group addresses.
+    /// </summary>
+    /// <param name="zoneId">Zone identifier.</param>
+    /// <param name="eventType">Type of event (e.g., ZONE_VOLUME, ZONE_MUTE).</param>
+    /// <param name="payload">Event payload.</param>
+    /// <param name="cancellationToken">Cancellation token for the operation.</param>
+    /// <returns>Result indicating success or failure.</returns>
+    Task<Result> PublishZoneStatusAsync<T>(
+        int zoneId,
+        string eventType,
+        T payload,
+        CancellationToken cancellationToken = default
+    );
 }
