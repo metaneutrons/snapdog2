@@ -1,5 +1,6 @@
 using System.CommandLine;
 using System.CommandLine.Parsing;
+using System.Linq;
 using System.Net.Sockets;
 using KnxMonitor.Models;
 using KnxMonitor.Services;
@@ -28,6 +29,21 @@ public static class Program
     /// <returns>Exit code.</returns>
     public static async Task<int> Main(string[] args)
     {
+        // CRITICAL FIX: Filter out arguments before '--' separator
+        // This handles the issue where 'dotnet watch run --' passes all arguments to the app
+        var separatorIndex = Array.IndexOf(args, "--");
+        if (separatorIndex >= 0 && separatorIndex < args.Length - 1)
+        {
+            // Take only arguments after the '--' separator
+            args = args.Skip(separatorIndex + 1).ToArray();
+        }
+        else if (separatorIndex >= 0)
+        {
+            // '--' found but no arguments after it
+            args = Array.Empty<string>();
+        }
+        // If no '--' separator found, use all arguments as-is (for direct execution)
+
         // Set up global Ctrl+C handling at the application level
         Console.CancelKeyPress += OnCancelKeyPress;
 
@@ -239,12 +255,19 @@ public static class Program
                 .ConfigureServices(services =>
                 {
                     services.AddSingleton(config);
+
+                    // 🔧 Use the WORKING manual decoding service until we fix Falcon SDK integration
                     services.AddSingleton<IKnxMonitorService, KnxMonitorService>();
+                    services.AddSingleton<IDptDecodingService, DptDecodingService>();
 
                     // Register appropriate display service based on environment
                     if (ShouldUseTuiMode())
                     {
-                        services.AddSingleton<IDisplayService, TuiDisplayService>();
+                        services.AddSingleton<IDisplayService>(provider =>
+                        {
+                            var logger = provider.GetRequiredService<ILogger<TuiDisplayService>>();
+                            return new TuiDisplayService(logger, config);
+                        });
                     }
                     else
                     {
@@ -257,6 +280,10 @@ public static class Program
             // Get services
             monitorService = host.Services.GetRequiredService<IKnxMonitorService>();
             displayService = host.Services.GetRequiredService<IDisplayService>();
+            var dptDecodingService = host.Services.GetRequiredService<IDptDecodingService>();
+
+            // Initialize the static DPT decoding service in KnxMessage
+            KnxMessage.SetDptDecodingService(dptDecodingService);
 
             // Start monitoring service first
             try

@@ -22,6 +22,7 @@ public class TuiDisplayService : IDisplayService
 {
     private readonly ILogger<TuiDisplayService> _logger;
     private readonly KnxMessageTableModel _tableModel;
+    private readonly KnxMonitorConfig _config;
     private Window? _mainWindow;
     private TableView? _tableView;
     private StatusBar? _statusBar;
@@ -36,10 +37,12 @@ public class TuiDisplayService : IDisplayService
     private CancellationTokenSource? _cancellationTokenSource;
     private TaskCompletionSource<bool>? _shutdownCompletionSource;
     private bool _shutdownRequested = false;
+    private Timer? _refreshTimer;
 
-    public TuiDisplayService(ILogger<TuiDisplayService> logger)
+    public TuiDisplayService(ILogger<TuiDisplayService> logger, KnxMonitorConfig config)
     {
         _logger = logger;
+        _config = config;
         _tableModel = new KnxMessageTableModel();
         _startTime = DateTime.Now;
     }
@@ -177,50 +180,60 @@ public class TuiDisplayService : IDisplayService
             RequestShutdown();
         };
 
-        // Create status frame at the top (compacted from 8 to 6 lines as mentioned in summary)
+        CreateWindowContent();
+
+        _logger.LogInformation("Main window created with Terminal.Gui V2 components");
+    }
+
+    private void CreateWindowContent()
+    {
+        // Clear existing content
+        _mainWindow?.RemoveAll();
+
+        // Create status frame at the top - uses computed layout for automatic resizing
         var statusFrame = new FrameView
         {
             Title = "Connection Status",
             X = 0,
             Y = 0,
-            Width = Dim.Fill(),
-            Height = 6, // Compacted status window
+            Width = Dim.Fill(), // Automatically adjusts to terminal width
+            Height = 6,
         };
 
         CreateStatusLabels(statusFrame);
-        _mainWindow.Add(statusFrame);
+        _mainWindow?.Add(statusFrame);
 
-        // Create messages frame below status
+        // Create messages frame below status - uses computed layout for automatic resizing
         var messagesFrame = new FrameView
         {
             Title = "KNX Messages",
             X = 0,
             Y = Pos.Bottom(statusFrame),
-            Width = Dim.Fill(),
-            Height = Dim.Fill()! - 1, // Leave space for status bar
+            Width = Dim.Fill(), // Automatically adjusts to terminal width
+            Height = Dim.Fill(1), // Automatically adjusts to terminal height, leaving space for status bar
         };
 
         CreateMessagesTable(messagesFrame);
-        _mainWindow.Add(messagesFrame);
+        _mainWindow?.Add(messagesFrame);
 
-        // Create status bar at the bottom
+        // Create status bar at the bottom - uses computed layout for automatic resizing
         CreateStatusBar();
-        _mainWindow.Add(_statusBar!);
+        _mainWindow?.Add(_statusBar!);
 
         // Set up key bindings
         SetupKeyBindings();
 
-        _logger.LogInformation("Main window created with Terminal.Gui V2 components");
+        _logger.LogDebug("Window content created with computed layout for automatic resizing");
     }
 
     private void CreateStatusLabels(FrameView statusFrame)
     {
-        // Adjusted Y positions for compacted layout (0,1,2,3 instead of 1,2,3,4)
+        // Connection status (consolidated status and details)
         _connectionStatusLabel = new Label
         {
-            Text = "Connection: Disconnected",
+            Text = "Status: Disconnected",
             X = 1,
-            Y = 0, // Changed from Y = 0
+            Y = 0,
             Width = Dim.Fill()! - 2,
             Height = 1,
         };
@@ -230,7 +243,7 @@ public class TuiDisplayService : IDisplayService
         {
             Text = "Messages: 0",
             X = 1,
-            Y = 1, // Changed from Y = 1
+            Y = 1,
             Width = Dim.Fill()! - 2,
             Height = 1,
         };
@@ -240,7 +253,7 @@ public class TuiDisplayService : IDisplayService
         {
             Text = "Last Message: None",
             X = 1,
-            Y = 2, // Changed from Y = 2
+            Y = 2,
             Width = Dim.Fill()! - 2,
             Height = 1,
         };
@@ -250,7 +263,7 @@ public class TuiDisplayService : IDisplayService
         {
             Text = "Filter: None",
             X = 1,
-            Y = 3, // Changed from Y = 3
+            Y = 3,
             Width = Dim.Fill()! - 2,
             Height = 1,
         };
@@ -511,9 +524,22 @@ public class TuiDisplayService : IDisplayService
         if (!_isRunning)
             return;
 
-        // Terminal.Gui V2 handles UI updates automatically
-        UpdateMessageCount();
-        UpdateLastMessage();
+        // Marshal UI updates to the main Terminal.Gui thread
+        Application.Invoke(() =>
+        {
+            try
+            {
+                UpdateMessageCount();
+                UpdateLastMessage();
+
+                // Update table data - Terminal.Gui should handle the refresh automatically
+                _tableView?.Update();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating UI");
+            }
+        });
     }
 
     private void UpdateConnectionStatusDisplay()
@@ -521,15 +547,63 @@ public class TuiDisplayService : IDisplayService
         if (!_isRunning || _connectionStatusLabel == null)
             return;
 
-        // Terminal.Gui V2 handles UI updates automatically
-        var status = "Connected"; // This would come from actual connection status
-        _connectionStatusLabel.Text = $"Connection: {status}";
+        // Marshal UI updates to the main Terminal.Gui thread
+        Application.Invoke(() =>
+        {
+            try
+            {
+                // Get actual connection status from monitor service
+                var isConnected = _monitorService?.IsConnected ?? false;
+                var config = GetConnectionConfig();
+
+                if (isConnected && config != null)
+                {
+                    var statusText = config.ConnectionType switch
+                    {
+                        KnxConnectionType.Tunnel =>
+                            $"Status: Connected via IP Tunneling to {config.Gateway}:{config.Port}",
+                        KnxConnectionType.Router =>
+                            $"Status: Connected via multicast {config.MulticastAddress}:{config.Port}",
+                        KnxConnectionType.Usb => "Status: Connected via USB to /dev/knx",
+                        _ => "Status: Connected (unknown mode)",
+                    };
+                    _connectionStatusLabel.Text = statusText;
+                }
+                else if (config != null)
+                {
+                    var statusText = config.ConnectionType switch
+                    {
+                        KnxConnectionType.Tunnel =>
+                            $"Status: Disconnected (IP Tunneling to {config.Gateway}:{config.Port})",
+                        KnxConnectionType.Router =>
+                            $"Status: Disconnected (multicast {config.MulticastAddress}:{config.Port})",
+                        KnxConnectionType.Usb => "Status: Disconnected (USB mode)",
+                        _ => "Status: Disconnected",
+                    };
+                    _connectionStatusLabel.Text = statusText;
+                }
+                else
+                {
+                    _connectionStatusLabel.Text = "Status: Disconnected";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating connection status display");
+            }
+        });
+    }
+
+    private KnxMonitorConfig? GetConnectionConfig()
+    {
+        return _config;
     }
 
     private void UpdateMessageCount()
     {
         if (_messageCountLabel == null)
             return;
+
         _messageCountLabel.Text = $"Messages: {_tableModel.Messages.Count}";
     }
 
@@ -549,6 +623,7 @@ public class TuiDisplayService : IDisplayService
     {
         if (_filterStatusLabel == null)
             return;
+
         _filterStatusLabel.Text = $"Filter: {_tableModel.Filter ?? "None"}";
     }
 
@@ -568,6 +643,14 @@ public class TuiDisplayService : IDisplayService
             {
                 _monitorService.MessageReceived += OnMessageReceived;
             }
+
+            // Start periodic refresh timer (every 100ms) to ensure UI updates
+            _refreshTimer = new Timer(
+                OnRefreshTimer,
+                null,
+                TimeSpan.FromMilliseconds(100),
+                TimeSpan.FromMilliseconds(100)
+            );
 
             // Start the TUI in a background task
             var tuiTask = Task.Run(
@@ -621,6 +704,10 @@ public class TuiDisplayService : IDisplayService
             {
                 _monitorService.MessageReceived -= OnMessageReceived;
             }
+
+            // Stop refresh timer
+            _refreshTimer?.Dispose();
+            _refreshTimer = null;
         }
     }
 
@@ -639,6 +726,39 @@ public class TuiDisplayService : IDisplayService
         }
     }
 
+    /// <summary>
+    /// Periodic refresh timer callback to ensure UI updates.
+    /// </summary>
+    private void OnRefreshTimer(object? state)
+    {
+        if (!_isRunning)
+            return;
+
+        try
+        {
+            // Trigger UI updates
+            Application.Invoke(() =>
+            {
+                try
+                {
+                    // Update the table view to refresh display
+                    _tableView?.Update();
+
+                    // Also refresh connection status periodically
+                    UpdateConnectionStatusDisplay();
+                }
+                catch (Exception)
+                {
+                    // Silently ignore refresh errors to avoid log spam
+                }
+            });
+        }
+        catch (Exception)
+        {
+            // Silently ignore timer callback errors
+        }
+    }
+
     public async Task StopAsync(CancellationToken cancellationToken = default)
     {
         await Task.Run(
@@ -647,6 +767,10 @@ public class TuiDisplayService : IDisplayService
                 try
                 {
                     _logger.LogInformation("Stopping TUI display service...");
+
+                    // Stop refresh timer first
+                    _refreshTimer?.Dispose();
+                    _refreshTimer = null;
 
                     // Unsubscribe from monitor service events
                     if (_monitorService != null)
@@ -673,8 +797,21 @@ public class TuiDisplayService : IDisplayService
 
     public void UpdateConnectionStatus(string status, bool isConnected)
     {
-        // Update connection status display
-        UpdateConnectionStatusDisplay();
+        if (!_isRunning || _connectionStatusLabel == null)
+            return;
+
+        // Marshal UI updates to the main Terminal.Gui thread
+        Application.Invoke(() =>
+        {
+            try
+            {
+                _connectionStatusLabel.Text = $"Connection: {status}";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating connection status");
+            }
+        });
     }
 
     public void DisplayMessage(KnxMessage message)
@@ -699,6 +836,10 @@ public class TuiDisplayService : IDisplayService
     {
         try
         {
+            // Stop refresh timer first
+            _refreshTimer?.Dispose();
+            _refreshTimer = null;
+
             // Unsubscribe from monitor service events
             if (_monitorService != null)
             {
@@ -735,9 +876,9 @@ public class KnxMessageTableSource : ITableSource
     }
 
     public int Rows => _model.Messages.Count;
-    public int Columns => 5; // Timestamp, Source, Destination, Type, Data
+    public int Columns => 7; // Timestamp, Source, Destination, Type, Data, Value, DPT
 
-    public string[] ColumnNames => new[] { "Timestamp", "Source", "Destination", "Type", "Data" };
+    public string[] ColumnNames => new[] { "Timestamp", "Source", "Dest", "MsgType", "DPT", "Raw Data", "Value" };
 
     public object this[int row, int col]
     {
@@ -752,8 +893,10 @@ public class KnxMessageTableSource : ITableSource
                 0 => messageRow.TimeDisplay,
                 1 => messageRow.SourceDisplay,
                 2 => messageRow.GroupAddressDisplay,
-                3 => messageRow.TypeDisplay,
-                4 => messageRow.DataDisplay,
+                3 => messageRow.MessageTypeDisplay,
+                4 => messageRow.DptDisplay,
+                5 => messageRow.DataDisplay,
+                6 => messageRow.ValueDisplay,
                 _ => "",
             };
         }

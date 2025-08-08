@@ -1,4 +1,6 @@
+using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using Knx.Falcon;
 using Knx.Falcon.Configuration;
@@ -21,6 +23,9 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
     private bool _isConnected;
     private string _connectionStatus = "Disconnected";
 
+    // Static logger for static methods
+    private static ILogger<KnxMonitorService>? _staticLogger;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="KnxMonitorService"/> class.
     /// </summary>
@@ -30,6 +35,9 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
     {
         _config = config ?? throw new ArgumentNullException(nameof(config));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+        // Set static logger for static methods
+        _staticLogger = _logger;
 
         // Compile filter regex if provided
         if (!string.IsNullOrEmpty(_config.Filter))
@@ -308,8 +316,19 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
     /// <returns>KNX message.</returns>
     private static KnxMessage CreateKnxMessage(GroupEventArgs e, KnxMessageType messageType)
     {
-        // Extract data from the value object
-        var data = ExtractDataFromValue(e.Value);
+        // Extract data and DPT information from the Falcon SDK value
+        var (data, dptId, falconValue) = ExtractValueInformation(e.Value);
+
+        // Debug logging for development
+        if (e.Value != null)
+        {
+            _staticLogger?.LogDebug(
+                "KNX Value - Type: {ValueType}, DPT: {DptId}, Data: {Data}",
+                e.Value.GetType().Name,
+                dptId ?? "Unknown",
+                Convert.ToHexString(data)
+            );
+        }
 
         return new KnxMessage
         {
@@ -318,14 +337,249 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
             GroupAddress = e.DestinationAddress.ToString(),
             MessageType = messageType,
             Data = data,
-            Value = TryInterpretValue(data),
+            Value = falconValue, // Store the original Falcon SDK decoded value
+            DataPointType = dptId, // Store the detected DPT ID
             Priority = KnxPriority.Normal, // Default priority since it's not available in the event
             IsRepeated = false, // Default since it's not available in the event
         };
     }
 
     /// <summary>
-    /// Extracts byte data from a KNX value object.
+    /// Extracts value information from a Falcon SDK value object.
+    /// </summary>
+    /// <param name="value">Falcon SDK value object.</param>
+    /// <returns>Tuple containing raw data, DPT ID, and the original Falcon value.</returns>
+    private static (byte[] Data, string? DptId, object? FalconValue) ExtractValueInformation(object? value)
+    {
+        if (value == null)
+        {
+            return (Array.Empty<byte>(), null, null);
+        }
+
+        try
+        {
+            // Check if it's a GroupValue from Falcon SDK
+            if (value.GetType().Name == "GroupValue" || value.GetType().Namespace?.StartsWith("Knx.Falcon") == true)
+            {
+                // Try to extract DPT information using reflection
+                var dptId = TryGetDptFromGroupValue(value);
+                var data = TryGetDataFromGroupValue(value);
+                var decodedValue = TryGetDecodedValueFromGroupValue(value);
+
+                return (data, dptId, decodedValue ?? value);
+            }
+
+            // Handle primitive .NET types that Falcon SDK might return directly
+            var (primitiveData, detectedDpt) = HandlePrimitiveValue(value);
+            return (primitiveData, detectedDpt, value);
+        }
+        catch (Exception ex)
+        {
+            _staticLogger?.LogWarning(ex, "Error extracting value information from {ValueType}", value.GetType().Name);
+
+            // Fallback to legacy extraction
+            var fallbackData = ExtractDataFromValue(value);
+            return (fallbackData, null, value);
+        }
+    }
+
+    /// <summary>
+    /// Tries to extract DPT ID from a Falcon SDK GroupValue object using reflection.
+    /// </summary>
+    /// <param name="groupValue">GroupValue object.</param>
+    /// <returns>DPT ID or null if not found.</returns>
+    private static string? TryGetDptFromGroupValue(object groupValue)
+    {
+        try
+        {
+            var type = groupValue.GetType();
+
+            // Look for DPT-related properties
+            var dptProperty = type.GetProperty("Dpt") ?? type.GetProperty("DptId") ?? type.GetProperty("DataPointType");
+
+            if (dptProperty != null)
+            {
+                var dptValue = dptProperty.GetValue(groupValue);
+                return dptValue?.ToString();
+            }
+
+            // Look for type information in the type name itself
+            var typeName = type.Name;
+            if (typeName.Contains("Dpt") && typeName.Length > 3)
+            {
+                // Try to extract DPT from type name like "Dpt1Value" or "Dpt9Value"
+                var match = System.Text.RegularExpressions.Regex.Match(typeName, @"Dpt(\d+)");
+                if (match.Success)
+                {
+                    return $"{match.Groups[1].Value}.001"; // Default to .001 subtype
+                }
+            }
+
+            return null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Tries to extract raw data bytes from a Falcon SDK GroupValue object.
+    /// </summary>
+    /// <param name="groupValue">GroupValue object.</param>
+    /// <returns>Raw data bytes.</returns>
+    private static byte[] TryGetDataFromGroupValue(object groupValue)
+    {
+        try
+        {
+            var type = groupValue.GetType();
+
+            // Look for data-related properties
+            var dataProperty = type.GetProperty("Data") ?? type.GetProperty("RawData") ?? type.GetProperty("Bytes");
+
+            if (dataProperty != null)
+            {
+                var dataValue = dataProperty.GetValue(groupValue);
+                if (dataValue is byte[] bytes)
+                {
+                    return bytes;
+                }
+            }
+
+            // Look for ToByteArray method
+            var toByteArrayMethod = type.GetMethod("ToByteArray") ?? type.GetMethod("GetBytes");
+
+            if (toByteArrayMethod != null)
+            {
+                var result = toByteArrayMethod.Invoke(groupValue, null);
+                if (result is byte[] methodBytes)
+                {
+                    return methodBytes;
+                }
+            }
+
+            // Fallback to legacy extraction
+            return ExtractDataFromValue(groupValue);
+        }
+        catch
+        {
+            return ExtractDataFromValue(groupValue);
+        }
+    }
+
+    /// <summary>
+    /// Tries to extract the decoded value from a Falcon SDK GroupValue object.
+    /// </summary>
+    /// <param name="groupValue">GroupValue object.</param>
+    /// <returns>Decoded value or null.</returns>
+    private static object? TryGetDecodedValueFromGroupValue(object groupValue)
+    {
+        try
+        {
+            var type = groupValue.GetType();
+
+            // Look for value-related properties
+            var valueProperty =
+                type.GetProperty("Value") ?? type.GetProperty("DecodedValue") ?? type.GetProperty("TypedValue");
+
+            if (valueProperty != null)
+            {
+                return valueProperty.GetValue(groupValue);
+            }
+
+            // Look for conversion methods
+            var toValueMethod = type.GetMethod("ToValue") ?? type.GetMethod("GetValue");
+
+            if (toValueMethod != null)
+            {
+                return toValueMethod.Invoke(groupValue, null);
+            }
+
+            return null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Handles primitive .NET values that might come directly from Falcon SDK.
+    /// </summary>
+    /// <param name="value">Primitive value.</param>
+    /// <returns>Tuple containing data bytes and detected DPT.</returns>
+    private static (byte[] Data, string? DptId) HandlePrimitiveValue(object value)
+    {
+        return value switch
+        {
+            bool boolValue => (new byte[] { (byte)(boolValue ? 1 : 0) }, "1.001"),
+            byte byteValue => (new byte[] { byteValue }, "5.001"),
+            sbyte sbyteValue => (new byte[] { (byte)sbyteValue }, "6.001"),
+            short shortValue => (BitConverter.GetBytes(shortValue).Reverse().ToArray(), "8.001"),
+            ushort ushortValue => (BitConverter.GetBytes(ushortValue).Reverse().ToArray(), "7.001"),
+            int intValue => (BitConverter.GetBytes(intValue).Reverse().ToArray(), "13.001"),
+            uint uintValue => (BitConverter.GetBytes(uintValue).Reverse().ToArray(), "12.001"),
+            float floatValue => (BitConverter.GetBytes(floatValue).Reverse().ToArray(), "14.000"),
+            double doubleValue => (BitConverter.GetBytes((float)doubleValue).Reverse().ToArray(), "14.000"),
+            _ => (ExtractDataFromValue(value), null),
+        };
+    }
+
+    /// <summary>
+    /// Checks if a string is a valid hex string.
+    /// </summary>
+    private static bool IsHexString(string str)
+    {
+        if (string.IsNullOrEmpty(str) || str.Length % 2 != 0)
+            return false;
+
+        return str.All(c => char.IsDigit(c) || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f'));
+    }
+
+    /// <summary>
+    /// Parses a hex string into byte array.
+    /// </summary>
+    private static byte[] ParseHexString(string hexString)
+    {
+        try
+        {
+            return Convert.FromHexString(hexString);
+        }
+        catch
+        {
+            return Array.Empty<byte>();
+        }
+    }
+
+    /// <summary>
+    /// Converts unknown value types to bytes.
+    /// </summary>
+    private static byte[] ConvertToBytes(object value)
+    {
+        var stringValue = value.ToString() ?? "";
+
+        // Try to parse as hex string first
+        if (IsHexString(stringValue))
+        {
+            return ParseHexString(stringValue);
+        }
+
+        // Try to parse as integer
+        if (int.TryParse(stringValue, out var intValue))
+        {
+            if (intValue >= 0 && intValue <= 255)
+                return new byte[] { (byte)intValue };
+            if (intValue >= 0 && intValue <= 65535)
+                return BitConverter.GetBytes((ushort)intValue).Reverse().ToArray(); // Big-endian
+            return BitConverter.GetBytes(intValue).Reverse().ToArray(); // Big-endian
+        }
+
+        // Fallback to UTF8 encoding
+        return System.Text.Encoding.UTF8.GetBytes(stringValue);
+    }
+
+    /// <summary>
+    /// Extracts byte data from a KNX value object (legacy fallback method).
     /// </summary>
     /// <param name="value">KNX value object.</param>
     /// <returns>Byte array representation.</returns>
@@ -345,42 +599,13 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
                 byte byteValue => new byte[] { byteValue },
                 int intValue when intValue >= 0 && intValue <= 255 => new byte[] { (byte)intValue },
                 byte[] byteArray => byteArray,
-                _ => System.Text.Encoding.UTF8.GetBytes(value.ToString() ?? ""),
+                string hexString when IsHexString(hexString) => ParseHexString(hexString),
+                _ => ConvertToBytes(value),
             };
         }
         catch
         {
             return Array.Empty<byte>();
-        }
-    }
-
-    /// <summary>
-    /// Tries to interpret the raw data as a meaningful value.
-    /// </summary>
-    /// <param name="data">Raw data.</param>
-    /// <returns>Interpreted value or null.</returns>
-    private static object? TryInterpretValue(byte[]? data)
-    {
-        if (data == null || data.Length == 0)
-        {
-            return null;
-        }
-
-        try
-        {
-            // Common KNX data types
-            return data.Length switch
-            {
-                1 when data[0] <= 1 => data[0] == 1, // Boolean (DPT 1.001)
-                1 => data[0], // 8-bit value (DPT 5.001)
-                2 => BitConverter.ToUInt16(data.Reverse().ToArray(), 0), // 16-bit value
-                4 => BitConverter.ToSingle(data.Reverse().ToArray(), 0), // Float (DPT 9.001)
-                _ => null,
-            };
-        }
-        catch
-        {
-            return null;
         }
     }
 

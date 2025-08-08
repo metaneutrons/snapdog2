@@ -162,10 +162,11 @@ public class KnxMessageRow
 
         // Pre-calculate display values for performance
         TimeDisplay = message.Timestamp.ToString("HH:mm:ss.fff");
-        TypeDisplay = FormatMessageType(message.MessageType);
+        MessageTypeDisplay = FormatMessageType(message.MessageType);
         SourceDisplay = message.SourceAddress;
         GroupAddressDisplay = message.GroupAddress;
         ValueDisplay = message.DisplayValue;
+        DptDisplay = message.GuessedDPT;
         PriorityDisplay = message.Priority.ToString();
         DataDisplay = message.DataHex;
 
@@ -186,9 +187,9 @@ public class KnxMessageRow
     public string TimeDisplay { get; }
 
     /// <summary>
-    /// Gets the formatted message type display.
+    /// Gets the formatted message action display.
     /// </summary>
-    public string TypeDisplay { get; }
+    public string MessageTypeDisplay { get; }
 
     /// <summary>
     /// Gets the formatted source display.
@@ -204,6 +205,11 @@ public class KnxMessageRow
     /// Gets the formatted value display.
     /// </summary>
     public string ValueDisplay { get; }
+
+    /// <summary>
+    /// Gets the formatted DPT (datapoint type) display.
+    /// </summary>
+    public string DptDisplay { get; }
 
     /// <summary>
     /// Gets the formatted priority display.

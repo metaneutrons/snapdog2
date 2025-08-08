@@ -215,6 +215,11 @@ services:
     restart: unless-stopped
 
   # KNX Monitor - Visual debugging tool for KNX bus activity
+  #
+  # TROUBLESHOOTING:
+  # - If you see "Unrecognized command or argument" errors, use short form arguments (-g, -p, -v)
+  # - Long form arguments (--gateway, --port, --verbose) may not work in Docker due to System.CommandLine beta version
+  # - Check logs with: docker compose logs knx-monitor -f
   knx-monitor:
     build:
       context: ./KnxMonitor
@@ -223,20 +228,41 @@ services:
     volumes:
       - ./KnxMonitor:/app:cached # Mount source code for hot reload
       - ./Directory.Packages.props:/Directory.Packages.props:ro # Central package management
+      - knx_monitor_nuget:/home/knxmonitor/.nuget # NuGet cache for better performance
     environment:
       - DOTNET_ENVIRONMENT=Development
       - DOTNET_USE_POLLING_FILE_WATCHER=true
       - DOTNET_WATCH_RESTART_ON_RUDE_EDIT=true
+      - DOTNET_WATCH_SUPPRESS_LAUNCH_BROWSER=true
       - KNX_MONITOR_LOGGING_MODE=true # Force logging mode for docker logs
-    command: ["dotnet", "watch", "run", "--", "--gateway", "knxd"]
+      - TZ=Europe/Berlin # Set timezone for proper log timestamps
+    # Option 1: Connect to internal knxd service (default) - using short form args (RECOMMENDED)
+    command: ["dotnet", "watch", "run", "--", "-g", "knxd", "-v"]
+    # Option 2: Connect to external KNX gateway (uncomment and modify IP as needed)
+    # command: ["dotnet", "watch", "run", "--", "-g", "192.168.2.8", "-p", "3671", "-v"]
+    # Option 3: Use KNX router mode (multicast)
+    # command: ["dotnet", "watch", "run", "--", "-c", "router", "-m", "224.0.23.12", "-v"]
+    # Option 4: Long form arguments (if short form doesn't work)
+    # command: ["dotnet", "watch", "run", "--", "--gateway", "knxd", "--port", "6720", "--verbose"]
     depends_on:
-      - knxd
+      knxd:
+        condition: service_healthy
     networks:
       snapdog-dev:
         ipv4_address: 172.20.0.14
     stdin_open: true
     tty: true
     restart: unless-stopped
+    # Health check to ensure the monitor is running
+    healthcheck:
+      test: ["CMD", "pgrep", "-f", "KnxMonitor"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    labels:
+      - "traefik.enable=false" # Not exposed via web interface
+      - "com.docker.compose.service=knx-monitor"
 
 volumes:
   mqtt_data:

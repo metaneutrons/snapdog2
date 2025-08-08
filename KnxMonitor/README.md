@@ -1,8 +1,8 @@
-# KNX Monitor v2.0 - Enterprise Edition
+![KNX Monitor](https://img.shields.io/badge/KNX-Monitor-blue) ![.NET 9.0](https://img.shields.io/badge/.NET-9.0-purple) ![Docker](https://img.shields.io/badge/Docker-Ready-blue) ![Terminal.Gui V2](https://img.shields.io/badge/Terminal.Gui-V2-green)
+
+# KNX Monitor
 
 A visual, colorful command-line application for monitoring KNX/EIB bus activity with **award-worthy Terminal.Gui V2 interface**. Perfect for debugging SnapDog2's KNX integration and understanding KNX bus traffic.
-
-![KNX Monitor](https://img.shields.io/badge/KNX-Monitor-blue) ![.NET 9.0](https://img.shields.io/badge/.NET-9.0-purple) ![Docker](https://img.shields.io/badge/Docker-Ready-blue) ![Terminal.Gui V2](https://img.shields.io/badge/Terminal.Gui-V2-green)
 
 ## 🏆 Award-Worthy Features
 
@@ -12,37 +12,79 @@ A visual, colorful command-line application for monitoring KNX/EIB bus activity 
 - 🔍 **Real-time Monitoring**: Live display of all KNX bus activity with zero flickering
 - 🎯 **Advanced Filtering**: Interactive filter dialogs with pattern matching
 - 📊 **Rich Status Display**: Connection status, message count, and uptime tracking
+- 🧠 **Advanced DPT Decoding**: Falcon SDK-powered data point type decoding with auto-detection
+- 🎨 **Smart Value Formatting**: Context-aware display of decoded values (temperatures, percentages, etc.)
 - 🐳 **Docker Ready**: Development and production Docker containers
 - ⚡ **Hot Reload**: Development mode with automatic code reloading
 - 🎹 **Keyboard Shortcuts**: Full keyboard navigation and shortcuts
 - 📤 **Export Functionality**: Export messages to CSV format
 - 🎨 **Color Coding**: Age-based and type-based color coding for messages
 
+## 🧠 Advanced DPT Decoding
+
+KNX Monitor features sophisticated Data Point Type (DPT) decoding using the Falcon SDK:
+
+### Supported DPT Types
+
+- **DPT 1.xxx**: Boolean values with context-aware formatting
+  - `1.001` Switch: `On/Off`
+  - `1.008` Up/Down: `Up/Down`
+  - `1.009` Open/Close: `Open/Close`
+- **DPT 5.xxx**: 8-bit unsigned values
+  - `5.001` Scaling: `75%`
+  - `5.003` Angle: `180°`
+- **DPT 9.xxx**: 2-byte float values with proper units
+  - `9.001` Temperature: `21.5°C`
+  - `9.004` Illuminance: `1500 lux`
+  - `9.005` Wind Speed: `5.2 m/s`
+  - `9.006` Pressure: `1013 Pa`
+  - `9.007` Humidity: `65.0%`
+- **DPT 14.xxx**: 4-byte IEEE 754 float values
+  - `14.019` Electric Current: `16.5 A`
+  - `14.027` Frequency: `50.0 Hz`
+  - `14.056` Power: `1500.0 W`
+  - `14.076` Voltage: `230.0 V`
+
+### Auto-Detection
+
+The monitor automatically detects DPT types based on:
+
+- Data length and patterns
+- Value ranges (e.g., temperature ranges for DPT 9.001)
+- Context clues from the data content
+
+### Test DPT Decoding
+
+```bash
+# Run built-in DPT decoding tests
+./KnxMonitor --test
+```
+
+Example output:
+
+```
+=== DPT Decoding Tests ===
+
+--- DPT 1.001 (Boolean Switch) Tests ---
+Data: 01 -> Value: True -> Formatted: On
+Data: 00 -> Value: False -> Formatted: Off
+
+--- DPT 9.001 (Temperature) Tests ---
+Data: 086E -> Value: 2,2 -> Formatted: 2,2°C
+Data: 860C -> Value: -5 -> Formatted: -5,0°C
+```
+
 ## 🖥️ Display Modes
 
 ### Interactive Mode (Terminal.Gui V2)
+
 When running in an interactive terminal, KNX Monitor automatically launches the **enterprise-grade Terminal.Gui V2 interface**:
 
-```
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                              KNX Monitor v2.0                                  │
-├─────────────────────────────────────────────────────────────────────────────────┤
-│ Connection: ✓ Connected │ Type: IP Tunneling │ Gateway: knxd:3671 │ Uptime: 05:23 │
-├─────────────────────────────────────────────────────────────────────────────────┤
-│ Messages: 142 │ Filter: 1/2/* │ [F1] Help [F2] Filter [F3] Clear [F10] Quit    │
-├─────────────────────────────────────────────────────────────────────────────────┤
-│ Time         │ Type     │ Source    │ Group Address │ Value      │ Priority      │
-├──────────────┼──────────┼───────────┼───────────────┼────────────┼───────────────┤
-│ 14:32:15.123 │ Write    │ 1.1.5     │ 1/2/1         │ 75         │ Normal        │
-│ 14:32:15.456 │ Read     │ 1.1.10    │ 1/2/5         │ Empty      │ Normal        │
-│ 14:32:15.789 │ Response │ 1.1.5     │ 1/2/5         │ false      │ Normal        │
-└─────────────────────────────────────────────────────────────────────────────────┘
-```
-
 ### Logging Mode (Console Output)
+
 When output is redirected or running in containers, automatically switches to logging mode:
 
-```
+```plaintext
 [14:32:15.123] Write 1.1.5 -> 1/2/1 = 75 (Normal)
 [14:32:15.456] Read 1.1.10 -> 1/2/5 = Empty (Normal)
 [14:32:15.789] Response 1.1.5 -> 1/2/5 = false (Normal)
@@ -117,6 +159,7 @@ dotnet run -- --connection-type tunnel --gateway knxd --port 3671 --verbose
 | `--port` | `-p` | KNX gateway port | `3671` |
 | `--verbose` | `-v` | Enable verbose logging | `false` |
 | `--filter` | `-f` | Filter group addresses (e.g., `1/2/*` or `1/2/3`) | None |
+| `--test` | `-t` | Run DPT decoding tests and exit | `false` |
 
 ## Usage Examples
 
@@ -176,6 +219,7 @@ docker run --rm -it \
 ### Advanced Usage Examples
 
 #### Monitor SnapDog2 KNX Traffic
+
 ```bash
 # Start SnapDog2 development environment
 cd /path/to/snapdog
@@ -189,6 +233,7 @@ dotnet run -- --verbose
 ```
 
 #### Monitor Production KNX Installation
+
 ```bash
 # Connect to real KNX/IP gateway
 dotnet run -- --connection-type tunnel --gateway 192.168.1.100 --port 3671
@@ -201,85 +246,11 @@ dotnet run -- --connection-type router --gateway 224.0.23.12
 ```
 
 #### USB KNX Interface
+
 ```bash
 # Auto-detect USB KNX interface
 dotnet run -- --connection-type usb
 ```
-
-## Display Layout
-
-The monitor displays information in a beautiful, organized layout:
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        KNX Monitor                          │
-│                Visual debugging tool for KNX/EIB           │
-│                   Press Ctrl+C to stop                     │
-└─────────────────────────────────────────────────────────────┘
-
-╭─────────────────────────────────────────────────────────────╮
-│ Property    │ Value                                         │
-├─────────────┼───────────────────────────────────────────────┤
-│ Connection  │ ✓ Connected to knxd:3671 (IP Tunneling)      │
-│ Type        │ IP Tunneling                                  │
-│ Gateway     │ knxd                                          │
-│ Port        │ 3671                                          │
-│ Filter      │ None                                          │
-│ Messages    │ 42                                            │
-│ Uptime      │ 00:05:23                                      │
-╰─────────────────────────────────────────────────────────────╯
-
-╭─────────────────────────────────────────────────────────────╮
-│ Time         │ Type   │ Source    │ Group Address │ Value    │
-├──────────────┼────────┼───────────┼───────────────┼──────────┤
-│ 14:32:15.123 │ Write  │ 1.1.5     │ 1/2/1         │ 75       │
-│ 14:32:15.456 │ Read   │ 1.1.10    │ 1/2/5         │ Empty    │
-│ 14:32:15.789 │ Response│ 1.1.5     │ 1/2/5         │ false    │
-╰─────────────────────────────────────────────────────────────╯
-```
-
-## Understanding the Display
-
-### Status Panel
-- **Connection**: Shows connection status with ✓ (connected) or ✗ (disconnected)
-- **Type**: Connection method (IP Tunneling, IP Routing, USB)
-- **Gateway**: Target gateway address
-- **Port**: Connection port
-- **Filter**: Active group address filter
-- **Messages**: Total messages received
-- **Uptime**: How long the monitor has been running
-
-### Message Table
-- **Time**: Timestamp when message was received
-- **Type**: Message type (Read, Write, Response)
-- **Source**: KNX device that sent the message
-- **Group Address**: Target group address (e.g., 1/2/3)
-- **Value**: Interpreted value (boolean, number, etc.)
-- **Data**: Raw hex data
-- **Priority**: Message priority (System, Urgent, Normal, Low)
-
-### Color Coding
-
-- 🟢 **Green**: Recent messages (< 1 second), Write operations, Connected status
-- 🟡 **Yellow**: Medium age messages (< 5 seconds), Response operations, Values
-- 🟠 **Orange**: Older messages (< 30 seconds), Urgent priority
-- 🔵 **Cyan**: Read operations, IP Tunneling connection
-- 🟣 **Magenta**: IP Routing connection
-- 🔴 **Red**: System priority, Disconnected status, Errors
-- ⚪ **White/Dim**: Normal priority, Very old messages
-
-## Message Types
-
-- **Read**: Request to read a group address value
-- **Write**: Write a value to a group address
-- **Response**: Response to a read request
-
-## Priority Levels
-
-- **System**: Critical system messages (red)
-- **Urgent**: High priority messages (orange)
-- **Normal**: Standard messages (white)
-- **Low**: Low priority messages (dim)
 
 ## Troubleshooting
 
@@ -294,6 +265,7 @@ The monitor displays information in a beautiful, organized layout:
 ```
 ✗ Connection failed: Failed to read device description from...
 ```
+
 - Check if KNX gateway/daemon is running
 - Verify gateway address and port
 - Ensure network connectivity
@@ -301,6 +273,7 @@ The monitor displays information in a beautiful, organized layout:
 ```
 No KNX USB devices found
 ```
+
 - Ensure USB KNX interface is connected
 - Check device permissions
 - Try running with elevated privileges if needed
@@ -311,6 +284,7 @@ No KNX USB devices found
 - **Layout problems**: Resize terminal window or use `--verbose` for simpler output
 
 #### No Messages Appearing
+
 - Check if KNX devices are actually sending traffic
 - Verify filter settings (remove filter to see all messages)
 - Enable verbose logging with `--verbose`
@@ -399,12 +373,14 @@ The KNX Monitor is designed to work seamlessly with SnapDog2's development envir
 ### Debugging Workflow
 
 1. Start SnapDog2 development environment:
+
    ```bash
    cd /path/to/snapdog
    make dev
    ```
 
 2. View KNX Monitor output:
+
    ```bash
    docker compose logs knx-monitor -f
    ```

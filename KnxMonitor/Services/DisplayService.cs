@@ -104,7 +104,16 @@ public class DisplayService : IDisplayService
             _cancellationTokenSource.Token
         );
 
-        await Task.CompletedTask;
+        // CRITICAL FIX: Wait for the background task to complete instead of returning immediately
+        // This ensures the StartAsync method doesn't complete until the service is actually stopped
+        try
+        {
+            await _displayTask;
+        }
+        catch (OperationCanceledException)
+        {
+            // Expected when cancellation is requested
+        }
     }
 
     /// <inheritdoc/>
