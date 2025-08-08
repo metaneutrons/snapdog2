@@ -344,21 +344,25 @@ var clientState = new ClientState
 
 **File:** `SnapDog2/Worker/DI/CortexMediatorConfiguration.cs`
 
-Added all client handlers to manual registration:
+**✅ UPDATED (August 2025)**: All handlers are now automatically discovered and registered through reflection-based assembly scanning. No manual registration required.
+
+**Previous Manual Registration (deprecated)**:
 
 ```csharp
-// Client command handlers
+// Client command handlers - NO LONGER REQUIRED
 services.AddScoped<SnapDog2.Server.Features.Clients.Handlers.SetClientVolumeCommandHandler>();
 services.AddScoped<SnapDog2.Server.Features.Clients.Handlers.SetClientMuteCommandHandler>();
 services.AddScoped<SnapDog2.Server.Features.Clients.Handlers.ToggleClientMuteCommandHandler>();
 services.AddScoped<SnapDog2.Server.Features.Clients.Handlers.SetClientLatencyCommandHandler>();
 services.AddScoped<SnapDog2.Server.Features.Clients.Handlers.AssignClientToZoneCommandHandler>();
 
-// Client query handlers
+// Client query handlers - NO LONGER REQUIRED
 services.AddScoped<SnapDog2.Server.Features.Clients.Handlers.GetAllClientsQueryHandler>();
 services.AddScoped<SnapDog2.Server.Features.Clients.Handlers.GetClientQueryHandler>();
 services.AddScoped<SnapDog2.Server.Features.Clients.Handlers.GetClientsByZoneQueryHandler>();
 ```
+
+> **See**: [19. Architectural Improvements Implementation](19-architectural-improvements-implementation.md) for the current auto-discovery implementation.
 
 **File:** `SnapDog2/Program.cs`
 
@@ -461,8 +465,10 @@ curl -X POST http://localhost:5000/api/clients/1/volume \
 
 ### 7.5.5. ✅ Dependency Injection Consistency
 - All services properly registered
-- Manual registration pattern maintained
+- **Auto-discovery registration**: ✅ **UPDATED** - Manual registrations eliminated through reflection-based auto-discovery
 - Service lifetimes correctly configured (Scoped)
+
+> **Update Note**: The manual registration pattern has been superseded by auto-discovery configuration. See [19. Architectural Improvements Implementation](19-architectural-improvements-implementation.md).
 
 ### 7.5.6. ✅ API Design Standards
 - RESTful endpoint design

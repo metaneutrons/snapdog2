@@ -24,9 +24,11 @@ This document details the implementation of the zone commands system for SnapDog
 
 - **CQRS Pattern**: Maintained consistency with global status implementation
 - **Result<T> Pattern**: Unified error handling across all operations
-- **Manual DI Registration**: Continued approach due to auto-discovery limitations
+- **Auto-Discovery Registration**: ✅ **UPDATED** - Manual registrations eliminated through reflection-based auto-discovery
 - **Placeholder Services**: Realistic implementations for development and testing
 - **Controller Pattern**: Same service provider injection as global status controller
+
+> **Important Update**: The manual DI registration approach has been superseded by comprehensive auto-discovery configuration. See [19. Architectural Improvements Implementation](19-architectural-improvements-implementation.md) for the current implementation.
 
 ## 5.3. Detailed Implementation
 
@@ -389,8 +391,11 @@ public class ZoneController : ControllerBase
 
 #### 5.3.7.1. Handler Registration (`CortexMediatorConfiguration.cs`)
 
+**✅ UPDATED (August 2025)**: All handlers are now automatically discovered and registered through reflection-based assembly scanning. No manual registration required.
+
+**Previous Manual Registration (deprecated)**:
 ```csharp
-// Zone command handlers
+// Zone command handlers - NO LONGER REQUIRED
 services.AddScoped<PlayCommandHandler>();
 services.AddScoped<PauseCommandHandler>();
 services.AddScoped<StopCommandHandler>();
@@ -405,12 +410,14 @@ services.AddScoped<PreviousTrackCommandHandler>();
 services.AddScoped<SetPlaylistCommandHandler>();
 services.AddScoped<NextPlaylistCommandHandler>();
 
-// Zone query handlers
+// Zone query handlers - NO LONGER REQUIRED
 services.AddScoped<GetZoneStateQueryHandler>();
 services.AddScoped<GetAllZoneStatesQueryHandler>();
 services.AddScoped<GetZonePlaybackStateQueryHandler>();
 services.AddScoped<GetZoneVolumeQueryHandler>();
 ```
+
+> **See**: [19. Architectural Improvements Implementation](19-architectural-improvements-implementation.md) for the current auto-discovery implementation.
 
 #### 5.3.7.2. Service Registration (`Program.cs`)
 
@@ -556,8 +563,10 @@ The foundation supports easy addition of:
 
 1. **Consistent Architecture**: Following the global status pattern made implementation straightforward
 2. **Placeholder Strategy**: Realistic placeholder implementations enabled full testing
-3. **Manual DI Registration**: Continued approach worked reliably
+3. **Auto-Discovery Registration**: ✅ **UPDATED** - Comprehensive auto-discovery eliminates manual registration maintenance
 4. **Result<T> Pattern**: Provided consistent error handling across all operations
+
+> **Update Note**: The manual DI registration approach mentioned in the original implementation has been superseded by auto-discovery configuration as documented in [19. Architectural Improvements Implementation](19-architectural-improvements-implementation.md).
 
 ### 5.7.2. ⚠️ **Challenges Addressed**
 

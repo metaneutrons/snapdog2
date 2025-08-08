@@ -19,6 +19,7 @@ using Polly.Retry;
 using Polly.Timeout;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Configuration;
+using SnapDog2.Core.Enums;
 using SnapDog2.Core.Extensions;
 using SnapDog2.Core.Helpers;
 using SnapDog2.Core.Models;
@@ -593,6 +594,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
 
     /// <summary>
     /// Maps MQTT topics to Cortex.Mediator commands based on the topic structure.
+    /// Implements complete command set as specified in blueprint Section 14.
     /// </summary>
     private object? MapTopicToCommand(string topic, string payload)
     {
@@ -609,19 +611,12 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             var entityId = topicParts[2];
             var command = topicParts[3].ToLowerInvariant();
 
-            // Handle zone commands
-            if (entityType == "zone" && int.TryParse(entityId, out var zoneId))
+            return entityType switch
             {
-                return this.MapZoneCommand(zoneId, command, payload);
-            }
-
-            // Handle client commands
-            if (entityType == "client")
-            {
-                return this.MapClientCommand(entityId, command, payload);
-            }
-
-            return null;
+                "zone" when int.TryParse(entityId, out var zoneId) => MapZoneCommand(zoneId, command, payload),
+                "client" when int.TryParse(entityId, out var clientId) => MapClientCommand(clientId, command, payload),
+                _ => null,
+            };
         }
         catch (Exception ex)
         {
@@ -631,60 +626,321 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     }
 
     /// <summary>
-    /// Maps zone-specific MQTT commands to Mediator commands.
+    /// Maps zone-specific MQTT commands to Mediator commands following blueprint specification.
+    /// Implements all commands from Section 14.3.1 of the blueprint.
     /// </summary>
     private object? MapZoneCommand(int zoneId, string command, string payload)
     {
-        // Import zone command types
-        using var scope = this._serviceProvider.CreateScope();
-
         return command switch
         {
-            // TODO: Implement these zone commands
-            // "play" => new SnapDog2.Server.Features.Zones.Commands.PlayZoneCommand { ZoneId = zoneId },
-            // "pause" => new SnapDog2.Server.Features.Zones.Commands.PauseZoneCommand { ZoneId = zoneId },
-            // "stop" => new SnapDog2.Server.Features.Zones.Commands.StopZoneCommand { ZoneId = zoneId },
-            "volume" when int.TryParse(payload, out var volume) =>
-                new SnapDog2.Server.Features.Zones.Commands.SetZoneVolumeCommand { ZoneId = zoneId, Volume = volume },
-            "mute" when bool.TryParse(payload, out var mute) =>
-                new SnapDog2.Server.Features.Zones.Commands.SetZoneMuteCommand { ZoneId = zoneId, Enabled = mute },
-            // "track" when int.TryParse(payload, out var trackIndex) =>
-            //     new SnapDog2.Server.Features.Zones.Commands.SetZoneTrackCommand { ZoneId = zoneId, TrackIndex = trackIndex },
-            // "playlist" when int.TryParse(payload, out var playlistIndex) =>
-            //     new SnapDog2.Server.Features.Zones.Commands.SetZonePlaylistCommand { ZoneId = zoneId, PlaylistIndex = playlistIndex },
-            // "next" => new SnapDog2.Server.Features.Zones.Commands.NextZoneTrackCommand { ZoneId = zoneId },
-            // "previous" => new SnapDog2.Server.Features.Zones.Commands.PreviousZoneTrackCommand { ZoneId = zoneId },
+            // Playback Control Commands (Section 14.3.1)
+            "play" => CreatePlayCommand(zoneId, payload),
+            "pause" => new SnapDog2.Server.Features.Zones.Commands.PauseCommand
+            {
+                ZoneId = zoneId,
+                Source = CommandSource.Mqtt,
+            },
+            "stop" => new SnapDog2.Server.Features.Zones.Commands.StopCommand
+            {
+                ZoneId = zoneId,
+                Source = CommandSource.Mqtt,
+            },
+
+            // Volume Control Commands
+            "volume" when TryParseVolume(payload, out var volume) =>
+                new SnapDog2.Server.Features.Zones.Commands.SetZoneVolumeCommand
+                {
+                    ZoneId = zoneId,
+                    Volume = volume,
+                    Source = CommandSource.Mqtt,
+                },
+            "volume" when payload.Equals("+", StringComparison.OrdinalIgnoreCase) =>
+                new SnapDog2.Server.Features.Zones.Commands.VolumeUpCommand
+                {
+                    ZoneId = zoneId,
+                    Source = CommandSource.Mqtt,
+                },
+            "volume" when payload.Equals("-", StringComparison.OrdinalIgnoreCase) =>
+                new SnapDog2.Server.Features.Zones.Commands.VolumeDownCommand
+                {
+                    ZoneId = zoneId,
+                    Source = CommandSource.Mqtt,
+                },
+            "volume" when TryParseVolumeStep(payload, out var step, out var direction) => direction > 0
+                ? new SnapDog2.Server.Features.Zones.Commands.VolumeUpCommand
+                {
+                    ZoneId = zoneId,
+                    Step = step,
+                    Source = CommandSource.Mqtt,
+                }
+                : new SnapDog2.Server.Features.Zones.Commands.VolumeDownCommand
+                {
+                    ZoneId = zoneId,
+                    Step = step,
+                    Source = CommandSource.Mqtt,
+                },
+
+            // Mute Control Commands
+            "mute" when TryParseBool(payload, out var mute) =>
+                new SnapDog2.Server.Features.Zones.Commands.SetZoneMuteCommand
+                {
+                    ZoneId = zoneId,
+                    Enabled = mute,
+                    Source = CommandSource.Mqtt,
+                },
+            "mute" when payload.Equals("toggle", StringComparison.OrdinalIgnoreCase) =>
+                new SnapDog2.Server.Features.Zones.Commands.ToggleZoneMuteCommand
+                {
+                    ZoneId = zoneId,
+                    Source = CommandSource.Mqtt,
+                },
+
+            // Track Management Commands
+            "track" when int.TryParse(payload, out var trackIndex) && trackIndex > 0 =>
+                new SnapDog2.Server.Features.Zones.Commands.SetTrackCommand
+                {
+                    ZoneId = zoneId,
+                    TrackIndex = trackIndex,
+                    Source = CommandSource.Mqtt,
+                },
+            "track" when payload.Equals("+", StringComparison.OrdinalIgnoreCase) =>
+                new SnapDog2.Server.Features.Zones.Commands.NextTrackCommand
+                {
+                    ZoneId = zoneId,
+                    Source = CommandSource.Mqtt,
+                },
+            "track" when payload.Equals("-", StringComparison.OrdinalIgnoreCase) =>
+                new SnapDog2.Server.Features.Zones.Commands.PreviousTrackCommand
+                {
+                    ZoneId = zoneId,
+                    Source = CommandSource.Mqtt,
+                },
+            "next" => new SnapDog2.Server.Features.Zones.Commands.NextTrackCommand
+            {
+                ZoneId = zoneId,
+                Source = CommandSource.Mqtt,
+            },
+            "previous" => new SnapDog2.Server.Features.Zones.Commands.PreviousTrackCommand
+            {
+                ZoneId = zoneId,
+                Source = CommandSource.Mqtt,
+            },
+
+            // Track Repeat Commands
+            "track_repeat" when TryParseBool(payload, out var repeat) =>
+                new SnapDog2.Server.Features.Zones.Commands.SetTrackRepeatCommand
+                {
+                    ZoneId = zoneId,
+                    Enabled = repeat,
+                    Source = CommandSource.Mqtt,
+                },
+            "track_repeat" when payload.Equals("toggle", StringComparison.OrdinalIgnoreCase) =>
+                new SnapDog2.Server.Features.Zones.Commands.ToggleTrackRepeatCommand
+                {
+                    ZoneId = zoneId,
+                    Source = CommandSource.Mqtt,
+                },
+
+            // Playlist Management Commands
+            "playlist" when int.TryParse(payload, out var playlistIndex) && playlistIndex > 0 =>
+                new SnapDog2.Server.Features.Zones.Commands.SetPlaylistCommand
+                {
+                    ZoneId = zoneId,
+                    PlaylistIndex = playlistIndex,
+                    Source = CommandSource.Mqtt,
+                },
+            "playlist" when payload.Equals("+", StringComparison.OrdinalIgnoreCase) =>
+                new SnapDog2.Server.Features.Zones.Commands.NextPlaylistCommand
+                {
+                    ZoneId = zoneId,
+                    Source = CommandSource.Mqtt,
+                },
+            "playlist" when payload.Equals("-", StringComparison.OrdinalIgnoreCase) =>
+                new SnapDog2.Server.Features.Zones.Commands.PreviousPlaylistCommand
+                {
+                    ZoneId = zoneId,
+                    Source = CommandSource.Mqtt,
+                },
+
+            // Playlist Mode Commands
+            "playlist_shuffle" when TryParseBool(payload, out var shuffle) =>
+                new SnapDog2.Server.Features.Zones.Commands.SetPlaylistShuffleCommand
+                {
+                    ZoneId = zoneId,
+                    Enabled = shuffle,
+                    Source = CommandSource.Mqtt,
+                },
+            "playlist_shuffle" when payload.Equals("toggle", StringComparison.OrdinalIgnoreCase) =>
+                new SnapDog2.Server.Features.Zones.Commands.TogglePlaylistShuffleCommand
+                {
+                    ZoneId = zoneId,
+                    Source = CommandSource.Mqtt,
+                },
+            "playlist_repeat" when TryParseBool(payload, out var playlistRepeat) =>
+                new SnapDog2.Server.Features.Zones.Commands.SetPlaylistRepeatCommand
+                {
+                    ZoneId = zoneId,
+                    Enabled = playlistRepeat,
+                    Source = CommandSource.Mqtt,
+                },
+            "playlist_repeat" when payload.Equals("toggle", StringComparison.OrdinalIgnoreCase) =>
+                new SnapDog2.Server.Features.Zones.Commands.TogglePlaylistRepeatCommand
+                {
+                    ZoneId = zoneId,
+                    Source = CommandSource.Mqtt,
+                },
+
             _ => null,
         };
     }
 
     /// <summary>
-    /// Maps client-specific MQTT commands to Mediator commands.
+    /// Maps client-specific MQTT commands to Mediator commands following blueprint specification.
+    /// Implements all commands from Section 14.4.1 of the blueprint.
     /// </summary>
-    private object? MapClientCommand(string clientId, string command, string payload)
+    private object? MapClientCommand(int clientId, string command, string payload)
     {
         return command switch
         {
-            "volume" when int.TryParse(payload, out var volume) && int.TryParse(clientId, out var clientIdInt) =>
+            // Volume Control Commands
+            "volume" when TryParseVolume(payload, out var volume) =>
                 new SnapDog2.Server.Features.Clients.Commands.SetClientVolumeCommand
                 {
-                    ClientId = clientIdInt,
+                    ClientId = clientId,
                     Volume = volume,
+                    Source = CommandSource.Mqtt,
                 },
-            "mute" when bool.TryParse(payload, out var mute) && int.TryParse(clientId, out var clientIdInt2) =>
+
+            // Mute Control Commands
+            "mute" when TryParseBool(payload, out var mute) =>
                 new SnapDog2.Server.Features.Clients.Commands.SetClientMuteCommand
                 {
-                    ClientId = clientIdInt2,
+                    ClientId = clientId,
                     Enabled = mute,
+                    Source = CommandSource.Mqtt,
                 },
-            "latency" when int.TryParse(payload, out var latency) && int.TryParse(clientId, out var clientIdInt3) =>
+            "mute" when payload.Equals("toggle", StringComparison.OrdinalIgnoreCase) =>
+                new SnapDog2.Server.Features.Clients.Commands.ToggleClientMuteCommand
+                {
+                    ClientId = clientId,
+                    Source = CommandSource.Mqtt,
+                },
+
+            // Configuration Commands
+            "latency" when int.TryParse(payload, out var latency) && latency >= 0 =>
                 new SnapDog2.Server.Features.Clients.Commands.SetClientLatencyCommand
                 {
-                    ClientId = clientIdInt3,
+                    ClientId = clientId,
                     LatencyMs = latency,
+                    Source = CommandSource.Mqtt,
                 },
+            "zone" when int.TryParse(payload, out var zoneId) && zoneId > 0 =>
+                new SnapDog2.Server.Features.Clients.Commands.AssignClientToZoneCommand
+                {
+                    ClientId = clientId,
+                    ZoneId = zoneId,
+                    Source = CommandSource.Mqtt,
+                },
+
             _ => null,
         };
+    }
+
+    /// <summary>
+    /// Creates a PlayCommand with optional parameters based on payload.
+    /// Supports different play command formats as per blueprint specification.
+    /// </summary>
+    private static SnapDog2.Server.Features.Zones.Commands.PlayCommand CreatePlayCommand(int zoneId, string payload)
+    {
+        // Handle different play command formats:
+        // "play" - simple play
+        // "play url <url>" - play specific URL
+        // "play track <index>" - play specific track
+
+        if (string.IsNullOrWhiteSpace(payload) || payload.Equals("play", StringComparison.OrdinalIgnoreCase))
+        {
+            return new SnapDog2.Server.Features.Zones.Commands.PlayCommand
+            {
+                ZoneId = zoneId,
+                Source = CommandSource.Mqtt,
+            };
+        }
+
+        var parts = payload.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 2)
+        {
+            return parts[0].ToLowerInvariant() switch
+            {
+                "url" => new SnapDog2.Server.Features.Zones.Commands.PlayCommand
+                {
+                    ZoneId = zoneId,
+                    MediaUrl = parts[1],
+                    Source = CommandSource.Mqtt,
+                },
+                "track" when int.TryParse(parts[1], out var trackIndex) && trackIndex > 0 =>
+                    new SnapDog2.Server.Features.Zones.Commands.PlayCommand
+                    {
+                        ZoneId = zoneId,
+                        TrackIndex = trackIndex,
+                        Source = CommandSource.Mqtt,
+                    },
+                _ => new SnapDog2.Server.Features.Zones.Commands.PlayCommand
+                {
+                    ZoneId = zoneId,
+                    Source = CommandSource.Mqtt,
+                },
+            };
+        }
+
+        return new SnapDog2.Server.Features.Zones.Commands.PlayCommand { ZoneId = zoneId, Source = CommandSource.Mqtt };
+    }
+
+    /// <summary>
+    /// Tries to parse volume value (0-100).
+    /// </summary>
+    private static bool TryParseVolume(string payload, out int volume)
+    {
+        volume = 0;
+        return int.TryParse(payload, out volume) && volume >= 0 && volume <= 100;
+    }
+
+    /// <summary>
+    /// Tries to parse boolean value from various formats.
+    /// </summary>
+    private static bool TryParseBool(string payload, out bool value)
+    {
+        value = false;
+        return payload.ToLowerInvariant() switch
+        {
+            "true" or "1" or "on" or "yes" => (value = true) == true,
+            "false" or "0" or "off" or "no" => (value = false) == false,
+            _ => false,
+        };
+    }
+
+    /// <summary>
+    /// Tries to parse volume step with direction (+5, -10, etc.).
+    /// </summary>
+    private static bool TryParseVolumeStep(string payload, out int step, out int direction)
+    {
+        step = 5; // Default step
+        direction = 0;
+
+        if (payload.StartsWith('+'))
+        {
+            direction = 1;
+            var stepStr = payload[1..];
+            return string.IsNullOrEmpty(stepStr) || (int.TryParse(stepStr, out step) && step > 0 && step <= 50);
+        }
+
+        if (payload.StartsWith('-'))
+        {
+            direction = -1;
+            var stepStr = payload[1..];
+            return string.IsNullOrEmpty(stepStr) || (int.TryParse(stepStr, out step) && step > 0 && step <= 50);
+        }
+
+        return false;
     }
 
     /// <summary>

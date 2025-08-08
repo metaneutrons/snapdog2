@@ -2,132 +2,146 @@ namespace SnapDog2.Worker.DI;
 
 using System.Reflection;
 using Cortex.Mediator;
+using Cortex.Mediator.Commands;
 using Cortex.Mediator.DependencyInjection;
 using Cortex.Mediator.Notifications;
+using Cortex.Mediator.Queries;
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Server.Behaviors;
 using SnapDog2.Server.Features.Shared.Notifications;
 
 /// <summary>
-/// Extension methods for configuring Cortex.Mediator services.
+/// Extension methods for configuring Cortex.Mediator services with auto-discovery.
+/// Eliminates 50+ manual handler registrations through assembly scanning.
+/// Uses shared logging behavior to reduce code duplication.
 /// </summary>
 public static class CortexMediatorConfiguration
 {
     /// <summary>
-    /// Adds Cortex.Mediator and related services (handlers, validators, behaviors) to the service collection.
+    /// Adds Cortex.Mediator and related services with auto-discovery.
+    /// Automatically discovers and registers all handlers, eliminating manual registration overhead.
+    /// Uses shared logging behavior to reduce code duplication.
     /// </summary>
     /// <param name="services">The service collection.</param>
     /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddCommandProcessing(this IServiceCollection services)
     {
-        // Get the assembly containing the Server layer code
-        var serverAssembly = typeof(LoggingCommandBehavior<,>).Assembly;
+        // Get assemblies for auto-discovery
+        var serverAssembly = typeof(SharedLoggingCommandBehavior<,>).Assembly;
+        var coreAssembly = typeof(SnapDog2.Core.Models.IResult).Assembly;
+        var assemblies = new[] { serverAssembly, coreAssembly };
 
-        // Add Cortex.Mediator using the proper extension method
+        // Add Cortex.Mediator with enhanced auto-discovery
         services.AddCortexMediator(
             new ConfigurationBuilder().Build().GetSection("Mediator"),
-            new[] { typeof(LoggingCommandBehavior<,>) },
+            new[] { typeof(SharedLoggingCommandBehavior<,>) }, // Use type array as expected
             options =>
             {
-                // Add default behaviors (logging)
-                options.AddDefaultBehaviors();
-
-                // Add custom pipeline behaviors
-                options.AddOpenCommandPipelineBehavior(typeof(LoggingCommandBehavior<,>));
-                options.AddOpenQueryPipelineBehavior(typeof(LoggingQueryBehavior<,>));
-                options.AddOpenCommandPipelineBehavior(typeof(PerformanceCommandBehavior<,>));
-                options.AddOpenQueryPipelineBehavior(typeof(PerformanceQueryBehavior<,>));
+                // Add pipeline behaviors in execution order
+                // Validation first to fail fast
                 options.AddOpenCommandPipelineBehavior(typeof(ValidationCommandBehavior<,>));
                 options.AddOpenQueryPipelineBehavior(typeof(ValidationQueryBehavior<,>));
+
+                // Performance monitoring
+                options.AddOpenCommandPipelineBehavior(typeof(PerformanceCommandBehavior<,>));
+                options.AddOpenQueryPipelineBehavior(typeof(PerformanceQueryBehavior<,>));
+
+                // Shared logging implementation (reduces duplication)
+                options.AddOpenCommandPipelineBehavior(typeof(SharedLoggingCommandBehavior<,>));
+                options.AddOpenQueryPipelineBehavior(typeof(SharedLoggingQueryBehavior<,>));
             }
         );
 
-        // Manually register query handlers since auto-discovery isn't working
-        services.AddScoped<Server.Features.Global.Handlers.GetSystemStatusQueryHandler>();
-        services.AddScoped<Server.Features.Global.Handlers.GetErrorStatusQueryHandler>();
-        services.AddScoped<Server.Features.Global.Handlers.GetVersionInfoQueryHandler>();
-        services.AddScoped<Server.Features.Global.Handlers.GetServerStatsQueryHandler>();
+        // Enhanced auto-discovery with comprehensive handler registration
+        RegisterHandlersWithAutoDiscovery(services, assemblies);
 
-        // Zone command handlers
-        services.AddScoped<Server.Features.Zones.Handlers.PlayCommandHandler>();
-        services.AddScoped<Server.Features.Zones.Handlers.PauseCommandHandler>();
-        services.AddScoped<Server.Features.Zones.Handlers.StopCommandHandler>();
-        services.AddScoped<Server.Features.Zones.Handlers.SetZoneVolumeCommandHandler>();
-        services.AddScoped<Server.Features.Zones.Handlers.VolumeUpCommandHandler>();
-        services.AddScoped<Server.Features.Zones.Handlers.VolumeDownCommandHandler>();
-        services.AddScoped<Server.Features.Zones.Handlers.SetZoneMuteCommandHandler>();
-        services.AddScoped<Server.Features.Zones.Handlers.ToggleZoneMuteCommandHandler>();
-        services.AddScoped<Server.Features.Zones.Handlers.SetTrackCommandHandler>();
-        services.AddScoped<Server.Features.Zones.Handlers.NextTrackCommandHandler>();
-        services.AddScoped<Server.Features.Zones.Handlers.PreviousTrackCommandHandler>();
-        services.AddScoped<Server.Features.Zones.Handlers.SetPlaylistCommandHandler>();
-        services.AddScoped<Server.Features.Zones.Handlers.NextPlaylistCommandHandler>();
-        services.AddScoped<Server.Features.Zones.Handlers.PreviousPlaylistCommandHandler>();
-        services.AddScoped<Server.Features.Zones.Handlers.SetTrackRepeatCommandHandler>();
-        services.AddScoped<Server.Features.Zones.Handlers.ToggleTrackRepeatCommandHandler>();
-        services.AddScoped<Server.Features.Zones.Handlers.SetPlaylistShuffleCommandHandler>();
-        services.AddScoped<Server.Features.Zones.Handlers.TogglePlaylistShuffleCommandHandler>();
-        services.AddScoped<Server.Features.Zones.Handlers.SetPlaylistRepeatCommandHandler>();
-        services.AddScoped<Server.Features.Zones.Handlers.TogglePlaylistRepeatCommandHandler>();
+        // Register integration services as notification handlers using elegant approach
+        RegisterIntegrationNotificationHandlers(services);
 
-        // Zone query handlers
-        services.AddScoped<Server.Features.Zones.Handlers.GetAllZonesQueryHandler>();
-        services.AddScoped<Server.Features.Zones.Handlers.GetZoneStateQueryHandler>();
-        services.AddScoped<Server.Features.Zones.Handlers.GetAllZoneStatesQueryHandler>();
-        services.AddScoped<Server.Features.Zones.Handlers.GetZonePlaybackStateQueryHandler>();
-        services.AddScoped<Server.Features.Zones.Handlers.GetZoneVolumeQueryHandler>();
-        services.AddScoped<Server.Features.Zones.Handlers.GetZoneTrackInfoQueryHandler>();
-        services.AddScoped<Server.Features.Zones.Handlers.GetZonePlaylistInfoQueryHandler>();
-        services.AddScoped<Server.Features.Zones.Handlers.GetAllPlaylistsQueryHandler>();
-        services.AddScoped<Server.Features.Zones.Handlers.GetPlaylistTracksQueryHandler>();
-
-        // Client command handlers
-        services.AddScoped<Server.Features.Clients.Handlers.SetClientVolumeCommandHandler>();
-        services.AddScoped<Server.Features.Clients.Handlers.SetClientMuteCommandHandler>();
-        services.AddScoped<Server.Features.Clients.Handlers.ToggleClientMuteCommandHandler>();
-        services.AddScoped<Server.Features.Clients.Handlers.SetClientLatencyCommandHandler>();
-        services.AddScoped<Server.Features.Clients.Handlers.AssignClientToZoneCommandHandler>();
-
-        // Client query handlers
-        services.AddScoped<Server.Features.Clients.Handlers.GetAllClientsQueryHandler>();
-        services.AddScoped<Server.Features.Clients.Handlers.GetClientQueryHandler>();
-        services.AddScoped<Server.Features.Clients.Handlers.GetClientsByZoneQueryHandler>();
-
-        // Playlist query handlers
-        services.AddScoped<Server.Features.Playlists.Handlers.GetAllPlaylistsQueryHandler>();
-        services.AddScoped<Server.Features.Playlists.Handlers.GetPlaylistQueryHandler>();
-        services.AddScoped<Server.Features.Playlists.Handlers.GetStreamUrlQueryHandler>();
-        services.AddScoped<Server.Features.Playlists.Handlers.TestSubsonicConnectionQueryHandler>();
-        services.AddScoped<Server.Features.Playlists.Handlers.GetPlaylistQueryHandler>();
-        services.AddScoped<Server.Features.Playlists.Handlers.GetStreamUrlQueryHandler>();
-        services.AddScoped<Server.Features.Playlists.Handlers.TestSubsonicConnectionQueryHandler>();
-
-        // Notification handlers
-        services.AddScoped<Server.Features.Shared.Handlers.ZoneStateNotificationHandler>();
-        services.AddScoped<Server.Features.Shared.Handlers.ClientStateNotificationHandler>();
-
-        // Register integration services as notification handlers
-        services.AddScoped<INotificationHandler<StatusChangedNotification>>(provider =>
-            provider.GetRequiredService<ISnapcastService>() as INotificationHandler<StatusChangedNotification>
-            ?? throw new InvalidOperationException(
-                "SnapcastService does not implement INotificationHandler<StatusChangedNotification>"
-            )
-        );
-
-        services.AddScoped<INotificationHandler<StatusChangedNotification>>(provider =>
-            provider.GetRequiredService<IKnxService>() as INotificationHandler<StatusChangedNotification>
-            ?? throw new InvalidOperationException(
-                "KnxService does not implement INotificationHandler<StatusChangedNotification>"
-            )
-        );
-
-        // Automatically register all FluentValidation AbstractValidator<> implementations
-        // found in the specified assembly. These are used by the ValidationBehavior.
-        services.AddValidatorsFromAssembly(serverAssembly, ServiceLifetime.Transient);
+        // Auto-register all FluentValidation validators from all assemblies
+        foreach (var assembly in assemblies)
+        {
+            services.AddValidatorsFromAssembly(assembly, ServiceLifetime.Transient);
+        }
 
         return services;
+    }
+
+    /// <summary>
+    /// Enhanced auto-discovery method that comprehensively registers all handlers.
+    /// Eliminates the need for 50+ manual registrations through reflection-based discovery.
+    /// </summary>
+    private static void RegisterHandlersWithAutoDiscovery(IServiceCollection services, Assembly[] assemblies)
+    {
+        var logger = services.BuildServiceProvider().GetService<ILogger<object>>();
+        var registeredHandlers = 0;
+
+        foreach (var assembly in assemblies)
+        {
+            // Get all handler types from the assembly
+            var handlerTypes = assembly
+                .GetTypes()
+                .Where(t => !t.IsAbstract && !t.IsInterface && t.IsClass)
+                .Where(t => t.GetInterfaces().Any(IsHandlerInterface))
+                .ToList();
+
+            foreach (var handlerType in handlerTypes)
+            {
+                // Register each handler with its interfaces
+                var handlerInterfaces = handlerType.GetInterfaces().Where(IsHandlerInterface).ToList();
+
+                foreach (var interfaceType in handlerInterfaces)
+                {
+                    services.AddScoped(interfaceType, handlerType);
+                    registeredHandlers++;
+                }
+            }
+        }
+
+        logger?.LogInformation(
+            "Auto-discovery registered {HandlerCount} handlers from {AssemblyCount} assemblies",
+            registeredHandlers,
+            assemblies.Length
+        );
+    }
+
+    /// <summary>
+    /// Determines if a type is a handler interface (Command, Query, or Notification handler).
+    /// </summary>
+    private static bool IsHandlerInterface(Type interfaceType)
+    {
+        if (!interfaceType.IsGenericType)
+            return false;
+
+        var genericTypeDefinition = interfaceType.GetGenericTypeDefinition();
+        return genericTypeDefinition == typeof(ICommandHandler<,>)
+            || genericTypeDefinition == typeof(IQueryHandler<,>)
+            || genericTypeDefinition == typeof(INotificationHandler<>);
+    }
+
+    /// <summary>
+    /// Registers integration services as notification handlers in a DRY way.
+    /// Eliminates repetitive registration code and makes it easier to add new services.
+    /// </summary>
+    private static void RegisterIntegrationNotificationHandlers(IServiceCollection services)
+    {
+        // Register services that implement INotificationHandler<StatusChangedNotification>
+        var integrationServiceTypes = new[] { typeof(ISnapcastService), typeof(IKnxService), typeof(IMqttService) };
+
+        foreach (var serviceType in integrationServiceTypes)
+        {
+            services.AddScoped<INotificationHandler<StatusChangedNotification>>(provider =>
+            {
+                var service = provider.GetRequiredService(serviceType);
+                return service as INotificationHandler<StatusChangedNotification>
+                    ?? throw new InvalidOperationException(
+                        $"{serviceType.Name} does not implement INotificationHandler<StatusChangedNotification>"
+                    );
+            });
+        }
     }
 }

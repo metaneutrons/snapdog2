@@ -48,7 +48,13 @@ This document provides a comprehensive analysis of the SnapDog2 implementation s
 - **Achievement**: Enterprise-grade KNX integration with Knx.Falcon.Sdk v6
 - **Key Features**: Multi-connection support (IP Tunneling/Routing/USB), CQRS integration, resilience patterns
 
-#### 15.2.1.7. **7. Core Architecture**
+#### 15.2.1.7. **7. Architectural Improvements**
+- **Status**: ✅ **COMPLETE**
+- **Reference**: [19. Implementation Status #19: Architectural Improvements (DRY Principle & Maintainability)](19-architectural-improvements-implementation.md)
+- **Achievement**: Eliminated DRY principle violations and enhanced maintainability
+- **Key Features**: Auto-discovery configuration (eliminates 50+ manual registrations), shared pipeline behaviors, one-command-per-file structure
+
+#### 15.2.1.8. **8. Core Architecture**
 - **Status**: ✅ **COMPLETE**
 - **References**: Multiple implementation files
 - **Achievement**: State management, error handling, logging, validation

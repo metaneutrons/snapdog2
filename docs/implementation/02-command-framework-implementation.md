@@ -69,10 +69,13 @@ Both services include placeholder implementations with TODO comments for future 
 #### 2.2.4.1. CortexMediatorConfiguration.cs
 Located in `SnapDog2/Worker/DI/CortexMediatorConfiguration.cs`:
 
-- Configures Cortex.Mediator with assembly scanning
+- ✅ **Auto-Discovery Configuration**: Eliminates 50+ manual handler registrations through reflection-based assembly scanning
+- ✅ **Shared Pipeline Behaviors**: Uses shared logging implementation to reduce code duplication
 - Registers all pipeline behaviors in correct execution order
 - Integrates FluentValidation for request validation
 - Uses proper DI lifetime management (Scoped services)
+
+> **Note**: As of August 2025, the manual registration approach described in earlier implementations has been replaced with comprehensive auto-discovery. See [19. Architectural Improvements Implementation](19-architectural-improvements-implementation.md) for details.
 
 #### 2.2.4.2. Program.cs Integration
 - Registers `ISystemStatusService` and `IMetricsService` implementations
