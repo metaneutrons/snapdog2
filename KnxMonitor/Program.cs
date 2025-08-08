@@ -1,10 +1,12 @@
 using System.CommandLine;
 using System.CommandLine.Parsing;
+using System.Net.Sockets;
 using KnxMonitor.Models;
 using KnxMonitor.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Polly;
 using Spectre.Console;
 
 namespace KnxMonitor;
@@ -14,6 +16,11 @@ namespace KnxMonitor;
 /// </summary>
 public static class Program
 {
+    private static readonly TaskCompletionSource<bool> _shutdownCompletionSource = new();
+    private static readonly CancellationTokenSource _applicationCancellationTokenSource = new();
+    private static bool _shutdownRequested = false;
+    private static readonly object _shutdownLock = new();
+
     /// <summary>
     /// Main entry point for the application.
     /// </summary>
@@ -21,86 +28,188 @@ public static class Program
     /// <returns>Exit code.</returns>
     public static async Task<int> Main(string[] args)
     {
-        // Create options using modern System.CommandLine pattern
-        Option<string> gatewayOption = new("--gateway", "-g")
+        // Set up global Ctrl+C handling at the application level
+        Console.CancelKeyPress += OnCancelKeyPress;
+
+        try
         {
-            Description = "KNX gateway address (required for tunnel/router connections)",
-            Required = true,
-        };
-
-        Option<string> connectionTypeOption = new("--connection-type", "-c")
-        {
-            Description = "Connection type: tunnel, router, usb",
-            DefaultValueFactory = _ => "tunnel",
-        };
-        connectionTypeOption.AcceptOnlyFromAmong("tunnel", "router", "usb");
-
-        Option<int> portOption = new("--port", "-p") { Description = "Gateway port", DefaultValueFactory = _ => 3671 };
-
-        Option<bool> verboseOption = new("--verbose", "-v") { Description = "Enable verbose logging" };
-
-        Option<string?> filterOption = new("--filter", "-f") { Description = "Group address filter pattern" };
-
-        // Create root command using modern pattern
-        RootCommand rootCommand = new("KNX Monitor - Visual debugging tool for KNX/EIB bus activity");
-        rootCommand.Options.Add(gatewayOption);
-        rootCommand.Options.Add(connectionTypeOption);
-        rootCommand.Options.Add(portOption);
-        rootCommand.Options.Add(verboseOption);
-        rootCommand.Options.Add(filterOption);
-
-        // Parse and handle the command
-        ParseResult parseResult = rootCommand.Parse(args);
-
-        // Check for parsing errors
-        if (parseResult.Errors.Count > 0)
-        {
-            foreach (ParseError parseError in parseResult.Errors)
+            // Create options using modern System.CommandLine pattern
+            Option<string?> gatewayOption = new("--gateway", "-g")
             {
-                Console.Error.WriteLine(parseError.Message);
+                Description = "KNX gateway address (required for tunnel connections only)",
+                Required = false,
+            };
+
+            Option<string> connectionTypeOption = new("--connection-type", "-c")
+            {
+                Description = "Connection type: tunnel (default), router, usb",
+                DefaultValueFactory = _ => "tunnel",
+            };
+            connectionTypeOption.AcceptOnlyFromAmong("tunnel", "router", "usb");
+
+            Option<string?> multicastAddressOption = new("--multicast-address", "-m")
+            {
+                Description = "Use router mode with multicast address (default: 224.0.23.12)",
+                Arity = ArgumentArity.ZeroOrOne, // Allow -m without value
+            };
+
+            Option<int> portOption = new("--port", "-p")
+            {
+                Description = "Port number (default: 3671)",
+                DefaultValueFactory = _ => 3671,
+            };
+
+            Option<bool> verboseOption = new("--verbose", "-v") { Description = "Enable verbose logging" };
+
+            Option<string?> filterOption = new("--filter", "-f") { Description = "Group address filter pattern" };
+
+            // Create root command using modern pattern
+            RootCommand rootCommand = new("KNX Monitor - Visual debugging tool for KNX/EIB bus activity");
+            rootCommand.Options.Add(gatewayOption);
+            rootCommand.Options.Add(connectionTypeOption);
+            rootCommand.Options.Add(multicastAddressOption);
+            rootCommand.Options.Add(portOption);
+            rootCommand.Options.Add(verboseOption);
+            rootCommand.Options.Add(filterOption);
+
+            // Parse the command line arguments
+            ParseResult parseResult = rootCommand.Parse(args);
+
+            // Check if help was requested - if so, let the system handle it
+            if (args.Contains("--help") || args.Contains("-h") || args.Contains("-?"))
+            {
+                Console.WriteLine(rootCommand.Description);
+                Console.WriteLine();
+                Console.WriteLine("Options:");
+                foreach (var option in rootCommand.Options)
+                {
+                    var aliases = string.Join(", ", option.Aliases);
+                    Console.WriteLine($"  {aliases, -20} {option.Description}");
+                }
+                return 0;
             }
-            return 1;
+
+            // Check for parsing errors
+            if (parseResult.Errors.Count > 0)
+            {
+                foreach (ParseError parseError in parseResult.Errors)
+                {
+                    Console.Error.WriteLine(parseError.Message);
+                }
+                return 1;
+            }
+
+            // Extract parsed values with null checks
+            string? gateway = parseResult.GetValue(gatewayOption);
+            string? connectionType = parseResult.GetValue(connectionTypeOption);
+            string? multicastAddress = parseResult.GetValue(multicastAddressOption);
+            int port = parseResult.GetValue(portOption);
+            bool verbose = parseResult.GetValue(verboseOption);
+            string? filter = parseResult.GetValue(filterOption);
+
+            // If -m/--multicast-address was specified, automatically switch to router mode
+            bool multicastOptionUsed = args.Contains("-m") || args.Contains("--multicast-address");
+            if (multicastOptionUsed)
+            {
+                connectionType = "router";
+                // If no specific address was provided with -m, use default
+                if (string.IsNullOrEmpty(multicastAddress))
+                {
+                    multicastAddress = "224.0.23.12";
+                }
+            }
+
+            // Set default connection type if not provided and -m wasn't used
+            if (string.IsNullOrEmpty(connectionType))
+            {
+                connectionType = "tunnel";
+            }
+
+            // Set default multicast address if not provided
+            if (string.IsNullOrEmpty(multicastAddress))
+            {
+                multicastAddress = "224.0.23.12";
+            }
+
+            // Validate required parameters based on connection type
+            if (connectionType.ToLowerInvariant() == "tunnel" && string.IsNullOrEmpty(gateway))
+            {
+                Console.Error.WriteLine("Error: Gateway address is required for tunnel connections");
+                return 1;
+            }
+
+            // Display startup banner only when actually running the monitor
+            DisplayStartupBanner();
+
+            // Run the monitor
+            return await RunMonitorAsync(gateway, connectionType, multicastAddress, port, verbose, filter);
         }
+        finally
+        {
+            // Clean up global resources
+            Console.CancelKeyPress -= OnCancelKeyPress;
+            _applicationCancellationTokenSource.Dispose();
+        }
+    }
 
-        // Extract parsed values
-        string gateway = parseResult.GetValue(gatewayOption)!;
-        string connectionType = parseResult.GetValue(connectionTypeOption)!;
-        int port = parseResult.GetValue(portOption);
-        bool verbose = parseResult.GetValue(verboseOption);
-        string? filter = parseResult.GetValue(filterOption);
+    /// <summary>
+    /// Handles Ctrl+C at the application level to coordinate shutdown between main program and TUI.
+    /// </summary>
+    private static void OnCancelKeyPress(object? sender, ConsoleCancelEventArgs e)
+    {
+        lock (_shutdownLock)
+        {
+            if (_shutdownRequested)
+            {
+                // If shutdown already requested, allow immediate termination
+                return;
+            }
 
-        // Run the monitor
-        return await RunMonitorAsync(gateway, connectionType, port, verbose, filter);
+            // Prevent immediate termination and initiate graceful shutdown
+            e.Cancel = true;
+            _shutdownRequested = true;
+
+            Console.WriteLine("\n[Ctrl+C] Initiating graceful shutdown...");
+
+            // Signal cancellation to all components
+            _applicationCancellationTokenSource.Cancel();
+
+            // Signal shutdown completion
+            _shutdownCompletionSource.TrySetResult(true);
+        }
     }
 
     /// <summary>
     /// Runs the KNX monitor with the specified configuration.
     /// </summary>
-    /// <param name="gateway">Gateway address.</param>
+    /// <param name="gateway">Gateway address (for tunnel connections).</param>
     /// <param name="connectionType">Connection type (tunnel/router/usb).</param>
-    /// <param name="port">Gateway port.</param>
+    /// <param name="multicastAddress">Multicast address (for router connections).</param>
+    /// <param name="port">Port number.</param>
     /// <param name="verbose">Enable verbose logging.</param>
     /// <param name="filter">Group address filter.</param>
     /// <returns>Exit code (0 = success, >0 = error).</returns>
     private static async Task<int> RunMonitorAsync(
-        string gateway,
+        string? gateway,
         string connectionType,
+        string multicastAddress,
         int port,
         bool verbose,
         string? filter
     )
     {
         IHost? host = null;
+        IKnxMonitorService? monitorService = null;
+        IDisplayService? displayService = null;
+
         try
         {
-            // Display startup banner
-            DisplayStartupBanner();
-
             // Create configuration
             var config = new KnxMonitorConfig
             {
                 ConnectionType = ParseConnectionType(connectionType),
                 Gateway = gateway,
+                MulticastAddress = multicastAddress,
                 Port = port,
                 Verbose = verbose,
                 Filter = filter,
@@ -131,83 +240,56 @@ public static class Program
                 {
                     services.AddSingleton(config);
                     services.AddSingleton<IKnxMonitorService, KnxMonitorService>();
-                    services.AddSingleton<IDisplayService, DisplayService>();
+
+                    // Register appropriate display service based on environment
+                    if (ShouldUseTuiMode())
+                    {
+                        services.AddSingleton<IDisplayService, TuiDisplayService>();
+                    }
+                    else
+                    {
+                        services.AddSingleton<IDisplayService, DisplayService>();
+                    }
                 });
 
             host = hostBuilder.Build();
 
             // Get services
-            var monitorService = host.Services.GetRequiredService<IKnxMonitorService>();
-            var displayService = host.Services.GetRequiredService<IDisplayService>();
+            monitorService = host.Services.GetRequiredService<IKnxMonitorService>();
+            displayService = host.Services.GetRequiredService<IDisplayService>();
 
-            // Start display service
-            await displayService.StartAsync(monitorService);
-
-            // Start monitoring with retry logic
-            const int maxRetries = 2;
-            int attempt = 0;
-            bool connected = false;
-
-            while (attempt <= maxRetries && !connected)
+            // Start monitoring service first
+            try
             {
-                attempt++;
-                try
-                {
-                    Console.WriteLine(
-                        $"[{DateTime.Now:HH:mm:ss.fff}] Connection attempt {attempt}/{maxRetries + 1}..."
-                    );
-
-                    using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(10)); // 10 second timeout
-                    await monitorService.StartMonitoringAsync(timeoutCts.Token);
-
-                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] KNX Monitor connection successful");
-                    connected = true;
-                }
-                catch (OperationCanceledException)
-                {
-                    Console.WriteLine(
-                        $"[{DateTime.Now:HH:mm:ss.fff}] Connection attempt {attempt} timed out after 10 seconds"
-                    );
-                    if (attempt <= maxRetries)
-                    {
-                        Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Retrying in 2 seconds...");
-                        await Task.Delay(2000);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(
-                        $"[{DateTime.Now:HH:mm:ss.fff}] Connection attempt {attempt} failed: {ex.Message}"
-                    );
-                    if (attempt <= maxRetries)
-                    {
-                        Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Retrying in 2 seconds...");
-                        await Task.Delay(2000);
-                    }
-                }
+                await StartMonitoringWithRetry(monitorService, _applicationCancellationTokenSource.Token);
             }
-
-            if (!connected)
+            catch (InvalidOperationException ex)
             {
-                Console.WriteLine(
-                    $"[{DateTime.Now:HH:mm:ss.fff}] Failed to connect after {maxRetries + 1} attempts. Exiting."
-                );
+                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] {ex.Message} Exiting.");
                 return 2; // Exit code 2 for connection failure
             }
 
-            // Wait for cancellation (Ctrl+C)
-            var cancellationToken = new CancellationTokenSource();
-            Console.CancelKeyPress += (_, e) =>
-            {
-                e.Cancel = true;
-                cancellationToken.Cancel();
-            };
+            // Start display service with proper lifecycle coordination
+            var displayTask = displayService.StartAsync(monitorService, _applicationCancellationTokenSource.Token);
 
-            await Task.Delay(Timeout.Infinite, cancellationToken.Token);
+            // Wait for either shutdown signal or display service completion
+            var completedTask = await Task.WhenAny(displayTask, _shutdownCompletionSource.Task);
+
+            if (completedTask == _shutdownCompletionSource.Task)
+            {
+                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Shutdown signal received, stopping services...");
+            }
+            else
+            {
+                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Display service completed, shutting down...");
+            }
+
+            return 0; // Success
         }
         catch (OperationCanceledException)
         {
-            // Expected when Ctrl+C is pressed
+            // Expected when Ctrl+C is pressed or cancellation is requested
+            Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Operation cancelled, shutting down gracefully...");
             return 0; // Normal shutdown
         }
         catch (Exception ex)
@@ -217,29 +299,78 @@ public static class Program
         }
         finally
         {
+            // Ensure graceful cleanup of all services
+            await CleanupServicesAsync(host, monitorService, displayService);
+        }
+    }
+
+    /// <summary>
+    /// Performs graceful cleanup of all services in the correct order.
+    /// </summary>
+    /// <param name="host">The host instance.</param>
+    /// <param name="monitorService">The KNX monitor service.</param>
+    /// <param name="displayService">The display service.</param>
+    private static async Task CleanupServicesAsync(
+        IHost? host,
+        IKnxMonitorService? monitorService,
+        IDisplayService? displayService
+    )
+    {
+        try
+        {
+            Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Starting graceful cleanup...");
+
+            // Stop display service first (this handles TUI shutdown)
+            if (displayService != null)
+            {
+                try
+                {
+                    await displayService.StopAsync(_applicationCancellationTokenSource.Token);
+                    await displayService.DisposeAsync();
+                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Display service stopped and disposed");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Error stopping display service: {ex.Message}");
+                }
+            }
+
+            // Stop monitoring service
+            if (monitorService != null)
+            {
+                try
+                {
+                    await monitorService.StopMonitoringAsync(_applicationCancellationTokenSource.Token);
+                    await monitorService.DisposeAsync();
+                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Monitor service stopped and disposed");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Error stopping monitor service: {ex.Message}");
+                }
+            }
+
+            // Stop host
             if (host != null)
             {
-                // Stop services gracefully
-                var monitorService = host.Services.GetService<IKnxMonitorService>();
-                var displayService = host.Services.GetService<IDisplayService>();
-
-                if (displayService != null)
+                try
                 {
-                    await displayService.StopAsync();
+                    await host.StopAsync(TimeSpan.FromSeconds(5));
+                    host.Dispose();
+                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Host stopped and disposed");
                 }
-
-                if (monitorService != null)
+                catch (Exception ex)
                 {
-                    await monitorService.StopMonitoringAsync();
+                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Error stopping host: {ex.Message}");
                 }
-
-                await host.StopAsync();
-
-                AnsiConsole.MarkupLine("\n[yellow]KNX Monitor stopped gracefully.[/]");
             }
-        }
 
-        return 0; // Success
+            Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] KNX Monitor stopped gracefully");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Error during cleanup: {ex.Message}");
+        }
     }
 
     /// <summary>
@@ -261,6 +392,11 @@ public static class Program
     /// <returns>Parsed connection type.</returns>
     private static KnxConnectionType ParseConnectionType(string connectionType)
     {
+        if (string.IsNullOrEmpty(connectionType))
+        {
+            throw new ArgumentException("Connection type cannot be null or empty");
+        }
+
         return connectionType.ToLowerInvariant() switch
         {
             "tunnel" => KnxConnectionType.Tunnel,
@@ -279,9 +415,17 @@ public static class Program
     /// <returns>True if valid, false otherwise.</returns>
     private static bool ValidateConfiguration(KnxMonitorConfig config)
     {
-        if (config.ConnectionType != KnxConnectionType.Usb && string.IsNullOrEmpty(config.Gateway))
+        // Gateway is only required for tunnel connections
+        if (config.ConnectionType == KnxConnectionType.Tunnel && string.IsNullOrEmpty(config.Gateway))
         {
-            AnsiConsole.MarkupLine("[red]Error: Gateway address is required for tunnel/router connections[/]");
+            AnsiConsole.MarkupLine("[red]Error: Gateway address is required for tunnel connections[/]");
+            return false;
+        }
+
+        // Validate multicast address for router connections
+        if (config.ConnectionType == KnxConnectionType.Router && string.IsNullOrEmpty(config.MulticastAddress))
+        {
+            AnsiConsole.MarkupLine("[red]Error: Multicast address is required for router connections[/]");
             return false;
         }
 
@@ -292,5 +436,113 @@ public static class Program
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Determines whether to use Terminal.Gui TUI mode or console logging mode.
+    /// </summary>
+    /// <returns>True if TUI mode should be used, false for logging mode.</returns>
+    private static bool ShouldUseTuiMode()
+    {
+        // Use logging mode if output is redirected or in container environment
+        if (
+            Console.IsOutputRedirected
+            || Console.IsInputRedirected
+            || Environment.GetEnvironmentVariable("KNX_MONITOR_LOGGING_MODE") == "true"
+            || Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true"
+        )
+        {
+            return false;
+        }
+
+        // Use TUI mode for interactive terminals
+        return true;
+    }
+
+    /// <summary>
+    /// Starts the monitoring service with Polly retry logic.
+    /// </summary>
+    /// <param name="monitorService">The monitor service to start.</param>
+    /// <param name="cancellationToken">Cancellation token for the operation.</param>
+    /// <returns>Task representing the async operation.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when connection fails after all retries.</exception>
+    private static async Task StartMonitoringWithRetry(
+        IKnxMonitorService monitorService,
+        CancellationToken cancellationToken = default
+    )
+    {
+        // Create a retry policy with Polly
+        var retryPolicy = Policy
+            .Handle<Exception>(ex =>
+                // Retry on most exceptions, but not on cancellation
+                ex is not OperationCanceledException
+                || !cancellationToken.IsCancellationRequested
+            )
+            .WaitAndRetryAsync(
+                retryCount: 3,
+                sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), // Exponential backoff: 2s, 4s, 8s
+                onRetry: (exception, timespan, retryCount, context) =>
+                {
+                    Console.WriteLine(
+                        $"[{DateTime.Now:HH:mm:ss.fff}] Connection attempt {retryCount} failed: {exception.Message}"
+                    );
+
+                    // Provide specific guidance for common errors
+                    if (
+                        exception is SocketException socketEx
+                        && socketEx.SocketErrorCode == SocketError.AddressAlreadyInUse
+                    )
+                    {
+                        Console.WriteLine(
+                            $"[{DateTime.Now:HH:mm:ss.fff}] Hint: Another KNX application may be using the multicast address. Try stopping other KNX tools."
+                        );
+                    }
+
+                    Console.WriteLine(
+                        $"[{DateTime.Now:HH:mm:ss.fff}] Retrying in {timespan.TotalSeconds} seconds... (attempt {retryCount + 1}/4)"
+                    );
+                }
+            );
+
+        try
+        {
+            Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Starting KNX connection with retry policy...");
+
+            await retryPolicy.ExecuteAsync(
+                async (ct) =>
+                {
+                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Attempting KNX connection...");
+
+                    // Create a timeout for each individual attempt
+                    using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+                    timeoutCts.CancelAfter(TimeSpan.FromSeconds(10));
+
+                    await monitorService.StartMonitoringAsync(timeoutCts.Token);
+
+                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] KNX Monitor connection successful");
+                },
+                cancellationToken
+            );
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Connection cancelled by user");
+            throw;
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = ex switch
+            {
+                SocketException socketEx when socketEx.SocketErrorCode == SocketError.AddressAlreadyInUse =>
+                    "Address already in use. Another KNX application may be running.",
+                SocketException socketEx when socketEx.SocketErrorCode == SocketError.NetworkUnreachable =>
+                    "Network unreachable. Check your network connection and KNX gateway.",
+                SocketException socketEx when socketEx.SocketErrorCode == SocketError.TimedOut =>
+                    "Connection timed out. Check if the KNX gateway is reachable.",
+                _ => ex.Message,
+            };
+
+            throw new InvalidOperationException($"Failed to connect after 4 attempts. Last error: {errorMessage}", ex);
+        }
     }
 }

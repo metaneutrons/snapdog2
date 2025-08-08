@@ -5,7 +5,7 @@ namespace KnxMonitor.Services;
 /// <summary>
 /// Interface for the KNX monitoring service.
 /// </summary>
-public interface IKnxMonitorService : IDisposable
+public interface IKnxMonitorService : IDisposable, IAsyncDisposable
 {
     /// <summary>
     /// Event raised when a KNX message is received.

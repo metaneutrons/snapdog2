@@ -1,18 +1,52 @@
-# KNX Monitor
+# KNX Monitor v2.0 - Enterprise Edition
 
-A visual, colorful command-line application for monitoring KNX/EIB bus activity. Perfect for debugging SnapDog2's KNX integration and understanding KNX bus traffic.
+A visual, colorful command-line application for monitoring KNX/EIB bus activity with **award-worthy Terminal.Gui V2 interface**. Perfect for debugging SnapDog2's KNX integration and understanding KNX bus traffic.
 
-![KNX Monitor](https://img.shields.io/badge/KNX-Monitor-blue) ![.NET 9.0](https://img.shields.io/badge/.NET-9.0-purple) ![Docker](https://img.shields.io/badge/Docker-Ready-blue)
+![KNX Monitor](https://img.shields.io/badge/KNX-Monitor-blue) ![.NET 9.0](https://img.shields.io/badge/.NET-9.0-purple) ![Docker](https://img.shields.io/badge/Docker-Ready-blue) ![Terminal.Gui V2](https://img.shields.io/badge/Terminal.Gui-V2-green)
 
-## Features
+## 🏆 Award-Worthy Features
 
-- 🎨 **Visual & Colorful**: Beautiful terminal UI with color-coded messages
+- 🎨 **Enterprise Terminal.Gui V2 Interface**: Beautiful, interactive TUI with real-time updates
+- 🔄 **Dual-Mode Architecture**: Automatic switching between TUI and logging modes
 - 🔌 **Multiple Connection Types**: Support for IP Tunneling, IP Routing, and USB
-- 🔍 **Real-time Monitoring**: Live display of all KNX bus activity
-- 🎯 **Filtering**: Filter messages by group address patterns
-- 📊 **Statistics**: Connection status, message count, and uptime
+- 🔍 **Real-time Monitoring**: Live display of all KNX bus activity with zero flickering
+- 🎯 **Advanced Filtering**: Interactive filter dialogs with pattern matching
+- 📊 **Rich Status Display**: Connection status, message count, and uptime tracking
 - 🐳 **Docker Ready**: Development and production Docker containers
 - ⚡ **Hot Reload**: Development mode with automatic code reloading
+- 🎹 **Keyboard Shortcuts**: Full keyboard navigation and shortcuts
+- 📤 **Export Functionality**: Export messages to CSV format
+- 🎨 **Color Coding**: Age-based and type-based color coding for messages
+
+## 🖥️ Display Modes
+
+### Interactive Mode (Terminal.Gui V2)
+When running in an interactive terminal, KNX Monitor automatically launches the **enterprise-grade Terminal.Gui V2 interface**:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              KNX Monitor v2.0                                  │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│ Connection: ✓ Connected │ Type: IP Tunneling │ Gateway: knxd:3671 │ Uptime: 05:23 │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│ Messages: 142 │ Filter: 1/2/* │ [F1] Help [F2] Filter [F3] Clear [F10] Quit    │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│ Time         │ Type     │ Source    │ Group Address │ Value      │ Priority      │
+├──────────────┼──────────┼───────────┼───────────────┼────────────┼───────────────┤
+│ 14:32:15.123 │ Write    │ 1.1.5     │ 1/2/1         │ 75         │ Normal        │
+│ 14:32:15.456 │ Read     │ 1.1.10    │ 1/2/5         │ Empty      │ Normal        │
+│ 14:32:15.789 │ Response │ 1.1.5     │ 1/2/5         │ false      │ Normal        │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Logging Mode (Console Output)
+When output is redirected or running in containers, automatically switches to logging mode:
+
+```
+[14:32:15.123] Write 1.1.5 -> 1/2/1 = 75 (Normal)
+[14:32:15.456] Read 1.1.10 -> 1/2/5 = Empty (Normal)
+[14:32:15.789] Response 1.1.5 -> 1/2/5 = false (Normal)
+```
 
 ## Quick Start
 
@@ -45,6 +79,34 @@ dotnet run
 # Run with custom settings
 dotnet run -- --connection-type tunnel --gateway knxd --port 3671 --verbose
 ```
+
+## ⌨️ Keyboard Shortcuts (Interactive Mode)
+
+| Shortcut | Action | Description |
+|----------|--------|-------------|
+| **F1** | Help | Show keyboard shortcuts help |
+| **F2** | Filter | Open filter dialog |
+| **F3** | Clear | Clear all messages |
+| **F5** | Refresh | Refresh display |
+| **F9** | Export | Export messages to CSV |
+| **F10** | Quit | Exit application |
+| **Ctrl+C** | Quit | Exit application |
+| **Ctrl+R** | Refresh | Refresh display |
+| **Ctrl+F** | Filter | Open filter dialog |
+| **Ctrl+E** | Export | Export messages |
+| **Arrow Keys** | Navigate | Navigate table |
+| **Page Up/Down** | Scroll | Scroll through messages |
+| **Home/End** | Jump | Go to first/last message |
+
+## 🎨 Color Coding (Interactive Mode)
+
+- 🟢 **Green**: Recent messages (< 1 second), Write operations, Connected status
+- 🟡 **Yellow**: Medium age messages (< 5 seconds), Response operations, Values
+- 🟠 **Orange**: Older messages (< 30 seconds), Urgent priority
+- 🔵 **Cyan**: Read operations, IP Tunneling connection
+- 🟣 **Magenta**: IP Routing connection
+- 🔴 **Red**: System priority, Disconnected status, Errors
+- ⚪ **White/Dim**: Normal priority, Very old messages
 
 ## Command Line Options
 
@@ -291,8 +353,9 @@ KnxMonitor/
 ### Dependencies
 
 - **Knx.Falcon.Sdk**: KNX/EIB communication
+- **Terminal.Gui V2**: Enterprise-grade Terminal User Interface
 - **System.CommandLine**: Command-line argument parsing
-- **Spectre.Console**: Beautiful terminal UI
+- **Spectre.Console**: Beautiful console output for logging mode
 - **Microsoft.Extensions.Hosting**: Dependency injection and hosting
 - **Microsoft.Extensions.Logging**: Structured logging
 

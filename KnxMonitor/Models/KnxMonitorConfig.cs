@@ -11,12 +11,17 @@ public class KnxMonitorConfig
     public KnxConnectionType ConnectionType { get; set; } = KnxConnectionType.Tunnel;
 
     /// <summary>
-    /// Gets or sets the KNX gateway address.
+    /// Gets or sets the KNX gateway address (required for tunnel connections).
     /// </summary>
     public string? Gateway { get; set; }
 
     /// <summary>
-    /// Gets or sets the KNX gateway port.
+    /// Gets or sets the multicast address for router connections (default: 224.0.23.12).
+    /// </summary>
+    public string MulticastAddress { get; set; } = "224.0.23.12";
+
+    /// <summary>
+    /// Gets or sets the port number (default: 3671).
     /// </summary>
     public int Port { get; set; } = 3671;
 

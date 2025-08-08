@@ -82,6 +82,7 @@ graph TB
         subgraph "IoT & Protocol Services"
             MQTT["📡 MQTT Broker<br/>172.20.0.3:1883"]
             KNX["🏠 KNX Gateway<br/>172.20.0.10:6720"]
+            KNXMON["🔧 KNX Monitor<br/>172.20.0.14"]
         end
         
         subgraph "Observability"
@@ -111,6 +112,9 @@ graph TB
     APP --> NAVIDROME
     APP --> KNX
     APP --> JAEGER
+    
+    %% KNX Monitor connection
+    KNXMON --> KNX
     
     %% Audio streaming
     SNAPSERVER --> LIVING
@@ -143,12 +147,13 @@ graph TB
 
 All services accessible through **single port 8000** via Caddy reverse proxy:
 
-- **🏠 Main Dashboard**: <http://localhost:8000>
+- **🎵 SnapDog2**: <http://localhost:8000>
 - **🎵 Snapcast Server**: <http://localhost:8000/server/>
 - **💿 Navidrome Music**: <http://localhost:8000/music/>
 - **🛋️ Living Room Client**: <http://localhost:8000/clients/living-room/>
 - **🍽️ Kitchen Client**: <http://localhost:8000/clients/kitchen/>
 - **🛏️ Bedroom Client**: <http://localhost:8000/clients/bedroom/>
+- **🔧 KNX Monitor**: Available via `docker compose logs knx-monitor -f` (visual KNX bus debugging)
 - **🔍 Jaeger Tracing**: <http://localhost:8000/tracing/>
 - **📊 Grafana Dashboards**: <http://localhost:8000/grafana/> (admin/snapdog-dev)
 - **📈 Prometheus Metrics**: <http://localhost:8000/prometheus/>

@@ -11,7 +11,7 @@ namespace KnxMonitor.Services;
 /// <summary>
 /// Service for monitoring KNX bus activity.
 /// </summary>
-public partial class KnxMonitorService : IKnxMonitorService
+public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
 {
     private readonly KnxMonitorConfig _config;
     private readonly ILogger<KnxMonitorService> _logger;
@@ -122,18 +122,39 @@ public partial class KnxMonitorService : IKnxMonitorService
     }
 
     /// <inheritdoc/>
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            await StopMonitoringAsync();
+            Dispose();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during async dispose");
+        }
+    }
+
+    /// <inheritdoc/>
     public void Dispose()
     {
         try
         {
-            StopMonitoringAsync().GetAwaiter().GetResult();
+            // Stop monitoring synchronously if not already stopped
+            if (_isConnected)
+            {
+                StopMonitoringAsync().GetAwaiter().GetResult();
+            }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error disposing KNX monitor service");
         }
-
-        _knxBus?.Dispose();
+        finally
+        {
+            // Dispose the bus if it exists
+            _knxBus?.Dispose();
+        }
     }
 
     /// <summary>
@@ -180,37 +201,41 @@ public partial class KnxMonitorService : IKnxMonitorService
     /// <returns>Routing connector parameters.</returns>
     private ConnectorParameters CreateRoutingParameters()
     {
-        if (string.IsNullOrEmpty(_config.Gateway))
-        {
-            throw new InvalidOperationException("Gateway address is required for routing connection");
-        }
+        var multicastAddress = _config.MulticastAddress;
 
         // Try to parse as IP address first
-        if (IPAddress.TryParse(_config.Gateway, out var ipAddress))
+        if (IPAddress.TryParse(multicastAddress, out var ipAddress))
         {
-            _logger.LogDebug("Creating IP routing connection to {Gateway}", _config.Gateway);
+            _logger.LogDebug(
+                "Creating IP routing connection to multicast address {MulticastAddress}",
+                multicastAddress
+            );
             return new IpRoutingConnectorParameters(ipAddress);
         }
 
-        // Resolve hostname to IP address
+        // Resolve hostname to IP address if needed
         try
         {
-            var hostEntry = Dns.GetHostEntry(_config.Gateway);
+            var hostEntry = Dns.GetHostEntry(multicastAddress);
             var resolvedIp = hostEntry.AddressList.FirstOrDefault(addr =>
                 addr.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork
             );
 
             if (resolvedIp == null)
             {
-                throw new InvalidOperationException($"Failed to resolve hostname '{_config.Gateway}' to IPv4 address");
+                throw new InvalidOperationException($"Failed to resolve hostname '{multicastAddress}' to IPv4 address");
             }
 
-            _logger.LogDebug("Creating IP routing connection to {Gateway} ({ResolvedIp})", _config.Gateway, resolvedIp);
+            _logger.LogDebug(
+                "Creating IP routing connection to {MulticastAddress} ({ResolvedIp})",
+                multicastAddress,
+                resolvedIp
+            );
             return new IpRoutingConnectorParameters(resolvedIp);
         }
         catch (Exception ex)
         {
-            throw new InvalidOperationException($"Error resolving hostname '{_config.Gateway}': {ex.Message}", ex);
+            throw new InvalidOperationException($"Error resolving hostname '{multicastAddress}': {ex.Message}", ex);
         }
     }
 
@@ -240,7 +265,7 @@ public partial class KnxMonitorService : IKnxMonitorService
         return _config.ConnectionType switch
         {
             KnxConnectionType.Tunnel => $"{_config.Gateway}:{_config.Port} (IP Tunneling)",
-            KnxConnectionType.Router => $"{_config.Gateway} (IP Routing)",
+            KnxConnectionType.Router => $"{_config.MulticastAddress}:{_config.Port} (IP Routing)",
             KnxConnectionType.Usb => "USB Device",
             _ => "Unknown",
         };

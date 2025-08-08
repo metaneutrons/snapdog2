@@ -7,7 +7,8 @@ using Spectre.Console.Rendering;
 namespace KnxMonitor.Services;
 
 /// <summary>
-/// Service for displaying KNX monitor output in a visually attractive manner.
+/// Service for displaying KNX monitor output in console logging mode.
+/// Used when output is redirected or in containerized environments.
 /// </summary>
 public class DisplayService : IDisplayService
 {
@@ -24,6 +25,7 @@ public class DisplayService : IDisplayService
     private CancellationTokenSource? _cancellationTokenSource;
     private int _messageCount;
     private DateTime _startTime;
+    private string? _currentFilter;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DisplayService"/> class.
@@ -34,7 +36,20 @@ public class DisplayService : IDisplayService
     {
         _config = config ?? throw new ArgumentNullException(nameof(config));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _currentFilter = config.Filter;
     }
+
+    /// <inheritdoc/>
+    public bool IsRunning => _isRunning;
+
+    /// <inheritdoc/>
+    public string? CurrentFilter => _currentFilter;
+
+    /// <inheritdoc/>
+    public int MessageCount => _messageCount;
+
+    /// <inheritdoc/>
+    public DateTime StartTime => _startTime;
 
     /// <inheritdoc/>
     public async Task StartAsync(IKnxMonitorService monitorService, CancellationToken cancellationToken = default)
@@ -101,27 +116,35 @@ public class DisplayService : IDisplayService
         }
 
         _isRunning = false;
-        _cancellationTokenSource?.Cancel();
 
-        if (_displayTask != null)
+        try
         {
-            try
+            _cancellationTokenSource?.Cancel();
+
+            if (_displayTask != null)
             {
                 await _displayTask;
             }
-            catch (OperationCanceledException)
-            {
-                // Expected
-            }
         }
-
-        _cancellationTokenSource?.Dispose();
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error stopping display service");
+        }
+        finally
+        {
+            _cancellationTokenSource?.Dispose();
+            _cancellationTokenSource = null;
+        }
     }
 
     /// <inheritdoc/>
     public void UpdateConnectionStatus(string status, bool isConnected)
     {
-        // Status updates are handled in the display update loop
+        // Implementation for logging mode
+        if (ShouldUseLoggingMode())
+        {
+            Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Connection status: {status} (Connected: {isConnected})");
+        }
     }
 
     /// <inheritdoc/>
@@ -129,232 +152,219 @@ public class DisplayService : IDisplayService
     {
         _messageQueue.Enqueue(message);
         Interlocked.Increment(ref _messageCount);
+
+        // In logging mode, immediately output the message
+        if (ShouldUseLoggingMode())
+        {
+            var filterMatch = string.IsNullOrEmpty(_currentFilter) || MatchesFilter(message, _currentFilter);
+            if (filterMatch)
+            {
+                Console.WriteLine(
+                    $"[{message.Timestamp:HH:mm:ss.fff}] {FormatMessageType(message.MessageType)} "
+                        + $"{message.SourceAddress} -> {message.GroupAddress} = {message.DisplayValue} "
+                        + $"({message.Priority})"
+                );
+            }
+        }
     }
 
     /// <inheritdoc/>
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
-        StopAsync().GetAwaiter().GetResult();
+        await StopAsync();
+        GC.SuppressFinalize(this);
     }
 
-    /// <summary>
-    /// Handles message received events from the monitor service.
-    /// </summary>
-    /// <param name="sender">Event sender.</param>
-    /// <param name="message">Received message.</param>
     private void OnMessageReceived(object? sender, KnxMessage message)
     {
         DisplayMessage(message);
     }
 
-    /// <summary>
-    /// Initializes the display layout.
-    /// </summary>
     private void InitializeDisplay()
     {
-        // Only create visual components for interactive mode
-        if (!ShouldUseLoggingMode())
+        if (ShouldUseLoggingMode())
         {
-            // Create status table
-            _statusTable = new Table()
-                .Border(TableBorder.Rounded)
-                .BorderColor(Color.Cyan1)
-                .AddColumn(new TableColumn("[bold]Property[/]").Centered())
-                .AddColumn(new TableColumn("[bold]Value[/]").Centered());
-
-            // Create messages table
-            _messagesTable = new Table()
-                .Border(TableBorder.Rounded)
-                .BorderColor(Color.Green)
-                .AddColumn(new TableColumn("[bold]Time[/]").Width(12))
-                .AddColumn(new TableColumn("[bold]Type[/]").Width(8))
-                .AddColumn(new TableColumn("[bold]Source[/]").Width(10))
-                .AddColumn(new TableColumn("[bold]Group Address[/]").Width(15))
-                .AddColumn(new TableColumn("[bold]Value[/]").Width(20))
-                .AddColumn(new TableColumn("[bold]Data[/]").Width(16))
-                .AddColumn(new TableColumn("[bold]Priority[/]").Width(8));
-
-            // Create layout
-            _layout = new Layout("Root").SplitRows(new Layout("Header").Size(8), new Layout("Messages"));
-
-            _layout["Header"].Update(_statusTable);
-            _layout["Messages"].Update(_messagesTable);
+            return; // No visual initialization needed for logging mode
         }
-        else
-        {
-            // For logging mode, just print a simple header
-            Console.WriteLine("=== KNX Monitor - Logging Mode ===");
-            Console.WriteLine("Format: [Time] [Type] Source -> GroupAddress = Value (Data) [Priority]");
-            Console.WriteLine("=====================================");
-        }
+
+        // Initialize Spectre.Console display for interactive mode
+        _statusTable = new Table()
+            .AddColumn("Property")
+            .AddColumn("Value")
+            .Border(TableBorder.Rounded)
+            .BorderColor(Color.Blue);
+
+        _messagesTable = new Table()
+            .AddColumn("Time")
+            .AddColumn("Type")
+            .AddColumn("Source")
+            .AddColumn("Group Address")
+            .AddColumn("Value")
+            .AddColumn("Priority")
+            .Border(TableBorder.Rounded)
+            .BorderColor(Color.Green);
+
+        _layout = new Layout("Root").SplitRows(new Layout("Header").Size(8), new Layout("Messages"));
+
+        _layout["Header"].Update(CreateHeaderPanel());
+        _layout["Messages"].Update(_messagesTable);
     }
 
-    /// <summary>
-    /// Checks if we should use logging mode instead of visual display.
-    /// </summary>
-    private static bool ShouldUseLoggingMode()
-    {
-        // Check for explicit logging mode environment variable
-        if (Environment.GetEnvironmentVariable("KNX_MONITOR_LOGGING_MODE") == "true")
-            return true;
-
-        // Check for Docker container environment
-        return Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true"
-            || File.Exists("/.dockerenv")
-            || Console.IsOutputRedirected;
-    }
-
-    /// <summary>
-    /// Updates the display with current information.
-    /// </summary>
-    /// <param name="monitorService">Monitor service.</param>
     private void UpdateDisplay(IKnxMonitorService monitorService)
     {
-        // Only update visual display if we're in an interactive terminal
-        if (!ShouldUseLoggingMode())
+        if (ShouldUseLoggingMode())
         {
-            lock (_displayLock)
+            return; // No visual updates needed for logging mode
+        }
+
+        lock (_displayLock)
+        {
+            try
             {
-                try
-                {
-                    // Update status table
-                    UpdateStatusTable(monitorService);
+                // Update status table
+                UpdateStatusTable(monitorService);
 
-                    // Update messages table
-                    UpdateMessagesTable();
+                // Update messages table
+                UpdateMessagesTable();
 
-                    // Render the layout
-                    AnsiConsole.Clear();
-                    AnsiConsole.Write(_layout!);
-                }
-                catch (Exception ex)
+                // Render the layout
+                AnsiConsole.Clear();
+                if (_layout != null)
                 {
-                    _logger.LogError(ex, "Error rendering display");
+                    AnsiConsole.Write(_layout);
                 }
             }
-        }
-        else
-        {
-            // For container/logging mode, just log new messages
-            ProcessNewMessagesForLogging();
-        }
-    }
-
-    /// <summary>
-    /// Processes new messages for simple logging output (non-interactive mode).
-    /// </summary>
-    private void ProcessNewMessagesForLogging()
-    {
-        var newMessages = new List<KnxMessage>();
-        while (_messageQueue.TryDequeue(out var message) && newMessages.Count < 50)
-        {
-            newMessages.Add(message);
-        }
-
-        foreach (var message in newMessages)
-        {
-            var typeColor = GetMessageTypeColor(message.MessageType);
-            var priorityColor = GetPriorityColor(message.Priority);
-
-            Console.WriteLine(
-                $"[{message.Timestamp:HH:mm:ss.fff}] "
-                    + $"[{typeColor}]{message.MessageType}[/] "
-                    + $"{message.SourceAddress} -> {message.GroupAddress} "
-                    + $"= {message.DisplayValue} "
-                    + $"({message.DataHex}) "
-                    + $"[{priorityColor}]{message.Priority}[/]"
-            );
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating visual display");
+            }
         }
     }
 
-    /// <summary>
-    /// Updates the status table with current information.
-    /// </summary>
-    /// <param name="monitorService">Monitor service.</param>
     private void UpdateStatusTable(IKnxMonitorService monitorService)
     {
-        _statusTable!.Rows.Clear();
+        if (_statusTable == null)
+            return;
 
-        var connectionColor = monitorService.IsConnected ? "green" : "red";
-        var connectionIcon = monitorService.IsConnected ? "✓" : "✗";
+        _statusTable.Rows.Clear();
 
-        _statusTable.AddRow("Connection", $"[{connectionColor}]{connectionIcon} {monitorService.ConnectionStatus}[/]");
-        _statusTable.AddRow("Type", GetConnectionTypeDisplay());
-        _statusTable.AddRow("Gateway", _config.Gateway ?? "N/A");
+        var connectionStatus = monitorService.IsConnected ? "✓ Connected" : "✗ Disconnected";
+        var connectionColor = monitorService.IsConnected ? Color.Green : Color.Red;
+
+        _statusTable.AddRow("Connection", $"[{connectionColor}]{connectionStatus}[/]");
+        _statusTable.AddRow("Type", FormatConnectionType(_config.ConnectionType));
+        _statusTable.AddRow("Gateway", _config.Gateway ?? "Unknown");
         _statusTable.AddRow("Port", _config.Port.ToString());
-        _statusTable.AddRow("Filter", _config.Filter ?? "None");
+        _statusTable.AddRow("Filter", _currentFilter ?? "None");
         _statusTable.AddRow("Messages", _messageCount.ToString());
-        _statusTable.AddRow("Uptime", GetUptime());
+        _statusTable.AddRow("Uptime", FormatUptime());
     }
 
-    /// <summary>
-    /// Updates the messages table with recent messages.
-    /// </summary>
     private void UpdateMessagesTable()
     {
-        // Process new messages from queue
-        var newMessages = new List<KnxMessage>();
-        while (_messageQueue.TryDequeue(out var message) && newMessages.Count < 50)
+        if (_messagesTable == null)
+            return;
+
+        _messagesTable.Rows.Clear();
+
+        var messages = new List<KnxMessage>();
+        while (_messageQueue.TryDequeue(out var message) && messages.Count < 20)
         {
-            newMessages.Add(message);
+            if (string.IsNullOrEmpty(_currentFilter) || MatchesFilter(message, _currentFilter))
+            {
+                messages.Add(message);
+            }
         }
 
-        // Add new messages to table (keep last 20 messages)
-        foreach (var message in newMessages.TakeLast(20))
+        foreach (var message in messages.Take(20).Reverse())
         {
-            var timeColor = GetTimeColor(message.Timestamp);
-            var typeColor = GetMessageTypeColor(message.MessageType);
-            var priorityColor = GetPriorityColor(message.Priority);
+            var ageColor = CalculateAgeColor(message.Timestamp);
+            var typeColor = CalculateTypeColor(message.MessageType);
 
-            _messagesTable!.AddRow(
-                $"[{timeColor}]{message.Timestamp:HH:mm:ss.fff}[/]",
-                $"[{typeColor}]{message.MessageType}[/]",
-                $"[dim]{message.SourceAddress}[/]",
-                $"[bold]{message.GroupAddress}[/]",
-                $"[yellow]{message.DisplayValue}[/]",
-                $"[dim]{message.DataHex}[/]",
-                $"[{priorityColor}]{message.Priority}[/]"
+            _messagesTable.AddRow(
+                $"[{ageColor}]{message.Timestamp:HH:mm:ss.fff}[/]",
+                $"[{typeColor}]{FormatMessageType(message.MessageType)}[/]",
+                message.SourceAddress,
+                message.GroupAddress,
+                message.DisplayValue,
+                message.Priority.ToString()
             );
-        }
-
-        // Keep only the last 20 rows
-        while (_messagesTable!.Rows.Count > 20)
-        {
-            _messagesTable.Rows.RemoveAt(0);
         }
     }
 
-    /// <summary>
-    /// Gets the display text for the connection type.
-    /// </summary>
-    /// <returns>Connection type display text.</returns>
-    private string GetConnectionTypeDisplay()
+    private Panel CreateHeaderPanel()
     {
-        return _config.ConnectionType switch
+        return new Panel(_statusTable ?? new Table()).Header("KNX Monitor").BorderColor(Color.Blue).Padding(1, 0);
+    }
+
+    /// <summary>
+    /// Determines whether to use logging mode based on output redirection.
+    /// </summary>
+    /// <returns>True if logging mode should be used, false for interactive mode.</returns>
+    private static bool ShouldUseLoggingMode()
+    {
+        // Check if output is redirected or if we're in a container environment
+        return Console.IsOutputRedirected
+            || !Console.IsInputRedirected
+            || Environment.GetEnvironmentVariable("KNX_MONITOR_LOGGING_MODE") == "true"
+            || Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
+    }
+
+    private static bool MatchesFilter(KnxMessage message, string filter)
+    {
+        if (string.IsNullOrEmpty(filter))
+            return true;
+
+        // Support wildcard patterns like "1/2/*" or exact matches
+        if (filter.EndsWith("/*"))
         {
-            KnxConnectionType.Tunnel => "[cyan]IP Tunneling[/]",
-            KnxConnectionType.Router => "[magenta]IP Routing[/]",
-            KnxConnectionType.Usb => "[orange1]USB[/]",
-            _ => "[dim]Unknown[/]",
+            var prefix = filter[..^2];
+            return message.GroupAddress.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
+        }
+
+        return message.GroupAddress.Equals(filter, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string FormatConnectionType(KnxConnectionType connectionType)
+    {
+        return connectionType switch
+        {
+            KnxConnectionType.Tunnel => "IP Tunneling",
+            KnxConnectionType.Router => "IP Routing",
+            KnxConnectionType.Usb => "USB",
+            _ => "Unknown",
         };
     }
 
-    /// <summary>
-    /// Gets the uptime string.
-    /// </summary>
-    /// <returns>Uptime string.</returns>
-    private string GetUptime()
+    private static string FormatMessageType(KnxMessageType type)
+    {
+        return type switch
+        {
+            KnxMessageType.Read => "Read",
+            KnxMessageType.Write => "Write",
+            KnxMessageType.Response => "Response",
+            _ => "Unknown",
+        };
+    }
+
+    private static string FormatValue(object? value)
+    {
+        return value switch
+        {
+            null => "Empty",
+            bool b => b ? "true" : "false",
+            byte[] bytes => Convert.ToHexString(bytes),
+            _ => value.ToString() ?? "Empty",
+        };
+    }
+
+    private string FormatUptime()
     {
         var uptime = DateTime.Now - _startTime;
         return $"{uptime.Hours:D2}:{uptime.Minutes:D2}:{uptime.Seconds:D2}";
     }
 
-    /// <summary>
-    /// Gets the color for a timestamp based on age.
-    /// </summary>
-    /// <param name="timestamp">Message timestamp.</param>
-    /// <returns>Color name.</returns>
-    private static string GetTimeColor(DateTime timestamp)
+    private static string CalculateAgeColor(DateTime timestamp)
     {
         var age = DateTime.Now - timestamp;
         return age.TotalSeconds switch
@@ -362,39 +372,17 @@ public class DisplayService : IDisplayService
             < 1 => "green",
             < 5 => "yellow",
             < 30 => "orange1",
-            _ => "dim",
-        };
-    }
-
-    /// <summary>
-    /// Gets the color for a message type.
-    /// </summary>
-    /// <param name="messageType">Message type.</param>
-    /// <returns>Color name.</returns>
-    private static string GetMessageTypeColor(KnxMessageType messageType)
-    {
-        return messageType switch
-        {
-            KnxMessageType.Read => "cyan",
-            KnxMessageType.Write => "green",
-            KnxMessageType.Response => "yellow",
             _ => "white",
         };
     }
 
-    /// <summary>
-    /// Gets the color for a message priority.
-    /// </summary>
-    /// <param name="priority">Message priority.</param>
-    /// <returns>Color name.</returns>
-    private static string GetPriorityColor(KnxPriority priority)
+    private static string CalculateTypeColor(KnxMessageType type)
     {
-        return priority switch
+        return type switch
         {
-            KnxPriority.System => "red",
-            KnxPriority.Urgent => "orange1",
-            KnxPriority.Normal => "white",
-            KnxPriority.Low => "dim",
+            KnxMessageType.Read => "cyan",
+            KnxMessageType.Write => "green",
+            KnxMessageType.Response => "yellow",
             _ => "white",
         };
     }
