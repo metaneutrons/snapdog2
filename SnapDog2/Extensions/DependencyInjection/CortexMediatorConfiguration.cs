@@ -15,15 +15,12 @@ using SnapDog2.Server.Features.Shared.Notifications;
 
 /// <summary>
 /// Extension methods for configuring Cortex.Mediator services with auto-discovery.
-/// Eliminates 50+ manual handler registrations through assembly scanning.
-/// Uses shared logging behavior to reduce code duplication.
 /// </summary>
 public static class CortexMediatorConfiguration
 {
     /// <summary>
     /// Adds Cortex.Mediator and related services with auto-discovery.
     /// Automatically discovers and registers all handlers, eliminating manual registration overhead.
-    /// Uses shared logging behavior to reduce code duplication.
     /// </summary>
     /// <param name="services">The service collection.</param>
     /// <returns>The service collection for chaining.</returns>
@@ -49,7 +46,7 @@ public static class CortexMediatorConfiguration
                 options.AddOpenCommandPipelineBehavior(typeof(PerformanceCommandBehavior<,>));
                 options.AddOpenQueryPipelineBehavior(typeof(PerformanceQueryBehavior<,>));
 
-                // Shared logging implementation (reduces duplication)
+                // Shared logging implementation
                 options.AddOpenCommandPipelineBehavior(typeof(SharedLoggingCommandBehavior<,>));
                 options.AddOpenQueryPipelineBehavior(typeof(SharedLoggingQueryBehavior<,>));
             }
@@ -71,8 +68,7 @@ public static class CortexMediatorConfiguration
     }
 
     /// <summary>
-    /// Enhanced auto-discovery method that comprehensively registers all handlers.
-    /// Eliminates the need for 50+ manual registrations through reflection-based discovery.
+    /// Auto-discovery method that comprehensively registers all handlers.
     /// Registers both interface types (for mediator) and concrete types (for direct injection).
     /// Prevents duplicate registrations by checking existing service descriptors.
     /// </summary>
@@ -150,8 +146,7 @@ public static class CortexMediatorConfiguration
     }
 
     /// <summary>
-    /// Registers integration services as notification handlers in a DRY way.
-    /// Eliminates repetitive registration code and makes it easier to add new services.
+    /// Registers integration services as notification handlers.
     /// </summary>
     private static void RegisterIntegrationNotificationHandlers(IServiceCollection services)
     {

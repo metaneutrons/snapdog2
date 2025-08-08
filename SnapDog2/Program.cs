@@ -213,16 +213,16 @@ static WebApplication CreateWebApplication(string[] args)
         SnapDog2.Server.Services.GlobalStatusService
     >();
 
-    // Zone management services (placeholder implementations)
+    // Zone management services
     builder.Services.AddScoped<SnapDog2.Core.Abstractions.IZoneManager, SnapDog2.Infrastructure.Domain.ZoneManager>();
 
-    // Client management services (placeholder implementations)
+    // Client management services
     builder.Services.AddScoped<
         SnapDog2.Core.Abstractions.IClientManager,
         SnapDog2.Infrastructure.Domain.ClientManager
     >();
 
-    // Playlist management services (placeholder implementations)
+    // Playlist management services
     builder.Services.AddScoped<
         SnapDog2.Core.Abstractions.IPlaylistManager,
         SnapDog2.Infrastructure.Domain.PlaylistManager
@@ -330,7 +330,8 @@ static WebApplication CreateWebApplication(string[] args)
     // Configure the HTTP request pipeline (conditionally based on API configuration)
     if (snapDogConfig.Api.Enabled)
     {
-        if (app.Environment.IsDevelopment())
+        // if (app.Environment.IsDevelopment())
+        // FIXME: maybe?! :=)
         {
             app.UseSwagger();
             app.UseSwaggerUI();

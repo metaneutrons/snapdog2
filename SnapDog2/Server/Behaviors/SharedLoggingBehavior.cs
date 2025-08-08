@@ -8,7 +8,6 @@ using SnapDog2.Core.Models;
 
 /// <summary>
 /// Command pipeline behavior with shared logging implementation.
-/// Reduces code duplication by using common logging logic.
 /// </summary>
 /// <typeparam name="TCommand">The command type.</typeparam>
 /// <typeparam name="TResponse">The response type.</typeparam>
@@ -69,7 +68,6 @@ public class SharedLoggingCommandBehavior<TCommand, TResponse> : ICommandPipelin
 
 /// <summary>
 /// Query pipeline behavior with shared logging implementation.
-/// Reduces code duplication by using common logging logic.
 /// </summary>
 /// <typeparam name="TQuery">The query type.</typeparam>
 /// <typeparam name="TResponse">The response type.</typeparam>

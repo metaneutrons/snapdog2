@@ -1,364 +1,250 @@
 namespace SnapDog2.Server.Features.Zones.Validators;
 
 using FluentValidation;
+using SnapDog2.Core.Enums;
+using SnapDog2.Server.Features.Shared.Validators;
 using SnapDog2.Server.Features.Zones.Commands.Playback;
 using SnapDog2.Server.Features.Zones.Commands.Playlist;
 using SnapDog2.Server.Features.Zones.Commands.Track;
 using SnapDog2.Server.Features.Zones.Commands.Volume;
 
 /// <summary>
-/// Validator for the SetZoneVolumeCommand.
+/// Validator for SetZoneVolumeCommand using base class.
 /// </summary>
-public class SetZoneVolumeCommandValidator : AbstractValidator<SetZoneVolumeCommand>
+public class SetZoneVolumeCommandValidator : CompositeZoneVolumeCommandValidator<SetZoneVolumeCommand>
 {
-    public SetZoneVolumeCommandValidator()
-    {
-        this.RuleFor(x => x.ZoneId).GreaterThan(0).WithMessage("Zone ID must be a positive integer.");
+    protected override int GetZoneId(SetZoneVolumeCommand command) => command.ZoneId;
 
-        this.RuleFor(x => x.Volume).InclusiveBetween(0, 100).WithMessage("Volume must be between 0 and 100.");
+    protected override CommandSource GetSource(SetZoneVolumeCommand command) => command.Source;
 
-        this.RuleFor(x => x.Source).IsInEnum().WithMessage("Invalid command source specified.");
-    }
+    protected override int GetVolume(SetZoneVolumeCommand command) => command.Volume;
 }
 
 /// <summary>
-/// Validator for the VolumeUpCommand.
+/// Validator for VolumeUpCommand using base class.
 /// </summary>
-public class VolumeUpCommandValidator : AbstractValidator<VolumeUpCommand>
+public class VolumeUpCommandValidator : CompositeZoneVolumeStepCommandValidator<VolumeUpCommand>
 {
-    public VolumeUpCommandValidator()
-    {
-        this.RuleFor(x => x.ZoneId).GreaterThan(0).WithMessage("Zone ID must be a positive integer.");
+    protected override int GetZoneId(VolumeUpCommand command) => command.ZoneId;
 
-        this.RuleFor(x => x.Step).InclusiveBetween(1, 50).WithMessage("Volume step must be between 1 and 50.");
+    protected override CommandSource GetSource(VolumeUpCommand command) => command.Source;
 
-        this.RuleFor(x => x.Source).IsInEnum().WithMessage("Invalid command source specified.");
-    }
+    protected override int GetStep(VolumeUpCommand command) => command.Step;
 }
 
 /// <summary>
-/// Validator for the VolumeDownCommand.
+/// Validator for VolumeDownCommand using base class.
 /// </summary>
-public class VolumeDownCommandValidator : AbstractValidator<VolumeDownCommand>
+public class VolumeDownCommandValidator : CompositeZoneVolumeStepCommandValidator<VolumeDownCommand>
 {
-    public VolumeDownCommandValidator()
-    {
-        this.RuleFor(x => x.ZoneId).GreaterThan(0).WithMessage("Zone ID must be a positive integer.");
+    protected override int GetZoneId(VolumeDownCommand command) => command.ZoneId;
 
-        this.RuleFor(x => x.Step).InclusiveBetween(1, 50).WithMessage("Volume step must be between 1 and 50.");
+    protected override CommandSource GetSource(VolumeDownCommand command) => command.Source;
 
-        this.RuleFor(x => x.Source).IsInEnum().WithMessage("Invalid command source specified.");
-    }
+    protected override int GetStep(VolumeDownCommand command) => command.Step;
 }
 
 /// <summary>
-/// Validator for the SetTrackCommand.
+/// Validator for SetZoneMuteCommand using base class.
 /// </summary>
-public class SetTrackCommandValidator : AbstractValidator<SetTrackCommand>
+public class SetZoneMuteCommandValidator : BaseZoneCommandValidator<SetZoneMuteCommand>
 {
-    public SetTrackCommandValidator()
-    {
-        this.RuleFor(x => x.ZoneId).GreaterThan(0).WithMessage("Zone ID must be a positive integer.");
+    protected override int GetZoneId(SetZoneMuteCommand command) => command.ZoneId;
 
-        this.RuleFor(x => x.TrackIndex).GreaterThan(0).WithMessage("Track index must be a positive integer (1-based).");
-
-        this.RuleFor(x => x.Source).IsInEnum().WithMessage("Invalid command source specified.");
-    }
+    protected override CommandSource GetSource(SetZoneMuteCommand command) => command.Source;
 }
 
 /// <summary>
-/// Validator for the SetPlaylistCommand.
+/// Validator for ToggleZoneMuteCommand using base class.
 /// </summary>
-public class SetPlaylistCommandValidator : AbstractValidator<SetPlaylistCommand>
+public class ToggleZoneMuteCommandValidator : BaseZoneCommandValidator<ToggleZoneMuteCommand>
 {
-    public SetPlaylistCommandValidator()
-    {
-        this.RuleFor(x => x.ZoneId).GreaterThan(0).WithMessage("Zone ID must be a positive integer.");
+    protected override int GetZoneId(ToggleZoneMuteCommand command) => command.ZoneId;
 
-        this.RuleFor(x => x)
-            .Must(x => x.PlaylistIndex.HasValue || !string.IsNullOrEmpty(x.PlaylistId))
-            .WithMessage("Either PlaylistIndex or PlaylistId must be specified.");
-
-        this.RuleFor(x => x.PlaylistIndex)
-            .GreaterThan(0)
-            .When(x => x.PlaylistIndex.HasValue)
-            .WithMessage("Playlist index must be a positive integer (1-based).");
-
-        this.RuleFor(x => x.PlaylistId)
-            .NotEmpty()
-            .When(x => !x.PlaylistIndex.HasValue)
-            .WithMessage("Playlist ID must not be empty when specified.");
-
-        this.RuleFor(x => x.Source).IsInEnum().WithMessage("Invalid command source specified.");
-    }
+    protected override CommandSource GetSource(ToggleZoneMuteCommand command) => command.Source;
 }
 
 /// <summary>
-/// Base validator for zone commands that only require a zone ID.
+/// Validator for SetTrackCommand using base class.
 /// </summary>
-public abstract class BaseZoneCommandValidator<T> : AbstractValidator<T>
-    where T : class
+public class SetTrackCommandValidator : CompositeZoneTrackCommandValidator<SetTrackCommand>
 {
-    protected BaseZoneCommandValidator()
-    {
-        this.RuleFor(x => this.GetZoneId(x)).GreaterThan(0).WithMessage("Zone ID must be a positive integer.");
+    protected override int GetZoneId(SetTrackCommand command) => command.ZoneId;
 
-        this.RuleFor(x => this.GetSource(x)).IsInEnum().WithMessage("Invalid command source specified.");
-    }
+    protected override CommandSource GetSource(SetTrackCommand command) => command.Source;
 
-    protected abstract int GetZoneId(T command);
-    protected abstract Core.Enums.CommandSource GetSource(T command);
+    protected override int GetTrackIndex(SetTrackCommand command) => command.TrackIndex;
 }
 
 /// <summary>
-/// Validator for the PlayCommand.
+/// Validator for NextTrackCommand using base class.
+/// </summary>
+public class NextTrackCommandValidator : BaseZoneCommandValidator<NextTrackCommand>
+{
+    protected override int GetZoneId(NextTrackCommand command) => command.ZoneId;
+
+    protected override CommandSource GetSource(NextTrackCommand command) => command.Source;
+}
+
+/// <summary>
+/// Validator for PreviousTrackCommand using base class.
+/// </summary>
+public class PreviousTrackCommandValidator : BaseZoneCommandValidator<PreviousTrackCommand>
+{
+    protected override int GetZoneId(PreviousTrackCommand command) => command.ZoneId;
+
+    protected override CommandSource GetSource(PreviousTrackCommand command) => command.Source;
+}
+
+/// <summary>
+/// Validator for SetTrackRepeatCommand using base class.
+/// </summary>
+public class SetTrackRepeatCommandValidator : BaseZoneCommandValidator<SetTrackRepeatCommand>
+{
+    protected override int GetZoneId(SetTrackRepeatCommand command) => command.ZoneId;
+
+    protected override CommandSource GetSource(SetTrackRepeatCommand command) => command.Source;
+}
+
+/// <summary>
+/// Validator for ToggleTrackRepeatCommand using base class.
+/// </summary>
+public class ToggleTrackRepeatCommandValidator : BaseZoneCommandValidator<ToggleTrackRepeatCommand>
+{
+    protected override int GetZoneId(ToggleTrackRepeatCommand command) => command.ZoneId;
+
+    protected override CommandSource GetSource(ToggleTrackRepeatCommand command) => command.Source;
+}
+
+/// <summary>
+/// Validator for SetPlaylistCommand using base class.
+/// </summary>
+public class SetPlaylistCommandValidator : CompositeZonePlaylistCommandValidator<SetPlaylistCommand>
+{
+    protected override int GetZoneId(SetPlaylistCommand command) => command.ZoneId;
+
+    protected override CommandSource GetSource(SetPlaylistCommand command) => command.Source;
+
+    protected override int? GetPlaylistIndex(SetPlaylistCommand command) => command.PlaylistIndex;
+
+    protected override string? GetPlaylistId(SetPlaylistCommand command) => command.PlaylistId;
+}
+
+/// <summary>
+/// Validator for NextPlaylistCommand using base class.
+/// </summary>
+public class NextPlaylistCommandValidator : BaseZoneCommandValidator<NextPlaylistCommand>
+{
+    protected override int GetZoneId(NextPlaylistCommand command) => command.ZoneId;
+
+    protected override CommandSource GetSource(NextPlaylistCommand command) => command.Source;
+}
+
+/// <summary>
+/// Validator for PreviousPlaylistCommand using base class.
+/// </summary>
+public class PreviousPlaylistCommandValidator : BaseZoneCommandValidator<PreviousPlaylistCommand>
+{
+    protected override int GetZoneId(PreviousPlaylistCommand command) => command.ZoneId;
+
+    protected override CommandSource GetSource(PreviousPlaylistCommand command) => command.Source;
+}
+
+/// <summary>
+/// Validator for SetPlaylistShuffleCommand using base class.
+/// </summary>
+public class SetPlaylistShuffleCommandValidator : BaseZoneCommandValidator<SetPlaylistShuffleCommand>
+{
+    protected override int GetZoneId(SetPlaylistShuffleCommand command) => command.ZoneId;
+
+    protected override CommandSource GetSource(SetPlaylistShuffleCommand command) => command.Source;
+}
+
+/// <summary>
+/// Validator for TogglePlaylistShuffleCommand using base class.
+/// </summary>
+public class TogglePlaylistShuffleCommandValidator : BaseZoneCommandValidator<TogglePlaylistShuffleCommand>
+{
+    protected override int GetZoneId(TogglePlaylistShuffleCommand command) => command.ZoneId;
+
+    protected override CommandSource GetSource(TogglePlaylistShuffleCommand command) => command.Source;
+}
+
+/// <summary>
+/// Validator for SetPlaylistRepeatCommand using base class.
+/// </summary>
+public class SetPlaylistRepeatCommandValidator : BaseZoneCommandValidator<SetPlaylistRepeatCommand>
+{
+    protected override int GetZoneId(SetPlaylistRepeatCommand command) => command.ZoneId;
+
+    protected override CommandSource GetSource(SetPlaylistRepeatCommand command) => command.Source;
+}
+
+/// <summary>
+/// Validator for TogglePlaylistRepeatCommand using base class.
+/// </summary>
+public class TogglePlaylistRepeatCommandValidator : BaseZoneCommandValidator<TogglePlaylistRepeatCommand>
+{
+    protected override int GetZoneId(TogglePlaylistRepeatCommand command) => command.ZoneId;
+
+    protected override CommandSource GetSource(TogglePlaylistRepeatCommand command) => command.Source;
+}
+
+/// <summary>
+/// Validator for PlayCommand with additional validation for optional parameters.
 /// </summary>
 public class PlayCommandValidator : BaseZoneCommandValidator<PlayCommand>
 {
     public PlayCommandValidator()
     {
-        this.RuleFor(x => x.TrackIndex)
-            .GreaterThan(0)
-            .When(x => x.TrackIndex.HasValue)
-            .WithMessage("Track index must be a positive integer (1-based) when specified.");
+        // Additional validation for optional track index
+        When(
+            x => x.TrackIndex.HasValue,
+            () =>
+            {
+                RuleFor(x => x.TrackIndex!.Value)
+                    .GreaterThan(0)
+                    .WithMessage("Track index must be a positive integer (1-based) when specified.");
+            }
+        );
 
-        this.RuleFor(x => x.MediaUrl)
-            .NotEmpty()
-            .When(x => !string.IsNullOrEmpty(x.MediaUrl))
-            .WithMessage("Media URL must not be empty when specified.");
+        // Additional validation for optional media URL
+        When(
+            x => !string.IsNullOrEmpty(x.MediaUrl),
+            () =>
+            {
+                RuleFor(x => x.MediaUrl).Must(BeValidUrl).WithMessage("Media URL must be a valid URL when specified.");
+            }
+        );
     }
 
-    protected override int GetZoneId(PlayCommand command)
-    {
-        return command.ZoneId;
-    }
+    protected override int GetZoneId(PlayCommand command) => command.ZoneId;
 
-    protected override Core.Enums.CommandSource GetSource(PlayCommand command)
+    protected override CommandSource GetSource(PlayCommand command) => command.Source;
+
+    private static bool BeValidUrl(string? url)
     {
-        return command.Source;
+        return Uri.TryCreate(url, UriKind.Absolute, out var result)
+            && (result.Scheme == Uri.UriSchemeHttp || result.Scheme == Uri.UriSchemeHttps);
     }
 }
 
 /// <summary>
-/// Validator for the PauseCommand.
+/// Validator for PauseCommand using base class.
 /// </summary>
 public class PauseCommandValidator : BaseZoneCommandValidator<PauseCommand>
 {
-    protected override int GetZoneId(PauseCommand command)
-    {
-        return command.ZoneId;
-    }
+    protected override int GetZoneId(PauseCommand command) => command.ZoneId;
 
-    protected override Core.Enums.CommandSource GetSource(PauseCommand command)
-    {
-        return command.Source;
-    }
+    protected override CommandSource GetSource(PauseCommand command) => command.Source;
 }
 
 /// <summary>
-/// Validator for the StopCommand.
+/// Validator for StopCommand using base class.
 /// </summary>
 public class StopCommandValidator : BaseZoneCommandValidator<StopCommand>
 {
-    protected override int GetZoneId(StopCommand command)
-    {
-        return command.ZoneId;
-    }
+    protected override int GetZoneId(StopCommand command) => command.ZoneId;
 
-    protected override Core.Enums.CommandSource GetSource(StopCommand command)
-    {
-        return command.Source;
-    }
-}
-
-/// <summary>
-/// Validator for the SetZoneMuteCommand.
-/// </summary>
-public class SetZoneMuteCommandValidator : BaseZoneCommandValidator<SetZoneMuteCommand>
-{
-    protected override int GetZoneId(SetZoneMuteCommand command)
-    {
-        return command.ZoneId;
-    }
-
-    protected override Core.Enums.CommandSource GetSource(SetZoneMuteCommand command)
-    {
-        return command.Source;
-    }
-}
-
-/// <summary>
-/// Validator for the ToggleZoneMuteCommand.
-/// </summary>
-public class ToggleZoneMuteCommandValidator : BaseZoneCommandValidator<ToggleZoneMuteCommand>
-{
-    protected override int GetZoneId(ToggleZoneMuteCommand command)
-    {
-        return command.ZoneId;
-    }
-
-    protected override Core.Enums.CommandSource GetSource(ToggleZoneMuteCommand command)
-    {
-        return command.Source;
-    }
-}
-
-/// <summary>
-/// Validator for the NextTrackCommand.
-/// </summary>
-public class NextTrackCommandValidator : BaseZoneCommandValidator<NextTrackCommand>
-{
-    protected override int GetZoneId(NextTrackCommand command)
-    {
-        return command.ZoneId;
-    }
-
-    protected override Core.Enums.CommandSource GetSource(NextTrackCommand command)
-    {
-        return command.Source;
-    }
-}
-
-/// <summary>
-/// Validator for the PreviousTrackCommand.
-/// </summary>
-public class PreviousTrackCommandValidator : BaseZoneCommandValidator<PreviousTrackCommand>
-{
-    protected override int GetZoneId(PreviousTrackCommand command)
-    {
-        return command.ZoneId;
-    }
-
-    protected override Core.Enums.CommandSource GetSource(PreviousTrackCommand command)
-    {
-        return command.Source;
-    }
-}
-
-/// <summary>
-/// Validator for the NextPlaylistCommand.
-/// </summary>
-public class NextPlaylistCommandValidator : BaseZoneCommandValidator<NextPlaylistCommand>
-{
-    protected override int GetZoneId(NextPlaylistCommand command)
-    {
-        return command.ZoneId;
-    }
-
-    protected override Core.Enums.CommandSource GetSource(NextPlaylistCommand command)
-    {
-        return command.Source;
-    }
-}
-
-/// <summary>
-/// Validator for the PreviousPlaylistCommand.
-/// </summary>
-public class PreviousPlaylistCommandValidator : BaseZoneCommandValidator<PreviousPlaylistCommand>
-{
-    protected override int GetZoneId(PreviousPlaylistCommand command)
-    {
-        return command.ZoneId;
-    }
-
-    protected override Core.Enums.CommandSource GetSource(PreviousPlaylistCommand command)
-    {
-        return command.Source;
-    }
-}
-
-/// <summary>
-/// Validator for the SetTrackRepeatCommand.
-/// </summary>
-public class SetTrackRepeatCommandValidator : BaseZoneCommandValidator<SetTrackRepeatCommand>
-{
-    protected override int GetZoneId(SetTrackRepeatCommand command)
-    {
-        return command.ZoneId;
-    }
-
-    protected override Core.Enums.CommandSource GetSource(SetTrackRepeatCommand command)
-    {
-        return command.Source;
-    }
-}
-
-/// <summary>
-/// Validator for the ToggleTrackRepeatCommand.
-/// </summary>
-public class ToggleTrackRepeatCommandValidator : BaseZoneCommandValidator<ToggleTrackRepeatCommand>
-{
-    protected override int GetZoneId(ToggleTrackRepeatCommand command)
-    {
-        return command.ZoneId;
-    }
-
-    protected override Core.Enums.CommandSource GetSource(ToggleTrackRepeatCommand command)
-    {
-        return command.Source;
-    }
-}
-
-/// <summary>
-/// Validator for the SetPlaylistShuffleCommand.
-/// </summary>
-public class SetPlaylistShuffleCommandValidator : BaseZoneCommandValidator<SetPlaylistShuffleCommand>
-{
-    protected override int GetZoneId(SetPlaylistShuffleCommand command)
-    {
-        return command.ZoneId;
-    }
-
-    protected override Core.Enums.CommandSource GetSource(SetPlaylistShuffleCommand command)
-    {
-        return command.Source;
-    }
-}
-
-/// <summary>
-/// Validator for the TogglePlaylistShuffleCommand.
-/// </summary>
-public class TogglePlaylistShuffleCommandValidator : BaseZoneCommandValidator<TogglePlaylistShuffleCommand>
-{
-    protected override int GetZoneId(TogglePlaylistShuffleCommand command)
-    {
-        return command.ZoneId;
-    }
-
-    protected override Core.Enums.CommandSource GetSource(TogglePlaylistShuffleCommand command)
-    {
-        return command.Source;
-    }
-}
-
-/// <summary>
-/// Validator for the SetPlaylistRepeatCommand.
-/// </summary>
-public class SetPlaylistRepeatCommandValidator : BaseZoneCommandValidator<SetPlaylistRepeatCommand>
-{
-    protected override int GetZoneId(SetPlaylistRepeatCommand command)
-    {
-        return command.ZoneId;
-    }
-
-    protected override Core.Enums.CommandSource GetSource(SetPlaylistRepeatCommand command)
-    {
-        return command.Source;
-    }
-}
-
-/// <summary>
-/// Validator for the TogglePlaylistRepeatCommand.
-/// </summary>
-public class TogglePlaylistRepeatCommandValidator : BaseZoneCommandValidator<TogglePlaylistRepeatCommand>
-{
-    protected override int GetZoneId(TogglePlaylistRepeatCommand command)
-    {
-        return command.ZoneId;
-    }
-
-    protected override Core.Enums.CommandSource GetSource(TogglePlaylistRepeatCommand command)
-    {
-        return command.Source;
-    }
+    protected override CommandSource GetSource(StopCommand command) => command.Source;
 }

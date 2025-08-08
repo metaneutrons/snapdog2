@@ -1,78 +1,62 @@
 namespace SnapDog2.Server.Features.Clients.Validators;
 
-using FluentValidation;
+using SnapDog2.Core.Enums;
 using SnapDog2.Server.Features.Clients.Commands.Config;
 using SnapDog2.Server.Features.Clients.Commands.Volume;
+using SnapDog2.Server.Features.Shared.Validators;
 
 /// <summary>
-/// Validator for the SetClientVolumeCommand.
+/// Validator for SetClientVolumeCommand using base class.
 /// </summary>
-public class SetClientVolumeCommandValidator : AbstractValidator<SetClientVolumeCommand>
+public class SetClientVolumeCommandValidator : CompositeClientVolumeCommandValidator<SetClientVolumeCommand>
 {
-    public SetClientVolumeCommandValidator()
-    {
-        this.RuleFor(x => x.ClientId).GreaterThan(0).WithMessage("Client ID must be a positive integer.");
+    protected override int GetClientId(SetClientVolumeCommand command) => command.ClientId;
 
-        this.RuleFor(x => x.Volume).InclusiveBetween(0, 100).WithMessage("Volume must be between 0 and 100.");
+    protected override CommandSource GetSource(SetClientVolumeCommand command) => command.Source;
 
-        this.RuleFor(x => x.Source).IsInEnum().WithMessage("Invalid command source specified.");
-    }
+    protected override int GetVolume(SetClientVolumeCommand command) => command.Volume;
 }
 
 /// <summary>
-/// Validator for the SetClientMuteCommand.
+/// Validator for SetClientMuteCommand using base class.
 /// </summary>
-public class SetClientMuteCommandValidator : AbstractValidator<SetClientMuteCommand>
+public class SetClientMuteCommandValidator : BaseClientCommandValidator<SetClientMuteCommand>
 {
-    public SetClientMuteCommandValidator()
-    {
-        this.RuleFor(x => x.ClientId).GreaterThan(0).WithMessage("Client ID must be a positive integer.");
+    protected override int GetClientId(SetClientMuteCommand command) => command.ClientId;
 
-        this.RuleFor(x => x.Source).IsInEnum().WithMessage("Invalid command source specified.");
-    }
+    protected override CommandSource GetSource(SetClientMuteCommand command) => command.Source;
 }
 
 /// <summary>
-/// Validator for the ToggleClientMuteCommand.
+/// Validator for ToggleClientMuteCommand using base class.
 /// </summary>
-public class ToggleClientMuteCommandValidator : AbstractValidator<ToggleClientMuteCommand>
+public class ToggleClientMuteCommandValidator : BaseClientCommandValidator<ToggleClientMuteCommand>
 {
-    public ToggleClientMuteCommandValidator()
-    {
-        this.RuleFor(x => x.ClientId).GreaterThan(0).WithMessage("Client ID must be a positive integer.");
+    protected override int GetClientId(ToggleClientMuteCommand command) => command.ClientId;
 
-        this.RuleFor(x => x.Source).IsInEnum().WithMessage("Invalid command source specified.");
-    }
+    protected override CommandSource GetSource(ToggleClientMuteCommand command) => command.Source;
 }
 
 /// <summary>
-/// Validator for the SetClientLatencyCommand.
+/// Validator for SetClientLatencyCommand using base class.
 /// </summary>
-public class SetClientLatencyCommandValidator : AbstractValidator<SetClientLatencyCommand>
+public class SetClientLatencyCommandValidator : CompositeClientLatencyCommandValidator<SetClientLatencyCommand>
 {
-    public SetClientLatencyCommandValidator()
-    {
-        this.RuleFor(x => x.ClientId).GreaterThan(0).WithMessage("Client ID must be a positive integer.");
+    protected override int GetClientId(SetClientLatencyCommand command) => command.ClientId;
 
-        this.RuleFor(x => x.LatencyMs)
-            .InclusiveBetween(0, 10000)
-            .WithMessage("Latency must be between 0 and 10000 milliseconds.");
+    protected override CommandSource GetSource(SetClientLatencyCommand command) => command.Source;
 
-        this.RuleFor(x => x.Source).IsInEnum().WithMessage("Invalid command source specified.");
-    }
+    protected override int GetLatencyMs(SetClientLatencyCommand command) => command.LatencyMs;
 }
 
 /// <summary>
-/// Validator for the AssignClientToZoneCommand.
+/// Validator for AssignClientToZoneCommand using base class.
 /// </summary>
-public class AssignClientToZoneCommandValidator : AbstractValidator<AssignClientToZoneCommand>
+public class AssignClientToZoneCommandValidator : CompositeClientZoneAssignmentValidator<AssignClientToZoneCommand>
 {
-    public AssignClientToZoneCommandValidator()
-    {
-        this.RuleFor(x => x.ClientId).GreaterThan(0).WithMessage("Client ID must be a positive integer.");
+    protected override int GetClientId(AssignClientToZoneCommand command) => command.ClientId;
 
-        this.RuleFor(x => x.ZoneId).GreaterThan(0).WithMessage("Zone ID must be a positive integer.");
+    protected override CommandSource GetSource(AssignClientToZoneCommand command) => command.Source;
 
-        this.RuleFor(x => x.Source).IsInEnum().WithMessage("Invalid command source specified.");
-    }
+    protected override int GetZoneId(AssignClientToZoneCommand command) => command.ZoneId;
 }
