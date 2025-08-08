@@ -232,7 +232,7 @@ static WebApplication CreateWebApplication(string[] args)
     if (snapDogConfig.Services.Subsonic.Enabled)
     {
         builder.Services.AddHttpClient<
-            SnapDog2.Core.Interfaces.ISubsonicService,
+            SnapDog2.Core.Abstractions.ISubsonicService,
             SnapDog2.Infrastructure.Subsonic.SubsonicService
         >(client =>
         {

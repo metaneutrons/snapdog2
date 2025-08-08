@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 using Cortex.Mediator.Queries;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Configuration;
-using SnapDog2.Core.Interfaces;
 using SnapDog2.Core.Models;
 using SnapDog2.Server.Features.Playlists.Queries;
 

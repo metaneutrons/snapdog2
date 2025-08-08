@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Abstractions;
-using SnapDog2.Core.Interfaces;
 
 /// <summary>
 /// Hosted service responsible for initializing integration services (Snapcast, MQTT, KNX, etc.) on application startup.

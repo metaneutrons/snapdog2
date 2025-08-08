@@ -1,4 +1,4 @@
-namespace SnapDog2.Core.Interfaces;
+namespace SnapDog2.Core.Abstractions;
 
 using SnapDog2.Core.Models;
 
