@@ -73,38 +73,65 @@ public static class CortexMediatorConfiguration
     /// <summary>
     /// Enhanced auto-discovery method that comprehensively registers all handlers.
     /// Eliminates the need for 50+ manual registrations through reflection-based discovery.
+    /// Registers both interface types (for mediator) and concrete types (for direct injection).
+    /// Prevents duplicate registrations by checking existing service descriptors.
     /// </summary>
     private static void RegisterHandlersWithAutoDiscovery(IServiceCollection services, Assembly[] assemblies)
     {
         var logger = services.BuildServiceProvider().GetService<ILogger<object>>();
         var registeredHandlers = 0;
 
-        foreach (var assembly in assemblies)
+        // Get all unique handler types across all assemblies
+        var allHandlerTypes = assemblies
+            .SelectMany(assembly => assembly.GetTypes())
+            .Where(t => !t.IsAbstract && !t.IsInterface && t.IsClass)
+            .Where(t => t.GetInterfaces().Any(IsHandlerInterface))
+            .Distinct()
+            .ToList();
+
+        logger?.LogInformation("Found {HandlerTypeCount} handler types to register", allHandlerTypes.Count);
+
+        foreach (var handlerType in allHandlerTypes)
         {
-            // Get all handler types from the assembly
-            var handlerTypes = assembly
-                .GetTypes()
-                .Where(t => !t.IsAbstract && !t.IsInterface && t.IsClass)
-                .Where(t => t.GetInterfaces().Any(IsHandlerInterface))
-                .ToList();
-
-            foreach (var handlerType in handlerTypes)
+            // Register the concrete type (for direct injection compatibility) - only if not already registered
+            if (!services.Any(s => s.ServiceType == handlerType && s.ImplementationType == handlerType))
             {
-                // Register each handler with its interfaces
-                var handlerInterfaces = handlerType.GetInterfaces().Where(IsHandlerInterface).ToList();
+                services.AddScoped(handlerType);
+                registeredHandlers++;
+                logger?.LogDebug("Registered concrete type: {HandlerType}", handlerType.Name);
+            }
 
-                foreach (var interfaceType in handlerInterfaces)
+            // Register each handler with its interfaces (for mediator pattern) - only if not already registered
+            var handlerInterfaces = handlerType.GetInterfaces().Where(IsHandlerInterface).ToList();
+
+            foreach (var interfaceType in handlerInterfaces)
+            {
+                if (!services.Any(s => s.ServiceType == interfaceType && s.ImplementationType == handlerType))
                 {
                     services.AddScoped(interfaceType, handlerType);
                     registeredHandlers++;
+                    logger?.LogDebug(
+                        "Registered interface: {InterfaceType} -> {HandlerType}",
+                        interfaceType.Name,
+                        handlerType.Name
+                    );
+                }
+                else
+                {
+                    logger?.LogWarning(
+                        "Skipped duplicate registration: {InterfaceType} -> {HandlerType}",
+                        interfaceType.Name,
+                        handlerType.Name
+                    );
                 }
             }
         }
 
         logger?.LogInformation(
-            "Auto-discovery registered {HandlerCount} handlers from {AssemblyCount} assemblies",
+            "Auto-discovery registered {HandlerCount} unique handler registrations from {AssemblyCount} assemblies ({HandlerTypes} handler types)",
             registeredHandlers,
-            assemblies.Length
+            assemblies.Length,
+            allHandlerTypes.Count
         );
     }
 
