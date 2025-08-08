@@ -13,7 +13,7 @@ using SnapDog2.Server.Features.Global.Queries;
 /// </summary>
 public partial class GetSystemStatusQueryHandler : IQueryHandler<GetSystemStatusQuery, Result<SystemStatus>>
 {
-    private readonly ISystemStatusService _systemStatusService;
+    private readonly IAppStatusService _systemStatusService;
     private readonly ILogger<GetSystemStatusQueryHandler> _logger;
 
     /// <summary>
@@ -22,7 +22,7 @@ public partial class GetSystemStatusQueryHandler : IQueryHandler<GetSystemStatus
     /// <param name="systemStatusService">The system status service.</param>
     /// <param name="logger">The logger instance.</param>
     public GetSystemStatusQueryHandler(
-        ISystemStatusService systemStatusService,
+        IAppStatusService systemStatusService,
         ILogger<GetSystemStatusQueryHandler> logger
     )
     {

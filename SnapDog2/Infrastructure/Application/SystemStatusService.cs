@@ -1,4 +1,4 @@
-namespace SnapDog2.Infrastructure.SystemServices;
+namespace SnapDog2.Infrastructure.Application;
 
 using System.Diagnostics;
 using System.Reflection;
@@ -10,16 +10,16 @@ using SnapDog2.Core.Models;
 /// Implementation of system status service.
 /// TODO: This is a placeholder implementation - will be enhanced with real metrics.
 /// </summary>
-public partial class SystemStatusService : ISystemStatusService
+public partial class AppStatusService : IAppStatusService
 {
-    private readonly ILogger<SystemStatusService> _logger;
+    private readonly ILogger<AppStatusService> _logger;
     private static readonly DateTime _startTime = DateTime.UtcNow;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="SystemStatusService"/> class.
+    /// Initializes a new instance of the <see cref="AppStatusService"/> class.
     /// </summary>
     /// <param name="logger">The logger instance.</param>
-    public SystemStatusService(ILogger<SystemStatusService> logger)
+    public AppStatusService(ILogger<AppStatusService> logger)
     {
         this._logger = logger;
     }

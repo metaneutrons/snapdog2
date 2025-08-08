@@ -5,7 +5,7 @@ using SnapDog2.Core.Models;
 /// <summary>
 /// Service for managing system status information.
 /// </summary>
-public interface ISystemStatusService
+public interface IAppStatusService
 {
     /// <summary>
     /// Gets the current system status.

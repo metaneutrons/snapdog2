@@ -201,12 +201,12 @@ static WebApplication CreateWebApplication(string[] args)
 
     // Register placeholder services
     builder.Services.AddScoped<
-        SnapDog2.Core.Abstractions.ISystemStatusService,
-        SnapDog2.Infrastructure.SystemServices.SystemStatusService
+        SnapDog2.Core.Abstractions.IAppStatusService,
+        SnapDog2.Infrastructure.Application.AppStatusService
     >();
     builder.Services.AddScoped<
         SnapDog2.Core.Abstractions.IMetricsService,
-        SnapDog2.Infrastructure.SystemServices.MetricsService
+        SnapDog2.Infrastructure.Application.MetricsService
     >();
     builder.Services.AddScoped<
         SnapDog2.Server.Services.Abstractions.IGlobalStatusService,
