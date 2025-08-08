@@ -19,7 +19,7 @@ public static class Program
     private static readonly TaskCompletionSource<bool> _shutdownCompletionSource = new();
     private static readonly CancellationTokenSource _applicationCancellationTokenSource = new();
     private static bool _shutdownRequested = false;
-    private static readonly object _shutdownLock = new();
+    private static readonly Lock _shutdownLock = new();
 
     /// <summary>
     /// Main entry point for the application.

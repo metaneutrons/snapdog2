@@ -28,7 +28,7 @@ public class FalconDptDecodingService : IDptDecodingService
     /// <inheritdoc/>
     public object? DecodeValue(byte[] data, string dptId)
     {
-        if (data == null || data.Length == 0 || string.IsNullOrEmpty(dptId))
+        if (data.Length == 0 || string.IsNullOrEmpty(dptId))
         {
             return null;
         }
