@@ -6,7 +6,10 @@ using Cortex.Mediator.Commands;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Models;
-using SnapDog2.Server.Features.Zones.Commands;
+using SnapDog2.Server.Features.Zones.Commands.Playback;
+using SnapDog2.Server.Features.Zones.Commands.Playlist;
+using SnapDog2.Server.Features.Zones.Commands.Track;
+using SnapDog2.Server.Features.Zones.Commands.Volume;
 
 /// <summary>
 /// Handles the PlayCommand.

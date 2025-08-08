@@ -16,9 +16,13 @@ using SnapDog2.Core.Configuration;
 using SnapDog2.Core.Enums;
 using SnapDog2.Core.Helpers;
 using SnapDog2.Core.Models;
-using SnapDog2.Server.Features.Clients.Commands;
+using SnapDog2.Server.Features.Clients.Commands.Config;
+using SnapDog2.Server.Features.Clients.Commands.Volume;
 using SnapDog2.Server.Features.Shared.Notifications;
-using SnapDog2.Server.Features.Zones.Commands;
+using SnapDog2.Server.Features.Zones.Commands.Playback;
+using SnapDog2.Server.Features.Zones.Commands.Playlist;
+using SnapDog2.Server.Features.Zones.Commands.Track;
+using SnapDog2.Server.Features.Zones.Commands.Volume;
 
 /// <summary>
 /// Enterprise-grade KNX integration service using Knx.Falcon.Sdk.

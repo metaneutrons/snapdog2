@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Enums;
 using SnapDog2.Core.Models;
-using SnapDog2.Server.Features.Clients.Commands;
+using SnapDog2.Server.Features.Clients.Commands.Volume;
 
 /// <summary>
 /// Handles the SetClientVolumeCommand.

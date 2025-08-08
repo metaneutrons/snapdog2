@@ -9,7 +9,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Api.Models;
 using SnapDog2.Core.Models;
-using SnapDog2.Server.Features.Clients.Commands;
+using SnapDog2.Server.Features.Clients.Commands.Config;
+using SnapDog2.Server.Features.Clients.Commands.Volume;
 using SnapDog2.Server.Features.Clients.Queries;
 
 /// <summary>

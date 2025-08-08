@@ -1,7 +1,10 @@
 namespace SnapDog2.Server.Features.Zones.Validators;
 
 using FluentValidation;
-using SnapDog2.Server.Features.Zones.Commands;
+using SnapDog2.Server.Features.Zones.Commands.Playback;
+using SnapDog2.Server.Features.Zones.Commands.Playlist;
+using SnapDog2.Server.Features.Zones.Commands.Track;
+using SnapDog2.Server.Features.Zones.Commands.Volume;
 
 /// <summary>
 /// Validator for the SetZoneVolumeCommand.

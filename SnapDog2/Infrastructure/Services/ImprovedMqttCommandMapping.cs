@@ -2,8 +2,12 @@ namespace SnapDog2.Infrastructure.Services;
 
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Enums;
-using SnapDog2.Server.Features.Clients.Commands;
-using SnapDog2.Server.Features.Zones.Commands;
+using SnapDog2.Server.Features.Clients.Commands.Config;
+using SnapDog2.Server.Features.Clients.Commands.Volume;
+using SnapDog2.Server.Features.Zones.Commands.Playback;
+using SnapDog2.Server.Features.Zones.Commands.Playlist;
+using SnapDog2.Server.Features.Zones.Commands.Track;
+using SnapDog2.Server.Features.Zones.Commands.Volume;
 
 /// <summary>
 /// Improved MQTT command mapping that follows DRY principles and implements all blueprint commands.

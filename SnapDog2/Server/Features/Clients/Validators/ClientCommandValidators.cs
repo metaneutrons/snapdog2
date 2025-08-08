@@ -1,7 +1,8 @@
 namespace SnapDog2.Server.Features.Clients.Validators;
 
 using FluentValidation;
-using SnapDog2.Server.Features.Clients.Commands;
+using SnapDog2.Server.Features.Clients.Commands.Config;
+using SnapDog2.Server.Features.Clients.Commands.Volume;
 
 /// <summary>
 /// Validator for the SetClientVolumeCommand.
