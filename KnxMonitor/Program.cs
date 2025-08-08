@@ -79,6 +79,18 @@ public static class Program
 
             Option<string?> filterOption = new("--filter", "-f") { Description = "Group address filter pattern" };
 
+            Option<bool> loggingModeOption = new("--logging-mode", "-l")
+            {
+                Description =
+                    "Force simple logging mode instead of TUI (useful for scripting or non-interactive environments)",
+            };
+
+            Option<bool> enableHealthCheckOption = new("--enable-health-check")
+            {
+                Description =
+                    "Enable HTTP health check service on port 8080 (automatically enabled in Docker containers)",
+            };
+
             // Create root command using modern pattern
             RootCommand rootCommand = new("KNX Monitor - Visual debugging tool for KNX/EIB bus activity");
             rootCommand.Options.Add(gatewayOption);
@@ -87,6 +99,8 @@ public static class Program
             rootCommand.Options.Add(portOption);
             rootCommand.Options.Add(verboseOption);
             rootCommand.Options.Add(filterOption);
+            rootCommand.Options.Add(loggingModeOption);
+            rootCommand.Options.Add(enableHealthCheckOption);
 
             // Parse the command line arguments
             ParseResult parseResult = rootCommand.Parse(args);
@@ -122,6 +136,8 @@ public static class Program
             int port = parseResult.GetValue(portOption);
             bool verbose = parseResult.GetValue(verboseOption);
             string? filter = parseResult.GetValue(filterOption);
+            bool loggingMode = parseResult.GetValue(loggingModeOption);
+            bool enableHealthCheck = parseResult.GetValue(enableHealthCheckOption);
 
             // If -m/--multicast-address was specified, automatically switch to router mode
             bool multicastOptionUsed = args.Contains("-m") || args.Contains("--multicast-address");
@@ -158,7 +174,16 @@ public static class Program
             DisplayStartupBanner();
 
             // Run the monitor
-            return await RunMonitorAsync(gateway, connectionType, multicastAddress, port, verbose, filter);
+            return await RunMonitorAsync(
+                gateway,
+                connectionType,
+                multicastAddress,
+                port,
+                verbose,
+                filter,
+                loggingMode,
+                enableHealthCheck
+            );
         }
         finally
         {
@@ -204,6 +229,8 @@ public static class Program
     /// <param name="port">Port number.</param>
     /// <param name="verbose">Enable verbose logging.</param>
     /// <param name="filter">Group address filter.</param>
+    /// <param name="loggingMode">Force simple logging mode instead of TUI.</param>
+    /// <param name="enableHealthCheck">Enable HTTP health check service (auto-enabled in containers).</param>
     /// <returns>Exit code (0 = success, >0 = error).</returns>
     private static async Task<int> RunMonitorAsync(
         string? gateway,
@@ -211,12 +238,15 @@ public static class Program
         string multicastAddress,
         int port,
         bool verbose,
-        string? filter
+        string? filter,
+        bool loggingMode,
+        bool enableHealthCheck
     )
     {
         IHost? host = null;
         IKnxMonitorService? monitorService = null;
         IDisplayService? displayService = null;
+        HealthCheckService? healthCheckService = null;
 
         try
         {
@@ -260,8 +290,20 @@ public static class Program
                     services.AddSingleton<IKnxMonitorService, KnxMonitorService>();
                     services.AddSingleton<IDptDecodingService, DptDecodingService>();
 
+                    // Health check service registration logic:
+                    // - Enabled by default in Docker containers (for container health monitoring)
+                    // - Disabled by default in standalone mode (unless --enable-health-check is used)
+                    bool shouldEnableHealthCheck =
+                        enableHealthCheck
+                        || Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
+
+                    if (shouldEnableHealthCheck)
+                    {
+                        services.AddSingleton<HealthCheckService>();
+                    }
+
                     // Register appropriate display service based on environment
-                    if (ShouldUseTuiMode())
+                    if (ShouldUseTuiMode(loggingMode))
                     {
                         services.AddSingleton<IDisplayService>(provider =>
                         {
@@ -282,8 +324,24 @@ public static class Program
             displayService = host.Services.GetRequiredService<IDisplayService>();
             var dptDecodingService = host.Services.GetRequiredService<IDptDecodingService>();
 
+            // Conditionally get health check service (same logic as registration)
+            bool shouldEnableHealthCheck =
+                enableHealthCheck || Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
+
+            if (shouldEnableHealthCheck)
+            {
+                healthCheckService = host.Services.GetRequiredService<HealthCheckService>();
+            }
+
             // Initialize the static DPT decoding service in KnxMessage
             KnxMessage.SetDptDecodingService(dptDecodingService);
+
+            // Start health check service if enabled
+            if (healthCheckService != null)
+            {
+                await healthCheckService.StartAsync(8080, _applicationCancellationTokenSource.Token);
+                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Health check service started on port 8080");
+            }
 
             // Start monitoring service first
             try
@@ -327,7 +385,7 @@ public static class Program
         finally
         {
             // Ensure graceful cleanup of all services
-            await CleanupServicesAsync(host, monitorService, displayService);
+            await CleanupServicesAsync(host, monitorService, displayService, healthCheckService);
         }
     }
 
@@ -337,15 +395,33 @@ public static class Program
     /// <param name="host">The host instance.</param>
     /// <param name="monitorService">The KNX monitor service.</param>
     /// <param name="displayService">The display service.</param>
+    /// <param name="healthCheckService">The health check service.</param>
     private static async Task CleanupServicesAsync(
         IHost? host,
         IKnxMonitorService? monitorService,
-        IDisplayService? displayService
+        IDisplayService? displayService,
+        HealthCheckService? healthCheckService = null
     )
     {
         try
         {
             Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Starting graceful cleanup...");
+
+            // Stop health check service first
+            if (healthCheckService != null)
+            {
+                try
+                {
+                    await healthCheckService.StopAsync();
+                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Health check service stopped");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(
+                        $"[{DateTime.Now:HH:mm:ss.fff}] Error stopping health check service: {ex.Message}"
+                    );
+                }
+            }
 
             // Stop display service first (this handles TUI shutdown)
             if (displayService != null)
@@ -468,9 +544,16 @@ public static class Program
     /// <summary>
     /// Determines whether to use Terminal.Gui TUI mode or console logging mode.
     /// </summary>
+    /// <param name="forceLoggingMode">Force logging mode regardless of environment.</param>
     /// <returns>True if TUI mode should be used, false for logging mode.</returns>
-    private static bool ShouldUseTuiMode()
+    private static bool ShouldUseTuiMode(bool forceLoggingMode = false)
     {
+        // Force logging mode if explicitly requested
+        if (forceLoggingMode)
+        {
+            return false;
+        }
+
         // Use logging mode if output is redirected or in container environment
         if (
             Console.IsOutputRedirected

@@ -6,7 +6,6 @@ namespace KnxMonitor.Services;
 
 /// <summary>
 /// DPT service that leverages Falcon SDK's built-in decoding capabilities first.
-/// This is the RIGHT way to do it - use what Falcon SDK already provides!
 /// </summary>
 public class FalconDptService : IDptDecodingService
 {
@@ -31,7 +30,7 @@ public class FalconDptService : IDptDecodingService
 
         try
         {
-            // Try to create a GroupValue using Falcon SDK - this is the RIGHT way!
+            // Try to create a GroupValue using Falcon SDK
             var groupValue = CreateFalconGroupValue(data, dptId);
             if (groupValue != null)
             {

@@ -4,25 +4,23 @@ using Microsoft.Extensions.Logging;
 namespace KnxMonitor.Services;
 
 /// <summary>
-/// The CORRECT Falcon-first DPT service that works with live KNX events.
 /// This service is designed to extract and format values that Falcon SDK already decoded!
 /// </summary>
-public class CorrectFalconFirstService : IDptDecodingService
+public class FalconService : IDptDecodingService
 {
-    private readonly ILogger<CorrectFalconFirstService> _logger;
+    private readonly ILogger<FalconService> _logger;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="CorrectFalconFirstService"/> class.
+    /// Initializes a new instance of the <see cref="FalconService"/> class.
     /// </summary>
     /// <param name="logger">Logger instance.</param>
-    public CorrectFalconFirstService(ILogger<CorrectFalconFirstService> logger)
+    public FalconService(ILogger<FalconService> logger)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <summary>
     /// Extracts DPT information from a Falcon SDK object (from live KNX events).
-    /// This is the RIGHT way - extract from what Falcon SDK already provides!
     /// </summary>
     /// <param name="falconObject">Object from GroupEventArgs.Value.</param>
     /// <returns>Extracted DPT information.</returns>

@@ -23,6 +23,11 @@ public interface IKnxMonitorService : IDisposable, IAsyncDisposable
     string ConnectionStatus { get; }
 
     /// <summary>
+    /// Gets the total number of messages received since monitoring started.
+    /// </summary>
+    int MessageCount { get; }
+
+    /// <summary>
     /// Starts monitoring the KNX bus.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>

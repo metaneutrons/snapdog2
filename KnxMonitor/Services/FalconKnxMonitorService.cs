@@ -12,7 +12,6 @@ namespace KnxMonitor.Services;
 
 /// <summary>
 /// KNX Monitor service that properly leverages Falcon SDK's built-in DPT decoding.
-/// This is the RIGHT approach - use what Falcon SDK already provides!
 /// </summary>
 public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposable
 {
@@ -23,6 +22,7 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
     private KnxBus? _knxBus;
     private bool _isConnected;
     private string _connectionStatus = "Disconnected";
+    private int _messageCount;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FalconKnxMonitorService"/> class.
@@ -57,6 +57,9 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
 
     /// <inheritdoc/>
     public string ConnectionStatus => _connectionStatus;
+
+    /// <inheritdoc/>
+    public int MessageCount => _messageCount;
 
     /// <inheritdoc/>
     public async Task StartMonitoringAsync(CancellationToken cancellationToken = default)
@@ -164,7 +167,6 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
     }
 
     /// <summary>
-    /// The NEW and CORRECT event handler that leverages Falcon SDK's decoded values!
     /// </summary>
     /// <param name="sender">Event sender.</param>
     /// <param name="e">Event arguments containing Falcon SDK's already-decoded value!</param>
@@ -186,7 +188,6 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
 
     /// <summary>
     /// Creates a KNX message that properly uses Falcon SDK's decoded values.
-    /// This is the RIGHT way - no manual decoding needed!
     /// </summary>
     /// <param name="e">Event arguments with Falcon SDK decoded value.</param>
     /// <param name="messageType">Message type.</param>
@@ -990,6 +991,9 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
                 message.DataPointType ?? "Unknown"
             );
         }
+
+        // Increment message counter
+        Interlocked.Increment(ref _messageCount);
 
         // Raise event
         MessageReceived?.Invoke(this, message);

@@ -22,6 +22,7 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
     private KnxBus? _knxBus;
     private bool _isConnected;
     private string _connectionStatus = "Disconnected";
+    private int _messageCount;
 
     // Static logger for static methods
     private static ILogger<KnxMonitorService>? _staticLogger;
@@ -62,6 +63,9 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
 
     /// <inheritdoc/>
     public string ConnectionStatus => _connectionStatus;
+
+    /// <inheritdoc/>
+    public int MessageCount => _messageCount;
 
     /// <inheritdoc/>
     public async Task StartMonitoringAsync(CancellationToken cancellationToken = default)
@@ -631,6 +635,9 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
                 message.DisplayValue
             );
         }
+
+        // Increment message counter
+        Interlocked.Increment(ref _messageCount);
 
         // Raise event
         MessageReceived?.Invoke(this, message);

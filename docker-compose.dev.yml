@@ -161,7 +161,6 @@ services:
       - FILTERS=single,pace:queue # Filters with queue to avoid warnings
     ports:
       - "3671:3671/udp" # KNX/IP port
-      - "6720:6720/tcp" # KNX daemon TCP port
     networks:
       snapdog-dev:
         ipv4_address: 172.20.0.10
@@ -220,6 +219,9 @@ services:
   # - If you see "Unrecognized command or argument" errors, use short form arguments (-g, -p, -v)
   # - Long form arguments (--gateway, --port, --verbose) may not work in Docker due to System.CommandLine beta version
   # - Check logs with: docker compose logs knx-monitor -f
+  # - Check health status: docker inspect snapdog-knx-monitor-1 --format='{{.State.Health.Status}}'
+  # - Access health endpoint: curl http://localhost:8080/health (if port is exposed)
+  # - Access readiness endpoint: curl http://localhost:8080/ready (if port is exposed)
   knx-monitor:
     build:
       context: ./KnxMonitor
@@ -236,14 +238,7 @@ services:
       - DOTNET_WATCH_SUPPRESS_LAUNCH_BROWSER=true
       - KNX_MONITOR_LOGGING_MODE=true # Force logging mode for docker logs
       - TZ=Europe/Berlin # Set timezone for proper log timestamps
-    # Option 1: Connect to internal knxd service (default) - using short form args (RECOMMENDED)
     command: ["dotnet", "watch", "run", "--", "-g", "knxd", "-v"]
-    # Option 2: Connect to external KNX gateway (uncomment and modify IP as needed)
-    # command: ["dotnet", "watch", "run", "--", "-g", "192.168.2.8", "-p", "3671", "-v"]
-    # Option 3: Use KNX router mode (multicast)
-    # command: ["dotnet", "watch", "run", "--", "-c", "router", "-m", "224.0.23.12", "-v"]
-    # Option 4: Long form arguments (if short form doesn't work)
-    # command: ["dotnet", "watch", "run", "--", "--gateway", "knxd", "--port", "6720", "--verbose"]
     depends_on:
       knxd:
         condition: service_healthy
@@ -253,13 +248,33 @@ services:
     stdin_open: true
     tty: true
     restart: unless-stopped
-    # Health check to ensure the monitor is running
+    # 🏥 HEALTH CHECK - Enabled by default in Docker containers
+    # 
+    # The KNX Monitor automatically enables health check service when running in containers.
+    # This provides comprehensive monitoring of both application and KNX connection status.
+    #
+    # Features:
+    # - HTTP-based health check using dedicated endpoint
+    # - Checks both application process AND KNX connection status
+    # - Returns detailed JSON with connection info and message count
+    # - More reliable than simple process checks
+    # - Faster response time (5s timeout vs 10s)
+    # - More frequent checks (15s interval vs 30s)
+    # - Longer startup grace period (30s) for KNX connection establishment
+    #
+    # Endpoints (internal to container):
+    # - http://localhost:8080/health: Detailed health information with uptime and message count
+    # - http://localhost:8080/ready: Simple readiness check (used by Docker health check)
+    #
+    # To debug health check: 
+    # - docker inspect snapdog-knx-monitor-1 --format='{{.State.Health.Status}}'
+    # - docker inspect snapdog-knx-monitor-1 --format='{{range .State.Health.Log}}{{.Output}}{{end}}'
     healthcheck:
-      test: ["CMD", "pgrep", "-f", "KnxMonitor"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
+      test: ["CMD", "curl", "-f", "http://localhost:8080/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     labels:
       - "traefik.enable=false" # Not exposed via web interface
       - "com.docker.compose.service=knx-monitor"
