@@ -27,9 +27,9 @@ public partial class GetAllPlaylistsQueryHandler : IQueryHandler<GetAllPlaylists
         ILogger<GetAllPlaylistsQueryHandler> logger
     )
     {
-        _subsonicService = subsonicService;
-        _config = configOptions.Value;
-        _logger = logger;
+        this._subsonicService = subsonicService;
+        this._config = configOptions.Value;
+        this._logger = logger;
     }
 
     public async Task<Result<List<PlaylistInfo>>> Handle(
@@ -37,18 +37,18 @@ public partial class GetAllPlaylistsQueryHandler : IQueryHandler<GetAllPlaylists
         CancellationToken cancellationToken
     )
     {
-        LogGettingAllPlaylists(_logger);
+        LogGettingAllPlaylists(this._logger);
 
         var playlists = new List<PlaylistInfo>();
 
         // First playlist is always radio stations (from environment variables)
-        var radioPlaylist = CreateRadioPlaylist();
+        var radioPlaylist = this.CreateRadioPlaylist();
         playlists.Add(radioPlaylist);
 
         // Add Subsonic playlists if enabled
-        if (_config.Services.Subsonic.Enabled)
+        if (this._config.Services.Subsonic.Enabled)
         {
-            var subsonicResult = await _subsonicService.GetPlaylistsAsync(cancellationToken);
+            var subsonicResult = await this._subsonicService.GetPlaylistsAsync(cancellationToken);
             if (subsonicResult.IsSuccess)
             {
                 // Add index numbers starting from 2 (radio is 1)
@@ -57,15 +57,15 @@ public partial class GetAllPlaylistsQueryHandler : IQueryHandler<GetAllPlaylists
                     .ToList();
                 playlists.AddRange(indexedPlaylists);
 
-                LogSubsonicPlaylistsAdded(_logger, indexedPlaylists.Count);
+                LogSubsonicPlaylistsAdded(this._logger, indexedPlaylists.Count);
             }
             else
             {
-                LogSubsonicPlaylistsError(_logger, subsonicResult.ErrorMessage ?? "Unknown error");
+                LogSubsonicPlaylistsError(this._logger, subsonicResult.ErrorMessage ?? "Unknown error");
             }
         }
 
-        LogAllPlaylistsRetrieved(_logger, playlists.Count);
+        LogAllPlaylistsRetrieved(this._logger, playlists.Count);
         return Result<List<PlaylistInfo>>.Success(playlists);
     }
 
@@ -74,7 +74,7 @@ public partial class GetAllPlaylistsQueryHandler : IQueryHandler<GetAllPlaylists
     /// </summary>
     private PlaylistInfo CreateRadioPlaylist()
     {
-        var radioStations = _config.RadioStations ?? new List<RadioStationConfig>();
+        var radioStations = this._config.RadioStations ?? new List<RadioStationConfig>();
 
         return new PlaylistInfo
         {
@@ -121,9 +121,9 @@ public partial class GetPlaylistQueryHandler : IQueryHandler<GetPlaylistQuery, R
         ILogger<GetPlaylistQueryHandler> logger
     )
     {
-        _subsonicService = subsonicService;
-        _config = configOptions.Value;
-        _logger = logger;
+        this._subsonicService = subsonicService;
+        this._config = configOptions.Value;
+        this._logger = logger;
     }
 
     public async Task<Result<Api.Models.PlaylistWithTracks>> Handle(
@@ -131,29 +131,29 @@ public partial class GetPlaylistQueryHandler : IQueryHandler<GetPlaylistQuery, R
         CancellationToken cancellationToken
     )
     {
-        LogGettingPlaylist(_logger, query.PlaylistId);
+        LogGettingPlaylist(this._logger, query.PlaylistId);
 
         // Handle radio stations playlist
         if (query.PlaylistId == "radio")
         {
-            return CreateRadioPlaylistWithTracks();
+            return this.CreateRadioPlaylistWithTracks();
         }
 
         // Handle Subsonic playlists
-        if (!_config.Services.Subsonic.Enabled)
+        if (!this._config.Services.Subsonic.Enabled)
         {
-            LogSubsonicDisabled(_logger);
+            LogSubsonicDisabled(this._logger);
             return Result<Api.Models.PlaylistWithTracks>.Failure("Subsonic service is disabled");
         }
 
-        var result = await _subsonicService.GetPlaylistAsync(query.PlaylistId, cancellationToken);
+        var result = await this._subsonicService.GetPlaylistAsync(query.PlaylistId, cancellationToken);
         if (result.IsSuccess)
         {
-            LogPlaylistRetrieved(_logger, query.PlaylistId, result.Value?.Tracks?.Count ?? 0);
+            LogPlaylistRetrieved(this._logger, query.PlaylistId, result.Value?.Tracks?.Count ?? 0);
         }
         else
         {
-            LogPlaylistError(_logger, query.PlaylistId, result.ErrorMessage ?? "Unknown error");
+            LogPlaylistError(this._logger, query.PlaylistId, result.ErrorMessage ?? "Unknown error");
         }
 
         return result;
@@ -164,7 +164,7 @@ public partial class GetPlaylistQueryHandler : IQueryHandler<GetPlaylistQuery, R
     /// </summary>
     private Result<Api.Models.PlaylistWithTracks> CreateRadioPlaylistWithTracks()
     {
-        var radioStations = _config.RadioStations ?? new List<RadioStationConfig>();
+        var radioStations = this._config.RadioStations ?? new List<RadioStationConfig>();
 
         var playlist = new PlaylistInfo
         {
@@ -198,7 +198,7 @@ public partial class GetPlaylistQueryHandler : IQueryHandler<GetPlaylistQuery, R
 
         var playlistWithTracks = new Api.Models.PlaylistWithTracks { Info = playlist, Tracks = tracks };
 
-        LogRadioPlaylistCreated(_logger, tracks.Count);
+        LogRadioPlaylistCreated(this._logger, tracks.Count);
         return Result<Api.Models.PlaylistWithTracks>.Success(playlistWithTracks);
     }
 
@@ -237,37 +237,37 @@ public partial class GetStreamUrlQueryHandler : IQueryHandler<GetStreamUrlQuery,
         ILogger<GetStreamUrlQueryHandler> logger
     )
     {
-        _subsonicService = subsonicService;
-        _config = configOptions.Value;
-        _logger = logger;
+        this._subsonicService = subsonicService;
+        this._config = configOptions.Value;
+        this._logger = logger;
     }
 
     public async Task<Result<string>> Handle(GetStreamUrlQuery query, CancellationToken cancellationToken)
     {
-        LogGettingStreamUrl(_logger, query.TrackId);
+        LogGettingStreamUrl(this._logger, query.TrackId);
 
         // For radio stations, the track ID is already the stream URL
         if (IsRadioStreamUrl(query.TrackId))
         {
-            LogRadioStreamUrl(_logger, query.TrackId);
+            LogRadioStreamUrl(this._logger, query.TrackId);
             return Result<string>.Success(query.TrackId);
         }
 
         // Handle Subsonic tracks
-        if (!_config.Services.Subsonic.Enabled)
+        if (!this._config.Services.Subsonic.Enabled)
         {
-            LogSubsonicDisabled(_logger);
+            LogSubsonicDisabled(this._logger);
             return Result<string>.Failure("Subsonic service is disabled");
         }
 
-        var result = await _subsonicService.GetStreamUrlAsync(query.TrackId, cancellationToken);
+        var result = await this._subsonicService.GetStreamUrlAsync(query.TrackId, cancellationToken);
         if (result.IsSuccess)
         {
-            LogStreamUrlRetrieved(_logger, query.TrackId);
+            LogStreamUrlRetrieved(this._logger, query.TrackId);
         }
         else
         {
-            LogStreamUrlError(_logger, query.TrackId, result.ErrorMessage ?? "Unknown error");
+            LogStreamUrlError(this._logger, query.TrackId, result.ErrorMessage ?? "Unknown error");
         }
 
         return result;
@@ -317,29 +317,29 @@ public partial class TestSubsonicConnectionQueryHandler : IQueryHandler<TestSubs
         ILogger<TestSubsonicConnectionQueryHandler> logger
     )
     {
-        _subsonicService = subsonicService;
-        _config = configOptions.Value;
-        _logger = logger;
+        this._subsonicService = subsonicService;
+        this._config = configOptions.Value;
+        this._logger = logger;
     }
 
     public async Task<Result> Handle(TestSubsonicConnectionQuery query, CancellationToken cancellationToken)
     {
-        LogTestingSubsonicConnection(_logger);
+        LogTestingSubsonicConnection(this._logger);
 
-        if (!_config.Services.Subsonic.Enabled)
+        if (!this._config.Services.Subsonic.Enabled)
         {
-            LogSubsonicDisabled(_logger);
+            LogSubsonicDisabled(this._logger);
             return Result.Failure("Subsonic service is disabled");
         }
 
-        var result = await _subsonicService.TestConnectionAsync(cancellationToken);
+        var result = await this._subsonicService.TestConnectionAsync(cancellationToken);
         if (result.IsSuccess)
         {
-            LogConnectionTestSuccessful(_logger);
+            LogConnectionTestSuccessful(this._logger);
         }
         else
         {
-            LogConnectionTestFailed(_logger, result.ErrorMessage ?? "Unknown error");
+            LogConnectionTestFailed(this._logger, result.ErrorMessage ?? "Unknown error");
         }
 
         return result;

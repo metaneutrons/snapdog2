@@ -1,7 +1,6 @@
 namespace SnapDog2.Worker.DI;
 
 using System.Reflection;
-using Cortex.Mediator;
 using Cortex.Mediator.Commands;
 using Cortex.Mediator.DependencyInjection;
 using Cortex.Mediator.Notifications;

@@ -1,5 +1,3 @@
-using System.Globalization;
-using Knx.Falcon;
 using Microsoft.Extensions.Logging;
 
 namespace KnxMonitor.Services;
@@ -75,7 +73,7 @@ public class DptDecodingService : IDptDecodingService
     /// <param name="logger">Logger instance.</param>
     public DptDecodingService(ILogger<DptDecodingService> logger)
     {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        this._logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <inheritdoc/>
@@ -98,14 +96,14 @@ public class DptDecodingService : IDptDecodingService
 
             if (!SupportedDpts.TryGetValue(normalizedDptId, out var dptInfo))
             {
-                _logger.LogDebug("Unsupported DPT: {DptId}", dptId);
+                this._logger.LogDebug("Unsupported DPT: {DptId}", dptId);
                 return null;
             }
 
             // Validate data length
             if (data.Length != dptInfo.ExpectedLength)
             {
-                _logger.LogDebug(
+                this._logger.LogDebug(
                     "Invalid data length for DPT {DptId}: expected {Expected}, got {Actual}",
                     dptId,
                     dptInfo.ExpectedLength,
@@ -148,7 +146,7 @@ public class DptDecodingService : IDptDecodingService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error decoding DPT {DptId} with data {Data}", dptId, Convert.ToHexString(data));
+            this._logger.LogError(ex, "Error decoding DPT {DptId} with data {Data}", dptId, Convert.ToHexString(data));
             return null;
         }
     }
@@ -161,13 +159,13 @@ public class DptDecodingService : IDptDecodingService
             return (null, null);
         }
 
-        var detectedDpt = DetectDpt(data);
+        var detectedDpt = this.DetectDpt(data);
         if (detectedDpt == null)
         {
             return (null, null);
         }
 
-        var value = DecodeValue(data, detectedDpt);
+        var value = this.DecodeValue(data, detectedDpt);
         return (value, detectedDpt);
     }
 

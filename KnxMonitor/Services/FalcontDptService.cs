@@ -17,7 +17,7 @@ public class FalconDptService : IDptDecodingService
     /// <param name="logger">Logger instance.</param>
     public FalconDptService(ILogger<FalconDptService> logger)
     {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        this._logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <inheritdoc/>
@@ -31,19 +31,23 @@ public class FalconDptService : IDptDecodingService
         try
         {
             // Try to create a GroupValue using Falcon SDK
-            var groupValue = CreateFalconGroupValue(data, dptId);
+            var groupValue = this.CreateFalconGroupValue(data, dptId);
             if (groupValue != null)
             {
-                var decodedValue = ExtractFalconDecodedValue(groupValue);
+                var decodedValue = this.ExtractFalconDecodedValue(groupValue);
                 if (decodedValue != null)
                 {
-                    _logger.LogDebug("Successfully decoded {DptId} using Falcon SDK: {Value}", dptId, decodedValue);
+                    this._logger.LogDebug(
+                        "Successfully decoded {DptId} using Falcon SDK: {Value}",
+                        dptId,
+                        decodedValue
+                    );
                     return decodedValue;
                 }
             }
 
             // If Falcon SDK can't handle it, we have a problem - log it
-            _logger.LogWarning(
+            this._logger.LogWarning(
                 "Falcon SDK couldn't decode DPT {DptId} with data {Data} - this shouldn't happen for standard DPTs",
                 dptId,
                 Convert.ToHexString(data)
@@ -53,7 +57,7 @@ public class FalconDptService : IDptDecodingService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error using Falcon SDK to decode DPT {DptId}", dptId);
+            this._logger.LogError(ex, "Error using Falcon SDK to decode DPT {DptId}", dptId);
             return null;
         }
     }
@@ -67,16 +71,20 @@ public class FalconDptService : IDptDecodingService
         }
 
         // Try common DPT types and see which one Falcon SDK can decode
-        var candidateDpts = GetCandidateDpts(data);
+        var candidateDpts = this.GetCandidateDpts(data);
 
         foreach (var dptId in candidateDpts)
         {
             try
             {
-                var decodedValue = DecodeValue(data, dptId);
+                var decodedValue = this.DecodeValue(data, dptId);
                 if (decodedValue != null)
                 {
-                    _logger.LogDebug("Auto-detected DPT {DptId} for data {Data}", dptId, Convert.ToHexString(data));
+                    this._logger.LogDebug(
+                        "Auto-detected DPT {DptId} for data {Data}",
+                        dptId,
+                        Convert.ToHexString(data)
+                    );
                     return (decodedValue, dptId);
                 }
             }
@@ -87,7 +95,7 @@ public class FalconDptService : IDptDecodingService
             }
         }
 
-        _logger.LogDebug("Could not auto-detect DPT for data {Data}", Convert.ToHexString(data));
+        this._logger.LogDebug("Could not auto-detect DPT for data {Data}", Convert.ToHexString(data));
         return (null, null);
     }
 
@@ -160,7 +168,7 @@ public class FalconDptService : IDptDecodingService
     /// <inheritdoc/>
     public string? DetectDpt(byte[] data)
     {
-        var (_, detectedDpt) = DecodeValueWithAutoDetection(data);
+        var (_, detectedDpt) = this.DecodeValueWithAutoDetection(data);
         return detectedDpt;
     }
 
@@ -175,8 +183,8 @@ public class FalconDptService : IDptDecodingService
         try
         {
             // Test with dummy data to see if Falcon SDK can handle this DPT
-            var testData = GetTestDataForDpt(dptId);
-            var result = DecodeValue(testData, dptId);
+            var testData = this.GetTestDataForDpt(dptId);
+            var result = this.DecodeValue(testData, dptId);
             return result != null;
         }
         catch
@@ -365,12 +373,15 @@ public class FalconDptService : IDptDecodingService
                 {
                     try
                     {
-                        _logger.LogDebug("Trying GroupValue constructor with byte[] and string for DPT {DptId}", dptId);
+                        this._logger.LogDebug(
+                            "Trying GroupValue constructor with byte[] and string for DPT {DptId}",
+                            dptId
+                        );
                         return constructor.Invoke(new object[] { data, dptId });
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogDebug(ex, "GroupValue constructor failed for DPT {DptId}", dptId);
+                        this._logger.LogDebug(ex, "GroupValue constructor failed for DPT {DptId}", dptId);
                     }
                 }
             }
@@ -388,33 +399,38 @@ public class FalconDptService : IDptDecodingService
                 {
                     try
                     {
-                        _logger.LogDebug("Trying factory method {MethodName} for DPT {DptId}", method.Name, dptId);
+                        this._logger.LogDebug("Trying factory method {MethodName} for DPT {DptId}", method.Name, dptId);
                         return method.Invoke(null, new object[] { data, dptId });
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogDebug(ex, "Factory method {MethodName} failed for DPT {DptId}", method.Name, dptId);
+                        this._logger.LogDebug(
+                            ex,
+                            "Factory method {MethodName} failed for DPT {DptId}",
+                            method.Name,
+                            dptId
+                        );
                     }
                 }
             }
 
             // Method 3: Try to find DPT-specific classes
             var falconAssembly = typeof(GroupValue).Assembly;
-            var dptSpecificType = FindDptSpecificType(falconAssembly, dptId);
+            var dptSpecificType = this.FindDptSpecificType(falconAssembly, dptId);
             if (dptSpecificType != null)
             {
                 try
                 {
-                    _logger.LogDebug(
+                    this._logger.LogDebug(
                         "Trying DPT-specific type {TypeName} for DPT {DptId}",
                         dptSpecificType.Name,
                         dptId
                     );
-                    return CreateFromDptSpecificType(dptSpecificType, data);
+                    return this.CreateFromDptSpecificType(dptSpecificType, data);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogDebug(
+                    this._logger.LogDebug(
                         ex,
                         "DPT-specific type {TypeName} failed for DPT {DptId}",
                         dptSpecificType.Name,
@@ -423,7 +439,7 @@ public class FalconDptService : IDptDecodingService
                 }
             }
 
-            _logger.LogWarning(
+            this._logger.LogWarning(
                 "Could not create Falcon GroupValue for DPT {DptId} - no suitable constructor/factory found",
                 dptId
             );
@@ -431,7 +447,7 @@ public class FalconDptService : IDptDecodingService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating Falcon GroupValue for DPT {DptId}", dptId);
+            this._logger.LogError(ex, "Error creating Falcon GroupValue for DPT {DptId}", dptId);
             return null;
         }
     }
@@ -460,7 +476,7 @@ public class FalconDptService : IDptDecodingService
                         var value = prop.GetValue(groupValue);
                         if (value != null)
                         {
-                            _logger.LogDebug(
+                            this._logger.LogDebug(
                                 "Extracted value from property {PropertyName}: {Value} ({ValueType})",
                                 propName,
                                 value,
@@ -471,7 +487,7 @@ public class FalconDptService : IDptDecodingService
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogDebug(ex, "Error reading property {PropertyName}", propName);
+                        this._logger.LogDebug(ex, "Error reading property {PropertyName}", propName);
                     }
                 }
             }
@@ -489,7 +505,7 @@ public class FalconDptService : IDptDecodingService
                         var value = method.Invoke(groupValue, null);
                         if (value != null)
                         {
-                            _logger.LogDebug(
+                            this._logger.LogDebug(
                                 "Extracted value from method {MethodName}: {Value} ({ValueType})",
                                 methodName,
                                 value,
@@ -500,13 +516,13 @@ public class FalconDptService : IDptDecodingService
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogDebug(ex, "Error calling method {MethodName}", methodName);
+                        this._logger.LogDebug(ex, "Error calling method {MethodName}", methodName);
                     }
                 }
             }
 
             // If no specific value property/method, the object itself might be the value
-            _logger.LogDebug(
+            this._logger.LogDebug(
                 "Using GroupValue object itself as value: {Value} ({ValueType})",
                 groupValue,
                 groupValue.GetType().Name
@@ -515,7 +531,7 @@ public class FalconDptService : IDptDecodingService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error extracting value from Falcon GroupValue");
+            this._logger.LogError(ex, "Error extracting value from Falcon GroupValue");
             return null;
         }
     }
@@ -529,9 +545,9 @@ public class FalconDptService : IDptDecodingService
     {
         return data.Length switch
         {
-            1 => GetOneByteCandidates(data[0]),
-            2 => GetTwoByteCandidates(data),
-            4 => GetFourByteCandidates(data),
+            1 => this.GetOneByteCandidates(data[0]),
+            2 => this.GetTwoByteCandidates(data),
+            4 => this.GetFourByteCandidates(data),
             _ => new[] { "16.000" }, // String fallback
         };
     }

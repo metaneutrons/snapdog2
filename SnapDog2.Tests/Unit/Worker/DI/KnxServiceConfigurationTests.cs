@@ -2,11 +2,9 @@ namespace SnapDog2.Tests.Unit.Worker.DI;
 
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Moq;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Configuration;
-using SnapDog2.Core.Enums;
 using SnapDog2.Worker.DI;
 
 public class KnxServiceConfigurationTests

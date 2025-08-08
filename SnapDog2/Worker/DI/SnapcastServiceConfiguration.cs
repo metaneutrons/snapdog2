@@ -1,6 +1,5 @@
 namespace SnapDog2.Worker.DI;
 
-using Cortex.Mediator;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

@@ -1,8 +1,5 @@
 namespace SnapDog2.Core.Models;
 
-using System;
-using System.Collections.Generic;
-
 /// <summary>
 /// Represents MQTT topic configuration for a zone.
 /// </summary>

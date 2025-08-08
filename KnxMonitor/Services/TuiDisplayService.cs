@@ -1,16 +1,10 @@
-using System.Collections.ObjectModel;
-using System.Data;
-using System.Diagnostics;
 using System.Text;
 using KnxMonitor.Models;
 using Microsoft.Extensions.Logging;
-using Terminal.Gui;
 using Terminal.Gui.App;
-using Terminal.Gui.Drawing;
 using Terminal.Gui.Input;
 using Terminal.Gui.ViewBase;
 using Terminal.Gui.Views;
-using Attribute = Terminal.Gui.Drawing.Attribute;
 
 namespace KnxMonitor.Services;
 
@@ -41,17 +35,17 @@ public class TuiDisplayService : IDisplayService
 
     public TuiDisplayService(ILogger<TuiDisplayService> logger, KnxMonitorConfig config)
     {
-        _logger = logger;
-        _config = config;
-        _tableModel = new KnxMessageTableModel();
-        _startTime = DateTime.Now;
+        this._logger = logger;
+        this._config = config;
+        this._tableModel = new KnxMessageTableModel();
+        this._startTime = DateTime.Now;
     }
 
     // IDisplayService properties
-    public bool IsRunning => _isRunning;
-    public string? CurrentFilter => _tableModel.Filter;
-    public int MessageCount => _tableModel.Messages.Count;
-    public DateTime StartTime => _startTime;
+    public bool IsRunning => this._isRunning;
+    public string? CurrentFilter => this._tableModel.Filter;
+    public int MessageCount => this._tableModel.Messages.Count;
+    public DateTime StartTime => this._startTime;
 
     public void Initialize()
     {
@@ -62,11 +56,11 @@ public class TuiDisplayService : IDisplayService
             // Note: Ctrl+C handling is now managed at the Program level
             // This avoids conflicts between main program and TUI service
 
-            _logger.LogInformation("Terminal.Gui V2 application initialized successfully");
+            this._logger.LogInformation("Terminal.Gui V2 application initialized successfully");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to initialize Terminal.Gui V2 application");
+            this._logger.LogError(ex, "Failed to initialize Terminal.Gui V2 application");
             throw;
         }
     }
@@ -77,74 +71,74 @@ public class TuiDisplayService : IDisplayService
     /// </summary>
     public void RequestShutdown()
     {
-        if (_shutdownRequested)
+        if (this._shutdownRequested)
         {
             return;
         }
 
         try
         {
-            _shutdownRequested = true;
-            _logger.LogInformation("TUI shutdown requested, closing application...");
+            this._shutdownRequested = true;
+            this._logger.LogInformation("TUI shutdown requested, closing application...");
 
             // Request Terminal.Gui to stop
             Application.RequestStop();
 
             // Signal that shutdown is complete
-            _shutdownCompletionSource?.TrySetResult(true);
+            this._shutdownCompletionSource?.TrySetResult(true);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during TUI shutdown request");
-            _shutdownCompletionSource?.TrySetException(ex);
+            this._logger.LogError(ex, "Error during TUI shutdown request");
+            this._shutdownCompletionSource?.TrySetException(ex);
         }
     }
 
     public void Start()
     {
-        if (_isRunning)
+        if (this._isRunning)
         {
-            _logger.LogWarning("TUI display service is already running");
+            this._logger.LogWarning("TUI display service is already running");
             return;
         }
 
         try
         {
-            _isRunning = true;
-            CreateMainWindow();
+            this._isRunning = true;
+            this.CreateMainWindow();
 
-            if (_mainWindow != null)
+            if (this._mainWindow != null)
             {
-                Application.Run(_mainWindow);
+                Application.Run(this._mainWindow);
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error running TUI display service");
+            this._logger.LogError(ex, "Error running TUI display service");
             throw;
         }
         finally
         {
-            _isRunning = false;
+            this._isRunning = false;
         }
     }
 
     public void Stop()
     {
-        if (!_isRunning)
+        if (!this._isRunning)
         {
             return;
         }
 
         try
         {
-            _isRunning = false;
-            RequestShutdown();
-            _logger.LogInformation("TUI display service stopped");
+            this._isRunning = false;
+            this.RequestShutdown();
+            this._logger.LogInformation("TUI display service stopped");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error stopping TUI display service");
+            this._logger.LogError(ex, "Error stopping TUI display service");
         }
     }
 
@@ -152,19 +146,19 @@ public class TuiDisplayService : IDisplayService
     {
         try
         {
-            Stop();
+            this.Stop();
             Application.Shutdown();
-            _logger.LogInformation("Terminal.Gui V2 application shutdown completed");
+            this._logger.LogInformation("Terminal.Gui V2 application shutdown completed");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during Terminal.Gui V2 shutdown");
+            this._logger.LogError(ex, "Error during Terminal.Gui V2 shutdown");
         }
     }
 
     private void CreateMainWindow()
     {
-        _mainWindow = new Window
+        this._mainWindow = new Window
         {
             Title = "KNX Monitor - Terminal.Gui V2",
             X = 0,
@@ -174,21 +168,21 @@ public class TuiDisplayService : IDisplayService
         };
 
         // Handle window closing
-        _mainWindow.Closing += (s, e) =>
+        this._mainWindow.Closing += (s, e) =>
         {
-            _logger.LogInformation("Main window closing, initiating shutdown...");
-            RequestShutdown();
+            this._logger.LogInformation("Main window closing, initiating shutdown...");
+            this.RequestShutdown();
         };
 
-        CreateWindowContent();
+        this.CreateWindowContent();
 
-        _logger.LogInformation("Main window created with Terminal.Gui V2 components");
+        this._logger.LogInformation("Main window created with Terminal.Gui V2 components");
     }
 
     private void CreateWindowContent()
     {
         // Clear existing content
-        _mainWindow?.RemoveAll();
+        this._mainWindow?.RemoveAll();
 
         // Create status frame at the top - uses computed layout for automatic resizing
         var statusFrame = new FrameView
@@ -200,8 +194,8 @@ public class TuiDisplayService : IDisplayService
             Height = 6,
         };
 
-        CreateStatusLabels(statusFrame);
-        _mainWindow?.Add(statusFrame);
+        this.CreateStatusLabels(statusFrame);
+        this._mainWindow?.Add(statusFrame);
 
         // Create messages frame below status - uses computed layout for automatic resizing
         var messagesFrame = new FrameView
@@ -213,23 +207,23 @@ public class TuiDisplayService : IDisplayService
             Height = Dim.Fill(1), // Automatically adjusts to terminal height, leaving space for status bar
         };
 
-        CreateMessagesTable(messagesFrame);
-        _mainWindow?.Add(messagesFrame);
+        this.CreateMessagesTable(messagesFrame);
+        this._mainWindow?.Add(messagesFrame);
 
         // Create status bar at the bottom - uses computed layout for automatic resizing
-        CreateStatusBar();
-        _mainWindow?.Add(_statusBar!);
+        this.CreateStatusBar();
+        this._mainWindow?.Add(this._statusBar!);
 
         // Set up key bindings
-        SetupKeyBindings();
+        this.SetupKeyBindings();
 
-        _logger.LogDebug("Window content created with computed layout for automatic resizing");
+        this._logger.LogDebug("Window content created with computed layout for automatic resizing");
     }
 
     private void CreateStatusLabels(FrameView statusFrame)
     {
         // Connection status (consolidated status and details)
-        _connectionStatusLabel = new Label
+        this._connectionStatusLabel = new Label
         {
             Text = "Status: Disconnected",
             X = 1,
@@ -237,9 +231,9 @@ public class TuiDisplayService : IDisplayService
             Width = Dim.Fill()! - 2,
             Height = 1,
         };
-        statusFrame.Add(_connectionStatusLabel);
+        statusFrame.Add(this._connectionStatusLabel);
 
-        _messageCountLabel = new Label
+        this._messageCountLabel = new Label
         {
             Text = "Messages: 0",
             X = 1,
@@ -247,9 +241,9 @@ public class TuiDisplayService : IDisplayService
             Width = Dim.Fill()! - 2,
             Height = 1,
         };
-        statusFrame.Add(_messageCountLabel);
+        statusFrame.Add(this._messageCountLabel);
 
-        _lastMessageLabel = new Label
+        this._lastMessageLabel = new Label
         {
             Text = "Last Message: None",
             X = 1,
@@ -257,9 +251,9 @@ public class TuiDisplayService : IDisplayService
             Width = Dim.Fill()! - 2,
             Height = 1,
         };
-        statusFrame.Add(_lastMessageLabel);
+        statusFrame.Add(this._lastMessageLabel);
 
-        _filterStatusLabel = new Label
+        this._filterStatusLabel = new Label
         {
             Text = "Filter: None",
             X = 1,
@@ -267,15 +261,15 @@ public class TuiDisplayService : IDisplayService
             Width = Dim.Fill()! - 2,
             Height = 1,
         };
-        statusFrame.Add(_filterStatusLabel);
+        statusFrame.Add(this._filterStatusLabel);
     }
 
     private void CreateMessagesTable(FrameView messagesFrame)
     {
         // Create a simple table source implementation
-        var tableSource = new KnxMessageTableSource(_tableModel);
+        var tableSource = new KnxMessageTableSource(this._tableModel);
 
-        _tableView = new TableView
+        this._tableView = new TableView
         {
             X = 0,
             Y = 0,
@@ -284,25 +278,25 @@ public class TuiDisplayService : IDisplayService
             Table = tableSource,
         };
 
-        messagesFrame.Add(_tableView);
+        messagesFrame.Add(this._tableView);
     }
 
     private void CreateStatusBar()
     {
-        _statusBar = new StatusBar(
+        this._statusBar = new StatusBar(
             new[]
             {
-                new Shortcut(Key.F1, "Help", ShowHelp),
-                new Shortcut(Key.F2, "Filter", ShowFilterDialog),
-                new Shortcut(Key.F3, "Export", ShowExportDialog),
-                new Shortcut(Key.F10, "Quit", RequestShutdown), // Now calls RequestShutdown instead of inline logic
+                new Shortcut(Key.F1, "Help", this.ShowHelp),
+                new Shortcut(Key.F2, "Filter", this.ShowFilterDialog),
+                new Shortcut(Key.F3, "Export", this.ShowExportDialog),
+                new Shortcut(Key.F10, "Quit", this.RequestShutdown), // Now calls RequestShutdown instead of inline logic
             }
         );
     }
 
     private void SetupKeyBindings()
     {
-        if (_mainWindow == null)
+        if (this._mainWindow == null)
             return;
 
         // Note: Ctrl+C is now handled at the Program level to avoid conflicts
@@ -344,7 +338,7 @@ public class TuiDisplayService : IDisplayService
             Y = 1,
             Width = Dim.Fill()! - 2,
             Height = 1,
-            Text = _tableModel.Filter ?? "",
+            Text = this._tableModel.Filter ?? "",
         };
 
         var label = new Label
@@ -373,8 +367,8 @@ public class TuiDisplayService : IDisplayService
 
         okButton.Accepting += (s, e) =>
         {
-            _tableModel.Filter = filterField.Text?.ToString();
-            UpdateFilterStatus();
+            this._tableModel.Filter = filterField.Text?.ToString();
+            this.UpdateFilterStatus();
             Application.RequestStop();
             e.Handled = true;
         };
@@ -439,7 +433,7 @@ public class TuiDisplayService : IDisplayService
                 var path = pathField.Text?.ToString();
                 if (!string.IsNullOrEmpty(path))
                 {
-                    ExportMessages(path);
+                    this.ExportMessages(path);
                     MessageBox.Query("Export", $"Messages exported to: {path}", "OK");
                 }
             }
@@ -464,49 +458,49 @@ public class TuiDisplayService : IDisplayService
 
     public void AddMessage(KnxMessage message)
     {
-        lock (_lockObject)
+        lock (this._lockObject)
         {
-            _tableModel.AddMessage(message);
-            UpdateUI();
+            this._tableModel.AddMessage(message);
+            this.UpdateUI();
         }
     }
 
     public void UpdateConnectionStatus(ConnectionStatusModel status)
     {
-        lock (_lockObject)
+        lock (this._lockObject)
         {
             // Update connection status display
-            UpdateConnectionStatusDisplay();
+            this.UpdateConnectionStatusDisplay();
         }
     }
 
     public void ClearMessages()
     {
-        lock (_lockObject)
+        lock (this._lockObject)
         {
-            _tableModel.Clear();
-            UpdateUI();
+            this._tableModel.Clear();
+            this.UpdateUI();
         }
     }
 
     public void SetFilter(string? filter)
     {
-        lock (_lockObject)
+        lock (this._lockObject)
         {
-            _tableModel.Filter = filter;
-            UpdateFilterStatus();
-            UpdateUI();
+            this._tableModel.Filter = filter;
+            this.UpdateFilterStatus();
+            this.UpdateUI();
         }
     }
 
     public void ExportMessages(string filePath)
     {
-        lock (_lockObject)
+        lock (this._lockObject)
         {
             var csv = new StringBuilder();
             csv.AppendLine("Timestamp,Source,Destination,Type,Data");
 
-            foreach (var messageRow in _tableModel.Messages)
+            foreach (var messageRow in this._tableModel.Messages)
             {
                 var message = messageRow.Message;
                 csv.AppendLine(
@@ -515,13 +509,17 @@ public class TuiDisplayService : IDisplayService
             }
 
             File.WriteAllText(filePath, csv.ToString());
-            _logger.LogInformation("Exported {Count} messages to {FilePath}", _tableModel.Messages.Count, filePath);
+            this._logger.LogInformation(
+                "Exported {Count} messages to {FilePath}",
+                this._tableModel.Messages.Count,
+                filePath
+            );
         }
     }
 
     private void UpdateUI()
     {
-        if (!_isRunning)
+        if (!this._isRunning)
             return;
 
         // Marshal UI updates to the main Terminal.Gui thread
@@ -529,22 +527,22 @@ public class TuiDisplayService : IDisplayService
         {
             try
             {
-                UpdateMessageCount();
-                UpdateLastMessage();
+                this.UpdateMessageCount();
+                this.UpdateLastMessage();
 
                 // Update table data - Terminal.Gui should handle the refresh automatically
-                _tableView?.Update();
+                this._tableView?.Update();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating UI");
+                this._logger.LogError(ex, "Error updating UI");
             }
         });
     }
 
     private void UpdateConnectionStatusDisplay()
     {
-        if (!_isRunning || _connectionStatusLabel == null)
+        if (!this._isRunning || this._connectionStatusLabel == null)
             return;
 
         // Marshal UI updates to the main Terminal.Gui thread
@@ -553,8 +551,8 @@ public class TuiDisplayService : IDisplayService
             try
             {
                 // Get actual connection status from monitor service
-                var isConnected = _monitorService?.IsConnected ?? false;
-                var config = GetConnectionConfig();
+                var isConnected = this._monitorService?.IsConnected ?? false;
+                var config = this.GetConnectionConfig();
 
                 if (isConnected && config != null)
                 {
@@ -567,7 +565,7 @@ public class TuiDisplayService : IDisplayService
                         KnxConnectionType.Usb => "Status: Connected via USB to /dev/knx",
                         _ => "Status: Connected (unknown mode)",
                     };
-                    _connectionStatusLabel.Text = statusText;
+                    this._connectionStatusLabel.Text = statusText;
                 }
                 else if (config != null)
                 {
@@ -580,40 +578,40 @@ public class TuiDisplayService : IDisplayService
                         KnxConnectionType.Usb => "Status: Disconnected (USB mode)",
                         _ => "Status: Disconnected",
                     };
-                    _connectionStatusLabel.Text = statusText;
+                    this._connectionStatusLabel.Text = statusText;
                 }
                 else
                 {
-                    _connectionStatusLabel.Text = "Status: Disconnected";
+                    this._connectionStatusLabel.Text = "Status: Disconnected";
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating connection status display");
+                this._logger.LogError(ex, "Error updating connection status display");
             }
         });
     }
 
     private KnxMonitorConfig? GetConnectionConfig()
     {
-        return _config;
+        return this._config;
     }
 
     private void UpdateMessageCount()
     {
-        if (_messageCountLabel == null)
+        if (this._messageCountLabel == null)
             return;
 
-        _messageCountLabel.Text = $"Messages: {_tableModel.Messages.Count}";
+        this._messageCountLabel.Text = $"Messages: {this._tableModel.Messages.Count}";
     }
 
     private void UpdateLastMessage()
     {
-        if (_lastMessageLabel == null)
+        if (this._lastMessageLabel == null)
             return;
 
-        var lastMessageRow = _tableModel.Messages.FirstOrDefault();
-        _lastMessageLabel.Text =
+        var lastMessageRow = this._tableModel.Messages.FirstOrDefault();
+        this._lastMessageLabel.Text =
             lastMessageRow != null
                 ? $"Last Message: {lastMessageRow.Message.Timestamp:HH:mm:ss} {lastMessageRow.Message.SourceAddress} -> {lastMessageRow.Message.GroupAddress}"
                 : "Last Message: None";
@@ -621,32 +619,32 @@ public class TuiDisplayService : IDisplayService
 
     private void UpdateFilterStatus()
     {
-        if (_filterStatusLabel == null)
+        if (this._filterStatusLabel == null)
             return;
 
-        _filterStatusLabel.Text = $"Filter: {_tableModel.Filter ?? "None"}";
+        this._filterStatusLabel.Text = $"Filter: {this._tableModel.Filter ?? "None"}";
     }
 
     public async Task StartAsync(IKnxMonitorService monitorService, CancellationToken cancellationToken = default)
     {
-        _monitorService = monitorService;
-        _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        _shutdownCompletionSource = new TaskCompletionSource<bool>();
-        _startTime = DateTime.Now;
+        this._monitorService = monitorService;
+        this._cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        this._shutdownCompletionSource = new TaskCompletionSource<bool>();
+        this._startTime = DateTime.Now;
 
         try
         {
-            Initialize();
+            this.Initialize();
 
             // Subscribe to monitor service events
-            if (_monitorService != null)
+            if (this._monitorService != null)
             {
-                _monitorService.MessageReceived += OnMessageReceived;
+                this._monitorService.MessageReceived += this.OnMessageReceived;
             }
 
             // Start periodic refresh timer (every 100ms) to ensure UI updates
-            _refreshTimer = new Timer(
-                OnRefreshTimer,
+            this._refreshTimer = new Timer(
+                this.OnRefreshTimer,
                 null,
                 TimeSpan.FromMilliseconds(100),
                 TimeSpan.FromMilliseconds(100)
@@ -658,56 +656,56 @@ public class TuiDisplayService : IDisplayService
                 {
                     try
                     {
-                        Start();
-                        _logger.LogInformation("TUI application completed normally");
-                        _shutdownCompletionSource.TrySetResult(true);
+                        this.Start();
+                        this._logger.LogInformation("TUI application completed normally");
+                        this._shutdownCompletionSource.TrySetResult(true);
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Error in TUI application");
-                        _shutdownCompletionSource.TrySetException(ex);
+                        this._logger.LogError(ex, "Error in TUI application");
+                        this._shutdownCompletionSource.TrySetException(ex);
                     }
                 },
-                _cancellationTokenSource.Token
+                this._cancellationTokenSource.Token
             );
 
             // Wait for either the TUI to close, cancellation, or shutdown completion
             var completedTask = await Task.WhenAny(
-                _shutdownCompletionSource.Task,
-                Task.Delay(System.Threading.Timeout.Infinite, _cancellationTokenSource.Token)
+                this._shutdownCompletionSource.Task,
+                Task.Delay(System.Threading.Timeout.Infinite, this._cancellationTokenSource.Token)
             );
 
-            if (completedTask == _shutdownCompletionSource.Task)
+            if (completedTask == this._shutdownCompletionSource.Task)
             {
-                _logger.LogInformation("TUI application has been closed");
+                this._logger.LogInformation("TUI application has been closed");
             }
             else
             {
-                _logger.LogInformation("TUI application was cancelled");
-                RequestShutdown();
+                this._logger.LogInformation("TUI application was cancelled");
+                this.RequestShutdown();
             }
         }
         catch (OperationCanceledException)
         {
-            _logger.LogInformation("TUI display service was cancelled");
-            RequestShutdown();
+            this._logger.LogInformation("TUI display service was cancelled");
+            this.RequestShutdown();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in TUI display service");
+            this._logger.LogError(ex, "Error in TUI display service");
             throw;
         }
         finally
         {
             // Unsubscribe from events
-            if (_monitorService != null)
+            if (this._monitorService != null)
             {
-                _monitorService.MessageReceived -= OnMessageReceived;
+                this._monitorService.MessageReceived -= this.OnMessageReceived;
             }
 
             // Stop refresh timer
-            _refreshTimer?.Dispose();
-            _refreshTimer = null;
+            this._refreshTimer?.Dispose();
+            this._refreshTimer = null;
         }
     }
 
@@ -718,11 +716,11 @@ public class TuiDisplayService : IDisplayService
     {
         try
         {
-            AddMessage(message);
+            this.AddMessage(message);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error handling received message");
+            this._logger.LogError(ex, "Error handling received message");
         }
     }
 
@@ -731,7 +729,7 @@ public class TuiDisplayService : IDisplayService
     /// </summary>
     private void OnRefreshTimer(object? state)
     {
-        if (!_isRunning)
+        if (!this._isRunning)
             return;
 
         try
@@ -742,10 +740,10 @@ public class TuiDisplayService : IDisplayService
                 try
                 {
                     // Update the table view to refresh display
-                    _tableView?.Update();
+                    this._tableView?.Update();
 
                     // Also refresh connection status periodically
-                    UpdateConnectionStatusDisplay();
+                    this.UpdateConnectionStatusDisplay();
                 }
                 catch (Exception)
                 {
@@ -766,29 +764,29 @@ public class TuiDisplayService : IDisplayService
             {
                 try
                 {
-                    _logger.LogInformation("Stopping TUI display service...");
+                    this._logger.LogInformation("Stopping TUI display service...");
 
                     // Stop refresh timer first
-                    _refreshTimer?.Dispose();
-                    _refreshTimer = null;
+                    this._refreshTimer?.Dispose();
+                    this._refreshTimer = null;
 
                     // Unsubscribe from monitor service events
-                    if (_monitorService != null)
+                    if (this._monitorService != null)
                     {
-                        _monitorService.MessageReceived -= OnMessageReceived;
+                        this._monitorService.MessageReceived -= this.OnMessageReceived;
                     }
 
                     // Stop the TUI
-                    Stop();
+                    this.Stop();
 
                     // Cancel any ongoing operations
-                    _cancellationTokenSource?.Cancel();
+                    this._cancellationTokenSource?.Cancel();
 
-                    _logger.LogInformation("TUI display service stopped");
+                    this._logger.LogInformation("TUI display service stopped");
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error stopping TUI display service");
+                    this._logger.LogError(ex, "Error stopping TUI display service");
                 }
             },
             cancellationToken
@@ -797,7 +795,7 @@ public class TuiDisplayService : IDisplayService
 
     public void UpdateConnectionStatus(string status, bool isConnected)
     {
-        if (!_isRunning || _connectionStatusLabel == null)
+        if (!this._isRunning || this._connectionStatusLabel == null)
             return;
 
         // Marshal UI updates to the main Terminal.Gui thread
@@ -805,30 +803,30 @@ public class TuiDisplayService : IDisplayService
         {
             try
             {
-                _connectionStatusLabel.Text = $"Connection: {status}";
+                this._connectionStatusLabel.Text = $"Connection: {status}";
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating connection status");
+                this._logger.LogError(ex, "Error updating connection status");
             }
         });
     }
 
     public void DisplayMessage(KnxMessage message)
     {
-        AddMessage(message);
+        this.AddMessage(message);
     }
 
     public async ValueTask DisposeAsync()
     {
         try
         {
-            await StopAsync();
-            Dispose();
+            await this.StopAsync();
+            this.Dispose();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during async dispose");
+            this._logger.LogError(ex, "Error during async dispose");
         }
     }
 
@@ -837,28 +835,28 @@ public class TuiDisplayService : IDisplayService
         try
         {
             // Stop refresh timer first
-            _refreshTimer?.Dispose();
-            _refreshTimer = null;
+            this._refreshTimer?.Dispose();
+            this._refreshTimer = null;
 
             // Unsubscribe from monitor service events
-            if (_monitorService != null)
+            if (this._monitorService != null)
             {
-                _monitorService.MessageReceived -= OnMessageReceived;
+                this._monitorService.MessageReceived -= this.OnMessageReceived;
             }
 
             // Stop and shutdown TUI
-            Stop();
-            Shutdown();
+            this.Stop();
+            this.Shutdown();
 
             // Dispose cancellation token source
-            _cancellationTokenSource?.Dispose();
+            this._cancellationTokenSource?.Dispose();
 
             // Complete shutdown if not already done
-            _shutdownCompletionSource?.TrySetResult(false);
+            this._shutdownCompletionSource?.TrySetResult(false);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during dispose");
+            this._logger.LogError(ex, "Error during dispose");
         }
     }
 }
@@ -872,10 +870,10 @@ public class KnxMessageTableSource : ITableSource
 
     public KnxMessageTableSource(KnxMessageTableModel model)
     {
-        _model = model;
+        this._model = model;
     }
 
-    public int Rows => _model.Messages.Count;
+    public int Rows => this._model.Messages.Count;
     public int Columns => 7; // Timestamp, Source, Destination, Type, Data, Value, DPT
 
     public string[] ColumnNames => new[] { "Timestamp", "Source", "Dest", "MsgType", "DPT", "Raw Data", "Value" };
@@ -884,10 +882,10 @@ public class KnxMessageTableSource : ITableSource
     {
         get
         {
-            if (row < 0 || row >= _model.Messages.Count)
+            if (row < 0 || row >= this._model.Messages.Count)
                 return "";
 
-            var messageRow = _model.Messages[row];
+            var messageRow = this._model.Messages[row];
             return col switch
             {
                 0 => messageRow.TimeDisplay,
@@ -904,7 +902,7 @@ public class KnxMessageTableSource : ITableSource
 
     public string GetColumnName(int col)
     {
-        return col >= 0 && col < ColumnNames.Length ? ColumnNames[col] : "";
+        return col >= 0 && col < this.ColumnNames.Length ? this.ColumnNames[col] : "";
     }
 
     public Type GetColumnType(int col) => typeof(string);

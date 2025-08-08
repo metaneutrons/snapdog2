@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -31,20 +30,20 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
     /// <param name="logger">Logger instance.</param>
     public FalconKnxMonitorService(KnxMonitorConfig config, ILogger<FalconKnxMonitorService> logger)
     {
-        _config = config ?? throw new ArgumentNullException(nameof(config));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        this._config = config ?? throw new ArgumentNullException(nameof(config));
+        this._logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         // Compile filter regex if provided
-        if (!string.IsNullOrEmpty(_config.Filter))
+        if (!string.IsNullOrEmpty(this._config.Filter))
         {
             try
             {
-                var pattern = _config.Filter.Replace("*", ".*").Replace("/", "\\/");
-                _filterRegex = new Regex($"^{pattern}$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+                var pattern = this._config.Filter.Replace("*", ".*").Replace("/", "\\/");
+                this._filterRegex = new Regex($"^{pattern}$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Invalid filter pattern: {Filter}", _config.Filter);
+                this._logger.LogWarning(ex, "Invalid filter pattern: {Filter}", this._config.Filter);
             }
         }
     }
@@ -53,54 +52,54 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
     public event EventHandler<KnxMessage>? MessageReceived;
 
     /// <inheritdoc/>
-    public bool IsConnected => _isConnected;
+    public bool IsConnected => this._isConnected;
 
     /// <inheritdoc/>
-    public string ConnectionStatus => _connectionStatus;
+    public string ConnectionStatus => this._connectionStatus;
 
     /// <inheritdoc/>
-    public int MessageCount => _messageCount;
+    public int MessageCount => this._messageCount;
 
     /// <inheritdoc/>
     public async Task StartMonitoringAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            _connectionStatus = "Connecting...";
-            _logger.LogInformation(
+            this._connectionStatus = "Connecting...";
+            this._logger.LogInformation(
                 "Starting Falcon-first KNX monitoring with {ConnectionType} connection",
-                _config.ConnectionType
+                this._config.ConnectionType
             );
 
             // Create connector parameters
-            var connectorParameters = CreateConnectorParameters();
+            var connectorParameters = this.CreateConnectorParameters();
             if (connectorParameters == null)
             {
-                _connectionStatus = "Failed to create connector parameters";
+                this._connectionStatus = "Failed to create connector parameters";
                 return;
             }
 
             // Create and configure KNX bus
-            _knxBus = new KnxBus(connectorParameters);
+            this._knxBus = new KnxBus(connectorParameters);
 
             // Subscribe to events - this is where the magic happens!
-            _knxBus.GroupMessageReceived += OnGroupMessageReceivedFalconFirst;
+            this._knxBus.GroupMessageReceived += this.OnGroupMessageReceivedFalconFirst;
 
             // Connect to bus with timeout support
-            await _knxBus.ConnectAsync(cancellationToken);
+            await this._knxBus.ConnectAsync(cancellationToken);
 
-            _isConnected = true;
-            _connectionStatus = $"Connected to {GetConnectionDescription()}";
+            this._isConnected = true;
+            this._connectionStatus = $"Connected to {this.GetConnectionDescription()}";
 
-            _logger.LogInformation(
+            this._logger.LogInformation(
                 "Falcon-first KNX monitoring started successfully - ready to use SDK decoded values!"
             );
         }
         catch (Exception ex)
         {
-            _isConnected = false;
-            _connectionStatus = $"Connection failed: {ex.Message}";
-            _logger.LogError(ex, "Failed to start Falcon-first KNX monitoring");
+            this._isConnected = false;
+            this._connectionStatus = $"Connection failed: {ex.Message}";
+            this._logger.LogError(ex, "Failed to start Falcon-first KNX monitoring");
             throw;
         }
     }
@@ -110,25 +109,25 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
     {
         try
         {
-            if (_knxBus != null)
+            if (this._knxBus != null)
             {
-                _connectionStatus = "Disconnecting...";
+                this._connectionStatus = "Disconnecting...";
 
                 // Unsubscribe from events
-                _knxBus.GroupMessageReceived -= OnGroupMessageReceivedFalconFirst;
+                this._knxBus.GroupMessageReceived -= this.OnGroupMessageReceivedFalconFirst;
 
                 // Dispose the bus (this will disconnect)
-                await _knxBus.DisposeAsync();
+                await this._knxBus.DisposeAsync();
 
-                _isConnected = false;
-                _connectionStatus = "Disconnected";
+                this._isConnected = false;
+                this._connectionStatus = "Disconnected";
 
-                _logger.LogInformation("Falcon-first KNX monitoring stopped");
+                this._logger.LogInformation("Falcon-first KNX monitoring stopped");
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error stopping Falcon-first KNX monitoring");
+            this._logger.LogError(ex, "Error stopping Falcon-first KNX monitoring");
         }
     }
 
@@ -137,12 +136,12 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
     {
         try
         {
-            await StopMonitoringAsync();
-            Dispose();
+            await this.StopMonitoringAsync();
+            this.Dispose();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during async dispose");
+            this._logger.LogError(ex, "Error during async dispose");
         }
     }
 
@@ -151,18 +150,18 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
     {
         try
         {
-            if (_isConnected)
+            if (this._isConnected)
             {
-                StopMonitoringAsync().GetAwaiter().GetResult();
+                this.StopMonitoringAsync().GetAwaiter().GetResult();
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error disposing Falcon-first KNX monitor service");
+            this._logger.LogError(ex, "Error disposing Falcon-first KNX monitor service");
         }
         finally
         {
-            _knxBus?.Dispose();
+            this._knxBus?.Dispose();
         }
     }
 
@@ -174,15 +173,15 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
     {
         try
         {
-            _logger.LogDebug("🎉 Received KNX message - Falcon SDK has already done the decoding work!");
+            this._logger.LogDebug("🎉 Received KNX message - Falcon SDK has already done the decoding work!");
 
             var messageType = DetermineMessageType(e);
-            var message = CreateFalconFirstKnxMessage(e, messageType);
-            ProcessMessage(message);
+            var message = this.CreateFalconFirstKnxMessage(e, messageType);
+            this.ProcessMessage(message);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error processing Falcon-first group message");
+            this._logger.LogError(ex, "Error processing Falcon-first group message");
         }
     }
 
@@ -195,9 +194,9 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
     private KnxMessage CreateFalconFirstKnxMessage(GroupEventArgs e, KnxMessageType messageType)
     {
         // Extract the treasure that Falcon SDK already prepared for us!
-        var falconTreasure = ExtractFalconTreasure(e);
+        var falconTreasure = this.ExtractFalconTreasure(e);
 
-        _logger.LogDebug(
+        this._logger.LogDebug(
             "✨ Falcon SDK treasure extracted - DPT: {DptId}, Value: {Value} ({ValueType}), Raw: {RawData}",
             falconTreasure.DptId ?? "Unknown",
             falconTreasure.DecodedValue ?? "null",
@@ -229,14 +228,14 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
     {
         if (e.Value == null)
         {
-            _logger.LogDebug("No value in GroupEventArgs - probably a read request");
+            this._logger.LogDebug("No value in GroupEventArgs - probably a read request");
             return new FalconTreasure(Array.Empty<byte>(), null, null, "Read request");
         }
 
         try
         {
             var valueType = e.Value.GetType();
-            _logger.LogDebug(
+            this._logger.LogDebug(
                 "🔍 Analyzing Falcon SDK value type: {ValueType} from namespace: {Namespace}",
                 valueType.Name,
                 valueType.Namespace
@@ -245,7 +244,7 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
             // CRITICAL FIX: Handle GroupValue objects (this is what Falcon SDK actually provides!)
             if (valueType.Name == "GroupValue" || valueType.Namespace?.StartsWith("Knx.Falcon") == true)
             {
-                _logger.LogDebug("🎯 Falcon SDK provided GroupValue object: {TypeName}", valueType.Name);
+                this._logger.LogDebug("🎯 Falcon SDK provided GroupValue object: {TypeName}", valueType.Name);
 
                 // DEBUG: Log all properties and methods
                 var properties = valueType.GetProperties();
@@ -254,46 +253,49 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
                     .Where(m => m.GetParameters().Length == 0 && m.ReturnType != typeof(void))
                     .Take(10);
 
-                _logger.LogDebug(
+                this._logger.LogDebug(
                     "📋 GroupValue properties: {Properties}",
                     string.Join(", ", properties.Select(p => $"{p.Name}:{p.PropertyType.Name}"))
                 );
-                _logger.LogDebug(
+                this._logger.LogDebug(
                     "📋 GroupValue methods: {Methods}",
                     string.Join(", ", methods.Select(m => $"{m.Name}():{m.ReturnType.Name}"))
                 );
 
                 // Extract byte array from GroupValue using reflection
-                var byteArray = TryExtractBytesFromGroupValue(e.Value);
+                var byteArray = this.TryExtractBytesFromGroupValue(e.Value);
                 if (byteArray != null && byteArray.Length > 0)
                 {
-                    _logger.LogDebug(
+                    this._logger.LogDebug(
                         "📦 Extracted bytes from GroupValue: {Data} (length: {Length})",
                         Convert.ToHexString(byteArray),
                         byteArray.Length
                     );
 
                     // Decode the byte array
-                    var (decodedValue, dptId) = DecodeByteArrayBasic(byteArray);
-                    _logger.LogDebug("🎉 Decoded: {DecodedValue} (DPT {DptId})", decodedValue, dptId);
+                    var (decodedValue, dptId) = this.DecodeByteArrayBasic(byteArray);
+                    this._logger.LogDebug("🎉 Decoded: {DecodedValue} (DPT {DptId})", decodedValue, dptId);
                     return new FalconTreasure(byteArray, dptId, decodedValue, "Decoded from GroupValue bytes");
                 }
 
                 // If we can't extract bytes, try to extract the decoded value directly
-                var directValue = TryExtractValueFromGroupValue(e.Value);
+                var directValue = this.TryExtractValueFromGroupValue(e.Value);
                 if (directValue != null)
                 {
-                    _logger.LogDebug(
+                    this._logger.LogDebug(
                         "🎉 Extracted direct value: {Value} ({Type})",
                         directValue,
                         directValue.GetType().Name
                     );
-                    var rawData = ConvertValueToRawData(directValue);
-                    var dptId = GuessDptFromValue(directValue);
+                    var rawData = this.ConvertValueToRawData(directValue);
+                    var dptId = this.GuessDptFromValue(directValue);
                     return new FalconTreasure(rawData, dptId, directValue, "Extracted value from GroupValue");
                 }
 
-                _logger.LogWarning("❌ Could not extract anything useful from GroupValue {TypeName}", valueType.Name);
+                this._logger.LogWarning(
+                    "❌ Could not extract anything useful from GroupValue {TypeName}",
+                    valueType.Name
+                );
             }
 
             // The value in e.Value is ALREADY DECODED by Falcon SDK!
@@ -302,26 +304,30 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
             // Method 1: If it's a primitive .NET type, Falcon SDK already converted it!
             if (IsPrimitiveType(valueType))
             {
-                _logger.LogDebug("🎯 Falcon SDK provided primitive type: {Value} ({Type})", e.Value, valueType.Name);
-                var dptId = GuessDptFromPrimitiveType(e.Value, valueType);
-                var rawData = ConvertPrimitiveToRawData(e.Value, valueType);
+                this._logger.LogDebug(
+                    "🎯 Falcon SDK provided primitive type: {Value} ({Type})",
+                    e.Value,
+                    valueType.Name
+                );
+                var dptId = this.GuessDptFromPrimitiveType(e.Value, valueType);
+                var rawData = this.ConvertPrimitiveToRawData(e.Value, valueType);
                 return new FalconTreasure(rawData, dptId, e.Value, $"Falcon SDK primitive: {valueType.Name}");
             }
 
             // Method 2: If it's a Falcon SDK GroupValue object, extract its information
             if (IsFalconGroupValue(valueType))
             {
-                _logger.LogDebug("🎯 Falcon SDK provided GroupValue object");
-                return ExtractFromFalconGroupValue(e.Value, valueType);
+                this._logger.LogDebug("🎯 Falcon SDK provided GroupValue object");
+                return this.ExtractFromFalconGroupValue(e.Value, valueType);
             }
 
             // Method 3: Use reflection to explore unknown Falcon SDK objects
-            _logger.LogDebug("🔍 Using reflection to explore Falcon SDK object");
-            return ExtractUsingReflection(e.Value, valueType);
+            this._logger.LogDebug("🔍 Using reflection to explore Falcon SDK object");
+            return this.ExtractUsingReflection(e.Value, valueType);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error extracting Falcon SDK treasure from {ValueType}", e.Value.GetType().Name);
+            this._logger.LogError(ex, "Error extracting Falcon SDK treasure from {ValueType}", e.Value.GetType().Name);
             return new FalconTreasure(Array.Empty<byte>(), null, e.Value, $"Extraction error: {ex.Message}");
         }
     }
@@ -411,13 +417,13 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
     {
         try
         {
-            var dptId = ExtractDptFromGroupValue(groupValue, type);
-            var rawData = ExtractRawDataFromGroupValue(groupValue, type);
-            var decodedValue = ExtractDecodedValueFromGroupValue(groupValue, type);
+            var dptId = this.ExtractDptFromGroupValue(groupValue, type);
+            var rawData = this.ExtractRawDataFromGroupValue(groupValue, type);
+            var decodedValue = this.ExtractDecodedValueFromGroupValue(groupValue, type);
 
             var info = $"Falcon GroupValue: {type.Name}";
 
-            _logger.LogDebug(
+            this._logger.LogDebug(
                 "📦 Extracted from Falcon GroupValue - DPT: {DptId}, Decoded: {DecodedValue}, Raw: {RawData}",
                 dptId,
                 decodedValue,
@@ -428,7 +434,7 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Error extracting from Falcon GroupValue {TypeName}", type.Name);
+            this._logger.LogWarning(ex, "Error extracting from Falcon GroupValue {TypeName}", type.Name);
             return new FalconTreasure(
                 Array.Empty<byte>(),
                 null,
@@ -449,7 +455,7 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
         try
         {
             var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-            _logger.LogDebug(
+            this._logger.LogDebug(
                 "🔍 Reflecting on {TypeName} with {PropertyCount} properties",
                 type.Name,
                 properties.Length
@@ -501,7 +507,7 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogDebug(ex, "Error reading property {PropertyName}", prop.Name);
+                    this._logger.LogDebug(ex, "Error reading property {PropertyName}", prop.Name);
                     propertyInfo.Add($"{prop.Name}=ERROR");
                 }
             }
@@ -512,12 +518,12 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
             // If no raw data found, try to convert the decoded value
             if (rawData.Length == 0 && decodedValue != null)
             {
-                rawData = ConvertValueToRawData(decodedValue);
+                rawData = this.ConvertValueToRawData(decodedValue);
             }
 
             var info = $"Reflected {type.Name}: {string.Join(", ", propertyInfo.Take(5))}";
 
-            _logger.LogDebug(
+            this._logger.LogDebug(
                 "🔍 Reflection result - DPT: {DptId}, Decoded: {DecodedValue}, Raw: {RawData}",
                 dptId,
                 decodedValue,
@@ -528,7 +534,7 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during reflection on {TypeName}", type.Name);
+            this._logger.LogError(ex, "Error during reflection on {TypeName}", type.Name);
             return new FalconTreasure(Array.Empty<byte>(), null, value, $"Reflection error: {ex.Message}");
         }
     }
@@ -693,7 +699,7 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
                     var data = prop.GetValue(groupValue) as byte[];
                     if (data != null && data.Length > 0)
                     {
-                        _logger.LogDebug(
+                        this._logger.LogDebug(
                             "✅ Found bytes in property {PropertyName}: {Data}",
                             propName,
                             Convert.ToHexString(data)
@@ -713,7 +719,7 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
                     var data = method.Invoke(groupValue, null) as byte[];
                     if (data != null && data.Length > 0)
                     {
-                        _logger.LogDebug(
+                        this._logger.LogDebug(
                             "✅ Found bytes from method {MethodName}: {Data}",
                             methodName,
                             Convert.ToHexString(data)
@@ -723,12 +729,12 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
                 }
             }
 
-            _logger.LogDebug("❌ Could not extract bytes from GroupValue {TypeName}", type.Name);
+            this._logger.LogDebug("❌ Could not extract bytes from GroupValue {TypeName}", type.Name);
             return null;
         }
         catch (Exception ex)
         {
-            _logger.LogDebug(ex, "Error extracting bytes from GroupValue");
+            this._logger.LogDebug(ex, "Error extracting bytes from GroupValue");
             return null;
         }
     }
@@ -755,7 +761,7 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
                     var value = prop.GetValue(groupValue);
                     if (value != null)
                     {
-                        _logger.LogDebug(
+                        this._logger.LogDebug(
                             "✅ Found value in property {PropertyName}: {Value} ({Type})",
                             propName,
                             value,
@@ -776,7 +782,7 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
                     var value = method.Invoke(groupValue, null);
                     if (value != null)
                     {
-                        _logger.LogDebug(
+                        this._logger.LogDebug(
                             "✅ Found value from method {MethodName}: {Value} ({Type})",
                             methodName,
                             value,
@@ -787,12 +793,12 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
                 }
             }
 
-            _logger.LogDebug("❌ Could not extract value from GroupValue {TypeName}", type.Name);
+            this._logger.LogDebug("❌ Could not extract value from GroupValue {TypeName}", type.Name);
             return null;
         }
         catch (Exception ex)
         {
-            _logger.LogDebug(ex, "Error extracting value from GroupValue");
+            this._logger.LogDebug(ex, "Error extracting value from GroupValue");
             return null;
         }
     }
@@ -833,8 +839,8 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
         {
             1 when data[0] <= 1 => (data[0] == 1, "1.001"), // Boolean
             1 => (data[0], "5.001"), // 8-bit value
-            2 => (DecodeKnx2ByteFloat(data), "9.001"), // 2-byte float
-            4 => (DecodeIeee754Float(data), "14.000"), // 4-byte float
+            2 => (this.DecodeKnx2ByteFloat(data), "9.001"), // 2-byte float
+            4 => (this.DecodeIeee754Float(data), "14.000"), // 4-byte float
             _ => (Convert.ToHexString(data), "16.001"), // String fallback
         };
     }
@@ -879,39 +885,43 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
     {
         try
         {
-            return _config.ConnectionType switch
+            return this._config.ConnectionType switch
             {
-                KnxConnectionType.Tunnel => CreateTunnelingParameters(),
-                KnxConnectionType.Router => CreateRoutingParameters(),
-                KnxConnectionType.Usb => CreateUsbParameters(),
-                _ => throw new ArgumentOutOfRangeException(nameof(_config.ConnectionType)),
+                KnxConnectionType.Tunnel => this.CreateTunnelingParameters(),
+                KnxConnectionType.Router => this.CreateRoutingParameters(),
+                KnxConnectionType.Usb => this.CreateUsbParameters(),
+                _ => throw new ArgumentOutOfRangeException(nameof(this._config.ConnectionType)),
             };
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to create connector parameters");
+            this._logger.LogError(ex, "Failed to create connector parameters");
             return null;
         }
     }
 
     private ConnectorParameters CreateTunnelingParameters()
     {
-        if (string.IsNullOrEmpty(_config.Gateway))
+        if (string.IsNullOrEmpty(this._config.Gateway))
         {
             throw new InvalidOperationException("Gateway address is required for tunneling connection");
         }
 
-        _logger.LogDebug("Creating IP tunneling connection to {Gateway}:{Port}", _config.Gateway, _config.Port);
-        return new IpTunnelingConnectorParameters(_config.Gateway, _config.Port);
+        this._logger.LogDebug(
+            "Creating IP tunneling connection to {Gateway}:{Port}",
+            this._config.Gateway,
+            this._config.Port
+        );
+        return new IpTunnelingConnectorParameters(this._config.Gateway, this._config.Port);
     }
 
     private ConnectorParameters CreateRoutingParameters()
     {
-        var multicastAddress = _config.MulticastAddress;
+        var multicastAddress = this._config.MulticastAddress;
 
         if (IPAddress.TryParse(multicastAddress, out var ipAddress))
         {
-            _logger.LogDebug(
+            this._logger.LogDebug(
                 "Creating IP routing connection to multicast address {MulticastAddress}",
                 multicastAddress
             );
@@ -930,7 +940,7 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
                 throw new InvalidOperationException($"Failed to resolve hostname '{multicastAddress}' to IPv4 address");
             }
 
-            _logger.LogDebug(
+            this._logger.LogDebug(
                 "Creating IP routing connection to {MulticastAddress} ({ResolvedIp})",
                 multicastAddress,
                 resolvedIp
@@ -952,16 +962,16 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
         }
 
         var device = usbDevices[0];
-        _logger.LogDebug("Creating USB connection to device: {Device}", device);
+        this._logger.LogDebug("Creating USB connection to device: {Device}", device);
         return UsbConnectorParameters.FromDiscovery(device);
     }
 
     private string GetConnectionDescription()
     {
-        return _config.ConnectionType switch
+        return this._config.ConnectionType switch
         {
-            KnxConnectionType.Tunnel => $"{_config.Gateway}:{_config.Port} (IP Tunneling)",
-            KnxConnectionType.Router => $"{_config.MulticastAddress}:{_config.Port} (IP Routing)",
+            KnxConnectionType.Tunnel => $"{this._config.Gateway}:{this._config.Port} (IP Tunneling)",
+            KnxConnectionType.Router => $"{this._config.MulticastAddress}:{this._config.Port} (IP Routing)",
             KnxConnectionType.Usb => "USB Device",
             _ => "Unknown",
         };
@@ -975,15 +985,15 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
     private void ProcessMessage(KnxMessage message)
     {
         // Apply filter if configured
-        if (_filterRegex != null && !_filterRegex.IsMatch(message.GroupAddress))
+        if (this._filterRegex != null && !this._filterRegex.IsMatch(message.GroupAddress))
         {
             return;
         }
 
         // Log message if verbose
-        if (_config.Verbose)
+        if (this._config.Verbose)
         {
-            _logger.LogDebug(
+            this._logger.LogDebug(
                 "🎉 Falcon-first KNX message: {MessageType} {GroupAddress} = {Value} (DPT: {DptId})",
                 message.MessageType,
                 message.GroupAddress,
@@ -993,10 +1003,10 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
         }
 
         // Increment message counter
-        Interlocked.Increment(ref _messageCount);
+        Interlocked.Increment(ref this._messageCount);
 
         // Raise event
-        MessageReceived?.Invoke(this, message);
+        this.MessageReceived?.Invoke(this, message);
     }
 
     /// <summary>

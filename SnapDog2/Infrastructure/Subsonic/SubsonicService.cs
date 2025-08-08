@@ -41,7 +41,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
     /// <summary>
     /// Gets a value indicating whether the Subsonic service is connected and ready.
     /// </summary>
-    public bool IsConnected => _initialized;
+    public bool IsConnected => this._initialized;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SubsonicService"/> class.
@@ -57,35 +57,38 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         ILogger<SubsonicService> logger
     )
     {
-        _config = configOptions.Value.Services.Subsonic;
-        _serviceProvider = serviceProvider;
-        _logger = logger;
+        this._config = configOptions.Value.Services.Subsonic;
+        this._serviceProvider = serviceProvider;
+        this._logger = logger;
 
         // Validate configuration
-        if (!_config.Enabled)
+        if (!this._config.Enabled)
         {
-            LogSubsonicDisabled(_logger);
+            LogSubsonicDisabled(this._logger);
             throw new InvalidOperationException("Subsonic service is disabled in configuration");
         }
 
-        if (string.IsNullOrEmpty(_config.Url))
+        if (string.IsNullOrEmpty(this._config.Url))
             throw new InvalidOperationException("Subsonic URL is required");
-        if (string.IsNullOrEmpty(_config.Username))
+        if (string.IsNullOrEmpty(this._config.Username))
             throw new InvalidOperationException("Subsonic username is required");
-        if (string.IsNullOrEmpty(_config.Password))
+        if (string.IsNullOrEmpty(this._config.Password))
             throw new InvalidOperationException("Subsonic password is required");
 
         // Configure resilience policies with retry callbacks
-        _connectionPolicy = CreateConnectionPolicy();
-        _operationPolicy = ResiliencePolicyFactory.CreatePipeline(_config.Resilience.Operation, "SubsonicOperation");
+        this._connectionPolicy = this.CreateConnectionPolicy();
+        this._operationPolicy = ResiliencePolicyFactory.CreatePipeline(
+            this._config.Resilience.Operation,
+            "SubsonicOperation"
+        );
 
         // Create connection info for SubsonicMedia library
-        var connectionInfo = new SubsonicConnectionInfo(_config.Url, _config.Username, _config.Password);
+        var connectionInfo = new SubsonicConnectionInfo(this._config.Url, this._config.Username, this._config.Password);
 
         // Initialize SubsonicClient with the resilient HttpClient
-        _subsonicClient = new SubsonicClient(connectionInfo, httpClient: httpClient, logger: null);
+        this._subsonicClient = new SubsonicClient(connectionInfo, httpClient: httpClient, logger: null);
 
-        LogSubsonicServiceInitialized(_logger, _config.Url, _config.Username);
+        LogSubsonicServiceInitialized(this._logger, this._config.Url, this._config.Username);
     }
 
     #region Helper Methods
@@ -98,13 +101,13 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
     {
         try
         {
-            using var scope = _serviceProvider.CreateScope();
+            using var scope = this._serviceProvider.CreateScope();
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
             await mediator.PublishAsync(notification);
         }
         catch (Exception ex)
         {
-            LogNotificationPublishError(_logger, typeof(T).Name, ex);
+            LogNotificationPublishError(this._logger, typeof(T).Name, ex);
         }
     }
 
@@ -118,7 +121,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         {
             try
             {
-                await PublishNotificationAsync(notification);
+                await this.PublishNotificationAsync(notification);
             }
             catch
             {
@@ -134,7 +137,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
     /// </summary>
     private ResiliencePipeline CreateConnectionPolicy()
     {
-        var validatedConfig = ResiliencePolicyFactory.ValidateAndNormalize(_config.Resilience.Connection);
+        var validatedConfig = ResiliencePolicyFactory.ValidateAndNormalize(this._config.Resilience.Connection);
 
         return new ResiliencePipelineBuilder()
             .AddRetry(
@@ -154,8 +157,8 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
                     OnRetry = args =>
                     {
                         LogConnectionRetryAttempt(
-                            _logger,
-                            _config.Url ?? "unknown",
+                            this._logger,
+                            this._config.Url ?? "unknown",
                             args.AttemptNumber + 1,
                             validatedConfig.MaxRetries + 1,
                             args.Outcome.Exception?.Message ?? "Unknown error"
@@ -173,19 +176,19 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         CancellationToken cancellationToken = default
     )
     {
-        if (_disposed)
+        if (this._disposed)
             return Result<IReadOnlyList<PlaylistInfo>>.Failure("Service has been disposed");
 
-        await _operationLock.WaitAsync(cancellationToken);
+        await this._operationLock.WaitAsync(cancellationToken);
         var stopwatch = Stopwatch.StartNew();
         try
         {
-            LogGettingPlaylists(_logger);
+            LogGettingPlaylists(this._logger);
 
-            var result = await _operationPolicy.ExecuteAsync(
+            var result = await this._operationPolicy.ExecuteAsync(
                 async (cancellationToken) =>
                 {
-                    var playlistsResponse = await _subsonicClient.Playlists.GetPlaylistsAsync(
+                    var playlistsResponse = await this._subsonicClient.Playlists.GetPlaylistsAsync(
                         cancellationToken: cancellationToken
                     );
 
@@ -207,11 +210,15 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
             );
 
             stopwatch.Stop();
-            LogPlaylistsRetrieved(_logger, result.Count);
+            LogPlaylistsRetrieved(this._logger, result.Count);
 
             // Publish playlists retrieved notification
-            PublishNotificationFireAndForget(
-                new SubsonicPlaylistsRetrievedNotification(_config.Url ?? "unknown", result.Count, stopwatch.Elapsed)
+            this.PublishNotificationFireAndForget(
+                new SubsonicPlaylistsRetrievedNotification(
+                    this._config.Url ?? "unknown",
+                    result.Count,
+                    stopwatch.Elapsed
+                )
             );
 
             return Result<IReadOnlyList<PlaylistInfo>>.Success(result);
@@ -219,18 +226,18 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         catch (Exception ex)
         {
             stopwatch.Stop();
-            LogGetPlaylistsError(_logger, ex);
+            LogGetPlaylistsError(this._logger, ex);
 
             // Publish playlist retrieval failed notification
-            PublishNotificationFireAndForget(
-                new SubsonicPlaylistRetrievalFailedNotification(_config.Url ?? "unknown", ex.Message)
+            this.PublishNotificationFireAndForget(
+                new SubsonicPlaylistRetrievalFailedNotification(this._config.Url ?? "unknown", ex.Message)
             );
 
             return Result<IReadOnlyList<PlaylistInfo>>.Failure($"Failed to get playlists: {ex.Message}");
         }
         finally
         {
-            _operationLock.Release();
+            this._operationLock.Release();
         }
     }
 
@@ -240,26 +247,26 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         CancellationToken cancellationToken = default
     )
     {
-        if (_disposed)
+        if (this._disposed)
             return Result<Api.Models.PlaylistWithTracks>.Failure("Service has been disposed");
 
         if (string.IsNullOrEmpty(playlistId))
             return Result<Api.Models.PlaylistWithTracks>.Failure("Playlist ID cannot be null or empty");
 
-        await _operationLock.WaitAsync(cancellationToken);
+        await this._operationLock.WaitAsync(cancellationToken);
         try
         {
-            LogGettingPlaylist(_logger, playlistId);
+            LogGettingPlaylist(this._logger, playlistId);
 
-            var result = await _operationPolicy.ExecuteAsync(
+            var result = await this._operationPolicy.ExecuteAsync(
                 async (ct) =>
                 {
-                    var playlistResponse = await _subsonicClient.Playlists.GetPlaylistAsync(playlistId, ct);
+                    var playlistResponse = await this._subsonicClient.Playlists.GetPlaylistAsync(playlistId, ct);
 
                     if (!playlistResponse.IsSuccess)
                     {
                         var errorMessage = playlistResponse.Error?.Message ?? "Unknown error";
-                        LogPlaylistNotFound(_logger, playlistId);
+                        LogPlaylistNotFound(this._logger, playlistId);
                         throw new InvalidOperationException(
                             $"Playlist with ID '{playlistId}' not found: {errorMessage}"
                         );
@@ -277,12 +284,12 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
                 cancellationToken
             );
 
-            LogPlaylistRetrieved(_logger, playlistId, result.Tracks.Count);
+            LogPlaylistRetrieved(this._logger, playlistId, result.Tracks.Count);
 
             // Publish playlist accessed notification
-            PublishNotificationFireAndForget(
+            this.PublishNotificationFireAndForget(
                 new SubsonicPlaylistAccessedNotification(
-                    _config.Url ?? "unknown",
+                    this._config.Url ?? "unknown",
                     playlistId,
                     result.Info.Name,
                     result.Tracks.Count
@@ -293,11 +300,11 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            LogGetPlaylistError(_logger, playlistId, ex);
+            LogGetPlaylistError(this._logger, playlistId, ex);
 
             // Publish playlist access failed notification
-            PublishNotificationFireAndForget(
-                new SubsonicPlaylistAccessFailedNotification(_config.Url ?? "unknown", playlistId, ex.Message)
+            this.PublishNotificationFireAndForget(
+                new SubsonicPlaylistAccessFailedNotification(this._config.Url ?? "unknown", playlistId, ex.Message)
             );
 
             return Result<Api.Models.PlaylistWithTracks>.Failure(
@@ -306,33 +313,33 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         }
         finally
         {
-            _operationLock.Release();
+            this._operationLock.Release();
         }
     }
 
     /// <inheritdoc />
     public async Task<Result<string>> GetStreamUrlAsync(string trackId, CancellationToken cancellationToken = default)
     {
-        if (_disposed)
+        if (this._disposed)
             return Result<string>.Failure("Service has been disposed");
 
         if (string.IsNullOrEmpty(trackId))
             return Result<string>.Failure("Track ID cannot be null or empty");
 
-        await _operationLock.WaitAsync(cancellationToken);
+        await this._operationLock.WaitAsync(cancellationToken);
         try
         {
-            LogGettingStreamUrl(_logger, trackId);
+            LogGettingStreamUrl(this._logger, trackId);
 
             // Note: SubsonicMedia library doesn't provide direct URL access, only streams
             // For SnapDog2's use case, we need to construct the URL manually
             // This follows the Subsonic API specification for stream URLs
-            var result = await _operationPolicy.ExecuteAsync(
+            var result = await this._operationPolicy.ExecuteAsync(
                 async (ct) =>
                 {
                     // Test that the track exists by attempting to get a stream
                     // This validates the track ID without actually downloading content
-                    using var testStream = await _subsonicClient.Media.StreamAsync(
+                    using var testStream = await this._subsonicClient.Media.StreamAsync(
                         trackId,
                         maxBitRate: 64,
                         cancellationToken: ct
@@ -341,76 +348,76 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
                     // Construct the stream URL manually following Subsonic API spec
                     // Format: {serverUrl}/rest/stream?id={trackId}&u={username}&p={password}&v={apiVersion}&c={clientName}&f=json
                     var streamUrl =
-                        $"{_config.Url?.TrimEnd('/') ?? string.Empty}/rest/stream?id={trackId}&u={_config.Username}&p={_config.Password}&v=1.16.1&c=SnapDog2&f=json";
+                        $"{this._config.Url?.TrimEnd('/') ?? string.Empty}/rest/stream?id={trackId}&u={this._config.Username}&p={this._config.Password}&v=1.16.1&c=SnapDog2&f=json";
 
                     return streamUrl;
                 },
                 cancellationToken
             );
 
-            LogStreamUrlRetrieved(_logger, trackId);
+            LogStreamUrlRetrieved(this._logger, trackId);
 
             // Publish stream requested notification
-            PublishNotificationFireAndForget(
-                new SubsonicStreamRequestedNotification(_config.Url ?? "unknown", trackId)
+            this.PublishNotificationFireAndForget(
+                new SubsonicStreamRequestedNotification(this._config.Url ?? "unknown", trackId)
             );
 
             return Result<string>.Success(result);
         }
         catch (Exception ex)
         {
-            LogGetStreamUrlError(_logger, trackId, ex);
+            LogGetStreamUrlError(this._logger, trackId, ex);
 
             // Publish stream request failed notification
-            PublishNotificationFireAndForget(
-                new SubsonicStreamRequestFailedNotification(_config.Url ?? "unknown", trackId, ex.Message)
+            this.PublishNotificationFireAndForget(
+                new SubsonicStreamRequestFailedNotification(this._config.Url ?? "unknown", trackId, ex.Message)
             );
 
             return Result<string>.Failure($"Failed to get stream URL for track '{trackId}': {ex.Message}");
         }
         finally
         {
-            _operationLock.Release();
+            this._operationLock.Release();
         }
     }
 
     /// <inheritdoc />
     public async Task<Result> TestConnectionAsync(CancellationToken cancellationToken = default)
     {
-        if (_disposed)
+        if (this._disposed)
             return Result.Failure("Service has been disposed");
 
-        await _operationLock.WaitAsync(cancellationToken);
+        await this._operationLock.WaitAsync(cancellationToken);
         try
         {
-            LogTestingConnection(_logger);
+            LogTestingConnection(this._logger);
 
-            await _connectionPolicy.ExecuteAsync(
+            await this._connectionPolicy.ExecuteAsync(
                 async (ct) =>
                 {
-                    var pingResult = await _subsonicClient.System.PingAsync(ct);
+                    var pingResult = await this._subsonicClient.System.PingAsync(ct);
 
                     if (!pingResult.IsSuccess)
                     {
                         var errorMessage = pingResult.Error?.Message ?? "Unknown error";
-                        LogConnectionTestFailed(_logger);
+                        LogConnectionTestFailed(this._logger);
                         throw new InvalidOperationException($"Subsonic server ping failed: {errorMessage}");
                     }
                 },
                 cancellationToken
             );
 
-            LogConnectionTestSuccessful(_logger);
+            LogConnectionTestSuccessful(this._logger);
             return Result.Success();
         }
         catch (Exception ex)
         {
-            LogConnectionTestError(_logger, ex);
+            LogConnectionTestError(this._logger, ex);
             return Result.Failure($"Connection test failed: {ex.Message}");
         }
         finally
         {
-            _operationLock.Release();
+            this._operationLock.Release();
         }
     }
 
@@ -472,47 +479,49 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
     /// <inheritdoc />
     public async Task<Result> InitializeAsync(CancellationToken cancellationToken = default)
     {
-        if (_disposed)
+        if (this._disposed)
         {
             return Result.Failure("Service has been disposed");
         }
 
-        if (_initialized)
+        if (this._initialized)
         {
             return Result.Success();
         }
 
-        LogInitializing(_logger, _config.Url ?? "unknown");
+        LogInitializing(this._logger, this._config.Url ?? "unknown");
 
         // Publish initialization started notification
-        await PublishNotificationAsync(new SubsonicInitializationStartedNotification(_config.Url ?? "unknown"));
+        await this.PublishNotificationAsync(
+            new SubsonicInitializationStartedNotification(this._config.Url ?? "unknown")
+        );
 
         try
         {
-            await _operationLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            await this._operationLock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                if (_initialized)
+                if (this._initialized)
                 {
                     return Result.Success();
                 }
 
                 // Log first attempt before Polly execution
-                var config = ResiliencePolicyFactory.ValidateAndNormalize(_config.Resilience.Connection);
+                var config = ResiliencePolicyFactory.ValidateAndNormalize(this._config.Resilience.Connection);
                 LogConnectionRetryAttempt(
-                    _logger,
-                    _config.Url ?? "unknown",
+                    this._logger,
+                    this._config.Url ?? "unknown",
                     1,
                     config.MaxRetries + 1,
                     "Initial attempt"
                 );
 
                 // Use Polly resilience for connection establishment
-                var result = await _connectionPolicy.ExecuteAsync(
+                var result = await this._connectionPolicy.ExecuteAsync(
                     async (ct) =>
                     {
                         // Test the connection by making a ping call
-                        var pingResult = await TestConnectionInternalAsync(ct);
+                        var pingResult = await this.TestConnectionInternalAsync(ct);
                         if (!pingResult.IsSuccess)
                         {
                             throw new InvalidOperationException(pingResult.ErrorMessage ?? "Connection test failed");
@@ -524,15 +533,19 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
 
                 if (result.IsSuccess)
                 {
-                    _initialized = true;
-                    LogConnectionEstablished(_logger, _config.Url ?? "unknown");
-                    LogSubsonicServiceInitialized(_logger, _config.Url ?? "unknown", _config.Username ?? "unknown");
+                    this._initialized = true;
+                    LogConnectionEstablished(this._logger, this._config.Url ?? "unknown");
+                    LogSubsonicServiceInitialized(
+                        this._logger,
+                        this._config.Url ?? "unknown",
+                        this._config.Username ?? "unknown"
+                    );
 
                     // Publish connection established notification
-                    await PublishNotificationAsync(
+                    await this.PublishNotificationAsync(
                         new SubsonicConnectionEstablishedNotification(
-                            _config.Url ?? "unknown",
-                            _config.Username ?? "unknown"
+                            this._config.Url ?? "unknown",
+                            this._config.Username ?? "unknown"
                         )
                     );
 
@@ -540,12 +553,12 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
                 }
                 else
                 {
-                    LogInitializationFailed(_logger, result.ErrorMessage ?? "Unknown error");
+                    LogInitializationFailed(this._logger, result.ErrorMessage ?? "Unknown error");
 
                     // Publish connection test failed notification
-                    PublishNotificationFireAndForget(
+                    this.PublishNotificationFireAndForget(
                         new SubsonicConnectionTestFailedNotification(
-                            _config.Url ?? "unknown",
+                            this._config.Url ?? "unknown",
                             result.ErrorMessage ?? "Unknown error"
                         )
                     );
@@ -557,16 +570,16 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
             }
             finally
             {
-                _operationLock.Release();
+                this._operationLock.Release();
             }
         }
         catch (Exception ex)
         {
-            LogInitializationFailed(_logger, ex.Message);
+            LogInitializationFailed(this._logger, ex.Message);
 
             // Publish service error notification
-            PublishNotificationFireAndForget(
-                new SubsonicServiceErrorNotification(_config.Url ?? "unknown", "Initialization", ex.Message)
+            this.PublishNotificationFireAndForget(
+                new SubsonicServiceErrorNotification(this._config.Url ?? "unknown", "Initialization", ex.Message)
             );
 
             return Result.Failure($"Subsonic service initialization failed: {ex.Message}");
@@ -580,25 +593,25 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
     {
         try
         {
-            LogTestingConnection(_logger);
+            LogTestingConnection(this._logger);
 
             // Use the SubsonicClient to ping the server
-            var pingResponse = await _subsonicClient.System.PingAsync(cancellationToken);
+            var pingResponse = await this._subsonicClient.System.PingAsync(cancellationToken);
 
             if (pingResponse != null)
             {
-                LogConnectionTestSuccessful(_logger);
+                LogConnectionTestSuccessful(this._logger);
                 return Result.Success();
             }
             else
             {
-                LogConnectionTestFailed(_logger);
+                LogConnectionTestFailed(this._logger);
                 return Result.Failure("Ping response was null");
             }
         }
         catch (Exception ex)
         {
-            LogConnectionTestError(_logger, ex);
+            LogConnectionTestError(this._logger, ex);
             return Result.Failure($"Connection test failed: {ex.Message}");
         }
     }
@@ -606,18 +619,18 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
     /// <inheritdoc />
     public ValueTask DisposeAsync()
     {
-        if (_disposed)
+        if (this._disposed)
             return ValueTask.CompletedTask;
 
-        _disposed = true;
+        this._disposed = true;
 
         // Publish service disposed notification (fire-and-forget)
-        PublishNotificationFireAndForget(new SubsonicServiceDisposedNotification(_config.Url ?? "unknown"));
+        this.PublishNotificationFireAndForget(new SubsonicServiceDisposedNotification(this._config.Url ?? "unknown"));
 
-        _operationLock.Dispose();
-        _subsonicClient?.Dispose();
+        this._operationLock.Dispose();
+        this._subsonicClient?.Dispose();
 
-        LogSubsonicServiceDisposed(_logger);
+        LogSubsonicServiceDisposed(this._logger);
         return ValueTask.CompletedTask;
     }
 

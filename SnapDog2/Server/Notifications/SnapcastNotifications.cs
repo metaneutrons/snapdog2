@@ -2,7 +2,6 @@ namespace SnapDog2.Server.Notifications;
 
 using Cortex.Mediator.Notifications;
 using SnapcastClient.Models;
-using SnapcastClient.Params;
 
 /// <summary>
 /// Base class for all Snapcast-related notifications.

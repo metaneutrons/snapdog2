@@ -1,6 +1,5 @@
 namespace SnapDog2.Infrastructure.Services;
 
-using System.Globalization;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Enums;
 using SnapDog2.Server.Features.Clients.Commands;
@@ -40,8 +39,12 @@ public partial class ImprovedMqttCommandMapper
 
             return entityType switch
             {
-                "zone" when int.TryParse(entityId, out var zoneId) => MapZoneCommand(zoneId, command, payload),
-                "client" when int.TryParse(entityId, out var clientId) => MapClientCommand(clientId, command, payload),
+                "zone" when int.TryParse(entityId, out var zoneId) => this.MapZoneCommand(zoneId, command, payload),
+                "client" when int.TryParse(entityId, out var clientId) => this.MapClientCommand(
+                    clientId,
+                    command,
+                    payload
+                ),
                 _ => null,
             };
         }

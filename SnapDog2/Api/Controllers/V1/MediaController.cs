@@ -1,6 +1,5 @@
 namespace SnapDog2.Api.Controllers.V1;
 
-using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;

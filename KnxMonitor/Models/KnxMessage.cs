@@ -68,7 +68,7 @@ public class KnxMessage
     /// <summary>
     /// Gets the data as a hexadecimal string.
     /// </summary>
-    public string DataHex => Convert.ToHexString(Data);
+    public string DataHex => Convert.ToHexString(this.Data);
 
     /// <summary>
     /// Gets a formatted display value with proper DPT decoding.
@@ -81,17 +81,17 @@ public class KnxMessage
             if (_dptDecodingService != null)
             {
                 // If we have a known DPT, use it for decoding
-                if (!string.IsNullOrEmpty(DataPointType))
+                if (!string.IsNullOrEmpty(this.DataPointType))
                 {
-                    var decodedValue = _dptDecodingService.DecodeValue(Data, DataPointType);
+                    var decodedValue = _dptDecodingService.DecodeValue(this.Data, this.DataPointType);
                     if (decodedValue != null)
                     {
-                        return _dptDecodingService.FormatValue(decodedValue, DataPointType);
+                        return _dptDecodingService.FormatValue(decodedValue, this.DataPointType);
                     }
                 }
 
                 // Try auto-detection if no DPT is known
-                var (autoDecodedValue, detectedDpt) = _dptDecodingService.DecodeValueWithAutoDetection(Data);
+                var (autoDecodedValue, detectedDpt) = _dptDecodingService.DecodeValueWithAutoDetection(this.Data);
                 if (autoDecodedValue != null)
                 {
                     return _dptDecodingService.FormatValue(autoDecodedValue, detectedDpt);
@@ -99,18 +99,18 @@ public class KnxMessage
             }
 
             // Fallback: if we have a pre-decoded value from Falcon SDK, format it
-            if (Value != null)
+            if (this.Value != null)
             {
-                return FormatFalconValue(Value, DataPointType);
+                return FormatFalconValue(this.Value, this.DataPointType);
             }
 
             // Final fallback: show raw data
-            if (Data.Length == 0)
+            if (this.Data.Length == 0)
             {
                 return "Empty";
             }
 
-            return $"Raw: {DataHex}";
+            return $"Raw: {this.DataHex}";
         }
     }
 
@@ -121,13 +121,13 @@ public class KnxMessage
     {
         get
         {
-            if (!string.IsNullOrEmpty(DataPointType))
-                return DataPointType;
+            if (!string.IsNullOrEmpty(this.DataPointType))
+                return this.DataPointType;
 
             // Use DPT decoding service for detection if available
             if (_dptDecodingService != null)
             {
-                var detectedDpt = _dptDecodingService.DetectDpt(Data);
+                var detectedDpt = _dptDecodingService.DetectDpt(this.Data);
                 if (!string.IsNullOrEmpty(detectedDpt))
                 {
                     return $"DPT {detectedDpt}";
@@ -135,7 +135,7 @@ public class KnxMessage
             }
 
             // Fallback to simple length-based guessing
-            return Data.Length switch
+            return this.Data.Length switch
             {
                 0 => "DPT 1 (1-bit)",
                 1 => "DPT 1/5/6 (1-byte)",
@@ -155,13 +155,13 @@ public class KnxMessage
         {
             if (_dptDecodingService == null)
             {
-                return Value; // Return Falcon SDK value if no decoding service
+                return this.Value; // Return Falcon SDK value if no decoding service
             }
 
             // Try with known DPT first
-            if (!string.IsNullOrEmpty(DataPointType))
+            if (!string.IsNullOrEmpty(this.DataPointType))
             {
-                var decoded = _dptDecodingService.DecodeValue(Data, DataPointType);
+                var decoded = _dptDecodingService.DecodeValue(this.Data, this.DataPointType);
                 if (decoded != null)
                 {
                     return decoded;
@@ -169,8 +169,8 @@ public class KnxMessage
             }
 
             // Try auto-detection
-            var (autoDecoded, _) = _dptDecodingService.DecodeValueWithAutoDetection(Data);
-            return autoDecoded ?? Value;
+            var (autoDecoded, _) = _dptDecodingService.DecodeValueWithAutoDetection(this.Data);
+            return autoDecoded ?? this.Value;
         }
     }
 

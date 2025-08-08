@@ -2,7 +2,6 @@ using System.Collections.Concurrent;
 using KnxMonitor.Models;
 using Microsoft.Extensions.Logging;
 using Spectre.Console;
-using Spectre.Console.Rendering;
 
 namespace KnxMonitor.Services;
 
@@ -34,43 +33,43 @@ public class DisplayService : IDisplayService
     /// <param name="logger">Logger instance.</param>
     public DisplayService(KnxMonitorConfig config, ILogger<DisplayService> logger)
     {
-        _config = config ?? throw new ArgumentNullException(nameof(config));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _currentFilter = config.Filter;
+        this._config = config ?? throw new ArgumentNullException(nameof(config));
+        this._logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        this._currentFilter = config.Filter;
     }
 
     /// <inheritdoc/>
-    public bool IsRunning => _isRunning;
+    public bool IsRunning => this._isRunning;
 
     /// <inheritdoc/>
-    public string? CurrentFilter => _currentFilter;
+    public string? CurrentFilter => this._currentFilter;
 
     /// <inheritdoc/>
-    public int MessageCount => _messageCount;
+    public int MessageCount => this._messageCount;
 
     /// <inheritdoc/>
-    public DateTime StartTime => _startTime;
+    public DateTime StartTime => this._startTime;
 
     /// <inheritdoc/>
     public async Task StartAsync(IKnxMonitorService monitorService, CancellationToken cancellationToken = default)
     {
-        if (_isRunning)
+        if (this._isRunning)
         {
             return;
         }
 
-        _startTime = DateTime.Now;
-        _isRunning = true;
-        _cancellationTokenSource = new CancellationTokenSource();
+        this._startTime = DateTime.Now;
+        this._isRunning = true;
+        this._cancellationTokenSource = new CancellationTokenSource();
 
         // Subscribe to monitor events
-        monitorService.MessageReceived += OnMessageReceived;
+        monitorService.MessageReceived += this.OnMessageReceived;
 
         // Initialize display
-        InitializeDisplay();
+        this.InitializeDisplay();
 
         // Start display update task
-        _displayTask = Task.Run(
+        this._displayTask = Task.Run(
             async () =>
             {
                 // Log initial connection status for container mode
@@ -81,15 +80,15 @@ public class DisplayService : IDisplayService
                     );
                 }
 
-                while (!_cancellationTokenSource.Token.IsCancellationRequested)
+                while (!this._cancellationTokenSource.Token.IsCancellationRequested)
                 {
                     try
                     {
-                        UpdateDisplay(monitorService);
+                        this.UpdateDisplay(monitorService);
 
                         // Use different update intervals based on output mode
                         var delay = ShouldUseLoggingMode() ? 1000 : 500; // 1s for logs, 500ms for interactive (much less flickering)
-                        await Task.Delay(delay, _cancellationTokenSource.Token);
+                        await Task.Delay(delay, this._cancellationTokenSource.Token);
                     }
                     catch (OperationCanceledException)
                     {
@@ -97,18 +96,18 @@ public class DisplayService : IDisplayService
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Error updating display");
+                        this._logger.LogError(ex, "Error updating display");
                     }
                 }
             },
-            _cancellationTokenSource.Token
+            this._cancellationTokenSource.Token
         );
 
         // CRITICAL FIX: Wait for the background task to complete instead of returning immediately
         // This ensures the StartAsync method doesn't complete until the service is actually stopped
         try
         {
-            await _displayTask;
+            await this._displayTask;
         }
         catch (OperationCanceledException)
         {
@@ -119,30 +118,30 @@ public class DisplayService : IDisplayService
     /// <inheritdoc/>
     public async Task StopAsync(CancellationToken cancellationToken = default)
     {
-        if (!_isRunning)
+        if (!this._isRunning)
         {
             return;
         }
 
-        _isRunning = false;
+        this._isRunning = false;
 
         try
         {
-            _cancellationTokenSource?.Cancel();
+            this._cancellationTokenSource?.Cancel();
 
-            if (_displayTask != null)
+            if (this._displayTask != null)
             {
-                await _displayTask;
+                await this._displayTask;
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error stopping display service");
+            this._logger.LogError(ex, "Error stopping display service");
         }
         finally
         {
-            _cancellationTokenSource?.Dispose();
-            _cancellationTokenSource = null;
+            this._cancellationTokenSource?.Dispose();
+            this._cancellationTokenSource = null;
         }
     }
 
@@ -159,13 +158,13 @@ public class DisplayService : IDisplayService
     /// <inheritdoc/>
     public void DisplayMessage(KnxMessage message)
     {
-        _messageQueue.Enqueue(message);
-        Interlocked.Increment(ref _messageCount);
+        this._messageQueue.Enqueue(message);
+        Interlocked.Increment(ref this._messageCount);
 
         // In logging mode, immediately output the message
         if (ShouldUseLoggingMode())
         {
-            var filterMatch = string.IsNullOrEmpty(_currentFilter) || MatchesFilter(message, _currentFilter);
+            var filterMatch = string.IsNullOrEmpty(this._currentFilter) || MatchesFilter(message, this._currentFilter);
             if (filterMatch)
             {
                 Console.WriteLine(
@@ -180,13 +179,13 @@ public class DisplayService : IDisplayService
     /// <inheritdoc/>
     public async ValueTask DisposeAsync()
     {
-        await StopAsync();
+        await this.StopAsync();
         GC.SuppressFinalize(this);
     }
 
     private void OnMessageReceived(object? sender, KnxMessage message)
     {
-        DisplayMessage(message);
+        this.DisplayMessage(message);
     }
 
     private void InitializeDisplay()
@@ -197,13 +196,13 @@ public class DisplayService : IDisplayService
         }
 
         // Initialize Spectre.Console display for interactive mode
-        _statusTable = new Table()
+        this._statusTable = new Table()
             .AddColumn("Property")
             .AddColumn("Value")
             .Border(TableBorder.Rounded)
             .BorderColor(Color.Blue);
 
-        _messagesTable = new Table()
+        this._messagesTable = new Table()
             .AddColumn("Time")
             .AddColumn("Type")
             .AddColumn("Source")
@@ -213,10 +212,10 @@ public class DisplayService : IDisplayService
             .Border(TableBorder.Rounded)
             .BorderColor(Color.Green);
 
-        _layout = new Layout("Root").SplitRows(new Layout("Header").Size(8), new Layout("Messages"));
+        this._layout = new Layout("Root").SplitRows(new Layout("Header").Size(8), new Layout("Messages"));
 
-        _layout["Header"].Update(CreateHeaderPanel());
-        _layout["Messages"].Update(_messagesTable);
+        this._layout["Header"].Update(this.CreateHeaderPanel());
+        this._layout["Messages"].Update(this._messagesTable);
     }
 
     private void UpdateDisplay(IKnxMonitorService monitorService)
@@ -226,60 +225,60 @@ public class DisplayService : IDisplayService
             return; // No visual updates needed for logging mode
         }
 
-        lock (_displayLock)
+        lock (this._displayLock)
         {
             try
             {
                 // Update status table
-                UpdateStatusTable(monitorService);
+                this.UpdateStatusTable(monitorService);
 
                 // Update messages table
-                UpdateMessagesTable();
+                this.UpdateMessagesTable();
 
                 // Render the layout
                 AnsiConsole.Clear();
-                if (_layout != null)
+                if (this._layout != null)
                 {
-                    AnsiConsole.Write(_layout);
+                    AnsiConsole.Write(this._layout);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating visual display");
+                this._logger.LogError(ex, "Error updating visual display");
             }
         }
     }
 
     private void UpdateStatusTable(IKnxMonitorService monitorService)
     {
-        if (_statusTable == null)
+        if (this._statusTable == null)
             return;
 
-        _statusTable.Rows.Clear();
+        this._statusTable.Rows.Clear();
 
         var connectionStatus = monitorService.IsConnected ? "✓ Connected" : "✗ Disconnected";
         var connectionColor = monitorService.IsConnected ? Color.Green : Color.Red;
 
-        _statusTable.AddRow("Connection", $"[{connectionColor}]{connectionStatus}[/]");
-        _statusTable.AddRow("Type", FormatConnectionType(_config.ConnectionType));
-        _statusTable.AddRow("Gateway", _config.Gateway ?? "Unknown");
-        _statusTable.AddRow("Port", _config.Port.ToString());
-        _statusTable.AddRow("Filter", _currentFilter ?? "None");
-        _statusTable.AddRow("Messages", _messageCount.ToString());
-        _statusTable.AddRow("Uptime", FormatUptime());
+        this._statusTable.AddRow("Connection", $"[{connectionColor}]{connectionStatus}[/]");
+        this._statusTable.AddRow("Type", FormatConnectionType(this._config.ConnectionType));
+        this._statusTable.AddRow("Gateway", this._config.Gateway ?? "Unknown");
+        this._statusTable.AddRow("Port", this._config.Port.ToString());
+        this._statusTable.AddRow("Filter", this._currentFilter ?? "None");
+        this._statusTable.AddRow("Messages", this._messageCount.ToString());
+        this._statusTable.AddRow("Uptime", this.FormatUptime());
     }
 
     private void UpdateMessagesTable()
     {
-        if (_messagesTable == null)
+        if (this._messagesTable == null)
             return;
 
-        _messagesTable.Rows.Clear();
+        this._messagesTable.Rows.Clear();
 
         var messages = new List<KnxMessage>();
-        while (_messageQueue.TryDequeue(out var message) && messages.Count < 20)
+        while (this._messageQueue.TryDequeue(out var message) && messages.Count < 20)
         {
-            if (string.IsNullOrEmpty(_currentFilter) || MatchesFilter(message, _currentFilter))
+            if (string.IsNullOrEmpty(this._currentFilter) || MatchesFilter(message, this._currentFilter))
             {
                 messages.Add(message);
             }
@@ -290,7 +289,7 @@ public class DisplayService : IDisplayService
             var ageColor = CalculateAgeColor(message.Timestamp);
             var typeColor = CalculateTypeColor(message.MessageType);
 
-            _messagesTable.AddRow(
+            this._messagesTable.AddRow(
                 $"[{ageColor}]{message.Timestamp:HH:mm:ss.fff}[/]",
                 $"[{typeColor}]{FormatMessageType(message.MessageType)}[/]",
                 message.SourceAddress,
@@ -303,7 +302,7 @@ public class DisplayService : IDisplayService
 
     private Panel CreateHeaderPanel()
     {
-        return new Panel(_statusTable ?? new Table()).Header("KNX Monitor").BorderColor(Color.Blue).Padding(1, 0);
+        return new Panel(this._statusTable ?? new Table()).Header("KNX Monitor").BorderColor(Color.Blue).Padding(1, 0);
     }
 
     /// <summary>
@@ -369,7 +368,7 @@ public class DisplayService : IDisplayService
 
     private string FormatUptime()
     {
-        var uptime = DateTime.Now - _startTime;
+        var uptime = DateTime.Now - this._startTime;
         return $"{uptime.Hours:D2}:{uptime.Minutes:D2}:{uptime.Seconds:D2}";
     }
 

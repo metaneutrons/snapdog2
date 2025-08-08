@@ -3,7 +3,6 @@ namespace SnapDog2.Core.Helpers;
 using System;
 using Polly;
 using Polly.Retry;
-using Polly.Timeout;
 using SnapDog2.Core.Configuration;
 
 /// <summary>

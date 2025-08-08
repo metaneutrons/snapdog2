@@ -1,5 +1,3 @@
-using KnxMonitor.Models;
-
 namespace KnxMonitor.Services;
 
 /// <summary>

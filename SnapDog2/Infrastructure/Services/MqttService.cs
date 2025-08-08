@@ -16,7 +16,6 @@ using MQTTnet;
 using MQTTnet.Protocol;
 using Polly;
 using Polly.Retry;
-using Polly.Timeout;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Core.Enums;
@@ -61,13 +60,13 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         this._clientConfigs = clientConfigOptions.Value;
 
         // Configure resilience policies
-        this._connectionPolicy = CreateConnectionPolicy();
-        this._operationPolicy = CreateOperationPolicy();
+        this._connectionPolicy = this.CreateConnectionPolicy();
+        this._operationPolicy = this.CreateOperationPolicy();
 
         // Build topic configurations
         this.BuildTopicConfigurations();
 
-        LogServiceCreated(_config.BrokerAddress, _config.Port, _config.Enabled);
+        this.LogServiceCreated(this._config.BrokerAddress, this._config.Port, this._config.Enabled);
     }
 
     #region Logging
@@ -146,7 +145,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     /// </summary>
     private ResiliencePipeline CreateConnectionPolicy()
     {
-        var validatedConfig = ResiliencePolicyFactory.ValidateAndNormalize(_config.Resilience.Connection);
+        var validatedConfig = ResiliencePolicyFactory.ValidateAndNormalize(this._config.Resilience.Connection);
 
         var builder = new ResiliencePipelineBuilder();
 
@@ -169,9 +168,9 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
                     ShouldHandle = new PredicateBuilder().Handle<Exception>(),
                     OnRetry = args =>
                     {
-                        LogConnectionRetryAttempt(
-                            _config.BrokerAddress,
-                            _config.Port,
+                        this.LogConnectionRetryAttempt(
+                            this._config.BrokerAddress,
+                            this._config.Port,
                             args.AttemptNumber + 1,
                             validatedConfig.MaxRetries + 1,
                             args.Outcome.Exception?.Message ?? "Unknown error"
@@ -196,7 +195,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     /// </summary>
     private ResiliencePipeline CreateOperationPolicy()
     {
-        var validatedConfig = ResiliencePolicyFactory.ValidateAndNormalize(_config.Resilience.Operation);
+        var validatedConfig = ResiliencePolicyFactory.ValidateAndNormalize(this._config.Resilience.Operation);
         return ResiliencePolicyFactory.CreatePipeline(validatedConfig, "MQTT-Operation");
     }
 
@@ -248,8 +247,8 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             this.LogInitializing(this._config.BrokerAddress, this._config.Port);
 
             // Log first attempt before Polly execution
-            var config = ResiliencePolicyFactory.ValidateAndNormalize(_config.Resilience.Connection);
-            LogConnectionRetryAttempt(
+            var config = ResiliencePolicyFactory.ValidateAndNormalize(this._config.Resilience.Connection);
+            this.LogConnectionRetryAttempt(
                 this._config.BrokerAddress,
                 this._config.Port,
                 1,
@@ -257,7 +256,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
                 "Initial attempt"
             );
 
-            var result = await _connectionPolicy.ExecuteAsync(
+            var result = await this._connectionPolicy.ExecuteAsync(
                 async (ct) =>
                 {
                     // Create MQTT client using v5 API
@@ -313,11 +312,11 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
                 || ex.Message.Contains("broker", StringComparison.OrdinalIgnoreCase)
             )
             {
-                LogConnectionErrorMessage(ex.Message);
+                this.LogConnectionErrorMessage(ex.Message);
             }
             else
             {
-                LogInitializationFailed(ex);
+                this.LogInitializationFailed(ex);
             }
             return Result.Failure($"Failed to initialize MQTT connection: {ex.Message}");
         }
@@ -400,13 +399,13 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     {
         if (!this.IsConnected)
         {
-            LogNotConnected(nameof(PublishAsync));
+            this.LogNotConnected(nameof(this.PublishAsync));
             return Result.Failure("MQTT client is not connected");
         }
 
         try
         {
-            return await _operationPolicy.ExecuteAsync(
+            return await this._operationPolicy.ExecuteAsync(
                 async (ct) =>
                 {
                     var message = new MqttApplicationMessageBuilder()
@@ -613,8 +612,12 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
 
             return entityType switch
             {
-                "zone" when int.TryParse(entityId, out var zoneId) => MapZoneCommand(zoneId, command, payload),
-                "client" when int.TryParse(entityId, out var clientId) => MapClientCommand(clientId, command, payload),
+                "zone" when int.TryParse(entityId, out var zoneId) => this.MapZoneCommand(zoneId, command, payload),
+                "client" when int.TryParse(entityId, out var clientId) => this.MapClientCommand(
+                    clientId,
+                    command,
+                    payload
+                ),
                 _ => null,
             };
         }

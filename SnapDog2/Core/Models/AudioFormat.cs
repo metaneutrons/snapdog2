@@ -11,7 +11,7 @@ public record AudioFormat(int SampleRate, int BitDepth, int Channels)
     /// <summary>
     /// Returns a string representation in the format "SampleRate:BitDepth:Channels".
     /// </summary>
-    public override string ToString() => $"{SampleRate}:{BitDepth}:{Channels}";
+    public override string ToString() => $"{this.SampleRate}:{this.BitDepth}:{this.Channels}";
 
     /// <summary>
     /// Creates an AudioFormat from a string in the format "SampleRate:BitDepth:Channels".

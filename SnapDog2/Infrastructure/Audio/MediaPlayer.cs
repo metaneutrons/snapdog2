@@ -1,7 +1,6 @@
 namespace SnapDog2.Infrastructure.Audio;
 
 using System;
-using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -41,11 +40,11 @@ public sealed partial class MediaPlayer : IAsyncDisposable
         HttpClient httpClient
     )
     {
-        _config = config ?? throw new ArgumentNullException(nameof(config));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _zoneId = zoneId;
-        _sinkPath = sinkPath ?? throw new ArgumentNullException(nameof(sinkPath));
-        _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+        this._config = config ?? throw new ArgumentNullException(nameof(config));
+        this._logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        this._zoneId = zoneId;
+        this._sinkPath = sinkPath ?? throw new ArgumentNullException(nameof(sinkPath));
+        this._httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
     }
 
     /// <summary>
@@ -55,13 +54,13 @@ public sealed partial class MediaPlayer : IAsyncDisposable
     {
         return new PlaybackStatus
         {
-            ZoneId = _zoneId,
-            IsPlaying = _audioGraph != null && !_disposed,
-            CurrentTrack = _currentTrack,
-            AudioFormat = new AudioFormat(_config.SampleRate, _config.BitDepth, _config.Channels),
-            PlaybackStartedAt = _playbackStartedAt,
-            ActiveStreams = _audioGraph != null ? 1 : 0,
-            MaxStreams = _config.MaxStreams,
+            ZoneId = this._zoneId,
+            IsPlaying = this._audioGraph != null && !this._disposed,
+            CurrentTrack = this._currentTrack,
+            AudioFormat = new AudioFormat(this._config.SampleRate, this._config.BitDepth, this._config.Channels),
+            PlaybackStartedAt = this._playbackStartedAt,
+            ActiveStreams = this._audioGraph != null ? 1 : 0,
+            MaxStreams = this._config.MaxStreams,
         };
     }
 
@@ -76,34 +75,34 @@ public sealed partial class MediaPlayer : IAsyncDisposable
     {
         try
         {
-            ObjectDisposedException.ThrowIf(_disposed, this);
+            ObjectDisposedException.ThrowIf(this._disposed, this);
 
             if (string.IsNullOrWhiteSpace(audioUrl))
                 return Result.Failure(new ArgumentException("Audio URL cannot be null or empty", nameof(audioUrl)));
 
             // Stop any existing stream
-            await StopStreamingAsync();
+            await this.StopStreamingAsync();
 
             // Store track information
-            _currentTrack = trackInfo;
-            _playbackStartedAt = DateTime.UtcNow;
+            this._currentTrack = trackInfo;
+            this._playbackStartedAt = DateTime.UtcNow;
 
             // Create cancellation token source
-            _streamingCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            this._streamingCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
             // Initialize SoundFlow components
-            await InitializeSoundFlowAsync(audioUrl);
+            await this.InitializeSoundFlowAsync(audioUrl);
 
             // Start the audio graph
-            await _audioGraph!.StartAsync(_streamingCts.Token);
+            await this._audioGraph!.StartAsync(this._streamingCts.Token);
 
-            LogStreamingStarted(_logger, _zoneId, audioUrl, _sinkPath, trackInfo.Title);
+            LogStreamingStarted(this._logger, this._zoneId, audioUrl, this._sinkPath, trackInfo.Title);
             return Result.Success();
         }
         catch (Exception ex)
         {
-            LogStreamingError(_logger, _zoneId, ex);
-            await CleanupResourcesAsync();
+            LogStreamingError(this._logger, this._zoneId, ex);
+            await this.CleanupResourcesAsync();
             return Result.Failure(ex);
         }
     }
@@ -113,22 +112,22 @@ public sealed partial class MediaPlayer : IAsyncDisposable
     /// </summary>
     public async Task StopStreamingAsync()
     {
-        if (_streamingCts != null)
+        if (this._streamingCts != null)
         {
-            _streamingCts.Cancel();
+            this._streamingCts.Cancel();
         }
 
-        if (_audioGraph != null)
+        if (this._audioGraph != null)
         {
-            await _audioGraph.StopAsync();
+            await this._audioGraph.StopAsync();
         }
 
-        await CleanupResourcesAsync();
+        await this.CleanupResourcesAsync();
 
-        _currentTrack = null;
-        _playbackStartedAt = null;
+        this._currentTrack = null;
+        this._playbackStartedAt = null;
 
-        LogStreamingStopped(_logger, _zoneId);
+        LogStreamingStopped(this._logger, this._zoneId);
     }
 
     /// <summary>
@@ -137,32 +136,32 @@ public sealed partial class MediaPlayer : IAsyncDisposable
     private async Task InitializeSoundFlowAsync(string audioUrl)
     {
         // Create target audio format
-        var targetFormat = new AudioFormat(_config.SampleRate, _config.BitDepth, _config.Channels);
+        var targetFormat = new AudioFormat(this._config.SampleRate, this._config.BitDepth, this._config.Channels);
 
         // Initialize virtual audio device for file output
-        _device = await CreateVirtualDeviceAsync(targetFormat);
+        this._device = await this.CreateVirtualDeviceAsync(targetFormat);
 
         // Create audio graph
-        _audioGraph = CreateAudioGraph(_device);
+        this._audioGraph = this.CreateAudioGraph(this._device);
 
         // Create HTTP stream source
-        _streamSource = CreateHttpStreamSource(audioUrl);
+        this._streamSource = this.CreateHttpStreamSource(audioUrl);
 
         // Create resampler for format conversion
-        _resampler = CreateResampleProcessor(targetFormat);
+        this._resampler = this.CreateResampleProcessor(targetFormat);
 
         // Create file output sink
-        _outputSink = CreateFileOutputSink(_sinkPath, targetFormat);
+        this._outputSink = this.CreateFileOutputSink(this._sinkPath, targetFormat);
 
         // Build audio processing pipeline: Source → Processor → Sink
-        _audioGraph.AddSource(_streamSource);
-        _audioGraph.AddProcessor(_resampler);
-        _audioGraph.AddSink(_outputSink);
+        this._audioGraph.AddSource(this._streamSource);
+        this._audioGraph.AddProcessor(this._resampler);
+        this._audioGraph.AddSink(this._outputSink);
 
         // Configure audio graph settings
-        ConfigureAudioGraph(_audioGraph);
+        this.ConfigureAudioGraph(this._audioGraph);
 
-        LogAudioGraphInitialized(_logger, _zoneId, audioUrl, targetFormat.ToString());
+        LogAudioGraphInitialized(this._logger, this._zoneId, audioUrl, targetFormat.ToString());
     }
 
     /// <summary>
@@ -171,7 +170,7 @@ public sealed partial class MediaPlayer : IAsyncDisposable
     private async Task<ISoundDevice> CreateVirtualDeviceAsync(AudioFormat format)
     {
         // Placeholder implementation - will use actual SoundFlow API
-        return await Task.FromResult(new VirtualSoundDevice(format, _config.BufferSize));
+        return await Task.FromResult(new VirtualSoundDevice(format, this._config.BufferSize));
     }
 
     /// <summary>
@@ -187,11 +186,11 @@ public sealed partial class MediaPlayer : IAsyncDisposable
     /// </summary>
     private IHttpStreamSource CreateHttpStreamSource(string audioUrl)
     {
-        return new HttpStreamSource(_httpClient)
+        return new HttpStreamSource(this._httpClient)
         {
             Url = audioUrl,
-            AutoDetectFormat = _config.AutoDetectFormat,
-            TimeoutSeconds = _config.HttpTimeoutSeconds,
+            AutoDetectFormat = this._config.AutoDetectFormat,
+            TimeoutSeconds = this._config.HttpTimeoutSeconds,
         };
     }
 
@@ -203,7 +202,7 @@ public sealed partial class MediaPlayer : IAsyncDisposable
         return new ResampleProcessor(targetFormat)
         {
             Quality = ResampleQuality.High,
-            RealtimeProcessing = _config.RealtimeProcessing,
+            RealtimeProcessing = this._config.RealtimeProcessing,
         };
     }
 
@@ -215,7 +214,7 @@ public sealed partial class MediaPlayer : IAsyncDisposable
         return new FileOutputSink(sinkPath)
         {
             Format = format,
-            BufferSize = _config.BufferSize,
+            BufferSize = this._config.BufferSize,
             FlushInterval = TimeSpan.FromMilliseconds(50), // Low latency for real-time streaming
         };
     }
@@ -225,8 +224,8 @@ public sealed partial class MediaPlayer : IAsyncDisposable
     /// </summary>
     private void ConfigureAudioGraph(IAudioGraph audioGraph)
     {
-        audioGraph.RealtimeProcessing = _config.RealtimeProcessing;
-        audioGraph.ThreadPriority = ParseThreadPriority(_config.ThreadPriority);
+        audioGraph.RealtimeProcessing = this._config.RealtimeProcessing;
+        audioGraph.ThreadPriority = this.ParseThreadPriority(this._config.ThreadPriority);
     }
 
     /// <summary>
@@ -234,41 +233,41 @@ public sealed partial class MediaPlayer : IAsyncDisposable
     /// </summary>
     private async Task CleanupResourcesAsync()
     {
-        if (_outputSink != null)
+        if (this._outputSink != null)
         {
-            await _outputSink.FlushAsync();
-            await _outputSink.DisposeAsync();
-            _outputSink = null;
+            await this._outputSink.FlushAsync();
+            await this._outputSink.DisposeAsync();
+            this._outputSink = null;
         }
 
-        if (_resampler != null)
+        if (this._resampler != null)
         {
-            await _resampler.DisposeAsync();
-            _resampler = null;
+            await this._resampler.DisposeAsync();
+            this._resampler = null;
         }
 
-        if (_streamSource != null)
+        if (this._streamSource != null)
         {
-            await _streamSource.DisposeAsync();
-            _streamSource = null;
+            await this._streamSource.DisposeAsync();
+            this._streamSource = null;
         }
 
-        if (_audioGraph != null)
+        if (this._audioGraph != null)
         {
-            await _audioGraph.DisposeAsync();
-            _audioGraph = null;
+            await this._audioGraph.DisposeAsync();
+            this._audioGraph = null;
         }
 
-        if (_device != null)
+        if (this._device != null)
         {
-            await _device.DisposeAsync();
-            _device = null;
+            await this._device.DisposeAsync();
+            this._device = null;
         }
 
-        if (_streamingCts != null)
+        if (this._streamingCts != null)
         {
-            _streamingCts.Dispose();
-            _streamingCts = null;
+            this._streamingCts.Dispose();
+            this._streamingCts = null;
         }
     }
 
@@ -290,10 +289,10 @@ public sealed partial class MediaPlayer : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        if (!_disposed)
+        if (!this._disposed)
         {
-            await StopStreamingAsync();
-            _disposed = true;
+            await this.StopStreamingAsync();
+            this._disposed = true;
         }
     }
 
@@ -448,7 +447,7 @@ internal class ResampleProcessor : IResampleProcessor
 {
     public ResampleProcessor(AudioFormat targetFormat)
     {
-        TargetFormat = targetFormat;
+        this.TargetFormat = targetFormat;
     }
 
     public AudioFormat TargetFormat { get; }

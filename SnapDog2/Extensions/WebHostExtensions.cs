@@ -1,8 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.Extensions.Configuration;
 using SnapDog2.Core.Configuration;
 
 namespace SnapDog2.Extensions;

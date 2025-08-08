@@ -23,7 +23,7 @@ public class HealthControllerTests : IClassFixture<CustomWebApplicationFactory>
     public async Task GetHealth_ShouldReturnHealthStatus()
     {
         // Arrange - Check if API and health checks are enabled
-        using var scope = _factory.Services.CreateScope();
+        using var scope = this._factory.Services.CreateScope();
         var config = scope.ServiceProvider.GetRequiredService<SnapDogConfiguration>();
 
         // Skip test if API or health checks are disabled
@@ -71,7 +71,7 @@ public class HealthControllerTests : IClassFixture<CustomWebApplicationFactory>
     public async Task GetReady_ShouldReturnReadyStatus()
     {
         // Arrange - Check if API and health checks are enabled
-        using var scope = _factory.Services.CreateScope();
+        using var scope = this._factory.Services.CreateScope();
         var config = scope.ServiceProvider.GetRequiredService<SnapDogConfiguration>();
 
         // Skip test if API or health checks are disabled
@@ -107,7 +107,7 @@ public class HealthControllerTests : IClassFixture<CustomWebApplicationFactory>
     public async Task GetLive_ShouldReturnLiveStatus()
     {
         // Arrange - Check if API and health checks are enabled
-        using var scope = _factory.Services.CreateScope();
+        using var scope = this._factory.Services.CreateScope();
         var config = scope.ServiceProvider.GetRequiredService<SnapDogConfiguration>();
 
         // Skip test if API or health checks are disabled

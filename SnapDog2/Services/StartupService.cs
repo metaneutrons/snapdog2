@@ -1,9 +1,6 @@
 using System.Net;
-using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using Microsoft.AspNetCore.Connections;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SnapDog2.Core.Configuration;
 

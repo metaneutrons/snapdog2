@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using Cortex.Mediator.Queries;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Abstractions;
-using SnapDog2.Core.Enums;
 using SnapDog2.Core.Models;
 using SnapDog2.Server.Features.Zones.Queries;
 

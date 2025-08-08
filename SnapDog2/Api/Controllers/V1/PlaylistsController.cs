@@ -51,21 +51,22 @@ public partial class PlaylistsController : ControllerBase
         CancellationToken cancellationToken = default
     )
     {
-        LogGetPlaylistsRequest(_logger, page, pageSize, sortBy);
+        LogGetPlaylistsRequest(this._logger, page, pageSize, sortBy);
 
-        var handler = _serviceProvider.GetService<Server.Features.Playlists.Handlers.GetAllPlaylistsQueryHandler>();
+        var handler =
+            this._serviceProvider.GetService<Server.Features.Playlists.Handlers.GetAllPlaylistsQueryHandler>();
         if (handler == null)
         {
-            LogGetPlaylistsError(_logger, "Handler not found");
-            return StatusCode(500, ApiResponse.CreateError("HANDLER_NOT_FOUND", "Playlist handler not available"));
+            LogGetPlaylistsError(this._logger, "Handler not found");
+            return this.StatusCode(500, ApiResponse.CreateError("HANDLER_NOT_FOUND", "Playlist handler not available"));
         }
 
         var result = await handler.Handle(new GetAllPlaylistsQuery(), cancellationToken);
 
         if (!result.IsSuccess)
         {
-            LogGetPlaylistsError(_logger, result.ErrorMessage ?? "Unknown error");
-            return StatusCode(
+            LogGetPlaylistsError(this._logger, result.ErrorMessage ?? "Unknown error");
+            return this.StatusCode(
                 500,
                 ApiResponse.CreateError("PLAYLISTS_ERROR", result.ErrorMessage ?? "Failed to get playlists")
             );
@@ -96,8 +97,8 @@ public partial class PlaylistsController : ControllerBase
             },
         };
 
-        LogGetPlaylistsSuccess(_logger, totalCount, pagedPlaylists.Count);
-        return Ok(ApiResponse<PaginatedResponse<PlaylistInfo>>.CreateSuccess(paginatedResponse));
+        LogGetPlaylistsSuccess(this._logger, totalCount, pagedPlaylists.Count);
+        return this.Ok(ApiResponse<PaginatedResponse<PlaylistInfo>>.CreateSuccess(paginatedResponse));
     }
 
     /// <summary>
@@ -115,35 +116,37 @@ public partial class PlaylistsController : ControllerBase
         CancellationToken cancellationToken = default
     )
     {
-        LogGetPlaylistRequest(_logger, playlistId);
+        LogGetPlaylistRequest(this._logger, playlistId);
 
-        var handler = _serviceProvider.GetService<Server.Features.Playlists.Handlers.GetPlaylistQueryHandler>();
+        var handler = this._serviceProvider.GetService<Server.Features.Playlists.Handlers.GetPlaylistQueryHandler>();
         if (handler == null)
         {
-            LogGetPlaylistError(_logger, playlistId, "Handler not found");
-            return StatusCode(500, ApiResponse.CreateError("HANDLER_NOT_FOUND", "Playlist handler not available"));
+            LogGetPlaylistError(this._logger, playlistId, "Handler not found");
+            return this.StatusCode(500, ApiResponse.CreateError("HANDLER_NOT_FOUND", "Playlist handler not available"));
         }
 
         var result = await handler.Handle(new GetPlaylistQuery { PlaylistId = playlistId }, cancellationToken);
 
         if (!result.IsSuccess)
         {
-            LogGetPlaylistError(_logger, playlistId, result.ErrorMessage ?? "Unknown error");
+            LogGetPlaylistError(this._logger, playlistId, result.ErrorMessage ?? "Unknown error");
 
             // Check if it's a not found error
             if ((result.ErrorMessage ?? "").Contains("not found", StringComparison.OrdinalIgnoreCase))
             {
-                return NotFound(ApiResponse.CreateError("PLAYLIST_NOT_FOUND", $"Playlist '{playlistId}' not found"));
+                return this.NotFound(
+                    ApiResponse.CreateError("PLAYLIST_NOT_FOUND", $"Playlist '{playlistId}' not found")
+                );
             }
 
-            return StatusCode(
+            return this.StatusCode(
                 500,
                 ApiResponse.CreateError("PLAYLIST_ERROR", result.ErrorMessage ?? "Failed to get playlist")
             );
         }
 
-        LogGetPlaylistSuccess(_logger, playlistId, result.Value?.Tracks?.Count ?? 0);
-        return Ok(ApiResponse<SnapDog2.Api.Models.PlaylistWithTracks>.CreateSuccess(result.Value!));
+        LogGetPlaylistSuccess(this._logger, playlistId, result.Value?.Tracks?.Count ?? 0);
+        return this.Ok(ApiResponse<SnapDog2.Api.Models.PlaylistWithTracks>.CreateSuccess(result.Value!));
     }
 
     /// <summary>
@@ -161,28 +164,31 @@ public partial class PlaylistsController : ControllerBase
         CancellationToken cancellationToken = default
     )
     {
-        LogGetStreamUrlRequest(_logger, trackId);
+        LogGetStreamUrlRequest(this._logger, trackId);
 
-        var handler = _serviceProvider.GetService<Server.Features.Playlists.Handlers.GetStreamUrlQueryHandler>();
+        var handler = this._serviceProvider.GetService<Server.Features.Playlists.Handlers.GetStreamUrlQueryHandler>();
         if (handler == null)
         {
-            LogGetStreamUrlError(_logger, trackId, "Handler not found");
-            return StatusCode(500, ApiResponse.CreateError("HANDLER_NOT_FOUND", "Stream URL handler not available"));
+            LogGetStreamUrlError(this._logger, trackId, "Handler not found");
+            return this.StatusCode(
+                500,
+                ApiResponse.CreateError("HANDLER_NOT_FOUND", "Stream URL handler not available")
+            );
         }
 
         var result = await handler.Handle(new GetStreamUrlQuery { TrackId = trackId }, cancellationToken);
 
         if (!result.IsSuccess)
         {
-            LogGetStreamUrlError(_logger, trackId, result.ErrorMessage ?? "Unknown error");
+            LogGetStreamUrlError(this._logger, trackId, result.ErrorMessage ?? "Unknown error");
 
             // Check if it's a not found error
             if ((result.ErrorMessage ?? "").Contains("not found", StringComparison.OrdinalIgnoreCase))
             {
-                return NotFound(ApiResponse.CreateError("TRACK_NOT_FOUND", $"Track '{trackId}' not found"));
+                return this.NotFound(ApiResponse.CreateError("TRACK_NOT_FOUND", $"Track '{trackId}' not found"));
             }
 
-            return StatusCode(
+            return this.StatusCode(
                 500,
                 ApiResponse.CreateError("STREAM_URL_ERROR", result.ErrorMessage ?? "Failed to get stream URL")
             );
@@ -195,8 +201,8 @@ public partial class PlaylistsController : ControllerBase
             TimestampUtc = DateTime.UtcNow,
         };
 
-        LogGetStreamUrlSuccess(_logger, trackId);
-        return Ok(ApiResponse<StreamUrlResponse>.CreateSuccess(response));
+        LogGetStreamUrlSuccess(this._logger, trackId);
+        return this.Ok(ApiResponse<StreamUrlResponse>.CreateSuccess(response));
     }
 
     /// <summary>
@@ -211,14 +217,14 @@ public partial class PlaylistsController : ControllerBase
         CancellationToken cancellationToken = default
     )
     {
-        LogTestConnectionRequest(_logger);
+        LogTestConnectionRequest(this._logger);
 
         var handler =
-            _serviceProvider.GetService<Server.Features.Playlists.Handlers.TestSubsonicConnectionQueryHandler>();
+            this._serviceProvider.GetService<Server.Features.Playlists.Handlers.TestSubsonicConnectionQueryHandler>();
         if (handler == null)
         {
-            LogTestConnectionError(_logger, "Handler not found");
-            return StatusCode(
+            LogTestConnectionError(this._logger, "Handler not found");
+            return this.StatusCode(
                 500,
                 ApiResponse.CreateError("HANDLER_NOT_FOUND", "Connection test handler not available")
             );
@@ -235,13 +241,13 @@ public partial class PlaylistsController : ControllerBase
 
         if (result.IsSuccess)
         {
-            LogTestConnectionSuccess(_logger);
-            return Ok(ApiResponse<ConnectionTestResponse>.CreateSuccess(response));
+            LogTestConnectionSuccess(this._logger);
+            return this.Ok(ApiResponse<ConnectionTestResponse>.CreateSuccess(response));
         }
         else
         {
-            LogTestConnectionError(_logger, result.ErrorMessage ?? "Unknown error");
-            return StatusCode(500, ApiResponse<ConnectionTestResponse>.CreateSuccess(response));
+            LogTestConnectionError(this._logger, result.ErrorMessage ?? "Unknown error");
+            return this.StatusCode(500, ApiResponse<ConnectionTestResponse>.CreateSuccess(response));
         }
     }
 

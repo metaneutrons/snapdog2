@@ -1,6 +1,5 @@
 using System.CommandLine;
 using System.CommandLine.Parsing;
-using System.Linq;
 using System.Net.Sockets;
 using KnxMonitor.Models;
 using KnxMonitor.Services;

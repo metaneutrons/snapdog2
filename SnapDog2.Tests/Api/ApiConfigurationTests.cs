@@ -4,9 +4,7 @@ using System.Net;
 using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Xunit;
 
 [Collection("ApiDisabled")]
@@ -16,14 +14,14 @@ public class ApiConfigurationTests : IClassFixture<ApiDisabledWebApplicationFact
 
     public ApiConfigurationTests(ApiDisabledWebApplicationFactory factory)
     {
-        _factory = factory;
+        this._factory = factory;
     }
 
     [Fact]
     public async Task DisabledApi_ShouldNotHaveControllersRegistered()
     {
         // Arrange
-        var client = _factory.CreateClient();
+        var client = this._factory.CreateClient();
 
         // Act & Assert
         // When API is disabled, no controllers should be registered
@@ -46,15 +44,15 @@ public class ApiEnabledConfigurationTests : IClassFixture<CustomWebApplicationFa
 
     public ApiEnabledConfigurationTests(CustomWebApplicationFactory factory)
     {
-        _factory = factory;
-        _client = _factory.CreateClient();
+        this._factory = factory;
+        this._client = this._factory.CreateClient();
     }
 
     [Fact]
     public async Task EnabledApi_ShouldHaveControllersRegistered()
     {
         // Arrange - Check if API and health checks are enabled
-        using var scope = _factory.Services.CreateScope();
+        using var scope = this._factory.Services.CreateScope();
         var config = scope.ServiceProvider.GetRequiredService<SnapDog2.Core.Configuration.SnapDogConfiguration>();
 
         // Skip test if API or health checks are disabled
@@ -69,7 +67,7 @@ public class ApiEnabledConfigurationTests : IClassFixture<CustomWebApplicationFa
         }
 
         // Act
-        var response = await _client.GetAsync("/api/health");
+        var response = await this._client.GetAsync("/api/health");
 
         // Assert
         // When API is enabled, controllers should be registered and health endpoint should work
@@ -91,24 +89,24 @@ public class ApiDisabledWebApplicationFactory : WebApplicationFactory<Program>
         lock (_lock)
         {
             // Store original values and set new ones
-            SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Testing");
-            SetEnvironmentVariable("SNAPDOG_SYSTEM_LOG_LEVEL", "Warning");
-            SetEnvironmentVariable("SNAPDOG_SYSTEM_HEALTH_CHECKS_ENABLED", "false");
-            SetEnvironmentVariable("SNAPDOG_SYSTEM_LOG_FILE", "");
-            SetEnvironmentVariable("SNAPDOG_API_ENABLED", "false"); // DISABLE API for this test
-            SetEnvironmentVariable("SNAPDOG_API_PORT", "0");
-            SetEnvironmentVariable("SNAPDOG_API_AUTH_ENABLED", "false");
-            SetEnvironmentVariable("SNAPDOG_SERVICES_SNAPCAST_ADDRESS", "localhost");
-            SetEnvironmentVariable("SNAPDOG_SERVICES_SNAPCAST_JSONRPC_PORT", "1704");
-            SetEnvironmentVariable("SNAPDOG_SERVICES_MQTT_ENABLED", "false");
-            SetEnvironmentVariable("SNAPDOG_SERVICES_KNX_ENABLED", "false");
-            SetEnvironmentVariable("SNAPDOG_SERVICES_SUBSONIC_ENABLED", "false");
+            this.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Testing");
+            this.SetEnvironmentVariable("SNAPDOG_SYSTEM_LOG_LEVEL", "Warning");
+            this.SetEnvironmentVariable("SNAPDOG_SYSTEM_HEALTH_CHECKS_ENABLED", "false");
+            this.SetEnvironmentVariable("SNAPDOG_SYSTEM_LOG_FILE", "");
+            this.SetEnvironmentVariable("SNAPDOG_API_ENABLED", "false"); // DISABLE API for this test
+            this.SetEnvironmentVariable("SNAPDOG_API_PORT", "0");
+            this.SetEnvironmentVariable("SNAPDOG_API_AUTH_ENABLED", "false");
+            this.SetEnvironmentVariable("SNAPDOG_SERVICES_SNAPCAST_ADDRESS", "localhost");
+            this.SetEnvironmentVariable("SNAPDOG_SERVICES_SNAPCAST_JSONRPC_PORT", "1704");
+            this.SetEnvironmentVariable("SNAPDOG_SERVICES_MQTT_ENABLED", "false");
+            this.SetEnvironmentVariable("SNAPDOG_SERVICES_KNX_ENABLED", "false");
+            this.SetEnvironmentVariable("SNAPDOG_SERVICES_SUBSONIC_ENABLED", "false");
         }
     }
 
     private void SetEnvironmentVariable(string name, string value)
     {
-        _originalValues[name] = Environment.GetEnvironmentVariable(name);
+        this._originalValues[name] = Environment.GetEnvironmentVariable(name);
         Environment.SetEnvironmentVariable(name, value);
     }
 
@@ -127,11 +125,12 @@ public class ApiDisabledWebApplicationFactory : WebApplicationFactory<Program>
             lock (_lock)
             {
                 // Restore original environment variable values
-                foreach (var kvp in _originalValues)
+                foreach (var kvp in this._originalValues)
                 {
                     Environment.SetEnvironmentVariable(kvp.Key, kvp.Value);
                 }
-                _originalValues.Clear();
+
+                this._originalValues.Clear();
             }
         }
         base.Dispose(disposing);

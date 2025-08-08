@@ -2,7 +2,6 @@ namespace SnapDog2.Tests;
 
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -17,24 +16,24 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         lock (_lock)
         {
             // Store original values and set new ones
-            SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Testing");
-            SetEnvironmentVariable("SNAPDOG_SYSTEM_LOG_LEVEL", "Warning");
-            SetEnvironmentVariable("SNAPDOG_SYSTEM_HEALTH_CHECKS_ENABLED", "true");
-            SetEnvironmentVariable("SNAPDOG_SYSTEM_LOG_FILE", ""); // Disable log file to avoid permission issues
-            SetEnvironmentVariable("SNAPDOG_API_ENABLED", "true"); // ENABLE API for tests
-            SetEnvironmentVariable("SNAPDOG_API_PORT", "0");
-            SetEnvironmentVariable("SNAPDOG_API_AUTH_ENABLED", "false");
-            SetEnvironmentVariable("SNAPDOG_SERVICES_SNAPCAST_ADDRESS", "localhost");
-            SetEnvironmentVariable("SNAPDOG_SERVICES_SNAPCAST_JSONRPC_PORT", "1704");
-            SetEnvironmentVariable("SNAPDOG_SERVICES_MQTT_ENABLED", "false");
-            SetEnvironmentVariable("SNAPDOG_SERVICES_KNX_ENABLED", "false");
-            SetEnvironmentVariable("SNAPDOG_SERVICES_SUBSONIC_ENABLED", "false");
+            this.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Testing");
+            this.SetEnvironmentVariable("SNAPDOG_SYSTEM_LOG_LEVEL", "Warning");
+            this.SetEnvironmentVariable("SNAPDOG_SYSTEM_HEALTH_CHECKS_ENABLED", "true");
+            this.SetEnvironmentVariable("SNAPDOG_SYSTEM_LOG_FILE", ""); // Disable log file to avoid permission issues
+            this.SetEnvironmentVariable("SNAPDOG_API_ENABLED", "true"); // ENABLE API for tests
+            this.SetEnvironmentVariable("SNAPDOG_API_PORT", "0");
+            this.SetEnvironmentVariable("SNAPDOG_API_AUTH_ENABLED", "false");
+            this.SetEnvironmentVariable("SNAPDOG_SERVICES_SNAPCAST_ADDRESS", "localhost");
+            this.SetEnvironmentVariable("SNAPDOG_SERVICES_SNAPCAST_JSONRPC_PORT", "1704");
+            this.SetEnvironmentVariable("SNAPDOG_SERVICES_MQTT_ENABLED", "false");
+            this.SetEnvironmentVariable("SNAPDOG_SERVICES_KNX_ENABLED", "false");
+            this.SetEnvironmentVariable("SNAPDOG_SERVICES_SUBSONIC_ENABLED", "false");
         }
     }
 
     private void SetEnvironmentVariable(string name, string value)
     {
-        _originalValues[name] = Environment.GetEnvironmentVariable(name);
+        this._originalValues[name] = Environment.GetEnvironmentVariable(name);
         Environment.SetEnvironmentVariable(name, value);
     }
 
@@ -69,11 +68,12 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             lock (_lock)
             {
                 // Restore original environment variable values
-                foreach (var kvp in _originalValues)
+                foreach (var kvp in this._originalValues)
                 {
                     Environment.SetEnvironmentVariable(kvp.Key, kvp.Value);
                 }
-                _originalValues.Clear();
+
+                this._originalValues.Clear();
             }
         }
         base.Dispose(disposing);

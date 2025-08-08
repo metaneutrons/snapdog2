@@ -2,7 +2,6 @@ namespace SnapDog2.Infrastructure.Services;
 
 using System.Collections.Concurrent;
 using System.Linq;
-using Cortex.Mediator;
 using Cortex.Mediator.Notifications;
 using Knx.Falcon;
 using Knx.Falcon.Configuration;
@@ -12,7 +11,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Polly;
 using Polly.Retry;
-using Polly.Timeout;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Core.Enums;
@@ -51,61 +49,61 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
     )
     {
         var config = configuration.Value;
-        _config = config.Services.Knx;
-        _zones = config.Zones;
-        _clients = config.Clients;
-        _serviceProvider = serviceProvider;
-        _logger = logger;
-        _groupAddressCache = new ConcurrentDictionary<string, string>();
-        _connectionSemaphore = new SemaphoreSlim(1, 1);
+        this._config = config.Services.Knx;
+        this._zones = config.Zones;
+        this._clients = config.Clients;
+        this._serviceProvider = serviceProvider;
+        this._logger = logger;
+        this._groupAddressCache = new ConcurrentDictionary<string, string>();
+        this._connectionSemaphore = new SemaphoreSlim(1, 1);
 
         // Configure resilience policies
-        _connectionPolicy = CreateConnectionPolicy();
-        _operationPolicy = CreateOperationPolicy();
+        this._connectionPolicy = this.CreateConnectionPolicy();
+        this._operationPolicy = this.CreateOperationPolicy();
 
         // Initialize reconnect timer (disabled initially)
-        _reconnectTimer = new Timer(OnReconnectTimer, null, Timeout.Infinite, Timeout.Infinite);
+        this._reconnectTimer = new Timer(this.OnReconnectTimer, null, Timeout.Infinite, Timeout.Infinite);
 
-        LogServiceCreated(_config.Gateway, _config.Port, _config.Enabled);
+        this.LogServiceCreated(this._config.Gateway, this._config.Port, this._config.Enabled);
     }
 
     /// <inheritdoc />
-    public bool IsConnected => _knxBus?.ConnectionState == BusConnectionState.Connected;
+    public bool IsConnected => this._knxBus?.ConnectionState == BusConnectionState.Connected;
 
     /// <inheritdoc />
     public ServiceStatus Status =>
-        _isInitialized switch
+        this._isInitialized switch
         {
             false => ServiceStatus.Stopped,
-            true when IsConnected => ServiceStatus.Running,
+            true when this.IsConnected => ServiceStatus.Running,
             true => ServiceStatus.Error,
         };
 
     /// <inheritdoc />
     public async Task<Result> InitializeAsync(CancellationToken cancellationToken = default)
     {
-        if (!_config.Enabled)
+        if (!this._config.Enabled)
         {
-            LogServiceDisabled();
+            this.LogServiceDisabled();
             return Result.Success();
         }
 
-        await _connectionSemaphore.WaitAsync(cancellationToken);
+        await this._connectionSemaphore.WaitAsync(cancellationToken);
         try
         {
-            if (_isInitialized)
+            if (this._isInitialized)
             {
-                LogAlreadyInitialized();
+                this.LogAlreadyInitialized();
                 return Result.Success();
             }
 
-            LogInitializationStarted();
+            this.LogInitializationStarted();
 
             // Log first attempt before Polly execution
-            var config = ResiliencePolicyFactory.ValidateAndNormalize(_config.Resilience.Connection);
-            LogConnectionRetryAttempt(
-                _config.Gateway ?? "USB",
-                _config.Port,
+            var config = ResiliencePolicyFactory.ValidateAndNormalize(this._config.Resilience.Connection);
+            this.LogConnectionRetryAttempt(
+                this._config.Gateway ?? "USB",
+                this._config.Port,
                 1,
                 config.MaxRetries + 1,
                 "Initial attempt"
@@ -113,23 +111,23 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
 
             try
             {
-                var result = await _connectionPolicy.ExecuteAsync(
+                var result = await this._connectionPolicy.ExecuteAsync(
                     async (ct) =>
                     {
-                        return await ConnectToKnxBusAsync(ct);
+                        return await this.ConnectToKnxBusAsync(ct);
                     },
                     cancellationToken
                 );
 
                 if (result.IsSuccess)
                 {
-                    _isInitialized = true;
-                    LogInitializationCompleted();
+                    this._isInitialized = true;
+                    this.LogInitializationCompleted();
                 }
                 else
                 {
-                    LogInitializationFailed(result.ErrorMessage ?? "Unknown error");
-                    StartReconnectTimer();
+                    this.LogInitializationFailed(result.ErrorMessage ?? "Unknown error");
+                    this.StartReconnectTimer();
                 }
 
                 return result;
@@ -137,54 +135,54 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             catch (Exception ex)
             {
                 var errorMessage = $"KNX connection failed: {ex.Message}";
-                LogInitializationFailed(errorMessage);
-                StartReconnectTimer();
+                this.LogInitializationFailed(errorMessage);
+                this.StartReconnectTimer();
                 return Result.Failure(errorMessage);
             }
         }
         finally
         {
-            _connectionSemaphore.Release();
+            this._connectionSemaphore.Release();
         }
     }
 
     /// <inheritdoc />
     public async Task<Result> StopAsync(CancellationToken cancellationToken = default)
     {
-        await _connectionSemaphore.WaitAsync(cancellationToken);
+        await this._connectionSemaphore.WaitAsync(cancellationToken);
         try
         {
-            LogStoppingService();
+            this.LogStoppingService();
 
-            StopReconnectTimer();
+            this.StopReconnectTimer();
 
-            if (_knxBus != null)
+            if (this._knxBus != null)
             {
                 try
                 {
-                    if (_knxBus.ConnectionState == BusConnectionState.Connected)
+                    if (this._knxBus.ConnectionState == BusConnectionState.Connected)
                     {
-                        await _knxBus.DisposeAsync();
+                        await this._knxBus.DisposeAsync();
                     }
                 }
                 catch (Exception ex)
                 {
-                    LogDisconnectionError(ex);
+                    this.LogDisconnectionError(ex);
                 }
                 finally
                 {
-                    _knxBus.Dispose();
-                    _knxBus = null;
+                    this._knxBus.Dispose();
+                    this._knxBus = null;
                 }
             }
 
-            _isInitialized = false;
-            LogServiceStopped();
+            this._isInitialized = false;
+            this.LogServiceStopped();
             return Result.Success();
         }
         finally
         {
-            _connectionSemaphore.Release();
+            this._connectionSemaphore.Release();
         }
     }
 
@@ -196,26 +194,26 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
         CancellationToken cancellationToken = default
     )
     {
-        if (!IsConnected)
+        if (!this.IsConnected)
         {
-            LogNotConnected("SendStatusAsync");
+            this.LogNotConnected("SendStatusAsync");
             return Result.Failure("KNX service is not connected");
         }
 
         try
         {
-            var groupAddress = GetStatusGroupAddress(statusId, targetId);
+            var groupAddress = this.GetStatusGroupAddress(statusId, targetId);
             if (string.IsNullOrEmpty(groupAddress))
             {
-                LogGroupAddressNotFound(statusId, targetId);
+                this.LogGroupAddressNotFound(statusId, targetId);
                 return Result.Failure($"No KNX group address configured for status {statusId} on target {targetId}");
             }
 
-            return await WriteToKnxAsync(groupAddress, value, cancellationToken);
+            return await this.WriteToKnxAsync(groupAddress, value, cancellationToken);
         }
         catch (Exception ex)
         {
-            LogSendStatusError(statusId, targetId, ex);
+            this.LogSendStatusError(statusId, targetId, ex);
             return Result.Failure($"Failed to send status: {ex.Message}");
         }
     }
@@ -227,13 +225,13 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
         CancellationToken cancellationToken = default
     )
     {
-        if (!IsConnected)
+        if (!this.IsConnected)
         {
-            LogNotConnected("WriteGroupValueAsync");
+            this.LogNotConnected("WriteGroupValueAsync");
             return Result.Failure("KNX service is not connected");
         }
 
-        return await WriteToKnxAsync(groupAddress, value, cancellationToken);
+        return await this.WriteToKnxAsync(groupAddress, value, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -242,30 +240,30 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
         CancellationToken cancellationToken = default
     )
     {
-        if (!IsConnected)
+        if (!this.IsConnected)
         {
-            LogNotConnected("ReadGroupValueAsync");
+            this.LogNotConnected("ReadGroupValueAsync");
             return Result<object>.Failure("KNX service is not connected");
         }
 
         try
         {
-            var result = await _operationPolicy.ExecuteAsync(
+            var result = await this._operationPolicy.ExecuteAsync(
                 async (ct) =>
                 {
                     var ga = new GroupAddress(groupAddress);
-                    var value = await _knxBus!.ReadGroupValueAsync(ga);
+                    var value = await this._knxBus!.ReadGroupValueAsync(ga);
                     return value;
                 },
                 cancellationToken
             );
 
-            LogGroupValueRead(groupAddress, result);
+            this.LogGroupValueRead(groupAddress, result);
             return Result<object>.Success(result);
         }
         catch (Exception ex)
         {
-            LogReadGroupValueError(groupAddress, ex);
+            this.LogReadGroupValueError(groupAddress, ex);
             return Result<object>.Failure($"Failed to read group value: {ex.Message}");
         }
     }
@@ -278,9 +276,9 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
         CancellationToken cancellationToken = default
     )
     {
-        if (!IsConnected)
+        if (!this.IsConnected)
         {
-            LogNotConnected("PublishClientStatusAsync");
+            this.LogNotConnected("PublishClientStatusAsync");
             return Result.Failure("KNX service is not connected");
         }
 
@@ -290,24 +288,24 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             var (statusId, knxValue) = MapClientEventToKnxStatus(eventType, payload);
             if (statusId == null)
             {
-                LogDebug($"No KNX mapping for client event type {eventType}");
+                this.LogDebug($"No KNX mapping for client event type {eventType}");
                 return Result.Success();
             }
 
             // For KNX, we need to convert client ID to integer if possible
             if (int.TryParse(clientId, out var clientIdInt))
             {
-                return await SendStatusAsync(statusId, clientIdInt, knxValue, cancellationToken);
+                return await this.SendStatusAsync(statusId, clientIdInt, knxValue, cancellationToken);
             }
             else
             {
-                LogInvalidTargetId(statusId, clientId);
+                this.LogInvalidTargetId(statusId, clientId);
                 return Result.Failure($"Invalid client ID for KNX: {clientId}");
             }
         }
         catch (Exception ex)
         {
-            LogCommandExecutionError($"PublishClientStatus-{eventType}", ex);
+            this.LogCommandExecutionError($"PublishClientStatus-{eventType}", ex);
             return Result.Failure($"Failed to publish client status: {ex.Message}");
         }
     }
@@ -320,9 +318,9 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
         CancellationToken cancellationToken = default
     )
     {
-        if (!IsConnected)
+        if (!this.IsConnected)
         {
-            LogNotConnected("PublishZoneStatusAsync");
+            this.LogNotConnected("PublishZoneStatusAsync");
             return Result.Failure("KNX service is not connected");
         }
 
@@ -332,15 +330,15 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             var (statusId, knxValue) = MapZoneEventToKnxStatus(eventType, payload);
             if (statusId == null)
             {
-                LogDebug($"No KNX mapping for zone event type {eventType}");
+                this.LogDebug($"No KNX mapping for zone event type {eventType}");
                 return Result.Success();
             }
 
-            return await SendStatusAsync(statusId, zoneId, knxValue, cancellationToken);
+            return await this.SendStatusAsync(statusId, zoneId, knxValue, cancellationToken);
         }
         catch (Exception ex)
         {
-            LogCommandExecutionError($"PublishZoneStatus-{eventType}", ex);
+            this.LogCommandExecutionError($"PublishZoneStatus-{eventType}", ex);
             return Result.Failure($"Failed to publish zone status: {ex.Message}");
         }
     }
@@ -348,7 +346,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
     /// <inheritdoc />
     public async Task Handle(StatusChangedNotification notification, CancellationToken cancellationToken)
     {
-        if (!IsConnected || !_config.Enabled)
+        if (!this.IsConnected || !this._config.Enabled)
         {
             return;
         }
@@ -357,22 +355,22 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
         {
             if (int.TryParse(notification.TargetId, out var targetId))
             {
-                await SendStatusAsync(notification.StatusType, targetId, notification.Value, cancellationToken);
+                await this.SendStatusAsync(notification.StatusType, targetId, notification.Value, cancellationToken);
             }
             else
             {
-                LogInvalidTargetId(notification.StatusType, notification.TargetId);
+                this.LogInvalidTargetId(notification.StatusType, notification.TargetId);
             }
         }
         catch (Exception ex)
         {
             if (int.TryParse(notification.TargetId, out var targetIdInt))
             {
-                LogStatusNotificationError(notification.StatusType, targetIdInt, ex);
+                this.LogStatusNotificationError(notification.StatusType, targetIdInt, ex);
             }
             else
             {
-                LogStatusNotificationError(notification.StatusType, -1, ex);
+                this.LogStatusNotificationError(notification.StatusType, -1, ex);
             }
         }
     }
@@ -382,27 +380,27 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
         try
         {
             // Create connector parameters based on configuration
-            var connectorParams = CreateConnectorParameters();
+            var connectorParams = this.CreateConnectorParameters();
             if (connectorParams == null)
             {
                 throw new InvalidOperationException("Failed to create KNX connector parameters");
             }
 
             // Create and configure KNX bus
-            _knxBus = new KnxBus(connectorParams);
+            this._knxBus = new KnxBus(connectorParams);
 
             // Subscribe to events before connecting
-            _knxBus.GroupMessageReceived += OnGroupMessageReceived;
+            this._knxBus.GroupMessageReceived += this.OnGroupMessageReceived;
 
             // Connect to KNX bus - this should throw an exception if it fails
-            await _knxBus.ConnectAsync();
+            await this._knxBus.ConnectAsync();
 
-            if (_knxBus.ConnectionState != BusConnectionState.Connected)
+            if (this._knxBus.ConnectionState != BusConnectionState.Connected)
             {
-                throw new InvalidOperationException($"KNX connection failed - state: {_knxBus.ConnectionState}");
+                throw new InvalidOperationException($"KNX connection failed - state: {this._knxBus.ConnectionState}");
             }
 
-            LogConnectionEstablished(_config.Gateway ?? "USB", _config.Port);
+            this.LogConnectionEstablished(this._config.Gateway ?? "USB", this._config.Port);
             return Result.Success();
         }
         catch (Exception ex)
@@ -410,11 +408,11 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             // For KNX connection errors, only log the message without stack trace to reduce noise
             if (ex is Knx.Falcon.KnxIpConnectorException)
             {
-                LogConnectionErrorMessage(ex.Message);
+                this.LogConnectionErrorMessage(ex.Message);
             }
             else
             {
-                LogConnectionError(ex);
+                this.LogConnectionError(ex);
             }
 
             // Re-throw the exception so Polly can handle retries
@@ -426,47 +424,47 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
     {
         try
         {
-            return _config.ConnectionType switch
+            return this._config.ConnectionType switch
             {
-                KnxConnectionType.Tunnel => CreateTunnelingConnectorParameters(),
-                KnxConnectionType.Router => CreateRoutingConnectorParameters(),
-                KnxConnectionType.Usb => CreateUsbConnectorParameters(),
+                KnxConnectionType.Tunnel => this.CreateTunnelingConnectorParameters(),
+                KnxConnectionType.Router => this.CreateRoutingConnectorParameters(),
+                KnxConnectionType.Usb => this.CreateUsbConnectorParameters(),
                 _ => throw new ArgumentOutOfRangeException(
-                    nameof(_config.ConnectionType),
-                    _config.ConnectionType,
+                    nameof(this._config.ConnectionType),
+                    this._config.ConnectionType,
                     "Unsupported KNX connection type"
                 ),
             };
         }
         catch (Exception ex)
         {
-            LogConnectorParametersError(ex);
+            this.LogConnectorParametersError(ex);
             return null;
         }
     }
 
     private ConnectorParameters? CreateTunnelingConnectorParameters()
     {
-        if (string.IsNullOrEmpty(_config.Gateway))
+        if (string.IsNullOrEmpty(this._config.Gateway))
         {
-            LogGatewayRequired("IP Tunneling");
+            this.LogGatewayRequired("IP Tunneling");
             return null;
         }
 
-        LogUsingIpTunneling(_config.Gateway, _config.Port);
-        return new IpTunnelingConnectorParameters(_config.Gateway, _config.Port);
+        this.LogUsingIpTunneling(this._config.Gateway, this._config.Port);
+        return new IpTunnelingConnectorParameters(this._config.Gateway, this._config.Port);
     }
 
     private ConnectorParameters? CreateRoutingConnectorParameters()
     {
-        var multicastAddress = _config.MulticastAddress;
+        var multicastAddress = this._config.MulticastAddress;
 
         try
         {
             // Try to parse as IP address first
             if (System.Net.IPAddress.TryParse(multicastAddress, out var ipAddress))
             {
-                LogUsingIpRouting(multicastAddress);
+                this.LogUsingIpRouting(multicastAddress);
                 return new IpRoutingConnectorParameters(ipAddress);
             }
 
@@ -478,16 +476,16 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
 
             if (resolvedIp == null)
             {
-                LogMulticastAddressResolutionFailed(multicastAddress);
+                this.LogMulticastAddressResolutionFailed(multicastAddress);
                 return null;
             }
 
-            LogUsingIpRouting($"{multicastAddress} ({resolvedIp})");
+            this.LogUsingIpRouting($"{multicastAddress} ({resolvedIp})");
             return new IpRoutingConnectorParameters(resolvedIp);
         }
         catch (Exception ex)
         {
-            LogMulticastAddressError(multicastAddress, ex.Message);
+            this.LogMulticastAddressError(multicastAddress, ex.Message);
             return null;
         }
     }
@@ -497,31 +495,31 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
         var usbDevices = KnxBus.GetAttachedUsbDevices().ToArray();
         if (usbDevices.Length == 0)
         {
-            LogNoUsbDevicesFound();
+            this.LogNoUsbDevicesFound();
             return null;
         }
 
         // If a specific USB device is configured, try to find it
-        if (!string.IsNullOrEmpty(_config.UsbDevice))
+        if (!string.IsNullOrEmpty(this._config.UsbDevice))
         {
             var specificDevice = usbDevices.FirstOrDefault(d =>
-                d.ToString().Contains(_config.UsbDevice, StringComparison.OrdinalIgnoreCase)
+                d.ToString().Contains(this._config.UsbDevice, StringComparison.OrdinalIgnoreCase)
             );
 
             if (specificDevice != null)
             {
-                LogUsingSpecificUsbDevice(_config.UsbDevice, specificDevice.ToString());
+                this.LogUsingSpecificUsbDevice(this._config.UsbDevice, specificDevice.ToString());
                 return UsbConnectorParameters.FromDiscovery(specificDevice);
             }
             else
             {
-                LogSpecificUsbDeviceNotFound(_config.UsbDevice);
+                this.LogSpecificUsbDeviceNotFound(this._config.UsbDevice);
                 // Fall back to first available device
             }
         }
 
         // Use first available USB device
-        LogUsingUsbDevice(usbDevices[0].ToString());
+        this.LogUsingUsbDevice(usbDevices[0].ToString());
         return UsbConnectorParameters.FromDiscovery(usbDevices[0]);
     }
 
@@ -532,29 +530,29 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             var address = e.DestinationAddress.ToString();
             var value = e.Value;
 
-            LogGroupValueReceived(address, value);
+            this.LogGroupValueReceived(address, value);
 
             // Map group address to command
-            var command = MapGroupAddressToCommand(address, value);
+            var command = this.MapGroupAddressToCommand(address, value);
             if (command != null)
             {
                 _ = Task.Run(async () =>
                 {
                     try
                     {
-                        await ExecuteCommandAsync(command, CancellationToken.None);
-                        LogCommandMapped(address, command.GetType().Name);
+                        await this.ExecuteCommandAsync(command, CancellationToken.None);
+                        this.LogCommandMapped(address, command.GetType().Name);
                     }
                     catch (Exception ex)
                     {
-                        LogCommandExecutionError(command.GetType().Name, ex);
+                        this.LogCommandExecutionError(command.GetType().Name, ex);
                     }
                 });
             }
         }
         catch (Exception ex)
         {
-            LogGroupValueProcessingError("unknown", ex);
+            this.LogGroupValueProcessingError("unknown", ex);
         }
     }
 
@@ -562,40 +560,41 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
     {
         try
         {
-            using var scope = _serviceProvider.CreateScope();
+            using var scope = this._serviceProvider.CreateScope();
 
             return command switch
             {
                 SetZoneVolumeCommand cmd =>
-                    await GetHandler<Server.Features.Zones.Handlers.SetZoneVolumeCommandHandler>(scope)
+                    await this.GetHandler<Server.Features.Zones.Handlers.SetZoneVolumeCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
-                SetZoneMuteCommand cmd => await GetHandler<Server.Features.Zones.Handlers.SetZoneMuteCommandHandler>(
+                SetZoneMuteCommand cmd =>
+                    await this.GetHandler<Server.Features.Zones.Handlers.SetZoneMuteCommandHandler>(scope)
+                        .Handle(cmd, cancellationToken),
+                PlayCommand cmd => await this.GetHandler<Server.Features.Zones.Handlers.PlayCommandHandler>(scope)
+                    .Handle(cmd, cancellationToken),
+                PauseCommand cmd => await this.GetHandler<Server.Features.Zones.Handlers.PauseCommandHandler>(scope)
+                    .Handle(cmd, cancellationToken),
+                StopCommand cmd => await this.GetHandler<Server.Features.Zones.Handlers.StopCommandHandler>(scope)
+                    .Handle(cmd, cancellationToken),
+                NextTrackCommand cmd => await this.GetHandler<Server.Features.Zones.Handlers.NextTrackCommandHandler>(
                         scope
                     )
                     .Handle(cmd, cancellationToken),
-                PlayCommand cmd => await GetHandler<Server.Features.Zones.Handlers.PlayCommandHandler>(scope)
-                    .Handle(cmd, cancellationToken),
-                PauseCommand cmd => await GetHandler<Server.Features.Zones.Handlers.PauseCommandHandler>(scope)
-                    .Handle(cmd, cancellationToken),
-                StopCommand cmd => await GetHandler<Server.Features.Zones.Handlers.StopCommandHandler>(scope)
-                    .Handle(cmd, cancellationToken),
-                NextTrackCommand cmd => await GetHandler<Server.Features.Zones.Handlers.NextTrackCommandHandler>(scope)
-                    .Handle(cmd, cancellationToken),
                 PreviousTrackCommand cmd =>
-                    await GetHandler<Server.Features.Zones.Handlers.PreviousTrackCommandHandler>(scope)
+                    await this.GetHandler<Server.Features.Zones.Handlers.PreviousTrackCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
                 SetClientVolumeCommand cmd =>
-                    await GetHandler<Server.Features.Clients.Handlers.SetClientVolumeCommandHandler>(scope)
+                    await this.GetHandler<Server.Features.Clients.Handlers.SetClientVolumeCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
                 SetClientMuteCommand cmd =>
-                    await GetHandler<Server.Features.Clients.Handlers.SetClientMuteCommandHandler>(scope)
+                    await this.GetHandler<Server.Features.Clients.Handlers.SetClientMuteCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
                 _ => Result.Failure($"Unknown command type: {command.GetType().Name}"),
             };
         }
         catch (Exception ex)
         {
-            LogCommandExecutionError(command.GetType().Name, ex);
+            this.LogCommandExecutionError(command.GetType().Name, ex);
             return Result.Failure($"Failed to execute command: {ex.Message}");
         }
     }
@@ -603,9 +602,9 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
     private object? MapGroupAddressToCommand(string groupAddress, object value)
     {
         // Check zones for matching group addresses
-        for (int i = 0; i < _zones.Count; i++)
+        for (int i = 0; i < this._zones.Count; i++)
         {
-            var zone = _zones[i];
+            var zone = this._zones[i];
             var zoneId = i + 1; // 1-based zone ID
 
             if (!zone.Knx.Enabled)
@@ -663,9 +662,9 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
         }
 
         // Check clients for matching group addresses
-        for (int i = 0; i < _clients.Count; i++)
+        for (int i = 0; i < this._clients.Count; i++)
         {
-            var client = _clients[i];
+            var client = this._clients[i];
             var clientId = i + 1; // 1-based client ID
 
             if (!client.Knx.Enabled)
@@ -702,9 +701,9 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
     private string? GetStatusGroupAddress(string statusId, int targetId)
     {
         // Check if it's a zone status (1-based ID)
-        if (targetId > 0 && targetId <= _zones.Count)
+        if (targetId > 0 && targetId <= this._zones.Count)
         {
-            var zone = _zones[targetId - 1]; // Convert to 0-based index
+            var zone = this._zones[targetId - 1]; // Convert to 0-based index
             if (zone.Knx.Enabled)
             {
                 return statusId switch
@@ -718,9 +717,9 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
         }
 
         // Check if it's a client status (1-based ID)
-        if (targetId > 0 && targetId <= _clients.Count)
+        if (targetId > 0 && targetId <= this._clients.Count)
         {
-            var client = _clients[targetId - 1]; // Convert to 0-based index
+            var client = this._clients[targetId - 1]; // Convert to 0-based index
             if (client.Knx.Enabled)
             {
                 return statusId switch
@@ -740,7 +739,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
     {
         try
         {
-            var result = await _operationPolicy.ExecuteAsync(
+            var result = await this._operationPolicy.ExecuteAsync(
                 async (ct) =>
                 {
                     var ga = new GroupAddress(groupAddress);
@@ -754,25 +753,25 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
                         _ => throw new ArgumentException($"Unsupported value type: {value?.GetType()}"),
                     };
 
-                    await _knxBus!.WriteGroupValueAsync(ga, groupValue);
+                    await this._knxBus!.WriteGroupValueAsync(ga, groupValue);
                     return Result.Success();
                 },
                 cancellationToken
             );
 
-            LogGroupValueWritten(groupAddress, value);
+            this.LogGroupValueWritten(groupAddress, value);
             return result;
         }
         catch (Exception ex)
         {
-            LogWriteGroupValueError(groupAddress, value, ex);
+            this.LogWriteGroupValueError(groupAddress, value, ex);
             return Result.Failure($"Failed to write group value: {ex.Message}");
         }
     }
 
     private ResiliencePipeline CreateConnectionPolicy()
     {
-        var validatedConfig = ResiliencePolicyFactory.ValidateAndNormalize(_config.Resilience.Connection);
+        var validatedConfig = ResiliencePolicyFactory.ValidateAndNormalize(this._config.Resilience.Connection);
 
         var builder = new ResiliencePipelineBuilder();
 
@@ -795,9 +794,9 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
                     ShouldHandle = new PredicateBuilder().Handle<Exception>(),
                     OnRetry = args =>
                     {
-                        LogConnectionRetryAttempt(
-                            _config.Gateway ?? "USB",
-                            _config.Port,
+                        this.LogConnectionRetryAttempt(
+                            this._config.Gateway ?? "USB",
+                            this._config.Port,
                             args.AttemptNumber + 1,
                             validatedConfig.MaxRetries + 1,
                             args.Outcome.Exception?.Message ?? "Unknown error"
@@ -819,54 +818,54 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
 
     private ResiliencePipeline CreateOperationPolicy()
     {
-        var validatedConfig = ResiliencePolicyFactory.ValidateAndNormalize(_config.Resilience.Operation);
+        var validatedConfig = ResiliencePolicyFactory.ValidateAndNormalize(this._config.Resilience.Operation);
         return ResiliencePolicyFactory.CreatePipeline(validatedConfig, "KNX-Operation");
     }
 
     private void StartReconnectTimer()
     {
-        if (_config.AutoReconnect)
+        if (this._config.AutoReconnect)
         {
             var interval = TimeSpan.FromSeconds(30); // Reconnect every 30 seconds
-            _reconnectTimer.Change(interval, interval);
-            LogReconnectTimerStarted();
+            this._reconnectTimer.Change(interval, interval);
+            this.LogReconnectTimerStarted();
         }
     }
 
     private void StopReconnectTimer()
     {
-        _reconnectTimer.Change(Timeout.Infinite, Timeout.Infinite);
+        this._reconnectTimer.Change(Timeout.Infinite, Timeout.Infinite);
     }
 
     private async void OnReconnectTimer(object? state)
     {
-        if (!_isInitialized || IsConnected)
+        if (!this._isInitialized || this.IsConnected)
         {
             return;
         }
 
-        LogAttemptingReconnection();
-        var result = await InitializeAsync();
+        this.LogAttemptingReconnection();
+        var result = await this.InitializeAsync();
         if (result.IsSuccess)
         {
-            StopReconnectTimer();
+            this.StopReconnectTimer();
         }
     }
 
     /// <inheritdoc />
     public async ValueTask DisposeAsync()
     {
-        if (_disposed)
+        if (this._disposed)
         {
             return;
         }
 
-        await StopAsync();
+        await this.StopAsync();
 
-        _reconnectTimer.Dispose();
-        _connectionSemaphore.Dispose();
+        this._reconnectTimer.Dispose();
+        this._connectionSemaphore.Dispose();
 
-        _disposed = true;
+        this._disposed = true;
         GC.SuppressFinalize(this);
     }
 
@@ -957,7 +956,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
     /// </summary>
     private void LogDebug(string message)
     {
-        _logger.LogDebug(message);
+        this._logger.LogDebug(message);
     }
 
     #region Logging

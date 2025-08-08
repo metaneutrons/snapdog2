@@ -1,7 +1,6 @@
 namespace SnapDog2.Tests.Unit.Infrastructure.Services;
 
 using FluentAssertions;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -15,7 +14,7 @@ public class KnxServiceTests
 
     public KnxServiceTests()
     {
-        _mockLogger = new Mock<ILogger<KnxService>>();
+        this._mockLogger = new Mock<ILogger<KnxService>>();
     }
 
     [Fact]
@@ -27,7 +26,7 @@ public class KnxServiceTests
 
         // Act
         var mockServiceProvider = new Mock<IServiceProvider>();
-        var service = new KnxService(options, mockServiceProvider.Object, _mockLogger.Object);
+        var service = new KnxService(options, mockServiceProvider.Object, this._mockLogger.Object);
 
         // Assert
         service.Should().NotBeNull();
@@ -42,7 +41,7 @@ public class KnxServiceTests
         var config = CreateTestConfiguration(enabled: false);
         var options = Options.Create(config);
         var mockServiceProvider = new Mock<IServiceProvider>();
-        var service = new KnxService(options, mockServiceProvider.Object, _mockLogger.Object);
+        var service = new KnxService(options, mockServiceProvider.Object, this._mockLogger.Object);
 
         // Act
         var result = await service.InitializeAsync();
@@ -59,7 +58,7 @@ public class KnxServiceTests
         var config = CreateTestConfiguration(enabled: true);
         var options = Options.Create(config);
         var mockServiceProvider = new Mock<IServiceProvider>();
-        var service = new KnxService(options, mockServiceProvider.Object, _mockLogger.Object);
+        var service = new KnxService(options, mockServiceProvider.Object, this._mockLogger.Object);
 
         // Act
         var result = await service.SendStatusAsync("VOLUME", 1, 50);
@@ -76,7 +75,7 @@ public class KnxServiceTests
         var config = CreateTestConfiguration(enabled: true);
         var options = Options.Create(config);
         var mockServiceProvider = new Mock<IServiceProvider>();
-        var service = new KnxService(options, mockServiceProvider.Object, _mockLogger.Object);
+        var service = new KnxService(options, mockServiceProvider.Object, this._mockLogger.Object);
 
         // Act
         var result = await service.WriteGroupValueAsync("1/0/1", true);
@@ -93,7 +92,7 @@ public class KnxServiceTests
         var config = CreateTestConfiguration(enabled: true);
         var options = Options.Create(config);
         var mockServiceProvider = new Mock<IServiceProvider>();
-        var service = new KnxService(options, mockServiceProvider.Object, _mockLogger.Object);
+        var service = new KnxService(options, mockServiceProvider.Object, this._mockLogger.Object);
 
         // Act
         var result = await service.ReadGroupValueAsync("1/0/1");
@@ -110,7 +109,7 @@ public class KnxServiceTests
         var config = CreateTestConfiguration(enabled: true);
         var options = Options.Create(config);
         var mockServiceProvider = new Mock<IServiceProvider>();
-        var service = new KnxService(options, mockServiceProvider.Object, _mockLogger.Object);
+        var service = new KnxService(options, mockServiceProvider.Object, this._mockLogger.Object);
 
         // Act
         var result = await service.StopAsync();
@@ -127,7 +126,7 @@ public class KnxServiceTests
         var config = CreateTestConfiguration(enabled: true);
         var options = Options.Create(config);
         var mockServiceProvider = new Mock<IServiceProvider>();
-        var service = new KnxService(options, mockServiceProvider.Object, _mockLogger.Object);
+        var service = new KnxService(options, mockServiceProvider.Object, this._mockLogger.Object);
 
         // Act & Assert
         await service.Invoking(s => s.DisposeAsync().AsTask()).Should().NotThrowAsync();

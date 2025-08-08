@@ -6,7 +6,6 @@ using Serilog;
 using Serilog.Events;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Extensions;
-using SnapDog2.Helpers;
 using SnapDog2.Hosting;
 using SnapDog2.Middleware;
 using SnapDog2.Worker.DI;

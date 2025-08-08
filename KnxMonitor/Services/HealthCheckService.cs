@@ -20,8 +20,8 @@ public class HealthCheckService : IDisposable
 
     public HealthCheckService(ILogger<HealthCheckService> logger, IKnxMonitorService knxMonitorService)
     {
-        _logger = logger;
-        _knxMonitorService = knxMonitorService;
+        this._logger = logger;
+        this._knxMonitorService = knxMonitorService;
     }
 
     /// <summary>
@@ -31,26 +31,29 @@ public class HealthCheckService : IDisposable
     /// <param name="cancellationToken">Cancellation token.</param>
     public Task StartAsync(int port = 8080, CancellationToken cancellationToken = default)
     {
-        if (_httpListener != null)
+        if (this._httpListener != null)
         {
             return Task.CompletedTask; // Already started
         }
 
         try
         {
-            _httpListener = new HttpListener();
-            _httpListener.Prefixes.Add($"http://+:{port}/");
-            _httpListener.Start();
+            this._httpListener = new HttpListener();
+            this._httpListener.Prefixes.Add($"http://+:{port}/");
+            this._httpListener.Start();
 
-            _cancellationTokenSource = new CancellationTokenSource();
-            _listenerTask = Task.Run(() => HandleRequestsAsync(_cancellationTokenSource.Token), cancellationToken);
+            this._cancellationTokenSource = new CancellationTokenSource();
+            this._listenerTask = Task.Run(
+                () => this.HandleRequestsAsync(this._cancellationTokenSource.Token),
+                cancellationToken
+            );
 
-            _logger.LogInformation("Health check service started on port {Port}", port);
+            this._logger.LogInformation("Health check service started on port {Port}", port);
             return Task.CompletedTask;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to start health check service on port {Port}", port);
+            this._logger.LogError(ex, "Failed to start health check service on port {Port}", port);
             throw;
         }
     }
@@ -60,45 +63,45 @@ public class HealthCheckService : IDisposable
     /// </summary>
     public async Task StopAsync()
     {
-        if (_httpListener == null)
+        if (this._httpListener == null)
         {
             return;
         }
 
         try
         {
-            _cancellationTokenSource?.Cancel();
-            _httpListener.Stop();
-            _httpListener.Close();
+            this._cancellationTokenSource?.Cancel();
+            this._httpListener.Stop();
+            this._httpListener.Close();
 
-            if (_listenerTask != null)
+            if (this._listenerTask != null)
             {
-                await _listenerTask;
+                await this._listenerTask;
             }
 
-            _logger.LogInformation("Health check service stopped");
+            this._logger.LogInformation("Health check service stopped");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error stopping health check service");
+            this._logger.LogError(ex, "Error stopping health check service");
         }
         finally
         {
-            _httpListener = null;
-            _listenerTask = null;
-            _cancellationTokenSource?.Dispose();
-            _cancellationTokenSource = null;
+            this._httpListener = null;
+            this._listenerTask = null;
+            this._cancellationTokenSource?.Dispose();
+            this._cancellationTokenSource = null;
         }
     }
 
     private async Task HandleRequestsAsync(CancellationToken cancellationToken)
     {
-        while (!cancellationToken.IsCancellationRequested && _httpListener != null)
+        while (!cancellationToken.IsCancellationRequested && this._httpListener != null)
         {
             try
             {
-                var context = await _httpListener.GetContextAsync();
-                _ = Task.Run(() => ProcessRequestAsync(context), cancellationToken);
+                var context = await this._httpListener.GetContextAsync();
+                _ = Task.Run(() => this.ProcessRequestAsync(context), cancellationToken);
             }
             catch (ObjectDisposedException)
             {
@@ -112,7 +115,7 @@ public class HealthCheckService : IDisposable
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error handling health check request");
+                this._logger.LogError(ex, "Error handling health check request");
             }
         }
     }
@@ -126,11 +129,11 @@ public class HealthCheckService : IDisposable
 
             if (request.Url?.AbsolutePath == "/health")
             {
-                await HandleHealthCheckAsync(response);
+                await this.HandleHealthCheckAsync(response);
             }
             else if (request.Url?.AbsolutePath == "/ready")
             {
-                await HandleReadinessCheckAsync(response);
+                await this.HandleReadinessCheckAsync(response);
             }
             else
             {
@@ -140,7 +143,7 @@ public class HealthCheckService : IDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error processing health check request");
+            this._logger.LogError(ex, "Error processing health check request");
         }
     }
 
@@ -153,9 +156,9 @@ public class HealthCheckService : IDisposable
             uptime = DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime(),
             knx = new
             {
-                connected = _knxMonitorService.IsConnected,
-                connectionStatus = _knxMonitorService.ConnectionStatus,
-                messagesReceived = _knxMonitorService.MessageCount,
+                connected = this._knxMonitorService.IsConnected,
+                connectionStatus = this._knxMonitorService.ConnectionStatus,
+                messagesReceived = this._knxMonitorService.MessageCount,
             },
         };
 
@@ -166,7 +169,7 @@ public class HealthCheckService : IDisposable
 
     private async Task HandleReadinessCheckAsync(HttpListenerResponse response)
     {
-        var isReady = _knxMonitorService.IsConnected;
+        var isReady = this._knxMonitorService.IsConnected;
         var statusCode = isReady ? 200 : 503;
 
         var readinessStatus = new
@@ -175,8 +178,8 @@ public class HealthCheckService : IDisposable
             timestamp = DateTime.UtcNow,
             knx = new
             {
-                connected = _knxMonitorService.IsConnected,
-                connectionStatus = _knxMonitorService.ConnectionStatus,
+                connected = this._knxMonitorService.IsConnected,
+                connectionStatus = this._knxMonitorService.ConnectionStatus,
             },
         };
 
@@ -201,12 +204,12 @@ public class HealthCheckService : IDisposable
 
     public void Dispose()
     {
-        if (_disposed)
+        if (this._disposed)
         {
             return;
         }
 
-        StopAsync().GetAwaiter().GetResult();
-        _disposed = true;
+        this.StopAsync().GetAwaiter().GetResult();
+        this._disposed = true;
     }
 }

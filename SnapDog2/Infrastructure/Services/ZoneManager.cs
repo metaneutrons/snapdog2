@@ -2,7 +2,6 @@ namespace SnapDog2.Infrastructure.Services;
 
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Abstractions;
-using SnapDog2.Core.Enums;
 using SnapDog2.Core.Models;
 
 /// <summary>

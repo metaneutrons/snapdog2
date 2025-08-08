@@ -1,6 +1,5 @@
 namespace SnapDog2.Tests.Unit.Services;
 
-using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;

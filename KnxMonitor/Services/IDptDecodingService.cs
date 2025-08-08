@@ -1,5 +1,3 @@
-using Knx.Falcon;
-
 namespace KnxMonitor.Services;
 
 /// <summary>

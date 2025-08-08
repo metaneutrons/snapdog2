@@ -224,7 +224,7 @@ public partial class IntegrationServicesHostedService : BackgroundService
                     );
 
                     // Disable failed services to prevent further issues
-                    await DisableFailedServicesAsync(failedServices.Select(s => s.Name));
+                    await this.DisableFailedServicesAsync(failedServices.Select(s => s.Name));
 
                     // Terminate application - system cannot function without critical services
                     Environment.Exit(1);
@@ -238,7 +238,7 @@ public partial class IntegrationServicesHostedService : BackgroundService
                     );
 
                     // Disable failed services to prevent resource waste and error noise
-                    await DisableFailedServicesAsync(nonCriticalFailures.Select(s => s.Name));
+                    await this.DisableFailedServicesAsync(nonCriticalFailures.Select(s => s.Name));
                 }
                 else
                 {

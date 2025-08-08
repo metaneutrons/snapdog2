@@ -1,6 +1,5 @@
 namespace SnapDog2.Server.Features.Subsonic.Handlers;
 
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Cortex.Mediator.Notifications;
@@ -19,12 +18,12 @@ public partial class SubsonicConnectionEstablishedNotificationHandler
         ILogger<SubsonicConnectionEstablishedNotificationHandler> logger
     )
     {
-        _logger = logger;
+        this._logger = logger;
     }
 
     public Task Handle(SubsonicConnectionEstablishedNotification notification, CancellationToken cancellationToken)
     {
-        LogSubsonicConnectionEstablished(_logger, notification.ServerUrl, notification.Username);
+        LogSubsonicConnectionEstablished(this._logger, notification.ServerUrl, notification.Username);
         return Task.CompletedTask;
     }
 
@@ -42,12 +41,12 @@ public partial class SubsonicConnectionLostNotificationHandler
 
     public SubsonicConnectionLostNotificationHandler(ILogger<SubsonicConnectionLostNotificationHandler> logger)
     {
-        _logger = logger;
+        this._logger = logger;
     }
 
     public Task Handle(SubsonicConnectionLostNotification notification, CancellationToken cancellationToken)
     {
-        LogSubsonicConnectionLost(_logger, notification.ServerUrl, notification.Reason);
+        LogSubsonicConnectionLost(this._logger, notification.ServerUrl, notification.Reason);
         return Task.CompletedTask;
     }
 
@@ -65,12 +64,12 @@ public partial class SubsonicPlaylistsRetrievedNotificationHandler
 
     public SubsonicPlaylistsRetrievedNotificationHandler(ILogger<SubsonicPlaylistsRetrievedNotificationHandler> logger)
     {
-        _logger = logger;
+        this._logger = logger;
     }
 
     public Task Handle(SubsonicPlaylistsRetrievedNotification notification, CancellationToken cancellationToken)
     {
-        LogPlaylistsRetrieved(_logger, notification.PlaylistCount, notification.RetrievalTime.TotalMilliseconds);
+        LogPlaylistsRetrieved(this._logger, notification.PlaylistCount, notification.RetrievalTime.TotalMilliseconds);
 
         // Future: Could implement caching logic here
         // Future: Could update metrics/analytics here
@@ -92,12 +91,12 @@ public partial class SubsonicPlaylistAccessedNotificationHandler
 
     public SubsonicPlaylistAccessedNotificationHandler(ILogger<SubsonicPlaylistAccessedNotificationHandler> logger)
     {
-        _logger = logger;
+        this._logger = logger;
     }
 
     public Task Handle(SubsonicPlaylistAccessedNotification notification, CancellationToken cancellationToken)
     {
-        LogPlaylistAccessed(_logger, notification.PlaylistName, notification.TrackCount);
+        LogPlaylistAccessed(this._logger, notification.PlaylistName, notification.TrackCount);
 
         // Future: Could implement usage analytics here
         // Future: Could implement playlist popularity tracking here
@@ -119,12 +118,12 @@ public partial class SubsonicStreamRequestedNotificationHandler
 
     public SubsonicStreamRequestedNotificationHandler(ILogger<SubsonicStreamRequestedNotificationHandler> logger)
     {
-        _logger = logger;
+        this._logger = logger;
     }
 
     public Task Handle(SubsonicStreamRequestedNotification notification, CancellationToken cancellationToken)
     {
-        LogStreamRequested(_logger, notification.TrackId);
+        LogStreamRequested(this._logger, notification.TrackId);
 
         // Future: Could implement stream analytics here
         // Future: Could implement track popularity tracking here
@@ -145,12 +144,12 @@ public partial class SubsonicServiceErrorNotificationHandler : INotificationHand
 
     public SubsonicServiceErrorNotificationHandler(ILogger<SubsonicServiceErrorNotificationHandler> logger)
     {
-        _logger = logger;
+        this._logger = logger;
     }
 
     public Task Handle(SubsonicServiceErrorNotification notification, CancellationToken cancellationToken)
     {
-        LogServiceError(_logger, notification.Operation, notification.ErrorMessage);
+        LogServiceError(this._logger, notification.Operation, notification.ErrorMessage);
 
         // Future: Could implement alerting logic here
         // Future: Could implement error rate monitoring here
@@ -174,12 +173,12 @@ public partial class SubsonicInitializationStartedNotificationHandler
         ILogger<SubsonicInitializationStartedNotificationHandler> logger
     )
     {
-        _logger = logger;
+        this._logger = logger;
     }
 
     public Task Handle(SubsonicInitializationStartedNotification notification, CancellationToken cancellationToken)
     {
-        LogInitializationStarted(_logger, notification.ServerUrl);
+        LogInitializationStarted(this._logger, notification.ServerUrl);
         return Task.CompletedTask;
     }
 
@@ -197,12 +196,12 @@ public partial class SubsonicServiceDisposedNotificationHandler
 
     public SubsonicServiceDisposedNotificationHandler(ILogger<SubsonicServiceDisposedNotificationHandler> logger)
     {
-        _logger = logger;
+        this._logger = logger;
     }
 
     public Task Handle(SubsonicServiceDisposedNotification notification, CancellationToken cancellationToken)
     {
-        LogServiceDisposed(_logger, notification.ServerUrl);
+        LogServiceDisposed(this._logger, notification.ServerUrl);
         return Task.CompletedTask;
     }
 

@@ -1,7 +1,6 @@
 namespace SnapDog2.Server.Notifications;
 
 using Cortex.Mediator.Notifications;
-using SnapDog2.Core.Models;
 
 /// <summary>
 /// Base class for all Subsonic-related notifications.

@@ -2,7 +2,6 @@ namespace SnapDog2.Server.Features.Zones.Queries;
 
 using System.Collections.Generic;
 using Cortex.Mediator.Queries;
-using SnapDog2.Core.Enums;
 using SnapDog2.Core.Models;
 
 /// <summary>

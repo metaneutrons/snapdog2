@@ -2,7 +2,6 @@ namespace SnapDog2.Server.Features.Shared.Notifications;
 
 using System;
 using Cortex.Mediator.Notifications;
-using SnapDog2.Core.Enums;
 using SnapDog2.Core.Models;
 
 /// <summary>

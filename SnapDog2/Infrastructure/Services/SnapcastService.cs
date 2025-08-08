@@ -10,8 +10,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Polly;
 using Polly.Retry;
-using Polly.Timeout;
-using SnapcastClient;
 using SnapcastClient.Models;
 using SnapcastClient.Params;
 using SnapDog2.Core.Abstractions;
@@ -57,21 +55,21 @@ public partial class SnapcastService
         this._snapcastClient = snapcastClient;
 
         // Configure resilience policies
-        this._connectionPolicy = CreateConnectionPolicy();
-        this._operationPolicy = CreateOperationPolicy();
+        this._connectionPolicy = this.CreateConnectionPolicy();
+        this._operationPolicy = this.CreateOperationPolicy();
 
-        LogServiceCreated(_config.Address, _config.JsonRpcPort, _config.AutoReconnect);
+        this.LogServiceCreated(this._config.Address, this._config.JsonRpcPort, this._config.AutoReconnect);
     }
 
     /// <inheritdoc />
-    public bool IsConnected => _initialized; // SnapcastClient doesn't expose IsConnected, use initialization status
+    public bool IsConnected => this._initialized; // SnapcastClient doesn't expose IsConnected, use initialization status
 
     /// <inheritdoc />
     public ServiceStatus Status =>
-        _initialized switch
+        this._initialized switch
         {
             false => ServiceStatus.Stopped,
-            true when IsConnected => ServiceStatus.Running,
+            true when this.IsConnected => ServiceStatus.Running,
             true => ServiceStatus.Error,
         };
 
@@ -149,7 +147,7 @@ public partial class SnapcastService
     {
         try
         {
-            using var scope = _serviceProvider.CreateScope();
+            using var scope = this._serviceProvider.CreateScope();
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
             await mediator.PublishAsync(notification);
         }
@@ -164,7 +162,7 @@ public partial class SnapcastService
     /// </summary>
     private ResiliencePipeline CreateConnectionPolicy()
     {
-        var validatedConfig = ResiliencePolicyFactory.ValidateAndNormalize(_config.Resilience.Connection);
+        var validatedConfig = ResiliencePolicyFactory.ValidateAndNormalize(this._config.Resilience.Connection);
 
         var builder = new ResiliencePipelineBuilder();
 
@@ -187,9 +185,9 @@ public partial class SnapcastService
                     ShouldHandle = new PredicateBuilder().Handle<Exception>(),
                     OnRetry = args =>
                     {
-                        LogConnectionRetryAttempt(
-                            _config.Address,
-                            _config.JsonRpcPort,
+                        this.LogConnectionRetryAttempt(
+                            this._config.Address,
+                            this._config.JsonRpcPort,
                             args.AttemptNumber + 1,
                             validatedConfig.MaxRetries + 1,
                             args.Outcome.Exception?.Message ?? "Unknown error"
@@ -214,7 +212,7 @@ public partial class SnapcastService
     /// </summary>
     private ResiliencePipeline CreateOperationPolicy()
     {
-        var validatedConfig = ResiliencePolicyFactory.ValidateAndNormalize(_config.Resilience.Operation);
+        var validatedConfig = ResiliencePolicyFactory.ValidateAndNormalize(this._config.Resilience.Operation);
         return ResiliencePolicyFactory.CreatePipeline(validatedConfig, "Snapcast-Operation");
     }
 
@@ -247,21 +245,21 @@ public partial class SnapcastService
                 }
 
                 // Log first attempt before Polly execution
-                var config = ResiliencePolicyFactory.ValidateAndNormalize(_config.Resilience.Connection);
-                LogConnectionRetryAttempt(
-                    _config.Address,
-                    _config.JsonRpcPort,
+                var config = ResiliencePolicyFactory.ValidateAndNormalize(this._config.Resilience.Connection);
+                this.LogConnectionRetryAttempt(
+                    this._config.Address,
+                    this._config.JsonRpcPort,
                     1,
                     config.MaxRetries + 1,
                     "Initial attempt"
                 );
 
                 // Use Polly resilience for connection establishment
-                var result = await _connectionPolicy.ExecuteAsync(
+                var result = await this._connectionPolicy.ExecuteAsync(
                     async (ct) =>
                     {
                         // Test the connection by making a simple RPC call
-                        await _snapcastClient.ServerGetRpcVersionAsync();
+                        await this._snapcastClient.ServerGetRpcVersionAsync();
                         return Result.Success();
                     },
                     cancellationToken
@@ -297,11 +295,11 @@ public partial class SnapcastService
                 || ex.Message.Contains("timeout", StringComparison.OrdinalIgnoreCase)
             )
             {
-                LogConnectionErrorMessage(ex.Message);
+                this.LogConnectionErrorMessage(ex.Message);
             }
             else
             {
-                LogInitializationFailed(ex);
+                this.LogInitializationFailed(ex);
             }
             return Result.Failure(ex);
         }
@@ -380,18 +378,18 @@ public partial class SnapcastService
             return Result.Failure("Service has been disposed");
         }
 
-        if (!IsConnected)
+        if (!this.IsConnected)
         {
-            LogNotConnected(nameof(SetClientVolumeAsync));
+            this.LogNotConnected(nameof(this.SetClientVolumeAsync));
             return Result.Failure("Snapcast service is not connected");
         }
 
         try
         {
-            return await _operationPolicy.ExecuteAsync(
+            return await this._operationPolicy.ExecuteAsync(
                 async (ct) =>
                 {
-                    await _snapcastClient.ClientSetVolumeAsync(snapcastClientId, volumePercent);
+                    await this._snapcastClient.ClientSetVolumeAsync(snapcastClientId, volumePercent);
                     return Result.Success();
                 },
                 cancellationToken
@@ -920,19 +918,19 @@ public partial class SnapcastService
 
     private void UnsubscribeFromEvents()
     {
-        if (_snapcastClient != null)
+        if (this._snapcastClient != null)
         {
-            _snapcastClient.OnClientConnect = null;
-            _snapcastClient.OnClientDisconnect = null;
-            _snapcastClient.OnClientVolumeChanged = null;
-            _snapcastClient.OnClientLatencyChanged = null;
-            _snapcastClient.OnClientNameChanged = null;
-            _snapcastClient.OnGroupMute = null;
-            _snapcastClient.OnGroupStreamChanged = null;
-            _snapcastClient.OnGroupNameChanged = null;
-            _snapcastClient.OnStreamUpdate = null;
-            _snapcastClient.OnStreamProperties = null;
-            _snapcastClient.OnServerUpdate = null;
+            this._snapcastClient.OnClientConnect = null;
+            this._snapcastClient.OnClientDisconnect = null;
+            this._snapcastClient.OnClientVolumeChanged = null;
+            this._snapcastClient.OnClientLatencyChanged = null;
+            this._snapcastClient.OnClientNameChanged = null;
+            this._snapcastClient.OnGroupMute = null;
+            this._snapcastClient.OnGroupStreamChanged = null;
+            this._snapcastClient.OnGroupNameChanged = null;
+            this._snapcastClient.OnStreamUpdate = null;
+            this._snapcastClient.OnStreamProperties = null;
+            this._snapcastClient.OnServerUpdate = null;
         }
     }
 
@@ -943,9 +941,9 @@ public partial class SnapcastService
     /// <inheritdoc />
     public async Task Handle(StatusChangedNotification notification, CancellationToken cancellationToken)
     {
-        if (!IsConnected || !_initialized)
+        if (!this.IsConnected || !this._initialized)
         {
-            LogNotConnected("Handle StatusChangedNotification");
+            this.LogNotConnected("Handle StatusChangedNotification");
             return;
         }
 
@@ -956,7 +954,7 @@ public partial class SnapcastService
 
             if (notification.StatusType == "VOLUME" && notification.TargetId.StartsWith("client_"))
             {
-                result = await SetClientVolumeAsync(
+                result = await this.SetClientVolumeAsync(
                     notification.TargetId,
                     Convert.ToInt32(notification.Value),
                     cancellationToken
@@ -964,7 +962,7 @@ public partial class SnapcastService
             }
             else if (notification.StatusType == "MUTE" && notification.TargetId.StartsWith("client_"))
             {
-                result = await SetClientMuteAsync(
+                result = await this.SetClientMuteAsync(
                     notification.TargetId,
                     Convert.ToBoolean(notification.Value),
                     cancellationToken
@@ -972,7 +970,7 @@ public partial class SnapcastService
             }
             else if (notification.StatusType == "VOLUME" && notification.TargetId.StartsWith("group_"))
             {
-                result = await SetGroupVolumeAsync(
+                result = await this.SetGroupVolumeAsync(
                     notification.TargetId,
                     Convert.ToInt32(notification.Value),
                     cancellationToken
@@ -980,7 +978,7 @@ public partial class SnapcastService
             }
             else if (notification.StatusType == "MUTE" && notification.TargetId.StartsWith("group_"))
             {
-                result = await SetGroupMuteAsync(
+                result = await this.SetGroupMuteAsync(
                     notification.TargetId,
                     Convert.ToBoolean(notification.Value),
                     cancellationToken
@@ -993,7 +991,7 @@ public partial class SnapcastService
 
             if (!result.IsSuccess)
             {
-                LogStatusNotificationError(
+                this.LogStatusNotificationError(
                     notification.StatusType,
                     notification.TargetId,
                     new Exception(result.ErrorMessage)
@@ -1002,7 +1000,7 @@ public partial class SnapcastService
         }
         catch (Exception ex)
         {
-            LogStatusNotificationError(notification.StatusType, notification.TargetId, ex);
+            this.LogStatusNotificationError(notification.StatusType, notification.TargetId, ex);
         }
     }
 
@@ -1012,18 +1010,18 @@ public partial class SnapcastService
         CancellationToken cancellationToken
     )
     {
-        if (!IsConnected)
+        if (!this.IsConnected)
         {
             return Result.Failure("Snapcast service is not connected");
         }
 
         try
         {
-            return await _operationPolicy.ExecuteAsync(
+            return await this._operationPolicy.ExecuteAsync(
                 async (ct) =>
                 {
                     // Get all clients in the group and set their volume
-                    var group = _stateRepository.GetGroup(groupId);
+                    var group = this._stateRepository.GetGroup(groupId);
                     if (group == null)
                     {
                         return Result.Failure($"Group {groupId} not found");
@@ -1031,7 +1029,7 @@ public partial class SnapcastService
 
                     foreach (var client in group.Value.Clients)
                     {
-                        await _snapcastClient.ClientSetVolumeAsync(client.Id, volumePercent);
+                        await this._snapcastClient.ClientSetVolumeAsync(client.Id, volumePercent);
                     }
 
                     return Result.Success();
@@ -1041,7 +1039,7 @@ public partial class SnapcastService
         }
         catch (Exception ex)
         {
-            LogOperationFailed(nameof(SetGroupVolumeAsync), ex);
+            this.LogOperationFailed(nameof(this.SetGroupVolumeAsync), ex);
             return Result.Failure($"Failed to set group volume: {ex.Message}");
         }
     }

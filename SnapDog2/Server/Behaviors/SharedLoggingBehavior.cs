@@ -25,7 +25,7 @@ public class SharedLoggingCommandBehavior<TCommand, TResponse> : ICommandPipelin
     /// <param name="logger">The logger instance.</param>
     public SharedLoggingCommandBehavior(ILogger<SharedLoggingCommandBehavior<TCommand, TResponse>> logger)
     {
-        _logger = logger;
+        this._logger = logger;
     }
 
     /// <inheritdoc/>
@@ -38,7 +38,7 @@ public class SharedLoggingCommandBehavior<TCommand, TResponse> : ICommandPipelin
         var commandName = typeof(TCommand).Name;
         using var activity = ActivitySource.StartActivity($"CortexMediator.Command.{commandName}");
 
-        _logger.LogInformation("Starting Command {CommandName}", commandName);
+        this._logger.LogInformation("Starting Command {CommandName}", commandName);
         var stopwatch = Stopwatch.StartNew();
 
         try
@@ -46,7 +46,7 @@ public class SharedLoggingCommandBehavior<TCommand, TResponse> : ICommandPipelin
             var response = await next().ConfigureAwait(false);
             stopwatch.Stop();
 
-            _logger.LogInformation(
+            this._logger.LogInformation(
                 "Completed Command {CommandName} in {ElapsedMilliseconds}ms",
                 commandName,
                 stopwatch.ElapsedMilliseconds
@@ -56,7 +56,7 @@ public class SharedLoggingCommandBehavior<TCommand, TResponse> : ICommandPipelin
         catch (Exception ex)
         {
             stopwatch.Stop();
-            _logger.LogError(
+            this._logger.LogError(
                 ex,
                 "Command {CommandName} failed after {ElapsedMilliseconds}ms",
                 commandName,
@@ -86,7 +86,7 @@ public class SharedLoggingQueryBehavior<TQuery, TResponse> : IQueryPipelineBehav
     /// <param name="logger">The logger instance.</param>
     public SharedLoggingQueryBehavior(ILogger<SharedLoggingQueryBehavior<TQuery, TResponse>> logger)
     {
-        _logger = logger;
+        this._logger = logger;
     }
 
     /// <inheritdoc/>
@@ -99,7 +99,7 @@ public class SharedLoggingQueryBehavior<TQuery, TResponse> : IQueryPipelineBehav
         var queryName = typeof(TQuery).Name;
         using var activity = ActivitySource.StartActivity($"CortexMediator.Query.{queryName}");
 
-        _logger.LogInformation("Starting Query {QueryName}", queryName);
+        this._logger.LogInformation("Starting Query {QueryName}", queryName);
         var stopwatch = Stopwatch.StartNew();
 
         try
@@ -107,7 +107,7 @@ public class SharedLoggingQueryBehavior<TQuery, TResponse> : IQueryPipelineBehav
             var response = await next().ConfigureAwait(false);
             stopwatch.Stop();
 
-            _logger.LogInformation(
+            this._logger.LogInformation(
                 "Completed Query {QueryName} in {ElapsedMilliseconds}ms",
                 queryName,
                 stopwatch.ElapsedMilliseconds
@@ -117,7 +117,7 @@ public class SharedLoggingQueryBehavior<TQuery, TResponse> : IQueryPipelineBehav
         catch (Exception ex)
         {
             stopwatch.Stop();
-            _logger.LogError(
+            this._logger.LogError(
                 ex,
                 "Query {QueryName} failed after {ElapsedMilliseconds}ms",
                 queryName,

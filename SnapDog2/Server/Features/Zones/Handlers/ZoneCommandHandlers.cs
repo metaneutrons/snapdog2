@@ -2,12 +2,10 @@ namespace SnapDog2.Server.Features.Zones.Handlers;
 
 using System.Threading;
 using System.Threading.Tasks;
-using Cortex.Mediator;
 using Cortex.Mediator.Commands;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Models;
-using SnapDog2.Server.Features.Shared.Notifications;
 using SnapDog2.Server.Features.Zones.Commands;
 
 /// <summary>

@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using SnapDog2.Services;
 
 namespace SnapDog2.Hosting;

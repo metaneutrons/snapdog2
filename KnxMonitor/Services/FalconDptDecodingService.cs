@@ -18,11 +18,11 @@ public class FalconDptDecodingService : IDptDecodingService
     /// <param name="logger">Logger instance.</param>
     public FalconDptDecodingService(ILogger<FalconDptDecodingService> logger)
     {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        this._logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         // Keep the manual implementation as fallback
         var fallbackLogger = LoggerFactory.Create(b => b.AddConsole()).CreateLogger<DptDecodingService>();
-        _fallbackService = new DptDecodingService(fallbackLogger);
+        this._fallbackService = new DptDecodingService(fallbackLogger);
     }
 
     /// <inheritdoc/>
@@ -36,21 +36,21 @@ public class FalconDptDecodingService : IDptDecodingService
         try
         {
             // First, try to use Falcon SDK's GroupValue for decoding
-            var falconDecoded = TryDecodeFalconGroupValue(data, dptId);
+            var falconDecoded = this.TryDecodeFalconGroupValue(data, dptId);
             if (falconDecoded != null)
             {
-                _logger.LogDebug("Successfully decoded {DptId} using Falcon SDK", dptId);
+                this._logger.LogDebug("Successfully decoded {DptId} using Falcon SDK", dptId);
                 return falconDecoded;
             }
 
             // Fallback to manual implementation
-            _logger.LogDebug("Falling back to manual decoding for {DptId}", dptId);
-            return _fallbackService.DecodeValue(data, dptId);
+            this._logger.LogDebug("Falling back to manual decoding for {DptId}", dptId);
+            return this._fallbackService.DecodeValue(data, dptId);
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Error decoding DPT {DptId}, falling back to manual decoding", dptId);
-            return _fallbackService.DecodeValue(data, dptId);
+            this._logger.LogWarning(ex, "Error decoding DPT {DptId}, falling back to manual decoding", dptId);
+            return this._fallbackService.DecodeValue(data, dptId);
         }
     }
 
@@ -59,35 +59,35 @@ public class FalconDptDecodingService : IDptDecodingService
     {
         // For auto-detection, we'll use our fallback service since we need to guess the DPT
         // Falcon SDK requires knowing the DPT beforehand
-        return _fallbackService.DecodeValueWithAutoDetection(data);
+        return this._fallbackService.DecodeValueWithAutoDetection(data);
     }
 
     /// <inheritdoc/>
     public string FormatValue(object? value, string? dptId)
     {
         // Use the fallback service for formatting since it has comprehensive formatting logic
-        return _fallbackService.FormatValue(value, dptId);
+        return this._fallbackService.FormatValue(value, dptId);
     }
 
     /// <inheritdoc/>
     public string? DetectDpt(byte[] data)
     {
-        return _fallbackService.DetectDpt(data);
+        return this._fallbackService.DetectDpt(data);
     }
 
     /// <inheritdoc/>
     public bool IsDptSupported(string dptId)
     {
         // Check if Falcon SDK supports it first, then fallback
-        return TryIsFalconDptSupported(dptId) || _fallbackService.IsDptSupported(dptId);
+        return this.TryIsFalconDptSupported(dptId) || this._fallbackService.IsDptSupported(dptId);
     }
 
     /// <inheritdoc/>
     public IEnumerable<string> GetSupportedDpts()
     {
         // Return the union of Falcon SDK supported DPTs and our manual ones
-        var falconDpts = GetFalconSupportedDpts();
-        var manualDpts = _fallbackService.GetSupportedDpts();
+        var falconDpts = this.GetFalconSupportedDpts();
+        var manualDpts = this._fallbackService.GetSupportedDpts();
         return falconDpts.Union(manualDpts).Distinct().OrderBy(x => x);
     }
 
@@ -105,18 +105,18 @@ public class FalconDptDecodingService : IDptDecodingService
             // This is where we'd use Falcon SDK's proper DPT conversion
 
             // Method 1: Try to use GroupValue constructor with DPT
-            var groupValue = TryCreateGroupValueWithDpt(data, dptId);
+            var groupValue = this.TryCreateGroupValueWithDpt(data, dptId);
             if (groupValue != null)
             {
-                return ExtractValueFromGroupValue(groupValue);
+                return this.ExtractValueFromGroupValue(groupValue);
             }
 
             // Method 2: Try to use DPT converter utilities directly
-            return TryUseDptConverters(data, dptId);
+            return this.TryUseDptConverters(data, dptId);
         }
         catch (Exception ex)
         {
-            _logger.LogDebug(ex, "Failed to decode using Falcon SDK for DPT {DptId}", dptId);
+            this._logger.LogDebug(ex, "Failed to decode using Falcon SDK for DPT {DptId}", dptId);
             return null;
         }
     }
@@ -205,7 +205,7 @@ public class FalconDptDecodingService : IDptDecodingService
                         var result = method.Invoke(null, new object[] { data });
                         if (result != null)
                         {
-                            _logger.LogDebug(
+                            this._logger.LogDebug(
                                 "Successfully used Falcon converter {ConverterType}.{MethodName} for DPT {DptId}",
                                 converterType.Name,
                                 method.Name,
@@ -278,7 +278,7 @@ public class FalconDptDecodingService : IDptDecodingService
             // Try to create a dummy GroupValue with this DPT to see if it's supported
             // This is a heuristic approach
             var dummyData = new byte[] { 0x00 };
-            var result = TryCreateGroupValueWithDpt(dummyData, dptId);
+            var result = this.TryCreateGroupValueWithDpt(dummyData, dptId);
             return result != null;
         }
         catch

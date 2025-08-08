@@ -10,7 +10,7 @@ namespace KnxMonitor.Models;
 public class KnxMessageTableModel : INotifyPropertyChanged
 {
     private readonly ObservableCollection<KnxMessageRow> _messages = new();
-    private readonly object _lock = new();
+    private readonly Lock _lock = new();
     private string? _filter;
     private int _maxMessages = 1000; // Configurable message buffer size
 
@@ -19,28 +19,28 @@ public class KnxMessageTableModel : INotifyPropertyChanged
     /// </summary>
     public KnxMessageTableModel()
     {
-        _messages.CollectionChanged += (_, _) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Messages)));
+        this._messages.CollectionChanged += (_, _) =>
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Messages)));
     }
 
     /// <summary>
     /// Gets the observable collection of KNX messages.
     /// </summary>
-    public ObservableCollection<KnxMessageRow> Messages => _messages;
+    public ObservableCollection<KnxMessageRow> Messages => this._messages;
 
     /// <summary>
     /// Gets or sets the current filter pattern.
     /// </summary>
     public string? Filter
     {
-        get => _filter;
+        get => this._filter;
         set
         {
-            if (_filter != value)
+            if (this._filter != value)
             {
-                _filter = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Filter)));
-                ApplyFilter();
+                this._filter = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Filter)));
+                this.ApplyFilter();
             }
         }
     }
@@ -50,14 +50,14 @@ public class KnxMessageTableModel : INotifyPropertyChanged
     /// </summary>
     public int MaxMessages
     {
-        get => _maxMessages;
+        get => this._maxMessages;
         set
         {
-            if (_maxMessages != value && value > 0)
+            if (this._maxMessages != value && value > 0)
             {
-                _maxMessages = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MaxMessages)));
-                TrimMessages();
+                this._maxMessages = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.MaxMessages)));
+                this.TrimMessages();
             }
         }
     }
@@ -76,18 +76,18 @@ public class KnxMessageTableModel : INotifyPropertyChanged
         if (message == null)
             return;
 
-        lock (_lock)
+        lock (this._lock)
         {
             var row = new KnxMessageRow(message);
 
             // Apply filter if active
-            if (!string.IsNullOrEmpty(_filter) && !MatchesFilter(message, _filter))
+            if (!string.IsNullOrEmpty(this._filter) && !MatchesFilter(message, this._filter))
             {
                 return;
             }
 
-            _messages.Insert(0, row); // Add to top for newest-first display
-            TrimMessages();
+            this._messages.Insert(0, row); // Add to top for newest-first display
+            this.TrimMessages();
         }
     }
 
@@ -96,9 +96,9 @@ public class KnxMessageTableModel : INotifyPropertyChanged
     /// </summary>
     public void Clear()
     {
-        lock (_lock)
+        lock (this._lock)
         {
-            _messages.Clear();
+            this._messages.Clear();
         }
     }
 
@@ -108,9 +108,9 @@ public class KnxMessageTableModel : INotifyPropertyChanged
     /// <returns>List of all current messages.</returns>
     public List<KnxMessageRow> GetAllMessages()
     {
-        lock (_lock)
+        lock (this._lock)
         {
-            return new List<KnxMessageRow>(_messages);
+            return new List<KnxMessageRow>(this._messages);
         }
     }
 
@@ -119,14 +119,14 @@ public class KnxMessageTableModel : INotifyPropertyChanged
         // Re-populate with filtered messages
         // This is a simplified implementation - in production, you might want to maintain
         // separate filtered and unfiltered collections for better performance
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Messages)));
+        this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Messages)));
     }
 
     private void TrimMessages()
     {
-        while (_messages.Count > _maxMessages)
+        while (this._messages.Count > this._maxMessages)
         {
-            _messages.RemoveAt(_messages.Count - 1);
+            this._messages.RemoveAt(this._messages.Count - 1);
         }
     }
 
@@ -158,22 +158,22 @@ public class KnxMessageRow
     /// <param name="message">The source KNX message.</param>
     public KnxMessageRow(KnxMessage message)
     {
-        Message = message ?? throw new ArgumentNullException(nameof(message));
+        this.Message = message ?? throw new ArgumentNullException(nameof(message));
 
         // Pre-calculate display values for performance
-        TimeDisplay = message.Timestamp.ToString("HH:mm:ss.fff");
-        MessageTypeDisplay = FormatMessageType(message.MessageType);
-        SourceDisplay = message.SourceAddress;
-        GroupAddressDisplay = message.GroupAddress;
-        ValueDisplay = message.DisplayValue;
-        DptDisplay = message.GuessedDPT;
-        PriorityDisplay = message.Priority.ToString();
-        DataDisplay = message.DataHex;
+        this.TimeDisplay = message.Timestamp.ToString("HH:mm:ss.fff");
+        this.MessageTypeDisplay = FormatMessageType(message.MessageType);
+        this.SourceDisplay = message.SourceAddress;
+        this.GroupAddressDisplay = message.GroupAddress;
+        this.ValueDisplay = message.DisplayValue;
+        this.DptDisplay = message.GuessedDPT;
+        this.PriorityDisplay = message.Priority.ToString();
+        this.DataDisplay = message.DataHex;
 
         // Calculate age-based color
-        AgeColorCode = CalculateAgeColorCode(message.Timestamp);
-        TypeColorCode = CalculateTypeColorCode(message.MessageType);
-        PriorityColorCode = CalculatePriorityColorCode(message.Priority);
+        this.AgeColorCode = CalculateAgeColorCode(message.Timestamp);
+        this.TypeColorCode = CalculateTypeColorCode(message.MessageType);
+        this.PriorityColorCode = CalculatePriorityColorCode(message.Priority);
     }
 
     /// <summary>
@@ -314,14 +314,14 @@ public class ConnectionStatusModel : INotifyPropertyChanged
     /// </summary>
     public bool IsConnected
     {
-        get => _isConnected;
+        get => this._isConnected;
         set
         {
-            if (_isConnected != value)
+            if (this._isConnected != value)
             {
-                _isConnected = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsConnected)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ConnectionStatusDisplay)));
+                this._isConnected = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.IsConnected)));
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.ConnectionStatusDisplay)));
             }
         }
     }
@@ -331,14 +331,14 @@ public class ConnectionStatusModel : INotifyPropertyChanged
     /// </summary>
     public string ConnectionType
     {
-        get => _connectionType;
+        get => this._connectionType;
         set
         {
-            if (_connectionType != value)
+            if (this._connectionType != value)
             {
-                _connectionType = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ConnectionType)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ConnectionStatusDisplay)));
+                this._connectionType = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.ConnectionType)));
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.ConnectionStatusDisplay)));
             }
         }
     }
@@ -348,14 +348,14 @@ public class ConnectionStatusModel : INotifyPropertyChanged
     /// </summary>
     public string Gateway
     {
-        get => _gateway;
+        get => this._gateway;
         set
         {
-            if (_gateway != value)
+            if (this._gateway != value)
             {
-                _gateway = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Gateway)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ConnectionStatusDisplay)));
+                this._gateway = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Gateway)));
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.ConnectionStatusDisplay)));
             }
         }
     }
@@ -365,14 +365,14 @@ public class ConnectionStatusModel : INotifyPropertyChanged
     /// </summary>
     public int Port
     {
-        get => _port;
+        get => this._port;
         set
         {
-            if (_port != value)
+            if (this._port != value)
             {
-                _port = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Port)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ConnectionStatusDisplay)));
+                this._port = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Port)));
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.ConnectionStatusDisplay)));
             }
         }
     }
@@ -382,14 +382,14 @@ public class ConnectionStatusModel : INotifyPropertyChanged
     /// </summary>
     public string? Filter
     {
-        get => _filter;
+        get => this._filter;
         set
         {
-            if (_filter != value)
+            if (this._filter != value)
             {
-                _filter = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Filter)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FilterDisplay)));
+                this._filter = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Filter)));
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.FilterDisplay)));
             }
         }
     }
@@ -399,13 +399,13 @@ public class ConnectionStatusModel : INotifyPropertyChanged
     /// </summary>
     public int MessageCount
     {
-        get => _messageCount;
+        get => this._messageCount;
         set
         {
-            if (_messageCount != value)
+            if (this._messageCount != value)
             {
-                _messageCount = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(MessageCount)));
+                this._messageCount = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.MessageCount)));
             }
         }
     }
@@ -415,14 +415,14 @@ public class ConnectionStatusModel : INotifyPropertyChanged
     /// </summary>
     public DateTime StartTime
     {
-        get => _startTime;
+        get => this._startTime;
         set
         {
-            if (_startTime != value)
+            if (this._startTime != value)
             {
-                _startTime = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StartTime)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UptimeDisplay)));
+                this._startTime = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.StartTime)));
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.UptimeDisplay)));
             }
         }
     }
@@ -432,13 +432,13 @@ public class ConnectionStatusModel : INotifyPropertyChanged
     /// </summary>
     public string LastError
     {
-        get => _lastError;
+        get => this._lastError;
         set
         {
-            if (_lastError != value)
+            if (this._lastError != value)
             {
-                _lastError = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LastError)));
+                this._lastError = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.LastError)));
             }
         }
     }
@@ -447,12 +447,12 @@ public class ConnectionStatusModel : INotifyPropertyChanged
     /// Gets the formatted connection status display.
     /// </summary>
     public string ConnectionStatusDisplay =>
-        $"{(IsConnected ? "✓ Connected" : "✗ Disconnected")} to {Gateway}:{Port} ({ConnectionType})";
+        $"{(this.IsConnected ? "✓ Connected" : "✗ Disconnected")} to {this.Gateway}:{this.Port} ({this.ConnectionType})";
 
     /// <summary>
     /// Gets the formatted filter display.
     /// </summary>
-    public string FilterDisplay => string.IsNullOrEmpty(Filter) ? "None" : Filter;
+    public string FilterDisplay => string.IsNullOrEmpty(this.Filter) ? "None" : this.Filter;
 
     /// <summary>
     /// Gets the formatted uptime display.
@@ -461,7 +461,7 @@ public class ConnectionStatusModel : INotifyPropertyChanged
     {
         get
         {
-            var uptime = DateTime.Now - StartTime;
+            var uptime = DateTime.Now - this.StartTime;
             return $"{uptime.Hours:D2}:{uptime.Minutes:D2}:{uptime.Seconds:D2}";
         }
     }

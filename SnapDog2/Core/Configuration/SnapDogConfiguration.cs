@@ -1,6 +1,5 @@
 namespace SnapDog2.Core.Configuration;
 
-using System.ComponentModel.DataAnnotations;
 using EnvoyConfig.Attributes;
 
 /// <summary>

@@ -16,7 +16,7 @@ public class FalconService : IDptDecodingService
     /// <param name="logger">Logger instance.</param>
     public FalconService(ILogger<FalconService> logger)
     {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        this._logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <summary>
@@ -34,7 +34,7 @@ public class FalconService : IDptDecodingService
         try
         {
             var objectType = falconObject.GetType();
-            _logger.LogDebug(
+            this._logger.LogDebug(
                 "🔍 Extracting from Falcon object: {TypeName} ({Namespace})",
                 objectType.Name,
                 objectType.Namespace
@@ -43,15 +43,15 @@ public class FalconService : IDptDecodingService
             // Case 1: Handle byte arrays (common case from Falcon SDK)
             if (falconObject is byte[] byteArray)
             {
-                _logger.LogDebug("🎯 Falcon SDK provided byte array: {Data}", Convert.ToHexString(byteArray));
-                return HandleByteArray(byteArray);
+                this._logger.LogDebug("🎯 Falcon SDK provided byte array: {Data}", Convert.ToHexString(byteArray));
+                return this.HandleByteArray(byteArray);
             }
 
             // Case 2: Primitive .NET types (Falcon SDK already converted!)
             if (IsPrimitiveType(objectType))
             {
-                var dptId = GuessDptFromPrimitive(falconObject, objectType);
-                _logger.LogDebug(
+                var dptId = this.GuessDptFromPrimitive(falconObject, objectType);
+                this._logger.LogDebug(
                     "✅ Falcon SDK provided primitive: {Value} ({Type}) -> DPT {DptId}",
                     falconObject,
                     objectType.Name,
@@ -63,15 +63,15 @@ public class FalconService : IDptDecodingService
             // Case 3: Falcon SDK GroupValue or similar objects
             if (IsFalconSdkObject(objectType))
             {
-                return ExtractFromFalconSdkObject(falconObject, objectType);
+                return this.ExtractFromFalconSdkObject(falconObject, objectType);
             }
 
             // Case 4: Unknown object - use reflection
-            return ExtractUsingReflection(falconObject, objectType);
+            return this.ExtractUsingReflection(falconObject, objectType);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error extracting from Falcon object {TypeName}", falconObject.GetType().Name);
+            this._logger.LogError(ex, "Error extracting from Falcon object {TypeName}", falconObject.GetType().Name);
             return new FalconExtractedInfo(falconObject, null, $"Extraction error: {ex.Message}");
         }
     }
@@ -91,9 +91,9 @@ public class FalconService : IDptDecodingService
         try
         {
             // Decode based on length and content patterns
-            var (decodedValue, dptId) = DecodeByteArray(byteArray);
+            var (decodedValue, dptId) = this.DecodeByteArray(byteArray);
 
-            _logger.LogDebug(
+            this._logger.LogDebug(
                 "📦 Decoded byte array {Data} -> {Value} (DPT {DptId})",
                 Convert.ToHexString(byteArray),
                 decodedValue,
@@ -104,7 +104,7 @@ public class FalconService : IDptDecodingService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Error decoding byte array {Data}", Convert.ToHexString(byteArray));
+            this._logger.LogWarning(ex, "Error decoding byte array {Data}", Convert.ToHexString(byteArray));
             return new FalconExtractedInfo(Convert.ToHexString(byteArray), null, "Raw hex (decode failed)");
         }
     }
@@ -118,9 +118,9 @@ public class FalconService : IDptDecodingService
     {
         return data.Length switch
         {
-            1 => DecodeOneByte(data[0]),
-            2 => DecodeTwoBytes(data),
-            4 => DecodeFourBytes(data),
+            1 => this.DecodeOneByte(data[0]),
+            2 => this.DecodeTwoBytes(data),
+            4 => this.DecodeFourBytes(data),
             _ => (Convert.ToHexString(data), "16.001"), // String fallback
         };
     }
@@ -149,7 +149,7 @@ public class FalconService : IDptDecodingService
     private (object DecodedValue, string DptId) DecodeTwoBytes(byte[] data)
     {
         // Try KNX 2-byte float (DPT 9.xxx) first
-        var floatValue = DecodeKnx2ByteFloat(data);
+        var floatValue = this.DecodeKnx2ByteFloat(data);
 
         // Check if it's a reasonable temperature
         if (floatValue >= -50 && floatValue <= 100)
@@ -313,7 +313,7 @@ public class FalconService : IDptDecodingService
     {
         // This method is not the primary use case for this service
         // The main purpose is to extract from live Falcon SDK objects
-        _logger.LogWarning(
+        this._logger.LogWarning(
             "DecodeValue called on CorrectFalconFirstService - this service is designed for live event extraction"
         );
         return null;
@@ -322,7 +322,7 @@ public class FalconService : IDptDecodingService
     /// <inheritdoc/>
     public (object? Value, string? DetectedDpt) DecodeValueWithAutoDetection(byte[] data)
     {
-        _logger.LogWarning(
+        this._logger.LogWarning(
             "DecodeValueWithAutoDetection called on CorrectFalconFirstService - this service is designed for live event extraction"
         );
         return (null, null);
@@ -331,13 +331,13 @@ public class FalconService : IDptDecodingService
     /// <inheritdoc/>
     public string FormatValue(object? value, string? dptId)
     {
-        return FormatFalconDecodedValue(value, dptId);
+        return this.FormatFalconDecodedValue(value, dptId);
     }
 
     /// <inheritdoc/>
     public string? DetectDpt(byte[] data)
     {
-        _logger.LogWarning(
+        this._logger.LogWarning(
             "DetectDpt called on CorrectFalconFirstService - this service is designed for live event extraction"
         );
         return null;
@@ -435,10 +435,14 @@ public class FalconService : IDptDecodingService
     {
         try
         {
-            var dptId = ExtractDptFromObject(falconObject, objectType);
-            var decodedValue = ExtractValueFromObject(falconObject, objectType);
+            var dptId = this.ExtractDptFromObject(falconObject, objectType);
+            var decodedValue = this.ExtractValueFromObject(falconObject, objectType);
 
-            _logger.LogDebug("✅ Extracted from Falcon SDK object: DPT {DptId}, Value {Value}", dptId, decodedValue);
+            this._logger.LogDebug(
+                "✅ Extracted from Falcon SDK object: DPT {DptId}, Value {Value}",
+                dptId,
+                decodedValue
+            );
 
             return new FalconExtractedInfo(
                 decodedValue ?? falconObject,
@@ -448,7 +452,7 @@ public class FalconService : IDptDecodingService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Error extracting from Falcon SDK object {TypeName}", objectType.Name);
+            this._logger.LogWarning(ex, "Error extracting from Falcon SDK object {TypeName}", objectType.Name);
             return new FalconExtractedInfo(falconObject, null, $"SDK object extraction error: {ex.Message}");
         }
     }
@@ -458,7 +462,7 @@ public class FalconService : IDptDecodingService
         try
         {
             var properties = objectType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-            _logger.LogDebug(
+            this._logger.LogDebug(
                 "🔍 Reflecting on {TypeName} with {PropertyCount} properties",
                 objectType.Name,
                 properties.Length
@@ -497,7 +501,7 @@ public class FalconService : IDptDecodingService
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogDebug(ex, "Error reading property {PropertyName}", prop.Name);
+                    this._logger.LogDebug(ex, "Error reading property {PropertyName}", prop.Name);
                     propertyInfo.Add($"{prop.Name}=ERROR");
                 }
             }
@@ -505,13 +509,13 @@ public class FalconService : IDptDecodingService
             decodedValue ??= obj;
             var info = $"Reflected {objectType.Name}: {string.Join(", ", propertyInfo.Take(3))}";
 
-            _logger.LogDebug("🔍 Reflection result: DPT {DptId}, Value {Value}", dptId, decodedValue);
+            this._logger.LogDebug("🔍 Reflection result: DPT {DptId}, Value {Value}", dptId, decodedValue);
 
             return new FalconExtractedInfo(decodedValue, dptId, info);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during reflection on {TypeName}", objectType.Name);
+            this._logger.LogError(ex, "Error during reflection on {TypeName}", objectType.Name);
             return new FalconExtractedInfo(obj, null, $"Reflection error: {ex.Message}");
         }
     }
