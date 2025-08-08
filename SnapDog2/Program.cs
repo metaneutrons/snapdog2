@@ -213,8 +213,14 @@ static WebApplication CreateWebApplication(string[] args)
         SnapDog2.Server.Services.GlobalStatusService
     >();
 
-    // Zone management services
+    // Zone management services (production implementations)
     builder.Services.AddScoped<SnapDog2.Core.Abstractions.IZoneManager, SnapDog2.Infrastructure.Domain.ZoneManager>();
+
+    // Media player services
+    builder.Services.AddScoped<
+        SnapDog2.Core.Abstractions.IMediaPlayerService,
+        SnapDog2.Infrastructure.Audio.MediaPlayerService
+    >();
 
     // Client management services
     builder.Services.AddScoped<
