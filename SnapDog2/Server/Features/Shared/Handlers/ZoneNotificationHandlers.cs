@@ -7,6 +7,7 @@ using Cortex.Mediator.Notifications;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Abstractions;
+using SnapDog2.Core.Attributes;
 using SnapDog2.Server.Features.Zones.Notifications;
 
 /// <summary>
@@ -69,7 +70,7 @@ public partial class ZoneStateNotificationHandler
 
         // Publish to external systems (MQTT, KNX)
         await this.PublishToExternalSystemsAsync(
-            "ZONE_VOLUME",
+            StatusIdAttribute.GetStatusId<ZoneVolumeChangedNotification>(),
             notification.ZoneId,
             notification.Volume,
             cancellationToken
@@ -82,7 +83,7 @@ public partial class ZoneStateNotificationHandler
 
         // Publish to external systems (MQTT, KNX)
         await this.PublishToExternalSystemsAsync(
-            "ZONE_MUTE",
+            StatusIdAttribute.GetStatusId<ZoneMuteChangedNotification>(),
             notification.ZoneId,
             notification.IsMuted,
             cancellationToken
@@ -96,7 +97,7 @@ public partial class ZoneStateNotificationHandler
 
         // Publish to external systems (MQTT, KNX)
         await this.PublishToExternalSystemsAsync(
-            "ZONE_PLAYBACK_STATE",
+            StatusIdAttribute.GetStatusId<ZonePlaybackStateChangedNotification>(),
             notification.ZoneId,
             playbackStateString,
             cancellationToken
@@ -109,7 +110,7 @@ public partial class ZoneStateNotificationHandler
 
         // Publish to external systems (MQTT, KNX)
         await this.PublishToExternalSystemsAsync(
-            "ZONE_TRACK",
+            StatusIdAttribute.GetStatusId<ZoneTrackChangedNotification>(),
             notification.ZoneId,
             notification.TrackInfo,
             cancellationToken
@@ -122,7 +123,7 @@ public partial class ZoneStateNotificationHandler
 
         // Publish to external systems (MQTT, KNX)
         await this.PublishToExternalSystemsAsync(
-            "ZONE_PLAYLIST",
+            StatusIdAttribute.GetStatusId<ZonePlaylistChangedNotification>(),
             notification.ZoneId,
             new { PlaylistInfo = notification.PlaylistInfo, PlaylistIndex = notification.PlaylistIndex },
             cancellationToken
@@ -139,7 +140,7 @@ public partial class ZoneStateNotificationHandler
 
         // Publish to external systems (MQTT, KNX)
         await this.PublishToExternalSystemsAsync(
-            "ZONE_REPEAT_MODE",
+            StatusIdAttribute.GetStatusId<ZoneRepeatModeChangedNotification>(),
             notification.ZoneId,
             new
             {
@@ -156,7 +157,7 @@ public partial class ZoneStateNotificationHandler
 
         // Publish to external systems (MQTT, KNX)
         await this.PublishToExternalSystemsAsync(
-            "ZONE_SHUFFLE_MODE",
+            StatusIdAttribute.GetStatusId<ZoneShuffleModeChangedNotification>(),
             notification.ZoneId,
             notification.ShuffleEnabled,
             cancellationToken
@@ -168,7 +169,12 @@ public partial class ZoneStateNotificationHandler
         this.LogStateChange(notification.ZoneId);
 
         // Publish to external systems (MQTT, KNX)
-        await this.PublishToExternalSystemsAsync("ZONE_STATE", notification.ZoneId, notification, cancellationToken);
+        await this.PublishToExternalSystemsAsync(
+            StatusIdAttribute.GetStatusId<ZoneStateChangedNotification>(),
+            notification.ZoneId,
+            notification,
+            cancellationToken
+        );
     }
 
     /// <summary>

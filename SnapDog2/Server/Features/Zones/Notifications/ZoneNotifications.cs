@@ -2,11 +2,13 @@ namespace SnapDog2.Server.Features.Zones.Notifications;
 
 using System;
 using Cortex.Mediator.Notifications;
+using SnapDog2.Core.Attributes;
 using SnapDog2.Core.Models;
 
 /// <summary>
 /// Notification published when a zone's playback state changes.
 /// </summary>
+[StatusId("ZONE_PLAYBACK_STATE", "ZP-001")]
 public record ZonePlaybackStateChangedNotification : INotification
 {
     /// <summary>
@@ -28,6 +30,7 @@ public record ZonePlaybackStateChangedNotification : INotification
 /// <summary>
 /// Notification published when a zone's volume changes.
 /// </summary>
+[StatusId("ZONE_VOLUME", "ZV-001")]
 public record ZoneVolumeChangedNotification : INotification
 {
     /// <summary>
@@ -49,6 +52,7 @@ public record ZoneVolumeChangedNotification : INotification
 /// <summary>
 /// Notification published when a zone's mute state changes.
 /// </summary>
+[StatusId("ZONE_MUTE", "ZM-001")]
 public record ZoneMuteChangedNotification : INotification
 {
     /// <summary>
@@ -70,6 +74,7 @@ public record ZoneMuteChangedNotification : INotification
 /// <summary>
 /// Notification published when a zone's current track changes.
 /// </summary>
+[StatusId("ZONE_TRACK", "ZT-001")]
 public record ZoneTrackChangedNotification : INotification
 {
     /// <summary>
@@ -96,6 +101,7 @@ public record ZoneTrackChangedNotification : INotification
 /// <summary>
 /// Notification published when a zone's current playlist changes.
 /// </summary>
+[StatusId("ZONE_PLAYLIST", "ZPL-001")]
 public record ZonePlaylistChangedNotification : INotification
 {
     /// <summary>
@@ -122,6 +128,7 @@ public record ZonePlaylistChangedNotification : INotification
 /// <summary>
 /// Notification published when a zone's repeat mode changes.
 /// </summary>
+[StatusId("ZONE_REPEAT_MODE", "ZR-001")]
 public record ZoneRepeatModeChangedNotification : INotification
 {
     /// <summary>
@@ -148,6 +155,7 @@ public record ZoneRepeatModeChangedNotification : INotification
 /// <summary>
 /// Notification published when a zone's shuffle mode changes.
 /// </summary>
+[StatusId("ZONE_SHUFFLE_MODE", "ZS-001")]
 public record ZoneShuffleModeChangedNotification : INotification
 {
     /// <summary>
@@ -169,6 +177,7 @@ public record ZoneShuffleModeChangedNotification : INotification
 /// <summary>
 /// Notification published when a zone's complete state changes.
 /// </summary>
+[StatusId("ZONE_STATE", "ZST-001")]
 public record ZoneStateChangedNotification : INotification
 {
     /// <summary>
