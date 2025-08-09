@@ -86,6 +86,15 @@ public partial class SnapcastStateRepository : ISnapcastStateRepository
     [LoggerMessage(13, LogLevel.Information, "Total Snapcast clients in repository: {ClientCount}")]
     private partial void LogTotalClientCount(int clientCount);
 
+    [LoggerMessage(14, LogLevel.Debug, "🔄 UpdateServerState called with {GroupCount} groups")]
+    private partial void LogUpdateServerStateCalled(int groupCount);
+
+    [LoggerMessage(15, LogLevel.Debug, "📝 Processing group {GroupId} with {ClientCount} clients")]
+    private partial void LogProcessingGroup(string groupId, int clientCount);
+
+    [LoggerMessage(16, LogLevel.Debug, "👤 Adding/updating client {ClientId} (MAC: {MacAddress})")]
+    private partial void LogAddingClient(string clientId, string macAddress);
+
     #endregion
 
     #region Server State Management
@@ -98,7 +107,25 @@ public partial class SnapcastStateRepository : ISnapcastStateRepository
         var groupCount = server.Groups?.Count ?? 0;
         var streamCount = server.Streams?.Count ?? 0;
 
+        this.LogUpdateServerStateCalled(groupCount);
         this.LogUpdatingServerState(groupCount, clientCount, streamCount);
+
+        // Debug: Log each group and its clients
+        if (server.Groups != null)
+        {
+            foreach (var group in server.Groups)
+            {
+                this.LogProcessingGroup(group.Id, group.Clients?.Count ?? 0);
+
+                if (group.Clients != null)
+                {
+                    foreach (var client in group.Clients)
+                    {
+                        this.LogAddingClient(client.Id, client.Host.Mac ?? "unknown");
+                    }
+                }
+            }
+        }
 
         // Update server info
         lock (this._serverInfoLock)
@@ -113,6 +140,9 @@ public partial class SnapcastStateRepository : ISnapcastStateRepository
         // Update clients from all groups
         var newClients = allClients.ToDictionary(c => c.Id, c => c);
         UpdateDictionary(this._clients, newClients);
+
+        // Debug: Log final client count
+        this.LogTotalClientCount(this._clients.Count);
 
         // Update streams
         var newStreams = server.Streams?.ToDictionary(s => s.Id, s => s) ?? new Dictionary<string, Stream>();

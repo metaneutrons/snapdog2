@@ -135,6 +135,22 @@ public partial class SnapcastService
     [LoggerMessage(6012, LogLevel.Information, "Snapcast service stopped successfully")]
     private partial void LogServiceStopped();
 
+    [LoggerMessage(6014, LogLevel.Debug, "🔍 Getting server status from Snapcast")]
+    private partial void LogGettingServerStatus();
+
+    [LoggerMessage(
+        6015,
+        LogLevel.Information,
+        "📊 Retrieved server status: {GroupCount} groups, {ClientCount} clients, {StreamCount} streams"
+    )]
+    private partial void LogServerStatusRetrieved(int groupCount, int clientCount, int streamCount);
+
+    [LoggerMessage(6016, LogLevel.Warning, "⚠️ Failed to get server status: {Error}")]
+    private partial void LogServerStatusFailed(string error);
+
+    [LoggerMessage(6017, LogLevel.Debug, "🔍 Updating state repository with server status")]
+    private partial void LogUpdatingStateRepository();
+
     #endregion
 
     #region Helper Methods
@@ -273,6 +289,13 @@ public partial class SnapcastService
                     // Subscribe to events after successful connection
                     this.SubscribeToEvents();
 
+                    // Get initial server status to populate client data
+                    var statusResult = await this.GetServerStatusAsync(cancellationToken);
+                    if (!statusResult.IsSuccess)
+                    {
+                        this.LogServerStatusFailed($"Failed to get initial server status: {statusResult.ErrorMessage}");
+                    }
+
                     // Publish connection established notification
                     await this.PublishNotificationAsync(new SnapcastConnectionEstablishedNotification());
                 }
@@ -316,9 +339,19 @@ public partial class SnapcastService
             return Result<SnapcastServerStatus>.Failure("Service has been disposed");
         }
 
+        this.LogGettingServerStatus();
+
         try
         {
             var serverStatus = await this._snapcastClient.ServerGetStatusAsync().ConfigureAwait(false);
+
+            this.LogServerStatusRetrieved(
+                serverStatus.Groups?.Count ?? 0,
+                serverStatus.Groups?.SelectMany(g => g.Clients)?.Count() ?? 0,
+                serverStatus.Streams?.Count ?? 0
+            );
+
+            this.LogUpdatingStateRepository();
 
             // Update our state repository with the raw data
             this._stateRepository.UpdateServerState(serverStatus);
@@ -330,6 +363,7 @@ public partial class SnapcastService
         }
         catch (Exception ex)
         {
+            this.LogServerStatusFailed(ex.Message);
             this.LogOperationFailed(nameof(this.GetServerStatusAsync), ex);
             return Result<SnapcastServerStatus>.Failure(ex);
         }
