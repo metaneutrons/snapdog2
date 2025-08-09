@@ -5,17 +5,19 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Abstractions;
+using SnapDog2.Core.Configuration;
 using SnapDog2.Core.Models;
 
 /// <summary>
-/// Placeholder implementation of IClientManager.
-/// This will be replaced with actual Snapcast integration later.
+/// Production implementation of IClientManager with Snapcast integration.
+/// Uses SnapcastStateRepository.GetClientByIndex for clean separation of concerns.
 /// </summary>
 public partial class ClientManager : IClientManager
 {
     private readonly ILogger<ClientManager> _logger;
-    private readonly Dictionary<int, IClient> _clients;
-    private readonly Dictionary<int, ClientState> _clientStates;
+    private readonly ISnapcastStateRepository _snapcastStateRepository;
+    private readonly ISnapcastService _snapcastService;
+    private readonly List<ClientConfig> _clientConfigs;
 
     [LoggerMessage(7001, LogLevel.Debug, "Getting client {ClientId}")]
     private partial void LogGettingClient(int clientId);
@@ -32,72 +34,123 @@ public partial class ClientManager : IClientManager
     [LoggerMessage(7005, LogLevel.Information, "Assigning client {ClientId} to zone {ZoneId}")]
     private partial void LogAssigningClientToZone(int clientId, int zoneId);
 
-    public ClientManager(ILogger<ClientManager> logger)
+    [LoggerMessage(7006, LogLevel.Information, "Initialized ClientManager with {ClientCount} configured clients")]
+    private partial void LogInitialized(int clientCount);
+
+    public ClientManager(
+        ILogger<ClientManager> logger,
+        ISnapcastStateRepository snapcastStateRepository,
+        ISnapcastService snapcastService,
+        SnapDogConfiguration configuration
+    )
     {
         this._logger = logger;
-        this._clients = new Dictionary<int, IClient>();
-        this._clientStates = new Dictionary<int, ClientState>();
+        this._snapcastStateRepository = snapcastStateRepository;
+        this._snapcastService = snapcastService;
+        this._clientConfigs = configuration.Clients;
+
+        this.LogInitialized(this._clientConfigs.Count);
     }
 
     public async Task<Result<IClient>> GetClientAsync(int clientId)
     {
         this.LogGettingClient(clientId);
 
-        await Task.Delay(1); // TODO: Fix simulation async operation
+        await Task.Delay(1); // Maintain async signature
 
-        if (this._clients.TryGetValue(clientId, out var client))
+        // Validate client ID range
+        if (clientId < 1 || clientId > this._clientConfigs.Count)
         {
-            return Result<IClient>.Success(client);
+            this.LogClientNotFound(clientId);
+            return Result<IClient>.Failure(
+                $"Client {clientId} is out of range. Valid range: 1-{this._clientConfigs.Count}"
+            );
         }
 
-        this.LogClientNotFound(clientId);
-        return Result<IClient>.Failure($"Client {clientId} not found");
+        // Get client from Snapcast using the repository's lookup logic
+        var snapcastClient = this._snapcastStateRepository.GetClientByIndex(clientId);
+        if (snapcastClient == null)
+        {
+            this.LogClientNotFound(clientId);
+            return Result<IClient>.Failure($"Client {clientId} not found in Snapcast");
+        }
+
+        // Convert Snapcast client to domain client
+        var client = new SnapDogClient(
+            clientId,
+            snapcastClient.Value,
+            this._clientConfigs[clientId - 1],
+            this._snapcastService
+        );
+        return Result<IClient>.Success(client);
     }
 
     public async Task<Result<ClientState>> GetClientStateAsync(int clientId)
     {
         this.LogGettingClient(clientId);
 
-        await Task.Delay(1); // TODO: Fix simulation async operation
-
-        if (this._clientStates.TryGetValue(clientId, out var state))
+        var clientResult = await this.GetClientAsync(clientId);
+        if (!clientResult.IsSuccess)
         {
-            // Update timestamp
-            var updatedState = state with
-            {
-                TimestampUtc = DateTime.UtcNow,
-            };
-            this._clientStates[clientId] = updatedState;
-            return Result<ClientState>.Success(updatedState);
+            return Result<ClientState>.Failure(clientResult.ErrorMessage!);
         }
 
-        this.LogClientNotFound(clientId);
-        return Result<ClientState>.Failure($"Client {clientId} not found");
+        var client = clientResult.Value!;
+        var snapDogClient = (SnapDogClient)client;
+        var state = new ClientState
+        {
+            Id = client.Id,
+            SnapcastId = snapDogClient._snapcastClient.Id,
+            Name = client.Name,
+            Mac = snapDogClient.MacAddress,
+            Connected = snapDogClient.Connected,
+            Volume = snapDogClient.Volume,
+            Mute = snapDogClient.Muted,
+            LatencyMs = snapDogClient.LatencyMs,
+            ZoneId = snapDogClient.ZoneId,
+            ConfiguredSnapcastName = snapDogClient._snapcastClient.Config.Name,
+            LastSeenUtc = snapDogClient.LastSeenUtc,
+            HostIpAddress = snapDogClient.IpAddress,
+            HostName = snapDogClient._snapcastClient.Host.Name,
+            HostOs = snapDogClient._snapcastClient.Host.Os,
+            HostArch = snapDogClient._snapcastClient.Host.Arch,
+            SnapClientVersion = null, // Not available in SnapcastClient model
+            SnapClientProtocolVersion = null, // Not available in SnapcastClient model
+        };
+
+        return Result<ClientState>.Success(state);
     }
 
     public async Task<Result<List<ClientState>>> GetAllClientsAsync()
     {
         this.LogGettingAllClients();
 
-        await Task.Delay(1); // TODO: Fix simulation async operation
+        var clientStates = new List<ClientState>();
 
-        var allStates = this
-            ._clientStates.Values.Select(state => state with { TimestampUtc = DateTime.UtcNow })
-            .ToList();
+        for (int clientId = 1; clientId <= this._clientConfigs.Count; clientId++)
+        {
+            var stateResult = await this.GetClientStateAsync(clientId);
+            if (stateResult.IsSuccess)
+            {
+                clientStates.Add(stateResult.Value!);
+            }
+            // Continue even if some clients are not found/connected
+        }
 
-        return Result<List<ClientState>>.Success(allStates);
+        return Result<List<ClientState>>.Success(clientStates);
     }
 
     public async Task<Result<List<ClientState>>> GetClientsByZoneAsync(int zoneId)
     {
         this.LogGettingClientsByZone(zoneId);
 
-        await Task.Delay(1); // TODO: Fix simulation async operation
+        var allClientsResult = await this.GetAllClientsAsync();
+        if (!allClientsResult.IsSuccess)
+        {
+            return Result<List<ClientState>>.Failure(allClientsResult.ErrorMessage!);
+        }
 
-        var zoneClients = this
-            ._clientStates.Values.Where(state => state.ZoneId == zoneId)
-            .Select(state => state with { TimestampUtc = DateTime.UtcNow })
-            .ToList();
+        var zoneClients = allClientsResult.Value!.Where(c => c.ZoneId == zoneId).ToList();
 
         return Result<List<ClientState>>.Success(zoneClients);
     }
@@ -106,66 +159,62 @@ public partial class ClientManager : IClientManager
     {
         this.LogAssigningClientToZone(clientId, zoneId);
 
-        await Task.Delay(10); // TODO: Fix simulation async operation
+        // TODO: Implement zone assignment through Snapcast groups
+        // This would require mapping zones to Snapcast groups and moving clients between groups
+        await Task.Delay(1); // Maintain async signature
 
-        if (!this._clientStates.TryGetValue(clientId, out var clientState))
-        {
-            this.LogClientNotFound(clientId);
-            return Result.Failure($"Client {clientId} not found");
-        }
-
-        // Update the client's zone assignment
-        var updatedState = clientState with
-        {
-            ZoneId = zoneId,
-            TimestampUtc = DateTime.UtcNow,
-        };
-
-        this._clientStates[clientId] = updatedState;
-
-        return Result.Success();
+        return Result.Failure("Client zone assignment not yet implemented");
     }
 
     /// <summary>
-    /// Placeholder implementation of IClient.
-    /// This will be replaced with actual Snapcast client integration later.
+    /// Internal implementation of IClient that wraps a Snapcast client with SnapDog2 configuration.
     /// </summary>
-    public partial class ClientService : IClient
+    private class SnapDogClient : IClient
     {
-        private readonly ILogger _logger;
+        internal readonly SnapcastClient.Models.SnapClient _snapcastClient;
+        private readonly ClientConfig _config;
+        private readonly ISnapcastService _snapcastService;
 
-        [LoggerMessage(7101, LogLevel.Information, "Client {ClientId} ({ClientName}): {Action}")]
-        private partial void LogClientAction(int clientId, string clientName, string action);
-
-        public int Id { get; }
-        public string Name { get; }
-
-        public ClientService(int id, string name, ILogger logger)
+        public SnapDogClient(
+            int id,
+            SnapcastClient.Models.SnapClient snapcastClient,
+            ClientConfig config,
+            ISnapcastService snapcastService
+        )
         {
             this.Id = id;
-            this.Name = name;
-            this._logger = logger;
+            this._snapcastClient = snapcastClient;
+            this._config = config;
+            this._snapcastService = snapcastService;
         }
+
+        public int Id { get; }
+        public string Name => this._config.Name;
+
+        // Internal properties for ClientState mapping
+        internal bool Connected => this._snapcastClient.Connected;
+        internal int Volume => this._snapcastClient.Config.Volume.Percent;
+        internal bool Muted => this._snapcastClient.Config.Volume.Muted;
+        internal int LatencyMs => this._snapcastClient.Config.Latency;
+        internal int ZoneId => this._config.DefaultZone; // TODO: Get actual zone from Snapcast groups
+        internal string MacAddress => this._snapcastClient.Host.Mac;
+        internal string IpAddress => this._snapcastClient.Host.Ip;
+        internal DateTime LastSeenUtc =>
+            DateTimeOffset.FromUnixTimeSeconds(this._snapcastClient.LastSeen.Sec).UtcDateTime;
 
         public async Task<Result> SetVolumeAsync(int volume)
         {
-            this.LogClientAction(this.Id, this.Name, $"Set volume to {volume}");
-            await Task.Delay(10); // TODO: Fix simulation async operation
-            return Result.Success();
+            return await this._snapcastService.SetClientVolumeAsync(this._snapcastClient.Id, volume);
         }
 
         public async Task<Result> SetMuteAsync(bool mute)
         {
-            this.LogClientAction(this.Id, this.Name, mute ? "Mute" : "Unmute");
-            await Task.Delay(10); // TODO: Fix simulation async operation
-            return Result.Success();
+            return await this._snapcastService.SetClientMuteAsync(this._snapcastClient.Id, mute);
         }
 
         public async Task<Result> SetLatencyAsync(int latencyMs)
         {
-            this.LogClientAction(this.Id, this.Name, $"Set latency to {latencyMs}ms");
-            await Task.Delay(10); // TODO: Fix simulation async operation
-            return Result.Success();
+            return await this._snapcastService.SetClientLatencyAsync(this._snapcastClient.Id, latencyMs);
         }
     }
 }

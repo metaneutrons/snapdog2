@@ -1,6 +1,7 @@
 namespace SnapDog2.Core.Abstractions;
 
 using SnapcastClient.Models;
+using SnapDog2.Core.Configuration;
 
 /// <summary>
 /// Repository for managing raw Snapcast server state.
@@ -32,6 +33,15 @@ public interface ISnapcastStateRepository
     /// <param name="clientId">Client ID to retrieve.</param>
     /// <returns>Client information or null if not found.</returns>
     SnapClient? GetClient(string clientId);
+
+    /// <summary>
+    /// Gets a client by SnapDog2 client index (1-based).
+    /// This method handles the mapping between SnapDog2 client index and Snapcast client data.
+    /// It will look up the client configuration by index, then find the matching Snapcast client by MAC address.
+    /// </summary>
+    /// <param name="clientIndex">SnapDog2 client index (1-based).</param>
+    /// <returns>Client information or null if not found.</returns>
+    SnapClient? GetClientByIndex(int clientIndex);
 
     /// <summary>
     /// Gets all clients currently known to the repository.

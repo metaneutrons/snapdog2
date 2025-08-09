@@ -1,9 +1,11 @@
 namespace SnapDog2.Infrastructure.Integrations.Snapcast;
 
 using System.Collections.Concurrent;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using SnapcastClient.Models;
 using SnapDog2.Core.Abstractions;
+using SnapDog2.Core.Configuration;
 
 /// <summary>
 /// Thread-safe repository holding the last known state received from Snapcast server.
@@ -17,10 +19,12 @@ public partial class SnapcastStateRepository : ISnapcastStateRepository
     private Server _serverInfo;
     private readonly object _serverInfoLock = new();
     private readonly ILogger<SnapcastStateRepository> _logger;
+    private readonly SnapDogConfiguration _configuration;
 
-    public SnapcastStateRepository(ILogger<SnapcastStateRepository> logger)
+    public SnapcastStateRepository(ILogger<SnapcastStateRepository> logger, SnapDogConfiguration configuration)
     {
         this._logger = logger;
+        this._configuration = configuration;
         this._serverInfo = new Server(); // Initialize with empty server info
     }
 
@@ -50,6 +54,37 @@ public partial class SnapcastStateRepository : ISnapcastStateRepository
 
     [LoggerMessage(7, LogLevel.Debug, "Removing Snapcast stream {StreamId}")]
     private partial void LogRemovingStream(string streamId);
+
+    [LoggerMessage(8, LogLevel.Warning, "Client index {ClientIndex} is out of range. Valid range: 1-{MaxClients}")]
+    private partial void LogClientIndexOutOfRange(int clientIndex, int maxClients);
+
+    [LoggerMessage(9, LogLevel.Warning, "Client {ClientIndex} ({ClientName}) has no MAC address configured")]
+    private partial void LogClientMacNotConfigured(int clientIndex, string clientName);
+
+    [LoggerMessage(
+        10,
+        LogLevel.Warning,
+        "Client {ClientIndex} ({ClientName}) with MAC {MacAddress} not found in Snapcast"
+    )]
+    private partial void LogClientNotFoundByMac(int clientIndex, string clientName, string macAddress);
+
+    [LoggerMessage(
+        11,
+        LogLevel.Debug,
+        "Client {ClientIndex} ({ClientName}) with MAC {MacAddress} found as Snapcast client {SnapcastClientId}"
+    )]
+    private partial void LogClientFoundByMac(
+        int clientIndex,
+        string clientName,
+        string macAddress,
+        string snapcastClientId
+    );
+
+    [LoggerMessage(12, LogLevel.Debug, "Available Snapcast clients: {AvailableClients}")]
+    private partial void LogAvailableClients(string availableClients);
+
+    [LoggerMessage(13, LogLevel.Information, "Total Snapcast clients in repository: {ClientCount}")]
+    private partial void LogTotalClientCount(int clientCount);
 
     #endregion
 
@@ -111,6 +146,51 @@ public partial class SnapcastStateRepository : ISnapcastStateRepository
     public SnapClient? GetClient(string clientId)
     {
         return this._clients.TryGetValue(clientId, out var client) ? client : null;
+    }
+
+    public SnapClient? GetClientByIndex(int clientIndex)
+    {
+        // Convert 1-based index to 0-based array index
+        var arrayIndex = clientIndex - 1;
+
+        // Check if index is valid
+        if (arrayIndex < 0 || arrayIndex >= this._configuration.Clients.Count)
+        {
+            this.LogClientIndexOutOfRange(clientIndex, this._configuration.Clients.Count);
+            return null;
+        }
+
+        var clientConfig = this._configuration.Clients[arrayIndex];
+
+        // If no MAC address configured, we can't look up the client
+        if (string.IsNullOrEmpty(clientConfig.Mac))
+        {
+            this.LogClientMacNotConfigured(clientIndex, clientConfig.Name);
+            return null;
+        }
+
+        // Try to find client by MAC address
+        var matchingClient = this._clients.Values.FirstOrDefault(c =>
+            string.Equals(c.Host.Mac, clientConfig.Mac, StringComparison.OrdinalIgnoreCase)
+        );
+
+        if (matchingClient.Id == null) // SnapClient is a struct, check if ID is null/empty
+        {
+            this.LogClientNotFoundByMac(clientIndex, clientConfig.Name, clientConfig.Mac);
+            // Log available clients for debugging
+            var availableClients = this._clients.Values.Select(c => $"{c.Id} (MAC: {c.Host.Mac})");
+            this.LogAvailableClients(string.Join(", ", availableClients));
+
+            // Also log total client count for debugging
+            this.LogTotalClientCount(this._clients.Count);
+            return null;
+        }
+        else
+        {
+            this.LogClientFoundByMac(clientIndex, clientConfig.Name, clientConfig.Mac, matchingClient.Id);
+        }
+
+        return matchingClient;
     }
 
     public IEnumerable<SnapClient> GetAllClients()
