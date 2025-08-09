@@ -1,6 +1,5 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
-using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Extensions;
 
@@ -9,6 +8,7 @@ namespace SnapDog2.Helpers;
 /// <summary>
 /// Helper class for displaying comprehensive startup information.
 /// Provides immediate startup feedback before service registrations begin.
+/// Uses Console.WriteLine for clean output without logger prefixes.
 /// </summary>
 public static class StartupInformationHelper
 {
@@ -19,27 +19,23 @@ public static class StartupInformationHelper
     /// <param name="config">The SnapDog2 configuration</param>
     public static void ShowStartupInformation(SnapDogConfiguration config)
     {
-        // Create a simple console logger for immediate output
-        using var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-        var logger = loggerFactory.CreateLogger("StartupInfo");
-
-        ShowStartupBanner(logger);
-        ShowApplicationInformation(logger);
-        ShowGitVersionInformation(logger);
-        ShowRuntimeInformation(logger);
-        ShowKeyConfiguration(logger, config);
-        ShowServicesStatus(logger, config);
-        ShowEndBanner(logger);
+        ShowStartupBanner();
+        ShowApplicationInformation();
+        ShowGitVersionInformation();
+        ShowRuntimeInformation();
+        ShowKeyConfiguration(config);
+        ShowServicesStatus(config);
+        ShowEndBanner();
     }
 
-    private static void ShowStartupBanner(ILogger logger)
+    private static void ShowStartupBanner()
     {
-        logger.LogInformation("════════════════════════════════");
-        logger.LogInformation("💑💑💑 SnapDog2 starting... 💑💑💑");
-        logger.LogInformation("════════════════════════════════");
+        Console.WriteLine("════════════════════════════════");
+        Console.WriteLine("💑💑💑 SnapDog2 starting... 💑💑💑");
+        Console.WriteLine("════════════════════════════════");
     }
 
-    private static void ShowApplicationInformation(ILogger logger)
+    private static void ShowApplicationInformation()
     {
         var assembly = Assembly.GetExecutingAssembly();
         var version = assembly.GetName().Version;
@@ -47,69 +43,60 @@ public static class StartupInformationHelper
             .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
             ?.InformationalVersion;
 
-        logger.LogInformation("🚀 Application Information:");
-        logger.LogInformation("   Name: {ApplicationName}", assembly.GetName().Name);
-        logger.LogInformation("   Version: {Version}", version?.ToString() ?? "Unknown");
-        logger.LogInformation("   Informational Version: {InformationalVersion}", informationalVersion ?? "Unknown");
+        Console.WriteLine("🚀 Application Information:");
+        Console.WriteLine($"   Name: {assembly.GetName().Name}");
+        Console.WriteLine($"   Version: {version?.ToString() ?? "Unknown"}");
+        Console.WriteLine($"   Informational Version: {informationalVersion ?? "Unknown"}");
     }
 
-    private static void ShowGitVersionInformation(ILogger logger)
+    private static void ShowGitVersionInformation()
     {
         var gitVersion = GitVersionHelper.GetVersionInfo();
-        logger.LogInformation("📋 GitVersion Information:");
-        logger.LogInformation("   Version: {SemVer}", gitVersion.SemVer);
-        logger.LogInformation("   Branch: {BranchName}", gitVersion.BranchName);
-        logger.LogInformation("   Commit: {ShortSha} ({CommitDate})", gitVersion.ShortSha, gitVersion.CommitDate);
+        Console.WriteLine("📋 GitVersion Information:");
+        Console.WriteLine($"   Version: {gitVersion.SemVer}");
+        Console.WriteLine($"   Branch: {gitVersion.BranchName}");
+        Console.WriteLine($"   Commit: {gitVersion.ShortSha} ({gitVersion.CommitDate})");
     }
 
-    private static void ShowRuntimeInformation(ILogger logger)
+    private static void ShowRuntimeInformation()
     {
-        logger.LogInformation("⚙️  Runtime Information:");
-        logger.LogInformation("   .NET Version: {DotNetVersion}", Environment.Version);
-        logger.LogInformation("   OS: {OperatingSystem}", RuntimeInformation.OSDescription);
-        logger.LogInformation("   Architecture: {Architecture}", RuntimeInformation.OSArchitecture);
+        Console.WriteLine("⚙️  Runtime Information:");
+        Console.WriteLine($"   .NET Version: {Environment.Version}");
+        Console.WriteLine($"   OS: {RuntimeInformation.OSDescription}");
+        Console.WriteLine($"   Architecture: {RuntimeInformation.OSArchitecture}");
     }
 
-    private static void ShowKeyConfiguration(ILogger logger, SnapDogConfiguration config)
+    private static void ShowKeyConfiguration(SnapDogConfiguration config)
     {
-        logger.LogInformation("⚙️  Key Configuration:");
-        logger.LogInformation("   Environment: {Environment}", config.System.Environment);
-        logger.LogInformation("   API Enabled: {ApiEnabled} (Port: {ApiPort})", config.Api.Enabled, config.Api.Port);
-        logger.LogInformation(
-            "   Zones: {ZoneCount}, Clients: {ClientCount}",
-            config.Zones.Count,
-            config.Clients.Count
-        );
+        Console.WriteLine("⚙️  Key Configuration:");
+        Console.WriteLine($"   Environment: {config.System.Environment}");
+        Console.WriteLine($"   API Enabled: {config.Api.Enabled} (Port: {config.Api.Port})");
+        Console.WriteLine($"   Zones: {config.Zones.Count}, Clients: {config.Clients.Count}");
     }
 
-    private static void ShowServicesStatus(ILogger logger, SnapDogConfiguration config)
+    private static void ShowServicesStatus(SnapDogConfiguration config)
     {
-        logger.LogInformation("🔌 Services:");
-        logger.LogInformation(
-            "   Snapcast: {SnapcastAddress}:{SnapcastPort}",
-            config.Services.Snapcast.Address,
-            config.Services.Snapcast.JsonRpcPort
-        );
-        logger.LogInformation(
-            "   MQTT: {MqttStatus}",
-            config.Services.Mqtt.Enabled
-                ? $"{config.Services.Mqtt.BrokerAddress}:{config.Services.Mqtt.Port}"
-                : "Disabled"
-        );
-        logger.LogInformation(
-            "   KNX: {KnxStatus}",
-            config.Services.Knx.Enabled ? $"{config.Services.Knx.Gateway}:{config.Services.Knx.Port}" : "Disabled"
-        );
-        logger.LogInformation(
-            "   Subsonic: {SubsonicStatus}",
-            config.Services.Subsonic.Enabled ? config.Services.Subsonic.Url ?? "Enabled" : "Disabled"
-        );
+        Console.WriteLine("🔌 Services:");
+        Console.WriteLine($"   Snapcast: {config.Services.Snapcast.Address}:{config.Services.Snapcast.JsonRpcPort}");
+
+        var mqttStatus = config.Services.Mqtt.Enabled
+            ? $"{config.Services.Mqtt.BrokerAddress}:{config.Services.Mqtt.Port}"
+            : "Disabled";
+        Console.WriteLine($"   MQTT: {mqttStatus}");
+
+        var knxStatus = config.Services.Knx.Enabled
+            ? $"{config.Services.Knx.Gateway}:{config.Services.Knx.Port}"
+            : "Disabled";
+        Console.WriteLine($"   KNX: {knxStatus}");
+
+        var subsonicStatus = config.Services.Subsonic.Enabled ? config.Services.Subsonic.Url ?? "Enabled" : "Disabled";
+        Console.WriteLine($"   Subsonic: {subsonicStatus}");
     }
 
-    private static void ShowEndBanner(ILogger logger)
+    private static void ShowEndBanner()
     {
-        logger.LogInformation("════════════════════════════════");
-        logger.LogInformation("Starting service registrations...");
-        logger.LogInformation("════════════════════════════════");
+        Console.WriteLine("════════════════════════════════");
+        Console.WriteLine("Starting service registrations...");
+        Console.WriteLine("════════════════════════════════");
     }
 }
