@@ -481,22 +481,24 @@ public partial class NextPlaylistCommandHandler : ICommandHandler<NextPlaylistCo
 
     public async Task<Result> Handle(NextPlaylistCommand request, CancellationToken cancellationToken)
     {
-        this._logger.LogInformation(
-            "Playing next playlist for Zone {ZoneId} from {Source}",
-            request.ZoneId,
-            request.Source
-        );
+        this.LogPlayingNextPlaylist(request.ZoneId, request.Source);
 
         var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            this._logger.LogWarning("Zone {ZoneId} not found for NextPlaylistCommand", request.ZoneId);
+            this.LogZoneNotFound(request.ZoneId, nameof(NextPlaylistCommand));
             return zoneResult;
         }
 
         var zone = zoneResult.Value!;
         return await zone.NextPlaylistAsync().ConfigureAwait(false);
     }
+
+    [LoggerMessage(9025, LogLevel.Information, "Playing next playlist for Zone {ZoneId} from {Source}")]
+    private partial void LogPlayingNextPlaylist(int zoneId, SnapDog2.Core.Enums.CommandSource source);
+
+    [LoggerMessage(9026, LogLevel.Warning, "Zone {ZoneId} not found for {CommandName}")]
+    private partial void LogZoneNotFound(int zoneId, string commandName);
 }
 
 /// <summary>
@@ -515,22 +517,24 @@ public partial class PreviousPlaylistCommandHandler : ICommandHandler<PreviousPl
 
     public async Task<Result> Handle(PreviousPlaylistCommand request, CancellationToken cancellationToken)
     {
-        this._logger.LogInformation(
-            "Playing previous playlist for Zone {ZoneId} from {Source}",
-            request.ZoneId,
-            request.Source
-        );
+        this.LogPlayingPreviousPlaylist(request.ZoneId, request.Source);
 
         var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            this._logger.LogWarning("Zone {ZoneId} not found for PreviousPlaylistCommand", request.ZoneId);
+            this.LogZoneNotFound(request.ZoneId, nameof(PreviousPlaylistCommand));
             return zoneResult;
         }
 
         var zone = zoneResult.Value!;
         return await zone.PreviousPlaylistAsync().ConfigureAwait(false);
     }
+
+    [LoggerMessage(9027, LogLevel.Information, "Playing previous playlist for Zone {ZoneId} from {Source}")]
+    private partial void LogPlayingPreviousPlaylist(int zoneId, SnapDog2.Core.Enums.CommandSource source);
+
+    [LoggerMessage(9028, LogLevel.Warning, "Zone {ZoneId} not found for {CommandName}")]
+    private partial void LogZoneNotFound(int zoneId, string commandName);
 }
 
 /// <summary>
@@ -549,23 +553,24 @@ public partial class SetTrackRepeatCommandHandler : ICommandHandler<SetTrackRepe
 
     public async Task<Result> Handle(SetTrackRepeatCommand request, CancellationToken cancellationToken)
     {
-        this._logger.LogInformation(
-            "Setting track repeat for Zone {ZoneId} to {Enabled} from {Source}",
-            request.ZoneId,
-            request.Enabled,
-            request.Source
-        );
+        this.LogSettingTrackRepeat(request.ZoneId, request.Enabled, request.Source);
 
         var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            this._logger.LogWarning("Zone {ZoneId} not found for SetTrackRepeatCommand", request.ZoneId);
+            this.LogZoneNotFound(request.ZoneId, nameof(SetTrackRepeatCommand));
             return zoneResult;
         }
 
         var zone = zoneResult.Value!;
         return await zone.SetTrackRepeatAsync(request.Enabled).ConfigureAwait(false);
     }
+
+    [LoggerMessage(9029, LogLevel.Information, "Setting track repeat for Zone {ZoneId} to {Enabled} from {Source}")]
+    private partial void LogSettingTrackRepeat(int zoneId, bool enabled, SnapDog2.Core.Enums.CommandSource source);
+
+    [LoggerMessage(9030, LogLevel.Warning, "Zone {ZoneId} not found for {CommandName}")]
+    private partial void LogZoneNotFound(int zoneId, string commandName);
 }
 
 /// <summary>
@@ -584,22 +589,24 @@ public partial class ToggleTrackRepeatCommandHandler : ICommandHandler<ToggleTra
 
     public async Task<Result> Handle(ToggleTrackRepeatCommand request, CancellationToken cancellationToken)
     {
-        this._logger.LogInformation(
-            "Toggling track repeat for Zone {ZoneId} from {Source}",
-            request.ZoneId,
-            request.Source
-        );
+        this.LogTogglingTrackRepeat(request.ZoneId, request.Source);
 
         var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            this._logger.LogWarning("Zone {ZoneId} not found for ToggleTrackRepeatCommand", request.ZoneId);
+            this.LogZoneNotFound(request.ZoneId, nameof(ToggleTrackRepeatCommand));
             return zoneResult;
         }
 
         var zone = zoneResult.Value!;
         return await zone.ToggleTrackRepeatAsync().ConfigureAwait(false);
     }
+
+    [LoggerMessage(9031, LogLevel.Information, "Toggling track repeat for Zone {ZoneId} from {Source}")]
+    private partial void LogTogglingTrackRepeat(int zoneId, SnapDog2.Core.Enums.CommandSource source);
+
+    [LoggerMessage(9032, LogLevel.Warning, "Zone {ZoneId} not found for {CommandName}")]
+    private partial void LogZoneNotFound(int zoneId, string commandName);
 }
 
 /// <summary>
@@ -618,23 +625,24 @@ public partial class SetPlaylistShuffleCommandHandler : ICommandHandler<SetPlayl
 
     public async Task<Result> Handle(SetPlaylistShuffleCommand request, CancellationToken cancellationToken)
     {
-        this._logger.LogInformation(
-            "Setting playlist shuffle for Zone {ZoneId} to {Enabled} from {Source}",
-            request.ZoneId,
-            request.Enabled,
-            request.Source
-        );
+        this.LogSettingPlaylistShuffle(request.ZoneId, request.Enabled, request.Source);
 
         var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            this._logger.LogWarning("Zone {ZoneId} not found for SetPlaylistShuffleCommand", request.ZoneId);
+            this.LogZoneNotFound(request.ZoneId, nameof(SetPlaylistShuffleCommand));
             return zoneResult;
         }
 
         var zone = zoneResult.Value!;
         return await zone.SetPlaylistShuffleAsync(request.Enabled).ConfigureAwait(false);
     }
+
+    [LoggerMessage(9033, LogLevel.Information, "Setting playlist shuffle for Zone {ZoneId} to {Enabled} from {Source}")]
+    private partial void LogSettingPlaylistShuffle(int zoneId, bool enabled, SnapDog2.Core.Enums.CommandSource source);
+
+    [LoggerMessage(9034, LogLevel.Warning, "Zone {ZoneId} not found for {CommandName}")]
+    private partial void LogZoneNotFound(int zoneId, string commandName);
 }
 
 /// <summary>
@@ -656,22 +664,24 @@ public partial class TogglePlaylistShuffleCommandHandler : ICommandHandler<Toggl
 
     public async Task<Result> Handle(TogglePlaylistShuffleCommand request, CancellationToken cancellationToken)
     {
-        this._logger.LogInformation(
-            "Toggling playlist shuffle for Zone {ZoneId} from {Source}",
-            request.ZoneId,
-            request.Source
-        );
+        this.LogTogglingPlaylistShuffle(request.ZoneId, request.Source);
 
         var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            this._logger.LogWarning("Zone {ZoneId} not found for TogglePlaylistShuffleCommand", request.ZoneId);
+            this.LogZoneNotFound(request.ZoneId, nameof(TogglePlaylistShuffleCommand));
             return zoneResult;
         }
 
         var zone = zoneResult.Value!;
         return await zone.TogglePlaylistShuffleAsync().ConfigureAwait(false);
     }
+
+    [LoggerMessage(9035, LogLevel.Information, "Toggling playlist shuffle for Zone {ZoneId} from {Source}")]
+    private partial void LogTogglingPlaylistShuffle(int zoneId, SnapDog2.Core.Enums.CommandSource source);
+
+    [LoggerMessage(9036, LogLevel.Warning, "Zone {ZoneId} not found for {CommandName}")]
+    private partial void LogZoneNotFound(int zoneId, string commandName);
 }
 
 /// <summary>
@@ -690,23 +700,24 @@ public partial class SetPlaylistRepeatCommandHandler : ICommandHandler<SetPlayli
 
     public async Task<Result> Handle(SetPlaylistRepeatCommand request, CancellationToken cancellationToken)
     {
-        this._logger.LogInformation(
-            "Setting playlist repeat for Zone {ZoneId} to {Enabled} from {Source}",
-            request.ZoneId,
-            request.Enabled,
-            request.Source
-        );
+        this.LogSettingPlaylistRepeat(request.ZoneId, request.Enabled, request.Source);
 
         var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            this._logger.LogWarning("Zone {ZoneId} not found for SetPlaylistRepeatCommand", request.ZoneId);
+            this.LogZoneNotFound(request.ZoneId, nameof(SetPlaylistRepeatCommand));
             return zoneResult;
         }
 
         var zone = zoneResult.Value!;
         return await zone.SetPlaylistRepeatAsync(request.Enabled).ConfigureAwait(false);
     }
+
+    [LoggerMessage(9037, LogLevel.Information, "Setting playlist repeat for Zone {ZoneId} to {Enabled} from {Source}")]
+    private partial void LogSettingPlaylistRepeat(int zoneId, bool enabled, SnapDog2.Core.Enums.CommandSource source);
+
+    [LoggerMessage(9038, LogLevel.Warning, "Zone {ZoneId} not found for {CommandName}")]
+    private partial void LogZoneNotFound(int zoneId, string commandName);
 }
 
 /// <summary>
@@ -728,20 +739,22 @@ public partial class TogglePlaylistRepeatCommandHandler : ICommandHandler<Toggle
 
     public async Task<Result> Handle(TogglePlaylistRepeatCommand request, CancellationToken cancellationToken)
     {
-        this._logger.LogInformation(
-            "Toggling playlist repeat for Zone {ZoneId} from {Source}",
-            request.ZoneId,
-            request.Source
-        );
+        this.LogTogglingPlaylistRepeat(request.ZoneId, request.Source);
 
         var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            this._logger.LogWarning("Zone {ZoneId} not found for TogglePlaylistRepeatCommand", request.ZoneId);
+            this.LogZoneNotFound(request.ZoneId, nameof(TogglePlaylistRepeatCommand));
             return zoneResult;
         }
 
         var zone = zoneResult.Value!;
         return await zone.TogglePlaylistRepeatAsync().ConfigureAwait(false);
     }
+
+    [LoggerMessage(9039, LogLevel.Information, "Toggling playlist repeat for Zone {ZoneId} from {Source}")]
+    private partial void LogTogglingPlaylistRepeat(int zoneId, SnapDog2.Core.Enums.CommandSource source);
+
+    [LoggerMessage(9040, LogLevel.Warning, "Zone {ZoneId} not found for {CommandName}")]
+    private partial void LogZoneNotFound(int zoneId, string commandName);
 }
