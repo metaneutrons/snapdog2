@@ -30,17 +30,17 @@ using SnapDog2.Server.Features.Zones.Queries;
 /// </summary>
 public partial class StatePublishingService : BackgroundService
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly ILogger<StatePublishingService> _logger;
     private readonly SnapDogConfiguration _configuration;
 
     public StatePublishingService(
-        IServiceProvider serviceProvider,
+        IServiceScopeFactory serviceScopeFactory,
         ILogger<StatePublishingService> logger,
         SnapDogConfiguration configuration
     )
     {
-        this._serviceProvider = serviceProvider;
+        this._serviceScopeFactory = serviceScopeFactory;
         this._logger = logger;
         this._configuration = configuration;
     }
@@ -101,8 +101,9 @@ public partial class StatePublishingService : BackgroundService
             this.LogStatePublishingStarted();
 
             // Check if any integration services are available
-            var mqttService = this._serviceProvider.GetService<IMqttService>();
-            var knxService = this._serviceProvider.GetService<IKnxService>();
+            using var tempScope = this._serviceScopeFactory.CreateScope();
+            var mqttService = tempScope.ServiceProvider.GetService<IMqttService>();
+            var knxService = tempScope.ServiceProvider.GetService<IKnxService>();
 
             if (mqttService == null && knxService == null)
             {
@@ -114,8 +115,9 @@ public partial class StatePublishingService : BackgroundService
             var successCount = 0;
             var failureCount = 0;
 
-            // Get mediator for publishing notifications
-            var mediator = this._serviceProvider.GetRequiredService<IMediator>();
+            // Create scope to resolve scoped services like IMediator
+            using var scope = this._serviceScopeFactory.CreateScope();
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
             // 1. Publish global system state (SYSTEM_STATUS, VERSION_INFO, SERVER_STATS)
             this.LogPublishingGlobalState();

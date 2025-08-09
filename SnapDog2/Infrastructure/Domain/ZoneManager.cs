@@ -13,7 +13,7 @@ using SnapDog2.Server.Features.Zones.Notifications;
 /// Production-ready implementation of IZoneManager with full Snapcast integration.
 /// Manages audio zones, their state, and coordinates with Snapcast groups.
 /// </summary>
-public partial class ZoneManager : IZoneManager, IAsyncDisposable
+public partial class ZoneManager : IZoneManager, IAsyncDisposable, IDisposable
 {
     private readonly ILogger<ZoneManager> _logger;
     private readonly ISnapcastService _snapcastService;
@@ -216,6 +216,13 @@ public partial class ZoneManager : IZoneManager, IAsyncDisposable
 
         _initializationLock?.Dispose();
         _disposed = true;
+    }
+
+    public void Dispose()
+    {
+        // Call DisposeAsync synchronously - this is safe for our use case
+        // since the zone services disposal is primarily about cleanup
+        DisposeAsync().AsTask().GetAwaiter().GetResult();
     }
 }
 

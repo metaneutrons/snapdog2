@@ -17,7 +17,7 @@ using SnapDog2.Server.Features.Zones.Notifications;
 /// SoundFlow-based implementation of media player service.
 /// Provides cross-platform audio streaming with native .NET implementation.
 /// </summary>
-public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisposable
+public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisposable, IDisposable
 {
     private readonly SoundFlowConfig _config;
     private readonly IHttpClientFactory _httpClientFactory;
@@ -335,6 +335,13 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
 
             LogServiceDisposed(this._logger);
         }
+    }
+
+    public void Dispose()
+    {
+        // Call DisposeAsync synchronously - this is safe for our use case
+        // since the player disposal is primarily about cleanup
+        DisposeAsync().AsTask().GetAwaiter().GetResult();
     }
 
     // Logger messages
