@@ -7,6 +7,7 @@ using Cortex.Mediator.Notifications;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Abstractions;
+using SnapDog2.Core.Attributes;
 using SnapDog2.Server.Features.Global.Notifications;
 
 /// <summary>
@@ -47,7 +48,11 @@ public partial class GlobalStateNotificationHandler
         this.LogSystemStatusChange(notification.Status.IsOnline);
 
         // Publish to external systems (MQTT, KNX)
-        await this.PublishToExternalSystemsAsync("SYSTEM_STATUS", notification.Status, cancellationToken);
+        await this.PublishToExternalSystemsAsync(
+            StatusIdAttribute.GetStatusId<SystemStatusChangedNotification>(),
+            notification.Status,
+            cancellationToken
+        );
     }
 
     public async Task Handle(VersionInfoChangedNotification notification, CancellationToken cancellationToken)
@@ -58,7 +63,11 @@ public partial class GlobalStateNotificationHandler
         );
 
         // Publish to external systems (MQTT, KNX)
-        await this.PublishToExternalSystemsAsync("VERSION_INFO", notification.VersionInfo, cancellationToken);
+        await this.PublishToExternalSystemsAsync(
+            StatusIdAttribute.GetStatusId<VersionInfoChangedNotification>(),
+            notification.VersionInfo,
+            cancellationToken
+        );
     }
 
     public async Task Handle(ServerStatsChangedNotification notification, CancellationToken cancellationToken)
@@ -66,7 +75,11 @@ public partial class GlobalStateNotificationHandler
         this.LogServerStatsChange(notification.Stats.CpuUsagePercent, notification.Stats.MemoryUsageMb);
 
         // Publish to external systems (MQTT, KNX)
-        await this.PublishToExternalSystemsAsync("SERVER_STATS", notification.Stats, cancellationToken);
+        await this.PublishToExternalSystemsAsync(
+            StatusIdAttribute.GetStatusId<ServerStatsChangedNotification>(),
+            notification.Stats,
+            cancellationToken
+        );
     }
 
     public async Task Handle(SystemErrorNotification notification, CancellationToken cancellationToken)
@@ -74,7 +87,11 @@ public partial class GlobalStateNotificationHandler
         this.LogSystemError(notification.Error.ErrorCode, notification.Error.Message);
 
         // Publish to external systems (MQTT, KNX)
-        await this.PublishToExternalSystemsAsync("ERROR_STATUS", notification.Error, cancellationToken);
+        await this.PublishToExternalSystemsAsync(
+            StatusIdAttribute.GetStatusId<SystemErrorNotification>(),
+            notification.Error,
+            cancellationToken
+        );
     }
 
     /// <summary>

@@ -2,11 +2,13 @@ namespace SnapDog2.Server.Features.Global.Notifications;
 
 using System;
 using Cortex.Mediator.Notifications;
+using SnapDog2.Core.Attributes;
 using SnapDog2.Core.Models;
 
 /// <summary>
 /// Notification published when a system error occurs.
 /// </summary>
+[StatusId("SYSTEM_ERROR", "SE-001")]
 public record SystemErrorNotification : INotification
 {
     /// <summary>
