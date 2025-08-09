@@ -1,12 +1,14 @@
 namespace SnapDog2.Server.Features.Clients.Commands.Volume;
 
 using Cortex.Mediator.Commands;
+using SnapDog2.Core.Attributes;
 using SnapDog2.Core.Enums;
 using SnapDog2.Core.Models;
 
 /// <summary>
 /// Command to toggle client mute state. Switches between muted and unmuted state for an individual Snapcast client.
 /// </summary>
+[CommandId("TOGGLE_CLIENT_MUTE", "CM-003")]
 public record ToggleClientMuteCommand : ICommand<Result>
 {
     /// <summary>

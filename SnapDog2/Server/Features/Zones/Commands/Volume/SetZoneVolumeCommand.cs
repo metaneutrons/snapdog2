@@ -1,12 +1,14 @@
 namespace SnapDog2.Server.Features.Zones.Commands.Volume;
 
 using Cortex.Mediator.Commands;
+using SnapDog2.Core.Attributes;
 using SnapDog2.Core.Enums;
 using SnapDog2.Core.Models;
 
 /// <summary>
 /// Command to set the volume for a specific zone. Sets the absolute volume level for all clients in the zone.
 /// </summary>
+[CommandId("SET_ZONE_VOLUME", "ZV-002")]
 public record SetZoneVolumeCommand : ICommand<Result>
 {
     /// <summary>

@@ -1,12 +1,14 @@
 namespace SnapDog2.Server.Features.Zones.Commands.Track;
 
 using Cortex.Mediator.Commands;
+using SnapDog2.Core.Attributes;
 using SnapDog2.Core.Enums;
 using SnapDog2.Core.Models;
 
 /// <summary>
-/// Command to set track repeat mode.
+/// Command to set track repeat mode in a zone.
 /// </summary>
+[CommandId("SET_TRACK_REPEAT", "ZTR-001")]
 public record SetTrackRepeatCommand : ICommand<Result>
 {
     /// <summary>
@@ -15,12 +17,13 @@ public record SetTrackRepeatCommand : ICommand<Result>
     public required int ZoneId { get; init; }
 
     /// <summary>
-    /// Gets whether to enable track repeat.
+    /// Gets whether track repeat should be enabled.
     /// </summary>
     public required bool Enabled { get; init; }
 
     /// <summary>
     /// Gets the source that initiated the command.
+    /// Used for tracking command origin and audit purposes.
     /// </summary>
     public CommandSource Source { get; init; } = CommandSource.Internal;
 }

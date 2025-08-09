@@ -1,12 +1,14 @@
 namespace SnapDog2.Server.Features.Zones.Commands.Playlist;
 
 using Cortex.Mediator.Commands;
+using SnapDog2.Core.Attributes;
 using SnapDog2.Core.Enums;
 using SnapDog2.Core.Models;
 
 /// <summary>
-/// Command to play the next playlist in a zone.
+/// Command to skip to the next playlist in a zone.
 /// </summary>
+[CommandId("NEXT_PLAYLIST", "ZPL-003")]
 public record NextPlaylistCommand : ICommand<Result>
 {
     /// <summary>
@@ -16,6 +18,7 @@ public record NextPlaylistCommand : ICommand<Result>
 
     /// <summary>
     /// Gets the source that initiated the command.
+    /// Used for tracking command origin and audit purposes.
     /// </summary>
     public CommandSource Source { get; init; } = CommandSource.Internal;
 }

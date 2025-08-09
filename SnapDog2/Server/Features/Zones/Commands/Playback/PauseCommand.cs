@@ -1,12 +1,14 @@
 namespace SnapDog2.Server.Features.Zones.Commands.Playback;
 
 using Cortex.Mediator.Commands;
+using SnapDog2.Core.Attributes;
 using SnapDog2.Core.Enums;
 using SnapDog2.Core.Models;
 
 /// <summary>
-/// Command to pause playback in a zone. Pauses the currently playing media without stopping it completely. Playback can be resumed using the PlayCommand.
+/// Command to pause playback in a zone. Pauses the currently playing track without stopping it.
 /// </summary>
+[CommandId("ZONE_PAUSE", "ZP-003")]
 public record PauseCommand : ICommand<Result>
 {
     /// <summary>

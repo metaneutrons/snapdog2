@@ -1,12 +1,14 @@
 namespace SnapDog2.Server.Features.Zones.Commands.Playlist;
 
 using Cortex.Mediator.Commands;
+using SnapDog2.Core.Attributes;
 using SnapDog2.Core.Enums;
 using SnapDog2.Core.Models;
 
 /// <summary>
-/// Command to toggle playlist shuffle mode.
+/// Command to toggle playlist shuffle mode in a zone.
 /// </summary>
+[CommandId("TOGGLE_PLAYLIST_SHUFFLE", "ZPLS-002")]
 public record TogglePlaylistShuffleCommand : ICommand<Result>
 {
     /// <summary>
@@ -16,6 +18,7 @@ public record TogglePlaylistShuffleCommand : ICommand<Result>
 
     /// <summary>
     /// Gets the source that initiated the command.
+    /// Used for tracking command origin and audit purposes.
     /// </summary>
     public CommandSource Source { get; init; } = CommandSource.Internal;
 }

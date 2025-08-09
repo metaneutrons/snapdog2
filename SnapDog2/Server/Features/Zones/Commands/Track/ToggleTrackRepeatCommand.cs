@@ -1,12 +1,14 @@
 namespace SnapDog2.Server.Features.Zones.Commands.Track;
 
 using Cortex.Mediator.Commands;
+using SnapDog2.Core.Attributes;
 using SnapDog2.Core.Enums;
 using SnapDog2.Core.Models;
 
 /// <summary>
-/// Command to toggle track repeat mode.
+/// Command to toggle track repeat mode in a zone.
 /// </summary>
+[CommandId("TOGGLE_TRACK_REPEAT", "ZTR-002")]
 public record ToggleTrackRepeatCommand : ICommand<Result>
 {
     /// <summary>
@@ -16,6 +18,7 @@ public record ToggleTrackRepeatCommand : ICommand<Result>
 
     /// <summary>
     /// Gets the source that initiated the command.
+    /// Used for tracking command origin and audit purposes.
     /// </summary>
     public CommandSource Source { get; init; } = CommandSource.Internal;
 }

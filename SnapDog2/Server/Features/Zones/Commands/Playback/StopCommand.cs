@@ -1,12 +1,14 @@
 namespace SnapDog2.Server.Features.Zones.Commands.Playback;
 
 using Cortex.Mediator.Commands;
+using SnapDog2.Core.Attributes;
 using SnapDog2.Core.Enums;
 using SnapDog2.Core.Models;
 
 /// <summary>
-/// Command to stop playback in a zone. Stops the currently playing media completely. Playback position is reset to the beginning.
+/// Command to stop playback in a zone. Stops the currently playing track and resets position.
 /// </summary>
+[CommandId("ZONE_STOP", "ZP-004")]
 public record StopCommand : ICommand<Result>
 {
     /// <summary>

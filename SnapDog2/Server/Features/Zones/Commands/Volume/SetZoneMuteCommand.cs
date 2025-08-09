@@ -1,12 +1,14 @@
 namespace SnapDog2.Server.Features.Zones.Commands.Volume;
 
 using Cortex.Mediator.Commands;
+using SnapDog2.Core.Attributes;
 using SnapDog2.Core.Enums;
 using SnapDog2.Core.Models;
 
 /// <summary>
-/// Command to set zone mute state. Mutes or unmutes all clients in the zone simultaneously.
+/// Command to set zone mute state. Mutes or unmutes all clients in the zone.
 /// </summary>
+[CommandId("SET_ZONE_MUTE", "ZM-002")]
 public record SetZoneMuteCommand : ICommand<Result>
 {
     /// <summary>
@@ -15,7 +17,7 @@ public record SetZoneMuteCommand : ICommand<Result>
     public required int ZoneId { get; init; }
 
     /// <summary>
-    /// Gets whether to mute (true) or unmute (false) the zone.
+    /// Gets whether the zone should be muted.
     /// </summary>
     public required bool Enabled { get; init; }
 

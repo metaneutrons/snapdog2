@@ -1,12 +1,14 @@
 namespace SnapDog2.Server.Features.Zones.Commands.Track;
 
 using Cortex.Mediator.Commands;
+using SnapDog2.Core.Attributes;
 using SnapDog2.Core.Enums;
 using SnapDog2.Core.Models;
 
 /// <summary>
-/// Command to set a specific track in a zone.
+/// Command to set the current track in a zone. Changes to a specific track by index.
 /// </summary>
+[CommandId("SET_TRACK", "ZT-002")]
 public record SetTrackCommand : ICommand<Result>
 {
     /// <summary>
@@ -15,12 +17,13 @@ public record SetTrackCommand : ICommand<Result>
     public required int ZoneId { get; init; }
 
     /// <summary>
-    /// Gets the track index to play (1-based).
+    /// Gets the track index to set (1-based).
     /// </summary>
     public required int TrackIndex { get; init; }
 
     /// <summary>
     /// Gets the source that initiated the command.
+    /// Used for tracking command origin and audit purposes.
     /// </summary>
     public CommandSource Source { get; init; } = CommandSource.Internal;
 }

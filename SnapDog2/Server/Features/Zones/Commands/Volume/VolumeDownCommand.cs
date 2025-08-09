@@ -1,12 +1,14 @@
 namespace SnapDog2.Server.Features.Zones.Commands.Volume;
 
 using Cortex.Mediator.Commands;
+using SnapDog2.Core.Attributes;
 using SnapDog2.Core.Enums;
 using SnapDog2.Core.Models;
 
 /// <summary>
-/// Command to decrease zone volume by a specified step. Decreases the volume for all clients in the zone relative to current level.
+/// Command to decrease zone volume. Decreases the volume by a specified step for all clients in the zone.
 /// </summary>
+[CommandId("ZONE_VOLUME_DOWN", "ZV-004")]
 public record VolumeDownCommand : ICommand<Result>
 {
     /// <summary>
@@ -15,7 +17,7 @@ public record VolumeDownCommand : ICommand<Result>
     public required int ZoneId { get; init; }
 
     /// <summary>
-    /// Gets the volume step to decrease (default 5). The volume will be decreased by this amount. Final volume will be clamped to minimum of 0.
+    /// Gets the volume step to decrease by (default: 5). Must be between 1 and 100.
     /// </summary>
     public int Step { get; init; } = 5;
 
