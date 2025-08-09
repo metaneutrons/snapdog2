@@ -52,7 +52,7 @@ public static class CortexMediatorConfiguration
             }
         );
 
-        // Enhanced auto-discovery with comprehensive handler registration
+        // Enhanced auto-discovery with comprehensive handler registration (but suppress duplicate warnings)
         RegisterHandlersWithAutoDiscovery(services, assemblies);
 
         // Register integration services as notification handlers using elegant approach
@@ -114,7 +114,8 @@ public static class CortexMediatorConfiguration
                 }
                 else
                 {
-                    logger?.LogWarning(
+                    // Changed from LogWarning to LogDebug to reduce noise
+                    logger?.LogDebug(
                         "Skipped duplicate registration: {InterfaceType} -> {HandlerType}",
                         interfaceType.Name,
                         handlerType.Name
