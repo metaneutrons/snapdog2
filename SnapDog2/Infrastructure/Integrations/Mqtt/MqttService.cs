@@ -931,7 +931,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
                 "CLIENT_VOLUME" => $"{baseTopic}/{clientConfig.Mqtt.VolumeTopic}",
                 "CLIENT_MUTE" => $"{baseTopic}/{clientConfig.Mqtt.MuteTopic}",
                 "CLIENT_LATENCY" => $"{baseTopic}/{clientConfig.Mqtt.LatencyTopic}",
-                "CLIENT_CONNECTION" => $"{baseTopic}/{clientConfig.Mqtt.ConnectedTopic}",
+                "CLIENT_CONNECTED" => $"{baseTopic}/{clientConfig.Mqtt.ConnectedTopic}",
                 "CLIENT_ZONE_ASSIGNMENT" => $"{baseTopic}/{clientConfig.Mqtt.ZoneTopic}",
                 "CLIENT_STATE" => $"{baseTopic}/{clientConfig.Mqtt.StateTopic}",
                 _ => null,

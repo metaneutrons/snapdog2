@@ -766,7 +766,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
                 {
                     "CLIENT_VOLUME" => client.Knx.VolumeStatus,
                     "CLIENT_MUTE" => client.Knx.MuteStatus,
-                    "CLIENT_CONNECTION" => client.Knx.ConnectedStatus,
+                    "CLIENT_CONNECTED" => client.Knx.ConnectedStatus,
                     "CLIENT_LATENCY" => client.Knx.LatencyStatus,
                     "CLIENT_ZONE_ASSIGNMENT" => client.Knx.ZoneStatus,
                     // Legacy support for old identifiers
@@ -936,7 +936,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             "CLIENT_VOLUME" when payload is int volume => ("CLIENT_VOLUME", Math.Clamp(volume, 0, 100)),
             "CLIENT_MUTE" when payload is bool mute => ("CLIENT_MUTE", mute ? 1 : 0),
             "CLIENT_LATENCY" when payload is int latency => ("CLIENT_LATENCY", Math.Clamp(latency, 0, 65535)),
-            "CLIENT_CONNECTION" when payload is bool connected => ("CLIENT_CONNECTION", connected ? 1 : 0),
+            "CLIENT_CONNECTED" when payload is bool connected => ("CLIENT_CONNECTED", connected ? 1 : 0),
             _ => (null, payload!),
         };
     }
@@ -995,7 +995,12 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             or "CLIENT_MUTE_STATUS"
             or "CLIENT_LATENCY_STATUS"
             or "CLIENT_ZONE_STATUS"
-            or "CLIENT_CONNECTED" => "client",
+            or "CLIENT_CONNECTED"
+            or "CLIENT_CONNECTED"
+            or "CLIENT_VOLUME"
+            or "CLIENT_MUTE"
+            or "CLIENT_LATENCY"
+            or "CLIENT_ZONE_ASSIGNMENT" => "client",
 
             // Zone-specific status IDs (everything else)
             _ => "zone",

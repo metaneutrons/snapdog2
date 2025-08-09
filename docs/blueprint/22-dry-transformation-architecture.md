@@ -50,6 +50,7 @@ public class StatusIdAttribute : Attribute
 **Purpose**: Provides type-safe access to notification status identifiers.
 
 **Usage Pattern**:
+
 ```csharp
 [StatusId("CLIENT_VOLUME", "CV-001")]
 public record ClientVolumeChangedNotification : INotification
@@ -87,6 +88,7 @@ public class CommandIdAttribute : Attribute
 **Purpose**: Provides type-safe access to command identifiers.
 
 **Usage Pattern**:
+
 ```csharp
 [CommandId("SET_CLIENT_VOLUME", "CV-002")]
 public record SetClientVolumeCommand : ICommand<Result>
@@ -103,14 +105,16 @@ var commandId = CommandIdAttribute.GetCommandId<SetClientVolumeCommand>();
 ### 24.4.1. Notification System (19 Classes)
 
 #### 24.4.1.1. Client Notifications (6 Classes)
+
 - `ClientVolumeChangedNotification` → `[StatusId("CLIENT_VOLUME", "CV-001")]`
 - `ClientMuteChangedNotification` → `[StatusId("CLIENT_MUTE", "CM-001")]`
 - `ClientLatencyChangedNotification` → `[StatusId("CLIENT_LATENCY", "CL-001")]`
 - `ClientZoneChangedNotification` → `[StatusId("CLIENT_ZONE", "CZ-001")]`
-- `ClientConnectionChangedNotification` → `[StatusId("CLIENT_CONNECTION", "CC-001")]`
+- `ClientConnectionChangedNotification` → `[StatusId("CLIENT_CONNECTED", "CC-001")]`
 - `ClientStateChangedNotification` → `[StatusId("CLIENT_STATE", "CS-001")]`
 
 #### 24.4.1.2. Zone Notifications (8 Classes)
+
 - `ZonePlaybackStateChangedNotification` → `[StatusId("ZONE_PLAYBACK_STATE", "ZP-001")]`
 - `ZoneVolumeChangedNotification` → `[StatusId("ZONE_VOLUME", "ZV-001")]`
 - `ZoneMuteChangedNotification` → `[StatusId("ZONE_MUTE", "ZM-001")]`
@@ -121,27 +125,32 @@ var commandId = CommandIdAttribute.GetCommandId<SetClientVolumeCommand>();
 - `ZoneStateChangedNotification` → `[StatusId("ZONE_STATE", "ZST-001")]`
 
 #### 24.4.1.3. Global Notifications (4 Classes)
+
 - `SystemStatusChangedNotification` → `[StatusId("SYSTEM_STATUS", "SS-001")]`
 - `VersionInfoChangedNotification` → `[StatusId("VERSION_INFO", "VI-001")]`
 - `ServerStatsChangedNotification` → `[StatusId("SERVER_STATS", "STS-001")]`
 - `SystemErrorNotification` → `[StatusId("SYSTEM_ERROR", "SE-001")]`
 
 #### 24.4.1.4. Generic Infrastructure (1 Class)
+
 - `StatusChangedNotification` → Uses dynamic strings for protocol-agnostic status updates
 
 ### 24.4.2. Command System (22 Classes)
 
 #### 24.4.2.1. Client Commands (3 Classes)
+
 - `SetClientVolumeCommand` → `[CommandId("SET_CLIENT_VOLUME", "CV-002")]`
 - `SetClientMuteCommand` → `[CommandId("SET_CLIENT_MUTE", "CM-002")]`
 - `ToggleClientMuteCommand` → `[CommandId("TOGGLE_CLIENT_MUTE", "CM-003")]`
 
 #### 24.4.2.2. Zone Playback Commands (3 Classes)
+
 - `PlayCommand` → `[CommandId("ZONE_PLAY", "ZP-002")]`
 - `PauseCommand` → `[CommandId("ZONE_PAUSE", "ZP-003")]`
 - `StopCommand` → `[CommandId("ZONE_STOP", "ZP-004")]`
 
 #### 24.4.2.3. Zone Volume Commands (4 Classes)
+
 - `SetZoneVolumeCommand` → `[CommandId("SET_ZONE_VOLUME", "ZV-002")]`
 - `SetZoneMuteCommand` → `[CommandId("SET_ZONE_MUTE", "ZM-002")]`
 - `ToggleZoneMuteCommand` → `[CommandId("TOGGLE_ZONE_MUTE", "ZM-003")]`
@@ -149,6 +158,7 @@ var commandId = CommandIdAttribute.GetCommandId<SetClientVolumeCommand>();
 - `VolumeDownCommand` → `[CommandId("ZONE_VOLUME_DOWN", "ZV-004")]`
 
 #### 24.4.2.4. Zone Track Commands (5 Classes)
+
 - `SetTrackCommand` → `[CommandId("SET_TRACK", "ZT-002")]`
 - `NextTrackCommand` → `[CommandId("NEXT_TRACK", "ZT-003")]`
 - `PreviousTrackCommand` → `[CommandId("PREVIOUS_TRACK", "ZT-004")]`
@@ -156,6 +166,7 @@ var commandId = CommandIdAttribute.GetCommandId<SetClientVolumeCommand>();
 - `ToggleTrackRepeatCommand` → `[CommandId("TOGGLE_TRACK_REPEAT", "ZTR-002")]`
 
 #### 24.4.2.5. Zone Playlist Commands (7 Classes)
+
 - `SetPlaylistCommand` → `[CommandId("SET_PLAYLIST", "ZPL-002")]`
 - `NextPlaylistCommand` → `[CommandId("NEXT_PLAYLIST", "ZPL-003")]`
 - `PreviousPlaylistCommand` → `[CommandId("PREVIOUS_PLAYLIST", "ZPL-004")]`
@@ -199,7 +210,7 @@ public class MqttService
 
         // Command ID automatically resolved via attribute
         var commandId = CommandIdAttribute.GetCommandId<SetZoneVolumeCommand>();
-        
+
         await this.mediator.Send(command);
     }
 }
@@ -210,6 +221,7 @@ public class MqttService
 ### 24.6.1. Compile-Time Validation
 
 The attribute system provides compile-time validation through:
+
 - Generic type constraints ensuring only classes can be used
 - Reflection-based attribute retrieval with clear error messages
 - Type safety preventing identifier mismatches
@@ -236,6 +248,7 @@ var statusId = StatusIdAttribute.GetStatusId<SomeNotification>();
 Blueprint references follow the pattern: `[CATEGORY][SUBCATEGORY]-[NUMBER]`
 
 **Examples**:
+
 - `CV-001`: Client Volume notification (001)
 - `CV-002`: Client Volume command (002)
 - `ZP-001`: Zone Playback notification (001)
@@ -320,6 +333,7 @@ public record NewFeatureCommand : ICommand<Result>
 ### 24.9.3. Validation Enhancements
 
 Future enhancements could include:
+
 - Runtime validation of blueprint references
 - Duplicate identifier detection
 - Naming convention enforcement
