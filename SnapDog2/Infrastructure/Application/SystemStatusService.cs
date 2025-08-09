@@ -5,6 +5,7 @@ using System.Reflection;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Models;
+using SnapDog2.Helpers;
 
 /// <summary>
 /// Implementation of system status service.
@@ -43,16 +44,19 @@ public partial class AppStatusService : IAppStatusService
     {
         this.LogGettingVersionInfo();
 
+        var gitVersionInfo = GitVersionHelper.GetVersionInfo();
         var assembly = Assembly.GetExecutingAssembly();
-        var version = assembly.GetName().Version?.ToString() ?? "Unknown";
 
         var versionDetails = new VersionDetails
         {
-            Version = version,
+            Version = gitVersionInfo.FullSemVer,
+            Major = gitVersionInfo.Major,
+            Minor = gitVersionInfo.Minor,
+            Patch = gitVersionInfo.Patch,
             TimestampUtc = DateTime.UtcNow,
             BuildDateUtc = GetBuildDate(assembly),
-            GitCommit = GetGitCommit(), // TODO: Implement
-            GitBranch = GetGitBranch(), // TODO: Implement
+            GitCommit = gitVersionInfo.Sha,
+            GitBranch = gitVersionInfo.BranchName,
             BuildConfiguration = GetBuildConfiguration(),
         };
 
@@ -88,24 +92,14 @@ public partial class AppStatusService : IAppStatusService
         return null;
     }
 
-    private static string? GetGitCommit()
-    {
-        // TODO: Implement Git commit hash extraction
-        return null;
-    }
-
-    private static string? GetGitBranch()
-    {
-        // TODO: Implement Git branch extraction
-        return null;
-    }
-
     private static string GetBuildConfiguration()
     {
 #if DEBUG
         return "Debug";
-#else
+#elif RELEASE
         return "Release";
+#else
+        return "Unknown";
 #endif
     }
 
