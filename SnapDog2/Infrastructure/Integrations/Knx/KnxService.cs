@@ -740,7 +740,8 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
                     "ZONE_VOLUME" => zone.Knx.VolumeStatus,
                     "ZONE_MUTE" => zone.Knx.MuteStatus,
                     "ZONE_PLAYBACK_STATE" => zone.Knx.ControlStatus,
-                    "ZONE_REPEAT_MODE" => zone.Knx.RepeatStatus,
+                    "TRACK_REPEAT_STATUS" => zone.Knx.TrackRepeatStatus,
+                    "PLAYLIST_REPEAT_STATUS" => zone.Knx.RepeatStatus,
                     "ZONE_SHUFFLE_MODE" => zone.Knx.ShuffleStatus,
                     "ZONE_TRACK" => zone.Knx.TrackStatus,
                     "ZONE_PLAYLIST" => zone.Knx.PlaylistStatus,
@@ -948,9 +949,10 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             "ZONE_VOLUME" when payload is int volume => ("ZONE_VOLUME", Math.Clamp(volume, 0, 100)),
             "ZONE_MUTE" when payload is bool mute => ("ZONE_MUTE", mute ? 1 : 0),
             "ZONE_PLAYBACK_STATE" when payload is string state => ("ZONE_PLAYBACK_STATE", MapPlaybackStateToKnx(state)),
-            "ZONE_REPEAT_MODE" when payload is object repeatMode => (
-                "ZONE_REPEAT_MODE",
-                MapRepeatModeToKnx(repeatMode)
+            "TRACK_REPEAT_STATUS" when payload is bool trackRepeat => ("TRACK_REPEAT_STATUS", trackRepeat ? 1 : 0),
+            "PLAYLIST_REPEAT_STATUS" when payload is bool playlistRepeat => (
+                "PLAYLIST_REPEAT_STATUS",
+                playlistRepeat ? 1 : 0
             ),
             "ZONE_SHUFFLE_MODE" when payload is bool shuffle => ("ZONE_SHUFFLE_MODE", shuffle ? 1 : 0),
             _ => (null, payload!),
@@ -969,29 +971,6 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             "paused" => 2,
             _ => 0,
         };
-    }
-
-    /// <summary>
-    /// Maps repeat mode objects to KNX values.
-    /// </summary>
-    private static int MapRepeatModeToKnx(object repeatMode)
-    {
-        // For KNX, we'll use a simple encoding: 0=none, 1=track, 2=playlist, 3=both
-        if (repeatMode is { } obj)
-        {
-            var type = obj.GetType();
-            var trackRepeat = type.GetProperty("TrackRepeatEnabled")?.GetValue(obj) as bool? ?? false;
-            var playlistRepeat = type.GetProperty("PlaylistRepeatEnabled")?.GetValue(obj) as bool? ?? false;
-
-            return (trackRepeat, playlistRepeat) switch
-            {
-                (false, false) => 0,
-                (true, false) => 1,
-                (false, true) => 2,
-                (true, true) => 3,
-            };
-        }
-        return 0;
     }
 
     /// <summary>

@@ -126,10 +126,10 @@ public record ZonePlaylistChangedNotification : INotification
 }
 
 /// <summary>
-/// Notification published when a zone's repeat mode changes.
+/// Notification published when a zone's track repeat mode changes.
 /// </summary>
-[StatusId("ZONE_REPEAT_MODE", "ZR-001")]
-public record ZoneRepeatModeChangedNotification : INotification
+[StatusId("TRACK_REPEAT_STATUS", "TR-001")]
+public record ZoneTrackRepeatChangedNotification : INotification
 {
     /// <summary>
     /// Gets the zone ID.
@@ -139,15 +139,32 @@ public record ZoneRepeatModeChangedNotification : INotification
     /// <summary>
     /// Gets whether track repeat is enabled.
     /// </summary>
-    public required bool TrackRepeatEnabled { get; init; }
+    public required bool Enabled { get; init; }
+
+    /// <summary>
+    /// Gets the UTC timestamp when the track repeat mode changed.
+    /// </summary>
+    public DateTime TimestampUtc { get; init; } = DateTime.UtcNow;
+}
+
+/// <summary>
+/// Notification published when a zone's playlist repeat mode changes.
+/// </summary>
+[StatusId("PLAYLIST_REPEAT_STATUS", "PR-001")]
+public record ZonePlaylistRepeatChangedNotification : INotification
+{
+    /// <summary>
+    /// Gets the zone ID.
+    /// </summary>
+    public required int ZoneId { get; init; }
 
     /// <summary>
     /// Gets whether playlist repeat is enabled.
     /// </summary>
-    public required bool PlaylistRepeatEnabled { get; init; }
+    public required bool Enabled { get; init; }
 
     /// <summary>
-    /// Gets the UTC timestamp when the repeat mode changed.
+    /// Gets the UTC timestamp when the playlist repeat mode changed.
     /// </summary>
     public DateTime TimestampUtc { get; init; } = DateTime.UtcNow;
 }

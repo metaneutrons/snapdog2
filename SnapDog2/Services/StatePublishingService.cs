@@ -364,12 +364,12 @@ public partial class StatePublishingService : BackgroundService
             }
 
             await mediator.PublishAsync(
-                new ZoneRepeatModeChangedNotification
-                {
-                    ZoneId = zoneId,
-                    TrackRepeatEnabled = zoneState.TrackRepeat,
-                    PlaylistRepeatEnabled = zoneState.PlaylistRepeat,
-                },
+                new ZoneTrackRepeatChangedNotification { ZoneId = zoneId, Enabled = zoneState.TrackRepeat },
+                cancellationToken
+            );
+
+            await mediator.PublishAsync(
+                new ZonePlaylistRepeatChangedNotification { ZoneId = zoneId, Enabled = zoneState.PlaylistRepeat },
                 cancellationToken
             );
 

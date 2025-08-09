@@ -19,7 +19,8 @@ public partial class ZoneStateNotificationHandler
         INotificationHandler<ZonePlaybackStateChangedNotification>,
         INotificationHandler<ZoneTrackChangedNotification>,
         INotificationHandler<ZonePlaylistChangedNotification>,
-        INotificationHandler<ZoneRepeatModeChangedNotification>,
+        INotificationHandler<ZoneTrackRepeatChangedNotification>,
+        INotificationHandler<ZonePlaylistRepeatChangedNotification>,
         INotificationHandler<ZoneShuffleModeChangedNotification>,
         INotificationHandler<ZoneStateChangedNotification>
 {
@@ -51,14 +52,13 @@ public partial class ZoneStateNotificationHandler
     )]
     private partial void LogPlaylistChange(int zoneId, string playlistName, int playlistIndex);
 
-    [LoggerMessage(
-        6006,
-        LogLevel.Information,
-        "Zone {ZoneId} repeat mode changed - Track: {TrackRepeat}, Playlist: {PlaylistRepeat}"
-    )]
-    private partial void LogRepeatModeChange(int zoneId, bool trackRepeat, bool playlistRepeat);
+    [LoggerMessage(6006, LogLevel.Information, "Zone {ZoneId} track repeat changed to {TrackRepeatEnabled}")]
+    private partial void LogTrackRepeatChange(int zoneId, bool trackRepeatEnabled);
 
-    [LoggerMessage(6007, LogLevel.Information, "Zone {ZoneId} shuffle mode changed to {ShuffleEnabled}")]
+    [LoggerMessage(6007, LogLevel.Information, "Zone {ZoneId} playlist repeat changed to {PlaylistRepeatEnabled}")]
+    private partial void LogPlaylistRepeatChange(int zoneId, bool playlistRepeatEnabled);
+
+    [LoggerMessage(6008, LogLevel.Information, "Zone {ZoneId} shuffle mode changed to {ShuffleEnabled}")]
     private partial void LogShuffleModeChange(int zoneId, bool shuffleEnabled);
 
     [LoggerMessage(6008, LogLevel.Information, "Zone {ZoneId} complete state changed")]
@@ -130,23 +130,28 @@ public partial class ZoneStateNotificationHandler
         );
     }
 
-    public async Task Handle(ZoneRepeatModeChangedNotification notification, CancellationToken cancellationToken)
+    public async Task Handle(ZoneTrackRepeatChangedNotification notification, CancellationToken cancellationToken)
     {
-        this.LogRepeatModeChange(
-            notification.ZoneId,
-            notification.TrackRepeatEnabled,
-            notification.PlaylistRepeatEnabled
-        );
+        this.LogTrackRepeatChange(notification.ZoneId, notification.Enabled);
 
         // Publish to external systems (MQTT, KNX)
         await this.PublishToExternalSystemsAsync(
-            StatusIdAttribute.GetStatusId<ZoneRepeatModeChangedNotification>(),
+            StatusIdAttribute.GetStatusId<ZoneTrackRepeatChangedNotification>(),
             notification.ZoneId,
-            new
-            {
-                TrackRepeatEnabled = notification.TrackRepeatEnabled,
-                PlaylistRepeatEnabled = notification.PlaylistRepeatEnabled,
-            },
+            notification.Enabled,
+            cancellationToken
+        );
+    }
+
+    public async Task Handle(ZonePlaylistRepeatChangedNotification notification, CancellationToken cancellationToken)
+    {
+        this.LogPlaylistRepeatChange(notification.ZoneId, notification.Enabled);
+
+        // Publish to external systems (MQTT, KNX)
+        await this.PublishToExternalSystemsAsync(
+            StatusIdAttribute.GetStatusId<ZonePlaylistRepeatChangedNotification>(),
+            notification.ZoneId,
+            notification.Enabled,
             cancellationToken
         );
     }
