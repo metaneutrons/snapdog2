@@ -1,4 +1,6 @@
 using System.CommandLine;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using dotenv.net;
 using EnvoyConfig;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -7,6 +9,7 @@ using Serilog.Events;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Extensions;
 using SnapDog2.Extensions.DependencyInjection;
+using SnapDog2.Helpers;
 using SnapDog2.Hosting;
 using SnapDog2.Middleware;
 
@@ -138,6 +141,9 @@ static WebApplication CreateWebApplication(string[] args)
     // Use Serilog for logging
     builder.Host.UseSerilog();
 
+    // Show startup banner immediately (before any service registrations)
+    ShowStartupInformation(snapDogConfig);
+
     // Register configuration
     builder.Services.AddSingleton(snapDogConfig);
     builder.Services.AddSingleton(snapDogConfig.System);
@@ -202,10 +208,7 @@ static WebApplication CreateWebApplication(string[] args)
     // Skip hosted services in test environment
     if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "Testing")
     {
-        // Add version logging service as the very first hosted service (show environment info)
-        builder.Services.AddHostedService<SnapDog2.Services.StartupInformationService>();
-
-        // Add resilient startup service as second hosted service (then check if everything is healthy)
+        // Add resilient startup service as first hosted service (check if everything is healthy)
         builder.Services.AddHostedService<SnapDog2.Services.StartupService>();
 
         // Add hosted service to initialize integration services on startup
@@ -364,6 +367,78 @@ static WebApplication CreateWebApplication(string[] args)
     }
 
     return app;
+}
+
+/// <summary>
+/// Shows comprehensive startup information immediately during application startup.
+/// This replaces the StartupInformationService to ensure startup info appears before service registrations.
+/// </summary>
+static void ShowStartupInformation(SnapDogConfiguration config)
+{
+    // Create a simple console logger for immediate output
+    using var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+    var logger = loggerFactory.CreateLogger("StartupInfo");
+
+    // Startup Banner
+    logger.LogInformation("════════════════════════════════");
+    logger.LogInformation("💑💑💑 SnapDog2 starting... 💑💑💑");
+    logger.LogInformation("════════════════════════════════");
+
+    // Application Information
+    var assembly = Assembly.GetExecutingAssembly();
+    var version = assembly.GetName().Version;
+    var informationalVersion = assembly
+        .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+        ?.InformationalVersion;
+
+    logger.LogInformation("🚀 Application Information:");
+    logger.LogInformation("   Name: {ApplicationName}", assembly.GetName().Name);
+    logger.LogInformation("   Version: {Version}", version?.ToString() ?? "Unknown");
+    logger.LogInformation("   Informational Version: {InformationalVersion}", informationalVersion ?? "Unknown");
+
+    // GitVersion Information
+    var gitVersion = GitVersionHelper.GetVersionInfo();
+    logger.LogInformation("📋 GitVersion Information:");
+    logger.LogInformation("   Version: {SemVer}", gitVersion.SemVer);
+    logger.LogInformation("   Branch: {BranchName}", gitVersion.BranchName);
+    logger.LogInformation("   Commit: {ShortSha} ({CommitDate})", gitVersion.ShortSha, gitVersion.CommitDate);
+
+    // Runtime Information
+    logger.LogInformation("⚙️  Runtime Information:");
+    logger.LogInformation("   .NET Version: {DotNetVersion}", Environment.Version);
+    logger.LogInformation("   OS: {OperatingSystem}", RuntimeInformation.OSDescription);
+    logger.LogInformation("   Architecture: {Architecture}", RuntimeInformation.OSArchitecture);
+
+    // Key Configuration
+    logger.LogInformation("⚙️  Key Configuration:");
+    logger.LogInformation("   Environment: {Environment}", config.System.Environment);
+    logger.LogInformation("   API Enabled: {ApiEnabled} (Port: {ApiPort})", config.Api.Enabled, config.Api.Port);
+    logger.LogInformation("   Zones: {ZoneCount}, Clients: {ClientCount}", config.Zones.Count, config.Clients.Count);
+
+    // Services Status
+    logger.LogInformation("🔌 Services:");
+    logger.LogInformation(
+        "   Snapcast: {SnapcastAddress}:{SnapcastPort}",
+        config.Services.Snapcast.Address,
+        config.Services.Snapcast.JsonRpcPort
+    );
+    logger.LogInformation(
+        "   MQTT: {MqttStatus}",
+        config.Services.Mqtt.Enabled ? $"{config.Services.Mqtt.BrokerAddress}:{config.Services.Mqtt.Port}" : "Disabled"
+    );
+    logger.LogInformation(
+        "   KNX: {KnxStatus}",
+        config.Services.Knx.Enabled ? $"{config.Services.Knx.Gateway}:{config.Services.Knx.Port}" : "Disabled"
+    );
+    logger.LogInformation(
+        "   Subsonic: {SubsonicStatus}",
+        config.Services.Subsonic.Enabled ? config.Services.Subsonic.Url ?? "Enabled" : "Disabled"
+    );
+
+    // End Banner
+    logger.LogInformation("════════════════════════════════");
+    logger.LogInformation("Starting service registrations...");
+    logger.LogInformation("════════════════════════════════");
 }
 
 // Make Program class accessible to tests
