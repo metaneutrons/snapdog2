@@ -339,8 +339,13 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
 
     public void Dispose()
     {
-        // Call DisposeAsync synchronously - this is safe for our use case
-        // since the player disposal is primarily about cleanup
+        // TODO: This is a workaround for DI container scope disposal limitations.
+        // The proper solution would be to:
+        // 1. Use IServiceScopeFactory in StatePublishingService to avoid disposing scoped services
+        // 2. Or implement a custom ServiceScope that supports async disposal
+        // 3. Or refactor to use IHostedService lifecycle management instead of BackgroundService
+        // Current approach blocks on async disposal which could cause deadlocks in some scenarios.
+        // See: https://github.com/dotnet/runtime/issues/61132
         DisposeAsync().AsTask().GetAwaiter().GetResult();
     }
 

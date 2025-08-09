@@ -116,6 +116,9 @@ public partial class StatePublishingService : BackgroundService
             var failureCount = 0;
 
             // Create scope to resolve scoped services like IMediator
+            // NOTE: Using 'using' statement for automatic disposal. Services that implement
+            // only IAsyncDisposable (like ZoneManager, MediaPlayerService) have been given
+            // sync Dispose() wrappers as a workaround. See TODO comments in those services.
             using var scope = this._serviceScopeFactory.CreateScope();
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
