@@ -80,7 +80,7 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
             this._knxBus = new KnxBus(connectorParameters);
 
             // Subscribe to events - this is where the magic happens!
-            this._knxBus.GroupMessageReceived += this.OnGroupMessageReceivedFalconFirst;
+            this._knxBus.GroupMessageReceived += this.OnGroupMessageReceived;
 
             // Connect to bus with timeout support
             await this._knxBus.ConnectAsync(cancellationToken);
@@ -109,7 +109,7 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
                 this._connectionStatus = "Disconnecting...";
 
                 // Unsubscribe from events
-                this._knxBus.GroupMessageReceived -= this.OnGroupMessageReceivedFalconFirst;
+                this._knxBus.GroupMessageReceived -= this.OnGroupMessageReceived;
 
                 // Dispose the bus (this will disconnect)
                 await this._knxBus.DisposeAsync();
@@ -164,14 +164,14 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
     /// </summary>
     /// <param name="sender">Event sender.</param>
     /// <param name="e">Event arguments containing Falcon SDK's already-decoded value!</param>
-    private void OnGroupMessageReceivedFalconFirst(object? sender, GroupEventArgs e)
+    private void OnGroupMessageReceived(object? sender, GroupEventArgs e)
     {
         try
         {
             this.LogReceivedKnxMessage();
 
             var messageType = DetermineMessageType(e);
-            var message = this.CreateFalconFirstKnxMessage(e, messageType);
+            var message = this.CreateKnxMessage(e, messageType);
             this.ProcessMessage(message);
         }
         catch (Exception ex)
@@ -186,7 +186,7 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
     /// <param name="e">Event arguments with Falcon SDK decoded value.</param>
     /// <param name="messageType">Message type.</param>
     /// <returns>KNX message with proper Falcon SDK integration.</returns>
-    private KnxMessage CreateFalconFirstKnxMessage(GroupEventArgs e, KnxMessageType messageType)
+    private KnxMessage CreateKnxMessage(GroupEventArgs e, KnxMessageType messageType)
     {
         // Extract the treasure that Falcon SDK already prepared for us!
         var falconTreasure = this.ExtractFalconTreasure(e);
@@ -921,7 +921,7 @@ public partial class FalconKnxMonitorService : IKnxMonitorService, IAsyncDisposa
         // Log message if verbose
         if (this._config.Verbose)
         {
-            this.LogFalconFirstKnxMessage(
+            this.LogKnxMessage(
                 message.MessageType,
                 message.GroupAddress,
                 message.DisplayValue,

@@ -32,23 +32,23 @@ public partial class FalconService
     [LoggerMessage(
         9507,
         LogLevel.Warning,
-        "DecodeValue called on CorrectFalconFirstService - this service is designed for live event extraction"
+        "DecodeValue called on KnxService - this service is designed for live event extraction"
     )]
-    private partial void LogDecodeValueCalledOnCorrectFalconFirstService();
+    private partial void LogDecodeValueCalledOnKnxService();
 
     [LoggerMessage(
         9508,
         LogLevel.Warning,
-        "DecodeValueWithAutoDetection called on CorrectFalconFirstService - this service is designed for live event extraction"
+        "DecodeValueWithAutoDetection called on KnxService - this service is designed for live event extraction"
     )]
-    private partial void LogDecodeValueWithAutoDetectionCalledOnCorrectFalconFirstService();
+    private partial void LogDecodeValueWithAutoDetectionCalledOnKnxService();
 
     [LoggerMessage(
         9509,
         LogLevel.Warning,
-        "DetectDpt called on CorrectFalconFirstService - this service is designed for live event extraction"
+        "DetectDpt called on KnxService - this service is designed for live event extraction"
     )]
-    private partial void LogDetectDptCalledOnCorrectFalconFirstService();
+    private partial void LogDetectDptCalledOnKnxService();
 
     // Falcon SDK Object Extraction Operations (9510-9511)
     [LoggerMessage(9510, LogLevel.Debug, "✅ Extracted from Falcon SDK object: DPT {DptId}, Value {Value}")]

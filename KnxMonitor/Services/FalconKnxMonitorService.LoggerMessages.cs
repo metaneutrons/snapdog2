@@ -164,5 +164,5 @@ public partial class FalconKnxMonitorService
         LogLevel.Debug,
         "🎉 Falcon-first KNX message: {MessageType} {GroupAddress} = {Value} (DPT: {DptId})"
     )]
-    private partial void LogFalconFirstKnxMessage(object messageType, string groupAddress, object? value, string dptId);
+    private partial void LogKnxMessage(object messageType, string groupAddress, object? value, string dptId);
 }

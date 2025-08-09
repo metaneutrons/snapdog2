@@ -299,14 +299,14 @@ public partial class FalconService : IDptDecodingService
     {
         // This method is not the primary use case for this service
         // The main purpose is to extract from live Falcon SDK objects
-        this.LogDecodeValueCalledOnCorrectFalconFirstService();
+        this.LogDecodeValueCalledOnKnxService();
         return null;
     }
 
     /// <inheritdoc/>
     public (object? Value, string? DetectedDpt) DecodeValueWithAutoDetection(byte[] data)
     {
-        this.LogDecodeValueWithAutoDetectionCalledOnCorrectFalconFirstService();
+        this.LogDecodeValueWithAutoDetectionCalledOnKnxService();
         return (null, null);
     }
 
@@ -319,7 +319,7 @@ public partial class FalconService : IDptDecodingService
     /// <inheritdoc/>
     public string? DetectDpt(byte[] data)
     {
-        this.LogDetectDptCalledOnCorrectFalconFirstService();
+        this.LogDetectDptCalledOnKnxService();
         return null;
     }
 
