@@ -359,13 +359,13 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             return Result.Failure("MQTT client is not connected");
         }
 
-        // Parse client ID to get index (clientId format: "client_1", "client_2", etc.)
-        if (!clientId.StartsWith("client_") || !int.TryParse(clientId.Substring(7), out var clientIndex))
+        // Parse client ID - now expecting integer format (1, 2, 3, etc.)
+        if (!int.TryParse(clientId, out var clientIndex))
         {
-            return Result.Failure($"Invalid client ID format: {clientId}");
+            return Result.Failure($"Invalid client ID format: {clientId}. Expected integer.");
         }
 
-        // Convert to 0-based index
+        // Convert to 0-based index for configuration array
         var configIndex = clientIndex - 1;
         if (configIndex < 0 || configIndex >= this._clientConfigs.Count)
         {
@@ -901,14 +901,14 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
                 return Result.Failure("MQTT client is not connected");
             }
 
-            // Parse client ID to get index (clientId format: "client_1", "client_2", etc.)
-            if (!clientId.StartsWith("client_") || !int.TryParse(clientId.Substring(7), out var clientIndex))
+            // Parse client ID - now expecting integer format (1, 2, 3, etc.)
+            if (!int.TryParse(clientId, out var clientIndex))
             {
-                this._logger.LogWarning("Invalid client ID format: {ClientId}", clientId);
+                this._logger.LogWarning("Invalid client ID format: {ClientId}. Expected integer.", clientId);
                 return Result.Success();
             }
 
-            // Convert to 0-based index
+            // Convert to 0-based index for configuration array
             var configIndex = clientIndex - 1;
             if (configIndex < 0 || configIndex >= this._clientConfigs.Count)
             {
