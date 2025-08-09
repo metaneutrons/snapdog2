@@ -7,6 +7,7 @@ using Cortex.Mediator.Notifications;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Abstractions;
+using SnapDog2.Core.Attributes;
 using SnapDog2.Server.Features.Clients.Notifications;
 
 /// <summary>
@@ -60,7 +61,7 @@ public partial class ClientStateNotificationHandler
 
         // Publish to external systems (MQTT, KNX)
         await this.PublishToExternalSystemsAsync(
-            "CLIENT_VOLUME",
+            StatusIdAttribute.GetStatusId<ClientVolumeChangedNotification>(),
             notification.ClientId.ToString(),
             notification.Volume,
             cancellationToken
@@ -73,7 +74,7 @@ public partial class ClientStateNotificationHandler
 
         // Publish to external systems (MQTT, KNX)
         await this.PublishToExternalSystemsAsync(
-            "CLIENT_MUTE",
+            StatusIdAttribute.GetStatusId<ClientMuteChangedNotification>(),
             notification.ClientId.ToString(),
             notification.IsMuted,
             cancellationToken
@@ -86,7 +87,7 @@ public partial class ClientStateNotificationHandler
 
         // Publish to external systems (MQTT, KNX)
         await this.PublishToExternalSystemsAsync(
-            "CLIENT_LATENCY",
+            StatusIdAttribute.GetStatusId<ClientLatencyChangedNotification>(),
             notification.ClientId.ToString(),
             notification.LatencyMs,
             cancellationToken
@@ -99,7 +100,7 @@ public partial class ClientStateNotificationHandler
 
         // Publish to external systems (MQTT, KNX)
         await this.PublishToExternalSystemsAsync(
-            "CLIENT_ZONE_ASSIGNMENT",
+            StatusIdAttribute.GetStatusId<ClientZoneAssignmentChangedNotification>(),
             notification.ClientId.ToString(),
             new { PreviousZoneId = notification.PreviousZoneId, ZoneId = notification.ZoneId },
             cancellationToken
@@ -112,7 +113,7 @@ public partial class ClientStateNotificationHandler
 
         // Publish to external systems (MQTT, KNX)
         await this.PublishToExternalSystemsAsync(
-            "CLIENT_CONNECTION",
+            StatusIdAttribute.GetStatusId<ClientConnectionChangedNotification>(),
             notification.ClientId.ToString(),
             notification.IsConnected,
             cancellationToken
@@ -125,7 +126,7 @@ public partial class ClientStateNotificationHandler
 
         // Publish to external systems (MQTT, KNX)
         await this.PublishToExternalSystemsAsync(
-            "CLIENT_STATE",
+            StatusIdAttribute.GetStatusId<ClientStateChangedNotification>(),
             notification.ClientId.ToString(),
             notification,
             cancellationToken

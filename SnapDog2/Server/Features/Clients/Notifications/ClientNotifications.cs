@@ -2,11 +2,13 @@ namespace SnapDog2.Server.Features.Clients.Notifications;
 
 using System;
 using Cortex.Mediator.Notifications;
+using SnapDog2.Core.Attributes;
 using SnapDog2.Core.Models;
 
 /// <summary>
 /// Notification published when a client's volume changes.
 /// </summary>
+[StatusId("CLIENT_VOLUME", "CV-001")]
 public record ClientVolumeChangedNotification : INotification
 {
     /// <summary>
@@ -28,6 +30,7 @@ public record ClientVolumeChangedNotification : INotification
 /// <summary>
 /// Notification published when a client's mute state changes.
 /// </summary>
+[StatusId("CLIENT_MUTE", "CM-001")]
 public record ClientMuteChangedNotification : INotification
 {
     /// <summary>
@@ -49,6 +52,7 @@ public record ClientMuteChangedNotification : INotification
 /// <summary>
 /// Notification published when a client's latency changes.
 /// </summary>
+[StatusId("CLIENT_LATENCY", "CL-001")]
 public record ClientLatencyChangedNotification : INotification
 {
     /// <summary>
@@ -70,6 +74,7 @@ public record ClientLatencyChangedNotification : INotification
 /// <summary>
 /// Notification published when a client is assigned to a different zone.
 /// </summary>
+[StatusId("CLIENT_ZONE_ASSIGNMENT", "CZ-001")]
 public record ClientZoneAssignmentChangedNotification : INotification
 {
     /// <summary>
@@ -96,6 +101,7 @@ public record ClientZoneAssignmentChangedNotification : INotification
 /// <summary>
 /// Notification published when a client's connection status changes.
 /// </summary>
+[StatusId("CLIENT_CONNECTION", "CC-001")]
 public record ClientConnectionChangedNotification : INotification
 {
     /// <summary>
@@ -117,6 +123,7 @@ public record ClientConnectionChangedNotification : INotification
 /// <summary>
 /// Notification published when a client's complete state changes.
 /// </summary>
+[StatusId("CLIENT_STATE", "CS-001")]
 public record ClientStateChangedNotification : INotification
 {
     /// <summary>
