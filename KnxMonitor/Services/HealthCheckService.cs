@@ -9,7 +9,7 @@ namespace KnxMonitor.Services;
 /// <summary>
 /// Simple HTTP health check service for container health monitoring.
 /// </summary>
-public class HealthCheckService : IDisposable
+public partial class HealthCheckService : IDisposable
 {
     private readonly ILogger<HealthCheckService> _logger;
     private readonly IKnxMonitorService _knxMonitorService;
@@ -48,12 +48,12 @@ public class HealthCheckService : IDisposable
                 cancellationToken
             );
 
-            this._logger.LogInformation("Health check service started on port {Port}", port);
+            this.LogHealthCheckServiceStarted(port);
             return Task.CompletedTask;
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Failed to start health check service on port {Port}", port);
+            this.LogFailedToStartHealthCheckService(ex, port);
             throw;
         }
     }
@@ -79,11 +79,11 @@ public class HealthCheckService : IDisposable
                 await this._listenerTask;
             }
 
-            this._logger.LogInformation("Health check service stopped");
+            this.LogHealthCheckServiceStopped();
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error stopping health check service");
+            this.LogErrorStoppingHealthCheckService(ex);
         }
         finally
         {
@@ -115,7 +115,7 @@ public class HealthCheckService : IDisposable
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error handling health check request");
+                this.LogErrorHandlingHealthCheckRequest(ex);
             }
         }
     }
@@ -143,7 +143,7 @@ public class HealthCheckService : IDisposable
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error processing health check request");
+            this.LogErrorProcessingHealthCheckRequest(ex);
         }
     }
 

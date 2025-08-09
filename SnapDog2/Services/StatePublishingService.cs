@@ -222,7 +222,7 @@ public partial class StatePublishingService : BackgroundService
         }
         catch (OperationCanceledException)
         {
-            this._logger.LogInformation("State publishing cancelled during shutdown");
+            this.LogStatePublishingCancelledDuringShutdown();
         }
         catch (Exception ex)
         {

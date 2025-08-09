@@ -161,12 +161,7 @@ public partial class ClientStateNotificationHandler
         }
         catch (Exception ex)
         {
-            this._logger.LogWarning(
-                ex,
-                "Failed to publish {EventType} for client {ClientId} to external systems",
-                eventType,
-                clientId
-            );
+            this.LogFailedToPublishClientEventToExternalSystems(ex, eventType, clientId);
         }
     }
 }

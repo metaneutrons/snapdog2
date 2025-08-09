@@ -11,7 +11,7 @@ using SnapDog2.Core.Models;
 /// </summary>
 /// <typeparam name="TCommand">The command type.</typeparam>
 /// <typeparam name="TResponse">The response type.</typeparam>
-public class SharedLoggingCommandBehavior<TCommand, TResponse> : ICommandPipelineBehavior<TCommand, TResponse>
+public partial class SharedLoggingCommandBehavior<TCommand, TResponse> : ICommandPipelineBehavior<TCommand, TResponse>
     where TCommand : ICommand<TResponse>
     where TResponse : IResult
 {
@@ -37,7 +37,7 @@ public class SharedLoggingCommandBehavior<TCommand, TResponse> : ICommandPipelin
         var commandName = typeof(TCommand).Name;
         using var activity = ActivitySource.StartActivity($"CortexMediator.Command.{commandName}");
 
-        this._logger.LogInformation("Starting Command {CommandName}", commandName);
+        this.LogStartingCommand(commandName);
         var stopwatch = Stopwatch.StartNew();
 
         try
@@ -45,22 +45,13 @@ public class SharedLoggingCommandBehavior<TCommand, TResponse> : ICommandPipelin
             var response = await next().ConfigureAwait(false);
             stopwatch.Stop();
 
-            this._logger.LogInformation(
-                "Completed Command {CommandName} in {ElapsedMilliseconds}ms",
-                commandName,
-                stopwatch.ElapsedMilliseconds
-            );
+            this.LogCompletedCommand(commandName, stopwatch.ElapsedMilliseconds);
             return response;
         }
         catch (Exception ex)
         {
             stopwatch.Stop();
-            this._logger.LogError(
-                ex,
-                "Command {CommandName} failed after {ElapsedMilliseconds}ms",
-                commandName,
-                stopwatch.ElapsedMilliseconds
-            );
+            this.LogCommandFailed(ex, commandName, stopwatch.ElapsedMilliseconds);
             throw;
         }
     }
@@ -71,7 +62,7 @@ public class SharedLoggingCommandBehavior<TCommand, TResponse> : ICommandPipelin
 /// </summary>
 /// <typeparam name="TQuery">The query type.</typeparam>
 /// <typeparam name="TResponse">The response type.</typeparam>
-public class SharedLoggingQueryBehavior<TQuery, TResponse> : IQueryPipelineBehavior<TQuery, TResponse>
+public partial class SharedLoggingQueryBehavior<TQuery, TResponse> : IQueryPipelineBehavior<TQuery, TResponse>
     where TQuery : IQuery<TResponse>
     where TResponse : IResult
 {
@@ -97,7 +88,7 @@ public class SharedLoggingQueryBehavior<TQuery, TResponse> : IQueryPipelineBehav
         var queryName = typeof(TQuery).Name;
         using var activity = ActivitySource.StartActivity($"CortexMediator.Query.{queryName}");
 
-        this._logger.LogInformation("Starting Query {QueryName}", queryName);
+        this.LogStartingQuery(queryName);
         var stopwatch = Stopwatch.StartNew();
 
         try
@@ -105,22 +96,13 @@ public class SharedLoggingQueryBehavior<TQuery, TResponse> : IQueryPipelineBehav
             var response = await next().ConfigureAwait(false);
             stopwatch.Stop();
 
-            this._logger.LogInformation(
-                "Completed Query {QueryName} in {ElapsedMilliseconds}ms",
-                queryName,
-                stopwatch.ElapsedMilliseconds
-            );
+            this.LogCompletedQuery(queryName, stopwatch.ElapsedMilliseconds);
             return response;
         }
         catch (Exception ex)
         {
             stopwatch.Stop();
-            this._logger.LogError(
-                ex,
-                "Query {QueryName} failed after {ElapsedMilliseconds}ms",
-                queryName,
-                stopwatch.ElapsedMilliseconds
-            );
+            this.LogQueryFailed(ex, queryName, stopwatch.ElapsedMilliseconds);
             throw;
         }
     }

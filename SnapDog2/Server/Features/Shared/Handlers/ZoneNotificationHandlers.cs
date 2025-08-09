@@ -210,12 +210,7 @@ public partial class ZoneStateNotificationHandler
         }
         catch (Exception ex)
         {
-            this._logger.LogWarning(
-                ex,
-                "Failed to publish {EventType} for zone {ZoneId} to external systems",
-                eventType,
-                zoneId
-            );
+            this.LogFailedToPublishZoneEventToExternalSystems(ex, eventType, zoneId.ToString());
         }
     }
 }

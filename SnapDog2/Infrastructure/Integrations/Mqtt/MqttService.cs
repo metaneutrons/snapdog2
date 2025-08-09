@@ -218,7 +218,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
 
         if (!this._config.Enabled)
         {
-            this._logger.LogInformation("MQTT integration is disabled");
+            this.LogMqttIntegrationIsDisabled();
             return Result.Success();
         }
 
@@ -540,7 +540,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     {
         try
         {
-            this._logger.LogDebug("Processing MQTT message on topic {Topic}: {Payload}", topic, payload);
+            this.LogProcessingMqttMessageOnTopic(topic, payload);
 
             // Map topic to command and execute via Mediator
             var command = this.MapTopicToCommand(topic, payload);
@@ -568,20 +568,20 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
                         await mediator.SendCommandAsync<SetClientLatencyCommand, Result>(clientLatencyCmd);
                         break;
                     default:
-                        this._logger.LogWarning("Unknown command type: {CommandType}", command.GetType().Name);
+                        this.LogUnknownCommandType(command.GetType().Name);
                         break;
                 }
 
-                this._logger.LogDebug("Successfully processed MQTT command for topic {Topic}", topic);
+                this.LogSuccessfullyProcessedMqttCommandForTopic(topic);
             }
             else
             {
-                this._logger.LogDebug("No command mapping found for topic {Topic}", topic);
+                this.LogNoCommandMappingFoundForTopic(topic);
             }
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Failed to process MQTT message on topic {Topic}", topic);
+            this.LogFailedToProcessMqttMessageOnTopic(ex, topic);
         }
     }
 
@@ -617,7 +617,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Failed to map topic {Topic} to command", topic);
+            this.LogFailedToMapTopicToCommand(ex, topic);
             return null;
         }
     }
@@ -904,7 +904,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             // Parse client ID - now expecting integer format (1, 2, 3, etc.)
             if (!int.TryParse(clientId, out var clientIndex))
             {
-                this._logger.LogWarning("Invalid client ID format: {ClientId}. Expected integer.", clientId);
+                this.LogInvalidClientIdFormat(clientId);
                 return Result.Success();
             }
 
@@ -912,14 +912,14 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             var configIndex = clientIndex - 1;
             if (configIndex < 0 || configIndex >= this._clientConfigs.Count)
             {
-                this._logger.LogWarning("No MQTT configuration for client {ClientId}", clientId);
+                this.LogNoMqttConfigurationForClient(clientId);
                 return Result.Success();
             }
 
             var clientConfig = this._clientConfigs[configIndex];
             if (clientConfig.Mqtt == null || string.IsNullOrEmpty(clientConfig.Mqtt.BaseTopic))
             {
-                this._logger.LogWarning("Client {ClientId} has no MQTT configuration", clientId);
+                this.LogClientHasNoMqttConfiguration(clientId);
                 return Result.Success();
             }
 
@@ -939,7 +939,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
 
             if (topic == null)
             {
-                this._logger.LogDebug("No MQTT topic mapping for event type {EventType}", eventType);
+                this.LogNoMqttTopicMappingForEventType(eventType);
                 return Result.Success();
             }
 
@@ -951,12 +951,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            this._logger.LogError(
-                ex,
-                "Failed to publish client status {EventType} for client {ClientId}",
-                eventType,
-                clientId
-            );
+            this.LogFailedToPublishClientStatus(ex, eventType, clientId);
             return Result.Failure($"Failed to publish client status: {ex.Message}");
         }
     }
@@ -982,14 +977,14 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             var zoneIndex = zoneId - 1;
             if (zoneIndex < 0 || zoneIndex >= this._zoneConfigs.Count)
             {
-                this._logger.LogWarning("No MQTT configuration for zone {ZoneId}", zoneId);
+                this.LogNoMqttConfigurationForZone(zoneId);
                 return Result.Success();
             }
 
             var zoneConfig = this._zoneConfigs[zoneIndex];
             if (zoneConfig.Mqtt == null || string.IsNullOrEmpty(zoneConfig.Mqtt.BaseTopic))
             {
-                this._logger.LogWarning("Zone {ZoneId} has no MQTT configuration", zoneId);
+                this.LogZoneHasNoMqttConfiguration(zoneId);
                 return Result.Success();
             }
 
@@ -1012,7 +1007,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
 
             if (topic == null)
             {
-                this._logger.LogDebug("No MQTT topic mapping for event type {EventType}", eventType);
+                this.LogNoMqttTopicMappingForEventType(eventType);
                 return Result.Success();
             }
 
@@ -1024,7 +1019,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Failed to publish zone status {EventType} for zone {ZoneId}", eventType, zoneId);
+            this.LogFailedToPublishZoneStatus(ex, eventType, zoneId);
             return Result.Failure($"Failed to publish zone status: {ex.Message}");
         }
     }
@@ -1058,7 +1053,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
 
             if (topic == null)
             {
-                this._logger.LogDebug("No MQTT topic mapping for global event type {EventType}", eventType);
+                this.LogNoMqttTopicMappingForGlobalEventType(eventType);
                 return Result.Success();
             }
 
@@ -1071,7 +1066,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Failed to publish global status {EventType}", eventType);
+            this.LogFailedToPublishGlobalStatus(ex, eventType);
             return Result.Failure($"Failed to publish global status: {ex.Message}");
         }
     }

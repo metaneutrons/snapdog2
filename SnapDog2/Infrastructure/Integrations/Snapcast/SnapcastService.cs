@@ -1197,7 +1197,7 @@ public partial class SnapcastService
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error during SnapcastService disposal");
+            this.LogErrorDuringSnapcastServiceDisposal(ex);
         }
     }
 

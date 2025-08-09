@@ -7,7 +7,7 @@ namespace KnxMonitor.Services;
 /// <summary>
 /// DPT decoding service that primarily uses Falcon SDK's built-in conversion capabilities.
 /// </summary>
-public class FalconDptDecodingService : IDptDecodingService
+public partial class FalconDptDecodingService : IDptDecodingService
 {
     private readonly ILogger<FalconDptDecodingService> _logger;
     private readonly DptDecodingService _fallbackService;
@@ -39,17 +39,17 @@ public class FalconDptDecodingService : IDptDecodingService
             var falconDecoded = this.TryDecodeFalconGroupValue(data, dptId);
             if (falconDecoded != null)
             {
-                this._logger.LogDebug("Successfully decoded {DptId} using Falcon SDK", dptId);
+                this.LogSuccessfullyDecodedUsingFalconSdk(dptId);
                 return falconDecoded;
             }
 
             // Fallback to manual implementation
-            this._logger.LogDebug("Falling back to manual decoding for {DptId}", dptId);
+            this.LogFallingBackToManualDecoding(dptId);
             return this._fallbackService.DecodeValue(data, dptId);
         }
         catch (Exception ex)
         {
-            this._logger.LogWarning(ex, "Error decoding DPT {DptId}, falling back to manual decoding", dptId);
+            this.LogErrorDecodingDpt(ex, dptId);
             return this._fallbackService.DecodeValue(data, dptId);
         }
     }
@@ -116,7 +116,7 @@ public class FalconDptDecodingService : IDptDecodingService
         }
         catch (Exception ex)
         {
-            this._logger.LogDebug(ex, "Failed to decode using Falcon SDK for DPT {DptId}", dptId);
+            this.LogFailedToDecodeUsingFalconSdk(ex, dptId);
             return null;
         }
     }
@@ -205,12 +205,7 @@ public class FalconDptDecodingService : IDptDecodingService
                         var result = method.Invoke(null, new object[] { data });
                         if (result != null)
                         {
-                            this._logger.LogDebug(
-                                "Successfully used Falcon converter {ConverterType}.{MethodName} for DPT {DptId}",
-                                converterType.Name,
-                                method.Name,
-                                dptId
-                            );
+                            this.LogSuccessfullyUsedFalconConverter(converterType.Name, method.Name, dptId);
                             return result;
                         }
                     }

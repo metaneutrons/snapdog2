@@ -121,7 +121,7 @@ public partial class GlobalStateNotificationHandler
         }
         catch (Exception ex)
         {
-            this._logger.LogWarning(ex, "Failed to publish {EventType} to external systems", eventType);
+            this.LogFailedToPublishGlobalEventToExternalSystems(ex, eventType);
         }
     }
 }

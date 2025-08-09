@@ -22,9 +22,6 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
     private string _connectionStatus = "Disconnected";
     private int _messageCount;
 
-    // Static logger for static methods
-    private static ILogger<KnxMonitorService>? _staticLogger;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="KnxMonitorService"/> class.
     /// </summary>
@@ -34,9 +31,6 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
     {
         this._config = config ?? throw new ArgumentNullException(nameof(config));
         this._logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
-        // Set static logger for static methods
-        _staticLogger = this._logger;
 
         // Compile filter regex if provided
         if (!string.IsNullOrEmpty(this._config.Filter))
@@ -48,7 +42,7 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
             }
             catch (Exception ex)
             {
-                this._logger.LogWarning(ex, "Invalid filter pattern: {Filter}", this._config.Filter);
+                this.LogInvalidFilterPattern(ex, this._config.Filter);
             }
         }
     }
@@ -71,10 +65,7 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
         try
         {
             this._connectionStatus = "Connecting...";
-            this._logger.LogInformation(
-                "Starting KNX monitoring with {ConnectionType} connection",
-                this._config.ConnectionType
-            );
+            this.LogStartingKnxMonitoring(this._config.ConnectionType.ToString());
 
             // Create connector parameters
             var connectorParameters = this.CreateConnectorParameters();
@@ -96,13 +87,13 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
             this._isConnected = true;
             this._connectionStatus = $"Connected to {this.GetConnectionDescription()}";
 
-            this._logger.LogInformation("KNX monitoring started successfully");
+            this.LogKnxMonitoringStartedSuccessfully();
         }
         catch (Exception ex)
         {
             this._isConnected = false;
             this._connectionStatus = $"Connection failed: {ex.Message}";
-            this._logger.LogError(ex, "Failed to start KNX monitoring");
+            this.LogFailedToStartKnxMonitoring(ex);
             throw;
         }
     }
@@ -125,12 +116,12 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
                 this._isConnected = false;
                 this._connectionStatus = "Disconnected";
 
-                this._logger.LogInformation("KNX monitoring stopped");
+                this.LogKnxMonitoringStopped();
             }
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error stopping KNX monitoring");
+            this.LogErrorStoppingKnxMonitoring(ex);
         }
     }
 
@@ -144,7 +135,7 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error during async dispose");
+            this.LogErrorDuringAsyncDispose(ex);
         }
     }
 
@@ -161,7 +152,7 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error disposing KNX monitor service");
+            this.LogErrorDisposingKnxMonitorService(ex);
         }
         finally
         {
@@ -188,7 +179,7 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Failed to create connector parameters");
+            this.LogFailedToCreateConnectorParameters(ex);
             return null;
         }
     }
@@ -204,11 +195,7 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
             throw new InvalidOperationException("Gateway address is required for tunneling connection");
         }
 
-        this._logger.LogDebug(
-            "Creating IP tunneling connection to {Gateway}:{Port}",
-            this._config.Gateway,
-            this._config.Port
-        );
+        this.LogCreatingIpTunnelingConnection(this._config.Gateway, this._config.Port);
         return new IpTunnelingConnectorParameters(this._config.Gateway, this._config.Port);
     }
 
@@ -223,10 +210,7 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
         // Try to parse as IP address first
         if (IPAddress.TryParse(multicastAddress, out var ipAddress))
         {
-            this._logger.LogDebug(
-                "Creating IP routing connection to multicast address {MulticastAddress}",
-                multicastAddress
-            );
+            this.LogCreatingIpRoutingConnection(multicastAddress);
             return new IpRoutingConnectorParameters(ipAddress);
         }
 
@@ -243,11 +227,7 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
                 throw new InvalidOperationException($"Failed to resolve hostname '{multicastAddress}' to IPv4 address");
             }
 
-            this._logger.LogDebug(
-                "Creating IP routing connection to {MulticastAddress} ({ResolvedIp})",
-                multicastAddress,
-                resolvedIp
-            );
+            this.LogCreatingIpRoutingConnectionWithResolvedIp(multicastAddress, resolvedIp.ToString());
             return new IpRoutingConnectorParameters(resolvedIp);
         }
         catch (Exception ex)
@@ -269,7 +249,7 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
         }
 
         var device = usbDevices[0];
-        this._logger.LogDebug("Creating USB connection to device: {Device}", device);
+        this.LogCreatingUsbConnectionToDevice(device.ToString());
         return UsbConnectorParameters.FromDiscovery(device);
     }
 
@@ -323,7 +303,7 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
     /// <param name="e">Event arguments.</param>
     /// <param name="messageType">Message type.</param>
     /// <returns>KNX message.</returns>
-    private static KnxMessage CreateKnxMessage(GroupEventArgs e, KnxMessageType messageType)
+    private KnxMessage CreateKnxMessage(GroupEventArgs e, KnxMessageType messageType)
     {
         // Extract data and DPT information from the Falcon SDK value
         var (data, dptId, falconValue) = ExtractValueInformation(e.Value);
@@ -331,12 +311,7 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
         // Debug logging for development
         if (e.Value != null)
         {
-            _staticLogger?.LogDebug(
-                "KNX Value - Type: {ValueType}, DPT: {DptId}, Data: {Data}",
-                e.Value.GetType().Name,
-                dptId ?? "Unknown",
-                Convert.ToHexString(data)
-            );
+            this.LogKnxValue(e.Value.GetType().Name, dptId ?? "Unknown", Convert.ToHexString(data));
         }
 
         return new KnxMessage
@@ -358,7 +333,7 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
     /// </summary>
     /// <param name="value">Falcon SDK value object.</param>
     /// <returns>Tuple containing raw data, DPT ID, and the original Falcon value.</returns>
-    private static (byte[] Data, string? DptId, object? FalconValue) ExtractValueInformation(object? value)
+    private (byte[] Data, string? DptId, object? FalconValue) ExtractValueInformation(object? value)
     {
         if (value == null)
         {
@@ -384,7 +359,7 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            _staticLogger?.LogWarning(ex, "Error extracting value information from {ValueType}", value.GetType().Name);
+            this.LogErrorExtractingValueInformation(ex, value.GetType().Name);
 
             // Fallback to legacy extraction
             var fallbackData = ExtractDataFromValue(value);
@@ -633,12 +608,7 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
         // Log message if verbose
         if (this._config.Verbose)
         {
-            this._logger.LogDebug(
-                "KNX message: {MessageType} {GroupAddress} = {Value}",
-                message.MessageType,
-                message.GroupAddress,
-                message.DisplayValue
-            );
+            this.LogKnxMessage(message.MessageType.ToString(), message.GroupAddress, message.DisplayValue);
         }
 
         // Increment message counter

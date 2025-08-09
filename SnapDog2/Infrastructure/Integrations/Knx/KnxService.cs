@@ -362,7 +362,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
     {
         // KNX implementation does not currently support global status publishing
         // as per the command framework blueprint (Section 14.2.3 only covers MQTT)
-        this._logger.LogDebug("KNX global status publishing not implemented for event type {EventType}", eventType);
+        this.LogKnxGlobalStatusPublishingNotImplemented(eventType);
         return await Task.FromResult(Result.Success());
     }
 
@@ -980,7 +980,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
     /// </summary>
     private void LogDebug(string message)
     {
-        this._logger.LogDebug(message);
+        this.LogKnxDebugMessage(message);
     }
 
     /// <summary>
@@ -1010,11 +1010,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
         var targetType = GetTargetTypeDescription(statusId);
         var targetDescription = targetType == "zone" ? $"zone {targetId}" : $"client {targetId}";
 
-        this._logger.LogWarning(
-            "No KNX group address configured for status {StatusId} on {TargetDescription}. ",
-            statusId,
-            targetDescription
-        );
+        this.LogNoKnxGroupAddressConfigured(statusId, targetDescription);
     }
 
     /// <summary>
@@ -1025,12 +1021,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
         var targetType = GetTargetTypeDescription(statusId);
         var targetDescription = targetType == "zone" ? $"zone {targetId}" : $"client {targetId}";
 
-        this._logger.LogError(
-            exception,
-            "Error sending KNX status {StatusId} to {TargetDescription}",
-            statusId,
-            targetDescription
-        );
+        this.LogErrorSendingKnxStatus(exception, statusId, targetDescription);
     }
 
     #region Logging

@@ -5,7 +5,7 @@ namespace KnxMonitor.Services;
 /// <summary>
 /// Service for decoding KNX Data Point Types (DPT) using Falcon SDK.
 /// </summary>
-public class DptDecodingService : IDptDecodingService
+public partial class DptDecodingService : IDptDecodingService
 {
     private readonly ILogger<DptDecodingService> _logger;
 
@@ -96,19 +96,14 @@ public class DptDecodingService : IDptDecodingService
 
             if (!SupportedDpts.TryGetValue(normalizedDptId, out var dptInfo))
             {
-                this._logger.LogDebug("Unsupported DPT: {DptId}", dptId);
+                this.LogUnsupportedDpt(dptId);
                 return null;
             }
 
             // Validate data length
             if (data.Length != dptInfo.ExpectedLength)
             {
-                this._logger.LogDebug(
-                    "Invalid data length for DPT {DptId}: expected {Expected}, got {Actual}",
-                    dptId,
-                    dptInfo.ExpectedLength,
-                    data.Length
-                );
+                this.LogInvalidDataLengthForDpt(dptId, dptInfo.ExpectedLength, data.Length);
                 return null;
             }
 
@@ -146,7 +141,7 @@ public class DptDecodingService : IDptDecodingService
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error decoding DPT {DptId} with data {Data}", dptId, Convert.ToHexString(data));
+            this.LogErrorDecodingDpt(ex, dptId, Convert.ToHexString(data));
             return null;
         }
     }

@@ -5,7 +5,7 @@ namespace SnapDog2.Hosting;
 /// <summary>
 /// Custom host wrapper that handles startup exceptions gracefully
 /// </summary>
-public class ResilientHost : IHost
+public partial class ResilientHost : IHost
 {
     private readonly IHost _innerHost;
     private readonly ILogger<ResilientHost> _logger;
@@ -96,15 +96,11 @@ public class ResilientHost : IHost
         {
             if (this._isDebugMode)
             {
-                this._logger.LogError(ex, "Error during host shutdown");
+                this.LogErrorDuringHostShutdown(ex);
             }
             else
             {
-                this._logger.LogError(
-                    "Error during host shutdown: {ErrorType} - {ErrorMessage}",
-                    ex.GetType().Name,
-                    ex.Message
-                );
+                this.LogErrorDuringHostShutdownProduction(ex.GetType().Name, ex.Message);
             }
             // Don't re-throw shutdown exceptions
         }

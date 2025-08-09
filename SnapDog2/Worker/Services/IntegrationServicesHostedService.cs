@@ -258,11 +258,11 @@ public partial class IntegrationServicesHostedService : BackgroundService
         }
         catch (OperationCanceledException)
         {
-            this._logger.LogInformation("Integration services initialization cancelled");
+            this.LogIntegrationServicesInitializationCancelled();
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Failed to initialize integration services");
+            this.LogFailedToInitializeIntegrationServices(ex);
             throw; // Re-throw to stop the application if critical services fail
         }
     }
@@ -414,8 +414,8 @@ public partial class IntegrationServicesHostedService : BackgroundService
 
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
-        this._logger.LogInformation("Stopping integration services...");
+        this.LogStoppingIntegrationServices();
         await base.StopAsync(cancellationToken);
-        this._logger.LogInformation("Integration services stopped");
+        this.LogIntegrationServicesStopped();
     }
 }

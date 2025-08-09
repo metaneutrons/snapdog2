@@ -11,7 +11,7 @@ using SnapDog2.Server.Features.Global.Queries;
 /// <summary>
 /// Handler for getting the latest system error information.
 /// </summary>
-public class GetErrorStatusQueryHandler : IQueryHandler<GetErrorStatusQuery, Result<ErrorDetails?>>
+public partial class GetErrorStatusQueryHandler : IQueryHandler<GetErrorStatusQuery, Result<ErrorDetails?>>
 {
     private readonly ILogger<GetErrorStatusQueryHandler> _logger;
     private readonly IMetricsService _metricsService;
@@ -37,7 +37,7 @@ public class GetErrorStatusQueryHandler : IQueryHandler<GetErrorStatusQuery, Res
     {
         try
         {
-            this._logger.LogDebug("Getting latest system error status");
+            this.LogGettingLatestSystemErrorStatus();
 
             // TODO: Implement error status tracking service
             // For now, return null indicating no recent errors
@@ -46,13 +46,13 @@ public class GetErrorStatusQueryHandler : IQueryHandler<GetErrorStatusQuery, Res
 
             var errorDetails = await this.GetLatestErrorAsync(cancellationToken);
 
-            this._logger.LogDebug("Successfully retrieved error status: {HasError}", errorDetails != null);
+            this.LogSuccessfullyRetrievedErrorStatus(errorDetails != null);
 
             return Result<ErrorDetails?>.Success(errorDetails);
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Failed to get error status");
+            this.LogFailedToGetErrorStatus(ex);
             return Result<ErrorDetails?>.Failure("Failed to retrieve error status");
         }
     }

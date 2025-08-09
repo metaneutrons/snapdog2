@@ -9,7 +9,7 @@ namespace KnxMonitor.Services;
 /// Service for displaying KNX monitor output in console logging mode.
 /// Used when output is redirected or in containerized environments.
 /// </summary>
-public class DisplayService : IDisplayService
+public partial class DisplayService : IDisplayService
 {
     private readonly KnxMonitorConfig _config;
     private readonly ILogger<DisplayService> _logger;
@@ -96,7 +96,7 @@ public class DisplayService : IDisplayService
                     }
                     catch (Exception ex)
                     {
-                        this._logger.LogError(ex, "Error updating display");
+                        this.LogErrorUpdatingDisplay(ex);
                     }
                 }
             },
@@ -136,7 +136,7 @@ public class DisplayService : IDisplayService
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error stopping display service");
+            this.LogErrorStoppingDisplayService(ex);
         }
         finally
         {
@@ -244,7 +244,7 @@ public class DisplayService : IDisplayService
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error updating visual display");
+                this.LogErrorUpdatingVisualDisplay(ex);
             }
         }
     }

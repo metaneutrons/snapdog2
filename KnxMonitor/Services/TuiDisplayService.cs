@@ -12,7 +12,7 @@ namespace KnxMonitor.Services;
 /// Award-worthy Terminal.Gui V2 implementation for KNX Monitor.
 /// Provides enterprise-grade windowed interface with proper V2 API compatibility and coordinated shutdown.
 /// </summary>
-public class TuiDisplayService : IDisplayService
+public partial class TuiDisplayService : IDisplayService
 {
     private readonly ILogger<TuiDisplayService> _logger;
     private readonly KnxMessageTableModel _tableModel;
@@ -56,11 +56,11 @@ public class TuiDisplayService : IDisplayService
             // Note: Ctrl+C handling is now managed at the Program level
             // This avoids conflicts between main program and TUI service
 
-            this._logger.LogInformation("Terminal.Gui V2 application initialized successfully");
+            this.LogTerminalGuiInitializedSuccessfully();
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Failed to initialize Terminal.Gui V2 application");
+            this.LogFailedToInitializeTerminalGui(ex);
             throw;
         }
     }
@@ -79,7 +79,7 @@ public class TuiDisplayService : IDisplayService
         try
         {
             this._shutdownRequested = true;
-            this._logger.LogInformation("TUI shutdown requested, closing application...");
+            this.LogTuiShutdownRequested();
 
             // Request Terminal.Gui to stop
             Application.RequestStop();
@@ -89,7 +89,7 @@ public class TuiDisplayService : IDisplayService
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error during TUI shutdown request");
+            this.LogErrorDuringTuiShutdownRequest(ex);
             this._shutdownCompletionSource?.TrySetException(ex);
         }
     }
@@ -98,7 +98,7 @@ public class TuiDisplayService : IDisplayService
     {
         if (this._isRunning)
         {
-            this._logger.LogWarning("TUI display service is already running");
+            this.LogTuiDisplayServiceAlreadyRunning();
             return;
         }
 
@@ -114,7 +114,7 @@ public class TuiDisplayService : IDisplayService
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error running TUI display service");
+            this.LogErrorRunningTuiDisplayService(ex);
             throw;
         }
         finally
@@ -134,11 +134,11 @@ public class TuiDisplayService : IDisplayService
         {
             this._isRunning = false;
             this.RequestShutdown();
-            this._logger.LogInformation("TUI display service stopped");
+            this.LogTuiDisplayServiceStopped();
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error stopping TUI display service");
+            this.LogErrorStoppingTuiDisplayService(ex);
         }
     }
 
@@ -148,11 +148,11 @@ public class TuiDisplayService : IDisplayService
         {
             this.Stop();
             Application.Shutdown();
-            this._logger.LogInformation("Terminal.Gui V2 application shutdown completed");
+            this.LogTerminalGuiShutdownCompleted();
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error during Terminal.Gui V2 shutdown");
+            this.LogErrorDuringTerminalGuiShutdown(ex);
         }
     }
 
@@ -170,13 +170,13 @@ public class TuiDisplayService : IDisplayService
         // Handle window closing
         this._mainWindow.Closing += (s, e) =>
         {
-            this._logger.LogInformation("Main window closing, initiating shutdown...");
+            this.LogMainWindowClosingInitiatingShutdown();
             this.RequestShutdown();
         };
 
         this.CreateWindowContent();
 
-        this._logger.LogInformation("Main window created with Terminal.Gui V2 components");
+        this.LogMainWindowCreatedWithTerminalGuiComponents();
     }
 
     private void CreateWindowContent()
@@ -217,7 +217,7 @@ public class TuiDisplayService : IDisplayService
         // Set up key bindings
         this.SetupKeyBindings();
 
-        this._logger.LogDebug("Window content created with computed layout for automatic resizing");
+        this.LogWindowContentCreatedWithComputedLayout();
     }
 
     private void CreateStatusLabels(FrameView statusFrame)
@@ -509,11 +509,7 @@ public class TuiDisplayService : IDisplayService
             }
 
             File.WriteAllText(filePath, csv.ToString());
-            this._logger.LogInformation(
-                "Exported {Count} messages to {FilePath}",
-                this._tableModel.Messages.Count,
-                filePath
-            );
+            this.LogExportedMessagesToFile(this._tableModel.Messages.Count, filePath);
         }
     }
 
@@ -535,7 +531,7 @@ public class TuiDisplayService : IDisplayService
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error updating UI");
+                this.LogErrorUpdatingUi(ex);
             }
         });
     }
@@ -587,7 +583,7 @@ public class TuiDisplayService : IDisplayService
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error updating connection status display");
+                this.LogErrorUpdatingConnectionStatusDisplay(ex);
             }
         });
     }
@@ -657,12 +653,12 @@ public class TuiDisplayService : IDisplayService
                     try
                     {
                         this.Start();
-                        this._logger.LogInformation("TUI application completed normally");
+                        this.LogTuiApplicationCompletedNormally();
                         this._shutdownCompletionSource.TrySetResult(true);
                     }
                     catch (Exception ex)
                     {
-                        this._logger.LogError(ex, "Error in TUI application");
+                        this.LogErrorInTuiApplication(ex);
                         this._shutdownCompletionSource.TrySetException(ex);
                     }
                 },
@@ -677,22 +673,22 @@ public class TuiDisplayService : IDisplayService
 
             if (completedTask == this._shutdownCompletionSource.Task)
             {
-                this._logger.LogInformation("TUI application has been closed");
+                this.LogTuiApplicationHasBeenClosed();
             }
             else
             {
-                this._logger.LogInformation("TUI application was cancelled");
+                this.LogTuiApplicationWasCancelled();
                 this.RequestShutdown();
             }
         }
         catch (OperationCanceledException)
         {
-            this._logger.LogInformation("TUI display service was cancelled");
+            this.LogTuiDisplayServiceWasCancelled();
             this.RequestShutdown();
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error in TUI display service");
+            this.LogErrorInTuiDisplayService(ex);
             throw;
         }
         finally
@@ -720,7 +716,7 @@ public class TuiDisplayService : IDisplayService
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error handling received message");
+            this.LogErrorHandlingReceivedMessage(ex);
         }
     }
 
@@ -764,7 +760,7 @@ public class TuiDisplayService : IDisplayService
             {
                 try
                 {
-                    this._logger.LogInformation("Stopping TUI display service...");
+                    this.LogStoppingTuiDisplayService();
 
                     // Stop refresh timer first
                     this._refreshTimer?.Dispose();
@@ -782,11 +778,11 @@ public class TuiDisplayService : IDisplayService
                     // Cancel any ongoing operations
                     this._cancellationTokenSource?.Cancel();
 
-                    this._logger.LogInformation("TUI display service stopped");
+                    this.LogTuiDisplayServiceStoppedAsync();
                 }
                 catch (Exception ex)
                 {
-                    this._logger.LogError(ex, "Error stopping TUI display service");
+                    this.LogErrorStoppingTuiDisplayServiceAsync(ex);
                 }
             },
             cancellationToken
@@ -807,7 +803,7 @@ public class TuiDisplayService : IDisplayService
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error updating connection status");
+                this.LogErrorUpdatingConnectionStatus(ex);
             }
         });
     }
@@ -826,7 +822,7 @@ public class TuiDisplayService : IDisplayService
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error during async dispose");
+            this.LogErrorDuringAsyncDispose(ex);
         }
     }
 
@@ -856,7 +852,7 @@ public class TuiDisplayService : IDisplayService
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error during dispose");
+            this.LogErrorDuringDispose(ex);
         }
     }
 }

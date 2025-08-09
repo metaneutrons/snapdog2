@@ -14,7 +14,7 @@ using SnapDog2.Server.Features.Global.Services.Abstractions;
 /// <summary>
 /// Service for managing and publishing global system status.
 /// </summary>
-public class GlobalStatusService : IGlobalStatusService
+public partial class GlobalStatusService : IGlobalStatusService
 {
     private readonly GetSystemStatusQueryHandler _systemStatusHandler;
     private readonly GetErrorStatusQueryHandler _errorStatusHandler;
@@ -65,16 +65,16 @@ public class GlobalStatusService : IGlobalStatusService
                     new SystemStatusChangedNotification { Status = result.Value },
                     cancellationToken
                 );
-                this._logger.LogDebug("System status retrieved: {IsOnline}", result.Value.IsOnline);
+                this.LogSystemStatusRetrieved(result.Value.IsOnline);
             }
             else
             {
-                this._logger.LogWarning("Failed to get system status for publishing: {Error}", result.ErrorMessage);
+                this.LogFailedToGetSystemStatusForPublishing(result.ErrorMessage);
             }
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Failed to publish system status");
+            this.LogFailedToPublishSystemStatus(ex);
         }
     }
 
@@ -85,11 +85,11 @@ public class GlobalStatusService : IGlobalStatusService
         {
             // Publish error notification to external systems (MQTT, KNX) via mediator
             await this._mediator.PublishAsync(new SystemErrorNotification { Error = errorDetails }, cancellationToken);
-            this._logger.LogDebug("Error status to publish: {ErrorCode}", errorDetails.ErrorCode);
+            this.LogErrorStatusToPublish(errorDetails.ErrorCode);
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Failed to publish error status");
+            this.LogFailedToPublishErrorStatus(ex);
         }
     }
 
@@ -107,16 +107,16 @@ public class GlobalStatusService : IGlobalStatusService
                     new VersionInfoChangedNotification { VersionInfo = result.Value },
                     cancellationToken
                 );
-                this._logger.LogDebug("Version info retrieved: {Version}", result.Value.Version);
+                this.LogVersionInfoRetrieved(result.Value.Version);
             }
             else
             {
-                this._logger.LogWarning("Failed to get version info for publishing: {Error}", result.ErrorMessage);
+                this.LogFailedToGetVersionInfoForPublishing(result.ErrorMessage);
             }
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Failed to publish version info");
+            this.LogFailedToPublishVersionInfo(ex);
         }
     }
 
@@ -134,27 +134,23 @@ public class GlobalStatusService : IGlobalStatusService
                     new ServerStatsChangedNotification { Stats = result.Value },
                     cancellationToken
                 );
-                this._logger.LogDebug(
-                    "Server stats retrieved: CPU={CpuUsage}%, Memory={MemoryUsage}MB",
-                    result.Value.CpuUsagePercent,
-                    result.Value.MemoryUsageMb
-                );
+                this.LogServerStatsRetrieved(result.Value.CpuUsagePercent, result.Value.MemoryUsageMb);
             }
             else
             {
-                this._logger.LogWarning("Failed to get server stats for publishing: {Error}", result.ErrorMessage);
+                this.LogFailedToGetServerStatsForPublishing(result.ErrorMessage);
             }
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Failed to publish server stats");
+            this.LogFailedToPublishServerStats(ex);
         }
     }
 
     /// <inheritdoc />
     public async Task StartPeriodicPublishingAsync(CancellationToken cancellationToken = default)
     {
-        this._logger.LogInformation("Starting periodic global status publishing");
+        this.LogStartingPeriodicGlobalStatusPublishing();
 
         // Publish initial status
         await this.PublishSystemStatusAsync(cancellationToken);
@@ -179,7 +175,7 @@ public class GlobalStatusService : IGlobalStatusService
                 }
                 catch (Exception ex)
                 {
-                    this._logger.LogError(ex, "Error in periodic system status publishing");
+                    this.LogErrorInPeriodicSystemStatusPublishing(ex);
                 }
             },
             cancellationToken
@@ -203,23 +199,23 @@ public class GlobalStatusService : IGlobalStatusService
                 }
                 catch (Exception ex)
                 {
-                    this._logger.LogError(ex, "Error in periodic server stats publishing");
+                    this.LogErrorInPeriodicServerStatsPublishing(ex);
                 }
             },
             cancellationToken
         );
 
-        this._logger.LogInformation("Periodic global status publishing started");
+        this.LogPeriodicGlobalStatusPublishingStarted();
     }
 
     /// <inheritdoc />
     public async Task StopPeriodicPublishingAsync()
     {
-        this._logger.LogInformation("Stopping periodic global status publishing");
+        this.LogStoppingPeriodicGlobalStatusPublishing();
 
         this._cancellationTokenSource.Cancel();
 
-        this._logger.LogInformation("Periodic global status publishing stopped");
+        this.LogPeriodicGlobalStatusPublishingStopped();
         await Task.CompletedTask;
     }
 
