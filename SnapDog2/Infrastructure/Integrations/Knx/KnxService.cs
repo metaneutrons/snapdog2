@@ -1011,11 +1011,9 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
         var targetDescription = targetType == "zone" ? $"zone {targetId}" : $"client {targetId}";
 
         this._logger.LogWarning(
-            "No KNX group address configured for status {StatusId} on {TargetDescription}. "
-                + "Configure the appropriate KNX group address in the {TargetType} configuration to enable KNX integration.",
+            "No KNX group address configured for status {StatusId} on {TargetDescription}. ",
             statusId,
-            targetDescription,
-            targetType
+            targetDescription
         );
     }
 
