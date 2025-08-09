@@ -197,6 +197,9 @@ static WebApplication CreateWebApplication(string[] args)
 
         // Add hosted service to initialize integration services on startup
         builder.Services.AddHostedService<SnapDog2.Worker.Services.IntegrationServicesHostedService>();
+
+        // Add hosted service to publish initial state after integration services are initialized
+        builder.Services.AddHostedService<SnapDog2.Services.StatePublishingService>();
     }
 
     // Register placeholder services

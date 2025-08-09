@@ -93,4 +93,18 @@ public interface IKnxService : IAsyncDisposable
         T payload,
         CancellationToken cancellationToken = default
     );
+
+    /// <summary>
+    /// Publishes global system status updates to KNX group addresses.
+    /// </summary>
+    /// <typeparam name="T">Type of the payload.</typeparam>
+    /// <param name="eventType">Type of event (e.g., SYSTEM_STATUS, VERSION_INFO).</param>
+    /// <param name="payload">Event payload.</param>
+    /// <param name="cancellationToken">Cancellation token for the operation.</param>
+    /// <returns>Result indicating success or failure.</returns>
+    Task<Result> PublishGlobalStatusAsync<T>(
+        string eventType,
+        T payload,
+        CancellationToken cancellationToken = default
+    );
 }

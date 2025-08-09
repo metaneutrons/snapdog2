@@ -347,6 +347,23 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
         }
     }
 
+    /// <summary>
+    /// Publishes global system status updates to KNX group addresses.
+    /// Currently, KNX implementation does not support global status publishing
+    /// as there are no global group addresses configured in the blueprint.
+    /// </summary>
+    public async Task<Result> PublishGlobalStatusAsync<T>(
+        string eventType,
+        T payload,
+        CancellationToken cancellationToken = default
+    )
+    {
+        // KNX implementation does not currently support global status publishing
+        // as per the command framework blueprint (Section 14.2.3 only covers MQTT)
+        this._logger.LogDebug("KNX global status publishing not implemented for event type {EventType}", eventType);
+        return await Task.FromResult(Result.Success());
+    }
+
     /// <inheritdoc />
     public async Task Handle(StatusChangedNotification notification, CancellationToken cancellationToken)
     {

@@ -19,7 +19,6 @@ using Polly.Retry;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Core.Enums;
-using SnapDog2.Core.Extensions;
 using SnapDog2.Core.Helpers;
 using SnapDog2.Core.Models;
 using SnapDog2.Server.Features.Clients.Commands.Config;
@@ -37,15 +36,13 @@ using SnapDog2.Server.Features.Zones.Commands.Volume;
 public sealed partial class MqttService : IMqttService, IAsyncDisposable
 {
     private readonly MqttConfig _config;
+    private readonly SystemConfig _systemConfig;
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<MqttService> _logger;
     private readonly List<ZoneConfig> _zoneConfigs;
     private readonly List<ClientConfig> _clientConfigs;
     private readonly ResiliencePipeline _connectionPolicy;
     private readonly ResiliencePipeline _operationPolicy;
-
-    private readonly ConcurrentDictionary<int, ZoneMqttTopics> _zoneTopics = new();
-    private readonly ConcurrentDictionary<string, ClientMqttTopics> _clientTopics = new();
 
     private IMqttClient? _mqttClient;
     private bool _initialized = false;
@@ -60,6 +57,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     )
     {
         this._config = configOptions.Value.Services.Mqtt;
+        this._systemConfig = configOptions.Value.System;
         this._serviceProvider = serviceProvider;
         this._logger = logger;
         this._zoneConfigs = zoneConfigOptions.Value;
@@ -68,9 +66,6 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         // Configure resilience policies
         this._connectionPolicy = this.CreateConnectionPolicy();
         this._operationPolicy = this.CreateOperationPolicy();
-
-        // Build topic configurations
-        this.BuildTopicConfigurations();
 
         this.LogServiceCreated(this._config.BrokerAddress, this._config.Port, this._config.Enabled);
     }
@@ -205,27 +200,6 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         return ResiliencePolicyFactory.CreatePipeline(validatedConfig, "MQTT-Operation");
     }
 
-    private void BuildTopicConfigurations()
-    {
-        // Build zone topic configurations (1-based indexing)
-        for (var i = 0; i < this._zoneConfigs.Count; i++)
-        {
-            var zoneConfig = this._zoneConfigs[i];
-            var zoneId = i + 1; // 1-based indexing
-            var topics = zoneConfig.BuildMqttTopics();
-            this._zoneTopics.TryAdd(zoneId, topics);
-        }
-
-        // Build client topic configurations
-        for (var i = 0; i < this._clientConfigs.Count; i++)
-        {
-            var clientConfig = this._clientConfigs[i];
-            var clientId = $"client_{i + 1}"; // Use client_1, client_2, etc.
-            var topics = clientConfig.BuildMqttTopics();
-            this._clientTopics.TryAdd(clientId, topics);
-        }
-    }
-
     #endregion
 
     #region Interface Implementation
@@ -339,19 +313,31 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             return Result.Failure("MQTT client is not connected");
         }
 
-        if (!this._zoneTopics.TryGetValue(zoneId, out var topics))
+        // Get zone config (1-based indexing)
+        var zoneIndex = zoneId - 1;
+        if (zoneIndex < 0 || zoneIndex >= this._zoneConfigs.Count)
         {
             return Result.Failure($"Zone {zoneId} not configured for MQTT");
         }
 
+        var zoneConfig = this._zoneConfigs[zoneIndex];
+        if (zoneConfig.Mqtt == null)
+        {
+            return Result.Failure($"Zone {zoneId} has no MQTT configuration");
+        }
+
         try
         {
+            // Build state topic from zone configuration
+            var baseTopic = zoneConfig.Mqtt.BaseTopic?.TrimEnd('/') ?? string.Empty;
+            var stateTopic = $"{baseTopic}/{zoneConfig.Mqtt.StateTopic}";
+
             // Publish comprehensive state as JSON
             var stateJson = JsonSerializer.Serialize(
                 state,
                 new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
             );
-            await this.PublishAsync(topics.Status.State, stateJson, true, cancellationToken);
+            await this.PublishAsync(stateTopic, stateJson, true, cancellationToken);
 
             return Result.Success();
         }
@@ -373,19 +359,36 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             return Result.Failure("MQTT client is not connected");
         }
 
-        if (!this._clientTopics.TryGetValue(clientId, out var topics))
+        // Parse client ID to get index (clientId format: "client_1", "client_2", etc.)
+        if (!clientId.StartsWith("client_") || !int.TryParse(clientId.Substring(7), out var clientIndex))
+        {
+            return Result.Failure($"Invalid client ID format: {clientId}");
+        }
+
+        // Convert to 0-based index
+        var configIndex = clientIndex - 1;
+        if (configIndex < 0 || configIndex >= this._clientConfigs.Count)
         {
             return Result.Failure($"Client {clientId} not configured for MQTT");
         }
 
+        var clientConfig = this._clientConfigs[configIndex];
+        if (clientConfig.Mqtt == null)
+        {
+            return Result.Failure($"Client {clientId} has no MQTT configuration");
+        }
+
         try
         {
+            // Build state topic from client configuration
+            var baseTopic = clientConfig.Mqtt.BaseTopic?.TrimEnd('/') ?? string.Empty;
+            var clientStateTopic = $"{baseTopic}/{clientConfig.Mqtt.StateTopic}";
             // Publish comprehensive state as JSON
             var stateJson = JsonSerializer.Serialize(
                 state,
                 new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
             );
-            await this.PublishAsync(topics.Status.State, stateJson, true, cancellationToken);
+            await this.PublishAsync(clientStateTopic, stateJson, true, cancellationToken);
 
             return Result.Success();
         }
@@ -898,22 +901,39 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
                 return Result.Failure("MQTT client is not connected");
             }
 
-            // Get client topics for this client
-            if (!this._clientTopics.TryGetValue(clientId, out var topics))
+            // Parse client ID to get index (clientId format: "client_1", "client_2", etc.)
+            if (!clientId.StartsWith("client_") || !int.TryParse(clientId.Substring(7), out var clientIndex))
             {
-                this._logger.LogWarning("No MQTT topics configured for client {ClientId}", clientId);
+                this._logger.LogWarning("Invalid client ID format: {ClientId}", clientId);
                 return Result.Success();
             }
+
+            // Convert to 0-based index
+            var configIndex = clientIndex - 1;
+            if (configIndex < 0 || configIndex >= this._clientConfigs.Count)
+            {
+                this._logger.LogWarning("No MQTT configuration for client {ClientId}", clientId);
+                return Result.Success();
+            }
+
+            var clientConfig = this._clientConfigs[configIndex];
+            if (clientConfig.Mqtt == null)
+            {
+                this._logger.LogWarning("Client {ClientId} has no MQTT configuration", clientId);
+                return Result.Success();
+            }
+
+            var baseTopic = clientConfig.Mqtt.BaseTopic?.TrimEnd('/') ?? string.Empty;
 
             // Map event type to specific topic
             var topic = eventType.ToUpperInvariant() switch
             {
-                "CLIENT_VOLUME" => topics.Status.Volume,
-                "CLIENT_MUTE" => topics.Status.Mute,
-                "CLIENT_LATENCY" => topics.Status.Latency,
-                "CLIENT_CONNECTION" => topics.Status.Connected,
-                "CLIENT_ZONE_ASSIGNMENT" => topics.Status.Zone,
-                "CLIENT_STATE" => topics.Status.State,
+                "CLIENT_VOLUME" => $"{baseTopic}/{clientConfig.Mqtt.VolumeTopic}",
+                "CLIENT_MUTE" => $"{baseTopic}/{clientConfig.Mqtt.MuteTopic}",
+                "CLIENT_LATENCY" => $"{baseTopic}/{clientConfig.Mqtt.LatencyTopic}",
+                "CLIENT_CONNECTION" => $"{baseTopic}/{clientConfig.Mqtt.ConnectedTopic}",
+                "CLIENT_ZONE_ASSIGNMENT" => $"{baseTopic}/{clientConfig.Mqtt.ZoneTopic}",
+                "CLIENT_STATE" => $"{baseTopic}/{clientConfig.Mqtt.StateTopic}",
                 _ => null,
             };
 
@@ -958,24 +978,34 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
                 return Result.Failure("MQTT client is not connected");
             }
 
-            // Get zone topics for this zone
-            if (!this._zoneTopics.TryGetValue(zoneId, out var topics))
+            // Get zone config (1-based indexing)
+            var zoneIndex = zoneId - 1;
+            if (zoneIndex < 0 || zoneIndex >= this._zoneConfigs.Count)
             {
-                this._logger.LogWarning("No MQTT topics configured for zone {ZoneId}", zoneId);
+                this._logger.LogWarning("No MQTT configuration for zone {ZoneId}", zoneId);
                 return Result.Success();
             }
+
+            var zoneConfig = this._zoneConfigs[zoneIndex];
+            if (zoneConfig.Mqtt == null)
+            {
+                this._logger.LogWarning("Zone {ZoneId} has no MQTT configuration", zoneId);
+                return Result.Success();
+            }
+
+            var baseTopic = zoneConfig.Mqtt.BaseTopic?.TrimEnd('/') ?? string.Empty;
 
             // Map event type to specific topic
             var topic = eventType.ToUpperInvariant() switch
             {
-                "ZONE_VOLUME" => topics.Status.Volume,
-                "ZONE_MUTE" => topics.Status.Mute,
-                "ZONE_PLAYBACK_STATE" => topics.Status.Control,
-                "ZONE_TRACK" => topics.Status.TrackInfo,
-                "ZONE_PLAYLIST" => topics.Status.PlaylistInfo,
-                "ZONE_REPEAT_MODE" => topics.Status.PlaylistRepeat,
-                "ZONE_SHUFFLE_MODE" => topics.Status.PlaylistShuffle,
-                "ZONE_STATE" => topics.Status.State,
+                "ZONE_VOLUME" => $"{baseTopic}/{zoneConfig.Mqtt.VolumeTopic}",
+                "ZONE_MUTE" => $"{baseTopic}/{zoneConfig.Mqtt.MuteTopic}",
+                "ZONE_PLAYBACK_STATE" => $"{baseTopic}/{zoneConfig.Mqtt.ControlTopic}",
+                "ZONE_TRACK" => $"{baseTopic}/{zoneConfig.Mqtt.TrackInfoTopic}",
+                "ZONE_PLAYLIST" => $"{baseTopic}/{zoneConfig.Mqtt.PlaylistInfoTopic}",
+                "ZONE_REPEAT_MODE" => $"{baseTopic}/{zoneConfig.Mqtt.PlaylistRepeatTopic}",
+                "ZONE_SHUFFLE_MODE" => $"{baseTopic}/{zoneConfig.Mqtt.PlaylistShuffleTopic}",
+                "ZONE_STATE" => $"{baseTopic}/{zoneConfig.Mqtt.StateTopic}",
                 _ => null,
             };
 
@@ -995,6 +1025,53 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         {
             this._logger.LogError(ex, "Failed to publish zone status {EventType} for zone {ZoneId}", eventType, zoneId);
             return Result.Failure($"Failed to publish zone status: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Publishes global system status updates to MQTT topics.
+    /// </summary>
+    public async Task<Result> PublishGlobalStatusAsync<T>(
+        string eventType,
+        T payload,
+        CancellationToken cancellationToken = default
+    )
+    {
+        try
+        {
+            if (!this.IsConnected)
+            {
+                return Result.Failure("MQTT client is not connected");
+            }
+
+            // Build topic from SystemConfig
+            var baseTopic = this._systemConfig.MqttBaseTopic.TrimEnd('/');
+            var topic = eventType.ToUpperInvariant() switch
+            {
+                "SYSTEM_STATUS" => $"{baseTopic}/{this._systemConfig.MqttStatusTopic}",
+                "ERROR_STATUS" => $"{baseTopic}/{this._systemConfig.MqttErrorTopic}",
+                "VERSION_INFO" => $"{baseTopic}/{this._systemConfig.MqttVersionTopic}",
+                "SERVER_STATS" => $"{baseTopic}/{this._systemConfig.MqttStatsTopic}",
+                _ => null,
+            };
+
+            if (topic == null)
+            {
+                this._logger.LogDebug("No MQTT topic mapping for global event type {EventType}", eventType);
+                return Result.Success();
+            }
+
+            // Serialize payload
+            var jsonPayload = System.Text.Json.JsonSerializer.Serialize(payload);
+
+            // Publish to MQTT with retain flag for status topics
+            var retain = eventType.ToUpperInvariant() != "ERROR_STATUS"; // Don't retain error messages
+            return await this.PublishAsync(topic, jsonPayload, retain, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            this._logger.LogError(ex, "Failed to publish global status {EventType}", eventType);
+            return Result.Failure($"Failed to publish global status: {ex.Message}");
         }
     }
 
