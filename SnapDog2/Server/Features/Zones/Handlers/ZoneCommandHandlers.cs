@@ -14,7 +14,7 @@ using SnapDog2.Server.Features.Zones.Commands.Volume;
 /// <summary>
 /// Handles the PlayCommand.
 /// </summary>
-public class PlayCommandHandler : ICommandHandler<PlayCommand, Result>
+public partial class PlayCommandHandler : ICommandHandler<PlayCommand, Result>
 {
     private readonly IZoneManager _zoneManager;
     private readonly ILogger<PlayCommandHandler> _logger;
@@ -27,16 +27,12 @@ public class PlayCommandHandler : ICommandHandler<PlayCommand, Result>
 
     public async Task<Result> Handle(PlayCommand request, CancellationToken cancellationToken)
     {
-        this._logger.LogInformation(
-            "Starting playback for Zone {ZoneId} from {Source}",
-            request.ZoneId,
-            request.Source
-        );
+        this.LogStartingPlayback(request.ZoneId, request.Source);
 
         var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            this._logger.LogWarning("Zone {ZoneId} not found for PlayCommand", request.ZoneId);
+            this.LogZoneNotFound(request.ZoneId, nameof(PlayCommand));
             return zoneResult;
         }
 
@@ -55,12 +51,18 @@ public class PlayCommandHandler : ICommandHandler<PlayCommand, Result>
             return await zone.PlayAsync().ConfigureAwait(false);
         }
     }
+
+    [LoggerMessage(9001, LogLevel.Information, "Starting playback for Zone {ZoneId} from {Source}")]
+    private partial void LogStartingPlayback(int zoneId, SnapDog2.Core.Enums.CommandSource source);
+
+    [LoggerMessage(9002, LogLevel.Warning, "Zone {ZoneId} not found for {CommandName}")]
+    private partial void LogZoneNotFound(int zoneId, string commandName);
 }
 
 /// <summary>
 /// Handles the PauseCommand.
 /// </summary>
-public class PauseCommandHandler : ICommandHandler<PauseCommand, Result>
+public partial class PauseCommandHandler : ICommandHandler<PauseCommand, Result>
 {
     private readonly IZoneManager _zoneManager;
     private readonly ILogger<PauseCommandHandler> _logger;
@@ -73,24 +75,30 @@ public class PauseCommandHandler : ICommandHandler<PauseCommand, Result>
 
     public async Task<Result> Handle(PauseCommand request, CancellationToken cancellationToken)
     {
-        this._logger.LogInformation("Pausing playback for Zone {ZoneId} from {Source}", request.ZoneId, request.Source);
+        this.LogPausingPlayback(request.ZoneId, request.Source);
 
         var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            this._logger.LogWarning("Zone {ZoneId} not found for PauseCommand", request.ZoneId);
+            this.LogZoneNotFound(request.ZoneId, nameof(PauseCommand));
             return zoneResult;
         }
 
         var zone = zoneResult.Value!;
         return await zone.PauseAsync().ConfigureAwait(false);
     }
+
+    [LoggerMessage(9003, LogLevel.Information, "Pausing playback for Zone {ZoneId} from {Source}")]
+    private partial void LogPausingPlayback(int zoneId, SnapDog2.Core.Enums.CommandSource source);
+
+    [LoggerMessage(9004, LogLevel.Warning, "Zone {ZoneId} not found for {CommandName}")]
+    private partial void LogZoneNotFound(int zoneId, string commandName);
 }
 
 /// <summary>
 /// Handles the StopCommand.
 /// </summary>
-public class StopCommandHandler : ICommandHandler<StopCommand, Result>
+public partial class StopCommandHandler : ICommandHandler<StopCommand, Result>
 {
     private readonly IZoneManager _zoneManager;
     private readonly ILogger<StopCommandHandler> _logger;
@@ -103,22 +111,24 @@ public class StopCommandHandler : ICommandHandler<StopCommand, Result>
 
     public async Task<Result> Handle(StopCommand request, CancellationToken cancellationToken)
     {
-        this._logger.LogInformation(
-            "Stopping playback for Zone {ZoneId} from {Source}",
-            request.ZoneId,
-            request.Source
-        );
+        this.LogStoppingPlayback(request.ZoneId, request.Source);
 
         var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            this._logger.LogWarning("Zone {ZoneId} not found for StopCommand", request.ZoneId);
+            this.LogZoneNotFound(request.ZoneId, nameof(StopCommand));
             return zoneResult;
         }
 
         var zone = zoneResult.Value!;
         return await zone.StopAsync().ConfigureAwait(false);
     }
+
+    [LoggerMessage(9005, LogLevel.Information, "Stopping playback for Zone {ZoneId} from {Source}")]
+    private partial void LogStoppingPlayback(int zoneId, SnapDog2.Core.Enums.CommandSource source);
+
+    [LoggerMessage(9006, LogLevel.Warning, "Zone {ZoneId} not found for {CommandName}")]
+    private partial void LogZoneNotFound(int zoneId, string commandName);
 }
 
 /// <summary>
