@@ -729,6 +729,14 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             {
                 return statusId switch
                 {
+                    "ZONE_VOLUME" => zone.Knx.VolumeStatus,
+                    "ZONE_MUTE" => zone.Knx.MuteStatus,
+                    "ZONE_PLAYBACK_STATE" => zone.Knx.ControlStatus,
+                    "ZONE_REPEAT_MODE" => zone.Knx.RepeatStatus,
+                    "ZONE_SHUFFLE_MODE" => zone.Knx.ShuffleStatus,
+                    "ZONE_TRACK" => zone.Knx.TrackStatus,
+                    "ZONE_PLAYLIST" => zone.Knx.PlaylistStatus,
+                    // Legacy support for old identifiers
                     "VOLUME" => zone.Knx.VolumeStatus,
                     "MUTE" => zone.Knx.MuteStatus,
                     "PLAYING" => zone.Knx.ControlStatus,
@@ -745,6 +753,12 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             {
                 return statusId switch
                 {
+                    "CLIENT_VOLUME" => client.Knx.VolumeStatus,
+                    "CLIENT_MUTE" => client.Knx.MuteStatus,
+                    "CLIENT_CONNECTION" => client.Knx.ConnectedStatus,
+                    "CLIENT_LATENCY" => client.Knx.LatencyStatus,
+                    "CLIENT_ZONE_ASSIGNMENT" => client.Knx.ZoneStatus,
+                    // Legacy support for old identifiers
                     "VOLUME" => client.Knx.VolumeStatus,
                     "MUTE" => client.Knx.MuteStatus,
                     "CONNECTED" => client.Knx.ConnectedStatus,

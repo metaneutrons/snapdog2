@@ -41,8 +41,14 @@ public class ClientKnxConfig
     [Env(Key = "LATENCY")]
     public string? Latency { get; set; }
 
+    [Env(Key = "LATENCY_STATUS")]
+    public string? LatencyStatus { get; set; }
+
     [Env(Key = "ZONE")]
     public string? Zone { get; set; }
+
+    [Env(Key = "ZONE_STATUS")]
+    public string? ZoneStatus { get; set; }
 
     [Env(Key = "CONNECTED_STATUS")]
     public string? ConnectedStatus { get; set; }
