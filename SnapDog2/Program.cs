@@ -166,6 +166,19 @@ static WebApplication CreateWebApplication(string[] args)
     // Add Snapcast services
     builder.Services.AddSnapcastServices();
 
+    // Register zone and client configurations for services that need them
+    builder.Services.Configure<List<ZoneConfig>>(options =>
+    {
+        options.Clear();
+        options.AddRange(snapDogConfig.Zones);
+    });
+
+    builder.Services.Configure<List<ClientConfig>>(options =>
+    {
+        options.Clear();
+        options.AddRange(snapDogConfig.Clients);
+    });
+
     // Add MQTT services
     if (snapDogConfig.Services.Mqtt.Enabled)
     {

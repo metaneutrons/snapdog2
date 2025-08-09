@@ -321,7 +321,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         }
 
         var zoneConfig = this._zoneConfigs[zoneIndex];
-        if (zoneConfig.Mqtt == null)
+        if (zoneConfig.Mqtt == null || string.IsNullOrEmpty(zoneConfig.Mqtt.BaseTopic))
         {
             return Result.Failure($"Zone {zoneId} has no MQTT configuration");
         }
@@ -373,7 +373,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         }
 
         var clientConfig = this._clientConfigs[configIndex];
-        if (clientConfig.Mqtt == null)
+        if (clientConfig.Mqtt == null || string.IsNullOrEmpty(clientConfig.Mqtt.BaseTopic))
         {
             return Result.Failure($"Client {clientId} has no MQTT configuration");
         }
@@ -917,7 +917,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             }
 
             var clientConfig = this._clientConfigs[configIndex];
-            if (clientConfig.Mqtt == null)
+            if (clientConfig.Mqtt == null || string.IsNullOrEmpty(clientConfig.Mqtt.BaseTopic))
             {
                 this._logger.LogWarning("Client {ClientId} has no MQTT configuration", clientId);
                 return Result.Success();
@@ -987,7 +987,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             }
 
             var zoneConfig = this._zoneConfigs[zoneIndex];
-            if (zoneConfig.Mqtt == null)
+            if (zoneConfig.Mqtt == null || string.IsNullOrEmpty(zoneConfig.Mqtt.BaseTopic))
             {
                 this._logger.LogWarning("Zone {ZoneId} has no MQTT configuration", zoneId);
                 return Result.Success();
