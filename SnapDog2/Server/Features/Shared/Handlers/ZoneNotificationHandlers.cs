@@ -7,7 +7,7 @@ using Cortex.Mediator.Notifications;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Abstractions;
-using SnapDog2.Server.Features.Shared.Notifications;
+using SnapDog2.Server.Features.Zones.Notifications;
 
 /// <summary>
 /// Handles zone state change notifications to log and process status updates.

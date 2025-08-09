@@ -1,4 +1,4 @@
-namespace SnapDog2.Server.Notifications;
+namespace SnapDog2.Server.Features.Snapcast.Notifications;
 
 using Cortex.Mediator.Notifications;
 using SnapcastClient.Models;

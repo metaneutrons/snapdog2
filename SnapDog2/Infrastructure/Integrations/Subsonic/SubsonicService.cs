@@ -17,7 +17,7 @@ using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Core.Helpers;
 using SnapDog2.Core.Models;
-using SnapDog2.Server.Notifications;
+using SnapDog2.Server.Features.Subsonic.Notifications;
 using SubSonicMedia;
 using SubSonicMedia.Models;
 using SubSonicMedia.Responses.Search.Models;

@@ -12,9 +12,11 @@ using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Core.Models;
+using SnapDog2.Server.Features.Clients.Notifications;
 using SnapDog2.Server.Features.Clients.Queries;
+using SnapDog2.Server.Features.Global.Notifications;
 using SnapDog2.Server.Features.Global.Queries;
-using SnapDog2.Server.Features.Shared.Notifications;
+using SnapDog2.Server.Features.Zones.Notifications;
 using SnapDog2.Server.Features.Zones.Queries;
 
 /// <summary>
@@ -255,17 +257,17 @@ public partial class StatePublishingService : BackgroundService
 
             // Publish notifications through Mediator - existing handlers will publish to integrations
             await mediator.PublishAsync(
-                new SystemStatusChangedNotification { Status = systemStatusResult.Value },
+                new SystemStatusChangedNotification { Status = systemStatusResult.Value! },
                 cancellationToken
             );
 
             await mediator.PublishAsync(
-                new VersionInfoChangedNotification { VersionInfo = versionInfoResult.Value },
+                new VersionInfoChangedNotification { VersionInfo = versionInfoResult.Value! },
                 cancellationToken
             );
 
             await mediator.PublishAsync(
-                new ServerStatsChangedNotification { Stats = serverStatsResult.Value },
+                new ServerStatsChangedNotification { Stats = serverStatsResult.Value! },
                 cancellationToken
             );
 

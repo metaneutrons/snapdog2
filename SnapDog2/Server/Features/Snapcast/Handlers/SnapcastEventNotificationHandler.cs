@@ -2,7 +2,7 @@ namespace SnapDog2.Server.Features.Snapcast.Handlers;
 
 using Cortex.Mediator.Notifications;
 using Microsoft.Extensions.Logging;
-using SnapDog2.Server.Notifications;
+using SnapDog2.Server.Features.Snapcast.Notifications;
 
 /// <summary>
 /// Handles Snapcast event notifications and processes them for the application.

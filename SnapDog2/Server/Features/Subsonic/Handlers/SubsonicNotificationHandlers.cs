@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Cortex.Mediator.Notifications;
 using Microsoft.Extensions.Logging;
-using SnapDog2.Server.Notifications;
+using SnapDog2.Server.Features.Subsonic.Notifications;
 
 /// <summary>
 /// Handles Subsonic connection established notifications.

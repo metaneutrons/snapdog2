@@ -1,4 +1,4 @@
-namespace SnapDog2.Server.Services;
+namespace SnapDog2.Server.Features.Global.Services;
 
 using System;
 using System.Threading;
@@ -7,9 +7,9 @@ using Cortex.Mediator;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Models;
 using SnapDog2.Server.Features.Global.Handlers;
+using SnapDog2.Server.Features.Global.Notifications;
 using SnapDog2.Server.Features.Global.Queries;
-using SnapDog2.Server.Features.Shared.Notifications;
-using SnapDog2.Server.Services.Abstractions;
+using SnapDog2.Server.Features.Global.Services.Abstractions;
 
 /// <summary>
 /// Service for managing and publishing global system status.

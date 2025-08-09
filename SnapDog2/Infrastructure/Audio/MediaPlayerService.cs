@@ -11,7 +11,7 @@ using Microsoft.Extensions.Options;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Core.Models;
-using SnapDog2.Server.Notifications;
+using SnapDog2.Server.Features.Zones.Notifications;
 
 /// <summary>
 /// SoundFlow-based implementation of media player service.

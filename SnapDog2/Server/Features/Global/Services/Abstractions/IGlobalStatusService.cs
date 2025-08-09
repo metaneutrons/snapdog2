@@ -1,4 +1,4 @@
-namespace SnapDog2.Server.Services.Abstractions;
+namespace SnapDog2.Server.Features.Global.Services.Abstractions;
 
 using SnapDog2.Core.Models;
 

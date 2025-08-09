@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Core.Models;
-using SnapDog2.Server.Features.Shared.Notifications;
+using SnapDog2.Server.Features.Zones.Notifications;
 
 /// <summary>
 /// Production-ready implementation of IZoneManager with full Snapcast integration.

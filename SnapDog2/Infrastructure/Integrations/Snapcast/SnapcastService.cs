@@ -18,7 +18,7 @@ using SnapDog2.Core.Enums;
 using SnapDog2.Core.Helpers;
 using SnapDog2.Core.Models;
 using SnapDog2.Server.Features.Shared.Notifications;
-using SnapDog2.Server.Notifications;
+using SnapDog2.Server.Features.Snapcast.Notifications;
 
 /// <summary>
 /// Enterprise-grade Snapcast service implementation using SnapcastClient library.

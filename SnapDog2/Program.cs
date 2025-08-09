@@ -212,8 +212,8 @@ static WebApplication CreateWebApplication(string[] args)
         SnapDog2.Infrastructure.Application.MetricsService
     >();
     builder.Services.AddScoped<
-        SnapDog2.Server.Services.Abstractions.IGlobalStatusService,
-        SnapDog2.Server.Services.GlobalStatusService
+        SnapDog2.Server.Features.Global.Services.Abstractions.IGlobalStatusService,
+        SnapDog2.Server.Features.Global.Services.GlobalStatusService
     >();
 
     // Zone management services (production implementations)
