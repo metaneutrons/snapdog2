@@ -721,8 +721,16 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
 
     private string? GetStatusGroupAddress(string statusId, int targetId)
     {
-        // Check if it's a zone status (1-based ID)
-        if (targetId > 0 && targetId <= this._zones.Count)
+        // Determine if this is a zone or client status based on the status ID prefix
+        bool isZoneStatus =
+            statusId.StartsWith("ZONE_")
+            || statusId.Equals("VOLUME")
+            || statusId.Equals("MUTE")
+            || statusId.Equals("PLAYING");
+        bool isClientStatus = statusId.StartsWith("CLIENT_") || statusId.Equals("CONNECTED");
+
+        // Handle zone statuses
+        if (isZoneStatus && targetId > 0 && targetId <= this._zones.Count)
         {
             var zone = this._zones[targetId - 1]; // Convert to 0-based index
             if (zone.Knx.Enabled)
@@ -745,8 +753,8 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             }
         }
 
-        // Check if it's a client status (1-based ID)
-        if (targetId > 0 && targetId <= this._clients.Count)
+        // Handle client statuses
+        if (isClientStatus && targetId > 0 && targetId <= this._clients.Count)
         {
             var client = this._clients[targetId - 1]; // Convert to 0-based index
             if (client.Knx.Enabled)
