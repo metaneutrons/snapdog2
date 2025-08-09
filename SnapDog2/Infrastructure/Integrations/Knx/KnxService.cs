@@ -209,15 +209,17 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             var groupAddress = this.GetStatusGroupAddress(statusId, targetId);
             if (string.IsNullOrEmpty(groupAddress))
             {
-                this.LogGroupAddressNotFound(statusId, targetId);
-                return Result.Failure($"No KNX group address configured for status {statusId} on target {targetId}");
+                this.LogGroupAddressNotFoundWithContext(statusId, targetId);
+                return Result.Failure(
+                    $"No KNX group address configured for status {statusId} on {GetTargetTypeDescription(statusId)} {targetId}"
+                );
             }
 
             return await this.WriteToKnxAsync(groupAddress, value, cancellationToken);
         }
         catch (Exception ex)
         {
-            this.LogSendStatusError(statusId, targetId, ex);
+            this.LogSendStatusErrorWithContext(statusId, targetId, ex);
             return Result.Failure($"Failed to send status: {ex.Message}");
         }
     }
@@ -979,6 +981,58 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
     private void LogDebug(string message)
     {
         this._logger.LogDebug(message);
+    }
+
+    /// <summary>
+    /// Determines the target type (zone or client) based on the status ID.
+    /// </summary>
+    private static string GetTargetTypeDescription(string statusId)
+    {
+        return statusId switch
+        {
+            // Client-specific status IDs
+            "CLIENT_VOLUME_STATUS"
+            or "CLIENT_MUTE_STATUS"
+            or "CLIENT_LATENCY_STATUS"
+            or "CLIENT_ZONE_STATUS"
+            or "CLIENT_CONNECTED" => "client",
+
+            // Zone-specific status IDs (everything else)
+            _ => "zone",
+        };
+    }
+
+    /// <summary>
+    /// Logs group address not found with contextual target type information.
+    /// </summary>
+    private void LogGroupAddressNotFoundWithContext(string statusId, int targetId)
+    {
+        var targetType = GetTargetTypeDescription(statusId);
+        var targetDescription = targetType == "zone" ? $"zone {targetId}" : $"client {targetId}";
+
+        this._logger.LogWarning(
+            "No KNX group address configured for status {StatusId} on {TargetDescription}. "
+                + "Configure the appropriate KNX group address in the {TargetType} configuration to enable KNX integration.",
+            statusId,
+            targetDescription,
+            targetType
+        );
+    }
+
+    /// <summary>
+    /// Logs send status error with contextual target type information.
+    /// </summary>
+    private void LogSendStatusErrorWithContext(string statusId, int targetId, Exception exception)
+    {
+        var targetType = GetTargetTypeDescription(statusId);
+        var targetDescription = targetType == "zone" ? $"zone {targetId}" : $"client {targetId}";
+
+        this._logger.LogError(
+            exception,
+            "Error sending KNX status {StatusId} to {TargetDescription}",
+            statusId,
+            targetDescription
+        );
     }
 
     #region Logging
