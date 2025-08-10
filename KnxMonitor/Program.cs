@@ -113,7 +113,7 @@ public static class Program
                 foreach (var option in rootCommand.Options)
                 {
                     var aliases = string.Join(", ", option.Aliases);
-                    Console.WriteLine($"  {aliases,-20} {option.Description}");
+                    Console.WriteLine($"  {aliases, -20} {option.Description}");
                 }
                 return 0;
             }
