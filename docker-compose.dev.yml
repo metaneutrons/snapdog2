@@ -215,6 +215,11 @@ services:
 
   # KNX Monitor - Visual debugging tool for KNX bus activity
   #
+  # Now using official GitHub Container Registry image with multi-architecture support
+  # - Automatically pulls the correct architecture (AMD64/ARM64)
+  # - Signed binaries for enhanced security
+  # - Regular updates from CI/CD pipeline
+  #
   # TROUBLESHOOTING:
   # - If you see "Unrecognized command or argument" errors, use short form arguments (-g, -p, -v)
   # - Long form arguments (--gateway, --port, --verbose) may not work in Docker due to System.CommandLine beta version
@@ -223,23 +228,12 @@ services:
   # - Access health endpoint: curl http://localhost:8080/health (if port is exposed)
   # - Access readiness endpoint: curl http://localhost:8080/ready (if port is exposed)
   knx-monitor:
-    build:
-      context: ./KnxMonitor
-      dockerfile: Dockerfile
-      target: development
+    image: ghcr.io/metaneutrons/knxmonitor:latest
     volumes:
-      - ./KnxMonitor:/app:cached # Mount source code for hot reload
-      - ./Directory.Packages.props:/Directory.Packages.props:ro # Central package management
       - ./devcontainer/knx-groupaddresses.csv:/app/knx-groupaddresses.csv:ro # KNX group addresses database
-      - knx_monitor_nuget:/home/knxmonitor/.nuget # NuGet cache for better performance
     environment:
-      - DOTNET_ENVIRONMENT=Development
-      - DOTNET_USE_POLLING_FILE_WATCHER=true
-      - DOTNET_WATCH_RESTART_ON_RUDE_EDIT=true
-      - DOTNET_WATCH_SUPPRESS_LAUNCH_BROWSER=true
-      - KNX_MONITOR_LOGGING_MODE=true # Force logging mode for docker logs
       - TZ=Europe/Berlin # Set timezone for proper log timestamps
-    command: ["dotnet", "watch", "run", "--", "-g", "knxd", "-v", "--csv", "/app/knx-groupaddresses.csv"]
+    command: ["-g", "knxd", "-v", "--csv", "/app/knx-groupaddresses.csv"]
     depends_on:
       knxd:
         condition: service_healthy
@@ -286,7 +280,6 @@ volumes:
   navidrome_data:
   caddy_data:
   caddy_config:
-  knx_monitor_nuget:
 
 networks:
   snapdog-dev:
