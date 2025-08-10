@@ -1,15 +1,26 @@
 using Knx.Falcon;
 using Knx.Falcon.ApplicationData.DatapointTypes;
 using Knx.Falcon.ApplicationData.MasterData;
+using Microsoft.Extensions.Logging;
 
 namespace KnxMonitor.Services;
 
 /// <summary>
 /// KNX DPT decoder using Falcon SDK's built-in decoding functionality.
 /// </summary>
-public class KnxDptDecoder
+public partial class KnxDptDecoder
 {
     private readonly Dictionary<string, DatapointSubtype> _dptCache = new();
+    private readonly ILogger<KnxDptDecoder> _logger;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="KnxDptDecoder"/> class.
+    /// </summary>
+    /// <param name="logger">The logger instance.</param>
+    public KnxDptDecoder(ILogger<KnxDptDecoder> logger)
+    {
+        this._logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
 
     /// <summary>
     /// Decodes a GroupValue using the specified DPT.
@@ -52,7 +63,7 @@ public class KnxDptDecoder
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[DEBUG] DPT decoding error for {dptString}: {ex.Message}");
+            this.LogDptDecodingError(ex, dptString, ex.Message);
             return null;
         }
     }
@@ -90,7 +101,7 @@ public class KnxDptDecoder
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[DEBUG] Error parsing DPT {dptString}: {ex.Message}");
+            this.LogErrorParsingDpt(ex, dptString, ex.Message);
             _dptCache[dptString] = null!;
             return null;
         }
@@ -126,7 +137,7 @@ public class KnxDptDecoder
     /// <param name="mainType">Main type number (e.g., 1).</param>
     /// <param name="subType">Sub type number (e.g., 1).</param>
     /// <returns>DatapointSubtype or null if not found.</returns>
-    private static DatapointSubtype? FindDatapointSubtype(int mainType, int subType)
+    private DatapointSubtype? FindDatapointSubtype(int mainType, int subType)
     {
         try
         {
@@ -144,7 +155,7 @@ public class KnxDptDecoder
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[DEBUG] Error finding datapoint subtype {mainType}.{subType}: {ex.Message}");
+            this.LogErrorFindingDatapointSubtype(ex, mainType, subType, ex.Message);
             return null;
         }
     }

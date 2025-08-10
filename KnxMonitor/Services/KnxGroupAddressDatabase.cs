@@ -1,4 +1,5 @@
 using System.Globalization;
+using Microsoft.Extensions.Logging;
 
 namespace KnxMonitor.Services;
 
@@ -6,9 +7,19 @@ namespace KnxMonitor.Services;
 /// Database for KNX group addresses loaded from ETS CSV export.
 /// Supports ETS export format "3/1" with semicolon separation.
 /// </summary>
-public class KnxGroupAddressDatabase
+public partial class KnxGroupAddressDatabase
 {
     private readonly Dictionary<string, GroupAddressInfo> _groupAddresses = new();
+    private readonly ILogger<KnxGroupAddressDatabase> _logger;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="KnxGroupAddressDatabase"/> class.
+    /// </summary>
+    /// <param name="logger">The logger instance.</param>
+    public KnxGroupAddressDatabase(ILogger<KnxGroupAddressDatabase> logger)
+    {
+        this._logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
 
     /// <summary>
     /// Loads group addresses from ETS CSV export file.
@@ -59,11 +70,11 @@ public class KnxGroupAddressDatabase
             catch (Exception ex)
             {
                 // Log the error but continue processing other lines
-                Console.WriteLine($"[WARNING] Error parsing CSV line {i + 1}: {ex.Message}");
+                this.LogCsvParsingError(ex, i + 1, ex.Message);
             }
         }
 
-        Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Loaded {loadedCount} group addresses from {csvFilePath}");
+        this.LogGroupAddressesLoaded(loadedCount, csvFilePath);
         IsCsvLoaded = true;
     }
 

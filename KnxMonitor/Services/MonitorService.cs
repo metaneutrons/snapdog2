@@ -28,12 +28,18 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
 
     public event EventHandler<KnxMessage>? MessageReceived;
 
-    public KnxMonitorService(KnxMonitorConfig config, ILogger<KnxMonitorService> logger)
+    public KnxMonitorService(
+        KnxMonitorConfig config,
+        ILogger<KnxMonitorService> logger,
+        KnxGroupAddressDatabase groupAddressDatabase,
+        KnxDptDecoder dptDecoder
+    )
     {
         this._config = config ?? throw new ArgumentNullException(nameof(config));
         this._logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        this._groupAddressDatabase = new KnxGroupAddressDatabase();
-        this._dptDecoder = new KnxDptDecoder();
+        this._groupAddressDatabase =
+            groupAddressDatabase ?? throw new ArgumentNullException(nameof(groupAddressDatabase));
+        this._dptDecoder = dptDecoder ?? throw new ArgumentNullException(nameof(dptDecoder));
 
         // Compile filter regex if provided
         if (!string.IsNullOrEmpty(this._config.Filter))
@@ -67,34 +73,19 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
             {
                 try
                 {
-                    Console.WriteLine(
-                        $"[{DateTime.Now:HH:mm:ss.fff}] Loading group address database from: {this._config.GroupAddressCsvPath}"
-                    );
+                    this.LogLoadingGroupAddressDatabase(this._config.GroupAddressCsvPath);
                     await this._groupAddressDatabase.LoadFromCsvAsync(this._config.GroupAddressCsvPath);
-                    Console.WriteLine(
-                        $"[{DateTime.Now:HH:mm:ss.fff}] Group address database loaded with {this._groupAddressDatabase.Count} entries"
-                    );
+                    this.LogGroupAddressDatabaseLoaded(this._groupAddressDatabase.Count);
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Failed to load group address CSV: {ex.Message}");
-                    if (ex.InnerException != null)
-                    {
-                        Console.WriteLine(
-                            $"[{DateTime.Now:HH:mm:ss.fff}] Inner exception: {ex.InnerException.Message}"
-                        );
-                    }
-                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Stack trace: {ex.StackTrace}");
-                    Console.WriteLine(
-                        $"[{DateTime.Now:HH:mm:ss.fff}] Continuing without group address database - raw values will be shown"
-                    );
+                    this.LogFailedToLoadGroupAddressCsv(ex, ex.Message);
+                    this.LogContinuingWithoutGroupAddressDatabase();
                 }
             }
             else
             {
-                Console.WriteLine(
-                    $"[{DateTime.Now:HH:mm:ss.fff}] No CSV path provided - continuing without group address database"
-                );
+                this.LogNoCsvPathProvided();
             }
 
             var connectorParameters = this.CreateConnectorParameters();
@@ -343,11 +334,18 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
         // Format value properly based on DPT type
         var formattedValue = FormatValueForLogging(message.Value, dptType);
 
-        // Always use Console.WriteLine for now - we'll clean this up after testing
-        var rawData = Convert.ToHexString(message.Data);
-        var logLine =
-            $"[{message.Timestamp:HH:mm:ss.fff}] {message.MessageType} {message.SourceAddress} -> {message.GroupAddress} = {formattedValue} (Raw: {rawData}) {dptType} {description}".Trim();
-        Console.WriteLine(logLine);
+        // Use structured logging for enterprise-grade logging
+        // The LogDetailedKnxMessage will handle the formatting appropriately
+        this.LogDetailedKnxMessage(
+            message.Timestamp.ToString("HH:mm:ss.fff"),
+            message.SourceAddress,
+            message.GroupAddress,
+            message.MessageType.ToString(),
+            Convert.ToHexString(message.Data),
+            formattedValue,
+            dptType,
+            description
+        );
 
         this.MessageReceived?.Invoke(this, message);
     }

@@ -1,11 +1,13 @@
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Net.Sockets;
+using KnxMonitor.Logging;
 using KnxMonitor.Models;
 using KnxMonitor.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 using Polly;
 using Spectre.Console;
 
@@ -14,7 +16,7 @@ namespace KnxMonitor;
 /// <summary>
 /// Main program entry point for the KNX Monitor application.
 /// </summary>
-public static class Program
+public static partial class Program
 {
     private static readonly TaskCompletionSource<bool> _shutdownCompletionSource = new();
     private static readonly CancellationTokenSource _applicationCancellationTokenSource = new();
@@ -299,14 +301,22 @@ public static class Program
                     }
                     else
                     {
-                        // Logging mode - disable Microsoft logging completely for clean output
-                        // Our service will use Console.WriteLine directly
-                        logging.SetMinimumLevel(LogLevel.Critical);
+                        // Logging mode - use custom formatter for clean KNX message output
+                        logging.AddConsole(options =>
+                        {
+                            options.FormatterName = "knx";
+                        });
+                        logging.AddConsoleFormatter<KnxConsoleFormatter, KnxConsoleFormatterOptions>();
+                        logging.SetMinimumLevel(verbose ? LogLevel.Debug : LogLevel.Information);
                     }
                 })
                 .ConfigureServices(services =>
                 {
                     services.AddSingleton(config);
+
+                    // Register supporting services
+                    services.AddSingleton<KnxGroupAddressDatabase>();
+                    services.AddSingleton<KnxDptDecoder>();
 
                     // 🚀 Use simplified Falcon SDK-only KNX monitoring service
                     services.AddSingleton<IKnxMonitorService, KnxMonitorService>();

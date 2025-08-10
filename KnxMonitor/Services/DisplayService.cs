@@ -75,9 +75,7 @@ public partial class DisplayService : IDisplayService
                 // Log initial connection status for container mode
                 if (ShouldUseLoggingMode())
                 {
-                    Console.WriteLine(
-                        $"[{DateTime.Now:HH:mm:ss.fff}] KNX Monitor started - {monitorService.ConnectionStatus}"
-                    );
+                    this.LogKnxMonitorStarted(monitorService.ConnectionStatus);
                 }
 
                 while (!this._cancellationTokenSource.Token.IsCancellationRequested)
@@ -151,7 +149,7 @@ public partial class DisplayService : IDisplayService
         // Implementation for logging mode
         if (ShouldUseLoggingMode())
         {
-            Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Connection status: {status} (Connected: {isConnected})");
+            this.LogConnectionStatusUpdate(status, isConnected);
         }
     }
 
