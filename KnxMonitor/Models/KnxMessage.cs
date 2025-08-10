@@ -42,6 +42,11 @@ public class KnxMessage
     public string? DataPointType { get; set; }
 
     /// <summary>
+    /// Gets or sets the description from the group address database.
+    /// </summary>
+    public string? Description { get; set; }
+
+    /// <summary>
     /// Gets or sets the message priority.
     /// </summary>
     public KnxPriority Priority { get; set; }

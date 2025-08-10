@@ -230,6 +230,7 @@ services:
     volumes:
       - ./KnxMonitor:/app:cached # Mount source code for hot reload
       - ./Directory.Packages.props:/Directory.Packages.props:ro # Central package management
+      - ./devcontainer/knx-groupaddresses.csv:/app/knx-groupaddresses.csv:ro # KNX group addresses database
       - knx_monitor_nuget:/home/knxmonitor/.nuget # NuGet cache for better performance
     environment:
       - DOTNET_ENVIRONMENT=Development
@@ -238,7 +239,7 @@ services:
       - DOTNET_WATCH_SUPPRESS_LAUNCH_BROWSER=true
       - KNX_MONITOR_LOGGING_MODE=true # Force logging mode for docker logs
       - TZ=Europe/Berlin # Set timezone for proper log timestamps
-    command: ["dotnet", "watch", "run", "--", "-g", "knxd", "-v"]
+    command: ["dotnet", "watch", "run", "--", "-g", "knxd", "-v", "--csv", "/app/knx-groupaddresses.csv"]
     depends_on:
       knxd:
         condition: service_healthy

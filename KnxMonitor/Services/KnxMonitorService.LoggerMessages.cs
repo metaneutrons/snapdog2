@@ -11,8 +11,8 @@ public partial class KnxMonitorService
     [LoggerMessage(12001, LogLevel.Information, "Starting KNX monitoring with connection type: {ConnectionType}")]
     private partial void LogStartingMonitoring(string connectionType);
 
-    [LoggerMessage(12002, LogLevel.Information, "KNX monitoring started successfully")]
-    private partial void LogMonitoringStartedSuccessfully();
+    [LoggerMessage(12002, LogLevel.Information, "KNX monitoring started successfully - {ConnectionStatus}")]
+    private partial void LogMonitoringStartedSuccessfully(string connectionStatus);
 
     [LoggerMessage(12003, LogLevel.Information, "KNX monitoring stopped")]
     private partial void LogMonitoringStopped();
@@ -40,7 +40,23 @@ public partial class KnxMonitorService
     [LoggerMessage(12021, LogLevel.Debug, "Received KNX message: {GroupAddress} ({MessageType})")]
     private partial void LogReceivedKnxMessage(string groupAddress, string messageType);
 
-    [LoggerMessage(12022, LogLevel.Error, "Error processing group message")]
+    [LoggerMessage(
+        12022,
+        LogLevel.Information,
+        "[{Timestamp}] {MessageType} {SourceAddress} -> {GroupAddress} = {Value} (Raw: {RawData}) {DataPointType} {Description}"
+    )]
+    private partial void LogDetailedKnxMessage(
+        string timestamp,
+        string sourceAddress,
+        string groupAddress,
+        string messageType,
+        string rawData,
+        string value,
+        string dataPointType,
+        string description
+    );
+
+    [LoggerMessage(12023, LogLevel.Error, "Error processing group message")]
     private partial void LogErrorProcessingGroupMessage(Exception ex);
 
     // Filter Operations (12031-12040)

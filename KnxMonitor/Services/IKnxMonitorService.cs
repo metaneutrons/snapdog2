@@ -28,6 +28,11 @@ public interface IKnxMonitorService : IDisposable, IAsyncDisposable
     int MessageCount { get; }
 
     /// <summary>
+    /// Gets a value indicating whether a CSV group address database has been loaded.
+    /// </summary>
+    bool IsCsvLoaded { get; }
+
+    /// <summary>
     /// Starts monitoring the KNX bus.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>

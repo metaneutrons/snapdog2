@@ -168,6 +168,8 @@ public class KnxMessageRow
         this.ValueDisplay = message.DisplayValue;
         this.PriorityDisplay = message.Priority.ToString();
         this.DataDisplay = message.DataHex;
+        this.DptDisplay = message.DataPointType ?? "";
+        this.DescriptionDisplay = FormatDescriptionForTable(message.Description);
 
         // Calculate age-based color
         this.AgeColorCode = CalculateAgeColorCode(message.Timestamp);
@@ -214,6 +216,16 @@ public class KnxMessageRow
     /// Gets the formatted raw data display.
     /// </summary>
     public string DataDisplay { get; }
+
+    /// <summary>
+    /// Gets the DPT (Data Point Type) display.
+    /// </summary>
+    public string DptDisplay { get; }
+
+    /// <summary>
+    /// Gets the formatted description display (truncated for table view).
+    /// </summary>
+    public string DescriptionDisplay { get; }
 
     /// <summary>
     /// Gets the age-based color code for the message.
@@ -286,6 +298,37 @@ public class KnxMessageRow
             KnxPriority.Low => "\u001b[90m", // Gray
             _ => "\u001b[37m", // White
         };
+    }
+
+    /// <summary>
+    /// Formats description for table display with maximum width constraint.
+    /// </summary>
+    /// <param name="description">Raw description.</param>
+    /// <returns>Formatted description suitable for table display.</returns>
+    private static string FormatDescriptionForTable(string? description)
+    {
+        if (string.IsNullOrWhiteSpace(description))
+        {
+            return "";
+        }
+
+        // Clean up the description
+        var cleaned = description.Replace('\r', ' ').Replace('\n', ' ').Replace('\t', ' ').Trim();
+
+        // Remove multiple spaces
+        while (cleaned.Contains("  "))
+        {
+            cleaned = cleaned.Replace("  ", " ");
+        }
+
+        // For table view, we need to be strict about width to maintain readability
+        const int maxTableWidth = 40;
+        if (cleaned.Length > maxTableWidth)
+        {
+            cleaned = cleaned.Substring(0, maxTableWidth - 3) + "...";
+        }
+
+        return cleaned;
     }
 }
 

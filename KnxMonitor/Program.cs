@@ -78,6 +78,11 @@ public static class Program
 
             Option<string?> filterOption = new("--filter", "-f") { Description = "Group address filter pattern" };
 
+            Option<string?> csvOption = new("--groupaddress-csv", "--csv")
+            {
+                Description = "Path to KNX group address CSV file (ETS export format 3/1, semicolon separated)",
+            };
+
             Option<bool> loggingModeOption = new("--logging-mode", "-l")
             {
                 Description =
@@ -98,6 +103,7 @@ public static class Program
             rootCommand.Options.Add(portOption);
             rootCommand.Options.Add(verboseOption);
             rootCommand.Options.Add(filterOption);
+            rootCommand.Options.Add(csvOption);
             rootCommand.Options.Add(loggingModeOption);
             rootCommand.Options.Add(enableHealthCheckOption);
 
@@ -135,6 +141,7 @@ public static class Program
             int port = parseResult.GetValue(portOption);
             bool verbose = parseResult.GetValue(verboseOption);
             string? filter = parseResult.GetValue(filterOption);
+            string? csvPath = parseResult.GetValue(csvOption);
             bool loggingMode = parseResult.GetValue(loggingModeOption);
             bool enableHealthCheck = parseResult.GetValue(enableHealthCheckOption);
 
@@ -180,6 +187,7 @@ public static class Program
                 port,
                 verbose,
                 filter,
+                csvPath,
                 loggingMode,
                 enableHealthCheck
             );
@@ -228,6 +236,7 @@ public static class Program
     /// <param name="port">Port number.</param>
     /// <param name="verbose">Enable verbose logging.</param>
     /// <param name="filter">Group address filter.</param>
+    /// <param name="csvPath">Path to KNX group address CSV file exported from ETS.</param>
     /// <param name="loggingMode">Force simple logging mode instead of TUI.</param>
     /// <param name="enableHealthCheck">Enable HTTP health check service (auto-enabled in containers).</param>
     /// <returns>Exit code (0 = success, >0 = error).</returns>
@@ -238,6 +247,7 @@ public static class Program
         int port,
         bool verbose,
         string? filter,
+        string? csvPath,
         bool loggingMode,
         bool enableHealthCheck
     )
@@ -258,6 +268,7 @@ public static class Program
                 Port = port,
                 Verbose = verbose,
                 Filter = filter,
+                GroupAddressCsvPath = csvPath,
             };
 
             // Validate configuration
@@ -271,14 +282,26 @@ public static class Program
                 .ConfigureLogging(logging =>
                 {
                     logging.ClearProviders();
-                    if (verbose)
+
+                    // In logging mode, we want clean output without Microsoft logging prefixes
+                    if (ShouldUseTuiMode(loggingMode))
                     {
-                        logging.AddConsole();
-                        logging.SetMinimumLevel(LogLevel.Debug);
+                        // TUI mode - use normal Microsoft logging for debugging
+                        if (verbose)
+                        {
+                            logging.AddConsole();
+                            logging.SetMinimumLevel(LogLevel.Debug);
+                        }
+                        else
+                        {
+                            logging.SetMinimumLevel(LogLevel.Warning);
+                        }
                     }
                     else
                     {
-                        logging.SetMinimumLevel(LogLevel.Warning);
+                        // Logging mode - disable Microsoft logging completely for clean output
+                        // Our service will use Console.WriteLine directly
+                        logging.SetMinimumLevel(LogLevel.Critical);
                     }
                 })
                 .ConfigureServices(services =>

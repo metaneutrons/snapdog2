@@ -34,6 +34,11 @@ public class KnxMonitorConfig
     /// Gets or sets the group address filter pattern.
     /// </summary>
     public string? Filter { get; set; }
+
+    /// <summary>
+    /// Gets or sets the path to the KNX group address CSV file exported from ETS.
+    /// </summary>
+    public string? GroupAddressCsvPath { get; set; }
 }
 
 /// <summary>

@@ -161,19 +161,11 @@ public partial class DisplayService : IDisplayService
         this._messageQueue.Enqueue(message);
         Interlocked.Increment(ref this._messageCount);
 
-        // In logging mode, immediately output the message
-        if (ShouldUseLoggingMode())
-        {
-            var filterMatch = string.IsNullOrEmpty(this._currentFilter) || MatchesFilter(message, this._currentFilter);
-            if (filterMatch)
-            {
-                Console.WriteLine(
-                    $"[{message.Timestamp:HH:mm:ss.fff}] {FormatMessageType(message.MessageType)} "
-                        + $"{message.SourceAddress} -> {message.GroupAddress} = {message.DisplayValue} "
-                        + $"({message.Priority})"
-                );
-            }
-        }
+        // Enhanced logging is now handled by KnxMonitorService.ProcessMessage()
+        // with CSV data, DPT types, and descriptions. We disable logging here
+        // to avoid duplicate output.
+
+        // Note: The message is still queued for potential TUI display or other processing
     }
 
     /// <inheritdoc/>

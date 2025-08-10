@@ -266,8 +266,9 @@ public partial class TuiDisplayService : IDisplayService
 
     private void CreateMessagesTable(FrameView messagesFrame)
     {
-        // Create a simple table source implementation
-        var tableSource = new KnxMessageTableSource(this._tableModel);
+        // Create a simple table source implementation with CSV status
+        var csvLoaded = this._monitorService?.IsCsvLoaded ?? false;
+        var tableSource = new KnxMessageTableSource(this._tableModel, csvLoaded);
 
         this._tableView = new TableView
         {
@@ -498,14 +499,33 @@ public partial class TuiDisplayService : IDisplayService
         lock (this._lockObject)
         {
             var csv = new StringBuilder();
-            csv.AppendLine("Timestamp,Source,Destination,Type,Data");
+            var csvLoaded = this._monitorService?.IsCsvLoaded ?? false;
+
+            if (csvLoaded)
+            {
+                csv.AppendLine("Timestamp,Source,Destination,Type,Data,Value,DPT,Description");
+            }
+            else
+            {
+                csv.AppendLine("Timestamp,Source,Destination,Type,Data,Value");
+            }
 
             foreach (var messageRow in this._tableModel.Messages)
             {
                 var message = messageRow.Message;
-                csv.AppendLine(
-                    $"{message.Timestamp:yyyy-MM-dd HH:mm:ss.fff},{message.SourceAddress},{message.GroupAddress},{message.MessageType},{message.DataHex}"
-                );
+                if (csvLoaded)
+                {
+                    var description = message.Description?.Replace("\"", "\"\"") ?? ""; // Escape quotes for CSV
+                    csv.AppendLine(
+                        $"{message.Timestamp:yyyy-MM-dd HH:mm:ss.fff},{message.SourceAddress},{message.GroupAddress},{message.MessageType},{message.DataHex},{message.DisplayValue},{message.DataPointType ?? ""},\"{description}\""
+                    );
+                }
+                else
+                {
+                    csv.AppendLine(
+                        $"{message.Timestamp:yyyy-MM-dd HH:mm:ss.fff},{message.SourceAddress},{message.GroupAddress},{message.MessageType},{message.DataHex},{message.DisplayValue}"
+                    );
+                }
             }
 
             File.WriteAllText(filePath, csv.ToString());
@@ -863,16 +883,23 @@ public partial class TuiDisplayService : IDisplayService
 public class KnxMessageTableSource : ITableSource
 {
     private readonly KnxMessageTableModel _model;
+    private readonly bool _csvLoaded;
 
-    public KnxMessageTableSource(KnxMessageTableModel model)
+    public KnxMessageTableSource(KnxMessageTableModel model, bool csvLoaded)
     {
         this._model = model;
+        this._csvLoaded = csvLoaded;
     }
 
     public int Rows => this._model.Messages.Count;
-    public int Columns => 6; // Timestamp, Source, Destination, Type, Raw Data, Value
+    public int Columns => _csvLoaded ? 8 : 6; // With CSV: Timestamp, Source, Dest, Type, Raw Data, Value, DPT, Description
 
-    public string[] ColumnNames => new[] { "Timestamp", "Source", "Dest", "MsgType", "Raw Data", "Value" };
+    // Without CSV: Timestamp, Source, Dest, Type, Raw Data, Value
+
+    public string[] ColumnNames =>
+        _csvLoaded
+            ? new[] { "Timestamp", "Source", "Dest", "MsgType", "Raw Data", "Value", "DPT", "Description" }
+            : new[] { "Timestamp", "Source", "Dest", "MsgType", "Raw Data", "Value" };
 
     public object this[int row, int col]
     {
@@ -882,16 +909,34 @@ public class KnxMessageTableSource : ITableSource
                 return "";
 
             var messageRow = this._model.Messages[row];
-            return col switch
+            if (_csvLoaded)
             {
-                0 => messageRow.TimeDisplay,
-                1 => messageRow.SourceDisplay,
-                2 => messageRow.GroupAddressDisplay,
-                3 => messageRow.MessageTypeDisplay,
-                4 => messageRow.DataDisplay,
-                5 => messageRow.ValueDisplay,
-                _ => "",
-            };
+                return col switch
+                {
+                    0 => messageRow.TimeDisplay,
+                    1 => messageRow.SourceDisplay,
+                    2 => messageRow.GroupAddressDisplay,
+                    3 => messageRow.MessageTypeDisplay,
+                    4 => messageRow.DataDisplay,
+                    5 => messageRow.ValueDisplay,
+                    6 => messageRow.DptDisplay,
+                    7 => messageRow.DescriptionDisplay,
+                    _ => "",
+                };
+            }
+            else
+            {
+                return col switch
+                {
+                    0 => messageRow.TimeDisplay,
+                    1 => messageRow.SourceDisplay,
+                    2 => messageRow.GroupAddressDisplay,
+                    3 => messageRow.MessageTypeDisplay,
+                    4 => messageRow.DataDisplay,
+                    5 => messageRow.ValueDisplay,
+                    _ => "",
+                };
+            }
         }
     }
 

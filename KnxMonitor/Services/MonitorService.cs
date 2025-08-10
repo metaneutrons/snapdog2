@@ -18,6 +18,8 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
     private readonly KnxMonitorConfig _config;
     private readonly ILogger<KnxMonitorService> _logger;
     private readonly Regex? _filterRegex;
+    private readonly KnxGroupAddressDatabase _groupAddressDatabase;
+    private readonly KnxDptDecoder _dptDecoder;
 
     private KnxBus? _knxBus;
     private bool _isConnected;
@@ -30,6 +32,8 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
     {
         this._config = config ?? throw new ArgumentNullException(nameof(config));
         this._logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        this._groupAddressDatabase = new KnxGroupAddressDatabase();
+        this._dptDecoder = new KnxDptDecoder();
 
         // Compile filter regex if provided
         if (!string.IsNullOrEmpty(this._config.Filter))
@@ -50,11 +54,48 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
     public string ConnectionStatus => this._connectionStatus;
     public int MessageCount => this._messageCount;
 
+    public bool IsCsvLoaded => this._groupAddressDatabase.IsCsvLoaded;
+
     public async Task StartMonitoringAsync(CancellationToken cancellationToken = default)
     {
         try
         {
             this.LogStartingMonitoring(this._config.ConnectionType.ToString());
+
+            // Load group address database if CSV path is provided
+            if (!string.IsNullOrEmpty(this._config.GroupAddressCsvPath))
+            {
+                try
+                {
+                    Console.WriteLine(
+                        $"[{DateTime.Now:HH:mm:ss.fff}] Loading group address database from: {this._config.GroupAddressCsvPath}"
+                    );
+                    await this._groupAddressDatabase.LoadFromCsvAsync(this._config.GroupAddressCsvPath);
+                    Console.WriteLine(
+                        $"[{DateTime.Now:HH:mm:ss.fff}] Group address database loaded with {this._groupAddressDatabase.Count} entries"
+                    );
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Failed to load group address CSV: {ex.Message}");
+                    if (ex.InnerException != null)
+                    {
+                        Console.WriteLine(
+                            $"[{DateTime.Now:HH:mm:ss.fff}] Inner exception: {ex.InnerException.Message}"
+                        );
+                    }
+                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Stack trace: {ex.StackTrace}");
+                    Console.WriteLine(
+                        $"[{DateTime.Now:HH:mm:ss.fff}] Continuing without group address database - raw values will be shown"
+                    );
+                }
+            }
+            else
+            {
+                Console.WriteLine(
+                    $"[{DateTime.Now:HH:mm:ss.fff}] No CSV path provided - continuing without group address database"
+                );
+            }
 
             var connectorParameters = this.CreateConnectorParameters();
             if (connectorParameters == null)
@@ -68,9 +109,19 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
 
             await this._knxBus.ConnectAsync(cancellationToken);
             this._isConnected = true;
-            this._connectionStatus = $"Connected via {this._config.ConnectionType}";
 
-            this.LogMonitoringStartedSuccessfully();
+            // Create informative connection status
+            var connectionInfo = this._config.ConnectionType switch
+            {
+                KnxConnectionType.Tunnel => $"Tunnel to {this._config.Gateway}:{this._config.Port}",
+                KnxConnectionType.Router => $"Router on {this._config.MulticastAddress}:{this._config.Port}",
+                KnxConnectionType.Usb => "USB",
+                _ => this._config.ConnectionType.ToString(),
+            };
+
+            this._connectionStatus = $"Connected via {connectionInfo}";
+
+            this.LogMonitoringStartedSuccessfully(this._connectionStatus);
         }
         catch (Exception ex)
         {
@@ -149,25 +200,59 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
     private KnxMessage CreateKnxMessage(GroupEventArgs e)
     {
         var messageType = e.Value != null ? KnxMessageType.Write : KnxMessageType.Read;
+        var groupAddress = e.DestinationAddress.ToString();
 
         // Extract raw data from GroupValue.Value property
         var rawData = this.TryExtractBytesFromGroupValue(e.Value) ?? Array.Empty<byte>();
 
-        // Extract the actual decoded value from GroupValue.TypedValue property
-        var decodedValue = this.ExtractDecodedValueFromGroupValue(e.Value);
+        // Try to decode using DPT information from CSV
+        var decodedValue = this.DecodeValueWithDpt(e.Value, groupAddress);
+
+        // Get group address info for description and DPT
+        var groupAddressInfo = this._groupAddressDatabase.GetGroupAddressInfo(groupAddress);
 
         return new KnxMessage
         {
             Timestamp = DateTime.Now,
             SourceAddress = e.SourceAddress.ToString(),
-            GroupAddress = e.DestinationAddress.ToString(),
+            GroupAddress = groupAddress,
             MessageType = messageType,
             Data = rawData,
             Value = decodedValue,
-            DataPointType = null,
+            DataPointType = groupAddressInfo?.DatapointType,
+            Description = groupAddressInfo?.Description,
             Priority = KnxPriority.Normal,
             IsRepeated = false,
         };
+    }
+
+    private object? DecodeValueWithDpt(GroupValue? groupValue, string groupAddress)
+    {
+        if (groupValue == null)
+        {
+            return null;
+        }
+
+        // Try to get DPT information from the database
+        var groupAddressInfo = this._groupAddressDatabase.GetGroupAddressInfo(groupAddress);
+        if (groupAddressInfo != null && !string.IsNullOrEmpty(groupAddressInfo.DatapointType))
+        {
+            // Use Falcon SDK DPT decoding
+            var decodedValue = this._dptDecoder.DecodeValue(groupValue, groupAddressInfo.DatapointType);
+            if (decodedValue != null)
+            {
+                return decodedValue;
+            }
+        }
+
+        // Fallback to TypedValue extraction
+        return this.ExtractDecodedValueFromGroupValue(groupValue);
+    }
+
+    private string? GetDatapointTypeForAddress(string groupAddress)
+    {
+        var groupAddressInfo = this._groupAddressDatabase.GetGroupAddressInfo(groupAddress);
+        return groupAddressInfo?.DatapointType;
     }
 
     private object? ExtractDecodedValueFromGroupValue(object? groupValue)
@@ -249,8 +334,100 @@ public partial class KnxMonitorService : IKnxMonitorService, IAsyncDisposable
         }
 
         this._messageCount++;
-        this.LogReceivedKnxMessage(message.GroupAddress, message.MessageType.ToString());
+
+        // Get description from database
+        var groupAddressInfo = this._groupAddressDatabase.GetGroupAddressInfo(message.GroupAddress);
+        var description = FormatDescriptionForLogging(groupAddressInfo?.Description);
+        var dptType = message.DataPointType ?? "";
+
+        // Format value properly based on DPT type
+        var formattedValue = FormatValueForLogging(message.Value, dptType);
+
+        // Always use Console.WriteLine for now - we'll clean this up after testing
+        var rawData = Convert.ToHexString(message.Data);
+        var logLine =
+            $"[{message.Timestamp:HH:mm:ss.fff}] {message.MessageType} {message.SourceAddress} -> {message.GroupAddress} = {formattedValue} (Raw: {rawData}) {dptType} {description}".Trim();
+        Console.WriteLine(logLine);
+
         this.MessageReceived?.Invoke(this, message);
+    }
+
+    /// <summary>
+    /// Formats description for logging with best practices.
+    /// </summary>
+    /// <param name="description">Raw description from CSV.</param>
+    /// <returns>Formatted description suitable for logging.</returns>
+    private static string FormatDescriptionForLogging(string? description)
+    {
+        if (string.IsNullOrWhiteSpace(description))
+        {
+            return "";
+        }
+
+        // Clean up the description for logging
+        var cleaned = description.Replace('\r', ' ').Replace('\n', ' ').Replace('\t', ' ').Trim();
+
+        // Remove multiple spaces
+        while (cleaned.Contains("  "))
+        {
+            cleaned = cleaned.Replace("  ", " ");
+        }
+
+        // For logging, we can be more generous with length but still reasonable
+        if (cleaned.Length > 200)
+        {
+            cleaned = cleaned.Substring(0, 197) + "...";
+        }
+
+        return cleaned;
+    }
+
+    /// <summary>
+    /// Formats value for logging with proper type-specific formatting.
+    /// </summary>
+    /// <param name="value">The value to format.</param>
+    /// <param name="dptType">The DPT type for context.</param>
+    /// <returns>Formatted value string.</returns>
+    private static string FormatValueForLogging(object? value, string dptType)
+    {
+        if (value == null)
+        {
+            return "null";
+        }
+
+        // Handle boolean values properly for DPST-1-1 (switching)
+        if (dptType == "DPST-1-1" && value is bool boolValue)
+        {
+            return boolValue ? "true" : "false";
+        }
+
+        // Handle numeric boolean values (0/1) for DPST-1-1
+        if (dptType == "DPST-1-1" && value is byte byteValue)
+        {
+            return byteValue != 0 ? "true" : "false";
+        }
+
+        if (dptType == "DPST-1-1" && value is int intValue)
+        {
+            return intValue != 0 ? "true" : "false";
+        }
+
+        // Handle other value types
+        return value switch
+        {
+            bool b => b ? "true" : "false",
+            byte by => $"{by}",
+            sbyte sb => $"{sb}",
+            short s => $"{s}",
+            ushort us => $"{us}",
+            int i => $"{i}",
+            uint ui => $"{ui}",
+            float f => $"{f:F2}",
+            double d => $"{d:F2}",
+            string str => str,
+            byte[] bytes => Convert.ToHexString(bytes),
+            _ => value.ToString() ?? "Unknown",
+        };
     }
 
     public void Dispose()
