@@ -219,3 +219,6 @@ tye.yaml
 devcontainer/music/*
 !devcontainer/music/create_library.sh
 !devcontainer/music/white-noise.m4a
+
+*.csv
+docs/FalconExamples
