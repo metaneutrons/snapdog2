@@ -166,7 +166,6 @@ public class KnxMessageRow
         this.SourceDisplay = message.SourceAddress;
         this.GroupAddressDisplay = message.GroupAddress;
         this.ValueDisplay = message.DisplayValue;
-        this.DptDisplay = message.GuessedDPT;
         this.PriorityDisplay = message.Priority.ToString();
         this.DataDisplay = message.DataHex;
 
@@ -205,11 +204,6 @@ public class KnxMessageRow
     /// Gets the formatted value display.
     /// </summary>
     public string ValueDisplay { get; }
-
-    /// <summary>
-    /// Gets the formatted DPT (datapoint type) display.
-    /// </summary>
-    public string DptDisplay { get; }
 
     /// <summary>
     /// Gets the formatted priority display.

@@ -1,24 +1,11 @@
-using KnxMonitor.Services;
-
 namespace KnxMonitor.Models;
 
 /// <summary>
 /// Represents a KNX bus message for display purposes.
+/// Simplified to work directly with Falcon SDK decoded values - no DPT guessing rubbish.
 /// </summary>
 public class KnxMessage
 {
-    private static IDptDecodingService? _dptDecodingService;
-
-    /// <summary>
-    /// Sets the DPT decoding service for all KnxMessage instances.
-    /// This should be called during application startup.
-    /// </summary>
-    /// <param name="dptDecodingService">The DPT decoding service.</param>
-    public static void SetDptDecodingService(IDptDecodingService dptDecodingService)
-    {
-        _dptDecodingService = dptDecodingService;
-    }
-
     /// <summary>
     /// Gets or sets the timestamp when the message was received.
     /// </summary>
@@ -45,13 +32,12 @@ public class KnxMessage
     public byte[] Data { get; set; } = Array.Empty<byte>();
 
     /// <summary>
-    /// Gets or sets the interpreted value (if available).
-    /// This should be set from the Falcon SDK's decoded value.
+    /// Gets or sets the interpreted value from Falcon SDK.
     /// </summary>
     public object? Value { get; set; }
 
     /// <summary>
-    /// Gets or sets the data point type (if known).
+    /// Gets or sets the data point type (if known from Falcon SDK).
     /// </summary>
     public string? DataPointType { get; set; }
 
@@ -71,40 +57,19 @@ public class KnxMessage
     public string DataHex => Convert.ToHexString(this.Data);
 
     /// <summary>
-    /// Gets a formatted display value with proper DPT decoding.
+    /// Gets a formatted display value using Falcon SDK decoded value.
     /// </summary>
     public string DisplayValue
     {
         get
         {
-            // If we have a DPT decoding service, use it
-            if (_dptDecodingService != null)
-            {
-                // If we have a known DPT, use it for decoding
-                if (!string.IsNullOrEmpty(this.DataPointType))
-                {
-                    var decodedValue = _dptDecodingService.DecodeValue(this.Data, this.DataPointType);
-                    if (decodedValue != null)
-                    {
-                        return _dptDecodingService.FormatValue(decodedValue, this.DataPointType);
-                    }
-                }
-
-                // Try auto-detection if no DPT is known
-                var (autoDecodedValue, detectedDpt) = _dptDecodingService.DecodeValueWithAutoDetection(this.Data);
-                if (autoDecodedValue != null)
-                {
-                    return _dptDecodingService.FormatValue(autoDecodedValue, detectedDpt);
-                }
-            }
-
-            // Fallback: if we have a pre-decoded value from Falcon SDK, format it
+            // Use Falcon SDK decoded value if available
             if (this.Value != null)
             {
-                return FormatFalconValue(this.Value, this.DataPointType);
+                return FormatFalconValue(this.Value);
             }
 
-            // Final fallback: show raw data
+            // Fallback: show raw data
             if (this.Data.Length == 0)
             {
                 return "Empty";
@@ -114,67 +79,7 @@ public class KnxMessage
         }
     }
 
-    /// <summary>
-    /// Gets the likely datapoint type based on data analysis.
-    /// </summary>
-    public string GuessedDPT
-    {
-        get
-        {
-            if (!string.IsNullOrEmpty(this.DataPointType))
-                return this.DataPointType;
-
-            // Use DPT decoding service for detection if available
-            if (_dptDecodingService != null)
-            {
-                var detectedDpt = _dptDecodingService.DetectDpt(this.Data);
-                if (!string.IsNullOrEmpty(detectedDpt))
-                {
-                    return $"DPT {detectedDpt}";
-                }
-            }
-
-            // Fallback to simple length-based guessing
-            return this.Data.Length switch
-            {
-                0 => "DPT 1 (1-bit)",
-                1 => "DPT 1/5/6 (1-byte)",
-                2 => "DPT 7/8/9 (2-byte)",
-                4 => "DPT 12/13/14 (4-byte)",
-                _ => "Unknown",
-            };
-        }
-    }
-
-    /// <summary>
-    /// Gets the decoded value using the DPT decoding service.
-    /// </summary>
-    public object? DecodedValue
-    {
-        get
-        {
-            if (_dptDecodingService == null)
-            {
-                return this.Value; // Return Falcon SDK value if no decoding service
-            }
-
-            // Try with known DPT first
-            if (!string.IsNullOrEmpty(this.DataPointType))
-            {
-                var decoded = _dptDecodingService.DecodeValue(this.Data, this.DataPointType);
-                if (decoded != null)
-                {
-                    return decoded;
-                }
-            }
-
-            // Try auto-detection
-            var (autoDecoded, _) = _dptDecodingService.DecodeValueWithAutoDetection(this.Data);
-            return autoDecoded ?? this.Value;
-        }
-    }
-
-    private static string FormatFalconValue(object value, string? dataPointType)
+    private static string FormatFalconValue(object value)
     {
         return value switch
         {

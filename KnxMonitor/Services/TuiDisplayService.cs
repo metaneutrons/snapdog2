@@ -870,9 +870,9 @@ public class KnxMessageTableSource : ITableSource
     }
 
     public int Rows => this._model.Messages.Count;
-    public int Columns => 7; // Timestamp, Source, Destination, Type, Data, Value, DPT
+    public int Columns => 6; // Timestamp, Source, Destination, Type, Raw Data, Value
 
-    public string[] ColumnNames => new[] { "Timestamp", "Source", "Dest", "MsgType", "DPT", "Raw Data", "Value" };
+    public string[] ColumnNames => new[] { "Timestamp", "Source", "Dest", "MsgType", "Raw Data", "Value" };
 
     public object this[int row, int col]
     {
@@ -888,9 +888,8 @@ public class KnxMessageTableSource : ITableSource
                 1 => messageRow.SourceDisplay,
                 2 => messageRow.GroupAddressDisplay,
                 3 => messageRow.MessageTypeDisplay,
-                4 => messageRow.DptDisplay,
-                5 => messageRow.DataDisplay,
-                6 => messageRow.ValueDisplay,
+                4 => messageRow.DataDisplay,
+                5 => messageRow.ValueDisplay,
                 _ => "",
             };
         }

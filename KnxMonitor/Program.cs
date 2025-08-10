@@ -113,7 +113,7 @@ public static class Program
                 foreach (var option in rootCommand.Options)
                 {
                     var aliases = string.Join(", ", option.Aliases);
-                    Console.WriteLine($"  {aliases, -20} {option.Description}");
+                    Console.WriteLine($"  {aliases,-20} {option.Description}");
                 }
                 return 0;
             }
@@ -285,9 +285,8 @@ public static class Program
                 {
                     services.AddSingleton(config);
 
-                    // 🔧 Use the WORKING manual decoding service until we fix Falcon SDK integration
+                    // 🚀 Use simplified Falcon SDK-only KNX monitoring service
                     services.AddSingleton<IKnxMonitorService, KnxMonitorService>();
-                    services.AddSingleton<IDptDecodingService, DptDecodingService>();
 
                     // Health check service registration logic:
                     // - Enabled by default in Docker containers (for container health monitoring)
@@ -321,7 +320,6 @@ public static class Program
             // Get services
             monitorService = host.Services.GetRequiredService<IKnxMonitorService>();
             displayService = host.Services.GetRequiredService<IDisplayService>();
-            var dptDecodingService = host.Services.GetRequiredService<IDptDecodingService>();
 
             // Conditionally get health check service (same logic as registration)
             bool shouldEnableHealthCheck =
@@ -331,9 +329,6 @@ public static class Program
             {
                 healthCheckService = host.Services.GetRequiredService<HealthCheckService>();
             }
-
-            // Initialize the static DPT decoding service in KnxMessage
-            KnxMessage.SetDptDecodingService(dptDecodingService);
 
             // Start health check service if enabled
             if (healthCheckService != null)
