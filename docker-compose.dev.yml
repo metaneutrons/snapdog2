@@ -217,37 +217,8 @@ services:
   #
   # TROUBLESHOOTING:
   # - If you see "Unrecognized command or argument" errors, use short form arguments (-g, -p, -v)
-  # - Long form arguments (--gateway, --port, --verbose) may not work in Docker due to System.CommandLine beta version
-  # - Check logs with: docker compose logs knx-monitor -f
-  # - Check health status: docker inspect snapdog-knx-monitor-1 --format='{{.State.Health.Status}}'
-  # - Access health endpoint: curl http://localhost:8080/health (if port is exposed)
-  # - Access readiness endpoint: curl http://localhost:8080/ready (if port is exposed)
-  knx-monitor:
-    build:
-      context: ./KnxMonitor
-      dockerfile: Dockerfile
-      target: development
-    volumes:
-      - ./KnxMonitor:/app:cached # Mount source code for hot reload
-      - ./Directory.Packages.props:/Directory.Packages.props:ro # Central package management
-      - ./devcontainer/knx-groupaddresses.csv:/app/knx-groupaddresses.csv:ro # KNX group addresses database
-      - knx_monitor_nuget:/home/knxmonitor/.nuget # NuGet cache for better performance
-    environment:
-      - DOTNET_ENVIRONMENT=Development
-      - DOTNET_USE_POLLING_FILE_WATCHER=true
-      - DOTNET_WATCH_RESTART_ON_RUDE_EDIT=true
-      - DOTNET_WATCH_SUPPRESS_LAUNCH_BROWSER=true
-      - KNX_MONITOR_LOGGING_MODE=true # Force logging mode for docker logs
-      - TZ=Europe/Berlin # Set timezone for proper log timestamps
-    command: ["dotnet", "watch", "run", "--", "-g", "knxd", "-v", "--csv", "/app/knx-groupaddresses.csv"]
-    depends_on:
-      knxd:
-        condition: service_healthy
-    networks:
-      snapdog-dev:
-        ipv4_address: 172.20.0.14
-    stdin_open: true
-    tty: true
+  # KNX Monitor service has been moved to its own repository
+  # See: https://github.com/yourusername/KnxMonitor
     restart: unless-stopped
     # 🏥 HEALTH CHECK - Enabled by default in Docker containers
     # 

@@ -1,8 +1,10 @@
 # SnapDog2 Logging Refactoring Master Plan
 
+> **📢 IMPORTANT UPDATE**: KnxMonitor components have been moved to their own independent repository. This refactoring plan now focuses exclusively on SnapDog2 components.
+
 ## 📋 Executive Summary
 
-**Objective**: Convert 237 old-style logging calls to structured `[LoggerMessage]` pattern across 22 files
+**Objective**: Convert remaining old-style logging calls to structured `[LoggerMessage]` pattern across SnapDog2 files
 
 **Benefits**:
 - 🚀 **Performance**: Compile-time optimized logging with zero allocations
@@ -20,8 +22,9 @@
 ### P1 - CRITICAL (40+ violations) - **IMMEDIATE ACTION REQUIRED**
 | File | Violations | Component | Complexity | Notes |
 |------|------------|-----------|------------|-------|
-| `FalconKnxMonitorService.cs` | **44** | KnxMonitor | High | Highest violation count |
 | `ZoneCommandHandlers.cs` | **38** | SnapDog2.Server | Very High | ✅ Partially completed (PlayCommandHandler done) |
+
+> **Note**: KnxMonitor components have been moved to their own repository and are no longer part of SnapDog2.
 
 ### P1 - CRITICAL (20+ violations) - **HIGH PRIORITY**
 | File | Violations | Component | Complexity | Notes |
