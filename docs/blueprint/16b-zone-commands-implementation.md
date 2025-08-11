@@ -473,7 +473,7 @@ public class SetPlaylistCommandValidator : AbstractValidator<SetPlaylistCommand>
         RuleFor(x => x.PlaylistIndex)
             .NotEmpty()
             .When(x => !x.PlaylistIndex.HasValue)
-            .WithMessage("Playlist ID must not be empty when specified.");
+            .WithMessage("Playlist Index must not be empty when specified.");
 
         RuleFor(x => x.Source)
             .IsInEnum()

@@ -251,7 +251,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
             return Result<Api.Models.PlaylistWithTracks>.Failure("Service has been disposed");
 
         if (string.IsNullOrEmpty(playlistIndex))
-            return Result<Api.Models.PlaylistWithTracks>.Failure("Playlist ID cannot be null or empty");
+            return Result<Api.Models.PlaylistWithTracks>.Failure("Playlist Index cannot be null or empty");
 
         await this._operationLock.WaitAsync(cancellationToken);
         try
