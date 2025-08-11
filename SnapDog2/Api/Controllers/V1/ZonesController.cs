@@ -409,17 +409,16 @@ public class ZonesController : ControllerBase
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
-    // PLAYBACK CONTROL - Clean HTTP semantics
+    // PLAYBACK CONTROL - Clean HTTP semantics with flexible parameter handling
     // ═══════════════════════════════════════════════════════════════════════════════
 
     /// <summary>
-    /// Starts playback in a zone.
-    /// Supports both URL and track-based playback via optional request body.
+    /// Starts playback in a zone (resume current).
     /// </summary>
     [HttpPost("{zoneIndex:int}/play")]
     [ProducesResponseType(204)]
     [ProducesResponseType(typeof(ProblemDetails), 404)]
-    public IActionResult Play(int zoneIndex, [FromBody] PlayRequest? request = null)
+    public IActionResult Play(int zoneIndex)
     {
         if (zoneIndex < 1 || zoneIndex > 10)
         {
@@ -433,8 +432,82 @@ public class ZonesController : ControllerBase
             );
         }
 
-        // Handle both URL and track-based playback
-        return NoContent(); // Action completed successfully
+        // Resume current playback
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Starts playback of a specific track by index (1-based) in the current playlist.
+    /// </summary>
+    [HttpPost("{zoneIndex:int}/play/track/{trackIndex:int}")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(typeof(ProblemDetails), 400)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
+    public IActionResult PlayTrack(int zoneIndex, int trackIndex)
+    {
+        if (zoneIndex < 1 || zoneIndex > 10)
+        {
+            return NotFound(
+                new ProblemDetails
+                {
+                    Title = "Zone not found",
+                    Detail = $"Zone {zoneIndex} does not exist",
+                    Status = 404,
+                }
+            );
+        }
+
+        if (trackIndex < 1)
+        {
+            return BadRequest(
+                new ProblemDetails
+                {
+                    Title = "Invalid track index",
+                    Detail = "Track index must be 1 or greater",
+                    Status = 400,
+                }
+            );
+        }
+
+        // Play specific track by index
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Starts playback of a direct URL (external streaming).
+    /// </summary>
+    [HttpPost("{zoneIndex:int}/play/url")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(typeof(ProblemDetails), 400)]
+    [ProducesResponseType(typeof(ProblemDetails), 404)]
+    public IActionResult PlayUrl(int zoneIndex, [FromBody] string url)
+    {
+        if (zoneIndex < 1 || zoneIndex > 10)
+        {
+            return NotFound(
+                new ProblemDetails
+                {
+                    Title = "Zone not found",
+                    Detail = $"Zone {zoneIndex} does not exist",
+                    Status = 404,
+                }
+            );
+        }
+
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            return BadRequest(
+                new ProblemDetails
+                {
+                    Title = "Invalid URL",
+                    Detail = "URL cannot be empty",
+                    Status = 400,
+                }
+            );
+        }
+
+        // Play direct URL
+        return NoContent();
     }
 
     /// <summary>Pauses playback in a zone.</summary>

@@ -75,7 +75,9 @@ Endpoints for interacting with configured audio zones. **Zone creation/deletion/
 | :----- | :----------------------------------------- | :------------------------ | :----------------------------------- | :---------------------------------------------- | :----------------------------------- | :---------- |
 | `GET`  | `/zones`                                   | -                         | List configured zones                | Query: `?page=1&size=20`                       | `Page<Zone>`                         | 200 OK      |
 | `GET`  | `/zones/{zoneIndex}`                       | `ZONE_STATE` (Full)       | Get details & full state for zone    | Path: `{zoneIndex}` (int)                       | `ZoneState`                          | 200 OK      |
-| `POST` | `/zones/{zoneIndex}/play`                  | `PLAY`                    | Start/resume playback                | Path: `{zoneIndex}`; Optional Body: `PlayRequest`  | No content                       | 204 No Content|
+| `POST` | `/zones/{zoneIndex}/play`                  | `PLAY`                    | Start/resume playback                | Path: `{zoneIndex}`                             | No content                           | 204 No Content|
+| `POST` | `/zones/{zoneIndex}/play/track/{trackIndex}` | `PLAY`                  | Play specific track by index         | Path: `{zoneIndex}`, `{trackIndex}` (1-based)  | No content                           | 204 No Content|
+| `POST` | `/zones/{zoneIndex}/play/url`              | `PLAY`                    | Play direct URL stream               | Path: `{zoneIndex}`; Body: `string` (URL)      | No content                           | 204 No Content|
 | `POST` | `/zones/{zoneIndex}/pause`                 | `PAUSE`                   | Pause playback                       | Path: `{zoneIndex}`                             | No content                           | 204 No Content|
 | `POST` | `/zones/{zoneIndex}/stop`                  | `STOP`                    | Stop playback                        | Path: `{zoneIndex}`                             | No content                           | 204 No Content|
 | `GET`  | `/zones/{zoneIndex}/track`                 | `TRACK_STATUS`            | Get current track by **1-based index** | Path: `{zoneIndex}`                          | `int` (track index)                  | 200 OK      |
@@ -109,25 +111,30 @@ Endpoints for interacting with configured audio zones. **Zone creation/deletion/
 
 *Note on HTTP Status Codes: State retrievals and settings return 200 OK with the primitive value. Actions (play, pause, stop, track navigation, playlist setting) return 204 No Content to indicate successful completion without response data.*
 
-**Ultra-Modern Request DTOs (Absolute Minimum):**
+**Zero Request DTOs (Ultimate Simplification):**
 
 ```csharp
 namespace SnapDog2.Api.Models;
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// ULTRA-SIMPLIFIED REQUEST DTOS - Only 1 remaining!
+// 🎉 ZERO REQUEST DTOS - ULTIMATE SIMPLIFICATION ACHIEVED!
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/// <summary>
-/// Play media request - supports both direct URLs and playlist tracks.
-/// The ONLY remaining multi-property request object.
-/// </summary>
-public record PlayRequest(string? Url = null, int? Track = null);
+// NO REQUEST OBJECTS NEEDED!
+// 
+// All API operations now use direct parameter binding:
+// - Primitives: int, bool, string
+// - Path parameters: /zones/{zoneIndex}/play/track/{trackIndex}
+// - Query parameters: ?page=1&size=20
+// - Body parameters: [FromBody] int volume, [FromBody] string url
+//
+// This represents the ultimate in API simplification!
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// ELIMINATED ALL OTHER REQUEST OBJECTS - Use direct parameter binding:
+// ELIMINATED ALL REQUEST OBJECTS - 100% reduction achieved:
 // ═══════════════════════════════════════════════════════════════════════════════
 // 
+// ❌ REMOVED: PlayRequest          → Use: separate endpoints /play, /play/track/{index}, /play/url
 // ❌ REMOVED: PlaylistRequest      → Use: int playlistIndex (1-based)
 // ❌ REMOVED: VolumeSetRequest     → Use: int volume (0-100)
 // ❌ REMOVED: MuteSetRequest       → Use: bool muted
@@ -139,7 +146,7 @@ public record PlayRequest(string? Url = null, int? Track = null);
 // ❌ REMOVED: ZoneAssignmentRequest → Use: int zoneId
 // ❌ REMOVED: RenameRequest        → Use: string name
 //
-// This eliminates 10 unnecessary DTOs - 91% reduction from original 11!
+// TOTAL ELIMINATION: 11 request DTOs → 0 (100% reduction!)
 ```
 
 **Modern Response Design (Direct Primitives):**
