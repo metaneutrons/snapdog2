@@ -128,7 +128,7 @@ public record ZonePlaylistChangedNotification : INotification
 /// <summary>
 /// Notification published when a zone's track repeat mode changes.
 /// </summary>
-[StatusId("TRACK_REPEAT_STATUS", "TR-001")]
+[StatusId("TRACK_REPEAT_STATUS")]
 public record ZoneTrackRepeatChangedNotification : INotification
 {
     /// <summary>
@@ -150,7 +150,7 @@ public record ZoneTrackRepeatChangedNotification : INotification
 /// <summary>
 /// Notification published when a zone's playlist repeat mode changes.
 /// </summary>
-[StatusId("PLAYLIST_REPEAT_STATUS", "PR-001")]
+[StatusId("PLAYLIST_REPEAT_STATUS")]
 public record ZonePlaylistRepeatChangedNotification : INotification
 {
     /// <summary>
@@ -194,7 +194,7 @@ public record ZoneShuffleModeChangedNotification : INotification
 /// <summary>
 /// Notification published when a zone's complete state changes.
 /// </summary>
-[StatusId("ZONE_STATE", "ZST-001")]
+[StatusId("ZONE_STATE")]
 public record ZoneStateChangedNotification : INotification
 {
     /// <summary>

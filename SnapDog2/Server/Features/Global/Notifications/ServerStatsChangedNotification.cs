@@ -8,7 +8,7 @@ using SnapDog2.Core.Models;
 /// <summary>
 /// Notification published when server statistics are updated.
 /// </summary>
-[StatusId("SERVER_STATS", "STS-001")]
+[StatusId("SERVER_STATS")]
 public record ServerStatsChangedNotification : INotification
 {
     /// <summary>

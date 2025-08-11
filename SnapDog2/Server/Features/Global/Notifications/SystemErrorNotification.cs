@@ -8,7 +8,7 @@ using SnapDog2.Core.Models;
 /// <summary>
 /// Notification published when a system error occurs.
 /// </summary>
-[StatusId("SYSTEM_ERROR", "SE-001")]
+[StatusId("SYSTEM_ERROR")]
 public record SystemErrorNotification : INotification
 {
     /// <summary>

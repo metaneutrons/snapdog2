@@ -101,7 +101,7 @@ public record ClientZoneAssignmentChangedNotification : INotification
 /// <summary>
 /// Notification published when a client's connection status changes.
 /// </summary>
-[StatusId("CLIENT_CONNECTED", "CC-001")]
+[StatusId("CLIENT_CONNECTED")]
 public record ClientConnectionChangedNotification : INotification
 {
     /// <summary>
@@ -123,7 +123,7 @@ public record ClientConnectionChangedNotification : INotification
 /// <summary>
 /// Notification published when a client's complete state changes.
 /// </summary>
-[StatusId("CLIENT_STATE", "CS-001")]
+[StatusId("CLIENT_STATE")]
 public record ClientStateChangedNotification : INotification
 {
     /// <summary>

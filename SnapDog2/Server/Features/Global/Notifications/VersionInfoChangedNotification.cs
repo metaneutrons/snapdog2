@@ -8,7 +8,7 @@ using SnapDog2.Core.Models;
 /// <summary>
 /// Notification published when version information is updated or requested.
 /// </summary>
-[StatusId("VERSION_INFO", "VI-001")]
+[StatusId("VERSION_INFO")]
 public record VersionInfoChangedNotification : INotification
 {
     /// <summary>

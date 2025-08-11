@@ -8,7 +8,7 @@ using SnapDog2.Core.Models;
 /// <summary>
 /// Notification published when the system status changes.
 /// </summary>
-[StatusId("SYSTEM_STATUS", "SS-001")]
+[StatusId("SYSTEM_STATUS")]
 public record SystemStatusChangedNotification : INotification
 {
     /// <summary>
