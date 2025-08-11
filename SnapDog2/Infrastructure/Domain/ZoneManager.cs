@@ -29,17 +29,17 @@ public partial class ZoneManager : IZoneManager, IAsyncDisposable, IDisposable
     [LoggerMessage(7001, LogLevel.Information, "Initializing ZoneManager with {ZoneCount} configured zones")]
     private partial void LogInitializing(int zoneCount);
 
-    [LoggerMessage(7002, LogLevel.Information, "Zone {ZoneId} ({ZoneName}) initialized successfully")]
-    private partial void LogZoneInitialized(int zoneId, string zoneName);
+    [LoggerMessage(7002, LogLevel.Information, "Zone {ZoneIndex} ({ZoneName}) initialized successfully")]
+    private partial void LogZoneInitialized(int zoneIndex, string zoneName);
 
-    [LoggerMessage(7003, LogLevel.Warning, "Zone {ZoneId} not found")]
-    private partial void LogZoneNotFound(int zoneId);
+    [LoggerMessage(7003, LogLevel.Warning, "Zone {ZoneIndex} not found")]
+    private partial void LogZoneNotFound(int zoneIndex);
 
-    [LoggerMessage(7004, LogLevel.Error, "Failed to initialize zone {ZoneId}: {Error}")]
-    private partial void LogZoneInitializationFailed(int zoneId, string error);
+    [LoggerMessage(7004, LogLevel.Error, "Failed to initialize zone {ZoneIndex}: {Error}")]
+    private partial void LogZoneInitializationFailed(int zoneIndex, string error);
 
-    [LoggerMessage(7005, LogLevel.Debug, "Getting zone {ZoneId}")]
-    private partial void LogGettingZone(int zoneId);
+    [LoggerMessage(7005, LogLevel.Debug, "Getting zone {ZoneIndex}")]
+    private partial void LogGettingZone(int zoneIndex);
 
     [LoggerMessage(7006, LogLevel.Debug, "Getting all zones")]
     private partial void LogGettingAllZones();
@@ -80,12 +80,12 @@ public partial class ZoneManager : IZoneManager, IAsyncDisposable, IDisposable
             for (int i = 0; i < _zoneConfigs.Count; i++)
             {
                 var zoneConfig = _zoneConfigs[i];
-                var zoneId = i + 1; // 1-based zone IDs
+                var zoneIndex = i + 1; // 1-based zone IDs
 
                 try
                 {
                     var zoneService = new ZoneService(
-                        zoneId,
+                        zoneIndex,
                         zoneConfig,
                         _snapcastService,
                         _snapcastStateRepository,
@@ -96,12 +96,12 @@ public partial class ZoneManager : IZoneManager, IAsyncDisposable, IDisposable
 
                     await zoneService.InitializeAsync(cancellationToken).ConfigureAwait(false);
 
-                    _zones.TryAdd(zoneId, zoneService);
-                    LogZoneInitialized(zoneId, zoneConfig.Name);
+                    _zones.TryAdd(zoneIndex, zoneService);
+                    LogZoneInitialized(zoneIndex, zoneConfig.Name);
                 }
                 catch (Exception ex)
                 {
-                    LogZoneInitializationFailed(zoneId, ex.Message);
+                    LogZoneInitializationFailed(zoneIndex, ex.Message);
                     // Continue with other zones even if one fails
                 }
             }
@@ -114,22 +114,22 @@ public partial class ZoneManager : IZoneManager, IAsyncDisposable, IDisposable
         }
     }
 
-    public async Task<Result<IZoneService>> GetZoneAsync(int zoneId)
+    public async Task<Result<IZoneService>> GetZoneAsync(int zoneIndex)
     {
-        LogGettingZone(zoneId);
+        LogGettingZone(zoneIndex);
 
         if (!_isInitialized)
         {
             await InitializeAsync().ConfigureAwait(false);
         }
 
-        if (_zones.TryGetValue(zoneId, out var zone))
+        if (_zones.TryGetValue(zoneIndex, out var zone))
         {
             return Result<IZoneService>.Success(zone);
         }
 
-        LogZoneNotFound(zoneId);
-        return Result<IZoneService>.Failure($"Zone {zoneId} not found");
+        LogZoneNotFound(zoneIndex);
+        return Result<IZoneService>.Failure($"Zone {zoneIndex} not found");
     }
 
     public async Task<Result<IEnumerable<IZoneService>>> GetAllZonesAsync()
@@ -144,9 +144,9 @@ public partial class ZoneManager : IZoneManager, IAsyncDisposable, IDisposable
         return Result<IEnumerable<IZoneService>>.Success(_zones.Values);
     }
 
-    public async Task<Result<ZoneState>> GetZoneStateAsync(int zoneId)
+    public async Task<Result<ZoneState>> GetZoneStateAsync(int zoneIndex)
     {
-        var zoneResult = await GetZoneAsync(zoneId).ConfigureAwait(false);
+        var zoneResult = await GetZoneAsync(zoneIndex).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
             return Result<ZoneState>.Failure(zoneResult.ErrorMessage ?? "Zone not found");
@@ -177,14 +177,14 @@ public partial class ZoneManager : IZoneManager, IAsyncDisposable, IDisposable
         return Result<List<ZoneState>>.Success(states);
     }
 
-    public async Task<bool> ZoneExistsAsync(int zoneId)
+    public async Task<bool> ZoneExistsAsync(int zoneIndex)
     {
         if (!_isInitialized)
         {
             await InitializeAsync().ConfigureAwait(false);
         }
 
-        return _zones.ContainsKey(zoneId);
+        return _zones.ContainsKey(zoneIndex);
     }
 
     /// <summary>
@@ -236,7 +236,7 @@ public partial class ZoneManager : IZoneManager, IAsyncDisposable, IDisposable
 /// </summary>
 public partial class ZoneService : IZoneService, IAsyncDisposable
 {
-    private readonly int _zoneId;
+    private readonly int _zoneIndex;
     private readonly ZoneConfig _config;
     private readonly ISnapcastService _snapcastService;
     private readonly ISnapcastStateRepository _snapcastStateRepository;
@@ -248,19 +248,19 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     private string? _snapcastGroupId;
     private bool _disposed;
 
-    [LoggerMessage(7101, LogLevel.Information, "Zone {ZoneId} ({ZoneName}): {Action}")]
-    private partial void LogZoneAction(int zoneId, string zoneName, string action);
+    [LoggerMessage(7101, LogLevel.Information, "Zone {ZoneIndex} ({ZoneName}): {Action}")]
+    private partial void LogZoneAction(int zoneIndex, string zoneName, string action);
 
-    [LoggerMessage(7102, LogLevel.Debug, "Zone {ZoneId} synchronized with Snapcast group {GroupId}")]
-    private partial void LogSnapcastSync(int zoneId, string groupId);
+    [LoggerMessage(7102, LogLevel.Debug, "Zone {ZoneIndex} synchronized with Snapcast group {GroupId}")]
+    private partial void LogSnapcastSync(int zoneIndex, string groupId);
 
-    [LoggerMessage(7103, LogLevel.Warning, "Zone {ZoneId} Snapcast group {GroupId} not found")]
-    private partial void LogSnapcastGroupNotFound(int zoneId, string groupId);
+    [LoggerMessage(7103, LogLevel.Warning, "Zone {ZoneIndex} Snapcast group {GroupId} not found")]
+    private partial void LogSnapcastGroupNotFound(int zoneIndex, string groupId);
 
-    public int ZoneId => _zoneId;
+    public int ZoneIndex => _zoneIndex;
 
     public ZoneService(
-        int zoneId,
+        int zoneIndex,
         ZoneConfig config,
         ISnapcastService snapcastService,
         ISnapcastStateRepository snapcastStateRepository,
@@ -269,7 +269,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         ILogger logger
     )
     {
-        _zoneId = zoneId;
+        _zoneIndex = zoneIndex;
         _config = config;
         _snapcastService = snapcastService;
         _snapcastStateRepository = snapcastStateRepository;
@@ -307,13 +307,15 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     // Playback Control Implementation
     public async Task<Result> PlayAsync()
     {
-        LogZoneAction(_zoneId, _config.Name, "Play");
+        LogZoneAction(_zoneIndex, _config.Name, "Play");
 
         await _stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
             // Start media playback
-            var playResult = await _mediaPlayerService.PlayAsync(_zoneId, _currentState.Track!).ConfigureAwait(false);
+            var playResult = await _mediaPlayerService
+                .PlayAsync(_zoneIndex, _currentState.Track!)
+                .ConfigureAwait(false);
             if (playResult.IsFailure)
                 return playResult;
 
@@ -336,7 +338,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     public async Task<Result> PlayTrackAsync(int trackIndex)
     {
-        LogZoneAction(_zoneId, _config.Name, $"Play track {trackIndex}");
+        LogZoneAction(_zoneIndex, _config.Name, $"Play track {trackIndex}");
 
         await _stateLock.WaitAsync().ConfigureAwait(false);
         try
@@ -350,7 +352,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             };
 
             // Start playback
-            var playResult = await _mediaPlayerService.PlayAsync(_zoneId, newTrack).ConfigureAwait(false);
+            var playResult = await _mediaPlayerService.PlayAsync(_zoneIndex, newTrack).ConfigureAwait(false);
             if (playResult.IsFailure)
                 return playResult;
 
@@ -372,7 +374,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     public async Task<Result> PlayUrlAsync(string mediaUrl)
     {
-        LogZoneAction(_zoneId, _config.Name, $"Play URL: {mediaUrl}");
+        LogZoneAction(_zoneIndex, _config.Name, $"Play URL: {mediaUrl}");
 
         await _stateLock.WaitAsync().ConfigureAwait(false);
         try
@@ -387,7 +389,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 Album = "Stream",
             };
 
-            var playResult = await _mediaPlayerService.PlayAsync(_zoneId, streamTrack).ConfigureAwait(false);
+            var playResult = await _mediaPlayerService.PlayAsync(_zoneIndex, streamTrack).ConfigureAwait(false);
             if (playResult.IsFailure)
                 return playResult;
 
@@ -404,12 +406,12 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     public async Task<Result> PauseAsync()
     {
-        LogZoneAction(_zoneId, _config.Name, "Pause");
+        LogZoneAction(_zoneIndex, _config.Name, "Pause");
 
         await _stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            var pauseResult = await _mediaPlayerService.PauseAsync(_zoneId).ConfigureAwait(false);
+            var pauseResult = await _mediaPlayerService.PauseAsync(_zoneIndex).ConfigureAwait(false);
             if (pauseResult.IsFailure)
                 return pauseResult;
 
@@ -425,12 +427,12 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     public async Task<Result> StopAsync()
     {
-        LogZoneAction(_zoneId, _config.Name, "Stop");
+        LogZoneAction(_zoneIndex, _config.Name, "Stop");
 
         await _stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            var stopResult = await _mediaPlayerService.StopAsync(_zoneId).ConfigureAwait(false);
+            var stopResult = await _mediaPlayerService.StopAsync(_zoneIndex).ConfigureAwait(false);
             if (stopResult.IsFailure)
                 return stopResult;
 
@@ -447,7 +449,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     // Volume Control Implementation
     public async Task<Result> SetVolumeAsync(int volume)
     {
-        LogZoneAction(_zoneId, _config.Name, $"Set volume to {volume}");
+        LogZoneAction(_zoneIndex, _config.Name, $"Set volume to {volume}");
 
         await _stateLock.WaitAsync().ConfigureAwait(false);
         try
@@ -504,7 +506,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     public async Task<Result> SetMuteAsync(bool enabled)
     {
-        LogZoneAction(_zoneId, _config.Name, enabled ? "Mute" : "Unmute");
+        LogZoneAction(_zoneIndex, _config.Name, enabled ? "Mute" : "Unmute");
 
         await _stateLock.WaitAsync().ConfigureAwait(false);
         try
@@ -545,7 +547,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     // Track Management Implementation
     public async Task<Result> SetTrackAsync(int trackIndex)
     {
-        LogZoneAction(_zoneId, _config.Name, $"Set track to {trackIndex}");
+        LogZoneAction(_zoneIndex, _config.Name, $"Set track to {trackIndex}");
 
         await _stateLock.WaitAsync().ConfigureAwait(false);
         try
@@ -599,7 +601,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     public async Task<Result> SetTrackRepeatAsync(bool enabled)
     {
-        LogZoneAction(_zoneId, _config.Name, enabled ? "Enable track repeat" : "Disable track repeat");
+        LogZoneAction(_zoneIndex, _config.Name, enabled ? "Enable track repeat" : "Disable track repeat");
 
         await _stateLock.WaitAsync().ConfigureAwait(false);
         try
@@ -630,7 +632,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     // Playlist Management Implementation
     public async Task<Result> SetPlaylistAsync(int playlistIndex)
     {
-        LogZoneAction(_zoneId, _config.Name, $"Set playlist to {playlistIndex}");
+        LogZoneAction(_zoneIndex, _config.Name, $"Set playlist to {playlistIndex}");
 
         await _stateLock.WaitAsync().ConfigureAwait(false);
         try
@@ -654,7 +656,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     public async Task<Result> SetPlaylistAsync(string playlistIndex)
     {
-        LogZoneAction(_zoneId, _config.Name, $"Set playlist to {playlistIndex}");
+        LogZoneAction(_zoneIndex, _config.Name, $"Set playlist to {playlistIndex}");
 
         await _stateLock.WaitAsync().ConfigureAwait(false);
         try
@@ -702,7 +704,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     public async Task<Result> SetPlaylistShuffleAsync(bool enabled)
     {
-        LogZoneAction(_zoneId, _config.Name, enabled ? "Enable playlist shuffle" : "Disable playlist shuffle");
+        LogZoneAction(_zoneIndex, _config.Name, enabled ? "Enable playlist shuffle" : "Disable playlist shuffle");
 
         await _stateLock.WaitAsync().ConfigureAwait(false);
         try
@@ -732,7 +734,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     public async Task<Result> SetPlaylistRepeatAsync(bool enabled)
     {
-        LogZoneAction(_zoneId, _config.Name, enabled ? "Enable playlist repeat" : "Disable playlist repeat");
+        LogZoneAction(_zoneIndex, _config.Name, enabled ? "Enable playlist repeat" : "Disable playlist repeat");
 
         await _stateLock.WaitAsync().ConfigureAwait(false);
         try
@@ -780,7 +782,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     {
         return new ZoneState
         {
-            Id = _zoneId,
+            Id = _zoneIndex,
             Name = _config.Name,
             PlaybackState = "stopped",
             Volume = 50,
@@ -788,7 +790,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             TrackRepeat = false,
             PlaylistRepeat = false,
             PlaylistShuffle = false,
-            SnapcastGroupId = $"group_{_zoneId}",
+            SnapcastGroupId = $"group_{_zoneIndex}",
             SnapcastStreamId = _config.Sink,
             IsSnapcastGroupMuted = false,
             Track = new TrackInfo
@@ -817,7 +819,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     {
         // Find or create Snapcast group for this zone
         // This would interact with actual Snapcast service
-        _snapcastGroupId = $"group_{_zoneId}";
+        _snapcastGroupId = $"group_{_zoneIndex}";
         await Task.CompletedTask; // Placeholder for future async Snapcast integration
     }
 
@@ -830,7 +832,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     private async Task PublishZoneStateChangedAsync()
     {
-        var notification = new ZoneStateChangedNotification { ZoneId = _zoneId, ZoneState = _currentState };
+        var notification = new ZoneStateChangedNotification { ZoneIndex = _zoneIndex, ZoneState = _currentState };
 
         await _mediator.PublishAsync(notification).ConfigureAwait(false);
     }

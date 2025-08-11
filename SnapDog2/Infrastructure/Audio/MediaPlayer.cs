@@ -16,7 +16,7 @@ public sealed partial class MediaPlayer : IAsyncDisposable
 {
     private readonly SoundFlowConfig _config;
     private readonly ILogger<MediaPlayer> _logger;
-    private readonly int _zoneId;
+    private readonly int _zoneIndex;
     private readonly string _sinkPath;
     private readonly HttpClient _httpClient;
 
@@ -35,14 +35,14 @@ public sealed partial class MediaPlayer : IAsyncDisposable
     public MediaPlayer(
         SoundFlowConfig config,
         ILogger<MediaPlayer> logger,
-        int zoneId,
+        int zoneIndex,
         string sinkPath,
         HttpClient httpClient
     )
     {
         this._config = config ?? throw new ArgumentNullException(nameof(config));
         this._logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        this._zoneId = zoneId;
+        this._zoneIndex = zoneIndex;
         this._sinkPath = sinkPath ?? throw new ArgumentNullException(nameof(sinkPath));
         this._httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
     }
@@ -54,7 +54,7 @@ public sealed partial class MediaPlayer : IAsyncDisposable
     {
         return new PlaybackStatus
         {
-            ZoneId = this._zoneId,
+            ZoneIndex = this._zoneIndex,
             IsPlaying = this._audioGraph != null && !this._disposed,
             CurrentTrack = this._currentTrack,
             AudioFormat = new AudioFormat(this._config.SampleRate, this._config.BitDepth, this._config.Channels),
@@ -96,12 +96,12 @@ public sealed partial class MediaPlayer : IAsyncDisposable
             // Start the audio graph
             await this._audioGraph!.StartAsync(this._streamingCts.Token);
 
-            LogStreamingStarted(this._logger, this._zoneId, audioUrl, this._sinkPath, trackInfo.Title);
+            LogStreamingStarted(this._logger, this._zoneIndex, audioUrl, this._sinkPath, trackInfo.Title);
             return Result.Success();
         }
         catch (Exception ex)
         {
-            LogStreamingError(this._logger, this._zoneId, ex);
+            LogStreamingError(this._logger, this._zoneIndex, ex);
             await this.CleanupResourcesAsync();
             return Result.Failure(ex);
         }
@@ -127,7 +127,7 @@ public sealed partial class MediaPlayer : IAsyncDisposable
         this._currentTrack = null;
         this._playbackStartedAt = null;
 
-        LogStreamingStopped(this._logger, this._zoneId);
+        LogStreamingStopped(this._logger, this._zoneIndex);
     }
 
     /// <summary>
@@ -161,7 +161,7 @@ public sealed partial class MediaPlayer : IAsyncDisposable
         // Configure audio graph settings
         this.ConfigureAudioGraph(this._audioGraph);
 
-        LogAudioGraphInitialized(this._logger, this._zoneId, audioUrl, targetFormat.ToString());
+        LogAudioGraphInitialized(this._logger, this._zoneIndex, audioUrl, targetFormat.ToString());
     }
 
     /// <summary>
@@ -300,11 +300,11 @@ public sealed partial class MediaPlayer : IAsyncDisposable
     [LoggerMessage(
         EventId = 901,
         Level = LogLevel.Information,
-        Message = "[SoundFlow] Started streaming for zone {ZoneId} from {AudioUrl} to {SinkPath} - Track: {TrackTitle}"
+        Message = "[SoundFlow] Started streaming for zone {ZoneIndex} from {AudioUrl} to {SinkPath} - Track: {TrackTitle}"
     )]
     private static partial void LogStreamingStarted(
         ILogger logger,
-        int zoneId,
+        int zoneIndex,
         string audioUrl,
         string sinkPath,
         string trackTitle
@@ -313,21 +313,21 @@ public sealed partial class MediaPlayer : IAsyncDisposable
     [LoggerMessage(
         EventId = 902,
         Level = LogLevel.Information,
-        Message = "[SoundFlow] Stopped streaming for zone {ZoneId}"
+        Message = "[SoundFlow] Stopped streaming for zone {ZoneIndex}"
     )]
-    private static partial void LogStreamingStopped(ILogger logger, int zoneId);
+    private static partial void LogStreamingStopped(ILogger logger, int zoneIndex);
 
-    [LoggerMessage(EventId = 903, Level = LogLevel.Error, Message = "[SoundFlow] Streaming error for zone {ZoneId}")]
-    private static partial void LogStreamingError(ILogger logger, int zoneId, Exception exception);
+    [LoggerMessage(EventId = 903, Level = LogLevel.Error, Message = "[SoundFlow] Streaming error for zone {ZoneIndex}")]
+    private static partial void LogStreamingError(ILogger logger, int zoneIndex, Exception exception);
 
     [LoggerMessage(
         EventId = 904,
         Level = LogLevel.Debug,
-        Message = "[SoundFlow] Audio graph initialized for zone {ZoneId} - URL: {AudioUrl}, Format: {AudioFormat}"
+        Message = "[SoundFlow] Audio graph initialized for zone {ZoneIndex} - URL: {AudioUrl}, Format: {AudioFormat}"
     )]
     private static partial void LogAudioGraphInitialized(
         ILogger logger,
-        int zoneId,
+        int zoneIndex,
         string audioUrl,
         string audioFormat
     );

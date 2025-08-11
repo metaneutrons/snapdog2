@@ -19,20 +19,20 @@ public partial class ClientManager : IClientManager
     private readonly ISnapcastService _snapcastService;
     private readonly List<ClientConfig> _clientConfigs;
 
-    [LoggerMessage(7001, LogLevel.Debug, "Getting client {ClientId}")]
-    private partial void LogGettingClient(int clientId);
+    [LoggerMessage(7001, LogLevel.Debug, "Getting client {ClientIndex}")]
+    private partial void LogGettingClient(int clientIndex);
 
-    [LoggerMessage(7002, LogLevel.Warning, "Client {ClientId} not found")]
-    private partial void LogClientNotFound(int clientId);
+    [LoggerMessage(7002, LogLevel.Warning, "Client {ClientIndex} not found")]
+    private partial void LogClientNotFound(int clientIndex);
 
     [LoggerMessage(7003, LogLevel.Debug, "Getting all clients")]
     private partial void LogGettingAllClients();
 
-    [LoggerMessage(7004, LogLevel.Debug, "Getting clients for zone {ZoneId}")]
-    private partial void LogGettingClientsByZone(int zoneId);
+    [LoggerMessage(7004, LogLevel.Debug, "Getting clients for zone {ZoneIndex}")]
+    private partial void LogGettingClientsByZone(int zoneIndex);
 
-    [LoggerMessage(7005, LogLevel.Information, "Assigning client {ClientId} to zone {ZoneId}")]
-    private partial void LogAssigningClientToZone(int clientId, int zoneId);
+    [LoggerMessage(7005, LogLevel.Information, "Assigning client {ClientIndex} to zone {ZoneIndex}")]
+    private partial void LogAssigningClientToZone(int clientIndex, int zoneIndex);
 
     [LoggerMessage(7006, LogLevel.Information, "Initialized ClientManager with {ClientCount} configured clients")]
     private partial void LogInitialized(int clientCount);
@@ -52,44 +52,44 @@ public partial class ClientManager : IClientManager
         this.LogInitialized(this._clientConfigs.Count);
     }
 
-    public async Task<Result<IClient>> GetClientAsync(int clientId)
+    public async Task<Result<IClient>> GetClientAsync(int clientIndex)
     {
-        this.LogGettingClient(clientId);
+        this.LogGettingClient(clientIndex);
 
         await Task.Delay(1); // Maintain async signature
 
         // Validate client ID range
-        if (clientId < 1 || clientId > this._clientConfigs.Count)
+        if (clientIndex < 1 || clientIndex > this._clientConfigs.Count)
         {
-            this.LogClientNotFound(clientId);
+            this.LogClientNotFound(clientIndex);
             return Result<IClient>.Failure(
-                $"Client {clientId} is out of range. Valid range: 1-{this._clientConfigs.Count}"
+                $"Client {clientIndex} is out of range. Valid range: 1-{this._clientConfigs.Count}"
             );
         }
 
         // Get client from Snapcast using the repository's lookup logic
-        var snapcastClient = this._snapcastStateRepository.GetClientByIndex(clientId);
+        var snapcastClient = this._snapcastStateRepository.GetClientByIndex(clientIndex);
         if (snapcastClient == null)
         {
-            this.LogClientNotFound(clientId);
-            return Result<IClient>.Failure($"Client {clientId} not found in Snapcast");
+            this.LogClientNotFound(clientIndex);
+            return Result<IClient>.Failure($"Client {clientIndex} not found in Snapcast");
         }
 
         // Convert Snapcast client to domain client
         var client = new SnapDogClient(
-            clientId,
+            clientIndex,
             snapcastClient.Value,
-            this._clientConfigs[clientId - 1],
+            this._clientConfigs[clientIndex - 1],
             this._snapcastService
         );
         return Result<IClient>.Success(client);
     }
 
-    public async Task<Result<ClientState>> GetClientStateAsync(int clientId)
+    public async Task<Result<ClientState>> GetClientStateAsync(int clientIndex)
     {
-        this.LogGettingClient(clientId);
+        this.LogGettingClient(clientIndex);
 
-        var clientResult = await this.GetClientAsync(clientId);
+        var clientResult = await this.GetClientAsync(clientIndex);
         if (!clientResult.IsSuccess)
         {
             return Result<ClientState>.Failure(clientResult.ErrorMessage!);
@@ -107,7 +107,7 @@ public partial class ClientManager : IClientManager
             Volume = snapDogClient.Volume,
             Mute = snapDogClient.Muted,
             LatencyMs = snapDogClient.LatencyMs,
-            ZoneId = snapDogClient.ZoneId,
+            ZoneIndex = snapDogClient.ZoneIndex,
             ConfiguredSnapcastName = snapDogClient._snapcastClient.Config.Name,
             LastSeenUtc = snapDogClient.LastSeenUtc,
             HostIpAddress = snapDogClient.IpAddress,
@@ -127,9 +127,9 @@ public partial class ClientManager : IClientManager
 
         var clientStates = new List<ClientState>();
 
-        for (int clientId = 1; clientId <= this._clientConfigs.Count; clientId++)
+        for (int clientIndex = 1; clientIndex <= this._clientConfigs.Count; clientIndex++)
         {
-            var stateResult = await this.GetClientStateAsync(clientId);
+            var stateResult = await this.GetClientStateAsync(clientIndex);
             if (stateResult.IsSuccess)
             {
                 clientStates.Add(stateResult.Value!);
@@ -140,9 +140,9 @@ public partial class ClientManager : IClientManager
         return Result<List<ClientState>>.Success(clientStates);
     }
 
-    public async Task<Result<List<ClientState>>> GetClientsByZoneAsync(int zoneId)
+    public async Task<Result<List<ClientState>>> GetClientsByZoneAsync(int zoneIndex)
     {
-        this.LogGettingClientsByZone(zoneId);
+        this.LogGettingClientsByZone(zoneIndex);
 
         var allClientsResult = await this.GetAllClientsAsync();
         if (!allClientsResult.IsSuccess)
@@ -150,14 +150,14 @@ public partial class ClientManager : IClientManager
             return Result<List<ClientState>>.Failure(allClientsResult.ErrorMessage!);
         }
 
-        var zoneClients = allClientsResult.Value!.Where(c => c.ZoneId == zoneId).ToList();
+        var zoneClients = allClientsResult.Value!.Where(c => c.ZoneIndex == zoneIndex).ToList();
 
         return Result<List<ClientState>>.Success(zoneClients);
     }
 
-    public async Task<Result> AssignClientToZoneAsync(int clientId, int zoneId)
+    public async Task<Result> AssignClientToZoneAsync(int clientIndex, int zoneIndex)
     {
-        this.LogAssigningClientToZone(clientId, zoneId);
+        this.LogAssigningClientToZone(clientIndex, zoneIndex);
 
         // TODO: Implement zone assignment through Snapcast groups
         // This would require mapping zones to Snapcast groups and moving clients between groups
@@ -196,7 +196,7 @@ public partial class ClientManager : IClientManager
         internal int Volume => this._snapcastClient.Config.Volume.Percent;
         internal bool Muted => this._snapcastClient.Config.Volume.Muted;
         internal int LatencyMs => this._snapcastClient.Config.Latency;
-        internal int ZoneId => this._config.DefaultZone; // TODO: Get actual zone from Snapcast groups
+        internal int ZoneIndex => this._config.DefaultZone; // TODO: Get actual zone from Snapcast groups
         internal string MacAddress => this._snapcastClient.Host.Mac;
         internal string IpAddress => this._snapcastClient.Host.Ip;
         internal DateTime LastSeenUtc =>

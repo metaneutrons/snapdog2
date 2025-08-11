@@ -49,7 +49,11 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
     /// <summary>
     /// Starts playing audio for the specified zone.
     /// </summary>
-    public async Task<Result> PlayAsync(int zoneId, TrackInfo trackInfo, CancellationToken cancellationToken = default)
+    public async Task<Result> PlayAsync(
+        int zoneIndex,
+        TrackInfo trackInfo,
+        CancellationToken cancellationToken = default
+    )
     {
         try
         {
@@ -58,10 +62,10 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
             if (trackInfo == null)
                 return Result.Failure(new ArgumentNullException(nameof(trackInfo)));
 
-            var zoneConfig = this._zoneConfigs.ElementAtOrDefault(zoneId - 1); // Zone IDs are 1-based
+            var zoneConfig = this._zoneConfigs.ElementAtOrDefault(zoneIndex - 1); // Zone IDs are 1-based
             if (zoneConfig == null)
             {
-                return Result.Failure(new ArgumentException($"Zone {zoneId} not found"));
+                return Result.Failure(new ArgumentException($"Zone {zoneIndex} not found"));
             }
 
             // Check if we're at the stream limit
@@ -76,7 +80,7 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
             }
 
             // Stop existing playback for this zone
-            await this.StopAsync(zoneId, cancellationToken);
+            await this.StopAsync(zoneIndex, cancellationToken);
 
             // Create HTTP client with resilience policies
             var httpClient = this._httpClientFactory.CreateClient("SoundFlowStreaming");
@@ -86,29 +90,29 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
             var player = new MediaPlayer(
                 this._config,
                 this._loggerFactory.CreateLogger<MediaPlayer>(),
-                zoneId,
+                zoneIndex,
                 zoneConfig.Sink,
                 httpClient
             );
 
-            this._players[zoneId] = player;
+            this._players[zoneIndex] = player;
 
             // Start streaming
             var result = await player.StartStreamingAsync(trackInfo.Id, trackInfo, cancellationToken);
 
             if (result.IsSuccess)
             {
-                LogPlaybackStarted(this._logger, zoneId, trackInfo.Title, trackInfo.Id);
+                LogPlaybackStarted(this._logger, zoneIndex, trackInfo.Title, trackInfo.Id);
 
                 // Publish playback started notification
                 await this._mediator.PublishAsync(
-                    new TrackPlaybackStartedNotification(zoneId, trackInfo),
+                    new TrackPlaybackStartedNotification(zoneIndex, trackInfo),
                     cancellationToken
                 );
             }
             else
             {
-                this._players.TryRemove(zoneId, out _);
+                this._players.TryRemove(zoneIndex, out _);
                 await player.DisposeAsync();
             }
 
@@ -116,7 +120,7 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
         }
         catch (Exception ex)
         {
-            LogPlaybackError(this._logger, zoneId, ex);
+            LogPlaybackError(this._logger, zoneIndex, ex);
             return Result.Failure(ex);
         }
     }
@@ -124,26 +128,26 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
     /// <summary>
     /// Stops playback for the specified zone.
     /// </summary>
-    public async Task<Result> StopAsync(int zoneId, CancellationToken cancellationToken = default)
+    public async Task<Result> StopAsync(int zoneIndex, CancellationToken cancellationToken = default)
     {
         try
         {
-            if (this._players.TryRemove(zoneId, out var player))
+            if (this._players.TryRemove(zoneIndex, out var player))
             {
                 await player.StopStreamingAsync();
                 await player.DisposeAsync();
 
-                LogPlaybackStopped(this._logger, zoneId);
+                LogPlaybackStopped(this._logger, zoneIndex);
 
                 // Publish playback stopped notification
-                await this._mediator.PublishAsync(new TrackPlaybackStoppedNotification(zoneId), cancellationToken);
+                await this._mediator.PublishAsync(new TrackPlaybackStoppedNotification(zoneIndex), cancellationToken);
             }
 
             return Result.Success();
         }
         catch (Exception ex)
         {
-            LogPlaybackError(this._logger, zoneId, ex);
+            LogPlaybackError(this._logger, zoneIndex, ex);
             return Result.Failure(ex);
         }
     }
@@ -152,26 +156,26 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
     /// Pauses playback for the specified zone.
     /// Note: For HTTP streaming, pause is equivalent to stop.
     /// </summary>
-    public async Task<Result> PauseAsync(int zoneId, CancellationToken cancellationToken = default)
+    public async Task<Result> PauseAsync(int zoneIndex, CancellationToken cancellationToken = default)
     {
         try
         {
             // For HTTP streaming, pause is equivalent to stop
-            var result = await this.StopAsync(zoneId, cancellationToken);
+            var result = await this.StopAsync(zoneIndex, cancellationToken);
 
             if (result.IsSuccess)
             {
-                LogPlaybackPaused(this._logger, zoneId);
+                LogPlaybackPaused(this._logger, zoneIndex);
 
                 // Publish playback paused notification
-                await this._mediator.PublishAsync(new TrackPlaybackPausedNotification(zoneId), cancellationToken);
+                await this._mediator.PublishAsync(new TrackPlaybackPausedNotification(zoneIndex), cancellationToken);
             }
 
             return result;
         }
         catch (Exception ex)
         {
-            LogPlaybackError(this._logger, zoneId, ex);
+            LogPlaybackError(this._logger, zoneIndex, ex);
             return Result.Failure(ex);
         }
     }
@@ -179,13 +183,13 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
     /// <summary>
     /// Gets the current playback status for a zone.
     /// </summary>
-    public Task<Result<PlaybackStatus>> GetStatusAsync(int zoneId, CancellationToken cancellationToken = default)
+    public Task<Result<PlaybackStatus>> GetStatusAsync(int zoneIndex, CancellationToken cancellationToken = default)
     {
         try
         {
             PlaybackStatus status;
 
-            if (this._players.TryGetValue(zoneId, out var player))
+            if (this._players.TryGetValue(zoneIndex, out var player))
             {
                 status = player.GetStatus();
                 status.ActiveStreams = this._players.Count;
@@ -195,7 +199,7 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
             {
                 status = new PlaybackStatus
                 {
-                    ZoneId = zoneId,
+                    ZoneIndex = zoneIndex,
                     IsPlaying = false,
                     ActiveStreams = this._players.Count,
                     MaxStreams = this._config.MaxStreams,
@@ -227,10 +231,10 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
             // Get status for all configured zones
             for (int i = 0; i < this._zoneConfigs.Count(); i++)
             {
-                var zoneId = i + 1; // Zone IDs are 1-based
+                var zoneIndex = i + 1; // Zone IDs are 1-based
                 var zoneConfig = this._zoneConfigs.ElementAt(i);
 
-                if (this._players.TryGetValue(zoneId, out var player))
+                if (this._players.TryGetValue(zoneIndex, out var player))
                 {
                     var status = player.GetStatus();
                     status.ActiveStreams = this._players.Count;
@@ -242,7 +246,7 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
                     allStatuses.Add(
                         new PlaybackStatus
                         {
-                            ZoneId = zoneId,
+                            ZoneIndex = zoneIndex,
                             IsPlaying = false,
                             ActiveStreams = this._players.Count,
                             MaxStreams = this._config.MaxStreams,
@@ -271,7 +275,7 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
     {
         try
         {
-            var stopTasks = this._players.Keys.Select(zoneId => this.StopAsync(zoneId, cancellationToken));
+            var stopTasks = this._players.Keys.Select(zoneIndex => this.StopAsync(zoneIndex, cancellationToken));
             var results = await Task.WhenAll(stopTasks);
 
             var activeStreamsCount = this._players.Count;
@@ -353,30 +357,30 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
     [LoggerMessage(
         EventId = 911,
         Level = LogLevel.Information,
-        Message = "[SoundFlowService] Started playback for zone {ZoneId}: {TrackTitle} from {StreamUrl}"
+        Message = "[SoundFlowService] Started playback for zone {ZoneIndex}: {TrackTitle} from {StreamUrl}"
     )]
-    private static partial void LogPlaybackStarted(ILogger logger, int zoneId, string trackTitle, string streamUrl);
+    private static partial void LogPlaybackStarted(ILogger logger, int zoneIndex, string trackTitle, string streamUrl);
 
     [LoggerMessage(
         EventId = 912,
         Level = LogLevel.Information,
-        Message = "[SoundFlowService] Stopped playback for zone {ZoneId}"
+        Message = "[SoundFlowService] Stopped playback for zone {ZoneIndex}"
     )]
-    private static partial void LogPlaybackStopped(ILogger logger, int zoneId);
+    private static partial void LogPlaybackStopped(ILogger logger, int zoneIndex);
 
     [LoggerMessage(
         EventId = 913,
         Level = LogLevel.Information,
-        Message = "[SoundFlowService] Paused playback for zone {ZoneId}"
+        Message = "[SoundFlowService] Paused playback for zone {ZoneIndex}"
     )]
-    private static partial void LogPlaybackPaused(ILogger logger, int zoneId);
+    private static partial void LogPlaybackPaused(ILogger logger, int zoneIndex);
 
     [LoggerMessage(
         EventId = 914,
         Level = LogLevel.Error,
-        Message = "[SoundFlowService] Playback error for zone {ZoneId}"
+        Message = "[SoundFlowService] Playback error for zone {ZoneIndex}"
     )]
-    private static partial void LogPlaybackError(ILogger logger, int zoneId, Exception exception);
+    private static partial void LogPlaybackError(ILogger logger, int zoneIndex, Exception exception);
 
     [LoggerMessage(
         EventId = 915,

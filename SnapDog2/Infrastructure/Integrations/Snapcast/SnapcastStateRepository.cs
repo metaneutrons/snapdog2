@@ -37,11 +37,11 @@ public partial class SnapcastStateRepository : ISnapcastStateRepository
     )]
     private partial void LogUpdatingServerState(int groupCount, int clientCount, int streamCount);
 
-    [LoggerMessage(2, LogLevel.Debug, "Updating Snapcast client {ClientId}")]
-    private partial void LogUpdatingClient(string clientId);
+    [LoggerMessage(2, LogLevel.Debug, "Updating Snapcast client {ClientIndex}")]
+    private partial void LogUpdatingClient(string clientIndex);
 
-    [LoggerMessage(3, LogLevel.Debug, "Removing Snapcast client {ClientId}")]
-    private partial void LogRemovingClient(string clientId);
+    [LoggerMessage(3, LogLevel.Debug, "Removing Snapcast client {ClientIndex}")]
+    private partial void LogRemovingClient(string clientIndex);
 
     [LoggerMessage(4, LogLevel.Debug, "Updating Snapcast group {GroupId}")]
     private partial void LogUpdatingGroup(string groupId);
@@ -71,13 +71,13 @@ public partial class SnapcastStateRepository : ISnapcastStateRepository
     [LoggerMessage(
         11,
         LogLevel.Debug,
-        "Client {ClientIndex} ({ClientName}) with MAC {MacAddress} found as Snapcast client {SnapcastClientId}"
+        "Client {ClientIndex} ({ClientName}) with MAC {MacAddress} found as Snapcast client {SnapcastClientIndex}"
     )]
     private partial void LogClientFoundByMac(
         int clientIndex,
         string clientName,
         string macAddress,
-        string snapcastClientId
+        string snapcastClientIndex
     );
 
     [LoggerMessage(12, LogLevel.Debug, "Available Snapcast clients: {AvailableClients}")]
@@ -92,8 +92,8 @@ public partial class SnapcastStateRepository : ISnapcastStateRepository
     [LoggerMessage(15, LogLevel.Debug, "📝 Processing group {GroupId} with {ClientCount} clients")]
     private partial void LogProcessingGroup(string groupId, int clientCount);
 
-    [LoggerMessage(16, LogLevel.Debug, "👤 Adding/updating client {ClientId} (MAC: {MacAddress})")]
-    private partial void LogAddingClient(string clientId, string macAddress);
+    [LoggerMessage(16, LogLevel.Debug, "👤 Adding/updating client {ClientIndex} (MAC: {MacAddress})")]
+    private partial void LogAddingClient(string clientIndex, string macAddress);
 
     #endregion
 
@@ -167,15 +167,15 @@ public partial class SnapcastStateRepository : ISnapcastStateRepository
         this._clients[client.Id] = client;
     }
 
-    public void RemoveClient(string clientId)
+    public void RemoveClient(string clientIndex)
     {
-        this.LogRemovingClient(clientId);
-        this._clients.TryRemove(clientId, out _);
+        this.LogRemovingClient(clientIndex);
+        this._clients.TryRemove(clientIndex, out _);
     }
 
-    public SnapClient? GetClient(string clientId)
+    public SnapClient? GetClient(string clientIndex)
     {
-        return this._clients.TryGetValue(clientId, out var client) ? client : null;
+        return this._clients.TryGetValue(clientIndex, out var client) ? client : null;
     }
 
     public SnapClient? GetClientByIndex(int clientIndex)

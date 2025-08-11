@@ -276,7 +276,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
 
     /// <inheritdoc />
     public async Task<Result> PublishClientStatusAsync<T>(
-        string clientId,
+        string clientIndex,
         string eventType,
         T payload,
         CancellationToken cancellationToken = default
@@ -299,14 +299,14 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             }
 
             // For KNX, we need to convert client ID to integer if possible
-            if (int.TryParse(clientId, out var clientIdInt))
+            if (int.TryParse(clientIndex, out var clientIndexInt))
             {
-                return await this.SendStatusAsync(statusId, clientIdInt, knxValue, cancellationToken);
+                return await this.SendStatusAsync(statusId, clientIndexInt, knxValue, cancellationToken);
             }
             else
             {
-                this.LogInvalidTargetId(statusId, clientId);
-                return Result.Failure($"Invalid client ID for KNX: {clientId}");
+                this.LogInvalidTargetId(statusId, clientIndex);
+                return Result.Failure($"Invalid client ID for KNX: {clientIndex}");
             }
         }
         catch (Exception ex)
@@ -318,7 +318,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
 
     /// <inheritdoc />
     public async Task<Result> PublishZoneStatusAsync<T>(
-        int zoneId,
+        int zoneIndex,
         string eventType,
         T payload,
         CancellationToken cancellationToken = default
@@ -340,7 +340,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
                 return Result.Success();
             }
 
-            return await this.SendStatusAsync(statusId, zoneId, knxValue, cancellationToken);
+            return await this.SendStatusAsync(statusId, zoneIndex, knxValue, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -628,7 +628,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
         for (int i = 0; i < this._zones.Count; i++)
         {
             var zone = this._zones[i];
-            var zoneId = i + 1; // 1-based zone ID
+            var zoneIndex = i + 1; // 1-based zone ID
 
             if (!zone.Knx.Enabled)
                 continue;
@@ -640,7 +640,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             {
                 return new SetZoneVolumeCommand
                 {
-                    ZoneId = zoneId,
+                    ZoneIndex = zoneIndex,
                     Volume = volumeValue,
                     Source = CommandSource.Knx,
                 };
@@ -651,7 +651,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             {
                 return new SetZoneMuteCommand
                 {
-                    ZoneId = zoneId,
+                    ZoneIndex = zoneIndex,
                     Enabled = muteValue,
                     Source = CommandSource.Knx,
                 };
@@ -660,27 +660,27 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             // Playback commands
             if (groupAddress == knxConfig.Play && value is bool playValue && playValue)
             {
-                return new PlayCommand { ZoneId = zoneId, Source = CommandSource.Knx };
+                return new PlayCommand { ZoneIndex = zoneIndex, Source = CommandSource.Knx };
             }
 
             if (groupAddress == knxConfig.Pause && value is bool pauseValue && pauseValue)
             {
-                return new PauseCommand { ZoneId = zoneId, Source = CommandSource.Knx };
+                return new PauseCommand { ZoneIndex = zoneIndex, Source = CommandSource.Knx };
             }
 
             if (groupAddress == knxConfig.Stop && value is bool stopValue && stopValue)
             {
-                return new StopCommand { ZoneId = zoneId, Source = CommandSource.Knx };
+                return new StopCommand { ZoneIndex = zoneIndex, Source = CommandSource.Knx };
             }
 
             if (groupAddress == knxConfig.TrackNext && value is bool nextValue && nextValue)
             {
-                return new NextTrackCommand { ZoneId = zoneId, Source = CommandSource.Knx };
+                return new NextTrackCommand { ZoneIndex = zoneIndex, Source = CommandSource.Knx };
             }
 
             if (groupAddress == knxConfig.TrackPrevious && value is bool prevValue && prevValue)
             {
-                return new PreviousTrackCommand { ZoneId = zoneId, Source = CommandSource.Knx };
+                return new PreviousTrackCommand { ZoneIndex = zoneIndex, Source = CommandSource.Knx };
             }
         }
 
@@ -688,7 +688,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
         for (int i = 0; i < this._clients.Count; i++)
         {
             var client = this._clients[i];
-            var clientId = i + 1; // 1-based client ID
+            var clientIndex = i + 1; // 1-based client ID
 
             if (!client.Knx.Enabled)
                 continue;
@@ -700,7 +700,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             {
                 return new SetClientVolumeCommand
                 {
-                    ClientId = clientId,
+                    ClientIndex = clientIndex,
                     Volume = clientVolumeValue,
                     Source = CommandSource.Knx,
                 };
@@ -711,7 +711,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             {
                 return new SetClientMuteCommand
                 {
-                    ClientId = clientId,
+                    ClientIndex = clientIndex,
                     Enabled = clientMuteValue,
                     Source = CommandSource.Knx,
                 };

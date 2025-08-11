@@ -99,107 +99,114 @@ public partial class MqttCommandMapper
         }
     }
 
-    private object? MapZoneControlCommand(int zoneId, string command, string parameter)
+    private object? MapZoneControlCommand(int zoneIndex, string command, string parameter)
     {
         return command switch
         {
             // Playback commands
             "play" when string.IsNullOrEmpty(parameter) => CommandFactory.CreatePlayCommand(
-                zoneId,
+                zoneIndex,
                 Core.Enums.CommandSource.Mqtt
             ),
             "play"
                 when parameter.StartsWith("track", StringComparison.OrdinalIgnoreCase)
                     && int.TryParse(parameter[5..].Trim(), out var trackIndex) => CommandFactory.CreatePlayTrackCommand(
-                zoneId,
+                zoneIndex,
                 trackIndex,
                 Core.Enums.CommandSource.Mqtt
             ),
             "play" when parameter.StartsWith("url", StringComparison.OrdinalIgnoreCase) =>
-                CommandFactory.CreatePlayUrlCommand(zoneId, parameter[3..].Trim(), Core.Enums.CommandSource.Mqtt),
-            "pause" => CommandFactory.CreatePauseCommand(zoneId, Core.Enums.CommandSource.Mqtt),
-            "stop" => CommandFactory.CreateStopCommand(zoneId, Core.Enums.CommandSource.Mqtt),
+                CommandFactory.CreatePlayUrlCommand(zoneIndex, parameter[3..].Trim(), Core.Enums.CommandSource.Mqtt),
+            "pause" => CommandFactory.CreatePauseCommand(zoneIndex, Core.Enums.CommandSource.Mqtt),
+            "stop" => CommandFactory.CreateStopCommand(zoneIndex, Core.Enums.CommandSource.Mqtt),
 
             // Navigation commands
-            "next" or "track_next" => CommandFactory.CreateNextTrackCommand(zoneId, Core.Enums.CommandSource.Mqtt),
+            "next" or "track_next" => CommandFactory.CreateNextTrackCommand(zoneIndex, Core.Enums.CommandSource.Mqtt),
             "previous" or "track_previous" => CommandFactory.CreatePreviousTrackCommand(
-                zoneId,
+                zoneIndex,
                 Core.Enums.CommandSource.Mqtt
             ),
-            "playlist_next" => CommandFactory.CreateNextPlaylistCommand(zoneId, Core.Enums.CommandSource.Mqtt),
-            "playlist_previous" => CommandFactory.CreatePreviousPlaylistCommand(zoneId, Core.Enums.CommandSource.Mqtt),
+            "playlist_next" => CommandFactory.CreateNextPlaylistCommand(zoneIndex, Core.Enums.CommandSource.Mqtt),
+            "playlist_previous" => CommandFactory.CreatePreviousPlaylistCommand(
+                zoneIndex,
+                Core.Enums.CommandSource.Mqtt
+            ),
 
             // Volume commands
             "volume" when int.TryParse(parameter, out var volume) => CommandFactory.CreateSetZoneVolumeCommand(
-                zoneId,
+                zoneIndex,
                 volume,
                 Core.Enums.CommandSource.Mqtt
             ),
-            "volume_up" => CommandFactory.CreateVolumeUpCommand(zoneId, 5, Core.Enums.CommandSource.Mqtt),
-            "volume_down" => CommandFactory.CreateVolumeDownCommand(zoneId, 5, Core.Enums.CommandSource.Mqtt),
+            "volume_up" => CommandFactory.CreateVolumeUpCommand(zoneIndex, 5, Core.Enums.CommandSource.Mqtt),
+            "volume_down" => CommandFactory.CreateVolumeDownCommand(zoneIndex, 5, Core.Enums.CommandSource.Mqtt),
 
             // Mute commands
-            "mute_on" => CommandFactory.CreateSetZoneMuteCommand(zoneId, true, Core.Enums.CommandSource.Mqtt),
-            "mute_off" => CommandFactory.CreateSetZoneMuteCommand(zoneId, false, Core.Enums.CommandSource.Mqtt),
-            "mute_toggle" => CommandFactory.CreateToggleZoneMuteCommand(zoneId, Core.Enums.CommandSource.Mqtt),
+            "mute_on" => CommandFactory.CreateSetZoneMuteCommand(zoneIndex, true, Core.Enums.CommandSource.Mqtt),
+            "mute_off" => CommandFactory.CreateSetZoneMuteCommand(zoneIndex, false, Core.Enums.CommandSource.Mqtt),
+            "mute_toggle" => CommandFactory.CreateToggleZoneMuteCommand(zoneIndex, Core.Enums.CommandSource.Mqtt),
 
             // Track repeat commands
             "track_repeat_on" => CommandFactory.CreateSetTrackRepeatCommand(
-                zoneId,
+                zoneIndex,
                 true,
                 Core.Enums.CommandSource.Mqtt
             ),
             "track_repeat_off" => CommandFactory.CreateSetTrackRepeatCommand(
-                zoneId,
+                zoneIndex,
                 false,
                 Core.Enums.CommandSource.Mqtt
             ),
             "track_repeat_toggle" => CommandFactory.CreateToggleTrackRepeatCommand(
-                zoneId,
+                zoneIndex,
                 Core.Enums.CommandSource.Mqtt
             ),
 
             // Shuffle commands
-            "shuffle_on" => CommandFactory.CreateSetPlaylistShuffleCommand(zoneId, true, Core.Enums.CommandSource.Mqtt),
+            "shuffle_on" => CommandFactory.CreateSetPlaylistShuffleCommand(
+                zoneIndex,
+                true,
+                Core.Enums.CommandSource.Mqtt
+            ),
             "shuffle_off" => CommandFactory.CreateSetPlaylistShuffleCommand(
-                zoneId,
+                zoneIndex,
                 false,
                 Core.Enums.CommandSource.Mqtt
             ),
             "shuffle_toggle" => CommandFactory.CreateTogglePlaylistShuffleCommand(
-                zoneId,
+                zoneIndex,
                 Core.Enums.CommandSource.Mqtt
             ),
 
             // Playlist repeat commands
             "playlist_repeat_on" => CommandFactory.CreateSetPlaylistRepeatCommand(
-                zoneId,
+                zoneIndex,
                 true,
                 Core.Enums.CommandSource.Mqtt
             ),
             "playlist_repeat_off" => CommandFactory.CreateSetPlaylistRepeatCommand(
-                zoneId,
+                zoneIndex,
                 false,
                 Core.Enums.CommandSource.Mqtt
             ),
             "playlist_repeat_toggle" => CommandFactory.CreateTogglePlaylistRepeatCommand(
-                zoneId,
+                zoneIndex,
                 Core.Enums.CommandSource.Mqtt
             ),
 
             // Track and playlist selection
             "track" when int.TryParse(parameter, out var trackNum) => CommandFactory.CreateSetTrackCommand(
-                zoneId,
+                zoneIndex,
                 trackNum,
                 Core.Enums.CommandSource.Mqtt
             ),
             "playlist" when int.TryParse(parameter, out var playlistNum) => CommandFactory.CreateSetPlaylistCommand(
-                zoneId,
+                zoneIndex,
                 playlistNum,
                 Core.Enums.CommandSource.Mqtt
             ),
             "playlist" when int.TryParse(parameter, out var playlistIndex) => CommandFactory.CreateSetPlaylistCommand(
-                zoneId,
+                zoneIndex,
                 playlistIndex,
                 Core.Enums.CommandSource.Mqtt
             ),
@@ -208,32 +215,32 @@ public partial class MqttCommandMapper
         };
     }
 
-    private object? MapClientControlCommand(int clientId, string command, string parameter)
+    private object? MapClientControlCommand(int clientIndex, string command, string parameter)
     {
         return command switch
         {
             // Volume commands
             "volume" when int.TryParse(parameter, out var volume) => CommandFactory.CreateSetClientVolumeCommand(
-                clientId,
+                clientIndex,
                 volume,
                 Core.Enums.CommandSource.Mqtt
             ),
 
             // Mute commands
-            "mute_on" => CommandFactory.CreateSetClientMuteCommand(clientId, true, Core.Enums.CommandSource.Mqtt),
-            "mute_off" => CommandFactory.CreateSetClientMuteCommand(clientId, false, Core.Enums.CommandSource.Mqtt),
-            "mute_toggle" => CommandFactory.CreateToggleClientMuteCommand(clientId, Core.Enums.CommandSource.Mqtt),
+            "mute_on" => CommandFactory.CreateSetClientMuteCommand(clientIndex, true, Core.Enums.CommandSource.Mqtt),
+            "mute_off" => CommandFactory.CreateSetClientMuteCommand(clientIndex, false, Core.Enums.CommandSource.Mqtt),
+            "mute_toggle" => CommandFactory.CreateToggleClientMuteCommand(clientIndex, Core.Enums.CommandSource.Mqtt),
 
             // Zone assignment
-            "zone" when int.TryParse(parameter, out var zoneId) => CommandFactory.CreateAssignClientToZoneCommand(
-                clientId,
-                zoneId,
+            "zone" when int.TryParse(parameter, out var zoneIndex) => CommandFactory.CreateAssignClientToZoneCommand(
+                clientIndex,
+                zoneIndex,
                 Core.Enums.CommandSource.Mqtt
             ),
 
             // Latency adjustment
             "latency" when int.TryParse(parameter, out var latency) => CommandFactory.CreateSetClientLatencyCommand(
-                clientId,
+                clientIndex,
                 latency,
                 Core.Enums.CommandSource.Mqtt
             ),

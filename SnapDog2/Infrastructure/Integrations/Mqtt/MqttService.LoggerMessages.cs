@@ -32,30 +32,30 @@ public sealed partial class MqttService
     private partial void LogFailedToMapTopicToCommand(Exception ex, string topic);
 
     // Client Status Publishing Operations (9308-9312)
-    [LoggerMessage(9308, LogLevel.Warning, "Invalid client ID format: {ClientId}. Expected integer.")]
-    private partial void LogInvalidClientIdFormat(string clientId);
+    [LoggerMessage(9308, LogLevel.Warning, "Invalid client ID format: {ClientIndex}. Expected integer.")]
+    private partial void LogInvalidClientIndexFormat(string clientIndex);
 
-    [LoggerMessage(9309, LogLevel.Warning, "No MQTT configuration for client {ClientId}")]
-    private partial void LogNoMqttConfigurationForClient(string clientId);
+    [LoggerMessage(9309, LogLevel.Warning, "No MQTT configuration for client {ClientIndex}")]
+    private partial void LogNoMqttConfigurationForClient(string clientIndex);
 
-    [LoggerMessage(9310, LogLevel.Warning, "Client {ClientId} has no MQTT configuration")]
-    private partial void LogClientHasNoMqttConfiguration(string clientId);
+    [LoggerMessage(9310, LogLevel.Warning, "Client {ClientIndex} has no MQTT configuration")]
+    private partial void LogClientHasNoMqttConfiguration(string clientIndex);
 
     [LoggerMessage(9311, LogLevel.Debug, "No MQTT topic mapping for event type {EventType}")]
     private partial void LogNoMqttTopicMappingForEventType(string eventType);
 
-    [LoggerMessage(9312, LogLevel.Error, "Failed to publish client status {EventType} for client {ClientId}")]
-    private partial void LogFailedToPublishClientStatus(Exception ex, string eventType, string clientId);
+    [LoggerMessage(9312, LogLevel.Error, "Failed to publish client status {EventType} for client {ClientIndex}")]
+    private partial void LogFailedToPublishClientStatus(Exception ex, string eventType, string clientIndex);
 
     // Zone Status Publishing Operations (9313-9315)
-    [LoggerMessage(9313, LogLevel.Warning, "No MQTT configuration for zone {ZoneId}")]
-    private partial void LogNoMqttConfigurationForZone(int zoneId);
+    [LoggerMessage(9313, LogLevel.Warning, "No MQTT configuration for zone {ZoneIndex}")]
+    private partial void LogNoMqttConfigurationForZone(int zoneIndex);
 
-    [LoggerMessage(9314, LogLevel.Warning, "Zone {ZoneId} has no MQTT configuration")]
-    private partial void LogZoneHasNoMqttConfiguration(int zoneId);
+    [LoggerMessage(9314, LogLevel.Warning, "Zone {ZoneIndex} has no MQTT configuration")]
+    private partial void LogZoneHasNoMqttConfiguration(int zoneIndex);
 
-    [LoggerMessage(9315, LogLevel.Error, "Failed to publish zone status {EventType} for zone {ZoneId}")]
-    private partial void LogFailedToPublishZoneStatus(Exception ex, string eventType, int zoneId);
+    [LoggerMessage(9315, LogLevel.Error, "Failed to publish zone status {EventType} for zone {ZoneIndex}")]
+    private partial void LogFailedToPublishZoneStatus(Exception ex, string eventType, int zoneIndex);
 
     // Global Status Publishing Operations (9316-9317)
     [LoggerMessage(9316, LogLevel.Debug, "No MQTT topic mapping for global event type {EventType}")]

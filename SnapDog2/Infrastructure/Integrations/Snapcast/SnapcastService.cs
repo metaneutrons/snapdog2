@@ -402,7 +402,7 @@ public partial class SnapcastService
     #region Client Operations
 
     public async Task<Result> SetClientVolumeAsync(
-        string snapcastClientId,
+        string snapcastClientIndex,
         int volumePercent,
         CancellationToken cancellationToken = default
     )
@@ -423,7 +423,7 @@ public partial class SnapcastService
             return await this._operationPolicy.ExecuteAsync(
                 async (ct) =>
                 {
-                    await this._snapcastClient.ClientSetVolumeAsync(snapcastClientId, volumePercent);
+                    await this._snapcastClient.ClientSetVolumeAsync(snapcastClientIndex, volumePercent);
                     return Result.Success();
                 },
                 cancellationToken
@@ -437,7 +437,7 @@ public partial class SnapcastService
     }
 
     public async Task<Result> SetClientMuteAsync(
-        string snapcastClientId,
+        string snapcastClientIndex,
         bool muted,
         CancellationToken cancellationToken = default
     )
@@ -450,16 +450,16 @@ public partial class SnapcastService
         try
         {
             // Get current client to preserve volume when muting/unmuting
-            var client = this._stateRepository.GetClient(snapcastClientId);
+            var client = this._stateRepository.GetClient(snapcastClientIndex);
             if (client == null)
             {
-                return Result.Failure($"Client {snapcastClientId} not found");
+                return Result.Failure($"Client {snapcastClientIndex} not found");
             }
 
             var currentVolume = client.Value.Config.Volume.Percent;
             var newVolume = muted ? 0 : currentVolume;
 
-            await this._snapcastClient.ClientSetVolumeAsync(snapcastClientId, newVolume).ConfigureAwait(false);
+            await this._snapcastClient.ClientSetVolumeAsync(snapcastClientIndex, newVolume).ConfigureAwait(false);
             return Result.Success();
         }
         catch (Exception ex)
@@ -470,7 +470,7 @@ public partial class SnapcastService
     }
 
     public async Task<Result> SetClientLatencyAsync(
-        string snapcastClientId,
+        string snapcastClientIndex,
         int latencyMs,
         CancellationToken cancellationToken = default
     )
@@ -482,7 +482,7 @@ public partial class SnapcastService
 
         try
         {
-            await this._snapcastClient.ClientSetLatencyAsync(snapcastClientId, latencyMs).ConfigureAwait(false);
+            await this._snapcastClient.ClientSetLatencyAsync(snapcastClientIndex, latencyMs).ConfigureAwait(false);
             return Result.Success();
         }
         catch (Exception ex)
@@ -493,7 +493,7 @@ public partial class SnapcastService
     }
 
     public async Task<Result> SetClientNameAsync(
-        string snapcastClientId,
+        string snapcastClientIndex,
         string name,
         CancellationToken cancellationToken = default
     )
@@ -505,7 +505,7 @@ public partial class SnapcastService
 
         try
         {
-            await this._snapcastClient.ClientSetNameAsync(snapcastClientId, name).ConfigureAwait(false);
+            await this._snapcastClient.ClientSetNameAsync(snapcastClientIndex, name).ConfigureAwait(false);
             return Result.Success();
         }
         catch (Exception ex)
@@ -516,7 +516,7 @@ public partial class SnapcastService
     }
 
     public async Task<Result> SetClientGroupAsync(
-        string snapcastClientId,
+        string snapcastClientIndex,
         string groupId,
         CancellationToken cancellationToken = default
     )
@@ -529,7 +529,7 @@ public partial class SnapcastService
         try
         {
             await this
-                ._snapcastClient.GroupSetClientsAsync(groupId, new List<string> { snapcastClientId })
+                ._snapcastClient.GroupSetClientsAsync(groupId, new List<string> { snapcastClientIndex })
                 .ConfigureAwait(false);
             return Result.Success();
         }
@@ -540,7 +540,10 @@ public partial class SnapcastService
         }
     }
 
-    public async Task<Result> DeleteClientAsync(string snapcastClientId, CancellationToken cancellationToken = default)
+    public async Task<Result> DeleteClientAsync(
+        string snapcastClientIndex,
+        CancellationToken cancellationToken = default
+    )
     {
         if (this._disposed)
         {
@@ -549,7 +552,7 @@ public partial class SnapcastService
 
         try
         {
-            await this._snapcastClient.ServerDeleteClientAsync(snapcastClientId).ConfigureAwait(false);
+            await this._snapcastClient.ServerDeleteClientAsync(snapcastClientIndex).ConfigureAwait(false);
             return Result.Success();
         }
         catch (Exception ex)
@@ -633,7 +636,7 @@ public partial class SnapcastService
     }
 
     public Task<Result<string>> CreateGroupAsync(
-        IEnumerable<string> clientIds,
+        IEnumerable<string> clientIndexs,
         CancellationToken cancellationToken = default
     )
     {
@@ -644,18 +647,18 @@ public partial class SnapcastService
 
         try
         {
-            var clientIdArray = clientIds.ToArray();
-            if (clientIdArray.Length == 0)
+            var clientIndexArray = clientIndexs.ToArray();
+            if (clientIndexArray.Length == 0)
             {
                 return Task.FromResult(Result<string>.Failure("At least one client ID is required"));
             }
 
             // For now, we'll use the first client's current group as a template
             // In a real implementation, you might want to create a new group ID
-            var firstClient = this._stateRepository.GetClient(clientIdArray[0]);
+            var firstClient = this._stateRepository.GetClient(clientIndexArray[0]);
             if (firstClient == null)
             {
-                return Task.FromResult(Result<string>.Failure($"Client {clientIdArray[0]} not found"));
+                return Task.FromResult(Result<string>.Failure($"Client {clientIndexArray[0]} not found"));
             }
 
             // This is a simplified implementation - in practice, you'd need to handle group creation differently
