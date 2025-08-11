@@ -8,7 +8,7 @@ using SnapDog2.Core.Models;
 
 /// <summary>
 /// Modern simplified zones controller with direct primitive responses.
-/// 
+///
 /// MODERN API DESIGN PRINCIPLES:
 /// - Return primitives directly (int, bool, string) instead of wrapper objects
 /// - Use direct parameter binding instead of single-property request objects
