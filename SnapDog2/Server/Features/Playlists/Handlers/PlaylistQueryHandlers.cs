@@ -196,7 +196,7 @@ public partial class GetPlaylistQueryHandler : IQueryHandler<GetPlaylistQuery, R
             )
             .ToList();
 
-        var playlistWithTracks = new Api.Models.PlaylistWithTracks { Info = playlist, Tracks = tracks };
+        var playlistWithTracks = new Api.Models.PlaylistWithTracks(playlist, tracks);
 
         LogRadioPlaylistCreated(this._logger, tracks.Count);
         return Result<Api.Models.PlaylistWithTracks>.Success(playlistWithTracks);

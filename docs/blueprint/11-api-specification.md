@@ -69,72 +69,135 @@ Endpoints for accessing system-wide information.
 
 Endpoints for interacting with configured audio zones. **Zone creation/deletion/rename is not supported via API** as zones are defined via environment variables. **Indices are 1-based.**
 
-| Method | Path                                       | Command/Status ID         | Description                          | Request Body / Params                           | Success Response (Direct)         | HTTP Status |
-| :----- | :----------------------------------------- | :------------------------ | :----------------------------------- | :---------------------------------------------- | :-------------------------------- | :---------- |
-| `GET`  | `/zones`                                   | -                         | List configured zones                | Query: `?page=1&pageSize=20&sortBy=name`        | `PaginatedResponse<ZoneInfo>`     | 200 OK      |
-| `GET`  | `/zones/{zoneIndex}`                       | `ZONE_STATE` (Full)       | Get details & full state for zone    | Path: `{zoneIndex}` (int)                       | `ZoneState`                       | 200 OK      |
-| `POST` | `/zones/{zoneIndex}/play`                  | `PLAY`                    | Start/resume playback                | Path: `{zoneIndex}`; Optional Body: `PlayRequest`  | No content                     | 204 No Content|
-| `POST` | `/zones/{zoneIndex}/pause`                 | `PAUSE`                   | Pause playback                       | Path: `{zoneIndex}`                             | No content                        | 204 No Content|
-| `POST` | `/zones/{zoneIndex}/stop`                  | `STOP`                    | Stop playback                        | Path: `{zoneIndex}`                             | No content                        | 204 No Content|
-| `GET`  | `/zones/{zoneIndex}/track`                 | `TRACK_STATUS`            | Get current track by **1-based index** | Path: `{zoneIndex}`                          | `TrackIndexResponse`              | 200 OK      |
-| `PUT`  | `/zones/{zoneIndex}/track`                 | `TRACK`                   | Set track by **1-based** index       | Path: `{zoneIndex}`; Body: `SetTrackRequest`    | No content                        | 204 No Content|
-| `GET`  | `/zones/{zoneIndex}/track/info`            | `TRACK_INFO`              | Get current track metadata           | Path: `{zoneIndex}`                             | `TrackInfo`                       | 200 OK      |
-| `POST` | `/zones/{zoneIndex}/track/next`            | `TRACK_NEXT`              | Play next track                      | Path: `{zoneIndex}`                             | No content                        | 204 No Content|
-| `POST` | `/zones/{zoneIndex}/track/previous`        | `TRACK_PREVIOUS`          | Play previous track                  | Path: `{zoneIndex}`                             | No content                        | 204 No Content|
-| `PUT`  | `/zones/{zoneIndex}/playlist`              | `PLAYLIST`                | Set playlist by **1-based** index/ID | Path: `{zoneIndex}`; Body: `SetPlaylistRequest` | No content                        | 204 No Content|
-| `PUT`  | `/zones/{zoneIndex}/volume`                | `VOLUME`                  | Set zone volume                      | Path: `{zoneIndex}`; Body: `VolumeSetRequest`   | `VolumeResponse`                  | 200 OK      |
-| `GET`  | `/zones/{zoneIndex}/volume`                | `VOLUME_STATUS`           | Get current zone volume.             | Path: `{zoneIndex}`                             | `VolumeResponse`                  | 200 OK      |
-| `POST` | `/zones/{zoneIndex}/volume/up`             | `VOLUME_UP`               | Increase volume                      | Path: `{zoneIndex}`; Optional Body: `StepRequest`  | `VolumeResponse`               | 200 OK      |
-| `POST` | `/zones/{zoneIndex}/volume/down`           | `VOLUME_DOWN`             | Decrease volume                      | Path: `{zoneIndex}`; Optional Body: `StepRequest`  | `VolumeResponse`               | 200 OK      |
-| `PUT`  | `/zones/{zoneIndex}/mute`                  | `MUTE`                    | Set mute state                       | Path: `{zoneIndex}`; Body: `MuteSetRequest`     | `MuteResponse`                    | 200 OK      |
-| `GET`  | `/zones/{zoneIndex}/mute`                  | `MUTE_STATUS`             | Get current mute state               | Path: `{zoneIndex}`                             | `MuteResponse`                    | 200 OK      |
-| `POST` | `/zones/{zoneIndex}/mute/toggle`           | `MUTE_TOGGLE`             | Toggle mute state                    | Path: `{zoneIndex}`                             | `MuteResponse`                    | 200 OK      |
-| `GET`  | `/zones/{zoneIndex}/track/repeat`          | `TRACK_REPEAT_STATUS`     | Get track repeat mode                | Path: `{zoneIndex}`                             | `TrackRepeatResponse`             | 200 OK      |
-| `PUT`  | `/zones/{zoneIndex}/track/repeat`          | `TRACK_REPEAT`            | Set track repeat mode                | Path: `{zoneIndex}`; Body: `ModeSetRequest`     | `TrackRepeatResponse`             | 200 OK      |
-| `POST` | `/zones/{zoneIndex}/track/repeat/toggle`   | `TRACK_REPEAT_TOGGLE`     | Toggle track repeat mode             | Path: `{zoneIndex}`                             | `TrackRepeatResponse`             | 200 OK      |
-| `GET`  | `/zones/{zoneIndex}/playlist/repeat`       | `PLAYLIST_REPEAT_STATUS`  | Get playlist repeat mode             | Path: `{zoneIndex}`                             | `PlaylistRepeatResponse`          | 200 OK      |
-| `PUT`  | `/zones/{zoneIndex}/playlist/repeat`       | `PLAYLIST_REPEAT`         | Set playlist repeat mode             | Path: `{zoneIndex}`; Body: `ModeSetRequest`     | `PlaylistRepeatResponse`          | 200 OK      |
-| `POST` | `/zones/{zoneIndex}/playlist/repeat/toggle`| `PLAYLIST_REPEAT_TOGGLE`  | Toggle playlist repeat mode          | Path: `{zoneIndex}`                             | `PlaylistRepeatResponse`          | 200 OK      |
-| `GET`  | `/zones/{zoneIndex}/playlist/shuffle`      | `PLAYLIST_SHUFFLE_STATUS` | Get playlist shuffle mode            | Path: `{zoneIndex}`                             | `PlaylistShuffleResponse`         | 200 OK      |
-| `PUT`  | `/zones/{zoneIndex}/playlist/shuffle`      | `PLAYLIST_SHUFFLE`        | Set playlist shuffle mode            | Path: `{zoneIndex}`; Body: `ModeSetRequest`     | `PlaylistShuffleResponse`         | 200 OK      |
-| `POST` | `/zones/{zoneIndex}/playlist/shuffle/toggle`| `PLAYLIST_SHUFFLE_TOGGLE`| Toggle playlist shuffle mode         | Path: `{zoneIndex}`                             | `PlaylistShuffleResponse`         | 200 OK      |
+**Modern Design Philosophy:** Returns primitive values directly (int, bool, string) instead of wrapper objects for maximum simplicity and better developer experience.
 
-*Note on HTTP Status Codes: Simple state retrievals and settings return 200 OK with the current/updated state. Commands triggering actions (Play, Pause, Stop, Next/Prev Track, Set Track/Playlist) return 204 No Content to indicate successful completion without response data.*
+| Method | Path                                       | Command/Status ID         | Description                          | Request Body / Params                           | Success Response (Direct Primitive)  | HTTP Status |
+| :----- | :----------------------------------------- | :------------------------ | :----------------------------------- | :---------------------------------------------- | :----------------------------------- | :---------- |
+| `GET`  | `/zones`                                   | -                         | List configured zones                | Query: `?page=1&size=20`                       | `Page<Zone>`                         | 200 OK      |
+| `GET`  | `/zones/{zoneIndex}`                       | `ZONE_STATE` (Full)       | Get details & full state for zone    | Path: `{zoneIndex}` (int)                       | `ZoneState`                          | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/play`                  | `PLAY`                    | Start/resume playback                | Path: `{zoneIndex}`; Optional Body: `PlayRequest`  | No content                       | 204 No Content|
+| `POST` | `/zones/{zoneIndex}/pause`                 | `PAUSE`                   | Pause playback                       | Path: `{zoneIndex}`                             | No content                           | 204 No Content|
+| `POST` | `/zones/{zoneIndex}/stop`                  | `STOP`                    | Stop playback                        | Path: `{zoneIndex}`                             | No content                           | 204 No Content|
+| `GET`  | `/zones/{zoneIndex}/track`                 | `TRACK_STATUS`            | Get current track by **1-based index** | Path: `{zoneIndex}`                          | `int` (track index)                  | 200 OK      |
+| `PUT`  | `/zones/{zoneIndex}/track`                 | `TRACK`                   | Set track by **1-based** index       | Path: `{zoneIndex}`; Body: `int` (track index) | No content                           | 204 No Content|
+| `GET`  | `/zones/{zoneIndex}/track/info`            | `TRACK_INFO`              | Get current track metadata           | Path: `{zoneIndex}`                             | `TrackInfo`                          | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/track/next`            | `TRACK_NEXT`              | Play next track                      | Path: `{zoneIndex}`                             | No content                           | 204 No Content|
+| `POST` | `/zones/{zoneIndex}/track/previous`        | `TRACK_PREVIOUS`          | Play previous track                  | Path: `{zoneIndex}`                             | No content                           | 204 No Content|
+| `PUT`  | `/zones/{zoneIndex}/playlist`              | `PLAYLIST`                | Set playlist by **1-based** index    | Path: `{zoneIndex}`; Body: `int` (playlist index) | No content                        | 204 No Content|
+| `PUT`  | `/zones/{zoneIndex}/volume`                | `VOLUME`                  | Set zone volume                      | Path: `{zoneIndex}`; Body: `int` (0-100)       | `int` (volume level)                 | 200 OK      |
+| `GET`  | `/zones/{zoneIndex}/volume`                | `VOLUME_STATUS`           | Get current zone volume.             | Path: `{zoneIndex}`                             | `int` (volume level)                 | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/volume/up`             | `VOLUME_UP`               | Increase volume                      | Path: `{zoneIndex}`; Body: `int` (step, default 5) | `int` (new volume)               | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/volume/down`           | `VOLUME_DOWN`             | Decrease volume                      | Path: `{zoneIndex}`; Body: `int` (step, default 5) | `int` (new volume)               | 200 OK      |
+| `PUT`  | `/zones/{zoneIndex}/mute`                  | `MUTE`                    | Set mute state                       | Path: `{zoneIndex}`; Body: `bool` (muted)       | `bool` (mute state)                  | 200 OK      |
+| `GET`  | `/zones/{zoneIndex}/mute`                  | `MUTE_STATUS`             | Get current mute state               | Path: `{zoneIndex}`                             | `bool` (mute state)                  | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/mute/toggle`           | `MUTE_TOGGLE`             | Toggle mute state                    | Path: `{zoneIndex}`                             | `bool` (new mute state)              | 200 OK      |
+| `GET`  | `/zones/{zoneIndex}/track/repeat`          | `TRACK_REPEAT_STATUS`     | Get track repeat mode                | Path: `{zoneIndex}`                             | `bool` (repeat enabled)              | 200 OK      |
+| `PUT`  | `/zones/{zoneIndex}/track/repeat`          | `TRACK_REPEAT`            | Set track repeat mode                | Path: `{zoneIndex}`; Body: `bool` (enabled)     | `bool` (repeat enabled)              | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/track/repeat/toggle`   | `TRACK_REPEAT_TOGGLE`     | Toggle track repeat mode             | Path: `{zoneIndex}`                             | `bool` (new repeat state)            | 200 OK      |
+| `GET`  | `/zones/{zoneIndex}/playlist/repeat`       | `PLAYLIST_REPEAT_STATUS`  | Get playlist repeat mode             | Path: `{zoneIndex}`                             | `bool` (repeat enabled)              | 200 OK      |
+| `PUT`  | `/zones/{zoneIndex}/playlist/repeat`       | `PLAYLIST_REPEAT`         | Set playlist repeat mode             | Path: `{zoneIndex}`; Body: `bool` (enabled)     | `bool` (repeat enabled)              | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/playlist/repeat/toggle`| `PLAYLIST_REPEAT_TOGGLE`  | Toggle playlist repeat mode          | Path: `{zoneIndex}`                             | `bool` (new repeat state)            | 200 OK      |
+| `GET`  | `/zones/{zoneIndex}/playlist/shuffle`      | `PLAYLIST_SHUFFLE_STATUS` | Get playlist shuffle mode            | Path: `{zoneIndex}`                             | `bool` (shuffle enabled)             | 200 OK      |
+| `PUT`  | `/zones/{zoneIndex}/playlist/shuffle`      | `PLAYLIST_SHUFFLE`        | Set playlist shuffle mode            | Path: `{zoneIndex}`; Body: `bool` (enabled)     | `bool` (shuffle enabled)             | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/playlist/shuffle/toggle`| `PLAYLIST_SHUFFLE_TOGGLE`| Toggle playlist shuffle mode         | Path: `{zoneIndex}`                             | `bool` (new shuffle state)           | 200 OK      |
 
-**Example Request DTOs (`/Api/Models` or `/Api/Controllers`):**
+**Modern API Benefits:**
+- **Primitive Returns:** Volume endpoints return `int` directly (e.g., `75`) instead of `{"volume": 75}`
+- **Boolean States:** Mute/repeat/shuffle return `bool` directly (e.g., `true`) instead of `{"enabled": true}`
+- **Direct Parameters:** Use `int volume` instead of `{"level": 75}` request objects
+- **Cleaner Client Code:** `const volume = await api.getVolume(1)` instead of `const volume = await api.getVolume(1).then(r => r.volume)`
 
-```csharp
-namespace SnapDog2.Api.Models; // Example namespace
+*Note on HTTP Status Codes: State retrievals and settings return 200 OK with the primitive value. Actions (play, pause, stop, track navigation, playlist setting) return 204 No Content to indicate successful completion without response data.*
 
-public record PlayRequest { public string? MediaUrl { get; set; } public int? TrackIndex { get; set; } } // 1-based index
-public record SetTrackRequest { public required int Index { get; set; } } // 1-based index
-public record SetPlaylistRequest { public string? Id { get; set; } public int? Index { get; set; } } // Provide Id OR 1-based index
-public record VolumeSetRequest { public required int Level { get; set; } } // 0-100
-public record MuteSetRequest { public required bool Enabled { get; set; } }
-public record ModeSetRequest { public required bool Enabled { get; set; } } // For Repeat/Shuffle
-public record StepRequest { public int Step { get; set; } = 5; } // Optional step for Vol Up/Down
-```
-
-**Example Response DTOs (Modern Positional Records):**
+**Ultra-Modern Request DTOs (Absolute Minimum):**
 
 ```csharp
 namespace SnapDog2.Api.Models;
 
-// Simple value responses - modern positional records
-public record VolumeResponse(int Volume);
-public record MuteResponse(bool IsMuted);
-public record TrackIndexResponse(int TrackIndex);
-public record TrackRepeatResponse(bool TrackRepeat);
-public record PlaylistRepeatResponse(bool PlaylistRepeat);
-public record PlaylistShuffleResponse(bool PlaylistShuffle);
+// ═══════════════════════════════════════════════════════════════════════════════
+// ULTRA-SIMPLIFIED REQUEST DTOS - Only 1 remaining!
+// ═══════════════════════════════════════════════════════════════════════════════
 
-// Collection responses
-public record ZoneInfo(string Name, int Index, bool IsActive, string Status);
-public record ClientInfo(int Id, string Name, bool Connected, int? ZoneIndex);
+/// <summary>
+/// Play media request - supports both direct URLs and playlist tracks.
+/// The ONLY remaining multi-property request object.
+/// </summary>
+public record PlayRequest(string? Url = null, int? Track = null);
 
-// Paginated responses
-public record PaginatedResponse<T>(List<T> Items, PaginationMetadata Pagination);
-public record PaginationMetadata(int Page, int PageSize, int TotalItems, int TotalPages);
+// ═══════════════════════════════════════════════════════════════════════════════
+// ELIMINATED ALL OTHER REQUEST OBJECTS - Use direct parameter binding:
+// ═══════════════════════════════════════════════════════════════════════════════
+// 
+// ❌ REMOVED: PlaylistRequest      → Use: int playlistIndex (1-based)
+// ❌ REMOVED: VolumeSetRequest     → Use: int volume (0-100)
+// ❌ REMOVED: MuteSetRequest       → Use: bool muted
+// ❌ REMOVED: ModeSetRequest       → Use: bool enabled  
+// ❌ REMOVED: SetTrackRequest      → Use: int track (1-based)
+// ❌ REMOVED: StepRequest          → Use: int step = 5
+// ❌ REMOVED: LatencySetRequest    → Use: int latency (ms)
+// ❌ REMOVED: AssignZoneRequest    → Use: int zoneId
+// ❌ REMOVED: ZoneAssignmentRequest → Use: int zoneId
+// ❌ REMOVED: RenameRequest        → Use: string name
+//
+// This eliminates 10 unnecessary DTOs - 91% reduction from original 11!
+```
+
+**Modern Response Design (Direct Primitives):**
+
+```csharp
+namespace SnapDog2.Api.Models;
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PRIMITIVE RESPONSES - Return values directly for maximum simplicity
+// ═══════════════════════════════════════════════════════════════════════════════
+// 
+// 🎯 PHILOSOPHY: Return the actual value, not a wrapper object
+// 
+// ✅ GET /zones/1/volume        → 75 (int)
+// ✅ GET /zones/1/mute          → false (bool)  
+// ✅ GET /zones/1/track         → 3 (int)
+// ✅ GET /zones/1/track/repeat  → true (bool)
+//
+// This eliminates ALL single-property response wrappers!
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// COLLECTION RESPONSES - Only when structure adds value
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/// <summary>
+/// Paginated collection with metadata.
+/// </summary>
+public record Page<T>(T[] Items, int Total, int PageSize = 20, int PageNumber = 1)
+{
+    public int TotalPages => (int)Math.Ceiling((double)Total / PageSize);
+    public bool HasNext => PageNumber < TotalPages;
+    public bool HasPrevious => PageNumber > 1;
+}
+
+/// <summary>
+/// Zone summary for listings.
+/// </summary>
+public record Zone(string Name, int Index, bool Active, string Status);
+
+/// <summary>
+/// Client summary for listings.
+/// </summary>
+public record Client(int Id, string Name, bool Connected, int? Zone = null);
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ELIMINATED WRAPPER RESPONSES - Return primitives directly:
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// ❌ REMOVED: VolumeResponse           → Return: int (0-100)
+// ❌ REMOVED: MuteResponse             → Return: bool
+// ❌ REMOVED: TrackIndexResponse       → Return: int (1-based)
+// ❌ REMOVED: TrackRepeatResponse      → Return: bool
+// ❌ REMOVED: PlaylistRepeatResponse   → Return: bool
+// ❌ REMOVED: PlaylistShuffleResponse  → Return: bool
+// ❌ REMOVED: LatencyResponse          → Return: int (milliseconds)
+// ❌ REMOVED: ZoneAssignmentResponse   → Return: int? (zone index)
+//
+// This eliminates 8 unnecessary wrapper objects and makes responses cleaner!
 ```
 
 ### 10.4.3. Client Endpoints

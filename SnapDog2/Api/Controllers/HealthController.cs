@@ -1,4 +1,4 @@
-namespace SnapDog2.Controllers;
+namespace SnapDog2.Api.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -7,7 +7,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 /// Health check controller providing application health status.
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/health")]
 public partial class HealthController : ControllerBase
 {
     private readonly HealthCheckService _healthCheckService;

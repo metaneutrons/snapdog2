@@ -4,6 +4,7 @@ using EnvoyConfig;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Serilog;
 using Serilog.Events;
+using SnapDog2.Authentication;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Extensions;
 using SnapDog2.Extensions.DependencyInjection;
@@ -291,6 +292,52 @@ static WebApplication CreateWebApplication(string[] args)
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
+        // Add authentication and authorization
+        if (snapDogConfig.Api.AuthEnabled && snapDogConfig.Api.ApiKeys.Count > 0)
+        {
+            // Configure API Key authentication
+            builder
+                .Services.AddAuthentication("ApiKey")
+                .AddScheme<
+                    Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions,
+                    ApiKeyAuthenticationHandler
+                >("ApiKey", null);
+
+            builder.Services.AddAuthorization();
+
+            Log.Information("API authentication enabled with {KeyCount} API keys", snapDogConfig.Api.ApiKeys.Count);
+        }
+        else if (snapDogConfig.Api.AuthEnabled)
+        {
+            // Auth is enabled but no API keys configured - use dummy authentication for development
+            builder
+                .Services.AddAuthentication("Dummy")
+                .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, DummyAuthenticationHandler>(
+                    "Dummy",
+                    null
+                );
+
+            builder.Services.AddAuthorization();
+
+            Log.Warning(
+                "API authentication enabled but no API keys configured - using dummy authentication for development"
+            );
+        }
+        else
+        {
+            // Auth is disabled - use dummy authentication to satisfy [Authorize] attributes
+            builder
+                .Services.AddAuthentication("Dummy")
+                .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, DummyAuthenticationHandler>(
+                    "Dummy",
+                    null
+                );
+
+            builder.Services.AddAuthorization();
+
+            Log.Information("API authentication disabled - using dummy authentication");
+        }
+
         Log.Information("API server enabled on port {Port}", snapDogConfig.Api.Port);
     }
     else
@@ -361,6 +408,11 @@ static WebApplication CreateWebApplication(string[] args)
         }
 
         app.UseRouting();
+
+        // Add authentication and authorization middleware
+        app.UseAuthentication();
+        app.UseAuthorization();
+
         app.MapControllers();
     }
 

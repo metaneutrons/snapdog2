@@ -279,7 +279,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
                             .Entry?.Select<Song, TrackInfo>((song, index) => MapToTrackInfo(song, index + 1))
                             .ToList() ?? new List<TrackInfo>();
 
-                    return new Api.Models.PlaylistWithTracks { Info = playlistInfo, Tracks = tracks };
+                    return new Api.Models.PlaylistWithTracks(playlistInfo, tracks);
                 },
                 cancellationToken
             );
