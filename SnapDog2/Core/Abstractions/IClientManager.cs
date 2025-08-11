@@ -12,16 +12,16 @@ public interface IClientManager
     /// <summary>
     /// Gets a client by its ID.
     /// </summary>
-    /// <param name="clientId">The client ID.</param>
+    /// <param name="clientIndex">The client ID.</param>
     /// <returns>A result containing the client if found.</returns>
-    Task<Result<IClient>> GetClientAsync(int clientId);
+    Task<Result<IClient>> GetClientAsync(int clientIndex);
 
     /// <summary>
     /// Gets the state of a specific client.
     /// </summary>
-    /// <param name="clientId">The client ID.</param>
+    /// <param name="clientIndex">The client ID.</param>
     /// <returns>A result containing the client state if found.</returns>
-    Task<Result<ClientState>> GetClientStateAsync(int clientId);
+    Task<Result<ClientState>> GetClientStateAsync(int clientIndex);
 
     /// <summary>
     /// Gets the state of all known clients.
@@ -32,15 +32,15 @@ public interface IClientManager
     /// <summary>
     /// Gets all clients assigned to a specific zone.
     /// </summary>
-    /// <param name="zoneId">The zone ID.</param>
+    /// <param name="zoneIndex">The zone ID.</param>
     /// <returns>A result containing the list of client states for the zone.</returns>
-    Task<Result<List<ClientState>>> GetClientsByZoneAsync(int zoneId);
+    Task<Result<List<ClientState>>> GetClientsByZoneAsync(int zoneIndex);
 
     /// <summary>
     /// Assigns a client to a zone.
     /// </summary>
-    /// <param name="clientId">The client ID.</param>
-    /// <param name="zoneId">The zone ID.</param>
+    /// <param name="clientIndex">The client ID.</param>
+    /// <param name="zoneIndex">The zone ID.</param>
     /// <returns>A result indicating success or failure.</returns>
-    Task<Result> AssignClientToZoneAsync(int clientId, int zoneId);
+    Task<Result> AssignClientToZoneAsync(int clientIndex, int zoneIndex);
 }

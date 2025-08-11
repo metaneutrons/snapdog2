@@ -48,7 +48,7 @@ public record ClientState
     /// <summary>
     /// Gets the 1-based SnapDog2 Zone ID the client is currently assigned to (null if unassigned).
     /// </summary>
-    public int? ZoneId { get; init; }
+    public int? ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the name from Snapcast client configuration.

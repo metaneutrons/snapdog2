@@ -8,7 +8,7 @@ public class PlaybackStatus
     /// <summary>
     /// Zone ID for this playback status.
     /// </summary>
-    public int ZoneId { get; set; }
+    public int ZoneIndex { get; set; }
 
     /// <summary>
     /// Whether audio is currently playing in this zone.

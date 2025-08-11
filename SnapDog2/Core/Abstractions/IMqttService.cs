@@ -22,22 +22,22 @@ public interface IMqttService : IAsyncDisposable
     /// Publishes zone state to configured MQTT topics.
     /// Publishes to both individual status topics and comprehensive state topic.
     /// </summary>
-    /// <param name="zoneId">Zone identifier (1-based).</param>
+    /// <param name="zoneIndex">Zone identifier (1-based).</param>
     /// <param name="state">Zone state to publish.</param>
     /// <param name="cancellationToken">Cancellation token for the operation.</param>
     /// <returns>Result indicating success or failure.</returns>
-    Task<Result> PublishZoneStateAsync(int zoneId, ZoneState state, CancellationToken cancellationToken = default);
+    Task<Result> PublishZoneStateAsync(int zoneIndex, ZoneState state, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Publishes client state to configured MQTT topics.
     /// Publishes to both individual status topics and comprehensive state topic.
     /// </summary>
-    /// <param name="clientId">Client identifier.</param>
+    /// <param name="clientIndex">Client identifier.</param>
     /// <param name="state">Client state to publish.</param>
     /// <param name="cancellationToken">Cancellation token for the operation.</param>
     /// <returns>Result indicating success or failure.</returns>
     Task<Result> PublishClientStateAsync(
-        string clientId,
+        string clientIndex,
         ClientState state,
         CancellationToken cancellationToken = default
     );
@@ -82,13 +82,13 @@ public interface IMqttService : IAsyncDisposable
     /// <summary>
     /// Publishes client status updates to MQTT topics.
     /// </summary>
-    /// <param name="clientId">Client identifier.</param>
+    /// <param name="clientIndex">Client identifier.</param>
     /// <param name="eventType">Type of event (e.g., CLIENT_VOLUME, CLIENT_MUTE).</param>
     /// <param name="payload">Event payload.</param>
     /// <param name="cancellationToken">Cancellation token for the operation.</param>
     /// <returns>Result indicating success or failure.</returns>
     Task<Result> PublishClientStatusAsync<T>(
-        string clientId,
+        string clientIndex,
         string eventType,
         T payload,
         CancellationToken cancellationToken = default
@@ -97,13 +97,13 @@ public interface IMqttService : IAsyncDisposable
     /// <summary>
     /// Publishes zone status updates to MQTT topics.
     /// </summary>
-    /// <param name="zoneId">Zone identifier.</param>
+    /// <param name="zoneIndex">Zone identifier.</param>
     /// <param name="eventType">Type of event (e.g., ZONE_VOLUME, ZONE_MUTE).</param>
     /// <param name="payload">Event payload.</param>
     /// <param name="cancellationToken">Cancellation token for the operation.</param>
     /// <returns>Result indicating success or failure.</returns>
     Task<Result> PublishZoneStatusAsync<T>(
-        int zoneId,
+        int zoneIndex,
         string eventType,
         T payload,
         CancellationToken cancellationToken = default

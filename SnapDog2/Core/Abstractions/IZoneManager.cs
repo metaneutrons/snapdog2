@@ -12,9 +12,9 @@ public interface IZoneManager
     /// <summary>
     /// Gets a zone by its ID.
     /// </summary>
-    /// <param name="zoneId">The zone ID.</param>
+    /// <param name="zoneIndex">The zone ID.</param>
     /// <returns>The zone service if found.</returns>
-    Task<Result<IZoneService>> GetZoneAsync(int zoneId);
+    Task<Result<IZoneService>> GetZoneAsync(int zoneIndex);
 
     /// <summary>
     /// Gets all available zones.
@@ -25,9 +25,9 @@ public interface IZoneManager
     /// <summary>
     /// Gets the state of a specific zone.
     /// </summary>
-    /// <param name="zoneId">The zone ID.</param>
+    /// <param name="zoneIndex">The zone ID.</param>
     /// <returns>The zone state if found.</returns>
-    Task<Result<ZoneState>> GetZoneStateAsync(int zoneId);
+    Task<Result<ZoneState>> GetZoneStateAsync(int zoneIndex);
 
     /// <summary>
     /// Gets the states of all zones.
@@ -38,7 +38,7 @@ public interface IZoneManager
     /// <summary>
     /// Checks if a zone exists.
     /// </summary>
-    /// <param name="zoneId">The zone ID to check.</param>
+    /// <param name="zoneIndex">The zone ID to check.</param>
     /// <returns>True if the zone exists.</returns>
-    Task<bool> ZoneExistsAsync(int zoneId);
+    Task<bool> ZoneExistsAsync(int zoneIndex);
 }

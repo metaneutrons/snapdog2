@@ -67,13 +67,13 @@ public interface IKnxService : IAsyncDisposable
     /// <summary>
     /// Publishes client status updates to KNX group addresses.
     /// </summary>
-    /// <param name="clientId">Client identifier.</param>
+    /// <param name="clientIndex">Client identifier.</param>
     /// <param name="eventType">Type of event (e.g., CLIENT_VOLUME, CLIENT_MUTE).</param>
     /// <param name="payload">Event payload.</param>
     /// <param name="cancellationToken">Cancellation token for the operation.</param>
     /// <returns>Result indicating success or failure.</returns>
     Task<Result> PublishClientStatusAsync<T>(
-        string clientId,
+        string clientIndex,
         string eventType,
         T payload,
         CancellationToken cancellationToken = default
@@ -82,13 +82,13 @@ public interface IKnxService : IAsyncDisposable
     /// <summary>
     /// Publishes zone status updates to KNX group addresses.
     /// </summary>
-    /// <param name="zoneId">Zone identifier.</param>
+    /// <param name="zoneIndex">Zone identifier.</param>
     /// <param name="eventType">Type of event (e.g., ZONE_VOLUME, ZONE_MUTE).</param>
     /// <param name="payload">Event payload.</param>
     /// <param name="cancellationToken">Cancellation token for the operation.</param>
     /// <returns>Result indicating success or failure.</returns>
     Task<Result> PublishZoneStatusAsync<T>(
-        int zoneId,
+        int zoneIndex,
         string eventType,
         T payload,
         CancellationToken cancellationToken = default

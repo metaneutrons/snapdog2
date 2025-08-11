@@ -33,7 +33,7 @@ public class MqttConfig
     /// Maps to: SNAPDOG_SERVICES_MQTT_CLIENT_ID
     /// </summary>
     [Env(Key = "CLIENT_ID", Default = "snapdog-server")]
-    public string ClientId { get; set; } = "snapdog-server";
+    public string ClientIndex { get; set; } = "snapdog-server";
 
     /// <summary>
     /// Whether SSL is enabled.

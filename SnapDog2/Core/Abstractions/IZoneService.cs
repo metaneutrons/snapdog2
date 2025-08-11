@@ -10,7 +10,7 @@ public interface IZoneService
     /// <summary>
     /// Gets the zone ID.
     /// </summary>
-    int ZoneId { get; }
+    int ZoneIndex { get; }
 
     /// <summary>
     /// Gets the current zone state.

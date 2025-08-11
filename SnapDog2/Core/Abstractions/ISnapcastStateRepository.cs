@@ -24,15 +24,15 @@ public interface ISnapcastStateRepository
     /// <summary>
     /// Removes a client from the state repository.
     /// </summary>
-    /// <param name="clientId">Client ID to remove.</param>
-    void RemoveClient(string clientId);
+    /// <param name="clientIndex">Client ID to remove.</param>
+    void RemoveClient(string clientIndex);
 
     /// <summary>
     /// Gets a specific client by ID.
     /// </summary>
-    /// <param name="clientId">Client ID to retrieve.</param>
+    /// <param name="clientIndex">Client ID to retrieve.</param>
     /// <returns>Client information or null if not found.</returns>
-    SnapClient? GetClient(string clientId);
+    SnapClient? GetClient(string clientIndex);
 
     /// <summary>
     /// Gets a client by SnapDog2 client index (1-based).
