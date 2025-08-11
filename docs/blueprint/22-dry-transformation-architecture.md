@@ -658,13 +658,13 @@ The CommandId system provides the same three complementary approaches as the Sta
 
 The CommandId system implements all 25 commands defined in the blueprint:
 
-#### Zone Commands (19 total)
+#### 24.11.2.1. Zone Commands (19 total)
 - **Playback Control**: `PLAY`, `PAUSE`, `STOP`
 - **Volume Control**: `VOLUME`, `VOLUME_UP`, `VOLUME_DOWN`, `MUTE`, `MUTE_TOGGLE`
 - **Track Management**: `TRACK`, `TRACK_NEXT`, `TRACK_PREVIOUS`, `TRACK_REPEAT`, `TRACK_REPEAT_TOGGLE`
 - **Playlist Management**: `PLAYLIST`, `PLAYLIST_NEXT`, `PLAYLIST_PREVIOUS`, `PLAYLIST_REPEAT`, `PLAYLIST_REPEAT_TOGGLE`, `PLAYLIST_SHUFFLE`, `PLAYLIST_SHUFFLE_TOGGLE`
 
-#### Client Commands (6 total)
+#### 24.11.2.2. Client Commands (6 total)
 - **Volume Control**: `CLIENT_VOLUME`, `CLIENT_MUTE`, `CLIENT_MUTE_TOGGLE`
 - **Configuration**: `CLIENT_LATENCY`, `CLIENT_ZONE`
 
