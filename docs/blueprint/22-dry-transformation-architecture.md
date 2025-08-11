@@ -52,7 +52,7 @@ public class StatusIdAttribute : Attribute
 **Usage Pattern**:
 
 ```csharp
-[StatusId("CLIENT_VOLUME", "CV-001")]
+[StatusId("CLIENT_VOLUME")]
 public record ClientVolumeChangedNotification : INotification
 {
     // Implementation
@@ -106,30 +106,30 @@ var commandId = CommandIdAttribute.GetCommandId<SetClientVolumeCommand>();
 
 #### 24.4.1.1. Client Notifications (6 Classes)
 
-- `ClientVolumeChangedNotification` → `[StatusId("CLIENT_VOLUME", "CV-001")]`
-- `ClientMuteChangedNotification` → `[StatusId("CLIENT_MUTE", "CM-001")]`
-- `ClientLatencyChangedNotification` → `[StatusId("CLIENT_LATENCY", "CL-001")]`
-- `ClientZoneChangedNotification` → `[StatusId("CLIENT_ZONE", "CZ-001")]`
-- `ClientConnectionChangedNotification` → `[StatusId("CLIENT_CONNECTED", "CC-001")]`
-- `ClientStateChangedNotification` → `[StatusId("CLIENT_STATE", "CS-001")]`
+- `ClientVolumeChangedNotification` → `[StatusId("CLIENT_VOLUME")]`
+- `ClientMuteChangedNotification` → `[StatusId("CLIENT_MUTE")]`
+- `ClientLatencyChangedNotification` → `[StatusId("CLIENT_LATENCY")]`
+- `ClientZoneChangedNotification` → `[StatusId("CLIENT_ZONE")]`
+- `ClientConnectionChangedNotification` → `[StatusId("CLIENT_CONNECTED")]`
+- `ClientStateChangedNotification` → `[StatusId("CLIENT_STATE")]`
 
 #### 24.4.1.2. Zone Notifications (8 Classes)
 
-- `ZonePlaybackStateChangedNotification` → `[StatusId("ZONE_PLAYBACK_STATE", "ZP-001")]`
-- `ZoneVolumeChangedNotification` → `[StatusId("ZONE_VOLUME", "ZV-001")]`
-- `ZoneMuteChangedNotification` → `[StatusId("ZONE_MUTE", "ZM-001")]`
-- `ZoneTrackChangedNotification` → `[StatusId("ZONE_TRACK", "ZT-001")]`
-- `ZonePlaylistChangedNotification` → `[StatusId("ZONE_PLAYLIST", "ZPL-001")]`
-- `ZoneRepeatModeChangedNotification` → `[StatusId("ZONE_REPEAT_MODE", "ZR-001")]`
-- `ZoneShuffleModeChangedNotification` → `[StatusId("ZONE_SHUFFLE_MODE", "ZS-001")]`
-- `ZoneStateChangedNotification` → `[StatusId("ZONE_STATE", "ZST-001")]`
+- `ZonePlaybackStateChangedNotification` → `[StatusId("ZONE_PLAYBACK_STATE")]`
+- `ZoneVolumeChangedNotification` → `[StatusId("ZONE_VOLUME")]`
+- `ZoneMuteChangedNotification` → `[StatusId("ZONE_MUTE")]`
+- `ZoneTrackChangedNotification` → `[StatusId("ZONE_TRACK")]`
+- `ZonePlaylistChangedNotification` → `[StatusId("ZONE_PLAYLIST")]`
+- `ZoneRepeatModeChangedNotification` → `[StatusId("ZONE_REPEAT_MODE")]`
+- `ZoneShuffleModeChangedNotification` → `[StatusId("ZONE_SHUFFLE_MODE")]`
+- `ZoneStateChangedNotification` → `[StatusId("ZONE_STATE")]`
 
 #### 24.4.1.3. Global Notifications (4 Classes)
 
-- `SystemStatusChangedNotification` → `[StatusId("SYSTEM_STATUS", "SS-001")]`
-- `VersionInfoChangedNotification` → `[StatusId("VERSION_INFO", "VI-001")]`
-- `ServerStatsChangedNotification` → `[StatusId("SERVER_STATS", "STS-001")]`
-- `SystemErrorNotification` → `[StatusId("SYSTEM_ERROR", "SE-001")]`
+- `SystemStatusChangedNotification` → `[StatusId("SYSTEM_STATUS")]`
+- `VersionInfoChangedNotification` → `[StatusId("VERSION_INFO")]`
+- `ServerStatsChangedNotification` → `[StatusId("SERVER_STATS")]`
+- `SystemErrorNotification` → `[StatusId("SYSTEM_ERROR")]`
 
 #### 24.4.1.4. Generic Infrastructure (1 Class)
 
