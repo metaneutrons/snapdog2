@@ -339,9 +339,9 @@ Future enhancements could include:
 - Naming convention enforcement
 - Usage reporting and analytics
 
-## 24.11. Enhanced StatusId System Architecture
+## 24.10. Enhanced StatusId System Architecture
 
-### 24.11.1. Multi-Layered DRY Approach
+### 24.10.1. Multi-Layered DRY Approach
 
 Building upon the foundational attribute system, SnapDog2 implements a comprehensive multi-layered approach to eliminate hardcoded strings throughout the entire codebase. This enhanced system provides three complementary approaches for different use cases:
 
@@ -349,7 +349,7 @@ Building upon the foundational attribute system, SnapDog2 implements a comprehen
 2. **StatusIds Constants** - Strongly-typed compile-time constants  
 3. **StatusEventType Enum** - Ultimate type safety with enum-based switching
 
-### 24.11.2. StatusIdRegistry Implementation
+### 24.10.2. StatusIdRegistry Implementation
 
 ```csharp
 public static class StatusIdRegistry
@@ -390,7 +390,7 @@ public static class StatusIdRegistry
 - Graceful handling of assembly loading exceptions
 - Lazy initialization with explicit control for performance
 
-### 24.11.3. StatusIds Constants Class
+### 24.10.3. StatusIds Constants Class
 
 ```csharp
 public static class StatusIds
@@ -425,7 +425,7 @@ public static class StatusIds
 - Automatic updates when notification classes change
 - Zero hardcoded strings in consuming code
 
-### 24.11.4. StatusEventType Enum System
+### 24.10.4. StatusEventType Enum System
 
 ```csharp
 public enum StatusEventType
@@ -472,7 +472,7 @@ public static class StatusEventTypeExtensions
 - Case-insensitive string parsing with null safety
 - Clear mapping between enum values and StatusId strings
 
-### 24.11.5. Enhanced MqttService Integration
+### 24.10.5. Enhanced MqttService Integration
 
 **Before (hardcoded strings)**:
 ```csharp
@@ -509,9 +509,9 @@ private string? GetClientMqttTopic(string eventType, ClientConfig clientConfig)
 }
 ```
 
-### 24.11.6. Usage Patterns and Best Practices
+### 24.10.6. Usage Patterns and Best Practices
 
-#### 24.11.6.1. Constants Approach (Recommended for Simple Cases)
+#### 24.10.6.1. Constants Approach (Recommended for Simple Cases)
 ```csharp
 // Direct usage in service methods
 if (eventType == StatusIds.ClientVolumeStatus)
@@ -527,7 +527,7 @@ var topicMappings = new Dictionary<string, string>
 };
 ```
 
-#### 24.11.6.2. Enum Approach (Best for Complex Logic)
+#### 24.10.6.2. Enum Approach (Best for Complex Logic)
 ```csharp
 // Type-safe parsing from external systems
 var eventType = StatusEventTypeExtensions.FromStatusString(incomingMessage);
@@ -543,7 +543,7 @@ if (eventType.HasValue)
 }
 ```
 
-#### 24.11.6.3. Registry Approach (Dynamic Scenarios)
+#### 24.10.6.3. Registry Approach (Dynamic Scenarios)
 ```csharp
 // Runtime type discovery
 var notificationType = StatusIdRegistry.GetNotificationType("CLIENT_VOLUME_STATUS");
@@ -560,29 +560,29 @@ if (StatusIdRegistry.IsRegistered(incomingStatusId))
 }
 ```
 
-### 24.11.7. System Benefits and Metrics
+### 24.10.7. System Benefits and Metrics
 
-#### 24.11.7.1. Code Quality Improvements
+#### 24.10.7.1. Code Quality Improvements
 - **Hardcoded Strings**: 0 (completely eliminated)
 - **Compile-time Safety**: 100% (all status references validated)
 - **IntelliSense Support**: Full coverage for all status identifiers
 - **Refactoring Safety**: Rename operations work across entire codebase
 
-#### 24.11.7.2. Performance Characteristics
+#### 24.10.7.2. Performance Characteristics
 - **Enum Switches**: Compiler-optimized jump tables
 - **Registry Lookups**: O(1) dictionary access with concurrent safety
 - **Constants Access**: Direct field access with no runtime overhead
 - **Memory Usage**: Minimal overhead with lazy initialization
 
-#### 24.11.7.3. Developer Experience Enhancements
+#### 24.10.7.3. Developer Experience Enhancements
 - **Three Usage Approaches**: Choose the right tool for each scenario
 - **Automatic Discovery**: New StatusId attributes automatically available
 - **Clear Error Messages**: Descriptive exceptions for missing attributes
 - **Documentation Integration**: Blueprint references maintained in code
 
-### 24.11.8. Extension and Maintenance
+### 24.10.8. Extension and Maintenance
 
-#### 24.11.8.1. Adding New Status Types
+#### 24.10.8.1. Adding New Status Types
 ```csharp
 // 1. Add notification with StatusId attribute
 [StatusId("NEW_FEATURE_STATUS")]
@@ -602,7 +602,7 @@ NewFeatureStatus,
 // 4. Registry automatically discovers the new type
 ```
 
-#### 24.11.8.2. Validation and Testing
+#### 24.10.8.2. Validation and Testing
 ```csharp
 [Test]
 public void AllNotificationsShouldHaveStatusIdAttributes()
@@ -621,20 +621,20 @@ public void AllNotificationsShouldHaveStatusIdAttributes()
 }
 ```
 
-### 24.11.9. Architecture Decision Records
+### 24.10.9. Architecture Decision Records
 
-#### 24.11.9.1. Why Three Approaches?
+#### 24.10.9.1. Why Three Approaches?
 - **Constants**: Simple, fast, IntelliSense-friendly for direct usage
 - **Enum**: Type-safe switching, compiler optimizations, complex logic
 - **Registry**: Dynamic scenarios, reflection-based operations, runtime discovery
 
-#### 24.11.9.2. Performance Considerations
+#### 24.10.9.2. Performance Considerations
 - Registry initialization is lazy and cached
 - Enum switches are compiler-optimized
 - Constants provide zero-overhead access
 - All approaches maintain thread safety
 
-#### 24.11.9.3. Maintenance Strategy
+#### 24.10.9.3. Maintenance Strategy
 - StatusIdAttribute remains the single source of truth
 - Constants and enum values are derived, not duplicated
 - Registry provides runtime validation and discovery
@@ -642,7 +642,58 @@ public void AllNotificationsShouldHaveStatusIdAttributes()
 
 This enhanced StatusId system represents the pinnacle of DRY architecture implementation, providing multiple complementary approaches while maintaining the StatusIdAttribute as the authoritative source. The system eliminates all hardcoded strings while offering optimal performance, type safety, and developer experience across all usage scenarios.
 
-## 24.10. Conclusion
+## 24.11. CommandId DRY System Architecture
+
+### 24.11.1. Comprehensive Command Management
+
+Building upon the StatusId DRY system, SnapDog2 implements an identical comprehensive approach for CommandId management. This ensures perfect architectural symmetry and consistency across all identifier types in the system.
+
+The CommandId system provides the same three complementary approaches as the StatusId system:
+
+1. **CommandIdRegistry** - Runtime discovery and mapping
+2. **CommandIds Constants** - Strongly-typed compile-time constants  
+3. **CommandEventType Enum** - Ultimate type safety with enum-based switching
+
+### 24.11.2. Blueprint Compliance
+
+The CommandId system implements all 25 commands defined in the blueprint:
+
+#### Zone Commands (19 total)
+- **Playback Control**: `PLAY`, `PAUSE`, `STOP`
+- **Volume Control**: `VOLUME`, `VOLUME_UP`, `VOLUME_DOWN`, `MUTE`, `MUTE_TOGGLE`
+- **Track Management**: `TRACK`, `TRACK_NEXT`, `TRACK_PREVIOUS`, `TRACK_REPEAT`, `TRACK_REPEAT_TOGGLE`
+- **Playlist Management**: `PLAYLIST`, `PLAYLIST_NEXT`, `PLAYLIST_PREVIOUS`, `PLAYLIST_REPEAT`, `PLAYLIST_REPEAT_TOGGLE`, `PLAYLIST_SHUFFLE`, `PLAYLIST_SHUFFLE_TOGGLE`
+
+#### Client Commands (6 total)
+- **Volume Control**: `CLIENT_VOLUME`, `CLIENT_MUTE`, `CLIENT_MUTE_TOGGLE`
+- **Configuration**: `CLIENT_LATENCY`, `CLIENT_ZONE`
+
+### 24.11.3. Architectural Symmetry
+
+The CommandId system provides perfect symmetry with the StatusId system:
+
+| Feature | StatusId System | CommandId System |
+|---------|----------------|------------------|
+| **Constants Class** | StatusIds | CommandIds |
+| **Enum Type** | StatusEventType | CommandEventType |
+| **Registry** | StatusIdRegistry | CommandIdRegistry |
+| **Blueprint Compliance** | 21 StatusIds | 25 CommandIds |
+| **Thread Safety** | ✅ | ✅ |
+| **Performance** | Optimized | Optimized |
+| **Type Safety** | 100% | 100% |
+
+### 24.11.4. Implementation Benefits
+
+- **Zero Hardcoded Strings**: Complete elimination across entire codebase
+- **Compile-time Safety**: All command references validated at build time
+- **Three Usage Approaches**: Constants, Enum, and Registry for different scenarios
+- **Automatic Discovery**: New CommandId attributes automatically integrated
+- **Performance Optimized**: Enum switches, O(1) lookups, zero overhead constants
+- **Developer Experience**: IntelliSense support, refactoring safety, clear error messages
+
+This CommandId system completes the comprehensive DRY architecture transformation, providing the same level of excellence and consistency as the StatusId system while ensuring perfect blueprint compliance and optimal developer experience.
+
+## 24.12. Conclusion
 
 The DRY transformation architecture represents a significant advancement in code quality, maintainability, and developer experience. By eliminating hardcoded strings and implementing type-safe attribute systems, SnapDog2 achieves enterprise-grade architecture standards with perfect build quality and complete test coverage.
 
