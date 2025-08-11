@@ -9,6 +9,6 @@ namespace SnapDog2.Server.Features.Shared.Handlers;
 public partial class ZoneStateNotificationHandler
 {
     // Zone Event Publishing Operations (11001)
-    [LoggerMessage(11001, LogLevel.Warning, "Failed to publish {EventType} for zone {ZoneId} to external systems")]
-    private partial void LogFailedToPublishZoneEventToExternalSystems(Exception ex, string eventType, string zoneId);
+    [LoggerMessage(11001, LogLevel.Warning, "Failed to publish {EventType} for zone {ZoneIndex} to external systems")]
+    private partial void LogFailedToPublishZoneEventToExternalSystems(Exception ex, string eventType, string zoneIndex);
 }

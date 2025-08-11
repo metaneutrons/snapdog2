@@ -20,23 +20,23 @@ public static class CommandFactory
     /// <summary>
     /// Creates a PlayCommand for the specified zone.
     /// </summary>
-    public static PlayCommand CreatePlayCommand(int zoneId, CommandSource source = CommandSource.Internal)
+    public static PlayCommand CreatePlayCommand(int zoneIndex, CommandSource source = CommandSource.Internal)
     {
-        return new PlayCommand { ZoneId = zoneId, Source = source };
+        return new PlayCommand { ZoneIndex = zoneIndex, Source = source };
     }
 
     /// <summary>
     /// Creates a PlayCommand with a specific track index.
     /// </summary>
     public static PlayCommand CreatePlayTrackCommand(
-        int zoneId,
+        int zoneIndex,
         int trackIndex,
         CommandSource source = CommandSource.Internal
     )
     {
         return new PlayCommand
         {
-            ZoneId = zoneId,
+            ZoneIndex = zoneIndex,
             TrackIndex = trackIndex,
             Source = source,
         };
@@ -46,14 +46,14 @@ public static class CommandFactory
     /// Creates a PlayCommand with a media URL.
     /// </summary>
     public static PlayCommand CreatePlayUrlCommand(
-        int zoneId,
+        int zoneIndex,
         string mediaUrl,
         CommandSource source = CommandSource.Internal
     )
     {
         return new PlayCommand
         {
-            ZoneId = zoneId,
+            ZoneIndex = zoneIndex,
             MediaUrl = mediaUrl,
             Source = source,
         };
@@ -62,17 +62,17 @@ public static class CommandFactory
     /// <summary>
     /// Creates a PauseCommand for the specified zone.
     /// </summary>
-    public static PauseCommand CreatePauseCommand(int zoneId, CommandSource source = CommandSource.Internal)
+    public static PauseCommand CreatePauseCommand(int zoneIndex, CommandSource source = CommandSource.Internal)
     {
-        return new PauseCommand { ZoneId = zoneId, Source = source };
+        return new PauseCommand { ZoneIndex = zoneIndex, Source = source };
     }
 
     /// <summary>
     /// Creates a StopCommand for the specified zone.
     /// </summary>
-    public static StopCommand CreateStopCommand(int zoneId, CommandSource source = CommandSource.Internal)
+    public static StopCommand CreateStopCommand(int zoneIndex, CommandSource source = CommandSource.Internal)
     {
-        return new StopCommand { ZoneId = zoneId, Source = source };
+        return new StopCommand { ZoneIndex = zoneIndex, Source = source };
     }
 
     #endregion
@@ -83,14 +83,14 @@ public static class CommandFactory
     /// Creates a SetZoneVolumeCommand with the specified volume level.
     /// </summary>
     public static SetZoneVolumeCommand CreateSetZoneVolumeCommand(
-        int zoneId,
+        int zoneIndex,
         int volume,
         CommandSource source = CommandSource.Internal
     )
     {
         return new SetZoneVolumeCommand
         {
-            ZoneId = zoneId,
+            ZoneIndex = zoneIndex,
             Volume = Math.Clamp(volume, 0, 100),
             Source = source,
         };
@@ -100,14 +100,14 @@ public static class CommandFactory
     /// Creates a VolumeUpCommand with the specified step.
     /// </summary>
     public static VolumeUpCommand CreateVolumeUpCommand(
-        int zoneId,
+        int zoneIndex,
         int step = 5,
         CommandSource source = CommandSource.Internal
     )
     {
         return new VolumeUpCommand
         {
-            ZoneId = zoneId,
+            ZoneIndex = zoneIndex,
             Step = Math.Clamp(step, 1, 50),
             Source = source,
         };
@@ -117,14 +117,14 @@ public static class CommandFactory
     /// Creates a VolumeDownCommand with the specified step.
     /// </summary>
     public static VolumeDownCommand CreateVolumeDownCommand(
-        int zoneId,
+        int zoneIndex,
         int step = 5,
         CommandSource source = CommandSource.Internal
     )
     {
         return new VolumeDownCommand
         {
-            ZoneId = zoneId,
+            ZoneIndex = zoneIndex,
             Step = Math.Clamp(step, 1, 50),
             Source = source,
         };
@@ -134,14 +134,14 @@ public static class CommandFactory
     /// Creates a SetZoneMuteCommand with the specified mute state.
     /// </summary>
     public static SetZoneMuteCommand CreateSetZoneMuteCommand(
-        int zoneId,
+        int zoneIndex,
         bool enabled,
         CommandSource source = CommandSource.Internal
     )
     {
         return new SetZoneMuteCommand
         {
-            ZoneId = zoneId,
+            ZoneIndex = zoneIndex,
             Enabled = enabled,
             Source = source,
         };
@@ -151,11 +151,11 @@ public static class CommandFactory
     /// Creates a ToggleZoneMuteCommand.
     /// </summary>
     public static ToggleZoneMuteCommand CreateToggleZoneMuteCommand(
-        int zoneId,
+        int zoneIndex,
         CommandSource source = CommandSource.Internal
     )
     {
-        return new ToggleZoneMuteCommand { ZoneId = zoneId, Source = source };
+        return new ToggleZoneMuteCommand { ZoneIndex = zoneIndex, Source = source };
     }
 
     #endregion
@@ -166,14 +166,14 @@ public static class CommandFactory
     /// Creates a SetTrackCommand with the specified track index.
     /// </summary>
     public static SetTrackCommand CreateSetTrackCommand(
-        int zoneId,
+        int zoneIndex,
         int trackIndex,
         CommandSource source = CommandSource.Internal
     )
     {
         return new SetTrackCommand
         {
-            ZoneId = zoneId,
+            ZoneIndex = zoneIndex,
             TrackIndex = Math.Max(1, trackIndex),
             Source = source,
         };
@@ -182,34 +182,34 @@ public static class CommandFactory
     /// <summary>
     /// Creates a NextTrackCommand.
     /// </summary>
-    public static NextTrackCommand CreateNextTrackCommand(int zoneId, CommandSource source = CommandSource.Internal)
+    public static NextTrackCommand CreateNextTrackCommand(int zoneIndex, CommandSource source = CommandSource.Internal)
     {
-        return new NextTrackCommand { ZoneId = zoneId, Source = source };
+        return new NextTrackCommand { ZoneIndex = zoneIndex, Source = source };
     }
 
     /// <summary>
     /// Creates a PreviousTrackCommand.
     /// </summary>
     public static PreviousTrackCommand CreatePreviousTrackCommand(
-        int zoneId,
+        int zoneIndex,
         CommandSource source = CommandSource.Internal
     )
     {
-        return new PreviousTrackCommand { ZoneId = zoneId, Source = source };
+        return new PreviousTrackCommand { ZoneIndex = zoneIndex, Source = source };
     }
 
     /// <summary>
     /// Creates a SetTrackRepeatCommand with the specified repeat state.
     /// </summary>
     public static SetTrackRepeatCommand CreateSetTrackRepeatCommand(
-        int zoneId,
+        int zoneIndex,
         bool enabled,
         CommandSource source = CommandSource.Internal
     )
     {
         return new SetTrackRepeatCommand
         {
-            ZoneId = zoneId,
+            ZoneIndex = zoneIndex,
             Enabled = enabled,
             Source = source,
         };
@@ -219,11 +219,11 @@ public static class CommandFactory
     /// Creates a ToggleTrackRepeatCommand.
     /// </summary>
     public static ToggleTrackRepeatCommand CreateToggleTrackRepeatCommand(
-        int zoneId,
+        int zoneIndex,
         CommandSource source = CommandSource.Internal
     )
     {
-        return new ToggleTrackRepeatCommand { ZoneId = zoneId, Source = source };
+        return new ToggleTrackRepeatCommand { ZoneIndex = zoneIndex, Source = source };
     }
 
     #endregion
@@ -234,14 +234,14 @@ public static class CommandFactory
     /// Creates a SetPlaylistCommand with the specified playlist index.
     /// </summary>
     public static SetPlaylistCommand CreateSetPlaylistCommand(
-        int zoneId,
+        int zoneIndex,
         int playlistIndex,
         CommandSource source = CommandSource.Internal
     )
     {
         return new SetPlaylistCommand
         {
-            ZoneId = zoneId,
+            ZoneIndex = zoneIndex,
             PlaylistIndex = Math.Max(1, playlistIndex),
             Source = source,
         };
@@ -251,36 +251,36 @@ public static class CommandFactory
     /// Creates a NextPlaylistCommand.
     /// </summary>
     public static NextPlaylistCommand CreateNextPlaylistCommand(
-        int zoneId,
+        int zoneIndex,
         CommandSource source = CommandSource.Internal
     )
     {
-        return new NextPlaylistCommand { ZoneId = zoneId, Source = source };
+        return new NextPlaylistCommand { ZoneIndex = zoneIndex, Source = source };
     }
 
     /// <summary>
     /// Creates a PreviousPlaylistCommand.
     /// </summary>
     public static PreviousPlaylistCommand CreatePreviousPlaylistCommand(
-        int zoneId,
+        int zoneIndex,
         CommandSource source = CommandSource.Internal
     )
     {
-        return new PreviousPlaylistCommand { ZoneId = zoneId, Source = source };
+        return new PreviousPlaylistCommand { ZoneIndex = zoneIndex, Source = source };
     }
 
     /// <summary>
     /// Creates a SetPlaylistShuffleCommand with the specified shuffle state.
     /// </summary>
     public static SetPlaylistShuffleCommand CreateSetPlaylistShuffleCommand(
-        int zoneId,
+        int zoneIndex,
         bool enabled,
         CommandSource source = CommandSource.Internal
     )
     {
         return new SetPlaylistShuffleCommand
         {
-            ZoneId = zoneId,
+            ZoneIndex = zoneIndex,
             Enabled = enabled,
             Source = source,
         };
@@ -290,25 +290,25 @@ public static class CommandFactory
     /// Creates a TogglePlaylistShuffleCommand.
     /// </summary>
     public static TogglePlaylistShuffleCommand CreateTogglePlaylistShuffleCommand(
-        int zoneId,
+        int zoneIndex,
         CommandSource source = CommandSource.Internal
     )
     {
-        return new TogglePlaylistShuffleCommand { ZoneId = zoneId, Source = source };
+        return new TogglePlaylistShuffleCommand { ZoneIndex = zoneIndex, Source = source };
     }
 
     /// <summary>
     /// Creates a SetPlaylistRepeatCommand with the specified repeat state.
     /// </summary>
     public static SetPlaylistRepeatCommand CreateSetPlaylistRepeatCommand(
-        int zoneId,
+        int zoneIndex,
         bool enabled,
         CommandSource source = CommandSource.Internal
     )
     {
         return new SetPlaylistRepeatCommand
         {
-            ZoneId = zoneId,
+            ZoneIndex = zoneIndex,
             Enabled = enabled,
             Source = source,
         };
@@ -318,11 +318,11 @@ public static class CommandFactory
     /// Creates a TogglePlaylistRepeatCommand.
     /// </summary>
     public static TogglePlaylistRepeatCommand CreateTogglePlaylistRepeatCommand(
-        int zoneId,
+        int zoneIndex,
         CommandSource source = CommandSource.Internal
     )
     {
-        return new TogglePlaylistRepeatCommand { ZoneId = zoneId, Source = source };
+        return new TogglePlaylistRepeatCommand { ZoneIndex = zoneIndex, Source = source };
     }
 
     #endregion
@@ -333,14 +333,14 @@ public static class CommandFactory
     /// Creates a SetClientVolumeCommand with the specified volume level.
     /// </summary>
     public static SetClientVolumeCommand CreateSetClientVolumeCommand(
-        int clientId,
+        int clientIndex,
         int volume,
         CommandSource source = CommandSource.Internal
     )
     {
         return new SetClientVolumeCommand
         {
-            ClientId = clientId,
+            ClientIndex = clientIndex,
             Volume = Math.Clamp(volume, 0, 100),
             Source = source,
         };
@@ -350,14 +350,14 @@ public static class CommandFactory
     /// Creates a SetClientMuteCommand with the specified mute state.
     /// </summary>
     public static SetClientMuteCommand CreateSetClientMuteCommand(
-        int clientId,
+        int clientIndex,
         bool enabled,
         CommandSource source = CommandSource.Internal
     )
     {
         return new SetClientMuteCommand
         {
-            ClientId = clientId,
+            ClientIndex = clientIndex,
             Enabled = enabled,
             Source = source,
         };
@@ -367,25 +367,25 @@ public static class CommandFactory
     /// Creates a ToggleClientMuteCommand.
     /// </summary>
     public static ToggleClientMuteCommand CreateToggleClientMuteCommand(
-        int clientId,
+        int clientIndex,
         CommandSource source = CommandSource.Internal
     )
     {
-        return new ToggleClientMuteCommand { ClientId = clientId, Source = source };
+        return new ToggleClientMuteCommand { ClientIndex = clientIndex, Source = source };
     }
 
     /// <summary>
     /// Creates a SetClientLatencyCommand with the specified latency.
     /// </summary>
     public static SetClientLatencyCommand CreateSetClientLatencyCommand(
-        int clientId,
+        int clientIndex,
         int latencyMs,
         CommandSource source = CommandSource.Internal
     )
     {
         return new SetClientLatencyCommand
         {
-            ClientId = clientId,
+            ClientIndex = clientIndex,
             LatencyMs = Math.Clamp(latencyMs, 0, 10000),
             Source = source,
         };
@@ -395,15 +395,15 @@ public static class CommandFactory
     /// Creates an AssignClientToZoneCommand.
     /// </summary>
     public static AssignClientToZoneCommand CreateAssignClientToZoneCommand(
-        int clientId,
-        int zoneId,
+        int clientIndex,
+        int zoneIndex,
         CommandSource source = CommandSource.Internal
     )
     {
         return new AssignClientToZoneCommand
         {
-            ClientId = clientId,
-            ZoneId = zoneId,
+            ClientIndex = clientIndex,
+            ZoneIndex = zoneIndex,
             Source = source,
         };
     }
@@ -416,97 +416,106 @@ public static class CommandFactory
     /// Parses a string payload to create appropriate zone commands.
     /// Used by protocol adapters (MQTT, KNX) for unified command creation.
     /// </summary>
-    public static object? CreateZoneCommandFromPayload(int zoneId, string command, string payload, CommandSource source)
+    public static object? CreateZoneCommandFromPayload(
+        int zoneIndex,
+        string command,
+        string payload,
+        CommandSource source
+    )
     {
         return command.ToLowerInvariant() switch
         {
             // Playback commands
-            "play" => CreatePlayCommand(zoneId, source),
-            "pause" => CreatePauseCommand(zoneId, source),
-            "stop" => CreateStopCommand(zoneId, source),
+            "play" => CreatePlayCommand(zoneIndex, source),
+            "pause" => CreatePauseCommand(zoneIndex, source),
+            "stop" => CreateStopCommand(zoneIndex, source),
 
             // Volume commands
-            "volume" when TryParseInt(payload, out var volume) => CreateSetZoneVolumeCommand(zoneId, volume, source),
+            "volume" when TryParseInt(payload, out var volume) => CreateSetZoneVolumeCommand(zoneIndex, volume, source),
             "volume" when payload.Equals("+", StringComparison.OrdinalIgnoreCase) => CreateVolumeUpCommand(
-                zoneId,
+                zoneIndex,
                 5,
                 source
             ),
             "volume" when payload.Equals("-", StringComparison.OrdinalIgnoreCase) => CreateVolumeDownCommand(
-                zoneId,
+                zoneIndex,
                 5,
                 source
             ),
             "volume" when TryParseVolumeStep(payload, out var step, out var direction) => direction > 0
-                ? CreateVolumeUpCommand(zoneId, step, source)
-                : CreateVolumeDownCommand(zoneId, step, source),
+                ? CreateVolumeUpCommand(zoneIndex, step, source)
+                : CreateVolumeDownCommand(zoneIndex, step, source),
 
             // Mute commands
-            "mute" when TryParseBool(payload, out var mute) => CreateSetZoneMuteCommand(zoneId, mute, source),
+            "mute" when TryParseBool(payload, out var mute) => CreateSetZoneMuteCommand(zoneIndex, mute, source),
             "mute" when payload.Equals("toggle", StringComparison.OrdinalIgnoreCase) => CreateToggleZoneMuteCommand(
-                zoneId,
+                zoneIndex,
                 source
             ),
 
             // Track commands
-            "track" when TryParseInt(payload, out var trackIndex) => CreateSetTrackCommand(zoneId, trackIndex, source),
+            "track" when TryParseInt(payload, out var trackIndex) => CreateSetTrackCommand(
+                zoneIndex,
+                trackIndex,
+                source
+            ),
             "track" when payload.Equals("+", StringComparison.OrdinalIgnoreCase) => CreateNextTrackCommand(
-                zoneId,
+                zoneIndex,
                 source
             ),
             "track" when payload.Equals("-", StringComparison.OrdinalIgnoreCase) => CreatePreviousTrackCommand(
-                zoneId,
+                zoneIndex,
                 source
             ),
-            "next" => CreateNextTrackCommand(zoneId, source),
-            "previous" => CreatePreviousTrackCommand(zoneId, source),
+            "next" => CreateNextTrackCommand(zoneIndex, source),
+            "previous" => CreatePreviousTrackCommand(zoneIndex, source),
 
             // Track repeat commands
             "track_repeat" when TryParseBool(payload, out var repeat) => CreateSetTrackRepeatCommand(
-                zoneId,
+                zoneIndex,
                 repeat,
                 source
             ),
             "track_repeat" when payload.Equals("toggle", StringComparison.OrdinalIgnoreCase) =>
-                CreateToggleTrackRepeatCommand(zoneId, source),
+                CreateToggleTrackRepeatCommand(zoneIndex, source),
 
             // Playlist commands
             "playlist" when TryParseInt(payload, out var playlistIndex) => CreateSetPlaylistCommand(
-                zoneId,
+                zoneIndex,
                 playlistIndex,
                 source
             ),
             "playlist" when payload.Equals("+", StringComparison.OrdinalIgnoreCase) => CreateNextPlaylistCommand(
-                zoneId,
+                zoneIndex,
                 source
             ),
             "playlist" when payload.Equals("-", StringComparison.OrdinalIgnoreCase) => CreatePreviousPlaylistCommand(
-                zoneId,
+                zoneIndex,
                 source
             ),
             "playlist" when TryParseInt(payload, out var playlistIndexFromString) => CreateSetPlaylistCommand(
-                zoneId,
+                zoneIndex,
                 playlistIndexFromString,
                 source
             ),
 
             // Playlist shuffle commands
             "shuffle" when TryParseBool(payload, out var shuffle) => CreateSetPlaylistShuffleCommand(
-                zoneId,
+                zoneIndex,
                 shuffle,
                 source
             ),
             "shuffle" when payload.Equals("toggle", StringComparison.OrdinalIgnoreCase) =>
-                CreateTogglePlaylistShuffleCommand(zoneId, source),
+                CreateTogglePlaylistShuffleCommand(zoneIndex, source),
 
             // Playlist repeat commands
             "playlist_repeat" when TryParseBool(payload, out var playlistRepeat) => CreateSetPlaylistRepeatCommand(
-                zoneId,
+                zoneIndex,
                 playlistRepeat,
                 source
             ),
             "playlist_repeat" when payload.Equals("toggle", StringComparison.OrdinalIgnoreCase) =>
-                CreateTogglePlaylistRepeatCommand(zoneId, source),
+                CreateTogglePlaylistRepeatCommand(zoneIndex, source),
 
             _ => null,
         };
@@ -517,7 +526,7 @@ public static class CommandFactory
     /// Used by protocol adapters (MQTT, KNX) for unified command creation.
     /// </summary>
     public static object? CreateClientCommandFromPayload(
-        int clientId,
+        int clientIndex,
         string command,
         string payload,
         CommandSource source
@@ -527,29 +536,29 @@ public static class CommandFactory
         {
             // Volume commands
             "volume" when TryParseInt(payload, out var volume) => CreateSetClientVolumeCommand(
-                clientId,
+                clientIndex,
                 volume,
                 source
             ),
 
             // Mute commands
-            "mute" when TryParseBool(payload, out var mute) => CreateSetClientMuteCommand(clientId, mute, source),
+            "mute" when TryParseBool(payload, out var mute) => CreateSetClientMuteCommand(clientIndex, mute, source),
             "mute" when payload.Equals("toggle", StringComparison.OrdinalIgnoreCase) => CreateToggleClientMuteCommand(
-                clientId,
+                clientIndex,
                 source
             ),
 
             // Latency commands
             "latency" when TryParseInt(payload, out var latency) => CreateSetClientLatencyCommand(
-                clientId,
+                clientIndex,
                 latency,
                 source
             ),
 
             // Zone assignment commands
-            "zone" when TryParseInt(payload, out var zoneId) => CreateAssignClientToZoneCommand(
-                clientId,
-                zoneId,
+            "zone" when TryParseInt(payload, out var zoneIndex) => CreateAssignClientToZoneCommand(
+                clientIndex,
+                zoneIndex,
                 source
             ),
 

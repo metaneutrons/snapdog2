@@ -33,36 +33,36 @@ public partial class ClientStateNotificationHandler
         this._logger = logger;
     }
 
-    [LoggerMessage(6101, LogLevel.Information, "Client {ClientId} volume changed to {Volume}")]
-    private partial void LogVolumeChange(int clientId, int volume);
+    [LoggerMessage(6101, LogLevel.Information, "Client {ClientIndex} volume changed to {Volume}")]
+    private partial void LogVolumeChange(int clientIndex, int volume);
 
-    [LoggerMessage(6102, LogLevel.Information, "Client {ClientId} mute changed to {IsMuted}")]
-    private partial void LogMuteChange(int clientId, bool isMuted);
+    [LoggerMessage(6102, LogLevel.Information, "Client {ClientIndex} mute changed to {IsMuted}")]
+    private partial void LogMuteChange(int clientIndex, bool isMuted);
 
-    [LoggerMessage(6103, LogLevel.Information, "Client {ClientId} latency changed to {LatencyMs}ms")]
-    private partial void LogLatencyChange(int clientId, int latencyMs);
+    [LoggerMessage(6103, LogLevel.Information, "Client {ClientIndex} latency changed to {LatencyMs}ms")]
+    private partial void LogLatencyChange(int clientIndex, int latencyMs);
 
     [LoggerMessage(
         6104,
         LogLevel.Information,
-        "Client {ClientId} zone assignment changed from {PreviousZoneId} to {NewZoneId}"
+        "Client {ClientIndex} zone assignment changed from {PreviousZoneIndex} to {NewZoneIndex}"
     )]
-    private partial void LogZoneAssignmentChange(int clientId, int? previousZoneId, int? newZoneId);
+    private partial void LogZoneAssignmentChange(int clientIndex, int? previousZoneIndex, int? newZoneIndex);
 
-    [LoggerMessage(6105, LogLevel.Information, "Client {ClientId} connection changed to {IsConnected}")]
-    private partial void LogConnectionChange(int clientId, bool isConnected);
+    [LoggerMessage(6105, LogLevel.Information, "Client {ClientIndex} connection changed to {IsConnected}")]
+    private partial void LogConnectionChange(int clientIndex, bool isConnected);
 
-    [LoggerMessage(6106, LogLevel.Information, "Client {ClientId} complete state changed")]
-    private partial void LogStateChange(int clientId);
+    [LoggerMessage(6106, LogLevel.Information, "Client {ClientIndex} complete state changed")]
+    private partial void LogStateChange(int clientIndex);
 
     public async Task Handle(ClientVolumeChangedNotification notification, CancellationToken cancellationToken)
     {
-        this.LogVolumeChange(notification.ClientId, notification.Volume);
+        this.LogVolumeChange(notification.ClientIndex, notification.Volume);
 
         // Publish to external systems (MQTT, KNX)
         await this.PublishToExternalSystemsAsync(
             StatusIdAttribute.GetStatusId<ClientVolumeChangedNotification>(),
-            notification.ClientId.ToString(),
+            notification.ClientIndex.ToString(),
             notification.Volume,
             cancellationToken
         );
@@ -70,12 +70,12 @@ public partial class ClientStateNotificationHandler
 
     public async Task Handle(ClientMuteChangedNotification notification, CancellationToken cancellationToken)
     {
-        this.LogMuteChange(notification.ClientId, notification.IsMuted);
+        this.LogMuteChange(notification.ClientIndex, notification.IsMuted);
 
         // Publish to external systems (MQTT, KNX)
         await this.PublishToExternalSystemsAsync(
             StatusIdAttribute.GetStatusId<ClientMuteChangedNotification>(),
-            notification.ClientId.ToString(),
+            notification.ClientIndex.ToString(),
             notification.IsMuted,
             cancellationToken
         );
@@ -83,12 +83,12 @@ public partial class ClientStateNotificationHandler
 
     public async Task Handle(ClientLatencyChangedNotification notification, CancellationToken cancellationToken)
     {
-        this.LogLatencyChange(notification.ClientId, notification.LatencyMs);
+        this.LogLatencyChange(notification.ClientIndex, notification.LatencyMs);
 
         // Publish to external systems (MQTT, KNX)
         await this.PublishToExternalSystemsAsync(
             StatusIdAttribute.GetStatusId<ClientLatencyChangedNotification>(),
-            notification.ClientId.ToString(),
+            notification.ClientIndex.ToString(),
             notification.LatencyMs,
             cancellationToken
         );
@@ -96,25 +96,25 @@ public partial class ClientStateNotificationHandler
 
     public async Task Handle(ClientZoneAssignmentChangedNotification notification, CancellationToken cancellationToken)
     {
-        this.LogZoneAssignmentChange(notification.ClientId, notification.PreviousZoneId, notification.ZoneId);
+        this.LogZoneAssignmentChange(notification.ClientIndex, notification.PreviousZoneIndex, notification.ZoneIndex);
 
         // Publish to external systems (MQTT, KNX)
         await this.PublishToExternalSystemsAsync(
             StatusIdAttribute.GetStatusId<ClientZoneAssignmentChangedNotification>(),
-            notification.ClientId.ToString(),
-            new { PreviousZoneId = notification.PreviousZoneId, ZoneId = notification.ZoneId },
+            notification.ClientIndex.ToString(),
+            new { PreviousZoneIndex = notification.PreviousZoneIndex, ZoneIndex = notification.ZoneIndex },
             cancellationToken
         );
     }
 
     public async Task Handle(ClientConnectionChangedNotification notification, CancellationToken cancellationToken)
     {
-        this.LogConnectionChange(notification.ClientId, notification.IsConnected);
+        this.LogConnectionChange(notification.ClientIndex, notification.IsConnected);
 
         // Publish to external systems (MQTT, KNX)
         await this.PublishToExternalSystemsAsync(
             StatusIdAttribute.GetStatusId<ClientConnectionChangedNotification>(),
-            notification.ClientId.ToString(),
+            notification.ClientIndex.ToString(),
             notification.IsConnected,
             cancellationToken
         );
@@ -122,12 +122,12 @@ public partial class ClientStateNotificationHandler
 
     public async Task Handle(ClientStateChangedNotification notification, CancellationToken cancellationToken)
     {
-        this.LogStateChange(notification.ClientId);
+        this.LogStateChange(notification.ClientIndex);
 
         // Publish to external systems (MQTT, KNX)
         await this.PublishToExternalSystemsAsync(
             StatusIdAttribute.GetStatusId<ClientStateChangedNotification>(),
-            notification.ClientId.ToString(),
+            notification.ClientIndex.ToString(),
             notification,
             cancellationToken
         );
@@ -138,7 +138,7 @@ public partial class ClientStateNotificationHandler
     /// </summary>
     private async Task PublishToExternalSystemsAsync<T>(
         string eventType,
-        string clientId,
+        string clientIndex,
         T payload,
         CancellationToken cancellationToken
     )
@@ -149,19 +149,19 @@ public partial class ClientStateNotificationHandler
             var mqttService = this._serviceProvider.GetService<IMqttService>();
             if (mqttService != null)
             {
-                await mqttService.PublishClientStatusAsync(clientId, eventType, payload, cancellationToken);
+                await mqttService.PublishClientStatusAsync(clientIndex, eventType, payload, cancellationToken);
             }
 
             // Publish to KNX if enabled
             var knxService = this._serviceProvider.GetService<IKnxService>();
             if (knxService != null)
             {
-                await knxService.PublishClientStatusAsync(clientId, eventType, payload, cancellationToken);
+                await knxService.PublishClientStatusAsync(clientIndex, eventType, payload, cancellationToken);
             }
         }
         catch (Exception ex)
         {
-            this.LogFailedToPublishClientEventToExternalSystems(ex, eventType, clientId);
+            this.LogFailedToPublishClientEventToExternalSystems(ex, eventType, clientIndex);
         }
     }
 }

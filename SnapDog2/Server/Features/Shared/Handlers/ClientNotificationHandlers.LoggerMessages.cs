@@ -9,10 +9,14 @@ namespace SnapDog2.Server.Features.Shared.Handlers;
 public partial class ClientStateNotificationHandler
 {
     // Client Event Publishing Operations (10901)
-    [LoggerMessage(10901, LogLevel.Warning, "Failed to publish {EventType} for client {ClientId} to external systems")]
+    [LoggerMessage(
+        10901,
+        LogLevel.Warning,
+        "Failed to publish {EventType} for client {ClientIndex} to external systems"
+    )]
     private partial void LogFailedToPublishClientEventToExternalSystems(
         Exception ex,
         string eventType,
-        string clientId
+        string clientIndex
     );
 }

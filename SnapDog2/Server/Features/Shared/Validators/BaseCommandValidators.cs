@@ -11,7 +11,7 @@ public abstract class BaseZoneCommandValidator<T> : AbstractValidator<T>
 {
     protected BaseZoneCommandValidator()
     {
-        RuleFor(x => GetZoneId(x)).GreaterThan(0).WithMessage("Zone ID must be a positive integer.");
+        RuleFor(x => GetZoneIndex(x)).GreaterThan(0).WithMessage("Zone ID must be a positive integer.");
 
         RuleFor(x => GetSource(x)).IsInEnum().WithMessage("Invalid command source specified.");
     }
@@ -19,7 +19,7 @@ public abstract class BaseZoneCommandValidator<T> : AbstractValidator<T>
     /// <summary>
     /// Extract the zone ID from the command. Must be implemented by derived validators.
     /// </summary>
-    protected abstract int GetZoneId(T command);
+    protected abstract int GetZoneIndex(T command);
 
     /// <summary>
     /// Extract the command source from the command. Must be implemented by derived validators.
@@ -35,7 +35,7 @@ public abstract class BaseClientCommandValidator<T> : AbstractValidator<T>
 {
     protected BaseClientCommandValidator()
     {
-        RuleFor(x => GetClientId(x)).GreaterThan(0).WithMessage("Client ID must be a positive integer.");
+        RuleFor(x => GetClientIndex(x)).GreaterThan(0).WithMessage("Client ID must be a positive integer.");
 
         RuleFor(x => GetSource(x)).IsInEnum().WithMessage("Invalid command source specified.");
     }
@@ -43,7 +43,7 @@ public abstract class BaseClientCommandValidator<T> : AbstractValidator<T>
     /// <summary>
     /// Extract the client ID from the command. Must be implemented by derived validators.
     /// </summary>
-    protected abstract int GetClientId(T command);
+    protected abstract int GetClientIndex(T command);
 
     /// <summary>
     /// Extract the command source from the command. Must be implemented by derived validators.
@@ -262,11 +262,11 @@ public abstract class CompositeClientZoneAssignmentValidator<T> : BaseClientComm
 {
     protected CompositeClientZoneAssignmentValidator()
     {
-        RuleFor(x => GetZoneId(x)).GreaterThan(0).WithMessage("Zone ID must be a positive integer.");
+        RuleFor(x => GetZoneIndex(x)).GreaterThan(0).WithMessage("Zone ID must be a positive integer.");
     }
 
     /// <summary>
     /// Extract the zone ID from the command. Must be implemented by derived validators.
     /// </summary>
-    protected abstract int GetZoneId(T command);
+    protected abstract int GetZoneIndex(T command);
 }
