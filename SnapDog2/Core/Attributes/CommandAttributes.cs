@@ -36,8 +36,7 @@ public class StatusIdAttribute : Attribute
         var attribute = typeof(T).GetCustomAttribute<StatusIdAttribute>();
         return attribute?.Id
             ?? throw new InvalidOperationException(
-                $"No StatusId attribute found on {typeof(T).Name}. "
-                    + $"Add [StatusId(\"STATUS_NAME\", \"Blueprint-Reference\")] to the class."
+                $"No StatusId attribute found on {typeof(T).Name}. " + $"Add [StatusId(\"STATUS_NAME\")] to the class."
             );
     }
 

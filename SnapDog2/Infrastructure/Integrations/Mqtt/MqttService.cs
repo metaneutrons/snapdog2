@@ -986,6 +986,40 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     }
 
     /// <summary>
+    /// Gets the MQTT topic for a zone status event type.
+    /// </summary>
+    /// <param name="eventType">The status event type.</param>
+    /// <param name="zoneConfig">The zone configuration.</param>
+    /// <returns>The MQTT topic string, or null if no mapping exists.</returns>
+    private string? GetZoneMqttTopic(string eventType, ZoneConfig zoneConfig)
+    {
+        var baseTopic = zoneConfig.Mqtt.BaseTopic?.TrimEnd('/') ?? string.Empty;
+
+        // Parse the event type to enum for type safety
+        var statusEventType = StatusEventTypeExtensions.FromStatusString(eventType);
+        if (statusEventType == null)
+        {
+            return null;
+        }
+
+        var topicSuffix = statusEventType switch
+        {
+            StatusEventType.VolumeStatus => zoneConfig.Mqtt.VolumeTopic,
+            StatusEventType.MuteStatus => zoneConfig.Mqtt.MuteTopic,
+            StatusEventType.PlaybackState => zoneConfig.Mqtt.ControlTopic,
+            StatusEventType.TrackIndex => zoneConfig.Mqtt.TrackTopic,
+            StatusEventType.PlaylistIndex => zoneConfig.Mqtt.PlaylistTopic,
+            StatusEventType.TrackRepeatStatus => zoneConfig.Mqtt.TrackRepeatTopic,
+            StatusEventType.PlaylistRepeatStatus => zoneConfig.Mqtt.PlaylistRepeatTopic,
+            StatusEventType.PlaylistShuffleStatus => zoneConfig.Mqtt.PlaylistShuffleTopic,
+            StatusEventType.ZoneState => zoneConfig.Mqtt.StateTopic,
+            _ => null,
+        };
+
+        return topicSuffix != null ? $"{baseTopic}/{topicSuffix}" : null;
+    }
+
+    /// <summary>
     /// Publishes zone status updates to MQTT topics.
     /// </summary>
     public async Task<Result> PublishZoneStatusAsync<T>(
@@ -1019,22 +1053,8 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
 
             var baseTopic = zoneConfig.Mqtt.BaseTopic?.TrimEnd('/') ?? string.Empty;
 
-            // Map event type to specific topic
-            var topic = eventType.ToUpperInvariant() switch
-            {
-                "VOLUME_STATUS" => $"{baseTopic}/{zoneConfig.Mqtt.VolumeTopic}",
-                "MUTE_STATUS" => $"{baseTopic}/{zoneConfig.Mqtt.MuteTopic}",
-                "PLAYBACK_STATE" => $"{baseTopic}/{zoneConfig.Mqtt.ControlTopic}",
-                "TRACK_INDEX" => $"{baseTopic}/{zoneConfig.Mqtt.TrackTopic}",
-                "TRACK_INFO" => $"{baseTopic}/{zoneConfig.Mqtt.TrackInfoTopic}",
-                "PLAYLIST_INDEX" => $"{baseTopic}/{zoneConfig.Mqtt.PlaylistTopic}",
-                "PLAYLIST_INFO" => $"{baseTopic}/{zoneConfig.Mqtt.PlaylistInfoTopic}",
-                "TRACK_REPEAT_STATUS" => $"{baseTopic}/{zoneConfig.Mqtt.TrackRepeatTopic}",
-                "PLAYLIST_REPEAT_STATUS" => $"{baseTopic}/{zoneConfig.Mqtt.PlaylistRepeatTopic}",
-                "PLAYLIST_SHUFFLE_STATUS" => $"{baseTopic}/{zoneConfig.Mqtt.PlaylistShuffleTopic}",
-                "ZONE_STATE" => $"{baseTopic}/{zoneConfig.Mqtt.StateTopic}",
-                _ => null,
-            };
+            // Get the appropriate MQTT topic for this event type
+            var topic = this.GetZoneMqttTopic(eventType, zoneConfig);
 
             if (topic == null)
             {

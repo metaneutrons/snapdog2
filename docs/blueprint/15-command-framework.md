@@ -106,8 +106,8 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 
 | Command/Status ID | Description             | Essential Information / Type                       | Direction        | Notes / Comments           |
 | :---------------- | :---------------------- | :------------------------------------------------- | :--------------- | :------------------------- |
-| `VOLUME`          | Set zone volume         | `ZoneIndex` (int), `Volume` (int, 0-100)              | Command (Set)    | Action: Set volume to `V`  |
-| `VOLUME_STATUS`   | Current zone volume     | `ZoneIndex` (int), `Volume` (int, 0-100)              | Status (Publish) | State: Current volume is `V` |
+| `VOLUME`          | Set zone volume         | `ZoneIndex` (int), `Volume` (int, 0-100)              | Command (Set)    | Action: Set volume to `Volume`  |
+| `VOLUME_STATUS`   | Current zone volume     | `ZoneIndex` (int), `Volume` (int, 0-100)              | Status (Publish) | State: Current volume is `Volume` |
 | `VOLUME_UP`       | Increase zone volume    | `ZoneIndex` (int), Optional `Step` (int, default 5)   | Command (Set)    | Action: Increase volume    |
 | `VOLUME_DOWN`     | Decrease zone volume    | `ZoneIndex` (int), Optional `Step` (int, default 5)   | Command (Set)    | Action: Decrease volume    |
 | `MUTE`            | Set zone mute           | `ZoneIndex` (int), `Enabled` (bool)                   | Command (Set)    | Action: Mute/unmute zone |

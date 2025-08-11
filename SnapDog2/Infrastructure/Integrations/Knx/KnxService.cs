@@ -13,6 +13,7 @@ using Polly;
 using Polly.Retry;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Configuration;
+using SnapDog2.Core.Constants;
 using SnapDog2.Core.Enums;
 using SnapDog2.Core.Helpers;
 using SnapDog2.Core.Models;
@@ -731,14 +732,14 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             {
                 return statusId switch
                 {
-                    "VOLUME_STATUS" => zone.Knx.VolumeStatus,
-                    "MUTE_STATUS" => zone.Knx.MuteStatus,
-                    "PLAYBACK_STATE" => zone.Knx.ControlStatus,
-                    "TRACK_INDEX" => zone.Knx.TrackStatus,
-                    "PLAYLIST_INDEX" => zone.Knx.PlaylistStatus,
-                    "TRACK_REPEAT_STATUS" => zone.Knx.TrackRepeatStatus,
-                    "PLAYLIST_REPEAT_STATUS" => zone.Knx.RepeatStatus,
-                    "PLAYLIST_SHUFFLE_STATUS" => zone.Knx.ShuffleStatus,
+                    var x when x == StatusIds.VolumeStatus => zone.Knx.VolumeStatus,
+                    var x when x == StatusIds.MuteStatus => zone.Knx.MuteStatus,
+                    var x when x == StatusIds.PlaybackState => zone.Knx.ControlStatus,
+                    var x when x == StatusIds.TrackIndex => zone.Knx.TrackStatus,
+                    var x when x == StatusIds.PlaylistIndex => zone.Knx.PlaylistStatus,
+                    var x when x == StatusIds.TrackRepeatStatus => zone.Knx.TrackRepeatStatus,
+                    var x when x == StatusIds.PlaylistRepeatStatus => zone.Knx.RepeatStatus,
+                    var x when x == StatusIds.PlaylistShuffleStatus => zone.Knx.ShuffleStatus,
                     _ => null,
                 };
             }
@@ -752,11 +753,11 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             {
                 return statusId switch
                 {
-                    "CLIENT_VOLUME_STATUS" => client.Knx.VolumeStatus,
-                    "CLIENT_MUTE_STATUS" => client.Knx.MuteStatus,
-                    "CLIENT_CONNECTED" => client.Knx.ConnectedStatus,
-                    "CLIENT_LATENCY_STATUS" => client.Knx.LatencyStatus,
-                    "CLIENT_ZONE_STATUS" => client.Knx.ZoneStatus,
+                    var x when x == StatusIds.ClientVolumeStatus => client.Knx.VolumeStatus,
+                    var x when x == StatusIds.ClientMuteStatus => client.Knx.MuteStatus,
+                    var x when x == StatusIds.ClientConnected => client.Knx.ConnectedStatus,
+                    var x when x == StatusIds.ClientLatencyStatus => client.Knx.LatencyStatus,
+                    var x when x == StatusIds.ClientZoneStatus => client.Knx.ZoneStatus,
                     _ => null,
                 };
             }
@@ -917,14 +918,26 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
     {
         return eventType.ToUpperInvariant() switch
         {
-            "CLIENT_VOLUME_STATUS" when payload is int volume => ("CLIENT_VOLUME_STATUS", Math.Clamp(volume, 0, 100)),
-            "CLIENT_MUTE_STATUS" when payload is bool mute => ("CLIENT_MUTE_STATUS", mute ? 1 : 0),
-            "CLIENT_LATENCY_STATUS" when payload is int latency => (
-                "CLIENT_LATENCY_STATUS",
+            var x when x == StatusIds.ClientVolumeStatus && payload is int volume => (
+                StatusIds.ClientVolumeStatus,
+                Math.Clamp(volume, 0, 100)
+            ),
+            var x when x == StatusIds.ClientMuteStatus && payload is bool mute => (
+                StatusIds.ClientMuteStatus,
+                mute ? 1 : 0
+            ),
+            var x when x == StatusIds.ClientLatencyStatus && payload is int latency => (
+                StatusIds.ClientLatencyStatus,
                 Math.Clamp(latency, 0, 65535)
             ),
-            "CLIENT_CONNECTED" when payload is bool connected => ("CLIENT_CONNECTED", connected ? 1 : 0),
-            "CLIENT_ZONE_STATUS" when payload is int zone => ("CLIENT_ZONE_STATUS", Math.Clamp(zone, 0, 255)),
+            var x when x == StatusIds.ClientConnected && payload is bool connected => (
+                StatusIds.ClientConnected,
+                connected ? 1 : 0
+            ),
+            var x when x == StatusIds.ClientZoneStatus && payload is int zone => (
+                StatusIds.ClientZoneStatus,
+                Math.Clamp(zone, 0, 255)
+            ),
             _ => (null, payload!),
         };
     }
@@ -936,17 +949,35 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
     {
         return eventType.ToUpperInvariant() switch
         {
-            "VOLUME_STATUS" when payload is int volume => ("VOLUME_STATUS", Math.Clamp(volume, 0, 100)),
-            "MUTE_STATUS" when payload is bool mute => ("MUTE_STATUS", mute ? 1 : 0),
-            "PLAYBACK_STATE" when payload is string state => ("PLAYBACK_STATE", MapPlaybackStateToKnx(state)),
-            "TRACK_INDEX" when payload is int track => ("TRACK_INDEX", Math.Clamp(track, 0, 255)),
-            "PLAYLIST_INDEX" when payload is int playlist => ("PLAYLIST_INDEX", Math.Clamp(playlist, 0, 255)),
-            "TRACK_REPEAT_STATUS" when payload is bool trackRepeat => ("TRACK_REPEAT_STATUS", trackRepeat ? 1 : 0),
-            "PLAYLIST_REPEAT_STATUS" when payload is bool playlistRepeat => (
-                "PLAYLIST_REPEAT_STATUS",
+            var x when x == StatusIds.VolumeStatus && payload is int volume => (
+                StatusIds.VolumeStatus,
+                Math.Clamp(volume, 0, 100)
+            ),
+            var x when x == StatusIds.MuteStatus && payload is bool mute => (StatusIds.MuteStatus, mute ? 1 : 0),
+            var x when x == StatusIds.PlaybackState && payload is string state => (
+                StatusIds.PlaybackState,
+                MapPlaybackStateToKnx(state)
+            ),
+            var x when x == StatusIds.TrackIndex && payload is int track => (
+                StatusIds.TrackIndex,
+                Math.Clamp(track, 0, 255)
+            ),
+            var x when x == StatusIds.PlaylistIndex && payload is int playlist => (
+                StatusIds.PlaylistIndex,
+                Math.Clamp(playlist, 0, 255)
+            ),
+            var x when x == StatusIds.TrackRepeatStatus && payload is bool trackRepeat => (
+                StatusIds.TrackRepeatStatus,
+                trackRepeat ? 1 : 0
+            ),
+            var x when x == StatusIds.PlaylistRepeatStatus && payload is bool playlistRepeat => (
+                StatusIds.PlaylistRepeatStatus,
                 playlistRepeat ? 1 : 0
             ),
-            "PLAYLIST_SHUFFLE_STATUS" when payload is bool shuffle => ("PLAYLIST_SHUFFLE_STATUS", shuffle ? 1 : 0),
+            var x when x == StatusIds.PlaylistShuffleStatus && payload is bool shuffle => (
+                StatusIds.PlaylistShuffleStatus,
+                shuffle ? 1 : 0
+            ),
             _ => (null, payload!),
         };
     }
@@ -981,12 +1012,12 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
         return statusId switch
         {
             // Client-specific status IDs
-            "CLIENT_VOLUME_STATUS"
-            or "CLIENT_MUTE_STATUS"
-            or "CLIENT_LATENCY_STATUS"
-            or "CLIENT_ZONE_STATUS"
-            or "CLIENT_CONNECTED"
-            or "CLIENT_STATE" => "client",
+            _ when statusId == StatusIds.ClientVolumeStatus
+                    || statusId == StatusIds.ClientMuteStatus
+                    || statusId == StatusIds.ClientLatencyStatus
+                    || statusId == StatusIds.ClientZoneStatus
+                    || statusId == StatusIds.ClientConnected
+                    || statusId == StatusIds.ClientState => "client",
 
             // Zone-specific status IDs (everything else)
             _ => "zone",

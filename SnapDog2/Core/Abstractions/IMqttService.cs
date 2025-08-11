@@ -83,7 +83,7 @@ public interface IMqttService : IAsyncDisposable
     /// Publishes client status updates to MQTT topics.
     /// </summary>
     /// <param name="clientIndex">Client identifier.</param>
-    /// <param name="eventType">Type of event (e.g., CLIENT_VOLUME_STATUS, CLIENT_MUTE_STATUS).</param>
+    /// <param name="eventType">Type of event (use StatusIds constants like StatusIds.ClientVolumeStatus).</param>
     /// <param name="payload">Event payload.</param>
     /// <param name="cancellationToken">Cancellation token for the operation.</param>
     /// <returns>Result indicating success or failure.</returns>
@@ -98,7 +98,7 @@ public interface IMqttService : IAsyncDisposable
     /// Publishes zone status updates to MQTT topics.
     /// </summary>
     /// <param name="zoneIndex">Zone identifier.</param>
-    /// <param name="eventType">Type of event (e.g., VOLUME_STATUS, MUTE_STATUS).</param>
+    /// <param name="eventType">Type of event (use StatusIds constants like StatusIds.VolumeStatus).</param>
     /// <param name="payload">Event payload.</param>
     /// <param name="cancellationToken">Cancellation token for the operation.</param>
     /// <returns>Result indicating success or failure.</returns>
@@ -113,7 +113,7 @@ public interface IMqttService : IAsyncDisposable
     /// Publishes global system status updates to MQTT topics.
     /// </summary>
     /// <typeparam name="T">Type of the payload.</typeparam>
-    /// <param name="eventType">Type of event (e.g., SYSTEM_STATUS, VERSION_INFO).</param>
+    /// <param name="eventType">Type of event (use StatusIds constants like StatusIds.SystemStatus).</param>
     /// <param name="payload">Event payload.</param>
     /// <param name="cancellationToken">Cancellation token for the operation.</param>
     /// <returns>Result indicating success or failure.</returns>
