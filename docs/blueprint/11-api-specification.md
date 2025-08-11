@@ -104,10 +104,11 @@ Endpoints for interacting with configured audio zones. **Zone creation/deletion/
 | `POST` | `/zones/{zoneIndex}/playlist/shuffle/toggle`| `PLAYLIST_SHUFFLE_TOGGLE`| Toggle playlist shuffle mode         | Path: `{zoneIndex}`                             | `bool` (new shuffle state)           | 200 OK      |
 
 **Modern API Benefits:**
-- **Primitive Returns:** Volume endpoints return `int` directly (e.g., `75`) instead of `{"volume": 75}`
-- **Boolean States:** Mute/repeat/shuffle return `bool` directly (e.g., `true`) instead of `{"enabled": true}`
-- **Direct Parameters:** Use `int volume` instead of `{"level": 75}` request objects
-- **Cleaner Client Code:** `const volume = await api.getVolume(1)` instead of `const volume = await api.getVolume(1).then(r => r.volume)`
+
+* **Primitive Returns:** Volume endpoints return `int` directly (e.g., `75`) instead of `{"volume": 75}`
+* **Boolean States:** Mute/repeat/shuffle return `bool` directly (e.g., `true`) instead of `{"enabled": true}`
+* **Direct Parameters:** Use `int volume` instead of `{"level": 75}` request objects
+* **Cleaner Client Code:** `const volume = await api.getVolume(1)` instead of `const volume = await api.getVolume(1).then(r => r.volume)`
 
 *Note on HTTP Status Codes: State retrievals and settings return 200 OK with the primitive value. Actions (play, pause, stop, track navigation, playlist setting) return 204 No Content to indicate successful completion without response data.*
 
@@ -121,7 +122,7 @@ namespace SnapDog2.Api.Models;
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // NO REQUEST OBJECTS NEEDED!
-// 
+//
 // All API operations now use direct parameter binding:
 // - Primitives: int, bool, string
 // - Path parameters: /zones/{zoneIndex}/play/track/{trackIndex}
@@ -133,12 +134,12 @@ namespace SnapDog2.Api.Models;
 // ═══════════════════════════════════════════════════════════════════════════════
 // ELIMINATED ALL REQUEST OBJECTS - 100% reduction achieved:
 // ═══════════════════════════════════════════════════════════════════════════════
-// 
+//
 // ❌ REMOVED: PlayRequest          → Use: separate endpoints /play, /play/track/{index}, /play/url
 // ❌ REMOVED: PlaylistRequest      → Use: int playlistIndex (1-based)
 // ❌ REMOVED: VolumeSetRequest     → Use: int volume (0-100)
 // ❌ REMOVED: MuteSetRequest       → Use: bool muted
-// ❌ REMOVED: ModeSetRequest       → Use: bool enabled  
+// ❌ REMOVED: ModeSetRequest       → Use: bool enabled
 // ❌ REMOVED: SetTrackRequest      → Use: int track (1-based)
 // ❌ REMOVED: StepRequest          → Use: int step = 5
 // ❌ REMOVED: LatencySetRequest    → Use: int latency (ms)
@@ -157,11 +158,11 @@ namespace SnapDog2.Api.Models;
 // ═══════════════════════════════════════════════════════════════════════════════
 // PRIMITIVE RESPONSES - Return values directly for maximum simplicity
 // ═══════════════════════════════════════════════════════════════════════════════
-// 
+//
 // 🎯 PHILOSOPHY: Return the actual value, not a wrapper object
-// 
+//
 // ✅ GET /zones/1/volume        → 75 (int)
-// ✅ GET /zones/1/mute          → false (bool)  
+// ✅ GET /zones/1/mute          → false (bool)
 // ✅ GET /zones/1/track         → 3 (int)
 // ✅ GET /zones/1/track/repeat  → true (bool)
 //
@@ -211,23 +212,32 @@ public record Client(int Id, string Name, bool Connected, int? Zone = null);
 
 Endpoints for interacting with discovered Snapcast clients.
 
-| Method | Path                                    | Command/Status ID      | Description                | Request Body / Params           | Success Response (`Data` field) | HTTP Status |
-| :----- | :-------------------------------------- | :--------------------- | :------------------------- | :------------------------------ | :---------------------------- | :---------- |
-| `GET`  | `/clients`                              | -                      | List discovered clients    | Query: `?page=1&pageSize=20`    | Paginated `List<ClientInfo>`  | 200 OK      |
-| `GET`  | `/clients/{clientId}`                   | `CLIENT_STATE` (Full)  | Get details for a client   | Path: `{clientId}` (int)      | `ClientState`                 | 200 OK      |
-| `GET`  | `/clients/{clientId}/state`             | `CLIENT_STATE` (Full)  | Get full state JSON        | Path: `{clientId}` (int)      | `ClientState`                 | 200 OK      |
-| `PUT`  | `/clients/{clientId}/volume`   | `CLIENT_VOLUME`        | Set client volume          | Path: `{clientId}`; Body: `VolumeSetRequest` | `object` { int Volume }       | 200 OK      |
-| `GET`  | `/clients/{clientId}/volume`   | `CLIENT_VOLUME_STATUS` | Get client volume          | Path: `{clientId}`            | `object` { int Volume }       | 200 OK      |
-| `POST`  | `/clients/{clientId}/volume`   | `CLIENT_VOLUME_UP`    | Increase client volume     | Path: `{clientId}` | Optional Body: `StepRequest` | 200 OK |
-| `POST`  | `/clients/{clientId}/volume`   | `CLIENT_VOLUME_DOWN`  | Decrease client volume     | Path: `{clientId}` | Optional Body: `StepRequest` | 200 OK |
-| `PUT`  | `/clients/{clientId}/mute`     | `CLIENT_MUTE`          | Set client mute state      | Path: `{clientId}`; Body: `MuteSetRequest` | `object` { bool IsMuted }     | 200 OK      |
-| `GET`  | `/clients/{clientId}/mute`     | `CLIENT_MUTE_STATUS`   | Get client mute state      | Path: `{clientId}`            | `object` { bool IsMuted }     | 200 OK      |
-| `POST` | `/clients/{clientId}/mute/toggle`| `CLIENT_MUTE_TOGGLE`   | Toggle client mute state   | Path: `{clientId}`            | `object` { bool IsMuted }     | 200 OK      |
-| `PUT`  | `/clients/{clientId}/latency`  | `CLIENT_LATENCY`       | Set client latency         | Path: `{clientId}`; Body: `LatencySetRequest`{ int Milliseconds } | `object` { int Latency }    | 200 OK      |
-| `GET`  | `/clients/{clientId}/latency`  | `CLIENT_LATENCY_STATUS`| Get client latency         | Path: `{clientId}`            | `object` { int Latency }    | 200 OK      |
-| `PUT`  | `/clients/{clientId}/zone`     | `CLIENT_ZONE`          | Assign client to zone      | Path: `{clientId}`; Body: `AssignZoneRequest`{ int ZoneId } (1-based) | `object` (null)           | 202 Accepted|
-| `GET`  | `/clients/{clientId}/zone`     | `CLIENT_ZONE_STATUS`   | Get client assigned zone   | Path: `{clientId}`            | `object` { int? ZoneId }    | 200 OK      |
-| `PUT`  | `/clients/{clientId}/name`     | `CLIENT_NAME`        | Rename client in Snapcast  | Path: `{clientId}`; Body: `RenameRequest`{ string Name } | `object` { string Name }      | 200 OK      |
+**Modern Design Philosophy:** Matches zones endpoints with direct primitive responses and zero request objects for maximum consistency and simplicity.
+
+| Method | Path                                    | Command/Status ID      | Description                | Request Body / Params           | Success Response (Direct Primitive) | HTTP Status |
+| :----- | :-------------------------------------- | :--------------------- | :------------------------- | :------------------------------ | :----------------------------------- | :---------- |
+| `GET`  | `/clients`                              | -                      | List discovered clients    | Query: `?page=1&size=20`        | `Page<Client>`                       | 200 OK      |
+| `GET`  | `/clients/{clientId}`                   | `CLIENT_STATE` (Full)  | Get details for a client   | Path: `{clientId}` (int)         | `ClientState`                        | 200 OK      |
+| `PUT`  | `/clients/{clientId}/volume`            | `CLIENT_VOLUME`        | Set client volume          | Path: `{clientId}`; Body: `int` (0-100) | `int` (volume level)              | 200 OK      |
+| `GET`  | `/clients/{clientId}/volume`            | `CLIENT_VOLUME_STATUS` | Get client volume          | Path: `{clientId}`               | `int` (volume level)                 | 200 OK      |
+| `POST` | `/clients/{clientId}/volume/up`         | `CLIENT_VOLUME_UP`     | Increase client volume     | Path: `{clientId}`; Optional Query: `?step=5` | `int` (new volume)            | 200 OK      |
+| `POST` | `/clients/{clientId}/volume/down`       | `CLIENT_VOLUME_DOWN`   | Decrease client volume     | Path: `{clientId}`; Optional Query: `?step=5` | `int` (new volume)            | 200 OK      |
+| `PUT`  | `/clients/{clientId}/mute`              | `CLIENT_MUTE`          | Set client mute state      | Path: `{clientId}`; Body: `bool` | `bool` (mute state)                  | 200 OK      |
+| `GET`  | `/clients/{clientId}/mute`              | `CLIENT_MUTE_STATUS`   | Get client mute state      | Path: `{clientId}`               | `bool` (mute state)                  | 200 OK      |
+| `POST` | `/clients/{clientId}/mute/toggle`       | `CLIENT_MUTE_TOGGLE`   | Toggle client mute state   | Path: `{clientId}`               | `bool` (new mute state)              | 200 OK      |
+| `PUT`  | `/clients/{clientId}/latency`           | `CLIENT_LATENCY`       | Set client latency         | Path: `{clientId}`; Body: `int` (ms) | `int` (latency)                  | 200 OK      |
+| `GET`  | `/clients/{clientId}/latency`           | `CLIENT_LATENCY_STATUS`| Get client latency         | Path: `{clientId}`               | `int` (latency)                      | 200 OK      |
+| `PUT`  | `/clients/{clientId}/zone`              | `CLIENT_ZONE`          | Assign client to zone      | Path: `{clientId}`; Body: `int` (zoneId, 1-based) | No content                     | 204 No Content |
+| `GET`  | `/clients/{clientId}/zone`              | `CLIENT_ZONE_STATUS`   | Get client assigned zone   | Path: `{clientId}`               | `int?` (zoneId)                      | 200 OK      |
+| `PUT`  | `/clients/{clientId}/name`              | `CLIENT_NAME`          | Rename client in Snapcast  | Path: `{clientId}`; Body: `string` (name) | `string` (name)                | 200 OK      |
+
+**Modern API Benefits:**
+
+* **Primitive Returns:** Volume endpoints return `int` directly (e.g., `65`) instead of `{"volume": 65}`
+* **Boolean States:** Mute returns `bool` directly (e.g., `true`) instead of `{"muted": true}`
+* **Direct Parameters:** Use `int volume` instead of `{"level": 65}` request objects
+* **Consistent Design:** Matches zones endpoints exactly for perfect API consistency
+* **Zero Request Objects:** All operations use direct parameter binding
 
 ### 10.4.4. Media Management Endpoints
 
@@ -237,11 +247,11 @@ Endpoints for browsing available media sources (initially Subsonic and Radio).
 | :----- | :-------------------------------------- | :----------------------------- | :-------------------------------- |
 | `GET`  | `/media/sources`                        | List configured media sources  | `List<MediaSourceInfo>` { string Id, string Type, string Name } |
 | `GET`  | `/media/playlists`                      | List all available playlists   | Paginated `List<PlaylistInfo>`    |
-| `GET`  | `/media/playlists/{playlistIdOrIndex}`  | Get details for a playlist     | `PlaylistWithTracks` { PlaylistInfo Info, List<TrackInfo> Tracks } |
-| `GET`  | `/media/playlists/{playlistIdOrIndex}/tracks` | List tracks in a playlist    | Paginated `List<TrackInfo>`       |
-| `GET`  | `/media/tracks/{trackId}`               | Get details for a track        | `TrackInfo`                       |
+| `GET`  | `/media/playlists/{playlistIndex}`  | Get details for a playlist     | `PlaylistWithTracks` { PlaylistInfo Info, List<TrackInfo> Tracks } |
+| `GET`  | `/media/playlists/{playlistIndex}/tracks` | List tracks in a playlist    | Paginated `List<TrackInfo>`       |
+| `GET`  | `/media/tracks/{trackIndex}`               | Get details for a track        | `TrackInfo`                       |
 
-*(Note: `playlistIdOrIndex` accepts `1` or `"radio"` for the Radio playlist, `2+` or Subsonic IDs for others. `trackId` format depends on the source.)*
+*(Note: `playlistIndex` accepts `1` for the Radio playlist, `2+` for others.*
 
 ## 10.5. Request and Response Format
 
@@ -327,7 +337,7 @@ Error responses include the `ApiError` structure in the response body.
 
 Endpoints returning collections support standard query parameters:
 
-* `?page=1&pageSize=20`
+* `?page=1&size=20`
 * `?sortBy=name&sortOrder=asc`
 * `?filterProperty=value` (Specific filters TBD per resource)
 
@@ -339,7 +349,7 @@ Paginated responses include metadata:
   "data": {
     "items": [ /* array of resources */ ],
     "pagination": {
-      "page": 1, "pageSize": 20, "totalItems": 53, "totalPages": 3
+      "page": 1, "size": 20, "totalItems": 53, "totalPages": 3
     }
   }, /* ... */
 }
