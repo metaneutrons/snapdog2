@@ -18,7 +18,7 @@ using SnapDog2.Server.Features.Clients.Queries;
 [Authorize]
 [Produces("application/json")]
 [Tags("Clients")]
-public class ClientsController : ControllerBase
+public partial class ClientsController : ControllerBase
 {
     private readonly IMediator _mediator;
     private readonly ILogger<ClientsController> _logger;
@@ -28,6 +28,10 @@ public class ClientsController : ControllerBase
         _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
+
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // API ENDPOINTS
+    // ═══════════════════════════════════════════════════════════════════════════════
 
     /// <summary>
     /// Get all discovered Snapcast clients.
@@ -43,7 +47,7 @@ public class ClientsController : ControllerBase
 
         if (result.IsFailure)
         {
-            _logger.LogWarning("Failed to get clients: {Error}", result.ErrorMessage);
+            LogFailedToGetClients(result.ErrorMessage ?? "Unknown error");
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
@@ -65,7 +69,7 @@ public class ClientsController : ControllerBase
 
         if (result.IsFailure)
         {
-            _logger.LogWarning("Failed to get client {ClientId}: {Error}", clientId, result.ErrorMessage);
+            LogFailedToGetClient(clientId, result.ErrorMessage ?? "Unknown error");
             return NotFound($"Client {clientId} not found");
         }
 
@@ -92,12 +96,7 @@ public class ClientsController : ControllerBase
 
         if (result.IsFailure)
         {
-            _logger.LogWarning(
-                "Failed to set client {ClientId} volume to {Volume}: {Error}",
-                clientId,
-                volume,
-                result.ErrorMessage
-            );
+            LogFailedToSetClientVolume(clientId, volume, result.ErrorMessage ?? "Unknown error");
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
@@ -119,7 +118,7 @@ public class ClientsController : ControllerBase
 
         if (result.IsFailure)
         {
-            _logger.LogWarning("Failed to get client {ClientId} volume: {Error}", clientId, result.ErrorMessage);
+            LogFailedToGetClientVolume(clientId, result.ErrorMessage ?? "Unknown error");
             return NotFound($"Client {clientId} not found");
         }
 
@@ -147,11 +146,7 @@ public class ClientsController : ControllerBase
 
         if (clientResult.IsFailure)
         {
-            _logger.LogWarning(
-                "Failed to get client {ClientId} for volume up: {Error}",
-                clientId,
-                clientResult.ErrorMessage
-            );
+            LogFailedToGetClientForVolumeUp(clientId, clientResult.ErrorMessage ?? "Unknown error");
             return NotFound($"Client {clientId} not found");
         }
 
@@ -161,7 +156,7 @@ public class ClientsController : ControllerBase
 
         if (result.IsFailure)
         {
-            _logger.LogWarning("Failed to increase client {ClientId} volume: {Error}", clientId, result.ErrorMessage);
+            LogFailedToIncreaseClientVolume(clientId, result.ErrorMessage ?? "Unknown error");
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
@@ -189,11 +184,7 @@ public class ClientsController : ControllerBase
 
         if (clientResult.IsFailure)
         {
-            _logger.LogWarning(
-                "Failed to get client {ClientId} for volume down: {Error}",
-                clientId,
-                clientResult.ErrorMessage
-            );
+            LogFailedToGetClientForVolumeDown(clientId, clientResult.ErrorMessage ?? "Unknown error");
             return NotFound($"Client {clientId} not found");
         }
 
@@ -203,7 +194,7 @@ public class ClientsController : ControllerBase
 
         if (result.IsFailure)
         {
-            _logger.LogWarning("Failed to decrease client {ClientId} volume: {Error}", clientId, result.ErrorMessage);
+            LogFailedToDecreaseClientVolume(clientId, result.ErrorMessage ?? "Unknown error");
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
@@ -226,12 +217,7 @@ public class ClientsController : ControllerBase
 
         if (result.IsFailure)
         {
-            _logger.LogWarning(
-                "Failed to set client {ClientId} mute to {Muted}: {Error}",
-                clientId,
-                muted,
-                result.ErrorMessage
-            );
+            LogFailedToSetClientMute(clientId, muted, result.ErrorMessage ?? "Unknown error");
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
@@ -253,7 +239,7 @@ public class ClientsController : ControllerBase
 
         if (result.IsFailure)
         {
-            _logger.LogWarning("Failed to get client {ClientId} mute state: {Error}", clientId, result.ErrorMessage);
+            LogFailedToGetClientMuteState(clientId, result.ErrorMessage ?? "Unknown error");
             return NotFound($"Client {clientId} not found");
         }
 
@@ -275,7 +261,7 @@ public class ClientsController : ControllerBase
 
         if (result.IsFailure)
         {
-            _logger.LogWarning("Failed to toggle client {ClientId} mute: {Error}", clientId, result.ErrorMessage);
+            LogFailedToToggleClientMute(clientId, result.ErrorMessage ?? "Unknown error");
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
@@ -285,11 +271,7 @@ public class ClientsController : ControllerBase
 
         if (clientResult.IsFailure)
         {
-            _logger.LogWarning(
-                "Failed to get client {ClientId} after mute toggle: {Error}",
-                clientId,
-                clientResult.ErrorMessage
-            );
+            LogFailedToGetClientAfterMuteToggle(clientId, clientResult.ErrorMessage ?? "Unknown error");
             return Problem(clientResult.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
@@ -316,12 +298,7 @@ public class ClientsController : ControllerBase
 
         if (result.IsFailure)
         {
-            _logger.LogWarning(
-                "Failed to set client {ClientId} latency to {Latency}ms: {Error}",
-                clientId,
-                latency,
-                result.ErrorMessage
-            );
+            LogFailedToSetClientLatency(clientId, latency, result.ErrorMessage ?? "Unknown error");
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
@@ -343,7 +320,7 @@ public class ClientsController : ControllerBase
 
         if (result.IsFailure)
         {
-            _logger.LogWarning("Failed to get client {ClientId} latency: {Error}", clientId, result.ErrorMessage);
+            LogFailedToGetClientLatency(clientId, result.ErrorMessage ?? "Unknown error");
             return NotFound($"Client {clientId} not found");
         }
 
@@ -370,12 +347,7 @@ public class ClientsController : ControllerBase
 
         if (result.IsFailure)
         {
-            _logger.LogWarning(
-                "Failed to assign client {ClientId} to zone {ZoneId}: {Error}",
-                clientId,
-                zoneId,
-                result.ErrorMessage
-            );
+            LogFailedToAssignClientToZone(clientId, zoneId, result.ErrorMessage ?? "Unknown error");
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
@@ -397,11 +369,7 @@ public class ClientsController : ControllerBase
 
         if (result.IsFailure)
         {
-            _logger.LogWarning(
-                "Failed to get client {ClientId} zone assignment: {Error}",
-                clientId,
-                result.ErrorMessage
-            );
+            LogFailedToGetClientZoneAssignment(clientId, result.ErrorMessage ?? "Unknown error");
             return NotFound($"Client {clientId} not found");
         }
 
@@ -428,8 +396,59 @@ public class ClientsController : ControllerBase
 
         // Note: This would need a SetClientNameCommand to be implemented
         // For now, return the name as if it was set successfully
-        _logger.LogInformation("Setting client {ClientId} name to '{Name}' (not yet implemented)", clientId, name);
+        LogSettingClientName(clientId, name);
 
         return Task.FromResult<ActionResult<string>>(Ok(name.Trim()));
     }
+
+    [LoggerMessage(11001, LogLevel.Warning, "Failed to get clients: {ErrorMessage}")]
+    private partial void LogFailedToGetClients(string errorMessage);
+
+    [LoggerMessage(11002, LogLevel.Warning, "Failed to get client {ClientId}: {ErrorMessage}")]
+    private partial void LogFailedToGetClient(int clientId, string errorMessage);
+
+    [LoggerMessage(11003, LogLevel.Warning, "Failed to set client {ClientId} volume to {Volume}: {ErrorMessage}")]
+    private partial void LogFailedToSetClientVolume(int clientId, int volume, string errorMessage);
+
+    [LoggerMessage(11004, LogLevel.Warning, "Failed to get client {ClientId} volume: {ErrorMessage}")]
+    private partial void LogFailedToGetClientVolume(int clientId, string errorMessage);
+
+    [LoggerMessage(11005, LogLevel.Warning, "Failed to get client {ClientId} for volume up: {ErrorMessage}")]
+    private partial void LogFailedToGetClientForVolumeUp(int clientId, string errorMessage);
+
+    [LoggerMessage(11006, LogLevel.Warning, "Failed to increase client {ClientId} volume: {ErrorMessage}")]
+    private partial void LogFailedToIncreaseClientVolume(int clientId, string errorMessage);
+
+    [LoggerMessage(11007, LogLevel.Warning, "Failed to get client {ClientId} for volume down: {ErrorMessage}")]
+    private partial void LogFailedToGetClientForVolumeDown(int clientId, string errorMessage);
+
+    [LoggerMessage(11008, LogLevel.Warning, "Failed to decrease client {ClientId} volume: {ErrorMessage}")]
+    private partial void LogFailedToDecreaseClientVolume(int clientId, string errorMessage);
+
+    [LoggerMessage(11009, LogLevel.Warning, "Failed to set client {ClientId} mute to {Muted}: {ErrorMessage}")]
+    private partial void LogFailedToSetClientMute(int clientId, bool muted, string errorMessage);
+
+    [LoggerMessage(11010, LogLevel.Warning, "Failed to get client {ClientId} mute state: {ErrorMessage}")]
+    private partial void LogFailedToGetClientMuteState(int clientId, string errorMessage);
+
+    [LoggerMessage(11011, LogLevel.Warning, "Failed to toggle client {ClientId} mute: {ErrorMessage}")]
+    private partial void LogFailedToToggleClientMute(int clientId, string errorMessage);
+
+    [LoggerMessage(11012, LogLevel.Warning, "Failed to get client {ClientId} after mute toggle: {ErrorMessage}")]
+    private partial void LogFailedToGetClientAfterMuteToggle(int clientId, string errorMessage);
+
+    [LoggerMessage(11013, LogLevel.Warning, "Failed to set client {ClientId} latency to {Latency}ms: {ErrorMessage}")]
+    private partial void LogFailedToSetClientLatency(int clientId, int latency, string errorMessage);
+
+    [LoggerMessage(11014, LogLevel.Warning, "Failed to get client {ClientId} latency: {ErrorMessage}")]
+    private partial void LogFailedToGetClientLatency(int clientId, string errorMessage);
+
+    [LoggerMessage(11015, LogLevel.Warning, "Failed to assign client {ClientId} to zone {ZoneId}: {ErrorMessage}")]
+    private partial void LogFailedToAssignClientToZone(int clientId, int zoneId, string errorMessage);
+
+    [LoggerMessage(11016, LogLevel.Warning, "Failed to get client {ClientId} zone assignment: {ErrorMessage}")]
+    private partial void LogFailedToGetClientZoneAssignment(int clientId, string errorMessage);
+
+    [LoggerMessage(11017, LogLevel.Information, "Setting client {ClientId} name to '{Name}' (not yet implemented)")]
+    private partial void LogSettingClientName(int clientId, string name);
 }

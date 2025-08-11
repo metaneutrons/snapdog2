@@ -26,7 +26,7 @@ using SnapDog2.Server.Features.Zones.Queries;
 [Authorize]
 [Produces("application/json")]
 [Tags("Zones")]
-public class ZonesController : ControllerBase
+public partial class ZonesController : ControllerBase
 {
     private readonly IMediator _mediator;
     private readonly ILogger<ZonesController> _logger;
@@ -61,7 +61,7 @@ public class ZonesController : ControllerBase
 
         if (result.IsFailure)
         {
-            _logger.LogWarning("Failed to get zones: {Error}", result.ErrorMessage);
+            LogFailedToGetZones(result.ErrorMessage ?? "Unknown error");
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
@@ -87,7 +87,7 @@ public class ZonesController : ControllerBase
 
         if (result.IsFailure)
         {
-            _logger.LogWarning("Failed to get zone {ZoneIndex}: {Error}", zoneIndex, result.ErrorMessage);
+            LogFailedToGetZone(zoneIndex, result.ErrorMessage ?? "Unknown error");
             return NotFound($"Zone {zoneIndex} not found");
         }
 
@@ -118,12 +118,7 @@ public class ZonesController : ControllerBase
 
         if (result.IsFailure)
         {
-            _logger.LogWarning(
-                "Failed to set zone {ZoneIndex} volume to {Volume}: {Error}",
-                zoneIndex,
-                volume,
-                result.ErrorMessage
-            );
+            LogFailedToSetZoneVolume(zoneIndex, volume, result.ErrorMessage ?? "Unknown error");
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
@@ -145,7 +140,7 @@ public class ZonesController : ControllerBase
 
         if (result.IsFailure)
         {
-            _logger.LogWarning("Failed to get zone {ZoneIndex} volume: {Error}", zoneIndex, result.ErrorMessage);
+            LogFailedToGetZoneVolume(zoneIndex, result.ErrorMessage ?? "Unknown error");
             return NotFound($"Zone {zoneIndex} not found");
         }
 
@@ -172,7 +167,7 @@ public class ZonesController : ControllerBase
 
         if (result.IsFailure)
         {
-            _logger.LogWarning("Failed to increase zone {ZoneIndex} volume: {Error}", zoneIndex, result.ErrorMessage);
+            LogFailedToIncreaseZoneVolume(zoneIndex, result.ErrorMessage ?? "Unknown error");
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
@@ -203,7 +198,7 @@ public class ZonesController : ControllerBase
 
         if (result.IsFailure)
         {
-            _logger.LogWarning("Failed to decrease zone {ZoneIndex} volume: {Error}", zoneIndex, result.ErrorMessage);
+            LogFailedToDecreaseZoneVolume(zoneIndex, result.ErrorMessage ?? "Unknown error");
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
@@ -234,12 +229,7 @@ public class ZonesController : ControllerBase
 
         if (result.IsFailure)
         {
-            _logger.LogWarning(
-                "Failed to set zone {ZoneIndex} mute to {Muted}: {Error}",
-                zoneIndex,
-                muted,
-                result.ErrorMessage
-            );
+            LogFailedToSetZoneMute(zoneIndex, muted, result.ErrorMessage ?? "Unknown error");
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
@@ -261,7 +251,7 @@ public class ZonesController : ControllerBase
 
         if (result.IsFailure)
         {
-            _logger.LogWarning("Failed to get zone {ZoneIndex} mute state: {Error}", zoneIndex, result.ErrorMessage);
+            LogFailedToGetZoneMuteState(zoneIndex, result.ErrorMessage ?? "Unknown error");
             return NotFound($"Zone {zoneIndex} not found");
         }
 
@@ -283,7 +273,7 @@ public class ZonesController : ControllerBase
 
         if (result.IsFailure)
         {
-            _logger.LogWarning("Failed to toggle zone {ZoneIndex} mute: {Error}", zoneIndex, result.ErrorMessage);
+            LogFailedToToggleZoneMute(zoneIndex, result.ErrorMessage ?? "Unknown error");
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
@@ -313,7 +303,7 @@ public class ZonesController : ControllerBase
 
         if (result.IsFailure)
         {
-            _logger.LogWarning("Failed to play zone {ZoneIndex}: {Error}", zoneIndex, result.ErrorMessage);
+            LogFailedToPlayZone(zoneIndex, result.ErrorMessage ?? "Unknown error");
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
@@ -335,7 +325,7 @@ public class ZonesController : ControllerBase
 
         if (result.IsFailure)
         {
-            _logger.LogWarning("Failed to pause zone {ZoneIndex}: {Error}", zoneIndex, result.ErrorMessage);
+            LogFailedToPauseZone(zoneIndex, result.ErrorMessage ?? "Unknown error");
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
@@ -357,7 +347,7 @@ public class ZonesController : ControllerBase
 
         if (result.IsFailure)
         {
-            _logger.LogWarning("Failed to stop zone {ZoneIndex}: {Error}", zoneIndex, result.ErrorMessage);
+            LogFailedToStopZone(zoneIndex, result.ErrorMessage ?? "Unknown error");
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
@@ -384,15 +374,53 @@ public class ZonesController : ControllerBase
 
         if (result.IsFailure)
         {
-            _logger.LogWarning(
-                "Failed to set zone {ZoneIndex} playlist to {PlaylistIndex}: {Error}",
-                zoneIndex,
-                playlistIndex,
-                result.ErrorMessage
-            );
+            LogFailedToSetZonePlaylist(zoneIndex, playlistIndex, result.ErrorMessage ?? "Unknown error");
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         return NoContent();
     }
+
+    [LoggerMessage(12001, LogLevel.Warning, "Failed to get zones: {ErrorMessage}")]
+    private partial void LogFailedToGetZones(string errorMessage);
+
+    [LoggerMessage(12002, LogLevel.Warning, "Failed to get zone {ZoneIndex}: {ErrorMessage}")]
+    private partial void LogFailedToGetZone(int zoneIndex, string errorMessage);
+
+    [LoggerMessage(12003, LogLevel.Warning, "Failed to set zone {ZoneIndex} volume to {Volume}: {ErrorMessage}")]
+    private partial void LogFailedToSetZoneVolume(int zoneIndex, int volume, string errorMessage);
+
+    [LoggerMessage(12004, LogLevel.Warning, "Failed to get zone {ZoneIndex} volume: {ErrorMessage}")]
+    private partial void LogFailedToGetZoneVolume(int zoneIndex, string errorMessage);
+
+    [LoggerMessage(12005, LogLevel.Warning, "Failed to increase zone {ZoneIndex} volume: {ErrorMessage}")]
+    private partial void LogFailedToIncreaseZoneVolume(int zoneIndex, string errorMessage);
+
+    [LoggerMessage(12006, LogLevel.Warning, "Failed to decrease zone {ZoneIndex} volume: {ErrorMessage}")]
+    private partial void LogFailedToDecreaseZoneVolume(int zoneIndex, string errorMessage);
+
+    [LoggerMessage(12007, LogLevel.Warning, "Failed to set zone {ZoneIndex} mute to {Muted}: {ErrorMessage}")]
+    private partial void LogFailedToSetZoneMute(int zoneIndex, bool muted, string errorMessage);
+
+    [LoggerMessage(12008, LogLevel.Warning, "Failed to get zone {ZoneIndex} mute state: {ErrorMessage}")]
+    private partial void LogFailedToGetZoneMuteState(int zoneIndex, string errorMessage);
+
+    [LoggerMessage(12009, LogLevel.Warning, "Failed to toggle zone {ZoneIndex} mute: {ErrorMessage}")]
+    private partial void LogFailedToToggleZoneMute(int zoneIndex, string errorMessage);
+
+    [LoggerMessage(12010, LogLevel.Warning, "Failed to play zone {ZoneIndex}: {ErrorMessage}")]
+    private partial void LogFailedToPlayZone(int zoneIndex, string errorMessage);
+
+    [LoggerMessage(12011, LogLevel.Warning, "Failed to pause zone {ZoneIndex}: {ErrorMessage}")]
+    private partial void LogFailedToPauseZone(int zoneIndex, string errorMessage);
+
+    [LoggerMessage(12012, LogLevel.Warning, "Failed to stop zone {ZoneIndex}: {ErrorMessage}")]
+    private partial void LogFailedToStopZone(int zoneIndex, string errorMessage);
+
+    [LoggerMessage(
+        12013,
+        LogLevel.Warning,
+        "Failed to set zone {ZoneIndex} playlist to {PlaylistIndex}: {ErrorMessage}"
+    )]
+    private partial void LogFailedToSetZonePlaylist(int zoneIndex, int playlistIndex, string errorMessage);
 }
