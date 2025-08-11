@@ -18,6 +18,7 @@ using Polly;
 using Polly.Retry;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Configuration;
+using SnapDog2.Core.Constants;
 using SnapDog2.Core.Enums;
 using SnapDog2.Core.Helpers;
 using SnapDog2.Core.Models;
@@ -931,17 +932,8 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
 
             var baseTopic = clientConfig.Mqtt.BaseTopic?.TrimEnd('/') ?? string.Empty;
 
-            // Map event type to specific topic
-            var topic = eventType.ToUpperInvariant() switch
-            {
-                "CLIENT_VOLUME_STATUS" => $"{baseTopic}/{clientConfig.Mqtt.VolumeTopic}",
-                "CLIENT_MUTE_STATUS" => $"{baseTopic}/{clientConfig.Mqtt.MuteTopic}",
-                "CLIENT_LATENCY_STATUS" => $"{baseTopic}/{clientConfig.Mqtt.LatencyTopic}",
-                "CLIENT_CONNECTED" => $"{baseTopic}/{clientConfig.Mqtt.ConnectedTopic}",
-                "CLIENT_ZONE_STATUS" => $"{baseTopic}/{clientConfig.Mqtt.ZoneTopic}",
-                "CLIENT_STATE" => $"{baseTopic}/{clientConfig.Mqtt.StateTopic}",
-                _ => null,
-            };
+            // Get the appropriate MQTT topic for this event type
+            var topic = this.GetClientMqttTopic(eventType, clientConfig);
 
             if (topic == null)
             {
@@ -960,6 +952,37 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             this.LogFailedToPublishClientStatus(ex, eventType, clientIndex);
             return Result.Failure($"Failed to publish client status: {ex.Message}");
         }
+    }
+
+    /// <summary>
+    /// Gets the MQTT topic for a client status event type.
+    /// </summary>
+    /// <param name="eventType">The status event type.</param>
+    /// <param name="clientConfig">The client configuration.</param>
+    /// <returns>The MQTT topic string, or null if no mapping exists.</returns>
+    private string? GetClientMqttTopic(string eventType, ClientConfig clientConfig)
+    {
+        var baseTopic = clientConfig.Mqtt.BaseTopic?.TrimEnd('/') ?? string.Empty;
+
+        // Parse the event type to enum for type safety
+        var statusEventType = StatusEventTypeExtensions.FromStatusString(eventType);
+        if (statusEventType == null)
+        {
+            return null;
+        }
+
+        var topicSuffix = statusEventType switch
+        {
+            StatusEventType.ClientVolumeStatus => clientConfig.Mqtt.VolumeTopic,
+            StatusEventType.ClientMuteStatus => clientConfig.Mqtt.MuteTopic,
+            StatusEventType.ClientLatencyStatus => clientConfig.Mqtt.LatencyTopic,
+            StatusEventType.ClientConnected => clientConfig.Mqtt.ConnectedTopic,
+            StatusEventType.ClientZoneStatus => clientConfig.Mqtt.ZoneTopic,
+            StatusEventType.ClientState => clientConfig.Mqtt.StateTopic,
+            _ => null,
+        };
+
+        return topicSuffix != null ? $"{baseTopic}/{topicSuffix}" : null;
     }
 
     /// <summary>
