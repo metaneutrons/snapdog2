@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0 # Full history for GitVersion
 
@@ -53,7 +53,7 @@ jobs:
       # Only proceed if the tag was created from develop branch
       - name: Checkout main branch
         if: steps.verify-branch.outputs.continue == 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0 # Full history for GitVersion
           ref: main
