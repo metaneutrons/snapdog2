@@ -234,7 +234,7 @@ public static class StartupInformationHelper
         if (config.Services.Mqtt.Enabled)
         {
             Console.WriteLine(
-                $"     MQTT: {config.Services.Mqtt.BrokerAddress}:{config.Services.Mqtt.Port} (Client: {config.Services.Mqtt.ClientId})"
+                $"     MQTT: {config.Services.Mqtt.BrokerAddress}:{config.Services.Mqtt.Port} (Client: {config.Services.Mqtt.ClientIndex})"
             );
             Console.WriteLine(
                 $"       SSL: {config.Services.Mqtt.SslEnabled}, Keep Alive: {config.Services.Mqtt.KeepAlive}s"

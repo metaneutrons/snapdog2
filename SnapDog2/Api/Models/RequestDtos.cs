@@ -28,8 +28,8 @@ using System.ComponentModel.DataAnnotations;
 // ❌ REMOVED: SetTrackRequest      → Use: int track (1-based)
 // ❌ REMOVED: StepRequest          → Use: int step = 5
 // ❌ REMOVED: LatencySetRequest    → Use: int latency (ms)
-// ❌ REMOVED: AssignZoneRequest    → Use: int zoneId
-// ❌ REMOVED: ZoneAssignmentRequest → Use: int zoneId
+// ❌ REMOVED: AssignZoneRequest    → Use: int zoneIndex
+// ❌ REMOVED: ZoneAssignmentRequest → Use: int zoneIndex
 // ❌ REMOVED: RenameRequest        → Use: string name
 //
 // TOTAL ELIMINATION: 11 request DTOs → 0 (100% reduction!)

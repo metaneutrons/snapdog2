@@ -51,7 +51,7 @@ public static class MqttServiceConfiguration
                         return false;
                     }
 
-                    if (string.IsNullOrWhiteSpace(config.Services.Mqtt.ClientId))
+                    if (string.IsNullOrWhiteSpace(config.Services.Mqtt.ClientIndex))
                     {
                         return false;
                     }
