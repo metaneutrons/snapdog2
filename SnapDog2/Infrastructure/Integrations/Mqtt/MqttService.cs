@@ -934,11 +934,11 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             // Map event type to specific topic
             var topic = eventType.ToUpperInvariant() switch
             {
-                "CLIENT_VOLUME" => $"{baseTopic}/{clientConfig.Mqtt.VolumeTopic}",
-                "CLIENT_MUTE" => $"{baseTopic}/{clientConfig.Mqtt.MuteTopic}",
-                "CLIENT_LATENCY" => $"{baseTopic}/{clientConfig.Mqtt.LatencyTopic}",
+                "CLIENT_VOLUME_STATUS" => $"{baseTopic}/{clientConfig.Mqtt.VolumeTopic}",
+                "CLIENT_MUTE_STATUS" => $"{baseTopic}/{clientConfig.Mqtt.MuteTopic}",
+                "CLIENT_LATENCY_STATUS" => $"{baseTopic}/{clientConfig.Mqtt.LatencyTopic}",
                 "CLIENT_CONNECTED" => $"{baseTopic}/{clientConfig.Mqtt.ConnectedTopic}",
-                "CLIENT_ZONE_ASSIGNMENT" => $"{baseTopic}/{clientConfig.Mqtt.ZoneTopic}",
+                "CLIENT_ZONE_STATUS" => $"{baseTopic}/{clientConfig.Mqtt.ZoneTopic}",
                 "CLIENT_STATE" => $"{baseTopic}/{clientConfig.Mqtt.StateTopic}",
                 _ => null,
             };
@@ -999,14 +999,16 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             // Map event type to specific topic
             var topic = eventType.ToUpperInvariant() switch
             {
-                "ZONE_VOLUME" => $"{baseTopic}/{zoneConfig.Mqtt.VolumeTopic}",
-                "ZONE_MUTE" => $"{baseTopic}/{zoneConfig.Mqtt.MuteTopic}",
-                "ZONE_PLAYBACK_STATE" => $"{baseTopic}/{zoneConfig.Mqtt.ControlTopic}",
-                "ZONE_TRACK" => $"{baseTopic}/{zoneConfig.Mqtt.TrackInfoTopic}",
-                "ZONE_PLAYLIST" => $"{baseTopic}/{zoneConfig.Mqtt.PlaylistInfoTopic}",
+                "VOLUME_STATUS" => $"{baseTopic}/{zoneConfig.Mqtt.VolumeTopic}",
+                "MUTE_STATUS" => $"{baseTopic}/{zoneConfig.Mqtt.MuteTopic}",
+                "PLAYBACK_STATE" => $"{baseTopic}/{zoneConfig.Mqtt.ControlTopic}",
+                "TRACK_INDEX" => $"{baseTopic}/{zoneConfig.Mqtt.TrackTopic}",
+                "TRACK_INFO" => $"{baseTopic}/{zoneConfig.Mqtt.TrackInfoTopic}",
+                "PLAYLIST_INDEX" => $"{baseTopic}/{zoneConfig.Mqtt.PlaylistTopic}",
+                "PLAYLIST_INFO" => $"{baseTopic}/{zoneConfig.Mqtt.PlaylistInfoTopic}",
                 "TRACK_REPEAT_STATUS" => $"{baseTopic}/{zoneConfig.Mqtt.TrackRepeatTopic}",
                 "PLAYLIST_REPEAT_STATUS" => $"{baseTopic}/{zoneConfig.Mqtt.PlaylistRepeatTopic}",
-                "ZONE_SHUFFLE_MODE" => $"{baseTopic}/{zoneConfig.Mqtt.PlaylistShuffleTopic}",
+                "PLAYLIST_SHUFFLE_STATUS" => $"{baseTopic}/{zoneConfig.Mqtt.PlaylistShuffleTopic}",
                 "ZONE_STATE" => $"{baseTopic}/{zoneConfig.Mqtt.StateTopic}",
                 _ => null,
             };
