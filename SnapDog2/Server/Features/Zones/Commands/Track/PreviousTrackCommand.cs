@@ -8,7 +8,7 @@ using SnapDog2.Core.Models;
 /// <summary>
 /// Command to skip to the previous track in a zone.
 /// </summary>
-[CommandId("TRACK_PREVIOUS", "ZT-004")]
+[CommandId("TRACK_PREVIOUS")]
 public record PreviousTrackCommand : ICommand<Result>
 {
     /// <summary>

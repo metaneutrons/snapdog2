@@ -8,7 +8,7 @@ using SnapDog2.Core.Models;
 /// <summary>
 /// Command to skip to the previous playlist in a zone.
 /// </summary>
-[CommandId("PLAYLIST_PREVIOUS", "ZPL-004")]
+[CommandId("PLAYLIST_PREVIOUS")]
 public record PreviousPlaylistCommand : ICommand<Result>
 {
     /// <summary>
