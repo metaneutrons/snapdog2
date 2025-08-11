@@ -919,7 +919,10 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
         {
             "CLIENT_VOLUME_STATUS" when payload is int volume => ("CLIENT_VOLUME_STATUS", Math.Clamp(volume, 0, 100)),
             "CLIENT_MUTE_STATUS" when payload is bool mute => ("CLIENT_MUTE_STATUS", mute ? 1 : 0),
-            "CLIENT_LATENCY_STATUS" when payload is int latency => ("CLIENT_LATENCY_STATUS", Math.Clamp(latency, 0, 65535)),
+            "CLIENT_LATENCY_STATUS" when payload is int latency => (
+                "CLIENT_LATENCY_STATUS",
+                Math.Clamp(latency, 0, 65535)
+            ),
             "CLIENT_CONNECTED" when payload is bool connected => ("CLIENT_CONNECTED", connected ? 1 : 0),
             "CLIENT_ZONE_STATUS" when payload is int zone => ("CLIENT_ZONE_STATUS", Math.Clamp(zone, 0, 255)),
             _ => (null, payload!),
@@ -939,7 +942,10 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             "TRACK_INDEX" when payload is int track => ("TRACK_INDEX", Math.Clamp(track, 0, 255)),
             "PLAYLIST_INDEX" when payload is int playlist => ("PLAYLIST_INDEX", Math.Clamp(playlist, 0, 255)),
             "TRACK_REPEAT_STATUS" when payload is bool trackRepeat => ("TRACK_REPEAT_STATUS", trackRepeat ? 1 : 0),
-            "PLAYLIST_REPEAT_STATUS" when payload is bool playlistRepeat => ("PLAYLIST_REPEAT_STATUS", playlistRepeat ? 1 : 0),
+            "PLAYLIST_REPEAT_STATUS" when payload is bool playlistRepeat => (
+                "PLAYLIST_REPEAT_STATUS",
+                playlistRepeat ? 1 : 0
+            ),
             "PLAYLIST_SHUFFLE_STATUS" when payload is bool shuffle => ("PLAYLIST_SHUFFLE_STATUS", shuffle ? 1 : 0),
             _ => (null, payload!),
         };
