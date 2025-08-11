@@ -52,10 +52,10 @@ public interface ISnapcastService : IAsyncDisposable
     Task<Result> InitializeAsync(CancellationToken cancellationToken = default);
     Task<Result<SnapcastServerStatus>> GetServerStatusAsync(CancellationToken cancellationToken = default);
     Task<Result<VersionDetails>> GetRpcVersionAsync(CancellationToken cancellationToken = default);
-    Task<Result> SetClientVolumeAsync(string snapcastClientId, int volume, CancellationToken cancellationToken = default);
-    Task<Result> SetClientMuteAsync(string snapcastClientId, bool muted, CancellationToken cancellationToken = default);
-    Task<Result> SetClientGroupAsync(string snapcastClientId, string groupId, CancellationToken cancellationToken = default);
-    Task<Result<string>> CreateGroupAsync(IEnumerable<string> clientIds, CancellationToken cancellationToken = default);
+    Task<Result> SetClientVolumeAsync(string snapcastClientIndex, int volume, CancellationToken cancellationToken = default);
+    Task<Result> SetClientMuteAsync(string snapcastClientIndex, bool muted, CancellationToken cancellationToken = default);
+    Task<Result> SetClientGroupAsync(string snapcastClientIndex, string groupId, CancellationToken cancellationToken = default);
+    Task<Result<string>> CreateGroupAsync(IEnumerable<string> clientIndexs, CancellationToken cancellationToken = default);
     Task<Result> DeleteGroupAsync(string groupId, CancellationToken cancellationToken = default);
 }
 ```
@@ -196,7 +196,7 @@ public class SnapcastStateRepository : ISnapcastStateRepository
 ```csharp
 public record SetSnapcastClientVolumeCommand : ICommand<Result>
 {
-    public required string ClientId { get; init; }
+    public required string ClientIndex { get; init; }
     [Range(0, 100)] public required int Volume { get; init; }
     public CommandSource Source { get; init; } = CommandSource.Api;
 }
@@ -209,7 +209,7 @@ public class SetSnapcastClientVolumeCommandValidator : AbstractValidator<SetSnap
 {
     public SetSnapcastClientVolumeCommandValidator()
     {
-        RuleFor(x => x.ClientId).NotEmpty().WithMessage("Client ID is required");
+        RuleFor(x => x.ClientIndex).NotEmpty().WithMessage("Client ID is required");
         RuleFor(x => x.Volume).InclusiveBetween(0, 100).WithMessage("Volume must be between 0 and 100");
     }
 }
@@ -232,14 +232,14 @@ public class SetSnapcastClientVolumeCommandHandler : ICommandHandler<SetSnapcast
 {
     public async Task<Result> Handle(SetSnapcastClientVolumeCommand command, CancellationToken cancellationToken)
     {
-        LogSettingClientVolume(command.ClientId, command.Volume, command.Source.ToString());
+        LogSettingClientVolume(command.ClientIndex, command.Volume, command.Source.ToString());
 
         var result = await _snapcastService.SetClientVolumeAsync(
-            command.ClientId, command.Volume, cancellationToken);
+            command.ClientIndex, command.Volume, cancellationToken);
 
         if (result.IsFailure)
         {
-            LogSetClientVolumeFailed(command.ClientId, new InvalidOperationException(result.ErrorMessage ?? "Unknown error"));
+            LogSetClientVolumeFailed(command.ClientIndex, new InvalidOperationException(result.ErrorMessage ?? "Unknown error"));
             return Result.Failure(result.ErrorMessage ?? "Unknown error");
         }
 
@@ -256,9 +256,9 @@ public class SetSnapcastClientVolumeCommandHandler : ICommandHandler<SetSnapcast
 // Client Events
 public record SnapcastClientConnectedNotification(SnapClient Client) : SnapcastNotification;
 public record SnapcastClientDisconnectedNotification(SnapClient Client) : SnapcastNotification;
-public record SnapcastClientVolumeChangedNotification(string ClientId, ClientVolume Volume) : SnapcastNotification;
-public record SnapcastClientLatencyChangedNotification(string ClientId, int LatencyMs) : SnapcastNotification;
-public record SnapcastClientNameChangedNotification(string ClientId, string Name) : SnapcastNotification;
+public record SnapcastClientVolumeChangedNotification(string ClientIndex, ClientVolume Volume) : SnapcastNotification;
+public record SnapcastClientLatencyChangedNotification(string ClientIndex, int LatencyMs) : SnapcastNotification;
+public record SnapcastClientNameChangedNotification(string ClientIndex, string Name) : SnapcastNotification;
 
 // Group Events
 public record SnapcastGroupMuteChangedNotification(string GroupId, bool Muted) : SnapcastNotification;
@@ -294,13 +294,13 @@ public class SnapcastController : ControllerBase
             : StatusCode(500, ApiResponse<SnapcastServerStatus>.CreateError("SNAPCAST_ERROR", result.ErrorMessage));
     }
 
-    [HttpPost("clients/{clientId}/volume")]
-    public async Task<ActionResult<ApiResponse<object>>> SetClientVolume(string clientId, [FromBody] SetVolumeRequest request)
+    [HttpPost("clients/{clientIndex}/volume")]
+    public async Task<ActionResult<ApiResponse<object>>> SetClientVolume(string clientIndex, [FromBody] SetVolumeRequest request)
     {
         var handler = _serviceProvider.GetService<SetSnapcastClientVolumeCommandHandler>();
         var command = new SetSnapcastClientVolumeCommand
         {
-            ClientId = clientId,
+            ClientIndex = clientIndex,
             Volume = request.Volume,
             Source = CommandSource.Api
         };

@@ -97,7 +97,7 @@ private async Task Internal_UpdatePlaybackStatus(PlaybackStatus newStatus)
         var previousStatus = _currentState.Status;
         // Create new state record
         _currentState = _currentState with { Status = newStatus };
-        _logger.LogInformation("Zone {ZoneId} playback state changed from {OldStatus} to {NewStatus}", Id, previousStatus, newStatus);
+        _logger.LogInformation("Zone {ZoneIndex} playback state changed from {OldStatus} to {NewStatus}", Id, previousStatus, newStatus);
 
         // Publish notification AFTER updating internal state
         await _mediator.Publish(new StatusChangedNotification("PLAYBACK_STATE", $"zone_{Id}", newStatus), CancellationToken.None).ConfigureAwait(false);
@@ -134,7 +134,7 @@ The flow maintains unidirectional data updates and clear responsibility:
 3. **Update Raw State Repository:** `SnapcastService` updates the `SnapcastStateRepository` with the new raw `Client` model data.
 4. **Publish Internal Notification:** `SnapcastService` publishes a Cortex.Mediator `SnapcastClientConnectedNotification` (containing the raw `Client` model).
 5. **Server Layer Handler:** `ClientManager` (as `INotificationHandler`) receives the notification.
-6. **Update SnapDog2 Domain State:** `ClientManager` acquires its lock, finds/creates the internal mapping for the client, updates its internal `ClientState` record (mapping fields from the raw model and adding SnapDog2 context like ZoneId), and releases the lock.
+6. **Update SnapDog2 Domain State:** `ClientManager` acquires its lock, finds/creates the internal mapping for the client, updates its internal `ClientState` record (mapping fields from the raw model and adding SnapDog2 context like ZoneIndex), and releases the lock.
 7. **Publish Domain Status Notification:** `ClientManager` (or the handler) publishes a domain-level Cortex.Mediator `StatusChangedNotification("CLIENT_CONNECTED", $"client_{internalId}", true)`.
 8. **External Notification Handlers:** `MqttStatusNotifier`, `KnxStatusNotifier` receive the `StatusChangedNotification` and publish the update to MQTT/KNX.
 

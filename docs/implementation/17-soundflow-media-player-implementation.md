@@ -36,10 +36,10 @@ This document details the complete implementation of the SoundFlow-based media p
 ```mermaid
 classDiagram
     class IMediaPlayerService {
-        +PlayAsync(zoneId, trackInfo)
-        +StopAsync(zoneId)
-        +PauseAsync(zoneId)
-        +GetStatusAsync(zoneId)
+        +PlayAsync(zoneIndex, trackInfo)
+        +StopAsync(zoneIndex)
+        +PauseAsync(zoneIndex)
+        +GetStatusAsync(zoneIndex)
         +GetAllStatusAsync()
         +StopAllAsync()
         +GetStatisticsAsync()
@@ -50,10 +50,10 @@ classDiagram
         -SoundFlowConfig _config
         -IHttpClientFactory _httpClientFactory
         -IMediator _mediator
-        +PlayAsync(zoneId, trackInfo)
-        +StopAsync(zoneId)
-        +PauseAsync(zoneId)
-        +GetStatusAsync(zoneId)
+        +PlayAsync(zoneIndex, trackInfo)
+        +StopAsync(zoneIndex)
+        +PauseAsync(zoneIndex)
+        +GetStatusAsync(zoneIndex)
     }
 
     class MediaPlayer {
@@ -234,7 +234,7 @@ public PlaybackStatus GetStatus()
 {
     return new PlaybackStatus
     {
-        ZoneId = _zoneId,
+        ZoneIndex = _zoneIndex,
         IsPlaying = _audioGraph != null && !_disposed,
         CurrentTrack = _currentTrack,
         AudioFormat = new AudioFormat(_config.SampleRate, _config.BitDepth, _config.Channels),
@@ -249,9 +249,9 @@ public PlaybackStatus GetStatus()
 
 ```csharp
 // Publish playback events via Cortex.Mediator
-await _mediator.PublishAsync(new TrackPlaybackStartedNotification(zoneId, trackInfo), cancellationToken);
-await _mediator.PublishAsync(new TrackPlaybackStoppedNotification(zoneId), cancellationToken);
-await _mediator.PublishAsync(new TrackPlaybackPausedNotification(zoneId), cancellationToken);
+await _mediator.PublishAsync(new TrackPlaybackStartedNotification(zoneIndex, trackInfo), cancellationToken);
+await _mediator.PublishAsync(new TrackPlaybackStoppedNotification(zoneIndex), cancellationToken);
+await _mediator.PublishAsync(new TrackPlaybackPausedNotification(zoneIndex), cancellationToken);
 ```
 
 ## 17.7. 🔍 **PLACEHOLDER INTERFACES**

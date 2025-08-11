@@ -68,104 +68,104 @@ public partial class MqttCommandMapper
 
     private object? MapTopicToCommand(string topic, string payload)
     {
-        // Parse topic structure: snapdog/zones/{zoneId}/volume/set
+        // Parse topic structure: snapdog/zones/{zoneIndex}/volume/set
         var parts = topic.Split('/');
 
         if (parts.Length >= 4 && parts[0] == "snapdog")
         {
-            if (parts[1] == "zones" && int.TryParse(parts[2], out var zoneId))
+            if (parts[1] == "zones" && int.TryParse(parts[2], out var zoneIndex))
             {
-                return MapZoneCommand(zoneId, parts[3..], payload);
+                return MapZoneCommand(zoneIndex, parts[3..], payload);
             }
-            else if (parts[1] == "clients" && int.TryParse(parts[2], out var clientId))
+            else if (parts[1] == "clients" && int.TryParse(parts[2], out var clientIndex))
             {
-                return MapClientCommand(clientId, parts[3..], payload);
+                return MapClientCommand(clientIndex, parts[3..], payload);
             }
         }
 
         return null;
     }
 
-    private object? MapZoneCommand(int zoneId, string[] commandParts, string payload)
+    private object? MapZoneCommand(int zoneIndex, string[] commandParts, string payload)
     {
         return commandParts switch
         {
             ["volume", "set"] => new SetZoneVolumeCommand
             {
-                ZoneId = zoneId,
+                ZoneIndex = zoneIndex,
                 Volume = int.Parse(payload),
                 Source = CommandSource.Mqtt
             },
 
             ["mute", "set"] => payload.ToLowerInvariant() switch
             {
-                "toggle" => new ToggleZoneMuteCommand { ZoneId = zoneId, Source = CommandSource.Mqtt },
+                "toggle" => new ToggleZoneMuteCommand { ZoneIndex = zoneIndex, Source = CommandSource.Mqtt },
                 _ => new SetZoneMuteCommand
                 {
-                    ZoneId = zoneId,
+                    ZoneIndex = zoneIndex,
                     Enabled = ParseBooleanPayload(payload),
                     Source = CommandSource.Mqtt
                 }
             },
 
-            ["control", "set"] => MapControlCommand(zoneId, payload),
+            ["control", "set"] => MapControlCommand(zoneIndex, payload),
 
             ["track", "set"] => payload switch
             {
-                "+" => new NextTrackCommand { ZoneId = zoneId, Source = CommandSource.Mqtt },
-                "-" => new PreviousTrackCommand { ZoneId = zoneId, Source = CommandSource.Mqtt },
+                "+" => new NextTrackCommand { ZoneIndex = zoneIndex, Source = CommandSource.Mqtt },
+                "-" => new PreviousTrackCommand { ZoneIndex = zoneIndex, Source = CommandSource.Mqtt },
                 _ when int.TryParse(payload, out var trackIndex) =>
-                    new SetTrackCommand { ZoneId = zoneId, TrackIndex = trackIndex, Source = CommandSource.Mqtt },
+                    new SetTrackCommand { ZoneIndex = zoneIndex, TrackIndex = trackIndex, Source = CommandSource.Mqtt },
                 _ => null
             },
 
             ["playlist", "set"] => payload switch
             {
-                "+" => new NextPlaylistCommand { ZoneId = zoneId, Source = CommandSource.Mqtt },
-                "-" => new PreviousPlaylistCommand { ZoneId = zoneId, Source = CommandSource.Mqtt },
+                "+" => new NextPlaylistCommand { ZoneIndex = zoneIndex, Source = CommandSource.Mqtt },
+                "-" => new PreviousPlaylistCommand { ZoneIndex = zoneIndex, Source = CommandSource.Mqtt },
                 _ when int.TryParse(payload, out var playlistIndex) =>
-                    new SetPlaylistCommand { ZoneId = zoneId, PlaylistIndex = playlistIndex, Source = CommandSource.Mqtt },
-                _ => new SetPlaylistCommand { ZoneId = zoneId, PlaylistIndex = payload, Source = CommandSource.Mqtt }
+                    new SetPlaylistCommand { ZoneIndex = zoneIndex, PlaylistIndex = playlistIndex, Source = CommandSource.Mqtt },
+                _ => new SetPlaylistCommand { ZoneIndex = zoneIndex, PlaylistIndex = payload, Source = CommandSource.Mqtt }
             },
 
             _ => null
         };
     }
 
-    private object? MapControlCommand(int zoneId, string payload)
+    private object? MapControlCommand(int zoneIndex, string payload)
     {
         return payload.ToLowerInvariant() switch
         {
-            "play" => new PlayCommand { ZoneId = zoneId, Source = CommandSource.Mqtt },
-            "pause" => new PauseCommand { ZoneId = zoneId, Source = CommandSource.Mqtt },
-            "stop" => new StopCommand { ZoneId = zoneId, Source = CommandSource.Mqtt },
-            "next" or "track_next" => new NextTrackCommand { ZoneId = zoneId, Source = CommandSource.Mqtt },
-            "previous" or "track_previous" => new PreviousTrackCommand { ZoneId = zoneId, Source = CommandSource.Mqtt },
-            "mute_toggle" => new ToggleZoneMuteCommand { ZoneId = zoneId, Source = CommandSource.Mqtt },
-            "shuffle_toggle" => new TogglePlaylistShuffleCommand { ZoneId = zoneId, Source = CommandSource.Mqtt },
-            _ when payload.StartsWith("volume ") => ParseVolumeCommand(zoneId, payload),
-            _ when payload.StartsWith("track ") => ParseTrackCommand(zoneId, payload),
+            "play" => new PlayCommand { ZoneIndex = zoneIndex, Source = CommandSource.Mqtt },
+            "pause" => new PauseCommand { ZoneIndex = zoneIndex, Source = CommandSource.Mqtt },
+            "stop" => new StopCommand { ZoneIndex = zoneIndex, Source = CommandSource.Mqtt },
+            "next" or "track_next" => new NextTrackCommand { ZoneIndex = zoneIndex, Source = CommandSource.Mqtt },
+            "previous" or "track_previous" => new PreviousTrackCommand { ZoneIndex = zoneIndex, Source = CommandSource.Mqtt },
+            "mute_toggle" => new ToggleZoneMuteCommand { ZoneIndex = zoneIndex, Source = CommandSource.Mqtt },
+            "shuffle_toggle" => new TogglePlaylistShuffleCommand { ZoneIndex = zoneIndex, Source = CommandSource.Mqtt },
+            _ when payload.StartsWith("volume ") => ParseVolumeCommand(zoneIndex, payload),
+            _ when payload.StartsWith("track ") => ParseTrackCommand(zoneIndex, payload),
             _ => null
         };
     }
 
-    private object? MapClientCommand(int clientId, string[] commandParts, string payload)
+    private object? MapClientCommand(int clientIndex, string[] commandParts, string payload)
     {
         return commandParts switch
         {
             ["volume", "set"] => new SetClientVolumeCommand
             {
-                ClientId = clientId,
+                ClientIndex = clientIndex,
                 Volume = int.Parse(payload),
                 Source = CommandSource.Mqtt
             },
 
             ["mute", "set"] => payload.ToLowerInvariant() switch
             {
-                "toggle" => new ToggleClientMuteCommand { ClientId = clientId, Source = CommandSource.Mqtt },
+                "toggle" => new ToggleClientMuteCommand { ClientIndex = clientIndex, Source = CommandSource.Mqtt },
                 _ => new SetClientMuteCommand
                 {
-                    ClientId = clientId,
+                    ClientIndex = clientIndex,
                     Enabled = ParseBooleanPayload(payload),
                     Source = CommandSource.Mqtt
                 }
@@ -173,14 +173,14 @@ public partial class MqttCommandMapper
 
             ["zone", "set"] => new AssignClientToZoneCommand
             {
-                ClientId = clientId,
-                ZoneId = int.Parse(payload),
+                ClientIndex = clientIndex,
+                ZoneIndex = int.Parse(payload),
                 Source = CommandSource.Mqtt
             },
 
             ["latency", "set"] => new SetClientLatencyCommand
             {
-                ClientId = clientId,
+                ClientIndex = clientIndex,
                 LatencyMs = int.Parse(payload),
                 Source = CommandSource.Mqtt
             },
@@ -274,25 +274,25 @@ public partial class KnxCommandMapper
         {
             "VOLUME" => new SetZoneVolumeCommand
             {
-                ZoneId = mapping.ZoneId,
+                ZoneIndex = mapping.ZoneIndex,
                 Volume = ConvertDpt5ToPercentage((byte)value),
                 Source = CommandSource.Knx
             },
 
             "MUTE" => new SetZoneMuteCommand
             {
-                ZoneId = mapping.ZoneId,
+                ZoneIndex = mapping.ZoneIndex,
                 Enabled = (bool)value,
                 Source = CommandSource.Knx
             },
 
             "PLAY_PAUSE" => (bool)value
-                ? new PlayCommand { ZoneId = mapping.ZoneId, Source = CommandSource.Knx }
-                : new PauseCommand { ZoneId = mapping.ZoneId, Source = CommandSource.Knx },
+                ? new PlayCommand { ZoneIndex = mapping.ZoneIndex, Source = CommandSource.Knx }
+                : new PauseCommand { ZoneIndex = mapping.ZoneIndex, Source = CommandSource.Knx },
 
             "TRACK" => new SetTrackCommand
             {
-                ZoneId = mapping.ZoneId,
+                ZoneIndex = mapping.ZoneIndex,
                 TrackIndex = (byte)value, // 1-based from KNX
                 Source = CommandSource.Knx
             },
@@ -356,10 +356,10 @@ public class ZonesController : ControllerBase
     /// <summary>
     /// Gets a specific zone.
     /// </summary>
-    [HttpGet("{zoneId:int}")]
-    public async Task<ActionResult<ApiResponse<ZoneState>>> GetZone(int zoneId)
+    [HttpGet("{zoneIndex:int}")]
+    public async Task<ActionResult<ApiResponse<ZoneState>>> GetZone(int zoneIndex)
     {
-        var query = new GetZoneStateQuery { ZoneId = zoneId };
+        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
         var result = await _mediator.Send(query);
 
         return result.IsSuccess
@@ -370,12 +370,12 @@ public class ZonesController : ControllerBase
     /// <summary>
     /// Sets the volume for a zone.
     /// </summary>
-    [HttpPost("{zoneId:int}/volume")]
-    public async Task<ActionResult<ApiResponse<object>>> SetVolume(int zoneId, [FromBody] SetVolumeRequest request)
+    [HttpPost("{zoneIndex:int}/volume")]
+    public async Task<ActionResult<ApiResponse<object>>> SetVolume(int zoneIndex, [FromBody] SetVolumeRequest request)
     {
         var command = new SetZoneVolumeCommand
         {
-            ZoneId = zoneId,
+            ZoneIndex = zoneIndex,
             Volume = request.Volume,
             Source = CommandSource.Api
         };
@@ -390,12 +390,12 @@ public class ZonesController : ControllerBase
     /// <summary>
     /// Starts playback in a zone.
     /// </summary>
-    [HttpPost("{zoneId:int}/play")]
-    public async Task<ActionResult<ApiResponse<object>>> Play(int zoneId, [FromBody] PlayRequest? request = null)
+    [HttpPost("{zoneIndex:int}/play")]
+    public async Task<ActionResult<ApiResponse<object>>> Play(int zoneIndex, [FromBody] PlayRequest? request = null)
     {
         var command = new PlayCommand
         {
-            ZoneId = zoneId,
+            ZoneIndex = zoneIndex,
             TrackIndex = request?.TrackIndex,
             MediaUrl = request?.MediaUrl,
             Source = CommandSource.Api
@@ -411,10 +411,10 @@ public class ZonesController : ControllerBase
     /// <summary>
     /// Pauses playback in a zone.
     /// </summary>
-    [HttpPost("{zoneId:int}/pause")]
-    public async Task<ActionResult<ApiResponse<object>>> Pause(int zoneId)
+    [HttpPost("{zoneIndex:int}/pause")]
+    public async Task<ActionResult<ApiResponse<object>>> Pause(int zoneIndex)
     {
-        var command = new PauseCommand { ZoneId = zoneId, Source = CommandSource.Api };
+        var command = new PauseCommand { ZoneIndex = zoneIndex, Source = CommandSource.Api };
         var result = await _mediator.Send(command);
 
         return result.IsSuccess
@@ -502,7 +502,7 @@ public class SetZoneVolumeCommandHandlerTests
     public async Task Handle_ValidCommand_ReturnsSuccess()
     {
         // Arrange
-        var command = new SetZoneVolumeCommand { ZoneId = 1, Volume = 75 };
+        var command = new SetZoneVolumeCommand { ZoneIndex = 1, Volume = 75 };
         var mockZone = new Mock<IZoneService>();
 
         _zoneManagerMock
@@ -526,7 +526,7 @@ public class SetZoneVolumeCommandHandlerTests
     public async Task Handle_ZoneNotFound_ReturnsFailure()
     {
         // Arrange
-        var command = new SetZoneVolumeCommand { ZoneId = 999, Volume = 75 };
+        var command = new SetZoneVolumeCommand { ZoneIndex = 999, Volume = 75 };
 
         _zoneManagerMock
             .Setup(x => x.GetZoneAsync(999))
@@ -573,7 +573,7 @@ public class ZoneCommandIntegrationTests : IClassFixture<TestServerFixture>
         // Arrange
         var command = new SetZoneVolumeCommand
         {
-            ZoneId = 1,
+            ZoneIndex = 1,
             Volume = 80,
             Source = CommandSource.Api
         };

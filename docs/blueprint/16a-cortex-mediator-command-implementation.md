@@ -192,7 +192,7 @@ public record PlayCommand : ICommand<Result>
     /// <summary>
     /// Gets the ID of the target zone.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the optional track index to play (1-based).
@@ -218,7 +218,7 @@ public record PauseCommand : ICommand<Result>
     /// <summary>
     /// Gets the ID of the target zone.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the source that initiated the command.
@@ -234,7 +234,7 @@ public record StopCommand : ICommand<Result>
     /// <summary>
     /// Gets the ID of the target zone.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the source that initiated the command.
@@ -306,7 +306,7 @@ public class PlayCommandValidator : AbstractValidator<PlayCommand>
 {
     public PlayCommandValidator()
     {
-        RuleFor(x => x.ZoneId)
+        RuleFor(x => x.ZoneIndex)
             .GreaterThan(0)
             .WithMessage("Zone ID must be a positive integer.");
 

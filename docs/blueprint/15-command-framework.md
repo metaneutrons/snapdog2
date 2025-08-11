@@ -18,7 +18,7 @@ For each level, this section defines:
 
 **Key Conventions within this Framework:**
 
-* **Targeting:** Commands and status related to Zones or Clients logically require a `ZoneId` or `ClientId` to identify the target. This ID is often implicit in specific implementations (e.g., API URL path, method called on an object instance) but is explicitly listed in the Functionality tables as essential information.
+* **Targeting:** Commands and status related to Zones or Clients logically require a `ZoneIndex` or `ClientIndex` to identify the target. This ID is often implicit in specific implementations (e.g., API URL path, method called on an object instance) but is explicitly listed in the Functionality tables as essential information.
 * **Indexing:** All **Playlist and Track indices** referenced in external interfaces (MQTT, KNX, API) are **1-based**. Playlist index `1` is reserved for the configured Radio stations (see Section 10 for configuration details).
 * **Internal Mapping:** The internal application logic (e.g., within `/Server` layer components like `PlaylistManager`) is responsible for mapping these 1-based external indices to 0-based internal list indices where necessary.
 * **KNX Limits:** For KNX DPT 5.010 (used for Track/Playlist indices), values greater than 255 cannot be represented. In such cases, the corresponding KNX Status GA **must** report `0`.
@@ -68,57 +68,57 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 
 | Command/Status ID | Description            | Essential Information / Type                       | Direction        | Notes / Comments                  |
 | :---------------- | :--------------------- | :------------------------------------------------- | :--------------- | :-------------------------------- |
-| `PLAY`            | Start/resume playback  | `ZoneId` (int), Optional `TrackIndex`/`MediaUrl` | Command (Set)    | Action: Tell zone to play         |
-| `PAUSE`           | Pause playback         | `ZoneId` (int)                                     | Command (Set)    | Action: Tell zone to pause        |
-| `STOP`            | Stop playback          | `ZoneId` (int)                                     | Command (Set)    | Action: Tell zone to stop         |
-| `PLAYBACK_STATE`  | Current playback state | `ZoneId` (int), `Status` (`PlaybackStatus` enum)   | Status (Publish) | State: Stopped, Playing, Paused |
+| `PLAY`            | Start/resume playback  | `ZoneIndex` (int), Optional `TrackIndex`/`MediaUrl` | Command (Set)    | Action: Tell zone to play         |
+| `PAUSE`           | Pause playback         | `ZoneIndex` (int)                                     | Command (Set)    | Action: Tell zone to pause        |
+| `STOP`            | Stop playback          | `ZoneIndex` (int)                                     | Command (Set)    | Action: Tell zone to stop         |
+| `PLAYBACK_STATE`  | Current playback state | `ZoneIndex` (int), `Status` (`PlaybackStatus` enum)   | Status (Publish) | State: Stopped, Playing, Paused |
 
 **Track Management**
 
 | Command/Status ID     | Description                | Essential Information / Type                   | Direction        | Notes / Comments                        |
 | :-------------------- | :------------------------- | :--------------------------------------------- | :--------------- | :-------------------------------------- |
-| `TRACK`               | Set specific track         | `ZoneId` (int), `TrackIndex` (int, 1-based)    | Command (Set)    | Action: Play track `N`                |
-| `TRACK_INDEX`         | Current track index        | `ZoneId` (int), `TrackIndex` (int, 1-based)    | Status (Publish) | State: Current index is `N`, 0 for KNX if > 255 |
-| `TRACK_INFO`          | Detailed track info        | `ZoneId` (int), `TrackInfo` (object/record)    | Status (Publish) | State: Details of track `N`         |
-| `TRACK_NEXT`          | Play next track            | `ZoneId` (int)                                 | Command (Set)    | Action: Go to next track            |
-| `TRACK_PREVIOUS`      | Play previous track        | `ZoneId` (int)                                 | Command (Set)    | Action: Go to previous track        |
-| `TRACK_REPEAT`        | Set track repeat mode      | `ZoneId` (int), `Enabled` (bool)               | Command (Set)    | Action: Turn repeat on/off            |
-| `TRACK_REPEAT_TOGGLE` | Toggle track repeat mode   | `ZoneId` (int)                                 | Command (Set)    | Action: Toggle repeat state           |
-| `TRACK_REPEAT_STATUS` | Current track repeat state | `ZoneId` (int), `Enabled` (bool)               | Status (Publish) | State: Repeat is on/off               |
+| `TRACK`               | Set specific track         | `ZoneIndex` (int), `TrackIndex` (int, 1-based)    | Command (Set)    | Action: Play track `N`                |
+| `TRACK_INDEX`         | Current track index        | `ZoneIndex` (int), `TrackIndex` (int, 1-based)    | Status (Publish) | State: Current index is `N`, 0 for KNX if > 255 |
+| `TRACK_INFO`          | Detailed track info        | `ZoneIndex` (int), `TrackInfo` (object/record)    | Status (Publish) | State: Details of track `N`         |
+| `TRACK_NEXT`          | Play next track            | `ZoneIndex` (int)                                 | Command (Set)    | Action: Go to next track            |
+| `TRACK_PREVIOUS`      | Play previous track        | `ZoneIndex` (int)                                 | Command (Set)    | Action: Go to previous track        |
+| `TRACK_REPEAT`        | Set track repeat mode      | `ZoneIndex` (int), `Enabled` (bool)               | Command (Set)    | Action: Turn repeat on/off            |
+| `TRACK_REPEAT_TOGGLE` | Toggle track repeat mode   | `ZoneIndex` (int)                                 | Command (Set)    | Action: Toggle repeat state           |
+| `TRACK_REPEAT_STATUS` | Current track repeat state | `ZoneIndex` (int), `Enabled` (bool)               | Status (Publish) | State: Repeat is on/off               |
 
 **Playlist Management**
 
 | Command/Status ID         | Description                | Essential Information / Type                          | Direction        | Notes / Comments                        |
 | :------------------------ | :------------------------- | :---------------------------------------------------- | :--------------- | :-------------------------------------- |
-| `PLAYLIST`                | Set specific playlist      | `ZoneId` (int), `PlaylistIndex` (1-based) or `PlaylistIndex` | Command (Set)    | Action: Change to playlist `P`        |
-| `PLAYLIST_INDEX`          | Current playlist index/ID  | `ZoneId` (int), `PlaylistIndex` (1-based) or `PlaylistIndex` | Status (Publish) | State: Current playlist is `P`, 0 for KNX if > 255 |
-| `PLAYLIST_INFO`           | Detailed playlist info     | `ZoneId` (int), `PlaylistInfo` (object/record)        | Status (Publish) | State: Details of playlist `P`        |
-| `PLAYLIST_NEXT`           | Play next playlist         | `ZoneId` (int)                                        | Command (Set)    | Action: Go to next playlist           |
-| `PLAYLIST_PREVIOUS`       | Play previous playlist     | `ZoneId` (int)                                        | Command (Set)    | Action: Go to previous playlist       |
-| `PLAYLIST_SHUFFLE`        | Set playlist shuffle mode  | `ZoneId` (int), `Enabled` (bool)                      | Command (Set)    | Action: Turn shuffle on/off           |
-| `PLAYLIST_SHUFFLE_TOGGLE` | Toggle shuffle mode        | `ZoneId` (int)                                        | Command (Set)    | Action: Toggle shuffle state          |
-| `PLAYLIST_SHUFFLE_STATUS` | Current shuffle state      | `ZoneId` (int), `Enabled` (bool)                      | Status (Publish) | State: Shuffle is on/off              |
-| `PLAYLIST_REPEAT`         | Set playlist repeat mode   | `ZoneId` (int), `Enabled` (bool)                      | Command (Set)    | Action: Turn playlist repeat on/off   |
-| `PLAYLIST_REPEAT_TOGGLE`  | Toggle playlist repeat     | `ZoneId` (int)                                        | Command (Set)    | Action: Toggle playlist repeat state  |
-| `PLAYLIST_REPEAT_STATUS`  | Current playlist repeat    | `ZoneId` (int), `Enabled` (bool)                      | Status (Publish) | State: Playlist repeat is on/off      |
+| `PLAYLIST`                | Set specific playlist      | `ZoneIndex` (int), `PlaylistIndex` (1-based) or `PlaylistIndex` | Command (Set)    | Action: Change to playlist `P`        |
+| `PLAYLIST_INDEX`          | Current playlist index/ID  | `ZoneIndex` (int), `PlaylistIndex` (1-based) or `PlaylistIndex` | Status (Publish) | State: Current playlist is `P`, 0 for KNX if > 255 |
+| `PLAYLIST_INFO`           | Detailed playlist info     | `ZoneIndex` (int), `PlaylistInfo` (object/record)        | Status (Publish) | State: Details of playlist `P`        |
+| `PLAYLIST_NEXT`           | Play next playlist         | `ZoneIndex` (int)                                        | Command (Set)    | Action: Go to next playlist           |
+| `PLAYLIST_PREVIOUS`       | Play previous playlist     | `ZoneIndex` (int)                                        | Command (Set)    | Action: Go to previous playlist       |
+| `PLAYLIST_SHUFFLE`        | Set playlist shuffle mode  | `ZoneIndex` (int), `Enabled` (bool)                      | Command (Set)    | Action: Turn shuffle on/off           |
+| `PLAYLIST_SHUFFLE_TOGGLE` | Toggle shuffle mode        | `ZoneIndex` (int)                                        | Command (Set)    | Action: Toggle shuffle state          |
+| `PLAYLIST_SHUFFLE_STATUS` | Current shuffle state      | `ZoneIndex` (int), `Enabled` (bool)                      | Status (Publish) | State: Shuffle is on/off              |
+| `PLAYLIST_REPEAT`         | Set playlist repeat mode   | `ZoneIndex` (int), `Enabled` (bool)                      | Command (Set)    | Action: Turn playlist repeat on/off   |
+| `PLAYLIST_REPEAT_TOGGLE`  | Toggle playlist repeat     | `ZoneIndex` (int)                                        | Command (Set)    | Action: Toggle playlist repeat state  |
+| `PLAYLIST_REPEAT_STATUS`  | Current playlist repeat    | `ZoneIndex` (int), `Enabled` (bool)                      | Status (Publish) | State: Playlist repeat is on/off      |
 
 **Volume & Mute Control**
 
 | Command/Status ID | Description             | Essential Information / Type                       | Direction        | Notes / Comments           |
 | :---------------- | :---------------------- | :------------------------------------------------- | :--------------- | :------------------------- |
-| `VOLUME`          | Set zone volume         | `ZoneId` (int), `Volume` (int, 0-100)              | Command (Set)    | Action: Set volume to `V`  |
-| `VOLUME_STATUS`   | Current zone volume     | `ZoneId` (int), `Volume` (int, 0-100)              | Status (Publish) | State: Current volume is `V` |
-| `VOLUME_UP`       | Increase zone volume    | `ZoneId` (int), Optional `Step` (int, default 5)   | Command (Set)    | Action: Increase volume    |
-| `VOLUME_DOWN`     | Decrease zone volume    | `ZoneId` (int), Optional `Step` (int, default 5)   | Command (Set)    | Action: Decrease volume    |
-| `MUTE`            | Set zone mute           | `ZoneId` (int), `Enabled` (bool)                   | Command (Set)    | Action: Mute/unmute zone |
-| `MUTE_TOGGLE`     | Toggle zone mute        | `ZoneId` (int)                                     | Command (Set)    | Action: Toggle mute state  |
-| `MUTE_STATUS`     | Current zone mute state | `ZoneId` (int), `Enabled` (bool)                   | Status (Publish) | State: Mute is on/off      |
+| `VOLUME`          | Set zone volume         | `ZoneIndex` (int), `Volume` (int, 0-100)              | Command (Set)    | Action: Set volume to `V`  |
+| `VOLUME_STATUS`   | Current zone volume     | `ZoneIndex` (int), `Volume` (int, 0-100)              | Status (Publish) | State: Current volume is `V` |
+| `VOLUME_UP`       | Increase zone volume    | `ZoneIndex` (int), Optional `Step` (int, default 5)   | Command (Set)    | Action: Increase volume    |
+| `VOLUME_DOWN`     | Decrease zone volume    | `ZoneIndex` (int), Optional `Step` (int, default 5)   | Command (Set)    | Action: Decrease volume    |
+| `MUTE`            | Set zone mute           | `ZoneIndex` (int), `Enabled` (bool)                   | Command (Set)    | Action: Mute/unmute zone |
+| `MUTE_TOGGLE`     | Toggle zone mute        | `ZoneIndex` (int)                                     | Command (Set)    | Action: Toggle mute state  |
+| `MUTE_STATUS`     | Current zone mute state | `ZoneIndex` (int), `Enabled` (bool)                   | Status (Publish) | State: Mute is on/off      |
 
 **General Zone**
 
 | Command/Status ID | Description         | Essential Information / Type                   | Direction        | Notes / Comments              |
 | :---------------- | :------------------ | :--------------------------------------------- | :--------------- | :-------------------------- |
-| `ZONE_STATE`      | Complete zone state | `ZoneId` (int), `ZoneState` (object/record)    | Status (Publish) | State: Full state incl. modes |
+| `ZONE_STATE`      | Complete zone state | `ZoneIndex` (int), `ZoneState` (object/record)    | Status (Publish) | State: Full state incl. modes |
 
 ### 14.3.2. Zone MQTT Implementation
 
@@ -160,6 +160,7 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 #### 14.3.2.2. Zone Status Topics (Read-Only)
 
 **Important Topic Distinction:**
+
 * **`control`** - Publishes simple string status values for current playback state and modes (e.g., `"play"`, `"mute_on"`)
 * **`state`** - Publishes complete JSON zone state object with all information (see Section 13.5.1 below)
 
@@ -321,22 +322,22 @@ Uses `Knx.Falcon.GroupAddress`. GAs configured via `SNAPDOG_ZONE_{n}_KNX_{SUFFIX
 
 | Command/Status ID    | Description             | Essential Information / Type          | Direction        | Notes                     |
 | :------------------- | :---------------------- | :------------------------------------ | :--------------- | :------------------------ |
-| `CLIENT_VOLUME`      | Set client volume       | `ClientId` (int), `Volume` (int, 0-100) | Command (Set)    | Sets individual client vol|
-| `CLIENT_VOLUME_STATUS`| Current client volume    | `ClientId` (int), `Volume` (int, 0-100) | Status (Publish) |                           |
-| `CLIENT_MUTE`        | Set client mute         | `ClientId` (int), `Enabled` (bool)      | Command (Set)    |                           |
-| `CLIENT_MUTE_TOGGLE` | Toggle client mute      | `ClientId` (int)                        | Command (Set)    |                           |
-| `CLIENT_MUTE_STATUS` | Current client mute state | `ClientId` (int), `Enabled` (bool)      | Status (Publish) |                           |
+| `CLIENT_VOLUME`      | Set client volume       | `ClientIndex` (int), `Volume` (int, 0-100) | Command (Set)    | Sets individual client vol|
+| `CLIENT_VOLUME_STATUS`| Current client volume    | `ClientIndex` (int), `Volume` (int, 0-100) | Status (Publish) |                           |
+| `CLIENT_MUTE`        | Set client mute         | `ClientIndex` (int), `Enabled` (bool)      | Command (Set)    |                           |
+| `CLIENT_MUTE_TOGGLE` | Toggle client mute      | `ClientIndex` (int)                        | Command (Set)    |                           |
+| `CLIENT_MUTE_STATUS` | Current client mute state | `ClientIndex` (int), `Enabled` (bool)      | Status (Publish) |                           |
 
 **Configuration & State**
 
 | Command/Status ID    | Description             | Essential Information / Type          | Direction        | Notes                     |
 | :------------------- | :---------------------- | :------------------------------------ | :--------------- | :------------------------ |
-| `CLIENT_LATENCY`     | Set client latency      | `ClientId` (int), `LatencyMs` (int)   | Command (Set)    |                           |
-| `CLIENT_LATENCY_STATUS`| Current client latency  | `ClientId` (int), `LatencyMs` (int)   | Status (Publish) |                           |
-| `CLIENT_ZONE`        | Assign client to zone   | `ClientId` (int), `ZoneId` (int, 1-based)| Command (Set)    | Assigns client to group   |
-| `CLIENT_ZONE_STATUS` | Current assigned zone ID| `ClientId` (int), `ZoneId` (int?, 1-based)| Status (Publish) |                           |
-| `CLIENT_CONNECTED`   | Client connection status| `ClientId` (int), `IsConnected` (bool)  | Status (Publish) |                           |
-| `CLIENT_STATE`       | Complete client state   | `ClientId` (int), `ClientState` object  | Status (Publish) |                           |
+| `CLIENT_LATENCY`     | Set client latency      | `ClientIndex` (int), `LatencyMs` (int)   | Command (Set)    |                           |
+| `CLIENT_LATENCY_STATUS`| Current client latency  | `ClientIndex` (int), `LatencyMs` (int)   | Status (Publish) |                           |
+| `CLIENT_ZONE`        | Assign client to zone   | `ClientIndex` (int), `ZoneIndex` (int, 1-based)| Command (Set)    | Assigns client to group   |
+| `CLIENT_ZONE_STATUS` | Current assigned zone ID| `ClientIndex` (int), `ZoneIndex` (int?, 1-based)| Status (Publish) |                           |
+| `CLIENT_CONNECTED`   | Client connection status| `ClientIndex` (int), `IsConnected` (bool)  | Status (Publish) |                           |
+| `CLIENT_STATE`       | Complete client state   | `ClientIndex` (int), `ClientState` object  | Status (Publish) |                           |
 
 ### 14.4.2. Client MQTT Implementation
 
@@ -469,7 +470,7 @@ Published to `{clientBaseTopic}/state`.
   "volume": 80, // 0-100
   "mute": false,
   "latency_ms": 20,
-  "zoneId": 1, // 1-based SnapDog2 Zone ID it's currently assigned to (null if unassigned)
+  "zoneIndex": 1, // 1-based SnapDog2 Zone ID it's currently assigned to (null if unassigned)
   "configuredSnapcastName": "Snapclient on pi", // Name from Snapcast client config
   "lastSeen": "2025-04-05T21:25:10Z", // Example ISO8601 UTC
   "hostIpAddress": "192.168.1.50",

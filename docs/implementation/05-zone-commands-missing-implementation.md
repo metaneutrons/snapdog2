@@ -1,7 +1,7 @@
 # 6. Zone Commands Missing Implementation
 
-**Date:** 2025-08-02  
-**Status:** ✅ Complete  
+**Date:** 2025-08-02
+**Status:** ✅ Complete
 **Blueprint Reference:** [16b-zone-commands-implementation.md](../blueprint/16b-zone-commands-implementation.md)
 
 ## 6.1. Overview
@@ -13,10 +13,12 @@ This document describes the implementation of the missing zone commands that wer
 ### 6.2.1. Blueprint vs Implementation Gap Analysis
 
 **Missing Track Management Commands:**
+
 - `SetTrackRepeatCommand` - Set track repeat mode
 - `ToggleTrackRepeatCommand` - Toggle track repeat mode
 
 **Missing Playlist Management Commands:**
+
 - `PreviousPlaylistCommand` - Play previous playlist in a zone
 - `SetPlaylistShuffleCommand` - Set playlist shuffle mode
 - `TogglePlaylistShuffleCommand` - Toggle playlist shuffle mode
@@ -24,10 +26,12 @@ This document describes the implementation of the missing zone commands that wer
 - `TogglePlaylistRepeatCommand` - Toggle playlist repeat mode
 
 **Missing Validation Layer:**
+
 - All FluentValidation validators specified in the blueprint
 - Comprehensive validation for volume ranges, zone IDs, track indices
 
 **Missing API Endpoints:**
+
 - Several controller endpoints for the new commands
 - Enhanced playback control endpoints (stop, track navigation)
 
@@ -46,7 +50,7 @@ Added missing command records following the established pattern:
 /// </summary>
 public record SetTrackRepeatCommand : ICommand<Result>
 {
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
     public required bool Enabled { get; init; }
     public CommandSource Source { get; init; } = CommandSource.Internal;
 }
@@ -56,7 +60,7 @@ public record SetTrackRepeatCommand : ICommand<Result>
 /// </summary>
 public record ToggleTrackRepeatCommand : ICommand<Result>
 {
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
     public CommandSource Source { get; init; } = CommandSource.Internal;
 }
 
@@ -66,7 +70,7 @@ public record ToggleTrackRepeatCommand : ICommand<Result>
 /// </summary>
 public record PreviousPlaylistCommand : ICommand<Result>
 {
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
     public CommandSource Source { get; init; } = CommandSource.Internal;
 }
 
@@ -75,7 +79,7 @@ public record PreviousPlaylistCommand : ICommand<Result>
 /// </summary>
 public record SetPlaylistShuffleCommand : ICommand<Result>
 {
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
     public required bool Enabled { get; init; }
     public CommandSource Source { get; init; } = CommandSource.Internal;
 }
@@ -85,7 +89,7 @@ public record SetPlaylistShuffleCommand : ICommand<Result>
 /// </summary>
 public record TogglePlaylistShuffleCommand : ICommand<Result>
 {
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
     public CommandSource Source { get; init; } = CommandSource.Internal;
 }
 
@@ -94,7 +98,7 @@ public record TogglePlaylistShuffleCommand : ICommand<Result>
 /// </summary>
 public record SetPlaylistRepeatCommand : ICommand<Result>
 {
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
     public required bool Enabled { get; init; }
     public CommandSource Source { get; init; } = CommandSource.Internal;
 }
@@ -104,7 +108,7 @@ public record SetPlaylistRepeatCommand : ICommand<Result>
 /// </summary>
 public record TogglePlaylistRepeatCommand : ICommand<Result>
 {
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
     public CommandSource Source { get; init; } = CommandSource.Internal;
 }
 ```
@@ -132,13 +136,13 @@ public class SetTrackRepeatCommandHandler : ICommandHandler<SetTrackRepeatComman
 
     public async Task<Result> Handle(SetTrackRepeatCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Setting track repeat for Zone {ZoneId} to {Enabled} from {Source}", 
-            request.ZoneId, request.Enabled, request.Source);
+        _logger.LogInformation("Setting track repeat for Zone {ZoneIndex} to {Enabled} from {Source}",
+            request.ZoneIndex, request.Enabled, request.Source);
 
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneIndex).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            _logger.LogWarning("Zone {ZoneId} not found for SetTrackRepeatCommand", request.ZoneId);
+            _logger.LogWarning("Zone {ZoneIndex} not found for SetTrackRepeatCommand", request.ZoneIndex);
             return zoneResult;
         }
 
@@ -149,6 +153,7 @@ public class SetTrackRepeatCommandHandler : ICommandHandler<SetTrackRepeatComman
 ```
 
 **All Implemented Handlers:**
+
 - `PreviousPlaylistCommandHandler`
 - `SetTrackRepeatCommandHandler`
 - `ToggleTrackRepeatCommandHandler`
@@ -171,7 +176,7 @@ public abstract class BaseZoneCommandValidator<T> : AbstractValidator<T> where T
 {
     protected BaseZoneCommandValidator()
     {
-        RuleFor(x => GetZoneId(x))
+        RuleFor(x => GetZoneIndex(x))
             .GreaterThan(0)
             .WithMessage("Zone ID must be a positive integer.");
 
@@ -180,7 +185,7 @@ public abstract class BaseZoneCommandValidator<T> : AbstractValidator<T> where T
             .WithMessage("Invalid command source specified.");
     }
 
-    protected abstract int GetZoneId(T command);
+    protected abstract int GetZoneIndex(T command);
     protected abstract CommandSource GetSource(T command);
 }
 
@@ -191,7 +196,7 @@ public class SetZoneVolumeCommandValidator : AbstractValidator<SetZoneVolumeComm
 {
     public SetZoneVolumeCommandValidator()
     {
-        RuleFor(x => x.ZoneId)
+        RuleFor(x => x.ZoneIndex)
             .GreaterThan(0)
             .WithMessage("Zone ID must be a positive integer.");
 
@@ -207,6 +212,7 @@ public class SetZoneVolumeCommandValidator : AbstractValidator<SetZoneVolumeComm
 ```
 
 **Validation Coverage:**
+
 - Zone ID validation (positive integers)
 - Volume range validation (0-100)
 - Volume step validation (1-50)
@@ -225,17 +231,17 @@ Added RESTful endpoints for all new commands:
 /// <summary>
 /// Sets track repeat mode for a zone.
 /// </summary>
-[HttpPost("{zoneId:int}/track-repeat")]
+[HttpPost("{zoneIndex:int}/track-repeat")]
 [ProducesResponseType(200)]
 [ProducesResponseType(400)]
 [ProducesResponseType(404)]
 [ProducesResponseType(500)]
-public async Task<IActionResult> SetTrackRepeat([Range(1, int.MaxValue)] int zoneId, 
+public async Task<IActionResult> SetTrackRepeat([Range(1, int.MaxValue)] int zoneIndex,
     [FromBody] RepeatRequest request, CancellationToken cancellationToken)
 {
     try
     {
-        _logger.LogDebug("Setting track repeat for zone {ZoneId} to {Enabled}", zoneId, request.Enabled);
+        _logger.LogDebug("Setting track repeat for zone {ZoneIndex} to {Enabled}", zoneIndex, request.Enabled);
 
         var handler = _serviceProvider.GetService<SetTrackRepeatCommandHandler>();
         if (handler == null)
@@ -246,7 +252,7 @@ public async Task<IActionResult> SetTrackRepeat([Range(1, int.MaxValue)] int zon
 
         var command = new SetTrackRepeatCommand
         {
-            ZoneId = zoneId,
+            ZoneIndex = zoneIndex,
             Enabled = request.Enabled,
             Source = CommandSource.Api
         };
@@ -258,18 +264,19 @@ public async Task<IActionResult> SetTrackRepeat([Range(1, int.MaxValue)] int zon
             return Ok(new { message = "Track repeat set successfully" });
         }
 
-        _logger.LogWarning("Failed to set track repeat for zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+        _logger.LogWarning("Failed to set track repeat for zone {ZoneIndex}: {Error}", zoneIndex, result.ErrorMessage);
         return BadRequest(new { error = result.ErrorMessage ?? "Failed to set track repeat" });
     }
     catch (Exception ex)
     {
-        _logger.LogError(ex, "Error setting track repeat for zone {ZoneId}", zoneId);
+        _logger.LogError(ex, "Error setting track repeat for zone {ZoneIndex}", zoneIndex);
         return StatusCode(500, new { error = "Internal server error" });
     }
 }
 ```
 
 **New Request DTOs:**
+
 ```csharp
 public record RepeatRequest
 {
@@ -283,6 +290,7 @@ public record ShuffleRequest
 ```
 
 **New API Endpoints:**
+
 - `POST /api/zones/{id}/stop` - Stop playback
 - `POST /api/zones/{id}/next-track` - Play next track
 - `POST /api/zones/{id}/previous-track` - Play previous track
@@ -382,24 +390,28 @@ $ cd /Users/fabian/Source/snapdog && dotnet build
 ## 6.6. Architecture Compliance
 
 ### 6.6.1. CQRS Pattern Adherence
+
 - ✅ Commands implement `ICommand<Result>`
 - ✅ Handlers implement `ICommandHandler<TCommand, Result>`
 - ✅ Proper separation of commands and queries
 - ✅ Consistent async/await patterns
 
 ### 6.6.2. Error Handling
+
 - ✅ Consistent `Result<T>` pattern usage
 - ✅ Proper error logging with structured logging
 - ✅ HTTP status code mapping (200, 400, 404, 500)
 - ✅ Zone validation and not-found handling
 
 ### 6.6.3. Logging Standards
+
 - ✅ Structured logging with proper log levels
 - ✅ Consistent log message patterns
 - ✅ Error and warning logging for failure cases
 - ✅ Debug logging for request tracking
 
 ### 6.6.4. Validation Framework
+
 - ✅ FluentValidation for all commands
 - ✅ Comprehensive validation rules
 - ✅ Proper error message formatting
@@ -408,12 +420,14 @@ $ cd /Users/fabian/Source/snapdog && dotnet build
 ## 6.7. Performance Considerations
 
 ### 6.7.1. Handler Performance
+
 - Async/await patterns throughout
 - Proper ConfigureAwait(false) usage
 - Minimal allocations in hot paths
 - Efficient zone lookup caching
 
 ### 6.7.2. Validation Performance
+
 - Lightweight validation rules
 - Early validation failures
 - Minimal reflection usage
@@ -422,12 +436,14 @@ $ cd /Users/fabian/Source/snapdog && dotnet build
 ## 6.8. Security Considerations
 
 ### 6.8.1. Input Validation
+
 - Zone ID range validation
 - Volume range constraints
 - Command source validation
 - Request body validation
 
 ### 6.8.2. Error Information Disclosure
+
 - Generic error messages for external APIs
 - Detailed logging for internal diagnostics
 - No sensitive information in error responses
@@ -435,6 +451,7 @@ $ cd /Users/fabian/Source/snapdog && dotnet build
 ## 6.9. Future Integration Points
 
 ### 6.9.1. Snapcast Integration
+
 The placeholder `ZoneService` implementations will be replaced with actual Snapcast JSON-RPC calls:
 
 ```csharp
@@ -446,12 +463,13 @@ public async Task<Result> SetTrackRepeatAsync(bool enabled)
         Method = "Stream.SetProperty",
         Params = new { property = "repeat", value = enabled }
     };
-    
+
     return await _snapcastClient.SendAsync(request);
 }
 ```
 
 ### 6.9.2. MQTT/KNX Protocol Support
+
 Command source tracking is already implemented for future protocol integrations:
 
 ```csharp
@@ -460,6 +478,7 @@ public CommandSource Source { get; init; } = CommandSource.Internal;
 ```
 
 ### 6.9.3. Enhanced Validation
+
 Additional validation rules can be added without breaking changes:
 
 ```csharp
@@ -472,18 +491,21 @@ RuleFor(x => x.TrackIndex)
 ## 6.10. Monitoring and Observability
 
 ### 6.10.1. Metrics Integration
+
 - Command execution metrics via existing telemetry
 - Success/failure rate tracking
 - Response time monitoring
 - Zone operation frequency analysis
 
 ### 6.10.2. Distributed Tracing
+
 - Jaeger integration for request tracing
 - Correlation ID propagation
 - Cross-service call tracking
 - Performance bottleneck identification
 
 ### 6.10.3. Health Checks
+
 - Zone service availability checks
 - Command handler health monitoring
 - Dependency health verification
@@ -491,12 +513,14 @@ RuleFor(x => x.TrackIndex)
 ## 6.11. Documentation Updates
 
 ### 6.11.1. API Documentation
+
 - OpenAPI/Swagger definitions updated automatically
 - Request/response examples included
 - Error code documentation
 - Rate limiting information
 
 ### 6.11.2. Developer Documentation
+
 - Command pattern examples
 - Handler implementation guidelines
 - Validation rule patterns

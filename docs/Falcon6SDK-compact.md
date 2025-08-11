@@ -277,7 +277,7 @@ private object? MapGroupAddressToCommand(string groupAddress, object value)
     for (int i = 0; i < _zones.Count; i++)
     {
         var zone = _zones[i];
-        var zoneId = i + 1; // 1-based zone ID
+        var zoneIndex = i + 1; // 1-based zone ID
 
         if (!zone.Knx.Enabled) continue;
 
@@ -288,7 +288,7 @@ private object? MapGroupAddressToCommand(string groupAddress, object value)
         {
             return new SetZoneVolumeCommand
             {
-                ZoneId = zoneId,
+                ZoneIndex = zoneIndex,
                 Volume = volumeValue,
                 Source = CommandSource.Knx
             };
@@ -299,7 +299,7 @@ private object? MapGroupAddressToCommand(string groupAddress, object value)
         {
             return new SetZoneMuteCommand
             {
-                ZoneId = zoneId,
+                ZoneIndex = zoneIndex,
                 Enabled = muteValue,
                 Source = CommandSource.Knx
             };
@@ -310,7 +310,7 @@ private object? MapGroupAddressToCommand(string groupAddress, object value)
         {
             return new PlayCommand
             {
-                ZoneId = zoneId,
+                ZoneIndex = zoneIndex,
                 Source = CommandSource.Knx
             };
         }

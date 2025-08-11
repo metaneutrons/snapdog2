@@ -1,7 +1,7 @@
 # 9. Status Notifications Implementation
 
-**Date:** 2025-08-02  
-**Status:** ✅ Complete  
+**Date:** 2025-08-02
+**Status:** ✅ Complete
 **Blueprint Reference:** [16d-queries-and-notifications.md](../blueprint/16d-queries-and-notifications.md)
 
 ## 9.1. Overview
@@ -13,6 +13,7 @@ This document describes the complete implementation of the Status Notifications 
 ### 9.2.1. Core Notification Infrastructure
 
 **Zone Status Notifications:**
+
 - `ZonePlaybackStateChangedNotification` - Playback state changes
 - `ZoneVolumeChangedNotification` - Volume level changes
 - `ZoneMuteChangedNotification` - Mute state changes
@@ -23,6 +24,7 @@ This document describes the complete implementation of the Status Notifications 
 - `ZoneStateChangedNotification` - Complete state changes
 
 **Client Status Notifications:**
+
 - `ClientVolumeChangedNotification` - Client volume changes
 - `ClientMuteChangedNotification` - Client mute state changes
 - `ClientLatencyChangedNotification` - Client latency changes
@@ -31,16 +33,19 @@ This document describes the complete implementation of the Status Notifications 
 - `ClientStateChangedNotification` - Complete client state changes
 
 **Generic Infrastructure:**
+
 - `StatusChangedNotification` - Protocol-agnostic status updates for infrastructure adapters
 
 ### 9.2.2. Notification Handlers
 
 **Zone Notification Handler:**
+
 - `ZoneStateNotificationHandler` - Handles all zone-related notifications
 - Structured logging with message IDs 6001-6008
 - Placeholder for future infrastructure adapter integration
 
 **Client Notification Handler:**
+
 - `ClientStateNotificationHandler` - Handles all client-related notifications
 - Structured logging with message IDs 6101-6106
 - Placeholder for future infrastructure adapter integration
@@ -59,7 +64,7 @@ Complete set of zone-related notifications following the blueprint specification
 /// </summary>
 public record ZoneVolumeChangedNotification : INotification
 {
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
     public required int Volume { get; init; }
     public DateTime TimestampUtc { get; init; } = DateTime.UtcNow;
 }
@@ -69,7 +74,7 @@ public record ZoneVolumeChangedNotification : INotification
 /// </summary>
 public record ZonePlaybackStateChangedNotification : INotification
 {
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
     public required PlaybackStatus PlaybackState { get; init; }
     public DateTime TimestampUtc { get; init; } = DateTime.UtcNow;
 }
@@ -79,7 +84,7 @@ public record ZonePlaybackStateChangedNotification : INotification
 /// </summary>
 public record ZoneTrackChangedNotification : INotification
 {
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
     public required TrackInfo TrackInfo { get; init; }
     public required int TrackIndex { get; init; }
     public DateTime TimestampUtc { get; init; } = DateTime.UtcNow;
@@ -87,6 +92,7 @@ public record ZoneTrackChangedNotification : INotification
 ```
 
 **Key Features:**
+
 - All notifications include UTC timestamps for event tracking
 - Required properties ensure data integrity
 - Strongly typed with appropriate domain models
@@ -104,7 +110,7 @@ Complete set of client-related notifications:
 /// </summary>
 public record ClientVolumeChangedNotification : INotification
 {
-    public required int ClientId { get; init; }
+    public required int ClientIndex { get; init; }
     public required int Volume { get; init; }
     public DateTime TimestampUtc { get; init; } = DateTime.UtcNow;
 }
@@ -114,14 +120,15 @@ public record ClientVolumeChangedNotification : INotification
 /// </summary>
 public record ClientZoneAssignmentChangedNotification : INotification
 {
-    public required int ClientId { get; init; }
-    public int? ZoneId { get; init; }
-    public int? PreviousZoneId { get; init; }
+    public required int ClientIndex { get; init; }
+    public int? ZoneIndex { get; init; }
+    public int? PreviousZoneIndex { get; init; }
     public DateTime TimestampUtc { get; init; } = DateTime.UtcNow;
 }
 ```
 
 **Key Features:**
+
 - Support for nullable zone assignments (unassigned clients)
 - Previous state tracking for assignment changes
 - Connection status monitoring capabilities
@@ -163,6 +170,7 @@ public record StatusChangedNotification : INotification
 ```
 
 **Design Features:**
+
 - Flexible `object` type for values to support any data type
 - String-based status types for protocol compatibility
 - Target ID format: `zone_{id}` or `client_{id}`
@@ -190,32 +198,35 @@ public partial class ZoneStateNotificationHandler :
 ```
 
 **Structured Logging Implementation:**
+
 ```csharp
-[LoggerMessage(6001, LogLevel.Information, "Zone {ZoneId} volume changed to {Volume}")]
-private partial void LogVolumeChange(int zoneId, int volume);
+[LoggerMessage(6001, LogLevel.Information, "Zone {ZoneIndex} volume changed to {Volume}")]
+private partial void LogVolumeChange(int zoneIndex, int volume);
 
-[LoggerMessage(6002, LogLevel.Information, "Zone {ZoneId} mute changed to {IsMuted}")]
-private partial void LogMuteChange(int zoneId, bool isMuted);
+[LoggerMessage(6002, LogLevel.Information, "Zone {ZoneIndex} mute changed to {IsMuted}")]
+private partial void LogMuteChange(int zoneIndex, bool isMuted);
 
-[LoggerMessage(6003, LogLevel.Information, "Zone {ZoneId} playback state changed to {PlaybackState}")]
-private partial void LogPlaybackStateChange(int zoneId, string playbackState);
+[LoggerMessage(6003, LogLevel.Information, "Zone {ZoneIndex} playback state changed to {PlaybackState}")]
+private partial void LogPlaybackStateChange(int zoneIndex, string playbackState);
 
-[LoggerMessage(6004, LogLevel.Information, "Zone {ZoneId} track changed to {TrackTitle} by {Artist}")]
-private partial void LogTrackChange(int zoneId, string trackTitle, string artist);
+[LoggerMessage(6004, LogLevel.Information, "Zone {ZoneIndex} track changed to {TrackTitle} by {Artist}")]
+private partial void LogTrackChange(int zoneIndex, string trackTitle, string artist);
 ```
 
 **Handler Pattern:**
+
 ```csharp
 public async Task Handle(ZoneVolumeChangedNotification notification, CancellationToken cancellationToken)
 {
-    LogVolumeChange(notification.ZoneId, notification.Volume);
-    
+    LogVolumeChange(notification.ZoneIndex, notification.Volume);
+
     // TODO: Publish to external systems (MQTT, KNX) when infrastructure adapters are implemented
     await Task.CompletedTask;
 }
 ```
 
 **Message ID Allocation:**
+
 - Zone notifications: 6001-6008
 - Client notifications: 6101-6106
 - Unique IDs for each notification type ensure log traceability
@@ -240,12 +251,13 @@ public partial class ClientStateNotificationHandler :
 ```
 
 **Advanced Logging Examples:**
-```csharp
-[LoggerMessage(6104, LogLevel.Information, "Client {ClientId} zone assignment changed from {PreviousZoneId} to {NewZoneId}")]
-private partial void LogZoneAssignmentChange(int clientId, int? previousZoneId, int? newZoneId);
 
-[LoggerMessage(6105, LogLevel.Information, "Client {ClientId} connection changed to {IsConnected}")]
-private partial void LogConnectionChange(int clientId, bool isConnected);
+```csharp
+[LoggerMessage(6104, LogLevel.Information, "Client {ClientIndex} zone assignment changed from {PreviousZoneIndex} to {NewZoneIndex}")]
+private partial void LogZoneAssignmentChange(int clientIndex, int? previousZoneIndex, int? newZoneIndex);
+
+[LoggerMessage(6105, LogLevel.Information, "Client {ClientIndex} connection changed to {IsConnected}")]
+private partial void LogConnectionChange(int clientIndex, bool isConnected);
 ```
 
 ### 9.3.6. Dependency Injection Registration
@@ -272,16 +284,17 @@ Added test endpoint for notification system verification:
 /// <summary>
 /// Test endpoint to publish a zone volume change notification.
 /// </summary>
-[HttpPost("{zoneId:int}/test-notification")]
+[HttpPost("{zoneIndex:int}/test-notification")]
 [ProducesResponseType(200)]
 [ProducesResponseType(500)]
 public async Task<ActionResult> TestZoneNotification(
-    [Range(1, int.MaxValue)] int zoneId, 
+    [Range(1, int.MaxValue)] int zoneIndex,
     [FromQuery] [Range(0, 100)] int volume = 75,
     CancellationToken cancellationToken = default)
 ```
 
 **Features:**
+
 - Input validation with data annotations
 - Direct handler invocation (following established pattern)
 - Proper error handling and logging
@@ -294,6 +307,7 @@ public async Task<ActionResult> TestZoneNotification(
 All notification functionality tested successfully in the Docker development environment:
 
 **✅ Test Notification Endpoint:**
+
 ```bash
 # Test zone 1 volume notification
 curl -X POST "http://localhost:5000/api/zones/1/test-notification?volume=85"
@@ -309,6 +323,7 @@ curl -X POST "http://localhost:5000/api/zones/3/test-notification?volume=40"
 ```
 
 **✅ Structured Logging Output:**
+
 ```
 [11:15:54 INF] [SnapDog2.Server.Features.Shared.Handlers.ZoneStateNotificationHandler] Zone 1 volume changed to 85
 [11:16:06 INF] [SnapDog2.Server.Features.Shared.Handlers.ZoneStateNotificationHandler] Zone 2 volume changed to 60
@@ -316,6 +331,7 @@ curl -X POST "http://localhost:5000/api/zones/3/test-notification?volume=40"
 ```
 
 **✅ Error Handling:**
+
 ```bash
 # Invalid zone ID (out of range)
 curl -X POST "http://localhost:5000/api/zones/0/test-notification"
@@ -327,6 +343,7 @@ curl -X POST "http://localhost:5000/api/zones/1/test-notification?volume=150"
 ```
 
 **✅ Handler Registration:**
+
 - All notification handlers properly registered in DI container
 - Handlers successfully resolved and invoked
 - No dependency injection errors or missing services
@@ -334,30 +351,35 @@ curl -X POST "http://localhost:5000/api/zones/1/test-notification?volume=150"
 ## 9.5. Architecture Compliance
 
 ### 9.5.1. ✅ CQRS Pattern Implementation
+
 - Clear separation between notifications and other concerns
 - Notification handlers follow established handler patterns
 - Proper use of `INotification` and `INotificationHandler<T>` interfaces
 - Consistent with existing command and query implementations
 
 ### 9.5.2. ✅ Structured Logging Implementation
+
 - Unique message IDs for all notification types (6001-6106 range)
 - Contextual information included in all log messages
 - Performance and behavior tracking implemented
 - Proper use of partial classes and LoggerMessage attributes
 
 ### 9.5.3. ✅ Dependency Injection Consistency
+
 - All handlers properly registered with correct lifetimes
 - Manual registration pattern maintained for consistency
 - Service dependencies correctly resolved
 - Interface-based design maintained
 
 ### 9.5.4. ✅ Domain Model Integration
+
 - Notifications use existing domain models (ZoneState, ClientState, TrackInfo, PlaylistInfo)
 - Proper enum usage (PlaybackStatus)
 - Consistent property naming and types
 - Strong typing throughout the notification system
 
 ### 9.5.5. ✅ Error Handling Standards
+
 - Comprehensive exception handling in test endpoint
 - Proper HTTP status codes and error responses
 - Graceful degradation when handlers are unavailable
@@ -390,32 +412,35 @@ The implementation fully complies with [16d-queries-and-notifications.md](../blu
 The notification system is designed for easy integration with infrastructure adapters:
 
 ### 9.8.1. MQTT Integration (Future)
+
 ```csharp
 // Example future MQTT integration in notification handlers
 public async Task Handle(ZoneVolumeChangedNotification notification, CancellationToken cancellationToken)
 {
-    LogVolumeChange(notification.ZoneId, notification.Volume);
-    
-    // Publish to MQTT topic: snapdog/zones/{zoneId}/volume
-    await _mqttPublisher.PublishAsync($"snapdog/zones/{notification.ZoneId}/volume", 
+    LogVolumeChange(notification.ZoneIndex, notification.Volume);
+
+    // Publish to MQTT topic: snapdog/zones/{zoneIndex}/volume
+    await _mqttPublisher.PublishAsync($"snapdog/zones/{notification.ZoneIndex}/volume",
         notification.Volume.ToString(), cancellationToken);
 }
 ```
 
 ### 9.8.2. KNX Integration (Future)
+
 ```csharp
 // Example future KNX integration in notification handlers
 public async Task Handle(ZoneVolumeChangedNotification notification, CancellationToken cancellationToken)
 {
-    LogVolumeChange(notification.ZoneId, notification.Volume);
-    
+    LogVolumeChange(notification.ZoneIndex, notification.Volume);
+
     // Send to KNX group address based on zone mapping
-    var groupAddress = _knxMappingService.GetVolumeGroupAddress(notification.ZoneId);
+    var groupAddress = _knxMappingService.GetVolumeGroupAddress(notification.ZoneIndex);
     await _knxConnection.SendAsync(groupAddress, notification.Volume, cancellationToken);
 }
 ```
 
 ### 9.8.3. Generic Status Publishing (Future)
+
 The `StatusChangedNotification` provides a protocol-agnostic way to publish status changes:
 
 ```csharp
@@ -423,7 +448,7 @@ The `StatusChangedNotification` provides a protocol-agnostic way to publish stat
 var statusNotification = new StatusChangedNotification
 {
     StatusType = "VOLUME_STATUS",
-    TargetId = $"zone_{notification.ZoneId}",
+    TargetId = $"zone_{notification.ZoneIndex}",
     Value = notification.Volume
 };
 
@@ -433,18 +458,21 @@ await _genericStatusPublisher.PublishAsync(statusNotification, cancellationToken
 ## 9.9. Performance Considerations
 
 ### 9.9.1. ✅ Efficient Notification Patterns
+
 - Lightweight notification objects with minimal data
 - Direct handler invocation without unnecessary overhead
 - Proper async/await usage throughout
 - No blocking operations in notification handlers
 
 ### 9.9.2. ✅ Memory Management
+
 - Record types provide efficient immutable notifications
 - Minimal object allocation in notification paths
 - Proper disposal patterns where applicable
 - UTC timestamps avoid timezone conversion overhead
 
 ### 9.9.3. ✅ Logging Performance
+
 - Structured logging with compile-time message generation
 - Minimal string interpolation overhead
 - Appropriate log levels (Information for state changes)
@@ -465,6 +493,7 @@ The foundation is now complete with Zone Commands, Client Commands, Zone Queries
 ## 9.11. Files Created/Modified
 
 ### 9.11.1. New Files Created (6 files)
+
 ```
 SnapDog2/Server/Features/Shared/Notifications/ZoneNotifications.cs
 SnapDog2/Server/Features/Shared/Notifications/ClientNotifications.cs
@@ -474,6 +503,7 @@ SnapDog2/Server/Features/Shared/Handlers/ClientStateNotificationHandler.cs
 ```
 
 ### 9.11.2. Modified Files (2 files)
+
 ```
 SnapDog2/Controllers/ZoneController.cs - Added test notification endpoint and using statements
 SnapDog2/Worker/DI/CortexMediatorConfiguration.cs - Added notification handler registrations

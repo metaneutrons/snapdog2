@@ -124,7 +124,7 @@ Consistent naming is crucial for readability and understanding code intent.
 * **Type Parameters** (Generics): Use `TPascalCase` (prefix `T`, then descriptive PascalCase name, SA1314).
   * Examples: `Result<TResponse>`, `ICommandHandler<TCommand, TResult>`, `List<TZoneConfig>`.
 * **Abbreviations**: Treat common acronyms (2-3 letters) as words unless only two letters. Capitalize only the first letter or keep all caps if standard (like `IO`). Prefer full words over abbreviations where clarity is improved.
-  * Correct: `HtmlParser`, `GetZoneId`, `UseApiAuth`, `IoService`.
+  * Correct: `HtmlParser`, `GetZoneIndex`, `UseApiAuth`, `IoService`.
   * Incorrect: `HTMLParser`, `GetZoneID`, `UseAPIAuth`.
 * **Hungarian Notation**: Strictly forbidden for all identifiers (variables, fields, parameters, etc.) (SA1305, SA1309). Do not use prefixes indicating type (e.g., `strName`, `iCount`, `bEnabled`).
 
@@ -171,7 +171,7 @@ public partial class ClientManager : IClientManager, // Implements Core abstract
     // Internal state mapping (example - adjust as needed)
     private readonly ConcurrentDictionary<string, int> _snapcastIdToInternalId = new();
     private readonly ConcurrentDictionary<int, ClientState> _internalClientStates = new();
-    private readonly ConcurrentDictionary<string, int> _lastKnownZoneAssignment = new(); // snapcastId -> zoneId
+    private readonly ConcurrentDictionary<string, int> _lastKnownZoneAssignment = new(); // snapcastId -> zoneIndex
     private readonly SemaphoreSlim _stateLock = new SemaphoreSlim(1, 1);
     private bool _disposed = false;
 
@@ -197,11 +197,11 @@ public partial class ClientManager : IClientManager, // Implements Core abstract
     [LoggerMessage(EventId = 307, Level = LogLevel.Warning, Message = "Could not find internal mapping for Snapcast Client {SnapcastId} during update.")]
     private partial void LogMappingNotFoundWarning(string snapcastId);
 
-    [LoggerMessage(EventId = 308, Level = LogLevel.Information, Message = "Assigning Client (Internal ID: {InternalId}, Snapcast ID: {SnapcastId}) to Zone {ZoneId}.")]
-    private partial void LogAssigningClientToZone(int internalId, string snapcastId, int zoneId);
+    [LoggerMessage(EventId = 308, Level = LogLevel.Information, Message = "Assigning Client (Internal ID: {InternalId}, Snapcast ID: {SnapcastId}) to Zone {ZoneIndex}.")]
+    private partial void LogAssigningClientToZone(int internalId, string snapcastId, int zoneIndex);
 
-    [LoggerMessage(EventId = 309, Level = LogLevel.Error, Message = "Failed to assign Client {InternalId} to Zone {ZoneId}.")]
-    private partial void LogAssignClientError(int internalId, int zoneId, Exception? ex = null); // Optional exception
+    [LoggerMessage(EventId = 309, Level = LogLevel.Error, Message = "Failed to assign Client {InternalId} to Zone {ZoneIndex}.")]
+    private partial void LogAssignClientError(int internalId, int zoneIndex, Exception? ex = null); // Optional exception
 
 
     public ClientManager(
@@ -257,14 +257,14 @@ public partial class ClientManager : IClientManager, // Implements Core abstract
             UpdateInternalClientState(notification.Client); // Update state based on event
 
             // Re-assign to last known zone if needed (Option B logic)
-            if (_lastKnownZoneAssignment.TryGetValue(notification.Client.Id, out int lastZoneId))
+            if (_lastKnownZoneAssignment.TryGetValue(notification.Client.Id, out int lastZoneIndex))
             {
                  var currentGroup = _stateRepository.GetAllGroups().FirstOrDefault(g => g.Clients.Any(c => c.Id == notification.Client.Id));
                  if(currentGroup == null) // Only assign if not already in a group
                  {
-                      LogAssigningClientToZone( /* Get internal ID */ -1, notification.Client.Id, lastZoneId);
+                      LogAssigningClientToZone( /* Get internal ID */ -1, notification.Client.Id, lastZoneIndex);
                       // Call AssignClientToZoneAsync (needs internal ID lookup first)
-                      // var assignResult = await AssignClientToZoneAsync(internalId, lastZoneId).ConfigureAwait(false);
+                      // var assignResult = await AssignClientToZoneAsync(internalId, lastZoneIndex).ConfigureAwait(false);
                       // if(assignResult.IsFailure) LogAssignClientError(...);
                  }
             }
@@ -289,18 +289,18 @@ public partial class ClientManager : IClientManager, // Implements Core abstract
 
          // Update last known zone if client is in a group
           var group = _stateRepository.GetAllGroups().FirstOrDefault(g => g.Clients.Any(c => c.Id == snapClient.Id));
-          if(group != null && _zoneManager.TryGetZoneIdByGroupId(group.Id, out int zoneId)) { // Assume ZoneManager has TryGet method
-               _lastKnownZoneAssignment[snapClient.Id] = zoneId;
-               // Update ZoneId in _internalClientStates record if different
-               if(clientState.ZoneId != zoneId) {
-                    _internalClientStates[internalId] = clientState with { ZoneId = zoneId };
+          if(group != null && _zoneManager.TryGetZoneIndexByGroupId(group.Id, out int zoneIndex)) { // Assume ZoneManager has TryGet method
+               _lastKnownZoneAssignment[snapClient.Id] = zoneIndex;
+               // Update ZoneIndex in _internalClientStates record if different
+               if(clientState.ZoneIndex != zoneIndex) {
+                    _internalClientStates[internalId] = clientState with { ZoneIndex = zoneIndex };
                }
           } else {
                // Client is not in a known group, remove last known assignment?
                // Or keep it for reconnection logic? Keep it for now.
-               // Ensure ZoneId is null in internal state if not in a group
-                if(clientState.ZoneId != null) {
-                    _internalClientStates[internalId] = clientState with { ZoneId = null };
+               // Ensure ZoneIndex is null in internal state if not in a group
+                if(clientState.ZoneIndex != null) {
+                    _internalClientStates[internalId] = clientState with { ZoneIndex = null };
                }
           }
 
@@ -311,7 +311,7 @@ public partial class ClientManager : IClientManager, // Implements Core abstract
      private ClientState MapSnapClientToClientState(int internalId, Sturd.SnapcastNet.Models.Client snapClient)
      {
           // ... Mapping logic ...
-          return new ClientState { Id = internalId, /* map other fields */ ZoneId = null /* Determine ZoneID */};
+          return new ClientState { Id = internalId, /* map other fields */ ZoneIndex = null /* Determine ZoneID */};
      }
 
 

@@ -239,7 +239,7 @@ namespace SnapDog2.Core.Abstractions;
 public interface IMetricsService
 {
     void RecordCortexMediatorRequestDuration(string requestType, string requestName, double durationMs, bool success);
-    void RecordZonePlaybackEvent(int zoneId, string eventType); // e.g., "play", "stop", "pause", "next", "prev"
+    void RecordZonePlaybackEvent(int zoneIndex, string eventType); // e.g., "play", "stop", "pause", "next", "prev"
     void IncrementClientConnectionCounter(bool connected); // True for connect, false for disconnect
     void RecordExternalCallDuration(string serviceName, string operation, double durationMs, bool success);
     // Add more specific metric recording methods as needed
@@ -305,10 +305,10 @@ public class OpenTelemetryMetricsService : IMetricsService
         _cortexMediatorRequestDuration.Record(durationMs, tags);
     }
 
-    public void RecordZonePlaybackEvent(int zoneId, string eventType)
+    public void RecordZonePlaybackEvent(int zoneIndex, string eventType)
     {
          var tags = new TagList {
-            { "zone.id", zoneId },
+            { "zone.id", zoneIndex },
             { "event.type", eventType }
          };
         _playbackEventCounter.Add(1, tags);

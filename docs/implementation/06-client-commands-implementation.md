@@ -1,7 +1,7 @@
 # 7. Client Commands Implementation
 
-**Date:** 2025-08-02  
-**Status:** ✅ Complete  
+**Date:** 2025-08-02
+**Status:** ✅ Complete
 **Blueprint Reference:** [16c-client-commands-implementation.md](../blueprint/16c-client-commands-implementation.md)
 
 ## 7.1. Overview
@@ -13,27 +13,32 @@ This document describes the complete implementation of the Client Commands layer
 ### 7.2.1. Core Infrastructure Created
 
 **New Interfaces:**
+
 - `IClientManager` - Client management operations interface
 - `IClient` - Individual client operations interface
 
 **Placeholder Implementations:**
+
 - `ClientManager` - Manages client state and operations
 - `ClientService` - Individual client control operations
 
 ### 7.2.2. Client Commands Implemented
 
 **Volume and Mute Commands:**
+
 - `SetClientVolumeCommand` - Set client volume (0-100)
 - `SetClientMuteCommand` - Set client mute state
 - `ToggleClientMuteCommand` - Toggle client mute state
 
 **Configuration Commands:**
+
 - `SetClientLatencyCommand` - Set client latency (0-10000ms)
 - `AssignClientToZoneCommand` - Assign client to zone
 
 ### 7.2.3. Client Queries Implemented
 
 **State Queries:**
+
 - `GetAllClientsQuery` - Retrieve all client states
 - `GetClientQuery` - Retrieve specific client state
 - `GetClientsByZoneQuery` - Retrieve clients by zone assignment
@@ -50,11 +55,11 @@ This document describes the complete implementation of the Client Commands layer
 /// </summary>
 public interface IClientManager
 {
-    Task<Result<IClient>> GetClientAsync(int clientId);
-    Task<Result<ClientState>> GetClientStateAsync(int clientId);
+    Task<Result<IClient>> GetClientAsync(int clientIndex);
+    Task<Result<ClientState>> GetClientStateAsync(int clientIndex);
     Task<Result<List<ClientState>>> GetAllClientsAsync();
-    Task<Result<List<ClientState>>> GetClientsByZoneAsync(int zoneId);
-    Task<Result> AssignClientToZoneAsync(int clientId, int zoneId);
+    Task<Result<List<ClientState>>> GetClientsByZoneAsync(int zoneIndex);
+    Task<Result> AssignClientToZoneAsync(int clientIndex, int zoneIndex);
 }
 ```
 
@@ -84,7 +89,7 @@ public interface IClient
 /// </summary>
 public record SetClientVolumeCommand : ICommand<Result>
 {
-    public required int ClientId { get; init; }
+    public required int ClientIndex { get; init; }
     public required int Volume { get; init; }
     public CommandSource Source { get; init; } = CommandSource.Internal;
 }
@@ -94,7 +99,7 @@ public record SetClientVolumeCommand : ICommand<Result>
 /// </summary>
 public record SetClientMuteCommand : ICommand<Result>
 {
-    public required int ClientId { get; init; }
+    public required int ClientIndex { get; init; }
     public required bool Enabled { get; init; }
     public CommandSource Source { get; init; } = CommandSource.Internal;
 }
@@ -104,7 +109,7 @@ public record SetClientMuteCommand : ICommand<Result>
 /// </summary>
 public record ToggleClientMuteCommand : ICommand<Result>
 {
-    public required int ClientId { get; init; }
+    public required int ClientIndex { get; init; }
     public CommandSource Source { get; init; } = CommandSource.Internal;
 }
 ```
@@ -117,7 +122,7 @@ public record ToggleClientMuteCommand : ICommand<Result>
 /// </summary>
 public record SetClientLatencyCommand : ICommand<Result>
 {
-    public required int ClientId { get; init; }
+    public required int ClientIndex { get; init; }
     public required int LatencyMs { get; init; }
     public CommandSource Source { get; init; } = CommandSource.Internal;
 }
@@ -127,8 +132,8 @@ public record SetClientLatencyCommand : ICommand<Result>
 /// </summary>
 public record AssignClientToZoneCommand : ICommand<Result>
 {
-    public required int ClientId { get; init; }
-    public required int ZoneId { get; init; }
+    public required int ClientIndex { get; init; }
+    public required int ZoneIndex { get; init; }
     public CommandSource Source { get; init; } = CommandSource.Internal;
 }
 ```
@@ -148,7 +153,7 @@ public record GetAllClientsQuery : IQuery<Result<List<ClientState>>>;
 /// </summary>
 public record GetClientQuery : IQuery<Result<ClientState>>
 {
-    public required int ClientId { get; init; }
+    public required int ClientIndex { get; init; }
 }
 
 /// <summary>
@@ -156,7 +161,7 @@ public record GetClientQuery : IQuery<Result<ClientState>>
 /// </summary>
 public record GetClientsByZoneQuery : IQuery<Result<List<ClientState>>>
 {
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 }
 ```
 
@@ -174,7 +179,7 @@ public class SetClientVolumeCommandValidator : AbstractValidator<SetClientVolume
 {
     public SetClientVolumeCommandValidator()
     {
-        RuleFor(x => x.ClientId)
+        RuleFor(x => x.ClientIndex)
             .GreaterThan(0)
             .WithMessage("Client ID must be a positive integer.");
 
@@ -190,6 +195,7 @@ public class SetClientVolumeCommandValidator : AbstractValidator<SetClientVolume
 ```
 
 **Validation Rules Implemented:**
+
 - Client ID validation (positive integers)
 - Volume validation (0-100 range)
 - Latency validation (0-10000ms range)
@@ -202,14 +208,15 @@ public class SetClientVolumeCommandValidator : AbstractValidator<SetClientVolume
 All handlers implement structured logging with unique message IDs:
 
 ```csharp
-[LoggerMessage(3001, LogLevel.Information, "Setting volume for Client {ClientId} to {Volume} from {Source}")]
-private partial void LogHandling(int clientId, int volume, CommandSource source);
+[LoggerMessage(3001, LogLevel.Information, "Setting volume for Client {ClientIndex} to {Volume} from {Source}")]
+private partial void LogHandling(int clientIndex, int volume, CommandSource source);
 
-[LoggerMessage(3002, LogLevel.Warning, "Client {ClientId} not found for SetClientVolumeCommand")]
-private partial void LogClientNotFound(int clientId);
+[LoggerMessage(3002, LogLevel.Warning, "Client {ClientIndex} not found for SetClientVolumeCommand")]
+private partial void LogClientNotFound(int clientIndex);
 ```
 
 **Handler Files Created:**
+
 - `SetClientVolumeCommandHandler.cs` (Message IDs: 3001-3002)
 - `SetClientMuteCommandHandler.cs` (Message IDs: 3011-3012)
 - `ToggleClientMuteCommandHandler.cs` (Message IDs: 3021-3023)
@@ -217,15 +224,16 @@ private partial void LogClientNotFound(int clientId);
 - `AssignClientToZoneCommandHandler.cs` (Message IDs: 3101-3103)
 
 **Error Handling Pattern:**
+
 ```csharp
 public async Task<Result> Handle(SetClientVolumeCommand request, CancellationToken cancellationToken)
 {
-    LogHandling(request.ClientId, request.Volume, request.Source);
+    LogHandling(request.ClientIndex, request.Volume, request.Source);
 
-    var clientResult = await _clientManager.GetClientAsync(request.ClientId).ConfigureAwait(false);
+    var clientResult = await _clientManager.GetClientAsync(request.ClientIndex).ConfigureAwait(false);
     if (clientResult.IsFailure)
     {
-        LogClientNotFound(request.ClientId);
+        LogClientNotFound(request.ClientIndex);
         return clientResult;
     }
 
@@ -238,11 +246,13 @@ public async Task<Result> Handle(SetClientVolumeCommand request, CancellationTok
 ### 7.3.6. Query Handlers
 
 **Query Handler Files Created:**
+
 - `GetAllClientsQueryHandler.cs` (Message IDs: 4001-4002)
 - `GetClientQueryHandler.cs` (Message ID: 4101)
 - `GetClientsByZoneQueryHandler.cs` (Message ID: 4201)
 
 **Exception Handling Pattern:**
+
 ```csharp
 public async Task<Result<List<ClientState>>> Handle(GetAllClientsQuery request, CancellationToken cancellationToken)
 {
@@ -268,18 +278,21 @@ public async Task<Result<List<ClientState>>> Handle(GetAllClientsQuery request, 
 **RESTful Endpoints Implemented:**
 
 **Query Endpoints:**
-- `GET /api/clients/{clientId}/state` - Get specific client state
-- `GET /api/clients/states` - Get all client states  
-- `GET /api/clients/by-zone/{zoneId}` - Get clients by zone
+
+- `GET /api/clients/{clientIndex}/state` - Get specific client state
+- `GET /api/clients/states` - Get all client states
+- `GET /api/clients/by-zone/{zoneIndex}` - Get clients by zone
 
 **Command Endpoints:**
-- `POST /api/clients/{clientId}/volume` - Set client volume
-- `POST /api/clients/{clientId}/mute` - Set client mute state
-- `POST /api/clients/{clientId}/toggle-mute` - Toggle client mute
-- `POST /api/clients/{clientId}/latency` - Set client latency
-- `POST /api/clients/{clientId}/assign-zone` - Assign client to zone
+
+- `POST /api/clients/{clientIndex}/volume` - Set client volume
+- `POST /api/clients/{clientIndex}/mute` - Set client mute state
+- `POST /api/clients/{clientIndex}/toggle-mute` - Toggle client mute
+- `POST /api/clients/{clientIndex}/latency` - Set client latency
+- `POST /api/clients/{clientIndex}/assign-zone` - Assign client to zone
 
 **Request DTOs:**
+
 ```csharp
 public record ClientVolumeRequest
 {
@@ -301,7 +314,7 @@ public record ClientLatencyRequest
 public record ZoneAssignmentRequest
 {
     [Range(1, int.MaxValue)]
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 }
 ```
 
@@ -310,12 +323,14 @@ public record ZoneAssignmentRequest
 **File:** `SnapDog2/Infrastructure/Services/ClientManager.cs`
 
 **Features:**
+
 - Manages 3 placeholder clients (Living Room, Kitchen, Bedroom)
 - Matches Docker container setup with correct MAC addresses and IPs
 - Implements all `IClientManager` interface methods
 - Provides realistic client state data for testing
 
 **Client State Data:**
+
 ```csharp
 var clientState = new ClientState
 {
@@ -327,7 +342,7 @@ var clientState = new ClientState
     Volume = 50,
     Mute = false,
     LatencyMs = 100,
-    ZoneId = clientInfo.ZoneId,
+    ZoneIndex = clientInfo.ZoneIndex,
     ConfiguredSnapcastName = clientInfo.Name,
     LastSeenUtc = DateTime.UtcNow,
     HostIpAddress = clientInfo.Ip,
@@ -380,13 +395,14 @@ builder.Services.AddScoped<SnapDog2.Core.Abstractions.IClientManager, SnapDog2.I
 All endpoints tested successfully in the Docker development environment:
 
 **✅ Query Endpoints:**
+
 ```bash
 # Get all clients
 curl http://localhost:5000/api/clients/states
 # Returns: Array of 3 client states with full details
 
 # Get specific client
-curl http://localhost:5000/api/clients/1/state  
+curl http://localhost:5000/api/clients/1/state
 # Returns: Living Room client state
 
 # Get clients by zone
@@ -395,6 +411,7 @@ curl http://localhost:5000/api/clients/by-zone/1
 ```
 
 **✅ Command Endpoints:**
+
 ```bash
 # Set client volume
 curl -X POST http://localhost:5000/api/clients/1/volume \
@@ -417,11 +434,12 @@ curl -X POST http://localhost:5000/api/clients/1/latency \
 
 # Assign client to zone
 curl -X POST http://localhost:5000/api/clients/1/assign-zone \
-  -H "Content-Type: application/json" -d '{"zoneId": 2}'
+  -H "Content-Type: application/json" -d '{"zoneIndex": 2}'
 # Returns: {"message": "Client assigned to zone successfully"}
 ```
 
 **✅ Error Handling:**
+
 ```bash
 # Invalid client ID
 curl http://localhost:5000/api/clients/999/state
@@ -434,6 +452,7 @@ curl -X POST http://localhost:5000/api/clients/1/volume \
 ```
 
 **✅ Structured Logging:**
+
 ```
 [10:50:05 INF] [SnapDog2.Server.Features.Clients.Handlers.SetClientLatencyCommandHandler] Setting latency for Client 1 to 150ms from Api
 [10:50:05 INF] [SnapDog2.Infrastructure.Services.ClientManager] Client 1 (Living Room): Set latency to 150ms
@@ -444,26 +463,31 @@ curl -X POST http://localhost:5000/api/clients/1/volume \
 ## 7.5. Architecture Compliance
 
 ### 7.5.1. ✅ CQRS Pattern Implementation
+
 - Commands and queries properly separated
 - Command handlers modify state, query handlers read state
 - Clear separation of concerns maintained
 
 ### 7.5.2. ✅ Result Pattern Usage
+
 - All operations return `Result<T>` or `Result`
 - Consistent error handling throughout the stack
 - Proper success/failure state management
 
 ### 7.5.3. ✅ Validation Pipeline Integration
+
 - FluentValidation seamlessly integrated
 - Validation occurs before command execution
 - Detailed validation error messages returned to API consumers
 
 ### 7.5.4. ✅ Structured Logging Implementation
+
 - Unique message IDs for all log entries (3001-4201 range)
 - Contextual information included in all log messages
 - Performance and behavior tracking implemented
 
 ### 7.5.5. ✅ Dependency Injection Consistency
+
 - All services properly registered
 - **Auto-discovery registration**: ✅ **UPDATED** - Manual registrations eliminated through reflection-based auto-discovery
 - Service lifetimes correctly configured (Scoped)
@@ -471,6 +495,7 @@ curl -X POST http://localhost:5000/api/clients/1/volume \
 > **Update Note**: The manual registration pattern has been superseded by auto-discovery configuration. See [19. Architectural Improvements Implementation](19-architectural-improvements-implementation.md).
 
 ### 7.5.6. ✅ API Design Standards
+
 - RESTful endpoint design
 - Proper HTTP status codes (200, 400, 404, 500)
 - Consistent JSON response format
@@ -481,7 +506,7 @@ curl -X POST http://localhost:5000/api/clients/1/volume \
 The implementation fully complies with [16c-client-commands-implementation.md](../blueprint/16c-client-commands-implementation.md):
 
 - ✅ All specified commands implemented
-- ✅ All specified queries implemented  
+- ✅ All specified queries implemented
 - ✅ All specified validators implemented
 - ✅ All specified handlers implemented
 - ✅ API controller endpoints match specification
@@ -510,6 +535,7 @@ The foundation is now solid with both Zone Commands and Client Commands fully im
 ## 7.9. Files Created/Modified
 
 ### 7.9.1. New Files Created (18 files)
+
 ```
 SnapDog2/Core/Abstractions/IClientManager.cs
 SnapDog2/Core/Abstractions/IClient.cs
@@ -530,6 +556,7 @@ SnapDog2/Infrastructure/Services/ClientManager.cs
 ```
 
 ### 7.9.2. Modified Files (2 files)
+
 ```
 SnapDog2/Worker/DI/CortexMediatorConfiguration.cs - Added client handler registrations
 SnapDog2/Program.cs - Added IClientManager service registration

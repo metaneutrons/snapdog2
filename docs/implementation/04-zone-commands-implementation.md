@@ -43,7 +43,7 @@ Implemented comprehensive command records covering all zone functionality:
 ```csharp
 public record PlayCommand : ICommand<Result>
 {
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
     public int? TrackIndex { get; init; }
     public string? MediaUrl { get; init; }
     public CommandSource Source { get; init; } = CommandSource.Internal;
@@ -58,7 +58,7 @@ public record StopCommand : ICommand<Result>
 ```csharp
 public record SetZoneVolumeCommand : ICommand<Result>
 {
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
     public required int Volume { get; init; }
     public CommandSource Source { get; init; } = CommandSource.Internal;
 }
@@ -81,7 +81,7 @@ public record NextPlaylistCommand : ICommand<Result>
 
 **Key Features:**
 
-- All commands include `ZoneId` for target identification
+- All commands include `ZoneIndex` for target identification
 - `CommandSource` tracking for audit trails
 - Optional parameters for flexible command usage
 - Consistent naming convention following blueprint specifications
@@ -93,7 +93,7 @@ public record NextPlaylistCommand : ICommand<Result>
 ```csharp
 public record GetZoneStateQuery : IQuery<Result<ZoneState>>
 {
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 }
 
 public record GetAllZoneStatesQuery : IQuery<Result<IEnumerable<ZoneState>>>
@@ -125,13 +125,13 @@ public class PlayCommandHandler : ICommandHandler<PlayCommand, Result>
 
     public async Task<Result> Handle(PlayCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Starting playback for Zone {ZoneId} from {Source}",
-            request.ZoneId, request.Source);
+        _logger.LogInformation("Starting playback for Zone {ZoneIndex} from {Source}",
+            request.ZoneIndex, request.Source);
 
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId);
+        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneIndex);
         if (zoneResult.IsFailure)
         {
-            _logger.LogWarning("Zone {ZoneId} not found for PlayCommand", request.ZoneId);
+            _logger.LogWarning("Zone {ZoneIndex} not found for PlayCommand", request.ZoneIndex);
             return zoneResult;
         }
 
@@ -155,12 +155,12 @@ public class GetZoneStateQueryHandler : IQueryHandler<GetZoneStateQuery, Result<
 {
     public async Task<Result<ZoneState>> Handle(GetZoneStateQuery request, CancellationToken cancellationToken)
     {
-        _logger.LogDebug("Getting state for Zone {ZoneId}", request.ZoneId);
+        _logger.LogDebug("Getting state for Zone {ZoneIndex}", request.ZoneIndex);
 
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId);
+        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneIndex);
         if (zoneResult.IsFailure)
         {
-            _logger.LogWarning("Zone {ZoneId} not found", request.ZoneId);
+            _logger.LogWarning("Zone {ZoneIndex} not found", request.ZoneIndex);
             return Result<ZoneState>.Failure(zoneResult.ErrorMessage);
         }
 
@@ -186,9 +186,9 @@ public class GetZoneStateQueryHandler : IQueryHandler<GetZoneStateQuery, Result<
 ```csharp
 public interface IZoneManager
 {
-    Task<Result<IZoneService>> GetZoneAsync(int zoneId);
+    Task<Result<IZoneService>> GetZoneAsync(int zoneIndex);
     Task<Result<IEnumerable<IZoneService>>> GetAllZonesAsync();
-    Task<bool> ZoneExistsAsync(int zoneId);
+    Task<bool> ZoneExistsAsync(int zoneIndex);
 }
 ```
 
@@ -197,7 +197,7 @@ public interface IZoneManager
 ```csharp
 public interface IZoneService
 {
-    int ZoneId { get; }
+    int ZoneIndex { get; }
     Task<Result<ZoneState>> GetStateAsync();
 
     // Playback Control
@@ -275,16 +275,16 @@ public partial class ZoneService : IZoneService
 {
     private ZoneState _currentState;
 
-    public ZoneService(int zoneId, string zoneName, ILogger logger)
+    public ZoneService(int zoneIndex, string zoneName, ILogger logger)
     {
-        ZoneId = zoneId;
+        ZoneIndex = zoneIndex;
         _zoneName = zoneName;
         _logger = logger;
 
         // Initialize with realistic default state
         _currentState = new ZoneState
         {
-            Id = zoneId,
+            Id = zoneIndex,
             Name = zoneName,
             PlaybackState = "stopped",
             Volume = 50,
@@ -292,8 +292,8 @@ public partial class ZoneService : IZoneService
             TrackRepeat = false,
             PlaylistRepeat = false,
             PlaylistShuffle = false,
-            SnapcastGroupId = $"group_{zoneId}",
-            SnapcastStreamId = $"stream_{zoneId}",
+            SnapcastGroupId = $"group_{zoneIndex}",
+            SnapcastStreamId = $"stream_{zoneIndex}",
             IsSnapcastGroupMuted = false,
             Track = new TrackInfo { /* realistic defaults */ },
             Playlist = new PlaylistInfo { /* realistic defaults */ },
@@ -304,7 +304,7 @@ public partial class ZoneService : IZoneService
 
     public async Task<Result> PlayAsync()
     {
-        LogZoneAction(ZoneId, _zoneName, "Play");
+        LogZoneAction(ZoneIndex, _zoneName, "Play");
         await Task.Delay(10); // TODO: Fix simulation async operation
 
         _currentState = _currentState with { PlaybackState = "playing" };
@@ -363,8 +363,8 @@ public class ZoneController : ControllerBase
         }
     }
 
-    [HttpPost("{zoneId:int}/play")]
-    public async Task<IActionResult> Play([Range(1, int.MaxValue)] int zoneId, CancellationToken cancellationToken)
+    [HttpPost("{zoneIndex:int}/play")]
+    public async Task<IActionResult> Play([Range(1, int.MaxValue)] int zoneIndex, CancellationToken cancellationToken)
     {
         // Implementation with proper error handling and logging
     }

@@ -50,8 +50,8 @@ The MQTT integration has been fully implemented as an **award-worthy, enterprise
 public interface IMqttService : IAsyncDisposable
 {
     Task<Result> InitializeAsync(CancellationToken cancellationToken = default);
-    Task<Result> PublishZoneStateAsync(int zoneId, ZoneState state, CancellationToken cancellationToken = default);
-    Task<Result> PublishClientStateAsync(string clientId, ClientState state, CancellationToken cancellationToken = default);
+    Task<Result> PublishZoneStateAsync(int zoneIndex, ZoneState state, CancellationToken cancellationToken = default);
+    Task<Result> PublishClientStateAsync(string clientIndex, ClientState state, CancellationToken cancellationToken = default);
     Task<Result> PublishAsync(string topic, string payload, bool retain = false, CancellationToken cancellationToken = default);
     Task<Result> SubscribeAsync(IEnumerable<string> topics, CancellationToken cancellationToken = default);
     Task<Result> UnsubscribeAsync(IEnumerable<string> topics, CancellationToken cancellationToken = default);
@@ -204,7 +204,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             // Configure client options with enterprise features
             var optionsBuilder = new MqttClientOptionsBuilder()
                 .WithTcpServer(_config.BrokerAddress, _config.Port)
-                .WithClientId(_config.ClientId)
+                .WithClientIndex(_config.ClientIndex)
                 .WithKeepAlivePeriod(TimeSpan.FromSeconds(_config.KeepAlive))
                 .WithCleanSession(true);
 
@@ -263,7 +263,7 @@ public static class MqttServiceConfiguration
                 if (!config.Mqtt.Enabled) return true;
                 if (string.IsNullOrWhiteSpace(config.Mqtt.BrokerAddress)) return false;
                 if (config.Mqtt.Port <= 0 || config.Mqtt.Port > 65535) return false;
-                if (string.IsNullOrWhiteSpace(config.Mqtt.ClientId)) return false;
+                if (string.IsNullOrWhiteSpace(config.Mqtt.ClientIndex)) return false;
                 return true;
             }, "Invalid MQTT configuration");
 

@@ -42,7 +42,7 @@ classDiagram
     class MqttConfig {
         +string BrokerAddress
         +int Port
-        +string ClientId
+        +string ClientIndex
         +ResilienceConfig Resilience
     }
 
@@ -71,7 +71,7 @@ Each service implements two distinct resilience policies:
   - Higher retry counts for connection establishment
   - Exponential backoff with jitter to avoid thundering herd
   - Longer timeouts to accommodate network latency
-  
+
 - **Operation Policy**: Applied to individual operations after connection is established
   - Lower retry counts for faster failure detection
   - Linear backoff for predictable timing
@@ -158,6 +158,7 @@ SNAPDOG_SERVICES_{SERVICE}_RESILIENCE_{POLICY_TYPE}_{SETTING}
 ```
 
 Where:
+
 - `{SERVICE}`: `KNX`, `MQTT`, or `SNAPCAST`
 - `{POLICY_TYPE}`: `CONNECTION` or `OPERATION`
 - `{SETTING}`: Specific resilience setting
@@ -501,7 +502,7 @@ services:
       SNAPDOG_SERVICES_KNX_RESILIENCE_OPERATION_MAX_RETRIES: 3
       SNAPDOG_SERVICES_KNX_RESILIENCE_OPERATION_RETRY_DELAY_MS: 1000
       SNAPDOG_SERVICES_KNX_RESILIENCE_OPERATION_TIMEOUT_SECONDS: 8
-      
+
       # MQTT Resilience - High Availability
       SNAPDOG_SERVICES_MQTT_RESILIENCE_CONNECTION_MAX_RETRIES: 7
       SNAPDOG_SERVICES_MQTT_RESILIENCE_CONNECTION_RETRY_DELAY_MS: 2000
@@ -509,7 +510,7 @@ services:
       SNAPDOG_SERVICES_MQTT_RESILIENCE_OPERATION_MAX_RETRIES: 3
       SNAPDOG_SERVICES_MQTT_RESILIENCE_OPERATION_RETRY_DELAY_MS: 750
       SNAPDOG_SERVICES_MQTT_RESILIENCE_OPERATION_TIMEOUT_SECONDS: 15
-      
+
       # Snapcast Resilience - Balanced
       SNAPDOG_SERVICES_SNAPCAST_RESILIENCE_CONNECTION_MAX_RETRIES: 4
       SNAPDOG_SERVICES_SNAPCAST_RESILIENCE_CONNECTION_RETRY_DELAY_MS: 2500
@@ -535,14 +536,14 @@ The resilience system integrates with the telemetry infrastructure to provide co
 Resilience events are logged with structured logging for operational visibility:
 
 ```csharp
-[LoggerMessage(EventId = 701, Level = LogLevel.Warning, 
+[LoggerMessage(EventId = 701, Level = LogLevel.Warning,
     Message = "[Resilience] {ServiceName} {PolicyType} retry attempt {RetryAttempt}/{MaxRetries} after {Delay}ms delay")]
-static partial void LogRetryAttempt(ILogger logger, string serviceName, string policyType, 
+static partial void LogRetryAttempt(ILogger logger, string serviceName, string policyType,
     int retryAttempt, int maxRetries, double delay, Exception exception);
 
-[LoggerMessage(EventId = 702, Level = LogLevel.Error, 
+[LoggerMessage(EventId = 702, Level = LogLevel.Error,
     Message = "[Resilience] {ServiceName} {PolicyType} operation timed out after {TimeoutSeconds}s")]
-static partial void LogTimeout(ILogger logger, string serviceName, string policyType, 
+static partial void LogTimeout(ILogger logger, string serviceName, string policyType,
     int timeoutSeconds, Exception exception);
 ```
 

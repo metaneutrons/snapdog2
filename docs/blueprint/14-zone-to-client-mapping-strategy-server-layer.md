@@ -11,7 +11,7 @@ The mapping strategy adheres to the following core principles:
 1. **1:1 Zone-Group Correspondence**: Every instance of `ZoneService` within the `/Server` layer maintains a reference to a unique Snapcast Group ID.
 2. **Exclusive Client Assignment**: Each discovered Snapcast Client can belong to, at most, one SnapDog2 Zone at any given time. This translates directly to the client belonging to the corresponding single Snapcast Group managed by that Zone. Clients not assigned to a SnapDog2 Zone remain unassigned or in externally managed Snapcast groups.
 3. **Authoritative Zone/Group Management**: SnapDog2 assumes authority over the lifecycle of Snapcast Groups that correspond to its configured Zones. It handles the creation of Snapcast Groups when Zones are initialized (if they don't exist) and potentially the deletion of groups when Zones are removed (though zone removal is not a planned feature based on static configuration). Renaming a Zone (via configuration change and restart) should trigger renaming the corresponding Snapcast Group.
-4. **Adaptive Synchronization**: While SnapDog2 manages its zones/groups, it must also react gracefully to changes made externally (e.g., via Snapweb or another controller modifying Snapcast groups/client assignments). SnapDog2 will **adapt** its internal state (`ClientState.ZoneId`, `ZoneState.ClientIds`) to reflect the actual state reported by Snapcast server events, logging these changes.
+4. **Adaptive Synchronization**: While SnapDog2 manages its zones/groups, it must also react gracefully to changes made externally (e.g., via Snapweb or another controller modifying Snapcast groups/client assignments). SnapDog2 will **adapt** its internal state (`ClientState.ZoneIndex`, `ZoneState.ClientIndexs`) to reflect the actual state reported by Snapcast server events, logging these changes.
 
 ## 13.3. Implementation (`ZoneManager`, `ClientManager`, `SnapcastService`)
 
@@ -33,7 +33,7 @@ The mapping and synchronization logic is primarily implemented within the core m
         * Stores the `IZoneService` instance in an internal dictionary, keyed by `ZoneConfig.Id`.
         * Stores the `SnapcastGroupId` -> `ZoneConfig.Id` mapping.
     4. (Optional Cleanup): Identify any Snapcast groups present on the server (via repository) that do *not* correspond to any `ZoneConfig`. Log a warning about these "unmanaged" groups. Do not delete them automatically.
-* **Lookup:** Provides methods like `GetZoneAsync(int zoneId)`, `GetAllZonesAsync()`, `TryGetZoneIdByGroupId(string snapcastGroupId, out int zoneId)`.
+* **Lookup:** Provides methods like `GetZoneAsync(int zoneIndex)`, `GetAllZonesAsync()`, `TryGetZoneIndexByGroupId(string snapcastGroupId, out int zoneIndex)`.
 * **Event Handling:** Handles Cortex.Mediator `SnapcastGroupChangedNotification` (published by `SnapcastService`). If a *managed* group's name changes externally, logs a warning and potentially calls `_snapcastService.SetGroupNameAsync` to revert it back to the configured name (Authoritative approach for names), or updates the internal `ZoneService.Name` (Adaptive). *Decision: Adopt Adaptive approach for external name changes - update internal state and log.*
 
 ### 13.3.2. `ClientManager` (/Server/Managers/ClientManager.cs)
@@ -46,15 +46,15 @@ The mapping and synchronization logic is primarily implemented within the core m
     2. Populates internal mappings (`_snapcastIdToInternalId`, `_internalClientStates` by calling `MapSnapClientToClientState`).
     3. For each client, performs **Initial Assignment (Option B):**
         * Check the `Client` model from the repository to see if it's already assigned to a Snapcast Group ID.
-        * Use `_zoneManager.TryGetZoneIdByGroupId` to see if this group corresponds to a managed SnapDog2 Zone.
-        * **If Yes:** Assign the client to this existing `ZoneId` in its `ClientState` and update `_lastKnownZoneAssignment`.
-        * **If No (or not in a group):** Get the `DefaultZoneId` from the client's corresponding `ClientConfig`. If valid, call `AssignClientToZoneAsync` to assign it to the default zone.
-* **Client Assignment (`AssignClientToZoneAsync(int clientId, int zoneId)`):**
-    1. Finds the internal `clientId` and corresponding `snapcastClientId`.
-    2. Uses `_zoneManager.GetZoneAsync(zoneId)` to get the target `ZoneService` and its `SnapcastGroupId`.
-    3. Calls `_snapcastService.AssignClientToGroupAsync(snapcastClientId, snapcastGroupId)`.
-    4. If successful, updates the internal `_internalClientStates[clientId]` record with the new `ZoneId`.
-    5. Updates `_lastKnownZoneAssignment[snapcastClientId] = zoneId`.
+        * Use `_zoneManager.TryGetZoneIndexByGroupId` to see if this group corresponds to a managed SnapDog2 Zone.
+        * **If Yes:** Assign the client to this existing `ZoneIndex` in its `ClientState` and update `_lastKnownZoneAssignment`.
+        * **If No (or not in a group):** Get the `DefaultZoneIndex` from the client's corresponding `ClientConfig`. If valid, call `AssignClientToZoneAsync` to assign it to the default zone.
+* **Client Assignment (`AssignClientToZoneAsync(int clientIndex, int zoneIndex)`):**
+    1. Finds the internal `clientIndex` and corresponding `snapcastClientIndex`.
+    2. Uses `_zoneManager.GetZoneAsync(zoneIndex)` to get the target `ZoneService` and its `SnapcastGroupId`.
+    3. Calls `_snapcastService.AssignClientToGroupAsync(snapcastClientIndex, snapcastGroupId)`.
+    4. If successful, updates the internal `_internalClientStates[clientIndex]` record with the new `ZoneIndex`.
+    5. Updates `_lastKnownZoneAssignment[snapcastClientIndex] = zoneIndex`.
     6. Publishes a `StatusChangedNotification` for `CLIENT_ZONE_STATUS`.
 * **Event Handling:** Implements `INotificationHandler` for Snapcast events published by `SnapcastService`:
   * `Handle(SnapcastClientConnectedNotification)`: Updates the corresponding `ClientState` (sets `Connected = true`, updates `LastSeenUtc`). Checks `_lastKnownZoneAssignment`. If the client isn't currently in a managed group (check state repo), calls `AssignClientToZoneAsync` to restore it to its last known zone. Publishes `StatusChangedNotification("CLIENT_CONNECTED", ..., true)`.
@@ -62,8 +62,8 @@ The mapping and synchronization logic is primarily implemented within the core m
   * `Handle(SnapcastClientVolumeChangedNotification)`: Updates the corresponding `ClientState` (Volume, IsMuted). Publishes relevant `StatusChangedNotification`.
   * `Handle(SnapcastClientLatencyChangedNotification)`: Updates `ClientState`. Publishes notification.
   * `Handle(SnapcastClientNameChangedNotification)`: Updates `ClientState.ConfiguredSnapcastName`. Publishes notification.
-  * `Handle(SnapcastGroupChangedNotification)`: **(Adaptive External Change Handling - Option B)** Iterates through the changed group's clients (from the notification's `Group` object). For each client, updates its `ZoneId` in `_internalClientStates` to match the zone corresponding to the `GroupId`. Updates `_lastKnownZoneAssignment`. Publishes relevant `CLIENT_ZONE_STATUS` notifications. Logs the change clearly. Handles clients being *removed* from a group by setting their `ZoneId` to `null` if they aren't found in another managed group.
-* **State Retrieval (`GetAllClientsAsync`, `GetClientAsync`):** Retrieves raw data from `_snapcastStateRepo` and merges/maps it with internal state (`internal ID`, configured `Name`, assigned `ZoneId`) to produce the final `ClientState` records.
+  * `Handle(SnapcastGroupChangedNotification)`: **(Adaptive External Change Handling - Option B)** Iterates through the changed group's clients (from the notification's `Group` object). For each client, updates its `ZoneIndex` in `_internalClientStates` to match the zone corresponding to the `GroupId`. Updates `_lastKnownZoneAssignment`. Publishes relevant `CLIENT_ZONE_STATUS` notifications. Logs the change clearly. Handles clients being *removed* from a group by setting their `ZoneIndex` to `null` if they aren't found in another managed group.
+* **State Retrieval (`GetAllClientsAsync`, `GetClientAsync`):** Retrieves raw data from `_snapcastStateRepo` and merges/maps it with internal state (`internal ID`, configured `Name`, assigned `ZoneIndex`) to produce the final `ClientState` records.
 
 ### 13.3.3. `SnapcastService` (/Infrastructure/Snapcast/SnapcastService.cs)
 
@@ -85,11 +85,11 @@ using Sturd.SnapcastNet.Models; // Use raw models from library
 
 // Published by SnapcastService when underlying library raises event
 public record SnapcastClientConnectedNotification(Client Client) : INotification;
-public record SnapcastClientDisconnectedNotification(string SnapcastClientId) : INotification; // Only ID needed usually
+public record SnapcastClientDisconnectedNotification(string SnapcastClientIndex) : INotification; // Only ID needed usually
 public record SnapcastGroupChangedNotification(Group Group) : INotification; // Carries full Group info including clients
-public record SnapcastClientVolumeChangedNotification(string SnapcastClientId, ClientVolume Volume) : INotification;
-public record SnapcastClientLatencyChangedNotification(string SnapcastClientId, int Latency) : INotification; // Assuming event args provide this
-public record SnapcastClientNameChangedNotification(string SnapcastClientId, string NewName) : INotification; // Assuming event args provide this
+public record SnapcastClientVolumeChangedNotification(string SnapcastClientIndex, ClientVolume Volume) : INotification;
+public record SnapcastClientLatencyChangedNotification(string SnapcastClientIndex, int Latency) : INotification; // Assuming event args provide this
+public record SnapcastClientNameChangedNotification(string SnapcastClientIndex, string NewName) : INotification; // Assuming event args provide this
 public record SnapcastGroupMuteChangedNotification(string GroupId, bool IsMuted) : INotification; // Assuming event args provide this
 public record SnapcastStreamChangedNotification(string StreamId, Stream Stream) : INotification; // Example for stream updates
 // ... other notifications as needed based on Sturd.SnapcastNet events ...

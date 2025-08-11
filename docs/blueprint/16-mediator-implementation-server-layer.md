@@ -86,7 +86,7 @@ public record SetZoneVolumeCommand : ICommand<Result> // Returns non-generic Res
     /// <summary>
     /// Gets the ID of the target zone.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the desired volume level (0-100).
@@ -118,11 +118,11 @@ public partial class SetZoneVolumeCommandHandler : ICommandHandler<SetZoneVolume
     private readonly ILogger<SetZoneVolumeCommandHandler> _logger;
 
     // Logger Messages
-    [LoggerMessage(101, LogLevel.Information, "Handling SetZoneVolumeCommand for Zone {ZoneId} to {Volume} from {Source}")]
-    private partial void LogHandling(int zoneId, int volume, CommandSource source);
+    [LoggerMessage(101, LogLevel.Information, "Handling SetZoneVolumeCommand for Zone {ZoneIndex} to {Volume} from {Source}")]
+    private partial void LogHandling(int zoneIndex, int volume, CommandSource source);
 
-    [LoggerMessage(102, LogLevel.Warning, "Zone {ZoneId} not found for SetZoneVolumeCommand.")]
-    private partial void LogZoneNotFound(int zoneId);
+    [LoggerMessage(102, LogLevel.Warning, "Zone {ZoneIndex} not found for SetZoneVolumeCommand.")]
+    private partial void LogZoneNotFound(int zoneIndex);
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SetZoneVolumeCommandHandler"/> class.
@@ -136,13 +136,13 @@ public partial class SetZoneVolumeCommandHandler : ICommandHandler<SetZoneVolume
     /// <inheritdoc/>
     public async Task<Result> Handle(SetZoneVolumeCommand request, CancellationToken cancellationToken)
     {
-        LogHandling(request.ZoneId, request.Volume, request.Source);
+        LogHandling(request.ZoneIndex, request.Volume, request.Source);
 
         // 1. Retrieve the target domain entity/service via Manager/Repository
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneIndex).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            LogZoneNotFound(request.ZoneId);
+            LogZoneNotFound(request.ZoneIndex);
             return zoneResult; // Propagate failure Result
         }
         var zone = zoneResult.Value;
@@ -252,7 +252,7 @@ public partial class GetAllClientsQueryHandler : IQueryHandler<GetAllClientsQuer
         return _mapper.Map<ClientState>(snapClient, opts => {
              opts.Items["InternalId"] = snapDogInfo?.InternalId ?? -1;
              opts.Items["SnapDogName"] = snapDogInfo?.ConfiguredName;
-             opts.Items["CurrentZoneId"] = snapDogInfo?.CurrentZoneId;
+             opts.Items["CurrentZoneIndex"] = snapDogInfo?.CurrentZoneIndex;
         }); // Example using AutoMapper context items
     }
 }
@@ -371,7 +371,7 @@ public class SetZoneVolumeCommandValidator : AbstractValidator<SetZoneVolumeComm
 {
     public SetZoneVolumeCommandValidator()
     {
-        RuleFor(x => x.ZoneId)
+        RuleFor(x => x.ZoneIndex)
             .GreaterThan(0).WithMessage("Zone ID must be a positive integer.");
 
         RuleFor(x => x.Volume)

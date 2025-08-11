@@ -55,9 +55,9 @@ Extended with missing state query methods:
 /// <summary>
 /// Gets the state of a specific zone.
 /// </summary>
-/// <param name="zoneId">The zone ID.</param>
+/// <param name="zoneIndex">The zone ID.</param>
 /// <returns>The zone state if found.</returns>
-Task<Result<ZoneState>> GetZoneStateAsync(int zoneId);
+Task<Result<ZoneState>> GetZoneStateAsync(int zoneIndex);
 
 /// <summary>
 /// Gets the states of all zones.
@@ -101,7 +101,7 @@ public record GetAllZonesQuery : IQuery<Result<List<ZoneState>>>;
 /// </summary>
 public record GetZoneTrackInfoQuery : IQuery<Result<TrackInfo>>
 {
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 }
 
 /// <summary>
@@ -109,7 +109,7 @@ public record GetZoneTrackInfoQuery : IQuery<Result<TrackInfo>>
 /// </summary>
 public record GetZonePlaylistInfoQuery : IQuery<Result<PlaylistInfo>>
 {
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 }
 
 /// <summary>
@@ -227,19 +227,19 @@ var track = new TrackInfo
 Added missing state query methods:
 
 ```csharp
-public async Task<Result<ZoneState>> GetZoneStateAsync(int zoneId)
+public async Task<Result<ZoneState>> GetZoneStateAsync(int zoneIndex)
 {
-    LogGettingZone(zoneId);
+    LogGettingZone(zoneIndex);
 
     await Task.Delay(1); // TODO: Fix simulation async operation
 
-    if (_zones.TryGetValue(zoneId, out var zone))
+    if (_zones.TryGetValue(zoneIndex, out var zone))
     {
         return await zone.GetStateAsync().ConfigureAwait(false);
     }
 
-    LogZoneNotFound(zoneId);
-    return Result<ZoneState>.Failure($"Zone {zoneId} not found");
+    LogZoneNotFound(zoneIndex);
+    return Result<ZoneState>.Failure($"Zone {zoneIndex} not found");
 }
 
 public async Task<Result<List<ZoneState>>> GetAllZoneStatesAsync()
@@ -271,8 +271,8 @@ Added new zone query endpoints:
 **New Endpoints:**
 
 - `GET /api/zones/all` - Get all zones with their states
-- `GET /api/zones/{zoneId}/track` - Get current track information for a zone
-- `GET /api/zones/{zoneId}/playlist` - Get current playlist information for a zone
+- `GET /api/zones/{zoneIndex}/track` - Get current track information for a zone
+- `GET /api/zones/{zoneIndex}/playlist` - Get current playlist information for a zone
 
 **Response Types:**
 
@@ -284,12 +284,12 @@ public async Task<ActionResult<IEnumerable<ZoneState>>> GetAllZones(Cancellation
 [ProducesResponseType(typeof(TrackInfo), 200)]
 [ProducesResponseType(404)]
 [ProducesResponseType(500)]
-public async Task<ActionResult<TrackInfo>> GetZoneTrackInfo([Range(1, int.MaxValue)] int zoneId, CancellationToken cancellationToken)
+public async Task<ActionResult<TrackInfo>> GetZoneTrackInfo([Range(1, int.MaxValue)] int zoneIndex, CancellationToken cancellationToken)
 
 [ProducesResponseType(typeof(PlaylistInfo), 200)]
 [ProducesResponseType(404)]
 [ProducesResponseType(500)]
-public async Task<ActionResult<PlaylistInfo>> GetZonePlaylistInfo([Range(1, int.MaxValue)] int zoneId, CancellationToken cancellationToken)
+public async Task<ActionResult<PlaylistInfo>> GetZonePlaylistInfo([Range(1, int.MaxValue)] int zoneIndex, CancellationToken cancellationToken)
 ```
 
 ### 8.3.7. New Playlist API Controller

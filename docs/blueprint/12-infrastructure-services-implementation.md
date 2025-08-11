@@ -64,12 +64,12 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     public async Task<Result> InitializeAsync(CancellationToken cancellationToken) { /* ... Connect logic using _reconnectionPolicy ... */ return Result.Success();}
 
     // --- Wrapper Methods ---
-    public async Task<Result> SetClientVolumeAsync(string snapcastClientId, int volumePercent)
+    public async Task<Result> SetClientVolumeAsync(string snapcastClientIndex, int volumePercent)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         var volumeData = new ClientVolume { Percent = volumePercent, Muted = volumePercent == 0 }; // Using SnapcastClient model
         var policyResult = await _operationPolicy.ExecuteAndCaptureAsync(
-          async ct => await _client.SetClientVolumeAsync(snapcastClientId, volumeData, ct).ConfigureAwait(false)
+          async ct => await _client.SetClientVolumeAsync(snapcastClientIndex, volumeData, ct).ConfigureAwait(false)
         ).ConfigureAwait(false);
 
         if(policyResult.Outcome == OutcomeType.Failure) {
@@ -85,15 +85,15 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     private void OnSnapcastClientVolumeChangedHandler(object? sender, ClientVolumeEventArgs e)
     {
         if (_disposed) return;
-        LogSnapcastEvent("ClientVolumeChanged", e.ClientId); // Example log
+        LogSnapcastEvent("ClientVolumeChanged", e.ClientIndex); // Example log
         try
         {
             // 1. Update State Repository (using raw event args/models)
-            var client = _stateRepository.GetClient(e.ClientId);
+            var client = _stateRepository.GetClient(e.ClientIndex);
             if (client != null) { _stateRepository.UpdateClient(client with { Config = client.Config with { Volume = e.Volume }}); }
 
             // 2. Publish Cortex.Mediator Notification (using raw event args/models)
-            _ = _mediator.Publish(new SnapcastClientVolumeChangedNotification(e.ClientId, e.Volume)); // Fire-and-forget publish
+            _ = _mediator.Publish(new SnapcastClientVolumeChangedNotification(e.ClientIndex, e.Volume)); // Fire-and-forget publish
         } catch(Exception ex) { LogEventHandlerError("ClientVolumeChanged", ex); }
     }
      private void OnSnapcastServerDisconnectedHandler(object? sender, EventArgs e) { /* Trigger Reconnect */ }
@@ -236,8 +236,8 @@ Implements `IMediaPlayerService` using **SoundFlow**, a powerful cross-platform 
 * **Dependencies:** `IOptions<SoundFlowConfig>`, `IHttpClientFactory`, `ILogger<MediaPlayerService>`, `IMediator` (for publishing playback events), `IEnumerable<ZoneConfig>`.
 * **Core Logic:**
   * Initializes SoundFlow audio engine with configurable parameters (sample rate, bit depth, channels, buffer size).
-  * Creates and manages a `Dictionary<int, MediaPlayer>` (one per ZoneId) for concurrent multi-zone audio streaming.
-  * Implements `PlayAsync(int zoneId, TrackInfo trackInfo)`:
+  * Creates and manages a `Dictionary<int, MediaPlayer>` (one per ZoneIndex) for concurrent multi-zone audio streaming.
+  * Implements `PlayAsync(int zoneIndex, TrackInfo trackInfo)`:
     * Retrieves zone configuration and creates HTTP client with resilience policies.
     * Creates `MediaPlayer` instance with audio processing pipeline:
       * `HttpStreamSource` - Streams audio from HTTP URLs (Subsonic/radio streams)

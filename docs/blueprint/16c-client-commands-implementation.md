@@ -20,7 +20,7 @@ public record SetClientVolumeCommand : ICommand<Result>
     /// <summary>
     /// Gets the ID of the target client.
     /// </summary>
-    public required int ClientId { get; init; }
+    public required int ClientIndex { get; init; }
 
     /// <summary>
     /// Gets the desired volume level (0-100).
@@ -41,7 +41,7 @@ public record SetClientMuteCommand : ICommand<Result>
     /// <summary>
     /// Gets the ID of the target client.
     /// </summary>
-    public required int ClientId { get; init; }
+    public required int ClientIndex { get; init; }
 
     /// <summary>
     /// Gets whether to mute (true) or unmute (false) the client.
@@ -62,7 +62,7 @@ public record ToggleClientMuteCommand : ICommand<Result>
     /// <summary>
     /// Gets the ID of the target client.
     /// </summary>
-    public required int ClientId { get; init; }
+    public required int ClientIndex { get; init; }
 
     /// <summary>
     /// Gets the source that initiated the command.
@@ -89,7 +89,7 @@ public record SetClientLatencyCommand : ICommand<Result>
     /// <summary>
     /// Gets the ID of the target client.
     /// </summary>
-    public required int ClientId { get; init; }
+    public required int ClientIndex { get; init; }
 
     /// <summary>
     /// Gets the latency in milliseconds.
@@ -110,12 +110,12 @@ public record AssignClientToZoneCommand : ICommand<Result>
     /// <summary>
     /// Gets the ID of the target client.
     /// </summary>
-    public required int ClientId { get; init; }
+    public required int ClientIndex { get; init; }
 
     /// <summary>
     /// Gets the ID of the zone to assign the client to (1-based).
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the source that initiated the command.
@@ -140,7 +140,7 @@ public class SetClientVolumeCommandValidator : AbstractValidator<SetClientVolume
 {
     public SetClientVolumeCommandValidator()
     {
-        RuleFor(x => x.ClientId)
+        RuleFor(x => x.ClientIndex)
             .GreaterThan(0)
             .WithMessage("Client ID must be a positive integer.");
 
@@ -161,7 +161,7 @@ public class SetClientMuteCommandValidator : AbstractValidator<SetClientMuteComm
 {
     public SetClientMuteCommandValidator()
     {
-        RuleFor(x => x.ClientId)
+        RuleFor(x => x.ClientIndex)
             .GreaterThan(0)
             .WithMessage("Client ID must be a positive integer.");
 
@@ -178,7 +178,7 @@ public class ToggleClientMuteCommandValidator : AbstractValidator<ToggleClientMu
 {
     public ToggleClientMuteCommandValidator()
     {
-        RuleFor(x => x.ClientId)
+        RuleFor(x => x.ClientIndex)
             .GreaterThan(0)
             .WithMessage("Client ID must be a positive integer.");
 
@@ -195,7 +195,7 @@ public class SetClientLatencyCommandValidator : AbstractValidator<SetClientLaten
 {
     public SetClientLatencyCommandValidator()
     {
-        RuleFor(x => x.ClientId)
+        RuleFor(x => x.ClientIndex)
             .GreaterThan(0)
             .WithMessage("Client ID must be a positive integer.");
 
@@ -216,11 +216,11 @@ public class AssignClientToZoneCommandValidator : AbstractValidator<AssignClient
 {
     public AssignClientToZoneCommandValidator()
     {
-        RuleFor(x => x.ClientId)
+        RuleFor(x => x.ClientIndex)
             .GreaterThan(0)
             .WithMessage("Client ID must be a positive integer.");
 
-        RuleFor(x => x.ZoneId)
+        RuleFor(x => x.ZoneIndex)
             .GreaterThan(0)
             .WithMessage("Zone ID must be a positive integer.");
 
@@ -253,11 +253,11 @@ public partial class SetClientVolumeCommandHandler : ICommandHandler<SetClientVo
     private readonly IClientManager _clientManager;
     private readonly ILogger<SetClientVolumeCommandHandler> _logger;
 
-    [LoggerMessage(3001, LogLevel.Information, "Setting volume for Client {ClientId} to {Volume} from {Source}")]
-    private partial void LogHandling(int clientId, int volume, CommandSource source);
+    [LoggerMessage(3001, LogLevel.Information, "Setting volume for Client {ClientIndex} to {Volume} from {Source}")]
+    private partial void LogHandling(int clientIndex, int volume, CommandSource source);
 
-    [LoggerMessage(3002, LogLevel.Warning, "Client {ClientId} not found for SetClientVolumeCommand")]
-    private partial void LogClientNotFound(int clientId);
+    [LoggerMessage(3002, LogLevel.Warning, "Client {ClientIndex} not found for SetClientVolumeCommand")]
+    private partial void LogClientNotFound(int clientIndex);
 
     public SetClientVolumeCommandHandler(
         IClientManager clientManager,
@@ -269,13 +269,13 @@ public partial class SetClientVolumeCommandHandler : ICommandHandler<SetClientVo
 
     public async Task<Result> Handle(SetClientVolumeCommand request, CancellationToken cancellationToken)
     {
-        LogHandling(request.ClientId, request.Volume, request.Source);
+        LogHandling(request.ClientIndex, request.Volume, request.Source);
 
         // Get the client
-        var clientResult = await _clientManager.GetClientAsync(request.ClientId).ConfigureAwait(false);
+        var clientResult = await _clientManager.GetClientAsync(request.ClientIndex).ConfigureAwait(false);
         if (clientResult.IsFailure)
         {
-            LogClientNotFound(request.ClientId);
+            LogClientNotFound(request.ClientIndex);
             return clientResult;
         }
 
@@ -308,14 +308,14 @@ public partial class AssignClientToZoneCommandHandler : ICommandHandler<AssignCl
     private readonly IZoneManager _zoneManager;
     private readonly ILogger<AssignClientToZoneCommandHandler> _logger;
 
-    [LoggerMessage(3101, LogLevel.Information, "Assigning Client {ClientId} to Zone {ZoneId} from {Source}")]
-    private partial void LogHandling(int clientId, int zoneId, CommandSource source);
+    [LoggerMessage(3101, LogLevel.Information, "Assigning Client {ClientIndex} to Zone {ZoneIndex} from {Source}")]
+    private partial void LogHandling(int clientIndex, int zoneIndex, CommandSource source);
 
-    [LoggerMessage(3102, LogLevel.Warning, "Client {ClientId} not found for AssignClientToZoneCommand")]
-    private partial void LogClientNotFound(int clientId);
+    [LoggerMessage(3102, LogLevel.Warning, "Client {ClientIndex} not found for AssignClientToZoneCommand")]
+    private partial void LogClientNotFound(int clientIndex);
 
-    [LoggerMessage(3103, LogLevel.Warning, "Zone {ZoneId} not found for AssignClientToZoneCommand")]
-    private partial void LogZoneNotFound(int zoneId);
+    [LoggerMessage(3103, LogLevel.Warning, "Zone {ZoneIndex} not found for AssignClientToZoneCommand")]
+    private partial void LogZoneNotFound(int zoneIndex);
 
     public AssignClientToZoneCommandHandler(
         IClientManager clientManager,
@@ -329,26 +329,26 @@ public partial class AssignClientToZoneCommandHandler : ICommandHandler<AssignCl
 
     public async Task<Result> Handle(AssignClientToZoneCommand request, CancellationToken cancellationToken)
     {
-        LogHandling(request.ClientId, request.ZoneId, request.Source);
+        LogHandling(request.ClientIndex, request.ZoneIndex, request.Source);
 
         // Validate client exists
-        var clientResult = await _clientManager.GetClientAsync(request.ClientId).ConfigureAwait(false);
+        var clientResult = await _clientManager.GetClientAsync(request.ClientIndex).ConfigureAwait(false);
         if (clientResult.IsFailure)
         {
-            LogClientNotFound(request.ClientId);
+            LogClientNotFound(request.ClientIndex);
             return clientResult;
         }
 
         // Validate zone exists
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneIndex).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            LogZoneNotFound(request.ZoneId);
+            LogZoneNotFound(request.ZoneIndex);
             return zoneResult;
         }
 
         // Perform the assignment
-        var result = await _clientManager.AssignClientToZoneAsync(request.ClientId, request.ZoneId).ConfigureAwait(false);
+        var result = await _clientManager.AssignClientToZoneAsync(request.ClientIndex, request.ZoneIndex).ConfigureAwait(false);
 
         return result;
     }
@@ -373,8 +373,8 @@ public partial class SetClientLatencyCommandHandler : ICommandHandler<SetClientL
     private readonly IClientManager _clientManager;
     private readonly ILogger<SetClientLatencyCommandHandler> _logger;
 
-    [LoggerMessage(3201, LogLevel.Information, "Setting latency for Client {ClientId} to {LatencyMs}ms from {Source}")]
-    private partial void LogHandling(int clientId, int latencyMs, CommandSource source);
+    [LoggerMessage(3201, LogLevel.Information, "Setting latency for Client {ClientIndex} to {LatencyMs}ms from {Source}")]
+    private partial void LogHandling(int clientIndex, int latencyMs, CommandSource source);
 
     public SetClientLatencyCommandHandler(
         IClientManager clientManager,
@@ -386,10 +386,10 @@ public partial class SetClientLatencyCommandHandler : ICommandHandler<SetClientL
 
     public async Task<Result> Handle(SetClientLatencyCommand request, CancellationToken cancellationToken)
     {
-        LogHandling(request.ClientId, request.LatencyMs, request.Source);
+        LogHandling(request.ClientIndex, request.LatencyMs, request.Source);
 
         // Get the client
-        var clientResult = await _clientManager.GetClientAsync(request.ClientId).ConfigureAwait(false);
+        var clientResult = await _clientManager.GetClientAsync(request.ClientIndex).ConfigureAwait(false);
         if (clientResult.IsFailure)
         {
             return clientResult;
@@ -428,7 +428,7 @@ public record GetClientQuery : IQuery<Result<ClientState>>
     /// <summary>
     /// Gets the ID of the client to retrieve.
     /// </summary>
-    public required int ClientId { get; init; }
+    public required int ClientIndex { get; init; }
 }
 
 /// <summary>
@@ -439,7 +439,7 @@ public record GetClientsByZoneQuery : IQuery<Result<List<ClientState>>>
     /// <summary>
     /// Gets the ID of the zone.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 }
 ```
 
@@ -512,8 +512,8 @@ public partial class GetClientQueryHandler : IQueryHandler<GetClientQuery, Resul
     private readonly IClientManager _clientManager;
     private readonly ILogger<GetClientQueryHandler> _logger;
 
-    [LoggerMessage(4101, LogLevel.Information, "Handling GetClientQuery for Client {ClientId}")]
-    private partial void LogHandling(int clientId);
+    [LoggerMessage(4101, LogLevel.Information, "Handling GetClientQuery for Client {ClientIndex}")]
+    private partial void LogHandling(int clientIndex);
 
     public GetClientQueryHandler(
         IClientManager clientManager,
@@ -525,9 +525,9 @@ public partial class GetClientQueryHandler : IQueryHandler<GetClientQuery, Resul
 
     public async Task<Result<ClientState>> Handle(GetClientQuery request, CancellationToken cancellationToken)
     {
-        LogHandling(request.ClientId);
+        LogHandling(request.ClientIndex);
 
-        var result = await _clientManager.GetClientStateAsync(request.ClientId).ConfigureAwait(false);
+        var result = await _clientManager.GetClientStateAsync(request.ClientIndex).ConfigureAwait(false);
         return result;
     }
 }

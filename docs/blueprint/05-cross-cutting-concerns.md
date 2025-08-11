@@ -197,19 +197,19 @@ All service methods in `/Server` and `/Infrastructure` that perform operations w
 // Example in IZoneManager (/Core/Abstractions)
 public interface IZoneManager
 {
-    Task<Result<IZoneService>> GetZoneAsync(int zoneId); // Can fail if zone doesn't exist
-    Task<Result> SomeZoneActionAsync(int zoneId, string parameter); // Can fail based on rules
+    Task<Result<IZoneService>> GetZoneAsync(int zoneIndex); // Can fail if zone doesn't exist
+    Task<Result> SomeZoneActionAsync(int zoneIndex, string parameter); // Can fail based on rules
     // ... other methods
 }
 
 // Example usage in a Cortex.Mediator handler (/Server/Features/...)
 public async Task<Result> Handle(SomeZoneCommand request, CancellationToken cancellationToken)
 {
-    var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+    var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneIndex).ConfigureAwait(false);
     if (zoneResult.IsFailure)
     {
         // Log failure reason (e.g., zone not found)
-        _logger.LogWarning("Zone lookup failed for Zone {ZoneId}: {Error}", request.ZoneId, zoneResult.ErrorMessage);
+        _logger.LogWarning("Zone lookup failed for Zone {ZoneIndex}: {Error}", request.ZoneIndex, zoneResult.ErrorMessage);
         return zoneResult; // Propagate the failure Result
     }
 
@@ -218,9 +218,9 @@ public async Task<Result> Handle(SomeZoneCommand request, CancellationToken canc
     var actionResult = await zoneService.PerformActionAsync(request.Data).ConfigureAwait(false); // Returns Result
 
     if(actionResult.IsFailure) {
-        _logger.LogError(actionResult.Exception, "Action failed for Zone {ZoneId}: {Error}", request.ZoneId, actionResult.ErrorMessage);
+        _logger.LogError(actionResult.Exception, "Action failed for Zone {ZoneIndex}: {Error}", request.ZoneIndex, actionResult.ErrorMessage);
     } else {
-         _logger.LogInformation("Action succeeded for Zone {ZoneId}", request.ZoneId);
+         _logger.LogInformation("Action succeeded for Zone {ZoneIndex}", request.ZoneIndex);
     }
 
     return actionResult; // Return the result of the action
@@ -232,9 +232,9 @@ public async Task<Result> Handle(SomeZoneCommand request, CancellationToken canc
 Logging uses the `Microsoft.Extensions.Logging.ILogger<T>` abstraction throughout the application. The concrete implementation is provided by **Serilog**, configured during application startup (`/Worker/Program.cs`).
 
 * **Mandatory Pattern:** Use **LoggerMessage Source Generators** (Section 1.5) for all log messages to ensure optimal performance and compile-time checks.
-* **Structured Logging:** Always log data using named placeholders in the message template (`_logger.LogInformation("Processing User {UserId} for Zone {ZoneId}", userId, zoneId);`). Avoid string interpolation directly in log messages (`$"..."`).
+* **Structured Logging:** Always log data using named placeholders in the message template (`_logger.LogInformation("Processing User {UserId} for Zone {ZoneIndex}", userId, zoneIndex);`). Avoid string interpolation directly in log messages (`$"..."`).
 * **Log Levels:** Use appropriate `LogLevel` values (Trace, Debug, Information, Warning, Error, Critical) as defined in Section 1.5.1.3. Default minimum level configured via environment variables (Section 10).
-* **Context Enrichment:** Logs are automatically enriched with Trace ID and Span ID via OpenTelemetry integration (Section 13) when using `ILogger`. Use logging scopes (`_logger.BeginScope(...)`) to add contextual information (like ZoneId, RequestId) to a series of related log messages.
+* **Context Enrichment:** Logs are automatically enriched with Trace ID and Span ID via OpenTelemetry integration (Section 13) when using `ILogger`. Use logging scopes (`_logger.BeginScope(...)`) to add contextual information (like ZoneIndex, RequestId) to a series of related log messages.
 * **Exception Logging:** When logging exceptions, **always** pass the `Exception` object as the first argument to the logging method (`_logger.LogError(ex, "Message template {Data}", data);`).
 
 ```csharp
@@ -307,7 +307,7 @@ public class SetZoneVolumeCommandValidator : AbstractValidator<SetZoneVolumeComm
     /// </summary>
     public SetZoneVolumeCommandValidator()
     {
-        RuleFor(command => command.ZoneId)
+        RuleFor(command => command.ZoneIndex)
             .GreaterThan(0)
             .WithMessage("Zone ID must be a positive integer.");
 

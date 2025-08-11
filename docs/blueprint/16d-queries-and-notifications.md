@@ -25,7 +25,7 @@ public record GetZoneStateQuery : IQuery<Result<ZoneState>>
     /// <summary>
     /// Gets the ID of the zone to retrieve.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 }
 
 /// <summary>
@@ -36,7 +36,7 @@ public record GetZoneTrackInfoQuery : IQuery<Result<TrackInfo>>
     /// <summary>
     /// Gets the ID of the zone.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 }
 
 /// <summary>
@@ -47,7 +47,7 @@ public record GetZonePlaylistInfoQuery : IQuery<Result<PlaylistInfo>>
     /// <summary>
     /// Gets the ID of the zone.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 }
 
 /// <summary>
@@ -141,8 +141,8 @@ public partial class GetZoneStateQueryHandler : IQueryHandler<GetZoneStateQuery,
     private readonly IZoneManager _zoneManager;
     private readonly ILogger<GetZoneStateQueryHandler> _logger;
 
-    [LoggerMessage(5101, LogLevel.Information, "Handling GetZoneStateQuery for Zone {ZoneId}")]
-    private partial void LogHandling(int zoneId);
+    [LoggerMessage(5101, LogLevel.Information, "Handling GetZoneStateQuery for Zone {ZoneIndex}")]
+    private partial void LogHandling(int zoneIndex);
 
     public GetZoneStateQueryHandler(
         IZoneManager zoneManager,
@@ -154,9 +154,9 @@ public partial class GetZoneStateQueryHandler : IQueryHandler<GetZoneStateQuery,
 
     public async Task<Result<ZoneState>> Handle(GetZoneStateQuery request, CancellationToken cancellationToken)
     {
-        LogHandling(request.ZoneId);
+        LogHandling(request.ZoneIndex);
 
-        var result = await _zoneManager.GetZoneStateAsync(request.ZoneId).ConfigureAwait(false);
+        var result = await _zoneManager.GetZoneStateAsync(request.ZoneIndex).ConfigureAwait(false);
         return result;
     }
 }
@@ -230,7 +230,7 @@ public record ZonePlaybackStateChangedNotification : INotification
     /// <summary>
     /// Gets the zone ID.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the new playback state.
@@ -251,7 +251,7 @@ public record ZoneVolumeChangedNotification : INotification
     /// <summary>
     /// Gets the zone ID.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the new volume level (0-100).
@@ -272,7 +272,7 @@ public record ZoneMuteChangedNotification : INotification
     /// <summary>
     /// Gets the zone ID.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets whether the zone is muted.
@@ -293,7 +293,7 @@ public record ZoneTrackChangedNotification : INotification
     /// <summary>
     /// Gets the zone ID.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the new track information.
@@ -319,7 +319,7 @@ public record ZonePlaylistChangedNotification : INotification
     /// <summary>
     /// Gets the zone ID.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the new playlist information.
@@ -345,7 +345,7 @@ public record ZoneRepeatModeChangedNotification : INotification
     /// <summary>
     /// Gets the zone ID.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets whether track repeat is enabled.
@@ -371,7 +371,7 @@ public record ZoneShuffleModeChangedNotification : INotification
     /// <summary>
     /// Gets the zone ID.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets whether shuffle is enabled.
@@ -392,7 +392,7 @@ public record ZoneStateChangedNotification : INotification
     /// <summary>
     /// Gets the zone ID.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the complete zone state.
@@ -424,7 +424,7 @@ public record ClientVolumeChangedNotification : INotification
     /// <summary>
     /// Gets the client ID.
     /// </summary>
-    public required int ClientId { get; init; }
+    public required int ClientIndex { get; init; }
 
     /// <summary>
     /// Gets the new volume level (0-100).
@@ -445,7 +445,7 @@ public record ClientMuteChangedNotification : INotification
     /// <summary>
     /// Gets the client ID.
     /// </summary>
-    public required int ClientId { get; init; }
+    public required int ClientIndex { get; init; }
 
     /// <summary>
     /// Gets whether the client is muted.
@@ -466,7 +466,7 @@ public record ClientLatencyChangedNotification : INotification
     /// <summary>
     /// Gets the client ID.
     /// </summary>
-    public required int ClientId { get; init; }
+    public required int ClientIndex { get; init; }
 
     /// <summary>
     /// Gets the new latency in milliseconds.
@@ -487,17 +487,17 @@ public record ClientZoneAssignmentChangedNotification : INotification
     /// <summary>
     /// Gets the client ID.
     /// </summary>
-    public required int ClientId { get; init; }
+    public required int ClientIndex { get; init; }
 
     /// <summary>
     /// Gets the new zone ID (null if unassigned).
     /// </summary>
-    public int? ZoneId { get; init; }
+    public int? ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the previous zone ID (null if was unassigned).
     /// </summary>
-    public int? PreviousZoneId { get; init; }
+    public int? PreviousZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the UTC timestamp when the assignment changed.
@@ -513,7 +513,7 @@ public record ClientConnectionChangedNotification : INotification
     /// <summary>
     /// Gets the client ID.
     /// </summary>
-    public required int ClientId { get; init; }
+    public required int ClientIndex { get; init; }
 
     /// <summary>
     /// Gets whether the client is connected.
@@ -534,7 +534,7 @@ public record ClientStateChangedNotification : INotification
     /// <summary>
     /// Gets the client ID.
     /// </summary>
-    public required int ClientId { get; init; }
+    public required int ClientIndex { get; init; }
 
     /// <summary>
     /// Gets the complete client state.
@@ -608,14 +608,14 @@ public partial class ZoneStateNotificationHandler :
     private readonly IMediator _mediator;
     private readonly ILogger<ZoneStateNotificationHandler> _logger;
 
-    [LoggerMessage(6001, LogLevel.Debug, "Publishing generic status for Zone {ZoneId} volume change to {Volume}")]
-    private partial void LogVolumeChange(int zoneId, int volume);
+    [LoggerMessage(6001, LogLevel.Debug, "Publishing generic status for Zone {ZoneIndex} volume change to {Volume}")]
+    private partial void LogVolumeChange(int zoneIndex, int volume);
 
-    [LoggerMessage(6002, LogLevel.Debug, "Publishing generic status for Zone {ZoneId} mute change to {IsMuted}")]
-    private partial void LogMuteChange(int zoneId, bool isMuted);
+    [LoggerMessage(6002, LogLevel.Debug, "Publishing generic status for Zone {ZoneIndex} mute change to {IsMuted}")]
+    private partial void LogMuteChange(int zoneIndex, bool isMuted);
 
-    [LoggerMessage(6003, LogLevel.Debug, "Publishing generic status for Zone {ZoneId} playback state change to {PlaybackState}")]
-    private partial void LogPlaybackStateChange(int zoneId, string playbackState);
+    [LoggerMessage(6003, LogLevel.Debug, "Publishing generic status for Zone {ZoneIndex} playback state change to {PlaybackState}")]
+    private partial void LogPlaybackStateChange(int zoneIndex, string playbackState);
 
     public ZoneStateNotificationHandler(
         IMediator mediator,
@@ -627,12 +627,12 @@ public partial class ZoneStateNotificationHandler :
 
     public async Task Handle(ZoneVolumeChangedNotification notification, CancellationToken cancellationToken)
     {
-        LogVolumeChange(notification.ZoneId, notification.Volume);
+        LogVolumeChange(notification.ZoneIndex, notification.Volume);
 
         var statusNotification = new StatusChangedNotification
         {
             StatusType = "VOLUME_STATUS",
-            TargetId = $"zone_{notification.ZoneId}",
+            TargetId = $"zone_{notification.ZoneIndex}",
             Value = notification.Volume
         };
 
@@ -641,12 +641,12 @@ public partial class ZoneStateNotificationHandler :
 
     public async Task Handle(ZoneMuteChangedNotification notification, CancellationToken cancellationToken)
     {
-        LogMuteChange(notification.ZoneId, notification.IsMuted);
+        LogMuteChange(notification.ZoneIndex, notification.IsMuted);
 
         var statusNotification = new StatusChangedNotification
         {
             StatusType = "MUTE_STATUS",
-            TargetId = $"zone_{notification.ZoneId}",
+            TargetId = $"zone_{notification.ZoneIndex}",
             Value = notification.IsMuted
         };
 
@@ -656,12 +656,12 @@ public partial class ZoneStateNotificationHandler :
     public async Task Handle(ZonePlaybackStateChangedNotification notification, CancellationToken cancellationToken)
     {
         var playbackStateString = notification.PlaybackState.ToString().ToLowerInvariant();
-        LogPlaybackStateChange(notification.ZoneId, playbackStateString);
+        LogPlaybackStateChange(notification.ZoneIndex, playbackStateString);
 
         var statusNotification = new StatusChangedNotification
         {
             StatusType = "PLAYBACK_STATE",
-            TargetId = $"zone_{notification.ZoneId}",
+            TargetId = $"zone_{notification.ZoneIndex}",
             Value = playbackStateString
         };
 

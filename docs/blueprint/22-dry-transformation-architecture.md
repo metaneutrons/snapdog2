@@ -199,11 +199,11 @@ public class ClientStateNotificationHandler : INotificationHandler<ClientVolumeC
 ```csharp
 public class MqttService
 {
-    private async Task ProcessVolumeCommand(int zoneId, int volume)
+    private async Task ProcessVolumeCommand(int zoneIndex, int volume)
     {
         var command = new SetZoneVolumeCommand
         {
-            ZoneId = zoneId,
+            ZoneIndex = zoneIndex,
             Volume = volume,
             Source = CommandSource.Mqtt
         };

@@ -8,7 +8,7 @@ The API structure and functionality directly map to the logical concepts defined
 
 Key design principles underpinning the API are:
 
-1. **Command Framework Alignment**: API endpoints and their operations correspond directly to the defined Global, Zone, and Client commands and status updates. Retrieving a zone's state via the API (`GET /api/v1/zones/{zoneId}`) reflects the same information available via the `ZONE_STATE` status. Sending a command (`POST /api/v1/zones/{zoneId}/play`) triggers the equivalent internal `PLAY` command logic.
+1. **Command Framework Alignment**: API endpoints and their operations correspond directly to the defined Global, Zone, and Client commands and status updates. Retrieving a zone's state via the API (`GET /api/v1/zones/{zoneIndex}`) reflects the same information available via the `ZONE_STATE` status. Sending a command (`POST /api/v1/zones/{zoneIndex}/play`) triggers the equivalent internal `PLAY` command logic.
 2. **Resource-Oriented Design**: Follows standard REST conventions. Nouns identify resources (e.g., `/zones`, `/clients`, `/media/playlists`), and standard HTTP verbs dictate actions:
     * `GET`: Retrieve resource state or collections (safe, idempotent).
     * `PUT`: Update resource state or settings entirely (idempotent where applicable, e.g., setting volume, mute state, specific track/playlist).
@@ -143,8 +143,8 @@ namespace SnapDog2.Api.Models;
 // ❌ REMOVED: SetTrackRequest      → Use: int track (1-based)
 // ❌ REMOVED: StepRequest          → Use: int step = 5
 // ❌ REMOVED: LatencySetRequest    → Use: int latency (ms)
-// ❌ REMOVED: AssignZoneRequest    → Use: int zoneId
-// ❌ REMOVED: ZoneAssignmentRequest → Use: int zoneId
+// ❌ REMOVED: AssignZoneRequest    → Use: int zoneIndex
+// ❌ REMOVED: ZoneAssignmentRequest → Use: int zoneIndex
 // ❌ REMOVED: RenameRequest        → Use: string name
 //
 // TOTAL ELIMINATION: 11 request DTOs → 0 (100% reduction!)
@@ -217,19 +217,19 @@ Endpoints for interacting with discovered Snapcast clients.
 | Method | Path                                    | Command/Status ID      | Description                | Request Body / Params           | Success Response (Direct Primitive) | HTTP Status |
 | :----- | :-------------------------------------- | :--------------------- | :------------------------- | :------------------------------ | :----------------------------------- | :---------- |
 | `GET`  | `/clients`                              | -                      | List discovered clients    | Query: `?page=1&size=20`        | `Page<Client>`                       | 200 OK      |
-| `GET`  | `/clients/{clientId}`                   | `CLIENT_STATE` (Full)  | Get details for a client   | Path: `{clientId}` (int)         | `ClientState`                        | 200 OK      |
-| `PUT`  | `/clients/{clientId}/volume`            | `CLIENT_VOLUME`        | Set client volume          | Path: `{clientId}`; Body: `int` (0-100) | `int` (volume level)              | 200 OK      |
-| `GET`  | `/clients/{clientId}/volume`            | `CLIENT_VOLUME_STATUS` | Get client volume          | Path: `{clientId}`               | `int` (volume level)                 | 200 OK      |
-| `POST` | `/clients/{clientId}/volume/up`         | `CLIENT_VOLUME_UP`     | Increase client volume     | Path: `{clientId}`; Optional Query: `?step=5` | `int` (new volume)            | 200 OK      |
-| `POST` | `/clients/{clientId}/volume/down`       | `CLIENT_VOLUME_DOWN`   | Decrease client volume     | Path: `{clientId}`; Optional Query: `?step=5` | `int` (new volume)            | 200 OK      |
-| `PUT`  | `/clients/{clientId}/mute`              | `CLIENT_MUTE`          | Set client mute state      | Path: `{clientId}`; Body: `bool` | `bool` (mute state)                  | 200 OK      |
-| `GET`  | `/clients/{clientId}/mute`              | `CLIENT_MUTE_STATUS`   | Get client mute state      | Path: `{clientId}`               | `bool` (mute state)                  | 200 OK      |
-| `POST` | `/clients/{clientId}/mute/toggle`       | `CLIENT_MUTE_TOGGLE`   | Toggle client mute state   | Path: `{clientId}`               | `bool` (new mute state)              | 200 OK      |
-| `PUT`  | `/clients/{clientId}/latency`           | `CLIENT_LATENCY`       | Set client latency         | Path: `{clientId}`; Body: `int` (ms) | `int` (latency)                  | 200 OK      |
-| `GET`  | `/clients/{clientId}/latency`           | `CLIENT_LATENCY_STATUS`| Get client latency         | Path: `{clientId}`               | `int` (latency)                      | 200 OK      |
-| `PUT`  | `/clients/{clientId}/zone`              | `CLIENT_ZONE`          | Assign client to zone      | Path: `{clientId}`; Body: `int` (zoneId, 1-based) | No content                     | 204 No Content |
-| `GET`  | `/clients/{clientId}/zone`              | `CLIENT_ZONE_STATUS`   | Get client assigned zone   | Path: `{clientId}`               | `int?` (zoneId)                      | 200 OK      |
-| `PUT`  | `/clients/{clientId}/name`              | `CLIENT_NAME`          | Rename client in Snapcast  | Path: `{clientId}`; Body: `string` (name) | `string` (name)                | 200 OK      |
+| `GET`  | `/clients/{clientIndex}`                   | `CLIENT_STATE` (Full)  | Get details for a client   | Path: `{clientIndex}` (int)         | `ClientState`                        | 200 OK      |
+| `PUT`  | `/clients/{clientIndex}/volume`            | `CLIENT_VOLUME`        | Set client volume          | Path: `{clientIndex}`; Body: `int` (0-100) | `int` (volume level)              | 200 OK      |
+| `GET`  | `/clients/{clientIndex}/volume`            | `CLIENT_VOLUME_STATUS` | Get client volume          | Path: `{clientIndex}`               | `int` (volume level)                 | 200 OK      |
+| `POST` | `/clients/{clientIndex}/volume/up`         | `CLIENT_VOLUME_UP`     | Increase client volume     | Path: `{clientIndex}`; Optional Query: `?step=5` | `int` (new volume)            | 200 OK      |
+| `POST` | `/clients/{clientIndex}/volume/down`       | `CLIENT_VOLUME_DOWN`   | Decrease client volume     | Path: `{clientIndex}`; Optional Query: `?step=5` | `int` (new volume)            | 200 OK      |
+| `PUT`  | `/clients/{clientIndex}/mute`              | `CLIENT_MUTE`          | Set client mute state      | Path: `{clientIndex}`; Body: `bool` | `bool` (mute state)                  | 200 OK      |
+| `GET`  | `/clients/{clientIndex}/mute`              | `CLIENT_MUTE_STATUS`   | Get client mute state      | Path: `{clientIndex}`               | `bool` (mute state)                  | 200 OK      |
+| `POST` | `/clients/{clientIndex}/mute/toggle`       | `CLIENT_MUTE_TOGGLE`   | Toggle client mute state   | Path: `{clientIndex}`               | `bool` (new mute state)              | 200 OK      |
+| `PUT`  | `/clients/{clientIndex}/latency`           | `CLIENT_LATENCY`       | Set client latency         | Path: `{clientIndex}`; Body: `int` (ms) | `int` (latency)                  | 200 OK      |
+| `GET`  | `/clients/{clientIndex}/latency`           | `CLIENT_LATENCY_STATUS`| Get client latency         | Path: `{clientIndex}`               | `int` (latency)                      | 200 OK      |
+| `PUT`  | `/clients/{clientIndex}/zone`              | `CLIENT_ZONE`          | Assign client to zone      | Path: `{clientIndex}`; Body: `int` (zoneIndex, 1-based) | No content                     | 204 No Content |
+| `GET`  | `/clients/{clientIndex}/zone`              | `CLIENT_ZONE_STATUS`   | Get client assigned zone   | Path: `{clientIndex}`               | `int?` (zoneIndex)                      | 200 OK      |
+| `PUT`  | `/clients/{clientIndex}/name`              | `CLIENT_NAME`          | Rename client in Snapcast  | Path: `{clientIndex}`; Body: `string` (name) | `string` (name)                | 200 OK      |
 
 **Modern API Benefits:**
 

@@ -183,7 +183,7 @@ public string? PlaylistIndex { get; init; }    // For ID-based selection
 // Example: Zone mute command processing
 var command = new SetZoneMuteCommand
 {
-    ZoneId = zoneId,
+    ZoneIndex = zoneIndex,
     Enabled = enabled,
     Source = CommandSource.Mqtt
 };

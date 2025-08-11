@@ -20,7 +20,7 @@ public record SetZoneVolumeCommand : ICommand<Result>
     /// <summary>
     /// Gets the ID of the target zone.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the desired volume level (0-100).
@@ -41,7 +41,7 @@ public record VolumeUpCommand : ICommand<Result>
     /// <summary>
     /// Gets the ID of the target zone.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the volume step to increase (default 5).
@@ -62,7 +62,7 @@ public record VolumeDownCommand : ICommand<Result>
     /// <summary>
     /// Gets the ID of the target zone.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the volume step to decrease (default 5).
@@ -83,7 +83,7 @@ public record SetZoneMuteCommand : ICommand<Result>
     /// <summary>
     /// Gets the ID of the target zone.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets whether to mute (true) or unmute (false) the zone.
@@ -104,7 +104,7 @@ public record ToggleZoneMuteCommand : ICommand<Result>
     /// <summary>
     /// Gets the ID of the target zone.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the source that initiated the command.
@@ -131,7 +131,7 @@ public record SetTrackCommand : ICommand<Result>
     /// <summary>
     /// Gets the ID of the target zone.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the track index to play (1-based).
@@ -152,7 +152,7 @@ public record NextTrackCommand : ICommand<Result>
     /// <summary>
     /// Gets the ID of the target zone.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the source that initiated the command.
@@ -168,7 +168,7 @@ public record PreviousTrackCommand : ICommand<Result>
     /// <summary>
     /// Gets the ID of the target zone.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the source that initiated the command.
@@ -184,7 +184,7 @@ public record SetTrackRepeatCommand : ICommand<Result>
     /// <summary>
     /// Gets the ID of the target zone.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets whether to enable track repeat.
@@ -205,7 +205,7 @@ public record ToggleTrackRepeatCommand : ICommand<Result>
     /// <summary>
     /// Gets the ID of the target zone.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the source that initiated the command.
@@ -232,7 +232,7 @@ public record SetPlaylistCommand : ICommand<Result>
     /// <summary>
     /// Gets the ID of the target zone.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the playlist index (1-based, where 1 = Radio).
@@ -258,7 +258,7 @@ public record NextPlaylistCommand : ICommand<Result>
     /// <summary>
     /// Gets the ID of the target zone.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the source that initiated the command.
@@ -274,7 +274,7 @@ public record PreviousPlaylistCommand : ICommand<Result>
     /// <summary>
     /// Gets the ID of the target zone.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the source that initiated the command.
@@ -290,7 +290,7 @@ public record SetPlaylistShuffleCommand : ICommand<Result>
     /// <summary>
     /// Gets the ID of the target zone.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets whether to enable playlist shuffle.
@@ -311,7 +311,7 @@ public record TogglePlaylistShuffleCommand : ICommand<Result>
     /// <summary>
     /// Gets the ID of the target zone.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the source that initiated the command.
@@ -327,7 +327,7 @@ public record SetPlaylistRepeatCommand : ICommand<Result>
     /// <summary>
     /// Gets the ID of the target zone.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets whether to enable playlist repeat.
@@ -348,7 +348,7 @@ public record TogglePlaylistRepeatCommand : ICommand<Result>
     /// <summary>
     /// Gets the ID of the target zone.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the source that initiated the command.
@@ -373,7 +373,7 @@ public class SetZoneVolumeCommandValidator : AbstractValidator<SetZoneVolumeComm
 {
     public SetZoneVolumeCommandValidator()
     {
-        RuleFor(x => x.ZoneId)
+        RuleFor(x => x.ZoneIndex)
             .GreaterThan(0)
             .WithMessage("Zone ID must be a positive integer.");
 
@@ -394,7 +394,7 @@ public class VolumeStepCommandValidator<T> : AbstractValidator<T> where T : clas
 {
     public VolumeStepCommandValidator()
     {
-        RuleFor(x => GetZoneId(x))
+        RuleFor(x => GetZoneIndex(x))
             .GreaterThan(0)
             .WithMessage("Zone ID must be a positive integer.");
 
@@ -407,10 +407,10 @@ public class VolumeStepCommandValidator<T> : AbstractValidator<T> where T : clas
             .WithMessage("Invalid command source specified.");
     }
 
-    private static int GetZoneId(T command) => command switch
+    private static int GetZoneIndex(T command) => command switch
     {
-        VolumeUpCommand cmd => cmd.ZoneId,
-        VolumeDownCommand cmd => cmd.ZoneId,
+        VolumeUpCommand cmd => cmd.ZoneIndex,
+        VolumeDownCommand cmd => cmd.ZoneIndex,
         _ => 0
     };
 
@@ -436,7 +436,7 @@ public class SetTrackCommandValidator : AbstractValidator<SetTrackCommand>
 {
     public SetTrackCommandValidator()
     {
-        RuleFor(x => x.ZoneId)
+        RuleFor(x => x.ZoneIndex)
             .GreaterThan(0)
             .WithMessage("Zone ID must be a positive integer.");
 
@@ -457,7 +457,7 @@ public class SetPlaylistCommandValidator : AbstractValidator<SetPlaylistCommand>
 {
     public SetPlaylistCommandValidator()
     {
-        RuleFor(x => x.ZoneId)
+        RuleFor(x => x.ZoneIndex)
             .GreaterThan(0)
             .WithMessage("Zone ID must be a positive integer.");
 
@@ -504,11 +504,11 @@ public partial class SetZoneVolumeCommandHandler : ICommandHandler<SetZoneVolume
     private readonly IZoneManager _zoneManager;
     private readonly ILogger<SetZoneVolumeCommandHandler> _logger;
 
-    [LoggerMessage(2001, LogLevel.Information, "Setting volume for Zone {ZoneId} to {Volume} from {Source}")]
-    private partial void LogHandling(int zoneId, int volume, CommandSource source);
+    [LoggerMessage(2001, LogLevel.Information, "Setting volume for Zone {ZoneIndex} to {Volume} from {Source}")]
+    private partial void LogHandling(int zoneIndex, int volume, CommandSource source);
 
-    [LoggerMessage(2002, LogLevel.Warning, "Zone {ZoneId} not found for SetZoneVolumeCommand")]
-    private partial void LogZoneNotFound(int zoneId);
+    [LoggerMessage(2002, LogLevel.Warning, "Zone {ZoneIndex} not found for SetZoneVolumeCommand")]
+    private partial void LogZoneNotFound(int zoneIndex);
 
     public SetZoneVolumeCommandHandler(
         IZoneManager zoneManager,
@@ -520,13 +520,13 @@ public partial class SetZoneVolumeCommandHandler : ICommandHandler<SetZoneVolume
 
     public async Task<Result> Handle(SetZoneVolumeCommand request, CancellationToken cancellationToken)
     {
-        LogHandling(request.ZoneId, request.Volume, request.Source);
+        LogHandling(request.ZoneIndex, request.Volume, request.Source);
 
         // Get the zone service
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneIndex).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            LogZoneNotFound(request.ZoneId);
+            LogZoneNotFound(request.ZoneIndex);
             return zoneResult;
         }
 
@@ -558,14 +558,14 @@ public partial class PlayCommandHandler : ICommandHandler<PlayCommand, Result>
     private readonly IZoneManager _zoneManager;
     private readonly ILogger<PlayCommandHandler> _logger;
 
-    [LoggerMessage(2101, LogLevel.Information, "Starting playback for Zone {ZoneId} from {Source}")]
-    private partial void LogHandling(int zoneId, CommandSource source);
+    [LoggerMessage(2101, LogLevel.Information, "Starting playback for Zone {ZoneIndex} from {Source}")]
+    private partial void LogHandling(int zoneIndex, CommandSource source);
 
-    [LoggerMessage(2102, LogLevel.Information, "Starting playback for Zone {ZoneId} with track {TrackIndex} from {Source}")]
-    private partial void LogHandlingWithTrack(int zoneId, int trackIndex, CommandSource source);
+    [LoggerMessage(2102, LogLevel.Information, "Starting playback for Zone {ZoneIndex} with track {TrackIndex} from {Source}")]
+    private partial void LogHandlingWithTrack(int zoneIndex, int trackIndex, CommandSource source);
 
-    [LoggerMessage(2103, LogLevel.Information, "Starting playback for Zone {ZoneId} with URL {MediaUrl} from {Source}")]
-    private partial void LogHandlingWithUrl(int zoneId, string mediaUrl, CommandSource source);
+    [LoggerMessage(2103, LogLevel.Information, "Starting playback for Zone {ZoneIndex} with URL {MediaUrl} from {Source}")]
+    private partial void LogHandlingWithUrl(int zoneIndex, string mediaUrl, CommandSource source);
 
     public PlayCommandHandler(
         IZoneManager zoneManager,
@@ -579,19 +579,19 @@ public partial class PlayCommandHandler : ICommandHandler<PlayCommand, Result>
     {
         if (request.TrackIndex.HasValue)
         {
-            LogHandlingWithTrack(request.ZoneId, request.TrackIndex.Value, request.Source);
+            LogHandlingWithTrack(request.ZoneIndex, request.TrackIndex.Value, request.Source);
         }
         else if (!string.IsNullOrEmpty(request.MediaUrl))
         {
-            LogHandlingWithUrl(request.ZoneId, request.MediaUrl, request.Source);
+            LogHandlingWithUrl(request.ZoneIndex, request.MediaUrl, request.Source);
         }
         else
         {
-            LogHandling(request.ZoneId, request.Source);
+            LogHandling(request.ZoneIndex, request.Source);
         }
 
         // Get the zone service
-        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneIndex).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
             return zoneResult;
