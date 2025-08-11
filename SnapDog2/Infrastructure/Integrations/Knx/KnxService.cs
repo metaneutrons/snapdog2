@@ -724,42 +724,56 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
 
     private string? GetStatusGroupAddress(string statusId, int targetId)
     {
-        // Handle zone statuses (1-based indexing)
-        if (targetId > 0 && targetId <= this._zones.Count)
+        // First determine if this is a zone or client StatusId based on the StatusId itself
+        bool isClientStatusId =
+            statusId == StatusIds.ClientVolumeStatus
+            || statusId == StatusIds.ClientMuteStatus
+            || statusId == StatusIds.ClientConnected
+            || statusId == StatusIds.ClientLatencyStatus
+            || statusId == StatusIds.ClientZoneStatus;
+
+        if (isClientStatusId)
         {
-            var zone = this._zones[targetId - 1];
-            if (zone.Knx.Enabled)
+            // Handle client statuses (1-based indexing)
+            if (targetId > 0 && targetId <= this._clients.Count)
             {
-                return statusId switch
+                var client = this._clients[targetId - 1];
+
+                if (client.Knx.Enabled)
                 {
-                    var x when x == StatusIds.VolumeStatus => zone.Knx.VolumeStatus,
-                    var x when x == StatusIds.MuteStatus => zone.Knx.MuteStatus,
-                    var x when x == StatusIds.PlaybackState => zone.Knx.ControlStatus,
-                    var x when x == StatusIds.TrackIndex => zone.Knx.TrackStatus,
-                    var x when x == StatusIds.PlaylistIndex => zone.Knx.PlaylistStatus,
-                    var x when x == StatusIds.TrackRepeatStatus => zone.Knx.TrackRepeatStatus,
-                    var x when x == StatusIds.PlaylistRepeatStatus => zone.Knx.RepeatStatus,
-                    var x when x == StatusIds.PlaylistShuffleStatus => zone.Knx.ShuffleStatus,
-                    _ => null,
-                };
+                    return statusId switch
+                    {
+                        var x when x == StatusIds.ClientVolumeStatus => client.Knx.VolumeStatus,
+                        var x when x == StatusIds.ClientMuteStatus => client.Knx.MuteStatus,
+                        var x when x == StatusIds.ClientConnected => client.Knx.ConnectedStatus,
+                        var x when x == StatusIds.ClientLatencyStatus => client.Knx.LatencyStatus,
+                        var x when x == StatusIds.ClientZoneStatus => client.Knx.ZoneStatus,
+                        _ => null,
+                    };
+                }
             }
         }
-
-        // Handle client statuses (1-based indexing)
-        if (targetId > 0 && targetId <= this._clients.Count)
+        else
         {
-            var client = this._clients[targetId - 1];
-            if (client.Knx.Enabled)
+            // Handle zone statuses (1-based indexing)
+            if (targetId > 0 && targetId <= this._zones.Count)
             {
-                return statusId switch
+                var zone = this._zones[targetId - 1];
+                if (zone.Knx.Enabled)
                 {
-                    var x when x == StatusIds.ClientVolumeStatus => client.Knx.VolumeStatus,
-                    var x when x == StatusIds.ClientMuteStatus => client.Knx.MuteStatus,
-                    var x when x == StatusIds.ClientConnected => client.Knx.ConnectedStatus,
-                    var x when x == StatusIds.ClientLatencyStatus => client.Knx.LatencyStatus,
-                    var x when x == StatusIds.ClientZoneStatus => client.Knx.ZoneStatus,
-                    _ => null,
-                };
+                    return statusId switch
+                    {
+                        var x when x == StatusIds.VolumeStatus => zone.Knx.VolumeStatus,
+                        var x when x == StatusIds.MuteStatus => zone.Knx.MuteStatus,
+                        var x when x == StatusIds.PlaybackState => zone.Knx.ControlStatus,
+                        var x when x == StatusIds.TrackIndex => zone.Knx.TrackStatus,
+                        var x when x == StatusIds.PlaylistIndex => zone.Knx.PlaylistStatus,
+                        var x when x == StatusIds.TrackRepeatStatus => zone.Knx.TrackRepeatStatus,
+                        var x when x == StatusIds.PlaylistRepeatStatus => zone.Knx.RepeatStatus,
+                        var x when x == StatusIds.PlaylistShuffleStatus => zone.Knx.ShuffleStatus,
+                        _ => null,
+                    };
+                }
             }
         }
 
