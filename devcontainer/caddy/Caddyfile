@@ -12,6 +12,8 @@
         not path /tracing*
         not path /grafana*
         not path /prometheus*
+        not path /api*
+        not path /swagger*
     }
 
     handle @not_server {
@@ -104,6 +106,16 @@
 
     handle @client_bedroom_exact {
         redir * /clients/bedroom/ 301
+    }
+
+    # SnapDog API
+    handle /api* {
+        reverse_proxy http://snapdog:5000
+    }
+
+    # Swagger UI
+    handle /swagger* {
+        reverse_proxy http://snapdog:5000
     }
 
     # Clients with trailing slashes (mapped to our service names)

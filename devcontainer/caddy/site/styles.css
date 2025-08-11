@@ -101,6 +101,10 @@ h1 {
     color: var(--secondary);
 }
 
+.api-card .card-icon {
+    color: var(--success);
+}
+
 .card h2 {
     font-size: 1.5rem;
     margin-bottom: 1rem;
