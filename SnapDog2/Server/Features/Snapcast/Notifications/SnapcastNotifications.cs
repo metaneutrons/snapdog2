@@ -27,18 +27,18 @@ public record SnapcastClientDisconnectedNotification(SnapClient Client) : Snapca
 /// <summary>
 /// Notification sent when a Snapcast client's volume changes.
 /// </summary>
-public record SnapcastClientVolumeChangedNotification(string ClientId, SnapcastClient.Models.ClientVolume Volume)
+public record SnapcastClientVolumeChangedNotification(string ClientIndex, SnapcastClient.Models.ClientVolume Volume)
     : SnapcastNotification;
 
 /// <summary>
 /// Notification sent when a Snapcast client's latency changes.
 /// </summary>
-public record SnapcastClientLatencyChangedNotification(string ClientId, int LatencyMs) : SnapcastNotification;
+public record SnapcastClientLatencyChangedNotification(string ClientIndex, int LatencyMs) : SnapcastNotification;
 
 /// <summary>
 /// Notification sent when a Snapcast client's name changes.
 /// </summary>
-public record SnapcastClientNameChangedNotification(string ClientId, string Name) : SnapcastNotification;
+public record SnapcastClientNameChangedNotification(string ClientIndex, string Name) : SnapcastNotification;
 
 /// <summary>
 /// Notification sent when a Snapcast group's mute state changes.

@@ -10,7 +10,7 @@ public class SetSnapcastClientVolumeCommandValidator : AbstractValidator<SetSnap
 {
     public SetSnapcastClientVolumeCommandValidator()
     {
-        this.RuleFor(x => x.ClientId).NotEmpty().WithMessage("Client ID is required");
+        this.RuleFor(x => x.ClientIndex).NotEmpty().WithMessage("Client ID is required");
 
         this.RuleFor(x => x.Volume).InclusiveBetween(0, 100).WithMessage("Volume must be between 0 and 100");
     }

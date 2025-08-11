@@ -12,7 +12,7 @@ public record SetSnapcastClientVolumeCommand : ICommand<Result>
     /// <summary>
     /// The Snapcast client ID.
     /// </summary>
-    public required string ClientId { get; init; }
+    public required string ClientIndex { get; init; }
 
     /// <summary>
     /// The volume percentage (0-100).

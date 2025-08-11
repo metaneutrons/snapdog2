@@ -26,27 +26,27 @@ public partial class SetSnapcastClientVolumeCommandHandler : ICommandHandler<Set
     [LoggerMessage(
         3001,
         LogLevel.Information,
-        "Setting volume for Snapcast client {ClientId} to {Volume}% (Source: {Source})"
+        "Setting volume for Snapcast client {ClientIndex} to {Volume}% (Source: {Source})"
     )]
-    private partial void LogSettingClientVolume(string clientId, int volume, string source);
+    private partial void LogSettingClientVolume(string clientIndex, int volume, string source);
 
-    [LoggerMessage(3002, LogLevel.Error, "Failed to set volume for Snapcast client {ClientId}")]
-    private partial void LogSetClientVolumeFailed(string clientId, Exception ex);
+    [LoggerMessage(3002, LogLevel.Error, "Failed to set volume for Snapcast client {ClientIndex}")]
+    private partial void LogSetClientVolumeFailed(string clientIndex, Exception ex);
 
     public async Task<Result> Handle(SetSnapcastClientVolumeCommand command, CancellationToken cancellationToken)
     {
-        this.LogSettingClientVolume(command.ClientId, command.Volume, command.Source.ToString());
+        this.LogSettingClientVolume(command.ClientIndex, command.Volume, command.Source.ToString());
 
         try
         {
             var result = await this
-                ._snapcastService.SetClientVolumeAsync(command.ClientId, command.Volume, cancellationToken)
+                ._snapcastService.SetClientVolumeAsync(command.ClientIndex, command.Volume, cancellationToken)
                 .ConfigureAwait(false);
 
             if (result.IsFailure)
             {
                 this.LogSetClientVolumeFailed(
-                    command.ClientId,
+                    command.ClientIndex,
                     new InvalidOperationException(result.ErrorMessage ?? "Unknown error")
                 );
                 return Result.Failure(result.ErrorMessage ?? "Unknown error");
@@ -56,7 +56,7 @@ public partial class SetSnapcastClientVolumeCommandHandler : ICommandHandler<Set
         }
         catch (Exception ex)
         {
-            this.LogSetClientVolumeFailed(command.ClientId, ex);
+            this.LogSetClientVolumeFailed(command.ClientIndex, ex);
             return Result.Failure(ex);
         }
     }

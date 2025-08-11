@@ -25,18 +25,18 @@ public partial class SnapcastEventNotificationHandler
 
     #region Logging
 
-    [LoggerMessage(4001, LogLevel.Information, "Snapcast client connected: {ClientId} ({ClientName})")]
-    private partial void LogClientConnected(string clientId, string clientName);
+    [LoggerMessage(4001, LogLevel.Information, "Snapcast client connected: {ClientIndex} ({ClientName})")]
+    private partial void LogClientConnected(string clientIndex, string clientName);
 
-    [LoggerMessage(4002, LogLevel.Information, "Snapcast client disconnected: {ClientId} ({ClientName})")]
-    private partial void LogClientDisconnected(string clientId, string clientName);
+    [LoggerMessage(4002, LogLevel.Information, "Snapcast client disconnected: {ClientIndex} ({ClientName})")]
+    private partial void LogClientDisconnected(string clientIndex, string clientName);
 
     [LoggerMessage(
         4003,
         LogLevel.Information,
-        "Snapcast client volume changed: {ClientId} -> {Volume}% (Muted: {Muted})"
+        "Snapcast client volume changed: {ClientIndex} -> {Volume}% (Muted: {Muted})"
     )]
-    private partial void LogClientVolumeChanged(string clientId, int volume, bool muted);
+    private partial void LogClientVolumeChanged(string clientIndex, int volume, bool muted);
 
     [LoggerMessage(4004, LogLevel.Information, "Snapcast group mute changed: {GroupId} -> Muted: {Muted}")]
     private partial void LogGroupMuteChanged(string groupId, bool muted);
@@ -81,7 +81,7 @@ public partial class SnapcastEventNotificationHandler
 
     public Task Handle(SnapcastClientVolumeChangedNotification notification, CancellationToken cancellationToken)
     {
-        this.LogClientVolumeChanged(notification.ClientId, notification.Volume.Percent, notification.Volume.Muted);
+        this.LogClientVolumeChanged(notification.ClientIndex, notification.Volume.Percent, notification.Volume.Muted);
 
         // Here you could:
         // - Update internal client state
