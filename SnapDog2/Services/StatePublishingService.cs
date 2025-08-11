@@ -59,20 +59,20 @@ public partial class StatePublishingService : BackgroundService
     [LoggerMessage(8004, LogLevel.Information, "📱 Publishing initial state for {ClientCount} clients...")]
     private partial void LogPublishingClientStates(int clientCount);
 
-    [LoggerMessage(8005, LogLevel.Information, "✅ Zone {ZoneId} initial state published successfully")]
-    private partial void LogZoneStatePublished(int zoneId);
+    [LoggerMessage(8005, LogLevel.Information, "✅ Zone {ZoneIndex} initial state published successfully")]
+    private partial void LogZoneStatePublished(int zoneIndex);
 
-    [LoggerMessage(8006, LogLevel.Information, "✅ Client {ClientId} initial state published successfully")]
-    private partial void LogClientStatePublished(int clientId);
+    [LoggerMessage(8006, LogLevel.Information, "✅ Client {ClientIndex} initial state published successfully")]
+    private partial void LogClientStatePublished(int clientIndex);
 
     [LoggerMessage(8007, LogLevel.Information, "✅ Global system state published successfully")]
     private partial void LogGlobalStatePublished();
 
-    [LoggerMessage(8008, LogLevel.Warning, "⚠️  Failed to publish zone {ZoneId} state: {ErrorMessage}")]
-    private partial void LogZoneStatePublishFailed(int zoneId, string errorMessage);
+    [LoggerMessage(8008, LogLevel.Warning, "⚠️  Failed to publish zone {ZoneIndex} state: {ErrorMessage}")]
+    private partial void LogZoneStatePublishFailed(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(8009, LogLevel.Warning, "⚠️  Failed to publish client {ClientId} state: {ErrorMessage}")]
-    private partial void LogClientStatePublishFailed(int clientId, string errorMessage);
+    [LoggerMessage(8009, LogLevel.Warning, "⚠️  Failed to publish client {ClientIndex} state: {ErrorMessage}")]
+    private partial void LogClientStatePublishFailed(int clientIndex, string errorMessage);
 
     [LoggerMessage(8010, LogLevel.Warning, "⚠️  Failed to publish global state: {ErrorMessage}")]
     private partial void LogGlobalStatePublishFailed(string errorMessage);
@@ -152,21 +152,21 @@ public partial class StatePublishingService : BackgroundService
 
                 for (var i = 0; i < this._configuration.Zones.Count; i++)
                 {
-                    var zoneId = i + 1; // 1-based indexing as per blueprint
+                    var zoneIndex = i + 1; // 1-based indexing as per blueprint
                     publishingTasks.Add(
-                        this.PublishZoneStateAsync(mediator, zoneId, stoppingToken)
+                        this.PublishZoneStateAsync(mediator, zoneIndex, stoppingToken)
                             .ContinueWith(
                                 t =>
                                 {
                                     if (t.IsCompletedSuccessfully && t.Result)
                                     {
-                                        this.LogZoneStatePublished(zoneId);
+                                        this.LogZoneStatePublished(zoneIndex);
                                         Interlocked.Increment(ref successCount);
                                     }
                                     else
                                     {
                                         var error = t.Exception?.GetBaseException()?.Message ?? "Unknown error";
-                                        this.LogZoneStatePublishFailed(zoneId, error);
+                                        this.LogZoneStatePublishFailed(zoneIndex, error);
                                         Interlocked.Increment(ref failureCount);
                                     }
                                 },
@@ -183,21 +183,21 @@ public partial class StatePublishingService : BackgroundService
 
                 for (var i = 0; i < this._configuration.Clients.Count; i++)
                 {
-                    var clientId = i + 1; // 1-based indexing as per blueprint
+                    var clientIndex = i + 1; // 1-based indexing as per blueprint
                     publishingTasks.Add(
-                        this.PublishClientStateAsync(mediator, clientId, stoppingToken)
+                        this.PublishClientStateAsync(mediator, clientIndex, stoppingToken)
                             .ContinueWith(
                                 t =>
                                 {
                                     if (t.IsCompletedSuccessfully && t.Result)
                                     {
-                                        this.LogClientStatePublished(clientId);
+                                        this.LogClientStatePublished(clientIndex);
                                         Interlocked.Increment(ref successCount);
                                     }
                                     else
                                     {
                                         var error = t.Exception?.GetBaseException()?.Message ?? "Unknown error";
-                                        this.LogClientStatePublishFailed(clientId, error);
+                                        this.LogClientStatePublishFailed(clientIndex, error);
                                         Interlocked.Increment(ref failureCount);
                                     }
                                 },
@@ -288,13 +288,17 @@ public partial class StatePublishingService : BackgroundService
     /// Publishes complete zone state including all "publish" direction states.
     /// Uses Mediator to publish notifications that are handled by existing notification handlers.
     /// </summary>
-    private async Task<bool> PublishZoneStateAsync(IMediator mediator, int zoneId, CancellationToken cancellationToken)
+    private async Task<bool> PublishZoneStateAsync(
+        IMediator mediator,
+        int zoneIndex,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
             // Get current zone state using Mediator query
             var zoneStateResult = await mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(
-                new GetZoneStateQuery { ZoneId = zoneId },
+                new GetZoneStateQuery { ZoneIndex = zoneIndex },
                 cancellationToken
             );
 
@@ -308,7 +312,7 @@ public partial class StatePublishingService : BackgroundService
             // Publish comprehensive zone state notification
             // The existing ZoneStateNotificationHandler will handle publishing to integrations
             await mediator.PublishAsync(
-                new ZoneStateChangedNotification { ZoneId = zoneId, ZoneState = zoneState },
+                new ZoneStateChangedNotification { ZoneIndex = zoneIndex, ZoneState = zoneState },
                 cancellationToken
             );
 
@@ -323,17 +327,17 @@ public partial class StatePublishingService : BackgroundService
 
             // Also publish individual state notifications for granular updates
             await mediator.PublishAsync(
-                new ZonePlaybackStateChangedNotification { ZoneId = zoneId, PlaybackState = playbackStateEnum },
+                new ZonePlaybackStateChangedNotification { ZoneIndex = zoneIndex, PlaybackState = playbackStateEnum },
                 cancellationToken
             );
 
             await mediator.PublishAsync(
-                new ZoneVolumeChangedNotification { ZoneId = zoneId, Volume = zoneState.Volume },
+                new ZoneVolumeChangedNotification { ZoneIndex = zoneIndex, Volume = zoneState.Volume },
                 cancellationToken
             );
 
             await mediator.PublishAsync(
-                new ZoneMuteChangedNotification { ZoneId = zoneId, IsMuted = zoneState.Mute },
+                new ZoneMuteChangedNotification { ZoneIndex = zoneIndex, IsMuted = zoneState.Mute },
                 cancellationToken
             );
 
@@ -342,7 +346,7 @@ public partial class StatePublishingService : BackgroundService
                 await mediator.PublishAsync(
                     new ZoneTrackChangedNotification
                     {
-                        ZoneId = zoneId,
+                        ZoneIndex = zoneIndex,
                         TrackInfo = zoneState.Track,
                         TrackIndex = zoneState.Track.Index,
                     },
@@ -355,7 +359,7 @@ public partial class StatePublishingService : BackgroundService
                 await mediator.PublishAsync(
                     new ZonePlaylistChangedNotification
                     {
-                        ZoneId = zoneId,
+                        ZoneIndex = zoneIndex,
                         PlaylistInfo = zoneState.Playlist,
                         PlaylistIndex = zoneState.Playlist.Index ?? 1,
                     },
@@ -364,17 +368,21 @@ public partial class StatePublishingService : BackgroundService
             }
 
             await mediator.PublishAsync(
-                new ZoneTrackRepeatChangedNotification { ZoneId = zoneId, Enabled = zoneState.TrackRepeat },
+                new ZoneTrackRepeatChangedNotification { ZoneIndex = zoneIndex, Enabled = zoneState.TrackRepeat },
                 cancellationToken
             );
 
             await mediator.PublishAsync(
-                new ZonePlaylistRepeatChangedNotification { ZoneId = zoneId, Enabled = zoneState.PlaylistRepeat },
+                new ZonePlaylistRepeatChangedNotification { ZoneIndex = zoneIndex, Enabled = zoneState.PlaylistRepeat },
                 cancellationToken
             );
 
             await mediator.PublishAsync(
-                new ZoneShuffleModeChangedNotification { ZoneId = zoneId, ShuffleEnabled = zoneState.PlaylistShuffle },
+                new ZoneShuffleModeChangedNotification
+                {
+                    ZoneIndex = zoneIndex,
+                    ShuffleEnabled = zoneState.PlaylistShuffle,
+                },
                 cancellationToken
             );
 
@@ -392,7 +400,7 @@ public partial class StatePublishingService : BackgroundService
     /// </summary>
     private async Task<bool> PublishClientStateAsync(
         IMediator mediator,
-        int clientId,
+        int clientIndex,
         CancellationToken cancellationToken
     )
     {
@@ -400,7 +408,7 @@ public partial class StatePublishingService : BackgroundService
         {
             // Get current client state using Mediator query
             var clientStateResult = await mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(
-                new GetClientQuery { ClientId = clientId },
+                new GetClientQuery { ClientIndex = clientIndex },
                 cancellationToken
             );
 
@@ -414,38 +422,42 @@ public partial class StatePublishingService : BackgroundService
             // Publish comprehensive client state notification
             // The existing ClientStateNotificationHandler will handle publishing to integrations
             await mediator.PublishAsync(
-                new ClientStateChangedNotification { ClientId = clientId, ClientState = clientState },
+                new ClientStateChangedNotification { ClientIndex = clientIndex, ClientState = clientState },
                 cancellationToken
             );
 
             // Also publish individual state notifications for granular updates
             await mediator.PublishAsync(
-                new ClientVolumeChangedNotification { ClientId = clientId, Volume = clientState.Volume },
+                new ClientVolumeChangedNotification { ClientIndex = clientIndex, Volume = clientState.Volume },
                 cancellationToken
             );
 
             await mediator.PublishAsync(
-                new ClientMuteChangedNotification { ClientId = clientId, IsMuted = clientState.Mute },
+                new ClientMuteChangedNotification { ClientIndex = clientIndex, IsMuted = clientState.Mute },
                 cancellationToken
             );
 
             await mediator.PublishAsync(
-                new ClientLatencyChangedNotification { ClientId = clientId, LatencyMs = clientState.LatencyMs },
+                new ClientLatencyChangedNotification { ClientIndex = clientIndex, LatencyMs = clientState.LatencyMs },
                 cancellationToken
             );
 
             await mediator.PublishAsync(
                 new ClientZoneAssignmentChangedNotification
                 {
-                    ClientId = clientId,
-                    ZoneId = clientState.ZoneId,
-                    PreviousZoneId = null, // No previous zone for initial state
+                    ClientIndex = clientIndex,
+                    ZoneIndex = clientState.ZoneIndex,
+                    PreviousZoneIndex = null, // No previous zone for initial state
                 },
                 cancellationToken
             );
 
             await mediator.PublishAsync(
-                new ClientConnectionChangedNotification { ClientId = clientId, IsConnected = clientState.Connected },
+                new ClientConnectionChangedNotification
+                {
+                    ClientIndex = clientIndex,
+                    IsConnected = clientState.Connected,
+                },
                 cancellationToken
             );
 
