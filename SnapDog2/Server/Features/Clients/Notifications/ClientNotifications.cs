@@ -14,7 +14,7 @@ public record ClientVolumeChangedNotification : INotification
     /// <summary>
     /// Gets the client ID.
     /// </summary>
-    public required int ClientId { get; init; }
+    public required int ClientIndex { get; init; }
 
     /// <summary>
     /// Gets the new volume level (0-100).
@@ -36,7 +36,7 @@ public record ClientMuteChangedNotification : INotification
     /// <summary>
     /// Gets the client ID.
     /// </summary>
-    public required int ClientId { get; init; }
+    public required int ClientIndex { get; init; }
 
     /// <summary>
     /// Gets whether the client is muted.
@@ -58,7 +58,7 @@ public record ClientLatencyChangedNotification : INotification
     /// <summary>
     /// Gets the client ID.
     /// </summary>
-    public required int ClientId { get; init; }
+    public required int ClientIndex { get; init; }
 
     /// <summary>
     /// Gets the new latency in milliseconds.
@@ -80,17 +80,17 @@ public record ClientZoneAssignmentChangedNotification : INotification
     /// <summary>
     /// Gets the client ID.
     /// </summary>
-    public required int ClientId { get; init; }
+    public required int ClientIndex { get; init; }
 
     /// <summary>
     /// Gets the new zone ID (null if unassigned).
     /// </summary>
-    public int? ZoneId { get; init; }
+    public int? ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the previous zone ID (null if was unassigned).
     /// </summary>
-    public int? PreviousZoneId { get; init; }
+    public int? PreviousZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the UTC timestamp when the assignment changed.
@@ -107,7 +107,7 @@ public record ClientConnectionChangedNotification : INotification
     /// <summary>
     /// Gets the client ID.
     /// </summary>
-    public required int ClientId { get; init; }
+    public required int ClientIndex { get; init; }
 
     /// <summary>
     /// Gets whether the client is connected.
@@ -129,7 +129,7 @@ public record ClientStateChangedNotification : INotification
     /// <summary>
     /// Gets the client ID.
     /// </summary>
-    public required int ClientId { get; init; }
+    public required int ClientIndex { get; init; }
 
     /// <summary>
     /// Gets the complete client state.

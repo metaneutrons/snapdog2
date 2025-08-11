@@ -18,14 +18,14 @@ public partial class AssignClientToZoneCommandHandler : ICommandHandler<AssignCl
     private readonly IZoneManager _zoneManager;
     private readonly ILogger<AssignClientToZoneCommandHandler> _logger;
 
-    [LoggerMessage(3101, LogLevel.Information, "Assigning Client {ClientId} to Zone {ZoneId} from {Source}")]
-    private partial void LogHandling(int clientId, int zoneId, CommandSource source);
+    [LoggerMessage(3101, LogLevel.Information, "Assigning Client {ClientIndex} to Zone {ZoneIndex} from {Source}")]
+    private partial void LogHandling(int clientIndex, int zoneIndex, CommandSource source);
 
-    [LoggerMessage(3102, LogLevel.Warning, "Client {ClientId} not found for AssignClientToZoneCommand")]
-    private partial void LogClientNotFound(int clientId);
+    [LoggerMessage(3102, LogLevel.Warning, "Client {ClientIndex} not found for AssignClientToZoneCommand")]
+    private partial void LogClientNotFound(int clientIndex);
 
-    [LoggerMessage(3103, LogLevel.Warning, "Zone {ZoneId} not found for AssignClientToZoneCommand")]
-    private partial void LogZoneNotFound(int zoneId);
+    [LoggerMessage(3103, LogLevel.Warning, "Zone {ZoneIndex} not found for AssignClientToZoneCommand")]
+    private partial void LogZoneNotFound(int zoneIndex);
 
     public AssignClientToZoneCommandHandler(
         IClientManager clientManager,
@@ -40,27 +40,27 @@ public partial class AssignClientToZoneCommandHandler : ICommandHandler<AssignCl
 
     public async Task<Result> Handle(AssignClientToZoneCommand request, CancellationToken cancellationToken)
     {
-        this.LogHandling(request.ClientId, request.ZoneId, request.Source);
+        this.LogHandling(request.ClientIndex, request.ZoneIndex, request.Source);
 
         // Validate client exists
-        var clientResult = await this._clientManager.GetClientAsync(request.ClientId).ConfigureAwait(false);
+        var clientResult = await this._clientManager.GetClientAsync(request.ClientIndex).ConfigureAwait(false);
         if (clientResult.IsFailure)
         {
-            this.LogClientNotFound(request.ClientId);
+            this.LogClientNotFound(request.ClientIndex);
             return clientResult;
         }
 
         // Validate zone exists
-        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneIndex).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            this.LogZoneNotFound(request.ZoneId);
+            this.LogZoneNotFound(request.ZoneIndex);
             return zoneResult;
         }
 
         // Perform the assignment
         var result = await this
-            ._clientManager.AssignClientToZoneAsync(request.ClientId, request.ZoneId)
+            ._clientManager.AssignClientToZoneAsync(request.ClientIndex, request.ZoneIndex)
             .ConfigureAwait(false);
 
         return result;

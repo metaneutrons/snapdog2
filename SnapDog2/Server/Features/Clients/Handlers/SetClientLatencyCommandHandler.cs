@@ -17,11 +17,15 @@ public partial class SetClientLatencyCommandHandler : ICommandHandler<SetClientL
     private readonly IClientManager _clientManager;
     private readonly ILogger<SetClientLatencyCommandHandler> _logger;
 
-    [LoggerMessage(3201, LogLevel.Information, "Setting latency for Client {ClientId} to {LatencyMs}ms from {Source}")]
-    private partial void LogHandling(int clientId, int latencyMs, CommandSource source);
+    [LoggerMessage(
+        3201,
+        LogLevel.Information,
+        "Setting latency for Client {ClientIndex} to {LatencyMs}ms from {Source}"
+    )]
+    private partial void LogHandling(int clientIndex, int latencyMs, CommandSource source);
 
-    [LoggerMessage(3202, LogLevel.Warning, "Client {ClientId} not found for SetClientLatencyCommand")]
-    private partial void LogClientNotFound(int clientId);
+    [LoggerMessage(3202, LogLevel.Warning, "Client {ClientIndex} not found for SetClientLatencyCommand")]
+    private partial void LogClientNotFound(int clientIndex);
 
     public SetClientLatencyCommandHandler(IClientManager clientManager, ILogger<SetClientLatencyCommandHandler> logger)
     {
@@ -31,13 +35,13 @@ public partial class SetClientLatencyCommandHandler : ICommandHandler<SetClientL
 
     public async Task<Result> Handle(SetClientLatencyCommand request, CancellationToken cancellationToken)
     {
-        this.LogHandling(request.ClientId, request.LatencyMs, request.Source);
+        this.LogHandling(request.ClientIndex, request.LatencyMs, request.Source);
 
         // Get the client
-        var clientResult = await this._clientManager.GetClientAsync(request.ClientId).ConfigureAwait(false);
+        var clientResult = await this._clientManager.GetClientAsync(request.ClientIndex).ConfigureAwait(false);
         if (clientResult.IsFailure)
         {
-            this.LogClientNotFound(request.ClientId);
+            this.LogClientNotFound(request.ClientIndex);
             return clientResult;
         }
 

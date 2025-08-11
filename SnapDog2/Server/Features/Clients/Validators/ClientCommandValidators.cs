@@ -10,7 +10,7 @@ using SnapDog2.Server.Features.Shared.Validators;
 /// </summary>
 public class SetClientVolumeCommandValidator : CompositeClientVolumeCommandValidator<SetClientVolumeCommand>
 {
-    protected override int GetClientId(SetClientVolumeCommand command) => command.ClientId;
+    protected override int GetClientIndex(SetClientVolumeCommand command) => command.ClientIndex;
 
     protected override CommandSource GetSource(SetClientVolumeCommand command) => command.Source;
 
@@ -22,7 +22,7 @@ public class SetClientVolumeCommandValidator : CompositeClientVolumeCommandValid
 /// </summary>
 public class SetClientMuteCommandValidator : BaseClientCommandValidator<SetClientMuteCommand>
 {
-    protected override int GetClientId(SetClientMuteCommand command) => command.ClientId;
+    protected override int GetClientIndex(SetClientMuteCommand command) => command.ClientIndex;
 
     protected override CommandSource GetSource(SetClientMuteCommand command) => command.Source;
 }
@@ -32,7 +32,7 @@ public class SetClientMuteCommandValidator : BaseClientCommandValidator<SetClien
 /// </summary>
 public class ToggleClientMuteCommandValidator : BaseClientCommandValidator<ToggleClientMuteCommand>
 {
-    protected override int GetClientId(ToggleClientMuteCommand command) => command.ClientId;
+    protected override int GetClientIndex(ToggleClientMuteCommand command) => command.ClientIndex;
 
     protected override CommandSource GetSource(ToggleClientMuteCommand command) => command.Source;
 }
@@ -42,7 +42,7 @@ public class ToggleClientMuteCommandValidator : BaseClientCommandValidator<Toggl
 /// </summary>
 public class SetClientLatencyCommandValidator : CompositeClientLatencyCommandValidator<SetClientLatencyCommand>
 {
-    protected override int GetClientId(SetClientLatencyCommand command) => command.ClientId;
+    protected override int GetClientIndex(SetClientLatencyCommand command) => command.ClientIndex;
 
     protected override CommandSource GetSource(SetClientLatencyCommand command) => command.Source;
 
@@ -54,9 +54,9 @@ public class SetClientLatencyCommandValidator : CompositeClientLatencyCommandVal
 /// </summary>
 public class AssignClientToZoneCommandValidator : CompositeClientZoneAssignmentValidator<AssignClientToZoneCommand>
 {
-    protected override int GetClientId(AssignClientToZoneCommand command) => command.ClientId;
+    protected override int GetClientIndex(AssignClientToZoneCommand command) => command.ClientIndex;
 
     protected override CommandSource GetSource(AssignClientToZoneCommand command) => command.Source;
 
-    protected override int GetZoneId(AssignClientToZoneCommand command) => command.ZoneId;
+    protected override int GetZoneIndex(AssignClientToZoneCommand command) => command.ZoneIndex;
 }

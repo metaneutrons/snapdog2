@@ -17,11 +17,11 @@ public partial class SetClientMuteCommandHandler : ICommandHandler<SetClientMute
     private readonly IClientManager _clientManager;
     private readonly ILogger<SetClientMuteCommandHandler> _logger;
 
-    [LoggerMessage(3011, LogLevel.Information, "Setting mute for Client {ClientId} to {Enabled} from {Source}")]
-    private partial void LogHandling(int clientId, bool enabled, CommandSource source);
+    [LoggerMessage(3011, LogLevel.Information, "Setting mute for Client {ClientIndex} to {Enabled} from {Source}")]
+    private partial void LogHandling(int clientIndex, bool enabled, CommandSource source);
 
-    [LoggerMessage(3012, LogLevel.Warning, "Client {ClientId} not found for SetClientMuteCommand")]
-    private partial void LogClientNotFound(int clientId);
+    [LoggerMessage(3012, LogLevel.Warning, "Client {ClientIndex} not found for SetClientMuteCommand")]
+    private partial void LogClientNotFound(int clientIndex);
 
     public SetClientMuteCommandHandler(IClientManager clientManager, ILogger<SetClientMuteCommandHandler> logger)
     {
@@ -31,13 +31,13 @@ public partial class SetClientMuteCommandHandler : ICommandHandler<SetClientMute
 
     public async Task<Result> Handle(SetClientMuteCommand request, CancellationToken cancellationToken)
     {
-        this.LogHandling(request.ClientId, request.Enabled, request.Source);
+        this.LogHandling(request.ClientIndex, request.Enabled, request.Source);
 
         // Get the client
-        var clientResult = await this._clientManager.GetClientAsync(request.ClientId).ConfigureAwait(false);
+        var clientResult = await this._clientManager.GetClientAsync(request.ClientIndex).ConfigureAwait(false);
         if (clientResult.IsFailure)
         {
-            this.LogClientNotFound(request.ClientId);
+            this.LogClientNotFound(request.ClientIndex);
             return clientResult;
         }
 

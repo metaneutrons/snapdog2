@@ -17,11 +17,11 @@ public partial class SetClientVolumeCommandHandler : ICommandHandler<SetClientVo
     private readonly IClientManager _clientManager;
     private readonly ILogger<SetClientVolumeCommandHandler> _logger;
 
-    [LoggerMessage(3001, LogLevel.Information, "Setting volume for Client {ClientId} to {Volume} from {Source}")]
-    private partial void LogHandling(int clientId, int volume, CommandSource source);
+    [LoggerMessage(3001, LogLevel.Information, "Setting volume for Client {ClientIndex} to {Volume} from {Source}")]
+    private partial void LogHandling(int clientIndex, int volume, CommandSource source);
 
-    [LoggerMessage(3002, LogLevel.Warning, "Client {ClientId} not found for SetClientVolumeCommand")]
-    private partial void LogClientNotFound(int clientId);
+    [LoggerMessage(3002, LogLevel.Warning, "Client {ClientIndex} not found for SetClientVolumeCommand")]
+    private partial void LogClientNotFound(int clientIndex);
 
     public SetClientVolumeCommandHandler(IClientManager clientManager, ILogger<SetClientVolumeCommandHandler> logger)
     {
@@ -31,13 +31,13 @@ public partial class SetClientVolumeCommandHandler : ICommandHandler<SetClientVo
 
     public async Task<Result> Handle(SetClientVolumeCommand request, CancellationToken cancellationToken)
     {
-        this.LogHandling(request.ClientId, request.Volume, request.Source);
+        this.LogHandling(request.ClientIndex, request.Volume, request.Source);
 
         // Get the client
-        var clientResult = await this._clientManager.GetClientAsync(request.ClientId).ConfigureAwait(false);
+        var clientResult = await this._clientManager.GetClientAsync(request.ClientIndex).ConfigureAwait(false);
         if (clientResult.IsFailure)
         {
-            this.LogClientNotFound(request.ClientId);
+            this.LogClientNotFound(request.ClientIndex);
             return clientResult;
         }
 

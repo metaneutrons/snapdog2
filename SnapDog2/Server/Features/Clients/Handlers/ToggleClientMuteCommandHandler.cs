@@ -17,14 +17,14 @@ public partial class ToggleClientMuteCommandHandler : ICommandHandler<ToggleClie
     private readonly IClientManager _clientManager;
     private readonly ILogger<ToggleClientMuteCommandHandler> _logger;
 
-    [LoggerMessage(3021, LogLevel.Information, "Toggling mute for Client {ClientId} from {Source}")]
-    private partial void LogHandling(int clientId, CommandSource source);
+    [LoggerMessage(3021, LogLevel.Information, "Toggling mute for Client {ClientIndex} from {Source}")]
+    private partial void LogHandling(int clientIndex, CommandSource source);
 
-    [LoggerMessage(3022, LogLevel.Warning, "Client {ClientId} not found for ToggleClientMuteCommand")]
-    private partial void LogClientNotFound(int clientId);
+    [LoggerMessage(3022, LogLevel.Warning, "Client {ClientIndex} not found for ToggleClientMuteCommand")]
+    private partial void LogClientNotFound(int clientIndex);
 
-    [LoggerMessage(3023, LogLevel.Information, "Toggled mute for Client {ClientId} to {NewMuteState}")]
-    private partial void LogToggleResult(int clientId, bool newMuteState);
+    [LoggerMessage(3023, LogLevel.Information, "Toggled mute for Client {ClientIndex} to {NewMuteState}")]
+    private partial void LogToggleResult(int clientIndex, bool newMuteState);
 
     public ToggleClientMuteCommandHandler(IClientManager clientManager, ILogger<ToggleClientMuteCommandHandler> logger)
     {
@@ -34,13 +34,15 @@ public partial class ToggleClientMuteCommandHandler : ICommandHandler<ToggleClie
 
     public async Task<Result> Handle(ToggleClientMuteCommand request, CancellationToken cancellationToken)
     {
-        this.LogHandling(request.ClientId, request.Source);
+        this.LogHandling(request.ClientIndex, request.Source);
 
         // Get the current client state
-        var clientStateResult = await this._clientManager.GetClientStateAsync(request.ClientId).ConfigureAwait(false);
+        var clientStateResult = await this
+            ._clientManager.GetClientStateAsync(request.ClientIndex)
+            .ConfigureAwait(false);
         if (clientStateResult.IsFailure)
         {
-            this.LogClientNotFound(request.ClientId);
+            this.LogClientNotFound(request.ClientIndex);
             return clientStateResult;
         }
 
@@ -48,10 +50,10 @@ public partial class ToggleClientMuteCommandHandler : ICommandHandler<ToggleClie
         var newMuteState = !clientState.Mute;
 
         // Get the client for operations
-        var clientResult = await this._clientManager.GetClientAsync(request.ClientId).ConfigureAwait(false);
+        var clientResult = await this._clientManager.GetClientAsync(request.ClientIndex).ConfigureAwait(false);
         if (clientResult.IsFailure)
         {
-            this.LogClientNotFound(request.ClientId);
+            this.LogClientNotFound(request.ClientIndex);
             return clientResult;
         }
 
@@ -62,7 +64,7 @@ public partial class ToggleClientMuteCommandHandler : ICommandHandler<ToggleClie
 
         if (result.IsSuccess)
         {
-            this.LogToggleResult(request.ClientId, newMuteState);
+            this.LogToggleResult(request.ClientIndex, newMuteState);
         }
 
         return result;

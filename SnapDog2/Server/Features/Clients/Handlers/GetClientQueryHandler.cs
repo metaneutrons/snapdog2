@@ -16,8 +16,8 @@ public partial class GetClientQueryHandler : IQueryHandler<GetClientQuery, Resul
     private readonly IClientManager _clientManager;
     private readonly ILogger<GetClientQueryHandler> _logger;
 
-    [LoggerMessage(4101, LogLevel.Information, "Handling GetClientQuery for Client {ClientId}")]
-    private partial void LogHandling(int clientId);
+    [LoggerMessage(4101, LogLevel.Information, "Handling GetClientQuery for Client {ClientIndex}")]
+    private partial void LogHandling(int clientIndex);
 
     public GetClientQueryHandler(IClientManager clientManager, ILogger<GetClientQueryHandler> logger)
     {
@@ -27,9 +27,9 @@ public partial class GetClientQueryHandler : IQueryHandler<GetClientQuery, Resul
 
     public async Task<Result<ClientState>> Handle(GetClientQuery request, CancellationToken cancellationToken)
     {
-        this.LogHandling(request.ClientId);
+        this.LogHandling(request.ClientIndex);
 
-        var result = await this._clientManager.GetClientStateAsync(request.ClientId).ConfigureAwait(false);
+        var result = await this._clientManager.GetClientStateAsync(request.ClientIndex).ConfigureAwait(false);
         return result;
     }
 }
