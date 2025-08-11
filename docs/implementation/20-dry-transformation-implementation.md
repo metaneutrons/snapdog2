@@ -161,7 +161,7 @@ await this.PublishToExternalSystemsAsync(StatusIdAttribute.GetStatusId<ClientVol
 During Phase 4, several property name mismatches were identified and resolved:
 
 1. **Boolean Properties:** Code expected `Enabled` instead of `IsEnabled`
-2. **Playlist Properties:** Code expected both `PlaylistIndex` (int?) and `PlaylistId` (string?)
+2. **Playlist Properties:** Code expected both `PlaylistIndex` (int?) and `PlaylistIndex` (string?)
 3. **Type Mismatches:** Ensured proper nullable types and string/int alignment
 
 ### Example Property Fixes
@@ -172,7 +172,7 @@ public required bool Enabled { get; init; } // Was: IsMuted
 
 // SetPlaylistCommand - Added both expected properties
 public int? PlaylistIndex { get; init; }    // For index-based selection
-public string? PlaylistId { get; init; }    // For ID-based selection
+public string? PlaylistIndex { get; init; }    // For ID-based selection
 ```
 
 ## Integration Points

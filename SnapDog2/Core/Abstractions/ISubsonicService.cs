@@ -19,11 +19,11 @@ public interface ISubsonicService
     /// <summary>
     /// Gets a specific playlist with all its tracks.
     /// </summary>
-    /// <param name="playlistId">The playlist identifier.</param>
+    /// <param name="playlistIndex">The playlist identifier.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Result containing playlist with tracks.</returns>
     Task<Result<Api.Models.PlaylistWithTracks>> GetPlaylistAsync(
-        string playlistId,
+        string playlistIndex,
         CancellationToken cancellationToken = default
     );
 

@@ -248,23 +248,6 @@ public static class CommandFactory
     }
 
     /// <summary>
-    /// Creates a SetPlaylistCommand with the specified playlist ID.
-    /// </summary>
-    public static SetPlaylistCommand CreateSetPlaylistCommand(
-        int zoneId,
-        string playlistId,
-        CommandSource source = CommandSource.Internal
-    )
-    {
-        return new SetPlaylistCommand
-        {
-            ZoneId = zoneId,
-            PlaylistId = playlistId,
-            Source = source,
-        };
-    }
-
-    /// <summary>
     /// Creates a NextPlaylistCommand.
     /// </summary>
     public static NextPlaylistCommand CreateNextPlaylistCommand(
@@ -501,7 +484,11 @@ public static class CommandFactory
                 zoneId,
                 source
             ),
-            "playlist" when !string.IsNullOrEmpty(payload) => CreateSetPlaylistCommand(zoneId, payload, source),
+            "playlist" when TryParseInt(payload, out var playlistIndexFromString) => CreateSetPlaylistCommand(
+                zoneId,
+                playlistIndexFromString,
+                source
+            ),
 
             // Playlist shuffle commands
             "shuffle" when TryParseBool(payload, out var shuffle) => CreateSetPlaylistShuffleCommand(

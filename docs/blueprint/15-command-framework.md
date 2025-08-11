@@ -90,8 +90,8 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 
 | Command/Status ID         | Description                | Essential Information / Type                          | Direction        | Notes / Comments                        |
 | :------------------------ | :------------------------- | :---------------------------------------------------- | :--------------- | :-------------------------------------- |
-| `PLAYLIST`                | Set specific playlist      | `ZoneId` (int), `PlaylistIndex` (1-based) or `PlaylistId` | Command (Set)    | Action: Change to playlist `P`        |
-| `PLAYLIST_INDEX`          | Current playlist index/ID  | `ZoneId` (int), `PlaylistIndex` (1-based) or `PlaylistId` | Status (Publish) | State: Current playlist is `P`, 0 for KNX if > 255 |
+| `PLAYLIST`                | Set specific playlist      | `ZoneId` (int), `PlaylistIndex` (1-based) or `PlaylistIndex` | Command (Set)    | Action: Change to playlist `P`        |
+| `PLAYLIST_INDEX`          | Current playlist index/ID  | `ZoneId` (int), `PlaylistIndex` (1-based) or `PlaylistIndex` | Status (Publish) | State: Current playlist is `P`, 0 for KNX if > 255 |
 | `PLAYLIST_INFO`           | Detailed playlist info     | `ZoneId` (int), `PlaylistInfo` (object/record)        | Status (Publish) | State: Details of playlist `P`        |
 | `PLAYLIST_NEXT`           | Play next playlist         | `ZoneId` (int)                                        | Command (Set)    | Action: Go to next playlist           |
 | `PLAYLIST_PREVIOUS`       | Play previous playlist     | `ZoneId` (int)                                        | Command (Set)    | Action: Go to previous playlist       |
@@ -160,8 +160,8 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 #### 14.3.2.2. Zone Status Topics (Read-Only)
 
 **Important Topic Distinction:**
-- **`control`** - Publishes simple string status values for current playback state and modes (e.g., `"play"`, `"mute_on"`)
-- **`state`** - Publishes complete JSON zone state object with all information (see Section 13.5.1 below)
+* **`control`** - Publishes simple string status values for current playback state and modes (e.g., `"play"`, `"mute_on"`)
+* **`state`** - Publishes complete JSON zone state object with all information (see Section 13.5.1 below)
 
 **Playback/Mode State**
 

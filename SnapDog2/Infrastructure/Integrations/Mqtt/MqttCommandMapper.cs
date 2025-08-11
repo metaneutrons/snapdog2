@@ -198,9 +198,9 @@ public partial class MqttCommandMapper
                 playlistNum,
                 Core.Enums.CommandSource.Mqtt
             ),
-            "playlist" when !string.IsNullOrEmpty(parameter) => CommandFactory.CreateSetPlaylistCommand(
+            "playlist" when int.TryParse(parameter, out var playlistIndex) => CommandFactory.CreateSetPlaylistCommand(
                 zoneId,
-                parameter,
+                playlistIndex,
                 Core.Enums.CommandSource.Mqtt
             ),
 

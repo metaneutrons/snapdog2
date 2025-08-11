@@ -17,14 +17,9 @@ public record SetPlaylistCommand : ICommand<Result>
     public required int ZoneId { get; init; }
 
     /// <summary>
-    /// Gets the playlist index to set (1-based). Either this or PlaylistId must be specified.
+    /// Gets the playlist index to set (1-based).
     /// </summary>
-    public int? PlaylistIndex { get; init; }
-
-    /// <summary>
-    /// Gets the playlist ID to set. Either this or PlaylistIndex must be specified.
-    /// </summary>
-    public string? PlaylistId { get; init; }
+    public required int PlaylistIndex { get; init; }
 
     /// <summary>
     /// Gets the optional track index to start from (1-based). If null, starts from beginning.

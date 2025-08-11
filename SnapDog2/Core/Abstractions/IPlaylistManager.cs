@@ -18,9 +18,9 @@ public interface IPlaylistManager
     /// <summary>
     /// Gets tracks for a specific playlist by ID.
     /// </summary>
-    /// <param name="playlistId">The playlist ID.</param>
+    /// <param name="playlistIndex">The playlist ID.</param>
     /// <returns>A result containing the list of tracks in the playlist.</returns>
-    Task<Result<List<TrackInfo>>> GetPlaylistTracksByIdAsync(string playlistId);
+    Task<Result<List<TrackInfo>>> GetPlaylistTracksByIdAsync(string playlistIndex);
 
     /// <summary>
     /// Gets tracks for a specific playlist by index.
@@ -32,9 +32,9 @@ public interface IPlaylistManager
     /// <summary>
     /// Gets a specific playlist by ID.
     /// </summary>
-    /// <param name="playlistId">The playlist ID.</param>
+    /// <param name="playlistIndex">The playlist ID.</param>
     /// <returns>A result containing the playlist information.</returns>
-    Task<Result<PlaylistInfo>> GetPlaylistByIdAsync(string playlistId);
+    Task<Result<PlaylistInfo>> GetPlaylistByIdAsync(string playlistIndex);
 
     /// <summary>
     /// Gets a specific playlist by index.

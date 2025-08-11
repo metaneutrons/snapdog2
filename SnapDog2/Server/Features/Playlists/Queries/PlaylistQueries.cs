@@ -17,7 +17,7 @@ public record GetPlaylistQuery : IQuery<Result<Api.Models.PlaylistWithTracks>>
     /// <summary>
     /// Gets the playlist identifier.
     /// </summary>
-    public required string PlaylistId { get; init; }
+    public required string PlaylistIndex { get; init; }
 }
 
 /// <summary>

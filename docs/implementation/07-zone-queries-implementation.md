@@ -77,9 +77,9 @@ New interface for playlist operations:
 public interface IPlaylistManager
 {
     Task<Result<List<PlaylistInfo>>> GetAllPlaylistsAsync();
-    Task<Result<List<TrackInfo>>> GetPlaylistTracksByIdAsync(string playlistId);
+    Task<Result<List<TrackInfo>>> GetPlaylistTracksByIdAsync(string playlistIndex);
     Task<Result<List<TrackInfo>>> GetPlaylistTracksByIndexAsync(int playlistIndex);
-    Task<Result<PlaylistInfo>> GetPlaylistByIdAsync(string playlistId);
+    Task<Result<PlaylistInfo>> GetPlaylistByIdAsync(string playlistIndex);
     Task<Result<PlaylistInfo>> GetPlaylistByIndexAsync(int playlistIndex);
 }
 ```
@@ -122,7 +122,7 @@ public record GetAllPlaylistsQuery : IQuery<Result<List<PlaylistInfo>>>;
 /// </summary>
 public record GetPlaylistTracksQuery : IQuery<Result<List<TrackInfo>>>
 {
-    public string? PlaylistId { get; init; }
+    public string? PlaylistIndex { get; init; }
     public int? PlaylistIndex { get; init; }
 }
 ```
@@ -301,7 +301,7 @@ Dedicated controller for playlist operations:
 **RESTful Endpoints:**
 
 - `GET /api/playlists` - Get all available playlists
-- `GET /api/playlists/{playlistId}/tracks` - Get tracks for a specific playlist by ID
+- `GET /api/playlists/{playlistIndex}/tracks` - Get tracks for a specific playlist by ID
 - `GET /api/playlists/by-index/{playlistIndex}/tracks` - Get tracks for a specific playlist by index
 
 **Error Handling:**
@@ -402,7 +402,7 @@ curl http://localhost:5000/api/zones/999/track
 
 ```
 [11:04:58 INF] [SnapDog2.Server.Features.Zones.Handlers.GetAllPlaylistsQueryHandler] Handling GetAllPlaylistsQuery
-[11:05:10 INF] [SnapDog2.Server.Features.Zones.Handlers.GetPlaylistTracksQueryHandler] Handling GetPlaylistTracksQuery for PlaylistId: rock_classics, PlaylistIndex:
+[11:05:10 INF] [SnapDog2.Server.Features.Zones.Handlers.GetPlaylistTracksQueryHandler] Handling GetPlaylistTracksQuery for PlaylistIndex: rock_classics, PlaylistIndex:
 [11:04:47 INF] [SnapDog2.Server.Features.Zones.Handlers.GetZoneTrackInfoQueryHandler] Handling GetZoneTrackInfoQuery for Zone 1
 [11:04:52 INF] [SnapDog2.Server.Features.Zones.Handlers.GetZonePlaylistInfoQueryHandler] Handling GetZonePlaylistInfoQuery for Zone 2
 ```

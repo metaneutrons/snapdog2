@@ -652,14 +652,14 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         }
     }
 
-    public async Task<Result> SetPlaylistAsync(string playlistId)
+    public async Task<Result> SetPlaylistAsync(string playlistIndex)
     {
-        LogZoneAction(_zoneId, _config.Name, $"Set playlist to {playlistId}");
+        LogZoneAction(_zoneId, _config.Name, $"Set playlist to {playlistIndex}");
 
         await _stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            var newPlaylist = _currentState.Playlist! with { Id = playlistId, Name = playlistId };
+            var newPlaylist = _currentState.Playlist! with { Id = playlistIndex, Name = playlistIndex };
 
             _currentState = _currentState with { Playlist = newPlaylist };
             await PublishZoneStateChangedAsync().ConfigureAwait(false);

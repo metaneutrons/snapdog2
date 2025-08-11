@@ -114,36 +114,16 @@ public abstract class BasePlaylistCommandValidator<T> : AbstractValidator<T>
 {
     protected BasePlaylistCommandValidator()
     {
-        // Playlist index validation (when provided)
-        When(
-            x => GetPlaylistIndex(x).HasValue,
-            () =>
-            {
-                RuleFor(x => GetPlaylistIndex(x)!.Value)
-                    .GreaterThan(0)
-                    .WithMessage("Playlist index must be a positive integer (1-based).");
-            }
-        );
-
-        // Playlist ID validation (when provided)
-        When(
-            x => !string.IsNullOrEmpty(GetPlaylistId(x)),
-            () =>
-            {
-                RuleFor(x => GetPlaylistId(x)).NotEmpty().WithMessage("Playlist ID must not be empty when specified.");
-            }
-        );
+        // Playlist index validation (required)
+        RuleFor(x => GetPlaylistIndex(x))
+            .GreaterThan(0)
+            .WithMessage("Playlist index must be a positive integer (1-based).");
     }
 
     /// <summary>
     /// Extract the playlist index from the command. Must be implemented by derived validators.
     /// </summary>
-    protected abstract int? GetPlaylistIndex(T command);
-
-    /// <summary>
-    /// Extract the playlist ID from the command. Must be implemented by derived validators.
-    /// </summary>
-    protected abstract string? GetPlaylistId(T command);
+    protected abstract int GetPlaylistIndex(T command);
 }
 
 /// <summary>
@@ -243,41 +223,16 @@ public abstract class CompositeZonePlaylistCommandValidator<T> : BaseZoneCommand
 {
     protected CompositeZonePlaylistCommandValidator()
     {
-        // Either playlist index or ID must be specified
-        RuleFor(x => x)
-            .Must(x => GetPlaylistIndex(x).HasValue || !string.IsNullOrEmpty(GetPlaylistId(x)))
-            .WithMessage("Either PlaylistIndex or PlaylistId must be specified.");
-
-        // Playlist index validation (when provided)
-        When(
-            x => GetPlaylistIndex(x).HasValue,
-            () =>
-            {
-                RuleFor(x => GetPlaylistIndex(x)!.Value)
-                    .GreaterThan(0)
-                    .WithMessage("Playlist index must be a positive integer (1-based).");
-            }
-        );
-
-        // Playlist ID validation (when provided)
-        When(
-            x => !string.IsNullOrEmpty(GetPlaylistId(x)),
-            () =>
-            {
-                RuleFor(x => GetPlaylistId(x)).NotEmpty().WithMessage("Playlist ID must not be empty when specified.");
-            }
-        );
+        // Playlist index validation (required)
+        RuleFor(x => GetPlaylistIndex(x))
+            .GreaterThan(0)
+            .WithMessage("Playlist index must be a positive integer (1-based).");
     }
 
     /// <summary>
     /// Extract the playlist index from the command. Must be implemented by derived validators.
     /// </summary>
-    protected abstract int? GetPlaylistIndex(T command);
-
-    /// <summary>
-    /// Extract the playlist ID from the command. Must be implemented by derived validators.
-    /// </summary>
-    protected abstract string? GetPlaylistId(T command);
+    protected abstract int GetPlaylistIndex(T command);
 }
 
 /// <summary>

@@ -20,14 +20,14 @@ public partial class PlaylistManager : IPlaylistManager
     [LoggerMessage(8001, LogLevel.Debug, "Getting all playlists")]
     private partial void LogGettingAllPlaylists();
 
-    [LoggerMessage(8002, LogLevel.Debug, "Getting tracks for playlist ID: {PlaylistId}")]
-    private partial void LogGettingTracksByPlaylistId(string playlistId);
+    [LoggerMessage(8002, LogLevel.Debug, "Getting tracks for playlist ID: {PlaylistIndex}")]
+    private partial void LogGettingTracksByPlaylistIndex(string playlistIndex);
 
     [LoggerMessage(8003, LogLevel.Debug, "Getting tracks for playlist index: {PlaylistIndex}")]
     private partial void LogGettingTracksByPlaylistIndex(int playlistIndex);
 
-    [LoggerMessage(8004, LogLevel.Warning, "Playlist {PlaylistId} not found")]
-    private partial void LogPlaylistNotFound(string playlistId);
+    [LoggerMessage(8004, LogLevel.Warning, "Playlist {PlaylistIndex} not found")]
+    private partial void LogPlaylistNotFound(string playlistIndex);
 
     [LoggerMessage(8005, LogLevel.Warning, "Playlist index {PlaylistIndex} not found")]
     private partial void LogPlaylistIndexNotFound(int playlistIndex);
@@ -52,19 +52,19 @@ public partial class PlaylistManager : IPlaylistManager
         return Result<List<PlaylistInfo>>.Success(allPlaylists);
     }
 
-    public async Task<Result<List<TrackInfo>>> GetPlaylistTracksByIdAsync(string playlistId)
+    public async Task<Result<List<TrackInfo>>> GetPlaylistTracksByIdAsync(string playlistIndex)
     {
-        this.LogGettingTracksByPlaylistId(playlistId);
+        this.LogGettingTracksByPlaylistIndex(playlistIndex);
 
         await Task.Delay(1); // TODO: Fix simulation async operation
 
-        if (this._playlistTracks.TryGetValue(playlistId, out var tracks))
+        if (this._playlistTracks.TryGetValue(playlistIndex, out var tracks))
         {
             return Result<List<TrackInfo>>.Success(tracks);
         }
 
-        this.LogPlaylistNotFound(playlistId);
-        return Result<List<TrackInfo>>.Failure($"Playlist {playlistId} not found");
+        this.LogPlaylistNotFound(playlistIndex);
+        return Result<List<TrackInfo>>.Failure($"Playlist {playlistIndex} not found");
     }
 
     public async Task<Result<List<TrackInfo>>> GetPlaylistTracksByIndexAsync(int playlistIndex)
@@ -83,17 +83,17 @@ public partial class PlaylistManager : IPlaylistManager
         return Result<List<TrackInfo>>.Failure($"Playlist at index {playlistIndex} not found");
     }
 
-    public async Task<Result<PlaylistInfo>> GetPlaylistByIdAsync(string playlistId)
+    public async Task<Result<PlaylistInfo>> GetPlaylistByIdAsync(string playlistIndex)
     {
         await Task.Delay(1); // TODO: Fix simulation async operation
 
-        if (this._playlists.TryGetValue(playlistId, out var playlist))
+        if (this._playlists.TryGetValue(playlistIndex, out var playlist))
         {
             return Result<PlaylistInfo>.Success(playlist);
         }
 
-        this.LogPlaylistNotFound(playlistId);
-        return Result<PlaylistInfo>.Failure($"Playlist {playlistId} not found");
+        this.LogPlaylistNotFound(playlistIndex);
+        return Result<PlaylistInfo>.Failure($"Playlist {playlistIndex} not found");
     }
 
     public async Task<Result<PlaylistInfo>> GetPlaylistByIndexAsync(int playlistIndex)

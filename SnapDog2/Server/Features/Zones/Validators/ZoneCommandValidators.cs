@@ -125,9 +125,7 @@ public class SetPlaylistCommandValidator : CompositeZonePlaylistCommandValidator
 
     protected override CommandSource GetSource(SetPlaylistCommand command) => command.Source;
 
-    protected override int? GetPlaylistIndex(SetPlaylistCommand command) => command.PlaylistIndex;
-
-    protected override string? GetPlaylistId(SetPlaylistCommand command) => command.PlaylistId;
+    protected override int GetPlaylistIndex(SetPlaylistCommand command) => command.PlaylistIndex;
 }
 
 /// <summary>

@@ -63,7 +63,7 @@ public record GetPlaylistTracksQuery : IQuery<Result<List<TrackInfo>>>
     /// <summary>
     /// Gets the playlist ID or index (1-based).
     /// </summary>
-    public string? PlaylistId { get; init; }
+    public string? PlaylistIndex { get; init; }
 
     /// <summary>
     /// Gets the playlist index (1-based, alternative to ID).

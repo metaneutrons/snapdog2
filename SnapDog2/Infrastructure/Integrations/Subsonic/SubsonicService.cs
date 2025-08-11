@@ -243,32 +243,32 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
 
     /// <inheritdoc />
     public async Task<Result<Api.Models.PlaylistWithTracks>> GetPlaylistAsync(
-        string playlistId,
+        string playlistIndex,
         CancellationToken cancellationToken = default
     )
     {
         if (this._disposed)
             return Result<Api.Models.PlaylistWithTracks>.Failure("Service has been disposed");
 
-        if (string.IsNullOrEmpty(playlistId))
+        if (string.IsNullOrEmpty(playlistIndex))
             return Result<Api.Models.PlaylistWithTracks>.Failure("Playlist ID cannot be null or empty");
 
         await this._operationLock.WaitAsync(cancellationToken);
         try
         {
-            LogGettingPlaylist(this._logger, playlistId);
+            LogGettingPlaylist(this._logger, playlistIndex);
 
             var result = await this._operationPolicy.ExecuteAsync(
                 async (ct) =>
                 {
-                    var playlistResponse = await this._subsonicClient.Playlists.GetPlaylistAsync(playlistId, ct);
+                    var playlistResponse = await this._subsonicClient.Playlists.GetPlaylistAsync(playlistIndex, ct);
 
                     if (!playlistResponse.IsSuccess)
                     {
                         var errorMessage = playlistResponse.Error?.Message ?? "Unknown error";
-                        LogPlaylistNotFound(this._logger, playlistId);
+                        LogPlaylistNotFound(this._logger, playlistIndex);
                         throw new InvalidOperationException(
-                            $"Playlist with ID '{playlistId}' not found: {errorMessage}"
+                            $"Playlist with ID '{playlistIndex}' not found: {errorMessage}"
                         );
                     }
 
@@ -284,13 +284,13 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
                 cancellationToken
             );
 
-            LogPlaylistRetrieved(this._logger, playlistId, result.Tracks.Count);
+            LogPlaylistRetrieved(this._logger, playlistIndex, result.Tracks.Count);
 
             // Publish playlist accessed notification
             this.PublishNotificationFireAndForget(
                 new SubsonicPlaylistAccessedNotification(
                     this._config.Url ?? "unknown",
-                    playlistId,
+                    playlistIndex,
                     result.Info.Name,
                     result.Tracks.Count
                 )
@@ -300,15 +300,15 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            LogGetPlaylistError(this._logger, playlistId, ex);
+            LogGetPlaylistError(this._logger, playlistIndex, ex);
 
             // Publish playlist access failed notification
             this.PublishNotificationFireAndForget(
-                new SubsonicPlaylistAccessFailedNotification(this._config.Url ?? "unknown", playlistId, ex.Message)
+                new SubsonicPlaylistAccessFailedNotification(this._config.Url ?? "unknown", playlistIndex, ex.Message)
             );
 
             return Result<Api.Models.PlaylistWithTracks>.Failure(
-                $"Failed to get playlist '{playlistId}': {ex.Message}"
+                $"Failed to get playlist '{playlistIndex}': {ex.Message}"
             );
         }
         finally
@@ -673,17 +673,17 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
     [LoggerMessage(2908, LogLevel.Error, "Failed to get playlists from Subsonic server")]
     private static partial void LogGetPlaylistsError(ILogger logger, Exception ex);
 
-    [LoggerMessage(2909, LogLevel.Debug, "Getting playlist: {PlaylistId}")]
-    private static partial void LogGettingPlaylist(ILogger logger, string playlistId);
+    [LoggerMessage(2909, LogLevel.Debug, "Getting playlist: {PlaylistIndex}")]
+    private static partial void LogGettingPlaylist(ILogger logger, string playlistIndex);
 
-    [LoggerMessage(2910, LogLevel.Information, "Retrieved playlist: {PlaylistId} with {TrackCount} tracks")]
-    private static partial void LogPlaylistRetrieved(ILogger logger, string playlistId, int trackCount);
+    [LoggerMessage(2910, LogLevel.Information, "Retrieved playlist: {PlaylistIndex} with {TrackCount} tracks")]
+    private static partial void LogPlaylistRetrieved(ILogger logger, string playlistIndex, int trackCount);
 
-    [LoggerMessage(2911, LogLevel.Warning, "Playlist not found: {PlaylistId}")]
-    private static partial void LogPlaylistNotFound(ILogger logger, string playlistId);
+    [LoggerMessage(2911, LogLevel.Warning, "Playlist not found: {PlaylistIndex}")]
+    private static partial void LogPlaylistNotFound(ILogger logger, string playlistIndex);
 
-    [LoggerMessage(2912, LogLevel.Error, "Failed to get playlist: {PlaylistId}")]
-    private static partial void LogGetPlaylistError(ILogger logger, string playlistId, Exception ex);
+    [LoggerMessage(2912, LogLevel.Error, "Failed to get playlist: {PlaylistIndex}")]
+    private static partial void LogGetPlaylistError(ILogger logger, string playlistIndex, Exception ex);
 
     [LoggerMessage(2913, LogLevel.Debug, "Getting stream URL for track: {TrackId}")]
     private static partial void LogGettingStreamUrl(ILogger logger, string trackId);

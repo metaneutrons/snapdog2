@@ -223,7 +223,7 @@ public interface IZoneService
 
     // Playlist Management
     Task<Result> SetPlaylistAsync(int playlistIndex);
-    Task<Result> SetPlaylistAsync(string playlistId);
+    Task<Result> SetPlaylistAsync(string playlistIndex);
     Task<Result> NextPlaylistAsync();
     Task<Result> PreviousPlaylistAsync();
     Task<Result> SetPlaylistShuffleAsync(bool enabled);
@@ -394,6 +394,7 @@ public class ZoneController : ControllerBase
 **✅ UPDATED (August 2025)**: All handlers are now automatically discovered and registered through reflection-based assembly scanning. No manual registration required.
 
 **Previous Manual Registration (deprecated)**:
+
 ```csharp
 // Zone command handlers - NO LONGER REQUIRED
 services.AddScoped<PlayCommandHandler>();

@@ -115,12 +115,12 @@ Consistent naming is crucial for readability and understanding code intent.
 * **Public Fields** (Generally discouraged; use Properties), **Public Constants (`public const`)**: Use `PascalCase`.
   * Example: `public const int DefaultTimeoutMilliseconds = 10000;`.
 * **Local Variables**, **Method Parameters**: Use `camelCase`. Names should be descriptive. Avoid single-letter variables except in very small scopes (e.g., LINQ lambdas `x => x.Id`, short loops `for(int i=0;...)`).
-  * Examples: `int currentVolume`, `string playlistId`, `CancellationToken cancellationToken`.
+  * Examples: `int currentVolume`, `string playlistIndex`, `CancellationToken cancellationToken`.
 * **Private/Protected Fields**: Use `_camelCase` (prefix `_`, then camelCase, enforced by SX1309). This clearly distinguishes instance fields.
   * Examples: `private readonly ILogger<MyClass> _logger;`, `private SemaphoreSlim _stateLock;`.
 * **Static Readonly Fields**: Use `PascalCase` if they represent logical constants or are publicly accessible (rare). Use `_camelCase` if they are private implementation details (more common).
 * **Constants (`private const`, `internal const`)**: Use `PascalCase` (SA1303).
-  * Example: `private const string RadioPlaylistId = "radio";`.
+  * Example: `private const string RadioPlaylistIndex = "radio";`.
 * **Type Parameters** (Generics): Use `TPascalCase` (prefix `T`, then descriptive PascalCase name, SA1314).
   * Examples: `Result<TResponse>`, `ICommandHandler<TCommand, TResult>`, `List<TZoneConfig>`.
 * **Abbreviations**: Treat common acronyms (2-3 letters) as words unless only two letters. Capitalize only the first letter or keep all caps if standard (like `IO`). Prefer full words over abbreviations where clarity is improved.

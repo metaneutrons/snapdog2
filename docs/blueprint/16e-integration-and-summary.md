@@ -125,7 +125,7 @@ public partial class MqttCommandMapper
                 "-" => new PreviousPlaylistCommand { ZoneId = zoneId, Source = CommandSource.Mqtt },
                 _ when int.TryParse(payload, out var playlistIndex) =>
                     new SetPlaylistCommand { ZoneId = zoneId, PlaylistIndex = playlistIndex, Source = CommandSource.Mqtt },
-                _ => new SetPlaylistCommand { ZoneId = zoneId, PlaylistId = payload, Source = CommandSource.Mqtt }
+                _ => new SetPlaylistCommand { ZoneId = zoneId, PlaylistIndex = payload, Source = CommandSource.Mqtt }
             },
 
             _ => null

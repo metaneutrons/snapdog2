@@ -80,12 +80,7 @@ public record GetAllPlaylistsQuery : IQuery<Result<List<PlaylistInfo>>>;
 public record GetPlaylistTracksQuery : IQuery<Result<List<TrackInfo>>>
 {
     /// <summary>
-    /// Gets the playlist ID or index (1-based).
+    /// Gets the playlist index (1-based).
     /// </summary>
-    public string? PlaylistId { get; init; }
-
-    /// <summary>
-    /// Gets the playlist index (1-based, alternative to ID).
-    /// </summary>
-    public int? PlaylistIndex { get; init; }
+    public required int PlaylistIndex { get; init; }
 }

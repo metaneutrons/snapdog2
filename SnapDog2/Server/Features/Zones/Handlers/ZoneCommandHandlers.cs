@@ -446,16 +446,7 @@ public partial class SetPlaylistCommandHandler : ICommandHandler<SetPlaylistComm
 
         var zone = zoneResult.Value!;
 
-        if (request.PlaylistIndex.HasValue)
-        {
-            return await zone.SetPlaylistAsync(request.PlaylistIndex.Value).ConfigureAwait(false);
-        }
-        else if (!string.IsNullOrEmpty(request.PlaylistId))
-        {
-            return await zone.SetPlaylistAsync(request.PlaylistId).ConfigureAwait(false);
-        }
-
-        return Result.Failure("Either PlaylistIndex or PlaylistId must be specified");
+        return await zone.SetPlaylistAsync(request.PlaylistIndex).ConfigureAwait(false);
     }
 
     [LoggerMessage(9023, LogLevel.Information, "Setting playlist for Zone {ZoneId} from {Source}")]

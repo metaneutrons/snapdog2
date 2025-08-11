@@ -375,14 +375,10 @@ public partial class GetPlaylistTracksQueryHandler : IQueryHandler<GetPlaylistTr
     private readonly IPlaylistManager _playlistManager;
     private readonly ILogger<GetPlaylistTracksQueryHandler> _logger;
 
-    [LoggerMessage(
-        5801,
-        LogLevel.Information,
-        "Handling GetPlaylistTracksQuery for PlaylistId: {PlaylistId}, PlaylistIndex: {PlaylistIndex}"
-    )]
-    private partial void LogHandling(string? playlistId, int? playlistIndex);
+    [LoggerMessage(5801, LogLevel.Information, "Handling GetPlaylistTracksQuery for PlaylistIndex: {PlaylistIndex}")]
+    private partial void LogHandling(int playlistIndex);
 
-    [LoggerMessage(5802, LogLevel.Warning, "Both PlaylistId and PlaylistIndex are null for GetPlaylistTracksQuery")]
+    [LoggerMessage(5802, LogLevel.Warning, "PlaylistIndex is required for GetPlaylistTracksQuery")]
     private partial void LogMissingParameters();
 
     [LoggerMessage(5803, LogLevel.Error, "Error retrieving playlist tracks: {ErrorMessage}")]
@@ -402,24 +398,13 @@ public partial class GetPlaylistTracksQueryHandler : IQueryHandler<GetPlaylistTr
         CancellationToken cancellationToken
     )
     {
-        this.LogHandling(request.PlaylistId, request.PlaylistIndex);
+        this.LogHandling(request.PlaylistIndex);
 
         try
         {
-            if (!string.IsNullOrEmpty(request.PlaylistId))
-            {
-                return await this._playlistManager.GetPlaylistTracksByIdAsync(request.PlaylistId).ConfigureAwait(false);
-            }
-
-            if (request.PlaylistIndex.HasValue)
-            {
-                return await this
-                    ._playlistManager.GetPlaylistTracksByIndexAsync(request.PlaylistIndex.Value)
-                    .ConfigureAwait(false);
-            }
-
-            this.LogMissingParameters();
-            return Result<List<TrackInfo>>.Failure("Either PlaylistId or PlaylistIndex must be provided");
+            return await this
+                ._playlistManager.GetPlaylistTracksByIndexAsync(request.PlaylistIndex)
+                .ConfigureAwait(false);
         }
         catch (Exception ex)
         {

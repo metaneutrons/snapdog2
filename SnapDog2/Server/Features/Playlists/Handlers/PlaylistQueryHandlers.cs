@@ -131,10 +131,10 @@ public partial class GetPlaylistQueryHandler : IQueryHandler<GetPlaylistQuery, R
         CancellationToken cancellationToken
     )
     {
-        LogGettingPlaylist(this._logger, query.PlaylistId);
+        LogGettingPlaylist(this._logger, query.PlaylistIndex);
 
         // Handle radio stations playlist
-        if (query.PlaylistId == "radio")
+        if (query.PlaylistIndex == "radio")
         {
             return this.CreateRadioPlaylistWithTracks();
         }
@@ -146,14 +146,14 @@ public partial class GetPlaylistQueryHandler : IQueryHandler<GetPlaylistQuery, R
             return Result<Api.Models.PlaylistWithTracks>.Failure("Subsonic service is disabled");
         }
 
-        var result = await this._subsonicService.GetPlaylistAsync(query.PlaylistId, cancellationToken);
+        var result = await this._subsonicService.GetPlaylistAsync(query.PlaylistIndex, cancellationToken);
         if (result.IsSuccess)
         {
-            LogPlaylistRetrieved(this._logger, query.PlaylistId, result.Value?.Tracks?.Count ?? 0);
+            LogPlaylistRetrieved(this._logger, query.PlaylistIndex, result.Value?.Tracks?.Count ?? 0);
         }
         else
         {
-            LogPlaylistError(this._logger, query.PlaylistId, result.ErrorMessage ?? "Unknown error");
+            LogPlaylistError(this._logger, query.PlaylistIndex, result.ErrorMessage ?? "Unknown error");
         }
 
         return result;
@@ -204,17 +204,17 @@ public partial class GetPlaylistQueryHandler : IQueryHandler<GetPlaylistQuery, R
 
     #region Logging
 
-    [LoggerMessage(2930, LogLevel.Debug, "Getting playlist: {PlaylistId}")]
-    private static partial void LogGettingPlaylist(ILogger logger, string playlistId);
+    [LoggerMessage(2930, LogLevel.Debug, "Getting playlist: {PlaylistIndex}")]
+    private static partial void LogGettingPlaylist(ILogger logger, string playlistIndex);
 
     [LoggerMessage(2931, LogLevel.Warning, "Subsonic service is disabled")]
     private static partial void LogSubsonicDisabled(ILogger logger);
 
-    [LoggerMessage(2932, LogLevel.Information, "Retrieved playlist: {PlaylistId} with {TrackCount} tracks")]
-    private static partial void LogPlaylistRetrieved(ILogger logger, string playlistId, int trackCount);
+    [LoggerMessage(2932, LogLevel.Information, "Retrieved playlist: {PlaylistIndex} with {TrackCount} tracks")]
+    private static partial void LogPlaylistRetrieved(ILogger logger, string playlistIndex, int trackCount);
 
-    [LoggerMessage(2933, LogLevel.Error, "Failed to get playlist: {PlaylistId}, error: {Error}")]
-    private static partial void LogPlaylistError(ILogger logger, string playlistId, string error);
+    [LoggerMessage(2933, LogLevel.Error, "Failed to get playlist: {PlaylistIndex}, error: {Error}")]
+    private static partial void LogPlaylistError(ILogger logger, string playlistIndex, string error);
 
     [LoggerMessage(2934, LogLevel.Debug, "Created radio playlist with {TrackCount} stations")]
     private static partial void LogRadioPlaylistCreated(ILogger logger, int trackCount);

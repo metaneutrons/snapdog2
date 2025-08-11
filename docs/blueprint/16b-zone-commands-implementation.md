@@ -242,7 +242,7 @@ public record SetPlaylistCommand : ICommand<Result>
     /// <summary>
     /// Gets the playlist ID (alternative to index).
     /// </summary>
-    public string? PlaylistId { get; init; }
+    public string? PlaylistIndex { get; init; }
 
     /// <summary>
     /// Gets the source that initiated the command.
@@ -462,15 +462,15 @@ public class SetPlaylistCommandValidator : AbstractValidator<SetPlaylistCommand>
             .WithMessage("Zone ID must be a positive integer.");
 
         RuleFor(x => x)
-            .Must(x => x.PlaylistIndex.HasValue || !string.IsNullOrEmpty(x.PlaylistId))
-            .WithMessage("Either PlaylistIndex or PlaylistId must be specified.");
+            .Must(x => x.PlaylistIndex.HasValue || !string.IsNullOrEmpty(x.PlaylistIndex))
+            .WithMessage("Either PlaylistIndex or PlaylistIndex must be specified.");
 
         RuleFor(x => x.PlaylistIndex)
             .GreaterThan(0)
             .When(x => x.PlaylistIndex.HasValue)
             .WithMessage("Playlist index must be a positive integer (1-based).");
 
-        RuleFor(x => x.PlaylistId)
+        RuleFor(x => x.PlaylistIndex)
             .NotEmpty()
             .When(x => !x.PlaylistIndex.HasValue)
             .WithMessage("Playlist ID must not be empty when specified.");

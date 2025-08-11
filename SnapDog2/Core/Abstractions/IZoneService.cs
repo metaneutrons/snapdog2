@@ -130,9 +130,9 @@ public interface IZoneService
     /// <summary>
     /// Sets a specific playlist by ID.
     /// </summary>
-    /// <param name="playlistId">The playlist ID.</param>
+    /// <param name="playlistIndex">The playlist ID.</param>
     /// <returns>Result of the operation.</returns>
-    Task<Result> SetPlaylistAsync(string playlistId);
+    Task<Result> SetPlaylistAsync(string playlistIndex);
 
     /// <summary>
     /// Plays the next playlist.

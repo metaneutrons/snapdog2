@@ -70,7 +70,7 @@ public record SubsonicPlaylistsRetrievedNotification(string ServerUrl, int Playl
 /// </summary>
 public record SubsonicPlaylistAccessedNotification(
     string ServerUrl,
-    string PlaylistId,
+    string PlaylistIndex,
     string PlaylistName,
     int TrackCount
 ) : SubsonicNotification
@@ -89,7 +89,7 @@ public record SubsonicPlaylistRetrievalFailedNotification(string ServerUrl, stri
 /// <summary>
 /// Notification sent when a specific playlist retrieval fails.
 /// </summary>
-public record SubsonicPlaylistAccessFailedNotification(string ServerUrl, string PlaylistId, string ErrorMessage)
+public record SubsonicPlaylistAccessFailedNotification(string ServerUrl, string PlaylistIndex, string ErrorMessage)
     : SubsonicNotification
 {
     public new string ServerUrl { get; init; } = ServerUrl;
