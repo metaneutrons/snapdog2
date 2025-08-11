@@ -8,7 +8,7 @@ using SnapDog2.Core.Models;
 /// <summary>
 /// Notification published when a client's volume changes.
 /// </summary>
-[StatusId("CLIENT_VOLUME", "CV-001")]
+[StatusId("CLIENT_VOLUME_STATUS")]
 public record ClientVolumeChangedNotification : INotification
 {
     /// <summary>
@@ -30,7 +30,7 @@ public record ClientVolumeChangedNotification : INotification
 /// <summary>
 /// Notification published when a client's mute state changes.
 /// </summary>
-[StatusId("CLIENT_MUTE", "CM-001")]
+[StatusId("CLIENT_MUTE_STATUS")]
 public record ClientMuteChangedNotification : INotification
 {
     /// <summary>
@@ -52,7 +52,7 @@ public record ClientMuteChangedNotification : INotification
 /// <summary>
 /// Notification published when a client's latency changes.
 /// </summary>
-[StatusId("CLIENT_LATENCY", "CL-001")]
+[StatusId("CLIENT_LATENCY_STATUS")]
 public record ClientLatencyChangedNotification : INotification
 {
     /// <summary>
@@ -74,7 +74,7 @@ public record ClientLatencyChangedNotification : INotification
 /// <summary>
 /// Notification published when a client is assigned to a different zone.
 /// </summary>
-[StatusId("CLIENT_ZONE_ASSIGNMENT", "CZ-001")]
+[StatusId("CLIENT_ZONE_STATUS")]
 public record ClientZoneAssignmentChangedNotification : INotification
 {
     /// <summary>

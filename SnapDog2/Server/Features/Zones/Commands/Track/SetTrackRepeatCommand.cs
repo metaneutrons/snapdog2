@@ -8,7 +8,7 @@ using SnapDog2.Core.Models;
 /// <summary>
 /// Command to set track repeat mode in a zone.
 /// </summary>
-[CommandId("SET_TRACK_REPEAT", "ZTR-001")]
+[CommandId("TRACK_REPEAT")]
 public record SetTrackRepeatCommand : ICommand<Result>
 {
     /// <summary>

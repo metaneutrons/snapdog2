@@ -15,9 +15,9 @@ public record GetAllClientsQuery : IQuery<Result<List<ClientState>>>;
 public record GetClientQuery : IQuery<Result<ClientState>>
 {
     /// <summary>
-    /// Gets the ID of the client to retrieve.
+    /// Gets the index of the client to retrieve (1-based).
     /// </summary>
-    public required int ClientId { get; init; }
+    public required int ClientIndex { get; init; }
 }
 
 /// <summary>
@@ -26,7 +26,7 @@ public record GetClientQuery : IQuery<Result<ClientState>>
 public record GetClientsByZoneQuery : IQuery<Result<List<ClientState>>>
 {
     /// <summary>
-    /// Gets the ID of the zone.
+    /// Gets the index of the zone (1-based).
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 }

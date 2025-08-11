@@ -8,7 +8,7 @@ using SnapDog2.Core.Models;
 /// <summary>
 /// Command to toggle playlist repeat mode in a zone.
 /// </summary>
-[CommandId("TOGGLE_PLAYLIST_REPEAT", "ZPLR-002")]
+[CommandId("PLAYLIST_REPEAT_TOGGLE")]
 public record TogglePlaylistRepeatCommand : ICommand<Result>
 {
     /// <summary>

@@ -6,23 +6,23 @@ using SnapDog2.Core.Enums;
 using SnapDog2.Core.Models;
 
 /// <summary>
-/// Command to start or resume playback in a zone. Supports both track index and media URL playback modes.
+/// Command to start playback in a zone. Can play current playlist, specific track, or media URL.
 /// </summary>
-[CommandId("ZONE_PLAY", "ZP-002")]
+[CommandId("PLAY")]
 public record PlayCommand : ICommand<Result>
 {
     /// <summary>
-    /// Gets the ID of the target zone.
+    /// Gets the index of the target zone (1-based).
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
-    /// Gets the optional track index to play (1-based). If null, resumes current track.
+    /// Gets the specific track index to play (1-based). If null, plays current or first track.
     /// </summary>
     public int? TrackIndex { get; init; }
 
     /// <summary>
-    /// Gets the optional media URL to play. If provided, takes precedence over TrackIndex.
+    /// Gets the media URL to play directly. If provided, overrides playlist/track selection.
     /// </summary>
     public string? MediaUrl { get; init; }
 

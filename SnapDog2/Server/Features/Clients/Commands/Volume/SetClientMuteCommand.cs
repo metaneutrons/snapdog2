@@ -8,13 +8,13 @@ using SnapDog2.Core.Models;
 /// <summary>
 /// Command to set client mute state. Mutes or unmutes an individual Snapcast client.
 /// </summary>
-[CommandId("SET_CLIENT_MUTE", "CM-002")]
+[CommandId("CLIENT_MUTE")]
 public record SetClientMuteCommand : ICommand<Result>
 {
     /// <summary>
-    /// Gets the ID of the target client.
+    /// Gets the index of the target client (1-based).
     /// </summary>
-    public required int ClientId { get; init; }
+    public required int ClientIndex { get; init; }
 
     /// <summary>
     /// Gets whether the client should be muted.

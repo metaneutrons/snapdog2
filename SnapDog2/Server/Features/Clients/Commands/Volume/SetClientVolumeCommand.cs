@@ -8,13 +8,13 @@ using SnapDog2.Core.Models;
 /// <summary>
 /// Command to set the volume for a specific client. Sets the absolute volume level for an individual Snapcast client.
 /// </summary>
-[CommandId("SET_CLIENT_VOLUME", "CV-002")]
+[CommandId("CLIENT_VOLUME")]
 public record SetClientVolumeCommand : ICommand<Result>
 {
     /// <summary>
-    /// Gets the ID of the target client.
+    /// Gets the index of the target client (1-based).
     /// </summary>
-    public required int ClientId { get; init; }
+    public required int ClientIndex { get; init; }
 
     /// <summary>
     /// Gets the desired volume level (0-100). 0 = muted, 100 = maximum volume. Values outside this range will be clamped.

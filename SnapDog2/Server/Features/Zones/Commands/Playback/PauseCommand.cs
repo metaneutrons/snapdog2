@@ -6,15 +6,15 @@ using SnapDog2.Core.Enums;
 using SnapDog2.Core.Models;
 
 /// <summary>
-/// Command to pause playback in a zone. Pauses the currently playing track without stopping it.
+/// Command to pause playback in a zone. Pauses the currently playing media.
 /// </summary>
-[CommandId("ZONE_PAUSE", "ZP-003")]
+[CommandId("PAUSE")]
 public record PauseCommand : ICommand<Result>
 {
     /// <summary>
-    /// Gets the ID of the target zone.
+    /// Gets the index of the target zone (1-based).
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the source that initiated the command.

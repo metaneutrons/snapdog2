@@ -8,13 +8,13 @@ using SnapDog2.Core.Models;
 /// <summary>
 /// Command to set the volume for a specific zone. Sets the absolute volume level for all clients in the zone.
 /// </summary>
-[CommandId("SET_ZONE_VOLUME", "ZV-002")]
+[CommandId("VOLUME")]
 public record SetZoneVolumeCommand : ICommand<Result>
 {
     /// <summary>
-    /// Gets the ID of the target zone.
+    /// Gets the index of the target zone (1-based).
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the desired volume level (0-100). 0 = muted, 100 = maximum volume. Values outside this range will be clamped.

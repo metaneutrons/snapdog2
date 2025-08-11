@@ -8,7 +8,7 @@ using SnapDog2.Core.Models;
 /// <summary>
 /// Command to toggle playlist shuffle mode in a zone.
 /// </summary>
-[CommandId("TOGGLE_PLAYLIST_SHUFFLE", "ZPLS-002")]
+[CommandId("PLAYLIST_SHUFFLE_TOGGLE")]
 public record TogglePlaylistShuffleCommand : ICommand<Result>
 {
     /// <summary>

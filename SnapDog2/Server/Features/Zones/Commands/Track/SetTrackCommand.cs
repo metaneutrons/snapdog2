@@ -8,7 +8,7 @@ using SnapDog2.Core.Models;
 /// <summary>
 /// Command to set the current track in a zone. Changes to a specific track by index.
 /// </summary>
-[CommandId("SET_TRACK", "ZT-002")]
+[CommandId("TRACK")]
 public record SetTrackCommand : ICommand<Result>
 {
     /// <summary>

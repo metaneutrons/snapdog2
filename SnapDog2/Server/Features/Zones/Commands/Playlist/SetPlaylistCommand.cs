@@ -8,13 +8,13 @@ using SnapDog2.Core.Models;
 /// <summary>
 /// Command to set the current playlist in a zone. Changes to a specific playlist by index.
 /// </summary>
-[CommandId("SET_PLAYLIST", "ZPL-002")]
+[CommandId("PLAYLIST")]
 public record SetPlaylistCommand : ICommand<Result>
 {
     /// <summary>
-    /// Gets the ID of the target zone.
+    /// Gets the index of the target zone (1-based).
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the playlist index to set (1-based).

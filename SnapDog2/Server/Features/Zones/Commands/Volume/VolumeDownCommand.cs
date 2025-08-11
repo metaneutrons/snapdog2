@@ -6,20 +6,20 @@ using SnapDog2.Core.Enums;
 using SnapDog2.Core.Models;
 
 /// <summary>
-/// Command to decrease zone volume. Decreases the volume by a specified step for all clients in the zone.
+/// Command to decrease zone volume by a specified step. Decreases the volume for all clients in the zone.
 /// </summary>
-[CommandId("ZONE_VOLUME_DOWN", "ZV-004")]
+[CommandId("VOLUME_DOWN")]
 public record VolumeDownCommand : ICommand<Result>
 {
     /// <summary>
-    /// Gets the ID of the target zone.
+    /// Gets the index of the target zone (1-based).
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
-    /// Gets the volume step to decrease by (default: 5). Must be between 1 and 100.
+    /// Gets the volume decrease step (1-50). Default is typically 5.
     /// </summary>
-    public int Step { get; init; } = 5;
+    public required int Step { get; init; }
 
     /// <summary>
     /// Gets the source that initiated the command.

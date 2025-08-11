@@ -6,15 +6,15 @@ using SnapDog2.Core.Enums;
 using SnapDog2.Core.Models;
 
 /// <summary>
-/// Command to toggle client mute state. Switches between muted and unmuted state for an individual Snapcast client.
+/// Command to toggle client mute state. Toggles the mute state of an individual Snapcast client.
 /// </summary>
-[CommandId("TOGGLE_CLIENT_MUTE", "CM-003")]
+[CommandId("CLIENT_MUTE_TOGGLE")]
 public record ToggleClientMuteCommand : ICommand<Result>
 {
     /// <summary>
-    /// Gets the ID of the target client.
+    /// Gets the index of the target client (1-based).
     /// </summary>
-    public required int ClientId { get; init; }
+    public required int ClientIndex { get; init; }
 
     /// <summary>
     /// Gets the source that initiated the command.

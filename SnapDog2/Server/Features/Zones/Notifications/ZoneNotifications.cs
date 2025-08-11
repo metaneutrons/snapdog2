@@ -8,7 +8,7 @@ using SnapDog2.Core.Models;
 /// <summary>
 /// Notification published when a zone's playback state changes.
 /// </summary>
-[StatusId("ZONE_PLAYBACK_STATE", "ZP-001")]
+[StatusId("PLAYBACK_STATE")]
 public record ZonePlaybackStateChangedNotification : INotification
 {
     /// <summary>
@@ -30,7 +30,7 @@ public record ZonePlaybackStateChangedNotification : INotification
 /// <summary>
 /// Notification published when a zone's volume changes.
 /// </summary>
-[StatusId("ZONE_VOLUME", "ZV-001")]
+[StatusId("VOLUME_STATUS")]
 public record ZoneVolumeChangedNotification : INotification
 {
     /// <summary>
@@ -52,7 +52,7 @@ public record ZoneVolumeChangedNotification : INotification
 /// <summary>
 /// Notification published when a zone's mute state changes.
 /// </summary>
-[StatusId("ZONE_MUTE", "ZM-001")]
+[StatusId("MUTE_STATUS")]
 public record ZoneMuteChangedNotification : INotification
 {
     /// <summary>
@@ -74,7 +74,7 @@ public record ZoneMuteChangedNotification : INotification
 /// <summary>
 /// Notification published when a zone's current track changes.
 /// </summary>
-[StatusId("ZONE_TRACK", "ZT-001")]
+[StatusId("TRACK_INDEX")]
 public record ZoneTrackChangedNotification : INotification
 {
     /// <summary>
@@ -101,7 +101,7 @@ public record ZoneTrackChangedNotification : INotification
 /// <summary>
 /// Notification published when a zone's current playlist changes.
 /// </summary>
-[StatusId("ZONE_PLAYLIST", "ZPL-001")]
+[StatusId("PLAYLIST_INDEX")]
 public record ZonePlaylistChangedNotification : INotification
 {
     /// <summary>
@@ -172,7 +172,7 @@ public record ZonePlaylistRepeatChangedNotification : INotification
 /// <summary>
 /// Notification published when a zone's shuffle mode changes.
 /// </summary>
-[StatusId("ZONE_SHUFFLE_MODE", "ZS-001")]
+[StatusId("PLAYLIST_SHUFFLE_STATUS")]
 public record ZoneShuffleModeChangedNotification : INotification
 {
     /// <summary>

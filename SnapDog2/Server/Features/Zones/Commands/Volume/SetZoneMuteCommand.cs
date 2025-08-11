@@ -8,13 +8,13 @@ using SnapDog2.Core.Models;
 /// <summary>
 /// Command to set zone mute state. Mutes or unmutes all clients in the zone.
 /// </summary>
-[CommandId("SET_ZONE_MUTE", "ZM-002")]
+[CommandId("MUTE")]
 public record SetZoneMuteCommand : ICommand<Result>
 {
     /// <summary>
-    /// Gets the ID of the target zone.
+    /// Gets the index of the target zone (1-based).
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets whether the zone should be muted.

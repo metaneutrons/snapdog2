@@ -82,7 +82,7 @@ public partial class ZonesController : ControllerBase
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ZoneState>> GetZone(int zoneIndex)
     {
-        var query = new GetZoneStateQuery { ZoneId = zoneIndex };
+        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
         var result = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
 
         if (result.IsFailure)
@@ -113,7 +113,7 @@ public partial class ZonesController : ControllerBase
         if (volume < 0 || volume > 100)
             return BadRequest("Volume must be between 0 and 100");
 
-        var command = new SetZoneVolumeCommand { ZoneId = zoneIndex, Volume = volume };
+        var command = new SetZoneVolumeCommand { ZoneIndex = zoneIndex, Volume = volume };
         var result = await _mediator.SendCommandAsync<SetZoneVolumeCommand, Result>(command);
 
         if (result.IsFailure)
@@ -135,7 +135,7 @@ public partial class ZonesController : ControllerBase
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<int>> GetVolume(int zoneIndex)
     {
-        var query = new GetZoneVolumeQuery { ZoneId = zoneIndex };
+        var query = new GetZoneVolumeQuery { ZoneIndex = zoneIndex };
         var result = await _mediator.SendQueryAsync<GetZoneVolumeQuery, Result<int>>(query);
 
         if (result.IsFailure)
@@ -162,7 +162,7 @@ public partial class ZonesController : ControllerBase
         if (step < 1 || step > 50)
             return BadRequest("Step must be between 1 and 50");
 
-        var command = new VolumeUpCommand { ZoneId = zoneIndex, Step = step };
+        var command = new VolumeUpCommand { ZoneIndex = zoneIndex, Step = step };
         var result = await _mediator.SendCommandAsync<VolumeUpCommand, Result>(command);
 
         if (result.IsFailure)
@@ -172,7 +172,7 @@ public partial class ZonesController : ControllerBase
         }
 
         // Get the new volume to return
-        var volumeQuery = new GetZoneVolumeQuery { ZoneId = zoneIndex };
+        var volumeQuery = new GetZoneVolumeQuery { ZoneIndex = zoneIndex };
         var volumeResult = await _mediator.SendQueryAsync<GetZoneVolumeQuery, Result<int>>(volumeQuery);
 
         return Ok(volumeResult.IsSuccess ? volumeResult.Value : 0);
@@ -193,7 +193,7 @@ public partial class ZonesController : ControllerBase
         if (step < 1 || step > 50)
             return BadRequest("Step must be between 1 and 50");
 
-        var command = new VolumeDownCommand { ZoneId = zoneIndex, Step = step };
+        var command = new VolumeDownCommand { ZoneIndex = zoneIndex, Step = step };
         var result = await _mediator.SendCommandAsync<VolumeDownCommand, Result>(command);
 
         if (result.IsFailure)
@@ -203,7 +203,7 @@ public partial class ZonesController : ControllerBase
         }
 
         // Get the new volume to return
-        var volumeQuery = new GetZoneVolumeQuery { ZoneId = zoneIndex };
+        var volumeQuery = new GetZoneVolumeQuery { ZoneIndex = zoneIndex };
         var volumeResult = await _mediator.SendQueryAsync<GetZoneVolumeQuery, Result<int>>(volumeQuery);
 
         return Ok(volumeResult.IsSuccess ? volumeResult.Value : 0);
@@ -224,7 +224,7 @@ public partial class ZonesController : ControllerBase
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<bool>> SetMute(int zoneIndex, [FromBody] bool muted)
     {
-        var command = new SetZoneMuteCommand { ZoneId = zoneIndex, Enabled = muted };
+        var command = new SetZoneMuteCommand { ZoneIndex = zoneIndex, Enabled = muted };
         var result = await _mediator.SendCommandAsync<SetZoneMuteCommand, Result>(command);
 
         if (result.IsFailure)
@@ -246,7 +246,7 @@ public partial class ZonesController : ControllerBase
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<bool>> GetMute(int zoneIndex)
     {
-        var query = new GetZoneStateQuery { ZoneId = zoneIndex };
+        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
         var result = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
 
         if (result.IsFailure)
@@ -268,7 +268,7 @@ public partial class ZonesController : ControllerBase
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<bool>> ToggleMute(int zoneIndex)
     {
-        var command = new ToggleZoneMuteCommand { ZoneId = zoneIndex };
+        var command = new ToggleZoneMuteCommand { ZoneIndex = zoneIndex };
         var result = await _mediator.SendCommandAsync<ToggleZoneMuteCommand, Result>(command);
 
         if (result.IsFailure)
@@ -278,7 +278,7 @@ public partial class ZonesController : ControllerBase
         }
 
         // Get the new state to return
-        var query = new GetZoneStateQuery { ZoneId = zoneIndex };
+        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
         var stateResult = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
 
         return Ok(stateResult.IsSuccess ? stateResult.Value!.Mute : false);
@@ -298,7 +298,7 @@ public partial class ZonesController : ControllerBase
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Play(int zoneIndex)
     {
-        var command = new PlayCommand { ZoneId = zoneIndex };
+        var command = new PlayCommand { ZoneIndex = zoneIndex };
         var result = await _mediator.SendCommandAsync<PlayCommand, Result>(command);
 
         if (result.IsFailure)
@@ -320,7 +320,7 @@ public partial class ZonesController : ControllerBase
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Pause(int zoneIndex)
     {
-        var command = new PauseCommand { ZoneId = zoneIndex };
+        var command = new PauseCommand { ZoneIndex = zoneIndex };
         var result = await _mediator.SendCommandAsync<PauseCommand, Result>(command);
 
         if (result.IsFailure)
@@ -342,7 +342,7 @@ public partial class ZonesController : ControllerBase
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Stop(int zoneIndex)
     {
-        var command = new StopCommand { ZoneId = zoneIndex };
+        var command = new StopCommand { ZoneIndex = zoneIndex };
         var result = await _mediator.SendCommandAsync<StopCommand, Result>(command);
 
         if (result.IsFailure)
@@ -369,7 +369,7 @@ public partial class ZonesController : ControllerBase
         if (playlistIndex < 1)
             return BadRequest("Playlist index must be greater than 0");
 
-        var command = new SetPlaylistCommand { ZoneId = zoneIndex, PlaylistIndex = playlistIndex };
+        var command = new SetPlaylistCommand { ZoneIndex = zoneIndex, PlaylistIndex = playlistIndex };
         var result = await _mediator.SendCommandAsync<SetPlaylistCommand, Result>(command);
 
         if (result.IsFailure)

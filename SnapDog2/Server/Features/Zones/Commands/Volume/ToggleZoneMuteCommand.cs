@@ -6,15 +6,15 @@ using SnapDog2.Core.Enums;
 using SnapDog2.Core.Models;
 
 /// <summary>
-/// Command to toggle zone mute state. Switches between muted and unmuted state for all clients in the zone.
+/// Command to toggle zone mute state. Toggles the mute state of all clients in the zone.
 /// </summary>
-[CommandId("TOGGLE_ZONE_MUTE", "ZM-003")]
+[CommandId("MUTE_TOGGLE")]
 public record ToggleZoneMuteCommand : ICommand<Result>
 {
     /// <summary>
-    /// Gets the ID of the target zone.
+    /// Gets the index of the target zone (1-based).
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the source that initiated the command.
