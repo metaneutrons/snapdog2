@@ -14,7 +14,7 @@ public record SetTrackCommand : ICommand<Result>
     /// <summary>
     /// Gets the ID of the target zone.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the track index to set (1-based).

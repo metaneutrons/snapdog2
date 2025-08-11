@@ -13,7 +13,7 @@ using SnapDog2.Server.Features.Zones.Commands.Volume;
 /// </summary>
 public class SetZoneVolumeCommandValidator : CompositeZoneVolumeCommandValidator<SetZoneVolumeCommand>
 {
-    protected override int GetZoneId(SetZoneVolumeCommand command) => command.ZoneId;
+    protected override int GetZoneIndex(SetZoneVolumeCommand command) => command.ZoneIndex;
 
     protected override CommandSource GetSource(SetZoneVolumeCommand command) => command.Source;
 
@@ -25,7 +25,7 @@ public class SetZoneVolumeCommandValidator : CompositeZoneVolumeCommandValidator
 /// </summary>
 public class VolumeUpCommandValidator : CompositeZoneVolumeStepCommandValidator<VolumeUpCommand>
 {
-    protected override int GetZoneId(VolumeUpCommand command) => command.ZoneId;
+    protected override int GetZoneIndex(VolumeUpCommand command) => command.ZoneIndex;
 
     protected override CommandSource GetSource(VolumeUpCommand command) => command.Source;
 
@@ -37,7 +37,7 @@ public class VolumeUpCommandValidator : CompositeZoneVolumeStepCommandValidator<
 /// </summary>
 public class VolumeDownCommandValidator : CompositeZoneVolumeStepCommandValidator<VolumeDownCommand>
 {
-    protected override int GetZoneId(VolumeDownCommand command) => command.ZoneId;
+    protected override int GetZoneIndex(VolumeDownCommand command) => command.ZoneIndex;
 
     protected override CommandSource GetSource(VolumeDownCommand command) => command.Source;
 
@@ -49,7 +49,7 @@ public class VolumeDownCommandValidator : CompositeZoneVolumeStepCommandValidato
 /// </summary>
 public class SetZoneMuteCommandValidator : BaseZoneCommandValidator<SetZoneMuteCommand>
 {
-    protected override int GetZoneId(SetZoneMuteCommand command) => command.ZoneId;
+    protected override int GetZoneIndex(SetZoneMuteCommand command) => command.ZoneIndex;
 
     protected override CommandSource GetSource(SetZoneMuteCommand command) => command.Source;
 }
@@ -59,7 +59,7 @@ public class SetZoneMuteCommandValidator : BaseZoneCommandValidator<SetZoneMuteC
 /// </summary>
 public class ToggleZoneMuteCommandValidator : BaseZoneCommandValidator<ToggleZoneMuteCommand>
 {
-    protected override int GetZoneId(ToggleZoneMuteCommand command) => command.ZoneId;
+    protected override int GetZoneIndex(ToggleZoneMuteCommand command) => command.ZoneIndex;
 
     protected override CommandSource GetSource(ToggleZoneMuteCommand command) => command.Source;
 }
@@ -69,7 +69,7 @@ public class ToggleZoneMuteCommandValidator : BaseZoneCommandValidator<ToggleZon
 /// </summary>
 public class SetTrackCommandValidator : CompositeZoneTrackCommandValidator<SetTrackCommand>
 {
-    protected override int GetZoneId(SetTrackCommand command) => command.ZoneId;
+    protected override int GetZoneIndex(SetTrackCommand command) => command.ZoneIndex;
 
     protected override CommandSource GetSource(SetTrackCommand command) => command.Source;
 
@@ -81,7 +81,7 @@ public class SetTrackCommandValidator : CompositeZoneTrackCommandValidator<SetTr
 /// </summary>
 public class NextTrackCommandValidator : BaseZoneCommandValidator<NextTrackCommand>
 {
-    protected override int GetZoneId(NextTrackCommand command) => command.ZoneId;
+    protected override int GetZoneIndex(NextTrackCommand command) => command.ZoneIndex;
 
     protected override CommandSource GetSource(NextTrackCommand command) => command.Source;
 }
@@ -91,7 +91,7 @@ public class NextTrackCommandValidator : BaseZoneCommandValidator<NextTrackComma
 /// </summary>
 public class PreviousTrackCommandValidator : BaseZoneCommandValidator<PreviousTrackCommand>
 {
-    protected override int GetZoneId(PreviousTrackCommand command) => command.ZoneId;
+    protected override int GetZoneIndex(PreviousTrackCommand command) => command.ZoneIndex;
 
     protected override CommandSource GetSource(PreviousTrackCommand command) => command.Source;
 }
@@ -101,7 +101,7 @@ public class PreviousTrackCommandValidator : BaseZoneCommandValidator<PreviousTr
 /// </summary>
 public class SetTrackRepeatCommandValidator : BaseZoneCommandValidator<SetTrackRepeatCommand>
 {
-    protected override int GetZoneId(SetTrackRepeatCommand command) => command.ZoneId;
+    protected override int GetZoneIndex(SetTrackRepeatCommand command) => command.ZoneIndex;
 
     protected override CommandSource GetSource(SetTrackRepeatCommand command) => command.Source;
 }
@@ -111,7 +111,7 @@ public class SetTrackRepeatCommandValidator : BaseZoneCommandValidator<SetTrackR
 /// </summary>
 public class ToggleTrackRepeatCommandValidator : BaseZoneCommandValidator<ToggleTrackRepeatCommand>
 {
-    protected override int GetZoneId(ToggleTrackRepeatCommand command) => command.ZoneId;
+    protected override int GetZoneIndex(ToggleTrackRepeatCommand command) => command.ZoneIndex;
 
     protected override CommandSource GetSource(ToggleTrackRepeatCommand command) => command.Source;
 }
@@ -121,7 +121,7 @@ public class ToggleTrackRepeatCommandValidator : BaseZoneCommandValidator<Toggle
 /// </summary>
 public class SetPlaylistCommandValidator : CompositeZonePlaylistCommandValidator<SetPlaylistCommand>
 {
-    protected override int GetZoneId(SetPlaylistCommand command) => command.ZoneId;
+    protected override int GetZoneIndex(SetPlaylistCommand command) => command.ZoneIndex;
 
     protected override CommandSource GetSource(SetPlaylistCommand command) => command.Source;
 
@@ -133,7 +133,7 @@ public class SetPlaylistCommandValidator : CompositeZonePlaylistCommandValidator
 /// </summary>
 public class NextPlaylistCommandValidator : BaseZoneCommandValidator<NextPlaylistCommand>
 {
-    protected override int GetZoneId(NextPlaylistCommand command) => command.ZoneId;
+    protected override int GetZoneIndex(NextPlaylistCommand command) => command.ZoneIndex;
 
     protected override CommandSource GetSource(NextPlaylistCommand command) => command.Source;
 }
@@ -143,7 +143,7 @@ public class NextPlaylistCommandValidator : BaseZoneCommandValidator<NextPlaylis
 /// </summary>
 public class PreviousPlaylistCommandValidator : BaseZoneCommandValidator<PreviousPlaylistCommand>
 {
-    protected override int GetZoneId(PreviousPlaylistCommand command) => command.ZoneId;
+    protected override int GetZoneIndex(PreviousPlaylistCommand command) => command.ZoneIndex;
 
     protected override CommandSource GetSource(PreviousPlaylistCommand command) => command.Source;
 }
@@ -153,7 +153,7 @@ public class PreviousPlaylistCommandValidator : BaseZoneCommandValidator<Previou
 /// </summary>
 public class SetPlaylistShuffleCommandValidator : BaseZoneCommandValidator<SetPlaylistShuffleCommand>
 {
-    protected override int GetZoneId(SetPlaylistShuffleCommand command) => command.ZoneId;
+    protected override int GetZoneIndex(SetPlaylistShuffleCommand command) => command.ZoneIndex;
 
     protected override CommandSource GetSource(SetPlaylistShuffleCommand command) => command.Source;
 }
@@ -163,7 +163,7 @@ public class SetPlaylistShuffleCommandValidator : BaseZoneCommandValidator<SetPl
 /// </summary>
 public class TogglePlaylistShuffleCommandValidator : BaseZoneCommandValidator<TogglePlaylistShuffleCommand>
 {
-    protected override int GetZoneId(TogglePlaylistShuffleCommand command) => command.ZoneId;
+    protected override int GetZoneIndex(TogglePlaylistShuffleCommand command) => command.ZoneIndex;
 
     protected override CommandSource GetSource(TogglePlaylistShuffleCommand command) => command.Source;
 }
@@ -173,7 +173,7 @@ public class TogglePlaylistShuffleCommandValidator : BaseZoneCommandValidator<To
 /// </summary>
 public class SetPlaylistRepeatCommandValidator : BaseZoneCommandValidator<SetPlaylistRepeatCommand>
 {
-    protected override int GetZoneId(SetPlaylistRepeatCommand command) => command.ZoneId;
+    protected override int GetZoneIndex(SetPlaylistRepeatCommand command) => command.ZoneIndex;
 
     protected override CommandSource GetSource(SetPlaylistRepeatCommand command) => command.Source;
 }
@@ -183,7 +183,7 @@ public class SetPlaylistRepeatCommandValidator : BaseZoneCommandValidator<SetPla
 /// </summary>
 public class TogglePlaylistRepeatCommandValidator : BaseZoneCommandValidator<TogglePlaylistRepeatCommand>
 {
-    protected override int GetZoneId(TogglePlaylistRepeatCommand command) => command.ZoneId;
+    protected override int GetZoneIndex(TogglePlaylistRepeatCommand command) => command.ZoneIndex;
 
     protected override CommandSource GetSource(TogglePlaylistRepeatCommand command) => command.Source;
 }
@@ -216,7 +216,7 @@ public class PlayCommandValidator : BaseZoneCommandValidator<PlayCommand>
         );
     }
 
-    protected override int GetZoneId(PlayCommand command) => command.ZoneId;
+    protected override int GetZoneIndex(PlayCommand command) => command.ZoneIndex;
 
     protected override CommandSource GetSource(PlayCommand command) => command.Source;
 
@@ -232,7 +232,7 @@ public class PlayCommandValidator : BaseZoneCommandValidator<PlayCommand>
 /// </summary>
 public class PauseCommandValidator : BaseZoneCommandValidator<PauseCommand>
 {
-    protected override int GetZoneId(PauseCommand command) => command.ZoneId;
+    protected override int GetZoneIndex(PauseCommand command) => command.ZoneIndex;
 
     protected override CommandSource GetSource(PauseCommand command) => command.Source;
 }
@@ -242,7 +242,7 @@ public class PauseCommandValidator : BaseZoneCommandValidator<PauseCommand>
 /// </summary>
 public class StopCommandValidator : BaseZoneCommandValidator<StopCommand>
 {
-    protected override int GetZoneId(StopCommand command) => command.ZoneId;
+    protected override int GetZoneIndex(StopCommand command) => command.ZoneIndex;
 
     protected override CommandSource GetSource(StopCommand command) => command.Source;
 }

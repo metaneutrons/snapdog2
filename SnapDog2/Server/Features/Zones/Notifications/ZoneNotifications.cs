@@ -14,7 +14,7 @@ public record ZonePlaybackStateChangedNotification : INotification
     /// <summary>
     /// Gets the zone ID.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the new playback state.
@@ -36,7 +36,7 @@ public record ZoneVolumeChangedNotification : INotification
     /// <summary>
     /// Gets the zone ID.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the new volume level (0-100).
@@ -58,7 +58,7 @@ public record ZoneMuteChangedNotification : INotification
     /// <summary>
     /// Gets the zone ID.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets whether the zone is muted.
@@ -80,7 +80,7 @@ public record ZoneTrackChangedNotification : INotification
     /// <summary>
     /// Gets the zone ID.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the new track information.
@@ -107,7 +107,7 @@ public record ZonePlaylistChangedNotification : INotification
     /// <summary>
     /// Gets the zone ID.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the new playlist information.
@@ -134,7 +134,7 @@ public record ZoneTrackRepeatChangedNotification : INotification
     /// <summary>
     /// Gets the zone ID.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets whether track repeat is enabled.
@@ -156,7 +156,7 @@ public record ZonePlaylistRepeatChangedNotification : INotification
     /// <summary>
     /// Gets the zone ID.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets whether playlist repeat is enabled.
@@ -178,7 +178,7 @@ public record ZoneShuffleModeChangedNotification : INotification
     /// <summary>
     /// Gets the zone ID.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets whether shuffle is enabled.
@@ -200,7 +200,7 @@ public record ZoneStateChangedNotification : INotification
     /// <summary>
     /// Gets the zone ID.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets the complete zone state.

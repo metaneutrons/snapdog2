@@ -56,11 +56,11 @@ public partial class GetZoneStateQueryHandler : IQueryHandler<GetZoneStateQuery,
     private readonly IZoneManager _zoneManager;
     private readonly ILogger<GetZoneStateQueryHandler> _logger;
 
-    [LoggerMessage(5101, LogLevel.Information, "Handling GetZoneStateQuery for Zone {ZoneId}")]
-    private partial void LogHandling(int zoneId);
+    [LoggerMessage(5101, LogLevel.Information, "Handling GetZoneStateQuery for Zone {ZoneIndex}")]
+    private partial void LogHandling(int zoneIndex);
 
-    [LoggerMessage(5102, LogLevel.Warning, "Zone {ZoneId} not found for GetZoneStateQuery")]
-    private partial void LogZoneNotFound(int zoneId);
+    [LoggerMessage(5102, LogLevel.Warning, "Zone {ZoneIndex} not found for GetZoneStateQuery")]
+    private partial void LogZoneNotFound(int zoneIndex);
 
     public GetZoneStateQueryHandler(IZoneManager zoneManager, ILogger<GetZoneStateQueryHandler> logger)
     {
@@ -70,13 +70,13 @@ public partial class GetZoneStateQueryHandler : IQueryHandler<GetZoneStateQuery,
 
     public async Task<Result<ZoneState>> Handle(GetZoneStateQuery request, CancellationToken cancellationToken)
     {
-        this.LogHandling(request.ZoneId);
+        this.LogHandling(request.ZoneIndex);
 
-        var result = await this._zoneManager.GetZoneStateAsync(request.ZoneId).ConfigureAwait(false);
+        var result = await this._zoneManager.GetZoneStateAsync(request.ZoneIndex).ConfigureAwait(false);
 
         if (result.IsFailure)
         {
-            this.LogZoneNotFound(request.ZoneId);
+            this.LogZoneNotFound(request.ZoneIndex);
         }
 
         return result;
@@ -139,11 +139,11 @@ public partial class GetZonePlaybackStateQueryHandler
     private readonly IZoneManager _zoneManager;
     private readonly ILogger<GetZonePlaybackStateQueryHandler> _logger;
 
-    [LoggerMessage(5301, LogLevel.Information, "Handling GetZonePlaybackStateQuery for Zone {ZoneId}")]
-    private partial void LogHandling(int zoneId);
+    [LoggerMessage(5301, LogLevel.Information, "Handling GetZonePlaybackStateQuery for Zone {ZoneIndex}")]
+    private partial void LogHandling(int zoneIndex);
 
-    [LoggerMessage(5302, LogLevel.Warning, "Zone {ZoneId} not found for GetZonePlaybackStateQuery")]
-    private partial void LogZoneNotFound(int zoneId);
+    [LoggerMessage(5302, LogLevel.Warning, "Zone {ZoneIndex} not found for GetZonePlaybackStateQuery")]
+    private partial void LogZoneNotFound(int zoneIndex);
 
     public GetZonePlaybackStateQueryHandler(IZoneManager zoneManager, ILogger<GetZonePlaybackStateQueryHandler> logger)
     {
@@ -156,12 +156,12 @@ public partial class GetZonePlaybackStateQueryHandler
         CancellationToken cancellationToken
     )
     {
-        this.LogHandling(request.ZoneId);
+        this.LogHandling(request.ZoneIndex);
 
-        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneIndex).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            this.LogZoneNotFound(request.ZoneId);
+            this.LogZoneNotFound(request.ZoneIndex);
             return SnapDog2.Core.Models.Result<SnapDog2.Core.Enums.PlaybackState>.Failure(
                 zoneResult.ErrorMessage ?? "Zone not found"
             );
@@ -191,11 +191,11 @@ public partial class GetZoneVolumeQueryHandler : IQueryHandler<GetZoneVolumeQuer
     private readonly IZoneManager _zoneManager;
     private readonly ILogger<GetZoneVolumeQueryHandler> _logger;
 
-    [LoggerMessage(5401, LogLevel.Information, "Handling GetZoneVolumeQuery for Zone {ZoneId}")]
-    private partial void LogHandling(int zoneId);
+    [LoggerMessage(5401, LogLevel.Information, "Handling GetZoneVolumeQuery for Zone {ZoneIndex}")]
+    private partial void LogHandling(int zoneIndex);
 
-    [LoggerMessage(5402, LogLevel.Warning, "Zone {ZoneId} not found for GetZoneVolumeQuery")]
-    private partial void LogZoneNotFound(int zoneId);
+    [LoggerMessage(5402, LogLevel.Warning, "Zone {ZoneIndex} not found for GetZoneVolumeQuery")]
+    private partial void LogZoneNotFound(int zoneIndex);
 
     public GetZoneVolumeQueryHandler(IZoneManager zoneManager, ILogger<GetZoneVolumeQueryHandler> logger)
     {
@@ -205,12 +205,12 @@ public partial class GetZoneVolumeQueryHandler : IQueryHandler<GetZoneVolumeQuer
 
     public async Task<Result<int>> Handle(GetZoneVolumeQuery request, CancellationToken cancellationToken)
     {
-        this.LogHandling(request.ZoneId);
+        this.LogHandling(request.ZoneIndex);
 
-        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneIndex).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            this.LogZoneNotFound(request.ZoneId);
+            this.LogZoneNotFound(request.ZoneIndex);
             return Result<int>.Failure(zoneResult.ErrorMessage ?? "Zone not found");
         }
 
@@ -234,11 +234,11 @@ public partial class GetZoneTrackInfoQueryHandler : IQueryHandler<GetZoneTrackIn
     private readonly IZoneManager _zoneManager;
     private readonly ILogger<GetZoneTrackInfoQueryHandler> _logger;
 
-    [LoggerMessage(5501, LogLevel.Information, "Handling GetZoneTrackInfoQuery for Zone {ZoneId}")]
-    private partial void LogHandling(int zoneId);
+    [LoggerMessage(5501, LogLevel.Information, "Handling GetZoneTrackInfoQuery for Zone {ZoneIndex}")]
+    private partial void LogHandling(int zoneIndex);
 
-    [LoggerMessage(5502, LogLevel.Warning, "Zone {ZoneId} not found for GetZoneTrackInfoQuery")]
-    private partial void LogZoneNotFound(int zoneId);
+    [LoggerMessage(5502, LogLevel.Warning, "Zone {ZoneIndex} not found for GetZoneTrackInfoQuery")]
+    private partial void LogZoneNotFound(int zoneIndex);
 
     public GetZoneTrackInfoQueryHandler(IZoneManager zoneManager, ILogger<GetZoneTrackInfoQueryHandler> logger)
     {
@@ -248,12 +248,12 @@ public partial class GetZoneTrackInfoQueryHandler : IQueryHandler<GetZoneTrackIn
 
     public async Task<Result<TrackInfo>> Handle(GetZoneTrackInfoQuery request, CancellationToken cancellationToken)
     {
-        this.LogHandling(request.ZoneId);
+        this.LogHandling(request.ZoneIndex);
 
-        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneIndex).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            this.LogZoneNotFound(request.ZoneId);
+            this.LogZoneNotFound(request.ZoneIndex);
             return Result<TrackInfo>.Failure(zoneResult.ErrorMessage ?? "Zone not found");
         }
 
@@ -283,11 +283,11 @@ public partial class GetZonePlaylistInfoQueryHandler : IQueryHandler<GetZonePlay
     private readonly IZoneManager _zoneManager;
     private readonly ILogger<GetZonePlaylistInfoQueryHandler> _logger;
 
-    [LoggerMessage(5601, LogLevel.Information, "Handling GetZonePlaylistInfoQuery for Zone {ZoneId}")]
-    private partial void LogHandling(int zoneId);
+    [LoggerMessage(5601, LogLevel.Information, "Handling GetZonePlaylistInfoQuery for Zone {ZoneIndex}")]
+    private partial void LogHandling(int zoneIndex);
 
-    [LoggerMessage(5602, LogLevel.Warning, "Zone {ZoneId} not found for GetZonePlaylistInfoQuery")]
-    private partial void LogZoneNotFound(int zoneId);
+    [LoggerMessage(5602, LogLevel.Warning, "Zone {ZoneIndex} not found for GetZonePlaylistInfoQuery")]
+    private partial void LogZoneNotFound(int zoneIndex);
 
     public GetZonePlaylistInfoQueryHandler(IZoneManager zoneManager, ILogger<GetZonePlaylistInfoQueryHandler> logger)
     {
@@ -300,12 +300,12 @@ public partial class GetZonePlaylistInfoQueryHandler : IQueryHandler<GetZonePlay
         CancellationToken cancellationToken
     )
     {
-        this.LogHandling(request.ZoneId);
+        this.LogHandling(request.ZoneIndex);
 
-        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneIndex).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
-            this.LogZoneNotFound(request.ZoneId);
+            this.LogZoneNotFound(request.ZoneIndex);
             return Result<PlaylistInfo>.Failure(zoneResult.ErrorMessage ?? "Zone not found");
         }
 

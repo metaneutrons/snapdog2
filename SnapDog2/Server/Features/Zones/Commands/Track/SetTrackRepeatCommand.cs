@@ -14,7 +14,7 @@ public record SetTrackRepeatCommand : ICommand<Result>
     /// <summary>
     /// Gets the ID of the target zone.
     /// </summary>
-    public required int ZoneId { get; init; }
+    public required int ZoneIndex { get; init; }
 
     /// <summary>
     /// Gets whether track repeat should be enabled.
