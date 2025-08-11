@@ -68,7 +68,7 @@ public interface IKnxService : IAsyncDisposable
     /// Publishes client status updates to KNX group addresses.
     /// </summary>
     /// <param name="clientIndex">Client identifier.</param>
-    /// <param name="eventType">Type of event (e.g., CLIENT_VOLUME, CLIENT_MUTE).</param>
+    /// <param name="eventType">Type of event (e.g., CLIENT_VOLUME_STATUS, CLIENT_MUTE_STATUS).</param>
     /// <param name="payload">Event payload.</param>
     /// <param name="cancellationToken">Cancellation token for the operation.</param>
     /// <returns>Result indicating success or failure.</returns>
@@ -83,7 +83,7 @@ public interface IKnxService : IAsyncDisposable
     /// Publishes zone status updates to KNX group addresses.
     /// </summary>
     /// <param name="zoneIndex">Zone identifier.</param>
-    /// <param name="eventType">Type of event (e.g., ZONE_VOLUME, ZONE_MUTE).</param>
+    /// <param name="eventType">Type of event (e.g., VOLUME_STATUS, MUTE_STATUS).</param>
     /// <param name="payload">Event payload.</param>
     /// <param name="cancellationToken">Cancellation token for the operation.</param>
     /// <returns>Result indicating success or failure.</returns>
