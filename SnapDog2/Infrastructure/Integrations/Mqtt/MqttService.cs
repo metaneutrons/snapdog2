@@ -246,7 +246,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
                     // Configure client options
                     var optionsBuilder = new MqttClientOptionsBuilder()
                         .WithTcpServer(this._config.BrokerAddress, this._config.Port)
-                        .WithClientId(this._config.ClientId)
+                        .WithClientId(this._config.ClientIndex)
                         .WithKeepAlivePeriod(TimeSpan.FromSeconds(this._config.KeepAlive))
                         .WithCleanSession(true);
 
@@ -303,7 +303,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     }
 
     public async Task<Result> PublishZoneStateAsync(
-        int zoneId,
+        int zoneIndex,
         ZoneState state,
         CancellationToken cancellationToken = default
     )
@@ -314,16 +314,16 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         }
 
         // Get zone config (1-based indexing)
-        var zoneIndex = zoneId - 1;
-        if (zoneIndex < 0 || zoneIndex >= this._zoneConfigs.Count)
+        var zoneConfigIndex = zoneIndex - 1;
+        if (zoneConfigIndex < 0 || zoneConfigIndex >= this._zoneConfigs.Count)
         {
-            return Result.Failure($"Zone {zoneId} not configured for MQTT");
+            return Result.Failure($"Zone {zoneIndex} not configured for MQTT");
         }
 
-        var zoneConfig = this._zoneConfigs[zoneIndex];
+        var zoneConfig = this._zoneConfigs[zoneConfigIndex];
         if (zoneConfig.Mqtt == null || string.IsNullOrEmpty(zoneConfig.Mqtt.BaseTopic))
         {
-            return Result.Failure($"Zone {zoneId} has no MQTT configuration");
+            return Result.Failure($"Zone {zoneIndex} has no MQTT configuration");
         }
 
         try
@@ -349,7 +349,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     }
 
     public async Task<Result> PublishClientStateAsync(
-        string clientId,
+        string clientIndex,
         ClientState state,
         CancellationToken cancellationToken = default
     )
@@ -360,22 +360,22 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         }
 
         // Parse client ID - now expecting integer format (1, 2, 3, etc.)
-        if (!int.TryParse(clientId, out var clientIndex))
+        if (!int.TryParse(clientIndex, out var parsedClientIndex))
         {
-            return Result.Failure($"Invalid client ID format: {clientId}. Expected integer.");
+            return Result.Failure($"Invalid client ID format: {clientIndex}. Expected integer.");
         }
 
         // Convert to 0-based index for configuration array
-        var configIndex = clientIndex - 1;
+        var configIndex = parsedClientIndex - 1;
         if (configIndex < 0 || configIndex >= this._clientConfigs.Count)
         {
-            return Result.Failure($"Client {clientId} not configured for MQTT");
+            return Result.Failure($"Client {clientIndex} not configured for MQTT");
         }
 
         var clientConfig = this._clientConfigs[configIndex];
         if (clientConfig.Mqtt == null || string.IsNullOrEmpty(clientConfig.Mqtt.BaseTopic))
         {
-            return Result.Failure($"Client {clientId} has no MQTT configuration");
+            return Result.Failure($"Client {clientIndex} has no MQTT configuration");
         }
 
         try
@@ -606,9 +606,13 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
 
             return entityType switch
             {
-                "zone" when int.TryParse(entityId, out var zoneId) => this.MapZoneCommand(zoneId, command, payload),
-                "client" when int.TryParse(entityId, out var clientId) => this.MapClientCommand(
-                    clientId,
+                "zone" when int.TryParse(entityId, out var zoneIndex) => this.MapZoneCommand(
+                    zoneIndex,
+                    command,
+                    payload
+                ),
+                "client" when int.TryParse(entityId, out var clientIndex) => this.MapClientCommand(
+                    clientIndex,
                     command,
                     payload
                 ),
@@ -626,42 +630,44 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     /// Maps zone-specific MQTT commands to Mediator commands following blueprint specification.
     /// Implements all commands from Section 14.3.1 of the blueprint.
     /// </summary>
-    private object? MapZoneCommand(int zoneId, string command, string payload)
+    private object? MapZoneCommand(int zoneIndex, string command, string payload)
     {
         return command switch
         {
             // Playback Control Commands (Section 14.3.1)
-            "play" => CreatePlayCommand(zoneId, payload),
-            "pause" => new PauseCommand { ZoneId = zoneId, Source = CommandSource.Mqtt },
-            "stop" => new StopCommand { ZoneId = zoneId, Source = CommandSource.Mqtt },
+            "play" => CreatePlayCommand(zoneIndex, payload),
+            "pause" => new PauseCommand { ZoneIndex = zoneIndex, Source = CommandSource.Mqtt },
+            "stop" => new StopCommand { ZoneIndex = zoneIndex, Source = CommandSource.Mqtt },
 
             // Volume Control Commands
             "volume" when TryParseVolume(payload, out var volume) => new SetZoneVolumeCommand
             {
-                ZoneId = zoneId,
+                ZoneIndex = zoneIndex,
                 Volume = volume,
                 Source = CommandSource.Mqtt,
             },
             "volume" when payload.Equals("+", StringComparison.OrdinalIgnoreCase) => new VolumeUpCommand
             {
-                ZoneId = zoneId,
+                ZoneIndex = zoneIndex,
+                Step = 5, // Default step
                 Source = CommandSource.Mqtt,
             },
             "volume" when payload.Equals("-", StringComparison.OrdinalIgnoreCase) => new VolumeDownCommand
             {
-                ZoneId = zoneId,
+                ZoneIndex = zoneIndex,
+                Step = 5, // Default step
                 Source = CommandSource.Mqtt,
             },
             "volume" when TryParseVolumeStep(payload, out var step, out var direction) => direction > 0
                 ? new VolumeUpCommand
                 {
-                    ZoneId = zoneId,
+                    ZoneIndex = zoneIndex,
                     Step = step,
                     Source = CommandSource.Mqtt,
                 }
                 : new VolumeDownCommand
                 {
-                    ZoneId = zoneId,
+                    ZoneIndex = zoneIndex,
                     Step = step,
                     Source = CommandSource.Mqtt,
                 },
@@ -669,81 +675,81 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             // Mute Control Commands
             "mute" when TryParseBool(payload, out var mute) => new SetZoneMuteCommand
             {
-                ZoneId = zoneId,
+                ZoneIndex = zoneIndex,
                 Enabled = mute,
                 Source = CommandSource.Mqtt,
             },
             "mute" when payload.Equals("toggle", StringComparison.OrdinalIgnoreCase) => new ToggleZoneMuteCommand
             {
-                ZoneId = zoneId,
+                ZoneIndex = zoneIndex,
                 Source = CommandSource.Mqtt,
             },
 
             // Track Management Commands
             "track" when int.TryParse(payload, out var trackIndex) && trackIndex > 0 => new SetTrackCommand
             {
-                ZoneId = zoneId,
+                ZoneIndex = zoneIndex,
                 TrackIndex = trackIndex,
                 Source = CommandSource.Mqtt,
             },
             "track" when payload.Equals("+", StringComparison.OrdinalIgnoreCase) => new NextTrackCommand
             {
-                ZoneId = zoneId,
+                ZoneIndex = zoneIndex,
                 Source = CommandSource.Mqtt,
             },
             "track" when payload.Equals("-", StringComparison.OrdinalIgnoreCase) => new PreviousTrackCommand
             {
-                ZoneId = zoneId,
+                ZoneIndex = zoneIndex,
                 Source = CommandSource.Mqtt,
             },
-            "next" => new NextTrackCommand { ZoneId = zoneId, Source = CommandSource.Mqtt },
-            "previous" => new PreviousTrackCommand { ZoneId = zoneId, Source = CommandSource.Mqtt },
+            "next" => new NextTrackCommand { ZoneIndex = zoneIndex, Source = CommandSource.Mqtt },
+            "previous" => new PreviousTrackCommand { ZoneIndex = zoneIndex, Source = CommandSource.Mqtt },
 
             // Track Repeat Commands
             "track_repeat" when TryParseBool(payload, out var repeat) => new SetTrackRepeatCommand
             {
-                ZoneId = zoneId,
+                ZoneIndex = zoneIndex,
                 Enabled = repeat,
                 Source = CommandSource.Mqtt,
             },
             "track_repeat" when payload.Equals("toggle", StringComparison.OrdinalIgnoreCase) =>
-                new ToggleTrackRepeatCommand { ZoneId = zoneId, Source = CommandSource.Mqtt },
+                new ToggleTrackRepeatCommand { ZoneIndex = zoneIndex, Source = CommandSource.Mqtt },
 
             // Playlist Management Commands
             "playlist" when int.TryParse(payload, out var playlistIndex) && playlistIndex > 0 => new SetPlaylistCommand
             {
-                ZoneId = zoneId,
+                ZoneIndex = zoneIndex,
                 PlaylistIndex = playlistIndex,
                 Source = CommandSource.Mqtt,
             },
             "playlist" when payload.Equals("+", StringComparison.OrdinalIgnoreCase) => new NextPlaylistCommand
             {
-                ZoneId = zoneId,
+                ZoneIndex = zoneIndex,
                 Source = CommandSource.Mqtt,
             },
             "playlist" when payload.Equals("-", StringComparison.OrdinalIgnoreCase) => new PreviousPlaylistCommand
             {
-                ZoneId = zoneId,
+                ZoneIndex = zoneIndex,
                 Source = CommandSource.Mqtt,
             },
 
             // Playlist Mode Commands
             "playlist_shuffle" when TryParseBool(payload, out var shuffle) => new SetPlaylistShuffleCommand
             {
-                ZoneId = zoneId,
+                ZoneIndex = zoneIndex,
                 Enabled = shuffle,
                 Source = CommandSource.Mqtt,
             },
             "playlist_shuffle" when payload.Equals("toggle", StringComparison.OrdinalIgnoreCase) =>
-                new TogglePlaylistShuffleCommand { ZoneId = zoneId, Source = CommandSource.Mqtt },
+                new TogglePlaylistShuffleCommand { ZoneIndex = zoneIndex, Source = CommandSource.Mqtt },
             "playlist_repeat" when TryParseBool(payload, out var playlistRepeat) => new SetPlaylistRepeatCommand
             {
-                ZoneId = zoneId,
+                ZoneIndex = zoneIndex,
                 Enabled = playlistRepeat,
                 Source = CommandSource.Mqtt,
             },
             "playlist_repeat" when payload.Equals("toggle", StringComparison.OrdinalIgnoreCase) =>
-                new TogglePlaylistRepeatCommand { ZoneId = zoneId, Source = CommandSource.Mqtt },
+                new TogglePlaylistRepeatCommand { ZoneIndex = zoneIndex, Source = CommandSource.Mqtt },
 
             _ => null,
         };
@@ -753,14 +759,14 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     /// Maps client-specific MQTT commands to Mediator commands following blueprint specification.
     /// Implements all commands from Section 14.4.1 of the blueprint.
     /// </summary>
-    private object? MapClientCommand(int clientId, string command, string payload)
+    private object? MapClientCommand(int clientIndex, string command, string payload)
     {
         return command switch
         {
             // Volume Control Commands
             "volume" when TryParseVolume(payload, out var volume) => new SetClientVolumeCommand
             {
-                ClientId = clientId,
+                ClientIndex = clientIndex,
                 Volume = volume,
                 Source = CommandSource.Mqtt,
             },
@@ -768,27 +774,27 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             // Mute Control Commands
             "mute" when TryParseBool(payload, out var mute) => new SetClientMuteCommand
             {
-                ClientId = clientId,
+                ClientIndex = clientIndex,
                 Enabled = mute,
                 Source = CommandSource.Mqtt,
             },
             "mute" when payload.Equals("toggle", StringComparison.OrdinalIgnoreCase) => new ToggleClientMuteCommand
             {
-                ClientId = clientId,
+                ClientIndex = clientIndex,
                 Source = CommandSource.Mqtt,
             },
 
             // Configuration Commands
             "latency" when int.TryParse(payload, out var latency) && latency >= 0 => new SetClientLatencyCommand
             {
-                ClientId = clientId,
+                ClientIndex = clientIndex,
                 LatencyMs = latency,
                 Source = CommandSource.Mqtt,
             },
-            "zone" when int.TryParse(payload, out var zoneId) && zoneId > 0 => new AssignClientToZoneCommand
+            "zone" when int.TryParse(payload, out var zoneIndex) && zoneIndex > 0 => new AssignClientToZoneCommand
             {
-                ClientId = clientId,
-                ZoneId = zoneId,
+                ClientIndex = clientIndex,
+                ZoneIndex = zoneIndex,
                 Source = CommandSource.Mqtt,
             },
 
@@ -800,7 +806,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     /// Creates a PlayCommand with optional parameters based on payload.
     /// Supports different play command formats as per blueprint specification.
     /// </summary>
-    private static PlayCommand CreatePlayCommand(int zoneId, string payload)
+    private static PlayCommand CreatePlayCommand(int zoneIndex, string payload)
     {
         // Handle different play command formats:
         // "play" - simple play
@@ -809,7 +815,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
 
         if (string.IsNullOrWhiteSpace(payload) || payload.Equals("play", StringComparison.OrdinalIgnoreCase))
         {
-            return new PlayCommand { ZoneId = zoneId, Source = CommandSource.Mqtt };
+            return new PlayCommand { ZoneIndex = zoneIndex, Source = CommandSource.Mqtt };
         }
 
         var parts = payload.Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -819,21 +825,21 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             {
                 "url" => new PlayCommand
                 {
-                    ZoneId = zoneId,
+                    ZoneIndex = zoneIndex,
                     MediaUrl = parts[1],
                     Source = CommandSource.Mqtt,
                 },
                 "track" when int.TryParse(parts[1], out var trackIndex) && trackIndex > 0 => new PlayCommand
                 {
-                    ZoneId = zoneId,
+                    ZoneIndex = zoneIndex,
                     TrackIndex = trackIndex,
                     Source = CommandSource.Mqtt,
                 },
-                _ => new PlayCommand { ZoneId = zoneId, Source = CommandSource.Mqtt },
+                _ => new PlayCommand { ZoneIndex = zoneIndex, Source = CommandSource.Mqtt },
             };
         }
 
-        return new PlayCommand { ZoneId = zoneId, Source = CommandSource.Mqtt };
+        return new PlayCommand { ZoneIndex = zoneIndex, Source = CommandSource.Mqtt };
     }
 
     /// <summary>
@@ -888,7 +894,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     /// Publishes client status updates to MQTT topics.
     /// </summary>
     public async Task<Result> PublishClientStatusAsync<T>(
-        string clientId,
+        string clientIndex,
         string eventType,
         T payload,
         CancellationToken cancellationToken = default
@@ -902,24 +908,24 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             }
 
             // Parse client ID - now expecting integer format (1, 2, 3, etc.)
-            if (!int.TryParse(clientId, out var clientIndex))
+            if (!int.TryParse(clientIndex, out var parsedClientIndex))
             {
-                this.LogInvalidClientIdFormat(clientId);
+                this.LogInvalidClientIndexFormat(clientIndex);
                 return Result.Success();
             }
 
             // Convert to 0-based index for configuration array
-            var configIndex = clientIndex - 1;
+            var configIndex = parsedClientIndex - 1;
             if (configIndex < 0 || configIndex >= this._clientConfigs.Count)
             {
-                this.LogNoMqttConfigurationForClient(clientId);
+                this.LogNoMqttConfigurationForClient(parsedClientIndex.ToString());
                 return Result.Success();
             }
 
             var clientConfig = this._clientConfigs[configIndex];
             if (clientConfig.Mqtt == null || string.IsNullOrEmpty(clientConfig.Mqtt.BaseTopic))
             {
-                this.LogClientHasNoMqttConfiguration(clientId);
+                this.LogClientHasNoMqttConfiguration(clientIndex);
                 return Result.Success();
             }
 
@@ -951,7 +957,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            this.LogFailedToPublishClientStatus(ex, eventType, clientId);
+            this.LogFailedToPublishClientStatus(ex, eventType, clientIndex);
             return Result.Failure($"Failed to publish client status: {ex.Message}");
         }
     }
@@ -960,7 +966,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     /// Publishes zone status updates to MQTT topics.
     /// </summary>
     public async Task<Result> PublishZoneStatusAsync<T>(
-        int zoneId,
+        int zoneIndex,
         string eventType,
         T payload,
         CancellationToken cancellationToken = default
@@ -974,17 +980,17 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             }
 
             // Get zone config (1-based indexing)
-            var zoneIndex = zoneId - 1;
-            if (zoneIndex < 0 || zoneIndex >= this._zoneConfigs.Count)
+            var zoneConfigIndex = zoneIndex - 1;
+            if (zoneConfigIndex < 0 || zoneConfigIndex >= this._zoneConfigs.Count)
             {
-                this.LogNoMqttConfigurationForZone(zoneId);
+                this.LogNoMqttConfigurationForZone(zoneIndex);
                 return Result.Success();
             }
 
-            var zoneConfig = this._zoneConfigs[zoneIndex];
+            var zoneConfig = this._zoneConfigs[zoneConfigIndex];
             if (zoneConfig.Mqtt == null || string.IsNullOrEmpty(zoneConfig.Mqtt.BaseTopic))
             {
-                this.LogZoneHasNoMqttConfiguration(zoneId);
+                this.LogZoneHasNoMqttConfiguration(zoneIndex);
                 return Result.Success();
             }
 
@@ -1019,7 +1025,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            this.LogFailedToPublishZoneStatus(ex, eventType, zoneId);
+            this.LogFailedToPublishZoneStatus(ex, eventType, zoneIndex);
             return Result.Failure($"Failed to publish zone status: {ex.Message}");
         }
     }
