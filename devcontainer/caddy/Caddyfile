@@ -110,12 +110,12 @@
 
     # SnapDog API
     handle /api* {
-        reverse_proxy http://snapdog:5000
+        reverse_proxy http://app:5000
     }
 
     # Swagger UI
     handle /swagger* {
-        reverse_proxy http://snapdog:5000
+        reverse_proxy http://app:5000
     }
 
     # Clients with trailing slashes (mapped to our service names)
