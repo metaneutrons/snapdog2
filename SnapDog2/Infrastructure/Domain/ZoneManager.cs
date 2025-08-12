@@ -294,10 +294,12 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         if (storedState != null)
         {
             _logger.LogInformation(
-                "Zone {ZoneIndex}: Loaded state from store - Track: {TrackId}, Playlist: {PlaylistIndex}",
+                "Zone {ZoneIndex}: Loaded state from store - Source: {Source}; Playlist: {PlaylistIndex}, Track: {TrackIndex} ({TrackTitle})",
                 zoneIndex,
-                storedState.Track?.Id ?? "none",
-                storedState.Playlist?.Index.ToString() ?? "none"
+                storedState.Playlist?.Source ?? "none",
+                storedState.Playlist?.Index.ToString() ?? "none",
+                storedState.Track?.Index.ToString() ?? "none",
+                storedState.Track?.Title ?? "No Track"
             );
             _currentState = storedState;
         }
@@ -642,6 +644,17 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
             _currentState = _currentState with { Track = targetTrack };
             await PublishZoneStateChangedAsync().ConfigureAwait(false);
+
+            // Log successful track change with meaningful information
+            _logger.LogInformation(
+                "Zone {ZoneIndex}: Set track - Source: {Source}; Playlist: {PlaylistIndex}, Track: {TrackIndex} ({TrackTitle})",
+                _zoneIndex,
+                _currentState.Playlist.Source,
+                _currentState.Playlist.Index,
+                targetTrack.Index,
+                targetTrack.Title
+            );
+
             return Result.Success();
         }
         finally
