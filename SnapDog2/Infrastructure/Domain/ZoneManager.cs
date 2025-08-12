@@ -1,6 +1,9 @@
 namespace SnapDog2.Infrastructure.Domain;
 
+using System;
 using System.Collections.Concurrent;
+using System.IO;
+using System.Linq;
 using Cortex.Mediator;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -817,10 +820,52 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     private async Task EnsureSnapcastGroupAsync()
     {
-        // Find or create Snapcast group for this zone
-        // This would interact with actual Snapcast service
-        _snapcastGroupId = $"group_{_zoneIndex}";
-        await Task.CompletedTask; // Placeholder for future async Snapcast integration
+        await Task.CompletedTask; // Ensure method is properly async
+
+        try
+        {
+            // Extract stream ID from sink path (e.g., "/snapsinks/zone1" -> "Zone1")
+            var streamId = ExtractStreamIdFromSink(_config.Sink);
+
+            // Find existing group for this zone's stream
+            var allGroups = _snapcastStateRepository.GetAllGroups();
+            var existingGroup = allGroups.FirstOrDefault(g => g.StreamId == streamId);
+
+            if (existingGroup.Id != null)
+            {
+                // Use existing group
+                _snapcastGroupId = existingGroup.Id;
+                this.LogSnapcastSync(_zoneIndex, _snapcastGroupId);
+            }
+            else
+            {
+                // No existing group for this stream - we'll create one when clients are assigned
+                // For now, use a placeholder that will be replaced when first client is assigned
+                _snapcastGroupId = null;
+                this.LogZoneAction(
+                    _zoneIndex,
+                    _config.Name,
+                    "No existing group found, will create when clients assigned"
+                );
+            }
+        }
+        catch (Exception ex)
+        {
+            this.LogZoneAction(_zoneIndex, _config.Name, $"Failed to ensure Snapcast group: {ex.Message}");
+            _snapcastGroupId = null;
+        }
+    }
+
+    private static string ExtractStreamIdFromSink(string sink)
+    {
+        // Convert "/snapsinks/zone1" -> "Zone1", "/snapsinks/zone2" -> "Zone2"
+        var fileName = Path.GetFileName(sink);
+        if (fileName.StartsWith("zone", StringComparison.OrdinalIgnoreCase))
+        {
+            var zoneNumber = fileName.Substring(4);
+            return $"Zone{zoneNumber}";
+        }
+        return fileName;
     }
 
     private async Task UpdateStateFromSnapcastAsync()

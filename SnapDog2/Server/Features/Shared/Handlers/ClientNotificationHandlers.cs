@@ -98,6 +98,53 @@ public partial class ClientStateNotificationHandler
     {
         this.LogZoneAssignmentChange(notification.ClientIndex, notification.PreviousZoneIndex, notification.ZoneIndex);
 
+        // Perform actual Snapcast group assignment only if ZoneIndex is not null
+        if (notification.ZoneIndex.HasValue)
+        {
+            try
+            {
+                var clientManager = this._serviceProvider.GetRequiredService<IClientManager>();
+                var result = await clientManager.AssignClientToZoneAsync(
+                    notification.ClientIndex,
+                    notification.ZoneIndex.Value
+                );
+
+                if (result.IsFailure)
+                {
+                    this._logger.LogWarning(
+                        "Failed to assign client {ClientIndex} to zone {ZoneIndex}: {Error}",
+                        notification.ClientIndex,
+                        notification.ZoneIndex.Value,
+                        result.ErrorMessage
+                    );
+                }
+                else
+                {
+                    this._logger.LogInformation(
+                        "Successfully assigned client {ClientIndex} to zone {ZoneIndex}",
+                        notification.ClientIndex,
+                        notification.ZoneIndex.Value
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                this._logger.LogError(
+                    ex,
+                    "Error during client {ClientIndex} zone assignment to zone {ZoneIndex}",
+                    notification.ClientIndex,
+                    notification.ZoneIndex.Value
+                );
+            }
+        }
+        else
+        {
+            this._logger.LogInformation(
+                "Client {ClientIndex} unassigned from zone (ZoneIndex is null)",
+                notification.ClientIndex
+            );
+        }
+
         // Publish to external systems (MQTT, KNX)
         await this.PublishToExternalSystemsAsync(
             StatusIdAttribute.GetStatusId<ClientZoneAssignmentChangedNotification>(),

@@ -1,9 +1,13 @@
 namespace SnapDog2.Infrastructure.Domain;
 
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Core.Models;
@@ -18,6 +22,7 @@ public partial class ClientManager : IClientManager
     private readonly ISnapcastStateRepository _snapcastStateRepository;
     private readonly ISnapcastService _snapcastService;
     private readonly List<ClientConfig> _clientConfigs;
+    private readonly SnapDogConfiguration _configuration;
 
     [LoggerMessage(7001, LogLevel.Debug, "Getting client {ClientIndex}")]
     private partial void LogGettingClient(int clientIndex);
@@ -48,6 +53,7 @@ public partial class ClientManager : IClientManager
         this._snapcastStateRepository = snapcastStateRepository;
         this._snapcastService = snapcastService;
         this._clientConfigs = configuration.Clients;
+        this._configuration = configuration;
 
         this.LogInitialized(this._clientConfigs.Count);
     }
@@ -159,11 +165,105 @@ public partial class ClientManager : IClientManager
     {
         this.LogAssigningClientToZone(clientIndex, zoneIndex);
 
-        // TODO: Implement zone assignment through Snapcast groups
-        // This would require mapping zones to Snapcast groups and moving clients between groups
-        await Task.Delay(1); // Maintain async signature
+        try
+        {
+            // Validate inputs
+            if (clientIndex < 1 || clientIndex > _clientConfigs.Count)
+            {
+                return Result.Failure($"Invalid client index: {clientIndex}");
+            }
 
-        return Result.Failure("Client zone assignment not yet implemented");
+            // Get the client from Snapcast
+            var snapcastClient = _snapcastStateRepository.GetClientByIndex(clientIndex);
+            if (snapcastClient == null)
+            {
+                return Result.Failure($"Client {clientIndex} not found in Snapcast");
+            }
+
+            var snapcastClientId = snapcastClient.Value.Id;
+            if (string.IsNullOrEmpty(snapcastClientId))
+            {
+                return Result.Failure($"Client {clientIndex} has no valid ID");
+            }
+
+            // Get target zone's stream ID
+            var zoneConfigs = _configuration.Zones;
+            if (zoneIndex < 1 || zoneIndex > zoneConfigs.Count)
+            {
+                return Result.Failure($"Invalid zone index: {zoneIndex}");
+            }
+
+            var targetZoneConfig = zoneConfigs[zoneIndex - 1];
+            var targetStreamId = ExtractStreamIdFromSink(targetZoneConfig.Sink);
+
+            // Find or create group for target zone
+            var targetGroupId = await FindOrCreateGroupForStreamAsync(targetStreamId);
+            if (targetGroupId == null)
+            {
+                return Result.Failure($"Failed to find or create group for zone {zoneIndex}");
+            }
+
+            // Move client to target group
+            var result = await _snapcastService.SetClientGroupAsync(snapcastClientId, targetGroupId);
+            if (result.IsFailure)
+            {
+                return Result.Failure($"Failed to move client to zone {zoneIndex}: {result.ErrorMessage}");
+            }
+
+            this.LogAssigningClientToZone(clientIndex, zoneIndex);
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure($"Error assigning client {clientIndex} to zone {zoneIndex}: {ex.Message}");
+        }
+    }
+
+    private async Task<string?> FindOrCreateGroupForStreamAsync(string streamId)
+    {
+        try
+        {
+            // Find existing group with this stream
+            var allGroups = _snapcastStateRepository.GetAllGroups();
+            var existingGroup = allGroups.FirstOrDefault(g => g.StreamId == streamId);
+
+            if (existingGroup.Id != null)
+            {
+                return existingGroup.Id;
+            }
+
+            // No existing group for this stream, need to create one
+            // For now, we'll use an existing group and change its stream
+            // This is a limitation of the current Snapcast library
+            var anyGroup = allGroups.FirstOrDefault();
+            if (anyGroup.Id != null)
+            {
+                // Set the group to use our target stream
+                var result = await _snapcastService.SetGroupStreamAsync(anyGroup.Id, streamId);
+                if (result.IsSuccess)
+                {
+                    return anyGroup.Id;
+                }
+            }
+
+            return null;
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
+    private static string ExtractStreamIdFromSink(string sink)
+    {
+        // Convert "/snapsinks/zone1" -> "Zone1", "/snapsinks/zone2" -> "Zone2"
+        var fileName = Path.GetFileName(sink);
+        if (fileName.StartsWith("zone", StringComparison.OrdinalIgnoreCase))
+        {
+            var zoneNumber = fileName.Substring(4);
+            return $"Zone{zoneNumber}";
+        }
+        return fileName;
     }
 
     /// <summary>
