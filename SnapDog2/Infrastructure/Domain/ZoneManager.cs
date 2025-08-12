@@ -10,6 +10,7 @@ using Microsoft.Extensions.Options;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Core.Models;
+using SnapDog2.Server.Features.Playlists.Queries;
 using SnapDog2.Server.Features.Zones.Notifications;
 
 /// <summary>
@@ -23,6 +24,7 @@ public partial class ZoneManager : IZoneManager, IAsyncDisposable, IDisposable
     private readonly ISnapcastStateRepository _snapcastStateRepository;
     private readonly IMediaPlayerService _mediaPlayerService;
     private readonly IMediator _mediator;
+    private readonly IZoneStateStore _zoneStateStore;
     private readonly List<ZoneConfig> _zoneConfigs;
     private readonly ConcurrentDictionary<int, IZoneService> _zones;
     private readonly SemaphoreSlim _initializationLock;
@@ -53,6 +55,7 @@ public partial class ZoneManager : IZoneManager, IAsyncDisposable, IDisposable
         ISnapcastStateRepository snapcastStateRepository,
         IMediaPlayerService mediaPlayerService,
         IMediator mediator,
+        IZoneStateStore zoneStateStore,
         IOptions<SnapDogConfiguration> configuration
     )
     {
@@ -61,6 +64,7 @@ public partial class ZoneManager : IZoneManager, IAsyncDisposable, IDisposable
         _snapcastStateRepository = snapcastStateRepository;
         _mediaPlayerService = mediaPlayerService;
         _mediator = mediator;
+        _zoneStateStore = zoneStateStore;
         _zoneConfigs = configuration.Value.Zones;
         _zones = new ConcurrentDictionary<int, IZoneService>();
         _initializationLock = new SemaphoreSlim(1, 1);
@@ -94,6 +98,7 @@ public partial class ZoneManager : IZoneManager, IAsyncDisposable, IDisposable
                         _snapcastStateRepository,
                         _mediaPlayerService,
                         _mediator,
+                        _zoneStateStore,
                         _logger
                     );
 
@@ -245,6 +250,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     private readonly ISnapcastStateRepository _snapcastStateRepository;
     private readonly IMediaPlayerService _mediaPlayerService;
     private readonly IMediator _mediator;
+    private readonly IZoneStateStore _zoneStateStore;
     private readonly ILogger _logger;
     private readonly SemaphoreSlim _stateLock;
     private ZoneState _currentState;
@@ -269,6 +275,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         ISnapcastStateRepository snapcastStateRepository,
         IMediaPlayerService mediaPlayerService,
         IMediator mediator,
+        IZoneStateStore zoneStateStore,
         ILogger logger
     )
     {
@@ -278,11 +285,29 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         _snapcastStateRepository = snapcastStateRepository;
         _mediaPlayerService = mediaPlayerService;
         _mediator = mediator;
+        _zoneStateStore = zoneStateStore;
         _logger = logger;
         _stateLock = new SemaphoreSlim(1, 1);
 
-        // Initialize with default state
-        _currentState = CreateInitialState();
+        // Initialize state from store or create default
+        var storedState = _zoneStateStore.GetZoneState(zoneIndex);
+        if (storedState != null)
+        {
+            _logger.LogInformation(
+                "Zone {ZoneIndex}: Loaded state from store - Track: {TrackId}, Playlist: {PlaylistIndex}",
+                zoneIndex,
+                storedState.Track?.Id ?? "none",
+                storedState.Playlist?.Index.ToString() ?? "none"
+            );
+            _currentState = storedState;
+        }
+        else
+        {
+            _logger.LogInformation("Zone {ZoneIndex}: No stored state found, creating initial state", zoneIndex);
+            _currentState = CreateInitialState();
+            // Store the initial state
+            _zoneStateStore.SetZoneState(zoneIndex, _currentState);
+        }
     }
 
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
@@ -316,10 +341,12 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         try
         {
             // Check if we have a valid track to play
-            if (_currentState.Track == null || 
-                string.IsNullOrEmpty(_currentState.Track.Id) || 
-                _currentState.Track.Id == "none" ||
-                _currentState.Track.Source == "none")
+            if (
+                _currentState.Track == null
+                || string.IsNullOrEmpty(_currentState.Track.Id)
+                || _currentState.Track.Id == "none"
+                || _currentState.Track.Source == "none"
+            )
             {
                 return Result.Failure("No track available to play. Please set a playlist or track first.");
             }
@@ -577,15 +604,43 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         await _stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            // This would normally interact with playlist manager
-            var newTrack = _currentState.Track! with
+            // Get tracks from the current playlist
+            if (_currentState.Playlist == null)
             {
-                Index = trackIndex,
-                Title = $"Track {trackIndex}",
-                Id = $"track_{trackIndex}",
-            };
+                return Result.Failure("No playlist selected. Please set a playlist first.");
+            }
 
-            _currentState = _currentState with { Track = newTrack };
+            // Get the playlist with tracks
+            if (_currentState.Playlist.Index == null)
+            {
+                return Result.Failure("Current playlist has no index");
+            }
+
+            var playlistIndex = _currentState.Playlist.Index.Value;
+            var getPlaylistQuery = new GetPlaylistQuery { PlaylistIndex = playlistIndex };
+            var playlistResult = await _mediator
+                .SendQueryAsync<GetPlaylistQuery, Result<Api.Models.PlaylistWithTracks>>(getPlaylistQuery)
+                .ConfigureAwait(false);
+
+            if (playlistResult.IsFailure)
+            {
+                return Result.Failure($"Failed to get playlist tracks: {playlistResult.ErrorMessage}");
+            }
+
+            var playlist = playlistResult.Value;
+            if (playlist?.Tracks == null || !playlist.Tracks.Any())
+            {
+                return Result.Failure("Playlist has no tracks");
+            }
+
+            // Find the track by index (1-based)
+            var targetTrack = playlist.Tracks.FirstOrDefault(t => t.Index == trackIndex);
+            if (targetTrack == null)
+            {
+                return Result.Failure($"Track {trackIndex} not found in playlist");
+            }
+
+            _currentState = _currentState with { Track = targetTrack };
             await PublishZoneStateChangedAsync().ConfigureAwait(false);
             return Result.Success();
         }
@@ -662,14 +717,26 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         await _stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            var newPlaylist = _currentState.Playlist! with
-            {
-                Index = playlistIndex,
-                Name = $"Playlist {playlistIndex}",
-                Id = $"playlist_{playlistIndex}",
-            };
+            // Get all playlists to find the correct one
+            var getAllPlaylistsQuery = new GetAllPlaylistsQuery();
+            var playlistsResult = await _mediator
+                .SendQueryAsync<GetAllPlaylistsQuery, Result<List<PlaylistInfo>>>(getAllPlaylistsQuery)
+                .ConfigureAwait(false);
 
-            _currentState = _currentState with { Playlist = newPlaylist };
+            if (playlistsResult.IsFailure)
+            {
+                return Result.Failure($"Failed to get playlists: {playlistsResult.ErrorMessage}");
+            }
+
+            var playlists = playlistsResult.Value ?? new List<PlaylistInfo>();
+            var targetPlaylist = playlists.FirstOrDefault(p => p.Index == playlistIndex);
+
+            if (targetPlaylist == null)
+            {
+                return Result.Failure($"Playlist {playlistIndex} not found");
+            }
+
+            _currentState = _currentState with { Playlist = targetPlaylist };
             await PublishZoneStateChangedAsync().ConfigureAwait(false);
             return Result.Success();
         }
@@ -899,6 +966,10 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     private async Task PublishZoneStateChangedAsync()
     {
+        // Persist state to store for future requests
+        _zoneStateStore.SetZoneState(_zoneIndex, _currentState);
+
+        // Publish notification via mediator
         var notification = new ZoneStateChangedNotification { ZoneIndex = _zoneIndex, ZoneState = _currentState };
 
         await _mediator.PublishAsync(notification).ConfigureAwait(false);

@@ -293,7 +293,7 @@ public partial class ZonesController : ControllerBase
     /// </summary>
     /// <param name="zoneIndex">Zone index (1-based)</param>
     /// <returns>No content on success</returns>
-    [HttpPost("{zoneIndex:int}/playback/play")]
+    [HttpPost("{zoneIndex:int}/play")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Play(int zoneIndex)
@@ -315,7 +315,7 @@ public partial class ZonesController : ControllerBase
     /// </summary>
     /// <param name="zoneIndex">Zone index (1-based)</param>
     /// <returns>No content on success</returns>
-    [HttpPost("{zoneIndex:int}/playback/pause")]
+    [HttpPost("{zoneIndex:int}/pause")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Pause(int zoneIndex)
@@ -337,7 +337,7 @@ public partial class ZonesController : ControllerBase
     /// </summary>
     /// <param name="zoneIndex">Zone index (1-based)</param>
     /// <returns>No content on success</returns>
-    [HttpPost("{zoneIndex:int}/playback/stop")]
+    [HttpPost("{zoneIndex:int}/stop")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Stop(int zoneIndex)
@@ -423,4 +423,33 @@ public partial class ZonesController : ControllerBase
         "Failed to set zone {ZoneIndex} playlist to {PlaylistIndex}: {ErrorMessage}"
     )]
     private partial void LogFailedToSetZonePlaylist(int zoneIndex, int playlistIndex, string errorMessage);
+
+    /// <summary>
+    /// Set track for the zone.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <param name="trackIndex">Track index (1-based)</param>
+    /// <returns>No content on success</returns>
+    [HttpPut("{zoneIndex:int}/track")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> SetTrack(int zoneIndex, [FromBody] int trackIndex)
+    {
+        if (trackIndex < 1)
+            return BadRequest("Track index must be greater than 0");
+
+        var command = new SetTrackCommand { ZoneIndex = zoneIndex, TrackIndex = trackIndex };
+        var result = await _mediator.SendCommandAsync<SetTrackCommand, Result>(command);
+
+        if (result.IsFailure)
+        {
+            LogFailedToSetZoneTrack(zoneIndex, trackIndex, result.ErrorMessage ?? "Unknown error");
+            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+        }
+
+        return NoContent();
+    }
+
+    [LoggerMessage(12014, LogLevel.Warning, "Failed to set zone {ZoneIndex} track to {TrackIndex}: {ErrorMessage}")]
+    private partial void LogFailedToSetZoneTrack(int zoneIndex, int trackIndex, string errorMessage);
 }

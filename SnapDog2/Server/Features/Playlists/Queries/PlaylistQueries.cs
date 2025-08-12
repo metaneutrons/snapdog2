@@ -15,9 +15,9 @@ public record GetAllPlaylistsQuery : IQuery<Result<List<PlaylistInfo>>>;
 public record GetPlaylistQuery : IQuery<Result<Api.Models.PlaylistWithTracks>>
 {
     /// <summary>
-    /// Gets the playlist identifier.
+    /// Gets the playlist index (1-based). Index 1 is always radio stations, 2+ are Subsonic playlists.
     /// </summary>
-    public required string PlaylistIndex { get; init; }
+    public required int PlaylistIndex { get; init; }
 }
 
 /// <summary>

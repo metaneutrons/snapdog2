@@ -232,7 +232,10 @@ static WebApplication CreateWebApplication(string[] args)
     >();
 
     // Zone management services (production implementations)
-    builder.Services.AddSingleton<SnapDog2.Core.Abstractions.IZoneStateStore, SnapDog2.Infrastructure.Storage.InMemoryZoneStateStore>();
+    builder.Services.AddSingleton<
+        SnapDog2.Core.Abstractions.IZoneStateStore,
+        SnapDog2.Infrastructure.Storage.InMemoryZoneStateStore
+    >();
     builder.Services.AddScoped<SnapDog2.Core.Abstractions.IZoneManager, SnapDog2.Infrastructure.Domain.ZoneManager>();
 
     // Media player services

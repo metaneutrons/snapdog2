@@ -133,27 +133,54 @@ public partial class GetPlaylistQueryHandler : IQueryHandler<GetPlaylistQuery, R
     {
         LogGettingPlaylist(this._logger, query.PlaylistIndex);
 
-        // Handle radio stations playlist
-        if (query.PlaylistIndex == "radio")
+        // Handle radio stations playlist (index 1)
+        if (query.PlaylistIndex == 1)
         {
             return this.CreateRadioPlaylistWithTracks();
         }
 
-        // Handle Subsonic playlists
+        // Handle Subsonic playlists (index 2+)
         if (!this._config.Services.Subsonic.Enabled)
         {
             LogSubsonicDisabled(this._logger);
             return Result<Api.Models.PlaylistWithTracks>.Failure("Subsonic service is disabled");
         }
 
-        var result = await this._subsonicService.GetPlaylistAsync(query.PlaylistIndex, cancellationToken);
+        // Get all Subsonic playlists to find the one at the requested index
+        var subsonicPlaylistsResult = await this._subsonicService.GetPlaylistsAsync(cancellationToken);
+        if (subsonicPlaylistsResult.IsFailure)
+        {
+            LogPlaylistError(
+                this._logger,
+                query.PlaylistIndex.ToString(),
+                subsonicPlaylistsResult.ErrorMessage ?? "Unknown error"
+            );
+            return Result<Api.Models.PlaylistWithTracks>.Failure(
+                $"Failed to get Subsonic playlists: {subsonicPlaylistsResult.ErrorMessage}"
+            );
+        }
+
+        var subsonicPlaylists = subsonicPlaylistsResult.Value ?? new List<PlaylistInfo>();
+
+        // Find the playlist at the requested index (index 2 = first Subsonic playlist, index 3 = second, etc.)
+        var subsonicIndex = query.PlaylistIndex - 2; // Convert to 0-based index for Subsonic playlists
+        if (subsonicIndex < 0 || subsonicIndex >= subsonicPlaylists.Count)
+        {
+            LogPlaylistError(this._logger, query.PlaylistIndex.ToString(), "Playlist index out of range");
+            return Result<Api.Models.PlaylistWithTracks>.Failure($"Playlist {query.PlaylistIndex} not found");
+        }
+
+        var targetPlaylist = subsonicPlaylists[subsonicIndex];
+
+        // Get the full playlist with tracks using the Subsonic ID
+        var result = await this._subsonicService.GetPlaylistAsync(targetPlaylist.Id, cancellationToken);
         if (result.IsSuccess)
         {
-            LogPlaylistRetrieved(this._logger, query.PlaylistIndex, result.Value?.Tracks?.Count ?? 0);
+            LogPlaylistRetrieved(this._logger, query.PlaylistIndex.ToString(), result.Value?.Tracks?.Count ?? 0);
         }
         else
         {
-            LogPlaylistError(this._logger, query.PlaylistIndex, result.ErrorMessage ?? "Unknown error");
+            LogPlaylistError(this._logger, query.PlaylistIndex.ToString(), result.ErrorMessage ?? "Unknown error");
         }
 
         return result;
@@ -205,7 +232,7 @@ public partial class GetPlaylistQueryHandler : IQueryHandler<GetPlaylistQuery, R
     #region Logging
 
     [LoggerMessage(2930, LogLevel.Debug, "Getting playlist: {PlaylistIndex}")]
-    private static partial void LogGettingPlaylist(ILogger logger, string playlistIndex);
+    private static partial void LogGettingPlaylist(ILogger logger, int playlistIndex);
 
     [LoggerMessage(2931, LogLevel.Warning, "Subsonic service is disabled")]
     private static partial void LogSubsonicDisabled(ILogger logger);
