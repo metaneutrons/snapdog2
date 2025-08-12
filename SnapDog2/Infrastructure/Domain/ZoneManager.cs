@@ -457,26 +457,31 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         await _stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            var clampedVolume = Math.Clamp(volume, 0, 100);
-
-            // Update Snapcast group volume if available
-            if (!string.IsNullOrEmpty(_snapcastGroupId))
-            {
-                // For now, we'll set individual client volumes since there's no SetGroupVolumeAsync
-                // This would need to be implemented by iterating through group clients
-                // var snapcastResult = await _snapcastService.SetGroupVolumeAsync(_snapcastGroupId, clampedVolume).ConfigureAwait(false);
-                // if (snapcastResult.IsFailure)
-                //     return snapcastResult;
-            }
-
-            _currentState = _currentState with { Volume = clampedVolume };
-            await PublishZoneStateChangedAsync().ConfigureAwait(false);
-            return Result.Success();
+            return await SetVolumeInternalAsync(volume).ConfigureAwait(false);
         }
         finally
         {
             _stateLock.Release();
         }
+    }
+
+    private async Task<Result> SetVolumeInternalAsync(int volume)
+    {
+        var clampedVolume = Math.Clamp(volume, 0, 100);
+
+        // Update Snapcast group volume if available
+        if (!string.IsNullOrEmpty(_snapcastGroupId))
+        {
+            // For now, we'll set individual client volumes since there's no SetGroupVolumeAsync
+            // This would need to be implemented by iterating through group clients
+            // var snapcastResult = await _snapcastService.SetGroupVolumeAsync(_snapcastGroupId, clampedVolume).ConfigureAwait(false);
+            // if (snapcastResult.IsFailure)
+            //     return snapcastResult;
+        }
+
+        _currentState = _currentState with { Volume = clampedVolume };
+        await PublishZoneStateChangedAsync().ConfigureAwait(false);
+        return Result.Success();
     }
 
     public async Task<Result> VolumeUpAsync(int step = 5)
@@ -485,7 +490,8 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         try
         {
             var newVolume = Math.Clamp(_currentState.Volume + step, 0, 100);
-            return await SetVolumeAsync(newVolume).ConfigureAwait(false);
+            LogZoneAction(_zoneIndex, _config.Name, $"Set volume to {newVolume}");
+            return await SetVolumeInternalAsync(newVolume).ConfigureAwait(false);
         }
         finally
         {
@@ -499,7 +505,8 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         try
         {
             var newVolume = Math.Clamp(_currentState.Volume - step, 0, 100);
-            return await SetVolumeAsync(newVolume).ConfigureAwait(false);
+            LogZoneAction(_zoneIndex, _config.Name, $"Set volume to {newVolume}");
+            return await SetVolumeInternalAsync(newVolume).ConfigureAwait(false);
         }
         finally
         {
@@ -514,19 +521,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         await _stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            // Update Snapcast group mute if available
-            if (!string.IsNullOrEmpty(_snapcastGroupId))
-            {
-                var snapcastResult = await _snapcastService
-                    .SetGroupMuteAsync(_snapcastGroupId, enabled)
-                    .ConfigureAwait(false);
-                if (snapcastResult.IsFailure)
-                    return snapcastResult;
-            }
-
-            _currentState = _currentState with { Mute = enabled };
-            await PublishZoneStateChangedAsync().ConfigureAwait(false);
-            return Result.Success();
+            return await SetMuteInternalAsync(enabled).ConfigureAwait(false);
         }
         finally
         {
@@ -534,12 +529,30 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         }
     }
 
+    private async Task<Result> SetMuteInternalAsync(bool enabled)
+    {
+        // Update Snapcast group mute if available
+        if (!string.IsNullOrEmpty(_snapcastGroupId))
+        {
+            var snapcastResult = await _snapcastService
+                .SetGroupMuteAsync(_snapcastGroupId, enabled)
+                .ConfigureAwait(false);
+            if (snapcastResult.IsFailure)
+                return snapcastResult;
+        }
+
+        _currentState = _currentState with { Mute = enabled };
+        await PublishZoneStateChangedAsync().ConfigureAwait(false);
+        return Result.Success();
+    }
+
     public async Task<Result> ToggleMuteAsync()
     {
         await _stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            return await SetMuteAsync(!_currentState.Mute).ConfigureAwait(false);
+            LogZoneAction(_zoneIndex, _config.Name, _currentState.Mute ? "Unmute" : "Mute");
+            return await SetMuteInternalAsync(!_currentState.Mute).ConfigureAwait(false);
         }
         finally
         {

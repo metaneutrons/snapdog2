@@ -86,7 +86,8 @@ public partial class ClientManager : IClientManager
             clientIndex,
             snapcastClient.Value,
             this._clientConfigs[clientIndex - 1],
-            this._snapcastService
+            this._snapcastService,
+            this._snapcastStateRepository
         );
         return Result<IClient>.Success(client);
     }
@@ -186,6 +187,8 @@ public partial class ClientManager : IClientManager
                 return Result.Failure($"Client {clientIndex} has no valid ID");
             }
 
+            this._logger.LogDebug("Found client {ClientIndex} with Snapcast ID: {SnapcastClientId}", clientIndex, snapcastClientId);
+
             // Get target zone's stream ID
             var zoneConfigs = _configuration.Zones;
             if (zoneIndex < 1 || zoneIndex > zoneConfigs.Count)
@@ -195,6 +198,8 @@ public partial class ClientManager : IClientManager
 
             var targetZoneConfig = zoneConfigs[zoneIndex - 1];
             var targetStreamId = ExtractStreamIdFromSink(targetZoneConfig.Sink);
+            
+            this._logger.LogDebug("Target zone {ZoneIndex} maps to stream: {StreamId}", zoneIndex, targetStreamId);
 
             // Find or create group for target zone
             var targetGroupId = await FindOrCreateGroupForStreamAsync(targetStreamId);
@@ -203,18 +208,39 @@ public partial class ClientManager : IClientManager
                 return Result.Failure($"Failed to find or create group for zone {zoneIndex}");
             }
 
+            this._logger.LogDebug("Using group {GroupId} for zone {ZoneIndex}", targetGroupId, zoneIndex);
+
             // Move client to target group
             var result = await _snapcastService.SetClientGroupAsync(snapcastClientId, targetGroupId);
             if (result.IsFailure)
             {
+                this._logger.LogWarning("Failed to move client {ClientId} to group {GroupId}: {Error}", 
+                    snapcastClientId, targetGroupId, result.ErrorMessage);
                 return Result.Failure($"Failed to move client to zone {zoneIndex}: {result.ErrorMessage}");
             }
 
-            this.LogAssigningClientToZone(clientIndex, zoneIndex);
+            // Refresh server state to update our local repository
+            this._logger.LogDebug("Refreshing server state after zone assignment");
+            var serverStatusResult = await _snapcastService.GetServerStatusAsync();
+            if (serverStatusResult.IsSuccess)
+            {
+                // The GetServerStatusAsync should trigger state repository updates via event handlers
+                this._logger.LogDebug("Server state refreshed successfully");
+            }
+            else
+            {
+                this._logger.LogWarning("Failed to refresh server state after zone assignment: {Error}", 
+                    serverStatusResult.ErrorMessage);
+            }
+
+            this._logger.LogInformation("Successfully assigned client {ClientIndex} ({ClientId}) to zone {ZoneIndex} (group {GroupId})", 
+                clientIndex, snapcastClientId, zoneIndex, targetGroupId);
+            
             return Result.Success();
         }
         catch (Exception ex)
         {
+            this._logger.LogError(ex, "Error assigning client {ClientIndex} to zone {ZoneIndex}", clientIndex, zoneIndex);
             return Result.Failure($"Error assigning client {clientIndex} to zone {zoneIndex}: {ex.Message}");
         }
     }
@@ -229,27 +255,44 @@ public partial class ClientManager : IClientManager
 
             if (existingGroup.Id != null)
             {
+                this._logger.LogDebug("Found existing group {GroupId} for stream {StreamId}", existingGroup.Id, streamId);
                 return existingGroup.Id;
             }
 
-            // No existing group for this stream, need to create one
-            // For now, we'll use an existing group and change its stream
-            // This is a limitation of the current Snapcast library
-            var anyGroup = allGroups.FirstOrDefault();
-            if (anyGroup.Id != null)
+            // No existing group for this stream, find a group to assign to this stream
+            // Prefer groups with no stream assigned (stream == null)
+            var availableGroup = allGroups.FirstOrDefault(g => string.IsNullOrEmpty(g.StreamId));
+            
+            // If no unassigned group, use any group (we'll reassign it)
+            if (availableGroup.Id == null)
             {
+                availableGroup = allGroups.FirstOrDefault();
+            }
+
+            if (availableGroup.Id != null)
+            {
+                this._logger.LogDebug("Assigning group {GroupId} to stream {StreamId}", availableGroup.Id, streamId);
+                
                 // Set the group to use our target stream
-                var result = await _snapcastService.SetGroupStreamAsync(anyGroup.Id, streamId);
+                var result = await _snapcastService.SetGroupStreamAsync(availableGroup.Id, streamId);
                 if (result.IsSuccess)
                 {
-                    return anyGroup.Id;
+                    this._logger.LogDebug("Successfully assigned group {GroupId} to stream {StreamId}", availableGroup.Id, streamId);
+                    return availableGroup.Id;
+                }
+                else
+                {
+                    this._logger.LogWarning("Failed to assign group {GroupId} to stream {StreamId}: {Error}", 
+                        availableGroup.Id, streamId, result.ErrorMessage);
                 }
             }
 
+            this._logger.LogWarning("No available groups found for stream {StreamId}", streamId);
             return null;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            this._logger.LogError(ex, "Error finding or creating group for stream {StreamId}", streamId);
             return null;
         }
     }
@@ -274,18 +317,21 @@ public partial class ClientManager : IClientManager
         internal readonly SnapcastClient.Models.SnapClient _snapcastClient;
         private readonly ClientConfig _config;
         private readonly ISnapcastService _snapcastService;
+        private readonly ISnapcastStateRepository _snapcastStateRepository;
 
         public SnapDogClient(
             int id,
             SnapcastClient.Models.SnapClient snapcastClient,
             ClientConfig config,
-            ISnapcastService snapcastService
+            ISnapcastService snapcastService,
+            ISnapcastStateRepository snapcastStateRepository
         )
         {
             this.Id = id;
             this._snapcastClient = snapcastClient;
             this._config = config;
             this._snapcastService = snapcastService;
+            this._snapcastStateRepository = snapcastStateRepository;
         }
 
         public int Id { get; }
@@ -296,7 +342,40 @@ public partial class ClientManager : IClientManager
         internal int Volume => this._snapcastClient.Config.Volume.Percent;
         internal bool Muted => this._snapcastClient.Config.Volume.Muted;
         internal int LatencyMs => this._snapcastClient.Config.Latency;
-        internal int ZoneIndex => this._config.DefaultZone; // TODO: Get actual zone from Snapcast groups
+        internal int ZoneIndex => GetActualZoneFromSnapcast();
+
+        private int GetActualZoneFromSnapcast()
+        {
+            try
+            {
+                // Find the group this client belongs to
+                var allGroups = _snapcastStateRepository.GetAllGroups();
+                var clientGroup = allGroups.FirstOrDefault(g => 
+                    g.Clients.Any(c => c.Id == _snapcastClient.Id));
+
+                if (clientGroup.Id == null || string.IsNullOrEmpty(clientGroup.StreamId))
+                {
+                    // No group or no stream assigned, return default zone
+                    return _config.DefaultZone;
+                }
+
+                // Map stream ID to zone index
+                // Zone1 -> 1, Zone2 -> 2, etc.
+                if (clientGroup.StreamId.StartsWith("Zone") && 
+                    int.TryParse(clientGroup.StreamId.Substring(4), out int zoneIndex))
+                {
+                    return zoneIndex;
+                }
+
+                // If we can't parse the stream ID, return default zone
+                return _config.DefaultZone;
+            }
+            catch
+            {
+                // On any error, return default zone
+                return _config.DefaultZone;
+            }
+        }
         internal string MacAddress => this._snapcastClient.Host.Mac;
         internal string IpAddress => this._snapcastClient.Host.Ip;
         internal DateTime LastSeenUtc =>

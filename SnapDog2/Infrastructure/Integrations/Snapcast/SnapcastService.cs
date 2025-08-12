@@ -600,13 +600,17 @@ public partial class SnapcastService
             return Result.Failure("Service has been disposed");
         }
 
+        this._logger.LogDebug("Setting group {GroupId} to stream {StreamId}", groupId, streamId);
+
         try
         {
             await this._snapcastClient.GroupSetStreamAsync(groupId, streamId).ConfigureAwait(false);
+            this._logger.LogDebug("Successfully set group {GroupId} to stream {StreamId}", groupId, streamId);
             return Result.Success();
         }
         catch (Exception ex)
         {
+            this._logger.LogError(ex, "Failed to set group {GroupId} to stream {StreamId}", groupId, streamId);
             this.LogOperationFailed(nameof(this.SetGroupStreamAsync), ex);
             return Result.Failure(ex);
         }
