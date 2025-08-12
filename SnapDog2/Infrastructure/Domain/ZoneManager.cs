@@ -315,6 +315,15 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         await _stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
+            // Check if we have a valid track to play
+            if (_currentState.Track == null || 
+                string.IsNullOrEmpty(_currentState.Track.Id) || 
+                _currentState.Track.Id == "none" ||
+                _currentState.Track.Source == "none")
+            {
+                return Result.Failure("No track available to play. Please set a playlist or track first.");
+            }
+
             // Start media playback
             var playResult = await _mediaPlayerService
                 .PlayAsync(_zoneIndex, _currentState.Track!)
