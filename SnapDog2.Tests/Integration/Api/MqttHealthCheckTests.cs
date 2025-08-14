@@ -11,12 +11,12 @@ using SnapDog2.Core.Configuration;
 using SnapDog2.Tests.Integration.Fixtures;
 
 [Collection("IntegrationContainers")]
-public class HealthWithMosquittoTests : IClassFixture<IntegrationWebApplicationFactory>
+public class MqttHealthCheckTests : IClassFixture<MqttIntegrationWebApplicationFactory>
 {
-    private readonly IntegrationWebApplicationFactory _factory;
+    private readonly MqttIntegrationWebApplicationFactory _factory;
     private readonly HttpClient _client;
 
-    public HealthWithMosquittoTests(IntegrationWebApplicationFactory factory)
+    public MqttHealthCheckTests(MqttIntegrationWebApplicationFactory factory)
     {
         _factory = factory;
         _client = _factory.CreateClient();
@@ -53,12 +53,12 @@ public class HealthWithMosquittoTests : IClassFixture<IntegrationWebApplicationF
     }
 }
 
-public class IntegrationWebApplicationFactory : CustomWebApplicationFactory
+public class MqttIntegrationWebApplicationFactory : CustomWebApplicationFactory
 {
     private readonly Dictionary<string, string?> _originalValues = new();
     private static readonly object _lock = new object();
 
-    public IntegrationWebApplicationFactory()
+    public MqttIntegrationWebApplicationFactory()
     {
         // Pull broker host/port from environment, set by test bootstrap
         var mqttHost = Environment.GetEnvironmentVariable("SNAPDOG_TEST_MQTT_HOST") ?? "localhost";

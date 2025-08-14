@@ -3,7 +3,7 @@ namespace SnapDog2.Tests.Integration.Internal;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 
-public class DiSmokeTests
+public class DependencyInjectionTests
 {
     [Fact]
     public void ServiceCollection_ShouldBuild_WithCoreManagersRegistered()

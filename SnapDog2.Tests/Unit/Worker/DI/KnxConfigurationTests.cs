@@ -7,7 +7,7 @@ using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Extensions.DependencyInjection;
 
-public class KnxServiceConfigurationTests
+public class KnxConfigurationTests
 {
     [Fact]
     public void AddKnxService_WhenEnabled_ShouldRegisterActualService()

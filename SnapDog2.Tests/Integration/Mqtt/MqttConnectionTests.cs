@@ -5,11 +5,11 @@ using FluentAssertions;
 using SnapDog2.Tests.Integration.Fixtures;
 
 [Collection("IntegrationContainers")]
-public class MqttSmokeTests
+public class MqttConnectionTests
 {
     private readonly TestcontainersFixture _fixture;
 
-    public MqttSmokeTests(TestcontainersFixture fixture)
+    public MqttConnectionTests(TestcontainersFixture fixture)
     {
         _fixture = fixture;
     }
