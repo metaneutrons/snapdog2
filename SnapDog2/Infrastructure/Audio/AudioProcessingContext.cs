@@ -12,7 +12,7 @@ using SnapDog2.Core.Models;
 public sealed class AudioProcessingContext : IAsyncDisposable, IDisposable
 {
     private readonly LibVLC _libvlc;
-    private readonly MediaPlayer _mediaPlayer;
+    private readonly LibVLCSharp.Shared.MediaPlayer _mediaPlayer;
     private readonly ILogger _logger;
     private readonly DirectoryInfo _tempDirectory;
     private bool _disposed;
@@ -29,7 +29,7 @@ public sealed class AudioProcessingContext : IAsyncDisposable, IDisposable
     {
         var args = config.LibVLCArgs;
         _libvlc = new LibVLC(args);
-        _mediaPlayer = new MediaPlayer(_libvlc);
+        _mediaPlayer = new LibVLCSharp.Shared.MediaPlayer(_libvlc);
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         var tempDir = tempDirectory ?? config.TempDirectory;

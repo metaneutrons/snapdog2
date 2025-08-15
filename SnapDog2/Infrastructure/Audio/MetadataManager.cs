@@ -31,8 +31,8 @@ public sealed class MetadataManager
         {
             _logger.LogDebug("Starting metadata extraction for media: {MediaMrl}", media.Mrl);
 
-            // Parse the media to extract metadata (synchronous in LibVLCSharp)
-            var parseResult = media.Parse(MediaParseOptions.ParseNetwork);
+            // Parse the media to extract metadata (asynchronous in LibVLCSharp)
+            var parseResult = await media.Parse(MediaParseOptions.ParseNetwork);
 
             if (parseResult != MediaParsedStatus.Done)
             {
@@ -151,12 +151,13 @@ public sealed class MetadataManager
             }
 
             // Find the first audio track
-            var audioTrack = tracks.FirstOrDefault(t => t.TrackType == TrackType.Audio);
-            if (audioTrack == null || audioTrack.Data.Audio == null)
+            var audioTracks = tracks.Where(t => t.TrackType == TrackType.Audio).ToList();
+            if (!audioTracks.Any())
             {
                 return null;
             }
 
+            var audioTrack = audioTracks.First();
             var audioData = audioTrack.Data.Audio;
 
             return new TechnicalDetails
