@@ -25,21 +25,34 @@ public class ZoneMqttConfig
     [Env(Key = "TRACK_SET_TOPIC", Default = "track/set")]
     public string TrackSetTopic { get; set; } = "track/set";
 
+    [Env(Key = "TRACK_NEXT_TOPIC", Default = "next")]
+    public string TrackNextTopic { get; set; } = "next";
+
+    [Env(Key = "TRACK_PREVIOUS_TOPIC", Default = "previous")]
+    public string TrackPreviousTopic { get; set; } = "previous";
+
     [Env(Key = "TRACK_TOPIC", Default = "track")]
     public string TrackTopic { get; set; } = "track";
 
     [Env(Key = "TRACK_INFO_TOPIC", Default = "track/info")]
     public string TrackInfoTopic { get; set; } = "track/info";
 
-    [Env(Key = "TRACK_REPEAT_SET_TOPIC", Default = "track_repeat/set")]
-    public string TrackRepeatSetTopic { get; set; } = "track_repeat/set";
+    // Track repeat topics (aligned with StatusIds)
+    [Env(Key = "TRACK_REPEAT_SET_TOPIC", Default = "repeat/track")]
+    public string TrackRepeatSetTopic { get; set; } = "repeat/track";
 
-    [Env(Key = "TRACK_REPEAT_TOPIC", Default = "track_repeat")]
-    public string TrackRepeatTopic { get; set; } = "track_repeat";
+    [Env(Key = "TRACK_REPEAT_TOPIC", Default = "repeat/track")]
+    public string TrackRepeatTopic { get; set; } = "repeat/track";
 
     // Playlist topics
     [Env(Key = "PLAYLIST_SET_TOPIC", Default = "playlist/set")]
     public string PlaylistSetTopic { get; set; } = "playlist/set";
+
+    [Env(Key = "PLAYLIST_NEXT_TOPIC", Default = "playlist/next")]
+    public string PlaylistNextTopic { get; set; } = "playlist/next";
+
+    [Env(Key = "PLAYLIST_PREVIOUS_TOPIC", Default = "playlist/previous")]
+    public string PlaylistPreviousTopic { get; set; } = "playlist/previous";
 
     [Env(Key = "PLAYLIST_TOPIC", Default = "playlist")]
     public string PlaylistTopic { get; set; } = "playlist";
@@ -47,17 +60,19 @@ public class ZoneMqttConfig
     [Env(Key = "PLAYLIST_INFO_TOPIC", Default = "playlist/info")]
     public string PlaylistInfoTopic { get; set; } = "playlist/info";
 
-    [Env(Key = "PLAYLIST_REPEAT_SET_TOPIC", Default = "playlist_repeat/set")]
-    public string PlaylistRepeatSetTopic { get; set; } = "playlist_repeat/set";
+    // Playlist repeat topics (aligned with StatusIds)
+    [Env(Key = "PLAYLIST_REPEAT_SET_TOPIC", Default = "repeat/set")]
+    public string PlaylistRepeatSetTopic { get; set; } = "repeat/set";
 
-    [Env(Key = "PLAYLIST_REPEAT_TOPIC", Default = "playlist_repeat")]
-    public string PlaylistRepeatTopic { get; set; } = "playlist_repeat";
+    [Env(Key = "PLAYLIST_REPEAT_TOPIC", Default = "repeat")]
+    public string PlaylistRepeatTopic { get; set; } = "repeat";
 
-    [Env(Key = "PLAYLIST_SHUFFLE_SET_TOPIC", Default = "playlist_shuffle/set")]
-    public string PlaylistShuffleSetTopic { get; set; } = "playlist_shuffle/set";
+    // Playlist shuffle topics (simplified structure)
+    [Env(Key = "PLAYLIST_SHUFFLE_SET_TOPIC", Default = "shuffle/set")]
+    public string PlaylistShuffleSetTopic { get; set; } = "shuffle/set";
 
-    [Env(Key = "PLAYLIST_SHUFFLE_TOPIC", Default = "playlist_shuffle")]
-    public string PlaylistShuffleTopic { get; set; } = "playlist_shuffle";
+    [Env(Key = "PLAYLIST_SHUFFLE_TOPIC", Default = "shuffle")]
+    public string PlaylistShuffleTopic { get; set; } = "shuffle";
 
     // Volume and mute topics
     [Env(Key = "VOLUME_SET_TOPIC", Default = "volume/set")]
