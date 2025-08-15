@@ -40,7 +40,7 @@ ENV DEBUG_LEVEL=info
 ENV FILTERS=single,pace:queue
 ENV KNXD_OPTS=""
 
-# Expose KNX ports
+# Expose KNX ports - both TCP and UDP to work with Testcontainers
 EXPOSE 3671/udp 6720/tcp
 
 # Use tini as init system and run as knxd user
