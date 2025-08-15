@@ -495,7 +495,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         await _stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            return await SetVolumeInternalAsync(volume).ConfigureAwait(false);
+            return SetVolumeInternal(volume);
         }
         finally
         {
@@ -503,7 +503,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         }
     }
 
-    private async Task<Result> SetVolumeInternalAsync(int volume)
+    private Result SetVolumeInternal(int volume)
     {
         var clampedVolume = Math.Clamp(volume, 0, 100);
 
@@ -529,7 +529,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         {
             var newVolume = Math.Clamp(_currentState.Volume + step, 0, 100);
             LogZoneAction(_zoneIndex, _config.Name, $"Set volume to {newVolume}");
-            return await SetVolumeInternalAsync(newVolume).ConfigureAwait(false);
+            return SetVolumeInternal(newVolume);
         }
         finally
         {
@@ -544,7 +544,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         {
             var newVolume = Math.Clamp(_currentState.Volume - step, 0, 100);
             LogZoneAction(_zoneIndex, _config.Name, $"Set volume to {newVolume}");
-            return await SetVolumeInternalAsync(newVolume).ConfigureAwait(false);
+            return SetVolumeInternal(newVolume);
         }
         finally
         {
