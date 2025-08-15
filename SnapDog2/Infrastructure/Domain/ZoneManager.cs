@@ -711,13 +711,21 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     public async Task<Result> ToggleTrackRepeatAsync()
     {
+        _logger.LogInformation("Zone {ZoneIndex}: Acquiring state lock for track repeat toggle", _zoneIndex);
         await _stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            return await SetTrackRepeatAsync(!_currentState.TrackRepeat).ConfigureAwait(false);
+            _logger.LogInformation("Zone {ZoneIndex}: State lock acquired, toggling track repeat", _zoneIndex);
+            var newValue = !_currentState.TrackRepeat;
+            LogZoneAction(_zoneIndex, _config.Name, newValue ? "Enable track repeat" : "Disable track repeat");
+            _currentState = _currentState with { TrackRepeat = newValue };
+            PublishZoneStateChangedAsync();
+            _logger.LogInformation("Zone {ZoneIndex}: Track repeat toggle completed", _zoneIndex);
+            return Result.Success();
         }
         finally
         {
+            _logger.LogInformation("Zone {ZoneIndex}: Releasing state lock", _zoneIndex);
             _stateLock.Release();
         }
     }
@@ -829,7 +837,11 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         await _stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            return await SetPlaylistShuffleAsync(!_currentState.PlaylistShuffle).ConfigureAwait(false);
+            var newValue = !_currentState.PlaylistShuffle;
+            LogZoneAction(_zoneIndex, _config.Name, newValue ? "Enable playlist shuffle" : "Disable playlist shuffle");
+            _currentState = _currentState with { PlaylistShuffle = newValue };
+            PublishZoneStateChangedAsync();
+            return Result.Success();
         }
         finally
         {
@@ -859,7 +871,11 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         await _stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            return await SetPlaylistRepeatAsync(!_currentState.PlaylistRepeat).ConfigureAwait(false);
+            var newValue = !_currentState.PlaylistRepeat;
+            LogZoneAction(_zoneIndex, _config.Name, newValue ? "Enable playlist repeat" : "Disable playlist repeat");
+            _currentState = _currentState with { PlaylistRepeat = newValue };
+            PublishZoneStateChangedAsync();
+            return Result.Success();
         }
         finally
         {

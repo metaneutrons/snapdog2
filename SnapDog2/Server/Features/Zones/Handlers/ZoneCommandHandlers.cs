@@ -590,7 +590,10 @@ public partial class ToggleTrackRepeatCommandHandler : ICommandHandler<ToggleTra
         }
 
         var zone = zoneResult.Value!;
-        return await zone.ToggleTrackRepeatAsync().ConfigureAwait(false);
+        var result = await zone.ToggleTrackRepeatAsync().ConfigureAwait(false);
+
+        this.LogToggleTrackRepeatCompleted(request.ZoneIndex, result.IsSuccess);
+        return result;
     }
 
     [LoggerMessage(9031, LogLevel.Information, "Toggling track repeat for Zone {ZoneIndex} from {Source}")]
@@ -598,6 +601,13 @@ public partial class ToggleTrackRepeatCommandHandler : ICommandHandler<ToggleTra
 
     [LoggerMessage(9032, LogLevel.Warning, "Zone {ZoneIndex} not found for {CommandName}")]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
+
+    [LoggerMessage(
+        9033,
+        LogLevel.Information,
+        "Toggle track repeat completed for Zone {ZoneIndex}, Success: {Success}"
+    )]
+    private partial void LogToggleTrackRepeatCompleted(int zoneIndex, bool success);
 }
 
 /// <summary>
