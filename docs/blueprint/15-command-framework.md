@@ -137,8 +137,8 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 | Command ID              | Env Var Suffix             | Default Rel. Topic   | Example Payloads                   | Notes                     |
 | :---------------------- | :------------------------- | :------------------- | :--------------------------------- | :------------------------ |
 | `TRACK`                 | `_TRACK_SET_TOPIC`         | `track/set`          | `<index>`, `"+"` , `"-"`         | **1-based** index       |
-| `TRACK_REPEAT`          | `_TRACK_REPEAT_SET_TOPIC`  | `track_repeat/set`   | `"true"`/`"false"`, `"1"`/`"0"`  |                           |
-| `TRACK_REPEAT_TOGGLE`   | `_TRACK_REPEAT_SET_TOPIC`  | `track_repeat/set`   | `"toggle"`                         |                           |
+| `TRACK_REPEAT`          | `_TRACK_REPEAT_SET_TOPIC`  | `repeat/track`      | `"true"`/`"false"`, `"1"`/`"0"`  |                           |
+| `TRACK_REPEAT_TOGGLE`   | `_TRACK_REPEAT_SET_TOPIC`  | `repeat/track`      | `"toggle"`                         |                           |
 
 **Playlist Management**
 
@@ -148,7 +148,7 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 | `PLAYLIST_REPEAT`         | `_PLAYLIST_REPEAT_SET_TOPIC` | `repeat/set`| `"true"`/`"false"`, `"1"`/`"0"`  |                           |
 | `PLAYLIST_REPEAT_TOGGLE`  | `_PLAYLIST_REPEAT_SET_TOPIC` | `repeat/set`| `"toggle"`                         |                           |
 | `PLAYLIST_SHUFFLE`        | `_PLAYLIST_SHUFFLE_SET_TOPIC`| `shuffle/set` | `"true"`/`"false"`, `"1"`/`"0"`  |                           |
-| `PLAYLIST_SHUFFLE_TOGGLE` | `_PLAYLIST_SHUFFLE_SET_TOPIC`| `playlist_shuffle/set` | `"toggle"`                         |                           |
+| `PLAYLIST_SHUFFLE_TOGGLE` | `_PLAYLIST_SHUFFLE_SET_TOPIC`| `shuffle/set` | `"toggle"`                         |                           |
 
 **Volume/Mute Control**
 
@@ -219,8 +219,8 @@ This topic accepts various string payloads to control multiple aspects:
 | `PLAYLIST_PREVIOUS`       | `playlist_previous`                  |
 | `PLAYLIST_SHUFFLE`        | `shuffle_on`, `shuffle_off`          |
 | `PLAYLIST_SHUFFLE_TOGGLE` | `shuffle_toggle`                     |
-| `PLAYLIST_REPEAT`         | `playlist_repeat_on`, `playlist_repeat_off` |
-| `PLAYLIST_REPEAT_TOGGLE`  | `playlist_repeat_toggle`             |
+| `PLAYLIST_REPEAT`         | `repeat_on`, `repeat_off` |
+| `PLAYLIST_REPEAT_TOGGLE`  | `repeat_toggle`             |
 | `MUTE`                    | `mute_on`, `mute_off`                |
 | `MUTE_TOGGLE`             | `mute_toggle`                        |
 | `VOLUME`                  | `volume <level>` (0-100)             |
@@ -236,7 +236,7 @@ This topic publishes simple string representations for various states:
 | `PLAYBACK_STATE`        | `play`, `pause`, `stop`                       |
 | `TRACK_REPEAT_STATUS`   | `track_repeat_on`, `track_repeat_off`         |
 | `PLAYLIST_SHUFFLE_STATUS`| `shuffle_on`, `shuffle_off`                   |
-| `PLAYLIST_REPEAT_STATUS`| `playlist_repeat_on`, `playlist_repeat_off`   |
+| `PLAYLIST_REPEAT_STATUS`| `repeat_on`, `repeat_off`   |
 | `MUTE_STATUS`           | `mute_on`, `mute_off`                         |
 
 ### 14.3.3. Zone KNX Implementation
