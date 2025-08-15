@@ -1,30 +1,30 @@
-# 24. DRY Transformation Architecture
+# 23. DRY Transformation Architecture
 
-## 24.1. Overview
+## 23.1. Overview
 
 This blueprint defines the comprehensive DRY (Don't Repeat Yourself) transformation architecture implemented in SnapDog2, establishing standards for identifier management, code maintainability, and type safety. The transformation eliminates all hardcoded strings from the notification and command systems through a sophisticated attribute-based architecture.
 
-## 24.2. Architectural Principles
+## 23.2. Architectural Principles
 
-### 24.2.1. Single Source of Truth
+### 23.2.1. Single Source of Truth
 
 All system identifiers (status IDs, command IDs) are defined once using type-safe attributes and accessed through compile-time validated methods. This eliminates duplication and ensures consistency across all layers.
 
-### 24.2.2. Type Safety
+### 23.2.2. Type Safety
 
 The attribute system provides compile-time validation, preventing identifier mismatches and enabling safe refactoring operations across the entire codebase.
 
-### 24.2.3. Blueprint Integration
+### 23.2.3. Blueprint Integration
 
 All attributes include blueprint references, creating direct traceability from code to documentation and ensuring architectural consistency.
 
-### 24.2.4. Developer Experience
+### 23.2.4. Developer Experience
 
 The system provides IntelliSense support, clear error messages, and automated validation, enhancing developer productivity and reducing errors.
 
-## 24.3. Attribute System Architecture
+## 23.3. Attribute System Architecture
 
-### 24.3.1. StatusIdAttribute
+### 23.3.1. StatusIdAttribute
 
 ```csharp
 [AttributeUsage(AttributeTargets.Class)]
@@ -62,7 +62,7 @@ public record ClientVolumeChangedNotification : INotification
 var statusId = StatusIdAttribute.GetStatusId<ClientVolumeChangedNotification>();
 ```
 
-### 24.3.2. CommandIdAttribute
+### 23.3.2. CommandIdAttribute
 
 ```csharp
 [AttributeUsage(AttributeTargets.Class)]
@@ -100,11 +100,11 @@ public record SetClientVolumeCommand : ICommand<Result>
 var commandId = CommandIdAttribute.GetCommandId<SetClientVolumeCommand>();
 ```
 
-## 24.4. Implementation Categories
+## 23.4. Implementation Categories
 
-### 24.4.1. Notification System (19 Classes)
+### 23.4.1. Notification System (19 Classes)
 
-#### 24.4.1.1. Client Notifications (6 Classes)
+#### 23.4.1.1. Client Notifications (6 Classes)
 
 - `ClientVolumeChangedNotification` → `[StatusId("CLIENT_VOLUME")]`
 - `ClientMuteChangedNotification` → `[StatusId("CLIENT_MUTE")]`
@@ -113,7 +113,7 @@ var commandId = CommandIdAttribute.GetCommandId<SetClientVolumeCommand>();
 - `ClientConnectionChangedNotification` → `[StatusId("CLIENT_CONNECTED")]`
 - `ClientStateChangedNotification` → `[StatusId("CLIENT_STATE")]`
 
-#### 24.4.1.2. Zone Notifications (8 Classes)
+#### 23.4.1.2. Zone Notifications (8 Classes)
 
 - `ZonePlaybackStateChangedNotification` → `[StatusId("ZONE_PLAYBACK_STATE")]`
 - `ZoneVolumeChangedNotification` → `[StatusId("ZONE_VOLUME")]`
@@ -124,32 +124,32 @@ var commandId = CommandIdAttribute.GetCommandId<SetClientVolumeCommand>();
 - `ZoneShuffleModeChangedNotification` → `[StatusId("ZONE_SHUFFLE_MODE")]`
 - `ZoneStateChangedNotification` → `[StatusId("ZONE_STATE")]`
 
-#### 24.4.1.3. Global Notifications (4 Classes)
+#### 23.4.1.3. Global Notifications (4 Classes)
 
 - `SystemStatusChangedNotification` → `[StatusId("SYSTEM_STATUS")]`
 - `VersionInfoChangedNotification` → `[StatusId("VERSION_INFO")]`
 - `ServerStatsChangedNotification` → `[StatusId("SERVER_STATS")]`
 - `SystemErrorNotification` → `[StatusId("SYSTEM_ERROR")]`
 
-#### 24.4.1.4. Generic Infrastructure (1 Class)
+#### 23.4.1.4. Generic Infrastructure (1 Class)
 
 - `StatusChangedNotification` → Uses dynamic strings for protocol-agnostic status updates
 
-### 24.4.2. Command System (22 Classes)
+### 23.4.2. Command System (22 Classes)
 
-#### 24.4.2.1. Client Commands (3 Classes)
+#### 23.4.2.1. Client Commands (3 Classes)
 
 - `SetClientVolumeCommand` → `[CommandId("SET_CLIENT_VOLUME", "CV-002")]`
 - `SetClientMuteCommand` → `[CommandId("SET_CLIENT_MUTE", "CM-002")]`
 - `ToggleClientMuteCommand` → `[CommandId("TOGGLE_CLIENT_MUTE", "CM-003")]`
 
-#### 24.4.2.2. Zone Playback Commands (3 Classes)
+#### 23.4.2.2. Zone Playback Commands (3 Classes)
 
 - `PlayCommand` → `[CommandId("ZONE_PLAY", "ZP-002")]`
 - `PauseCommand` → `[CommandId("ZONE_PAUSE", "ZP-003")]`
 - `StopCommand` → `[CommandId("ZONE_STOP", "ZP-004")]`
 
-#### 24.4.2.3. Zone Volume Commands (4 Classes)
+#### 23.4.2.3. Zone Volume Commands (4 Classes)
 
 - `SetZoneVolumeCommand` → `[CommandId("SET_ZONE_VOLUME", "ZV-002")]`
 - `SetZoneMuteCommand` → `[CommandId("SET_ZONE_MUTE", "ZM-002")]`
@@ -157,7 +157,7 @@ var commandId = CommandIdAttribute.GetCommandId<SetClientVolumeCommand>();
 - `VolumeUpCommand` → `[CommandId("ZONE_VOLUME_UP", "ZV-003")]`
 - `VolumeDownCommand` → `[CommandId("ZONE_VOLUME_DOWN", "ZV-004")]`
 
-#### 24.4.2.4. Zone Track Commands (5 Classes)
+#### 23.4.2.4. Zone Track Commands (5 Classes)
 
 - `SetTrackCommand` → `[CommandId("SET_TRACK", "ZT-002")]`
 - `NextTrackCommand` → `[CommandId("NEXT_TRACK", "ZT-003")]`
@@ -165,7 +165,7 @@ var commandId = CommandIdAttribute.GetCommandId<SetClientVolumeCommand>();
 - `SetTrackRepeatCommand` → `[CommandId("SET_TRACK_REPEAT", "ZTR-001")]`
 - `ToggleTrackRepeatCommand` → `[CommandId("TOGGLE_TRACK_REPEAT", "ZTR-002")]`
 
-#### 24.4.2.5. Zone Playlist Commands (7 Classes)
+#### 23.4.2.5. Zone Playlist Commands (7 Classes)
 
 - `SetPlaylistCommand` → `[CommandId("SET_PLAYLIST", "ZPL-002")]`
 - `NextPlaylistCommand` → `[CommandId("NEXT_PLAYLIST", "ZPL-003")]`
@@ -175,9 +175,9 @@ var commandId = CommandIdAttribute.GetCommandId<SetClientVolumeCommand>();
 - `SetPlaylistShuffleCommand` → `[CommandId("SET_PLAYLIST_SHUFFLE", "ZPLS-001")]`
 - `TogglePlaylistShuffleCommand` → `[CommandId("TOGGLE_PLAYLIST_SHUFFLE", "ZPLS-002")]`
 
-## 24.5. Integration Patterns
+## 23.5. Integration Patterns
 
-### 24.5.1. Notification Handler Pattern
+### 23.5.1. Notification Handler Pattern
 
 ```csharp
 public class ClientStateNotificationHandler : INotificationHandler<ClientVolumeChangedNotification>
@@ -194,7 +194,7 @@ public class ClientStateNotificationHandler : INotificationHandler<ClientVolumeC
 }
 ```
 
-### 24.5.2. Command Processing Pattern
+### 23.5.2. Command Processing Pattern
 
 ```csharp
 public class MqttService
@@ -216,9 +216,9 @@ public class MqttService
 }
 ```
 
-## 24.6. Quality Assurance
+## 23.6. Quality Assurance
 
-### 24.6.1. Compile-Time Validation
+### 23.6.1. Compile-Time Validation
 
 The attribute system provides compile-time validation through:
 
@@ -226,7 +226,7 @@ The attribute system provides compile-time validation through:
 - Reflection-based attribute retrieval with clear error messages
 - Type safety preventing identifier mismatches
 
-### 24.6.2. Runtime Validation
+### 23.6.2. Runtime Validation
 
 ```csharp
 // Throws InvalidOperationException if attribute is missing
@@ -235,15 +235,15 @@ var statusId = StatusIdAttribute.GetStatusId<SomeNotification>();
 // Clear error message: "StatusIdAttribute not found on SomeNotification"
 ```
 
-### 24.6.3. Refactoring Safety
+### 23.6.3. Refactoring Safety
 
 - Rename operations work across entire codebase
 - Find all references includes attribute usage
 - Compile-time errors prevent broken references
 
-## 24.7. Blueprint Reference System
+## 23.7. Blueprint Reference System
 
-### 24.7.1. Reference Format
+### 23.7.1. Reference Format
 
 Blueprint references follow the pattern: `[CATEGORY][SUBCATEGORY]-[NUMBER]`
 
@@ -254,7 +254,7 @@ Blueprint references follow the pattern: `[CATEGORY][SUBCATEGORY]-[NUMBER]`
 - `ZP-001`: Zone Playback notification (001)
 - `ZP-002`: Zone Playback command (002)
 
-### 24.7.2. Category Mapping
+### 23.7.2. Category Mapping
 
 | Category | Description | Examples |
 |----------|-------------|----------|
@@ -280,9 +280,9 @@ Blueprint references follow the pattern: `[CATEGORY][SUBCATEGORY]-[NUMBER]`
 | STS | Server Stats | STS-001 |
 | SE | System Error | SE-001 |
 
-## 24.8. Benefits and Outcomes
+## 23.8. Benefits and Outcomes
 
-### 24.8.1. Code Quality Metrics
+### 23.8.1. Code Quality Metrics
 
 - **Hardcoded Strings**: 0 (eliminated)
 - **Code Duplication**: 0 (eliminated)
@@ -290,23 +290,23 @@ Blueprint references follow the pattern: `[CATEGORY][SUBCATEGORY]-[NUMBER]`
 - **Build Errors**: 0
 - **Test Coverage**: 100% (38/38 tests passing)
 
-### 24.8.2. Developer Experience
+### 23.8.2. Developer Experience
 
 - **IntelliSense Support**: Full support for all identifiers
 - **Refactoring Safety**: Rename operations work across codebase
 - **Error Prevention**: Compile-time validation prevents mismatches
 - **Documentation Integration**: Blueprint references in code
 
-### 24.8.3. Maintainability
+### 23.8.3. Maintainability
 
 - **Single Source of Truth**: All identifiers centralized
 - **Type Safety**: Compile-time validation
 - **Traceability**: Code to documentation mapping
 - **Consistency**: Uniform identifier access patterns
 
-## 24.9. Future Extensibility
+## 23.9. Future Extensibility
 
-### 24.9.1. Adding New Notifications
+### 23.9.1. Adding New Notifications
 
 ```csharp
 [StatusId("NEW_FEATURE_STATUS", "NF-001")]
@@ -318,7 +318,7 @@ public record NewFeatureStatusChangedNotification : INotification
 }
 ```
 
-### 24.9.2. Adding New Commands
+### 23.9.2. Adding New Commands
 
 ```csharp
 [CommandId("NEW_FEATURE_COMMAND", "NF-002")]
@@ -330,7 +330,7 @@ public record NewFeatureCommand : ICommand<Result>
 }
 ```
 
-### 24.9.3. Validation Enhancements
+### 23.9.3. Validation Enhancements
 
 Future enhancements could include:
 
@@ -339,9 +339,9 @@ Future enhancements could include:
 - Naming convention enforcement
 - Usage reporting and analytics
 
-## 24.10. Enhanced StatusId System Architecture
+## 23.10. Enhanced StatusId System Architecture
 
-### 24.10.1. Multi-Layered DRY Approach
+### 23.10.1. Multi-Layered DRY Approach
 
 Building upon the foundational attribute system, SnapDog2 implements a comprehensive multi-layered approach to eliminate hardcoded strings throughout the entire codebase. This enhanced system provides three complementary approaches for different use cases:
 
@@ -349,7 +349,7 @@ Building upon the foundational attribute system, SnapDog2 implements a comprehen
 2. **StatusIds Constants** - Strongly-typed compile-time constants
 3. **StatusEventType Enum** - Ultimate type safety with enum-based switching
 
-### 24.10.2. StatusIdRegistry Implementation
+### 23.10.2. StatusIdRegistry Implementation
 
 ```csharp
 public static class StatusIdRegistry
@@ -391,7 +391,7 @@ public static class StatusIdRegistry
 - Graceful handling of assembly loading exceptions
 - Lazy initialization with explicit control for performance
 
-### 24.10.3. StatusIds Constants Class
+### 23.10.3. StatusIds Constants Class
 
 ```csharp
 public static class StatusIds
@@ -427,7 +427,7 @@ public static class StatusIds
 - Automatic updates when notification classes change
 - Zero hardcoded strings in consuming code
 
-### 24.10.4. StatusEventType Enum System
+### 23.10.4. StatusEventType Enum System
 
 ```csharp
 public enum StatusEventType
@@ -475,7 +475,7 @@ public static class StatusEventTypeExtensions
 - Case-insensitive string parsing with null safety
 - Clear mapping between enum values and StatusId strings
 
-### 24.10.5. Enhanced MqttService Integration
+### 23.10.5. Enhanced MqttService Integration
 
 **Before (hardcoded strings)**:
 
@@ -514,9 +514,9 @@ private string? GetClientMqttTopic(string eventType, ClientConfig clientConfig)
 }
 ```
 
-### 24.10.6. Usage Patterns and Best Practices
+### 23.10.6. Usage Patterns and Best Practices
 
-#### 24.10.6.1. Constants Approach (Recommended for Simple Cases)
+#### 23.10.6.1. Constants Approach (Recommended for Simple Cases)
 
 ```csharp
 // Direct usage in service methods
@@ -533,7 +533,7 @@ var topicMappings = new Dictionary<string, string>
 };
 ```
 
-#### 24.10.6.2. Enum Approach (Best for Complex Logic)
+#### 23.10.6.2. Enum Approach (Best for Complex Logic)
 
 ```csharp
 // Type-safe parsing from external systems
@@ -550,7 +550,7 @@ if (eventType.HasValue)
 }
 ```
 
-#### 24.10.6.3. Registry Approach (Dynamic Scenarios)
+#### 23.10.6.3. Registry Approach (Dynamic Scenarios)
 
 ```csharp
 // Runtime type discovery
@@ -568,32 +568,32 @@ if (StatusIdRegistry.IsRegistered(incomingStatusId))
 }
 ```
 
-### 24.10.7. System Benefits and Metrics
+### 23.10.7. System Benefits and Metrics
 
-#### 24.10.7.1. Code Quality Improvements
+#### 23.10.7.1. Code Quality Improvements
 
 - **Hardcoded Strings**: 0 (completely eliminated)
 - **Compile-time Safety**: 100% (all status references validated)
 - **IntelliSense Support**: Full coverage for all status identifiers
 - **Refactoring Safety**: Rename operations work across entire codebase
 
-#### 24.10.7.2. Performance Characteristics
+#### 23.10.7.2. Performance Characteristics
 
 - **Enum Switches**: Compiler-optimized jump tables
 - **Registry Lookups**: O(1) dictionary access with concurrent safety
 - **Constants Access**: Direct field access with no runtime overhead
 - **Memory Usage**: Minimal overhead with lazy initialization
 
-#### 24.10.7.3. Developer Experience Enhancements
+#### 23.10.7.3. Developer Experience Enhancements
 
 - **Three Usage Approaches**: Choose the right tool for each scenario
 - **Automatic Discovery**: New StatusId attributes automatically available
 - **Clear Error Messages**: Descriptive exceptions for missing attributes
 - **Documentation Integration**: Blueprint references maintained in code
 
-### 24.10.8. Extension and Maintenance
+### 23.10.8. Extension and Maintenance
 
-#### 24.10.8.1. Adding New Status Types
+#### 23.10.8.1. Adding New Status Types
 
 ```csharp
 // 1. Add notification with StatusId attribute
@@ -614,7 +614,7 @@ NewFeatureStatus,
 // 4. Registry automatically discovers the new type
 ```
 
-#### 24.10.8.2. Validation and Testing
+#### 23.10.8.2. Validation and Testing
 
 ```csharp
 [Test]
@@ -634,22 +634,22 @@ public void AllNotificationsShouldHaveStatusIdAttributes()
 }
 ```
 
-### 24.10.9. Architecture Decision Records
+### 23.10.9. Architecture Decision Records
 
-#### 24.10.9.1. Why Three Approaches?
+#### 23.10.9.1. Why Three Approaches?
 
 - **Constants**: Simple, fast, IntelliSense-friendly for direct usage
 - **Enum**: Type-safe switching, compiler optimizations, complex logic
 - **Registry**: Dynamic scenarios, reflection-based operations, runtime discovery
 
-#### 24.10.9.2. Performance Considerations
+#### 23.10.9.2. Performance Considerations
 
 - Registry initialization is lazy and cached
 - Enum switches are compiler-optimized
 - Constants provide zero-overhead access
 - All approaches maintain thread safety
 
-#### 24.10.9.3. Maintenance Strategy
+#### 23.10.9.3. Maintenance Strategy
 
 - StatusIdAttribute remains the single source of truth
 - Constants and enum values are derived, not duplicated
@@ -658,9 +658,9 @@ public void AllNotificationsShouldHaveStatusIdAttributes()
 
 This enhanced StatusId system represents the pinnacle of DRY architecture implementation, providing multiple complementary approaches while maintaining the StatusIdAttribute as the authoritative source. The system eliminates all hardcoded strings while offering optimal performance, type safety, and developer experience across all usage scenarios.
 
-## 24.11. CommandId DRY System Architecture
+## 23.11. CommandId DRY System Architecture
 
-### 24.11.1. Comprehensive Command Management
+### 23.11.1. Comprehensive Command Management
 
 Building upon the StatusId DRY system, SnapDog2 implements an identical comprehensive approach for CommandId management. This ensures perfect architectural symmetry and consistency across all identifier types in the system.
 
@@ -670,23 +670,23 @@ The CommandId system provides the same three complementary approaches as the Sta
 2. **CommandIds Constants** - Strongly-typed compile-time constants
 3. **CommandEventType Enum** - Ultimate type safety with enum-based switching
 
-### 24.11.2. Blueprint Compliance
+### 23.11.2. Blueprint Compliance
 
 The CommandId system implements all 25 commands defined in the blueprint:
 
-#### 24.11.2.1. Zone Commands (19 total)
+#### 23.11.2.1. Zone Commands (19 total)
 
 - **Playback Control**: `PLAY`, `PAUSE`, `STOP`
 - **Volume Control**: `VOLUME`, `VOLUME_UP`, `VOLUME_DOWN`, `MUTE`, `MUTE_TOGGLE`
 - **Track Management**: `TRACK`, `TRACK_NEXT`, `TRACK_PREVIOUS`, `TRACK_REPEAT`, `TRACK_REPEAT_TOGGLE`
 - **Playlist Management**: `PLAYLIST`, `PLAYLIST_NEXT`, `PLAYLIST_PREVIOUS`, `PLAYLIST_REPEAT`, `PLAYLIST_REPEAT_TOGGLE`, `PLAYLIST_SHUFFLE`, `PLAYLIST_SHUFFLE_TOGGLE`
 
-#### 24.11.2.2. Client Commands (6 total)
+#### 23.11.2.2. Client Commands (6 total)
 
 - **Volume Control**: `CLIENT_VOLUME`, `CLIENT_MUTE`, `CLIENT_MUTE_TOGGLE`
 - **Configuration**: `CLIENT_LATENCY`, `CLIENT_ZONE`
 
-### 24.11.3. Architectural Symmetry
+### 23.11.3. Architectural Symmetry
 
 The CommandId system provides perfect symmetry with the StatusId system:
 
@@ -700,7 +700,7 @@ The CommandId system provides perfect symmetry with the StatusId system:
 | **Performance** | Optimized | Optimized |
 | **Type Safety** | 100% | 100% |
 
-### 24.11.4. Implementation Benefits
+### 23.11.4. Implementation Benefits
 
 - **Zero Hardcoded Strings**: Complete elimination across entire codebase
 - **Compile-time Safety**: All command references validated at build time
@@ -711,7 +711,7 @@ The CommandId system provides perfect symmetry with the StatusId system:
 
 This CommandId system completes the comprehensive DRY architecture transformation, providing the same level of excellence and consistency as the StatusId system while ensuring perfect blueprint compliance and optimal developer experience.
 
-## 24.12. Conclusion
+## 23.12. Conclusion
 
 The DRY transformation architecture represents a significant advancement in code quality, maintainability, and developer experience. By eliminating hardcoded strings and implementing type-safe attribute systems, SnapDog2 achieves architecture standards with perfect build quality and complete test coverage.
 
