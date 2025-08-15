@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Sockets;
 using Microsoft.AspNetCore.Connections;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Options;
 using SnapDog2.Core.Configuration;
 
@@ -15,6 +16,7 @@ public partial class StartupService : IHostedService
     private readonly IHostApplicationLifetime _applicationLifetime;
     private readonly SnapDogConfiguration _config;
     private readonly IServiceProvider _serviceProvider;
+    private readonly IWebHostEnvironment _environment;
     private readonly bool _isDebugLoggingEnabled;
 
     private const int MaxRetryAttempts = 5;
@@ -26,13 +28,15 @@ public partial class StartupService : IHostedService
         ILogger<StartupService> logger,
         IHostApplicationLifetime applicationLifetime,
         IOptions<SnapDogConfiguration> config,
-        IServiceProvider serviceProvider
+        IServiceProvider serviceProvider,
+        IWebHostEnvironment environment
     )
     {
         this._logger = logger;
         this._applicationLifetime = applicationLifetime;
         this._config = config.Value;
         this._serviceProvider = serviceProvider;
+        this._environment = environment;
 
         // Determine if debug logging is enabled
         this._isDebugLoggingEnabled =
@@ -316,13 +320,36 @@ public partial class StartupService : IHostedService
 
     private async Task ValidateExternalDependenciesAsync(CancellationToken cancellationToken)
     {
-        // Check if required directories exist and are writable
-        var requiredDirectories = new[]
+        // Skip directory validation in test environment
+        if (_environment.EnvironmentName == "Testing")
         {
-            "/var/log/snapdog2",
-            "/tmp/snapdog2",
-            Environment.GetEnvironmentVariable("SNAPDOG_DATA_PATH") ?? "/data/snapdog2",
-        };
+            this.LogDirectoryValidationSkipped();
+            return;
+        }
+
+        // Build list of required directories based on configuration
+        var requiredDirectories = new List<string>();
+
+        // Only add log directory if SNAPDOG_SYSTEM_LOG_FILE is configured
+        var systemLogFile = Environment.GetEnvironmentVariable("SNAPDOG_SYSTEM_LOG_FILE");
+        if (!string.IsNullOrEmpty(systemLogFile))
+        {
+            var logDirectory = Path.GetDirectoryName(systemLogFile);
+            if (!string.IsNullOrEmpty(logDirectory))
+            {
+                requiredDirectories.Add(logDirectory);
+            }
+        }
+
+        // Always check temp directory
+        requiredDirectories.Add("/tmp/snapdog2");
+
+        // Add data directory if configured
+        var dataPath = Environment.GetEnvironmentVariable("SNAPDOG_DATA_PATH");
+        if (!string.IsNullOrEmpty(dataPath))
+        {
+            requiredDirectories.Add(dataPath);
+        }
 
         foreach (var directory in requiredDirectories)
         {
@@ -661,6 +688,9 @@ public partial class StartupService : IHostedService
 
     [LoggerMessage(4024, LogLevel.Information, "📁 Created required directory: {Directory}")]
     private partial void LogDirectoryCreated(string directory);
+
+    [LoggerMessage(4023, LogLevel.Information, "🧪 Directory validation skipped in test environment")]
+    private partial void LogDirectoryValidationSkipped();
 
     [LoggerMessage(4025, LogLevel.Debug, "✅ Directory {Directory} is accessible and writable")]
     private partial void LogDirectoryAccessible(string directory);
