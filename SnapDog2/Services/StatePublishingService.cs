@@ -68,19 +68,19 @@ public partial class StatePublishingService : BackgroundService
     [LoggerMessage(8007, LogLevel.Information, "✅ Global system state published successfully")]
     private partial void LogGlobalStatePublished();
 
-    [LoggerMessage(8008, LogLevel.Warning, "⚠️  Failed to publish zone {ZoneIndex} state: {ErrorMessage}")]
+    [LoggerMessage(8008, LogLevel.Warning, "⚠️ Failed to publish zone {ZoneIndex} state: {ErrorMessage}")]
     private partial void LogZoneStatePublishFailed(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(8009, LogLevel.Warning, "⚠️  Failed to publish client {ClientIndex} state: {ErrorMessage}")]
+    [LoggerMessage(8009, LogLevel.Warning, "⚠️ Failed to publish client {ClientIndex} state: {ErrorMessage}")]
     private partial void LogClientStatePublishFailed(int clientIndex, string errorMessage);
 
-    [LoggerMessage(8010, LogLevel.Warning, "⚠️  Failed to publish global state: {ErrorMessage}")]
+    [LoggerMessage(8010, LogLevel.Warning, "⚠️ Failed to publish global state: {ErrorMessage}")]
     private partial void LogGlobalStatePublishFailed(string errorMessage);
 
     [LoggerMessage(8011, LogLevel.Information, "✅ Initial state publishing completed successfully")]
     private partial void LogStatePublishingCompleted();
 
-    [LoggerMessage(8012, LogLevel.Warning, "⚠️  State publishing completed with some failures")]
+    [LoggerMessage(8012, LogLevel.Warning, "⚠️ State publishing completed with some failures")]
     private partial void LogStatePublishingCompletedWithFailures();
 
     [LoggerMessage(8013, LogLevel.Information, "📴 No integration services available - skipping state publishing")]

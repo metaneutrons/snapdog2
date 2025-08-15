@@ -187,6 +187,9 @@ static WebApplication CreateWebApplication(string[] args)
     // Add command processing (Mediator, handlers, behaviors)
     builder.Services.AddCommandProcessing();
 
+    // Add HTTP client factory (required by MediaPlayerService and other services)
+    builder.Services.AddHttpClient();
+
     // Add Snapcast services
     builder.Services.AddSnapcastServices();
 

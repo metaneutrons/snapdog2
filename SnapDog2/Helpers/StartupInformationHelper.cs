@@ -80,7 +80,7 @@ public static class StartupInformationHelper
 
         if (gitVersion.UncommittedChanges > 0)
         {
-            Console.WriteLine($"   ⚠️  Uncommitted Changes: {gitVersion.UncommittedChanges}");
+            Console.WriteLine($"   ⚠️ Uncommitted Changes: {gitVersion.UncommittedChanges}");
         }
 
         Console.WriteLine($"   Build Metadata: {gitVersion.FullBuildMetaData}");
@@ -349,7 +349,7 @@ public static class StartupInformationHelper
 
             if (config.Api.AuthEnabled && config.Api.ApiKeys.Count == 0)
             {
-                Console.WriteLine("     ⚠️  Authentication is enabled but no API keys are configured!");
+                Console.WriteLine("     ⚠️ Authentication is enabled but no API keys are configured!");
             }
         }
         else

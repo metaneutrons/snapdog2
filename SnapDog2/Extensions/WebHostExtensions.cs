@@ -75,7 +75,7 @@ public static class WebHostExtensions
                     if (currentPort != preferredPort)
                     {
                         logger.Warning(
-                            "⚠️  HTTP port {PreferredPort} was not available. Using fallback port {ActualPort}",
+                            "⚠️ HTTP port {PreferredPort} was not available. Using fallback port {ActualPort}",
                             preferredPort,
                             currentPort
                         );
@@ -132,7 +132,7 @@ public static class WebHostExtensions
                     if (currentPort != preferredPort)
                     {
                         logger.LogWarning(
-                            "⚠️  HTTP port {PreferredPort} was not available. Using fallback port {ActualPort}",
+                            "⚠️ HTTP port {PreferredPort} was not available. Using fallback port {ActualPort}",
                             preferredPort,
                             currentPort
                         );
