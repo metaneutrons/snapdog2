@@ -17,7 +17,8 @@ public partial class GlobalStateNotificationHandler
     : INotificationHandler<SystemStatusChangedNotification>,
         INotificationHandler<VersionInfoChangedNotification>,
         INotificationHandler<ServerStatsChangedNotification>,
-        INotificationHandler<SystemErrorNotification>
+        INotificationHandler<SystemErrorNotification>,
+        INotificationHandler<ZonesInfoChangedNotification>
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<GlobalStateNotificationHandler> _logger;
@@ -42,6 +43,9 @@ public partial class GlobalStateNotificationHandler
 
     [LoggerMessage(6204, LogLevel.Error, "System error occurred: {ErrorCode} - {Message}")]
     private partial void LogSystemError(string errorCode, string message);
+
+    [LoggerMessage(6205, LogLevel.Information, "Zones info updated - Available zones: [{ZoneIndices}]")]
+    private partial void LogZonesInfoChange(string zoneIndices);
 
     public async Task Handle(SystemStatusChangedNotification notification, CancellationToken cancellationToken)
     {
@@ -90,6 +94,19 @@ public partial class GlobalStateNotificationHandler
         await this.PublishToExternalSystemsAsync(
             StatusIdAttribute.GetStatusId<SystemErrorNotification>(),
             notification.Error,
+            cancellationToken
+        );
+    }
+
+    public async Task Handle(ZonesInfoChangedNotification notification, CancellationToken cancellationToken)
+    {
+        var zoneIndicesStr = string.Join(", ", notification.ZoneIndices);
+        this.LogZonesInfoChange(zoneIndicesStr);
+
+        // Publish to external systems (MQTT, KNX)
+        await this.PublishToExternalSystemsAsync(
+            StatusIdAttribute.GetStatusId<ZonesInfoChangedNotification>(),
+            notification.ZoneIndices,
             cancellationToken
         );
     }

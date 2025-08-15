@@ -276,6 +276,12 @@ public partial class StatePublishingService : BackgroundService
                 cancellationToken
             );
 
+            // Publish zones info for system discovery
+            var zoneIndices =
+                this._configuration.Zones?.Select((zone, index) => index + 1) // Zones are 1-based
+                    .ToList() ?? new List<int>();
+            await mediator.PublishAsync(new ZonesInfoChangedNotification(zoneIndices), cancellationToken);
+
             return true;
         }
         catch (Exception)

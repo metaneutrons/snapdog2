@@ -78,6 +78,13 @@ public class SystemConfig
     public string MqttVersionTopic { get; set; } = "version";
 
     /// <summary>
+    /// System-wide MQTT zones topic.
+    /// Maps to: SNAPDOG_SYSTEM_MQTT_ZONES_TOPIC
+    /// </summary>
+    [Env(Key = "MQTT_ZONES_TOPIC", Default = "system/zones")]
+    public string MqttZonesTopic { get; set; } = "system/zones";
+
+    /// <summary>
     /// System-wide MQTT stats topic.
     /// Maps to: SNAPDOG_SYSTEM_MQTT_STATS_TOPIC
     /// </summary>

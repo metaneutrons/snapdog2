@@ -1099,6 +1099,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
                 "ERROR_STATUS" => $"{baseTopic}/{this._systemConfig.MqttErrorTopic}",
                 "VERSION_INFO" => $"{baseTopic}/{this._systemConfig.MqttVersionTopic}",
                 "SERVER_STATS" => $"{baseTopic}/{this._systemConfig.MqttStatsTopic}",
+                "ZONES_INFO" => $"{baseTopic}/{this._systemConfig.MqttZonesTopic}",
                 _ => null,
             };
 
