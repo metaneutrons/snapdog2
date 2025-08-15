@@ -228,8 +228,8 @@ public class IntegrationTestFixture : IAsyncLifetime
         const int containerMqttPort = 1883;
 
         // Use the same MQTT configuration as devcontainer for consistency
-        var configPath = "/Users/fabian/Source/snapdog/devcontainer/mosquitto/mosquitto.conf";
-        var passwdPath = "/Users/fabian/Source/snapdog/devcontainer/mosquitto/passwd";
+        var configPath = Path.Combine(Directory.GetCurrentDirectory(), "devcontainer", "mosquitto", "mosquitto.conf");
+        var passwdPath = Path.Combine(Directory.GetCurrentDirectory(), "devcontainer", "mosquitto", "passwd");
 
         _mqttContainer = new ContainerBuilder()
             .WithImage("eclipse-mosquitto:2.0")
