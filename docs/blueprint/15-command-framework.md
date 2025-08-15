@@ -132,23 +132,32 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 | :------------------------ | :----------------------- | :--------------------- | :--------------------------------------------- | :------------------------------- |
 | `PLAY`/`PAUSE`/`STOP` etc.| `_CONTROL_SET_TOPIC`     | `control/set`              | `"play"`, `"pause"`, `"next"`, `"shuffle_on"` | **See 13.3.2.3 for full payload list** |
 
+**Navigation Commands (Dedicated Topics)**
+
+| Command ID              | Env Var Suffix             | Default Rel. Topic   | Example Payloads                   | Notes                     |
+| :---------------------- | :------------------------- | :------------------- | :--------------------------------- | :------------------------ |
+| `TRACK_NEXT`            | `_TRACK_NEXT_TOPIC`        | `next`               | (no payload needed)                | Next track (most common) |
+| `TRACK_PREVIOUS`        | `_TRACK_PREVIOUS_TOPIC`    | `previous`           | (no payload needed)                | Previous track           |
+| `PLAYLIST_NEXT`         | `_PLAYLIST_NEXT_TOPIC`     | `playlist/next`      | (no payload needed)                | Next playlist            |
+| `PLAYLIST_PREVIOUS`     | `_PLAYLIST_PREVIOUS_TOPIC` | `playlist/previous`  | (no payload needed)                | Previous playlist        |
+
 **Track Management**
 
 | Command ID              | Env Var Suffix             | Default Rel. Topic   | Example Payloads                   | Notes                     |
 | :---------------------- | :------------------------- | :------------------- | :--------------------------------- | :------------------------ |
 | `TRACK`                 | `_TRACK_SET_TOPIC`         | `track/set`          | `<index>`, `"+"` , `"-"`         | **1-based** index       |
-| `TRACK_REPEAT`          | `_TRACK_REPEAT_SET_TOPIC`  | `repeat/track`      | `"true"`/`"false"`, `"1"`/`"0"`  |                           |
-| `TRACK_REPEAT_TOGGLE`   | `_TRACK_REPEAT_SET_TOPIC`  | `repeat/track`      | `"toggle"`                         |                           |
+| `TRACK_REPEAT`          | `_TRACK_REPEAT_SET_TOPIC`  | `repeat/track`       | `"true"`/`"false"`, `"1"`/`"0"`  |                           |
+| `TRACK_REPEAT_TOGGLE`   | `_TRACK_REPEAT_SET_TOPIC`  | `repeat/track`       | `"toggle"`                         |                           |
 
 **Playlist Management**
 
 | Command ID                | Env Var Suffix                 | Default Rel. Topic   | Example Payloads                   | Notes                     |
 | :------------------------ | :----------------------------- | :--------------------- | :--------------------------------- | :------------------------ |
 | `PLAYLIST`                | `_PLAYLIST_SET_TOPIC`        | `playlist/set`         | `<id_or_index>`, `"+"` , `"-"`   | **1=Radio**, 2+=Subsonic|
-| `PLAYLIST_REPEAT`         | `_PLAYLIST_REPEAT_SET_TOPIC` | `repeat/set`| `"true"`/`"false"`, `"1"`/`"0"`  |                           |
-| `PLAYLIST_REPEAT_TOGGLE`  | `_PLAYLIST_REPEAT_SET_TOPIC` | `repeat/set`| `"toggle"`                         |                           |
-| `PLAYLIST_SHUFFLE`        | `_PLAYLIST_SHUFFLE_SET_TOPIC`| `shuffle/set` | `"true"`/`"false"`, `"1"`/`"0"`  |                           |
-| `PLAYLIST_SHUFFLE_TOGGLE` | `_PLAYLIST_SHUFFLE_SET_TOPIC`| `shuffle/set` | `"toggle"`                         |                           |
+| `PLAYLIST_REPEAT`         | `_PLAYLIST_REPEAT_SET_TOPIC` | `repeat/set`           | `"true"`/`"false"`, `"1"`/`"0"`  |                           |
+| `PLAYLIST_REPEAT_TOGGLE`  | `_PLAYLIST_REPEAT_SET_TOPIC` | `repeat/set`           | `"toggle"`                         |                           |
+| `PLAYLIST_SHUFFLE`        | `_PLAYLIST_SHUFFLE_SET_TOPIC`| `shuffle/set`          | `"true"`/`"false"`, `"1"`/`"0"`  |                           |
+| `PLAYLIST_SHUFFLE_TOGGLE` | `_PLAYLIST_SHUFFLE_SET_TOPIC`| `shuffle/set`          | `"toggle"`                         |                           |
 
 **Volume/Mute Control**
 
@@ -176,7 +185,7 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 | :--------------------- | :--------------------- | :----------------- | :------------------------------- | :------- | :----------------------- |
 | `TRACK_INDEX`          | `_TRACK_TOPIC`         | `track`            | `1`, `3`                         | Yes      | **1-based** index      |
 | `TRACK_INFO`           | `_TRACK_INFO_TOPIC`    | `track/info`       | Full JSON `TrackInfo` object     | Yes      | Structure from Core Models |
-| `TRACK_REPEAT_STATUS`  | `_TRACK_REPEAT_TOPIC`  | `repeat/track`     | `true` / `false` (`1`/`0`)       | Yes      |                            |
+| `TRACK_REPEAT_STATUS`  | `_TRACK_REPEAT_TOPIC`  | `repeat/track`     | `true` / `false` (`1`/`0`)       | Yes      | Improved hierarchy       |
 
 **Playlist Management**
 
@@ -184,8 +193,8 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 | :------------------------ | :------------------------- | :------------------- | :--------------------------------- | :------- | :------------------------- |
 | `PLAYLIST_INDEX`          | `_PLAYLIST_TOPIC`        | `playlist`           | `1` (Radio), `2`                 | Yes      | **1-based** index        |
 | `PLAYLIST_INFO`           | `_PLAYLIST_INFO_TOPIC`   | `playlist/info`      | Full JSON `PlaylistInfo` object  | Yes      | Structure from Core Models |
-| `PLAYLIST_REPEAT_STATUS`  | `_PLAYLIST_REPEAT_TOPIC` | `repeat`    | `true` / `false` (`1`/`0`)         | Yes      |                            |
-| `PLAYLIST_SHUFFLE_STATUS` | `_PLAYLIST_SHUFFLE_TOPIC`| `shuffle`   | `true` / `false` (`1`/`0`)         | Yes      |                            |
+| `PLAYLIST_REPEAT_STATUS`  | `_PLAYLIST_REPEAT_TOPIC` | `repeat`             | `true` / `false` (`1`/`0`)         | Yes      |                            |
+| `PLAYLIST_SHUFFLE_STATUS` | `_PLAYLIST_SHUFFLE_TOPIC`| `shuffle`            | `true` / `false` (`1`/`0`)         | Yes      |                            |
 
 **Volume/Mute Control**
 
@@ -219,8 +228,8 @@ This topic accepts various string payloads to control multiple aspects:
 | `PLAYLIST_PREVIOUS`       | `playlist_previous`                  |
 | `PLAYLIST_SHUFFLE`        | `shuffle_on`, `shuffle_off`          |
 | `PLAYLIST_SHUFFLE_TOGGLE` | `shuffle_toggle`                     |
-| `PLAYLIST_REPEAT`         | `repeat_on`, `repeat_off` |
-| `PLAYLIST_REPEAT_TOGGLE`  | `repeat_toggle`             |
+| `PLAYLIST_REPEAT`         | `repeat_on`, `repeat_off`            |
+| `PLAYLIST_REPEAT_TOGGLE`  | `repeat_toggle`                      |
 | `MUTE`                    | `mute_on`, `mute_off`                |
 | `MUTE_TOGGLE`             | `mute_toggle`                        |
 | `VOLUME`                  | `volume <level>` (0-100)             |
