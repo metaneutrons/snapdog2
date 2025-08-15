@@ -83,7 +83,7 @@ public partial class IntegrationServicesHostedService : BackgroundService
     [LoggerMessage(
         5019,
         LogLevel.Warning,
-        "⚠️  SYSTEM DEGRADED: Non-critical integration services failed, but core functionality remains available. Failed: [{FailedServices}], Successful: [{SuccessfulServices}]"
+        "⚠️ SYSTEM DEGRADED: Non-critical integration services failed, but core functionality remains available. Failed: [{FailedServices}], Successful: [{SuccessfulServices}]"
     )]
     private partial void LogSystemDegraded(string failedServices, string successfulServices);
 
@@ -107,7 +107,7 @@ public partial class IntegrationServicesHostedService : BackgroundService
     [LoggerMessage(5019, LogLevel.Information, "📴 {ServiceName} service marked as disabled")]
     private partial void LogServiceDisabled(string serviceName);
 
-    [LoggerMessage(5020, LogLevel.Warning, "⚠️  Unknown service name for disabling: {ServiceName}")]
+    [LoggerMessage(5020, LogLevel.Warning, "⚠️ Unknown service name for disabling: {ServiceName}")]
     private partial void LogUnknownServiceName(string serviceName);
 
     [LoggerMessage(5021, LogLevel.Error, "❌ Failed to disable service: {ServiceName}")]

@@ -898,6 +898,22 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
     }
 
     /// <inheritdoc />
+    public void Dispose()
+    {
+        // For synchronous disposal, we need to block on the async dispose
+        // This is not ideal but necessary for DI container compatibility
+        try
+        {
+            DisposeAsync().AsTask().GetAwaiter().GetResult();
+        }
+        catch (Exception ex)
+        {
+            // Log the exception but don't throw to avoid issues during disposal
+            LogKnxDisposalError(ex.Message);
+        }
+    }
+
+    /// <inheritdoc />
     public async ValueTask DisposeAsync()
     {
         if (this._disposed)
@@ -1193,6 +1209,9 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
 
     [LoggerMessage(8038, LogLevel.Error, "Error executing KNX command {CommandType}")]
     private partial void LogCommandExecutionError(string commandType, Exception exception);
+
+    [LoggerMessage(8039, LogLevel.Warning, "Error during KNX service disposal: {ErrorMessage}")]
+    private partial void LogKnxDisposalError(string errorMessage);
 
     #endregion
 }

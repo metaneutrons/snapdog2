@@ -604,7 +604,7 @@ public partial class StartupService : IHostedService
     [LoggerMessage(
         4010,
         LogLevel.Warning,
-        "⚠️  {ValidationStep} failed (attempt {AttemptNumber}/{MaxAttempts}): {ErrorMessage}"
+        "⚠️ {ValidationStep} failed (attempt {AttemptNumber}/{MaxAttempts}): {ErrorMessage}"
     )]
     private partial void LogValidationFailedWithRetry(
         string validationStep,
@@ -616,7 +616,7 @@ public partial class StartupService : IHostedService
     [LoggerMessage(
         4011,
         LogLevel.Warning,
-        "⚠️  {ValidationStep} failed (attempt {AttemptNumber}/{MaxAttempts}): {ErrorMessage}"
+        "⚠️ {ValidationStep} failed (attempt {AttemptNumber}/{MaxAttempts}): {ErrorMessage}"
     )]
     private partial void LogValidationFailedWithRetryAndException(
         string validationStep,
@@ -669,14 +669,14 @@ public partial class StartupService : IHostedService
     [LoggerMessage(
         4022,
         LogLevel.Warning,
-        "⚠️  Failed to check connectivity to {ServiceName} ({Address}:{Port}): {ErrorMessage}"
+        "⚠️ Failed to check connectivity to {ServiceName} ({Address}:{Port}): {ErrorMessage}"
     )]
     private partial void LogConnectivityCheckFailed(string serviceName, string address, int port, string errorMessage);
 
     [LoggerMessage(
         4023,
         LogLevel.Warning,
-        "⚠️  Failed to check connectivity to {ServiceName} ({Address}:{Port}): {ErrorMessage}"
+        "⚠️ Failed to check connectivity to {ServiceName} ({Address}:{Port}): {ErrorMessage}"
     )]
     private partial void LogConnectivityCheckFailedWithException(
         string serviceName,
@@ -794,7 +794,7 @@ public partial class StartupService : IHostedService
     [LoggerMessage(
         4050,
         LogLevel.Warning,
-        "⚠️  {OperationName} failed (attempt {Attempt}/{MaxAttempts}): {ErrorMessage}"
+        "⚠️ {OperationName} failed (attempt {Attempt}/{MaxAttempts}): {ErrorMessage}"
     )]
     private partial void LogOperationFailedWithRetry(
         string operationName,
@@ -806,7 +806,7 @@ public partial class StartupService : IHostedService
     [LoggerMessage(
         4051,
         LogLevel.Warning,
-        "⚠️  {OperationName} failed (attempt {Attempt}/{MaxAttempts}): {ErrorMessage}"
+        "⚠️ {OperationName} failed (attempt {Attempt}/{MaxAttempts}): {ErrorMessage}"
     )]
     private partial void LogOperationFailedWithRetryAndException(
         string operationName,
@@ -830,7 +830,7 @@ public partial class StartupService : IHostedService
     [LoggerMessage(
         4054,
         LogLevel.Warning,
-        "⚠️  {OperationName}: Attempt {Attempt}/{MaxAttempts} failed. Retrying in {DelayMs} ms. Error: {ErrorMessage}"
+        "⚠️ {OperationName}: Attempt {Attempt}/{MaxAttempts} failed. Retrying in {DelayMs} ms. Error: {ErrorMessage}"
     )]
     private partial void LogOperationFailedWithRetryAndDelay(
         string operationName,
@@ -843,7 +843,7 @@ public partial class StartupService : IHostedService
     [LoggerMessage(
         4055,
         LogLevel.Warning,
-        "⚠️  {OperationName}: Attempt {Attempt}/{MaxAttempts} failed. Retrying in {DelayMs} ms. Error: {ErrorMessage}"
+        "⚠️ {OperationName}: Attempt {Attempt}/{MaxAttempts} failed. Retrying in {DelayMs} ms. Error: {ErrorMessage}"
     )]
     private partial void LogOperationFailedWithRetryAndDelayAndException(
         string operationName,

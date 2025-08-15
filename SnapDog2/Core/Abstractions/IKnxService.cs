@@ -6,7 +6,7 @@ using SnapDog2.Core.Models;
 /// <summary>
 /// Interface for KNX integration service providing bi-directional KNX communication.
 /// </summary>
-public interface IKnxService : IAsyncDisposable
+public interface IKnxService : IDisposable, IAsyncDisposable
 {
     /// <summary>
     /// Gets a value indicating whether the KNX service is connected and operational.
