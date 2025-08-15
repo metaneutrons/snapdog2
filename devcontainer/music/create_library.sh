@@ -35,7 +35,7 @@ mkdir -p "$COVERS_DIR"
 get_cover_url() {
     local safe_artist="$1"
     local safe_album="$2"
-    
+
     case "${safe_artist}_${safe_album}" in
         "Pink_Floyd_The_Dark_Side_of_the_Moon")
             echo "https://upload.wikimedia.org/wikipedia/en/3/3b/Dark_Side_of_the_Moon.png"
@@ -78,22 +78,22 @@ download_cover() {
     local artist="$1"
     local album="$2"
     local cover_file="$3"
-    
+
     # Create safe key by replacing spaces and special chars with underscores
     local safe_artist=$(echo "$artist" | sed 's/[^a-zA-Z0-9]/_/g')
     local safe_album=$(echo "$album" | sed 's/[^a-zA-Z0-9]/_/g')
-    
+
     echo "  🖼️  Downloading album cover..."
-    
+
     # Try primary URL
     local primary_url=$(get_cover_url "$safe_artist" "$safe_album")
     if [ -n "$primary_url" ]; then
         echo "    📥 Trying: $primary_url"
-        
+
         if curl -s -L -A "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)" \
             --max-time 15 --max-filesize 10M \
             "$primary_url" -o "$cover_file" 2>/dev/null; then
-            
+
             # Verify it's a valid image file
             if file "$cover_file" | grep -q -E "(JPEG|PNG|image)"; then
                 local file_size=$(stat -f%z "$cover_file" 2>/dev/null || stat -c%s "$cover_file" 2>/dev/null)
@@ -105,20 +105,20 @@ download_cover() {
             rm -f "$cover_file"
         fi
     fi
-    
+
     echo "    🔄 Trying fallback sources..."
-    
+
     # Try MusicBrainz/Cover Art Archive approach
     local search_query=$(echo "${artist} ${album}" | sed 's/ /+/g' | sed 's/[^a-zA-Z0-9+]//g')
     local musicbrainz_url="https://musicbrainz.org/ws/2/release-group/?query=artist:${search_query}&fmt=json&limit=1"
-    
+
     local mb_result=$(curl -s --max-time 10 -A "MusicLibraryScript/1.0" "$musicbrainz_url" 2>/dev/null)
     if [ -n "$mb_result" ]; then
         local mbid=$(echo "$mb_result" | grep -o '"id":"[^"]*"' | head -1 | cut -d'"' -f4)
         if [ -n "$mbid" ]; then
             local cover_url="https://coverartarchive.org/release-group/${mbid}/front-500"
             echo "    📥 Trying Cover Art Archive: $mbid"
-            
+
             if curl -s -L --max-time 10 --max-filesize 5M "$cover_url" -o "$cover_file" 2>/dev/null; then
                 if file "$cover_file" | grep -q -E "(JPEG|PNG|image)"; then
                     local file_size=$(stat -f%z "$cover_file" 2>/dev/null || stat -c%s "$cover_file" 2>/dev/null)
@@ -131,9 +131,9 @@ download_cover() {
             fi
         fi
     fi
-    
+
     # If all else fails, create a simple placeholder
-    echo "    ⚠️  Could not download cover, creating placeholder..."
+    echo "    ⚠️ Could not download cover, creating placeholder..."
     create_placeholder_cover "$artist" "$album" "$cover_file"
     return 1
 }
@@ -143,10 +143,10 @@ create_placeholder_cover() {
     local artist="$1"
     local album="$2"
     local cover_file="$3"
-    
+
     # Ensure the covers directory exists
     mkdir -p "$(dirname "$cover_file")"
-    
+
     # Create a simple colored square as placeholder using ImageMagick if available
     if command -v convert &> /dev/null; then
         # Generate a color based on album name hash
@@ -161,7 +161,7 @@ create_placeholder_cover() {
             -annotate +0+30 "$album" \
             "$cover_file" 2>/dev/null && return 0
     fi
-    
+
     # Fallback: create a simple text file as placeholder
     echo "Album: $album by $artist" > "${cover_file%.jpg}.txt"
     return 1
@@ -177,18 +177,18 @@ create_track() {
     local genre="$6"
     local filename="$7"
     local cover_file="$8"
-    
+
     # Build ffmpeg command
     local ffmpeg_cmd="ffmpeg -i ../../$BASE_FILE"
-    
+
     # Add cover art if available
     if [ -f "$cover_file" ] && file "$cover_file" | grep -q -E "(JPEG|PNG|image)"; then
         ffmpeg_cmd="$ffmpeg_cmd -i $cover_file -map 0:0 -map 1:0 -c:v copy -disposition:v:0 attached_pic"
     fi
-    
+
     # Add metadata and output
     ffmpeg_cmd="$ffmpeg_cmd -metadata track=\"$track_num\" -metadata title=\"$title\" -metadata artist=\"$artist\" -metadata album=\"$album\" -metadata date=\"$year\" -metadata genre=\"$genre\" -codec:a copy -y \"$filename\""
-    
+
     # Execute ffmpeg command
     if eval "$ffmpeg_cmd" 2>/dev/null; then
         if [ -f "$cover_file" ] && file "$cover_file" | grep -q -E "(JPEG|PNG|image)"; then
@@ -210,24 +210,24 @@ process_album() {
     local folder="$5"
     shift 5
     local tracks=("$@")
-    
+
     echo "🎼 Creating $artist - $album ($year)..."
     mkdir -p "$folder"
     cd "$folder"
-    
+
     # Download cover art
     local safe_artist=$(echo "$artist" | sed 's/[^a-zA-Z0-9]/_/g')
     local safe_album=$(echo "$album" | sed 's/[^a-zA-Z0-9]/_/g')
     local cover_file="../../$COVERS_DIR/${safe_artist}_${safe_album}.jpg"
     download_cover "$artist" "$album" "$cover_file"
-    
+
     # Create tracks
     local track_num=1
     for track in "${tracks[@]}"; do
         create_track "$track_num" "$track" "$artist" "$album" "$year" "$genre" "$(printf "%02d - %s.m4a" $track_num "$track")" "$cover_file"
         ((track_num++))
     done
-    
+
     cd ../..
     echo ""
 }

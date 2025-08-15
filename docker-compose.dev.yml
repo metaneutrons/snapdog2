@@ -9,6 +9,7 @@ services:
       - .:/app:cached # Mount source code for hot reload
       - ~/.nuget/packages:/home/vscode/.nuget/packages:cached # NuGet cache
       - ~/.nuget/local:/app/local-nuget:cached # Local NuGet packages for development
+      - snapcast_sinks:/snapsinks # Shared audio sinks with snapcast-server
     env_file:
       - ./devcontainer/.env
     environment:
@@ -58,6 +59,8 @@ services:
       - ./devcontainer/.env
     ports:
       - "1705:1705" # Snapcast server port
+    volumes:
+      - snapcast_sinks:/snapsinks # Shared audio sinks with app container
     networks:
       snapdog-dev:
         ipv4_address: 172.20.0.5
@@ -280,6 +283,7 @@ volumes:
   navidrome_data:
   caddy_data:
   caddy_config:
+  snapcast_sinks: # Shared volume for audio sinks between snapcast-server and app
 
 networks:
   snapdog-dev:
