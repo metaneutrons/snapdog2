@@ -8,13 +8,6 @@ using EnvoyConfig.Attributes;
 public class SnapcastConfig
 {
     /// <summary>
-    /// Whether Snapcast integration is enabled.
-    /// Maps to: SNAPDOG_SERVICES_SNAPCAST_ENABLED
-    /// </summary>
-    [Env(Key = "ENABLED", Default = true)]
-    public bool Enabled { get; set; } = true;
-
-    /// <summary>
     /// Snapcast server address.
     /// Maps to: SNAPDOG_SERVICES_SNAPCAST_ADDRESS
     /// </summary>

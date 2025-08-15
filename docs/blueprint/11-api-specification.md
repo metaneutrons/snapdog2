@@ -93,15 +93,15 @@ Endpoints for interacting with configured audio zones. **Zone creation/deletion/
 | `PUT`  | `/zones/{zoneIndex}/mute`                  | `MUTE`                    | Set mute state                       | Path: `{zoneIndex}`; Body: `bool` (muted)       | `bool` (mute state)                  | 200 OK      |
 | `GET`  | `/zones/{zoneIndex}/mute`                  | `MUTE_STATUS`             | Get current mute state               | Path: `{zoneIndex}`                             | `bool` (mute state)                  | 200 OK      |
 | `POST` | `/zones/{zoneIndex}/mute/toggle`           | `MUTE_TOGGLE`             | Toggle mute state                    | Path: `{zoneIndex}`                             | `bool` (new mute state)              | 200 OK      |
-| `GET`  | `/zones/{zoneIndex}/track/repeat`          | `TRACK_REPEAT_STATUS`     | Get track repeat mode                | Path: `{zoneIndex}`                             | `bool` (repeat enabled)              | 200 OK      |
-| `PUT`  | `/zones/{zoneIndex}/track/repeat`          | `TRACK_REPEAT`            | Set track repeat mode                | Path: `{zoneIndex}`; Body: `bool` (enabled)     | `bool` (repeat enabled)              | 200 OK      |
-| `POST` | `/zones/{zoneIndex}/track/repeat/toggle`   | `TRACK_REPEAT_TOGGLE`     | Toggle track repeat mode             | Path: `{zoneIndex}`                             | `bool` (new repeat state)            | 200 OK      |
-| `GET`  | `/zones/{zoneIndex}/playlist/repeat`       | `PLAYLIST_REPEAT_STATUS`  | Get playlist repeat mode             | Path: `{zoneIndex}`                             | `bool` (repeat enabled)              | 200 OK      |
-| `PUT`  | `/zones/{zoneIndex}/playlist/repeat`       | `PLAYLIST_REPEAT`         | Set playlist repeat mode             | Path: `{zoneIndex}`; Body: `bool` (enabled)     | `bool` (repeat enabled)              | 200 OK      |
-| `POST` | `/zones/{zoneIndex}/playlist/repeat/toggle`| `PLAYLIST_REPEAT_TOGGLE`  | Toggle playlist repeat mode          | Path: `{zoneIndex}`                             | `bool` (new repeat state)            | 200 OK      |
-| `GET`  | `/zones/{zoneIndex}/playlist/shuffle`      | `PLAYLIST_SHUFFLE_STATUS` | Get playlist shuffle mode            | Path: `{zoneIndex}`                             | `bool` (shuffle enabled)             | 200 OK      |
-| `PUT`  | `/zones/{zoneIndex}/playlist/shuffle`      | `PLAYLIST_SHUFFLE`        | Set playlist shuffle mode            | Path: `{zoneIndex}`; Body: `bool` (enabled)     | `bool` (shuffle enabled)             | 200 OK      |
-| `POST` | `/zones/{zoneIndex}/playlist/shuffle/toggle`| `PLAYLIST_SHUFFLE_TOGGLE`| Toggle playlist shuffle mode         | Path: `{zoneIndex}`                             | `bool` (new shuffle state)           | 200 OK      |
+| `GET`  | `/zones/{zoneIndex}/repeat/track`          | `TRACK_REPEAT_STATUS`     | Get track repeat mode                | Path: `{zoneIndex}`                             | `bool` (repeat enabled)              | 200 OK      |
+| `PUT`  | `/zones/{zoneIndex}/repeat/track`          | `TRACK_REPEAT`            | Set track repeat mode                | Path: `{zoneIndex}`; Body: `bool` (enabled)     | `bool` (repeat enabled)              | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/repeat/track/toggle`   | `TRACK_REPEAT_TOGGLE`     | Toggle track repeat mode             | Path: `{zoneIndex}`                             | `bool` (new repeat state)            | 200 OK      |
+| `GET`  | `/zones/{zoneIndex}/repeat`       | `PLAYLIST_REPEAT_STATUS`  | Get playlist repeat mode             | Path: `{zoneIndex}`                             | `bool` (repeat enabled)              | 200 OK      |
+| `PUT`  | `/zones/{zoneIndex}/repeat`       | `PLAYLIST_REPEAT`         | Set playlist repeat mode             | Path: `{zoneIndex}`; Body: `bool` (enabled)     | `bool` (repeat enabled)              | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/repeat/toggle`| `PLAYLIST_REPEAT_TOGGLE`  | Toggle playlist repeat mode          | Path: `{zoneIndex}`                             | `bool` (new repeat state)            | 200 OK      |
+| `GET`  | `/zones/{zoneIndex}/shuffle`      | `PLAYLIST_SHUFFLE_STATUS` | Get playlist shuffle mode            | Path: `{zoneIndex}`                             | `bool` (shuffle enabled)             | 200 OK      |
+| `PUT`  | `/zones/{zoneIndex}/shuffle`      | `PLAYLIST_SHUFFLE`        | Set playlist shuffle mode            | Path: `{zoneIndex}`; Body: `bool` (enabled)     | `bool` (shuffle enabled)             | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/shuffle/toggle`| `PLAYLIST_SHUFFLE_TOGGLE`| Toggle playlist shuffle mode         | Path: `{zoneIndex}`                             | `bool` (new shuffle state)           | 200 OK      |
 
 **Modern API Benefits:**
 
@@ -111,44 +111,6 @@ Endpoints for interacting with configured audio zones. **Zone creation/deletion/
 * **Cleaner Client Code:** `const volume = await api.getVolume(1)` instead of `const volume = await api.getVolume(1).then(r => r.volume)`
 
 *Note on HTTP Status Codes: State retrievals and settings return 200 OK with the primitive value. Actions (play, pause, stop, track navigation, playlist setting) return 204 No Content to indicate successful completion without response data.*
-
-**Zero Request DTOs (Ultimate Simplification):**
-
-```csharp
-namespace SnapDog2.Api.Models;
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// 🎉 ZERO REQUEST DTOS - ULTIMATE SIMPLIFICATION ACHIEVED!
-// ═══════════════════════════════════════════════════════════════════════════════
-
-// NO REQUEST OBJECTS NEEDED!
-//
-// All API operations now use direct parameter binding:
-// - Primitives: int, bool, string
-// - Path parameters: /zones/{zoneIndex}/play/track/{trackIndex}
-// - Query parameters: ?page=1&size=20
-// - Body parameters: [FromBody] int volume, [FromBody] string url
-//
-// This represents the ultimate in API simplification!
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// ELIMINATED ALL REQUEST OBJECTS - 100% reduction achieved:
-// ═══════════════════════════════════════════════════════════════════════════════
-//
-// ❌ REMOVED: PlayRequest          → Use: separate endpoints /play, /play/track/{index}, /play/url
-// ❌ REMOVED: PlaylistRequest      → Use: int playlistIndex (1-based)
-// ❌ REMOVED: VolumeSetRequest     → Use: int volume (0-100)
-// ❌ REMOVED: MuteSetRequest       → Use: bool muted
-// ❌ REMOVED: ModeSetRequest       → Use: bool enabled
-// ❌ REMOVED: SetTrackRequest      → Use: int track (1-based)
-// ❌ REMOVED: StepRequest          → Use: int step = 5
-// ❌ REMOVED: LatencySetRequest    → Use: int latency (ms)
-// ❌ REMOVED: AssignZoneRequest    → Use: int zoneIndex
-// ❌ REMOVED: ZoneAssignmentRequest → Use: int zoneIndex
-// ❌ REMOVED: RenameRequest        → Use: string name
-//
-// TOTAL ELIMINATION: 11 request DTOs → 0 (100% reduction!)
-```
 
 **Modern Response Design (Direct Primitives):**
 
@@ -164,7 +126,7 @@ namespace SnapDog2.Api.Models;
 // ✅ GET /zones/1/volume        → 75 (int)
 // ✅ GET /zones/1/mute          → false (bool)
 // ✅ GET /zones/1/track         → 3 (int)
-// ✅ GET /zones/1/track/repeat  → true (bool)
+// ✅ GET /zones/1/repeat/track  → true (bool)
 //
 // This eliminates ALL single-property response wrappers!
 
@@ -192,20 +154,6 @@ public record Zone(string Name, int Index, bool Active, string Status);
 /// </summary>
 public record Client(int Id, string Name, bool Connected, int? Zone = null);
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// ELIMINATED WRAPPER RESPONSES - Return primitives directly:
-// ═══════════════════════════════════════════════════════════════════════════════
-//
-// ❌ REMOVED: VolumeResponse           → Return: int (0-100)
-// ❌ REMOVED: MuteResponse             → Return: bool
-// ❌ REMOVED: TrackIndexResponse       → Return: int (1-based)
-// ❌ REMOVED: TrackRepeatResponse      → Return: bool
-// ❌ REMOVED: PlaylistRepeatResponse   → Return: bool
-// ❌ REMOVED: PlaylistShuffleResponse  → Return: bool
-// ❌ REMOVED: LatencyResponse          → Return: int (milliseconds)
-// ❌ REMOVED: ZoneAssignmentResponse   → Return: int? (zone index)
-//
-// This eliminates 8 unnecessary wrapper objects and makes responses cleaner!
 ```
 
 ### 10.4.3. Client Endpoints

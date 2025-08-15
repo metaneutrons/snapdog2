@@ -5,6 +5,7 @@ using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Configurations;
 using DotNet.Testcontainers.Containers;
 using DotNet.Testcontainers.Images;
+using DotNet.Testcontainers.Networks;
 using FluentAssertions;
 using global::Knx.Falcon;
 using global::Knx.Falcon.Configuration;
@@ -38,9 +39,13 @@ public class IntegrationTestFixture : IAsyncLifetime
     private WebApplicationFactory<Program>? _factory;
     private IContainer? _mqttContainer;
     private IContainer? _snapcastContainer;
+    private IContainer? _snapcastClientLivingRoom;
+    private IContainer? _snapcastClientKitchen;
+    private IContainer? _snapcastClientBedroom;
     private KnxdFixture? _knxdFixture;
     private IMqttClient? _testMqttClient;
     private KnxBus? _testKnxBus;
+    private INetwork? _testNetwork;
 
     public IntegrationTestFixture()
     {
@@ -63,11 +68,19 @@ public class IntegrationTestFixture : IAsyncLifetime
         {
             Console.WriteLine("🚀 Starting integration test fixture initialization...");
 
+            // Create a custom network for all containers to communicate
+            _testNetwork = new NetworkBuilder().WithName($"snapdog-test-{Guid.NewGuid():N}").Build();
+            await _testNetwork.CreateAsync();
+            Console.WriteLine("✅ Test network created");
+
             // Start MQTT broker container
             await StartMqttBrokerAsync();
 
             // Start Snapcast server container
             await StartSnapcastServerAsync();
+
+            // Start Snapcast client containers
+            await StartSnapcastClientsAsync();
 
             // Start KNXd container
             await StartKnxdAsync();
@@ -137,9 +150,31 @@ public class IntegrationTestFixture : IAsyncLifetime
                 await _snapcastContainer.DisposeAsync();
             }
 
+            // Dispose Snapcast client containers
+            if (_snapcastClientLivingRoom != null)
+            {
+                await _snapcastClientLivingRoom.DisposeAsync();
+            }
+
+            if (_snapcastClientKitchen != null)
+            {
+                await _snapcastClientKitchen.DisposeAsync();
+            }
+
+            if (_snapcastClientBedroom != null)
+            {
+                await _snapcastClientBedroom.DisposeAsync();
+            }
+
             if (_knxdFixture != null)
             {
                 await _knxdFixture.DisposeAsync();
+            }
+
+            // Dispose test network
+            if (_testNetwork != null)
+            {
+                await _testNetwork.DisposeAsync();
             }
 
             Console.WriteLine("✅ Integration test fixture disposed successfully");
@@ -165,6 +200,8 @@ public class IntegrationTestFixture : IAsyncLifetime
             .WithPortBinding(containerMqttPort, true) // Use dynamic port binding
             .WithBindMount(configPath, "/mosquitto/config/mosquitto.conf")
             .WithBindMount(passwdPath, "/mosquitto/config/passwd")
+            .WithNetwork(_testNetwork!)
+            .WithNetworkAliases("mqtt-broker")
             .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(containerMqttPort))
             .Build();
 
@@ -189,6 +226,8 @@ public class IntegrationTestFixture : IAsyncLifetime
             .WithPortBinding(containerJsonRpcPort, true) // Use dynamic port binding
             .WithPortBinding(containerHttpPort, true)
             .WithEnvironment("SNAPCAST_LOG_LEVEL", "info")
+            .WithNetwork(_testNetwork!)
+            .WithNetworkAliases("snapcast-server")
             .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(containerJsonRpcPort))
             .Build();
 
@@ -201,6 +240,104 @@ public class IntegrationTestFixture : IAsyncLifetime
         Console.WriteLine(
             $"✅ Snapcast server started at {SnapcastHost}:{SnapcastJsonRpcPort} (JSON-RPC), {SnapcastHost}:{SnapcastHttpPort} (HTTP)"
         );
+    }
+
+    private async Task StartSnapcastClientsAsync()
+    {
+        Console.WriteLine("🐳 Starting Snapcast client containers...");
+
+        // We need to build the Snapcast client image first since it's a custom build
+        var clientImageName = "snapdog-snapcast-client:test";
+
+        // Build the Snapcast client image from the devcontainer directory
+        var clientImageBuilder = new ImageFromDockerfileBuilder()
+            .WithDockerfileDirectory("/Users/fabian/Source/snapdog/devcontainer/snapcast-client")
+            .WithDockerfile("Dockerfile")
+            .WithName(clientImageName);
+
+        var clientImage = clientImageBuilder.Build();
+        await clientImage.CreateAsync();
+
+        // Check if audio devices are available on the host system
+        var hasAudioDevices = Directory.Exists("/dev/snd");
+        if (hasAudioDevices)
+        {
+            Console.WriteLine("✅ Audio devices detected - enabling full audio support");
+        }
+        else
+        {
+            Console.WriteLine("⚠️ No audio devices detected - using null audio output");
+        }
+
+        // Start Living Room client
+        var livingRoomBuilder = new ContainerBuilder()
+            .WithImage(clientImageName)
+            .WithEnvironment("SNAPSERVER_HOST", "snapcast-server") // Use network alias
+            .WithEnvironment("CLIENT_ID", "living-room")
+            .WithEnvironment("FIXED_MAC_ADDRESS", "02:42:ac:11:00:10")
+            .WithNetwork(_testNetwork!)
+            .WithNetworkAliases("snapcast-client-living-room");
+
+        if (hasAudioDevices)
+        {
+            livingRoomBuilder = livingRoomBuilder
+                .WithPrivileged(true) // Enable privileged mode for audio device access
+                .WithBindMount("/dev/snd", "/dev/snd"); // Mount audio devices
+        }
+
+        _snapcastClientLivingRoom = livingRoomBuilder.Build();
+
+        // Start Kitchen client
+        var kitchenBuilder = new ContainerBuilder()
+            .WithImage(clientImageName)
+            .WithEnvironment("SNAPSERVER_HOST", "snapcast-server") // Use network alias
+            .WithEnvironment("CLIENT_ID", "kitchen")
+            .WithEnvironment("FIXED_MAC_ADDRESS", "02:42:ac:11:00:11")
+            .WithNetwork(_testNetwork!)
+            .WithNetworkAliases("snapcast-client-kitchen");
+
+        if (hasAudioDevices)
+        {
+            kitchenBuilder = kitchenBuilder
+                .WithPrivileged(true) // Enable privileged mode for audio device access
+                .WithBindMount("/dev/snd", "/dev/snd"); // Mount audio devices
+        }
+
+        _snapcastClientKitchen = kitchenBuilder.Build();
+
+        // Start Bedroom client
+        var bedroomBuilder = new ContainerBuilder()
+            .WithImage(clientImageName)
+            .WithEnvironment("SNAPSERVER_HOST", "snapcast-server") // Use network alias
+            .WithEnvironment("CLIENT_ID", "bedroom")
+            .WithEnvironment("FIXED_MAC_ADDRESS", "02:42:ac:11:00:12")
+            .WithNetwork(_testNetwork!)
+            .WithNetworkAliases("snapcast-client-bedroom");
+
+        if (hasAudioDevices)
+        {
+            bedroomBuilder = bedroomBuilder
+                .WithPrivileged(true) // Enable privileged mode for audio device access
+                .WithBindMount("/dev/snd", "/dev/snd"); // Mount audio devices
+        }
+
+        _snapcastClientBedroom = bedroomBuilder.Build();
+
+        // Start all clients concurrently
+        var clientTasks = new[]
+        {
+            _snapcastClientLivingRoom.StartAsync(),
+            _snapcastClientKitchen.StartAsync(),
+            _snapcastClientBedroom.StartAsync(),
+        };
+
+        await Task.WhenAll(clientTasks);
+
+        Console.WriteLine("✅ Snapcast clients started: living-room, kitchen, bedroom");
+
+        // Give clients a moment to connect to the server
+        await Task.Delay(2000);
+        Console.WriteLine("✅ Snapcast clients should now be connected to server");
     }
 
     private async Task StartKnxdAsync()

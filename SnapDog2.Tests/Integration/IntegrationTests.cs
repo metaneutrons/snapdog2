@@ -54,6 +54,7 @@ public class IntegrationTests
         // Assert - Verify core service interfaces are registered
         _fixture.AssertServiceIsRunning<IMqttService>();
         _fixture.AssertServiceIsRunning<IKnxService>();
+        _fixture.AssertServiceIsRunning<ISnapcastService>();
         // Note: Don't check concrete classes as they're registered as interfaces
     }
 

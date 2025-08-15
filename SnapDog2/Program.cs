@@ -22,6 +22,11 @@ Option<FileInfo?> envFileOption = new("--env-file", "-e")
 };
 
 // Add WebApplicationFactory arguments (used by integration tests)
+Option<string?> environmentOption = new("--environment")
+{
+    Description = "Internal: WebApplicationFactory environment",
+};
+
 Option<string?> environmentOptionUpper = new("--ENVIRONMENT")
 {
     Description = "Internal: WebApplicationFactory environment",
@@ -40,6 +45,7 @@ Option<string?> applicationNameOption = new("--applicationName")
 RootCommand rootCommand = new("SnapDog2 - The Snapcast-based Smart Home Audio System with MQTT & KNX integration")
 {
     envFileOption,
+    environmentOption, // Accept but ignore - WebApplicationFactory passes --environment
     environmentOptionUpper, // Accept but ignore - WebApplicationFactory passes --ENVIRONMENT
     contentRootOption, // Accept but ignore - not needed for REST API
     applicationNameOption, // Accept but ignore - purely internal
@@ -182,14 +188,7 @@ static WebApplication CreateWebApplication(string[] args)
     builder.Services.AddCommandProcessing();
 
     // Add Snapcast services
-    if (snapDogConfig.Services.Snapcast.Enabled)
-    {
-        builder.Services.AddSnapcastServices();
-    }
-    else
-    {
-        Log.Information("Snapcast is disabled in configuration (SNAPDOG_SERVICES_SNAPCAST_ENABLED=false)");
-    }
+    builder.Services.AddSnapcastServices();
 
     // Register zone and client configurations for services that need them
     builder.Services.Configure<List<ZoneConfig>>(options =>
