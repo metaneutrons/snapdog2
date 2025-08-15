@@ -66,20 +66,26 @@ public class ZonesApiIntegrationTests : IClassFixture<IntegrationTestFixture>
         _output.WriteLine($"✅ Set track repeat for zone {zoneIndex} to {newState}, returned: {returnedState}");
     }
 
-    [Fact(Timeout = 30000)] // 30 second timeout to prevent CI hanging
+    [Fact(Timeout = 30000)] // 30 second timeout to prevent hanging
     public async Task ToggleTrackRepeat_Should_ReturnNewState()
     {
+        _output.WriteLine("🔍 Starting ToggleTrackRepeat test...");
+
         // Arrange
         const int zoneIndex = 1;
 
+        _output.WriteLine($"🔍 Getting current track repeat state for zone {zoneIndex}...");
         // Get current state
         var getCurrentResponse = await _httpClient.GetAsync($"/api/v1/zones/{zoneIndex}/repeat/track");
         getCurrentResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         var currentState = await getCurrentResponse.Content.ReadFromJsonAsync<bool>();
+        _output.WriteLine($"🔍 Current track repeat state: {currentState}");
 
+        _output.WriteLine($"🔍 Toggling track repeat for zone {zoneIndex}...");
         // Act
         var response = await _httpClient.PostAsync($"/api/v1/zones/{zoneIndex}/repeat/track/toggle", null);
 
+        _output.WriteLine($"🔍 Toggle response status: {response.StatusCode}");
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var newState = await response.Content.ReadFromJsonAsync<bool>();
