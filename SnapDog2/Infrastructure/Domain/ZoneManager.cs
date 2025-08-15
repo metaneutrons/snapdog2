@@ -367,7 +367,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             };
 
             // Publish notification
-            await PublishZoneStateChangedAsync().ConfigureAwait(false);
+            PublishZoneStateChangedAsync();
 
             return Result.Success();
         }
@@ -404,7 +404,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 Track = newTrack,
             };
 
-            await PublishZoneStateChangedAsync().ConfigureAwait(false);
+            PublishZoneStateChangedAsync();
             return Result.Success();
         }
         finally
@@ -436,7 +436,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
             _currentState = _currentState with { PlaybackState = "playing", Track = streamTrack };
 
-            await PublishZoneStateChangedAsync().ConfigureAwait(false);
+            PublishZoneStateChangedAsync();
             return Result.Success();
         }
         finally
@@ -457,7 +457,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 return pauseResult;
 
             _currentState = _currentState with { PlaybackState = "paused" };
-            await PublishZoneStateChangedAsync().ConfigureAwait(false);
+            PublishZoneStateChangedAsync();
             return Result.Success();
         }
         finally
@@ -478,7 +478,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 return stopResult;
 
             _currentState = _currentState with { PlaybackState = "stopped" };
-            await PublishZoneStateChangedAsync().ConfigureAwait(false);
+            PublishZoneStateChangedAsync();
             return Result.Success();
         }
         finally
@@ -518,7 +518,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         }
 
         _currentState = _currentState with { Volume = clampedVolume };
-        await PublishZoneStateChangedAsync().ConfigureAwait(false);
+        PublishZoneStateChangedAsync();
         return Result.Success();
     }
 
@@ -580,7 +580,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         }
 
         _currentState = _currentState with { Mute = enabled };
-        await PublishZoneStateChangedAsync().ConfigureAwait(false);
+        PublishZoneStateChangedAsync();
         return Result.Success();
     }
 
@@ -643,7 +643,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             }
 
             _currentState = _currentState with { Track = targetTrack };
-            await PublishZoneStateChangedAsync().ConfigureAwait(false);
+            PublishZoneStateChangedAsync();
 
             // Log successful track change with meaningful information
             _logger.LogInformation(
@@ -700,7 +700,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         try
         {
             _currentState = _currentState with { TrackRepeat = enabled };
-            await PublishZoneStateChangedAsync().ConfigureAwait(false);
+            PublishZoneStateChangedAsync();
             return Result.Success();
         }
         finally
@@ -750,7 +750,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             }
 
             _currentState = _currentState with { Playlist = targetPlaylist };
-            await PublishZoneStateChangedAsync().ConfigureAwait(false);
+            PublishZoneStateChangedAsync();
             return Result.Success();
         }
         finally
@@ -769,7 +769,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             var newPlaylist = _currentState.Playlist! with { Id = playlistIndex, Name = playlistIndex };
 
             _currentState = _currentState with { Playlist = newPlaylist };
-            await PublishZoneStateChangedAsync().ConfigureAwait(false);
+            PublishZoneStateChangedAsync();
             return Result.Success();
         }
         finally
@@ -815,7 +815,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         try
         {
             _currentState = _currentState with { PlaylistShuffle = enabled };
-            await PublishZoneStateChangedAsync().ConfigureAwait(false);
+            PublishZoneStateChangedAsync();
             return Result.Success();
         }
         finally
@@ -845,7 +845,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         try
         {
             _currentState = _currentState with { PlaylistRepeat = enabled };
-            await PublishZoneStateChangedAsync().ConfigureAwait(false);
+            PublishZoneStateChangedAsync();
             return Result.Success();
         }
         finally
@@ -977,7 +977,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         await Task.CompletedTask;
     }
 
-    private async Task PublishZoneStateChangedAsync()
+    private void PublishZoneStateChangedAsync()
     {
         // Persist state to store for future requests
         _zoneStateStore.SetZoneState(_zoneIndex, _currentState);
