@@ -584,4 +584,4 @@ static partial void LogTimeout(ILogger logger, string serviceName, string policy
 - **Validation**: Runtime validation with sensible defaults
 - **Documentation**: Self-documenting through environment variable names
 
-This resilience configuration system provides SnapDog2 with enterprise-grade fault tolerance capabilities while maintaining the flexibility needed for diverse deployment scenarios and operational requirements.
+This resilience configuration system provides SnapDog2 with fault tolerance capabilities while maintaining the flexibility needed for diverse deployment scenarios and operational requirements.

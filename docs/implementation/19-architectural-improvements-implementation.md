@@ -6,7 +6,7 @@
 
 ## 19.1. Overview
 
-This document details the implementation of three major architectural improvements to address DRY principle violations and enhance maintainability while preserving the enterprise-grade architecture patterns established in the SnapDog2 project.
+This document details the implementation of three major architectural improvements to address DRY principle violations and enhance maintainability while preserving the architecture patterns established in the SnapDog2 project.
 
 ## 19.2. Problems Identified
 

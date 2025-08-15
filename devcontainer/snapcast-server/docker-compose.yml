@@ -1,15 +1,15 @@
 # =============================================================================
 # 🏆 Award-Worthy Snapcast Server - Test Composition
 # =============================================================================
-# 
+#
 # This docker-compose.yml provides a complete testing environment for the
-# award-worthy snapcast-server container with monitoring and debugging tools.
-# 
+# snapcast-server container with monitoring and debugging tools.
+#
 # Usage:
 #   docker-compose up -d          # Start all services
 #   docker-compose logs -f        # Monitor logs
 #   docker-compose down           # Stop all services
-# 
+#
 # Access:
 #   - Snapcast Web UI: http://localhost:1780
 #   - TCP JSON-RPC: nc localhost 1705
@@ -17,7 +17,7 @@
 #   - Monitoring: http://localhost:3000 (Grafana)
 # =============================================================================
 
-version: '3.8'
+version: "3.8"
 
 networks:
   snapcast-test:
@@ -56,12 +56,12 @@ services:
         ipv4_address: 172.25.0.10
     ports:
       # Core Snapcast ports
-      - "1704:1704/tcp"   # Audio streaming
-      - "1705:1705/tcp"   # TCP JSON-RPC (The critical feature!)
-      - "1780:1780/tcp"   # HTTP JSON-RPC Web UI
+      - "1704:1704/tcp" # Audio streaming
+      - "1705:1705/tcp" # TCP JSON-RPC (The critical feature!)
+      - "1780:1780/tcp" # HTTP JSON-RPC Web UI
       # AirPlay ports
-      - "5000:5000/tcp"   # AirPlay service
-      - "6001-6011:6001-6011/udp"  # AirPlay data channels
+      - "5000:5000/tcp" # AirPlay service
+      - "6001-6011:6001-6011/udp" # AirPlay data channels
     volumes:
       - snapcast-data:/var/lib/snapcast
       - snapcast-logs:/var/log/snapcast
@@ -170,12 +170,12 @@ services:
       - prometheus-data:/prometheus
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/etc/prometheus/console_libraries'
-      - '--web.console.templates=/etc/prometheus/consoles'
-      - '--storage.tsdb.retention.time=200h'
-      - '--web.enable-lifecycle'
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/etc/prometheus/console_libraries"
+      - "--web.console.templates=/etc/prometheus/consoles"
+      - "--storage.tsdb.retention.time=200h"
+      - "--web.enable-lifecycle"
     restart: unless-stopped
 
   grafana:
@@ -227,7 +227,7 @@ services:
         ipv4_address: 172.25.0.50
     ports:
       - "80:80"
-      - "8080:8080"  # Traefik dashboard
+      - "8080:8080" # Traefik dashboard
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     command:
@@ -238,45 +238,44 @@ services:
     restart: unless-stopped
     profiles:
       - proxy
-
 # =============================================================================
 # 🧪 Testing Commands
 # =============================================================================
-# 
+#
 # Start the full test environment:
 #   docker-compose up -d
-# 
+#
 # Test TCP JSON-RPC (the award-winning feature!):
 #   echo '{"method":"Server.GetStatus","id":1}' | nc localhost 1705
-# 
+#
 # Test with curl:
 #   curl -X POST http://localhost:1780/jsonrpc \
 #     -H "Content-Type: application/json" \
 #     -d '{"method":"Server.GetStatus","id":1}'
-# 
+#
 # Monitor logs:
 #   docker-compose logs -f snapcast-server
-# 
+#
 # Check health:
 #   docker-compose exec snapcast-server /usr/local/bin/health-check.sh
-# 
+#
 # Network debugging:
 #   docker-compose --profile debug up -d network-tools
 #   docker-compose exec network-tools nmap -p 1704,1705,1780,5000 172.25.0.10
-# 
+#
 # AirPlay testing:
 #   # Look for "SnapDog2 Test AirPlay" in iOS/macOS AirPlay menu
 #   docker-compose exec snapcast-server avahi-browse -rt _raop._tcp
-# 
+#
 # Audio flow testing:
 #   docker-compose exec snapcast-server ls -la /snapsinks/
 #   docker-compose exec snapcast-server lsof /snapsinks/default
-# 
+#
 # Performance monitoring:
 #   # Access Grafana at http://localhost:3000 (admin/snapcast-test)
 #   # Access Prometheus at http://localhost:9090
-# 
+#
 # Clean shutdown:
 #   docker-compose down -v  # Removes volumes too
-# 
+#
 # =============================================================================

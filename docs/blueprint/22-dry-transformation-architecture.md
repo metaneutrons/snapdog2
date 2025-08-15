@@ -2,7 +2,7 @@
 
 ## 24.1. Overview
 
-This blueprint defines the comprehensive DRY (Don't Repeat Yourself) transformation architecture implemented in SnapDog2, establishing enterprise-grade standards for identifier management, code maintainability, and type safety. The transformation eliminates all hardcoded strings from the notification and command systems through a sophisticated attribute-based architecture.
+This blueprint defines the comprehensive DRY (Don't Repeat Yourself) transformation architecture implemented in SnapDog2, establishing standards for identifier management, code maintainability, and type safety. The transformation eliminates all hardcoded strings from the notification and command systems through a sophisticated attribute-based architecture.
 
 ## 24.2. Architectural Principles
 
@@ -346,7 +346,7 @@ Future enhancements could include:
 Building upon the foundational attribute system, SnapDog2 implements a comprehensive multi-layered approach to eliminate hardcoded strings throughout the entire codebase. This enhanced system provides three complementary approaches for different use cases:
 
 1. **StatusIdRegistry** - Runtime discovery and mapping
-2. **StatusIds Constants** - Strongly-typed compile-time constants  
+2. **StatusIds Constants** - Strongly-typed compile-time constants
 3. **StatusEventType Enum** - Ultimate type safety with enum-based switching
 
 ### 24.10.2. StatusIdRegistry Implementation
@@ -356,7 +356,7 @@ public static class StatusIdRegistry
 {
     private static readonly ConcurrentDictionary<string, Type> _statusIdToTypeMap = new();
     private static readonly ConcurrentDictionary<Type, string> _typeToStatusIdMap = new();
-    
+
     public static void Initialize()
     {
         // Automatically scans all loaded assemblies for StatusId attributes
@@ -374,16 +374,17 @@ public static class StatusIdRegistry
             }
         }
     }
-    
-    public static Type? GetNotificationType(string statusId) => 
+
+    public static Type? GetNotificationType(string statusId) =>
         _statusIdToTypeMap.TryGetValue(statusId, out var type) ? type : null;
-        
-    public static bool IsRegistered(string statusId) => 
+
+    public static bool IsRegistered(string statusId) =>
         _statusIdToTypeMap.ContainsKey(statusId);
 }
 ```
 
 **Key Features**:
+
 - Thread-safe implementation using `ConcurrentDictionary`
 - Automatic discovery of all StatusId attributes at runtime
 - Bidirectional mapping between strings and types
@@ -396,30 +397,31 @@ public static class StatusIdRegistry
 public static class StatusIds
 {
     // Client Status IDs - derived from notification classes
-    public static readonly string ClientVolumeStatus = 
+    public static readonly string ClientVolumeStatus =
         StatusIdAttribute.GetStatusId<ClientVolumeChangedNotification>();
-    public static readonly string ClientMuteStatus = 
+    public static readonly string ClientMuteStatus =
         StatusIdAttribute.GetStatusId<ClientMuteChangedNotification>();
-    public static readonly string ClientLatencyStatus = 
+    public static readonly string ClientLatencyStatus =
         StatusIdAttribute.GetStatusId<ClientLatencyChangedNotification>();
-    
+
     // Zone Status IDs
-    public static readonly string PlaybackState = 
+    public static readonly string PlaybackState =
         StatusIdAttribute.GetStatusId<ZonePlaybackStateChangedNotification>();
-    public static readonly string VolumeStatus = 
+    public static readonly string VolumeStatus =
         StatusIdAttribute.GetStatusId<ZoneVolumeChangedNotification>();
-    public static readonly string MuteStatus = 
+    public static readonly string MuteStatus =
         StatusIdAttribute.GetStatusId<ZoneMuteChangedNotification>();
-    
+
     // Global Status IDs
-    public static readonly string SystemStatus = 
+    public static readonly string SystemStatus =
         StatusIdAttribute.GetStatusId<SystemStatusChangedNotification>();
-    public static readonly string VersionInfo = 
+    public static readonly string VersionInfo =
         StatusIdAttribute.GetStatusId<VersionInfoChangedNotification>();
 }
 ```
 
 **Benefits**:
+
 - Compile-time safety with IntelliSense support
 - Single source of truth through StatusIdAttribute references
 - Automatic updates when notification classes change
@@ -432,16 +434,16 @@ public enum StatusEventType
 {
     [Description("CLIENT_VOLUME_STATUS")]
     ClientVolumeStatus,
-    
+
     [Description("CLIENT_MUTE_STATUS")]
     ClientMuteStatus,
-    
+
     [Description("PLAYBACK_STATE")]
     PlaybackState,
-    
+
     [Description("VOLUME_STATUS")]
     VolumeStatus,
-    
+
     // ... additional enum values
 }
 
@@ -453,7 +455,7 @@ public static class StatusEventTypeExtensions
         var attribute = (DescriptionAttribute?)Attribute.GetCustomAttribute(field!, typeof(DescriptionAttribute));
         return attribute?.Description ?? eventType.ToString();
     }
-    
+
     public static StatusEventType? FromStatusString(string statusString)
     {
         foreach (StatusEventType eventType in Enum.GetValues<StatusEventType>())
@@ -467,6 +469,7 @@ public static class StatusEventTypeExtensions
 ```
 
 **Advantages**:
+
 - Ultimate compile-time safety with enum switching
 - Optimized performance through compiler enum optimizations
 - Case-insensitive string parsing with null safety
@@ -475,6 +478,7 @@ public static class StatusEventTypeExtensions
 ### 24.10.5. Enhanced MqttService Integration
 
 **Before (hardcoded strings)**:
+
 ```csharp
 var topic = eventType.ToUpperInvariant() switch
 {
@@ -486,11 +490,12 @@ var topic = eventType.ToUpperInvariant() switch
 ```
 
 **After (enum-based approach)**:
+
 ```csharp
 private string? GetClientMqttTopic(string eventType, ClientConfig clientConfig)
 {
     var baseTopic = clientConfig.Mqtt.BaseTopic?.TrimEnd('/') ?? string.Empty;
-    
+
     var statusEventType = StatusEventTypeExtensions.FromStatusString(eventType);
     if (statusEventType == null) return null;
 
@@ -512,6 +517,7 @@ private string? GetClientMqttTopic(string eventType, ClientConfig clientConfig)
 ### 24.10.6. Usage Patterns and Best Practices
 
 #### 24.10.6.1. Constants Approach (Recommended for Simple Cases)
+
 ```csharp
 // Direct usage in service methods
 if (eventType == StatusIds.ClientVolumeStatus)
@@ -528,6 +534,7 @@ var topicMappings = new Dictionary<string, string>
 ```
 
 #### 24.10.6.2. Enum Approach (Best for Complex Logic)
+
 ```csharp
 // Type-safe parsing from external systems
 var eventType = StatusEventTypeExtensions.FromStatusString(incomingMessage);
@@ -544,6 +551,7 @@ if (eventType.HasValue)
 ```
 
 #### 24.10.6.3. Registry Approach (Dynamic Scenarios)
+
 ```csharp
 // Runtime type discovery
 var notificationType = StatusIdRegistry.GetNotificationType("CLIENT_VOLUME_STATUS");
@@ -563,18 +571,21 @@ if (StatusIdRegistry.IsRegistered(incomingStatusId))
 ### 24.10.7. System Benefits and Metrics
 
 #### 24.10.7.1. Code Quality Improvements
+
 - **Hardcoded Strings**: 0 (completely eliminated)
 - **Compile-time Safety**: 100% (all status references validated)
 - **IntelliSense Support**: Full coverage for all status identifiers
 - **Refactoring Safety**: Rename operations work across entire codebase
 
 #### 24.10.7.2. Performance Characteristics
+
 - **Enum Switches**: Compiler-optimized jump tables
 - **Registry Lookups**: O(1) dictionary access with concurrent safety
 - **Constants Access**: Direct field access with no runtime overhead
 - **Memory Usage**: Minimal overhead with lazy initialization
 
 #### 24.10.7.3. Developer Experience Enhancements
+
 - **Three Usage Approaches**: Choose the right tool for each scenario
 - **Automatic Discovery**: New StatusId attributes automatically available
 - **Clear Error Messages**: Descriptive exceptions for missing attributes
@@ -583,6 +594,7 @@ if (StatusIdRegistry.IsRegistered(incomingStatusId))
 ### 24.10.8. Extension and Maintenance
 
 #### 24.10.8.1. Adding New Status Types
+
 ```csharp
 // 1. Add notification with StatusId attribute
 [StatusId("NEW_FEATURE_STATUS")]
@@ -592,7 +604,7 @@ public record NewFeatureStatusChangedNotification : INotification
 }
 
 // 2. Add to StatusIds constants (optional)
-public static readonly string NewFeatureStatus = 
+public static readonly string NewFeatureStatus =
     StatusIdAttribute.GetStatusId<NewFeatureStatusChangedNotification>();
 
 // 3. Add to StatusEventType enum (optional)
@@ -603,6 +615,7 @@ NewFeatureStatus,
 ```
 
 #### 24.10.8.2. Validation and Testing
+
 ```csharp
 [Test]
 public void AllNotificationsShouldHaveStatusIdAttributes()
@@ -624,17 +637,20 @@ public void AllNotificationsShouldHaveStatusIdAttributes()
 ### 24.10.9. Architecture Decision Records
 
 #### 24.10.9.1. Why Three Approaches?
+
 - **Constants**: Simple, fast, IntelliSense-friendly for direct usage
 - **Enum**: Type-safe switching, compiler optimizations, complex logic
 - **Registry**: Dynamic scenarios, reflection-based operations, runtime discovery
 
 #### 24.10.9.2. Performance Considerations
+
 - Registry initialization is lazy and cached
 - Enum switches are compiler-optimized
 - Constants provide zero-overhead access
 - All approaches maintain thread safety
 
 #### 24.10.9.3. Maintenance Strategy
+
 - StatusIdAttribute remains the single source of truth
 - Constants and enum values are derived, not duplicated
 - Registry provides runtime validation and discovery
@@ -651,7 +667,7 @@ Building upon the StatusId DRY system, SnapDog2 implements an identical comprehe
 The CommandId system provides the same three complementary approaches as the StatusId system:
 
 1. **CommandIdRegistry** - Runtime discovery and mapping
-2. **CommandIds Constants** - Strongly-typed compile-time constants  
+2. **CommandIds Constants** - Strongly-typed compile-time constants
 3. **CommandEventType Enum** - Ultimate type safety with enum-based switching
 
 ### 24.11.2. Blueprint Compliance
@@ -659,12 +675,14 @@ The CommandId system provides the same three complementary approaches as the Sta
 The CommandId system implements all 25 commands defined in the blueprint:
 
 #### 24.11.2.1. Zone Commands (19 total)
+
 - **Playback Control**: `PLAY`, `PAUSE`, `STOP`
 - **Volume Control**: `VOLUME`, `VOLUME_UP`, `VOLUME_DOWN`, `MUTE`, `MUTE_TOGGLE`
 - **Track Management**: `TRACK`, `TRACK_NEXT`, `TRACK_PREVIOUS`, `TRACK_REPEAT`, `TRACK_REPEAT_TOGGLE`
 - **Playlist Management**: `PLAYLIST`, `PLAYLIST_NEXT`, `PLAYLIST_PREVIOUS`, `PLAYLIST_REPEAT`, `PLAYLIST_REPEAT_TOGGLE`, `PLAYLIST_SHUFFLE`, `PLAYLIST_SHUFFLE_TOGGLE`
 
 #### 24.11.2.2. Client Commands (6 total)
+
 - **Volume Control**: `CLIENT_VOLUME`, `CLIENT_MUTE`, `CLIENT_MUTE_TOGGLE`
 - **Configuration**: `CLIENT_LATENCY`, `CLIENT_ZONE`
 
@@ -695,6 +713,6 @@ This CommandId system completes the comprehensive DRY architecture transformatio
 
 ## 24.12. Conclusion
 
-The DRY transformation architecture represents a significant advancement in code quality, maintainability, and developer experience. By eliminating hardcoded strings and implementing type-safe attribute systems, SnapDog2 achieves enterprise-grade architecture standards with perfect build quality and complete test coverage.
+The DRY transformation architecture represents a significant advancement in code quality, maintainability, and developer experience. By eliminating hardcoded strings and implementing type-safe attribute systems, SnapDog2 achieves architecture standards with perfect build quality and complete test coverage.
 
 This architecture serves as a foundation for future development, ensuring consistency, safety, and maintainability across all system components while providing excellent developer experience through IntelliSense support and compile-time validation.
