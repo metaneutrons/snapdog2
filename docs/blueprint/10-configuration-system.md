@@ -159,8 +159,8 @@ SNAPDOG_SERVICES_SNAPCAST_RECONNECT_INTERVAL=5        # Default: 5 (reconnect in
 SNAPDOG_SERVICES_SNAPCAST_AUTO_RECONNECT=true         # Default: true
 
 # Snapcast server configuration (for container setup)
-SNAPDOG_SNAPCAST_WEBSERVER_PORT=1780                  # Default: 1780 (SnapWeb HTTP port)
-SNAPDOG_SNAPCAST_WEBSOCKET_PORT=1704                  # Default: 1704 (WebSocket port)
+SNAPDOG_SERVICES_SNAPCAST_HTTP_PORT=1780                  # Default: 1780 (SnapWeb HTTP port)
+SNAPDOG_SERVICES_SNAPCAST_WEBSOCKET_PORT=1704                  # Default: 1704 (WebSocket port)
 SNAPDOG_SNAPCAST_JSONRPC_PORT=1705                    # Default: 1705 (JSON-RPC port)
 
 # Note: Audio format (codec, sample format) is now controlled by the unified
