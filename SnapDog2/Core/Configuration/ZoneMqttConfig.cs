@@ -78,11 +78,20 @@ public class ZoneMqttConfig
     [Env(Key = "VOLUME_SET_TOPIC", Default = "volume/set")]
     public string VolumeSetTopic { get; set; } = "volume/set";
 
+    [Env(Key = "VOLUME_UP_TOPIC", Default = "volume/up")]
+    public string VolumeUpTopic { get; set; } = "volume/up";
+
+    [Env(Key = "VOLUME_DOWN_TOPIC", Default = "volume/down")]
+    public string VolumeDownTopic { get; set; } = "volume/down";
+
     [Env(Key = "VOLUME_TOPIC", Default = "volume")]
     public string VolumeTopic { get; set; } = "volume";
 
     [Env(Key = "MUTE_SET_TOPIC", Default = "mute/set")]
     public string MuteSetTopic { get; set; } = "mute/set";
+
+    [Env(Key = "MUTE_TOGGLE_TOPIC", Default = "mute/toggle")]
+    public string MuteToggleTopic { get; set; } = "mute/toggle";
 
     [Env(Key = "MUTE_TOPIC", Default = "mute")]
     public string MuteTopic { get; set; } = "mute";
@@ -90,4 +99,11 @@ public class ZoneMqttConfig
     // State topic
     [Env(Key = "STATE_TOPIC", Default = "state")]
     public string StateTopic { get; set; } = "state";
+
+    // Response topics for command acknowledgments and errors
+    [Env(Key = "ERROR_TOPIC", Default = "error")]
+    public string ErrorTopic { get; set; } = "error";
+
+    [Env(Key = "STATUS_TOPIC", Default = "status")]
+    public string StatusTopic { get; set; } = "status";
 }

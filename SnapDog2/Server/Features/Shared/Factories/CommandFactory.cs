@@ -446,12 +446,33 @@ public static class CommandFactory
                 ? CreateVolumeUpCommand(zoneIndex, step, source)
                 : CreateVolumeDownCommand(zoneIndex, step, source),
 
+            // Volume navigation commands (dedicated topics)
+            "volume/set" when TryParseInt(payload, out var volumeSet) => CreateSetZoneVolumeCommand(
+                zoneIndex,
+                volumeSet,
+                source
+            ),
+            "volume/up" => CreateVolumeUpCommand(zoneIndex, 5, source),
+            "volume/down" => CreateVolumeDownCommand(zoneIndex, 5, source),
+
             // Mute commands
             "mute" when TryParseBool(payload, out var mute) => CreateSetZoneMuteCommand(zoneIndex, mute, source),
             "mute" when payload.Equals("toggle", StringComparison.OrdinalIgnoreCase) => CreateToggleZoneMuteCommand(
                 zoneIndex,
                 source
             ),
+
+            // Mute navigation commands (dedicated topics)
+            "mute/set" when TryParseBool(payload, out var muteSet) => CreateSetZoneMuteCommand(
+                zoneIndex,
+                muteSet,
+                source
+            ),
+            "mute/set" when payload.Equals("toggle", StringComparison.OrdinalIgnoreCase) => CreateToggleZoneMuteCommand(
+                zoneIndex,
+                source
+            ),
+            "mute/toggle" => CreateToggleZoneMuteCommand(zoneIndex, source),
 
             // Navigation commands (simplified)
             "next" => CreateNextTrackCommand(zoneIndex, source),
