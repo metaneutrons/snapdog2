@@ -161,10 +161,13 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 
 **Volume/Mute Control**
 
-| Command ID            | Env Var Suffix      | Default Rel. Topic | Example Payloads                     |
-| :-------------------- | :------------------ | :----------------- | :----------------------------------- |
-| `VOLUME`/`UP`/`DOWN`  | `_VOLUME_SET_TOPIC` | `volume/set`       | `0`-`100`, `"+"` / `"-"`, `"+/-<step>"` |
-| `MUTE`/`TOGGLE`       | `_MUTE_SET_TOPIC`   | `mute/set`         | `"true"`/`"false"`, `"1"`/`"0"`, `"toggle"` |
+| Command ID            | Env Var Suffix      | Default Rel. Topic | Example Payloads                     | Notes                     |
+| :-------------------- | :------------------ | :----------------- | :----------------------------------- | :------------------------ |
+| `VOLUME`/`UP`/`DOWN`  | `_VOLUME_SET_TOPIC` | `volume/set`       | `0`-`100`, `"+"` / `"-"`, `"+/-<step>"` |                           |
+| `VOLUME_UP`           | `_VOLUME_UP_TOPIC`  | `volume/up`        | (no payload needed)                  | Dedicated volume up       |
+| `VOLUME_DOWN`         | `_VOLUME_DOWN_TOPIC`| `volume/down`      | (no payload needed)                  | Dedicated volume down     |
+| `MUTE`/`TOGGLE`       | `_MUTE_SET_TOPIC`   | `mute/set`         | `"true"`/`"false"`, `"1"`/`"0"`, `"toggle"` |                           |
+| `MUTE_TOGGLE`         | `_MUTE_TOGGLE_TOPIC`| `mute/toggle`      | (no payload needed)                  | Dedicated mute toggle     |
 
 #### 14.3.2.2. Zone Status Topics (Read-Only)
 
@@ -209,7 +212,33 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 | :---------------- | :------------- | :----------------- | :------------------------------- | :------- | :-------------------- |
 | `ZONE_STATE`      | `_STATE_TOPIC` | `state`            | **Full JSON object (see 13.5.1)** | Yes      | Includes all status |
 
-#### 14.3.2.3. Payloads for `{zoneBaseTopic}control/set`
+**Response Topics (Command Acknowledgments & Errors)**
+
+| Status ID             | Env Var Suffix     | Default Rel. Topic | Example Payload                    | Retained | Notes                      |
+| :-------------------- | :----------------- | :----------------- | :--------------------------------- | :------- | :------------------------- |
+| `COMMAND_STATUS`      | `_STATUS_TOPIC`    | `status`           | `"ok"`, `"processing"`, `"done"`   | No       | Command acknowledgments    |
+| `COMMAND_ERROR`       | `_ERROR_TOPIC`     | `error`            | `{"error": "Invalid track", "code": 400}` | No       | Error responses            |
+
+#### 14.3.2.3. System-Level Topics (Discovery & Global Status)
+
+System-level topics provide discovery and global status information across all zones.
+
+**System Discovery**
+
+| Status ID             | Env Var Suffix           | Default Topic          | Example Payload                    | Retained | Notes                      |
+| :-------------------- | :----------------------- | :--------------------- | :--------------------------------- | :------- | :------------------------- |
+| `ZONES_INFO`          | `_SYSTEM_MQTT_ZONES_TOPIC` | `snapdog/system/zones` | `[1, 2, 3]`                      | Yes      | List of available zones    |
+
+**Global System Status**
+
+| Status ID             | Env Var Suffix           | Default Topic          | Example Payload                    | Retained | Notes                      |
+| :-------------------- | :----------------------- | :--------------------- | :--------------------------------- | :------- | :------------------------- |
+| `SYSTEM_STATUS`       | `_SYSTEM_MQTT_STATUS_TOPIC` | `snapdog/status`      | `{"online": true, "uptime": 3600}` | Yes      | System health status       |
+| `VERSION_INFO`        | `_SYSTEM_MQTT_VERSION_TOPIC` | `snapdog/version`     | `{"version": "2.0.0", "build": "..."}` | Yes      | Version information        |
+| `SERVER_STATS`        | `_SYSTEM_MQTT_STATS_TOPIC` | `snapdog/stats`        | `{"cpu": 15.2, "memory": 512}`    | Yes      | Server performance stats   |
+| `ERROR_STATUS`        | `_SYSTEM_MQTT_ERROR_TOPIC` | `snapdog/error`        | `{"error": "Service unavailable"}` | No       | System-level errors        |
+
+#### 14.3.2.4. Payloads for `{zoneBaseTopic}control/set`
 
 This topic accepts various string payloads to control multiple aspects:
 
@@ -236,7 +265,28 @@ This topic accepts various string payloads to control multiple aspects:
 | `VOLUME_UP`               | `volume_up`, `volume +<step>`        |
 | `VOLUME_DOWN`             | `volume_down`, `volume -<step>`      |
 
-#### 14.3.2.4. Status Values for `{zoneBaseTopic}control`
+#### 14.3.2.5. Standardized Payload Patterns
+
+All boolean topics accept consistent payload formats for maximum compatibility:
+
+**Boolean Values**
+- **True**: `"true"`, `"1"`, `"on"`, `"yes"`
+- **False**: `"false"`, `"0"`, `"off"`, `"no"`
+- **Toggle**: `"toggle"`
+
+**Examples:**
+```
+snapdog/zone/1/repeat/track     → "true" | "false" | "1" | "0" | "on" | "off" | "toggle"
+snapdog/zone/1/shuffle/set      → "true" | "false" | "1" | "0" | "on" | "off" | "toggle"
+snapdog/zone/1/mute/set         → "true" | "false" | "1" | "0" | "on" | "off" | "toggle"
+```
+
+**Numeric Values**
+- **Volume**: `0`-`100` (integer)
+- **Track/Playlist Index**: `1`-based integers
+- **Volume Steps**: `+5`, `-3`, `+`, `-` (default step: 5)
+
+#### 14.3.2.6. Status Values for `{zoneBaseTopic}control`
 
 This topic publishes simple string representations for various states:
 
