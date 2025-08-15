@@ -287,7 +287,7 @@ public class IntegrationTestFixture : IAsyncLifetime
 
         // Build the Snapcast client image from the devcontainer directory
         var clientImageBuilder = new ImageFromDockerfileBuilder()
-            .WithDockerfileDirectory("/Users/fabian/Source/snapdog/devcontainer/snapcast-client")
+            .WithDockerfileDirectory(Path.Combine(Directory.GetCurrentDirectory(), "devcontainer", "snapcast-client"))
             .WithDockerfile("Dockerfile")
             .WithName(clientImageName);
 
