@@ -16,33 +16,51 @@ using SnapDog2.Middleware;
 // System.CommandLine Flow - Command-Line Argument Parsing
 // ═══════════════════════════════════════════════════════════════════════════════
 
-// Check if we're running in a test environment
-if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Testing")
-{
-    // For tests, create the web application directly without command-line parsing
-    var testApp = CreateWebApplication(args);
-    await testApp.RunAsync();
-    return 0;
-}
-
 Option<FileInfo?> envFileOption = new("--env-file", "-e")
 {
     Description = "Path to environment file to load (.env format)",
 };
 
+// Add WebApplicationFactory arguments (used by integration tests) - hidden from normal usage
+Option<string?> environmentOption = new("--environment")
+{
+    Description = "Internal: WebApplicationFactory environment",
+};
+
+Option<string?> environmentOptionUpper = new("--ENVIRONMENT")
+{
+    Description = "Internal: WebApplicationFactory environment (uppercase)",
+};
+
+Option<string?> contentRootOption = new("--contentRoot")
+{
+    Description = "Internal: WebApplicationFactory content root",
+};
+
+Option<string?> applicationNameOption = new("--applicationName")
+{
+    Description = "Internal: WebApplicationFactory application name",
+};
+
 RootCommand rootCommand = new("SnapDog2 - The Snapcast-based Smart Home Audio System with MQTT & KNX integration")
 {
     envFileOption,
+    environmentOptionUpper, // Accept but ignore - WebApplicationFactory passes --ENVIRONMENT
+    contentRootOption, // Accept but ignore - not needed for REST API
+    applicationNameOption, // Accept but ignore - purely internal
 };
 
 // Parse and handle commands
 var parseResult = rootCommand.Parse(args);
 
-// Check if a command line was provided
-var result = parseResult.Invoke();
-if (result != 0 || args.Contains("--help") || args.Contains("-h") || args.Contains("--version"))
+// Check if parsing failed or help was requested
+if (parseResult.Errors.Count > 0 || args.Contains("--help") || args.Contains("-h") || args.Contains("--version"))
 {
-    return result;
+    var result = parseResult.Invoke();
+    if (result != 0 || args.Contains("--help") || args.Contains("-h") || args.Contains("--version"))
+    {
+        return result;
+    }
 }
 
 // Handle environment file option
@@ -169,7 +187,14 @@ static WebApplication CreateWebApplication(string[] args)
     builder.Services.AddCommandProcessing();
 
     // Add Snapcast services
-    builder.Services.AddSnapcastServices();
+    if (snapDogConfig.Services.Snapcast.Enabled)
+    {
+        builder.Services.AddSnapcastServices();
+    }
+    else
+    {
+        Log.Information("Snapcast is disabled in configuration (SNAPDOG_SERVICES_SNAPCAST_ENABLED=false)");
+    }
 
     // Register zone and client configurations for services that need them
     builder.Services.Configure<List<ZoneConfig>>(options =>
@@ -404,12 +429,8 @@ static WebApplication CreateWebApplication(string[] args)
     // Configure the HTTP request pipeline (conditionally based on API configuration)
     if (snapDogConfig.Api.Enabled)
     {
-        // if (app.Environment.IsDevelopment())
-        // FIXME: maybe?! :=)
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI();
-        }
+        app.UseSwagger();
+        app.UseSwaggerUI();
 
         app.UseRouting();
 
@@ -418,6 +439,26 @@ static WebApplication CreateWebApplication(string[] args)
         app.UseAuthorization();
 
         app.MapControllers();
+
+        // Map health check endpoints
+        if (snapDogConfig.System.HealthChecksEnabled)
+        {
+            app.MapHealthChecks("/health");
+            app.MapHealthChecks(
+                "/health/ready",
+                new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+                {
+                    Predicate = check => check.Tags.Contains("ready"),
+                }
+            );
+            app.MapHealthChecks(
+                "/health/live",
+                new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+                {
+                    Predicate = check => check.Tags.Contains("live"),
+                }
+            );
+        }
     }
 
     return app;
