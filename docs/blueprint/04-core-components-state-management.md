@@ -12,17 +12,17 @@ Key structural components and their roles within the logical layers:
     * **`/Worker/DI/`**: Contains extension methods (`AddCoreServices`, `AddInfrastructureServices`, `AddCommandProcessing`, `AddApiServices`, etc.) used by `Program.cs` to register dependencies with the DI container, promoting modularity in startup configuration.
 
 2. **`/Infrastructure` (External Interactions & Implementation):**
-    * **Service Implementations (e.g., `/Infrastructure/Snapcast/SnapcastService.cs`)**: Concrete classes implementing `/Core` abstractions (`ISnapcastService`, `IKnxService`, `IMqttService`, `ISubsonicService`, `IMediaPlayerService`). These classes contain the logic specific to interacting with external libraries (`Sturd.SnapcastNet`, `Knx.Falcon.Sdk`, `MQTTnet`, `SubSonicMedia`, `LibVLCSharp`) and systems. They handle protocol details, resilience (Polly), error translation (to `Result` pattern), and state synchronization (updating `SnapcastStateRepository`, publishing MediatR notifications).
+    * **Service Implementations (e.g., `/Infrastructure/Snapcast/SnapcastService.cs`)**: Concrete classes implementing `/Core` abstractions (`ISnapcastService`, `IKnxService`, `IMqttService`, `ISubsonicService`, `IMediaPlayerService`). These classes contain the logic specific to interacting with external libraries (`Sturd.SnapcastNet`, `Knx.Falcon.Sdk`, `MQTTnet`, `SubSonicMedia`, `LibVLCSharp`) and systems. They handle protocol details, resilience (Polly), error translation (to `Result` pattern), and state synchronization (updating `SnapcastStateRepository`, publishing Cortex.Mediator notifications).
     * **State Repositories (e.g., `/Infrastructure/Snapcast/SnapcastStateRepository.cs`)**: Responsible for holding the latest known *raw* state received from certain external systems, primarily the Snapcast server state using `Sturd.SnapcastNet` models. Ensures thread-safe access to this in-memory representation.
     * **Helpers (e.g., `/Infrastructure/EnvConfigHelper.cs`, `/Infrastructure/Resilience/ResiliencePolicies.cs`)**: Utility classes supporting infrastructure concerns.
 
 3. **`/Server` (Application & Domain Logic):**
-    * **MediatR Handlers (`/Server/Features/...`)**: Contain the core application logic triggered by Commands and Queries. They orchestrate interactions between Core Managers/Services and Infrastructure *Abstractions*. Should remain thin and focused on coordinating actions for a specific use case. Organized by feature (e.g., Zones, Clients).
+    * **Cortex.Mediator Handlers (`/Server/Features/...`)**: Contain the core application logic triggered by Commands and Queries. They orchestrate interactions between Core Managers/Services and Infrastructure *Abstractions*. Should remain thin and focused on coordinating actions for a specific use case. Organized by feature (e.g., Zones, Clients).
     * **Core Managers (`/Server/Managers/...`)**: Classes like `ZoneManager`, `ClientManager`, `PlaylistManager` that encapsulate the business logic and rules for managing collections or higher-level concepts related to zones, clients, and playlists *within the SnapDog2 context*. They manage the mapping between SnapDog2's view of the world (e.g., internal Zone/Client IDs) and external system identifiers (Snapcast Group/Client IDs). They hold and manage SnapDog2's derived state (`ClientState`, `ZoneState`). They depend on `/Core` abstractions.
     * **Domain Services (e.g., `/Server/Features/Zones/ZoneService.cs`)**: Represents the logic and state management for a single instance of a core domain entity, like an individual audio zone. Holds the `ZoneState` record.
-    * **MediatR Messages (`/Server/.../Commands`, `/Server/.../Queries`, `/Server/Notifications`)**: Definitions of the Commands, Queries, and Notifications used for internal communication via the MediatR bus.
-    * **Validation (`/Server/.../Validators`)**: FluentValidation classes for MediatR commands.
-    * **Behaviors (`/Server/Behaviors`)**: MediatR pipeline behaviors (Logging, Validation, Performance).
+    * **Cortex.Mediator Messages (`/Server/.../Commands`, `/Server/.../Queries`, `/Server/Notifications`)**: Definitions of the Commands, Queries, and Notifications used for internal communication via the Cortex.Mediator bus.
+    * **Validation (`/Server/.../Validators`)**: FluentValidation classes for Cortex.Mediator commands.
+    * **Behaviors (`/Server/Behaviors`)**: Cortex.Mediator pipeline behaviors (Logging, Validation, Performance).
 
 4. **`/Core` (Foundation):**
     * **Abstractions (`/Core/Abstractions`)**: Interface definitions (`IZoneManager`, `ISnapcastService`, `ISnapcastStateRepository`, etc.) defining the contracts implemented by `/Infrastructure` or `/Server` layers.
@@ -30,7 +30,7 @@ Key structural components and their roles within the logical layers:
     * **Enums (`/Core/Enums`)**: Common enumerations like `PlaybackStatus`, `KnxConnectionType`.
 
 5. **`/Api` (Presentation):**
-    * **Controllers (`/Api/Controllers`)**: ASP.NET Core controllers handling HTTP requests. Translate requests into MediatR commands/queries. Format responses using `/Core/Models` or API-specific DTOs and the standard `ApiResponse<T>`.
+    * **Controllers (`/Api/Controllers`)**: ASP.NET Core controllers handling HTTP requests. Translate requests into Cortex.Mediator commands/queries. Format responses using `/Core/Models` or API-specific DTOs and the standard `ApiResponse<T>`.
     * **Authentication (`/Api/Auth`)**: Handlers for API Key authentication.
     * **DTOs (`/Api/Models`)**: Request models and potentially response models if they differ significantly from Core models.
 
@@ -97,7 +97,7 @@ private async Task Internal_UpdatePlaybackStatus(PlaybackStatus newStatus)
         var previousStatus = _currentState.Status;
         // Create new state record
         _currentState = _currentState with { Status = newStatus };
-        _logger.LogInformation("Zone {ZoneId} playback state changed from {OldStatus} to {NewStatus}", Id, previousStatus, newStatus);
+        _logger.LogInformation("Zone {ZoneIndex} playback state changed from {OldStatus} to {NewStatus}", Id, previousStatus, newStatus);
 
         // Publish notification AFTER updating internal state
         await _mediator.Publish(new StatusChangedNotification("PLAYBACK_STATE", $"zone_{Id}", newStatus), CancellationToken.None).ConfigureAwait(false);
@@ -120,8 +120,8 @@ private async Task Internal_UpdatePlaybackStatus(PlaybackStatus newStatus)
 2. **SnapDog2 Domain State (`ClientState`, `ZoneState`):**
     * **Representation:** Uses immutable `record` types defined in `/Core/Models`. This state represents SnapDog2's *view* of the system, potentially mapping, enriching, or differing slightly from the raw external state. Includes SnapDog2-specific concepts like internal IDs, playlist state, etc.
     * **Storage:** Held as instance variables within relevant `/Server` layer components (e.g., `ZoneService` holds its `_currentState: ZoneState`; `ClientManager` holds mappings and potentially derived `ClientState` info).
-    * **Updates:** Updated by `/Server` components (Managers, Services) typically in response to MediatR commands or notifications originating from Infrastructure services. Updates use the immutable pattern (`with` expressions) protected by `SemaphoreSlim`.
-    * **Access:** Read via MediatR queries which retrieve this derived state from Managers/Services.
+    * **Updates:** Updated by `/Server` components (Managers, Services) typically in response to Cortex.Mediator commands or notifications originating from Infrastructure services. Updates use the immutable pattern (`with` expressions) protected by `SemaphoreSlim`.
+    * **Access:** Read via Cortex.Mediator queries which retrieve this derived state from Managers/Services.
 
 This separation ensures that Infrastructure deals with raw external data, while the Server layer works with SnapDog2's consistent domain model. Mapping occurs at the boundary, often within Managers or Query Handlers.
 
@@ -132,17 +132,17 @@ The flow maintains unidirectional data updates and clear responsibility:
 1. **External Event Occurs:** (e.g., Snapcast client connects).
 2. **Infrastructure Service Listener:** `SnapcastService` receives the event from `Sturd.SnapcastNet`.
 3. **Update Raw State Repository:** `SnapcastService` updates the `SnapcastStateRepository` with the new raw `Client` model data.
-4. **Publish Internal Notification:** `SnapcastService` publishes a MediatR `SnapcastClientConnectedNotification` (containing the raw `Client` model).
+4. **Publish Internal Notification:** `SnapcastService` publishes a Cortex.Mediator `SnapcastClientConnectedNotification` (containing the raw `Client` model).
 5. **Server Layer Handler:** `ClientManager` (as `INotificationHandler`) receives the notification.
-6. **Update SnapDog2 Domain State:** `ClientManager` acquires its lock, finds/creates the internal mapping for the client, updates its internal `ClientState` record (mapping fields from the raw model and adding SnapDog2 context like ZoneId), and releases the lock.
-7. **Publish Domain Status Notification:** `ClientManager` (or the handler) publishes a domain-level MediatR `StatusChangedNotification("CLIENT_CONNECTED", $"client_{internalId}", true)`.
+6. **Update SnapDog2 Domain State:** `ClientManager` acquires its lock, finds/creates the internal mapping for the client, updates its internal `ClientState` record (mapping fields from the raw model and adding SnapDog2 context like ZoneIndex), and releases the lock.
+7. **Publish Domain Status Notification:** `ClientManager` (or the handler) publishes a domain-level Cortex.Mediator `StatusChangedNotification("CLIENT_CONNECTED", $"client_{internalId}", true)`.
 8. **External Notification Handlers:** `MqttStatusNotifier`, `KnxStatusNotifier` receive the `StatusChangedNotification` and publish the update to MQTT/KNX.
 
 This ensures changes flow from external -> infrastructure repo -> internal notification -> server state -> external notification -> external systems.
 
 ## 4.3. Event-Driven Architecture
 
-Internal communication relies heavily on MediatR notifications (`INotification`).
+Internal communication relies heavily on Cortex.Mediator notifications (`INotification`).
 
 * **Events Published By:** Primarily by `/Infrastructure` services upon detecting changes from external systems (e.g., `SnapcastClientVolumeChangedNotification`) and potentially by `/Server` Managers/Services after successfully processing a command that results in a state change (though often the external event notification is sufficient).
 * **Events Handled By:** `/Server` layer components (Managers, other Services) to update their internal state based on external changes, and by `/Infrastructure` Notification Handlers (`MqttStatusNotifier`, `KnxStatusNotifier`) to propagate SnapDog2 state changes outwards.
@@ -154,7 +154,7 @@ Managed by `/Worker/Program.cs` and the main `IHostedService`.
 
 1. Load Configuration (`IConfigurationBuilder`, Env Vars).
 2. Setup Logging (Serilog).
-3. Register Dependencies (DI Extensions for Core, Server, Infra, Api, MediatR, OTel, etc.).
+3. Register Dependencies (DI Extensions for Core, Server, Infra, Api, Cortex.Mediator, OTel, etc.).
 4. Build `IServiceProvider`.
 5. **Run Configuration Validation** (`ConfigurationValidator.Validate`). Abort on critical failure.
 6. Start Host (`host.Run()`).
@@ -178,4 +178,4 @@ Relies on:
 2. **Structured Logging**: Contextual error details (Sec 1.5, Sec 5.2).
 3. **Resilience Policies**: Polly for external calls (Sec 7).
 4. **Graceful Degradation**: Attempt to function if optional services fail. Log critical failures robustly.
-5. **Error Notifications**: `ERROR_STATUS` via MediatR/MQTT for critical system issues (Sec 9.2).
+5. **Error Notifications**: `ERROR_STATUS` via Cortex.Mediator/MQTT for critical system issues (Sec 9.2).

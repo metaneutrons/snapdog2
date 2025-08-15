@@ -1,359 +1,476 @@
+using System.CommandLine;
+using dotenv.net;
 using EnvoyConfig;
-using EnvoyConfig.Conversion;
-using MediatR;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Serilog;
+using Serilog.Events;
+using SnapDog2.Authentication;
 using SnapDog2.Core.Configuration;
-using SnapDog2.Core.Demo;
-using SnapDog2.Core.Events;
-using SnapDog2.Core.State;
-using SnapDog2.Infrastructure.Services;
-using SnapDog2.Api.Authentication;
+using SnapDog2.Extensions;
+using SnapDog2.Extensions.DependencyInjection;
+using SnapDog2.Helpers;
+using SnapDog2.Hosting;
+using SnapDog2.Middleware;
 
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("SnapDog2.Tests")]
+// ═══════════════════════════════════════════════════════════════════════════════
+// System.CommandLine Flow - Command-Line Argument Parsing
+// ═══════════════════════════════════════════════════════════════════════════════
 
-// Configure Serilog early
-Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Information()
-    .WriteTo.Console()
-    .WriteTo.File("logs/snapdog-demo-.txt", rollingInterval: RollingInterval.Day)
-    .CreateLogger();
+Option<FileInfo?> envFileOption = new("--env-file", "-e")
+{
+    Description = "Path to environment file to load (.env format)",
+};
+
+// Add WebApplicationFactory arguments (used by integration tests)
+Option<string?> environmentOption = new("--environment")
+{
+    Description = "Internal: WebApplicationFactory environment",
+};
+
+Option<string?> environmentOptionUpper = new("--ENVIRONMENT")
+{
+    Description = "Internal: WebApplicationFactory environment",
+};
+
+Option<string?> contentRootOption = new("--contentRoot")
+{
+    Description = "Internal: WebApplicationFactory content root",
+};
+
+Option<string?> applicationNameOption = new("--applicationName")
+{
+    Description = "Internal: WebApplicationFactory application name",
+};
+
+RootCommand rootCommand = new("SnapDog2 - The Snapcast-based Smart Home Audio System with MQTT & KNX integration")
+{
+    envFileOption,
+    environmentOption, // Accept but ignore - WebApplicationFactory passes --environment
+    environmentOptionUpper, // Accept but ignore - WebApplicationFactory passes --ENVIRONMENT
+    contentRootOption, // Accept but ignore - not needed for REST API
+    applicationNameOption, // Accept but ignore - purely internal
+};
+
+// Parse and handle commands
+var parseResult = rootCommand.Parse(args);
+
+// Check if parsing failed or help was requested
+if (parseResult.Errors.Count > 0 || args.Contains("--help") || args.Contains("-h") || args.Contains("--version"))
+{
+    var result = parseResult.Invoke();
+    if (result != 0 || args.Contains("--help") || args.Contains("-h") || args.Contains("--version"))
+    {
+        return result;
+    }
+}
+
+// Handle environment file option
+if (parseResult.GetValue(envFileOption) is FileInfo parsedFile)
+{
+    try
+    {
+        Console.WriteLine($"📁 Loading environment file: {parsedFile.FullName}");
+        DotEnv.Fluent().WithExceptions().WithEnvFiles(parsedFile.FullName).WithTrimValues().Load();
+        Console.WriteLine("✅ Environment file loaded successfully");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"❌ Failed to load environment file: {ex.Message}");
+        return 1;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Start Services - Original Working Logic
+// ═══════════════════════════════════════════════════════════════════════════════
+
+var app = CreateWebApplication(args);
 
 try
 {
-    Log.Information("=== SnapDog2 Unified Server + API Host Starting ===");
+    Log.Information("SnapDog2 application configured successfully");
 
+    // Use resilient host wrapper to handle startup exceptions gracefully
+    var resilientHost = app.UseResilientStartup(true);
+    await resilientHost.RunAsync();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+    Environment.ExitCode = 3;
+}
+finally
+{
+    await Log.CloseAndFlushAsync();
+}
+
+return 0;
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Web Application Creation Method (for both normal and test usage)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+static WebApplication CreateWebApplication(string[] args)
+{
     var builder = WebApplication.CreateBuilder(args);
+
+    // Set global prefix for all EnvoyConfig environment variables
+    EnvConfig.GlobalPrefix = "SNAPDOG_";
+
+    // Load configuration from environment variables using EnvoyConfig
+    SnapDogConfiguration snapDogConfig;
+    try
+    {
+        snapDogConfig = EnvConfig.Load<SnapDogConfiguration>();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Failed to load configuration: {ex.Message}");
+        throw;
+    }
+
+    // Configure Serilog based on configuration
+    var loggerConfig = new LoggerConfiguration()
+        .MinimumLevel.Is(Enum.Parse<LogEventLevel>(snapDogConfig.System.LogLevel, true))
+        .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+        .MinimumLevel.Override("System", LogEventLevel.Warning)
+        .MinimumLevel.Override("Microsoft.Extensions.Hosting.Internal.Host", LogEventLevel.Fatal)
+        .Enrich.FromLogContext()
+        .WriteTo.Console(
+            outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}"
+        );
+
+    // Add file logging only if log file path is configured
+    if (!string.IsNullOrWhiteSpace(snapDogConfig.System.LogFile))
+    {
+        loggerConfig.WriteTo.File(
+            snapDogConfig.System.LogFile,
+            rollingInterval: RollingInterval.Day,
+            outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}",
+            retainedFileCountLimit: 31,
+            fileSizeLimitBytes: 100 * 1024 * 1024
+        );
+    }
+
+    Log.Logger = loggerConfig.CreateLogger();
+
+    // Configuration will be logged by StartupVersionLoggingService
 
     // Use Serilog for logging
     builder.Host.UseSerilog();
 
-    // Configure EnvoyConfig for configuration loading
-    ConfigureEnvoyConfig();
+    // Show startup banner immediately (before any service registrations)
+    StartupInformationHelper.ShowStartupInformation(snapDogConfig);
 
-    // Load configuration
-    var configuration = LoadConfiguration();
-    builder.Services.AddSingleton(configuration);
+    // Register configuration
+    builder.Services.AddSingleton(snapDogConfig);
+    builder.Services.AddSingleton(snapDogConfig.System);
+    builder.Services.AddSingleton(snapDogConfig.Telemetry);
+    builder.Services.AddSingleton(snapDogConfig.Api);
+    builder.Services.AddSingleton(snapDogConfig.Services);
+    builder.Services.AddSingleton(snapDogConfig.SnapcastServer);
 
-    // Register MediatR
-    builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
-
-    // Register core services
-    builder.Services.AddSingleton<IEventPublisher, InMemoryEventPublisher>();
-    builder.Services.AddSingleton<IStateManager, StateManager>();
-
-    // Register infrastructure services as singletons for unified in-memory access
-    builder.Services.AddSingleton<IKnxService, KnxService>();
-    builder.Services.AddSingleton<IMqttService, MqttService>();
-    builder.Services.AddSingleton<ISnapcastService, SnapcastService>();
-
-    // Register demo classes
-    builder.Services.AddTransient<DomainEntitiesDemo>();
-    builder.Services.AddTransient<StateManagementDemo>();
-    builder.Services.AddTransient<EventsDemo>();
-    builder.Services.AddTransient<ValidationDemo>();
-    builder.Services.AddTransient<DemoOrchestrator>();
-
-    // Register validators (FluentValidation auto-registration could be used in real scenarios)
-    RegisterValidators(builder.Services);
-
-    // Register API controllers (placeholder, actual controllers to be added)
-    builder.Services.AddControllers();
-
-    // Register API documentation (Swagger)
-    builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen();
-// Add API Key authentication
-builder.Services.AddSnapDogApiKeyAuthentication(builder.Configuration);
-
-    // TODO: Register API-specific services and authentication/authorization as needed
-
-    var app = builder.Build();
-
-    // Configure middleware pipeline
-    if (app.Environment.IsDevelopment())
+    // Register AudioConfig for IOptions pattern
+    builder.Services.Configure<AudioConfig>(options =>
     {
-        app.UseDeveloperExceptionPage();
-        app.UseSwagger();
-        app.UseSwaggerUI();
+        var audioConfig = snapDogConfig.Services.Audio;
+        options.SampleRate = audioConfig.SampleRate;
+        options.BitDepth = audioConfig.BitDepth;
+        options.Channels = audioConfig.Channels;
+        options.Codec = audioConfig.Codec;
+        options.HttpTimeoutSeconds = audioConfig.HttpTimeoutSeconds;
+    });
+
+    // Register configuration for IOptions pattern
+    builder.Services.Configure<SnapDogConfiguration>(options =>
+    {
+        // Copy all configuration sections
+        options.System = snapDogConfig.System;
+        options.Telemetry = snapDogConfig.Telemetry;
+        options.Api = snapDogConfig.Api;
+        options.Services = snapDogConfig.Services;
+        options.SnapcastServer = snapDogConfig.SnapcastServer;
+        options.Zones = snapDogConfig.Zones;
+        options.Clients = snapDogConfig.Clients;
+        options.RadioStations = snapDogConfig.RadioStations;
+    });
+
+    // Add command processing (Mediator, handlers, behaviors)
+    builder.Services.AddCommandProcessing();
+
+    // Add HTTP client factory (required by MediaPlayerService and other services)
+    builder.Services.AddHttpClient();
+
+    // Add Snapcast services
+    builder.Services.AddSnapcastServices();
+
+    // Register zone and client configurations for services that need them
+    builder.Services.Configure<List<ZoneConfig>>(options =>
+    {
+        options.Clear();
+        options.AddRange(snapDogConfig.Zones);
+    });
+
+    builder.Services.Configure<List<ClientConfig>>(options =>
+    {
+        options.Clear();
+        options.AddRange(snapDogConfig.Clients);
+    });
+
+    // Add MQTT services
+    if (snapDogConfig.Services.Mqtt.Enabled)
+    {
+        builder.Services.AddMqttServices().ValidateMqttConfiguration();
     }
     else
     {
-        app.UseSwagger();
-        app.UseSwaggerUI();
-        // app.UseExceptionHandler("/error"); // Uncomment and implement as needed
+        Log.Information("MQTT is disabled in configuration (SNAPDOG_SERVICES_MQTT_ENABLED=false)");
     }
 
-    // API security middleware (placeholder, add authentication/authorization as needed)
-    app.UseAuthentication();
-    app.UseAuthorization();
-
-    app.MapControllers();
-
-    // Optionally run the demo orchestrator on startup (for legacy demo)
-    using (var scope = app.Services.CreateScope())
+    // Add KNX services
+    if (snapDogConfig.Services.Knx.Enabled)
     {
-        var demoOrchestrator = scope.ServiceProvider.GetService<DemoOrchestrator>();
-        if (demoOrchestrator != null)
+        builder.Services.AddKnxService(snapDogConfig);
+    }
+    else
+    {
+        Log.Information("KNX is disabled in configuration (SNAPDOG_SERVICES_KNX_ENABLED=false)");
+    }
+
+    // Skip hosted services in test environment
+    if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "Testing")
+    {
+        // Add resilient startup service as first hosted service (check if everything is healthy)
+        builder.Services.AddHostedService<SnapDog2.Services.StartupService>();
+
+        // Add hosted service to initialize integration services on startup
+        builder.Services.AddHostedService<SnapDog2.Worker.Services.IntegrationServicesHostedService>();
+
+        // Add hosted service to publish initial state after integration services are initialized
+        builder.Services.AddHostedService<SnapDog2.Services.StatePublishingService>();
+    }
+
+    // Register placeholder services
+    builder.Services.AddScoped<
+        SnapDog2.Core.Abstractions.IAppStatusService,
+        SnapDog2.Infrastructure.Application.AppStatusService
+    >();
+    builder.Services.AddScoped<
+        SnapDog2.Core.Abstractions.IMetricsService,
+        SnapDog2.Infrastructure.Application.MetricsService
+    >();
+    builder.Services.AddScoped<
+        SnapDog2.Server.Features.Global.Services.Abstractions.IGlobalStatusService,
+        SnapDog2.Server.Features.Global.Services.GlobalStatusService
+    >();
+
+    // Zone management services (production implementations)
+    builder.Services.AddSingleton<
+        SnapDog2.Core.Abstractions.IZoneStateStore,
+        SnapDog2.Infrastructure.Storage.InMemoryZoneStateStore
+    >();
+    builder.Services.AddScoped<SnapDog2.Core.Abstractions.IZoneManager, SnapDog2.Infrastructure.Domain.ZoneManager>();
+
+    // Media player services
+    builder.Services.AddScoped<
+        SnapDog2.Core.Abstractions.IMediaPlayerService,
+        SnapDog2.Infrastructure.Audio.MediaPlayerService
+    >();
+
+    // Client management services
+    builder.Services.AddScoped<
+        SnapDog2.Core.Abstractions.IClientManager,
+        SnapDog2.Infrastructure.Domain.ClientManager
+    >();
+
+    // Playlist management services
+    builder.Services.AddScoped<
+        SnapDog2.Core.Abstractions.IPlaylistManager,
+        SnapDog2.Infrastructure.Domain.PlaylistManager
+    >();
+
+    // Subsonic integration service
+    if (snapDogConfig.Services.Subsonic.Enabled)
+    {
+        builder.Services.AddHttpClient<
+            SnapDog2.Core.Abstractions.ISubsonicService,
+            SnapDog2.Infrastructure.Integrations.Subsonic.SubsonicService
+        >(client =>
         {
-            demoOrchestrator.RunComprehensiveDemoAsync().GetAwaiter().GetResult();
-        }
+            client.Timeout = TimeSpan.FromMilliseconds(snapDogConfig.Services.Subsonic.Timeout);
+        });
+    }
+    else
+    {
+        Log.Information("Subsonic is disabled in configuration (SNAPDOG_SERVICES_SUBSONIC_ENABLED=false)");
     }
 
-    Log.Information("=== SnapDog2 Unified Server + API Host Running ===");
-    app.Run();
-}
-catch (Exception ex)
-{
-    Log.Fatal(ex, "SnapDog2 Unified Host terminated unexpectedly");
-    throw;
-}
-finally
-{
-    Log.CloseAndFlush();
-}
-
-/// <summary>
-/// Configures EnvoyConfig with custom type converters.
-/// </summary>
-static void ConfigureEnvoyConfig()
-{
-    // TypeConverterRegistry.RegisterConverter(typeof(KnxAddress), new KnxAddressConverter()); // Temporarily commented out due to type mismatch
-    // TypeConverterRegistry.RegisterConverter(typeof(KnxAddress?), new KnxAddressConverter()); // Temporarily commented out due to type mismatch
-    EnvConfig.GlobalPrefix = "SNAPDOG_";
-}
-
-/// <summary>
-/// Loads the SnapDog configuration using EnvoyConfig.
-/// </summary>
-/// <returns>Loaded SnapDog configuration.</returns>
-static SnapDogConfiguration LoadConfiguration()
-{
-    try
+    // Configure resilient web host with port from configuration
+    if (snapDogConfig.Api.Enabled)
     {
-        var config = EnvConfig.Load<SnapDogConfiguration>();
-        Log.Information("Configuration loaded successfully");
-        return config;
+        builder.WebHost.UseResilientKestrel(snapDogConfig.Api, Log.Logger);
     }
-    catch (Exception ex)
+    else if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Testing")
     {
-        Log.Warning(ex, "Failed to load configuration from environment, using defaults");
-        return new SnapDogConfiguration();
+        // For tests, we still need to configure Kestrel even when API is disabled
+        // so that WebApplicationFactory can create HTTP clients
+        Log.Information("🧪 Test environment detected - configuring minimal Kestrel for testing");
+        builder.WebHost.UseKestrel();
     }
-}
-
-/// <summary>
-/// Registers all validators with the DI container.
-/// </summary>
-/// <param name="services">Service collection.</param>
-static void RegisterValidators(IServiceCollection services)
-{
-    // Register all validators from the validation namespace
-    var validatorTypes = typeof(Program)
-        .Assembly.GetTypes()
-        .Where(t => t.Name.EndsWith("Validator") && !t.IsAbstract && !t.IsInterface)
-        .ToList();
-
-    foreach (var validatorType in validatorTypes)
+    else
     {
-        services.AddTransient(validatorType);
+        Log.Information("🌐 API is disabled - Kestrel will not bind to any ports.");
     }
 
-    Log.Information("Registered {ValidatorCount} validators", validatorTypes.Count);
-}
-
-/// <summary>
-/// Orchestrates the comprehensive demo of all Phase 1 capabilities.
-/// </summary>
-public class DemoOrchestrator
-{
-    private readonly ILogger<DemoOrchestrator> _logger;
-    private readonly DomainEntitiesDemo _entitiesDemo;
-    private readonly StateManagementDemo _stateDemo;
-    private readonly EventsDemo _eventsDemo;
-    private readonly ValidationDemo _validationDemo;
-    private readonly SnapDogConfiguration _configuration;
-
-    public DemoOrchestrator(
-        ILogger<DemoOrchestrator> logger,
-        DomainEntitiesDemo entitiesDemo,
-        StateManagementDemo stateDemo,
-        EventsDemo eventsDemo,
-        ValidationDemo validationDemo,
-        SnapDogConfiguration configuration
-    )
+    // Add services to the container (conditionally based on API configuration)
+    if (snapDogConfig.Api.Enabled)
     {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _entitiesDemo = entitiesDemo ?? throw new ArgumentNullException(nameof(entitiesDemo));
-        _stateDemo = stateDemo ?? throw new ArgumentNullException(nameof(stateDemo));
-        _eventsDemo = eventsDemo ?? throw new ArgumentNullException(nameof(eventsDemo));
-        _validationDemo = validationDemo ?? throw new ArgumentNullException(nameof(validationDemo));
-        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-    }
+        builder.Services.AddControllers();
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
 
-    /// <summary>
-    /// Runs the comprehensive demo showcasing all Phase 1 capabilities.
-    /// </summary>
-    public async Task RunComprehensiveDemoAsync()
-    {
-        _logger.LogInformation("Starting comprehensive SnapDog2 Phase 1 demonstration");
-
-        try
+        // Add authentication and authorization
+        if (snapDogConfig.Api.AuthEnabled && snapDogConfig.Api.ApiKeys.Count > 0)
         {
-            // 1. Configuration Demo
-            await DemonstrateConfigurationAsync();
+            // Configure API Key authentication
+            builder
+                .Services.AddAuthentication("ApiKey")
+                .AddScheme<
+                    Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions,
+                    ApiKeyAuthenticationHandler
+                >("ApiKey", null);
 
-            // 2. Domain Entities Demo
-            await _entitiesDemo.RunDemoAsync();
+            builder.Services.AddAuthorization();
 
-            // 3. State Management Demo
-            await _stateDemo.RunDemoAsync();
-
-            // 4. Events Demo
-            await _eventsDemo.RunDemoAsync();
-
-            // 5. Validation Demo
-            await _validationDemo.RunDemoAsync();
-
-            // 6. Multi-threaded Operations Demo
-            await DemonstrateMultiThreadedOperationsAsync();
-
-            // 7. Performance Demo
-            await DemonstratePerformanceAsync();
-
-            // 8. Error Handling Demo
-            await DemonstrateErrorHandlingAsync();
-
-            _logger.LogInformation("Comprehensive demo completed successfully");
+            Log.Information("API authentication enabled with {KeyCount} API keys", snapDogConfig.Api.ApiKeys.Count);
         }
-        catch (Exception ex)
+        else if (snapDogConfig.Api.AuthEnabled)
         {
-            _logger.LogError(ex, "Demo execution failed");
-            throw;
+            // Auth is enabled but no API keys configured - use dummy authentication for development
+            builder
+                .Services.AddAuthentication("Dummy")
+                .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, DummyAuthenticationHandler>(
+                    "Dummy",
+                    null
+                );
+
+            builder.Services.AddAuthorization();
+
+            Log.Warning(
+                "API authentication enabled but no API keys configured - using dummy authentication for development"
+            );
         }
+        else
+        {
+            // Auth is disabled - use dummy authentication to satisfy [Authorize] attributes
+            builder
+                .Services.AddAuthentication("Dummy")
+                .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, DummyAuthenticationHandler>(
+                    "Dummy",
+                    null
+                );
+
+            builder.Services.AddAuthorization();
+
+            Log.Information("API authentication disabled - using dummy authentication");
+        }
+
+        Log.Information("API server enabled on port {Port}", snapDogConfig.Api.Port);
+    }
+    else
+    {
+        Log.Information("API server is disabled via configuration (SNAPDOG_API_ENABLED=false)");
     }
 
-    /// <summary>
-    /// Demonstrates configuration loading and validation.
-    /// </summary>
-    private async Task DemonstrateConfigurationAsync()
+    // Add health checks
+    if (snapDogConfig.System.HealthChecksEnabled)
     {
-        _logger.LogInformation("=== Configuration Demo ===");
+        var healthChecksBuilder = builder.Services.AddHealthChecks();
 
-        _logger.LogInformation(
-            "Application: {ApplicationName} v{Version}",
-            _configuration.System.ApplicationName,
-            _configuration.System.Version
+        // Add basic application health check
+        healthChecksBuilder.AddCheck(
+            "self",
+            () => HealthCheckResult.Healthy("Application is running"),
+            ["ready", "live"]
         );
-        _logger.LogInformation("Environment: {Environment}", _configuration.System.Environment);
-        _logger.LogInformation("API Port: {Port}", _configuration.Api.Port);
-        _logger.LogInformation("Telemetry Enabled: {Enabled}", _configuration.Telemetry.Enabled);
-        _logger.LogInformation("Configured Zones: {ZoneCount}", _configuration.Zones.Count);
-        _logger.LogInformation("Configured Clients: {ClientCount}", _configuration.Clients.Count);
-        _logger.LogInformation("Configured Radio Stations: {StationCount}", _configuration.RadioStations.Count);
 
-        await Task.Delay(1000); // Simulate async operation
-        _logger.LogInformation("Configuration demo completed");
-    }
+        // Add external service health checks based on configuration
+        healthChecksBuilder.AddTcpHealthCheck(
+            options =>
+            {
+                options.AddHost(snapDogConfig.Services.Snapcast.Address, snapDogConfig.Services.Snapcast.JsonRpcPort);
+            },
+            "snapcast",
+            tags: ["ready"]
+        );
 
-    /// <summary>
-    /// Demonstrates multi-threaded state operations.
-    /// </summary>
-    private async Task DemonstrateMultiThreadedOperationsAsync()
-    {
-        _logger.LogInformation("=== Multi-threaded Operations Demo ===");
-
-        var tasks = new List<Task>();
-        var cancellationTokenSource = new CancellationTokenSource();
-
-        // Simulate concurrent state updates
-        for (int i = 0; i < 5; i++)
+        if (snapDogConfig.Services.Mqtt.Enabled)
         {
-            int workerId = i;
-            tasks.Add(
-                Task.Run(async () =>
+            healthChecksBuilder.AddTcpHealthCheck(
+                options =>
                 {
-                    await _stateDemo.SimulateConcurrentUpdatesAsync(workerId, cancellationTokenSource.Token);
-                })
+                    options.AddHost(snapDogConfig.Services.Mqtt.BrokerAddress, snapDogConfig.Services.Mqtt.Port);
+                },
+                "mqtt",
+                tags: ["ready"]
             );
         }
 
-        // Let them run for a few seconds
-        await Task.Delay(3000);
-        cancellationTokenSource.Cancel();
-
-        try
+        if (snapDogConfig.Services.Knx.Enabled && !string.IsNullOrEmpty(snapDogConfig.Services.Knx.Gateway))
         {
-            await Task.WhenAll(tasks);
+            healthChecksBuilder.AddTcpHealthCheck(
+                options =>
+                {
+                    options.AddHost(snapDogConfig.Services.Knx.Gateway, snapDogConfig.Services.Knx.Port);
+                },
+                "knx",
+                tags: ["ready"]
+            );
         }
-        catch (OperationCanceledException)
-        {
-            _logger.LogInformation("Multi-threaded operations cancelled as expected");
-        }
-
-        _logger.LogInformation("Multi-threaded operations demo completed");
     }
 
-    /// <summary>
-    /// Demonstrates performance characteristics.
-    /// </summary>
-    private async Task DemonstratePerformanceAsync()
+    var app = builder.Build();
+
+    // Add global exception handling as the first middleware
+    app.UseGlobalExceptionHandling();
+
+    // Configure the HTTP request pipeline (conditionally based on API configuration)
+    if (snapDogConfig.Api.Enabled)
     {
-        _logger.LogInformation("=== Performance Demo ===");
+        app.UseSwagger();
+        app.UseSwaggerUI();
 
-        const int iterations = 1000;
-        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        app.UseRouting();
 
-        // Measure state update performance
-        for (int i = 0; i < iterations; i++)
+        // Add authentication and authorization middleware
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        app.MapControllers();
+
+        // Map health check endpoints
+        if (snapDogConfig.System.HealthChecksEnabled)
         {
-            await _stateDemo.BenchmarkStateUpdatesAsync();
+            app.MapHealthChecks("/health");
+            app.MapHealthChecks(
+                "/health/ready",
+                new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+                {
+                    Predicate = check => check.Tags.Contains("ready"),
+                }
+            );
+            app.MapHealthChecks(
+                "/health/live",
+                new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+                {
+                    Predicate = check => check.Tags.Contains("live"),
+                }
+            );
         }
-
-        stopwatch.Stop();
-        _logger.LogInformation(
-            "Completed {Iterations} state updates in {ElapsedMs}ms ({Rate:F2} ops/sec)",
-            iterations,
-            stopwatch.ElapsedMilliseconds,
-            iterations / stopwatch.Elapsed.TotalSeconds
-        );
-
-        await Task.Delay(500);
-        _logger.LogInformation("Performance demo completed");
     }
 
-    /// <summary>
-    /// Demonstrates error handling and recovery scenarios.
-    /// </summary>
-    private async Task DemonstrateErrorHandlingAsync()
-    {
-        _logger.LogInformation("=== Error Handling Demo ===");
-
-        try
-        {
-            // Demonstrate validation errors
-            await _validationDemo.DemonstrateValidationErrorsAsync();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Caught expected validation error during demo");
-        }
-
-        try
-        {
-            // Demonstrate state management errors
-            await _stateDemo.DemonstrateErrorScenariosAsync();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Caught expected state management error during demo");
-        }
-
-        await Task.Delay(500);
-        _logger.LogInformation("Error handling demo completed");
-    }
+    return app;
 }
+
+// Make Program class accessible to tests
+public partial class Program { }

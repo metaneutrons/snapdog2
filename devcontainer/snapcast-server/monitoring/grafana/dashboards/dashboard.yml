@@ -1,0 +1,16 @@
+# =============================================================================
+# 🏆 Grafana Dashboard Configuration for Award-Worthy Snapcast Server
+# =============================================================================
+
+apiVersion: 1
+
+providers:
+  - name: 'snapcast-dashboards'
+    orgId: 1
+    folder: 'Snapcast'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards

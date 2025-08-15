@@ -1,0 +1,28 @@
+using Microsoft.Extensions.Logging;
+
+namespace SnapDog2.Infrastructure.Integrations.Knx;
+
+/// <summary>
+/// High-performance LoggerMessage definitions for KnxService.
+/// Eliminates boxing, reduces allocations, and provides compile-time safety.
+/// </summary>
+public partial class KnxService
+{
+    // Status Publishing Operations (10101-10102)
+    [LoggerMessage(10101, LogLevel.Debug, "KNX global status publishing not implemented for event type {EventType}")]
+    private partial void LogKnxGlobalStatusPublishingNotImplemented(string eventType);
+
+    [LoggerMessage(10102, LogLevel.Debug, "{Message}")]
+    private partial void LogKnxDebugMessage(string message);
+
+    // Configuration and Error Operations (10103-10104)
+    [LoggerMessage(
+        10103,
+        LogLevel.Warning,
+        "No KNX group address configured for status {StatusId} on {TargetDescription}. "
+    )]
+    private partial void LogNoKnxGroupAddressConfigured(string statusId, string targetDescription);
+
+    [LoggerMessage(10104, LogLevel.Error, "Error sending KNX status {StatusId} to {TargetDescription}")]
+    private partial void LogErrorSendingKnxStatus(Exception exception, string statusId, string targetDescription);
+}

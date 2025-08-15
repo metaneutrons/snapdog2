@@ -1,0 +1,109 @@
+namespace SnapDog2.Server.Behaviors;
+
+using System.Diagnostics;
+using Cortex.Mediator.Commands;
+using Cortex.Mediator.Queries;
+using Microsoft.Extensions.Logging;
+using SnapDog2.Core.Models;
+
+/// <summary>
+/// Command pipeline behavior with shared logging implementation.
+/// </summary>
+/// <typeparam name="TCommand">The command type.</typeparam>
+/// <typeparam name="TResponse">The response type.</typeparam>
+public partial class SharedLoggingCommandBehavior<TCommand, TResponse> : ICommandPipelineBehavior<TCommand, TResponse>
+    where TCommand : ICommand<TResponse>
+    where TResponse : IResult
+{
+    private readonly ILogger<SharedLoggingCommandBehavior<TCommand, TResponse>> _logger;
+    private static readonly ActivitySource ActivitySource = new("SnapDog2.CortexMediator");
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SharedLoggingCommandBehavior{TCommand, TResponse}"/> class.
+    /// </summary>
+    /// <param name="logger">The logger instance.</param>
+    public SharedLoggingCommandBehavior(ILogger<SharedLoggingCommandBehavior<TCommand, TResponse>> logger)
+    {
+        this._logger = logger;
+    }
+
+    /// <inheritdoc/>
+    public async Task<TResponse> Handle(
+        TCommand command,
+        CommandHandlerDelegate<TResponse> next,
+        CancellationToken cancellationToken
+    )
+    {
+        var commandName = typeof(TCommand).Name;
+        using var activity = ActivitySource.StartActivity($"CortexMediator.Command.{commandName}");
+
+        this.LogStartingCommand(commandName);
+        var stopwatch = Stopwatch.StartNew();
+
+        try
+        {
+            var response = await next().ConfigureAwait(false);
+            stopwatch.Stop();
+
+            this.LogCompletedCommand(commandName, stopwatch.ElapsedMilliseconds);
+            return response;
+        }
+        catch (Exception ex)
+        {
+            stopwatch.Stop();
+            this.LogCommandFailed(ex, commandName, stopwatch.ElapsedMilliseconds);
+            throw;
+        }
+    }
+}
+
+/// <summary>
+/// Query pipeline behavior with shared logging implementation.
+/// </summary>
+/// <typeparam name="TQuery">The query type.</typeparam>
+/// <typeparam name="TResponse">The response type.</typeparam>
+public partial class SharedLoggingQueryBehavior<TQuery, TResponse> : IQueryPipelineBehavior<TQuery, TResponse>
+    where TQuery : IQuery<TResponse>
+    where TResponse : IResult
+{
+    private readonly ILogger<SharedLoggingQueryBehavior<TQuery, TResponse>> _logger;
+    private static readonly ActivitySource ActivitySource = new("SnapDog2.CortexMediator");
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SharedLoggingQueryBehavior{TQuery, TResponse}"/> class.
+    /// </summary>
+    /// <param name="logger">The logger instance.</param>
+    public SharedLoggingQueryBehavior(ILogger<SharedLoggingQueryBehavior<TQuery, TResponse>> logger)
+    {
+        this._logger = logger;
+    }
+
+    /// <inheritdoc/>
+    public async Task<TResponse> Handle(
+        TQuery query,
+        QueryHandlerDelegate<TResponse> next,
+        CancellationToken cancellationToken
+    )
+    {
+        var queryName = typeof(TQuery).Name;
+        using var activity = ActivitySource.StartActivity($"CortexMediator.Query.{queryName}");
+
+        this.LogStartingQuery(queryName);
+        var stopwatch = Stopwatch.StartNew();
+
+        try
+        {
+            var response = await next().ConfigureAwait(false);
+            stopwatch.Stop();
+
+            this.LogCompletedQuery(queryName, stopwatch.ElapsedMilliseconds);
+            return response;
+        }
+        catch (Exception ex)
+        {
+            stopwatch.Stop();
+            this.LogQueryFailed(ex, queryName, stopwatch.ElapsedMilliseconds);
+            throw;
+        }
+    }
+}

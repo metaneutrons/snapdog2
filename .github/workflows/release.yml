@@ -1,49 +1,48 @@
-name: Create GitHub Release
+name: Release
+
+permissions:
+  contents: write
+  packages: write
 
 on:
   push:
     tags:
-      - "v*" # Push events to matching v*, i.e. v1.0.0, v20.15.10
-  workflow_dispatch:
-    inputs:
-      branch:
-        description: "Branch to release from (e.g., main, develop, feature/xyz, fix/abc)"
-        required: true
-        default: "main"
-      is_prerelease_override:
-        description: "Manually mark as prerelease (true/false). If empty, auto-detect based on branch/GitVersion."
-        required: false
-        type: boolean
-      specific_version:
-        description: "Optional: Specify an exact version to use (e.g., 1.2.3-beta.1). Overrides GitVersion branch calculation."
-        required: false
-      extra_docker_tag:
-        description: "Optional: Add an extra Docker tag (e.g., prod, staging, custom). Will be appended to the Docker additional_tags."
-        required: false
+      - "v*.*.*"
 
-permissions:
-  contents: write # Needed for creating GitHub releases and potentially pushing tags
+env:
+  DOTNET_VERSION: "9.0.301"
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.gitversion.outputs.semVer }}
-      is_prerelease: ${{ steps.determine_prerelease_flag.outputs.is_prerelease }}
-      # The actual tag created/used for the release will be 'v' + semVer
-      release_tag_name: v${{ steps.gitversion.outputs.semVer }}
+  # Build native binaries for multiple architectures
+  build-native:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            runtime: linux-x64
+            artifact-name: linux-x64
+          - os: ubuntu-latest
+            runtime: linux-arm64
+            artifact-name: linux-arm64
+
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Full history for GitVersion
-          ref: ${{ github.event.inputs.branch || github.ref }}
+          fetch-depth: 0
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "9.0.301"
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Install GitVersion
         uses: gittools/actions/gitversion/setup@v4.0.1
@@ -52,153 +51,187 @@ jobs:
 
       - name: Determine version
         id: gitversion
-        run: |
-          if [ -n "${{ github.event.inputs.specific_version }}" ]; then
-            echo "Using specific version from input: ${{ github.event.inputs.specific_version }}"
-            # Ensure specific_version is directly usable as SemVer
-            RAW_VERSION="${{ github.event.inputs.specific_version }}"
-            # Remove 'v' prefix if present
-            CLEAN_VERSION=${RAW_VERSION#v}
+        uses: gittools/actions/gitversion/execute@v4.0.1
+        with:
+          configFilePath: 'GitVersion.yml'
+          updateAssemblyInfo: true
 
-            echo "semVer=$CLEAN_VERSION" >> $GITHUB_OUTPUT
-
-            VERSION_BASE=$(echo "$CLEAN_VERSION" | cut -d'-' -f1)
-            PRE_RELEASE_TAG=$(echo "$CLEAN_VERSION" | cut -s -d'-' -f2-)
-
-            echo "majorMinorPatch=$VERSION_BASE" >> $GITHUB_OUTPUT
-            echo "nuGetVersion=$CLEAN_VERSION" >> $GITHUB_OUTPUT # Assuming NuGetVersion is same as SemVer for specific inputs
-            if [ -n "$PRE_RELEASE_TAG" ]; then
-              echo "preReleaseTag=$PRE_RELEASE_TAG" >> $GITHUB_OUTPUT
-            else
-              echo "preReleaseTag=" >> $GITHUB_OUTPUT # Ensure it's empty string if no prerelease part
-            fi
-            # For FullSemVer, if it's a manual override, it's likely just the SemVer itself unless more complex logic is needed
-            echo "fullSemVer=$CLEAN_VERSION" >> $GITHUB_OUTPUT
-          else
-            # Execute GitVersion, capturing all its output variables
-            # Ensure GitVersion tool is directly callable after setup action
-            GITVERSION_JSON=$(dotnet-gitversion /output json /config GitVersion.yml)
-            echo "GitVersion JSON: $GITVERSION_JSON"
-            echo "semVer=$(echo $GITVERSION_JSON | jq -r .SemVer)" >> $GITHUB_OUTPUT
-            echo "majorMinorPatch=$(echo $GITVERSION_JSON | jq -r .MajorMinorPatch)" >> $GITHUB_OUTPUT
-            echo "nuGetVersion=$(echo $GITVERSION_JSON | jq -r .NuGetVersion)" >> $GITHUB_OUTPUT
-            echo "preReleaseTag=$(echo $GITVERSION_JSON | jq -r .PreReleaseTag)" >> $GITHUB_OUTPUT
-            echo "fullSemVer=$(echo $GITVERSION_JSON | jq -r .FullSemVer)" >> $GITHUB_OUTPUT
-            # Update assembly info using GitVersion's recommended way
-            dotnet-gitversion /updateassemblyinfo true
-          fi
-        shell: bash
-
-      - name: Display Version Info
-        run: |
-          echo "SemVer: ${{ steps.gitversion.outputs.semVer }}"
-          echo "MajorMinorPatch: ${{ steps.gitversion.outputs.majorMinorPatch }}"
-          echo "NuGetVersion: ${{ steps.gitversion.outputs.nuGetVersion }}"
-          echo "PreReleaseTag: ${{ steps.gitversion.outputs.preReleaseTag }}"
-          echo "FullSemVer: ${{ steps.gitversion.outputs.fullSemVer }}"
-
-      - name: Tag commit if manually triggered and tag doesn't exist
-        if: github.event_name == 'workflow_dispatch'
-        run: |
-          VERSION_TAG="v${{ steps.gitversion.outputs.semVer }}"
-          # Check if tag exists remotely or locally
-          if ! git rev-parse -q --verify "refs/tags/$VERSION_TAG" && ! git ls-remote --tags origin "refs/tags/$VERSION_TAG" | grep -q "refs/tags/$VERSION_TAG"; then
-            echo "Tag $VERSION_TAG does not exist. Creating tag..."
-            git config user.name "${{ github.actor }}"
-            git config user.email "${{ github.actor }}@users.noreply.github.com"
-            git tag -a "$VERSION_TAG" -m "Release $VERSION_TAG"
-            git push origin "$VERSION_TAG"
-            echo "Pushed tag $VERSION_TAG"
-          else
-            echo "Tag $VERSION_TAG already exists."
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Determine Prerelease Flag
-        id: determine_prerelease_flag
-        run: |
-          IS_PRERELEASE="false"
-          # Priority 1: Manual override from input
-          if [ "${{ github.event.inputs.is_prerelease_override }}" == "true" ]; then
-            IS_PRERELEASE="true"
-          elif [ "${{ github.event.inputs.is_prerelease_override }}" == "false" ]; then
-            # Explicitly set to false if override is 'false'
-            IS_PRERELEASE="false"
-          # Priority 2: GitVersion's PreReleaseTag (check if not null and not empty)
-          elif [ -n "${{ steps.gitversion.outputs.preReleaseTag }}" ] && [ "${{ steps.gitversion.outputs.preReleaseTag }}" != "null" ]; then
-            IS_PRERELEASE="true"
-          # Priority 3: If triggered by workflow_dispatch and branch is not main (safer default for non-main branches)
-          # Ensure branch input is correctly evaluated
-          elif [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.branch }}" != "main" ]]; then
-            IS_PRERELEASE="true"
-          # Priority 4: If triggered by a tag, check if the tag name contains a hyphen (like v1.0.0-beta)
-          # This handles the case where a pre-release tag (e.g. v1.2.3-beta.1) is pushed directly
-          elif [[ "${{ github.ref_type }}" == "tag" && "${{ github.ref_name }}" == *"-"* ]]; then
-            IS_PRERELEASE="true"
-          fi
-          echo "is_prerelease=${IS_PRERELEASE}" >> $GITHUB_OUTPUT
-          echo "Determined is_prerelease: ${IS_PRERELEASE}"
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/Directory.Packages.props') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore --verbosity minimal
 
-      - name: Build Release
-        run: dotnet build --configuration Release --no-restore /p:Version=${{ steps.gitversion.outputs.semVer }}
+      - name: Build
+        run: dotnet build --configuration Release --no-restore --verbosity minimal
+
+      - name: Test (x64 only)
+        if: matrix.runtime == 'linux-x64'
+        run: |
+          dotnet test --configuration Release --verbosity normal \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./TestResults \
+            --logger "trx;LogFileName=test-results.trx"
+
+      - name: Publish application
+        run: |
+          dotnet publish ./SnapDog2/SnapDog2.csproj \
+            --configuration Release \
+            --runtime ${{ matrix.runtime }} \
+            --self-contained true \
+            --output ./publish/${{ matrix.runtime }} \
+            -p:PublishSingleFile=true \
+            -p:PublishTrimmed=true
+
+      - name: Create release archive
+        run: |
+          cd publish/${{ matrix.runtime }}
+          tar -czf ../../snapdog2-${{ steps.gitversion.outputs.semVer }}-${{ matrix.artifact-name }}.tar.gz *
+          cd ../..
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapdog2-${{ matrix.artifact-name }}-${{ steps.gitversion.outputs.semVer }}
+          path: snapdog2-${{ steps.gitversion.outputs.semVer }}-${{ matrix.artifact-name }}.tar.gz
+          retention-days: 7
+
+  # Build and push Docker images for multiple architectures
+  build-docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v4.0.1
+        with:
+          versionSpec: "6.x"
+
+      - name: Determine version
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v4.0.1
+        with:
+          configFilePath: 'GitVersion.yml'
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=tag
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            VERSION=${{ steps.gitversion.outputs.semVer }}
+
+  # Create GitHub Release
+  release:
+    needs: [build-native, build-docker]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v4.0.1
+        with:
+          versionSpec: "6.x"
+
+      - name: Determine version
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v4.0.1
+        with:
+          configFilePath: 'GitVersion.yml'
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.gitversion.outputs.semVer }} # Use the SemVer from GitVersion for the tag name
-          name: ${{ steps.determine_prerelease_flag.outputs.is_prerelease == 'true' && 'Pre-release' || 'Release' }} v${{ steps.gitversion.outputs.semVer }}
+          tag_name: ${{ github.ref_name }}
+          name: SnapDog2 ${{ steps.gitversion.outputs.semVer }}
           body: |
-            Automated release for version v${{ steps.gitversion.outputs.semVer }}.
-            ${{ github.event_name == 'workflow_dispatch' && format('Triggered manually by {0} from branch {1}.', github.actor, github.event.inputs.branch) || format('Triggered by tag push {0}.', github.ref_name) }}
-
-            **Version Details:**
-            - SemVer: `${{ steps.gitversion.outputs.semVer }}`
-            - FullSemVer: `${{ steps.gitversion.outputs.fullSemVer }}`
-            - Pre-release Tag: `${{ steps.gitversion.outputs.preReleaseTag || 'N/A' }}`
+            ## SnapDog2 ${{ steps.gitversion.outputs.semVer }}
+            
+            ### 🎵 Smart Home Audio Controller
+            
+            **Release Notes:**
+            - Multi-room audio streaming with Snapcast
+            - MQTT and KNX integration
+            - RESTful API for home automation
+            
+            **Native Binaries:**
+            - `snapdog2-${{ steps.gitversion.outputs.semVer }}-linux-x64.tar.gz` - Linux x64
+            - `snapdog2-${{ steps.gitversion.outputs.semVer }}-linux-arm64.tar.gz` - Linux ARM64 (Raspberry Pi)
+            
+            **Docker Images:**
+            ```bash
+            # x64 systems
+            docker run -d --name snapdog2 \
+              -p 5000:5000 \
+              -v $(pwd)/config:/app/config \
+              ghcr.io/metaneutrons/snapdog2:${{ steps.gitversion.outputs.semVer }}
+            
+            # ARM64 systems (Raspberry Pi)
+            docker run -d --name snapdog2 \
+              -p 5000:5000 \
+              -v $(pwd)/config:/app/config \
+              --platform linux/arm64 \
+              ghcr.io/metaneutrons/snapdog2:${{ steps.gitversion.outputs.semVer }}
+            ```
+            
+            **Installation:**
+            1. Download the appropriate archive for your architecture
+            2. Extract: `tar -xzf snapdog2-*.tar.gz`
+            3. Configure your environment variables
+            4. Run: `./SnapDog2`
+            
+            For full documentation, visit the [project repository](https://github.com/metaneutrons/snapdog2).
+          files: |
+            ./artifacts/*/snapdog2-*.tar.gz
           draft: false
-          prerelease: ${{ steps.determine_prerelease_flag.outputs.is_prerelease == 'true' }}
-          # Generate release notes only for actual tag pushes to avoid issues with dispatch/manual tags
-          generate_release_notes: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  set-docker-tags:
-    needs: release
-    runs-on: ubuntu-latest
-    outputs:
-      additional_tags: ${{ steps.set_tags.outputs.additional_tags }}
-    steps:
-      - name: Set Docker additional_tags
-        id: set_tags
-        run: |
-          if [ "${{ needs.release.outputs.is_prerelease }}" = "false" ]; then
-            echo "additional_tags=latest" >> $GITHUB_OUTPUT
-          else
-            # Use preReleaseTag from GitVersion output (e.g., alpha, beta, rc)
-            tag="${{ needs.release.outputs.version }}"
-            pre="${{ needs.release.outputs.version }}"
-            # Extract pre-release label (e.g., beta from 1.2.3-beta.1)
-            if [[ "$tag" =~ -([a-zA-Z]+) ]]; then
-              pre="${BASH_REMATCH[1]}"
-              echo "additional_tags=$pre" >> $GITHUB_OUTPUT
-            else
-              echo "additional_tags=prerelease" >> $GITHUB_OUTPUT
-            fi
-          fi
-          # Append extra Docker tag if provided
-          if [ -n "${{ github.event.inputs.extra_docker_tag }}" ]; then
-            echo "Appending extra Docker tag: ${{ github.event.inputs.extra_docker_tag }}"
-            echo "additional_tags=${{ steps.set_tags.outputs.additional_tags }},${{ github.event.inputs.extra_docker_tag }}" >> $GITHUB_OUTPUT
-          fi
-
-  docker:
-    needs: [release, set-docker-tags]
-    uses: ./.github/workflows/docker.yml
-    with:
-      version: ${{ needs.release.outputs.version }}
-      additional_tags: ${{ needs.set-docker-tags.outputs.additional_tags }}
-    secrets: inherit
+          prerelease: ${{ contains(steps.gitversion.outputs.semVer, '-') }}
+          generate_release_notes: true

@@ -1,0 +1,233 @@
+name: CI
+
+permissions:
+  contents: read
+  checks: write # For test results
+  pull-requests: write # For PR comments
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, develop]
+    paths-ignore:
+      - "**/*.md"
+      - ".gitignore"
+      - "docs/**"
+      - "assets/**"
+  pull_request:
+    branches: [main, develop]
+    paths-ignore:
+      - "**/*.md"
+      - ".gitignore"
+      - "docs/**"
+      - "assets/**"
+
+env:
+  DOTNET_VERSION: "9.0.301"
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  # Fast feedback job for basic validation
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      version: ${{ steps.gitversion.outputs.semVer }}
+      should-build: ${{ steps.changes.outputs.src }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for source changes
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            src:
+              - 'SnapDog2/**'
+              - 'SnapDog2.Tests/**'
+              - '**/*.csproj'
+              - '**/*.sln'
+              - 'Directory.*.props'
+              - 'GitVersion.*'
+              - 'nuget.config'
+
+      - name: Setup .NET
+        if: steps.changes.outputs.src == 'true'
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Install GitVersion
+        if: steps.changes.outputs.src == 'true'
+        uses: gittools/actions/gitversion/setup@v4.0.1
+        with:
+          versionSpec: "6.x"
+
+      - name: Determine version
+        if: steps.changes.outputs.src == 'true'
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v4.0.1
+        with:
+          configFilePath: 'GitVersion.yml'
+
+      - name: Cache NuGet packages
+        if: steps.changes.outputs.src == 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/Directory.Packages.props') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore dependencies
+        if: steps.changes.outputs.src == 'true'
+        run: dotnet restore --verbosity minimal
+
+      - name: Build (validation only)
+        if: steps.changes.outputs.src == 'true'
+        run: dotnet build --configuration Debug --no-restore --verbosity minimal
+
+  # Comprehensive build and test
+  build-and-test:
+    needs: validate
+    if: needs.validate.outputs.should-build == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v4.0.1
+        with:
+          versionSpec: "6.x"
+
+      - name: Determine version
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v4.0.1
+        with:
+          configFilePath: 'GitVersion.yml'
+          updateAssemblyInfo: true
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/Directory.Packages.props') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore dependencies
+        run: dotnet restore --verbosity minimal
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore --verbosity minimal
+
+      - name: Test
+        run: |
+          dotnet test --configuration Release --verbosity normal \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./TestResults \
+            --logger "trx;LogFileName=test-results.trx"
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ needs.validate.outputs.version }}
+          path: ./TestResults/**
+          retention-days: 7
+
+      - name: Publish Test Results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Test Results
+          path: "./TestResults/*.trx"
+          reporter: dotnet-trx
+          fail-on-error: true
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          files: "./TestResults/*/coverage.cobertura.xml"
+          fail_ci_if_error: false
+          verbose: true
+
+      - name: Publish application
+        run: |
+          dotnet publish ./SnapDog2/SnapDog2.csproj \
+            --configuration Release \
+            --no-build \
+            --output ./publish
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapdog2-${{ needs.validate.outputs.version }}
+          path: ./publish/**
+          retention-days: 7
+          compression-level: 9
+
+  # Security scanning
+  security-scan:
+    needs: validate
+    if: needs.validate.outputs.should-build == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      security-events: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/Directory.Packages.props') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore dependencies
+        run: dotnet restore --verbosity minimal
+
+      - name: Run security scan
+        run: |
+          dotnet list package --vulnerable --include-transitive 2>&1 | tee vulnerable-packages.txt
+          if grep -q "has the following vulnerable packages" vulnerable-packages.txt; then
+            echo "::warning::Vulnerable packages detected"
+            cat vulnerable-packages.txt
+          fi
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: csharp
+          queries: security-and-quality
+
+      - name: Build for CodeQL
+        run: dotnet build --configuration Release --verbosity minimal
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3

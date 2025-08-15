@@ -1,6 +1,6 @@
 services:
   # SnapDog2 application - container-only development with full debugging
-  snapdog:
+  app:
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -8,17 +8,14 @@ services:
     volumes:
       - .:/app:cached # Mount source code for hot reload
       - ~/.nuget/packages:/home/vscode/.nuget/packages:cached # NuGet cache
+      - ~/.nuget/local:/app/local-nuget:cached # Local NuGet packages for development
+      - snapcast_sinks:/snapsinks # Shared audio sinks with snapcast-server
+    env_file:
+      - ./devcontainer/.env
     environment:
       - DOTNET_ENVIRONMENT=Development
       - DOTNET_USE_POLLING_FILE_WATCHER=true
       - DOTNET_WATCH_RESTART_ON_RUDE_EDIT=true
-      # Internal networking - no localhost needed!
-      - SNAPDOG_SERVICES_SNAPCAST_HOST=snapcast-server
-      - SNAPDOG_SERVICES_SNAPCAST_PORT=1704
-      - SNAPDOG_SERVICES_MQTT_BROKER=mqtt:1883
-      - SNAPDOG_SERVICES_SUBSONIC_SERVER_URL=http://navidrome:4533
-      - SNAPDOG_TELEMETRY_JAEGER_ENDPOINT=http://jaeger:14268
-      - SNAPDOG_SERVICES_KNX_GATEWAY=knx-simulator:6720
     depends_on:
       - snapcast-server
       - mqtt
@@ -33,7 +30,6 @@ services:
   # Caddy reverse proxy with dashboard - SINGLE PORT TO HOST
   caddy:
     image: caddy:2-alpine
-    container_name: snapdog-caddy
     ports:
       - "8000:80" # Only exposed port!
     volumes:
@@ -42,7 +38,7 @@ services:
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
-      - snapdog
+      - app
       - snapcast-server
       - snapcast-client-living-room
       - snapcast-client-kitchen
@@ -58,15 +54,20 @@ services:
   snapcast-server:
     build:
       context: ./devcontainer/snapcast-server
-    container_name: snapdog-snapcast-server
     hostname: snapcast-server
+    env_file:
+      - ./devcontainer/.env
+    ports:
+      - "1705:1705" # Snapcast server port
+    volumes:
+      - snapcast_sinks:/snapsinks # Shared audio sinks with app container
     networks:
       snapdog-dev:
         ipv4_address: 172.20.0.5
     restart: unless-stopped
 
-  # Base Snapcast client configuration (not directly instantiated)
-  snapcast-client: &snapcast-client-base
+  # Living room client
+  snapcast-client-living-room:
     build:
       context: ./devcontainer/snapcast-client
     restart: unless-stopped
@@ -74,12 +75,6 @@ services:
       - snapcast-server
     environment:
       - SNAPSERVER_HOST=172.20.0.5 # IP address of snapcast-server
-
-  # Living room client
-  snapcast-client-living-room:
-    <<: *snapcast-client-base
-    environment:
-      - SNAPSERVER_HOST=172.20.0.5
       - CLIENT_ID=living-room
       - FIXED_MAC_ADDRESS=02:42:ac:11:00:10
     networks:
@@ -89,7 +84,11 @@ services:
 
   # Kitchen client
   snapcast-client-kitchen:
-    <<: *snapcast-client-base
+    build:
+      context: ./devcontainer/snapcast-client
+    restart: unless-stopped
+    depends_on:
+      - snapcast-server
     environment:
       - SNAPSERVER_HOST=172.20.0.5
       - CLIENT_ID=kitchen
@@ -101,7 +100,11 @@ services:
 
   # Bedroom client
   snapcast-client-bedroom:
-    <<: *snapcast-client-base
+    build:
+      context: ./devcontainer/snapcast-client
+    restart: unless-stopped
+    depends_on:
+      - snapcast-server
     environment:
       - SNAPSERVER_HOST=172.20.0.5
       - CLIENT_ID=bedroom
@@ -111,14 +114,19 @@ services:
         ipv4_address: 172.20.0.8
         mac_address: 02:42:ac:11:00:12
 
-  # MQTT Broker - NO HOST PORTS (internal only)
+  # MQTT Broker
   mqtt:
     image: eclipse-mosquitto:2.0
-    container_name: snapdog-mqtt
     volumes:
-      - ./devcontainer/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./devcontainer/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./devcontainer/mosquitto/passwd:/mosquitto/config/passwd
       - mqtt_data:/mosquitto/data
       - mqtt_logs:/mosquitto/log
+    ports:
+      - "1883:1883" # MQTT port
+    environment:
+      - MOSQUITTO_LOG_LEVEL=debug
+    command: ["/usr/sbin/mosquitto", "-c", "/mosquitto/config/mosquitto.conf", "-v"]
     networks:
       snapdog-dev:
         ipv4_address: 172.20.0.3
@@ -127,8 +135,8 @@ services:
   # Navidrome - NO HOST PORTS (via Caddy)
   navidrome:
     image: deluan/navidrome:latest
-    container_name: snapdog-navidrome
     environment:
+      ND_ENABLEINSIGHTSCOLLECTOR: "false" # Disable insights collector
       ND_SCANSCHEDULE: "1h"
       ND_LOGLEVEL: info
       ND_SESSIONTIMEOUT: "24h"
@@ -143,25 +151,40 @@ services:
         ipv4_address: 172.20.0.9
     restart: unless-stopped
 
-  # KNX Gateway Simulator - NO HOST PORTS (internal only)
-  knx-simulator:
-    image: michelmu/knxd-docker:latest
-    container_name: snapdog-knx-simulator
+  # KNX Gateway Simulator - Custom Alpine-based container
+  knxd:
+    build:
+      context: ./devcontainer/knxd
+      dockerfile: Dockerfile
     environment:
-      - ADDRESS=1.1.128 # KNX daemon address
-      - CLIENT_ADDRESS=1.1.129:8 # Client address range
+      - ADDRESS=0.0.1 # KNX daemon address (standard format)
+      - CLIENT_ADDRESS=0.0.2:8 # Client address range (start:count)
       - INTERFACE=dummy # Use dummy interface for simulation
-      - DEBUG_ERROR_LEVEL=info # Debug level
-      - FILTERS=single # Filter configuration
+      - DEBUG_LEVEL=verbose # Debug level (verbose for troubleshooting)
+      - FILTERS=single,pace:queue # Filters with queue to avoid warnings
+    ports:
+      - "3671:3671/udp" # KNX/IP port
     networks:
       snapdog-dev:
         ipv4_address: 172.20.0.10
     restart: unless-stopped
+    # Security: Run as non-root with minimal capabilities
+    user: "1000:1000"
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    # Health check
+    healthcheck:
+      test: ["CMD", "netstat", "-ln"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
-  # Jaeger - NO HOST PORTS (via Caddy)
+  # Jaeger
   jaeger:
     image: jaegertracing/all-in-one:latest
-    container_name: snapdog-jaeger
     environment:
       COLLECTOR_OTLP_ENABLED: true
     networks:
@@ -169,22 +192,20 @@ services:
         ipv4_address: 172.20.0.11
     restart: unless-stopped
 
-  # Optional: Prometheus for metrics - NO HOST PORTS
+  # Prometheus for metrics
   prometheus:
     image: prom/prometheus:latest
-    container_name: snapdog-prometheus
     volumes:
-      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./devcontainer/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     networks:
       snapdog-dev:
         ipv4_address: 172.20.0.12
     profiles: ["monitoring"]
     restart: unless-stopped
 
-  # Optional: Grafana for visualization - NO HOST PORTS
+  # Grafana for visualization
   grafana:
     image: grafana/grafana:latest
-    container_name: snapdog-grafana
     environment:
       GF_SECURITY_ADMIN_PASSWORD: snapdog-dev
       GF_SERVER_ROOT_URL: http://localhost:8000/grafana/
@@ -195,12 +216,74 @@ services:
     profiles: ["monitoring"]
     restart: unless-stopped
 
+  # KNX Monitor - Visual debugging tool for KNX bus activity
+  #
+  # Now using official GitHub Container Registry image with multi-architecture support
+  # - Automatically pulls the correct architecture (AMD64/ARM64)
+  # - Signed binaries for enhanced security
+  # - Regular updates from CI/CD pipeline
+  #
+  # TROUBLESHOOTING:
+  # - If you see "Unrecognized command or argument" errors, use short form arguments (-g, -p, -v)
+  # - Long form arguments (--gateway, --port, --verbose) may not work in Docker due to System.CommandLine beta version
+  # - Check logs with: docker compose logs knx-monitor -f
+  # - Check health status: docker inspect snapdog-knx-monitor-1 --format='{{.State.Health.Status}}'
+  # - Access health endpoint: curl http://localhost:8080/health (if port is exposed)
+  # - Access readiness endpoint: curl http://localhost:8080/ready (if port is exposed)
+  knx-monitor:
+    image: ghcr.io/metaneutrons/knxmonitor:latest
+    volumes:
+      - ./devcontainer/knx-groupaddresses.csv:/app/knx-groupaddresses.csv:ro # KNX group addresses database
+    environment:
+      - TZ=Europe/Berlin # Set timezone for proper log timestamps
+    command: ["-g", "knxd", "-v", "--csv", "/app/knx-groupaddresses.csv"]
+    depends_on:
+      knxd:
+        condition: service_healthy
+    networks:
+      snapdog-dev:
+        ipv4_address: 172.20.0.14
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+    # 🏥 HEALTH CHECK - Enabled by default in Docker containers
+    # 
+    # The KNX Monitor automatically enables health check service when running in containers.
+    # This provides comprehensive monitoring of both application and KNX connection status.
+    #
+    # Features:
+    # - HTTP-based health check using dedicated endpoint
+    # - Checks both application process AND KNX connection status
+    # - Returns detailed JSON with connection info and message count
+    # - More reliable than simple process checks
+    # - Faster response time (5s timeout vs 10s)
+    # - More frequent checks (15s interval vs 30s)
+    # - Longer startup grace period (30s) for KNX connection establishment
+    #
+    # Endpoints (internal to container):
+    # - http://localhost:8080/health: Detailed health information with uptime and message count
+    # - http://localhost:8080/ready: Simple readiness check (used by Docker health check)
+    #
+    # To debug health check: 
+    # - docker inspect snapdog-knx-monitor-1 --format='{{.State.Health.Status}}'
+    # - docker inspect snapdog-knx-monitor-1 --format='{{range .State.Health.Log}}{{.Output}}{{end}}'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    labels:
+      - "traefik.enable=false" # Not exposed via web interface
+      - "com.docker.compose.service=knx-monitor"
+
 volumes:
   mqtt_data:
   mqtt_logs:
   navidrome_data:
   caddy_data:
   caddy_config:
+  snapcast_sinks: # Shared volume for audio sinks between snapcast-server and app
 
 networks:
   snapdog-dev:

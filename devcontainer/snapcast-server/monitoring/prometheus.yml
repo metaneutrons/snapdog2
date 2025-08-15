@@ -1,0 +1,43 @@
+# =============================================================================
+# 🏆 Prometheus Configuration for Award-Worthy Snapcast Server
+# =============================================================================
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Snapcast Server monitoring (if metrics endpoint available)
+  - job_name: 'snapcast-server'
+    static_configs:
+      - targets: ['172.25.0.10:1780']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # Docker container monitoring
+  - job_name: 'docker-containers'
+    static_configs:
+      - targets: ['172.25.0.10:1704', '172.25.0.10:1705', '172.25.0.10:1780']
+    metrics_path: '/health'
+    scrape_interval: 30s
+
+  # Network connectivity monitoring
+  - job_name: 'snapcast-network'
+    static_configs:
+      - targets: 
+        - '172.25.0.10:1704'  # Stream port
+        - '172.25.0.10:1705'  # TCP JSON-RPC
+        - '172.25.0.10:1780'  # HTTP JSON-RPC
+        - '172.25.0.10:5000'  # AirPlay
+    metrics_path: '/probe'
+    scrape_interval: 15s

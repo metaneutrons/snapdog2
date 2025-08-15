@@ -1,0 +1,15 @@
+<Project>
+  <PropertyGroup>
+    <LocalNuGetPath Condition="'$(OS)' == 'Windows_NT'">$(USERPROFILE)\.nuget\local</LocalNuGetPath>
+    <LocalNuGetPath Condition="'$(OS)' != 'Windows_NT'">$(HOME)/.nuget/local</LocalNuGetPath>
+    <!-- Build metadata for version tracking -->
+    <BuildDate>$([System.DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"))</BuildDate>
+    <BuildMachine>$([System.Environment]::MachineName)</BuildMachine>
+    <BuildUser>$([System.Environment]::UserName)</BuildUser>
+  </PropertyGroup>
+  <ItemGroup>
+    <AssemblyMetadata Include="BuildDate" Value="$(BuildDate)" />
+    <AssemblyMetadata Include="BuildMachine" Value="$(BuildMachine)" />
+    <AssemblyMetadata Include="BuildUser" Value="$(BuildUser)" />
+  </ItemGroup>
+</Project>

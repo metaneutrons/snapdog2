@@ -21,6 +21,8 @@ API keys are managed securely outside the application code, loaded at startup fr
 
     ```bash
     # Example Environment Variables
+    SNAPDOG_API_ENABLED=true                           # Default: true
+    SNAPDOG_API_PORT=5000                               # Default: 5000
     SNAPDOG_API_AUTH_ENABLED=true
     SNAPDOG_API_APIKEY_1="sd-key-for-homeassistant-integration-alksjdhfgqwer"
     SNAPDOG_API_APIKEY_2="sd-key-for-mobile-app-zxcvbnm12345"
@@ -28,7 +30,7 @@ API keys are managed securely outside the application code, loaded at startup fr
     # Add as many keys as needed for different clients
     ```
 
-* **Loading:** The `/Core/Configuration/ApiAuthConfiguration.cs` class is responsible for loading these keys from the environment variables into a list used for validation. It should also load the `Enabled` flag.
+* **Loading:** The `/Core/Configuration/ApiConfig.cs` class is responsible for loading these keys from the environment variables into a list used for validation. It should also load the `Enabled` flag and `Port` configuration.
 
 ```csharp
 // Example: /Core/Configuration/ApiAuthConfiguration.cs
@@ -239,7 +241,7 @@ Authentication and Authorization services are configured in `Program.cs` via DI 
 
 ```csharp
 // In /Worker/DI/ApiAuthExtensions.cs
-namespace SnapDog2.Worker.DI;
+namespace SnapDog2.Extensions.DependencyInjection;
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -354,7 +356,6 @@ public class StatusController : ControllerBase
 
 In addition to API Key Authentication, SnapDog2 incorporates:
 
-1. **HTTPS Enforcement:** Production deployments **must** be configured to serve the API over HTTPS using a reverse proxy (like Nginx or Traefik) or Kestrel HTTPS configuration with valid certificates. Traffic within the Docker network might be HTTP, but external access must be encrypted.
 2. **Input Validation:** All API request models and command payloads are validated using FluentValidation (Section 5.4) to prevent injection attacks, ensure data integrity, and handle malformed requests gracefully.
 3. **Rate Limiting:** Implementing rate limiting middleware (e.g., `AspNetCoreRateLimit` NuGet package) is recommended for production deployments to mitigate denial-of-service and brute-force attacks against the API. Configuration should be done in `Program.cs`.
 4. **Security Headers:** Standard security headers (`X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Content-Security-Policy`, `Referrer-Policy`, `Permissions-Policy`, etc.) should be configured in the ASP.NET Core middleware pipeline (`Program.cs`) to enhance browser-level security for potential future web interfaces or direct API interactions.

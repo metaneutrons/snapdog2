@@ -17,10 +17,11 @@ Code quality and style consistency are rigorously enforced through a multi-prong
 These overarching principles guide the development process and architectural choices:
 
 * **Framework & Language**: Target **.NET 9.0**. Actively utilize modern and appropriate **C# language features** (currently C# 12/13 features available in the .NET 9 SDK) such as primary constructors, collection expressions, `required` members, file-scoped namespaces, enhanced pattern matching, `record` types, etc., prioritizing clarity, conciseness, and performance benefits.
-* **Immutability**: Strongly favor immutable data structures wherever possible. This applies particularly to Data Transfer Objects (DTOs) used in the API layer, configuration models, MediatR messages (Commands, Queries, Notifications), and internal state representations (`ZoneState`, `ClientState`). Use C# `record` types with `init`-only properties as the default mechanism for achieving immutability. Updates to state objects within services must be performed immutably by creating *new* state record instances using `with` expressions, rather than modifying existing objects in place.
+* **DRY Principles (Don't Repeat Yourself)**: **Mandatory** elimination of hardcoded strings and code duplication through type-safe attribute systems. All notification classes must use `[StatusId("IDENTIFIER")]` attributes, and all command classes must use `[CommandId("IDENTIFIER")]` attributes. Access identifiers using `StatusIdAttribute.GetStatusId<T>()` and `CommandIdAttribute.GetCommandId<T>()` for compile-time validation and refactoring safety. Blueprint references in attributes ensure traceability from code to documentation. This approach provides IntelliSense support, prevents identifier mismatches, and creates a single source of truth for all system identifiers.
+* **Immutability**: Strongly favor immutable data structures wherever possible. This applies particularly to Data Transfer Objects (DTOs) used in the API layer, configuration models, Cortex.Mediator messages (Commands, Queries, Notifications), and internal state representations (`ZoneState`, `ClientState`). Use C# `record` types with `init`-only properties as the default mechanism for achieving immutability. Updates to state objects within services must be performed immutably by creating *new* state record instances using `with` expressions, rather than modifying existing objects in place.
 * **Asynchronous Programming**: Employ `async`/`await` **mandatorily** for all operations that are potentially I/O-bound, including network communication (HTTP calls, MQTT, KNX, Snapcast control), file system interactions (logging sinks, configuration loading if applicable), and any future database operations. Strictly avoid `async void` methods, with the sole exception being top-level event handlers directly subscribing to external library events where the event signature dictates `void` return (e.g., `SnapcastClient.ClientConnected += MyHandler;`). Even in such cases, the handler body must contain comprehensive `try/catch` blocks to prevent unhandled exceptions from terminating the process. Consistently use `ConfigureAwait(false)` on awaited `Task` and `ValueTask` instances within the `/Infrastructure` and `/Core` layers to prevent deadlocks by avoiding unnecessary capturing and resuming on the original synchronization context. Ensure `CancellationToken` parameters are accepted and passed down through asynchronous call chains wherever feasible to support cooperative cancellation.
 * **Error Handling**: Strict adherence to the **Result Pattern** (defined canonically in Section 5.1 using `Result` and `Result<T>`) is **mandatory** for all methods that represent operations which might fail due to predictable operational reasons (e.g., external service unavailable after retries, invalid input not caught by validation, business rule violation, resource not found). Exceptions must **never** be used for normal control flow or to signal expected failure conditions across internal component boundaries (between `Server`, `Infrastructure`, `Api` layers). Use `try/catch` blocks **only** at the lowest level of interaction with external systems or libraries (typically within `/Infrastructure` services) where the external code might throw exceptions. Any caught exception must be immediately logged with relevant context and converted into a `Result.Failure(ex)` object, which is then returned up the call stack for controlled handling by the caller. Unhandled exceptions should only occur in truly exceptional, unrecoverable circumstances (e.g., critical configuration missing at startup, out-of-memory) and should result in application termination after logging.
-* **Dependency Injection**: Exclusively utilize .NET's built-in Dependency Injection container (`Microsoft.Extensions.DependencyInjection`). Define abstractions (interfaces) in the `/Core/Abstractions` folder. Implement these interfaces in the appropriate layer (`/Infrastructure` for external service interactions, `/Server` for core application logic services/managers). Register all services with their correct lifetimes (typically `Singleton` for stateless services, state repositories like `SnapcastStateRepository`, and configuration options; `Scoped` if request-specific context is needed, e.g., within API request handling; `Transient` for lightweight, stateless services like MediatR handlers and validators) within dedicated extension methods organized by layer or feature in the `/Worker/DI` folder. These extensions are called from `Program.cs`. Strictly favor **constructor injection** for resolving dependencies. Avoid service locator anti-patterns.
+* **Dependency Injection**: Exclusively utilize .NET's built-in Dependency Injection container (`Microsoft.Extensions.DependencyInjection`). Define abstractions (interfaces) in the `/Core/Abstractions` folder. Implement these interfaces in the appropriate layer (`/Infrastructure` for external service interactions, `/Server` for core application logic services/managers). Register all services with their correct lifetimes (typically `Singleton` for stateless services, state repositories like `SnapcastStateRepository`, and configuration options; `Scoped` if request-specific context is needed, e.g., within API request handling; `Transient` for lightweight, stateless services like Cortex.Mediator handlers and validators) within dedicated extension methods organized by layer or feature in the `/Worker/DI` folder. These extensions are called from `Program.cs`. Strictly favor **constructor injection** for resolving dependencies. Avoid service locator anti-patterns.
 * **Logging**: Implement all application logging using the `Microsoft.Extensions.Logging` abstractions (`ILogger<T>`). **Mandatory** use of the **LoggerMessage Source Generator pattern** (detailed in Section 1.5) for all log messages to ensure maximum performance (by avoiding runtime boxing and formatting) and compile-time checking of log messages and parameters. **Serilog** is the configured concrete logging provider (backend) as detailed in Section 5.2. Logs must be structured and include relevant context, including Trace IDs and Span IDs provided by OpenTelemetry integration (Section 13) for correlation.
 * **Disposal**: Correctly implement `IAsyncDisposable` (preferred for async cleanup) or `IDisposable` for any class that manages unmanaged resources (e.g., network connections, file handles, native library contexts like LibVLC) or subscribes to events from external or long-lived objects to prevent memory leaks. Implement the standard dispose pattern robustly. In public methods of disposable classes, check the disposal state at the beginning using `ObjectDisposedException.ThrowIf(this.disposed, this);` to provide immediate feedback on incorrect usage.
 * **Null Handling**: Enable nullable reference types project-wide via `<Nullable>enable</Nullable>` in `SnapDog2.csproj`. All code must be null-aware. Eliminate compiler warnings related to nullability by explicitly handling potential `null` values using appropriate checks (`is not null`), pattern matching (`is { }`), null-conditional operators (`?.`), null-coalescing operators (`??`), or parameter/property validation. Use the `required` modifier for non-nullable properties in DTOs and configuration classes where initialization is mandatory. Avoid using the null-forgiving operator (`!`) unless it is absolutely necessary and its safety can be guaranteed and justified with a code comment.
@@ -58,7 +59,7 @@ These rules ensure visual consistency and readability. Primarily enforced by `.e
   * Single space after commas in argument/parameter lists, array initializers, etc.
   * No space before commas or semicolons.
   * Specific rules apply around unary operators, type casts, generic brackets, etc. (Refer to SA10xx rule documentation).
-* **`using` Directives**: Place all `using` directives **inside** the `namespace` declaration (StyleCop SA1200 configured via `stylecop.json`). Order directives as follows: `System.*` namespaces first, then other external library namespaces (e.g., `Microsoft.*`, `Knx.*`, `MediatR.*`), finally own project namespaces (`SnapDog2.*`). Within each group, directives must be sorted alphabetically by namespace (StyleCop SA1208, SA1210). Utilize **global usings** (`/Worker/GlobalUsings.cs`) for extremely common namespaces used throughout the application (e.g., `System`, `System.Collections.Generic`, `System.Linq`, `System.Threading.Tasks`, `SnapDog2.Core.Models`).
+* **`using` Directives**: Place all `using` directives **inside** the `namespace` declaration (StyleCop SA1200 configured via `stylecop.json`). Order directives as follows: `System.*` namespaces first, then other external library namespaces (e.g., `Microsoft.*`, `Knx.*`, `Cortex.Mediator.*`), finally own project namespaces (`SnapDog2.*`). Within each group, directives must be sorted alphabetically by namespace (StyleCop SA1208, SA1210). Utilize **global usings** (`/Worker/GlobalUsings.cs`) for extremely common namespaces used throughout the application (e.g., `System`, `System.Collections.Generic`, `System.Linq`, `System.Threading.Tasks`, `SnapDog2.Core.Models`).
 
     ```csharp
     // Example: /Infrastructure/Knx/KnxService.cs
@@ -79,7 +80,7 @@ These rules ensure visual consistency and readability. Primarily enforced by `.e
     using Knx.Falcon.Discovery;
     using Knx.Falcon.KnxnetIp;
     using Knx.Falcon.Sdk;
-    using MediatR;
+    using Cortex.Mediator;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Polly;
@@ -114,16 +115,16 @@ Consistent naming is crucial for readability and understanding code intent.
 * **Public Fields** (Generally discouraged; use Properties), **Public Constants (`public const`)**: Use `PascalCase`.
   * Example: `public const int DefaultTimeoutMilliseconds = 10000;`.
 * **Local Variables**, **Method Parameters**: Use `camelCase`. Names should be descriptive. Avoid single-letter variables except in very small scopes (e.g., LINQ lambdas `x => x.Id`, short loops `for(int i=0;...)`).
-  * Examples: `int currentVolume`, `string playlistId`, `CancellationToken cancellationToken`.
+  * Examples: `int currentVolume`, `string playlistIndex`, `CancellationToken cancellationToken`.
 * **Private/Protected Fields**: Use `_camelCase` (prefix `_`, then camelCase, enforced by SX1309). This clearly distinguishes instance fields.
   * Examples: `private readonly ILogger<MyClass> _logger;`, `private SemaphoreSlim _stateLock;`.
 * **Static Readonly Fields**: Use `PascalCase` if they represent logical constants or are publicly accessible (rare). Use `_camelCase` if they are private implementation details (more common).
 * **Constants (`private const`, `internal const`)**: Use `PascalCase` (SA1303).
-  * Example: `private const string RadioPlaylistId = "radio";`.
+  * Example: `private const string RadioPlaylistIndex = "radio";`.
 * **Type Parameters** (Generics): Use `TPascalCase` (prefix `T`, then descriptive PascalCase name, SA1314).
-  * Examples: `Result<TResponse>`, `IRequestHandler<TCommand, TResult>`, `List<TZoneConfig>`.
+  * Examples: `Result<TResponse>`, `ICommandHandler<TCommand, TResult>`, `List<TZoneConfig>`.
 * **Abbreviations**: Treat common acronyms (2-3 letters) as words unless only two letters. Capitalize only the first letter or keep all caps if standard (like `IO`). Prefer full words over abbreviations where clarity is improved.
-  * Correct: `HtmlParser`, `GetZoneId`, `UseApiAuth`, `IoService`.
+  * Correct: `HtmlParser`, `GetZoneIndex`, `UseApiAuth`, `IoService`.
   * Incorrect: `HTMLParser`, `GetZoneID`, `UseAPIAuth`.
 * **Hungarian Notation**: Strictly forbidden for all identifiers (variables, fields, parameters, etc.) (SA1305, SA1309). Do not use prefixes indicating type (e.g., `strName`, `iCount`, `bEnabled`).
 
@@ -149,7 +150,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Cortex.Mediator;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Models;
@@ -160,7 +161,7 @@ using SnapDog2.Server.Notifications; // For publishing internal events
 /// Must be declared partial for LoggerMessage generation.
 /// </summary>
 public partial class ClientManager : IClientManager, // Implements Core abstraction
-                                     INotificationHandler<SnapcastClientConnectedNotification>, // Handles MediatR notification
+                                     INotificationHandler<SnapcastClientConnectedNotification>, // Handles Cortex.Mediator notification
                                      IAsyncDisposable
 {
     private readonly ISnapcastService _snapcastService;
@@ -170,7 +171,7 @@ public partial class ClientManager : IClientManager, // Implements Core abstract
     // Internal state mapping (example - adjust as needed)
     private readonly ConcurrentDictionary<string, int> _snapcastIdToInternalId = new();
     private readonly ConcurrentDictionary<int, ClientState> _internalClientStates = new();
-    private readonly ConcurrentDictionary<string, int> _lastKnownZoneAssignment = new(); // snapcastId -> zoneId
+    private readonly ConcurrentDictionary<string, int> _lastKnownZoneAssignment = new(); // snapcastId -> zoneIndex
     private readonly SemaphoreSlim _stateLock = new SemaphoreSlim(1, 1);
     private bool _disposed = false;
 
@@ -196,11 +197,11 @@ public partial class ClientManager : IClientManager, // Implements Core abstract
     [LoggerMessage(EventId = 307, Level = LogLevel.Warning, Message = "Could not find internal mapping for Snapcast Client {SnapcastId} during update.")]
     private partial void LogMappingNotFoundWarning(string snapcastId);
 
-    [LoggerMessage(EventId = 308, Level = LogLevel.Information, Message = "Assigning Client (Internal ID: {InternalId}, Snapcast ID: {SnapcastId}) to Zone {ZoneId}.")]
-    private partial void LogAssigningClientToZone(int internalId, string snapcastId, int zoneId);
+    [LoggerMessage(EventId = 308, Level = LogLevel.Information, Message = "Assigning Client (Internal ID: {InternalId}, Snapcast ID: {SnapcastId}) to Zone {ZoneIndex}.")]
+    private partial void LogAssigningClientToZone(int internalId, string snapcastId, int zoneIndex);
 
-    [LoggerMessage(EventId = 309, Level = LogLevel.Error, Message = "Failed to assign Client {InternalId} to Zone {ZoneId}.")]
-    private partial void LogAssignClientError(int internalId, int zoneId, Exception? ex = null); // Optional exception
+    [LoggerMessage(EventId = 309, Level = LogLevel.Error, Message = "Failed to assign Client {InternalId} to Zone {ZoneIndex}.")]
+    private partial void LogAssignClientError(int internalId, int zoneIndex, Exception? ex = null); // Optional exception
 
 
     public ClientManager(
@@ -256,14 +257,14 @@ public partial class ClientManager : IClientManager, // Implements Core abstract
             UpdateInternalClientState(notification.Client); // Update state based on event
 
             // Re-assign to last known zone if needed (Option B logic)
-            if (_lastKnownZoneAssignment.TryGetValue(notification.Client.Id, out int lastZoneId))
+            if (_lastKnownZoneAssignment.TryGetValue(notification.Client.Id, out int lastZoneIndex))
             {
                  var currentGroup = _stateRepository.GetAllGroups().FirstOrDefault(g => g.Clients.Any(c => c.Id == notification.Client.Id));
                  if(currentGroup == null) // Only assign if not already in a group
                  {
-                      LogAssigningClientToZone( /* Get internal ID */ -1, notification.Client.Id, lastZoneId);
+                      LogAssigningClientToZone( /* Get internal ID */ -1, notification.Client.Id, lastZoneIndex);
                       // Call AssignClientToZoneAsync (needs internal ID lookup first)
-                      // var assignResult = await AssignClientToZoneAsync(internalId, lastZoneId).ConfigureAwait(false);
+                      // var assignResult = await AssignClientToZoneAsync(internalId, lastZoneIndex).ConfigureAwait(false);
                       // if(assignResult.IsFailure) LogAssignClientError(...);
                  }
             }
@@ -288,18 +289,18 @@ public partial class ClientManager : IClientManager, // Implements Core abstract
 
          // Update last known zone if client is in a group
           var group = _stateRepository.GetAllGroups().FirstOrDefault(g => g.Clients.Any(c => c.Id == snapClient.Id));
-          if(group != null && _zoneManager.TryGetZoneIdByGroupId(group.Id, out int zoneId)) { // Assume ZoneManager has TryGet method
-               _lastKnownZoneAssignment[snapClient.Id] = zoneId;
-               // Update ZoneId in _internalClientStates record if different
-               if(clientState.ZoneId != zoneId) {
-                    _internalClientStates[internalId] = clientState with { ZoneId = zoneId };
+          if(group != null && _zoneManager.TryGetZoneIndexByGroupId(group.Id, out int zoneIndex)) { // Assume ZoneManager has TryGet method
+               _lastKnownZoneAssignment[snapClient.Id] = zoneIndex;
+               // Update ZoneIndex in _internalClientStates record if different
+               if(clientState.ZoneIndex != zoneIndex) {
+                    _internalClientStates[internalId] = clientState with { ZoneIndex = zoneIndex };
                }
           } else {
                // Client is not in a known group, remove last known assignment?
                // Or keep it for reconnection logic? Keep it for now.
-               // Ensure ZoneId is null in internal state if not in a group
-                if(clientState.ZoneId != null) {
-                    _internalClientStates[internalId] = clientState with { ZoneId = null };
+               // Ensure ZoneIndex is null in internal state if not in a group
+                if(clientState.ZoneIndex != null) {
+                    _internalClientStates[internalId] = clientState with { ZoneIndex = null };
                }
           }
 
@@ -310,7 +311,7 @@ public partial class ClientManager : IClientManager, // Implements Core abstract
      private ClientState MapSnapClientToClientState(int internalId, Sturd.SnapcastNet.Models.Client snapClient)
      {
           // ... Mapping logic ...
-          return new ClientState { Id = internalId, /* map other fields */ ZoneId = null /* Determine ZoneID */};
+          return new ClientState { Id = internalId, /* map other fields */ ZoneIndex = null /* Determine ZoneID */};
      }
 
 

@@ -12,6 +12,8 @@
         not path /tracing*
         not path /grafana*
         not path /prometheus*
+        not path /api*
+        not path /swagger*
     }
 
     handle @not_server {
@@ -30,24 +32,10 @@
         redir * /server/ 301
     }
 
-    # API endpoints (must come before the general server handler)
-    handle /server/api/v1/* {
-        reverse_proxy http://snapcast-server:1780
-    }
-
-    # Snapcast server with trailing slash
+    # Snapcast server with trailing slash - simple reverse proxy
     handle /server/* {
         uri strip_prefix /server
         reverse_proxy http://snapcast-server:1780
-    }
-
-    # WebSocket connections to Snapcast server - direct forward for websocket
-    handle /server/jsonrpc {
-        reverse_proxy http://snapcast-server:1780 {
-            header_up Host {host}
-            header_up Connection {http.request.header.Connection}
-            header_up Upgrade {http.request.header.Upgrade}
-        }
     }
 
     # WebSocket connections for control interface
@@ -58,7 +46,6 @@
 
     # Navidrome music server
     handle /music* {
-        uri strip_prefix /music
         reverse_proxy http://navidrome:4533
     }
 
@@ -75,8 +62,19 @@
         }
     }
 
-    # Prometheus metrics
+    # Prometheus metrics - handle root redirect
+    @prometheus_root {
+        path /prometheus
+        path /prometheus/
+    }
+    
+    handle @prometheus_root {
+        redir * /prometheus/query 301
+    }
+
+    # Prometheus metrics - other paths
     handle /prometheus* {
+        uri strip_prefix /prometheus
         reverse_proxy http://prometheus:9090 {
             header_up Host {host}
         }
@@ -108,6 +106,16 @@
 
     handle @client_bedroom_exact {
         redir * /clients/bedroom/ 301
+    }
+
+    # SnapDog API
+    handle /api* {
+        reverse_proxy http://app:5000
+    }
+
+    # Swagger UI
+    handle /swagger* {
+        reverse_proxy http://app:5000
     }
 
     # Clients with trailing slashes (mapped to our service names)

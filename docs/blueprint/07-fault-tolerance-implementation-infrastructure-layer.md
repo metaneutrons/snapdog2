@@ -33,7 +33,7 @@ public static partial class ResiliencePolicies
     private static readonly ActivitySource ResilienceActivitySource = new("SnapDog2.Resilience");
 
     // Logger Messages (Defined using partial methods for source generation)
-    [LoggerMessage(EventId = 701, Level = LogLevel.Warning, Message = "[Resilience] HTTP Request failed. Delaying {Delay}ms before retry {RetryAttempt}/{MaxRetries}. Uri: {RequestUri}")]
+    [LoggerMessage(EventId = 701, Level = LogLevel.Warning, Message = "[Resilience] HTTP Request failed. Delaying {Delay} ms before retry {RetryAttempt}/{MaxRetries}. Uri: {RequestUri}")]
     static partial void LogHttpRetry(ILogger logger, double delay, int retryAttempt, int maxRetries, Uri? requestUri, Exception exception);
 
     [LoggerMessage(EventId = 702, Level = LogLevel.Error, Message = "[Resilience] Circuit breaker opened for {BreakDelayMs}ms due to failure. Uri: {RequestUri}")]
@@ -45,7 +45,7 @@ public static partial class ResiliencePolicies
     [LoggerMessage(EventId = 704, Level = LogLevel.Warning, Message = "[Resilience] Circuit breaker is half-open. Next call is a trial.")]
     static partial void LogCircuitHalfOpen(ILogger logger); // Added Uri for context
 
-    [LoggerMessage(EventId = 705, Level = LogLevel.Warning, Message = "[Resilience] Operation '{OperationKey}' failed. Delaying {Delay}ms before retry {RetryAttempt}/{MaxRetries}.")]
+    [LoggerMessage(EventId = 705, Level = LogLevel.Warning, Message = "[Resilience] Operation '{OperationKey}' failed. Delaying {Delay} ms before retry {RetryAttempt}/{MaxRetries}.")]
     static partial void LogGeneralRetry(ILogger logger, string operationKey, double delay, int retryAttempt, int maxRetries, Exception exception);
 
     [LoggerMessage(EventId = 706, Level = LogLevel.Error, Message = "[Resilience] Timeout occurred after {TimeoutMs}ms for operation '{OperationKey}'.")]
@@ -232,7 +232,7 @@ Configured via `HttpClientFactory` extensions (`/Worker/DI/ResilienceExtensions.
 
 ```csharp
 // In /Worker/DI/ResilienceExtensions.cs
-namespace SnapDog2.Worker.DI;
+namespace SnapDog2.Extensions.DependencyInjection;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

@@ -214,3 +214,11 @@ tye.yaml
 
 # explicit local files
 .claudecode
+
+# Exclude all files from devcontainer/music/ except specific files
+devcontainer/music/*
+!devcontainer/music/create_library.sh
+!devcontainer/music/white-noise.m4a
+
+*.csv
+docs/FalconExamples

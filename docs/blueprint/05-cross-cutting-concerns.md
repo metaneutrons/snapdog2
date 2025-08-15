@@ -11,8 +11,8 @@ SnapDog2 employs a strict and consistent error handling strategy centered around
 1. **Avoid Exceptions for Control Flow:** Exceptions are reserved *only* for truly unexpected, unrecoverable, or programmer errors (e.g., `ArgumentNullException`, `NullReferenceException` indicating bugs, `OutOfMemoryException`, critical startup failures). They must **never** be used to signal expected operational failures like "Zone Not Found" or "Snapcast Connection Unavailable".
 2. **Result Pattern Encapsulation:** Operations that can fail gracefully must return either `SnapDog2.Core.Models.Result` (for void operations) or `SnapDog2.Core.Models.Result<T>` (for operations returning a value `T`). These objects encapsulate the success/failure status, an optional error message, and an optional originating `Exception` object (only populated if the failure was due to an *unexpected* exception caught at the infrastructure boundary).
 3. **Boundary Exception Handling:** `try/catch` blocks should primarily exist within the `/Infrastructure` layer, specifically around calls to external libraries (`Sturd.SnapcastNet`, `Knx.Falcon.Sdk`, `MQTTnet`, `HttpClient`, etc.) or system resources that might throw exceptions. When an exception is caught here (and potentially *after* resilience policies like Polly have failed), it **must** be logged with context and immediately converted into a `Result.Failure(ex)` object before being returned to the calling layer (`/Server`).
-4. **Propagation & Handling:** Callers (e.g., MediatR handlers in `/Server`, other services) **must** check the `IsSuccess` or `IsFailure` property of the returned `Result` object. If `IsFailure` is true, the caller should handle the failure appropriately (e.g., log a warning/error, return the failure `Result` further up the stack, potentially publish an `ErrorNotification`). The `Value` property of `Result<T>` should only be accessed if `IsSuccess` is true.
-5. **API Layer Exception Handling:** The `/Api` layer translates `Result.Failure` outcomes received from MediatR handlers into appropriate HTTP error responses (e.g., 400 Bad Request, 404 Not Found, 500 Internal Server Error) using the standard `ApiResponse` structure (Section 11.4.1). Unhandled exceptions bubbling up to the API layer should be caught by global exception handling middleware, logged critically, and result in a generic 500 Internal Server Error response.
+4. **Propagation & Handling:** Callers (e.g., Cortex.Mediator handlers in `/Server`, other services) **must** check the `IsSuccess` or `IsFailure` property of the returned `Result` object. If `IsFailure` is true, the caller should handle the failure appropriately (e.g., log a warning/error, return the failure `Result` further up the stack, potentially publish an `ErrorNotification`). The `Value` property of `Result<T>` should only be accessed if `IsSuccess` is true.
+5. **API Layer Exception Handling:** The `/Api` layer translates `Result.Failure` outcomes received from Cortex.Mediator handlers into appropriate HTTP error responses (e.g., 400 Bad Request, 404 Not Found, 500 Internal Server Error) using the standard `ApiResponse` structure (Section 11.4.1). Unhandled exceptions bubbling up to the API layer should be caught by global exception handling middleware, logged critically, and result in a generic 500 Internal Server Error response.
 
 ### 5.1.1. Result Pattern Implementation (Canonical Definition)
 
@@ -27,7 +27,7 @@ using System.Collections.Generic; // For EqualityComparer
 using System.Diagnostics.CodeAnalysis; // For NotNullWhen
 
 /// <summary>
-/// Marker interface for Result types, useful for MediatR behaviors and constraints.
+/// Marker interface for Result types, useful for Cortex.Mediator behaviors and constraints.
 /// </summary>
 public interface IResult
 {
@@ -197,19 +197,19 @@ All service methods in `/Server` and `/Infrastructure` that perform operations w
 // Example in IZoneManager (/Core/Abstractions)
 public interface IZoneManager
 {
-    Task<Result<IZoneService>> GetZoneAsync(int zoneId); // Can fail if zone doesn't exist
-    Task<Result> SomeZoneActionAsync(int zoneId, string parameter); // Can fail based on rules
+    Task<Result<IZoneService>> GetZoneAsync(int zoneIndex); // Can fail if zone doesn't exist
+    Task<Result> SomeZoneActionAsync(int zoneIndex, string parameter); // Can fail based on rules
     // ... other methods
 }
 
-// Example usage in a MediatR handler (/Server/Features/...)
+// Example usage in a Cortex.Mediator handler (/Server/Features/...)
 public async Task<Result> Handle(SomeZoneCommand request, CancellationToken cancellationToken)
 {
-    var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneId).ConfigureAwait(false);
+    var zoneResult = await _zoneManager.GetZoneAsync(request.ZoneIndex).ConfigureAwait(false);
     if (zoneResult.IsFailure)
     {
         // Log failure reason (e.g., zone not found)
-        _logger.LogWarning("Zone lookup failed for Zone {ZoneId}: {Error}", request.ZoneId, zoneResult.ErrorMessage);
+        _logger.LogWarning("Zone lookup failed for Zone {ZoneIndex}: {Error}", request.ZoneIndex, zoneResult.ErrorMessage);
         return zoneResult; // Propagate the failure Result
     }
 
@@ -218,9 +218,9 @@ public async Task<Result> Handle(SomeZoneCommand request, CancellationToken canc
     var actionResult = await zoneService.PerformActionAsync(request.Data).ConfigureAwait(false); // Returns Result
 
     if(actionResult.IsFailure) {
-        _logger.LogError(actionResult.Exception, "Action failed for Zone {ZoneId}: {Error}", request.ZoneId, actionResult.ErrorMessage);
+        _logger.LogError(actionResult.Exception, "Action failed for Zone {ZoneIndex}: {Error}", request.ZoneIndex, actionResult.ErrorMessage);
     } else {
-         _logger.LogInformation("Action succeeded for Zone {ZoneId}", request.ZoneId);
+         _logger.LogInformation("Action succeeded for Zone {ZoneIndex}", request.ZoneIndex);
     }
 
     return actionResult; // Return the result of the action
@@ -232,9 +232,9 @@ public async Task<Result> Handle(SomeZoneCommand request, CancellationToken canc
 Logging uses the `Microsoft.Extensions.Logging.ILogger<T>` abstraction throughout the application. The concrete implementation is provided by **Serilog**, configured during application startup (`/Worker/Program.cs`).
 
 * **Mandatory Pattern:** Use **LoggerMessage Source Generators** (Section 1.5) for all log messages to ensure optimal performance and compile-time checks.
-* **Structured Logging:** Always log data using named placeholders in the message template (`_logger.LogInformation("Processing User {UserId} for Zone {ZoneId}", userId, zoneId);`). Avoid string interpolation directly in log messages (`$"..."`).
+* **Structured Logging:** Always log data using named placeholders in the message template (`_logger.LogInformation("Processing User {UserId} for Zone {ZoneIndex}", userId, zoneIndex);`). Avoid string interpolation directly in log messages (`$"..."`).
 * **Log Levels:** Use appropriate `LogLevel` values (Trace, Debug, Information, Warning, Error, Critical) as defined in Section 1.5.1.3. Default minimum level configured via environment variables (Section 10).
-* **Context Enrichment:** Logs are automatically enriched with Trace ID and Span ID via OpenTelemetry integration (Section 13) when using `ILogger`. Use logging scopes (`_logger.BeginScope(...)`) to add contextual information (like ZoneId, RequestId) to a series of related log messages.
+* **Context Enrichment:** Logs are automatically enriched with Trace ID and Span ID via OpenTelemetry integration (Section 13) when using `ILogger`. Use logging scopes (`_logger.BeginScope(...)`) to add contextual information (like ZoneIndex, RequestId) to a series of related log messages.
 * **Exception Logging:** When logging exceptions, **always** pass the `Exception` object as the first argument to the logging method (`_logger.LogError(ex, "Message template {Data}", data);`).
 
 ```csharp
@@ -275,7 +275,7 @@ Log.Logger = new LoggerConfiguration()
 
 Observability is achieved using **OpenTelemetry**.
 
-* **Tracing:** Uses `.NET`'s built-in `System.Diagnostics.ActivitySource` for creating distributed traces. Instrumentation for ASP.NET Core and HttpClient is automatic. Manual activities (`_activitySource.StartActivity(...)`) are added for MediatR handlers and key infrastructure operations. Traces are exported via **OTLP** (Section 13).
+* **Tracing:** Uses `.NET`'s built-in `System.Diagnostics.ActivitySource` for creating distributed traces. Instrumentation for ASP.NET Core and HttpClient is automatic. Manual activities (`_activitySource.StartActivity(...)`) are added for Cortex.Mediator handlers and key infrastructure operations. Traces are exported via **OTLP** (Section 13).
 * **Metrics:** Uses `.NET`'s built-in `System.Diagnostics.Metrics.Meter` for defining and recording application metrics. Instrumentation for ASP.NET Core, HttpClient, and Runtime is automatic. Custom metrics (request counts, durations, error rates) are defined and recorded via `IMetricsService`. Metrics are exposed via a **Prometheus scraping endpoint** (Section 13).
 
 (See Section 13 for detailed OpenTelemetry setup and usage).
@@ -284,10 +284,10 @@ Observability is achieved using **OpenTelemetry**.
 
 Input validation is primarily handled using the **FluentValidation** library.
 
-* **Scope:** Validators are defined for MediatR Command objects (`IRequest<Result>`) and potentially for API Request DTOs.
+* **Scope:** Validators are defined for Cortex.Mediator Command objects (`IRequest<Result>`) and potentially for API Request DTOs.
 * **Implementation:** Create validator classes inheriting from `AbstractValidator<TCommand>` in the `/Server/Features/.../Validators` folder structure. Define rules using FluentValidation's fluent API.
 * **Execution:**
-  * For MediatR commands, validation is executed automatically by the `ValidationBehavior` pipeline behavior (Section 6.4.2) registered in DI.
+  * For Cortex.Mediator commands, validation is executed automatically by the `ValidationBehavior` pipeline behavior (Section 6.4.2) registered in DI.
   * For API DTOs, validation can be integrated into the ASP.NET Core model binding pipeline (`builder.Services.AddFluentValidationAutoValidation();`).
 * **Failure Handling:** If validation fails, the `ValidationBehavior` throws a `FluentValidation.ValidationException`. This exception should be caught by global exception handling middleware (in `/Api` or `/Worker`) and translated into a user-friendly error response (e.g., HTTP 400 Bad Request or 422 Unprocessable Entity with validation failure details) using the standard `ApiResponse` format.
 
@@ -307,7 +307,7 @@ public class SetZoneVolumeCommandValidator : AbstractValidator<SetZoneVolumeComm
     /// </summary>
     public SetZoneVolumeCommandValidator()
     {
-        RuleFor(command => command.ZoneId)
+        RuleFor(command => command.ZoneIndex)
             .GreaterThan(0)
             .WithMessage("Zone ID must be a positive integer.");
 
@@ -323,6 +323,6 @@ public class SetZoneVolumeCommandValidator : AbstractValidator<SetZoneVolumeComm
 These cross-cutting concerns interact seamlessly:
 
 * **Resilience (Sec 7) & Result (Sec 5.1):** Polly policies wrap calls in `/Infrastructure`. If all retries/attempts within a policy fail, the originating exception is caught and returned as `Result.Failure(ex)`.
-* **Validation (Sec 5.4) & Result (Sec 5.1):** `ValidationBehavior` runs early in the MediatR pipeline. If validation fails, it throws `ValidationException`, preventing the command handler from executing. This exception does *not* typically result in a `Result.Failure` directly from the handler but is handled by higher-level middleware to produce an appropriate error response.
+* **Validation (Sec 5.4) & Result (Sec 5.1):** `ValidationBehavior` runs early in the Cortex.Mediator pipeline. If validation fails, it throws `ValidationException`, preventing the command handler from executing. This exception does *not* typically result in a `Result.Failure` directly from the handler but is handled by higher-level middleware to produce an appropriate error response.
 * **Logging (Sec 5.2) & Telemetry (Sec 13):** Logs are automatically enriched with `TraceId` and `SpanId` from the current OpenTelemetry `Activity`. Events like resilience retries, validation failures, command handling start/end, and `Result` failures are logged with structured context.
-* **Metrics (Sec 13) & Handlers/Behaviors:** The `PerformanceBehavior` (Sec 6.4.3) uses `IMetricsService` to record durations and success/failure counts of MediatR requests. Other specific metrics can be recorded directly where relevant actions occur.
+* **Metrics (Sec 13) & Handlers/Behaviors:** The `PerformanceBehavior` (Sec 6.4.3) uses `IMetricsService` to record durations and success/failure counts of Cortex.Mediator requests. Other specific metrics can be recorded directly where relevant actions occur.

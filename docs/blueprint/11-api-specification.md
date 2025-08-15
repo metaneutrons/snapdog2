@@ -1,6 +1,6 @@
-# 11. API Specification
+# 10. API Specification
 
-## 11.1. API Design Philosophy
+## 10.1. API Design Philosophy
 
 The SnapDog2 Application Programming Interface (API) is designed as a modern, **RESTful HTTP interface** providing comprehensive programmatic control over the audio management system. It serves as a primary integration point for web UIs, mobile applications, third-party services, and custom scripts operating within the local network.
 
@@ -8,17 +8,17 @@ The API structure and functionality directly map to the logical concepts defined
 
 Key design principles underpinning the API are:
 
-1. **Command Framework Alignment**: API endpoints and their operations correspond directly to the defined Global, Zone, and Client commands and status updates. Retrieving a zone's state via the API (`GET /api/v1/zones/{zoneId}`) reflects the same information available via the `ZONE_STATE` status. Sending a command (`POST /api/v1/zones/{zoneId}/commands/play`) triggers the equivalent internal `PLAY` command logic.
+1. **Command Framework Alignment**: API endpoints and their operations correspond directly to the defined Global, Zone, and Client commands and status updates. Retrieving a zone's state via the API (`GET /api/v1/zones/{zoneIndex}`) reflects the same information available via the `ZONE_STATE` status. Sending a command (`POST /api/v1/zones/{zoneIndex}/play`) triggers the equivalent internal `PLAY` command logic.
 2. **Resource-Oriented Design**: Follows standard REST conventions. Nouns identify resources (e.g., `/zones`, `/clients`, `/media/playlists`), and standard HTTP verbs dictate actions:
     * `GET`: Retrieve resource state or collections (safe, idempotent).
     * `PUT`: Update resource state or settings entirely (idempotent where applicable, e.g., setting volume, mute state, specific track/playlist).
     * `POST`: Trigger actions/commands that may not be idempotent (e.g., `play`, `pause`, `next_track`) or create new resources (though zone creation is handled via configuration in SnapDog2).
     * `DELETE`: Remove resources (not applicable to zones/clients in SnapDog2 due to static configuration).
-3. **Consistent Response Structure**: All API responses, whether successful or indicating an error, adhere to a standardized JSON wrapper structure (`ApiResponse<T>`, defined in Section 11.4.1) containing status flags, data payload, error details, and a request ID for traceability.
+3. **Modern Direct Response Design**: All API responses return data directly without wrapper objects, using HTTP status codes to indicate success or failure. This provides a cleaner, more intuitive API experience compared to traditional wrapper patterns. Error responses use Problem Details (RFC 7807) for standardized error information.
 4. **Statelessness**: The API is stateless. Each request from a client must contain all the information needed to understand and process the request. The server does not maintain client session state between requests. Authentication is handled per-request via API keys.
 5. **Clear Versioning**: Uses URI path versioning (`/api/v1/`) to manage changes and ensure backward compatibility where possible.
 
-## 11.2. Authentication and Authorization
+## 10.2. Authentication and Authorization
 
 Given SnapDog2's typical deployment within a trusted local network, the primary security mechanism focuses on preventing unauthorized *control* rather than complex user management or data protection.
 
@@ -26,11 +26,33 @@ Given SnapDog2's typical deployment within a trusted local network, the primary 
 * **Authorization**: Currently basic. Successful authentication grants access to all authorized endpoints. Finer-grained authorization (e.g., specific keys only allowed to control certain zones) is **not implemented** in the current scope but could be a future enhancement. A failed authorization check (if implemented later) would result in a `403 Forbidden` response.
 * *(Future Considerations)*: While Bearer Tokens (JWT) or OAuth2 could be added later for more complex scenarios or third-party integrations, they are outside the current MVP scope.
 
-## 11.3. API Structure (`/api/v1/`)
+## 10.3. Server Configuration
+
+The API server configuration is controlled via environment variables:
+
+* **`SNAPDOG_API_ENABLED`**: Enable/disable the API server entirely (default: true)
+* **`SNAPDOG_API_PORT`**: Port number for the HTTP API server (default: 5000)
+* **`SNAPDOG_API_AUTH_ENABLED`**: Enable/disable API key authentication (default: true)
+* **`SNAPDOG_API_APIKEY_{n}`**: API keys for authentication (where n is 1, 2, 3, etc.)
+
+Example configuration:
+
+```bash
+SNAPDOG_API_ENABLED=true
+SNAPDOG_API_PORT=5000
+SNAPDOG_API_AUTH_ENABLED=true
+SNAPDOG_API_APIKEY_1=your-secret-api-key-here
+```
+
+When `SNAPDOG_API_ENABLED=false`, the API server is completely disabled - no HTTP endpoints are exposed, no controllers are registered, and no port is opened. This is useful for deployments where only MQTT or KNX control is desired.
+
+The server listens on all network interfaces (`0.0.0.0`) on the configured port, making it accessible from any device on the local network.
+
+## 10.4. API Structure (`/api/v1/`)
 
 Base path: `/api/v1`. All endpoints below assume this prefix.
 
-### 11.3.1. Global Endpoints
+### 10.4.1. Global Endpoints
 
 Endpoints for accessing system-wide information.
 
@@ -43,85 +65,129 @@ Endpoints for accessing system-wide information.
 
 *(Note: DTO structures match Core Models where appropriate)*
 
-### 11.3.2. Zone Endpoints
+### 10.4.2. Zone Endpoints
 
 Endpoints for interacting with configured audio zones. **Zone creation/deletion/rename is not supported via API** as zones are defined via environment variables. **Indices are 1-based.**
 
-| Method | Path                                       | Command/Status ID         | Description                        | Request Body / Params                           | Success Response (`Data` field) | HTTP Status |
-| :----- | :----------------------------------------- | :------------------------ | :--------------------------------- | :---------------------------------------------- | :---------------------------- | :---------- |
-| `GET`  | `/zones`                                   | -                         | List configured zones              | Query: `?page=1&pageSize=20&sortBy=name`      | Paginated `List<ZoneInfo>`    | 200 OK      |
-| `GET`  | `/zones/{zoneId}`                          | `ZONE_STATE` (Full)     | Get details & full state for zone  | Path: `{zoneId}` (int)                        | `ZoneState`                   | 200 OK      |
-| `GET`  | `/zones/{zoneId}/state`                    | `ZONE_STATE` (Full)     | Get full state JSON (alias for above)| Path: `{zoneId}` (int)                        | `ZoneState`                   | 200 OK      |
-| `POST` | `/zones/{zoneId}/commands/play`            | `PLAY`                    | Start/resume playback              | Path: `{zoneId}`; Optional Body: `PlayRequest`| `object` (null or status update)| 202 Accepted|
-| `POST` | `/zones/{zoneId}/commands/pause`           | `PAUSE`                   | Pause playback                     | Path: `{zoneId}`                              | `object` (null)               | 202 Accepted|
-| `POST` | `/zones/{zoneId}/commands/stop`            | `STOP`                    | Stop playback                      | Path: `{zoneId}`                              | `object` (null)               | 202 Accepted|
-| `POST` | `/zones/{zoneId}/commands/next_track`      | `TRACK_NEXT`              | Play next track                    | Path: `{zoneId}`                              | `object` (null)               | 202 Accepted|
-| `POST` | `/zones/{zoneId}/commands/prev_track`      | `TRACK_PREVIOUS`          | Play previous track                | Path: `{zoneId}`                              | `object` (null)               | 202 Accepted|
-| `PUT`  | `/zones/{zoneId}/track`                    | `TRACK`                   | Set track by **1-based** index     | Path: `{zoneId}`; Body: `SetTrackRequest`     | `object` (null or status update)| 202 Accepted|
-| `PUT`  | `/zones/{zoneId}/playlist`                 | `PLAYLIST`                | Set playlist by **1-based** index/ID| Path: `{zoneId}`; Body: `SetPlaylistRequest`| `object` (null or status update)| 202 Accepted|
-| `PUT`  | `/zones/{zoneId}/settings/volume`          | `VOLUME`                  | Set zone volume                    | Path: `{zoneId}`; Body: `VolumeSetRequest`   | `object` { int Volume }       | 200 OK      |
-| `GET`  | `/zones/{zoneId}/settings/volume`          | `VOLUME_STATUS`           | Get current zone volume            | Path: `{zoneId}`                              | `object` { int Volume }       | 200 OK      |
-| `POST` | `/zones/{zoneId}/settings/volume/up`       | `VOLUME_UP`               | Increase volume                    | Path: `{zoneId}`; Optional Body: `StepRequest`| `object` { int NewVolume }    | 200 OK      |
-| `POST` | `/zones/{zoneId}/settings/volume/down`     | `VOLUME_DOWN`             | Decrease volume                    | Path: `{zoneId}`; Optional Body: `StepRequest`| `object` { int NewVolume }    | 200 OK      |
-| `PUT`  | `/zones/{zoneId}/settings/mute`            | `MUTE`                    | Set mute state                     | Path: `{zoneId}`; Body: `MuteSetRequest`     | `object` { bool IsMuted }     | 200 OK      |
-| `GET`  | `/zones/{zoneId}/settings/mute`            | `MUTE_STATUS`             | Get current mute state             | Path: `{zoneId}`                              | `object` { bool IsMuted }     | 200 OK      |
-| `POST` | `/zones/{zoneId}/settings/mute/toggle`     | `MUTE_TOGGLE`             | Toggle mute state                  | Path: `{zoneId}`                              | `object` { bool IsMuted }     | 200 OK      |
-| `PUT`  | `/zones/{zoneId}/settings/track_repeat`    | `TRACK_REPEAT`            | Set track repeat mode              | Path: `{zoneId}`; Body: `ModeSetRequest`     | `object` { bool TrackRepeat } | 200 OK      |
-| `POST` | `/zones/{zoneId}/settings/track_repeat/toggle`|`TRACK_REPEAT_TOGGLE`    | Toggle track repeat mode           | Path: `{zoneId}`                              | `object` { bool TrackRepeat } | 200 OK      |
-| `PUT`  | `/zones/{zoneId}/settings/playlist_repeat` | `PLAYLIST_REPEAT`         | Set playlist repeat mode           | Path: `{zoneId}`; Body: `ModeSetRequest`     | `object` { bool PlaylistRepeat } | 200 OK      |
-| `POST` | `/zones/{zoneId}/settings/playlist_repeat/toggle`|`PLAYLIST_REPEAT_TOGGLE`| Toggle playlist repeat mode      | Path: `{zoneId}`                              | `object` { bool PlaylistRepeat } | 200 OK      |
-| `PUT`  | `/zones/{zoneId}/settings/playlist_shuffle`| `PLAYLIST_SHUFFLE`        | Set playlist shuffle mode          | Path: `{zoneId}`; Body: `ModeSetRequest`     | `object` { bool PlaylistShuffle }| 200 OK      |
-| `POST` | `/zones/{zoneId}/settings/playlist_shuffle/toggle`|`PLAYLIST_SHUFFLE_TOGGLE`| Toggle playlist shuffle mode     | Path: `{zoneId}`                              | `object` { bool PlaylistShuffle }| 200 OK      |
+**Modern Design Philosophy:** Returns primitive values directly (int, bool, string) instead of wrapper objects for maximum simplicity and better developer experience.
 
-*Note on 200 vs 202: Simple state settings (Volume, Mute, Repeat, Shuffle) can return 200 OK with the updated state. Commands triggering potentially longer actions (Play, Pause, Stop, Next/Prev Track/Playlist) might return 202 Accepted immediately, with the actual state update reflected later via status endpoints or event streams.*
+| Method | Path                                       | Command/Status ID         | Description                          | Request Body / Params                           | Success Response (Direct Primitive)  | HTTP Status |
+| :----- | :----------------------------------------- | :------------------------ | :----------------------------------- | :---------------------------------------------- | :----------------------------------- | :---------- |
+| `GET`  | `/zones`                                   | -                         | List configured zones                | Query: `?page=1&size=20`                       | `Page<Zone>`                         | 200 OK      |
+| `GET`  | `/zones/{zoneIndex}`                       | `ZONE_STATE` (Full)       | Get details & full state for zone    | Path: `{zoneIndex}` (int)                       | `ZoneState`                          | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/play`                  | `PLAY`                    | Start/resume playback                | Path: `{zoneIndex}`                             | No content                           | 204 No Content|
+| `POST` | `/zones/{zoneIndex}/play/track/{trackIndex}` | `PLAY`                  | Play specific track by index         | Path: `{zoneIndex}`, `{trackIndex}` (1-based)  | No content                           | 204 No Content|
+| `POST` | `/zones/{zoneIndex}/play/url`              | `PLAY`                    | Play direct URL stream               | Path: `{zoneIndex}`; Body: `string` (URL)      | No content                           | 204 No Content|
+| `POST` | `/zones/{zoneIndex}/pause`                 | `PAUSE`                   | Pause playback                       | Path: `{zoneIndex}`                             | No content                           | 204 No Content|
+| `POST` | `/zones/{zoneIndex}/stop`                  | `STOP`                    | Stop playback                        | Path: `{zoneIndex}`                             | No content                           | 204 No Content|
+| `GET`  | `/zones/{zoneIndex}/track`                 | `TRACK_STATUS`            | Get current track by **1-based index** | Path: `{zoneIndex}`                          | `int` (track index)                  | 200 OK      |
+| `PUT`  | `/zones/{zoneIndex}/track`                 | `TRACK`                   | Set track by **1-based** index       | Path: `{zoneIndex}`; Body: `int` (track index) | No content                           | 204 No Content|
+| `GET`  | `/zones/{zoneIndex}/track/info`            | `TRACK_INFO`              | Get current track metadata           | Path: `{zoneIndex}`                             | `TrackInfo`                          | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/track/next`            | `TRACK_NEXT`              | Play next track                      | Path: `{zoneIndex}`                             | No content                           | 204 No Content|
+| `POST` | `/zones/{zoneIndex}/track/previous`        | `TRACK_PREVIOUS`          | Play previous track                  | Path: `{zoneIndex}`                             | No content                           | 204 No Content|
+| `PUT`  | `/zones/{zoneIndex}/playlist`              | `PLAYLIST`                | Set playlist by **1-based** index    | Path: `{zoneIndex}`; Body: `int` (playlist index) | No content                        | 204 No Content|
+| `PUT`  | `/zones/{zoneIndex}/volume`                | `VOLUME`                  | Set zone volume                      | Path: `{zoneIndex}`; Body: `int` (0-100)       | `int` (volume level)                 | 200 OK      |
+| `GET`  | `/zones/{zoneIndex}/volume`                | `VOLUME_STATUS`           | Get current zone volume.             | Path: `{zoneIndex}`                             | `int` (volume level)                 | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/volume/up`             | `VOLUME_UP`               | Increase volume                      | Path: `{zoneIndex}`; Body: `int` (step, default 5) | `int` (new volume)               | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/volume/down`           | `VOLUME_DOWN`             | Decrease volume                      | Path: `{zoneIndex}`; Body: `int` (step, default 5) | `int` (new volume)               | 200 OK      |
+| `PUT`  | `/zones/{zoneIndex}/mute`                  | `MUTE`                    | Set mute state                       | Path: `{zoneIndex}`; Body: `bool` (muted)       | `bool` (mute state)                  | 200 OK      |
+| `GET`  | `/zones/{zoneIndex}/mute`                  | `MUTE_STATUS`             | Get current mute state               | Path: `{zoneIndex}`                             | `bool` (mute state)                  | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/mute/toggle`           | `MUTE_TOGGLE`             | Toggle mute state                    | Path: `{zoneIndex}`                             | `bool` (new mute state)              | 200 OK      |
+| `GET`  | `/zones/{zoneIndex}/repeat/track`          | `TRACK_REPEAT_STATUS`     | Get track repeat mode                | Path: `{zoneIndex}`                             | `bool` (repeat enabled)              | 200 OK      |
+| `PUT`  | `/zones/{zoneIndex}/repeat/track`          | `TRACK_REPEAT`            | Set track repeat mode                | Path: `{zoneIndex}`; Body: `bool` (enabled)     | `bool` (repeat enabled)              | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/repeat/track/toggle`   | `TRACK_REPEAT_TOGGLE`     | Toggle track repeat mode             | Path: `{zoneIndex}`                             | `bool` (new repeat state)            | 200 OK      |
+| `GET`  | `/zones/{zoneIndex}/repeat`       | `PLAYLIST_REPEAT_STATUS`  | Get playlist repeat mode             | Path: `{zoneIndex}`                             | `bool` (repeat enabled)              | 200 OK      |
+| `PUT`  | `/zones/{zoneIndex}/repeat`       | `PLAYLIST_REPEAT`         | Set playlist repeat mode             | Path: `{zoneIndex}`; Body: `bool` (enabled)     | `bool` (repeat enabled)              | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/repeat/toggle`| `PLAYLIST_REPEAT_TOGGLE`  | Toggle playlist repeat mode          | Path: `{zoneIndex}`                             | `bool` (new repeat state)            | 200 OK      |
+| `GET`  | `/zones/{zoneIndex}/shuffle`      | `PLAYLIST_SHUFFLE_STATUS` | Get playlist shuffle mode            | Path: `{zoneIndex}`                             | `bool` (shuffle enabled)             | 200 OK      |
+| `PUT`  | `/zones/{zoneIndex}/shuffle`      | `PLAYLIST_SHUFFLE`        | Set playlist shuffle mode            | Path: `{zoneIndex}`; Body: `bool` (enabled)     | `bool` (shuffle enabled)             | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/shuffle/toggle`| `PLAYLIST_SHUFFLE_TOGGLE`| Toggle playlist shuffle mode         | Path: `{zoneIndex}`                             | `bool` (new shuffle state)           | 200 OK      |
 
-**Example Request DTOs (`/Api/Models` or `/Api/Controllers`):**
+**Modern API Benefits:**
+
+* **Primitive Returns:** Volume endpoints return `int` directly (e.g., `75`) instead of `{"volume": 75}`
+* **Boolean States:** Mute/repeat/shuffle return `bool` directly (e.g., `true`) instead of `{"enabled": true}`
+* **Direct Parameters:** Use `int volume` instead of `{"level": 75}` request objects
+* **Cleaner Client Code:** `const volume = await api.getVolume(1)` instead of `const volume = await api.getVolume(1).then(r => r.volume)`
+
+*Note on HTTP Status Codes: State retrievals and settings return 200 OK with the primitive value. Actions (play, pause, stop, track navigation, playlist setting) return 204 No Content to indicate successful completion without response data.*
+
+**Modern Response Design (Direct Primitives):**
 
 ```csharp
-namespace SnapDog2.Api.Models; // Example namespace
+namespace SnapDog2.Api.Models;
 
-public record PlayRequest { public string? MediaUrl { get; set; } public int? TrackIndex { get; set; } } // 1-based index
-public record SetTrackRequest { public required int Index { get; set; } } // 1-based index
-public record SetPlaylistRequest { public string? Id { get; set; } public int? Index { get; set; } } // Provide Id OR 1-based index
-public record VolumeSetRequest { public required int Level { get; set; } } // 0-100
-public record MuteSetRequest { public required bool Enabled { get; set; } }
-public record ModeSetRequest { public required bool Enabled { get; set; } } // For Repeat/Shuffle
-public record StepRequest { public int Step { get; set; } = 5; } // Optional step for Vol Up/Down
+// ═══════════════════════════════════════════════════════════════════════════════
+// PRIMITIVE RESPONSES - Return values directly for maximum simplicity
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// 🎯 PHILOSOPHY: Return the actual value, not a wrapper object
+//
+// ✅ GET /zones/1/volume        → 75 (int)
+// ✅ GET /zones/1/mute          → false (bool)
+// ✅ GET /zones/1/track         → 3 (int)
+// ✅ GET /zones/1/repeat/track  → true (bool)
+//
+// This eliminates ALL single-property response wrappers!
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// COLLECTION RESPONSES - Only when structure adds value
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/// <summary>
+/// Paginated collection with metadata.
+/// </summary>
+public record Page<T>(T[] Items, int Total, int PageSize = 20, int PageNumber = 1)
+{
+    public int TotalPages => (int)Math.Ceiling((double)Total / PageSize);
+    public bool HasNext => PageNumber < TotalPages;
+    public bool HasPrevious => PageNumber > 1;
+}
+
+/// <summary>
+/// Zone summary for listings.
+/// </summary>
+public record Zone(string Name, int Index, bool Active, string Status);
+
+/// <summary>
+/// Client summary for listings.
+/// </summary>
+public record Client(int Id, string Name, bool Connected, int? Zone = null);
+
 ```
 
-**Example Response DTOs (subset examples):**
-
-```csharp
-// For GET /zones response item
-public record ZoneInfo(int Id, string Name, string PlaybackStatus);
-// Full GET /zones/{id} uses Core.Models.ZoneState
-
-// For GET /clients response item
-public record ClientInfo(int Id, string Name, bool Connected, int? ZoneId);
-// Full GET /clients/{id} uses Core.Models.ClientState
-```
-
-### 11.3.3. Client Endpoints
+### 10.4.3. Client Endpoints
 
 Endpoints for interacting with discovered Snapcast clients.
 
-| Method | Path                                    | Command/Status ID      | Description                | Request Body / Params           | Success Response (`Data` field) | HTTP Status |
-| :----- | :-------------------------------------- | :--------------------- | :------------------------- | :------------------------------ | :---------------------------- | :---------- |
-| `GET`  | `/clients`                              | -                      | List discovered clients    | Query: `?page=1&pageSize=20`    | Paginated `List<ClientInfo>`  | 200 OK      |
-| `GET`  | `/clients/{clientId}`                   | `CLIENT_STATE` (Full)  | Get details for a client   | Path: `{clientId}` (int)      | `ClientState`                 | 200 OK      |
-| `GET`  | `/clients/{clientId}/state`             | `CLIENT_STATE` (Full)  | Get full state JSON        | Path: `{clientId}` (int)      | `ClientState`                 | 200 OK      |
-| `PUT`  | `/clients/{clientId}/settings/volume`   | `CLIENT_VOLUME`        | Set client volume          | Path: `{clientId}`; Body: `VolumeSetRequest` | `object` { int Volume }       | 200 OK      |
-| `GET`  | `/clients/{clientId}/settings/volume`   | `CLIENT_VOLUME_STATUS` | Get client volume          | Path: `{clientId}`            | `object` { int Volume }       | 200 OK      |
-| `PUT`  | `/clients/{clientId}/settings/mute`     | `CLIENT_MUTE`          | Set client mute state      | Path: `{clientId}`; Body: `MuteSetRequest` | `object` { bool IsMuted }     | 200 OK      |
-| `GET`  | `/clients/{clientId}/settings/mute`     | `CLIENT_MUTE_STATUS`   | Get client mute state      | Path: `{clientId}`            | `object` { bool IsMuted }     | 200 OK      |
-| `POST` | `/clients/{clientId}/settings/mute/toggle`| `CLIENT_MUTE_TOGGLE`   | Toggle client mute state   | Path: `{clientId}`            | `object` { bool IsMuted }     | 200 OK      |
-| `PUT`  | `/clients/{clientId}/settings/latency`  | `CLIENT_LATENCY`       | Set client latency         | Path: `{clientId}`; Body: `LatencySetRequest`{ int Milliseconds } | `object` { int Latency }    | 200 OK      |
-| `GET`  | `/clients/{clientId}/settings/latency`  | `CLIENT_LATENCY_STATUS`| Get client latency         | Path: `{clientId}`            | `object` { int Latency }    | 200 OK      |
-| `PUT`  | `/clients/{clientId}/settings/zone`     | `CLIENT_ZONE`          | Assign client to zone      | Path: `{clientId}`; Body: `AssignZoneRequest`{ int ZoneId } (1-based) | `object` (null)           | 202 Accepted|
-| `GET`  | `/clients/{clientId}/settings/zone`     | `CLIENT_ZONE_STATUS`   | Get client assigned zone   | Path: `{clientId}`            | `object` { int? ZoneId }    | 200 OK      |
-| `PUT`  | `/clients/{clientId}/settings/name`     | `RENAME_CLIENT`        | Rename client in Snapcast  | Path: `{clientId}`; Body: `RenameRequest`{ string Name } | `object` { string Name }      | 200 OK      |
+**Modern Design Philosophy:** Matches zones endpoints with direct primitive responses and zero request objects for maximum consistency and simplicity.
 
-### 11.3.4. Media Management Endpoints
+| Method | Path                                    | Command/Status ID      | Description                | Request Body / Params           | Success Response (Direct Primitive) | HTTP Status |
+| :----- | :-------------------------------------- | :--------------------- | :------------------------- | :------------------------------ | :----------------------------------- | :---------- |
+| `GET`  | `/clients`                              | -                      | List discovered clients    | Query: `?page=1&size=20`        | `Page<Client>`                       | 200 OK      |
+| `GET`  | `/clients/{clientIndex}`                   | `CLIENT_STATE` (Full)  | Get details for a client   | Path: `{clientIndex}` (int)         | `ClientState`                        | 200 OK      |
+| `PUT`  | `/clients/{clientIndex}/volume`            | `CLIENT_VOLUME`        | Set client volume          | Path: `{clientIndex}`; Body: `int` (0-100) | `int` (volume level)              | 200 OK      |
+| `GET`  | `/clients/{clientIndex}/volume`            | `CLIENT_VOLUME_STATUS` | Get client volume          | Path: `{clientIndex}`               | `int` (volume level)                 | 200 OK      |
+| `POST` | `/clients/{clientIndex}/volume/up`         | `CLIENT_VOLUME_UP`     | Increase client volume     | Path: `{clientIndex}`; Optional Query: `?step=5` | `int` (new volume)            | 200 OK      |
+| `POST` | `/clients/{clientIndex}/volume/down`       | `CLIENT_VOLUME_DOWN`   | Decrease client volume     | Path: `{clientIndex}`; Optional Query: `?step=5` | `int` (new volume)            | 200 OK      |
+| `PUT`  | `/clients/{clientIndex}/mute`              | `CLIENT_MUTE`          | Set client mute state      | Path: `{clientIndex}`; Body: `bool` | `bool` (mute state)                  | 200 OK      |
+| `GET`  | `/clients/{clientIndex}/mute`              | `CLIENT_MUTE_STATUS`   | Get client mute state      | Path: `{clientIndex}`               | `bool` (mute state)                  | 200 OK      |
+| `POST` | `/clients/{clientIndex}/mute/toggle`       | `CLIENT_MUTE_TOGGLE`   | Toggle client mute state   | Path: `{clientIndex}`               | `bool` (new mute state)              | 200 OK      |
+| `PUT`  | `/clients/{clientIndex}/latency`           | `CLIENT_LATENCY`       | Set client latency         | Path: `{clientIndex}`; Body: `int` (ms) | `int` (latency)                  | 200 OK      |
+| `GET`  | `/clients/{clientIndex}/latency`           | `CLIENT_LATENCY_STATUS`| Get client latency         | Path: `{clientIndex}`               | `int` (latency)                      | 200 OK      |
+| `PUT`  | `/clients/{clientIndex}/zone`              | `CLIENT_ZONE`          | Assign client to zone      | Path: `{clientIndex}`; Body: `int` (zoneIndex, 1-based) | No content                     | 204 No Content |
+| `GET`  | `/clients/{clientIndex}/zone`              | `CLIENT_ZONE_STATUS`   | Get client assigned zone   | Path: `{clientIndex}`               | `int?` (zoneIndex)                      | 200 OK      |
+| `PUT`  | `/clients/{clientIndex}/name`              | `CLIENT_NAME`          | Rename client in Snapcast  | Path: `{clientIndex}`; Body: `string` (name) | `string` (name)                | 200 OK      |
+
+**Modern API Benefits:**
+
+* **Primitive Returns:** Volume endpoints return `int` directly (e.g., `65`) instead of `{"volume": 65}`
+* **Boolean States:** Mute returns `bool` directly (e.g., `true`) instead of `{"muted": true}`
+* **Direct Parameters:** Use `int volume` instead of `{"level": 65}` request objects
+* **Consistent Design:** Matches zones endpoints exactly for perfect API consistency
+* **Zero Request Objects:** All operations use direct parameter binding
+
+### 10.4.4. Media Management Endpoints
 
 Endpoints for browsing available media sources (initially Subsonic and Radio).
 
@@ -129,15 +195,52 @@ Endpoints for browsing available media sources (initially Subsonic and Radio).
 | :----- | :-------------------------------------- | :----------------------------- | :-------------------------------- |
 | `GET`  | `/media/sources`                        | List configured media sources  | `List<MediaSourceInfo>` { string Id, string Type, string Name } |
 | `GET`  | `/media/playlists`                      | List all available playlists   | Paginated `List<PlaylistInfo>`    |
-| `GET`  | `/media/playlists/{playlistIdOrIndex}`  | Get details for a playlist     | `PlaylistWithTracks` { PlaylistInfo Info, List<TrackInfo> Tracks } |
-| `GET`  | `/media/playlists/{playlistIdOrIndex}/tracks` | List tracks in a playlist    | Paginated `List<TrackInfo>`       |
-| `GET`  | `/media/tracks/{trackId}`               | Get details for a track        | `TrackInfo`                       |
+| `GET`  | `/media/playlists/{playlistIndex}`  | Get details for a playlist     | `PlaylistWithTracks` { PlaylistInfo Info, List<TrackInfo> Tracks } |
+| `GET`  | `/media/playlists/{playlistIndex}/tracks` | List tracks in a playlist    | Paginated `List<TrackInfo>`       |
+| `GET`  | `/media/tracks/{trackIndex}`               | Get details for a track        | `TrackInfo`                       |
 
-*(Note: `playlistIdOrIndex` accepts `1` or `"radio"` for the Radio playlist, `2+` or Subsonic IDs for others. `trackId` format depends on the source.)*
+*(Note: `playlistIndex` accepts `1` for the Radio playlist, `2+` for others.*
 
-## 11.4. Request and Response Format
+## 10.5. Request and Response Format
 
-### 11.4.1. Standard Response Wrapper (`ApiResponse<T>`)
+### 10.5.1. Modern Direct Response Design
+
+The SnapDog2 API uses a **modern direct response approach** where endpoints return data directly without wrapper objects. This provides a cleaner, more intuitive API experience:
+
+**Success Responses:**
+
+* **Data Endpoints**: Return the requested data directly (e.g., `VolumeResponse`, `ZoneState`, `TrackInfo`)
+* **Action Endpoints**: Return `204 No Content` for successful actions without response data
+* **Setting Endpoints**: Return the updated state directly (e.g., `VolumeResponse` after setting volume)
+
+**Error Responses:**
+
+* Use **Problem Details (RFC 7807)** for standardized error information
+* Return appropriate HTTP status codes (400, 404, 500, etc.)
+* Include structured error details in the response body
+
+**Example Success Response (GET /zones/1/volume):**
+
+```json
+{
+  "volume": 75
+}
+```
+
+**Example Error Response (404 Not Found):**
+
+```json
+{
+  "type": "https://tools.ietf.org/html/rfc7231#section-6.5.4",
+  "title": "Zone not found",
+  "status": 404,
+  "detail": "Zone 1 does not exist"
+}
+```
+
+### 10.5.2. Legacy Response Wrapper (Deprecated)
+
+*Note: The `ApiResponse<T>` wrapper pattern is deprecated in favor of direct responses. This section is maintained for reference only.*
 
 All API responses use a consistent JSON wrapper.
 
@@ -168,7 +271,7 @@ public class ApiError { public string Code { get; set; } public string Message {
 
 *(Success/Error examples remain as previously defined)*
 
-## 11.5. HTTP Status Codes
+## 10.6. HTTP Status Codes
 
 Standard HTTP status codes are used:
 
@@ -178,11 +281,11 @@ Standard HTTP status codes are used:
 
 Error responses include the `ApiError` structure in the response body.
 
-## 11.6. Pagination, Filtering, and Sorting
+## 10.7. Pagination, Filtering, and Sorting
 
 Endpoints returning collections support standard query parameters:
 
-* `?page=1&pageSize=20`
+* `?page=1&size=20`
 * `?sortBy=name&sortOrder=asc`
 * `?filterProperty=value` (Specific filters TBD per resource)
 
@@ -194,13 +297,13 @@ Paginated responses include metadata:
   "data": {
     "items": [ /* array of resources */ ],
     "pagination": {
-      "page": 1, "pageSize": 20, "totalItems": 53, "totalPages": 3
+      "page": 1, "size": 20, "totalItems": 53, "totalPages": 3
     }
   }, /* ... */
 }
 ```
 
-## 11.7. Webhooks and Event Streams (Optional / Future)
+## 10.8. Webhooks and Event Streams (Optional / Future)
 
 Mechanisms for pushing real-time updates from SnapDog2:
 
@@ -209,7 +312,7 @@ Mechanisms for pushing real-time updates from SnapDog2:
 
 *(Implementation details deferred)*
 
-## 11.8. HATEOAS Links (Optional)
+## 10.9. HATEOAS Links (Optional)
 
 Responses *may* include a `_links` object with hypermedia controls for related actions.
 
@@ -224,20 +327,20 @@ Responses *may* include a `_links` object with hypermedia controls for related a
 
 *(Implementation details deferred)*
 
-## 11.9. API Implementation Notes
+## 10.10. API Implementation Notes
 
 * Implemented using ASP.NET Core Minimal APIs or MVC Controllers within the `/Api` folder.
-* Controllers/Endpoints act as thin layers, translating HTTP to MediatR requests (`_mediator.Send(...)`).
+* Controllers/Endpoints act as thin layers, translating HTTP to Cortex.Mediator requests (`_mediator.Send(...)`).
 * Use `[ApiController]` attributes (for MVC) for standard behaviors.
 * Leverage ASP.NET Core middleware for exception handling (converting to `ApiResponse`), authentication, authorization, rate limiting, security headers.
 * Use built-in model binding and validation, potentially enhanced by FluentValidation integration.
 
-## 11.10. API Versioning
+## 10.11. API Versioning
 
 * Uses URI path versioning (`/api/v1/`).
 * Maintain backward compatibility within `v1.x`. Introduce breaking changes only in new major versions (`v2`).
 
-## 11.11. API Documentation (Swagger/OpenAPI)
+## 10.12. API Documentation (Swagger/OpenAPI)
 
 * Uses **Swashbuckle.AspNetCore** NuGet package.
 * Generate OpenAPI specification automatically from code (controllers, DTOs, XML comments).

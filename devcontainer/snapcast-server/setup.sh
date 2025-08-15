@@ -1,108 +1,261 @@
 #!/bin/bash
 
-set -e
-echo "Starting SnapDog2 Development entrypoint.sh"
-echo "------------------------------------------------"
-echo "Creating zones for snapcast server configuration"
+set -euo pipefail
 
-# AirPlay port for first instance
-PORT=5555
+# ═══════════════════════════════════════════════════════════════════════════════
+# SnapDog2 Snapcast Server Configuration Generator
+# ═══════════════════════════════════════════════════════════════════════════════
 
-# create snapsinks from environment variables
-for var in "${!SNAPDOG_ZONE_@}"; do
-    if [[ $var =~ "NAME" ]]; then
+readonly SCRIPT_NAME="SnapDog2 Snapcast Server Setup"
+readonly CONFIG_FILE="/etc/snapserver.conf"
+readonly SNAPCAST_USER="snapcast"
+readonly SNAPCAST_GROUP="snapcast"
+
+# Default configuration values
+declare -A DEFAULTS=(
+    ["SAMPLE_RATE"]="48000"
+    ["BIT_DEPTH"]="16" 
+    ["CHANNELS"]="2"
+    ["CODEC"]="flac"
+    ["JSONRPC_PORT"]="1705"
+    ["WEBSERVER_PORT"]="1780"
+    ["WEBSOCKET_PORT"]="1704"
+    ["BASE_URL"]=""
+)
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Utility Functions
+# ═══════════════════════════════════════════════════════════════════════════════
+
+log() {
+    echo "🔧 $*"
+}
+
+log_section() {
+    echo
+    echo "═══════════════════════════════════════════════════════════════════════════════"
+    echo "🎵 $*"
+    echo "═══════════════════════════════════════════════════════════════════════════════"
+}
+
+log_zone() {
+    echo "  📍 Zone $1: $2"
+}
+
+log_config() {
+    echo "    ├─ $1: $2"
+}
+
+# Get environment variable with fallback to default
+get_env_or_default() {
+    local var_name="$1"
+    local default_key="$2"
+    local env_value
+    
+    env_value=$(printenv "SNAPDOG_${var_name}" 2>/dev/null || echo "")
+    echo "${env_value:-${DEFAULTS[$default_key]}}"
+}
+
+# Get audio configuration from global settings
+get_audio_config() {
+    local sample_rate bit_depth channels codec
+    
+    sample_rate=$(get_env_or_default "AUDIO_SAMPLE_RATE" "SAMPLE_RATE")
+    bit_depth=$(get_env_or_default "AUDIO_BIT_DEPTH" "BIT_DEPTH")
+    channels=$(get_env_or_default "AUDIO_CHANNELS" "CHANNELS")
+    codec=$(get_env_or_default "AUDIO_CODEC" "CODEC")
+    
+    echo "${sample_rate}:${bit_depth}:${channels}:${codec}"
+}
+
+# Write configuration section to file
+write_config_section() {
+    local section="$1"
+    shift
+    
+    {
+        echo "[$section]"
+        printf '%s\n' "$@"
         echo
-        ZONE=$(echo $var | cut -d'_' -f 3)
+    } >> "$CONFIG_FILE"
+}
 
-        ## Set name to environment variable
-        eval NAME="\$SNAPDOG_ZONE_${ZONE}_NAME"
-        echo "Creating Zone $ZONE: $NAME"
+# ═══════════════════════════════════════════════════════════════════════════════
+# Zone Discovery and Configuration
+# ═══════════════════════════════════════════════════════════════════════════════
 
-        ## Set sink to environment variable or default
-        SINK="/snapsinks/zone$ZONE"
-        eval SINK_VAR="\$SNAPDOG_ZONE_${ZONE}_SINK"
-        if [[ -z "${SINK_VAR}" ]]; then
-            SINK=$SINK_VAR
+discover_zones() {
+    local zones=()
+    
+    # Find all zone name variables using a simpler approach
+    while IFS= read -r line; do
+        if [[ $line =~ ^SNAPDOG_ZONE_([0-9]+)_NAME= ]]; then
+            zones+=("${BASH_REMATCH[1]}")
         fi
-        echo -e with sink: $SINK
-
-        ## Set codec to environment variable or default
-        CODEC='flac'
-        eval CODEC_VAR="\$SNAPDOG_SNAPCAST_CODEC"
-        if [[ -z "${CODEC_VAR}" ]]; then
-            CODEC=$CODEC_VAR
-        fi
-        echo -e "with codec: $CODEC"
-
-        ## Set sampleformat to environment variable or default
-        SAMPLEFORMAT="48000:16:2"
-        eval SAMPLEFORMAT_VAR="\$SNAPDOG_SNAPCAST_SAMPLEFORMAT"
-        if [[ -z "${SAMPLEFORMAT_VAR}" ]]; then
-            SAMPLEFORMAT=$SAMPLEFORMAT_VAR
-        fi
-        echo -e "with sample format: $SAMPLEFORMAT"
-
-        ## Add zone to snapserver configuration
-        SNAPSERVER="${SNAPSERVER}source = pipe://$SINK?name=Zone$ZONE&sampleformat=$SAMPLEFORMAT&codec=$CODEC\n"
-
-        echo -e "" >>/etc/supervisord.conf
-
-        ((PORT++))
+    done < <(env | grep "^SNAPDOG_ZONE_.*_NAME=")
+    
+    # Sort zones numerically and return
+    if [[ ${#zones[@]} -gt 0 ]]; then
+        printf '%s\n' "${zones[@]}" | sort -n
     fi
-done
+}
 
-# create /etc/snapserver.conf
-rm -Rf /etc/snapserver.conf
+configure_zone() {
+    local zone_id="$1"
+    local audio_config="$2"
+    
+    # Parse audio configuration
+    IFS=':' read -r sample_rate bit_depth channels codec <<< "$audio_config"
+    local sample_format="${sample_rate}:${bit_depth}:${channels}"
+    
+    # Get zone-specific configuration with proper error handling
+    local zone_name sink_path
+    zone_name=$(env | grep "^SNAPDOG_ZONE_${zone_id}_NAME=" | cut -d= -f2- || echo "")
+    sink_path=$(env | grep "^SNAPDOG_ZONE_${zone_id}_SINK=" | cut -d= -f2- || echo "/snapsinks/zone${zone_id}")
+    
+    # Validate zone name
+    if [[ -z "$zone_name" ]]; then
+        log_zone "$zone_id" "ERROR: Zone name not found"
+        return 1
+    fi
+    
+    log_zone "$zone_id" "$zone_name"
+    log_config "Sink" "$sink_path"
+    log_config "Sample Format" "$sample_format"
+    log_config "Codec" "$codec"
+    
+    # Generate source configuration
+    echo "source = pipe://${sink_path}?name=Zone${zone_id}&sampleformat=${sample_format}&codec=${codec}"
+}
 
-# Create the snapserver settings directory
-mkdir -p /root/.config/snapserver
-chown snapcast:snapcast /root/.config/snapserver
+# ═══════════════════════════════════════════════════════════════════════════════
+# Configuration File Generation
+# ═══════════════════════════════════════════════════════════════════════════════
 
-echo -e '[server]' >>/etc/snapserver.conf
-echo -e 'user = snapcast' >>/etc/snapserver.conf
-echo -e 'group = snapcast' >>/etc/snapserver.conf
-echo -e 'datadir = /var/lib/snapserver/' >>/etc/snapserver.conf
-echo -e '[http]' >>/etc/snapserver.conf
-echo -e 'enabled = true' >>/etc/snapserver.conf
-echo -e 'bind_to_address = 0.0.0.0' >>/etc/snapserver.conf
+generate_snapserver_config() {
+    local audio_config="$1"
+    local sources="$2"
+    
+    # Parse audio configuration for stream section
+    IFS=':' read -r sample_rate bit_depth channels codec <<< "$audio_config"
+    local sample_format="${sample_rate}:${bit_depth}:${channels}"
+    
+    # Get port configuration
+    local jsonrpc_port webserver_port websocket_port base_url
+    jsonrpc_port=$(get_env_or_default "SNAPCAST_JSONRPC_PORT" "JSONRPC_PORT")
+    webserver_port=$(get_env_or_default "SNAPCAST_WEBSERVER_PORT" "WEBSERVER_PORT")
+    websocket_port=$(get_env_or_default "SNAPCAST_WEBSOCKET_PORT" "WEBSOCKET_PORT")
+    base_url=$(get_env_or_default "SERVICES_SNAPCAST_BASE_URL" "BASE_URL")
+    
+    # Remove existing config and create directories
+    rm -f "$CONFIG_FILE"
+    mkdir -p /root/.config/snapserver
+    chown "$SNAPCAST_USER:$SNAPCAST_GROUP" /root/.config/snapserver
+    
+    # Generate configuration sections
+    write_config_section "server" \
+        "user = $SNAPCAST_USER" \
+        "group = $SNAPCAST_GROUP" \
+        "datadir = /var/lib/snapserver/"
+    
+    write_config_section "tcp" \
+        "enabled = true" \
+        "bind_to_address = ::" \
+        "port = $jsonrpc_port"
+    
+    write_config_section "http" \
+        "enabled = true" \
+        "bind_to_address = ::" \
+        "port = $webserver_port" \
+        "doc_root = /usr/share/snapserver/snapweb/" \
+        "host = snapdog" \
+        "base_url = $base_url"
+    
+    write_config_section "logging" \
+        "sink = stdout" \
+        "filter = *:info"
+    
+    write_config_section "stream" \
+        "bind_to_address = ::" \
+        "port = $websocket_port" \
+        "sampleformat = $sample_format" \
+        "codec = $codec" \
+        "chunk_ms = 26" \
+        "buffer = 1000" \
+        "send_to_muted = false"
+    
+    # Add sources
+    echo "$sources" >> "$CONFIG_FILE"
+}
 
-## set port to environment variable or default
-PORT="1780"
-eval PORT_VAR="\$SNAPDOG_SNAPCAST_WEBSERVER_PORT"
-if [[ -z "${PORT_VAR}" ]]; then
-    PORT=$PORT_VAR
-fi
+# ═══════════════════════════════════════════════════════════════════════════════
+# Main Execution
+# ═══════════════════════════════════════════════════════════════════════════════
 
-echo -e "port = $PORT" >>/etc/snapserver.conf
-echo -e 'doc_root = /usr/share/snapserver/snapweb/' >>/etc/snapserver.conf
-echo -e 'host = snapdog' >>/etc/snapserver.conf
-echo -e '[tcp]' >>/etc/snapserver.conf
-echo -e 'enabled = disabled' >>/etc/snapserver.conf
-echo -e '[logging]' >>/etc/snapserver.conf
-echo -e 'sink = stdout' >>/etc/snapserver.conf
-echo -e 'filter = *:info' >>/etc/snapserver.conf
-echo -e '[stream]' >>/etc/snapserver.conf
-echo -e 'bind_to_address = 0.0.0.0' >>/etc/snapserver.conf
+main() {
+    log_section "$SCRIPT_NAME"
+    
+    # Debug: Show available SNAPDOG environment variables
+    log "Available SNAPDOG environment variables:"
+    env | grep "^SNAPDOG_" | head -10 | while read -r var; do
+        log "  $var"
+    done
+    
+    # Get global audio configuration
+    local audio_config
+    audio_config=$(get_audio_config)
+    log "Global audio configuration: $audio_config"
+    
+    # Discover and configure zones
+    log_section "Zone Discovery and Configuration"
+    local zones sources=""
+    readarray -t zones < <(discover_zones)
+    
+    if [[ ${#zones[@]} -eq 0 ]]; then
+        log "⚠️  No zones found - creating default configuration"
+        sources="# No zones configured"
+    else
+        log "Found ${#zones[@]} zone(s): ${zones[*]}"
+        echo
+        
+        # Create named pipes for each zone
+        for zone_id in "${zones[@]}"; do
+            local sink_path
+            sink_path=$(env | grep "^SNAPDOG_ZONE_${zone_id}_SINK=" | cut -d= -f2- || echo "/snapsinks/zone${zone_id}")
+            
+            # Create named pipe if it doesn't exist
+            if [[ ! -p "$sink_path" ]]; then
+                log "🔧 Creating named pipe: $sink_path"
+                mkfifo "$sink_path"
+                chown snapcast:snapcast "$sink_path"
+            fi
+        done
+        
+        for zone_id in "${zones[@]}"; do
+            local zone_source
+            if zone_source=$(configure_zone "$zone_id" "$audio_config"); then
+                sources+="$zone_source"$'\n'
+            else
+                log "❌ Failed to configure zone $zone_id"
+            fi
+        done
+    fi
+    
+    # Generate configuration file
+    log_section "Generating Snapcast Configuration"
+    generate_snapserver_config "$audio_config" "$sources"
+    
+    # Display results
+    log_section "Configuration Summary"
+    log "Sources configured:"
+    echo "$sources"
+    
+    log_section "Generated Configuration File"
+    cat "$CONFIG_FILE"
+    
+    log_section "Setup Complete"
+    log "✅ Snapcast server configuration generated successfully"
+}
 
-## set port to environment variable or default
-PORT="1704"
-eval PORT_VAR="\$SNAPDOG_SNAPCAST_WEBSOCKET_PORT"
-if [[ -z "${PORT_VAR}" ]]; then
-    PORT=$PORT_VAR
-fi
-
-echo -e "port = $PORT" >>/etc/snapserver.conf
-echo -e "sampleformat = $SAMPLEFORMAT" >>/etc/snapserver.conf
-echo -e 'codec = flac' >>/etc/snapserver.conf
-echo -e 'chunk_ms = 26' >>/etc/snapserver.conf
-echo -e 'buffer = 1000' >>/etc/snapserver.conf
-echo -e 'send_to_muted = false' >>/etc/snapserver.conf
-
-ESC_SNAPSERVER=$(printf '%s\n' "$SNAPSERVER" | sed -e 's/[\/&]/\\&/g')
-
-echo -e $SNAPSERVER >>/etc/snapserver.conf
-echo "------------------------------------"
-echo "Snapserver configuration:"
-echo
-echo -e $SNAPSERVER
-echo "------------------------------------"
+# Execute main function
+main "$@"

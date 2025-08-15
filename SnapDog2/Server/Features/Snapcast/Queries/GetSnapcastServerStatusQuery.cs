@@ -1,8 +1,9 @@
-using MediatR;
-
 namespace SnapDog2.Server.Features.Snapcast.Queries;
 
+using Cortex.Mediator.Queries;
+using SnapDog2.Core.Models;
+
 /// <summary>
-/// Query to retrieve the current status of the Snapcast server.
+/// Query to get the current Snapcast server status.
 /// </summary>
-public record GetSnapcastServerStatusQuery : IRequest<string>;
+public record GetSnapcastServerStatusQuery : IQuery<Result<SnapcastServerStatus>>;
