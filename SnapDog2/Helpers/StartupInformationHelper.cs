@@ -215,7 +215,6 @@ public static class StartupInformationHelper
         Console.WriteLine("   📋 System:");
         Console.WriteLine($"     Environment: {config.System.Environment}");
         Console.WriteLine($"     Log Level: {config.System.LogLevel}");
-        Console.WriteLine($"     Debug Enabled: {config.System.DebugEnabled}");
         Console.WriteLine($"     Health Checks Enabled: {config.System.HealthChecksEnabled}");
         Console.WriteLine($"     Health Checks Timeout: {config.System.HealthChecksTimeout}s");
 

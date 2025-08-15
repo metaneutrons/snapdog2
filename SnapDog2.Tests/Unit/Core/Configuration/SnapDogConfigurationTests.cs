@@ -31,7 +31,6 @@ public class SnapDogConfigurationTests
         // Assert
         config.LogLevel.Should().Be("Information");
         config.Environment.Should().Be("Development");
-        config.DebugEnabled.Should().BeFalse();
         config.HealthChecksEnabled.Should().BeTrue();
         config.HealthChecksTimeout.Should().Be(30);
         config.HealthChecksTags.Should().Be("ready,live");

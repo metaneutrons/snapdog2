@@ -96,7 +96,6 @@ All environment variables use the global prefix `SNAPDOG_` and follow a hierarch
 # Basic system settings
 SNAPDOG_SYSTEM_LOG_LEVEL=Information                  # Default: Information
 SNAPDOG_SYSTEM_ENVIRONMENT=Production                 # Default: Development
-SNAPDOG_SYSTEM_DEBUG_ENABLED=true                     # Default: false
 
 # Health Check Configuration
 SNAPDOG_SYSTEM_HEALTH_CHECKS_ENABLED=true             # Default: true
@@ -243,6 +242,7 @@ The streamlined configuration replaces the previous separate SoundFlow and Snapc
 # NEW: Unified configuration (CURRENT)
 # SNAPDOG_AUDIO_* variables with automatic derivation
 ```
+
 ```
 
 #### 9.2.4.1. Services Resilience Configuration
@@ -533,7 +533,7 @@ public class ApiConfig
     /// Maps to: SNAPDOG_API_ENABLED
     /// </summary>
     [Env(Key = "ENABLED", Default = true)]
-    public bool Enabled { get; set; } = true;
+    public bool Enabled { get; set; };
 
     /// <summary>
     /// Port number for the API server.
@@ -547,7 +547,7 @@ public class ApiConfig
     /// Maps to: SNAPDOG_API_AUTH_ENABLED
     /// </summary>
     [Env(Key = "AUTH_ENABLED", Default = true)]
-    public bool AuthEnabled { get; set; } = true;
+    public bool AuthEnabled { get; set; };
 
     /// <summary>
     /// List of API keys for authentication.
@@ -577,21 +577,14 @@ public class SystemConfig
     /// Maps to: SNAPDOG_SYSTEM_LOG_LEVEL
     /// </summary>
     [Env(Key = "LOG_LEVEL", Default = "Information")]
-    public string LogLevel { get; set; } = "Information";
+    public string LogLevel { get; set; };
 
     /// <summary>
     /// Application environment (Development, Staging, Production).
     /// Maps to: SNAPDOG_SYSTEM_ENVIRONMENT
     /// </summary>
-    [Env(Key = "ENVIRONMENT", Default = "Development")]
-    public string Environment { get; set; } = "Development";
-
-    /// <summary>
-    /// Whether debug mode is enabled.
-    /// Maps to: SNAPDOG_SYSTEM_DEBUG_ENABLED
-    /// </summary>
-    [Env(Key = "DEBUG_ENABLED", Default = false)]
-    public bool DebugEnabled { get; set; } = false;
+    [Env(Key = "ENVIRONMENT", Default = "Production")]
+    public string Environment { get; set; };
 }
 ```
 

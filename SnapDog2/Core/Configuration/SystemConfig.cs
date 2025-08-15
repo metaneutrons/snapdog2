@@ -22,13 +22,6 @@ public class SystemConfig
     public string Environment { get; set; } = "Development";
 
     /// <summary>
-    /// Whether debug mode is enabled.
-    /// Maps to: SNAPDOG_SYSTEM_DEBUG_ENABLED
-    /// </summary>
-    [Env(Key = "DEBUG_ENABLED", Default = false)]
-    public bool DebugEnabled { get; set; } = false;
-
-    /// <summary>
     /// Whether health checks are enabled.
     /// Maps to: SNAPDOG_SYSTEM_HEALTH_CHECKS_ENABLED
     /// </summary>
