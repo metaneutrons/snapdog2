@@ -6,6 +6,8 @@ using SnapDog2.Core.Models;
 public class ResultTests
 {
     [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "Unit")]
     public void Success_ShouldCreateSuccessfulResult()
     {
         // Act
@@ -19,6 +21,8 @@ public class ResultTests
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "Unit")]
     public void Failure_WithMessage_ShouldCreateFailedResult()
     {
         // Arrange
@@ -35,6 +39,8 @@ public class ResultTests
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "Unit")]
     public void Failure_WithException_ShouldCreateFailedResult()
     {
         // Arrange
@@ -51,6 +57,8 @@ public class ResultTests
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "Unit")]
     public void Failure_WithNullOrEmptyMessage_ShouldThrowArgumentException()
     {
         // Act & Assert
@@ -59,6 +67,8 @@ public class ResultTests
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "Unit")]
     public void Failure_WithNullException_ShouldThrowArgumentNullException()
     {
         // Act & Assert
@@ -69,6 +79,8 @@ public class ResultTests
 public class ResultTTests
 {
     [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "Unit")]
     public void Success_WithValue_ShouldCreateSuccessfulResult()
     {
         // Arrange
@@ -86,6 +98,8 @@ public class ResultTTests
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "Unit")]
     public void Failure_WithMessage_ShouldCreateFailedResult()
     {
         // Arrange
@@ -102,6 +116,8 @@ public class ResultTTests
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "Unit")]
     public void Value_OnFailedResult_ShouldThrowInvalidOperationException()
     {
         // Arrange
@@ -112,6 +128,8 @@ public class ResultTTests
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "Unit")]
     public void Failure_WithException_ShouldCreateFailedResult()
     {
         // Arrange

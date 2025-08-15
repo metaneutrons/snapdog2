@@ -6,6 +6,7 @@ using SnapDog2.Core.Configuration;
 public class ZoneConfigTests
 {
     [Fact]
+    [Trait("Category", "Unit")]
     public void Constructor_ShouldInitializeNestedProperties()
     {
         // Act
@@ -17,6 +18,7 @@ public class ZoneConfigTests
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public void ZoneMqttConfig_ShouldHaveDefaultValues()
     {
         // Act
@@ -54,6 +56,7 @@ public class ZoneConfigTests
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public void ZoneKnxConfig_ShouldHaveDefaultValues()
     {
         // Act

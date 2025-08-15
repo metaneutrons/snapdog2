@@ -6,6 +6,8 @@ using SnapDog2.Core.Configuration;
 public class SnapDogConfigurationTests
 {
     [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "Unit")]
     public void Constructor_ShouldInitializeAllProperties()
     {
         // Act
@@ -19,6 +21,8 @@ public class SnapDogConfigurationTests
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "Unit")]
     public void SystemConfig_ShouldHaveDefaultValues()
     {
         // Act
@@ -41,6 +45,8 @@ public class SnapDogConfigurationTests
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "Unit")]
     public void TelemetryConfig_ShouldHaveDefaultValues()
     {
         // Act
@@ -55,6 +61,8 @@ public class SnapDogConfigurationTests
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "Unit")]
     public void ApiConfig_ShouldHaveDefaultValues()
     {
         // Act
@@ -67,6 +75,8 @@ public class SnapDogConfigurationTests
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "Unit")]
     public void ServicesConfig_ShouldHaveDefaultValues()
     {
         // Act

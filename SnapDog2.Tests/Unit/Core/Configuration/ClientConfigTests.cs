@@ -6,6 +6,7 @@ using SnapDog2.Core.Configuration;
 public class ClientConfigTests
 {
     [Fact]
+    [Trait("Category", "Unit")]
     public void Constructor_ShouldInitializeNestedProperties()
     {
         // Act
@@ -18,6 +19,7 @@ public class ClientConfigTests
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public void ClientMqttConfig_ShouldHaveDefaultValues()
     {
         // Act
@@ -37,6 +39,7 @@ public class ClientConfigTests
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public void ClientKnxConfig_ShouldHaveDefaultValues()
     {
         // Act

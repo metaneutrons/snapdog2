@@ -10,6 +10,7 @@ using SnapDog2.Extensions.DependencyInjection;
 public class KnxConfigurationTests
 {
     [Fact]
+    [Trait("Category", "Unit")]
     public void AddKnxService_WhenEnabled_ShouldRegisterActualService()
     {
         // Arrange
@@ -33,6 +34,7 @@ public class KnxConfigurationTests
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public void AddKnxService_WithValidGroupAddresses_ShouldSucceed()
     {
         // Arrange

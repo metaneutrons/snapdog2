@@ -18,6 +18,7 @@ public class KnxServiceTests
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public void Constructor_ShouldInitializeCorrectly()
     {
         // Arrange
@@ -35,6 +36,7 @@ public class KnxServiceTests
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public async Task InitializeAsync_WhenDisabled_ShouldReturnSuccess()
     {
         // Arrange
@@ -52,6 +54,7 @@ public class KnxServiceTests
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public async Task SendStatusAsync_WhenNotConnected_ShouldReturnFailure()
     {
         // Arrange
@@ -69,6 +72,7 @@ public class KnxServiceTests
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public async Task WriteGroupValueAsync_WhenNotConnected_ShouldReturnFailure()
     {
         // Arrange
@@ -86,6 +90,7 @@ public class KnxServiceTests
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public async Task ReadGroupValueAsync_WhenNotConnected_ShouldReturnFailure()
     {
         // Arrange
@@ -103,6 +108,7 @@ public class KnxServiceTests
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public async Task StopAsync_ShouldReturnSuccess()
     {
         // Arrange
@@ -120,6 +126,7 @@ public class KnxServiceTests
     }
 
     [Fact]
+    [Trait("Category", "Unit")]
     public async Task DisposeAsync_ShouldCompleteWithoutError()
     {
         // Arrange

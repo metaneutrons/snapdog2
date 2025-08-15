@@ -6,6 +6,7 @@ using SnapDog2.Core.Configuration;
 public class RadioStationConfigTests
 {
     [Fact]
+    [Trait("Category", "Unit")]
     public void Constructor_ShouldInitializeWithNullValues()
     {
         // Act
