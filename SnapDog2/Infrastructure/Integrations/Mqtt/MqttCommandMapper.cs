@@ -120,7 +120,7 @@ public partial class MqttCommandMapper
             "pause" => CommandFactory.CreatePauseCommand(zoneIndex, Core.Enums.CommandSource.Mqtt),
             "stop" => CommandFactory.CreateStopCommand(zoneIndex, Core.Enums.CommandSource.Mqtt),
 
-            // Navigation commands
+            // Navigation commands (simplified)
             "next" or "track_next" => CommandFactory.CreateNextTrackCommand(zoneIndex, Core.Enums.CommandSource.Mqtt),
             "previous" or "track_previous" => CommandFactory.CreatePreviousTrackCommand(
                 zoneIndex,
@@ -146,7 +146,7 @@ public partial class MqttCommandMapper
             "mute_off" => CommandFactory.CreateSetZoneMuteCommand(zoneIndex, false, Core.Enums.CommandSource.Mqtt),
             "mute_toggle" => CommandFactory.CreateToggleZoneMuteCommand(zoneIndex, Core.Enums.CommandSource.Mqtt),
 
-            // Track repeat commands
+            // Track repeat commands (simplified payloads)
             "track_repeat_on" => CommandFactory.CreateSetTrackRepeatCommand(
                 zoneIndex,
                 true,
@@ -162,7 +162,7 @@ public partial class MqttCommandMapper
                 Core.Enums.CommandSource.Mqtt
             ),
 
-            // Shuffle commands
+            // Shuffle commands (simplified payloads)
             "shuffle_on" => CommandFactory.CreateSetPlaylistShuffleCommand(
                 zoneIndex,
                 true,
@@ -178,18 +178,18 @@ public partial class MqttCommandMapper
                 Core.Enums.CommandSource.Mqtt
             ),
 
-            // Playlist repeat commands
-            "playlist_repeat_on" => CommandFactory.CreateSetPlaylistRepeatCommand(
+            // Playlist repeat commands (simplified payloads)
+            "repeat_on" => CommandFactory.CreateSetPlaylistRepeatCommand(
                 zoneIndex,
                 true,
                 Core.Enums.CommandSource.Mqtt
             ),
-            "playlist_repeat_off" => CommandFactory.CreateSetPlaylistRepeatCommand(
+            "repeat_off" => CommandFactory.CreateSetPlaylistRepeatCommand(
                 zoneIndex,
                 false,
                 Core.Enums.CommandSource.Mqtt
             ),
-            "playlist_repeat_toggle" => CommandFactory.CreateTogglePlaylistRepeatCommand(
+            "repeat_toggle" => CommandFactory.CreateTogglePlaylistRepeatCommand(
                 zoneIndex,
                 Core.Enums.CommandSource.Mqtt
             ),

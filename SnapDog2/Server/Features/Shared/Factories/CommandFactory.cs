@@ -453,6 +453,10 @@ public static class CommandFactory
                 source
             ),
 
+            // Navigation commands (simplified)
+            "next" => CreateNextTrackCommand(zoneIndex, source),
+            "previous" => CreatePreviousTrackCommand(zoneIndex, source),
+
             // Track commands
             "track" when TryParseInt(payload, out var trackIndex) => CreateSetTrackCommand(
                 zoneIndex,
@@ -467,17 +471,13 @@ public static class CommandFactory
                 zoneIndex,
                 source
             ),
-            "next" => CreateNextTrackCommand(zoneIndex, source),
-            "previous" => CreatePreviousTrackCommand(zoneIndex, source),
 
-            // Track repeat commands
-            "track_repeat" when TryParseBool(payload, out var repeat) => CreateSetTrackRepeatCommand(
+            // Track commands (hierarchical)
+            "track/set" when TryParseInt(payload, out var trackSetIndex) => CreateSetTrackCommand(
                 zoneIndex,
-                repeat,
+                trackSetIndex,
                 source
             ),
-            "track_repeat" when payload.Equals("toggle", StringComparison.OrdinalIgnoreCase) =>
-                CreateToggleTrackRepeatCommand(zoneIndex, source),
 
             // Playlist commands
             "playlist" when TryParseInt(payload, out var playlistIndex) => CreateSetPlaylistCommand(
@@ -499,7 +499,16 @@ public static class CommandFactory
                 source
             ),
 
-            // Playlist shuffle commands
+            // Playlist commands (hierarchical)
+            "playlist/set" when TryParseInt(payload, out var playlistSetIndex) => CreateSetPlaylistCommand(
+                zoneIndex,
+                playlistSetIndex,
+                source
+            ),
+            "playlist/next" => CreateNextPlaylistCommand(zoneIndex, source),
+            "playlist/previous" => CreatePreviousPlaylistCommand(zoneIndex, source),
+
+            // Playlist shuffle commands (simplified topic)
             "shuffle" when TryParseBool(payload, out var shuffle) => CreateSetPlaylistShuffleCommand(
                 zoneIndex,
                 shuffle,
@@ -508,14 +517,59 @@ public static class CommandFactory
             "shuffle" when payload.Equals("toggle", StringComparison.OrdinalIgnoreCase) =>
                 CreateTogglePlaylistShuffleCommand(zoneIndex, source),
 
-            // Playlist repeat commands
-            "playlist_repeat" when TryParseBool(payload, out var playlistRepeat) => CreateSetPlaylistRepeatCommand(
+            // Repeat commands (improved hierarchical structure)
+            "repeat/track" when TryParseBool(payload, out var trackRepeat) => CreateSetTrackRepeatCommand(
+                zoneIndex,
+                trackRepeat,
+                source
+            ),
+            "repeat/track" when payload.Equals("toggle", StringComparison.OrdinalIgnoreCase) =>
+                CreateToggleTrackRepeatCommand(zoneIndex, source),
+            "repeat/track/set" when TryParseBool(payload, out var trackRepeatSet) => CreateSetTrackRepeatCommand(
+                zoneIndex,
+                trackRepeatSet,
+                source
+            ),
+            "repeat/track/set" when payload.Equals("toggle", StringComparison.OrdinalIgnoreCase) =>
+                CreateToggleTrackRepeatCommand(zoneIndex, source),
+
+            // Playlist repeat commands (improved hierarchical structure)
+            "repeat/playlist" when TryParseBool(payload, out var playlistRepeatNew) => CreateSetPlaylistRepeatCommand(
+                zoneIndex,
+                playlistRepeatNew,
+                source
+            ),
+            "repeat/playlist" when payload.Equals("toggle", StringComparison.OrdinalIgnoreCase) =>
+                CreateTogglePlaylistRepeatCommand(zoneIndex, source),
+            "repeat/playlist/set" when TryParseBool(payload, out var playlistRepeatSetNew) =>
+                CreateSetPlaylistRepeatCommand(zoneIndex, playlistRepeatSetNew, source),
+            "repeat/playlist/set" when payload.Equals("toggle", StringComparison.OrdinalIgnoreCase) =>
+                CreateTogglePlaylistRepeatCommand(zoneIndex, source),
+
+            // Legacy repeat commands (for backward compatibility)
+            "repeat" when TryParseBool(payload, out var playlistRepeat) => CreateSetPlaylistRepeatCommand(
                 zoneIndex,
                 playlistRepeat,
                 source
             ),
-            "playlist_repeat" when payload.Equals("toggle", StringComparison.OrdinalIgnoreCase) =>
+            "repeat" when payload.Equals("toggle", StringComparison.OrdinalIgnoreCase) =>
                 CreateTogglePlaylistRepeatCommand(zoneIndex, source),
+            "repeat/set" when TryParseBool(payload, out var playlistRepeatSet) => CreateSetPlaylistRepeatCommand(
+                zoneIndex,
+                playlistRepeatSet,
+                source
+            ),
+            "repeat/set" when payload.Equals("toggle", StringComparison.OrdinalIgnoreCase) =>
+                CreateTogglePlaylistRepeatCommand(zoneIndex, source),
+
+            // Shuffle commands (simplified topic)
+            "shuffle/set" when TryParseBool(payload, out var shuffleSet) => CreateSetPlaylistShuffleCommand(
+                zoneIndex,
+                shuffleSet,
+                source
+            ),
+            "shuffle/set" when payload.Equals("toggle", StringComparison.OrdinalIgnoreCase) =>
+                CreateTogglePlaylistShuffleCommand(zoneIndex, source),
 
             _ => null,
         };
@@ -628,10 +682,13 @@ public static class CommandFactoryExtensions
 
         var entityType = parts[1].ToLowerInvariant();
         var entityIdStr = parts[2];
-        var command = parts[3].ToLowerInvariant();
 
         if (!int.TryParse(entityIdStr, out var entityId))
             return null;
+
+        // Handle hierarchical commands (e.g., repeat/track, repeat/set)
+        var commandParts = parts.Skip(3).ToArray();
+        var command = string.Join("/", commandParts).ToLowerInvariant();
 
         return entityType switch
         {
