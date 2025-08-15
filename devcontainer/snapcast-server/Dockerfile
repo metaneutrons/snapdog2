@@ -190,11 +190,11 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
             echo "❌ Supervisor services unhealthy"; exit 1; \
         }; \
         \
-        JSONRPC_PORT=$(grep -E '^port = ' /etc/snapserver.conf | head -1 | cut -d' ' -f3 || echo 1705); \
+        HTTP_PORT=$(grep -E '^port = ' /etc/snapserver.conf | grep -A5 '\\[http\\]' | grep 'port = ' | cut -d' ' -f3 || echo 1780); \
         API_RESPONSE=$(curl -sf --max-time 5 -X POST \
             -d '{"id":1,"jsonrpc":"2.0","method":"Server.GetStatus"}' \
-            "http://localhost:${JSONRPC_PORT}/jsonrpc" 2>/dev/null) || { \
-            echo "❌ Snapcast API unreachable on port ${JSONRPC_PORT}"; exit 2; \
+            "http://localhost:${HTTP_PORT}/jsonrpc" 2>/dev/null) || { \
+            echo "❌ Snapcast API unreachable on port ${HTTP_PORT}"; exit 2; \
         }; \
         \
         echo "$API_RESPONSE" | grep -q '"snapserver"' || { \

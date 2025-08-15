@@ -86,14 +86,13 @@ write_config_section() {
 
 discover_zones() {
     local zones=()
-    local zone_pattern="^SNAPDOG_ZONE_([0-9]+)_NAME$"
     
-    # Find all zone name variables
-    while IFS= read -r var; do
-        if [[ $var =~ $zone_pattern ]]; then
+    # Find all zone name variables using a simpler approach
+    while IFS= read -r line; do
+        if [[ $line =~ ^SNAPDOG_ZONE_([0-9]+)_NAME= ]]; then
             zones+=("${BASH_REMATCH[1]}")
         fi
-    done < <(env | grep -E "$zone_pattern" | cut -d= -f1)
+    done < <(env | grep "^SNAPDOG_ZONE_.*_NAME=")
     
     # Sort zones numerically and return
     if [[ ${#zones[@]} -gt 0 ]]; then
@@ -218,6 +217,19 @@ main() {
     else
         log "Found ${#zones[@]} zone(s): ${zones[*]}"
         echo
+        
+        # Create named pipes for each zone
+        for zone_id in "${zones[@]}"; do
+            local sink_path
+            sink_path=$(env | grep "^SNAPDOG_ZONE_${zone_id}_SINK=" | cut -d= -f2- || echo "/snapsinks/zone${zone_id}")
+            
+            # Create named pipe if it doesn't exist
+            if [[ ! -p "$sink_path" ]]; then
+                log "🔧 Creating named pipe: $sink_path"
+                mkfifo "$sink_path"
+                chown snapcast:snapcast "$sink_path"
+            fi
+        done
         
         for zone_id in "${zones[@]}"; do
             local zone_source
