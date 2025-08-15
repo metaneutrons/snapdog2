@@ -1,24 +1,3 @@
-# =============================================================================
-# 🏆 Award-Worthy Snapcast Server - Test Composition
-# =============================================================================
-#
-# This docker-compose.yml provides a complete testing environment for the
-# snapcast-server container with monitoring and debugging tools.
-#
-# Usage:
-#   docker-compose up -d          # Start all services
-#   docker-compose logs -f        # Monitor logs
-#   docker-compose down           # Stop all services
-#
-# Access:
-#   - Snapcast Web UI: http://localhost:1780
-#   - TCP JSON-RPC: nc localhost 1705
-#   - AirPlay: "SnapDog2 Test AirPlay" in iOS/macOS
-#   - Monitoring: http://localhost:3000 (Grafana)
-# =============================================================================
-
-version: "3.8"
-
 networks:
   snapcast-test:
     driver: bridge
@@ -238,44 +217,3 @@ services:
     restart: unless-stopped
     profiles:
       - proxy
-# =============================================================================
-# 🧪 Testing Commands
-# =============================================================================
-#
-# Start the full test environment:
-#   docker-compose up -d
-#
-# Test TCP JSON-RPC (the award-winning feature!):
-#   echo '{"method":"Server.GetStatus","id":1}' | nc localhost 1705
-#
-# Test with curl:
-#   curl -X POST http://localhost:1780/jsonrpc \
-#     -H "Content-Type: application/json" \
-#     -d '{"method":"Server.GetStatus","id":1}'
-#
-# Monitor logs:
-#   docker-compose logs -f snapcast-server
-#
-# Check health:
-#   docker-compose exec snapcast-server /usr/local/bin/health-check.sh
-#
-# Network debugging:
-#   docker-compose --profile debug up -d network-tools
-#   docker-compose exec network-tools nmap -p 1704,1705,1780,5000 172.25.0.10
-#
-# AirPlay testing:
-#   # Look for "SnapDog2 Test AirPlay" in iOS/macOS AirPlay menu
-#   docker-compose exec snapcast-server avahi-browse -rt _raop._tcp
-#
-# Audio flow testing:
-#   docker-compose exec snapcast-server ls -la /snapsinks/
-#   docker-compose exec snapcast-server lsof /snapsinks/default
-#
-# Performance monitoring:
-#   # Access Grafana at http://localhost:3000 (admin/snapcast-test)
-#   # Access Prometheus at http://localhost:9090
-#
-# Clean shutdown:
-#   docker-compose down -v  # Removes volumes too
-#
-# =============================================================================
