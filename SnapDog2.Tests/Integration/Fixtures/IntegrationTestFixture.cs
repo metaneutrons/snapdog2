@@ -228,8 +228,9 @@ public class IntegrationTestFixture : IAsyncLifetime
         const int containerMqttPort = 1883;
 
         // Use the same MQTT configuration as devcontainer for consistency
-        var configPath = Path.Combine(Directory.GetCurrentDirectory(), "devcontainer", "mosquitto", "mosquitto.conf");
-        var passwdPath = Path.Combine(Directory.GetCurrentDirectory(), "devcontainer", "mosquitto", "passwd");
+        var repositoryRoot = GetRepositoryRoot();
+        var configPath = Path.Combine(repositoryRoot, "devcontainer", "mosquitto", "mosquitto.conf");
+        var passwdPath = Path.Combine(repositoryRoot, "devcontainer", "mosquitto", "passwd");
 
         _mqttContainer = new ContainerBuilder()
             .WithImage("eclipse-mosquitto:2.0")
@@ -799,5 +800,31 @@ public class IntegrationTestFixture : IAsyncLifetime
         // Verify system configuration using the configuration object
         snapDogConfig.System.HealthChecksEnabled.Should().BeTrue("Health checks should be enabled in tests");
         snapDogConfig.System.LogLevel.Should().Be("Information", "Log level should be Information in tests");
+    }
+
+    /// <summary>
+    /// Finds the repository root by traversing up the directory tree looking for the .git folder or solution file.
+    /// This ensures the devcontainer folder can be found regardless of the current working directory.
+    /// </summary>
+    private static string GetRepositoryRoot()
+    {
+        var currentDirectory = Directory.GetCurrentDirectory();
+        var directory = new DirectoryInfo(currentDirectory);
+
+        while (directory != null)
+        {
+            // Look for .git folder or solution file to identify repository root
+            if (directory.GetDirectories(".git").Length > 0 || directory.GetFiles("*.sln").Length > 0)
+            {
+                return directory.FullName;
+            }
+
+            directory = directory.Parent;
+        }
+
+        throw new InvalidOperationException(
+            $"Could not find repository root starting from {currentDirectory}. "
+                + "Make sure the test is running from within the repository."
+        );
     }
 }
