@@ -66,7 +66,7 @@ public class ZonesApiIntegrationTests : IClassFixture<IntegrationTestFixture>
         _output.WriteLine($"✅ Set track repeat for zone {zoneIndex} to {newState}, returned: {returnedState}");
     }
 
-    [Fact]
+    [Fact(Timeout = 30000)] // 30 second timeout to prevent CI hanging
     public async Task ToggleTrackRepeat_Should_ReturnNewState()
     {
         // Arrange
