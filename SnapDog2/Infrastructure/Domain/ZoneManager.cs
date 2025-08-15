@@ -982,10 +982,22 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         // Persist state to store for future requests
         _zoneStateStore.SetZoneState(_zoneIndex, _currentState);
 
-        // Publish notification via mediator
+        // Publish notification via mediator using fire-and-forget to prevent blocking
         var notification = new ZoneStateChangedNotification { ZoneIndex = _zoneIndex, ZoneState = _currentState };
 
-        await _mediator.PublishAsync(notification).ConfigureAwait(false);
+        // Use Task.Run to avoid blocking the calling thread
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await _mediator.PublishAsync(notification).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't propagate to avoid breaking the main operation
+                _logger.LogError(ex, "Failed to publish zone state notification for zone {ZoneIndex}", _zoneIndex);
+            }
+        });
     }
 
     public ValueTask DisposeAsync()
