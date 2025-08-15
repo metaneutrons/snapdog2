@@ -145,9 +145,9 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 | Command ID                | Env Var Suffix                 | Default Rel. Topic   | Example Payloads                   | Notes                     |
 | :------------------------ | :----------------------------- | :--------------------- | :--------------------------------- | :------------------------ |
 | `PLAYLIST`                | `_PLAYLIST_SET_TOPIC`        | `playlist/set`         | `<id_or_index>`, `"+"` , `"-"`   | **1=Radio**, 2+=Subsonic|
-| `PLAYLIST_REPEAT`         | `_PLAYLIST_REPEAT_SET_TOPIC` | `playlist_repeat/set`| `"true"`/`"false"`, `"1"`/`"0"`  |                           |
-| `PLAYLIST_REPEAT_TOGGLE`  | `_PLAYLIST_REPEAT_SET_TOPIC` | `playlist_repeat/set`| `"toggle"`                         |                           |
-| `PLAYLIST_SHUFFLE`        | `_PLAYLIST_SHUFFLE_SET_TOPIC`| `playlist_shuffle/set` | `"true"`/`"false"`, `"1"`/`"0"`  |                           |
+| `PLAYLIST_REPEAT`         | `_PLAYLIST_REPEAT_SET_TOPIC` | `repeat/set`| `"true"`/`"false"`, `"1"`/`"0"`  |                           |
+| `PLAYLIST_REPEAT_TOGGLE`  | `_PLAYLIST_REPEAT_SET_TOPIC` | `repeat/set`| `"toggle"`                         |                           |
+| `PLAYLIST_SHUFFLE`        | `_PLAYLIST_SHUFFLE_SET_TOPIC`| `shuffle/set` | `"true"`/`"false"`, `"1"`/`"0"`  |                           |
 | `PLAYLIST_SHUFFLE_TOGGLE` | `_PLAYLIST_SHUFFLE_SET_TOPIC`| `playlist_shuffle/set` | `"toggle"`                         |                           |
 
 **Volume/Mute Control**
@@ -176,7 +176,7 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 | :--------------------- | :--------------------- | :----------------- | :------------------------------- | :------- | :----------------------- |
 | `TRACK_INDEX`          | `_TRACK_TOPIC`         | `track`            | `1`, `3`                         | Yes      | **1-based** index      |
 | `TRACK_INFO`           | `_TRACK_INFO_TOPIC`    | `track/info`       | Full JSON `TrackInfo` object     | Yes      | Structure from Core Models |
-| `TRACK_REPEAT_STATUS`  | `_TRACK_REPEAT_TOPIC`  | `track_repeat`     | `true` / `false` (`1`/`0`)       | Yes      |                            |
+| `TRACK_REPEAT_STATUS`  | `_TRACK_REPEAT_TOPIC`  | `repeat/track`     | `true` / `false` (`1`/`0`)       | Yes      |                            |
 
 **Playlist Management**
 
@@ -184,8 +184,8 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 | :------------------------ | :------------------------- | :------------------- | :--------------------------------- | :------- | :------------------------- |
 | `PLAYLIST_INDEX`          | `_PLAYLIST_TOPIC`        | `playlist`           | `1` (Radio), `2`                 | Yes      | **1-based** index        |
 | `PLAYLIST_INFO`           | `_PLAYLIST_INFO_TOPIC`   | `playlist/info`      | Full JSON `PlaylistInfo` object  | Yes      | Structure from Core Models |
-| `PLAYLIST_REPEAT_STATUS`  | `_PLAYLIST_REPEAT_TOPIC` | `playlist_repeat`    | `true` / `false` (`1`/`0`)         | Yes      |                            |
-| `PLAYLIST_SHUFFLE_STATUS` | `_PLAYLIST_SHUFFLE_TOPIC`| `playlist_shuffle`   | `true` / `false` (`1`/`0`)         | Yes      |                            |
+| `PLAYLIST_REPEAT_STATUS`  | `_PLAYLIST_REPEAT_TOPIC` | `repeat`    | `true` / `false` (`1`/`0`)         | Yes      |                            |
+| `PLAYLIST_SHUFFLE_STATUS` | `_PLAYLIST_SHUFFLE_TOPIC`| `shuffle`   | `true` / `false` (`1`/`0`)         | Yes      |                            |
 
 **Volume/Mute Control**
 

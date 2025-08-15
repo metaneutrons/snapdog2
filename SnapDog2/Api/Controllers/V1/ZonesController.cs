@@ -452,4 +452,264 @@ public partial class ZonesController : ControllerBase
 
     [LoggerMessage(12014, LogLevel.Warning, "Failed to set zone {ZoneIndex} track to {TrackIndex}: {ErrorMessage}")]
     private partial void LogFailedToSetZoneTrack(int zoneIndex, int trackIndex, string errorMessage);
+
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // REPEAT CONTROL - New simplified API structure
+    // ═══════════════════════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// Get track repeat mode for the zone.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <returns>Track repeat enabled state</returns>
+    [HttpGet("{zoneIndex:int}/repeat/track")]
+    [ProducesResponseType<bool>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<bool>> GetTrackRepeat(int zoneIndex)
+    {
+        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
+        var result = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+
+        if (result.IsFailure)
+        {
+            LogFailedToGetZoneTrackRepeat(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return NotFound($"Zone {zoneIndex} not found");
+        }
+
+        return Ok(result.Value!.TrackRepeat);
+    }
+
+    /// <summary>
+    /// Set track repeat mode for the zone.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <param name="enabled">Track repeat enabled state</param>
+    /// <returns>New track repeat state</returns>
+    [HttpPut("{zoneIndex:int}/repeat/track")]
+    [ProducesResponseType<bool>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<bool>> SetTrackRepeat(int zoneIndex, [FromBody] bool enabled)
+    {
+        var command = new SetTrackRepeatCommand { ZoneIndex = zoneIndex, Enabled = enabled };
+        var result = await _mediator.SendCommandAsync<SetTrackRepeatCommand, Result>(command);
+
+        if (result.IsFailure)
+        {
+            LogFailedToSetZoneTrackRepeat(zoneIndex, enabled, result.ErrorMessage ?? "Unknown error");
+            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+        }
+
+        return Ok(enabled);
+    }
+
+    /// <summary>
+    /// Toggle track repeat mode for the zone.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <returns>New track repeat state</returns>
+    [HttpPost("{zoneIndex:int}/repeat/track/toggle")]
+    [ProducesResponseType<bool>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<bool>> ToggleTrackRepeat(int zoneIndex)
+    {
+        var command = new ToggleTrackRepeatCommand { ZoneIndex = zoneIndex };
+        var result = await _mediator.SendCommandAsync<ToggleTrackRepeatCommand, Result>(command);
+
+        if (result.IsFailure)
+        {
+            LogFailedToToggleZoneTrackRepeat(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+        }
+
+        // Get the new state to return
+        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
+        var stateResult = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+
+        return Ok(stateResult.IsSuccess ? stateResult.Value!.TrackRepeat : false);
+    }
+
+    /// <summary>
+    /// Get playlist repeat mode for the zone.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <returns>Playlist repeat enabled state</returns>
+    [HttpGet("{zoneIndex:int}/repeat")]
+    [ProducesResponseType<bool>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<bool>> GetPlaylistRepeat(int zoneIndex)
+    {
+        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
+        var result = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+
+        if (result.IsFailure)
+        {
+            LogFailedToGetZonePlaylistRepeat(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return NotFound($"Zone {zoneIndex} not found");
+        }
+
+        return Ok(result.Value!.PlaylistRepeat);
+    }
+
+    /// <summary>
+    /// Set playlist repeat mode for the zone.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <param name="enabled">Playlist repeat enabled state</param>
+    /// <returns>New playlist repeat state</returns>
+    [HttpPut("{zoneIndex:int}/repeat")]
+    [ProducesResponseType<bool>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<bool>> SetPlaylistRepeat(int zoneIndex, [FromBody] bool enabled)
+    {
+        var command = new SetPlaylistRepeatCommand { ZoneIndex = zoneIndex, Enabled = enabled };
+        var result = await _mediator.SendCommandAsync<SetPlaylistRepeatCommand, Result>(command);
+
+        if (result.IsFailure)
+        {
+            LogFailedToSetZonePlaylistRepeat(zoneIndex, enabled, result.ErrorMessage ?? "Unknown error");
+            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+        }
+
+        return Ok(enabled);
+    }
+
+    /// <summary>
+    /// Toggle playlist repeat mode for the zone.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <returns>New playlist repeat state</returns>
+    [HttpPost("{zoneIndex:int}/repeat/toggle")]
+    [ProducesResponseType<bool>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<bool>> TogglePlaylistRepeat(int zoneIndex)
+    {
+        var command = new TogglePlaylistRepeatCommand { ZoneIndex = zoneIndex };
+        var result = await _mediator.SendCommandAsync<TogglePlaylistRepeatCommand, Result>(command);
+
+        if (result.IsFailure)
+        {
+            LogFailedToToggleZonePlaylistRepeat(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+        }
+
+        // Get the new state to return
+        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
+        var stateResult = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+
+        return Ok(stateResult.IsSuccess ? stateResult.Value!.PlaylistRepeat : false);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // SHUFFLE CONTROL - Simplified API structure
+    // ═══════════════════════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// Get playlist shuffle mode for the zone.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <returns>Playlist shuffle enabled state</returns>
+    [HttpGet("{zoneIndex:int}/shuffle")]
+    [ProducesResponseType<bool>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<bool>> GetPlaylistShuffle(int zoneIndex)
+    {
+        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
+        var result = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+
+        if (result.IsFailure)
+        {
+            LogFailedToGetZonePlaylistShuffle(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return NotFound($"Zone {zoneIndex} not found");
+        }
+
+        return Ok(result.Value!.PlaylistShuffle);
+    }
+
+    /// <summary>
+    /// Set playlist shuffle mode for the zone.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <param name="enabled">Playlist shuffle enabled state</param>
+    /// <returns>New playlist shuffle state</returns>
+    [HttpPut("{zoneIndex:int}/shuffle")]
+    [ProducesResponseType<bool>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<bool>> SetPlaylistShuffle(int zoneIndex, [FromBody] bool enabled)
+    {
+        var command = new SetPlaylistShuffleCommand { ZoneIndex = zoneIndex, Enabled = enabled };
+        var result = await _mediator.SendCommandAsync<SetPlaylistShuffleCommand, Result>(command);
+
+        if (result.IsFailure)
+        {
+            LogFailedToSetZonePlaylistShuffle(zoneIndex, enabled, result.ErrorMessage ?? "Unknown error");
+            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+        }
+
+        return Ok(enabled);
+    }
+
+    /// <summary>
+    /// Toggle playlist shuffle mode for the zone.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <returns>New playlist shuffle state</returns>
+    [HttpPost("{zoneIndex:int}/shuffle/toggle")]
+    [ProducesResponseType<bool>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<bool>> TogglePlaylistShuffle(int zoneIndex)
+    {
+        var command = new TogglePlaylistShuffleCommand { ZoneIndex = zoneIndex };
+        var result = await _mediator.SendCommandAsync<TogglePlaylistShuffleCommand, Result>(command);
+
+        if (result.IsFailure)
+        {
+            LogFailedToToggleZonePlaylistShuffle(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+        }
+
+        // Get the new state to return
+        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
+        var stateResult = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+
+        return Ok(stateResult.IsSuccess ? stateResult.Value!.PlaylistShuffle : false);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // LOGGING METHODS FOR NEW ENDPOINTS
+    // ═══════════════════════════════════════════════════════════════════════════════
+
+    [LoggerMessage(12015, LogLevel.Warning, "Failed to get zone {ZoneIndex} track repeat: {ErrorMessage}")]
+    private partial void LogFailedToGetZoneTrackRepeat(int zoneIndex, string errorMessage);
+
+    [LoggerMessage(12016, LogLevel.Warning, "Failed to set zone {ZoneIndex} track repeat to {Enabled}: {ErrorMessage}")]
+    private partial void LogFailedToSetZoneTrackRepeat(int zoneIndex, bool enabled, string errorMessage);
+
+    [LoggerMessage(12017, LogLevel.Warning, "Failed to toggle zone {ZoneIndex} track repeat: {ErrorMessage}")]
+    private partial void LogFailedToToggleZoneTrackRepeat(int zoneIndex, string errorMessage);
+
+    [LoggerMessage(12018, LogLevel.Warning, "Failed to get zone {ZoneIndex} playlist repeat: {ErrorMessage}")]
+    private partial void LogFailedToGetZonePlaylistRepeat(int zoneIndex, string errorMessage);
+
+    [LoggerMessage(
+        12019,
+        LogLevel.Warning,
+        "Failed to set zone {ZoneIndex} playlist repeat to {Enabled}: {ErrorMessage}"
+    )]
+    private partial void LogFailedToSetZonePlaylistRepeat(int zoneIndex, bool enabled, string errorMessage);
+
+    [LoggerMessage(12020, LogLevel.Warning, "Failed to toggle zone {ZoneIndex} playlist repeat: {ErrorMessage}")]
+    private partial void LogFailedToToggleZonePlaylistRepeat(int zoneIndex, string errorMessage);
+
+    [LoggerMessage(12021, LogLevel.Warning, "Failed to get zone {ZoneIndex} playlist shuffle: {ErrorMessage}")]
+    private partial void LogFailedToGetZonePlaylistShuffle(int zoneIndex, string errorMessage);
+
+    [LoggerMessage(
+        12022,
+        LogLevel.Warning,
+        "Failed to set zone {ZoneIndex} playlist shuffle to {Enabled}: {ErrorMessage}"
+    )]
+    private partial void LogFailedToSetZonePlaylistShuffle(int zoneIndex, bool enabled, string errorMessage);
+
+    [LoggerMessage(12023, LogLevel.Warning, "Failed to toggle zone {ZoneIndex} playlist shuffle: {ErrorMessage}")]
+    private partial void LogFailedToToggleZonePlaylistShuffle(int zoneIndex, string errorMessage);
 }
