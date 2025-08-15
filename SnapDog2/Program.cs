@@ -170,6 +170,17 @@ static WebApplication CreateWebApplication(string[] args)
     builder.Services.AddSingleton(snapDogConfig.Services);
     builder.Services.AddSingleton(snapDogConfig.SnapcastServer);
 
+    // Register AudioConfig for IOptions pattern
+    builder.Services.Configure<AudioConfig>(options =>
+    {
+        var audioConfig = snapDogConfig.Services.Audio;
+        options.SampleRate = audioConfig.SampleRate;
+        options.BitDepth = audioConfig.BitDepth;
+        options.Channels = audioConfig.Channels;
+        options.Codec = audioConfig.Codec;
+        options.HttpTimeoutSeconds = audioConfig.HttpTimeoutSeconds;
+    });
+
     // Register configuration for IOptions pattern
     builder.Services.Configure<SnapDogConfiguration>(options =>
     {

@@ -28,19 +28,33 @@ for var in "${!SNAPDOG_ZONE_@}"; do
 
         ## Set codec to environment variable or default
         CODEC='flac'
-        eval CODEC_VAR="\$SNAPDOG_SNAPCAST_CODEC"
+        eval CODEC_VAR="\$SNAPDOG_AUDIO_CODEC"
         if [[ -n "${CODEC_VAR}" ]]; then
             CODEC=$CODEC_VAR
         fi
         echo -e "with codec: $CODEC"
 
-        ## Set sampleformat to environment variable or default
-        SAMPLEFORMAT="48000:16:2"
-        eval SAMPLEFORMAT_VAR="\$SNAPDOG_SNAPCAST_SAMPLEFORMAT"
-        if [[ -n "${SAMPLEFORMAT_VAR}" ]]; then
-            SAMPLEFORMAT=$SAMPLEFORMAT_VAR
+        ## Build sampleformat from global audio configuration
+        SAMPLE_RATE="48000"
+        eval SAMPLE_RATE_VAR="\$SNAPDOG_AUDIO_SAMPLE_RATE"
+        if [[ -n "${SAMPLE_RATE_VAR}" ]]; then
+            SAMPLE_RATE=$SAMPLE_RATE_VAR
         fi
-        echo -e "with sample format: $SAMPLEFORMAT"
+
+        BIT_DEPTH="16"
+        eval BIT_DEPTH_VAR="\$SNAPDOG_AUDIO_BIT_DEPTH"
+        if [[ -n "${BIT_DEPTH_VAR}" ]]; then
+            BIT_DEPTH=$BIT_DEPTH_VAR
+        fi
+
+        CHANNELS="2"
+        eval CHANNELS_VAR="\$SNAPDOG_AUDIO_CHANNELS"
+        if [[ -n "${CHANNELS_VAR}" ]]; then
+            CHANNELS=$CHANNELS_VAR
+        fi
+
+        SAMPLEFORMAT="${SAMPLE_RATE}:${BIT_DEPTH}:${CHANNELS}"
+        echo -e "with sample format: $SAMPLEFORMAT (computed from global audio config)"
 
         ## Add zone to snapserver configuration
         SNAPSERVER="${SNAPSERVER}source = pipe://$SINK?name=Zone$ZONE&sampleformat=$SAMPLEFORMAT&codec=$CODEC\n"

@@ -25,6 +25,8 @@
     <PackageVersion Include="SubSonicMedia" Version="1.0.5" />
     <!-- Snapcast Integration -->
     <PackageVersion Include="SnapcastClient" Version="0.3.6" />
+    <!-- LibVLC Integration -->
+    <PackageVersion Include="LibVLCSharp" Version="3.9.4" />
     <!-- MQTT Integration -->
     <PackageVersion Include="MQTTnet" Version="5.0.1.1416" />
     <!-- KNX Integration -->

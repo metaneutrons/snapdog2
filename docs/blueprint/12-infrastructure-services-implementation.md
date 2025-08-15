@@ -230,25 +230,55 @@ Implements `ISubsonicService` using **`SubSonicMedia` (1.0.5)**.
 
 ## 11.5. Media Playback (`/Infrastructure/Audio/MediaPlayerService.cs`)
 
-Implements `IMediaPlayerService` using **SoundFlow**, a powerful cross-platform .NET audio engine.
+Implements `IMediaPlayerService` using **LibVLCSharp**, a cross-platform .NET wrapper for the powerful VLC media framework.
 
-* **Library:** `SoundFlow` - Pure .NET cross-platform audio engine with native support for Windows, macOS, Linux, Android, iOS, and FreeBSD.
-* **Dependencies:** `IOptions<SoundFlowConfig>`, `IHttpClientFactory`, `ILogger<MediaPlayerService>`, `IMediator` (for publishing playback events), `IEnumerable<ZoneConfig>`.
+* **Library:** `LibVLCSharp` (3.8.5) - Cross-platform .NET bindings for LibVLC with comprehensive multimedia support.
+* **Dependencies:** `IOptions<AudioConfig>`, `ILogger<MediaPlayerService>`, `ILoggerFactory`, `IMediator` (for publishing playback events), `IEnumerable<ZoneConfig>`.
 * **Core Logic:**
-  * Initializes SoundFlow audio engine with configurable parameters (sample rate, bit depth, channels, buffer size).
-  * Creates and manages a `Dictionary<int, MediaPlayer>` (one per ZoneIndex) for concurrent multi-zone audio streaming.
+  * Uses **streamlined audio configuration** (`AudioConfig`) that provides a single source of truth for audio settings across both Snapcast and LibVLC.
+  * Creates and manages a `ConcurrentDictionary<int, MediaPlayer>` (one per ZoneIndex) for concurrent multi-zone audio streaming.
+  * **Automatic MAX_STREAMS calculation** - Maximum concurrent streams equals the number of configured zones (`_zoneConfigs.Count()`), eliminating manual configuration.
   * Implements `PlayAsync(int zoneIndex, TrackInfo trackInfo)`:
-    * Retrieves zone configuration and creates HTTP client with resilience policies.
-    * Creates `MediaPlayer` instance with audio processing pipeline:
-      * `HttpStreamSource` - Streams audio from HTTP URLs (Subsonic/radio streams)
-      * `ResampleProcessor` - Converts audio to target format (48000:16:2 by default)
-      * `FileOutputSink` - Writes processed audio data to Snapcast sink file
-    * Builds audio graph: Source → Processor → Sink
-    * Starts real-time audio streaming with configurable thread priority and buffer management.
+    * Validates zone limits using automatic MAX_STREAMS calculation.
+    * Creates `MediaPlayer` instance with `AudioProcessingContext` containing:
+      * `LibVLC` instance with hardcoded arguments (`--no-video`, `--quiet`) for consistency.
+      * `MetadataManager` for comprehensive metadata extraction using `Media.Parse()`.
+      * Audio processing pipeline configured for raw output to Snapcast sinks.
+    * Builds LibVLC media options for transcoding to raw audio format matching global audio configuration.
+    * Starts real-time audio streaming with automatic format detection and processing.
     * Publishes `TrackPlaybackStartedNotification` via Cortex.Mediator.
-  * Implements `StopAsync`, `PauseAsync` by stopping the audio graph and cleaning up resources.
-  * Subscribes to SoundFlow audio events and publishes corresponding Cortex.Mediator notifications (e.g., `TrackEndedNotification`, `PlaybackErrorNotification`).
-  * Implements `IAsyncDisposable` to stop all players and dispose SoundFlow resources properly.
-  * **Audio Format Support:** MP3, AAC, FLAC, WAV, OGG Vorbis with automatic format detection.
-  * **Cross-Platform Streaming:** Native HTTP streaming support with configurable timeout and retry policies.
-  * **Real-time Processing:** Low-latency audio pipeline optimized for live streaming to Snapcast.
+  * Implements `StopAsync`, `PauseAsync` by stopping LibVLC playback and cleaning up resources.
+  * Subscribes to LibVLC media events and publishes corresponding Cortex.Mediator notifications.
+  * Implements `IAsyncDisposable` to stop all players and dispose LibVLC resources properly.
+  * **Audio Format Support:** Comprehensive format support via LibVLC (MP3, AAC, FLAC, WAV, OGG, HLS, DASH, and many more).
+  * **Cross-Platform Streaming:** Native HTTP/HTTPS streaming with configurable timeout and robust error handling.
+  * **Metadata Extraction:** Rich metadata extraction including technical details, artwork URLs, and comprehensive track information.
+
+### 11.5.1. Streamlined Audio Configuration Integration
+
+The media playback system uses the unified `AudioConfig` class that eliminates configuration duplication:
+
+```csharp
+// Global audio configuration (single source of truth)
+public class AudioConfig
+{
+    // User-configurable settings
+    public int SampleRate { get; set; } = 48000;
+    public int BitDepth { get; set; } = 16;
+    public int Channels { get; set; } = 2;
+    public string Codec { get; set; } = "flac";
+    public int HttpTimeoutSeconds { get; set; } = 20;
+
+    // Computed properties (not configurable)
+    public string SnapcastSampleFormat => $"{SampleRate}:{BitDepth}:{Channels}";
+    public string[] LibVLCArgs => new[] { "--no-video", "--quiet" };
+    public string OutputFormat => "raw";
+    public string TempDirectory => "/tmp/snapdog_audio";
+}
+```
+
+**Key Benefits:**
+- **Single Source of Truth**: Audio format defined once, used by both Snapcast and LibVLC
+- **Automatic Consistency**: Impossible to configure mismatched audio settings
+- **Smart Automation**: MAX_STREAMS calculated from actual zone configuration
+- **Simplified Management**: Only essential settings are user-configurable

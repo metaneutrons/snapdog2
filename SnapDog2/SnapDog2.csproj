@@ -26,5 +26,6 @@
     <PackageReference Include="GitVersion.MsBuild" PrivateAssets="All" />
     <PackageReference Include="System.CommandLine" />
     <PackageReference Include="SubsonicMedia" />
+    <PackageReference Include="LibVLCSharp" />
   </ItemGroup>
 </Project>

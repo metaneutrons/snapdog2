@@ -127,28 +127,41 @@
 - [9.2.2 Telemetry Configuration](10-configuration-system.md#922-telemetry-configuration)
 - [9.2.3 API Configuration](10-configuration-system.md#923-api-configuration)
 - [9.2.4 Services Configuration](10-configuration-system.md#924-services-configuration)
-- [9.2.4.1 Services Resilience Configuration](10-configuration-system.md#9241-services-resilience-configuration)
-- [9.2.5 Zone Configuration (Nested Lists)](10-configuration-system.md#925-zone-configuration-nested-lists)
-- [9.2.6 Client Configuration (Nested Lists)](10-configuration-system.md#926-client-configuration-nested-lists)
-- [9.2.7 Radio Station Configuration (Nested Lists)](10-configuration-system.md#927-radio-station-configuration-nested-lists)
-- [9.3 Configuration Classes](10-configuration-system.md#93-configuration-classes)
-- [9.3.1 Root Configuration Class](10-configuration-system.md#931-root-configuration-class)
-- [9.3.2 API Configuration](10-configuration-system.md#932-api-configuration)
-- [9.3.3 System Configuration](10-configuration-system.md#933-system-configuration)
-- [9.3.4 Zone Configuration](10-configuration-system.md#934-zone-configuration)
-- [9.3.5 Client Configuration](10-configuration-system.md#935-client-configuration)
-- [9.3.6 SoundFlow Configuration](10-configuration-system.md#936-soundflow-configuration)
-- [9.4 Custom Type Converters](10-configuration-system.md#94-custom-type-converters)
-- [9.4.1 KNX Address Converter](10-configuration-system.md#941-knx-address-converter)
-- [9.5 Configuration Validation](10-configuration-system.md#95-configuration-validation)
-- [9.5.1 Business Logic Validation](10-configuration-system.md#951-business-logic-validation)
-- [9.6 Dependency Injection Setup](10-configuration-system.md#96-dependency-injection-setup)
-- [9.6.1 Configuration Registration](10-configuration-system.md#961-configuration-registration)
-- [9.7 Configuration Benefits](10-configuration-system.md#97-configuration-benefits)
-- [9.7.1 Type Safety & Validation](10-configuration-system.md#971-type-safety-validation)
-- [9.7.2 Developer Experience](10-configuration-system.md#972-developer-experience)
-- [9.7.3 Operational Benefits](10-configuration-system.md#973-operational-benefits)
-- [9.7.4 Maintainability](10-configuration-system.md#974-maintainability)
+- [9.2.4.1 Streamlined Audio Configuration](10-configuration-system.md#9241-streamlined-audio-configuration)
+9. [KNX Connection Policy (for establishing connections)](10-configuration-system.md#9-knx-connection-policy-for-establishing-connections)
+
+9. [KNX Operation Policy (for individual operations)](10-configuration-system.md#9-knx-operation-policy-for-individual-operations)
+
+9. [MQTT Connection Policy](10-configuration-system.md#9-mqtt-connection-policy)
+
+9. [MQTT Operation Policy](10-configuration-system.md#9-mqtt-operation-policy)
+
+9. [Snapcast Connection Policy](10-configuration-system.md#9-snapcast-connection-policy)
+
+9. [Snapcast Operation Policy](10-configuration-system.md#9-snapcast-operation-policy)
+
+9. [Zone 1 Configuration](10-configuration-system.md#9-zone-1-configuration)
+
+9. [Zone 1 MQTT Configuration](10-configuration-system.md#9-zone-1-mqtt-configuration)
+
+9. [Zone 1 KNX Configuration](10-configuration-system.md#9-zone-1-knx-configuration)
+
+9. [Zone 2 Configuration](10-configuration-system.md#9-zone-2-configuration)
+
+9. [Client 1 Configuration](10-configuration-system.md#9-client-1-configuration)
+
+9. [Client 1 MQTT Configuration](10-configuration-system.md#9-client-1-mqtt-configuration)
+
+9. [Client 1 KNX Configuration](10-configuration-system.md#9-client-1-knx-configuration)
+
+9. [Client 2 Configuration](10-configuration-system.md#9-client-2-configuration)
+
+9. [Radio Station 1](10-configuration-system.md#9-radio-station-1)
+
+9. [Radio Station 2](10-configuration-system.md#9-radio-station-2)
+
+9. [Radio Station 3](10-configuration-system.md#9-radio-station-3)
+
 
 10. [API Specification](11-api-specification.md#10-api-specification)
 
@@ -180,6 +193,7 @@
 - [11.3 MQTT Integration (`/Infrastructure/Mqtt/MqttService.cs`)](12-infrastructure-services-implementation.md#113-mqtt-integration-infrastructuremqttmqttservicecs)
 - [11.4 Subsonic Integration (`/Infrastructure/Subsonic/SubsonicService.cs`)](12-infrastructure-services-implementation.md#114-subsonic-integration-infrastructuresubsonicsubsonicservicecs)
 - [11.5 Media Playback (`/Infrastructure/Audio/MediaPlayerService.cs`)](12-infrastructure-services-implementation.md#115-media-playback-infrastructureaudiomediaplayerservicecs)
+- [11.5.1 Streamlined Audio Configuration Integration](12-infrastructure-services-implementation.md#1151-streamlined-audio-configuration-integration)
 
 12. [Metrics and Telemetry (Infrastructure Layer)](13-metrics-and-telemetry-infrastructure-layer.md#12-metrics-and-telemetry-infrastructure-layer)
 
@@ -215,8 +229,10 @@
 - [14.3.2 Zone MQTT Implementation](15-command-framework.md#1432-zone-mqtt-implementation)
 - [14.3.2.1 Zone Command Topics](15-command-framework.md#14321-zone-command-topics)
 - [14.3.2.2 Zone Status Topics (Read-Only)](15-command-framework.md#14322-zone-status-topics-read-only)
-- [14.3.2.3 Payloads for `{zoneBaseTopic}control/set`](15-command-framework.md#14323-payloads-for-zonebasetopiccontrolset)
-- [14.3.2.4 Status Values for `{zoneBaseTopic}control`](15-command-framework.md#14324-status-values-for-zonebasetopiccontrol)
+- [14.3.2.3 System-Level Topics (Discovery & Global Status)](15-command-framework.md#14323-system-level-topics-discovery-global-status)
+- [14.3.2.4 Payloads for `{zoneBaseTopic}control/set`](15-command-framework.md#14324-payloads-for-zonebasetopiccontrolset)
+- [14.3.2.5 Standardized Payload Patterns](15-command-framework.md#14325-standardized-payload-patterns)
+- [14.3.2.6 Status Values for `{zoneBaseTopic}control`](15-command-framework.md#14326-status-values-for-zonebasetopiccontrol)
 - [14.3.3 Zone KNX Implementation](15-command-framework.md#1433-zone-knx-implementation)
 - [14.3.3.1 KNX Zone Command Group Addresses](15-command-framework.md#14331-knx-zone-command-group-addresses)
 - [14.3.3.2 KNX Zone Status Group Addresses](15-command-framework.md#14332-knx-zone-status-group-addresses)

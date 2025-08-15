@@ -38,6 +38,7 @@ classDiagram
         +MqttConfig Mqtt
         +KnxConfig Knx
         +SubsonicConfig Subsonic
+        +AudioConfig Audio
     }
 
     class ZoneConfig {
@@ -55,11 +56,24 @@ classDiagram
         +ClientKnxConfig Knx
     }
 
+    class AudioConfig {
+        +int SampleRate
+        +int BitDepth
+        +int Channels
+        +string Codec
+        +int HttpTimeoutSeconds
+        +string SnapcastSampleFormat
+        +string[] LibVLCArgs
+        +string OutputFormat
+        +string TempDirectory
+    }
+
     SnapDogConfiguration --> SystemConfig
     SnapDogConfiguration --> TelemetryConfig
     SnapDogConfiguration --> ServicesConfig
     SnapDogConfiguration --> ZoneConfig
     SnapDogConfiguration --> ClientConfig
+    ServicesConfig --> AudioConfig
 ```
 
 ### 9.1.2. EnvoyConfig Features Utilized
@@ -146,10 +160,12 @@ SNAPDOG_SERVICES_SNAPCAST_RECONNECT_INTERVAL=5        # Default: 5 (reconnect in
 SNAPDOG_SERVICES_SNAPCAST_AUTO_RECONNECT=true         # Default: true
 
 # Snapcast server configuration (for container setup)
-SNAPDOG_SNAPCAST_CODEC=flac                           # Default: flac (audio codec)
-SNAPDOG_SNAPCAST_SAMPLEFORMAT=48000:16:2              # Default: 48000:16:2 (sample rate:bit depth:channels)
 SNAPDOG_SNAPCAST_WEBSERVER_PORT=1780                  # Default: 1780 (SnapWeb HTTP port)
-SNAPDOG_SNAPCAST_WEBSOCKET_PORT=1705                  # Default: 1705 (JSON-RPC WebSocket port)
+SNAPDOG_SNAPCAST_WEBSOCKET_PORT=1704                  # Default: 1704 (WebSocket port)
+SNAPDOG_SNAPCAST_JSONRPC_PORT=1705                    # Default: 1705 (JSON-RPC port)
+
+# Note: Audio format (codec, sample format) is now controlled by the unified
+# SNAPDOG_AUDIO_* configuration and automatically applied to Snapcast server setup
 
 # MQTT integration
 SNAPDOG_SERVICES_MQTT_ENABLED=true                    # Default: true
@@ -177,17 +193,56 @@ SNAPDOG_SERVICES_SUBSONIC_URL=http://subsonic:4533.   # Required if enabled
 SNAPDOG_SERVICES_SUBSONIC_USERNAME=admin              # Required if enabled
 SNAPDOG_SERVICES_SUBSONIC_PASSWORD=password           # Required if enabled
 SNAPDOG_SERVICES_SUBSONIC_TIMEOUT=10000               # Default: 10000ms
+```
 
-# SoundFlow audio engine integration
-SNAPDOG_SOUNDFLOW_SAMPLE_RATE=48000                   # Default: 48000 (target sample rate)
-SNAPDOG_SOUNDFLOW_BIT_DEPTH=16                        # Default: 16 (target bit depth)
-SNAPDOG_SOUNDFLOW_CHANNELS=2                          # Default: 2 (target channels)
-SNAPDOG_SOUNDFLOW_BUFFER_SIZE=1024                    # Default: 1024 (buffer size in samples)
-SNAPDOG_SOUNDFLOW_MAX_STREAMS=10                      # Default: 10 (max concurrent streams)
-SNAPDOG_SOUNDFLOW_HTTP_TIMEOUT_SECONDS=30             # Default: 30 (HTTP timeout)
-SNAPDOG_SOUNDFLOW_AUTO_DETECT_FORMAT=true             # Default: true (auto-detect audio format)
-SNAPDOG_SOUNDFLOW_THREAD_PRIORITY=Normal              # Default: Normal (Lowest|BelowNormal|Normal|AboveNormal|Highest)
-SNAPDOG_SOUNDFLOW_REALTIME_PROCESSING=true            # Default: true (enable real-time processing)
+#### 9.2.4.1. Streamlined Audio Configuration
+
+SnapDog2 uses a **unified audio configuration system** that provides a single source of truth for audio settings across both Snapcast server and LibVLC audio processing components. This eliminates configuration duplication and ensures consistency throughout the system.
+
+```bash
+# ═══════════════════════════════════════════════════════════════════════════════
+# GLOBAL AUDIO CONFIGURATION (Single Source of Truth)
+# ═══════════════════════════════════════════════════════════════════════════════
+# These settings control audio format for both Snapcast server and LibVLC
+SNAPDOG_AUDIO_SAMPLE_RATE=48000                       # Default: 48000 (audio sampling frequency)
+SNAPDOG_AUDIO_BIT_DEPTH=16                            # Default: 16 (audio bit depth)
+SNAPDOG_AUDIO_CHANNELS=2                              # Default: 2 (audio channels: 1=mono, 2=stereo)
+SNAPDOG_AUDIO_CODEC=flac                              # Default: flac (Snapcast compression codec)
+
+# Network timeout for HTTP streaming
+SNAPDOG_AUDIO_HTTP_TIMEOUT_SECONDS=20                 # Default: 20 (HTTP connection timeout)
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# AUTOMATICALLY CALCULATED VALUES (Not User Configurable)
+# ═══════════════════════════════════════════════════════════════════════════════
+# MAX_STREAMS: Automatically calculated from number of configured zones (count of SNAPDOG_ZONE_*_NAME)
+# Snapcast Sample Format: Automatically computed as "${SAMPLE_RATE}:${BIT_DEPTH}:${CHANNELS}"
+# LibVLC Arguments: Hardcoded as "--no-video,--quiet" for consistency
+# Output Format: Hardcoded as "raw" for Snapcast compatibility
+# Temp Directory: Hardcoded as "/tmp/snapdog_audio"
+# Processing Settings: Hardcoded for optimal real-time audio streaming
+```
+
+**Key Benefits of Streamlined Audio Configuration:**
+
+- **Single Source of Truth**: Audio format defined once, used by both Snapcast and LibVLC
+- **Automatic Consistency**: Impossible to configure mismatched audio settings
+- **Smart Automation**: MAX_STREAMS calculated automatically from actual zone configuration
+- **Simplified Management**: Only essential settings are user-configurable
+- **Future-Proof**: Easy to extend for new audio components using same configuration
+
+**Migration from Previous System:**
+
+The streamlined configuration replaces the previous separate SoundFlow and Snapcast audio configurations:
+
+```bash
+# OLD: Separate configurations (REMOVED)
+# SNAPDOG_SOUNDFLOW_* variables
+# SNAPDOG_SNAPCAST_CODEC and SNAPDOG_SNAPCAST_SAMPLEFORMAT
+
+# NEW: Unified configuration (CURRENT)
+# SNAPDOG_AUDIO_* variables with automatic derivation
+```
 ```
 
 #### 9.2.4.1. Services Resilience Configuration
@@ -197,7 +252,7 @@ SnapDog2 provides comprehensive resilience configuration for all external servic
 **KNX Service Resilience:**
 
 ```bash
-# KNX Connection Policy (for establishing connections)
+# 9. KNX Connection Policy (for establishing connections)
 SNAPDOG_SERVICES_KNX_RESILIENCE_CONNECTION_MAX_RETRIES=3           # Default: 3 (0-10)
 SNAPDOG_SERVICES_KNX_RESILIENCE_CONNECTION_RETRY_DELAY_MS=2000     # Default: 2000 (100-60000)
 SNAPDOG_SERVICES_KNX_RESILIENCE_CONNECTION_BACKOFF_TYPE=Exponential # Default: Exponential (Linear|Exponential|Constant)
@@ -205,7 +260,7 @@ SNAPDOG_SERVICES_KNX_RESILIENCE_CONNECTION_USE_JITTER=true         # Default: tr
 SNAPDOG_SERVICES_KNX_RESILIENCE_CONNECTION_JITTER_PERCENTAGE=25    # Default: 25 (0-100)
 SNAPDOG_SERVICES_KNX_RESILIENCE_CONNECTION_TIMEOUT_SECONDS=10      # Default: 10 (1-300)
 
-# KNX Operation Policy (for individual operations)
+# 9. KNX Operation Policy (for individual operations)
 SNAPDOG_SERVICES_KNX_RESILIENCE_OPERATION_MAX_RETRIES=2           # Default: 2 (0-10)
 SNAPDOG_SERVICES_KNX_RESILIENCE_OPERATION_RETRY_DELAY_MS=500      # Default: 500 (100-60000)
 SNAPDOG_SERVICES_KNX_RESILIENCE_OPERATION_BACKOFF_TYPE=Linear     # Default: Linear (Linear|Exponential|Constant)
@@ -217,7 +272,7 @@ SNAPDOG_SERVICES_KNX_RESILIENCE_OPERATION_TIMEOUT_SECONDS=5       # Default: 5 (
 **MQTT Service Resilience:**
 
 ```bash
-# MQTT Connection Policy
+# 9. MQTT Connection Policy
 SNAPDOG_SERVICES_MQTT_RESILIENCE_CONNECTION_MAX_RETRIES=3          # Default: 3 (0-10)
 SNAPDOG_SERVICES_MQTT_RESILIENCE_CONNECTION_RETRY_DELAY_MS=2000    # Default: 2000 (100-60000)
 SNAPDOG_SERVICES_MQTT_RESILIENCE_CONNECTION_BACKOFF_TYPE=Exponential # Default: Exponential (Linear|Exponential|Constant)
@@ -225,7 +280,7 @@ SNAPDOG_SERVICES_MQTT_RESILIENCE_CONNECTION_USE_JITTER=true        # Default: tr
 SNAPDOG_SERVICES_MQTT_RESILIENCE_CONNECTION_JITTER_PERCENTAGE=25   # Default: 25 (0-100)
 SNAPDOG_SERVICES_MQTT_RESILIENCE_CONNECTION_TIMEOUT_SECONDS=30     # Default: 30 (1-300)
 
-# MQTT Operation Policy
+# 9. MQTT Operation Policy
 SNAPDOG_SERVICES_MQTT_RESILIENCE_OPERATION_MAX_RETRIES=2          # Default: 2 (0-10)
 SNAPDOG_SERVICES_MQTT_RESILIENCE_OPERATION_RETRY_DELAY_MS=500     # Default: 500 (100-60000)
 SNAPDOG_SERVICES_MQTT_RESILIENCE_OPERATION_BACKOFF_TYPE=Linear    # Default: Linear (Linear|Exponential|Constant)
@@ -237,7 +292,7 @@ SNAPDOG_SERVICES_MQTT_RESILIENCE_OPERATION_TIMEOUT_SECONDS=10     # Default: 10 
 **Snapcast Service Resilience:**
 
 ```bash
-# Snapcast Connection Policy
+# 9. Snapcast Connection Policy
 SNAPDOG_SERVICES_SNAPCAST_RESILIENCE_CONNECTION_MAX_RETRIES=3         # Default: 3 (0-10)
 SNAPDOG_SERVICES_SNAPCAST_RESILIENCE_CONNECTION_RETRY_DELAY_MS=2000   # Default: 2000 (100-60000)
 SNAPDOG_SERVICES_SNAPCAST_RESILIENCE_CONNECTION_BACKOFF_TYPE=Exponential # Default: Exponential (Linear|Exponential|Constant)
@@ -245,7 +300,7 @@ SNAPDOG_SERVICES_SNAPCAST_RESILIENCE_CONNECTION_USE_JITTER=true       # Default:
 SNAPDOG_SERVICES_SNAPCAST_RESILIENCE_CONNECTION_JITTER_PERCENTAGE=25  # Default: 25 (0-100)
 SNAPDOG_SERVICES_SNAPCAST_RESILIENCE_CONNECTION_TIMEOUT_SECONDS=30    # Default: 30 (1-300)
 
-# Snapcast Operation Policy
+# 9. Snapcast Operation Policy
 SNAPDOG_SERVICES_SNAPCAST_RESILIENCE_OPERATION_MAX_RETRIES=2         # Default: 2 (0-10)
 SNAPDOG_SERVICES_SNAPCAST_RESILIENCE_OPERATION_RETRY_DELAY_MS=500    # Default: 500 (100-60000)
 SNAPDOG_SERVICES_SNAPCAST_RESILIENCE_OPERATION_BACKOFF_TYPE=Linear   # Default: Linear (Linear|Exponential|Constant)
@@ -266,11 +321,11 @@ For detailed resilience configuration documentation, see [6. Resilience Configur
 ### 9.2.5. Zone Configuration (Nested Lists)
 
 ```bash
-# Zone 1 Configuration
+# 9. Zone 1 Configuration
 SNAPDOG_ZONE_1_NAME=Living Room                       # Required
 SNAPDOG_ZONE_1_SINK=/snapsinks/living-room            # Required
 
-# Zone 1 MQTT Configuration
+# 9. Zone 1 MQTT Configuration
 SNAPDOG_ZONE_1_MQTT_BASE_TOPIC=snapdog/zones/living-room
 SNAPDOG_ZONE_1_MQTT_CONTROL_SET_TOPIC=control/set         # Default: control/set
 SNAPDOG_ZONE_1_MQTT_TRACK_SET_TOPIC=track/set             # Default: track/set
@@ -292,7 +347,7 @@ SNAPDOG_ZONE_1_MQTT_VOLUME_TOPIC=volume                   # Default: volume
 SNAPDOG_ZONE_1_MQTT_MUTE_TOPIC=mute                       # Default: mute
 SNAPDOG_ZONE_1_MQTT_STATE_TOPIC=state                     # Default: state
 
-# Zone 1 KNX Configuration
+# 9. Zone 1 KNX Configuration
 SNAPDOG_ZONE_1_KNX_ENABLED=true                       # Default: false
 SNAPDOG_ZONE_1_KNX_PLAY=1/1/1                         # Optional KNX addresses
 SNAPDOG_ZONE_1_KNX_PAUSE=1/1/2
@@ -323,7 +378,7 @@ SNAPDOG_ZONE_1_KNX_MUTE=1/2/5
 SNAPDOG_ZONE_1_KNX_MUTE_TOGGLE=1/2/7
 SNAPDOG_ZONE_1_KNX_MUTE_STATUS=1/2/6
 
-# Zone 2 Configuration
+# 9. Zone 2 Configuration
 SNAPDOG_ZONE_2_NAME=Kitchen
 SNAPDOG_ZONE_2_SINK=/snapsinks/kitchen
 SNAPDOG_ZONE_2_MQTT_BASE_TOPIC=snapdog/zones/kitchen
@@ -333,12 +388,12 @@ SNAPDOG_ZONE_2_KNX_ENABLED=false
 ### 9.2.6. Client Configuration (Nested Lists)
 
 ```bash
-# Client 1 Configuration
+# 9. Client 1 Configuration
 SNAPDOG_CLIENT_1_NAME=Living Room Speaker             # Required
 SNAPDOG_CLIENT_1_MAC=AA:BB:CC:DD:EE:FF                # Optional
 SNAPDOG_CLIENT_1_DEFAULT_ZONE=1                       # Default: 1
 
-# Client 1 MQTT Configuration
+# 9. Client 1 MQTT Configuration
 SNAPDOG_CLIENT_1_MQTT_BASE_TOPIC=snapdog/clients/living-room
 SNAPDOG_CLIENT_1_MQTT_VOLUME_SET_TOPIC=volume/set     # Default: volume/set
 SNAPDOG_CLIENT_1_MQTT_MUTE_SET_TOPIC=mute/set         # Default: mute/set
@@ -351,7 +406,7 @@ SNAPDOG_CLIENT_1_MQTT_LATENCY_TOPIC=latency           # Default: latency
 SNAPDOG_CLIENT_1_MQTT_ZONE_TOPIC=zone                 # Default: zone
 SNAPDOG_CLIENT_1_MQTT_STATE_TOPIC=state               # Default: state
 
-# Client 1 KNX Configuration
+# 9. Client 1 KNX Configuration
 SNAPDOG_CLIENT_1_KNX_ENABLED=true                     # Default: false
 SNAPDOG_CLIENT_1_KNX_VOLUME=2/1/1                     # Optional KNX addresses
 SNAPDOG_CLIENT_1_KNX_VOLUME_STATUS=2/1/2
@@ -364,7 +419,7 @@ SNAPDOG_CLIENT_1_KNX_LATENCY=2/1/8
 SNAPDOG_CLIENT_1_KNX_ZONE=2/1/9
 SNAPDOG_CLIENT_1_KNX_CONNECTED_STATUS=2/1/10
 
-# Client 2 Configuration
+# 9. Client 2 Configuration
 SNAPDOG_CLIENT_2_NAME=Kitchen Speaker
 SNAPDOG_CLIENT_2_DEFAULT_ZONE=2
 SNAPDOG_CLIENT_2_MQTT_BASE_TOPIC=snapdog/clients/kitchen
@@ -374,15 +429,15 @@ SNAPDOG_CLIENT_2_KNX_ENABLED=false
 ### 9.2.7. Radio Station Configuration (Nested Lists)
 
 ```bash
-# Radio Station 1
+# 9. Radio Station 1
 SNAPDOG_RADIO_1_NAME=BBC Radio 1
 SNAPDOG_RADIO_1_URL=http://stream.live.vc.bbcmedia.co.uk/bbc_radio_one
 
-# Radio Station 2
+# 9. Radio Station 2
 SNAPDOG_RADIO_2_NAME=Jazz FM
 SNAPDOG_RADIO_2_URL=http://jazz-wr04.ice.infomaniak.ch/jazz-wr04.mp3
 
-# Radio Station 3
+# 9. Radio Station 3
 SNAPDOG_RADIO_3_NAME=Classical Radio
 SNAPDOG_RADIO_3_URL=https://stream.srg-ssr.ch/rsc_de/aacp_96.m3u
 ```

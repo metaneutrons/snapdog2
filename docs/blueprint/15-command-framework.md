@@ -80,6 +80,11 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 | `TRACK`               | Set specific track         | `ZoneIndex` (int), `TrackIndex` (int, 1-based)    | Command (Set)    | Action: Play track `N`                |
 | `TRACK_INDEX`         | Current track index        | `ZoneIndex` (int), `TrackIndex` (int, 1-based)    | Status (Publish) | State: Current index is `N`, 0 for KNX if > 255 |
 | `TRACK_INFO`          | Detailed track info        | `ZoneIndex` (int), `TrackInfo` (object/record)    | Status (Publish) | State: Details of track `N`         |
+| `TRACK_INFO_LENGTH`   | Track length.              | `ZoneIndex` (int), `TrackLength` in ms (long)  | Status (Publish) | State: Length of track `N`         |
+| `TRACK_INFO_POSITION` | Track position.            | `ZoneIndex` (int), `TrackPosition` in ms (long) | Status (Publish) | State: Position of track `N`       |
+| `TRACK_INFO_TITLE`  | Track title.             | `ZoneIndex` (int), `TrackTitle` (string)        | Status (Publish) | State: Title of track `N`          |
+| `TRACK_INFO_ARTIST`  | Track artist.           | `ZoneIndex` (int), `TrackArtist` (string)      | Status (Publish) | State: Artist of track `N`        |
+| `TRACK_INFO_ALBUM`   | Track album.            | `ZoneIndex` (int), `TrackAlbum` (string)       | Status (Publish) | State: Album of track `N`         |
 | `TRACK_NEXT`          | Play next track            | `ZoneIndex` (int)                                 | Command (Set)    | Action: Go to next track            |
 | `TRACK_PREVIOUS`      | Play previous track        | `ZoneIndex` (int)                                 | Command (Set)    | Action: Go to previous track        |
 | `TRACK_REPEAT`        | Set track repeat mode      | `ZoneIndex` (int), `Enabled` (bool)               | Command (Set)    | Action: Turn repeat on/off            |
@@ -188,6 +193,11 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 | :--------------------- | :--------------------- | :----------------- | :------------------------------- | :------- | :----------------------- |
 | `TRACK_INDEX`          | `_TRACK_TOPIC`         | `track`            | `1`, `3`                         | Yes      | **1-based** index      |
 | `TRACK_INFO`           | `_TRACK_INFO_TOPIC`    | `track/info`       | Full JSON `TrackInfo` object     | Yes      | Structure from Core Models |
+| `TRACK_INFO_LENGTH`    | `_TRACK_INFO_LENGTH`   | `track/length`     | `300000` (in ms)                  | Yes      | Length of track `N`     |
+| `TRACK_INFO_POSITION`  | `_TRACK_INFO_POSITION` | `track/position`   | `10000` (in ms)                  | Yes      | Position of track `N`   |
+| `TRACK_INFO_TITLE`     | `_TRACK_INFO_TITLE`    | `track/title`      | `"Song Title"`                   | Yes      | Title of track `N`      |
+| `TRACK_INFO_ARTIST`    | `_TRACK_INFO_ARTIST`   | `track/artist`    | `"Artist Name"`                  | Yes      | Artist of track `N`     |
+| `TRACK_INFO_ALBUM`     | `_TRACK_INFO_ALBUM`    | `track/album`     | `"Album Name"`                   | Yes      | Album of track `N`      |
 | `TRACK_REPEAT_STATUS`  | `_TRACK_REPEAT_TOPIC`  | `repeat/track`     | `true` / `false` (`1`/`0`)       | Yes      | Improved hierarchy       |
 
 **Playlist Management**
@@ -270,11 +280,13 @@ This topic accepts various string payloads to control multiple aspects:
 All boolean topics accept consistent payload formats for maximum compatibility:
 
 **Boolean Values**
-- **True**: `"true"`, `"1"`, `"on"`, `"yes"`
-- **False**: `"false"`, `"0"`, `"off"`, `"no"`
-- **Toggle**: `"toggle"`
+
+* **True**: `"true"`, `"1"`, `"on"`, `"yes"`
+* **False**: `"false"`, `"0"`, `"off"`, `"no"`
+* **Toggle**: `"toggle"`
 
 **Examples:**
+
 ```
 snapdog/zone/1/repeat/track     → "true" | "false" | "1" | "0" | "on" | "off" | "toggle"
 snapdog/zone/1/shuffle/set      → "true" | "false" | "1" | "0" | "on" | "off" | "toggle"
@@ -282,9 +294,10 @@ snapdog/zone/1/mute/set         → "true" | "false" | "1" | "0" | "on" | "off" 
 ```
 
 **Numeric Values**
-- **Volume**: `0`-`100` (integer)
-- **Track/Playlist Index**: `1`-based integers
-- **Volume Steps**: `+5`, `-3`, `+`, `-` (default step: 5)
+
+* **Volume**: `0`-`100` (integer)
+* **Track/Playlist Index**: `1`-based integers
+* **Volume Steps**: `+5`, `-3`, `+`, `-` (default step: 5)
 
 #### 14.3.2.6. Status Values for `{zoneBaseTopic}control`
 

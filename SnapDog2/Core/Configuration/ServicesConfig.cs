@@ -36,9 +36,9 @@ public class ServicesConfig
     public SubsonicConfig Subsonic { get; set; } = new();
 
     /// <summary>
-    /// SoundFlow audio engine configuration.
-    /// Maps environment variables with prefix: SNAPDOG_SOUNDFLOW_*
+    /// Global audio configuration for Snapcast and LibVLC.
+    /// Maps environment variables with prefix: SNAPDOG_AUDIO_*
     /// </summary>
-    [Env(NestedPrefix = "SOUNDFLOW_")]
-    public SoundFlowConfig SoundFlow { get; set; } = new();
+    [Env(NestedPrefix = "AUDIO_")]
+    public AudioConfig Audio { get; set; } = new();
 }
