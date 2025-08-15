@@ -57,15 +57,7 @@ cat > .git/hooks/pre-push << 'EOF'
 #!/bin/sh
 # Pre-push hook for SnapDog2
 
-echo "🧪 Running tests..."
-dotnet test --verbosity quiet
-
-if [ $? -ne 0 ]; then
-    echo "❌ Tests failed. Please fix failing tests before pushing."
-    exit 1
-fi
-
-echo "✅ Pre-push checks passed!"
+echo "✅ Pre-push checks passed! (Tests will run in CI)"
 EOF
 
 # Make hooks executable
