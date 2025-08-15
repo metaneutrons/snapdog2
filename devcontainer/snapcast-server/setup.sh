@@ -93,10 +93,12 @@ discover_zones() {
         if [[ $var =~ $zone_pattern ]]; then
             zones+=("${BASH_REMATCH[1]}")
         fi
-    done < <(printenv | grep -E "$zone_pattern" | cut -d= -f1)
+    done < <(env | grep -E "$zone_pattern" | cut -d= -f1)
     
-    # Sort zones numerically
-    printf '%s\n' "${zones[@]}" | sort -n
+    # Sort zones numerically and return
+    if [[ ${#zones[@]} -gt 0 ]]; then
+        printf '%s\n' "${zones[@]}" | sort -n
+    fi
 }
 
 configure_zone() {
@@ -107,10 +109,16 @@ configure_zone() {
     IFS=':' read -r sample_rate bit_depth channels codec <<< "$audio_config"
     local sample_format="${sample_rate}:${bit_depth}:${channels}"
     
-    # Get zone-specific configuration
+    # Get zone-specific configuration with proper error handling
     local zone_name sink_path
-    zone_name=$(printenv "SNAPDOG_ZONE_${zone_id}_NAME")
-    sink_path=$(printenv "SNAPDOG_ZONE_${zone_id}_SINK" 2>/dev/null || echo "/snapsinks/zone${zone_id}")
+    zone_name=$(env | grep "^SNAPDOG_ZONE_${zone_id}_NAME=" | cut -d= -f2- || echo "")
+    sink_path=$(env | grep "^SNAPDOG_ZONE_${zone_id}_SINK=" | cut -d= -f2- || echo "/snapsinks/zone${zone_id}")
+    
+    # Validate zone name
+    if [[ -z "$zone_name" ]]; then
+        log_zone "$zone_id" "ERROR: Zone name not found"
+        return 1
+    fi
     
     log_zone "$zone_id" "$zone_name"
     log_config "Sink" "$sink_path"
@@ -188,6 +196,12 @@ generate_snapserver_config() {
 main() {
     log_section "$SCRIPT_NAME"
     
+    # Debug: Show available SNAPDOG environment variables
+    log "Available SNAPDOG environment variables:"
+    env | grep "^SNAPDOG_" | head -10 | while read -r var; do
+        log "  $var"
+    done
+    
     # Get global audio configuration
     local audio_config
     audio_config=$(get_audio_config)
@@ -207,8 +221,11 @@ main() {
         
         for zone_id in "${zones[@]}"; do
             local zone_source
-            zone_source=$(configure_zone "$zone_id" "$audio_config")
-            sources+="$zone_source"$'\n'
+            if zone_source=$(configure_zone "$zone_id" "$audio_config"); then
+                sources+="$zone_source"$'\n'
+            else
+                log "❌ Failed to configure zone $zone_id"
+            fi
         done
     fi
     
