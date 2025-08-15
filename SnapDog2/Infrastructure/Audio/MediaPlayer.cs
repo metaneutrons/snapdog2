@@ -233,41 +233,116 @@ public sealed partial class MediaPlayer : IAsyncDisposable
     /// </summary>
     private async Task CleanupResourcesAsync()
     {
+        // Cancel any ongoing streaming first
+        if (this._streamingCts != null)
+        {
+            try
+            {
+                this._streamingCts.Cancel();
+            }
+            catch (ObjectDisposedException)
+            {
+                // Already disposed, ignore
+            }
+        }
+
+        // Dispose resources in reverse order of creation to avoid dependencies
         if (this._outputSink != null)
         {
-            await this._outputSink.FlushAsync();
-            await this._outputSink.DisposeAsync();
-            this._outputSink = null;
+            try
+            {
+                await this._outputSink.FlushAsync();
+                await this._outputSink.DisposeAsync();
+            }
+            catch (Exception ex)
+            {
+                // Log but don't throw during cleanup
+                LogCleanupError(this._logger, this._zoneIndex, "OutputSink", ex);
+            }
+            finally
+            {
+                this._outputSink = null;
+            }
         }
 
         if (this._resampler != null)
         {
-            await this._resampler.DisposeAsync();
-            this._resampler = null;
+            try
+            {
+                await this._resampler.DisposeAsync();
+            }
+            catch (Exception ex)
+            {
+                LogCleanupError(this._logger, this._zoneIndex, "Resampler", ex);
+            }
+            finally
+            {
+                this._resampler = null;
+            }
         }
 
         if (this._streamSource != null)
         {
-            await this._streamSource.DisposeAsync();
-            this._streamSource = null;
+            try
+            {
+                await this._streamSource.DisposeAsync();
+            }
+            catch (Exception ex)
+            {
+                LogCleanupError(this._logger, this._zoneIndex, "StreamSource", ex);
+            }
+            finally
+            {
+                this._streamSource = null;
+            }
         }
 
         if (this._audioGraph != null)
         {
-            await this._audioGraph.DisposeAsync();
-            this._audioGraph = null;
+            try
+            {
+                await this._audioGraph.DisposeAsync();
+            }
+            catch (Exception ex)
+            {
+                LogCleanupError(this._logger, this._zoneIndex, "AudioGraph", ex);
+            }
+            finally
+            {
+                this._audioGraph = null;
+            }
         }
 
         if (this._device != null)
         {
-            await this._device.DisposeAsync();
-            this._device = null;
+            try
+            {
+                await this._device.DisposeAsync();
+            }
+            catch (Exception ex)
+            {
+                LogCleanupError(this._logger, this._zoneIndex, "Device", ex);
+            }
+            finally
+            {
+                this._device = null;
+            }
         }
 
         if (this._streamingCts != null)
         {
-            this._streamingCts.Dispose();
-            this._streamingCts = null;
+            try
+            {
+                this._streamingCts.Dispose();
+            }
+            catch (ObjectDisposedException)
+            {
+                // Already disposed, ignore
+            }
+            finally
+            {
+                this._streamingCts = null;
+            }
         }
     }
 
@@ -291,8 +366,19 @@ public sealed partial class MediaPlayer : IAsyncDisposable
     {
         if (!this._disposed)
         {
-            await this.StopStreamingAsync();
-            this._disposed = true;
+            try
+            {
+                await this.StopStreamingAsync();
+            }
+            catch (Exception ex)
+            {
+                // Log but don't throw during disposal
+                LogCleanupError(this._logger, this._zoneIndex, "StopStreaming", ex);
+            }
+            finally
+            {
+                this._disposed = true;
+            }
         }
     }
 
@@ -330,6 +416,18 @@ public sealed partial class MediaPlayer : IAsyncDisposable
         int zoneIndex,
         string audioUrl,
         string audioFormat
+    );
+
+    [LoggerMessage(
+        EventId = 905,
+        Level = LogLevel.Warning,
+        Message = "[SoundFlow] Error cleaning up {ComponentName} for zone {ZoneIndex}"
+    )]
+    private static partial void LogCleanupError(
+        ILogger logger,
+        int zoneIndex,
+        string componentName,
+        Exception exception
     );
 }
 
@@ -380,22 +478,32 @@ internal enum ResampleQuality
     High,
 }
 
-// Placeholder implementations
+// Placeholder implementations - optimized for test scenarios
 internal class VirtualSoundDevice : ISoundDevice
 {
+    private volatile bool _disposed;
+
     public VirtualSoundDevice(AudioFormat format, int bufferSize)
     {
-        // Placeholder constructor
+        // Placeholder constructor - store parameters for potential debugging
     }
 
     public async ValueTask DisposeAsync()
     {
-        await Task.CompletedTask;
+        if (_disposed)
+            return;
+        _disposed = true;
+
+        // Use Task.Yield to ensure we don't block synchronously
+        await Task.Yield();
     }
 }
 
 internal class AudioGraph : IAudioGraph
 {
+    private volatile bool _disposed;
+    private volatile bool _started;
+
     public AudioGraph(ISoundDevice device)
     {
         // Placeholder constructor
@@ -404,33 +512,65 @@ internal class AudioGraph : IAudioGraph
     public bool RealtimeProcessing { get; set; }
     public ThreadPriority ThreadPriority { get; set; }
 
-    public void AddSource(IHttpStreamSource source) { }
+    public void AddSource(IHttpStreamSource source)
+    {
+        if (_disposed)
+            return;
+        // Placeholder - no-op
+    }
 
-    public void AddProcessor(IResampleProcessor processor) { }
+    public void AddProcessor(IResampleProcessor processor)
+    {
+        if (_disposed)
+            return;
+        // Placeholder - no-op
+    }
 
-    public void AddSink(IFileOutputSink sink) { }
+    public void AddSink(IFileOutputSink sink)
+    {
+        if (_disposed)
+            return;
+        // Placeholder - no-op
+    }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        await Task.CompletedTask;
+        if (_disposed)
+            return;
+        _started = true;
+        await Task.Yield();
     }
 
     public async Task StopAsync()
     {
-        await Task.CompletedTask;
+        if (_disposed)
+            return;
+        _started = false;
+        await Task.Yield();
     }
 
     public async ValueTask DisposeAsync()
     {
-        await Task.CompletedTask;
+        if (_disposed)
+            return;
+        _disposed = true;
+
+        if (_started)
+        {
+            await StopAsync();
+        }
+
+        await Task.Yield();
     }
 }
 
 internal class HttpStreamSource : IHttpStreamSource
 {
+    private volatile bool _disposed;
+
     public HttpStreamSource(HttpClient httpClient)
     {
-        // Placeholder constructor
+        // Placeholder constructor - don't store HttpClient to avoid disposal issues
     }
 
     public string Url { get; set; } = string.Empty;
@@ -439,12 +579,17 @@ internal class HttpStreamSource : IHttpStreamSource
 
     public async ValueTask DisposeAsync()
     {
-        await Task.CompletedTask;
+        if (_disposed)
+            return;
+        _disposed = true;
+        await Task.Yield();
     }
 }
 
 internal class ResampleProcessor : IResampleProcessor
 {
+    private volatile bool _disposed;
+
     public ResampleProcessor(AudioFormat targetFormat)
     {
         this.TargetFormat = targetFormat;
@@ -456,15 +601,20 @@ internal class ResampleProcessor : IResampleProcessor
 
     public async ValueTask DisposeAsync()
     {
-        await Task.CompletedTask;
+        if (_disposed)
+            return;
+        _disposed = true;
+        await Task.Yield();
     }
 }
 
 internal class FileOutputSink : IFileOutputSink
 {
+    private volatile bool _disposed;
+
     public FileOutputSink(string filePath)
     {
-        // Placeholder constructor
+        // Placeholder constructor - don't create actual files in tests
     }
 
     public AudioFormat Format { get; set; } = new(48000, 16, 2);
@@ -473,11 +623,20 @@ internal class FileOutputSink : IFileOutputSink
 
     public async Task FlushAsync()
     {
-        await Task.CompletedTask;
+        if (_disposed)
+            return;
+        // Placeholder flush - just yield to simulate async work
+        await Task.Yield();
     }
 
     public async ValueTask DisposeAsync()
     {
-        await Task.CompletedTask;
+        if (_disposed)
+            return;
+        _disposed = true;
+
+        // Ensure flush is called before disposal
+        await FlushAsync();
+        await Task.Yield();
     }
 }

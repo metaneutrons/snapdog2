@@ -330,14 +330,39 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
     {
         if (!this._disposed)
         {
-            // Stop all players
-            var disposeTasks = this._players.Values.Select(p => p.DisposeAsync().AsTask());
-            await Task.WhenAll(disposeTasks);
+            this._disposed = true; // Set early to prevent re-entry
 
-            this._players.Clear();
-            this._disposed = true;
+            try
+            {
+                // Stop all players with timeout to prevent hanging
+                var players = this._players.Values.ToList();
+                this._players.Clear();
 
-            LogServiceDisposed(this._logger);
+                if (players.Count > 0)
+                {
+                    var disposeTasks = players.Select(async p =>
+                    {
+                        try
+                        {
+                            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                            await p.DisposeAsync().AsTask().WaitAsync(cts.Token);
+                        }
+                        catch (Exception ex)
+                        {
+                            // Log but don't throw during disposal
+                            this._logger.LogWarning(ex, "Error disposing MediaPlayer during service cleanup");
+                        }
+                    });
+
+                    await Task.WhenAll(disposeTasks);
+                }
+
+                LogServiceDisposed(this._logger);
+            }
+            catch (Exception ex)
+            {
+                this._logger.LogError(ex, "Error during MediaPlayerService disposal");
+            }
         }
     }
 
@@ -350,7 +375,56 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
         // 3. Or refactor to use IHostedService lifecycle management instead of BackgroundService
         // Current approach blocks on async disposal which could cause deadlocks in some scenarios.
         // See: https://github.com/dotnet/runtime/issues/61132
-        DisposeAsync().AsTask().GetAwaiter().GetResult();
+
+        if (!this._disposed)
+        {
+            this._disposed = true; // Set early to prevent re-entry
+
+            try
+            {
+                // Fire-and-forget disposal to prevent blocking during test cleanup
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        var players = this._players.Values.ToList();
+                        this._players.Clear();
+
+                        if (players.Count > 0)
+                        {
+                            var disposeTasks = players.Select(async p =>
+                            {
+                                try
+                                {
+                                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+                                    await p.DisposeAsync().AsTask().WaitAsync(cts.Token);
+                                }
+                                catch (Exception ex)
+                                {
+                                    // Log but don't throw during disposal
+                                    this._logger.LogWarning(
+                                        ex,
+                                        "Error disposing MediaPlayer during background cleanup"
+                                    );
+                                }
+                            });
+
+                            await Task.WhenAll(disposeTasks);
+                        }
+
+                        LogServiceDisposed(this._logger);
+                    }
+                    catch (Exception ex)
+                    {
+                        this._logger.LogError(ex, "Error during background MediaPlayerService disposal");
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                this._logger.LogError(ex, "Error starting background disposal task");
+            }
+        }
     }
 
     // Logger messages
