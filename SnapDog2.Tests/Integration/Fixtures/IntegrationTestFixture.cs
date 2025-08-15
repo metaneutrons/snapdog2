@@ -6,6 +6,7 @@ using DotNet.Testcontainers.Configurations;
 using DotNet.Testcontainers.Containers;
 using DotNet.Testcontainers.Images;
 using DotNet.Testcontainers.Networks;
+using EnvoyConfig;
 using FluentAssertions;
 using global::Knx.Falcon;
 using global::Knx.Falcon.Configuration;
@@ -15,6 +16,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using MQTTnet;
 using MQTTnet.Protocol;
 using SnapDog2.Core.Abstractions;
@@ -396,6 +398,26 @@ public class IntegrationTestFixture : IAsyncLifetime
             // Set the environment to Testing to trigger the correct path in Program.cs
             builder.UseEnvironment("Testing");
 
+            // Configure services to ensure environment variables are loaded
+            builder.ConfigureAppConfiguration(
+                (context, config) =>
+                {
+                    // Clear existing configuration sources and rebuild with environment variables
+                    config.Sources.Clear();
+                    config.AddEnvironmentVariables();
+                    config.AddEnvironmentVariables("SNAPDOG_");
+                }
+            );
+
+            // Configure services to ensure EnvoyConfig is set up properly
+            builder.ConfigureServices(
+                (context, services) =>
+                {
+                    // Set up EnvoyConfig with the same global prefix as the main application
+                    EnvoyConfig.EnvConfig.GlobalPrefix = "SNAPDOG_";
+                }
+            );
+
             // Set environment variables with dynamic ports from containers
             Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_SNAPCAST_ADDRESS", SnapcastHost);
             Environment.SetEnvironmentVariable(
@@ -752,24 +774,30 @@ public class IntegrationTestFixture : IAsyncLifetime
     public void AssertConfigurationIsValid()
     {
         using var scope = ServiceProvider.CreateScope();
-        var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
 
-        // Verify MQTT configuration
-        config["Services:Mqtt:Enabled"].Should().Be("true");
-        config["Services:Mqtt:BrokerAddress"].Should().Be(MqttBrokerHost);
-        config["Services:Mqtt:Port"].Should().Be(MqttBrokerPort.ToString());
+        // Get the actual SnapDog configuration object which uses EnvoyConfig
+        var snapDogConfig = scope.ServiceProvider.GetRequiredService<IOptions<SnapDogConfiguration>>().Value;
+
+        // Verify MQTT configuration using the configuration object
+        snapDogConfig.Services.Mqtt.Enabled.Should().BeTrue("MQTT should be enabled in tests");
+        snapDogConfig
+            .Services.Mqtt.BrokerAddress.Should()
+            .Be(MqttBrokerHost, "MQTT broker should use test container address");
+        snapDogConfig.Services.Mqtt.Port.Should().Be(MqttBrokerPort, "MQTT should use test container port");
 
         // Verify KNX configuration (disabled in tests)
-        config["Services:Knx:Enabled"].Should().Be("false");
-        config["Services:Knx:Gateway"].Should().Be(KnxdHost);
-        config["Services:Knx:Port"].Should().Be(KnxdPort.ToString());
+        snapDogConfig.Services.Knx.Enabled.Should().BeFalse("KNX should be disabled in tests");
+        snapDogConfig.Services.Knx.Gateway.Should().Be(KnxdHost, "KNX gateway should use test container address");
+        snapDogConfig.Services.Knx.Port.Should().Be(KnxdPort, "KNX should use test container port");
 
-        // Verify API configuration
-        config["Api:Enabled"].Should().Be("true");
-        config["Api:Port"].Should().Be("5000");
-        config["Api:Auth:Enabled"].Should().Be("false");
+        // Verify API configuration using the actual configuration object
+        // This works because EnvoyConfig properly loads the SNAPDOG_ prefixed environment variables
+        snapDogConfig.Api.Enabled.Should().BeTrue("API should be enabled in tests");
+        snapDogConfig.Api.Port.Should().Be(5000, "API should be on port 5000 in tests");
+        snapDogConfig.Api.AuthEnabled.Should().BeFalse("API auth should be disabled in tests");
 
-        // Verify system configuration
-        config["System:HealthChecks:Enabled"].Should().Be("true");
+        // Verify system configuration using the configuration object
+        snapDogConfig.System.HealthChecksEnabled.Should().BeTrue("Health checks should be enabled in tests");
+        snapDogConfig.System.LogLevel.Should().Be("Information", "Log level should be Information in tests");
     }
 }
