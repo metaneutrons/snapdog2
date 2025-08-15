@@ -330,6 +330,90 @@ public partial class GetStreamUrlQueryHandler : IQueryHandler<GetStreamUrlQuery,
 }
 
 /// <summary>
+/// Handler for getting track details.
+/// </summary>
+public partial class GetTrackQueryHandler : IQueryHandler<GetTrackQuery, Result<TrackInfo>>
+{
+    private readonly ISubsonicService _subsonicService;
+    private readonly SnapDogConfiguration _config;
+    private readonly ILogger<GetTrackQueryHandler> _logger;
+
+    public GetTrackQueryHandler(
+        ISubsonicService subsonicService,
+        IOptions<SnapDogConfiguration> configOptions,
+        ILogger<GetTrackQueryHandler> logger
+    )
+    {
+        this._subsonicService = subsonicService;
+        this._config = configOptions.Value;
+        this._logger = logger;
+    }
+
+    public async Task<Result<TrackInfo>> Handle(GetTrackQuery query, CancellationToken cancellationToken)
+    {
+        LogGettingTrack(this._logger, query.TrackId);
+
+        // For radio stations, check if it's a radio URL and create a TrackInfo
+        if (IsRadioStreamUrl(query.TrackId))
+        {
+            var radioTrack = CreateRadioTrackInfo(query.TrackId);
+            LogRadioTrackRetrieved(this._logger, query.TrackId);
+            return Result<TrackInfo>.Success(radioTrack);
+        }
+
+        // Handle Subsonic tracks - for now, we don't have a direct track lookup in Subsonic service
+        // This would require extending the Subsonic service or searching through playlists
+        LogTrackNotImplemented(this._logger, query.TrackId);
+        return Result<TrackInfo>.Failure($"Track lookup not implemented for track ID: {query.TrackId}");
+    }
+
+    /// <summary>
+    /// Determines if the track ID is a radio stream URL.
+    /// </summary>
+    private static bool IsRadioStreamUrl(string trackId)
+    {
+        return trackId.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+            || trackId.StartsWith("https://", StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Creates a TrackInfo for a radio stream URL.
+    /// </summary>
+    private TrackInfo CreateRadioTrackInfo(string url)
+    {
+        // Try to find the radio station in configuration
+        var radioStations = this._config.RadioStations ?? new List<RadioStationConfig>();
+        var station = radioStations.FirstOrDefault(s => s.Url == url);
+
+        return new TrackInfo
+        {
+            Index = 1,
+            Id = url,
+            Title = station?.Name ?? "Unknown Radio Station",
+            Artist = "Radio",
+            Album = "Radio Stations",
+            DurationSec = null, // Radio streams don't have duration
+            PositionSec = 0,
+            CoverArtUrl = null,
+            Source = "radio",
+        };
+    }
+
+    #region Logging
+
+    [LoggerMessage(2960, LogLevel.Debug, "Getting track: {TrackId}")]
+    private static partial void LogGettingTrack(ILogger logger, string trackId);
+
+    [LoggerMessage(2961, LogLevel.Debug, "Retrieved radio track: {TrackId}")]
+    private static partial void LogRadioTrackRetrieved(ILogger logger, string trackId);
+
+    [LoggerMessage(2962, LogLevel.Warning, "Track lookup not implemented for: {TrackId}")]
+    private static partial void LogTrackNotImplemented(ILogger logger, string trackId);
+
+    #endregion
+}
+
+/// <summary>
 /// Handler for testing Subsonic connection.
 /// </summary>
 public partial class TestSubsonicConnectionQueryHandler : IQueryHandler<TestSubsonicConnectionQuery, Result>

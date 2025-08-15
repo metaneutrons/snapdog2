@@ -21,9 +21,31 @@ public record GetPlaylistQuery : IQuery<Result<Api.Models.PlaylistWithTracks>>
 }
 
 /// <summary>
+/// Query to retrieve a specific playlist by string identifier (for API compatibility).
+/// </summary>
+public record GetPlaylistByIdQuery : IQuery<Result<Api.Models.PlaylistWithTracks>>
+{
+    /// <summary>
+    /// Gets the playlist identifier (string format for API compatibility).
+    /// </summary>
+    public required string PlaylistId { get; init; }
+}
+
+/// <summary>
 /// Query to get the streaming URL for a specific track.
 /// </summary>
 public record GetStreamUrlQuery : IQuery<Result<string>>
+{
+    /// <summary>
+    /// Gets the track identifier.
+    /// </summary>
+    public required string TrackId { get; init; }
+}
+
+/// <summary>
+/// Query to get details for a specific track.
+/// </summary>
+public record GetTrackQuery : IQuery<Result<TrackInfo>>
 {
     /// <summary>
     /// Gets the track identifier.
