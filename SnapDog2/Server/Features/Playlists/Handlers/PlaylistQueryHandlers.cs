@@ -349,7 +349,7 @@ public partial class GetTrackQueryHandler : IQueryHandler<GetTrackQuery, Result<
         this._logger = logger;
     }
 
-    public async Task<Result<TrackInfo>> Handle(GetTrackQuery query, CancellationToken cancellationToken)
+    public Task<Result<TrackInfo>> Handle(GetTrackQuery query, CancellationToken cancellationToken)
     {
         LogGettingTrack(this._logger, query.TrackId);
 
@@ -358,13 +358,15 @@ public partial class GetTrackQueryHandler : IQueryHandler<GetTrackQuery, Result<
         {
             var radioTrack = CreateRadioTrackInfo(query.TrackId);
             LogRadioTrackRetrieved(this._logger, query.TrackId);
-            return Result<TrackInfo>.Success(radioTrack);
+            return Task.FromResult(Result<TrackInfo>.Success(radioTrack));
         }
 
         // Handle Subsonic tracks - for now, we don't have a direct track lookup in Subsonic service
         // This would require extending the Subsonic service or searching through playlists
         LogTrackNotImplemented(this._logger, query.TrackId);
-        return Result<TrackInfo>.Failure($"Track lookup not implemented for track ID: {query.TrackId}");
+        return Task.FromResult(
+            Result<TrackInfo>.Failure($"Track lookup not implemented for track ID: {query.TrackId}")
+        );
     }
 
     /// <summary>

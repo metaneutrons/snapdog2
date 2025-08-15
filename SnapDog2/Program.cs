@@ -21,15 +21,10 @@ Option<FileInfo?> envFileOption = new("--env-file", "-e")
     Description = "Path to environment file to load (.env format)",
 };
 
-// Add WebApplicationFactory arguments (used by integration tests) - hidden from normal usage
-Option<string?> environmentOption = new("--environment")
-{
-    Description = "Internal: WebApplicationFactory environment",
-};
-
+// Add WebApplicationFactory arguments (used by integration tests)
 Option<string?> environmentOptionUpper = new("--ENVIRONMENT")
 {
-    Description = "Internal: WebApplicationFactory environment (uppercase)",
+    Description = "Internal: WebApplicationFactory environment",
 };
 
 Option<string?> contentRootOption = new("--contentRoot")

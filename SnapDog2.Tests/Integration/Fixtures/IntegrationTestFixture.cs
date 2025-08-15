@@ -216,7 +216,7 @@ public class IntegrationTestFixture : IAsyncLifetime
         Console.WriteLine($"✅ KNXd started at {KnxdHost}:{KnxdPort}");
     }
 
-    private async Task CreateWebApplicationFactoryAsync()
+    private Task CreateWebApplicationFactoryAsync()
     {
         Console.WriteLine("🏭 Creating web application factory...");
 
@@ -324,6 +324,7 @@ public class IntegrationTestFixture : IAsyncLifetime
         Console.WriteLine("✅ Service provider obtained");
 
         Console.WriteLine("✅ Web application factory created");
+        return Task.CompletedTask;
     }
 
     private async Task InitializeTestClientsAsync()
