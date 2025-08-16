@@ -233,15 +233,14 @@ services:
       - ./devcontainer/knx-groupaddresses.csv:/app/knx-groupaddresses.csv:ro # KNX group addresses database
     environment:
       - TZ=Europe/Berlin # Set timezone for proper log timestamps
-      - DOTNET_RUNNING_IN_CONTAINER=true # Force web interface mode
     command: [
-      "-g", "knxd", 
-      "-v", 
-      "--csv", "/app/knx-groupaddresses.csv",
-      "--logging-mode", # Force web interface mode
-      "--http-host", "0.0.0.0", # Bind to all interfaces for container access
-      "--http-port", "8671" # Default web interface port
-    ]
+        "-g",
+        "knxd",
+        "-v",
+        "--csv",
+        "/app/knx-groupaddresses.csv",
+        "--logging-mode", # Force web interface mode
+      ]
     depends_on:
       knxd:
         condition: service_healthy
@@ -250,7 +249,7 @@ services:
         ipv4_address: 172.25.0.14
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/ready"]
+      test: ["CMD", "curl", "-f", "http://localhost:8671/ready"]
       interval: 15s
       timeout: 5s
       retries: 5
