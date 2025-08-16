@@ -90,14 +90,14 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 | `TRACK_REPEAT_TOGGLE` | Toggle track repeat mode   | `ZoneIndex` (int)                                 | Command (Set)    | Action: Toggle repeat state           |
 | `TRACK_REPEAT_STATUS` | Current track repeat state | `ZoneIndex` (int), `Enabled` (bool)               | Status (Publish) | State: Repeat is on/off               |
 | `TRACK_METADATA`      | Complete track metadata    | `ZoneIndex` (int), `TrackInfo` (object/record)    | Status (Publish) | State: Full track details           |
-| `TRACK_INFO_LENGTH`   | Track duration             | `ZoneIndex` (int), `Duration` (long, ms)         | Status (Publish) | State: Length of current track      |
-| `TRACK_INFO_POSITION` | Track position             | `ZoneIndex` (int), `Position` (long, ms)         | Status (Publish) | State: Position in current track    |
-| `TRACK_INFO_TITLE`    | Track title                | `ZoneIndex` (int), `Title` (string)              | Status (Publish) | State: Title of current track       |
-| `TRACK_INFO_ARTIST`   | Track artist               | `ZoneIndex` (int), `Artist` (string)             | Status (Publish) | State: Artist of current track      |
-| `TRACK_INFO_ALBUM`    | Track album                | `ZoneIndex` (int), `Album` (string)              | Status (Publish) | State: Album of current track       |
+| `TRACK_METADATA_LENGTH`   | Track duration             | `ZoneIndex` (int), `Duration` (long, ms)         | Status (Publish) | State: Length of current track      |
+| `TRACK_METADATA_POSITION` | Track position             | `ZoneIndex` (int), `Position` (long, ms)         | Status (Publish) | State: Position in current track    |
+| `TRACK_METADATA_TITLE`    | Track title                | `ZoneIndex` (int), `Title` (string)              | Status (Publish) | State: Title of current track       |
+| `TRACK_METADATA_ARTIST`   | Track artist               | `ZoneIndex` (int), `Artist` (string)             | Status (Publish) | State: Artist of current track      |
+| `TRACK_METADATA_ALBUM`    | Track album                | `ZoneIndex` (int), `Album` (string)              | Status (Publish) | State: Album of current track       |
 | `TRACK_PLAYING_STATUS`| Current playing state      | `ZoneIndex` (int), `IsPlaying` (bool)            | Status (Publish) | State: Track is playing/paused      |
 | `TRACK_PROGRESS_STATUS`| Current progress percentage | `ZoneIndex` (int), `Progress` (float, 0.0-1.0) | Status (Publish) | State: Progress through track       |
-| `TRACK_META_COVER`    | Track cover art URL        | `ZoneIndex` (int), `CoverUrl` (string)           | Status (Publish) | State: Cover art URL                |
+| `TRACK_METADATA_COVER`    | Track cover art URL        | `ZoneIndex` (int), `CoverUrl` (string)           | Status (Publish) | State: Cover art URL                |
 
 **Playlist Management**
 
@@ -207,14 +207,14 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 | :------------------------ | :------------------------ | :------------------- | :------------------------------- | :------- | :----------------------- |
 | `TRACK_INDEX`             | `_TRACK_TOPIC`            | `track`              | `1`, `3`                         | Yes      | **1-based** index      |
 | `TRACK_METADATA`          | `_TRACK_METADATA_TOPIC`   | `track/metadata`     | Full JSON `TrackInfo` object     | Yes      | Complete track metadata |
-| `TRACK_INFO_LENGTH`       | `_TRACK_LENGTH_TOPIC`     | `track/duration`     | `300000` (in ms)                 | Yes      | Duration of current track |
-| `TRACK_INFO_POSITION`     | `_TRACK_POSITION_TOPIC`   | `track/position`     | `10000` (in ms)                  | Yes      | Position in current track |
-| `TRACK_INFO_TITLE`        | `_TRACK_TITLE_TOPIC`      | `track/title`        | `"Song Title"`                   | Yes      | Title of current track   |
-| `TRACK_INFO_ARTIST`       | `_TRACK_ARTIST_TOPIC`     | `track/artist`       | `"Artist Name"`                  | Yes      | Artist of current track  |
-| `TRACK_INFO_ALBUM`        | `_TRACK_ALBUM_TOPIC`      | `track/album`        | `"Album Name"`                   | Yes      | Album of current track   |
+| `TRACK_METADATA_LENGTH`       | `_TRACK_LENGTH_TOPIC`     | `track/duration`     | `300000` (in ms)                 | Yes      | Duration of current track |
+| `TRACK_METADATA_TITLE`        | `_TRACK_TITLE_TOPIC`      | `track/title`        | `"Song Title"`                   | Yes      | Title of current track   |
+| `TRACK_METADATA_ARTIST`       | `_TRACK_ARTIST_TOPIC`     | `track/artist`       | `"Artist Name"`                  | Yes      | Artist of current track  |
+| `TRACK_METADATA_ALBUM`        | `_TRACK_ALBUM_TOPIC`      | `track/album`        | `"Album Name"`                   | Yes      | Album of current track   |
+| `TRACK_METADATA_COVER`        | `_TRACK_COVER_TOPIC`      | `track/cover`        | `"http://server/cover.jpg"`      | Yes      | Cover art URL            |
 | `TRACK_PLAYING_STATUS`    | `_TRACK_PLAYING_TOPIC`    | `track/playing`      | `true` / `false`                 | Yes      | Is track currently playing |
+| `TRACK_METADATA_POSITION` | `_TRACK_POSITION_TOPIC`   | `track/position`     | `10000` (in ms)                  | Yes      | Position in current track |
 | `TRACK_PROGRESS_STATUS`   | `_TRACK_PROGRESS_TOPIC`   | `track/progress`     | `0.65` (65% progress)            | Yes      | Progress percentage 0.0-1.0 |
-| `TRACK_META_COVER`        | `_TRACK_COVER_TOPIC`      | `track/cover`        | `"http://server/cover.jpg"`      | Yes      | Cover art URL            |
 | `TRACK_REPEAT_STATUS`     | `_TRACK_REPEAT_TOPIC`     | `repeat/track`       | `true` / `false` (`1`/`0`)       | Yes      | Track repeat enabled     |
 
 **Playlist Management**
@@ -269,28 +269,28 @@ System-level topics provide discovery and global status information across all z
 
 This topic accepts various string payloads to control multiple aspects:
 
-| Command Functionality     | `{zoneBaseTopic}control/set` Payload |
-| :------------------------ | :----------------------------------- |
-| `PLAY`                    | `play`, `play url <url>`             |
-| `PAUSE`                   | `pause`                              |
-| `STOP`                    | `stop`                               |
-| `TRACK`                   | `track <index>` (1-based)            |
-| `TRACK_NEXT`              | `next`, `track_next`, `+`            |
-| `TRACK_PREVIOUS`          | `previous`, `track_previous`, `-`    |
-| `TRACK_REPEAT`            | `track_repeat_on`, `track_repeat_off`|
-| `TRACK_REPEAT_TOGGLE`     | `track_repeat_toggle`                |
-| `PLAYLIST`                | `playlist <index_or_id>` (1=Radio)   |
-| `PLAYLIST_NEXT`           | `playlist_next`                      |
-| `PLAYLIST_PREVIOUS`       | `playlist_previous`                  |
-| `PLAYLIST_SHUFFLE`        | `shuffle_on`, `shuffle_off`          |
-| `PLAYLIST_SHUFFLE_TOGGLE` | `shuffle_toggle`                     |
-| `PLAYLIST_REPEAT`         | `repeat_on`, `repeat_off`            |
-| `PLAYLIST_REPEAT_TOGGLE`  | `repeat_toggle`                      |
-| `MUTE`                    | `mute_on`, `mute_off`                |
-| `MUTE_TOGGLE`             | `mute_toggle`                        |
-| `VOLUME`                  | `volume <level>` (0-100)             |
-| `VOLUME_UP`               | `volume_up`, `volume +<step>`        |
-| `VOLUME_DOWN`             | `volume_down`, `volume -<step>`      |
+| Command Functionality     | `{zoneBaseTopic}control/set` Payload     |
+| :------------------------ | :--------------------------------------- |
+| `PLAY`                    | `play`, `play <track int>`, `play <url>` |
+| `PAUSE`                   | `pause`                                  |
+| `STOP`                    | `stop`                                   |
+| `TRACK`                   | `track <index>` (1-based)                |
+| `TRACK_NEXT`              | `next`, `track_next`, `+`                |
+| `TRACK_PREVIOUS`          | `previous`, `track_previous`, `-`        |
+| `TRACK_REPEAT`            | `track_repeat_on`, `track_repeat_off`    |
+| `TRACK_REPEAT_TOGGLE`     | `track_repeat_toggle`                    |
+| `PLAYLIST`                | `playlist <index_or_id>` (1=Radio)       |
+| `PLAYLIST_NEXT`           | `playlist_next`                          |
+| `PLAYLIST_PREVIOUS`       | `playlist_previous`                      |
+| `PLAYLIST_SHUFFLE`        | `shuffle_on`, `shuffle_off`              |
+| `PLAYLIST_SHUFFLE_TOGGLE` | `shuffle_toggle`                         |
+| `PLAYLIST_REPEAT`         | `repeat_on`, `repeat_off`                |
+| `PLAYLIST_REPEAT_TOGGLE`  | `repeat_toggle`                          |
+| `MUTE`                    | `mute_on`, `mute_off`                    |
+| `MUTE_TOGGLE`             | `mute_toggle`                            |
+| `VOLUME`                  | `volume <level>` (0-100)                 |
+| `VOLUME_UP`               | `volume_up`, `volume +<step>`            |
+| `VOLUME_DOWN`             | `volume_down`, `volume -<step>`          |
 
 #### 14.3.2.5. Standardized Payload Patterns
 
@@ -304,7 +304,7 @@ All boolean topics accept consistent payload formats for maximum compatibility:
 
 **Examples:**
 
-```
+```plaintext
 snapdog/zone/1/repeat/track     → "true" | "false" | "1" | "0" | "on" | "off" | "toggle"
 snapdog/zone/1/shuffle/set      → "true" | "false" | "1" | "0" | "on" | "off" | "toggle"
 snapdog/zone/1/mute/set         → "true" | "false" | "1" | "0" | "on" | "off" | "toggle"
