@@ -3,7 +3,6 @@ namespace SnapDog2.Core.Constants;
 using SnapDog2.Core.Attributes;
 using SnapDog2.Server.Features.Clients.Notifications;
 using SnapDog2.Server.Features.Global.Notifications;
-using SnapDog2.Server.Features.Shared.Notifications;
 using SnapDog2.Server.Features.Zones.Notifications;
 
 /// <summary>
