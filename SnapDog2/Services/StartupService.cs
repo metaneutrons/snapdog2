@@ -199,7 +199,6 @@ public partial class StartupService : IHostedService
         {
             ("Snapcast JSON-RPC", this._config.Services.Snapcast.JsonRpcPort),
             ("MQTT", this._config.Services.Mqtt.Port),
-            ("Prometheus", this._config.Telemetry.Prometheus.Port),
         };
 
         var portConflicts = new List<(string Service, int Port, string ConflictDetails)>();

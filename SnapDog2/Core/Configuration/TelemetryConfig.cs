@@ -4,6 +4,8 @@ using EnvoyConfig.Attributes;
 
 /// <summary>
 /// Telemetry and observability configuration.
+/// SnapDog2 uses OpenTelemetry Protocol (OTLP) for vendor-neutral telemetry export.
+/// The backend (Jaeger, SigNoz, etc.) is configured in the deployment environment.
 /// </summary>
 public class TelemetryConfig
 {
@@ -29,29 +31,35 @@ public class TelemetryConfig
     public double SamplingRate { get; set; } = 1.0;
 
     /// <summary>
-    /// OTLP configuration for Jaeger.
+    /// OTLP configuration for unified telemetry export.
     /// Maps environment variables with prefix: SNAPDOG_TELEMETRY_OTLP_*
     /// </summary>
     [Env(NestedPrefix = "OTLP_")]
     public OtlpConfig Otlp { get; set; } = new();
 
     /// <summary>
-    /// Prometheus configuration.
+    /// Optional Prometheus config placeholder for compatibility with existing tests/config.
     /// Maps environment variables with prefix: SNAPDOG_TELEMETRY_PROMETHEUS_*
     /// </summary>
     [Env(NestedPrefix = "PROMETHEUS_")]
     public PrometheusConfig Prometheus { get; set; } = new();
-
-    /// <summary>
-    /// Seq configuration.
-    /// Maps environment variables with prefix: SNAPDOG_TELEMETRY_SEQ_*
-    /// </summary>
-    [Env(NestedPrefix = "SEQ_")]
-    public SeqConfig Seq { get; set; } = new();
 }
 
 /// <summary>
-/// OTLP configuration for Jaeger integration.
+/// Minimal Prometheus telemetry configuration placeholder.
+/// </summary>
+public class PrometheusConfig
+{
+    [Env(Key = "ENABLED", Default = false)]
+    public bool Enabled { get; set; } = false;
+
+    [Env(Key = "PORT", Default = 9464)]
+    public int Port { get; set; } = 9464;
+}
+
+/// <summary>
+/// OTLP configuration for vendor-neutral telemetry export.
+/// Supports any OTLP-compatible backend (Jaeger, SigNoz, etc.).
 /// </summary>
 public class OtlpConfig
 {
@@ -63,70 +71,35 @@ public class OtlpConfig
     public bool Enabled { get; set; } = false;
 
     /// <summary>
-    /// OTLP endpoint URL.
+    /// OTLP endpoint URL for traces and metrics.
     /// Maps to: SNAPDOG_TELEMETRY_OTLP_ENDPOINT
+    /// Examples:
+    /// - Jaeger: http://jaeger:14268/api/traces
+    /// - SigNoz: http://otel-collector:4317
+    /// - Local collector: http://localhost:4317
     /// </summary>
-    [Env(Key = "ENDPOINT", Default = "http://localhost:14268")]
-    public string Endpoint { get; set; } = "http://localhost:14268";
+    [Env(Key = "ENDPOINT", Default = "http://localhost:4317")]
+    public string Endpoint { get; set; } = "http://localhost:4317";
 
     /// <summary>
-    /// OTLP agent address.
-    /// Maps to: SNAPDOG_TELEMETRY_OTLP_AGENT_ADDRESS
+    /// OTLP protocol (grpc or http/protobuf).
+    /// Maps to: SNAPDOG_TELEMETRY_OTLP_PROTOCOL
     /// </summary>
-    [Env(Key = "AGENT_ADDRESS", Default = "localhost")]
-    public string AgentAddress { get; set; } = "localhost";
+    [Env(Key = "PROTOCOL", Default = "grpc")]
+    public string Protocol { get; set; } = "grpc";
 
     /// <summary>
-    /// OTLP agent port.
-    /// Maps to: SNAPDOG_TELEMETRY_OTLP_AGENT_PORT
+    /// OTLP headers for authentication (e.g., API keys).
+    /// Maps to: SNAPDOG_TELEMETRY_OTLP_HEADERS
+    /// Format: "key1=value1,key2=value2"
     /// </summary>
-    [Env(Key = "AGENT_PORT", Default = 6831)]
-    public int AgentPort { get; set; } = 6831;
-}
-
-/// <summary>
-/// Prometheus configuration.
-/// </summary>
-public class PrometheusConfig
-{
-    /// <summary>
-    /// Whether Prometheus metrics are enabled.
-    /// Maps to: SNAPDOG_TELEMETRY_PROMETHEUS_ENABLED
-    /// </summary>
-    [Env(Key = "ENABLED", Default = false)]
-    public bool Enabled { get; set; } = false;
+    [Env(Key = "HEADERS")]
+    public string? Headers { get; set; }
 
     /// <summary>
-    /// Prometheus metrics port.
-    /// Maps to: SNAPDOG_TELEMETRY_PROMETHEUS_PORT
+    /// Export timeout in seconds.
+    /// Maps to: SNAPDOG_TELEMETRY_OTLP_TIMEOUT
     /// </summary>
-    [Env(Key = "PORT", Default = 9090)]
-    public int Port { get; set; } = 9090;
-
-    /// <summary>
-    /// Prometheus metrics path.
-    /// Maps to: SNAPDOG_TELEMETRY_PROMETHEUS_PATH
-    /// </summary>
-    [Env(Key = "PATH", Default = "/metrics")]
-    public string Path { get; set; } = "/metrics";
-}
-
-/// <summary>
-/// Seq configuration.
-/// </summary>
-public class SeqConfig
-{
-    /// <summary>
-    /// Whether Seq logging is enabled.
-    /// Maps to: SNAPDOG_TELEMETRY_SEQ_ENABLED
-    /// </summary>
-    [Env(Key = "ENABLED", Default = true)]
-    public bool Enabled { get; set; } = true;
-
-    /// <summary>
-    /// Seq server URL.
-    /// Maps to: SNAPDOG_TELEMETRY_SEQ_URL
-    /// </summary>
-    [Env(Key = "URL")]
-    public string? Url { get; set; }
+    [Env(Key = "TIMEOUT", Default = 30)]
+    public int TimeoutSeconds { get; set; } = 30;
 }

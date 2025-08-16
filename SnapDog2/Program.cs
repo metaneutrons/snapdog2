@@ -2,6 +2,11 @@ using System.CommandLine;
 using dotenv.net;
 using EnvoyConfig;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using OpenTelemetry;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Serilog;
 using Serilog.Events;
 using SnapDog2.Authentication;
@@ -170,6 +175,86 @@ static WebApplication CreateWebApplication(string[] args)
     builder.Services.AddSingleton(snapDogConfig.Services);
     builder.Services.AddSingleton(snapDogConfig.SnapcastServer);
 
+    // Configure OpenTelemetry (if enabled)
+    if (snapDogConfig.Telemetry.Enabled && snapDogConfig.Telemetry.Otlp.Enabled)
+    {
+        builder
+            .Services.AddOpenTelemetry()
+            .ConfigureResource(resource =>
+                resource
+                    .AddService(snapDogConfig.Telemetry.ServiceName, "2.0.0")
+                    .AddAttributes(
+                        new Dictionary<string, object>
+                        {
+                            ["deployment.environment"] = builder.Environment.EnvironmentName,
+                            ["service.namespace"] = "snapdog",
+                        }
+                    )
+            )
+            .WithTracing(tracing =>
+                tracing
+                    .SetSampler(new TraceIdRatioBasedSampler(snapDogConfig.Telemetry.SamplingRate))
+                    .AddAspNetCoreInstrumentation(options =>
+                    {
+                        options.RecordException = true;
+                    })
+                    .AddHttpClientInstrumentation()
+                    .AddSource("SnapDog2.*")
+                    .AddOtlpExporter(options =>
+                    {
+                        options.Endpoint = new Uri(snapDogConfig.Telemetry.Otlp.Endpoint);
+                        options.Protocol = snapDogConfig.Telemetry.Otlp.Protocol.ToLowerInvariant() switch
+                        {
+                            "grpc" => OtlpExportProtocol.Grpc,
+                            "http/protobuf" => OtlpExportProtocol.HttpProtobuf,
+                            _ => OtlpExportProtocol.Grpc,
+                        };
+                        options.TimeoutMilliseconds = snapDogConfig.Telemetry.Otlp.TimeoutSeconds * 1000;
+
+                        if (!string.IsNullOrEmpty(snapDogConfig.Telemetry.Otlp.Headers))
+                        {
+                            options.Headers = snapDogConfig.Telemetry.Otlp.Headers;
+                        }
+                    })
+            )
+            .WithMetrics(metrics =>
+                metrics
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddMeter("SnapDog2.*")
+                    .AddOtlpExporter(options =>
+                    {
+                        options.Endpoint = new Uri(snapDogConfig.Telemetry.Otlp.Endpoint);
+                        options.Protocol = snapDogConfig.Telemetry.Otlp.Protocol.ToLowerInvariant() switch
+                        {
+                            "grpc" => OtlpExportProtocol.Grpc,
+                            "http/protobuf" => OtlpExportProtocol.HttpProtobuf,
+                            _ => OtlpExportProtocol.Grpc,
+                        };
+                        options.TimeoutMilliseconds = snapDogConfig.Telemetry.Otlp.TimeoutSeconds * 1000;
+
+                        if (!string.IsNullOrEmpty(snapDogConfig.Telemetry.Otlp.Headers))
+                        {
+                            options.Headers = snapDogConfig.Telemetry.Otlp.Headers;
+                        }
+                    })
+            );
+
+        Log.Information(
+            "OpenTelemetry configured with OTLP endpoint: {Endpoint} (Protocol: {Protocol})",
+            snapDogConfig.Telemetry.Otlp.Endpoint,
+            snapDogConfig.Telemetry.Otlp.Protocol
+        );
+    }
+    else
+    {
+        Log.Information(
+            "OpenTelemetry disabled (SNAPDOG_TELEMETRY_ENABLED={TelemetryEnabled}, SNAPDOG_TELEMETRY_OTLP_ENABLED={OtlpEnabled})",
+            snapDogConfig.Telemetry.Enabled,
+            snapDogConfig.Telemetry.Otlp.Enabled
+        );
+    }
+
     // Register AudioConfig for IOptions pattern
     builder.Services.Configure<AudioConfig>(options =>
     {
@@ -237,6 +322,23 @@ static WebApplication CreateWebApplication(string[] args)
         Log.Information("KNX is disabled in configuration (SNAPDOG_SERVICES_KNX_ENABLED=false)");
     }
 
+    // Notification processing configuration and services
+    builder.Services.Configure<NotificationProcessingOptions>(options =>
+    {
+        // Sensible defaults; can be overridden via env or appsettings in future
+        options.MaxQueueCapacity = 2048;
+        options.MaxConcurrency = 2;
+        options.MaxRetryAttempts = 3;
+        options.RetryBaseDelayMs = 250;
+        options.RetryMaxDelayMs = 5000;
+        options.ShutdownTimeoutSeconds = 10;
+    });
+    builder.Services.AddSingleton<SnapDog2.Infrastructure.Notifications.NotificationQueue>();
+    builder.Services.AddSingleton<SnapDog2.Core.Abstractions.INotificationQueue>(sp =>
+        sp.GetRequiredService<SnapDog2.Infrastructure.Notifications.NotificationQueue>()
+    );
+    builder.Services.AddHostedService<SnapDog2.Infrastructure.Notifications.NotificationBackgroundService>();
+
     // Skip hosted services in test environment
     if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "Testing")
     {
@@ -259,7 +361,7 @@ static WebApplication CreateWebApplication(string[] args)
         SnapDog2.Core.Abstractions.IAppStatusService,
         SnapDog2.Infrastructure.Application.AppStatusService
     >();
-    builder.Services.AddScoped<
+    builder.Services.AddSingleton<
         SnapDog2.Core.Abstractions.IMetricsService,
         SnapDog2.Infrastructure.Application.MetricsService
     >();

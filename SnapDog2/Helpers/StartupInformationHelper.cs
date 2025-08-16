@@ -370,18 +370,6 @@ public static class StartupInformationHelper
                 telemetryTargets.Add($"OTLP: {config.Telemetry.Otlp.Endpoint}");
             }
 
-            if (config.Telemetry.Prometheus.Enabled)
-            {
-                telemetryTargets.Add(
-                    $"Prometheus: :{config.Telemetry.Prometheus.Port}{config.Telemetry.Prometheus.Path}"
-                );
-            }
-
-            if (config.Telemetry.Seq.Enabled && !string.IsNullOrEmpty(config.Telemetry.Seq.Url))
-            {
-                telemetryTargets.Add($"Seq: {config.Telemetry.Seq.Url}");
-            }
-
             if (telemetryTargets.Count != 0)
             {
                 Console.WriteLine($"     Targets: {string.Join(", ", telemetryTargets)}");
