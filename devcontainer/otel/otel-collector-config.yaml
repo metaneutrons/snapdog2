@@ -22,35 +22,39 @@ processors:
         action: upsert
 
 exporters:
-  # Debug exporter (replacement for deprecated logging exporter)
+  # Prometheus metrics exporter for Grafana
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+    const_labels:
+      environment: development
+      service: snapdog
+
+  # Debug exporter for development
   debug:
     verbosity: normal
     sampling_initial: 5
     sampling_thereafter: 200
 
-  # Export metrics to Prometheus format
-  prometheus:
-    endpoint: "0.0.0.0:8889"
-    const_labels:
-      environment: development
-      service_namespace: snapdog
+  # Logging exporter for traces and logs
+  logging:
+    loglevel: info
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
       processors: [batch, resource]
-      exporters: [debug]
+      exporters: [debug, logging]
     
     metrics:
       receivers: [otlp]
       processors: [batch, resource]
-      exporters: [debug, prometheus]
+      exporters: [prometheus, debug]
     
     logs:
       receivers: [otlp]
       processors: [batch, resource]
-      exporters: [debug]
+      exporters: [debug, logging]
 
   extensions: []
   

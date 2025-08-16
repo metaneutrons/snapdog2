@@ -154,7 +154,9 @@ public sealed class NotificationBackgroundService : BackgroundService
         if (_mqtt != null && _mqtt.IsConnected)
         {
             // Use dynamic to invoke the generic method with runtime payload type
-            var mqttResult = await _mqtt.PublishZoneStatusAsync(item.ZoneIndex, item.EventType, (dynamic)item.Payload, ct).ConfigureAwait(false);
+            var mqttResult = await _mqtt
+                .PublishZoneStatusAsync(item.ZoneIndex, item.EventType, (dynamic)item.Payload, ct)
+                .ConfigureAwait(false);
             if (mqttResult.IsFailure)
             {
                 throw new InvalidOperationException(mqttResult.ErrorMessage ?? "MQTT publish failed");
@@ -164,7 +166,8 @@ public sealed class NotificationBackgroundService : BackgroundService
         // KNX
         if (_knx != null && _knx.IsConnected)
         {
-            var knxResult = await _knx.PublishZoneStatusAsync(item.ZoneIndex, item.EventType, (dynamic)item.Payload, ct).ConfigureAwait(false);
+            var knxResult = await _knx.PublishZoneStatusAsync(item.ZoneIndex, item.EventType, (dynamic)item.Payload, ct)
+                .ConfigureAwait(false);
             if (knxResult.IsFailure)
             {
                 throw new InvalidOperationException(knxResult.ErrorMessage ?? "KNX publish failed");

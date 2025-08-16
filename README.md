@@ -80,9 +80,8 @@ graph TB
         end
         
         subgraph "Observability"
-            SIGNOZ["🔍 SigNoz<br/>172.20.0.23:3301"]
-            OTELCOL["📊 OTEL Collector<br/>172.20.0.21:4317"]
-            CLICKHOUSE["🗄️ ClickHouse<br/>172.20.0.20:9000"]
+            GRAFANA["📊 Grafana<br/>172.25.0.21:3000"]
+            OTELCOL["📊 OTEL Collector<br/>172.25.0.20:4317"]
         end
     end
     
@@ -96,7 +95,7 @@ graph TB
     CADDY --> LIVING
     CADDY --> KITCHEN
     CADDY --> BEDROOM
-    CADDY --> SIGNOZ
+    CADDY --> GRAFANA
     
     %% Application connections
     APP --> SNAPSERVER
@@ -114,8 +113,8 @@ graph TB
     SNAPSERVER --> BEDROOM
     
     %% Observability flows
-    OTELCOL --> CLICKHOUSE
-    CLICKHOUSE --> SIGNOZ
+    APP --> OTELCOL
+    OTELCOL --> GRAFANA
     
     %% Styling
     classDef external fill:#e1f5fe,stroke:#01579b,stroke-width:2px
@@ -132,7 +131,7 @@ graph TB
     class SNAPSERVER,NAVIDROME audio
     class LIVING,KITCHEN,BEDROOM client
     class MQTT,KNX iot
-    class SIGNOZ,OTELCOL,CLICKHOUSE monitoring
+    class GRAFANA,OTELCOL monitoring
 ```
 
 ## Service Access
@@ -146,7 +145,7 @@ All services accessible through **single port 8000** via Caddy reverse proxy:
 - **🍽️ Kitchen Client**: <http://localhost:8000/clients/kitchen/>
 - **🛏️ Bedroom Client**: <http://localhost:8000/clients/bedroom/>
 - **🔧 KNX Monitor**: Available via `docker compose logs knx-monitor -f` (visual KNX bus debugging)
-- **🔍 SigNoz Observability**: <http://localhost:8000/signoz/> (unified traces, metrics, and logs)
+- **📊 Grafana Observability**: <http://localhost:8000/grafana/> (metrics dashboards and monitoring)
 
 ## What's Included
 
@@ -160,7 +159,8 @@ All services accessible through **single port 8000** via Caddy reverse proxy:
 
 ### 📊 Observability
 
-- **SigNoz** - Unified observability platform (traces, metrics, logs)
+- **Grafana** - Beautiful dashboards for metrics visualization and monitoring
+- **OpenTelemetry Collector** - Collects and processes telemetry data (traces, metrics, logs)
 
 ### 🌐 Infrastructure
 

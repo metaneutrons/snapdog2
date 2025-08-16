@@ -20,7 +20,7 @@ services:
       - snapcast-server
       - mqtt
       - navidrome
-      - signoz-otel-collector
+      - otel-collector
     networks:
       snapdog-dev:
         ipv4_address: 172.25.0.2
@@ -45,6 +45,7 @@ services:
       - snapcast-client-kitchen
       - snapcast-client-bedroom
       - navidrome
+      - grafana
     networks:
       snapdog-dev:
         ipv4_address: 172.25.0.4
@@ -183,24 +184,45 @@ services:
       start_period: 10s
 
   # ═══════════════════════════════════════════════════════════════════════════════
-  # SigNoz Observability Stack (v0.92.1) - Basic Development Setup
+  # Observability Stack - OTEL Collector + Grafana (Simple & Reliable)
   # ═══════════════════════════════════════════════════════════════════════════════
 
   # OpenTelemetry Collector (Standalone for development)
-  signoz-otel-collector:
+  otel-collector:
     image: otel/opentelemetry-collector-contrib:0.112.0
-    container_name: snapdog-signoz-otel-collector
-    hostname: signoz-otel-collector
+    container_name: snapdog-otel-collector
+    hostname: otel-collector
     command: ["--config=/etc/otel-collector-config.yaml"]
     volumes:
-      - ./devcontainer/signoz/otel-collector-simple.yaml:/etc/otel-collector-config.yaml:ro
+      - ./devcontainer/otel/otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
     ports:
       - "4317:4317"  # OTLP gRPC receiver
       - "4318:4318"  # OTLP HTTP receiver
       - "8889:8889"  # Prometheus metrics endpoint
     networks:
       snapdog-dev:
-        ipv4_address: 172.25.0.22
+        ipv4_address: 172.25.0.20
+    restart: unless-stopped
+
+  # Grafana for observability dashboards
+  grafana:
+    image: grafana/grafana:latest
+    container_name: snapdog-grafana
+    hostname: grafana
+    ports:
+      - "3301:3000"  # Grafana UI
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./devcontainer/grafana/provisioning:/etc/grafana/provisioning:ro
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    depends_on:
+      - otel-collector
+    networks:
+      snapdog-dev:
+        ipv4_address: 172.25.0.21
     restart: unless-stopped
 
   # KNX Monitor - Visual debugging tool for KNX bus activity
@@ -237,6 +259,8 @@ volumes:
   caddy_data:
   caddy_config:
   snapcast_sinks: # Shared volume for audio sinks between snapcast-server and app
+  grafana-data:
+    name: snapdog-grafana-data
 
 networks:
   snapdog-dev:

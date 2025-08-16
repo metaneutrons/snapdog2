@@ -11,20 +11,27 @@ public class TestMetricsService : IMetricsService
     public ConcurrentDictionary<string, long> Counters { get; } = new();
     public ConcurrentDictionary<string, double> Gauges { get; } = new();
 
-    public void RecordCortexMediatorRequestDuration(string requestType, string requestName, long durationMs, bool success)
+    public void RecordCortexMediatorRequestDuration(
+        string requestType,
+        string requestName,
+        long durationMs,
+        bool success
+    )
     {
         // not used in these tests
     }
 
     public Task<ServerStats> GetServerStatsAsync()
     {
-        return Task.FromResult(new ServerStats
-        {
-            CpuUsagePercent = 0,
-            MemoryUsageMb = 0,
-            TotalMemoryMb = 0,
-            Uptime = TimeSpan.Zero,
-        });
+        return Task.FromResult(
+            new ServerStats
+            {
+                CpuUsagePercent = 0,
+                MemoryUsageMb = 0,
+                TotalMemoryMb = 0,
+                Uptime = TimeSpan.Zero,
+            }
+        );
     }
 
     public void IncrementCounter(string name, long delta = 1, params (string Key, string Value)[] labels)
@@ -37,4 +44,3 @@ public class TestMetricsService : IMetricsService
         Gauges[name] = value;
     }
 }
-

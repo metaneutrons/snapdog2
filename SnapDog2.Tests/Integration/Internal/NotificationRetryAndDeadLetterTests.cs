@@ -18,7 +18,12 @@ public class NotificationRetryAndDeadLetterTests
         await using var factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
             // WebApplicationFactory provides IWebHostBuilder; set environment via configuration
-            builder.ConfigureAppConfiguration((ctx, cfg) => { ctx.HostingEnvironment.EnvironmentName = "Testing"; });
+            builder.ConfigureAppConfiguration(
+                (ctx, cfg) =>
+                {
+                    ctx.HostingEnvironment.EnvironmentName = "Testing";
+                }
+            );
             builder.ConfigureServices(services =>
             {
                 // Replace MQTT with failing implementation
@@ -64,4 +69,3 @@ public class NotificationRetryAndDeadLetterTests
         dead.Should().BeGreaterThan(0);
     }
 }
-

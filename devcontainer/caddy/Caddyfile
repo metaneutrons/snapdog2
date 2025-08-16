@@ -9,7 +9,7 @@
         not path /snapcast*
         not path /clients*
         not path /music*
-        not path /signoz*
+        not path /grafana*
         not path /api*
         not path /swagger*
     }
@@ -47,15 +47,10 @@
         reverse_proxy http://navidrome:4533
     }
 
-    # SigNoz Observability (unified observability platform)
-    handle /signoz/* {
-        uri strip_prefix /signoz
-        reverse_proxy http://signoz-frontend:3301
-    }
-
-    handle /signoz-api/* {
-        uri strip_prefix /signoz-api
-        reverse_proxy http://signoz-query-service:8080
+    # Grafana Observability Dashboard
+    handle /grafana/* {
+        uri strip_prefix /grafana
+        reverse_proxy http://grafana:3000
     }
 
     # Redirect for clients

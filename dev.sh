@@ -14,12 +14,12 @@ show_urls() {
     echo "  🛏️  Bedroom:           http://localhost:8000/clients/bedroom/"
     echo ""
     echo "🔍 Observability:"
-    echo "  🔍 SigNoz:            http://localhost:8000/signoz/"
+    echo "  📊 Grafana:           http://localhost:8000/grafana/"
     echo ""
 }
 
 start_dev() {
-    echo "🚀 Starting SnapDog2 development environment with SigNoz..."
+    echo "🚀 Starting SnapDog2 development environment with Grafana observability..."
     docker compose -f docker-compose.dev.yml up -d
     sleep 3
     show_urls
