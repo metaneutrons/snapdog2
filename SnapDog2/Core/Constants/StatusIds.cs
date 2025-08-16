@@ -3,6 +3,7 @@ namespace SnapDog2.Core.Constants;
 using SnapDog2.Core.Attributes;
 using SnapDog2.Server.Features.Clients.Notifications;
 using SnapDog2.Server.Features.Global.Notifications;
+using SnapDog2.Server.Features.Shared.Notifications;
 using SnapDog2.Server.Features.Zones.Notifications;
 
 /// <summary>
@@ -37,9 +38,26 @@ public static class StatusIds
         StatusIdAttribute.GetStatusId<ZoneShuffleModeChangedNotification>();
     public static readonly string ZoneState = StatusIdAttribute.GetStatusId<ZoneStateChangedNotification>();
 
+    // Track Information Status IDs
+    public static readonly string TrackInfo = StatusIdAttribute.GetStatusId<ZoneTrackInfoChangedNotification>();
+    public static readonly string TrackInfoLength = StatusIdAttribute.GetStatusId<ZoneTrackLengthChangedNotification>();
+    public static readonly string TrackInfoPosition =
+        StatusIdAttribute.GetStatusId<ZoneTrackPositionChangedNotification>();
+    public static readonly string TrackInfoTitle = StatusIdAttribute.GetStatusId<ZoneTrackTitleChangedNotification>();
+    public static readonly string TrackInfoArtist = StatusIdAttribute.GetStatusId<ZoneTrackArtistChangedNotification>();
+    public static readonly string TrackInfoAlbum = StatusIdAttribute.GetStatusId<ZoneTrackAlbumChangedNotification>();
+
+    // Playlist Information Status IDs
+    public static readonly string PlaylistInfo = StatusIdAttribute.GetStatusId<ZonePlaylistInfoChangedNotification>();
+
+    // Command Response Status IDs
+    public static readonly string CommandStatus = StatusIdAttribute.GetStatusId<CommandStatusNotification>();
+    public static readonly string CommandError = StatusIdAttribute.GetStatusId<CommandErrorNotification>();
+
     // Global Status IDs
     public static readonly string VersionInfo = StatusIdAttribute.GetStatusId<VersionInfoChangedNotification>();
     public static readonly string SystemStatus = StatusIdAttribute.GetStatusId<SystemStatusChangedNotification>();
     public static readonly string ServerStats = StatusIdAttribute.GetStatusId<ServerStatsChangedNotification>();
     public static readonly string SystemError = StatusIdAttribute.GetStatusId<SystemErrorNotification>();
+    public static readonly string ZonesInfo = StatusIdAttribute.GetStatusId<ZonesInfoChangedNotification>();
 }

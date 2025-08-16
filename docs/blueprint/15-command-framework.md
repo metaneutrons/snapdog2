@@ -32,9 +32,10 @@ For each level, this section defines:
 | Status ID         | Description                 | Essential Information / Type          | Direction        | Notes                           |
 | :---------------- | :-------------------------- | :------------------------------------ | :--------------- | :------------------------------ |
 | `SYSTEM_STATUS`   | System online/offline status | `IsOnline` (bool)                     | Status (Publish) | `true`=online, `false`=offline  |
-| `ERROR_STATUS`    | System error information    | `ErrorDetails` object (`Core.Models`) | Status (Publish) | Published on significant errors |
+| `SYSTEM_ERROR`    | System error information    | `ErrorDetails` object (`Core.Models`) | Status (Publish) | Published on significant errors |
 | `VERSION_INFO`    | Software version information| `VersionDetails` object (`Core.Models`) | Status (Publish) | Contains version, build date etc. |
 | `SERVER_STATS`    | Server performance stats    | `ServerStats` object (`Core.Models`)  | Status (Publish) | CPU, Memory, Uptime             |
+| `ZONES_INFO`      | Available zones list        | `ZoneIndex[]` (int array, 1-based)   | Status (Publish) | List of configured zone indices |
 
 *(The C# Record definitions for `ErrorDetails`, `VersionDetails`, `ServerStats` are implemented in `SnapDog2.Core.Models` namespace)*
 
