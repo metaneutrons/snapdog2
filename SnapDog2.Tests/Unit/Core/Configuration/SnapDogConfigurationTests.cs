@@ -67,7 +67,6 @@ public class SnapDogConfigurationTests
         var config = new OtlpConfig();
 
         // Assert
-        config.Enabled.Should().BeFalse();
         config.Endpoint.Should().Be("http://localhost:4317");
         config.Protocol.Should().Be("grpc");
         config.Headers.Should().BeNull();

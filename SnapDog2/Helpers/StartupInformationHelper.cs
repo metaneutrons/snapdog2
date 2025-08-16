@@ -365,7 +365,7 @@ public static class StartupInformationHelper
             );
 
             var telemetryTargets = new List<string>();
-            if (config.Telemetry.Otlp.Enabled)
+            if (config.Telemetry.Enabled)
             {
                 telemetryTargets.Add($"OTLP: {config.Telemetry.Otlp.Endpoint}");
             }

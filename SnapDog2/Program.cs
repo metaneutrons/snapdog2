@@ -176,7 +176,7 @@ static WebApplication CreateWebApplication(string[] args)
     builder.Services.AddSingleton(snapDogConfig.SnapcastServer);
 
     // Configure OpenTelemetry (if enabled)
-    if (snapDogConfig.Telemetry.Enabled && snapDogConfig.Telemetry.Otlp.Enabled)
+    if (snapDogConfig.Telemetry.Enabled)
     {
         builder
             .Services.AddOpenTelemetry()
@@ -249,9 +249,8 @@ static WebApplication CreateWebApplication(string[] args)
     else
     {
         Log.Information(
-            "OpenTelemetry disabled (SNAPDOG_TELEMETRY_ENABLED={TelemetryEnabled}, SNAPDOG_TELEMETRY_OTLP_ENABLED={OtlpEnabled})",
-            snapDogConfig.Telemetry.Enabled,
-            snapDogConfig.Telemetry.Otlp.Enabled
+            "OpenTelemetry disabled (SNAPDOG_TELEMETRY_ENABLED={TelemetryEnabled})",
+            snapDogConfig.Telemetry.Enabled
         );
     }
 

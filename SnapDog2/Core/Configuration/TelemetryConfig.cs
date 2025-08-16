@@ -36,25 +36,6 @@ public class TelemetryConfig
     /// </summary>
     [Env(NestedPrefix = "OTLP_")]
     public OtlpConfig Otlp { get; set; } = new();
-
-    /// <summary>
-    /// Optional Prometheus config placeholder for compatibility with existing tests/config.
-    /// Maps environment variables with prefix: SNAPDOG_TELEMETRY_PROMETHEUS_*
-    /// </summary>
-    [Env(NestedPrefix = "PROMETHEUS_")]
-    public PrometheusConfig Prometheus { get; set; } = new();
-}
-
-/// <summary>
-/// Minimal Prometheus telemetry configuration placeholder.
-/// </summary>
-public class PrometheusConfig
-{
-    [Env(Key = "ENABLED", Default = false)]
-    public bool Enabled { get; set; } = false;
-
-    [Env(Key = "PORT", Default = 9464)]
-    public int Port { get; set; } = 9464;
 }
 
 /// <summary>
@@ -63,13 +44,6 @@ public class PrometheusConfig
 /// </summary>
 public class OtlpConfig
 {
-    /// <summary>
-    /// Whether OTLP export is enabled.
-    /// Maps to: SNAPDOG_TELEMETRY_OTLP_ENABLED
-    /// </summary>
-    [Env(Key = "ENABLED", Default = false)]
-    public bool Enabled { get; set; } = false;
-
     /// <summary>
     /// OTLP endpoint URL for traces and metrics.
     /// Maps to: SNAPDOG_TELEMETRY_OTLP_ENDPOINT
