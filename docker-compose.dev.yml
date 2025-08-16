@@ -7,8 +7,8 @@ services:
       target: development # Multi-stage development target
     volumes:
       - .:/app:cached # Mount source code for hot reload
-      - ~/.nuget/packages:/home/vscode/.nuget/packages:cached # NuGet cache
-      - ~/.nuget/local:/app/local-nuget:cached # Local NuGet packages for development
+      #      - ~/.nuget/packages:/home/vscode/.nuget/packages:cached # NuGet cache
+      #      - ~/.nuget/local:/app/local-nuget:cached # Local NuGet packages for development
       - snapcast_sinks:/snapsinks # Shared audio sinks with snapcast-server
     env_file:
       - ./devcontainer/.env
@@ -196,9 +196,9 @@ services:
     volumes:
       - ./devcontainer/otel/otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
     ports:
-      - "4317:4317"  # OTLP gRPC receiver
-      - "4318:4318"  # OTLP HTTP receiver
-      - "8889:8889"  # Prometheus metrics endpoint
+      - "4317:4317" # OTLP gRPC receiver
+      - "4318:4318" # OTLP HTTP receiver
+      - "8889:8889" # Prometheus metrics endpoint
     networks:
       snapdog-dev:
         ipv4_address: 172.25.0.20
@@ -210,7 +210,7 @@ services:
     container_name: snapdog-grafana
     hostname: grafana
     ports:
-      - "3301:3000"  # Grafana UI
+      - "3301:3000" # Grafana UI
     volumes:
       - grafana-data:/var/lib/grafana
       - ./devcontainer/grafana/provisioning:/etc/grafana/provisioning:ro
@@ -218,6 +218,7 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_INSTALL_PLUGINS=grafana-piechart-panel
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
     depends_on:
       - otel-collector
     networks:
@@ -225,22 +226,28 @@ services:
         ipv4_address: 172.25.0.21
     restart: unless-stopped
 
-  # KNX Monitor - Visual debugging tool for KNX bus activity
+  # KNX Monitor - Visual debugging tool for KNX bus activity with web interface
   knx-monitor:
     image: ghcr.io/metaneutrons/knxmonitor:latest
     volumes:
       - ./devcontainer/knx-groupaddresses.csv:/app/knx-groupaddresses.csv:ro # KNX group addresses database
     environment:
       - TZ=Europe/Berlin # Set timezone for proper log timestamps
-    command: ["-g", "knxd", "-v", "--csv", "/app/knx-groupaddresses.csv"]
+      - DOTNET_RUNNING_IN_CONTAINER=true # Force web interface mode
+    command: [
+      "-g", "knxd", 
+      "-v", 
+      "--csv", "/app/knx-groupaddresses.csv",
+      "--logging-mode", # Force web interface mode
+      "--http-host", "0.0.0.0", # Bind to all interfaces for container access
+      "--http-port", "8671" # Default web interface port
+    ]
     depends_on:
       knxd:
         condition: service_healthy
     networks:
       snapdog-dev:
         ipv4_address: 172.25.0.14
-    stdin_open: true
-    tty: true
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/ready"]
@@ -249,7 +256,7 @@ services:
       retries: 5
       start_period: 30s
     labels:
-      - "traefik.enable=false" # Not exposed via web interface
+      - "traefik.enable=false" # Exposed via Caddy instead
       - "com.docker.compose.service=knx-monitor"
 
 volumes:

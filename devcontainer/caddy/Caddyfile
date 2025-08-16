@@ -10,6 +10,7 @@
         not path /clients*
         not path /music*
         not path /grafana*
+        not path /knx*
         not path /api*
         not path /swagger*
     }
@@ -51,6 +52,12 @@
     handle /grafana/* {
         uri strip_prefix /grafana
         reverse_proxy http://grafana:3000
+    }
+
+    # KNX Monitor - Real-time KNX bus monitoring web interface
+    handle /knx* {
+        uri strip_prefix /knx
+        reverse_proxy http://knx-monitor:8671
     }
 
     # Redirect for clients
