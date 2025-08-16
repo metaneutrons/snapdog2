@@ -20,6 +20,7 @@ services:
       - snapcast-server
       - mqtt
       - navidrome
+      - signoz-otel-collector
     networks:
       snapdog-dev:
         ipv4_address: 172.20.0.2
@@ -44,7 +45,7 @@ services:
       - snapcast-client-kitchen
       - snapcast-client-bedroom
       - navidrome
-      - jaeger
+      - signoz-frontend
     networks:
       snapdog-dev:
         ipv4_address: 172.20.0.4
@@ -182,54 +183,78 @@ services:
       retries: 3
       start_period: 10s
 
-  # Jaeger
-  jaeger:
-    image: jaegertracing/all-in-one:latest
-    environment:
-      COLLECTOR_OTLP_ENABLED: true
-    networks:
-      snapdog-dev:
-        ipv4_address: 172.20.0.11
-    restart: unless-stopped
+  # ═══════════════════════════════════════════════════════════════════════════════
+  # SigNoz Observability Stack
+  # ═══════════════════════════════════════════════════════════════════════════════
 
-  # Prometheus for metrics
-  prometheus:
-    image: prom/prometheus:latest
+  # ClickHouse Database for SigNoz
+  signoz-clickhouse:
+    image: clickhouse/clickhouse-server:23.7
+    container_name: snapdog-signoz-clickhouse
+    environment:
+      - CLICKHOUSE_DB=signoz
+      - CLICKHOUSE_USER=signoz
+      - CLICKHOUSE_PASSWORD=signoz
     volumes:
-      - ./devcontainer/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - signoz-clickhouse-data:/var/lib/clickhouse
     networks:
       snapdog-dev:
-        ipv4_address: 172.20.0.12
-    profiles: ["monitoring"]
+        ipv4_address: 172.20.0.20
     restart: unless-stopped
 
-  # Grafana for visualization
-  grafana:
-    image: grafana/grafana:latest
+  # OpenTelemetry Collector for SigNoz
+  signoz-otel-collector:
+    image: signoz/signoz-otel-collector:0.88.11
+    container_name: snapdog-signoz-otel-collector
+    command: 
+      - --config=/etc/otel-collector-config.yaml
     environment:
-      GF_SECURITY_ADMIN_PASSWORD: snapdog-dev
-      GF_SERVER_ROOT_URL: http://localhost:8000/grafana/
-      GF_SERVER_SERVE_FROM_SUB_PATH: true
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=signoz-otel-collector,service.version=0.88.11
+    volumes:
+      - ./devcontainer/signoz/otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    ports:
+      - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # OTLP HTTP receiver
     networks:
       snapdog-dev:
-        ipv4_address: 172.20.0.13
-    profiles: ["monitoring"]
+        ipv4_address: 172.20.0.21
     restart: unless-stopped
+    depends_on:
+      - signoz-clickhouse
+
+  # SigNoz Query Service
+  signoz-query-service:
+    image: signoz/query-service:0.39.0
+    container_name: snapdog-signoz-query-service
+    environment:
+      - ClickHouseUrl=tcp://signoz-clickhouse:9000/?database=signoz
+      - STORAGE=clickhouse
+      - GODEBUG=netdns=go
+      - TELEMETRY_ENABLED=true
+      - DEPLOYMENT_TYPE=docker-standalone
+    networks:
+      snapdog-dev:
+        ipv4_address: 172.20.0.22
+    restart: unless-stopped
+    depends_on:
+      - signoz-clickhouse
+      - signoz-otel-collector
+
+  # SigNoz Frontend
+  signoz-frontend:
+    image: signoz/frontend:0.39.0
+    container_name: snapdog-signoz-frontend
+    environment:
+      - FRONTEND_API_ENDPOINT=http://signoz-query-service:8080
+      - NEXT_PUBLIC_FRONTEND_API_ENDPOINT=http://localhost:8000/signoz-api
+    networks:
+      snapdog-dev:
+        ipv4_address: 172.20.0.23
+    restart: unless-stopped
+    depends_on:
+      - signoz-query-service
 
   # KNX Monitor - Visual debugging tool for KNX bus activity
-  #
-  # Now using official GitHub Container Registry image with multi-architecture support
-  # - Automatically pulls the correct architecture (AMD64/ARM64)
-  # - Signed binaries for enhanced security
-  # - Regular updates from CI/CD pipeline
-  #
-  # TROUBLESHOOTING:
-  # - If you see "Unrecognized command or argument" errors, use short form arguments (-g, -p, -v)
-  # - Long form arguments (--gateway, --port, --verbose) may not work in Docker due to System.CommandLine beta version
-  # - Check logs with: docker compose logs knx-monitor -f
-  # - Check health status: docker inspect snapdog-knx-monitor-1 --format='{{.State.Health.Status}}'
-  # - Access health endpoint: curl http://localhost:8080/health (if port is exposed)
-  # - Access readiness endpoint: curl http://localhost:8080/ready (if port is exposed)
   knx-monitor:
     image: ghcr.io/metaneutrons/knxmonitor:latest
     volumes:
@@ -246,27 +271,6 @@ services:
     stdin_open: true
     tty: true
     restart: unless-stopped
-    # 🏥 HEALTH CHECK - Enabled by default in Docker containers
-    # 
-    # The KNX Monitor automatically enables health check service when running in containers.
-    # This provides comprehensive monitoring of both application and KNX connection status.
-    #
-    # Features:
-    # - HTTP-based health check using dedicated endpoint
-    # - Checks both application process AND KNX connection status
-    # - Returns detailed JSON with connection info and message count
-    # - More reliable than simple process checks
-    # - Faster response time (5s timeout vs 10s)
-    # - More frequent checks (15s interval vs 30s)
-    # - Longer startup grace period (30s) for KNX connection establishment
-    #
-    # Endpoints (internal to container):
-    # - http://localhost:8080/health: Detailed health information with uptime and message count
-    # - http://localhost:8080/ready: Simple readiness check (used by Docker health check)
-    #
-    # To debug health check: 
-    # - docker inspect snapdog-knx-monitor-1 --format='{{.State.Health.Status}}'
-    # - docker inspect snapdog-knx-monitor-1 --format='{{range .State.Health.Log}}{{.Output}}{{end}}'
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/ready"]
       interval: 15s
@@ -284,6 +288,8 @@ volumes:
   caddy_data:
   caddy_config:
   snapcast_sinks: # Shared volume for audio sinks between snapcast-server and app
+  signoz-clickhouse-data:
+    name: snapdog-signoz-clickhouse-data
 
 networks:
   snapdog-dev:

@@ -29,27 +29,21 @@ make dev
 
 ### 🏗️ Development
 
-- `make dev-setup` - Initial setup (pull images, restore packages)
-- `make dev` - Full development environment (setup + start + urls)
-- `make dev-stop` - Stop all services
-- `make dev-status` - Show status of all services
-- `make dev-logs` - Show logs from all services
-
-### 📊 Monitoring
-
-- `make monitoring-start` - Start Prometheus + Grafana
-- `make monitoring-stop` - Stop monitoring services
+- `./dev.sh start` - Start full development environment
+- `./dev.sh stop` - Stop all services
+- `./dev.sh restart` - Quick restart
+- `./dev.sh status` - Show status of all services
+- `./dev.sh logs` - Show logs from all services
 
 ### 🧪 Testing & Building
 
-- `make test` - Run tests with services
-- `make build` - Build the application
-- `make clean` - Clean containers and volumes
+- `./dev.sh test` - Run tests with services
+- `./dev.sh build` - Build the application
+- `./dev.sh clean` - Clean containers and volumes
 
 ### 🌐 Utilities
 
-- `make urls` - Show all service URLs
-- `make restart` - Quick restart
+- `./dev.sh urls` - Show all service URLs
 
 ## Architecture
 
@@ -86,9 +80,9 @@ graph TB
         end
         
         subgraph "Observability"
-            JAEGER["🔍 Jaeger<br/>172.20.0.11:16686"]
-            PROMETHEUS["📈 Prometheus<br/>172.20.0.12:9090"]
-            GRAFANA["📊 Grafana<br/>172.20.0.13:3000"]
+            SIGNOZ["🔍 SigNoz<br/>172.20.0.23:3301"]
+            OTELCOL["📊 OTEL Collector<br/>172.20.0.21:4317"]
+            CLICKHOUSE["🗄️ ClickHouse<br/>172.20.0.20:9000"]
         end
     end
     
@@ -102,16 +96,14 @@ graph TB
     CADDY --> LIVING
     CADDY --> KITCHEN
     CADDY --> BEDROOM
-    CADDY --> JAEGER
-    CADDY --> PROMETHEUS
-    CADDY --> GRAFANA
+    CADDY --> SIGNOZ
     
     %% Application connections
     APP --> SNAPSERVER
     APP --> MQTT
     APP --> NAVIDROME
     APP --> KNX
-    APP --> JAEGER
+    APP --> OTELCOL
     
     %% KNX Monitor connection
     KNXMON --> KNX
@@ -121,9 +113,9 @@ graph TB
     SNAPSERVER --> KITCHEN
     SNAPSERVER --> BEDROOM
     
-    %% Monitoring flows
-    APP --> PROMETHEUS
-    PROMETHEUS --> GRAFANA
+    %% Observability flows
+    OTELCOL --> CLICKHOUSE
+    CLICKHOUSE --> SIGNOZ
     
     %% Styling
     classDef external fill:#e1f5fe,stroke:#01579b,stroke-width:2px
@@ -140,7 +132,7 @@ graph TB
     class SNAPSERVER,NAVIDROME audio
     class LIVING,KITCHEN,BEDROOM client
     class MQTT,KNX iot
-    class JAEGER,PROMETHEUS,GRAFANA monitoring
+    class SIGNOZ,OTELCOL,CLICKHOUSE monitoring
 ```
 
 ## Service Access
@@ -154,9 +146,7 @@ All services accessible through **single port 8000** via Caddy reverse proxy:
 - **🍽️ Kitchen Client**: <http://localhost:8000/clients/kitchen/>
 - **🛏️ Bedroom Client**: <http://localhost:8000/clients/bedroom/>
 - **🔧 KNX Monitor**: Available via `docker compose logs knx-monitor -f` (visual KNX bus debugging)
-- **🔍 Jaeger Tracing**: <http://localhost:8000/tracing/>
-- **📊 Grafana Dashboards**: <http://localhost:8000/grafana/> (admin/snapdog-dev)
-- **📈 Prometheus Metrics**: <http://localhost:8000/prometheus/>
+- **🔍 SigNoz Observability**: <http://localhost:8000/signoz/> (unified traces, metrics, and logs)
 
 ## What's Included
 
@@ -170,9 +160,7 @@ All services accessible through **single port 8000** via Caddy reverse proxy:
 
 ### 📊 Observability
 
-- **Jaeger** - Distributed tracing
-- **Prometheus** - Metrics collection
-- **Grafana** - Metrics visualization
+- **SigNoz** - Unified observability platform (traces, metrics, logs)
 
 ### 🌐 Infrastructure
 
@@ -211,24 +199,24 @@ All services accessible through **single port 8000** via Caddy reverse proxy:
 
 ```bash
 # Start everything
-make dev
+./dev.sh start
 
 # View what's running
-make dev-status
-make urls
+./dev.sh status
+./dev.sh urls
 
 # Monitor logs
-make dev-logs
+./dev.sh logs
 
 # When done
-make dev-stop
+./dev.sh stop
 ```
 
 ### Testing Multi-Room Audio
 
 ```bash
 # Start services and app
-make dev
+./dev.sh start
 
 # Test with real Snapcast clients
 curl http://snapcast-server:1704 -d '{"method":"Server.GetStatus","id":1}'
@@ -251,12 +239,11 @@ curl http://snapcast-server:1704 -d '{"method":"Server.GetStatus","id":1}'
 
 ```bash
 # Check container logs
-make dev-logs
+./dev.sh logs
 
 # Rebuild containers
-make clean
-make dev-setup
-make dev
+./dev.sh clean
+./dev.sh start
 ```
 
 ## Why This Approach Works

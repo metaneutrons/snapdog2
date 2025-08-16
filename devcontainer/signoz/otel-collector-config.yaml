@@ -1,0 +1,86 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+        cors:
+          allowed_origins:
+            - "http://localhost:8000"
+            - "http://localhost:3301"
+
+  # Prometheus scraping for existing services
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'snapdog-api'
+          static_configs:
+            - targets: ['snapdog:5000']
+          metrics_path: '/metrics'
+          scrape_interval: 15s
+        
+        - job_name: 'snapcast-server'
+          static_configs:
+            - targets: ['snapcast-server:1780']
+          metrics_path: '/metrics'
+          scrape_interval: 30s
+
+processors:
+  batch:
+    timeout: 1s
+    send_batch_size: 1024
+    send_batch_max_size: 2048
+
+  resource:
+    attributes:
+      - key: service.namespace
+        value: snapdog
+        action: upsert
+      - key: deployment.environment
+        value: development
+        action: upsert
+
+  # Memory limiter to prevent OOM
+  memory_limiter:
+    limit_mib: 512
+
+exporters:
+  clickhouse:
+    endpoint: tcp://signoz-clickhouse:9000/?database=signoz
+    username: signoz
+    password: signoz
+    traces_table_name: signoz_traces
+    metrics_table_name: signoz_metrics
+    logs_table_name: signoz_logs
+    timeout: 5s
+    retry_on_failure:
+      enabled: true
+      initial_interval: 5s
+      max_interval: 30s
+      max_elapsed_time: 300s
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch, resource]
+      exporters: [clickhouse]
+    
+    metrics:
+      receivers: [otlp, prometheus]
+      processors: [memory_limiter, batch, resource]
+      exporters: [clickhouse]
+    
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, batch, resource]
+      exporters: [clickhouse]
+
+  extensions: []
+  
+  telemetry:
+    logs:
+      level: info
+    metrics:
+      address: 0.0.0.0:8888
