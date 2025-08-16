@@ -1,43 +1,208 @@
 # 12. Metrics and Telemetry (Infrastructure Layer)
 
-This chapter details the strategy and implementation for observability within SnapDog2, encompassing metrics, distributed tracing, and correlated logging. The primary framework used is **OpenTelemetry**, leveraging the standard .NET abstractions (`System.Diagnostics.ActivitySource`, `System.Diagnostics.Metrics.Meter`) and configured exporters. Observability components reside primarily within the `/Infrastructure/Observability` folder.
+This chapter details the strategy and implementation for observability within SnapDog2, encompassing metrics, distributed tracing, and correlated logging. The framework used is **OpenTelemetry with OTLP (OpenTelemetry Protocol)** for vendor-neutral telemetry export. SnapDog2 implements only OTLP - the choice of observability backend (Jaeger, SigNoz, Prometheus, etc.) is a deployment concern.
 
 ## 12.1. Overview
 
-For a self-hosted application like SnapDog2, observability should be powerful yet resource-efficient. While a full Prometheus + Grafana + Jaeger stack is supported as an advanced option, it can be overkill. **The recommended approach is a logging-first strategy using a centralized log server like Seq**, which provides excellent diagnostic capabilities with minimal overhead.
+SnapDog2 follows a **vendor-neutral observability approach** using OpenTelemetry Protocol (OTLP). This provides maximum flexibility in choosing observability backends without requiring application code changes. The application exports all three observability signals (traces, metrics, logs) via OTLP to any compatible backend.
 
-The application is instrumented with OpenTelemetry to provide all three signals (logs, traces, metrics), allowing the user to choose the desired backend. The three pillars of observability are:
+**Architecture:**
+```
+SnapDog2 Application → OTLP → [Jaeger | SigNoz | Prometheus | Any OTLP Backend]
+```
 
-* **Distributed Tracing:** To track the flow of requests and operations across different logical components (API, Cortex.Mediator Handlers, Infrastructure Services).
-* **Metrics:** To quantify application performance, resource usage, and key operational counts (e.g., commands processed, errors).
-* **Correlated Logging:** To link log events directly to the specific trace and span that generated them, significantly simplifying debugging.
+**Supported Backends:**
+- **Jaeger**: Distributed tracing
+- **SigNoz**: Unified observability (traces, metrics, logs)
+- **Prometheus**: Metrics collection (via OpenTelemetry Collector)
+- **Grafana Cloud**: Managed observability
+- **Any OTLP-compatible backend**
 
-## 12.2. Scope
+The three pillars of observability are:
 
-OpenTelemetry instrumentation aims to cover critical paths and components:
+* **Distributed Tracing:** Track request flow across components (API, Cortex.Mediator, Infrastructure Services)
+* **Metrics:** Quantify performance, resource usage, and operational counts
+* **Correlated Logging:** Link log events to specific traces and spans for simplified debugging
 
-* **Incoming Requests:** ASP.NET Core instrumentation automatically traces incoming API requests.
-* **Internal Processing:** Cortex.Mediator pipeline behaviors (`LoggingBehavior`, `PerformanceBehavior`) are instrumented to create spans representing command/query handling.
+## 12.2. Configuration
+
+### 12.2.1. Environment Variables
+
+All telemetry configuration uses the `SNAPDOG_TELEMETRY_` prefix:
+
+```bash
+# Core telemetry settings
+SNAPDOG_TELEMETRY_ENABLED=true                        # Default: false
+SNAPDOG_TELEMETRY_SERVICE_NAME=SnapDog2               # Default: SnapDog2
+SNAPDOG_TELEMETRY_SAMPLING_RATE=1.0                   # Default: 1.0
+
+# OTLP Configuration (vendor-neutral)
+SNAPDOG_TELEMETRY_OTLP_ENABLED=true                   # Default: false
+SNAPDOG_TELEMETRY_OTLP_ENDPOINT=http://localhost:4317 # Default: http://localhost:4317
+SNAPDOG_TELEMETRY_OTLP_PROTOCOL=grpc                  # Default: grpc (grpc|http/protobuf)
+SNAPDOG_TELEMETRY_OTLP_HEADERS=key1=value1,key2=value2 # Optional authentication headers
+SNAPDOG_TELEMETRY_OTLP_TIMEOUT=30                     # Default: 30 (seconds)
+```
+
+### 12.2.2. Backend-Specific Examples
+
+**Jaeger:**
+```bash
+SNAPDOG_TELEMETRY_OTLP_ENDPOINT=http://jaeger:14268/api/traces
+SNAPDOG_TELEMETRY_OTLP_PROTOCOL=http/protobuf
+```
+
+**SigNoz:**
+```bash
+SNAPDOG_TELEMETRY_OTLP_ENDPOINT=http://signoz-otel-collector:4317
+SNAPDOG_TELEMETRY_OTLP_PROTOCOL=grpc
+```
+
+**OpenTelemetry Collector:**
+```bash
+SNAPDOG_TELEMETRY_OTLP_ENDPOINT=http://otel-collector:4317
+SNAPDOG_TELEMETRY_OTLP_PROTOCOL=grpc
+SNAPDOG_TELEMETRY_OTLP_HEADERS=authorization=Bearer token123
+```
+
+## 12.3. Implementation
+
+### 12.3.1. TelemetryConfig Class
+
+```csharp
+namespace SnapDog2.Core.Configuration;
+
+/// <summary>
+/// Telemetry and observability configuration.
+/// SnapDog2 uses OpenTelemetry Protocol (OTLP) for vendor-neutral telemetry export.
+/// </summary>
+public class TelemetryConfig
+{
+    [Env(Key = "ENABLED", Default = false)]
+    public bool Enabled { get; set; } = false;
+
+    [Env(Key = "SERVICE_NAME", Default = "SnapDog2")]
+    public string ServiceName { get; set; } = "SnapDog2";
+
+    [Env(Key = "SAMPLING_RATE", Default = 1.0)]
+    public double SamplingRate { get; set; } = 1.0;
+
+    [Env(NestedPrefix = "OTLP_")]
+    public OtlpConfig Otlp { get; set; } = new();
+}
+
+/// <summary>
+/// OTLP configuration for vendor-neutral telemetry export.
+/// </summary>
+public class OtlpConfig
+{
+    [Env(Key = "ENABLED", Default = false)]
+    public bool Enabled { get; set; } = false;
+
+    [Env(Key = "ENDPOINT", Default = "http://localhost:4317")]
+    public string Endpoint { get; set; } = "http://localhost:4317";
+
+    [Env(Key = "PROTOCOL", Default = "grpc")]
+    public string Protocol { get; set; } = "grpc";
+
+    [Env(Key = "HEADERS")]
+    public string? Headers { get; set; }
+
+    [Env(Key = "TIMEOUT", Default = 30)]
+    public int TimeoutSeconds { get; set; } = 30;
+}
+```
+
+### 12.3.2. OpenTelemetry Setup
+
+```csharp
+// Program.cs - OpenTelemetry configuration
+if (snapDogConfig.Telemetry.Enabled && snapDogConfig.Telemetry.Otlp.Enabled)
+{
+    builder.Services.AddOpenTelemetry()
+        .ConfigureResource(resource => resource
+            .AddService(snapDogConfig.Telemetry.ServiceName, "2.0.0")
+            .AddAttributes(new Dictionary<string, object>
+            {
+                ["deployment.environment"] = builder.Environment.EnvironmentName,
+                ["service.namespace"] = "snapdog"
+            }))
+        .WithTracing(tracing => tracing
+            .SetSampler(new TraceIdRatioBasedSampler(snapDogConfig.Telemetry.SamplingRate))
+            .AddAspNetCoreInstrumentation(options => options.RecordException = true)
+            .AddHttpClientInstrumentation()
+            .AddSource("SnapDog2.*")
+            .AddOtlpExporter(options =>
+            {
+                options.Endpoint = new Uri(snapDogConfig.Telemetry.Otlp.Endpoint);
+                options.Protocol = snapDogConfig.Telemetry.Otlp.Protocol.ToLowerInvariant() switch
+                {
+                    "grpc" => OtlpExportProtocol.Grpc,
+                    "http/protobuf" => OtlpExportProtocol.HttpProtobuf,
+                    _ => OtlpExportProtocol.Grpc
+                };
+                options.TimeoutMilliseconds = snapDogConfig.Telemetry.Otlp.TimeoutSeconds * 1000;
+                
+                if (!string.IsNullOrEmpty(snapDogConfig.Telemetry.Otlp.Headers))
+                {
+                    options.Headers = snapDogConfig.Telemetry.Otlp.Headers;
+                }
+            }))
+        .WithMetrics(metrics => metrics
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddMeter("SnapDog2.*")
+            .AddOtlpExporter(/* same configuration as tracing */));
+}
+```
+
+## 12.4. Scope
+
+OpenTelemetry instrumentation covers critical application paths:
+
+* **Incoming Requests:** ASP.NET Core instrumentation automatically traces API requests
+* **Internal Processing:** Cortex.Mediator pipeline behaviors create spans for command/query handling
 * **External Dependencies:**
-  * `HttpClient` instrumentation automatically traces outgoing HTTP requests (e.g., to Subsonic).
-  * Manual instrumentation (creating specific `Activity` spans) is applied within key methods of infrastructure services (`SnapcastService`, `KnxService`, `MqttService`, `MediaPlayerService`) for significant operations or external interactions not covered automatically.
-* **Custom Metrics:** Key application events and performance indicators are measured using custom `Meter` instruments.
+  * `HttpClient` instrumentation automatically traces outgoing HTTP requests (Subsonic, etc.)
+  * Manual instrumentation for infrastructure services (`SnapcastService`, `KnxService`, `MqttService`)
+* **Custom Metrics:** Application-specific events and performance indicators
 
-## 12.3. Telemetry Types
+## 12.5. Telemetry Types
 
-1. **Metrics:**
-    * **Goal:** Provide quantitative data on application health and performance.
-    * **Implementation:** Uses `System.Diagnostics.Metrics.Meter`. Standard instruments provided by OpenTelemetry (`AspNetCore`, `HttpClient`, `Runtime`, `Process`) are enabled. Custom metrics (e.g., Cortex.Mediator request counts/duration, playback events) defined via `IMetricsService`.
-    * **Export:** Primarily exported in **Prometheus** format via an ASP.NET Core endpoint (`/metrics`), configured via `SNAPDOG_PROMETHEUS_*` variables (Section 10). Console exporter used as fallback/for debugging.
-2. **Tracing:**
-    * **Goal:** Visualize the flow and duration of operations across components.
-    * **Implementation:** Uses `System.Diagnostics.ActivitySource`. Automatic instrumentation for ASP.NET Core and HttpClient. Manual instrumentation (`ActivitySource.StartActivity()`) within Cortex.Mediator behaviors and key infrastructure service methods.
-    * **Export:** Exported using the **OpenTelemetry Protocol (OTLP)**, configured via `SNAPDOG_TELEMETRY_OTLP_*` variables (Section 10). This allows sending traces to various compatible backends like Jaeger, Tempo, Grafana Cloud Traces, etc. Console exporter used as fallback/for debugging.
-    * **Sampling:** Configured via `SNAPDOG_TELEMETRY_SAMPLING_RATE` (default 1.0 = sample all traces).
-3. **Logging:**
-    * **Goal:** Provide detailed, contextual event information correlated with traces.
-    * **Implementation:** Uses `Microsoft.Extensions.Logging.ILogger<T>` with Serilog backend and **LoggerMessage Source Generators**.
-    * **Correlation:** OpenTelemetry logging integration (configured in `Program.cs`) automatically enriches log events with the `TraceId` and `SpanId` of the current `Activity`. Serilog output templates are configured to include these IDs (Section 5.2).
+### 12.5.1. Traces
+- **Goal:** Visualize operation flow and duration across components
+- **Implementation:** `System.Diagnostics.ActivitySource` with automatic and manual instrumentation
+- **Export:** OTLP to any compatible backend (Jaeger, SigNoz, etc.)
+- **Sampling:** Configurable via `SNAPDOG_TELEMETRY_SAMPLING_RATE`
+
+### 12.5.2. Metrics  
+- **Goal:** Quantitative data on application health and performance
+- **Implementation:** `System.Diagnostics.Metrics.Meter` with custom instruments
+- **Export:** OTLP to any compatible backend (Prometheus via collector, SigNoz, etc.)
+- **Instruments:** Counters, histograms, gauges for key application events
+
+### 12.5.3. Logs
+- **Goal:** Detailed contextual information correlated with traces
+- **Implementation:** `Microsoft.Extensions.Logging.ILogger<T>` with Serilog
+- **Correlation:** Automatic enrichment with `TraceId` and `SpanId`
+- **Export:** Structured logging with trace correlation
+
+## 12.6. Benefits
+
+### 12.6.1. Vendor Neutrality
+- **Backend Agnostic:** Switch observability platforms without code changes
+- **Future Proof:** Works with emerging OTLP-compatible platforms
+- **Cost Flexibility:** Choose between self-hosted and managed solutions
+
+### 12.6.2. Operational Benefits
+- **Unified Configuration:** Single OTLP endpoint for all telemetry signals
+- **Simple Deployment:** No backend-specific configuration in application
+- **Easy Migration:** Change backends by updating deployment configuration
+
+### 12.6.3. Development Experience
+- **Consistent Instrumentation:** Same code works with any backend
+- **Local Development:** Easy to enable/disable observability
+- **Testing:** Mock OTLP endpoints for integration tests
 
 ## 12.4. OpenTelemetry Setup (DI / `/Worker/DI/ObservabilityExtensions.cs`)
 

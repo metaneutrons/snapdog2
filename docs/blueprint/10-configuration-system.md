@@ -30,7 +30,6 @@ classDiagram
         +string ServiceName
         +double SamplingRate
         +OtlpConfig Otlp
-        +PrometheusConfig Prometheus
     }
 
     class ServicesConfig {
@@ -112,27 +111,44 @@ SNAPDOG_SYSTEM_MQTT_STATS_TOPIC=stats                 # Default: stats
 
 ### 9.2.2. Telemetry Configuration
 
+SnapDog2 uses **OpenTelemetry Protocol (OTLP)** for vendor-neutral telemetry export. The application only implements OTLP - the choice of observability backend (Jaeger, SigNoz, Prometheus, etc.) is a deployment concern.
+
 ```bash
 # Core telemetry settings
 SNAPDOG_TELEMETRY_ENABLED=true                        # Default: false
-SNAPDOG_TELEMETRY_SERVICE_NAME=snapdog                # Default: SnapDog2
+SNAPDOG_TELEMETRY_SERVICE_NAME=SnapDog2               # Default: SnapDog2
 SNAPDOG_TELEMETRY_SAMPLING_RATE=1.0                   # Default: 1.0
 
-# Jaeger exporter configuration (Docker environment)
+# OTLP Configuration (vendor-neutral)
 SNAPDOG_TELEMETRY_OTLP_ENABLED=true                   # Default: false
-SNAPDOG_TELEMETRY_OTLP_ENDPOINT=http://jaeger:14268   # Default: http://localhost:14268
-SNAPDOG_TELEMETRY_OTLP_AGENT_ADDRESS=jaeger           # Default: localhost
-SNAPDOG_TELEMETRY_OTLP_AGENT_PORT=6831                # Default: 6831
-
-# Prometheus metrics configuration
-SNAPDOG_TELEMETRY_PROMETHEUS_ENABLED=true             # Default: false
-SNAPDOG_TELEMETRY_PROMETHEUS_PORT=9090                # Default: 9090
-SNAPDOG_TELEMETRY_PROMETHEUS_PATH=/metrics            # Default: /metrics
-
-# Seq integration (Recommended for Logging)
-SNAPDOG_TELEMETRY_SEQ_ENABLED=true                    # Default: true
-SNAPDOG_TELEMETRY_SEQ_URL=http://seq:5341             # Required if enabled
+SNAPDOG_TELEMETRY_OTLP_ENDPOINT=http://localhost:4317 # Default: http://localhost:4317
+SNAPDOG_TELEMETRY_OTLP_PROTOCOL=grpc                  # Default: grpc (grpc|http/protobuf)
+SNAPDOG_TELEMETRY_OTLP_HEADERS=key1=value1,key2=value2 # Optional authentication headers
+SNAPDOG_TELEMETRY_OTLP_TIMEOUT=30                     # Default: 30 (seconds)
 ```
+
+**Backend-Specific Examples:**
+
+```bash
+# For Jaeger
+SNAPDOG_TELEMETRY_OTLP_ENDPOINT=http://jaeger:14268/api/traces
+SNAPDOG_TELEMETRY_OTLP_PROTOCOL=http/protobuf
+
+# For SigNoz
+SNAPDOG_TELEMETRY_OTLP_ENDPOINT=http://signoz-otel-collector:4317
+SNAPDOG_TELEMETRY_OTLP_PROTOCOL=grpc
+
+# For OpenTelemetry Collector
+SNAPDOG_TELEMETRY_OTLP_ENDPOINT=http://otel-collector:4317
+SNAPDOG_TELEMETRY_OTLP_PROTOCOL=grpc
+SNAPDOG_TELEMETRY_OTLP_HEADERS=authorization=Bearer token123
+```
+
+**Key Benefits:**
+- **Vendor Neutral**: Works with any OTLP-compatible backend
+- **Simple Configuration**: Just change endpoint to switch backends  
+- **Clean Separation**: Application vs infrastructure concerns
+- **Future Proof**: Supports emerging observability platforms
 
 ### 9.2.3. API Configuration
 
