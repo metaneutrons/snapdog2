@@ -56,7 +56,22 @@ public class SnapDogConfigurationTests
         config.ServiceName.Should().Be("SnapDog2");
         config.SamplingRate.Should().Be(1.0);
         config.Otlp.Should().NotBeNull();
-        config.Prometheus.Should().NotBeNull();
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "Unit")]
+    public void OtlpConfig_ShouldHaveDefaultValues()
+    {
+        // Act
+        var config = new OtlpConfig();
+
+        // Assert
+        config.Enabled.Should().BeFalse();
+        config.Endpoint.Should().Be("http://localhost:4317");
+        config.Protocol.Should().Be("grpc");
+        config.Headers.Should().BeNull();
+        config.TimeoutSeconds.Should().Be(30);
     }
 
     [Fact]
