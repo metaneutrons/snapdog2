@@ -45,7 +45,6 @@ services:
       - snapcast-client-kitchen
       - snapcast-client-bedroom
       - navidrome
-      - signoz
     networks:
       snapdog-dev:
         ipv4_address: 172.25.0.4
@@ -184,66 +183,21 @@ services:
       start_period: 10s
 
   # ═══════════════════════════════════════════════════════════════════════════════
-  # SigNoz Observability Stack (v0.92.1) - Simplified for Development
+  # SigNoz Observability Stack (v0.92.1) - Basic Development Setup
   # ═══════════════════════════════════════════════════════════════════════════════
 
-  # ClickHouse Database for SigNoz (using default config)
-  signoz-clickhouse:
-    image: clickhouse/clickhouse-server:24.1.2-alpine
-    container_name: snapdog-signoz-clickhouse
-    hostname: signoz-clickhouse
-    volumes:
-      - signoz-clickhouse-data:/var/lib/clickhouse/
-    environment:
-      - CLICKHOUSE_DB=default
-      - CLICKHOUSE_USER=default
-      - CLICKHOUSE_PASSWORD=
-    networks:
-      snapdog-dev:
-        ipv4_address: 172.25.0.20
-    restart: unless-stopped
-
-  # SigNoz Main Application
-  signoz:
-    image: signoz/signoz:v0.92.1
-    container_name: snapdog-signoz
-    hostname: signoz
-    ports:
-      - "3301:8080"  # SigNoz UI
-    volumes:
-      - signoz-sqlite:/var/lib/signoz/
-    environment:
-      - SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_DSN=tcp://signoz-clickhouse:9000
-      - SIGNOZ_SQLSTORE_SQLITE_PATH=/var/lib/signoz/signoz.db
-      - STORAGE=clickhouse
-      - GODEBUG=netdns=go
-      - TELEMETRY_ENABLED=true
-      - DEPLOYMENT_TYPE=docker-standalone-amd
-    depends_on:
-      - signoz-clickhouse
-    networks:
-      snapdog-dev:
-        ipv4_address: 172.25.0.21
-    restart: unless-stopped
-
-  # OpenTelemetry Collector for SigNoz
+  # OpenTelemetry Collector (Standalone for development)
   signoz-otel-collector:
-    image: signoz/signoz-otel-collector:v0.129.0
+    image: otel/opentelemetry-collector-contrib:0.112.0
     container_name: snapdog-signoz-otel-collector
     hostname: signoz-otel-collector
-    command:
-      - --config=/etc/otel-collector-config.yaml
-      - --feature-gates=-pkg.translator.prometheus.NormalizeName
+    command: ["--config=/etc/otel-collector-config.yaml"]
     volumes:
-      - ./devcontainer/signoz/otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
-    environment:
-      - OTEL_RESOURCE_ATTRIBUTES=host.name=snapdog-dev,os.type=linux
-      - LOW_CARDINAL_EXCEPTION_GROUPING=false
+      - ./devcontainer/signoz/otel-collector-simple.yaml:/etc/otel-collector-config.yaml:ro
     ports:
       - "4317:4317"  # OTLP gRPC receiver
       - "4318:4318"  # OTLP HTTP receiver
-    depends_on:
-      - signoz
+      - "8889:8889"  # Prometheus metrics endpoint
     networks:
       snapdog-dev:
         ipv4_address: 172.25.0.22
@@ -283,10 +237,6 @@ volumes:
   caddy_data:
   caddy_config:
   snapcast_sinks: # Shared volume for audio sinks between snapcast-server and app
-  signoz-clickhouse-data:
-    name: snapdog-signoz-clickhouse-data
-  signoz-sqlite:
-    name: snapdog-signoz-sqlite
 
 networks:
   snapdog-dev:
