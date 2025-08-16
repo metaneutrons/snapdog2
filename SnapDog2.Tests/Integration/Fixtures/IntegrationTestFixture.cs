@@ -548,6 +548,22 @@ public class IntegrationTestFixture : IAsyncLifetime
                 logging.ClearProviders();
                 logging.SetMinimumLevel(LogLevel.Debug);
             });
+
+            // Replace metrics service with test capture implementation
+            builder.ConfigureServices(services =>
+            {
+                var metricsDescriptor = services.SingleOrDefault(d =>
+                    d.ServiceType == typeof(SnapDog2.Core.Abstractions.IMetricsService)
+                );
+                if (metricsDescriptor != null)
+                {
+                    services.Remove(metricsDescriptor);
+                }
+                services.AddSingleton<
+                    SnapDog2.Core.Abstractions.IMetricsService,
+                    SnapDog2.Tests.Testing.TestMetricsService
+                >();
+            });
         });
 
         Console.WriteLine("🏭 Creating HTTP client...");

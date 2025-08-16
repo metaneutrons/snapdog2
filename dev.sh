@@ -1,22 +1,20 @@
 #!/bin/bash
 
 # SnapDog2 Development Environment Script
-# Simple replacement for Makefile with SigNoz-only observability
+# Manages Docker Compose services for development
 
-set -e
-
-show_help() {
-    echo "SnapDog2 Development Commands:"
+show_urls() {
     echo ""
-    echo "  ./dev.sh start     - Start development environment"
-    echo "  ./dev.sh stop      - Stop all services"
-    echo "  ./dev.sh restart   - Restart development environment"
-    echo "  ./dev.sh logs      - Show logs from all services"
-    echo "  ./dev.sh status    - Show status of all services"
-    echo "  ./dev.sh clean     - Clean containers and volumes"
-    echo "  ./dev.sh urls      - Show all service URLs"
-    echo "  ./dev.sh test      - Run tests"
-    echo "  ./dev.sh build     - Build the application"
+    echo "🎵 SnapDog2 Services (http://localhost:8000):"
+    echo "  🎵 SnapDog2 API:      http://localhost:8000"
+    echo "  📻 Snapcast Server:   http://localhost:8000/server/"
+    echo "  💿 Navidrome Music:   http://localhost:8000/music/"
+    echo "  🛋️  Living Room:       http://localhost:8000/clients/living-room/"
+    echo "  🍽️  Kitchen:           http://localhost:8000/clients/kitchen/"
+    echo "  🛏️  Bedroom:           http://localhost:8000/clients/bedroom/"
+    echo ""
+    echo "🔍 Observability:"
+    echo "  🔍 SigNoz:            http://localhost:8000/signoz/"
     echo ""
 }
 
@@ -52,21 +50,6 @@ clean_env() {
     docker system prune -f
 }
 
-show_urls() {
-    echo ""
-    echo "🎵 SnapDog2 Services (http://localhost:8000):"
-    echo "  🎵 SnapDog2 API:      http://localhost:8000"
-    echo "  📻 Snapcast Server:   http://localhost:8000/server/"
-    echo "  💿 Navidrome Music:   http://localhost:8000/music/"
-    echo "  🛋️  Living Room:       http://localhost:8000/clients/living-room/"
-    echo "  🍽️  Kitchen:           http://localhost:8000/clients/kitchen/"
-    echo "  🛏️  Bedroom:           http://localhost:8000/clients/bedroom/"
-    echo ""
-    echo "🔍 Observability:"
-    echo "  🔍 SigNoz:            http://localhost:8000/signoz/"
-    echo ""
-}
-
 run_tests() {
     echo "🧪 Running tests..."
     docker compose -f docker-compose.dev.yml up -d
@@ -74,44 +57,55 @@ run_tests() {
     docker compose -f docker-compose.dev.yml down
 }
 
-build_app() {
-    echo "🏗️ Building SnapDog2..."
-    dotnet build --configuration Release
+show_help() {
+    echo "🎵 SnapDog2 Development Environment"
+    echo ""
+    echo "Usage: $0 [command]"
+    echo ""
+    echo "Commands:"
+    echo "  start      Start development environment"
+    echo "  stop       Stop development environment"
+    echo "  restart    Restart development environment"
+    echo "  status     Show service status"
+    echo "  logs       Show logs"
+    echo "  urls       Show service URLs"
+    echo "  clean      Clean up containers and volumes"
+    echo "  test       Run tests with services"
+    echo "  help       Show this help"
+    echo ""
 }
 
-case "${1:-help}" in
-    start)
+# Main script logic
+case "${1:-start}" in
+    "start")
         start_dev
         ;;
-    stop)
+    "stop")
         stop_dev
         ;;
-    restart)
+    "restart")
         restart_dev
         ;;
-    logs)
-        show_logs
-        ;;
-    status)
+    "status")
         show_status
         ;;
-    clean)
-        clean_env
+    "logs")
+        show_logs
         ;;
-    urls)
+    "urls")
         show_urls
         ;;
-    test)
+    "clean")
+        clean_env
+        ;;
+    "test")
         run_tests
         ;;
-    build)
-        build_app
-        ;;
-    help|--help|-h)
+    "help"|"-h"|"--help")
         show_help
         ;;
     *)
-        echo "Unknown command: $1"
+        echo "❌ Unknown command: $1"
         show_help
         exit 1
         ;;

@@ -1,0 +1,86 @@
+namespace SnapDog2.Infrastructure.Notifications;
+
+using System;
+using System.Collections.Concurrent;
+using System.Threading;
+using System.Threading.Channels;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using SnapDog2.Core.Abstractions;
+using SnapDog2.Core.Configuration;
+
+internal sealed class NotificationItem
+{
+    public required string EventType { get; init; }
+    public required int ZoneIndex { get; init; }
+    public required object Payload { get; init; }
+    public int Attempt { get; set; }
+}
+
+/// <summary>
+/// Default queue implementation using bounded Channel<T> with backpressure.
+/// </summary>
+public sealed class NotificationQueue : INotificationQueue
+{
+    private readonly Channel<NotificationItem> _queue;
+    private readonly ILogger<NotificationQueue> _logger;
+    private readonly IMetricsService? _metrics;
+    private int _depth;
+
+    internal ChannelReader<NotificationItem> Reader => _queue.Reader;
+    internal Task ReaderCompletion => _queue.Reader.Completion;
+
+    public NotificationQueue(
+        IOptions<NotificationProcessingOptions> options,
+        ILogger<NotificationQueue> logger,
+        IMetricsService? metrics = null
+    )
+    {
+        _logger = logger;
+        _metrics = metrics;
+        var capacity = Math.Max(16, options.Value.MaxQueueCapacity);
+        var channelOptions = new BoundedChannelOptions(capacity)
+        {
+            FullMode = BoundedChannelFullMode.Wait,
+            SingleReader = false,
+            SingleWriter = false,
+            AllowSynchronousContinuations = false,
+        };
+        _queue = Channel.CreateBounded<NotificationItem>(channelOptions);
+    }
+
+    public async Task EnqueueZoneAsync<T>(
+        string eventType,
+        int zoneIndex,
+        T payload,
+        CancellationToken cancellationToken
+    )
+    {
+        var item = new NotificationItem
+        {
+            EventType = eventType,
+            ZoneIndex = zoneIndex,
+            Payload = payload!,
+            Attempt = 0,
+        };
+
+        await _queue.Writer.WriteAsync(item, cancellationToken);
+        var newDepth = Interlocked.Increment(ref _depth);
+        _logger.LogDebug("Enqueued notification {EventType} for zone {ZoneIndex}", eventType, zoneIndex);
+        _metrics?.IncrementCounter("notifications_enqueued_total", 1, ("event", eventType));
+        _metrics?.SetGauge("notifications_queue_depth", newDepth);
+    }
+
+    internal void OnItemDequeued(NotificationItem item)
+    {
+        var newDepth = Interlocked.Decrement(ref _depth);
+        _metrics?.IncrementCounter("notifications_dequeued_total", 1, ("event", item.EventType));
+        _metrics?.SetGauge("notifications_queue_depth", Math.Max(0, newDepth));
+    }
+
+    internal void CompleteWriter()
+    {
+        _queue.Writer.TryComplete();
+    }
+}

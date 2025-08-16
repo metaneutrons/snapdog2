@@ -1,6 +1,7 @@
 namespace SnapDog2.Infrastructure.Application;
 
 using System.Diagnostics;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Models;
@@ -35,6 +36,18 @@ public partial class MetricsService : IMetricsService
 
         // TODO: Implement actual metrics recording (e.g., to Prometheus, Application Insights, etc.)
         // For now, we just log the metrics
+    }
+
+    /// <inheritdoc/>
+    public void IncrementCounter(string name, long delta = 1, params (string Key, string Value)[] labels)
+    {
+        this.LogCounterIncrement(name, delta, FormatLabels(labels));
+    }
+
+    /// <inheritdoc/>
+    public void SetGauge(string name, double value, params (string Key, string Value)[] labels)
+    {
+        this.LogGaugeSet(name, value, FormatLabels(labels));
     }
 
     /// <inheritdoc/>
@@ -100,4 +113,17 @@ public partial class MetricsService : IMetricsService
 
     [LoggerMessage(6002, LogLevel.Debug, "Getting server statistics")]
     private partial void LogGettingServerStats();
+
+    [LoggerMessage(6003, LogLevel.Debug, "Metric counter increment: {Name} += {Delta} {Labels}")]
+    private partial void LogCounterIncrement(string name, long delta, string labels);
+
+    [LoggerMessage(6004, LogLevel.Debug, "Metric gauge set: {Name} = {Value} {Labels}")]
+    private partial void LogGaugeSet(string name, double value, string labels);
+
+    private static string FormatLabels((string Key, string Value)[] labels)
+    {
+        if (labels == null || labels.Length == 0)
+            return string.Empty;
+        return "[" + string.Join(", ", labels.Select(l => $"{l.Key}={l.Value}")) + "]";
+    }
 }

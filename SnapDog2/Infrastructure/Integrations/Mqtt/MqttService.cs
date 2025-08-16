@@ -130,11 +130,21 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     private async Task PublishNotificationAsync<T>(T notification)
         where T : INotification
     {
+        // Avoid noisy errors during shutdown when the root provider is disposed
+        if (this._disposed)
+        {
+            return;
+        }
         try
         {
             using var scope = this._serviceProvider.CreateScope();
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
             await mediator.PublishAsync(notification);
+        }
+        catch (ObjectDisposedException)
+        {
+            // Benign during shutdown
+            return;
         }
         catch (Exception ex)
         {

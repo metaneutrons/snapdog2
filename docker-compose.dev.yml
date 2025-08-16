@@ -45,7 +45,7 @@ services:
       - snapcast-client-kitchen
       - snapcast-client-bedroom
       - navidrome
-      - signoz-frontend
+      - signoz
     networks:
       snapdog-dev:
         ipv4_address: 172.25.0.4
@@ -184,75 +184,70 @@ services:
       start_period: 10s
 
   # ═══════════════════════════════════════════════════════════════════════════════
-  # SigNoz Observability Stack
+  # SigNoz Observability Stack (v0.92.1) - Simplified for Development
   # ═══════════════════════════════════════════════════════════════════════════════
 
-  # ClickHouse Database for SigNoz
+  # ClickHouse Database for SigNoz (using default config)
   signoz-clickhouse:
-    image: clickhouse/clickhouse-server:23.7
+    image: clickhouse/clickhouse-server:24.1.2-alpine
     container_name: snapdog-signoz-clickhouse
-    environment:
-      - CLICKHOUSE_DB=signoz
-      - CLICKHOUSE_USER=signoz
-      - CLICKHOUSE_PASSWORD=signoz
+    hostname: signoz-clickhouse
     volumes:
-      - signoz-clickhouse-data:/var/lib/clickhouse
+      - signoz-clickhouse-data:/var/lib/clickhouse/
+    environment:
+      - CLICKHOUSE_DB=default
+      - CLICKHOUSE_USER=default
+      - CLICKHOUSE_PASSWORD=
     networks:
       snapdog-dev:
         ipv4_address: 172.25.0.20
     restart: unless-stopped
 
-  # OpenTelemetry Collector for SigNoz
-  signoz-otel-collector:
-    image: signoz/signoz-otel-collector:0.88.11
-    container_name: snapdog-signoz-otel-collector
-    command: 
-      - --config=/etc/otel-collector-config.yaml
-    environment:
-      - OTEL_RESOURCE_ATTRIBUTES=service.name=signoz-otel-collector,service.version=0.88.11
-    volumes:
-      - ./devcontainer/signoz/otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+  # SigNoz Main Application
+  signoz:
+    image: signoz/signoz:v0.92.1
+    container_name: snapdog-signoz
+    hostname: signoz
     ports:
-      - "4317:4317"   # OTLP gRPC receiver
-      - "4318:4318"   # OTLP HTTP receiver
+      - "3301:8080"  # SigNoz UI
+    volumes:
+      - signoz-sqlite:/var/lib/signoz/
+    environment:
+      - SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_DSN=tcp://signoz-clickhouse:9000
+      - SIGNOZ_SQLSTORE_SQLITE_PATH=/var/lib/signoz/signoz.db
+      - STORAGE=clickhouse
+      - GODEBUG=netdns=go
+      - TELEMETRY_ENABLED=true
+      - DEPLOYMENT_TYPE=docker-standalone-amd
+    depends_on:
+      - signoz-clickhouse
     networks:
       snapdog-dev:
         ipv4_address: 172.25.0.21
     restart: unless-stopped
-    depends_on:
-      - signoz-clickhouse
 
-  # SigNoz Query Service
-  signoz-query-service:
-    image: signoz/query-service:0.39.0
-    container_name: snapdog-signoz-query-service
+  # OpenTelemetry Collector for SigNoz
+  signoz-otel-collector:
+    image: signoz/signoz-otel-collector:v0.129.0
+    container_name: snapdog-signoz-otel-collector
+    hostname: signoz-otel-collector
+    command:
+      - --config=/etc/otel-collector-config.yaml
+      - --feature-gates=-pkg.translator.prometheus.NormalizeName
+    volumes:
+      - ./devcontainer/signoz/otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
     environment:
-      - ClickHouseUrl=tcp://signoz-clickhouse:9000/?database=signoz
-      - STORAGE=clickhouse
-      - GODEBUG=netdns=go
-      - TELEMETRY_ENABLED=true
-      - DEPLOYMENT_TYPE=docker-standalone
+      - OTEL_RESOURCE_ATTRIBUTES=host.name=snapdog-dev,os.type=linux
+      - LOW_CARDINAL_EXCEPTION_GROUPING=false
+    ports:
+      - "4317:4317"  # OTLP gRPC receiver
+      - "4318:4318"  # OTLP HTTP receiver
+    depends_on:
+      - signoz
     networks:
       snapdog-dev:
         ipv4_address: 172.25.0.22
     restart: unless-stopped
-    depends_on:
-      - signoz-clickhouse
-      - signoz-otel-collector
-
-  # SigNoz Frontend
-  signoz-frontend:
-    image: signoz/frontend:0.39.0
-    container_name: snapdog-signoz-frontend
-    environment:
-      - FRONTEND_API_ENDPOINT=http://signoz-query-service:8080
-      - NEXT_PUBLIC_FRONTEND_API_ENDPOINT=http://localhost:8000/signoz-api
-    networks:
-      snapdog-dev:
-        ipv4_address: 172.25.0.23
-    restart: unless-stopped
-    depends_on:
-      - signoz-query-service
 
   # KNX Monitor - Visual debugging tool for KNX bus activity
   knx-monitor:
@@ -290,6 +285,8 @@ volumes:
   snapcast_sinks: # Shared volume for audio sinks between snapcast-server and app
   signoz-clickhouse-data:
     name: snapdog-signoz-clickhouse-data
+  signoz-sqlite:
+    name: snapdog-signoz-sqlite
 
 networks:
   snapdog-dev:

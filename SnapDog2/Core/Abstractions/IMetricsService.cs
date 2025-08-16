@@ -22,5 +22,9 @@ public interface IMetricsService
     /// <returns>A task that represents the asynchronous operation. The task result contains the server statistics.</returns>
     Task<ServerStats> GetServerStatsAsync();
 
+    // Lightweight metrics hooks (stubbed until full telemetry is implemented)
+    void IncrementCounter(string name, long delta = 1, params (string Key, string Value)[] labels);
+    void SetGauge(string name, double value, params (string Key, string Value)[] labels);
+
     // TODO: Add other metric recording methods as needed
 }
