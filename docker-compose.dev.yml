@@ -236,7 +236,6 @@ services:
     command: [
         "-g",
         "knxd",
-        "-v",
         "--csv",
         "/app/knx-groupaddresses.csv",
         "--logging-mode", # Force web interface mode
