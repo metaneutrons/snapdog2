@@ -40,9 +40,11 @@ public class TestMqttServiceFailing : IMqttService
     public Task<Result> UnsubscribeAsync(IEnumerable<string> topics, CancellationToken cancellationToken = default) =>
         Task.FromResult(Result.Failure("Simulated MQTT failure"));
 
+#pragma warning disable CS0067 // Event is never used - this is a test mock
     public event EventHandler? Connected;
     public event EventHandler<string>? Disconnected;
     public event EventHandler<MqttMessageReceivedEventArgs>? MessageReceived;
+#pragma warning restore CS0067
 
     public Task<Result> PublishClientStatusAsync<T>(
         string clientIndex,
