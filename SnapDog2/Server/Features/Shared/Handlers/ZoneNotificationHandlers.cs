@@ -64,122 +64,302 @@ public partial class ZoneStateNotificationHandler
     [LoggerMessage(6008, LogLevel.Information, "Zone {ZoneIndex} complete state changed")]
     private partial void LogStateChange(int zoneIndex);
 
-    public async Task Handle(ZoneVolumeChangedNotification notification, CancellationToken cancellationToken)
+    public Task Handle(ZoneVolumeChangedNotification notification, CancellationToken cancellationToken)
     {
         this.LogVolumeChange(notification.ZoneIndex, notification.Volume);
 
-        // Publish to external systems (MQTT, KNX)
-        await this.PublishToExternalSystemsAsync(
-            StatusIdAttribute.GetStatusId<ZoneVolumeChangedNotification>(),
-            notification.ZoneIndex,
-            notification.Volume,
-            cancellationToken
+        // Publish to external systems (MQTT, KNX) - fire and forget to prevent blocking
+        _ = Task.Run(
+            async () =>
+            {
+                try
+                {
+                    await this.PublishToExternalSystemsAsync(
+                        StatusIdAttribute.GetStatusId<ZoneVolumeChangedNotification>(),
+                        notification.ZoneIndex,
+                        notification.Volume,
+                        CancellationToken.None
+                    );
+                }
+                catch (Exception ex)
+                {
+                    // Log but don't throw - this is fire and forget
+                    this.LogFailedToPublishZoneEventToExternalSystems(
+                        ex,
+                        StatusIdAttribute.GetStatusId<ZoneVolumeChangedNotification>(),
+                        notification.ZoneIndex.ToString()
+                    );
+                }
+            },
+            CancellationToken.None
         );
+
+        return Task.CompletedTask;
     }
 
-    public async Task Handle(ZoneMuteChangedNotification notification, CancellationToken cancellationToken)
+    public Task Handle(ZoneMuteChangedNotification notification, CancellationToken cancellationToken)
     {
         this.LogMuteChange(notification.ZoneIndex, notification.IsMuted);
 
-        // Publish to external systems (MQTT, KNX)
-        await this.PublishToExternalSystemsAsync(
-            StatusIdAttribute.GetStatusId<ZoneMuteChangedNotification>(),
-            notification.ZoneIndex,
-            notification.IsMuted,
-            cancellationToken
+        // Publish to external systems (MQTT, KNX) - fire and forget to prevent blocking
+        _ = Task.Run(
+            async () =>
+            {
+                try
+                {
+                    await this.PublishToExternalSystemsAsync(
+                        StatusIdAttribute.GetStatusId<ZoneMuteChangedNotification>(),
+                        notification.ZoneIndex,
+                        notification.IsMuted,
+                        CancellationToken.None
+                    );
+                }
+                catch (Exception ex)
+                {
+                    // Log but don't throw - this is fire and forget
+                    this.LogFailedToPublishZoneEventToExternalSystems(
+                        ex,
+                        StatusIdAttribute.GetStatusId<ZoneMuteChangedNotification>(),
+                        notification.ZoneIndex.ToString()
+                    );
+                }
+            },
+            CancellationToken.None
         );
+
+        return Task.CompletedTask;
     }
 
-    public async Task Handle(ZonePlaybackStateChangedNotification notification, CancellationToken cancellationToken)
+    public Task Handle(ZonePlaybackStateChangedNotification notification, CancellationToken cancellationToken)
     {
         var playbackStateString = notification.PlaybackState.ToString().ToLowerInvariant();
         this.LogPlaybackStateChange(notification.ZoneIndex, playbackStateString);
 
-        // Publish to external systems (MQTT, KNX)
-        await this.PublishToExternalSystemsAsync(
-            StatusIdAttribute.GetStatusId<ZonePlaybackStateChangedNotification>(),
-            notification.ZoneIndex,
-            playbackStateString,
-            cancellationToken
+        // Publish to external systems (MQTT, KNX) - fire and forget to prevent blocking
+        _ = Task.Run(
+            async () =>
+            {
+                try
+                {
+                    await this.PublishToExternalSystemsAsync(
+                        StatusIdAttribute.GetStatusId<ZonePlaybackStateChangedNotification>(),
+                        notification.ZoneIndex,
+                        playbackStateString,
+                        CancellationToken.None
+                    );
+                }
+                catch (Exception ex)
+                {
+                    // Log but don't throw - this is fire and forget
+                    this.LogFailedToPublishZoneEventToExternalSystems(
+                        ex,
+                        StatusIdAttribute.GetStatusId<ZonePlaybackStateChangedNotification>(),
+                        notification.ZoneIndex.ToString()
+                    );
+                }
+            },
+            CancellationToken.None
         );
+
+        return Task.CompletedTask;
     }
 
-    public async Task Handle(ZoneTrackChangedNotification notification, CancellationToken cancellationToken)
+    public Task Handle(ZoneTrackChangedNotification notification, CancellationToken cancellationToken)
     {
         this.LogTrackChange(notification.ZoneIndex, notification.TrackInfo.Title, notification.TrackInfo.Artist);
 
-        // Publish to external systems (MQTT, KNX)
-        await this.PublishToExternalSystemsAsync(
-            StatusIdAttribute.GetStatusId<ZoneTrackChangedNotification>(),
-            notification.ZoneIndex,
-            notification.TrackInfo,
-            cancellationToken
+        // Publish to external systems (MQTT, KNX) - fire and forget to prevent blocking
+        _ = Task.Run(
+            async () =>
+            {
+                try
+                {
+                    await this.PublishToExternalSystemsAsync(
+                        StatusIdAttribute.GetStatusId<ZoneTrackChangedNotification>(),
+                        notification.ZoneIndex,
+                        notification.TrackInfo,
+                        CancellationToken.None
+                    );
+                }
+                catch (Exception ex)
+                {
+                    // Log but don't throw - this is fire and forget
+                    this.LogFailedToPublishZoneEventToExternalSystems(
+                        ex,
+                        StatusIdAttribute.GetStatusId<ZoneTrackChangedNotification>(),
+                        notification.ZoneIndex.ToString()
+                    );
+                }
+            },
+            CancellationToken.None
         );
+
+        return Task.CompletedTask;
     }
 
-    public async Task Handle(ZonePlaylistChangedNotification notification, CancellationToken cancellationToken)
+    public Task Handle(ZonePlaylistChangedNotification notification, CancellationToken cancellationToken)
     {
         this.LogPlaylistChange(notification.ZoneIndex, notification.PlaylistInfo.Name, notification.PlaylistIndex);
 
-        // Publish to external systems (MQTT, KNX)
-        await this.PublishToExternalSystemsAsync(
-            StatusIdAttribute.GetStatusId<ZonePlaylistChangedNotification>(),
-            notification.ZoneIndex,
-            new { PlaylistInfo = notification.PlaylistInfo, PlaylistIndex = notification.PlaylistIndex },
-            cancellationToken
+        // Publish to external systems (MQTT, KNX) - fire and forget to prevent blocking
+        _ = Task.Run(
+            async () =>
+            {
+                try
+                {
+                    await this.PublishToExternalSystemsAsync(
+                        StatusIdAttribute.GetStatusId<ZonePlaylistChangedNotification>(),
+                        notification.ZoneIndex,
+                        new { PlaylistInfo = notification.PlaylistInfo, PlaylistIndex = notification.PlaylistIndex },
+                        CancellationToken.None
+                    );
+                }
+                catch (Exception ex)
+                {
+                    // Log but don't throw - this is fire and forget
+                    this.LogFailedToPublishZoneEventToExternalSystems(
+                        ex,
+                        StatusIdAttribute.GetStatusId<ZonePlaylistChangedNotification>(),
+                        notification.ZoneIndex.ToString()
+                    );
+                }
+            },
+            CancellationToken.None
         );
+
+        return Task.CompletedTask;
     }
 
-    public async Task Handle(ZoneTrackRepeatChangedNotification notification, CancellationToken cancellationToken)
+    public Task Handle(ZoneTrackRepeatChangedNotification notification, CancellationToken cancellationToken)
     {
         this.LogTrackRepeatChange(notification.ZoneIndex, notification.Enabled);
 
-        // Publish to external systems (MQTT, KNX)
-        await this.PublishToExternalSystemsAsync(
-            StatusIdAttribute.GetStatusId<ZoneTrackRepeatChangedNotification>(),
-            notification.ZoneIndex,
-            notification.Enabled,
-            cancellationToken
+        // Publish to external systems (MQTT, KNX) - fire and forget to prevent blocking
+        _ = Task.Run(
+            async () =>
+            {
+                try
+                {
+                    await this.PublishToExternalSystemsAsync(
+                        StatusIdAttribute.GetStatusId<ZoneTrackRepeatChangedNotification>(),
+                        notification.ZoneIndex,
+                        notification.Enabled,
+                        CancellationToken.None
+                    );
+                }
+                catch (Exception ex)
+                {
+                    // Log but don't throw - this is fire and forget
+                    this.LogFailedToPublishZoneEventToExternalSystems(
+                        ex,
+                        StatusIdAttribute.GetStatusId<ZoneTrackRepeatChangedNotification>(),
+                        notification.ZoneIndex.ToString()
+                    );
+                }
+            },
+            CancellationToken.None
         );
+
+        return Task.CompletedTask;
     }
 
-    public async Task Handle(ZonePlaylistRepeatChangedNotification notification, CancellationToken cancellationToken)
+    public Task Handle(ZonePlaylistRepeatChangedNotification notification, CancellationToken cancellationToken)
     {
         this.LogPlaylistRepeatChange(notification.ZoneIndex, notification.Enabled);
 
-        // Publish to external systems (MQTT, KNX)
-        await this.PublishToExternalSystemsAsync(
-            StatusIdAttribute.GetStatusId<ZonePlaylistRepeatChangedNotification>(),
-            notification.ZoneIndex,
-            notification.Enabled,
-            cancellationToken
+        // Publish to external systems (MQTT, KNX) - fire and forget to prevent blocking
+        _ = Task.Run(
+            async () =>
+            {
+                try
+                {
+                    await this.PublishToExternalSystemsAsync(
+                        StatusIdAttribute.GetStatusId<ZonePlaylistRepeatChangedNotification>(),
+                        notification.ZoneIndex,
+                        notification.Enabled,
+                        CancellationToken.None
+                    );
+                }
+                catch (Exception ex)
+                {
+                    // Log but don't throw - this is fire and forget
+                    this.LogFailedToPublishZoneEventToExternalSystems(
+                        ex,
+                        StatusIdAttribute.GetStatusId<ZonePlaylistRepeatChangedNotification>(),
+                        notification.ZoneIndex.ToString()
+                    );
+                }
+            },
+            CancellationToken.None
         );
+
+        return Task.CompletedTask;
     }
 
-    public async Task Handle(ZoneShuffleModeChangedNotification notification, CancellationToken cancellationToken)
+    public Task Handle(ZoneShuffleModeChangedNotification notification, CancellationToken cancellationToken)
     {
         this.LogShuffleModeChange(notification.ZoneIndex, notification.ShuffleEnabled);
 
-        // Publish to external systems (MQTT, KNX)
-        await this.PublishToExternalSystemsAsync(
-            StatusIdAttribute.GetStatusId<ZoneShuffleModeChangedNotification>(),
-            notification.ZoneIndex,
-            notification.ShuffleEnabled,
-            cancellationToken
+        // Publish to external systems (MQTT, KNX) - fire and forget to prevent blocking
+        _ = Task.Run(
+            async () =>
+            {
+                try
+                {
+                    await this.PublishToExternalSystemsAsync(
+                        StatusIdAttribute.GetStatusId<ZoneShuffleModeChangedNotification>(),
+                        notification.ZoneIndex,
+                        notification.ShuffleEnabled,
+                        CancellationToken.None
+                    );
+                }
+                catch (Exception ex)
+                {
+                    // Log but don't throw - this is fire and forget
+                    this.LogFailedToPublishZoneEventToExternalSystems(
+                        ex,
+                        StatusIdAttribute.GetStatusId<ZoneShuffleModeChangedNotification>(),
+                        notification.ZoneIndex.ToString()
+                    );
+                }
+            },
+            CancellationToken.None
         );
+
+        return Task.CompletedTask;
     }
 
-    public async Task Handle(ZoneStateChangedNotification notification, CancellationToken cancellationToken)
+    public Task Handle(ZoneStateChangedNotification notification, CancellationToken cancellationToken)
     {
         this.LogStateChange(notification.ZoneIndex);
 
-        // Publish to external systems (MQTT, KNX)
-        await this.PublishToExternalSystemsAsync(
-            StatusIdAttribute.GetStatusId<ZoneStateChangedNotification>(),
-            notification.ZoneIndex,
-            notification,
-            cancellationToken
+        // Publish to external systems (MQTT, KNX) - fire and forget to prevent blocking
+        _ = Task.Run(
+            async () =>
+            {
+                try
+                {
+                    await this.PublishToExternalSystemsAsync(
+                        StatusIdAttribute.GetStatusId<ZoneStateChangedNotification>(),
+                        notification.ZoneIndex,
+                        notification,
+                        CancellationToken.None
+                    );
+                }
+                catch (Exception ex)
+                {
+                    // Log but don't throw - this is fire and forget
+                    this.LogFailedToPublishZoneEventToExternalSystems(
+                        ex,
+                        StatusIdAttribute.GetStatusId<ZoneStateChangedNotification>(),
+                        notification.ZoneIndex.ToString()
+                    );
+                }
+            },
+            CancellationToken.None
         );
+
+        return Task.CompletedTask;
     }
 
     /// <summary>
@@ -194,6 +374,12 @@ public partial class ZoneStateNotificationHandler
     {
         try
         {
+            // Check if service provider is disposed before attempting to use it
+            if (this._serviceProvider == null)
+            {
+                return;
+            }
+
             // Publish to MQTT if enabled
             var mqttService = this._serviceProvider.GetService<IMqttService>();
             if (mqttService != null)
@@ -207,6 +393,11 @@ public partial class ZoneStateNotificationHandler
             {
                 await knxService.PublishZoneStatusAsync(zoneIndex, eventType, payload, cancellationToken);
             }
+        }
+        catch (ObjectDisposedException)
+        {
+            // Service provider is disposed, silently ignore
+            return;
         }
         catch (Exception ex)
         {

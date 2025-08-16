@@ -711,21 +711,17 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     public async Task<Result> ToggleTrackRepeatAsync()
     {
-        _logger.LogInformation("Zone {ZoneIndex}: Acquiring state lock for track repeat toggle", _zoneIndex);
         await _stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            _logger.LogInformation("Zone {ZoneIndex}: State lock acquired, toggling track repeat", _zoneIndex);
             var newValue = !_currentState.TrackRepeat;
             LogZoneAction(_zoneIndex, _config.Name, newValue ? "Enable track repeat" : "Disable track repeat");
             _currentState = _currentState with { TrackRepeat = newValue };
             PublishZoneStateChangedAsync();
-            _logger.LogInformation("Zone {ZoneIndex}: Track repeat toggle completed", _zoneIndex);
             return Result.Success();
         }
         finally
         {
-            _logger.LogInformation("Zone {ZoneIndex}: Releasing state lock", _zoneIndex);
             _stateLock.Release();
         }
     }
