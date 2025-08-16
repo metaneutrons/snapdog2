@@ -15,9 +15,10 @@ The recommended production deployment consists of several collaborating containe
 **Optional Supporting Containers (Enabled via Docker Compose Profiles):**
 
 4. **`navidrome`**: Runs the Navidrome media server (Subsonic API compatible) if Subsonic integration is enabled. Requires volume mounts for its configuration/database and the music library.
-5. **`jaeger` / `otel-collector`**: Receives traces exported via OTLP from the `snapdog` container for distributed tracing analysis (if Telemetry enabled).
-6. **`prometheus`**: Scrapes metrics exposed by the `snapdog` container (`/metrics` endpoint) and potentially other services (if Telemetry/Prometheus enabled).
-7. **`grafana`**: Visualizes metrics from Prometheus and potentially logs/traces (if Telemetry enabled).
+5. **`signoz-clickhouse`**: ClickHouse database for SigNoz observability platform (if telemetry enabled).
+6. **`signoz-otel-collector`**: OpenTelemetry Collector that receives traces/metrics via OTLP from the `snapdog` container and forwards to ClickHouse.
+7. **`signoz-query-service`**: SigNoz query service for processing observability data.
+8. **`signoz-frontend`**: SigNoz web UI for unified observability (traces, metrics, logs).
 
 ```mermaid
 graph TD
@@ -26,18 +27,19 @@ graph TD
         SNAP[snapserver Container\n(Customized Snapcast)]
         MQTT[mosquitto Container\n(MQTT Broker)]
         SUB[navidrome Container\n(Optional - profile:media)]
-        OTEL[otel-collector Container\n(Optional - profile:metrics)]
-        PROM[prometheus Container\n(Optional - profile:metrics)]
-        GRAF[grafana Container\n(Optional - profile:metrics)]
+        OTEL[signoz-otel-collector\n(Optional - profile:observability)]
+        CLICKHOUSE[signoz-clickhouse\n(Optional - profile:observability)]
+        QUERY[signoz-query-service\n(Optional - profile:observability)]
+        FRONTEND[signoz-frontend\n(Optional - profile:observability)]
 
         APP --> SNAP;
         APP --> MQTT;
         APP --> SUB;
         APP --> OTEL[OTLP Endpoint];
 
-        PROM -- scrapes --> APP[/metrics];
-        GRAF -- queries --> PROM;
-        GRAF -- queries --> OTEL[Trace Source];
+        OTEL --> CLICKHOUSE;
+        CLICKHOUSE --> QUERY;
+        QUERY --> FRONTEND;
 
         subgraph "Mounted Volumes / Paths"
             direction LR
@@ -56,7 +58,7 @@ graph TD
         APP -- writes --> LOGS;
         MQTT -- uses --> DB_DATA;
         SUB -- uses --> DB_DATA;
-        GRAF -- uses --> DB_DATA;
+        CLICKHOUSE -- uses --> DB_DATA;
 
 
     end
@@ -65,14 +67,13 @@ graph TD
         KNX[KNX Gateway]
         CLIENTS[Snapcast Clients]
         USER[User via API/MQTT]
-        ADMIN[Admin via Grafana/Jaeger UI]
+        ADMIN[Admin via SigNoz UI]
     end
 
     USER --> APP;
     USER --> MQTT;
     APP --> KNX;
-    ADMIN --> GRAF;
-    ADMIN --> OTEL;
+    ADMIN --> FRONTEND;
 
 
     classDef extern fill:#EFEFEF,stroke:#666
@@ -258,74 +259,77 @@ services:
       - .env # Load ND_* variables
     profiles: ["media"]
 
-  # OpenTelemetry Collector (Recommended for production trace/metric export)
-  otel-collector:
-    image: otel/opentelemetry-collector-contrib:latest # Or pin version
-    container_name: otel-collector
+  # SigNoz ClickHouse Database
+  signoz-clickhouse:
+    image: clickhouse/clickhouse-server:23.7
+    container_name: signoz-clickhouse
+    restart: unless-stopped
+    networks:
+      - snapdog_net
+    environment:
+      - CLICKHOUSE_DB=signoz
+      - CLICKHOUSE_USER=signoz
+      - CLICKHOUSE_PASSWORD=signoz
+    volumes:
+      - signoz_clickhouse_data:/var/lib/clickhouse
+    profiles: ["observability"]
+
+  # SigNoz OpenTelemetry Collector
+  signoz-otel-collector:
+    image: signoz/signoz-otel-collector:0.88.11
+    container_name: signoz-otel-collector
     restart: unless-stopped
     networks:
       - snapdog_net
     ports:
       - "127.0.0.1:4317:4317" # OTLP gRPC receiver
-      # - "4318:4318" # OTLP HTTP receiver (optional)
+      - "127.0.0.1:4318:4318" # OTLP HTTP receiver
     volumes:
-      - ./config/otel/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
-    command: --config=/etc/otelcol-contrib/config.yaml
+      - ./config/signoz/otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    command: --config=/etc/otel-collector-config.yaml
     depends_on:
-      - jaeger # Example: collector sends to Jaeger
-    profiles: ["metrics"]
+      - signoz-clickhouse
+    profiles: ["observability"]
 
-  # Jaeger Service (Can receive directly or via OTel Collector)
-  jaeger:
-    image: jaegertracing/all-in-one:1.53
-    container_name: jaeger
+  # SigNoz Query Service
+  signoz-query-service:
+    image: signoz/query-service:0.39.0
+    container_name: signoz-query-service
     restart: unless-stopped
     networks:
       - snapdog_net
-    ports:
-      - "127.0.0.1:16686:16686" # UI
-      - "127.0.0.1:4317:4317"   # OTLP gRPC receiver (if Jaeger receives directly)
     environment:
-      - COLLECTOR_OTLP_ENABLED=true
-    profiles: ["metrics"]
-
-  # Prometheus Service
-  prometheus:
-    image: prom/prometheus:v2.48.1
-    container_name: prometheus
-    restart: unless-stopped
-    networks:
-      - snapdog_net
-    ports:
-      - "127.0.0.1:9090:9090"
-    volumes:
-      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - prometheus_data:/prometheus # Persistent storage
-    command: --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus --web.console.libraries=/usr/share/prometheus/console_libraries --web.console.templates=/usr/share/prometheus/consoles --web.enable-lifecycle
-    profiles: ["metrics"]
-
-  # Grafana Service
-  grafana:
-    image: grafana/grafana:10.2.2
-    container_name: grafana
-    restart: unless-stopped
-    networks:
-      - snapdog_net
-    ports:
-      - "127.0.0.1:3000:3000"
-    volumes:
-      - ./devcontainer/grafana/provisioning:/etc/grafana/provisioning:ro
-      - grafana_data:/var/lib/grafana
-    env_file:
-      - .env # Load GF_* variables
+      - ClickHouseUrl=tcp://signoz-clickhouse:9000/?database=signoz
+      - STORAGE=clickhouse
+      - GODEBUG=netdns=go
+      - TELEMETRY_ENABLED=true
+      - DEPLOYMENT_TYPE=docker-standalone
     depends_on:
-      - prometheus
-    profiles: ["metrics"]
+      - signoz-clickhouse
+      - signoz-otel-collector
+    profiles: ["observability"]
 
-# Define named volumes for Prometheus/Grafana persistent data
-# volumes:
-#   prometheus_data:
-#   grafana_data:
+  # SigNoz Frontend
+  signoz-frontend:
+    image: signoz/frontend:0.39.0
+    container_name: signoz-frontend
+    restart: unless-stopped
+    networks:
+      - snapdog_net
+    ports:
+      - "127.0.0.1:3301:3301" # SigNoz UI
+    environment:
+      - FRONTEND_API_ENDPOINT=http://signoz-query-service:8080
+    depends_on:
+      - signoz-query-service
+    profiles: ["observability"]
+
+# Define named volumes for persistent data
+volumes:
+  mosquitto_data:
+  mosquitto_log:
+  navidrome_data:
+  signoz_clickhouse_data: # SigNoz database storage
 ```
 
 ## 25.5. Docker Compose Profiles
@@ -334,10 +338,33 @@ Use profiles to manage optional service groups:
 
 * **`default`** (implied): `snapdog`, `snapserver`, `mosquitto`.
 * **`media`**: Adds `navidrome`.
-* **`metrics`**: Adds `otel-collector`, `jaeger`, `prometheus`, `grafana`.
+* **`observability`**: Adds `signoz-clickhouse`, `signoz-otel-collector`, `signoz-query-service`, `signoz-frontend`.
 
 Run commands:
 
 * Core only: `docker compose up -d`
 * Core + Media: `docker compose --profile media up -d`
-* Core + Media + Metrics: `docker compose --profile media --profile metrics up -d`
+* Core + Media + Observability: `docker compose --profile media --profile observability up -d`
+
+## 25.6. Environment Variables for Production
+
+Key environment variables for production deployment:
+
+```bash
+# Core Application
+SNAPDOG_TELEMETRY_ENABLED=true
+SNAPDOG_TELEMETRY_SERVICE_NAME=SnapDog2
+SNAPDOG_TELEMETRY_OTLP_ENDPOINT=http://signoz-otel-collector:4317
+SNAPDOG_TELEMETRY_OTLP_PROTOCOL=grpc
+
+# Services
+SNAPDOG_SERVICES_SNAPCAST_ADDRESS=snapserver
+SNAPDOG_SERVICES_MQTT_BROKER_ADDRESS=mosquitto
+SNAPDOG_SERVICES_SUBSONIC_URL=http://navidrome:4533
+
+# Zones and Clients (example)
+SNAPDOG_ZONE_1_NAME=Living Room
+SNAPDOG_ZONE_1_SINK=/snapsinks/zone1
+SNAPDOG_CLIENT_1_NAME=Living Room Speaker
+SNAPDOG_CLIENT_1_DEFAULT_ZONE=1
+```
