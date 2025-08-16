@@ -22,14 +22,14 @@ show_help() {
 
 start_dev() {
     echo "🚀 Starting SnapDog2 development environment with SigNoz..."
-    docker-compose -f docker-compose.dev.yml up -d
+    docker compose -f docker-compose.dev.yml up -d
     sleep 3
     show_urls
 }
 
 stop_dev() {
     echo "🛑 Stopping development environment..."
-    docker-compose -f docker-compose.dev.yml down
+    docker compose -f docker-compose.dev.yml down
 }
 
 restart_dev() {
@@ -38,17 +38,17 @@ restart_dev() {
 }
 
 show_logs() {
-    docker-compose -f docker-compose.dev.yml logs -f
+    docker compose -f docker-compose.dev.yml logs -f
 }
 
 show_status() {
     echo "📊 Service Status:"
-    docker-compose -f docker-compose.dev.yml ps
+    docker compose -f docker-compose.dev.yml ps
 }
 
 clean_env() {
     echo "🧹 Cleaning up..."
-    docker-compose -f docker-compose.dev.yml down -v --remove-orphans
+    docker compose -f docker-compose.dev.yml down -v --remove-orphans
     docker system prune -f
 }
 
@@ -69,9 +69,9 @@ show_urls() {
 
 run_tests() {
     echo "🧪 Running tests..."
-    docker-compose -f docker-compose.dev.yml up -d
+    docker compose -f docker-compose.dev.yml up -d
     dotnet test --verbosity normal
-    docker-compose -f docker-compose.dev.yml down
+    docker compose -f docker-compose.dev.yml down
 }
 
 build_app() {
