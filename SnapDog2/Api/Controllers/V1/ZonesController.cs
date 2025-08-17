@@ -843,6 +843,28 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
     }
 
     /// <summary>
+    /// Get current playlist information in the zone.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <returns>Current playlist information</returns>
+    [HttpGet("{zoneIndex:int}/playlist/info")]
+    [ProducesResponseType<PlaylistInfo>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<PlaylistInfo>> GetPlaylistInfo(int zoneIndex)
+    {
+        var query = new GetZonePlaylistInfoQuery { ZoneIndex = zoneIndex };
+        var result = await this._mediator.SendQueryAsync<GetZonePlaylistInfoQuery, Result<PlaylistInfo>>(query);
+
+        if (result.IsFailure)
+        {
+            LogFailedToGetZonePlaylistInfo(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return this.NotFound($"Zone {zoneIndex} not found");
+        }
+
+        return Ok(result.Value!);
+    }
+
+    /// <summary>
     /// Get current track metadata in the zone.
     /// </summary>
     /// <param name="zoneIndex">Zone index (1-based)</param>
@@ -868,11 +890,11 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
                 new TrackInfo
                 {
                     Index = 1,
-                    Id = "unknown",
                     Title = "No Track",
                     Artist = "Unknown",
                     Album = "Unknown",
                     Source = "none",
+                    Url = "none://no-track",
                     PositionMs = 0,
                     Progress = 0.0f,
                     IsPlaying = false,
@@ -881,6 +903,116 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
         }
 
         return Ok(track);
+    }
+
+    /// <summary>
+    /// Get current track title in the zone.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <returns>Current track title</returns>
+    [HttpGet("{zoneIndex:int}/track/title")]
+    [ProducesResponseType<string>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<string>> GetTrackTitle(int zoneIndex)
+    {
+        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
+        var result = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+
+        if (result.IsFailure)
+        {
+            LogFailedToGetZoneTrackTitle(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return this.NotFound($"Zone {zoneIndex} not found");
+        }
+
+        return Ok(result.Value!.Track?.Title ?? "No Track");
+    }
+
+    /// <summary>
+    /// Get current track artist in the zone.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <returns>Current track artist</returns>
+    [HttpGet("{zoneIndex:int}/track/artist")]
+    [ProducesResponseType<string>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<string>> GetTrackArtist(int zoneIndex)
+    {
+        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
+        var result = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+
+        if (result.IsFailure)
+        {
+            LogFailedToGetZoneTrackArtist(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return this.NotFound($"Zone {zoneIndex} not found");
+        }
+
+        return Ok(result.Value!.Track?.Artist ?? "Unknown");
+    }
+
+    /// <summary>
+    /// Get current track album in the zone.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <returns>Current track album</returns>
+    [HttpGet("{zoneIndex:int}/track/album")]
+    [ProducesResponseType<string>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<string>> GetTrackAlbum(int zoneIndex)
+    {
+        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
+        var result = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+
+        if (result.IsFailure)
+        {
+            LogFailedToGetZoneTrackAlbum(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return this.NotFound($"Zone {zoneIndex} not found");
+        }
+
+        return Ok(result.Value!.Track?.Album ?? "Unknown");
+    }
+
+    /// <summary>
+    /// Get current track cover art URL in the zone.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <returns>Current track cover art URL</returns>
+    [HttpGet("{zoneIndex:int}/track/cover")]
+    [ProducesResponseType<string>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<string>> GetTrackCover(int zoneIndex)
+    {
+        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
+        var result = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+
+        if (result.IsFailure)
+        {
+            LogFailedToGetZoneTrackCover(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return this.NotFound($"Zone {zoneIndex} not found");
+        }
+
+        return Ok(result.Value!.Track?.CoverArtUrl ?? "");
+    }
+
+    /// <summary>
+    /// Get current track duration in the zone.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <returns>Current track duration in milliseconds</returns>
+    [HttpGet("{zoneIndex:int}/track/duration")]
+    [ProducesResponseType<long>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<long>> GetTrackDuration(int zoneIndex)
+    {
+        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
+        var result = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+
+        if (result.IsFailure)
+        {
+            LogFailedToGetZoneTrackDuration(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return this.NotFound($"Zone {zoneIndex} not found");
+        }
+
+        return Ok(result.Value!.Track?.DurationMs ?? 0L);
     }
 
     /// <summary>
@@ -1131,6 +1263,9 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
     [LoggerMessage(12029, LogLevel.Warning, "Failed to get zone {ZoneIndex} playlist index: {ErrorMessage}")]
     private partial void LogFailedToGetZonePlaylistIndex(int zoneIndex, string errorMessage);
 
+    [LoggerMessage(12038, LogLevel.Warning, "Failed to get zone {ZoneIndex} playlist info: {ErrorMessage}")]
+    private partial void LogFailedToGetZonePlaylistInfo(int zoneIndex, string errorMessage);
+
     [LoggerMessage(12030, LogLevel.Warning, "Failed to get zone {ZoneIndex} track metadata: {ErrorMessage}")]
     private partial void LogFailedToGetZoneTrackMetadata(int zoneIndex, string errorMessage);
 
@@ -1162,4 +1297,19 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
     [LoggerMessage(12037, LogLevel.Warning, "Failed to play URL '{Url}' for zone {ZoneIndex}: {ErrorMessage}")]
     private partial void LogFailedToPlayUrl(int zoneIndex, string url, string errorMessage);
+
+    [LoggerMessage(12039, LogLevel.Warning, "Failed to get zone {ZoneIndex} track title: {ErrorMessage}")]
+    private partial void LogFailedToGetZoneTrackTitle(int zoneIndex, string errorMessage);
+
+    [LoggerMessage(12040, LogLevel.Warning, "Failed to get zone {ZoneIndex} track artist: {ErrorMessage}")]
+    private partial void LogFailedToGetZoneTrackArtist(int zoneIndex, string errorMessage);
+
+    [LoggerMessage(12041, LogLevel.Warning, "Failed to get zone {ZoneIndex} track album: {ErrorMessage}")]
+    private partial void LogFailedToGetZoneTrackAlbum(int zoneIndex, string errorMessage);
+
+    [LoggerMessage(12042, LogLevel.Warning, "Failed to get zone {ZoneIndex} track cover: {ErrorMessage}")]
+    private partial void LogFailedToGetZoneTrackCover(int zoneIndex, string errorMessage);
+
+    [LoggerMessage(12043, LogLevel.Warning, "Failed to get zone {ZoneIndex} track duration: {ErrorMessage}")]
+    private partial void LogFailedToGetZoneTrackDuration(int zoneIndex, string errorMessage);
 }

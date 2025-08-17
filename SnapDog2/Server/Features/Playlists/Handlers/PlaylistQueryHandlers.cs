@@ -197,7 +197,6 @@ public partial class GetPlaylistQueryHandler(
                     new TrackInfo
                     {
                         Index = index + 1,
-                        Id = station.Url ?? string.Empty,
                         Title = station.Name ?? "Unknown Station",
                         Artist = "Radio",
                         Album = "Radio Stations",
@@ -205,6 +204,7 @@ public partial class GetPlaylistQueryHandler(
                         PositionMs = 0,
                         CoverArtUrl = null,
                         Source = "radio",
+                        Url = station.Url ?? string.Empty,
                     }
             )
             .ToList();
@@ -362,7 +362,6 @@ public partial class GetTrackQueryHandler(
         return new TrackInfo
         {
             Index = 1,
-            Id = url,
             Title = station?.Name ?? "Unknown Radio Station",
             Artist = "Radio",
             Album = "Radio Stations",
@@ -370,6 +369,7 @@ public partial class GetTrackQueryHandler(
             PositionMs = 0,
             CoverArtUrl = null,
             Source = "radio",
+            Url = url,
         };
     }
 
