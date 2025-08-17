@@ -6,7 +6,6 @@ using SnapDog2.Core.Enums;
 using SnapDog2.Core.Models;
 using SnapDog2.Server.Features.Clients.Commands.Config;
 using SnapDog2.Server.Features.Clients.Commands.Volume;
-using SnapDog2.Server.Features.Snapcast.Commands;
 using SnapDog2.Server.Features.Zones.Commands.Playback;
 using SnapDog2.Server.Features.Zones.Commands.Playlist;
 using SnapDog2.Server.Features.Zones.Commands.Track;
@@ -848,58 +847,6 @@ public static class CommandFactory
     {
         return float.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out result);
     }
-
-    #endregion
-
-    #region Snapcast Commands (Backend Integration)
-
-    /// <summary>
-    /// Creates a command to set Snapcast client volume.
-    /// Used internally for backend Snapcast integration.
-    /// </summary>
-    public static SetSnapcastClientVolumeCommand CreateSetSnapcastClientVolumeCommand(
-        string clientIndex,
-        int volume,
-        CommandSource source
-    ) =>
-        new()
-        {
-            ClientIndex = clientIndex,
-            Volume = volume,
-            Source = source,
-        };
-
-    /// <summary>
-    /// Creates a command to set Snapcast client mute state.
-    /// Used internally for backend Snapcast integration.
-    /// </summary>
-    public static SetSnapcastClientMuteCommand CreateSetSnapcastClientMuteCommand(
-        string clientIndex,
-        bool muted,
-        CommandSource source
-    ) =>
-        new()
-        {
-            ClientIndex = clientIndex,
-            Muted = muted,
-            Source = source,
-        };
-
-    /// <summary>
-    /// Creates a command to set Snapcast client latency.
-    /// Used internally for backend Snapcast integration.
-    /// </summary>
-    public static SetSnapcastClientLatencyCommand CreateSetSnapcastClientLatencyCommand(
-        string clientIndex,
-        int latencyMs,
-        CommandSource source
-    ) =>
-        new()
-        {
-            ClientIndex = clientIndex,
-            LatencyMs = latencyMs,
-            Source = source,
-        };
 
     #endregion
 }

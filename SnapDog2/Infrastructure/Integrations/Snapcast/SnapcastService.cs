@@ -17,17 +17,13 @@ using SnapDog2.Core.Configuration;
 using SnapDog2.Core.Enums;
 using SnapDog2.Core.Helpers;
 using SnapDog2.Core.Models;
-using SnapDog2.Server.Features.Shared.Notifications;
 using SnapDog2.Server.Features.Snapcast.Notifications;
 
 /// <summary>
 /// Enterprise-grade Snapcast service implementation using SnapcastClient library.
 /// Provides resilient operations with Polly policies and comprehensive Mediator integration.
 /// </summary>
-public partial class SnapcastService
-    : ISnapcastService,
-        INotificationHandler<StatusChangedNotification>,
-        IAsyncDisposable
+public partial class SnapcastService : ISnapcastService, IAsyncDisposable
 {
     private readonly SnapcastConfig _config;
     private readonly IServiceProvider _serviceProvider;
@@ -972,139 +968,6 @@ public partial class SnapcastService
             this._snapcastClient.OnStreamUpdate = null;
             this._snapcastClient.OnStreamProperties = null;
             this._snapcastClient.OnServerUpdate = null;
-        }
-    }
-
-    #endregion
-
-    #region Status Change Notification Handler
-
-    /// <inheritdoc />
-    public async Task Handle(StatusChangedNotification notification, CancellationToken cancellationToken)
-    {
-        if (!this.IsConnected || !this._initialized)
-        {
-            this.LogNotConnected("Handle StatusChangedNotification");
-            return;
-        }
-
-        try
-        {
-            // Map status changes to Snapcast operations using constants instead of magic strings
-            Result result;
-
-            if (
-                notification.StatusType == SnapcastConstants.StatusTypes.VOLUME
-                && notification.TargetId.StartsWith(SnapcastConstants.TargetPrefixes.CLIENT)
-            )
-            {
-                result = await this.SetClientVolumeAsync(
-                    notification.TargetId,
-                    Convert.ToInt32(notification.Value),
-                    cancellationToken
-                );
-            }
-            else if (
-                notification.StatusType == SnapcastConstants.StatusTypes.MUTE
-                && notification.TargetId.StartsWith(SnapcastConstants.TargetPrefixes.CLIENT)
-            )
-            {
-                result = await this.SetClientMuteAsync(
-                    notification.TargetId,
-                    Convert.ToBoolean(notification.Value),
-                    cancellationToken
-                );
-            }
-            else if (
-                notification.StatusType == SnapcastConstants.StatusTypes.LATENCY
-                && notification.TargetId.StartsWith(SnapcastConstants.TargetPrefixes.CLIENT)
-            )
-            {
-                result = await this.SetClientLatencyAsync(
-                    notification.TargetId,
-                    Convert.ToInt32(notification.Value),
-                    cancellationToken
-                );
-            }
-            else if (
-                notification.StatusType == SnapcastConstants.StatusTypes.VOLUME
-                && notification.TargetId.StartsWith(SnapcastConstants.TargetPrefixes.GROUP)
-            )
-            {
-                result = await this.SetGroupVolumeAsync(
-                    notification.TargetId,
-                    Convert.ToInt32(notification.Value),
-                    cancellationToken
-                );
-            }
-            else if (
-                notification.StatusType == SnapcastConstants.StatusTypes.MUTE
-                && notification.TargetId.StartsWith(SnapcastConstants.TargetPrefixes.GROUP)
-            )
-            {
-                result = await this.SetGroupMuteAsync(
-                    notification.TargetId,
-                    Convert.ToBoolean(notification.Value),
-                    cancellationToken
-                );
-            }
-            else
-            {
-                result = Result.Success(); // Ignore unknown status types
-            }
-
-            if (!result.IsSuccess)
-            {
-                this.LogStatusNotificationError(
-                    notification.StatusType,
-                    notification.TargetId,
-                    new Exception(result.ErrorMessage)
-                );
-            }
-        }
-        catch (Exception ex)
-        {
-            this.LogStatusNotificationError(notification.StatusType, notification.TargetId, ex);
-        }
-    }
-
-    private async Task<Result> SetGroupVolumeAsync(
-        string groupId,
-        int volumePercent,
-        CancellationToken cancellationToken
-    )
-    {
-        if (!this.IsConnected)
-        {
-            return Result.Failure("Snapcast service is not connected");
-        }
-
-        try
-        {
-            return await this._operationPolicy.ExecuteAsync(
-                async (ct) =>
-                {
-                    // Get all clients in the group and set their volume
-                    var group = this._stateRepository.GetGroup(groupId);
-                    if (group == null)
-                    {
-                        return Result.Failure($"Group {groupId} not found");
-                    }
-
-                    foreach (var client in group.Value.Clients)
-                    {
-                        await this._snapcastClient.ClientSetVolumeAsync(client.Id, volumePercent);
-                    }
-
-                    return Result.Success();
-                },
-                cancellationToken
-            );
-        }
-        catch (Exception ex)
-        {
-            this.LogOperationFailed(nameof(this.SetGroupVolumeAsync), ex);
-            return Result.Failure($"Failed to set group volume: {ex.Message}");
         }
     }
 
