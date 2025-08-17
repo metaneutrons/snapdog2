@@ -34,7 +34,7 @@ public class ZoneMqttConfig
     [Env(Key = "TRACK_TOPIC", Default = "track")]
     public string TrackTopic { get; set; } = "track";
 
-    [Env(Key = "TRACK_INFO_TOPIC", Default = "track/info")]
+    [Env(Key = "TRACK_METADATA_TOPIC", Default = "track/info")]
     public string TrackInfoTopic { get; set; } = "track/info";
 
     // Track repeat topics (aligned with StatusIds)

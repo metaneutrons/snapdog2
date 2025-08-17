@@ -38,14 +38,22 @@ public static class StatusIds
         StatusIdAttribute.GetStatusId<ZoneShuffleModeChangedNotification>();
     public static readonly string ZoneState = StatusIdAttribute.GetStatusId<ZoneStateChangedNotification>();
 
-    // Track Information Status IDs
-    public static readonly string TrackInfo = StatusIdAttribute.GetStatusId<ZoneTrackInfoChangedNotification>();
-    public static readonly string TrackInfoLength = StatusIdAttribute.GetStatusId<ZoneTrackLengthChangedNotification>();
-    public static readonly string TrackInfoPosition =
+    // Track Metadata Status IDs (Static information about media files)
+    public static readonly string TrackMetadata = StatusIdAttribute.GetStatusId<ZoneTrackMetadataChangedNotification>();
+    public static readonly string TrackMetadataDuration =
+        StatusIdAttribute.GetStatusId<ZoneTrackDurationChangedNotification>();
+    public static readonly string TrackMetadataTitle =
+        StatusIdAttribute.GetStatusId<ZoneTrackTitleChangedNotification>();
+    public static readonly string TrackMetadataArtist =
+        StatusIdAttribute.GetStatusId<ZoneTrackArtistChangedNotification>();
+    public static readonly string TrackMetadataAlbum =
+        StatusIdAttribute.GetStatusId<ZoneTrackAlbumChangedNotification>();
+    public static readonly string TrackMetadataCover =
+        StatusIdAttribute.GetStatusId<ZoneTrackCoverChangedNotification>();
+
+    // Track Playback Status IDs (Dynamic playback state)
+    public static readonly string TrackPositionStatus =
         StatusIdAttribute.GetStatusId<ZoneTrackPositionChangedNotification>();
-    public static readonly string TrackInfoTitle = StatusIdAttribute.GetStatusId<ZoneTrackTitleChangedNotification>();
-    public static readonly string TrackInfoArtist = StatusIdAttribute.GetStatusId<ZoneTrackArtistChangedNotification>();
-    public static readonly string TrackInfoAlbum = StatusIdAttribute.GetStatusId<ZoneTrackAlbumChangedNotification>();
     public static readonly string TrackPlayingStatus =
         StatusIdAttribute.GetStatusId<ZoneTrackPlayingStatusChangedNotification>();
     public static readonly string TrackProgressStatus =

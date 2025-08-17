@@ -145,8 +145,9 @@ SNAPDOG_TELEMETRY_OTLP_HEADERS=authorization=Bearer token123
 ```
 
 **Key Benefits:**
+
 - **Vendor Neutral**: Works with any OTLP-compatible backend
-- **Simple Configuration**: Just change endpoint to switch backends  
+- **Simple Configuration**: Just change endpoint to switch backends
 - **Clean Separation**: Application vs infrastructure concerns
 - **Future Proof**: Supports emerging observability platforms
 
@@ -353,7 +354,7 @@ SNAPDOG_ZONE_1_MQTT_VOLUME_SET_TOPIC=volume/set           # Default: volume/set
 SNAPDOG_ZONE_1_MQTT_MUTE_SET_TOPIC=mute/set               # Default: mute/set
 SNAPDOG_ZONE_1_MQTT_CONTROL_TOPIC=control                 # Default: control
 SNAPDOG_ZONE_1_MQTT_TRACK_TOPIC=track                     # Default: track
-SNAPDOG_ZONE_1_MQTT_TRACK_INFO_TOPIC=track/info           # Default: track/info
+SNAPDOG_ZONE_1_MQTT_TRACK_METADATA_TOPIC=track/info           # Default: track/info
 SNAPDOG_ZONE_1_MQTT_TRACK_REPEAT_TOPIC=track_repeat       # Default: track_repeat
 SNAPDOG_ZONE_1_MQTT_PLAYLIST_TOPIC=playlist               # Default: playlist
 SNAPDOG_ZONE_1_MQTT_PLAYLIST_INFO_TOPIC=playlist/info     # Default: playlist/info
