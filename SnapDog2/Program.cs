@@ -2,6 +2,7 @@ using System.CommandLine;
 using dotenv.net;
 using EnvoyConfig;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Options;
 using OpenTelemetry;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
@@ -301,6 +302,13 @@ static WebApplication CreateWebApplication(string[] args)
         options.AddRange(snapDogConfig.Clients);
     });
 
+    // Register IEnumerable<ZoneConfig> for MediaPlayerService
+    builder.Services.AddSingleton<IEnumerable<ZoneConfig>>(provider =>
+    {
+        var zoneOptions = provider.GetRequiredService<IOptions<List<ZoneConfig>>>();
+        return zoneOptions.Value;
+    });
+
     // Add MQTT services
     if (snapDogConfig.Services.Mqtt.Enabled)
     {
@@ -378,7 +386,10 @@ static WebApplication CreateWebApplication(string[] args)
         SnapDog2.Core.Abstractions.IZoneStateStore,
         SnapDog2.Infrastructure.Storage.InMemoryZoneStateStore
     >();
-    builder.Services.AddScoped<SnapDog2.Core.Abstractions.IZoneManager, SnapDog2.Infrastructure.Domain.ZoneManager>();
+    builder.Services.AddSingleton<
+        SnapDog2.Core.Abstractions.IZoneManager,
+        SnapDog2.Infrastructure.Domain.ZoneManager
+    >();
 
     // Zone event bridge service for external event handling
     builder.Services.AddScoped<
@@ -386,14 +397,14 @@ static WebApplication CreateWebApplication(string[] args)
         SnapDog2.Infrastructure.Services.ZoneEventBridgeService
     >();
 
-    // Status factory for centralized status notification creation
-    builder.Services.AddScoped<
+    // Status factory for centralized status notification creation - Singleton for performance
+    builder.Services.AddSingleton<
         SnapDog2.Core.Abstractions.IStatusFactory,
         SnapDog2.Server.Features.Shared.Factories.StatusFactory
     >();
 
-    // Media player services
-    builder.Services.AddScoped<
+    // Media player services - Singleton to persist across requests and scopes
+    builder.Services.AddSingleton<
         SnapDog2.Core.Abstractions.IMediaPlayerService,
         SnapDog2.Infrastructure.Audio.MediaPlayerService
     >();
