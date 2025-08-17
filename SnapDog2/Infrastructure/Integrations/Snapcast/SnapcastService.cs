@@ -28,7 +28,6 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     private readonly SnapcastConfig _config;
     private readonly IServiceProvider _serviceProvider;
     private readonly ISnapcastStateRepository _stateRepository;
-    private readonly IClientManager _clientManager;
     private readonly ILogger<SnapcastService> _logger;
     private readonly SnapcastClient.IClient _snapcastClient;
     private readonly ResiliencePipeline _connectionPolicy;
@@ -37,11 +36,20 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     private bool _disposed = false;
     private bool _initialized = false;
 
+    /// <summary>
+    /// Helper method to resolve IClientManager in a scoped way to avoid service lifetime issues.
+    /// </summary>
+    private async Task<IClient?> GetClientBySnapcastIdAsync(string snapcastClientId)
+    {
+        using var scope = this._serviceProvider.CreateScope();
+        var clientManager = scope.ServiceProvider.GetRequiredService<IClientManager>();
+        return await clientManager.GetClientBySnapcastIdAsync(snapcastClientId);
+    }
+
     public SnapcastService(
         IOptions<SnapDogConfiguration> configOptions,
         IServiceProvider serviceProvider,
         ISnapcastStateRepository stateRepository,
-        IClientManager clientManager,
         ILogger<SnapcastService> logger,
         SnapcastClient.IClient snapcastClient
     )
@@ -49,7 +57,6 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         this._config = configOptions.Value.Services.Snapcast;
         this._serviceProvider = serviceProvider;
         this._stateRepository = stateRepository;
-        this._clientManager = clientManager;
         this._logger = logger;
         this._snapcastClient = snapcastClient;
 
@@ -996,7 +1003,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     {
         try
         {
-            var client = await this._clientManager.GetClientBySnapcastIdAsync(snapcastClientId);
+            var client = await this.GetClientBySnapcastIdAsync(snapcastClientId);
             if (client != null)
             {
                 await client.PublishConnectionStatusAsync(isConnected);
@@ -1020,7 +1027,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     {
         try
         {
-            var client = await this._clientManager.GetClientBySnapcastIdAsync(snapcastClientId);
+            var client = await this.GetClientBySnapcastIdAsync(snapcastClientId);
             if (client != null)
             {
                 await client.PublishVolumeStatusAsync(volume);
@@ -1044,7 +1051,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     {
         try
         {
-            var client = await this._clientManager.GetClientBySnapcastIdAsync(snapcastClientId);
+            var client = await this.GetClientBySnapcastIdAsync(snapcastClientId);
             if (client != null)
             {
                 await client.PublishMuteStatusAsync(muted);
@@ -1068,7 +1075,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     {
         try
         {
-            var client = await this._clientManager.GetClientBySnapcastIdAsync(snapcastClientId);
+            var client = await this.GetClientBySnapcastIdAsync(snapcastClientId);
             if (client != null)
             {
                 await client.PublishLatencyStatusAsync(latencyMs);

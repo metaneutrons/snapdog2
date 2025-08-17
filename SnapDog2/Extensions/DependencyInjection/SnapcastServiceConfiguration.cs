@@ -44,9 +44,10 @@ public static class SnapcastServiceConfiguration
             var stateRepository = serviceProvider.GetRequiredService<ISnapcastStateRepository>();
             var logger = serviceProvider.GetRequiredService<ILogger<SnapcastService>>();
             var snapcastClient = serviceProvider.GetRequiredService<SnapcastClient.IClient>();
-            var clientManager = serviceProvider.GetRequiredService<IClientManager>();
 
-            return new SnapcastService(config, serviceProvider, stateRepository, clientManager, logger, snapcastClient);
+            // Don't resolve IClientManager here - pass IServiceProvider instead
+            // SnapcastService will create scopes when it needs to access IClientManager
+            return new SnapcastService(config, serviceProvider, stateRepository, logger, snapcastClient);
         });
 
         return services;
