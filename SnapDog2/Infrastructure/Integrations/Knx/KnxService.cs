@@ -211,10 +211,9 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             var groupAddress = this.GetStatusGroupAddress(statusId, targetId);
             if (string.IsNullOrEmpty(groupAddress))
             {
-                this.LogGroupAddressNotFoundWithContext(statusId, targetId);
-                return Result.Failure(
-                    $"No KNX group address configured for status {statusId} on {GetTargetTypeDescription(statusId)} {targetId}"
-                );
+                // No group address configured means "not interested in this status" - this is normal and not an error
+                this.LogGroupAddressNotConfigured(statusId, targetId);
+                return Result.Success(); // Changed from Failure to Success
             }
 
             return await this.WriteToKnxAsync(groupAddress, value, cancellationToken);
@@ -1244,7 +1243,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
     /// <summary>
     /// Logs group address not found with contextual target type information.
     /// </summary>
-    private void LogGroupAddressNotFoundWithContext(string statusId, int targetId)
+    private void LogGroupAddressNotConfigured(string statusId, int targetId)
     {
         var targetType = GetTargetTypeDescription(statusId);
         var targetDescription = targetType == "zone" ? $"zone {targetId}" : $"client {targetId}";

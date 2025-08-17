@@ -18,8 +18,8 @@ public partial class KnxService
     // Configuration and Error Operations (10103-10104)
     [LoggerMessage(
         10103,
-        LogLevel.Warning,
-        "No KNX group address configured for status {StatusId} on {TargetDescription}. "
+        LogLevel.Debug,
+        "No KNX group address configured for status {StatusId} on {TargetDescription} - skipping (this is normal)"
     )]
     private partial void LogNoKnxGroupAddressConfigured(string statusId, string targetDescription);
 
