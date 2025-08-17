@@ -163,7 +163,7 @@ public static class CommandIdUsageExamples
 /// 5. **Flexibility**: Three approaches for different use cases and complexity levels
 /// 6. **Maintainability**: Adding new commands automatically updates all approaches
 /// 7. **Type Safety**: Eliminates string typos and runtime command ID errors
-/// 8. **Documentation**: Clear mapping between code and blueprint specifications
+/// 8. **Documentation**: Clear mapping between code and external system specifications
 ///
 /// Architecture Decision Records:
 ///

@@ -3,7 +3,7 @@ namespace SnapDog2.Core.Attributes;
 using System.Reflection;
 
 /// <summary>
-/// Attribute to mark command classes with their corresponding command ID from the blueprint.
+/// Attribute to mark command classes with their corresponding command ID.
 /// Used for inbound command processing from external systems (MQTT, KNX).
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
@@ -14,15 +14,9 @@ public class CommandIdAttribute : Attribute
     /// </summary>
     public string Id { get; }
 
-    /// <summary>
-    /// Optional reference to the blueprint document for traceability.
-    /// </summary>
-    public string? BlueprintReference { get; }
-
-    public CommandIdAttribute(string id, string? blueprintReference = null)
+    public CommandIdAttribute(string id)
     {
         Id = id ?? throw new ArgumentNullException(nameof(id));
-        BlueprintReference = blueprintReference;
     }
 
     /// <summary>
@@ -37,7 +31,7 @@ public class CommandIdAttribute : Attribute
         return attribute?.Id
             ?? throw new InvalidOperationException(
                 $"No CommandId attribute found on {typeof(T).Name}. "
-                    + $"Add [CommandId(\"COMMAND_NAME\", \"Blueprint-Reference\")] to the class."
+                    + $"Add [CommandId(\"COMMAND_NAME\")] to the class."
             );
     }
 

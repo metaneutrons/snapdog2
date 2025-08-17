@@ -3,7 +3,7 @@ namespace SnapDog2.Core.Attributes;
 using System.Reflection;
 
 /// <summary>
-/// Attribute to mark notification classes with their corresponding status ID from the blueprint.
+/// Attribute to mark notification classes with their corresponding status ID.
 /// Used for outbound status events to external systems (MQTT, KNX).
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
@@ -14,15 +14,9 @@ public class StatusIdAttribute : Attribute
     /// </summary>
     public string Id { get; }
 
-    /// <summary>
-    /// Optional reference to the blueprint document for traceability.
-    /// </summary>
-    public string? BlueprintReference { get; }
-
-    public StatusIdAttribute(string id, string? blueprintReference = null)
+    public StatusIdAttribute(string id)
     {
         Id = id ?? throw new ArgumentNullException(nameof(id));
-        BlueprintReference = blueprintReference;
     }
 
     /// <summary>
