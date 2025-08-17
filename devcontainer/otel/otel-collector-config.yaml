@@ -35,16 +35,18 @@ exporters:
     sampling_initial: 5
     sampling_thereafter: 200
 
-  # Logging exporter for traces and logs
-  logging:
-    loglevel: info
+  # Additional debug exporter for traces and logs
+  debug/verbose:
+    verbosity: detailed
+    sampling_initial: 10
+    sampling_thereafter: 100
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
       processors: [batch, resource]
-      exporters: [debug, logging]
+      exporters: [debug, debug/verbose]
     
     metrics:
       receivers: [otlp]
@@ -54,7 +56,7 @@ service:
     logs:
       receivers: [otlp]
       processors: [batch, resource]
-      exporters: [debug, logging]
+      exporters: [debug, debug/verbose]
 
   extensions: []
   

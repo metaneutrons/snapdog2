@@ -78,7 +78,7 @@ jobs:
             --results-directory ./TestResults \
             --logger "trx;LogFileName=test-results.trx"
 
-      - name: Publish application
+      - name: Publish application (self-contained for packaging)
         run: |
           dotnet publish ./SnapDog2/SnapDog2.csproj \
             --configuration Release \
@@ -86,19 +86,47 @@ jobs:
             --self-contained true \
             --output ./publish/${{ matrix.runtime }} \
             -p:PublishSingleFile=true \
-            -p:PublishTrimmed=true
+            -p:PublishTrimmed=false \
+            -p:PublishReadyToRun=false
 
-      - name: Create release archive
+      - name: Publish application (framework-dependent for Docker)
+        if: matrix.runtime == 'linux-x64' || matrix.runtime == 'linux-arm64'
+        run: |
+          dotnet publish ./SnapDog2/SnapDog2.csproj \
+            --configuration Release \
+            --runtime ${{ matrix.runtime }} \
+            --self-contained false \
+            --output ./publish-docker/${{ matrix.runtime }} \
+            -p:UseAppHost=false \
+            -p:PublishTrimmed=false \
+            -p:PublishReadyToRun=false
+
+      - name: Create release archive (self-contained)
         run: |
           cd publish/${{ matrix.runtime }}
           tar -czf ../../snapdog2-${{ steps.gitversion.outputs.semVer }}-${{ matrix.artifact-name }}.tar.gz *
           cd ../..
 
-      - name: Upload build artifacts
+      - name: Create Docker archive (framework-dependent)
+        if: matrix.runtime == 'linux-x64' || matrix.runtime == 'linux-arm64'
+        run: |
+          cd publish-docker/${{ matrix.runtime }}
+          tar -czf ../../snapdog2-docker-${{ steps.gitversion.outputs.semVer }}-${{ matrix.artifact-name }}.tar.gz *
+          cd ../..
+
+      - name: Upload build artifacts (self-contained)
         uses: actions/upload-artifact@v4
         with:
           name: snapdog2-${{ matrix.artifact-name }}-${{ steps.gitversion.outputs.semVer }}
           path: snapdog2-${{ steps.gitversion.outputs.semVer }}-${{ matrix.artifact-name }}.tar.gz
+          retention-days: 7
+
+      - name: Upload Docker artifacts (framework-dependent)
+        if: matrix.runtime == 'linux-x64' || matrix.runtime == 'linux-arm64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapdog2-docker-${{ matrix.artifact-name }}-${{ steps.gitversion.outputs.semVer }}
+          path: snapdog2-docker-${{ steps.gitversion.outputs.semVer }}-${{ matrix.artifact-name }}.tar.gz
           retention-days: 7
 
   # Build and push Docker images for multiple architectures
