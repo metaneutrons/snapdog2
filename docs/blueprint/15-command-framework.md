@@ -90,8 +90,8 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 | `TRACK_REPEAT_TOGGLE` | Toggle track repeat mode   | `ZoneIndex` (int)                                 | Command (Set)    | Action: Toggle repeat state           |
 | `TRACK_REPEAT_STATUS` | Current track repeat state | `ZoneIndex` (int), `Enabled` (bool)               | Status (Publish) | State: Repeat is on/off               |
 | `TRACK_METADATA`      | Complete track metadata    | `ZoneIndex` (int), `TrackInfo` (object/record)    | Status (Publish) | State: Full track details           |
-| `TRACK_METADATA_LENGTH`   | Track duration             | `ZoneIndex` (int), `Duration` (long, ms)         | Status (Publish) | State: Length of current track      |
-| `TRACK_METADATA_POSITION` | Track position             | `ZoneIndex` (int), `Position` (long, ms)         | Status (Publish) | State: Position in current track    |
+| `TRACK_METADATA_DURATION`   | Track duration             | `ZoneIndex` (int), `Duration` (long, ms)         | Status (Publish) | State: Length of current track      |
+| `TRACK_POSITION_STATUS` | Track position             | `ZoneIndex` (int), `Position` (long, ms)         | Status (Publish) | State: Position in current track    |
 | `TRACK_METADATA_TITLE`    | Track title                | `ZoneIndex` (int), `Title` (string)              | Status (Publish) | State: Title of current track       |
 | `TRACK_METADATA_ARTIST`   | Track artist               | `ZoneIndex` (int), `Artist` (string)             | Status (Publish) | State: Artist of current track      |
 | `TRACK_METADATA_ALBUM`    | Track album                | `ZoneIndex` (int), `Album` (string)              | Status (Publish) | State: Album of current track       |
@@ -207,13 +207,13 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 | :------------------------ | :------------------------ | :------------------- | :------------------------------- | :------- | :----------------------- |
 | `TRACK_INDEX`             | `_TRACK_TOPIC`            | `track`              | `1`, `3`                         | Yes      | **1-based** index      |
 | `TRACK_METADATA`          | `_TRACK_METADATA_TOPIC`   | `track/metadata`     | Full JSON `TrackInfo` object     | Yes      | Complete track metadata |
-| `TRACK_METADATA_LENGTH`       | `_TRACK_LENGTH_TOPIC`     | `track/duration`     | `300000` (in ms)                 | Yes      | Duration of current track |
+| `TRACK_METADATA_DURATION`       | `_TRACK_LENGTH_TOPIC`     | `track/duration`     | `300000` (in ms)                 | Yes      | Duration of current track |
 | `TRACK_METADATA_TITLE`        | `_TRACK_TITLE_TOPIC`      | `track/title`        | `"Song Title"`                   | Yes      | Title of current track   |
 | `TRACK_METADATA_ARTIST`       | `_TRACK_ARTIST_TOPIC`     | `track/artist`       | `"Artist Name"`                  | Yes      | Artist of current track  |
 | `TRACK_METADATA_ALBUM`        | `_TRACK_ALBUM_TOPIC`      | `track/album`        | `"Album Name"`                   | Yes      | Album of current track   |
 | `TRACK_METADATA_COVER`        | `_TRACK_COVER_TOPIC`      | `track/cover`        | `"http://server/cover.jpg"`      | Yes      | Cover art URL            |
 | `TRACK_PLAYING_STATUS`    | `_TRACK_PLAYING_TOPIC`    | `track/playing`      | `true` / `false`                 | Yes      | Is track currently playing |
-| `TRACK_METADATA_POSITION` | `_TRACK_POSITION_TOPIC`   | `track/position`     | `10000` (in ms)                  | Yes      | Position in current track |
+| `TRACK_POSITION_STATUS` | `_TRACK_POSITION_TOPIC`   | `track/position`     | `10000` (in ms)                  | Yes      | Position in current track |
 | `TRACK_PROGRESS_STATUS`   | `_TRACK_PROGRESS_TOPIC`   | `track/progress`     | `0.65` (65% progress)            | Yes      | Progress percentage 0.0-1.0 |
 | `TRACK_REPEAT_STATUS`     | `_TRACK_REPEAT_TOPIC`     | `repeat/track`       | `true` / `false` (`1`/`0`)       | Yes      | Track repeat enabled     |
 
