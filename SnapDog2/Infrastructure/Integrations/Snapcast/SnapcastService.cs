@@ -990,10 +990,13 @@ public partial class SnapcastService
 
         try
         {
-            // Map status changes to Snapcast operations
+            // Map status changes to Snapcast operations using constants instead of magic strings
             Result result;
 
-            if (notification.StatusType == "VOLUME" && notification.TargetId.StartsWith("client_"))
+            if (
+                notification.StatusType == SnapcastConstants.StatusTypes.VOLUME
+                && notification.TargetId.StartsWith(SnapcastConstants.TargetPrefixes.CLIENT)
+            )
             {
                 result = await this.SetClientVolumeAsync(
                     notification.TargetId,
@@ -1001,7 +1004,10 @@ public partial class SnapcastService
                     cancellationToken
                 );
             }
-            else if (notification.StatusType == "MUTE" && notification.TargetId.StartsWith("client_"))
+            else if (
+                notification.StatusType == SnapcastConstants.StatusTypes.MUTE
+                && notification.TargetId.StartsWith(SnapcastConstants.TargetPrefixes.CLIENT)
+            )
             {
                 result = await this.SetClientMuteAsync(
                     notification.TargetId,
@@ -1009,7 +1015,10 @@ public partial class SnapcastService
                     cancellationToken
                 );
             }
-            else if (notification.StatusType == "VOLUME" && notification.TargetId.StartsWith("group_"))
+            else if (
+                notification.StatusType == SnapcastConstants.StatusTypes.VOLUME
+                && notification.TargetId.StartsWith(SnapcastConstants.TargetPrefixes.GROUP)
+            )
             {
                 result = await this.SetGroupVolumeAsync(
                     notification.TargetId,
@@ -1017,7 +1026,10 @@ public partial class SnapcastService
                     cancellationToken
                 );
             }
-            else if (notification.StatusType == "MUTE" && notification.TargetId.StartsWith("group_"))
+            else if (
+                notification.StatusType == SnapcastConstants.StatusTypes.MUTE
+                && notification.TargetId.StartsWith(SnapcastConstants.TargetPrefixes.GROUP)
+            )
             {
                 result = await this.SetGroupMuteAsync(
                     notification.TargetId,
