@@ -33,6 +33,10 @@ public static class CommandIds
     public static readonly string TrackPrevious = CommandIdAttribute.GetCommandId<PreviousTrackCommand>();
     public static readonly string TrackRepeat = CommandIdAttribute.GetCommandId<SetTrackRepeatCommand>();
     public static readonly string TrackRepeatToggle = CommandIdAttribute.GetCommandId<ToggleTrackRepeatCommand>();
+    public static readonly string TrackSeekPosition = CommandIdAttribute.GetCommandId<SeekPositionCommand>();
+    public static readonly string TrackSeekProgress = CommandIdAttribute.GetCommandId<SeekProgressCommand>();
+    public static readonly string TrackPlayByIndex = CommandIdAttribute.GetCommandId<PlayTrackByIndexCommand>();
+    public static readonly string TrackPlayUrl = CommandIdAttribute.GetCommandId<PlayUrlCommand>();
 
     // Zone Playlist Commands
     public static readonly string Playlist = CommandIdAttribute.GetCommandId<SetPlaylistCommand>();
@@ -46,6 +50,8 @@ public static class CommandIds
 
     // Client Volume Commands
     public static readonly string ClientVolume = CommandIdAttribute.GetCommandId<SetClientVolumeCommand>();
+    public static readonly string ClientVolumeUp = CommandIdAttribute.GetCommandId<ClientVolumeUpCommand>();
+    public static readonly string ClientVolumeDown = CommandIdAttribute.GetCommandId<ClientVolumeDownCommand>();
     public static readonly string ClientMute = CommandIdAttribute.GetCommandId<SetClientMuteCommand>();
     public static readonly string ClientMuteToggle = CommandIdAttribute.GetCommandId<ToggleClientMuteCommand>();
 

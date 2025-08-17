@@ -408,6 +408,95 @@ public static class CommandFactory
         };
     }
 
+    /// <summary>
+    /// Creates a SeekPositionCommand.
+    /// </summary>
+    public static SeekPositionCommand CreateSeekPositionCommand(
+        int zoneIndex,
+        long positionMs,
+        CommandSource source = CommandSource.Internal
+    )
+    {
+        return new SeekPositionCommand
+        {
+            ZoneIndex = zoneIndex,
+            PositionMs = positionMs,
+            Source = source,
+        };
+    }
+
+    /// <summary>
+    /// Creates a SeekProgressCommand.
+    /// </summary>
+    public static SeekProgressCommand CreateSeekProgressCommand(
+        int zoneIndex,
+        float progress,
+        CommandSource source = CommandSource.Internal
+    )
+    {
+        return new SeekProgressCommand
+        {
+            ZoneIndex = zoneIndex,
+            Progress = progress,
+            Source = source,
+        };
+    }
+
+    /// <summary>
+    /// Creates a PlayTrackByIndexCommand.
+    /// </summary>
+    public static PlayTrackByIndexCommand CreatePlayTrackByIndexCommand(
+        int zoneIndex,
+        int trackIndex,
+        CommandSource source = CommandSource.Internal
+    )
+    {
+        return new PlayTrackByIndexCommand
+        {
+            ZoneIndex = zoneIndex,
+            TrackIndex = trackIndex,
+            Source = source,
+        };
+    }
+
+    #endregion
+
+    #region Client Volume Commands
+
+    /// <summary>
+    /// Creates a ClientVolumeUpCommand.
+    /// </summary>
+    public static ClientVolumeUpCommand CreateClientVolumeUpCommand(
+        int clientIndex,
+        int step = 5,
+        CommandSource source = CommandSource.Internal
+    )
+    {
+        return new ClientVolumeUpCommand
+        {
+            ClientIndex = clientIndex,
+            Step = step,
+            Source = source,
+        };
+    }
+
+    /// <summary>
+    /// Creates a ClientVolumeDownCommand.
+    /// </summary>
+    public static ClientVolumeDownCommand CreateClientVolumeDownCommand(
+        int clientIndex,
+        int step = 5,
+        CommandSource source = CommandSource.Internal
+    )
+    {
+        return new ClientVolumeDownCommand
+        {
+            ClientIndex = clientIndex,
+            Step = step,
+            Source = source,
+        };
+    }
+
     #endregion
 
     #region Parsing Helpers
@@ -592,6 +681,44 @@ public static class CommandFactory
             "shuffle/set" when payload.Equals("toggle", StringComparison.OrdinalIgnoreCase) =>
                 CreateTogglePlaylistShuffleCommand(zoneIndex, source),
 
+            // Track position and progress commands (seek functionality)
+            "track/position" when TryParseLong(payload, out var positionMs) => CreateSeekPositionCommand(
+                zoneIndex,
+                positionMs,
+                source
+            ),
+            "track/position/set" when TryParseLong(payload, out var positionSetMs) => CreateSeekPositionCommand(
+                zoneIndex,
+                positionSetMs,
+                source
+            ),
+            "track/progress" when TryParseFloat(payload, out var progress) => CreateSeekProgressCommand(
+                zoneIndex,
+                progress,
+                source
+            ),
+            "track/progress/set" when TryParseFloat(payload, out var progressSet) => CreateSeekProgressCommand(
+                zoneIndex,
+                progressSet,
+                source
+            ),
+
+            // Play specific track by index
+            "play/track" when TryParseInt(payload, out var playTrackIndex) => CreatePlayTrackByIndexCommand(
+                zoneIndex,
+                playTrackIndex,
+                source
+            ),
+            "track/play" when TryParseInt(payload, out var trackPlayIndex) => CreatePlayTrackByIndexCommand(
+                zoneIndex,
+                trackPlayIndex,
+                source
+            ),
+
+            // Play URL directly
+            "play/url" when !string.IsNullOrWhiteSpace(payload) => CreatePlayUrlCommand(zoneIndex, payload, source),
+            "url/play" when !string.IsNullOrWhiteSpace(payload) => CreatePlayUrlCommand(zoneIndex, payload, source),
+
             _ => null,
         };
     }
@@ -615,6 +742,23 @@ public static class CommandFactory
                 volume,
                 source
             ),
+            "volume" when payload.Equals("+", StringComparison.OrdinalIgnoreCase) => CreateClientVolumeUpCommand(
+                clientIndex,
+                5,
+                source
+            ),
+            "volume" when payload.Equals("-", StringComparison.OrdinalIgnoreCase) => CreateClientVolumeDownCommand(
+                clientIndex,
+                5,
+                source
+            ),
+            "volume/set" when TryParseInt(payload, out var volumeSet) => CreateSetClientVolumeCommand(
+                clientIndex,
+                volumeSet,
+                source
+            ),
+            "volume/up" => CreateClientVolumeUpCommand(clientIndex, 5, source),
+            "volume/down" => CreateClientVolumeDownCommand(clientIndex, 5, source),
 
             // Mute commands
             "mute" when TryParseBool(payload, out var mute) => CreateSetClientMuteCommand(clientIndex, mute, source),
@@ -622,6 +766,14 @@ public static class CommandFactory
                 clientIndex,
                 source
             ),
+            "mute/set" when TryParseBool(payload, out var muteSet) => CreateSetClientMuteCommand(
+                clientIndex,
+                muteSet,
+                source
+            ),
+            "mute/set" when payload.Equals("toggle", StringComparison.OrdinalIgnoreCase) =>
+                CreateToggleClientMuteCommand(clientIndex, source),
+            "mute/toggle" => CreateToggleClientMuteCommand(clientIndex, source),
 
             // Latency commands
             "latency" when TryParseInt(payload, out var latency) => CreateSetClientLatencyCommand(
@@ -682,6 +834,16 @@ public static class CommandFactory
         }
 
         return false;
+    }
+
+    private static bool TryParseLong(string value, out long result)
+    {
+        return long.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out result);
+    }
+
+    private static bool TryParseFloat(string value, out float result)
+    {
+        return float.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out result);
     }
 
     #endregion
