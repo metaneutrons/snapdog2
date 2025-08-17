@@ -24,6 +24,19 @@ public static class StatusIds
     public static readonly string ClientState = StatusIdAttribute.GetStatusId<ClientStateChangedNotification>();
     public static readonly string ClientName = StatusIdAttribute.GetStatusId<ClientNameChangedNotification>();
 
+    // Client Status Notification IDs (Blueprint Compliance - Status Publishing)
+    public static readonly string ClientVolumeStatusPublish =
+        StatusIdAttribute.GetStatusId<ClientVolumeStatusNotification>();
+    public static readonly string ClientMuteStatusPublish =
+        StatusIdAttribute.GetStatusId<ClientMuteStatusNotification>();
+    public static readonly string ClientLatencyStatusPublish =
+        StatusIdAttribute.GetStatusId<ClientLatencyStatusNotification>();
+    public static readonly string ClientZoneStatusPublish =
+        StatusIdAttribute.GetStatusId<ClientZoneStatusNotification>();
+    public static readonly string ClientConnectionStatusPublish =
+        StatusIdAttribute.GetStatusId<ClientConnectionStatusNotification>();
+    public static readonly string ClientStateStatusPublish = StatusIdAttribute.GetStatusId<ClientStateNotification>();
+
     // Zone Status IDs
     public static readonly string PlaybackState = StatusIdAttribute.GetStatusId<ZonePlaybackStateChangedNotification>();
     public static readonly string VolumeStatus = StatusIdAttribute.GetStatusId<ZoneVolumeChangedNotification>();

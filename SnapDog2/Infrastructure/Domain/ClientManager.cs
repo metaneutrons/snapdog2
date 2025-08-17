@@ -5,12 +5,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Cortex.Mediator;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Core.Models;
+using SnapDog2.Server.Features.Clients.Notifications;
 
 /// <summary>
 /// Production implementation of IClientManager with Snapcast integration.
@@ -21,6 +23,7 @@ public partial class ClientManager : IClientManager
     private readonly ILogger<ClientManager> _logger;
     private readonly ISnapcastStateRepository _snapcastStateRepository;
     private readonly ISnapcastService _snapcastService;
+    private readonly IMediator _mediator;
     private readonly List<ClientConfig> _clientConfigs;
     private readonly SnapDogConfiguration _configuration;
 
@@ -46,12 +49,14 @@ public partial class ClientManager : IClientManager
         ILogger<ClientManager> logger,
         ISnapcastStateRepository snapcastStateRepository,
         ISnapcastService snapcastService,
+        IMediator mediator,
         SnapDogConfiguration configuration
     )
     {
         this._logger = logger;
         this._snapcastStateRepository = snapcastStateRepository;
         this._snapcastService = snapcastService;
+        this._mediator = mediator;
         this._clientConfigs = configuration.Clients;
         this._configuration = configuration;
 
@@ -87,7 +92,8 @@ public partial class ClientManager : IClientManager
             snapcastClient.Value,
             this._clientConfigs[clientIndex - 1],
             this._snapcastService,
-            this._snapcastStateRepository
+            this._snapcastStateRepository,
+            this._mediator
         );
         return Result<IClient>.Success(client);
     }
@@ -349,13 +355,15 @@ public partial class ClientManager : IClientManager
         SnapcastClient.Models.SnapClient snapcastClient,
         ClientConfig config,
         ISnapcastService snapcastService,
-        ISnapcastStateRepository snapcastStateRepository
+        ISnapcastStateRepository snapcastStateRepository,
+        IMediator mediator
     ) : IClient
     {
         internal readonly SnapcastClient.Models.SnapClient _snapcastClient = snapcastClient;
         private readonly ClientConfig _config = config;
         private readonly ISnapcastService _snapcastService = snapcastService;
         private readonly ISnapcastStateRepository _snapcastStateRepository = snapcastStateRepository;
+        private readonly IMediator _mediator = mediator;
 
         public int Id { get; } = id;
         public string Name => this._config.Name;
@@ -406,24 +414,97 @@ public partial class ClientManager : IClientManager
         internal DateTime LastSeenUtc =>
             DateTimeOffset.FromUnixTimeSeconds(this._snapcastClient.LastSeen.Sec).UtcDateTime;
 
+        #region Command Operations
+
         public async Task<Result> SetVolumeAsync(int volume)
         {
-            return await this._snapcastService.SetClientVolumeAsync(this._snapcastClient.Id, volume);
+            var result = await this._snapcastService.SetClientVolumeAsync(this._snapcastClient.Id, volume);
+
+            if (result.IsSuccess)
+            {
+                await PublishVolumeStatusAsync(volume);
+            }
+
+            return result;
         }
 
         public async Task<Result> SetMuteAsync(bool mute)
         {
-            return await this._snapcastService.SetClientMuteAsync(this._snapcastClient.Id, mute);
+            var result = await this._snapcastService.SetClientMuteAsync(this._snapcastClient.Id, mute);
+
+            if (result.IsSuccess)
+            {
+                await PublishMuteStatusAsync(mute);
+            }
+
+            return result;
         }
 
         public async Task<Result> SetLatencyAsync(int latencyMs)
         {
-            return await this._snapcastService.SetClientLatencyAsync(this._snapcastClient.Id, latencyMs);
+            var result = await this._snapcastService.SetClientLatencyAsync(this._snapcastClient.Id, latencyMs);
+
+            if (result.IsSuccess)
+            {
+                await PublishLatencyStatusAsync(latencyMs);
+            }
+
+            return result;
         }
 
         public async Task<Result> SetNameAsync(string name)
         {
-            return await this._snapcastService.SetClientNameAsync(this._snapcastClient.Id, name);
+            var result = await this._snapcastService.SetClientNameAsync(this._snapcastClient.Id, name);
+
+            if (result.IsSuccess)
+            {
+                // Note: Name changes don't have a status notification in blueprint
+                // They use ClientNameChangedNotification instead
+            }
+
+            return result;
         }
+
+        #endregion
+
+        #region Status Publishing
+
+        public async Task PublishVolumeStatusAsync(int volume)
+        {
+            var notification = new ClientVolumeStatusNotification(this.Id, volume);
+            await this._mediator.PublishAsync(notification);
+        }
+
+        public async Task PublishMuteStatusAsync(bool muted)
+        {
+            var notification = new ClientMuteStatusNotification(this.Id, muted);
+            await this._mediator.PublishAsync(notification);
+        }
+
+        public async Task PublishLatencyStatusAsync(int latencyMs)
+        {
+            var notification = new ClientLatencyStatusNotification(this.Id, latencyMs);
+            await this._mediator.PublishAsync(notification);
+        }
+
+        public async Task PublishZoneStatusAsync(int? zoneIndex)
+        {
+            var notification = new ClientZoneStatusNotification(this.Id, zoneIndex);
+            await this._mediator.PublishAsync(notification);
+        }
+
+        public async Task PublishConnectionStatusAsync(bool isConnected)
+        {
+            var notification = new ClientConnectionStatusNotification(this.Id, isConnected);
+            await this._mediator.PublishAsync(notification);
+        }
+
+        public async Task PublishStateAsync(ClientState state)
+        {
+            var notification = new ClientStateNotification(this.Id, state);
+            await this._mediator.PublishAsync(notification);
+        }
+
+        #endregion
     }
 }
