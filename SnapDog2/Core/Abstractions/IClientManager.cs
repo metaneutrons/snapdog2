@@ -43,4 +43,12 @@ public interface IClientManager
     /// <param name="zoneIndex">The zone ID.</param>
     /// <returns>A result indicating success or failure.</returns>
     Task<Result> AssignClientToZoneAsync(int clientIndex, int zoneIndex);
+
+    /// <summary>
+    /// Gets a client by its Snapcast client ID for event bridging.
+    /// Used internally by SnapcastService to bridge external events to IClient notifications.
+    /// </summary>
+    /// <param name="snapcastClientId">The Snapcast client ID.</param>
+    /// <returns>The client if found, null otherwise.</returns>
+    Task<IClient?> GetClientBySnapcastIdAsync(string snapcastClientId);
 }

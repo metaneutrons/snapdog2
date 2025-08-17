@@ -28,6 +28,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     private readonly SnapcastConfig _config;
     private readonly IServiceProvider _serviceProvider;
     private readonly ISnapcastStateRepository _stateRepository;
+    private readonly IClientManager _clientManager;
     private readonly ILogger<SnapcastService> _logger;
     private readonly SnapcastClient.IClient _snapcastClient;
     private readonly ResiliencePipeline _connectionPolicy;
@@ -40,6 +41,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         IOptions<SnapDogConfiguration> configOptions,
         IServiceProvider serviceProvider,
         ISnapcastStateRepository stateRepository,
+        IClientManager clientManager,
         ILogger<SnapcastService> logger,
         SnapcastClient.IClient snapcastClient
     )
@@ -47,6 +49,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         this._config = configOptions.Value.Services.Snapcast;
         this._serviceProvider = serviceProvider;
         this._stateRepository = stateRepository;
+        this._clientManager = clientManager;
         this._logger = logger;
         this._snapcastClient = snapcastClient;
 
@@ -719,6 +722,9 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         {
             this._stateRepository.UpdateClient(client);
             _ = this.PublishNotificationAsync(new SnapcastClientConnectedNotification(client));
+
+            // Bridge to IClient status notification
+            _ = this.BridgeClientConnectionStatusAsync(client.Id, true);
         }
         catch (Exception ex)
         {
@@ -733,6 +739,9 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         {
             this._stateRepository.UpdateClient(client);
             _ = this.PublishNotificationAsync(new SnapcastClientDisconnectedNotification(client));
+
+            // Bridge to IClient status notification
+            _ = this.BridgeClientConnectionStatusAsync(client.Id, false);
         }
         catch (Exception ex)
         {
@@ -772,6 +781,10 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
             _ = this.PublishNotificationAsync(
                 new SnapcastClientVolumeChangedNotification(volumeChange.Id, modelVolume)
             );
+
+            // Bridge to IClient status notifications
+            _ = this.BridgeClientVolumeStatusAsync(volumeChange.Id, volumeChange.Volume.Percent);
+            _ = this.BridgeClientMuteStatusAsync(volumeChange.Id, volumeChange.Volume.Muted);
         }
         catch (Exception ex)
         {
@@ -798,6 +811,9 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
             _ = this.PublishNotificationAsync(
                 new SnapcastClientLatencyChangedNotification(latencyChange.Id, latencyChange.Latency)
             );
+
+            // Bridge to IClient status notification
+            _ = this.BridgeClientLatencyStatusAsync(latencyChange.Id, latencyChange.Latency);
         }
         catch (Exception ex)
         {
@@ -970,6 +986,123 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
             this._snapcastClient.OnServerUpdate = null;
         }
     }
+
+    #region Event Bridge Methods
+
+    /// <summary>
+    /// Bridges Snapcast client connection events to IClient status notifications.
+    /// </summary>
+    private async Task BridgeClientConnectionStatusAsync(string snapcastClientId, bool isConnected)
+    {
+        try
+        {
+            var client = await this._clientManager.GetClientBySnapcastIdAsync(snapcastClientId);
+            if (client != null)
+            {
+                await client.PublishConnectionStatusAsync(isConnected);
+                this.LogEventBridged("ClientConnection", snapcastClientId, client.Id);
+            }
+            else
+            {
+                this.LogClientNotFoundForBridge(snapcastClientId, "connection");
+            }
+        }
+        catch (Exception ex)
+        {
+            this.LogEventBridgeError("ClientConnection", snapcastClientId, ex);
+        }
+    }
+
+    /// <summary>
+    /// Bridges Snapcast client volume events to IClient status notifications.
+    /// </summary>
+    private async Task BridgeClientVolumeStatusAsync(string snapcastClientId, int volume)
+    {
+        try
+        {
+            var client = await this._clientManager.GetClientBySnapcastIdAsync(snapcastClientId);
+            if (client != null)
+            {
+                await client.PublishVolumeStatusAsync(volume);
+                this.LogEventBridged("ClientVolume", snapcastClientId, client.Id);
+            }
+            else
+            {
+                this.LogClientNotFoundForBridge(snapcastClientId, "volume");
+            }
+        }
+        catch (Exception ex)
+        {
+            this.LogEventBridgeError("ClientVolume", snapcastClientId, ex);
+        }
+    }
+
+    /// <summary>
+    /// Bridges Snapcast client mute events to IClient status notifications.
+    /// </summary>
+    private async Task BridgeClientMuteStatusAsync(string snapcastClientId, bool muted)
+    {
+        try
+        {
+            var client = await this._clientManager.GetClientBySnapcastIdAsync(snapcastClientId);
+            if (client != null)
+            {
+                await client.PublishMuteStatusAsync(muted);
+                this.LogEventBridged("ClientMute", snapcastClientId, client.Id);
+            }
+            else
+            {
+                this.LogClientNotFoundForBridge(snapcastClientId, "mute");
+            }
+        }
+        catch (Exception ex)
+        {
+            this.LogEventBridgeError("ClientMute", snapcastClientId, ex);
+        }
+    }
+
+    /// <summary>
+    /// Bridges Snapcast client latency events to IClient status notifications.
+    /// </summary>
+    private async Task BridgeClientLatencyStatusAsync(string snapcastClientId, int latencyMs)
+    {
+        try
+        {
+            var client = await this._clientManager.GetClientBySnapcastIdAsync(snapcastClientId);
+            if (client != null)
+            {
+                await client.PublishLatencyStatusAsync(latencyMs);
+                this.LogEventBridged("ClientLatency", snapcastClientId, client.Id);
+            }
+            else
+            {
+                this.LogClientNotFoundForBridge(snapcastClientId, "latency");
+            }
+        }
+        catch (Exception ex)
+        {
+            this.LogEventBridgeError("ClientLatency", snapcastClientId, ex);
+        }
+    }
+
+    [LoggerMessage(
+        6020,
+        LogLevel.Debug,
+        "Bridged {EventType} event from Snapcast client {SnapcastClientId} to IClient {ClientId}"
+    )]
+    private partial void LogEventBridged(string eventType, string snapcastClientId, int clientId);
+
+    [LoggerMessage(
+        6021,
+        LogLevel.Warning,
+        "Client not found for bridging {EventType} event from Snapcast client {SnapcastClientId}"
+    )]
+    private partial void LogClientNotFoundForBridge(string snapcastClientId, string eventType);
+
+    [LoggerMessage(6022, LogLevel.Error, "Error bridging {EventType} event from Snapcast client {SnapcastClientId}")]
+    private partial void LogEventBridgeError(string eventType, string snapcastClientId, Exception ex);
+
+    #endregion
 
     #endregion
 

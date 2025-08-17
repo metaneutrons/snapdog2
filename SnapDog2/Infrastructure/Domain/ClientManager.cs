@@ -45,6 +45,28 @@ public partial class ClientManager : IClientManager
     [LoggerMessage(7006, LogLevel.Information, "Initialized ClientManager with {ClientCount} configured clients")]
     private partial void LogInitialized(int clientCount);
 
+    [LoggerMessage(7010, LogLevel.Debug, "Getting client by Snapcast ID {SnapcastClientId}")]
+    private partial void LogGettingClientBySnapcastId(string snapcastClientId);
+
+    [LoggerMessage(7011, LogLevel.Warning, "Snapcast client {SnapcastClientId} not found")]
+    private partial void LogSnapcastClientNotFound(string snapcastClientId);
+
+    [LoggerMessage(7012, LogLevel.Warning, "MAC address not found for Snapcast client {SnapcastClientId}")]
+    private partial void LogMacAddressNotFound(string snapcastClientId);
+
+    [LoggerMessage(7013, LogLevel.Warning, "Client config not found for MAC address {MacAddress}")]
+    private partial void LogClientConfigNotFoundByMac(string macAddress);
+
+    [LoggerMessage(
+        7014,
+        LogLevel.Debug,
+        "Found client {SnapcastClientId} with MAC {MacAddress} mapped to client index {ClientIndex}"
+    )]
+    private partial void LogClientFoundByMac(string snapcastClientId, string macAddress, int clientIndex);
+
+    [LoggerMessage(7015, LogLevel.Error, "Error getting client by Snapcast ID {SnapcastClientId}")]
+    private partial void LogGetClientBySnapcastIdError(string snapcastClientId, Exception ex);
+
     public ClientManager(
         ILogger<ClientManager> logger,
         ISnapcastStateRepository snapcastStateRepository,
@@ -268,6 +290,63 @@ public partial class ClientManager : IClientManager
                 zoneIndex
             );
             return Result.Failure($"Error assigning client {clientIndex} to zone {zoneIndex}: {ex.Message}");
+        }
+    }
+
+    public Task<IClient?> GetClientBySnapcastIdAsync(string snapcastClientId)
+    {
+        this.LogGettingClientBySnapcastId(snapcastClientId);
+
+        try
+        {
+            // Get all Snapcast clients (synchronous call)
+            var allSnapcastClients = this._snapcastStateRepository.GetAllClients();
+
+            // Find the Snapcast client by ID
+            var snapcastClient = allSnapcastClients.FirstOrDefault(c => c.Id == snapcastClientId);
+            if (string.IsNullOrEmpty(snapcastClient.Id)) // Check if default struct was returned
+            {
+                this.LogSnapcastClientNotFound(snapcastClientId);
+                return Task.FromResult<IClient?>(null);
+            }
+
+            // Get the MAC address from the Snapcast client
+            var macAddress = snapcastClient.Host.Mac;
+            if (string.IsNullOrEmpty(macAddress))
+            {
+                this.LogMacAddressNotFound(snapcastClientId);
+                return Task.FromResult<IClient?>(null);
+            }
+
+            // Find the corresponding client index by MAC address in our configuration
+            var clientIndex =
+                this._clientConfigs.FindIndex(config =>
+                    string.Equals(config.Mac, macAddress, StringComparison.OrdinalIgnoreCase)
+                ) + 1; // 1-based index
+
+            if (clientIndex == 0) // Not found (-1 + 1 = 0)
+            {
+                this.LogClientConfigNotFoundByMac(macAddress);
+                return Task.FromResult<IClient?>(null);
+            }
+
+            // Create and return the IClient wrapper
+            var client = new SnapDogClient(
+                clientIndex,
+                snapcastClient,
+                this._clientConfigs[clientIndex - 1],
+                this._snapcastService,
+                this._snapcastStateRepository,
+                this._mediator
+            );
+
+            this.LogClientFoundByMac(snapcastClientId, macAddress, clientIndex);
+            return Task.FromResult<IClient?>(client);
+        }
+        catch (Exception ex)
+        {
+            this.LogGetClientBySnapcastIdError(snapcastClientId, ex);
+            return Task.FromResult<IClient?>(null);
         }
     }
 
