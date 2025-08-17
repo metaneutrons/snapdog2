@@ -172,8 +172,8 @@ public partial class PlaylistManager : IPlaylistManager
                     Title = $"{playlistInfo.Name} Track {i}",
                     Artist = $"Artist {i}",
                     Album = $"{playlistInfo.Name} Album",
-                    DurationSec = 180 + i % 4 * 60, // 3-6 minute tracks in seconds
-                    PositionSec = 0,
+                    DurationMs = (180 + i % 4 * 60) * 1000, // 3-6 minute tracks in milliseconds
+                    PositionMs = 0,
                     CoverArtUrl = null,
                     TimestampUtc = DateTime.UtcNow,
                 };

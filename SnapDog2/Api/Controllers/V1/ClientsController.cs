@@ -89,8 +89,11 @@ public partial class ClientsController : ControllerBase
     [LoggerMessage(11016, LogLevel.Warning, "Failed to get client {ClientIndex} zone assignment: {ErrorMessage}")]
     private partial void LogFailedToGetClientZoneAssignment(int clientIndex, string errorMessage);
 
-    [LoggerMessage(11017, LogLevel.Information, "Setting client {ClientIndex} name to '{Name}' (not yet implemented)")]
+    [LoggerMessage(11017, LogLevel.Information, "Setting client {ClientIndex} name to '{Name}'")]
     private partial void LogSettingClientName(int clientIndex, string name);
+
+    [LoggerMessage(11019, LogLevel.Warning, "Failed to set client {ClientIndex} name to '{Name}': {ErrorMessage}")]
+    private partial void LogFailedToSetClientName(int clientIndex, string name, string errorMessage);
 
     // ═══════════════════════════════════════════════════════════════════════════════
     // API ENDPOINTS
@@ -449,18 +452,52 @@ public partial class ClientsController : ControllerBase
     [ProducesResponseType<string>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
-    public Task<ActionResult<string>> SetName(int clientIndex, [FromBody] string name)
+    public async Task<ActionResult<string>> SetName(int clientIndex, [FromBody] string name)
     {
         if (string.IsNullOrWhiteSpace(name))
-            return Task.FromResult<ActionResult<string>>(BadRequest("Name cannot be empty"));
+            return BadRequest("Name cannot be empty");
 
         if (name.Length > 100)
-            return Task.FromResult<ActionResult<string>>(BadRequest("Name cannot exceed 100 characters"));
+            return BadRequest("Name cannot exceed 100 characters");
 
-        // Note: This would need a SetClientNameCommand to be implemented
-        // For now, return the name as if it was set successfully
-        LogSettingClientName(clientIndex, name);
+        var command = new SetClientNameCommand { ClientIndex = clientIndex, Name = name.Trim() };
+        var result = await _mediator.SendCommandAsync<SetClientNameCommand, Result>(command);
 
-        return Task.FromResult<ActionResult<string>>(Ok(name.Trim()));
+        if (result.IsFailure)
+        {
+            LogFailedToSetClientName(clientIndex, name, result.ErrorMessage ?? "Unknown error");
+            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+        }
+
+        return Ok(name.Trim());
     }
+
+    /// <summary>
+    /// Get client connection status.
+    /// </summary>
+    /// <param name="clientIndex">Client ID</param>
+    /// <returns>Client connection status</returns>
+    [HttpGet("{clientIndex:int}/connected")]
+    [ProducesResponseType<bool>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<bool>> GetClientConnected(int clientIndex)
+    {
+        var query = new GetClientQuery { ClientIndex = clientIndex };
+        var result = await _mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
+
+        if (result.IsFailure)
+        {
+            LogFailedToGetClientConnectionStatus(clientIndex, result.ErrorMessage ?? "Unknown error");
+            return NotFound($"Client {clientIndex} not found");
+        }
+
+        return Ok(result.Value!.Connected);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // LOGGING METHODS FOR NEW ENDPOINTS
+    // ═══════════════════════════════════════════════════════════════════════════════
+
+    [LoggerMessage(11018, LogLevel.Warning, "Failed to get client {ClientIndex} connection status: {ErrorMessage}")]
+    private partial void LogFailedToGetClientConnectionStatus(int clientIndex, string errorMessage);
 }

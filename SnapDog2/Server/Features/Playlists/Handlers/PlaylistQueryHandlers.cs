@@ -215,8 +215,8 @@ public partial class GetPlaylistQueryHandler : IQueryHandler<GetPlaylistQuery, R
                         Title = station.Name ?? "Unknown Station",
                         Artist = "Radio",
                         Album = "Radio Stations",
-                        DurationSec = null, // Radio streams don't have duration
-                        PositionSec = 0,
+                        DurationMs = null, // Radio streams don't have duration
+                        PositionMs = 0,
                         CoverArtUrl = null,
                         Source = "radio",
                     }
@@ -394,8 +394,8 @@ public partial class GetTrackQueryHandler : IQueryHandler<GetTrackQuery, Result<
             Title = station?.Name ?? "Unknown Radio Station",
             Artist = "Radio",
             Album = "Radio Stations",
-            DurationSec = null, // Radio streams don't have duration
-            PositionSec = 0,
+            DurationMs = null, // Radio streams don't have duration
+            PositionMs = 0,
             CoverArtUrl = null,
             Source = "radio",
         };

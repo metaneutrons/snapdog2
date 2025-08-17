@@ -469,8 +469,8 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
             Title = song.Title ?? "Unknown Track",
             Artist = song.Artist ?? "Unknown Artist",
             Album = song.Album,
-            DurationSec = song.Duration > 0 ? song.Duration : null,
-            PositionSec = 0, // Always start at beginning
+            DurationMs = song.Duration > 0 ? song.Duration * 1000 : null, // Convert seconds to milliseconds
+            PositionMs = 0, // Always start at beginning
             CoverArtUrl = song.CoverArt,
             Source = "subsonic",
         };

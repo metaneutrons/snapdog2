@@ -429,5 +429,10 @@ public partial class ClientManager : IClientManager
         {
             return await this._snapcastService.SetClientLatencyAsync(this._snapcastClient.Id, latencyMs);
         }
+
+        public async Task<Result> SetNameAsync(string name)
+        {
+            return await this._snapcastService.SetClientNameAsync(this._snapcastClient.Id, name);
+        }
     }
 }

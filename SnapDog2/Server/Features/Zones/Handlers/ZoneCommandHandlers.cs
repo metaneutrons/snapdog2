@@ -765,3 +765,157 @@ public partial class TogglePlaylistRepeatCommandHandler : ICommandHandler<Toggle
     [LoggerMessage(9040, LogLevel.Warning, "Zone {ZoneIndex} not found for {CommandName}")]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
+
+/// <summary>
+/// Handles the SeekPositionCommand.
+/// </summary>
+public partial class SeekPositionCommandHandler : ICommandHandler<SeekPositionCommand, Result>
+{
+    private readonly IZoneManager _zoneManager;
+    private readonly ILogger<SeekPositionCommandHandler> _logger;
+
+    public SeekPositionCommandHandler(IZoneManager zoneManager, ILogger<SeekPositionCommandHandler> logger)
+    {
+        this._zoneManager = zoneManager;
+        this._logger = logger;
+    }
+
+    public async Task<Result> Handle(SeekPositionCommand request, CancellationToken cancellationToken)
+    {
+        this.LogSeekingToPosition(request.ZoneIndex, request.PositionMs, request.Source);
+
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneIndex).ConfigureAwait(false);
+        if (zoneResult.IsFailure)
+        {
+            this.LogZoneNotFound(request.ZoneIndex, nameof(SeekPositionCommand));
+            return zoneResult;
+        }
+
+        var zone = zoneResult.Value!;
+        return await zone.SeekToPositionAsync(request.PositionMs).ConfigureAwait(false);
+    }
+
+    [LoggerMessage(9041, LogLevel.Information, "Seeking Zone {ZoneIndex} to position {PositionMs}ms from {Source}")]
+    private partial void LogSeekingToPosition(int zoneIndex, long positionMs, SnapDog2.Core.Enums.CommandSource source);
+
+    [LoggerMessage(9042, LogLevel.Warning, "Zone {ZoneIndex} not found for {CommandName}")]
+    private partial void LogZoneNotFound(int zoneIndex, string commandName);
+}
+
+/// <summary>
+/// Handles the SeekProgressCommand.
+/// </summary>
+public partial class SeekProgressCommandHandler : ICommandHandler<SeekProgressCommand, Result>
+{
+    private readonly IZoneManager _zoneManager;
+    private readonly ILogger<SeekProgressCommandHandler> _logger;
+
+    public SeekProgressCommandHandler(IZoneManager zoneManager, ILogger<SeekProgressCommandHandler> logger)
+    {
+        this._zoneManager = zoneManager;
+        this._logger = logger;
+    }
+
+    public async Task<Result> Handle(SeekProgressCommand request, CancellationToken cancellationToken)
+    {
+        this.LogSeekingToProgress(request.ZoneIndex, request.Progress, request.Source);
+
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneIndex).ConfigureAwait(false);
+        if (zoneResult.IsFailure)
+        {
+            this.LogZoneNotFound(request.ZoneIndex, nameof(SeekProgressCommand));
+            return zoneResult;
+        }
+
+        var zone = zoneResult.Value!;
+        return await zone.SeekToProgressAsync(request.Progress).ConfigureAwait(false);
+    }
+
+    [LoggerMessage(9043, LogLevel.Information, "Seeking Zone {ZoneIndex} to progress {Progress:P1} from {Source}")]
+    private partial void LogSeekingToProgress(int zoneIndex, float progress, SnapDog2.Core.Enums.CommandSource source);
+
+    [LoggerMessage(9044, LogLevel.Warning, "Zone {ZoneIndex} not found for {CommandName}")]
+    private partial void LogZoneNotFound(int zoneIndex, string commandName);
+}
+
+/// <summary>
+/// Handles the PlayTrackByIndexCommand.
+/// </summary>
+public partial class PlayTrackByIndexCommandHandler : ICommandHandler<PlayTrackByIndexCommand, Result>
+{
+    private readonly IZoneManager _zoneManager;
+    private readonly ILogger<PlayTrackByIndexCommandHandler> _logger;
+
+    public PlayTrackByIndexCommandHandler(IZoneManager zoneManager, ILogger<PlayTrackByIndexCommandHandler> logger)
+    {
+        this._zoneManager = zoneManager;
+        this._logger = logger;
+    }
+
+    public async Task<Result> Handle(PlayTrackByIndexCommand request, CancellationToken cancellationToken)
+    {
+        this.LogPlayingTrackByIndex(request.ZoneIndex, request.TrackIndex, request.Source);
+
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneIndex).ConfigureAwait(false);
+        if (zoneResult.IsFailure)
+        {
+            this.LogZoneNotFound(request.ZoneIndex, nameof(PlayTrackByIndexCommand));
+            return zoneResult;
+        }
+
+        var zone = zoneResult.Value!;
+        var setResult = await zone.SetTrackAsync(request.TrackIndex).ConfigureAwait(false);
+        if (setResult.IsFailure)
+        {
+            return setResult;
+        }
+
+        return await zone.PlayAsync().ConfigureAwait(false);
+    }
+
+    [LoggerMessage(9045, LogLevel.Information, "Playing track {TrackIndex} for Zone {ZoneIndex} from {Source}")]
+    private partial void LogPlayingTrackByIndex(
+        int zoneIndex,
+        int trackIndex,
+        SnapDog2.Core.Enums.CommandSource source
+    );
+
+    [LoggerMessage(9046, LogLevel.Warning, "Zone {ZoneIndex} not found for {CommandName}")]
+    private partial void LogZoneNotFound(int zoneIndex, string commandName);
+}
+
+/// <summary>
+/// Handles the PlayUrlCommand.
+/// </summary>
+public partial class PlayUrlCommandHandler : ICommandHandler<PlayUrlCommand, Result>
+{
+    private readonly IZoneManager _zoneManager;
+    private readonly ILogger<PlayUrlCommandHandler> _logger;
+
+    public PlayUrlCommandHandler(IZoneManager zoneManager, ILogger<PlayUrlCommandHandler> logger)
+    {
+        this._zoneManager = zoneManager;
+        this._logger = logger;
+    }
+
+    public async Task<Result> Handle(PlayUrlCommand request, CancellationToken cancellationToken)
+    {
+        this.LogPlayingUrl(request.ZoneIndex, request.Url, request.Source);
+
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneIndex).ConfigureAwait(false);
+        if (zoneResult.IsFailure)
+        {
+            this.LogZoneNotFound(request.ZoneIndex, nameof(PlayUrlCommand));
+            return zoneResult;
+        }
+
+        var zone = zoneResult.Value!;
+        return await zone.PlayUrlAsync(request.Url).ConfigureAwait(false);
+    }
+
+    [LoggerMessage(9047, LogLevel.Information, "Playing URL '{Url}' for Zone {ZoneIndex} from {Source}")]
+    private partial void LogPlayingUrl(int zoneIndex, string url, SnapDog2.Core.Enums.CommandSource source);
+
+    [LoggerMessage(9048, LogLevel.Warning, "Zone {ZoneIndex} not found for {CommandName}")]
+    private partial void LogZoneNotFound(int zoneIndex, string commandName);
+}

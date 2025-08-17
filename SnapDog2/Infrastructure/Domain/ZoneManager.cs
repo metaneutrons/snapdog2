@@ -266,6 +266,9 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     [LoggerMessage(7103, LogLevel.Warning, "Zone {ZoneIndex} Snapcast group {GroupId} not found")]
     private partial void LogSnapcastGroupNotFound(int zoneIndex, string groupId);
 
+    [LoggerMessage(7104, LogLevel.Error, "Zone {ZoneIndex} ({ZoneName}): {Action} - {Error}")]
+    private partial void LogZoneError(int zoneIndex, string zoneName, string action, string error);
+
     public int ZoneIndex => _zoneIndex;
 
     public ZoneService(
@@ -689,6 +692,56 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         finally
         {
             _stateLock.Release();
+        }
+    }
+
+    /// <summary>
+    /// Seeks to a specific position in the current track.
+    /// </summary>
+    /// <param name="positionMs">Position in milliseconds</param>
+    /// <returns>Result indicating success or failure</returns>
+    public async Task<Result> SeekToPositionAsync(long positionMs)
+    {
+        LogZoneAction(_zoneIndex, _config.Name, $"Seek to position {positionMs}ms");
+
+        try
+        {
+            if (this._mediaPlayerService == null)
+            {
+                return Result.Failure("Media player service not initialized");
+            }
+
+            return await this._mediaPlayerService.SeekToPositionAsync(_zoneIndex, positionMs).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            LogZoneError(_zoneIndex, _config.Name, $"Failed to seek to position {positionMs}ms", ex.Message);
+            return Result.Failure($"Failed to seek to position {positionMs}ms: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Seeks to a specific progress percentage in the current track.
+    /// </summary>
+    /// <param name="progress">Progress percentage (0.0-1.0)</param>
+    /// <returns>Result indicating success or failure</returns>
+    public async Task<Result> SeekToProgressAsync(float progress)
+    {
+        LogZoneAction(_zoneIndex, _config.Name, $"Seek to progress {progress:P1}");
+
+        try
+        {
+            if (this._mediaPlayerService == null)
+            {
+                return Result.Failure("Media player service not initialized");
+            }
+
+            return await this._mediaPlayerService.SeekToProgressAsync(_zoneIndex, progress).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            LogZoneError(_zoneIndex, _config.Name, $"Failed to seek to progress {progress:P1}", ex.Message);
+            return Result.Failure($"Failed to seek to progress {progress:P1}: {ex.Message}");
         }
     }
 

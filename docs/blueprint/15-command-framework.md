@@ -371,8 +371,10 @@ Uses `Knx.Falcon.GroupAddress`. GAs configured via `SNAPDOG_ZONE_{n}_KNX_{SUFFIX
 | Command ID    | DPT     | Env Var Suffix      | Notes                 |
 | :------------ | :------ | :------------------ | :-------------------- |
 | `VOLUME`      | 5.001   | `_KNX_VOLUME`       | Send 0-100%           |
-| `VOLUME_UP`   | 3.007   | `_KNX_VOLUME_UP`    | Send Dim Up command   |
-| `VOLUME_DOWN` | 3.007   | `_KNX_VOLUME_DOWN`  | Send Dim Down command |
+| `VOLUME_UP`   | 3.007   | `_KNX_VOLUME_DIM`   | Send Dim Up command   |
+| `VOLUME_DOWN` | 3.007   | `_KNX_VOLUME_DIM`   | Send Dim Down command |
+
+> **Note:** `VOLUME_UP` and `VOLUME_DOWN` share the same KNX group address (`_KNX_VOLUME_DIM`) because KNX dimming uses DPT 3.007 with a single GA for both up/down operations. The direction is encoded in the DPT value itself.
 | `MUTE`        | 1.001   | `_KNX_MUTE`         | Send 0=Off, 1=On      |
 | `MUTE_TOGGLE` | 1.001   | `_KNX_MUTE_TOGGLE`  | Send 1 to toggle      |
 
@@ -489,10 +491,12 @@ Uses `Knx.Falcon.GroupAddress`. GAs configured via `SNAPDOG_CLIENT_{m}_KNX_{SUFF
 | Command ID           | DPT     | Env Var Suffix       | Notes              |
 | :------------------- | :------ | :------------------- | :----------------- |
 | `CLIENT_VOLUME`      | 5.001   | `_KNX_VOLUME`        | Send 0-100%        |
-| `CLIENT_VOLUME_UP`   | 3.007   | `_KNX_VOLUME_UP`     | Send 1 to step up  |
-| `CLIENT_VOLUME_DOWN` | 3.007   | `_KNX_VOLUME_DOWN`   | Send 1 to step down|
+| `CLIENT_VOLUME_UP`   | 3.007   | `_KNX_VOLUME_DIM`    | Send Dim Up command|
+| `CLIENT_VOLUME_DOWN` | 3.007   | `_KNX_VOLUME_DIM`    | Send Dim Down command|
 | `CLIENT_MUTE`        | 1.001   | `_KNX_MUTE`          | Send 0=Off, 1=On   |
 | `CLIENT_MUTE_TOGGLE` | 1.001   | `_KNX_MUTE_TOGGLE`   | Send 1 to toggle   |
+
+> **Note:** `CLIENT_VOLUME_UP` and `CLIENT_VOLUME_DOWN` share the same KNX group address (`_KNX_VOLUME_DIM`) because KNX dimming uses DPT 3.007 with a single GA for both up/down operations. The direction is encoded in the DPT value itself.
 
 **Config & State**
 

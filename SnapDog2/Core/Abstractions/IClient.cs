@@ -38,4 +38,11 @@ public interface IClient
     /// <param name="latencyMs">The latency in milliseconds.</param>
     /// <returns>A result indicating success or failure.</returns>
     Task<Result> SetLatencyAsync(int latencyMs);
+
+    /// <summary>
+    /// Sets the display name for this client.
+    /// </summary>
+    /// <param name="name">The new name for the client.</param>
+    /// <returns>A result indicating success or failure.</returns>
+    Task<Result> SetNameAsync(string name);
 }

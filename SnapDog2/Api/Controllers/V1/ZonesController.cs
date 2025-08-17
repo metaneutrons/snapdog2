@@ -675,6 +675,384 @@ public partial class ZonesController : ControllerBase
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
+    // TRACK NAVIGATION - Following existing patterns
+    // ═══════════════════════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// Skip to the next track in the zone.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <returns>New track index</returns>
+    [HttpPost("{zoneIndex:int}/next")]
+    [ProducesResponseType<int>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<int>> TrackNext(int zoneIndex)
+    {
+        var command = new NextTrackCommand { ZoneIndex = zoneIndex };
+        var result = await _mediator.SendCommandAsync<NextTrackCommand, Result>(command);
+
+        if (result.IsFailure)
+        {
+            LogFailedToSkipToNextTrack(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+        }
+
+        // Get the new track index to return
+        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
+        var stateResult = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+
+        return Ok(stateResult.IsSuccess ? stateResult.Value!.Track?.Index ?? 1 : 1);
+    }
+
+    /// <summary>
+    /// Skip to the previous track in the zone.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <returns>New track index</returns>
+    [HttpPost("{zoneIndex:int}/previous")]
+    [ProducesResponseType<int>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<int>> TrackPrevious(int zoneIndex)
+    {
+        var command = new PreviousTrackCommand { ZoneIndex = zoneIndex };
+        var result = await _mediator.SendCommandAsync<PreviousTrackCommand, Result>(command);
+
+        if (result.IsFailure)
+        {
+            LogFailedToSkipToPreviousTrack(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+        }
+
+        // Get the new track index to return
+        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
+        var stateResult = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+
+        return Ok(stateResult.IsSuccess ? stateResult.Value!.Track?.Index ?? 1 : 1);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // PLAYLIST NAVIGATION - Following existing patterns
+    // ═══════════════════════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// Switch to the next playlist in the zone.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <returns>New playlist name</returns>
+    [HttpPost("{zoneIndex:int}/playlist/next")]
+    [ProducesResponseType<string>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<string>> PlaylistNext(int zoneIndex)
+    {
+        var command = new NextPlaylistCommand { ZoneIndex = zoneIndex };
+        var result = await _mediator.SendCommandAsync<NextPlaylistCommand, Result>(command);
+
+        if (result.IsFailure)
+        {
+            LogFailedToSwitchToNextPlaylist(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+        }
+
+        // Get the new playlist name to return
+        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
+        var stateResult = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+
+        return Ok(stateResult.IsSuccess ? stateResult.Value!.Playlist?.Name ?? "Unknown" : "Unknown");
+    }
+
+    /// <summary>
+    /// Switch to the previous playlist in the zone.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <returns>New playlist name</returns>
+    [HttpPost("{zoneIndex:int}/playlist/previous")]
+    [ProducesResponseType<string>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<string>> PlaylistPrevious(int zoneIndex)
+    {
+        var command = new PreviousPlaylistCommand { ZoneIndex = zoneIndex };
+        var result = await _mediator.SendCommandAsync<PreviousPlaylistCommand, Result>(command);
+
+        if (result.IsFailure)
+        {
+            LogFailedToSwitchToPreviousPlaylist(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+        }
+
+        // Get the new playlist name to return
+        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
+        var stateResult = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+
+        return Ok(stateResult.IsSuccess ? stateResult.Value!.Playlist?.Name ?? "Unknown" : "Unknown");
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // TRACK AND PLAYLIST STATUS - Simple getters from zone state
+    // ═══════════════════════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// Get current track index in the zone.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <returns>Current track index (1-based)</returns>
+    [HttpGet("{zoneIndex:int}/track")]
+    [ProducesResponseType<int>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<int>> GetTrackIndex(int zoneIndex)
+    {
+        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
+        var result = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+
+        if (result.IsFailure)
+        {
+            LogFailedToGetZoneTrackIndex(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return NotFound($"Zone {zoneIndex} not found");
+        }
+
+        return Ok(result.Value!.Track?.Index ?? 1);
+    }
+
+    /// <summary>
+    /// Get current playlist index in the zone.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <returns>Current playlist index (1-based)</returns>
+    [HttpGet("{zoneIndex:int}/playlist")]
+    [ProducesResponseType<int>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<int>> GetPlaylistIndex(int zoneIndex)
+    {
+        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
+        var result = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+
+        if (result.IsFailure)
+        {
+            LogFailedToGetZonePlaylistIndex(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return NotFound($"Zone {zoneIndex} not found");
+        }
+
+        return Ok(result.Value!.Playlist?.Index ?? 1);
+    }
+
+    /// <summary>
+    /// Get current track metadata in the zone.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <returns>Current track metadata</returns>
+    [HttpGet("{zoneIndex:int}/track/metadata")]
+    [ProducesResponseType<TrackInfo>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<TrackInfo>> GetTrackMetadata(int zoneIndex)
+    {
+        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
+        var result = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+
+        if (result.IsFailure)
+        {
+            LogFailedToGetZoneTrackMetadata(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return NotFound($"Zone {zoneIndex} not found");
+        }
+
+        var track = result.Value!.Track;
+        if (track == null)
+        {
+            return Ok(
+                new TrackInfo
+                {
+                    Index = 1,
+                    Id = "unknown",
+                    Title = "No Track",
+                    Artist = "Unknown",
+                    Album = "Unknown",
+                    Source = "none",
+                    PositionMs = 0,
+                    Progress = 0.0f,
+                    IsPlaying = false,
+                }
+            );
+        }
+
+        return Ok(track);
+    }
+
+    /// <summary>
+    /// Get current track playing status in the zone.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <returns>Is track currently playing</returns>
+    [HttpGet("{zoneIndex:int}/track/playing")]
+    [ProducesResponseType<bool>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<bool>> GetTrackPlaying(int zoneIndex)
+    {
+        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
+        var result = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+
+        if (result.IsFailure)
+        {
+            LogFailedToGetZoneTrackPlaying(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return NotFound($"Zone {zoneIndex} not found");
+        }
+
+        return Ok(result.Value!.PlaybackState == "playing");
+    }
+
+    /// <summary>
+    /// Get current track position in the zone.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <returns>Current track position in milliseconds</returns>
+    [HttpGet("{zoneIndex:int}/track/position")]
+    [ProducesResponseType<long>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<long>> GetTrackPosition(int zoneIndex)
+    {
+        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
+        var result = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+
+        if (result.IsFailure)
+        {
+            LogFailedToGetZoneTrackPosition(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return NotFound($"Zone {zoneIndex} not found");
+        }
+
+        return Ok(result.Value!.Track?.PositionMs ?? 0L);
+    }
+
+    /// <summary>
+    /// Get current track progress in the zone.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <returns>Current track progress as percentage (0.0-1.0)</returns>
+    [HttpGet("{zoneIndex:int}/track/progress")]
+    [ProducesResponseType<float>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<float>> GetTrackProgress(int zoneIndex)
+    {
+        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
+        var result = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+
+        if (result.IsFailure)
+        {
+            LogFailedToGetZoneTrackProgress(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return NotFound($"Zone {zoneIndex} not found");
+        }
+
+        return Ok(result.Value!.Track?.Progress ?? 0.0f);
+    }
+
+    /// <summary>
+    /// Seek to a specific position in the current track.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <param name="positionMs">Position in milliseconds</param>
+    /// <returns>New track position in milliseconds</returns>
+    [HttpPut("{zoneIndex:int}/track/position")]
+    [ProducesResponseType<long>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<long>> SetTrackPosition(int zoneIndex, [FromBody] long positionMs)
+    {
+        if (positionMs < 0)
+            return BadRequest("Position must be greater than or equal to 0");
+
+        var command = new SeekPositionCommand { ZoneIndex = zoneIndex, PositionMs = positionMs };
+        var result = await _mediator.SendCommandAsync<SeekPositionCommand, Result>(command);
+
+        if (result.IsFailure)
+        {
+            LogFailedToSetZoneTrackPosition(zoneIndex, positionMs, result.ErrorMessage ?? "Unknown error");
+            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+        }
+
+        return Ok(positionMs);
+    }
+
+    /// <summary>
+    /// Seek to a specific progress percentage in the current track.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <param name="progress">Progress percentage (0.0-1.0)</param>
+    /// <returns>New track progress percentage</returns>
+    [HttpPut("{zoneIndex:int}/track/progress")]
+    [ProducesResponseType<float>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<float>> SetTrackProgress(int zoneIndex, [FromBody] float progress)
+    {
+        if (progress < 0.0f || progress > 1.0f)
+            return BadRequest("Progress must be between 0.0 and 1.0");
+
+        var command = new SeekProgressCommand { ZoneIndex = zoneIndex, Progress = progress };
+        var result = await _mediator.SendCommandAsync<SeekProgressCommand, Result>(command);
+
+        if (result.IsFailure)
+        {
+            LogFailedToSetZoneTrackProgress(zoneIndex, progress, result.ErrorMessage ?? "Unknown error");
+            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+        }
+
+        return Ok(progress);
+    }
+
+    /// <summary>
+    /// Play a specific track by index and start playback immediately.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <param name="trackIndex">Track index (1-based)</param>
+    /// <returns>Track index that started playing</returns>
+    [HttpPost("{zoneIndex:int}/play/{trackIndex:int}")]
+    [ProducesResponseType<int>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<int>> PlayTrackByIndex(int zoneIndex, int trackIndex)
+    {
+        if (trackIndex < 1)
+            return BadRequest("Track index must be greater than 0");
+
+        var command = new PlayTrackByIndexCommand { ZoneIndex = zoneIndex, TrackIndex = trackIndex };
+        var result = await _mediator.SendCommandAsync<PlayTrackByIndexCommand, Result>(command);
+
+        if (result.IsFailure)
+        {
+            LogFailedToPlayTrackByIndex(zoneIndex, trackIndex, result.ErrorMessage ?? "Unknown error");
+            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+        }
+
+        return Ok(trackIndex);
+    }
+
+    /// <summary>
+    /// Play a direct URL stream and start playback immediately.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <param name="url">URL to play</param>
+    /// <returns>URL that started playing</returns>
+    [HttpPost("{zoneIndex:int}/play/url")]
+    [ProducesResponseType<string>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<string>> PlayUrl(int zoneIndex, [FromBody] string url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+            return BadRequest("URL cannot be empty");
+
+        if (!Uri.TryCreate(url, UriKind.Absolute, out _))
+            return BadRequest("Invalid URL format");
+
+        var command = new PlayUrlCommand { ZoneIndex = zoneIndex, Url = url };
+        var result = await _mediator.SendCommandAsync<PlayUrlCommand, Result>(command);
+
+        if (result.IsFailure)
+        {
+            LogFailedToPlayUrl(zoneIndex, url, result.ErrorMessage ?? "Unknown error");
+            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+        }
+
+        return Ok(url);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════════
     // LOGGING METHODS FOR NEW ENDPOINTS
     // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -712,4 +1090,58 @@ public partial class ZonesController : ControllerBase
 
     [LoggerMessage(12023, LogLevel.Warning, "Failed to toggle zone {ZoneIndex} playlist shuffle: {ErrorMessage}")]
     private partial void LogFailedToToggleZonePlaylistShuffle(int zoneIndex, string errorMessage);
+
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // LOGGING METHODS FOR NEW TRACK NAVIGATION ENDPOINTS
+    // ═══════════════════════════════════════════════════════════════════════════════
+
+    [LoggerMessage(12024, LogLevel.Warning, "Failed to skip zone {ZoneIndex} to next track: {ErrorMessage}")]
+    private partial void LogFailedToSkipToNextTrack(int zoneIndex, string errorMessage);
+
+    [LoggerMessage(12025, LogLevel.Warning, "Failed to skip zone {ZoneIndex} to previous track: {ErrorMessage}")]
+    private partial void LogFailedToSkipToPreviousTrack(int zoneIndex, string errorMessage);
+
+    [LoggerMessage(12026, LogLevel.Warning, "Failed to switch zone {ZoneIndex} to next playlist: {ErrorMessage}")]
+    private partial void LogFailedToSwitchToNextPlaylist(int zoneIndex, string errorMessage);
+
+    [LoggerMessage(12027, LogLevel.Warning, "Failed to switch zone {ZoneIndex} to previous playlist: {ErrorMessage}")]
+    private partial void LogFailedToSwitchToPreviousPlaylist(int zoneIndex, string errorMessage);
+
+    [LoggerMessage(12028, LogLevel.Warning, "Failed to get zone {ZoneIndex} track index: {ErrorMessage}")]
+    private partial void LogFailedToGetZoneTrackIndex(int zoneIndex, string errorMessage);
+
+    [LoggerMessage(12029, LogLevel.Warning, "Failed to get zone {ZoneIndex} playlist index: {ErrorMessage}")]
+    private partial void LogFailedToGetZonePlaylistIndex(int zoneIndex, string errorMessage);
+
+    [LoggerMessage(12030, LogLevel.Warning, "Failed to get zone {ZoneIndex} track metadata: {ErrorMessage}")]
+    private partial void LogFailedToGetZoneTrackMetadata(int zoneIndex, string errorMessage);
+
+    [LoggerMessage(12031, LogLevel.Warning, "Failed to get zone {ZoneIndex} track playing status: {ErrorMessage}")]
+    private partial void LogFailedToGetZoneTrackPlaying(int zoneIndex, string errorMessage);
+
+    [LoggerMessage(12032, LogLevel.Warning, "Failed to get zone {ZoneIndex} track position: {ErrorMessage}")]
+    private partial void LogFailedToGetZoneTrackPosition(int zoneIndex, string errorMessage);
+
+    [LoggerMessage(12033, LogLevel.Warning, "Failed to get zone {ZoneIndex} track progress: {ErrorMessage}")]
+    private partial void LogFailedToGetZoneTrackProgress(int zoneIndex, string errorMessage);
+
+    [LoggerMessage(
+        12034,
+        LogLevel.Warning,
+        "Failed to set zone {ZoneIndex} track position to {PositionMs}ms: {ErrorMessage}"
+    )]
+    private partial void LogFailedToSetZoneTrackPosition(int zoneIndex, long positionMs, string errorMessage);
+
+    [LoggerMessage(
+        12035,
+        LogLevel.Warning,
+        "Failed to set zone {ZoneIndex} track progress to {Progress:P1}: {ErrorMessage}"
+    )]
+    private partial void LogFailedToSetZoneTrackProgress(int zoneIndex, float progress, string errorMessage);
+
+    [LoggerMessage(12036, LogLevel.Warning, "Failed to play track {TrackIndex} for zone {ZoneIndex}: {ErrorMessage}")]
+    private partial void LogFailedToPlayTrackByIndex(int zoneIndex, int trackIndex, string errorMessage);
+
+    [LoggerMessage(12037, LogLevel.Warning, "Failed to play URL '{Url}' for zone {ZoneIndex}: {ErrorMessage}")]
+    private partial void LogFailedToPlayUrl(int zoneIndex, string url, string errorMessage);
 }

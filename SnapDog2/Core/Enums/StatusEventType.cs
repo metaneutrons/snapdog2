@@ -40,8 +40,38 @@ public enum StatusEventType
     [Description("TRACK_INDEX")]
     TrackIndex,
 
+    [Description("TRACK_METADATA")]
+    TrackMetadata,
+
+    [Description("TRACK_METADATA_TITLE")]
+    TrackMetadataTitle,
+
+    [Description("TRACK_METADATA_ARTIST")]
+    TrackMetadataArtist,
+
+    [Description("TRACK_METADATA_ALBUM")]
+    TrackMetadataAlbum,
+
+    [Description("TRACK_METADATA_COVER")]
+    TrackMetadataCover,
+
+    [Description("TRACK_METADATA_DURATION")]
+    TrackMetadataDuration,
+
+    [Description("TRACK_PLAYING_STATUS")]
+    TrackPlayingStatus,
+
+    [Description("TRACK_POSITION_STATUS")]
+    TrackPositionStatus,
+
+    [Description("TRACK_PROGRESS_STATUS")]
+    TrackProgressStatus,
+
     [Description("PLAYLIST_INDEX")]
     PlaylistIndex,
+
+    [Description("PLAYLIST_INFO")]
+    PlaylistInfo,
 
     [Description("TRACK_REPEAT_STATUS")]
     TrackRepeatStatus,
@@ -55,6 +85,9 @@ public enum StatusEventType
     [Description("ZONE_STATE")]
     ZoneState,
 
+    [Description("ZONES_INFO")]
+    ZonesInfo,
+
     // Global Status Events
     [Description("VERSION_INFO")]
     VersionInfo,
@@ -67,6 +100,15 @@ public enum StatusEventType
 
     [Description("SYSTEM_ERROR")]
     SystemError,
+
+    [Description("COMMAND_ERROR")]
+    CommandError,
+
+    [Description("COMMAND_STATUS")]
+    CommandStatus,
+
+    [Description("ERROR_STATUS")]
+    ErrorStatus,
 }
 
 /// <summary>

@@ -2,6 +2,7 @@ namespace SnapDog2.Api.Controllers.V1;
 
 using System.Threading;
 using System.Threading.Tasks;
+using Cortex.Mediator;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,14 +21,16 @@ using SnapDog2.Server.Features.Global.Queries;
 public partial class SystemController : ControllerBase
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly IMediator _mediator;
     private readonly ILogger<SystemController> _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SystemController"/> class.
     /// </summary>
-    public SystemController(IServiceProvider serviceProvider, ILogger<SystemController> logger)
+    public SystemController(IServiceProvider serviceProvider, IMediator mediator, ILogger<SystemController> logger)
     {
         this._serviceProvider = serviceProvider;
+        this._mediator = mediator;
         this._logger = logger;
     }
 
@@ -293,5 +296,96 @@ public partial class SystemController : ControllerBase
     [LoggerMessage(2342, LogLevel.Error, "Error getting system statistics")]
     private partial void LogErrorGettingSystemStatistics(Exception exception);
 
+    // Command Status (2350-2359)
+    [LoggerMessage(2350, LogLevel.Debug, "Getting command processing status")]
+    private partial void LogGettingCommandStatus();
+
+    [LoggerMessage(2351, LogLevel.Warning, "Failed to get command status: {Error}")]
+    private partial void LogFailedToGetCommandStatus(string? error);
+
+    [LoggerMessage(2352, LogLevel.Error, "Error getting command status")]
+    private partial void LogErrorGettingCommandStatus(Exception exception);
+
+    [LoggerMessage(2353, LogLevel.Debug, "Getting command errors")]
+    private partial void LogGettingCommandErrors();
+
+    [LoggerMessage(2354, LogLevel.Warning, "Failed to get command errors: {Error}")]
+    private partial void LogFailedToGetCommandErrors(string? error);
+
+    [LoggerMessage(2355, LogLevel.Error, "Error getting command errors")]
+    private partial void LogErrorGettingCommandErrors(Exception exception);
+
     #endregion
+
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // COMMAND STATUS ENDPOINTS
+    // ═══════════════════════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// Get current command processing status.
+    /// </summary>
+    /// <returns>Command processing status</returns>
+    [HttpGet("commands/status")]
+    [ProducesResponseType<string>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<string>> GetCommandStatus()
+    {
+        this.LogGettingCommandStatus();
+
+        try
+        {
+            var query = new CommandStatusQuery();
+            var result = await this._mediator.SendQueryAsync<CommandStatusQuery, Result<string>>(query);
+
+            if (result.IsFailure)
+            {
+                this.LogFailedToGetCommandStatus(result.ErrorMessage);
+                return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            }
+
+            return this.Ok(result.Value!);
+        }
+        catch (Exception ex)
+        {
+            this.LogErrorGettingCommandStatus(ex);
+            return this.Problem(
+                "An error occurred while getting command status",
+                statusCode: StatusCodes.Status500InternalServerError
+            );
+        }
+    }
+
+    /// <summary>
+    /// Get recent command errors.
+    /// </summary>
+    /// <returns>Array of recent command error messages</returns>
+    [HttpGet("commands/errors")]
+    [ProducesResponseType<string[]>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<string[]>> GetCommandErrors()
+    {
+        this.LogGettingCommandErrors();
+
+        try
+        {
+            var query = new CommandErrorsQuery();
+            var result = await this._mediator.SendQueryAsync<CommandErrorsQuery, Result<string[]>>(query);
+
+            if (result.IsFailure)
+            {
+                this.LogFailedToGetCommandErrors(result.ErrorMessage);
+                return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            }
+
+            return this.Ok(result.Value!);
+        }
+        catch (Exception ex)
+        {
+            this.LogErrorGettingCommandErrors(ex);
+            return this.Problem(
+                "An error occurred while getting command errors",
+                statusCode: StatusCodes.Status500InternalServerError
+            );
+        }
+    }
 }

@@ -61,4 +61,22 @@ public interface IMediaPlayerService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Result containing playback statistics</returns>
     Task<Result<PlaybackStatistics>> GetStatisticsAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Seeks to a specific position in the current track for the specified zone.
+    /// </summary>
+    /// <param name="zoneIndex">The zone ID to seek in</param>
+    /// <param name="positionMs">Position in milliseconds</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Result indicating success or failure</returns>
+    Task<Result> SeekToPositionAsync(int zoneIndex, long positionMs, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Seeks to a specific progress percentage in the current track for the specified zone.
+    /// </summary>
+    /// <param name="zoneIndex">The zone ID to seek in</param>
+    /// <param name="progress">Progress percentage (0.0-1.0)</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Result indicating success or failure</returns>
+    Task<Result> SeekToProgressAsync(int zoneIndex, float progress, CancellationToken cancellationToken = default);
 }

@@ -132,7 +132,7 @@ This section summarizes the mapping between SnapDog2 internal values/states and 
     * Toggle Commands: Receiving `1` triggers the toggle action.
 
 * **DPT 3.007 (Dimming Control):**
-  * Used for: `VOLUME_UP`, `VOLUME_DOWN` Commands via `_KNX_VOLUME_UP` and `_KNX_VOLUME_DOWN` GAs.
+  * Used for: `VOLUME_UP`, `VOLUME_DOWN` Commands via `_KNX_VOLUME_DIM` GA.
   * Mapping:
     * `VOLUME_UP`: Send telegram with Control Bit = `1` (Step), Direction Bit = `1` (Increase). Step Code can be `001` (1/64th step) for fine control, or higher for larger steps (e.g., `111` for 1/1). **Default: Send `0b1001` (Step Up by 1/64th)**.
     * `VOLUME_DOWN`: Send telegram with Control Bit = `1` (Step), Direction Bit = `0` (Decrease). Step Code usually matches Up. **Default: Send `0b0001` (Step Down by 1/64th)**.

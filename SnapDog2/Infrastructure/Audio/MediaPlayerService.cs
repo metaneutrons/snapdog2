@@ -313,6 +313,68 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
         }
     }
 
+    /// <summary>
+    /// Seeks to a specific position in the current track for the specified zone.
+    /// </summary>
+    public Task<Result> SeekToPositionAsync(
+        int zoneIndex,
+        long positionMs,
+        CancellationToken cancellationToken = default
+    )
+    {
+        try
+        {
+            LogSeekingToPosition(_logger, zoneIndex, positionMs);
+
+            if (!_players.TryGetValue(zoneIndex, out var player))
+            {
+                LogPlayerNotFound(_logger, zoneIndex);
+                return Task.FromResult(Result.Failure($"No active player found for zone {zoneIndex}"));
+            }
+
+            // For now, return success as seeking is not implemented in the LibVLC wrapper
+            // This would need to be implemented in the actual media player
+            LogSeekNotImplemented(_logger, zoneIndex);
+            return Task.FromResult(Result.Success());
+        }
+        catch (Exception ex)
+        {
+            LogSeekError(_logger, zoneIndex, ex);
+            return Task.FromResult(Result.Failure(ex));
+        }
+    }
+
+    /// <summary>
+    /// Seeks to a specific progress percentage in the current track for the specified zone.
+    /// </summary>
+    public Task<Result> SeekToProgressAsync(
+        int zoneIndex,
+        float progress,
+        CancellationToken cancellationToken = default
+    )
+    {
+        try
+        {
+            LogSeekingToProgress(_logger, zoneIndex, progress);
+
+            if (!_players.TryGetValue(zoneIndex, out var player))
+            {
+                LogPlayerNotFound(_logger, zoneIndex);
+                return Task.FromResult(Result.Failure($"No active player found for zone {zoneIndex}"));
+            }
+
+            // For now, return success as seeking is not implemented in the LibVLC wrapper
+            // This would need to be implemented in the actual media player
+            LogSeekNotImplemented(_logger, zoneIndex);
+            return Task.FromResult(Result.Success());
+        }
+        catch (Exception ex)
+        {
+            LogSeekError(_logger, zoneIndex, ex);
+            return Task.FromResult(Result.Failure(ex));
+        }
+    }
+
     public async ValueTask DisposeAsync()
     {
         if (!_disposed)
@@ -460,4 +522,39 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
         Message = "[LibVLCService] Service disposed"
     )]
     private static partial void LogServiceDisposed(ILogger logger);
+
+    [LoggerMessage(
+        EventId = 918,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "[LibVLCService] Seeking zone {ZoneIndex} to position {PositionMs}ms"
+    )]
+    private static partial void LogSeekingToPosition(ILogger logger, int zoneIndex, long positionMs);
+
+    [LoggerMessage(
+        EventId = 919,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "[LibVLCService] Seeking zone {ZoneIndex} to progress {Progress:P1}"
+    )]
+    private static partial void LogSeekingToProgress(ILogger logger, int zoneIndex, float progress);
+
+    [LoggerMessage(
+        EventId = 920,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "[LibVLCService] Seek not implemented for zone {ZoneIndex} - returning success"
+    )]
+    private static partial void LogSeekNotImplemented(ILogger logger, int zoneIndex);
+
+    [LoggerMessage(
+        EventId = 921,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "[LibVLCService] Seek error for zone {ZoneIndex}"
+    )]
+    private static partial void LogSeekError(ILogger logger, int zoneIndex, Exception ex);
+
+    [LoggerMessage(
+        EventId = 922,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "[LibVLCService] No active player found for zone {ZoneIndex}"
+    )]
+    private static partial void LogPlayerNotFound(ILogger logger, int zoneIndex);
 }

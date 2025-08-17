@@ -364,6 +364,10 @@ static WebApplication CreateWebApplication(string[] args)
         SnapDog2.Core.Abstractions.IMetricsService,
         SnapDog2.Infrastructure.Application.MetricsService
     >();
+    builder.Services.AddSingleton<
+        SnapDog2.Core.Abstractions.ICommandStatusService,
+        SnapDog2.Infrastructure.Services.CommandStatusService
+    >();
     builder.Services.AddScoped<
         SnapDog2.Server.Features.Global.Services.Abstractions.IGlobalStatusService,
         SnapDog2.Server.Features.Global.Services.GlobalStatusService

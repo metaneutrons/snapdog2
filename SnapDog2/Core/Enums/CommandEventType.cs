@@ -45,6 +45,18 @@ public enum CommandEventType
     [Description("TRACK_PREVIOUS")]
     TrackPrevious,
 
+    [Description("TRACK_PLAY_INDEX")]
+    TrackPlayIndex,
+
+    [Description("TRACK_PLAY_URL")]
+    TrackPlayUrl,
+
+    [Description("TRACK_POSITION")]
+    TrackPosition,
+
+    [Description("TRACK_PROGRESS")]
+    TrackProgress,
+
     [Description("TRACK_REPEAT")]
     TrackRepeat,
 
@@ -77,6 +89,12 @@ public enum CommandEventType
     [Description("CLIENT_VOLUME")]
     ClientVolume,
 
+    [Description("CLIENT_VOLUME_UP")]
+    ClientVolumeUp,
+
+    [Description("CLIENT_VOLUME_DOWN")]
+    ClientVolumeDown,
+
     [Description("CLIENT_MUTE")]
     ClientMute,
 
@@ -84,6 +102,9 @@ public enum CommandEventType
     ClientMuteToggle,
 
     // Client Configuration Commands
+    [Description("CLIENT_NAME")]
+    ClientName,
+
     [Description("CLIENT_LATENCY")]
     ClientLatency,
 

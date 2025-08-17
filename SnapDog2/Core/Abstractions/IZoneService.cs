@@ -171,4 +171,18 @@ public interface IZoneService
     /// </summary>
     /// <returns>Result of the operation.</returns>
     Task<Result> TogglePlaylistRepeatAsync();
+
+    /// <summary>
+    /// Seeks to a specific position in the current track.
+    /// </summary>
+    /// <param name="positionMs">Position in milliseconds</param>
+    /// <returns>Result of the operation.</returns>
+    Task<Result> SeekToPositionAsync(long positionMs);
+
+    /// <summary>
+    /// Seeks to a specific progress percentage in the current track.
+    /// </summary>
+    /// <param name="progress">Progress percentage (0.0-1.0)</param>
+    /// <returns>Result of the operation.</returns>
+    Task<Result> SeekToProgressAsync(float progress);
 }
