@@ -367,6 +367,9 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             // Publish notification
             this.PublishZoneStateChangedAsync();
 
+            // Publish status notification for blueprint compliance
+            await PublishPlaybackStateStatusAsync(Core.Enums.PlaybackState.Playing);
+
             return Result.Success();
         }
         finally
@@ -503,7 +506,14 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            return this.SetVolumeInternal(volume);
+            var result = this.SetVolumeInternal(volume);
+
+            if (result.IsSuccess)
+            {
+                await PublishVolumeStatusAsync(Math.Clamp(volume, 0, 100));
+            }
+
+            return result;
         }
         finally
         {
@@ -537,7 +547,14 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         {
             var newVolume = Math.Clamp(this._currentState.Volume + step, 0, 100);
             this.LogZoneAction(this._zoneIndex, this._config.Name, $"Set volume to {newVolume}");
-            return this.SetVolumeInternal(newVolume);
+            var result = this.SetVolumeInternal(newVolume);
+
+            if (result.IsSuccess)
+            {
+                await PublishVolumeStatusAsync(newVolume);
+            }
+
+            return result;
         }
         finally
         {
@@ -552,7 +569,14 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         {
             var newVolume = Math.Clamp(this._currentState.Volume - step, 0, 100);
             this.LogZoneAction(this._zoneIndex, this._config.Name, $"Set volume to {newVolume}");
-            return this.SetVolumeInternal(newVolume);
+            var result = this.SetVolumeInternal(newVolume);
+
+            if (result.IsSuccess)
+            {
+                await PublishVolumeStatusAsync(newVolume);
+            }
+
+            return result;
         }
         finally
         {
@@ -567,7 +591,14 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            return await this.SetMuteInternalAsync(enabled).ConfigureAwait(false);
+            var result = await this.SetMuteInternalAsync(enabled).ConfigureAwait(false);
+
+            if (result.IsSuccess)
+            {
+                await PublishMuteStatusAsync(enabled);
+            }
+
+            return result;
         }
         finally
         {
@@ -1115,6 +1146,46 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             }
         });
     }
+
+    #region Status Publishing Methods (Blueprint Compliance)
+
+    public async Task PublishPlaybackStateStatusAsync(Core.Enums.PlaybackState playbackState)
+    {
+        var notification = new ZonePlaybackStateStatusNotification(this._zoneIndex, playbackState);
+        await this._mediator.PublishAsync(notification).ConfigureAwait(false);
+    }
+
+    public async Task PublishVolumeStatusAsync(int volume)
+    {
+        var notification = new ZoneVolumeStatusNotification(this._zoneIndex, volume);
+        await this._mediator.PublishAsync(notification).ConfigureAwait(false);
+    }
+
+    public async Task PublishMuteStatusAsync(bool isMuted)
+    {
+        var notification = new ZoneMuteStatusNotification(this._zoneIndex, isMuted);
+        await this._mediator.PublishAsync(notification).ConfigureAwait(false);
+    }
+
+    public async Task PublishTrackStatusAsync(Core.Models.TrackInfo trackInfo, int trackIndex)
+    {
+        var notification = new ZoneTrackStatusNotification(this._zoneIndex, trackInfo, trackIndex);
+        await this._mediator.PublishAsync(notification).ConfigureAwait(false);
+    }
+
+    public async Task PublishPlaylistStatusAsync(Core.Models.PlaylistInfo playlistInfo, int playlistIndex)
+    {
+        var notification = new ZonePlaylistStatusNotification(this._zoneIndex, playlistInfo, playlistIndex);
+        await this._mediator.PublishAsync(notification).ConfigureAwait(false);
+    }
+
+    public async Task PublishZoneStateStatusAsync(Core.Models.ZoneState zoneState)
+    {
+        var notification = new ZoneStateStatusNotification(this._zoneIndex, zoneState);
+        await this._mediator.PublishAsync(notification).ConfigureAwait(false);
+    }
+
+    #endregion
 
     public ValueTask DisposeAsync()
     {

@@ -38,7 +38,7 @@ public partial class PlaylistManager : IPlaylistManager
         this._playlists = new Dictionary<string, PlaylistInfo>();
         this._playlistTracks = new Dictionary<string, List<TrackInfo>>();
 
-        // Initialize with placeholder playlists
+        // FIXME: Initialize with placeholder playlists
         this.InitializePlaceholderPlaylists();
     }
 

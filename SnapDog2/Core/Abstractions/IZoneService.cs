@@ -185,4 +185,49 @@ public interface IZoneService
     /// <param name="progress">Progress percentage (0.0-1.0)</param>
     /// <returns>Result of the operation.</returns>
     Task<Result> SeekToProgressAsync(float progress);
+
+    // Status Publishing Methods (Blueprint Compliance)
+    /// <summary>
+    /// Publishes the current playback state status.
+    /// </summary>
+    /// <param name="playbackState">The playback state to publish.</param>
+    /// <returns>Task representing the async operation.</returns>
+    Task PublishPlaybackStateStatusAsync(Core.Enums.PlaybackState playbackState);
+
+    /// <summary>
+    /// Publishes the current volume status.
+    /// </summary>
+    /// <param name="volume">The volume level to publish (0-100).</param>
+    /// <returns>Task representing the async operation.</returns>
+    Task PublishVolumeStatusAsync(int volume);
+
+    /// <summary>
+    /// Publishes the current mute status.
+    /// </summary>
+    /// <param name="isMuted">The mute state to publish.</param>
+    /// <returns>Task representing the async operation.</returns>
+    Task PublishMuteStatusAsync(bool isMuted);
+
+    /// <summary>
+    /// Publishes the current track status.
+    /// </summary>
+    /// <param name="trackInfo">The track information to publish.</param>
+    /// <param name="trackIndex">The track index to publish (1-based).</param>
+    /// <returns>Task representing the async operation.</returns>
+    Task PublishTrackStatusAsync(Core.Models.TrackInfo trackInfo, int trackIndex);
+
+    /// <summary>
+    /// Publishes the current playlist status.
+    /// </summary>
+    /// <param name="playlistInfo">The playlist information to publish.</param>
+    /// <param name="playlistIndex">The playlist index to publish (1-based).</param>
+    /// <returns>Task representing the async operation.</returns>
+    Task PublishPlaylistStatusAsync(Core.Models.PlaylistInfo playlistInfo, int playlistIndex);
+
+    /// <summary>
+    /// Publishes the complete zone state status.
+    /// </summary>
+    /// <param name="zoneState">The zone state to publish.</param>
+    /// <returns>Task representing the async operation.</returns>
+    Task PublishZoneStateStatusAsync(Core.Models.ZoneState zoneState);
 }

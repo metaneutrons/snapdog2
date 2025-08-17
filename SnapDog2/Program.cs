@@ -355,7 +355,7 @@ static WebApplication CreateWebApplication(string[] args)
         }
     }
 
-    // Register placeholder services
+    // Register status services
     builder.Services.AddScoped<
         SnapDog2.Core.Abstractions.IAppStatusService,
         SnapDog2.Infrastructure.Application.AppStatusService
@@ -373,12 +373,18 @@ static WebApplication CreateWebApplication(string[] args)
         SnapDog2.Server.Features.Global.Services.GlobalStatusService
     >();
 
-    // Zone management services (production implementations)
+    // Zone management services
     builder.Services.AddSingleton<
         SnapDog2.Core.Abstractions.IZoneStateStore,
         SnapDog2.Infrastructure.Storage.InMemoryZoneStateStore
     >();
     builder.Services.AddScoped<SnapDog2.Core.Abstractions.IZoneManager, SnapDog2.Infrastructure.Domain.ZoneManager>();
+
+    // Zone event bridge service for external event handling
+    builder.Services.AddScoped<
+        SnapDog2.Core.Abstractions.IZoneEventBridgeService,
+        SnapDog2.Infrastructure.Services.ZoneEventBridgeService
+    >();
 
     // Media player services
     builder.Services.AddScoped<
