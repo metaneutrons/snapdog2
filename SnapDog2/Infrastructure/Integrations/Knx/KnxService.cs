@@ -923,12 +923,19 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
                     {
                         var x when x == StatusIds.VolumeStatus => zone.Knx.VolumeStatus,
                         var x when x == StatusIds.MuteStatus => zone.Knx.MuteStatus,
-                        var x when x == StatusIds.PlaybackState => zone.Knx.ControlStatus,
+                        // Replaced PLAYBACK_STATE with more granular TRACK_PLAYING_STATUS for better KNX alignment
+                        var x when x == StatusIds.TrackPlayingStatus => zone.Knx.TrackPlayingStatus,
                         var x when x == StatusIds.TrackIndex => zone.Knx.TrackStatus,
                         var x when x == StatusIds.PlaylistIndex => zone.Knx.PlaylistStatus,
                         var x when x == StatusIds.TrackRepeatStatus => zone.Knx.TrackRepeatStatus,
                         var x when x == StatusIds.PlaylistRepeatStatus => zone.Knx.RepeatStatus,
                         var x when x == StatusIds.PlaylistShuffleStatus => zone.Knx.ShuffleStatus,
+                        // New track metadata status IDs (KNX DPT 16.001 - 14-byte strings)
+                        var x when x == StatusIds.TrackMetadataTitle => zone.Knx.TrackTitleStatus,
+                        var x when x == StatusIds.TrackMetadataArtist => zone.Knx.TrackArtistStatus,
+                        var x when x == StatusIds.TrackMetadataAlbum => zone.Knx.TrackAlbumStatus,
+                        // New track playback status IDs
+                        var x when x == StatusIds.TrackProgressStatus => zone.Knx.TrackProgressStatus,
                         _ => null,
                     };
                 }
@@ -950,10 +957,32 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
                     // Convert value to appropriate type for GroupValue
                     GroupValue groupValue = value switch
                     {
+                        // DPT 1.001 - Boolean (1-bit)
                         bool boolValue => new GroupValue(boolValue),
+
+                        // DPT 5.001 - Percentage (0-100%) and DPT 5.010 - Counter (0-255)
                         byte byteValue => new GroupValue(byteValue),
                         int intValue when intValue >= 0 && intValue <= 255 => new GroupValue((byte)intValue),
-                        _ => throw new ArgumentException($"Unsupported value type: {value?.GetType()}"),
+
+                        // DPT 5.001 - Percentage (0-100%) - convert float percentage to byte
+                        float floatValue when floatValue >= 0.0f && floatValue <= 1.0f => new GroupValue(
+                            (byte)(floatValue * 100)
+                        ), // Convert 0.0-1.0 to 0-100
+                        float floatValue when floatValue >= 0.0f && floatValue <= 100.0f => new GroupValue(
+                            (byte)floatValue
+                        ), // Already 0-100 range
+
+                        // DPT 16.001 - 14-byte string (ASCII)
+                        string stringValue when stringValue.Length <= 14 => new GroupValue(
+                            System.Text.Encoding.ASCII.GetBytes(stringValue.PadRight(14, '\0'))
+                        ),
+                        string stringValue => new GroupValue(
+                            System.Text.Encoding.ASCII.GetBytes(stringValue.Substring(0, 14))
+                        ),
+
+                        _ => throw new ArgumentException(
+                            $"Unsupported value type: {value?.GetType()} with value: {value}"
+                        ),
                     };
 
                     await this._knxBus!.WriteGroupValueAsync(ga, groupValue);

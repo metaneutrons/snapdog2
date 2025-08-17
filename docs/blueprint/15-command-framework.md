@@ -425,7 +425,9 @@ The following commands are **intentionally not implemented** in KNX due to proto
 
 | Status ID        | DPT     | Env Var Suffix         | Notes                  |
 | :--------------- | :------ | :--------------------- | :--------------------- |
-| `PLAYBACK_STATE` | 1.001   | `_KNX_PLAYBACK_STATUS` | Send 1=Play, 0=Pause/Stop |
+| `TRACK_PLAYING_STATUS` | 1.001   | `_KNX_TRACK_PLAYING_STATUS` | Send 1=Playing, 0=Not Playing |
+
+> **Note:** Replaced `PLAYBACK_STATE` with `TRACK_PLAYING_STATUS` for better KNX protocol alignment. Simple boolean vs complex state enum.
 
 **Track Management**
 
@@ -433,6 +435,20 @@ The following commands are **intentionally not implemented** in KNX due to proto
 | :----------------------- | :------ | :---------------------------- | :--------------------- |
 | `TRACK_INDEX`            | 5.010   | `_KNX_TRACK_STATUS`           | Send 1-based, 0 if>255 |
 | `TRACK_REPEAT_STATUS`    | 1.001   | `_KNX_TRACK_REPEAT_STATUS`    | Send 0=Off, 1=On       |
+
+**Track Metadata**
+
+| Status ID                | DPT     | Env Var Suffix                | Notes                    |
+| :----------------------- | :------ | :---------------------------- | :----------------------- |
+| `TRACK_METADATA_TITLE`   | 16.001  | `_KNX_TRACK_TITLE_STATUS`     | Send 14-byte ASCII string|
+| `TRACK_METADATA_ARTIST`  | 16.001  | `_KNX_TRACK_ARTIST_STATUS`    | Send 14-byte ASCII string|
+| `TRACK_METADATA_ALBUM`   | 16.001  | `_KNX_TRACK_ALBUM_STATUS`     | Send 14-byte ASCII string|
+
+**Track Playback**
+
+| Status ID                | DPT     | Env Var Suffix                | Notes                    |
+| :----------------------- | :------ | :---------------------------- | :----------------------- |
+| `TRACK_PROGRESS_STATUS`  | 5.001   | `_KNX_TRACK_PROGRESS_STATUS`  | Send 0-100% progress     |
 
 **Track Metadata (Static Information - Not Typically Sent via KNX)**
 

@@ -142,7 +142,13 @@ public static class KnxServiceConfiguration
         ValidateGroupAddress(knxConfig.Stop, $"{context} Stop", errors);
         ValidateGroupAddress(knxConfig.TrackNext, $"{context} TrackNext", errors);
         ValidateGroupAddress(knxConfig.TrackPrevious, $"{context} TrackPrevious", errors);
-        ValidateGroupAddress(knxConfig.ControlStatus, $"{context} ControlStatus", errors);
+
+        // Validate new track metadata and playback status addresses
+        ValidateGroupAddress(knxConfig.TrackTitleStatus, $"{context} TrackTitleStatus", errors);
+        ValidateGroupAddress(knxConfig.TrackArtistStatus, $"{context} TrackArtistStatus", errors);
+        ValidateGroupAddress(knxConfig.TrackAlbumStatus, $"{context} TrackAlbumStatus", errors);
+        ValidateGroupAddress(knxConfig.TrackProgressStatus, $"{context} TrackProgressStatus", errors);
+        ValidateGroupAddress(knxConfig.TrackPlayingStatus, $"{context} TrackPlayingStatus", errors);
     }
 
     private static void ValidateGroupAddresses(ClientKnxConfig knxConfig, string context, List<string> errors)

@@ -172,7 +172,7 @@ public class KnxServiceTests
                         Stop = "1/0/7",
                         TrackNext = "1/0/8",
                         TrackPrevious = "1/0/9",
-                        ControlStatus = "1/0/10",
+                        TrackPlayingStatus = "1/0/10",
                     },
                 },
             },

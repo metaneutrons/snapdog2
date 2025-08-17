@@ -24,8 +24,9 @@ public class ZoneKnxConfig
     [Env(Key = "STOP")]
     public string? Stop { get; set; }
 
-    [Env(Key = "CONTROL_STATUS")]
-    public string? ControlStatus { get; set; }
+    // Removed CONTROL_STATUS - replaced with more granular TRACK_PLAYING_STATUS
+    // [Env(Key = "CONTROL_STATUS")]
+    // public string? ControlStatus { get; set; }
 
     // Track addresses
     [Env(Key = "TRACK_NEXT")]
@@ -101,4 +102,21 @@ public class ZoneKnxConfig
 
     [Env(Key = "MUTE_STATUS")]
     public string? MuteStatus { get; set; }
+
+    // Track metadata status addresses (KNX DPT 16.001 - 14-byte strings)
+    [Env(Key = "TRACK_TITLE_STATUS")]
+    public string? TrackTitleStatus { get; set; }
+
+    [Env(Key = "TRACK_ARTIST_STATUS")]
+    public string? TrackArtistStatus { get; set; }
+
+    [Env(Key = "TRACK_ALBUM_STATUS")]
+    public string? TrackAlbumStatus { get; set; }
+
+    // Track playback status addresses
+    [Env(Key = "TRACK_PROGRESS_STATUS")]
+    public string? TrackProgressStatus { get; set; }
+
+    [Env(Key = "TRACK_PLAYING_STATUS")]
+    public string? TrackPlayingStatus { get; set; }
 }
