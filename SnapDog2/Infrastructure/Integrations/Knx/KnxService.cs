@@ -19,6 +19,7 @@ using SnapDog2.Core.Helpers;
 using SnapDog2.Core.Models;
 using SnapDog2.Server.Features.Clients.Commands.Config;
 using SnapDog2.Server.Features.Clients.Commands.Volume;
+using SnapDog2.Server.Features.Shared.Factories;
 using SnapDog2.Server.Features.Shared.Notifications;
 using SnapDog2.Server.Features.Zones.Commands.Playback;
 using SnapDog2.Server.Features.Zones.Commands.Playlist;
@@ -588,17 +589,37 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
 
             return command switch
             {
+                // Zone Volume Commands
                 SetZoneVolumeCommand cmd =>
                     await this.GetHandler<Server.Features.Zones.Handlers.SetZoneVolumeCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
+                VolumeUpCommand cmd => await this.GetHandler<Server.Features.Zones.Handlers.VolumeUpCommandHandler>(
+                        scope
+                    )
+                    .Handle(cmd, cancellationToken),
+                VolumeDownCommand cmd => await this.GetHandler<Server.Features.Zones.Handlers.VolumeDownCommandHandler>(
+                        scope
+                    )
+                    .Handle(cmd, cancellationToken),
                 SetZoneMuteCommand cmd =>
                     await this.GetHandler<Server.Features.Zones.Handlers.SetZoneMuteCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
+                ToggleZoneMuteCommand cmd =>
+                    await this.GetHandler<Server.Features.Zones.Handlers.ToggleZoneMuteCommandHandler>(scope)
+                        .Handle(cmd, cancellationToken),
+
+                // Zone Playback Commands
                 PlayCommand cmd => await this.GetHandler<Server.Features.Zones.Handlers.PlayCommandHandler>(scope)
                     .Handle(cmd, cancellationToken),
                 PauseCommand cmd => await this.GetHandler<Server.Features.Zones.Handlers.PauseCommandHandler>(scope)
                     .Handle(cmd, cancellationToken),
                 StopCommand cmd => await this.GetHandler<Server.Features.Zones.Handlers.StopCommandHandler>(scope)
+                    .Handle(cmd, cancellationToken),
+
+                // Zone Track Commands
+                SetTrackCommand cmd => await this.GetHandler<Server.Features.Zones.Handlers.SetTrackCommandHandler>(
+                        scope
+                    )
                     .Handle(cmd, cancellationToken),
                 NextTrackCommand cmd => await this.GetHandler<Server.Features.Zones.Handlers.NextTrackCommandHandler>(
                         scope
@@ -607,12 +628,69 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
                 PreviousTrackCommand cmd =>
                     await this.GetHandler<Server.Features.Zones.Handlers.PreviousTrackCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
+                SetTrackRepeatCommand cmd =>
+                    await this.GetHandler<Server.Features.Zones.Handlers.SetTrackRepeatCommandHandler>(scope)
+                        .Handle(cmd, cancellationToken),
+                ToggleTrackRepeatCommand cmd =>
+                    await this.GetHandler<Server.Features.Zones.Handlers.ToggleTrackRepeatCommandHandler>(scope)
+                        .Handle(cmd, cancellationToken),
+                PlayTrackByIndexCommand cmd =>
+                    await this.GetHandler<Server.Features.Zones.Handlers.PlayTrackByIndexCommandHandler>(scope)
+                        .Handle(cmd, cancellationToken),
+
+                // Zone Playlist Commands
+                SetPlaylistCommand cmd =>
+                    await this.GetHandler<Server.Features.Zones.Handlers.SetPlaylistCommandHandler>(scope)
+                        .Handle(cmd, cancellationToken),
+                NextPlaylistCommand cmd =>
+                    await this.GetHandler<Server.Features.Zones.Handlers.NextPlaylistCommandHandler>(scope)
+                        .Handle(cmd, cancellationToken),
+                PreviousPlaylistCommand cmd =>
+                    await this.GetHandler<Server.Features.Zones.Handlers.PreviousPlaylistCommandHandler>(scope)
+                        .Handle(cmd, cancellationToken),
+                SetPlaylistRepeatCommand cmd =>
+                    await this.GetHandler<Server.Features.Zones.Handlers.SetPlaylistRepeatCommandHandler>(scope)
+                        .Handle(cmd, cancellationToken),
+                TogglePlaylistRepeatCommand cmd =>
+                    await this.GetHandler<Server.Features.Zones.Handlers.TogglePlaylistRepeatCommandHandler>(scope)
+                        .Handle(cmd, cancellationToken),
+                SetPlaylistShuffleCommand cmd =>
+                    await this.GetHandler<Server.Features.Zones.Handlers.SetPlaylistShuffleCommandHandler>(scope)
+                        .Handle(cmd, cancellationToken),
+                TogglePlaylistShuffleCommand cmd =>
+                    await this.GetHandler<Server.Features.Zones.Handlers.TogglePlaylistShuffleCommandHandler>(scope)
+                        .Handle(cmd, cancellationToken),
+
+                // Client Volume Commands
                 SetClientVolumeCommand cmd =>
                     await this.GetHandler<Server.Features.Clients.Handlers.SetClientVolumeCommandHandler>(scope)
+                        .Handle(cmd, cancellationToken),
+                ClientVolumeUpCommand cmd =>
+                    await this.GetHandler<SnapDog2.Server.Features.Clients.Commands.Volume.ClientVolumeUpCommandHandler>(
+                            scope
+                        )
+                        .Handle(cmd, cancellationToken),
+                ClientVolumeDownCommand cmd =>
+                    await this.GetHandler<SnapDog2.Server.Features.Clients.Commands.Volume.ClientVolumeDownCommandHandler>(
+                            scope
+                        )
                         .Handle(cmd, cancellationToken),
                 SetClientMuteCommand cmd =>
                     await this.GetHandler<Server.Features.Clients.Handlers.SetClientMuteCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
+                ToggleClientMuteCommand cmd =>
+                    await this.GetHandler<Server.Features.Clients.Handlers.ToggleClientMuteCommandHandler>(scope)
+                        .Handle(cmd, cancellationToken),
+
+                // Client Configuration Commands
+                AssignClientToZoneCommand cmd =>
+                    await this.GetHandler<Server.Features.Clients.Handlers.AssignClientToZoneCommandHandler>(scope)
+                        .Handle(cmd, cancellationToken),
+
+                // Intentionally excluded commands (see comments in MapGroupAddressToCommand):
+                // - SeekPositionCommand, SeekProgressCommand, PlayUrlCommand
+                // - SetClientLatencyCommand, SetClientNameCommand
+
                 _ => Result.Failure($"Unknown command type: {command.GetType().Name}"),
             };
         }
@@ -625,6 +703,13 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
 
     private object? MapGroupAddressToCommand(string groupAddress, object value)
     {
+        // NOTE: The following commands are INTENTIONALLY NOT IMPLEMENTED in KNX:
+        // - SeekPositionCommand (TRACK_POSITION): KNX lacks precision for millisecond-based seeking
+        // - SeekProgressCommand (TRACK_PROGRESS): KNX lacks precision for percentage-based seeking
+        // - PlayUrlCommand (TRACK_PLAY_URL): KNX cannot transmit URL strings effectively
+        // - SetClientLatencyCommand (CLIENT_LATENCY): KNX latency adjustment not practical via bus
+        // - SetClientNameCommand (CLIENT_NAME): KNX cannot transmit string names effectively
+
         // Check zones for matching group addresses
         for (int i = 0; i < this._zones.Count; i++)
         {
@@ -636,52 +721,112 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
 
             var knxConfig = zone.Knx;
 
-            // Volume commands
+            // Zone Volume Commands
             if (groupAddress == knxConfig.Volume && value is int volumeValue)
             {
-                return new SetZoneVolumeCommand
-                {
-                    ZoneIndex = zoneIndex,
-                    Volume = volumeValue,
-                    Source = CommandSource.Knx,
-                };
+                return CommandFactory.CreateSetZoneVolumeCommand(zoneIndex, volumeValue, CommandSource.Knx);
             }
 
-            // Mute commands
+            if (groupAddress == knxConfig.VolumeUp && value is bool volumeUpValue && volumeUpValue)
+            {
+                return CommandFactory.CreateVolumeUpCommand(zoneIndex, 5, CommandSource.Knx);
+            }
+
+            if (groupAddress == knxConfig.VolumeDown && value is bool volumeDownValue && volumeDownValue)
+            {
+                return CommandFactory.CreateVolumeDownCommand(zoneIndex, 5, CommandSource.Knx);
+            }
+
             if (groupAddress == knxConfig.Mute && value is bool muteValue)
             {
-                return new SetZoneMuteCommand
-                {
-                    ZoneIndex = zoneIndex,
-                    Enabled = muteValue,
-                    Source = CommandSource.Knx,
-                };
+                return CommandFactory.CreateSetZoneMuteCommand(zoneIndex, muteValue, CommandSource.Knx);
             }
 
-            // Playback commands
+            if (groupAddress == knxConfig.MuteToggle && value is bool muteToggleValue && muteToggleValue)
+            {
+                return CommandFactory.CreateToggleZoneMuteCommand(zoneIndex, CommandSource.Knx);
+            }
+
+            // Zone Playback Commands
             if (groupAddress == knxConfig.Play && value is bool playValue && playValue)
             {
-                return new PlayCommand { ZoneIndex = zoneIndex, Source = CommandSource.Knx };
+                return CommandFactory.CreatePlayCommand(zoneIndex, CommandSource.Knx);
             }
 
             if (groupAddress == knxConfig.Pause && value is bool pauseValue && pauseValue)
             {
-                return new PauseCommand { ZoneIndex = zoneIndex, Source = CommandSource.Knx };
+                return CommandFactory.CreatePauseCommand(zoneIndex, CommandSource.Knx);
             }
 
             if (groupAddress == knxConfig.Stop && value is bool stopValue && stopValue)
             {
-                return new StopCommand { ZoneIndex = zoneIndex, Source = CommandSource.Knx };
+                return CommandFactory.CreateStopCommand(zoneIndex, CommandSource.Knx);
+            }
+
+            // Zone Track Commands
+            if (groupAddress == knxConfig.Track && value is int trackValue)
+            {
+                return CommandFactory.CreateSetTrackCommand(zoneIndex, trackValue, CommandSource.Knx);
             }
 
             if (groupAddress == knxConfig.TrackNext && value is bool nextValue && nextValue)
             {
-                return new NextTrackCommand { ZoneIndex = zoneIndex, Source = CommandSource.Knx };
+                return CommandFactory.CreateNextTrackCommand(zoneIndex, CommandSource.Knx);
             }
 
             if (groupAddress == knxConfig.TrackPrevious && value is bool prevValue && prevValue)
             {
-                return new PreviousTrackCommand { ZoneIndex = zoneIndex, Source = CommandSource.Knx };
+                return CommandFactory.CreatePreviousTrackCommand(zoneIndex, CommandSource.Knx);
+            }
+
+            if (groupAddress == knxConfig.TrackRepeat && value is bool trackRepeatValue)
+            {
+                return CommandFactory.CreateSetTrackRepeatCommand(zoneIndex, trackRepeatValue, CommandSource.Knx);
+            }
+
+            if (
+                groupAddress == knxConfig.TrackRepeatToggle
+                && value is bool trackRepeatToggleValue
+                && trackRepeatToggleValue
+            )
+            {
+                return CommandFactory.CreateToggleTrackRepeatCommand(zoneIndex, CommandSource.Knx);
+            }
+
+            // Zone Playlist Commands
+            if (groupAddress == knxConfig.Playlist && value is int playlistValue)
+            {
+                return CommandFactory.CreateSetPlaylistCommand(zoneIndex, playlistValue, CommandSource.Knx);
+            }
+
+            if (groupAddress == knxConfig.PlaylistNext && value is bool playlistNextValue && playlistNextValue)
+            {
+                return CommandFactory.CreateNextPlaylistCommand(zoneIndex, CommandSource.Knx);
+            }
+
+            if (groupAddress == knxConfig.PlaylistPrevious && value is bool playlistPrevValue && playlistPrevValue)
+            {
+                return CommandFactory.CreatePreviousPlaylistCommand(zoneIndex, CommandSource.Knx);
+            }
+
+            if (groupAddress == knxConfig.Repeat && value is bool repeatValue)
+            {
+                return CommandFactory.CreateSetPlaylistRepeatCommand(zoneIndex, repeatValue, CommandSource.Knx);
+            }
+
+            if (groupAddress == knxConfig.RepeatToggle && value is bool repeatToggleValue && repeatToggleValue)
+            {
+                return CommandFactory.CreateTogglePlaylistRepeatCommand(zoneIndex, CommandSource.Knx);
+            }
+
+            if (groupAddress == knxConfig.Shuffle && value is bool shuffleValue)
+            {
+                return CommandFactory.CreateSetPlaylistShuffleCommand(zoneIndex, shuffleValue, CommandSource.Knx);
+            }
+
+            if (groupAddress == knxConfig.ShuffleToggle && value is bool shuffleToggleValue && shuffleToggleValue)
+            {
+                return CommandFactory.CreateTogglePlaylistShuffleCommand(zoneIndex, CommandSource.Knx);
             }
         }
 
@@ -696,27 +841,40 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
 
             var knxConfig = client.Knx;
 
-            // Client volume commands
+            // Client Volume Commands
             if (groupAddress == knxConfig.Volume && value is int clientVolumeValue)
             {
-                return new SetClientVolumeCommand
-                {
-                    ClientIndex = clientIndex,
-                    Volume = clientVolumeValue,
-                    Source = CommandSource.Knx,
-                };
+                return CommandFactory.CreateSetClientVolumeCommand(clientIndex, clientVolumeValue, CommandSource.Knx);
             }
 
-            // Client mute commands
+            if (groupAddress == knxConfig.VolumeUp && value is bool clientVolumeUpValue && clientVolumeUpValue)
+            {
+                return CommandFactory.CreateClientVolumeUpCommand(clientIndex, 5, CommandSource.Knx);
+            }
+
+            if (groupAddress == knxConfig.VolumeDown && value is bool clientVolumeDownValue && clientVolumeDownValue)
+            {
+                return CommandFactory.CreateClientVolumeDownCommand(clientIndex, 5, CommandSource.Knx);
+            }
+
+            // Client Mute Commands
             if (groupAddress == knxConfig.Mute && value is bool clientMuteValue)
             {
-                return new SetClientMuteCommand
-                {
-                    ClientIndex = clientIndex,
-                    Enabled = clientMuteValue,
-                    Source = CommandSource.Knx,
-                };
+                return CommandFactory.CreateSetClientMuteCommand(clientIndex, clientMuteValue, CommandSource.Knx);
             }
+
+            if (groupAddress == knxConfig.MuteToggle && value is bool clientMuteToggleValue && clientMuteToggleValue)
+            {
+                return CommandFactory.CreateToggleClientMuteCommand(clientIndex, CommandSource.Knx);
+            }
+
+            // Client Configuration Commands
+            if (groupAddress == knxConfig.Zone && value is int zoneValue)
+            {
+                return CommandFactory.CreateAssignClientToZoneCommand(clientIndex, zoneValue, CommandSource.Knx);
+            }
+
+            // Note: CLIENT_LATENCY and CLIENT_NAME are intentionally excluded (see comments above)
         }
 
         return null;

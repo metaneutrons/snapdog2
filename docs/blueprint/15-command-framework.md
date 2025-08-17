@@ -400,13 +400,24 @@ Uses `Knx.Falcon.GroupAddress`. GAs configured via `SNAPDOG_ZONE_{n}_KNX_{SUFFIX
 
 | Command ID    | DPT     | Env Var Suffix      | Notes                 |
 | :------------ | :------ | :------------------ | :-------------------- |
+| `MUTE`        | 1.001   | `_KNX_MUTE`         | Send 0=Off, 1=On      |
+| `MUTE_TOGGLE` | 1.001   | `_KNX_MUTE_TOGGLE`  | Send 1 to toggle      |
 | `VOLUME`      | 5.001   | `_KNX_VOLUME`       | Send 0-100%           |
 | `VOLUME_UP`   | 3.007   | `_KNX_VOLUME_DIM`   | Send Dim Up command   |
 | `VOLUME_DOWN` | 3.007   | `_KNX_VOLUME_DIM`   | Send Dim Down command |
 
 > **Note:** `VOLUME_UP` and `VOLUME_DOWN` share the same KNX group address (`_KNX_VOLUME_DIM`) because KNX dimming uses DPT 3.007 with a single GA for both up/down operations. The direction is encoded in the DPT value itself.
-| `MUTE`        | 1.001   | `_KNX_MUTE`         | Send 0=Off, 1=On      |
-| `MUTE_TOGGLE` | 1.001   | `_KNX_MUTE_TOGGLE`  | Send 1 to toggle      |
+
+**Intentionally Excluded Commands:**
+The following commands are **intentionally not implemented** in KNX due to protocol limitations or architectural decisions:
+
+| Command ID | Reason for Exclusion |
+|:-----------|:---------------------|
+| `TRACK_POSITION` | KNX lacks precision for millisecond-based seeking |
+| `TRACK_PROGRESS` | KNX lacks precision for percentage-based seeking |
+| `TRACK_PLAY_URL` | KNX cannot transmit URL strings effectively |
+| `CLIENT_LATENCY` | KNX latency adjustment not practical via bus |
+| `CLIENT_NAME` | KNX cannot transmit string names effectively |
 
 #### 14.3.3.2. KNX Zone Status Group Addresses
 
@@ -536,6 +547,8 @@ Uses `Knx.Falcon.GroupAddress`. GAs configured via `SNAPDOG_CLIENT_{m}_KNX_{SUFF
 | `CLIENT_MUTE_TOGGLE` | 1.001   | `_KNX_MUTE_TOGGLE`   | Send 1 to toggle   |
 
 > **Note:** `CLIENT_VOLUME_UP` and `CLIENT_VOLUME_DOWN` share the same KNX group address (`_KNX_VOLUME_DIM`) because KNX dimming uses DPT 3.007 with a single GA for both up/down operations. The direction is encoded in the DPT value itself.
+
+> **Intentionally Excluded:** `CLIENT_LATENCY` and `CLIENT_NAME` commands are not implemented in KNX due to protocol limitations (see Zone exclusions above).
 
 **Config & State**
 
