@@ -74,6 +74,16 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 | `STOP`            | Stop playback          | `ZoneIndex` (int)                                     | Command (Set)    | Action: Tell zone to stop         |
 | `PLAYBACK_STATE`  | Current playback state | `ZoneIndex` (int), `Status` (`PlaybackStatus` enum)   | Status (Publish) | State: Stopped, Playing, Paused |
 
+> **Important Distinction: Track Metadata vs. Playback State**
+>
+> The track-related functionality is organized into three distinct categories to maintain clear separation of concerns:
+>
+> 1. **Track Management**: Basic track control and indexing (play, next, previous, repeat settings)
+> 2. **Track Metadata**: Static information about media files (title, artist, album, duration, cover art) - this data does not change during playback
+> 3. **Track Playback State**: Dynamic real-time information that changes during playback (position, progress, playing status)
+>
+> This separation ensures proper data flow, efficient caching strategies, and clear integration patterns for external systems (MQTT topics, KNX group addresses, API endpoints).
+
 **Track Management**
 
 | Command/Status ID     | Description                | Essential Information / Type                   | Direction        | Notes / Comments                        |
@@ -84,20 +94,30 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 | `TRACK_PREVIOUS`      | Play previous track        | `ZoneIndex` (int)                                 | Command (Set)    | Action: Go to previous track        |
 | `TRACK_PLAY_INDEX`    | Play specific track by index | `ZoneIndex` (int), `TrackIndex` (int, 1-based)  | Command (Set)    | Action: Play track `N` directly     |
 | `TRACK_PLAY_URL`      | Play direct URL stream     | `ZoneIndex` (int), `MediaUrl` (string)           | Command (Set)    | Action: Play URL stream             |
-| `TRACK_POSITION`      | Seek to position in track  | `ZoneIndex` (int), `Position` (long, ms)        | Command (Set)    | Action: Seek to position            |
-| `TRACK_PROGRESS`      | Seek to progress percentage | `ZoneIndex` (int), `Progress` (float, 0.0-1.0) | Command (Set)    | Action: Seek to progress %          |
 | `TRACK_REPEAT`        | Set track repeat mode      | `ZoneIndex` (int), `Enabled` (bool)               | Command (Set)    | Action: Turn repeat on/off            |
 | `TRACK_REPEAT_TOGGLE` | Toggle track repeat mode   | `ZoneIndex` (int)                                 | Command (Set)    | Action: Toggle repeat state           |
 | `TRACK_REPEAT_STATUS` | Current track repeat state | `ZoneIndex` (int), `Enabled` (bool)               | Status (Publish) | State: Repeat is on/off               |
-| `TRACK_METADATA`      | Complete track metadata    | `ZoneIndex` (int), `TrackInfo` (object/record)    | Status (Publish) | State: Full track details           |
-| `TRACK_METADATA_DURATION`   | Track duration             | `ZoneIndex` (int), `Duration` (long, ms)         | Status (Publish) | State: Length of current track      |
-| `TRACK_POSITION_STATUS` | Track position             | `ZoneIndex` (int), `Position` (long, ms)         | Status (Publish) | State: Position in current track    |
+
+**Track Metadata (Static Information About Media Files)**
+
+| Command/Status ID         | Description                | Essential Information / Type                   | Direction        | Notes / Comments                        |
+| :------------------------ | :------------------------- | :--------------------------------------------- | :--------------- | :-------------------------------------- |
+| `TRACK_METADATA`          | Complete track metadata    | `ZoneIndex` (int), `TrackInfo` (object/record)    | Status (Publish) | State: Full track details           |
+| `TRACK_METADATA_DURATION` | Track duration             | `ZoneIndex` (int), `Duration` (long, ms)         | Status (Publish) | State: Length of current track      |
 | `TRACK_METADATA_TITLE`    | Track title                | `ZoneIndex` (int), `Title` (string)              | Status (Publish) | State: Title of current track       |
 | `TRACK_METADATA_ARTIST`   | Track artist               | `ZoneIndex` (int), `Artist` (string)             | Status (Publish) | State: Artist of current track      |
 | `TRACK_METADATA_ALBUM`    | Track album                | `ZoneIndex` (int), `Album` (string)              | Status (Publish) | State: Album of current track       |
-| `TRACK_PLAYING_STATUS`| Current playing state      | `ZoneIndex` (int), `IsPlaying` (bool)            | Status (Publish) | State: Track is playing/paused      |
-| `TRACK_PROGRESS_STATUS`| Current progress percentage | `ZoneIndex` (int), `Progress` (float, 0.0-1.0) | Status (Publish) | State: Progress through track       |
 | `TRACK_METADATA_COVER`    | Track cover art URL        | `ZoneIndex` (int), `CoverUrl` (string)           | Status (Publish) | State: Cover art URL                |
+
+**Track Playback State (Dynamic Real-Time Information)**
+
+| Command/Status ID         | Description                | Essential Information / Type                   | Direction        | Notes / Comments                        |
+| :------------------------ | :------------------------- | :--------------------------------------------- | :--------------- | :-------------------------------------- |
+| `TRACK_POSITION`          | Seek to position in track  | `ZoneIndex` (int), `Position` (long, ms)        | Command (Set)    | Action: Seek to position            |
+| `TRACK_PROGRESS`          | Seek to progress percentage | `ZoneIndex` (int), `Progress` (float, 0.0-1.0) | Command (Set)    | Action: Seek to progress %          |
+| `TRACK_POSITION_STATUS`   | Track position             | `ZoneIndex` (int), `Position` (long, ms)         | Status (Publish) | State: Position in current track    |
+| `TRACK_PLAYING_STATUS`    | Current playing state      | `ZoneIndex` (int), `IsPlaying` (bool)            | Status (Publish) | State: Track is playing/paused      |
+| `TRACK_PROGRESS_STATUS`   | Current progress percentage | `ZoneIndex` (int), `Progress` (float, 0.0-1.0) | Status (Publish) | State: Progress through track       |
 
 **Playlist Management**
 
@@ -206,16 +226,26 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 | Status ID                 | Env Var Suffix            | Default Rel. Topic   | Example Payload                  | Retained | Notes                    |
 | :------------------------ | :------------------------ | :------------------- | :------------------------------- | :------- | :----------------------- |
 | `TRACK_INDEX`             | `_TRACK_TOPIC`            | `track`              | `1`, `3`                         | Yes      | **1-based** index      |
-| `TRACK_METADATA`          | `_TRACK_METADATA_TOPIC`   | `track/metadata`     | Full JSON `TrackInfo` object     | Yes      | Complete track metadata |
-| `TRACK_METADATA_DURATION`       | `_TRACK_LENGTH_TOPIC`     | `track/duration`     | `300000` (in ms)                 | Yes      | Duration of current track |
-| `TRACK_METADATA_TITLE`        | `_TRACK_TITLE_TOPIC`      | `track/title`        | `"Song Title"`                   | Yes      | Title of current track   |
-| `TRACK_METADATA_ARTIST`       | `_TRACK_ARTIST_TOPIC`     | `track/artist`       | `"Artist Name"`                  | Yes      | Artist of current track  |
-| `TRACK_METADATA_ALBUM`        | `_TRACK_ALBUM_TOPIC`      | `track/album`        | `"Album Name"`                   | Yes      | Album of current track   |
-| `TRACK_METADATA_COVER`        | `_TRACK_COVER_TOPIC`      | `track/cover`        | `"http://server/cover.jpg"`      | Yes      | Cover art URL            |
-| `TRACK_PLAYING_STATUS`    | `_TRACK_PLAYING_TOPIC`    | `track/playing`      | `true` / `false`                 | Yes      | Is track currently playing |
-| `TRACK_POSITION_STATUS` | `_TRACK_POSITION_TOPIC`   | `track/position`     | `10000` (in ms)                  | Yes      | Position in current track |
-| `TRACK_PROGRESS_STATUS`   | `_TRACK_PROGRESS_TOPIC`   | `track/progress`     | `0.65` (65% progress)            | Yes      | Progress percentage 0.0-1.0 |
 | `TRACK_REPEAT_STATUS`     | `_TRACK_REPEAT_TOPIC`     | `repeat/track`       | `true` / `false` (`1`/`0`)       | Yes      | Track repeat enabled     |
+
+**Track Metadata (Static Information About Media Files)**
+
+| Status ID                 | Env Var Suffix            | Default Rel. Topic   | Example Payload                  | Retained | Notes                    |
+| :------------------------ | :------------------------ | :------------------- | :------------------------------- | :------- | :----------------------- |
+| `TRACK_METADATA`          | `_TRACK_METADATA_TOPIC`   | `track/metadata`     | Full JSON `TrackInfo` object     | Yes      | Complete track metadata |
+| `TRACK_METADATA_DURATION` | `_TRACK_LENGTH_TOPIC`     | `track/duration`     | `300000` (in ms)                 | Yes      | Duration of current track |
+| `TRACK_METADATA_TITLE`    | `_TRACK_TITLE_TOPIC`      | `track/title`        | `"Song Title"`                   | Yes      | Title of current track   |
+| `TRACK_METADATA_ARTIST`   | `_TRACK_ARTIST_TOPIC`     | `track/artist`       | `"Artist Name"`                  | Yes      | Artist of current track  |
+| `TRACK_METADATA_ALBUM`    | `_TRACK_ALBUM_TOPIC`      | `track/album`        | `"Album Name"`                   | Yes      | Album of current track   |
+| `TRACK_METADATA_COVER`    | `_TRACK_COVER_TOPIC`      | `track/cover`        | `"http://server/cover.jpg"`      | Yes      | Cover art URL            |
+
+**Track Playback State (Dynamic Real-Time Information)**
+
+| Status ID                 | Env Var Suffix            | Default Rel. Topic   | Example Payload                  | Retained | Notes                    |
+| :------------------------ | :------------------------ | :------------------- | :------------------------------- | :------- | :----------------------- |
+| `TRACK_PLAYING_STATUS`    | `_TRACK_PLAYING_TOPIC`    | `track/playing`      | `true` / `false`                 | Yes      | Is track currently playing |
+| `TRACK_POSITION_STATUS`   | `_TRACK_POSITION_TOPIC`   | `track/position`     | `10000` (in ms)                  | Yes      | Position in current track |
+| `TRACK_PROGRESS_STATUS`   | `_TRACK_PROGRESS_TOPIC`   | `track/progress`     | `0.65` (65% progress)            | Yes      | Progress percentage 0.0-1.0 |
 
 **Playlist Management**
 
@@ -391,9 +421,18 @@ Uses `Knx.Falcon.GroupAddress`. GAs configured via `SNAPDOG_ZONE_{n}_KNX_{SUFFIX
 | Status ID                | DPT     | Env Var Suffix                | Notes                  |
 | :----------------------- | :------ | :---------------------------- | :--------------------- |
 | `TRACK_INDEX`            | 5.010   | `_KNX_TRACK_STATUS`           | Send 1-based, 0 if>255 |
+| `TRACK_REPEAT_STATUS`    | 1.001   | `_KNX_TRACK_REPEAT_STATUS`    | Send 0=Off, 1=On       |
+
+**Track Metadata (Static Information - Not Typically Sent via KNX)**
+
+> **Note:** Static track metadata (title, artist, album, cover, duration) is typically not transmitted via KNX due to protocol limitations and the binary nature of KNX data types. This information is better suited for MQTT or API access.
+
+**Track Playback State (Dynamic Real-Time Information)**
+
+| Status ID                | DPT     | Env Var Suffix                | Notes                  |
+| :----------------------- | :------ | :---------------------------- | :--------------------- |
 | `TRACK_PLAYING_STATUS`   | 1.001   | `_KNX_TRACK_PLAYING_STATUS`   | Send 1=Playing, 0=Paused |
 | `TRACK_PROGRESS_STATUS`  | 5.001   | `_KNX_TRACK_PROGRESS_STATUS`  | Send progress 0-100%   |
-| `TRACK_REPEAT_STATUS`    | 1.001   | `_KNX_TRACK_REPEAT_STATUS`    | Send 0=Off, 1=On       |
 
 **Playlist Management**
 
