@@ -885,6 +885,22 @@ public static class CommandFactory
             Source = source,
         };
 
+    /// <summary>
+    /// Creates a command to set Snapcast client latency.
+    /// Used internally for backend Snapcast integration.
+    /// </summary>
+    public static SetSnapcastClientLatencyCommand CreateSetSnapcastClientLatencyCommand(
+        string clientIndex,
+        int latencyMs,
+        CommandSource source
+    ) =>
+        new()
+        {
+            ClientIndex = clientIndex,
+            LatencyMs = latencyMs,
+            Source = source,
+        };
+
     #endregion
 }
 

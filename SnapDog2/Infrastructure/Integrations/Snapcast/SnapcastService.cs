@@ -1016,6 +1016,17 @@ public partial class SnapcastService
                 );
             }
             else if (
+                notification.StatusType == SnapcastConstants.StatusTypes.LATENCY
+                && notification.TargetId.StartsWith(SnapcastConstants.TargetPrefixes.CLIENT)
+            )
+            {
+                result = await this.SetClientLatencyAsync(
+                    notification.TargetId,
+                    Convert.ToInt32(notification.Value),
+                    cancellationToken
+                );
+            }
+            else if (
                 notification.StatusType == SnapcastConstants.StatusTypes.VOLUME
                 && notification.TargetId.StartsWith(SnapcastConstants.TargetPrefixes.GROUP)
             )

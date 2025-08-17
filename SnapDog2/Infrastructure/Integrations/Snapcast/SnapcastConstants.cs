@@ -14,6 +14,7 @@ internal static class SnapcastConstants
     {
         public const string VOLUME = "VOLUME";
         public const string MUTE = "MUTE";
+        public const string LATENCY = "LATENCY";
     }
 
     /// <summary>
