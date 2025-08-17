@@ -24,6 +24,7 @@ public partial class ZoneManager(
     IMediaPlayerService mediaPlayerService,
     IMediator mediator,
     IZoneStateStore zoneStateStore,
+    IStatusFactory statusFactory,
     IOptions<SnapDogConfiguration> configuration
 ) : IZoneManager, IAsyncDisposable, IDisposable
 {
@@ -33,6 +34,7 @@ public partial class ZoneManager(
     private readonly IMediaPlayerService _mediaPlayerService = mediaPlayerService;
     private readonly IMediator _mediator = mediator;
     private readonly IZoneStateStore _zoneStateStore = zoneStateStore;
+    private readonly IStatusFactory _statusFactory = statusFactory;
     private readonly List<ZoneConfig> _zoneConfigs = configuration.Value.Zones;
     private readonly ConcurrentDictionary<int, IZoneService> _zones = new ConcurrentDictionary<int, IZoneService>();
     private readonly SemaphoreSlim _initializationLock = new SemaphoreSlim(1, 1);
@@ -88,6 +90,7 @@ public partial class ZoneManager(
                         this._mediaPlayerService,
                         this._mediator,
                         this._zoneStateStore,
+                        this._statusFactory,
                         this._logger
                     );
 
@@ -244,6 +247,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     private readonly IMediaPlayerService _mediaPlayerService;
     private readonly IMediator _mediator;
     private readonly IZoneStateStore _zoneStateStore;
+    private readonly IStatusFactory _statusFactory;
     private readonly ILogger _logger;
     private readonly SemaphoreSlim _stateLock;
     private ZoneState _currentState;
@@ -272,6 +276,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         IMediaPlayerService mediaPlayerService,
         IMediator mediator,
         IZoneStateStore zoneStateStore,
+        IStatusFactory statusFactory,
         ILogger logger
     )
     {
@@ -282,6 +287,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         this._mediaPlayerService = mediaPlayerService;
         this._mediator = mediator;
         this._zoneStateStore = zoneStateStore;
+        this._statusFactory = statusFactory;
         this._logger = logger;
         this._stateLock = new SemaphoreSlim(1, 1);
 
@@ -1122,11 +1128,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
 
         // Publish notification via mediator using fire-and-forget to prevent blocking
-        var notification = new ZoneStateChangedNotification
-        {
-            ZoneIndex = this._zoneIndex,
-            ZoneState = this._currentState,
-        };
+        var notification = this._statusFactory.CreateZoneStateChangedNotification(this._zoneIndex, this._currentState);
 
         // Use Task.Run to avoid blocking the calling thread
         _ = Task.Run(async () =>
@@ -1151,37 +1153,48 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     public async Task PublishPlaybackStateStatusAsync(Core.Enums.PlaybackState playbackState)
     {
-        var notification = new ZonePlaybackStateStatusNotification(this._zoneIndex, playbackState);
+        var notification = this._statusFactory.CreateZonePlaybackStateStatusNotification(
+            this._zoneIndex,
+            playbackState
+        );
         await this._mediator.PublishAsync(notification).ConfigureAwait(false);
     }
 
     public async Task PublishVolumeStatusAsync(int volume)
     {
-        var notification = new ZoneVolumeStatusNotification(this._zoneIndex, volume);
+        var notification = this._statusFactory.CreateZoneVolumeStatusNotification(this._zoneIndex, volume);
         await this._mediator.PublishAsync(notification).ConfigureAwait(false);
     }
 
     public async Task PublishMuteStatusAsync(bool isMuted)
     {
-        var notification = new ZoneMuteStatusNotification(this._zoneIndex, isMuted);
+        var notification = this._statusFactory.CreateZoneMuteStatusNotification(this._zoneIndex, isMuted);
         await this._mediator.PublishAsync(notification).ConfigureAwait(false);
     }
 
     public async Task PublishTrackStatusAsync(Core.Models.TrackInfo trackInfo, int trackIndex)
     {
-        var notification = new ZoneTrackStatusNotification(this._zoneIndex, trackInfo, trackIndex);
+        var notification = this._statusFactory.CreateZoneTrackStatusNotification(
+            this._zoneIndex,
+            trackInfo,
+            trackIndex
+        );
         await this._mediator.PublishAsync(notification).ConfigureAwait(false);
     }
 
     public async Task PublishPlaylistStatusAsync(Core.Models.PlaylistInfo playlistInfo, int playlistIndex)
     {
-        var notification = new ZonePlaylistStatusNotification(this._zoneIndex, playlistInfo, playlistIndex);
+        var notification = this._statusFactory.CreateZonePlaylistStatusNotification(
+            this._zoneIndex,
+            playlistInfo,
+            playlistIndex
+        );
         await this._mediator.PublishAsync(notification).ConfigureAwait(false);
     }
 
     public async Task PublishZoneStateStatusAsync(Core.Models.ZoneState zoneState)
     {
-        var notification = new ZoneStateStatusNotification(this._zoneIndex, zoneState);
+        var notification = this._statusFactory.CreateZoneStateStatusNotification(this._zoneIndex, zoneState);
         await this._mediator.PublishAsync(notification).ConfigureAwait(false);
     }
 

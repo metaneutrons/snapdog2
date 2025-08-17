@@ -386,6 +386,12 @@ static WebApplication CreateWebApplication(string[] args)
         SnapDog2.Infrastructure.Services.ZoneEventBridgeService
     >();
 
+    // Status factory for centralized status notification creation
+    builder.Services.AddScoped<
+        SnapDog2.Core.Abstractions.IStatusFactory,
+        SnapDog2.Server.Features.Shared.Factories.StatusFactory
+    >();
+
     // Media player services
     builder.Services.AddScoped<
         SnapDog2.Core.Abstractions.IMediaPlayerService,
