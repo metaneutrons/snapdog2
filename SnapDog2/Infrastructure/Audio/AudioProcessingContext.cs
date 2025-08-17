@@ -27,9 +27,38 @@ public sealed class AudioProcessingContext : IAsyncDisposable, IDisposable
         string? tempDirectory = null
     )
     {
+        // Initialize LibVLCSharp with proper error handling
+        try
+        {
+            Core.Initialize();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(
+                ex,
+                "Failed to initialize LibVLCSharp Core. Ensure LibVLC native libraries are properly installed."
+            );
+            throw new InvalidOperationException(
+                "LibVLC initialization failed. Check that libvlc5 and libvlccore9 are installed.",
+                ex
+            );
+        }
+
         var args = config.LibVLCArgs;
-        this._libvlc = new LibVLC(args);
-        this._mediaPlayer = new LibVLCSharp.Shared.MediaPlayer(this._libvlc);
+        try
+        {
+            this._libvlc = new LibVLC(args);
+            this._mediaPlayer = new LibVLCSharp.Shared.MediaPlayer(this._libvlc);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to create LibVLC instance with args: {Args}", string.Join(" ", args));
+            throw new InvalidOperationException(
+                "LibVLC instance creation failed. Check LibVLC installation and arguments.",
+                ex
+            );
+        }
+
         this._logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         var tempDir = tempDirectory ?? config.TempDirectory;
@@ -56,11 +85,13 @@ public sealed class AudioProcessingContext : IAsyncDisposable, IDisposable
     /// </summary>
     /// <param name="sourceUrl">The source URL to process.</param>
     /// <param name="sourceType">The type of audio source.</param>
+    /// <param name="outputPath">The output path where audio should be written (e.g., Snapcast sink). If null, uses temp directory.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Audio processing result with output file and metadata.</returns>
     public async Task<AudioProcessingResult> ProcessAudioStreamAsync(
         string sourceUrl,
         AudioSourceType sourceType = AudioSourceType.Url,
+        string? outputPath = null,
         CancellationToken cancellationToken = default
     )
     {
@@ -72,17 +103,20 @@ public sealed class AudioProcessingContext : IAsyncDisposable, IDisposable
         try
         {
             var sourceId = Guid.NewGuid().ToString("N");
-            var outputPath = Path.Combine(this._tempDirectory.FullName, $"{sourceId}.{this.Config.Format}");
-            var metadataPath = Path.ChangeExtension(outputPath, ".json");
+
+            // Use provided output path or generate temp file path
+            var finalOutputPath =
+                outputPath ?? Path.Combine(this._tempDirectory.FullName, $"{sourceId}.{this.Config.Format}");
+            var metadataPath = Path.ChangeExtension(finalOutputPath, ".json");
 
             this._logger.LogInformation(
                 "Starting audio processing: Source={SourceUrl}, Output={OutputPath}",
                 sourceUrl,
-                outputPath
+                finalOutputPath
             );
 
             // Build media options for raw audio output
-            var mediaOptions = this.BuildMediaOptions(outputPath);
+            var mediaOptions = this.BuildMediaOptions(finalOutputPath);
 
             using var media = new Media(this._libvlc, sourceUrl, FromType.FromLocation, mediaOptions.ToArray());
 
@@ -120,12 +154,12 @@ public sealed class AudioProcessingContext : IAsyncDisposable, IDisposable
             // Save metadata to JSON file
             await this.MetadataManager.SaveMetadataAsync(metadata, metadataPath, cancellationToken);
 
-            this._logger.LogInformation("Audio processing completed successfully: {OutputPath}", outputPath);
+            this._logger.LogInformation("Audio processing completed successfully: {OutputPath}", finalOutputPath);
 
             return new AudioProcessingResult
             {
                 Success = true,
-                OutputFilePath = outputPath,
+                OutputFilePath = finalOutputPath,
                 MetadataPath = metadataPath,
                 SourceId = sourceId,
                 Config = this.Config,

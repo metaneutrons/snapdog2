@@ -71,26 +71,36 @@ public sealed partial class MediaPlayer(
             this._currentTrack = trackInfo;
             this._playbackStartedAt = DateTime.UtcNow;
 
-            // Start processing in background
+            // Start processing in background - stream directly to sink
             _ = Task.Run(
                 async () =>
                 {
                     try
                     {
+                        // Ensure the sink directory exists
+                        var sinkDirectory = Path.GetDirectoryName(this._sinkPath);
+                        if (!string.IsNullOrEmpty(sinkDirectory))
+                        {
+                            Directory.CreateDirectory(sinkDirectory);
+                        }
+
                         var result = await this._processingContext.ProcessAudioStreamAsync(
                             streamUrl,
                             AudioSourceType.Url,
+                            this._sinkPath, // Stream directly to sink instead of temp file
                             this._streamingCts.Token
                         );
 
-                        if (result.Success && !string.IsNullOrEmpty(result.OutputFilePath))
+                        if (!result.Success)
                         {
-                            // Copy the processed audio to the Snapcast sink
-                            await this.CopyToSinkAsync(result.OutputFilePath, this._streamingCts.Token);
+                            this._logger.LogError("Audio processing failed: {ErrorMessage}", result.ErrorMessage);
                         }
                         else
                         {
-                            this._logger.LogError("Audio processing failed: {ErrorMessage}", result.ErrorMessage);
+                            this._logger.LogInformation(
+                                "Audio streaming completed successfully for zone {ZoneIndex}",
+                                this._zoneIndex
+                            );
                         }
                     }
                     catch (OperationCanceledException)
@@ -168,50 +178,6 @@ public sealed partial class MediaPlayer(
             ActiveStreams = isPlaying ? 1 : 0,
             MaxStreams = 1, // Each MediaPlayer handles exactly 1 stream
         };
-    }
-
-    /// <summary>
-    /// Copies processed audio data to the Snapcast sink.
-    /// </summary>
-    /// <param name="sourceFilePath">Path to the processed audio file.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    private async Task CopyToSinkAsync(string sourceFilePath, CancellationToken cancellationToken)
-    {
-        try
-        {
-            this._logger.LogDebug("Copying audio data from {SourcePath} to {SinkPath}", sourceFilePath, this._sinkPath);
-
-            // Ensure the sink directory exists
-            var sinkDirectory = Path.GetDirectoryName(this._sinkPath);
-            if (!string.IsNullOrEmpty(sinkDirectory))
-            {
-                Directory.CreateDirectory(sinkDirectory);
-            }
-
-            // Stream copy the audio data to the sink
-            using var sourceStream = new FileStream(sourceFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            using var sinkStream = new FileStream(this._sinkPath, FileMode.Create, FileAccess.Write, FileShare.Read);
-
-            await sourceStream.CopyToAsync(sinkStream, cancellationToken);
-            await sinkStream.FlushAsync(cancellationToken);
-
-            this._logger.LogDebug("Audio data copied successfully to sink: {SinkPath}", this._sinkPath);
-
-            // Clean up the temporary file
-            try
-            {
-                File.Delete(sourceFilePath);
-            }
-            catch (Exception ex)
-            {
-                this._logger.LogWarning(ex, "Failed to delete temporary file: {FilePath}", sourceFilePath);
-            }
-        }
-        catch (Exception ex)
-        {
-            this._logger.LogError(ex, "Failed to copy audio data to sink: {SinkPath}", this._sinkPath);
-            throw;
-        }
     }
 
     public async ValueTask DisposeAsync()
