@@ -371,8 +371,8 @@ Uses `Knx.Falcon.GroupAddress`. GAs configured via `SNAPDOG_ZONE_{n}_KNX_{SUFFIX
 | Command ID    | DPT     | Env Var Suffix      | Notes                 |
 | :------------ | :------ | :------------------ | :-------------------- |
 | `VOLUME`      | 5.001   | `_KNX_VOLUME`       | Send 0-100%           |
-| `VOLUME_UP`   | 3.007   | `_KNX_VOLUME_DIM`   | Send Dim Up command   |
-| `VOLUME_DOWN` | 3.007   | `_KNX_VOLUME_DIM`   | Send Dim Down command |
+| `VOLUME_UP`   | 3.007   | `_KNX_VOLUME_UP`    | Send Dim Up command   |
+| `VOLUME_DOWN` | 3.007   | `_KNX_VOLUME_DOWN`  | Send Dim Down command |
 | `MUTE`        | 1.001   | `_KNX_MUTE`         | Send 0=Off, 1=On      |
 | `MUTE_TOGGLE` | 1.001   | `_KNX_MUTE_TOGGLE`  | Send 1 to toggle      |
 
@@ -489,6 +489,8 @@ Uses `Knx.Falcon.GroupAddress`. GAs configured via `SNAPDOG_CLIENT_{m}_KNX_{SUFF
 | Command ID           | DPT     | Env Var Suffix       | Notes              |
 | :------------------- | :------ | :------------------- | :----------------- |
 | `CLIENT_VOLUME`      | 5.001   | `_KNX_VOLUME`        | Send 0-100%        |
+| `CLIENT_VOLUME_UP`   | 3.007   | `_KNX_VOLUME_UP`     | Send 1 to step up  |
+| `CLIENT_VOLUME_DOWN` | 3.007   | `_KNX_VOLUME_DOWN`   | Send 1 to step down|
 | `CLIENT_MUTE`        | 1.001   | `_KNX_MUTE`          | Send 0=Off, 1=On   |
 | `CLIENT_MUTE_TOGGLE` | 1.001   | `_KNX_MUTE_TOGGLE`   | Send 1 to toggle   |
 
