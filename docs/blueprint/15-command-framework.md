@@ -418,6 +418,8 @@ Uses `Knx.Falcon.GroupAddress`. GAs configured via `SNAPDOG_ZONE_{n}_KNX_{SUFFIX
 | :------------------- | :---------------------- | :------------------------------------ | :--------------- | :------------------------ |
 | `CLIENT_VOLUME`      | Set client volume       | `ClientIndex` (int), `Volume` (int, 0-100) | Command (Set)    | Sets individual client vol|
 | `CLIENT_VOLUME_STATUS`| Current client volume    | `ClientIndex` (int), `Volume` (int, 0-100) | Status (Publish) |                           |
+| `CLIENT_VOLUME_UP`   | Increase client volume  | `ClientIndex` (int), Optional `Step` (int, default 5) | Command (Set) | Action: Increase client volume |
+| `CLIENT_VOLUME_DOWN` | Decrease client volume  | `ClientIndex` (int), Optional `Step` (int, default 5) | Command (Set) | Action: Decrease client volume |
 | `CLIENT_MUTE`        | Set client mute         | `ClientIndex` (int), `Enabled` (bool)      | Command (Set)    |                           |
 | `CLIENT_MUTE_TOGGLE` | Toggle client mute      | `ClientIndex` (int)                        | Command (Set)    |                           |
 | `CLIENT_MUTE_STATUS` | Current client mute state | `ClientIndex` (int), `Enabled` (bool)      | Status (Publish) |                           |
@@ -430,6 +432,7 @@ Uses `Knx.Falcon.GroupAddress`. GAs configured via `SNAPDOG_ZONE_{n}_KNX_{SUFFIX
 | `CLIENT_LATENCY_STATUS`| Current client latency  | `ClientIndex` (int), `LatencyMs` (int)   | Status (Publish) |                           |
 | `CLIENT_ZONE`        | Assign client to zone   | `ClientIndex` (int), `ZoneIndex` (int, 1-based)| Command (Set)    | Assigns client to group   |
 | `CLIENT_ZONE_STATUS` | Current assigned zone ID| `ClientIndex` (int), `ZoneIndex` (int?, 1-based)| Status (Publish) |                           |
+| `CLIENT_NAME`        | Set client name         | `ClientIndex` (int), `Name` (string)           | Command (Set)    | Rename client in Snapcast |
 | `CLIENT_CONNECTED`   | Client connection status| `ClientIndex` (int), `IsConnected` (bool)  | Status (Publish) |                           |
 | `CLIENT_STATE`       | Complete client state   | `ClientIndex` (int), `ClientState` object  | Status (Publish) |                           |
 
@@ -444,6 +447,8 @@ Base topic: `SNAPDOG_CLIENT_m_MQTT_BASE_TOPIC` (default: `snapdog/clients/{m}/`)
 | Command ID           | Env Var Suffix         | Default Rel. Topic | Example Payloads              |
 | :------------------- | :--------------------- | :--------------------- | :---------------------------- |
 | `CLIENT_VOLUME`      | `_VOLUME_SET_TOPIC`    | `volume/set`           | `0`-`100`                     |
+| `CLIENT_VOLUME_UP`   | `_VOLUME_UP_TOPIC`     | `volume/up`            | (no payload needed)           |
+| `CLIENT_VOLUME_DOWN` | `_VOLUME_DOWN_TOPIC`   | `volume/down`          | (no payload needed)           |
 | `CLIENT_MUTE`        | `_MUTE_SET_TOPIC`      | `mute/set`             | `true` / `false`, `1` / `0`   |
 | `CLIENT_MUTE_TOGGLE` | `_MUTE_SET_TOPIC`      | `mute/set`             | `toggle`                      |
 
@@ -453,6 +458,7 @@ Base topic: `SNAPDOG_CLIENT_m_MQTT_BASE_TOPIC` (default: `snapdog/clients/{m}/`)
 | :---------------- | :------------------- | :------------------- | :---------------------------- |
 | `CLIENT_LATENCY`  | `_LATENCY_SET_TOPIC` | `latency/set`        | `<ms>`                        |
 | `CLIENT_ZONE`     | `_ZONE_SET_TOPIC`    | `zone/set`           | `<zone_id>` (1-based)         |
+| `CLIENT_NAME`     | `_NAME_SET_TOPIC`    | `name/set`           | `<name>` (string)             |
 
 #### 14.4.2.2. Client Status Topics (Read-Only)
 
