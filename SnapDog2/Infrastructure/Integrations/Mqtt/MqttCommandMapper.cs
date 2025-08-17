@@ -4,7 +4,8 @@ using Microsoft.Extensions.Logging;
 using SnapDog2.Server.Features.Shared.Factories;
 
 /// <summary>
-/// MQTT command mapper using the centralized CommandFactory.
+/// Modern MQTT command mapper using constants, dictionaries, and type-safe parsing.
+/// Eliminates magic strings and provides maintainable command mapping.
 /// </summary>
 public partial class MqttCommandMapper
 {
@@ -51,7 +52,7 @@ public partial class MqttCommandMapper
     }
 
     /// <summary>
-    /// Maps complex control topics that contain multiple commands in a single payload.
+    /// Maps complex control topics using modern parsing and dictionary-based command mapping.
     /// Example: snapdog/zone/1/control/set with payload "play track 5"
     /// </summary>
     public object? MapControlTopicToCommand(string topic, string payload)
@@ -60,22 +61,12 @@ public partial class MqttCommandMapper
         {
             LogMappingCommand(topic, payload);
 
-            var parts = topic.Split('/');
-            if (
-                parts.Length < 5
-                || !parts[0].Equals("snapdog", StringComparison.OrdinalIgnoreCase)
-                || !parts[3].Equals("control", StringComparison.OrdinalIgnoreCase)
-                || !parts[4].Equals("set", StringComparison.OrdinalIgnoreCase)
-            )
+            // Parse topic using structured parser
+            var topicParts = MqttTopicParser.Parse(topic);
+            if (topicParts == null || !topicParts.IsControlTopic)
             {
                 return null;
             }
-
-            var entityType = parts[1].ToLowerInvariant();
-            var entityIdStr = parts[2];
-
-            if (!int.TryParse(entityIdStr, out var entityId))
-                return null;
 
             // Parse complex control payloads
             var payloadParts = payload.Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -83,12 +74,21 @@ public partial class MqttCommandMapper
                 return null;
 
             var command = payloadParts[0].ToLowerInvariant();
-            var parameter = payloadParts.Length > 1 ? payloadParts[1] : string.Empty;
+            var parameter = payloadParts.Length > 1 ? string.Join(" ", payloadParts[1..]) : string.Empty;
 
-            return entityType switch
+            // Use strategy pattern for command mapping
+            return topicParts.EntityType switch
             {
-                "zone" => MapZoneControlCommand(entityId, command, parameter),
-                "client" => MapClientControlCommand(entityId, command, parameter),
+                MqttConstants.EntityTypes.ZONE => MqttCommandMappingStrategy.MapZoneCommand(
+                    command,
+                    topicParts.EntityId,
+                    parameter
+                ),
+                MqttConstants.EntityTypes.CLIENT => MqttCommandMappingStrategy.MapClientCommand(
+                    command,
+                    topicParts.EntityId,
+                    parameter
+                ),
                 _ => null,
             };
         }
@@ -99,227 +99,23 @@ public partial class MqttCommandMapper
         }
     }
 
-    private object? MapZoneControlCommand(int zoneIndex, string command, string parameter)
-    {
-        return command switch
-        {
-            // Playback commands
-            "play" when string.IsNullOrEmpty(parameter) => CommandFactory.CreatePlayCommand(
-                zoneIndex,
-                Core.Enums.CommandSource.Mqtt
-            ),
-            "play"
-                when parameter.StartsWith("track", StringComparison.OrdinalIgnoreCase)
-                    && int.TryParse(parameter[5..].Trim(), out var trackIndex) => CommandFactory.CreatePlayTrackCommand(
-                zoneIndex,
-                trackIndex,
-                Core.Enums.CommandSource.Mqtt
-            ),
-            "play" when parameter.StartsWith("url", StringComparison.OrdinalIgnoreCase) =>
-                CommandFactory.CreatePlayUrlCommand(zoneIndex, parameter[3..].Trim(), Core.Enums.CommandSource.Mqtt),
-            "pause" => CommandFactory.CreatePauseCommand(zoneIndex, Core.Enums.CommandSource.Mqtt),
-            "stop" => CommandFactory.CreateStopCommand(zoneIndex, Core.Enums.CommandSource.Mqtt),
-
-            // Navigation commands (simplified)
-            "next" or "track_next" => CommandFactory.CreateNextTrackCommand(zoneIndex, Core.Enums.CommandSource.Mqtt),
-            "previous" or "track_previous" => CommandFactory.CreatePreviousTrackCommand(
-                zoneIndex,
-                Core.Enums.CommandSource.Mqtt
-            ),
-            "playlist_next" => CommandFactory.CreateNextPlaylistCommand(zoneIndex, Core.Enums.CommandSource.Mqtt),
-            "playlist_previous" => CommandFactory.CreatePreviousPlaylistCommand(
-                zoneIndex,
-                Core.Enums.CommandSource.Mqtt
-            ),
-
-            // Volume commands
-            "volume" when int.TryParse(parameter, out var volume) => CommandFactory.CreateSetZoneVolumeCommand(
-                zoneIndex,
-                volume,
-                Core.Enums.CommandSource.Mqtt
-            ),
-            "volume_up" => CommandFactory.CreateVolumeUpCommand(zoneIndex, 5, Core.Enums.CommandSource.Mqtt),
-            "volume_down" => CommandFactory.CreateVolumeDownCommand(zoneIndex, 5, Core.Enums.CommandSource.Mqtt),
-
-            // Mute commands
-            "mute_on" => CommandFactory.CreateSetZoneMuteCommand(zoneIndex, true, Core.Enums.CommandSource.Mqtt),
-            "mute_off" => CommandFactory.CreateSetZoneMuteCommand(zoneIndex, false, Core.Enums.CommandSource.Mqtt),
-            "mute_toggle" => CommandFactory.CreateToggleZoneMuteCommand(zoneIndex, Core.Enums.CommandSource.Mqtt),
-
-            // Track repeat commands (simplified payloads)
-            "track_repeat_on" => CommandFactory.CreateSetTrackRepeatCommand(
-                zoneIndex,
-                true,
-                Core.Enums.CommandSource.Mqtt
-            ),
-            "track_repeat_off" => CommandFactory.CreateSetTrackRepeatCommand(
-                zoneIndex,
-                false,
-                Core.Enums.CommandSource.Mqtt
-            ),
-            "track_repeat_toggle" => CommandFactory.CreateToggleTrackRepeatCommand(
-                zoneIndex,
-                Core.Enums.CommandSource.Mqtt
-            ),
-
-            // Shuffle commands (simplified payloads)
-            "shuffle_on" => CommandFactory.CreateSetPlaylistShuffleCommand(
-                zoneIndex,
-                true,
-                Core.Enums.CommandSource.Mqtt
-            ),
-            "shuffle_off" => CommandFactory.CreateSetPlaylistShuffleCommand(
-                zoneIndex,
-                false,
-                Core.Enums.CommandSource.Mqtt
-            ),
-            "shuffle_toggle" => CommandFactory.CreateTogglePlaylistShuffleCommand(
-                zoneIndex,
-                Core.Enums.CommandSource.Mqtt
-            ),
-
-            // Playlist repeat commands (simplified payloads)
-            "repeat_on" => CommandFactory.CreateSetPlaylistRepeatCommand(
-                zoneIndex,
-                true,
-                Core.Enums.CommandSource.Mqtt
-            ),
-            "repeat_off" => CommandFactory.CreateSetPlaylistRepeatCommand(
-                zoneIndex,
-                false,
-                Core.Enums.CommandSource.Mqtt
-            ),
-            "repeat_toggle" => CommandFactory.CreateTogglePlaylistRepeatCommand(
-                zoneIndex,
-                Core.Enums.CommandSource.Mqtt
-            ),
-
-            // Track and playlist selection
-            "track" when int.TryParse(parameter, out var trackNum) => CommandFactory.CreateSetTrackCommand(
-                zoneIndex,
-                trackNum,
-                Core.Enums.CommandSource.Mqtt
-            ),
-            "playlist" when int.TryParse(parameter, out var playlistNum) => CommandFactory.CreateSetPlaylistCommand(
-                zoneIndex,
-                playlistNum,
-                Core.Enums.CommandSource.Mqtt
-            ),
-            "playlist" when int.TryParse(parameter, out var playlistIndex) => CommandFactory.CreateSetPlaylistCommand(
-                zoneIndex,
-                playlistIndex,
-                Core.Enums.CommandSource.Mqtt
-            ),
-
-            _ => null,
-        };
-    }
-
-    private object? MapClientControlCommand(int clientIndex, string command, string parameter)
-    {
-        return command switch
-        {
-            // Volume commands
-            "volume" when int.TryParse(parameter, out var volume) => CommandFactory.CreateSetClientVolumeCommand(
-                clientIndex,
-                volume,
-                Core.Enums.CommandSource.Mqtt
-            ),
-
-            // Mute commands
-            "mute_on" => CommandFactory.CreateSetClientMuteCommand(clientIndex, true, Core.Enums.CommandSource.Mqtt),
-            "mute_off" => CommandFactory.CreateSetClientMuteCommand(clientIndex, false, Core.Enums.CommandSource.Mqtt),
-            "mute_toggle" => CommandFactory.CreateToggleClientMuteCommand(clientIndex, Core.Enums.CommandSource.Mqtt),
-
-            // Zone assignment
-            "zone" when int.TryParse(parameter, out var zoneIndex) => CommandFactory.CreateAssignClientToZoneCommand(
-                clientIndex,
-                zoneIndex,
-                Core.Enums.CommandSource.Mqtt
-            ),
-
-            // Latency adjustment
-            "latency" when int.TryParse(parameter, out var latency) => CommandFactory.CreateSetClientLatencyCommand(
-                clientIndex,
-                latency,
-                Core.Enums.CommandSource.Mqtt
-            ),
-
-            _ => null,
-        };
-    }
-
     /// <summary>
     /// Validates that a topic follows the expected MQTT topic structure.
     /// </summary>
-    public bool IsValidMqttTopic(string topic)
-    {
-        if (string.IsNullOrWhiteSpace(topic))
-            return false;
-
-        var parts = topic.Split('/');
-
-        // Basic structure: snapdog/{entity}/{id}/{command}[/set]
-        if (parts.Length < 4 || parts.Length > 5)
-            return false;
-
-        // Must start with snapdog
-        if (!parts[0].Equals("snapdog", StringComparison.OrdinalIgnoreCase))
-            return false;
-
-        // Entity type must be zone or client
-        var entityType = parts[1].ToLowerInvariant();
-        if (entityType != "zone" && entityType != "client")
-            return false;
-
-        // Entity ID must be a positive integer
-        if (!int.TryParse(parts[2], out var entityId) || entityId <= 0)
-            return false;
-
-        // Command must not be empty
-        if (string.IsNullOrWhiteSpace(parts[3]))
-            return false;
-
-        // If 5 parts, last part should be "set"
-        if (parts.Length == 5 && !parts[4].Equals("set", StringComparison.OrdinalIgnoreCase))
-            return false;
-
-        return true;
-    }
+    public bool IsValidMqttTopic(string topic) => MqttTopicParser.IsValid(topic);
 
     /// <summary>
     /// Gets the entity type (zone/client) from an MQTT topic.
     /// </summary>
-    public string? GetEntityType(string topic)
-    {
-        if (!IsValidMqttTopic(topic))
-            return null;
-
-        var parts = topic.Split('/');
-        return parts[1].ToLowerInvariant();
-    }
+    public string? GetEntityType(string topic) => MqttTopicParser.Parse(topic)?.EntityType;
 
     /// <summary>
     /// Gets the entity ID from an MQTT topic.
     /// </summary>
-    public int? GetEntityId(string topic)
-    {
-        if (!IsValidMqttTopic(topic))
-            return null;
-
-        var parts = topic.Split('/');
-        return int.TryParse(parts[2], out var entityId) ? entityId : null;
-    }
+    public int? GetEntityId(string topic) => MqttTopicParser.Parse(topic)?.EntityId;
 
     /// <summary>
     /// Gets the command name from an MQTT topic.
     /// </summary>
-    public string? GetCommandName(string topic)
-    {
-        if (!IsValidMqttTopic(topic))
-            return null;
-
-        var parts = topic.Split('/');
-        return parts[3].ToLowerInvariant();
-    }
+    public string? GetCommandName(string topic) => MqttTopicParser.Parse(topic)?.Command;
 }
