@@ -5,29 +5,32 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS development
 WORKDIR /app
 
-# Install development tools for container debugging
+# Install development tools and LibVLC dependencies (both dev and runtime)
 RUN apt-get update && apt-get install -y \
     curl \
     git \
     procps \
     iputils-ping \
     telnet \
-    && rm -rf /var/lib/apt/lists/*
+    libvlc-dev \
+    libvlccore-dev \
+    libvlc5 \
+    libvlccore9 \
+    vlc-plugin-base \
+    && rm -rf /var/lib/apt/lists/* \
+    && /usr/lib/aarch64-linux-gnu/vlc/vlc-cache-gen /usr/lib/aarch64-linux-gnu/vlc/plugins
+
+# Set LibVLC environment variables for ARM64 architecture
+ENV VLC_PLUGIN_PATH=/usr/lib/aarch64-linux-gnu/vlc/plugins
+ENV LD_LIBRARY_PATH=/usr/lib/aarch64-linux-gnu
 
 # Create a non-root user for development (consistent with volume permissions)
 RUN useradd -m -s /bin/bash -u 1000 vscode && \
     mkdir -p /home/vscode/.nuget/packages && \
     chown -R vscode:vscode /home/vscode
 
-# Organize project files and fix permissions
-#RUN for file in $(ls *.csproj); do mkdir -p ${file%.*}/ && mv $file ${file%.*}/; done && \
-#    chown -R vscode:vscode /app
-
 # Switch to vscode user for development
 USER vscode
-
-# Skip restore during build - dotnet watch will handle it at runtime with bind-mounted local packages
-# RUN dotnet restore
 
 # Switch back to root for remaining setup
 USER root
@@ -36,11 +39,17 @@ USER root
 EXPOSE 5000
 
 # Development entrypoint with hot reload (HTTP only for internal networking)
-ENTRYPOINT ["sh", "-c", "dotnet watch --project SnapDog2"]
+ENTRYPOINT ["sh", "-c", "echo \"LibVLC configured: VLC_PLUGIN_PATH=$VLC_PLUGIN_PATH\" && dotnet watch --project SnapDog2"]
 
 # Build Stage
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
+
+# Install LibVLC development dependencies for build
+RUN apt-get update && apt-get install -y \
+    libvlc-dev \
+    libvlccore-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy csproj and restore dependencies
 COPY ["SnapDog2.sln", "./"]
@@ -63,11 +72,19 @@ RUN dotnet publish "SnapDog2/SnapDog2.csproj" -c Release -o /app/publish
 # Runtime Stage
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS production
 
-# Install dependencies if needed (audio libraries, etc.)
+# Install LibVLC runtime dependencies (not development packages)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     procps \
-    && rm -rf /var/lib/apt/lists/*
+    libvlc5 \
+    libvlccore9 \
+    vlc-plugin-base \
+    && rm -rf /var/lib/apt/lists/* \
+    && /usr/lib/aarch64-linux-gnu/vlc/vlc-cache-gen /usr/lib/aarch64-linux-gnu/vlc/plugins
+
+# Set LibVLC environment variables for ARM64 architecture
+ENV VLC_PLUGIN_PATH=/usr/lib/aarch64-linux-gnu/vlc/plugins
+ENV LD_LIBRARY_PATH=/usr/lib/aarch64-linux-gnu
 
 WORKDIR /app
 COPY --from=build /app/publish .
