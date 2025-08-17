@@ -13,11 +13,6 @@ public record TrackInfo
     public required int Index { get; init; }
 
     /// <summary>
-    /// Gets the unique track identifier or stream URL for radio.
-    /// </summary>
-    public required string Id { get; init; }
-
-    /// <summary>
     /// Gets the track title.
     /// Maps to TRACK_METADATA_TITLE status from LibVLC MetadataType.Title.
     /// </summary>
@@ -93,6 +88,12 @@ public record TrackInfo
     /// Gets the source type ("subsonic", "radio", "file", "stream").
     /// </summary>
     public required string Source { get; init; }
+
+    /// <summary>
+    /// Gets the media URL for playback (stream URL for radio, file path for local files).
+    /// Used by MediaPlayerService for LibVLC playback.
+    /// </summary>
+    public required string Url { get; init; }
 
     /// <summary>
     /// Gets the UTC timestamp when the track info was recorded.
