@@ -599,7 +599,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
 
     /// <summary>
     /// Maps MQTT topics to Cortex.Mediator commands based on the topic structure.
-    /// Implements complete command set as specified in blueprint Section 14.
+    /// Implements complete command set as specified in blueprint Section 15.
     /// </summary>
     private ICommand<Result>? MapTopicToCommand(string topic, string payload)
     {
@@ -639,7 +639,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     }
 
     /// <summary>
-    /// Maps zone-specific MQTT commands to Mediator commands following blueprint specification.
+    /// Maps zone-specific MQTT commands to Mediator commands.
     /// </summary>
     private ICommand<Result>? MapZoneCommand(int zoneIndex, string command, string payload)
     {
@@ -767,7 +767,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     }
 
     /// <summary>
-    /// Maps client-specific MQTT commands to Mediator commands following blueprint specification.
+    /// Maps client-specific MQTT commands to Mediator commands.
     /// </summary>
     private ICommand<Result>? MapClientCommand(int clientIndex, string command, string payload)
     {

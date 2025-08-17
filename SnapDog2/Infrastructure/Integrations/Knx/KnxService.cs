@@ -363,7 +363,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
     )
     {
         // KNX implementation does not currently support global status publishing
-        // as per the command framework blueprint (Section 14.2.3 only covers MQTT)
+        // as per the command framework blueprint
         this.LogKnxGlobalStatusPublishingNotImplemented(eventType);
         return await Task.FromResult(Result.Success());
     }
