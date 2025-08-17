@@ -14,16 +14,11 @@ using SnapDog2.Server.Features.Zones.Commands.Volume;
 /// <summary>
 /// Handles the PlayCommand.
 /// </summary>
-public partial class PlayCommandHandler : ICommandHandler<PlayCommand, Result>
+public partial class PlayCommandHandler(IZoneManager zoneManager, ILogger<PlayCommandHandler> logger)
+    : ICommandHandler<PlayCommand, Result>
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<PlayCommandHandler> _logger;
-
-    public PlayCommandHandler(IZoneManager zoneManager, ILogger<PlayCommandHandler> logger)
-    {
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<PlayCommandHandler> _logger = logger;
 
     public async Task<Result> Handle(PlayCommand request, CancellationToken cancellationToken)
     {
@@ -62,16 +57,11 @@ public partial class PlayCommandHandler : ICommandHandler<PlayCommand, Result>
 /// <summary>
 /// Handles the PauseCommand.
 /// </summary>
-public partial class PauseCommandHandler : ICommandHandler<PauseCommand, Result>
+public partial class PauseCommandHandler(IZoneManager zoneManager, ILogger<PauseCommandHandler> logger)
+    : ICommandHandler<PauseCommand, Result>
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<PauseCommandHandler> _logger;
-
-    public PauseCommandHandler(IZoneManager zoneManager, ILogger<PauseCommandHandler> logger)
-    {
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<PauseCommandHandler> _logger = logger;
 
     public async Task<Result> Handle(PauseCommand request, CancellationToken cancellationToken)
     {
@@ -98,16 +88,11 @@ public partial class PauseCommandHandler : ICommandHandler<PauseCommand, Result>
 /// <summary>
 /// Handles the StopCommand.
 /// </summary>
-public partial class StopCommandHandler : ICommandHandler<StopCommand, Result>
+public partial class StopCommandHandler(IZoneManager zoneManager, ILogger<StopCommandHandler> logger)
+    : ICommandHandler<StopCommand, Result>
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<StopCommandHandler> _logger;
-
-    public StopCommandHandler(IZoneManager zoneManager, ILogger<StopCommandHandler> logger)
-    {
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<StopCommandHandler> _logger = logger;
 
     public async Task<Result> Handle(StopCommand request, CancellationToken cancellationToken)
     {
@@ -134,16 +119,11 @@ public partial class StopCommandHandler : ICommandHandler<StopCommand, Result>
 /// <summary>
 /// Handles the SetZoneVolumeCommand.
 /// </summary>
-public partial class SetZoneVolumeCommandHandler : ICommandHandler<SetZoneVolumeCommand, Result>
+public partial class SetZoneVolumeCommandHandler(IZoneManager zoneManager, ILogger<SetZoneVolumeCommandHandler> logger)
+    : ICommandHandler<SetZoneVolumeCommand, Result>
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<SetZoneVolumeCommandHandler> _logger;
-
-    public SetZoneVolumeCommandHandler(IZoneManager zoneManager, ILogger<SetZoneVolumeCommandHandler> logger)
-    {
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<SetZoneVolumeCommandHandler> _logger = logger;
 
     public async Task<Result> Handle(SetZoneVolumeCommand request, CancellationToken cancellationToken)
     {
@@ -170,16 +150,11 @@ public partial class SetZoneVolumeCommandHandler : ICommandHandler<SetZoneVolume
 /// <summary>
 /// Handles the VolumeUpCommand.
 /// </summary>
-public partial class VolumeUpCommandHandler : ICommandHandler<VolumeUpCommand, Result>
+public partial class VolumeUpCommandHandler(IZoneManager zoneManager, ILogger<VolumeUpCommandHandler> logger)
+    : ICommandHandler<VolumeUpCommand, Result>
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<VolumeUpCommandHandler> _logger;
-
-    public VolumeUpCommandHandler(IZoneManager zoneManager, ILogger<VolumeUpCommandHandler> logger)
-    {
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<VolumeUpCommandHandler> _logger = logger;
 
     public async Task<Result> Handle(VolumeUpCommand request, CancellationToken cancellationToken)
     {
@@ -206,16 +181,11 @@ public partial class VolumeUpCommandHandler : ICommandHandler<VolumeUpCommand, R
 /// <summary>
 /// Handles the VolumeDownCommand.
 /// </summary>
-public partial class VolumeDownCommandHandler : ICommandHandler<VolumeDownCommand, Result>
+public partial class VolumeDownCommandHandler(IZoneManager zoneManager, ILogger<VolumeDownCommandHandler> logger)
+    : ICommandHandler<VolumeDownCommand, Result>
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<VolumeDownCommandHandler> _logger;
-
-    public VolumeDownCommandHandler(IZoneManager zoneManager, ILogger<VolumeDownCommandHandler> logger)
-    {
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<VolumeDownCommandHandler> _logger = logger;
 
     public async Task<Result> Handle(VolumeDownCommand request, CancellationToken cancellationToken)
     {
@@ -242,16 +212,11 @@ public partial class VolumeDownCommandHandler : ICommandHandler<VolumeDownComman
 /// <summary>
 /// Handles the SetZoneMuteCommand.
 /// </summary>
-public partial class SetZoneMuteCommandHandler : ICommandHandler<SetZoneMuteCommand, Result>
+public partial class SetZoneMuteCommandHandler(IZoneManager zoneManager, ILogger<SetZoneMuteCommandHandler> logger)
+    : ICommandHandler<SetZoneMuteCommand, Result>
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<SetZoneMuteCommandHandler> _logger;
-
-    public SetZoneMuteCommandHandler(IZoneManager zoneManager, ILogger<SetZoneMuteCommandHandler> logger)
-    {
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<SetZoneMuteCommandHandler> _logger = logger;
 
     public async Task<Result> Handle(SetZoneMuteCommand request, CancellationToken cancellationToken)
     {
@@ -278,16 +243,13 @@ public partial class SetZoneMuteCommandHandler : ICommandHandler<SetZoneMuteComm
 /// <summary>
 /// Handles the ToggleZoneMuteCommand.
 /// </summary>
-public partial class ToggleZoneMuteCommandHandler : ICommandHandler<ToggleZoneMuteCommand, Result>
+public partial class ToggleZoneMuteCommandHandler(
+    IZoneManager zoneManager,
+    ILogger<ToggleZoneMuteCommandHandler> logger
+) : ICommandHandler<ToggleZoneMuteCommand, Result>
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<ToggleZoneMuteCommandHandler> _logger;
-
-    public ToggleZoneMuteCommandHandler(IZoneManager zoneManager, ILogger<ToggleZoneMuteCommandHandler> logger)
-    {
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<ToggleZoneMuteCommandHandler> _logger = logger;
 
     public async Task<Result> Handle(ToggleZoneMuteCommand request, CancellationToken cancellationToken)
     {
@@ -314,16 +276,11 @@ public partial class ToggleZoneMuteCommandHandler : ICommandHandler<ToggleZoneMu
 /// <summary>
 /// Handles the SetTrackCommand.
 /// </summary>
-public partial class SetTrackCommandHandler : ICommandHandler<SetTrackCommand, Result>
+public partial class SetTrackCommandHandler(IZoneManager zoneManager, ILogger<SetTrackCommandHandler> logger)
+    : ICommandHandler<SetTrackCommand, Result>
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<SetTrackCommandHandler> _logger;
-
-    public SetTrackCommandHandler(IZoneManager zoneManager, ILogger<SetTrackCommandHandler> logger)
-    {
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<SetTrackCommandHandler> _logger = logger;
 
     public async Task<Result> Handle(SetTrackCommand request, CancellationToken cancellationToken)
     {
@@ -350,16 +307,11 @@ public partial class SetTrackCommandHandler : ICommandHandler<SetTrackCommand, R
 /// <summary>
 /// Handles the NextTrackCommand.
 /// </summary>
-public partial class NextTrackCommandHandler : ICommandHandler<NextTrackCommand, Result>
+public partial class NextTrackCommandHandler(IZoneManager zoneManager, ILogger<NextTrackCommandHandler> logger)
+    : ICommandHandler<NextTrackCommand, Result>
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<NextTrackCommandHandler> _logger;
-
-    public NextTrackCommandHandler(IZoneManager zoneManager, ILogger<NextTrackCommandHandler> logger)
-    {
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<NextTrackCommandHandler> _logger = logger;
 
     public async Task<Result> Handle(NextTrackCommand request, CancellationToken cancellationToken)
     {
@@ -386,16 +338,11 @@ public partial class NextTrackCommandHandler : ICommandHandler<NextTrackCommand,
 /// <summary>
 /// Handles the PreviousTrackCommand.
 /// </summary>
-public partial class PreviousTrackCommandHandler : ICommandHandler<PreviousTrackCommand, Result>
+public partial class PreviousTrackCommandHandler(IZoneManager zoneManager, ILogger<PreviousTrackCommandHandler> logger)
+    : ICommandHandler<PreviousTrackCommand, Result>
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<PreviousTrackCommandHandler> _logger;
-
-    public PreviousTrackCommandHandler(IZoneManager zoneManager, ILogger<PreviousTrackCommandHandler> logger)
-    {
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<PreviousTrackCommandHandler> _logger = logger;
 
     public async Task<Result> Handle(PreviousTrackCommand request, CancellationToken cancellationToken)
     {
@@ -422,16 +369,11 @@ public partial class PreviousTrackCommandHandler : ICommandHandler<PreviousTrack
 /// <summary>
 /// Handles the SetPlaylistCommand.
 /// </summary>
-public partial class SetPlaylistCommandHandler : ICommandHandler<SetPlaylistCommand, Result>
+public partial class SetPlaylistCommandHandler(IZoneManager zoneManager, ILogger<SetPlaylistCommandHandler> logger)
+    : ICommandHandler<SetPlaylistCommand, Result>
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<SetPlaylistCommandHandler> _logger;
-
-    public SetPlaylistCommandHandler(IZoneManager zoneManager, ILogger<SetPlaylistCommandHandler> logger)
-    {
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<SetPlaylistCommandHandler> _logger = logger;
 
     public async Task<Result> Handle(SetPlaylistCommand request, CancellationToken cancellationToken)
     {
@@ -459,16 +401,11 @@ public partial class SetPlaylistCommandHandler : ICommandHandler<SetPlaylistComm
 /// <summary>
 /// Handles the NextPlaylistCommand.
 /// </summary>
-public partial class NextPlaylistCommandHandler : ICommandHandler<NextPlaylistCommand, Result>
+public partial class NextPlaylistCommandHandler(IZoneManager zoneManager, ILogger<NextPlaylistCommandHandler> logger)
+    : ICommandHandler<NextPlaylistCommand, Result>
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<NextPlaylistCommandHandler> _logger;
-
-    public NextPlaylistCommandHandler(IZoneManager zoneManager, ILogger<NextPlaylistCommandHandler> logger)
-    {
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<NextPlaylistCommandHandler> _logger = logger;
 
     public async Task<Result> Handle(NextPlaylistCommand request, CancellationToken cancellationToken)
     {
@@ -495,16 +432,13 @@ public partial class NextPlaylistCommandHandler : ICommandHandler<NextPlaylistCo
 /// <summary>
 /// Handles the PreviousPlaylistCommand.
 /// </summary>
-public partial class PreviousPlaylistCommandHandler : ICommandHandler<PreviousPlaylistCommand, Result>
+public partial class PreviousPlaylistCommandHandler(
+    IZoneManager zoneManager,
+    ILogger<PreviousPlaylistCommandHandler> logger
+) : ICommandHandler<PreviousPlaylistCommand, Result>
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<PreviousPlaylistCommandHandler> _logger;
-
-    public PreviousPlaylistCommandHandler(IZoneManager zoneManager, ILogger<PreviousPlaylistCommandHandler> logger)
-    {
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<PreviousPlaylistCommandHandler> _logger = logger;
 
     public async Task<Result> Handle(PreviousPlaylistCommand request, CancellationToken cancellationToken)
     {
@@ -531,16 +465,13 @@ public partial class PreviousPlaylistCommandHandler : ICommandHandler<PreviousPl
 /// <summary>
 /// Handles the SetTrackRepeatCommand.
 /// </summary>
-public partial class SetTrackRepeatCommandHandler : ICommandHandler<SetTrackRepeatCommand, Result>
+public partial class SetTrackRepeatCommandHandler(
+    IZoneManager zoneManager,
+    ILogger<SetTrackRepeatCommandHandler> logger
+) : ICommandHandler<SetTrackRepeatCommand, Result>
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<SetTrackRepeatCommandHandler> _logger;
-
-    public SetTrackRepeatCommandHandler(IZoneManager zoneManager, ILogger<SetTrackRepeatCommandHandler> logger)
-    {
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<SetTrackRepeatCommandHandler> _logger = logger;
 
     public async Task<Result> Handle(SetTrackRepeatCommand request, CancellationToken cancellationToken)
     {
@@ -567,16 +498,13 @@ public partial class SetTrackRepeatCommandHandler : ICommandHandler<SetTrackRepe
 /// <summary>
 /// Handles the ToggleTrackRepeatCommand.
 /// </summary>
-public partial class ToggleTrackRepeatCommandHandler : ICommandHandler<ToggleTrackRepeatCommand, Result>
+public partial class ToggleTrackRepeatCommandHandler(
+    IZoneManager zoneManager,
+    ILogger<ToggleTrackRepeatCommandHandler> logger
+) : ICommandHandler<ToggleTrackRepeatCommand, Result>
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<ToggleTrackRepeatCommandHandler> _logger;
-
-    public ToggleTrackRepeatCommandHandler(IZoneManager zoneManager, ILogger<ToggleTrackRepeatCommandHandler> logger)
-    {
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<ToggleTrackRepeatCommandHandler> _logger = logger;
 
     public async Task<Result> Handle(ToggleTrackRepeatCommand request, CancellationToken cancellationToken)
     {
@@ -603,16 +531,13 @@ public partial class ToggleTrackRepeatCommandHandler : ICommandHandler<ToggleTra
 /// <summary>
 /// Handles the SetPlaylistShuffleCommand.
 /// </summary>
-public partial class SetPlaylistShuffleCommandHandler : ICommandHandler<SetPlaylistShuffleCommand, Result>
+public partial class SetPlaylistShuffleCommandHandler(
+    IZoneManager zoneManager,
+    ILogger<SetPlaylistShuffleCommandHandler> logger
+) : ICommandHandler<SetPlaylistShuffleCommand, Result>
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<SetPlaylistShuffleCommandHandler> _logger;
-
-    public SetPlaylistShuffleCommandHandler(IZoneManager zoneManager, ILogger<SetPlaylistShuffleCommandHandler> logger)
-    {
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<SetPlaylistShuffleCommandHandler> _logger = logger;
 
     public async Task<Result> Handle(SetPlaylistShuffleCommand request, CancellationToken cancellationToken)
     {
@@ -647,19 +572,13 @@ public partial class SetPlaylistShuffleCommandHandler : ICommandHandler<SetPlayl
 /// <summary>
 /// Handles the TogglePlaylistShuffleCommand.
 /// </summary>
-public partial class TogglePlaylistShuffleCommandHandler : ICommandHandler<TogglePlaylistShuffleCommand, Result>
+public partial class TogglePlaylistShuffleCommandHandler(
+    IZoneManager zoneManager,
+    ILogger<TogglePlaylistShuffleCommandHandler> logger
+) : ICommandHandler<TogglePlaylistShuffleCommand, Result>
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<TogglePlaylistShuffleCommandHandler> _logger;
-
-    public TogglePlaylistShuffleCommandHandler(
-        IZoneManager zoneManager,
-        ILogger<TogglePlaylistShuffleCommandHandler> logger
-    )
-    {
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<TogglePlaylistShuffleCommandHandler> _logger = logger;
 
     public async Task<Result> Handle(TogglePlaylistShuffleCommand request, CancellationToken cancellationToken)
     {
@@ -686,16 +605,13 @@ public partial class TogglePlaylistShuffleCommandHandler : ICommandHandler<Toggl
 /// <summary>
 /// Handles the SetPlaylistRepeatCommand.
 /// </summary>
-public partial class SetPlaylistRepeatCommandHandler : ICommandHandler<SetPlaylistRepeatCommand, Result>
+public partial class SetPlaylistRepeatCommandHandler(
+    IZoneManager zoneManager,
+    ILogger<SetPlaylistRepeatCommandHandler> logger
+) : ICommandHandler<SetPlaylistRepeatCommand, Result>
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<SetPlaylistRepeatCommandHandler> _logger;
-
-    public SetPlaylistRepeatCommandHandler(IZoneManager zoneManager, ILogger<SetPlaylistRepeatCommandHandler> logger)
-    {
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<SetPlaylistRepeatCommandHandler> _logger = logger;
 
     public async Task<Result> Handle(SetPlaylistRepeatCommand request, CancellationToken cancellationToken)
     {
@@ -730,19 +646,13 @@ public partial class SetPlaylistRepeatCommandHandler : ICommandHandler<SetPlayli
 /// <summary>
 /// Handles the TogglePlaylistRepeatCommand.
 /// </summary>
-public partial class TogglePlaylistRepeatCommandHandler : ICommandHandler<TogglePlaylistRepeatCommand, Result>
+public partial class TogglePlaylistRepeatCommandHandler(
+    IZoneManager zoneManager,
+    ILogger<TogglePlaylistRepeatCommandHandler> logger
+) : ICommandHandler<TogglePlaylistRepeatCommand, Result>
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<TogglePlaylistRepeatCommandHandler> _logger;
-
-    public TogglePlaylistRepeatCommandHandler(
-        IZoneManager zoneManager,
-        ILogger<TogglePlaylistRepeatCommandHandler> logger
-    )
-    {
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<TogglePlaylistRepeatCommandHandler> _logger = logger;
 
     public async Task<Result> Handle(TogglePlaylistRepeatCommand request, CancellationToken cancellationToken)
     {
@@ -769,16 +679,11 @@ public partial class TogglePlaylistRepeatCommandHandler : ICommandHandler<Toggle
 /// <summary>
 /// Handles the SeekPositionCommand.
 /// </summary>
-public partial class SeekPositionCommandHandler : ICommandHandler<SeekPositionCommand, Result>
+public partial class SeekPositionCommandHandler(IZoneManager zoneManager, ILogger<SeekPositionCommandHandler> logger)
+    : ICommandHandler<SeekPositionCommand, Result>
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<SeekPositionCommandHandler> _logger;
-
-    public SeekPositionCommandHandler(IZoneManager zoneManager, ILogger<SeekPositionCommandHandler> logger)
-    {
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<SeekPositionCommandHandler> _logger = logger;
 
     public async Task<Result> Handle(SeekPositionCommand request, CancellationToken cancellationToken)
     {
@@ -805,16 +710,11 @@ public partial class SeekPositionCommandHandler : ICommandHandler<SeekPositionCo
 /// <summary>
 /// Handles the SeekProgressCommand.
 /// </summary>
-public partial class SeekProgressCommandHandler : ICommandHandler<SeekProgressCommand, Result>
+public partial class SeekProgressCommandHandler(IZoneManager zoneManager, ILogger<SeekProgressCommandHandler> logger)
+    : ICommandHandler<SeekProgressCommand, Result>
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<SeekProgressCommandHandler> _logger;
-
-    public SeekProgressCommandHandler(IZoneManager zoneManager, ILogger<SeekProgressCommandHandler> logger)
-    {
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<SeekProgressCommandHandler> _logger = logger;
 
     public async Task<Result> Handle(SeekProgressCommand request, CancellationToken cancellationToken)
     {
@@ -841,16 +741,13 @@ public partial class SeekProgressCommandHandler : ICommandHandler<SeekProgressCo
 /// <summary>
 /// Handles the PlayTrackByIndexCommand.
 /// </summary>
-public partial class PlayTrackByIndexCommandHandler : ICommandHandler<PlayTrackByIndexCommand, Result>
+public partial class PlayTrackByIndexCommandHandler(
+    IZoneManager zoneManager,
+    ILogger<PlayTrackByIndexCommandHandler> logger
+) : ICommandHandler<PlayTrackByIndexCommand, Result>
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<PlayTrackByIndexCommandHandler> _logger;
-
-    public PlayTrackByIndexCommandHandler(IZoneManager zoneManager, ILogger<PlayTrackByIndexCommandHandler> logger)
-    {
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<PlayTrackByIndexCommandHandler> _logger = logger;
 
     public async Task<Result> Handle(PlayTrackByIndexCommand request, CancellationToken cancellationToken)
     {
@@ -887,16 +784,11 @@ public partial class PlayTrackByIndexCommandHandler : ICommandHandler<PlayTrackB
 /// <summary>
 /// Handles the PlayUrlCommand.
 /// </summary>
-public partial class PlayUrlCommandHandler : ICommandHandler<PlayUrlCommand, Result>
+public partial class PlayUrlCommandHandler(IZoneManager zoneManager, ILogger<PlayUrlCommandHandler> logger)
+    : ICommandHandler<PlayUrlCommand, Result>
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<PlayUrlCommandHandler> _logger;
-
-    public PlayUrlCommandHandler(IZoneManager zoneManager, ILogger<PlayUrlCommandHandler> logger)
-    {
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<PlayUrlCommandHandler> _logger = logger;
 
     public async Task<Result> Handle(PlayUrlCommand request, CancellationToken cancellationToken)
     {

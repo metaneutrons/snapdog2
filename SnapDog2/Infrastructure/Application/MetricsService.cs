@@ -10,19 +10,14 @@ using SnapDog2.Core.Models;
 /// Implementation of metrics service for recording and retrieving application metrics.
 /// TODO: This is a placeholder implementation - will be enhanced with real metrics collection.
 /// </summary>
-public partial class MetricsService : IMetricsService
+/// <remarks>
+/// Initializes a new instance of the <see cref="MetricsService"/> class.
+/// </remarks>
+/// <param name="logger">The logger instance.</param>
+public partial class MetricsService(ILogger<MetricsService> logger) : IMetricsService
 {
-    private readonly ILogger<MetricsService> _logger;
+    private readonly ILogger<MetricsService> _logger = logger;
     private static readonly DateTime _startTime = DateTime.UtcNow;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MetricsService"/> class.
-    /// </summary>
-    /// <param name="logger">The logger instance.</param>
-    public MetricsService(ILogger<MetricsService> logger)
-    {
-        this._logger = logger;
-    }
 
     /// <inheritdoc/>
     public void RecordCortexMediatorRequestDuration(
@@ -123,7 +118,10 @@ public partial class MetricsService : IMetricsService
     private static string FormatLabels((string Key, string Value)[] labels)
     {
         if (labels == null || labels.Length == 0)
+        {
             return string.Empty;
+        }
+
         return "[" + string.Join(", ", labels.Select(l => $"{l.Key}={l.Value}")) + "]";
     }
 }

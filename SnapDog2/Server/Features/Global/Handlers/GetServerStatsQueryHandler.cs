@@ -11,21 +11,18 @@ using SnapDog2.Server.Features.Global.Queries;
 /// <summary>
 /// Handles the GetServerStatsQuery.
 /// </summary>
-public partial class GetServerStatsQueryHandler : IQueryHandler<GetServerStatsQuery, Result<ServerStats>>
+/// <remarks>
+/// Initializes a new instance of the <see cref="GetServerStatsQueryHandler"/> class.
+/// </remarks>
+/// <param name="metricsService">The metrics service.</param>
+/// <param name="logger">The logger instance.</param>
+public partial class GetServerStatsQueryHandler(
+    IMetricsService metricsService,
+    ILogger<GetServerStatsQueryHandler> logger
+) : IQueryHandler<GetServerStatsQuery, Result<ServerStats>>
 {
-    private readonly IMetricsService _metricsService;
-    private readonly ILogger<GetServerStatsQueryHandler> _logger;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="GetServerStatsQueryHandler"/> class.
-    /// </summary>
-    /// <param name="metricsService">The metrics service.</param>
-    /// <param name="logger">The logger instance.</param>
-    public GetServerStatsQueryHandler(IMetricsService metricsService, ILogger<GetServerStatsQueryHandler> logger)
-    {
-        this._metricsService = metricsService;
-        this._logger = logger;
-    }
+    private readonly IMetricsService _metricsService = metricsService;
+    private readonly ILogger<GetServerStatsQueryHandler> _logger = logger;
 
     /// <inheritdoc/>
     public async Task<Result<ServerStats>> Handle(GetServerStatsQuery request, CancellationToken cancellationToken)

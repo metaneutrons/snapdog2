@@ -69,11 +69,19 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         }
 
         if (string.IsNullOrEmpty(this._config.Url))
+        {
             throw new InvalidOperationException("Subsonic URL is required");
+        }
+
         if (string.IsNullOrEmpty(this._config.Username))
+        {
             throw new InvalidOperationException("Subsonic username is required");
+        }
+
         if (string.IsNullOrEmpty(this._config.Password))
+        {
             throw new InvalidOperationException("Subsonic password is required");
+        }
 
         // Configure resilience policies with retry callbacks
         this._connectionPolicy = this.CreateConnectionPolicy();
@@ -177,7 +185,9 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
     )
     {
         if (this._disposed)
+        {
             return Result<IReadOnlyList<PlaylistInfo>>.Failure("Service has been disposed");
+        }
 
         await this._operationLock.WaitAsync(cancellationToken);
         var stopwatch = Stopwatch.StartNew();
@@ -248,10 +258,14 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
     )
     {
         if (this._disposed)
+        {
             return Result<Api.Models.PlaylistWithTracks>.Failure("Service has been disposed");
+        }
 
         if (string.IsNullOrEmpty(playlistIndex))
+        {
             return Result<Api.Models.PlaylistWithTracks>.Failure("Playlist Index cannot be null or empty");
+        }
 
         await this._operationLock.WaitAsync(cancellationToken);
         try
@@ -321,10 +335,14 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
     public async Task<Result<string>> GetStreamUrlAsync(string trackId, CancellationToken cancellationToken = default)
     {
         if (this._disposed)
+        {
             return Result<string>.Failure("Service has been disposed");
+        }
 
         if (string.IsNullOrEmpty(trackId))
+        {
             return Result<string>.Failure("Track ID cannot be null or empty");
+        }
 
         await this._operationLock.WaitAsync(cancellationToken);
         try
@@ -385,7 +403,9 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
     public async Task<Result> TestConnectionAsync(CancellationToken cancellationToken = default)
     {
         if (this._disposed)
+        {
             return Result.Failure("Service has been disposed");
+        }
 
         await this._operationLock.WaitAsync(cancellationToken);
         try
@@ -620,7 +640,9 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
     public ValueTask DisposeAsync()
     {
         if (this._disposed)
+        {
             return ValueTask.CompletedTask;
+        }
 
         this._disposed = true;
 

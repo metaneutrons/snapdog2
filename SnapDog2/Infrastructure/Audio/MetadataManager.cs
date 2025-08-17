@@ -8,16 +8,10 @@ using SnapDog2.Core.Models;
 /// <summary>
 /// Manages metadata extraction from media files using LibVLC.
 /// </summary>
-public sealed class MetadataManager
+public sealed class MetadataManager(LibVLC libvlc, ILogger<MetadataManager> logger)
 {
-    private readonly LibVLC _libvlc;
-    private readonly ILogger<MetadataManager> _logger;
-
-    public MetadataManager(LibVLC libvlc, ILogger<MetadataManager> logger)
-    {
-        _libvlc = libvlc ?? throw new ArgumentNullException(nameof(libvlc));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
+    private readonly LibVLC _libvlc = libvlc ?? throw new ArgumentNullException(nameof(libvlc));
+    private readonly ILogger<MetadataManager> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     /// <summary>
     /// Extracts metadata from a media source asynchronously.
@@ -29,14 +23,14 @@ public sealed class MetadataManager
     {
         try
         {
-            _logger.LogDebug("Starting metadata extraction for media: {MediaMrl}", media.Mrl);
+            this._logger.LogDebug("Starting metadata extraction for media: {MediaMrl}", media.Mrl);
 
             // Parse the media to extract metadata (asynchronous in LibVLCSharp)
             var parseResult = await media.Parse(MediaParseOptions.ParseNetwork);
 
             if (parseResult != MediaParsedStatus.Done)
             {
-                _logger.LogWarning("Media parsing incomplete. Status: {ParseStatus}", parseResult);
+                this._logger.LogWarning("Media parsing incomplete. Status: {ParseStatus}", parseResult);
             }
 
             var metadata = new AudioMetadata
@@ -77,9 +71,9 @@ public sealed class MetadataManager
             }
 
             // Extract technical details from tracks
-            metadata.TechnicalDetails = ExtractTechnicalDetails(media);
+            metadata.TechnicalDetails = this.ExtractTechnicalDetails(media);
 
-            _logger.LogDebug(
+            this._logger.LogDebug(
                 "Metadata extraction completed. Title: {Title}, Artist: {Artist}, Duration: {Duration}ms",
                 metadata.Title,
                 metadata.Artist,
@@ -90,7 +84,7 @@ public sealed class MetadataManager
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to extract metadata from media: {MediaMrl}", media.Mrl);
+            this._logger.LogError(ex, "Failed to extract metadata from media: {MediaMrl}", media.Mrl);
 
             // Return minimal metadata on error
             return new AudioMetadata
@@ -126,11 +120,11 @@ public sealed class MetadataManager
             var json = JsonSerializer.Serialize(metadata, options);
             await File.WriteAllTextAsync(filePath, json, cancellationToken);
 
-            _logger.LogDebug("Metadata saved to: {FilePath}", filePath);
+            this._logger.LogDebug("Metadata saved to: {FilePath}", filePath);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to save metadata to: {FilePath}", filePath);
+            this._logger.LogError(ex, "Failed to save metadata to: {FilePath}", filePath);
             throw;
         }
     }
@@ -170,7 +164,7 @@ public sealed class MetadataManager
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Failed to extract technical details from media");
+            this._logger.LogWarning(ex, "Failed to extract technical details from media");
             return null;
         }
     }

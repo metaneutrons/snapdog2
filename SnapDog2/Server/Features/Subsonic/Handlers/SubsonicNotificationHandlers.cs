@@ -9,17 +9,11 @@ using SnapDog2.Server.Features.Subsonic.Notifications;
 /// <summary>
 /// Handles Subsonic connection established notifications.
 /// </summary>
-public partial class SubsonicConnectionEstablishedNotificationHandler
-    : INotificationHandler<SubsonicConnectionEstablishedNotification>
+public partial class SubsonicConnectionEstablishedNotificationHandler(
+    ILogger<SubsonicConnectionEstablishedNotificationHandler> logger
+) : INotificationHandler<SubsonicConnectionEstablishedNotification>
 {
-    private readonly ILogger<SubsonicConnectionEstablishedNotificationHandler> _logger;
-
-    public SubsonicConnectionEstablishedNotificationHandler(
-        ILogger<SubsonicConnectionEstablishedNotificationHandler> logger
-    )
-    {
-        this._logger = logger;
-    }
+    private readonly ILogger<SubsonicConnectionEstablishedNotificationHandler> _logger = logger;
 
     public Task Handle(SubsonicConnectionEstablishedNotification notification, CancellationToken cancellationToken)
     {
@@ -34,15 +28,11 @@ public partial class SubsonicConnectionEstablishedNotificationHandler
 /// <summary>
 /// Handles Subsonic connection lost notifications.
 /// </summary>
-public partial class SubsonicConnectionLostNotificationHandler
-    : INotificationHandler<SubsonicConnectionLostNotification>
+public partial class SubsonicConnectionLostNotificationHandler(
+    ILogger<SubsonicConnectionLostNotificationHandler> logger
+) : INotificationHandler<SubsonicConnectionLostNotification>
 {
-    private readonly ILogger<SubsonicConnectionLostNotificationHandler> _logger;
-
-    public SubsonicConnectionLostNotificationHandler(ILogger<SubsonicConnectionLostNotificationHandler> logger)
-    {
-        this._logger = logger;
-    }
+    private readonly ILogger<SubsonicConnectionLostNotificationHandler> _logger = logger;
 
     public Task Handle(SubsonicConnectionLostNotification notification, CancellationToken cancellationToken)
     {
@@ -57,15 +47,11 @@ public partial class SubsonicConnectionLostNotificationHandler
 /// <summary>
 /// Handles Subsonic playlists retrieved notifications for analytics and caching.
 /// </summary>
-public partial class SubsonicPlaylistsRetrievedNotificationHandler
-    : INotificationHandler<SubsonicPlaylistsRetrievedNotification>
+public partial class SubsonicPlaylistsRetrievedNotificationHandler(
+    ILogger<SubsonicPlaylistsRetrievedNotificationHandler> logger
+) : INotificationHandler<SubsonicPlaylistsRetrievedNotification>
 {
-    private readonly ILogger<SubsonicPlaylistsRetrievedNotificationHandler> _logger;
-
-    public SubsonicPlaylistsRetrievedNotificationHandler(ILogger<SubsonicPlaylistsRetrievedNotificationHandler> logger)
-    {
-        this._logger = logger;
-    }
+    private readonly ILogger<SubsonicPlaylistsRetrievedNotificationHandler> _logger = logger;
 
     public Task Handle(SubsonicPlaylistsRetrievedNotification notification, CancellationToken cancellationToken)
     {
@@ -84,15 +70,11 @@ public partial class SubsonicPlaylistsRetrievedNotificationHandler
 /// <summary>
 /// Handles Subsonic playlist accessed notifications for usage tracking.
 /// </summary>
-public partial class SubsonicPlaylistAccessedNotificationHandler
-    : INotificationHandler<SubsonicPlaylistAccessedNotification>
+public partial class SubsonicPlaylistAccessedNotificationHandler(
+    ILogger<SubsonicPlaylistAccessedNotificationHandler> logger
+) : INotificationHandler<SubsonicPlaylistAccessedNotification>
 {
-    private readonly ILogger<SubsonicPlaylistAccessedNotificationHandler> _logger;
-
-    public SubsonicPlaylistAccessedNotificationHandler(ILogger<SubsonicPlaylistAccessedNotificationHandler> logger)
-    {
-        this._logger = logger;
-    }
+    private readonly ILogger<SubsonicPlaylistAccessedNotificationHandler> _logger = logger;
 
     public Task Handle(SubsonicPlaylistAccessedNotification notification, CancellationToken cancellationToken)
     {
@@ -111,15 +93,11 @@ public partial class SubsonicPlaylistAccessedNotificationHandler
 /// <summary>
 /// Handles Subsonic stream requested notifications for usage tracking.
 /// </summary>
-public partial class SubsonicStreamRequestedNotificationHandler
-    : INotificationHandler<SubsonicStreamRequestedNotification>
+public partial class SubsonicStreamRequestedNotificationHandler(
+    ILogger<SubsonicStreamRequestedNotificationHandler> logger
+) : INotificationHandler<SubsonicStreamRequestedNotification>
 {
-    private readonly ILogger<SubsonicStreamRequestedNotificationHandler> _logger;
-
-    public SubsonicStreamRequestedNotificationHandler(ILogger<SubsonicStreamRequestedNotificationHandler> logger)
-    {
-        this._logger = logger;
-    }
+    private readonly ILogger<SubsonicStreamRequestedNotificationHandler> _logger = logger;
 
     public Task Handle(SubsonicStreamRequestedNotification notification, CancellationToken cancellationToken)
     {
@@ -138,14 +116,10 @@ public partial class SubsonicStreamRequestedNotificationHandler
 /// <summary>
 /// Handles Subsonic service error notifications for monitoring and alerting.
 /// </summary>
-public partial class SubsonicServiceErrorNotificationHandler : INotificationHandler<SubsonicServiceErrorNotification>
+public partial class SubsonicServiceErrorNotificationHandler(ILogger<SubsonicServiceErrorNotificationHandler> logger)
+    : INotificationHandler<SubsonicServiceErrorNotification>
 {
-    private readonly ILogger<SubsonicServiceErrorNotificationHandler> _logger;
-
-    public SubsonicServiceErrorNotificationHandler(ILogger<SubsonicServiceErrorNotificationHandler> logger)
-    {
-        this._logger = logger;
-    }
+    private readonly ILogger<SubsonicServiceErrorNotificationHandler> _logger = logger;
 
     public Task Handle(SubsonicServiceErrorNotification notification, CancellationToken cancellationToken)
     {
@@ -164,17 +138,11 @@ public partial class SubsonicServiceErrorNotificationHandler : INotificationHand
 /// <summary>
 /// Handles Subsonic initialization started notifications for monitoring.
 /// </summary>
-public partial class SubsonicInitializationStartedNotificationHandler
-    : INotificationHandler<SubsonicInitializationStartedNotification>
+public partial class SubsonicInitializationStartedNotificationHandler(
+    ILogger<SubsonicInitializationStartedNotificationHandler> logger
+) : INotificationHandler<SubsonicInitializationStartedNotification>
 {
-    private readonly ILogger<SubsonicInitializationStartedNotificationHandler> _logger;
-
-    public SubsonicInitializationStartedNotificationHandler(
-        ILogger<SubsonicInitializationStartedNotificationHandler> logger
-    )
-    {
-        this._logger = logger;
-    }
+    private readonly ILogger<SubsonicInitializationStartedNotificationHandler> _logger = logger;
 
     public Task Handle(SubsonicInitializationStartedNotification notification, CancellationToken cancellationToken)
     {
@@ -189,15 +157,11 @@ public partial class SubsonicInitializationStartedNotificationHandler
 /// <summary>
 /// Handles Subsonic service disposed notifications for cleanup tracking.
 /// </summary>
-public partial class SubsonicServiceDisposedNotificationHandler
-    : INotificationHandler<SubsonicServiceDisposedNotification>
+public partial class SubsonicServiceDisposedNotificationHandler(
+    ILogger<SubsonicServiceDisposedNotificationHandler> logger
+) : INotificationHandler<SubsonicServiceDisposedNotification>
 {
-    private readonly ILogger<SubsonicServiceDisposedNotificationHandler> _logger;
-
-    public SubsonicServiceDisposedNotificationHandler(ILogger<SubsonicServiceDisposedNotificationHandler> logger)
-    {
-        this._logger = logger;
-    }
+    private readonly ILogger<SubsonicServiceDisposedNotificationHandler> _logger = logger;
 
     public Task Handle(SubsonicServiceDisposedNotification notification, CancellationToken cancellationToken)
     {

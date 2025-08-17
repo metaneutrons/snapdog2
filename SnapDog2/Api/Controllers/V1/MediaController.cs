@@ -13,24 +13,18 @@ using SnapDog2.Server.Features.Playlists.Queries;
 /// Media controller for managing playlists, tracks, and media sources.
 /// Provides access to Subsonic integration and media library functionality.
 /// </summary>
+/// <remarks>
+/// Initializes a new instance of the <see cref="MediaController"/> class.
+/// </remarks>
+/// <param name="serviceProvider">Service provider for handler resolution.</param>
+/// <param name="logger">Logger instance.</param>
 [ApiController]
 [Route("api/v1/media")]
 [Authorize]
-public partial class MediaController : ControllerBase
+public partial class MediaController(IServiceProvider serviceProvider, ILogger<MediaController> logger) : ControllerBase
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<MediaController> _logger;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MediaController"/> class.
-    /// </summary>
-    /// <param name="serviceProvider">Service provider for handler resolution.</param>
-    /// <param name="logger">Logger instance.</param>
-    public MediaController(IServiceProvider serviceProvider, ILogger<MediaController> logger)
-    {
-        _serviceProvider = serviceProvider;
-        _logger = logger;
-    }
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
+    private readonly ILogger<MediaController> _logger = logger;
 
     /// <summary>
     /// Gets all configured media sources.
@@ -43,7 +37,7 @@ public partial class MediaController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
     public Task<ActionResult<ApiResponse<List<MediaSourceInfo>>>> GetMediaSources()
     {
-        LogGettingMediaSources(_logger);
+        LogGettingMediaSources(this._logger);
 
         try
         {
@@ -74,16 +68,16 @@ public partial class MediaController : ControllerBase
                 }
             );
 
-            LogMediaSourcesRetrieved(_logger, sources.Count);
+            LogMediaSourcesRetrieved(this._logger, sources.Count);
             return Task.FromResult<ActionResult<ApiResponse<List<MediaSourceInfo>>>>(
-                Ok(ApiResponse<List<MediaSourceInfo>>.CreateSuccess(sources))
+                this.Ok(ApiResponse<List<MediaSourceInfo>>.CreateSuccess(sources))
             );
         }
         catch (Exception ex)
         {
-            LogGetMediaSourcesError(_logger, ex);
+            LogGetMediaSourcesError(this._logger, ex);
             return Task.FromResult<ActionResult<ApiResponse<List<MediaSourceInfo>>>>(
-                StatusCode(
+                this.StatusCode(
                     500,
                     ApiResponse<List<MediaSourceInfo>>.CreateError(
                         "MEDIA_SOURCES_ERROR",
@@ -112,15 +106,15 @@ public partial class MediaController : ControllerBase
         [FromQuery, Range(1, 100)] int pageSize = 20
     )
     {
-        LogGettingPlaylists(_logger, page, pageSize);
+        LogGettingPlaylists(this._logger, page, pageSize);
 
         try
         {
-            var handler = _serviceProvider.GetService<GetAllPlaylistsQueryHandler>();
+            var handler = this._serviceProvider.GetService<GetAllPlaylistsQueryHandler>();
             if (handler == null)
             {
-                LogHandlerNotFound(_logger, nameof(GetAllPlaylistsQueryHandler));
-                return StatusCode(
+                LogHandlerNotFound(this._logger, nameof(GetAllPlaylistsQueryHandler));
+                return this.StatusCode(
                     500,
                     ApiResponse<Page<PlaylistInfo>>.CreateError("HANDLER_NOT_FOUND", "Playlist handler not available")
                 );
@@ -131,8 +125,8 @@ public partial class MediaController : ControllerBase
 
             if (!result.IsSuccess)
             {
-                LogGetPlaylistsError(_logger, result.ErrorMessage ?? "Unknown error");
-                return StatusCode(
+                LogGetPlaylistsError(this._logger, result.ErrorMessage ?? "Unknown error");
+                return this.StatusCode(
                     500,
                     ApiResponse<Page<PlaylistInfo>>.CreateError(
                         "PLAYLISTS_ERROR",
@@ -154,13 +148,13 @@ public partial class MediaController : ControllerBase
                 PageNumber: page
             );
 
-            LogPlaylistsRetrieved(_logger, paginatedPlaylists.Length, totalCount);
-            return Ok(ApiResponse<Page<PlaylistInfo>>.CreateSuccess(paginatedResponse));
+            LogPlaylistsRetrieved(this._logger, paginatedPlaylists.Length, totalCount);
+            return this.Ok(ApiResponse<Page<PlaylistInfo>>.CreateSuccess(paginatedResponse));
         }
         catch (Exception ex)
         {
-            LogGetPlaylistsError(_logger, ex.Message);
-            return StatusCode(
+            LogGetPlaylistsError(this._logger, ex.Message);
+            return this.StatusCode(
                 500,
                 ApiResponse<Page<PlaylistInfo>>.CreateError("INTERNAL_ERROR", "Failed to retrieve playlists")
             );
@@ -185,18 +179,20 @@ public partial class MediaController : ControllerBase
     {
         if (string.IsNullOrWhiteSpace(id))
         {
-            return BadRequest(ApiResponse<PlaylistWithTracks>.CreateError("INVALID_ID", "Playlist ID is required"));
+            return this.BadRequest(
+                ApiResponse<PlaylistWithTracks>.CreateError("INVALID_ID", "Playlist ID is required")
+            );
         }
 
-        LogGettingPlaylist(_logger, id);
+        LogGettingPlaylist(this._logger, id);
 
         try
         {
-            var handler = _serviceProvider.GetService<GetPlaylistQueryHandler>();
+            var handler = this._serviceProvider.GetService<GetPlaylistQueryHandler>();
             if (handler == null)
             {
-                LogHandlerNotFound(_logger, nameof(GetPlaylistQueryHandler));
-                return StatusCode(
+                LogHandlerNotFound(this._logger, nameof(GetPlaylistQueryHandler));
+                return this.StatusCode(
                     500,
                     ApiResponse<PlaylistWithTracks>.CreateError("HANDLER_NOT_FOUND", "Playlist handler not available")
                 );
@@ -210,8 +206,8 @@ public partial class MediaController : ControllerBase
 
                 if (!radioResult.IsSuccess)
                 {
-                    LogGetPlaylistError(_logger, id, radioResult.ErrorMessage ?? "Unknown error");
-                    return StatusCode(
+                    LogGetPlaylistError(this._logger, id, radioResult.ErrorMessage ?? "Unknown error");
+                    return this.StatusCode(
                         500,
                         ApiResponse<PlaylistWithTracks>.CreateError(
                             "PLAYLIST_ERROR",
@@ -220,8 +216,8 @@ public partial class MediaController : ControllerBase
                     );
                 }
 
-                LogPlaylistRetrieved(_logger, id, radioResult.Value?.Tracks?.Count ?? 0);
-                return Ok(ApiResponse<PlaylistWithTracks>.CreateSuccess(radioResult.Value!));
+                LogPlaylistRetrieved(this._logger, id, radioResult.Value?.Tracks?.Count ?? 0);
+                return this.Ok(ApiResponse<PlaylistWithTracks>.CreateSuccess(radioResult.Value!));
             }
 
             // Try to parse as integer index for backward compatibility
@@ -234,8 +230,8 @@ public partial class MediaController : ControllerBase
                 {
                     if (indexResult.ErrorMessage?.Contains("not found", StringComparison.OrdinalIgnoreCase) == true)
                     {
-                        LogPlaylistNotFound(_logger, id);
-                        return NotFound(
+                        LogPlaylistNotFound(this._logger, id);
+                        return this.NotFound(
                             ApiResponse<PlaylistWithTracks>.CreateError(
                                 "PLAYLIST_NOT_FOUND",
                                 $"Playlist '{id}' not found"
@@ -243,8 +239,8 @@ public partial class MediaController : ControllerBase
                         );
                     }
 
-                    LogGetPlaylistError(_logger, id, indexResult.ErrorMessage ?? "Unknown error");
-                    return StatusCode(
+                    LogGetPlaylistError(this._logger, id, indexResult.ErrorMessage ?? "Unknown error");
+                    return this.StatusCode(
                         500,
                         ApiResponse<PlaylistWithTracks>.CreateError(
                             "PLAYLIST_ERROR",
@@ -253,17 +249,17 @@ public partial class MediaController : ControllerBase
                     );
                 }
 
-                LogPlaylistRetrieved(_logger, id, indexResult.Value?.Tracks?.Count ?? 0);
-                return Ok(ApiResponse<PlaylistWithTracks>.CreateSuccess(indexResult.Value!));
+                LogPlaylistRetrieved(this._logger, id, indexResult.Value?.Tracks?.Count ?? 0);
+                return this.Ok(ApiResponse<PlaylistWithTracks>.CreateSuccess(indexResult.Value!));
             }
 
             // Handle Subsonic playlist ID directly
             // First get all playlists to find the matching one
-            var allPlaylistsHandler = _serviceProvider.GetService<GetAllPlaylistsQueryHandler>();
+            var allPlaylistsHandler = this._serviceProvider.GetService<GetAllPlaylistsQueryHandler>();
             if (allPlaylistsHandler == null)
             {
-                LogHandlerNotFound(_logger, nameof(GetAllPlaylistsQueryHandler));
-                return StatusCode(
+                LogHandlerNotFound(this._logger, nameof(GetAllPlaylistsQueryHandler));
+                return this.StatusCode(
                     500,
                     ApiResponse<PlaylistWithTracks>.CreateError("HANDLER_NOT_FOUND", "Playlist handler not available")
                 );
@@ -274,8 +270,8 @@ public partial class MediaController : ControllerBase
 
             if (!allPlaylistsResult.IsSuccess)
             {
-                LogGetPlaylistError(_logger, id, allPlaylistsResult.ErrorMessage ?? "Unknown error");
-                return StatusCode(
+                LogGetPlaylistError(this._logger, id, allPlaylistsResult.ErrorMessage ?? "Unknown error");
+                return this.StatusCode(
                     500,
                     ApiResponse<PlaylistWithTracks>.CreateError(
                         "PLAYLISTS_ERROR",
@@ -289,8 +285,8 @@ public partial class MediaController : ControllerBase
 
             if (targetPlaylist == null || !targetPlaylist.Index.HasValue)
             {
-                LogPlaylistNotFound(_logger, id);
-                return NotFound(
+                LogPlaylistNotFound(this._logger, id);
+                return this.NotFound(
                     ApiResponse<PlaylistWithTracks>.CreateError("PLAYLIST_NOT_FOUND", $"Playlist '{id}' not found")
                 );
             }
@@ -301,8 +297,8 @@ public partial class MediaController : ControllerBase
 
             if (!result.IsSuccess)
             {
-                LogGetPlaylistError(_logger, id, result.ErrorMessage ?? "Unknown error");
-                return StatusCode(
+                LogGetPlaylistError(this._logger, id, result.ErrorMessage ?? "Unknown error");
+                return this.StatusCode(
                     500,
                     ApiResponse<PlaylistWithTracks>.CreateError(
                         "PLAYLIST_ERROR",
@@ -311,13 +307,13 @@ public partial class MediaController : ControllerBase
                 );
             }
 
-            LogPlaylistRetrieved(_logger, id, result.Value?.Tracks?.Count ?? 0);
-            return Ok(ApiResponse<PlaylistWithTracks>.CreateSuccess(result.Value!));
+            LogPlaylistRetrieved(this._logger, id, result.Value?.Tracks?.Count ?? 0);
+            return this.Ok(ApiResponse<PlaylistWithTracks>.CreateSuccess(result.Value!));
         }
         catch (Exception ex)
         {
-            LogGetPlaylistError(_logger, id, ex.Message);
-            return StatusCode(
+            LogGetPlaylistError(this._logger, id, ex.Message);
+            return this.StatusCode(
                 500,
                 ApiResponse<PlaylistWithTracks>.CreateError("INTERNAL_ERROR", "Failed to retrieve playlist")
             );
@@ -348,28 +344,28 @@ public partial class MediaController : ControllerBase
     {
         if (string.IsNullOrWhiteSpace(id))
         {
-            return BadRequest(ApiResponse<Page<TrackInfo>>.CreateError("INVALID_ID", "Playlist ID is required"));
+            return this.BadRequest(ApiResponse<Page<TrackInfo>>.CreateError("INVALID_ID", "Playlist ID is required"));
         }
 
-        LogGettingPlaylistTracks(_logger, id, page, pageSize);
+        LogGettingPlaylistTracks(this._logger, id, page, pageSize);
 
         try
         {
             // Get the full playlist first (reuse the logic from GetPlaylist)
-            var playlistResult = await GetPlaylistInternal(id);
+            var playlistResult = await this.GetPlaylistInternal(id);
 
             if (!playlistResult.IsSuccess)
             {
                 if (playlistResult.ErrorMessage?.Contains("not found", StringComparison.OrdinalIgnoreCase) == true)
                 {
-                    LogPlaylistNotFound(_logger, id);
-                    return NotFound(
+                    LogPlaylistNotFound(this._logger, id);
+                    return this.NotFound(
                         ApiResponse<Page<TrackInfo>>.CreateError("PLAYLIST_NOT_FOUND", $"Playlist '{id}' not found")
                     );
                 }
 
-                LogGetPlaylistError(_logger, id, playlistResult.ErrorMessage ?? "Unknown error");
-                return StatusCode(
+                LogGetPlaylistError(this._logger, id, playlistResult.ErrorMessage ?? "Unknown error");
+                return this.StatusCode(
                     500,
                     ApiResponse<Page<TrackInfo>>.CreateError(
                         "PLAYLIST_ERROR",
@@ -391,13 +387,13 @@ public partial class MediaController : ControllerBase
                 PageNumber: page
             );
 
-            LogPlaylistTracksRetrieved(_logger, id, paginatedTracks.Length, totalCount);
-            return Ok(ApiResponse<Page<TrackInfo>>.CreateSuccess(paginatedResponse));
+            LogPlaylistTracksRetrieved(this._logger, id, paginatedTracks.Length, totalCount);
+            return this.Ok(ApiResponse<Page<TrackInfo>>.CreateSuccess(paginatedResponse));
         }
         catch (Exception ex)
         {
-            LogGetPlaylistError(_logger, id, ex.Message);
-            return StatusCode(
+            LogGetPlaylistError(this._logger, id, ex.Message);
+            return this.StatusCode(
                 500,
                 ApiResponse<Page<TrackInfo>>.CreateError("INTERNAL_ERROR", "Failed to retrieve playlist tracks")
             );
@@ -422,18 +418,18 @@ public partial class MediaController : ControllerBase
     {
         if (string.IsNullOrWhiteSpace(id))
         {
-            return BadRequest(ApiResponse<TrackInfo>.CreateError("INVALID_ID", "Track ID is required"));
+            return this.BadRequest(ApiResponse<TrackInfo>.CreateError("INVALID_ID", "Track ID is required"));
         }
 
-        LogGettingTrack(_logger, id);
+        LogGettingTrack(this._logger, id);
 
         try
         {
-            var handler = _serviceProvider.GetService<GetTrackQueryHandler>();
+            var handler = this._serviceProvider.GetService<GetTrackQueryHandler>();
             if (handler == null)
             {
-                LogHandlerNotFound(_logger, nameof(GetTrackQueryHandler));
-                return StatusCode(
+                LogHandlerNotFound(this._logger, nameof(GetTrackQueryHandler));
+                return this.StatusCode(
                     500,
                     ApiResponse<TrackInfo>.CreateError("HANDLER_NOT_FOUND", "Track handler not available")
                 );
@@ -446,24 +442,29 @@ public partial class MediaController : ControllerBase
             {
                 if (result.ErrorMessage?.Contains("not found", StringComparison.OrdinalIgnoreCase) == true)
                 {
-                    LogTrackNotFound(_logger, id);
-                    return NotFound(ApiResponse<TrackInfo>.CreateError("TRACK_NOT_FOUND", $"Track '{id}' not found"));
+                    LogTrackNotFound(this._logger, id);
+                    return this.NotFound(
+                        ApiResponse<TrackInfo>.CreateError("TRACK_NOT_FOUND", $"Track '{id}' not found")
+                    );
                 }
 
-                LogGetTrackError(_logger, id, result.ErrorMessage ?? "Unknown error");
-                return StatusCode(
+                LogGetTrackError(this._logger, id, result.ErrorMessage ?? "Unknown error");
+                return this.StatusCode(
                     500,
                     ApiResponse<TrackInfo>.CreateError("TRACK_ERROR", result.ErrorMessage ?? "Failed to retrieve track")
                 );
             }
 
-            LogTrackRetrieved(_logger, id);
-            return Ok(ApiResponse<TrackInfo>.CreateSuccess(result.Value!));
+            LogTrackRetrieved(this._logger, id);
+            return this.Ok(ApiResponse<TrackInfo>.CreateSuccess(result.Value!));
         }
         catch (Exception ex)
         {
-            LogGetTrackError(_logger, id, ex.Message);
-            return StatusCode(500, ApiResponse<TrackInfo>.CreateError("INTERNAL_ERROR", "Failed to retrieve track"));
+            LogGetTrackError(this._logger, id, ex.Message);
+            return this.StatusCode(
+                500,
+                ApiResponse<TrackInfo>.CreateError("INTERNAL_ERROR", "Failed to retrieve track")
+            );
         }
     }
 
@@ -472,7 +473,7 @@ public partial class MediaController : ControllerBase
     /// </summary>
     private async Task<Result<PlaylistWithTracks>> GetPlaylistInternal(string id)
     {
-        var handler = _serviceProvider.GetService<GetPlaylistQueryHandler>();
+        var handler = this._serviceProvider.GetService<GetPlaylistQueryHandler>();
         if (handler == null)
         {
             return Result<PlaylistWithTracks>.Failure("Playlist handler not available");
@@ -493,7 +494,7 @@ public partial class MediaController : ControllerBase
         }
 
         // Handle Subsonic playlist ID directly
-        var allPlaylistsHandler = _serviceProvider.GetService<GetAllPlaylistsQueryHandler>();
+        var allPlaylistsHandler = this._serviceProvider.GetService<GetAllPlaylistsQueryHandler>();
         if (allPlaylistsHandler == null)
         {
             return Result<PlaylistWithTracks>.Failure("Playlist handler not available");

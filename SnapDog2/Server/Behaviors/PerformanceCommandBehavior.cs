@@ -10,21 +10,18 @@ using SnapDog2.Core.Models;
 /// </summary>
 /// <typeparam name="TCommand">The command type.</typeparam>
 /// <typeparam name="TResponse">The response type.</typeparam>
-public partial class PerformanceCommandBehavior<TCommand, TResponse> : ICommandPipelineBehavior<TCommand, TResponse>
+/// <remarks>
+/// Initializes a new instance of the <see cref="PerformanceCommandBehavior{TCommand, TResponse}"/> class.
+/// </remarks>
+/// <param name="logger">The logger instance.</param>
+public partial class PerformanceCommandBehavior<TCommand, TResponse>(
+    ILogger<PerformanceCommandBehavior<TCommand, TResponse>> logger
+) : ICommandPipelineBehavior<TCommand, TResponse>
     where TCommand : ICommand<TResponse>
     where TResponse : IResult
 {
-    private readonly ILogger<PerformanceCommandBehavior<TCommand, TResponse>> _logger;
+    private readonly ILogger<PerformanceCommandBehavior<TCommand, TResponse>> _logger = logger;
     private const int SlowOperationThresholdMs = 500;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="PerformanceCommandBehavior{TCommand, TResponse}"/> class.
-    /// </summary>
-    /// <param name="logger">The logger instance.</param>
-    public PerformanceCommandBehavior(ILogger<PerformanceCommandBehavior<TCommand, TResponse>> logger)
-    {
-        this._logger = logger;
-    }
 
     /// <inheritdoc/>
     public async Task<TResponse> Handle(

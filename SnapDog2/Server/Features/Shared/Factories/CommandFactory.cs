@@ -1,7 +1,9 @@
 namespace SnapDog2.Server.Features.Shared.Factories;
 
 using System.Globalization;
+using Cortex.Mediator.Commands;
 using SnapDog2.Core.Enums;
+using SnapDog2.Core.Models;
 using SnapDog2.Server.Features.Clients.Commands.Config;
 using SnapDog2.Server.Features.Clients.Commands.Volume;
 using SnapDog2.Server.Features.Zones.Commands.Playback;
@@ -505,7 +507,7 @@ public static class CommandFactory
     /// Parses a string payload to create appropriate zone commands.
     /// Used by protocol adapters (MQTT, KNX) for unified command creation.
     /// </summary>
-    public static object? CreateZoneCommandFromPayload(
+    public static ICommand<Result>? CreateZoneCommandFromPayload(
         int zoneIndex,
         string command,
         string payload,
@@ -727,7 +729,7 @@ public static class CommandFactory
     /// Parses a string payload to create appropriate client commands.
     /// Used by protocol adapters (MQTT, KNX) for unified command creation.
     /// </summary>
-    public static object? CreateClientCommandFromPayload(
+    public static ICommand<Result>? CreateClientCommandFromPayload(
         int clientIndex,
         string command,
         string payload,
@@ -857,7 +859,7 @@ public static class CommandFactoryExtensions
     /// <summary>
     /// Creates a command from MQTT topic and payload.
     /// </summary>
-    public static object? CreateFromMqttTopic(string topic, string payload)
+    public static ICommand<Result>? CreateFromMqttTopic(string topic, string payload)
     {
         var parts = topic.Split('/');
         if (parts.Length < 4 || !parts[0].Equals("snapdog", StringComparison.OrdinalIgnoreCase))
@@ -884,7 +886,12 @@ public static class CommandFactoryExtensions
     /// <summary>
     /// Creates a command from KNX group address and value.
     /// </summary>
-    public static object? CreateFromKnxGroupAddress(string groupAddress, object value, int entityId, string commandType)
+    public static ICommand<Result>? CreateFromKnxGroupAddress(
+        string groupAddress,
+        object value,
+        int entityId,
+        string commandType
+    )
     {
         var source = CommandSource.Knx;
 

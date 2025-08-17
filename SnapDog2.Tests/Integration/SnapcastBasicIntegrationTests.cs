@@ -14,7 +14,7 @@ public class SnapcastBasicIntegrationTests
 
     public SnapcastBasicIntegrationTests(ITestOutputHelper output)
     {
-        _output = output;
+        this._output = output;
     }
 
     [Fact]
@@ -33,10 +33,10 @@ public class SnapcastBasicIntegrationTests
         snapcastConfigType.Should().NotBeNull("SnapcastConfig should be defined");
         snapcastServerStatusType.Should().NotBeNull("SnapcastServerStatus model should be defined");
 
-        _output.WriteLine("✅ Snapcast integration types are properly configured:");
-        _output.WriteLine($"   ISnapcastService: {snapcastServiceType.FullName}");
-        _output.WriteLine($"   SnapcastConfig: {snapcastConfigType.FullName}");
-        _output.WriteLine($"   SnapcastServerStatus: {snapcastServerStatusType.FullName}");
+        this._output.WriteLine("✅ Snapcast integration types are properly configured:");
+        this._output.WriteLine($"   ISnapcastService: {snapcastServiceType.FullName}");
+        this._output.WriteLine($"   SnapcastConfig: {snapcastConfigType.FullName}");
+        this._output.WriteLine($"   SnapcastServerStatus: {snapcastServerStatusType.FullName}");
     }
 
     [Fact]
@@ -59,7 +59,7 @@ public class SnapcastBasicIntegrationTests
         methods.Should().Contain("SetGroupStreamAsync", "Service should have group stream control");
         methods.Should().Contain("SetGroupMuteAsync", "Service should have group mute control");
 
-        _output.WriteLine("✅ ISnapcastService has required methods:");
+        this._output.WriteLine("✅ ISnapcastService has required methods:");
         foreach (
             var method in methods
                 .Where(m =>
@@ -68,7 +68,7 @@ public class SnapcastBasicIntegrationTests
                 .OrderBy(m => m)
         )
         {
-            _output.WriteLine($"   {method}");
+            this._output.WriteLine($"   {method}");
         }
     }
 
@@ -90,10 +90,10 @@ public class SnapcastBasicIntegrationTests
         properties.Should().Contain("Streams", "SnapcastServerStatus should have Streams property");
         properties.Should().Contain("Clients", "SnapcastServerStatus should have Clients property");
 
-        _output.WriteLine("✅ SnapcastServerStatus has correct structure:");
+        this._output.WriteLine("✅ SnapcastServerStatus has correct structure:");
         foreach (var property in properties.OrderBy(p => p))
         {
-            _output.WriteLine($"   {property}");
+            this._output.WriteLine($"   {property}");
         }
     }
 
@@ -112,11 +112,11 @@ public class SnapcastBasicIntegrationTests
         // Assert
         properties.Should().NotBeEmpty("SnapcastConfig should have configuration properties");
 
-        _output.WriteLine("✅ SnapcastConfig is well-defined:");
+        this._output.WriteLine("✅ SnapcastConfig is well-defined:");
         foreach (var property in properties.OrderBy(p => p))
         {
             var propertyInfo = configType.GetProperty(property);
-            _output.WriteLine($"   {property}: {propertyInfo?.PropertyType.Name}");
+            this._output.WriteLine($"   {property}: {propertyInfo?.PropertyType.Name}");
         }
     }
 
@@ -146,13 +146,13 @@ public class SnapcastBasicIntegrationTests
 
         resultMethods.Should().NotBeEmpty("Service methods should return Result types");
 
-        _output.WriteLine("✅ Snapcast integration supports Result pattern:");
-        _output.WriteLine($"   Result type: {resultType.FullName}");
-        _output.WriteLine($"   Methods using Result pattern: {resultMethods.Count}");
+        this._output.WriteLine("✅ Snapcast integration supports Result pattern:");
+        this._output.WriteLine($"   Result type: {resultType.FullName}");
+        this._output.WriteLine($"   Methods using Result pattern: {resultMethods.Count}");
 
         foreach (var method in resultMethods.Take(5))
         {
-            _output.WriteLine($"   {method.Name}: {method.ReturnType.Name}");
+            this._output.WriteLine($"   {method.Name}: {method.ReturnType.Name}");
         }
     }
 
@@ -175,11 +175,11 @@ public class SnapcastBasicIntegrationTests
 
         configMethods.Should().NotBeEmpty("Should have configuration methods for DI");
 
-        _output.WriteLine("✅ Snapcast integration is configured for dependency injection:");
-        _output.WriteLine($"   Configuration type: {serviceConfigurationType.FullName}");
+        this._output.WriteLine("✅ Snapcast integration is configured for dependency injection:");
+        this._output.WriteLine($"   Configuration type: {serviceConfigurationType.FullName}");
         foreach (var method in configMethods)
         {
-            _output.WriteLine($"   {method.Name}");
+            this._output.WriteLine($"   {method.Name}");
         }
     }
 }

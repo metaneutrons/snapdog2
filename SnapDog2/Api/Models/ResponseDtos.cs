@@ -7,9 +7,9 @@ using SnapDog2.Core.Models;
 /// </summary>
 public record Page<T>(T[] Items, int Total, int PageSize = 20, int PageNumber = 1)
 {
-    public int TotalPages => (int)Math.Ceiling((double)Total / PageSize);
-    public bool HasNext => PageNumber < TotalPages;
-    public bool HasPrevious => PageNumber > 1;
+    public int TotalPages => (int)Math.Ceiling((double)this.Total / this.PageSize);
+    public bool HasNext => this.PageNumber < this.TotalPages;
+    public bool HasPrevious => this.PageNumber > 1;
 }
 
 /// <summary>

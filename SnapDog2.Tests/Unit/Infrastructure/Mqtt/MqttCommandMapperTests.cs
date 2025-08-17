@@ -20,8 +20,8 @@ public class MqttCommandMapperTests
 
     public MqttCommandMapperTests()
     {
-        _mockLogger = new Mock<ILogger<MqttCommandMapper>>();
-        _mapper = new MqttCommandMapper(_mockLogger.Object);
+        this._mockLogger = new Mock<ILogger<MqttCommandMapper>>();
+        this._mapper = new MqttCommandMapper(this._mockLogger.Object);
     }
 
     #region Zone Track Command Mapping Tests
@@ -34,7 +34,7 @@ public class MqttCommandMapperTests
     public void MapTopicToCommand_Should_MapZoneTrackCommands_Correctly(string topic, string payload, Type expectedType)
     {
         // Act
-        var result = _mapper.MapTopicToCommand(topic, payload);
+        var result = this._mapper.MapTopicToCommand(topic, payload);
 
         // Assert
         result.Should().NotBeNull();
@@ -51,7 +51,7 @@ public class MqttCommandMapperTests
         const long expectedPositionMs = 45000;
 
         // Act
-        var result = _mapper.MapTopicToCommand(topic, payload) as SeekPositionCommand;
+        var result = this._mapper.MapTopicToCommand(topic, payload) as SeekPositionCommand;
 
         // Assert
         result.Should().NotBeNull();
@@ -70,7 +70,7 @@ public class MqttCommandMapperTests
         const float expectedProgress = 0.25f;
 
         // Act
-        var result = _mapper.MapTopicToCommand(topic, payload) as SeekProgressCommand;
+        var result = this._mapper.MapTopicToCommand(topic, payload) as SeekProgressCommand;
 
         // Assert
         result.Should().NotBeNull();
@@ -89,7 +89,7 @@ public class MqttCommandMapperTests
         const int expectedTrackIndex = 10;
 
         // Act
-        var result = _mapper.MapTopicToCommand(topic, payload) as PlayTrackByIndexCommand;
+        var result = this._mapper.MapTopicToCommand(topic, payload) as PlayTrackByIndexCommand;
 
         // Assert
         result.Should().NotBeNull();
@@ -108,7 +108,7 @@ public class MqttCommandMapperTests
         const string expectedUrl = "http://radio.example.com/stream";
 
         // Act
-        var result = _mapper.MapTopicToCommand(topic, payload) as PlayUrlCommand;
+        var result = this._mapper.MapTopicToCommand(topic, payload) as PlayUrlCommand;
 
         // Assert
         result.Should().NotBeNull();
@@ -133,7 +133,7 @@ public class MqttCommandMapperTests
     )
     {
         // Act
-        var result = _mapper.MapTopicToCommand(topic, payload);
+        var result = this._mapper.MapTopicToCommand(topic, payload);
 
         // Assert
         result.Should().NotBeNull();
@@ -150,7 +150,7 @@ public class MqttCommandMapperTests
         const int expectedStep = 5; // Default step
 
         // Act
-        var result = _mapper.MapTopicToCommand(topic, payload) as ClientVolumeUpCommand;
+        var result = this._mapper.MapTopicToCommand(topic, payload) as ClientVolumeUpCommand;
 
         // Assert
         result.Should().NotBeNull();
@@ -169,7 +169,7 @@ public class MqttCommandMapperTests
         const int expectedStep = 5; // Default step
 
         // Act
-        var result = _mapper.MapTopicToCommand(topic, payload) as ClientVolumeDownCommand;
+        var result = this._mapper.MapTopicToCommand(topic, payload) as ClientVolumeDownCommand;
 
         // Assert
         result.Should().NotBeNull();
@@ -190,7 +190,7 @@ public class MqttCommandMapperTests
         const string payload = "play track 5";
 
         // Act
-        var result = _mapper.MapControlTopicToCommand(topic, payload) as PlayTrackByIndexCommand;
+        var result = this._mapper.MapControlTopicToCommand(topic, payload) as PlayTrackByIndexCommand;
 
         // Assert
         result.Should().NotBeNull();
@@ -207,7 +207,7 @@ public class MqttCommandMapperTests
         const string payload = "play url http://stream.example.com";
 
         // Act
-        var result = _mapper.MapControlTopicToCommand(topic, payload) as PlayUrlCommand;
+        var result = this._mapper.MapControlTopicToCommand(topic, payload) as PlayUrlCommand;
 
         // Assert
         result.Should().NotBeNull();
@@ -224,7 +224,7 @@ public class MqttCommandMapperTests
         const string payload = "volume_up";
 
         // Act
-        var result = _mapper.MapControlTopicToCommand(topic, payload);
+        var result = this._mapper.MapControlTopicToCommand(topic, payload);
 
         // Assert
         result.Should().NotBeNull();
@@ -244,7 +244,7 @@ public class MqttCommandMapperTests
     public void IsValidMqttTopic_Should_ReturnTrue_ForValidTopics(string topic)
     {
         // Act
-        var result = _mapper.IsValidMqttTopic(topic);
+        var result = this._mapper.IsValidMqttTopic(topic);
 
         // Assert
         result.Should().BeTrue();
@@ -258,7 +258,7 @@ public class MqttCommandMapperTests
     public void IsValidMqttTopic_Should_ReturnFalse_ForInvalidTopics(string topic)
     {
         // Act
-        var result = _mapper.IsValidMqttTopic(topic);
+        var result = this._mapper.IsValidMqttTopic(topic);
 
         // Assert
         result.Should().BeFalse();
@@ -268,7 +268,7 @@ public class MqttCommandMapperTests
     public void IsValidMqttTopic_Should_ReturnFalse_ForNullTopic()
     {
         // Act
-        var result = _mapper.IsValidMqttTopic(null!);
+        var result = this._mapper.IsValidMqttTopic(null!);
 
         // Assert
         result.Should().BeFalse();
@@ -280,7 +280,7 @@ public class MqttCommandMapperTests
     public void GetEntityType_Should_ReturnCorrectType(string topic, string expectedType)
     {
         // Act
-        var result = _mapper.GetEntityType(topic);
+        var result = this._mapper.GetEntityType(topic);
 
         // Assert
         result.Should().Be(expectedType);
@@ -292,7 +292,7 @@ public class MqttCommandMapperTests
     public void GetEntityId_Should_ReturnCorrectId(string topic, int expectedId)
     {
         // Act
-        var result = _mapper.GetEntityId(topic);
+        var result = this._mapper.GetEntityId(topic);
 
         // Assert
         result.Should().Be(expectedId);
@@ -310,7 +310,7 @@ public class MqttCommandMapperTests
         const string payload = "test";
 
         // Act
-        var result = _mapper.MapTopicToCommand(invalidTopic, payload);
+        var result = this._mapper.MapTopicToCommand(invalidTopic, payload);
 
         // Assert
         result.Should().BeNull();
@@ -324,7 +324,7 @@ public class MqttCommandMapperTests
         const string invalidPayload = "not_a_number";
 
         // Act
-        var result = _mapper.MapTopicToCommand(topic, invalidPayload);
+        var result = this._mapper.MapTopicToCommand(topic, invalidPayload);
 
         // Assert
         result.Should().BeNull();

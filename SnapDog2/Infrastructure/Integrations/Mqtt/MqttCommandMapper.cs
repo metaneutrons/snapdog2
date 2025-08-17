@@ -1,15 +1,17 @@
 namespace SnapDog2.Infrastructure.Integrations.Mqtt;
 
+using Cortex.Mediator.Commands;
 using Microsoft.Extensions.Logging;
+using SnapDog2.Core.Models;
 using SnapDog2.Server.Features.Shared.Factories;
 
 /// <summary>
 /// Modern MQTT command mapper using constants, dictionaries, and type-safe parsing.
 /// Eliminates magic strings and provides maintainable command mapping.
 /// </summary>
-public partial class MqttCommandMapper
+public partial class MqttCommandMapper(ILogger<MqttCommandMapper> logger)
 {
-    private readonly ILogger<MqttCommandMapper> _logger;
+    private readonly ILogger<MqttCommandMapper> _logger = logger;
 
     [LoggerMessage(8001, LogLevel.Debug, "Mapping MQTT command: {Topic} -> {Payload}")]
     private partial void LogMappingCommand(string topic, string payload);
@@ -20,33 +22,28 @@ public partial class MqttCommandMapper
     [LoggerMessage(8003, LogLevel.Error, "Error mapping MQTT command for topic {Topic}: {Error}")]
     private partial void LogMappingError(string topic, string error);
 
-    public MqttCommandMapper(ILogger<MqttCommandMapper> logger)
-    {
-        _logger = logger;
-    }
-
     /// <summary>
     /// Maps MQTT topics to Cortex.Mediator commands using the centralized CommandFactory.
     /// </summary>
-    public object? MapTopicToCommand(string topic, string payload)
+    public ICommand<Result>? MapTopicToCommand(string topic, string payload)
     {
         try
         {
-            LogMappingCommand(topic, payload);
+            this.LogMappingCommand(topic, payload);
 
             // Use the factory extension method for MQTT topic parsing
             var command = CommandFactoryExtensions.CreateFromMqttTopic(topic, payload);
 
             if (command == null)
             {
-                LogMappingFailed(topic);
+                this.LogMappingFailed(topic);
             }
 
             return command;
         }
         catch (Exception ex)
         {
-            LogMappingError(topic, ex.Message);
+            this.LogMappingError(topic, ex.Message);
             return null;
         }
     }
@@ -55,11 +52,11 @@ public partial class MqttCommandMapper
     /// Maps complex control topics using modern parsing and dictionary-based command mapping.
     /// Example: snapdog/zone/1/control/set with payload "play track 5"
     /// </summary>
-    public object? MapControlTopicToCommand(string topic, string payload)
+    public ICommand<Result>? MapControlTopicToCommand(string topic, string payload)
     {
         try
         {
-            LogMappingCommand(topic, payload);
+            this.LogMappingCommand(topic, payload);
 
             // Parse topic using structured parser
             var topicParts = MqttTopicParser.Parse(topic);
@@ -71,7 +68,9 @@ public partial class MqttCommandMapper
             // Parse complex control payloads
             var payloadParts = payload.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             if (payloadParts.Length == 0)
+            {
                 return null;
+            }
 
             var command = payloadParts[0].ToLowerInvariant();
             var parameter = payloadParts.Length > 1 ? string.Join(" ", payloadParts[1..]) : string.Empty;
@@ -94,7 +93,7 @@ public partial class MqttCommandMapper
         }
         catch (Exception ex)
         {
-            LogMappingError(topic, ex.Message);
+            this.LogMappingError(topic, ex.Message);
             return null;
         }
     }

@@ -1,6 +1,8 @@
 namespace SnapDog2.Infrastructure.Integrations.Mqtt;
 
+using Cortex.Mediator.Commands;
 using SnapDog2.Core.Enums;
+using SnapDog2.Core.Models;
 using SnapDog2.Server.Features.Shared.Factories;
 
 /// <summary>
@@ -9,7 +11,7 @@ using SnapDog2.Server.Features.Shared.Factories;
 /// <param name="entityId">The entity ID (zone or client index).</param>
 /// <param name="parameter">The command parameter (if any).</param>
 /// <returns>The mapped command or null if mapping fails.</returns>
-public delegate object? MqttCommandMappingDelegate(int entityId, string parameter);
+public delegate ICommand<Result>? MqttCommandMappingDelegate(int entityId, string parameter);
 
 /// <summary>
 /// Strategy for mapping MQTT commands to Cortex.Mediator commands using type-safe dictionaries.
@@ -110,7 +112,7 @@ public static class MqttCommandMappingStrategy
     /// <summary>
     /// Maps a zone command using the command mapping dictionary.
     /// </summary>
-    public static object? MapZoneCommand(string command, int zoneIndex, string parameter)
+    public static ICommand<Result>? MapZoneCommand(string command, int zoneIndex, string parameter)
     {
         return ZoneCommandMap.TryGetValue(command, out var mapper) ? mapper(zoneIndex, parameter) : null;
     }
@@ -118,16 +120,18 @@ public static class MqttCommandMappingStrategy
     /// <summary>
     /// Maps a client command using the command mapping dictionary.
     /// </summary>
-    public static object? MapClientCommand(string command, int clientIndex, string parameter)
+    public static ICommand<Result>? MapClientCommand(string command, int clientIndex, string parameter)
     {
         return ClientCommandMap.TryGetValue(command, out var mapper) ? mapper(clientIndex, parameter) : null;
     }
 
     // Complex command mappers with parameter parsing
-    private static object? MapZonePlayCommand(int zoneIndex, string parameter)
+    private static ICommand<Result>? MapZonePlayCommand(int zoneIndex, string parameter)
     {
         if (string.IsNullOrEmpty(parameter))
+        {
             return CommandFactory.CreatePlayCommand(zoneIndex, CommandSource.Mqtt);
+        }
 
         if (parameter.StartsWith(MqttConstants.Parameters.TRACK_PREFIX, StringComparison.OrdinalIgnoreCase))
         {
@@ -146,42 +150,42 @@ public static class MqttCommandMappingStrategy
         return null;
     }
 
-    private static object? MapZoneVolumeCommand(int zoneIndex, string parameter)
+    private static ICommand<Result>? MapZoneVolumeCommand(int zoneIndex, string parameter)
     {
         return int.TryParse(parameter, out var volume)
             ? CommandFactory.CreateSetZoneVolumeCommand(zoneIndex, volume, CommandSource.Mqtt)
             : null;
     }
 
-    private static object? MapZoneTrackCommand(int zoneIndex, string parameter)
+    private static ICommand<Result>? MapZoneTrackCommand(int zoneIndex, string parameter)
     {
         return int.TryParse(parameter, out var trackIndex)
             ? CommandFactory.CreateSetTrackCommand(zoneIndex, trackIndex, CommandSource.Mqtt)
             : null;
     }
 
-    private static object? MapZonePlaylistCommand(int zoneIndex, string parameter)
+    private static ICommand<Result>? MapZonePlaylistCommand(int zoneIndex, string parameter)
     {
         return int.TryParse(parameter, out var playlistIndex)
             ? CommandFactory.CreateSetPlaylistCommand(zoneIndex, playlistIndex, CommandSource.Mqtt)
             : null;
     }
 
-    private static object? MapClientVolumeCommand(int clientIndex, string parameter)
+    private static ICommand<Result>? MapClientVolumeCommand(int clientIndex, string parameter)
     {
         return int.TryParse(parameter, out var volume)
             ? CommandFactory.CreateSetClientVolumeCommand(clientIndex, volume, CommandSource.Mqtt)
             : null;
     }
 
-    private static object? MapClientZoneCommand(int clientIndex, string parameter)
+    private static ICommand<Result>? MapClientZoneCommand(int clientIndex, string parameter)
     {
         return int.TryParse(parameter, out var zoneIndex)
             ? CommandFactory.CreateAssignClientToZoneCommand(clientIndex, zoneIndex, CommandSource.Mqtt)
             : null;
     }
 
-    private static object? MapClientLatencyCommand(int clientIndex, string parameter)
+    private static ICommand<Result>? MapClientLatencyCommand(int clientIndex, string parameter)
     {
         return int.TryParse(parameter, out var latency)
             ? CommandFactory.CreateSetClientLatencyCommand(clientIndex, latency, CommandSource.Mqtt)

@@ -10,21 +10,18 @@ using SnapDog2.Core.Models;
 /// </summary>
 /// <typeparam name="TQuery">The query type.</typeparam>
 /// <typeparam name="TResponse">The response type.</typeparam>
-public partial class PerformanceQueryBehavior<TQuery, TResponse> : IQueryPipelineBehavior<TQuery, TResponse>
+/// <remarks>
+/// Initializes a new instance of the <see cref="PerformanceQueryBehavior{TQuery, TResponse}"/> class.
+/// </remarks>
+/// <param name="logger">The logger instance.</param>
+public partial class PerformanceQueryBehavior<TQuery, TResponse>(
+    ILogger<PerformanceQueryBehavior<TQuery, TResponse>> logger
+) : IQueryPipelineBehavior<TQuery, TResponse>
     where TQuery : IQuery<TResponse>
     where TResponse : IResult
 {
-    private readonly ILogger<PerformanceQueryBehavior<TQuery, TResponse>> _logger;
+    private readonly ILogger<PerformanceQueryBehavior<TQuery, TResponse>> _logger = logger;
     private const int SlowOperationThresholdMs = 500;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="PerformanceQueryBehavior{TQuery, TResponse}"/> class.
-    /// </summary>
-    /// <param name="logger">The logger instance.</param>
-    public PerformanceQueryBehavior(ILogger<PerformanceQueryBehavior<TQuery, TResponse>> logger)
-    {
-        this._logger = logger;
-    }
 
     /// <inheritdoc/>
     public async Task<TResponse> Handle(

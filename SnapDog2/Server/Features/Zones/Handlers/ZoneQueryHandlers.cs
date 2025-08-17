@@ -14,22 +14,17 @@ using SnapDog2.Server.Features.Zones.Queries;
 /// <summary>
 /// Handles the GetAllZonesQuery.
 /// </summary>
-public partial class GetAllZonesQueryHandler : IQueryHandler<GetAllZonesQuery, Result<List<ZoneState>>>
+public partial class GetAllZonesQueryHandler(IZoneManager zoneManager, ILogger<GetAllZonesQueryHandler> logger)
+    : IQueryHandler<GetAllZonesQuery, Result<List<ZoneState>>>
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<GetAllZonesQueryHandler> _logger;
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<GetAllZonesQueryHandler> _logger = logger;
 
     [LoggerMessage(5001, LogLevel.Information, "Handling GetAllZonesQuery")]
     private partial void LogHandling();
 
     [LoggerMessage(5002, LogLevel.Error, "Error retrieving all zones: {ErrorMessage}")]
     private partial void LogError(string errorMessage);
-
-    public GetAllZonesQueryHandler(IZoneManager zoneManager, ILogger<GetAllZonesQueryHandler> logger)
-    {
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
 
     public async Task<Result<List<ZoneState>>> Handle(GetAllZonesQuery request, CancellationToken cancellationToken)
     {
@@ -51,22 +46,17 @@ public partial class GetAllZonesQueryHandler : IQueryHandler<GetAllZonesQuery, R
 /// <summary>
 /// Handles the GetZoneStateQuery.
 /// </summary>
-public partial class GetZoneStateQueryHandler : IQueryHandler<GetZoneStateQuery, Result<ZoneState>>
+public partial class GetZoneStateQueryHandler(IZoneManager zoneManager, ILogger<GetZoneStateQueryHandler> logger)
+    : IQueryHandler<GetZoneStateQuery, Result<ZoneState>>
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<GetZoneStateQueryHandler> _logger;
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<GetZoneStateQueryHandler> _logger = logger;
 
     [LoggerMessage(5101, LogLevel.Information, "Handling GetZoneStateQuery for Zone {ZoneIndex}")]
     private partial void LogHandling(int zoneIndex);
 
     [LoggerMessage(5102, LogLevel.Warning, "Zone {ZoneIndex} not found for GetZoneStateQuery")]
     private partial void LogZoneNotFound(int zoneIndex);
-
-    public GetZoneStateQueryHandler(IZoneManager zoneManager, ILogger<GetZoneStateQueryHandler> logger)
-    {
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
 
     public async Task<Result<ZoneState>> Handle(GetZoneStateQuery request, CancellationToken cancellationToken)
     {
@@ -86,22 +76,19 @@ public partial class GetZoneStateQueryHandler : IQueryHandler<GetZoneStateQuery,
 /// <summary>
 /// Handles the GetAllZoneStatesQuery.
 /// </summary>
-public partial class GetAllZoneStatesQueryHandler : IQueryHandler<GetAllZoneStatesQuery, Result<IEnumerable<ZoneState>>>
+public partial class GetAllZoneStatesQueryHandler(
+    IZoneManager zoneManager,
+    ILogger<GetAllZoneStatesQueryHandler> logger
+) : IQueryHandler<GetAllZoneStatesQuery, Result<IEnumerable<ZoneState>>>
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<GetAllZoneStatesQueryHandler> _logger;
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<GetAllZoneStatesQueryHandler> _logger = logger;
 
     [LoggerMessage(5201, LogLevel.Information, "Handling GetAllZoneStatesQuery")]
     private partial void LogHandling();
 
     [LoggerMessage(5202, LogLevel.Error, "Error retrieving all zone states: {ErrorMessage}")]
     private partial void LogError(string errorMessage);
-
-    public GetAllZoneStatesQueryHandler(IZoneManager zoneManager, ILogger<GetAllZoneStatesQueryHandler> logger)
-    {
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
 
     public async Task<Result<IEnumerable<ZoneState>>> Handle(
         GetAllZoneStatesQuery request,
@@ -133,23 +120,19 @@ public partial class GetAllZoneStatesQueryHandler : IQueryHandler<GetAllZoneStat
 /// <summary>
 /// Handles the GetZonePlaybackStateQuery.
 /// </summary>
-public partial class GetZonePlaybackStateQueryHandler
-    : IQueryHandler<GetZonePlaybackStateQuery, Result<SnapDog2.Core.Enums.PlaybackState>>
+public partial class GetZonePlaybackStateQueryHandler(
+    IZoneManager zoneManager,
+    ILogger<GetZonePlaybackStateQueryHandler> logger
+) : IQueryHandler<GetZonePlaybackStateQuery, Result<SnapDog2.Core.Enums.PlaybackState>>
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<GetZonePlaybackStateQueryHandler> _logger;
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<GetZonePlaybackStateQueryHandler> _logger = logger;
 
     [LoggerMessage(5301, LogLevel.Information, "Handling GetZonePlaybackStateQuery for Zone {ZoneIndex}")]
     private partial void LogHandling(int zoneIndex);
 
     [LoggerMessage(5302, LogLevel.Warning, "Zone {ZoneIndex} not found for GetZonePlaybackStateQuery")]
     private partial void LogZoneNotFound(int zoneIndex);
-
-    public GetZonePlaybackStateQueryHandler(IZoneManager zoneManager, ILogger<GetZonePlaybackStateQueryHandler> logger)
-    {
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
 
     public async Task<Result<SnapDog2.Core.Enums.PlaybackState>> Handle(
         GetZonePlaybackStateQuery request,
@@ -186,22 +169,17 @@ public partial class GetZonePlaybackStateQueryHandler
 /// <summary>
 /// Handles the GetZoneVolumeQuery.
 /// </summary>
-public partial class GetZoneVolumeQueryHandler : IQueryHandler<GetZoneVolumeQuery, Result<int>>
+public partial class GetZoneVolumeQueryHandler(IZoneManager zoneManager, ILogger<GetZoneVolumeQueryHandler> logger)
+    : IQueryHandler<GetZoneVolumeQuery, Result<int>>
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<GetZoneVolumeQueryHandler> _logger;
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<GetZoneVolumeQueryHandler> _logger = logger;
 
     [LoggerMessage(5401, LogLevel.Information, "Handling GetZoneVolumeQuery for Zone {ZoneIndex}")]
     private partial void LogHandling(int zoneIndex);
 
     [LoggerMessage(5402, LogLevel.Warning, "Zone {ZoneIndex} not found for GetZoneVolumeQuery")]
     private partial void LogZoneNotFound(int zoneIndex);
-
-    public GetZoneVolumeQueryHandler(IZoneManager zoneManager, ILogger<GetZoneVolumeQueryHandler> logger)
-    {
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
 
     public async Task<Result<int>> Handle(GetZoneVolumeQuery request, CancellationToken cancellationToken)
     {
@@ -229,22 +207,19 @@ public partial class GetZoneVolumeQueryHandler : IQueryHandler<GetZoneVolumeQuer
 /// <summary>
 /// Handles the GetZoneTrackInfoQuery.
 /// </summary>
-public partial class GetZoneTrackInfoQueryHandler : IQueryHandler<GetZoneTrackInfoQuery, Result<TrackInfo>>
+public partial class GetZoneTrackInfoQueryHandler(
+    IZoneManager zoneManager,
+    ILogger<GetZoneTrackInfoQueryHandler> logger
+) : IQueryHandler<GetZoneTrackInfoQuery, Result<TrackInfo>>
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<GetZoneTrackInfoQueryHandler> _logger;
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<GetZoneTrackInfoQueryHandler> _logger = logger;
 
     [LoggerMessage(5501, LogLevel.Information, "Handling GetZoneTrackInfoQuery for Zone {ZoneIndex}")]
     private partial void LogHandling(int zoneIndex);
 
     [LoggerMessage(5502, LogLevel.Warning, "Zone {ZoneIndex} not found for GetZoneTrackInfoQuery")]
     private partial void LogZoneNotFound(int zoneIndex);
-
-    public GetZoneTrackInfoQueryHandler(IZoneManager zoneManager, ILogger<GetZoneTrackInfoQueryHandler> logger)
-    {
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
 
     public async Task<Result<TrackInfo>> Handle(GetZoneTrackInfoQuery request, CancellationToken cancellationToken)
     {
@@ -278,22 +253,19 @@ public partial class GetZoneTrackInfoQueryHandler : IQueryHandler<GetZoneTrackIn
 /// <summary>
 /// Handles the GetZonePlaylistInfoQuery.
 /// </summary>
-public partial class GetZonePlaylistInfoQueryHandler : IQueryHandler<GetZonePlaylistInfoQuery, Result<PlaylistInfo>>
+public partial class GetZonePlaylistInfoQueryHandler(
+    IZoneManager zoneManager,
+    ILogger<GetZonePlaylistInfoQueryHandler> logger
+) : IQueryHandler<GetZonePlaylistInfoQuery, Result<PlaylistInfo>>
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<GetZonePlaylistInfoQueryHandler> _logger;
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<GetZonePlaylistInfoQueryHandler> _logger = logger;
 
     [LoggerMessage(5601, LogLevel.Information, "Handling GetZonePlaylistInfoQuery for Zone {ZoneIndex}")]
     private partial void LogHandling(int zoneIndex);
 
     [LoggerMessage(5602, LogLevel.Warning, "Zone {ZoneIndex} not found for GetZonePlaylistInfoQuery")]
     private partial void LogZoneNotFound(int zoneIndex);
-
-    public GetZonePlaylistInfoQueryHandler(IZoneManager zoneManager, ILogger<GetZonePlaylistInfoQueryHandler> logger)
-    {
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
 
     public async Task<Result<PlaylistInfo>> Handle(
         GetZonePlaylistInfoQuery request,
@@ -330,22 +302,19 @@ public partial class GetZonePlaylistInfoQueryHandler : IQueryHandler<GetZonePlay
 /// <summary>
 /// Handles the GetAllPlaylistsQuery.
 /// </summary>
-public partial class GetAllPlaylistsQueryHandler : IQueryHandler<GetAllPlaylistsQuery, Result<List<PlaylistInfo>>>
+public partial class GetAllPlaylistsQueryHandler(
+    IPlaylistManager playlistManager,
+    ILogger<GetAllPlaylistsQueryHandler> logger
+) : IQueryHandler<GetAllPlaylistsQuery, Result<List<PlaylistInfo>>>
 {
-    private readonly IPlaylistManager _playlistManager;
-    private readonly ILogger<GetAllPlaylistsQueryHandler> _logger;
+    private readonly IPlaylistManager _playlistManager = playlistManager;
+    private readonly ILogger<GetAllPlaylistsQueryHandler> _logger = logger;
 
     [LoggerMessage(5701, LogLevel.Information, "Handling GetAllPlaylistsQuery")]
     private partial void LogHandling();
 
     [LoggerMessage(5702, LogLevel.Error, "Error retrieving all playlists: {ErrorMessage}")]
     private partial void LogError(string errorMessage);
-
-    public GetAllPlaylistsQueryHandler(IPlaylistManager playlistManager, ILogger<GetAllPlaylistsQueryHandler> logger)
-    {
-        this._playlistManager = playlistManager;
-        this._logger = logger;
-    }
 
     public async Task<Result<List<PlaylistInfo>>> Handle(
         GetAllPlaylistsQuery request,
@@ -370,10 +339,13 @@ public partial class GetAllPlaylistsQueryHandler : IQueryHandler<GetAllPlaylists
 /// <summary>
 /// Handles the GetPlaylistTracksQuery.
 /// </summary>
-public partial class GetPlaylistTracksQueryHandler : IQueryHandler<GetPlaylistTracksQuery, Result<List<TrackInfo>>>
+public partial class GetPlaylistTracksQueryHandler(
+    IPlaylistManager playlistManager,
+    ILogger<GetPlaylistTracksQueryHandler> logger
+) : IQueryHandler<GetPlaylistTracksQuery, Result<List<TrackInfo>>>
 {
-    private readonly IPlaylistManager _playlistManager;
-    private readonly ILogger<GetPlaylistTracksQueryHandler> _logger;
+    private readonly IPlaylistManager _playlistManager = playlistManager;
+    private readonly ILogger<GetPlaylistTracksQueryHandler> _logger = logger;
 
     [LoggerMessage(5801, LogLevel.Information, "Handling GetPlaylistTracksQuery for PlaylistIndex: {PlaylistIndex}")]
     private partial void LogHandling(int playlistIndex);
@@ -383,15 +355,6 @@ public partial class GetPlaylistTracksQueryHandler : IQueryHandler<GetPlaylistTr
 
     [LoggerMessage(5803, LogLevel.Error, "Error retrieving playlist tracks: {ErrorMessage}")]
     private partial void LogError(string errorMessage);
-
-    public GetPlaylistTracksQueryHandler(
-        IPlaylistManager playlistManager,
-        ILogger<GetPlaylistTracksQueryHandler> logger
-    )
-    {
-        this._playlistManager = playlistManager;
-        this._logger = logger;
-    }
 
     public async Task<Result<List<TrackInfo>>> Handle(
         GetPlaylistTracksQuery request,

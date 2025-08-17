@@ -14,21 +14,21 @@ public class InMemoryZoneStateStore : IZoneStateStore
 
     public ZoneState? GetZoneState(int zoneIndex)
     {
-        return _zoneStates.TryGetValue(zoneIndex, out var state) ? state : null;
+        return this._zoneStates.TryGetValue(zoneIndex, out var state) ? state : null;
     }
 
     public void SetZoneState(int zoneIndex, ZoneState state)
     {
-        _zoneStates.AddOrUpdate(zoneIndex, state, (_, _) => state);
+        this._zoneStates.AddOrUpdate(zoneIndex, state, (_, _) => state);
     }
 
     public Dictionary<int, ZoneState> GetAllZoneStates()
     {
-        return _zoneStates.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        return this._zoneStates.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
     }
 
     public void InitializeZoneState(int zoneIndex, ZoneState defaultState)
     {
-        _zoneStates.TryAdd(zoneIndex, defaultState);
+        this._zoneStates.TryAdd(zoneIndex, defaultState);
     }
 }

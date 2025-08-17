@@ -11,19 +11,14 @@ using SnapDog2.Server.Features.Clients.Queries;
 /// <summary>
 /// Handles the GetClientQuery.
 /// </summary>
-public partial class GetClientQueryHandler : IQueryHandler<GetClientQuery, Result<ClientState>>
+public partial class GetClientQueryHandler(IClientManager clientManager, ILogger<GetClientQueryHandler> logger)
+    : IQueryHandler<GetClientQuery, Result<ClientState>>
 {
-    private readonly IClientManager _clientManager;
-    private readonly ILogger<GetClientQueryHandler> _logger;
+    private readonly IClientManager _clientManager = clientManager;
+    private readonly ILogger<GetClientQueryHandler> _logger = logger;
 
     [LoggerMessage(4101, LogLevel.Information, "Handling GetClientQuery for Client {ClientIndex}")]
     private partial void LogHandling(int clientIndex);
-
-    public GetClientQueryHandler(IClientManager clientManager, ILogger<GetClientQueryHandler> logger)
-    {
-        this._clientManager = clientManager;
-        this._logger = logger;
-    }
 
     public async Task<Result<ClientState>> Handle(GetClientQuery request, CancellationToken cancellationToken)
     {

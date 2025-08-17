@@ -56,7 +56,7 @@ public class AudioConfig
     /// Computed from SampleRate, BitDepth, and Channels.
     /// Example: "48000:16:2"
     /// </summary>
-    public string SnapcastSampleFormat => $"{SampleRate}:{BitDepth}:{Channels}";
+    public string SnapcastSampleFormat => $"{this.SampleRate}:{this.BitDepth}:{this.Channels}";
 
     /// <summary>
     /// LibVLC command line arguments (hardcoded for consistency).

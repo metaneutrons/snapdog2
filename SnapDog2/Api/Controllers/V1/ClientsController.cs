@@ -18,16 +18,10 @@ using SnapDog2.Server.Features.Clients.Queries;
 [Authorize]
 [Produces("application/json")]
 [Tags("Clients")]
-public partial class ClientsController : ControllerBase
+public partial class ClientsController(IMediator mediator, ILogger<ClientsController> logger) : ControllerBase
 {
-    private readonly IMediator _mediator;
-    private readonly ILogger<ClientsController> _logger;
-
-    public ClientsController(IMediator mediator, ILogger<ClientsController> logger)
-    {
-        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
+    private readonly IMediator _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+    private readonly ILogger<ClientsController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     // ═══════════════════════════════════════════════════════════════════════════════
     // LOGGER MESSAGE DEFINITIONS - High-performance source generators
@@ -109,7 +103,7 @@ public partial class ClientsController : ControllerBase
     public async Task<ActionResult<List<ClientState>>> GetClients()
     {
         var query = new GetAllClientsQuery();
-        var result = await _mediator.SendQueryAsync<GetAllClientsQuery, Result<List<ClientState>>>(query);
+        var result = await this._mediator.SendQueryAsync<GetAllClientsQuery, Result<List<ClientState>>>(query);
 
         if (result.IsFailure)
         {
@@ -131,12 +125,12 @@ public partial class ClientsController : ControllerBase
     public async Task<ActionResult<ClientState>> GetClient(int clientIndex)
     {
         var query = new GetClientQuery { ClientIndex = clientIndex };
-        var result = await _mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
+        var result = await this._mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
 
         if (result.IsFailure)
         {
             LogFailedToGetClient(clientIndex, result.ErrorMessage ?? "Unknown error");
-            return NotFound($"Client {clientIndex} not found");
+            return this.NotFound($"Client {clientIndex} not found");
         }
 
         return Ok(result.Value!);
@@ -155,10 +149,12 @@ public partial class ClientsController : ControllerBase
     public async Task<ActionResult<int>> SetVolume(int clientIndex, [FromBody] int volume)
     {
         if (volume < 0 || volume > 100)
-            return BadRequest("Volume must be between 0 and 100");
+        {
+            return this.BadRequest("Volume must be between 0 and 100");
+        }
 
         var command = new SetClientVolumeCommand { ClientIndex = clientIndex, Volume = volume };
-        var result = await _mediator.SendCommandAsync<SetClientVolumeCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<SetClientVolumeCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -166,7 +162,7 @@ public partial class ClientsController : ControllerBase
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return Ok(volume);
+        return this.Ok(volume);
     }
 
     /// <summary>
@@ -180,12 +176,12 @@ public partial class ClientsController : ControllerBase
     public async Task<ActionResult<int>> GetVolume(int clientIndex)
     {
         var query = new GetClientQuery { ClientIndex = clientIndex };
-        var result = await _mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
+        var result = await this._mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
 
         if (result.IsFailure)
         {
             LogFailedToGetClientVolume(clientIndex, result.ErrorMessage ?? "Unknown error");
-            return NotFound($"Client {clientIndex} not found");
+            return this.NotFound($"Client {clientIndex} not found");
         }
 
         return Ok(result.Value!.Volume);
@@ -204,21 +200,23 @@ public partial class ClientsController : ControllerBase
     public async Task<ActionResult<int>> VolumeUp(int clientIndex, [FromQuery] int step = 5)
     {
         if (step < 1 || step > 50)
-            return BadRequest("Step must be between 1 and 50");
+        {
+            return this.BadRequest("Step must be between 1 and 50");
+        }
 
         // Get current volume first
         var query = new GetClientQuery { ClientIndex = clientIndex };
-        var clientResult = await _mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
+        var clientResult = await this._mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
 
         if (clientResult.IsFailure)
         {
             LogFailedToGetClientForVolumeUp(clientIndex, clientResult.ErrorMessage ?? "Unknown error");
-            return NotFound($"Client {clientIndex} not found");
+            return this.NotFound($"Client {clientIndex} not found");
         }
 
         var newVolume = Math.Min(100, clientResult.Value!.Volume + step);
         var command = new SetClientVolumeCommand { ClientIndex = clientIndex, Volume = newVolume };
-        var result = await _mediator.SendCommandAsync<SetClientVolumeCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<SetClientVolumeCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -242,21 +240,23 @@ public partial class ClientsController : ControllerBase
     public async Task<ActionResult<int>> VolumeDown(int clientIndex, [FromQuery] int step = 5)
     {
         if (step < 1 || step > 50)
-            return BadRequest("Step must be between 1 and 50");
+        {
+            return this.BadRequest("Step must be between 1 and 50");
+        }
 
         // Get current volume first
         var query = new GetClientQuery { ClientIndex = clientIndex };
-        var clientResult = await _mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
+        var clientResult = await this._mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
 
         if (clientResult.IsFailure)
         {
             LogFailedToGetClientForVolumeDown(clientIndex, clientResult.ErrorMessage ?? "Unknown error");
-            return NotFound($"Client {clientIndex} not found");
+            return this.NotFound($"Client {clientIndex} not found");
         }
 
         var newVolume = Math.Max(0, clientResult.Value!.Volume - step);
         var command = new SetClientVolumeCommand { ClientIndex = clientIndex, Volume = newVolume };
-        var result = await _mediator.SendCommandAsync<SetClientVolumeCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<SetClientVolumeCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -279,7 +279,7 @@ public partial class ClientsController : ControllerBase
     public async Task<ActionResult<bool>> SetMute(int clientIndex, [FromBody] bool muted)
     {
         var command = new SetClientMuteCommand { ClientIndex = clientIndex, Enabled = muted };
-        var result = await _mediator.SendCommandAsync<SetClientMuteCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<SetClientMuteCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -287,7 +287,7 @@ public partial class ClientsController : ControllerBase
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return Ok(muted);
+        return this.Ok(muted);
     }
 
     /// <summary>
@@ -301,12 +301,12 @@ public partial class ClientsController : ControllerBase
     public async Task<ActionResult<bool>> GetMute(int clientIndex)
     {
         var query = new GetClientQuery { ClientIndex = clientIndex };
-        var result = await _mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
+        var result = await this._mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
 
         if (result.IsFailure)
         {
             LogFailedToGetClientMuteState(clientIndex, result.ErrorMessage ?? "Unknown error");
-            return NotFound($"Client {clientIndex} not found");
+            return this.NotFound($"Client {clientIndex} not found");
         }
 
         return Ok(result.Value!.Mute);
@@ -323,7 +323,7 @@ public partial class ClientsController : ControllerBase
     public async Task<ActionResult<bool>> ToggleMute(int clientIndex)
     {
         var command = new ToggleClientMuteCommand { ClientIndex = clientIndex };
-        var result = await _mediator.SendCommandAsync<ToggleClientMuteCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<ToggleClientMuteCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -333,7 +333,7 @@ public partial class ClientsController : ControllerBase
 
         // Get the new state to return
         var query = new GetClientQuery { ClientIndex = clientIndex };
-        var clientResult = await _mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
+        var clientResult = await this._mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
 
         if (clientResult.IsFailure)
         {
@@ -357,10 +357,12 @@ public partial class ClientsController : ControllerBase
     public async Task<ActionResult<int>> SetLatency(int clientIndex, [FromBody] int latency)
     {
         if (latency < -2000 || latency > 2000)
-            return BadRequest("Latency must be between -2000 and 2000 milliseconds");
+        {
+            return this.BadRequest("Latency must be between -2000 and 2000 milliseconds");
+        }
 
         var command = new SetClientLatencyCommand { ClientIndex = clientIndex, LatencyMs = latency };
-        var result = await _mediator.SendCommandAsync<SetClientLatencyCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<SetClientLatencyCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -368,7 +370,7 @@ public partial class ClientsController : ControllerBase
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return Ok(latency);
+        return this.Ok(latency);
     }
 
     /// <summary>
@@ -382,12 +384,12 @@ public partial class ClientsController : ControllerBase
     public async Task<ActionResult<int>> GetLatency(int clientIndex)
     {
         var query = new GetClientQuery { ClientIndex = clientIndex };
-        var result = await _mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
+        var result = await this._mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
 
         if (result.IsFailure)
         {
             LogFailedToGetClientLatency(clientIndex, result.ErrorMessage ?? "Unknown error");
-            return NotFound($"Client {clientIndex} not found");
+            return this.NotFound($"Client {clientIndex} not found");
         }
 
         return Ok(result.Value!.LatencyMs);
@@ -406,10 +408,12 @@ public partial class ClientsController : ControllerBase
     public async Task<IActionResult> AssignToZone(int clientIndex, [FromBody] int zoneIndex)
     {
         if (zoneIndex < 1)
-            return BadRequest("Zone ID must be greater than 0");
+        {
+            return this.BadRequest("Zone ID must be greater than 0");
+        }
 
         var command = new AssignClientToZoneCommand { ClientIndex = clientIndex, ZoneIndex = zoneIndex };
-        var result = await _mediator.SendCommandAsync<AssignClientToZoneCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<AssignClientToZoneCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -417,7 +421,7 @@ public partial class ClientsController : ControllerBase
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return NoContent();
+        return this.NoContent();
     }
 
     /// <summary>
@@ -431,12 +435,12 @@ public partial class ClientsController : ControllerBase
     public async Task<ActionResult<int?>> GetZoneAssignment(int clientIndex)
     {
         var query = new GetClientQuery { ClientIndex = clientIndex };
-        var result = await _mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
+        var result = await this._mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
 
         if (result.IsFailure)
         {
             LogFailedToGetClientZoneAssignment(clientIndex, result.ErrorMessage ?? "Unknown error");
-            return NotFound($"Client {clientIndex} not found");
+            return this.NotFound($"Client {clientIndex} not found");
         }
 
         return Ok(result.Value!.ZoneIndex);
@@ -455,13 +459,17 @@ public partial class ClientsController : ControllerBase
     public async Task<ActionResult<string>> SetName(int clientIndex, [FromBody] string name)
     {
         if (string.IsNullOrWhiteSpace(name))
-            return BadRequest("Name cannot be empty");
+        {
+            return this.BadRequest("Name cannot be empty");
+        }
 
         if (name.Length > 100)
-            return BadRequest("Name cannot exceed 100 characters");
+        {
+            return this.BadRequest("Name cannot exceed 100 characters");
+        }
 
         var command = new SetClientNameCommand { ClientIndex = clientIndex, Name = name.Trim() };
-        var result = await _mediator.SendCommandAsync<SetClientNameCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<SetClientNameCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -469,7 +477,7 @@ public partial class ClientsController : ControllerBase
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return Ok(name.Trim());
+        return this.Ok(name.Trim());
     }
 
     /// <summary>
@@ -483,12 +491,12 @@ public partial class ClientsController : ControllerBase
     public async Task<ActionResult<bool>> GetClientConnected(int clientIndex)
     {
         var query = new GetClientQuery { ClientIndex = clientIndex };
-        var result = await _mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
+        var result = await this._mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
 
         if (result.IsFailure)
         {
             LogFailedToGetClientConnectionStatus(clientIndex, result.ErrorMessage ?? "Unknown error");
-            return NotFound($"Client {clientIndex} not found");
+            return this.NotFound($"Client {clientIndex} not found");
         }
 
         return Ok(result.Value!.Connected);

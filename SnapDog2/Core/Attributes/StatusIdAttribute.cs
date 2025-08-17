@@ -7,17 +7,12 @@ using System.Reflection;
 /// Used for outbound status events to external systems (MQTT, KNX).
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public class StatusIdAttribute : Attribute
+public class StatusIdAttribute(string id) : Attribute
 {
     /// <summary>
     /// The status identifier used in external systems.
     /// </summary>
-    public string Id { get; }
-
-    public StatusIdAttribute(string id)
-    {
-        Id = id ?? throw new ArgumentNullException(nameof(id));
-    }
+    public string Id { get; } = id ?? throw new ArgumentNullException(nameof(id));
 
     /// <summary>
     /// Gets the status ID for a notification type.

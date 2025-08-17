@@ -13,24 +13,18 @@ using SnapDog2.Server.Features.Global.Notifications;
 /// <summary>
 /// Handles global system state change notifications to log and process status updates.
 /// </summary>
-public partial class GlobalStateNotificationHandler
+public partial class GlobalStateNotificationHandler(
+    IServiceProvider serviceProvider,
+    ILogger<GlobalStateNotificationHandler> logger
+)
     : INotificationHandler<SystemStatusChangedNotification>,
         INotificationHandler<VersionInfoChangedNotification>,
         INotificationHandler<ServerStatsChangedNotification>,
         INotificationHandler<SystemErrorNotification>,
         INotificationHandler<ZonesInfoChangedNotification>
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<GlobalStateNotificationHandler> _logger;
-
-    public GlobalStateNotificationHandler(
-        IServiceProvider serviceProvider,
-        ILogger<GlobalStateNotificationHandler> logger
-    )
-    {
-        this._serviceProvider = serviceProvider;
-        this._logger = logger;
-    }
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
+    private readonly ILogger<GlobalStateNotificationHandler> _logger = logger;
 
     [LoggerMessage(6201, LogLevel.Information, "System status changed to online: {IsOnline}")]
     private partial void LogSystemStatusChange(bool isOnline);

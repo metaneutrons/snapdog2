@@ -13,7 +13,10 @@ using SnapDog2.Server.Features.Clients.Notifications;
 /// <summary>
 /// Handles client state change notifications to log and process status updates.
 /// </summary>
-public partial class ClientStateNotificationHandler
+public partial class ClientStateNotificationHandler(
+    IServiceProvider serviceProvider,
+    ILogger<ClientStateNotificationHandler> logger
+)
     : INotificationHandler<ClientVolumeChangedNotification>,
         INotificationHandler<ClientMuteChangedNotification>,
         INotificationHandler<ClientLatencyChangedNotification>,
@@ -21,17 +24,8 @@ public partial class ClientStateNotificationHandler
         INotificationHandler<ClientConnectionChangedNotification>,
         INotificationHandler<ClientStateChangedNotification>
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<ClientStateNotificationHandler> _logger;
-
-    public ClientStateNotificationHandler(
-        IServiceProvider serviceProvider,
-        ILogger<ClientStateNotificationHandler> logger
-    )
-    {
-        this._serviceProvider = serviceProvider;
-        this._logger = logger;
-    }
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
+    private readonly ILogger<ClientStateNotificationHandler> _logger = logger;
 
     [LoggerMessage(6101, LogLevel.Information, "Client {ClientIndex} volume changed to {Volume}")]
     private partial void LogVolumeChange(int clientIndex, int volume);

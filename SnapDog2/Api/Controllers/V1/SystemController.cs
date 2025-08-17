@@ -14,25 +14,22 @@ using SnapDog2.Server.Features.Global.Queries;
 /// <summary>
 /// Controller for system-wide information endpoints.
 /// </summary>
+/// <remarks>
+/// Initializes a new instance of the <see cref="SystemController"/> class.
+/// </remarks>
 [ApiController]
 [Route("api/v1/system")]
 [Authorize]
 [Produces("application/json")]
-public partial class SystemController : ControllerBase
+public partial class SystemController(
+    IServiceProvider serviceProvider,
+    IMediator mediator,
+    ILogger<SystemController> logger
+) : ControllerBase
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly IMediator _mediator;
-    private readonly ILogger<SystemController> _logger;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="SystemController"/> class.
-    /// </summary>
-    public SystemController(IServiceProvider serviceProvider, IMediator mediator, ILogger<SystemController> logger)
-    {
-        this._serviceProvider = serviceProvider;
-        this._mediator = mediator;
-        this._logger = logger;
-    }
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
+    private readonly IMediator _mediator = mediator;
+    private readonly ILogger<SystemController> _logger = logger;
 
     /// <summary>
     /// Gets system online status.

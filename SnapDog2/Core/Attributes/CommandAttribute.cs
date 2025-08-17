@@ -7,17 +7,12 @@ using System.Reflection;
 /// Used for inbound command processing from external systems (MQTT, KNX).
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public class CommandIdAttribute : Attribute
+public class CommandIdAttribute(string id) : Attribute
 {
     /// <summary>
     /// The command identifier used in external systems.
     /// </summary>
-    public string Id { get; }
-
-    public CommandIdAttribute(string id)
-    {
-        Id = id ?? throw new ArgumentNullException(nameof(id));
-    }
+    public string Id { get; } = id ?? throw new ArgumentNullException(nameof(id));
 
     /// <summary>
     /// Gets the command ID for a command type.

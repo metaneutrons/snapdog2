@@ -86,7 +86,9 @@ public static class StatusIdUsageExamples
         // Parse to enum for type safety
         var statusEventType = StatusEventTypeExtensions.FromStatusString(eventType);
         if (statusEventType == null)
+        {
             return null;
+        }
 
         // Use enum in switch for compile-time safety
         return statusEventType switch
@@ -106,7 +108,9 @@ public static class StatusIdUsageExamples
         // Method 1: Using enum parsing
         var parsedEnum = StatusEventTypeExtensions.FromStatusString(eventType);
         if (parsedEnum.HasValue)
+        {
             return true;
+        }
 
         // Method 2: Using registry
         return StatusIdRegistry.IsRegistered(eventType);

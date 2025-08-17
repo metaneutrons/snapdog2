@@ -21,7 +21,7 @@ public class CommandStatusService : ICommandStatusService
     /// <returns>Status string: "idle", "processing", or "error"</returns>
     public Task<string> GetStatusAsync()
     {
-        return Task.FromResult(_currentStatus);
+        return Task.FromResult(this._currentStatus);
     }
 
     /// <summary>
@@ -36,7 +36,7 @@ public class CommandStatusService : ICommandStatusService
         var recentErrors = new List<string>();
         var tempQueue = new ConcurrentQueue<(DateTime, string)>();
 
-        while (_recentErrors.TryDequeue(out var error))
+        while (this._recentErrors.TryDequeue(out var error))
         {
             if (error.Timestamp >= cutoff)
             {
@@ -48,7 +48,7 @@ public class CommandStatusService : ICommandStatusService
         // Put back the recent errors
         while (tempQueue.TryDequeue(out var error))
         {
-            _recentErrors.Enqueue(error);
+            this._recentErrors.Enqueue(error);
         }
 
         return Task.FromResult(recentErrors.TakeLast(50).ToArray());
@@ -59,9 +59,9 @@ public class CommandStatusService : ICommandStatusService
     /// </summary>
     public void SetProcessing()
     {
-        lock (_statusLock)
+        lock (this._statusLock)
         {
-            _currentStatus = "processing";
+            this._currentStatus = "processing";
         }
     }
 
@@ -70,9 +70,9 @@ public class CommandStatusService : ICommandStatusService
     /// </summary>
     public void SetIdle()
     {
-        lock (_statusLock)
+        lock (this._statusLock)
         {
-            _currentStatus = "idle";
+            this._currentStatus = "idle";
         }
     }
 
@@ -82,17 +82,17 @@ public class CommandStatusService : ICommandStatusService
     /// <param name="errorMessage">The error message</param>
     public void RecordError(string errorMessage)
     {
-        lock (_statusLock)
+        lock (this._statusLock)
         {
-            _currentStatus = "error";
+            this._currentStatus = "error";
         }
 
-        _recentErrors.Enqueue((DateTime.UtcNow, errorMessage));
+        this._recentErrors.Enqueue((DateTime.UtcNow, errorMessage));
 
         // Keep only last 100 errors to prevent memory issues
-        while (_recentErrors.Count > 100)
+        while (this._recentErrors.Count > 100)
         {
-            _recentErrors.TryDequeue(out _);
+            this._recentErrors.TryDequeue(out _);
         }
     }
 }

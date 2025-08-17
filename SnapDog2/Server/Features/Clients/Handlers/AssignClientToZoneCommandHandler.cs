@@ -12,11 +12,15 @@ using SnapDog2.Server.Features.Clients.Commands.Config;
 /// <summary>
 /// Handles the AssignClientToZoneCommand.
 /// </summary>
-public partial class AssignClientToZoneCommandHandler : ICommandHandler<AssignClientToZoneCommand, Result>
+public partial class AssignClientToZoneCommandHandler(
+    IClientManager clientManager,
+    IZoneManager zoneManager,
+    ILogger<AssignClientToZoneCommandHandler> logger
+) : ICommandHandler<AssignClientToZoneCommand, Result>
 {
-    private readonly IClientManager _clientManager;
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<AssignClientToZoneCommandHandler> _logger;
+    private readonly IClientManager _clientManager = clientManager;
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<AssignClientToZoneCommandHandler> _logger = logger;
 
     [LoggerMessage(3101, LogLevel.Information, "Assigning Client {ClientIndex} to Zone {ZoneIndex} from {Source}")]
     private partial void LogHandling(int clientIndex, int zoneIndex, CommandSource source);
@@ -26,17 +30,6 @@ public partial class AssignClientToZoneCommandHandler : ICommandHandler<AssignCl
 
     [LoggerMessage(3103, LogLevel.Warning, "Zone {ZoneIndex} not found for AssignClientToZoneCommand")]
     private partial void LogZoneNotFound(int zoneIndex);
-
-    public AssignClientToZoneCommandHandler(
-        IClientManager clientManager,
-        IZoneManager zoneManager,
-        ILogger<AssignClientToZoneCommandHandler> logger
-    )
-    {
-        this._clientManager = clientManager;
-        this._zoneManager = zoneManager;
-        this._logger = logger;
-    }
 
     public async Task<Result> Handle(AssignClientToZoneCommand request, CancellationToken cancellationToken)
     {

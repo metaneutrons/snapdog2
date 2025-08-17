@@ -11,21 +11,18 @@ using SnapDog2.Core.Models;
 /// </summary>
 /// <typeparam name="TCommand">The command type.</typeparam>
 /// <typeparam name="TResponse">The response type.</typeparam>
-public partial class SharedLoggingCommandBehavior<TCommand, TResponse> : ICommandPipelineBehavior<TCommand, TResponse>
+/// <remarks>
+/// Initializes a new instance of the <see cref="SharedLoggingCommandBehavior{TCommand, TResponse}"/> class.
+/// </remarks>
+/// <param name="logger">The logger instance.</param>
+public partial class SharedLoggingCommandBehavior<TCommand, TResponse>(
+    ILogger<SharedLoggingCommandBehavior<TCommand, TResponse>> logger
+) : ICommandPipelineBehavior<TCommand, TResponse>
     where TCommand : ICommand<TResponse>
     where TResponse : IResult
 {
-    private readonly ILogger<SharedLoggingCommandBehavior<TCommand, TResponse>> _logger;
+    private readonly ILogger<SharedLoggingCommandBehavior<TCommand, TResponse>> _logger = logger;
     private static readonly ActivitySource ActivitySource = new("SnapDog2.CortexMediator");
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="SharedLoggingCommandBehavior{TCommand, TResponse}"/> class.
-    /// </summary>
-    /// <param name="logger">The logger instance.</param>
-    public SharedLoggingCommandBehavior(ILogger<SharedLoggingCommandBehavior<TCommand, TResponse>> logger)
-    {
-        this._logger = logger;
-    }
 
     /// <inheritdoc/>
     public async Task<TResponse> Handle(
@@ -62,21 +59,18 @@ public partial class SharedLoggingCommandBehavior<TCommand, TResponse> : IComman
 /// </summary>
 /// <typeparam name="TQuery">The query type.</typeparam>
 /// <typeparam name="TResponse">The response type.</typeparam>
-public partial class SharedLoggingQueryBehavior<TQuery, TResponse> : IQueryPipelineBehavior<TQuery, TResponse>
+/// <remarks>
+/// Initializes a new instance of the <see cref="SharedLoggingQueryBehavior{TQuery, TResponse}"/> class.
+/// </remarks>
+/// <param name="logger">The logger instance.</param>
+public partial class SharedLoggingQueryBehavior<TQuery, TResponse>(
+    ILogger<SharedLoggingQueryBehavior<TQuery, TResponse>> logger
+) : IQueryPipelineBehavior<TQuery, TResponse>
     where TQuery : IQuery<TResponse>
     where TResponse : IResult
 {
-    private readonly ILogger<SharedLoggingQueryBehavior<TQuery, TResponse>> _logger;
+    private readonly ILogger<SharedLoggingQueryBehavior<TQuery, TResponse>> _logger = logger;
     private static readonly ActivitySource ActivitySource = new("SnapDog2.CortexMediator");
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="SharedLoggingQueryBehavior{TQuery, TResponse}"/> class.
-    /// </summary>
-    /// <param name="logger">The logger instance.</param>
-    public SharedLoggingQueryBehavior(ILogger<SharedLoggingQueryBehavior<TQuery, TResponse>> logger)
-    {
-        this._logger = logger;
-    }
 
     /// <inheritdoc/>
     public async Task<TResponse> Handle(

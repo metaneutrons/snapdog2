@@ -8,7 +8,7 @@ using SnapDog2.Server.Features.Snapcast.Notifications;
 /// Handles Snapcast event notifications and processes them for the application.
 /// This demonstrates how Snapcast events flow through the mediator pattern.
 /// </summary>
-public partial class SnapcastEventNotificationHandler
+public partial class SnapcastEventNotificationHandler(ILogger<SnapcastEventNotificationHandler> logger)
     : INotificationHandler<SnapcastClientConnectedNotification>,
         INotificationHandler<SnapcastClientDisconnectedNotification>,
         INotificationHandler<SnapcastClientVolumeChangedNotification>,
@@ -16,12 +16,7 @@ public partial class SnapcastEventNotificationHandler
         INotificationHandler<SnapcastConnectionEstablishedNotification>,
         INotificationHandler<SnapcastConnectionLostNotification>
 {
-    private readonly ILogger<SnapcastEventNotificationHandler> _logger;
-
-    public SnapcastEventNotificationHandler(ILogger<SnapcastEventNotificationHandler> logger)
-    {
-        this._logger = logger;
-    }
+    private readonly ILogger<SnapcastEventNotificationHandler> _logger = logger;
 
     #region Logging
 

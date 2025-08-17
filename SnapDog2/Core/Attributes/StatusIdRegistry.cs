@@ -21,12 +21,16 @@ public static class StatusIdRegistry
     public static void Initialize()
     {
         if (_isInitialized)
+        {
             return;
+        }
 
         lock (_initLock)
         {
             if (_isInitialized)
+            {
                 return;
+            }
 
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             foreach (var assembly in assemblies)

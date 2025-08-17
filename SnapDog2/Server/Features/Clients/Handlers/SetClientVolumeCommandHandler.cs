@@ -12,22 +12,19 @@ using SnapDog2.Server.Features.Clients.Commands.Volume;
 /// <summary>
 /// Handles the SetClientVolumeCommand.
 /// </summary>
-public partial class SetClientVolumeCommandHandler : ICommandHandler<SetClientVolumeCommand, Result>
+public partial class SetClientVolumeCommandHandler(
+    IClientManager clientManager,
+    ILogger<SetClientVolumeCommandHandler> logger
+) : ICommandHandler<SetClientVolumeCommand, Result>
 {
-    private readonly IClientManager _clientManager;
-    private readonly ILogger<SetClientVolumeCommandHandler> _logger;
+    private readonly IClientManager _clientManager = clientManager;
+    private readonly ILogger<SetClientVolumeCommandHandler> _logger = logger;
 
     [LoggerMessage(3001, LogLevel.Information, "Setting volume for Client {ClientIndex} to {Volume} from {Source}")]
     private partial void LogHandling(int clientIndex, int volume, CommandSource source);
 
     [LoggerMessage(3002, LogLevel.Warning, "Client {ClientIndex} not found for SetClientVolumeCommand")]
     private partial void LogClientNotFound(int clientIndex);
-
-    public SetClientVolumeCommandHandler(IClientManager clientManager, ILogger<SetClientVolumeCommandHandler> logger)
-    {
-        this._clientManager = clientManager;
-        this._logger = logger;
-    }
 
     public async Task<Result> Handle(SetClientVolumeCommand request, CancellationToken cancellationToken)
     {

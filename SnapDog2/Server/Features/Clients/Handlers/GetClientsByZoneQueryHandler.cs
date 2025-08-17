@@ -12,19 +12,16 @@ using SnapDog2.Server.Features.Clients.Queries;
 /// <summary>
 /// Handles the GetClientsByZoneQuery.
 /// </summary>
-public partial class GetClientsByZoneQueryHandler : IQueryHandler<GetClientsByZoneQuery, Result<List<ClientState>>>
+public partial class GetClientsByZoneQueryHandler(
+    IClientManager clientManager,
+    ILogger<GetClientsByZoneQueryHandler> logger
+) : IQueryHandler<GetClientsByZoneQuery, Result<List<ClientState>>>
 {
-    private readonly IClientManager _clientManager;
-    private readonly ILogger<GetClientsByZoneQueryHandler> _logger;
+    private readonly IClientManager _clientManager = clientManager;
+    private readonly ILogger<GetClientsByZoneQueryHandler> _logger = logger;
 
     [LoggerMessage(4201, LogLevel.Information, "Handling GetClientsByZoneQuery for Zone {ZoneIndex}")]
     private partial void LogHandling(int zoneIndex);
-
-    public GetClientsByZoneQueryHandler(IClientManager clientManager, ILogger<GetClientsByZoneQueryHandler> logger)
-    {
-        this._clientManager = clientManager;
-        this._logger = logger;
-    }
 
     public async Task<Result<List<ClientState>>> Handle(
         GetClientsByZoneQuery request,

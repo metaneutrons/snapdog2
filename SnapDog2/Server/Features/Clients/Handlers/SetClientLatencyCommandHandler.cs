@@ -12,10 +12,13 @@ using SnapDog2.Server.Features.Clients.Commands.Config;
 /// <summary>
 /// Handles the SetClientLatencyCommand.
 /// </summary>
-public partial class SetClientLatencyCommandHandler : ICommandHandler<SetClientLatencyCommand, Result>
+public partial class SetClientLatencyCommandHandler(
+    IClientManager clientManager,
+    ILogger<SetClientLatencyCommandHandler> logger
+) : ICommandHandler<SetClientLatencyCommand, Result>
 {
-    private readonly IClientManager _clientManager;
-    private readonly ILogger<SetClientLatencyCommandHandler> _logger;
+    private readonly IClientManager _clientManager = clientManager;
+    private readonly ILogger<SetClientLatencyCommandHandler> _logger = logger;
 
     [LoggerMessage(
         3201,
@@ -26,12 +29,6 @@ public partial class SetClientLatencyCommandHandler : ICommandHandler<SetClientL
 
     [LoggerMessage(3202, LogLevel.Warning, "Client {ClientIndex} not found for SetClientLatencyCommand")]
     private partial void LogClientNotFound(int clientIndex);
-
-    public SetClientLatencyCommandHandler(IClientManager clientManager, ILogger<SetClientLatencyCommandHandler> logger)
-    {
-        this._clientManager = clientManager;
-        this._logger = logger;
-    }
 
     public async Task<Result> Handle(SetClientLatencyCommand request, CancellationToken cancellationToken)
     {

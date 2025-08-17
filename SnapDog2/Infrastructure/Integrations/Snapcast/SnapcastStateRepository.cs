@@ -11,22 +11,18 @@ using SnapDog2.Core.Configuration;
 /// Thread-safe repository holding the last known state received from Snapcast server.
 /// Uses raw SnapcastClient models to maintain fidelity with the external system.
 /// </summary>
-public partial class SnapcastStateRepository : ISnapcastStateRepository
+public partial class SnapcastStateRepository(
+    ILogger<SnapcastStateRepository> logger,
+    SnapDogConfiguration configuration
+) : ISnapcastStateRepository
 {
     private readonly ConcurrentDictionary<string, SnapClient> _clients = new();
     private readonly ConcurrentDictionary<string, Group> _groups = new();
     private readonly ConcurrentDictionary<string, Stream> _streams = new();
-    private Server _serverInfo;
+    private Server _serverInfo = new Server();
     private readonly object _serverInfoLock = new();
-    private readonly ILogger<SnapcastStateRepository> _logger;
-    private readonly SnapDogConfiguration _configuration;
-
-    public SnapcastStateRepository(ILogger<SnapcastStateRepository> logger, SnapDogConfiguration configuration)
-    {
-        this._logger = logger;
-        this._configuration = configuration;
-        this._serverInfo = new Server(); // Initialize with empty server info
-    }
+    private readonly ILogger<SnapcastStateRepository> _logger = logger;
+    private readonly SnapDogConfiguration _configuration = configuration;
 
     #region Logging
 

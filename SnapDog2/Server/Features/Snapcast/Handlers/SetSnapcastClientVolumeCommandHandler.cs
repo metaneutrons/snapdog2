@@ -9,19 +9,13 @@ using SnapDog2.Server.Features.Snapcast.Commands;
 /// <summary>
 /// Handler for setting Snapcast client volume.
 /// </summary>
-public partial class SetSnapcastClientVolumeCommandHandler : ICommandHandler<SetSnapcastClientVolumeCommand, Result>
+public partial class SetSnapcastClientVolumeCommandHandler(
+    ISnapcastService snapcastService,
+    ILogger<SetSnapcastClientVolumeCommandHandler> logger
+) : ICommandHandler<SetSnapcastClientVolumeCommand, Result>
 {
-    private readonly ISnapcastService _snapcastService;
-    private readonly ILogger<SetSnapcastClientVolumeCommandHandler> _logger;
-
-    public SetSnapcastClientVolumeCommandHandler(
-        ISnapcastService snapcastService,
-        ILogger<SetSnapcastClientVolumeCommandHandler> logger
-    )
-    {
-        this._snapcastService = snapcastService;
-        this._logger = logger;
-    }
+    private readonly ISnapcastService _snapcastService = snapcastService;
+    private readonly ILogger<SetSnapcastClientVolumeCommandHandler> _logger = logger;
 
     [LoggerMessage(
         3001,

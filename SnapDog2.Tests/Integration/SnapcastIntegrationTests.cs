@@ -20,27 +20,27 @@ public class SnapcastIntegrationTests
 
     public SnapcastIntegrationTests(IntegrationTestFixture fixture, ITestOutputHelper output)
     {
-        _fixture = fixture;
-        _output = output;
+        this._fixture = fixture;
+        this._output = output;
     }
 
     [Fact]
     public void SnapcastService_Should_BeRegisteredInDI()
     {
         // Arrange & Act
-        using var scope = _fixture.ServiceProvider.CreateScope();
+        using var scope = this._fixture.ServiceProvider.CreateScope();
         var snapcastService = scope.ServiceProvider.GetService<ISnapcastService>();
 
         // Assert
         snapcastService.Should().NotBeNull("ISnapcastService should be registered in DI container");
-        _output.WriteLine($"✅ SnapcastService registered: {snapcastService?.GetType().Name}");
+        this._output.WriteLine($"✅ SnapcastService registered: {snapcastService?.GetType().Name}");
     }
 
     [Fact]
     public async Task SnapcastService_Should_InitializeSuccessfully()
     {
         // Arrange
-        using var scope = _fixture.ServiceProvider.CreateScope();
+        using var scope = this._fixture.ServiceProvider.CreateScope();
         var snapcastService = scope.ServiceProvider.GetRequiredService<ISnapcastService>();
 
         // Act
@@ -50,14 +50,14 @@ public class SnapcastIntegrationTests
         result
             .IsSuccess.Should()
             .BeTrue($"Snapcast service should initialize successfully. Error: {result.ErrorMessage}");
-        _output.WriteLine("✅ Snapcast service initialized successfully");
+        this._output.WriteLine("✅ Snapcast service initialized successfully");
     }
 
     [Fact]
     public async Task SnapcastService_Should_GetServerStatus()
     {
         // Arrange
-        using var scope = _fixture.ServiceProvider.CreateScope();
+        using var scope = this._fixture.ServiceProvider.CreateScope();
         var snapcastService = scope.ServiceProvider.GetRequiredService<ISnapcastService>();
         await snapcastService.InitializeAsync();
 
@@ -73,18 +73,18 @@ public class SnapcastIntegrationTests
         status.Groups.Should().NotBeNull("Groups should be present");
         status.Streams.Should().NotBeNull("Streams should be present");
 
-        _output.WriteLine($"✅ Server status retrieved:");
-        _output.WriteLine($"   Server version: {status.Server?.Version}");
-        _output.WriteLine($"   Groups count: {status.Groups?.Count ?? 0}");
-        _output.WriteLine($"   Streams count: {status.Streams?.Count ?? 0}");
-        _output.WriteLine($"   Clients count: {status.Clients?.Count ?? 0}");
+        this._output.WriteLine($"✅ Server status retrieved:");
+        this._output.WriteLine($"   Server version: {status.Server?.Version}");
+        this._output.WriteLine($"   Groups count: {status.Groups?.Count ?? 0}");
+        this._output.WriteLine($"   Streams count: {status.Streams?.Count ?? 0}");
+        this._output.WriteLine($"   Clients count: {status.Clients?.Count ?? 0}");
     }
 
     [Fact]
     public async Task SnapcastService_Should_HaveClients()
     {
         // Arrange
-        using var scope = _fixture.ServiceProvider.CreateScope();
+        using var scope = this._fixture.ServiceProvider.CreateScope();
         var snapcastService = scope.ServiceProvider.GetRequiredService<ISnapcastService>();
         await snapcastService.InitializeAsync();
 
@@ -102,10 +102,10 @@ public class SnapcastIntegrationTests
         firstClient.Id.Should().NotBeNullOrEmpty("Client should have an ID");
         firstClient.Host.Should().NotBeNull("Client should have host info");
 
-        _output.WriteLine($"✅ Found {status.Clients.Count} Snapcast clients:");
+        this._output.WriteLine($"✅ Found {status.Clients.Count} Snapcast clients:");
         foreach (var client in status.Clients.Take(3))
         {
-            _output.WriteLine($"   Client {client.Id}: {client.Host?.Name} (Connected: {client.Connected})");
+            this._output.WriteLine($"   Client {client.Id}: {client.Host?.Name} (Connected: {client.Connected})");
         }
     }
 
@@ -113,7 +113,7 @@ public class SnapcastIntegrationTests
     public async Task SnapcastService_Should_HaveGroups()
     {
         // Arrange
-        using var scope = _fixture.ServiceProvider.CreateScope();
+        using var scope = this._fixture.ServiceProvider.CreateScope();
         var snapcastService = scope.ServiceProvider.GetRequiredService<ISnapcastService>();
         await snapcastService.InitializeAsync();
 
@@ -131,10 +131,10 @@ public class SnapcastIntegrationTests
         firstGroup.Id.Should().NotBeNullOrEmpty("Group should have an ID");
         firstGroup.Clients.Should().NotBeNull("Group should have clients collection");
 
-        _output.WriteLine($"✅ Found {status.Groups.Count} Snapcast groups:");
+        this._output.WriteLine($"✅ Found {status.Groups.Count} Snapcast groups:");
         foreach (var group in status.Groups.Take(3))
         {
-            _output.WriteLine(
+            this._output.WriteLine(
                 $"   Group {group.Id}: {group.Name} (Clients: {group.Clients?.Count ?? 0}, Muted: {group.Muted})"
             );
         }
@@ -144,7 +144,7 @@ public class SnapcastIntegrationTests
     public async Task SnapcastService_Should_HaveStreams()
     {
         // Arrange
-        using var scope = _fixture.ServiceProvider.CreateScope();
+        using var scope = this._fixture.ServiceProvider.CreateScope();
         var snapcastService = scope.ServiceProvider.GetRequiredService<ISnapcastService>();
         await snapcastService.InitializeAsync();
 
@@ -162,10 +162,10 @@ public class SnapcastIntegrationTests
         firstStream.Id.Should().NotBeNullOrEmpty("Stream should have an ID");
         firstStream.Status.Should().NotBeNullOrEmpty("Stream should have a status");
 
-        _output.WriteLine($"✅ Found {status.Streams.Count} Snapcast streams:");
+        this._output.WriteLine($"✅ Found {status.Streams.Count} Snapcast streams:");
         foreach (var stream in status.Streams.Take(3))
         {
-            _output.WriteLine($"   Stream {stream.Id}: {stream.Status} (URI: {stream.Uri})");
+            this._output.WriteLine($"   Stream {stream.Id}: {stream.Status} (URI: {stream.Uri})");
         }
     }
 
@@ -173,7 +173,7 @@ public class SnapcastIntegrationTests
     public async Task SnapcastService_Should_ControlClientVolume()
     {
         // Arrange
-        using var scope = _fixture.ServiceProvider.CreateScope();
+        using var scope = this._fixture.ServiceProvider.CreateScope();
         var snapcastService = scope.ServiceProvider.GetRequiredService<ISnapcastService>();
         await snapcastService.InitializeAsync();
 
@@ -199,11 +199,11 @@ public class SnapcastIntegrationTests
         updatedClient.Should().NotBeNull();
         updatedClient!.Volume.Should().Be(testVolume, "Volume should be updated");
 
-        _output.WriteLine($"✅ Client volume control successful:");
-        _output.WriteLine($"   Client: {client.Id}");
-        _output.WriteLine($"   Original volume: {originalVolume}%");
-        _output.WriteLine($"   New volume: {testVolume}%");
-        _output.WriteLine($"   Verified volume: {updatedClient.Volume}%");
+        this._output.WriteLine($"✅ Client volume control successful:");
+        this._output.WriteLine($"   Client: {client.Id}");
+        this._output.WriteLine($"   Original volume: {originalVolume}%");
+        this._output.WriteLine($"   New volume: {testVolume}%");
+        this._output.WriteLine($"   Verified volume: {updatedClient.Volume}%");
 
         // Cleanup - Restore original volume
         await snapcastService.SetClientVolumeAsync(client.Id, originalVolume);
@@ -213,7 +213,7 @@ public class SnapcastIntegrationTests
     public async Task SnapcastService_Should_ControlClientMute()
     {
         // Arrange
-        using var scope = _fixture.ServiceProvider.CreateScope();
+        using var scope = this._fixture.ServiceProvider.CreateScope();
         var snapcastService = scope.ServiceProvider.GetRequiredService<ISnapcastService>();
         await snapcastService.InitializeAsync();
 
@@ -229,12 +229,12 @@ public class SnapcastIntegrationTests
         // Check if audio devices are available (affects mute functionality)
         var hasAudioDevices = Directory.Exists("/dev/snd");
 
-        _output.WriteLine($"🔧 Testing client mute control:");
-        _output.WriteLine($"   Client ID: {client.Id}");
-        _output.WriteLine($"   Client Name: {client.Name}");
-        _output.WriteLine($"   Original muted: {originalMuted}");
-        _output.WriteLine($"   Target muted: {testMuted}");
-        _output.WriteLine($"   Audio devices available: {hasAudioDevices}");
+        this._output.WriteLine($"🔧 Testing client mute control:");
+        this._output.WriteLine($"   Client ID: {client.Id}");
+        this._output.WriteLine($"   Client Name: {client.Name}");
+        this._output.WriteLine($"   Original muted: {originalMuted}");
+        this._output.WriteLine($"   Target muted: {testMuted}");
+        this._output.WriteLine($"   Audio devices available: {hasAudioDevices}");
 
         // Act - Set mute
         var setResult = await snapcastService.SetClientMuteAsync(client.Id, testMuted);
@@ -242,7 +242,7 @@ public class SnapcastIntegrationTests
         // Assert - The command should either succeed or fail gracefully
         if (setResult.IsSuccess)
         {
-            _output.WriteLine("✅ Mute command succeeded - verifying state change");
+            this._output.WriteLine("✅ Mute command succeeded - verifying state change");
 
             // Give the server a moment to process the change
             await Task.Delay(500);
@@ -257,29 +257,29 @@ public class SnapcastIntegrationTests
             // Some test containers might accept the command but not change state
             if (updatedClient!.Muted == testMuted)
             {
-                _output.WriteLine($"✅ Client mute control successful (full audio support):");
-                _output.WriteLine($"   Client: {client.Id}");
-                _output.WriteLine($"   Original muted: {originalMuted}");
-                _output.WriteLine($"   New muted: {testMuted}");
-                _output.WriteLine($"   Verified muted: {updatedClient.Muted}");
+                this._output.WriteLine($"✅ Client mute control successful (full audio support):");
+                this._output.WriteLine($"   Client: {client.Id}");
+                this._output.WriteLine($"   Original muted: {originalMuted}");
+                this._output.WriteLine($"   New muted: {testMuted}");
+                this._output.WriteLine($"   Verified muted: {updatedClient.Muted}");
 
                 // Cleanup - Restore original mute state
                 await snapcastService.SetClientMuteAsync(client.Id, originalMuted);
             }
             else
             {
-                _output.WriteLine($"⚠️ Client accepted mute command but state didn't change:");
-                _output.WriteLine($"   Client: {client.Id}");
-                _output.WriteLine($"   Command succeeded but mute state remained: {updatedClient.Muted}");
+                this._output.WriteLine($"⚠️ Client accepted mute command but state didn't change:");
+                this._output.WriteLine($"   Client: {client.Id}");
+                this._output.WriteLine($"   Command succeeded but mute state remained: {updatedClient.Muted}");
                 if (!hasAudioDevices)
                 {
-                    _output.WriteLine($"   This is expected - no audio devices available for actual mute control");
+                    this._output.WriteLine($"   This is expected - no audio devices available for actual mute control");
                 }
                 else
                 {
-                    _output.WriteLine($"   This may indicate container audio configuration needs adjustment");
+                    this._output.WriteLine($"   This may indicate container audio configuration needs adjustment");
                 }
-                _output.WriteLine($"   Service correctly handled the mute command without errors");
+                this._output.WriteLine($"   Service correctly handled the mute command without errors");
 
                 // This is acceptable - the service handled the command correctly,
                 // even if the test client doesn't actually implement mute functionality
@@ -287,15 +287,17 @@ public class SnapcastIntegrationTests
         }
         else
         {
-            _output.WriteLine($"⚠️ Mute command failed (expected for some client types): {setResult.ErrorMessage}");
+            this._output.WriteLine(
+                $"⚠️ Mute command failed (expected for some client types): {setResult.ErrorMessage}"
+            );
 
             // For integration tests with container clients, mute might not be supported
             // This is acceptable as long as the service handles the error gracefully
             setResult.ErrorMessage.Should().NotBeNullOrEmpty("Should provide error message when mute fails");
 
-            _output.WriteLine($"✅ Client mute error handling verified:");
-            _output.WriteLine($"   Client: {client.Id}");
-            _output.WriteLine($"   Error handled gracefully: {setResult.ErrorMessage}");
+            this._output.WriteLine($"✅ Client mute error handling verified:");
+            this._output.WriteLine($"   Client: {client.Id}");
+            this._output.WriteLine($"   Error handled gracefully: {setResult.ErrorMessage}");
         }
     }
 
@@ -303,7 +305,7 @@ public class SnapcastIntegrationTests
     public async Task SnapcastService_Should_ControlGroupMute()
     {
         // Arrange
-        using var scope = _fixture.ServiceProvider.CreateScope();
+        using var scope = this._fixture.ServiceProvider.CreateScope();
         var snapcastService = scope.ServiceProvider.GetRequiredService<ISnapcastService>();
         await snapcastService.InitializeAsync();
 
@@ -329,11 +331,11 @@ public class SnapcastIntegrationTests
         updatedGroup.Should().NotBeNull();
         updatedGroup!.Muted.Should().Be(testMuted, "Group mute state should be updated");
 
-        _output.WriteLine($"✅ Group mute control successful:");
-        _output.WriteLine($"   Group: {group.Id} ({group.Name})");
-        _output.WriteLine($"   Original muted: {originalMuted}");
-        _output.WriteLine($"   New muted: {testMuted}");
-        _output.WriteLine($"   Verified muted: {updatedGroup.Muted}");
+        this._output.WriteLine($"✅ Group mute control successful:");
+        this._output.WriteLine($"   Group: {group.Id} ({group.Name})");
+        this._output.WriteLine($"   Original muted: {originalMuted}");
+        this._output.WriteLine($"   New muted: {testMuted}");
+        this._output.WriteLine($"   Verified muted: {updatedGroup.Muted}");
 
         // Cleanup - Restore original mute state
         await snapcastService.SetGroupMuteAsync(group.Id, originalMuted);
@@ -343,7 +345,7 @@ public class SnapcastIntegrationTests
     public async Task SnapcastService_Should_ControlGroupStream()
     {
         // Arrange
-        using var scope = _fixture.ServiceProvider.CreateScope();
+        using var scope = this._fixture.ServiceProvider.CreateScope();
         var snapcastService = scope.ServiceProvider.GetRequiredService<ISnapcastService>();
         await snapcastService.InitializeAsync();
 
@@ -372,18 +374,18 @@ public class SnapcastIntegrationTests
         updatedGroup.Should().NotBeNull();
         updatedGroup!.StreamId.Should().Be(testStream.Id, "Group stream should be updated");
 
-        _output.WriteLine($"✅ Group stream control successful:");
-        _output.WriteLine($"   Group: {group.Id} ({group.Name})");
-        _output.WriteLine($"   Original stream: {originalStreamId}");
-        _output.WriteLine($"   New stream: {testStream.Id}");
-        _output.WriteLine($"   Verified stream: {updatedGroup.StreamId}");
+        this._output.WriteLine($"✅ Group stream control successful:");
+        this._output.WriteLine($"   Group: {group.Id} ({group.Name})");
+        this._output.WriteLine($"   Original stream: {originalStreamId}");
+        this._output.WriteLine($"   New stream: {testStream.Id}");
+        this._output.WriteLine($"   Verified stream: {updatedGroup.StreamId}");
     }
 
     [Fact]
     public async Task SnapcastService_Should_HandleInvalidClientId()
     {
         // Arrange
-        using var scope = _fixture.ServiceProvider.CreateScope();
+        using var scope = this._fixture.ServiceProvider.CreateScope();
         var snapcastService = scope.ServiceProvider.GetRequiredService<ISnapcastService>();
         await snapcastService.InitializeAsync();
 
@@ -396,16 +398,16 @@ public class SnapcastIntegrationTests
         result.IsSuccess.Should().BeFalse("Should fail for invalid client ID");
         result.ErrorMessage.Should().NotBeNullOrEmpty("Should provide error message");
 
-        _output.WriteLine($"✅ Invalid client ID handled correctly:");
-        _output.WriteLine($"   Client ID: {invalidClientId}");
-        _output.WriteLine($"   Error: {result.ErrorMessage}");
+        this._output.WriteLine($"✅ Invalid client ID handled correctly:");
+        this._output.WriteLine($"   Client ID: {invalidClientId}");
+        this._output.WriteLine($"   Error: {result.ErrorMessage}");
     }
 
     [Fact]
     public async Task SnapcastService_Should_HandleInvalidGroupId()
     {
         // Arrange
-        using var scope = _fixture.ServiceProvider.CreateScope();
+        using var scope = this._fixture.ServiceProvider.CreateScope();
         var snapcastService = scope.ServiceProvider.GetRequiredService<ISnapcastService>();
         await snapcastService.InitializeAsync();
 
@@ -418,16 +420,16 @@ public class SnapcastIntegrationTests
         result.IsSuccess.Should().BeFalse("Should fail for invalid group ID");
         result.ErrorMessage.Should().NotBeNullOrEmpty("Should provide error message");
 
-        _output.WriteLine($"✅ Invalid group ID handled correctly:");
-        _output.WriteLine($"   Group ID: {invalidGroupId}");
-        _output.WriteLine($"   Error: {result.ErrorMessage}");
+        this._output.WriteLine($"✅ Invalid group ID handled correctly:");
+        this._output.WriteLine($"   Group ID: {invalidGroupId}");
+        this._output.WriteLine($"   Error: {result.ErrorMessage}");
     }
 
     [Fact]
     public async Task SnapcastService_Should_MaintainConnectionState()
     {
         // Arrange
-        using var scope = _fixture.ServiceProvider.CreateScope();
+        using var scope = this._fixture.ServiceProvider.CreateScope();
         var snapcastService = scope.ServiceProvider.GetRequiredService<ISnapcastService>();
 
         // Act & Assert - In integration tests, the service is already initialized by the fixture
@@ -442,7 +444,7 @@ public class SnapcastIntegrationTests
         status2.IsSuccess.Should().BeTrue();
         snapcastService.IsConnected.Should().BeTrue("Should remain connected after multiple operations");
 
-        _output.WriteLine($"✅ Connection state maintained correctly:");
-        _output.WriteLine($"   Connected: {snapcastService.IsConnected}");
+        this._output.WriteLine($"✅ Connection state maintained correctly:");
+        this._output.WriteLine($"   Connected: {snapcastService.IsConnected}");
     }
 }

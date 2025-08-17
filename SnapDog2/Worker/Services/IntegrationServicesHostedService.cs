@@ -10,19 +10,13 @@ using SnapDog2.Core.Abstractions;
 /// Hosted service responsible for initializing integration services (Snapcast, MQTT, KNX, etc.) on application startup.
 /// This ensures that all external integrations are properly connected and ready before the application starts serving requests.
 /// </summary>
-public partial class IntegrationServicesHostedService : BackgroundService
+public partial class IntegrationServicesHostedService(
+    IServiceProvider serviceProvider,
+    ILogger<IntegrationServicesHostedService> logger
+) : BackgroundService
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<IntegrationServicesHostedService> _logger;
-
-    public IntegrationServicesHostedService(
-        IServiceProvider serviceProvider,
-        ILogger<IntegrationServicesHostedService> logger
-    )
-    {
-        this._serviceProvider = serviceProvider;
-        this._logger = logger;
-    }
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
+    private readonly ILogger<IntegrationServicesHostedService> _logger = logger;
 
     #region Logging
 

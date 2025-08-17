@@ -14,42 +14,31 @@ using SnapDog2.Server.Features.Global.Services.Abstractions;
 /// <summary>
 /// Service for managing and publishing global system status.
 /// </summary>
-public partial class GlobalStatusService : IGlobalStatusService
+/// <remarks>
+/// Initializes a new instance of the <see cref="GlobalStatusService"/> class.
+/// </remarks>
+/// <param name="systemStatusHandler">The system status query handler.</param>
+/// <param name="errorStatusHandler">The error status query handler.</param>
+/// <param name="versionInfoHandler">The version info query handler.</param>
+/// <param name="serverStatsHandler">The server stats query handler.</param>
+/// <param name="mediator">The mediator instance.</param>
+/// <param name="logger">The logger instance.</param>
+public partial class GlobalStatusService(
+    GetSystemStatusQueryHandler systemStatusHandler,
+    GetErrorStatusQueryHandler errorStatusHandler,
+    GetVersionInfoQueryHandler versionInfoHandler,
+    GetServerStatsQueryHandler serverStatsHandler,
+    IMediator mediator,
+    ILogger<GlobalStatusService> logger
+) : IGlobalStatusService
 {
-    private readonly GetSystemStatusQueryHandler _systemStatusHandler;
-    private readonly GetErrorStatusQueryHandler _errorStatusHandler;
-    private readonly GetVersionInfoQueryHandler _versionInfoHandler;
-    private readonly GetServerStatsQueryHandler _serverStatsHandler;
-    private readonly IMediator _mediator;
-    private readonly ILogger<GlobalStatusService> _logger;
-    private readonly CancellationTokenSource _cancellationTokenSource;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="GlobalStatusService"/> class.
-    /// </summary>
-    /// <param name="systemStatusHandler">The system status query handler.</param>
-    /// <param name="errorStatusHandler">The error status query handler.</param>
-    /// <param name="versionInfoHandler">The version info query handler.</param>
-    /// <param name="serverStatsHandler">The server stats query handler.</param>
-    /// <param name="mediator">The mediator instance.</param>
-    /// <param name="logger">The logger instance.</param>
-    public GlobalStatusService(
-        GetSystemStatusQueryHandler systemStatusHandler,
-        GetErrorStatusQueryHandler errorStatusHandler,
-        GetVersionInfoQueryHandler versionInfoHandler,
-        GetServerStatsQueryHandler serverStatsHandler,
-        IMediator mediator,
-        ILogger<GlobalStatusService> logger
-    )
-    {
-        this._systemStatusHandler = systemStatusHandler;
-        this._errorStatusHandler = errorStatusHandler;
-        this._versionInfoHandler = versionInfoHandler;
-        this._serverStatsHandler = serverStatsHandler;
-        this._mediator = mediator;
-        this._logger = logger;
-        this._cancellationTokenSource = new CancellationTokenSource();
-    }
+    private readonly GetSystemStatusQueryHandler _systemStatusHandler = systemStatusHandler;
+    private readonly GetErrorStatusQueryHandler _errorStatusHandler = errorStatusHandler;
+    private readonly GetVersionInfoQueryHandler _versionInfoHandler = versionInfoHandler;
+    private readonly GetServerStatsQueryHandler _serverStatsHandler = serverStatsHandler;
+    private readonly IMediator _mediator = mediator;
+    private readonly ILogger<GlobalStatusService> _logger = logger;
+    private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
     /// <inheritdoc />
     public async Task PublishSystemStatusAsync(CancellationToken cancellationToken = default)

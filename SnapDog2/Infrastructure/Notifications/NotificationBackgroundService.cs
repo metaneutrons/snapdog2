@@ -16,55 +16,45 @@ using SnapDog2.Core.Models;
 /// Background service that reads notifications from the queue and publishes
 /// them to external systems (MQTT/KNX) with retry and graceful shutdown.
 /// </summary>
-public sealed class NotificationBackgroundService : BackgroundService
+public sealed class NotificationBackgroundService(
+    NotificationQueue queue,
+    IServiceProvider services,
+    IOptions<NotificationProcessingOptions> options,
+    ILogger<NotificationBackgroundService> logger,
+    IMetricsService? metrics = null
+) : BackgroundService
 {
-    private readonly NotificationQueue _queue;
-    private readonly IMqttService? _mqtt;
-    private readonly IKnxService? _knx;
-    private readonly NotificationProcessingOptions _options;
-    private readonly ILogger<NotificationBackgroundService> _logger;
-    private readonly IMetricsService? _metrics;
-
-    public NotificationBackgroundService(
-        NotificationQueue queue,
-        IServiceProvider services,
-        IOptions<NotificationProcessingOptions> options,
-        ILogger<NotificationBackgroundService> logger,
-        IMetricsService? metrics = null
-    )
-    {
-        _queue = queue;
-        _mqtt = services.GetService<IMqttService>();
-        _knx = services.GetService<IKnxService>();
-        _options = options.Value;
-        _logger = logger;
-        _metrics = metrics;
-    }
+    private readonly NotificationQueue _queue = queue;
+    private readonly IMqttService? _mqtt = services.GetService<IMqttService>();
+    private readonly IKnxService? _knx = services.GetService<IKnxService>();
+    private readonly NotificationProcessingOptions _options = options.Value;
+    private readonly ILogger<NotificationBackgroundService> _logger = logger;
+    private readonly IMetricsService? _metrics = metrics;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Notification background service started");
+        this._logger.LogInformation("Notification background service started");
 
         var readers = new List<Task>();
-        var concurrency = Math.Max(1, _options.MaxConcurrency);
+        var concurrency = Math.Max(1, this._options.MaxConcurrency);
         for (int i = 0; i < concurrency; i++)
         {
-            readers.Add(RunReaderAsync(stoppingToken));
+            readers.Add(this.RunReaderAsync(stoppingToken));
         }
 
         await Task.WhenAll(readers);
 
-        _logger.LogInformation("Notification background service stopped");
+        this._logger.LogInformation("Notification background service stopped");
     }
 
     private async Task RunReaderAsync(CancellationToken stoppingToken)
     {
-        await foreach (var item in _queue.Reader.ReadAllAsync(stoppingToken))
+        await foreach (var item in this._queue.Reader.ReadAllAsync(stoppingToken))
         {
             try
             {
-                await ProcessItemWithRetryAsync(item, stoppingToken);
-                _queue.OnItemDequeued(item);
+                await this.ProcessItemWithRetryAsync(item, stoppingToken);
+                this._queue.OnItemDequeued(item);
             }
             catch (OperationCanceledException)
             {
@@ -73,7 +63,7 @@ public sealed class NotificationBackgroundService : BackgroundService
             }
             catch (Exception ex)
             {
-                _logger.LogError(
+                this._logger.LogError(
                     ex,
                     "Unhandled error processing notification {EventType} for zone {ZoneIndex}",
                     item.EventType,
@@ -86,18 +76,20 @@ public sealed class NotificationBackgroundService : BackgroundService
     private async Task ProcessItemWithRetryAsync(NotificationItem item, CancellationToken ct)
     {
         var attempt = 0;
-        var maxAttempts = Math.Max(1, _options.MaxRetryAttempts);
-        var baseDelay = TimeSpan.FromMilliseconds(Math.Max(0, _options.RetryBaseDelayMs));
-        var maxDelay = TimeSpan.FromMilliseconds(Math.Max(_options.RetryBaseDelayMs, _options.RetryMaxDelayMs));
+        var maxAttempts = Math.Max(1, this._options.MaxRetryAttempts);
+        var baseDelay = TimeSpan.FromMilliseconds(Math.Max(0, this._options.RetryBaseDelayMs));
+        var maxDelay = TimeSpan.FromMilliseconds(
+            Math.Max(this._options.RetryBaseDelayMs, this._options.RetryMaxDelayMs)
+        );
 
         while (true)
         {
             ct.ThrowIfCancellationRequested();
             try
             {
-                await PublishAsync(item, ct);
-                _metrics?.IncrementCounter("notifications_processed_total", 1, ("event", item.EventType));
-                _logger.LogDebug(
+                await this.PublishAsync(item, ct);
+                this._metrics?.IncrementCounter("notifications_processed_total", 1, ("event", item.EventType));
+                this._logger.LogDebug(
                     "Notification {EventType} for zone {ZoneIndex} processed",
                     item.EventType,
                     item.ZoneIndex
@@ -113,14 +105,14 @@ public sealed class NotificationBackgroundService : BackgroundService
                 attempt++;
                 if (attempt >= maxAttempts)
                 {
-                    _logger.LogError(
+                    this._logger.LogError(
                         ex,
                         "Notification {EventType} for zone {ZoneIndex} failed after {Attempts} attempts; dead-lettering",
                         item.EventType,
                         item.ZoneIndex,
                         attempt
                     );
-                    _metrics?.IncrementCounter("notifications_dead_letter_total", 1, ("event", item.EventType));
+                    this._metrics?.IncrementCounter("notifications_dead_letter_total", 1, ("event", item.EventType));
                     // dead-letter hook: could enqueue to an external DLQ or emit metric/log for inspection
                     return;
                 }
@@ -133,8 +125,8 @@ public sealed class NotificationBackgroundService : BackgroundService
                     Random.Shared.Next(0, (int)Math.Min(250, delay.TotalMilliseconds / 5))
                 );
                 var totalDelay = delay + jitter;
-                _metrics?.IncrementCounter("notifications_retried_total", 1, ("event", item.EventType));
-                _logger.LogWarning(
+                this._metrics?.IncrementCounter("notifications_retried_total", 1, ("event", item.EventType));
+                this._logger.LogWarning(
                     ex,
                     "Retrying notification {EventType} for zone {ZoneIndex} (attempt {Attempt}/{MaxAttempts}) after {Delay}ms",
                     item.EventType,
@@ -151,11 +143,11 @@ public sealed class NotificationBackgroundService : BackgroundService
     private async Task PublishAsync(NotificationItem item, CancellationToken ct)
     {
         // MQTT
-        if (_mqtt != null && _mqtt.IsConnected)
+        if (this._mqtt != null && this._mqtt.IsConnected)
         {
             // Use dynamic to invoke the generic method with runtime payload type
-            var mqttResult = await _mqtt
-                .PublishZoneStatusAsync(item.ZoneIndex, item.EventType, (dynamic)item.Payload, ct)
+            var mqttResult = await this
+                ._mqtt.PublishZoneStatusAsync(item.ZoneIndex, item.EventType, (dynamic)item.Payload, ct)
                 .ConfigureAwait(false);
             if (mqttResult.IsFailure)
             {
@@ -164,9 +156,10 @@ public sealed class NotificationBackgroundService : BackgroundService
         }
 
         // KNX
-        if (_knx != null && _knx.IsConnected)
+        if (this._knx != null && this._knx.IsConnected)
         {
-            var knxResult = await _knx.PublishZoneStatusAsync(item.ZoneIndex, item.EventType, (dynamic)item.Payload, ct)
+            var knxResult = await this
+                ._knx.PublishZoneStatusAsync(item.ZoneIndex, item.EventType, (dynamic)item.Payload, ct)
                 .ConfigureAwait(false);
             if (knxResult.IsFailure)
             {
@@ -178,12 +171,12 @@ public sealed class NotificationBackgroundService : BackgroundService
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
         // Graceful drain: complete writer and wait up to configured timeout
-        _queue.CompleteWriter();
-        var timeout = TimeSpan.FromSeconds(Math.Max(1, _options.ShutdownTimeoutSeconds));
+        this._queue.CompleteWriter();
+        var timeout = TimeSpan.FromSeconds(Math.Max(1, this._options.ShutdownTimeoutSeconds));
         using var drainCts = new CancellationTokenSource(timeout);
         try
         {
-            await Task.WhenAny(_queue.ReaderCompletion, Task.Delay(Timeout.InfiniteTimeSpan, drainCts.Token));
+            await Task.WhenAny(this._queue.ReaderCompletion, Task.Delay(Timeout.InfiniteTimeSpan, drainCts.Token));
         }
         catch
         {

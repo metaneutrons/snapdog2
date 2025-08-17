@@ -138,7 +138,9 @@ public static class CortexMediatorConfiguration
     private static bool IsHandlerInterface(Type interfaceType)
     {
         if (!interfaceType.IsGenericType)
+        {
             return false;
+        }
 
         var genericTypeDefinition = interfaceType.GetGenericTypeDefinition();
         return genericTypeDefinition == typeof(ICommandHandler<,>)

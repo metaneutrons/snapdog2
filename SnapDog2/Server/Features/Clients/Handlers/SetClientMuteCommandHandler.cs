@@ -12,22 +12,19 @@ using SnapDog2.Server.Features.Clients.Commands.Volume;
 /// <summary>
 /// Handles the SetClientMuteCommand.
 /// </summary>
-public partial class SetClientMuteCommandHandler : ICommandHandler<SetClientMuteCommand, Result>
+public partial class SetClientMuteCommandHandler(
+    IClientManager clientManager,
+    ILogger<SetClientMuteCommandHandler> logger
+) : ICommandHandler<SetClientMuteCommand, Result>
 {
-    private readonly IClientManager _clientManager;
-    private readonly ILogger<SetClientMuteCommandHandler> _logger;
+    private readonly IClientManager _clientManager = clientManager;
+    private readonly ILogger<SetClientMuteCommandHandler> _logger = logger;
 
     [LoggerMessage(3011, LogLevel.Information, "Setting mute for Client {ClientIndex} to {Enabled} from {Source}")]
     private partial void LogHandling(int clientIndex, bool enabled, CommandSource source);
 
     [LoggerMessage(3012, LogLevel.Warning, "Client {ClientIndex} not found for SetClientMuteCommand")]
     private partial void LogClientNotFound(int clientIndex);
-
-    public SetClientMuteCommandHandler(IClientManager clientManager, ILogger<SetClientMuteCommandHandler> logger)
-    {
-        this._clientManager = clientManager;
-        this._logger = logger;
-    }
 
     public async Task<Result> Handle(SetClientMuteCommand request, CancellationToken cancellationToken)
     {

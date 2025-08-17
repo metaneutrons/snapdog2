@@ -28,14 +28,14 @@ public sealed class AudioProcessingContext : IAsyncDisposable, IDisposable
     )
     {
         var args = config.LibVLCArgs;
-        _libvlc = new LibVLC(args);
-        _mediaPlayer = new LibVLCSharp.Shared.MediaPlayer(_libvlc);
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        this._libvlc = new LibVLC(args);
+        this._mediaPlayer = new LibVLCSharp.Shared.MediaPlayer(this._libvlc);
+        this._logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         var tempDir = tempDirectory ?? config.TempDirectory;
-        _tempDirectory = Directory.CreateDirectory(tempDir);
+        this._tempDirectory = Directory.CreateDirectory(tempDir);
 
-        Config = new AudioProcessingConfig
+        this.Config = new AudioProcessingConfig
         {
             SampleRate = config.SampleRate,
             BitsPerSample = config.BitDepth,
@@ -43,11 +43,11 @@ public sealed class AudioProcessingContext : IAsyncDisposable, IDisposable
             Format = config.OutputFormat,
         };
 
-        MetadataManager = new MetadataManager(_libvlc, metadataLogger);
+        this.MetadataManager = new MetadataManager(this._libvlc, metadataLogger);
 
-        _logger.LogDebug(
+        this._logger.LogDebug(
             "Audio processing context initialized with temp directory: {TempDirectory}",
-            _tempDirectory.FullName
+            this._tempDirectory.FullName
         );
     }
 
@@ -64,7 +64,7 @@ public sealed class AudioProcessingContext : IAsyncDisposable, IDisposable
         CancellationToken cancellationToken = default
     )
     {
-        if (_disposed)
+        if (this._disposed)
         {
             throw new ObjectDisposedException(nameof(AudioProcessingContext));
         }
@@ -72,39 +72,39 @@ public sealed class AudioProcessingContext : IAsyncDisposable, IDisposable
         try
         {
             var sourceId = Guid.NewGuid().ToString("N");
-            var outputPath = Path.Combine(_tempDirectory.FullName, $"{sourceId}.{Config.Format}");
+            var outputPath = Path.Combine(this._tempDirectory.FullName, $"{sourceId}.{this.Config.Format}");
             var metadataPath = Path.ChangeExtension(outputPath, ".json");
 
-            _logger.LogInformation(
+            this._logger.LogInformation(
                 "Starting audio processing: Source={SourceUrl}, Output={OutputPath}",
                 sourceUrl,
                 outputPath
             );
 
             // Build media options for raw audio output
-            var mediaOptions = BuildMediaOptions(outputPath);
+            var mediaOptions = this.BuildMediaOptions(outputPath);
 
-            using var media = new Media(_libvlc, sourceUrl, FromType.FromLocation, mediaOptions.ToArray());
+            using var media = new Media(this._libvlc, sourceUrl, FromType.FromLocation, mediaOptions.ToArray());
 
             // Extract metadata before starting playback
-            var metadata = await MetadataManager.ExtractMetadataAsync(media, cancellationToken);
+            var metadata = await this.MetadataManager.ExtractMetadataAsync(media, cancellationToken);
 
             // Set up the media player
-            _mediaPlayer.Media = media;
+            this._mediaPlayer.Media = media;
 
             // Start playback (which will write to the output file)
-            var playResult = _mediaPlayer.Play();
+            var playResult = this._mediaPlayer.Play();
             if (!playResult)
             {
                 return new AudioProcessingResult { Success = false, ErrorMessage = "Failed to start media playback" };
             }
 
             // Wait for playback to start
-            while (_mediaPlayer.State == VLCState.Opening || _mediaPlayer.State == VLCState.Buffering)
+            while (this._mediaPlayer.State == VLCState.Opening || this._mediaPlayer.State == VLCState.Buffering)
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
-                    _mediaPlayer.Stop();
+                    this._mediaPlayer.Stop();
                     return new AudioProcessingResult { Success = false, ErrorMessage = "Operation was cancelled" };
                 }
 
@@ -112,15 +112,15 @@ public sealed class AudioProcessingContext : IAsyncDisposable, IDisposable
             }
 
             // Check if playback started successfully
-            if (_mediaPlayer.State == VLCState.Error)
+            if (this._mediaPlayer.State == VLCState.Error)
             {
                 return new AudioProcessingResult { Success = false, ErrorMessage = "Media playback failed" };
             }
 
             // Save metadata to JSON file
-            await MetadataManager.SaveMetadataAsync(metadata, metadataPath, cancellationToken);
+            await this.MetadataManager.SaveMetadataAsync(metadata, metadataPath, cancellationToken);
 
-            _logger.LogInformation("Audio processing completed successfully: {OutputPath}", outputPath);
+            this._logger.LogInformation("Audio processing completed successfully: {OutputPath}", outputPath);
 
             return new AudioProcessingResult
             {
@@ -128,18 +128,18 @@ public sealed class AudioProcessingContext : IAsyncDisposable, IDisposable
                 OutputFilePath = outputPath,
                 MetadataPath = metadataPath,
                 SourceId = sourceId,
-                Config = Config,
+                Config = this.Config,
                 Metadata = metadata,
             };
         }
         catch (OperationCanceledException)
         {
-            _logger.LogInformation("Audio processing was cancelled");
+            this._logger.LogInformation("Audio processing was cancelled");
             return new AudioProcessingResult { Success = false, ErrorMessage = "Operation was cancelled" };
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to process audio stream: {SourceUrl}", sourceUrl);
+            this._logger.LogError(ex, "Failed to process audio stream: {SourceUrl}", sourceUrl);
             return new AudioProcessingResult { Success = false, ErrorMessage = ex.Message };
         }
     }
@@ -156,10 +156,10 @@ public sealed class AudioProcessingContext : IAsyncDisposable, IDisposable
         // Set up transcoding to raw audio format
         var transcode =
             $"#transcode{{"
-            + $"acodec=s{Config.BitsPerSample}l,"
-            + $"ab={Config.SampleRate * Config.Channels * Config.BitsPerSample / 8},"
-            + $"channels={Config.Channels},"
-            + $"samplerate={Config.SampleRate}"
+            + $"acodec=s{this.Config.BitsPerSample}l,"
+            + $"ab={this.Config.SampleRate * this.Config.Channels * this.Config.BitsPerSample / 8},"
+            + $"channels={this.Config.Channels},"
+            + $"samplerate={this.Config.SampleRate}"
             + $"}}";
 
         // Set up file output
@@ -172,7 +172,7 @@ public sealed class AudioProcessingContext : IAsyncDisposable, IDisposable
         options.Add(":no-sout-video");
         options.Add(":sout-keep");
 
-        _logger.LogDebug("Built media options: {Options}", string.Join(", ", options));
+        this._logger.LogDebug("Built media options: {Options}", string.Join(", ", options));
 
         return options;
     }
@@ -182,46 +182,46 @@ public sealed class AudioProcessingContext : IAsyncDisposable, IDisposable
     /// </summary>
     public void Stop()
     {
-        if (!_disposed && _mediaPlayer.IsPlaying)
+        if (!this._disposed && this._mediaPlayer.IsPlaying)
         {
-            _mediaPlayer.Stop();
-            _logger.LogDebug("Stopped media playback");
+            this._mediaPlayer.Stop();
+            this._logger.LogDebug("Stopped media playback");
         }
     }
 
     /// <summary>
     /// Gets the current playback state.
     /// </summary>
-    public VLCState State => _mediaPlayer.State;
+    public VLCState State => this._mediaPlayer.State;
 
     /// <summary>
     /// Gets whether media is currently playing.
     /// </summary>
-    public bool IsPlaying => _mediaPlayer.IsPlaying;
+    public bool IsPlaying => this._mediaPlayer.IsPlaying;
 
     public void Dispose()
     {
-        if (!_disposed)
+        if (!this._disposed)
         {
-            _mediaPlayer?.Stop();
-            _mediaPlayer?.Dispose();
-            _libvlc?.Dispose();
-            _disposed = true;
+            this._mediaPlayer?.Stop();
+            this._mediaPlayer?.Dispose();
+            this._libvlc?.Dispose();
+            this._disposed = true;
 
-            _logger.LogDebug("Audio processing context disposed");
+            this._logger.LogDebug("Audio processing context disposed");
         }
     }
 
     public async ValueTask DisposeAsync()
     {
-        if (!_disposed)
+        if (!this._disposed)
         {
-            _mediaPlayer?.Stop();
-            _mediaPlayer?.Dispose();
-            _libvlc?.Dispose();
-            _disposed = true;
+            this._mediaPlayer?.Stop();
+            this._mediaPlayer?.Dispose();
+            this._libvlc?.Dispose();
+            this._disposed = true;
 
-            _logger.LogDebug("Audio processing context disposed asynchronously");
+            this._logger.LogDebug("Audio processing context disposed asynchronously");
         }
 
         await Task.CompletedTask;

@@ -9,15 +9,12 @@ using Microsoft.Extensions.Options;
 /// Dummy authentication handler that allows all requests.
 /// Used when authentication is disabled or no API keys are configured.
 /// </summary>
-public class DummyAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+public class DummyAuthenticationHandler(
+    IOptionsMonitor<AuthenticationSchemeOptions> options,
+    ILoggerFactory logger,
+    UrlEncoder encoder
+) : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
-    public DummyAuthenticationHandler(
-        IOptionsMonitor<AuthenticationSchemeOptions> options,
-        ILoggerFactory logger,
-        UrlEncoder encoder
-    )
-        : base(options, logger, encoder) { }
-
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         // Create a dummy identity for development
@@ -28,9 +25,9 @@ public class DummyAuthenticationHandler : AuthenticationHandler<AuthenticationSc
             new Claim("scope", "api"),
         };
 
-        var identity = new ClaimsIdentity(claims, Scheme.Name);
+        var identity = new ClaimsIdentity(claims, this.Scheme.Name);
         var principal = new ClaimsPrincipal(identity);
-        var ticket = new AuthenticationTicket(principal, Scheme.Name);
+        var ticket = new AuthenticationTicket(principal, this.Scheme.Name);
 
         return Task.FromResult(AuthenticateResult.Success(ticket));
     }

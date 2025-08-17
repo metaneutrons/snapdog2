@@ -320,7 +320,7 @@ public partial class StartupService : IHostedService
     private async Task ValidateExternalDependenciesAsync(CancellationToken cancellationToken)
     {
         // Skip directory validation in test environment
-        if (_environment.EnvironmentName == "Testing")
+        if (this._environment.EnvironmentName == "Testing")
         {
             this.LogDirectoryValidationSkipped();
             return;
@@ -935,46 +935,30 @@ public partial class StartupService : IHostedService
 /// <summary>
 /// Exception thrown when startup validation fails
 /// </summary>
-public class StartupValidationException : Exception
+public class StartupValidationException(string validationStep, int attempts, Exception innerException)
+    : Exception($"Startup validation failed for '{validationStep}' after {attempts} attempts", innerException)
 {
-    public string ValidationStep { get; }
-    public int Attempts { get; }
-
-    public StartupValidationException(string validationStep, int attempts, Exception innerException)
-        : base($"Startup validation failed for '{validationStep}' after {attempts} attempts", innerException)
-    {
-        this.ValidationStep = validationStep;
-        this.Attempts = attempts;
-    }
+    public string ValidationStep { get; } = validationStep;
+    public int Attempts { get; } = attempts;
 }
 
 /// <summary>
 /// Exception thrown when port conflicts are detected
 /// </summary>
-public class PortConflictException : StartupValidationException
+public class PortConflictException(
+    string message,
+    IEnumerable<(string Service, int Port, string ConflictDetails)> conflicts
+) : StartupValidationException("Port Availability Check", 1, new AddressInUseException(message))
 {
-    public IReadOnlyList<(string Service, int Port, string ConflictDetails)> Conflicts { get; }
-
-    public PortConflictException(
-        string message,
-        IEnumerable<(string Service, int Port, string ConflictDetails)> conflicts
-    )
-        : base("Port Availability Check", 1, new AddressInUseException(message))
-    {
-        this.Conflicts = conflicts.ToList().AsReadOnly();
-    }
+    public IReadOnlyList<(string Service, int Port, string ConflictDetails)> Conflicts { get; } =
+        conflicts.ToList().AsReadOnly();
 }
 
 /// <summary>
 /// Exception thrown when directory access fails
 /// </summary>
-public class DirectoryAccessException : StartupValidationException
+public class DirectoryAccessException(string directory, Exception innerException)
+    : StartupValidationException("External Dependencies Check", 1, innerException)
 {
-    public string Directory { get; }
-
-    public DirectoryAccessException(string directory, Exception innerException)
-        : base("External Dependencies Check", 1, innerException)
-    {
-        this.Directory = directory;
-    }
+    public string Directory { get; } = directory;
 }

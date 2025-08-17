@@ -71,32 +71,32 @@ public class IntegrationTestFixture : IAsyncLifetime
             Console.WriteLine("🚀 Starting integration test fixture initialization...");
 
             // Create a custom network for all containers to communicate
-            _testNetwork = new NetworkBuilder().WithName($"snapdog-test-{Guid.NewGuid():N}").Build();
-            await _testNetwork.CreateAsync();
+            this._testNetwork = new NetworkBuilder().WithName($"snapdog-test-{Guid.NewGuid():N}").Build();
+            await this._testNetwork.CreateAsync();
             Console.WriteLine("✅ Test network created");
 
             // Start MQTT broker container
-            await StartMqttBrokerAsync();
+            await this.StartMqttBrokerAsync();
 
             // Start Snapcast server container
-            await StartSnapcastServerAsync();
+            await this.StartSnapcastServerAsync();
 
             // Start Snapcast client containers
-            await StartSnapcastClientsAsync();
+            await this.StartSnapcastClientsAsync();
 
             // Skip KNX container startup since KNX is disabled for integration tests
             // await StartKnxdAsync();
-            KnxdHost = "localhost";
-            KnxdPort = 3671; // Default KNX port
+            this.KnxdHost = "localhost";
+            this.KnxdPort = 3671; // Default KNX port
 
             // Create and configure web application factory
             Console.WriteLine("🏭 About to create web application factory...");
-            await CreateWebApplicationFactoryAsync();
+            await this.CreateWebApplicationFactoryAsync();
             Console.WriteLine("✅ Web application factory created successfully");
 
             // Initialize test clients
             Console.WriteLine("🔧 About to initialize test clients...");
-            await InitializeTestClientsAsync();
+            await this.InitializeTestClientsAsync();
             Console.WriteLine("✅ Test clients initialized successfully");
 
             Console.WriteLine("✅ Integration test fixture initialized successfully");
@@ -157,60 +157,60 @@ public class IntegrationTestFixture : IAsyncLifetime
             Environment.SetEnvironmentVariable("SNAPDOG_CLIENT_3_DEFAULT_ZONE", null);
 
             // Dispose test clients
-            if (_testMqttClient != null)
+            if (this._testMqttClient != null)
             {
-                if (_testMqttClient.IsConnected)
+                if (this._testMqttClient.IsConnected)
                 {
-                    await _testMqttClient.DisconnectAsync();
+                    await this._testMqttClient.DisconnectAsync();
                 }
-                _testMqttClient.Dispose();
+                this._testMqttClient.Dispose();
             }
 
-            if (_testKnxBus != null)
+            if (this._testKnxBus != null)
             {
-                await _testKnxBus.DisposeAsync();
-                _testKnxBus.Dispose();
+                await this._testKnxBus.DisposeAsync();
+                this._testKnxBus.Dispose();
             }
 
             // Dispose application factory
-            _factory?.Dispose();
+            this._factory?.Dispose();
 
             // Dispose containers
-            if (_mqttContainer != null)
+            if (this._mqttContainer != null)
             {
-                await _mqttContainer.DisposeAsync();
+                await this._mqttContainer.DisposeAsync();
             }
 
-            if (_snapcastContainer != null)
+            if (this._snapcastContainer != null)
             {
-                await _snapcastContainer.DisposeAsync();
+                await this._snapcastContainer.DisposeAsync();
             }
 
             // Dispose Snapcast client containers
-            if (_snapcastClientLivingRoom != null)
+            if (this._snapcastClientLivingRoom != null)
             {
-                await _snapcastClientLivingRoom.DisposeAsync();
+                await this._snapcastClientLivingRoom.DisposeAsync();
             }
 
-            if (_snapcastClientKitchen != null)
+            if (this._snapcastClientKitchen != null)
             {
-                await _snapcastClientKitchen.DisposeAsync();
+                await this._snapcastClientKitchen.DisposeAsync();
             }
 
-            if (_snapcastClientBedroom != null)
+            if (this._snapcastClientBedroom != null)
             {
-                await _snapcastClientBedroom.DisposeAsync();
+                await this._snapcastClientBedroom.DisposeAsync();
             }
 
-            if (_knxdFixture != null)
+            if (this._knxdFixture != null)
             {
-                await _knxdFixture.DisposeAsync();
+                await this._knxdFixture.DisposeAsync();
             }
 
             // Dispose test network
-            if (_testNetwork != null)
+            if (this._testNetwork != null)
             {
-                await _testNetwork.DisposeAsync();
+                await this._testNetwork.DisposeAsync();
             }
 
             Console.WriteLine("✅ Integration test fixture disposed successfully");
@@ -232,22 +232,22 @@ public class IntegrationTestFixture : IAsyncLifetime
         var configPath = Path.Combine(repositoryRoot, "devcontainer", "mosquitto", "mosquitto.conf");
         var passwdPath = Path.Combine(repositoryRoot, "devcontainer", "mosquitto", "passwd");
 
-        _mqttContainer = new ContainerBuilder()
+        this._mqttContainer = new ContainerBuilder()
             .WithImage("eclipse-mosquitto:2.0")
             .WithPortBinding(containerMqttPort, true) // Use dynamic port binding
             .WithBindMount(configPath, "/mosquitto/config/mosquitto.conf")
             .WithBindMount(passwdPath, "/mosquitto/config/passwd")
-            .WithNetwork(_testNetwork!)
+            .WithNetwork(this._testNetwork!)
             .WithNetworkAliases("mqtt-broker")
             .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(containerMqttPort))
             .Build();
 
-        await _mqttContainer.StartAsync();
+        await this._mqttContainer.StartAsync();
 
-        MqttBrokerHost = _mqttContainer.Hostname;
-        MqttBrokerPort = _mqttContainer.GetMappedPublicPort(containerMqttPort);
+        this.MqttBrokerHost = this._mqttContainer.Hostname;
+        this.MqttBrokerPort = this._mqttContainer.GetMappedPublicPort(containerMqttPort);
 
-        Console.WriteLine($"✅ MQTT broker started at {MqttBrokerHost}:{MqttBrokerPort}");
+        Console.WriteLine($"✅ MQTT broker started at {this.MqttBrokerHost}:{this.MqttBrokerPort}");
     }
 
     private async Task StartSnapcastServerAsync()
@@ -258,24 +258,24 @@ public class IntegrationTestFixture : IAsyncLifetime
         const int containerHttpPort = 1780;
 
         // Use dynamic ports to avoid conflicts
-        _snapcastContainer = new ContainerBuilder()
+        this._snapcastContainer = new ContainerBuilder()
             .WithImage("saiyato/snapserver:latest")
             .WithPortBinding(containerJsonRpcPort, true) // Use dynamic port binding
             .WithPortBinding(containerHttpPort, true)
             .WithEnvironment("SNAPCAST_LOG_LEVEL", "info")
-            .WithNetwork(_testNetwork!)
+            .WithNetwork(this._testNetwork!)
             .WithNetworkAliases("snapcast-server")
             .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(containerJsonRpcPort))
             .Build();
 
-        await _snapcastContainer.StartAsync();
+        await this._snapcastContainer.StartAsync();
 
-        SnapcastHost = _snapcastContainer.Hostname;
-        SnapcastJsonRpcPort = _snapcastContainer.GetMappedPublicPort(containerJsonRpcPort);
-        SnapcastHttpPort = _snapcastContainer.GetMappedPublicPort(containerHttpPort);
+        this.SnapcastHost = this._snapcastContainer.Hostname;
+        this.SnapcastJsonRpcPort = this._snapcastContainer.GetMappedPublicPort(containerJsonRpcPort);
+        this.SnapcastHttpPort = this._snapcastContainer.GetMappedPublicPort(containerHttpPort);
 
         Console.WriteLine(
-            $"✅ Snapcast server started at {SnapcastHost}:{SnapcastJsonRpcPort} (JSON-RPC), {SnapcastHost}:{SnapcastHttpPort} (HTTP)"
+            $"✅ Snapcast server started at {this.SnapcastHost}:{this.SnapcastJsonRpcPort} (JSON-RPC), {this.SnapcastHost}:{this.SnapcastHttpPort} (HTTP)"
         );
     }
 
@@ -313,7 +313,7 @@ public class IntegrationTestFixture : IAsyncLifetime
             .WithEnvironment("SNAPSERVER_HOST", "snapcast-server") // Use network alias
             .WithEnvironment("CLIENT_ID", "living-room")
             .WithEnvironment("FIXED_MAC_ADDRESS", "02:42:ac:11:00:10")
-            .WithNetwork(_testNetwork!)
+            .WithNetwork(this._testNetwork!)
             .WithNetworkAliases("snapcast-client-living-room");
 
         if (hasAudioDevices)
@@ -323,7 +323,7 @@ public class IntegrationTestFixture : IAsyncLifetime
                 .WithBindMount("/dev/snd", "/dev/snd"); // Mount audio devices
         }
 
-        _snapcastClientLivingRoom = livingRoomBuilder.Build();
+        this._snapcastClientLivingRoom = livingRoomBuilder.Build();
 
         // Start Kitchen client
         var kitchenBuilder = new ContainerBuilder()
@@ -331,7 +331,7 @@ public class IntegrationTestFixture : IAsyncLifetime
             .WithEnvironment("SNAPSERVER_HOST", "snapcast-server") // Use network alias
             .WithEnvironment("CLIENT_ID", "kitchen")
             .WithEnvironment("FIXED_MAC_ADDRESS", "02:42:ac:11:00:11")
-            .WithNetwork(_testNetwork!)
+            .WithNetwork(this._testNetwork!)
             .WithNetworkAliases("snapcast-client-kitchen");
 
         if (hasAudioDevices)
@@ -341,7 +341,7 @@ public class IntegrationTestFixture : IAsyncLifetime
                 .WithBindMount("/dev/snd", "/dev/snd"); // Mount audio devices
         }
 
-        _snapcastClientKitchen = kitchenBuilder.Build();
+        this._snapcastClientKitchen = kitchenBuilder.Build();
 
         // Start Bedroom client
         var bedroomBuilder = new ContainerBuilder()
@@ -349,7 +349,7 @@ public class IntegrationTestFixture : IAsyncLifetime
             .WithEnvironment("SNAPSERVER_HOST", "snapcast-server") // Use network alias
             .WithEnvironment("CLIENT_ID", "bedroom")
             .WithEnvironment("FIXED_MAC_ADDRESS", "02:42:ac:11:00:12")
-            .WithNetwork(_testNetwork!)
+            .WithNetwork(this._testNetwork!)
             .WithNetworkAliases("snapcast-client-bedroom");
 
         if (hasAudioDevices)
@@ -359,14 +359,14 @@ public class IntegrationTestFixture : IAsyncLifetime
                 .WithBindMount("/dev/snd", "/dev/snd"); // Mount audio devices
         }
 
-        _snapcastClientBedroom = bedroomBuilder.Build();
+        this._snapcastClientBedroom = bedroomBuilder.Build();
 
         // Start all clients concurrently
         var clientTasks = new[]
         {
-            _snapcastClientLivingRoom.StartAsync(),
-            _snapcastClientKitchen.StartAsync(),
-            _snapcastClientBedroom.StartAsync(),
+            this._snapcastClientLivingRoom.StartAsync(),
+            this._snapcastClientKitchen.StartAsync(),
+            this._snapcastClientBedroom.StartAsync(),
         };
 
         await Task.WhenAll(clientTasks);
@@ -382,20 +382,20 @@ public class IntegrationTestFixture : IAsyncLifetime
     {
         Console.WriteLine("🐳 Starting KNXd container...");
 
-        _knxdFixture = new KnxdFixture();
-        await _knxdFixture.InitializeAsync();
+        this._knxdFixture = new KnxdFixture();
+        await this._knxdFixture.InitializeAsync();
 
-        KnxdHost = _knxdFixture.KnxHost;
-        KnxdPort = _knxdFixture.KnxTcpPort;
+        this.KnxdHost = this._knxdFixture.KnxHost;
+        this.KnxdPort = this._knxdFixture.KnxTcpPort;
 
-        Console.WriteLine($"✅ KNXd started at {KnxdHost}:{KnxdPort}");
+        Console.WriteLine($"✅ KNXd started at {this.KnxdHost}:{this.KnxdPort}");
     }
 
     private Task CreateWebApplicationFactoryAsync()
     {
         Console.WriteLine("🏭 Creating web application factory...");
 
-        _factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
+        this._factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
             // Set the environment to Testing to trigger the correct path in Program.cs
             builder.UseEnvironment("Testing");
@@ -421,20 +421,20 @@ public class IntegrationTestFixture : IAsyncLifetime
             );
 
             // Set environment variables with dynamic ports from containers
-            Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_SNAPCAST_ADDRESS", SnapcastHost);
+            Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_SNAPCAST_ADDRESS", this.SnapcastHost);
             Environment.SetEnvironmentVariable(
                 "SNAPDOG_SERVICES_SNAPCAST_JSONRPC_PORT",
-                SnapcastJsonRpcPort.ToString()
+                this.SnapcastJsonRpcPort.ToString()
             );
-            Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_MQTT_BROKER_ADDRESS", MqttBrokerHost);
-            Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_MQTT_PORT", MqttBrokerPort.ToString());
+            Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_MQTT_BROKER_ADDRESS", this.MqttBrokerHost);
+            Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_MQTT_PORT", this.MqttBrokerPort.ToString());
             Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_MQTT_USERNAME", "snapdog");
             Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_MQTT_PASSWORD", "snapdog");
             Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_MQTT_ENABLED", "true"); // Enable MQTT service for tests
             Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_KNX_ENABLED", "false"); // Disable KNX service to prevent hanging
             Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_KNX_CONNECTION_TYPE", "tunnel"); // Use tunnel mode like devcontainer
-            Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_KNX_GATEWAY", KnxdHost);
-            Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_KNX_PORT", KnxdPort.ToString());
+            Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_KNX_GATEWAY", this.KnxdHost);
+            Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_KNX_PORT", this.KnxdPort.ToString());
 
             // Enable API server for integration tests
             Environment.SetEnvironmentVariable("SNAPDOG_API_ENABLED", "true");
@@ -483,8 +483,8 @@ public class IntegrationTestFixture : IAsyncLifetime
                     {
                         // MQTT Configuration
                         ["Services:Mqtt:Enabled"] = "true",
-                        ["Services:Mqtt:BrokerAddress"] = MqttBrokerHost,
-                        ["Services:Mqtt:Port"] = MqttBrokerPort.ToString(),
+                        ["Services:Mqtt:BrokerAddress"] = this.MqttBrokerHost,
+                        ["Services:Mqtt:Port"] = this.MqttBrokerPort.ToString(),
                         ["Services:Mqtt:ClientIndex"] = "test-client",
                         ["Services:Mqtt:Username"] = "snapdog",
                         ["Services:Mqtt:Password"] = "snapdog",
@@ -493,14 +493,14 @@ public class IntegrationTestFixture : IAsyncLifetime
                         // KNX Configuration - Disabled for integration tests to prevent hanging
                         ["Services:Knx:Enabled"] = "false",
                         ["Services:Knx:ConnectionType"] = "Tunnel",
-                        ["Services:Knx:Gateway"] = KnxdHost,
-                        ["Services:Knx:Port"] = KnxdPort.ToString(),
+                        ["Services:Knx:Gateway"] = this.KnxdHost,
+                        ["Services:Knx:Port"] = this.KnxdPort.ToString(),
                         ["Services:Knx:AutoReconnect"] = "true",
 
                         // Snapcast Configuration
-                        ["Services:Snapcast:Address"] = SnapcastHost,
-                        ["Services:Snapcast:JsonRpcPort"] = SnapcastJsonRpcPort.ToString(),
-                        ["Services:Snapcast:HttpPort"] = SnapcastHttpPort.ToString(),
+                        ["Services:Snapcast:Address"] = this.SnapcastHost,
+                        ["Services:Snapcast:JsonRpcPort"] = this.SnapcastJsonRpcPort.ToString(),
+                        ["Services:Snapcast:HttpPort"] = this.SnapcastHttpPort.ToString(),
                         ["Services:Snapcast:Timeout"] = "30",
                         ["Services:Snapcast:AutoReconnect"] = "true",
                         ["Services:Snapcast:ReconnectInterval"] = "5",
@@ -567,11 +567,11 @@ public class IntegrationTestFixture : IAsyncLifetime
         });
 
         Console.WriteLine("🏭 Creating HTTP client...");
-        HttpClient = _factory.CreateClient();
+        this.HttpClient = this._factory.CreateClient();
         Console.WriteLine("✅ HTTP client created");
 
         Console.WriteLine("🏭 Getting service provider...");
-        ServiceProvider = _factory.Services;
+        this.ServiceProvider = this._factory.Services;
         Console.WriteLine("✅ Service provider obtained");
 
         Console.WriteLine("✅ Web application factory created");
@@ -583,7 +583,7 @@ public class IntegrationTestFixture : IAsyncLifetime
         Console.WriteLine("🔧 Initializing test clients...");
 
         // Initialize MQTT test client using MQTTnet 5.x patterns from the application
-        await InitializeMqttTestClientAsync();
+        await this.InitializeMqttTestClientAsync();
 
         // Skip KNX test client initialization since KNX is disabled
         // await InitializeKnxTestClientAsync();
@@ -597,11 +597,11 @@ public class IntegrationTestFixture : IAsyncLifetime
         {
             // Create MQTT client using the same pattern as MqttService
             var factory = new MqttClientFactory();
-            _testMqttClient = factory.CreateMqttClient();
+            this._testMqttClient = factory.CreateMqttClient();
 
             // Configure client options using dynamic container ports
             var optionsBuilder = new MqttClientOptionsBuilder()
-                .WithTcpServer(MqttBrokerHost, MqttBrokerPort)
+                .WithTcpServer(this.MqttBrokerHost, this.MqttBrokerPort)
                 .WithClientId("test-client")
                 .WithCredentials("snapdog", "snapdog") // Use same credentials as devcontainer
                 .WithKeepAlivePeriod(TimeSpan.FromSeconds(60))
@@ -610,9 +610,9 @@ public class IntegrationTestFixture : IAsyncLifetime
             var options = optionsBuilder.Build();
 
             // Connect to broker
-            await _testMqttClient.ConnectAsync(options);
+            await this._testMqttClient.ConnectAsync(options);
 
-            Console.WriteLine($"✅ MQTT test client connected to {MqttBrokerHost}:{MqttBrokerPort}");
+            Console.WriteLine($"✅ MQTT test client connected to {this.MqttBrokerHost}:{this.MqttBrokerPort}");
         }
         catch (Exception ex)
         {
@@ -626,20 +626,20 @@ public class IntegrationTestFixture : IAsyncLifetime
         try
         {
             // Create KNX bus using dynamic container ports
-            var connectorParams = new IpTunnelingConnectorParameters(KnxdHost, KnxdPort);
-            _testKnxBus = new KnxBus(connectorParams);
+            var connectorParams = new IpTunnelingConnectorParameters(this.KnxdHost, this.KnxdPort);
+            this._testKnxBus = new KnxBus(connectorParams);
 
             // Connect to KNX bus
-            await _testKnxBus.ConnectAsync();
+            await this._testKnxBus.ConnectAsync();
 
-            if (_testKnxBus.ConnectionState != BusConnectionState.Connected)
+            if (this._testKnxBus.ConnectionState != BusConnectionState.Connected)
             {
                 throw new InvalidOperationException(
-                    $"KNX test client connection failed - state: {_testKnxBus.ConnectionState}"
+                    $"KNX test client connection failed - state: {this._testKnxBus.ConnectionState}"
                 );
             }
 
-            Console.WriteLine($"✅ KNX test client connected to {KnxdHost}:{KnxdPort}");
+            Console.WriteLine($"✅ KNX test client connected to {this.KnxdHost}:{this.KnxdPort}");
         }
         catch (Exception ex)
         {
@@ -657,7 +657,7 @@ public class IntegrationTestFixture : IAsyncLifetime
         CancellationToken cancellationToken = default
     )
     {
-        if (_testMqttClient == null || !_testMqttClient.IsConnected)
+        if (this._testMqttClient == null || !this._testMqttClient.IsConnected)
         {
             return Result.Failure("MQTT test client is not connected");
         }
@@ -671,7 +671,7 @@ public class IntegrationTestFixture : IAsyncLifetime
                 .WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce)
                 .Build();
 
-            await _testMqttClient.PublishAsync(message, cancellationToken);
+            await this._testMqttClient.PublishAsync(message, cancellationToken);
             return Result.Success();
         }
         catch (Exception ex)
@@ -686,7 +686,7 @@ public class IntegrationTestFixture : IAsyncLifetime
         CancellationToken cancellationToken = default
     )
     {
-        if (_testKnxBus == null || _testKnxBus.ConnectionState != BusConnectionState.Connected)
+        if (this._testKnxBus == null || this._testKnxBus.ConnectionState != BusConnectionState.Connected)
         {
             return Result.Failure("KNX test client is not connected");
         }
@@ -704,7 +704,7 @@ public class IntegrationTestFixture : IAsyncLifetime
                 _ => throw new ArgumentException($"Unsupported value type: {value?.GetType()}"),
             };
 
-            await _testKnxBus.WriteGroupValueAsync(ga, groupValue);
+            await this._testKnxBus.WriteGroupValueAsync(ga, groupValue);
             return Result.Success();
         }
         catch (Exception ex)
@@ -717,7 +717,7 @@ public class IntegrationTestFixture : IAsyncLifetime
     {
         try
         {
-            using var scope = ServiceProvider.CreateScope();
+            using var scope = this.ServiceProvider.CreateScope();
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
             // Send the command using the same pattern as the application
@@ -739,7 +739,7 @@ public class IntegrationTestFixture : IAsyncLifetime
     {
         try
         {
-            var response = await HttpClient.GetAsync($"/api/v1/zones/{zoneIndex}", cancellationToken);
+            var response = await this.HttpClient.GetAsync($"/api/v1/zones/{zoneIndex}", cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
                 return null;
@@ -781,7 +781,7 @@ public class IntegrationTestFixture : IAsyncLifetime
     {
         // Don't create a scope to avoid disposal issues with async-only disposable services
         // Just check if the service is registered in the root container
-        var service = ServiceProvider.GetService<T>();
+        var service = this.ServiceProvider.GetService<T>();
 
         // Debug output
         Console.WriteLine($"Checking service {typeof(T).Name}: {(service != null ? "Found" : "Not Found")}");
@@ -791,7 +791,7 @@ public class IntegrationTestFixture : IAsyncLifetime
 
     public void AssertConfigurationIsValid()
     {
-        using var scope = ServiceProvider.CreateScope();
+        using var scope = this.ServiceProvider.CreateScope();
 
         // Get the actual SnapDog configuration object which uses EnvoyConfig
         var snapDogConfig = scope.ServiceProvider.GetRequiredService<IOptions<SnapDogConfiguration>>().Value;
@@ -800,13 +800,13 @@ public class IntegrationTestFixture : IAsyncLifetime
         snapDogConfig.Services.Mqtt.Enabled.Should().BeTrue("MQTT should be enabled in tests");
         snapDogConfig
             .Services.Mqtt.BrokerAddress.Should()
-            .Be(MqttBrokerHost, "MQTT broker should use test container address");
-        snapDogConfig.Services.Mqtt.Port.Should().Be(MqttBrokerPort, "MQTT should use test container port");
+            .Be(this.MqttBrokerHost, "MQTT broker should use test container address");
+        snapDogConfig.Services.Mqtt.Port.Should().Be(this.MqttBrokerPort, "MQTT should use test container port");
 
         // Verify KNX configuration (disabled in tests)
         snapDogConfig.Services.Knx.Enabled.Should().BeFalse("KNX should be disabled in tests");
-        snapDogConfig.Services.Knx.Gateway.Should().Be(KnxdHost, "KNX gateway should use test container address");
-        snapDogConfig.Services.Knx.Port.Should().Be(KnxdPort, "KNX should use test container port");
+        snapDogConfig.Services.Knx.Gateway.Should().Be(this.KnxdHost, "KNX gateway should use test container address");
+        snapDogConfig.Services.Knx.Port.Should().Be(this.KnxdPort, "KNX should use test container port");
 
         // Verify API configuration using the actual configuration object
         // This works because EnvoyConfig properly loads the SNAPDOG_ prefixed environment variables

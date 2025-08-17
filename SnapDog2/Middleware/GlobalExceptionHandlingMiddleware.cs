@@ -8,26 +8,16 @@ namespace SnapDog2.Middleware;
 /// <summary>
 /// global exception handling middleware
 /// </summary>
-public partial class GlobalExceptionHandlingMiddleware
+public partial class GlobalExceptionHandlingMiddleware(
+    RequestDelegate next,
+    ILogger<GlobalExceptionHandlingMiddleware> logger,
+    IHostEnvironment environment
+)
 {
-    private readonly RequestDelegate _next;
-    private readonly ILogger<GlobalExceptionHandlingMiddleware> _logger;
-    private readonly IHostEnvironment _environment;
-    private readonly bool _includeStackTraces;
-
-    public GlobalExceptionHandlingMiddleware(
-        RequestDelegate next,
-        ILogger<GlobalExceptionHandlingMiddleware> logger,
-        IHostEnvironment environment
-    )
-    {
-        this._next = next;
-        this._logger = logger;
-        this._environment = environment;
-
-        // Include stack traces in development or when debug logging is enabled
-        this._includeStackTraces = environment.IsDevelopment() || logger.IsEnabled(LogLevel.Debug);
-    }
+    private readonly RequestDelegate _next = next;
+    private readonly ILogger<GlobalExceptionHandlingMiddleware> _logger = logger;
+    private readonly IHostEnvironment _environment = environment;
+    private readonly bool _includeStackTraces = environment.IsDevelopment() || logger.IsEnabled(LogLevel.Debug);
 
     public async Task InvokeAsync(HttpContext context)
     {

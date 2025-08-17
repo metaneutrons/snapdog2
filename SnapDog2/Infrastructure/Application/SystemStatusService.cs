@@ -11,19 +11,14 @@ using SnapDog2.Helpers;
 /// Implementation of system status service.
 /// TODO: This is a placeholder implementation - will be enhanced with real metrics.
 /// </summary>
-public partial class AppStatusService : IAppStatusService
+/// <remarks>
+/// Initializes a new instance of the <see cref="AppStatusService"/> class.
+/// </remarks>
+/// <param name="logger">The logger instance.</param>
+public partial class AppStatusService(ILogger<AppStatusService> logger) : IAppStatusService
 {
-    private readonly ILogger<AppStatusService> _logger;
+    private readonly ILogger<AppStatusService> _logger = logger;
     private static readonly DateTime _startTime = DateTime.UtcNow;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="AppStatusService"/> class.
-    /// </summary>
-    /// <param name="logger">The logger instance.</param>
-    public AppStatusService(ILogger<AppStatusService> logger)
-    {
-        this._logger = logger;
-    }
 
     /// <inheritdoc/>
     public Task<SystemStatus> GetCurrentStatusAsync()

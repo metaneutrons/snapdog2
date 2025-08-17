@@ -16,19 +16,19 @@ public class TestcontainersFixture : IAsyncLifetime
     {
         // Start a Mosquitto broker for MQTT smoke tests
         const int containerMqttPort = 1883;
-        _mqttContainer = new ContainerBuilder()
+        this._mqttContainer = new ContainerBuilder()
             .WithImage("eclipse-mosquitto:2.0")
             .WithPortBinding(0, containerMqttPort)
             .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(containerMqttPort))
             .Build();
 
-        await _mqttContainer.StartAsync();
-        MqttPort = _mqttContainer.GetMappedPublicPort(containerMqttPort);
-        MqttHost = "localhost";
+        await this._mqttContainer.StartAsync();
+        this.MqttPort = this._mqttContainer.GetMappedPublicPort(containerMqttPort);
+        this.MqttHost = "localhost";
 
         // Expose to other tests that rely on environment variables
-        Environment.SetEnvironmentVariable("SNAPDOG_TEST_MQTT_HOST", MqttHost);
-        Environment.SetEnvironmentVariable("SNAPDOG_TEST_MQTT_PORT", MqttPort.ToString());
+        Environment.SetEnvironmentVariable("SNAPDOG_TEST_MQTT_HOST", this.MqttHost);
+        Environment.SetEnvironmentVariable("SNAPDOG_TEST_MQTT_PORT", this.MqttPort.ToString());
     }
 
     public async Task DisposeAsync()
@@ -36,10 +36,10 @@ public class TestcontainersFixture : IAsyncLifetime
         try { }
         finally
         {
-            if (_mqttContainer is not null)
+            if (this._mqttContainer is not null)
             {
-                await _mqttContainer.StopAsync();
-                await _mqttContainer.DisposeAsync();
+                await this._mqttContainer.StopAsync();
+                await this._mqttContainer.DisposeAsync();
             }
         }
     }

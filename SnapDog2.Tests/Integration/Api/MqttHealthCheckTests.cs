@@ -18,20 +18,20 @@ public class MqttHealthCheckTests : IClassFixture<MqttIntegrationWebApplicationF
 
     public MqttHealthCheckTests(MqttIntegrationWebApplicationFactory factory)
     {
-        _factory = factory;
-        _client = _factory.CreateClient();
+        this._factory = factory;
+        this._client = this._factory.CreateClient();
     }
 
     [Fact]
     public async Task ReadyEndpoint_ShouldBeReachable_AndIncludeMqttCheck()
     {
         // Arrange - ensure API enabled in factory, mqtt enabled and pointed to container
-        using var scope = _factory.Services.CreateScope();
+        using var scope = this._factory.Services.CreateScope();
         var config = scope.ServiceProvider.GetRequiredService<SnapDogConfiguration>();
         config.Api.Enabled.Should().BeTrue("API must be enabled for this test");
 
         // Act
-        var response = await _client.GetAsync("/api/health/ready");
+        var response = await this._client.GetAsync("/api/health/ready");
 
         // Assert: reachable, not 404
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.ServiceUnavailable);
@@ -65,30 +65,30 @@ public class MqttIntegrationWebApplicationFactory : CustomWebApplicationFactory
         var mqttPort = Environment.GetEnvironmentVariable("SNAPDOG_TEST_MQTT_PORT") ?? "1883";
 
         // Ensure API and health checks are enabled for the test harness
-        SetEnv("SNAPDOG_SYSTEM_HEALTH_CHECKS_ENABLED", "true");
-        SetEnv("SNAPDOG_API_ENABLED", "true");
-        SetEnv("SNAPDOG_API_AUTH_ENABLED", "false");
-        SetEnv("SNAPDOG_API_PORT", "0");
+        this.SetEnv("SNAPDOG_SYSTEM_HEALTH_CHECKS_ENABLED", "true");
+        this.SetEnv("SNAPDOG_API_ENABLED", "true");
+        this.SetEnv("SNAPDOG_API_AUTH_ENABLED", "false");
+        this.SetEnv("SNAPDOG_API_PORT", "0");
 
         // Snapcast health check target; it's fine if it's unhealthy
-        SetEnv("SNAPDOG_SERVICES_SNAPCAST_ADDRESS", "localhost");
-        SetEnv("SNAPDOG_SERVICES_SNAPCAST_JSONRPC_PORT", "1704");
+        this.SetEnv("SNAPDOG_SERVICES_SNAPCAST_ADDRESS", "localhost");
+        this.SetEnv("SNAPDOG_SERVICES_SNAPCAST_JSONRPC_PORT", "1704");
 
         // Enable MQTT and point to container
-        SetEnv("SNAPDOG_SERVICES_MQTT_ENABLED", "true");
-        SetEnv("SNAPDOG_SERVICES_MQTT_BROKER_ADDRESS", mqttHost);
-        SetEnv("SNAPDOG_SERVICES_MQTT_PORT", mqttPort);
+        this.SetEnv("SNAPDOG_SERVICES_MQTT_ENABLED", "true");
+        this.SetEnv("SNAPDOG_SERVICES_MQTT_BROKER_ADDRESS", mqttHost);
+        this.SetEnv("SNAPDOG_SERVICES_MQTT_PORT", mqttPort);
 
         // Disable other integrations to reduce noise
-        SetEnv("SNAPDOG_SERVICES_KNX_ENABLED", "false");
-        SetEnv("SNAPDOG_SERVICES_SUBSONIC_ENABLED", "false");
+        this.SetEnv("SNAPDOG_SERVICES_KNX_ENABLED", "false");
+        this.SetEnv("SNAPDOG_SERVICES_SUBSONIC_ENABLED", "false");
     }
 
     private void SetEnv(string name, string value)
     {
         lock (_lock)
         {
-            _originalValues[name] = Environment.GetEnvironmentVariable(name);
+            this._originalValues[name] = Environment.GetEnvironmentVariable(name);
             Environment.SetEnvironmentVariable(name, value);
         }
     }
@@ -99,11 +99,11 @@ public class MqttIntegrationWebApplicationFactory : CustomWebApplicationFactory
         {
             lock (_lock)
             {
-                foreach (var kvp in _originalValues)
+                foreach (var kvp in this._originalValues)
                 {
                     Environment.SetEnvironmentVariable(kvp.Key, kvp.Value);
                 }
-                _originalValues.Clear();
+                this._originalValues.Clear();
             }
         }
         base.Dispose(disposing);

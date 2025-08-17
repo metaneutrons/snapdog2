@@ -28,8 +28,8 @@ public sealed class NotificationQueue : INotificationQueue
     private readonly IMetricsService? _metrics;
     private int _depth;
 
-    internal ChannelReader<NotificationItem> Reader => _queue.Reader;
-    internal Task ReaderCompletion => _queue.Reader.Completion;
+    internal ChannelReader<NotificationItem> Reader => this._queue.Reader;
+    internal Task ReaderCompletion => this._queue.Reader.Completion;
 
     public NotificationQueue(
         IOptions<NotificationProcessingOptions> options,
@@ -37,8 +37,8 @@ public sealed class NotificationQueue : INotificationQueue
         IMetricsService? metrics = null
     )
     {
-        _logger = logger;
-        _metrics = metrics;
+        this._logger = logger;
+        this._metrics = metrics;
         var capacity = Math.Max(16, options.Value.MaxQueueCapacity);
         var channelOptions = new BoundedChannelOptions(capacity)
         {
@@ -47,7 +47,7 @@ public sealed class NotificationQueue : INotificationQueue
             SingleWriter = false,
             AllowSynchronousContinuations = false,
         };
-        _queue = Channel.CreateBounded<NotificationItem>(channelOptions);
+        this._queue = Channel.CreateBounded<NotificationItem>(channelOptions);
     }
 
     public async Task EnqueueZoneAsync<T>(
@@ -65,22 +65,22 @@ public sealed class NotificationQueue : INotificationQueue
             Attempt = 0,
         };
 
-        await _queue.Writer.WriteAsync(item, cancellationToken);
-        var newDepth = Interlocked.Increment(ref _depth);
-        _logger.LogDebug("Enqueued notification {EventType} for zone {ZoneIndex}", eventType, zoneIndex);
-        _metrics?.IncrementCounter("notifications_enqueued_total", 1, ("event", eventType));
-        _metrics?.SetGauge("notifications_queue_depth", newDepth);
+        await this._queue.Writer.WriteAsync(item, cancellationToken);
+        var newDepth = Interlocked.Increment(ref this._depth);
+        this._logger.LogDebug("Enqueued notification {EventType} for zone {ZoneIndex}", eventType, zoneIndex);
+        this._metrics?.IncrementCounter("notifications_enqueued_total", 1, ("event", eventType));
+        this._metrics?.SetGauge("notifications_queue_depth", newDepth);
     }
 
     internal void OnItemDequeued(NotificationItem item)
     {
-        var newDepth = Interlocked.Decrement(ref _depth);
-        _metrics?.IncrementCounter("notifications_dequeued_total", 1, ("event", item.EventType));
-        _metrics?.SetGauge("notifications_queue_depth", Math.Max(0, newDepth));
+        var newDepth = Interlocked.Decrement(ref this._depth);
+        this._metrics?.IncrementCounter("notifications_dequeued_total", 1, ("event", item.EventType));
+        this._metrics?.SetGauge("notifications_queue_depth", Math.Max(0, newDepth));
     }
 
     internal void CompleteWriter()
     {
-        _queue.Writer.TryComplete();
+        this._queue.Writer.TryComplete();
     }
 }

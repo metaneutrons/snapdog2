@@ -23,10 +23,10 @@ public class ClientVolumeCommandHandlerTests
 
     public ClientVolumeCommandHandlerTests()
     {
-        _mockClientManager = new Mock<IClientManager>();
-        _mockClient = new Mock<IClient>();
-        _mockLoggerUp = new Mock<ILogger<ClientVolumeUpCommandHandler>>();
-        _mockLoggerDown = new Mock<ILogger<ClientVolumeDownCommandHandler>>();
+        this._mockClientManager = new Mock<IClientManager>();
+        this._mockClient = new Mock<IClient>();
+        this._mockLoggerUp = new Mock<ILogger<ClientVolumeUpCommandHandler>>();
+        this._mockLoggerDown = new Mock<ILogger<ClientVolumeDownCommandHandler>>();
     }
 
     #region ClientVolumeUpCommandHandler Tests
@@ -59,24 +59,22 @@ public class ClientVolumeCommandHandlerTests
             LatencyMs = 0,
         };
 
-        _mockClientManager
-            .Setup(x => x.GetClientStateAsync(clientIndex))
+        this._mockClientManager.Setup(x => x.GetClientStateAsync(clientIndex))
             .ReturnsAsync(Result<ClientState>.Success(clientState));
 
-        _mockClientManager
-            .Setup(x => x.GetClientAsync(clientIndex))
-            .ReturnsAsync(Result<IClient>.Success(_mockClient.Object));
+        this._mockClientManager.Setup(x => x.GetClientAsync(clientIndex))
+            .ReturnsAsync(Result<IClient>.Success(this._mockClient.Object));
 
-        _mockClient.Setup(x => x.SetVolumeAsync(expectedVolume)).ReturnsAsync(Result.Success());
+        this._mockClient.Setup(x => x.SetVolumeAsync(expectedVolume)).ReturnsAsync(Result.Success());
 
-        var handler = new ClientVolumeUpCommandHandler(_mockClientManager.Object, _mockLoggerUp.Object);
+        var handler = new ClientVolumeUpCommandHandler(this._mockClientManager.Object, this._mockLoggerUp.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        _mockClient.Verify(x => x.SetVolumeAsync(expectedVolume), Times.Once);
+        this._mockClient.Verify(x => x.SetVolumeAsync(expectedVolume), Times.Once);
     }
 
     [Fact]
@@ -107,24 +105,22 @@ public class ClientVolumeCommandHandlerTests
             LatencyMs = 0,
         };
 
-        _mockClientManager
-            .Setup(x => x.GetClientStateAsync(clientIndex))
+        this._mockClientManager.Setup(x => x.GetClientStateAsync(clientIndex))
             .ReturnsAsync(Result<ClientState>.Success(clientState));
 
-        _mockClientManager
-            .Setup(x => x.GetClientAsync(clientIndex))
-            .ReturnsAsync(Result<IClient>.Success(_mockClient.Object));
+        this._mockClientManager.Setup(x => x.GetClientAsync(clientIndex))
+            .ReturnsAsync(Result<IClient>.Success(this._mockClient.Object));
 
-        _mockClient.Setup(x => x.SetVolumeAsync(expectedVolume)).ReturnsAsync(Result.Success());
+        this._mockClient.Setup(x => x.SetVolumeAsync(expectedVolume)).ReturnsAsync(Result.Success());
 
-        var handler = new ClientVolumeUpCommandHandler(_mockClientManager.Object, _mockLoggerUp.Object);
+        var handler = new ClientVolumeUpCommandHandler(this._mockClientManager.Object, this._mockLoggerUp.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        _mockClient.Verify(x => x.SetVolumeAsync(expectedVolume), Times.Once);
+        this._mockClient.Verify(x => x.SetVolumeAsync(expectedVolume), Times.Once);
     }
 
     [Fact]
@@ -139,11 +135,10 @@ public class ClientVolumeCommandHandlerTests
             Source = CommandSource.Internal,
         };
 
-        _mockClientManager
-            .Setup(x => x.GetClientStateAsync(clientIndex))
+        this._mockClientManager.Setup(x => x.GetClientStateAsync(clientIndex))
             .ReturnsAsync(Result<ClientState>.Failure("Client not found"));
 
-        var handler = new ClientVolumeUpCommandHandler(_mockClientManager.Object, _mockLoggerUp.Object);
+        var handler = new ClientVolumeUpCommandHandler(this._mockClientManager.Object, this._mockLoggerUp.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -185,24 +180,22 @@ public class ClientVolumeCommandHandlerTests
             LatencyMs = 0,
         };
 
-        _mockClientManager
-            .Setup(x => x.GetClientStateAsync(clientIndex))
+        this._mockClientManager.Setup(x => x.GetClientStateAsync(clientIndex))
             .ReturnsAsync(Result<ClientState>.Success(clientState));
 
-        _mockClientManager
-            .Setup(x => x.GetClientAsync(clientIndex))
-            .ReturnsAsync(Result<IClient>.Success(_mockClient.Object));
+        this._mockClientManager.Setup(x => x.GetClientAsync(clientIndex))
+            .ReturnsAsync(Result<IClient>.Success(this._mockClient.Object));
 
-        _mockClient.Setup(x => x.SetVolumeAsync(expectedVolume)).ReturnsAsync(Result.Success());
+        this._mockClient.Setup(x => x.SetVolumeAsync(expectedVolume)).ReturnsAsync(Result.Success());
 
-        var handler = new ClientVolumeDownCommandHandler(_mockClientManager.Object, _mockLoggerDown.Object);
+        var handler = new ClientVolumeDownCommandHandler(this._mockClientManager.Object, this._mockLoggerDown.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        _mockClient.Verify(x => x.SetVolumeAsync(expectedVolume), Times.Once);
+        this._mockClient.Verify(x => x.SetVolumeAsync(expectedVolume), Times.Once);
     }
 
     [Fact]
@@ -233,24 +226,22 @@ public class ClientVolumeCommandHandlerTests
             LatencyMs = 0,
         };
 
-        _mockClientManager
-            .Setup(x => x.GetClientStateAsync(clientIndex))
+        this._mockClientManager.Setup(x => x.GetClientStateAsync(clientIndex))
             .ReturnsAsync(Result<ClientState>.Success(clientState));
 
-        _mockClientManager
-            .Setup(x => x.GetClientAsync(clientIndex))
-            .ReturnsAsync(Result<IClient>.Success(_mockClient.Object));
+        this._mockClientManager.Setup(x => x.GetClientAsync(clientIndex))
+            .ReturnsAsync(Result<IClient>.Success(this._mockClient.Object));
 
-        _mockClient.Setup(x => x.SetVolumeAsync(expectedVolume)).ReturnsAsync(Result.Success());
+        this._mockClient.Setup(x => x.SetVolumeAsync(expectedVolume)).ReturnsAsync(Result.Success());
 
-        var handler = new ClientVolumeDownCommandHandler(_mockClientManager.Object, _mockLoggerDown.Object);
+        var handler = new ClientVolumeDownCommandHandler(this._mockClientManager.Object, this._mockLoggerDown.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        _mockClient.Verify(x => x.SetVolumeAsync(expectedVolume), Times.Once);
+        this._mockClient.Verify(x => x.SetVolumeAsync(expectedVolume), Times.Once);
     }
 
     [Fact]
@@ -265,11 +256,10 @@ public class ClientVolumeCommandHandlerTests
             Source = CommandSource.Mqtt,
         };
 
-        _mockClientManager
-            .Setup(x => x.GetClientStateAsync(clientIndex))
+        this._mockClientManager.Setup(x => x.GetClientStateAsync(clientIndex))
             .ReturnsAsync(Result<ClientState>.Failure("Client not found"));
 
-        var handler = new ClientVolumeDownCommandHandler(_mockClientManager.Object, _mockLoggerDown.Object);
+        var handler = new ClientVolumeDownCommandHandler(this._mockClientManager.Object, this._mockLoggerDown.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);

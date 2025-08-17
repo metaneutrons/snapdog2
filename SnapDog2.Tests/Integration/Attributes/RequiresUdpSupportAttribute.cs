@@ -14,7 +14,7 @@ public class RequiresUdpSupportAttribute : FactAttribute
     {
         if (!IsUdpSupportAvailable())
         {
-            Skip =
+            this.Skip =
                 "UDP support not available or Testcontainers UDP limitation detected. "
                 + "KNX/IP protocol requires proper UDP port mapping which is not supported "
                 + "by current Testcontainers version. See docs/investigation/FINDINGS-SUMMARY.md";

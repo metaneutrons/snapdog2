@@ -11,24 +11,18 @@ using SnapDog2.Server.Features.Global.Queries;
 /// <summary>
 /// Handles the GetSystemStatusQuery.
 /// </summary>
-public partial class GetSystemStatusQueryHandler : IQueryHandler<GetSystemStatusQuery, Result<SystemStatus>>
+/// <remarks>
+/// Initializes a new instance of the <see cref="GetSystemStatusQueryHandler"/> class.
+/// </remarks>
+/// <param name="systemStatusService">The system status service.</param>
+/// <param name="logger">The logger instance.</param>
+public partial class GetSystemStatusQueryHandler(
+    IAppStatusService systemStatusService,
+    ILogger<GetSystemStatusQueryHandler> logger
+) : IQueryHandler<GetSystemStatusQuery, Result<SystemStatus>>
 {
-    private readonly IAppStatusService _systemStatusService;
-    private readonly ILogger<GetSystemStatusQueryHandler> _logger;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="GetSystemStatusQueryHandler"/> class.
-    /// </summary>
-    /// <param name="systemStatusService">The system status service.</param>
-    /// <param name="logger">The logger instance.</param>
-    public GetSystemStatusQueryHandler(
-        IAppStatusService systemStatusService,
-        ILogger<GetSystemStatusQueryHandler> logger
-    )
-    {
-        this._systemStatusService = systemStatusService;
-        this._logger = logger;
-    }
+    private readonly IAppStatusService _systemStatusService = systemStatusService;
+    private readonly ILogger<GetSystemStatusQueryHandler> _logger = logger;
 
     /// <inheritdoc/>
     public async Task<Result<SystemStatus>> Handle(GetSystemStatusQuery request, CancellationToken cancellationToken)

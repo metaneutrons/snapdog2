@@ -21,9 +21,9 @@ public class ZonesApiIntegrationTests : IClassFixture<IntegrationTestFixture>
 
     public ZonesApiIntegrationTests(IntegrationTestFixture fixture, ITestOutputHelper output)
     {
-        _fixture = fixture ?? throw new ArgumentNullException(nameof(fixture));
-        _output = output ?? throw new ArgumentNullException(nameof(output));
-        _httpClient = _fixture.HttpClient;
+        this._fixture = fixture ?? throw new ArgumentNullException(nameof(fixture));
+        this._output = output ?? throw new ArgumentNullException(nameof(output));
+        this._httpClient = this._fixture.HttpClient;
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -37,7 +37,7 @@ public class ZonesApiIntegrationTests : IClassFixture<IntegrationTestFixture>
         const int zoneIndex = 1;
 
         // Act
-        var response = await _httpClient.GetAsync($"/api/v1/zones/{zoneIndex}/repeat/track");
+        var response = await this._httpClient.GetAsync($"/api/v1/zones/{zoneIndex}/repeat/track");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -45,7 +45,7 @@ public class ZonesApiIntegrationTests : IClassFixture<IntegrationTestFixture>
         var isValidBoolean = bool.TryParse(content, out var repeatState);
 
         isValidBoolean.Should().BeTrue("Response should be a valid boolean");
-        _output.WriteLine($"✅ Track repeat state for zone {zoneIndex}: {repeatState}");
+        this._output.WriteLine($"✅ Track repeat state for zone {zoneIndex}: {repeatState}");
     }
 
     [Fact]
@@ -56,42 +56,42 @@ public class ZonesApiIntegrationTests : IClassFixture<IntegrationTestFixture>
         const bool newState = true;
 
         // Act
-        var response = await _httpClient.PutAsJsonAsync($"/api/v1/zones/{zoneIndex}/repeat/track", newState);
+        var response = await this._httpClient.PutAsJsonAsync($"/api/v1/zones/{zoneIndex}/repeat/track", newState);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var returnedState = await response.Content.ReadFromJsonAsync<bool>();
         returnedState.Should().Be(newState);
 
-        _output.WriteLine($"✅ Set track repeat for zone {zoneIndex} to {newState}, returned: {returnedState}");
+        this._output.WriteLine($"✅ Set track repeat for zone {zoneIndex} to {newState}, returned: {returnedState}");
     }
 
     [Fact(Timeout = 30000)] // 30 second timeout to prevent hanging
     public async Task ToggleTrackRepeat_Should_ReturnNewState()
     {
-        _output.WriteLine("🔍 Starting ToggleTrackRepeat test...");
+        this._output.WriteLine("🔍 Starting ToggleTrackRepeat test...");
 
         // Arrange
         const int zoneIndex = 1;
 
-        _output.WriteLine($"🔍 Getting current track repeat state for zone {zoneIndex}...");
+        this._output.WriteLine($"🔍 Getting current track repeat state for zone {zoneIndex}...");
         // Get current state
-        var getCurrentResponse = await _httpClient.GetAsync($"/api/v1/zones/{zoneIndex}/repeat/track");
+        var getCurrentResponse = await this._httpClient.GetAsync($"/api/v1/zones/{zoneIndex}/repeat/track");
         getCurrentResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         var currentState = await getCurrentResponse.Content.ReadFromJsonAsync<bool>();
-        _output.WriteLine($"🔍 Current track repeat state: {currentState}");
+        this._output.WriteLine($"🔍 Current track repeat state: {currentState}");
 
-        _output.WriteLine($"🔍 Toggling track repeat for zone {zoneIndex}...");
+        this._output.WriteLine($"🔍 Toggling track repeat for zone {zoneIndex}...");
         // Act
-        var response = await _httpClient.PostAsync($"/api/v1/zones/{zoneIndex}/repeat/track/toggle", null);
+        var response = await this._httpClient.PostAsync($"/api/v1/zones/{zoneIndex}/repeat/track/toggle", null);
 
-        _output.WriteLine($"🔍 Toggle response status: {response.StatusCode}");
+        this._output.WriteLine($"🔍 Toggle response status: {response.StatusCode}");
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var newState = await response.Content.ReadFromJsonAsync<bool>();
         newState.Should().Be(!currentState, "Toggle should flip the current state");
 
-        _output.WriteLine($"✅ Toggled track repeat for zone {zoneIndex}: {currentState} → {newState}");
+        this._output.WriteLine($"✅ Toggled track repeat for zone {zoneIndex}: {currentState} → {newState}");
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -105,7 +105,7 @@ public class ZonesApiIntegrationTests : IClassFixture<IntegrationTestFixture>
         const int zoneIndex = 1;
 
         // Act
-        var response = await _httpClient.GetAsync($"/api/v1/zones/{zoneIndex}/repeat");
+        var response = await this._httpClient.GetAsync($"/api/v1/zones/{zoneIndex}/repeat");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -113,7 +113,7 @@ public class ZonesApiIntegrationTests : IClassFixture<IntegrationTestFixture>
         var isValidBoolean = bool.TryParse(content, out var repeatState);
 
         isValidBoolean.Should().BeTrue("Response should be a valid boolean");
-        _output.WriteLine($"✅ Playlist repeat state for zone {zoneIndex}: {repeatState}");
+        this._output.WriteLine($"✅ Playlist repeat state for zone {zoneIndex}: {repeatState}");
     }
 
     [Fact]
@@ -124,14 +124,14 @@ public class ZonesApiIntegrationTests : IClassFixture<IntegrationTestFixture>
         const bool newState = true;
 
         // Act
-        var response = await _httpClient.PutAsJsonAsync($"/api/v1/zones/{zoneIndex}/repeat", newState);
+        var response = await this._httpClient.PutAsJsonAsync($"/api/v1/zones/{zoneIndex}/repeat", newState);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var returnedState = await response.Content.ReadFromJsonAsync<bool>();
         returnedState.Should().Be(newState);
 
-        _output.WriteLine($"✅ Set playlist repeat for zone {zoneIndex} to {newState}, returned: {returnedState}");
+        this._output.WriteLine($"✅ Set playlist repeat for zone {zoneIndex} to {newState}, returned: {returnedState}");
     }
 
     [Fact]
@@ -141,19 +141,19 @@ public class ZonesApiIntegrationTests : IClassFixture<IntegrationTestFixture>
         const int zoneIndex = 1;
 
         // Get current state
-        var getCurrentResponse = await _httpClient.GetAsync($"/api/v1/zones/{zoneIndex}/repeat");
+        var getCurrentResponse = await this._httpClient.GetAsync($"/api/v1/zones/{zoneIndex}/repeat");
         getCurrentResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         var currentState = await getCurrentResponse.Content.ReadFromJsonAsync<bool>();
 
         // Act
-        var response = await _httpClient.PostAsync($"/api/v1/zones/{zoneIndex}/repeat/toggle", null);
+        var response = await this._httpClient.PostAsync($"/api/v1/zones/{zoneIndex}/repeat/toggle", null);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var newState = await response.Content.ReadFromJsonAsync<bool>();
         newState.Should().Be(!currentState, "Toggle should flip the current state");
 
-        _output.WriteLine($"✅ Toggled playlist repeat for zone {zoneIndex}: {currentState} → {newState}");
+        this._output.WriteLine($"✅ Toggled playlist repeat for zone {zoneIndex}: {currentState} → {newState}");
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -167,7 +167,7 @@ public class ZonesApiIntegrationTests : IClassFixture<IntegrationTestFixture>
         const int zoneIndex = 1;
 
         // Act
-        var response = await _httpClient.GetAsync($"/api/v1/zones/{zoneIndex}/shuffle");
+        var response = await this._httpClient.GetAsync($"/api/v1/zones/{zoneIndex}/shuffle");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -175,7 +175,7 @@ public class ZonesApiIntegrationTests : IClassFixture<IntegrationTestFixture>
         var isValidBoolean = bool.TryParse(content, out var shuffleState);
 
         isValidBoolean.Should().BeTrue("Response should be a valid boolean");
-        _output.WriteLine($"✅ Playlist shuffle state for zone {zoneIndex}: {shuffleState}");
+        this._output.WriteLine($"✅ Playlist shuffle state for zone {zoneIndex}: {shuffleState}");
     }
 
     [Fact]
@@ -186,14 +186,14 @@ public class ZonesApiIntegrationTests : IClassFixture<IntegrationTestFixture>
         const bool newState = true;
 
         // Act
-        var response = await _httpClient.PutAsJsonAsync($"/api/v1/zones/{zoneIndex}/shuffle", newState);
+        var response = await this._httpClient.PutAsJsonAsync($"/api/v1/zones/{zoneIndex}/shuffle", newState);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var returnedState = await response.Content.ReadFromJsonAsync<bool>();
         returnedState.Should().Be(newState);
 
-        _output.WriteLine($"✅ Set playlist shuffle for zone {zoneIndex} to {newState}, returned: {returnedState}");
+        this._output.WriteLine($"✅ Set playlist shuffle for zone {zoneIndex} to {newState}, returned: {returnedState}");
     }
 
     [Fact]
@@ -203,19 +203,19 @@ public class ZonesApiIntegrationTests : IClassFixture<IntegrationTestFixture>
         const int zoneIndex = 1;
 
         // Get current state
-        var getCurrentResponse = await _httpClient.GetAsync($"/api/v1/zones/{zoneIndex}/shuffle");
+        var getCurrentResponse = await this._httpClient.GetAsync($"/api/v1/zones/{zoneIndex}/shuffle");
         getCurrentResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         var currentState = await getCurrentResponse.Content.ReadFromJsonAsync<bool>();
 
         // Act
-        var response = await _httpClient.PostAsync($"/api/v1/zones/{zoneIndex}/shuffle/toggle", null);
+        var response = await this._httpClient.PostAsync($"/api/v1/zones/{zoneIndex}/shuffle/toggle", null);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var newState = await response.Content.ReadFromJsonAsync<bool>();
         newState.Should().Be(!currentState, "Toggle should flip the current state");
 
-        _output.WriteLine($"✅ Toggled playlist shuffle for zone {zoneIndex}: {currentState} → {newState}");
+        this._output.WriteLine($"✅ Toggled playlist shuffle for zone {zoneIndex}: {currentState} → {newState}");
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -229,11 +229,11 @@ public class ZonesApiIntegrationTests : IClassFixture<IntegrationTestFixture>
         const int invalidZoneIndex = 999;
 
         // Act
-        var response = await _httpClient.GetAsync($"/api/v1/zones/{invalidZoneIndex}/repeat/track");
+        var response = await this._httpClient.GetAsync($"/api/v1/zones/{invalidZoneIndex}/repeat/track");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        _output.WriteLine($"✅ Invalid zone {invalidZoneIndex} correctly returned 404 Not Found");
+        this._output.WriteLine($"✅ Invalid zone {invalidZoneIndex} correctly returned 404 Not Found");
     }
 
     [Fact]
@@ -243,11 +243,11 @@ public class ZonesApiIntegrationTests : IClassFixture<IntegrationTestFixture>
         const int invalidZoneIndex = 999;
 
         // Act
-        var response = await _httpClient.GetAsync($"/api/v1/zones/{invalidZoneIndex}/repeat");
+        var response = await this._httpClient.GetAsync($"/api/v1/zones/{invalidZoneIndex}/repeat");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        _output.WriteLine($"✅ Invalid zone {invalidZoneIndex} correctly returned 404 Not Found");
+        this._output.WriteLine($"✅ Invalid zone {invalidZoneIndex} correctly returned 404 Not Found");
     }
 
     [Fact]
@@ -257,11 +257,11 @@ public class ZonesApiIntegrationTests : IClassFixture<IntegrationTestFixture>
         const int invalidZoneIndex = 999;
 
         // Act
-        var response = await _httpClient.GetAsync($"/api/v1/zones/{invalidZoneIndex}/shuffle");
+        var response = await this._httpClient.GetAsync($"/api/v1/zones/{invalidZoneIndex}/shuffle");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        _output.WriteLine($"✅ Invalid zone {invalidZoneIndex} correctly returned 404 Not Found");
+        this._output.WriteLine($"✅ Invalid zone {invalidZoneIndex} correctly returned 404 Not Found");
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -283,7 +283,7 @@ public class ZonesApiIntegrationTests : IClassFixture<IntegrationTestFixture>
         // Act & Assert
         foreach (var endpoint in endpoints)
         {
-            var response = await _httpClient.GetAsync(endpoint);
+            var response = await this._httpClient.GetAsync(endpoint);
             response.StatusCode.Should().Be(HttpStatusCode.OK, $"Endpoint {endpoint} should return OK");
 
             var content = await response.Content.ReadAsStringAsync();
@@ -294,7 +294,7 @@ public class ZonesApiIntegrationTests : IClassFixture<IntegrationTestFixture>
                 .Content.Headers.ContentType?.MediaType.Should()
                 .Be("application/json", $"Endpoint {endpoint} should return JSON content type");
 
-            _output.WriteLine($"✅ {endpoint} → {state} (valid boolean response)");
+            this._output.WriteLine($"✅ {endpoint} → {state} (valid boolean response)");
         }
     }
 }

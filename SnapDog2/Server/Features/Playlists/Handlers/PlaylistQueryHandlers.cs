@@ -15,22 +15,15 @@ using SnapDog2.Server.Features.Playlists.Queries;
 /// <summary>
 /// Handler for getting all playlists including radio stations.
 /// </summary>
-public partial class GetAllPlaylistsQueryHandler : IQueryHandler<GetAllPlaylistsQuery, Result<List<PlaylistInfo>>>
+public partial class GetAllPlaylistsQueryHandler(
+    ISubsonicService subsonicService,
+    IOptions<SnapDogConfiguration> configOptions,
+    ILogger<GetAllPlaylistsQueryHandler> logger
+) : IQueryHandler<GetAllPlaylistsQuery, Result<List<PlaylistInfo>>>
 {
-    private readonly ISubsonicService _subsonicService;
-    private readonly SnapDogConfiguration _config;
-    private readonly ILogger<GetAllPlaylistsQueryHandler> _logger;
-
-    public GetAllPlaylistsQueryHandler(
-        ISubsonicService subsonicService,
-        IOptions<SnapDogConfiguration> configOptions,
-        ILogger<GetAllPlaylistsQueryHandler> logger
-    )
-    {
-        this._subsonicService = subsonicService;
-        this._config = configOptions.Value;
-        this._logger = logger;
-    }
+    private readonly ISubsonicService _subsonicService = subsonicService;
+    private readonly SnapDogConfiguration _config = configOptions.Value;
+    private readonly ILogger<GetAllPlaylistsQueryHandler> _logger = logger;
 
     public async Task<Result<List<PlaylistInfo>>> Handle(
         GetAllPlaylistsQuery query,
@@ -109,22 +102,15 @@ public partial class GetAllPlaylistsQueryHandler : IQueryHandler<GetAllPlaylists
 /// <summary>
 /// Handler for getting a specific playlist with tracks.
 /// </summary>
-public partial class GetPlaylistQueryHandler : IQueryHandler<GetPlaylistQuery, Result<Api.Models.PlaylistWithTracks>>
+public partial class GetPlaylistQueryHandler(
+    ISubsonicService subsonicService,
+    IOptions<SnapDogConfiguration> configOptions,
+    ILogger<GetPlaylistQueryHandler> logger
+) : IQueryHandler<GetPlaylistQuery, Result<Api.Models.PlaylistWithTracks>>
 {
-    private readonly ISubsonicService _subsonicService;
-    private readonly SnapDogConfiguration _config;
-    private readonly ILogger<GetPlaylistQueryHandler> _logger;
-
-    public GetPlaylistQueryHandler(
-        ISubsonicService subsonicService,
-        IOptions<SnapDogConfiguration> configOptions,
-        ILogger<GetPlaylistQueryHandler> logger
-    )
-    {
-        this._subsonicService = subsonicService;
-        this._config = configOptions.Value;
-        this._logger = logger;
-    }
+    private readonly ISubsonicService _subsonicService = subsonicService;
+    private readonly SnapDogConfiguration _config = configOptions.Value;
+    private readonly ILogger<GetPlaylistQueryHandler> _logger = logger;
 
     public async Task<Result<Api.Models.PlaylistWithTracks>> Handle(
         GetPlaylistQuery query,
@@ -252,22 +238,15 @@ public partial class GetPlaylistQueryHandler : IQueryHandler<GetPlaylistQuery, R
 /// <summary>
 /// Handler for getting stream URL for a track.
 /// </summary>
-public partial class GetStreamUrlQueryHandler : IQueryHandler<GetStreamUrlQuery, Result<string>>
+public partial class GetStreamUrlQueryHandler(
+    ISubsonicService subsonicService,
+    IOptions<SnapDogConfiguration> configOptions,
+    ILogger<GetStreamUrlQueryHandler> logger
+) : IQueryHandler<GetStreamUrlQuery, Result<string>>
 {
-    private readonly ISubsonicService _subsonicService;
-    private readonly SnapDogConfiguration _config;
-    private readonly ILogger<GetStreamUrlQueryHandler> _logger;
-
-    public GetStreamUrlQueryHandler(
-        ISubsonicService subsonicService,
-        IOptions<SnapDogConfiguration> configOptions,
-        ILogger<GetStreamUrlQueryHandler> logger
-    )
-    {
-        this._subsonicService = subsonicService;
-        this._config = configOptions.Value;
-        this._logger = logger;
-    }
+    private readonly ISubsonicService _subsonicService = subsonicService;
+    private readonly SnapDogConfiguration _config = configOptions.Value;
+    private readonly ILogger<GetStreamUrlQueryHandler> _logger = logger;
 
     public async Task<Result<string>> Handle(GetStreamUrlQuery query, CancellationToken cancellationToken)
     {
@@ -332,22 +311,15 @@ public partial class GetStreamUrlQueryHandler : IQueryHandler<GetStreamUrlQuery,
 /// <summary>
 /// Handler for getting track details.
 /// </summary>
-public partial class GetTrackQueryHandler : IQueryHandler<GetTrackQuery, Result<TrackInfo>>
+public partial class GetTrackQueryHandler(
+    ISubsonicService subsonicService,
+    IOptions<SnapDogConfiguration> configOptions,
+    ILogger<GetTrackQueryHandler> logger
+) : IQueryHandler<GetTrackQuery, Result<TrackInfo>>
 {
-    private readonly ISubsonicService _subsonicService;
-    private readonly SnapDogConfiguration _config;
-    private readonly ILogger<GetTrackQueryHandler> _logger;
-
-    public GetTrackQueryHandler(
-        ISubsonicService subsonicService,
-        IOptions<SnapDogConfiguration> configOptions,
-        ILogger<GetTrackQueryHandler> logger
-    )
-    {
-        this._subsonicService = subsonicService;
-        this._config = configOptions.Value;
-        this._logger = logger;
-    }
+    private readonly ISubsonicService _subsonicService = subsonicService;
+    private readonly SnapDogConfiguration _config = configOptions.Value;
+    private readonly ILogger<GetTrackQueryHandler> _logger = logger;
 
     public Task<Result<TrackInfo>> Handle(GetTrackQuery query, CancellationToken cancellationToken)
     {
@@ -356,7 +328,7 @@ public partial class GetTrackQueryHandler : IQueryHandler<GetTrackQuery, Result<
         // For radio stations, check if it's a radio URL and create a TrackInfo
         if (IsRadioStreamUrl(query.TrackId))
         {
-            var radioTrack = CreateRadioTrackInfo(query.TrackId);
+            var radioTrack = this.CreateRadioTrackInfo(query.TrackId);
             LogRadioTrackRetrieved(this._logger, query.TrackId);
             return Task.FromResult(Result<TrackInfo>.Success(radioTrack));
         }
@@ -418,22 +390,15 @@ public partial class GetTrackQueryHandler : IQueryHandler<GetTrackQuery, Result<
 /// <summary>
 /// Handler for testing Subsonic connection.
 /// </summary>
-public partial class TestSubsonicConnectionQueryHandler : IQueryHandler<TestSubsonicConnectionQuery, Result>
+public partial class TestSubsonicConnectionQueryHandler(
+    ISubsonicService subsonicService,
+    IOptions<SnapDogConfiguration> configOptions,
+    ILogger<TestSubsonicConnectionQueryHandler> logger
+) : IQueryHandler<TestSubsonicConnectionQuery, Result>
 {
-    private readonly ISubsonicService _subsonicService;
-    private readonly SnapDogConfiguration _config;
-    private readonly ILogger<TestSubsonicConnectionQueryHandler> _logger;
-
-    public TestSubsonicConnectionQueryHandler(
-        ISubsonicService subsonicService,
-        IOptions<SnapDogConfiguration> configOptions,
-        ILogger<TestSubsonicConnectionQueryHandler> logger
-    )
-    {
-        this._subsonicService = subsonicService;
-        this._config = configOptions.Value;
-        this._logger = logger;
-    }
+    private readonly ISubsonicService _subsonicService = subsonicService;
+    private readonly SnapDogConfiguration _config = configOptions.Value;
+    private readonly ILogger<TestSubsonicConnectionQueryHandler> _logger = logger;
 
     public async Task<Result> Handle(TestSubsonicConnectionQuery query, CancellationToken cancellationToken)
     {

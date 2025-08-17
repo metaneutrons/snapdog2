@@ -9,34 +9,27 @@ using SnapDog2.Core.Models;
 /// LibVLC-based audio player for streaming to Snapcast sinks.
 /// Handles HTTP audio streaming with format conversion and metadata extraction.
 /// </summary>
-public sealed partial class MediaPlayer : IAsyncDisposable
+public sealed partial class MediaPlayer(
+    SnapDog2.Core.Configuration.AudioConfig config,
+    ILogger<MediaPlayer> logger,
+    ILogger<MetadataManager> metadataLogger,
+    int zoneIndex,
+    string sinkPath
+) : IAsyncDisposable
 {
-    private readonly SnapDog2.Core.Configuration.AudioConfig _config;
-    private readonly ILogger<MediaPlayer> _logger;
-    private readonly ILogger<MetadataManager> _metadataLogger;
-    private readonly int _zoneIndex;
-    private readonly string _sinkPath;
+    private readonly SnapDog2.Core.Configuration.AudioConfig _config =
+        config ?? throw new ArgumentNullException(nameof(config));
+    private readonly ILogger<MediaPlayer> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly ILogger<MetadataManager> _metadataLogger =
+        metadataLogger ?? throw new ArgumentNullException(nameof(metadataLogger));
+    private readonly int _zoneIndex = zoneIndex;
+    private readonly string _sinkPath = sinkPath ?? throw new ArgumentNullException(nameof(sinkPath));
 
     private AudioProcessingContext? _processingContext;
     private CancellationTokenSource? _streamingCts;
     private TrackInfo? _currentTrack;
     private DateTime? _playbackStartedAt;
     private bool _disposed;
-
-    public MediaPlayer(
-        SnapDog2.Core.Configuration.AudioConfig config,
-        ILogger<MediaPlayer> logger,
-        ILogger<MetadataManager> metadataLogger,
-        int zoneIndex,
-        string sinkPath
-    )
-    {
-        _config = config ?? throw new ArgumentNullException(nameof(config));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _metadataLogger = metadataLogger ?? throw new ArgumentNullException(nameof(metadataLogger));
-        _zoneIndex = zoneIndex;
-        _sinkPath = sinkPath ?? throw new ArgumentNullException(nameof(sinkPath));
-    }
 
     /// <summary>
     /// Starts streaming audio from the specified URL to the Snapcast sink.
@@ -51,7 +44,7 @@ public sealed partial class MediaPlayer : IAsyncDisposable
         CancellationToken cancellationToken = default
     )
     {
-        if (_disposed)
+        if (this._disposed)
         {
             return Result.Failure(new ObjectDisposedException(nameof(MediaPlayer)));
         }
@@ -59,15 +52,24 @@ public sealed partial class MediaPlayer : IAsyncDisposable
         try
         {
             // Stop any existing streaming
-            await StopStreamingAsync();
+            await this.StopStreamingAsync();
 
-            _logger.LogInformation("Starting audio streaming for zone {ZoneIndex}: {StreamUrl}", _zoneIndex, streamUrl);
+            this._logger.LogInformation(
+                "Starting audio streaming for zone {ZoneIndex}: {StreamUrl}",
+                this._zoneIndex,
+                streamUrl
+            );
 
             // Create new processing context
-            _processingContext = new AudioProcessingContext(_config, _logger, _metadataLogger, _config.TempDirectory);
-            _streamingCts = new CancellationTokenSource();
-            _currentTrack = trackInfo;
-            _playbackStartedAt = DateTime.UtcNow;
+            this._processingContext = new AudioProcessingContext(
+                this._config,
+                this._logger,
+                this._metadataLogger,
+                this._config.TempDirectory
+            );
+            this._streamingCts = new CancellationTokenSource();
+            this._currentTrack = trackInfo;
+            this._playbackStartedAt = DateTime.UtcNow;
 
             // Start processing in background
             _ = Task.Run(
@@ -75,40 +77,40 @@ public sealed partial class MediaPlayer : IAsyncDisposable
                 {
                     try
                     {
-                        var result = await _processingContext.ProcessAudioStreamAsync(
+                        var result = await this._processingContext.ProcessAudioStreamAsync(
                             streamUrl,
                             AudioSourceType.Url,
-                            _streamingCts.Token
+                            this._streamingCts.Token
                         );
 
                         if (result.Success && !string.IsNullOrEmpty(result.OutputFilePath))
                         {
                             // Copy the processed audio to the Snapcast sink
-                            await CopyToSinkAsync(result.OutputFilePath, _streamingCts.Token);
+                            await this.CopyToSinkAsync(result.OutputFilePath, this._streamingCts.Token);
                         }
                         else
                         {
-                            _logger.LogError("Audio processing failed: {ErrorMessage}", result.ErrorMessage);
+                            this._logger.LogError("Audio processing failed: {ErrorMessage}", result.ErrorMessage);
                         }
                     }
                     catch (OperationCanceledException)
                     {
-                        _logger.LogDebug("Audio streaming was cancelled for zone {ZoneIndex}", _zoneIndex);
+                        this._logger.LogDebug("Audio streaming was cancelled for zone {ZoneIndex}", this._zoneIndex);
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Error during audio streaming for zone {ZoneIndex}", _zoneIndex);
+                        this._logger.LogError(ex, "Error during audio streaming for zone {ZoneIndex}", this._zoneIndex);
                     }
                 },
-                _streamingCts.Token
+                this._streamingCts.Token
             );
 
-            LogStreamingStarted(_logger, _zoneIndex, streamUrl, trackInfo.Title ?? "Unknown");
+            LogStreamingStarted(this._logger, this._zoneIndex, streamUrl, trackInfo.Title ?? "Unknown");
             return Result.Success();
         }
         catch (Exception ex)
         {
-            LogStreamingFailed(_logger, ex, _zoneIndex, streamUrl);
+            LogStreamingFailed(this._logger, ex, this._zoneIndex, streamUrl);
             return Result.Failure(ex);
         }
     }
@@ -121,29 +123,29 @@ public sealed partial class MediaPlayer : IAsyncDisposable
     {
         try
         {
-            if (_streamingCts != null)
+            if (this._streamingCts != null)
             {
-                _streamingCts.Cancel();
-                _streamingCts.Dispose();
-                _streamingCts = null;
+                this._streamingCts.Cancel();
+                this._streamingCts.Dispose();
+                this._streamingCts = null;
             }
 
-            if (_processingContext != null)
+            if (this._processingContext != null)
             {
-                _processingContext.Stop();
-                await _processingContext.DisposeAsync();
-                _processingContext = null;
+                this._processingContext.Stop();
+                await this._processingContext.DisposeAsync();
+                this._processingContext = null;
             }
 
-            _currentTrack = null;
-            _playbackStartedAt = null;
+            this._currentTrack = null;
+            this._playbackStartedAt = null;
 
-            LogStreamingStopped(_logger, _zoneIndex);
+            LogStreamingStopped(this._logger, this._zoneIndex);
             return Result.Success();
         }
         catch (Exception ex)
         {
-            LogStreamingStopFailed(_logger, ex, _zoneIndex);
+            LogStreamingStopFailed(this._logger, ex, this._zoneIndex);
             return Result.Failure(ex);
         }
     }
@@ -154,15 +156,15 @@ public sealed partial class MediaPlayer : IAsyncDisposable
     /// <returns>Current playback status.</returns>
     public PlaybackStatus GetStatus()
     {
-        var isPlaying = _processingContext?.IsPlaying == true && !_disposed;
+        var isPlaying = this._processingContext?.IsPlaying == true && !this._disposed;
 
         return new PlaybackStatus
         {
-            ZoneIndex = _zoneIndex,
+            ZoneIndex = this._zoneIndex,
             IsPlaying = isPlaying,
-            CurrentTrack = _currentTrack,
-            AudioFormat = new AudioFormat(_config.SampleRate, _config.BitDepth, _config.Channels),
-            PlaybackStartedAt = _playbackStartedAt,
+            CurrentTrack = this._currentTrack,
+            AudioFormat = new AudioFormat(this._config.SampleRate, this._config.BitDepth, this._config.Channels),
+            PlaybackStartedAt = this._playbackStartedAt,
             ActiveStreams = isPlaying ? 1 : 0,
             MaxStreams = 1, // Each MediaPlayer handles exactly 1 stream
         };
@@ -177,10 +179,10 @@ public sealed partial class MediaPlayer : IAsyncDisposable
     {
         try
         {
-            _logger.LogDebug("Copying audio data from {SourcePath} to {SinkPath}", sourceFilePath, _sinkPath);
+            this._logger.LogDebug("Copying audio data from {SourcePath} to {SinkPath}", sourceFilePath, this._sinkPath);
 
             // Ensure the sink directory exists
-            var sinkDirectory = Path.GetDirectoryName(_sinkPath);
+            var sinkDirectory = Path.GetDirectoryName(this._sinkPath);
             if (!string.IsNullOrEmpty(sinkDirectory))
             {
                 Directory.CreateDirectory(sinkDirectory);
@@ -188,12 +190,12 @@ public sealed partial class MediaPlayer : IAsyncDisposable
 
             // Stream copy the audio data to the sink
             using var sourceStream = new FileStream(sourceFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            using var sinkStream = new FileStream(_sinkPath, FileMode.Create, FileAccess.Write, FileShare.Read);
+            using var sinkStream = new FileStream(this._sinkPath, FileMode.Create, FileAccess.Write, FileShare.Read);
 
             await sourceStream.CopyToAsync(sinkStream, cancellationToken);
             await sinkStream.FlushAsync(cancellationToken);
 
-            _logger.LogDebug("Audio data copied successfully to sink: {SinkPath}", _sinkPath);
+            this._logger.LogDebug("Audio data copied successfully to sink: {SinkPath}", this._sinkPath);
 
             // Clean up the temporary file
             try
@@ -202,23 +204,23 @@ public sealed partial class MediaPlayer : IAsyncDisposable
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Failed to delete temporary file: {FilePath}", sourceFilePath);
+                this._logger.LogWarning(ex, "Failed to delete temporary file: {FilePath}", sourceFilePath);
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to copy audio data to sink: {SinkPath}", _sinkPath);
+            this._logger.LogError(ex, "Failed to copy audio data to sink: {SinkPath}", this._sinkPath);
             throw;
         }
     }
 
     public async ValueTask DisposeAsync()
     {
-        if (!_disposed)
+        if (!this._disposed)
         {
-            await StopStreamingAsync();
-            _disposed = true;
-            LogPlayerDisposed(_logger, _zoneIndex);
+            await this.StopStreamingAsync();
+            this._disposed = true;
+            LogPlayerDisposed(this._logger, this._zoneIndex);
         }
     }
 

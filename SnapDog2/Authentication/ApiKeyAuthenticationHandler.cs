@@ -10,33 +10,27 @@ using SnapDog2.Core.Configuration;
 /// API Key authentication handler that validates requests against configured API keys.
 /// Supports both header-based and query parameter-based API key authentication.
 /// </summary>
-public class ApiKeyAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+public class ApiKeyAuthenticationHandler(
+    IOptionsMonitor<AuthenticationSchemeOptions> options,
+    ILoggerFactory logger,
+    UrlEncoder encoder,
+    ApiConfig apiConfig
+) : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
     private const string ApiKeyHeaderName = "X-API-Key";
     private const string ApiKeyQueryParameter = "apikey";
 
-    private readonly ApiConfig _apiConfig;
-
-    public ApiKeyAuthenticationHandler(
-        IOptionsMonitor<AuthenticationSchemeOptions> options,
-        ILoggerFactory logger,
-        UrlEncoder encoder,
-        ApiConfig apiConfig
-    )
-        : base(options, logger, encoder)
-    {
-        _apiConfig = apiConfig;
-    }
+    private readonly ApiConfig _apiConfig = apiConfig;
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         // Try to get API key from header first
-        string? apiKey = Request.Headers[ApiKeyHeaderName].FirstOrDefault();
+        string? apiKey = this.Request.Headers[ApiKeyHeaderName].FirstOrDefault();
 
         // If not in header, try query parameter
         if (string.IsNullOrEmpty(apiKey))
         {
-            apiKey = Request.Query[ApiKeyQueryParameter].FirstOrDefault();
+            apiKey = this.Request.Query[ApiKeyQueryParameter].FirstOrDefault();
         }
 
         // If no API key provided
@@ -46,9 +40,9 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<AuthenticationS
         }
 
         // Validate API key against configured keys
-        if (!_apiConfig.ApiKeys.Contains(apiKey))
+        if (!this._apiConfig.ApiKeys.Contains(apiKey))
         {
-            Logger.LogWarning(
+            this.Logger.LogWarning(
                 "Invalid API key attempted: {ApiKey}",
                 apiKey.Substring(0, Math.Min(8, apiKey.Length)) + "..."
             );
@@ -64,11 +58,11 @@ public class ApiKeyAuthenticationHandler : AuthenticationHandler<AuthenticationS
             new Claim("auth_method", "apikey"),
         };
 
-        var identity = new ClaimsIdentity(claims, Scheme.Name);
+        var identity = new ClaimsIdentity(claims, this.Scheme.Name);
         var principal = new ClaimsPrincipal(identity);
-        var ticket = new AuthenticationTicket(principal, Scheme.Name);
+        var ticket = new AuthenticationTicket(principal, this.Scheme.Name);
 
-        Logger.LogDebug("API key authentication successful");
+        this.Logger.LogDebug("API key authentication successful");
         return Task.FromResult(AuthenticateResult.Success(ticket));
     }
 }

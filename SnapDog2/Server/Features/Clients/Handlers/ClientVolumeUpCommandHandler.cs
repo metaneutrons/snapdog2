@@ -9,10 +9,13 @@ using SnapDog2.Core.Models;
 /// <summary>
 /// Handler for ClientVolumeUpCommand.
 /// </summary>
-public partial class ClientVolumeUpCommandHandler : ICommandHandler<ClientVolumeUpCommand, Result>
+public partial class ClientVolumeUpCommandHandler(
+    IClientManager clientManager,
+    ILogger<ClientVolumeUpCommandHandler> logger
+) : ICommandHandler<ClientVolumeUpCommand, Result>
 {
-    private readonly IClientManager _clientManager;
-    private readonly ILogger<ClientVolumeUpCommandHandler> _logger;
+    private readonly IClientManager _clientManager = clientManager;
+    private readonly ILogger<ClientVolumeUpCommandHandler> _logger = logger;
 
     [LoggerMessage(3011, LogLevel.Information, "Increasing volume for Client {ClientIndex} by {Step} from {Source}")]
     private partial void LogHandling(int clientIndex, int step, CommandSource source);
@@ -20,21 +23,17 @@ public partial class ClientVolumeUpCommandHandler : ICommandHandler<ClientVolume
     [LoggerMessage(3012, LogLevel.Warning, "Client {ClientIndex} not found for ClientVolumeUpCommand")]
     private partial void LogClientNotFound(int clientIndex);
 
-    public ClientVolumeUpCommandHandler(IClientManager clientManager, ILogger<ClientVolumeUpCommandHandler> logger)
-    {
-        _clientManager = clientManager;
-        _logger = logger;
-    }
-
     public async Task<Result> Handle(ClientVolumeUpCommand request, CancellationToken cancellationToken)
     {
-        LogHandling(request.ClientIndex, request.Step, request.Source);
+        this.LogHandling(request.ClientIndex, request.Step, request.Source);
 
         // Get the current client state
-        var clientStateResult = await _clientManager.GetClientStateAsync(request.ClientIndex).ConfigureAwait(false);
+        var clientStateResult = await this
+            ._clientManager.GetClientStateAsync(request.ClientIndex)
+            .ConfigureAwait(false);
         if (clientStateResult.IsFailure)
         {
-            LogClientNotFound(request.ClientIndex);
+            this.LogClientNotFound(request.ClientIndex);
             return clientStateResult;
         }
 
@@ -42,10 +41,10 @@ public partial class ClientVolumeUpCommandHandler : ICommandHandler<ClientVolume
         var newVolume = Math.Min(100, clientState.Volume + request.Step);
 
         // Get the client for operations
-        var clientResult = await _clientManager.GetClientAsync(request.ClientIndex).ConfigureAwait(false);
+        var clientResult = await this._clientManager.GetClientAsync(request.ClientIndex).ConfigureAwait(false);
         if (clientResult.IsFailure)
         {
-            LogClientNotFound(request.ClientIndex);
+            this.LogClientNotFound(request.ClientIndex);
             return clientResult;
         }
 

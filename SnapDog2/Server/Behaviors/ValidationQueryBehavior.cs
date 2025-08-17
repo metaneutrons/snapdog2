@@ -10,26 +10,20 @@ using SnapDog2.Core.Models;
 /// </summary>
 /// <typeparam name="TQuery">The query type.</typeparam>
 /// <typeparam name="TResponse">The response type.</typeparam>
-public partial class ValidationQueryBehavior<TQuery, TResponse> : IQueryPipelineBehavior<TQuery, TResponse>
+/// <remarks>
+/// Initializes a new instance of the <see cref="ValidationQueryBehavior{TQuery, TResponse}"/> class.
+/// </remarks>
+/// <param name="validators">The validators for the query type.</param>
+/// <param name="logger">The logger instance.</param>
+public partial class ValidationQueryBehavior<TQuery, TResponse>(
+    IEnumerable<IValidator<TQuery>> validators,
+    ILogger<ValidationQueryBehavior<TQuery, TResponse>> logger
+) : IQueryPipelineBehavior<TQuery, TResponse>
     where TQuery : IQuery<TResponse>
     where TResponse : IResult
 {
-    private readonly IEnumerable<IValidator<TQuery>> _validators;
-    private readonly ILogger<ValidationQueryBehavior<TQuery, TResponse>> _logger;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ValidationQueryBehavior{TQuery, TResponse}"/> class.
-    /// </summary>
-    /// <param name="validators">The validators for the query type.</param>
-    /// <param name="logger">The logger instance.</param>
-    public ValidationQueryBehavior(
-        IEnumerable<IValidator<TQuery>> validators,
-        ILogger<ValidationQueryBehavior<TQuery, TResponse>> logger
-    )
-    {
-        this._validators = validators;
-        this._logger = logger;
-    }
+    private readonly IEnumerable<IValidator<TQuery>> _validators = validators;
+    private readonly ILogger<ValidationQueryBehavior<TQuery, TResponse>> _logger = logger;
 
     /// <inheritdoc/>
     public async Task<TResponse> Handle(

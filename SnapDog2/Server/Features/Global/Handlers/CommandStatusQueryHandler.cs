@@ -11,30 +11,24 @@ using SnapDog2.Server.Features.Global.Queries;
 /// <summary>
 /// Handles the CommandStatusQuery.
 /// </summary>
-public partial class CommandStatusQueryHandler : IQueryHandler<CommandStatusQuery, Result<string>>
+/// <remarks>
+/// Initializes a new instance of the <see cref="CommandStatusQueryHandler"/> class.
+/// </remarks>
+/// <param name="commandStatusService">The command status service.</param>
+/// <param name="logger">The logger instance.</param>
+public partial class CommandStatusQueryHandler(
+    ICommandStatusService commandStatusService,
+    ILogger<CommandStatusQueryHandler> logger
+) : IQueryHandler<CommandStatusQuery, Result<string>>
 {
-    private readonly ICommandStatusService _commandStatusService;
-    private readonly ILogger<CommandStatusQueryHandler> _logger;
+    private readonly ICommandStatusService _commandStatusService = commandStatusService;
+    private readonly ILogger<CommandStatusQueryHandler> _logger = logger;
 
     [LoggerMessage(5001, LogLevel.Debug, "Retrieving command processing status")]
     private partial void LogRetrievingCommandStatus();
 
     [LoggerMessage(5002, LogLevel.Warning, "Failed to retrieve command status: {ErrorMessage}")]
     private partial void LogFailedToRetrieveCommandStatus(string errorMessage);
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CommandStatusQueryHandler"/> class.
-    /// </summary>
-    /// <param name="commandStatusService">The command status service.</param>
-    /// <param name="logger">The logger instance.</param>
-    public CommandStatusQueryHandler(
-        ICommandStatusService commandStatusService,
-        ILogger<CommandStatusQueryHandler> logger
-    )
-    {
-        this._commandStatusService = commandStatusService;
-        this._logger = logger;
-    }
 
     /// <summary>
     /// Handles the CommandStatusQuery.

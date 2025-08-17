@@ -12,7 +12,10 @@ using SnapDog2.Server.Features.Zones.Notifications;
 /// <summary>
 /// Handles zone state change notifications to log and process status updates.
 /// </summary>
-public partial class ZoneStateNotificationHandler
+public partial class ZoneStateNotificationHandler(
+    INotificationQueue? queue,
+    ILogger<ZoneStateNotificationHandler> logger
+)
     : INotificationHandler<ZoneVolumeChangedNotification>,
         INotificationHandler<ZoneMuteChangedNotification>,
         INotificationHandler<ZonePlaybackStateChangedNotification>,
@@ -23,14 +26,8 @@ public partial class ZoneStateNotificationHandler
         INotificationHandler<ZoneShuffleModeChangedNotification>,
         INotificationHandler<ZoneStateChangedNotification>
 {
-    private readonly INotificationQueue? _queue;
-    private readonly ILogger<ZoneStateNotificationHandler> _logger;
-
-    public ZoneStateNotificationHandler(INotificationQueue? queue, ILogger<ZoneStateNotificationHandler> logger)
-    {
-        this._queue = queue;
-        this._logger = logger;
-    }
+    private readonly INotificationQueue? _queue = queue;
+    private readonly ILogger<ZoneStateNotificationHandler> _logger = logger;
 
     [LoggerMessage(6001, LogLevel.Information, "Zone {ZoneIndex} volume changed to {Volume}")]
     private partial void LogVolumeChange(int zoneIndex, int volume);

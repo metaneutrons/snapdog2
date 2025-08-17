@@ -12,10 +12,13 @@ using SnapDog2.Server.Features.Clients.Commands.Volume;
 /// <summary>
 /// Handles the ToggleClientMuteCommand.
 /// </summary>
-public partial class ToggleClientMuteCommandHandler : ICommandHandler<ToggleClientMuteCommand, Result>
+public partial class ToggleClientMuteCommandHandler(
+    IClientManager clientManager,
+    ILogger<ToggleClientMuteCommandHandler> logger
+) : ICommandHandler<ToggleClientMuteCommand, Result>
 {
-    private readonly IClientManager _clientManager;
-    private readonly ILogger<ToggleClientMuteCommandHandler> _logger;
+    private readonly IClientManager _clientManager = clientManager;
+    private readonly ILogger<ToggleClientMuteCommandHandler> _logger = logger;
 
     [LoggerMessage(3021, LogLevel.Information, "Toggling mute for Client {ClientIndex} from {Source}")]
     private partial void LogHandling(int clientIndex, CommandSource source);
@@ -25,12 +28,6 @@ public partial class ToggleClientMuteCommandHandler : ICommandHandler<ToggleClie
 
     [LoggerMessage(3023, LogLevel.Information, "Toggled mute for Client {ClientIndex} to {NewMuteState}")]
     private partial void LogToggleResult(int clientIndex, bool newMuteState);
-
-    public ToggleClientMuteCommandHandler(IClientManager clientManager, ILogger<ToggleClientMuteCommandHandler> logger)
-    {
-        this._clientManager = clientManager;
-        this._logger = logger;
-    }
 
     public async Task<Result> Handle(ToggleClientMuteCommand request, CancellationToken cancellationToken)
     {

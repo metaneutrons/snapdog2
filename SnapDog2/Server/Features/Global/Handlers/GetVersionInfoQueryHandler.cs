@@ -11,18 +11,14 @@ using SnapDog2.Server.Features.Global.Queries;
 /// <summary>
 /// Handles the GetVersionInfoQuery.
 /// </summary>
-public partial class GetVersionInfoQueryHandler : IQueryHandler<GetVersionInfoQuery, Result<VersionDetails>>
+/// <remarks>
+/// Initializes a new instance of the <see cref="GetVersionInfoQueryHandler"/> class.
+/// </remarks>
+/// <param name="logger">The logger instance.</param>
+public partial class GetVersionInfoQueryHandler(ILogger<GetVersionInfoQueryHandler> logger)
+    : IQueryHandler<GetVersionInfoQuery, Result<VersionDetails>>
 {
-    private readonly ILogger<GetVersionInfoQueryHandler> _logger;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="GetVersionInfoQueryHandler"/> class.
-    /// </summary>
-    /// <param name="logger">The logger instance.</param>
-    public GetVersionInfoQueryHandler(ILogger<GetVersionInfoQueryHandler> logger)
-    {
-        this._logger = logger;
-    }
+    private readonly ILogger<GetVersionInfoQueryHandler> _logger = logger;
 
     /// <inheritdoc/>
     public async Task<Result<VersionDetails>> Handle(GetVersionInfoQuery request, CancellationToken cancellationToken)

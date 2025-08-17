@@ -2,6 +2,7 @@ namespace SnapDog2.Infrastructure.Integrations.Knx;
 
 using System.Collections.Concurrent;
 using System.Linq;
+using Cortex.Mediator.Commands;
 using Cortex.Mediator.Notifications;
 using global::Knx.Falcon;
 using global::Knx.Falcon.Configuration;
@@ -580,7 +581,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
         }
     }
 
-    private async Task<Result> ExecuteCommandAsync(object command, CancellationToken cancellationToken)
+    private async Task<Result> ExecuteCommandAsync(ICommand<Result> command, CancellationToken cancellationToken)
     {
         try
         {
@@ -700,7 +701,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
         }
     }
 
-    private object? MapGroupAddressToCommand(string groupAddress, object value)
+    private ICommand<Result>? MapGroupAddressToCommand(string groupAddress, object value)
     {
         // NOTE: The following commands are INTENTIONALLY NOT IMPLEMENTED in KNX:
         // - SeekPositionCommand (TRACK_POSITION): KNX lacks precision for millisecond-based seeking
@@ -716,7 +717,9 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             var zoneIndex = i + 1; // 1-based zone ID
 
             if (!zone.Knx.Enabled)
+            {
                 continue;
+            }
 
             var knxConfig = zone.Knx;
 
@@ -836,7 +839,9 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             var clientIndex = i + 1; // 1-based client ID
 
             if (!client.Knx.Enabled)
+            {
                 continue;
+            }
 
             var knxConfig = client.Knx;
 
@@ -1090,12 +1095,12 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
         // This is not ideal but necessary for DI container compatibility
         try
         {
-            DisposeAsync().AsTask().GetAwaiter().GetResult();
+            this.DisposeAsync().AsTask().GetAwaiter().GetResult();
         }
         catch (Exception ex)
         {
             // Log the exception but don't throw to avoid issues during disposal
-            LogKnxDisposalError(ex.Message);
+            this.LogKnxDisposalError(ex.Message);
         }
     }
 

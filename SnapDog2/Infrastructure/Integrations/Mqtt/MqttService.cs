@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Cortex.Mediator;
+using Cortex.Mediator.Commands;
 using Cortex.Mediator.Notifications;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -600,7 +601,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     /// Maps MQTT topics to Cortex.Mediator commands based on the topic structure.
     /// Implements complete command set as specified in blueprint Section 14.
     /// </summary>
-    private object? MapTopicToCommand(string topic, string payload)
+    private ICommand<Result>? MapTopicToCommand(string topic, string payload)
     {
         try
         {
@@ -639,9 +640,8 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
 
     /// <summary>
     /// Maps zone-specific MQTT commands to Mediator commands following blueprint specification.
-    /// Implements all commands from Section 14.3.1 of the blueprint.
     /// </summary>
-    private object? MapZoneCommand(int zoneIndex, string command, string payload)
+    private ICommand<Result>? MapZoneCommand(int zoneIndex, string command, string payload)
     {
         return command switch
         {
@@ -768,9 +768,8 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
 
     /// <summary>
     /// Maps client-specific MQTT commands to Mediator commands following blueprint specification.
-    /// Implements all commands from Section 14.4.1 of the blueprint.
     /// </summary>
-    private object? MapClientCommand(int clientIndex, string command, string payload)
+    private ICommand<Result>? MapClientCommand(int clientIndex, string command, string payload)
     {
         return command switch
         {
@@ -815,7 +814,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
 
     /// <summary>
     /// Creates a PlayCommand with optional parameters based on payload.
-    /// Supports different play command formats as per blueprint specification.
+    /// Supports different play command formats specification.
     /// </summary>
     private static PlayCommand CreatePlayCommand(int zoneIndex, string payload)
     {

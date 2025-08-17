@@ -11,21 +11,18 @@ using SnapDog2.Server.Features.Global.Queries;
 /// <summary>
 /// Handler for getting the latest system error information.
 /// </summary>
-public partial class GetErrorStatusQueryHandler : IQueryHandler<GetErrorStatusQuery, Result<ErrorDetails?>>
+/// <remarks>
+/// Initializes a new instance of the <see cref="GetErrorStatusQueryHandler"/> class.
+/// </remarks>
+/// <param name="logger">The logger instance.</param>
+/// <param name="metricsService">The metrics service instance.</param>
+public partial class GetErrorStatusQueryHandler(
+    ILogger<GetErrorStatusQueryHandler> logger,
+    IMetricsService metricsService
+) : IQueryHandler<GetErrorStatusQuery, Result<ErrorDetails?>>
 {
-    private readonly ILogger<GetErrorStatusQueryHandler> _logger;
-    private readonly IMetricsService _metricsService;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="GetErrorStatusQueryHandler"/> class.
-    /// </summary>
-    /// <param name="logger">The logger instance.</param>
-    /// <param name="metricsService">The metrics service instance.</param>
-    public GetErrorStatusQueryHandler(ILogger<GetErrorStatusQueryHandler> logger, IMetricsService metricsService)
-    {
-        this._logger = logger;
-        this._metricsService = metricsService;
-    }
+    private readonly ILogger<GetErrorStatusQueryHandler> _logger = logger;
+    private readonly IMetricsService _metricsService = metricsService;
 
     /// <summary>
     /// Handles the get error status query.

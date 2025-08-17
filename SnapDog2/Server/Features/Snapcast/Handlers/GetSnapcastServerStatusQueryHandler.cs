@@ -9,20 +9,13 @@ using SnapDog2.Server.Features.Snapcast.Queries;
 /// <summary>
 /// Handler for getting Snapcast server status.
 /// </summary>
-public partial class GetSnapcastServerStatusQueryHandler
-    : IQueryHandler<GetSnapcastServerStatusQuery, Result<SnapcastServerStatus>>
+public partial class GetSnapcastServerStatusQueryHandler(
+    ISnapcastService snapcastService,
+    ILogger<GetSnapcastServerStatusQueryHandler> logger
+) : IQueryHandler<GetSnapcastServerStatusQuery, Result<SnapcastServerStatus>>
 {
-    private readonly ISnapcastService _snapcastService;
-    private readonly ILogger<GetSnapcastServerStatusQueryHandler> _logger;
-
-    public GetSnapcastServerStatusQueryHandler(
-        ISnapcastService snapcastService,
-        ILogger<GetSnapcastServerStatusQueryHandler> logger
-    )
-    {
-        this._snapcastService = snapcastService;
-        this._logger = logger;
-    }
+    private readonly ISnapcastService _snapcastService = snapcastService;
+    private readonly ILogger<GetSnapcastServerStatusQueryHandler> _logger = logger;
 
     [LoggerMessage(2001, LogLevel.Information, "Getting Snapcast server status")]
     private partial void LogGettingServerStatus();

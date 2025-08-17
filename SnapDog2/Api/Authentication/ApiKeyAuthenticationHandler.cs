@@ -8,24 +8,18 @@ using Microsoft.Extensions.Options;
 /// <summary>
 /// Authentication handler for API key authentication.
 /// </summary>
-public class ApiKeyAuthenticationHandler : AuthenticationHandler<ApiKeyAuthenticationSchemeOptions>
+/// <remarks>
+/// Initializes a new instance of the <see cref="ApiKeyAuthenticationHandler"/> class.
+/// </remarks>
+public class ApiKeyAuthenticationHandler(
+    IOptionsMonitor<ApiKeyAuthenticationSchemeOptions> options,
+    ILoggerFactory logger,
+    UrlEncoder encoder,
+    IConfiguration configuration
+) : AuthenticationHandler<ApiKeyAuthenticationSchemeOptions>(options, logger, encoder)
 {
     private const string ApiKeyHeaderName = "X-API-Key";
-    private readonly IConfiguration _configuration;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ApiKeyAuthenticationHandler"/> class.
-    /// </summary>
-    public ApiKeyAuthenticationHandler(
-        IOptionsMonitor<ApiKeyAuthenticationSchemeOptions> options,
-        ILoggerFactory logger,
-        UrlEncoder encoder,
-        IConfiguration configuration
-    )
-        : base(options, logger, encoder)
-    {
-        this._configuration = configuration;
-    }
+    private readonly IConfiguration _configuration = configuration;
 
     /// <inheritdoc/>
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()

@@ -22,9 +22,9 @@ public class NewEndpointsIntegrationTests : IClassFixture<IntegrationTestFixture
 
     public NewEndpointsIntegrationTests(IntegrationTestFixture fixture, ITestOutputHelper output)
     {
-        _fixture = fixture ?? throw new ArgumentNullException(nameof(fixture));
-        _output = output ?? throw new ArgumentNullException(nameof(output));
-        _httpClient = _fixture.HttpClient;
+        this._fixture = fixture ?? throw new ArgumentNullException(nameof(fixture));
+        this._output = output ?? throw new ArgumentNullException(nameof(output));
+        this._httpClient = this._fixture.HttpClient;
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -40,11 +40,11 @@ public class NewEndpointsIntegrationTests : IClassFixture<IntegrationTestFixture
         var requestBody = JsonContent.Create(positionMs);
 
         // Act
-        var response = await _httpClient.PostAsync($"/api/v1/zones/{zoneIndex}/track/seek/position", requestBody);
+        var response = await this._httpClient.PostAsync($"/api/v1/zones/{zoneIndex}/track/seek/position", requestBody);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.Accepted, HttpStatusCode.NotFound);
-        _output.WriteLine($"✅ Track seek position for zone {zoneIndex} to {positionMs}ms: {response.StatusCode}");
+        this._output.WriteLine($"✅ Track seek position for zone {zoneIndex} to {positionMs}ms: {response.StatusCode}");
     }
 
     [Fact]
@@ -56,11 +56,13 @@ public class NewEndpointsIntegrationTests : IClassFixture<IntegrationTestFixture
         var requestBody = JsonContent.Create(progress);
 
         // Act
-        var response = await _httpClient.PostAsync($"/api/v1/zones/{zoneIndex}/track/seek/progress", requestBody);
+        var response = await this._httpClient.PostAsync($"/api/v1/zones/{zoneIndex}/track/seek/progress", requestBody);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.Accepted, HttpStatusCode.NotFound);
-        _output.WriteLine($"✅ Track seek progress for zone {zoneIndex} to {progress * 100}%: {response.StatusCode}");
+        this._output.WriteLine(
+            $"✅ Track seek progress for zone {zoneIndex} to {progress * 100}%: {response.StatusCode}"
+        );
     }
 
     [Theory]
@@ -73,11 +75,11 @@ public class NewEndpointsIntegrationTests : IClassFixture<IntegrationTestFixture
         var requestBody = JsonContent.Create(invalidPosition);
 
         // Act
-        var response = await _httpClient.PostAsync($"/api/v1/zones/{zoneIndex}/track/seek/position", requestBody);
+        var response = await this._httpClient.PostAsync($"/api/v1/zones/{zoneIndex}/track/seek/position", requestBody);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.BadRequest, HttpStatusCode.OK, HttpStatusCode.NotFound);
-        _output.WriteLine($"✅ Invalid position {invalidPosition}ms handled: {response.StatusCode}");
+        this._output.WriteLine($"✅ Invalid position {invalidPosition}ms handled: {response.StatusCode}");
     }
 
     [Theory]
@@ -90,11 +92,11 @@ public class NewEndpointsIntegrationTests : IClassFixture<IntegrationTestFixture
         var requestBody = JsonContent.Create(invalidProgress);
 
         // Act
-        var response = await _httpClient.PostAsync($"/api/v1/zones/{zoneIndex}/track/seek/progress", requestBody);
+        var response = await this._httpClient.PostAsync($"/api/v1/zones/{zoneIndex}/track/seek/progress", requestBody);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.BadRequest, HttpStatusCode.OK, HttpStatusCode.NotFound);
-        _output.WriteLine($"✅ Invalid progress {invalidProgress} handled: {response.StatusCode}");
+        this._output.WriteLine($"✅ Invalid progress {invalidProgress} handled: {response.StatusCode}");
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -110,11 +112,14 @@ public class NewEndpointsIntegrationTests : IClassFixture<IntegrationTestFixture
         var requestBody = JsonContent.Create(trackIndex);
 
         // Act
-        var response = await _httpClient.PostAsync($"/api/v1/zones/{zoneIndex}/track/play/{trackIndex}", requestBody);
+        var response = await this._httpClient.PostAsync(
+            $"/api/v1/zones/{zoneIndex}/track/play/{trackIndex}",
+            requestBody
+        );
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.Accepted, HttpStatusCode.NotFound);
-        _output.WriteLine($"✅ Play track {trackIndex} in zone {zoneIndex}: {response.StatusCode}");
+        this._output.WriteLine($"✅ Play track {trackIndex} in zone {zoneIndex}: {response.StatusCode}");
     }
 
     [Fact]
@@ -126,11 +131,11 @@ public class NewEndpointsIntegrationTests : IClassFixture<IntegrationTestFixture
         var requestBody = new StringContent($"\"{mediaUrl}\"", Encoding.UTF8, "application/json");
 
         // Act
-        var response = await _httpClient.PostAsync($"/api/v1/zones/{zoneIndex}/track/play/url", requestBody);
+        var response = await this._httpClient.PostAsync($"/api/v1/zones/{zoneIndex}/track/play/url", requestBody);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.Accepted, HttpStatusCode.NotFound);
-        _output.WriteLine($"✅ Play URL {mediaUrl} in zone {zoneIndex}: {response.StatusCode}");
+        this._output.WriteLine($"✅ Play URL {mediaUrl} in zone {zoneIndex}: {response.StatusCode}");
     }
 
     [Theory]
@@ -143,14 +148,14 @@ public class NewEndpointsIntegrationTests : IClassFixture<IntegrationTestFixture
         var requestBody = JsonContent.Create(invalidTrackIndex);
 
         // Act
-        var response = await _httpClient.PostAsync(
+        var response = await this._httpClient.PostAsync(
             $"/api/v1/zones/{zoneIndex}/track/play/{invalidTrackIndex}",
             requestBody
         );
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.BadRequest, HttpStatusCode.OK, HttpStatusCode.NotFound);
-        _output.WriteLine($"✅ Invalid track index {invalidTrackIndex} handled: {response.StatusCode}");
+        this._output.WriteLine($"✅ Invalid track index {invalidTrackIndex} handled: {response.StatusCode}");
     }
 
     [Theory]
@@ -164,11 +169,11 @@ public class NewEndpointsIntegrationTests : IClassFixture<IntegrationTestFixture
         var requestBody = new StringContent($"\"{invalidUrl}\"", Encoding.UTF8, "application/json");
 
         // Act
-        var response = await _httpClient.PostAsync($"/api/v1/zones/{zoneIndex}/track/play/url", requestBody);
+        var response = await this._httpClient.PostAsync($"/api/v1/zones/{zoneIndex}/track/play/url", requestBody);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.BadRequest, HttpStatusCode.OK, HttpStatusCode.NotFound);
-        _output.WriteLine($"✅ Invalid URL '{invalidUrl}' handled: {response.StatusCode}");
+        this._output.WriteLine($"✅ Invalid URL '{invalidUrl}' handled: {response.StatusCode}");
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -184,11 +189,11 @@ public class NewEndpointsIntegrationTests : IClassFixture<IntegrationTestFixture
         var requestBody = new StringContent($"\"{newName}\"", Encoding.UTF8, "application/json");
 
         // Act
-        var response = await _httpClient.PostAsync($"/api/v1/clients/{clientIndex}/name", requestBody);
+        var response = await this._httpClient.PostAsync($"/api/v1/clients/{clientIndex}/name", requestBody);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.Accepted, HttpStatusCode.NotFound);
-        _output.WriteLine($"✅ Set client {clientIndex} name to '{newName}': {response.StatusCode}");
+        this._output.WriteLine($"✅ Set client {clientIndex} name to '{newName}': {response.StatusCode}");
     }
 
     [Fact]
@@ -198,7 +203,7 @@ public class NewEndpointsIntegrationTests : IClassFixture<IntegrationTestFixture
         const int clientIndex = 1;
 
         // Act
-        var response = await _httpClient.GetAsync($"/api/v1/clients/{clientIndex}/connection/status");
+        var response = await this._httpClient.GetAsync($"/api/v1/clients/{clientIndex}/connection/status");
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NotFound);
@@ -208,11 +213,11 @@ public class NewEndpointsIntegrationTests : IClassFixture<IntegrationTestFixture
             var content = await response.Content.ReadAsStringAsync();
             var isValidBoolean = bool.TryParse(content, out var connectionStatus);
             isValidBoolean.Should().BeTrue("Response should be a valid boolean");
-            _output.WriteLine($"✅ Client {clientIndex} connection status: {connectionStatus}");
+            this._output.WriteLine($"✅ Client {clientIndex} connection status: {connectionStatus}");
         }
         else
         {
-            _output.WriteLine($"✅ Client {clientIndex} not found: {response.StatusCode}");
+            this._output.WriteLine($"✅ Client {clientIndex} not found: {response.StatusCode}");
         }
     }
 
@@ -226,11 +231,11 @@ public class NewEndpointsIntegrationTests : IClassFixture<IntegrationTestFixture
         var requestBody = new StringContent($"\"{invalidName}\"", Encoding.UTF8, "application/json");
 
         // Act
-        var response = await _httpClient.PostAsync($"/api/v1/clients/{clientIndex}/name", requestBody);
+        var response = await this._httpClient.PostAsync($"/api/v1/clients/{clientIndex}/name", requestBody);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.BadRequest, HttpStatusCode.OK, HttpStatusCode.NotFound);
-        _output.WriteLine($"✅ Invalid client name '{invalidName}' handled: {response.StatusCode}");
+        this._output.WriteLine($"✅ Invalid client name '{invalidName}' handled: {response.StatusCode}");
     }
 
     [Fact]
@@ -241,11 +246,11 @@ public class NewEndpointsIntegrationTests : IClassFixture<IntegrationTestFixture
         var requestBody = new StringContent("null", Encoding.UTF8, "application/json");
 
         // Act
-        var response = await _httpClient.PostAsync($"/api/v1/clients/{clientIndex}/name", requestBody);
+        var response = await this._httpClient.PostAsync($"/api/v1/clients/{clientIndex}/name", requestBody);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.BadRequest, HttpStatusCode.OK, HttpStatusCode.NotFound);
-        _output.WriteLine($"✅ Null client name handled: {response.StatusCode}");
+        this._output.WriteLine($"✅ Null client name handled: {response.StatusCode}");
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -256,7 +261,7 @@ public class NewEndpointsIntegrationTests : IClassFixture<IntegrationTestFixture
     public async Task GetSystemCommandsStatus_Should_ReturnStatusList()
     {
         // Act
-        var response = await _httpClient.GetAsync("/api/v1/system/commands/status");
+        var response = await this._httpClient.GetAsync("/api/v1/system/commands/status");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -266,14 +271,14 @@ public class NewEndpointsIntegrationTests : IClassFixture<IntegrationTestFixture
         var isValidJson = IsValidJson(content);
         isValidJson.Should().BeTrue("Response should be valid JSON");
 
-        _output.WriteLine($"✅ System commands status retrieved: {content.Length} characters");
+        this._output.WriteLine($"✅ System commands status retrieved: {content.Length} characters");
     }
 
     [Fact]
     public async Task GetSystemCommandsErrors_Should_ReturnErrorList()
     {
         // Act
-        var response = await _httpClient.GetAsync("/api/v1/system/commands/errors");
+        var response = await this._httpClient.GetAsync("/api/v1/system/commands/errors");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -283,7 +288,7 @@ public class NewEndpointsIntegrationTests : IClassFixture<IntegrationTestFixture
         var isValidJson = IsValidJson(content);
         isValidJson.Should().BeTrue("Response should be valid JSON");
 
-        _output.WriteLine($"✅ System commands errors retrieved: {content.Length} characters");
+        this._output.WriteLine($"✅ System commands errors retrieved: {content.Length} characters");
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -308,11 +313,11 @@ public class NewEndpointsIntegrationTests : IClassFixture<IntegrationTestFixture
         foreach (var endpoint in endpoints)
         {
             // Act
-            var response = await _httpClient.PostAsync(endpoint, JsonContent.Create("test"));
+            var response = await this._httpClient.PostAsync(endpoint, JsonContent.Create("test"));
 
             // Assert
             response.StatusCode.Should().BeOneOf(HttpStatusCode.BadRequest, HttpStatusCode.NotFound);
-            _output.WriteLine($"✅ Invalid zone {invalidZoneIndex} handled for {endpoint}: {response.StatusCode}");
+            this._output.WriteLine($"✅ Invalid zone {invalidZoneIndex} handled for {endpoint}: {response.StatusCode}");
         }
     }
 
@@ -330,11 +335,11 @@ public class NewEndpointsIntegrationTests : IClassFixture<IntegrationTestFixture
         foreach (var endpoint in getEndpoints)
         {
             // Act
-            var response = await _httpClient.GetAsync(endpoint);
+            var response = await this._httpClient.GetAsync(endpoint);
 
             // Assert
             response.StatusCode.Should().BeOneOf(HttpStatusCode.BadRequest, HttpStatusCode.NotFound);
-            _output.WriteLine(
+            this._output.WriteLine(
                 $"✅ Invalid client {invalidClientIndex} handled for GET {endpoint}: {response.StatusCode}"
             );
         }
@@ -342,11 +347,11 @@ public class NewEndpointsIntegrationTests : IClassFixture<IntegrationTestFixture
         foreach (var endpoint in postEndpoints)
         {
             // Act
-            var response = await _httpClient.PostAsync(endpoint, JsonContent.Create("test"));
+            var response = await this._httpClient.PostAsync(endpoint, JsonContent.Create("test"));
 
             // Assert
             response.StatusCode.Should().BeOneOf(HttpStatusCode.BadRequest, HttpStatusCode.NotFound);
-            _output.WriteLine(
+            this._output.WriteLine(
                 $"✅ Invalid client {invalidClientIndex} handled for POST {endpoint}: {response.StatusCode}"
             );
         }
@@ -375,8 +380,8 @@ public class NewEndpointsIntegrationTests : IClassFixture<IntegrationTestFixture
             // Act
             var response =
                 testCase.Method == "GET"
-                    ? await _httpClient.GetAsync(testCase.Endpoint)
-                    : await _httpClient.PostAsync(testCase.Endpoint, testCase.Body);
+                    ? await this._httpClient.GetAsync(testCase.Endpoint)
+                    : await this._httpClient.PostAsync(testCase.Endpoint, testCase.Body);
 
             // Assert - Check that response has consistent headers and format
             response.Headers.Should().NotBeNull();
@@ -386,7 +391,7 @@ public class NewEndpointsIntegrationTests : IClassFixture<IntegrationTestFixture
                 response.Content.Headers.ContentType.MediaType.Should().BeOneOf("application/json", "text/plain");
             }
 
-            _output.WriteLine(
+            this._output.WriteLine(
                 $"✅ {testCase.Method} {testCase.Endpoint}: {response.StatusCode} - Content-Type: {response.Content.Headers.ContentType?.MediaType}"
             );
         }

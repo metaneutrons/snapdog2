@@ -10,26 +10,20 @@ using SnapDog2.Core.Models;
 /// </summary>
 /// <typeparam name="TCommand">The command type.</typeparam>
 /// <typeparam name="TResponse">The response type.</typeparam>
-public partial class ValidationCommandBehavior<TCommand, TResponse> : ICommandPipelineBehavior<TCommand, TResponse>
+/// <remarks>
+/// Initializes a new instance of the <see cref="ValidationCommandBehavior{TCommand, TResponse}"/> class.
+/// </remarks>
+/// <param name="validators">The validators for the command type.</param>
+/// <param name="logger">The logger instance.</param>
+public partial class ValidationCommandBehavior<TCommand, TResponse>(
+    IEnumerable<IValidator<TCommand>> validators,
+    ILogger<ValidationCommandBehavior<TCommand, TResponse>> logger
+) : ICommandPipelineBehavior<TCommand, TResponse>
     where TCommand : ICommand<TResponse>
     where TResponse : IResult
 {
-    private readonly IEnumerable<IValidator<TCommand>> _validators;
-    private readonly ILogger<ValidationCommandBehavior<TCommand, TResponse>> _logger;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ValidationCommandBehavior{TCommand, TResponse}"/> class.
-    /// </summary>
-    /// <param name="validators">The validators for the command type.</param>
-    /// <param name="logger">The logger instance.</param>
-    public ValidationCommandBehavior(
-        IEnumerable<IValidator<TCommand>> validators,
-        ILogger<ValidationCommandBehavior<TCommand, TResponse>> logger
-    )
-    {
-        this._validators = validators;
-        this._logger = logger;
-    }
+    private readonly IEnumerable<IValidator<TCommand>> _validators = validators;
+    private readonly ILogger<ValidationCommandBehavior<TCommand, TResponse>> _logger = logger;
 
     /// <inheritdoc/>
     public async Task<TResponse> Handle(

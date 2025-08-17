@@ -28,22 +28,15 @@ using SnapDog2.Server.Features.Zones.Queries;
 /// This service uses the Cortex.Mediator pattern to publish notifications, which are then
 /// handled by the existing notification handlers that publish to integration services (MQTT, KNX).
 /// </summary>
-public partial class StatePublishingService : BackgroundService
+public partial class StatePublishingService(
+    IServiceScopeFactory serviceScopeFactory,
+    ILogger<StatePublishingService> logger,
+    SnapDogConfiguration configuration
+) : BackgroundService
 {
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly ILogger<StatePublishingService> _logger;
-    private readonly SnapDogConfiguration _configuration;
-
-    public StatePublishingService(
-        IServiceScopeFactory serviceScopeFactory,
-        ILogger<StatePublishingService> logger,
-        SnapDogConfiguration configuration
-    )
-    {
-        this._serviceScopeFactory = serviceScopeFactory;
-        this._logger = logger;
-        this._configuration = configuration;
-    }
+    private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
+    private readonly ILogger<StatePublishingService> _logger = logger;
+    private readonly SnapDogConfiguration _configuration = configuration;
 
     #region Logging
 
@@ -152,7 +145,7 @@ public partial class StatePublishingService : BackgroundService
 
                 for (var i = 0; i < this._configuration.Zones.Count; i++)
                 {
-                    var zoneIndex = i + 1; // 1-based indexing as per blueprint
+                    var zoneIndex = i + 1; // 1-based indexing
                     publishingTasks.Add(
                         this.PublishZoneStateAsync(mediator, zoneIndex, stoppingToken)
                             .ContinueWith(
@@ -183,7 +176,7 @@ public partial class StatePublishingService : BackgroundService
 
                 for (var i = 0; i < this._configuration.Clients.Count; i++)
                 {
-                    var clientIndex = i + 1; // 1-based indexing as per blueprint
+                    var clientIndex = i + 1; // 1-based indexing
                     publishingTasks.Add(
                         this.PublishClientStateAsync(mediator, clientIndex, stoppingToken)
                             .ContinueWith(

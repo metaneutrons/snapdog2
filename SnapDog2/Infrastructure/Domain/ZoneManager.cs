@@ -17,17 +17,25 @@ using SnapDog2.Server.Features.Zones.Notifications;
 /// Production-ready implementation of IZoneManager with full Snapcast integration.
 /// Manages audio zones, their state, and coordinates with Snapcast groups.
 /// </summary>
-public partial class ZoneManager : IZoneManager, IAsyncDisposable, IDisposable
+public partial class ZoneManager(
+    ILogger<ZoneManager> logger,
+    ISnapcastService snapcastService,
+    ISnapcastStateRepository snapcastStateRepository,
+    IMediaPlayerService mediaPlayerService,
+    IMediator mediator,
+    IZoneStateStore zoneStateStore,
+    IOptions<SnapDogConfiguration> configuration
+) : IZoneManager, IAsyncDisposable, IDisposable
 {
-    private readonly ILogger<ZoneManager> _logger;
-    private readonly ISnapcastService _snapcastService;
-    private readonly ISnapcastStateRepository _snapcastStateRepository;
-    private readonly IMediaPlayerService _mediaPlayerService;
-    private readonly IMediator _mediator;
-    private readonly IZoneStateStore _zoneStateStore;
-    private readonly List<ZoneConfig> _zoneConfigs;
-    private readonly ConcurrentDictionary<int, IZoneService> _zones;
-    private readonly SemaphoreSlim _initializationLock;
+    private readonly ILogger<ZoneManager> _logger = logger;
+    private readonly ISnapcastService _snapcastService = snapcastService;
+    private readonly ISnapcastStateRepository _snapcastStateRepository = snapcastStateRepository;
+    private readonly IMediaPlayerService _mediaPlayerService = mediaPlayerService;
+    private readonly IMediator _mediator = mediator;
+    private readonly IZoneStateStore _zoneStateStore = zoneStateStore;
+    private readonly List<ZoneConfig> _zoneConfigs = configuration.Value.Zones;
+    private readonly ConcurrentDictionary<int, IZoneService> _zones = new ConcurrentDictionary<int, IZoneService>();
+    private readonly SemaphoreSlim _initializationLock = new SemaphoreSlim(1, 1);
     private bool _isInitialized;
     private bool _disposed;
 
@@ -49,44 +57,25 @@ public partial class ZoneManager : IZoneManager, IAsyncDisposable, IDisposable
     [LoggerMessage(7006, LogLevel.Debug, "Getting all zones")]
     private partial void LogGettingAllZones();
 
-    public ZoneManager(
-        ILogger<ZoneManager> logger,
-        ISnapcastService snapcastService,
-        ISnapcastStateRepository snapcastStateRepository,
-        IMediaPlayerService mediaPlayerService,
-        IMediator mediator,
-        IZoneStateStore zoneStateStore,
-        IOptions<SnapDogConfiguration> configuration
-    )
-    {
-        _logger = logger;
-        _snapcastService = snapcastService;
-        _snapcastStateRepository = snapcastStateRepository;
-        _mediaPlayerService = mediaPlayerService;
-        _mediator = mediator;
-        _zoneStateStore = zoneStateStore;
-        _zoneConfigs = configuration.Value.Zones;
-        _zones = new ConcurrentDictionary<int, IZoneService>();
-        _initializationLock = new SemaphoreSlim(1, 1);
-    }
-
     /// <summary>
     /// Initializes all configured zones and their Snapcast group mappings.
     /// </summary>
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
-        await _initializationLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+        await this._initializationLock.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            if (_isInitialized)
+            if (this._isInitialized)
+            {
                 return;
+            }
 
-            LogInitializing(_zoneConfigs.Count);
+            this.LogInitializing(this._zoneConfigs.Count);
 
             // Initialize zones based on configuration
-            for (int i = 0; i < _zoneConfigs.Count; i++)
+            for (int i = 0; i < this._zoneConfigs.Count; i++)
             {
-                var zoneConfig = _zoneConfigs[i];
+                var zoneConfig = this._zoneConfigs[i];
                 var zoneIndex = i + 1; // 1-based zone IDs
 
                 try
@@ -94,67 +83,67 @@ public partial class ZoneManager : IZoneManager, IAsyncDisposable, IDisposable
                     var zoneService = new ZoneService(
                         zoneIndex,
                         zoneConfig,
-                        _snapcastService,
-                        _snapcastStateRepository,
-                        _mediaPlayerService,
-                        _mediator,
-                        _zoneStateStore,
-                        _logger
+                        this._snapcastService,
+                        this._snapcastStateRepository,
+                        this._mediaPlayerService,
+                        this._mediator,
+                        this._zoneStateStore,
+                        this._logger
                     );
 
                     await zoneService.InitializeAsync(cancellationToken).ConfigureAwait(false);
 
-                    _zones.TryAdd(zoneIndex, zoneService);
-                    LogZoneInitialized(zoneIndex, zoneConfig.Name);
+                    this._zones.TryAdd(zoneIndex, zoneService);
+                    this.LogZoneInitialized(zoneIndex, zoneConfig.Name);
                 }
                 catch (Exception ex)
                 {
-                    LogZoneInitializationFailed(zoneIndex, ex.Message);
+                    this.LogZoneInitializationFailed(zoneIndex, ex.Message);
                     // Continue with other zones even if one fails
                 }
             }
 
-            _isInitialized = true;
+            this._isInitialized = true;
         }
         finally
         {
-            _initializationLock.Release();
+            this._initializationLock.Release();
         }
     }
 
     public async Task<Result<IZoneService>> GetZoneAsync(int zoneIndex)
     {
-        LogGettingZone(zoneIndex);
+        this.LogGettingZone(zoneIndex);
 
-        if (!_isInitialized)
+        if (!this._isInitialized)
         {
-            await InitializeAsync().ConfigureAwait(false);
+            await this.InitializeAsync().ConfigureAwait(false);
         }
 
-        if (_zones.TryGetValue(zoneIndex, out var zone))
+        if (this._zones.TryGetValue(zoneIndex, out var zone))
         {
             return Result<IZoneService>.Success(zone);
         }
 
-        LogZoneNotFound(zoneIndex);
+        this.LogZoneNotFound(zoneIndex);
         return Result<IZoneService>.Failure($"Zone {zoneIndex} not found");
     }
 
     public async Task<Result<IEnumerable<IZoneService>>> GetAllZonesAsync()
     {
-        LogGettingAllZones();
+        this.LogGettingAllZones();
 
-        if (!_isInitialized)
+        if (!this._isInitialized)
         {
-            await InitializeAsync().ConfigureAwait(false);
+            await this.InitializeAsync().ConfigureAwait(false);
         }
 
-        return Result<IEnumerable<IZoneService>>.Success(_zones.Values);
+        return Result<IEnumerable<IZoneService>>.Success(this._zones.Values);
     }
 
     public async Task<Result<ZoneState>> GetZoneStateAsync(int zoneIndex)
     {
-        var zoneResult = await GetZoneAsync(zoneIndex).ConfigureAwait(false);
+        var zoneResult = await this.GetZoneAsync(zoneIndex).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
             return Result<ZoneState>.Failure(zoneResult.ErrorMessage ?? "Zone not found");
@@ -165,15 +154,15 @@ public partial class ZoneManager : IZoneManager, IAsyncDisposable, IDisposable
 
     public async Task<Result<List<ZoneState>>> GetAllZoneStatesAsync()
     {
-        LogGettingAllZones();
+        this.LogGettingAllZones();
 
-        if (!_isInitialized)
+        if (!this._isInitialized)
         {
-            await InitializeAsync().ConfigureAwait(false);
+            await this.InitializeAsync().ConfigureAwait(false);
         }
 
         var states = new List<ZoneState>();
-        var tasks = _zones.Values.Select(async zone =>
+        var tasks = this._zones.Values.Select(async zone =>
         {
             var stateResult = await zone.GetStateAsync().ConfigureAwait(false);
             return stateResult.IsSuccess ? stateResult.Value : null;
@@ -187,12 +176,12 @@ public partial class ZoneManager : IZoneManager, IAsyncDisposable, IDisposable
 
     public async Task<bool> ZoneExistsAsync(int zoneIndex)
     {
-        if (!_isInitialized)
+        if (!this._isInitialized)
         {
-            await InitializeAsync().ConfigureAwait(false);
+            await this.InitializeAsync().ConfigureAwait(false);
         }
 
-        return _zones.ContainsKey(zoneIndex);
+        return this._zones.ContainsKey(zoneIndex);
     }
 
     /// <summary>
@@ -201,12 +190,14 @@ public partial class ZoneManager : IZoneManager, IAsyncDisposable, IDisposable
     /// </summary>
     public async Task SynchronizeWithSnapcastAsync()
     {
-        if (!_isInitialized)
+        if (!this._isInitialized)
+        {
             return;
+        }
 
-        var snapcastGroups = _snapcastStateRepository.GetAllGroups();
+        var snapcastGroups = this._snapcastStateRepository.GetAllGroups();
 
-        foreach (var zone in _zones.Values.Cast<ZoneService>())
+        foreach (var zone in this._zones.Values.Cast<ZoneService>())
         {
             await zone.SynchronizeWithSnapcastAsync(snapcastGroups).ConfigureAwait(false);
         }
@@ -214,16 +205,18 @@ public partial class ZoneManager : IZoneManager, IAsyncDisposable, IDisposable
 
     public async ValueTask DisposeAsync()
     {
-        if (_disposed)
+        if (this._disposed)
+        {
             return;
+        }
 
         // Dispose all zone services
-        var disposeTasks = _zones.Values.OfType<IAsyncDisposable>().Select(zone => zone.DisposeAsync().AsTask());
+        var disposeTasks = this._zones.Values.OfType<IAsyncDisposable>().Select(zone => zone.DisposeAsync().AsTask());
 
         await Task.WhenAll(disposeTasks).ConfigureAwait(false);
 
-        _initializationLock?.Dispose();
-        _disposed = true;
+        this._initializationLock?.Dispose();
+        this._disposed = true;
     }
 
     public void Dispose()
@@ -235,7 +228,7 @@ public partial class ZoneManager : IZoneManager, IAsyncDisposable, IDisposable
         // 3. Or refactor to use IHostedService lifecycle management instead of BackgroundService
         // Current approach blocks on async disposal which could cause deadlocks in some scenarios.
         // See: https://github.com/dotnet/runtime/issues/61132
-        DisposeAsync().AsTask().GetAwaiter().GetResult();
+        this.DisposeAsync().AsTask().GetAwaiter().GetResult();
     }
 }
 
@@ -269,7 +262,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     [LoggerMessage(7104, LogLevel.Error, "Zone {ZoneIndex} ({ZoneName}): {Action} - {Error}")]
     private partial void LogZoneError(int zoneIndex, string zoneName, string action, string error);
 
-    public int ZoneIndex => _zoneIndex;
+    public int ZoneIndex => this._zoneIndex;
 
     public ZoneService(
         int zoneIndex,
@@ -282,21 +275,21 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         ILogger logger
     )
     {
-        _zoneIndex = zoneIndex;
-        _config = config;
-        _snapcastService = snapcastService;
-        _snapcastStateRepository = snapcastStateRepository;
-        _mediaPlayerService = mediaPlayerService;
-        _mediator = mediator;
-        _zoneStateStore = zoneStateStore;
-        _logger = logger;
-        _stateLock = new SemaphoreSlim(1, 1);
+        this._zoneIndex = zoneIndex;
+        this._config = config;
+        this._snapcastService = snapcastService;
+        this._snapcastStateRepository = snapcastStateRepository;
+        this._mediaPlayerService = mediaPlayerService;
+        this._mediator = mediator;
+        this._zoneStateStore = zoneStateStore;
+        this._logger = logger;
+        this._stateLock = new SemaphoreSlim(1, 1);
 
         // Initialize state from store or create default
-        var storedState = _zoneStateStore.GetZoneState(zoneIndex);
+        var storedState = this._zoneStateStore.GetZoneState(zoneIndex);
         if (storedState != null)
         {
-            _logger.LogInformation(
+            this._logger.LogInformation(
                 "Zone {ZoneIndex}: Loaded state from store - Source: {Source}; Playlist: {PlaylistIndex}, Track: {TrackIndex} ({TrackTitle})",
                 zoneIndex,
                 storedState.Playlist?.Source ?? "none",
@@ -304,91 +297,93 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 storedState.Track?.Index.ToString() ?? "none",
                 storedState.Track?.Title ?? "No Track"
             );
-            _currentState = storedState;
+            this._currentState = storedState;
         }
         else
         {
-            _logger.LogInformation("Zone {ZoneIndex}: No stored state found, creating initial state", zoneIndex);
-            _currentState = CreateInitialState();
+            this._logger.LogInformation("Zone {ZoneIndex}: No stored state found, creating initial state", zoneIndex);
+            this._currentState = this.CreateInitialState();
             // Store the initial state
-            _zoneStateStore.SetZoneState(zoneIndex, _currentState);
+            this._zoneStateStore.SetZoneState(zoneIndex, this._currentState);
         }
     }
 
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
         // Find or create corresponding Snapcast group
-        await EnsureSnapcastGroupAsync().ConfigureAwait(false);
+        await this.EnsureSnapcastGroupAsync().ConfigureAwait(false);
     }
 
     public async Task<Result<ZoneState>> GetStateAsync()
     {
-        await _stateLock.WaitAsync().ConfigureAwait(false);
+        await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
             // Update state from Snapcast if available
-            await UpdateStateFromSnapcastAsync().ConfigureAwait(false);
+            await this.UpdateStateFromSnapcastAsync().ConfigureAwait(false);
 
-            return Result<ZoneState>.Success(_currentState with { TimestampUtc = DateTime.UtcNow });
+            return Result<ZoneState>.Success(this._currentState with { TimestampUtc = DateTime.UtcNow });
         }
         finally
         {
-            _stateLock.Release();
+            this._stateLock.Release();
         }
     }
 
     // Playback Control Implementation
     public async Task<Result> PlayAsync()
     {
-        LogZoneAction(_zoneIndex, _config.Name, "Play");
+        this.LogZoneAction(this._zoneIndex, this._config.Name, "Play");
 
-        await _stateLock.WaitAsync().ConfigureAwait(false);
+        await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
             // Check if we have a valid track to play
             if (
-                _currentState.Track == null
-                || string.IsNullOrEmpty(_currentState.Track.Id)
-                || _currentState.Track.Id == "none"
-                || _currentState.Track.Source == "none"
+                this._currentState.Track == null
+                || string.IsNullOrEmpty(this._currentState.Track.Id)
+                || this._currentState.Track.Id == "none"
+                || this._currentState.Track.Source == "none"
             )
             {
                 return Result.Failure("No track available to play. Please set a playlist or track first.");
             }
 
             // Start media playback
-            var playResult = await _mediaPlayerService
-                .PlayAsync(_zoneIndex, _currentState.Track!)
+            var playResult = await this
+                ._mediaPlayerService.PlayAsync(this._zoneIndex, this._currentState.Track!)
                 .ConfigureAwait(false);
             if (playResult.IsFailure)
+            {
                 return playResult;
+            }
 
             // Update state
-            _currentState = _currentState with
+            this._currentState = this._currentState with
             {
                 PlaybackState = "playing",
             };
 
             // Publish notification
-            PublishZoneStateChangedAsync();
+            this.PublishZoneStateChangedAsync();
 
             return Result.Success();
         }
         finally
         {
-            _stateLock.Release();
+            this._stateLock.Release();
         }
     }
 
     public async Task<Result> PlayTrackAsync(int trackIndex)
     {
-        LogZoneAction(_zoneIndex, _config.Name, $"Play track {trackIndex}");
+        this.LogZoneAction(this._zoneIndex, this._config.Name, $"Play track {trackIndex}");
 
-        await _stateLock.WaitAsync().ConfigureAwait(false);
+        await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
             // Update track info (this would normally come from playlist manager)
-            var newTrack = _currentState.Track! with
+            var newTrack = this._currentState.Track! with
             {
                 Index = trackIndex,
                 Title = $"Track {trackIndex}",
@@ -396,31 +391,33 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             };
 
             // Start playback
-            var playResult = await _mediaPlayerService.PlayAsync(_zoneIndex, newTrack).ConfigureAwait(false);
+            var playResult = await this._mediaPlayerService.PlayAsync(this._zoneIndex, newTrack).ConfigureAwait(false);
             if (playResult.IsFailure)
+            {
                 return playResult;
+            }
 
             // Update state
-            _currentState = _currentState with
+            this._currentState = this._currentState with
             {
                 PlaybackState = "playing",
                 Track = newTrack,
             };
 
-            PublishZoneStateChangedAsync();
+            this.PublishZoneStateChangedAsync();
             return Result.Success();
         }
         finally
         {
-            _stateLock.Release();
+            this._stateLock.Release();
         }
     }
 
     public async Task<Result> PlayUrlAsync(string mediaUrl)
     {
-        LogZoneAction(_zoneIndex, _config.Name, $"Play URL: {mediaUrl}");
+        this.LogZoneAction(this._zoneIndex, this._config.Name, $"Play URL: {mediaUrl}");
 
-        await _stateLock.WaitAsync().ConfigureAwait(false);
+        await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
             var streamTrack = new TrackInfo
@@ -433,76 +430,84 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 Album = "Stream",
             };
 
-            var playResult = await _mediaPlayerService.PlayAsync(_zoneIndex, streamTrack).ConfigureAwait(false);
+            var playResult = await this
+                ._mediaPlayerService.PlayAsync(this._zoneIndex, streamTrack)
+                .ConfigureAwait(false);
             if (playResult.IsFailure)
+            {
                 return playResult;
+            }
 
-            _currentState = _currentState with { PlaybackState = "playing", Track = streamTrack };
+            this._currentState = this._currentState with { PlaybackState = "playing", Track = streamTrack };
 
-            PublishZoneStateChangedAsync();
+            this.PublishZoneStateChangedAsync();
             return Result.Success();
         }
         finally
         {
-            _stateLock.Release();
+            this._stateLock.Release();
         }
     }
 
     public async Task<Result> PauseAsync()
     {
-        LogZoneAction(_zoneIndex, _config.Name, "Pause");
+        this.LogZoneAction(this._zoneIndex, this._config.Name, "Pause");
 
-        await _stateLock.WaitAsync().ConfigureAwait(false);
+        await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            var pauseResult = await _mediaPlayerService.PauseAsync(_zoneIndex).ConfigureAwait(false);
+            var pauseResult = await this._mediaPlayerService.PauseAsync(this._zoneIndex).ConfigureAwait(false);
             if (pauseResult.IsFailure)
+            {
                 return pauseResult;
+            }
 
-            _currentState = _currentState with { PlaybackState = "paused" };
-            PublishZoneStateChangedAsync();
+            this._currentState = this._currentState with { PlaybackState = "paused" };
+            this.PublishZoneStateChangedAsync();
             return Result.Success();
         }
         finally
         {
-            _stateLock.Release();
+            this._stateLock.Release();
         }
     }
 
     public async Task<Result> StopAsync()
     {
-        LogZoneAction(_zoneIndex, _config.Name, "Stop");
+        this.LogZoneAction(this._zoneIndex, this._config.Name, "Stop");
 
-        await _stateLock.WaitAsync().ConfigureAwait(false);
+        await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            var stopResult = await _mediaPlayerService.StopAsync(_zoneIndex).ConfigureAwait(false);
+            var stopResult = await this._mediaPlayerService.StopAsync(this._zoneIndex).ConfigureAwait(false);
             if (stopResult.IsFailure)
+            {
                 return stopResult;
+            }
 
-            _currentState = _currentState with { PlaybackState = "stopped" };
-            PublishZoneStateChangedAsync();
+            this._currentState = this._currentState with { PlaybackState = "stopped" };
+            this.PublishZoneStateChangedAsync();
             return Result.Success();
         }
         finally
         {
-            _stateLock.Release();
+            this._stateLock.Release();
         }
     }
 
     // Volume Control Implementation
     public async Task<Result> SetVolumeAsync(int volume)
     {
-        LogZoneAction(_zoneIndex, _config.Name, $"Set volume to {volume}");
+        this.LogZoneAction(this._zoneIndex, this._config.Name, $"Set volume to {volume}");
 
-        await _stateLock.WaitAsync().ConfigureAwait(false);
+        await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            return SetVolumeInternal(volume);
+            return this.SetVolumeInternal(volume);
         }
         finally
         {
-            _stateLock.Release();
+            this._stateLock.Release();
         }
     }
 
@@ -511,7 +516,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         var clampedVolume = Math.Clamp(volume, 0, 100);
 
         // Update Snapcast group volume if available
-        if (!string.IsNullOrEmpty(_snapcastGroupId))
+        if (!string.IsNullOrEmpty(this._snapcastGroupId))
         {
             // For now, we'll set individual client volumes since there's no SetGroupVolumeAsync
             // This would need to be implemented by iterating through group clients
@@ -520,111 +525,113 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             //     return snapcastResult;
         }
 
-        _currentState = _currentState with { Volume = clampedVolume };
-        PublishZoneStateChangedAsync();
+        this._currentState = this._currentState with { Volume = clampedVolume };
+        this.PublishZoneStateChangedAsync();
         return Result.Success();
     }
 
     public async Task<Result> VolumeUpAsync(int step = 5)
     {
-        await _stateLock.WaitAsync().ConfigureAwait(false);
+        await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            var newVolume = Math.Clamp(_currentState.Volume + step, 0, 100);
-            LogZoneAction(_zoneIndex, _config.Name, $"Set volume to {newVolume}");
-            return SetVolumeInternal(newVolume);
+            var newVolume = Math.Clamp(this._currentState.Volume + step, 0, 100);
+            this.LogZoneAction(this._zoneIndex, this._config.Name, $"Set volume to {newVolume}");
+            return this.SetVolumeInternal(newVolume);
         }
         finally
         {
-            _stateLock.Release();
+            this._stateLock.Release();
         }
     }
 
     public async Task<Result> VolumeDownAsync(int step = 5)
     {
-        await _stateLock.WaitAsync().ConfigureAwait(false);
+        await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            var newVolume = Math.Clamp(_currentState.Volume - step, 0, 100);
-            LogZoneAction(_zoneIndex, _config.Name, $"Set volume to {newVolume}");
-            return SetVolumeInternal(newVolume);
+            var newVolume = Math.Clamp(this._currentState.Volume - step, 0, 100);
+            this.LogZoneAction(this._zoneIndex, this._config.Name, $"Set volume to {newVolume}");
+            return this.SetVolumeInternal(newVolume);
         }
         finally
         {
-            _stateLock.Release();
+            this._stateLock.Release();
         }
     }
 
     public async Task<Result> SetMuteAsync(bool enabled)
     {
-        LogZoneAction(_zoneIndex, _config.Name, enabled ? "Mute" : "Unmute");
+        this.LogZoneAction(this._zoneIndex, this._config.Name, enabled ? "Mute" : "Unmute");
 
-        await _stateLock.WaitAsync().ConfigureAwait(false);
+        await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            return await SetMuteInternalAsync(enabled).ConfigureAwait(false);
+            return await this.SetMuteInternalAsync(enabled).ConfigureAwait(false);
         }
         finally
         {
-            _stateLock.Release();
+            this._stateLock.Release();
         }
     }
 
     private async Task<Result> SetMuteInternalAsync(bool enabled)
     {
         // Update Snapcast group mute if available
-        if (!string.IsNullOrEmpty(_snapcastGroupId))
+        if (!string.IsNullOrEmpty(this._snapcastGroupId))
         {
-            var snapcastResult = await _snapcastService
-                .SetGroupMuteAsync(_snapcastGroupId, enabled)
+            var snapcastResult = await this
+                ._snapcastService.SetGroupMuteAsync(this._snapcastGroupId, enabled)
                 .ConfigureAwait(false);
             if (snapcastResult.IsFailure)
+            {
                 return snapcastResult;
+            }
         }
 
-        _currentState = _currentState with { Mute = enabled };
-        PublishZoneStateChangedAsync();
+        this._currentState = this._currentState with { Mute = enabled };
+        this.PublishZoneStateChangedAsync();
         return Result.Success();
     }
 
     public async Task<Result> ToggleMuteAsync()
     {
-        await _stateLock.WaitAsync().ConfigureAwait(false);
+        await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            LogZoneAction(_zoneIndex, _config.Name, _currentState.Mute ? "Unmute" : "Mute");
-            return await SetMuteInternalAsync(!_currentState.Mute).ConfigureAwait(false);
+            this.LogZoneAction(this._zoneIndex, this._config.Name, this._currentState.Mute ? "Unmute" : "Mute");
+            return await this.SetMuteInternalAsync(!this._currentState.Mute).ConfigureAwait(false);
         }
         finally
         {
-            _stateLock.Release();
+            this._stateLock.Release();
         }
     }
 
     // Track Management Implementation
     public async Task<Result> SetTrackAsync(int trackIndex)
     {
-        LogZoneAction(_zoneIndex, _config.Name, $"Set track to {trackIndex}");
+        this.LogZoneAction(this._zoneIndex, this._config.Name, $"Set track to {trackIndex}");
 
-        await _stateLock.WaitAsync().ConfigureAwait(false);
+        await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
             // Get tracks from the current playlist
-            if (_currentState.Playlist == null)
+            if (this._currentState.Playlist == null)
             {
                 return Result.Failure("No playlist selected. Please set a playlist first.");
             }
 
             // Get the playlist with tracks
-            if (_currentState.Playlist.Index == null)
+            if (this._currentState.Playlist.Index == null)
             {
                 return Result.Failure("Current playlist has no index");
             }
 
-            var playlistIndex = _currentState.Playlist.Index.Value;
+            var playlistIndex = this._currentState.Playlist.Index.Value;
             var getPlaylistQuery = new GetPlaylistQuery { PlaylistIndex = playlistIndex };
-            var playlistResult = await _mediator
-                .SendQueryAsync<GetPlaylistQuery, Result<Api.Models.PlaylistWithTracks>>(getPlaylistQuery)
+            var playlistResult = await this
+                ._mediator.SendQueryAsync<GetPlaylistQuery, Result<Api.Models.PlaylistWithTracks>>(getPlaylistQuery)
                 .ConfigureAwait(false);
 
             if (playlistResult.IsFailure)
@@ -645,15 +652,15 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 return Result.Failure($"Track {trackIndex} not found in playlist");
             }
 
-            _currentState = _currentState with { Track = targetTrack };
-            PublishZoneStateChangedAsync();
+            this._currentState = this._currentState with { Track = targetTrack };
+            this.PublishZoneStateChangedAsync();
 
             // Log successful track change with meaningful information
-            _logger.LogInformation(
+            this._logger.LogInformation(
                 "Zone {ZoneIndex}: Set track - Source: {Source}; Playlist: {PlaylistIndex}, Track: {TrackIndex} ({TrackTitle})",
-                _zoneIndex,
-                _currentState.Playlist.Source,
-                _currentState.Playlist.Index,
+                this._zoneIndex,
+                this._currentState.Playlist.Source,
+                this._currentState.Playlist.Index,
                 targetTrack.Index,
                 targetTrack.Title
             );
@@ -662,36 +669,36 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         }
         finally
         {
-            _stateLock.Release();
+            this._stateLock.Release();
         }
     }
 
     public async Task<Result> NextTrackAsync()
     {
-        await _stateLock.WaitAsync().ConfigureAwait(false);
+        await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            var currentIndex = _currentState.Track?.Index ?? 1;
-            return await SetTrackAsync(currentIndex + 1).ConfigureAwait(false);
+            var currentIndex = this._currentState.Track?.Index ?? 1;
+            return await this.SetTrackAsync(currentIndex + 1).ConfigureAwait(false);
         }
         finally
         {
-            _stateLock.Release();
+            this._stateLock.Release();
         }
     }
 
     public async Task<Result> PreviousTrackAsync()
     {
-        await _stateLock.WaitAsync().ConfigureAwait(false);
+        await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            var currentIndex = _currentState.Track?.Index ?? 1;
+            var currentIndex = this._currentState.Track?.Index ?? 1;
             var newIndex = Math.Max(1, currentIndex - 1);
-            return await SetTrackAsync(newIndex).ConfigureAwait(false);
+            return await this.SetTrackAsync(newIndex).ConfigureAwait(false);
         }
         finally
         {
-            _stateLock.Release();
+            this._stateLock.Release();
         }
     }
 
@@ -702,7 +709,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     /// <returns>Result indicating success or failure</returns>
     public async Task<Result> SeekToPositionAsync(long positionMs)
     {
-        LogZoneAction(_zoneIndex, _config.Name, $"Seek to position {positionMs}ms");
+        this.LogZoneAction(this._zoneIndex, this._config.Name, $"Seek to position {positionMs}ms");
 
         try
         {
@@ -711,11 +718,18 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 return Result.Failure("Media player service not initialized");
             }
 
-            return await this._mediaPlayerService.SeekToPositionAsync(_zoneIndex, positionMs).ConfigureAwait(false);
+            return await this
+                ._mediaPlayerService.SeekToPositionAsync(this._zoneIndex, positionMs)
+                .ConfigureAwait(false);
         }
         catch (Exception ex)
         {
-            LogZoneError(_zoneIndex, _config.Name, $"Failed to seek to position {positionMs}ms", ex.Message);
+            this.LogZoneError(
+                this._zoneIndex,
+                this._config.Name,
+                $"Failed to seek to position {positionMs}ms",
+                ex.Message
+            );
             return Result.Failure($"Failed to seek to position {positionMs}ms: {ex.Message}");
         }
     }
@@ -727,7 +741,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     /// <returns>Result indicating success or failure</returns>
     public async Task<Result> SeekToProgressAsync(float progress)
     {
-        LogZoneAction(_zoneIndex, _config.Name, $"Seek to progress {progress:P1}");
+        this.LogZoneAction(this._zoneIndex, this._config.Name, $"Seek to progress {progress:P1}");
 
         try
         {
@@ -736,61 +750,74 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 return Result.Failure("Media player service not initialized");
             }
 
-            return await this._mediaPlayerService.SeekToProgressAsync(_zoneIndex, progress).ConfigureAwait(false);
+            return await this._mediaPlayerService.SeekToProgressAsync(this._zoneIndex, progress).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
-            LogZoneError(_zoneIndex, _config.Name, $"Failed to seek to progress {progress:P1}", ex.Message);
+            this.LogZoneError(
+                this._zoneIndex,
+                this._config.Name,
+                $"Failed to seek to progress {progress:P1}",
+                ex.Message
+            );
             return Result.Failure($"Failed to seek to progress {progress:P1}: {ex.Message}");
         }
     }
 
     public async Task<Result> SetTrackRepeatAsync(bool enabled)
     {
-        LogZoneAction(_zoneIndex, _config.Name, enabled ? "Enable track repeat" : "Disable track repeat");
+        this.LogZoneAction(
+            this._zoneIndex,
+            this._config.Name,
+            enabled ? "Enable track repeat" : "Disable track repeat"
+        );
 
-        await _stateLock.WaitAsync().ConfigureAwait(false);
+        await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            _currentState = _currentState with { TrackRepeat = enabled };
-            PublishZoneStateChangedAsync();
+            this._currentState = this._currentState with { TrackRepeat = enabled };
+            this.PublishZoneStateChangedAsync();
             return Result.Success();
         }
         finally
         {
-            _stateLock.Release();
+            this._stateLock.Release();
         }
     }
 
     public async Task<Result> ToggleTrackRepeatAsync()
     {
-        await _stateLock.WaitAsync().ConfigureAwait(false);
+        await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            var newValue = !_currentState.TrackRepeat;
-            LogZoneAction(_zoneIndex, _config.Name, newValue ? "Enable track repeat" : "Disable track repeat");
-            _currentState = _currentState with { TrackRepeat = newValue };
-            PublishZoneStateChangedAsync();
+            var newValue = !this._currentState.TrackRepeat;
+            this.LogZoneAction(
+                this._zoneIndex,
+                this._config.Name,
+                newValue ? "Enable track repeat" : "Disable track repeat"
+            );
+            this._currentState = this._currentState with { TrackRepeat = newValue };
+            this.PublishZoneStateChangedAsync();
             return Result.Success();
         }
         finally
         {
-            _stateLock.Release();
+            this._stateLock.Release();
         }
     }
 
     // Playlist Management Implementation
     public async Task<Result> SetPlaylistAsync(int playlistIndex)
     {
-        LogZoneAction(_zoneIndex, _config.Name, $"Set playlist to {playlistIndex}");
+        this.LogZoneAction(this._zoneIndex, this._config.Name, $"Set playlist to {playlistIndex}");
 
-        await _stateLock.WaitAsync().ConfigureAwait(false);
+        await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
             // Get all playlists to find the correct one
             var getAllPlaylistsQuery = new GetAllPlaylistsQuery();
-            var playlistsResult = await _mediator
-                .SendQueryAsync<GetAllPlaylistsQuery, Result<List<PlaylistInfo>>>(getAllPlaylistsQuery)
+            var playlistsResult = await this
+                ._mediator.SendQueryAsync<GetAllPlaylistsQuery, Result<List<PlaylistInfo>>>(getAllPlaylistsQuery)
                 .ConfigureAwait(false);
 
             if (playlistsResult.IsFailure)
@@ -806,145 +833,161 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 return Result.Failure($"Playlist {playlistIndex} not found");
             }
 
-            _currentState = _currentState with { Playlist = targetPlaylist };
-            PublishZoneStateChangedAsync();
+            this._currentState = this._currentState with { Playlist = targetPlaylist };
+            this.PublishZoneStateChangedAsync();
             return Result.Success();
         }
         finally
         {
-            _stateLock.Release();
+            this._stateLock.Release();
         }
     }
 
     public async Task<Result> SetPlaylistAsync(string playlistIndex)
     {
-        LogZoneAction(_zoneIndex, _config.Name, $"Set playlist to {playlistIndex}");
+        this.LogZoneAction(this._zoneIndex, this._config.Name, $"Set playlist to {playlistIndex}");
 
-        await _stateLock.WaitAsync().ConfigureAwait(false);
+        await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            var newPlaylist = _currentState.Playlist! with { Id = playlistIndex, Name = playlistIndex };
+            var newPlaylist = this._currentState.Playlist! with { Id = playlistIndex, Name = playlistIndex };
 
-            _currentState = _currentState with { Playlist = newPlaylist };
-            PublishZoneStateChangedAsync();
+            this._currentState = this._currentState with { Playlist = newPlaylist };
+            this.PublishZoneStateChangedAsync();
             return Result.Success();
         }
         finally
         {
-            _stateLock.Release();
+            this._stateLock.Release();
         }
     }
 
     public async Task<Result> NextPlaylistAsync()
     {
-        await _stateLock.WaitAsync().ConfigureAwait(false);
+        await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            var currentIndex = _currentState.Playlist?.Index ?? 1;
-            return await SetPlaylistAsync(currentIndex + 1).ConfigureAwait(false);
+            var currentIndex = this._currentState.Playlist?.Index ?? 1;
+            return await this.SetPlaylistAsync(currentIndex + 1).ConfigureAwait(false);
         }
         finally
         {
-            _stateLock.Release();
+            this._stateLock.Release();
         }
     }
 
     public async Task<Result> PreviousPlaylistAsync()
     {
-        await _stateLock.WaitAsync().ConfigureAwait(false);
+        await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            var currentIndex = _currentState.Playlist?.Index ?? 1;
+            var currentIndex = this._currentState.Playlist?.Index ?? 1;
             var newIndex = Math.Max(1, currentIndex - 1);
-            return await SetPlaylistAsync(newIndex).ConfigureAwait(false);
+            return await this.SetPlaylistAsync(newIndex).ConfigureAwait(false);
         }
         finally
         {
-            _stateLock.Release();
+            this._stateLock.Release();
         }
     }
 
     public async Task<Result> SetPlaylistShuffleAsync(bool enabled)
     {
-        LogZoneAction(_zoneIndex, _config.Name, enabled ? "Enable playlist shuffle" : "Disable playlist shuffle");
+        this.LogZoneAction(
+            this._zoneIndex,
+            this._config.Name,
+            enabled ? "Enable playlist shuffle" : "Disable playlist shuffle"
+        );
 
-        await _stateLock.WaitAsync().ConfigureAwait(false);
+        await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            _currentState = _currentState with { PlaylistShuffle = enabled };
-            PublishZoneStateChangedAsync();
+            this._currentState = this._currentState with { PlaylistShuffle = enabled };
+            this.PublishZoneStateChangedAsync();
             return Result.Success();
         }
         finally
         {
-            _stateLock.Release();
+            this._stateLock.Release();
         }
     }
 
     public async Task<Result> TogglePlaylistShuffleAsync()
     {
-        await _stateLock.WaitAsync().ConfigureAwait(false);
+        await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            var newValue = !_currentState.PlaylistShuffle;
-            LogZoneAction(_zoneIndex, _config.Name, newValue ? "Enable playlist shuffle" : "Disable playlist shuffle");
-            _currentState = _currentState with { PlaylistShuffle = newValue };
-            PublishZoneStateChangedAsync();
+            var newValue = !this._currentState.PlaylistShuffle;
+            this.LogZoneAction(
+                this._zoneIndex,
+                this._config.Name,
+                newValue ? "Enable playlist shuffle" : "Disable playlist shuffle"
+            );
+            this._currentState = this._currentState with { PlaylistShuffle = newValue };
+            this.PublishZoneStateChangedAsync();
             return Result.Success();
         }
         finally
         {
-            _stateLock.Release();
+            this._stateLock.Release();
         }
     }
 
     public async Task<Result> SetPlaylistRepeatAsync(bool enabled)
     {
-        LogZoneAction(_zoneIndex, _config.Name, enabled ? "Enable playlist repeat" : "Disable playlist repeat");
+        this.LogZoneAction(
+            this._zoneIndex,
+            this._config.Name,
+            enabled ? "Enable playlist repeat" : "Disable playlist repeat"
+        );
 
-        await _stateLock.WaitAsync().ConfigureAwait(false);
+        await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            _currentState = _currentState with { PlaylistRepeat = enabled };
-            PublishZoneStateChangedAsync();
+            this._currentState = this._currentState with { PlaylistRepeat = enabled };
+            this.PublishZoneStateChangedAsync();
             return Result.Success();
         }
         finally
         {
-            _stateLock.Release();
+            this._stateLock.Release();
         }
     }
 
     public async Task<Result> TogglePlaylistRepeatAsync()
     {
-        await _stateLock.WaitAsync().ConfigureAwait(false);
+        await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            var newValue = !_currentState.PlaylistRepeat;
-            LogZoneAction(_zoneIndex, _config.Name, newValue ? "Enable playlist repeat" : "Disable playlist repeat");
-            _currentState = _currentState with { PlaylistRepeat = newValue };
-            PublishZoneStateChangedAsync();
+            var newValue = !this._currentState.PlaylistRepeat;
+            this.LogZoneAction(
+                this._zoneIndex,
+                this._config.Name,
+                newValue ? "Enable playlist repeat" : "Disable playlist repeat"
+            );
+            this._currentState = this._currentState with { PlaylistRepeat = newValue };
+            this.PublishZoneStateChangedAsync();
             return Result.Success();
         }
         finally
         {
-            _stateLock.Release();
+            this._stateLock.Release();
         }
     }
 
     // Internal synchronization methods
     internal async Task SynchronizeWithSnapcastAsync(IEnumerable<SnapcastClient.Models.Group> snapcastGroups)
     {
-        await _stateLock.WaitAsync().ConfigureAwait(false);
+        await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
             // Find matching Snapcast group and update state
             // This would use actual Snapcast group data
-            await UpdateStateFromSnapcastAsync().ConfigureAwait(false);
+            await this.UpdateStateFromSnapcastAsync().ConfigureAwait(false);
         }
         finally
         {
-            _stateLock.Release();
+            this._stateLock.Release();
         }
     }
 
@@ -952,16 +995,16 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     {
         return new ZoneState
         {
-            Id = _zoneIndex,
-            Name = _config.Name,
+            Id = this._zoneIndex,
+            Name = this._config.Name,
             PlaybackState = "stopped",
             Volume = 50,
             Mute = false,
             TrackRepeat = false,
             PlaylistRepeat = false,
             PlaylistShuffle = false,
-            SnapcastGroupId = $"group_{_zoneIndex}",
-            SnapcastStreamId = _config.Sink,
+            SnapcastGroupId = $"group_{this._zoneIndex}",
+            SnapcastStreamId = this._config.Sink,
             IsSnapcastGroupMuted = false,
             Track = new TrackInfo
             {
@@ -992,34 +1035,34 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         try
         {
             // Extract stream ID from sink path (e.g., "/snapsinks/zone1" -> "Zone1")
-            var streamId = ExtractStreamIdFromSink(_config.Sink);
+            var streamId = ExtractStreamIdFromSink(this._config.Sink);
 
             // Find existing group for this zone's stream
-            var allGroups = _snapcastStateRepository.GetAllGroups();
+            var allGroups = this._snapcastStateRepository.GetAllGroups();
             var existingGroup = allGroups.FirstOrDefault(g => g.StreamId == streamId);
 
             if (existingGroup.Id != null)
             {
                 // Use existing group
-                _snapcastGroupId = existingGroup.Id;
-                this.LogSnapcastSync(_zoneIndex, _snapcastGroupId);
+                this._snapcastGroupId = existingGroup.Id;
+                this.LogSnapcastSync(this._zoneIndex, this._snapcastGroupId);
             }
             else
             {
                 // No existing group for this stream - we'll create one when clients are assigned
                 // For now, use a placeholder that will be replaced when first client is assigned
-                _snapcastGroupId = null;
+                this._snapcastGroupId = null;
                 this.LogZoneAction(
-                    _zoneIndex,
-                    _config.Name,
+                    this._zoneIndex,
+                    this._config.Name,
                     "No existing group found, will create when clients assigned"
                 );
             }
         }
         catch (Exception ex)
         {
-            this.LogZoneAction(_zoneIndex, _config.Name, $"Failed to ensure Snapcast group: {ex.Message}");
-            _snapcastGroupId = null;
+            this.LogZoneAction(this._zoneIndex, this._config.Name, $"Failed to ensure Snapcast group: {ex.Message}");
+            this._snapcastGroupId = null;
         }
     }
 
@@ -1045,33 +1088,43 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     private void PublishZoneStateChangedAsync()
     {
         // Persist state to store for future requests
-        _zoneStateStore.SetZoneState(_zoneIndex, _currentState);
+        this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
 
         // Publish notification via mediator using fire-and-forget to prevent blocking
-        var notification = new ZoneStateChangedNotification { ZoneIndex = _zoneIndex, ZoneState = _currentState };
+        var notification = new ZoneStateChangedNotification
+        {
+            ZoneIndex = this._zoneIndex,
+            ZoneState = this._currentState,
+        };
 
         // Use Task.Run to avoid blocking the calling thread
         _ = Task.Run(async () =>
         {
             try
             {
-                await _mediator.PublishAsync(notification).ConfigureAwait(false);
+                await this._mediator.PublishAsync(notification).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 // Log error but don't propagate to avoid breaking the main operation
-                _logger.LogError(ex, "Failed to publish zone state notification for zone {ZoneIndex}", _zoneIndex);
+                this._logger.LogError(
+                    ex,
+                    "Failed to publish zone state notification for zone {ZoneIndex}",
+                    this._zoneIndex
+                );
             }
         });
     }
 
     public ValueTask DisposeAsync()
     {
-        if (_disposed)
+        if (this._disposed)
+        {
             return ValueTask.CompletedTask;
+        }
 
-        _stateLock?.Dispose();
-        _disposed = true;
+        this._stateLock?.Dispose();
+        this._disposed = true;
         return ValueTask.CompletedTask;
     }
 }

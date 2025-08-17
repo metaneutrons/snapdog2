@@ -16,31 +16,25 @@ using SnapDog2.Server.Features.Zones.Notifications;
 /// LibVLC-based implementation of media player service.
 /// Provides cross-platform audio streaming with LibVLC implementation.
 /// </summary>
-public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisposable, IDisposable
+public sealed partial class MediaPlayerService(
+    IOptions<SnapDog2.Core.Configuration.AudioConfig> config,
+    ILogger<MediaPlayerService> logger,
+    ILoggerFactory loggerFactory,
+    IMediator mediator,
+    IEnumerable<ZoneConfig> zoneConfigs
+) : IMediaPlayerService, IAsyncDisposable, IDisposable
 {
-    private readonly SnapDog2.Core.Configuration.AudioConfig _config;
-    private readonly ILogger<MediaPlayerService> _logger;
-    private readonly ILoggerFactory _loggerFactory;
-    private readonly IMediator _mediator;
-    private readonly IEnumerable<ZoneConfig> _zoneConfigs;
+    private readonly SnapDog2.Core.Configuration.AudioConfig _config =
+        config?.Value ?? throw new ArgumentNullException(nameof(config));
+    private readonly ILogger<MediaPlayerService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly ILoggerFactory _loggerFactory =
+        loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
+    private readonly IMediator _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+    private readonly IEnumerable<ZoneConfig> _zoneConfigs =
+        zoneConfigs ?? throw new ArgumentNullException(nameof(zoneConfigs));
 
     private readonly ConcurrentDictionary<int, MediaPlayer> _players = new();
     private bool _disposed;
-
-    public MediaPlayerService(
-        IOptions<SnapDog2.Core.Configuration.AudioConfig> config,
-        ILogger<MediaPlayerService> logger,
-        ILoggerFactory loggerFactory,
-        IMediator mediator,
-        IEnumerable<ZoneConfig> zoneConfigs
-    )
-    {
-        _config = config?.Value ?? throw new ArgumentNullException(nameof(config));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
-        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
-        _zoneConfigs = zoneConfigs ?? throw new ArgumentNullException(nameof(zoneConfigs));
-    }
 
     /// <summary>
     /// Starts playing audio for the specified zone.
@@ -53,40 +47,42 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
     {
         try
         {
-            ObjectDisposedException.ThrowIf(_disposed, this);
+            ObjectDisposedException.ThrowIf(this._disposed, this);
 
             if (trackInfo == null)
+            {
                 return Result.Failure(new ArgumentNullException(nameof(trackInfo)));
+            }
 
-            var zoneConfig = _zoneConfigs.ElementAtOrDefault(zoneIndex - 1); // Zone IDs are 1-based
+            var zoneConfig = this._zoneConfigs.ElementAtOrDefault(zoneIndex - 1); // Zone IDs are 1-based
             if (zoneConfig == null)
             {
                 return Result.Failure(new ArgumentException($"Zone {zoneIndex} not found"));
             }
 
             // Check if we're at the stream limit (max = number of configured zones)
-            var maxStreams = _zoneConfigs.Count();
-            if (_players.Count >= maxStreams)
+            var maxStreams = this._zoneConfigs.Count();
+            if (this._players.Count >= maxStreams)
             {
-                LogMaxStreamsReached(_logger, maxStreams);
+                LogMaxStreamsReached(this._logger, maxStreams);
                 return Result.Failure(
                     new InvalidOperationException($"Maximum number of concurrent streams ({maxStreams}) reached")
                 );
             }
 
             // Stop existing playback for this zone
-            await StopAsync(zoneIndex, cancellationToken);
+            await this.StopAsync(zoneIndex, cancellationToken);
 
             // Create LibVLC player for this zone
             var player = new MediaPlayer(
-                _config,
-                _loggerFactory.CreateLogger<MediaPlayer>(),
-                _loggerFactory.CreateLogger<MetadataManager>(),
+                this._config,
+                this._loggerFactory.CreateLogger<MediaPlayer>(),
+                this._loggerFactory.CreateLogger<MetadataManager>(),
                 zoneIndex,
                 zoneConfig.Sink
             );
 
-            _players[zoneIndex] = player;
+            this._players[zoneIndex] = player;
 
             // Start streaming using the Id as the stream URL
             var streamUrl = trackInfo.Id; // TrackInfo.Id contains the stream URL
@@ -94,17 +90,17 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
 
             if (result.IsSuccess)
             {
-                LogPlaybackStarted(_logger, zoneIndex, trackInfo.Title ?? "Unknown", streamUrl);
+                LogPlaybackStarted(this._logger, zoneIndex, trackInfo.Title ?? "Unknown", streamUrl);
 
                 // Publish playback started notification
-                await _mediator.PublishAsync(
+                await this._mediator.PublishAsync(
                     new TrackPlaybackStartedNotification(zoneIndex, trackInfo),
                     cancellationToken
                 );
             }
             else
             {
-                _players.TryRemove(zoneIndex, out _);
+                this._players.TryRemove(zoneIndex, out _);
                 await player.DisposeAsync();
             }
 
@@ -112,7 +108,7 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
         }
         catch (Exception ex)
         {
-            LogPlaybackError(_logger, zoneIndex, ex);
+            LogPlaybackError(this._logger, zoneIndex, ex);
             return Result.Failure(ex);
         }
     }
@@ -124,22 +120,22 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
     {
         try
         {
-            if (_players.TryRemove(zoneIndex, out var player))
+            if (this._players.TryRemove(zoneIndex, out var player))
             {
                 await player.StopStreamingAsync();
                 await player.DisposeAsync();
 
-                LogPlaybackStopped(_logger, zoneIndex);
+                LogPlaybackStopped(this._logger, zoneIndex);
 
                 // Publish playback stopped notification
-                await _mediator.PublishAsync(new TrackPlaybackStoppedNotification(zoneIndex), cancellationToken);
+                await this._mediator.PublishAsync(new TrackPlaybackStoppedNotification(zoneIndex), cancellationToken);
             }
 
             return Result.Success();
         }
         catch (Exception ex)
         {
-            LogPlaybackError(_logger, zoneIndex, ex);
+            LogPlaybackError(this._logger, zoneIndex, ex);
             return Result.Failure(ex);
         }
     }
@@ -153,21 +149,21 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
         try
         {
             // For HTTP streaming, pause is equivalent to stop
-            var result = await StopAsync(zoneIndex, cancellationToken);
+            var result = await this.StopAsync(zoneIndex, cancellationToken);
 
             if (result.IsSuccess)
             {
-                LogPlaybackPaused(_logger, zoneIndex);
+                LogPlaybackPaused(this._logger, zoneIndex);
 
                 // Publish playback paused notification
-                await _mediator.PublishAsync(new TrackPlaybackPausedNotification(zoneIndex), cancellationToken);
+                await this._mediator.PublishAsync(new TrackPlaybackPausedNotification(zoneIndex), cancellationToken);
             }
 
             return result;
         }
         catch (Exception ex)
         {
-            LogPlaybackError(_logger, zoneIndex, ex);
+            LogPlaybackError(this._logger, zoneIndex, ex);
             return Result.Failure(ex);
         }
     }
@@ -179,13 +175,13 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
     {
         try
         {
-            var maxStreams = _zoneConfigs.Count();
+            var maxStreams = this._zoneConfigs.Count();
             PlaybackStatus status;
 
-            if (_players.TryGetValue(zoneIndex, out var player))
+            if (this._players.TryGetValue(zoneIndex, out var player))
             {
                 status = player.GetStatus();
-                status.ActiveStreams = _players.Count;
+                status.ActiveStreams = this._players.Count;
                 status.MaxStreams = maxStreams;
             }
             else
@@ -194,9 +190,13 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
                 {
                     ZoneIndex = zoneIndex,
                     IsPlaying = false,
-                    ActiveStreams = _players.Count,
+                    ActiveStreams = this._players.Count,
                     MaxStreams = maxStreams,
-                    AudioFormat = new AudioFormat(_config.SampleRate, _config.BitDepth, _config.Channels),
+                    AudioFormat = new AudioFormat(
+                        this._config.SampleRate,
+                        this._config.BitDepth,
+                        this._config.Channels
+                    ),
                 };
             }
 
@@ -216,18 +216,18 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
         try
         {
             var allStatuses = new List<PlaybackStatus>();
-            var maxStreams = _zoneConfigs.Count();
+            var maxStreams = this._zoneConfigs.Count();
 
             // Get status for all configured zones
-            for (int i = 0; i < _zoneConfigs.Count(); i++)
+            for (int i = 0; i < this._zoneConfigs.Count(); i++)
             {
                 var zoneIndex = i + 1; // Zone IDs are 1-based
-                var zoneConfig = _zoneConfigs.ElementAt(i);
+                var zoneConfig = this._zoneConfigs.ElementAt(i);
 
-                if (_players.TryGetValue(zoneIndex, out var player))
+                if (this._players.TryGetValue(zoneIndex, out var player))
                 {
                     var status = player.GetStatus();
-                    status.ActiveStreams = _players.Count;
+                    status.ActiveStreams = this._players.Count;
                     status.MaxStreams = maxStreams;
                     allStatuses.Add(status);
                 }
@@ -238,9 +238,13 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
                         {
                             ZoneIndex = zoneIndex,
                             IsPlaying = false,
-                            ActiveStreams = _players.Count,
+                            ActiveStreams = this._players.Count,
                             MaxStreams = maxStreams,
-                            AudioFormat = new AudioFormat(_config.SampleRate, _config.BitDepth, _config.Channels),
+                            AudioFormat = new AudioFormat(
+                                this._config.SampleRate,
+                                this._config.BitDepth,
+                                this._config.Channels
+                            ),
                         }
                     );
                 }
@@ -261,10 +265,10 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
     {
         try
         {
-            var stopTasks = _players.Keys.Select(zoneIndex => StopAsync(zoneIndex, cancellationToken));
+            var stopTasks = this._players.Keys.Select(zoneIndex => this.StopAsync(zoneIndex, cancellationToken));
             var results = await Task.WhenAll(stopTasks);
 
-            var activeStreamsCount = _players.Count;
+            var activeStreamsCount = this._players.Count;
 
             var failures = results.Where(r => !r.IsSuccess).ToList();
             if (failures.Any())
@@ -273,12 +277,12 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
                 return Result.Failure(aggregateException);
             }
 
-            LogAllPlaybackStopped(_logger, activeStreamsCount);
+            LogAllPlaybackStopped(this._logger, activeStreamsCount);
             return Result.Success();
         }
         catch (Exception ex)
         {
-            LogPlaybackError(_logger, -1, ex);
+            LogPlaybackError(this._logger, -1, ex);
             return Result.Failure(ex);
         }
     }
@@ -292,14 +296,14 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
     {
         try
         {
-            var maxStreams = _zoneConfigs.Count();
+            var maxStreams = this._zoneConfigs.Count();
             var statistics = new PlaybackStatistics
             {
-                ActiveStreams = _players.Count,
+                ActiveStreams = this._players.Count,
                 MaxStreams = maxStreams,
-                ConfiguredZones = _zoneConfigs.Count(),
-                ActiveZones = _players.Count,
-                AudioFormat = new AudioFormat(_config.SampleRate, _config.BitDepth, _config.Channels),
+                ConfiguredZones = this._zoneConfigs.Count(),
+                ActiveZones = this._players.Count,
+                AudioFormat = new AudioFormat(this._config.SampleRate, this._config.BitDepth, this._config.Channels),
                 UptimeSeconds = 0, // Could be tracked if needed
             };
 
@@ -324,22 +328,22 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
     {
         try
         {
-            LogSeekingToPosition(_logger, zoneIndex, positionMs);
+            LogSeekingToPosition(this._logger, zoneIndex, positionMs);
 
-            if (!_players.TryGetValue(zoneIndex, out var player))
+            if (!this._players.TryGetValue(zoneIndex, out var player))
             {
-                LogPlayerNotFound(_logger, zoneIndex);
+                LogPlayerNotFound(this._logger, zoneIndex);
                 return Task.FromResult(Result.Failure($"No active player found for zone {zoneIndex}"));
             }
 
             // For now, return success as seeking is not implemented in the LibVLC wrapper
             // This would need to be implemented in the actual media player
-            LogSeekNotImplemented(_logger, zoneIndex);
+            LogSeekNotImplemented(this._logger, zoneIndex);
             return Task.FromResult(Result.Success());
         }
         catch (Exception ex)
         {
-            LogSeekError(_logger, zoneIndex, ex);
+            LogSeekError(this._logger, zoneIndex, ex);
             return Task.FromResult(Result.Failure(ex));
         }
     }
@@ -355,37 +359,37 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
     {
         try
         {
-            LogSeekingToProgress(_logger, zoneIndex, progress);
+            LogSeekingToProgress(this._logger, zoneIndex, progress);
 
-            if (!_players.TryGetValue(zoneIndex, out var player))
+            if (!this._players.TryGetValue(zoneIndex, out var player))
             {
-                LogPlayerNotFound(_logger, zoneIndex);
+                LogPlayerNotFound(this._logger, zoneIndex);
                 return Task.FromResult(Result.Failure($"No active player found for zone {zoneIndex}"));
             }
 
             // For now, return success as seeking is not implemented in the LibVLC wrapper
             // This would need to be implemented in the actual media player
-            LogSeekNotImplemented(_logger, zoneIndex);
+            LogSeekNotImplemented(this._logger, zoneIndex);
             return Task.FromResult(Result.Success());
         }
         catch (Exception ex)
         {
-            LogSeekError(_logger, zoneIndex, ex);
+            LogSeekError(this._logger, zoneIndex, ex);
             return Task.FromResult(Result.Failure(ex));
         }
     }
 
     public async ValueTask DisposeAsync()
     {
-        if (!_disposed)
+        if (!this._disposed)
         {
-            _disposed = true; // Set early to prevent re-entry
+            this._disposed = true; // Set early to prevent re-entry
 
             try
             {
                 // Stop all players with timeout to prevent hanging
-                var players = _players.Values.ToList();
-                _players.Clear();
+                var players = this._players.Values.ToList();
+                this._players.Clear();
 
                 if (players.Count > 0)
                 {
@@ -399,18 +403,18 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
                         catch (Exception ex)
                         {
                             // Log but don't throw during disposal
-                            _logger.LogWarning(ex, "Error disposing MediaPlayer during service cleanup");
+                            this._logger.LogWarning(ex, "Error disposing MediaPlayer during service cleanup");
                         }
                     });
 
                     await Task.WhenAll(disposeTasks);
                 }
 
-                LogServiceDisposed(_logger);
+                LogServiceDisposed(this._logger);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error during MediaPlayerService disposal");
+                this._logger.LogError(ex, "Error during MediaPlayerService disposal");
             }
         }
     }
@@ -425,9 +429,9 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
         // Current approach blocks on async disposal which could cause deadlocks in some scenarios.
         // See: https://github.com/dotnet/runtime/issues/61132
 
-        if (!_disposed)
+        if (!this._disposed)
         {
-            _disposed = true; // Set early to prevent re-entry
+            this._disposed = true; // Set early to prevent re-entry
 
             try
             {
@@ -436,8 +440,8 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
                 {
                     try
                     {
-                        var players = _players.Values.ToList();
-                        _players.Clear();
+                        var players = this._players.Values.ToList();
+                        this._players.Clear();
 
                         if (players.Count > 0)
                         {
@@ -451,24 +455,27 @@ public sealed partial class MediaPlayerService : IMediaPlayerService, IAsyncDisp
                                 catch (Exception ex)
                                 {
                                     // Log but don't throw during disposal
-                                    _logger.LogWarning(ex, "Error disposing MediaPlayer during background cleanup");
+                                    this._logger.LogWarning(
+                                        ex,
+                                        "Error disposing MediaPlayer during background cleanup"
+                                    );
                                 }
                             });
 
                             await Task.WhenAll(disposeTasks);
                         }
 
-                        LogServiceDisposed(_logger);
+                        LogServiceDisposed(this._logger);
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Error during background MediaPlayerService disposal");
+                        this._logger.LogError(ex, "Error during background MediaPlayerService disposal");
                     }
                 });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error starting background disposal task");
+                this._logger.LogError(ex, "Error starting background disposal task");
             }
         }
     }

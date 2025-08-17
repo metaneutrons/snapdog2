@@ -26,16 +26,10 @@ using SnapDog2.Server.Features.Zones.Queries;
 [Authorize]
 [Produces("application/json")]
 [Tags("Zones")]
-public partial class ZonesController : ControllerBase
+public partial class ZonesController(IMediator mediator, ILogger<ZonesController> logger) : ControllerBase
 {
-    private readonly IMediator _mediator;
-    private readonly ILogger<ZonesController> _logger;
-
-    public ZonesController(IMediator mediator, ILogger<ZonesController> logger)
-    {
-        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
+    private readonly IMediator _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+    private readonly ILogger<ZonesController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     // ═══════════════════════════════════════════════════════════════════════════════
     // ZONE LISTING - Clean paginated API with real data via mediator
@@ -51,13 +45,17 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<Page<ZoneState>>> GetZones([FromQuery] int page = 1, [FromQuery] int size = 20)
     {
         if (page < 1)
-            return BadRequest("Page must be greater than 0");
+        {
+            return this.BadRequest("Page must be greater than 0");
+        }
 
         if (size < 1 || size > 100)
-            return BadRequest("Size must be between 1 and 100");
+        {
+            return this.BadRequest("Size must be between 1 and 100");
+        }
 
         var query = new GetAllZonesQuery();
-        var result = await _mediator.SendQueryAsync<GetAllZonesQuery, Result<List<ZoneState>>>(query);
+        var result = await this._mediator.SendQueryAsync<GetAllZonesQuery, Result<List<ZoneState>>>(query);
 
         if (result.IsFailure)
         {
@@ -69,7 +67,7 @@ public partial class ZonesController : ControllerBase
         var pagedZones = zones.Skip((page - 1) * size).Take(size).ToArray();
         var pageResult = new Page<ZoneState>(pagedZones, zones.Count, size, page);
 
-        return Ok(pageResult);
+        return this.Ok(pageResult);
     }
 
     /// <summary>
@@ -83,12 +81,12 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<ZoneState>> GetZone(int zoneIndex)
     {
         var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
-        var result = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+        var result = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
 
         if (result.IsFailure)
         {
             LogFailedToGetZone(zoneIndex, result.ErrorMessage ?? "Unknown error");
-            return NotFound($"Zone {zoneIndex} not found");
+            return this.NotFound($"Zone {zoneIndex} not found");
         }
 
         return Ok(result.Value!);
@@ -111,10 +109,12 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<int>> SetVolume(int zoneIndex, [FromBody] int volume)
     {
         if (volume < 0 || volume > 100)
-            return BadRequest("Volume must be between 0 and 100");
+        {
+            return this.BadRequest("Volume must be between 0 and 100");
+        }
 
         var command = new SetZoneVolumeCommand { ZoneIndex = zoneIndex, Volume = volume };
-        var result = await _mediator.SendCommandAsync<SetZoneVolumeCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<SetZoneVolumeCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -122,7 +122,7 @@ public partial class ZonesController : ControllerBase
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return Ok(volume);
+        return this.Ok(volume);
     }
 
     /// <summary>
@@ -136,12 +136,12 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<int>> GetVolume(int zoneIndex)
     {
         var query = new GetZoneVolumeQuery { ZoneIndex = zoneIndex };
-        var result = await _mediator.SendQueryAsync<GetZoneVolumeQuery, Result<int>>(query);
+        var result = await this._mediator.SendQueryAsync<GetZoneVolumeQuery, Result<int>>(query);
 
         if (result.IsFailure)
         {
             LogFailedToGetZoneVolume(zoneIndex, result.ErrorMessage ?? "Unknown error");
-            return NotFound($"Zone {zoneIndex} not found");
+            return this.NotFound($"Zone {zoneIndex} not found");
         }
 
         return Ok(result.Value);
@@ -160,10 +160,12 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<int>> VolumeUp(int zoneIndex, [FromQuery] int step = 5)
     {
         if (step < 1 || step > 50)
-            return BadRequest("Step must be between 1 and 50");
+        {
+            return this.BadRequest("Step must be between 1 and 50");
+        }
 
         var command = new VolumeUpCommand { ZoneIndex = zoneIndex, Step = step };
-        var result = await _mediator.SendCommandAsync<VolumeUpCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<VolumeUpCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -173,7 +175,7 @@ public partial class ZonesController : ControllerBase
 
         // Get the new volume to return
         var volumeQuery = new GetZoneVolumeQuery { ZoneIndex = zoneIndex };
-        var volumeResult = await _mediator.SendQueryAsync<GetZoneVolumeQuery, Result<int>>(volumeQuery);
+        var volumeResult = await this._mediator.SendQueryAsync<GetZoneVolumeQuery, Result<int>>(volumeQuery);
 
         return Ok(volumeResult.IsSuccess ? volumeResult.Value : 0);
     }
@@ -191,10 +193,12 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<int>> VolumeDown(int zoneIndex, [FromQuery] int step = 5)
     {
         if (step < 1 || step > 50)
-            return BadRequest("Step must be between 1 and 50");
+        {
+            return this.BadRequest("Step must be between 1 and 50");
+        }
 
         var command = new VolumeDownCommand { ZoneIndex = zoneIndex, Step = step };
-        var result = await _mediator.SendCommandAsync<VolumeDownCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<VolumeDownCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -204,7 +208,7 @@ public partial class ZonesController : ControllerBase
 
         // Get the new volume to return
         var volumeQuery = new GetZoneVolumeQuery { ZoneIndex = zoneIndex };
-        var volumeResult = await _mediator.SendQueryAsync<GetZoneVolumeQuery, Result<int>>(volumeQuery);
+        var volumeResult = await this._mediator.SendQueryAsync<GetZoneVolumeQuery, Result<int>>(volumeQuery);
 
         return Ok(volumeResult.IsSuccess ? volumeResult.Value : 0);
     }
@@ -225,7 +229,7 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<bool>> SetMute(int zoneIndex, [FromBody] bool muted)
     {
         var command = new SetZoneMuteCommand { ZoneIndex = zoneIndex, Enabled = muted };
-        var result = await _mediator.SendCommandAsync<SetZoneMuteCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<SetZoneMuteCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -233,7 +237,7 @@ public partial class ZonesController : ControllerBase
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return Ok(muted);
+        return this.Ok(muted);
     }
 
     /// <summary>
@@ -247,12 +251,12 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<bool>> GetMute(int zoneIndex)
     {
         var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
-        var result = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+        var result = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
 
         if (result.IsFailure)
         {
             LogFailedToGetZoneMuteState(zoneIndex, result.ErrorMessage ?? "Unknown error");
-            return NotFound($"Zone {zoneIndex} not found");
+            return this.NotFound($"Zone {zoneIndex} not found");
         }
 
         return Ok(result.Value!.Mute);
@@ -269,7 +273,7 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<bool>> ToggleMute(int zoneIndex)
     {
         var command = new ToggleZoneMuteCommand { ZoneIndex = zoneIndex };
-        var result = await _mediator.SendCommandAsync<ToggleZoneMuteCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<ToggleZoneMuteCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -279,7 +283,7 @@ public partial class ZonesController : ControllerBase
 
         // Get the new state to return
         var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
-        var stateResult = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+        var stateResult = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
 
         return Ok(stateResult.IsSuccess ? stateResult.Value!.Mute : false);
     }
@@ -299,7 +303,7 @@ public partial class ZonesController : ControllerBase
     public async Task<IActionResult> Play(int zoneIndex)
     {
         var command = new PlayCommand { ZoneIndex = zoneIndex };
-        var result = await _mediator.SendCommandAsync<PlayCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<PlayCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -307,7 +311,7 @@ public partial class ZonesController : ControllerBase
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return NoContent();
+        return this.NoContent();
     }
 
     /// <summary>
@@ -321,7 +325,7 @@ public partial class ZonesController : ControllerBase
     public async Task<IActionResult> Pause(int zoneIndex)
     {
         var command = new PauseCommand { ZoneIndex = zoneIndex };
-        var result = await _mediator.SendCommandAsync<PauseCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<PauseCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -329,7 +333,7 @@ public partial class ZonesController : ControllerBase
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return NoContent();
+        return this.NoContent();
     }
 
     /// <summary>
@@ -343,7 +347,7 @@ public partial class ZonesController : ControllerBase
     public async Task<IActionResult> Stop(int zoneIndex)
     {
         var command = new StopCommand { ZoneIndex = zoneIndex };
-        var result = await _mediator.SendCommandAsync<StopCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<StopCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -351,7 +355,7 @@ public partial class ZonesController : ControllerBase
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return NoContent();
+        return this.NoContent();
     }
 
     /// <summary>
@@ -367,10 +371,12 @@ public partial class ZonesController : ControllerBase
     public async Task<IActionResult> SetPlaylist(int zoneIndex, [FromBody] int playlistIndex)
     {
         if (playlistIndex < 1)
-            return BadRequest("Playlist index must be greater than 0");
+        {
+            return this.BadRequest("Playlist index must be greater than 0");
+        }
 
         var command = new SetPlaylistCommand { ZoneIndex = zoneIndex, PlaylistIndex = playlistIndex };
-        var result = await _mediator.SendCommandAsync<SetPlaylistCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<SetPlaylistCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -378,7 +384,7 @@ public partial class ZonesController : ControllerBase
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return NoContent();
+        return this.NoContent();
     }
 
     [LoggerMessage(12001, LogLevel.Warning, "Failed to get zones: {ErrorMessage}")]
@@ -436,10 +442,12 @@ public partial class ZonesController : ControllerBase
     public async Task<IActionResult> SetTrack(int zoneIndex, [FromBody] int trackIndex)
     {
         if (trackIndex < 1)
-            return BadRequest("Track index must be greater than 0");
+        {
+            return this.BadRequest("Track index must be greater than 0");
+        }
 
         var command = new SetTrackCommand { ZoneIndex = zoneIndex, TrackIndex = trackIndex };
-        var result = await _mediator.SendCommandAsync<SetTrackCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<SetTrackCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -447,7 +455,7 @@ public partial class ZonesController : ControllerBase
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return NoContent();
+        return this.NoContent();
     }
 
     [LoggerMessage(12014, LogLevel.Warning, "Failed to set zone {ZoneIndex} track to {TrackIndex}: {ErrorMessage}")]
@@ -468,12 +476,12 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<bool>> GetTrackRepeat(int zoneIndex)
     {
         var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
-        var result = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+        var result = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
 
         if (result.IsFailure)
         {
             LogFailedToGetZoneTrackRepeat(zoneIndex, result.ErrorMessage ?? "Unknown error");
-            return NotFound($"Zone {zoneIndex} not found");
+            return this.NotFound($"Zone {zoneIndex} not found");
         }
 
         return Ok(result.Value!.TrackRepeat);
@@ -491,7 +499,7 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<bool>> SetTrackRepeat(int zoneIndex, [FromBody] bool enabled)
     {
         var command = new SetTrackRepeatCommand { ZoneIndex = zoneIndex, Enabled = enabled };
-        var result = await _mediator.SendCommandAsync<SetTrackRepeatCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<SetTrackRepeatCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -499,7 +507,7 @@ public partial class ZonesController : ControllerBase
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return Ok(enabled);
+        return this.Ok(enabled);
     }
 
     /// <summary>
@@ -513,7 +521,7 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<bool>> ToggleTrackRepeat(int zoneIndex)
     {
         var command = new ToggleTrackRepeatCommand { ZoneIndex = zoneIndex };
-        var result = await _mediator.SendCommandAsync<ToggleTrackRepeatCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<ToggleTrackRepeatCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -523,7 +531,7 @@ public partial class ZonesController : ControllerBase
 
         // Get the new state to return
         var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
-        var stateResult = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+        var stateResult = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
 
         return Ok(stateResult.IsSuccess ? stateResult.Value!.TrackRepeat : false);
     }
@@ -539,12 +547,12 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<bool>> GetPlaylistRepeat(int zoneIndex)
     {
         var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
-        var result = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+        var result = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
 
         if (result.IsFailure)
         {
             LogFailedToGetZonePlaylistRepeat(zoneIndex, result.ErrorMessage ?? "Unknown error");
-            return NotFound($"Zone {zoneIndex} not found");
+            return this.NotFound($"Zone {zoneIndex} not found");
         }
 
         return Ok(result.Value!.PlaylistRepeat);
@@ -562,7 +570,7 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<bool>> SetPlaylistRepeat(int zoneIndex, [FromBody] bool enabled)
     {
         var command = new SetPlaylistRepeatCommand { ZoneIndex = zoneIndex, Enabled = enabled };
-        var result = await _mediator.SendCommandAsync<SetPlaylistRepeatCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<SetPlaylistRepeatCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -570,7 +578,7 @@ public partial class ZonesController : ControllerBase
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return Ok(enabled);
+        return this.Ok(enabled);
     }
 
     /// <summary>
@@ -584,7 +592,7 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<bool>> TogglePlaylistRepeat(int zoneIndex)
     {
         var command = new TogglePlaylistRepeatCommand { ZoneIndex = zoneIndex };
-        var result = await _mediator.SendCommandAsync<TogglePlaylistRepeatCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<TogglePlaylistRepeatCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -594,7 +602,7 @@ public partial class ZonesController : ControllerBase
 
         // Get the new state to return
         var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
-        var stateResult = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+        var stateResult = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
 
         return Ok(stateResult.IsSuccess ? stateResult.Value!.PlaylistRepeat : false);
     }
@@ -614,12 +622,12 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<bool>> GetPlaylistShuffle(int zoneIndex)
     {
         var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
-        var result = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+        var result = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
 
         if (result.IsFailure)
         {
             LogFailedToGetZonePlaylistShuffle(zoneIndex, result.ErrorMessage ?? "Unknown error");
-            return NotFound($"Zone {zoneIndex} not found");
+            return this.NotFound($"Zone {zoneIndex} not found");
         }
 
         return Ok(result.Value!.PlaylistShuffle);
@@ -637,7 +645,7 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<bool>> SetPlaylistShuffle(int zoneIndex, [FromBody] bool enabled)
     {
         var command = new SetPlaylistShuffleCommand { ZoneIndex = zoneIndex, Enabled = enabled };
-        var result = await _mediator.SendCommandAsync<SetPlaylistShuffleCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<SetPlaylistShuffleCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -645,7 +653,7 @@ public partial class ZonesController : ControllerBase
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return Ok(enabled);
+        return this.Ok(enabled);
     }
 
     /// <summary>
@@ -659,7 +667,7 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<bool>> TogglePlaylistShuffle(int zoneIndex)
     {
         var command = new TogglePlaylistShuffleCommand { ZoneIndex = zoneIndex };
-        var result = await _mediator.SendCommandAsync<TogglePlaylistShuffleCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<TogglePlaylistShuffleCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -669,7 +677,7 @@ public partial class ZonesController : ControllerBase
 
         // Get the new state to return
         var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
-        var stateResult = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+        var stateResult = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
 
         return Ok(stateResult.IsSuccess ? stateResult.Value!.PlaylistShuffle : false);
     }
@@ -689,7 +697,7 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<int>> TrackNext(int zoneIndex)
     {
         var command = new NextTrackCommand { ZoneIndex = zoneIndex };
-        var result = await _mediator.SendCommandAsync<NextTrackCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<NextTrackCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -699,7 +707,7 @@ public partial class ZonesController : ControllerBase
 
         // Get the new track index to return
         var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
-        var stateResult = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+        var stateResult = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
 
         return Ok(stateResult.IsSuccess ? stateResult.Value!.Track?.Index ?? 1 : 1);
     }
@@ -715,7 +723,7 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<int>> TrackPrevious(int zoneIndex)
     {
         var command = new PreviousTrackCommand { ZoneIndex = zoneIndex };
-        var result = await _mediator.SendCommandAsync<PreviousTrackCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<PreviousTrackCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -725,7 +733,7 @@ public partial class ZonesController : ControllerBase
 
         // Get the new track index to return
         var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
-        var stateResult = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+        var stateResult = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
 
         return Ok(stateResult.IsSuccess ? stateResult.Value!.Track?.Index ?? 1 : 1);
     }
@@ -745,7 +753,7 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<string>> PlaylistNext(int zoneIndex)
     {
         var command = new NextPlaylistCommand { ZoneIndex = zoneIndex };
-        var result = await _mediator.SendCommandAsync<NextPlaylistCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<NextPlaylistCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -755,7 +763,7 @@ public partial class ZonesController : ControllerBase
 
         // Get the new playlist name to return
         var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
-        var stateResult = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+        var stateResult = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
 
         return Ok(stateResult.IsSuccess ? stateResult.Value!.Playlist?.Name ?? "Unknown" : "Unknown");
     }
@@ -771,7 +779,7 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<string>> PlaylistPrevious(int zoneIndex)
     {
         var command = new PreviousPlaylistCommand { ZoneIndex = zoneIndex };
-        var result = await _mediator.SendCommandAsync<PreviousPlaylistCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<PreviousPlaylistCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -781,7 +789,7 @@ public partial class ZonesController : ControllerBase
 
         // Get the new playlist name to return
         var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
-        var stateResult = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+        var stateResult = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
 
         return Ok(stateResult.IsSuccess ? stateResult.Value!.Playlist?.Name ?? "Unknown" : "Unknown");
     }
@@ -801,12 +809,12 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<int>> GetTrackIndex(int zoneIndex)
     {
         var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
-        var result = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+        var result = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
 
         if (result.IsFailure)
         {
             LogFailedToGetZoneTrackIndex(zoneIndex, result.ErrorMessage ?? "Unknown error");
-            return NotFound($"Zone {zoneIndex} not found");
+            return this.NotFound($"Zone {zoneIndex} not found");
         }
 
         return Ok(result.Value!.Track?.Index ?? 1);
@@ -823,12 +831,12 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<int>> GetPlaylistIndex(int zoneIndex)
     {
         var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
-        var result = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+        var result = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
 
         if (result.IsFailure)
         {
             LogFailedToGetZonePlaylistIndex(zoneIndex, result.ErrorMessage ?? "Unknown error");
-            return NotFound($"Zone {zoneIndex} not found");
+            return this.NotFound($"Zone {zoneIndex} not found");
         }
 
         return Ok(result.Value!.Playlist?.Index ?? 1);
@@ -845,18 +853,18 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<TrackInfo>> GetTrackMetadata(int zoneIndex)
     {
         var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
-        var result = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+        var result = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
 
         if (result.IsFailure)
         {
             LogFailedToGetZoneTrackMetadata(zoneIndex, result.ErrorMessage ?? "Unknown error");
-            return NotFound($"Zone {zoneIndex} not found");
+            return this.NotFound($"Zone {zoneIndex} not found");
         }
 
         var track = result.Value!.Track;
         if (track == null)
         {
-            return Ok(
+            return this.Ok(
                 new TrackInfo
                 {
                     Index = 1,
@@ -886,15 +894,15 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<bool>> GetTrackPlaying(int zoneIndex)
     {
         var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
-        var result = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+        var result = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
 
         if (result.IsFailure)
         {
             LogFailedToGetZoneTrackPlaying(zoneIndex, result.ErrorMessage ?? "Unknown error");
-            return NotFound($"Zone {zoneIndex} not found");
+            return this.NotFound($"Zone {zoneIndex} not found");
         }
 
-        return Ok(result.Value!.PlaybackState == "playing");
+        return this.Ok(result.Value!.PlaybackState == "playing");
     }
 
     /// <summary>
@@ -908,12 +916,12 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<long>> GetTrackPosition(int zoneIndex)
     {
         var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
-        var result = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+        var result = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
 
         if (result.IsFailure)
         {
             LogFailedToGetZoneTrackPosition(zoneIndex, result.ErrorMessage ?? "Unknown error");
-            return NotFound($"Zone {zoneIndex} not found");
+            return this.NotFound($"Zone {zoneIndex} not found");
         }
 
         return Ok(result.Value!.Track?.PositionMs ?? 0L);
@@ -930,12 +938,12 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<float>> GetTrackProgress(int zoneIndex)
     {
         var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
-        var result = await _mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+        var result = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
 
         if (result.IsFailure)
         {
             LogFailedToGetZoneTrackProgress(zoneIndex, result.ErrorMessage ?? "Unknown error");
-            return NotFound($"Zone {zoneIndex} not found");
+            return this.NotFound($"Zone {zoneIndex} not found");
         }
 
         return Ok(result.Value!.Track?.Progress ?? 0.0f);
@@ -954,10 +962,12 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<long>> SetTrackPosition(int zoneIndex, [FromBody] long positionMs)
     {
         if (positionMs < 0)
-            return BadRequest("Position must be greater than or equal to 0");
+        {
+            return this.BadRequest("Position must be greater than or equal to 0");
+        }
 
         var command = new SeekPositionCommand { ZoneIndex = zoneIndex, PositionMs = positionMs };
-        var result = await _mediator.SendCommandAsync<SeekPositionCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<SeekPositionCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -965,7 +975,7 @@ public partial class ZonesController : ControllerBase
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return Ok(positionMs);
+        return this.Ok(positionMs);
     }
 
     /// <summary>
@@ -981,10 +991,12 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<float>> SetTrackProgress(int zoneIndex, [FromBody] float progress)
     {
         if (progress < 0.0f || progress > 1.0f)
-            return BadRequest("Progress must be between 0.0 and 1.0");
+        {
+            return this.BadRequest("Progress must be between 0.0 and 1.0");
+        }
 
         var command = new SeekProgressCommand { ZoneIndex = zoneIndex, Progress = progress };
-        var result = await _mediator.SendCommandAsync<SeekProgressCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<SeekProgressCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -992,7 +1004,7 @@ public partial class ZonesController : ControllerBase
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return Ok(progress);
+        return this.Ok(progress);
     }
 
     /// <summary>
@@ -1008,10 +1020,12 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<int>> PlayTrackByIndex(int zoneIndex, int trackIndex)
     {
         if (trackIndex < 1)
-            return BadRequest("Track index must be greater than 0");
+        {
+            return this.BadRequest("Track index must be greater than 0");
+        }
 
         var command = new PlayTrackByIndexCommand { ZoneIndex = zoneIndex, TrackIndex = trackIndex };
-        var result = await _mediator.SendCommandAsync<PlayTrackByIndexCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<PlayTrackByIndexCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -1019,7 +1033,7 @@ public partial class ZonesController : ControllerBase
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return Ok(trackIndex);
+        return this.Ok(trackIndex);
     }
 
     /// <summary>
@@ -1035,13 +1049,17 @@ public partial class ZonesController : ControllerBase
     public async Task<ActionResult<string>> PlayUrl(int zoneIndex, [FromBody] string url)
     {
         if (string.IsNullOrWhiteSpace(url))
-            return BadRequest("URL cannot be empty");
+        {
+            return this.BadRequest("URL cannot be empty");
+        }
 
         if (!Uri.TryCreate(url, UriKind.Absolute, out _))
-            return BadRequest("Invalid URL format");
+        {
+            return this.BadRequest("Invalid URL format");
+        }
 
         var command = new PlayUrlCommand { ZoneIndex = zoneIndex, Url = url };
-        var result = await _mediator.SendCommandAsync<PlayUrlCommand, Result>(command);
+        var result = await this._mediator.SendCommandAsync<PlayUrlCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -1049,7 +1067,7 @@ public partial class ZonesController : ControllerBase
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return Ok(url);
+        return this.Ok(url);
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════

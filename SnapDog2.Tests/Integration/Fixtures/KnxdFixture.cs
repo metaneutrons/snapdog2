@@ -22,21 +22,21 @@ public class KnxdFixture : IAsyncLifetime
     public KnxdFixture()
     {
         using var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-        _logger = loggerFactory.CreateLogger<KnxdFixture>();
+        this._logger = loggerFactory.CreateLogger<KnxdFixture>();
     }
 
     public async Task InitializeAsync()
     {
-        _logger.LogInformation("Starting KNX daemon container initialization");
+        this._logger.LogInformation("Starting KNX daemon container initialization");
 
         try
         {
             // Find an available UDP port for host binding
             var availablePort = GetAvailableUdpPort();
-            _logger.LogInformation("Using host UDP port {Port} for KNX daemon", availablePort);
+            this._logger.LogInformation("Using host UDP port {Port} for KNX daemon", availablePort);
 
             // Build container with proper UDP networking configuration
-            _knxdContainer = new ContainerBuilder()
+            this._knxdContainer = new ContainerBuilder()
                 .WithImage("knxd-test:latest")
                 .WithPortBinding(availablePort, 3671) // Explicit port binding (host:container)
                 .WithEnvironment("ADDRESS", "0.0.1") // KNX daemon address
@@ -47,28 +47,32 @@ public class KnxdFixture : IAsyncLifetime
                 .WithCleanUp(true) // Ensure proper resource cleanup
                 .Build();
 
-            await _knxdContainer.StartAsync();
-            _logger.LogInformation("KNX daemon container started successfully");
+            await this._knxdContainer.StartAsync();
+            this._logger.LogInformation("KNX daemon container started successfully");
 
             // Allow time for KNX daemon initialization
             await Task.Delay(2000);
 
             // Configure connection parameters
-            KnxTcpPort = availablePort; // Use the explicit port we assigned
-            KnxHost = "localhost";
+            this.KnxTcpPort = availablePort; // Use the explicit port we assigned
+            this.KnxHost = "localhost";
 
             // Validate UDP connectivity
-            await ValidateUdpConnectivityAsync();
+            await this.ValidateUdpConnectivityAsync();
 
             // Set environment variables for application configuration
-            Environment.SetEnvironmentVariable("SNAPDOG_TEST_KNX_HOST", KnxHost);
-            Environment.SetEnvironmentVariable("SNAPDOG_TEST_KNX_TCP_PORT", KnxTcpPort.ToString());
+            Environment.SetEnvironmentVariable("SNAPDOG_TEST_KNX_HOST", this.KnxHost);
+            Environment.SetEnvironmentVariable("SNAPDOG_TEST_KNX_TCP_PORT", this.KnxTcpPort.ToString());
 
-            _logger.LogInformation("KNX daemon fixture initialized - Host: {Host}, Port: {Port}", KnxHost, KnxTcpPort);
+            this._logger.LogInformation(
+                "KNX daemon fixture initialized - Host: {Host}, Port: {Port}",
+                this.KnxHost,
+                this.KnxTcpPort
+            );
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to initialize KNX daemon container");
+            this._logger.LogError(ex, "Failed to initialize KNX daemon container");
             throw;
         }
     }
@@ -90,7 +94,7 @@ public class KnxdFixture : IAsyncLifetime
     /// </summary>
     private async Task ValidateUdpConnectivityAsync()
     {
-        _logger.LogInformation("Validating UDP connectivity to KNX daemon");
+        this._logger.LogInformation("Validating UDP connectivity to KNX daemon");
 
         using var udpClient = new UdpClient();
         try
@@ -99,25 +103,27 @@ public class KnxdFixture : IAsyncLifetime
             udpClient.Client.ReceiveTimeout = 5000;
             udpClient.Client.SendTimeout = 5000;
 
-            var endpoint = new IPEndPoint(IPAddress.Loopback, KnxTcpPort);
+            var endpoint = new IPEndPoint(IPAddress.Loopback, this.KnxTcpPort);
 
             // Send a basic connectivity test packet
             var testData = new byte[] { 0x06, 0x10, 0x02, 0x01, 0x00, 0x0E }; // KNX/IP search request
             await udpClient.SendAsync(testData, testData.Length, endpoint);
 
-            _logger.LogInformation("UDP connectivity validation completed successfully");
+            this._logger.LogInformation("UDP connectivity validation completed successfully");
         }
         catch (SocketException ex) when (ex.SocketErrorCode == SocketError.NetworkUnreachable)
         {
-            _logger.LogWarning("Network unreachable during UDP validation - this may be expected in test environments");
+            this._logger.LogWarning(
+                "Network unreachable during UDP validation - this may be expected in test environments"
+            );
         }
         catch (SocketException ex) when (ex.SocketErrorCode == SocketError.ConnectionRefused)
         {
-            _logger.LogWarning("Connection refused during UDP validation - KNX daemon may still be initializing");
+            this._logger.LogWarning("Connection refused during UDP validation - KNX daemon may still be initializing");
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "UDP connectivity validation encountered an issue - proceeding with caution");
+            this._logger.LogWarning(ex, "UDP connectivity validation encountered an issue - proceeding with caution");
         }
     }
 
@@ -127,20 +133,20 @@ public class KnxdFixture : IAsyncLifetime
     /// </summary>
     public async Task DisposeAsync()
     {
-        _logger.LogInformation("Disposing KNX daemon fixture");
+        this._logger.LogInformation("Disposing KNX daemon fixture");
 
         try
         {
-            if (_knxdContainer != null)
+            if (this._knxdContainer != null)
             {
-                await _knxdContainer.StopAsync();
-                await _knxdContainer.DisposeAsync();
-                _logger.LogInformation("KNX daemon container disposed successfully");
+                await this._knxdContainer.StopAsync();
+                await this._knxdContainer.DisposeAsync();
+                this._logger.LogInformation("KNX daemon container disposed successfully");
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during KNX daemon fixture disposal");
+            this._logger.LogError(ex, "Error during KNX daemon fixture disposal");
         }
     }
 }

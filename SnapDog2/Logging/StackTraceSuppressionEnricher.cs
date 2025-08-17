@@ -6,14 +6,9 @@ namespace SnapDog2.Logging;
 /// <summary>
 /// Serilog enricher that suppresses stack traces for expected exceptions in non-debug mode
 /// </summary>
-public class StackTraceSuppressionEnricher : ILogEventEnricher
+public class StackTraceSuppressionEnricher(bool isDebugMode) : ILogEventEnricher
 {
-    private readonly bool _isDebugMode;
-
-    public StackTraceSuppressionEnricher(bool isDebugMode)
-    {
-        this._isDebugMode = isDebugMode;
-    }
+    private readonly bool _isDebugMode = isDebugMode;
 
     public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
     {

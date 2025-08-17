@@ -36,11 +36,11 @@ public class TestMetricsService : IMetricsService
 
     public void IncrementCounter(string name, long delta = 1, params (string Key, string Value)[] labels)
     {
-        Counters.AddOrUpdate(name, delta, (_, v) => v + delta);
+        this.Counters.AddOrUpdate(name, delta, (_, v) => v + delta);
     }
 
     public void SetGauge(string name, double value, params (string Key, string Value)[] labels)
     {
-        Gauges[name] = value;
+        this.Gauges[name] = value;
     }
 }

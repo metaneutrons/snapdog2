@@ -23,8 +23,8 @@ public class IntegrationTests
 
     public IntegrationTests(IntegrationTestFixture fixture, ITestOutputHelper output)
     {
-        _fixture = fixture;
-        _output = output;
+        this._fixture = fixture;
+        this._output = output;
     }
 
     [Fact]
@@ -33,16 +33,16 @@ public class IntegrationTests
         // Arrange & Act - Application startup happens in fixture
 
         // Assert
-        _fixture.HttpClient.Should().NotBeNull();
-        _fixture.ServiceProvider.Should().NotBeNull();
+        this._fixture.HttpClient.Should().NotBeNull();
+        this._fixture.ServiceProvider.Should().NotBeNull();
 
-        var response = await _fixture.HttpClient.GetAsync("/health");
+        var response = await this._fixture.HttpClient.GetAsync("/health");
 
-        _output.WriteLine($"Health check response: {response.StatusCode}");
+        this._output.WriteLine($"Health check response: {response.StatusCode}");
         if (!response.IsSuccessStatusCode)
         {
             var content = await response.Content.ReadAsStringAsync();
-            _output.WriteLine($"Health check content: {content}");
+            this._output.WriteLine($"Health check content: {content}");
         }
 
         response.IsSuccessStatusCode.Should().BeTrue();
@@ -52,9 +52,9 @@ public class IntegrationTests
     public void Services_Should_BeRegisteredInDI()
     {
         // Assert - Verify core service interfaces are registered
-        _fixture.AssertServiceIsRunning<IMqttService>();
-        _fixture.AssertServiceIsRunning<IKnxService>();
-        _fixture.AssertServiceIsRunning<ISnapcastService>();
+        this._fixture.AssertServiceIsRunning<IMqttService>();
+        this._fixture.AssertServiceIsRunning<IKnxService>();
+        this._fixture.AssertServiceIsRunning<ISnapcastService>();
         // Note: Don't check concrete classes as they're registered as interfaces
     }
 
@@ -62,14 +62,14 @@ public class IntegrationTests
     public void Configuration_Should_BeValid()
     {
         // Assert - Verify configuration is properly loaded
-        _fixture.AssertConfigurationIsValid();
+        this._fixture.AssertConfigurationIsValid();
     }
 
     [Fact]
     public async Task MqttService_Should_ConnectSuccessfully()
     {
         // Arrange
-        using var scope = _fixture.ServiceProvider.CreateScope();
+        using var scope = this._fixture.ServiceProvider.CreateScope();
         var mqttService = scope.ServiceProvider.GetRequiredService<IMqttService>();
 
         // Act
@@ -86,7 +86,7 @@ public class IntegrationTests
     public async Task KnxService_Should_ConnectSuccessfully()
     {
         // Arrange
-        using var scope = _fixture.ServiceProvider.CreateScope();
+        using var scope = this._fixture.ServiceProvider.CreateScope();
         var knxService = scope.ServiceProvider.GetRequiredService<IKnxService>();
 
         // Act
@@ -102,7 +102,7 @@ public class IntegrationTests
     public async Task MqttService_Should_PublishAndReceiveMessages()
     {
         // Arrange
-        using var scope = _fixture.ServiceProvider.CreateScope();
+        using var scope = this._fixture.ServiceProvider.CreateScope();
         var mqttService = scope.ServiceProvider.GetRequiredService<IMqttService>();
         await mqttService.InitializeAsync();
 
@@ -127,7 +127,7 @@ public class IntegrationTests
         var publishResult = await mqttService.PublishAsync(testTopic, testPayload);
 
         // Wait for message to be received
-        await _fixture.WaitForConditionAsync(
+        await this._fixture.WaitForConditionAsync(
             () => Task.FromResult(messageReceived),
             TimeSpan.FromSeconds(5),
             "MQTT message to be received"
@@ -145,7 +145,7 @@ public class IntegrationTests
     public async Task KnxService_Should_WriteAndReadGroupValues()
     {
         // Arrange
-        using var scope = _fixture.ServiceProvider.CreateScope();
+        using var scope = this._fixture.ServiceProvider.CreateScope();
         var knxService = scope.ServiceProvider.GetRequiredService<IKnxService>();
         await knxService.InitializeAsync();
 
@@ -172,11 +172,11 @@ public class IntegrationTests
     public async Task TestClients_Should_ConnectToServices()
     {
         // Act & Assert - Test MQTT client connection
-        var mqttResult = await _fixture.SendMqttCommandAsync("test/command", new { action = "test" });
+        var mqttResult = await this._fixture.SendMqttCommandAsync("test/command", new { action = "test" });
         mqttResult.IsSuccess.Should().BeTrue();
 
         // Act & Assert - Test KNX client connection
-        var knxResult = await _fixture.SendKnxCommandAsync("1/1/1", true);
+        var knxResult = await this._fixture.SendKnxCommandAsync("1/1/1", true);
         knxResult.IsSuccess.Should().BeTrue();
     }
 
@@ -186,7 +186,7 @@ public class IntegrationTests
     public async Task Integration_Should_HandleZoneStateRequests()
     {
         // Act
-        var zoneState = await _fixture.GetZoneStateAsync(1);
+        var zoneState = await this._fixture.GetZoneStateAsync(1);
 
         // Assert
         zoneState.Should().NotBeNull();
@@ -200,7 +200,7 @@ public class IntegrationTests
     public async Task Services_Should_HandleConcurrentOperations()
     {
         // Arrange
-        using var scope = _fixture.ServiceProvider.CreateScope();
+        using var scope = this._fixture.ServiceProvider.CreateScope();
         var mqttService = scope.ServiceProvider.GetRequiredService<IMqttService>();
         var knxService = scope.ServiceProvider.GetRequiredService<IKnxService>();
 

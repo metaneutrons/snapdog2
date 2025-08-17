@@ -6,23 +6,18 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 /// <summary>
 /// Health check controller providing application health status.
 /// </summary>
+/// <remarks>
+/// Initializes a new instance of the <see cref="HealthController"/> class.
+/// </remarks>
+/// <param name="healthCheckService">The health check service.</param>
+/// <param name="logger">The logger.</param>
 [ApiController]
 [Route("api/health")]
-public partial class HealthController : ControllerBase
+public partial class HealthController(HealthCheckService healthCheckService, ILogger<HealthController> logger)
+    : ControllerBase
 {
-    private readonly HealthCheckService _healthCheckService;
-    private readonly ILogger<HealthController> _logger;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="HealthController"/> class.
-    /// </summary>
-    /// <param name="healthCheckService">The health check service.</param>
-    /// <param name="logger">The logger.</param>
-    public HealthController(HealthCheckService healthCheckService, ILogger<HealthController> logger)
-    {
-        this._healthCheckService = healthCheckService;
-        this._logger = logger;
-    }
+    private readonly HealthCheckService _healthCheckService = healthCheckService;
+    private readonly ILogger<HealthController> _logger = logger;
 
     /// <summary>
     /// Gets the health status of the application.

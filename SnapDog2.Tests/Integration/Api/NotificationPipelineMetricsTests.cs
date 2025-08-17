@@ -16,14 +16,14 @@ public class NotificationPipelineMetricsTests : IClassFixture<IntegrationTestFix
 
     public NotificationPipelineMetricsTests(IntegrationTestFixture fixture)
     {
-        _fixture = fixture;
+        this._fixture = fixture;
     }
 
     [Fact]
     public async Task Zone_state_changes_are_enqueued_and_processed_and_metrics_updated()
     {
         // Arrange
-        var services = _fixture.ServiceProvider;
+        var services = this._fixture.ServiceProvider;
         var metrics = (TestMetricsService)services.GetRequiredService<IMetricsService>();
 
         // Act: enqueue a small burst to exercise queue and background service
