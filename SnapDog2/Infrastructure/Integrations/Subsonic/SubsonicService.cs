@@ -485,7 +485,6 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         return new TrackInfo
         {
             Index = index,
-            Id = song.Id ?? string.Empty,
             Title = song.Title ?? "Unknown Track",
             Artist = song.Artist ?? "Unknown Artist",
             Album = song.Album,
@@ -493,6 +492,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
             PositionMs = 0, // Always start at beginning
             CoverArtUrl = song.CoverArt,
             Source = "subsonic",
+            Url = song.Id ?? string.Empty, // Use song ID as URL for Subsonic tracks
         };
     }
 

@@ -166,7 +166,6 @@ public partial class PlaylistManager : IPlaylistManager
             {
                 var track = new TrackInfo
                 {
-                    Id = $"{playlistInfo.Id}_track_{i}",
                     Source = "placeholder",
                     Index = i,
                     Title = $"{playlistInfo.Name} Track {i}",
@@ -176,6 +175,7 @@ public partial class PlaylistManager : IPlaylistManager
                     PositionMs = 0,
                     CoverArtUrl = null,
                     TimestampUtc = DateTime.UtcNow,
+                    Url = $"placeholder://track/{playlistInfo.Id}/{i}",
                 };
 
                 tracks.Add(track);

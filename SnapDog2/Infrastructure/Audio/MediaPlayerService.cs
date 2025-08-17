@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using Cortex.Mediator;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SnapDog2.Core.Abstractions;
@@ -20,7 +21,7 @@ public sealed partial class MediaPlayerService(
     IOptions<SnapDog2.Core.Configuration.AudioConfig> config,
     ILogger<MediaPlayerService> logger,
     ILoggerFactory loggerFactory,
-    IMediator mediator,
+    IServiceScopeFactory serviceScopeFactory,
     IEnumerable<ZoneConfig> zoneConfigs
 ) : IMediaPlayerService, IAsyncDisposable, IDisposable
 {
@@ -29,7 +30,8 @@ public sealed partial class MediaPlayerService(
     private readonly ILogger<MediaPlayerService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly ILoggerFactory _loggerFactory =
         loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
-    private readonly IMediator _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+    private readonly IServiceScopeFactory _serviceScopeFactory =
+        serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
     private readonly IEnumerable<ZoneConfig> _zoneConfigs =
         zoneConfigs ?? throw new ArgumentNullException(nameof(zoneConfigs));
 
@@ -54,11 +56,39 @@ public sealed partial class MediaPlayerService(
                 return Result.Failure(new ArgumentNullException(nameof(trackInfo)));
             }
 
+            // Debug logging for zone lookup
+            this._logger.LogInformation("MediaPlayerService: Looking for zone {ZoneIndex}", zoneIndex);
+            this._logger.LogInformation(
+                "MediaPlayerService: Available zone configs count: {Count}",
+                this._zoneConfigs.Count()
+            );
+
+            var zoneConfigsList = this._zoneConfigs.ToList();
+            for (int i = 0; i < zoneConfigsList.Count; i++)
+            {
+                this._logger.LogInformation(
+                    "MediaPlayerService: Zone config {Index}: {Name}",
+                    i,
+                    zoneConfigsList[i].Name
+                );
+            }
+
             var zoneConfig = this._zoneConfigs.ElementAtOrDefault(zoneIndex - 1); // Zone IDs are 1-based
             if (zoneConfig == null)
             {
+                this._logger.LogError(
+                    "MediaPlayerService: Zone {ZoneIndex} not found. Requested index in array: {ArrayIndex}",
+                    zoneIndex,
+                    zoneIndex - 1
+                );
                 return Result.Failure(new ArgumentException($"Zone {zoneIndex} not found"));
             }
+
+            this._logger.LogInformation(
+                "MediaPlayerService: Found zone config for zone {ZoneIndex}: {ZoneName}",
+                zoneIndex,
+                zoneConfig.Name
+            );
 
             // Check if we're at the stream limit (max = number of configured zones)
             var maxStreams = this._zoneConfigs.Count();
@@ -84,16 +114,18 @@ public sealed partial class MediaPlayerService(
 
             this._players[zoneIndex] = player;
 
-            // Start streaming using the Id as the stream URL
-            var streamUrl = trackInfo.Id; // TrackInfo.Id contains the stream URL
+            // Start streaming using the Url field
+            var streamUrl = trackInfo.Url; // TrackInfo.Url contains the stream URL
             var result = await player.StartStreamingAsync(streamUrl, trackInfo, cancellationToken);
 
             if (result.IsSuccess)
             {
                 LogPlaybackStarted(this._logger, zoneIndex, trackInfo.Title ?? "Unknown", streamUrl);
 
-                // Publish playback started notification
-                await this._mediator.PublishAsync(
+                // Publish playback started notification using scoped mediator
+                using var scope = this._serviceScopeFactory.CreateScope();
+                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+                await mediator.PublishAsync(
                     new TrackPlaybackStartedNotification(zoneIndex, trackInfo),
                     cancellationToken
                 );
@@ -127,8 +159,10 @@ public sealed partial class MediaPlayerService(
 
                 LogPlaybackStopped(this._logger, zoneIndex);
 
-                // Publish playback stopped notification
-                await this._mediator.PublishAsync(new TrackPlaybackStoppedNotification(zoneIndex), cancellationToken);
+                // Publish playback stopped notification using scoped mediator
+                using var scope = this._serviceScopeFactory.CreateScope();
+                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+                await mediator.PublishAsync(new TrackPlaybackStoppedNotification(zoneIndex), cancellationToken);
             }
 
             return Result.Success();
@@ -155,8 +189,10 @@ public sealed partial class MediaPlayerService(
             {
                 LogPlaybackPaused(this._logger, zoneIndex);
 
-                // Publish playback paused notification
-                await this._mediator.PublishAsync(new TrackPlaybackPausedNotification(zoneIndex), cancellationToken);
+                // Publish playback paused notification using scoped mediator
+                using var scope = this._serviceScopeFactory.CreateScope();
+                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+                await mediator.PublishAsync(new TrackPlaybackPausedNotification(zoneIndex), cancellationToken);
             }
 
             return result;

@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using Cortex.Mediator;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SnapDog2.Core.Abstractions;
@@ -22,7 +23,7 @@ public partial class ZoneManager(
     ISnapcastService snapcastService,
     ISnapcastStateRepository snapcastStateRepository,
     IMediaPlayerService mediaPlayerService,
-    IMediator mediator,
+    IServiceScopeFactory serviceScopeFactory,
     IZoneStateStore zoneStateStore,
     IStatusFactory statusFactory,
     IOptions<SnapDogConfiguration> configuration
@@ -32,7 +33,7 @@ public partial class ZoneManager(
     private readonly ISnapcastService _snapcastService = snapcastService;
     private readonly ISnapcastStateRepository _snapcastStateRepository = snapcastStateRepository;
     private readonly IMediaPlayerService _mediaPlayerService = mediaPlayerService;
-    private readonly IMediator _mediator = mediator;
+    private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
     private readonly IZoneStateStore _zoneStateStore = zoneStateStore;
     private readonly IStatusFactory _statusFactory = statusFactory;
     private readonly List<ZoneConfig> _zoneConfigs = configuration.Value.Zones;
@@ -88,7 +89,7 @@ public partial class ZoneManager(
                         this._snapcastService,
                         this._snapcastStateRepository,
                         this._mediaPlayerService,
-                        this._mediator,
+                        this._serviceScopeFactory,
                         this._zoneStateStore,
                         this._statusFactory,
                         this._logger
@@ -245,7 +246,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     private readonly ISnapcastService _snapcastService;
     private readonly ISnapcastStateRepository _snapcastStateRepository;
     private readonly IMediaPlayerService _mediaPlayerService;
-    private readonly IMediator _mediator;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly IZoneStateStore _zoneStateStore;
     private readonly IStatusFactory _statusFactory;
     private readonly ILogger _logger;
@@ -274,7 +275,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         ISnapcastService snapcastService,
         ISnapcastStateRepository snapcastStateRepository,
         IMediaPlayerService mediaPlayerService,
-        IMediator mediator,
+        IServiceScopeFactory serviceScopeFactory,
         IZoneStateStore zoneStateStore,
         IStatusFactory statusFactory,
         ILogger logger
@@ -285,7 +286,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         this._snapcastService = snapcastService;
         this._snapcastStateRepository = snapcastStateRepository;
         this._mediaPlayerService = mediaPlayerService;
-        this._mediator = mediator;
+        this._serviceScopeFactory = serviceScopeFactory;
         this._zoneStateStore = zoneStateStore;
         this._statusFactory = statusFactory;
         this._logger = logger;
@@ -347,8 +348,8 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             // Check if we have a valid track to play
             if (
                 this._currentState.Track == null
-                || string.IsNullOrEmpty(this._currentState.Track.Id)
-                || this._currentState.Track.Id == "none"
+                || string.IsNullOrEmpty(this._currentState.Track.Url)
+                || this._currentState.Track.Url == "none://no-track"
                 || this._currentState.Track.Source == "none"
             )
             {
@@ -396,7 +397,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             {
                 Index = trackIndex,
                 Title = $"Track {trackIndex}",
-                Id = $"track_{trackIndex}",
+                Url = $"placeholder://track/{trackIndex}",
             };
 
             // Start playback
@@ -431,12 +432,12 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         {
             var streamTrack = new TrackInfo
             {
-                Id = mediaUrl,
                 Source = "stream",
                 Index = 0,
                 Title = "Stream",
                 Artist = "Unknown",
                 Album = "Stream",
+                Url = mediaUrl,
             };
 
             var playResult = await this
@@ -667,8 +668,11 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
             var playlistIndex = this._currentState.Playlist.Index.Value;
             var getPlaylistQuery = new GetPlaylistQuery { PlaylistIndex = playlistIndex };
-            var playlistResult = await this
-                ._mediator.SendQueryAsync<GetPlaylistQuery, Result<Api.Models.PlaylistWithTracks>>(getPlaylistQuery)
+
+            var scope = this._serviceScopeFactory.CreateScope();
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+            var playlistResult = await mediator
+                .SendQueryAsync<GetPlaylistQuery, Result<Api.Models.PlaylistWithTracks>>(getPlaylistQuery)
                 .ConfigureAwait(false);
 
             if (playlistResult.IsFailure)
@@ -853,8 +857,11 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         {
             // Get all playlists to find the correct one
             var getAllPlaylistsQuery = new GetAllPlaylistsQuery();
-            var playlistsResult = await this
-                ._mediator.SendQueryAsync<GetAllPlaylistsQuery, Result<List<PlaylistInfo>>>(getAllPlaylistsQuery)
+
+            var scope = this._serviceScopeFactory.CreateScope();
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+            var playlistsResult = await mediator
+                .SendQueryAsync<GetAllPlaylistsQuery, Result<List<PlaylistInfo>>>(getAllPlaylistsQuery)
                 .ConfigureAwait(false);
 
             if (playlistsResult.IsFailure)
@@ -1045,12 +1052,12 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             IsSnapcastGroupMuted = false,
             Track = new TrackInfo
             {
-                Id = "none",
                 Source = "none",
                 Index = 0,
                 Title = "No Track",
                 Artist = "Unknown",
                 Album = "Unknown",
+                Url = "none://no-track",
             },
             Playlist = new PlaylistInfo
             {
@@ -1135,7 +1142,9 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         {
             try
             {
-                await this._mediator.PublishAsync(notification).ConfigureAwait(false);
+                using var scope = this._serviceScopeFactory.CreateScope();
+                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+                await mediator.PublishAsync(notification).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -1157,19 +1166,28 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             this._zoneIndex,
             playbackState
         );
-        await this._mediator.PublishAsync(notification).ConfigureAwait(false);
+
+        using var scope = this._serviceScopeFactory.CreateScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        await mediator.PublishAsync(notification).ConfigureAwait(false);
     }
 
     public async Task PublishVolumeStatusAsync(int volume)
     {
         var notification = this._statusFactory.CreateZoneVolumeStatusNotification(this._zoneIndex, volume);
-        await this._mediator.PublishAsync(notification).ConfigureAwait(false);
+
+        using var scope = this._serviceScopeFactory.CreateScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        await mediator.PublishAsync(notification).ConfigureAwait(false);
     }
 
     public async Task PublishMuteStatusAsync(bool isMuted)
     {
         var notification = this._statusFactory.CreateZoneMuteStatusNotification(this._zoneIndex, isMuted);
-        await this._mediator.PublishAsync(notification).ConfigureAwait(false);
+
+        using var scope = this._serviceScopeFactory.CreateScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        await mediator.PublishAsync(notification).ConfigureAwait(false);
     }
 
     public async Task PublishTrackStatusAsync(Core.Models.TrackInfo trackInfo, int trackIndex)
@@ -1179,7 +1197,10 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             trackInfo,
             trackIndex
         );
-        await this._mediator.PublishAsync(notification).ConfigureAwait(false);
+
+        using var scope = this._serviceScopeFactory.CreateScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        await mediator.PublishAsync(notification).ConfigureAwait(false);
     }
 
     public async Task PublishPlaylistStatusAsync(Core.Models.PlaylistInfo playlistInfo, int playlistIndex)
@@ -1189,13 +1210,19 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             playlistInfo,
             playlistIndex
         );
-        await this._mediator.PublishAsync(notification).ConfigureAwait(false);
+
+        using var scope = this._serviceScopeFactory.CreateScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        await mediator.PublishAsync(notification).ConfigureAwait(false);
     }
 
     public async Task PublishZoneStateStatusAsync(Core.Models.ZoneState zoneState)
     {
         var notification = this._statusFactory.CreateZoneStateStatusNotification(this._zoneIndex, zoneState);
-        await this._mediator.PublishAsync(notification).ConfigureAwait(false);
+
+        using var scope = this._serviceScopeFactory.CreateScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        await mediator.PublishAsync(notification).ConfigureAwait(false);
     }
 
     #endregion
