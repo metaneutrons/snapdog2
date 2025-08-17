@@ -22,6 +22,7 @@ public static class StatusIds
     public static readonly string ClientZoneStatus =
         StatusIdAttribute.GetStatusId<ClientZoneAssignmentChangedNotification>();
     public static readonly string ClientState = StatusIdAttribute.GetStatusId<ClientStateChangedNotification>();
+    public static readonly string ClientName = StatusIdAttribute.GetStatusId<ClientNameChangedNotification>();
 
     // Zone Status IDs
     public static readonly string PlaybackState = StatusIdAttribute.GetStatusId<ZonePlaybackStateChangedNotification>();
@@ -45,6 +46,10 @@ public static class StatusIds
     public static readonly string TrackInfoTitle = StatusIdAttribute.GetStatusId<ZoneTrackTitleChangedNotification>();
     public static readonly string TrackInfoArtist = StatusIdAttribute.GetStatusId<ZoneTrackArtistChangedNotification>();
     public static readonly string TrackInfoAlbum = StatusIdAttribute.GetStatusId<ZoneTrackAlbumChangedNotification>();
+    public static readonly string TrackPlayingStatus =
+        StatusIdAttribute.GetStatusId<ZoneTrackPlayingStatusChangedNotification>();
+    public static readonly string TrackProgressStatus =
+        StatusIdAttribute.GetStatusId<ZoneTrackProgressChangedNotification>();
 
     // Playlist Information Status IDs
     public static readonly string PlaylistInfo = StatusIdAttribute.GetStatusId<ZonePlaylistInfoChangedNotification>();

@@ -141,3 +141,30 @@ public record ClientStateChangedNotification : INotification
     /// </summary>
     public DateTime TimestampUtc { get; init; } = DateTime.UtcNow;
 }
+
+/// <summary>
+/// Notification published when a client's name changes.
+/// </summary>
+[StatusId("CLIENT_NAME")]
+public record ClientNameChangedNotification : INotification
+{
+    /// <summary>
+    /// Gets the client ID.
+    /// </summary>
+    public required int ClientIndex { get; init; }
+
+    /// <summary>
+    /// Gets the new client name.
+    /// </summary>
+    public required string Name { get; init; }
+
+    /// <summary>
+    /// Gets the previous client name.
+    /// </summary>
+    public string? PreviousName { get; init; }
+
+    /// <summary>
+    /// Gets the UTC timestamp when the name changed.
+    /// </summary>
+    public DateTime TimestampUtc { get; init; } = DateTime.UtcNow;
+}

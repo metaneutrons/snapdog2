@@ -1,5 +1,6 @@
 namespace SnapDog2.Server.Features.Zones.Notifications;
 
+using System;
 using Cortex.Mediator.Notifications;
 using SnapDog2.Core.Attributes;
 using SnapDog2.Core.Models;
@@ -121,4 +122,48 @@ public record ZonePlaylistInfoChangedNotification : INotification
     /// Gets the detailed playlist information.
     /// </summary>
     public required PlaylistInfo PlaylistInfo { get; init; }
+}
+
+/// <summary>
+/// Notification published when a zone's track playing status changes.
+/// </summary>
+[StatusId("TRACK_PLAYING_STATUS")]
+public record ZoneTrackPlayingStatusChangedNotification : INotification
+{
+    /// <summary>
+    /// Gets the zone index (1-based).
+    /// </summary>
+    public required int ZoneIndex { get; init; }
+
+    /// <summary>
+    /// Gets whether the track is currently playing.
+    /// </summary>
+    public required bool IsPlaying { get; init; }
+
+    /// <summary>
+    /// Gets the UTC timestamp when the playing status changed.
+    /// </summary>
+    public DateTime TimestampUtc { get; init; } = DateTime.UtcNow;
+}
+
+/// <summary>
+/// Notification published when a zone's track progress changes.
+/// </summary>
+[StatusId("TRACK_PROGRESS_STATUS")]
+public record ZoneTrackProgressChangedNotification : INotification
+{
+    /// <summary>
+    /// Gets the zone index (1-based).
+    /// </summary>
+    public required int ZoneIndex { get; init; }
+
+    /// <summary>
+    /// Gets the current track progress as percentage (0.0-1.0).
+    /// </summary>
+    public required float Progress { get; init; }
+
+    /// <summary>
+    /// Gets the UTC timestamp when the progress changed.
+    /// </summary>
+    public DateTime TimestampUtc { get; init; } = DateTime.UtcNow;
 }
