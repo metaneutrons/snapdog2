@@ -115,7 +115,8 @@ public partial class ClientManager : IClientManager
             this._clientConfigs[clientIndex - 1],
             this._snapcastService,
             this._snapcastStateRepository,
-            this._mediator
+            this._mediator,
+            this
         );
         return Result<IClient>.Success(client);
     }
@@ -337,7 +338,8 @@ public partial class ClientManager : IClientManager
                 this._clientConfigs[clientIndex - 1],
                 this._snapcastService,
                 this._snapcastStateRepository,
-                this._mediator
+                this._mediator,
+                this
             );
 
             this.LogClientFoundByMac(snapcastClientId, macAddress, clientIndex);
@@ -435,7 +437,8 @@ public partial class ClientManager : IClientManager
         ClientConfig config,
         ISnapcastService snapcastService,
         ISnapcastStateRepository snapcastStateRepository,
-        IMediator mediator
+        IMediator mediator,
+        IClientManager clientManager
     ) : IClient
     {
         internal readonly SnapcastClient.Models.SnapClient _snapcastClient = snapcastClient;
@@ -443,6 +446,7 @@ public partial class ClientManager : IClientManager
         private readonly ISnapcastService _snapcastService = snapcastService;
         private readonly ISnapcastStateRepository _snapcastStateRepository = snapcastStateRepository;
         private readonly IMediator _mediator = mediator;
+        private readonly IClientManager _clientManager = clientManager;
 
         public int Id { get; } = id;
         public string Name => this._config.Name;
@@ -539,6 +543,67 @@ public partial class ClientManager : IClientManager
             {
                 // Note: Name changes don't have a status notification in blueprint
                 // They use ClientNameChangedNotification instead
+            }
+
+            return result;
+        }
+
+        public async Task<Result> VolumeUpAsync(int step = 5)
+        {
+            // Get current volume and calculate new volume
+            var currentVolume = this.Volume;
+            var newVolume = Math.Min(100, currentVolume + step);
+
+            var result = await this._snapcastService.SetClientVolumeAsync(this._snapcastClient.Id, newVolume);
+
+            if (result.IsSuccess)
+            {
+                await PublishVolumeStatusAsync(newVolume);
+            }
+
+            return result;
+        }
+
+        public async Task<Result> VolumeDownAsync(int step = 5)
+        {
+            // Get current volume and calculate new volume
+            var currentVolume = this.Volume;
+            var newVolume = Math.Max(0, currentVolume - step);
+
+            var result = await this._snapcastService.SetClientVolumeAsync(this._snapcastClient.Id, newVolume);
+
+            if (result.IsSuccess)
+            {
+                await PublishVolumeStatusAsync(newVolume);
+            }
+
+            return result;
+        }
+
+        public async Task<Result> ToggleMuteAsync()
+        {
+            // Get current mute state and toggle it
+            var currentMuted = this.Muted;
+            var newMuted = !currentMuted;
+
+            var result = await this._snapcastService.SetClientMuteAsync(this._snapcastClient.Id, newMuted);
+
+            if (result.IsSuccess)
+            {
+                await PublishMuteStatusAsync(newMuted);
+            }
+
+            return result;
+        }
+
+        public async Task<Result> AssignToZoneAsync(int zoneIndex)
+        {
+            // Use the ClientManager's zone assignment logic
+            var result = await this._clientManager.AssignClientToZoneAsync(this.Id, zoneIndex);
+
+            if (result.IsSuccess)
+            {
+                await PublishZoneStatusAsync(zoneIndex);
             }
 
             return result;

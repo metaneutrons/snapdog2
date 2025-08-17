@@ -43,6 +43,8 @@ public partial class AssignClientToZoneCommandHandler(
             return clientResult;
         }
 
+        var client = clientResult.Value!;
+
         // Validate zone exists
         var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneIndex).ConfigureAwait(false);
         if (zoneResult.IsFailure)
@@ -51,10 +53,8 @@ public partial class AssignClientToZoneCommandHandler(
             return zoneResult;
         }
 
-        // Perform the assignment
-        var result = await this
-            ._clientManager.AssignClientToZoneAsync(request.ClientIndex, request.ZoneIndex)
-            .ConfigureAwait(false);
+        // Use the IClient method directly
+        var result = await client.AssignToZoneAsync(request.ZoneIndex).ConfigureAwait(false);
 
         return result;
     }

@@ -48,6 +48,33 @@ public interface IClient
     /// <returns>A result indicating success or failure.</returns>
     Task<Result> SetNameAsync(string name);
 
+    /// <summary>
+    /// Increases the volume for this client by the specified step.
+    /// </summary>
+    /// <param name="step">The volume step to increase (default: 5).</param>
+    /// <returns>A result indicating success or failure.</returns>
+    Task<Result> VolumeUpAsync(int step = 5);
+
+    /// <summary>
+    /// Decreases the volume for this client by the specified step.
+    /// </summary>
+    /// <param name="step">The volume step to decrease (default: 5).</param>
+    /// <returns>A result indicating success or failure.</returns>
+    Task<Result> VolumeDownAsync(int step = 5);
+
+    /// <summary>
+    /// Toggles the mute state for this client.
+    /// </summary>
+    /// <returns>A result indicating success or failure.</returns>
+    Task<Result> ToggleMuteAsync();
+
+    /// <summary>
+    /// Assigns this client to the specified zone.
+    /// </summary>
+    /// <param name="zoneIndex">The zone index (1-based) to assign the client to.</param>
+    /// <returns>A result indicating success or failure.</returns>
+    Task<Result> AssignToZoneAsync(int zoneIndex);
+
     #endregion
 
     #region Status Publishing

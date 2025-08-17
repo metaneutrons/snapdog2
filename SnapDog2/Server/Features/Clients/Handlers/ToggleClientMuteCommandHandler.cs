@@ -33,19 +33,6 @@ public partial class ToggleClientMuteCommandHandler(
     {
         this.LogHandling(request.ClientIndex, request.Source);
 
-        // Get the current client state
-        var clientStateResult = await this
-            ._clientManager.GetClientStateAsync(request.ClientIndex)
-            .ConfigureAwait(false);
-        if (clientStateResult.IsFailure)
-        {
-            this.LogClientNotFound(request.ClientIndex);
-            return clientStateResult;
-        }
-
-        var clientState = clientStateResult.Value!;
-        var newMuteState = !clientState.Mute;
-
         // Get the client for operations
         var clientResult = await this._clientManager.GetClientAsync(request.ClientIndex).ConfigureAwait(false);
         if (clientResult.IsFailure)
@@ -56,12 +43,13 @@ public partial class ToggleClientMuteCommandHandler(
 
         var client = clientResult.Value!;
 
-        // Toggle the mute state
-        var result = await client.SetMuteAsync(newMuteState).ConfigureAwait(false);
+        // Use the IClient method directly
+        var result = await client.ToggleMuteAsync().ConfigureAwait(false);
 
         if (result.IsSuccess)
         {
-            this.LogToggleResult(request.ClientIndex, newMuteState);
+            // Note: The actual new mute state will be logged by the IClient method
+            // We could get the current state if needed for logging
         }
 
         return result;

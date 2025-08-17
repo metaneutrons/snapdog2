@@ -27,19 +27,6 @@ public partial class ClientVolumeDownCommandHandler(
     {
         this.LogHandling(request.ClientIndex, request.Step, request.Source);
 
-        // Get the current client state
-        var clientStateResult = await this
-            ._clientManager.GetClientStateAsync(request.ClientIndex)
-            .ConfigureAwait(false);
-        if (clientStateResult.IsFailure)
-        {
-            this.LogClientNotFound(request.ClientIndex);
-            return clientStateResult;
-        }
-
-        var clientState = clientStateResult.Value!;
-        var newVolume = Math.Max(0, clientState.Volume - request.Step);
-
         // Get the client for operations
         var clientResult = await this._clientManager.GetClientAsync(request.ClientIndex).ConfigureAwait(false);
         if (clientResult.IsFailure)
@@ -50,8 +37,8 @@ public partial class ClientVolumeDownCommandHandler(
 
         var client = clientResult.Value!;
 
-        // Set the new volume
-        var result = await client.SetVolumeAsync(newVolume).ConfigureAwait(false);
+        // Use the IClient method directly
+        var result = await client.VolumeDownAsync(request.Step).ConfigureAwait(false);
 
         return result;
     }
