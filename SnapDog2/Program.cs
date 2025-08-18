@@ -424,6 +424,9 @@ static WebApplication CreateWebApplication(string[] args)
         SnapDog2.Infrastructure.Services.ZoneGroupingService
     >();
 
+    // Zone grouping metrics for OpenTelemetry
+    builder.Services.AddSingleton<SnapDog2.Infrastructure.Metrics.ZoneGroupingMetrics>();
+
     // Playlist management services
     builder.Services.AddScoped<
         SnapDog2.Core.Abstractions.IPlaylistManager,

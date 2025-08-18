@@ -48,15 +48,16 @@ public class ContinuousZoneGroupingTests : IClassFixture<TestcontainersFixture>,
         // Wait a moment for background service to complete startup
         await Task.Delay(2000);
 
-        // Act - Check initial state
-        var response = await _httpClient.GetAsync("/api/zone-grouping/status");
-        response.Should().BeSuccessful();
+        // Act - Check initial state using service directly
+        using var scope = _integrationFixture.ServiceProvider.CreateScope();
+        var zoneGroupingService = scope.ServiceProvider.GetRequiredService<IZoneGroupingService>();
 
-        var status = await response.Content.ReadFromJsonAsync<ZoneGroupingStatus>();
+        var statusResult = await zoneGroupingService.GetZoneGroupingStatusAsync();
 
         // Assert - Should be properly grouped after startup
-        status.Should().NotBeNull();
-        status!.OverallHealth.Should().Be(ZoneGroupingHealth.Healthy);
+        statusResult.Should().BeSuccessful();
+        var status = statusResult.Value!;
+        status.OverallHealth.Should().Be(ZoneGroupingHealth.Healthy);
         status.TotalZones.Should().Be(2);
         status.HealthyZones.Should().Be(2);
         status.UnhealthyZones.Should().Be(0);
@@ -73,19 +74,20 @@ public class ContinuousZoneGroupingTests : IClassFixture<TestcontainersFixture>,
         // Arrange
         _output.WriteLine("🧪 Testing continuous monitoring - automatic correction of manual changes");
 
+        using var scope = _integrationFixture.ServiceProvider.CreateScope();
+        var zoneGroupingService = scope.ServiceProvider.GetRequiredService<IZoneGroupingService>();
+
         // First ensure we start in a good state
-        var initialResponse = await _httpClient.GetAsync("/api/zone-grouping/validate");
-        initialResponse.Should().BeSuccessful();
+        var initialValidation = await zoneGroupingService.ValidateGroupingConsistencyAsync();
+        initialValidation.Should().BeSuccessful();
 
         // Act - Manually break grouping via Snapcast API
         _output.WriteLine("🔧 Breaking grouping manually via Snapcast API");
         await BreakGroupingManually();
 
         // Verify broken state
-        var brokenValidation = await _httpClient.GetAsync("/api/zone-grouping/validate");
-        var brokenResult = await brokenValidation.Content.ReadAsStringAsync();
-        var brokenJson = JsonSerializer.Deserialize<JsonElement>(brokenResult);
-        brokenJson.GetProperty("status").GetString().Should().Be("invalid");
+        var brokenValidation = await zoneGroupingService.ValidateGroupingConsistencyAsync();
+        brokenValidation.IsSuccess.Should().BeFalse("Grouping should be broken after manual changes");
 
         _output.WriteLine("⚠️ Grouping successfully broken, waiting for automatic correction...");
 
@@ -98,11 +100,9 @@ public class ContinuousZoneGroupingTests : IClassFixture<TestcontainersFixture>,
         {
             await Task.Delay(5000); // Check every 5 seconds
 
-            var validationResponse = await _httpClient.GetAsync("/api/zone-grouping/validate");
-            var validationResult = await validationResponse.Content.ReadAsStringAsync();
-            var validationJson = JsonSerializer.Deserialize<JsonElement>(validationResult);
+            var validationResult = await zoneGroupingService.ValidateGroupingConsistencyAsync();
 
-            if (validationJson.GetProperty("status").GetString() == "valid")
+            if (validationResult.IsSuccess)
             {
                 corrected = true;
                 _output.WriteLine(
