@@ -355,8 +355,8 @@ static WebApplication CreateWebApplication(string[] args)
         // Add hosted service to initialize integration services on startup
         builder.Services.AddHostedService<SnapDog2.Worker.Services.IntegrationServicesHostedService>();
 
-        // Add hosted service to initialize client zone grouping based on default zones
-        builder.Services.AddHostedService<SnapDog2.Services.ClientZoneInitializationService>();
+        // Add hosted service for enterprise-grade zone-based client grouping
+        builder.Services.AddHostedService<SnapDog2.Services.ZoneGroupingHostedService>();
 
         // Add hosted service to publish initial state after integration services are initialized
         // Skip in test environment to prevent hanging issues
@@ -416,6 +416,12 @@ static WebApplication CreateWebApplication(string[] args)
     builder.Services.AddScoped<
         SnapDog2.Core.Abstractions.IClientManager,
         SnapDog2.Infrastructure.Domain.ClientManager
+    >();
+
+    // Zone grouping service for managing Snapcast client grouping based on zone assignments
+    builder.Services.AddScoped<
+        SnapDog2.Core.Abstractions.IZoneGroupingService,
+        SnapDog2.Infrastructure.Services.ZoneGroupingService
     >();
 
     // Playlist management services

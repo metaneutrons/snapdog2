@@ -147,6 +147,19 @@ public interface ISnapcastService
     Task<Result> DeleteClientAsync(string snapcastClientIndex, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Sets the clients for a specific group, moving them from their current groups.
+    /// </summary>
+    /// <param name="groupId">Target group ID.</param>
+    /// <param name="clientIds">List of client IDs to assign to the group.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Result indicating success or failure.</returns>
+    Task<Result> SetGroupClientsAsync(
+        string groupId,
+        IEnumerable<string> clientIds,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     /// Gets the RPC version of the Snapcast server.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>

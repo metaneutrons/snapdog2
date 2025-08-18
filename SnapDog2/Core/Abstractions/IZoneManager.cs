@@ -17,10 +17,25 @@ public interface IZoneManager
     Task<Result<IZoneService>> GetZoneAsync(int zoneIndex);
 
     /// <summary>
+    /// Gets a zone by its ID.
+    /// </summary>
+    /// <param name="zoneIndex">The zone ID.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The zone state if found.</returns>
+    Task<Result<ZoneState>> GetZoneAsync(int zoneIndex, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets all available zones.
     /// </summary>
     /// <returns>Collection of all zones.</returns>
     Task<Result<IEnumerable<IZoneService>>> GetAllZonesAsync();
+
+    /// <summary>
+    /// Gets all available zones.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Collection of all zone states.</returns>
+    Task<Result<List<ZoneState>>> GetAllZonesAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets the state of a specific zone.

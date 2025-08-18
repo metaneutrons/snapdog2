@@ -27,6 +27,16 @@ public static class TestTypes
     public const string Api = "Api";
     public const string Database = "Database";
     public const string Network = "Network";
+
+    // Real-world scenario test types
+    public const string RealWorldScenario = "RealWorldScenario";
+    public const string FaultInjection = "FaultInjection";
+    public const string Performance = "Performance";
+    public const string LoadTest = "LoadTest";
+    public const string StressTest = "StressTest";
+    public const string EndToEnd = "EndToEnd";
+    public const string CrossSystem = "CrossSystem";
+    public const string Recovery = "Recovery";
 }
 
 /// <summary>
@@ -40,6 +50,13 @@ public static class TestRequirements
     public const string FileSystem = "FileSystem";
     public const string ExternalService = "ExternalService";
     public const string Database = "Database";
+
+    // Real-world scenario requirements
+    public const string Container = "Container";
+    public const string Snapcast = "Snapcast";
+    public const string RealTimeSystem = "RealTimeSystem";
+    public const string HighMemory = "HighMemory";
+    public const string LongRunning = "LongRunning";
 }
 
 /// <summary>
@@ -114,5 +131,19 @@ public class EnvironmentAttribute : Attribute
     public EnvironmentAttribute(string environment)
     {
         Environment = environment;
+    }
+}
+
+/// <summary>
+/// Custom attribute for marking test execution priority
+/// </summary>
+[AttributeUsage(AttributeTargets.Method)]
+public class TestPriorityAttribute : Attribute
+{
+    public int Priority { get; }
+
+    public TestPriorityAttribute(int priority)
+    {
+        Priority = priority;
     }
 }

@@ -234,6 +234,16 @@ public partial class ZoneManager(
         // See: https://github.com/dotnet/runtime/issues/61132
         this.DisposeAsync().AsTask().GetAwaiter().GetResult();
     }
+
+    public async Task<Result<ZoneState>> GetZoneAsync(int zoneIndex, CancellationToken cancellationToken = default)
+    {
+        return await GetZoneStateAsync(zoneIndex);
+    }
+
+    public async Task<Result<List<ZoneState>>> GetAllZonesAsync(CancellationToken cancellationToken = default)
+    {
+        return await GetAllZoneStatesAsync();
+    }
 }
 
 /// <summary>

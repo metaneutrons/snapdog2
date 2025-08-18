@@ -645,6 +645,44 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         }
     }
 
+    public async Task<Result> SetGroupClientsAsync(
+        string groupId,
+        IEnumerable<string> clientIds,
+        CancellationToken cancellationToken = default
+    )
+    {
+        if (this._disposed)
+        {
+            return Result.Failure("Service has been disposed");
+        }
+
+        try
+        {
+            var clientIdList = clientIds.ToList();
+            this._logger.LogDebug(
+                "Setting group {GroupId} clients to: {ClientIds}",
+                groupId,
+                string.Join(", ", clientIdList)
+            );
+
+            // Use the Snapcast client library to set group clients
+            await this._snapcastClient.GroupSetClientsAsync(groupId, clientIdList).ConfigureAwait(false);
+
+            this._logger.LogInformation(
+                "Successfully set {ClientCount} clients for group {GroupId}",
+                clientIdList.Count,
+                groupId
+            );
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            this._logger.LogError(ex, "Failed to set clients for group {GroupId}", groupId);
+            this.LogOperationFailed(nameof(this.SetGroupClientsAsync), ex);
+            return Result.Failure(ex);
+        }
+    }
+
     public Task<Result<string>> CreateGroupAsync(
         IEnumerable<string> clientIndexs,
         CancellationToken cancellationToken = default

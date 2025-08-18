@@ -416,6 +416,28 @@ public partial class ClientManager : IClientManager
         }
     }
 
+    public async Task<Result<ClientState>> GetClientAsync(
+        int clientIndex,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var clientResult = await GetClientStateAsync(clientIndex);
+        return clientResult;
+    }
+
+    public async Task<Result<List<ClientState>>> GetAllClientsAsync(CancellationToken cancellationToken = default)
+    {
+        return await GetAllClientsAsync();
+    }
+
+    public async Task<Result<List<ClientState>>> GetClientsByZoneAsync(
+        int zoneIndex,
+        CancellationToken cancellationToken = default
+    )
+    {
+        return await GetClientsByZoneAsync(zoneIndex);
+    }
+
     private static string ExtractStreamIdFromSink(string sink)
     {
         // Convert "/snapsinks/zone1" -> "Zone1", "/snapsinks/zone2" -> "Zone2"
@@ -456,7 +478,7 @@ public partial class ClientManager : IClientManager
         internal int Volume => this._snapcastClient.Config.Volume.Percent;
         internal bool Muted => this._snapcastClient.Config.Volume.Muted;
         internal int LatencyMs => this._snapcastClient.Config.Latency;
-        internal int ZoneIndex => this.GetActualZoneFromSnapcast();
+        internal int ZoneIndex => this._config.DefaultZone;
 
         private int GetActualZoneFromSnapcast()
         {
