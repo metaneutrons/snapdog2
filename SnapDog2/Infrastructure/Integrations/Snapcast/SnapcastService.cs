@@ -146,7 +146,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
 
     [LoggerMessage(
         6015,
-        LogLevel.Information,
+        LogLevel.Debug,
         "📊 Retrieved server status: {GroupCount} groups, {ClientCount} clients, {StreamCount} streams"
     )]
     private partial void LogServerStatusRetrieved(int groupCount, int clientCount, int streamCount);

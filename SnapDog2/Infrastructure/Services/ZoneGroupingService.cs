@@ -374,7 +374,7 @@ public class ZoneGroupingService : IZoneGroupingService
                 Issues = zoneDetails.SelectMany(z => z.Issues).ToList(),
             };
 
-            _logger.LogInformation(
+            _logger.LogDebug(
                 "📊 Zone grouping status: {Health} ({HealthyZones}/{TotalZones} zones, {CorrectClients}/{TotalClients} clients)",
                 overallHealth,
                 healthyZones,

@@ -79,7 +79,7 @@ public partial class SnapcastStateRepository(
     [LoggerMessage(12, LogLevel.Debug, "Available Snapcast clients: {AvailableClients}")]
     private partial void LogAvailableClients(string availableClients);
 
-    [LoggerMessage(13, LogLevel.Information, "Total Snapcast clients in repository: {ClientCount}")]
+    [LoggerMessage(13, LogLevel.Debug, "Total Snapcast clients in repository: {ClientCount}")]
     private partial void LogTotalClientCount(int clientCount);
 
     [LoggerMessage(14, LogLevel.Debug, "🔄 UpdateServerState called with {GroupCount} groups")]

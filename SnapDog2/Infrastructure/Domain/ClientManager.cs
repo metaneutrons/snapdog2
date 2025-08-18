@@ -42,7 +42,7 @@ public partial class ClientManager : IClientManager
     [LoggerMessage(7005, LogLevel.Information, "Assigning client {ClientIndex} to zone {ZoneIndex}")]
     private partial void LogAssigningClientToZone(int clientIndex, int zoneIndex);
 
-    [LoggerMessage(7006, LogLevel.Information, "Initialized ClientManager with {ClientCount} configured clients")]
+    [LoggerMessage(7006, LogLevel.Debug, "Initialized ClientManager with {ClientCount} configured clients")]
     private partial void LogInitialized(int clientCount);
 
     [LoggerMessage(7010, LogLevel.Debug, "Getting client by Snapcast ID {SnapcastClientId}")]
