@@ -410,7 +410,7 @@ public class ZoneGroupingService : IZoneGroupingService
             var clientsMoved = 0;
 
             // First, synchronize client names to ensure friendly names are set
-            _logger.LogDebug("🏷️ Synchronizing client names before zone reconciliation");
+            _logger.LogInformation("🏷️ Synchronizing client names before zone reconciliation");
             var nameSync = await SynchronizeClientNamesAsync(cancellationToken);
             if (nameSync.IsSuccess && nameSync.Value!.UpdatedClients > 0)
             {
@@ -421,6 +421,10 @@ public class ZoneGroupingService : IZoneGroupingService
             {
                 errors.Add($"Client name sync failed: {nameSync.ErrorMessage}");
                 _logger.LogWarning("⚠️ Client name synchronization failed: {Error}", nameSync.ErrorMessage);
+            }
+            else
+            {
+                _logger.LogInformation("ℹ️ No client names needed updating");
             }
 
             // Get all zones
@@ -798,6 +802,9 @@ public class ZoneGroupingService : IZoneGroupingService
         var issues = new List<string>();
         var clientDetails = new List<ZoneClientDetail>();
 
+        // Determine the expected group ID for this zone
+        var expectedGroupId = GetExpectedGroupIdForZone(zone, serverStatus);
+
         // Analyze each client in the zone
         foreach (var client in zoneClients)
         {
@@ -810,6 +817,9 @@ public class ZoneGroupingService : IZoneGroupingService
             var currentGroup = FindClientCurrentGroup(client.SnapcastId, serverStatus);
             var isConnected = currentGroup?.Clients?.Any(c => c.Id == client.SnapcastId && c.Connected) == true;
 
+            // Check if client is in the correct group for this zone
+            var isCorrectlyGrouped = isConnected && currentGroup?.Id == expectedGroupId;
+
             var clientDetail = new ZoneClientDetail
             {
                 ClientId = client.Id,
@@ -817,56 +827,68 @@ public class ZoneGroupingService : IZoneGroupingService
                 SnapcastClientId = client.SnapcastId,
                 CurrentGroupId = currentGroup?.Id,
                 IsConnected = isConnected,
-                IsCorrectlyGrouped = false, // Will be determined below
+                IsCorrectlyGrouped = isCorrectlyGrouped,
             };
 
             clientDetails.Add(clientDetail);
-        }
 
-        // Determine if clients are correctly grouped together
-        var connectedClients = clientDetails.Where(c => c.IsConnected).ToList();
-        if (connectedClients.Count > 1)
-        {
-            var groupIds = connectedClients.Select(c => c.CurrentGroupId).Distinct().ToList();
-            if (groupIds.Count > 1)
+            // Add issues for incorrectly grouped clients
+            if (isConnected && !isCorrectlyGrouped)
             {
-                issues.Add($"Zone {zone.Name} clients are split across {groupIds.Count} groups");
-            }
-            else if (groupIds.Count == 1)
-            {
-                // All clients are in the same group - mark as correctly grouped
-                for (int i = 0; i < clientDetails.Count; i++)
-                {
-                    if (clientDetails[i].IsConnected)
-                    {
-                        clientDetails[i] = clientDetails[i] with { IsCorrectlyGrouped = true };
-                    }
-                }
-            }
-        }
-        else if (connectedClients.Count == 1)
-        {
-            // Single client is always correctly grouped
-            var connectedIndex = clientDetails.FindIndex(c => c.IsConnected);
-            if (connectedIndex >= 0)
-            {
-                clientDetails[connectedIndex] = clientDetails[connectedIndex] with { IsCorrectlyGrouped = true };
+                issues.Add(
+                    $"Client {client.Name} is in group {currentGroup?.Id} but should be in group {expectedGroupId}"
+                );
             }
         }
 
         // Determine overall zone health
-        var health = issues.Any() ? ZoneGroupingHealth.Unhealthy : ZoneGroupingHealth.Healthy;
+        var connectedClients = clientDetails.Where(c => c.IsConnected).ToList();
+        var correctlyGroupedCount = connectedClients.Count(c => c.IsCorrectlyGrouped);
+
+        var health =
+            connectedClients.Count == 0 ? ZoneGroupingHealth.Unknown
+            : correctlyGroupedCount == connectedClients.Count ? ZoneGroupingHealth.Healthy
+            : ZoneGroupingHealth.Unhealthy;
+
+        if (issues.Any())
+        {
+            health = ZoneGroupingHealth.Unhealthy;
+        }
 
         return new ZoneGroupingDetail
         {
             ZoneId = zone.Id,
             ZoneName = zone.Name,
-            ExpectedGroupId = connectedClients.FirstOrDefault()?.CurrentGroupId,
+            ExpectedGroupId = expectedGroupId,
             ActualGroupIds = clientDetails.Select(c => c.CurrentGroupId).Where(id => id != null).Distinct().ToList()!,
             ExpectedClients = clientDetails,
             Health = health,
             Issues = issues,
         };
+    }
+
+    /// <summary>
+    /// Determines the expected Snapcast group ID for a given zone.
+    /// </summary>
+    private string? GetExpectedGroupIdForZone(ZoneState zone, SnapcastServerStatus serverStatus)
+    {
+        // Look for a group that matches the zone's stream
+        var expectedStream = zone.SnapcastStreamId;
+        if (string.IsNullOrEmpty(expectedStream))
+        {
+            return null;
+        }
+
+        // Find the group that should be playing this zone's stream
+        var matchingGroup = serverStatus.Groups?.FirstOrDefault(g => g.StreamId == expectedStream);
+        if (matchingGroup != null)
+        {
+            return matchingGroup.Id;
+        }
+
+        // If no group is currently using the zone's stream, we need to find or create one
+        // For now, return null to indicate no expected group exists
+        return null;
     }
 
     #endregion
