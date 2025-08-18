@@ -77,6 +77,7 @@ services:
     environment:
       - SNAPSERVER_HOST=172.25.0.5 # IP address of snapcast-server
       - CLIENT_ID=living-room
+      - CLIENT_NAME=Living Room
       - FIXED_MAC_ADDRESS=02:42:ac:11:00:10
     networks:
       snapdog-dev:
@@ -93,6 +94,7 @@ services:
     environment:
       - SNAPSERVER_HOST=172.25.0.5
       - CLIENT_ID=kitchen
+      - CLIENT_NAME=Kitchen
       - FIXED_MAC_ADDRESS=02:42:ac:11:00:11
     networks:
       snapdog-dev:
@@ -109,6 +111,7 @@ services:
     environment:
       - SNAPSERVER_HOST=172.25.0.5
       - CLIENT_ID=bedroom
+      - CLIENT_NAME=Bedroom
       - FIXED_MAC_ADDRESS=02:42:ac:11:00:12
     networks:
       snapdog-dev:

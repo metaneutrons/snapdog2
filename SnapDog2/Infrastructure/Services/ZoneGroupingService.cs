@@ -409,6 +409,20 @@ public class ZoneGroupingService : IZoneGroupingService
             var zonesReconciled = 0;
             var clientsMoved = 0;
 
+            // First, synchronize client names to ensure friendly names are set
+            _logger.LogDebug("🏷️ Synchronizing client names before zone reconciliation");
+            var nameSync = await SynchronizeClientNamesAsync(cancellationToken);
+            if (nameSync.IsSuccess && nameSync.Value!.UpdatedClients > 0)
+            {
+                actions.Add($"Updated {nameSync.Value.UpdatedClients} client names");
+                _logger.LogInformation("✅ Updated {Count} client names", nameSync.Value.UpdatedClients);
+            }
+            else if (!nameSync.IsSuccess)
+            {
+                errors.Add($"Client name sync failed: {nameSync.ErrorMessage}");
+                _logger.LogWarning("⚠️ Client name synchronization failed: {Error}", nameSync.ErrorMessage);
+            }
+
             // Get all zones
             var zones = await _zoneManager.GetAllZonesAsync(cancellationToken);
             if (!zones.IsSuccess)
