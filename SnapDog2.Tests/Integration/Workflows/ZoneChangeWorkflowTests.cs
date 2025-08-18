@@ -59,7 +59,7 @@ public class ZoneChangeWorkflowTests
         serverStatus.Groups.Should().NotBeNull().And.HaveCount(3, "Should have 3 client groups");
 
         // Verify MAC addresses match expected configuration
-        await VerifyClientMacAddressesAsync(serverStatus);
+        VerifyClientMacAddresses(serverStatus);
 
         // Verify clients can be identified by the application
         await VerifyClientDiscoveryAsync();
@@ -125,7 +125,7 @@ public class ZoneChangeWorkflowTests
     [Fact]
     [TestSpeed(TestSpeed.Fast)]
     [Trait("Scenario", "Configuration")]
-    public async Task Configuration_ShouldMatchContainerSetup()
+    public void Configuration_ShouldMatchContainerSetup()
     {
         // Arrange
         _output.WriteSection("Configuration Validation Test");
@@ -191,7 +191,7 @@ public class ZoneChangeWorkflowTests
         throw new InvalidOperationException("Snapcast service failed to initialize within timeout");
     }
 
-    private async Task VerifyClientMacAddressesAsync(SnapcastServerStatus serverStatus)
+    private void VerifyClientMacAddresses(SnapcastServerStatus serverStatus)
     {
         _output.WriteStep("Verify Client MAC Addresses");
 

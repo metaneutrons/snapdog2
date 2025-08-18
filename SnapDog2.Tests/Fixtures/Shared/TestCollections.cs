@@ -31,7 +31,7 @@ public class ContainerTestCollection : ICollectionFixture<Containers.Testcontain
 /// Collection for performance tests that need isolated execution
 /// </summary>
 [CollectionDefinition(TestCategories.Performance)]
-public class PerformanceTestCollection
+public class PerformanceTestCollection : ICollectionFixture<Integration.IntegrationTestFixture>
 {
     // Performance tests run sequentially to avoid resource contention
 }

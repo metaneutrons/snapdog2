@@ -32,7 +32,7 @@ public class ZoneChangeFlowIntegrationTests
     }
 
     [Fact]
-    public async Task ZoneChangeFlow_ShouldMaintainConsistentState()
+    public void ZoneChangeFlow_ShouldMaintainConsistentState()
     {
         // Skip this test for now due to MAC address configuration issues
         // The test infrastructure is working but there's a mismatch between
@@ -205,7 +205,7 @@ public class ZoneChangeFlowIntegrationTests
 
             if (serverStatus.Groups != null)
             {
-                await UpdateClientMacAddressesAsync(serverStatus);
+                UpdateClientMacAddresses(serverStatus);
             }
         }
         else
@@ -219,7 +219,7 @@ public class ZoneChangeFlowIntegrationTests
         this._output.WriteLine("✅ Client discovery wait period completed");
     }
 
-    private async Task UpdateClientMacAddressesAsync(SnapcastServerStatus serverStatus)
+    private void UpdateClientMacAddresses(SnapcastServerStatus serverStatus)
     {
         this._output.WriteLine("🔄 Updating client MAC addresses based on actual Snapcast clients...");
 
