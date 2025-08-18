@@ -97,8 +97,8 @@ public class ZoneGroupingHostedService : IHostedService
     {
         _logger.LogInformation("⏳ Waiting for Snapcast service to be ready...");
 
-        const int maxWaitTimeMs = 30000; // 30 seconds
-        const int checkIntervalMs = 1000; // 1 second
+        const int maxWaitTimeMs = 60000; // 60 seconds - increased for container startup
+        const int checkIntervalMs = 2000; // 2 seconds - increased interval
         var elapsed = 0;
 
         while (elapsed < maxWaitTimeMs && !cancellationToken.IsCancellationRequested)
@@ -115,10 +115,12 @@ public class ZoneGroupingHostedService : IHostedService
                     _logger.LogInformation("🔄 Snapcast service ready, proceeding with zone grouping");
                     return;
                 }
+
+                _logger.LogDebug("Snapcast service not ready yet: {Error}", statusResult.ErrorMessage);
             }
-            catch
+            catch (Exception ex)
             {
-                // Service not ready yet, continue waiting
+                _logger.LogDebug(ex, "Snapcast service not available yet, retrying in {Interval}ms", checkIntervalMs);
             }
 
             await Task.Delay(checkIntervalMs, cancellationToken);

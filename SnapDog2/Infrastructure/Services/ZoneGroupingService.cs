@@ -476,7 +476,26 @@ public class ZoneGroupingService : IZoneGroupingService
         CancellationToken cancellationToken
     )
     {
-        // Look for existing group with zone clients
+        // Determine the correct stream ID for this zone
+        var expectedStreamId = $"Zone{zoneId}";
+
+        _logger.LogDebug("🎯 Looking for group with stream {StreamId} for zone {ZoneId}", expectedStreamId, zoneId);
+
+        // Look for existing group with the correct stream ID
+        var existingGroupWithCorrectStream = serverStatus.Groups?.FirstOrDefault(g => g.StreamId == expectedStreamId);
+
+        if (existingGroupWithCorrectStream != null)
+        {
+            _logger.LogDebug(
+                "✅ Found existing group {GroupId} with correct stream {StreamId} for zone {ZoneId}",
+                existingGroupWithCorrectStream.Id,
+                expectedStreamId,
+                zoneId
+            );
+            return Result<SnapcastGroupInfo>.Success(existingGroupWithCorrectStream);
+        }
+
+        // Look for existing group with zone clients but wrong stream
         var zoneClients = await _clientManager.GetClientsByZoneAsync(zoneId, cancellationToken);
         if (!zoneClients.IsSuccess)
         {
@@ -488,22 +507,84 @@ public class ZoneGroupingService : IZoneGroupingService
             ?? new HashSet<string>();
 
         // Find group that contains any of the zone's clients
-        var existingGroup = serverStatus.Groups?.FirstOrDefault(g =>
+        var existingGroupWithClients = serverStatus.Groups?.FirstOrDefault(g =>
             g.Clients?.Any(c => zoneClientIds.Contains(c.Id)) == true
         );
 
-        if (existingGroup != null)
+        if (existingGroupWithClients != null)
         {
-            _logger.LogDebug("📍 Found existing group {GroupId} for zone {ZoneId}", existingGroup.Id, zoneId);
-            return Result<SnapcastGroupInfo>.Success(existingGroup);
+            _logger.LogDebug(
+                "🔧 Found group {GroupId} with zone clients but wrong stream {CurrentStream}, fixing to {ExpectedStream}",
+                existingGroupWithClients.Id,
+                existingGroupWithClients.StreamId,
+                expectedStreamId
+            );
+
+            // Fix the stream ID for this group
+            var setStreamResult = await _snapcastService.SetGroupStreamAsync(
+                existingGroupWithClients.Id,
+                expectedStreamId,
+                cancellationToken
+            );
+
+            if (!setStreamResult.IsSuccess)
+            {
+                _logger.LogError(
+                    "❌ Failed to set stream {StreamId} for group {GroupId}: {Error}",
+                    expectedStreamId,
+                    existingGroupWithClients.Id,
+                    setStreamResult.ErrorMessage
+                );
+                return Result<SnapcastGroupInfo>.Failure(
+                    $"Failed to set correct stream: {setStreamResult.ErrorMessage}"
+                );
+            }
+
+            _logger.LogInformation(
+                "✅ Fixed group {GroupId} stream to {StreamId} for zone {ZoneId}",
+                existingGroupWithClients.Id,
+                expectedStreamId,
+                zoneId
+            );
+
+            return Result<SnapcastGroupInfo>.Success(existingGroupWithClients);
         }
 
-        // Create new group (Snapcast automatically creates groups when clients are moved)
-        // For now, we'll use the first available group or let Snapcast handle group creation
+        // Use any available group and set correct stream
         var availableGroup = serverStatus.Groups?.FirstOrDefault();
         if (availableGroup != null)
         {
-            _logger.LogDebug("📍 Using available group {GroupId} for zone {ZoneId}", availableGroup.Id, zoneId);
+            _logger.LogDebug(
+                "🔧 Using available group {GroupId} and setting stream to {StreamId} for zone {ZoneId}",
+                availableGroup.Id,
+                expectedStreamId,
+                zoneId
+            );
+
+            var setStreamResult = await _snapcastService.SetGroupStreamAsync(
+                availableGroup.Id,
+                expectedStreamId,
+                cancellationToken
+            );
+
+            if (!setStreamResult.IsSuccess)
+            {
+                _logger.LogError(
+                    "❌ Failed to set stream {StreamId} for group {GroupId}: {Error}",
+                    expectedStreamId,
+                    availableGroup.Id,
+                    setStreamResult.ErrorMessage
+                );
+                return Result<SnapcastGroupInfo>.Failure($"Failed to set stream: {setStreamResult.ErrorMessage}");
+            }
+
+            _logger.LogInformation(
+                "✅ Set group {GroupId} stream to {StreamId} for zone {ZoneId}",
+                availableGroup.Id,
+                expectedStreamId,
+                zoneId
+            );
+
             return Result<SnapcastGroupInfo>.Success(availableGroup);
         }
 
