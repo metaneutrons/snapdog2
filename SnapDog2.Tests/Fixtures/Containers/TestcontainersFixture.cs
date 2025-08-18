@@ -14,7 +14,6 @@ namespace SnapDog2.Tests.Fixtures.Containers;
 /// </summary>
 public class TestcontainersFixture : IAsyncLifetime
 {
-    private readonly ITestOutputHelper _output;
     private INetwork? _testNetwork;
     private IContainer? _mqttContainer;
     private IContainer? _snapcastServerContainer;
@@ -29,27 +28,32 @@ public class TestcontainersFixture : IAsyncLifetime
     public int SnapcastJsonRpcPort { get; private set; }
     public int SnapcastHttpPort { get; private set; }
 
-    public TestcontainersFixture(ITestOutputHelper output)
-    {
-        _output = output;
-    }
+    public TestcontainersFixture() { }
 
     public async Task InitializeAsync()
     {
-        _output.WriteLine("🚀 Starting integration test fixture initialization...");
+        Console.WriteLine("🚀 Starting integration test fixture initialization...");
 
         try
         {
+            Console.WriteLine("📡 Step 1: Creating test network...");
             await CreateTestNetworkAsync();
+
+            Console.WriteLine("📡 Step 2: Starting MQTT broker...");
             await StartMqttBrokerAsync();
+
+            Console.WriteLine("📡 Step 3: Starting Snapcast server...");
             await StartSnapcastServerAsync();
+
+            Console.WriteLine("📡 Step 4: Starting Snapcast clients...");
             await StartSnapcastClientsAsync();
 
-            _output.WriteLine("✅ Integration test fixture initialized successfully");
+            Console.WriteLine("✅ Integration test fixture initialized successfully");
         }
         catch (Exception ex)
         {
-            _output.WriteLine($"❌ Failed to initialize test fixture: {ex.Message}");
+            Console.WriteLine($"❌ Failed to initialize test fixture: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
             throw;
         }
     }
@@ -57,17 +61,17 @@ public class TestcontainersFixture : IAsyncLifetime
     private async Task CreateTestNetworkAsync()
     {
         _testNetwork = new NetworkBuilder()
-            .WithName($"snapdog-test-{Guid.NewGuid():N}"[..12])
+            .WithName($"snapdog-test-{Guid.NewGuid():N}")
             .WithDriver(NetworkDriver.Bridge)
             .Build();
 
         await _testNetwork.CreateAsync();
-        _output.WriteLine("✅ Test network created");
+        Console.WriteLine("✅ Test network created");
     }
 
     private async Task StartMqttBrokerAsync()
     {
-        _output.WriteLine("🐳 Starting MQTT broker container...");
+        Console.WriteLine("🐳 Starting MQTT broker container...");
 
         const int containerMqttPort = 1883;
 
@@ -96,19 +100,25 @@ public class TestcontainersFixture : IAsyncLifetime
             .Build();
 
         await _mqttContainer.StartAsync();
-        _output.WriteLine($"✅ MQTT broker started at {MqttHost}:{MqttPort}");
+        Console.WriteLine($"✅ MQTT broker started at {MqttHost}:{MqttPort}");
     }
 
     private async Task StartSnapcastServerAsync()
     {
-        _output.WriteLine("🐳 Starting Snapcast server container...");
+        Console.WriteLine("🐳 Starting Snapcast server container...");
 
         const int jsonRpcPort = 1705;
         const int httpPort = 1780;
 
+        Console.WriteLine($"📡 Configuring Snapcast server with ports {jsonRpcPort} (JSON-RPC) and {httpPort} (HTTP)");
+
+        // TODO: Use custom image once build issues are resolved
+        // For now, use public image to unblock testing
+        // _snapcastServerImage = await BuildSnapcastServerImageAsync();
+
         _snapcastServerContainer = new ContainerBuilder()
-            .WithImage("badaix/snapserver:latest")
-            .WithName($"snapcast-server-{Guid.NewGuid():N}"[..8])
+            .WithImage("saiyato/snapserver:latest") // Using public image temporarily
+            .WithName($"snapcast-server-{Guid.NewGuid():N}")
             .WithNetwork(_testNetwork!)
             .WithNetworkAliases("snapcast-server")
             .WithPortBinding(0, jsonRpcPort)
@@ -118,33 +128,51 @@ public class TestcontainersFixture : IAsyncLifetime
                 "--http.enabled=true",
                 $"--http.port={httpPort}",
                 $"--tcp.port={jsonRpcPort}",
-                "--source=pipe:///tmp/snapfifo?name=default"
+                // Configure multiple streams for zone testing
+                "--source=pipe:///tmp/zone1.fifo?name=Zone1",
+                "--source=pipe:///tmp/zone2.fifo?name=Zone2",
+                "--source=pipe:///tmp/default.fifo?name=default"
             )
-            .WithWaitStrategy(
-                Wait.ForUnixContainer().UntilPortIsAvailable(jsonRpcPort).UntilMessageIsLogged("Server listening")
-            )
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(jsonRpcPort).UntilPortIsAvailable(httpPort))
             .WithStartupCallback(
                 (container, ct) =>
                 {
                     SnapcastJsonRpcPort = container.GetMappedPublicPort(jsonRpcPort);
                     SnapcastHttpPort = container.GetMappedPublicPort(httpPort);
+                    Console.WriteLine(
+                        $"📡 Snapcast server ports mapped: {SnapcastJsonRpcPort} (JSON-RPC), {SnapcastHttpPort} (HTTP)"
+                    );
                     return Task.CompletedTask;
                 }
             )
             .Build();
 
+        Console.WriteLine("📡 Starting Snapcast server container...");
         await _snapcastServerContainer.StartAsync();
-        _output.WriteLine(
+        Console.WriteLine(
             $"✅ Snapcast server started at {SnapcastHost}:{SnapcastJsonRpcPort} (JSON-RPC), {SnapcastHost}:{SnapcastHttpPort} (HTTP)"
         );
+        Console.WriteLine("   Configured streams: Zone1, Zone2, default");
+    }
+
+    private async Task<IImage> BuildSnapcastServerImageAsync()
+    {
+        var image = new ImageFromDockerfileBuilder()
+            .WithDockerfileDirectory(CommonDirectoryPath.GetSolutionDirectory(), "devcontainer/snapcast-server")
+            .WithDockerfile("Dockerfile")
+            .WithName($"snapdog-snapcast-server-test:{Guid.NewGuid():N}"[..12])
+            .Build();
+
+        await image.CreateAsync();
+        return image;
     }
 
     private async Task StartSnapcastClientsAsync()
     {
-        _output.WriteLine("🐳 Starting Snapcast client containers...");
+        Console.WriteLine("🐳 Starting Snapcast client containers...");
 
-        // Build custom Snapcast client image if it doesn't exist
-        var clientImage = await BuildSnapcastClientImageAsync();
+        // Use public snapcast client image instead of building custom one
+        var clientImage = "saiyato/snapclient:latest";
 
         var clientConfigs = new[]
         {
@@ -164,42 +192,24 @@ public class TestcontainersFixture : IAsyncLifetime
         _kitchenClientContainer = clients[1];
         _bedroomClientContainer = clients[2];
 
-        _output.WriteLine("✅ Snapcast clients started: living-room, kitchen, bedroom");
-        _output.WriteLine("   Living Room MAC: 02:42:ac:11:00:10");
-        _output.WriteLine("   Kitchen MAC: 02:42:ac:11:00:11");
-        _output.WriteLine("   Bedroom MAC: 02:42:ac:11:00:12");
-        _output.WriteLine("✅ Snapcast clients should now be connected to server");
+        Console.WriteLine("✅ Snapcast clients started: living-room, kitchen, bedroom");
+        Console.WriteLine("   Living Room MAC: 02:42:ac:11:00:10");
+        Console.WriteLine("   Kitchen MAC: 02:42:ac:11:00:11");
+        Console.WriteLine("   Bedroom MAC: 02:42:ac:11:00:12");
+        Console.WriteLine("✅ Snapcast clients should now be connected to server");
     }
 
-    private async Task<IImage> BuildSnapcastClientImageAsync()
-    {
-        var dockerfile =
-            @"
-FROM badaix/snapclient:latest
-RUN apt-get update && apt-get install -y alsa-utils && rm -rf /var/lib/apt/lists/*
-ENTRYPOINT [""snapclient""]
-";
-
-        var image = new ImageFromDockerfileBuilder()
-            .WithName("snapdog-snapcast-client:test")
-            .WithDockerfile(dockerfile)
-            .Build();
-
-        await image.CreateAsync();
-        return image;
-    }
-
-    private async Task<IContainer> StartSnapcastClientAsync(IImage clientImage, string clientId, string macAddress)
+    private async Task<IContainer> StartSnapcastClientAsync(string clientImage, string clientId, string macAddress)
     {
         var networkName = _testNetwork!.Name;
 
         var container = new ContainerBuilder()
             .WithImage(clientImage)
-            .WithName($"snapcast-client-{clientId}-{Guid.NewGuid():N}"[..8])
+            .WithName($"snapcast-client-{clientId}-{Guid.NewGuid():N}")
             .WithNetwork(_testNetwork!)
             .WithNetworkAliases($"snapcast-client-{clientId}")
             .WithEnvironment("FIXED_MAC_ADDRESS", macAddress)
-            .WithCommand("--host", "snapcast-server", "--port", "1704", "--hostID", clientId)
+            .WithCommand("--host", "snapcast-server", "--port", "1705", "--hostID", clientId)
             .WithCreateParameterModifier(parameters =>
             {
                 // Set static MAC address on container network interface
@@ -219,7 +229,7 @@ ENTRYPOINT [""snapclient""]
 
     public async Task DisposeAsync()
     {
-        _output.WriteLine("🧹 Cleaning up integration test fixture...");
+        Console.WriteLine("🧹 Cleaning up integration test fixture...");
 
         var disposeTasks = new List<Task>();
 
@@ -237,6 +247,6 @@ ENTRYPOINT [""snapclient""]
             disposeTasks.Add(_testNetwork.DisposeAsync().AsTask());
 
         await Task.WhenAll(disposeTasks);
-        _output.WriteLine("✅ Integration test fixture disposed successfully");
+        Console.WriteLine("✅ Integration test fixture disposed successfully");
     }
 }

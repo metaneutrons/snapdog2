@@ -261,6 +261,7 @@ public class IntegrationTestFixture : IAsyncLifetime
         // Use dynamic ports to avoid conflicts
         this._snapcastContainer = new ContainerBuilder()
             .WithImage("saiyato/snapserver:latest")
+            .WithName($"snapcast-integration-{Guid.NewGuid():N}") // Use full GUID for uniqueness
             .WithPortBinding(containerJsonRpcPort, true) // Use dynamic port binding
             .WithPortBinding(containerHttpPort, true)
             .WithEnvironment("SNAPCAST_LOG_LEVEL", "info")

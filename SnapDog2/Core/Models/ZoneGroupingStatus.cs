@@ -179,3 +179,100 @@ public record ZoneGroupingReconciliationResult
     /// </summary>
     public TimeSpan Duration { get; init; }
 }
+
+/// <summary>
+/// Represents the result of a client name synchronization operation.
+/// </summary>
+public record ClientNameSyncResult
+{
+    /// <summary>
+    /// When the synchronization started.
+    /// </summary>
+    public DateTime StartTime { get; init; }
+
+    /// <summary>
+    /// When the synchronization completed.
+    /// </summary>
+    public DateTime EndTime { get; init; }
+
+    /// <summary>
+    /// Duration of the synchronization operation.
+    /// </summary>
+    public TimeSpan Duration { get; init; }
+
+    /// <summary>
+    /// Total number of clients processed.
+    /// </summary>
+    public int TotalClients { get; set; }
+
+    /// <summary>
+    /// Number of clients that were updated with new names.
+    /// </summary>
+    public int UpdatedClients { get; set; }
+
+    /// <summary>
+    /// Number of clients that already had the correct name.
+    /// </summary>
+    public int AlreadyCorrect { get; set; }
+
+    /// <summary>
+    /// Number of clients that were skipped (not found in Snapcast).
+    /// </summary>
+    public int SkippedClients { get; set; }
+
+    /// <summary>
+    /// Number of clients that failed to update.
+    /// </summary>
+    public int FailedClients { get; set; }
+
+    /// <summary>
+    /// Details of all client name updates that were performed.
+    /// </summary>
+    public List<ClientNameUpdate> UpdatedClientNames { get; init; } = new();
+
+    /// <summary>
+    /// Whether the synchronization was successful overall.
+    /// </summary>
+    public bool IsSuccessful => FailedClients == 0;
+
+    /// <summary>
+    /// Summary of actions taken during synchronization.
+    /// </summary>
+    public List<string> Actions
+    {
+        get
+        {
+            var actions = new List<string>();
+            if (UpdatedClients > 0)
+                actions.Add($"Updated {UpdatedClients} client names");
+            if (AlreadyCorrect > 0)
+                actions.Add($"{AlreadyCorrect} clients already had correct names");
+            if (SkippedClients > 0)
+                actions.Add($"Skipped {SkippedClients} clients (not found)");
+            if (FailedClients > 0)
+                actions.Add($"Failed to update {FailedClients} clients");
+            return actions;
+        }
+    }
+}
+
+/// <summary>
+/// Represents a single client name update operation.
+/// </summary>
+public record ClientNameUpdate
+{
+    /// <summary>
+    /// The Snapcast client ID.
+    /// </summary>
+    public required string SnapcastId { get; init; }
+
+    /// <summary>
+    /// The old name (usually MAC address or empty).
+    /// </summary>
+    public required string OldName { get; init; }
+
+    /// <summary>
+    /// The new friendly name from SnapDog configuration.
+    /// </summary>
+    public required string NewName { get; init; }
+}

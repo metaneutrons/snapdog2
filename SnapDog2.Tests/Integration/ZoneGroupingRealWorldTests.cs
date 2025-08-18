@@ -184,25 +184,37 @@ public class ZoneGroupingRealWorldTests : IClassFixture<TestcontainersFixture>, 
 
     [Fact]
     [TestPriority(5)]
-    public async Task Scenario_05_RecoveryAPI_ShouldFixBrokenGrouping()
+    public async Task Scenario_05_AutomaticRecovery_ShouldFixBrokenGroupingAutomatically()
     {
         // Arrange
-        _output.WriteLine("🧪 Testing recovery via SnapDog API");
+        _output.WriteLine("🧪 Testing automatic recovery - no manual intervention needed");
 
-        // Act - Fix Zone 1 grouping
-        var recoveryResponse = await _output.MeasureAsync(
-            "Zone 1 recovery",
-            async () =>
+        // Wait for automatic correction (background service monitors every 30 seconds)
+        _output.WriteLine("⏳ Waiting for automatic correction...");
+
+        var corrected = false;
+        var maxWaitTime = TimeSpan.FromSeconds(45);
+        var startTime = DateTime.UtcNow;
+
+        while (DateTime.UtcNow - startTime < maxWaitTime && !corrected)
+        {
+            await Task.Delay(5000); // Check every 5 seconds
+
+            var validationResponse = await _httpClient.GetAsync("/api/zone-grouping/validate");
+            var validationResult = await validationResponse.Content.ReadAsStringAsync();
+            var validation = JsonSerializer.Deserialize<JsonElement>(validationResult);
+
+            if (validation.GetProperty("status").GetString() == "valid")
             {
-                return await _httpClient.PostAsync("/api/zone-grouping/zones/1/synchronize", null);
+                corrected = true;
+                _output.WriteLine(
+                    $"✅ Automatic correction detected after {(DateTime.UtcNow - startTime).TotalSeconds:F1} seconds"
+                );
             }
-        );
+        }
 
-        // Assert - Recovery should succeed
-        recoveryResponse.Should().BeSuccessful();
-        var recoveryResult = await recoveryResponse.Content.ReadAsStringAsync();
-        var recovery = JsonSerializer.Deserialize<JsonElement>(recoveryResult);
-        recovery.GetProperty("message").GetString().Should().Contain("synchronized successfully");
+        // Assert - Should be automatically corrected
+        corrected.Should().BeTrue("Background service should automatically correct grouping issues");
 
         // Verify recovery
         var recoveredGroups = await GetSnapcastGroupsAsync();
@@ -219,15 +231,15 @@ public class ZoneGroupingRealWorldTests : IClassFixture<TestcontainersFixture>, 
         zone2Group.Should().NotBeNull();
         zone2Group!.Clients.Should().HaveCount(1);
 
-        _output.WriteLine("✅ Recovery API working perfectly");
+        _output.WriteLine("✅ Automatic recovery working perfectly");
     }
 
     [Fact]
     [TestPriority(6)]
-    public async Task Scenario_06_FullReconciliation_ShouldHandleComplexBrokenState()
+    public async Task Scenario_06_ComplexBrokenState_ShouldHandleAutomatically()
     {
         // Arrange
-        _output.WriteLine("🧪 Testing full reconciliation with complex broken state");
+        _output.WriteLine("🧪 Testing automatic handling of complex broken state");
 
         // Create complex broken state - all clients in one group
         var groups = await GetSnapcastGroupsAsync();
@@ -248,23 +260,34 @@ public class ZoneGroupingRealWorldTests : IClassFixture<TestcontainersFixture>, 
         var allInOneGroup = brokenGroups.FirstOrDefault(g => g.Clients.Count == 3);
         allInOneGroup.Should().NotBeNull();
 
-        // Act - Full reconciliation
-        var reconciliationResponse = await _output.MeasureAsync(
-            "Full reconciliation",
-            async () =>
+        _output.WriteLine("🔧 Created complex broken state - all clients in one group");
+
+        // Act - Wait for automatic correction
+        _output.WriteLine("⏳ Waiting for automatic correction of complex state...");
+
+        var corrected = false;
+        var maxWaitTime = TimeSpan.FromSeconds(60); // Allow more time for complex correction
+        var startTime = DateTime.UtcNow;
+
+        while (DateTime.UtcNow - startTime < maxWaitTime && !corrected)
+        {
+            await Task.Delay(5000);
+
+            var validationResponse = await _httpClient.GetAsync("/api/zone-grouping/validate");
+            var validationResult = await validationResponse.Content.ReadAsStringAsync();
+            var validation = JsonSerializer.Deserialize<JsonElement>(validationResult);
+
+            if (validation.GetProperty("status").GetString() == "valid")
             {
-                return await _httpClient.PostAsync("/api/zone-grouping/reconcile", null);
+                corrected = true;
+                _output.WriteLine(
+                    $"✅ Complex state automatically corrected after {(DateTime.UtcNow - startTime).TotalSeconds:F1} seconds"
+                );
             }
-        );
+        }
 
-        // Assert - Reconciliation should succeed
-        reconciliationResponse.Should().BeSuccessful();
-        var reconciliationResult =
-            await reconciliationResponse.Content.ReadFromJsonAsync<ZoneGroupingReconciliationResult>();
-
-        reconciliationResult.Should().NotBeNull();
-        reconciliationResult!.ZonesReconciled.Should().Be(2);
-        reconciliationResult.Errors.Should().BeEmpty();
+        // Assert - Should be automatically corrected
+        corrected.Should().BeTrue("Background service should automatically correct even complex broken states");
 
         // Verify final state
         var finalGroups = await GetSnapcastGroupsAsync();
@@ -280,7 +303,7 @@ public class ZoneGroupingRealWorldTests : IClassFixture<TestcontainersFixture>, 
         finalZone1Group.Should().NotBeNull();
         finalZone2Group.Should().NotBeNull();
 
-        _output.WriteLine("✅ Full reconciliation working perfectly");
+        _output.WriteLine("✅ Complex broken state handled automatically");
     }
 
     [Fact]
@@ -327,30 +350,26 @@ public class ZoneGroupingRealWorldTests : IClassFixture<TestcontainersFixture>, 
     public async Task Scenario_08_PerformanceUnderLoad_ShouldHandleMultipleOperations()
     {
         // Arrange
-        _output.WriteLine("🧪 Testing performance under load with multiple operations");
+        _output.WriteLine("🧪 Testing performance under load with multiple monitoring operations");
 
         var tasks = new List<Task>();
 
-        // Act - Execute multiple operations concurrently
+        // Act - Execute multiple monitoring operations concurrently
         await _output.MeasureAsync(
-            "Concurrent operations",
+            "Concurrent monitoring operations",
             async () =>
             {
                 // Multiple status checks
-                for (int i = 0; i < 5; i++)
+                for (int i = 0; i < 10; i++)
                 {
                     tasks.Add(_httpClient.GetAsync("/api/zone-grouping/status"));
                 }
 
                 // Multiple validation checks
-                for (int i = 0; i < 3; i++)
+                for (int i = 0; i < 10; i++)
                 {
                     tasks.Add(_httpClient.GetAsync("/api/zone-grouping/validate"));
                 }
-
-                // Zone synchronizations
-                tasks.Add(_httpClient.PostAsync("/api/zone-grouping/zones/1/synchronize", null));
-                tasks.Add(_httpClient.PostAsync("/api/zone-grouping/zones/2/synchronize", null));
 
                 await Task.WhenAll(tasks);
             }
@@ -371,7 +390,7 @@ public class ZoneGroupingRealWorldTests : IClassFixture<TestcontainersFixture>, 
         finalState.Should().NotBeNull();
         finalState!.OverallHealth.Should().Be(ZoneGroupingHealth.Healthy);
 
-        _output.WriteLine("✅ Performance under load test passed");
+        _output.WriteLine("✅ Performance under monitoring load test passed");
     }
 
     #region Helper Methods

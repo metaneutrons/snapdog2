@@ -6,99 +6,149 @@ using SnapDog2.Core.Abstractions;
 namespace SnapDog2.Services;
 
 /// <summary>
-/// Hosted service that ensures proper zone-based client grouping on application startup.
-/// Replaces the legacy ClientZoneInitializationService with enterprise-grade zone grouping functionality.
+/// Continuous background service for automatic zone-based client grouping.
+/// Monitors Snapcast server for client changes and maintains proper zone grouping automatically.
 /// </summary>
-public class ZoneGroupingHostedService : IHostedService
+public class ZoneGroupingBackgroundService : BackgroundService
 {
-    private readonly ILogger<ZoneGroupingHostedService> _logger;
+    private readonly ILogger<ZoneGroupingBackgroundService> _logger;
     private readonly IServiceProvider _serviceProvider;
 
-    public ZoneGroupingHostedService(ILogger<ZoneGroupingHostedService> logger, IServiceProvider serviceProvider)
+    public ZoneGroupingBackgroundService(
+        ILogger<ZoneGroupingBackgroundService> logger,
+        IServiceProvider serviceProvider
+    )
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("🎵 Starting zone-based client grouping initialization");
+        _logger.LogInformation("🎵 Starting continuous zone grouping service");
+
+        // Initial startup reconciliation
+        await PerformInitialReconciliation(stoppingToken);
+
+        // Continuous monitoring loop
+        await MonitorAndMaintainGrouping(stoppingToken);
+    }
+
+    private async Task PerformInitialReconciliation(CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("🔧 Performing initial zone grouping reconciliation");
 
         try
         {
             // Wait for Snapcast service to be ready
             await WaitForSnapcastServiceAsync(cancellationToken);
 
-            // Perform full zone grouping reconciliation
             using var scope = _serviceProvider.CreateScope();
             var zoneGroupingService = scope.ServiceProvider.GetRequiredService<IZoneGroupingService>();
 
-            _logger.LogInformation("🔧 Performing initial zone grouping reconciliation");
+            // Perform full reconciliation
             var reconciliationResult = await zoneGroupingService.ReconcileAllZoneGroupingsAsync(cancellationToken);
 
             if (reconciliationResult.IsSuccess)
             {
                 var result = reconciliationResult.Value!;
                 _logger.LogInformation(
-                    "✅ Zone grouping initialization completed successfully: "
-                        + "{ZonesReconciled} zones reconciled, {ClientsMoved} clients moved in {Duration}ms",
+                    "✅ Initial reconciliation completed: {ZonesReconciled} zones, {ClientsMoved} clients moved in {Duration}ms",
                     result.ZonesReconciled,
                     result.ClientsMoved,
                     result.Duration.TotalMilliseconds
                 );
 
-                if (result.Actions.Any())
+                // Synchronize client names
+                var nameSync = await zoneGroupingService.SynchronizeClientNamesAsync(cancellationToken);
+                if (nameSync.IsSuccess)
                 {
-                    _logger.LogInformation("📋 Actions taken: {Actions}", string.Join(", ", result.Actions));
-                }
-
-                if (result.Errors.Any())
-                {
-                    _logger.LogWarning("⚠️ Errors during reconciliation: {Errors}", string.Join(", ", result.Errors));
+                    var nameSyncResult = nameSync.Value!;
+                    _logger.LogInformation(
+                        "✅ Client names synchronized: {Updated} updated, {AlreadyCorrect} already correct",
+                        nameSyncResult.UpdatedClients,
+                        nameSyncResult.AlreadyCorrect
+                    );
                 }
             }
             else
             {
-                _logger.LogError("❌ Zone grouping reconciliation failed: {Error}", reconciliationResult.ErrorMessage);
+                _logger.LogError("❌ Initial reconciliation failed: {Error}", reconciliationResult.ErrorMessage);
             }
-
-            // Validate final grouping state
-            _logger.LogInformation("🔍 Validating final zone grouping consistency");
-            var validationResult = await zoneGroupingService.ValidateGroupingConsistencyAsync(cancellationToken);
-
-            if (validationResult.IsSuccess)
-            {
-                _logger.LogInformation("✅ Zone grouping consistency validation passed");
-            }
-            else
-            {
-                _logger.LogWarning(
-                    "⚠️ Zone grouping consistency issues detected: {Issues}",
-                    validationResult.ErrorMessage
-                );
-            }
-
-            _logger.LogInformation("🎉 Zone grouping hosted service startup completed");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "💥 Critical error during zone grouping initialization");
-            // Don't throw - this is not critical for application startup, but log as error
+            _logger.LogError(ex, "💥 Error during initial reconciliation");
         }
     }
 
-    public Task StopAsync(CancellationToken cancellationToken)
+    private async Task MonitorAndMaintainGrouping(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("🛑 Zone grouping hosted service stopping");
-        return Task.CompletedTask;
+        _logger.LogInformation("👁️ Starting continuous zone grouping monitoring");
+
+        const int monitoringIntervalMs = 30000; // 30 seconds - reasonable for automatic maintenance
+
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            try
+            {
+                await Task.Delay(monitoringIntervalMs, cancellationToken);
+
+                using var scope = _serviceProvider.CreateScope();
+                var zoneGroupingService = scope.ServiceProvider.GetRequiredService<IZoneGroupingService>();
+
+                // Quick validation check
+                var validationResult = await zoneGroupingService.ValidateGroupingConsistencyAsync(cancellationToken);
+
+                if (!validationResult.IsSuccess)
+                {
+                    _logger.LogInformation("🔄 Detected grouping inconsistency, performing automatic correction");
+
+                    // Perform reconciliation to fix issues
+                    var reconciliationResult = await zoneGroupingService.ReconcileAllZoneGroupingsAsync(
+                        cancellationToken
+                    );
+
+                    if (reconciliationResult.IsSuccess)
+                    {
+                        var result = reconciliationResult.Value!;
+                        if (result.ClientsMoved > 0)
+                        {
+                            _logger.LogInformation(
+                                "✅ Automatic correction completed: {ClientsMoved} clients moved",
+                                result.ClientsMoved
+                            );
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning(
+                            "⚠️ Automatic correction failed: {Error}",
+                            reconciliationResult.ErrorMessage
+                        );
+                    }
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // Expected when service is stopping
+                break;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "💥 Error during continuous monitoring, will retry");
+            }
+        }
+
+        _logger.LogInformation("🛑 Zone grouping monitoring stopped");
     }
 
     private async Task WaitForSnapcastServiceAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("⏳ Waiting for Snapcast service to be ready...");
+        _logger.LogInformation("⏳ Waiting for Snapcast service...");
 
-        const int maxWaitTimeMs = 60000; // 60 seconds - increased for container startup
-        const int checkIntervalMs = 2000; // 2 seconds - increased interval
+        const int maxWaitTimeMs = 30000; // 30 seconds - reduced timeout
+        const int checkIntervalMs = 1000; // 1 second
         var elapsed = 0;
 
         while (elapsed < maxWaitTimeMs && !cancellationToken.IsCancellationRequested)
@@ -108,31 +158,22 @@ public class ZoneGroupingHostedService : IHostedService
                 using var scope = _serviceProvider.CreateScope();
                 var snapcastService = scope.ServiceProvider.GetRequiredService<ISnapcastService>();
 
-                // Try to get server status to check if service is ready
                 var statusResult = await snapcastService.GetServerStatusAsync(cancellationToken);
                 if (statusResult.IsSuccess)
                 {
-                    _logger.LogInformation("🔄 Snapcast service ready, proceeding with zone grouping");
+                    _logger.LogInformation("🔄 Snapcast service ready");
                     return;
                 }
-
-                _logger.LogDebug("Snapcast service not ready yet: {Error}", statusResult.ErrorMessage);
             }
             catch (Exception ex)
             {
-                _logger.LogDebug(ex, "Snapcast service not available yet, retrying in {Interval}ms", checkIntervalMs);
+                _logger.LogDebug(ex, "Snapcast service not ready, retrying...");
             }
 
             await Task.Delay(checkIntervalMs, cancellationToken);
             elapsed += checkIntervalMs;
         }
 
-        if (elapsed >= maxWaitTimeMs)
-        {
-            _logger.LogWarning(
-                "⏱️ Timeout waiting for Snapcast service to be ready after {TimeoutMs}ms",
-                maxWaitTimeMs
-            );
-        }
+        _logger.LogWarning("⏱️ Snapcast service not ready after {TimeoutMs}ms, proceeding anyway", maxWaitTimeMs);
     }
 }

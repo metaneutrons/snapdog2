@@ -467,6 +467,148 @@ public class ZoneGroupingService : IZoneGroupingService
         }
     }
 
+    /// <summary>
+    /// Synchronizes client names between SnapDog configuration and Snapcast server.
+    /// Sets friendly names from SnapDog config to replace MAC address-based names in Snapcast.
+    /// </summary>
+    public async Task<Result<ClientNameSyncResult>> SynchronizeClientNamesAsync(
+        CancellationToken cancellationToken = default
+    )
+    {
+        using var activity = ActivitySource.StartActivity("SynchronizeClientNames");
+        _logger.LogInformation("🏷️ Starting client name synchronization");
+
+        var startTime = DateTime.UtcNow;
+        var syncResult = new ClientNameSyncResult { StartTime = startTime };
+
+        try
+        {
+            // Get all clients from SnapDog configuration
+            var allClients = await _clientManager.GetAllClientsAsync(cancellationToken);
+            if (!allClients.IsSuccess)
+            {
+                return Result<ClientNameSyncResult>.Failure(
+                    $"Failed to get clients: {allClients.ErrorMessage ?? "Unknown error"}"
+                );
+            }
+
+            // Get current Snapcast server status
+            var serverStatus = await _snapcastService.GetServerStatusAsync(cancellationToken);
+            if (!serverStatus.IsSuccess)
+            {
+                return Result<ClientNameSyncResult>.Failure(
+                    $"Failed to get server status: {serverStatus.ErrorMessage ?? "Unknown error"}"
+                );
+            }
+
+            var clientsToSync =
+                allClients.Value?.Where(c => !string.IsNullOrEmpty(c.SnapcastId)).ToList() ?? new List<ClientState>();
+            syncResult.TotalClients = clientsToSync.Count;
+
+            foreach (var client in clientsToSync)
+            {
+                try
+                {
+                    // Find the corresponding Snapcast client
+                    var snapcastClient = serverStatus
+                        .Value!.Groups?.SelectMany(g => g.Clients ?? Enumerable.Empty<SnapcastClientInfo>())
+                        .FirstOrDefault(sc => sc.Id == client.SnapcastId);
+
+                    if (snapcastClient == null)
+                    {
+                        _logger.LogWarning(
+                            "⚠️ Snapcast client {SnapcastId} not found for SnapDog client {ClientName}",
+                            client.SnapcastId,
+                            client.Name
+                        );
+                        syncResult.SkippedClients++;
+                        continue;
+                    }
+
+                    // Check if name needs updating
+                    var currentName = snapcastClient.Name ?? "";
+                    var desiredName = client.Name;
+
+                    if (currentName == desiredName)
+                    {
+                        _logger.LogDebug(
+                            "✅ Client {SnapcastId} already has correct name: {Name}",
+                            client.SnapcastId,
+                            desiredName
+                        );
+                        syncResult.AlreadyCorrect++;
+                        continue;
+                    }
+
+                    // Update the client name
+                    _logger.LogInformation(
+                        "🏷️ Setting client {SnapcastId} name from '{CurrentName}' to '{DesiredName}'",
+                        client.SnapcastId,
+                        currentName,
+                        desiredName
+                    );
+
+                    var setNameResult = await _snapcastService.SetClientNameAsync(
+                        client.SnapcastId,
+                        desiredName,
+                        cancellationToken
+                    );
+
+                    if (setNameResult.IsSuccess)
+                    {
+                        syncResult.UpdatedClients++;
+                        syncResult.UpdatedClientNames.Add(
+                            new ClientNameUpdate
+                            {
+                                SnapcastId = client.SnapcastId,
+                                OldName = currentName,
+                                NewName = desiredName,
+                            }
+                        );
+                        _logger.LogInformation(
+                            "✅ Successfully updated client {SnapcastId} name to '{Name}'",
+                            client.SnapcastId,
+                            desiredName
+                        );
+                    }
+                    else
+                    {
+                        syncResult.FailedClients++;
+                        _logger.LogError(
+                            "❌ Failed to update client {SnapcastId} name: {Error}",
+                            client.SnapcastId,
+                            setNameResult.ErrorMessage
+                        );
+                    }
+                }
+                catch (Exception ex)
+                {
+                    syncResult.FailedClients++;
+                    _logger.LogError(ex, "❌ Error synchronizing name for client {SnapcastId}", client.SnapcastId);
+                }
+            }
+
+            var endTime = DateTime.UtcNow;
+            var finalResult = syncResult with { EndTime = endTime, Duration = endTime - startTime };
+
+            _logger.LogInformation(
+                "🏷️ Client name synchronization completed: {Updated} updated, {AlreadyCorrect} already correct, {Skipped} skipped, {Failed} failed in {Duration}ms",
+                finalResult.UpdatedClients,
+                finalResult.AlreadyCorrect,
+                finalResult.SkippedClients,
+                finalResult.FailedClients,
+                finalResult.Duration.TotalMilliseconds
+            );
+
+            return Result<ClientNameSyncResult>.Success(finalResult);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ Client name synchronization failed");
+            return Result<ClientNameSyncResult>.Failure($"Client name synchronization failed: {ex.Message}");
+        }
+    }
+
     #region Private Helper Methods
 
     private async Task<Result<SnapcastGroupInfo>> FindOrCreateZoneGroupAsync(

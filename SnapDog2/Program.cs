@@ -355,8 +355,8 @@ static WebApplication CreateWebApplication(string[] args)
         // Add hosted service to initialize integration services on startup
         builder.Services.AddHostedService<SnapDog2.Worker.Services.IntegrationServicesHostedService>();
 
-        // Add hosted service for enterprise-grade zone-based client grouping
-        builder.Services.AddHostedService<SnapDog2.Services.ZoneGroupingHostedService>();
+        // Add continuous background service for automatic zone grouping
+        builder.Services.AddHostedService<SnapDog2.Services.ZoneGroupingBackgroundService>();
 
         // Add hosted service to publish initial state after integration services are initialized
         // Skip in test environment to prevent hanging issues
