@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using FluentAssertions;
+using SnapDog2.Tests.Fixtures.Integration;
 using SnapDog2.Tests.Integration.Fixtures;
 using Xunit;
 using Xunit.Abstractions;

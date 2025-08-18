@@ -1,6 +1,7 @@
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Configurations;
 using DotNet.Testcontainers.Containers;
+using SnapDog2.Tests.Fixtures.Integration;
 using Xunit;
 
 namespace SnapDog2.Tests.Integration.Fixtures;

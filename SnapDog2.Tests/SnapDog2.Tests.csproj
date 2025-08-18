@@ -8,23 +8,61 @@
     <FileVersion>0.1.0.0</FileVersion>
     <InformationalVersion>0.1.0-beta.1+Branch.develop.Sha.01bc21baa47be00212511efc5b773aa2df642b0a</InformationalVersion>
     <Version>0.1.0-beta.1</Version>
+    <!-- Enterprise Test Configuration -->
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <!-- Performance Optimization for Tests -->
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
   </PropertyGroup>
+  <!-- Core Testing Packages -->
   <ItemGroup>
     <PackageReference Include="coverlet.collector" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio" />
+    <!-- Enterprise Testing Packages -->
     <PackageReference Include="FluentAssertions" />
     <PackageReference Include="Moq" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     <PackageReference Include="Testcontainers" />
+    <!-- Integration Dependencies -->
     <PackageReference Include="MQTTnet" />
     <PackageReference Include="Knx.Falcon.Sdk" />
   </ItemGroup>
+  <!-- Global Test Usings -->
   <ItemGroup>
     <Using Include="Xunit" />
+    <Using Include="FluentAssertions" />
+    <Using Include="Moq" />
+    <Using Include="System.Threading.Tasks" />
+    <Using Include="Microsoft.Extensions.DependencyInjection" />
+    <Using Include="Microsoft.Extensions.Configuration" />
+    <Using Include="Xunit.Abstractions" />
+    <Using Include="SnapDog2.Tests.Fixtures.Shared" />
+    <Using Include="SnapDog2.Tests.Helpers.Extensions" />
   </ItemGroup>
+  <!-- Project References -->
   <ItemGroup>
     <ProjectReference Include="../SnapDog2/SnapDog2.csproj" />
+  </ItemGroup>
+  <!-- Test Data Files -->
+  <ItemGroup>
+    <None Update="TestData/**/*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Integration/Fixtures/mosquitto-no-auth.conf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <!-- Test Categories for Filtering -->
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadata">
+      <_Parameter1>TestCategories</_Parameter1>
+      <_Parameter2>Unit,Integration,Container,Performance,Workflow,Smoke,Regression</_Parameter2>
+    </AssemblyAttribute>
   </ItemGroup>
 </Project>

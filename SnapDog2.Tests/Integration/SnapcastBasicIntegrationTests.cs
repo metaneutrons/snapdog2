@@ -1,4 +1,5 @@
 using FluentAssertions;
+using SnapDog2.Tests.Fixtures.Integration;
 using Xunit;
 using Xunit.Abstractions;
 

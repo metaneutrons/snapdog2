@@ -1,3 +1,5 @@
+using SnapDog2.Tests.Fixtures.Integration;
+
 namespace SnapDog2.Tests.Integration.Api;
 
 using System.Net;

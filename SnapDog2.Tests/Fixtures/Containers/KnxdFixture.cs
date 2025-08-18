@@ -4,8 +4,9 @@ using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Configurations;
 using DotNet.Testcontainers.Containers;
 using Microsoft.Extensions.Logging;
+using SnapDog2.Tests.Fixtures.Integration;
 
-namespace SnapDog2.Tests.Integration.Fixtures;
+namespace SnapDog2.Tests.Fixtures.Containers;
 
 /// <summary>
 /// KNX daemon test fixture with proper UDP support for KNX/IP protocol.

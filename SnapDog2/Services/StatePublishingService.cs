@@ -441,15 +441,9 @@ public partial class StatePublishingService(
                 cancellationToken
             );
 
-            await mediator.PublishAsync(
-                new ClientZoneAssignmentChangedNotification
-                {
-                    ClientIndex = clientIndex,
-                    ZoneIndex = clientState.ZoneIndex,
-                    PreviousZoneIndex = null, // No previous zone for initial state
-                },
-                cancellationToken
-            );
+            // Note: ClientZoneAssignmentChangedNotification is not published during initial state
+            // publishing to avoid conflicts with ClientZoneInitializationService. Zone assignment
+            // notifications should only be published when zones are actually changed by user actions.
 
             await mediator.PublishAsync(
                 new ClientConnectionChangedNotification

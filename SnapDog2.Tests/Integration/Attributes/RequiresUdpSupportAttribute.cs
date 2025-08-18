@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
+using SnapDog2.Tests.Fixtures.Integration;
 using Xunit;
 
 namespace SnapDog2.Tests.Integration.Attributes;

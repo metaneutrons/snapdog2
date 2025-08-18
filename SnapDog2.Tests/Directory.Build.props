@@ -1,0 +1,40 @@
+<Project>
+  <PropertyGroup>
+    <!-- Test Project Configuration -->
+    <IsTestProject>true</IsTestProject>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <!-- Code Coverage -->
+    <CollectCoverage>true</CollectCoverage>
+    <CoverletOutputFormat>cobertura,json,lcov,opencover</CoverletOutputFormat>
+    <CoverletOutput>$(OutputPath)coverage/</CoverletOutput>
+    <Threshold>80</Threshold>
+    <ThresholdType>line,branch,method</ThresholdType>
+    <ThresholdStat>minimum</ThresholdStat>
+    <!-- Test Execution -->
+    <VSTestLogger>trx;LogFileName=TestResults.trx</VSTestLogger>
+    <VSTestResultsDirectory>$(OutputPath)TestResults</VSTestResultsDirectory>
+    <!-- Performance -->
+    <DebugType>portable</DebugType>
+    <Optimize>false</Optimize>
+    <!-- Warnings -->
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+    <WarningsNotAsErrors>CS1998</WarningsNotAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Global Test Usings -->
+    <Using Include="Xunit" />
+    <Using Include="FluentAssertions" />
+    <Using Include="Moq" />
+    <Using Include="System.Threading.Tasks" />
+    <Using Include="Microsoft.Extensions.DependencyInjection" />
+    <Using Include="Xunit.Abstractions" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Test Categories for filtering -->
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadata">
+      <_Parameter1>TestCategories</_Parameter1>
+      <_Parameter2>Unit,Integration,Container,Performance,Workflow</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+</Project>

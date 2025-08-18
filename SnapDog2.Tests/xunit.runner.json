@@ -1,0 +1,20 @@
+{
+  "$schema": "https://xunit.net/schema/current/xunit.runner.schema.json",
+  "methodDisplay": "method",
+  "methodDisplayOptions": "all",
+  "parallelizeTestCollections": true,
+  "parallelizeAssembly": false,
+  "maxParallelThreads": 4,
+  "preEnumerateTheories": false,
+  "shadowCopy": false,
+  "stopOnFail": false,
+  "diagnosticMessages": false,
+  "internalDiagnosticMessages": false,
+  "longRunningTestSeconds": 60,
+  "reporters": [
+    {
+      "typeName": "Xunit.Runner.Reporters.VerboseReporter",
+      "assemblyName": "xunit.runner.utility"
+    }
+  ]
+}

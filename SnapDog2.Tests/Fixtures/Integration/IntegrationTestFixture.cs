@@ -26,10 +26,11 @@ using SnapDog2.Core.Models;
 using SnapDog2.Infrastructure.Integrations.Knx;
 using SnapDog2.Infrastructure.Integrations.Mqtt;
 using SnapDog2.Server.Features.Zones.Commands.Volume;
+using SnapDog2.Tests.Fixtures.Containers;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace SnapDog2.Tests.Integration.Fixtures;
+namespace SnapDog2.Tests.Fixtures.Integration;
 
 /// <summary>
 /// Comprehensive integration test fixture for all SnapDog2 services including MQTT, KNX, and Snapcast.
@@ -307,14 +308,20 @@ public class IntegrationTestFixture : IAsyncLifetime
             Console.WriteLine("⚠️ No audio devices detected - using null audio output");
         }
 
-        // Start Living Room client
+        // Start Living Room client with fixed MAC address
+        var livingRoomMac = "02:42:ac:11:00:10";
         var livingRoomBuilder = new ContainerBuilder()
             .WithImage(clientImageName)
             .WithEnvironment("SNAPSERVER_HOST", "snapcast-server") // Use network alias
             .WithEnvironment("CLIENT_ID", "living-room")
-            .WithEnvironment("FIXED_MAC_ADDRESS", "02:42:ac:11:00:10")
+            .WithEnvironment("FIXED_MAC_ADDRESS", livingRoomMac)
             .WithNetwork(this._testNetwork!)
-            .WithNetworkAliases("snapcast-client-living-room");
+            .WithNetworkAliases("snapcast-client-living-room")
+            .WithCreateParameterModifier(parameters =>
+            {
+                // Set the MAC address for the container's network interface
+                parameters.NetworkingConfig.EndpointsConfig[this._testNetwork!.Name].MacAddress = livingRoomMac;
+            });
 
         if (hasAudioDevices)
         {
@@ -325,14 +332,20 @@ public class IntegrationTestFixture : IAsyncLifetime
 
         this._snapcastClientLivingRoom = livingRoomBuilder.Build();
 
-        // Start Kitchen client
+        // Start Kitchen client with fixed MAC address
+        var kitchenMac = "02:42:ac:11:00:11";
         var kitchenBuilder = new ContainerBuilder()
             .WithImage(clientImageName)
             .WithEnvironment("SNAPSERVER_HOST", "snapcast-server") // Use network alias
             .WithEnvironment("CLIENT_ID", "kitchen")
-            .WithEnvironment("FIXED_MAC_ADDRESS", "02:42:ac:11:00:11")
+            .WithEnvironment("FIXED_MAC_ADDRESS", kitchenMac)
             .WithNetwork(this._testNetwork!)
-            .WithNetworkAliases("snapcast-client-kitchen");
+            .WithNetworkAliases("snapcast-client-kitchen")
+            .WithCreateParameterModifier(parameters =>
+            {
+                // Set the MAC address for the container's network interface
+                parameters.NetworkingConfig.EndpointsConfig[this._testNetwork!.Name].MacAddress = kitchenMac;
+            });
 
         if (hasAudioDevices)
         {
@@ -343,14 +356,20 @@ public class IntegrationTestFixture : IAsyncLifetime
 
         this._snapcastClientKitchen = kitchenBuilder.Build();
 
-        // Start Bedroom client
+        // Start Bedroom client with fixed MAC address
+        var bedroomMac = "02:42:ac:11:00:12";
         var bedroomBuilder = new ContainerBuilder()
             .WithImage(clientImageName)
             .WithEnvironment("SNAPSERVER_HOST", "snapcast-server") // Use network alias
             .WithEnvironment("CLIENT_ID", "bedroom")
-            .WithEnvironment("FIXED_MAC_ADDRESS", "02:42:ac:11:00:12")
+            .WithEnvironment("FIXED_MAC_ADDRESS", bedroomMac)
             .WithNetwork(this._testNetwork!)
-            .WithNetworkAliases("snapcast-client-bedroom");
+            .WithNetworkAliases("snapcast-client-bedroom")
+            .WithCreateParameterModifier(parameters =>
+            {
+                // Set the MAC address for the container's network interface
+                parameters.NetworkingConfig.EndpointsConfig[this._testNetwork!.Name].MacAddress = bedroomMac;
+            });
 
         if (hasAudioDevices)
         {
@@ -372,6 +391,9 @@ public class IntegrationTestFixture : IAsyncLifetime
         await Task.WhenAll(clientTasks);
 
         Console.WriteLine("✅ Snapcast clients started: living-room, kitchen, bedroom");
+        Console.WriteLine($"   Living Room MAC: {livingRoomMac}");
+        Console.WriteLine($"   Kitchen MAC: {kitchenMac}");
+        Console.WriteLine($"   Bedroom MAC: {bedroomMac}");
 
         // Give clients a moment to connect to the server
         await Task.Delay(2000);

@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using SnapDog2.Core.Abstractions;
+using SnapDog2.Tests.Fixtures.Integration;
 using SnapDog2.Tests.Integration.Fixtures;
 using SnapDog2.Tests.Testing;
 using Xunit;
