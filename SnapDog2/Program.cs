@@ -372,10 +372,6 @@ static WebApplication CreateWebApplication(string[] args)
         SnapDog2.Infrastructure.Application.AppStatusService
     >();
     builder.Services.AddSingleton<
-        SnapDog2.Core.Abstractions.IMetricsService,
-        SnapDog2.Infrastructure.Application.MetricsService
-    >();
-    builder.Services.AddSingleton<
         SnapDog2.Core.Abstractions.ICommandStatusService,
         SnapDog2.Infrastructure.Services.CommandStatusService
     >();
@@ -424,8 +420,18 @@ static WebApplication CreateWebApplication(string[] args)
         SnapDog2.Infrastructure.Services.ZoneGroupingService
     >();
 
-    // Zone grouping metrics for OpenTelemetry
+    // Enterprise-grade metrics services
+    builder.Services.AddSingleton<SnapDog2.Infrastructure.Metrics.ApplicationMetrics>();
+    builder.Services.AddSingleton<SnapDog2.Infrastructure.Application.EnterpriseMetricsService>();
     builder.Services.AddSingleton<SnapDog2.Infrastructure.Metrics.ZoneGroupingMetrics>();
+
+    // Replace basic MetricsService with enterprise implementation
+    builder.Services.AddSingleton<SnapDog2.Core.Abstractions.IMetricsService>(provider =>
+        provider.GetRequiredService<SnapDog2.Infrastructure.Application.EnterpriseMetricsService>()
+    );
+
+    // Business metrics collection service
+    builder.Services.AddHostedService<SnapDog2.Services.BusinessMetricsCollectionService>();
 
     // Playlist management services
     builder.Services.AddScoped<
@@ -577,6 +583,9 @@ static WebApplication CreateWebApplication(string[] args)
 
     // Add global exception handling as the first middleware
     app.UseGlobalExceptionHandling();
+
+    // Add HTTP metrics middleware (after exception handling, before other middleware)
+    app.UseMiddleware<SnapDog2.Middleware.HttpMetricsMiddleware>();
 
     // Configure the HTTP request pipeline (conditionally based on API configuration)
     if (snapDogConfig.Api.Enabled)

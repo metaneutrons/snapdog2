@@ -42,9 +42,9 @@ public static class CortexMediatorConfiguration
                 options.AddOpenCommandPipelineBehavior(typeof(ValidationCommandBehavior<,>));
                 options.AddOpenQueryPipelineBehavior(typeof(ValidationQueryBehavior<,>));
 
-                // Performance monitoring
-                options.AddOpenCommandPipelineBehavior(typeof(PerformanceCommandBehavior<,>));
-                options.AddOpenQueryPipelineBehavior(typeof(PerformanceQueryBehavior<,>));
+                // Enterprise-grade performance monitoring with metrics
+                options.AddOpenCommandPipelineBehavior(typeof(EnhancedPerformanceCommandBehavior<,>));
+                options.AddOpenQueryPipelineBehavior(typeof(EnhancedPerformanceQueryBehavior<,>));
 
                 // Shared logging implementation
                 options.AddOpenCommandPipelineBehavior(typeof(SharedLoggingCommandBehavior<,>));
