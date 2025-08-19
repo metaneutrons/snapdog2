@@ -238,6 +238,7 @@ public sealed class AudioProcessingContext : IAsyncDisposable, IDisposable
 
     /// <summary>
     /// Builds LibVLC media options for raw audio output to named pipe.
+    /// Respects the audio configuration from environment variables.
     /// </summary>
     /// <param name="outputPath">The output pipe path.</param>
     /// <returns>List of media options.</returns>
@@ -245,11 +246,14 @@ public sealed class AudioProcessingContext : IAsyncDisposable, IDisposable
     {
         var options = new List<string>();
 
+        // Generate the appropriate LibVLC audio codec based on bit depth
+        var audioCodec = this.GetLibVLCAudioCodec(this.Config.BitsPerSample);
+
         // For named pipes (Snapcast sinks), we need to use raw audio output
-        // Use transcode with raw audio codec and specify the mux format
+        // Use transcode with dynamic audio codec based on configuration
         var transcode =
             $"#transcode{{"
-            + $"acodec=s16l," // 16-bit little-endian PCM
+            + $"acodec={audioCodec}," // Dynamic codec based on bit depth
             + $"channels={this.Config.Channels},"
             + $"samplerate={this.Config.SampleRate}"
             + $"}}";
@@ -267,9 +271,36 @@ public sealed class AudioProcessingContext : IAsyncDisposable, IDisposable
         options.Add(":no-sout-standard-sap");
         options.Add(":sout-all"); // Keep streaming even if no one is reading
 
-        this._logger.LogDebug("Built media options for pipe streaming: {Options}", string.Join(", ", options));
+        this._logger.LogDebug(
+            "Built media options for pipe streaming: Codec={AudioCodec}, SampleRate={SampleRate}, Channels={Channels}, Options={Options}",
+            audioCodec,
+            this.Config.SampleRate,
+            this.Config.Channels,
+            string.Join(", ", options)
+        );
 
         return options;
+    }
+
+    /// <summary>
+    /// Gets the appropriate LibVLC audio codec string based on bit depth.
+    /// Maps bit depth to LibVLC PCM codec format.
+    /// </summary>
+    /// <param name="bitsPerSample">Bit depth from configuration.</param>
+    /// <returns>LibVLC audio codec string.</returns>
+    private string GetLibVLCAudioCodec(int bitsPerSample)
+    {
+        return bitsPerSample switch
+        {
+            8 => "u8", // 8-bit unsigned PCM
+            16 => "s16l", // 16-bit signed little-endian PCM (most common)
+            24 => "s24l", // 24-bit signed little-endian PCM
+            32 => "s32l", // 32-bit signed little-endian PCM
+            _ => throw new ArgumentException(
+                $"Unsupported bit depth: {bitsPerSample}. Supported values: 8, 16, 24, 32",
+                nameof(bitsPerSample)
+            ),
+        };
     }
 
     /// <summary>

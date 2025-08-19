@@ -59,7 +59,7 @@ public class AudioConfig
     public string SnapcastSampleFormat => $"{this.SampleRate}:{this.BitDepth}:{this.Channels}";
 
     /// <summary>
-    /// LibVLC command line arguments (hardcoded for consistency).
+    /// LibVLC command line arguments with dynamic configuration support.
     /// </summary>
     public string[] LibVLCArgs =>
         new[]
@@ -68,6 +68,8 @@ public class AudioConfig
             "--verbose=2", // Enable verbose logging instead of quiet
             "--plugin-path=/usr/lib/aarch64-linux-gnu/vlc/plugins", // Set plugin path
             "--intf=dummy", // Use dummy interface for headless operation
+            $"--network-caching={this.HttpTimeoutSeconds * 1000}", // Network caching timeout in milliseconds
+            "--file-caching=300", // File caching in milliseconds for local files
         };
 
     /// <summary>
