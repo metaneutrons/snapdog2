@@ -5,7 +5,6 @@ using SnapDog2.Core.Enums;
 using SnapDog2.Infrastructure.Integrations.Knx;
 using SnapDog2.Infrastructure.Integrations.Mqtt;
 using SnapDog2.Tests.Fixtures.Containers;
-using SnapDog2.Tests.Fixtures.Containers;
 using SnapDog2.Tests.Integration.Attributes;
 using Xunit;
 using Xunit.Abstractions;

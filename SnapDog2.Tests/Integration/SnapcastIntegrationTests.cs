@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Models;
 using SnapDog2.Tests.Fixtures.Containers;
-using SnapDog2.Tests.Fixtures.Containers;
 using Xunit;
 using Xunit.Abstractions;
 

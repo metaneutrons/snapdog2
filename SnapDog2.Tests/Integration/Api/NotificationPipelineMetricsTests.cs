@@ -4,7 +4,6 @@ using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Tests.Fixtures.Containers;
-using SnapDog2.Tests.Fixtures.Containers;
 using SnapDog2.Tests.Testing;
 using Xunit;
 

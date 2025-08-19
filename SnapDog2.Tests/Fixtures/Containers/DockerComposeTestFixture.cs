@@ -24,7 +24,6 @@ namespace SnapDog2.Tests.Fixtures.Containers;
 /// </summary>
 public class DockerComposeTestFixture : IAsyncLifetime
 {
-    private Process? _dockerComposeProcess;
     private readonly string _projectName = $"snapdog-test-{Guid.NewGuid():N}"[..12];
     private WebApplicationFactory<Program>? _factory;
     private IMqttClient? _testMqttClient;
@@ -88,10 +87,8 @@ public class DockerComposeTestFixture : IAsyncLifetime
             HttpClient?.Dispose();
             _factory?.Dispose();
 
-            if (_dockerComposeProcess != null)
-            {
-                await StopDockerComposeAsync();
-            }
+            // Always stop Docker Compose on disposal
+            await StopDockerComposeAsync();
 
             Console.WriteLine("✅ Docker Compose test environment cleaned up");
         }
@@ -510,7 +507,7 @@ public class DockerComposeTestFixture : IAsyncLifetime
         throw new TimeoutException("Services did not become healthy within timeout period");
     }
 
-    private async Task CreateWebApplicationFactoryAsync()
+    private Task CreateWebApplicationFactoryAsync()
     {
         Console.WriteLine("🏭 Creating web application factory...");
 
@@ -569,6 +566,7 @@ public class DockerComposeTestFixture : IAsyncLifetime
         ServiceProvider = _factory.Services;
 
         Console.WriteLine("✅ Web application factory created");
+        return Task.CompletedTask;
     }
 
     private async Task InitializeTestClientsAsync()
