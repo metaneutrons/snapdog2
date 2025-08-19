@@ -26,6 +26,13 @@ public static class KnxServiceConfiguration
             .GetRequiredService<ILoggerFactory>()
             .CreateLogger("KnxServiceConfiguration");
 
+        // Check if KNX service is enabled
+        if (!knxConfig.Enabled)
+        {
+            logger.LogInformation("KNX service is disabled in configuration - skipping registration");
+            return services;
+        }
+
         // Validate configuration
         var validationResult = ValidateKnxConfiguration(knxConfig, configuration.Zones, configuration.Clients);
         if (!validationResult.IsValid)

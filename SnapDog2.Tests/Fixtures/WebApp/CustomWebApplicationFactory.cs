@@ -13,12 +13,7 @@ namespace SnapDog2.Tests.Fixtures.WebApp;
 /// </summary>
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
-    private readonly ITestOutputHelper? _output;
-
-    public CustomWebApplicationFactory(ITestOutputHelper? output = null)
-    {
-        _output = output;
-    }
+    public CustomWebApplicationFactory() { }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -46,10 +41,8 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
         {
             logging.ClearProviders();
 
-            if (_output != null)
-            {
-                logging.AddXunitTestOutput(_output);
-            }
+            logging.AddConsole();
+            logging.AddDebug();
 
             logging.AddConsole();
             logging.SetMinimumLevel(LogLevel.Information);
@@ -108,8 +101,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
 /// </summary>
 public class ApiDisabledWebApplicationFactory : CustomWebApplicationFactory
 {
-    public ApiDisabledWebApplicationFactory(ITestOutputHelper? output = null)
-        : base(output) { }
+    public ApiDisabledWebApplicationFactory() { }
 
     protected override Dictionary<string, string?> GetTestConfiguration()
     {

@@ -25,7 +25,7 @@ namespace SnapDog2.Tests.Fixtures.Containers;
 /// </summary>
 public class DockerComposeTestFixture : IAsyncLifetime
 {
-    private readonly string _projectName = $"snapdog-test-{Guid.NewGuid():N}"[..12];
+    private readonly string _projectName = $"snapdog-{Guid.NewGuid():N}"[..12];
     private WebApplicationFactory<Program>? _factory;
     private IMqttClient? _testMqttClient;
 
@@ -290,14 +290,12 @@ public class DockerComposeTestFixture : IAsyncLifetime
 
         // Verify MQTT configuration
         snapDogConfig.Services.Mqtt.Enabled.Should().BeTrue("MQTT should be enabled in tests");
-        snapDogConfig
-            .Services.Mqtt.BrokerAddress.Should()
-            .Be("mqtt-test", "MQTT broker should use test container address");
+        snapDogConfig.Services.Mqtt.BrokerAddress.Should().Be("mqtt", "MQTT broker should use test container address");
         snapDogConfig.Services.Mqtt.Port.Should().Be(1883, "MQTT should use test container port");
 
-        // Verify KNX configuration (enabled in tests with knxd-test)
+        // Verify KNX configuration (enabled in tests with knxd)
         snapDogConfig.Services.Knx.Enabled.Should().BeTrue("KNX should be enabled in tests");
-        snapDogConfig.Services.Knx.Gateway.Should().Be("knxd-test", "KNX gateway should use test container address");
+        snapDogConfig.Services.Knx.Gateway.Should().Be("knxd", "KNX gateway should use test container address");
 
         // Verify API configuration
         snapDogConfig.Api.Enabled.Should().BeTrue("API should be enabled in tests");
@@ -395,10 +393,10 @@ public class DockerComposeTestFixture : IAsyncLifetime
 
         var containerNames = new[]
         {
-            $"{_projectName}-app-test-1",
-            $"{_projectName}-snapcast-client-living-room-test-1",
-            $"{_projectName}-snapcast-client-kitchen-test-1",
-            $"{_projectName}-snapcast-client-bedroom-test-1",
+            $"{_projectName}-app",
+            $"{_projectName}-snapcast-client-living-room",
+            $"{_projectName}-snapcast-client-kitchen",
+            $"{_projectName}-snapcast-client-bedroom",
         };
 
         foreach (var containerName in containerNames)

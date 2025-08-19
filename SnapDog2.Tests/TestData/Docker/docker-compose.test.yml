@@ -10,7 +10,7 @@ services:
   # SnapDog2 application for testing - dedicated test container
   app:
     build:
-      context: ../../../..  # Build from project root
+      context: .  # Build from project root (working directory)
       dockerfile: SnapDog2.Tests/TestData/Docker/containers/app/Dockerfile.test
     volumes:
       - snapcast_sinks:/snapsinks # Shared audio sinks
@@ -59,10 +59,10 @@ services:
       knxd:
         condition: service_healthy
     networks:
-      snapdog-test:
+      default:
         ipv4_address: 172.24.0.2
     ports:
-      - "5001:5000"  # HTTP port for test access
+      - "5001:5000" # HTTP port for test access
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
       interval: 10s
@@ -78,12 +78,28 @@ services:
     volumes:
       - ./configs/mosquitto.test.conf:/mosquitto/config/mosquitto.conf:ro
     networks:
-      snapdog-test:
+      default:
         ipv4_address: 172.24.0.3
     ports:
-      - "1883:1883"  # MQTT port for test access
+      - "1883:1883" # MQTT port for test access
     healthcheck:
-      test: ["CMD", "mosquitto_pub", "-h", "localhost", "-p", "1883", "-u", "snapdog", "-P", "snapdog", "-t", "health", "-m", "check"]
+      test:
+        [
+          "CMD",
+          "mosquitto_pub",
+          "-h",
+          "localhost",
+          "-p",
+          "1883",
+          "-u",
+          "snapdog",
+          "-P",
+          "snapdog",
+          "-t",
+          "health",
+          "-m",
+          "check",
+        ]
       interval: 5s
       timeout: 3s
       retries: 3
@@ -98,12 +114,12 @@ services:
       - ./configs/snapserver.test.conf:/etc/snapserver.conf:ro
       - snapcast_sinks:/tmp/snapfifo
     networks:
-      snapdog-test:
+      default:
         ipv4_address: 172.24.0.5
     ports:
-      - "1704:1704"  # JSON-RPC port
-      - "1705:1705"  # TCP port
-      - "1780:1780"  # HTTP port
+      - "1704:1704" # JSON-RPC port
+      - "1705:1705" # TCP port
+      - "1780:1780" # HTTP port
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:1780"]
       interval: 10s
@@ -116,12 +132,13 @@ services:
     build:
       context: containers/snapcast-client
       dockerfile: Dockerfile
-    command: ["snapclient", "--host", "snapcast-server", "--port", "1704", "--hostID", "02:42:ac:14:00:10", "--player", "null"]
+    command:
+      ["snapclient", "--host", "snapcast-server", "--port", "1704", "--hostID", "02:42:ac:14:00:10", "--player", "null"]
     depends_on:
       snapcast-server:
         condition: service_healthy
     networks:
-      snapdog-test:
+      default:
         ipv4_address: 172.24.0.6
         mac_address: 02:42:ac:14:00:10
     healthcheck:
@@ -136,12 +153,13 @@ services:
     build:
       context: containers/snapcast-client
       dockerfile: Dockerfile
-    command: ["snapclient", "--host", "snapcast-server", "--port", "1704", "--hostID", "02:42:ac:14:00:11", "--player", "null"]
+    command:
+      ["snapclient", "--host", "snapcast-server", "--port", "1704", "--hostID", "02:42:ac:14:00:11", "--player", "null"]
     depends_on:
       snapcast-server:
         condition: service_healthy
     networks:
-      snapdog-test:
+      default:
         ipv4_address: 172.24.0.7
         mac_address: 02:42:ac:14:00:11
     healthcheck:
@@ -156,12 +174,13 @@ services:
     build:
       context: containers/snapcast-client
       dockerfile: Dockerfile
-    command: ["snapclient", "--host", "snapcast-server", "--port", "1704", "--hostID", "02:42:ac:14:00:12", "--player", "null"]
+    command:
+      ["snapclient", "--host", "snapcast-server", "--port", "1704", "--hostID", "02:42:ac:14:00:12", "--player", "null"]
     depends_on:
       snapcast-server:
         condition: service_healthy
     networks:
-      snapdog-test:
+      default:
         ipv4_address: 172.24.0.8
         mac_address: 02:42:ac:14:00:12
     healthcheck:
@@ -179,11 +198,11 @@ services:
     volumes:
       - ./configs/knxd.test.conf:/etc/knxd.conf:ro
     networks:
-      snapdog-test:
+      default:
         ipv4_address: 172.24.0.10
     ports:
-      - "3671:3671"  # KNX tunnel port
-      - "6720:6720"  # KNX web interface port
+      - "3671:3671" # KNX tunnel port
+      - "6720:6720" # KNX web interface port
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "3671"]
       interval: 10s
@@ -193,7 +212,7 @@ services:
 
 # Test network - isolated from development
 networks:
-  snapdog-test:
+  default:
     driver: bridge
     ipam:
       config:
