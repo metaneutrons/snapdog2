@@ -289,7 +289,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
                         }
 
                         // Test the connection by making a simple RPC call
-                        await this._snapcastClient.ServerGetRpcVersionAsync();
+                        await this._snapcastClient!.ServerGetRpcVersionAsync();
                         return Result.Success();
                     },
                     cancellationToken
@@ -413,7 +413,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
 
         try
         {
-            var version = await this._snapcastClient.ServerGetRpcVersionAsync().ConfigureAwait(false);
+            var version = await this._snapcastClient!.ServerGetRpcVersionAsync().ConfigureAwait(false);
 
             var versionDetails = new VersionDetails
             {
@@ -458,7 +458,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
             return await this._operationPolicy.ExecuteAsync(
                 async (ct) =>
                 {
-                    await this._snapcastClient.ClientSetVolumeAsync(snapcastClientIndex, volumePercent);
+                    await this._snapcastClient!.ClientSetVolumeAsync(snapcastClientIndex, volumePercent);
                     return Result.Success();
                 },
                 cancellationToken
@@ -494,7 +494,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
             var currentVolume = client.Value.Config.Volume.Percent;
             var newVolume = muted ? 0 : currentVolume;
 
-            await this._snapcastClient.ClientSetVolumeAsync(snapcastClientIndex, newVolume).ConfigureAwait(false);
+            await this._snapcastClient!.ClientSetVolumeAsync(snapcastClientIndex, newVolume).ConfigureAwait(false);
             return Result.Success();
         }
         catch (Exception ex)
@@ -517,7 +517,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
 
         try
         {
-            await this._snapcastClient.ClientSetLatencyAsync(snapcastClientIndex, latencyMs).ConfigureAwait(false);
+            await this._snapcastClient!.ClientSetLatencyAsync(snapcastClientIndex, latencyMs).ConfigureAwait(false);
             return Result.Success();
         }
         catch (Exception ex)
@@ -540,7 +540,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
 
         try
         {
-            await this._snapcastClient.ClientSetNameAsync(snapcastClientIndex, name).ConfigureAwait(false);
+            await this._snapcastClient!.ClientSetNameAsync(snapcastClientIndex, name).ConfigureAwait(false);
             return Result.Success();
         }
         catch (Exception ex)
@@ -563,8 +563,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
 
         try
         {
-            await this
-                ._snapcastClient.GroupSetClientsAsync(groupId, new List<string> { snapcastClientIndex })
+            await this._snapcastClient!.GroupSetClientsAsync(groupId, new List<string> { snapcastClientIndex })
                 .ConfigureAwait(false);
             return Result.Success();
         }
@@ -587,7 +586,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
 
         try
         {
-            await this._snapcastClient.ServerDeleteClientAsync(snapcastClientIndex).ConfigureAwait(false);
+            await this._snapcastClient!.ServerDeleteClientAsync(snapcastClientIndex).ConfigureAwait(false);
             return Result.Success();
         }
         catch (Exception ex)
@@ -614,7 +613,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
 
         try
         {
-            await this._snapcastClient.GroupSetMuteAsync(groupId, muted).ConfigureAwait(false);
+            await this._snapcastClient!.GroupSetMuteAsync(groupId, muted).ConfigureAwait(false);
             return Result.Success();
         }
         catch (Exception ex)
@@ -639,7 +638,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
 
         try
         {
-            await this._snapcastClient.GroupSetStreamAsync(groupId, streamId).ConfigureAwait(false);
+            await this._snapcastClient!.GroupSetStreamAsync(groupId, streamId).ConfigureAwait(false);
             this._logger.LogDebug("Successfully set group {GroupId} to stream {StreamId}", groupId, streamId);
             return Result.Success();
         }
@@ -664,7 +663,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
 
         try
         {
-            await this._snapcastClient.GroupSetNameAsync(groupId, name).ConfigureAwait(false);
+            await this._snapcastClient!.GroupSetNameAsync(groupId, name).ConfigureAwait(false);
             return Result.Success();
         }
         catch (Exception ex)
@@ -695,7 +694,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
             );
 
             // Use the Snapcast client library to set group clients
-            await this._snapcastClient.GroupSetClientsAsync(groupId, clientIdList).ConfigureAwait(false);
+            await this._snapcastClient!.GroupSetClientsAsync(groupId, clientIdList).ConfigureAwait(false);
 
             this._logger.LogInformation(
                 "Successfully set {ClientCount} clients for group {GroupId}",
@@ -782,7 +781,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
             return;
         }
 
-        this._snapcastClient.OnClientConnect = this.HandleClientConnect;
+        this._snapcastClient!.OnClientConnect = this.HandleClientConnect;
         this._snapcastClient.OnClientDisconnect = this.HandleClientDisconnect;
         this._snapcastClient.OnClientVolumeChanged = this.HandleClientVolumeChanged;
         this._snapcastClient.OnClientLatencyChanged = this.HandleClientLatencyChanged;
@@ -1053,7 +1052,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     {
         if (this._snapcastClient != null)
         {
-            this._snapcastClient.OnClientConnect = null;
+            this._snapcastClient!.OnClientConnect = null;
             this._snapcastClient.OnClientDisconnect = null;
             this._snapcastClient.OnClientVolumeChanged = null;
             this._snapcastClient.OnClientLatencyChanged = null;
@@ -1275,7 +1274,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
             // Unsubscribe from events
             if (this._snapcastClient != null)
             {
-                this._snapcastClient.OnClientConnect = null;
+                this._snapcastClient!.OnClientConnect = null;
                 this._snapcastClient.OnClientDisconnect = null;
                 this._snapcastClient.OnClientVolumeChanged = null;
                 this._snapcastClient.OnClientLatencyChanged = null;
