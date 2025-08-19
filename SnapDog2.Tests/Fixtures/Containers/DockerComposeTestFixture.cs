@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Net.Sockets;
 using System.Text.Json;
 using Cortex.Mediator;
 using FluentAssertions;
@@ -297,7 +298,7 @@ public class DockerComposeTestFixture : IAsyncLifetime
         var startInfo = new ProcessStartInfo
         {
             FileName = "docker",
-            Arguments = $"compose -f docker-compose.test.yml -p {_projectName} up -d --build",
+            Arguments = $"compose -f docker-compose.test.yml -p {_projectName} up -d", // Removed --build to prevent hanging
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
@@ -531,6 +532,7 @@ public class DockerComposeTestFixture : IAsyncLifetime
             Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_SNAPCAST_ADDRESS", "localhost");
             Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_SNAPCAST_JSONRPC_PORT", "1705");
             Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_SNAPCAST_HTTP_PORT", "1780");
+            Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_SNAPCAST_ENABLED", "true");
             Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_MQTT_ENABLED", "false"); // Disable MQTT for WebApplicationFactory tests
             Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_KNX_ENABLED", "false");
             Environment.SetEnvironmentVariable("SNAPDOG_API_ENABLED", "true");
@@ -626,16 +628,59 @@ public class DockerComposeTestFixture : IAsyncLifetime
 
     private async Task<JsonElement> SendSnapcastCommandAsync(object command)
     {
-        using var client = new HttpClient();
         var json = JsonSerializer.Serialize(command);
-        var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+        Console.WriteLine($"🔍 Sending JSON-RPC command: {json}");
 
-        // Send directly to Snapcast server via Docker network
-        var response = await client.PostAsync("http://localhost:1705/jsonrpc", content);
-        response.EnsureSuccessStatusCode();
+        // Use bare TCP connection like SnapcastClient does (no HTTP)
+        using var tcpClient = new TcpClient();
 
-        var responseJson = await response.Content.ReadAsStringAsync();
-        return JsonSerializer.Deserialize<JsonElement>(responseJson);
+        // Add connection timeout to prevent hanging
+        var connectTask = tcpClient.ConnectAsync("localhost", 1705);
+        var timeoutTask = Task.Delay(TimeSpan.FromSeconds(10));
+        var completedTask = await Task.WhenAny(connectTask, timeoutTask);
+
+        if (completedTask == timeoutTask)
+        {
+            throw new TimeoutException("TCP connection to Snapcast server timed out after 10 seconds");
+        }
+
+        using var stream = tcpClient.GetStream();
+        using var writer = new StreamWriter(stream, System.Text.Encoding.UTF8, leaveOpen: true);
+        using var reader = new StreamReader(stream, System.Text.Encoding.UTF8, leaveOpen: true);
+
+        // Send raw JSON-RPC over TCP (no HTTP headers)
+        await writer.WriteLineAsync(json);
+        await writer.FlushAsync();
+
+        // Read the JSON-RPC response with timeout
+        var readTask = reader.ReadLineAsync();
+        var readTimeoutTask = Task.Delay(TimeSpan.FromSeconds(5));
+        var readCompletedTask = await Task.WhenAny(readTask, readTimeoutTask);
+
+        if (readCompletedTask == readTimeoutTask)
+        {
+            throw new TimeoutException("Reading Snapcast server response timed out after 5 seconds");
+        }
+
+        var responseJson = await readTask;
+        Console.WriteLine($"🔍 Response content: {responseJson}");
+
+        if (string.IsNullOrEmpty(responseJson))
+        {
+            throw new InvalidOperationException("Empty response from Snapcast server");
+        }
+
+        var jsonResponse = JsonSerializer.Deserialize<JsonElement>(responseJson);
+
+        // Check for JSON-RPC errors
+        if (jsonResponse.TryGetProperty("error", out var error))
+        {
+            var errorMessage = error.TryGetProperty("message", out var msg) ? msg.GetString() : "Unknown error";
+            var errorData = error.TryGetProperty("data", out var data) ? data.GetString() : "";
+            throw new InvalidOperationException($"JSON-RPC error: {errorMessage}. Data: {errorData}");
+        }
+
+        return jsonResponse;
     }
 
     private static List<SnapcastGroup> ExtractGroupsFromStatus(JsonElement status)
