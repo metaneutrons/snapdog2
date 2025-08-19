@@ -315,10 +315,26 @@ public class DockerComposeTestFixture : IAsyncLifetime
         var projectRoot = FindProjectRoot();
         Console.WriteLine($"🔍 Using project root: {projectRoot}");
 
+        // Try new location first, then fallback to old location
+        var composeFilePath = Path.Combine(
+            projectRoot,
+            "SnapDog2.Tests",
+            "TestData",
+            "Docker",
+            "docker-compose.test.yml"
+        );
+        if (!File.Exists(composeFilePath))
+        {
+            composeFilePath = Path.Combine(projectRoot, "docker-compose.test.yml");
+        }
+
+        var relativePath = Path.GetRelativePath(projectRoot, composeFilePath);
+        Console.WriteLine($"📄 Using compose file: {relativePath}");
+
         var startInfo = new ProcessStartInfo
         {
             FileName = "docker",
-            Arguments = $"compose -f docker-compose.test.yml -p {_projectName} up -d", // Removed --build to prevent hanging
+            Arguments = $"compose -f {relativePath} -p {_projectName} up -d", // Removed --build to prevent hanging
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
@@ -428,10 +444,25 @@ public class DockerComposeTestFixture : IAsyncLifetime
         // Find the project root directory (where docker-compose.test.yml is located)
         var projectRoot = FindProjectRoot();
 
+        // Try new location first, then fallback to old location
+        var composeFilePath = Path.Combine(
+            projectRoot,
+            "SnapDog2.Tests",
+            "TestData",
+            "Docker",
+            "docker-compose.test.yml"
+        );
+        if (!File.Exists(composeFilePath))
+        {
+            composeFilePath = Path.Combine(projectRoot, "docker-compose.test.yml");
+        }
+
+        var relativePath = Path.GetRelativePath(projectRoot, composeFilePath);
+
         var stopInfo = new ProcessStartInfo
         {
             FileName = "docker",
-            Arguments = $"compose -f docker-compose.test.yml -p {_projectName} down -v",
+            Arguments = $"compose -f {relativePath} -p {_projectName} down -v",
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
@@ -454,7 +485,20 @@ public class DockerComposeTestFixture : IAsyncLifetime
 
         while (directory != null)
         {
-            // Look for docker-compose.test.yml file
+            // Look for docker-compose.test.yml file in TestData/Docker directory (new location)
+            var testDataDockerPath = Path.Combine(
+                directory.FullName,
+                "SnapDog2.Tests",
+                "TestData",
+                "Docker",
+                "docker-compose.test.yml"
+            );
+            if (File.Exists(testDataDockerPath))
+            {
+                return directory.FullName;
+            }
+
+            // Fallback: Look for docker-compose.test.yml file in root (old location)
             if (File.Exists(Path.Combine(directory.FullName, "docker-compose.test.yml")))
             {
                 return directory.FullName;
