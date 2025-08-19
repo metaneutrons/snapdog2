@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MQTTnet;
+using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Core.Models;
 using SnapDog2.Server.Features.Zones.Commands.Volume;
@@ -186,9 +187,30 @@ public class DockerComposeTestFixture : IAsyncLifetime
         CancellationToken cancellationToken = default
     )
     {
-        // KNX is disabled in test environment, so return success for compatibility
-        await Task.Delay(10, cancellationToken);
-        return Result.Success();
+        try
+        {
+            // Use the KNX service from the application's DI container
+            using var scope = ServiceProvider.CreateScope();
+            var knxService = scope.ServiceProvider.GetRequiredService<IKnxService>();
+
+            // Ensure KNX service is initialized
+            if (!knxService.IsConnected)
+            {
+                var initResult = await knxService.InitializeAsync();
+                if (!initResult.IsSuccess)
+                {
+                    return Result.Failure($"Failed to initialize KNX service: {initResult.ErrorMessage}");
+                }
+            }
+
+            // Send the KNX command
+            var result = await knxService.WriteGroupValueAsync(groupAddress, value);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure($"Failed to send KNX command: {ex.Message}");
+        }
     }
 
     public async Task<Result> SendMediatorCommandAsync(object command, CancellationToken cancellationToken = default)
@@ -273,8 +295,9 @@ public class DockerComposeTestFixture : IAsyncLifetime
             .Be("mqtt-test", "MQTT broker should use test container address");
         snapDogConfig.Services.Mqtt.Port.Should().Be(1883, "MQTT should use test container port");
 
-        // Verify KNX configuration (disabled in tests)
-        snapDogConfig.Services.Knx.Enabled.Should().BeFalse("KNX should be disabled in tests");
+        // Verify KNX configuration (enabled in tests with knxd-test)
+        snapDogConfig.Services.Knx.Enabled.Should().BeTrue("KNX should be enabled in tests");
+        snapDogConfig.Services.Knx.Gateway.Should().Be("knxd-test", "KNX gateway should use test container address");
 
         // Verify API configuration
         snapDogConfig.Api.Enabled.Should().BeTrue("API should be enabled in tests");
@@ -531,7 +554,9 @@ public class DockerComposeTestFixture : IAsyncLifetime
             Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_SNAPCAST_HTTP_PORT", "1780");
             Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_SNAPCAST_ENABLED", "true");
             Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_MQTT_ENABLED", "false"); // Disable MQTT for WebApplicationFactory tests
-            Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_KNX_ENABLED", "false");
+            Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_KNX_ENABLED", "true");
+            Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_KNX_GATEWAY", "localhost");
+            Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_KNX_PORT", "3671");
             Environment.SetEnvironmentVariable("SNAPDOG_API_ENABLED", "true");
             Environment.SetEnvironmentVariable("SNAPDOG_API_PORT", "5000");
             Environment.SetEnvironmentVariable("SNAPDOG_API_AUTH_ENABLED", "false");

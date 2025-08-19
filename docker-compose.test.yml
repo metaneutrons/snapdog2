@@ -27,6 +27,13 @@ services:
       - SNAPDOG_SERVICES_MQTT_PORT=1883
       - SNAPDOG_SERVICES_MQTT_USERNAME=snapdog
       - SNAPDOG_SERVICES_MQTT_PASSWORD=snapdog
+      # Enable KNX for testing with test daemon
+      - SNAPDOG_SERVICES_KNX_ENABLED=true
+      - SNAPDOG_SERVICES_KNX_CONNECTION_TYPE=tunnel
+      - SNAPDOG_SERVICES_KNX_GATEWAY=knxd-test
+      - SNAPDOG_SERVICES_KNX_PORT=3671
+      - SNAPDOG_SERVICES_KNX_TIMEOUT=10
+      - SNAPDOG_SERVICES_KNX_AUTO_RECONNECT=true
       # Test-specific settings
       - SNAPDOG_SYSTEM_LOG_LEVEL=Information
       - SNAPDOG_SYSTEM_HEALTH_CHECKS_ENABLED=true
@@ -50,6 +57,8 @@ services:
         condition: service_healthy
       mqtt-test:
         condition: service_started
+      knxd-test:
+        condition: service_healthy
     networks:
       snapdog-test:
         ipv4_address: 172.30.0.2
@@ -88,6 +97,30 @@ services:
       - "1704:1704" # WebSocket port for test access
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "1705"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  # KNX Gateway Simulator for testing - same as dev but with test suffix
+  knxd-test:
+    build:
+      context: ./devcontainer/knxd
+      dockerfile: Dockerfile
+    hostname: knxd-test
+    environment:
+      - ADDRESS=0.0.1 # KNX daemon address (standard format)
+      - CLIENT_ADDRESS=0.0.2:8 # Client address range (start:count)
+      - INTERFACE=dummy # Use dummy interface for simulation
+      - DEBUG_LEVEL=verbose # Debug level (verbose for troubleshooting)
+      - FILTERS=single,pace:queue # Filters with queue to avoid warnings
+    networks:
+      snapdog-test:
+        ipv4_address: 172.30.0.10
+    ports:
+      - "3671:3671/udp" # KNX/IP port for test access
+    healthcheck:
+      test: ["CMD", "netstat", "-ln", "|", "grep", ":3671"]
       interval: 5s
       timeout: 3s
       retries: 5

@@ -80,9 +80,7 @@ public class IntegrationTests
         mqttService.IsConnected.Should().BeTrue();
     }
 
-    [Fact(
-        Skip = "KNX tests require UDP support. Testcontainers has UDP port mapping limitations. See docs/investigation/FINDINGS-SUMMARY.md"
-    )]
+    [Fact]
     public async Task KnxService_Should_ConnectSuccessfully()
     {
         // Arrange
@@ -139,9 +137,7 @@ public class IntegrationTests
         receivedPayload.Should().Be(testPayload);
     }
 
-    [Fact(
-        Skip = "KNX tests require UDP support. Testcontainers has UDP port mapping limitations. See docs/investigation/FINDINGS-SUMMARY.md"
-    )]
+    [Fact]
     public async Task KnxService_Should_WriteAndReadGroupValues()
     {
         // Arrange
@@ -166,9 +162,7 @@ public class IntegrationTests
         readResult.Value.Should().NotBeNull();
     }
 
-    [Fact(
-        Skip = "KNX tests require UDP support. Testcontainers has UDP port mapping limitations. See docs/investigation/FINDINGS-SUMMARY.md"
-    )]
+    [Fact]
     public async Task TestClients_Should_ConnectToServices()
     {
         // Act & Assert - Test MQTT client connection
@@ -180,9 +174,7 @@ public class IntegrationTests
         knxResult.IsSuccess.Should().BeTrue();
     }
 
-    [Fact(
-        Skip = "KNX tests require UDP support. Testcontainers has UDP port mapping limitations. See docs/investigation/FINDINGS-SUMMARY.md"
-    )]
+    [Fact]
     public async Task Integration_Should_HandleZoneStateRequests()
     {
         // Act
@@ -194,9 +186,7 @@ public class IntegrationTests
         // This test validates that the HTTP endpoint is working and returns valid data
     }
 
-    [Fact(
-        Skip = "KNX tests require UDP support. Testcontainers has UDP port mapping limitations. See docs/investigation/FINDINGS-SUMMARY.md"
-    )]
+    [Fact]
     public async Task Services_Should_HandleConcurrentOperations()
     {
         // Arrange
