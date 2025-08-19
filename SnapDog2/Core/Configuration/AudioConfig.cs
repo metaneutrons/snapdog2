@@ -15,7 +15,7 @@ public class AudioConfig
     /// Used by both Snapcast and LibVLC for consistent audio format.
     /// </summary>
     [Env(Key = "SAMPLE_RATE", Default = 48000)]
-    public int SampleRate { get; set; } = 48000;
+    public int SampleRate { get; set; }
 
     /// <summary>
     /// Audio bit depth in bits per sample.
@@ -23,7 +23,7 @@ public class AudioConfig
     /// Used by both Snapcast and LibVLC for consistent audio format.
     /// </summary>
     [Env(Key = "BIT_DEPTH", Default = 16)]
-    public int BitDepth { get; set; } = 16;
+    public int BitDepth { get; set; }
 
     /// <summary>
     /// Number of audio channels (1=mono, 2=stereo).
@@ -31,21 +31,21 @@ public class AudioConfig
     /// Used by both Snapcast and LibVLC for consistent audio format.
     /// </summary>
     [Env(Key = "CHANNELS", Default = 2)]
-    public int Channels { get; set; } = 2;
+    public int Channels { get; set; }
 
     /// <summary>
     /// Audio codec for Snapcast server.
     /// Maps to: SNAPDOG_AUDIO_CODEC
     /// </summary>
     [Env(Key = "CODEC", Default = "flac")]
-    public string Codec { get; set; } = "flac";
+    public string Codec { get; set; }
 
     /// <summary>
     /// HTTP connection timeout in seconds for streaming sources.
-    /// Maps to: SNAPDOG_AUDIO_HTTP_TIMEOUT_SECONDS
+    /// Maps to: SNAPDOG_AUDIO_BUFFER_MS
     /// </summary>
-    [Env(Key = "HTTP_TIMEOUT_SECONDS", Default = 20)]
-    public int HttpTimeoutSeconds { get; set; } = 20;
+    [Env(Key = "BUFFER_MS", Default = 1000)]
+    public int BufferMs { get; set; }
 
     // ═══════════════════════════════════════════════════════════════════════════════
     // COMPUTED PROPERTIES (Not configurable via environment variables)
@@ -62,15 +62,13 @@ public class AudioConfig
     /// LibVLC command line arguments with dynamic configuration support.
     /// </summary>
     public string[] LibVLCArgs =>
-        new[]
-        {
+        [
             "--no-video",
             "--verbose=2", // Enable verbose logging instead of quiet
             "--plugin-path=/usr/lib/aarch64-linux-gnu/vlc/plugins", // Set plugin path
             "--intf=dummy", // Use dummy interface for headless operation
-            $"--network-caching={this.HttpTimeoutSeconds * 1000}", // Network caching timeout in milliseconds
-            "--file-caching=300", // File caching in milliseconds for local files
-        };
+            $"--network-caching={this.BufferMs}", // Network caching timeout in milliseconds
+        ];
 
     /// <summary>
     /// LibVLC output format (hardcoded as raw for Snapcast compatibility).

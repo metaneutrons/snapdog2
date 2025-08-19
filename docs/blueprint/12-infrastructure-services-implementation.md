@@ -267,7 +267,7 @@ public class AudioConfig
     public int BitDepth { get; set; } = 16;
     public int Channels { get; set; } = 2;
     public string Codec { get; set; } = "flac";
-    public int HttpTimeoutSeconds { get; set; } = 20;
+    public int BufferMs { get; set; } = 20;
 
     // Computed properties (not configurable)
     public string SnapcastSampleFormat => $"{SampleRate}:{BitDepth}:{Channels}";
@@ -278,7 +278,7 @@ public class AudioConfig
 ```
 
 **Key Benefits:**
-- **Single Source of Truth**: Audio format defined once, used by both Snapcast and LibVLC
-- **Automatic Consistency**: Impossible to configure mismatched audio settings
-- **Smart Automation**: MAX_STREAMS calculated from actual zone configuration
-- **Simplified Management**: Only essential settings are user-configurable
+* **Single Source of Truth**: Audio format defined once, used by both Snapcast and LibVLC
+* **Automatic Consistency**: Impossible to configure mismatched audio settings
+* **Smart Automation**: MAX_STREAMS calculated from actual zone configuration
+* **Simplified Management**: Only essential settings are user-configurable

@@ -73,7 +73,7 @@ classDiagram
         +int Channels
         +int BufferSize
         +int MaxStreams
-        +int HttpTimeoutSeconds
+        +int BufferMs
         +bool AutoDetectFormat
         +string ThreadPriority
         +bool RealtimeProcessing

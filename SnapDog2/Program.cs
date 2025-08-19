@@ -263,7 +263,7 @@ static WebApplication CreateWebApplication(string[] args)
         options.BitDepth = audioConfig.BitDepth;
         options.Channels = audioConfig.Channels;
         options.Codec = audioConfig.Codec;
-        options.HttpTimeoutSeconds = audioConfig.HttpTimeoutSeconds;
+        options.BufferMs = audioConfig.BufferMs;
     });
 
     // Register configuration for IOptions pattern

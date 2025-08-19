@@ -60,7 +60,7 @@ classDiagram
         +int BitDepth
         +int Channels
         +string Codec
-        +int HttpTimeoutSeconds
+        +int BufferMs
         +string SnapcastSampleFormat
         +string[] LibVLCArgs
         +string OutputFormat
@@ -226,7 +226,7 @@ SNAPDOG_AUDIO_CHANNELS=2                              # Default: 2 (audio channe
 SNAPDOG_AUDIO_CODEC=flac                              # Default: flac (Snapcast compression codec)
 
 # Network timeout for HTTP streaming
-SNAPDOG_AUDIO_HTTP_TIMEOUT_SECONDS=20                 # Default: 20 (HTTP connection timeout)
+SNAPDOG_AUDIO_BUFFER_MS=20                 # Default: 20 (HTTP connection timeout)
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # AUTOMATICALLY CALCULATED VALUES (Not User Configurable)
@@ -760,7 +760,7 @@ public class SoundFlowConfig
     /// Maps to: SNAPDOG_SOUNDFLOW_HTTP_TIMEOUT_SECONDS
     /// </summary>
     [Env(Key = "HTTP_TIMEOUT_SECONDS", Default = 30)]
-    public int HttpTimeoutSeconds { get; set; } = 30;
+    public int BufferMs { get; set; } = 30;
 
     /// <summary>
     /// Enable audio format auto-detection.
