@@ -5,6 +5,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using SnapDog2.Tests.Fixtures.WebApp;
 using Xunit;
 
 [Collection("ApiDisabled")]

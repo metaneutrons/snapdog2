@@ -5,6 +5,7 @@ using System.Text.Json;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using SnapDog2.Core.Configuration;
+using SnapDog2.Tests.Fixtures.WebApp;
 using Xunit;
 
 [Collection("ApiEnabled")]

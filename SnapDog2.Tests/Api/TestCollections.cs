@@ -1,5 +1,6 @@
 namespace SnapDog2.Tests.Api;
 
+using SnapDog2.Tests.Fixtures.WebApp;
 using Xunit;
 
 /// <summary>

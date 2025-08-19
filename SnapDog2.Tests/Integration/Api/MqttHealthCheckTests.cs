@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Tests.Fixtures.Containers;
+using SnapDog2.Tests.Fixtures.WebApp;
 
 [Collection("IntegrationContainers")]
 public class MqttHealthCheckTests : IClassFixture<MqttIntegrationWebApplicationFactory>
