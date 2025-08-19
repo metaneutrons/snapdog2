@@ -7,7 +7,6 @@ public class SnapDogConfigurationTests
 {
     [Fact]
     [Trait("Category", "Unit")]
-    [Trait("Category", "Unit")]
     public void Constructor_ShouldInitializeAllProperties()
     {
         // Act

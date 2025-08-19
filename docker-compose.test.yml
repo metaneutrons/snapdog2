@@ -5,32 +5,33 @@
 # All services use same network and configuration as development environment
 # ═══════════════════════════════════════════════════════════════════════════════
 
+name: snapdog-test
 services:
   # SnapDog2 application for testing - same as dev but with test overrides
-  app-test:
+  app:
     build:
       context: .
       dockerfile: ./Dockerfile
       target: development
     volumes:
       - .:/app:cached
-      - snapcast_sinks_test:/snapsinks # Shared audio sinks
+      - snapcast_sinks:/snapsinks # Shared audio sinks
     environment:
       - DOTNET_ENVIRONMENT=Test
       - ASPNETCORE_ENVIRONMENT=Test
       # Override Snapcast connection to use test server
-      - SNAPDOG_SERVICES_SNAPCAST_ADDRESS=snapcast-server-test
+      - SNAPDOG_SERVICES_SNAPCAST_ADDRESS=snapcast-server
       - SNAPDOG_SERVICES_SNAPCAST_JSONRPC_PORT=1705
       - SNAPDOG_SERVICES_SNAPCAST_HTTP_PORT=1780
       # Override MQTT to use test broker
-      - SNAPDOG_SERVICES_MQTT_BROKER_ADDRESS=mqtt-test
+      - SNAPDOG_SERVICES_MQTT_BROKER_ADDRESS=mqtt
       - SNAPDOG_SERVICES_MQTT_PORT=1883
       - SNAPDOG_SERVICES_MQTT_USERNAME=snapdog
       - SNAPDOG_SERVICES_MQTT_PASSWORD=snapdog
       # Enable KNX for testing with test daemon
       - SNAPDOG_SERVICES_KNX_ENABLED=true
       - SNAPDOG_SERVICES_KNX_CONNECTION_TYPE=tunnel
-      - SNAPDOG_SERVICES_KNX_GATEWAY=knxd-test
+      - SNAPDOG_SERVICES_KNX_GATEWAY=knxd
       - SNAPDOG_SERVICES_KNX_PORT=3671
       - SNAPDOG_SERVICES_KNX_TIMEOUT=10
       - SNAPDOG_SERVICES_KNX_AUTO_RECONNECT=true
@@ -53,14 +54,14 @@ services:
       - SNAPDOG_CLIENT_3_MAC=02:42:ac:11:00:12
       - SNAPDOG_CLIENT_3_NAME=Bedroom
     depends_on:
-      snapcast-server-test:
+      snapcast-server:
         condition: service_healthy
-      mqtt-test:
+      mqtt:
         condition: service_started
-      knxd-test:
+      knxd:
         condition: service_healthy
     networks:
-      snapdog-test:
+      snapdog:
         ipv4_address: 172.30.0.2
     ports:
       - "5001:5000" # API port for test access
@@ -72,12 +73,12 @@ services:
       start_period: 30s
 
   # Snapcast Server - same config as dev but for testing
-  snapcast-server-test:
+  snapcast-server:
     build:
       context: ./devcontainer/snapcast-server
-    hostname: snapcast-server-test
+    hostname: snapcast-server
     volumes:
-      - snapcast_sinks_test:/snapsinks
+      - snapcast_sinks:/snapsinks
     environment:
       # Zone configuration (same as SnapDog2 app)
       - SNAPDOG_ZONE_1_NAME=Ground Floor
@@ -89,7 +90,7 @@ services:
       - SNAPCAST_WEBSERVER_PORT=1780
       - SNAPCAST_WEBSOCKET_PORT=1704
     networks:
-      snapdog-test:
+      snapdog:
         ipv4_address: 172.30.0.5
     ports:
       - "1705:1705" # JSON-RPC port for test access
@@ -103,11 +104,11 @@ services:
       start_period: 10s
 
   # KNX Gateway Simulator for testing - same as dev but with test suffix
-  knxd-test:
+  knxd:
     build:
       context: ./devcontainer/knxd
       dockerfile: Dockerfile
-    hostname: knxd-test
+    hostname: knxd
     environment:
       - ADDRESS=0.0.1 # KNX daemon address (standard format)
       - CLIENT_ADDRESS=0.0.2:8 # Client address range (start:count)
@@ -115,7 +116,7 @@ services:
       - DEBUG_LEVEL=verbose # Debug level (verbose for troubleshooting)
       - FILTERS=single,pace:queue # Filters with queue to avoid warnings
     networks:
-      snapdog-test:
+      snapdog:
         ipv4_address: 172.30.0.10
     ports:
       - "3671:3671/udp" # KNX/IP port for test access
@@ -127,11 +128,11 @@ services:
       start_period: 10s
 
   # Snapcast Clients - same as dev but for testing
-  snapcast-client-living-room-test:
+  snapcast-client-living-room:
     build:
       context: ./devcontainer/snapcast-client
     depends_on:
-      snapcast-server-test:
+      snapcast-server:
         condition: service_healthy
     environment:
       - SNAPSERVER_HOST=172.30.0.5
@@ -139,15 +140,15 @@ services:
       - CLIENT_NAME=Living Room
       - FIXED_MAC_ADDRESS=02:42:ac:11:00:10
     networks:
-      snapdog-test:
+      snapdog:
         ipv4_address: 172.30.0.6
         mac_address: 02:42:ac:11:00:10
 
-  snapcast-client-kitchen-test:
+  snapcast-client-kitchen:
     build:
       context: ./devcontainer/snapcast-client
     depends_on:
-      snapcast-server-test:
+      snapcast-server:
         condition: service_healthy
     environment:
       - SNAPSERVER_HOST=172.30.0.5
@@ -155,15 +156,15 @@ services:
       - CLIENT_NAME=Kitchen
       - FIXED_MAC_ADDRESS=02:42:ac:11:00:11
     networks:
-      snapdog-test:
+      snapdog:
         ipv4_address: 172.30.0.7
         mac_address: 02:42:ac:11:00:11
 
-  snapcast-client-bedroom-test:
+  snapcast-client-bedroom:
     build:
       context: ./devcontainer/snapcast-client
     depends_on:
-      snapcast-server-test:
+      snapcast-server:
         condition: service_healthy
     environment:
       - SNAPSERVER_HOST=172.30.0.5
@@ -171,12 +172,12 @@ services:
       - CLIENT_NAME=Bedroom
       - FIXED_MAC_ADDRESS=02:42:ac:11:00:12
     networks:
-      snapdog-test:
+      snapdog:
         ipv4_address: 172.30.0.8
         mac_address: 02:42:ac:11:00:12
 
   # MQTT Broker for testing
-  mqtt-test:
+  mqtt:
     image: eclipse-mosquitto:2.0
     volumes:
       - ./devcontainer/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
@@ -186,18 +187,18 @@ services:
     environment:
       - MOSQUITTO_LOG_LEVEL=debug
     networks:
-      snapdog-test:
+      snapdog:
         ipv4_address: 172.30.0.3
     ports:
       - "1883:1883" # MQTT port for test access
 
 volumes:
-  snapcast_sinks_test: # Shared volume for audio sinks
+  snapcast_sinks: # Shared volume for audio sinks
   mqtt_data_test: # MQTT persistence data
   mqtt_logs_test: # MQTT logs
 
 networks:
-  snapdog-test:
+  snapdog:
     driver: bridge
     ipam:
       config:

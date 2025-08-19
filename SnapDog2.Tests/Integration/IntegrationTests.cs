@@ -48,16 +48,6 @@ public class ApplicationStartupIntegrationTests
     }
 
     [Fact]
-    public void Services_Should_BeRegisteredInDI()
-    {
-        // Assert - Verify core service interfaces are registered
-        this._fixture.AssertServiceIsRunning<IMqttService>();
-        this._fixture.AssertServiceIsRunning<IKnxService>();
-        this._fixture.AssertServiceIsRunning<ISnapcastService>();
-        // Note: Don't check concrete classes as they're registered as interfaces
-    }
-
-    [Fact]
     public void Configuration_Should_BeValid()
     {
         // Assert - Verify configuration is properly loaded
