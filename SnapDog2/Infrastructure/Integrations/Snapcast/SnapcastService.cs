@@ -29,7 +29,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     private readonly IServiceProvider _serviceProvider;
     private readonly ISnapcastStateRepository _stateRepository;
     private readonly ILogger<SnapcastService> _logger;
-    private readonly SnapcastClient.IClient _snapcastClient;
+    private readonly SnapcastClient.IClient? _snapcastClient;
     private readonly ResiliencePipeline _connectionPolicy;
     private readonly ResiliencePipeline _operationPolicy;
     private readonly SemaphoreSlim _operationLock = new(1, 1);
@@ -51,7 +51,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         IServiceProvider serviceProvider,
         ISnapcastStateRepository stateRepository,
         ILogger<SnapcastService> logger,
-        SnapcastClient.IClient snapcastClient
+        SnapcastClient.IClient? snapcastClient
     )
     {
         this._config = configOptions.Value.Services.Snapcast;
@@ -280,6 +280,14 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
                 var result = await this._connectionPolicy.ExecuteAsync(
                     async (ct) =>
                     {
+                        // Check if client is available
+                        if (this._snapcastClient == null)
+                        {
+                            return Result.Failure(
+                                "Snapcast client is not available - connection failed during startup"
+                            );
+                        }
+
                         // Test the connection by making a simple RPC call
                         await this._snapcastClient.ServerGetRpcVersionAsync();
                         return Result.Success();
@@ -338,6 +346,20 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
 
     #region Server Operations
 
+    /// <summary>
+    /// Checks if the Snapcast client is available and returns an appropriate error if not.
+    /// </summary>
+    private Result CheckClientAvailability()
+    {
+        if (this._snapcastClient == null)
+        {
+            return Result.Failure(
+                "Snapcast client is not available - connection failed during startup. Please check server connectivity."
+            );
+        }
+        return Result.Success();
+    }
+
     public async Task<Result<SnapcastServerStatus>> GetServerStatusAsync(CancellationToken cancellationToken = default)
     {
         if (this._disposed)
@@ -345,11 +367,18 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
             return Result<SnapcastServerStatus>.Failure("Service has been disposed");
         }
 
+        // Check if client is available
+        var clientCheck = this.CheckClientAvailability();
+        if (!clientCheck.IsSuccess)
+        {
+            return Result<SnapcastServerStatus>.Failure("Snapcast client is not available");
+        }
+
         this.LogGettingServerStatus();
 
         try
         {
-            var serverStatus = await this._snapcastClient.ServerGetStatusAsync().ConfigureAwait(false);
+            var serverStatus = await this._snapcastClient!.ServerGetStatusAsync().ConfigureAwait(false);
 
             this.LogServerStatusRetrieved(
                 serverStatus.Groups?.Count ?? 0,
@@ -747,6 +776,12 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
 
     private void SubscribeToEvents()
     {
+        if (this._snapcastClient == null)
+        {
+            this._logger.LogWarning("Cannot subscribe to Snapcast events - client is not available");
+            return;
+        }
+
         this._snapcastClient.OnClientConnect = this.HandleClientConnect;
         this._snapcastClient.OnClientDisconnect = this.HandleClientDisconnect;
         this._snapcastClient.OnClientVolumeChanged = this.HandleClientVolumeChanged;

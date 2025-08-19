@@ -107,6 +107,20 @@ public partial class IntegrationServicesHostedService(
     [LoggerMessage(5021, LogLevel.Error, "❌ Failed to disable service: {ServiceName}")]
     private partial void LogServiceDisableFailed(string serviceName, Exception exception);
 
+    [LoggerMessage(
+        5022,
+        LogLevel.Warning,
+        "⏰ Service initialization timed out after 30 seconds - continuing with partial initialization"
+    )]
+    private partial void LogInitializationTimeout();
+
+    [LoggerMessage(
+        5023,
+        LogLevel.Warning,
+        "⚠️ Service initialization partially failed - continuing with available services"
+    )]
+    private partial void LogInitializationPartialFailure(Exception exception);
+
     #endregion
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -115,6 +129,10 @@ public partial class IntegrationServicesHostedService(
 
         try
         {
+            // Create a timeout for the entire initialization process
+            using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
+            timeoutCts.CancelAfter(TimeSpan.FromSeconds(30)); // 30 second timeout for initialization
+
             // Initialize services in parallel for faster startup
             var initializationTasks = new List<Task>();
 
@@ -123,7 +141,7 @@ public partial class IntegrationServicesHostedService(
             if (snapcastService != null)
             {
                 this.LogInitializingSnapcast();
-                initializationTasks.Add(this.InitializeSnapcastServiceAsync(snapcastService, stoppingToken));
+                initializationTasks.Add(this.InitializeSnapcastServiceAsync(snapcastService, timeoutCts.Token));
             }
             else
             {
@@ -135,7 +153,7 @@ public partial class IntegrationServicesHostedService(
             if (mqttService != null)
             {
                 this.LogInitializingMqtt();
-                initializationTasks.Add(this.InitializeMqttServiceAsync(mqttService, stoppingToken));
+                initializationTasks.Add(this.InitializeMqttServiceAsync(mqttService, timeoutCts.Token));
             }
             else
             {
@@ -147,7 +165,7 @@ public partial class IntegrationServicesHostedService(
             if (knxService != null)
             {
                 this.LogInitializingKnx();
-                initializationTasks.Add(this.InitializeKnxServiceAsync(knxService, stoppingToken));
+                initializationTasks.Add(this.InitializeKnxServiceAsync(knxService, timeoutCts.Token));
             }
             else
             {
@@ -159,17 +177,31 @@ public partial class IntegrationServicesHostedService(
             if (subsonicService != null)
             {
                 this.LogInitializingSubsonic();
-                initializationTasks.Add(this.InitializeSubsonicServiceAsync(subsonicService, stoppingToken));
+                initializationTasks.Add(this.InitializeSubsonicServiceAsync(subsonicService, timeoutCts.Token));
             }
             else
             {
                 this.LogSubsonicNotRegistered();
             }
 
-            // Wait for all services to initialize and track results
+            // Wait for all services to initialize with timeout handling
             if (initializationTasks.Count > 0)
             {
-                await Task.WhenAll(initializationTasks);
+                try
+                {
+                    await Task.WhenAll(initializationTasks);
+                }
+                catch (OperationCanceledException)
+                    when (timeoutCts.Token.IsCancellationRequested && !stoppingToken.IsCancellationRequested)
+                {
+                    this.LogInitializationTimeout();
+                    // Continue with partial initialization - don't fail the entire application
+                }
+                catch (Exception ex)
+                {
+                    this.LogInitializationPartialFailure(ex);
+                    // Continue with partial initialization - don't fail the entire application
+                }
 
                 // Check actual service states to provide accurate logging and system health assessment
                 var serviceStates = new List<(string Name, bool IsConnected, bool IsCritical)>();

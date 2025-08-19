@@ -26,8 +26,9 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
                 // Add test-specific configuration
                 config
                     .AddJsonFile("appsettings.Test.json", optional: true)
-                    .AddEnvironmentVariables("SNAPDOG_TEST_")
-                    .AddInMemoryCollection(GetTestConfiguration());
+                    .AddInMemoryCollection(GetTestConfiguration()) // Base test configuration
+                    .AddEnvironmentVariables("SNAPDOG_") // Regular SnapDog environment variables (higher priority)
+                    .AddEnvironmentVariables("SNAPDOG_TEST_"); // Test-specific overrides (highest priority)
             }
         );
 

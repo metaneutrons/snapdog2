@@ -23,18 +23,33 @@ public static class SnapcastServiceConfiguration
         // Register the state repository as singleton since it holds shared state
         services.AddSingleton<ISnapcastStateRepository, SnapcastStateRepository>();
 
-        // Register the SnapcastClient client with basic TCP connection
-        // Resilience is handled by Polly in the SnapcastService layer
-        services.AddSingleton<SnapcastClient.IClient>(serviceProvider =>
+        // Register the SnapcastClient client with connection error handling
+        // If connection fails during DI setup, register a null client that will be handled by the service layer
+        services.AddSingleton<SnapcastClient.IClient?>(serviceProvider =>
         {
             var config = serviceProvider.GetRequiredService<IOptions<SnapDogConfiguration>>().Value.Services.Snapcast;
             var logger = serviceProvider.GetService<ILogger<Client>>();
 
-            // Create basic TCP connection without built-in resilience
-            var connection = new TcpConnection(config.Address, config.JsonRpcPort);
+            try
+            {
+                // Attempt to create TCP connection
+                var connection = new TcpConnection(config.Address, config.JsonRpcPort);
+                return new Client(connection, logger);
+            }
+            catch (Exception ex)
+            {
+                // Log the connection failure but don't fail the entire DI container setup
+                var serviceLogger = serviceProvider.GetService<ILogger<Client>>();
+                serviceLogger?.LogWarning(
+                    ex,
+                    "Failed to connect to Snapcast server at {Address}:{Port} during startup. Service will retry later.",
+                    config.Address,
+                    config.JsonRpcPort
+                );
 
-            // Create and return the client
-            return new Client(connection, logger);
+                // Return null - the SnapcastService will handle this gracefully
+                return null;
+            }
         });
 
         // Register our Snapcast service as singleton with mediator injection
@@ -43,7 +58,7 @@ public static class SnapcastServiceConfiguration
             var config = serviceProvider.GetRequiredService<IOptions<SnapDogConfiguration>>();
             var stateRepository = serviceProvider.GetRequiredService<ISnapcastStateRepository>();
             var logger = serviceProvider.GetRequiredService<ILogger<SnapcastService>>();
-            var snapcastClient = serviceProvider.GetRequiredService<SnapcastClient.IClient>();
+            var snapcastClient = serviceProvider.GetService<SnapcastClient.IClient?>();
 
             // Don't resolve IClientManager here - pass IServiceProvider instead
             // SnapcastService will create scopes when it needs to access IClientManager

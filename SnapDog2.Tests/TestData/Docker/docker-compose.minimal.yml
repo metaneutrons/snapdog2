@@ -1,0 +1,36 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# SnapDog2 Minimal Test Environment - Docker Compose
+# ═══════════════════════════════════════════════════════════════════════════════
+# Minimal setup with just app container to test timeout handling
+# ═══════════════════════════════════════════════════════════════════════════════
+
+services:
+  # SnapDog2 application for testing - simplified container
+  app:
+    build:
+      context: ../../.. # Go back to solution root (snapdog directory)
+      dockerfile: SnapDog2.Tests/TestData/Docker/containers/app/Dockerfile.test
+    networks:
+      container:
+        ipv4_address: 172.25.0.2
+    ports:
+      - "5001:5000" # HTTP port for test access
+    environment:
+      - SNAPDOG_SERVICES_SNAPCAST_ADDRESS=nonexistent-server
+      - SNAPDOG_SERVICES_SNAPCAST_JSONRPC_PORT=1704
+      - SNAPDOG_SERVICES_SNAPCAST_HTTP_PORT=1780
+      - SNAPDOG_SERVICES_SNAPCAST_ENABLED=true
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "5000"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 35s # Give time for timeout handling
+
+# Network configuration for test environment
+networks:
+  container:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16

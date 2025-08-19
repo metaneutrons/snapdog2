@@ -313,14 +313,24 @@ public class DockerComposeTestFixture : IAsyncLifetime
         var projectRoot = FindProjectRoot();
         Console.WriteLine($"🔍 Using project root: {projectRoot}");
 
-        // Try new location first, then fallback to old location
+        // Try minimal compose file first for basic testing, then fallback to full compose
         var composeFilePath = Path.Combine(
             projectRoot,
             "SnapDog2.Tests",
             "TestData",
             "Docker",
-            "docker-compose.test.yml"
+            "docker-compose.minimal.yml"
         );
+        if (!File.Exists(composeFilePath))
+        {
+            composeFilePath = Path.Combine(
+                projectRoot,
+                "SnapDog2.Tests",
+                "TestData",
+                "Docker",
+                "docker-compose.test.yml"
+            );
+        }
         if (!File.Exists(composeFilePath))
         {
             composeFilePath = Path.Combine(projectRoot, "docker-compose.test.yml");
@@ -591,12 +601,12 @@ public class DockerComposeTestFixture : IAsyncLifetime
             );
 
             // Set environment variables for test configuration
-            Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_SNAPCAST_ADDRESS", "localhost");
-            Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_SNAPCAST_JSONRPC_PORT", "1705");
+            Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_SNAPCAST_ADDRESS", "snapcast-server");
+            Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_SNAPCAST_JSONRPC_PORT", "1704");
             Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_SNAPCAST_HTTP_PORT", "1780");
-            Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_SNAPCAST_ENABLED", "true");
+            Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_SNAPCAST_ENABLED", "true"); // Re-enable with proper server
             Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_MQTT_ENABLED", "false"); // Disable MQTT for WebApplicationFactory tests
-            Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_KNX_ENABLED", "true");
+            Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_KNX_ENABLED", "false"); // Disable KNX for minimal tests
             Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_KNX_GATEWAY", "localhost");
             Environment.SetEnvironmentVariable("SNAPDOG_SERVICES_KNX_PORT", "3671");
             Environment.SetEnvironmentVariable("SNAPDOG_API_ENABLED", "true");
