@@ -82,6 +82,7 @@ public sealed class AudioProcessingContext : IAsyncDisposable, IDisposable
 
     /// <summary>
     /// Processes an audio stream from a URL and extracts metadata.
+    /// For streaming sources, this will continue until cancelled.
     /// </summary>
     /// <param name="sourceUrl">The source URL to process.</param>
     /// <param name="sourceType">The type of audio source.</param>
@@ -126,7 +127,7 @@ public sealed class AudioProcessingContext : IAsyncDisposable, IDisposable
             // Set up the media player
             this._mediaPlayer.Media = media;
 
-            // Start playback (which will write to the output file)
+            // Start playback (which will write to the output file/pipe)
             var playResult = this._mediaPlayer.Play();
             if (!playResult)
             {
@@ -134,12 +135,25 @@ public sealed class AudioProcessingContext : IAsyncDisposable, IDisposable
             }
 
             // Wait for playback to start
+            var startTimeout = TimeSpan.FromSeconds(10);
+            var startTime = DateTime.UtcNow;
+
             while (this._mediaPlayer.State == VLCState.Opening || this._mediaPlayer.State == VLCState.Buffering)
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
                     this._mediaPlayer.Stop();
                     return new AudioProcessingResult { Success = false, ErrorMessage = "Operation was cancelled" };
+                }
+
+                if (DateTime.UtcNow - startTime > startTimeout)
+                {
+                    this._mediaPlayer.Stop();
+                    return new AudioProcessingResult
+                    {
+                        Success = false,
+                        ErrorMessage = "Timeout waiting for playback to start",
+                    };
                 }
 
                 await Task.Delay(100, cancellationToken);
@@ -154,7 +168,51 @@ public sealed class AudioProcessingContext : IAsyncDisposable, IDisposable
             // Save metadata to JSON file
             await this.MetadataManager.SaveMetadataAsync(metadata, metadataPath, cancellationToken);
 
-            this._logger.LogInformation("Audio processing completed successfully: {OutputPath}", finalOutputPath);
+            this._logger.LogInformation("Audio streaming started successfully: {OutputPath}", finalOutputPath);
+
+            // For streaming sources (like radio), keep the stream alive until cancelled
+            if (
+                sourceType == AudioSourceType.Url
+                && (sourceUrl.StartsWith("http://") || sourceUrl.StartsWith("https://"))
+            )
+            {
+                this._logger.LogInformation("Maintaining continuous stream for URL source: {SourceUrl}", sourceUrl);
+
+                // Keep streaming until cancelled or error occurs
+                while (
+                    !cancellationToken.IsCancellationRequested
+                    && this._mediaPlayer.State != VLCState.Error
+                    && this._mediaPlayer.State != VLCState.Ended
+                )
+                {
+                    await Task.Delay(1000, cancellationToken);
+
+                    // Log periodic status for debugging
+                    if (DateTime.UtcNow.Second % 30 == 0) // Every 30 seconds
+                    {
+                        this._logger.LogDebug(
+                            "Stream status: State={State}, IsPlaying={IsPlaying}",
+                            this._mediaPlayer.State,
+                            this._mediaPlayer.IsPlaying
+                        );
+                    }
+                }
+
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    this._logger.LogInformation("Stream cancelled for: {SourceUrl}", sourceUrl);
+                }
+                else if (this._mediaPlayer.State == VLCState.Error)
+                {
+                    this._logger.LogWarning("Stream ended with error for: {SourceUrl}", sourceUrl);
+                }
+                else
+                {
+                    this._logger.LogInformation("Stream ended naturally for: {SourceUrl}", sourceUrl);
+                }
+            }
+
+            this._logger.LogInformation("Audio processing completed: {OutputPath}", finalOutputPath);
 
             return new AudioProcessingResult
             {
@@ -179,34 +237,37 @@ public sealed class AudioProcessingContext : IAsyncDisposable, IDisposable
     }
 
     /// <summary>
-    /// Builds LibVLC media options for raw audio output.
+    /// Builds LibVLC media options for raw audio output to named pipe.
     /// </summary>
-    /// <param name="outputPath">The output file path.</param>
+    /// <param name="outputPath">The output pipe path.</param>
     /// <returns>List of media options.</returns>
     private List<string> BuildMediaOptions(string outputPath)
     {
         var options = new List<string>();
 
-        // Set up transcoding to raw audio format
+        // For named pipes (Snapcast sinks), we need to use raw audio output
+        // Use transcode with raw audio codec and specify the mux format
         var transcode =
             $"#transcode{{"
-            + $"acodec=s{this.Config.BitsPerSample}l,"
-            + $"ab={this.Config.SampleRate * this.Config.Channels * this.Config.BitsPerSample / 8},"
+            + $"acodec=s16l," // 16-bit little-endian PCM
             + $"channels={this.Config.Channels},"
             + $"samplerate={this.Config.SampleRate}"
             + $"}}";
 
-        // Set up file output
-        var fileOutput = $"file{{dst={outputPath}}}";
+        // Use standard output with raw mux for named pipes
+        var standardOutput = $"standard{{access=file,mux=raw,dst={outputPath}}}";
 
         // Combine transcode and output
-        options.Add($":sout={transcode}:{fileOutput}");
+        options.Add($":sout={transcode}:{standardOutput}");
 
-        // Additional options for better streaming
+        // Critical options for streaming to named pipes
         options.Add(":no-sout-video");
         options.Add(":sout-keep");
+        options.Add(":no-sout-rtp-sap");
+        options.Add(":no-sout-standard-sap");
+        options.Add(":sout-all"); // Keep streaming even if no one is reading
 
-        this._logger.LogDebug("Built media options: {Options}", string.Join(", ", options));
+        this._logger.LogDebug("Built media options for pipe streaming: {Options}", string.Join(", ", options));
 
         return options;
     }

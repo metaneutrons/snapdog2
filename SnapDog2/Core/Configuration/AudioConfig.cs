@@ -61,7 +61,14 @@ public class AudioConfig
     /// <summary>
     /// LibVLC command line arguments (hardcoded for consistency).
     /// </summary>
-    public string[] LibVLCArgs => new[] { "--no-video", "--quiet" };
+    public string[] LibVLCArgs =>
+        new[]
+        {
+            "--no-video",
+            "--verbose=2", // Enable verbose logging instead of quiet
+            "--plugin-path=/usr/lib/aarch64-linux-gnu/vlc/plugins", // Set plugin path
+            "--intf=dummy", // Use dummy interface for headless operation
+        };
 
     /// <summary>
     /// LibVLC output format (hardcoded as raw for Snapcast compatibility).
