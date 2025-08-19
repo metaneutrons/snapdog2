@@ -17,12 +17,12 @@ USER testuser
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
-# Copy project files
+# Copy project files only (avoid copying TestData to prevent circular reference)
 COPY ["SnapDog2/SnapDog2.csproj", "SnapDog2/"]
 RUN dotnet restore "SnapDog2/SnapDog2.csproj"
 
-# Copy source code
-COPY . .
+# Copy only the source code we need (exclude TestData directory)
+COPY SnapDog2/ SnapDog2/
 WORKDIR "/src/SnapDog2"
 
 # Build application
