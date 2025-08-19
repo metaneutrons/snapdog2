@@ -3,8 +3,8 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using FluentAssertions;
-using SnapDog2.Tests.Fixtures.Integration;
-using SnapDog2.Tests.Integration.Fixtures;
+using SnapDog2.Tests.Fixtures.Containers;
+using SnapDog2.Tests.Fixtures.Containers;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -15,13 +15,13 @@ namespace SnapDog2.Tests.Integration.Api;
 /// Tests all 18 new endpoints: Zone Track Commands, Client Commands, and System Commands.
 /// </summary>
 [Collection("Integration")]
-public class NewEndpointsIntegrationTests : IClassFixture<IntegrationTestFixture>
+public class NewEndpointsIntegrationTests : IClassFixture<DockerComposeTestFixture>
 {
-    private readonly IntegrationTestFixture _fixture;
+    private readonly DockerComposeTestFixture _fixture;
     private readonly ITestOutputHelper _output;
     private readonly HttpClient _httpClient;
 
-    public NewEndpointsIntegrationTests(IntegrationTestFixture fixture, ITestOutputHelper output)
+    public NewEndpointsIntegrationTests(DockerComposeTestFixture fixture, ITestOutputHelper output)
     {
         this._fixture = fixture ?? throw new ArgumentNullException(nameof(fixture));
         this._output = output ?? throw new ArgumentNullException(nameof(output));

@@ -10,39 +10,39 @@ public class UnitTestCollection
 }
 
 /// <summary>
-/// Collection for integration tests that require shared infrastructure
+/// Collection for integration tests using unified Docker Compose infrastructure
 /// </summary>
 [CollectionDefinition(TestCategories.Integration)]
-public class IntegrationTestCollection : ICollectionFixture<Integration.IntegrationTestFixture>
+public class IntegrationTestCollection : ICollectionFixture<Containers.DockerComposeTestFixture>
 {
-    // Integration tests share the same fixture to avoid resource conflicts
+    // Integration tests share the unified Docker Compose environment
 }
 
 /// <summary>
-/// Collection for container-based tests using Testcontainers
+/// Collection for container-based tests using unified Docker Compose infrastructure
 /// </summary>
 [CollectionDefinition(TestCategories.Container)]
-public class ContainerTestCollection : ICollectionFixture<Containers.TestcontainersFixture>
+public class ContainerTestCollection : ICollectionFixture<Containers.DockerComposeTestFixture>
 {
-    // Container tests share Docker resources and network
+    // Container tests use the same unified infrastructure
 }
 
 /// <summary>
-/// Collection for performance tests that need isolated execution
+/// Collection for performance tests using unified Docker Compose infrastructure
 /// </summary>
 [CollectionDefinition(TestCategories.Performance)]
-public class PerformanceTestCollection : ICollectionFixture<Integration.IntegrationTestFixture>
+public class PerformanceTestCollection : ICollectionFixture<Containers.DockerComposeTestFixture>
 {
-    // Performance tests run sequentially to avoid resource contention
+    // Performance tests run with unified infrastructure
 }
 
 /// <summary>
-/// Collection for workflow tests that simulate end-to-end scenarios
+/// Collection for workflow tests using unified Docker Compose infrastructure
 /// </summary>
 [CollectionDefinition(TestCategories.Workflow)]
-public class WorkflowTestCollection : ICollectionFixture<Integration.IntegrationTestFixture>
+public class WorkflowTestCollection : ICollectionFixture<Containers.DockerComposeTestFixture>
 {
-    // Workflow tests need full application context
+    // Workflow tests use unified infrastructure
 }
 
 /// <summary>
@@ -64,19 +64,19 @@ public class ApiDisabledCollection : ICollectionFixture<WebApp.ApiDisabledWebApp
 }
 
 /// <summary>
-/// Collection for smoke tests that verify basic functionality
+/// Collection for smoke tests using unified Docker Compose infrastructure
 /// </summary>
 [CollectionDefinition(TestCategories.Smoke)]
-public class SmokeTestCollection : ICollectionFixture<Integration.IntegrationTestFixture>
+public class SmokeTestCollection : ICollectionFixture<Containers.DockerComposeTestFixture>
 {
-    // Smoke tests verify critical paths work
+    // Smoke tests use unified infrastructure
 }
 
 /// <summary>
-/// Collection for regression tests that prevent known issues from reoccurring
+/// Collection for regression tests using unified Docker Compose infrastructure
 /// </summary>
 [CollectionDefinition(TestCategories.Regression)]
-public class RegressionTestCollection : ICollectionFixture<Integration.IntegrationTestFixture>
+public class RegressionTestCollection : ICollectionFixture<Containers.DockerComposeTestFixture>
 {
-    // Regression tests ensure fixed bugs stay fixed
+    // Regression tests use unified infrastructure
 }

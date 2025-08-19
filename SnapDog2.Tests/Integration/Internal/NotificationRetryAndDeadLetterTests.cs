@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SnapDog2.Core.Abstractions;
-using SnapDog2.Tests.Fixtures.Integration;
+using SnapDog2.Tests.Fixtures.Containers;
 using SnapDog2.Tests.Testing;
 using Xunit;
 

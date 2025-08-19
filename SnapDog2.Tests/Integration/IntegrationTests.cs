@@ -4,9 +4,9 @@ using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Enums;
 using SnapDog2.Infrastructure.Integrations.Knx;
 using SnapDog2.Infrastructure.Integrations.Mqtt;
-using SnapDog2.Tests.Fixtures.Integration;
+using SnapDog2.Tests.Fixtures.Containers;
+using SnapDog2.Tests.Fixtures.Containers;
 using SnapDog2.Tests.Integration.Attributes;
-using SnapDog2.Tests.Integration.Fixtures;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -19,10 +19,10 @@ namespace SnapDog2.Tests.Integration;
 [Collection("Integration")]
 public class IntegrationTests
 {
-    private readonly IntegrationTestFixture _fixture;
+    private readonly DockerComposeTestFixture _fixture;
     private readonly ITestOutputHelper _output;
 
-    public IntegrationTests(IntegrationTestFixture fixture, ITestOutputHelper output)
+    public IntegrationTests(DockerComposeTestFixture fixture, ITestOutputHelper output)
     {
         this._fixture = fixture;
         this._output = output;
@@ -235,7 +235,7 @@ public class IntegrationTests
 /// Test collection for integration tests to ensure proper fixture sharing.
 /// </summary>
 [CollectionDefinition("Integration")]
-public class IntegrationTestCollection : ICollectionFixture<IntegrationTestFixture>
+public class IntegrationTestCollection : ICollectionFixture<DockerComposeTestFixture>
 {
     // This class has no code, and is never created. Its purpose is simply
     // to be the place to apply [CollectionDefinition] and all the

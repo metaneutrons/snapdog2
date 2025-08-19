@@ -1,4 +1,4 @@
-using SnapDog2.Tests.Fixtures.Integration;
+using SnapDog2.Tests.Fixtures.Containers;
 
 namespace SnapDog2.Tests.Integration.Internal;
 

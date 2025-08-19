@@ -4,7 +4,7 @@ using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Configurations;
 using DotNet.Testcontainers.Containers;
 using Microsoft.Extensions.Logging;
-using SnapDog2.Tests.Fixtures.Integration;
+using SnapDog2.Tests.Fixtures.Containers;
 
 namespace SnapDog2.Tests.Fixtures.Containers;
 

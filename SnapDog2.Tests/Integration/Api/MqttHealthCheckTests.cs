@@ -1,4 +1,4 @@
-using SnapDog2.Tests.Fixtures.Integration;
+using SnapDog2.Tests.Fixtures.Containers;
 
 namespace SnapDog2.Tests.Integration.Api;
 
@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Configuration;
-using SnapDog2.Tests.Integration.Fixtures;
+using SnapDog2.Tests.Fixtures.Containers;
 
 [Collection("IntegrationContainers")]
 public class MqttHealthCheckTests : IClassFixture<MqttIntegrationWebApplicationFactory>

@@ -2,8 +2,8 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using FluentAssertions;
-using SnapDog2.Tests.Fixtures.Integration;
-using SnapDog2.Tests.Integration.Fixtures;
+using SnapDog2.Tests.Fixtures.Containers;
+using SnapDog2.Tests.Fixtures.Containers;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -14,13 +14,13 @@ namespace SnapDog2.Tests.Integration.Api;
 /// Tests the new simplified API structure with repeat and shuffle endpoints.
 /// </summary>
 [Collection("Integration")]
-public class ZonesApiIntegrationTests : IClassFixture<IntegrationTestFixture>
+public class ZonesApiIntegrationTests : IClassFixture<DockerComposeTestFixture>
 {
-    private readonly IntegrationTestFixture _fixture;
+    private readonly DockerComposeTestFixture _fixture;
     private readonly ITestOutputHelper _output;
     private readonly HttpClient _httpClient;
 
-    public ZonesApiIntegrationTests(IntegrationTestFixture fixture, ITestOutputHelper output)
+    public ZonesApiIntegrationTests(DockerComposeTestFixture fixture, ITestOutputHelper output)
     {
         this._fixture = fixture ?? throw new ArgumentNullException(nameof(fixture));
         this._output = output ?? throw new ArgumentNullException(nameof(output));

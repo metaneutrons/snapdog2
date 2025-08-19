@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Models;
 using SnapDog2.Tests.Fixtures.Containers;
-using SnapDog2.Tests.Fixtures.Integration;
+using SnapDog2.Tests.Fixtures.Containers;
 using SnapDog2.Tests.Fixtures.Shared;
 using Xunit.Abstractions;
 
@@ -20,18 +20,18 @@ namespace SnapDog2.Tests.Integration;
 [Trait("TestType", TestTypes.FaultInjection)]
 [Trait("TestSpeed", TestSpeed.Slow)]
 [Trait("TestRequirement", TestRequirements.Container)]
-public class FaultInjectionTests : IClassFixture<TestcontainersFixture>, IClassFixture<IntegrationTestFixture>
+public class FaultInjectionTests : IClassFixture<DockerComposeTestFixture>
 {
     private readonly ITestOutputHelper _output;
-    private readonly TestcontainersFixture _containersFixture;
-    private readonly IntegrationTestFixture _integrationFixture;
+    private readonly DockerComposeTestFixture _containersFixture;
+    private readonly DockerComposeTestFixture _integrationFixture;
     private readonly HttpClient _httpClient;
     private readonly IZoneGroupingService _zoneGroupingService;
 
     public FaultInjectionTests(
         ITestOutputHelper output,
-        TestcontainersFixture containersFixture,
-        IntegrationTestFixture integrationFixture
+        DockerComposeTestFixture containersFixture,
+        DockerComposeTestFixture integrationFixture
     )
     {
         _output = output;

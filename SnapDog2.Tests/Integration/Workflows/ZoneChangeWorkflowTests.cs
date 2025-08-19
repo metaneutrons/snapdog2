@@ -4,7 +4,7 @@ using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Models;
-using SnapDog2.Tests.Fixtures.Integration;
+using SnapDog2.Tests.Fixtures.Containers;
 using SnapDog2.Tests.Fixtures.Shared;
 using SnapDog2.Tests.Helpers.Extensions;
 
@@ -22,10 +22,10 @@ namespace SnapDog2.Tests.Integration.Workflows;
 [RequiresAttribute(TestRequirements.Network)]
 public class ZoneChangeWorkflowTests
 {
-    private readonly IntegrationTestFixture _fixture;
+    private readonly DockerComposeTestFixture _fixture;
     private readonly ITestOutputHelper _output;
 
-    public ZoneChangeWorkflowTests(IntegrationTestFixture fixture, ITestOutputHelper output)
+    public ZoneChangeWorkflowTests(DockerComposeTestFixture fixture, ITestOutputHelper output)
     {
         _fixture = fixture;
         _output = output;

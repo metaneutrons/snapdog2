@@ -24,7 +24,7 @@ RUN chmod +x /start.sh
 EXPOSE 1704/tcp
 EXPOSE 1705/tcp
 
-HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD pgrep -x snapclient || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD pgrep snapclient || exit 1
 
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 CMD ["/start.sh"]

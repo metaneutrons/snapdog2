@@ -3,19 +3,19 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using SnapDog2.Core.Abstractions;
-using SnapDog2.Tests.Fixtures.Integration;
-using SnapDog2.Tests.Integration.Fixtures;
+using SnapDog2.Tests.Fixtures.Containers;
+using SnapDog2.Tests.Fixtures.Containers;
 using SnapDog2.Tests.Testing;
 using Xunit;
 
 namespace SnapDog2.Tests.Integration.Api;
 
 [Collection("IntegrationTests")] // reuse existing fixture collection if defined
-public class NotificationPipelineMetricsTests : IClassFixture<IntegrationTestFixture>
+public class NotificationPipelineMetricsTests : IClassFixture<DockerComposeTestFixture>
 {
-    private readonly IntegrationTestFixture _fixture;
+    private readonly DockerComposeTestFixture _fixture;
 
-    public NotificationPipelineMetricsTests(IntegrationTestFixture fixture)
+    public NotificationPipelineMetricsTests(DockerComposeTestFixture fixture)
     {
         this._fixture = fixture;
     }

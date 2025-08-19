@@ -5,8 +5,8 @@ using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Models;
-using SnapDog2.Tests.Fixtures.Integration;
-using SnapDog2.Tests.Integration.Fixtures;
+using SnapDog2.Tests.Fixtures.Containers;
+using SnapDog2.Tests.Fixtures.Containers;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -20,11 +20,11 @@ namespace SnapDog2.Tests.Integration.Api;
 [Collection("Integration")]
 public class ZoneChangeFlowIntegrationTests
 {
-    private readonly IntegrationTestFixture _fixture;
+    private readonly DockerComposeTestFixture _fixture;
     private readonly HttpClient _client;
     private readonly ITestOutputHelper _output;
 
-    public ZoneChangeFlowIntegrationTests(IntegrationTestFixture fixture, ITestOutputHelper output)
+    public ZoneChangeFlowIntegrationTests(DockerComposeTestFixture fixture, ITestOutputHelper output)
     {
         this._fixture = fixture;
         this._client = fixture.HttpClient;
