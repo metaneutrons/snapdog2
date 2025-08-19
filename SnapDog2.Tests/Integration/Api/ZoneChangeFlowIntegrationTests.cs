@@ -14,7 +14,7 @@ namespace SnapDog2.Tests.Integration.Api;
 /// <summary>
 /// Integration tests for zone change flow to ensure proper client grouping,
 /// stream management, and state synchronization.
-/// Uses real Snapcast server and clients via Testcontainers.
+/// Uses real Snapcast server and clients via Docker Compose.
 /// </summary>
 [Collection("Integration")]
 public class ZoneChangeFlowIntegrationTests
