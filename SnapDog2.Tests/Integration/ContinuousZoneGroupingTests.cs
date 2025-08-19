@@ -1,3 +1,4 @@
+using System.Text.Json;
 using FluentAssertions;
 using SnapDog2.Tests.Fixtures.Containers;
 using SnapDog2.Tests.Fixtures.Shared;
@@ -80,31 +81,72 @@ public class ContinuousZoneGroupingTestsNew : IClassFixture<DockerComposeTestFix
         {
             await Task.Delay(5000); // Check every 5 seconds
 
-            // Check if zones are properly grouped again
-            var statusResponse = await _httpClient.GetAsync("/api/v1/zones");
-            if (statusResponse.IsSuccessStatusCode)
-            {
-                var statusContent = await statusResponse.Content.ReadAsStringAsync();
+            // Check actual Snapcast server status to verify correction
+            var snapcastStatus = await _testFixture.GetSnapcastServerStatusAsync();
+            var statusJson = JsonSerializer.Deserialize<JsonElement>(snapcastStatus.ToString());
 
-                // Parse and check if clients are properly distributed
-                // Zone 1 should have Living Room + Kitchen (2 clients)
-                // Zone 2 should have Bedroom (1 client)
-                if (
-                    statusContent.Contains("Living Room")
-                    && statusContent.Contains("Kitchen")
-                    && statusContent.Contains("Bedroom")
-                )
+            if (
+                statusJson.TryGetProperty("result", out var result)
+                && result.TryGetProperty("server", out var server)
+                && server.TryGetProperty("groups", out var groups)
+            )
+            {
+                var groupsArray = groups.EnumerateArray().ToList();
+
+                // Find Zone1 and Zone2 groups
+                var zone1Group = groupsArray.FirstOrDefault(g =>
+                    g.TryGetProperty("stream_id", out var streamId) && streamId.GetString() == "Zone1"
+                );
+                var zone2Group = groupsArray.FirstOrDefault(g =>
+                    g.TryGetProperty("stream_id", out var streamId) && streamId.GetString() == "Zone2"
+                );
+
+                if (zone1Group.ValueKind != JsonValueKind.Undefined && zone2Group.ValueKind != JsonValueKind.Undefined)
                 {
-                    corrected = true;
-                    _output.WriteLine(
-                        $"✅ Automatic correction detected after {(DateTime.UtcNow - startTime).TotalSeconds:F1} seconds"
-                    );
-                }
-                else
-                {
-                    _output.WriteLine(
-                        $"⏳ Still waiting for correction... ({(DateTime.UtcNow - startTime).TotalSeconds:F1}s elapsed)"
-                    );
+                    // Check Zone1 has Living Room + Kitchen (2 clients)
+                    var zone1Clients = zone1Group.TryGetProperty("clients", out var z1Clients)
+                        ? z1Clients.EnumerateArray().ToList()
+                        : new List<JsonElement>();
+                    var zone1ClientIds = zone1Clients
+                        .Select(c => c.TryGetProperty("id", out var id) ? id.GetString() : "")
+                        .ToList();
+
+                    // Check Zone2 has Bedroom (1 client)
+                    var zone2Clients = zone2Group.TryGetProperty("clients", out var z2Clients)
+                        ? z2Clients.EnumerateArray().ToList()
+                        : new List<JsonElement>();
+                    var zone2ClientIds = zone2Clients
+                        .Select(c => c.TryGetProperty("id", out var id) ? id.GetString() : "")
+                        .ToList();
+
+                    // Verify correct grouping: Zone1 should have living-room + kitchen, Zone2 should have bedroom
+                    if (
+                        zone1ClientIds.Contains("living-room")
+                        && zone1ClientIds.Contains("kitchen")
+                        && zone2ClientIds.Contains("bedroom")
+                        && zone2ClientIds.Count == 1
+                    )
+                    {
+                        corrected = true;
+                        _output.WriteLine(
+                            $"✅ Automatic correction detected after {(DateTime.UtcNow - startTime).TotalSeconds:F1} seconds"
+                        );
+                        _output.WriteLine($"📊 Zone1 clients: [{string.Join(", ", zone1ClientIds)}]");
+                        _output.WriteLine($"📊 Zone2 clients: [{string.Join(", ", zone2ClientIds)}]");
+                        break;
+                    }
+                    else
+                    {
+                        _output.WriteLine(
+                            $"⏳ Still waiting for correction... ({(DateTime.UtcNow - startTime).TotalSeconds:F1}s elapsed)"
+                        );
+                        _output.WriteLine(
+                            $"📊 Zone1 clients: [{string.Join(", ", zone1ClientIds)}] (expected: living-room, kitchen)"
+                        );
+                        _output.WriteLine(
+                            $"📊 Zone2 clients: [{string.Join(", ", zone2ClientIds)}] (expected: bedroom)"
+                        );
+                    }
                 }
             }
         }
