@@ -11,16 +11,16 @@ using Xunit.Abstractions;
 namespace SnapDog2.Tests.Integration;
 
 /// <summary>
-/// Integration tests using the comprehensive test fixture with MQTT, KNX, and Snapcast services.
+/// Application startup and dependency injection integration tests.
 /// These tests validate that the application infrastructure works correctly with real dependencies.
 /// </summary>
 [Collection("Integration")]
-public class IntegrationTests
+public class ApplicationStartupIntegrationTests
 {
     private readonly DockerComposeTestFixture _fixture;
     private readonly ITestOutputHelper _output;
 
-    public IntegrationTests(DockerComposeTestFixture fixture, ITestOutputHelper output)
+    public ApplicationStartupIntegrationTests(DockerComposeTestFixture fixture, ITestOutputHelper output)
     {
         this._fixture = fixture;
         this._output = output;

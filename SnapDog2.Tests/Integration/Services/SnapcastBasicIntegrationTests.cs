@@ -3,7 +3,7 @@ using SnapDog2.Tests.Fixtures.Containers;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace SnapDog2.Tests.Integration;
+namespace SnapDog2.Tests.Integration.Services;
 
 /// <summary>
 /// Basic integration tests for Snapcast functionality that validate the working SnapDog application.

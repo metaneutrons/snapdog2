@@ -8,7 +8,7 @@ using SnapDog2.Tests.Fixtures.Containers;
 using SnapDog2.Tests.Fixtures.Shared;
 using Xunit.Abstractions;
 
-namespace SnapDog2.Tests.Integration;
+namespace SnapDog2.Tests.Integration.Services;
 
 /// <summary>
 /// Enterprise-grade real-world scenario tests for zone grouping functionality.

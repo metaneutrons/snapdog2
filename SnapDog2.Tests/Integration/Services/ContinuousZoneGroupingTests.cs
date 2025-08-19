@@ -4,7 +4,7 @@ using SnapDog2.Tests.Fixtures.Containers;
 using SnapDog2.Tests.Fixtures.Shared;
 using Xunit.Abstractions;
 
-namespace SnapDog2.Tests.Integration;
+namespace SnapDog2.Tests.Integration.Services;
 
 /// <summary>
 /// Tests for the continuous zone grouping background service using Docker Compose pattern.
@@ -14,13 +14,13 @@ namespace SnapDog2.Tests.Integration;
 [Trait("Category", TestCategories.Integration)]
 [Trait("TestType", TestTypes.RealWorldScenario)]
 [Trait("TestSpeed", TestSpeed.Slow)]
-public class ContinuousZoneGroupingTestsNew : IClassFixture<DockerComposeTestFixture>
+public class ContinuousZoneGroupingTests : IClassFixture<DockerComposeTestFixture>
 {
     private readonly ITestOutputHelper _output;
     private readonly DockerComposeTestFixture _testFixture;
     private readonly HttpClient _httpClient;
 
-    public ContinuousZoneGroupingTestsNew(ITestOutputHelper output, DockerComposeTestFixture testFixture)
+    public ContinuousZoneGroupingTests(ITestOutputHelper output, DockerComposeTestFixture testFixture)
     {
         _output = output;
         _testFixture = testFixture;
