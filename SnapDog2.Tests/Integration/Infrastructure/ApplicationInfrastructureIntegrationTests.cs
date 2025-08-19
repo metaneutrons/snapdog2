@@ -8,19 +8,19 @@ using SnapDog2.Tests.Fixtures.Containers;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace SnapDog2.Tests.Integration;
+namespace SnapDog2.Tests.Integration.Infrastructure;
 
 /// <summary>
-/// Application startup and dependency injection integration tests.
-/// These tests validate that the application infrastructure works correctly with real dependencies.
+/// Integration tests for application infrastructure including service startup, connectivity,
+/// and cross-service communication. Tests the complete application stack with real dependencies.
 /// </summary>
 [Collection("Integration")]
-public class ApplicationStartupIntegrationTests
+public class ApplicationInfrastructureIntegrationTests
 {
     private readonly DockerComposeTestFixture _fixture;
     private readonly ITestOutputHelper _output;
 
-    public ApplicationStartupIntegrationTests(DockerComposeTestFixture fixture, ITestOutputHelper output)
+    public ApplicationInfrastructureIntegrationTests(DockerComposeTestFixture fixture, ITestOutputHelper output)
     {
         this._fixture = fixture;
         this._output = output;
