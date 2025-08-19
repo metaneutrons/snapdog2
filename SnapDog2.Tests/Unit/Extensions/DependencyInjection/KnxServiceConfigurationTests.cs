@@ -1,4 +1,4 @@
-namespace SnapDog2.Tests.Unit.Worker.DI;
+namespace SnapDog2.Tests.Unit.Extensions.DependencyInjection;
 
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,7 +7,11 @@ using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Extensions.DependencyInjection;
 
-public class KnxConfigurationTests
+/// <summary>
+/// Unit tests for KNX service dependency injection configuration.
+/// Tests the extension methods in SnapDog2.Extensions.DependencyInjection.KnxServiceConfiguration.
+/// </summary>
+public class KnxServiceConfigurationTests
 {
     [Fact]
     [Trait("Category", "Unit")]
@@ -35,7 +39,7 @@ public class KnxConfigurationTests
 
     [Fact]
     [Trait("Category", "Unit")]
-    public void AddKnxService_WithValidGroupAddresses_ShouldSucceed()
+    public void AddKnxService_WithValidConfiguration_ShouldSucceed()
     {
         // Arrange
         var services = new ServiceCollection();
@@ -45,6 +49,25 @@ public class KnxConfigurationTests
 
         // Act & Assert
         services.Invoking(s => s.AddKnxService(configuration)).Should().NotThrow();
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public void AddKnxService_WhenDisabled_ShouldNotRegisterService()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddLogging();
+
+        var configuration = CreateTestConfiguration(enabled: false);
+
+        // Act
+        services.AddKnxService(configuration);
+        var serviceProvider = services.BuildServiceProvider();
+        var knxService = serviceProvider.GetService<IKnxService>();
+
+        // Assert
+        knxService.Should().BeNull("KNX service should not be registered when disabled");
     }
 
     private static SnapDogConfiguration CreateTestConfiguration(bool enabled)
@@ -101,41 +124,6 @@ public class KnxConfigurationTests
                     },
                 },
             },
-        };
-    }
-
-    private static SnapDogConfiguration CreateInvalidTestConfiguration()
-    {
-        return new SnapDogConfiguration
-        {
-            Services = new ServicesConfig
-            {
-                Knx = new KnxConfig
-                {
-                    Enabled = true,
-                    Gateway = "192.168.1.10",
-                    Port = -1, // Invalid port
-                    Timeout = -5, // Invalid timeout
-                    AutoReconnect = true,
-                },
-            },
-            Zones = new List<ZoneConfig>
-            {
-                new ZoneConfig
-                {
-                    Name = "Living Room",
-                    Sink = "living-room",
-                    Knx = new ZoneKnxConfig
-                    {
-                        Enabled = true,
-                        Volume = "invalid/address/format", // Invalid format
-                        VolumeStatus = "1/0/2",
-                        Mute = "1/0/3",
-                        MuteStatus = "1/0/4",
-                    },
-                },
-            },
-            Clients = new List<ClientConfig>(),
         };
     }
 }
