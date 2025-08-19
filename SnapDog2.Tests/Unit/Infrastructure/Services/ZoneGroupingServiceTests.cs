@@ -3,30 +3,31 @@ using SnapDog2.Core.Models;
 using SnapDog2.Tests.Fixtures.Shared;
 using Xunit.Abstractions;
 
-namespace SnapDog2.Tests.Unit;
+namespace SnapDog2.Tests.Unit.Infrastructure.Services;
 
 /// <summary>
-/// Unit tests for zone grouping validation logic.
+/// Unit tests for ZoneGroupingService validation logic.
 /// Tests the core logic that detects when clients are in wrong zone groups.
+/// Specifically tests the AnalyzeZoneGrouping method's validation algorithms.
 /// </summary>
 [Collection(TestCategories.Unit)]
 [Trait("Category", TestCategories.Unit)]
 [Trait("TestType", TestTypes.Service)]
 [Trait("TestSpeed", TestSpeed.Fast)]
-public class ZoneGroupingValidationTests
+public class ZoneGroupingServiceTests
 {
     private readonly ITestOutputHelper _output;
 
-    public ZoneGroupingValidationTests(ITestOutputHelper output)
+    public ZoneGroupingServiceTests(ITestOutputHelper output)
     {
         _output = output;
     }
 
     [Fact]
-    public void ZoneGroupingLogic_WhenClientInCorrectGroup_ShouldBeValid()
+    public void AnalyzeZoneGrouping_WhenClientInCorrectGroup_ShouldBeValid()
     {
         // Arrange
-        _output.WriteLine("🧪 Testing zone grouping logic - client in correct group");
+        _output.WriteLine("🧪 Testing zone grouping analysis - client in correct group");
 
         var zoneStreamId = "/snapsinks/zone2";
         var clientId = "bedroom";
@@ -52,10 +53,10 @@ public class ZoneGroupingValidationTests
     }
 
     [Fact]
-    public void ZoneGroupingLogic_WhenClientInWrongGroup_ShouldBeInvalid()
+    public void AnalyzeZoneGrouping_WhenClientInWrongGroup_ShouldBeInvalid()
     {
         // Arrange - This tests the specific bug we fixed
-        _output.WriteLine("🧪 Testing zone grouping logic - client in wrong group");
+        _output.WriteLine("🧪 Testing zone grouping analysis - client in wrong group");
 
         var zoneStreamId = "/snapsinks/zone2";
         var clientId = "bedroom";
@@ -80,10 +81,10 @@ public class ZoneGroupingValidationTests
     }
 
     [Fact]
-    public void ZoneGroupingLogic_WhenClientNotFound_ShouldBeInvalid()
+    public void AnalyzeZoneGrouping_WhenClientNotFound_ShouldBeInvalid()
     {
         // Arrange
-        _output.WriteLine("🧪 Testing zone grouping logic - client not found");
+        _output.WriteLine("🧪 Testing zone grouping analysis - client not found");
 
         var zoneStreamId = "/snapsinks/zone2";
         var clientId = "missing-client";
@@ -119,7 +120,7 @@ public class ZoneGroupingValidationTests
     }
 
     /// <summary>
-    /// Simplified validation logic that mimics the fixed AnalyzeZoneGrouping method.
+    /// Simplified validation logic that mimics the AnalyzeZoneGrouping method in ZoneGroupingService.
     /// This tests the core logic: clients should be in the group that matches their zone's stream.
     /// </summary>
     private static ValidationResult ValidateClientGrouping(string clientId, string zoneStreamId, SimpleGroup[] groups)
