@@ -9,20 +9,6 @@ using EnvoyConfig.Attributes;
 public class SnapcastServerConfig
 {
     /// <summary>
-    /// Audio codec for Snapcast server.
-    /// Maps to: SNAPDOG_SNAPCAST_CODEC
-    /// </summary>
-    [Env(Key = "CODEC", Default = "flac")]
-    public string Codec { get; set; } = "flac";
-
-    /// <summary>
-    /// Sample format (sample rate:bit depth:channels).
-    /// Maps to: SNAPDOG_SNAPCAST_SAMPLEFORMAT
-    /// </summary>
-    [Env(Key = "SAMPLEFORMAT", Default = "48000:16:2")]
-    public string SampleFormat { get; set; } = "48000:16:2";
-
-    /// <summary>
     /// SnapWeb HTTP port.
     /// Maps to: SNAPDOG_SERVICES_SNAPCAST_HTTP_PORT
     /// </summary>

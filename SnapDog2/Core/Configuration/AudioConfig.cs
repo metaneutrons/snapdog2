@@ -38,7 +38,7 @@ public class AudioConfig
     /// Maps to: SNAPDOG_AUDIO_CODEC
     /// </summary>
     [Env(Key = "CODEC", Default = "flac")]
-    public string Codec { get; set; }
+    public string Codec { get; set; } = "flac";
 
     /// <summary>
     /// HTTP connection timeout in seconds for streaming sources.

@@ -287,7 +287,7 @@ public static class StartupInformationHelper
         // Snapcast Server Configuration
         Console.WriteLine("   🎵 Snapcast Server:");
         Console.WriteLine(
-            $"     Codec: {config.SnapcastServer.Codec}, Sample Format: {config.SnapcastServer.SampleFormat}"
+            $"     Codec: {config.Services.Audio.Codec}, Sample Format: {config.Services.Audio.SnapcastSampleFormat}"
         );
         Console.WriteLine(
             $"     Ports - Web: {config.SnapcastServer.WebServerPort}, WebSocket: {config.SnapcastServer.WebSocketPort}, JSON-RPC: {config.SnapcastServer.JsonRpcPort}"
