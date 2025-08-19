@@ -1,0 +1,47 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# SnapDog2 Test Application Container
+# ═══════════════════════════════════════════════════════════════════════════════
+# Optimized for integration testing - minimal, fast-starting container
+# ═══════════════════════════════════════════════════════════════════════════════
+
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+WORKDIR /app
+EXPOSE 5000
+EXPOSE 5001
+
+# Create non-root user for security
+RUN adduser --disabled-password --gecos '' --uid 1000 testuser && \
+    chown -R testuser:testuser /app
+USER testuser
+
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+WORKDIR /src
+
+# Copy project files
+COPY ["SnapDog2/SnapDog2.csproj", "SnapDog2/"]
+RUN dotnet restore "SnapDog2/SnapDog2.csproj"
+
+# Copy source code
+COPY . .
+WORKDIR "/src/SnapDog2"
+
+# Build application
+RUN dotnet build "SnapDog2.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "SnapDog2.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+
+# Test-specific environment variables
+ENV DOTNET_ENVIRONMENT=Test
+ENV ASPNETCORE_ENVIRONMENT=Test
+ENV ASPNETCORE_URLS=http://+:5000;https://+:5001
+
+# Health check for test reliability
+HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:5000/health || exit 1
+
+ENTRYPOINT ["dotnet", "SnapDog2.dll"]

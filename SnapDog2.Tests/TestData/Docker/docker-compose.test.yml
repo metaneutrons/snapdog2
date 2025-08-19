@@ -1,34 +1,32 @@
 # ═══════════════════════════════════════════════════════════════════════════════
-# SnapDog2 Integration Test Environment
+# SnapDog2 Integration Test Environment - Self-Contained
 # ═══════════════════════════════════════════════════════════════════════════════
-# Based on proven devcontainer pattern - single coordinated environment
-# All services use same network and configuration as development environment
+# Fully self-contained test environment with dedicated test-optimized containers
+# No external dependencies on devcontainer infrastructure
 # ═══════════════════════════════════════════════════════════════════════════════
 
 name: snapdog-test
 services:
-  # SnapDog2 application for testing - same as dev but with test overrides
+  # SnapDog2 application for testing - dedicated test container
   app:
     build:
-      context: .
-      dockerfile: ./Dockerfile
-      target: development
+      context: ../../../..  # Build from project root
+      dockerfile: SnapDog2.Tests/TestData/Docker/containers/app/Dockerfile.test
     volumes:
-      - .:/app:cached
       - snapcast_sinks:/snapsinks # Shared audio sinks
     environment:
       - DOTNET_ENVIRONMENT=Test
       - ASPNETCORE_ENVIRONMENT=Test
-      # Override Snapcast connection to use test server
+      # Snapcast connection settings
       - SNAPDOG_SERVICES_SNAPCAST_ADDRESS=snapcast-server
-      - SNAPDOG_SERVICES_SNAPCAST_JSONRPC_PORT=1705
+      - SNAPDOG_SERVICES_SNAPCAST_JSONRPC_PORT=1704
       - SNAPDOG_SERVICES_SNAPCAST_HTTP_PORT=1780
-      # Override MQTT to use test broker
+      # MQTT connection settings
       - SNAPDOG_SERVICES_MQTT_BROKER_ADDRESS=mqtt
       - SNAPDOG_SERVICES_MQTT_PORT=1883
       - SNAPDOG_SERVICES_MQTT_USERNAME=snapdog
       - SNAPDOG_SERVICES_MQTT_PASSWORD=snapdog
-      # Enable KNX for testing with test daemon
+      # KNX connection settings
       - SNAPDOG_SERVICES_KNX_ENABLED=true
       - SNAPDOG_SERVICES_KNX_CONNECTION_TYPE=tunnel
       - SNAPDOG_SERVICES_KNX_GATEWAY=knxd
@@ -38,33 +36,33 @@ services:
       # Test-specific settings
       - SNAPDOG_SYSTEM_LOG_LEVEL=Information
       - SNAPDOG_SYSTEM_HEALTH_CHECKS_ENABLED=true
-      # Zone configuration (same as dev)
-      - SNAPDOG_ZONE_1_NAME=Ground Floor
+      # Zone configuration
+      - SNAPDOG_ZONE_1_NAME=Test Zone 1
       - SNAPDOG_ZONE_1_SINK=/snapsinks/zone1
-      - SNAPDOG_ZONE_2_NAME=1st Floor
+      - SNAPDOG_ZONE_2_NAME=Test Zone 2
       - SNAPDOG_ZONE_2_SINK=/snapsinks/zone2
-      # Client configuration (same as dev)
+      # Client configuration
       - SNAPDOG_CLIENT_1_DEFAULT_ZONE=1
-      - SNAPDOG_CLIENT_1_MAC=02:42:ac:11:00:10
-      - SNAPDOG_CLIENT_1_NAME=Living Room
+      - SNAPDOG_CLIENT_1_MAC=02:42:ac:14:00:10
+      - SNAPDOG_CLIENT_1_NAME=Test Living Room
       - SNAPDOG_CLIENT_2_DEFAULT_ZONE=1
-      - SNAPDOG_CLIENT_2_MAC=02:42:ac:11:00:11
-      - SNAPDOG_CLIENT_2_NAME=Kitchen
+      - SNAPDOG_CLIENT_2_MAC=02:42:ac:14:00:11
+      - SNAPDOG_CLIENT_2_NAME=Test Kitchen
       - SNAPDOG_CLIENT_3_DEFAULT_ZONE=2
-      - SNAPDOG_CLIENT_3_MAC=02:42:ac:11:00:12
-      - SNAPDOG_CLIENT_3_NAME=Bedroom
+      - SNAPDOG_CLIENT_3_MAC=02:42:ac:14:00:12
+      - SNAPDOG_CLIENT_3_NAME=Test Bedroom
     depends_on:
       snapcast-server:
         condition: service_healthy
       mqtt:
-        condition: service_started
+        condition: service_healthy
       knxd:
         condition: service_healthy
     networks:
-      snapdog:
-        ipv4_address: 172.30.0.2
+      snapdog-test:
+        ipv4_address: 172.24.0.2
     ports:
-      - "5001:5000" # API port for test access
+      - "5001:5000"  # HTTP port for test access
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
       interval: 10s
@@ -72,134 +70,136 @@ services:
       retries: 3
       start_period: 30s
 
-  # Snapcast Server - same config as dev but for testing
+  # MQTT Broker - dedicated test container
+  mqtt:
+    build:
+      context: containers/mqtt
+      dockerfile: Dockerfile
+    volumes:
+      - ./configs/mosquitto.test.conf:/mosquitto/config/mosquitto.conf:ro
+    networks:
+      snapdog-test:
+        ipv4_address: 172.24.0.3
+    ports:
+      - "1883:1883"  # MQTT port for test access
+    healthcheck:
+      test: ["CMD", "mosquitto_pub", "-h", "localhost", "-p", "1883", "-u", "snapdog", "-P", "snapdog", "-t", "health", "-m", "check"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+  # Snapcast Server - dedicated test container
   snapcast-server:
     build:
-      context: ./devcontainer/snapcast-server
-    hostname: snapcast-server
-    volumes:
-      - snapcast_sinks:/snapsinks
-    environment:
-      # Zone configuration (same as SnapDog2 app)
-      - SNAPDOG_ZONE_1_NAME=Ground Floor
-      - SNAPDOG_ZONE_1_SINK=/snapsinks/zone1
-      - SNAPDOG_ZONE_2_NAME=1st Floor
-      - SNAPDOG_ZONE_2_SINK=/snapsinks/zone2
-      # Snapcast server configuration
-      - SNAPCAST_JSONRPC_PORT=1705
-      - SNAPCAST_WEBSERVER_PORT=1780
-      - SNAPCAST_WEBSOCKET_PORT=1704
-    networks:
-      snapdog:
-        ipv4_address: 172.30.0.5
-    ports:
-      - "1705:1705" # JSON-RPC port for test access
-      - "1780:1780" # Web server port for test access
-      - "1704:1704" # WebSocket port for test access
-    healthcheck:
-      test: ["CMD", "nc", "-z", "localhost", "1705"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-      start_period: 10s
-
-  # KNX Gateway Simulator for testing - same as dev but with test suffix
-  knxd:
-    build:
-      context: ./devcontainer/knxd
+      context: containers/snapcast-server
       dockerfile: Dockerfile
-    hostname: knxd
-    environment:
-      - ADDRESS=0.0.1 # KNX daemon address (standard format)
-      - CLIENT_ADDRESS=0.0.2:8 # Client address range (start:count)
-      - INTERFACE=dummy # Use dummy interface for simulation
-      - DEBUG_LEVEL=verbose # Debug level (verbose for troubleshooting)
-      - FILTERS=single,pace:queue # Filters with queue to avoid warnings
+    volumes:
+      - ./configs/snapserver.test.conf:/etc/snapserver.conf:ro
+      - snapcast_sinks:/tmp/snapfifo
     networks:
-      snapdog:
-        ipv4_address: 172.30.0.10
+      snapdog-test:
+        ipv4_address: 172.24.0.5
     ports:
-      - "3671:3671/udp" # KNX/IP port for test access
+      - "1704:1704"  # JSON-RPC port
+      - "1705:1705"  # TCP port
+      - "1780:1780"  # HTTP port
     healthcheck:
-      test: ["CMD", "netstat", "-ln", "|", "grep", ":3671"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-      start_period: 10s
+      test: ["CMD", "curl", "-f", "http://localhost:1780"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
 
-  # Snapcast Clients - same as dev but for testing
-  snapcast-client-living-room:
+  # Snapcast Client - Living Room (Test)
+  snapcast-client-living:
     build:
-      context: ./devcontainer/snapcast-client
+      context: containers/snapcast-client
+      dockerfile: Dockerfile
+    command: ["snapclient", "--host", "snapcast-server", "--port", "1704", "--hostID", "02:42:ac:14:00:10", "--player", "null"]
     depends_on:
       snapcast-server:
         condition: service_healthy
-    environment:
-      - SNAPSERVER_HOST=172.30.0.5
-      - CLIENT_ID=living-room
-      - CLIENT_NAME=Living Room
-      - FIXED_MAC_ADDRESS=02:42:ac:11:00:10
     networks:
-      snapdog:
-        ipv4_address: 172.30.0.6
-        mac_address: 02:42:ac:11:00:10
+      snapdog-test:
+        ipv4_address: 172.24.0.6
+        mac_address: 02:42:ac:14:00:10
+    healthcheck:
+      test: ["CMD", "pgrep", "snapclient"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
 
+  # Snapcast Client - Kitchen (Test)
   snapcast-client-kitchen:
     build:
-      context: ./devcontainer/snapcast-client
+      context: containers/snapcast-client
+      dockerfile: Dockerfile
+    command: ["snapclient", "--host", "snapcast-server", "--port", "1704", "--hostID", "02:42:ac:14:00:11", "--player", "null"]
     depends_on:
       snapcast-server:
         condition: service_healthy
-    environment:
-      - SNAPSERVER_HOST=172.30.0.5
-      - CLIENT_ID=kitchen
-      - CLIENT_NAME=Kitchen
-      - FIXED_MAC_ADDRESS=02:42:ac:11:00:11
     networks:
-      snapdog:
-        ipv4_address: 172.30.0.7
-        mac_address: 02:42:ac:11:00:11
+      snapdog-test:
+        ipv4_address: 172.24.0.7
+        mac_address: 02:42:ac:14:00:11
+    healthcheck:
+      test: ["CMD", "pgrep", "snapclient"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
 
+  # Snapcast Client - Bedroom (Test)
   snapcast-client-bedroom:
     build:
-      context: ./devcontainer/snapcast-client
+      context: containers/snapcast-client
+      dockerfile: Dockerfile
+    command: ["snapclient", "--host", "snapcast-server", "--port", "1704", "--hostID", "02:42:ac:14:00:12", "--player", "null"]
     depends_on:
       snapcast-server:
         condition: service_healthy
-    environment:
-      - SNAPSERVER_HOST=172.30.0.5
-      - CLIENT_ID=bedroom
-      - CLIENT_NAME=Bedroom
-      - FIXED_MAC_ADDRESS=02:42:ac:11:00:12
     networks:
-      snapdog:
-        ipv4_address: 172.30.0.8
-        mac_address: 02:42:ac:11:00:12
+      snapdog-test:
+        ipv4_address: 172.24.0.8
+        mac_address: 02:42:ac:14:00:12
+    healthcheck:
+      test: ["CMD", "pgrep", "snapclient"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
 
-  # MQTT Broker for testing
-  mqtt:
-    image: eclipse-mosquitto:2.0
+  # KNX Daemon - dedicated test container
+  knxd:
+    build:
+      context: containers/knxd
+      dockerfile: Dockerfile
     volumes:
-      - ./devcontainer/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
-      - ./devcontainer/mosquitto/passwd:/mosquitto/config/passwd
-      - mqtt_data_test:/mosquitto/data
-      - mqtt_logs_test:/mosquitto/log
-    environment:
-      - MOSQUITTO_LOG_LEVEL=debug
+      - ./configs/knxd.test.conf:/etc/knxd.conf:ro
     networks:
-      snapdog:
-        ipv4_address: 172.30.0.3
+      snapdog-test:
+        ipv4_address: 172.24.0.10
     ports:
-      - "1883:1883" # MQTT port for test access
+      - "3671:3671"  # KNX tunnel port
+      - "6720:6720"  # KNX web interface port
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "3671"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
 
-volumes:
-  snapcast_sinks: # Shared volume for audio sinks
-  mqtt_data_test: # MQTT persistence data
-  mqtt_logs_test: # MQTT logs
-
+# Test network - isolated from development
 networks:
-  snapdog:
+  snapdog-test:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.30.0.0/16
+        - subnet: 172.24.0.0/16
+
+# Shared volumes for test environment
+volumes:
+  snapcast_sinks:
+    driver: local
