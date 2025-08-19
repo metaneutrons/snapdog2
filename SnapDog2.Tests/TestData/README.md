@@ -1,6 +1,13 @@
 # 📁 Test Data Directory - Self-Contained Test Infrastructure
 
-This directory contains a **fully self-contained test infrastructure** for SnapDog2 integration tests. No external dependencies on development containers or configurations.
+This directory contains a **fully self-contained test infrastructure** for SnapDog2 integration tests, **based on proven devcontainer implementations** but optimized for testing.
+
+## 🎯 **IMPORTANT: Based on Devcontainer Templates**
+
+All test containers are **adapted from the proven devcontainer implementations** to ensure:
+- ✅ **Same proven approach** - Uses the working devcontainer logic
+- ✅ **Test optimizations** - Enhanced for testing reliability and speed
+- ✅ **No reinvention** - Leverages existing, tested container definitions
 
 ## 🏗️ Directory Structure
 
@@ -8,77 +15,105 @@ This directory contains a **fully self-contained test infrastructure** for SnapD
 TestData/
 ├── Docker/                                    # Self-contained Docker test environment
 │   ├── docker-compose.test.yml               # Main test environment orchestration
-│   ├── containers/                           # Dedicated test container definitions
+│   ├── containers/                           # Test containers based on devcontainer templates
 │   │   ├── app/
 │   │   │   └── Dockerfile.test               # Test-optimized SnapDog2 container
 │   │   ├── mqtt/
-│   │   │   ├── Dockerfile                    # Minimal MQTT broker
-│   │   │   └── mosquitto.test.conf           # MQTT test configuration
+│   │   │   ├── Dockerfile                    # Based on devcontainer MQTT setup
+│   │   │   └── mosquitto.test.conf           # Adapted from devcontainer/mosquitto/mosquitto.conf
 │   │   ├── snapcast-server/
-│   │   │   ├── Dockerfile                    # Test Snapcast server
-│   │   │   └── snapserver.test.conf          # Snapcast test configuration
+│   │   │   ├── Dockerfile                    # Based on devcontainer/snapcast-server/Dockerfile
+│   │   │   └── snapserver.test.conf          # Test-optimized Snapcast configuration
 │   │   ├── snapcast-client/
-│   │   │   └── Dockerfile                    # Test Snapcast clients
+│   │   │   ├── Dockerfile                    # Based on devcontainer/snapcast-client/Dockerfile
+│   │   │   ├── start.test.sh                 # Adapted from devcontainer/snapcast-client/start.sh
+│   │   │   └── supervisord.test.conf         # Adapted from devcontainer/snapcast-client/supervisord.conf
 │   │   └── knxd/
-│   │       ├── Dockerfile                    # Test KNX daemon
-│   │       └── knxd.test.conf                # KNX test configuration
+│   │       ├── Dockerfile                    # Based on devcontainer/knxd/Dockerfile
+│   │       └── knxd.test.conf                # Test-specific KNX configuration
 │   └── configs/                              # Shared test configurations
-│       ├── mosquitto.test.conf               # MQTT broker config
-│       ├── snapserver.test.conf              # Snapcast server config
-│       └── knxd.test.conf                    # KNX daemon config
 └── README.md                                 # This file
 ```
 
+## 🔄 **Devcontainer Template Adaptations**
+
+### **MQTT Broker** (`mqtt/`)
+- **Template**: `devcontainer/mosquitto/mosquitto.conf`
+- **Adaptations**: 
+  - Disabled persistence for clean test state
+  - Enhanced logging for test debugging
+  - Simplified authentication (snapdog/snapdog)
+  - Optimized timeouts for test reliability
+
+### **Snapcast Server** (`snapcast-server/`)
+- **Template**: `devcontainer/snapcast-server/Dockerfile`
+- **Adaptations**:
+  - Same Alpine + compiled approach
+  - Same build dependencies and process
+  - Test-specific named pipes for audio streams
+  - Enhanced health checks for test reliability
+
+### **Snapcast Clients** (`snapcast-client/`)
+- **Template**: `devcontainer/snapcast-client/Dockerfile` + `start.sh` + `supervisord.conf`
+- **Adaptations**:
+  - Same Alpine + supervisor approach
+  - Same MAC address detection logic
+  - Test-specific MAC addresses (02:42:ac:14:00:xx)
+  - Same null audio configuration
+  - Enhanced health checks
+
+### **KNX Daemon** (`knxd/`)
+- **Template**: `devcontainer/knxd/Dockerfile`
+- **Adaptations**:
+  - Same Alpine edge + knxd approach
+  - Same user and directory setup
+  - Test-specific dummy backend configuration
+  - Enhanced health checks for test reliability
+
 ## 🎯 Self-Contained Design Principles
 
-### ✅ **Fully Explicit Dependencies**
-- All container definitions are in the test project
-- No references to external devcontainer files
-- All configurations are test-specific and optimized
+### ✅ **Proven Foundation**
+- All containers based on working devcontainer implementations
+- Same build processes and dependencies
+- Same runtime configurations adapted for testing
 
-### ✅ **Test-Optimized Containers**
-- **Minimal size** - Only essential components installed
-- **Fast startup** - Optimized for quick test execution
-- **Health checks** - Reliable service readiness detection
-- **Test-specific configs** - Simplified settings for testing
+### ✅ **Test-Optimized Enhancements**
+- **Health checks** - Added to all services for reliability
+- **Clean state** - No persistence between test runs
+- **Fast startup** - Optimized configurations for speed
+- **Enhanced logging** - Better debugging for test failures
 
 ### ✅ **Isolated Test Environment**
 - **Separate network** - `172.24.0.0/16` (different from dev `172.25.0.0/16`)
-- **Test-specific MACs** - `02:42:ac:14:00:xx` pattern
-- **No persistence** - Clean state for each test run
-- **Dedicated ports** - Avoid conflicts with development environment
+- **Test-specific MACs** - `02:42:ac:14:00:xx` pattern (different from dev)
+- **No conflicts** - Completely isolated from development environment
 
 ## 🐳 Container Details
 
 ### **Application Container** (`app/Dockerfile.test`)
-- **Base**: `mcr.microsoft.com/dotnet/aspnet:9.0`
 - **Purpose**: Test-optimized SnapDog2 application
-- **Features**: Health checks, non-root user, minimal dependencies
-- **Environment**: Test-specific configuration
+- **Base**: `mcr.microsoft.com/dotnet/aspnet:9.0`
+- **Features**: Health checks, test environment variables
 
 ### **MQTT Broker** (`mqtt/Dockerfile`)
+- **Template**: Devcontainer mosquitto setup
 - **Base**: `eclipse-mosquitto:2.0-openssl`
-- **Purpose**: Lightweight message broker for testing
-- **Features**: Simple auth (snapdog/snapdog), no persistence
-- **Config**: Optimized for test reliability
+- **Adaptations**: Test-optimized configuration, no persistence
 
 ### **Snapcast Server** (`snapcast-server/Dockerfile`)
-- **Base**: `debian:bookworm-slim`
-- **Purpose**: Multi-room audio server for testing
-- **Features**: Named pipes for audio streams, web interface
-- **Config**: Two test zones with health monitoring
+- **Template**: Devcontainer snapcast-server (Alpine + compiled)
+- **Base**: `alpine:3.21` with compiled Snapcast v0.31.0
+- **Adaptations**: Test audio streams, enhanced health checks
 
 ### **Snapcast Clients** (`snapcast-client/Dockerfile`)
-- **Base**: `debian:bookworm-slim`
-- **Purpose**: Simulated audio playback devices
-- **Features**: Null audio player (no actual audio), fixed MAC addresses
-- **Instances**: Living Room, Kitchen, Bedroom
+- **Template**: Devcontainer snapcast-client (Alpine + supervisor)
+- **Base**: `alpine:latest` with supervisor
+- **Adaptations**: Test MAC addresses, enhanced health checks
 
 ### **KNX Daemon** (`knxd/Dockerfile`)
-- **Base**: `debian:bookworm-slim`
-- **Purpose**: Building automation protocol testing
-- **Features**: Dummy backend (no real hardware), tunnel interface
-- **Config**: Test-friendly KNX setup
+- **Template**: Devcontainer knxd (Alpine edge)
+- **Base**: `alpine:edge` with knxd from testing repo
+- **Adaptations**: Dummy backend for testing, enhanced health checks
 
 ## 🔧 MSBuild Integration
 
@@ -119,52 +154,30 @@ docker compose -f docker-compose.test.yml down -v
 
 ## 🎯 Benefits Achieved
 
-### ✅ **Explicit Dependencies**
-- All test infrastructure is visible and contained
-- No hidden dependencies on development files
-- Easy to understand what tests require
+### ✅ **Proven Foundation**
+- **No reinvention** - Uses working devcontainer implementations
+- **Battle-tested** - Same containers used in development
+- **Consistent behavior** - Same runtime characteristics as dev environment
 
-### ✅ **Stable & Reliable**
-- Changes to development environment don't break tests
-- Test-specific optimizations improve reliability
-- Health checks ensure services are ready before testing
+### ✅ **Test Optimizations**
+- **Enhanced reliability** - Health checks on all services
+- **Clean state** - No persistence between test runs
+- **Fast execution** - Optimized for CI/CD environments
+- **Better debugging** - Enhanced logging for test failures
 
-### ✅ **Fast & Efficient**
-- Minimal containers start faster
-- No unnecessary services or features
-- Optimized for CI/CD environments
+### ✅ **Self-Contained & Explicit**
+- **No hidden dependencies** - All infrastructure visible in test project
+- **Development isolation** - Changes to dev environment don't break tests
+- **Clear understanding** - Easy to see what tests require
 
-### ✅ **Maintainable**
-- Clear separation between dev and test infrastructure
-- Self-documenting through explicit container definitions
-- Easy to modify test-specific configurations
+## 📝 Template Maintenance
 
-## 📝 Adding New Test Services
+When updating devcontainer implementations:
+1. **Review changes** in devcontainer files
+2. **Adapt test versions** to incorporate improvements
+3. **Test thoroughly** to ensure compatibility
+4. **Update documentation** to reflect changes
 
-1. **Create container directory**: `containers/new-service/`
-2. **Add Dockerfile**: Optimized for testing
-3. **Add configuration**: Test-specific settings
-4. **Update docker-compose.test.yml**: Add service definition
-5. **Update this README**: Document the new service
+This approach ensures test containers stay current with proven devcontainer implementations while maintaining test-specific optimizations.
 
-## 🔍 Troubleshooting
-
-### **Container Build Issues**
-```bash
-# Build individual container
-docker build -t test-app containers/app -f containers/app/Dockerfile.test
-
-# Check logs
-docker compose -f docker-compose.test.yml logs app
-```
-
-### **Service Health Issues**
-```bash
-# Check service health
-docker compose -f docker-compose.test.yml ps
-
-# Inspect specific service
-docker compose -f docker-compose.test.yml exec app curl http://localhost:5000/health
-```
-
-The test infrastructure is now **fully self-contained and explicit** - no more hidden dependencies! 🎯
+The test infrastructure now leverages **proven devcontainer templates** with test-specific enhancements! 🎯

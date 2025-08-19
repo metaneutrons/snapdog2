@@ -1,33 +1,41 @@
 # ═══════════════════════════════════════════════════════════════════════════════
-# Test Snapcast Client Container
+# Test Snapcast Client Container - Based on Proven Devcontainer Implementation
 # ═══════════════════════════════════════════════════════════════════════════════
-# Minimal Snapcast client optimized for testing - simulates audio playback devices
+# Adapted from devcontainer/snapcast-client/Dockerfile with test optimizations
+# Uses the same proven Alpine + supervisor approach but optimized for testing
 # ═══════════════════════════════════════════════════════════════════════════════
 
-FROM debian:bookworm-slim
+FROM alpine:latest
 
-# Install Snapcast client and dependencies
-RUN apt-get update && apt-get install -y \
-    snapclient \
-    alsa-utils \
-    pulseaudio \
-    && rm -rf /var/lib/apt/lists/*
+# Install dependencies - same as devcontainer
+RUN apk update && \
+    apk upgrade && \
+    apk add --no-cache \
+    snapcast-client \
+    dumb-init \
+    bash \
+    supervisor \
+    alsa-utils
 
-# Create snapcast user
-RUN useradd -r -s /bin/false snapclient
+# Create configuration and environment - same as devcontainer approach
+RUN mkdir -p /run/supervisord && \
+    mkdir -p /etc/snapclient && \
+    mkdir -p /var/log/supervisor
 
-# Create dummy audio device for testing (null sink)
-RUN mkdir -p /var/log/snapclient && \
-    chown -R snapclient:snapclient /var/log/snapclient
+# Add supervisor configuration - adapted for testing
+COPY supervisord.test.conf /etc/supervisord.conf
 
-# Expose client port for web interface
-EXPOSE 1780
+# Add startup script - adapted for testing
+COPY start.test.sh /start.sh
+RUN chmod +x /start.sh
 
-# Health check for test reliability
-HEALTHCHECK --interval=10s --timeout=5s --start-period=15s --retries=3 \
+# Expose ports - same as devcontainer
+EXPOSE 1704/tcp
+EXPOSE 1705/tcp
+
+# Health check - same approach as devcontainer but test-optimized
+HEALTHCHECK --interval=10s --timeout=5s --retries=3 --start-period=15s \
     CMD pgrep snapclient || exit 1
 
-USER snapclient
-
-# Default command - will be overridden with specific client settings
-CMD ["snapclient", "--host", "snapcast-server", "--port", "1704", "--player", "null"]
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+CMD ["/start.sh"]

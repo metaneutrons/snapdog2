@@ -1,22 +1,22 @@
 # ═══════════════════════════════════════════════════════════════════════════════
-# Test MQTT Broker Container
+# Test MQTT Broker Container - Based on Proven Devcontainer Implementation
 # ═══════════════════════════════════════════════════════════════════════════════
-# Minimal Eclipse Mosquitto broker optimized for testing
+# Adapted from devcontainer/mosquitto setup with test-specific optimizations
 # ═══════════════════════════════════════════════════════════════════════════════
 
 FROM eclipse-mosquitto:2.0-openssl
 
-# Copy test-specific configuration
+# Copy the proven mosquitto configuration from devcontainer (adapted for testing)
 COPY mosquitto.test.conf /mosquitto/config/mosquitto.conf
 
-# Create test user credentials
+# Create test user credentials (same as devcontainer approach)
 RUN echo "snapdog:snapdog" > /mosquitto/config/passwd && \
     mosquitto_passwd -U /mosquitto/config/passwd
 
 # Expose MQTT port
 EXPOSE 1883
 
-# Health check for test reliability
+# Health check for test reliability (enhanced from devcontainer approach)
 HEALTHCHECK --interval=5s --timeout=3s --start-period=10s --retries=3 \
     CMD mosquitto_pub -h localhost -p 1883 -u snapdog -P snapdog -t health -m "check" || exit 1
 
