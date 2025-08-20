@@ -14,6 +14,8 @@
     <!-- Performance Optimization for Tests -->
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
+    <!-- Suppress FluentAssertions License Warning -->
+    <FluentAssertionsSuppressLicenseWarning>true</FluentAssertionsSuppressLicenseWarning>
   </PropertyGroup>
   <!-- Core Testing Packages -->
   <ItemGroup>
@@ -38,8 +40,6 @@
     <Using Include="Microsoft.Extensions.DependencyInjection" />
     <Using Include="Microsoft.Extensions.Configuration" />
     <Using Include="Xunit.Abstractions" />
-    <Using Include="SnapDog2.Tests.Fixtures.Shared" />
-    <Using Include="SnapDog2.Tests.Helpers.Extensions" />
   </ItemGroup>
   <!-- Project References -->
   <ItemGroup>

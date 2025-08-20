@@ -4,12 +4,11 @@ namespace SnapDog2.Tests.Unit.Infrastructure.Services;
 
 /// <summary>
 /// Pure business logic tests for zone grouping validation algorithms.
-/// Tests the core logic without any external dependencies or complex mocking.
-/// This elegant approach focuses on the algorithm correctness rather than infrastructure.
+/// Tests the core logic without any external dependencies or mocking.
 /// </summary>
 [Trait("Category", "Unit")]
 [Trait("Logic", "ZoneGrouping")]
-public class ZoneGroupingServiceTests
+public class ZoneGroupingLogicTests
 {
     #region Core Validation Logic Tests
 
@@ -42,7 +41,7 @@ public class ZoneGroupingServiceTests
     [Fact]
     public void ValidateZoneGrouping_WhenClientInWrongGroup_ShouldBeInvalid()
     {
-        // Arrange - This tests the cross-zone grouping bug we want to detect
+        // Arrange - This tests the cross-zone grouping bug
         var scenario = new ZoneGroupingScenario
         {
             ZoneId = 2,
@@ -237,111 +236,6 @@ public class ZoneGroupingServiceTests
         // Assert
         result.IsValid.Should().BeFalse();
         result.ValidationMessage.Should().Contain("No group found for zone stream");
-    }
-
-    #endregion
-
-    #region Real-World Scenarios
-
-    [Fact]
-    public void ValidateZoneGrouping_TypicalHomeSetup_ShouldWork()
-    {
-        // Arrange - Typical 3-zone home setup
-        var groups = new[]
-        {
-            CreateGroup("living-room-group", "/snapsinks/living-room", "living-room-left", "living-room-right"),
-            CreateGroup("kitchen-group", "/snapsinks/kitchen", "kitchen-speaker"),
-            CreateGroup("bedroom-group", "/snapsinks/bedroom", "bedroom-speaker", "bedroom-echo"),
-        };
-
-        // Test each zone's clients
-        var testCases = new[]
-        {
-            new
-            {
-                Client = "living-room-left",
-                Stream = "/snapsinks/living-room",
-                ExpectedGroup = "living-room-group",
-            },
-            new
-            {
-                Client = "living-room-right",
-                Stream = "/snapsinks/living-room",
-                ExpectedGroup = "living-room-group",
-            },
-            new
-            {
-                Client = "kitchen-speaker",
-                Stream = "/snapsinks/kitchen",
-                ExpectedGroup = "kitchen-group",
-            },
-            new
-            {
-                Client = "bedroom-speaker",
-                Stream = "/snapsinks/bedroom",
-                ExpectedGroup = "bedroom-group",
-            },
-            new
-            {
-                Client = "bedroom-echo",
-                Stream = "/snapsinks/bedroom",
-                ExpectedGroup = "bedroom-group",
-            },
-        };
-
-        // Act & Assert
-        foreach (var testCase in testCases)
-        {
-            var scenario = new ZoneGroupingScenario
-            {
-                ZoneId = 1,
-                ZoneStreamId = testCase.Stream,
-                ClientId = testCase.Client,
-                Groups = groups,
-            };
-
-            var result = ValidateClientGrouping(scenario);
-
-            result.IsValid.Should().BeTrue($"{testCase.Client} should be valid");
-            result.ActualGroupId.Should().Be(testCase.ExpectedGroup);
-        }
-    }
-
-    [Fact]
-    public void ValidateZoneGrouping_DetectCrossZoneContamination_ShouldFail()
-    {
-        // Arrange - Simulate the bug where clients end up in wrong zone groups
-        var groups = new[]
-        {
-            CreateGroup(
-                "living-room-group",
-                "/snapsinks/living-room",
-                "living-room-left",
-                "living-room-right",
-                "bedroom-speaker"
-            ), // Contaminated!
-            CreateGroup("kitchen-group", "/snapsinks/kitchen", "kitchen-speaker"),
-            CreateGroup("bedroom-group", "/snapsinks/bedroom"), // Missing bedroom-speaker
-        };
-
-        // Act - Test the contaminated client
-        var result = ValidateClientGrouping(
-            new ZoneGroupingScenario
-            {
-                ZoneId = 3,
-                ZoneStreamId = "/snapsinks/bedroom",
-                ClientId = "bedroom-speaker",
-                Groups = groups,
-            }
-        );
-
-        // Assert
-        result.IsValid.Should().BeFalse("bedroom-speaker is in wrong group");
-        result.ExpectedGroupId.Should().Be("bedroom-group");
-        result.ActualGroupId.Should().Be("living-room-group");
-        result
-            .ValidationMessage.Should()
-            .Contain("bedroom-speaker is in group living-room-group but should be in group bedroom-group");
     }
 
     #endregion

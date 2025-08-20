@@ -57,6 +57,7 @@ public record TrackInfo
     /// <summary>
     /// Gets the genre information.
     /// From LibVLC MetadataType.Genre.
+    /// TODO: This should be added to TRACK_METADATA_*, integrated in blueprint and command/status framework.
     /// </summary>
     public string? Genre { get; init; }
 
@@ -69,12 +70,14 @@ public record TrackInfo
     /// <summary>
     /// Gets the release year.
     /// From LibVLC MetadataType.Date.
+    /// TODO: This should be added to TRACK_METADATA_*, integrated in blueprint and command/status framework.
     /// </summary>
     public int? Year { get; init; }
 
     /// <summary>
     /// Gets the track rating (0.0-1.0).
     /// From LibVLC MetadataType.Rating.
+    /// TODO: This should be added to TRACK_METADATA_*, integrated in blueprint and command/status framework.
     /// </summary>
     public float? Rating { get; init; }
 
@@ -86,6 +89,7 @@ public record TrackInfo
 
     /// <summary>
     /// Gets the source type ("subsonic", "radio", "file", "stream").
+    /// TODO: This should be an Enum.
     /// </summary>
     public required string Source { get; init; }
 
