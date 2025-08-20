@@ -39,28 +39,4 @@ public interface IZoneGroupingService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Result indicating whether grouping is consistent</returns>
     Task<Result> ValidateGroupingConsistencyAsync(CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Gets the current status of zone-based grouping across all zones.
-    /// </summary>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>Comprehensive status of zone grouping</returns>
-    Task<Result<ZoneGroupingStatus>> GetZoneGroupingStatusAsync(CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Performs a full reconciliation of all zone groupings, correcting any inconsistencies.
-    /// </summary>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>Result with details of reconciliation actions taken</returns>
-    Task<Result<ZoneGroupingReconciliationResult>> ReconcileAllZoneGroupingsAsync(
-        CancellationToken cancellationToken = default
-    );
-
-    /// <summary>
-    /// Synchronizes client names between SnapDog configuration and Snapcast server.
-    /// Sets friendly names from SnapDog config to replace MAC address-based names in Snapcast.
-    /// </summary>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>Result with details of client name synchronization actions taken</returns>
-    Task<Result<ClientNameSyncResult>> SynchronizeClientNamesAsync(CancellationToken cancellationToken = default);
 }

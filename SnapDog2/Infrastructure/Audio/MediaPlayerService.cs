@@ -114,8 +114,43 @@ public sealed partial class MediaPlayerService(
 
             this._players[zoneIndex] = player;
 
-            // Start streaming using the Url field
-            var streamUrl = trackInfo.Url; // TrackInfo.Url contains the stream URL
+            // Resolve stream URL based on source type
+            string streamUrl;
+            if (trackInfo.Source == "subsonic")
+            {
+                // For Subsonic tracks, the Url field contains the media ID, not a streamable URL
+                // We need to convert it to a proper stream URL using the SubsonicService
+                var scope = this._serviceScopeFactory.CreateAsyncScope();
+                try
+                {
+                    var subsonicService = scope.ServiceProvider.GetRequiredService<ISubsonicService>();
+
+                    var streamUrlResult = await subsonicService.GetStreamUrlAsync(trackInfo.Url, cancellationToken);
+                    if (!streamUrlResult.IsSuccess)
+                    {
+                        this._players.TryRemove(zoneIndex, out _);
+                        await player.DisposeAsync();
+                        return Result.Failure($"Failed to get Subsonic stream URL: {streamUrlResult.ErrorMessage}");
+                    }
+
+                    streamUrl = streamUrlResult.Value!;
+                    this._logger.LogDebug(
+                        "Converted Subsonic media ID {MediaId} to stream URL: {StreamUrl}",
+                        trackInfo.Url,
+                        streamUrl
+                    );
+                }
+                finally
+                {
+                    await scope.DisposeAsync();
+                }
+            }
+            else
+            {
+                // For other sources (radio, etc.), use the URL directly
+                streamUrl = trackInfo.Url;
+            }
+
             var result = await player.StartStreamingAsync(streamUrl, trackInfo, cancellationToken);
 
             if (result.IsSuccess)

@@ -40,7 +40,7 @@ public class ZoneGroupingService : IZoneGroupingService
 
         try
         {
-            _logger.LogDebug("🔍 Starting periodic zone grouping check");
+            _logger.LogDebug("🔍 Starting zone grouping check for all zones");
 
             // Get all available zones
             var zonesResult = await _zoneManager.GetAllZonesAsync(cancellationToken);
@@ -61,14 +61,19 @@ public class ZoneGroupingService : IZoneGroupingService
             // Synchronize each zone
             foreach (var zoneId in zones)
             {
+                _logger.LogDebug("🔧 Checking zone {ZoneId}...", zoneId);
                 var result = await SynchronizeZoneGroupingAsync(zoneId, cancellationToken);
                 if (!result.IsSuccess)
                 {
                     _logger.LogWarning("⚠️ Failed to synchronize zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
                 }
+                else
+                {
+                    _logger.LogDebug("✅ Zone {ZoneId} check completed", zoneId);
+                }
             }
 
-            _logger.LogDebug("✅ Periodic zone grouping check completed");
+            _logger.LogDebug("✅ All zone grouping checks completed");
             return Result.Success();
         }
         catch (Exception ex)
@@ -115,12 +120,23 @@ public class ZoneGroupingService : IZoneGroupingService
             // Check if zone is already properly configured
             if (IsZoneProperlyConfigured(serverStatus.Value, clientIds, expectedStreamId))
             {
-                _logger.LogDebug("✅ Zone {ZoneId} is already properly configured", zoneId);
+                _logger.LogDebug(
+                    "✅ Zone {ZoneId} is already properly configured (clients: {ClientIds}, stream: {StreamId})",
+                    zoneId,
+                    string.Join(",", clientIds),
+                    expectedStreamId
+                );
                 return Result.Success();
             }
 
-            // Zone needs configuration - provision it
-            _logger.LogInformation("🔧 Provisioning zone {ZoneId}: {ClientCount} clients", zoneId, clientIds.Count);
+            // Zone needs configuration - provision it (KEEP THIS AT INFO - actual work!)
+            _logger.LogInformation(
+                "🔧 Provisioning zone {ZoneId}: {ClientCount} clients ({ClientIds}) with stream {StreamId}",
+                zoneId,
+                clientIds.Count,
+                string.Join(",", clientIds),
+                expectedStreamId
+            );
 
             // Find a group that has any of our zone's clients, or use any available group
             var targetGroup =
@@ -164,6 +180,9 @@ public class ZoneGroupingService : IZoneGroupingService
             {
                 return Result.Failure($"Failed to set clients for group: {setClientsResult.ErrorMessage}");
             }
+
+            // Synchronize client names to match configuration
+            await SynchronizeClientNamesAsync(zoneId, cancellationToken);
 
             _logger.LogInformation(
                 "✅ Zone {ZoneId} synchronized: {ClientCount} clients in group {GroupId} with stream {StreamId}",
@@ -227,28 +246,67 @@ public class ZoneGroupingService : IZoneGroupingService
         var noForeignClients = groupClientIds.All(id => clientIds.Contains(id));
         var correctStream = targetGroup.StreamId == expectedStreamId;
 
+        // Check group name - extract zone ID from stream and get expected zone name
+        var zoneId = int.Parse(expectedStreamId.Replace("Zone", ""));
+        var expectedGroupName = GetExpectedZoneName(zoneId);
+        var correctGroupName = targetGroup.Name == expectedGroupName;
+
+        // Check client names - all clients should have their configured names (not null)
+        var correctClientNames = true;
+        if (targetGroup.Clients != null)
+        {
+            foreach (var client in targetGroup.Clients)
+            {
+                if (string.IsNullOrEmpty(client.Name))
+                {
+                    correctClientNames = false;
+                    break;
+                }
+            }
+        }
+
         _logger.LogDebug(
-            "🔍 Zone check details: AllClientsPresent={AllPresent}, NoForeignClients={NoForeign}, CorrectStream={CorrectStream} (expected {ExpectedStream}, actual {ActualStream})",
+            "🔍 Zone check details: AllClientsPresent={AllPresent}, NoForeignClients={NoForeign}, CorrectStream={CorrectStream}, CorrectGroupName={CorrectGroupName} (expected '{ExpectedName}', actual '{ActualName}'), CorrectClientNames={CorrectClientNames}",
             allOurClientsPresent,
             noForeignClients,
             correctStream,
-            expectedStreamId,
-            targetGroup.StreamId
+            correctGroupName,
+            expectedGroupName,
+            targetGroup.Name,
+            correctClientNames
         );
 
-        var isProperlyConfigured = allOurClientsPresent && noForeignClients && correctStream;
+        var isProperlyConfigured =
+            allOurClientsPresent && noForeignClients && correctStream && correctGroupName && correctClientNames;
 
         if (!isProperlyConfigured)
         {
             _logger.LogInformation(
-                "❌ Zone misconfigured: AllClientsPresent={AllPresent}, NoForeignClients={NoForeign}, CorrectStream={CorrectStream}",
+                "❌ Zone misconfigured: AllClientsPresent={AllPresent}, NoForeignClients={NoForeign}, CorrectStream={CorrectStream}, CorrectGroupName={CorrectGroupName}, CorrectClientNames={CorrectClientNames}",
                 allOurClientsPresent,
                 noForeignClients,
-                correctStream
+                correctStream,
+                correctGroupName,
+                correctClientNames
             );
         }
 
         return isProperlyConfigured;
+    }
+
+    /// <summary>
+    /// Gets the expected zone name for a given zone ID.
+    /// </summary>
+    private string GetExpectedZoneName(int zoneId)
+    {
+        // This should match the zone names from configuration
+        // Zone 1 = "Ground Floor", Zone 2 = "1st Floor"
+        return zoneId switch
+        {
+            1 => "Ground Floor",
+            2 => "1st Floor",
+            _ => $"Zone {zoneId}",
+        };
     }
 
     // Stub implementations for interface compatibility - these are not used in periodic mode
@@ -266,37 +324,129 @@ public class ZoneGroupingService : IZoneGroupingService
         return await EnsureZoneGroupingAsync(cancellationToken);
     }
 
-    public Task<Result<ZoneGroupingStatus>> GetZoneGroupingStatusAsync(CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Synchronizes client names for a specific zone to match configuration.
+    /// </summary>
+    private async Task SynchronizeClientNamesAsync(int zoneId, CancellationToken cancellationToken = default)
     {
-        // Simple status - just return healthy
-        var status = new ZoneGroupingStatus
+        try
         {
-            OverallHealth = ZoneGroupingHealth.Healthy,
-            TotalZones = 2,
-            ZoneDetails = new List<ZoneGroupingDetail>(),
-        };
-        return Task.FromResult(Result<ZoneGroupingStatus>.Success(status));
-    }
+            _logger.LogDebug("🏷️ Starting client name synchronization for zone {ZoneId}", zoneId);
 
-    public Task<Result<ZoneGroupingReconciliationResult>> ReconcileAllZoneGroupingsAsync(
-        CancellationToken cancellationToken = default
-    )
-    {
-        // Just call EnsureZoneGroupingAsync and return a simple result
-        return Task.Run(async () =>
+            // Get zone clients with their configured names
+            var zoneClients = await _clientManager.GetClientsByZoneAsync(zoneId, cancellationToken);
+            if (!zoneClients.IsSuccess || zoneClients.Value == null)
+            {
+                _logger.LogWarning(
+                    "⚠️ Failed to get zone clients for name synchronization: {Error}",
+                    zoneClients.ErrorMessage
+                );
+                return;
+            }
+
+            _logger.LogDebug(
+                "🔍 Found {ClientCount} clients for zone {ZoneId}: {ClientNames}",
+                zoneClients.Value.Count,
+                zoneId,
+                string.Join(", ", zoneClients.Value.Select(c => $"{c.SnapcastId}='{c.Name}'"))
+            );
+
+            // Get current server status to check actual client names
+            var serverStatus = await _snapcastService.GetServerStatusAsync(cancellationToken);
+            if (!serverStatus.IsSuccess || serverStatus.Value?.Groups == null)
+            {
+                _logger.LogWarning(
+                    "⚠️ Failed to get server status for client name synchronization: {Error}",
+                    serverStatus.ErrorMessage
+                );
+                return;
+            }
+
+            // Create a map of snapcast client ID to current name
+            var currentClientNames = new Dictionary<string, string?>();
+            foreach (var group in serverStatus.Value.Groups)
+            {
+                if (group.Clients != null)
+                {
+                    foreach (var client in group.Clients)
+                    {
+                        currentClientNames[client.Id] = client.Name;
+                    }
+                }
+            }
+
+            _logger.LogDebug(
+                "🔍 Current Snapcast client names: {CurrentNames}",
+                string.Join(", ", currentClientNames.Select(kvp => $"{kvp.Key}='{kvp.Value}'"))
+            );
+
+            // Check and update client names
+            foreach (var client in zoneClients.Value)
+            {
+                if (string.IsNullOrEmpty(client.SnapcastId))
+                {
+                    continue;
+                }
+
+                var expectedName = client.Name;
+                var currentName = currentClientNames.GetValueOrDefault(client.SnapcastId);
+
+                _logger.LogDebug(
+                    "🔍 Checking client {ClientId}: expected='{ExpectedName}', current='{CurrentName}'",
+                    client.SnapcastId,
+                    expectedName,
+                    currentName
+                );
+
+                if (currentName != expectedName)
+                {
+                    // KEEP THIS AT INFO - actual work being done!
+                    _logger.LogInformation(
+                        "🏷️ Setting client {ClientId} name from '{CurrentName}' to '{ExpectedName}'",
+                        client.SnapcastId,
+                        currentName,
+                        expectedName
+                    );
+
+                    var setNameResult = await _snapcastService.SetClientNameAsync(
+                        client.SnapcastId,
+                        expectedName,
+                        cancellationToken
+                    );
+
+                    if (setNameResult.IsSuccess)
+                    {
+                        // KEEP THIS AT INFO - successful work completed!
+                        _logger.LogInformation(
+                            "✅ Set client {ClientId} name to '{ClientName}'",
+                            client.SnapcastId,
+                            expectedName
+                        );
+                    }
+                    else
+                    {
+                        _logger.LogWarning(
+                            "⚠️ Failed to set name for client {ClientId}: {Error}",
+                            client.SnapcastId,
+                            setNameResult.ErrorMessage
+                        );
+                    }
+                }
+                else
+                {
+                    _logger.LogDebug(
+                        "✅ Client {ClientId} name is already correct: '{ClientName}'",
+                        client.SnapcastId,
+                        expectedName
+                    );
+                }
+            }
+
+            _logger.LogDebug("✅ Client name synchronization completed for zone {ZoneId}", zoneId);
+        }
+        catch (Exception ex)
         {
-            var result = await EnsureZoneGroupingAsync(cancellationToken);
-            var reconciliationResult = new ZoneGroupingReconciliationResult { ClientsMoved = 0, ZonesReconciled = 2 };
-            return result.IsSuccess
-                ? Result<ZoneGroupingReconciliationResult>.Success(reconciliationResult)
-                : Result<ZoneGroupingReconciliationResult>.Failure(result.ErrorMessage ?? "Reconciliation failed");
-        });
-    }
-
-    public Task<Result<ClientNameSyncResult>> SynchronizeClientNamesAsync(CancellationToken cancellationToken = default)
-    {
-        // Not needed for simple periodic mode
-        var result = new ClientNameSyncResult { UpdatedClients = 0 };
-        return Task.FromResult(Result<ClientNameSyncResult>.Success(result));
+            _logger.LogError(ex, "💥 Error synchronizing client names for zone {ZoneId}", zoneId);
+        }
     }
 }

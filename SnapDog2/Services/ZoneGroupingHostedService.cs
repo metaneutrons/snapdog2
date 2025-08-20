@@ -42,14 +42,21 @@ public class ZoneGroupingBackgroundService : BackgroundService
         );
 
         // Wait for services to be ready
+        _logger.LogInformation("⏳ Waiting 5 seconds for services to be ready...");
         await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+        _logger.LogInformation("✅ Starting periodic zone grouping checks...");
 
         // Start periodic checks
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
+                _logger.LogDebug("🔄 Starting periodic zone grouping check...");
                 await PerformPeriodicCheckAsync(stoppingToken);
+                _logger.LogDebug(
+                    "✅ Periodic zone grouping check completed, waiting {Interval}ms...",
+                    _config.ZoneGroupingCheckIntervalMs
+                );
                 await Task.Delay(_reconciliationInterval, stoppingToken);
             }
             catch (OperationCanceledException)
@@ -75,13 +82,15 @@ public class ZoneGroupingBackgroundService : BackgroundService
             using var scope = _serviceProvider.CreateScope();
             var zoneGroupingService = scope.ServiceProvider.GetRequiredService<IZoneGroupingService>();
 
+            _logger.LogDebug("🔍 Checking zone grouping configuration...");
+
             // Simple periodic check - just ensure zones are properly configured
             var result = await zoneGroupingService.EnsureZoneGroupingAsync(cancellationToken);
 
             if (result.IsSuccess)
             {
                 _metrics.RecordReconciliation(stopwatch.Elapsed.TotalSeconds, true);
-                _logger.LogDebug("✅ Periodic zone grouping check completed successfully");
+                _logger.LogDebug("✅ Zone grouping check completed successfully");
             }
             else
             {

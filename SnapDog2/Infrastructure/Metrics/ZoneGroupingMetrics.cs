@@ -1,7 +1,6 @@
 namespace SnapDog2.Infrastructure.Metrics;
 
 using System.Diagnostics.Metrics;
-using SnapDog2.Core.Models;
 
 /// <summary>
 /// OpenTelemetry metrics for zone grouping operations.
@@ -12,18 +11,8 @@ public class ZoneGroupingMetrics : IDisposable
     private readonly Meter _meter;
     private readonly Counter<long> _reconciliationCounter;
     private readonly Histogram<double> _reconciliationDuration;
-    private readonly ObservableGauge<int> _totalZones;
-    private readonly ObservableGauge<int> _healthyZones;
-    private readonly ObservableGauge<int> _degradedZones;
-    private readonly ObservableGauge<int> _unhealthyZones;
     private readonly Counter<long> _clientUpdatesCounter;
     private readonly Counter<long> _errorsCounter;
-
-    // Current state for observable gauges
-    private volatile int _currentTotalZones;
-    private volatile int _currentHealthyZones;
-    private volatile int _currentDegradedZones;
-    private volatile int _currentUnhealthyZones;
 
     public ZoneGroupingMetrics()
     {
@@ -50,31 +39,6 @@ public class ZoneGroupingMetrics : IDisposable
             "zone_grouping_reconciliation_duration_seconds",
             unit: "s",
             description: "Duration of zone grouping reconciliation operations"
-        );
-
-        // Observable gauges for current state
-        _totalZones = _meter.CreateObservableGauge<int>(
-            "zone_grouping_zones_total",
-            observeValue: () => _currentTotalZones,
-            description: "Total number of zones configured"
-        );
-
-        _healthyZones = _meter.CreateObservableGauge<int>(
-            "zone_grouping_zones_healthy",
-            observeValue: () => _currentHealthyZones,
-            description: "Number of zones in healthy state"
-        );
-
-        _degradedZones = _meter.CreateObservableGauge<int>(
-            "zone_grouping_zones_degraded",
-            observeValue: () => _currentDegradedZones,
-            description: "Number of zones in degraded state"
-        );
-
-        _unhealthyZones = _meter.CreateObservableGauge<int>(
-            "zone_grouping_zones_unhealthy",
-            observeValue: () => _currentUnhealthyZones,
-            description: "Number of zones in unhealthy state"
         );
     }
 
@@ -106,40 +70,6 @@ public class ZoneGroupingMetrics : IDisposable
         {
             _errorsCounter.Add(1, new KeyValuePair<string, object?>[] { new("error_type", errorType) });
         }
-    }
-
-    /// <summary>
-    /// Updates the current zone status metrics.
-    /// </summary>
-    /// <param name="status">Current zone grouping status</param>
-    public void UpdateZoneStatus(ZoneGroupingStatus status)
-    {
-        _currentTotalZones = status.TotalZones;
-
-        // Count zones by health status
-        var healthyCount = 0;
-        var degradedCount = 0;
-        var unhealthyCount = 0;
-
-        foreach (var zone in status.ZoneDetails)
-        {
-            switch (zone.Health)
-            {
-                case ZoneGroupingHealth.Healthy:
-                    healthyCount++;
-                    break;
-                case ZoneGroupingHealth.Degraded:
-                    degradedCount++;
-                    break;
-                case ZoneGroupingHealth.Unhealthy:
-                    unhealthyCount++;
-                    break;
-            }
-        }
-
-        _currentHealthyZones = healthyCount;
-        _currentDegradedZones = degradedCount;
-        _currentUnhealthyZones = unhealthyCount;
     }
 
     /// <summary>
