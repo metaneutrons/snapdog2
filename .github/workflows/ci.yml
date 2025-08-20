@@ -1,4 +1,4 @@
-name: CI
+name: Build
 
 permissions:
   contents: read
@@ -8,14 +8,12 @@ permissions:
 on:
   workflow_dispatch:
   push:
-    branches: [main, develop]
     paths-ignore:
       - "**/*.md"
       - ".gitignore"
       - "docs/**"
       - "assets/**"
   pull_request:
-    branches: [main, develop]
     paths-ignore:
       - "**/*.md"
       - ".gitignore"
@@ -23,7 +21,7 @@ on:
       - "assets/**"
 
 env:
-  DOTNET_VERSION: "9.0.301"
+  DOTNET_VERSION: "9.0.x"
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
 
@@ -63,25 +61,14 @@ jobs:
 
       - name: Install GitVersion
         if: steps.changes.outputs.src == 'true'
-        uses: gittools/actions/gitversion/setup@v4.0.1
+        uses: gittools/actions/gitversion/setup@v0.10.2
         with:
           versionSpec: "6.x"
 
       - name: Determine version
         if: steps.changes.outputs.src == 'true'
         id: gitversion
-        uses: gittools/actions/gitversion/execute@v4.0.1
-        with:
-          configFilePath: 'GitVersion.yml'
-
-      - name: Cache NuGet packages
-        if: steps.changes.outputs.src == 'true'
-        uses: actions/cache@v4
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/Directory.Packages.props') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget-
+        uses: gittools/actions/gitversion/execute@v0.10.2
 
       - name: Restore dependencies
         if: steps.changes.outputs.src == 'true'
@@ -91,11 +78,28 @@ jobs:
         if: steps.changes.outputs.src == 'true'
         run: dotnet build --configuration Debug --no-restore --verbosity minimal
 
-  # Comprehensive build and test
+  # Comprehensive build and test matrix
   build-and-test:
     needs: validate
     if: needs.validate.outputs.should-build == 'true'
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            runtime: linux-x64
+            artifact-name: linux
+          - os: windows-latest
+            runtime: win-x64
+            artifact-name: windows
+          - os: macos-latest
+            runtime: osx-x64
+            artifact-name: macos-x64
+          - os: macos-latest
+            runtime: osx-arm64
+            artifact-name: macos-arm64
+
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 20
 
     steps:
@@ -110,16 +114,13 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v4.0.1
+        uses: gittools/actions/gitversion/setup@v0.10.2
         with:
           versionSpec: "6.x"
 
       - name: Determine version
         id: gitversion
-        uses: gittools/actions/gitversion/execute@v4.0.1
-        with:
-          configFilePath: 'GitVersion.yml'
-          updateAssemblyInfo: true
+        uses: gittools/actions/gitversion/execute@v0.10.2
 
       - name: Cache NuGet packages
         uses: actions/cache@v4
@@ -137,48 +138,36 @@ jobs:
 
       - name: Test
         run: |
-          dotnet test --configuration Release --verbosity normal \
+          dotnet test --configuration Release --no-build --verbosity normal \
             --collect:"XPlat Code Coverage" \
             --results-directory ./TestResults \
             --logger "trx;LogFileName=test-results.trx"
-
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: test-results-${{ needs.validate.outputs.version }}
-          path: ./TestResults/**
-          retention-days: 7
 
       - name: Publish Test Results
         uses: dorny/test-reporter@v1
         if: always()
         with:
-          name: Test Results
+          name: Test Results (${{ matrix.os }})
           path: "./TestResults/*.trx"
           reporter: dotnet-trx
-          fail-on-error: true
+          fail-on-error: false
 
       - name: Upload coverage to Codecov
+        if: matrix.os == 'ubuntu-latest'
         uses: codecov/codecov-action@v4
-        if: always()
         with:
           files: "./TestResults/*/coverage.cobertura.xml"
           fail_ci_if_error: false
           verbose: true
 
-      - name: Publish application
-        run: |
-          dotnet publish ./SnapDog2/SnapDog2.csproj \
-            --configuration Release \
-            --no-build \
-            --output ./publish
+      - name: Publish artifacts
+        run: dotnet publish SnapDog2/SnapDog2.csproj --configuration Release --runtime ${{ matrix.runtime }} --self-contained true --output ./publish/${{ matrix.runtime }} -p:PublishSingleFile=true
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: snapdog2-${{ needs.validate.outputs.version }}
-          path: ./publish/**
+          name: snapdog2-${{ matrix.artifact-name }}-${{ needs.validate.outputs.version }}
+          path: ./publish/${{ matrix.runtime }}/
           retention-days: 7
           compression-level: 9
 
@@ -194,20 +183,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # Full git history needed for GitVersion
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Cache NuGet packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/Directory.Packages.props') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget-
 
       - name: Restore dependencies
         run: dotnet restore --verbosity minimal
