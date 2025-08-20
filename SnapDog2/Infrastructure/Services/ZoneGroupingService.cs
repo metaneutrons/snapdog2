@@ -170,6 +170,33 @@ public class ZoneGroupingService : IZoneGroupingService
                 }
             }
 
+            // Set the correct group name for this zone
+            var expectedGroupName = GetExpectedZoneName(zoneId);
+            if (targetGroup.Name != expectedGroupName)
+            {
+                var setGroupNameResult = await _snapcastService.SetGroupNameAsync(
+                    targetGroup.Id,
+                    expectedGroupName,
+                    cancellationToken
+                );
+                if (!setGroupNameResult.IsSuccess)
+                {
+                    _logger.LogWarning(
+                        "⚠️ Failed to set name for group {GroupId}: {Error}",
+                        targetGroup.Id,
+                        setGroupNameResult.ErrorMessage
+                    );
+                }
+                else
+                {
+                    _logger.LogInformation(
+                        "✅ Set group {GroupId} name to '{GroupName}'",
+                        targetGroup.Id,
+                        expectedGroupName
+                    );
+                }
+            }
+
             // Put ALL zone clients in this group
             var setClientsResult = await _snapcastService.SetGroupClientsAsync(
                 targetGroup.Id,

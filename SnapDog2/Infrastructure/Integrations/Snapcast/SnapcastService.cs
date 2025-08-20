@@ -1086,6 +1086,11 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
                 this.LogClientNotFoundForBridge(snapcastClientId, "connection");
             }
         }
+        catch (ObjectDisposedException)
+        {
+            // Service provider has been disposed (likely during shutdown) - ignore this event
+            // This is expected behavior during application shutdown
+        }
         catch (Exception ex)
         {
             this.LogEventBridgeError("ClientConnection", snapcastClientId, ex);
@@ -1109,6 +1114,11 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
             {
                 this.LogClientNotFoundForBridge(snapcastClientId, "volume");
             }
+        }
+        catch (ObjectDisposedException)
+        {
+            // Service provider has been disposed (likely during shutdown) - ignore this event
+            // This is expected behavior during application shutdown
         }
         catch (Exception ex)
         {
@@ -1134,6 +1144,11 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
                 this.LogClientNotFoundForBridge(snapcastClientId, "mute");
             }
         }
+        catch (ObjectDisposedException)
+        {
+            // Service provider has been disposed (likely during shutdown) - ignore this event
+            // This is expected behavior during application shutdown
+        }
         catch (Exception ex)
         {
             this.LogEventBridgeError("ClientMute", snapcastClientId, ex);
@@ -1157,6 +1172,11 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
             {
                 this.LogClientNotFoundForBridge(snapcastClientId, "latency");
             }
+        }
+        catch (ObjectDisposedException)
+        {
+            // Service provider has been disposed (likely during shutdown) - ignore this event
+            // This is expected behavior during application shutdown
         }
         catch (Exception ex)
         {

@@ -637,38 +637,114 @@ public partial class ClientManager : IClientManager
 
         public async Task PublishVolumeStatusAsync(int volume)
         {
-            var notification = new ClientVolumeStatusNotification(this.Id, volume);
-            await this._mediator.PublishAsync(notification);
+            try
+            {
+                var notification = new ClientVolumeStatusNotification(this.Id, volume);
+                await this._mediator.PublishAsync(notification);
+            }
+            catch (ObjectDisposedException)
+            {
+                // Service provider has been disposed (likely during shutdown) - ignore this event
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(
+                    $"Error publishing volume status for client {this.Id}: {ex.Message}"
+                );
+            }
         }
 
         public async Task PublishMuteStatusAsync(bool muted)
         {
-            var notification = new ClientMuteStatusNotification(this.Id, muted);
-            await this._mediator.PublishAsync(notification);
+            try
+            {
+                var notification = new ClientMuteStatusNotification(this.Id, muted);
+                await this._mediator.PublishAsync(notification);
+            }
+            catch (ObjectDisposedException)
+            {
+                // Service provider has been disposed (likely during shutdown) - ignore this event
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error publishing mute status for client {this.Id}: {ex.Message}");
+            }
         }
 
         public async Task PublishLatencyStatusAsync(int latencyMs)
         {
-            var notification = new ClientLatencyStatusNotification(this.Id, latencyMs);
-            await this._mediator.PublishAsync(notification);
+            try
+            {
+                var notification = new ClientLatencyStatusNotification(this.Id, latencyMs);
+                await this._mediator.PublishAsync(notification);
+            }
+            catch (ObjectDisposedException)
+            {
+                // Service provider has been disposed (likely during shutdown) - ignore this event
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(
+                    $"Error publishing latency status for client {this.Id}: {ex.Message}"
+                );
+            }
         }
 
         public async Task PublishZoneStatusAsync(int? zoneIndex)
         {
-            var notification = new ClientZoneStatusNotification(this.Id, zoneIndex);
-            await this._mediator.PublishAsync(notification);
+            try
+            {
+                var notification = new ClientZoneStatusNotification(this.Id, zoneIndex);
+                await this._mediator.PublishAsync(notification);
+            }
+            catch (ObjectDisposedException)
+            {
+                // Service provider has been disposed (likely during shutdown) - ignore this event
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error publishing zone status for client {this.Id}: {ex.Message}");
+            }
         }
 
         public async Task PublishConnectionStatusAsync(bool isConnected)
         {
-            var notification = new ClientConnectionStatusNotification(this.Id, isConnected);
-            await this._mediator.PublishAsync(notification);
+            try
+            {
+                var notification = new ClientConnectionStatusNotification(this.Id, isConnected);
+                await this._mediator.PublishAsync(notification);
+            }
+            catch (ObjectDisposedException)
+            {
+                // Service provider has been disposed (likely during shutdown) - ignore this event
+                // This is expected behavior during application shutdown
+            }
+            catch (Exception ex)
+            {
+                // Log other unexpected exceptions but don't rethrow to avoid breaking the event flow
+                System.Diagnostics.Debug.WriteLine(
+                    $"Error publishing connection status for client {this.Id}: {ex.Message}"
+                );
+            }
         }
 
         public async Task PublishStateAsync(ClientState state)
         {
-            var notification = new ClientStateNotification(this.Id, state);
-            await this._mediator.PublishAsync(notification);
+            try
+            {
+                var notification = new ClientStateNotification(this.Id, state);
+                await this._mediator.PublishAsync(notification);
+            }
+            catch (ObjectDisposedException)
+            {
+                // Service provider has been disposed (likely during shutdown) - ignore this event
+                // This is expected behavior during application shutdown
+            }
+            catch (Exception ex)
+            {
+                // Log other unexpected exceptions but don't rethrow to avoid breaking the event flow
+                System.Diagnostics.Debug.WriteLine($"Error publishing state for client {this.Id}: {ex.Message}");
+            }
         }
 
         #endregion
