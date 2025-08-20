@@ -27,19 +27,18 @@ ENV LD_LIBRARY_PATH=/usr/lib/aarch64-linux-gnu
 # Create a non-root user for development (consistent with volume permissions)
 RUN useradd -m -s /bin/bash -u 1000 vscode && \
     mkdir -p /home/vscode/.nuget/packages && \
+    mkdir -p /home/vscode/.nuget/local && \
     chown -R vscode:vscode /home/vscode
 
 # Switch to vscode user for development
 USER vscode
 
-# Switch back to root for remaining setup
-USER root
-
 # Expose only HTTP port
 EXPOSE 5000
 
-# Development entrypoint with hot reload (HTTP only for internal networking)
-ENTRYPOINT ["sh", "-c", "echo \"LibVLC configured: VLC_PLUGIN_PATH=$VLC_PLUGIN_PATH\" && dotnet watch --project SnapDog2"]
+# Direct entrypoint - no script needed!
+# Volume mounts provide source code and local packages at runtime
+ENTRYPOINT ["dotnet", "watch", "--project", "SnapDog2/SnapDog2.csproj", "run"]
 
 # Build Stage
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build

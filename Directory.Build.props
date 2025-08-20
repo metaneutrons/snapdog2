@@ -1,12 +1,24 @@
 <Project>
+  <!-- Local NuGet package feed configuration -->
   <PropertyGroup>
-    <LocalNuGetPath Condition="'$(OS)' == 'Windows_NT'">$(USERPROFILE)\.nuget\local</LocalNuGetPath>
-    <LocalNuGetPath Condition="'$(OS)' != 'Windows_NT'">$(HOME)/.nuget/local</LocalNuGetPath>
-    <!-- Build metadata for version tracking -->
+    <!-- Repo-relative path to the optional local feed -->
+    <LocalDevFeed>$(MSBuildThisFileDirectory).nuget\local</LocalDevFeed>
+  </PropertyGroup>
+
+  <!-- Append the local feed for restore ONLY if the folder exists -->
+  <PropertyGroup Condition="Exists('$(LocalDevFeed)')">
+    <RestoreAdditionalProjectSources>
+      $(RestoreAdditionalProjectSources);$(LocalDevFeed)
+    </RestoreAdditionalProjectSources>
+  </PropertyGroup>
+
+  <!-- Build metadata for version tracking -->
+  <PropertyGroup>
     <BuildDate>$([System.DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"))</BuildDate>
     <BuildMachine>$([System.Environment]::MachineName)</BuildMachine>
     <BuildUser>$([System.Environment]::UserName)</BuildUser>
   </PropertyGroup>
+  
   <ItemGroup>
     <AssemblyMetadata Include="BuildDate" Value="$(BuildDate)" />
     <AssemblyMetadata Include="BuildMachine" Value="$(BuildMachine)" />

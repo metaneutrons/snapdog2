@@ -7,9 +7,8 @@ services:
       target: development # Multi-stage development target
     volumes:
       - .:/app:cached # Mount source code for hot reload
-      #      - ~/.nuget/packages:/home/vscode/.nuget/packages:cached # NuGet cache
-      #      - ~/.nuget/local:/app/local-nuget:cached # Local NuGet packages for development
       - snapcast_sinks:/snapsinks # Shared audio sinks with snapcast-server
+      - ~/.nuget/local:/app/.nuget/local:ro # Direct bind mount for local NuGet packages
     env_file:
       - ./devcontainer/.env
     environment:
