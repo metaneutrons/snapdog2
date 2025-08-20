@@ -168,13 +168,8 @@ static WebApplication CreateWebApplication(string[] args)
     // Show startup banner immediately (before any service registrations)
     StartupInformationHelper.ShowStartupInformation(snapDogConfig);
 
-    // Register configuration
-    builder.Services.AddSingleton(snapDogConfig);
-    builder.Services.AddSingleton(snapDogConfig.System);
-    builder.Services.AddSingleton(snapDogConfig.Telemetry);
-    builder.Services.AddSingleton(snapDogConfig.Api);
-    builder.Services.AddSingleton(snapDogConfig.Services);
-    builder.Services.AddSingleton(snapDogConfig.SnapcastServer);
+    // Register configuration using elegant extension methods
+    builder.Services.ConfigureSnapDog(snapDogConfig);
 
     // Configure OpenTelemetry (if enabled)
     if (snapDogConfig.Telemetry.Enabled)
@@ -255,31 +250,6 @@ static WebApplication CreateWebApplication(string[] args)
         );
     }
 
-    // Register AudioConfig for IOptions pattern
-    builder.Services.Configure<AudioConfig>(options =>
-    {
-        var audioConfig = snapDogConfig.Services.Audio;
-        options.SampleRate = audioConfig.SampleRate;
-        options.BitDepth = audioConfig.BitDepth;
-        options.Channels = audioConfig.Channels;
-        options.Codec = audioConfig.Codec;
-        options.BufferMs = audioConfig.BufferMs;
-    });
-
-    // Register configuration for IOptions pattern
-    builder.Services.Configure<SnapDogConfiguration>(options =>
-    {
-        // Copy all configuration sections
-        options.System = snapDogConfig.System;
-        options.Telemetry = snapDogConfig.Telemetry;
-        options.Api = snapDogConfig.Api;
-        options.Services = snapDogConfig.Services;
-        options.SnapcastServer = snapDogConfig.SnapcastServer;
-        options.Zones = snapDogConfig.Zones;
-        options.Clients = snapDogConfig.Clients;
-        options.RadioStations = snapDogConfig.RadioStations;
-    });
-
     // Add command processing (Mediator, handlers, behaviors)
     builder.Services.AddCommandProcessing();
 
@@ -288,26 +258,6 @@ static WebApplication CreateWebApplication(string[] args)
 
     // Add Snapcast services
     builder.Services.AddSnapcastServices();
-
-    // Register zone and client configurations for services that need them
-    builder.Services.Configure<List<ZoneConfig>>(options =>
-    {
-        options.Clear();
-        options.AddRange(snapDogConfig.Zones);
-    });
-
-    builder.Services.Configure<List<ClientConfig>>(options =>
-    {
-        options.Clear();
-        options.AddRange(snapDogConfig.Clients);
-    });
-
-    // Register IEnumerable<ZoneConfig> for MediaPlayerService
-    builder.Services.AddSingleton<IEnumerable<ZoneConfig>>(provider =>
-    {
-        var zoneOptions = provider.GetRequiredService<IOptions<List<ZoneConfig>>>();
-        return zoneOptions.Value;
-    });
 
     // Add MQTT services
     if (snapDogConfig.Services.Mqtt.Enabled)
@@ -330,16 +280,7 @@ static WebApplication CreateWebApplication(string[] args)
     }
 
     // Notification processing configuration and services
-    builder.Services.Configure<NotificationProcessingOptions>(options =>
-    {
-        // Sensible defaults; can be overridden via env or appsettings in future
-        options.MaxQueueCapacity = 2048;
-        options.MaxConcurrency = 2;
-        options.MaxRetryAttempts = 3;
-        options.RetryBaseDelayMs = 250;
-        options.RetryMaxDelayMs = 5000;
-        options.ShutdownTimeoutSeconds = 10;
-    });
+    builder.Services.ConfigureNotificationProcessing();
     builder.Services.AddSingleton<SnapDog2.Infrastructure.Notifications.NotificationQueue>();
     builder.Services.AddSingleton<SnapDog2.Core.Abstractions.INotificationQueue>(sp =>
         sp.GetRequiredService<SnapDog2.Infrastructure.Notifications.NotificationQueue>()
