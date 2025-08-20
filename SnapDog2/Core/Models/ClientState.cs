@@ -6,11 +6,6 @@ namespace SnapDog2.Core.Models;
 public record ClientState
 {
     /// <summary>
-    /// Gets the SnapDog2 internal client ID.
-    /// </summary>
-    public required int Id { get; init; }
-
-    /// <summary>
     /// Gets the Snapcast client ID.
     /// </summary>
     public required string SnapcastId { get; init; }

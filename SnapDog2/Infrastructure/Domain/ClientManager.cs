@@ -135,7 +135,6 @@ public partial class ClientManager : IClientManager
         var snapDogClient = (SnapDogClient)client;
         var state = new ClientState
         {
-            Id = client.Id,
             SnapcastId = snapDogClient._snapcastClient.Id,
             Name = client.Name,
             Mac = snapDogClient.MacAddress,
