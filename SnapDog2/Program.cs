@@ -356,7 +356,7 @@ static WebApplication CreateWebApplication(string[] args)
         builder.Services.AddHostedService<SnapDog2.Worker.Services.IntegrationServicesHostedService>();
 
         // Add zone grouping configuration
-        builder.Services.Configure<SnapDog2.Core.Configuration.ZoneGroupingConfig>(_ => { });
+        builder.Services.Configure<SnapDog2.Core.Configuration.SnapcastConfig>(_ => { });
 
         // Add continuous background service for automatic zone grouping
         builder.Services.AddHostedService<SnapDog2.Services.ZoneGroupingBackgroundService>();

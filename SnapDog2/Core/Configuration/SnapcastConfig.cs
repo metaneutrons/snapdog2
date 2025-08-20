@@ -69,6 +69,14 @@ public class SnapcastConfig
     public bool AutoReconnect { get; set; } = true;
 
     /// <summary>
+    /// Gets or sets the interval in milliseconds between periodic zone grouping checks.
+    /// This is the main interval for ensuring zones are properly configured.
+    /// Default: 5000ms (5 seconds).
+    /// </summary>
+    [Env("ZONE_GROUPING_CHECK_INTERVAL_MS")]
+    public int ZoneGroupingCheckIntervalMs { get; set; } = 5_000;
+
+    /// <summary>
     /// Snapcast HTTP port.
     /// Maps to: SNAPDOG_SERVICES_SNAPCAST_HTTP_PORT
     /// </summary>

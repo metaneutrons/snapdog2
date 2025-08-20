@@ -17,28 +17,28 @@ public class ZoneGroupingBackgroundService : BackgroundService
     private readonly ILogger<ZoneGroupingBackgroundService> _logger;
     private readonly IServiceProvider _serviceProvider;
     private readonly ZoneGroupingMetrics _metrics;
-    private readonly ZoneGroupingConfig _config;
+    private readonly SnapcastConfig _config;
     private readonly TimeSpan _reconciliationInterval;
 
     public ZoneGroupingBackgroundService(
         ILogger<ZoneGroupingBackgroundService> logger,
         IServiceProvider serviceProvider,
         ZoneGroupingMetrics metrics,
-        IOptions<ZoneGroupingConfig> config
+        IOptions<SnapcastConfig> config
     )
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         _metrics = metrics ?? throw new ArgumentNullException(nameof(metrics));
         _config = config?.Value ?? throw new ArgumentNullException(nameof(config));
-        _reconciliationInterval = TimeSpan.FromMilliseconds(_config.PeriodicCheckIntervalMs);
+        _reconciliationInterval = TimeSpan.FromMilliseconds(_config.ZoneGroupingCheckIntervalMs);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _logger.LogInformation(
             "🎵 Zone grouping background service starting with {Interval}ms interval...",
-            _config.PeriodicCheckIntervalMs
+            _config.ZoneGroupingCheckIntervalMs
         );
 
         // Wait for services to be ready
