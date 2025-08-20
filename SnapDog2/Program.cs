@@ -393,12 +393,6 @@ static WebApplication CreateWebApplication(string[] args)
         SnapDog2.Infrastructure.Domain.ZoneManager
     >();
 
-    // Zone event bridge service for external event handling
-    builder.Services.AddScoped<
-        SnapDog2.Core.Abstractions.IZoneEventBridgeService,
-        SnapDog2.Infrastructure.Services.ZoneEventBridgeService
-    >();
-
     // Status factory for centralized status notification creation - Singleton for performance
     builder.Services.AddSingleton<
         SnapDog2.Core.Abstractions.IStatusFactory,

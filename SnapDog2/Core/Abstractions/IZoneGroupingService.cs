@@ -9,6 +9,14 @@ namespace SnapDog2.Core.Abstractions;
 public interface IZoneGroupingService
 {
     /// <summary>
+    /// Ensures all zones are properly configured with correct client groupings and streams.
+    /// This is the main method for periodic zone grouping checks.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Result indicating success or failure of the zone grouping operation</returns>
+    Task<Result> EnsureZoneGroupingAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Ensures all clients assigned to a specific zone are grouped together in Snapcast.
     /// </summary>
     /// <param name="zoneId">The zone ID to synchronize grouping for</param>
