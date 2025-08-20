@@ -65,9 +65,10 @@ public sealed class NotificationBackgroundService(
             {
                 this._logger.LogError(
                     ex,
-                    "Unhandled error processing notification {EventType} for zone {ZoneIndex}",
+                    "Unhandled error processing notification {EventType} for {EntityType} {EntityId}",
                     item.EventType,
-                    item.ZoneIndex
+                    item.EntityType,
+                    item.EntityId
                 );
             }
         }
@@ -90,9 +91,10 @@ public sealed class NotificationBackgroundService(
                 await this.PublishAsync(item, ct);
                 this._metrics?.IncrementCounter("notifications_processed_total", 1, ("event", item.EventType));
                 this._logger.LogDebug(
-                    "Notification {EventType} for zone {ZoneIndex} processed",
+                    "Notification {EventType} for {EntityType} {EntityId} processed",
                     item.EventType,
-                    item.ZoneIndex
+                    item.EntityType,
+                    item.EntityId
                 );
                 return;
             }
@@ -107,9 +109,10 @@ public sealed class NotificationBackgroundService(
                 {
                     this._logger.LogError(
                         ex,
-                        "Notification {EventType} for zone {ZoneIndex} failed after {Attempts} attempts; dead-lettering",
+                        "Notification {EventType} for {EntityType} {EntityId} failed after {Attempts} attempts; dead-lettering",
                         item.EventType,
-                        item.ZoneIndex,
+                        item.EntityType,
+                        item.EntityId,
                         attempt
                     );
                     this._metrics?.IncrementCounter("notifications_dead_letter_total", 1, ("event", item.EventType));
@@ -128,9 +131,10 @@ public sealed class NotificationBackgroundService(
                 this._metrics?.IncrementCounter("notifications_retried_total", 1, ("event", item.EventType));
                 this._logger.LogWarning(
                     ex,
-                    "Retrying notification {EventType} for zone {ZoneIndex} (attempt {Attempt}/{MaxAttempts}) after {Delay}ms",
+                    "Retrying notification {EventType} for {EntityType} {EntityId} (attempt {Attempt}/{MaxAttempts}) after {Delay}ms",
                     item.EventType,
-                    item.ZoneIndex,
+                    item.EntityType,
+                    item.EntityId,
                     attempt + 1,
                     maxAttempts,
                     (int)totalDelay.TotalMilliseconds
@@ -145,10 +149,24 @@ public sealed class NotificationBackgroundService(
         // MQTT
         if (this._mqtt != null && this._mqtt.IsConnected)
         {
-            // Use dynamic to invoke the generic method with runtime payload type
-            var mqttResult = await this
-                ._mqtt.PublishZoneStatusAsync(item.ZoneIndex, item.EventType, (dynamic)item.Payload, ct)
-                .ConfigureAwait(false);
+            Result mqttResult = item.EntityType switch
+            {
+                "Zone" when int.TryParse(item.EntityId, out var zoneIndex) => await this._mqtt.PublishZoneStatusAsync(
+                    zoneIndex,
+                    item.EventType,
+                    (dynamic)item.Payload,
+                    ct
+                ),
+                "Client" => await this._mqtt.PublishClientStatusAsync(
+                    item.EntityId,
+                    item.EventType,
+                    (dynamic)item.Payload,
+                    ct
+                ),
+                "Global" => await this._mqtt.PublishGlobalStatusAsync(item.EventType, (dynamic)item.Payload, ct),
+                _ => Result.Failure($"Unknown entity type: {item.EntityType}"),
+            };
+
             if (mqttResult.IsFailure)
             {
                 throw new InvalidOperationException(mqttResult.ErrorMessage ?? "MQTT publish failed");
@@ -158,9 +176,24 @@ public sealed class NotificationBackgroundService(
         // KNX
         if (this._knx != null && this._knx.IsConnected)
         {
-            var knxResult = await this
-                ._knx.PublishZoneStatusAsync(item.ZoneIndex, item.EventType, (dynamic)item.Payload, ct)
-                .ConfigureAwait(false);
+            Result knxResult = item.EntityType switch
+            {
+                "Zone" when int.TryParse(item.EntityId, out var zoneIndex) => await this._knx.PublishZoneStatusAsync(
+                    zoneIndex,
+                    item.EventType,
+                    (dynamic)item.Payload,
+                    ct
+                ),
+                "Client" => await this._knx.PublishClientStatusAsync(
+                    item.EntityId,
+                    item.EventType,
+                    (dynamic)item.Payload,
+                    ct
+                ),
+                "Global" => await this._knx.PublishGlobalStatusAsync(item.EventType, (dynamic)item.Payload, ct),
+                _ => Result.Failure($"Unknown entity type: {item.EntityType}"),
+            };
+
             if (knxResult.IsFailure)
             {
                 throw new InvalidOperationException(knxResult.ErrorMessage ?? "KNX publish failed");

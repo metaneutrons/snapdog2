@@ -259,10 +259,11 @@ static WebApplication CreateWebApplication(string[] args)
     // Add Snapcast services
     builder.Services.AddSnapcastServices();
 
-    // Add MQTT services
+    // Add MQTT services with smart publishing
     if (snapDogConfig.Services.Mqtt.Enabled)
     {
         builder.Services.AddMqttServices().ValidateMqttConfiguration();
+        builder.Services.AddSmartMqttPublishing();
     }
     else
     {

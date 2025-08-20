@@ -13,7 +13,8 @@ using SnapDog2.Core.Configuration;
 internal sealed class NotificationItem
 {
     public required string EventType { get; init; }
-    public required int ZoneIndex { get; init; }
+    public required string EntityType { get; init; } // "Zone", "Client", "Global"
+    public required string EntityId { get; init; } // Zone index, client index, or "system"
     public required object Payload { get; init; }
     public int Attempt { get; set; }
 }
@@ -60,7 +61,8 @@ public sealed class NotificationQueue : INotificationQueue
         var item = new NotificationItem
         {
             EventType = eventType,
-            ZoneIndex = zoneIndex,
+            EntityType = "Zone",
+            EntityId = zoneIndex.ToString(),
             Payload = payload!,
             Attempt = 0,
         };
@@ -68,6 +70,47 @@ public sealed class NotificationQueue : INotificationQueue
         await this._queue.Writer.WriteAsync(item, cancellationToken);
         var newDepth = Interlocked.Increment(ref this._depth);
         this._logger.LogDebug("Enqueued notification {EventType} for zone {ZoneIndex}", eventType, zoneIndex);
+        this._metrics?.IncrementCounter("notifications_enqueued_total", 1, ("event", eventType));
+        this._metrics?.SetGauge("notifications_queue_depth", newDepth);
+    }
+
+    public async Task EnqueueClientAsync<T>(
+        string eventType,
+        string clientIndex,
+        T payload,
+        CancellationToken cancellationToken
+    )
+    {
+        var item = new NotificationItem
+        {
+            EventType = eventType,
+            EntityType = "Client",
+            EntityId = clientIndex,
+            Payload = payload!,
+            Attempt = 0,
+        };
+
+        await this._queue.Writer.WriteAsync(item, cancellationToken);
+        var newDepth = Interlocked.Increment(ref this._depth);
+        this._logger.LogDebug("Enqueued notification {EventType} for client {ClientIndex}", eventType, clientIndex);
+        this._metrics?.IncrementCounter("notifications_enqueued_total", 1, ("event", eventType));
+        this._metrics?.SetGauge("notifications_queue_depth", newDepth);
+    }
+
+    public async Task EnqueueGlobalAsync<T>(string eventType, T payload, CancellationToken cancellationToken)
+    {
+        var item = new NotificationItem
+        {
+            EventType = eventType,
+            EntityType = "Global",
+            EntityId = "system",
+            Payload = payload!,
+            Attempt = 0,
+        };
+
+        await this._queue.Writer.WriteAsync(item, cancellationToken);
+        var newDepth = Interlocked.Increment(ref this._depth);
+        this._logger.LogDebug("Enqueued notification {EventType} for global system", eventType);
         this._metrics?.IncrementCounter("notifications_enqueued_total", 1, ("event", eventType));
         this._metrics?.SetGauge("notifications_queue_depth", newDepth);
     }
