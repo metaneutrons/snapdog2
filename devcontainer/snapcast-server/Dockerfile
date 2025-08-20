@@ -99,6 +99,7 @@ log "Starting development initialization..."
 log "Preparing audio sinks..."
 mkdir -p /snapsinks
 chown snapcast:snapcast /snapsinks
+chmod 0777 /snapsinks
 
 # Run SnapDog2 configuration
 log "Generating configuration..."
