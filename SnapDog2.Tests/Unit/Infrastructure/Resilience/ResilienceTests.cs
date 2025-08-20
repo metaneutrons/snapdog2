@@ -14,7 +14,7 @@ namespace SnapDog2.Tests.Unit.Infrastructure.Resilience;
 /// </summary>
 [Trait("Category", "Unit")]
 [Trait("Scenario", "RealWorld")]
-public class RealWorldResilienceScenarioTests
+public class ResilienceTests
 {
     #region Network Partition Scenarios
 
