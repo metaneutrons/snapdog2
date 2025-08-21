@@ -64,7 +64,7 @@ public class AudioConfig
     public string[] LibVLCArgs =>
         [
             "--no-video",
-            "--verbose=2", // Enable verbose logging instead of quiet
+            "--quiet", // Suppress all LibVLC debug output
             "--plugin-path=/usr/lib/aarch64-linux-gnu/vlc/plugins", // Set plugin path
             "--intf=dummy", // Use dummy interface for headless operation
             $"--network-caching={this.BufferMs}", // Network caching timeout in milliseconds
