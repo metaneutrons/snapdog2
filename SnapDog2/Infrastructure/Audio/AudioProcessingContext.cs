@@ -1,10 +1,30 @@
 namespace SnapDog2.Infrastructure.Audio;
 
+using System;
 using System.Text.Json;
 using LibVLCSharp.Shared;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Core.Models;
+
+/// <summary>
+/// Event arguments for position changes.
+/// </summary>
+public class PositionChangedEventArgs : EventArgs
+{
+    public long PositionMs { get; init; }
+    public float Progress { get; init; }
+    public long DurationMs { get; init; }
+}
+
+/// <summary>
+/// Event arguments for playback state changes.
+/// </summary>
+public class PlaybackStateChangedEventArgs : EventArgs
+{
+    public bool IsPlaying { get; init; }
+    public VLCState State { get; init; }
+}
 
 /// <summary>
 /// Audio processing context using LibVLC for streaming and metadata extraction.
@@ -16,6 +36,10 @@ public sealed class AudioProcessingContext : IAsyncDisposable, IDisposable
     private readonly ILogger _logger;
     private readonly DirectoryInfo _tempDirectory;
     private bool _disposed;
+
+    // Event for position changes
+    public event EventHandler<PositionChangedEventArgs>? PositionChanged;
+    public event EventHandler<PlaybackStateChangedEventArgs>? PlaybackStateChanged;
 
     public AudioProcessingConfig Config { get; }
     public MetadataManager MetadataManager { get; }
@@ -49,6 +73,10 @@ public sealed class AudioProcessingContext : IAsyncDisposable, IDisposable
         {
             this._libvlc = new LibVLC(args);
             this._mediaPlayer = new LibVLCSharp.Shared.MediaPlayer(this._libvlc);
+
+            // Subscribe to LibVLC events for real-time position updates
+            // Temporarily disabled to isolate LibVLC issue
+            // this.SetupEventHandlers();
         }
         catch (Exception ex)
         {
@@ -165,8 +193,8 @@ public sealed class AudioProcessingContext : IAsyncDisposable, IDisposable
                 return new AudioProcessingResult { Success = false, ErrorMessage = "Media playback failed" };
             }
 
-            // Save metadata to JSON file
-            await this.MetadataManager.SaveMetadataAsync(metadata, metadataPath, cancellationToken);
+            // Save metadata to JSON file (disabled - metadata available programmatically)
+            // await this.MetadataManager.SaveMetadataAsync(metadata, metadataPath, cancellationToken);
 
             this._logger.LogInformation("Audio streaming started successfully: {OutputPath}", finalOutputPath);
 
@@ -323,7 +351,169 @@ public sealed class AudioProcessingContext : IAsyncDisposable, IDisposable
     /// <summary>
     /// Gets whether media is currently playing.
     /// </summary>
-    public bool IsPlaying => this._mediaPlayer.IsPlaying;
+    public bool IsPlaying
+    {
+        get
+        {
+            var isPlaying = this._mediaPlayer.IsPlaying;
+            var state = this._mediaPlayer.State;
+
+            this._logger.LogDebug("LibVLC IsPlaying Check - IsPlaying: {IsPlaying}, State: {State}", isPlaying, state);
+
+            return isPlaying;
+        }
+    }
+
+    /// <summary>
+    /// Gets the current playback position in milliseconds.
+    /// </summary>
+    public long PositionMs
+    {
+        get
+        {
+            var time = this._mediaPlayer.Time;
+            var state = this._mediaPlayer.State;
+            var isPlaying = this._mediaPlayer.IsPlaying;
+
+            this._logger.LogDebug(
+                "LibVLC Direct Access - Time: {Time}ms, State: {State}, IsPlaying: {IsPlaying}",
+                time,
+                state,
+                isPlaying
+            );
+
+            return time;
+        }
+    }
+
+    /// <summary>
+    /// Gets the current playback position as a percentage (0.0-1.0).
+    /// </summary>
+    public float Progress => this._mediaPlayer.Position;
+
+    /// <summary>
+    /// Gets the total duration of the media in milliseconds.
+    /// </summary>
+    public long DurationMs => this._mediaPlayer.Length;
+
+    /// <summary>
+    /// Sets up LibVLC event handlers for real-time position and state updates.
+    /// </summary>
+    private void SetupEventHandlers()
+    {
+        this._logger.LogInformation("🔧 Setting up LibVLC event handlers");
+
+        // Position change events (percentage-based)
+        this._mediaPlayer.PositionChanged += (sender, e) =>
+        {
+            try
+            {
+                var positionMs = (long)(e.Position * this._mediaPlayer.Length);
+                this._logger.LogDebug(
+                    "📍 LibVLC PositionChanged event: {Position}% = {PositionMs}ms",
+                    e.Position,
+                    positionMs
+                );
+
+                this.PositionChanged?.Invoke(
+                    this,
+                    new PositionChangedEventArgs
+                    {
+                        PositionMs = positionMs,
+                        Progress = e.Position,
+                        DurationMs = this._mediaPlayer.Length,
+                    }
+                );
+            }
+            catch (Exception ex)
+            {
+                this._logger.LogWarning(ex, "Error handling PositionChanged event");
+            }
+        };
+
+        // Also keep TimeChanged as backup
+        this._mediaPlayer.TimeChanged += (sender, e) =>
+        {
+            try
+            {
+                this._logger.LogDebug("⏰ LibVLC TimeChanged event: {Time}ms", e.Time);
+                this.PositionChanged?.Invoke(
+                    this,
+                    new PositionChangedEventArgs
+                    {
+                        PositionMs = e.Time,
+                        Progress = this._mediaPlayer.Position,
+                        DurationMs = this._mediaPlayer.Length,
+                    }
+                );
+            }
+            catch (Exception ex)
+            {
+                this._logger.LogWarning(ex, "Error handling TimeChanged event");
+            }
+        };
+
+        // Playback state change events
+        this._mediaPlayer.Playing += (sender, e) =>
+        {
+            try
+            {
+                this.PlaybackStateChanged?.Invoke(
+                    this,
+                    new PlaybackStateChangedEventArgs { IsPlaying = true, State = VLCState.Playing }
+                );
+            }
+            catch (Exception ex)
+            {
+                this._logger.LogWarning(ex, "Error handling Playing event");
+            }
+        };
+
+        this._mediaPlayer.Paused += (sender, e) =>
+        {
+            try
+            {
+                this.PlaybackStateChanged?.Invoke(
+                    this,
+                    new PlaybackStateChangedEventArgs { IsPlaying = false, State = VLCState.Paused }
+                );
+            }
+            catch (Exception ex)
+            {
+                this._logger.LogWarning(ex, "Error handling Paused event");
+            }
+        };
+
+        this._mediaPlayer.Stopped += (sender, e) =>
+        {
+            try
+            {
+                this.PlaybackStateChanged?.Invoke(
+                    this,
+                    new PlaybackStateChangedEventArgs { IsPlaying = false, State = VLCState.Stopped }
+                );
+            }
+            catch (Exception ex)
+            {
+                this._logger.LogWarning(ex, "Error handling Stopped event");
+            }
+        };
+
+        this._mediaPlayer.EndReached += (sender, e) =>
+        {
+            try
+            {
+                this.PlaybackStateChanged?.Invoke(
+                    this,
+                    new PlaybackStateChangedEventArgs { IsPlaying = false, State = VLCState.Ended }
+                );
+            }
+            catch (Exception ex)
+            {
+                this._logger.LogWarning(ex, "Error handling EndReached event");
+            }
+        };
+    }
 
     public void Dispose()
     {

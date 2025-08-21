@@ -262,8 +262,8 @@ public partial class SmartMqttNotificationHandlers(
     {
         try
         {
-            _logger.LogInformation(
-                "🔍 Attempting to publish zone status: {EventType} for Zone {ZoneIndex}",
+            _logger.LogDebug(
+                "Attempting to publish zone status: {EventType} for Zone {ZoneIndex}",
                 eventType,
                 zoneIndex
             );
@@ -271,7 +271,7 @@ public partial class SmartMqttNotificationHandlers(
             var smartPublisher = _serviceProvider.GetService<ISmartMqttPublisher>();
             if (smartPublisher != null)
             {
-                _logger.LogInformation("✅ Smart publisher found, publishing zone status");
+                _logger.LogDebug("Smart publisher found, publishing zone status");
                 await smartPublisher.PublishZoneStatusAsync(zoneIndex, eventType, payload, cancellationToken);
             }
             else
@@ -346,7 +346,7 @@ public partial class SmartMqttNotificationHandlers(
     [LoggerMessage(9018, LogLevel.Information, "Zone {ZoneIndex} shuffle mode changed to {ShuffleEnabled}")]
     private partial void LogZoneShuffleModeChange(int zoneIndex, bool shuffleEnabled);
 
-    [LoggerMessage(9019, LogLevel.Information, "Zone {ZoneIndex} complete state changed")]
+    [LoggerMessage(9019, LogLevel.Debug, "Zone {ZoneIndex} complete state changed")]
     private partial void LogZoneStateChange(int zoneIndex);
 
     // Error logging

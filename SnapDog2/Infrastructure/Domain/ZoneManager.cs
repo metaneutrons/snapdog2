@@ -11,8 +11,10 @@ using Microsoft.Extensions.Options;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Core.Models;
+using SnapDog2.Infrastructure.Audio;
 using SnapDog2.Server.Features.Playlists.Queries;
 using SnapDog2.Server.Features.Zones.Notifications;
+using LibVLC = LibVLCSharp.Shared;
 
 /// <summary>
 /// Production-ready implementation of IZoneManager with full Snapcast integration.
@@ -253,6 +255,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 {
     private readonly int _zoneIndex;
     private readonly ZoneConfig _config;
+    private int _lastLoggedPositionSeconds = -1; // Track last logged position to avoid spam
     private readonly ISnapcastService _snapcastService;
     private readonly ISnapcastStateRepository _snapcastStateRepository;
     private readonly IMediaPlayerService _mediaPlayerService;
@@ -264,6 +267,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     private ZoneState _currentState;
     private string? _snapcastGroupId;
     private bool _disposed;
+    private Timer? _positionUpdateTimer;
 
     [LoggerMessage(7101, LogLevel.Information, "Zone {ZoneIndex} ({ZoneName}): {Action}")]
     private partial void LogZoneAction(int zoneIndex, string zoneName, string action);
@@ -333,6 +337,8 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     public async Task<Result<ZoneState>> GetStateAsync()
     {
+        this._logger.LogDebug("GetStateAsync: Called for zone {ZoneIndex}", this._zoneIndex);
+
         await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
@@ -378,8 +384,12 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             // Update state
             this._currentState = this._currentState with
             {
-                PlaybackState = "playing",
+                PlaybackState = SnapDog2.Core.Enums.PlaybackState.Playing,
             };
+
+            // Start position update timer for reliable MQTT updates + subscribe to events for immediate updates
+            this.StartPositionUpdateTimer();
+            this.SubscribeToMediaPlayerEvents();
 
             // Publish notification
             this.PublishZoneStateChangedAsync();
@@ -420,9 +430,13 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             // Update state
             this._currentState = this._currentState with
             {
-                PlaybackState = "playing",
+                PlaybackState = SnapDog2.Core.Enums.PlaybackState.Playing,
                 Track = newTrack,
             };
+
+            // Start timer for reliable updates + events for immediate updates
+            this.StartPositionUpdateTimer();
+            this.SubscribeToMediaPlayerEvents();
 
             this.PublishZoneStateChangedAsync();
             return Result.Success();
@@ -458,7 +472,15 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 return playResult;
             }
 
-            this._currentState = this._currentState with { PlaybackState = "playing", Track = streamTrack };
+            this._currentState = this._currentState with
+            {
+                PlaybackState = SnapDog2.Core.Enums.PlaybackState.Playing,
+                Track = streamTrack,
+            };
+
+            // Start timer for reliable updates + events for immediate updates
+            this.StartPositionUpdateTimer();
+            this.SubscribeToMediaPlayerEvents();
 
             this.PublishZoneStateChangedAsync();
             return Result.Success();
@@ -482,7 +504,12 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 return pauseResult;
             }
 
-            this._currentState = this._currentState with { PlaybackState = "paused" };
+            this._currentState = this._currentState with { PlaybackState = SnapDog2.Core.Enums.PlaybackState.Paused };
+
+            // Stop timer and unsubscribe from events when not playing
+            this.StopPositionUpdateTimer();
+            this.UnsubscribeFromMediaPlayerEvents();
+
             this.PublishZoneStateChangedAsync();
             return Result.Success();
         }
@@ -505,7 +532,12 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 return stopResult;
             }
 
-            this._currentState = this._currentState with { PlaybackState = "stopped" };
+            this._currentState = this._currentState with { PlaybackState = SnapDog2.Core.Enums.PlaybackState.Stopped };
+
+            // Stop timer and unsubscribe from events when not playing
+            this.StopPositionUpdateTimer();
+            this.UnsubscribeFromMediaPlayerEvents();
+
             this.PublishZoneStateChangedAsync();
             return Result.Success();
         }
@@ -1051,7 +1083,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         {
             Id = this._zoneIndex,
             Name = this._config.Name,
-            PlaybackState = "stopped",
+            PlaybackState = SnapDog2.Core.Enums.PlaybackState.Stopped,
             Volume = 50,
             Mute = false,
             TrackRepeat = false,
@@ -1134,9 +1166,130 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     private async Task UpdateStateFromSnapcastAsync()
     {
-        // Update state from current Snapcast group state
-        // This would read from SnapcastStateRepository
-        await Task.CompletedTask;
+        try
+        {
+            this._logger.LogDebug("UpdateStateFromSnapcastAsync: Starting for zone {ZoneIndex}", this._zoneIndex);
+
+            // Get current playback status from MediaPlayerService
+            var playbackStatus = await this._mediaPlayerService.GetStatusAsync(this._zoneIndex).ConfigureAwait(false);
+
+            this._logger.LogDebug(
+                "UpdateStateFromSnapcastAsync: MediaPlayer status result - Success: {Success}, Value: {Value}",
+                playbackStatus.IsSuccess,
+                playbackStatus.Value != null ? "NotNull" : "Null"
+            );
+
+            if (playbackStatus.IsSuccess && playbackStatus.Value != null)
+            {
+                var status = playbackStatus.Value;
+
+                this._logger.LogDebug(
+                    "UpdateStateFromSnapcastAsync: Status - IsPlaying: {IsPlaying}, CurrentTrack: {CurrentTrack}",
+                    status.IsPlaying,
+                    status.CurrentTrack != null ? "NotNull" : "Null"
+                );
+
+                // Update track playing state if we have a current track
+                if (this._currentState.Track != null && status.CurrentTrack != null)
+                {
+                    // Only log track state changes at INFO level if something actually changed
+                    var stateChanged = this._currentState.Track.IsPlaying != status.IsPlaying;
+
+                    if (stateChanged)
+                    {
+                        this._logger.LogInformation(
+                            "UpdateStateFromSnapcastAsync: Track state changed - Old IsPlaying: {OldIsPlaying}, New IsPlaying: {NewIsPlaying}",
+                            this._currentState.Track.IsPlaying,
+                            status.IsPlaying
+                        );
+                    }
+                    else
+                    {
+                        this._logger.LogDebug(
+                            "UpdateStateFromSnapcastAsync: Updating track state - Old IsPlaying: {OldIsPlaying}, New IsPlaying: {NewIsPlaying}",
+                            this._currentState.Track.IsPlaying,
+                            status.IsPlaying
+                        );
+                    }
+
+                    // Log position updates every 30 seconds (simpler approach)
+                    var positionSeconds = status.CurrentTrack.PositionMs / 1000.0;
+                    var durationSeconds = status.CurrentTrack.DurationMs / 1000.0;
+                    var progressPercent = status.CurrentTrack.Progress * 100;
+
+                    // Log every 30 seconds of playback
+                    var positionSecondsInt = (int)positionSeconds;
+                    var shouldLogPosition =
+                        positionSecondsInt > 0
+                        && positionSecondsInt % 30 == 0
+                        && (positionSecondsInt != this._lastLoggedPositionSeconds);
+
+                    if (shouldLogPosition)
+                    {
+                        this._logger.LogInformation(
+                            "Zone {ZoneIndex}: Playing \"{Title}\" - {Position:F1}s / {Duration:F1}s ({Progress:F1}%)",
+                            this._zoneIndex,
+                            status.CurrentTrack.Title ?? "Unknown",
+                            positionSeconds,
+                            durationSeconds,
+                            progressPercent
+                        );
+                        this._lastLoggedPositionSeconds = positionSecondsInt;
+                    }
+                    else
+                    {
+                        this._logger.LogDebug(
+                            "UpdateStateFromSnapcastAsync: LibVLC Position Data - PositionMs: {PositionMs}, Progress: {Progress}, DurationMs: {DurationMs}",
+                            status.CurrentTrack.PositionMs,
+                            status.CurrentTrack.Progress,
+                            status.CurrentTrack.DurationMs
+                        );
+                    }
+
+                    // Update the track with current playback information
+                    this._currentState = this._currentState with
+                    {
+                        Track = this._currentState.Track with
+                        {
+                            IsPlaying = status.IsPlaying,
+                            PositionMs = status.CurrentTrack.PositionMs,
+                            Progress = status.CurrentTrack.Progress,
+                        },
+                        PlaybackState = status.IsPlaying
+                            ? SnapDog2.Core.Enums.PlaybackState.Playing
+                            : SnapDog2.Core.Enums.PlaybackState.Stopped,
+                    };
+
+                    this._logger.LogDebug(
+                        "UpdateStateFromSnapcastAsync: Updated track state - IsPlaying: {IsPlaying}, PositionMs: {PositionMs}, Progress: {Progress}",
+                        this._currentState.Track.IsPlaying,
+                        this._currentState.Track.PositionMs,
+                        this._currentState.Track.Progress
+                    );
+                }
+                else
+                {
+                    this._logger.LogDebug(
+                        "UpdateStateFromSnapcastAsync: Skipping update - CurrentState.Track: {CurrentTrack}, Status.CurrentTrack: {StatusCurrentTrack}",
+                        this._currentState.Track != null ? "NotNull" : "Null",
+                        status.CurrentTrack != null ? "NotNull" : "Null"
+                    );
+                }
+            }
+            else
+            {
+                this._logger.LogInformation(
+                    "UpdateStateFromSnapcastAsync: MediaPlayer status failed or null - Success: {Success}, ErrorMessage: {ErrorMessage}",
+                    playbackStatus.IsSuccess,
+                    playbackStatus.ErrorMessage
+                );
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log error but don't fail the state update
+            this._logger.LogWarning(ex, "Failed to update zone {ZoneIndex} state from media player", this._zoneIndex);
+        }
     }
 
     private void PublishZoneStateChangedAsync()
@@ -1166,6 +1319,166 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 );
             }
         });
+    }
+
+    /// <summary>
+    /// Starts the position update timer for reliable MQTT position updates when playing.
+    /// </summary>
+    private void StartPositionUpdateTimer()
+    {
+        if (this._positionUpdateTimer != null)
+            return; // Timer already running
+
+        this._logger.LogDebug("Starting position update timer for zone {ZoneIndex}", this._zoneIndex);
+
+        this._positionUpdateTimer = new Timer(
+            async _ =>
+            {
+                try
+                {
+                    // Only update if we're playing and not disposed
+                    if (this._disposed || this._currentState.PlaybackState != SnapDog2.Core.Enums.PlaybackState.Playing)
+                        return;
+
+                    // Update state from MediaPlayer and publish if position changed
+                    await this.UpdateStateFromSnapcastAsync().ConfigureAwait(false);
+                    this.PublishZoneStateChangedAsync();
+                }
+                catch (Exception ex)
+                {
+                    this._logger.LogWarning(ex, "Error during position update for zone {ZoneIndex}", this._zoneIndex);
+                }
+            },
+            null,
+            TimeSpan.FromSeconds(1),
+            TimeSpan.FromSeconds(1)
+        );
+    }
+
+    /// <summary>
+    /// Stops the position update timer.
+    /// </summary>
+    private void StopPositionUpdateTimer()
+    {
+        if (this._positionUpdateTimer == null)
+            return;
+
+        this._logger.LogDebug("Stopping position update timer for zone {ZoneIndex}", this._zoneIndex);
+
+        this._positionUpdateTimer?.Dispose();
+        this._positionUpdateTimer = null;
+    }
+
+    /// <summary>
+    /// Subscribes to MediaPlayer events for immediate position and state updates.
+    /// </summary>
+    private void SubscribeToMediaPlayerEvents()
+    {
+        var mediaPlayer = this._mediaPlayerService.GetMediaPlayer(this._zoneIndex);
+        if (mediaPlayer != null)
+        {
+            this._logger.LogInformation("✅ Subscribing to MediaPlayer events for zone {ZoneIndex}", this._zoneIndex);
+
+            mediaPlayer.PositionChanged += this.OnMediaPlayerPositionChanged;
+            mediaPlayer.PlaybackStateChanged += this.OnMediaPlayerStateChanged;
+        }
+        else
+        {
+            this._logger.LogWarning(
+                "❌ No MediaPlayer found for zone {ZoneIndex} - cannot subscribe to events",
+                this._zoneIndex
+            );
+        }
+    }
+
+    /// <summary>
+    /// Unsubscribes from MediaPlayer events.
+    /// </summary>
+    private void UnsubscribeFromMediaPlayerEvents()
+    {
+        var mediaPlayer = this._mediaPlayerService.GetMediaPlayer(this._zoneIndex);
+        if (mediaPlayer != null)
+        {
+            this._logger.LogDebug("Unsubscribing from MediaPlayer events for zone {ZoneIndex}", this._zoneIndex);
+
+            mediaPlayer.PositionChanged -= this.OnMediaPlayerPositionChanged;
+            mediaPlayer.PlaybackStateChanged -= this.OnMediaPlayerStateChanged;
+        }
+    }
+
+    /// <summary>
+    /// Handles position changes from MediaPlayer and publishes updates.
+    /// </summary>
+    private void OnMediaPlayerPositionChanged(object? sender, PositionChangedEventArgs e)
+    {
+        try
+        {
+            this._logger.LogInformation(
+                "🎵 LibVLC Position Event: Zone {ZoneIndex}, PositionMs: {PositionMs}, Progress: {Progress}",
+                this._zoneIndex,
+                e.PositionMs,
+                e.Progress
+            );
+
+            if (this._disposed || this._currentState.PlaybackState != SnapDog2.Core.Enums.PlaybackState.Playing)
+            {
+                this._logger.LogDebug(
+                    "Skipping position update - disposed: {Disposed}, state: {State}",
+                    this._disposed,
+                    this._currentState.PlaybackState
+                );
+                return;
+            }
+
+            // Update current state with new position
+            if (this._currentState.Track != null)
+            {
+                this._currentState = this._currentState with
+                {
+                    Track = this._currentState.Track with
+                    {
+                        PositionMs = e.PositionMs,
+                        Progress = e.Progress,
+                        DurationMs = e.DurationMs > 0 ? e.DurationMs : this._currentState.Track.DurationMs,
+                    },
+                };
+
+                // Publish updated state to MQTT
+                this.PublishZoneStateChangedAsync();
+                this._logger.LogDebug("📡 Published MQTT update for position change");
+            }
+        }
+        catch (Exception ex)
+        {
+            this._logger.LogWarning(ex, "Error handling position change for zone {ZoneIndex}", this._zoneIndex);
+        }
+    }
+
+    /// <summary>
+    /// Handles playback state changes from MediaPlayer.
+    /// </summary>
+    private void OnMediaPlayerStateChanged(object? sender, PlaybackStateChangedEventArgs e)
+    {
+        try
+        {
+            this._logger.LogDebug("MediaPlayer state changed for zone {ZoneIndex}: {State}", this._zoneIndex, e.State);
+
+            // Update playback state based on LibVLC state
+            var newPlaybackState =
+                e.IsPlaying ? SnapDog2.Core.Enums.PlaybackState.Playing
+                : e.State == LibVLC.VLCState.Paused ? SnapDog2.Core.Enums.PlaybackState.Paused
+                : SnapDog2.Core.Enums.PlaybackState.Stopped;
+
+            if (this._currentState.PlaybackState != newPlaybackState)
+            {
+                this._currentState = this._currentState with { PlaybackState = newPlaybackState };
+                this.PublishZoneStateChangedAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            this._logger.LogWarning(ex, "Error handling state change for zone {ZoneIndex}", this._zoneIndex);
+        }
     }
 
     #region Status Publishing Methods (Blueprint Compliance)
@@ -1243,6 +1556,10 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         {
             return ValueTask.CompletedTask;
         }
+
+        // Stop timer and unsubscribe from MediaPlayer events
+        this.StopPositionUpdateTimer();
+        this.UnsubscribeFromMediaPlayerEvents();
 
         this._stateLock?.Dispose();
         this._disposed = true;

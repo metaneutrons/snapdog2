@@ -31,6 +31,10 @@ public sealed partial class MediaPlayer(
     private DateTime? _playbackStartedAt;
     private bool _disposed;
 
+    // Events for real-time updates
+    public event EventHandler<PositionChangedEventArgs>? PositionChanged;
+    public event EventHandler<PlaybackStateChangedEventArgs>? PlaybackStateChanged;
+
     /// <summary>
     /// Starts streaming audio from the specified URL to the Snapcast sink.
     /// </summary>
@@ -67,6 +71,10 @@ public sealed partial class MediaPlayer(
                 this._metadataLogger,
                 this._config.TempDirectory
             );
+
+            // Subscribe to real-time events
+            this._processingContext.PositionChanged += this.OnPositionChanged;
+            this._processingContext.PlaybackStateChanged += this.OnPlaybackStateChanged;
             this._streamingCts = new CancellationTokenSource();
             this._currentTrack = trackInfo;
             this._playbackStartedAt = DateTime.UtcNow;
@@ -168,16 +176,90 @@ public sealed partial class MediaPlayer(
     {
         var isPlaying = this._processingContext?.IsPlaying == true && !this._disposed;
 
+        this._logger.LogDebug(
+            "MediaPlayer.GetStatus() - ProcessingContext: {HasContext}, IsPlaying: {IsPlaying}, Disposed: {Disposed}, CurrentTrack: {HasTrack}",
+            this._processingContext != null,
+            this._processingContext?.IsPlaying ?? false,
+            this._disposed,
+            this._currentTrack != null
+        );
+
+        // Create updated track info with current position if we have a track and processing context
+        TrackInfo? currentTrack = this._currentTrack;
+        if (currentTrack != null && this._processingContext != null && isPlaying)
+        {
+            this._logger.LogDebug("Updating track position from LibVLC...");
+
+            // Update track with real-time position information from LibVLC
+            currentTrack = currentTrack with
+            {
+                IsPlaying = isPlaying,
+                PositionMs = this._processingContext.PositionMs,
+                Progress = this._processingContext.Progress,
+                DurationMs =
+                    this._processingContext.DurationMs > 0
+                        ? this._processingContext.DurationMs
+                        : currentTrack.DurationMs,
+            };
+        }
+        else
+        {
+            this._logger.LogInformation(
+                "❌ NOT updating position - CurrentTrack: {HasTrack}, ProcessingContext: {HasContext}, IsPlaying: {IsPlaying}",
+                currentTrack != null,
+                this._processingContext != null,
+                isPlaying
+            );
+        }
+
         return new PlaybackStatus
         {
             ZoneIndex = this._zoneIndex,
             IsPlaying = isPlaying,
-            CurrentTrack = this._currentTrack,
+            CurrentTrack = currentTrack,
             AudioFormat = new AudioFormat(this._config.SampleRate, this._config.BitDepth, this._config.Channels),
             PlaybackStartedAt = this._playbackStartedAt,
             ActiveStreams = isPlaying ? 1 : 0,
             MaxStreams = 1, // Each MediaPlayer handles exactly 1 stream
         };
+    }
+
+    /// <summary>
+    /// Handles position changes from LibVLC and forwards them.
+    /// </summary>
+    private void OnPositionChanged(object? sender, PositionChangedEventArgs e)
+    {
+        try
+        {
+            this.PositionChanged?.Invoke(this, e);
+        }
+        catch (Exception ex)
+        {
+            this._logger.LogWarning(
+                ex,
+                "Error forwarding position changed event for zone {ZoneIndex}",
+                this._zoneIndex
+            );
+        }
+    }
+
+    /// <summary>
+    /// Handles playback state changes from LibVLC and forwards them.
+    /// </summary>
+    private void OnPlaybackStateChanged(object? sender, PlaybackStateChangedEventArgs e)
+    {
+        try
+        {
+            this.PlaybackStateChanged?.Invoke(this, e);
+        }
+        catch (Exception ex)
+        {
+            this._logger.LogWarning(
+                ex,
+                "Error forwarding playback state changed event for zone {ZoneIndex}",
+                this._zoneIndex
+            );
+        }
     }
 
     public async ValueTask DisposeAsync()
