@@ -49,6 +49,13 @@ public interface IMediaPlayerService
     Task<Result<IEnumerable<PlaybackStatus>>> GetAllStatusAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Gets the MediaPlayer instance for a specific zone (for event subscription).
+    /// </summary>
+    /// <param name="zoneIndex">Zone index</param>
+    /// <returns>MediaPlayer instance or null if not found</returns>
+    SnapDog2.Infrastructure.Audio.MediaPlayer? GetMediaPlayer(int zoneIndex);
+
+    /// <summary>
     /// Stops all active playback across all zones.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token</param>

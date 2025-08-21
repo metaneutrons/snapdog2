@@ -160,9 +160,7 @@ public partial class GetZonePlaybackStateQueryHandler(
             );
         }
 
-        return SnapDog2.Core.Models.Result<SnapDog2.Core.Enums.PlaybackState>.Success(
-            Enum.Parse<SnapDog2.Core.Enums.PlaybackState>(stateResult.Value!.PlaybackState, true)
-        );
+        return SnapDog2.Core.Models.Result<SnapDog2.Core.Enums.PlaybackState>.Success(stateResult.Value!.PlaybackState);
     }
 }
 

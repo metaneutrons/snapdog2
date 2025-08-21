@@ -315,14 +315,8 @@ public partial class StatePublishingService(
                 cancellationToken
             );
 
-            // Convert string playback state to enum
-            var playbackStateEnum = zoneState.PlaybackState.ToLowerInvariant() switch
-            {
-                "play" or "playing" => SnapDog2.Core.Enums.PlaybackState.Playing,
-                "pause" or "paused" => SnapDog2.Core.Enums.PlaybackState.Paused,
-                "stop" or "stopped" => SnapDog2.Core.Enums.PlaybackState.Stopped,
-                _ => SnapDog2.Core.Enums.PlaybackState.Stopped,
-            };
+            // PlaybackState is already an enum, no conversion needed
+            var playbackStateEnum = zoneState.PlaybackState;
 
             // Also publish individual state notifications for granular updates
             await mediator.PublishAsync(

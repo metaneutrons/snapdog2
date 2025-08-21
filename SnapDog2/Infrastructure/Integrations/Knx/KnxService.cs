@@ -1175,7 +1175,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
                 Math.Clamp(volume, 0, 100)
             ),
             var x when x == StatusIds.MuteStatus && payload is bool mute => (StatusIds.MuteStatus, mute ? 1 : 0),
-            var x when x == StatusIds.PlaybackState && payload is string state => (
+            var x when x == StatusIds.PlaybackState && payload is SnapDog2.Core.Enums.PlaybackState state => (
                 StatusIds.PlaybackState,
                 MapPlaybackStateToKnx(state)
             ),
@@ -1204,15 +1204,15 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
     }
 
     /// <summary>
-    /// Maps playback state strings to KNX values.
+    /// Maps playback state enum to KNX values.
     /// </summary>
-    private static int MapPlaybackStateToKnx(string state)
+    private static int MapPlaybackStateToKnx(SnapDog2.Core.Enums.PlaybackState state)
     {
-        return state.ToLowerInvariant() switch
+        return state switch
         {
-            "stopped" => 0,
-            "playing" => 1,
-            "paused" => 2,
+            SnapDog2.Core.Enums.PlaybackState.Stopped => 0,
+            SnapDog2.Core.Enums.PlaybackState.Playing => 1,
+            SnapDog2.Core.Enums.PlaybackState.Paused => 2,
             _ => 0,
         };
     }

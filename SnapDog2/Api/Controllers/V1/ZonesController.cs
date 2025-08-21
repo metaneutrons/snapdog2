@@ -1034,7 +1034,7 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
             return this.NotFound($"Zone {zoneIndex} not found");
         }
 
-        return this.Ok(result.Value!.PlaybackState == "playing");
+        return this.Ok(result.Value!.PlaybackState == SnapDog2.Core.Enums.PlaybackState.Playing);
     }
 
     /// <summary>

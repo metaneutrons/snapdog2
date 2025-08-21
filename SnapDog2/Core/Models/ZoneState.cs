@@ -16,9 +16,9 @@ public record ZoneState
     public required string Name { get; init; }
 
     /// <summary>
-    /// Gets the current playback state ("play", "pause", "stop").
+    /// Gets the current playback state.
     /// </summary>
-    public required string PlaybackState { get; init; }
+    public required SnapDog2.Core.Enums.PlaybackState PlaybackState { get; init; }
 
     /// <summary>
     /// Gets the zone volume (0-100).

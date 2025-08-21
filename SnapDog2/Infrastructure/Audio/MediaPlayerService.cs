@@ -330,6 +330,14 @@ public sealed partial class MediaPlayerService(
     }
 
     /// <summary>
+    /// Gets the MediaPlayer instance for a specific zone (for event subscription).
+    /// </summary>
+    public MediaPlayer? GetMediaPlayer(int zoneIndex)
+    {
+        return this._players.TryGetValue(zoneIndex, out var player) ? player : null;
+    }
+
+    /// <summary>
     /// Stops all active playback across all zones.
     /// </summary>
     public async Task<Result> StopAllAsync(CancellationToken cancellationToken = default)
