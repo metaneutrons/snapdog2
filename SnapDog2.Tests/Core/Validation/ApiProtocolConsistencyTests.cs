@@ -229,10 +229,10 @@ public class ApiProtocolConsistencyTests
             if (commandIds.Any())
             {
                 var httpMethods = ConsistencyTestHelpers.GetHttpMethodsFromEndpoint(endpoint);
-                
+
                 // Allow POST for actions and PUT for idempotent state changes
                 var hasValidMethod = httpMethods.Contains("POST") || httpMethods.Contains("PUT");
-                
+
                 if (!hasValidMethod)
                 {
                     commandEndpointsWithWrongMethod.Add(

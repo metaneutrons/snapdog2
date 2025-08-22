@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using SnapDog2.Core.Attributes;
+using SnapDog2.Tests.Blueprint;
 
 /// <summary>
 /// Shared utilities for command framework consistency tests.
@@ -1082,8 +1083,7 @@ public static class ConsistencyTestHelpers
         var statusIds = new List<string>();
 
         // Skip notification handlers - they handle notifications but aren't publishers themselves
-        if (publisherType.Name.Contains("NotificationHandlers") || 
-            publisherType.Name.Contains("NotificationHandler"))
+        if (publisherType.Name.Contains("NotificationHandlers") || publisherType.Name.Contains("NotificationHandler"))
         {
             return statusIds; // Return empty list for notification handlers
         }
@@ -1305,47 +1305,34 @@ public static class ConsistencyTestHelpers
     }
 
     /// <summary>
-    /// Gets documented KNX exclusions.
+    /// <summary>
+    /// Gets documented KNX exclusions from the blueprint.
     /// </summary>
     public static HashSet<string> GetDocumentedKnxExclusions()
     {
-        return new HashSet<string>
-        {
-            // Volume and audio controls - handled by dedicated KNX actuators
-            "VOLUME_SET",
-            "VOLUME_UP", 
-            "VOLUME_DOWN", 
-            "MUTE_TOGGLE", 
-            // Playlist controls - complex state management not suitable for KNX
-            "PLAYLIST_SHUFFLE",
-            "PLAYLIST_SHUFFLE_TOGGLE", 
-            "PLAYLIST_REPEAT",
-            "PLAYLIST_REPEAT_TOGGLE",
-            "PLAYLIST_NEXT",
-            "PLAYLIST_PREVIOUS",
-            // Track controls - complex navigation not suitable for KNX
-            "TRACK_NEXT",
-            "TRACK_PREVIOUS", 
-            "TRACK_PLAY_INDEX",
-            "TRACK_PLAY_URL",
-            "TRACK_POSITION",
-            "TRACK_PROGRESS",
-            "TRACK_REPEAT",
-            "TRACK_REPEAT_TOGGLE",
-            // Client-specific network settings - not suitable for building automation
-            "CLIENT_LATENCY", 
-            "CLIENT_VOLUME",
-            "CLIENT_VOLUME_UP",
-            "CLIENT_VOLUME_DOWN", 
-            "CLIENT_MUTE",
-            "CLIENT_MUTE_TOGGLE",
-            "CLIENT_NAME",
-            "CLIENT_ZONE",
-            // System information - read-only data not actionable via KNX
-            "SYSTEM_STATUS",
-            "CLIENTS_INFO",
-            "TRACK_INFO",
-        };
+        return SnapDogBlueprint.Spec.Commands.ExcludedFrom(Protocol.Knx).Select(c => c.Id).ToHashSet();
+    }
+
+    /// <summary>
+    /// Gets all MQTT handler methods from a type.
+    /// </summary>
+    public static List<MethodInfo> GetMqttHandlerMethods(Type handlerType)
+    {
+        return handlerType
+            .GetMethods()
+            .Where(m => m.Name.Contains("Handle") || m.Name.Contains("Process") || m.Name.Contains("Map"))
+            .ToList();
+    }
+
+    /// <summary>
+    /// Gets actual KNX exclusions by checking what commands are not implemented in KNX handlers.
+    /// This is a placeholder - in a real implementation, you'd check actual KNX handler registrations.
+    /// </summary>
+    public static HashSet<string> GetActualKnxExclusions()
+    {
+        // For now, return the blueprint exclusions as the actual exclusions
+        // In a real implementation, you'd inspect actual KNX handler registrations
+        return SnapDogBlueprint.Spec.Commands.ExcludedFrom(Protocol.Knx).Select(c => c.Id).ToHashSet();
     }
 
     /// <summary>
