@@ -74,7 +74,7 @@ public record ZoneMuteChangedNotification : INotification
 /// <summary>
 /// Notification published when a zone's current track changes.
 /// </summary>
-[StatusId("TRACK_INDEX")]
+[StatusId("TRACK_STATUS")]
 public record ZoneTrackChangedNotification : INotification
 {
     /// <summary>
@@ -101,7 +101,7 @@ public record ZoneTrackChangedNotification : INotification
 /// <summary>
 /// Notification published when a zone's current playlist changes.
 /// </summary>
-[StatusId("PLAYLIST_INDEX")]
+[StatusId("PLAYLIST_STATUS")]
 public record ZonePlaylistChangedNotification : INotification
 {
     /// <summary>

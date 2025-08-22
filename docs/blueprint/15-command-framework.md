@@ -29,13 +29,14 @@ For each level, this section defines:
 
 ### 14.2.1. Global Functionality (Status Only)
 
-| Status ID         | Description                 | Essential Information / Type          | Direction        | Notes                           |
-| :---------------- | :-------------------------- | :------------------------------------ | :--------------- | :------------------------------ |
-| `SYSTEM_STATUS`   | System online/offline status | `IsOnline` (bool)                     | Status (Publish) | `true`=online, `false`=offline  |
-| `SYSTEM_ERROR`    | System error information    | `ErrorDetails` object (`Core.Models`) | Status (Publish) | Published on significant errors |
-| `VERSION_INFO`    | Software version information| `VersionDetails` object (`Core.Models`) | Status (Publish) | Contains version, build date etc. |
-| `SERVER_STATS`    | Server performance stats    | `ServerStats` object (`Core.Models`)  | Status (Publish) | CPU, Memory, Uptime             |
-| `ZONES_INFO`      | Available zones list        | `ZoneIndex[]` (int array, 1-based)   | Status (Publish) | List of configured zone indices |
+| Status ID       | Description                  | Essential Information / Type              | Direction        | Notes                             |
+| :-------------- | :--------------------------- | :---------------------------------------- | :--------------- | :-------------------------------- |
+| `SYSTEM_STATUS` | System online/offline status | `IsOnline` (bool)                         | Status (Publish) | `true`=online, `false`=offline    |
+| `SYSTEM_ERROR`  | System error information     | `ErrorDetails` object (`Core.Models`)     | Status (Publish) | Published on significant errors   |
+| `VERSION_INFO`  | Software version information | `VersionDetails` object (`Core.Models`)   | Status (Publish) | Contains version, build date etc. |
+| `SERVER_STATS`  | Server performance stats     | `ServerStats` object (`Core.Models`)      | Status (Publish) | CPU, Memory, Uptime               |
+| `ZONES_INFO`    | Available zones list         | JSON `ZoneIndex[]` (int array, 1-based)   | Status (Publish) | List of configured zone indices   |
+| `CLIENTS_INFO`  | Available clients list       | JSON `ClientIndex[]` (int array, 1-based) | Status (Publish) | List of configured client indices |
 
 *(The C# Record definitions for `ErrorDetails`, `VersionDetails`, `ServerStats` are implemented in `SnapDog2.Core.Models` namespace)*
 
@@ -43,11 +44,11 @@ For each level, this section defines:
 
 Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics relative to base, configurable via `SNAPDOG_SYSTEM_MQTT_*_TOPIC` vars (Sec 10).
 
-| Status ID         | Default Relative Topic | Retained | Example Payload (JSON - aligned with Records)                         |
-| :---------------- | :--------------------- | :------- | :-------------------------------------------------------------------- |
-| `SYSTEM_STATUS`   | `status`               | Yes      | `{"status": 1, "timestamp": "2025-04-05T20:00:00Z"}`                  |
-| `ERROR_STATUS`    | `error`                | No       | `{"timestampUtc":"...","level":4,"errorCode":"KNX_WRITE_TIMEOUT",...}`  |
-| `VERSION_INFO`    | `version`              | Yes      | `{"version":"1.3.0","timestampUtc":"...","buildDateUtc":"..."}`      |
+| Status ID         | Default Relative Topic | Retained | Example Payload (JSON - aligned with Records)                            |
+| :---------------- | :--------------------- | :------- | :----------------------------------------------------------------------- |
+| `SYSTEM_STATUS`   | `status`               | Yes      | `{"status": 1, "timestamp": "2025-04-05T20:00:00Z"}`                     |
+| `ERROR_STATUS`    | `error`                | No       | `{"timestampUtc":"...","level":4,"errorCode":"KNX_WRITE_TIMEOUT",...}`   |
+| `VERSION_INFO`    | `version`              | Yes      | `{"version":"1.3.0","timestampUtc":"...","buildDateUtc":"..."}`          |
 | `SERVER_STATS`    | `stats`                | No       | `{"timestampUtc":"...","cpuUsagePercent":12.5,"memoryUsageMb":128.5,...}`|
 
 ### 14.2.3. Global MQTT Last Will and Testament (LWT)
@@ -67,12 +68,12 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 
 **Playback Control**
 
-| Command/Status ID | Description            | Essential Information / Type                       | Direction        | Notes / Comments                  |
-| :---------------- | :--------------------- | :------------------------------------------------- | :--------------- | :-------------------------------- |
-| `PLAY`            | Start/resume playback  | `ZoneIndex` (int), Optional `TrackIndex`/`MediaUrl` | Command (Set)    | Action: Tell zone to play         |
-| `PAUSE`           | Pause playback         | `ZoneIndex` (int)                                     | Command (Set)    | Action: Tell zone to pause        |
-| `STOP`            | Stop playback          | `ZoneIndex` (int)                                     | Command (Set)    | Action: Tell zone to stop         |
-| `PLAYBACK_STATE`  | Current playback state | `ZoneIndex` (int), `Status` (`PlaybackStatus` enum)   | Status (Publish) | State: Stopped, Playing, Paused |
+| Command/Status ID | Description            | Essential Information / Type                          | Direction          | Notes / Comments                |
+| :---------------- | :--------------------- | :---------------------------------------------------- | :----------------- | :------------------------------ |
+| `PLAY`            | Start/resume playback  | `ZoneIndex` (int), Optional `TrackIndex`/`MediaUrl`   | Command (Set)      | Action: Tell zone to play       |
+| `PAUSE`           | Pause playback         | `ZoneIndex` (int)                                     | Command (Set)      | Action: Tell zone to pause      |
+| `STOP`            | Stop playback          | `ZoneIndex` (int)                                     | Command (Set)      | Action: Tell zone to stop       |
+| `PLAYBACK_STATE`  | Current playback state | `ZoneIndex` (int), `Status` (`PlaybackStatus` enum)   | Status (Publish)   | State: Stopped, Playing, Paused |
 
 > **Important Distinction: Track Metadata vs. Playback State**
 >
@@ -86,72 +87,78 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 
 **Track Management**
 
-| Command/Status ID     | Description                | Essential Information / Type                   | Direction        | Notes / Comments                        |
-| :-------------------- | :------------------------- | :--------------------------------------------- | :--------------- | :-------------------------------------- |
-| `TRACK`               | Set specific track         | `ZoneIndex` (int), `TrackIndex` (int, 1-based)    | Command (Set)    | Action: Play track `N`                |
-| `TRACK_INDEX`         | Current track index        | `ZoneIndex` (int), `TrackIndex` (int, 1-based)    | Status (Publish) | State: Current index is `N`, 0 for KNX if > 255 |
-| `TRACK_NEXT`          | Play next track            | `ZoneIndex` (int)                                 | Command (Set)    | Action: Go to next track            |
-| `TRACK_PREVIOUS`      | Play previous track        | `ZoneIndex` (int)                                 | Command (Set)    | Action: Go to previous track        |
-| `TRACK_PLAY_INDEX`    | Play specific track by index | `ZoneIndex` (int), `TrackIndex` (int, 1-based)  | Command (Set)    | Action: Play track `N` directly     |
-| `TRACK_PLAY_URL`      | Play direct URL stream     | `ZoneIndex` (int), `MediaUrl` (string)           | Command (Set)    | Action: Play URL stream             |
-| `TRACK_REPEAT`        | Set track repeat mode      | `ZoneIndex` (int), `Enabled` (bool)               | Command (Set)    | Action: Turn repeat on/off            |
-| `TRACK_REPEAT_TOGGLE` | Toggle track repeat mode   | `ZoneIndex` (int)                                 | Command (Set)    | Action: Toggle repeat state           |
-| `TRACK_REPEAT_STATUS` | Current track repeat state | `ZoneIndex` (int), `Enabled` (bool)               | Status (Publish) | State: Repeat is on/off               |
+| Command/Status ID     | Description                  | Essential Information / Type                     | Direction        | Notes / Comments                     |
+| :-------------------- | :--------------------------- | :----------------------------------------------- | :--------------- | :----------------------------------- |
+| `TRACK`               | Set specific track           | `ZoneIndex` (int), `TrackIndex` (int, 1-based)   | Command (Set)    | Action: Play track `N`               |
+| `TRACK_STATUS`        | Current track index          | `ZoneIndex` (int), `TrackIndex` (int, 1-based)   | Status (Publish) | State: Current index is `N`, 0 for KNX if > 255 |
+| `TRACK_NEXT`          | Play next track              | `ZoneIndex` (int)                                | Command (Set)    | Action: Go to next track             |
+| `TRACK_PREVIOUS`      | Play previous track          | `ZoneIndex` (int)                                | Command (Set)    | Action: Go to previous track         |
+| `TRACK_PLAY_INDEX`    | Play specific track by index | `ZoneIndex` (int), `TrackIndex` (int, 1-based)   | Command (Set)    | Action: Play track `N` directly      |
+| `TRACK_PLAY_URL`      | Play direct URL stream       | `ZoneIndex` (int), `MediaUrl` (string)           | Command (Set)    | Action: Play URL stream              |
+| `TRACK_REPEAT`        | Set track repeat mode        | `ZoneIndex` (int), `Enabled` (bool)              | Command (Set)    | Action: Turn repeat on/off           |
+| `TRACK_REPEAT_TOGGLE` | Toggle track repeat mode     | `ZoneIndex` (int)                                | Command (Set)    | Action: Toggle repeat state          |
+| `TRACK_REPEAT_STATUS` | Current track repeat state   | `ZoneIndex` (int), `Enabled` (bool)              | Status (Publish) | State: Repeat is on/off              |
 
 **Track Metadata (Static Information About Media Files)**
 
-| Command/Status ID         | Description                | Essential Information / Type                   | Direction        | Notes / Comments                        |
-| :------------------------ | :------------------------- | :--------------------------------------------- | :--------------- | :-------------------------------------- |
-| `TRACK_METADATA`          | Complete track metadata    | `ZoneIndex` (int), `TrackInfo` (object/record)    | Status (Publish) | State: Full track details           |
-| `TRACK_METADATA_DURATION` | Track duration             | `ZoneIndex` (int), `Duration` (long, ms)         | Status (Publish) | State: Length of current track      |
-| `TRACK_METADATA_TITLE`    | Track title                | `ZoneIndex` (int), `Title` (string)              | Status (Publish) | State: Title of current track       |
-| `TRACK_METADATA_ARTIST`   | Track artist               | `ZoneIndex` (int), `Artist` (string)             | Status (Publish) | State: Artist of current track      |
-| `TRACK_METADATA_ALBUM`    | Track album                | `ZoneIndex` (int), `Album` (string)              | Status (Publish) | State: Album of current track       |
-| `TRACK_METADATA_COVER`    | Track cover art URL        | `ZoneIndex` (int), `CoverUrl` (string)           | Status (Publish) | State: Cover art URL                |
+| Command/Status ID         | Description                | Essential Information / Type                     | Direction        | Notes / Comments                   |
+| :------------------------ | :------------------------- | :----------------------------------------------- | :--------------- | :--------------------------------- |
+| `TRACK_METADATA`          | Complete track metadata    | `ZoneIndex` (int), `TrackInfo` (object/record)   | Status (Publish) | State: Full track details          |
+| `TRACK_METADATA_DURATION` | Track duration             | `ZoneIndex` (int), `Duration` (long, ms)         | Status (Publish) | State: Length of current track     |
+| `TRACK_METADATA_TITLE`    | Track title                | `ZoneIndex` (int), `Title` (string)              | Status (Publish) | State: Title of current track      |
+| `TRACK_METADATA_ARTIST`   | Track artist               | `ZoneIndex` (int), `Artist` (string)             | Status (Publish) | State: Artist of current track     |
+| `TRACK_METADATA_ALBUM`    | Track album                | `ZoneIndex` (int), `Album` (string)              | Status (Publish) | State: Album of current track      |
+| `TRACK_METADATA_COVER`    | Track cover art URL        | `ZoneIndex` (int), `CoverUrl` (string)           | Status (Publish) | State: Cover art URL               |
 
 **Track Playback State (Dynamic Real-Time Information)**
 
-| Command/Status ID         | Description                | Essential Information / Type                   | Direction        | Notes / Comments                        |
-| :------------------------ | :------------------------- | :--------------------------------------------- | :--------------- | :-------------------------------------- |
-| `TRACK_POSITION`          | Seek to position in track  | `ZoneIndex` (int), `Position` (long, ms)        | Command (Set)    | Action: Seek to position            |
+| Command/Status ID         | Description                 | Essential Information / Type                   | Direction        | Notes / Comments                    |
+| :------------------------ | :-------------------------- | :--------------------------------------------- | :--------------- | :---------------------------------- |
+| `TRACK_PLAYING_STATUS`    | Current playing state       | `ZoneIndex` (int), `IsPlaying` (bool)          | Status (Publish) | State: Track is playing/paused      |
+| `TRACK_POSITION`          | Seek to position in track   | `ZoneIndex` (int), `Position` (long, ms)       | Command (Set)    | Action: Seek to position            |
 | `TRACK_PROGRESS`          | Seek to progress percentage | `ZoneIndex` (int), `Progress` (float, 0.0-1.0) | Command (Set)    | Action: Seek to progress %          |
-| `TRACK_POSITION_STATUS`   | Track position             | `ZoneIndex` (int), `Position` (long, ms)         | Status (Publish) | State: Position in current track    |
-| `TRACK_PLAYING_STATUS`    | Current playing state      | `ZoneIndex` (int), `IsPlaying` (bool)            | Status (Publish) | State: Track is playing/paused      |
+| `TRACK_POSITION_STATUS`   | Track position              | `ZoneIndex` (int), `Position` (long, ms)       | Status (Publish) | State: Position in current track    |
 | `TRACK_PROGRESS_STATUS`   | Current progress percentage | `ZoneIndex` (int), `Progress` (float, 0.0-1.0) | Status (Publish) | State: Progress through track       |
 
 **Playlist Management**
 
-| Command/Status ID         | Description                | Essential Information / Type                          | Direction        | Notes / Comments                        |
-| :------------------------ | :------------------------- | :---------------------------------------------------- | :--------------- | :-------------------------------------- |
-| `PLAYLIST`                | Set specific playlist      | `ZoneIndex` (int), `PlaylistIndex` (1-based) or `PlaylistIndex` | Command (Set)    | Action: Change to playlist `P`        |
-| `PLAYLIST_INDEX`          | Current playlist index/ID  | `ZoneIndex` (int), `PlaylistIndex` (1-based) or `PlaylistIndex` | Status (Publish) | State: Current playlist is `P`, 0 for KNX if > 255 |
-| `PLAYLIST_INFO`           | Detailed playlist info     | `ZoneIndex` (int), `PlaylistInfo` (object/record)        | Status (Publish) | State: Details of playlist `P`        |
-| `PLAYLIST_NEXT`           | Play next playlist         | `ZoneIndex` (int)                                        | Command (Set)    | Action: Go to next playlist           |
-| `PLAYLIST_PREVIOUS`       | Play previous playlist     | `ZoneIndex` (int)                                        | Command (Set)    | Action: Go to previous playlist       |
-| `PLAYLIST_SHUFFLE`        | Set playlist shuffle mode  | `ZoneIndex` (int), `Enabled` (bool)                      | Command (Set)    | Action: Turn shuffle on/off           |
-| `PLAYLIST_SHUFFLE_TOGGLE` | Toggle shuffle mode        | `ZoneIndex` (int)                                        | Command (Set)    | Action: Toggle shuffle state          |
-| `PLAYLIST_SHUFFLE_STATUS` | Current shuffle state      | `ZoneIndex` (int), `Enabled` (bool)                      | Status (Publish) | State: Shuffle is on/off              |
-| `PLAYLIST_REPEAT`         | Set playlist repeat mode   | `ZoneIndex` (int), `Enabled` (bool)                      | Command (Set)    | Action: Turn playlist repeat on/off   |
-| `PLAYLIST_REPEAT_TOGGLE`  | Toggle playlist repeat     | `ZoneIndex` (int)                                        | Command (Set)    | Action: Toggle playlist repeat state  |
-| `PLAYLIST_REPEAT_STATUS`  | Current playlist repeat    | `ZoneIndex` (int), `Enabled` (bool)                      | Status (Publish) | State: Playlist repeat is on/off      |
+| Command/Status ID         | Description                | Essential Information / Type                                    | Direction        | Notes / Comments                        |
+| :------------------------ | :------------------------- | :-------------------------------------------------------------- | :--------------- | :-------------------------------------- |
+| `PLAYLIST`                | Set specific playlist      | `ZoneIndex` (int), `PlaylistIndex` (1-based) or `PlaylistIndex` | Command (Set)    | Action: Change to playlist `P`          |
+| `PLAYLIST_STATUS`         | Current playlist index/ID  | `ZoneIndex` (int), `PlaylistIndex` (1-based) or `PlaylistIndex` | Status (Publish) | State: Current playlist is `P`, 0 for KNX if > 255 |
+| `PLAYLIST_NAME_STATUS`    | Current playlist name      | `ZoneIndex` (int), `PlaylistName` (string)                      | Status (Publish) | State: Current playlist name is `P`     |
+| `PLAYLIST_COUNT_STATUS`   | Playlist track count       | `ZoneIndex` (int), `Count` (int)                                | Status (Publish) | State: Number of tracks in playlist     |
+| `PLAYLIST_INFO`           | Detailed playlist info     | `ZoneIndex` (int), `PlaylistInfo` (object/record)               | Status (Publish) | State: Details of playlist `P`          |
+| `PLAYLIST_NEXT`           | Play next playlist         | `ZoneIndex` (int)                                               | Command (Set)    | Action: Go to next playlist             |
+| `PLAYLIST_PREVIOUS`       | Play previous playlist     | `ZoneIndex` (int)                                               | Command (Set)    | Action: Go to previous playlist         |
+| `PLAYLIST_SHUFFLE`        | Set playlist shuffle mode  | `ZoneIndex` (int), `Enabled` (bool)                             | Command (Set)    | Action: Turn shuffle on/off             |
+| `PLAYLIST_SHUFFLE_TOGGLE` | Toggle shuffle mode        | `ZoneIndex` (int)                                               | Command (Set)    | Action: Toggle shuffle state            |
+| `PLAYLIST_SHUFFLE_STATUS` | Current shuffle state      | `ZoneIndex` (int), `Enabled` (bool)                             | Status (Publish) | State: Shuffle is on/off                |
+| `PLAYLIST_REPEAT`         | Set playlist repeat mode   | `ZoneIndex` (int), `Enabled` (bool)                             | Command (Set)    | Action: Turn playlist repeat on/off     |
+| `PLAYLIST_REPEAT_TOGGLE`  | Toggle playlist repeat     | `ZoneIndex` (int)                                               | Command (Set)    | Action: Toggle playlist repeat state    |
+| `PLAYLIST_REPEAT_STATUS`  | Current playlist repeat    | `ZoneIndex` (int), `Enabled` (bool)                             | Status (Publish) | State: Playlist repeat is on/off        |
 
 **Volume & Mute Control**
 
-| Command/Status ID | Description             | Essential Information / Type                       | Direction        | Notes / Comments           |
-| :---------------- | :---------------------- | :------------------------------------------------- | :--------------- | :------------------------- |
-| `VOLUME`          | Set zone volume         | `ZoneIndex` (int), `Volume` (int, 0-100)              | Command (Set)    | Action: Set volume to `Volume`  |
-| `VOLUME_STATUS`   | Current zone volume     | `ZoneIndex` (int), `Volume` (int, 0-100)              | Status (Publish) | State: Current volume is `Volume` |
-| `VOLUME_UP`       | Increase zone volume    | `ZoneIndex` (int), Optional `Step` (int, default 5)   | Command (Set)    | Action: Increase volume    |
-| `VOLUME_DOWN`     | Decrease zone volume    | `ZoneIndex` (int), Optional `Step` (int, default 5)   | Command (Set)    | Action: Decrease volume    |
-| `MUTE`            | Set zone mute           | `ZoneIndex` (int), `Enabled` (bool)                   | Command (Set)    | Action: Mute/unmute zone |
-| `MUTE_TOGGLE`     | Toggle zone mute        | `ZoneIndex` (int)                                     | Command (Set)    | Action: Toggle mute state  |
-| `MUTE_STATUS`     | Current zone mute state | `ZoneIndex` (int), `Enabled` (bool)                   | Status (Publish) | State: Mute is on/off      |
+| Command/Status ID | Description             | Essential Information / Type                         | Direction        | Notes / Comments                  |
+| :---------------- | :---------------------- | :--------------------------------------------------- | :--------------- | :-------------------------------- |
+| `VOLUME`          | Set zone volume         | `ZoneIndex` (int), `Volume` (int, 0-100)             | Command (Set)    | Action: Set volume to `Volume`    |
+| `VOLUME_STATUS`   | Current zone volume     | `ZoneIndex` (int), `Volume` (int, 0-100)             | Status (Publish) | State: Current volume is `Volume` |
+| `VOLUME_UP`       | Increase zone volume    | `ZoneIndex` (int), Optional `Step` (int, default 5)  | Command (Set)    | Action: Increase volume           |
+| `VOLUME_DOWN`     | Decrease zone volume    | `ZoneIndex` (int), Optional `Step` (int, default 5)  | Command (Set)    | Action: Decrease volume           |
+| `MUTE`            | Set zone mute           | `ZoneIndex` (int), `Enabled` (bool)                  | Command (Set)    | Action: Mute/unmute zone          |
+| `MUTE_TOGGLE`     | Toggle zone mute        | `ZoneIndex` (int)                                    | Command (Set)    | Action: Toggle mute state         |
+| `MUTE_STATUS`     | Current zone mute state | `ZoneIndex` (int), `Enabled` (bool)                  | Status (Publish) | State: Mute is on/off             |
 
 **General Zone**
 
-| Command/Status ID | Description         | Essential Information / Type                   | Direction        | Notes / Comments              |
-| :---------------- | :------------------ | :--------------------------------------------- | :--------------- | :-------------------------- |
-| `ZONE_STATE`      | Complete zone state | `ZoneIndex` (int), `ZoneState` (object/record)    | Status (Publish) | State: Full state incl. modes |
+| Command/Status ID   | Description             | Essential Information / Type                        | Direction        | Notes / Comments                 |
+| :------------------ | :---------------------- | :-------------------------------------------------- | :--------------- | :------------------------------- |
+| `CONTROL_SET`       | Unified control command | `ZoneIndex` (int), `Command` (string)               | Command (Set)    | Accepts vocabulary from 14.3.2.3 |
+| `CONTROL_STATUS`    | Unified control status  | `ZoneIndex` (int), `Status` (string)                | Status (Publish) | Publishes status from 14.3.2.4   |
+| `ZONE_NAME`         | Zone Name               | `ZoneIndex` (int), `ZoneName` (string)              | Command (Set)    |                                  |
+| `ZONE_NAME_STATUS`  | Zone Name               | `ZoneIndex` (int), `ZoneName` (string)              | Status (Publish) |                                  |
+| `ZONE_STATE`        | Complete zone state     | `ZoneIndex` (int), JSON `ZoneState` (object/record) | Status (Publish) | State: Full state incl. modes    |
 
 ### 14.3.2. Zone MQTT Implementation
 
@@ -161,14 +168,14 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 
 **Playback/Mode Control**
 
-| Command ID                | Env Var Suffix           | Default Rel. Topic   | Example Payloads                               | Notes                            |
-| :------------------------ | :----------------------- | :--------------------- | :--------------------------------------------- | :------------------------------- |
-| `PLAY`/`PAUSE`/`STOP` etc.| `_CONTROL_SET_TOPIC`     | `control/set`              | `"play"`, `"pause"`, `"next"`, `"shuffle_on"` | **See 13.3.2.3 for full payload list** |
+| Command ID                | Env Var Suffix           | Default Rel. Topic   | Example Payloads                               | Notes                                  |
+| :------------------------ | :----------------------- | :------------------- | :--------------------------------------------- | :------------------------------------- |
+| `PLAY`/`PAUSE`/`STOP` etc.| `_CONTROL_SET_TOPIC`     | `control/set`        | `"play"`, `"pause"`, `"next"`, `"shuffle_on"`  | **See 13.3.2.3 for full payload list** |
 
 **Navigation Commands (Dedicated Topics)**
 
-| Command ID              | Env Var Suffix             | Default Rel. Topic   | Example Payloads                   | Notes                     |
-| :---------------------- | :------------------------- | :------------------- | :--------------------------------- | :------------------------ |
+| Command ID              | Env Var Suffix             | Default Rel. Topic   | Example Payloads                   | Notes                    |
+| :---------------------- | :------------------------- | :------------------- | :--------------------------------- | :----------------------- |
 | `TRACK_NEXT`            | `_TRACK_NEXT_TOPIC`        | `next`               | (no payload needed)                | Next track (most common) |
 | `TRACK_PREVIOUS`        | `_TRACK_PREVIOUS_TOPIC`    | `previous`           | (no payload needed)                | Previous track           |
 | `PLAYLIST_NEXT`         | `_PLAYLIST_NEXT_TOPIC`     | `playlist/next`      | (no payload needed)                | Next playlist            |
@@ -176,37 +183,38 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 
 **Track Management**
 
-| Command ID              | Env Var Suffix             | Default Rel. Topic   | Example Payloads                   | Notes                     |
-| :---------------------- | :------------------------- | :------------------- | :--------------------------------- | :------------------------ |
-| `TRACK`                 | `_TRACK_SET_TOPIC`         | `track/set`          | `<index>`, `"+"` , `"-"`         | **1-based** index       |
-| `TRACK_NEXT`            | `_TRACK_NEXT_TOPIC`        | `next`               | (no payload needed)                | Next track (most common) |
-| `TRACK_PREVIOUS`        | `_TRACK_PREVIOUS_TOPIC`    | `previous`           | (no payload needed)                | Previous track           |
-| `TRACK_PLAY_INDEX`      | `_TRACK_PLAY_INDEX_TOPIC`  | `play/track`         | `<index>` (1-based)                | Play specific track      |
-| `TRACK_PLAY_URL`        | `_TRACK_PLAY_URL_TOPIC`    | `play/url`           | `<url>` (string)                   | Play direct URL stream   |
-| `TRACK_POSITION`        | `_TRACK_POSITION_SET_TOPIC`| `track/position/set` | `<ms>` (long)                      | Seek to position         |
-| `TRACK_PROGRESS`        | `_TRACK_PROGRESS_SET_TOPIC`| `track/progress/set` | `<percent>` (0.0-1.0)              | Seek to progress %       |
-| `TRACK_REPEAT`          | `_TRACK_REPEAT_SET_TOPIC`  | `repeat/track`       | `"true"`/`"false"`, `"1"`/`"0"`  |                           |
-| `TRACK_REPEAT_TOGGLE`   | `_TRACK_REPEAT_SET_TOPIC`  | `repeat/track`       | `"toggle"`                         |                           |
+| Command ID              | Env Var Suffix             | Default Rel. Topic   | Example Payloads                | Notes                    |
+| :---------------------- | :------------------------- | :------------------- | :------------------------------ | :----------------------- |
+| `TRACK`                 | `_TRACK_SET_TOPIC`         | `track/set`          | `<index>`, `"+"` , `"-"`        | **1-based** index        |
+| `TRACK_NEXT`            | `_TRACK_NEXT_TOPIC`        | `next`               | (no payload needed)             | Next track (most common) |
+| `TRACK_PREVIOUS`        | `_TRACK_PREVIOUS_TOPIC`    | `previous`           | (no payload needed)             | Previous track           |
+| `TRACK_PLAY_INDEX`      | `_TRACK_PLAY_INDEX_TOPIC`  | `play/track`         | `<index>` (1-based)             | Play specific track      |
+| `TRACK_PLAY_URL`        | `_TRACK_PLAY_URL_TOPIC`    | `play/url`           | `<url>` (string)                | Play direct URL stream   |
+| `TRACK_POSITION`        | `_TRACK_POSITION_SET_TOPIC`| `track/position/set` | `<ms>` (long)                   | Seek to position         |
+| `TRACK_PROGRESS`        | `_TRACK_PROGRESS_SET_TOPIC`| `track/progress/set` | `<percent>` (0.0-1.0)           | Seek to progress %       |
+| `TRACK_REPEAT`          | `_TRACK_REPEAT_SET_TOPIC`  | `repeat/track`       | `"true"`/`"false"`, `"1"`/`"0"` |                          |
+| `TRACK_REPEAT_TOGGLE`   | `_TRACK_REPEAT_SET_TOPIC`  | `repeat/track`       | `"toggle"`                      |                          |
 
 **Playlist Management**
 
-| Command ID                | Env Var Suffix                 | Default Rel. Topic   | Example Payloads                   | Notes                     |
-| :------------------------ | :----------------------------- | :--------------------- | :--------------------------------- | :------------------------ |
-| `PLAYLIST`                | `_PLAYLIST_SET_TOPIC`        | `playlist/set`         | `<id_or_index>`, `"+"` , `"-"`   | **1=Radio**, 2+=Subsonic|
-| `PLAYLIST_REPEAT`         | `_PLAYLIST_REPEAT_SET_TOPIC` | `repeat/set`           | `"true"`/`"false"`, `"1"`/`"0"`  |                           |
-| `PLAYLIST_REPEAT_TOGGLE`  | `_PLAYLIST_REPEAT_SET_TOPIC` | `repeat/set`           | `"toggle"`                         |                           |
-| `PLAYLIST_SHUFFLE`        | `_PLAYLIST_SHUFFLE_SET_TOPIC`| `shuffle/set`          | `"true"`/`"false"`, `"1"`/`"0"`  |                           |
-| `PLAYLIST_SHUFFLE_TOGGLE` | `_PLAYLIST_SHUFFLE_SET_TOPIC`| `shuffle/set`          | `"toggle"`                         |                           |
+| Command ID                | Env Var Suffix               | Default Rel. Topic | Example Payloads               | Notes                     |
+| :------------------------ | :--------------------------- | :------------------| :----------------------------- | :------------------------ |
+| `PLAYLIST`                | `_PLAYLIST_SET_TOPIC`        | `playlist/set`     | `<id_or_index>`, `"+"` , `"-"` | **1=Radio**, 2+=Subsonic  |
+| `PLAYLIST_NAME_STATUS`    | `_PLAYLIST_NAME_STATUS_TOPIC`| `playlist/name`    | (no payload needed)            | Playlist name             |
+| `PLAYLIST_REPEAT`         | `_PLAYLIST_REPEAT_SET_TOPIC` | `repeat/set`       | `"true"`/`"false"`, `"1"`/`"0"`|                           |
+| `PLAYLIST_REPEAT_TOGGLE`  | `_PLAYLIST_REPEAT_SET_TOPIC` | `repeat/set`       | `"toggle"`                     |                           |
+| `PLAYLIST_SHUFFLE`        | `_PLAYLIST_SHUFFLE_SET_TOPIC`| `shuffle/set`      | `"true"`/`"false"`, `"1"`/`"0"`|                           |
+| `PLAYLIST_SHUFFLE_TOGGLE` | `_PLAYLIST_SHUFFLE_SET_TOPIC`| `shuffle/set`      | `"toggle"`                     |                           |
 
 **Volume/Mute Control**
 
-| Command ID            | Env Var Suffix      | Default Rel. Topic | Example Payloads                     | Notes                     |
-| :-------------------- | :------------------ | :----------------- | :----------------------------------- | :------------------------ |
-| `VOLUME`/`UP`/`DOWN`  | `_VOLUME_SET_TOPIC` | `volume/set`       | `0`-`100`, `"+"` / `"-"`, `"+/-<step>"` |                           |
-| `VOLUME_UP`           | `_VOLUME_UP_TOPIC`  | `volume/up`        | (no payload needed)                  | Dedicated volume up       |
-| `VOLUME_DOWN`         | `_VOLUME_DOWN_TOPIC`| `volume/down`      | (no payload needed)                  | Dedicated volume down     |
+| Command ID            | Env Var Suffix      | Default Rel. Topic | Example Payloads                            | Notes                     |
+| :-------------------- | :------------------ | :----------------- | :------------------------------------------ | :------------------------ |
+| `VOLUME`/`UP`/`DOWN`  | `_VOLUME_SET_TOPIC` | `volume/set`       | `0`-`100`, `"+"` / `"-"`, `"+/-<step>"`     |                           |
+| `VOLUME_UP`           | `_VOLUME_UP_TOPIC`  | `volume/up`        | (no payload needed)                         | Dedicated volume up       |
+| `VOLUME_DOWN`         | `_VOLUME_DOWN_TOPIC`| `volume/down`      | (no payload needed)                         | Dedicated volume down     |
 | `MUTE`/`TOGGLE`       | `_MUTE_SET_TOPIC`   | `mute/set`         | `"true"`/`"false"`, `"1"`/`"0"`, `"toggle"` |                           |
-| `MUTE_TOGGLE`         | `_MUTE_TOGGLE_TOPIC`| `mute/toggle`      | (no payload needed)                  | Dedicated mute toggle     |
+| `MUTE_TOGGLE`         | `_MUTE_TOGGLE_TOPIC`| `mute/toggle`      | (no payload needed)                         | Dedicated mute toggle     |
 
 #### 14.3.2.2. Zone Status Topics (Read-Only)
 
@@ -217,44 +225,44 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 
 **Playback/Mode State**
 
-| Status ID                 | Env Var Suffix         | Default Rel. Topic | Example Payload                      | Retained | Notes                      |
-| :------------------------ | :--------------------- | :----------------- | :----------------------------------- | :------- | :------------------------- |
-| `PLAYBACK_STATE` + Modes  | `_CONTROL_TOPIC`       | `control`          | `"play"`, `"track_repeat_on"`, etc. | Yes      | Simple string status values    |
+| Status ID                 | Env Var Suffix         | Default Rel. Topic | Example Payload                      | Retained | Notes                       |
+| :------------------------ | :--------------------- | :----------------- | :----------------------------------- | :------- | :-------------------------- |
+| `PLAYBACK_STATE` + Modes  | `_CONTROL_TOPIC`       | `control`          | `"play"`, `"track_repeat_on"`, etc.  | Yes      | Simple string status values |
 
 **Track Management**
 
-| Status ID                 | Env Var Suffix            | Default Rel. Topic   | Example Payload                  | Retained | Notes                    |
-| :------------------------ | :------------------------ | :------------------- | :------------------------------- | :------- | :----------------------- |
-| `TRACK_INDEX`             | `_TRACK_TOPIC`            | `track`              | `1`, `3`                         | Yes      | **1-based** index      |
-| `TRACK_REPEAT_STATUS`     | `_TRACK_REPEAT_TOPIC`     | `repeat/track`       | `true` / `false` (`1`/`0`)       | Yes      | Track repeat enabled     |
+| Status ID                 | Env Var Suffix            | Default Rel. Topic   | Example Payload                 | Retained | Notes                    |
+| :------------------------ | :------------------------ | :------------------- | :------------------------------ | :------- | :----------------------- |
+| `TRACK_STATUS`             | `_TRACK_TOPIC`            | `track`              | `1`, `3`                       | Yes      | **1-based** index        |
+| `TRACK_REPEAT_STATUS`     | `_TRACK_REPEAT_TOPIC`     | `repeat/track`       | `true` / `false` (`1`/`0`)      | Yes      | Track repeat enabled     |
 
 **Track Metadata (Static Information About Media Files)**
 
-| Status ID                 | Env Var Suffix            | Default Rel. Topic   | Example Payload                  | Retained | Notes                    |
-| :------------------------ | :------------------------ | :------------------- | :------------------------------- | :------- | :----------------------- |
-| `TRACK_METADATA`          | `_TRACK_METADATA_TOPIC`   | `track/metadata`     | Full JSON `TrackInfo` object     | Yes      | Complete track metadata |
-| `TRACK_METADATA_DURATION` | `_TRACK_LENGTH_TOPIC`     | `track/duration`     | `300000` (in ms)                 | Yes      | Duration of current track |
-| `TRACK_METADATA_TITLE`    | `_TRACK_TITLE_TOPIC`      | `track/title`        | `"Song Title"`                   | Yes      | Title of current track   |
-| `TRACK_METADATA_ARTIST`   | `_TRACK_ARTIST_TOPIC`     | `track/artist`       | `"Artist Name"`                  | Yes      | Artist of current track  |
-| `TRACK_METADATA_ALBUM`    | `_TRACK_ALBUM_TOPIC`      | `track/album`        | `"Album Name"`                   | Yes      | Album of current track   |
-| `TRACK_METADATA_COVER`    | `_TRACK_COVER_TOPIC`      | `track/cover`        | `"http://server/cover.jpg"`      | Yes      | Cover art URL            |
+| Status ID                 | Env Var Suffix            | Default Rel. Topic   | Example Payload                 | Retained | Notes                     |
+| :------------------------ | :------------------------ | :------------------- | :------------------------------ | :------- | :------------------------ |
+| `TRACK_METADATA`          | `_TRACK_METADATA_TOPIC`   | `track/metadata`     | Full JSON `TrackInfo` object    | Yes      | Complete track metadata   |
+| `TRACK_METADATA_DURATION` | `_TRACK_LENGTH_TOPIC`     | `track/duration`     | `300000` (in ms)                | Yes      | Duration of current track |
+| `TRACK_METADATA_TITLE`    | `_TRACK_TITLE_TOPIC`      | `track/title`        | `"Song Title"`                  | Yes      | Title of current track    |
+| `TRACK_METADATA_ARTIST`   | `_TRACK_ARTIST_TOPIC`     | `track/artist`       | `"Artist Name"`                 | Yes      | Artist of current track   |
+| `TRACK_METADATA_ALBUM`    | `_TRACK_ALBUM_TOPIC`      | `track/album`        | `"Album Name"`                  | Yes      | Album of current track    |
+| `TRACK_METADATA_COVER`    | `_TRACK_COVER_TOPIC`      | `track/cover`        | `"http://server/cover.jpg"`     | Yes      | Cover art URL             |
 
 **Track Playback State (Dynamic Real-Time Information)**
 
-| Status ID                 | Env Var Suffix            | Default Rel. Topic   | Example Payload                  | Retained | Notes                    |
-| :------------------------ | :------------------------ | :------------------- | :------------------------------- | :------- | :----------------------- |
-| `TRACK_PLAYING_STATUS`    | `_TRACK_PLAYING_TOPIC`    | `track/playing`      | `true` / `false`                 | Yes      | Is track currently playing |
-| `TRACK_POSITION_STATUS`   | `_TRACK_POSITION_TOPIC`   | `track/position`     | `10000` (in ms)                  | Yes      | Position in current track |
-| `TRACK_PROGRESS_STATUS`   | `_TRACK_PROGRESS_TOPIC`   | `track/progress`     | `0.65` (65% progress)            | Yes      | Progress percentage 0.0-1.0 |
+| Status ID                 | Env Var Suffix            | Default Rel. Topic   | Example Payload                 | Retained | Notes                       |
+| :------------------------ | :------------------------ | :------------------- | :------------------------------ | :------- | :-------------------------- |
+| `TRACK_PLAYING_STATUS`    | `_TRACK_PLAYING_TOPIC`    | `track/playing`      | `true` / `false`                | Yes      | Is track currently playing  |
+| `TRACK_POSITION_STATUS`   | `_TRACK_POSITION_TOPIC`   | `track/position`     | `10000` (in ms)                 | Yes      | Position in current track   |
+| `TRACK_PROGRESS_STATUS`   | `_TRACK_PROGRESS_TOPIC`   | `track/progress`     | `0.65` (65% progress)           | Yes      | Progress percentage 0.0-1.0 |
 
 **Playlist Management**
 
-| Status ID                 | Env Var Suffix             | Default Rel. Topic | Example Payload                    | Retained | Notes                      |
-| :------------------------ | :------------------------- | :------------------- | :--------------------------------- | :------- | :------------------------- |
-| `PLAYLIST_INDEX`          | `_PLAYLIST_TOPIC`        | `playlist`           | `1` (Radio), `2`                 | Yes      | **1-based** index        |
-| `PLAYLIST_INFO`           | `_PLAYLIST_INFO_TOPIC`   | `playlist/info`      | Full JSON `PlaylistInfo` object  | Yes      | Structure from Core Models |
-| `PLAYLIST_REPEAT_STATUS`  | `_PLAYLIST_REPEAT_TOPIC` | `repeat`             | `true` / `false` (`1`/`0`)         | Yes      |                            |
-| `PLAYLIST_SHUFFLE_STATUS` | `_PLAYLIST_SHUFFLE_TOPIC`| `shuffle`            | `true` / `false` (`1`/`0`)         | Yes      |                            |
+| Status ID                 | Env Var Suffix             | Default Rel. Topic   | Example Payload                  | Retained | Notes                      |
+| :------------------------ | :------------------------- | :------------------- | :------------------------------- | :------- | :------------------------- |
+| `PLAYLIST_STATUS`         | `_PLAYLIST_TOPIC`          | `playlist`           | `1` (Radio), `2`                 | Yes      | **1-based** index          |
+| `PLAYLIST_INFO`           | `_PLAYLIST_INFO_TOPIC`     | `playlist/info`      | Full JSON `PlaylistInfo` object  | Yes      | Structure from Core Models |
+| `PLAYLIST_REPEAT_STATUS`  | `_PLAYLIST_REPEAT_TOPIC`   | `repeat`             | `true` / `false` (`1`/`0`)       | Yes      |                            |
+| `PLAYLIST_SHUFFLE_STATUS` | `_PLAYLIST_SHUFFLE_TOPIC`. | `shuffle`            | `true` / `false` (`1`/`0`)       | Yes      |                            |
 
 **Volume/Mute Control**
 
@@ -265,16 +273,9 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 
 **General**
 
-| Status ID         | Env Var Suffix | Default Rel. Topic | Example Payload                  | Retained | Notes                 |
-| :---------------- | :------------- | :----------------- | :------------------------------- | :------- | :-------------------- |
+| Status ID         | Env Var Suffix | Default Rel. Topic | Example Payload                   | Retained | Notes                 |
+| :---------------- | :------------- | :----------------- | :-------------------------------- | :------- | :-------------------- |
 | `ZONE_STATE`      | `_STATE_TOPIC` | `state`            | **Full JSON object (see 13.5.1)** | Yes      | Includes all status |
-
-**Response Topics (Command Acknowledgments & Errors)**
-
-| Status ID             | Env Var Suffix     | Default Rel. Topic | Example Payload                    | Retained | Notes                      |
-| :-------------------- | :----------------- | :----------------- | :--------------------------------- | :------- | :------------------------- |
-| `COMMAND_STATUS`      | `_STATUS_TOPIC`    | `status`           | `"ok"`, `"processing"`, `"done"`   | No       | Command acknowledgments    |
-| `COMMAND_ERROR`       | `_ERROR_TOPIC`     | `error`            | `{"error": "Invalid track", "code": 400}` | No       | Error responses            |
 
 #### 14.3.2.3. System-Level Topics (Discovery & Global Status)
 
@@ -433,7 +434,7 @@ The following commands are **intentionally not implemented** in KNX due to proto
 
 | Status ID                | DPT     | Env Var Suffix                | Notes                  |
 | :----------------------- | :------ | :---------------------------- | :--------------------- |
-| `TRACK_INDEX`            | 5.010   | `_KNX_TRACK_STATUS`           | Send 1-based, 0 if>255 |
+| `TRACK_STATUS`            | 5.010   | `_KNX_TRACK_STATUS`           | Send 1-based, 0 if>255 |
 | `TRACK_REPEAT_STATUS`    | 1.001   | `_KNX_TRACK_REPEAT_STATUS`    | Send 0=Off, 1=On       |
 
 **Track Metadata**
@@ -465,7 +466,7 @@ The following commands are **intentionally not implemented** in KNX due to proto
 
 | Status ID                 | DPT     | Env Var Suffix                   | Notes                  |
 | :------------------------ | :------ | :------------------------------- | :--------------------- |
-| `PLAYLIST_INDEX`          | 5.010   | `_KNX_PLAYLIST_STATUS`           | Send 1-based, 0 if>255 |
+| `PLAYLIST_STATUS`          | 5.010   | `_KNX_PLAYLIST_STATUS`           | Send 1-based, 0 if>255 |
 | `PLAYLIST_SHUFFLE_STATUS` | 1.001   | `_KNX_PLAYLIST_SHUFFLE_STATUS`   | Send 0=Off, 1=On       |
 | `PLAYLIST_REPEAT_STATUS`  | 1.001   | `_KNX_PLAYLIST_REPEAT_STATUS`    | Send 0=Off, 1=On       |
 
@@ -501,6 +502,7 @@ The following commands are **intentionally not implemented** in KNX due to proto
 | `CLIENT_ZONE`        | Assign client to zone   | `ClientIndex` (int), `ZoneIndex` (int, 1-based)| Command (Set)    | Assigns client to group   |
 | `CLIENT_ZONE_STATUS` | Current assigned zone ID| `ClientIndex` (int), `ZoneIndex` (int?, 1-based)| Status (Publish) |                           |
 | `CLIENT_NAME`        | Set client name         | `ClientIndex` (int), `Name` (string)           | Command (Set)    | Rename client in Snapcast |
+| `CLIENT_NAME_STATUS` | Current client name     | `ClientIndex` (int), `Name` (string)           | Status (Publish) | Display name of client    |
 | `CLIENT_CONNECTED`   | Client connection status| `ClientIndex` (int), `IsConnected` (bool)  | Status (Publish) |                           |
 | `CLIENT_STATE`       | Complete client state   | `ClientIndex` (int), `ClientState` object  | Status (Publish) |                           |
 
@@ -598,34 +600,36 @@ Published to `{zoneBaseTopic}/state`.
 
 ```json
 {
-  "id": 1,
-  "name": "Living Room",
-  "playback_state": "play", // "play", "pause", "stop"
+  "index": 1,
+  "name": "Ground Floor",
+  "playing": true, // true / false
   "volume": 65,
   "mute": false,
-  "track_repeat": false,
-  "playlist_repeat": false,
-  "playlist_shuffle": true,
+  "repeat_track": false,
+  "repeat_playlist": false,
+  "shuffle": true,
   "snapcastGroupId": "group-uuid-1",
   "snapcastStreamId": "stream-fifo-1",
   "isSnapcastGroupMuted": false, // Raw state from Snapcast
   "playlist": {
-    "id": "pl.10", // Can be "radio"
+    "index": 2, // 1 = radio, from 2 up it's Subsonic playlists
     "name": "Jazz Classics", // Can be "Radio Stations"
-    "index": 2 // 1-based playlist index (1=Radio, 2=First Subsonic etc.) - Optional
+    "count": 52. // track count of playlist
   },
   "track": {
     "index": 1, // 1-based track index within the current playlist
-    "id": "track_12345", // or stream URL for radio
     "title": "Take Five",
     "artist": "Dave Brubeck", // or "Radio"
     "album": "Time Out", // or Playlist Name
-    "duration_sec": 325, // null for radio/streams
-    "position_sec": 142, // Current playback position
-    "coverArtUrl": "...",
+    "duration": 3255355, // duration in ms, null for radio/streams
+    "position": 14245, // Current playback position in ms
+    "progress": 43, // Current playback progress in percent
+    "coverArtUrl": "https://music.example.eu/track/cover.jpg",
     "source": "subsonic" // or "radio"
   },
-  "clients": [ 1, 2 ], // SnapDog2 Client IDs currently in this zone
+  "clients": [
+    // array json-object of client - see 14.5.2 for details >, ...
+  ],
   "timestamp": "2025-04-05T21:30:00Z" // Example ISO8601 UTC
 }
 ```
@@ -636,8 +640,8 @@ Published to `{clientBaseTopic}/state`.
 
 ```json
 {
-  "id": 1, // SnapDog2 internal client ID
-  "snapcastId": "00:11:22:AA:BB:CC",
+  "index": 1, // SnapDog2 internal client index
+  "snapcastId": "001122AABBCC",
   "name": "Living Room Speaker", // SnapDog2 configured Name
   "mac": "00:11:22:AA:BB:CC",
   "connected": true,

@@ -34,6 +34,7 @@
 ### Zone Commands (28/32 ✅ 88% Complete)
 
 #### Playback Control (3/3 ✅ Complete)
+
 | Command ID | Description | Blueprint | API Spec | Codebase | API Endpoint | Notes |
 |:-----------|:------------|:---------:|:--------:|:--------:|:-------------|:------|
 | `PLAY` | Start/resume playback | ✅ | ✅ | ✅ | `POST /zones/{id}/play` | ✅ Complete |
@@ -41,6 +42,7 @@
 | `STOP` | Stop playback | ✅ | ✅ | ✅ | `POST /zones/{id}/stop` | ✅ Complete |
 
 #### Track Management (7/9 ✅ 78% Complete)
+
 | Command ID | Description | Blueprint | API Spec | Codebase | API Endpoint | Notes |
 |:-----------|:------------|:---------:|:--------:|:--------:|:-------------|:------|
 | `TRACK` | Set specific track | ✅ | ✅ | ✅ | `PUT /zones/{id}/track` | ✅ Complete |
@@ -54,6 +56,7 @@
 | `TRACK_REPEAT_TOGGLE` | Toggle track repeat mode | ✅ | ✅ | ❌ | ❌ Missing | ⚠️ **MISSING** |
 
 #### Playlist Management (6/8 ✅ 75% Complete)
+
 | Command ID | Description | Blueprint | API Spec | Codebase | API Endpoint | Notes |
 |:-----------|:------------|:---------:|:--------:|:--------:|:-------------|:------|
 | `PLAYLIST` | Set specific playlist | ✅ | ✅ | ✅ | `PUT /zones/{id}/playlist` | ✅ Complete |
@@ -65,6 +68,7 @@
 | `PLAYLIST_REPEAT_TOGGLE` | Toggle playlist repeat | ✅ | ✅ | ❌ | `POST /zones/{id}/repeat/toggle` | ⚠️ **MISSING COMMAND** |
 
 #### Volume & Mute Control (7/7 ✅ Complete)
+
 | Command ID | Description | Blueprint | API Spec | Codebase | API Endpoint | Notes |
 |:-----------|:------------|:---------:|:--------:|:--------:|:-------------|:------|
 | `VOLUME` | Set zone volume | ✅ | ✅ | ✅ | `PUT /zones/{id}/volume` | ✅ Complete |
@@ -74,6 +78,7 @@
 | `MUTE_TOGGLE` | Toggle zone mute | ✅ | ✅ | ✅ | `POST /zones/{id}/mute/toggle` | ✅ Complete |
 
 #### Missing Commands (4/32 ❌)
+
 | Command ID | Description | Status | Priority |
 |:-----------|:------------|:-------|:---------|
 | `TRACK_REPEAT_TOGGLE` | Toggle track repeat mode | ❌ Missing | 🔴 High |
@@ -83,17 +88,20 @@
 ### Zone Status (16/20 ✅ 80% Complete)
 
 #### Playback Status (1/1 ✅ Complete)
+
 | Status ID | Description | Blueprint | API Spec | Codebase | API Endpoint | Notes |
 |:----------|:------------|:---------:|:--------:|:--------:|:-------------|:------|
 | `PLAYBACK_STATE` | Current playback state | ✅ | ✅ | ✅ | Implicit in zone state | ✅ Complete |
 
 #### Track Management Status (3/3 ✅ Complete)
+
 | Status ID | Description | Blueprint | API Spec | Codebase | API Endpoint | Notes |
 |:----------|:------------|:---------:|:--------:|:--------:|:-------------|:------|
-| `TRACK_INDEX` | Current track index | ✅ | ✅ | ✅ | `GET /zones/{id}/track` | ✅ Complete |
+| `TRACK_STATUS` | Current track index | ✅ | ✅ | ✅ | `GET /zones/{id}/track` | ✅ Complete |
 | `TRACK_REPEAT_STATUS` | Current track repeat state | ✅ | ✅ | ✅ | `GET /zones/{id}/repeat/track` | ✅ Complete |
 
 #### Track Metadata Status (1/6 ✅ 17% Complete)
+
 | Status ID | Description | Blueprint | API Spec | Codebase | API Endpoint | Notes |
 |:----------|:------------|:---------:|:--------:|:--------:|:-------------|:------|
 | `TRACK_METADATA` | Complete track metadata | ✅ | ✅ | ✅ | `GET /zones/{id}/track/metadata` | ✅ Complete |
@@ -104,6 +112,7 @@
 | `TRACK_METADATA_COVER` | Track cover art URL | ✅ | ❌ | ❌ | ❌ Missing | ⚠️ **MISSING** |
 
 #### Track Playback Status (3/3 ✅ Complete)
+
 | Status ID | Description | Blueprint | API Spec | Codebase | API Endpoint | Notes |
 |:----------|:------------|:---------:|:--------:|:--------:|:-------------|:------|
 | `TRACK_PLAYING_STATUS` | Current playing state | ✅ | ✅ | ❌ | `GET /zones/{id}/track/playing` | ⚠️ **MISSING STATUS** |
@@ -111,20 +120,23 @@
 | `TRACK_PROGRESS_STATUS` | Current progress percentage | ✅ | ✅ | ❌ | `GET /zones/{id}/track/progress` | ⚠️ **MISSING STATUS** |
 
 #### Playlist Status (3/3 ✅ Complete)
+
 | Status ID | Description | Blueprint | API Spec | Codebase | API Endpoint | Notes |
 |:----------|:------------|:---------:|:--------:|:--------:|:-------------|:------|
-| `PLAYLIST_INDEX` | Current playlist index | ✅ | ✅ | ✅ | `GET /zones/{id}/playlist` | ✅ Complete |
+| `PLAYLIST_STATUS` | Current playlist index | ✅ | ✅ | ✅ | `GET /zones/{id}/playlist` | ✅ Complete |
 | `PLAYLIST_INFO` | Detailed playlist info | ✅ | ✅ | ❌ | ❌ Missing | ⚠️ **MISSING STATUS** |
 | `PLAYLIST_SHUFFLE_STATUS` | Current shuffle state | ✅ | ✅ | ✅ | `GET /zones/{id}/shuffle` | ✅ Complete |
 | `PLAYLIST_REPEAT_STATUS` | Current playlist repeat | ✅ | ✅ | ✅ | `GET /zones/{id}/repeat` | ✅ Complete |
 
 #### Volume & Mute Status (2/2 ✅ Complete)
+
 | Status ID | Description | Blueprint | API Spec | Codebase | API Endpoint | Notes |
 |:----------|:------------|:---------:|:--------:|:--------:|:-------------|:------|
 | `VOLUME_STATUS` | Current zone volume | ✅ | ✅ | ✅ | `GET /zones/{id}/volume` | ✅ Complete |
 | `MUTE_STATUS` | Current zone mute state | ✅ | ✅ | ✅ | `GET /zones/{id}/mute` | ✅ Complete |
 
 #### General Zone Status (1/1 ✅ Complete)
+
 | Status ID | Description | Blueprint | API Spec | Codebase | API Endpoint | Notes |
 |:----------|:------------|:---------:|:--------:|:--------:|:-------------|:------|
 | `ZONE_STATE` | Complete zone state | ✅ | ✅ | ✅ | `GET /zones/{id}` | ✅ Complete |
@@ -138,6 +150,7 @@
 ### Client Commands (8/8 ✅ 100% Complete)
 
 #### Volume & Mute Commands (5/5 ✅ Complete)
+
 | Command ID | Description | Blueprint | API Spec | Codebase | API Endpoint | Notes |
 |:-----------|:------------|:---------:|:--------:|:--------:|:-------------|:------|
 | `CLIENT_VOLUME` | Set client volume | ✅ | ✅ | ✅ | `PUT /clients/{id}/volume` | ✅ Complete |
@@ -147,6 +160,7 @@
 | `CLIENT_MUTE_TOGGLE` | Toggle client mute | ✅ | ✅ | ✅ | `POST /clients/{id}/mute/toggle` | ✅ Complete |
 
 #### Configuration Commands (3/3 ✅ Complete)
+
 | Command ID | Description | Blueprint | API Spec | Codebase | API Endpoint | Notes |
 |:-----------|:------------|:---------:|:--------:|:--------:|:-------------|:------|
 | `CLIENT_LATENCY` | Set client latency | ✅ | ✅ | ✅ | `PUT /clients/{id}/latency` | ✅ Complete |
@@ -156,12 +170,14 @@
 ### Client Status (6/6 ✅ 100% Complete)
 
 #### Volume & Mute Status (2/2 ✅ Complete)
+
 | Status ID | Description | Blueprint | API Spec | Codebase | API Endpoint | Notes |
 |:----------|:------------|:---------:|:--------:|:--------:|:-------------|:------|
 | `CLIENT_VOLUME_STATUS` | Current client volume | ✅ | ✅ | ✅ | `GET /clients/{id}/volume` | ✅ Complete |
 | `CLIENT_MUTE_STATUS` | Current client mute state | ✅ | ✅ | ✅ | `GET /clients/{id}/mute` | ✅ Complete |
 
 #### Configuration Status (4/4 ✅ Complete)
+
 | Status ID | Description | Blueprint | API Spec | Codebase | API Endpoint | Notes |
 |:----------|:------------|:---------:|:--------:|:--------:|:-------------|:------|
 | `CLIENT_LATENCY_STATUS` | Current client latency | ✅ | ✅ | ✅ | `GET /clients/{id}/latency` | ✅ Complete |
@@ -178,12 +194,14 @@
 ### 🎯 **Missing Implementations**
 
 #### High Priority (Core Functionality)
+
 1. **Zone Toggle Commands** (3 missing):
    - `TRACK_REPEAT_TOGGLE` - Toggle track repeat mode
-   - `PLAYLIST_SHUFFLE_TOGGLE` - Toggle shuffle mode  
+   - `PLAYLIST_SHUFFLE_TOGGLE` - Toggle shuffle mode
    - `PLAYLIST_REPEAT_TOGGLE` - Toggle playlist repeat
 
 #### Medium Priority (Enhanced Status)
+
 2. **Track Metadata Status** (5 missing):
    - `TRACK_METADATA_DURATION` - Individual track duration endpoint
    - `TRACK_METADATA_TITLE` - Individual track title endpoint
@@ -200,13 +218,15 @@
    - `PLAYLIST_INFO` - Detailed playlist info notifications
 
 ### 🏆 **Strengths**
+
 - ✅ **Global System**: 100% complete implementation
-- ✅ **Client Management**: 100% complete implementation  
+- ✅ **Client Management**: 100% complete implementation
 - ✅ **Core Zone Functionality**: 88% complete with all essential features
 - ✅ **Modern API Design**: Direct primitive responses, clean REST endpoints
 - ✅ **Comprehensive Architecture**: CQRS pattern with proper separation
 
 ### 📈 **Overall Assessment**
+
 **87% Complete** - The SnapDog2 command framework implementation is highly mature with excellent coverage of core functionality. The missing items are primarily convenience features (toggle commands) and granular status endpoints that can be derived from existing complete state objects.
 
 The architecture demonstrates solid adherence to the blueprint specifications with modern API design principles successfully implemented.

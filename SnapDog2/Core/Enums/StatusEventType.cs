@@ -37,7 +37,7 @@ public enum StatusEventType
     [Description("MUTE_STATUS")]
     MuteStatus,
 
-    [Description("TRACK_INDEX")]
+    [Description("TRACK_STATUS")]
     TrackIndex,
 
     [Description("TRACK_METADATA")]
@@ -67,7 +67,7 @@ public enum StatusEventType
     [Description("TRACK_PROGRESS_STATUS")]
     TrackProgressStatus,
 
-    [Description("PLAYLIST_INDEX")]
+    [Description("PLAYLIST_STATUS")]
     PlaylistIndex,
 
     [Description("PLAYLIST_INFO")]

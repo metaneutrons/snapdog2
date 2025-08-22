@@ -144,7 +144,7 @@ This section summarizes the mapping between SnapDog2 internal values/states and 
     * Sending (Status): Convert internal `percent` (0-100) to KNX byte: `knxVal = (byte)Math.Clamp(Math.Round(percent * 2.55), 0, 255)`.
 
 * **DPT 5.010 (Unsigned Count 0-255):**
-  * Used for: `TRACK` Command (`_KNX_TRACK`), `PLAYLIST` Command (`_KNX_PLAYLIST`), `CLIENT_ZONE` Command (`_KNX_ZONE`), `TRACK_INDEX` Status (`_KNX_TRACK_STATUS`), `PLAYLIST_INDEX` Status (`_KNX_PLAYLIST_STATUS`), `CLIENT_ZONE_STATUS` (`_KNX_ZONE_STATUS`).
+  * Used for: `TRACK` Command (`_KNX_TRACK`), `PLAYLIST` Command (`_KNX_PLAYLIST`), `CLIENT_ZONE` Command (`_KNX_ZONE`), `TRACK_STATUS` Status (`_KNX_TRACK_STATUS`), `PLAYLIST_STATUS` Status (`_KNX_PLAYLIST_STATUS`), `CLIENT_ZONE_STATUS` (`_KNX_ZONE_STATUS`).
   * Mapping:
     * Receiving (Command): Read byte value `knxVal`. This represents the **1-based index**. If `knxVal == 0`, treat as invalid/ignore. Use `knxVal` directly as the 1-based index internally.
     * Sending (Status): Get the internal **1-based** index (`statusIndex`). If `statusIndex > 255` or `statusIndex < 1`, send KNX value `0`. Otherwise, send `(byte)statusIndex`.

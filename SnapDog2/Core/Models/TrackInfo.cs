@@ -8,7 +8,7 @@ public record TrackInfo
 {
     /// <summary>
     /// Gets the track index within the current playlist (1-based).
-    /// Maps to TRACK_INDEX status.
+    /// Maps to TRACK_STATUS status.
     /// </summary>
     public required int Index { get; init; }
 
