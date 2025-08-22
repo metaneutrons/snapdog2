@@ -82,7 +82,7 @@ snapdog/
 ### 15.2.2. Zone Level
 
 | MQTT Topic | Command/Status ID | Type | Description |
-|------------|------------------|------|-------------|
+|------------|-------------------|------|-------------|
 | `zones/{index}/name` | `ZONE_NAME_STATUS` | Status | Name of the zone |
 | `zones/{index}/control` | `multiple` | Status | Control status in one topic(see framework 14.3.2.4)|
 | `zones/{index}/control/set` | `multiple` | Command | Control commands (see framework 14.3.2.4) |
