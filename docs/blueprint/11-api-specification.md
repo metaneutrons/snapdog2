@@ -67,7 +67,7 @@ Endpoints for accessing system-wide information.
 | `GET`  | `/system/commands/status` | `COMMAND_STATUS` | Get command processing status    | `string` ("idle", "processing", "error") | 200 OK |
 | `GET`  | `/system/commands/errors` | `COMMAND_ERROR`  | Get recent command errors        | `string[]` (error messages)     | 200 OK      |
 
-#### **Health Endpoints:**
+#### 10.4.1.1. **Health Endpoints:**
 
 | Method | Path                   | Description                      | Success Response (Direct)       | HTTP Status |
 | :----- | :--------------------- | :------------------------------- | :------------------------------ | :---------- |

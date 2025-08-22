@@ -1,8 +1,8 @@
-# 16. Cortex.Mediator Command Framework Implementation
+# 18. Cortex.Mediator Command Framework Implementation
 
 This document provides the concrete Cortex.Mediator implementation of the Command Framework defined in Section 9. It translates the logical commands and status updates into specific C# classes using Cortex.Mediator interfaces.
 
-## 16.1. Implementation Overview
+## 18.1. Implementation Overview
 
 The implementation follows these key principles:
 
@@ -12,7 +12,7 @@ The implementation follows these key principles:
 4. **Validation**: All commands include FluentValidation validators
 5. **Handler Organization**: Handlers are organized by domain area (Global, Zone, Client)
 
-## 16.2. Project Structure
+## 18.2. Project Structure
 
 ```
 /Server/Features/
@@ -34,9 +34,9 @@ The implementation follows these key principles:
     └── Notifications/
 ```
 
-## 16.3. Base Interfaces and Common Types
+## 18.3. Base Interfaces and Common Types
 
-### 16.3.1. Command Result Types
+### 18.3.1. Command Result Types
 
 ```csharp
 // Already defined in Core.Models - referenced here for clarity
@@ -65,7 +65,7 @@ public class Result<T> : Result
 }
 ```
 
-### 16.3.2. Common Enums
+### 18.3.2. Common Enums
 
 ```csharp
 namespace SnapDog2.Core.Enums;
@@ -93,9 +93,9 @@ public enum CommandSource
 }
 ```
 
-## 16.4. Global Commands and Queries
+## 18.4. Global Commands and Queries
 
-### 16.4.1. Global Status Queries
+### 18.4.1. Global Status Queries
 
 ```csharp
 // /Server/Features/Global/Queries/GetSystemStatusQuery.cs
@@ -120,7 +120,7 @@ public record GetVersionInfoQuery : IQuery<Result<VersionDetails>>;
 public record GetServerStatsQuery : IQuery<Result<ServerStats>>;
 ```
 
-### 16.4.2. Global Query Handlers
+### 18.4.2. Global Query Handlers
 
 ```csharp
 // /Server/Features/Global/Handlers/GetSystemStatusQueryHandler.cs
@@ -170,11 +170,11 @@ public partial class GetSystemStatusQueryHandler : IQueryHandler<GetSystemStatus
 }
 ```
 
-## 16.5. Zone Commands
+## 18.5. Zone Commands
 
 This section will be expanded in the next parts of this document.
 
-### 16.5.1. Playback Control Commands
+### 18.5.1. Playback Control Commands
 
 ```csharp
 // /Server/Features/Zones/Commands/PlayCommand.cs
@@ -243,9 +243,9 @@ public record StopCommand : ICommand<Result>
 }
 ```
 
-## 16.6. Status Notifications
+## 18.6. Status Notifications
 
-### 16.6.1. Global Status Notifications
+### 18.6.1. Global Status Notifications
 
 ```csharp
 // /Server/Features/Shared/Notifications/SystemStatusChangedNotification.cs
@@ -288,9 +288,9 @@ public record SystemErrorNotification : INotification
 }
 ```
 
-## 16.7. Command Validators
+## 18.7. Command Validators
 
-### 16.7.1. Zone Command Validators
+### 18.7.1. Zone Command Validators
 
 ```csharp
 // /Server/Features/Zones/Validators/PlayCommandValidator.cs

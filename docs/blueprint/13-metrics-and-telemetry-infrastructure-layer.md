@@ -175,7 +175,7 @@ OpenTelemetry instrumentation covers critical application paths:
 - **Export:** OTLP to any compatible backend (Jaeger, SigNoz, etc.)
 - **Sampling:** Configurable via `SNAPDOG_TELEMETRY_SAMPLING_RATE`
 
-### 12.5.2. Metrics  
+### 12.5.2. Metrics
 - **Goal:** Quantitative data on application health and performance
 - **Implementation:** `System.Diagnostics.Metrics.Meter` with custom instruments
 - **Export:** OTLP to any compatible backend (Prometheus via collector, SigNoz, etc.)
@@ -204,7 +204,7 @@ OpenTelemetry instrumentation covers critical application paths:
 - **Local Development:** Easy to enable/disable observability
 - **Testing:** Mock OTLP endpoints for integration tests
 
-## 12.4. OpenTelemetry Setup (DI / `/Worker/DI/ObservabilityExtensions.cs`)
+## 12.7. OpenTelemetry Setup (DI / `/Worker/DI/ObservabilityExtensions.cs`)
 
 OpenTelemetry pipelines for tracing, metrics, and logging are configured during application startup using Dependency Injection.
 
@@ -390,7 +390,7 @@ public static class ObservabilityExtensions
 }
 ```
 
-## 12.5. Custom Metrics (`IMetricsService` / `OpenTelemetryMetricsService`)
+## 12.8. Custom Metrics (`IMetricsService` / `OpenTelemetryMetricsService`)
 
 Define application-specific metrics using `System.Diagnostics.Metrics.Meter` via a dedicated service abstraction (`IMetricsService`) implemented in `/Infrastructure/Observability`.
 
@@ -500,7 +500,7 @@ public class OpenTelemetryMetricsService : IMetricsService
 
 Inject `IMetricsService` into components (like Cortex.Mediator Behaviors, Infrastructure Services) where metrics need to be recorded.
 
-## 12.6. Manual Tracing Instrumentation
+## 12.9. Manual Tracing Instrumentation
 
 Use the shared `ActivitySource` (`ObservabilityExtensions.SnapDogActivitySource`) to manually create Activities (spans) for important operations not covered by automatic instrumentation. Use `using var activity = _activitySource.StartActivity(...)`, add relevant tags (`activity.SetTag`), record exceptions (`activity.RecordException`), and set status (`activity.SetStatus`).
 
@@ -546,6 +546,6 @@ public partial class SubsonicService : ISubsonicService
 // ... set tags, status, record exceptions based on handler outcome ...
 ```
 
-## 12.7. Logging Correlation
+## 12.10. Logging Correlation
 
 Ensure Serilog (or chosen logging provider) is configured with OpenTelemetry integration (`loggingBuilder.AddOpenTelemetry(...)` in DI setup) and output templates include `{TraceId}` and `{SpanId}`. This automatically links logs to the currently active trace span.

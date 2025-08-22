@@ -1,8 +1,8 @@
-# 22. Dependencies
+# 24. Dependencies
 
 This section meticulously documents the external software dependencies required by the SnapDog2 project, including the .NET framework version, essential NuGet packages, and necessary native libraries or external services. Managing these dependencies effectively is crucial for application stability, security, and maintainability.
 
-## 22.1. .NET Framework
+## 24.1. .NET Framework
 
 * **Target Framework:** SnapDog2 is built targeting **.NET 9.0**. Implementation should leverage the relevant features of the framework and the corresponding C# language version.
 * **Core Components Utilized:**
@@ -13,11 +13,11 @@ This section meticulously documents the external software dependencies required 
   * Logging: `Microsoft.Extensions.Logging` abstractions used throughout the application, with Serilog as the backend provider (Section 5.2).
   * HttpClientFactory: Used for managing `HttpClient` instances, incorporating resilience policies (Section 7).
 
-## 22.2. Core NuGet Packages
+## 24.2. Core NuGet Packages
 
 Dependencies are managed centrally via **Central Package Management (CPM)** using a `Directory.Packages.props` file at the solution root. Specific versions listed below are confirmed target versions; ensure `Directory.Packages.props` reflects these.
 
-### 22.2.1. Application Framework & Utilities
+### 24.2.1. Application Framework & Utilities
 
 These packages provide fundamental application building blocks and utility functions.
 
@@ -30,7 +30,7 @@ These packages provide fundamental application building blocks and utility funct
 | `FluentValidation.AspNetCore`     | `11.11.0`        | Validation library & ASP.NET Core integration   | Used by ValidationBehavior & API    |
 | `EnvoyConfig`                     | `1.0.5`          | Environment variable configuration binding      | Replaces custom EnvConfigHelper     |
 
-### 22.2.2. Resilience
+### 24.2.2. Resilience
 
 Packages providing fault-tolerance capabilities, primarily used in the Infrastructure layer.
 
@@ -41,7 +41,7 @@ Packages providing fault-tolerance capabilities, primarily used in the Infrastru
 | `Microsoft.Extensions.Http.Polly` | `9.0.3`          | `HttpClientFactory` Polly integration | Enables policy registration   |
 | `Polly.Contrib.WaitAndRetry`    | *(Included via Polly 8+)* | Provides advanced retry strategies (e.g., Jitter) | Ensure correct version if referenced separately |
 
-### 22.2.3. Logging
+### 24.2.3. Logging
 
 Packages enabling structured logging via Serilog as the backend provider.
 
@@ -54,7 +54,7 @@ Packages enabling structured logging via Serilog as the backend provider.
 | `Serilog.Enrichers.Environment` | `3.0.1`          | Enrich logs with env info   | Adds context       |
 | `Serilog.Enrichers.Thread`      | `4.0.0`          | Enrich logs with thread ID  | Adds context       |
 
-### 22.2.4. External System Integration
+### 24.2.4. External System Integration
 
 Libraries used to communicate with specific external services and protocols.
 
@@ -67,7 +67,7 @@ Libraries used to communicate with specific external services and protocols.
 | `VideoLAN.LibVLC.Linux`          | `3.0.20`           | LibVLC native binaries (Linux) | Needed for target Docker runtime (Alpine might need different base or manual install) |
 | `SubSonicMedia`                  | **`1.0.4-beta.1`** | Subsonic API client         | Confirmed (Monitor for stable release) |
 
-### 22.2.5. Observability (OpenTelemetry)
+### 24.2.5. Observability (OpenTelemetry)
 
 Packages for implementing distributed tracing and metrics collection.
 
@@ -82,7 +82,7 @@ Packages for implementing distributed tracing and metrics collection.
 | `OpenTelemetry.Exporter.Console`    | `1.11.2`           | Console exporter                 | For debugging             |
 | `OpenTelemetry.Api`                 | `1.11.2`           | Core API (`ActivitySource`, etc.)| For manual instrumentation|
 
-### 22.2.6. Code Quality & Analysis
+### 24.2.6. Code Quality & Analysis
 
 Packages providing static analysis during build, referenced as Development Dependencies / Analyzers.
 
@@ -93,7 +93,7 @@ Packages providing static analysis during build, referenced as Development Depen
 | `Microsoft.CodeAnalysis.NetAnalyzers` | `9.0.0`            | Core .NET analysis rules     | Include via `<PrivateAssets>` |
 | `Microsoft.VisualStudio.Threading.Analyzers` | `17.13.61`   | Async best practice rules    | Include via `<PrivateAssets>` |
 
-### 22.2.7. Testing Dependencies
+### 24.2.7. Testing Dependencies
 
 Packages used exclusively in the test project (`SnapDog2.Tests.csproj`).
 
@@ -108,7 +108,7 @@ Packages used exclusively in the test project (`SnapDog2.Tests.csproj`).
 | `coverlet.collector`             | `6.0.4`          | Code coverage collection           | Test Projs |
 | `Testcontainers`                 | `4.3.0`          | Docker containers for integration tests | Test Projs |
 
-## 22.3. Centralized Package Management (`Directory.Packages.props`)
+## 24.3. Centralized Package Management (`Directory.Packages.props`)
 
 All NuGet package versions listed above **must** be defined centrally in the `Directory.Packages.props` file at the solution root to ensure consistency across projects (even though there is currently only one main project and one test project).
 
@@ -196,13 +196,13 @@ Project files (`.csproj`) then reference packages without version numbers:
 </ItemGroup>
 ```
 
-## 22.4. Dependency Management Strategy
+## 24.4. Dependency Management Strategy
 
 * **Versioning**: Use CPM with specific, tested versions. Avoid wildcards. Update dependencies deliberately as part of planned maintenance, testing compatibility thoroughly.
 * **Validation**: CI pipeline **must** include `dotnet list package --vulnerable --include-transitive` to check for known security vulnerabilities in direct and transitive dependencies. Optionally include license checking tools (e.g., `ClearlyDefined`, `GitHub License Check Action`).
 * **Transitive Dependencies**: Regularly review the `project.assets.json` file or use `dotnet list package --include-transitive` to understand the full dependency graph. If problematic transitive versions are pulled in, explicitly define a `PackageVersion` for that transitive dependency in `Directory.Packages.props` to override it.
 
-## 22.5. Native Dependencies
+## 24.5. Native Dependencies
 
 These are required at runtime in the execution environment (e.g., within the Docker container or on the host machine).
 

@@ -1,8 +1,8 @@
-# 19. Zone Queries and Status Notifications
+# 21. Zone Queries and Status Notifications
 
 This document covers the Query implementations and Status Notifications for the Cortex.Mediator command framework.
 
-## 19.1. Zone Queries
+## 21.1. Zone Queries
 
 ```csharp
 // /Server/Features/Zones/Queries/ZoneQueries.cs
@@ -72,7 +72,7 @@ public record GetPlaylistTracksQuery : IQuery<Result<List<TrackInfo>>>
 }
 ```
 
-## 19.2. Zone Query Handlers
+## 21.2. Zone Query Handlers
 
 ```csharp
 // /Server/Features/Zones/Handlers/GetAllZonesQueryHandler.cs
@@ -209,9 +209,9 @@ public partial class GetAllPlaylistsQueryHandler : IQueryHandler<GetAllPlaylists
 }
 ```
 
-## 19.3. Status Notifications
+## 21.3. Status Notifications
 
-### 19.3.1. Zone Status Notifications
+### 21.3.1. Zone Status Notifications
 
 ```csharp
 // /Server/Features/Shared/Notifications/ZoneNotifications.cs
@@ -406,7 +406,7 @@ public record ZoneStateChangedNotification : INotification
 }
 ```
 
-### 19.3.2. Client Status Notifications
+### 21.3.2. Client Status Notifications
 
 ```csharp
 // /Server/Features/Shared/Notifications/ClientNotifications.cs
@@ -548,7 +548,7 @@ public record ClientStateChangedNotification : INotification
 }
 ```
 
-## 19.4. Generic Status Changed Notification
+## 21.4. Generic Status Changed Notification
 
 ```csharp
 // /Server/Features/Shared/Notifications/StatusChangedNotification.cs
@@ -585,7 +585,7 @@ public record StatusChangedNotification : INotification
 }
 ```
 
-## 19.5. Notification Handlers Example
+## 21.5. Notification Handlers Example
 
 ```csharp
 // /Server/Features/Shared/Handlers/ZoneNotificationHandlers.cs
