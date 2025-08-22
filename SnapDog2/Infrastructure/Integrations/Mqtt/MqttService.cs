@@ -18,6 +18,7 @@ using MQTTnet.Protocol;
 using Polly;
 using Polly.Retry;
 using SnapDog2.Core.Abstractions;
+using SnapDog2.Core.Attributes;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Core.Constants;
 using SnapDog2.Core.Enums;
@@ -640,9 +641,37 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
 
     /// <summary>
     /// Maps zone-specific MQTT commands to Mediator commands.
+    /// Now includes registry validation to prevent hardcoded command usage.
     /// </summary>
     private ICommand<Result>? MapZoneCommand(int zoneIndex, string command, string payload)
     {
+        // Map MQTT command strings to registry command IDs for validation
+        var commandId = command switch
+        {
+            "play" => "PLAY",
+            "pause" => "PAUSE",
+            "stop" => "STOP",
+            "volume" => "ZONE_VOLUME",
+            "mute" => "ZONE_MUTE",
+            "track" => "TRACK_SET",
+            "next" => "TRACK_NEXT",
+            "previous" => "TRACK_PREVIOUS",
+            "playlist" => "PLAYLIST_SET",
+            _ => null,
+        };
+
+        // Validate command ID against registry
+        if (commandId != null && !CommandIdRegistry.IsRegistered(commandId))
+        {
+            this.LogUnknownMqttCommand(command, commandId);
+            return null;
+        }
+        else if (commandId == null)
+        {
+            // Command not mapped - this is normal for unsupported commands
+            return null;
+        }
+
         return command switch
         {
             // Playback Control Commands (Section 14.3.1)

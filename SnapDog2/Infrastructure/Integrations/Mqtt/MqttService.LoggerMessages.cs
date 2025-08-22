@@ -63,4 +63,12 @@ public sealed partial class MqttService
 
     [LoggerMessage(9317, LogLevel.Error, "Failed to publish global status {EventType}")]
     private partial void LogFailedToPublishGlobalStatus(Exception ex, string eventType);
+
+    // Registry Validation Operations (9318)
+    [LoggerMessage(
+        9318,
+        LogLevel.Warning,
+        "Unknown MQTT command '{Command}' with command ID '{CommandId}' not found in registry"
+    )]
+    private partial void LogUnknownMqttCommand(string command, string commandId);
 }

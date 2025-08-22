@@ -15,7 +15,7 @@ public class ZoneMqttConfig
     public string? BaseTopic { get; set; }
 
     // Control topics
-    [Env(Key = "CONTROL_SET_TOPIC", Default = "control/set")]
+    [Env(Key = "CONTROL_TOPIC", Default = "control/set")]
     public string ControlSetTopic { get; set; } = "control/set";
 
     [Env(Key = "CONTROL_TOPIC", Default = "control")]

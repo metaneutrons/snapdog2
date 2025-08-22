@@ -37,7 +37,9 @@ public partial class SmartMqttNotificationHandlers(
         INotificationHandler<ZoneTrackRepeatChangedNotification>,
         INotificationHandler<ZonePlaylistRepeatChangedNotification>,
         INotificationHandler<ZoneShuffleModeChangedNotification>,
-        INotificationHandler<ZoneStateChangedNotification>
+        INotificationHandler<ZoneStateChangedNotification>,
+        // Track metadata notification handlers
+        INotificationHandler<ZoneTrackAlbumChangedNotification>
 {
     private readonly IServiceProvider _serviceProvider = serviceProvider;
     private readonly ILogger<SmartMqttNotificationHandlers> _logger = logger;
@@ -214,6 +216,17 @@ public partial class SmartMqttNotificationHandlers(
         );
     }
 
+    public async Task Handle(ZoneTrackAlbumChangedNotification notification, CancellationToken cancellationToken)
+    {
+        LogZoneTrackAlbumChange(notification.ZoneIndex, notification.Album);
+        await PublishZoneStatusAsync(
+            StatusIdAttribute.GetStatusId<ZoneTrackAlbumChangedNotification>(),
+            notification.ZoneIndex,
+            notification.Album,
+            cancellationToken
+        );
+    }
+
     #endregion
 
     #region Helper Methods
@@ -345,6 +358,9 @@ public partial class SmartMqttNotificationHandlers(
 
     [LoggerMessage(9018, LogLevel.Information, "Zone {ZoneIndex} shuffle mode changed to {ShuffleEnabled}")]
     private partial void LogZoneShuffleModeChange(int zoneIndex, bool shuffleEnabled);
+
+    [LoggerMessage(9019, LogLevel.Information, "Zone {ZoneIndex} track album changed to {Album}")]
+    private partial void LogZoneTrackAlbumChange(int zoneIndex, string album);
 
     [LoggerMessage(9019, LogLevel.Debug, "Zone {ZoneIndex} complete state changed")]
     private partial void LogZoneStateChange(int zoneIndex);
