@@ -109,6 +109,7 @@ KNX integration using Knx.Falcon.Sdk with complete implementation of all KNX-app
 #### KNX Implementation Breakdown
 
 **Total Blueprint Features**: 72 (40 commands + 32 status)
+
 - **KNX-Suitable Features**: 47
 - **Implemented**: 47/47 (100%)
 - **Intentionally Excluded**: 25 (due to protocol limitations)
@@ -154,7 +155,7 @@ These features are **intentionally not implemented** due to fundamental KNX prot
 **Commands Not Suitable for KNX (10)**:
 
 - `TRACK_POSITION`, `TRACK_PROGRESS` - Millisecond precision not practical for building automation
-- `TRACK_PLAY_URL` - URL strings exceed KNX data length limits  
+- `TRACK_PLAY_URL` - URL strings exceed KNX data length limits
 - `TRACK_PLAY_INDEX` - Redundant with `TRACK` command
 - `SEEK_POSITION`, `SEEK_PROGRESS` - Complex operations better suited for API/MQTT
 - `PLAY_URL` - URL handling not appropriate for KNX bus
@@ -258,14 +259,14 @@ These features are **intentionally not implemented** due to fundamental KNX prot
 
 | Command ID | Description | Blueprint | Codebase | Implementation Status |
 |:-----------|:------------|:---------:|:--------:|:---------------------|
-| `CONTROL_SET` | Unified control command | ✅ | ⚠️ | ⚠️ **PARTIAL** (MQTT config only) |
-| `ZONE_NAME` | Zone Name | ✅ | ❌ | ⚠️ **MISSING** |
+| `CONTROL`  | Unified control command | ✅ | ⚠️ | ⚠️ **PARTIAL** (MQTT config only) |
+| `ZONE_NAME`| Zone Name | ✅ | ❌ | ⚠️ **MISSING** |
 
 #### Missing Zone Commands (2/34)
 
 | Command ID | Description | Status | Priority |
 |:-----------|:------------|:-------|:---------|
-| `CONTROL_SET` | Unified control command | ⚠️ Partial (config only) | 🔴 High |
+| `CONTROL` | Unified control command | ⚠️ Partial (config only) | 🔴 High |
 | `ZONE_NAME` | Set zone name | ❌ Missing | 🟡 Medium |
 
 ### Zone Status (20/22 ✅ 91% Complete)
@@ -475,25 +476,30 @@ The implementation demonstrates:
 The following features were recently added to the blueprint but are not yet implemented:
 
 **Global Status (1 missing)**:
+
 - `CLIENTS_INFO` - Available clients list (similar to existing `ZONES_INFO`)
 
 **Zone Commands (2 missing)**:
-- `CONTROL_SET` - Unified control command (partial: MQTT config exists)
+
+- `CONTROL` - Unified control command (partial: MQTT config exists)
 - `ZONE_NAME` - Set zone name command
 
 **Zone Status (4 missing)**:
+
 - `PLAYLIST_NAME_STATUS` - Current playlist name
-- `PLAYLIST_COUNT_STATUS` - Playlist track count  
+- `PLAYLIST_COUNT_STATUS` - Playlist track count
 - `ZONE_NAME_STATUS` - Zone name status
 - `CONTROL_STATUS` - Unified control status
 
 **Client Status (1 missing)**:
+
 - `CLIENT_NAME_STATUS` - Current client name status
 
 ### 🔧 **Implementation Priority**
 
 **High Priority (Core Functionality)**:
-1. `CONTROL_SET` - Complete the unified control command implementation
+
+1. `CONTROL` - Complete the unified control command implementation
 2. `CLIENTS_INFO` - Add clients info notification (mirror of `ZONES_INFO`)
 
 **Medium Priority (Enhanced Status)**:
@@ -547,7 +553,7 @@ This represents a mature, production-ready implementation that fully satisfies t
 - Track: `TRACK`, `TRACK_NEXT`, `TRACK_PREVIOUS`, `TRACK_PLAY_INDEX`, `TRACK_PLAY_URL`, `TRACK_POSITION`, `TRACK_PROGRESS`, `TRACK_REPEAT`, `TRACK_REPEAT_TOGGLE`
 - Playlist: `PLAYLIST`, `PLAYLIST_NEXT`, `PLAYLIST_PREVIOUS`, `PLAYLIST_SHUFFLE`, `PLAYLIST_SHUFFLE_TOGGLE`, `PLAYLIST_REPEAT`, `PLAYLIST_REPEAT_TOGGLE`
 - Volume: `VOLUME`, `VOLUME_UP`, `VOLUME_DOWN`, `MUTE`, `MUTE_TOGGLE`
-- **Missing**: `CONTROL_SET` (partial), `ZONE_NAME`
+- **Missing**: `CONTROL` (partial), `ZONE_NAME`
 
 **Client Commands (8/8 ✅ 100%)**:
 
@@ -579,7 +585,7 @@ This represents a mature, production-ready implementation that fully satisfies t
 ### Summary of Missing Items (6 total)
 
 1. `CLIENTS_INFO` - Global clients list status
-2. `CONTROL_SET` - Unified zone control command (partial implementation)
+2. `CONTROL` - Unified zone control command (partial implementation)
 3. `ZONE_NAME` - Zone naming command
 4. `PLAYLIST_NAME_STATUS`, `PLAYLIST_COUNT_STATUS` - Enhanced playlist status
 5. `ZONE_NAME_STATUS`, `CONTROL_STATUS` - Zone status enhancements
