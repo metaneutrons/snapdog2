@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SnapDog2.Api.Models;
 using SnapDog2.Core.Models;
+using SnapDog2.Server.Features.Zones.Commands.Control;
 using SnapDog2.Server.Features.Zones.Commands.Playback;
 using SnapDog2.Server.Features.Zones.Commands.Playlist;
 using SnapDog2.Server.Features.Zones.Commands.Track;
@@ -1312,4 +1313,74 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
     [LoggerMessage(12043, LogLevel.Warning, "Failed to get zone {ZoneIndex} track duration: {ErrorMessage}")]
     private partial void LogFailedToGetZoneTrackDuration(int zoneIndex, string errorMessage);
+
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // ZONE NAME - Read-only endpoint for zone identification
+    // ═══════════════════════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// Get the name of the zone.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <returns>Zone name</returns>
+    [HttpGet("{zoneIndex:int}/name")]
+    [ProducesResponseType<string>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<string>> GetZoneName(int zoneIndex)
+    {
+        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
+        var result = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+
+        if (result.IsFailure)
+        {
+            LogFailedToGetZoneName(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return this.NotFound($"Zone {zoneIndex} not found");
+        }
+
+        return Ok(result.Value!.Name ?? $"Zone {zoneIndex}");
+    }
+
+    [LoggerMessage(12044, LogLevel.Warning, "Failed to get zone {ZoneIndex} name: {ErrorMessage}")]
+    private partial void LogFailedToGetZoneName(int zoneIndex, string errorMessage);
+
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // UNIFIED CONTROL - Blueprint-compliant control command endpoint
+    // ═══════════════════════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// Execute a unified control command on the zone using blueprint vocabulary.
+    /// Accepts commands like "play", "pause", "next", "shuffle_on", etc.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <param name="command">Control command string (blueprint vocabulary)</param>
+    /// <returns>No content on success</returns>
+    [HttpPost("{zoneIndex:int}/control")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ControlSet(int zoneIndex, [FromBody] string command)
+    {
+        if (string.IsNullOrWhiteSpace(command))
+        {
+            return this.BadRequest("Command cannot be empty");
+        }
+
+        var controlCommand = new ControlSetCommand { ZoneIndex = zoneIndex, Command = command.Trim() };
+        var result = await this._mediator.SendCommandAsync<ControlSetCommand, Result>(controlCommand);
+
+        if (result.IsFailure)
+        {
+            LogFailedToExecuteControlCommand(zoneIndex, command, result.ErrorMessage ?? "Unknown error");
+            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+        }
+
+        return this.NoContent();
+    }
+
+    [LoggerMessage(
+        12045,
+        LogLevel.Warning,
+        "Failed to execute control command '{Command}' on zone {ZoneIndex}: {ErrorMessage}"
+    )]
+    private partial void LogFailedToExecuteControlCommand(int zoneIndex, string command, string errorMessage);
 }

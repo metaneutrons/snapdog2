@@ -145,7 +145,7 @@ public record ClientStateChangedNotification : INotification
 /// <summary>
 /// Notification published when a client's name changes.
 /// </summary>
-[StatusId("CLIENT_NAME")]
+[StatusId("CLIENT_NAME_STATUS")]
 public record ClientNameChangedNotification : INotification
 {
     /// <summary>

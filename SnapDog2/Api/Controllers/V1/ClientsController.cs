@@ -204,19 +204,8 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
             return this.BadRequest("Step must be between 1 and 50");
         }
 
-        // Get current volume first
-        var query = new GetClientQuery { ClientIndex = clientIndex };
-        var clientResult = await this._mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
-
-        if (clientResult.IsFailure)
-        {
-            LogFailedToGetClientForVolumeUp(clientIndex, clientResult.ErrorMessage ?? "Unknown error");
-            return this.NotFound($"Client {clientIndex} not found");
-        }
-
-        var newVolume = Math.Min(100, clientResult.Value!.Volume + step);
-        var command = new SetClientVolumeCommand { ClientIndex = clientIndex, Volume = newVolume };
-        var result = await this._mediator.SendCommandAsync<SetClientVolumeCommand, Result>(command);
+        var command = new ClientVolumeUpCommand { ClientIndex = clientIndex, Step = step };
+        var result = await this._mediator.SendCommandAsync<ClientVolumeUpCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -224,7 +213,11 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return Ok(newVolume);
+        // Get the new volume to return
+        var query = new GetClientQuery { ClientIndex = clientIndex };
+        var clientResult = await this._mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
+
+        return Ok(clientResult.IsSuccess ? clientResult.Value!.Volume : 0);
     }
 
     /// <summary>
@@ -244,19 +237,8 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
             return this.BadRequest("Step must be between 1 and 50");
         }
 
-        // Get current volume first
-        var query = new GetClientQuery { ClientIndex = clientIndex };
-        var clientResult = await this._mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
-
-        if (clientResult.IsFailure)
-        {
-            LogFailedToGetClientForVolumeDown(clientIndex, clientResult.ErrorMessage ?? "Unknown error");
-            return this.NotFound($"Client {clientIndex} not found");
-        }
-
-        var newVolume = Math.Max(0, clientResult.Value!.Volume - step);
-        var command = new SetClientVolumeCommand { ClientIndex = clientIndex, Volume = newVolume };
-        var result = await this._mediator.SendCommandAsync<SetClientVolumeCommand, Result>(command);
+        var command = new ClientVolumeDownCommand { ClientIndex = clientIndex, Step = step };
+        var result = await this._mediator.SendCommandAsync<ClientVolumeDownCommand, Result>(command);
 
         if (result.IsFailure)
         {
@@ -264,7 +246,11 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return Ok(newVolume);
+        // Get the new volume to return
+        var query = new GetClientQuery { ClientIndex = clientIndex };
+        var clientResult = await this._mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
+
+        return Ok(clientResult.IsSuccess ? clientResult.Value!.Volume : 0);
     }
 
     /// <summary>

@@ -1485,7 +1485,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     public async Task PublishPlaybackStateStatusAsync(Core.Enums.PlaybackState playbackState)
     {
-        var notification = this._statusFactory.CreateZonePlaybackStateStatusNotification(
+        var notification = this._statusFactory.CreateZonePlaybackStateChangedNotification(
             this._zoneIndex,
             playbackState
         );
@@ -1497,7 +1497,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     public async Task PublishVolumeStatusAsync(int volume)
     {
-        var notification = this._statusFactory.CreateZoneVolumeStatusNotification(this._zoneIndex, volume);
+        var notification = this._statusFactory.CreateZoneVolumeChangedNotification(this._zoneIndex, volume);
 
         using var scope = this._serviceScopeFactory.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
@@ -1506,7 +1506,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     public async Task PublishMuteStatusAsync(bool isMuted)
     {
-        var notification = this._statusFactory.CreateZoneMuteStatusNotification(this._zoneIndex, isMuted);
+        var notification = this._statusFactory.CreateZoneMuteChangedNotification(this._zoneIndex, isMuted);
 
         using var scope = this._serviceScopeFactory.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
@@ -1515,7 +1515,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     public async Task PublishTrackStatusAsync(Core.Models.TrackInfo trackInfo, int trackIndex)
     {
-        var notification = this._statusFactory.CreateZoneTrackStatusNotification(
+        var notification = this._statusFactory.CreateZoneTrackChangedNotification(
             this._zoneIndex,
             trackInfo,
             trackIndex
@@ -1528,7 +1528,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     public async Task PublishPlaylistStatusAsync(Core.Models.PlaylistInfo playlistInfo, int playlistIndex)
     {
-        var notification = this._statusFactory.CreateZonePlaylistStatusNotification(
+        var notification = this._statusFactory.CreateZonePlaylistChangedNotification(
             this._zoneIndex,
             playlistInfo,
             playlistIndex
@@ -1541,7 +1541,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     public async Task PublishZoneStateStatusAsync(Core.Models.ZoneState zoneState)
     {
-        var notification = this._statusFactory.CreateZoneStateStatusNotification(this._zoneIndex, zoneState);
+        var notification = this._statusFactory.CreateZoneStateChangedNotification(this._zoneIndex, zoneState);
 
         using var scope = this._serviceScopeFactory.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
