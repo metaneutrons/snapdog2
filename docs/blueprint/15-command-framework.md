@@ -154,7 +154,7 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 
 | Command/Status ID   | Description             | Essential Information / Type                        | Direction        | Notes / Comments                 |
 | :------------------ | :---------------------- | :-------------------------------------------------- | :--------------- | :------------------------------- |
-| `CONTROL_SET`       | Unified control command | `ZoneIndex` (int), `Command` (string)               | Command (Set)    | Accepts vocabulary from 14.3.2.3 |
+| `CONTROL`           | Unified control command | `ZoneIndex` (int), `Command` (string)               | Command (Set)    | Accepts vocabulary from 14.3.2.3 |
 | `CONTROL_STATUS`    | Unified control status  | `ZoneIndex` (int), `Status` (string)                | Status (Publish) | Publishes status from 14.3.2.4   |
 | `ZONE_NAME`         | Zone Name               | `ZoneIndex` (int), `ZoneName` (string)              | Command (Set)    |                                  |
 | `ZONE_NAME_STATUS`  | Zone Name               | `ZoneIndex` (int), `ZoneName` (string)              | Status (Publish) |                                  |
@@ -170,7 +170,7 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 
 | Command ID                | Env Var Suffix           | Default Rel. Topic   | Example Payloads                               | Notes                                  |
 | :------------------------ | :----------------------- | :------------------- | :--------------------------------------------- | :------------------------------------- |
-| `PLAY`/`PAUSE`/`STOP` etc.| `_CONTROL_SET_TOPIC`     | `control/set`        | `"play"`, `"pause"`, `"next"`, `"shuffle_on"`  | **See 13.3.2.3 for full payload list** |
+| `PLAY`/`PAUSE`/`STOP` etc.| `_CONTROL_TOPIC`     | `control/set`        | `"play"`, `"pause"`, `"next"`, `"shuffle_on"`  | **See 13.3.2.3 for full payload list** |
 
 **Navigation Commands (Dedicated Topics)**
 

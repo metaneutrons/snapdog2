@@ -339,7 +339,7 @@ All MQTT topics are fully configurable via environment variables:
 ```bash
 # Zone 1 MQTT Configuration
 SNAPDOG_ZONE_1_MQTT_BASE_TOPIC=snapdog/zones/living-room
-SNAPDOG_ZONE_1_MQTT_CONTROL_SET_TOPIC=control/set         # Default: control/set
+SNAPDOG_ZONE_1_MQTT_CONTROL_TOPIC=control/set             # Default: control/set
 SNAPDOG_ZONE_1_MQTT_TRACK_SET_TOPIC=track/set             # Default: track/set
 SNAPDOG_ZONE_1_MQTT_VOLUME_SET_TOPIC=volume/set           # Default: volume/set
 SNAPDOG_ZONE_1_MQTT_STATE_TOPIC=state                     # Default: state
@@ -352,10 +352,10 @@ SNAPDOG_CLIENT_1_MQTT_STATE_TOPIC=state                   # Default: state
 # MQTT Service Configuration
 SNAPDOG_SERVICES_MQTT_ENABLED=true                        # Default: true
 SNAPDOG_SERVICES_MQTT_BROKER_ADDRESS=localhost            # Default: localhost
-SNAPDOG_SERVICES_MQTT_PORT=1883                          # Default: 1883
-SNAPDOG_SERVICES_MQTT_CLIENT_ID=snapdog-server           # Default: snapdog-server
-SNAPDOG_SERVICES_MQTT_USERNAME=                          # Optional
-SNAPDOG_SERVICES_MQTT_PASSWORD=                          # Optional
+SNAPDOG_SERVICES_MQTT_PORT=1883                           # Default: 1883
+SNAPDOG_SERVICES_MQTT_CLIENT_ID=snapdog-server            # Default: snapdog-server
+SNAPDOG_SERVICES_MQTT_USERNAME=                           # Optional
+SNAPDOG_SERVICES_MQTT_PASSWORD=                           # Optional
 ```
 
 ## 13.6. 🚀 **Enterprise Features**

@@ -9,7 +9,7 @@ The Command Framework Consistency Framework ensures that all command and status 
 During recent analysis, we discovered that 6 out of 8 newly added command/status IDs were not implemented across protocols:
 
 - **Missing Global Status**: `CLIENTS_INFO`
-- **Missing Zone Commands**: `CONTROL_SET` (partial), `ZONE_NAME`
+- **Missing Zone Commands**: `CONTROL` (partial), `ZONE_NAME`
 - **Missing Zone Status**: `PLAYLIST_NAME_STATUS`, `PLAYLIST_COUNT_STATUS`, `ZONE_NAME_STATUS`, `CONTROL_STATUS`
 - **Missing Client Status**: `CLIENT_NAME_STATUS`
 
@@ -32,30 +32,30 @@ graph TB
     subgraph "Blueprint Layer"
         BP[Command Framework Blueprint<br/>Section 15]
     end
-    
+
     subgraph "Registry Layer"
         CR[CommandIdRegistry]
         SR[StatusIdRegistry]
     end
-    
+
     subgraph "Implementation Layer"
         API[REST API Controllers]
         MQTT[MQTT Service & Handlers]
         KNX[KNX Service & Mappings]
     end
-    
+
     subgraph "Validation Layer"
         CT[Core Consistency Tests]
         APT[API Protocol Tests]
         MT[MQTT Protocol Tests]
         KT[KNX Protocol Tests]
     end
-    
+
     subgraph "CI/CD Integration"
         BUILD[Build Pipeline]
         REPORT[Coverage Reports]
     end
-    
+
     BP --> CR
     BP --> SR
     CR --> API
@@ -64,13 +64,13 @@ graph TB
     SR --> API
     SR --> MQTT
     SR --> KNX
-    
+
     CR --> CT
     SR --> CT
     API --> APT
     MQTT --> MT
     KNX --> KT
-    
+
     CT --> BUILD
     APT --> BUILD
     MT --> BUILD
@@ -83,6 +83,7 @@ graph TB
 The consistency framework is implemented as **unit tests** rather than runtime services for the following reasons:
 
 **✅ Benefits of Test-Based Approach:**
+
 - **Build-Time Validation**: Prevents inconsistent code from reaching production
 - **CI/CD Integration**: Automatic validation on every commit
 - **Zero Runtime Cost**: No performance impact on production systems
@@ -90,6 +91,7 @@ The consistency framework is implemented as **unit tests** rather than runtime s
 - **Simple Maintenance**: Standard test lifecycle and tooling
 
 **❌ Why Not Runtime Services:**
+
 - Runtime overhead for development-time issues
 - Complex service lifecycle management
 - Health check complexity for static validation
@@ -187,6 +189,7 @@ SnapDog2.Tests/
 ### 16.4.2. b.4.2. Test Execution Strategy
 
 #### 16.4.2.1. b.4.2.1. Local Development
+
 ```bash
 # Run all consistency tests
 dotnet test --filter "Category=Consistency"
@@ -201,6 +204,7 @@ dotnet test --logger "trx;LogFileName=consistency-report.trx"
 ```
 
 #### 16.4.2.2. b.4.2.2. CI/CD Integration
+
 ```yaml
 # GitHub Actions / Azure DevOps
 - name: Run Consistency Tests
@@ -208,7 +212,7 @@ dotnet test --logger "trx;LogFileName=consistency-report.trx"
     dotnet test --filter "Category=Consistency" \
       --logger "trx;LogFileName=consistency-report.trx" \
       --logger "console;verbosity=detailed"
-    
+
 - name: Upload Consistency Report
   uses: actions/upload-artifact@v3
   with:
@@ -219,6 +223,7 @@ dotnet test --logger "trx;LogFileName=consistency-report.trx"
 ### 16.4.3. b.4.3. Error Reporting Strategy
 
 #### 16.4.3.1. b.4.3.1. Test Failure Messages
+
 ```csharp
 Assert.That(missingCommands, Is.Empty,
     $"Missing API endpoints for commands: {string.Join(", ", missingCommands)}\n" +
@@ -227,10 +232,11 @@ Assert.That(missingCommands, Is.Empty,
 ```
 
 #### 16.4.3.2. b.4.3.2. Implementation Suggestions
+
 ```csharp
 private string GenerateEndpointSuggestions(IEnumerable<string> missingCommands)
 {
-    return string.Join("\n", missingCommands.Select(cmd => 
+    return string.Join("\n", missingCommands.Select(cmd =>
         $"  - {cmd}: POST /api/v1/{GetControllerPath(cmd)}/{GetEndpointPath(cmd)}"));
 }
 ```
@@ -244,7 +250,7 @@ private bool IsRecentlyAddedFeature(string featureId)
 {
     var recentlyAdded = new[]
     {
-        "CONTROL_SET", "ZONE_NAME", "CLIENTS_INFO", 
+        "CONTROL", "ZONE_NAME", "CLIENTS_INFO",
         "PLAYLIST_NAME_STATUS", "CLIENT_NAME_STATUS"
     };
     return recentlyAdded.Contains(featureId);
@@ -252,6 +258,7 @@ private bool IsRecentlyAddedFeature(string featureId)
 ```
 
 **Tolerance Strategy:**
+
 - **Warning**: Recently added features generate warnings, not failures
 - **Grace Period**: 2-week implementation window for new features
 - **Tracking**: Progress tracking for incomplete implementations
@@ -272,6 +279,7 @@ private bool IsRecentlyAddedFeature(string featureId)
 ### 16.5.2. b.5.2. Report Generation
 
 #### 16.5.2.1. b.5.2.1. Console Output
+
 ```
 Command Framework Consistency Report
 ====================================
@@ -283,31 +291,32 @@ Overall Completion: 92.3% (72/78 features)
 └── KNX Coverage: 94.0% (47/50 suitable features)
 
 Missing Implementations (6):
-├── API: CLIENTS_INFO, CONTROL_SET, ZONE_NAME, PLAYLIST_NAME_STATUS, CLIENT_NAME_STATUS
-├── MQTT: CLIENTS_INFO, CONTROL_SET, ZONE_NAME, PLAYLIST_NAME_STATUS, CLIENT_NAME_STATUS  
-└── KNX: CONTROL_SET, ZONE_NAME, PLAYLIST_NAME_STATUS, CLIENT_NAME_STATUS
+├── API: CLIENTS_INFO, CONTROL, ZONE_NAME, PLAYLIST_NAME_STATUS, CLIENT_NAME_STATUS
+├── MQTT: CLIENTS_INFO, CONTROL, ZONE_NAME, PLAYLIST_NAME_STATUS, CLIENT_NAME_STATUS
+└── KNX: CONTROL, ZONE_NAME, PLAYLIST_NAME_STATUS, CLIENT_NAME_STATUS
 
 Recently Added Features (Grace Period):
 └── All missing items are from recent blueprint additions (commit ff7db9d)
 ```
 
 #### 16.5.2.2. b.5.2.2. Markdown Report Generation
+
 ```csharp
 public string GenerateMarkdownReport()
 {
     return $"""
         # Command Framework Consistency Report
-        
+
         **Generated**: {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC
-        
+
         ## Summary
         - **Overall Completion**: {OverallPercentage:F1}%
         - **Total Features**: {TotalFeatures}
         - **Missing**: {MissingCount}
-        
+
         ## Protocol Breakdown
         {GenerateProtocolTable()}
-        
+
         ## Missing Implementations
         {GenerateMissingItemsList()}
         """;
@@ -324,12 +333,12 @@ public void ImplementationStatusDocument_ShouldReflectActualState()
 {
     // Generate current consistency report
     var report = GenerateConsistencyReport();
-    
+
     // Read existing implementation status document
     var statusDoc = File.ReadAllText("docs/implementation/command-implementation-status.md");
-    
+
     // Validate that documented percentages match actual implementation
-    Assert.That(ExtractDocumentedPercentage(statusDoc), 
+    Assert.That(ExtractDocumentedPercentage(statusDoc),
         Is.EqualTo(report.OverallPercentage).Within(1.0),
         "Implementation status document should reflect actual implementation state");
 }
