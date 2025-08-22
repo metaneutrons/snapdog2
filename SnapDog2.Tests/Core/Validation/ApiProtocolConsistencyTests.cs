@@ -68,6 +68,7 @@ public class ApiProtocolConsistencyTests
     /// <summary>
     /// Validates that all registered status have corresponding API endpoints for retrieval.
     /// This test ensures that every status can be queried via the REST API.
+    /// Excludes protocol-specific status that are not intended for REST API access.
     /// </summary>
     [Fact]
     [Trait("Category", "Consistency")]
@@ -87,9 +88,21 @@ public class ApiProtocolConsistencyTests
             }
         }
 
+        // Define protocol-specific status that should be excluded from API consistency tests
+        var mqttOnlyStatus = new HashSet<string>
+        {
+            "CONTROL_STATUS", // MQTT-only status for control command notifications
+        };
+
         // Act & Assert
         foreach (var registeredStatus in _allRegisteredStatus)
         {
+            // Skip MQTT-only status that are not intended for REST API access
+            if (mqttOnlyStatus.Contains(registeredStatus))
+            {
+                continue;
+            }
+
             statusWithEndpoints
                 .Should()
                 .Contain(
