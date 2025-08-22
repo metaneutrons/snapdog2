@@ -15,7 +15,7 @@ NC='\033[0m' # No Color
 # Configuration
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEST_PROJECT="$PROJECT_ROOT/SnapDog2.Tests"
-REPORTS_DIR="$PROJECT_ROOT/test-reports"
+REPORTS_DIR="$PROJECT_ROOT/TestResults"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 
 echo -e "${BLUE}🔍 Command Framework Consistency Test Runner${NC}"
@@ -33,10 +33,11 @@ mkdir -p "$REPORTS_DIR"
 run_test_category() {
     local category=$1
     local description=$2
-    local report_file="$REPORTS_DIR/consistency-${category,,}-${TIMESTAMP}.trx"
-    
+    local category_lower=$(echo "$category" | tr '[:upper:]' '[:lower:]')
+    local report_file="$REPORTS_DIR/consistency-${category_lower}-${TIMESTAMP}.trx"
+
     echo -e "${BLUE}Running $description...${NC}"
-    
+
     if dotnet test "$TEST_PROJECT" \
         --filter "Category=${category}" \
         --logger "trx;LogFileName=${report_file}" \
@@ -53,9 +54,9 @@ run_test_category() {
 # Function to generate summary report
 generate_summary_report() {
     local summary_file="$REPORTS_DIR/consistency-summary-${TIMESTAMP}.md"
-    
+
     echo -e "${BLUE}Generating summary report...${NC}"
-    
+
     cat > "$summary_file" << EOF
 # Command Framework Consistency Test Summary
 
@@ -68,14 +69,15 @@ EOF
 
     # Add test results to summary
     for category in "CoreConsistency" "ApiConsistency" "MqttConsistency" "CrossProtocolConsistency"; do
-        local report_file="$REPORTS_DIR/consistency-${category,,}-${TIMESTAMP}.trx"
+        local category_lower=$(echo "$category" | tr '[:upper:]' '[:lower:]')
+        local report_file="$REPORTS_DIR/consistency-${category_lower}-${TIMESTAMP}.trx"
         if [[ -f "$report_file" ]]; then
             echo "- ✅ $category: Report generated" >> "$summary_file"
         else
             echo "- ❌ $category: No report found" >> "$summary_file"
         fi
     done
-    
+
     cat >> "$summary_file" << EOF
 
 ## Reports Location
@@ -106,43 +108,43 @@ main() {
     echo
 
     local failed_categories=()
-    
+
     # Run each test category
     if ! run_test_category "CoreConsistency" "Core Registry Tests"; then
         failed_categories+=("CoreConsistency")
     fi
     echo
-    
+
     if ! run_test_category "ApiConsistency" "API Protocol Tests"; then
         failed_categories+=("ApiConsistency")
     fi
     echo
-    
+
     if ! run_test_category "MqttConsistency" "MQTT Protocol Tests"; then
         failed_categories+=("MqttConsistency")
     fi
     echo
-    
+
     if ! run_test_category "CrossProtocolConsistency" "Cross-Protocol Tests"; then
         failed_categories+=("CrossProtocolConsistency")
     fi
     echo
-    
+
     # Run all consistency tests together for overall report
     echo -e "${BLUE}Running all consistency tests...${NC}"
     local all_report_file="$REPORTS_DIR/consistency-all-${TIMESTAMP}.trx"
-    
+
     dotnet test "$TEST_PROJECT" \
         --filter "Category=Consistency" \
         --logger "trx;LogFileName=${all_report_file}" \
         --logger "console;verbosity=detailed" \
         --no-build
-    
+
     echo
-    
+
     # Generate summary report
     generate_summary_report
-    
+
     # Final status
     echo
     echo "=================================================="
@@ -216,13 +218,13 @@ done
 if [[ -n "$CATEGORY" ]]; then
     echo -e "${BLUE}Running specific category: $CATEGORY${NC}"
     echo
-    
+
     if [[ "$NO_BUILD" != true ]]; then
         echo -e "${YELLOW}Building test project...${NC}"
         dotnet build "$TEST_PROJECT" --configuration Debug
         echo
     fi
-    
+
     case "$CATEGORY" in
         "CoreConsistency")
             run_test_category "CoreConsistency" "Core Registry Tests"

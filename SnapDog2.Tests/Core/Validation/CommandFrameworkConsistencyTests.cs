@@ -212,6 +212,68 @@ public class CommandFrameworkConsistencyTests
     }
 
     /// <summary>
+    /// Validates that no extra command IDs exist in registry that are not in the blueprint.
+    /// This test ensures no obsolete or surplus commands remain registered.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "Consistency")]
+    [Trait("Category", "CoreConsistency")]
+    public void CommandIdRegistry_ShouldNotContainExtraCommands()
+    {
+        // Arrange
+        var blueprintCommands = ConsistencyTestHelpers.GetBlueprintCommandIds();
+        var extraCommands = new List<string>();
+
+        // Check each registered command against blueprint
+        foreach (var registeredCommand in _allRegisteredCommands)
+        {
+            if (!blueprintCommands.Contains(registeredCommand))
+            {
+                extraCommands.Add(registeredCommand);
+            }
+        }
+
+        // Act & Assert
+        extraCommands
+            .Should()
+            .BeEmpty(
+                $"Found registered commands not in blueprint: {string.Join(", ", extraCommands)}. "
+                    + "These may be obsolete implementations that should be removed or added to blueprint."
+            );
+    }
+
+    /// <summary>
+    /// Validates that no extra status IDs exist in registry that are not in the blueprint.
+    /// This test ensures no obsolete or surplus status remain registered.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "Consistency")]
+    [Trait("Category", "CoreConsistency")]
+    public void StatusIdRegistry_ShouldNotContainExtraStatus()
+    {
+        // Arrange
+        var blueprintStatus = ConsistencyTestHelpers.GetBlueprintStatusIds();
+        var extraStatus = new List<string>();
+
+        // Check each registered status against blueprint
+        foreach (var registeredStatus in _allRegisteredStatus)
+        {
+            if (!blueprintStatus.Contains(registeredStatus))
+            {
+                extraStatus.Add(registeredStatus);
+            }
+        }
+
+        // Act & Assert
+        extraStatus
+            .Should()
+            .BeEmpty(
+                $"Found registered status not in blueprint: {string.Join(", ", extraStatus)}. "
+                    + "These may be obsolete implementations that should be removed or added to blueprint."
+            );
+    }
+
+    /// <summary>
     /// Validates that command and status registries are properly initialized and accessible.
     /// This test ensures the basic infrastructure is working correctly.
     /// </summary>
