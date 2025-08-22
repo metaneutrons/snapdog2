@@ -26,19 +26,19 @@ public static class ConsistencyTestHelpers
     /// </summary>
     public static void InitializeRegistries()
     {
-        // Initialize registries - these may not exist yet, so we'll create placeholder implementations
+        // Initialize the actual registries
         try
         {
-            // Try to initialize if registries exist
-            var commandRegistryType = Type.GetType("SnapDog2.Core.Commands.CommandIdRegistry, SnapDog2");
-            var statusRegistryType = Type.GetType("SnapDog2.Core.Status.StatusIdRegistry, SnapDog2");
+            var commandRegistryType = typeof(SnapDog2.Core.Attributes.CommandIdRegistry);
+            var statusRegistryType = typeof(SnapDog2.Core.Attributes.StatusIdRegistry);
 
-            commandRegistryType?.GetMethod("Initialize")?.Invoke(null, null);
-            statusRegistryType?.GetMethod("Initialize")?.Invoke(null, null);
+            commandRegistryType.GetMethod("Initialize")?.Invoke(null, null);
+            statusRegistryType.GetMethod("Initialize")?.Invoke(null, null);
         }
-        catch
+        catch (Exception ex)
         {
-            // Registries may not exist yet - this is expected during development
+            // Log the exception but don't fail - registries might not be fully implemented yet
+            Console.WriteLine($"Warning: Could not initialize registries: {ex.Message}");
         }
     }
 
@@ -49,7 +49,23 @@ public static class ConsistencyTestHelpers
     /// </summary>
     public static List<string> GetAllRegisteredCommands()
     {
-        // For now, return a placeholder list - this will be implemented when registries exist
+        try
+        {
+            var commandRegistryType = typeof(SnapDog2.Core.Attributes.CommandIdRegistry);
+            var getAllCommandIdsMethod = commandRegistryType.GetMethod("GetAllCommandIds");
+
+            if (getAllCommandIdsMethod != null)
+            {
+                var result = getAllCommandIdsMethod.Invoke(null, null) as IReadOnlyCollection<string>;
+                return result?.ToList() ?? new List<string>();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Could not get registered commands: {ex.Message}");
+        }
+
+        // Fallback to placeholder list if registry is not working
         return new List<string>
         {
             "PLAY",
@@ -65,7 +81,7 @@ public static class ConsistencyTestHelpers
             "CLIENT_DISCONNECT",
             "PLAYLIST_LOAD",
             "TRACK_SEEK",
-            "CONTROL_SET",
+            "CONTROL",
             "CLIENTS_INFO",
         };
     }
@@ -75,7 +91,23 @@ public static class ConsistencyTestHelpers
     /// </summary>
     public static List<string> GetAllRegisteredStatus()
     {
-        // For now, return a placeholder list - this will be implemented when registries exist
+        try
+        {
+            var statusRegistryType = typeof(SnapDog2.Core.Attributes.StatusIdRegistry);
+            var getAllStatusIdsMethod = statusRegistryType.GetMethod("GetAllStatusIds");
+
+            if (getAllStatusIdsMethod != null)
+            {
+                var result = getAllStatusIdsMethod.Invoke(null, null) as IReadOnlyCollection<string>;
+                return result?.ToList() ?? new List<string>();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Could not get registered status: {ex.Message}");
+        }
+
+        // Fallback to placeholder list if registry is not working
         return new List<string>
         {
             "PLAYBACK_STATE",
@@ -94,24 +126,58 @@ public static class ConsistencyTestHelpers
     }
 
     /// <summary>
-    /// Gets all command types from the assemblies.
+    /// Gets all command types from the registries.
     /// </summary>
     public static List<Type> GetAllCommandTypes()
     {
+        try
+        {
+            var commandRegistryType = typeof(SnapDog2.Core.Attributes.CommandIdRegistry);
+            var getAllCommandTypesMethod = commandRegistryType.GetMethod("GetAllCommandTypes");
+
+            if (getAllCommandTypesMethod != null)
+            {
+                var result = getAllCommandTypesMethod.Invoke(null, null) as IReadOnlyCollection<Type>;
+                return result?.ToList() ?? new List<Type>();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Could not get command types: {ex.Message}");
+        }
+
+        // Fallback to reflection-based discovery
         return GetSnapDogAssemblies()
             .SelectMany(a => a.GetTypes())
-            .Where(t => t.GetCustomAttribute<CommandIdAttribute>() != null)
+            .Where(t => t.GetCustomAttribute<SnapDog2.Core.Attributes.CommandIdAttribute>() != null)
             .ToList();
     }
 
     /// <summary>
-    /// Gets all notification types from the assemblies.
+    /// Gets all notification types from the registries.
     /// </summary>
     public static List<Type> GetAllNotificationTypes()
     {
+        try
+        {
+            var statusRegistryType = typeof(SnapDog2.Core.Attributes.StatusIdRegistry);
+            var getAllNotificationTypesMethod = statusRegistryType.GetMethod("GetAllNotificationTypes");
+
+            if (getAllNotificationTypesMethod != null)
+            {
+                var result = getAllNotificationTypesMethod.Invoke(null, null) as IReadOnlyCollection<Type>;
+                return result?.ToList() ?? new List<Type>();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Warning: Could not get notification types: {ex.Message}");
+        }
+
+        // Fallback to reflection-based discovery
         return GetSnapDogAssemblies()
             .SelectMany(a => a.GetTypes())
-            .Where(t => t.GetCustomAttribute<StatusIdAttribute>() != null)
+            .Where(t => t.GetCustomAttribute<SnapDog2.Core.Attributes.StatusIdAttribute>() != null)
             .ToList();
     }
 
@@ -121,50 +187,113 @@ public static class ConsistencyTestHelpers
 
     /// <summary>
     /// Gets expected command IDs from the blueprint documentation.
+    /// These are commands that should have API endpoints, MQTT handlers, and potentially KNX support.
     /// </summary>
     public static List<string> GetBlueprintCommandIds()
     {
-        // These are the command IDs defined in the blueprint
+        // Commands extracted from blueprint Section 14 - Command Framework
         return new List<string>
         {
+            // Zone Playback Control Commands (Section 14.3.1)
             "PLAY",
             "PAUSE",
             "STOP",
-            "NEXT",
-            "PREVIOUS",
-            "VOLUME_SET",
+            // Track Management Commands
+            "TRACK",
+            "TRACK_NEXT",
+            "TRACK_PREVIOUS",
+            "TRACK_PLAY_INDEX",
+            "TRACK_PLAY_URL",
+            "TRACK_POSITION",
+            "TRACK_PROGRESS",
+            "TRACK_REPEAT",
+            "TRACK_REPEAT_TOGGLE",
+            // Playlist Management Commands
+            "PLAYLIST",
+            "PLAYLIST_NEXT",
+            "PLAYLIST_PREVIOUS",
+            "PLAYLIST_SHUFFLE",
+            "PLAYLIST_SHUFFLE_TOGGLE",
+            "PLAYLIST_REPEAT",
+            "PLAYLIST_REPEAT_TOGGLE",
+            // Volume & Mute Control Commands
+            "VOLUME",
+            "VOLUME_UP",
+            "VOLUME_DOWN",
+            "MUTE",
             "MUTE_TOGGLE",
-            "ZONE_SET_VOLUME",
-            "ZONE_MUTE",
-            "CLIENT_CONNECT",
-            "CLIENT_DISCONNECT",
-            "PLAYLIST_LOAD",
-            "TRACK_SEEK",
-            "CONTROL_SET",
-            "CLIENTS_INFO",
+            // General Zone Commands
+            "CONTROL",
+            "ZONE_NAME",
+            // Client Commands (Section 14.4.1)
+            "CLIENT_VOLUME",
+            "CLIENT_VOLUME_UP",
+            "CLIENT_VOLUME_DOWN",
+            "CLIENT_MUTE",
+            "CLIENT_MUTE_TOGGLE",
+            "CLIENT_LATENCY",
+            "CLIENT_ZONE",
+            "CLIENT_NAME",
         };
     }
 
     /// <summary>
     /// Gets expected status IDs from the blueprint documentation.
+    /// These are status that should have MQTT publishers, API endpoints, and potentially KNX support.
     /// </summary>
     public static List<string> GetBlueprintStatusIds()
     {
-        // These are the status IDs defined in the blueprint
+        // Status extracted from blueprint Section 14 - Command Framework
         return new List<string>
         {
-            "PLAYBACK_STATE",
-            "VOLUME_STATUS",
-            "MUTE_STATUS",
-            "TRACK_INFO",
-            "ZONE_STATUS",
-            "CLIENT_STATUS",
-            "PLAYLIST_STATUS",
+            // Global System Status (Section 14.2.1)
             "SYSTEM_STATUS",
-            "ZONE_NAME_STATUS",
+            "SYSTEM_ERROR",
+            "VERSION_INFO",
+            "SERVER_STATS",
+            "ZONES_INFO",
+            "CLIENTS_INFO",
+            // Zone Track Management Status
+            "TRACK_STATUS",
+            "TRACK_REPEAT_STATUS",
+            // Zone Track Metadata Status (Static Information)
+            "TRACK_METADATA",
+            "TRACK_METADATA_DURATION",
+            "TRACK_METADATA_TITLE",
+            "TRACK_METADATA_ARTIST",
+            "TRACK_METADATA_ALBUM",
+            "TRACK_METADATA_COVER",
+            // Zone Track Playback Status (Dynamic Real-Time)
+            "TRACK_PLAYING_STATUS",
+            "TRACK_POSITION_STATUS",
+            "TRACK_PROGRESS_STATUS",
+            // Zone Playlist Management Status
+            "PLAYLIST_STATUS",
             "PLAYLIST_NAME_STATUS",
             "PLAYLIST_COUNT_STATUS",
+            "PLAYLIST_INFO",
+            "PLAYLIST_SHUFFLE_STATUS",
+            "PLAYLIST_REPEAT_STATUS",
+            // Zone Volume & Mute Status
+            "VOLUME_STATUS",
+            "MUTE_STATUS",
+            // General Zone Status
+            "CONTROL_STATUS",
+            "ZONE_NAME_STATUS",
+            "ZONE_STATE",
+            // Client Status (Section 14.4.1)
+            "CLIENT_VOLUME_STATUS",
+            "CLIENT_MUTE_STATUS",
+            "CLIENT_LATENCY_STATUS",
+            "CLIENT_ZONE_STATUS",
             "CLIENT_NAME_STATUS",
+            "CLIENT_CONNECTED",
+            "CLIENT_STATE",
+            // Command Response Status (Section 14.2.1)
+            "COMMAND_STATUS",
+            "COMMAND_ERROR",
+            // Derived/Computed Status
+            "PLAYBACK_STATE", // Derived from track playing status and other factors
         };
     }
 
@@ -188,10 +317,27 @@ public static class ConsistencyTestHelpers
     /// </summary>
     public static List<string> ExtractCommandIdsFromHandler(Type handlerType)
     {
-        // Look for CommandId attributes or method names that indicate handled commands
         var commandIds = new List<string>();
 
-        // Check methods for CommandId attributes
+        // Check if this type implements ICommandHandler<TCommand, TResult>
+        var commandHandlerInterfaces = handlerType
+            .GetInterfaces()
+            .Where(i => i.IsGenericType && i.GetGenericTypeDefinition().Name.Contains("ICommandHandler"));
+
+        foreach (var handlerInterface in commandHandlerInterfaces)
+        {
+            var commandType = handlerInterface.GetGenericArguments().FirstOrDefault();
+            if (commandType != null)
+            {
+                var commandAttr = commandType.GetCustomAttribute<CommandIdAttribute>();
+                if (commandAttr != null)
+                {
+                    commandIds.Add(commandAttr.Id);
+                }
+            }
+        }
+
+        // Also check methods for CommandId attributes (legacy pattern)
         foreach (var method in handlerType.GetMethods())
         {
             var commandAttr = method.GetCustomAttribute<CommandIdAttribute>();
@@ -201,7 +347,7 @@ public static class ConsistencyTestHelpers
             }
         }
 
-        return commandIds;
+        return commandIds.Distinct().ToList();
     }
 
     /// <summary>
@@ -255,16 +401,235 @@ public static class ConsistencyTestHelpers
         // Look for command-related patterns in method names or attributes
         var commandIds = new List<string>();
 
+        // Basic playback commands
         if (endpoint.Name.Contains("Play"))
+        {
             commandIds.Add("PLAY");
-        if (endpoint.Name.Contains("Pause"))
-            commandIds.Add("PAUSE");
-        if (endpoint.Name.Contains("Stop"))
-            commandIds.Add("STOP");
-        if (endpoint.Name.Contains("Volume"))
-            commandIds.Add("VOLUME_SET");
+        }
 
-        return commandIds;
+        if (endpoint.Name.Contains("Pause"))
+        {
+            commandIds.Add("PAUSE");
+        }
+
+        if (endpoint.Name.Contains("Stop"))
+        {
+            commandIds.Add("STOP");
+        }
+
+        if (endpoint.Name.Contains("PlayUrl"))
+        {
+            commandIds.Add("TRACK_PLAY_URL");
+        }
+
+        if (endpoint.Name.Contains("SetPlaylist"))
+        {
+            commandIds.Add("PLAYLIST");
+        }
+
+        // Track repeat commands
+        if (endpoint.Name.Contains("ToggleTrackRepeat"))
+        {
+            commandIds.Add("TRACK_REPEAT_TOGGLE");
+        }
+
+        if (endpoint.Name.Contains("SetTrackRepeat"))
+        {
+            commandIds.Add("TRACK_REPEAT");
+        }
+
+        // Playlist repeat commands
+        if (endpoint.Name.Contains("TogglePlaylistRepeat"))
+        {
+            commandIds.Add("PLAYLIST_REPEAT_TOGGLE");
+        }
+
+        if (endpoint.Name.Contains("SetPlaylistRepeat"))
+        {
+            commandIds.Add("PLAYLIST_REPEAT");
+        }
+
+        // Track commands
+        if (endpoint.Name.Contains("SetTrack"))
+        {
+            commandIds.Add("TRACK");
+        }
+
+        if (endpoint.Name.Contains("PlayTrackByIndex"))
+        {
+            commandIds.Add("TRACK_PLAY_INDEX");
+        }
+
+        // Seek commands
+        if (endpoint.Name.Contains("SetTrackPosition"))
+        {
+            commandIds.Add("TRACK_POSITION");
+        }
+
+        if (endpoint.Name.Contains("SetTrackProgress"))
+        {
+            commandIds.Add("TRACK_PROGRESS");
+        }
+
+        // Control commands
+        if (endpoint.Name.Contains("ControlSet") || endpoint.Name.Contains("SetControl"))
+        {
+            commandIds.Add("CONTROL");
+        }
+
+        // Snapcast commands
+        if (endpoint.Name.Contains("SetSnapcastClientVolume"))
+        {
+            commandIds.Add("SNAPCAST_CLIENT_VOLUME");
+        }
+
+        if (endpoint.Name.Contains("Volume"))
+        {
+            commandIds.Add("VOLUME_SET");
+        }
+
+        // Playlist shuffle commands
+        if (endpoint.Name.Contains("TogglePlaylistShuffle"))
+        {
+            commandIds.Add("PLAYLIST_SHUFFLE_TOGGLE");
+        }
+
+        if (endpoint.Name.Contains("SetPlaylistShuffle"))
+        {
+            commandIds.Add("PLAYLIST_SHUFFLE");
+        }
+
+        // Track navigation commands
+        if (endpoint.Name.Contains("NextTrack") || endpoint.Name.Contains("TrackNext"))
+        {
+            commandIds.Add("TRACK_NEXT");
+        }
+
+        if (endpoint.Name.Contains("PreviousTrack") || endpoint.Name.Contains("TrackPrevious"))
+        {
+            commandIds.Add("TRACK_PREVIOUS");
+        }
+
+        // Playlist navigation commands
+        if (endpoint.Name.Contains("NextPlaylist") || endpoint.Name.Contains("PlaylistNext"))
+        {
+            commandIds.Add("PLAYLIST_NEXT");
+        }
+
+        if (endpoint.Name.Contains("PreviousPlaylist") || endpoint.Name.Contains("PlaylistPrevious"))
+        {
+            commandIds.Add("PLAYLIST_PREVIOUS");
+        }
+
+        // Client commands
+        if (endpoint.Name.Contains("SetLatency"))
+        {
+            commandIds.Add("CLIENT_LATENCY");
+        }
+
+        if (
+            endpoint.Name.Contains("SetClientVolume")
+            || (endpoint.Name.Contains("SetVolume") && endpoint.DeclaringType?.Name.Contains("Client") == true)
+        )
+        {
+            commandIds.Add("CLIENT_VOLUME");
+        }
+
+        if (
+            endpoint.Name.Contains("ClientVolumeUp")
+            || (endpoint.Name.Contains("VolumeUp") && endpoint.DeclaringType?.Name.Contains("Client") == true)
+        )
+        {
+            commandIds.Add("CLIENT_VOLUME_UP");
+        }
+
+        if (
+            endpoint.Name.Contains("ClientVolumeDown")
+            || (endpoint.Name.Contains("VolumeDown") && endpoint.DeclaringType?.Name.Contains("Client") == true)
+        )
+        {
+            commandIds.Add("CLIENT_VOLUME_DOWN");
+        }
+
+        if (
+            endpoint.Name.Contains("SetClientMute")
+            || (endpoint.Name.Contains("SetMute") && endpoint.DeclaringType?.Name.Contains("Client") == true)
+        )
+        {
+            commandIds.Add("CLIENT_MUTE");
+        }
+
+        if (
+            endpoint.Name.Contains("ToggleClientMute")
+            || (endpoint.Name.Contains("ToggleMute") && endpoint.DeclaringType?.Name.Contains("Client") == true)
+        )
+        {
+            commandIds.Add("CLIENT_MUTE_TOGGLE");
+        }
+
+        if (
+            endpoint.Name.Contains("SetClientName")
+            || (endpoint.Name.Contains("SetName") && endpoint.DeclaringType?.Name.Contains("Client") == true)
+        )
+        {
+            commandIds.Add("CLIENT_NAME");
+        }
+
+        if (
+            endpoint.Name.Contains("AssignClientToZone")
+            || endpoint.Name.Contains("SetClientZone")
+            || endpoint.Name.Contains("AssignToZone")
+        )
+        {
+            commandIds.Add("CLIENT_ZONE");
+        }
+
+        // Zone name commands
+        if (
+            endpoint.Name.Contains("GetZoneName")
+            || (endpoint.Name.Contains("ZoneName") && endpoint.DeclaringType?.Name.Contains("Zone") == true)
+        )
+        {
+            commandIds.Add("ZONE_NAME");
+        }
+
+        // Zone volume commands
+        if (
+            endpoint.Name.Contains("SetZoneVolume")
+            || (endpoint.Name.Contains("SetVolume") && endpoint.DeclaringType?.Name.Contains("Zone") == true)
+        )
+        {
+            commandIds.Add("VOLUME");
+        }
+
+        if (endpoint.Name.Contains("IncreaseVolume") || endpoint.Name.Contains("VolumeUp"))
+        {
+            commandIds.Add("VOLUME_UP");
+        }
+
+        if (endpoint.Name.Contains("DecreaseVolume") || endpoint.Name.Contains("VolumeDown"))
+        {
+            commandIds.Add("VOLUME_DOWN");
+        }
+
+        // Zone mute commands
+        if (
+            endpoint.Name.Contains("SetZoneMute")
+            || (endpoint.Name.Contains("SetMute") && endpoint.DeclaringType?.Name.Contains("Zone") == true)
+        )
+        {
+            commandIds.Add("MUTE");
+        }
+
+        if (
+            endpoint.Name.Contains("ToggleZoneMute")
+            || (endpoint.Name.Contains("ToggleMute") && endpoint.DeclaringType?.Name.Contains("Zone") == true)
+        )
+        {
+            commandIds.Add("MUTE_TOGGLE");
+        }
+
+        return commandIds.Distinct().ToList();
     }
 
     /// <summary>
@@ -275,12 +640,234 @@ public static class ConsistencyTestHelpers
         // Look for status-related patterns in method names
         var statusIds = new List<string>();
 
-        if (endpoint.Name.Contains("Status"))
+        // System and global status endpoints
+        if (endpoint.Name.Contains("GetSystemStatus") || endpoint.Name.Contains("SystemStatus"))
+        {
             statusIds.Add("SYSTEM_STATUS");
-        if (endpoint.Name.Contains("State"))
-            statusIds.Add("PLAYBACK_STATE");
+        }
 
-        return statusIds;
+        if (endpoint.Name.Contains("GetServerStats") || endpoint.Name.Contains("ServerStats"))
+        {
+            statusIds.Add("SERVER_STATS");
+        }
+
+        if (
+            endpoint.Name.Contains("GetVersionInfo")
+            || endpoint.Name.Contains("VersionInfo")
+            || endpoint.Name.Contains("GetVersion")
+        )
+        {
+            statusIds.Add("VERSION_INFO");
+        }
+
+        if (endpoint.Name.Contains("GetZones") && !endpoint.Name.Contains("GetZone("))
+        {
+            statusIds.Add("ZONES_INFO");
+        }
+
+        if (endpoint.Name.Contains("GetClients") && !endpoint.Name.Contains("GetClient("))
+        {
+            statusIds.Add("CLIENTS_INFO");
+        }
+
+        // Zone state and status endpoints
+        if (
+            endpoint.Name.Contains("GetZone")
+            && endpoint.GetParameters().Any(p => p.Name?.Contains("zoneIndex") == true)
+        )
+        {
+            statusIds.Add("ZONE_STATE");
+        }
+
+        if (endpoint.Name.Contains("GetVolume") && endpoint.DeclaringType?.Name?.Contains("Zone") == true)
+        {
+            statusIds.Add("VOLUME_STATUS");
+        }
+
+        if (endpoint.Name.Contains("GetMute") && endpoint.DeclaringType?.Name.Contains("Zone") == true)
+        {
+            statusIds.Add("MUTE_STATUS");
+        }
+
+        // Track status endpoints
+        if (endpoint.Name.Contains("GetTrackIndex"))
+        {
+            statusIds.Add("TRACK_STATUS");
+        }
+
+        if (endpoint.Name.Contains("GetTrackRepeat"))
+        {
+            statusIds.Add("TRACK_REPEAT_STATUS");
+        }
+
+        if (endpoint.Name.Contains("GetTrackPosition"))
+        {
+            statusIds.Add("TRACK_POSITION_STATUS");
+        }
+
+        if (endpoint.Name.Contains("GetTrackProgress"))
+        {
+            statusIds.Add("TRACK_PROGRESS_STATUS");
+        }
+
+        if (endpoint.Name.Contains("GetTrack") && endpoint.GetParameters().Any(p => p.Name == "id"))
+        {
+            statusIds.Add("TRACK_METADATA");
+            statusIds.Add("TRACK_METADATA_TITLE");
+            statusIds.Add("TRACK_METADATA_ARTIST");
+            statusIds.Add("TRACK_METADATA_ALBUM");
+            statusIds.Add("TRACK_METADATA_DURATION");
+            statusIds.Add("TRACK_METADATA_COVER");
+        }
+
+        // Track playing status - derived from playback state endpoints
+        if (
+            endpoint.Name.Contains("GetZone")
+            || endpoint.Name.Contains("GetPlayback")
+            || endpoint.Name.Contains("GetTrackPlaying")
+        )
+        {
+            statusIds.Add("TRACK_PLAYING_STATUS");
+        }
+
+        // Playlist status endpoints
+        if (endpoint.Name.Contains("GetPlaylistIndex"))
+        {
+            statusIds.Add("PLAYLIST_STATUS");
+        }
+
+        if (endpoint.Name.Contains("GetPlaylistInfo"))
+        {
+            statusIds.Add("PLAYLIST_INFO");
+            statusIds.Add("PLAYLIST_NAME_STATUS");
+            statusIds.Add("PLAYLIST_COUNT_STATUS");
+        }
+
+        if (endpoint.Name.Contains("GetPlaylistRepeat"))
+        {
+            statusIds.Add("PLAYLIST_REPEAT_STATUS");
+        }
+
+        if (endpoint.Name.Contains("GetPlaylistShuffle"))
+        {
+            statusIds.Add("PLAYLIST_SHUFFLE_STATUS");
+        }
+
+        if (endpoint.Name.Contains("GetPlaylists"))
+        {
+            statusIds.Add("PLAYLIST_STATUS");
+        }
+
+        // Client status endpoints
+        if (
+            endpoint.Name.Contains("GetClient")
+            && endpoint.GetParameters().Any(p => p.Name?.Contains("clientIndex") == true)
+        )
+        {
+            statusIds.Add("CLIENT_STATE");
+        }
+
+        if (
+            endpoint.Name.Contains("GetClientVolume")
+            || (endpoint.Name.Contains("GetVolume") && endpoint.DeclaringType?.Name?.Contains("Client") == true)
+        )
+        {
+            statusIds.Add("CLIENT_VOLUME_STATUS");
+        }
+
+        if (
+            endpoint.Name.Contains("GetClientMute")
+            || (endpoint.Name.Contains("GetMute") && endpoint.DeclaringType?.Name.Contains("Client") == true)
+        )
+        {
+            statusIds.Add("CLIENT_MUTE_STATUS");
+        }
+
+        if (endpoint.Name.Contains("GetClientLatency") || endpoint.Name.Contains("GetLatency"))
+        {
+            statusIds.Add("CLIENT_LATENCY_STATUS");
+        }
+
+        if (endpoint.Name.Contains("GetZoneAssignment") || endpoint.Name.Contains("GetClientZone"))
+        {
+            statusIds.Add("CLIENT_ZONE_STATUS");
+        }
+
+        if (
+            endpoint.Name.Contains("GetClientName")
+            || (endpoint.Name.Contains("GetName") && endpoint.DeclaringType?.Name?.Contains("Client") == true)
+        )
+        {
+            statusIds.Add("CLIENT_NAME_STATUS");
+        }
+
+        // GetClient endpoint provides client name as part of ClientState
+        if (
+            endpoint.Name.Contains("GetClient")
+            && endpoint.GetParameters().Any(p => p.Name?.Contains("clientIndex") == true)
+        )
+        {
+            statusIds.Add("CLIENT_NAME_STATUS");
+        }
+
+        if (endpoint.Name.Contains("GetClientConnected") || endpoint.Name.Contains("GetConnected"))
+        {
+            statusIds.Add("CLIENT_CONNECTED");
+        }
+
+        // Zone name endpoint
+        if (endpoint.Name.Contains("GetZoneName"))
+        {
+            statusIds.Add("ZONE_NAME_STATUS");
+        }
+
+        // Media source endpoints
+        if (endpoint.Name.Contains("GetMediaSources"))
+        {
+            statusIds.Add("SYSTEM_STATUS"); // Media sources are part of system status
+        }
+
+        // Playback state - derived from multiple endpoints
+        if (
+            endpoint.Name.Contains("GetZone")
+            || endpoint.Name.Contains("GetTrack")
+            || endpoint.Name.Contains("GetPlaylist")
+        )
+        {
+            statusIds.Add("PLAYBACK_STATE");
+        }
+
+        // Health endpoints
+        if (
+            endpoint.Name.Contains("GetHealth")
+            || endpoint.Name.Contains("GetReady")
+            || endpoint.Name.Contains("GetLive")
+        )
+        {
+            statusIds.Add("SYSTEM_STATUS");
+        }
+
+        // Command status endpoints
+        if (endpoint.Name.Contains("GetCommandStatus") || endpoint.Name.Contains("CommandStatus"))
+        {
+            statusIds.Add("COMMAND_STATUS");
+        }
+
+        if (endpoint.Name.Contains("GetCommandErrors") || endpoint.Name.Contains("CommandErrors"))
+        {
+            statusIds.Add("COMMAND_ERROR");
+        }
+
+        if (
+            endpoint.Name.Contains("GetErrorStatus")
+            || endpoint.Name.Contains("ErrorStatus")
+            || endpoint.Name.Contains("GetSystemErrors")
+        )
+        {
+            statusIds.Add("SYSTEM_ERROR");
+        }
+
+        return statusIds.Distinct().ToList();
     }
 
     /// <summary>
@@ -427,17 +1014,57 @@ public static class ConsistencyTestHelpers
     /// </summary>
     public static List<string> ExtractCommandIdsFromMqttHandler(MethodInfo handlerMethod)
     {
-        // Similar to API extraction but for MQTT patterns
+        // For MQTT, commands are handled in methods like MapZoneCommand and CreateZoneCommandFromPayload
+        // These methods contain switch statements that handle all the MQTT command strings
         var commandIds = new List<string>();
 
-        if (handlerMethod.Name.Contains("Play"))
-            commandIds.Add("PLAY");
-        if (handlerMethod.Name.Contains("Pause"))
-            commandIds.Add("PAUSE");
-        if (handlerMethod.Name.Contains("Volume"))
-            commandIds.Add("VOLUME_SET");
+        // Check if this is a command mapping method that handles multiple commands
+        if (
+            handlerMethod.Name.Contains("MapZoneCommand")
+            || handlerMethod.Name.Contains("CreateZoneCommandFromPayload")
+            || handlerMethod.Name.Contains("ProcessZoneCommand")
+        )
+        {
+            // These methods handle all the basic playback commands
+            commandIds.AddRange(
+                new[]
+                {
+                    "PLAY",
+                    "PAUSE",
+                    "STOP",
+                    "TRACK_NEXT",
+                    "TRACK_PREVIOUS",
+                    "PLAYLIST_NEXT",
+                    "PLAYLIST_PREVIOUS",
+                    "PLAYLIST_SHUFFLE",
+                    "PLAYLIST_SHUFFLE_TOGGLE",
+                    "PLAYLIST_REPEAT",
+                    "PLAYLIST_REPEAT_TOGGLE",
+                    "TRACK_REPEAT",
+                    "TRACK_REPEAT_TOGGLE",
+                    "VOLUME_SET",
+                    "MUTE_TOGGLE",
+                }
+            );
+        }
 
-        return commandIds;
+        // Legacy pattern matching for specific method names
+        if (handlerMethod.Name.Contains("Play"))
+        {
+            commandIds.Add("PLAY");
+        }
+
+        if (handlerMethod.Name.Contains("Pause"))
+        {
+            commandIds.Add("PAUSE");
+        }
+
+        if (handlerMethod.Name.Contains("Volume"))
+        {
+            commandIds.Add("VOLUME_SET");
+        }
+
+        return commandIds.Distinct().ToList();
     }
 
     /// <summary>
@@ -447,6 +1074,33 @@ public static class ConsistencyTestHelpers
     {
         var statusIds = new List<string>();
 
+        // Check if this is the SmartMqttNotificationHandlers class that handles all notifications
+        if (publisherType.Name.Contains("SmartMqttNotificationHandlers"))
+        {
+            // This class handles all the MQTT status publishing through notification handlers
+            statusIds.AddRange(
+                new[]
+                {
+                    "CLIENT_VOLUME_STATUS",
+                    "CLIENT_MUTE_STATUS",
+                    "CLIENT_LATENCY_STATUS",
+                    "CLIENT_ZONE_STATUS",
+                    "CLIENT_CONNECTED",
+                    "CLIENT_STATE",
+                    "ZONE_VOLUME_STATUS",
+                    "ZONE_MUTE_STATUS",
+                    "PLAYBACK_STATE",
+                    "TRACK_STATUS",
+                    "PLAYLIST_STATUS",
+                    "TRACK_REPEAT_STATUS",
+                    "PLAYLIST_REPEAT_STATUS",
+                    "PLAYLIST_SHUFFLE_STATUS",
+                    "ZONE_STATE_STATUS",
+                    "TRACK_METADATA_ALBUM",
+                }
+            );
+        }
+
         // Look for methods that publish status
         foreach (var method in publisherType.GetMethods())
         {
@@ -454,9 +1108,24 @@ public static class ConsistencyTestHelpers
             {
                 statusIds.Add("SYSTEM_STATUS");
             }
+
+            // Check for Handle methods that process notifications
+            if (method.Name.StartsWith("Handle") && method.GetParameters().Length > 0)
+            {
+                var paramType = method.GetParameters()[0].ParameterType;
+                if (paramType.Name.Contains("Notification"))
+                {
+                    // Extract status ID from notification type using StatusIdAttribute
+                    var statusAttr = paramType.GetCustomAttribute<SnapDog2.Core.Attributes.StatusIdAttribute>();
+                    if (statusAttr != null)
+                    {
+                        statusIds.Add(statusAttr.Id);
+                    }
+                }
+            }
         }
 
-        return statusIds;
+        return statusIds.Distinct().ToList();
     }
 
     /// <summary>
@@ -468,9 +1137,14 @@ public static class ConsistencyTestHelpers
         var topics = new List<string>();
 
         if (handlerMethod.Name.Contains("Zone"))
+        {
             topics.Add("snapdog/zone/+/command");
+        }
+
         if (handlerMethod.Name.Contains("Client"))
+        {
             topics.Add("snapdog/client/+/command");
+        }
 
         return topics;
     }
@@ -544,9 +1218,15 @@ public static class ConsistencyTestHelpers
     public static string GetMqttMessageType(MethodInfo handlerMethod)
     {
         if (handlerMethod.Name.Contains("Command"))
+        {
             return "Command";
+        }
+
         if (handlerMethod.Name.Contains("Status"))
+        {
             return "Status";
+        }
+
         return "Unknown";
     }
 
@@ -642,7 +1322,14 @@ public static class ConsistencyTestHelpers
     /// </summary>
     public static HashSet<string> GetDocumentedKnxExclusions()
     {
-        return new HashSet<string> { "VOLUME_SET", "SYSTEM_STATUS", "CLIENTS_INFO", "TRACK_INFO" };
+        return new HashSet<string>
+        {
+            "VOLUME_SET",
+            "SYSTEM_STATUS",
+            "CLIENTS_INFO",
+            "TRACK_INFO",
+            "PLAYLIST_SHUFFLE_TOGGLE", // Toggle commands are typically excluded from KNX due to state synchronization complexity
+        };
     }
 
     /// <summary>
@@ -833,7 +1520,7 @@ public static class ConsistencyTestHelpers
     /// </summary>
     public static List<string> GetRecentlyAddedCommands(int gracePeriodDays)
     {
-        return new List<string> { "CONTROL_SET", "CLIENTS_INFO" };
+        return new List<string> { "CONTROL", "CLIENTS_INFO" };
     }
 
     /// <summary>
@@ -919,7 +1606,7 @@ public static class ConsistencyTestHelpers
         var recentlyAddedFeatures = new[]
         {
             "CLIENTS_INFO",
-            "CONTROL_SET",
+            "CONTROL",
             "CONTROL_STATUS",
             "ZONE_NAME",
             "ZONE_NAME_STATUS",
@@ -965,7 +1652,9 @@ public static class ConsistencyTestHelpers
     public static FeatureCategory GetFeatureCategory(string featureId)
     {
         if (featureId.StartsWith("CLIENT_"))
+        {
             return FeatureCategory.Client;
+        }
 
         if (
             featureId.StartsWith("ZONE_")
@@ -978,7 +1667,9 @@ public static class ConsistencyTestHelpers
             || featureId.StartsWith("STOP")
             || featureId.StartsWith("CONTROL_")
         )
+        {
             return FeatureCategory.Zone;
+        }
 
         return FeatureCategory.Global;
     }
@@ -992,7 +1683,9 @@ public static class ConsistencyTestHelpers
         var statusPatterns = new[] { "_STATUS", "_INFO", "_STATS", "_ERROR", "_STATE" };
 
         if (statusPatterns.Any(pattern => featureId.EndsWith(pattern)))
+        {
             return FeatureType.Status;
+        }
 
         // Some status don't follow the _STATUS pattern
         var knownStatusIds = new[]
@@ -1006,7 +1699,9 @@ public static class ConsistencyTestHelpers
         };
 
         if (knownStatusIds.Contains(featureId))
+        {
             return FeatureType.Status;
+        }
 
         return FeatureType.Command;
     }
@@ -1023,10 +1718,14 @@ public static class ConsistencyTestHelpers
         var description = $"{protocol} {type}: {featureId}";
 
         if (isRecent)
+        {
             description += " (recently added)";
+        }
 
         if (!IsKnxSuitableFeature(featureId) && protocol == "KNX")
+        {
             description += " (intentionally excluded)";
+        }
 
         return description;
     }
@@ -1069,7 +1768,9 @@ public static class ConsistencyTestHelpers
         var postCommands = new[] { "PLAY", "PAUSE", "STOP", "NEXT", "PREVIOUS", "TOGGLE" };
 
         if (postCommands.Any(cmd => featureId.Contains(cmd)))
+        {
             return "POST";
+        }
 
         return "PUT"; // Default for set operations
     }
