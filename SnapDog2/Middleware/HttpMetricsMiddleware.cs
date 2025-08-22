@@ -90,7 +90,7 @@ public partial class HttpMetricsMiddleware
                 {
                     if (int.TryParse(segments[i], out _))
                     {
-                        segments[i] = "{id}";
+                        segments[i] = "{index}";
                     }
                 }
 

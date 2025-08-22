@@ -170,7 +170,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
     /// <response code="400">Invalid playlist ID.</response>
     /// <response code="404">Playlist not found.</response>
     /// <response code="500">Internal server error.</response>
-    [HttpGet("playlists/{id}")]
+    [HttpGet("playlists/{index}")]
     [ProducesResponseType(typeof(ApiResponse<PlaylistWithTracks>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
@@ -234,7 +234,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
                         return this.NotFound(
                             ApiResponse<PlaylistWithTracks>.CreateError(
                                 "PLAYLIST_NOT_FOUND",
-                                $"Playlist '{id}' not found"
+                                $"Playlist '{index}' not found"
                             )
                         );
                     }
@@ -287,7 +287,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
             {
                 LogPlaylistNotFound(this._logger, id);
                 return this.NotFound(
-                    ApiResponse<PlaylistWithTracks>.CreateError("PLAYLIST_NOT_FOUND", $"Playlist '{id}' not found")
+                    ApiResponse<PlaylistWithTracks>.CreateError("PLAYLIST_NOT_FOUND", $"Playlist '{index}' not found")
                 );
             }
 
@@ -331,7 +331,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
     /// <response code="400">Invalid parameters.</response>
     /// <response code="404">Playlist not found.</response>
     /// <response code="500">Internal server error.</response>
-    [HttpGet("playlists/{id}/tracks")]
+    [HttpGet("playlists/{index}/tracks")]
     [ProducesResponseType(typeof(ApiResponse<Page<TrackInfo>>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
@@ -360,7 +360,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
                 {
                     LogPlaylistNotFound(this._logger, id);
                     return this.NotFound(
-                        ApiResponse<Page<TrackInfo>>.CreateError("PLAYLIST_NOT_FOUND", $"Playlist '{id}' not found")
+                        ApiResponse<Page<TrackInfo>>.CreateError("PLAYLIST_NOT_FOUND", $"Playlist '{index}' not found")
                     );
                 }
 
@@ -409,7 +409,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
     /// <response code="400">Invalid track ID.</response>
     /// <response code="404">Track not found.</response>
     /// <response code="500">Internal server error.</response>
-    [HttpGet("tracks/{id}")]
+    [HttpGet("tracks/{index}")]
     [ProducesResponseType(typeof(ApiResponse<TrackInfo>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
@@ -444,7 +444,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
                 {
                     LogTrackNotFound(this._logger, id);
                     return this.NotFound(
-                        ApiResponse<TrackInfo>.CreateError("TRACK_NOT_FOUND", $"Track '{id}' not found")
+                        ApiResponse<TrackInfo>.CreateError("TRACK_NOT_FOUND", $"Track '{index}' not found")
                     );
                 }
 
@@ -515,7 +515,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
 
         if (targetPlaylist == null || !targetPlaylist.Index.HasValue)
         {
-            return Result<PlaylistWithTracks>.Failure($"Playlist '{id}' not found");
+            return Result<PlaylistWithTracks>.Failure($"Playlist '{index}' not found");
         }
 
         // Use the playlist's index to get the full details

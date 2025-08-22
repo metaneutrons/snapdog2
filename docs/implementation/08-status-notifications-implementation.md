@@ -173,7 +173,7 @@ public record StatusChangedNotification : INotification
 
 - Flexible `object` type for values to support any data type
 - String-based status types for protocol compatibility
-- Target ID format: `zone_{id}` or `client_{id}`
+- Target ID format: `zone_{index}` or `client_{index}`
 - Ready for MQTT topic mapping and KNX group address mapping
 
 ### 9.3.4. Zone Notification Handler

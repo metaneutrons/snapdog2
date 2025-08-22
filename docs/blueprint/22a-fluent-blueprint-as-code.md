@@ -24,17 +24,17 @@ public static class SnapDogBlueprint
 
         // Zone Commands - API + MQTT (KNX not mentioned = not included)
         .Command("PLAY")
-            .Zone().Api().Mqtt().Post("/zones/{id}/play")
+            .Zone().Api().Mqtt().Post("/zones/{index}/play")
             .Description("Start playback in a zone")
 
         .Command("VOLUME")
-            .Zone().Api().Mqtt().Put("/zones/{id}/volume")
+            .Zone().Api().Mqtt().Put("/zones/{index}/volume")
             .Description("Set zone volume level")
             .Exclude(Protocol.Knx, "Handled by dedicated KNX actuators")
 
         // Client Commands - explicitly excluded from KNX for clarity
         .Command("CLIENT_LATENCY")
-            .Client().Api().Mqtt().Put("/clients/{id}/latency")
+            .Client().Api().Mqtt().Put("/clients/{index}/latency")
             .Description("Set client audio latency")
             .Exclude(Protocol.Knx, "Network-specific setting")
 

@@ -291,13 +291,13 @@ public record ShuffleRequest
 
 **New API Endpoints:**
 
-- `POST /api/zones/{id}/stop` - Stop playback
-- `POST /api/zones/{id}/next-track` - Play next track
-- `POST /api/zones/{id}/previous-track` - Play previous track
-- `POST /api/zones/{id}/track-repeat` - Set track repeat mode
-- `POST /api/zones/{id}/toggle-track-repeat` - Toggle track repeat mode
-- `POST /api/zones/{id}/playlist-shuffle` - Set playlist shuffle mode
-- `POST /api/zones/{id}/playlist-repeat` - Set playlist repeat mode
+- `POST /api/zones/{index}/stop` - Stop playback
+- `POST /api/zones/{index}/next-track` - Play next track
+- `POST /api/zones/{index}/previous-track` - Play previous track
+- `POST /api/zones/{index}/track-repeat` - Set track repeat mode
+- `POST /api/zones/{index}/toggle-track-repeat` - Toggle track repeat mode
+- `POST /api/zones/{index}/playlist-shuffle` - Set playlist shuffle mode
+- `POST /api/zones/{index}/playlist-repeat` - Set playlist repeat mode
 
 ### 6.3.5. Dependency Injection Configuration
 

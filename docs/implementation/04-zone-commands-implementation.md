@@ -374,10 +374,10 @@ public class ZoneController : ControllerBase
 **API Endpoints:**
 
 - `GET /api/zones/states` - Get all zone states
-- `GET /api/zones/{id}/state` - Get specific zone state
-- `POST /api/zones/{id}/play` - Start playback
-- `POST /api/zones/{id}/pause` - Pause playback
-- `POST /api/zones/{id}/volume` - Set volume (with JSON body)
+- `GET /api/zones/{index}/state` - Get specific zone state
+- `POST /api/zones/{index}/play` - Start playback
+- `POST /api/zones/{index}/pause` - Pause playback
+- `POST /api/zones/{index}/volume` - Set volume (with JSON body)
 
 **Controller Features:**
 

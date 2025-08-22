@@ -606,7 +606,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     {
         try
         {
-            // Parse the topic structure: snapdog/{zone|client}/{id}/{command}
+            // Parse the topic structure: snapdog/{zone|client}/{index}/{command}
             var topicParts = topic.Split('/');
             if (topicParts.Length < 4 || !topicParts[0].Equals("snapdog", StringComparison.OrdinalIgnoreCase))
             {

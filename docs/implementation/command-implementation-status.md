@@ -37,31 +37,31 @@ All commands and status are fully implemented as REST API endpoints with proper 
 
 **Commands (32)**:
 
-- Playback: `POST /zones/{id}/play`, `POST /zones/{id}/pause`, `POST /zones/{id}/stop`
-- Track: `PUT /zones/{id}/track`, `POST /zones/{id}/next`, `POST /zones/{id}/previous`, `POST /zones/{id}/play/{index}`, `POST /zones/{id}/play/url`, `PUT /zones/{id}/track/position`, `PUT /zones/{id}/track/progress`, `PUT /zones/{id}/repeat/track`, `POST /zones/{id}/repeat/track/toggle`
-- Playlist: `PUT /zones/{id}/playlist`, `POST /zones/{id}/playlist/next`, `POST /zones/{id}/playlist/previous`, `PUT /zones/{id}/shuffle`, `POST /zones/{id}/shuffle/toggle`, `PUT /zones/{id}/repeat`, `POST /zones/{id}/repeat/toggle`
-- Volume: `PUT /zones/{id}/volume`, `POST /zones/{id}/volume/up`, `POST /zones/{id}/volume/down`, `PUT /zones/{id}/mute`, `POST /zones/{id}/mute/toggle`
+- Playback: `POST /zones/{index}/play`, `POST /zones/{index}/pause`, `POST /zones/{index}/stop`
+- Track: `PUT /zones/{index}/track`, `POST /zones/{index}/next`, `POST /zones/{index}/previous`, `POST /zones/{index}/play/{index}`, `POST /zones/{index}/play/url`, `PUT /zones/{index}/track/position`, `PUT /zones/{index}/track/progress`, `PUT /zones/{index}/repeat/track`, `POST /zones/{index}/repeat/track/toggle`
+- Playlist: `PUT /zones/{index}/playlist`, `POST /zones/{index}/playlist/next`, `POST /zones/{index}/playlist/previous`, `PUT /zones/{index}/shuffle`, `POST /zones/{index}/shuffle/toggle`, `PUT /zones/{index}/repeat`, `POST /zones/{index}/repeat/toggle`
+- Volume: `PUT /zones/{index}/volume`, `POST /zones/{index}/volume/up`, `POST /zones/{index}/volume/down`, `PUT /zones/{index}/mute`, `POST /zones/{index}/mute/toggle`
 
 **Status (20)**:
 
-- State: `GET /zones/{id}` (complete state)
-- Playback: `GET /zones/{id}/track/playing`
-- Track: `GET /zones/{id}/track`, `GET /zones/{id}/repeat/track`, `GET /zones/{id}/track/metadata`, `GET /zones/{id}/track/duration`, `GET /zones/{id}/track/title`, `GET /zones/{id}/track/artist`, `GET /zones/{id}/track/album`, `GET /zones/{id}/track/cover`, `GET /zones/{id}/track/position`, `GET /zones/{id}/track/progress`
-- Playlist: `GET /zones/{id}/playlist`, `GET /zones/{id}/playlist/info`, `GET /zones/{id}/shuffle`, `GET /zones/{id}/repeat`
-- Volume: `GET /zones/{id}/volume`, `GET /zones/{id}/mute`
+- State: `GET /zones/{index}` (complete state)
+- Playback: `GET /zones/{index}/track/playing`
+- Track: `GET /zones/{index}/track`, `GET /zones/{index}/repeat/track`, `GET /zones/{index}/track/metadata`, `GET /zones/{index}/track/duration`, `GET /zones/{index}/track/title`, `GET /zones/{index}/track/artist`, `GET /zones/{index}/track/album`, `GET /zones/{index}/track/cover`, `GET /zones/{index}/track/position`, `GET /zones/{index}/track/progress`
+- Playlist: `GET /zones/{index}/playlist`, `GET /zones/{index}/playlist/info`, `GET /zones/{index}/shuffle`, `GET /zones/{index}/repeat`
+- Volume: `GET /zones/{index}/volume`, `GET /zones/{index}/mute`
 
 #### Client API Endpoints (14/14 ✅)
 
 **Commands (8)**:
 
-- Volume: `PUT /clients/{id}/volume`, `POST /clients/{id}/volume/up`, `POST /clients/{id}/volume/down`, `PUT /clients/{id}/mute`, `POST /clients/{id}/mute/toggle`
-- Config: `PUT /clients/{id}/latency`, `PUT /clients/{id}/zone`, `PUT /clients/{id}/name`
+- Volume: `PUT /clients/{index}/volume`, `POST /clients/{index}/volume/up`, `POST /clients/{index}/volume/down`, `PUT /clients/{index}/mute`, `POST /clients/{index}/mute/toggle`
+- Config: `PUT /clients/{index}/latency`, `PUT /clients/{index}/zone`, `PUT /clients/{index}/name`
 
 **Status (6)**:
 
-- State: `GET /clients/{id}` (complete state)
-- Volume: `GET /clients/{id}/volume`, `GET /clients/{id}/mute`
-- Config: `GET /clients/{id}/latency`, `GET /clients/{id}/zone`, `GET /clients/{id}/connected`
+- State: `GET /clients/{index}` (complete state)
+- Volume: `GET /clients/{index}/volume`, `GET /clients/{index}/mute`
+- Config: `GET /clients/{index}/latency`, `GET /clients/{index}/zone`, `GET /clients/{index}/connected`
 
 ### 📡 **MQTT Implementation**
 
@@ -73,7 +73,7 @@ Full bi-directional MQTT support with configurable topic structure and comprehen
 
 - **Command Processing**: All 40 commands supported via MQTT topics
 - **Status Publishing**: All 32 status notifications published to MQTT
-- **Topic Structure**: Hierarchical topics (`snapdog/zones/{id}/command`, `snapdog/clients/{id}/command`)
+- **Topic Structure**: Hierarchical topics (`snapdog/zones/{index}/command`, `snapdog/clients/{index}/command`)
 - **Payload Formats**: JSON for complex data, primitives for simple values
 - **Retained Messages**: Status topics use retained messages for state persistence
 - **Last Will Testament**: System status with offline notification
@@ -82,14 +82,14 @@ Full bi-directional MQTT support with configurable topic structure and comprehen
 
 #### MQTT Command Topics (40/40 ✅)
 
-**Zone Commands**: `snapdog/zones/{id}/play`, `snapdog/zones/{id}/volume/set`, `snapdog/zones/{id}/track/set`, etc.
-**Client Commands**: `snapdog/clients/{id}/volume/set`, `snapdog/clients/{id}/mute/set`, etc.
+**Zone Commands**: `snapdog/zones/{index}/play`, `snapdog/zones/{index}/volume/set`, `snapdog/zones/{index}/track/set`, etc.
+**Client Commands**: `snapdog/clients/{index}/volume/set`, `snapdog/clients/{index}/mute/set`, etc.
 
 #### MQTT Status Topics (32/32 ✅)
 
 **Global Status**: `snapdog/status`, `snapdog/version`, `snapdog/stats`, etc.
-**Zone Status**: `snapdog/zones/{id}/volume`, `snapdog/zones/{id}/track`, `snapdog/zones/{id}/state`, etc.
-**Client Status**: `snapdog/clients/{id}/volume`, `snapdog/clients/{id}/connected`, `snapdog/clients/{id}/state`, etc.
+**Zone Status**: `snapdog/zones/{index}/volume`, `snapdog/zones/{index}/track`, `snapdog/zones/{index}/state`, etc.
+**Client Status**: `snapdog/clients/{index}/volume`, `snapdog/clients/{index}/connected`, `snapdog/clients/{index}/state`, etc.
 
 ### 🏠 **KNX Implementation**
 

@@ -29,8 +29,8 @@ Complete implementation of Subsonic integration service for SnapDog2, providing 
 ### 2.3 API Endpoints ✅
 
 - ✅ **GET /api/v1/playlists** - Paginated playlist listing with sorting
-- ✅ **GET /api/v1/playlists/{id}** - Individual playlist with tracks
-- ✅ **GET /api/v1/playlists/tracks/{id}/stream-url** - Track streaming URLs
+- ✅ **GET /api/v1/playlists/{index}** - Individual playlist with tracks
+- ✅ **GET /api/v1/playlists/tracks/{index}/stream-url** - Track streaming URLs
 - ✅ **POST /api/v1/playlists/test-connection** - Connection testing endpoint
 
 ### 2.4 Query Handlers ✅

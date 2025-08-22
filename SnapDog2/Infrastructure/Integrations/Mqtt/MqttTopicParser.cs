@@ -32,7 +32,7 @@ public static class MqttTopicParser
 
         var parts = topic.Split('/');
 
-        // Basic structure: snapdog/{entity}/{id}/{command}[/set]
+        // Basic structure: snapdog/{entity}/{index}/{command}[/set]
         if (parts.Length < 4 || parts.Length > 5)
         {
             return null;
