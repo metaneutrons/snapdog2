@@ -148,74 +148,9 @@ public partial class StatusFactory(ILogger<StatusFactory> logger) : IStatusFacto
 
     #endregion
 
-    #region Zone Status Notifications (Blueprint Compliance - Status Publishing)
-
-    /// <inheritdoc />
-    public ZonePlaybackStateStatusNotification CreateZonePlaybackStateStatusNotification(
-        int zoneIndex,
-        PlaybackState playbackState
-    )
-    {
-        ValidateZoneIndex(zoneIndex, nameof(ZonePlaybackStateStatusNotification));
-        this.LogStatusCreation(nameof(ZonePlaybackStateStatusNotification), "Zone", zoneIndex);
-        return new ZonePlaybackStateStatusNotification(zoneIndex, playbackState);
-    }
-
-    /// <inheritdoc />
-    public ZoneVolumeStatusNotification CreateZoneVolumeStatusNotification(int zoneIndex, int volume)
-    {
-        ValidateZoneIndex(zoneIndex, nameof(ZoneVolumeStatusNotification));
-        var clampedVolume = ValidateAndClampVolume(volume, nameof(ZoneVolumeStatusNotification));
-        this.LogStatusCreation(nameof(ZoneVolumeStatusNotification), "Zone", zoneIndex);
-        return new ZoneVolumeStatusNotification(zoneIndex, clampedVolume);
-    }
-
-    /// <inheritdoc />
-    public ZoneMuteStatusNotification CreateZoneMuteStatusNotification(int zoneIndex, bool isMuted)
-    {
-        ValidateZoneIndex(zoneIndex, nameof(ZoneMuteStatusNotification));
-        this.LogStatusCreation(nameof(ZoneMuteStatusNotification), "Zone", zoneIndex);
-        return new ZoneMuteStatusNotification(zoneIndex, isMuted);
-    }
-
-    /// <inheritdoc />
-    public ZoneTrackStatusNotification CreateZoneTrackStatusNotification(
-        int zoneIndex,
-        TrackInfo trackInfo,
-        int trackIndex
-    )
-    {
-        ValidateZoneIndex(zoneIndex, nameof(ZoneTrackStatusNotification));
-        ArgumentNullException.ThrowIfNull(trackInfo);
-        var validatedTrackIndex = ValidateTrackIndex(trackIndex, nameof(ZoneTrackStatusNotification));
-        this.LogStatusCreation(nameof(ZoneTrackStatusNotification), "Zone", zoneIndex);
-        return new ZoneTrackStatusNotification(zoneIndex, trackInfo, validatedTrackIndex);
-    }
-
-    /// <inheritdoc />
-    public ZonePlaylistStatusNotification CreateZonePlaylistStatusNotification(
-        int zoneIndex,
-        PlaylistInfo playlistInfo,
-        int playlistIndex
-    )
-    {
-        ValidateZoneIndex(zoneIndex, nameof(ZonePlaylistStatusNotification));
-        ArgumentNullException.ThrowIfNull(playlistInfo);
-        var validatedPlaylistIndex = ValidatePlaylistIndex(playlistIndex, nameof(ZonePlaylistStatusNotification));
-        this.LogStatusCreation(nameof(ZonePlaylistStatusNotification), "Zone", zoneIndex);
-        return new ZonePlaylistStatusNotification(zoneIndex, playlistInfo, validatedPlaylistIndex);
-    }
-
-    /// <inheritdoc />
-    public ZoneStateStatusNotification CreateZoneStateStatusNotification(int zoneIndex, ZoneState zoneState)
-    {
-        ValidateZoneIndex(zoneIndex, nameof(ZoneStateStatusNotification));
-        ArgumentNullException.ThrowIfNull(zoneState);
-        this.LogStatusCreation(nameof(ZoneStateStatusNotification), "Zone", zoneIndex);
-        return new ZoneStateStatusNotification(zoneIndex, zoneState);
-    }
-
-    #endregion
+    // Note: Obsolete Zone Status Notifications (Blueprint Compliance - Status Publishing) methods removed
+    // These used incorrect ZONE_* prefixed status IDs that don't match blueprint specification
+    // Use the correct state change notifications above instead
 
     #region Client Status Notifications (State Changes)
 

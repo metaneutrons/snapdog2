@@ -87,13 +87,6 @@ public static class StatusIds
     public static readonly string ZonesInfo = StatusIdAttribute.GetStatusId<ZonesInfoChangedNotification>();
 
     // Zone Status Notification IDs (Blueprint Compliance - Status Publishing)
-    public static readonly string ZonePlaybackStateStatusPublish =
-        StatusIdAttribute.GetStatusId<ZonePlaybackStateStatusNotification>();
-    public static readonly string ZoneVolumeStatusPublish =
-        StatusIdAttribute.GetStatusId<ZoneVolumeStatusNotification>();
-    public static readonly string ZoneMuteStatusPublish = StatusIdAttribute.GetStatusId<ZoneMuteStatusNotification>();
-    public static readonly string ZoneTrackStatusPublish = StatusIdAttribute.GetStatusId<ZoneTrackStatusNotification>();
-    public static readonly string ZonePlaylistStatusPublish =
-        StatusIdAttribute.GetStatusId<ZonePlaylistStatusNotification>();
-    public static readonly string ZoneStateStatusPublish = StatusIdAttribute.GetStatusId<ZoneStateStatusNotification>();
+    // Note: These obsolete status notifications have been removed as they don't match blueprint specification
+    // The correct status IDs are defined above without the ZONE_ prefix
 }

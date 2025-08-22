@@ -112,66 +112,9 @@ public interface IStatusFactory
 
     #endregion
 
-    #region Zone Status Notifications (Blueprint Compliance - Status Publishing)
-
-    /// <summary>
-    /// Creates a zone playback state status notification for blueprint compliance.
-    /// </summary>
-    /// <param name="zoneIndex">Zone index (1-based).</param>
-    /// <param name="playbackState">Playback state to publish.</param>
-    /// <returns>Zone playback state status notification.</returns>
-    ZonePlaybackStateStatusNotification CreateZonePlaybackStateStatusNotification(
-        int zoneIndex,
-        PlaybackState playbackState
-    );
-
-    /// <summary>
-    /// Creates a zone volume status notification for blueprint compliance.
-    /// </summary>
-    /// <param name="zoneIndex">Zone index (1-based).</param>
-    /// <param name="volume">Volume level to publish (0-100).</param>
-    /// <returns>Zone volume status notification.</returns>
-    ZoneVolumeStatusNotification CreateZoneVolumeStatusNotification(int zoneIndex, int volume);
-
-    /// <summary>
-    /// Creates a zone mute status notification for blueprint compliance.
-    /// </summary>
-    /// <param name="zoneIndex">Zone index (1-based).</param>
-    /// <param name="isMuted">Mute state to publish.</param>
-    /// <returns>Zone mute status notification.</returns>
-    ZoneMuteStatusNotification CreateZoneMuteStatusNotification(int zoneIndex, bool isMuted);
-
-    /// <summary>
-    /// Creates a zone track status notification for blueprint compliance.
-    /// </summary>
-    /// <param name="zoneIndex">Zone index (1-based).</param>
-    /// <param name="trackInfo">Track information to publish.</param>
-    /// <param name="trackIndex">Track index to publish (1-based).</param>
-    /// <returns>Zone track status notification.</returns>
-    ZoneTrackStatusNotification CreateZoneTrackStatusNotification(int zoneIndex, TrackInfo trackInfo, int trackIndex);
-
-    /// <summary>
-    /// Creates a zone playlist status notification for blueprint compliance.
-    /// </summary>
-    /// <param name="zoneIndex">Zone index (1-based).</param>
-    /// <param name="playlistInfo">Playlist information to publish.</param>
-    /// <param name="playlistIndex">Playlist index to publish (1-based).</param>
-    /// <returns>Zone playlist status notification.</returns>
-    ZonePlaylistStatusNotification CreateZonePlaylistStatusNotification(
-        int zoneIndex,
-        PlaylistInfo playlistInfo,
-        int playlistIndex
-    );
-
-    /// <summary>
-    /// Creates a zone state status notification for blueprint compliance.
-    /// </summary>
-    /// <param name="zoneIndex">Zone index (1-based).</param>
-    /// <param name="zoneState">Zone state to publish.</param>
-    /// <returns>Zone state status notification.</returns>
-    ZoneStateStatusNotification CreateZoneStateStatusNotification(int zoneIndex, ZoneState zoneState);
-
-    #endregion
+    // Note: Obsolete Zone Status Notifications (Blueprint Compliance - Status Publishing) methods removed
+    // These used incorrect ZONE_* prefixed status IDs that don't match blueprint specification
+    // Use the correct state change notifications above instead
 
     #region Client Status Notifications (State Changes)
 
