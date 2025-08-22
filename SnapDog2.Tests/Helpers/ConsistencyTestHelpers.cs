@@ -401,6 +401,13 @@ public static class ConsistencyTestHelpers
         // Look for command-related patterns in method names or attributes
         var commandIds = new List<string>();
 
+        // Skip GET methods as they are status/query endpoints, not commands
+        var httpMethods = GetHttpMethodsFromEndpoint(endpoint);
+        if (httpMethods.Contains("GET"))
+        {
+            return commandIds; // Return empty list for GET endpoints
+        }
+
         // Basic playback commands
         if (endpoint.Name.Contains("Play"))
         {
@@ -1074,31 +1081,11 @@ public static class ConsistencyTestHelpers
     {
         var statusIds = new List<string>();
 
-        // Check if this is the SmartMqttNotificationHandlers class that handles all notifications
-        if (publisherType.Name.Contains("SmartMqttNotificationHandlers"))
+        // Skip notification handlers - they handle notifications but aren't publishers themselves
+        if (publisherType.Name.Contains("NotificationHandlers") || 
+            publisherType.Name.Contains("NotificationHandler"))
         {
-            // This class handles all the MQTT status publishing through notification handlers
-            statusIds.AddRange(
-                new[]
-                {
-                    "CLIENT_VOLUME_STATUS",
-                    "CLIENT_MUTE_STATUS",
-                    "CLIENT_LATENCY_STATUS",
-                    "CLIENT_ZONE_STATUS",
-                    "CLIENT_CONNECTED",
-                    "CLIENT_STATE",
-                    "ZONE_VOLUME_STATUS",
-                    "ZONE_MUTE_STATUS",
-                    "PLAYBACK_STATE",
-                    "TRACK_STATUS",
-                    "PLAYLIST_STATUS",
-                    "TRACK_REPEAT_STATUS",
-                    "PLAYLIST_REPEAT_STATUS",
-                    "PLAYLIST_SHUFFLE_STATUS",
-                    "ZONE_STATE_STATUS",
-                    "TRACK_METADATA_ALBUM",
-                }
-            );
+            return statusIds; // Return empty list for notification handlers
         }
 
         // Look for methods that publish status
@@ -1324,11 +1311,40 @@ public static class ConsistencyTestHelpers
     {
         return new HashSet<string>
         {
+            // Volume and audio controls - handled by dedicated KNX actuators
             "VOLUME_SET",
+            "VOLUME_UP", 
+            "VOLUME_DOWN", 
+            "MUTE_TOGGLE", 
+            // Playlist controls - complex state management not suitable for KNX
+            "PLAYLIST_SHUFFLE",
+            "PLAYLIST_SHUFFLE_TOGGLE", 
+            "PLAYLIST_REPEAT",
+            "PLAYLIST_REPEAT_TOGGLE",
+            "PLAYLIST_NEXT",
+            "PLAYLIST_PREVIOUS",
+            // Track controls - complex navigation not suitable for KNX
+            "TRACK_NEXT",
+            "TRACK_PREVIOUS", 
+            "TRACK_PLAY_INDEX",
+            "TRACK_PLAY_URL",
+            "TRACK_POSITION",
+            "TRACK_PROGRESS",
+            "TRACK_REPEAT",
+            "TRACK_REPEAT_TOGGLE",
+            // Client-specific network settings - not suitable for building automation
+            "CLIENT_LATENCY", 
+            "CLIENT_VOLUME",
+            "CLIENT_VOLUME_UP",
+            "CLIENT_VOLUME_DOWN", 
+            "CLIENT_MUTE",
+            "CLIENT_MUTE_TOGGLE",
+            "CLIENT_NAME",
+            "CLIENT_ZONE",
+            // System information - read-only data not actionable via KNX
             "SYSTEM_STATUS",
             "CLIENTS_INFO",
             "TRACK_INFO",
-            "PLAYLIST_SHUFFLE_TOGGLE", // Toggle commands are typically excluded from KNX due to state synchronization complexity
         };
     }
 

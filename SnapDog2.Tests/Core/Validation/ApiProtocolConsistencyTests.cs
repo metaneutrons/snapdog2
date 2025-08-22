@@ -210,13 +210,14 @@ public class ApiProtocolConsistencyTests
     }
 
     /// <summary>
-    /// Validates that command endpoints use appropriate HTTP methods (POST for commands).
+    /// Validates that command endpoints use appropriate HTTP methods.
+    /// POST for actions (play, pause, stop) and PUT for idempotent state changes (set volume, mute).
     /// This test ensures that command operations follow REST conventions.
     /// </summary>
     [Fact]
     [Trait("Category", "Consistency")]
     [Trait("Category", "ApiConsistency")]
-    public void CommandEndpoints_ShouldUsePostMethod()
+    public void CommandEndpoints_ShouldUseAppropriateHttpMethods()
     {
         // Arrange
         var commandEndpointsWithWrongMethod = new List<string>();
@@ -228,7 +229,11 @@ public class ApiProtocolConsistencyTests
             if (commandIds.Any())
             {
                 var httpMethods = ConsistencyTestHelpers.GetHttpMethodsFromEndpoint(endpoint);
-                if (!httpMethods.Contains("POST"))
+                
+                // Allow POST for actions and PUT for idempotent state changes
+                var hasValidMethod = httpMethods.Contains("POST") || httpMethods.Contains("PUT");
+                
+                if (!hasValidMethod)
                 {
                     commandEndpointsWithWrongMethod.Add(
                         $"{endpoint.DeclaringType?.Name}.{endpoint.Name} (uses: {string.Join(", ", httpMethods)})"
@@ -241,7 +246,7 @@ public class ApiProtocolConsistencyTests
         commandEndpointsWithWrongMethod
             .Should()
             .BeEmpty(
-                $"Found command endpoints not using POST method: {string.Join(", ", commandEndpointsWithWrongMethod)}"
+                $"Found command endpoints not using POST or PUT method: {string.Join(", ", commandEndpointsWithWrongMethod)}"
             );
     }
 
