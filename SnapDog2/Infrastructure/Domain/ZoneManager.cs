@@ -1187,19 +1187,11 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
                     if (stateChanged)
                     {
-                        this._logger.LogInformation(
-                            "UpdateStateFromSnapcastAsync: Track state changed - Old IsPlaying: {OldIsPlaying}, New IsPlaying: {NewIsPlaying}",
-                            this._currentState.Track.IsPlaying,
-                            status.IsPlaying
-                        );
+                        LogTrackStateChanged(this._currentState.Track.IsPlaying, status.IsPlaying);
                     }
                     else
                     {
-                        this._logger.LogDebug(
-                            "UpdateStateFromSnapcastAsync: Updating track state - Old IsPlaying: {OldIsPlaying}, New IsPlaying: {NewIsPlaying}",
-                            this._currentState.Track.IsPlaying,
-                            status.IsPlaying
-                        );
+                        LogUpdatingTrackState(this._currentState.Track.IsPlaying, status.IsPlaying);
                     }
 
                     // Log position updates every 30 seconds (simpler approach)
@@ -1216,8 +1208,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
                     if (shouldLogPosition)
                     {
-                        this._logger.LogInformation(
-                            "Zone {ZoneIndex}: Playing \"{Title}\" - {Position:F1}s / {Duration:F1}s ({Progress:F1}%)",
+                        LogZonePlayingWithPosition(
                             this._zoneIndex,
                             status.CurrentTrack.Title ?? "Unknown",
                             positionSeconds,
@@ -1228,8 +1219,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                     }
                     else
                     {
-                        this._logger.LogDebug(
-                            "UpdateStateFromSnapcastAsync: LibVLC Position Data - PositionMs: {PositionMs}, Progress: {Progress}, DurationMs: {DurationMs}",
+                        LogLibVLCPositionData(
                             status.CurrentTrack.PositionMs,
                             status.CurrentTrack.Progress,
                             status.CurrentTrack.DurationMs
@@ -1250,8 +1240,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                             : SnapDog2.Core.Enums.PlaybackState.Stopped,
                     };
 
-                    this._logger.LogDebug(
-                        "UpdateStateFromSnapcastAsync: Updated track state - IsPlaying: {IsPlaying}, PositionMs: {PositionMs}, Progress: {Progress}",
+                    LogUpdatedTrackState(
                         this._currentState.Track.IsPlaying,
                         this._currentState.Track.PositionMs,
                         this._currentState.Track.Progress
@@ -1259,8 +1248,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 }
                 else
                 {
-                    this._logger.LogDebug(
-                        "UpdateStateFromSnapcastAsync: Skipping update - CurrentState.Track: {CurrentTrack}, Status.CurrentTrack: {StatusCurrentTrack}",
+                    LogSkippingUpdate(
                         this._currentState.Track != null ? "NotNull" : "Null",
                         status.CurrentTrack != null ? "NotNull" : "Null"
                     );
@@ -1268,17 +1256,13 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             }
             else
             {
-                this._logger.LogInformation(
-                    "UpdateStateFromSnapcastAsync: MediaPlayer status failed or null - Success: {Success}, ErrorMessage: {ErrorMessage}",
-                    playbackStatus.IsSuccess,
-                    playbackStatus.ErrorMessage
-                );
+                LogMediaPlayerStatusFailed(playbackStatus.IsSuccess, playbackStatus.ErrorMessage);
             }
         }
         catch (Exception ex)
         {
             // Log error but don't fail the state update
-            this._logger.LogWarning(ex, "Failed to update zone {ZoneIndex} state from media player", this._zoneIndex);
+            LogFailedToUpdateZoneState(ex, this._zoneIndex);
         }
     }
 
@@ -1302,11 +1286,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             catch (Exception ex)
             {
                 // Log error but don't propagate to avoid breaking the main operation
-                this._logger.LogError(
-                    ex,
-                    "Failed to publish zone state notification for zone {ZoneIndex}",
-                    this._zoneIndex
-                );
+                LogFailedToPublishZoneStateNotification(ex, this._zoneIndex);
             }
         });
     }
@@ -1319,7 +1299,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         if (this._positionUpdateTimer != null)
             return; // Timer already running
 
-        this._logger.LogDebug("Starting position update timer for zone {ZoneIndex}", this._zoneIndex);
+        LogStartingPositionUpdateTimer(this._zoneIndex);
 
         this._positionUpdateTimer = new Timer(
             async _ =>
@@ -1336,7 +1316,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 }
                 catch (Exception ex)
                 {
-                    this._logger.LogWarning(ex, "Error during position update for zone {ZoneIndex}", this._zoneIndex);
+                    LogErrorDuringPositionUpdate(ex, this._zoneIndex);
                 }
             },
             null,
@@ -1353,7 +1333,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         if (this._positionUpdateTimer == null)
             return;
 
-        this._logger.LogDebug("Stopping position update timer for zone {ZoneIndex}", this._zoneIndex);
+        LogStoppingPositionUpdateTimer(this._zoneIndex);
 
         this._positionUpdateTimer?.Dispose();
         this._positionUpdateTimer = null;
@@ -1367,17 +1347,14 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         var mediaPlayer = this._mediaPlayerService.GetMediaPlayer(this._zoneIndex);
         if (mediaPlayer != null)
         {
-            this._logger.LogInformation("✅ Subscribing to MediaPlayer events for zone {ZoneIndex}", this._zoneIndex);
+            LogSubscribingToMediaPlayerEvents(this._zoneIndex);
 
             mediaPlayer.PositionChanged += this.OnMediaPlayerPositionChanged;
             mediaPlayer.PlaybackStateChanged += this.OnMediaPlayerStateChanged;
         }
         else
         {
-            this._logger.LogWarning(
-                "❌ No MediaPlayer found for zone {ZoneIndex} - cannot subscribe to events",
-                this._zoneIndex
-            );
+            LogMediaPlayerNullOnSubscribe(this._zoneIndex);
         }
     }
 
@@ -1389,7 +1366,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         var mediaPlayer = this._mediaPlayerService.GetMediaPlayer(this._zoneIndex);
         if (mediaPlayer != null)
         {
-            this._logger.LogDebug("Unsubscribing from MediaPlayer events for zone {ZoneIndex}", this._zoneIndex);
+            LogUnsubscribingFromMediaPlayerEvents(this._zoneIndex);
 
             mediaPlayer.PositionChanged -= this.OnMediaPlayerPositionChanged;
             mediaPlayer.PlaybackStateChanged -= this.OnMediaPlayerStateChanged;
@@ -1403,20 +1380,11 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     {
         try
         {
-            this._logger.LogInformation(
-                "🎵 LibVLC Position Event: Zone {ZoneIndex}, PositionMs: {PositionMs}, Progress: {Progress}",
-                this._zoneIndex,
-                e.PositionMs,
-                e.Progress
-            );
+            LogPositionChangedForZone(this._zoneIndex, e.PositionMs, e.Progress);
 
             if (this._disposed || this._currentState.PlaybackState != SnapDog2.Core.Enums.PlaybackState.Playing)
             {
-                this._logger.LogDebug(
-                    "Skipping position update - disposed: {Disposed}, state: {State}",
-                    this._disposed,
-                    this._currentState.PlaybackState
-                );
+                LogSkippingPositionUpdate(this._disposed, this._currentState.PlaybackState.ToString());
                 return;
             }
 
@@ -1435,12 +1403,12 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
                 // Publish updated state to MQTT
                 this.PublishZoneStateChangedAsync();
-                this._logger.LogDebug("📡 Published MQTT update for position change");
+                LogPublishedMqttUpdateForPositionChange();
             }
         }
         catch (Exception ex)
         {
-            this._logger.LogWarning(ex, "Error handling position change for zone {ZoneIndex}", this._zoneIndex);
+            LogErrorHandlingPositionChange(ex, this._zoneIndex);
         }
     }
 
@@ -1451,7 +1419,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     {
         try
         {
-            this._logger.LogDebug("MediaPlayer state changed for zone {ZoneIndex}: {State}", this._zoneIndex, e.State);
+            LogMediaPlayerStateChanged(this._zoneIndex, e.State.ToString());
 
             // Update playback state based on LibVLC state
             var newPlaybackState =
@@ -1467,7 +1435,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            this._logger.LogWarning(ex, "Error handling state change for zone {ZoneIndex}", this._zoneIndex);
+            LogErrorHandlingStateChange(ex, this._zoneIndex);
         }
     }
 
@@ -1754,4 +1722,167 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         Message = "UpdateStateFromSnapcastAsync: Status - IsPlaying: {IsPlaying}, CurrentTrack: {CurrentTrack}"
     )]
     private partial void LogMediaPlayerStatus(bool IsPlaying, string? CurrentTrack);
+
+    [LoggerMessage(
+        EventId = 31,
+        Level = LogLevel.Information,
+        Message = "UpdateStateFromSnapcastAsync: Track state changed - Old IsPlaying: {OldIsPlaying}, New IsPlaying: {NewIsPlaying}"
+    )]
+    private partial void LogTrackStateChanged(bool OldIsPlaying, bool NewIsPlaying);
+
+    [LoggerMessage(
+        EventId = 32,
+        Level = LogLevel.Debug,
+        Message = "UpdateStateFromSnapcastAsync: Updating track state - Old IsPlaying: {OldIsPlaying}, New IsPlaying: {NewIsPlaying}"
+    )]
+    private partial void LogUpdatingTrackState(bool OldIsPlaying, bool NewIsPlaying);
+
+    [LoggerMessage(
+        EventId = 33,
+        Level = LogLevel.Information,
+        Message = "UpdateStateFromSnapcastAsync: Position update - Position: {PositionMs}ms, Duration: {DurationMs}ms"
+    )]
+    private partial void LogPositionUpdateFromSnapcast(long PositionMs, long DurationMs);
+
+    [LoggerMessage(
+        EventId = 34,
+        Level = LogLevel.Debug,
+        Message = "UpdateStateFromSnapcastAsync: Position unchanged - Position: {PositionMs}ms"
+    )]
+    private partial void LogPositionUnchanged(long PositionMs);
+
+    [LoggerMessage(
+        EventId = 35,
+        Level = LogLevel.Debug,
+        Message = "UpdateStateFromSnapcastAsync: No group found for zone {ZoneIndex}"
+    )]
+    private partial void LogNoGroupFoundForZone(int ZoneIndex);
+
+    [LoggerMessage(
+        EventId = 36,
+        Level = LogLevel.Debug,
+        Message = "UpdateStateFromSnapcastAsync: No server status available for zone {ZoneIndex}"
+    )]
+    private partial void LogNoServerStatusForZone(int ZoneIndex);
+
+    [LoggerMessage(
+        EventId = 37,
+        Level = LogLevel.Information,
+        Message = "UpdateStateFromSnapcastAsync: State synchronized for zone {ZoneIndex}"
+    )]
+    private partial void LogStateSynchronizedForZone(int ZoneIndex);
+
+    [LoggerMessage(
+        EventId = 38,
+        Level = LogLevel.Information,
+        Message = "Zone {ZoneIndex}: Playing \"{Title}\" - {Position:F1}s / {Duration:F1}s ({Progress:F1}%)"
+    )]
+    private partial void LogZonePlayingWithPosition(
+        int ZoneIndex,
+        string? Title,
+        double Position,
+        double? Duration,
+        double Progress
+    );
+
+    [LoggerMessage(
+        EventId = 39,
+        Level = LogLevel.Debug,
+        Message = "UpdateStateFromSnapcastAsync: LibVLC Position Data - PositionMs: {PositionMs}, Progress: {Progress}, DurationMs: {DurationMs}"
+    )]
+    private partial void LogLibVLCPositionData(long? PositionMs, float Progress, long? DurationMs);
+
+    [LoggerMessage(
+        EventId = 40,
+        Level = LogLevel.Debug,
+        Message = "UpdateStateFromSnapcastAsync: Updated track state - IsPlaying: {IsPlaying}, PositionMs: {PositionMs}, Progress: {Progress}"
+    )]
+    private partial void LogUpdatedTrackState(bool IsPlaying, long PositionMs, float Progress);
+
+    [LoggerMessage(
+        EventId = 41,
+        Level = LogLevel.Debug,
+        Message = "UpdateStateFromSnapcastAsync: Skipping update - CurrentState.Track: {CurrentTrack}, Status.CurrentTrack: {StatusCurrentTrack}"
+    )]
+    private partial void LogSkippingUpdate(string CurrentTrack, string StatusCurrentTrack);
+
+    [LoggerMessage(
+        EventId = 42,
+        Level = LogLevel.Information,
+        Message = "UpdateStateFromSnapcastAsync: MediaPlayer status failed or null - Success: {Success}, ErrorMessage: {ErrorMessage}"
+    )]
+    private partial void LogMediaPlayerStatusFailed(bool Success, string? ErrorMessage);
+
+    [LoggerMessage(
+        EventId = 43,
+        Level = LogLevel.Warning,
+        Message = "Failed to update zone {ZoneIndex} state from media player"
+    )]
+    private partial void LogFailedToUpdateZoneState(Exception ex, int ZoneIndex);
+
+    [LoggerMessage(
+        EventId = 44,
+        Level = LogLevel.Error,
+        Message = "Failed to publish zone state notification for zone {ZoneIndex}"
+    )]
+    private partial void LogFailedToPublishZoneStateNotification(Exception ex, int ZoneIndex);
+
+    [LoggerMessage(
+        EventId = 45,
+        Level = LogLevel.Debug,
+        Message = "Starting position update timer for zone {ZoneIndex}"
+    )]
+    private partial void LogStartingPositionUpdateTimer(int ZoneIndex);
+
+    [LoggerMessage(
+        EventId = 46,
+        Level = LogLevel.Warning,
+        Message = "Error during position update for zone {ZoneIndex}"
+    )]
+    private partial void LogErrorDuringPositionUpdate(Exception ex, int ZoneIndex);
+
+    [LoggerMessage(
+        EventId = 47,
+        Level = LogLevel.Debug,
+        Message = "Stopping position update timer for zone {ZoneIndex}"
+    )]
+    private partial void LogStoppingPositionUpdateTimer(int ZoneIndex);
+
+    [LoggerMessage(
+        EventId = 51,
+        Level = LogLevel.Information,
+        Message = "🎵 LibVLC Position Event: Zone {ZoneIndex}, PositionMs: {PositionMs}, Progress: {Progress}"
+    )]
+    private partial void LogPositionChangedForZone(int ZoneIndex, long PositionMs, float Progress);
+
+    [LoggerMessage(
+        EventId = 52,
+        Level = LogLevel.Debug,
+        Message = "Skipping position update - disposed: {Disposed}, state: {State}"
+    )]
+    private partial void LogSkippingPositionUpdate(bool Disposed, string State);
+
+    [LoggerMessage(EventId = 53, Level = LogLevel.Debug, Message = "📡 Published MQTT update for position change")]
+    private partial void LogPublishedMqttUpdateForPositionChange();
+
+    [LoggerMessage(
+        EventId = 54,
+        Level = LogLevel.Warning,
+        Message = "Error handling position change for zone {ZoneIndex}"
+    )]
+    private partial void LogErrorHandlingPositionChange(Exception ex, int ZoneIndex);
+
+    [LoggerMessage(
+        EventId = 55,
+        Level = LogLevel.Debug,
+        Message = "MediaPlayer state changed for zone {ZoneIndex}: {State}"
+    )]
+    private partial void LogMediaPlayerStateChanged(int ZoneIndex, string State);
+
+    [LoggerMessage(
+        EventId = 56,
+        Level = LogLevel.Warning,
+        Message = "Error handling state change for zone {ZoneIndex}"
+    )]
+    private partial void LogErrorHandlingStateChange(Exception ex, int ZoneIndex);
 }
