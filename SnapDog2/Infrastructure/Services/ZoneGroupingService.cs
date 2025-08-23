@@ -9,7 +9,7 @@ namespace SnapDog2.Infrastructure.Services;
 /// Simple zone grouping service using periodic checks only.
 /// Ensures clients assigned to the same zone are grouped together for synchronized audio playback.
 /// </summary>
-public class ZoneGroupingService : IZoneGroupingService
+public partial class ZoneGroupingService : IZoneGroupingService
 {
     private readonly ISnapcastService _snapcastService;
     private readonly IClientManager _clientManager;
@@ -40,7 +40,7 @@ public class ZoneGroupingService : IZoneGroupingService
 
         try
         {
-            _logger.LogDebug("🔍 Starting zone grouping check for all zones");
+            LogStartingZoneGroupingCheck();
 
             // Get all available zones
             var zonesResult = await _zoneManager.GetAllZonesAsync(cancellationToken);
@@ -52,33 +52,33 @@ public class ZoneGroupingService : IZoneGroupingService
             var zones = zonesResult.Value?.Select(z => z.Id).ToList() ?? new List<int>();
             if (!zones.Any())
             {
-                _logger.LogDebug("ℹ️ No zones configured, skipping zone grouping");
+                LogNoZonesConfigured();
                 return Result.Success();
             }
 
-            _logger.LogDebug("🔍 Checking {ZoneCount} zones: {ZoneIds}", zones.Count, string.Join(",", zones));
+            LogCheckingZones(zones.Count, string.Join(",", zones));
 
             // Synchronize each zone
             foreach (var zoneId in zones)
             {
-                _logger.LogDebug("🔧 Checking zone {ZoneId}...", zoneId);
+                LogCheckingZone(zoneId);
                 var result = await SynchronizeZoneGroupingAsync(zoneId, cancellationToken);
                 if (!result.IsSuccess)
                 {
-                    _logger.LogWarning("⚠️ Failed to synchronize zone {ZoneId}: {Error}", zoneId, result.ErrorMessage);
+                    LogFailedSynchronizeZone(zoneId, result.ErrorMessage);
                 }
                 else
                 {
-                    _logger.LogDebug("✅ Zone {ZoneId} check completed", zoneId);
+                    LogZoneCheckCompleted(zoneId);
                 }
             }
 
-            _logger.LogDebug("✅ All zone grouping checks completed");
+            LogAllZoneGroupingChecksCompleted();
             return Result.Success();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ Error during periodic zone grouping check");
+            LogErrorDuringPeriodicCheck(ex);
             return Result.Failure($"Error during zone grouping check: {ex.Message}");
         }
     }
@@ -90,7 +90,7 @@ public class ZoneGroupingService : IZoneGroupingService
 
         try
         {
-            _logger.LogDebug("🔄 Synchronizing zone {ZoneId}", zoneId);
+            LogSynchronizingZone(zoneId);
 
             // Get zone clients - who should be in this zone?
             var zoneClients = await _clientManager.GetClientsByZoneAsync(zoneId, cancellationToken);
@@ -104,7 +104,7 @@ public class ZoneGroupingService : IZoneGroupingService
                 ?? new List<string>();
             if (!clientIds.Any())
             {
-                _logger.LogDebug("ℹ️ No clients assigned to zone {ZoneId}, skipping", zoneId);
+                LogNoClientsAssigned(zoneId);
                 return Result.Success();
             }
 
@@ -476,4 +476,35 @@ public class ZoneGroupingService : IZoneGroupingService
             _logger.LogError(ex, "💥 Error synchronizing client names for zone {ZoneId}", zoneId);
         }
     }
+
+    // LoggerMessage methods for high-performance logging
+    [LoggerMessage(EventId = 1, Level = LogLevel.Debug, Message = "🔍 Starting zone grouping check for all zones")]
+    private partial void LogStartingZoneGroupingCheck();
+
+    [LoggerMessage(EventId = 2, Level = LogLevel.Debug, Message = "ℹ️ No zones configured, skipping zone grouping")]
+    private partial void LogNoZonesConfigured();
+
+    [LoggerMessage(EventId = 3, Level = LogLevel.Debug, Message = "🔍 Checking {ZoneCount} zones: {ZoneIds}")]
+    private partial void LogCheckingZones(int ZoneCount, string ZoneIds);
+
+    [LoggerMessage(EventId = 4, Level = LogLevel.Debug, Message = "🔧 Checking zone {ZoneId}...")]
+    private partial void LogCheckingZone(int ZoneId);
+
+    [LoggerMessage(EventId = 5, Level = LogLevel.Warning, Message = "⚠️ Failed to synchronize zone {ZoneId}: {Error}")]
+    private partial void LogFailedSynchronizeZone(int ZoneId, string Error);
+
+    [LoggerMessage(EventId = 6, Level = LogLevel.Debug, Message = "✅ Zone {ZoneId} check completed")]
+    private partial void LogZoneCheckCompleted(int ZoneId);
+
+    [LoggerMessage(EventId = 7, Level = LogLevel.Debug, Message = "✅ All zone grouping checks completed")]
+    private partial void LogAllZoneGroupingChecksCompleted();
+
+    [LoggerMessage(EventId = 8, Level = LogLevel.Error, Message = "❌ Error during periodic zone grouping check")]
+    private partial void LogErrorDuringPeriodicCheck(Exception ex);
+
+    [LoggerMessage(EventId = 9, Level = LogLevel.Debug, Message = "🔄 Synchronizing zone {ZoneId}")]
+    private partial void LogSynchronizingZone(int ZoneId);
+
+    [LoggerMessage(EventId = 10, Level = LogLevel.Debug, Message = "ℹ️ No clients assigned to zone {ZoneId}, skipping")]
+    private partial void LogNoClientsAssigned(int ZoneId);
 }
