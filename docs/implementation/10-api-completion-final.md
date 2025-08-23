@@ -101,10 +101,6 @@ The SnapDog API has been successfully implemented to **100% completion** accordi
 
 #### 11.2.2.4. **Media Controller** - `/api/v1/media/*` ✅ Complete
 
-**Media Sources:**
-
-- ✅ `GET /api/v1/media/sources` - List configured media sources
-
 **Playlist Management:**
 
 - ✅ `GET /api/v1/media/playlists` - List playlists (paginated)

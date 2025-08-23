@@ -101,7 +101,6 @@ This document outlines the roadmap to complete the SnapDog API to 100% according
 
 **Media Sources:**
 
-- ❌ `GET /api/v1/media/sources` - List media sources
 - ❌ `GET /api/v1/media/playlists` - List playlists (paginated)
 - ❌ `GET /api/v1/media/playlists/{index}` - Get playlist details
 - ❌ `GET /api/v1/media/playlists/{index}/tracks` - List playlist tracks

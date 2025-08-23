@@ -23,12 +23,14 @@ public static class SnapDogBlueprint
     public static readonly Blueprint Spec = Blueprint.Define()
 
         // Zone Commands - API + MQTT with topic patterns
+        //
         .Command("PLAY")
             .Zone().Api().Mqtt()
             .Post("/api/v1/zones/{zoneIndex:int}/play")
             .MqttTopic("snapdog/zone/{zoneIndex}/play/set")
             .Description("Start playback in a zone")
 
+        //
         .Command("VOLUME")
             .Zone().Api().Mqtt()
             .Put("/api/v1/zones/{zoneIndex:int}/volume")
@@ -37,6 +39,7 @@ public static class SnapDogBlueprint
             .Exclude(Protocol.Knx, "Handled by dedicated KNX actuators")
 
         // Client Commands - with MQTT topic patterns
+        //
         .Command("CLIENT_VOLUME")
             .Client().Api().Mqtt()
             .Put("/api/v1/clients/{clientIndex:int}/volume")
@@ -45,6 +48,7 @@ public static class SnapDogBlueprint
             .Exclude(Protocol.Knx, "Network-specific setting")
 
         // Global Status - API + MQTT with status topics
+        //
         .Status("SYSTEM_STATUS")
             .Global().Api().Mqtt()
             .Get("/api/v1/system/status")
@@ -52,6 +56,7 @@ public static class SnapDogBlueprint
             .Description("Overall system health")
 
         // Zone Status - with MQTT status topics
+        //
         .Status("VOLUME_STATUS")
             .Zone().Api().Mqtt()
             .Get("/api/v1/zones/{zoneIndex:int}/volume")
@@ -59,6 +64,7 @@ public static class SnapDogBlueprint
             .Description("Current zone volume level")
 
         // MQTT-only Status - just specify MQTT with topic
+        //
         .Status("CONTROL_STATUS")
             .Zone().Mqtt()
             .MqttTopic("snapdog/zone/{zoneIndex}/control/status")
@@ -66,6 +72,7 @@ public static class SnapDogBlueprint
             .RecentlyAdded()
 
         // KNX-enabled Commands - explicitly include all protocols
+        //
         .Command("STOP")
             .Zone().Api().Mqtt().Knx()
             .Post("/api/v1/zones/{zoneIndex:int}/stop")
@@ -73,6 +80,7 @@ public static class SnapDogBlueprint
             .Description("Basic stop command suitable for building automation")
 
         // Optional implementation
+        //
         .Command("ADVANCED_EQ")
             .Zone().Api().Mqtt()
             .Put("/api/v1/zones/{zoneIndex:int}/equalizer")
@@ -115,7 +123,8 @@ Blueprint.Define()
 **Protocols** (combinable)
 
 - `Api()` - REST API available
-- `Mqtt()` - MQTT available
+- `Mqtt()` - MQTT available (without topic pattern)
+- `Mqtt(topicPattern)` - MQTT available with specific topic pattern
 - `Knx()` - KNX available
 
 **HTTP Methods**
@@ -123,10 +132,6 @@ Blueprint.Define()
 - `Get(path)` - Query endpoint
 - `Post(path)` - Action endpoint
 - `Put(path)` - Update endpoint
-
-**MQTT Topics**
-
-- `MqttTopic(pattern)` - MQTT topic pattern with placeholders like `{zoneIndex}`, `{clientIndex}`
 
 **Documentation**
 
@@ -196,14 +201,14 @@ public void MqttTopics_ShouldMatchBlueprintSpecification()
 public void MqttTopicAttributes_ShouldMatchBlueprint()
 {
     var commands = SnapDogBlueprint.Spec.Commands.WithMqtt();
-    
+
     foreach (var command in commands)
     {
         var commandType = GetCommandType(command.Id);
         var attribute = commandType.GetCustomAttribute<MqttTopicAttribute>();
-        
+
         attribute.Should().NotBeNull($"Command {command.Id} should have MqttTopic attribute");
-        attribute!.TopicPattern.Should().Be(command.MqttTopic, 
+        attribute!.TopicPattern.Should().Be(command.MqttTopic,
             $"Command {command.Id} attribute should match blueprint");
     }
 }
