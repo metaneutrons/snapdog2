@@ -9,6 +9,7 @@ using SnapDog2.Core.Models;
 /// Command to set the volume for a specific zone. Sets the absolute volume level for all clients in the zone.
 /// </summary>
 [CommandId("VOLUME")]
+[MqttTopic("snapdog/zone/{zoneIndex}/volume/set")]
 public record SetZoneVolumeCommand : ICommand<Result>
 {
     /// <summary>

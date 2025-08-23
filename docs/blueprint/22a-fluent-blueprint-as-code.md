@@ -22,41 +22,61 @@ public static class SnapDogBlueprint
 {
     public static readonly Blueprint Spec = Blueprint.Define()
 
-        // Zone Commands - API + MQTT (KNX not mentioned = not included)
+        // Zone Commands - API + MQTT with topic patterns
         .Command("PLAY")
-            .Zone().Api().Mqtt().Post("/zones/{index}/play")
+            .Zone().Api().Mqtt()
+            .Post("/api/v1/zones/{zoneIndex:int}/play")
+            .MqttTopic("snapdog/zone/{zoneIndex}/play/set")
             .Description("Start playback in a zone")
 
         .Command("VOLUME")
-            .Zone().Api().Mqtt().Put("/zones/{index}/volume")
+            .Zone().Api().Mqtt()
+            .Put("/api/v1/zones/{zoneIndex:int}/volume")
+            .MqttTopic("snapdog/zone/{zoneIndex}/volume/set")
             .Description("Set zone volume level")
             .Exclude(Protocol.Knx, "Handled by dedicated KNX actuators")
 
-        // Client Commands - explicitly excluded from KNX for clarity
-        .Command("CLIENT_LATENCY")
-            .Client().Api().Mqtt().Put("/clients/{index}/latency")
-            .Description("Set client audio latency")
+        // Client Commands - with MQTT topic patterns
+        .Command("CLIENT_VOLUME")
+            .Client().Api().Mqtt()
+            .Put("/api/v1/clients/{clientIndex:int}/volume")
+            .MqttTopic("snapdog/client/{clientIndex}/volume/set")
+            .Description("Set client volume level")
             .Exclude(Protocol.Knx, "Network-specific setting")
 
-        // Global Status - API + MQTT
+        // Global Status - API + MQTT with status topics
         .Status("SYSTEM_STATUS")
-            .Global().Api().Mqtt().Get("/system/status")
+            .Global().Api().Mqtt()
+            .Get("/api/v1/system/status")
+            .MqttTopic("snapdog/system/status")
             .Description("Overall system health")
 
-        // MQTT-only Status - just specify MQTT
+        // Zone Status - with MQTT status topics
+        .Status("VOLUME_STATUS")
+            .Zone().Api().Mqtt()
+            .Get("/api/v1/zones/{zoneIndex:int}/volume")
+            .MqttTopic("snapdog/zone/{zoneIndex}/volume")
+            .Description("Current zone volume level")
+
+        // MQTT-only Status - just specify MQTT with topic
         .Status("CONTROL_STATUS")
             .Zone().Mqtt()
+            .MqttTopic("snapdog/zone/{zoneIndex}/control/status")
             .Description("Control command execution status")
             .RecentlyAdded()
 
         // KNX-enabled Commands - explicitly include all protocols
         .Command("STOP")
             .Zone().Api().Mqtt().Knx()
+            .Post("/api/v1/zones/{zoneIndex:int}/stop")
+            .MqttTopic("snapdog/zone/{zoneIndex}/stop/set")
             .Description("Basic stop command suitable for building automation")
 
         // Optional implementation
         .Command("ADVANCED_EQ")
             .Zone().Api().Mqtt()
+            .Put("/api/v1/zones/{zoneIndex:int}/equalizer")
+            .MqttTopic("snapdog/zone/{zoneIndex}/equalizer/set")
             .Description("Advanced equalizer settings")
             .Optional()
 
@@ -74,6 +94,7 @@ Blueprint.Define()
     .Category()                    // Zone() | Client() | Global()
     .Protocols()                   // Api() | Mqtt() | Knx()
     .HttpMethod(path)              // Get() | Post() | Put() | Delete()
+    .MqttTopic(pattern)            // MQTT topic pattern with placeholders
     .Documentation()               // Description()
     .Modifiers()                   // Exclude() | RecentlyAdded() | Optional()
 ```
@@ -102,6 +123,10 @@ Blueprint.Define()
 - `Get(path)` - Query endpoint
 - `Post(path)` - Action endpoint
 - `Put(path)` - Update endpoint
+
+**MQTT Topics**
+
+- `MqttTopic(pattern)` - MQTT topic pattern with placeholders like `{zoneIndex}`, `{clientIndex}`
 
 **Documentation**
 
@@ -158,6 +183,32 @@ public void RestEndpoints_ShouldUseCorrectHttpMethods()
 }
 
 [Fact]
+public void MqttTopics_ShouldMatchBlueprintSpecification()
+{
+    var incorrect = SnapDogBlueprint.Spec.Commands
+        .WithMqtt()
+        .Where(c => GetActualMqttTopic(c) != c.MqttTopic);
+
+    incorrect.Should().BeEmpty();
+}
+
+[Fact]
+public void MqttTopicAttributes_ShouldMatchBlueprint()
+{
+    var commands = SnapDogBlueprint.Spec.Commands.WithMqtt();
+    
+    foreach (var command in commands)
+    {
+        var commandType = GetCommandType(command.Id);
+        var attribute = commandType.GetCustomAttribute<MqttTopicAttribute>();
+        
+        attribute.Should().NotBeNull($"Command {command.Id} should have MqttTopic attribute");
+        attribute!.TopicPattern.Should().Be(command.MqttTopic, 
+            $"Command {command.Id} attribute should match blueprint");
+    }
+}
+
+[Fact]
 public void KnxExclusions_ShouldBeDocumented()
 {
     var undocumented = GetActualKnxExclusions()
@@ -176,9 +227,17 @@ var apiCommands = Spec.Commands.WithApi();
 // Get MQTT-only status (has MQTT but not API)
 var mqttOnly = Spec.Status.WithMqtt().WithoutApi();
 
+// Get all MQTT commands with their topic patterns
+var mqttCommands = Spec.Commands.WithMqtt()
+    .ToDictionary(c => c.Id, c => c.MqttTopic);
+
+// Get MQTT status topics for zone features
+var zoneStatusTopics = Spec.Status.Zone().WithMqtt()
+    .ToDictionary(s => s.Id, s => s.MqttTopic);
+
 // Get KNX exclusions with reasons
 var exclusions = Spec.ExcludedFrom(Protocol.Knx)
-    .ToDictionary(f => f.Id, f => f.ExclusionReason);
+    .ToDictionary(f => f.Id, f => f.GetExclusionReason(Protocol.Knx));
 
 // Get POST endpoints
 var postEndpoints = Spec.Commands.WithMethod("POST");
@@ -188,6 +247,11 @@ var optional = Spec.All.Optional();
 
 // Get recent features
 var recent = Spec.All.RecentlyAdded();
+
+// Validate MQTT topic patterns
+var invalidTopics = Spec.Commands.WithMqtt()
+    .Where(c => string.IsNullOrEmpty(c.MqttTopic))
+    .Select(c => c.Id);
 ```
 
 ## 26.7. Benefits
