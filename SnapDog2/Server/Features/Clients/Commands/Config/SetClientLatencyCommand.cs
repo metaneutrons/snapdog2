@@ -9,6 +9,7 @@ using SnapDog2.Core.Models;
 /// Command to set client latency compensation. Adjusts the audio latency for an individual Snapcast client.
 /// </summary>
 [CommandId("CLIENT_LATENCY")]
+[MqttTopic("snapdog/client/{clientIndex}/latency/set")]
 public record SetClientLatencyCommand : ICommand<Result>
 {
     /// <summary>

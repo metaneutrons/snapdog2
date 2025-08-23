@@ -298,10 +298,6 @@ public static class StartupInformationHelper
         foreach (var (zone, index) in config.Zones.Select((z, i) => (z, i + 1)))
         {
             Console.WriteLine($"     Zone {index}: {zone.Name} -> {zone.Sink}");
-            if (!string.IsNullOrEmpty(zone.Mqtt.BaseTopic))
-            {
-                Console.WriteLine($"       MQTT Base Topic: {zone.Mqtt.BaseTopic}");
-            }
 
             if (zone.Knx.Enabled)
             {
@@ -317,11 +313,6 @@ public static class StartupInformationHelper
             if (!string.IsNullOrEmpty(client.Mac))
             {
                 Console.WriteLine($"       MAC: {client.Mac}");
-            }
-
-            if (!string.IsNullOrEmpty(client.Mqtt.BaseTopic))
-            {
-                Console.WriteLine($"       MQTT Base Topic: {client.Mqtt.BaseTopic}");
             }
 
             if (client.Knx.Enabled)

@@ -9,6 +9,7 @@ using SnapDog2.Core.Models;
 /// Command to seek to a specific position in the current track.
 /// </summary>
 [CommandId("TRACK_POSITION")]
+[MqttTopic("snapdog/zone/{zoneIndex}/track/position/set")]
 public record SeekPositionCommand : ICommand<Result>
 {
     /// <summary>

@@ -9,6 +9,7 @@ using SnapDog2.Core.Models;
 /// Command to decrease zone volume by a specified step. Decreases the volume for all clients in the zone.
 /// </summary>
 [CommandId("VOLUME_DOWN")]
+[MqttTopic("snapdog/zone/{zoneIndex}/volume/down")]
 public record VolumeDownCommand : ICommand<Result>
 {
     /// <summary>

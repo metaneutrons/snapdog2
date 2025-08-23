@@ -17,12 +17,16 @@ public class BlueprintTests
     public void Blueprint_Commands_ShouldHaveMatchingApiEndpoints()
     {
         // Act
-        var (missingCommands, _) = StaticApiAnalyzer.CompareCommandImplementation();
+        var (missingCommands, extraEndpoints) = StaticApiAnalyzer.CompareCommandImplementation();
 
         // Assert
         missingCommands
             .Should()
             .BeEmpty($"Missing API implementations for required commands: {string.Join(", ", missingCommands)}");
+
+        extraEndpoints
+            .Should()
+            .BeEmpty($"Orphaned API endpoints not defined in blueprint: {string.Join(", ", extraEndpoints)}");
     }
 
     [Fact]
@@ -30,12 +34,16 @@ public class BlueprintTests
     public void Blueprint_Status_ShouldHaveMatchingApiEndpoints()
     {
         // Act
-        var (missingStatus, _) = StaticApiAnalyzer.CompareStatusImplementation();
+        var (missingStatus, extraEndpoints) = StaticApiAnalyzer.CompareStatusImplementation();
 
         // Assert
         missingStatus
             .Should()
             .BeEmpty($"Missing API implementations for required status: {string.Join(", ", missingStatus)}");
+
+        extraEndpoints
+            .Should()
+            .BeEmpty($"Orphaned API endpoints not defined in blueprint: {string.Join(", ", extraEndpoints)}");
     }
 
     [Fact]
@@ -64,6 +72,21 @@ public class BlueprintTests
         {
             stat.ApiPath.Should().NotBeNullOrEmpty($"Status {stat.Id} should have an API path");
             stat.HttpMethod.Should().NotBeNullOrEmpty($"Status {stat.Id} should have an HTTP method");
+        }
+
+        // Ensure all MQTT commands have topic patterns
+        var mqttCommands = commands.Where(c => c.HasMqtt && !c.IsExcludedFrom(Protocol.Mqtt)).ToList();
+        foreach (var cmd in mqttCommands)
+        {
+            cmd.MqttTopic.Should().NotBeNullOrEmpty($"Command {cmd.Id} declares MQTT support but has no topic pattern");
+        }
+
+        // Ensure all MQTT status have topic patterns
+        var mqttStatus = status.Where(s => s.HasMqtt && !s.IsExcludedFrom(Protocol.Mqtt)).ToList();
+        foreach (var stat in mqttStatus)
+        {
+            stat.MqttTopic.Should()
+                .NotBeNullOrEmpty($"Status {stat.Id} declares MQTT support but has no topic pattern");
         }
     }
 }

@@ -9,6 +9,7 @@ using SnapDog2.Core.Models;
 /// Command to set the current playlist in a zone. Changes to a specific playlist by index.
 /// </summary>
 [CommandId("PLAYLIST")]
+[MqttTopic("snapdog/zone/{zoneIndex}/playlist/set")]
 public record SetPlaylistCommand : ICommand<Result>
 {
     /// <summary>

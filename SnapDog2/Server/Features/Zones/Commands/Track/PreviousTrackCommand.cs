@@ -9,6 +9,7 @@ using SnapDog2.Core.Models;
 /// Command to skip to the previous track in a zone.
 /// </summary>
 [CommandId("TRACK_PREVIOUS")]
+[MqttTopic("snapdog/zone/{zoneIndex}/previous")]
 public record PreviousTrackCommand : ICommand<Result>
 {
     /// <summary>

@@ -333,17 +333,10 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             return Result.Failure($"Zone {zoneIndex} not configured for MQTT");
         }
 
-        var zoneConfig = this._zoneConfigs[zoneConfigIndex];
-        if (zoneConfig.Mqtt == null || string.IsNullOrEmpty(zoneConfig.Mqtt.BaseTopic))
-        {
-            return Result.Failure($"Zone {zoneIndex} has no MQTT configuration");
-        }
-
         try
         {
-            // Build state topic from zone configuration
-            var baseTopic = zoneConfig.Mqtt.BaseTopic?.TrimEnd('/') ?? string.Empty;
-            var stateTopic = $"{baseTopic}/{zoneConfig.Mqtt.StateTopic}";
+            // Use simple zone state topic that matches blueprint pattern
+            var stateTopic = $"snapdog/zone/{zoneIndex}/state";
 
             // Publish comprehensive state as JSON
             var stateJson = JsonSerializer.Serialize(
@@ -385,17 +378,11 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             return Result.Failure($"Client {clientIndex} not configured for MQTT");
         }
 
-        var clientConfig = this._clientConfigs[configIndex];
-        if (clientConfig.Mqtt == null || string.IsNullOrEmpty(clientConfig.Mqtt.BaseTopic))
-        {
-            return Result.Failure($"Client {clientIndex} has no MQTT configuration");
-        }
-
         try
         {
-            // Build state topic from client configuration
-            var baseTopic = clientConfig.Mqtt.BaseTopic?.TrimEnd('/') ?? string.Empty;
-            var clientStateTopic = $"{baseTopic}/{clientConfig.Mqtt.StateTopic}";
+            // Use simple client state topic that matches blueprint pattern
+            var clientStateTopic = $"snapdog/client/{parsedClientIndex}/state";
+
             // Publish comprehensive state as JSON
             var stateJson = JsonSerializer.Serialize(
                 state,
@@ -962,16 +949,9 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             }
 
             var clientConfig = this._clientConfigs[configIndex];
-            if (clientConfig.Mqtt == null || string.IsNullOrEmpty(clientConfig.Mqtt.BaseTopic))
-            {
-                this.LogClientHasNoMqttConfiguration(clientIndex);
-                return Result.Success();
-            }
 
-            var baseTopic = clientConfig.Mqtt.BaseTopic?.TrimEnd('/') ?? string.Empty;
-
-            // Get the appropriate MQTT topic for this event type
-            var topic = this.GetClientMqttTopic(eventType, clientConfig);
+            // Get the appropriate MQTT topic for this event type using simple patterns
+            var topic = this.GetClientMqttTopic(eventType, parsedClientIndex);
 
             if (topic == null)
             {
@@ -993,68 +973,43 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     }
 
     /// <summary>
-    /// Gets the MQTT topic for a client status event type.
+    /// Gets the MQTT topic for a client status event type using simple patterns that match blueprint.
     /// </summary>
     /// <param name="eventType">The status event type.</param>
-    /// <param name="clientConfig">The client configuration.</param>
+    /// <param name="clientIndex">The client index (1-based).</param>
     /// <returns>The MQTT topic string, or null if no mapping exists.</returns>
-    private string? GetClientMqttTopic(string eventType, ClientConfig clientConfig)
+    private string? GetClientMqttTopic(string eventType, int clientIndex)
     {
-        var baseTopic = clientConfig.Mqtt.BaseTopic?.TrimEnd('/') ?? string.Empty;
-
-        // Parse the event type to enum for type safety
-        var statusEventType = StatusEventTypeExtensions.FromStatusString(eventType);
-        if (statusEventType == null)
+        // Use simple topic patterns that match the blueprint
+        return eventType.ToUpperInvariant() switch
         {
-            return null;
-        }
-
-        var topicSuffix = statusEventType switch
-        {
-            StatusEventType.ClientVolumeStatus => clientConfig.Mqtt.VolumeTopic,
-            StatusEventType.ClientMuteStatus => clientConfig.Mqtt.MuteTopic,
-            StatusEventType.ClientLatencyStatus => clientConfig.Mqtt.LatencyTopic,
-            StatusEventType.ClientConnected => clientConfig.Mqtt.ConnectedTopic,
-            StatusEventType.ClientZoneStatus => clientConfig.Mqtt.ZoneTopic,
-            StatusEventType.ClientState => clientConfig.Mqtt.StateTopic,
+            "CLIENT_VOLUME_STATUS" => $"snapdog/client/{clientIndex}/volume",
+            "CLIENT_MUTE_STATUS" => $"snapdog/client/{clientIndex}/mute",
+            "CLIENT_LATENCY_STATUS" => $"snapdog/client/{clientIndex}/latency",
+            "CLIENT_CONNECTED" => $"snapdog/client/{clientIndex}/connected",
+            "CLIENT_ZONE_STATUS" => $"snapdog/client/{clientIndex}/zone",
+            "CLIENT_STATE" => $"snapdog/client/{clientIndex}/state",
             _ => null,
         };
-
-        return topicSuffix != null ? $"{baseTopic}/{topicSuffix}" : null;
     }
 
     /// <summary>
-    /// Gets the MQTT topic for a zone status event type.
+    /// Gets the MQTT topic for a zone status event type using simple patterns that match blueprint.
     /// </summary>
     /// <param name="eventType">The status event type.</param>
-    /// <param name="zoneConfig">The zone configuration.</param>
+    /// <param name="zoneIndex">The zone index (1-based).</param>
     /// <returns>The MQTT topic string, or null if no mapping exists.</returns>
-    private string? GetZoneMqttTopic(string eventType, ZoneConfig zoneConfig)
+    private string? GetZoneMqttTopic(string eventType, int zoneIndex)
     {
-        var baseTopic = zoneConfig.Mqtt.BaseTopic?.TrimEnd('/') ?? string.Empty;
-
-        // Parse the event type to enum for type safety
-        var statusEventType = StatusEventTypeExtensions.FromStatusString(eventType);
-        if (statusEventType == null)
+        // Use simple topic patterns that match the blueprint
+        return eventType.ToUpperInvariant() switch
         {
-            return null;
-        }
-
-        var topicSuffix = statusEventType switch
-        {
-            StatusEventType.VolumeStatus => zoneConfig.Mqtt.VolumeTopic,
-            StatusEventType.MuteStatus => zoneConfig.Mqtt.MuteTopic,
-            StatusEventType.PlaybackState => zoneConfig.Mqtt.ControlTopic,
-            StatusEventType.TrackIndex => zoneConfig.Mqtt.TrackTopic,
-            StatusEventType.PlaylistIndex => zoneConfig.Mqtt.PlaylistTopic,
-            StatusEventType.TrackRepeatStatus => zoneConfig.Mqtt.TrackRepeatTopic,
-            StatusEventType.PlaylistRepeatStatus => zoneConfig.Mqtt.PlaylistRepeatTopic,
-            StatusEventType.PlaylistShuffleStatus => zoneConfig.Mqtt.PlaylistShuffleTopic,
-            StatusEventType.ZoneState => zoneConfig.Mqtt.StateTopic,
+            "VOLUME_STATUS" => $"snapdog/zone/{zoneIndex}/volume",
+            "MUTE_STATUS" => $"snapdog/zone/{zoneIndex}/mute",
+            "PLAYBACK_STATE" => $"snapdog/zone/{zoneIndex}/playing",
+            "ZONE_STATE" => $"snapdog/zone/{zoneIndex}/state",
             _ => null,
         };
-
-        return topicSuffix != null ? $"{baseTopic}/{topicSuffix}" : null;
     }
 
     /// <summary>
@@ -1082,17 +1037,8 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
                 return Result.Success();
             }
 
-            var zoneConfig = this._zoneConfigs[zoneConfigIndex];
-            if (zoneConfig.Mqtt == null || string.IsNullOrEmpty(zoneConfig.Mqtt.BaseTopic))
-            {
-                this.LogZoneHasNoMqttConfiguration(zoneIndex);
-                return Result.Success();
-            }
-
-            var baseTopic = zoneConfig.Mqtt.BaseTopic?.TrimEnd('/') ?? string.Empty;
-
-            // Get the appropriate MQTT topic for this event type
-            var topic = this.GetZoneMqttTopic(eventType, zoneConfig);
+            // Get the appropriate MQTT topic for this event type from blueprint
+            var topic = this.GetZoneMqttTopic(eventType, zoneIndex);
 
             if (topic == null)
             {
@@ -1129,15 +1075,12 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
                 return Result.Failure("MQTT client is not connected");
             }
 
-            // Build topic from SystemConfig
-            var baseTopic = this._systemConfig.MqttBaseTopic.TrimEnd('/');
+            // Use simple topic patterns that match the blueprint
             var topic = eventType.ToUpperInvariant() switch
             {
-                "SYSTEM_STATUS" => $"{baseTopic}/{this._systemConfig.MqttStatusTopic}",
-                "ERROR_STATUS" => $"{baseTopic}/{this._systemConfig.MqttErrorTopic}",
-                "VERSION_INFO" => $"{baseTopic}/{this._systemConfig.MqttVersionTopic}",
-                "SERVER_STATS" => $"{baseTopic}/{this._systemConfig.MqttStatsTopic}",
-                "ZONES_INFO" => $"{baseTopic}/{this._systemConfig.MqttZonesTopic}",
+                "SYSTEM_STATUS" => "snapdog/system/status",
+                "VERSION_INFO" => "snapdog/system/version",
+                "SERVER_STATS" => "snapdog/system/stats",
                 _ => null,
             };
 

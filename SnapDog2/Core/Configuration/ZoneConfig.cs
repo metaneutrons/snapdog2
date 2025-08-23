@@ -26,13 +26,6 @@ public class ZoneConfig
     public string Sink { get; set; } = null!;
 
     /// <summary>
-    /// MQTT configuration for this zone.
-    /// Maps environment variables with prefix: SNAPDOG_ZONE_X_MQTT_*
-    /// </summary>
-    [Env(NestedPrefix = "MQTT_")]
-    public ZoneMqttConfig Mqtt { get; set; } = new();
-
-    /// <summary>
     /// KNX configuration for this zone.
     /// Maps environment variables with prefix: SNAPDOG_ZONE_X_KNX_*
     /// </summary>

@@ -16,6 +16,7 @@ public abstract class FeatureBuilder<TBuilder>
     protected readonly List<ProtocolExclusion> _exclusions = new();
     protected string? _httpMethod;
     protected string? _apiPath;
+    protected string? _mqttTopic;
 
     protected FeatureBuilder(BlueprintBuilder blueprintBuilder, string id)
     {
@@ -58,6 +59,13 @@ public abstract class FeatureBuilder<TBuilder>
     public TBuilder Mqtt()
     {
         _protocols |= Protocol.Mqtt;
+        return (TBuilder)this;
+    }
+
+    public TBuilder Mqtt(string topicPattern)
+    {
+        _protocols |= Protocol.Mqtt;
+        _mqttTopic = topicPattern;
         return (TBuilder)this;
     }
 
@@ -164,6 +172,7 @@ public class CommandBuilder : FeatureBuilder<CommandBuilder>
             Exclusions = _exclusions,
             HttpMethod = _httpMethod,
             ApiPath = _apiPath,
+            MqttTopic = _mqttTopic,
         };
 
         _blueprintBuilder.AddCommand(command);
@@ -209,6 +218,7 @@ public class StatusBuilder : FeatureBuilder<StatusBuilder>
             Exclusions = _exclusions,
             HttpMethod = _httpMethod,
             ApiPath = _apiPath,
+            MqttTopic = _mqttTopic,
         };
 
         _blueprintBuilder.AddStatus(status);

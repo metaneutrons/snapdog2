@@ -65,9 +65,14 @@ public static class StaticApiAnalyzer
         var implementedEndpoints = GetImplementedApiEndpoints();
 
         var missing = new HashSet<string>();
+        var blueprintEndpoints = new HashSet<string>();
 
+        // Check for missing implementations
         foreach (var (commandId, expectedPath, expectedMethod) in blueprintCommands)
         {
+            var endpointKey = $"{expectedMethod.ToUpper()} {expectedPath}";
+            blueprintEndpoints.Add(endpointKey);
+
             if (
                 !implementedEndpoints.TryGetValue(expectedPath, out var methods)
                 || !methods.Contains(expectedMethod.ToUpper())
@@ -77,7 +82,26 @@ public static class StaticApiAnalyzer
             }
         }
 
-        return (missing, new HashSet<string>());
+        // Check for extra implementations (orphaned) - only command methods
+        var commandMethods = new HashSet<string> { "PUT", "POST", "DELETE", "PATCH" };
+        var extra = new HashSet<string>();
+        foreach (var (path, methods) in implementedEndpoints)
+        {
+            foreach (var method in methods)
+            {
+                // Only check command methods for orphaned commands
+                if (commandMethods.Contains(method))
+                {
+                    var endpointKey = $"{method} {path}";
+                    if (!blueprintEndpoints.Contains(endpointKey))
+                    {
+                        extra.Add(endpointKey);
+                    }
+                }
+            }
+        }
+
+        return (missing, extra);
     }
 
     /// <summary>
@@ -89,9 +113,14 @@ public static class StaticApiAnalyzer
         var implementedEndpoints = GetImplementedApiEndpoints();
 
         var missing = new HashSet<string>();
+        var blueprintEndpoints = new HashSet<string>();
 
+        // Check for missing implementations
         foreach (var (statusId, expectedPath, expectedMethod) in blueprintStatus)
         {
+            var endpointKey = $"{expectedMethod.ToUpper()} {expectedPath}";
+            blueprintEndpoints.Add(endpointKey);
+
             if (
                 !implementedEndpoints.TryGetValue(expectedPath, out var methods)
                 || !methods.Contains(expectedMethod.ToUpper())
@@ -101,7 +130,25 @@ public static class StaticApiAnalyzer
             }
         }
 
-        return (missing, new HashSet<string>());
+        // Check for extra implementations (orphaned) - only GET methods for status
+        var extra = new HashSet<string>();
+        foreach (var (path, methods) in implementedEndpoints)
+        {
+            foreach (var method in methods)
+            {
+                // Only check GET methods for orphaned status endpoints
+                if (method == "GET")
+                {
+                    var endpointKey = $"{method} {path}";
+                    if (!blueprintEndpoints.Contains(endpointKey))
+                    {
+                        extra.Add(endpointKey);
+                    }
+                }
+            }
+        }
+
+        return (missing, extra);
     }
 
     private static string GetControllerRoute(Type controllerType)

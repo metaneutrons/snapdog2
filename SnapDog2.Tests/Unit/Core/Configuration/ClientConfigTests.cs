@@ -13,29 +13,8 @@ public class ClientConfigTests
         var config = new ClientConfig();
 
         // Assert
-        config.Mqtt.Should().NotBeNull();
         config.Knx.Should().NotBeNull();
         config.DefaultZone.Should().Be(1);
-    }
-
-    [Fact]
-    [Trait("Category", "Unit")]
-    public void ClientMqttConfig_ShouldHaveDefaultValues()
-    {
-        // Act
-        var config = new ClientMqttConfig();
-
-        // Assert
-        config.VolumeSetTopic.Should().Be("volume/set");
-        config.MuteSetTopic.Should().Be("mute/set");
-        config.LatencySetTopic.Should().Be("latency/set");
-        config.ZoneSetTopic.Should().Be("zone/set");
-        config.ConnectedTopic.Should().Be("connected");
-        config.VolumeTopic.Should().Be("volume");
-        config.MuteTopic.Should().Be("mute");
-        config.LatencyTopic.Should().Be("latency");
-        config.ZoneTopic.Should().Be("zone");
-        config.StateTopic.Should().Be("state");
     }
 
     [Fact]

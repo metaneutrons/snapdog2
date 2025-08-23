@@ -43,51 +43,16 @@ public class SystemConfig
     public string HealthChecksTags { get; set; } = "ready,live";
 
     /// <summary>
-    /// System-wide MQTT base topic.
-    /// Maps to: SNAPDOG_SYSTEM_MQTT_BASE_TOPIC
-    /// </summary>
-    [Env(Key = "MQTT_BASE_TOPIC", Default = "snapdog")]
-    public string MqttBaseTopic { get; set; } = "snapdog";
-
-    /// <summary>
-    /// System-wide MQTT status topic.
-    /// Maps to: SNAPDOG_SYSTEM_MQTT_STATUS_TOPIC
-    /// </summary>
-    [Env(Key = "MQTT_STATUS_TOPIC", Default = "status")]
-    public string MqttStatusTopic { get; set; } = "status";
-
-    /// <summary>
-    /// System-wide MQTT error topic.
-    /// Maps to: SNAPDOG_SYSTEM_MQTT_ERROR_TOPIC
-    /// </summary>
-    [Env(Key = "MQTT_ERROR_TOPIC", Default = "error")]
-    public string MqttErrorTopic { get; set; } = "error";
-
-    /// <summary>
-    /// System-wide MQTT version topic.
-    /// Maps to: SNAPDOG_SYSTEM_MQTT_VERSION_TOPIC
-    /// </summary>
-    [Env(Key = "MQTT_VERSION_TOPIC", Default = "version")]
-    public string MqttVersionTopic { get; set; } = "version";
-
-    /// <summary>
-    /// System-wide MQTT zones topic.
-    /// Maps to: SNAPDOG_SYSTEM_MQTT_ZONES_TOPIC
-    /// </summary>
-    [Env(Key = "MQTT_ZONES_TOPIC", Default = "system/zones")]
-    public string MqttZonesTopic { get; set; } = "system/zones";
-
-    /// <summary>
-    /// System-wide MQTT stats topic.
-    /// Maps to: SNAPDOG_SYSTEM_MQTT_STATS_TOPIC
-    /// </summary>
-    [Env(Key = "MQTT_STATS_TOPIC", Default = "stats")]
-    public string MqttStatsTopic { get; set; } = "stats";
-
-    /// <summary>
     /// Optional log file path. If not set, file logging is disabled.
     /// Maps to: SNAPDOG_SYSTEM_LOG_FILE
     /// </summary>
     [Env(Key = "LOG_FILE")]
     public string? LogFile { get; set; }
+
+    /// <summary>
+    /// Base MQTT topic prefix for all system topics.
+    /// Maps to: SNAPDOG_SYSTEM_MQTT_BASE_TOPIC
+    /// </summary>
+    [Env(Key = "MQTT_BASE_TOPIC", Default = "snapdog")]
+    public string MqttBaseTopic { get; set; } = "snapdog";
 }

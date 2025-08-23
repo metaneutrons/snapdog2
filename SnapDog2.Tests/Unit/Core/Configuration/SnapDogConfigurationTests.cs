@@ -34,11 +34,6 @@ public class SnapDogConfigurationTests
         config.HealthChecksTimeout.Should().Be(30);
         config.HealthChecksTags.Should().Be("ready,live");
         config.MqttBaseTopic.Should().Be("snapdog");
-        config.MqttStatusTopic.Should().Be("status");
-        config.MqttErrorTopic.Should().Be("error");
-        config.MqttVersionTopic.Should().Be("version");
-        config.MqttZonesTopic.Should().Be("system/zones");
-        config.MqttStatsTopic.Should().Be("stats");
         config.LogFile.Should().BeNull();
     }
 

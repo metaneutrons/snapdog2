@@ -9,6 +9,7 @@ using SnapDog2.Core.Models;
 /// Command to stop playback in a zone. Stops the currently playing media.
 /// </summary>
 [CommandId("STOP")]
+[MqttTopic("snapdog/zone/{zoneIndex}/stop")]
 public record StopCommand : ICommand<Result>
 {
     /// <summary>

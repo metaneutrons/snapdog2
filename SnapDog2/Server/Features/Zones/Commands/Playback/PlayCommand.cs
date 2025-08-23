@@ -9,7 +9,7 @@ using SnapDog2.Core.Models;
 /// Command to start playback in a zone. Can play current playlist, specific track, or media URL.
 /// </summary>
 [CommandId("PLAY")]
-[MqttTopic("snapdog/zone/{zoneIndex}/play/set")]
+[MqttTopic("snapdog/zone/{zoneIndex}/play")]
 public record PlayCommand : ICommand<Result>
 {
     /// <summary>

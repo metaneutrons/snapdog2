@@ -9,6 +9,7 @@ using SnapDog2.Core.Models;
 /// Command to set track repeat mode in a zone.
 /// </summary>
 [CommandId("TRACK_REPEAT")]
+[MqttTopic("snapdog/zone/{zoneIndex}/repeat/track/set")]
 public record SetTrackRepeatCommand : ICommand<Result>
 {
     /// <summary>

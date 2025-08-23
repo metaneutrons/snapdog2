@@ -37,13 +37,6 @@ public class ClientConfig
     public int DefaultZone { get; set; } = 1;
 
     /// <summary>
-    /// MQTT configuration for this client.
-    /// Maps environment variables with prefix: SNAPDOG_CLIENT_X_MQTT_*
-    /// </summary>
-    [Env(NestedPrefix = "MQTT_")]
-    public ClientMqttConfig Mqtt { get; set; } = new();
-
-    /// <summary>
     /// KNX configuration for this client.
     /// Maps environment variables with prefix: SNAPDOG_CLIENT_X_KNX_*
     /// </summary>
