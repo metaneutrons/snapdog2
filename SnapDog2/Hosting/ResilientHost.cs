@@ -24,15 +24,11 @@ public partial class ResilientHost(IHost innerHost, ILogger<ResilientHost> logge
             // Handle our custom startup validation exceptions gracefully
             if (this._isDebugMode)
             {
-                this._logger.LogCritical(ex, "🚨 STARTUP VALIDATION FAILED: {ValidationStep}", ex.ValidationStep);
+                LogStartupValidationFailedDebug(this._logger, ex, ex.ValidationStep);
             }
             else
             {
-                this._logger.LogCritical(
-                    "🚨 STARTUP VALIDATION FAILED: {ValidationStep} - {ErrorMessage}",
-                    ex.ValidationStep,
-                    GetCleanErrorMessage(ex)
-                );
+                LogStartupValidationFailedProduction(this._logger, ex.ValidationStep, GetCleanErrorMessage(ex));
             }
 
             // Don't re-throw - let the application exit gracefully
@@ -44,15 +40,11 @@ public partial class ResilientHost(IHost innerHost, ILogger<ResilientHost> logge
             // Handle expected startup exceptions
             if (this._isDebugMode)
             {
-                this._logger.LogCritical(ex, "🚨 STARTUP FAILED: Expected startup error occurred");
+                LogStartupFailedDebug(this._logger, ex);
             }
             else
             {
-                this._logger.LogCritical(
-                    "🚨 STARTUP FAILED: {ErrorType} - {ErrorMessage}",
-                    ex.GetType().Name,
-                    ex.Message
-                );
+                LogStartupFailedProduction(this._logger, ex.GetType().Name, ex.Message);
             }
 
             Environment.ExitCode = 1;
@@ -63,15 +55,11 @@ public partial class ResilientHost(IHost innerHost, ILogger<ResilientHost> logge
             // Handle unexpected startup exceptions
             if (this._isDebugMode)
             {
-                this._logger.LogCritical(ex, "🚨 UNEXPECTED STARTUP FAILURE: Unhandled exception during host startup");
+                LogUnexpectedStartupFailureDebug(this._logger, ex);
             }
             else
             {
-                this._logger.LogCritical(
-                    "🚨 UNEXPECTED STARTUP FAILURE: {ErrorType} - {ErrorMessage}",
-                    ex.GetType().Name,
-                    ex.Message
-                );
+                LogUnexpectedStartupFailureProduction(this._logger, ex.GetType().Name, ex.Message);
             }
 
             Environment.ExitCode = 2;

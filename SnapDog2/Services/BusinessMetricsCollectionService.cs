@@ -30,10 +30,7 @@ public partial class BusinessMetricsCollectionService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation(
-            "BusinessMetricsCollectionService started with {CollectionInterval} interval",
-            _collectionInterval
-        );
+        LogServiceStarted(_logger, _collectionInterval);
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -49,7 +46,7 @@ public partial class BusinessMetricsCollectionService : BackgroundService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while collecting business metrics");
+                LogErrorCollectingMetrics(_logger, ex);
 
                 // Record the error in metrics
                 _metricsService.RecordException(ex, "BusinessMetricsCollection");
@@ -59,7 +56,7 @@ public partial class BusinessMetricsCollectionService : BackgroundService
             }
         }
 
-        _logger.LogInformation("BusinessMetricsCollectionService stopped");
+        LogServiceStopped(_logger);
     }
 
     /// <summary>
@@ -93,7 +90,7 @@ public partial class BusinessMetricsCollectionService : BackgroundService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Failed to collect business metrics");
+            LogFailedToCollectMetrics(_logger, ex);
         }
     }
 
@@ -201,4 +198,32 @@ public partial class BusinessMetricsCollectionService : BackgroundService
         int clientsConnected,
         int tracksPlaying
     );
+
+    [LoggerMessage(
+        EventId = 4002,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "BusinessMetricsCollectionService started with {CollectionInterval} interval"
+    )]
+    private static partial void LogServiceStarted(ILogger logger, TimeSpan collectionInterval);
+
+    [LoggerMessage(
+        EventId = 4003,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Error occurred while collecting business metrics"
+    )]
+    private static partial void LogErrorCollectingMetrics(ILogger logger, Exception ex);
+
+    [LoggerMessage(
+        EventId = 4004,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "BusinessMetricsCollectionService stopped"
+    )]
+    private static partial void LogServiceStopped(ILogger logger);
+
+    [LoggerMessage(
+        EventId = 4005,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to collect business metrics"
+    )]
+    private static partial void LogFailedToCollectMetrics(ILogger logger, Exception ex);
 }

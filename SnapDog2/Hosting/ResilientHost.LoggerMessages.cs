@@ -8,6 +8,35 @@ namespace SnapDog2.Hosting;
 /// </summary>
 public partial class ResilientHost
 {
+    // Startup Validation Errors (10001-10002)
+    [LoggerMessage(10001, LogLevel.Critical, "🚨 STARTUP VALIDATION FAILED: {ValidationStep}")]
+    private static partial void LogStartupValidationFailedDebug(ILogger logger, Exception ex, string validationStep);
+
+    [LoggerMessage(10002, LogLevel.Critical, "🚨 STARTUP VALIDATION FAILED: {ValidationStep} - {ErrorMessage}")]
+    private static partial void LogStartupValidationFailedProduction(
+        ILogger logger,
+        string validationStep,
+        string errorMessage
+    );
+
+    // Expected Startup Errors (10003-10004)
+    [LoggerMessage(10003, LogLevel.Critical, "🚨 STARTUP FAILED: Expected startup error occurred")]
+    private static partial void LogStartupFailedDebug(ILogger logger, Exception ex);
+
+    [LoggerMessage(10004, LogLevel.Critical, "🚨 STARTUP FAILED: {ErrorType} - {ErrorMessage}")]
+    private static partial void LogStartupFailedProduction(ILogger logger, string errorType, string errorMessage);
+
+    // Unexpected Startup Errors (10005-10006)
+    [LoggerMessage(10005, LogLevel.Critical, "🚨 UNEXPECTED STARTUP FAILURE: Unhandled exception during host startup")]
+    private static partial void LogUnexpectedStartupFailureDebug(ILogger logger, Exception ex);
+
+    [LoggerMessage(10006, LogLevel.Critical, "🚨 UNEXPECTED STARTUP FAILURE: {ErrorType} - {ErrorMessage}")]
+    private static partial void LogUnexpectedStartupFailureProduction(
+        ILogger logger,
+        string errorType,
+        string errorMessage
+    );
+
     // Host Shutdown Error Operations (10501-10502)
     [LoggerMessage(10501, LogLevel.Error, "Error during host shutdown")]
     private partial void LogErrorDuringHostShutdown(Exception ex);

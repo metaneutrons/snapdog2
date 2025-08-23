@@ -14,8 +14,6 @@ public static class GitVersionHelper
     /// <returns>GitVersionInfo populated with current version data</returns>
     public static GitVersionInfo GetVersionInfo()
     {
-        var assembly = Assembly.GetExecutingAssembly();
-
         return new GitVersionInfo
         {
             AssemblySemFileVer = GitVersionInformation.AssemblySemFileVer,
