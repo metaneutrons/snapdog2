@@ -112,7 +112,7 @@ public partial class PlaylistManager : IPlaylistManager
 
     private void InitializePlaceholderPlaylists()
     {
-        // Create placeholder playlists with sample tracks
+        // FIXME: Create placeholder playlists with sample tracks
         var playlists = new[]
         {
             new

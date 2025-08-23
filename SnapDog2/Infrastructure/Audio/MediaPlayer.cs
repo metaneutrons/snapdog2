@@ -58,11 +58,7 @@ public sealed partial class MediaPlayer(
             // Stop any existing streaming
             await this.StopStreamingAsync();
 
-            this._logger.LogInformation(
-                "Starting audio streaming for zone {ZoneIndex}: {StreamUrl}",
-                this._zoneIndex,
-                streamUrl
-            );
+            LogStartingStreaming(this._logger, this._zoneIndex, streamUrl);
 
             // Create new processing context
             this._processingContext = new AudioProcessingContext(
@@ -101,23 +97,20 @@ public sealed partial class MediaPlayer(
 
                         if (!result.Success)
                         {
-                            this._logger.LogError("Audio processing failed: {ErrorMessage}", result.ErrorMessage);
+                            LogAudioProcessingFailed(this._logger, result.ErrorMessage ?? "Unknown error");
                         }
                         else
                         {
-                            this._logger.LogInformation(
-                                "Audio streaming completed successfully for zone {ZoneIndex}",
-                                this._zoneIndex
-                            );
+                            LogAudioStreamingCompleted(this._logger, this._zoneIndex);
                         }
                     }
                     catch (OperationCanceledException)
                     {
-                        this._logger.LogDebug("Audio streaming was cancelled for zone {ZoneIndex}", this._zoneIndex);
+                        LogStreamingCancelled(this._logger, this._zoneIndex);
                     }
                     catch (Exception ex)
                     {
-                        this._logger.LogError(ex, "Error during audio streaming for zone {ZoneIndex}", this._zoneIndex);
+                        LogStreamingError(this._logger, ex, this._zoneIndex);
                     }
                 },
                 this._streamingCts.Token
@@ -176,8 +169,8 @@ public sealed partial class MediaPlayer(
     {
         var isPlaying = this._processingContext?.IsPlaying == true && !this._disposed;
 
-        this._logger.LogDebug(
-            "MediaPlayer.GetStatus() - ProcessingContext: {HasContext}, IsPlaying: {IsPlaying}, Disposed: {Disposed}, CurrentTrack: {HasTrack}",
+        LogGetStatusDebug(
+            this._logger,
             this._processingContext != null,
             this._processingContext?.IsPlaying ?? false,
             this._disposed,
@@ -188,7 +181,7 @@ public sealed partial class MediaPlayer(
         TrackInfo? currentTrack = this._currentTrack;
         if (currentTrack != null && this._processingContext != null && isPlaying)
         {
-            this._logger.LogDebug("Updating track position from LibVLC...");
+            LogUpdatingTrackPosition(this._logger);
 
             // Update track with real-time position information from LibVLC
             currentTrack = currentTrack with
@@ -204,12 +197,7 @@ public sealed partial class MediaPlayer(
         }
         else
         {
-            this._logger.LogInformation(
-                "❌ NOT updating position - CurrentTrack: {HasTrack}, ProcessingContext: {HasContext}, IsPlaying: {IsPlaying}",
-                currentTrack != null,
-                this._processingContext != null,
-                isPlaying
-            );
+            LogNotUpdatingPosition(this._logger, currentTrack != null, this._processingContext != null, isPlaying);
         }
 
         return new PlaybackStatus
@@ -235,11 +223,7 @@ public sealed partial class MediaPlayer(
         }
         catch (Exception ex)
         {
-            this._logger.LogWarning(
-                ex,
-                "Error forwarding position changed event for zone {ZoneIndex}",
-                this._zoneIndex
-            );
+            LogPositionEventError(this._logger, ex, this._zoneIndex);
         }
     }
 
@@ -254,11 +238,7 @@ public sealed partial class MediaPlayer(
         }
         catch (Exception ex)
         {
-            this._logger.LogWarning(
-                ex,
-                "Error forwarding playback state changed event for zone {ZoneIndex}",
-                this._zoneIndex
-            );
+            LogPlaybackStateEventError(this._logger, ex, this._zoneIndex);
         }
     }
 
@@ -307,4 +287,80 @@ public sealed partial class MediaPlayer(
         Message = "MediaPlayer disposed for zone {ZoneIndex}"
     )]
     private static partial void LogPlayerDisposed(ILogger logger, int zoneIndex);
+
+    [LoggerMessage(
+        EventId = 1,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Starting audio streaming for zone {ZoneIndex}: {StreamUrl}"
+    )]
+    private static partial void LogStartingStreaming(ILogger logger, int zoneIndex, string streamUrl);
+
+    [LoggerMessage(
+        EventId = 2,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Audio processing failed: {ErrorMessage}"
+    )]
+    private static partial void LogAudioProcessingFailed(ILogger logger, string errorMessage);
+
+    [LoggerMessage(
+        EventId = 3,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Audio streaming completed successfully for zone {ZoneIndex}"
+    )]
+    private static partial void LogAudioStreamingCompleted(ILogger logger, int zoneIndex);
+
+    [LoggerMessage(
+        EventId = 4,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Audio streaming was cancelled for zone {ZoneIndex}"
+    )]
+    private static partial void LogStreamingCancelled(ILogger logger, int zoneIndex);
+
+    [LoggerMessage(
+        EventId = 5,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Error during audio streaming for zone {ZoneIndex}"
+    )]
+    private static partial void LogStreamingError(ILogger logger, Exception ex, int zoneIndex);
+
+    [LoggerMessage(
+        EventId = 6,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "MediaPlayer.GetStatus() - ProcessingContext: {HasContext}, IsPlaying: {IsPlaying}, Disposed: {Disposed}, CurrentTrack: {HasTrack}"
+    )]
+    private static partial void LogGetStatusDebug(
+        ILogger logger,
+        bool hasContext,
+        bool isPlaying,
+        bool disposed,
+        bool hasTrack
+    );
+
+    [LoggerMessage(
+        EventId = 7,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Updating track position from LibVLC..."
+    )]
+    private static partial void LogUpdatingTrackPosition(ILogger logger);
+
+    [LoggerMessage(
+        EventId = 8,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "❌ NOT updating position - CurrentTrack: {HasTrack}, ProcessingContext: {HasContext}, IsPlaying: {IsPlaying}"
+    )]
+    private static partial void LogNotUpdatingPosition(ILogger logger, bool hasTrack, bool hasContext, bool isPlaying);
+
+    [LoggerMessage(
+        EventId = 9,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Error forwarding position changed event for zone {ZoneIndex}"
+    )]
+    private static partial void LogPositionEventError(ILogger logger, Exception ex, int zoneIndex);
+
+    [LoggerMessage(
+        EventId = 10,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Error forwarding playback state changed event for zone {ZoneIndex}"
+    )]
+    private static partial void LogPlaybackStateEventError(ILogger logger, Exception ex, int zoneIndex);
 }

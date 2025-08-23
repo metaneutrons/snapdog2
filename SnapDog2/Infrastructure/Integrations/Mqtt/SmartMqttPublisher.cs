@@ -11,7 +11,7 @@ namespace SnapDog2.Infrastructure.Integrations.Mqtt;
 /// Smart MQTT publisher that uses direct publishing with queue fallback for maximum reliability and performance.
 /// Implements the hybrid pattern: Direct publish for speed, queue for resilience.
 /// </summary>
-public sealed class SmartMqttPublisher : ISmartMqttPublisher
+public sealed partial class SmartMqttPublisher : ISmartMqttPublisher
 {
     private readonly IMqttService _mqttService;
     private readonly INotificationQueue _notificationQueue;
@@ -204,62 +204,53 @@ public sealed class SmartMqttPublisher : ISmartMqttPublisher
 
     #region Logging
 
-    private void LogDirectPublishSuccess(string entityType, string entityId, string eventType)
-    {
-        _logger.LogDebug(
-            "✅ Direct MQTT publish success: {EntityType} {EntityId} {EventType}",
-            entityType,
-            entityId,
-            eventType
-        );
-    }
+    [LoggerMessage(
+        EventId = 1,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "✅ Direct MQTT publish success: {EntityType} {EntityId} {EventType}"
+    )]
+    private partial void LogDirectPublishSuccess(string entityType, string entityId, string eventType);
 
-    private void LogDirectPublishFailure(
+    [LoggerMessage(
+        EventId = 2,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "❌ Direct MQTT publish failed: {EntityType} {EntityId} {EventType} - {ErrorMessage} (Failure #{FailureCount})"
+    )]
+    private partial void LogDirectPublishFailure(
         string entityType,
         string entityId,
         string eventType,
         string errorMessage,
         int failureCount
-    )
-    {
-        _logger.LogWarning(
-            "❌ Direct MQTT publish failed: {EntityType} {EntityId} {EventType} - {ErrorMessage} (Failure #{FailureCount})",
-            entityType,
-            entityId,
-            eventType,
-            errorMessage,
-            failureCount
-        );
-    }
+    );
 
-    private void LogFallingBackToQueue(string entityType, string entityId, string eventType)
-    {
-        _logger.LogInformation(
-            "🔄 Falling back to queue: {EntityType} {EntityId} {EventType}",
-            entityType,
-            entityId,
-            eventType
-        );
-    }
+    [LoggerMessage(
+        EventId = 3,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "🔄 Falling back to queue: {EntityType} {EntityId} {EventType}"
+    )]
+    private partial void LogFallingBackToQueue(string entityType, string entityId, string eventType);
 
-    private void LogCircuitBreakerOpened(int failureCount, double resetTimeMinutes)
-    {
-        _logger.LogWarning(
-            "🚫 Circuit breaker opened after {FailureCount} failures - switching to queue-only mode for {ResetTimeMinutes} minutes",
-            failureCount,
-            resetTimeMinutes
-        );
-    }
+    [LoggerMessage(
+        EventId = 4,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "🚫 Circuit breaker opened after {FailureCount} failures - switching to queue-only mode for {ResetTimeMinutes} minutes"
+    )]
+    private partial void LogCircuitBreakerOpened(int failureCount, double resetTimeMinutes);
 
-    private void LogCircuitBreakerReset()
-    {
-        _logger.LogInformation("✅ Circuit breaker reset - direct publishing re-enabled");
-    }
+    [LoggerMessage(
+        EventId = 5,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "✅ Circuit breaker reset - direct publishing re-enabled"
+    )]
+    private partial void LogCircuitBreakerReset();
 
-    private void LogCircuitBreakerAutoReset()
-    {
-        _logger.LogInformation("🔄 Circuit breaker auto-reset after timeout - direct publishing re-enabled");
-    }
+    [LoggerMessage(
+        EventId = 6,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "🔄 Circuit breaker auto-reset after timeout - direct publishing re-enabled"
+    )]
+    private partial void LogCircuitBreakerAutoReset();
 
     #endregion
 }

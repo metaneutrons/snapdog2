@@ -140,7 +140,7 @@ public partial class AttributeBasedMqttCommandMapper(ILogger<AttributeBasedMqttC
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to create command instance for type {CommandType}", commandType.Name);
+            this.LogCommandInstanceCreationError(commandType.Name, ex);
             return null;
         }
     }
@@ -256,4 +256,7 @@ public partial class AttributeBasedMqttCommandMapper(ILogger<AttributeBasedMqttC
 
         return _topicMappings.Keys;
     }
+
+    [LoggerMessage(9006, LogLevel.Error, "Failed to create command instance for type {CommandType}")]
+    private partial void LogCommandInstanceCreationError(string commandType, Exception ex);
 }

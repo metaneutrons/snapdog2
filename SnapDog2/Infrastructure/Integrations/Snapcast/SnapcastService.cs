@@ -634,17 +634,17 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
             return Result.Failure("Service has been disposed");
         }
 
-        this._logger.LogDebug("Setting group {GroupId} to stream {StreamId}", groupId, streamId);
+        LogSettingGroupStream(this._logger, groupId, streamId);
 
         try
         {
             await this._snapcastClient!.GroupSetStreamAsync(groupId, streamId).ConfigureAwait(false);
-            this._logger.LogDebug("Successfully set group {GroupId} to stream {StreamId}", groupId, streamId);
+            LogGroupStreamSetSuccessfully(this._logger, groupId, streamId);
             return Result.Success();
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Failed to set group {GroupId} to stream {StreamId}", groupId, streamId);
+            LogFailedToSetGroupStream(this._logger, ex, groupId, streamId);
             this.LogOperationFailed(nameof(this.SetGroupStreamAsync), ex);
             return Result.Failure(ex);
         }
@@ -687,25 +687,17 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         try
         {
             var clientIdList = clientIds.ToList();
-            this._logger.LogDebug(
-                "Setting group {GroupId} clients to: {ClientIds}",
-                groupId,
-                string.Join(", ", clientIdList)
-            );
+            LogSettingGroupClients(this._logger, groupId, string.Join(", ", clientIdList));
 
             // Use the Snapcast client library to set group clients
             await this._snapcastClient!.GroupSetClientsAsync(groupId, clientIdList).ConfigureAwait(false);
 
-            this._logger.LogInformation(
-                "Successfully set {ClientCount} clients for group {GroupId}",
-                clientIdList.Count,
-                groupId
-            );
+            LogGroupClientsSetSuccessfully(this._logger, clientIdList.Count, groupId);
             return Result.Success();
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Failed to set clients for group {GroupId}", groupId);
+            LogFailedToSetGroupClients(this._logger, ex, groupId);
             this.LogOperationFailed(nameof(this.SetGroupClientsAsync), ex);
             return Result.Failure(ex);
         }
@@ -777,7 +769,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     {
         if (this._snapcastClient == null)
         {
-            this._logger.LogWarning("Cannot subscribe to Snapcast events - client is not available");
+            LogCannotSubscribeToEvents(this._logger);
             return;
         }
 
@@ -1200,6 +1192,32 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
 
     [LoggerMessage(6022, LogLevel.Error, "Error bridging {EventType} event from Snapcast client {SnapcastClientId}")]
     private partial void LogEventBridgeError(string eventType, string snapcastClientId, Exception ex);
+
+    [LoggerMessage(6023, LogLevel.Debug, "Setting group {GroupId} to stream {StreamId}")]
+    private static partial void LogSettingGroupStream(ILogger logger, string groupId, string streamId);
+
+    [LoggerMessage(6024, LogLevel.Debug, "Successfully set group {GroupId} to stream {StreamId}")]
+    private static partial void LogGroupStreamSetSuccessfully(ILogger logger, string groupId, string streamId);
+
+    [LoggerMessage(6025, LogLevel.Error, "Failed to set group {GroupId} to stream {StreamId}")]
+    private static partial void LogFailedToSetGroupStream(
+        ILogger logger,
+        Exception ex,
+        string groupId,
+        string streamId
+    );
+
+    [LoggerMessage(6026, LogLevel.Debug, "Setting group {GroupId} clients to: {ClientIds}")]
+    private static partial void LogSettingGroupClients(ILogger logger, string groupId, string clientIds);
+
+    [LoggerMessage(6027, LogLevel.Information, "Successfully set {ClientCount} clients for group {GroupId}")]
+    private static partial void LogGroupClientsSetSuccessfully(ILogger logger, int clientCount, string groupId);
+
+    [LoggerMessage(6028, LogLevel.Error, "Failed to set clients for group {GroupId}")]
+    private static partial void LogFailedToSetGroupClients(ILogger logger, Exception ex, string groupId);
+
+    [LoggerMessage(6029, LogLevel.Warning, "Cannot subscribe to Snapcast events - client is not available")]
+    private static partial void LogCannotSubscribeToEvents(ILogger logger);
 
     #endregion
 

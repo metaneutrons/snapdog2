@@ -67,6 +67,60 @@ public partial class ClientManager : IClientManager
     [LoggerMessage(7015, LogLevel.Error, "Error getting client by Snapcast ID {SnapcastClientId}")]
     private partial void LogGetClientBySnapcastIdError(string snapcastClientId, Exception ex);
 
+    [LoggerMessage(7016, LogLevel.Debug, "Found client {ClientIndex} with Snapcast ID: {SnapcastClientId}")]
+    private partial void LogFoundClientWithSnapcastId(int ClientIndex, string SnapcastClientId);
+
+    [LoggerMessage(7017, LogLevel.Debug, "Target zone {ZoneIndex} maps to stream: {StreamId}")]
+    private partial void LogTargetZoneMapsToStream(int ZoneIndex, string StreamId);
+
+    [LoggerMessage(7018, LogLevel.Debug, "Using group {GroupId} for zone {ZoneIndex}")]
+    private partial void LogUsingGroupForZone(string GroupId, int ZoneIndex);
+
+    [LoggerMessage(7019, LogLevel.Warning, "Failed to move client {ClientId} to group {GroupId}: {Error}")]
+    private partial void LogFailedToMoveClientToGroup(string ClientId, string GroupId, string? Error);
+
+    [LoggerMessage(7020, LogLevel.Debug, "Refreshing server state after zone assignment")]
+    private partial void LogRefreshingServerStateAfterZoneAssignment();
+
+    [LoggerMessage(7021, LogLevel.Debug, "Server state refreshed successfully")]
+    private partial void LogServerStateRefreshedSuccessfully();
+
+    [LoggerMessage(7022, LogLevel.Warning, "Failed to refresh server state after zone assignment: {Error}")]
+    private partial void LogFailedToRefreshServerState(string? Error);
+
+    [LoggerMessage(
+        7023,
+        LogLevel.Information,
+        "Successfully assigned client {ClientIndex} ({ClientId}) to zone {ZoneIndex} (group {GroupId})"
+    )]
+    private partial void LogSuccessfullyAssignedClientToZone(
+        int ClientIndex,
+        string ClientId,
+        int ZoneIndex,
+        string GroupId
+    );
+
+    [LoggerMessage(7024, LogLevel.Error, "Error assigning client {ClientIndex} to zone {ZoneIndex}")]
+    private partial void LogErrorAssigningClientToZone(Exception ex, int ClientIndex, int ZoneIndex);
+
+    [LoggerMessage(7025, LogLevel.Debug, "Found existing group {GroupId} for stream {StreamId}")]
+    private partial void LogFoundExistingGroupForStream(string GroupId, string StreamId);
+
+    [LoggerMessage(7026, LogLevel.Debug, "Assigning group {GroupId} to stream {StreamId}")]
+    private partial void LogAssigningGroupToStream(string GroupId, string StreamId);
+
+    [LoggerMessage(7027, LogLevel.Debug, "Successfully assigned group {GroupId} to stream {StreamId}")]
+    private partial void LogSuccessfullyAssignedGroupToStream(string GroupId, string StreamId);
+
+    [LoggerMessage(7028, LogLevel.Warning, "Failed to assign group {GroupId} to stream {StreamId}: {Error}")]
+    private partial void LogFailedToAssignGroupToStream(string GroupId, string StreamId, string? Error);
+
+    [LoggerMessage(7029, LogLevel.Warning, "No available groups found for stream {StreamId}")]
+    private partial void LogNoAvailableGroupsFoundForStream(string StreamId);
+
+    [LoggerMessage(7030, LogLevel.Error, "Error finding or creating group for stream {StreamId}")]
+    private partial void LogErrorFindingOrCreatingGroupForStream(Exception ex, string StreamId);
+
     public ClientManager(
         ILogger<ClientManager> logger,
         ISnapcastStateRepository snapcastStateRepository,
@@ -215,11 +269,7 @@ public partial class ClientManager : IClientManager
                 return Result.Failure($"Client {clientIndex} has no valid ID");
             }
 
-            this._logger.LogDebug(
-                "Found client {ClientIndex} with Snapcast ID: {SnapcastClientId}",
-                clientIndex,
-                snapcastClientId
-            );
+            LogFoundClientWithSnapcastId(clientIndex, snapcastClientId);
 
             // Get target zone's stream ID
             var zoneConfigs = this._configuration.Zones;
@@ -231,7 +281,7 @@ public partial class ClientManager : IClientManager
             var targetZoneConfig = zoneConfigs[zoneIndex - 1];
             var targetStreamId = ExtractStreamIdFromSink(targetZoneConfig.Sink);
 
-            this._logger.LogDebug("Target zone {ZoneIndex} maps to stream: {StreamId}", zoneIndex, targetStreamId);
+            LogTargetZoneMapsToStream(zoneIndex, targetStreamId);
 
             // Find or create group for target zone
             var targetGroupId = await this.FindOrCreateGroupForStreamAsync(targetStreamId);
@@ -240,55 +290,36 @@ public partial class ClientManager : IClientManager
                 return Result.Failure($"Failed to find or create group for zone {zoneIndex}");
             }
 
-            this._logger.LogDebug("Using group {GroupId} for zone {ZoneIndex}", targetGroupId, zoneIndex);
+            LogUsingGroupForZone(targetGroupId, zoneIndex);
 
             // Move client to target group
             var result = await this._snapcastService.SetClientGroupAsync(snapcastClientId, targetGroupId);
             if (result.IsFailure)
             {
-                this._logger.LogWarning(
-                    "Failed to move client {ClientId} to group {GroupId}: {Error}",
-                    snapcastClientId,
-                    targetGroupId,
-                    result.ErrorMessage
-                );
+                LogFailedToMoveClientToGroup(snapcastClientId, targetGroupId, result.ErrorMessage);
                 return Result.Failure($"Failed to move client to zone {zoneIndex}: {result.ErrorMessage}");
             }
 
             // Refresh server state to update our local repository
-            this._logger.LogDebug("Refreshing server state after zone assignment");
+            LogRefreshingServerStateAfterZoneAssignment();
             var serverStatusResult = await this._snapcastService.GetServerStatusAsync();
             if (serverStatusResult.IsSuccess)
             {
                 // The GetServerStatusAsync should trigger state repository updates via event handlers
-                this._logger.LogDebug("Server state refreshed successfully");
+                LogServerStateRefreshedSuccessfully();
             }
             else
             {
-                this._logger.LogWarning(
-                    "Failed to refresh server state after zone assignment: {Error}",
-                    serverStatusResult.ErrorMessage
-                );
+                LogFailedToRefreshServerState(serverStatusResult.ErrorMessage);
             }
 
-            this._logger.LogInformation(
-                "Successfully assigned client {ClientIndex} ({ClientId}) to zone {ZoneIndex} (group {GroupId})",
-                clientIndex,
-                snapcastClientId,
-                zoneIndex,
-                targetGroupId
-            );
+            LogSuccessfullyAssignedClientToZone(clientIndex, snapcastClientId, zoneIndex, targetGroupId);
 
             return Result.Success();
         }
         catch (Exception ex)
         {
-            this._logger.LogError(
-                ex,
-                "Error assigning client {ClientIndex} to zone {ZoneIndex}",
-                clientIndex,
-                zoneIndex
-            );
+            LogErrorAssigningClientToZone(ex, clientIndex, zoneIndex);
             return Result.Failure($"Error assigning client {clientIndex} to zone {zoneIndex}: {ex.Message}");
         }
     }
@@ -361,11 +392,7 @@ public partial class ClientManager : IClientManager
 
             if (existingGroup.Id != null)
             {
-                this._logger.LogDebug(
-                    "Found existing group {GroupId} for stream {StreamId}",
-                    existingGroup.Id,
-                    streamId
-                );
+                LogFoundExistingGroupForStream(existingGroup.Id, streamId);
                 return existingGroup.Id;
             }
 
@@ -381,36 +408,27 @@ public partial class ClientManager : IClientManager
 
             if (availableGroup.Id != null)
             {
-                this._logger.LogDebug("Assigning group {GroupId} to stream {StreamId}", availableGroup.Id, streamId);
+                LogAssigningGroupToStream(availableGroup.Id, streamId);
 
                 // Set the group to use our target stream
                 var result = await this._snapcastService.SetGroupStreamAsync(availableGroup.Id, streamId);
                 if (result.IsSuccess)
                 {
-                    this._logger.LogDebug(
-                        "Successfully assigned group {GroupId} to stream {StreamId}",
-                        availableGroup.Id,
-                        streamId
-                    );
+                    LogSuccessfullyAssignedGroupToStream(availableGroup.Id, streamId);
                     return availableGroup.Id;
                 }
                 else
                 {
-                    this._logger.LogWarning(
-                        "Failed to assign group {GroupId} to stream {StreamId}: {Error}",
-                        availableGroup.Id,
-                        streamId,
-                        result.ErrorMessage
-                    );
+                    LogFailedToAssignGroupToStream(availableGroup.Id, streamId, result.ErrorMessage);
                 }
             }
 
-            this._logger.LogWarning("No available groups found for stream {StreamId}", streamId);
+            LogNoAvailableGroupsFoundForStream(streamId);
             return null;
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error finding or creating group for stream {StreamId}", streamId);
+            LogErrorFindingOrCreatingGroupForStream(ex, streamId);
             return null;
         }
     }

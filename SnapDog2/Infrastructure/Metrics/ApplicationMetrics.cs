@@ -10,7 +10,7 @@ using SnapDog2.Core.Models;
 /// Provides comprehensive monitoring across all application layers.
 /// Follows Prometheus naming conventions and OpenTelemetry best practices.
 /// </summary>
-public class ApplicationMetrics : IDisposable
+public partial class ApplicationMetrics : IDisposable
 {
     private readonly Meter _meter;
     private readonly ILogger<ApplicationMetrics> _logger;
@@ -192,11 +192,7 @@ public class ApplicationMetrics : IDisposable
             description: "Total number of unhandled exceptions"
         );
 
-        _logger.LogInformation(
-            "ApplicationMetrics initialized with {MeterName} v{MeterVersion}",
-            _meter.Name,
-            _meter.Version
-        );
+        this.LogApplicationMetricsInitialized(_meter.Name, _meter.Version);
     }
 
     #region HTTP Metrics
@@ -331,6 +327,9 @@ public class ApplicationMetrics : IDisposable
     {
         _meter?.Dispose();
     }
+
+    [LoggerMessage(3001, LogLevel.Information, "ApplicationMetrics initialized with {MeterName} v{MeterVersion}")]
+    private partial void LogApplicationMetricsInitialized(string? meterName, string? meterVersion);
 }
 
 /// <summary>

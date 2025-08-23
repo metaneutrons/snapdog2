@@ -8,7 +8,7 @@ using SnapDog2.Core.Models;
 /// <summary>
 /// Manages metadata extraction from media files using LibVLC.
 /// </summary>
-public sealed class MetadataManager(LibVLC libvlc, ILogger<MetadataManager> logger)
+public sealed partial class MetadataManager(LibVLC libvlc, ILogger<MetadataManager> logger)
 {
     private readonly LibVLC _libvlc = libvlc ?? throw new ArgumentNullException(nameof(libvlc));
     private readonly ILogger<MetadataManager> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -23,14 +23,14 @@ public sealed class MetadataManager(LibVLC libvlc, ILogger<MetadataManager> logg
     {
         try
         {
-            this._logger.LogDebug("Starting metadata extraction for media: {MediaMrl}", media.Mrl);
+            LogStartingMetadataExtraction(this._logger, media.Mrl);
 
             // Parse the media to extract metadata (asynchronous in LibVLCSharp)
             var parseResult = await media.Parse(MediaParseOptions.ParseNetwork);
 
             if (parseResult != MediaParsedStatus.Done)
             {
-                this._logger.LogWarning("Media parsing incomplete. Status: {ParseStatus}", parseResult);
+                LogMediaParsingIncomplete(this._logger, parseResult.ToString());
             }
 
             var metadata = new AudioMetadata
@@ -73,10 +73,10 @@ public sealed class MetadataManager(LibVLC libvlc, ILogger<MetadataManager> logg
             // Extract technical details from tracks
             metadata.TechnicalDetails = this.ExtractTechnicalDetails(media);
 
-            this._logger.LogDebug(
-                "Metadata extraction completed. Title: {Title}, Artist: {Artist}, Duration: {Duration}ms",
-                metadata.Title,
-                metadata.Artist,
+            LogMetadataExtractionCompleted(
+                this._logger,
+                metadata.Title ?? "Unknown",
+                metadata.Artist ?? "Unknown",
                 metadata.Duration
             );
 
@@ -84,7 +84,7 @@ public sealed class MetadataManager(LibVLC libvlc, ILogger<MetadataManager> logg
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Failed to extract metadata from media: {MediaMrl}", media.Mrl);
+            LogFailedToExtractMetadata(this._logger, ex, media.Mrl);
 
             // Return minimal metadata on error
             return new AudioMetadata
@@ -120,11 +120,11 @@ public sealed class MetadataManager(LibVLC libvlc, ILogger<MetadataManager> logg
             var json = JsonSerializer.Serialize(metadata, options);
             await File.WriteAllTextAsync(filePath, json, cancellationToken);
 
-            this._logger.LogDebug("Metadata saved to: {FilePath}", filePath);
+            LogMetadataSaved(this._logger, filePath);
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Failed to save metadata to: {FilePath}", filePath);
+            LogFailedToSaveMetadata(this._logger, ex, filePath);
             throw;
         }
     }
@@ -164,8 +164,63 @@ public sealed class MetadataManager(LibVLC libvlc, ILogger<MetadataManager> logg
         }
         catch (Exception ex)
         {
-            this._logger.LogWarning(ex, "Failed to extract technical details from media");
+            LogFailedToExtractTechnicalDetails(this._logger, ex);
             return null;
         }
     }
+
+    // LoggerMessage methods for high-performance logging
+    [LoggerMessage(
+        EventId = 1,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Starting metadata extraction for media: {MediaMrl}"
+    )]
+    private static partial void LogStartingMetadataExtraction(ILogger logger, string mediaMrl);
+
+    [LoggerMessage(
+        EventId = 2,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Media parsing incomplete. Status: {ParseStatus}"
+    )]
+    private static partial void LogMediaParsingIncomplete(ILogger logger, string parseStatus);
+
+    [LoggerMessage(
+        EventId = 3,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Metadata extraction completed. Title: {Title}, Artist: {Artist}, Duration: {Duration}ms"
+    )]
+    private static partial void LogMetadataExtractionCompleted(
+        ILogger logger,
+        string title,
+        string artist,
+        long duration
+    );
+
+    [LoggerMessage(
+        EventId = 4,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Failed to extract metadata from media: {MediaMrl}"
+    )]
+    private static partial void LogFailedToExtractMetadata(ILogger logger, Exception ex, string mediaMrl);
+
+    [LoggerMessage(
+        EventId = 5,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Metadata saved to: {FilePath}"
+    )]
+    private static partial void LogMetadataSaved(ILogger logger, string filePath);
+
+    [LoggerMessage(
+        EventId = 6,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Failed to save metadata to: {FilePath}"
+    )]
+    private static partial void LogFailedToSaveMetadata(ILogger logger, Exception ex, string filePath);
+
+    [LoggerMessage(
+        EventId = 7,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to extract technical details from media"
+    )]
+    private static partial void LogFailedToExtractTechnicalDetails(ILogger logger, Exception ex);
 }

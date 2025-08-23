@@ -58,10 +58,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
         }
         catch (Exception ex)
         {
-            logger.LogError(
-                ex,
-                "Failed to initialize LibVLCSharp Core. Ensure LibVLC native libraries are properly installed."
-            );
+            this.LogLibVLCCoreInitializationFailed(ex);
             throw new InvalidOperationException(
                 "LibVLC initialization failed. Check that libvlc5 and libvlccore9 are installed.",
                 ex
@@ -80,7 +77,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to create LibVLC instance with args: {Args}", string.Join(" ", args));
+            this.LogLibVLCInstanceCreationFailed(ex, string.Join(" ", args));
             throw new InvalidOperationException(
                 "LibVLC instance creation failed. Check LibVLC installation and arguments.",
                 ex
@@ -102,10 +99,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
 
         this.MetadataManager = new MetadataManager(this._libvlc, metadataLogger);
 
-        this._logger.LogDebug(
-            "Audio processing context initialized with temp directory: {TempDirectory}",
-            this._tempDirectory.FullName
-        );
+        LogAudioProcessingContextInitialized(this._tempDirectory.FullName);
     }
 
     /// <summary>
@@ -138,11 +132,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
                 outputPath ?? Path.Combine(this._tempDirectory.FullName, $"{sourceId}.{this.Config.Format}");
             var metadataPath = Path.ChangeExtension(finalOutputPath, ".json");
 
-            this._logger.LogInformation(
-                "Starting audio processing: Source={SourceUrl}, Output={OutputPath}",
-                sourceUrl,
-                finalOutputPath
-            );
+            LogStartingAudioProcessing(sourceUrl, finalOutputPath);
 
             // Build media options for raw audio output
             var mediaOptions = this.BuildMediaOptions(finalOutputPath);
@@ -196,7 +186,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             // Save metadata to JSON file (disabled - metadata available programmatically)
             // await this.MetadataManager.SaveMetadataAsync(metadata, metadataPath, cancellationToken);
 
-            this._logger.LogInformation("Audio streaming started successfully: {OutputPath}", finalOutputPath);
+            LogAudioStreamingStartedSuccessfully(finalOutputPath);
 
             // For streaming sources (like radio), keep the stream alive until cancelled
             if (
@@ -204,7 +194,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
                 && (sourceUrl.StartsWith("http://") || sourceUrl.StartsWith("https://"))
             )
             {
-                this._logger.LogInformation("Maintaining continuous stream for URL source: {SourceUrl}", sourceUrl);
+                LogMaintainingContinuousStream(sourceUrl);
 
                 // Keep streaming until cancelled or error occurs
                 while (
@@ -218,29 +208,25 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
                     // Log periodic status for debugging
                     if (DateTime.UtcNow.Second % 30 == 0) // Every 30 seconds
                     {
-                        this._logger.LogDebug(
-                            "Stream status: State={State}, IsPlaying={IsPlaying}",
-                            this._mediaPlayer.State,
-                            this._mediaPlayer.IsPlaying
-                        );
+                        LogStreamStatus(this._mediaPlayer.State, this._mediaPlayer.IsPlaying);
                     }
                 }
 
                 if (cancellationToken.IsCancellationRequested)
                 {
-                    this._logger.LogInformation("Stream cancelled for: {SourceUrl}", sourceUrl);
+                    LogStreamCancelled(sourceUrl);
                 }
                 else if (this._mediaPlayer.State == VLCState.Error)
                 {
-                    this._logger.LogWarning("Stream ended with error for: {SourceUrl}", sourceUrl);
+                    LogStreamEndedWithError(sourceUrl);
                 }
                 else
                 {
-                    this._logger.LogInformation("Stream ended naturally for: {SourceUrl}", sourceUrl);
+                    LogStreamEndedNaturally(sourceUrl);
                 }
             }
 
-            this._logger.LogInformation("Audio processing completed: {OutputPath}", finalOutputPath);
+            LogAudioProcessingCompleted(finalOutputPath);
 
             return new AudioProcessingResult
             {
@@ -254,12 +240,12 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
         }
         catch (OperationCanceledException)
         {
-            this._logger.LogInformation("Audio processing was cancelled");
+            LogAudioProcessingWasCancelled();
             return new AudioProcessingResult { Success = false, ErrorMessage = "Operation was cancelled" };
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Failed to process audio stream: {SourceUrl}", sourceUrl);
+            LogFailedToProcessAudioStream(ex, sourceUrl);
             return new AudioProcessingResult { Success = false, ErrorMessage = ex.Message };
         }
     }
@@ -299,13 +285,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
         options.Add(":no-sout-standard-sap");
         options.Add(":sout-all"); // Keep streaming even if no one is reading
 
-        this._logger.LogDebug(
-            "Built media options for pipe streaming: Codec={AudioCodec}, SampleRate={SampleRate}, Channels={Channels}, Options={Options}",
-            audioCodec,
-            this.Config.SampleRate,
-            this.Config.Channels,
-            string.Join(", ", options)
-        );
+        LogBuiltMediaOptions(audioCodec, this.Config.SampleRate, this.Config.Channels, string.Join(", ", options));
 
         return options;
     }
@@ -339,7 +319,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
         if (!this._disposed && this._mediaPlayer.IsPlaying)
         {
             this._mediaPlayer.Stop();
-            this._logger.LogDebug("Stopped media playback");
+            LogStoppedMediaPlayback();
         }
     }
 
@@ -358,7 +338,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             var isPlaying = this._mediaPlayer.IsPlaying;
             var state = this._mediaPlayer.State;
 
-            this._logger.LogDebug("LibVLC IsPlaying Check - IsPlaying: {IsPlaying}, State: {State}", isPlaying, state);
+            LogLibVlcIsPlayingCheck(isPlaying, state);
 
             return isPlaying;
         }
@@ -375,12 +355,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             var state = this._mediaPlayer.State;
             var isPlaying = this._mediaPlayer.IsPlaying;
 
-            this._logger.LogDebug(
-                "LibVLC Direct Access - Time: {Time}ms, State: {State}, IsPlaying: {IsPlaying}",
-                time,
-                state,
-                isPlaying
-            );
+            LogLibVlcDirectAccess(time, state, isPlaying);
 
             return time;
         }
@@ -401,7 +376,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
     /// </summary>
     private void SetupEventHandlers()
     {
-        this._logger.LogInformation("🔧 Setting up LibVLC event handlers");
+        LogSettingUpLibVlcEventHandlers();
 
         // Position change events (percentage-based)
         this._mediaPlayer.PositionChanged += (sender, e) =>
@@ -409,11 +384,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             try
             {
                 var positionMs = (long)(e.Position * this._mediaPlayer.Length);
-                this._logger.LogDebug(
-                    "📍 LibVLC PositionChanged event: {Position}% = {PositionMs}ms",
-                    e.Position,
-                    positionMs
-                );
+                LogLibVlcPositionChanged(e.Position, positionMs);
 
                 this.PositionChanged?.Invoke(
                     this,
@@ -427,7 +398,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             }
             catch (Exception ex)
             {
-                this._logger.LogWarning(ex, "Error handling PositionChanged event");
+                LogErrorHandlingPositionChangedEvent(ex);
             }
         };
 
@@ -436,7 +407,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
         {
             try
             {
-                this._logger.LogDebug("⏰ LibVLC TimeChanged event: {Time}ms", e.Time);
+                LogLibVlcTimeChanged(e.Time);
                 this.PositionChanged?.Invoke(
                     this,
                     new PositionChangedEventArgs
@@ -449,7 +420,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             }
             catch (Exception ex)
             {
-                this._logger.LogWarning(ex, "Error handling TimeChanged event");
+                LogErrorHandlingTimeChangedEvent(ex);
             }
         };
 
@@ -465,7 +436,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             }
             catch (Exception ex)
             {
-                this._logger.LogWarning(ex, "Error handling Playing event");
+                LogErrorHandlingPlayingEvent(ex);
             }
         };
 
@@ -480,7 +451,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             }
             catch (Exception ex)
             {
-                this._logger.LogWarning(ex, "Error handling Paused event");
+                LogErrorHandlingPausedEvent(ex);
             }
         };
 
@@ -495,7 +466,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             }
             catch (Exception ex)
             {
-                this._logger.LogWarning(ex, "Error handling Stopped event");
+                LogErrorHandlingStoppedEvent(ex);
             }
         };
 
@@ -510,7 +481,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             }
             catch (Exception ex)
             {
-                this._logger.LogWarning(ex, "Error handling EndReached event");
+                LogErrorHandlingEndReachedEvent(ex);
             }
         };
     }
@@ -524,7 +495,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             this._libvlc?.Dispose();
             this._disposed = true;
 
-            this._logger.LogDebug("Audio processing context disposed");
+            LogAudioProcessingContextDisposed();
         }
     }
 
@@ -537,9 +508,206 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             this._libvlc?.Dispose();
             this._disposed = true;
 
-            this._logger.LogDebug("Audio processing context disposed asynchronously");
+            LogAudioProcessingContextDisposedAsynchronously();
         }
 
         await Task.CompletedTask;
     }
+
+    // LoggerMessage methods for high-performance logging
+    [LoggerMessage(
+        EventId = 1,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Audio processing context initialized with temp directory: {TempDirectory}"
+    )]
+    private partial void LogAudioProcessingContextInitialized(string TempDirectory);
+
+    [LoggerMessage(
+        EventId = 2,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Starting audio processing: Source={SourceUrl}, Output={OutputPath}"
+    )]
+    private partial void LogStartingAudioProcessing(string SourceUrl, string OutputPath);
+
+    [LoggerMessage(
+        EventId = 3,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Audio streaming started successfully: {OutputPath}"
+    )]
+    private partial void LogAudioStreamingStartedSuccessfully(string OutputPath);
+
+    [LoggerMessage(
+        EventId = 4,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Maintaining continuous stream for URL source: {SourceUrl}"
+    )]
+    private partial void LogMaintainingContinuousStream(string SourceUrl);
+
+    [LoggerMessage(
+        EventId = 5,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Stream status: State={State}, IsPlaying={IsPlaying}"
+    )]
+    private partial void LogStreamStatus(VLCState State, bool IsPlaying);
+
+    [LoggerMessage(
+        EventId = 6,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Stream cancelled for: {SourceUrl}"
+    )]
+    private partial void LogStreamCancelled(string SourceUrl);
+
+    [LoggerMessage(
+        EventId = 7,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Stream ended with error for: {SourceUrl}"
+    )]
+    private partial void LogStreamEndedWithError(string SourceUrl);
+
+    [LoggerMessage(
+        EventId = 8,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Stream ended naturally for: {SourceUrl}"
+    )]
+    private partial void LogStreamEndedNaturally(string SourceUrl);
+
+    [LoggerMessage(
+        EventId = 9,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Audio processing completed: {OutputPath}"
+    )]
+    private partial void LogAudioProcessingCompleted(string OutputPath);
+
+    [LoggerMessage(
+        EventId = 10,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Audio processing was cancelled"
+    )]
+    private partial void LogAudioProcessingWasCancelled();
+
+    [LoggerMessage(
+        EventId = 11,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Failed to process audio stream: {SourceUrl}"
+    )]
+    private partial void LogFailedToProcessAudioStream(Exception ex, string SourceUrl);
+
+    [LoggerMessage(
+        EventId = 12,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Built media options for pipe streaming: Codec={AudioCodec}, SampleRate={SampleRate}, Channels={Channels}, Options={Options}"
+    )]
+    private partial void LogBuiltMediaOptions(string AudioCodec, int SampleRate, int Channels, string Options);
+
+    [LoggerMessage(
+        EventId = 13,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Stopped media playback"
+    )]
+    private partial void LogStoppedMediaPlayback();
+
+    [LoggerMessage(
+        EventId = 14,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "LibVLC IsPlaying Check - IsPlaying: {IsPlaying}, State: {State}"
+    )]
+    private partial void LogLibVlcIsPlayingCheck(bool IsPlaying, VLCState State);
+
+    [LoggerMessage(
+        EventId = 15,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "LibVLC Direct Access - Time: {Time}ms, State: {State}, IsPlaying: {IsPlaying}"
+    )]
+    private partial void LogLibVlcDirectAccess(long Time, VLCState State, bool IsPlaying);
+
+    [LoggerMessage(
+        EventId = 16,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "🔧 Setting up LibVLC event handlers"
+    )]
+    private partial void LogSettingUpLibVlcEventHandlers();
+
+    [LoggerMessage(
+        EventId = 17,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "📍 LibVLC PositionChanged event: {Position}% = {PositionMs}ms"
+    )]
+    private partial void LogLibVlcPositionChanged(float Position, long PositionMs);
+
+    [LoggerMessage(
+        EventId = 18,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Error handling PositionChanged event"
+    )]
+    private partial void LogErrorHandlingPositionChangedEvent(Exception ex);
+
+    [LoggerMessage(
+        EventId = 19,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "⏰ LibVLC TimeChanged event: {Time}ms"
+    )]
+    private partial void LogLibVlcTimeChanged(long Time);
+
+    [LoggerMessage(
+        EventId = 20,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Error handling TimeChanged event"
+    )]
+    private partial void LogErrorHandlingTimeChangedEvent(Exception ex);
+
+    [LoggerMessage(
+        EventId = 21,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Error handling Playing event"
+    )]
+    private partial void LogErrorHandlingPlayingEvent(Exception ex);
+
+    [LoggerMessage(
+        EventId = 22,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Error handling Paused event"
+    )]
+    private partial void LogErrorHandlingPausedEvent(Exception ex);
+
+    [LoggerMessage(
+        EventId = 23,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Error handling Stopped event"
+    )]
+    private partial void LogErrorHandlingStoppedEvent(Exception ex);
+
+    [LoggerMessage(
+        EventId = 24,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Error handling EndReached event"
+    )]
+    private partial void LogErrorHandlingEndReachedEvent(Exception ex);
+
+    [LoggerMessage(
+        EventId = 25,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Audio processing context disposed"
+    )]
+    private partial void LogAudioProcessingContextDisposed();
+
+    [LoggerMessage(
+        EventId = 26,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Audio processing context disposed asynchronously"
+    )]
+    private partial void LogAudioProcessingContextDisposedAsynchronously();
+
+    [LoggerMessage(
+        EventId = 27,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Failed to initialize LibVLCSharp Core. Ensure LibVLC native libraries are properly installed."
+    )]
+    private partial void LogLibVLCCoreInitializationFailed(Exception ex);
+
+    [LoggerMessage(
+        EventId = 28,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Failed to create LibVLC instance with args: {Args}"
+    )]
+    private partial void LogLibVLCInstanceCreationFailed(Exception ex, string args);
 }

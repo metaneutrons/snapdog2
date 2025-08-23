@@ -22,7 +22,7 @@ internal sealed class NotificationItem
 /// <summary>
 /// Default queue implementation using bounded Channel<T> with backpressure.
 /// </summary>
-public sealed class NotificationQueue : INotificationQueue
+public sealed partial class NotificationQueue : INotificationQueue
 {
     private readonly Channel<NotificationItem> _queue;
     private readonly ILogger<NotificationQueue> _logger;
@@ -69,7 +69,7 @@ public sealed class NotificationQueue : INotificationQueue
 
         await this._queue.Writer.WriteAsync(item, cancellationToken);
         var newDepth = Interlocked.Increment(ref this._depth);
-        this._logger.LogDebug("Enqueued notification {EventType} for zone {ZoneIndex}", eventType, zoneIndex);
+        this.LogZoneNotificationEnqueued(eventType, zoneIndex);
         this._metrics?.IncrementCounter("notifications_enqueued_total", 1, ("event", eventType));
         this._metrics?.SetGauge("notifications_queue_depth", newDepth);
     }
@@ -92,7 +92,7 @@ public sealed class NotificationQueue : INotificationQueue
 
         await this._queue.Writer.WriteAsync(item, cancellationToken);
         var newDepth = Interlocked.Increment(ref this._depth);
-        this._logger.LogDebug("Enqueued notification {EventType} for client {ClientIndex}", eventType, clientIndex);
+        this.LogClientNotificationEnqueued(eventType, clientIndex);
         this._metrics?.IncrementCounter("notifications_enqueued_total", 1, ("event", eventType));
         this._metrics?.SetGauge("notifications_queue_depth", newDepth);
     }
@@ -110,7 +110,7 @@ public sealed class NotificationQueue : INotificationQueue
 
         await this._queue.Writer.WriteAsync(item, cancellationToken);
         var newDepth = Interlocked.Increment(ref this._depth);
-        this._logger.LogDebug("Enqueued notification {EventType} for global system", eventType);
+        this.LogGlobalNotificationEnqueued(eventType);
         this._metrics?.IncrementCounter("notifications_enqueued_total", 1, ("event", eventType));
         this._metrics?.SetGauge("notifications_queue_depth", newDepth);
     }
@@ -126,4 +126,13 @@ public sealed class NotificationQueue : INotificationQueue
     {
         this._queue.Writer.TryComplete();
     }
+
+    [LoggerMessage(4001, LogLevel.Debug, "Enqueued notification {EventType} for zone {ZoneIndex}")]
+    private partial void LogZoneNotificationEnqueued(string eventType, int zoneIndex);
+
+    [LoggerMessage(4002, LogLevel.Debug, "Enqueued notification {EventType} for client {ClientIndex}")]
+    private partial void LogClientNotificationEnqueued(string eventType, string clientIndex);
+
+    [LoggerMessage(4003, LogLevel.Debug, "Enqueued notification {EventType} for global system")]
+    private partial void LogGlobalNotificationEnqueued(string eventType);
 }

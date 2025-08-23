@@ -16,7 +16,7 @@ using SnapDog2.Core.Models;
 /// Background service that reads notifications from the queue and publishes
 /// them to external systems (MQTT/KNX) with retry and graceful shutdown.
 /// </summary>
-public sealed class NotificationBackgroundService(
+public sealed partial class NotificationBackgroundService(
     NotificationQueue queue,
     IServiceProvider services,
     IOptions<NotificationProcessingOptions> options,
@@ -33,7 +33,7 @@ public sealed class NotificationBackgroundService(
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        this._logger.LogInformation("Notification background service started");
+        LogServiceStarted(this._logger);
 
         var readers = new List<Task>();
         var concurrency = Math.Max(1, this._options.MaxConcurrency);
@@ -44,7 +44,7 @@ public sealed class NotificationBackgroundService(
 
         await Task.WhenAll(readers);
 
-        this._logger.LogInformation("Notification background service stopped");
+        LogServiceStopped(this._logger);
     }
 
     private async Task RunReaderAsync(CancellationToken stoppingToken)
@@ -63,13 +63,7 @@ public sealed class NotificationBackgroundService(
             }
             catch (Exception ex)
             {
-                this._logger.LogError(
-                    ex,
-                    "Unhandled error processing notification {EventType} for {EntityType} {EntityId}",
-                    item.EventType,
-                    item.EntityType,
-                    item.EntityId
-                );
+                LogUnhandledError(this._logger, ex, item.EventType, item.EntityType, item.EntityId);
             }
         }
     }
@@ -90,12 +84,7 @@ public sealed class NotificationBackgroundService(
             {
                 await this.PublishAsync(item, ct);
                 this._metrics?.IncrementCounter("notifications_processed_total", 1, ("event", item.EventType));
-                this._logger.LogDebug(
-                    "Notification {EventType} for {EntityType} {EntityId} processed",
-                    item.EventType,
-                    item.EntityType,
-                    item.EntityId
-                );
+                LogNotificationProcessed(this._logger, item.EventType, item.EntityType, item.EntityId);
                 return;
             }
             catch (OperationCanceledException)
@@ -107,14 +96,7 @@ public sealed class NotificationBackgroundService(
                 attempt++;
                 if (attempt >= maxAttempts)
                 {
-                    this._logger.LogError(
-                        ex,
-                        "Notification {EventType} for {EntityType} {EntityId} failed after {Attempts} attempts; dead-lettering",
-                        item.EventType,
-                        item.EntityType,
-                        item.EntityId,
-                        attempt
-                    );
+                    LogNotificationFailed(this._logger, ex, item.EventType, item.EntityType, item.EntityId, attempt);
                     this._metrics?.IncrementCounter("notifications_dead_letter_total", 1, ("event", item.EventType));
                     // dead-letter hook: could enqueue to an external DLQ or emit metric/log for inspection
                     return;
@@ -129,9 +111,9 @@ public sealed class NotificationBackgroundService(
                 );
                 var totalDelay = delay + jitter;
                 this._metrics?.IncrementCounter("notifications_retried_total", 1, ("event", item.EventType));
-                this._logger.LogWarning(
+                LogRetryingNotification(
+                    this._logger,
                     ex,
-                    "Retrying notification {EventType} for {EntityType} {EntityId} (attempt {Attempt}/{MaxAttempts}) after {Delay}ms",
                     item.EventType,
                     item.EntityType,
                     item.EntityId,
@@ -218,4 +200,74 @@ public sealed class NotificationBackgroundService(
 
         await base.StopAsync(cancellationToken);
     }
+
+    // LoggerMessage methods for high-performance logging
+    [LoggerMessage(
+        EventId = 1,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Notification background service started"
+    )]
+    private static partial void LogServiceStarted(ILogger logger);
+
+    [LoggerMessage(
+        EventId = 2,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Notification background service stopped"
+    )]
+    private static partial void LogServiceStopped(ILogger logger);
+
+    [LoggerMessage(
+        EventId = 3,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Unhandled error processing notification {EventType} for {EntityType} {EntityId}"
+    )]
+    private static partial void LogUnhandledError(
+        ILogger logger,
+        Exception ex,
+        string eventType,
+        string entityType,
+        string entityId
+    );
+
+    [LoggerMessage(
+        EventId = 4,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Notification {EventType} for {EntityType} {EntityId} processed"
+    )]
+    private static partial void LogNotificationProcessed(
+        ILogger logger,
+        string eventType,
+        string entityType,
+        string entityId
+    );
+
+    [LoggerMessage(
+        EventId = 5,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Notification {EventType} for {EntityType} {EntityId} failed after {Attempts} attempts; dead-lettering"
+    )]
+    private static partial void LogNotificationFailed(
+        ILogger logger,
+        Exception ex,
+        string eventType,
+        string entityType,
+        string entityId,
+        int attempts
+    );
+
+    [LoggerMessage(
+        EventId = 6,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Retrying notification {EventType} for {EntityType} {EntityId} (attempt {Attempt}/{MaxAttempts}) after {Delay}ms"
+    )]
+    private static partial void LogRetryingNotification(
+        ILogger logger,
+        Exception ex,
+        string eventType,
+        string entityType,
+        string entityId,
+        int attempt,
+        int maxAttempts,
+        int delay
+    );
 }

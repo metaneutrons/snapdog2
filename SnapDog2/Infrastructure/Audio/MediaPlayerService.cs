@@ -57,38 +57,23 @@ public sealed partial class MediaPlayerService(
             }
 
             // Debug logging for zone lookup
-            this._logger.LogInformation("MediaPlayerService: Looking for zone {ZoneIndex}", zoneIndex);
-            this._logger.LogInformation(
-                "MediaPlayerService: Available zone configs count: {Count}",
-                this._zoneConfigs.Count()
-            );
+            LogLookingForZone(this._logger, zoneIndex);
+            LogAvailableZoneConfigs(this._logger, this._zoneConfigs.Count());
 
             var zoneConfigsList = this._zoneConfigs.ToList();
             for (int i = 0; i < zoneConfigsList.Count; i++)
             {
-                this._logger.LogInformation(
-                    "MediaPlayerService: Zone config {Index}: {Name}",
-                    i,
-                    zoneConfigsList[i].Name
-                );
+                LogZoneConfig(this._logger, i, zoneConfigsList[i].Name);
             }
 
             var zoneConfig = this._zoneConfigs.ElementAtOrDefault(zoneIndex - 1); // Zone IDs are 1-based
             if (zoneConfig == null)
             {
-                this._logger.LogError(
-                    "MediaPlayerService: Zone {ZoneIndex} not found. Requested index in array: {ArrayIndex}",
-                    zoneIndex,
-                    zoneIndex - 1
-                );
+                LogZoneNotFound(this._logger, zoneIndex, zoneIndex - 1);
                 return Result.Failure(new ArgumentException($"Zone {zoneIndex} not found"));
             }
 
-            this._logger.LogInformation(
-                "MediaPlayerService: Found zone config for zone {ZoneIndex}: {ZoneName}",
-                zoneIndex,
-                zoneConfig.Name
-            );
+            LogFoundZoneConfig(this._logger, zoneIndex, zoneConfig.Name);
 
             // Check if we're at the stream limit (max = number of configured zones)
             var maxStreams = this._zoneConfigs.Count();
@@ -134,11 +119,7 @@ public sealed partial class MediaPlayerService(
                     }
 
                     streamUrl = streamUrlResult.Value!;
-                    this._logger.LogDebug(
-                        "Converted Subsonic media ID {MediaId} to stream URL: {StreamUrl}",
-                        trackInfo.Url,
-                        streamUrl
-                    );
+                    LogConvertedSubsonicUrl(this._logger, trackInfo.Url, streamUrl);
                 }
                 finally
                 {
@@ -482,7 +463,7 @@ public sealed partial class MediaPlayerService(
                         catch (Exception ex)
                         {
                             // Log but don't throw during disposal
-                            this._logger.LogWarning(ex, "Error disposing MediaPlayer during service cleanup");
+                            LogDisposalWarning(this._logger, ex);
                         }
                     });
 
@@ -493,7 +474,7 @@ public sealed partial class MediaPlayerService(
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error during MediaPlayerService disposal");
+                LogDisposalError(this._logger, ex);
             }
         }
     }
@@ -534,10 +515,7 @@ public sealed partial class MediaPlayerService(
                                 catch (Exception ex)
                                 {
                                     // Log but don't throw during disposal
-                                    this._logger.LogWarning(
-                                        ex,
-                                        "Error disposing MediaPlayer during background cleanup"
-                                    );
+                                    LogBackgroundDisposalWarning(this._logger, ex);
                                 }
                             });
 
@@ -548,13 +526,13 @@ public sealed partial class MediaPlayerService(
                     }
                     catch (Exception ex)
                     {
-                        this._logger.LogError(ex, "Error during background MediaPlayerService disposal");
+                        LogBackgroundDisposalError(this._logger, ex);
                     }
                 });
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error starting background disposal task");
+                LogTaskStartError(this._logger, ex);
             }
         }
     }
@@ -643,4 +621,81 @@ public sealed partial class MediaPlayerService(
         Message = "[LibVLCService] No active player found for zone {ZoneIndex}"
     )]
     private static partial void LogPlayerNotFound(ILogger logger, int zoneIndex);
+
+    [LoggerMessage(
+        EventId = 923,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "MediaPlayerService: Looking for zone {ZoneIndex}"
+    )]
+    private static partial void LogLookingForZone(ILogger logger, int zoneIndex);
+
+    [LoggerMessage(
+        EventId = 924,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "MediaPlayerService: Available zone configs count: {Count}"
+    )]
+    private static partial void LogAvailableZoneConfigs(ILogger logger, int count);
+
+    [LoggerMessage(
+        EventId = 925,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "MediaPlayerService: Zone config {Index}: {Name}"
+    )]
+    private static partial void LogZoneConfig(ILogger logger, int index, string name);
+
+    [LoggerMessage(
+        EventId = 926,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "MediaPlayerService: Zone {ZoneIndex} not found. Requested index in array: {ArrayIndex}"
+    )]
+    private static partial void LogZoneNotFound(ILogger logger, int zoneIndex, int arrayIndex);
+
+    [LoggerMessage(
+        EventId = 927,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "MediaPlayerService: Found zone config for zone {ZoneIndex}: {ZoneName}"
+    )]
+    private static partial void LogFoundZoneConfig(ILogger logger, int zoneIndex, string zoneName);
+
+    [LoggerMessage(
+        EventId = 928,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Converted Subsonic media ID {MediaId} to stream URL: {StreamUrl}"
+    )]
+    private static partial void LogConvertedSubsonicUrl(ILogger logger, string mediaId, string streamUrl);
+
+    [LoggerMessage(
+        EventId = 929,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Error disposing MediaPlayer during service cleanup"
+    )]
+    private static partial void LogDisposalWarning(ILogger logger, Exception ex);
+
+    [LoggerMessage(
+        EventId = 930,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Error during MediaPlayerService disposal"
+    )]
+    private static partial void LogDisposalError(ILogger logger, Exception ex);
+
+    [LoggerMessage(
+        EventId = 931,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Error disposing MediaPlayer during background cleanup"
+    )]
+    private static partial void LogBackgroundDisposalWarning(ILogger logger, Exception ex);
+
+    [LoggerMessage(
+        EventId = 932,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Error during background MediaPlayerService disposal"
+    )]
+    private static partial void LogBackgroundDisposalError(ILogger logger, Exception ex);
+
+    [LoggerMessage(
+        EventId = 933,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Error starting background disposal task"
+    )]
+    private static partial void LogTaskStartError(ILogger logger, Exception ex);
 }
