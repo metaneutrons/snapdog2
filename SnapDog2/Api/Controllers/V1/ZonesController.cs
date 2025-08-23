@@ -748,7 +748,7 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
     /// </summary>
     /// <param name="zoneIndex">Zone index (1-based)</param>
     /// <returns>New playlist name</returns>
-    [HttpPost("{zoneIndex:int}/playlist/next")]
+    [HttpPost("{zoneIndex:int}/next/playlist")]
     [ProducesResponseType<string>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<string>> PlaylistNext(int zoneIndex)
@@ -774,7 +774,7 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
     /// </summary>
     /// <param name="zoneIndex">Zone index (1-based)</param>
     /// <returns>New playlist name</returns>
-    [HttpPost("{zoneIndex:int}/playlist/previous")]
+    [HttpPost("{zoneIndex:int}/previous/playlist")]
     [ProducesResponseType<string>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<string>> PlaylistPrevious(int zoneIndex)
@@ -1344,6 +1344,87 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
     private partial void LogFailedToGetZoneName(int zoneIndex, string errorMessage);
 
     // ═══════════════════════════════════════════════════════════════════════════════
+    // ADDITIONAL STATUS ENDPOINTS - Blueprint-required status endpoints
+    // ═══════════════════════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// Get current playback state for the zone.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <returns>Current playback state</returns>
+    [HttpGet("{zoneIndex:int}/playback")]
+    [ProducesResponseType<string>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetPlaybackState(int zoneIndex)
+    {
+        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
+        var result = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
+
+        if (result.IsFailure)
+        {
+            LogFailedToGetPlaybackState(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return this.NotFound($"Zone {zoneIndex} not found");
+        }
+
+        // Return playback state as string (Playing, Paused, Stopped)
+        var playbackState = result.Value?.PlaybackState.ToString() ?? "Unknown";
+        return Ok(playbackState);
+    }
+
+    /// <summary>
+    /// Get current playlist name for the zone.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <returns>Current playlist name</returns>
+    [HttpGet("{zoneIndex:int}/playlist/name")]
+    [ProducesResponseType<string>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetPlaylistName(int zoneIndex)
+    {
+        var query = new GetZonePlaylistInfoQuery { ZoneIndex = zoneIndex };
+        var result = await this._mediator.SendQueryAsync<GetZonePlaylistInfoQuery, Result<PlaylistInfo>>(query);
+
+        if (result.IsFailure)
+        {
+            LogFailedToGetPlaylistName(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return this.NotFound($"Zone {zoneIndex} not found");
+        }
+
+        return Ok(result.Value?.Name ?? "Unknown Playlist");
+    }
+
+    /// <summary>
+    /// Get current playlist track count for the zone.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <returns>Number of tracks in current playlist</returns>
+    [HttpGet("{zoneIndex:int}/playlist/count")]
+    [ProducesResponseType<int>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetPlaylistCount(int zoneIndex)
+    {
+        var query = new GetZonePlaylistInfoQuery { ZoneIndex = zoneIndex };
+        var result = await this._mediator.SendQueryAsync<GetZonePlaylistInfoQuery, Result<PlaylistInfo>>(query);
+
+        if (result.IsFailure)
+        {
+            LogFailedToGetPlaylistCount(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return this.NotFound($"Zone {zoneIndex} not found");
+        }
+
+        return Ok(result.Value?.TrackCount ?? 0);
+    }
+
+    [LoggerMessage(12045, LogLevel.Warning, "Failed to get zone {ZoneIndex} playback state: {ErrorMessage}")]
+    private partial void LogFailedToGetPlaybackState(int zoneIndex, string errorMessage);
+
+    [LoggerMessage(12046, LogLevel.Warning, "Failed to get zone {ZoneIndex} playlist name: {ErrorMessage}")]
+    private partial void LogFailedToGetPlaylistName(int zoneIndex, string errorMessage);
+
+    [LoggerMessage(12047, LogLevel.Warning, "Failed to get zone {ZoneIndex} playlist count: {ErrorMessage}")]
+    private partial void LogFailedToGetPlaylistCount(int zoneIndex, string errorMessage);
+
+    // ═══════════════════════════════════════════════════════════════════════════════
     // UNIFIED CONTROL - Blueprint-compliant control command endpoint
     // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -1378,7 +1459,7 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
     }
 
     [LoggerMessage(
-        12045,
+        12048,
         LogLevel.Warning,
         "Failed to execute control command '{Command}' on zone {ZoneIndex}: {ErrorMessage}"
     )]

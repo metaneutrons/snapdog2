@@ -488,10 +488,35 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
         return Ok(result.Value!.Connected);
     }
 
+    /// <summary>
+    /// Get client name.
+    /// </summary>
+    /// <param name="clientIndex">Client ID</param>
+    /// <returns>Client name</returns>
+    [HttpGet("{clientIndex:int}/name")]
+    [ProducesResponseType<string>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<string>> GetClientName(int clientIndex)
+    {
+        var query = new GetClientQuery { ClientIndex = clientIndex };
+        var result = await this._mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
+
+        if (result.IsFailure)
+        {
+            LogFailedToGetClientName(clientIndex, result.ErrorMessage ?? "Unknown error");
+            return this.NotFound($"Client {clientIndex} not found");
+        }
+
+        return Ok(result.Value!.Name ?? $"Client {clientIndex}");
+    }
+
     // ═══════════════════════════════════════════════════════════════════════════════
     // LOGGING METHODS FOR NEW ENDPOINTS
     // ═══════════════════════════════════════════════════════════════════════════════
 
     [LoggerMessage(11018, LogLevel.Warning, "Failed to get client {ClientIndex} connection status: {ErrorMessage}")]
     private partial void LogFailedToGetClientConnectionStatus(int clientIndex, string errorMessage);
+
+    [LoggerMessage(11019, LogLevel.Warning, "Failed to get client {ClientIndex} name: {ErrorMessage}")]
+    private partial void LogFailedToGetClientName(int clientIndex, string errorMessage);
 }
