@@ -491,7 +491,7 @@ public partial class ZoneGroupingService : IZoneGroupingService
     private partial void LogCheckingZone(int ZoneId);
 
     [LoggerMessage(EventId = 5, Level = LogLevel.Warning, Message = "⚠️ Failed to synchronize zone {ZoneId}: {Error}")]
-    private partial void LogFailedSynchronizeZone(int ZoneId, string Error);
+    private partial void LogFailedSynchronizeZone(int ZoneId, string? Error);
 
     [LoggerMessage(EventId = 6, Level = LogLevel.Debug, Message = "✅ Zone {ZoneId} check completed")]
     private partial void LogZoneCheckCompleted(int ZoneId);
