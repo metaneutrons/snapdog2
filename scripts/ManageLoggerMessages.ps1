@@ -21,11 +21,11 @@
     Show what would be changed without making modifications
 
 .EXAMPLE
-    ./Manage-LoggerMessages.ps1 -Action Format -DryRun
+    ./ManageLoggerMessages.ps1 -Action Format -DryRun
     Shows formatting changes that would be made
 
 .EXAMPLE
-    ./Manage-LoggerMessages.ps1 -Action Analyze
+    ./ManageLoggerMessages.ps1 -Action Analyze
     Analyzes current EventId usage and suggests ranges
 #>
 
@@ -137,6 +137,24 @@ function Get-ClassName {
     return [System.IO.Path]::GetFileNameWithoutExtension($FilePath)
 }
 
+function Get-LogLevelFormat {
+    param([string]$FilePath)
+    
+    $content = Get-Content $FilePath -Raw
+    
+    # Check for potential LogLevel conflicts by looking for multiple LogLevel imports/usings
+    $hasLibVLCSharp = $content -match 'using\s+LibVLCSharp' -or $content -match 'LibVLCSharp\.Shared\.LogLevel'
+    $hasMicrosoftLogging = $content -match 'using\s+Microsoft\.Extensions\.Logging' -or $content -match 'Microsoft\.Extensions\.Logging\.LogLevel'
+    
+    # If both are present, use full namespace to avoid ambiguity
+    if ($hasLibVLCSharp -and $hasMicrosoftLogging) {
+        return "Microsoft.Extensions.Logging.LogLevel"
+    }
+    
+    # Otherwise use short form
+    return "LogLevel"
+}
+
 function Get-LoggingCategory {
     param([string]$FilePath, [string]$ClassName)
     
@@ -166,32 +184,35 @@ function Format-LoggerMessages {
         $content = Get-Content $file.FullName -Raw
         $originalContent = $content
         
-        # Pattern to match LoggerMessage attributes (single or multi-line)
-        $pattern = '\[LoggerMessage\([^\]]+\)\]\s*\r?\n\s*private\s+partial\s+void\s+\w+\s*\([^)]*\)\s*;'
+        # Pattern to match LoggerMessage attributes (single or multi-line, both positional and named)
+        $pattern = '(?m)^\s*\[LoggerMessage\s*\([^\]]+\)\]\s*\r?\n\s*private\s+partial\s+void\s+\w+\s*\([^)]*\)\s*;'
         
         $content = [regex]::Replace($content, $pattern, {
             param($match)
             
             $text = $match.Value
             
-            # Extract components - handle both positional and named parameters
-            if ($text -match '\[LoggerMessage\(([^\]]+)\)\]\s*\r?\n\s*private\s+partial\s+void\s+(\w+)\s*\(([^)]*)\)\s*;') {
+            # Extract components - handle both positional and named parameters  
+            if ($text -match '(?s)\[LoggerMessage\s*\(([^\]]+)\)\]\s*\r?\n\s*private\s+partial\s+void\s+(\w+)\s*\(([^)]*)\)\s*;') {
                 $attributeParams = $matches[1]
                 $methodName = $matches[2]
                 $methodParams = $matches[3]
+                
+                # Clean up whitespace and newlines from attribute parameters
+                $attributeParams = $attributeParams -replace '\s+', ' ' -replace '^\s+|\s+$', ''
                 
                 # Parse attribute parameters (handle both formats)
                 $eventId = ""
                 $level = ""
                 $message = ""
                 
+                # Handle named parameter format
                 if ($attributeParams -match 'EventId\s*=\s*(\d+)') {
-                    # Named parameter format
                     $eventId = $matches[1]
                     if ($attributeParams -match 'Level\s*=\s*([^,\)]+)') { 
                         $level = $matches[1].Trim()
                     }
-                    if ($attributeParams -match 'Message\s*=\s*"([^"]*)"') { 
+                    if ($attributeParams -match 'Message\s*=\s*"((?:[^"\\]|\\.)*)"') { 
                         $message = $matches[1] 
                     }
                 } else {
@@ -228,27 +249,48 @@ function Format-LoggerMessages {
                     if ($parts.Count -ge 3) {
                         $eventId = $parts[0]
                         $level = $parts[1]
-                        $message = $parts[2] -replace '^"', '' -replace '"$', ''
+                        # Don't strip quotes from message - preserve the entire quoted string including escaped quotes
+                        $message = $parts[2]
+                        if ($message -match '^"(.*)"$') {
+                            $message = $matches[1]  # Remove outer quotes but preserve inner escaped quotes
+                        }
                     }
                 }
                 
-                # Ensure full namespace for LogLevel
-                if ($level -and $level -notmatch "Microsoft\.Extensions\.Logging\.LogLevel") {
-                    $level = $level -replace "LogLevel\.", "Microsoft.Extensions.Logging.LogLevel."
+                # Normalize LogLevel format based on conflict detection
+                if ($level) {
+                    # Remove any existing namespace
+                    $level = $level -replace "Microsoft\.Extensions\.Logging\.LogLevel\.", ""
+                    $level = $level -replace "LibVLCSharp\.Shared\.LogLevel\.", ""
+                    $level = $level -replace "^LogLevel\.", ""
+                    
+                    # Detect LogLevel conflicts in this file
+                    $logLevelFormat = Get-LogLevelFormat -FilePath $file.FullName
+                    
+                    # Apply the appropriate format for this file
+                    if ($logLevelFormat -eq "Microsoft.Extensions.Logging.LogLevel") {
+                        $level = "Microsoft.Extensions.Logging.LogLevel.$level"
+                    } else {
+                        $level = "LogLevel.$level"
+                    }
                 }
                 
                 # Use defaults if parsing failed
                 if (-not $eventId) { $eventId = "1000" }
-                if (-not $level) { $level = "Microsoft.Extensions.Logging.LogLevel.Information" }
+                if (-not $level) { 
+                    $logLevelFormat = Get-LogLevelFormat -FilePath $file.FullName
+                    $level = if ($logLevelFormat -eq "Microsoft.Extensions.Logging.LogLevel") { 
+                        "Microsoft.Extensions.Logging.LogLevel.Information" 
+                    } else { 
+                        "LogLevel.Information" 
+                    }
+                }
                 if (-not $message) { $message = "Message not found" }
                 
-                # Format in preferred style
+                # Format in preferred single-line style with consistent 4-space indentation
                 return @"
-    [LoggerMessage(
-        EventId = $eventId,
-        Level = $level,
-        Message = "$message"
-    )]
+
+    [LoggerMessage(EventId = $eventId, Level = $level, Message = "$message")]
     private partial void $methodName($methodParams);
 "@
             }
@@ -340,24 +382,42 @@ function Validate-LoggerMessages {
     $issues = @()
     
     foreach ($msg in $loggerMessages) {
-        # Check parameter naming consistency
+        # Check parameter naming consistency (SYSLIB1015)
         $messageParams = [regex]::Matches($msg.Message, '\{(\w+)\}') | ForEach-Object { $_.Groups[1].Value }
-        $methodParams = $msg.Parameters | ForEach-Object { ($_ -split '\s+')[-1] }
+        $methodParams = $msg.Parameters | ForEach-Object { 
+            # Extract parameter name from "Type paramName" format
+            if ($_ -match '\s+(\w+)$') { $matches[1] } else { $_ }
+        }
         
+        # Check for parameters in method but not in message (SYSLIB1015)
+        foreach ($methodParam in $methodParams) {
+            if ($methodParam -notin $messageParams) {
+                $issues += "⚠️  SYSLIB1015: $($msg.ClassName).$($msg.MethodName): Parameter '$methodParam' not referenced in message template"
+                $issues += "   File: $($msg.FilePath -replace [regex]::Escape((Get-Location).Path), '')"
+                $issues += "   Message: `"$($msg.Message)`""
+                $issues += ""
+            }
+        }
+        
+        # Check for parameters in message but not in method
         foreach ($msgParam in $messageParams) {
             if ($msgParam -notin $methodParams) {
                 $issues += "❌ $($msg.ClassName).$($msg.MethodName): Message parameter '{$msgParam}' not found in method parameters"
+                $issues += "   File: $($msg.FilePath -replace [regex]::Escape((Get-Location).Path), '')"
+                $issues += ""
             }
         }
         
         # Check EventId is positive
         if ($msg.EventId -le 0) {
             $issues += "❌ $($msg.ClassName).$($msg.MethodName): EventId must be positive (current: $($msg.EventId))"
+            $issues += ""
         }
         
         # Check Level format
-        if ($msg.Level -and $msg.Level -notmatch "Microsoft\.Extensions\.Logging\.LogLevel") {
-            $issues += "⚠️  $($msg.ClassName).$($msg.MethodName): Consider using full LogLevel namespace"
+        if ($msg.Level -and $msg.Level -notmatch "LogLevel") {
+            $issues += "⚠️  $($msg.ClassName).$($msg.MethodName): Consider using LogLevel namespace"
+            $issues += ""
         }
     }
     
@@ -366,7 +426,20 @@ function Validate-LoggerMessages {
     } else {
         Write-Host "`n🚨 Validation Issues Found:" -ForegroundColor Red
         foreach ($issue in $issues) {
-            Write-Host "  $issue" -ForegroundColor Yellow
+            if ($issue) {
+                Write-Host "  $issue" -ForegroundColor Yellow
+            } else {
+                Write-Host ""
+            }
+        }
+        
+        # Provide suggestions for SYSLIB1015 fixes
+        $syslib1015Issues = $issues | Where-Object { $_ -match "SYSLIB1015" }
+        if ($syslib1015Issues.Count -gt 0) {
+            Write-Host "`n💡 SYSLIB1015 Fix Suggestions:" -ForegroundColor Cyan
+            Write-Host "  1. Add missing parameters to message template: `"Message with {ParameterName}`"" -ForegroundColor White
+            Write-Host "  2. Remove unused parameters from method signature" -ForegroundColor White
+            Write-Host "  3. Use underscore for intentionally unused parameters: `"_ => LogUnused()`"" -ForegroundColor White
         }
     }
     
