@@ -1,0 +1,71 @@
+{
+  "eventIdRanges": {
+    "Core": {
+      "start": 1000,
+      "end": 1999,
+      "description": "Core application events",
+      "examples": ["Application startup", "Configuration loading", "General errors"]
+    },
+    "Audio": {
+      "start": 2000,
+      "end": 2999,
+      "description": "Audio processing and Snapcast",
+      "examples": ["Audio stream processing", "Snapcast client management", "LibVLC operations"]
+    },
+    "KNX": {
+      "start": 3000,
+      "end": 3999,
+      "description": "KNX building automation",
+      "examples": ["KNX service registration", "Group address operations", "Device communication"]
+    },
+    "MQTT": {
+      "start": 4000,
+      "end": 4999,
+      "description": "MQTT messaging",
+      "examples": ["MQTT broker connection", "Message publishing", "Topic subscriptions"]
+    },
+    "Web": {
+      "start": 5000,
+      "end": 5999,
+      "description": "Web API and HTTP",
+      "examples": ["HTTP requests", "API endpoints", "Web host configuration"]
+    },
+    "Infrastructure": {
+      "start": 6000,
+      "end": 6999,
+      "description": "Infrastructure and hosting",
+      "examples": ["Service registration", "Dependency injection", "Host extensions"]
+    },
+    "Performance": {
+      "start": 7000,
+      "end": 7999,
+      "description": "Performance monitoring",
+      "examples": ["Metrics collection", "Performance counters", "Monitoring alerts"]
+    },
+    "Notifications": {
+      "start": 8000,
+      "end": 8999,
+      "description": "Notification system",
+      "examples": ["Zone notifications", "Client notifications", "Global notifications"]
+    },
+    "Testing": {
+      "start": 9000,
+      "end": 9999,
+      "description": "Test-related logging",
+      "examples": ["Test setup", "Mock operations", "Test assertions"]
+    }
+  },
+  "preferredFormat": {
+    "multiLine": true,
+    "fullNamespace": "Microsoft.Extensions.Logging.LogLevel",
+    "indentation": "    ",
+    "parameterStyle": "PascalCase"
+  },
+  "validationRules": {
+    "requirePositiveEventId": true,
+    "requireFullNamespace": true,
+    "validateParameterNames": true,
+    "checkDuplicateEventIds": true,
+    "enforceRanges": true
+  }
+}
