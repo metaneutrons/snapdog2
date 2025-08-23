@@ -55,6 +55,73 @@
       "examples": ["Test setup", "Mock operations", "Test assertions"]
     }
   },
+  "categoryMappings": {
+    "Audio": [
+      "Audio",
+      "Snapcast",
+      "Media",
+      "Stream",
+      "LibVLC",
+      "Player",
+      "Sound"
+    ],
+    "KNX": [
+      "KNX",
+      "Knx",
+      "Building",
+      "Automation",
+      "GroupAddress"
+    ],
+    "MQTT": [
+      "MQTT",
+      "Mqtt",
+      "Message",
+      "Broker",
+      "Topic",
+      "Publisher"
+    ],
+    "Web": [
+      "Web",
+      "Http",
+      "API",
+      "Controller",
+      "Endpoint",
+      "Request",
+      "Response"
+    ],
+    "Infrastructure": [
+      "Infrastructure",
+      "Host",
+      "Extension",
+      "Service",
+      "Integration",
+      "Manager",
+      "Repository"
+    ],
+    "Performance": [
+      "Performance",
+      "Metrics",
+      "Monitor",
+      "Stats",
+      "Counter",
+      "Measure"
+    ],
+    "Notifications": [
+      "Notification",
+      "Event",
+      "Handler",
+      "Publisher",
+      "Subscriber"
+    ],
+    "Testing": [
+      "Test",
+      "Mock",
+      "Fake",
+      "Stub",
+      "Unit",
+      "Integration"
+    ]
+  },
   "preferredFormat": {
     "multiLine": true,
     "fullNamespace": "Microsoft.Extensions.Logging.LogLevel",
@@ -67,5 +134,9 @@
     "validateParameterNames": true,
     "checkDuplicateEventIds": true,
     "enforceRanges": true
+  },
+  "classRanges": {
+    "rangeSize": 100,
+    "description": "Each class gets 100 EventIds (e.g., 6000-6099, 6100-6199)"
   }
 }

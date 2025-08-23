@@ -31,7 +31,7 @@
 
 param(
     [Parameter(Mandatory)]
-    [ValidateSet("Format", "Analyze", "Validate", "Report", "FixEventIds")]
+    [ValidateSet("Format", "Analyze", "Validate", "Report", "FixEventIds", "Repair")]
     [string]$Action,
     
     [string]$Path = "SnapDog2",
@@ -50,13 +50,68 @@ if (-not (Test-Path $configPath)) {
 
 $config = Get-Content $configPath | ConvertFrom-Json
 $EventIdRanges = @{}
+$CategoryMappings = @{}
 
-# Convert JSON config to PowerShell hashtable
+# Convert JSON config to PowerShell hashtables
 foreach ($category in $config.eventIdRanges.PSObject.Properties) {
     $EventIdRanges[$category.Name] = @{
         Start = $category.Value.start
         End = $category.Value.end
         Description = $category.Value.description
+    }
+}
+
+# Load category mappings if they exist
+if ($config.categoryMappings) {
+    foreach ($category in $config.categoryMappings.PSObject.Properties) {
+        $CategoryMappings[$category.Name] = $category.Value
+    }
+}
+
+function Repair-MalformedEventIds {
+    param([string]$SearchPath)
+    
+    Write-Host "🔧 Repairing malformed EventIds..." -ForegroundColor Cyan
+    
+    $files = Get-ChildItem -Path $SearchPath -Recurse -Filter "*.cs" | Where-Object { 
+        $_.FullName -notmatch "\\bin\\|\\obj\\|\\packages\\" 
+    }
+    
+    $repairedCount = 0
+    
+    foreach ($file in $files) {
+        $content = Get-Content $file.FullName -Raw
+        $originalContent = $content
+        
+        # Fix EventIds that are too large (likely concatenated)
+        # Pattern: EventId = [very large number]
+        $content = $content -replace 'EventId\s*=\s*(\d{7,})', {
+            param($match)
+            $largeNumber = $match.Groups[1].Value
+            Write-Host "  🔧 Fixing malformed EventId $largeNumber in $($file.Name)" -ForegroundColor Yellow
+            
+            # Extract a reasonable 4-digit number from the large number
+            # Take the last 4 digits, but ensure it's in a valid range
+            $lastFour = $largeNumber.Substring([Math]::Max(0, $largeNumber.Length - 4))
+            $eventId = [int]$lastFour
+            
+            # Ensure it's in a reasonable range (1000-9999)
+            if ($eventId -lt 1000) { $eventId += 1000 }
+            if ($eventId -gt 9999) { $eventId = 1000 + ($eventId % 1000) }
+            
+            return "EventId = $eventId"
+        }
+        
+        if ($content -ne $originalContent) {
+            Set-Content -Path $file.FullName -Value $content -NoNewline
+            $repairedCount++
+        }
+    }
+    
+    if ($repairedCount -gt 0) {
+        Write-Host "✅ Repaired $repairedCount files with malformed EventIds" -ForegroundColor Green
+    } else {
+        Write-Host "✅ No malformed EventIds found" -ForegroundColor Green
     }
 }
 
@@ -119,7 +174,7 @@ function Get-LoggerMessages {
             }
             
             # Determine category based on file path or class name
-            $category = Get-LoggingCategory -FilePath $file.FullName -ClassName (Get-ClassName $file.FullName)
+            $category = Get-LoggingCategory -FilePath $file.FullName -ClassName (Get-ClassName $file.FullName) -CategoryMappings $CategoryMappings
             
             $loggerMessages += [LoggerMessageInfo]@{
                 FilePath = $file.FullName
@@ -168,20 +223,23 @@ function Get-LogLevelFormat {
 }
 
 function Get-LoggingCategory {
-    param([string]$FilePath, [string]$ClassName)
+    param([string]$FilePath, [string]$ClassName, [hashtable]$CategoryMappings)
     
     $relativePath = $FilePath -replace [regex]::Escape((Get-Location).Path), ""
+    $fullContext = "$relativePath $ClassName"
     
-    switch -Regex ($relativePath) {
-        "Audio|Snapcast" { return "Audio" }
-        "KNX|Knx" { return "KNX" }
-        "MQTT|Mqtt" { return "MQTT" }
-        "Web|Http|Api|Controller" { return "Web" }
-        "Infrastructure|Host|Extension" { return "Infrastructure" }
-        "Performance|Metrics" { return "Performance" }
-        "Test" { return "Testing" }
-        default { return "Core" }
+    # Check each category mapping
+    foreach ($category in $CategoryMappings.Keys) {
+        $patterns = $CategoryMappings[$category]
+        foreach ($pattern in $patterns) {
+            if ($fullContext -match $pattern) {
+                return $category
+            }
+        }
     }
+    
+    # Default to Core for everything else
+    return "Core"
 }
 
 function Format-LoggerMessages {
@@ -461,32 +519,54 @@ function Validate-LoggerMessages {
 function Fix-EventIds {
     param([string]$SearchPath, [switch]$DryRun)
     
-    Write-Host "🔧 Fixing EventId conflicts and organizing ranges..." -ForegroundColor Cyan
+    Write-Host "🔧 Fixing EventId conflicts and organizing with 100-based class ranges..." -ForegroundColor Cyan
     
     $loggerMessages = Get-LoggerMessages -SearchPath $SearchPath
     $changes = @()
     
-    # Group by category and assign sequential IDs within ranges
+    # Group by category first, then by class within each category
     $byCategory = $loggerMessages | Group-Object Category
     
     foreach ($categoryGroup in $byCategory) {
         $category = $categoryGroup.Name
-        $messages = $categoryGroup.Group | Sort-Object ClassName, MethodName
         $range = $EventIdRanges[$category]
+        $rangeSize = $Config.classRanges.rangeSize
         
-        $nextId = $range.Start
+        # Group by class within this category
+        $byClass = $categoryGroup.Group | Group-Object ClassName | Sort-Object Name
         
-        foreach ($msg in $messages) {
-            if ($msg.EventId -ne $nextId) {
-                $changes += @{
-                    File = $msg.FilePath
-                    OldEventId = $msg.EventId
-                    NewEventId = $nextId
-                    Method = "$($msg.ClassName).$($msg.MethodName)"
-                    Category = $category
-                }
+        $classIndex = 0
+        foreach ($classGroup in $byClass) {
+            $className = $classGroup.Name
+            $messages = $classGroup.Group | Sort-Object MethodName
+            
+            # Calculate starting EventId for this class (100-based ranges)
+            $classStartId = $range.Start + ($classIndex * $rangeSize)
+            
+            # Ensure we don't exceed the category range
+            if ($classStartId + $messages.Count - 1 > $range.End) {
+                Write-Warning "⚠️  Class $className in category $category would exceed range limit. Consider increasing range or reducing classes."
+                continue
             }
-            $nextId++
+            
+            $nextId = $classStartId
+            
+            foreach ($msg in $messages) {
+                if ($msg.EventId -ne $nextId) {
+                    $changes += @{
+                        File = $msg.FilePath
+                        OldEventId = $msg.EventId
+                        NewEventId = $nextId
+                        Method = "$($msg.ClassName).$($msg.MethodName)"
+                        Category = $category
+                        ClassName = $className
+                        ClassRange = "$classStartId-$($classStartId + $rangeSize - 1)"
+                    }
+                }
+                $nextId++
+            }
+            
+            $classIndex++
         }
     }
     
@@ -495,10 +575,25 @@ function Fix-EventIds {
         return
     }
     
-    Write-Host "`n📋 Proposed EventId Changes:" -ForegroundColor White
-    foreach ($change in $changes) {
-        Write-Host "  $($change.Method): $($change.OldEventId) → $($change.NewEventId) [$($change.Category)]" -ForegroundColor Yellow
+    Write-Host "`n📋 Proposed EventId Changes (100-based class ranges):" -ForegroundColor White
+    $changesByClass = $changes | Group-Object ClassName | Sort-Object Name
+    
+    foreach ($classGroup in $changesByClass) {
+        $className = $classGroup.Name
+        $classChanges = $classGroup.Group
+        $range = $classChanges[0].ClassRange
+        $category = $classChanges[0].Category
+        
+        Write-Host "`n  📁 $className [$category] → Range: $range" -ForegroundColor Cyan
+        foreach ($change in $classChanges) {
+            Write-Host "    $($change.Method): $($change.OldEventId) → $($change.NewEventId)" -ForegroundColor Yellow
+        }
     }
+    
+    Write-Host "`n📊 Summary:" -ForegroundColor White
+    Write-Host "  Total changes: $($changes.Count)"
+    Write-Host "  Classes affected: $(($changes | Group-Object ClassName).Count)"
+    Write-Host "  Categories: $(($changes | Group-Object Category).Count)"
     
     if (-not $DryRun) {
         $confirm = Read-Host "`nApply these changes? (y/N)"
@@ -512,7 +607,7 @@ function Fix-EventIds {
                 $content = $content -replace $pattern, $replacement
                 Set-Content -Path $change.File -Value $content -NoNewline
             }
-            Write-Host "✅ EventId changes applied!" -ForegroundColor Green
+            Write-Host "✅ EventId changes applied with 100-based class ranges!" -ForegroundColor Green
         }
     }
 }
@@ -543,11 +638,29 @@ function Show-Report {
 
 # Main execution
 switch ($Action) {
-    "Format" { Format-LoggerMessages -SearchPath $Path -DryRun:$DryRun }
-    "Analyze" { Analyze-EventIds -SearchPath $Path }
-    "Validate" { Validate-LoggerMessages -SearchPath $Path }
-    "Report" { Show-Report -SearchPath $Path }
-    "FixEventIds" { Fix-EventIds -SearchPath $Path -DryRun:$DryRun }
+    "Format" { 
+        Repair-MalformedEventIds -SearchPath $Path
+        Format-LoggerMessages -SearchPath $Path -DryRun:$DryRun 
+    }
+    "Analyze" { 
+        Repair-MalformedEventIds -SearchPath $Path
+        Analyze-EventIds -SearchPath $Path 
+    }
+    "Validate" { 
+        Repair-MalformedEventIds -SearchPath $Path
+        Validate-LoggerMessages -SearchPath $Path 
+    }
+    "Report" { 
+        Repair-MalformedEventIds -SearchPath $Path
+        Show-Report -SearchPath $Path 
+    }
+    "FixEventIds" { 
+        Repair-MalformedEventIds -SearchPath $Path
+        Fix-EventIds -SearchPath $Path -DryRun:$DryRun 
+    }
+    "Repair" { 
+        Repair-MalformedEventIds -SearchPath $Path 
+    }
 }
 
 Write-Host "`n🎯 Script completed!" -ForegroundColor Green
