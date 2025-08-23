@@ -310,8 +310,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         var storedState = this._zoneStateStore.GetZoneState(zoneIndex);
         if (storedState != null)
         {
-            this._logger.LogInformation(
-                "Zone {ZoneIndex}: Loaded state from store - Source: {Source}; Playlist: {PlaylistIndex}, Track: {TrackIndex} ({TrackTitle})",
+            LogZoneInitializing(
                 zoneIndex,
                 storedState.Playlist?.Source ?? "none",
                 storedState.Playlist?.Index.ToString() ?? "none",
@@ -322,7 +321,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         }
         else
         {
-            this._logger.LogInformation("Zone {ZoneIndex}: No stored state found, creating initial state", zoneIndex);
+            LogNoStoredStateFound(zoneIndex);
             this._currentState = this.CreateInitialState();
             // Store the initial state
             this._zoneStateStore.SetZoneState(zoneIndex, this._currentState);
@@ -337,7 +336,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     public async Task<Result<ZoneState>> GetStateAsync()
     {
-        this._logger.LogDebug("GetStateAsync: Called for zone {ZoneIndex}", this._zoneIndex);
+        LogGetStateAsyncCalled(this._zoneIndex);
 
         await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
@@ -1565,4 +1564,42 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         this._disposed = true;
         return ValueTask.CompletedTask;
     }
+
+    // LoggerMessage methods for high-performance logging
+    [LoggerMessage(
+        EventId = 1,
+        Level = LogLevel.Information,
+        Message = "Zone {ZoneIndex}: Loaded state from store - Source: {Source}; Playlist: {PlaylistIndex}, Track: {TrackIndex} ({TrackTitle})"
+    )]
+    private partial void LogZoneInitializing(
+        int ZoneIndex,
+        string Source,
+        string PlaylistIndex,
+        string TrackIndex,
+        string TrackTitle
+    );
+
+    [LoggerMessage(
+        EventId = 2,
+        Level = LogLevel.Information,
+        Message = "Zone {ZoneIndex}: No stored state found, creating initial state"
+    )]
+    private partial void LogNoStoredStateFound(int ZoneIndex);
+
+    [LoggerMessage(EventId = 3, Level = LogLevel.Debug, Message = "GetStateAsync: Called for zone {ZoneIndex}")]
+    private partial void LogGetStateAsyncCalled(int ZoneIndex);
+
+    [LoggerMessage(
+        EventId = 4,
+        Level = LogLevel.Information,
+        Message = "Zone {ZoneIndex}: State updated - {StateInfo}"
+    )]
+    private partial void LogZoneStateUpdated(int ZoneIndex, string StateInfo);
+
+    [LoggerMessage(
+        EventId = 5,
+        Level = LogLevel.Debug,
+        Message = "UpdateStateFromSnapcastAsync: Starting for zone {ZoneIndex}"
+    )]
+    private partial void LogUpdateStateFromSnapcastStarting(int ZoneIndex);
 }

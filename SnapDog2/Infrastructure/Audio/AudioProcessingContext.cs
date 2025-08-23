@@ -29,7 +29,7 @@ public class PlaybackStateChangedEventArgs : EventArgs
 /// <summary>
 /// Audio processing context using LibVLC for streaming and metadata extraction.
 /// </summary>
-public sealed class AudioProcessingContext : IAsyncDisposable, IDisposable
+public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposable
 {
     private readonly LibVLC _libvlc;
     private readonly LibVLCSharp.Shared.MediaPlayer _mediaPlayer;
