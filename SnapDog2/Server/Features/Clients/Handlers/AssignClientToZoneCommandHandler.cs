@@ -35,6 +35,13 @@ public partial class AssignClientToZoneCommandHandler(
     [LoggerMessage(3103, LogLevel.Warning, "Zone {ZoneIndex} not found for AssignClientToZoneCommand")]
     private partial void LogZoneNotFound(int zoneIndex);
 
+    [LoggerMessage(
+        3104,
+        LogLevel.Error,
+        "Failed to publish ClientZoneAssignmentChangedNotification for client {ClientIndex}"
+    )]
+    private partial void LogNotificationPublishingFailed(Exception ex, int clientIndex);
+
     public async Task<Result> Handle(AssignClientToZoneCommand request, CancellationToken cancellationToken)
     {
         this.LogHandling(request.ClientIndex, request.ZoneIndex, request.Source);
@@ -92,11 +99,7 @@ public partial class AssignClientToZoneCommandHandler(
                     }
                     catch (Exception ex)
                     {
-                        this._logger.LogError(
-                            ex,
-                            "Failed to publish ClientZoneAssignmentChangedNotification for client {ClientIndex}",
-                            request.ClientIndex
-                        );
+                        LogNotificationPublishingFailed(ex, request.ClientIndex);
                     }
                 },
                 cancellationToken

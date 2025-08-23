@@ -275,21 +275,17 @@ public partial class SmartMqttNotificationHandlers(
     {
         try
         {
-            _logger.LogDebug(
-                "Attempting to publish zone status: {EventType} for Zone {ZoneIndex}",
-                eventType,
-                zoneIndex
-            );
+            LogAttemptingToPublishZoneStatus(_logger, eventType, zoneIndex);
 
             var smartPublisher = _serviceProvider.GetService<ISmartMqttPublisher>();
             if (smartPublisher != null)
             {
-                _logger.LogDebug("Smart publisher found, publishing zone status");
+                LogSmartPublisherFound(_logger);
                 await smartPublisher.PublishZoneStatusAsync(zoneIndex, eventType, payload, cancellationToken);
             }
             else
             {
-                _logger.LogWarning("❌ Smart publisher not available");
+                LogSmartPublisherNotAvailableWarning(_logger);
                 LogSmartPublisherNotAvailable("Zone", zoneIndex.ToString(), eventType);
             }
         }
@@ -375,6 +371,27 @@ public partial class SmartMqttNotificationHandlers(
 
     [LoggerMessage(9021, LogLevel.Error, "Failed to publish {EntityType} {EntityId} {EventType} to MQTT")]
     private partial void LogPublishError(string entityType, string entityId, string eventType, Exception ex);
+
+    [LoggerMessage(
+        EventId = 9022,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Attempting to publish zone status: {EventType} for Zone {ZoneIndex}"
+    )]
+    private static partial void LogAttemptingToPublishZoneStatus(ILogger logger, string eventType, int zoneIndex);
+
+    [LoggerMessage(
+        EventId = 9023,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Smart publisher found, publishing zone status"
+    )]
+    private static partial void LogSmartPublisherFound(ILogger logger);
+
+    [LoggerMessage(
+        EventId = 9024,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "❌ Smart publisher not available"
+    )]
+    private static partial void LogSmartPublisherNotAvailableWarning(ILogger logger);
 
     #endregion
 }
