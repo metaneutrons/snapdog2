@@ -96,9 +96,21 @@ function Get-LoggerMessages {
             $lineNumber = ($content.Substring(0, $match.Index) -split "`n").Count
             
             # Parse attribute parameters
-            $eventId = if ($attributeContent -match 'EventId\s*=\s*(\d+)') { [int]$matches[0].Groups[1].Value } else { 0 }
-            $level = if ($attributeContent -match 'Level\s*=\s*([^,\)]+)') { $matches[0].Groups[1].Value.Trim() } else { "" }
-            $message = if ($attributeContent -match 'Message\s*=\s*"([^"]*)"') { $matches[0].Groups[1].Value } else { "" }
+            $eventIdMatch = if ($attributeContent -match 'EventId\s*=\s*(\d+)') { $matches[1] } else { "0" }
+            $eventId = try { 
+                $num = [long]$eventIdMatch
+                if ($num -gt [int]::MaxValue -or $num -lt 0) { 
+                    Write-Warning "Skipping invalid EventId $num in $file"
+                    0 
+                } else { 
+                    [int]$num 
+                }
+            } catch { 
+                Write-Warning "Could not parse EventId '$eventIdMatch' in $file"
+                0 
+            }
+            $level = if ($attributeContent -match 'Level\s*=\s*([^,\)]+)') { $matches[1].Trim() } else { "" }
+            $message = if ($attributeContent -match 'Message\s*=\s*"([^"]*)"') { $matches[1] } else { "" }
             
             # Parse parameters
             $paramList = @()
@@ -494,7 +506,10 @@ function Fix-EventIds {
             # Apply changes
             foreach ($change in $changes) {
                 $content = Get-Content $change.File -Raw
-                $content = $content -replace "EventId = $($change.OldEventId)", "EventId = $($change.NewEventId)"
+                # Use word boundaries to ensure exact EventId match and prevent partial replacements
+                $pattern = "EventId\s*=\s*$($change.OldEventId)\b"
+                $replacement = "EventId = $($change.NewEventId)"
+                $content = $content -replace $pattern, $replacement
                 Set-Content -Path $change.File -Value $content -NoNewline
             }
             Write-Host "✅ EventId changes applied!" -ForegroundColor Green
