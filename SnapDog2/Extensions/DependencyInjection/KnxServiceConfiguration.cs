@@ -10,7 +10,7 @@ using SnapDog2.Infrastructure.Integrations.Knx;
 /// <summary>
 /// Dependency injection configuration for KNX service.
 /// </summary>
-public static class KnxServiceConfiguration
+public static partial class KnxServiceConfiguration
 {
     /// <summary>
     /// Adds KNX service to the service collection.
@@ -29,7 +29,7 @@ public static class KnxServiceConfiguration
         // Check if KNX service is enabled
         if (!knxConfig.Enabled)
         {
-            logger.LogInformation("KNX service is disabled in configuration - skipping registration");
+            LogKnxServiceDisabled(logger);
             return services;
         }
 
@@ -37,48 +37,35 @@ public static class KnxServiceConfiguration
         var validationResult = ValidateKnxConfiguration(knxConfig, configuration.Zones, configuration.Clients);
         if (!validationResult.IsValid)
         {
-            logger.LogError(
-                "KNX configuration validation failed: {Errors}",
-                string.Join(", ", validationResult.Errors)
-            );
+            LogKnxConfigurationValidationFailed(logger, string.Join(", ", validationResult.Errors));
         }
 
-        logger.LogInformation(
-            "Registering KNX service with {ConnectionType} connection",
-            knxConfig.ConnectionType switch
-            {
-                KnxConnectionType.Tunnel => "IP Tunneling",
-                KnxConnectionType.Router => "IP Routing",
-                KnxConnectionType.Usb => "USB",
-                _ => "Unknown",
-            }
-        );
+        var connectionTypeText = knxConfig.ConnectionType switch
+        {
+            KnxConnectionType.Tunnel => "IP Tunneling",
+            KnxConnectionType.Router => "IP Routing",
+            KnxConnectionType.Usb => "USB",
+            _ => "Unknown",
+        };
+
+        LogKnxServiceRegistering(logger, connectionTypeText);
 
         if (!string.IsNullOrEmpty(knxConfig.Gateway))
         {
-            var connectionTypeText = knxConfig.ConnectionType switch
+            var ipConnectionTypeText = knxConfig.ConnectionType switch
             {
                 KnxConnectionType.Tunnel => "IP Tunneling",
                 KnxConnectionType.Router => "IP Routing",
                 _ => "IP Connection",
             };
-            logger.LogInformation(
-                "KNX {ConnectionType}: {Gateway}:{Port}",
-                connectionTypeText,
-                knxConfig.Gateway,
-                knxConfig.Port
-            );
+            LogKnxConnectionDetails(logger, ipConnectionTypeText, knxConfig.Gateway, knxConfig.Port);
         }
 
         // Count configured KNX zones and clients
         var knxZoneCount = configuration.Zones.Count(z => z.Knx.Enabled);
         var knxClientCount = configuration.Clients.Count(c => c.Knx.Enabled);
 
-        logger.LogInformation(
-            "KNX integration configured for {ZoneCount} zones and {ClientCount} clients",
-            knxZoneCount,
-            knxClientCount
-        );
+        LogKnxIntegrationConfigured(logger, knxZoneCount, knxClientCount);
 
         // Register the actual KNX service
         services.AddSingleton<IKnxService, KnxService>();
@@ -210,6 +197,30 @@ public static class KnxServiceConfiguration
             }
         }
     }
+
+    [LoggerMessage(13001, LogLevel.Information, "KNX service is disabled in configuration - skipping registration")]
+    private static partial void LogKnxServiceDisabled(ILogger logger);
+
+    [LoggerMessage(13002, LogLevel.Error, "KNX configuration validation failed: {Errors}")]
+    private static partial void LogKnxConfigurationValidationFailed(ILogger logger, string errors);
+
+    [LoggerMessage(13003, LogLevel.Information, "Registering KNX service with {ConnectionType} connection")]
+    private static partial void LogKnxServiceRegistering(ILogger logger, string connectionType);
+
+    [LoggerMessage(13004, LogLevel.Information, "KNX {ConnectionType}: {Gateway}:{Port}")]
+    private static partial void LogKnxConnectionDetails(
+        ILogger logger,
+        string connectionType,
+        string gateway,
+        int port
+    );
+
+    [LoggerMessage(
+        13005,
+        LogLevel.Information,
+        "KNX integration configured for {ZoneCount} zones and {ClientCount} clients"
+    )]
+    private static partial void LogKnxIntegrationConfigured(ILogger logger, int zoneCount, int clientCount);
 
     private class ValidationResult
     {

@@ -397,7 +397,10 @@ static WebApplication CreateWebApplication(string[] args)
     // Configure resilient web host with port from configuration
     if (snapDogConfig.Api.Enabled)
     {
-        builder.WebHost.UseResilientKestrel(snapDogConfig.Api, Log.Logger);
+        builder.WebHost.UseResilientKestrel(
+            snapDogConfig.Api,
+            builder.Services.BuildServiceProvider().GetRequiredService<ILoggerFactory>().CreateLogger("WebHost")
+        );
     }
     else if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Testing")
     {
