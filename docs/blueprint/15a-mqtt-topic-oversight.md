@@ -126,8 +126,8 @@ snapdog/
 | `zones/{index}/track/duration` | `TRACK_METADATA_DURATION` | Status | Track duration |
 | `zones/{index}/playlist` | `PLAYLIST_STATUS` | Status | Current playlist index |
 | `zones/{index}/playlist/set` | `PLAYLIST` | Command | Set playlist |
-| `zones/{index}/playlist/next` | `PLAYLIST_NEXT` | Command | Next playlist |
-| `zones/{index}/playlist/previous` | `PLAYLIST_PREVIOUS` | Command | Previous playlist |
+| `zones/{index}/next/playlist` | `PLAYLIST_NEXT` | Command | Next playlist |
+| `zones/{index}/previous/playlist` | `PLAYLIST_PREVIOUS` | Command | Previous playlist |
 | `zones/{index}/playlist/name` | `PLAYLIST_NAME_STATUS` | Status | Playlist name |
 | `zones/{index}/playlist/count` | `PLAYLIST_COUNT_STATUS` | Status | Playlist track count |
 | `zones/{index}/play/track` | `TRACK_PLAY_INDEX` | Command | Play specific track |

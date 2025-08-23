@@ -39,7 +39,7 @@ All commands and status are fully implemented as REST API endpoints with proper 
 
 - Playback: `POST /zones/{index}/play`, `POST /zones/{index}/pause`, `POST /zones/{index}/stop`
 - Track: `PUT /zones/{index}/track`, `POST /zones/{index}/next`, `POST /zones/{index}/previous`, `POST /zones/{index}/play/{index}`, `POST /zones/{index}/play/url`, `PUT /zones/{index}/track/position`, `PUT /zones/{index}/track/progress`, `PUT /zones/{index}/repeat/track`, `POST /zones/{index}/repeat/track/toggle`
-- Playlist: `PUT /zones/{index}/playlist`, `POST /zones/{index}/playlist/next`, `POST /zones/{index}/playlist/previous`, `PUT /zones/{index}/shuffle`, `POST /zones/{index}/shuffle/toggle`, `PUT /zones/{index}/repeat`, `POST /zones/{index}/repeat/toggle`
+- Playlist: `PUT /zones/{index}/playlist`, `POST /zones/{index}/next/playlist`, `POST /zones/{index}/previous/playlist`, `PUT /zones/{index}/shuffle`, `POST /zones/{index}/shuffle/toggle`, `PUT /zones/{index}/repeat`, `POST /zones/{index}/repeat/toggle`
 - Volume: `PUT /zones/{index}/volume`, `POST /zones/{index}/volume/up`, `POST /zones/{index}/volume/down`, `PUT /zones/{index}/mute`, `POST /zones/{index}/mute/toggle`
 
 **Status (20)**:
