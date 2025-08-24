@@ -239,7 +239,9 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return this.Ok(volume);
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        // The volume change will be applied asynchronously and published via MQTT/KNX
+        return this.Accepted(volume);
     }
 
     /// <summary>
@@ -290,11 +292,9 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        // Get the new volume to return
-        var query = new GetClientQuery { ClientIndex = clientIndex };
-        var clientResult = await this._mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
-
-        return Ok(clientResult.IsSuccess ? clientResult.Value!.Volume : 0);
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        // The volume change will be applied asynchronously and published via MQTT/KNX
+        return this.Accepted(step);
     }
 
     /// <summary>
@@ -323,11 +323,9 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        // Get the new volume to return
-        var query = new GetClientQuery { ClientIndex = clientIndex };
-        var clientResult = await this._mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
-
-        return Ok(clientResult.IsSuccess ? clientResult.Value!.Volume : 0);
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        // The volume change will be applied asynchronously and published via MQTT/KNX
+        return this.Accepted(step);
     }
 
     /// <summary>
@@ -350,7 +348,8 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return this.Ok(muted);
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        return this.Accepted(muted);
     }
 
     /// <summary>
@@ -394,17 +393,10 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        // Get the new state to return
-        var query = new GetClientQuery { ClientIndex = clientIndex };
-        var clientResult = await this._mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
-
-        if (clientResult.IsFailure)
-        {
-            LogFailedToGetClientAfterMuteToggle(clientIndex, clientResult.ErrorMessage ?? "Unknown error");
-            return Problem(clientResult.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
-        }
-
-        return Ok(clientResult.Value!.Mute);
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        // The mute toggle will be applied asynchronously and published via MQTT/KNX
+        // Client should query current state or listen to MQTT/KNX for the actual result
+        return this.Accepted();
     }
 
     /// <summary>
@@ -433,7 +425,8 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return this.Ok(latency);
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        return this.Accepted(latency);
     }
 
     /// <summary>
@@ -484,7 +477,9 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return this.NoContent();
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        // The zone assignment will be applied asynchronously and published via MQTT/KNX
+        return this.Accepted(zoneIndex);
     }
 
     /// <summary>
@@ -540,7 +535,8 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return this.Ok(name.Trim());
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        return this.Accepted(name.Trim());
     }
 
     /// <summary>

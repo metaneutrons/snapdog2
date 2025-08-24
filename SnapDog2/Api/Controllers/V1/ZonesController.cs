@@ -136,7 +136,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return this.Ok(volume);
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        return this.Accepted(volume);
     }
 
     /// <summary>
@@ -187,11 +188,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        // Get the new volume to return
-        var volumeQuery = new GetZoneVolumeQuery { ZoneIndex = zoneIndex };
-        var volumeResult = await this._mediator.SendQueryAsync<GetZoneVolumeQuery, Result<int>>(volumeQuery);
-
-        return Ok(volumeResult.IsSuccess ? volumeResult.Value : 0);
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        return this.Accepted(step);
     }
 
     /// <summary>
@@ -220,11 +218,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        // Get the new volume to return
-        var volumeQuery = new GetZoneVolumeQuery { ZoneIndex = zoneIndex };
-        var volumeResult = await this._mediator.SendQueryAsync<GetZoneVolumeQuery, Result<int>>(volumeQuery);
-
-        return Ok(volumeResult.IsSuccess ? volumeResult.Value : 0);
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        return this.Accepted(step);
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -251,7 +246,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return this.Ok(muted);
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        return this.Accepted(muted);
     }
 
     /// <summary>
@@ -295,11 +291,9 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        // Get the new state to return
-        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
-        var stateResult = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
-
-        return Ok(stateResult.IsSuccess ? stateResult.Value!.Mute : false);
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        // The mute toggle will be applied asynchronously and published via MQTT/KNX
+        return this.Accepted();
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -325,7 +319,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return this.NoContent();
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        return this.Accepted();
     }
 
     /// <summary>
@@ -347,7 +342,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return this.NoContent();
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        return this.Accepted();
     }
 
     /// <summary>
@@ -369,7 +365,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return this.NoContent();
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        return this.Accepted();
     }
 
     /// <summary>
@@ -398,7 +395,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return this.NoContent();
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        return this.Accepted(playlistIndex);
     }
 
     [LoggerMessage(
@@ -517,7 +515,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return this.NoContent();
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        return this.Accepted(trackIndex);
     }
 
     [LoggerMessage(
@@ -573,7 +572,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return this.Ok(enabled);
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        return this.Accepted(enabled);
     }
 
     /// <summary>
@@ -595,11 +595,9 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        // Get the new state to return
-        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
-        var stateResult = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
-
-        return Ok(stateResult.IsSuccess ? stateResult.Value!.TrackRepeat : false);
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        // The track repeat toggle will be applied asynchronously and published via MQTT/KNX
+        return this.Accepted();
     }
 
     /// <summary>
@@ -644,7 +642,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return this.Ok(enabled);
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        return this.Accepted(enabled);
     }
 
     /// <summary>
@@ -666,11 +665,9 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        // Get the new state to return
-        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
-        var stateResult = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
-
-        return Ok(stateResult.IsSuccess ? stateResult.Value!.PlaylistRepeat : false);
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        // The playlist repeat toggle will be applied asynchronously and published via MQTT/KNX
+        return this.Accepted();
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -719,7 +716,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return this.Ok(enabled);
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        return this.Accepted(enabled);
     }
 
     /// <summary>
@@ -741,11 +739,9 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        // Get the new state to return
-        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
-        var stateResult = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
-
-        return Ok(stateResult.IsSuccess ? stateResult.Value!.PlaylistShuffle : false);
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        // The playlist shuffle toggle will be applied asynchronously and published via MQTT/KNX
+        return this.Accepted();
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -771,11 +767,9 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        // Get the new track index to return
-        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
-        var stateResult = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
-
-        return Ok(stateResult.IsSuccess ? stateResult.Value!.Track?.Index ?? 1 : 1);
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        // The track navigation will be applied asynchronously and published via MQTT/KNX
+        return this.Accepted();
     }
 
     /// <summary>
@@ -797,11 +791,9 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        // Get the new track index to return
-        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
-        var stateResult = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
-
-        return Ok(stateResult.IsSuccess ? stateResult.Value!.Track?.Index ?? 1 : 1);
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        // The track navigation will be applied asynchronously and published via MQTT/KNX
+        return this.Accepted();
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -827,11 +819,9 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        // Get the new playlist name to return
-        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
-        var stateResult = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
-
-        return Ok(stateResult.IsSuccess ? stateResult.Value!.Playlist?.Name ?? "Unknown" : "Unknown");
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        // The playlist navigation will be applied asynchronously and published via MQTT/KNX
+        return this.Accepted();
     }
 
     /// <summary>
@@ -853,11 +843,9 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        // Get the new playlist name to return
-        var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
-        var stateResult = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
-
-        return Ok(stateResult.IsSuccess ? stateResult.Value!.Playlist?.Name ?? "Unknown" : "Unknown");
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        // The playlist navigation will be applied asynchronously and published via MQTT/KNX
+        return this.Accepted();
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -1173,7 +1161,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return this.Ok(positionMs);
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        return this.Accepted(positionMs);
     }
 
     /// <summary>
@@ -1202,7 +1191,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return this.Ok(progress);
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        return this.Accepted(progress);
     }
 
     /// <summary>
@@ -1231,7 +1221,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return this.Ok(trackIndex);
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        return this.Accepted(trackIndex);
     }
 
     /// <summary>
@@ -1265,7 +1256,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return this.Ok(url);
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        return this.Accepted(url);
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -1636,7 +1628,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return this.NoContent();
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        return this.Accepted();
     }
 
     [LoggerMessage(
