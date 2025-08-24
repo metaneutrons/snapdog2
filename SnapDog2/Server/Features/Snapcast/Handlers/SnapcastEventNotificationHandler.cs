@@ -16,6 +16,7 @@ namespace SnapDog2.Server.Features.Snapcast.Handlers;
 using Cortex.Mediator;
 using Cortex.Mediator.Notifications;
 using Microsoft.Extensions.Logging;
+using SnapDog2.Core.Abstractions;
 using SnapDog2.Server.Features.Clients.Notifications;
 using SnapDog2.Server.Features.Snapcast.Notifications;
 
@@ -25,6 +26,7 @@ using SnapDog2.Server.Features.Snapcast.Notifications;
 /// </summary>
 public partial class SnapcastEventNotificationHandler(
     IMediator mediator,
+    IClientStateStore clientStateStore,
     ILogger<SnapcastEventNotificationHandler> logger)
     : INotificationHandler<SnapcastClientConnectedNotification>,
         INotificationHandler<SnapcastClientDisconnectedNotification>,
@@ -36,6 +38,7 @@ public partial class SnapcastEventNotificationHandler(
         INotificationHandler<SnapcastConnectionLostNotification>
 {
     private readonly IMediator _mediator = mediator;
+    private readonly IClientStateStore _clientStateStore = clientStateStore;
     private readonly ILogger<SnapcastEventNotificationHandler> _logger = logger;
 
     #region Logging
@@ -82,6 +85,104 @@ public partial class SnapcastEventNotificationHandler(
     )]
     private partial void LogConnectionLost(string reason);
 
+    [LoggerMessage(
+        EventId = 3006,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Snapcast client latency changed: {ClientIndex} -> {LatencyMs}ms"
+    )]
+    private partial void LogClientLatencyChanged(int clientIndex, int latencyMs);
+
+    [LoggerMessage(
+        EventId = 3007,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Invalid client index format for connection: {ClientId}"
+    )]
+    private partial void LogInvalidClientIndexForConnection(string clientId);
+
+    [LoggerMessage(
+        EventId = 3008,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Updated client {ClientIndex} storage: Connected=true"
+    )]
+    private partial void LogClientStorageUpdatedConnected(int clientIndex);
+
+    [LoggerMessage(
+        EventId = 3009,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Client {ClientIndex} state not found in storage for connection update"
+    )]
+    private partial void LogClientStateNotFoundForConnection(int clientIndex);
+
+    [LoggerMessage(
+        EventId = 3010,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Invalid client index format for disconnection: {ClientId}"
+    )]
+    private partial void LogInvalidClientIndexForDisconnection(string clientId);
+
+    [LoggerMessage(
+        EventId = 3011,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Updated client {ClientIndex} storage: Connected=false"
+    )]
+    private partial void LogClientStorageUpdatedDisconnected(int clientIndex);
+
+    [LoggerMessage(
+        EventId = 3012,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Client {ClientIndex} state not found in storage for disconnection update"
+    )]
+    private partial void LogClientStateNotFoundForDisconnection(int clientIndex);
+
+    [LoggerMessage(
+        EventId = 3013,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Invalid client index format: {ClientIndex}"
+    )]
+    private partial void LogInvalidClientIndexFormat(string clientIndex);
+
+    [LoggerMessage(
+        EventId = 3014,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Updated client {ClientIndex} storage: Volume={Volume}, Mute={Mute}"
+    )]
+    private partial void LogClientStorageUpdatedVolume(int clientIndex, int volume, bool mute);
+
+    [LoggerMessage(
+        EventId = 3015,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Client {ClientIndex} state not found in storage for volume update"
+    )]
+    private partial void LogClientStateNotFoundForVolume(int clientIndex);
+
+    [LoggerMessage(
+        EventId = 3016,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Invalid client index format for latency change: {ClientIndex}"
+    )]
+    private partial void LogInvalidClientIndexForLatency(string clientIndex);
+
+    [LoggerMessage(
+        EventId = 3017,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Updated client {ClientIndex} storage: LatencyMs={LatencyMs}"
+    )]
+    private partial void LogClientStorageUpdatedLatency(int clientIndex, int latencyMs);
+
+    [LoggerMessage(
+        EventId = 3018,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Client {ClientIndex} state not found in storage for latency update"
+    )]
+    private partial void LogClientStateNotFoundForLatency(int clientIndex);
+
+    [LoggerMessage(
+        EventId = 3019,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Invalid client index format for name change: {ClientIndex}"
+    )]
+    private partial void LogInvalidClientIndexForName(string clientIndex);
+
     #endregion
 
     #region Client Events
@@ -90,10 +191,31 @@ public partial class SnapcastEventNotificationHandler(
     {
         this.LogClientConnected(notification.Client.Id, notification.Client.Config.Name);
 
-        // Publish ClientConnectionChangedNotification to trigger MQTT/KNX updates
+        // Parse client index from Snapcast ID
+        if (!int.TryParse(notification.Client.Id, out var clientIndex))
+        {
+            LogInvalidClientIndexForConnection(notification.Client.Id);
+            return;
+        }
+
+        // 1. Update storage (single source of truth) - Command-Status Flow Pattern
+        var currentState = this._clientStateStore.GetClientState(clientIndex);
+        if (currentState != null)
+        {
+            var updatedState = currentState with { Connected = true };
+            this._clientStateStore.SetClientState(clientIndex, updatedState);
+
+            LogClientStorageUpdatedConnected(clientIndex);
+        }
+        else
+        {
+            LogClientStateNotFoundForConnection(clientIndex);
+        }
+
+        // 2. Publish status notification to trigger integration publishing
         await this._mediator.PublishAsync(new ClientConnectionChangedNotification
         {
-            ClientIndex = int.Parse(notification.Client.Id),
+            ClientIndex = clientIndex,
             IsConnected = true
         }, cancellationToken);
     }
@@ -102,10 +224,31 @@ public partial class SnapcastEventNotificationHandler(
     {
         this.LogClientDisconnected(notification.Client.Id, notification.Client.Config.Name);
 
-        // Publish ClientConnectionChangedNotification to trigger MQTT/KNX updates
+        // Parse client index from Snapcast ID
+        if (!int.TryParse(notification.Client.Id, out var clientIndex))
+        {
+            LogInvalidClientIndexForDisconnection(notification.Client.Id);
+            return;
+        }
+
+        // 1. Update storage (single source of truth) - Command-Status Flow Pattern
+        var currentState = this._clientStateStore.GetClientState(clientIndex);
+        if (currentState != null)
+        {
+            var updatedState = currentState with { Connected = false };
+            this._clientStateStore.SetClientState(clientIndex, updatedState);
+
+            LogClientStorageUpdatedDisconnected(clientIndex);
+        }
+        else
+        {
+            LogClientStateNotFoundForDisconnection(clientIndex);
+        }
+
+        // 2. Publish status notification to trigger integration publishing
         await this._mediator.PublishAsync(new ClientConnectionChangedNotification
         {
-            ClientIndex = int.Parse(notification.Client.Id),
+            ClientIndex = clientIndex,
             IsConnected = false
         }, cancellationToken);
     }
@@ -117,16 +260,30 @@ public partial class SnapcastEventNotificationHandler(
         // Parse client index from string to int (now it should be a proper client ID)
         if (!int.TryParse(notification.ClientIndex, out var clientIndex))
         {
-            this._logger.LogWarning("Invalid client index format: {ClientIndex}", notification.ClientIndex);
+            LogInvalidClientIndexFormat(notification.ClientIndex);
             return;
         }
 
-        // Publish ClientVolumeChangedNotification to trigger MQTT/KNX updates
-        await this._mediator.PublishAsync(new ClientVolumeChangedNotification
+        // 1. Update storage (single source of truth) - Command-Status Flow Pattern
+        var currentState = this._clientStateStore.GetClientState(clientIndex);
+        if (currentState != null)
         {
-            ClientIndex = clientIndex,
-            Volume = notification.Volume.Percent
-        }, cancellationToken);
+            var updatedState = currentState with
+            {
+                Volume = notification.Volume.Percent,
+                Mute = notification.Volume.Muted
+            };
+            this._clientStateStore.SetClientState(clientIndex, updatedState);
+
+            LogClientStorageUpdatedVolume(clientIndex, notification.Volume.Percent, notification.Volume.Muted);
+        }
+        else
+        {
+            LogClientStateNotFoundForVolume(clientIndex);
+        }
+
+        // 2. Publish status notification to trigger integration publishing
+        await this._mediator.PublishAsync(new ClientVolumeStatusNotification(clientIndex, notification.Volume.Percent), cancellationToken);
     }
 
     public async Task Handle(SnapcastClientLatencyChangedNotification notification, CancellationToken cancellationToken)
@@ -134,16 +291,28 @@ public partial class SnapcastEventNotificationHandler(
         // Parse client index from string to int
         if (!int.TryParse(notification.ClientIndex, out var clientIndex))
         {
-            this._logger.LogWarning("Invalid client index format for latency change: {ClientIndex}", notification.ClientIndex);
+            LogInvalidClientIndexForLatency(notification.ClientIndex);
             return;
         }
 
-        // Publish ClientLatencyChangedNotification to trigger MQTT/KNX updates
-        await this._mediator.PublishAsync(new ClientLatencyChangedNotification
+        this.LogClientLatencyChanged(clientIndex, notification.LatencyMs);
+
+        // 1. Update storage (single source of truth) - Command-Status Flow Pattern
+        var currentState = this._clientStateStore.GetClientState(clientIndex);
+        if (currentState != null)
         {
-            ClientIndex = clientIndex,
-            LatencyMs = notification.LatencyMs
-        }, cancellationToken);
+            var updatedState = currentState with { LatencyMs = notification.LatencyMs };
+            this._clientStateStore.SetClientState(clientIndex, updatedState);
+
+            LogClientStorageUpdatedLatency(clientIndex, notification.LatencyMs);
+        }
+        else
+        {
+            LogClientStateNotFoundForLatency(clientIndex);
+        }
+
+        // 2. Publish status notification to trigger integration publishing
+        await this._mediator.PublishAsync(new ClientLatencyStatusNotification(clientIndex, notification.LatencyMs), cancellationToken);
     }
 
     public async Task Handle(SnapcastClientNameChangedNotification notification, CancellationToken cancellationToken)
@@ -151,7 +320,7 @@ public partial class SnapcastEventNotificationHandler(
         // Parse client index from string to int
         if (!int.TryParse(notification.ClientIndex, out var clientIndex))
         {
-            this._logger.LogWarning("Invalid client index format for name change: {ClientIndex}", notification.ClientIndex);
+            LogInvalidClientIndexForName(notification.ClientIndex);
             return;
         }
 
