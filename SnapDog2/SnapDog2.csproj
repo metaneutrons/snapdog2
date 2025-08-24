@@ -34,4 +34,7 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
   </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\SnapDog.Analyzers\SnapDog.Analyzers.csproj" />
+  </ItemGroup>
 </Project>

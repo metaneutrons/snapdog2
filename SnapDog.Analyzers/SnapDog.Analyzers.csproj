@@ -10,6 +10,9 @@
     <Authors>SnapDog Team</Authors>
     <Description>Roslyn analyzers for SnapDog2 LoggerMessage patterns</Description>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <!-- Suppress NU5128 - analyzers don't provide lib assemblies, only analyzer assemblies -->
+    <!-- Suppress RS2007 - release tracking file format warnings -->
+    <NoWarn>$(NoWarn);NU5128;RS2007</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
