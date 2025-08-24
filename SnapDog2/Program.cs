@@ -343,7 +343,7 @@ static WebApplication CreateWebApplication(string[] args)
         SnapDog2.Core.Abstractions.IZoneStateStore,
         SnapDog2.Infrastructure.Storage.InMemoryZoneStateStore
     >();
-    
+
     // Client management services
     builder.Services.AddSingleton<
         SnapDog2.Core.Abstractions.IClientStateStore,
@@ -362,7 +362,7 @@ static WebApplication CreateWebApplication(string[] args)
             configuration.DefaultDatabase = snapDogConfig.Redis.Database;
             configuration.AbortOnConnectFail = false; // Allow retries
             configuration.ConnectRetry = 3;
-            
+
             return StackExchange.Redis.ConnectionMultiplexer.Connect(configuration);
         });
 

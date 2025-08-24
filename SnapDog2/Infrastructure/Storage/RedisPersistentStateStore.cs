@@ -16,11 +16,11 @@ namespace SnapDog2.Infrastructure.Storage;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Polly;
-using StackExchange.Redis;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Configuration;
 using SnapDog2.Core.Helpers;
 using SnapDog2.Core.Models;
+using StackExchange.Redis;
 
 /// <summary>
 /// Redis-based implementation of persistent state storage.
@@ -34,13 +34,13 @@ public partial class RedisPersistentStateStore : IPersistentStateStore, IDisposa
     private readonly JsonSerializerOptions _jsonOptions;
     private readonly ResiliencePipeline _connectionPipeline;
     private readonly ResiliencePipeline _operationPipeline;
-    
+
     // Redis key prefixes
     private const string ZoneStatePrefix = "snapdog:zone:";
     private const string ClientStatePrefix = "snapdog:client:";
     private const string ConfigFingerprintKey = "snapdog:config:fingerprint";
     private const string StatsKey = "snapdog:stats";
-    
+
     public RedisPersistentStateStore(
         IConnectionMultiplexer redis,
         RedisConfig redisConfig,
@@ -49,17 +49,17 @@ public partial class RedisPersistentStateStore : IPersistentStateStore, IDisposa
         _redis = redis;
         _database = redis.GetDatabase();
         _logger = logger;
-        
+
         // Create resilience pipelines using approved pattern
         _connectionPipeline = ResiliencePolicyFactory.CreatePipeline(
-            redisConfig.Resilience.Connection, 
+            redisConfig.Resilience.Connection,
             "Redis-Connection"
         );
         _operationPipeline = ResiliencePolicyFactory.CreatePipeline(
-            redisConfig.Resilience.Operation, 
+            redisConfig.Resilience.Operation,
             "Redis-Operation"
         );
-        
+
         _jsonOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -76,13 +76,13 @@ public partial class RedisPersistentStateStore : IPersistentStateStore, IDisposa
         {
             var key = $"{ZoneStatePrefix}{zoneIndex}";
             var json = JsonSerializer.Serialize(zoneState, _jsonOptions);
-            
+
             await _operationPipeline.ExecuteAsync(async _ =>
             {
                 await _database.StringSetAsync(key, json);
                 await UpdateStatsAsync("zone", zoneIndex);
             });
-            
+
             LogZoneStateSaved(zoneIndex, zoneState.Name);
         }
         catch (Exception ex)
@@ -142,13 +142,13 @@ public partial class RedisPersistentStateStore : IPersistentStateStore, IDisposa
         {
             var key = $"{ClientStatePrefix}{clientIndex}";
             var json = JsonSerializer.Serialize(clientState, _jsonOptions);
-            
+
             await _operationPipeline.ExecuteAsync(async _ =>
             {
                 await _database.StringSetAsync(key, json);
                 await UpdateStatsAsync("client", clientIndex);
             });
-            
+
             LogClientStateSaved(clientIndex, clientState.Name);
         }
         catch (Exception ex)
@@ -224,7 +224,7 @@ public partial class RedisPersistentStateStore : IPersistentStateStore, IDisposa
         {
             var json = JsonSerializer.Serialize(fingerprint, _jsonOptions);
             await _database.StringSetAsync(ConfigFingerprintKey, json);
-            
+
             LogConfigFingerprintSaved(fingerprint.Hash);
         }
         catch (Exception ex)
@@ -254,7 +254,7 @@ public partial class RedisPersistentStateStore : IPersistentStateStore, IDisposa
 
             // Clear configuration fingerprint
             await _database.KeyDeleteAsync(ConfigFingerprintKey);
-            
+
             // Clear stats
             await _database.KeyDeleteAsync(StatsKey);
 
@@ -294,10 +294,10 @@ public partial class RedisPersistentStateStore : IPersistentStateStore, IDisposa
         {
             var zoneKeys = await GetKeysAsync($"{ZoneStatePrefix}*");
             var clientKeys = await GetKeysAsync($"{ClientStatePrefix}*");
-            
+
             var statsJson = await _database.StringGetAsync(StatsKey);
             var lastSaveTime = DateTime.UtcNow;
-            
+
             if (statsJson.HasValue)
             {
                 var statsData = JsonSerializer.Deserialize<Dictionary<string, object>>(statsJson!, _jsonOptions);
@@ -325,7 +325,7 @@ public partial class RedisPersistentStateStore : IPersistentStateStore, IDisposa
         catch (Exception ex)
         {
             LogStatsRetrievalFailed(ex);
-            
+
             return new PersistentStoreStats
             {
                 ZoneStatesCount = 0,
@@ -356,7 +356,7 @@ public partial class RedisPersistentStateStore : IPersistentStateStore, IDisposa
                 ["lastSaveTime"] = DateTime.UtcNow.ToString("O"),
                 [$"last{type}Index"] = index
             };
-            
+
             var json = JsonSerializer.Serialize(stats, _jsonOptions);
             await _database.StringSetAsync(StatsKey, json);
         }
@@ -371,98 +371,98 @@ public partial class RedisPersistentStateStore : IPersistentStateStore, IDisposa
     #region LoggerMessage Methods
 
     [LoggerMessage(
-        EventId = 8001,
+        EventId = 7300,
         Level = LogLevel.Debug,
         Message = "💾 Zone {ZoneIndex} ({ZoneName}) state saved to Redis"
     )]
     private partial void LogZoneStateSaved(int ZoneIndex, string ZoneName);
 
     [LoggerMessage(
-        EventId = 8002,
+        EventId = 7301,
         Level = LogLevel.Error,
         Message = "❌ Failed to save zone {ZoneIndex} state to Redis"
     )]
     private partial void LogZoneStateSaveFailed(Exception ex, int ZoneIndex);
 
     [LoggerMessage(
-        EventId = 8003,
+        EventId = 7302,
         Level = LogLevel.Information,
         Message = "📥 Loaded {Count} zone states from Redis"
     )]
     private partial void LogZoneStatesLoaded(int Count);
 
     [LoggerMessage(
-        EventId = 8004,
+        EventId = 7303,
         Level = LogLevel.Error,
         Message = "❌ Failed to load zone states from Redis"
     )]
     private partial void LogZoneStatesLoadFailed(Exception ex);
 
     [LoggerMessage(
-        EventId = 8005,
+        EventId = 7304,
         Level = LogLevel.Debug,
         Message = "💾 Client {ClientIndex} ({ClientName}) state saved to Redis"
     )]
     private partial void LogClientStateSaved(int ClientIndex, string ClientName);
 
     [LoggerMessage(
-        EventId = 8006,
+        EventId = 7305,
         Level = LogLevel.Error,
         Message = "❌ Failed to save client {ClientIndex} state to Redis"
     )]
     private partial void LogClientStateSaveFailed(Exception ex, int ClientIndex);
 
     [LoggerMessage(
-        EventId = 8007,
+        EventId = 7306,
         Level = LogLevel.Information,
         Message = "📥 Loaded {Count} client states from Redis"
     )]
     private partial void LogClientStatesLoaded(int Count);
 
     [LoggerMessage(
-        EventId = 8008,
+        EventId = 7307,
         Level = LogLevel.Error,
         Message = "❌ Failed to load client states from Redis"
     )]
     private partial void LogClientStatesLoadFailed(Exception ex);
 
     [LoggerMessage(
-        EventId = 8009,
+        EventId = 7308,
         Level = LogLevel.Debug,
         Message = "🔍 Configuration fingerprint saved: {Hash}"
     )]
     private partial void LogConfigFingerprintSaved(string Hash);
 
     [LoggerMessage(
-        EventId = 8010,
+        EventId = 7309,
         Level = LogLevel.Error,
         Message = "❌ Failed to save configuration fingerprint"
     )]
     private partial void LogConfigFingerprintSaveFailed(Exception ex);
 
     [LoggerMessage(
-        EventId = 8011,
+        EventId = 7310,
         Level = LogLevel.Error,
         Message = "❌ Failed to load configuration fingerprint"
     )]
     private partial void LogConfigFingerprintLoadFailed(Exception ex);
 
     [LoggerMessage(
-        EventId = 8012,
+        EventId = 7311,
         Level = LogLevel.Warning,
         Message = "🧹 All persistent state cleared from Redis"
     )]
     private partial void LogAllStateCleared();
 
     [LoggerMessage(
-        EventId = 8013,
+        EventId = 7312,
         Level = LogLevel.Error,
         Message = "❌ Failed to clear all state from Redis"
     )]
     private partial void LogAllStateClearFailed(Exception ex);
 
     [LoggerMessage(
-        EventId = 8014,
+        EventId = 7313,
         Level = LogLevel.Error,
         Message = "❌ Failed to retrieve stats from Redis"
     )]

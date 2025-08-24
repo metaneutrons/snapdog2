@@ -208,7 +208,7 @@ public partial class BusinessMetricsCollectionService : BackgroundService
     }
 
     [LoggerMessage(
-        EventId = 7100,
+        EventId = 7400,
         Level = Microsoft.Extensions.Logging.LogLevel.Debug,
         Message = "Business metrics collected - Zones: {ZonesTotal} total, {ZonesActive} active; "
             + "Clients: {ClientsConnected} connected; Tracks: {TracksPlaying} playing"
@@ -221,28 +221,28 @@ public partial class BusinessMetricsCollectionService : BackgroundService
     );
 
     [LoggerMessage(
-        EventId = 7101,
+        EventId = 7401,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
         Message = "BusinessMetricsCollectionService started with {CollectionInterval} interval"
     )]
     private static partial void LogServiceStarted(ILogger logger, TimeSpan collectionInterval);
 
     [LoggerMessage(
-        EventId = 7102,
+        EventId = 7402,
         Level = Microsoft.Extensions.Logging.LogLevel.Error,
         Message = "Error occurred while collecting business metrics"
     )]
     private static partial void LogErrorCollectingMetrics(ILogger logger, Exception ex);
 
     [LoggerMessage(
-        EventId = 7103,
+        EventId = 7403,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
         Message = "BusinessMetricsCollectionService stopped"
     )]
     private static partial void LogServiceStopped(ILogger logger);
 
     [LoggerMessage(
-        EventId = 7104,
+        EventId = 7404,
         Level = Microsoft.Extensions.Logging.LogLevel.Warning,
         Message = "Failed to collect business metrics"
     )]

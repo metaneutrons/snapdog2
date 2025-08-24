@@ -260,9 +260,9 @@ public partial class ClientManager : IClientManager
         {
             var clientIndex = i + 1; // 1-based indexing
             var clientConfig = this._clientConfigs[i];
-            
+
             this._clientStateLocks[clientIndex] = new SemaphoreSlim(1, 1);
-            
+
             // Initialize default client state
             var defaultState = new ClientState
             {
@@ -283,7 +283,7 @@ public partial class ClientManager : IClientManager
                 HostArch = string.Empty,
                 TimestampUtc = DateTime.UtcNow
             };
-            
+
             this._clientStates[clientIndex] = defaultState;
             this._clientStateStore.InitializeClientState(clientIndex, defaultState);
         }
@@ -771,10 +771,10 @@ public partial class ClientManager : IClientManager
         {
             try
             {
-                var notification = new ClientStateChangedNotification 
-                { 
-                    ClientIndex = clientIndex, 
-                    ClientState = currentState 
+                var notification = new ClientStateChangedNotification
+                {
+                    ClientIndex = clientIndex,
+                    ClientState = currentState
                 };
                 await this._mediator.PublishAsync(notification);
             }

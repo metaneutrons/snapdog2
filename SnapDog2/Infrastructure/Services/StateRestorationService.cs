@@ -62,10 +62,10 @@ public partial class StateRestorationService : BackgroundService
 
             // Generate current configuration fingerprint
             var currentFingerprint = GenerateConfigurationFingerprint();
-            
+
             // Check if configuration has changed
             var storedFingerprint = await _persistentStore.GetConfigurationFingerprintAsync();
-            
+
             if (storedFingerprint != null && !ConfigurationChanged(currentFingerprint, storedFingerprint))
             {
                 // Configuration unchanged, restore states
@@ -83,7 +83,7 @@ public partial class StateRestorationService : BackgroundService
                 {
                     LogFirstRun();
                 }
-                
+
                 await _persistentStore.SaveConfigurationFingerprintAsync(currentFingerprint);
             }
 
@@ -182,77 +182,77 @@ public partial class StateRestorationService : BackgroundService
     #region LoggerMessage Methods
 
     [LoggerMessage(
-        EventId = 9001,
+        EventId = 7100,
         Level = LogLevel.Information,
         Message = "🔄 Starting state restoration from persistent storage..."
     )]
     private partial void LogStateRestorationStarting();
 
     [LoggerMessage(
-        EventId = 9002,
+        EventId = 7101,
         Level = LogLevel.Warning,
         Message = "⚠️ Persistent store unavailable - skipping state restoration"
     )]
     private partial void LogPersistentStoreUnavailable();
 
     [LoggerMessage(
-        EventId = 9003,
+        EventId = 7102,
         Level = LogLevel.Information,
         Message = "🔄 Configuration changed: {OldHash} → {NewHash} - clearing old state"
     )]
     private partial void LogConfigurationChanged(string OldHash, string NewHash);
 
     [LoggerMessage(
-        EventId = 9004,
+        EventId = 7103,
         Level = LogLevel.Information,
         Message = "🆕 First run detected - initializing persistent state"
     )]
     private partial void LogFirstRun();
 
     [LoggerMessage(
-        EventId = 9005,
+        EventId = 7104,
         Level = LogLevel.Debug,
         Message = "✅ Zone {ZoneIndex} ({ZoneName}) state restored"
     )]
     private partial void LogZoneStateRestored(int ZoneIndex, string ZoneName);
 
     [LoggerMessage(
-        EventId = 9006,
+        EventId = 7105,
         Level = LogLevel.Error,
         Message = "❌ Failed to restore zone {ZoneIndex} state"
     )]
     private partial void LogZoneStateRestoreFailed(Exception ex, int ZoneIndex);
 
     [LoggerMessage(
-        EventId = 9007,
+        EventId = 7106,
         Level = LogLevel.Debug,
         Message = "✅ Client {ClientIndex} ({ClientName}) state restored"
     )]
     private partial void LogClientStateRestored(int ClientIndex, string ClientName);
 
     [LoggerMessage(
-        EventId = 9008,
+        EventId = 7107,
         Level = LogLevel.Error,
         Message = "❌ Failed to restore client {ClientIndex} state"
     )]
     private partial void LogClientStateRestoreFailed(Exception ex, int ClientIndex);
 
     [LoggerMessage(
-        EventId = 9009,
+        EventId = 7108,
         Level = LogLevel.Information,
         Message = "✅ State restoration completed: {ZoneCount} zones, {ClientCount} clients restored"
     )]
     private partial void LogStatesRestored(int ZoneCount, int ClientCount);
 
     [LoggerMessage(
-        EventId = 9010,
+        EventId = 7109,
         Level = LogLevel.Information,
         Message = "✅ State restoration service completed successfully"
     )]
     private partial void LogStateRestorationCompleted();
 
     [LoggerMessage(
-        EventId = 9011,
+        EventId = 7110,
         Level = LogLevel.Error,
         Message = "❌ State restoration service failed"
     )]

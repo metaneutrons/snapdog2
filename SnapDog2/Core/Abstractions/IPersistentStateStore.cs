@@ -22,71 +22,71 @@ using SnapDog2.Core.Models;
 public interface IPersistentStateStore
 {
     #region Zone State Persistence
-    
+
     /// <summary>
     /// Saves a single zone state immediately (event-based).
     /// </summary>
     /// <param name="zoneIndex">Zone index (1-based)</param>
     /// <param name="zoneState">Zone state to save</param>
     Task SaveZoneStateAsync(int zoneIndex, ZoneState zoneState);
-    
+
     /// <summary>
     /// Loads all persisted zone states.
     /// </summary>
     /// <returns>Dictionary of zone states by zone index</returns>
     Task<Dictionary<int, ZoneState>> LoadAllZoneStatesAsync();
-    
+
     #endregion
-    
+
     #region Client State Persistence
-    
+
     /// <summary>
     /// Saves a single client state immediately (event-based).
     /// </summary>
     /// <param name="clientIndex">Client index (1-based)</param>
     /// <param name="clientState">Client state to save</param>
     Task SaveClientStateAsync(int clientIndex, ClientState clientState);
-    
+
     /// <summary>
     /// Loads all persisted client states.
     /// </summary>
     /// <returns>Dictionary of client states by client index</returns>
     Task<Dictionary<int, ClientState>> LoadAllClientStatesAsync();
-    
+
     #endregion
-    
+
     #region Configuration Management
-    
+
     /// <summary>
     /// Gets the stored configuration fingerprint to detect config changes.
     /// </summary>
     Task<ConfigurationFingerprint?> GetConfigurationFingerprintAsync();
-    
+
     /// <summary>
     /// Saves the current configuration fingerprint.
     /// </summary>
     /// <param name="fingerprint">Configuration fingerprint</param>
     Task SaveConfigurationFingerprintAsync(ConfigurationFingerprint fingerprint);
-    
+
     /// <summary>
     /// Clears all persisted state (used when configuration changes).
     /// </summary>
     Task ClearAllStateAsync();
-    
+
     #endregion
-    
+
     #region Health and Diagnostics
-    
+
     /// <summary>
     /// Checks if the persistent store is healthy and accessible.
     /// </summary>
     Task<bool> IsHealthyAsync();
-    
+
     /// <summary>
     /// Gets storage statistics for monitoring.
     /// </summary>
     Task<PersistentStoreStats> GetStatsAsync();
-    
+
     #endregion
 }
 
