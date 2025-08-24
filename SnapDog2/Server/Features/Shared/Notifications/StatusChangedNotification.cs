@@ -28,9 +28,9 @@ public record StatusChangedNotification : INotification
     public required string StatusType { get; init; }
 
     /// <summary>
-    /// Gets the identifier for the entity whose status changed.
+    /// Gets the index of the entity whose status changed (zone index or client index).
     /// </summary>
-    public required string TargetId { get; init; }
+    public required int TargetIndex { get; init; }
 
     /// <summary>
     /// Gets the new value of the status.

@@ -391,25 +391,11 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
 
         try
         {
-            if (int.TryParse(notification.TargetId, out var targetId))
-            {
-                await this.SendStatusAsync(notification.StatusType, targetId, notification.Value, cancellationToken);
-            }
-            else
-            {
-                this.LogInvalidTargetId(notification.StatusType, notification.TargetId);
-            }
+            await this.SendStatusAsync(notification.StatusType, notification.TargetIndex, notification.Value, cancellationToken);
         }
         catch (Exception ex)
         {
-            if (int.TryParse(notification.TargetId, out var targetIdInt))
-            {
-                this.LogStatusNotificationError(notification.StatusType, targetIdInt, ex);
-            }
-            else
-            {
-                this.LogStatusNotificationError(notification.StatusType, -1, ex);
-            }
+            this.LogStatusNotificationError(notification.StatusType, notification.TargetIndex, ex);
         }
     }
 

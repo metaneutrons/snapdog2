@@ -73,15 +73,10 @@ public partial class IntegrationPublishingHandlers(
         );
 
         // Also publish StatusChangedNotification for KNX integration
-        using var scope = _serviceProvider.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-        await mediator.PublishAsync(
-            new StatusChangedNotification
-            {
-                StatusType = StatusIds.ClientVolumeStatus,
-                TargetId = notification.ClientIndex.ToString(),
-                Value = notification.Volume
-            },
+        await PublishKnxStatusAsync(
+            StatusIds.ClientVolumeStatus,
+            notification.ClientIndex,
+            notification.Volume,
             cancellationToken
         );
     }
@@ -92,6 +87,14 @@ public partial class IntegrationPublishingHandlers(
         await PublishClientStatusAsync(
             StatusIdAttribute.GetStatusId<ClientMuteStatusNotification>(),
             notification.ClientIndex.ToString(),
+            notification.Muted,
+            cancellationToken
+        );
+
+        // Also publish StatusChangedNotification for KNX integration
+        await PublishKnxStatusAsync(
+            StatusIds.ClientMuteStatus,
+            notification.ClientIndex,
             notification.Muted,
             cancellationToken
         );
@@ -106,6 +109,14 @@ public partial class IntegrationPublishingHandlers(
             notification.LatencyMs,
             cancellationToken
         );
+
+        // Also publish StatusChangedNotification for KNX integration
+        await PublishKnxStatusAsync(
+            StatusIds.ClientLatencyStatus,
+            notification.ClientIndex,
+            notification.LatencyMs,
+            cancellationToken
+        );
     }
 
     public async Task Handle(ClientZoneStatusNotification notification, CancellationToken cancellationToken)
@@ -117,6 +128,14 @@ public partial class IntegrationPublishingHandlers(
             notification.ZoneIndex,
             cancellationToken
         );
+
+        // Also publish StatusChangedNotification for KNX integration
+        await PublishKnxStatusAsync(
+            StatusIds.ClientZoneStatus,
+            notification.ClientIndex,
+            notification.ZoneIndex,
+            cancellationToken
+        );
     }
 
     public async Task Handle(ClientConnectionStatusNotification notification, CancellationToken cancellationToken)
@@ -125,6 +144,14 @@ public partial class IntegrationPublishingHandlers(
         await PublishClientStatusAsync(
             StatusIdAttribute.GetStatusId<ClientConnectionStatusNotification>(),
             notification.ClientIndex.ToString(),
+            notification.IsConnected,
+            cancellationToken
+        );
+
+        // Also publish StatusChangedNotification for KNX integration
+        await PublishKnxStatusAsync(
+            StatusIds.ClientConnected,
+            notification.ClientIndex,
             notification.IsConnected,
             cancellationToken
         );
@@ -154,6 +181,14 @@ public partial class IntegrationPublishingHandlers(
             notification.Volume,
             cancellationToken
         );
+
+        // Also publish StatusChangedNotification for KNX integration
+        await PublishKnxStatusAsync(
+            StatusIds.VolumeStatus,
+            notification.ZoneIndex,
+            notification.Volume,
+            cancellationToken
+        );
     }
 
     public async Task Handle(ZoneMuteChangedNotification notification, CancellationToken cancellationToken)
@@ -161,6 +196,14 @@ public partial class IntegrationPublishingHandlers(
         LogZoneMuteChange(notification.ZoneIndex, notification.IsMuted);
         await PublishZoneStatusAsync(
             StatusIdAttribute.GetStatusId<ZoneMuteChangedNotification>(),
+            notification.ZoneIndex,
+            notification.IsMuted,
+            cancellationToken
+        );
+
+        // Also publish StatusChangedNotification for KNX integration
+        await PublishKnxStatusAsync(
+            StatusIds.MuteStatus,
             notification.ZoneIndex,
             notification.IsMuted,
             cancellationToken
@@ -173,6 +216,14 @@ public partial class IntegrationPublishingHandlers(
         LogZonePlaybackStateChange(notification.ZoneIndex, playbackStateString);
         await PublishZoneStatusAsync(
             StatusIdAttribute.GetStatusId<ZonePlaybackStateChangedNotification>(),
+            notification.ZoneIndex,
+            playbackStateString,
+            cancellationToken
+        );
+
+        // Also publish StatusChangedNotification for KNX integration
+        await PublishKnxStatusAsync(
+            StatusIds.PlaybackState,
             notification.ZoneIndex,
             playbackStateString,
             cancellationToken
@@ -259,6 +310,24 @@ public partial class IntegrationPublishingHandlers(
     #endregion
 
     #region Helper Methods
+
+    /// <summary>
+    /// Publishes status change notification for KNX integration.
+    /// </summary>
+    private async Task PublishKnxStatusAsync<T>(string statusType, int targetIndex, T value, CancellationToken cancellationToken)
+    {
+        using var scope = _serviceProvider.CreateScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        await mediator.PublishAsync(
+            new StatusChangedNotification
+            {
+                StatusType = statusType,
+                TargetIndex = targetIndex,
+                Value = value
+            },
+            cancellationToken
+        );
+    }
 
     /// <summary>
     /// Publishes client status using the smart MQTT publisher.
