@@ -570,7 +570,25 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
 
             this.LogGroupValueReceived(address, value);
 
-            // Map group address to command
+            // Check if this is a read request (typically indicated by null value or specific pattern)
+            if (this.IsReadRequest(e))
+            {
+                // Handle read request asynchronously
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await this.HandleReadRequestAsync(address, CancellationToken.None);
+                    }
+                    catch (Exception ex)
+                    {
+                        this.LogReadRequestError(address, ex);
+                    }
+                });
+                return;
+            }
+
+            // Map group address to command (existing logic)
             var command = this.MapGroupAddressToCommand(address, value);
             if (command != null)
             {
@@ -591,6 +609,322 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
         catch (Exception ex)
         {
             this.LogGroupValueProcessingError("unknown", ex);
+        }
+    }
+
+    /// <summary>
+    /// Determines if the received KNX message is a read request.
+    /// In KNX, read requests typically have null values or specific patterns.
+    /// </summary>
+    private bool IsReadRequest(GroupEventArgs e)
+    {
+        // In Falcon SDK, read requests typically have null values
+        // or the value might be a specific type indicating a read request
+        if (e.Value == null)
+        {
+            return true;
+        }
+
+        // Additional heuristics: if the address is a status address (not a control address)
+        // and we receive a message, it's likely a read request
+        var address = e.DestinationAddress.ToString();
+        return this.IsStatusAddress(address);
+    }
+
+    /// <summary>
+    /// Determines if the given group address is a status address (vs control address).
+    /// Status addresses are used for reading current state, control addresses for commands.
+    /// </summary>
+    private bool IsStatusAddress(string groupAddress)
+    {
+        // Check if this address matches any configured status addresses
+        // Status addresses typically end with different numbers than control addresses
+
+        // Check zone status addresses
+        foreach (var zone in this._zones)
+        {
+            if (!zone.Knx.Enabled)
+            {
+                continue;
+            }
+
+            if (groupAddress == zone.Knx.VolumeStatus ||
+                groupAddress == zone.Knx.MuteStatus ||
+                groupAddress == zone.Knx.TrackStatus ||
+                groupAddress == zone.Knx.PlaylistStatus ||
+                groupAddress == zone.Knx.TrackRepeatStatus ||
+                groupAddress == zone.Knx.RepeatStatus ||
+                groupAddress == zone.Knx.ShuffleStatus ||
+                groupAddress == zone.Knx.TrackTitleStatus ||
+                groupAddress == zone.Knx.TrackArtistStatus ||
+                groupAddress == zone.Knx.TrackAlbumStatus ||
+                groupAddress == zone.Knx.TrackProgressStatus ||
+                groupAddress == zone.Knx.TrackPlayingStatus)
+            {
+                return true;
+            }
+        }
+
+        // Check client status addresses
+        foreach (var client in this._clients)
+        {
+            if (!client.Knx.Enabled)
+            {
+                continue;
+            }
+
+            if (groupAddress == client.Knx.VolumeStatus ||
+                groupAddress == client.Knx.MuteStatus ||
+                groupAddress == client.Knx.ConnectedStatus ||
+                groupAddress == client.Knx.LatencyStatus ||
+                groupAddress == client.Knx.ZoneStatus)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Handles KNX read requests by responding with current state values.
+    /// Maps status addresses to current entity state and sends response via KNX bus.
+    /// </summary>
+    private async Task HandleReadRequestAsync(string groupAddress, CancellationToken cancellationToken)
+    {
+        this.LogReadRequestReceived(groupAddress);
+
+        try
+        {
+            // Map group address to status information
+            var statusInfo = this.MapGroupAddressToStatusInfo(groupAddress);
+            if (statusInfo == null)
+            {
+                this.LogUnmappedReadRequest(groupAddress);
+                return;
+            }
+
+            // Get current state value
+            var currentValue = this.GetCurrentStateValue(statusInfo);
+            if (currentValue == null)
+            {
+                this.LogReadRequestStateNotAvailable(groupAddress, statusInfo.EntityType, statusInfo.EntityId);
+                return;
+            }
+
+            // Convert to KNX-compatible value
+            var knxValue = this.ConvertToKnxValue(currentValue, statusInfo.StatusId);
+
+            // Send response via KNX bus
+            await this._knxBus!.WriteGroupValueAsync(groupAddress, knxValue, cancellationToken: cancellationToken);
+
+            this.LogReadResponseSent(groupAddress, knxValue, statusInfo.StatusId, statusInfo.EntityId);
+        }
+        catch (Exception ex)
+        {
+            this.LogReadRequestError(groupAddress, ex);
+        }
+    }
+
+    /// <summary>
+    /// Information about a status address mapping.
+    /// </summary>
+    private record StatusInfo(string StatusId, string EntityType, string EntityId, int EntityIndex);
+
+    /// <summary>
+    /// Maps a group address to status information for read requests.
+    /// This is the reverse of the existing GetStatusGroupAddress method.
+    /// </summary>
+    private StatusInfo? MapGroupAddressToStatusInfo(string groupAddress)
+    {
+        // Check zone status addresses
+        for (int i = 0; i < this._zones.Count; i++)
+        {
+            var zone = this._zones[i];
+            var zoneIndex = i + 1; // 1-based zone ID
+
+            if (!zone.Knx.Enabled)
+            {
+                continue;
+            }
+
+            // Map zone status addresses to StatusIds
+            if (groupAddress == zone.Knx.VolumeStatus)
+            {
+                return new StatusInfo(StatusIds.VolumeStatus, "Zone", zoneIndex.ToString(), zoneIndex);
+            }
+
+            if (groupAddress == zone.Knx.MuteStatus)
+            {
+                return new StatusInfo(StatusIds.MuteStatus, "Zone", zoneIndex.ToString(), zoneIndex);
+            }
+
+            if (groupAddress == zone.Knx.TrackStatus)
+            {
+                return new StatusInfo(StatusIds.TrackIndex, "Zone", zoneIndex.ToString(), zoneIndex);
+            }
+
+            if (groupAddress == zone.Knx.PlaylistStatus)
+            {
+                return new StatusInfo(StatusIds.PlaylistIndex, "Zone", zoneIndex.ToString(), zoneIndex);
+            }
+
+            if (groupAddress == zone.Knx.TrackRepeatStatus)
+            {
+                return new StatusInfo(StatusIds.TrackRepeatStatus, "Zone", zoneIndex.ToString(), zoneIndex);
+            }
+
+            if (groupAddress == zone.Knx.RepeatStatus)
+            {
+                return new StatusInfo(StatusIds.PlaylistRepeatStatus, "Zone", zoneIndex.ToString(), zoneIndex);
+            }
+
+            if (groupAddress == zone.Knx.ShuffleStatus)
+            {
+                return new StatusInfo(StatusIds.PlaylistShuffleStatus, "Zone", zoneIndex.ToString(), zoneIndex);
+            }
+
+            if (groupAddress == zone.Knx.TrackTitleStatus)
+            {
+                return new StatusInfo(StatusIds.TrackMetadataTitle, "Zone", zoneIndex.ToString(), zoneIndex);
+            }
+
+            if (groupAddress == zone.Knx.TrackArtistStatus)
+            {
+                return new StatusInfo(StatusIds.TrackMetadataArtist, "Zone", zoneIndex.ToString(), zoneIndex);
+            }
+
+            if (groupAddress == zone.Knx.TrackAlbumStatus)
+            {
+                return new StatusInfo(StatusIds.TrackMetadataAlbum, "Zone", zoneIndex.ToString(), zoneIndex);
+            }
+
+            if (groupAddress == zone.Knx.TrackProgressStatus)
+            {
+                return new StatusInfo(StatusIds.TrackProgressStatus, "Zone", zoneIndex.ToString(), zoneIndex);
+            }
+
+            if (groupAddress == zone.Knx.TrackPlayingStatus)
+            {
+                return new StatusInfo(StatusIds.TrackPlayingStatus, "Zone", zoneIndex.ToString(), zoneIndex);
+            }
+        }
+
+        // Check client status addresses
+        for (int i = 0; i < this._clients.Count; i++)
+        {
+            var client = this._clients[i];
+            var clientIndex = i + 1; // 1-based client ID
+
+            if (!client.Knx.Enabled)
+            {
+                continue;
+            }
+
+            // Map client status addresses to StatusIds
+            if (groupAddress == client.Knx.VolumeStatus)
+            {
+                return new StatusInfo(StatusIds.ClientVolumeStatus, "Client", clientIndex.ToString(), clientIndex);
+            }
+
+            if (groupAddress == client.Knx.MuteStatus)
+            {
+                return new StatusInfo(StatusIds.ClientMuteStatus, "Client", clientIndex.ToString(), clientIndex);
+            }
+
+            if (groupAddress == client.Knx.ConnectedStatus)
+            {
+                return new StatusInfo(StatusIds.ClientConnected, "Client", clientIndex.ToString(), clientIndex);
+            }
+
+            if (groupAddress == client.Knx.LatencyStatus)
+            {
+                return new StatusInfo(StatusIds.ClientLatencyStatus, "Client", clientIndex.ToString(), clientIndex);
+            }
+
+            if (groupAddress == client.Knx.ZoneStatus)
+            {
+                return new StatusInfo(StatusIds.ClientZoneStatus, "Client", clientIndex.ToString(), clientIndex);
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Retrieves the current state value for the specified status information.
+    /// Uses existing state stores to get current entity state.
+    /// </summary>
+    private object? GetCurrentStateValue(StatusInfo statusInfo)
+    {
+        try
+        {
+            using var scope = this._serviceProvider.CreateScope();
+
+            if (statusInfo.EntityType == "Client")
+            {
+                var clientStateStore = scope.ServiceProvider.GetService<IClientStateStore>();
+                if (clientStateStore == null)
+                {
+                    return null;
+                }
+
+                var clientState = clientStateStore.GetClientState(statusInfo.EntityIndex);
+                if (clientState == null)
+                {
+                    return null;
+                }
+
+                return statusInfo.StatusId switch
+                {
+                    var x when x == StatusIds.ClientVolumeStatus => clientState.Volume,
+                    var x when x == StatusIds.ClientMuteStatus => clientState.Mute,
+                    var x when x == StatusIds.ClientConnected => clientState.Connected,
+                    var x when x == StatusIds.ClientLatencyStatus => clientState.LatencyMs,
+                    var x when x == StatusIds.ClientZoneStatus => clientState.ZoneIndex,
+                    _ => null
+                };
+            }
+            else if (statusInfo.EntityType == "Zone")
+            {
+                var zoneStateStore = scope.ServiceProvider.GetService<IZoneStateStore>();
+                if (zoneStateStore == null)
+                {
+                    return null;
+                }
+
+                var zoneState = zoneStateStore.GetZoneState(statusInfo.EntityIndex);
+                if (zoneState == null)
+                {
+                    return null;
+                }
+
+                return statusInfo.StatusId switch
+                {
+                    var x when x == StatusIds.VolumeStatus => zoneState.Volume,
+                    var x when x == StatusIds.MuteStatus => zoneState.Mute,
+                    var x when x == StatusIds.TrackRepeatStatus => zoneState.TrackRepeat,
+                    var x when x == StatusIds.PlaylistRepeatStatus => zoneState.PlaylistRepeat,
+                    var x when x == StatusIds.PlaylistShuffleStatus => zoneState.PlaylistShuffle,
+                    var x when x == StatusIds.TrackPlayingStatus => zoneState.PlaybackState == Core.Enums.PlaybackState.Playing,
+                    // For properties not available in ZoneState, return default values
+                    var x when x == StatusIds.TrackIndex => 0,
+                    var x when x == StatusIds.PlaylistIndex => 0,
+                    var x when x == StatusIds.TrackMetadataTitle => "",
+                    var x when x == StatusIds.TrackMetadataArtist => "",
+                    var x when x == StatusIds.TrackMetadataAlbum => "",
+                    var x when x == StatusIds.TrackProgressStatus => 0,
+                    _ => null
+                };
+            }
+
+            return null;
+        }
+        catch (Exception ex)
+        {
+            this._logger.LogError(ex, "Error retrieving current state for {EntityType} {EntityId}, StatusId: {StatusId}",
+                statusInfo.EntityType, statusInfo.EntityId, statusInfo.StatusId);
+            return null;
         }
     }
 
@@ -1271,6 +1605,31 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
         this.LogErrorSendingKnxStatus(exception, statusId, targetDescription);
     }
 
+    /// <summary>
+    /// Converts a state value to KNX-compatible GroupValue format.
+    /// Reuses existing KNX value conversion logic.
+    /// </summary>
+    private GroupValue ConvertToKnxValue(object value, string statusId)
+    {
+        return value switch
+        {
+            // Boolean values (DPT 1.001)
+            bool boolValue => new GroupValue(boolValue),
+
+            // Integer values (DPT 5.001 - Percentage 0-100, DPT 5.010 - Counter 0-255)
+            int intValue when intValue >= 0 && intValue <= 255 => new GroupValue((byte)intValue),
+
+            // String values (DPT 16.001 - 14-byte ASCII)
+            string stringValue when stringValue.Length <= 14 =>
+                new GroupValue(System.Text.Encoding.ASCII.GetBytes(stringValue.PadRight(14, '\0'))),
+            string stringValue =>
+                new GroupValue(System.Text.Encoding.ASCII.GetBytes(stringValue.Substring(0, 14))),
+
+            // Default: try to convert to byte for most KNX data types
+            _ => new GroupValue((byte)0)
+        };
+    }
+
     #region Logging
 
     [LoggerMessage(
@@ -1551,6 +1910,41 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
         Message = "Error during KNX service disposal: {ErrorMessage}"
     )]
     private partial void LogKnxDisposalError(string errorMessage);
+
+    [LoggerMessage(
+        EventId = 3239,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "KNX read request received for status address {GroupAddress}"
+    )]
+    private partial void LogReadRequestReceived(string groupAddress);
+
+    [LoggerMessage(
+        EventId = 3240,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "KNX read response sent: {GroupAddress} = {Value} (StatusId: {StatusId}, Target: {TargetId})"
+    )]
+    private partial void LogReadResponseSent(string groupAddress, object value, string statusId, string targetId);
+
+    [LoggerMessage(
+        EventId = 3241,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "KNX read request for unmapped status address {GroupAddress} - no response sent"
+    )]
+    private partial void LogUnmappedReadRequest(string groupAddress);
+
+    [LoggerMessage(
+        EventId = 3242,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Error handling KNX read request for {GroupAddress}"
+    )]
+    private partial void LogReadRequestError(string groupAddress, Exception exception);
+
+    [LoggerMessage(
+        EventId = 3243,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "KNX read request for {GroupAddress} - current state not available for {EntityType} {EntityId}"
+    )]
+    private partial void LogReadRequestStateNotAvailable(string groupAddress, string entityType, string entityId);
 
     #endregion
 }
