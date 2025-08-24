@@ -343,6 +343,56 @@ static WebApplication CreateWebApplication(string[] args)
         SnapDog2.Core.Abstractions.IZoneStateStore,
         SnapDog2.Infrastructure.Storage.InMemoryZoneStateStore
     >();
+    
+    // Client management services
+    builder.Services.AddSingleton<
+        SnapDog2.Core.Abstractions.IClientStateStore,
+        SnapDog2.Infrastructure.Storage.InMemoryClientStateStore
+    >();
+
+    // Redis persistent state storage services
+    if (snapDogConfig.Redis.Enabled)
+    {
+        // Register Redis connection multiplexer
+        builder.Services.AddSingleton<StackExchange.Redis.IConnectionMultiplexer>(provider =>
+        {
+            var configuration = StackExchange.Redis.ConfigurationOptions.Parse(snapDogConfig.Redis.ConnectionString);
+            configuration.ConnectTimeout = snapDogConfig.Redis.TimeoutSeconds * 1000;
+            configuration.SyncTimeout = snapDogConfig.Redis.TimeoutSeconds * 1000;
+            configuration.DefaultDatabase = snapDogConfig.Redis.Database;
+            configuration.AbortOnConnectFail = false; // Allow retries
+            configuration.ConnectRetry = 3;
+            
+            return StackExchange.Redis.ConnectionMultiplexer.Connect(configuration);
+        });
+
+        // Register persistent state store
+        builder.Services.AddSingleton<
+            SnapDog2.Core.Abstractions.IPersistentStateStore
+        >(provider =>
+        {
+            var redis = provider.GetRequiredService<StackExchange.Redis.IConnectionMultiplexer>();
+            var logger = provider.GetRequiredService<ILogger<SnapDog2.Infrastructure.Storage.RedisPersistentStateStore>>();
+            return new SnapDog2.Infrastructure.Storage.RedisPersistentStateStore(redis, snapDogConfig.Redis, logger);
+        });
+
+        // Register persistent state notification handler
+        builder.Services.AddSingleton<
+            Cortex.Mediator.Notifications.INotificationHandler<SnapDog2.Server.Features.Zones.Notifications.ZoneStateChangedNotification>,
+            SnapDog2.Infrastructure.Notifications.PersistentStateNotificationHandler
+        >();
+        builder.Services.AddSingleton<
+            Cortex.Mediator.Notifications.INotificationHandler<SnapDog2.Server.Features.Clients.Notifications.ClientStateChangedNotification>,
+            SnapDog2.Infrastructure.Notifications.PersistentStateNotificationHandler
+        >();
+
+        // Register state restoration service (only if Redis is enabled)
+        builder.Services.AddHostedService<SnapDog2.Infrastructure.Services.StateRestorationService>();
+    }
+    else
+    {
+        Log.Information("🚫 Redis persistent state storage is disabled");
+    }
     builder.Services.AddSingleton<
         SnapDog2.Core.Abstractions.IZoneManager,
         SnapDog2.Infrastructure.Domain.ZoneManager

@@ -30,6 +30,7 @@ using SnapDog2.Server.Features.Clients.Notifications;
 /// <summary>
 /// Production implementation of IClientManager with Snapcast integration.
 /// Uses SnapcastStateRepository.GetClientByIndex for clean separation of concerns.
+/// Maintains internal ClientState for each configured client.
 /// </summary>
 public partial class ClientManager : IClientManager
 {
@@ -37,8 +38,11 @@ public partial class ClientManager : IClientManager
     private readonly ISnapcastStateRepository _snapcastStateRepository;
     private readonly ISnapcastService _snapcastService;
     private readonly IMediator _mediator;
+    private readonly IClientStateStore _clientStateStore;
     private readonly List<ClientConfig> _clientConfigs;
     private readonly SnapDogConfiguration _configuration;
+    private readonly Dictionary<int, ClientState> _clientStates = new();
+    private readonly Dictionary<int, SemaphoreSlim> _clientStateLocks = new();
 
     [LoggerMessage(
         EventId = 6300,
@@ -239,6 +243,7 @@ public partial class ClientManager : IClientManager
         ISnapcastStateRepository snapcastStateRepository,
         ISnapcastService snapcastService,
         IMediator mediator,
+        IClientStateStore clientStateStore,
         SnapDogConfiguration configuration
     )
     {
@@ -246,8 +251,42 @@ public partial class ClientManager : IClientManager
         this._snapcastStateRepository = snapcastStateRepository;
         this._snapcastService = snapcastService;
         this._mediator = mediator;
+        this._clientStateStore = clientStateStore;
         this._clientConfigs = configuration.Clients;
         this._configuration = configuration;
+
+        // Initialize state locks and default states for each configured client
+        for (int i = 0; i < this._clientConfigs.Count; i++)
+        {
+            var clientIndex = i + 1; // 1-based indexing
+            var clientConfig = this._clientConfigs[i];
+            
+            this._clientStateLocks[clientIndex] = new SemaphoreSlim(1, 1);
+            
+            // Initialize default client state
+            var defaultState = new ClientState
+            {
+                Id = clientIndex,
+                Name = clientConfig.Name,
+                Mac = clientConfig.Mac ?? "00:00:00:00:00:00",
+                SnapcastId = string.Empty, // Will be updated when Snapcast client is discovered
+                Volume = 50, // Default volume
+                Mute = false,
+                Connected = false,
+                ZoneIndex = clientConfig.DefaultZone,
+                LatencyMs = 0,
+                ConfiguredSnapcastName = string.Empty,
+                LastSeenUtc = DateTime.UtcNow,
+                HostIpAddress = string.Empty,
+                HostName = string.Empty,
+                HostOs = string.Empty,
+                HostArch = string.Empty,
+                TimestampUtc = DateTime.UtcNow
+            };
+            
+            this._clientStates[clientIndex] = defaultState;
+            this._clientStateStore.InitializeClientState(clientIndex, defaultState);
+        }
 
         this.LogInitialized(this._clientConfigs.Count);
     }
@@ -302,6 +341,7 @@ public partial class ClientManager : IClientManager
         var snapDogClient = (SnapDogClient)client;
         var state = new ClientState
         {
+            Id = clientIndex,
             SnapcastId = snapDogClient._snapcastClient.Id,
             Name = client.Name,
             Mac = snapDogClient.MacAddress,
@@ -427,6 +467,21 @@ public partial class ClientManager : IClientManager
             }
 
             LogSuccessfullyAssignedClientToZone(clientIndex, snapcastClientId, zoneIndex, targetGroupId);
+
+            // Update internal client state
+            if (this._clientStateLocks.TryGetValue(clientIndex, out var stateLock))
+            {
+                await stateLock.WaitAsync().ConfigureAwait(false);
+                try
+                {
+                    this._clientStates[clientIndex] = this._clientStates[clientIndex] with { ZoneIndex = zoneIndex };
+                    this.PublishClientStateChangedAsync(clientIndex);
+                }
+                finally
+                {
+                    stateLock.Release();
+                }
+            }
 
             return Result.Success();
         }
@@ -579,6 +634,164 @@ public partial class ClientManager : IClientManager
         }
         return fileName;
     }
+
+    #region Client State Management Methods
+
+    /// <summary>
+    /// Updates client volume and publishes state change.
+    /// </summary>
+    public async Task<Result> SetClientVolumeAsync(int clientIndex, int volume)
+    {
+        if (!this._clientStateLocks.TryGetValue(clientIndex, out var stateLock))
+        {
+            return Result.Failure($"Client {clientIndex} not found");
+        }
+
+        await stateLock.WaitAsync().ConfigureAwait(false);
+        try
+        {
+            // Get Snapcast client
+            var snapcastClient = this._snapcastStateRepository.GetClientByIndex(clientIndex);
+            if (snapcastClient == null)
+            {
+                return Result.Failure($"Client {clientIndex} not found in Snapcast");
+            }
+
+            // Call Snapcast service
+            var result = await this._snapcastService.SetClientVolumeAsync(snapcastClient.Value.Id, volume);
+            if (result.IsFailure)
+            {
+                return result;
+            }
+
+            // Update internal state
+            var clampedVolume = Math.Clamp(volume, 0, 100);
+            this._clientStates[clientIndex] = this._clientStates[clientIndex] with { Volume = clampedVolume };
+            this.PublishClientStateChangedAsync(clientIndex);
+
+            return Result.Success();
+        }
+        finally
+        {
+            stateLock.Release();
+        }
+    }
+
+    /// <summary>
+    /// Updates client mute state and publishes state change.
+    /// </summary>
+    public async Task<Result> SetClientMuteAsync(int clientIndex, bool mute)
+    {
+        if (!this._clientStateLocks.TryGetValue(clientIndex, out var stateLock))
+        {
+            return Result.Failure($"Client {clientIndex} not found");
+        }
+
+        await stateLock.WaitAsync().ConfigureAwait(false);
+        try
+        {
+            // Get Snapcast client
+            var snapcastClient = this._snapcastStateRepository.GetClientByIndex(clientIndex);
+            if (snapcastClient == null)
+            {
+                return Result.Failure($"Client {clientIndex} not found in Snapcast");
+            }
+
+            // Call Snapcast service
+            var result = await this._snapcastService.SetClientMuteAsync(snapcastClient.Value.Id, mute);
+            if (result.IsFailure)
+            {
+                return result;
+            }
+
+            // Update internal state
+            this._clientStates[clientIndex] = this._clientStates[clientIndex] with { Mute = mute };
+            this.PublishClientStateChangedAsync(clientIndex);
+
+            return Result.Success();
+        }
+        finally
+        {
+            stateLock.Release();
+        }
+    }
+
+    /// <summary>
+    /// Updates internal client state from Snapcast server data.
+    /// </summary>
+    private async Task UpdateClientStateFromSnapcastAsync(int clientIndex)
+    {
+        await Task.Delay(1); // Maintain async signature
+
+        var snapcastClient = this._snapcastStateRepository.GetClientByIndex(clientIndex);
+        if (snapcastClient == null)
+        {
+            return;
+        }
+
+        var client = snapcastClient.Value;
+        var currentState = this._clientStates[clientIndex];
+
+        // Update state from Snapcast data
+        this._clientStates[clientIndex] = currentState with
+        {
+            SnapcastId = client.Id,
+            Volume = client.Config.Volume.Percent,
+            Mute = client.Config.Volume.Muted,
+            Connected = client.Connected,
+            LatencyMs = client.Config.Latency,
+            ConfiguredSnapcastName = client.Config.Name,
+            LastSeenUtc = DateTimeOffset.FromUnixTimeSeconds(client.LastSeen.Sec).UtcDateTime,
+            HostIpAddress = client.Host.Ip,
+            HostName = client.Host.Name,
+            HostOs = client.Host.Os,
+            HostArch = client.Host.Arch,
+            // ZoneIndex is determined by group assignment - will be updated by zone assignment logic
+            TimestampUtc = DateTime.UtcNow
+        };
+    }
+
+    /// <summary>
+    /// Publishes client state changes to the state store and notification system.
+    /// Similar to ZoneManager.PublishZoneStateChangedAsync().
+    /// </summary>
+    private void PublishClientStateChangedAsync(int clientIndex)
+    {
+        if (!this._clientStates.TryGetValue(clientIndex, out var currentState))
+        {
+            return; // No state to publish
+        }
+
+        // Persist state to store for future requests
+        this._clientStateStore.SetClientState(clientIndex, currentState);
+
+        // Publish notification via mediator using fire-and-forget to prevent blocking
+        // Use Task.Run to avoid blocking the calling thread
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                var notification = new ClientStateChangedNotification 
+                { 
+                    ClientIndex = clientIndex, 
+                    ClientState = currentState 
+                };
+                await this._mediator.PublishAsync(notification);
+            }
+            catch (ObjectDisposedException)
+            {
+                // Service provider has been disposed (likely during shutdown) - ignore this event
+                // This is expected behavior during application shutdown
+            }
+            catch (Exception ex)
+            {
+                // Log other unexpected exceptions but don't rethrow to avoid breaking the event flow
+                System.Diagnostics.Debug.WriteLine($"Error publishing client state for client {clientIndex}: {ex.Message}");
+            }
+        }, CancellationToken.None);
+    }
+
+    #endregion
 
     /// <summary>
     /// Internal implementation of IClient that wraps a Snapcast client with SnapDog2 configuration.

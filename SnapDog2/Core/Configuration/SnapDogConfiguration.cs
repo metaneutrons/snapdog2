@@ -43,6 +43,13 @@ public class SnapDogConfiguration
     public ApiConfig Api { get; set; } = new();
 
     /// <summary>
+    /// Redis persistent state storage configuration.
+    /// Maps environment variables with prefix: SNAPDOG_REDIS_*
+    /// </summary>
+    [Env(NestedPrefix = "REDIS_")]
+    public RedisConfig Redis { get; set; } = new();
+
+    /// <summary>
     /// External services configuration (Snapcast, MQTT, KNX, ServicesSubsonic).
     /// Maps environment variables with prefix: SNAPDOG_SERVICES_*
     /// </summary>

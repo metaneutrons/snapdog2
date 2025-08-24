@@ -15,17 +15,33 @@ services:
       - DOTNET_ENVIRONMENT=Development
       - DOTNET_USE_POLLING_FILE_WATCHER=true
       - DOTNET_WATCH_RESTART_ON_RUDE_EDIT=true
+      - ASPNETCORE_URLS="" # Let UseResilientKestrel handle all binding configuration
     depends_on:
+      - redis
       - snapcast-server
       - mqtt
       - navidrome
       - otel-collector
     networks:
       snapdog-dev:
-        ipv4_address: 172.25.0.2
+    #        ipv4_address: 172.25.0.2
     # Enable debugger
     stdin_open: true
     tty: true
+  # Redis for persistent state storage
+  redis:
+    image: redis:8-alpine
+    command: redis-server --appendonly yes --appendfsync everysec
+    volumes:
+      - redis_data:/data
+    networks:
+      snapdog-dev:
+    #        ipv4_address: 172.25.0.15
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
 
   # Caddy reverse proxy with dashboard - SINGLE PORT TO HOST
   caddy:
@@ -47,7 +63,7 @@ services:
       - grafana
     networks:
       snapdog-dev:
-        ipv4_address: 172.25.0.4
+    #        ipv4_address: 172.25.0.4
     restart: unless-stopped
 
   # Snapcast Server - NO HOST PORTS
@@ -63,7 +79,7 @@ services:
       - snapcast_sinks:/snapsinks # Shared audio sinks with app container
     networks:
       snapdog-dev:
-        ipv4_address: 172.25.0.5
+    #        ipv4_address: 172.25.0.5
     restart: unless-stopped
 
   # Living room client
@@ -74,13 +90,13 @@ services:
     depends_on:
       - snapcast-server
     environment:
-      - SNAPSERVER_HOST=172.25.0.5 # IP address of snapcast-server
+      - SNAPSERVER_HOST=snapcast-server # IP address of snapcast-server
       - CLIENT_ID=living-room
       - CLIENT_NAME=Living Room
       - FIXED_MAC_ADDRESS=02:42:ac:11:00:10
     networks:
       snapdog-dev:
-        ipv4_address: 172.25.0.6
+        #        ipv4_address: 172.25.0.6
         mac_address: 02:42:ac:11:00:10
 
   # Kitchen client
@@ -91,13 +107,13 @@ services:
     depends_on:
       - snapcast-server
     environment:
-      - SNAPSERVER_HOST=172.25.0.5
+      - SNAPSERVER_HOST=snapcast-server
       - CLIENT_ID=kitchen
       - CLIENT_NAME=Kitchen
       - FIXED_MAC_ADDRESS=02:42:ac:11:00:11
     networks:
       snapdog-dev:
-        ipv4_address: 172.25.0.7
+        #        ipv4_address: 172.25.0.7
         mac_address: 02:42:ac:11:00:11
 
   # Bedroom client
@@ -108,13 +124,13 @@ services:
     depends_on:
       - snapcast-server
     environment:
-      - SNAPSERVER_HOST=172.25.0.5
+      - SNAPSERVER_HOST=snapcast-server
       - CLIENT_ID=bedroom
       - CLIENT_NAME=Bedroom
       - FIXED_MAC_ADDRESS=02:42:ac:11:00:12
     networks:
       snapdog-dev:
-        ipv4_address: 172.25.0.8
+        #        ipv4_address: 172.25.0.8
         mac_address: 02:42:ac:11:00:12
 
   # MQTT Broker
@@ -132,7 +148,7 @@ services:
     command: ["/usr/sbin/mosquitto", "-c", "/mosquitto/config/mosquitto.conf", "-v"]
     networks:
       snapdog-dev:
-        ipv4_address: 172.25.0.3
+    #        ipv4_address: 172.25.0.3
     restart: unless-stopped
 
   # Navidrome - NO HOST PORTS (via Caddy)
@@ -151,7 +167,7 @@ services:
       - navidrome_data:/data
     networks:
       snapdog-dev:
-        ipv4_address: 172.25.0.9
+    #        ipv4_address: 172.25.0.9
     restart: unless-stopped
 
   # KNX Gateway Simulator - Custom Alpine-based container
@@ -169,7 +185,7 @@ services:
       - "3671:3671/udp" # KNX/IP port
     networks:
       snapdog-dev:
-        ipv4_address: 172.25.0.10
+    #        ipv4_address: 172.25.0.10
     restart: unless-stopped
     # Security: Run as non-root with minimal capabilities
     user: "1000:1000"
@@ -203,7 +219,7 @@ services:
       - "8889:8889" # Prometheus metrics endpoint
     networks:
       snapdog-dev:
-        ipv4_address: 172.25.0.20
+    #        ipv4_address: 172.25.0.20
     restart: unless-stopped
 
   # Grafana for observability dashboards
@@ -225,7 +241,7 @@ services:
       - otel-collector
     networks:
       snapdog-dev:
-        ipv4_address: 172.25.0.21
+    #        ipv4_address: 172.25.0.21
     restart: unless-stopped
 
   # KNX Monitor - Visual debugging tool for KNX bus activity with web interface
@@ -247,7 +263,7 @@ services:
         condition: service_healthy
     networks:
       snapdog-dev:
-        ipv4_address: 172.25.0.14
+    #        ipv4_address: 172.25.0.14
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8671/ready"]
@@ -260,14 +276,14 @@ services:
       - "com.docker.compose.service=knx-monitor"
 
 volumes:
+  snapcast_sinks: # Shared volume for audio sinks between snapcast-server and app
+  redis_data:
   mqtt_data:
   mqtt_logs:
   navidrome_data:
   caddy_data:
   caddy_config:
-  snapcast_sinks: # Shared volume for audio sinks between snapcast-server and app
   grafana-data:
-    name: snapdog-grafana-data
 
 networks:
   snapdog-dev:
