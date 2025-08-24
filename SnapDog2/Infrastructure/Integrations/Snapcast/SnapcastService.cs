@@ -896,18 +896,18 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         }
     }
 
-    private void HandleClientVolumeChanged(ClientSetVolume volumeChange)
+    private async void HandleClientVolumeChanged(ClientSetVolume volumeChange)
     {
         this.LogProcessingEvent("ClientVolumeChanged");
         try
         {
             // Update the client in our repository
-            var client = this._stateRepository.GetClient(volumeChange.Id);
-            if (client != null)
+            var snapcastClient = this._stateRepository.GetClient(volumeChange.Id);
+            if (snapcastClient != null)
             {
-                var updatedClient = client.Value with
+                var updatedClient = snapcastClient.Value with
                 {
-                    Config = client.Value.Config with
+                    Config = snapcastClient.Value.Config with
                     {
                         Volume = new SnapcastClient.Models.ClientVolume
                         {
@@ -925,9 +925,19 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
                 Muted = volumeChange.Volume.Muted,
                 Percent = volumeChange.Volume.Percent,
             };
-            _ = this.PublishNotificationAsync(
-                new SnapcastClientVolumeChangedNotification(volumeChange.Id, modelVolume)
-            );
+
+            // Get the proper client ID (1-based index) instead of using Snapcast client name
+            var client = await this.GetClientBySnapcastIdAsync(volumeChange.Id);
+            if (client != null)
+            {
+                _ = this.PublishNotificationAsync(
+                    new SnapcastClientVolumeChangedNotification(client.Id.ToString(), modelVolume)
+                );
+            }
+            else
+            {
+                this.LogClientNotFound(volumeChange.Id);
+            }
 
             // Bridge to IClient status notifications
             _ = this.BridgeClientVolumeStatusAsync(volumeChange.Id, volumeChange.Volume.Percent);
@@ -939,25 +949,34 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         }
     }
 
-    private void HandleClientLatencyChanged(ClientSetLatency latencyChange)
+    private async void HandleClientLatencyChanged(ClientSetLatency latencyChange)
     {
         this.LogProcessingEvent("ClientLatencyChanged");
         try
         {
             // Update the client in our repository
-            var client = this._stateRepository.GetClient(latencyChange.Id);
-            if (client != null)
+            var snapcastClient = this._stateRepository.GetClient(latencyChange.Id);
+            if (snapcastClient != null)
             {
-                var updatedClient = client.Value with
+                var updatedClient = snapcastClient.Value with
                 {
-                    Config = client.Value.Config with { Latency = latencyChange.Latency },
+                    Config = snapcastClient.Value.Config with { Latency = latencyChange.Latency },
                 };
                 this._stateRepository.UpdateClient(updatedClient);
             }
 
-            _ = this.PublishNotificationAsync(
-                new SnapcastClientLatencyChangedNotification(latencyChange.Id, latencyChange.Latency)
-            );
+            // Get the proper client ID (1-based index) instead of using Snapcast client name
+            var client = await this.GetClientBySnapcastIdAsync(latencyChange.Id);
+            if (client != null)
+            {
+                _ = this.PublishNotificationAsync(
+                    new SnapcastClientLatencyChangedNotification(client.Id.ToString(), latencyChange.Latency)
+                );
+            }
+            else
+            {
+                this.LogClientNotFound(latencyChange.Id);
+            }
 
             // Bridge to IClient status notification
             _ = this.BridgeClientLatencyStatusAsync(latencyChange.Id, latencyChange.Latency);
@@ -968,22 +987,31 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         }
     }
 
-    private void HandleClientNameChanged(ClientSetName nameChange)
+    private async void HandleClientNameChanged(ClientSetName nameChange)
     {
         this.LogProcessingEvent("ClientNameChanged");
         try
         {
             // Update the client in our repository
-            var client = this._stateRepository.GetClient(nameChange.Id);
-            if (client != null)
+            var snapcastClient = this._stateRepository.GetClient(nameChange.Id);
+            if (snapcastClient != null)
             {
-                var updatedClient = client.Value with { Config = client.Value.Config with { Name = nameChange.Name } };
+                var updatedClient = snapcastClient.Value with { Config = snapcastClient.Value.Config with { Name = nameChange.Name } };
                 this._stateRepository.UpdateClient(updatedClient);
             }
 
-            _ = this.PublishNotificationAsync(
-                new SnapcastClientNameChangedNotification(nameChange.Id, nameChange.Name)
-            );
+            // Get the proper client ID (1-based index) instead of using Snapcast client name
+            var client = await this.GetClientBySnapcastIdAsync(nameChange.Id);
+            if (client != null)
+            {
+                _ = this.PublishNotificationAsync(
+                    new SnapcastClientNameChangedNotification(client.Id.ToString(), nameChange.Name)
+                );
+            }
+            else
+            {
+                this.LogClientNotFound(nameChange.Id);
+            }
         }
         catch (Exception ex)
         {
@@ -1326,6 +1354,13 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         Message = "Cannot subscribe to Snapcast events - client is not available"
     )]
     private static partial void LogCannotSubscribeToEvents(ILogger logger);
+
+    [LoggerMessage(
+        EventId = 2628,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Client not found for Snapcast ID: {SnapcastClientId}"
+    )]
+    private partial void LogClientNotFound(string snapcastClientId);
 
     #endregion
 

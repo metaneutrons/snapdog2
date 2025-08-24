@@ -13,22 +13,29 @@
 //
 namespace SnapDog2.Server.Features.Snapcast.Handlers;
 
+using Cortex.Mediator;
 using Cortex.Mediator.Notifications;
 using Microsoft.Extensions.Logging;
+using SnapDog2.Server.Features.Clients.Notifications;
 using SnapDog2.Server.Features.Snapcast.Notifications;
 
 /// <summary>
 /// Handles Snapcast event notifications and processes them for the application.
 /// This demonstrates how Snapcast events flow through the mediator pattern.
 /// </summary>
-public partial class SnapcastEventNotificationHandler(ILogger<SnapcastEventNotificationHandler> logger)
+public partial class SnapcastEventNotificationHandler(
+    IMediator mediator,
+    ILogger<SnapcastEventNotificationHandler> logger)
     : INotificationHandler<SnapcastClientConnectedNotification>,
         INotificationHandler<SnapcastClientDisconnectedNotification>,
         INotificationHandler<SnapcastClientVolumeChangedNotification>,
+        INotificationHandler<SnapcastClientLatencyChangedNotification>,
+        INotificationHandler<SnapcastClientNameChangedNotification>,
         INotificationHandler<SnapcastGroupMuteChangedNotification>,
         INotificationHandler<SnapcastConnectionEstablishedNotification>,
         INotificationHandler<SnapcastConnectionLostNotification>
 {
+    private readonly IMediator _mediator = mediator;
     private readonly ILogger<SnapcastEventNotificationHandler> _logger = logger;
 
     #region Logging
@@ -79,46 +86,81 @@ public partial class SnapcastEventNotificationHandler(ILogger<SnapcastEventNotif
 
     #region Client Events
 
-    public Task Handle(SnapcastClientConnectedNotification notification, CancellationToken cancellationToken)
+    public async Task Handle(SnapcastClientConnectedNotification notification, CancellationToken cancellationToken)
     {
         this.LogClientConnected(notification.Client.Id, notification.Client.Config.Name);
 
-        // Here you could:
-        // - Update internal client state
-        // - Publish MQTT status updates
-        // - Send KNX notifications
-        // - Update metrics
-        // - Trigger other business logic
-
-        return Task.CompletedTask;
+        // Publish ClientConnectionChangedNotification to trigger MQTT/KNX updates
+        await this._mediator.PublishAsync(new ClientConnectionChangedNotification
+        {
+            ClientIndex = int.Parse(notification.Client.Id),
+            IsConnected = true
+        }, cancellationToken);
     }
 
-    public Task Handle(SnapcastClientDisconnectedNotification notification, CancellationToken cancellationToken)
+    public async Task Handle(SnapcastClientDisconnectedNotification notification, CancellationToken cancellationToken)
     {
         this.LogClientDisconnected(notification.Client.Id, notification.Client.Config.Name);
 
-        // Here you could:
-        // - Update internal client state
-        // - Publish MQTT status updates
-        // - Send KNX notifications
-        // - Update metrics
-        // - Trigger reconnection logic
-
-        return Task.CompletedTask;
+        // Publish ClientConnectionChangedNotification to trigger MQTT/KNX updates
+        await this._mediator.PublishAsync(new ClientConnectionChangedNotification
+        {
+            ClientIndex = int.Parse(notification.Client.Id),
+            IsConnected = false
+        }, cancellationToken);
     }
 
-    public Task Handle(SnapcastClientVolumeChangedNotification notification, CancellationToken cancellationToken)
+    public async Task Handle(SnapcastClientVolumeChangedNotification notification, CancellationToken cancellationToken)
     {
         this.LogClientVolumeChanged(notification.ClientIndex, notification.Volume.Percent, notification.Volume.Muted);
 
-        // Here you could:
-        // - Update internal client state
-        // - Publish MQTT volume updates
-        // - Send KNX volume status
-        // - Update metrics
-        // - Trigger volume-based automation
+        // Parse client index from string to int (now it should be a proper client ID)
+        if (!int.TryParse(notification.ClientIndex, out var clientIndex))
+        {
+            this._logger.LogWarning("Invalid client index format: {ClientIndex}", notification.ClientIndex);
+            return;
+        }
 
-        return Task.CompletedTask;
+        // Publish ClientVolumeChangedNotification to trigger MQTT/KNX updates
+        await this._mediator.PublishAsync(new ClientVolumeChangedNotification
+        {
+            ClientIndex = clientIndex,
+            Volume = notification.Volume.Percent
+        }, cancellationToken);
+    }
+
+    public async Task Handle(SnapcastClientLatencyChangedNotification notification, CancellationToken cancellationToken)
+    {
+        // Parse client index from string to int
+        if (!int.TryParse(notification.ClientIndex, out var clientIndex))
+        {
+            this._logger.LogWarning("Invalid client index format for latency change: {ClientIndex}", notification.ClientIndex);
+            return;
+        }
+
+        // Publish ClientLatencyChangedNotification to trigger MQTT/KNX updates
+        await this._mediator.PublishAsync(new ClientLatencyChangedNotification
+        {
+            ClientIndex = clientIndex,
+            LatencyMs = notification.LatencyMs
+        }, cancellationToken);
+    }
+
+    public async Task Handle(SnapcastClientNameChangedNotification notification, CancellationToken cancellationToken)
+    {
+        // Parse client index from string to int
+        if (!int.TryParse(notification.ClientIndex, out var clientIndex))
+        {
+            this._logger.LogWarning("Invalid client index format for name change: {ClientIndex}", notification.ClientIndex);
+            return;
+        }
+
+        // Publish ClientNameChangedNotification to trigger MQTT/KNX updates
+        await this._mediator.PublishAsync(new ClientNameChangedNotification
+        {
+            ClientIndex = clientIndex,
+            Name = notification.Name
+        }, cancellationToken);
     }
 
     #endregion

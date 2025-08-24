@@ -922,8 +922,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error retrieving current state for {EntityType} {EntityId}, StatusId: {StatusId}",
-                statusInfo.EntityType, statusInfo.EntityId, statusInfo.StatusId);
+            this.LogCurrentStateRetrievalError(statusInfo.EntityType, statusInfo.EntityId, statusInfo.StatusId, ex);
             return null;
         }
     }
@@ -1945,6 +1944,13 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
         Message = "KNX read request for {GroupAddress} - current state not available for {EntityType} {EntityId}"
     )]
     private partial void LogReadRequestStateNotAvailable(string groupAddress, string entityType, string entityId);
+
+    [LoggerMessage(
+        EventId = 3244,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Error retrieving current state for {EntityType} {EntityId}, StatusId: {StatusId}"
+    )]
+    private partial void LogCurrentStateRetrievalError(string entityType, string entityId, string statusId, Exception exception);
 
     #endregion
 }
