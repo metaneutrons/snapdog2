@@ -15,14 +15,12 @@ namespace SnapDog2.Server.Features.Clients.Handlers;
 
 using System.Threading;
 using System.Threading.Tasks;
-using Cortex.Mediator;
 using Cortex.Mediator.Commands;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Enums;
 using SnapDog2.Core.Models;
 using SnapDog2.Server.Features.Clients.Commands.Config;
-using SnapDog2.Server.Features.Clients.Notifications;
 
 /// <summary>
 /// Handles the AssignClientToZoneCommand.
@@ -30,13 +28,11 @@ using SnapDog2.Server.Features.Clients.Notifications;
 public partial class AssignClientToZoneCommandHandler(
     IClientManager clientManager,
     IZoneManager zoneManager,
-    IMediator mediator,
     ILogger<AssignClientToZoneCommandHandler> logger
 ) : ICommandHandler<AssignClientToZoneCommand, Result>
 {
     private readonly IClientManager _clientManager = clientManager;
     private readonly IZoneManager _zoneManager = zoneManager;
-    private readonly IMediator _mediator = mediator;
     private readonly ILogger<AssignClientToZoneCommandHandler> _logger = logger;
 
     [LoggerMessage(
@@ -59,13 +55,6 @@ public partial class AssignClientToZoneCommandHandler(
         Message = "Zone {ZoneIndex} not found for AssignClientToZoneCommand"
     )]
     private partial void LogZoneNotFound(int zoneIndex);
-
-    [LoggerMessage(
-        EventId = 8103,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
-        Message = "Failed to publish ClientZoneAssignmentChangedNotification for client {ClientIndex}"
-    )]
-    private partial void LogNotificationPublishingFailed(Exception ex, int clientIndex);
 
     public async Task<Result> Handle(AssignClientToZoneCommand request, CancellationToken cancellationToken)
     {
@@ -104,33 +93,10 @@ public partial class AssignClientToZoneCommandHandler(
         // Use the IClient method directly
         var result = await client.AssignToZoneAsync(request.ZoneIndex).ConfigureAwait(false);
 
-        // If the assignment was successful, publish the notification for event-driven zone grouping
-        if (result.IsSuccess)
-        {
-            var notification = new ClientZoneAssignmentChangedNotification
-            {
-                ClientIndex = request.ClientIndex,
-                ZoneIndex = request.ZoneIndex,
-                PreviousZoneIndex = previousZoneIndex,
-            };
-
-            // Publish the notification asynchronously to trigger immediate zone grouping
-            _ = Task.Run(
-                async () =>
-                {
-                    try
-                    {
-                        await this._mediator.PublishAsync(notification, cancellationToken);
-                    }
-                    catch (Exception ex)
-                    {
-                        LogNotificationPublishingFailed(ex, request.ClientIndex);
-                    }
-                },
-                cancellationToken
-            );
-        }
-
+        // ✅ Command-Status Flow Pattern: Only instruct external system
+        // External system will send notification → event handler → storage → integrations
+        // Note: Initially return 200 OK to avoid breaking changes
+        // Will switch to 202 Accepted in Phase 3 (Week 5)
         return result;
     }
 }

@@ -15,28 +15,22 @@ namespace SnapDog2.Server.Features.Clients.Handlers;
 
 using System.Threading;
 using System.Threading.Tasks;
-using Cortex.Mediator;
 using Cortex.Mediator.Commands;
-using Cortex.Mediator.Notifications;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Abstractions;
-using SnapDog2.Core.Constants;
 using SnapDog2.Core.Enums;
 using SnapDog2.Core.Models;
 using SnapDog2.Server.Features.Clients.Commands.Volume;
-using SnapDog2.Server.Features.Shared.Notifications;
 
 /// <summary>
 /// Handles the SetClientVolumeCommand.
 /// </summary>
 public partial class SetClientVolumeCommandHandler(
     IClientManager clientManager,
-    IMediator mediator,
     ILogger<SetClientVolumeCommandHandler> logger
 ) : ICommandHandler<SetClientVolumeCommand, Result>
 {
     private readonly IClientManager _clientManager = clientManager;
-    private readonly IMediator _mediator = mediator;
     private readonly ILogger<SetClientVolumeCommandHandler> _logger = logger;
 
     [LoggerMessage(
@@ -53,13 +47,6 @@ public partial class SetClientVolumeCommandHandler(
     )]
     private partial void LogClientNotFound(int clientIndex);
 
-    [LoggerMessage(
-        EventId = 9002,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
-        Message = "Failed to publish StatusChangedNotification for client {ClientIndex} volume change"
-    )]
-    private partial void LogNotificationPublishingFailed(Exception ex, int clientIndex);
-
     public async Task<Result> Handle(SetClientVolumeCommand request, CancellationToken cancellationToken)
     {
         this.LogHandling(request.ClientIndex, request.Volume, request.Source);
@@ -74,31 +61,12 @@ public partial class SetClientVolumeCommandHandler(
 
         var client = clientResult.Value!;
 
-        // Set the volume
+        // ✅ Command-Status Flow Pattern: Only instruct external system
+        // External system will send notification → event handler → storage → integrations
         var result = await client.SetVolumeAsync(request.Volume).ConfigureAwait(false);
 
-        // If successful, publish StatusChangedNotification for external systems (MQTT, KNX)
-        if (result.IsSuccess)
-        {
-            try
-            {
-                await this._mediator.PublishAsync(
-                    new StatusChangedNotification
-                    {
-                        StatusType = StatusIds.ClientVolumeStatus,
-                        TargetId = request.ClientIndex.ToString(),
-                        Value = request.Volume
-                    },
-                    cancellationToken
-                ).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                this.LogNotificationPublishingFailed(ex, request.ClientIndex);
-                // Don't fail the command if notification publishing fails
-            }
-        }
-
+        // Note: Initially return 200 OK to avoid breaking changes
+        // Will switch to 202 Accepted in Phase 3 (Week 5)
         return result;
     }
 }
