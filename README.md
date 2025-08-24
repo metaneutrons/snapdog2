@@ -264,3 +264,4 @@ curl http://snapcast-server:1704 -d '{"method":"Server.GetStatus","id":1}'
 ## License
 
 This project is licensed under the GNU LGPL v3.0. See [LICENSE](LICENSE) for details.
+# Test commit for Husky.Net setup
