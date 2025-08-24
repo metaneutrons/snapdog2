@@ -77,6 +77,13 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         this._connectionPolicy = this.CreateConnectionPolicy();
         this._operationPolicy = this.CreateOperationPolicy();
 
+        // Subscribe to connection health events for detailed logging
+        if (this._snapcastClient != null)
+        {
+            // Note: We'll need to access the Connection property to get health stats
+            // This will be implemented in the InitializeAsync method
+        }
+
         this.LogServiceCreated(this._config.Address, this._config.JsonRpcPort, this._config.AutoReconnect);
     }
 

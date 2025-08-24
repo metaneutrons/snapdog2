@@ -568,13 +568,9 @@ static WebApplication CreateWebApplication(string[] args)
             );
         }
 
-        if (snapDogConfig.Services.Knx.Enabled && !string.IsNullOrEmpty(snapDogConfig.Services.Knx.Gateway))
+        if (snapDogConfig.Services.Knx.Enabled)
         {
-            healthChecksBuilder.AddTcpHealthCheck(
-                options =>
-                {
-                    options.AddHost(snapDogConfig.Services.Knx.Gateway, snapDogConfig.Services.Knx.Port);
-                },
+            healthChecksBuilder.AddCheck<SnapDog2.Infrastructure.HealthChecks.KnxHealthCheck>(
                 "knx",
                 tags: ["ready"]
             );

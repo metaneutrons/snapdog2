@@ -21,7 +21,7 @@ namespace SnapDog2.Infrastructure.Integrations.Snapcast;
 /// </summary>
 public partial class SnapcastService
 {
-    // Service Disposal Operations (10801)
+    // Service Disposal Operations (2500)
     [LoggerMessage(
         EventId = 2500,
         Level = Microsoft.Extensions.Logging.LogLevel.Error,
