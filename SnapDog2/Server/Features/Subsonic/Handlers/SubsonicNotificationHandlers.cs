@@ -34,7 +34,11 @@ public partial class SubsonicConnectionEstablishedNotificationHandler(
         return Task.CompletedTask;
     }
 
-    [LoggerMessage(3000, LogLevel.Information, "🎵 Subsonic connection established to {ServerUrl} for user {Username}")]
+    [LoggerMessage(
+        EventId = 9800,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "🎵 Subsonic connection established to {ServerUrl} for user {Username}"
+    )]
     private static partial void LogSubsonicConnectionEstablished(ILogger logger, string serverUrl, string username);
 }
 
@@ -53,7 +57,11 @@ public partial class SubsonicConnectionLostNotificationHandler(
         return Task.CompletedTask;
     }
 
-    [LoggerMessage(3001, LogLevel.Warning, "⚠️ Subsonic connection lost to {ServerUrl}: {Reason}")]
+    [LoggerMessage(
+        EventId = 9801,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "⚠️ Subsonic connection lost to {ServerUrl}: {Reason}"
+    )]
     private static partial void LogSubsonicConnectionLost(ILogger logger, string serverUrl, string reason);
 }
 
@@ -76,7 +84,11 @@ public partial class SubsonicPlaylistsRetrievedNotificationHandler(
         return Task.CompletedTask;
     }
 
-    [LoggerMessage(3002, LogLevel.Debug, "📊 Retrieved {PlaylistCount} playlists in {RetrievalTimeMs:F2}ms")]
+    [LoggerMessage(
+        EventId = 9802,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "📊 Retrieved {PlaylistCount} playlists in {RetrievalTimeMs:F2}ms"
+    )]
     private static partial void LogPlaylistsRetrieved(ILogger logger, int playlistCount, double retrievalTimeMs);
 }
 
@@ -99,7 +111,11 @@ public partial class SubsonicPlaylistAccessedNotificationHandler(
         return Task.CompletedTask;
     }
 
-    [LoggerMessage(3003, LogLevel.Debug, "🎵 Accessed playlist '{PlaylistName}' with {TrackCount} tracks")]
+    [LoggerMessage(
+        EventId = 9803,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "🎵 Accessed playlist '{PlaylistName}' with {TrackCount} tracks"
+    )]
     private static partial void LogPlaylistAccessed(ILogger logger, string playlistName, int trackCount);
 }
 
@@ -122,7 +138,11 @@ public partial class SubsonicStreamRequestedNotificationHandler(
         return Task.CompletedTask;
     }
 
-    [LoggerMessage(3004, LogLevel.Debug, "🎧 Stream requested for track {TrackId}")]
+    [LoggerMessage(
+        EventId = 9804,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "🎧 Stream requested for track {TrackId}"
+    )]
     private static partial void LogStreamRequested(ILogger logger, string trackId);
 }
 
@@ -144,7 +164,11 @@ public partial class SubsonicServiceErrorNotificationHandler(ILogger<SubsonicSer
         return Task.CompletedTask;
     }
 
-    [LoggerMessage(3005, LogLevel.Error, "❌ Subsonic service error in {Operation}: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 9805,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "❌ Subsonic service error in {Operation}: {ErrorMessage}"
+    )]
     private static partial void LogServiceError(ILogger logger, string operation, string errorMessage);
 }
 
@@ -163,7 +187,11 @@ public partial class SubsonicInitializationStartedNotificationHandler(
         return Task.CompletedTask;
     }
 
-    [LoggerMessage(3006, LogLevel.Information, "🚀 Subsonic service initialization started for {ServerUrl}")]
+    [LoggerMessage(
+        EventId = 9806,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "🚀 Subsonic service initialization started for {ServerUrl}"
+    )]
     private static partial void LogInitializationStarted(ILogger logger, string serverUrl);
 }
 
@@ -182,6 +210,10 @@ public partial class SubsonicServiceDisposedNotificationHandler(
         return Task.CompletedTask;
     }
 
-    [LoggerMessage(3007, LogLevel.Information, "🗑️ Subsonic service disposed for {ServerUrl}")]
+    [LoggerMessage(
+        EventId = 9807,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "🗑️ Subsonic service disposed for {ServerUrl}"
+    )]
     private static partial void LogServiceDisposed(ILogger logger, string serverUrl);
 }

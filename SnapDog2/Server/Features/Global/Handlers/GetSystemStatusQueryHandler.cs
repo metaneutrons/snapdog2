@@ -54,9 +54,17 @@ public partial class GetSystemStatusQueryHandler(
         }
     }
 
-    [LoggerMessage(1001, LogLevel.Information, "Handling GetSystemStatusQuery")]
+    [LoggerMessage(
+        EventId = 9400,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Handling GetSystemStatusQuery"
+    )]
     private partial void LogHandling();
 
-    [LoggerMessage(1002, LogLevel.Error, "Error retrieving system status")]
+    [LoggerMessage(
+        EventId = 9401,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Error retrieving system status"
+    )]
     private partial void LogError(Exception ex);
 }

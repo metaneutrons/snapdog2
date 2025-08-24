@@ -260,69 +260,141 @@ public partial class SystemController(
 
     // ARCHITECTURAL PROBLEM - This should never happen in production
     [LoggerMessage(
-        2301,
-        LogLevel.Critical,
-        "🚨 CRITICAL: Handler {HandlerType} not found in DI container - This is a configuration BUG!"
+        EventId = 5200,
+        Level = Microsoft.Extensions.Logging.LogLevel.Critical,
+        Message = "🚨 CRITICAL: Handler {HandlerType} not found in DI container - This is a configuration BUG!"
     )]
     private partial void LogCriticalHandlerNotFound(string handlerType);
 
     // System Status (2310-2319)
-    [LoggerMessage(2310, LogLevel.Debug, "Getting system status")]
+    [LoggerMessage(
+        EventId = 5201,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Getting system status"
+    )]
     private partial void LogGettingSystemStatus();
 
-    [LoggerMessage(2311, LogLevel.Warning, "Failed to get system status: {Error}")]
+    [LoggerMessage(
+        EventId = 5202,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to get system status: {Error}"
+    )]
     private partial void LogFailedToGetSystemStatus(string? error);
 
-    [LoggerMessage(2312, LogLevel.Error, "Error getting system status")]
+    [LoggerMessage(
+        EventId = 5203,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Error getting system status"
+    )]
     private partial void LogErrorGettingSystemStatus(Exception exception);
 
     // System Errors (2320-2329)
-    [LoggerMessage(2320, LogLevel.Debug, "Getting system errors")]
+    [LoggerMessage(
+        EventId = 5204,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Getting system errors"
+    )]
     private partial void LogGettingSystemErrors();
 
-    [LoggerMessage(2321, LogLevel.Warning, "Failed to get system errors: {Error}")]
+    [LoggerMessage(
+        EventId = 5205,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to get system errors: {Error}"
+    )]
     private partial void LogFailedToGetSystemErrors(string? error);
 
-    [LoggerMessage(2322, LogLevel.Error, "Error getting system errors")]
+    [LoggerMessage(
+        EventId = 5206,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Error getting system errors"
+    )]
     private partial void LogErrorGettingSystemErrors(Exception exception);
 
     // System Version (2330-2339)
-    [LoggerMessage(2330, LogLevel.Debug, "Getting system version")]
+    [LoggerMessage(
+        EventId = 5207,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Getting system version"
+    )]
     private partial void LogGettingSystemVersion();
 
-    [LoggerMessage(2331, LogLevel.Warning, "Failed to get system version: {Error}")]
+    [LoggerMessage(
+        EventId = 5208,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to get system version: {Error}"
+    )]
     private partial void LogFailedToGetSystemVersion(string? error);
 
-    [LoggerMessage(2332, LogLevel.Error, "Error getting system version")]
+    [LoggerMessage(
+        EventId = 5209,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Error getting system version"
+    )]
     private partial void LogErrorGettingSystemVersion(Exception exception);
 
     // System Statistics (2340-2349)
-    [LoggerMessage(2340, LogLevel.Debug, "Getting system statistics")]
+    [LoggerMessage(
+        EventId = 5210,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Getting system statistics"
+    )]
     private partial void LogGettingSystemStatistics();
 
-    [LoggerMessage(2341, LogLevel.Warning, "Failed to get system statistics: {Error}")]
+    [LoggerMessage(
+        EventId = 5211,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to get system statistics: {Error}"
+    )]
     private partial void LogFailedToGetSystemStatistics(string? error);
 
-    [LoggerMessage(2342, LogLevel.Error, "Error getting system statistics")]
+    [LoggerMessage(
+        EventId = 5212,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Error getting system statistics"
+    )]
     private partial void LogErrorGettingSystemStatistics(Exception exception);
 
     // Command Status (2350-2359)
-    [LoggerMessage(2350, LogLevel.Debug, "Getting command processing status")]
+    [LoggerMessage(
+        EventId = 5213,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Getting command processing status"
+    )]
     private partial void LogGettingCommandStatus();
 
-    [LoggerMessage(2351, LogLevel.Warning, "Failed to get command status: {Error}")]
+    [LoggerMessage(
+        EventId = 5214,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to get command status: {Error}"
+    )]
     private partial void LogFailedToGetCommandStatus(string? error);
 
-    [LoggerMessage(2352, LogLevel.Error, "Error getting command status")]
+    [LoggerMessage(
+        EventId = 5215,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Error getting command status"
+    )]
     private partial void LogErrorGettingCommandStatus(Exception exception);
 
-    [LoggerMessage(2353, LogLevel.Debug, "Getting command errors")]
+    [LoggerMessage(
+        EventId = 5216,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Getting command errors"
+    )]
     private partial void LogGettingCommandErrors();
 
-    [LoggerMessage(2354, LogLevel.Warning, "Failed to get command errors: {Error}")]
+    [LoggerMessage(
+        EventId = 5217,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to get command errors: {Error}"
+    )]
     private partial void LogFailedToGetCommandErrors(string? error);
 
-    [LoggerMessage(2355, LogLevel.Error, "Error getting command errors")]
+    [LoggerMessage(
+        EventId = 5218,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Error getting command errors"
+    )]
     private partial void LogErrorGettingCommandErrors(Exception exception);
 
     #endregion

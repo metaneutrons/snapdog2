@@ -589,58 +589,130 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
 
     #region Logging
 
-    [LoggerMessage(3003, LogLevel.Debug, "Getting playlists (page {Page}, size {PageSize})")]
+    [LoggerMessage(
+        EventId = 2000,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Getting playlists (page {Page}, size {PageSize})"
+    )]
     private static partial void LogGettingPlaylists(ILogger logger, int page, int pageSize);
 
-    [LoggerMessage(3004, LogLevel.Information, "Retrieved {Count} playlists (total: {Total})")]
+    [LoggerMessage(
+        EventId = 2001,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Retrieved {Count} playlists (total: {Total})"
+    )]
     private static partial void LogPlaylistsRetrieved(ILogger logger, int count, int total);
 
-    [LoggerMessage(3005, LogLevel.Error, "Failed to get playlists: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 2002,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Failed to get playlists: {ErrorMessage}"
+    )]
     private static partial void LogGetPlaylistsError(ILogger logger, string errorMessage);
 
-    [LoggerMessage(3006, LogLevel.Debug, "Getting playlist: {PlaylistId}")]
+    [LoggerMessage(
+        EventId = 2003,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Getting playlist: {PlaylistId}"
+    )]
     private static partial void LogGettingPlaylist(ILogger logger, string playlistId);
 
-    [LoggerMessage(3007, LogLevel.Information, "Retrieved playlist: {PlaylistId} with {TrackCount} tracks")]
+    [LoggerMessage(
+        EventId = 2004,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Retrieved playlist: {PlaylistId} with {TrackCount} tracks"
+    )]
     private static partial void LogPlaylistRetrieved(ILogger logger, string playlistId, int trackCount);
 
-    [LoggerMessage(3008, LogLevel.Warning, "Playlist not found: {PlaylistId}")]
+    [LoggerMessage(
+        EventId = 2005,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Playlist not found: {PlaylistId}"
+    )]
     private static partial void LogPlaylistNotFound(ILogger logger, string playlistId);
 
-    [LoggerMessage(3009, LogLevel.Error, "Failed to get playlist: {PlaylistId}, error: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 2006,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Failed to get playlist: {PlaylistId}, error: {ErrorMessage}"
+    )]
     private static partial void LogGetPlaylistError(ILogger logger, string playlistId, string errorMessage);
 
-    [LoggerMessage(3010, LogLevel.Debug, "Getting tracks for playlist: {PlaylistId} (page {Page}, size {PageSize})")]
+    [LoggerMessage(
+        EventId = 2007,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Getting tracks for playlist: {PlaylistId} (page {Page}, size {PageSize})"
+    )]
     private static partial void LogGettingPlaylistTracks(ILogger logger, string playlistId, int page, int pageSize);
 
-    [LoggerMessage(3011, LogLevel.Information, "Retrieved {Count} tracks for playlist: {PlaylistId} (total: {Total})")]
+    [LoggerMessage(
+        EventId = 2008,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Retrieved {Count} tracks for playlist: {PlaylistId} (total: {Total})"
+    )]
     private static partial void LogPlaylistTracksRetrieved(ILogger logger, string playlistId, int count, int total);
 
-    [LoggerMessage(3012, LogLevel.Debug, "Getting track: {TrackId}")]
+    [LoggerMessage(
+        EventId = 2009,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Getting track: {TrackId}"
+    )]
     private static partial void LogGettingTrack(ILogger logger, string trackId);
 
-    [LoggerMessage(3013, LogLevel.Information, "Retrieved track: {TrackId}")]
+    [LoggerMessage(
+        EventId = 2010,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Retrieved track: {TrackId}"
+    )]
     private static partial void LogTrackRetrieved(ILogger logger, string trackId);
 
-    [LoggerMessage(3014, LogLevel.Warning, "Track not found: {TrackId}")]
+    [LoggerMessage(
+        EventId = 2011,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Track not found: {TrackId}"
+    )]
     private static partial void LogTrackNotFound(ILogger logger, string trackId);
 
-    [LoggerMessage(3015, LogLevel.Error, "Failed to get track: {TrackId}, error: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 2012,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Failed to get track: {TrackId}, error: {ErrorMessage}"
+    )]
     private static partial void LogGetTrackError(ILogger logger, string trackId, string errorMessage);
 
-    [LoggerMessage(3016, LogLevel.Error, "Handler not found: {HandlerName}")]
+    [LoggerMessage(
+        EventId = 2013,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Handler not found: {HandlerName}"
+    )]
     private static partial void LogHandlerNotFound(ILogger logger, string handlerName);
 
-    [LoggerMessage(3017, LogLevel.Debug, "Getting track {TrackId} from playlist {PlaylistId}")]
+    [LoggerMessage(
+        EventId = 2014,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Getting track {TrackId} from playlist {PlaylistId}"
+    )]
     private static partial void LogGettingPlaylistTrack(ILogger logger, string playlistId, string trackId);
 
-    [LoggerMessage(3018, LogLevel.Information, "Retrieved track {TrackId} from playlist {PlaylistId}")]
+    [LoggerMessage(
+        EventId = 2015,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Retrieved track {TrackId} from playlist {PlaylistId}"
+    )]
     private static partial void LogPlaylistTrackRetrieved(ILogger logger, string playlistId, string trackId);
 
-    [LoggerMessage(3019, LogLevel.Warning, "Track {TrackId} not found in playlist {PlaylistId}")]
+    [LoggerMessage(
+        EventId = 2016,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Track {TrackId} not found in playlist {PlaylistId}"
+    )]
     private static partial void LogTrackNotFound(ILogger logger, string trackId, string playlistId);
 
-    [LoggerMessage(3020, LogLevel.Error, "Failed to get track {TrackId} from playlist {PlaylistId}: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 2017,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Failed to get track {TrackId} from playlist {PlaylistId}: {ErrorMessage}"
+    )]
     private static partial void LogGetPlaylistTrackError(
         ILogger logger,
         string playlistId,

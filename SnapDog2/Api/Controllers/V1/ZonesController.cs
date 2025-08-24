@@ -401,46 +401,94 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
         return this.NoContent();
     }
 
-    [LoggerMessage(12001, LogLevel.Warning, "Failed to get zones: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5300,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to get zones: {ErrorMessage}"
+    )]
     private partial void LogFailedToGetZones(string errorMessage);
 
-    [LoggerMessage(12002, LogLevel.Warning, "Failed to get zone {ZoneIndex}: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5301,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to get zone {ZoneIndex}: {ErrorMessage}"
+    )]
     private partial void LogFailedToGetZone(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(12003, LogLevel.Warning, "Failed to set zone {ZoneIndex} volume to {Volume}: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5302,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to set zone {ZoneIndex} volume to {Volume}: {ErrorMessage}"
+    )]
     private partial void LogFailedToSetZoneVolume(int zoneIndex, int volume, string errorMessage);
 
-    [LoggerMessage(12004, LogLevel.Warning, "Failed to get zone {ZoneIndex} volume: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5303,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to get zone {ZoneIndex} volume: {ErrorMessage}"
+    )]
     private partial void LogFailedToGetZoneVolume(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(12005, LogLevel.Warning, "Failed to increase zone {ZoneIndex} volume: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5304,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to increase zone {ZoneIndex} volume: {ErrorMessage}"
+    )]
     private partial void LogFailedToIncreaseZoneVolume(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(12006, LogLevel.Warning, "Failed to decrease zone {ZoneIndex} volume: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5305,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to decrease zone {ZoneIndex} volume: {ErrorMessage}"
+    )]
     private partial void LogFailedToDecreaseZoneVolume(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(12007, LogLevel.Warning, "Failed to set zone {ZoneIndex} mute to {Muted}: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5306,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to set zone {ZoneIndex} mute to {Muted}: {ErrorMessage}"
+    )]
     private partial void LogFailedToSetZoneMute(int zoneIndex, bool muted, string errorMessage);
 
-    [LoggerMessage(12008, LogLevel.Warning, "Failed to get zone {ZoneIndex} mute state: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5307,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to get zone {ZoneIndex} mute state: {ErrorMessage}"
+    )]
     private partial void LogFailedToGetZoneMuteState(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(12009, LogLevel.Warning, "Failed to toggle zone {ZoneIndex} mute: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5308,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to toggle zone {ZoneIndex} mute: {ErrorMessage}"
+    )]
     private partial void LogFailedToToggleZoneMute(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(12010, LogLevel.Warning, "Failed to play zone {ZoneIndex}: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5309,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to play zone {ZoneIndex}: {ErrorMessage}"
+    )]
     private partial void LogFailedToPlayZone(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(12011, LogLevel.Warning, "Failed to pause zone {ZoneIndex}: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5310,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to pause zone {ZoneIndex}: {ErrorMessage}"
+    )]
     private partial void LogFailedToPauseZone(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(12012, LogLevel.Warning, "Failed to stop zone {ZoneIndex}: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5311,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to stop zone {ZoneIndex}: {ErrorMessage}"
+    )]
     private partial void LogFailedToStopZone(int zoneIndex, string errorMessage);
 
     [LoggerMessage(
-        12013,
-        LogLevel.Warning,
-        "Failed to set zone {ZoneIndex} playlist to {PlaylistIndex}: {ErrorMessage}"
+        EventId = 5312,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to set zone {ZoneIndex} playlist to {PlaylistIndex}: {ErrorMessage}"
     )]
     private partial void LogFailedToSetZonePlaylist(int zoneIndex, int playlistIndex, string errorMessage);
 
@@ -472,7 +520,11 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
         return this.NoContent();
     }
 
-    [LoggerMessage(12014, LogLevel.Warning, "Failed to set zone {ZoneIndex} track to {TrackIndex}: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5313,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to set zone {ZoneIndex} track to {TrackIndex}: {ErrorMessage}"
+    )]
     private partial void LogFailedToSetZoneTrack(int zoneIndex, int trackIndex, string errorMessage);
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -1220,111 +1272,211 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
     // LOGGING METHODS FOR NEW ENDPOINTS
     // ═══════════════════════════════════════════════════════════════════════════════
 
-    [LoggerMessage(12015, LogLevel.Warning, "Failed to get zone {ZoneIndex} track repeat: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5314,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to get zone {ZoneIndex} track repeat: {ErrorMessage}"
+    )]
     private partial void LogFailedToGetZoneTrackRepeat(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(12016, LogLevel.Warning, "Failed to set zone {ZoneIndex} track repeat to {Enabled}: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5315,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to set zone {ZoneIndex} track repeat to {Enabled}: {ErrorMessage}"
+    )]
     private partial void LogFailedToSetZoneTrackRepeat(int zoneIndex, bool enabled, string errorMessage);
 
-    [LoggerMessage(12017, LogLevel.Warning, "Failed to toggle zone {ZoneIndex} track repeat: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5316,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to toggle zone {ZoneIndex} track repeat: {ErrorMessage}"
+    )]
     private partial void LogFailedToToggleZoneTrackRepeat(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(12018, LogLevel.Warning, "Failed to get zone {ZoneIndex} playlist repeat: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5317,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to get zone {ZoneIndex} playlist repeat: {ErrorMessage}"
+    )]
     private partial void LogFailedToGetZonePlaylistRepeat(int zoneIndex, string errorMessage);
 
     [LoggerMessage(
-        12019,
-        LogLevel.Warning,
-        "Failed to set zone {ZoneIndex} playlist repeat to {Enabled}: {ErrorMessage}"
+        EventId = 5318,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to set zone {ZoneIndex} playlist repeat to {Enabled}: {ErrorMessage}"
     )]
     private partial void LogFailedToSetZonePlaylistRepeat(int zoneIndex, bool enabled, string errorMessage);
 
-    [LoggerMessage(12020, LogLevel.Warning, "Failed to toggle zone {ZoneIndex} playlist repeat: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5319,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to toggle zone {ZoneIndex} playlist repeat: {ErrorMessage}"
+    )]
     private partial void LogFailedToToggleZonePlaylistRepeat(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(12021, LogLevel.Warning, "Failed to get zone {ZoneIndex} playlist shuffle: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5320,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to get zone {ZoneIndex} playlist shuffle: {ErrorMessage}"
+    )]
     private partial void LogFailedToGetZonePlaylistShuffle(int zoneIndex, string errorMessage);
 
     [LoggerMessage(
-        12022,
-        LogLevel.Warning,
-        "Failed to set zone {ZoneIndex} playlist shuffle to {Enabled}: {ErrorMessage}"
+        EventId = 5321,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to set zone {ZoneIndex} playlist shuffle to {Enabled}: {ErrorMessage}"
     )]
     private partial void LogFailedToSetZonePlaylistShuffle(int zoneIndex, bool enabled, string errorMessage);
 
-    [LoggerMessage(12023, LogLevel.Warning, "Failed to toggle zone {ZoneIndex} playlist shuffle: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5322,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to toggle zone {ZoneIndex} playlist shuffle: {ErrorMessage}"
+    )]
     private partial void LogFailedToToggleZonePlaylistShuffle(int zoneIndex, string errorMessage);
 
     // ═══════════════════════════════════════════════════════════════════════════════
     // LOGGING METHODS FOR NEW TRACK NAVIGATION ENDPOINTS
     // ═══════════════════════════════════════════════════════════════════════════════
 
-    [LoggerMessage(12024, LogLevel.Warning, "Failed to skip zone {ZoneIndex} to next track: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5323,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to skip zone {ZoneIndex} to next track: {ErrorMessage}"
+    )]
     private partial void LogFailedToSkipToNextTrack(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(12025, LogLevel.Warning, "Failed to skip zone {ZoneIndex} to previous track: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5324,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to skip zone {ZoneIndex} to previous track: {ErrorMessage}"
+    )]
     private partial void LogFailedToSkipToPreviousTrack(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(12026, LogLevel.Warning, "Failed to switch zone {ZoneIndex} to next playlist: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5325,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to switch zone {ZoneIndex} to next playlist: {ErrorMessage}"
+    )]
     private partial void LogFailedToSwitchToNextPlaylist(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(12027, LogLevel.Warning, "Failed to switch zone {ZoneIndex} to previous playlist: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5326,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to switch zone {ZoneIndex} to previous playlist: {ErrorMessage}"
+    )]
     private partial void LogFailedToSwitchToPreviousPlaylist(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(12028, LogLevel.Warning, "Failed to get zone {ZoneIndex} track index: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5327,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to get zone {ZoneIndex} track index: {ErrorMessage}"
+    )]
     private partial void LogFailedToGetZoneTrackIndex(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(12029, LogLevel.Warning, "Failed to get zone {ZoneIndex} playlist index: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5328,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to get zone {ZoneIndex} playlist index: {ErrorMessage}"
+    )]
     private partial void LogFailedToGetZonePlaylistIndex(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(12038, LogLevel.Warning, "Failed to get zone {ZoneIndex} playlist info: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5337,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to get zone {ZoneIndex} playlist info: {ErrorMessage}"
+    )]
     private partial void LogFailedToGetZonePlaylistInfo(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(12030, LogLevel.Warning, "Failed to get zone {ZoneIndex} track metadata: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5329,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to get zone {ZoneIndex} track metadata: {ErrorMessage}"
+    )]
     private partial void LogFailedToGetZoneTrackMetadata(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(12031, LogLevel.Warning, "Failed to get zone {ZoneIndex} track playing status: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5330,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to get zone {ZoneIndex} track playing status: {ErrorMessage}"
+    )]
     private partial void LogFailedToGetZoneTrackPlaying(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(12032, LogLevel.Warning, "Failed to get zone {ZoneIndex} track position: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5331,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to get zone {ZoneIndex} track position: {ErrorMessage}"
+    )]
     private partial void LogFailedToGetZoneTrackPosition(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(12033, LogLevel.Warning, "Failed to get zone {ZoneIndex} track progress: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5332,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to get zone {ZoneIndex} track progress: {ErrorMessage}"
+    )]
     private partial void LogFailedToGetZoneTrackProgress(int zoneIndex, string errorMessage);
 
     [LoggerMessage(
-        12034,
-        LogLevel.Warning,
-        "Failed to set zone {ZoneIndex} track position to {PositionMs}ms: {ErrorMessage}"
+        EventId = 5333,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to set zone {ZoneIndex} track position to {PositionMs}ms: {ErrorMessage}"
     )]
     private partial void LogFailedToSetZoneTrackPosition(int zoneIndex, long positionMs, string errorMessage);
 
     [LoggerMessage(
-        12035,
-        LogLevel.Warning,
-        "Failed to set zone {ZoneIndex} track progress to {Progress:P1}: {ErrorMessage}"
+        EventId = 5334,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to set zone {ZoneIndex} track progress to {Progress:P1}: {ErrorMessage}"
     )]
     private partial void LogFailedToSetZoneTrackProgress(int zoneIndex, float progress, string errorMessage);
 
-    [LoggerMessage(12036, LogLevel.Warning, "Failed to play track {TrackIndex} for zone {ZoneIndex}: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5335,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to play track {TrackIndex} for zone {ZoneIndex}: {ErrorMessage}"
+    )]
     private partial void LogFailedToPlayTrackByIndex(int zoneIndex, int trackIndex, string errorMessage);
 
-    [LoggerMessage(12037, LogLevel.Warning, "Failed to play URL '{Url}' for zone {ZoneIndex}: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5336,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to play URL '{Url}' for zone {ZoneIndex}: {ErrorMessage}"
+    )]
     private partial void LogFailedToPlayUrl(int zoneIndex, string url, string errorMessage);
 
-    [LoggerMessage(12039, LogLevel.Warning, "Failed to get zone {ZoneIndex} track title: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5338,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to get zone {ZoneIndex} track title: {ErrorMessage}"
+    )]
     private partial void LogFailedToGetZoneTrackTitle(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(12040, LogLevel.Warning, "Failed to get zone {ZoneIndex} track artist: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5339,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to get zone {ZoneIndex} track artist: {ErrorMessage}"
+    )]
     private partial void LogFailedToGetZoneTrackArtist(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(12041, LogLevel.Warning, "Failed to get zone {ZoneIndex} track album: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5340,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to get zone {ZoneIndex} track album: {ErrorMessage}"
+    )]
     private partial void LogFailedToGetZoneTrackAlbum(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(12042, LogLevel.Warning, "Failed to get zone {ZoneIndex} track cover: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5341,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to get zone {ZoneIndex} track cover: {ErrorMessage}"
+    )]
     private partial void LogFailedToGetZoneTrackCover(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(12043, LogLevel.Warning, "Failed to get zone {ZoneIndex} track duration: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5342,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to get zone {ZoneIndex} track duration: {ErrorMessage}"
+    )]
     private partial void LogFailedToGetZoneTrackDuration(int zoneIndex, string errorMessage);
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -1353,7 +1505,11 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
         return Ok(result.Value!.Name ?? $"Zone {zoneIndex}");
     }
 
-    [LoggerMessage(12044, LogLevel.Warning, "Failed to get zone {ZoneIndex} name: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5343,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to get zone {ZoneIndex} name: {ErrorMessage}"
+    )]
     private partial void LogFailedToGetZoneName(int zoneIndex, string errorMessage);
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -1428,13 +1584,25 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
         return Ok(result.Value?.TrackCount ?? 0);
     }
 
-    [LoggerMessage(12045, LogLevel.Warning, "Failed to get zone {ZoneIndex} playback state: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5344,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to get zone {ZoneIndex} playback state: {ErrorMessage}"
+    )]
     private partial void LogFailedToGetPlaybackState(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(12046, LogLevel.Warning, "Failed to get zone {ZoneIndex} playlist name: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5345,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to get zone {ZoneIndex} playlist name: {ErrorMessage}"
+    )]
     private partial void LogFailedToGetPlaylistName(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(12047, LogLevel.Warning, "Failed to get zone {ZoneIndex} playlist count: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 5346,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to get zone {ZoneIndex} playlist count: {ErrorMessage}"
+    )]
     private partial void LogFailedToGetPlaylistCount(int zoneIndex, string errorMessage);
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -1472,9 +1640,9 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
     }
 
     [LoggerMessage(
-        12048,
-        LogLevel.Warning,
-        "Failed to execute control command '{Command}' on zone {ZoneIndex}: {ErrorMessage}"
+        EventId = 5347,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to execute control command '{Command}' on zone {ZoneIndex}: {ErrorMessage}"
     )]
     private partial void LogFailedToExecuteControlCommand(int zoneIndex, string command, string errorMessage);
 }

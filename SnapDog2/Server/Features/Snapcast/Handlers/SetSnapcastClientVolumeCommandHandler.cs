@@ -31,13 +31,17 @@ public partial class SetSnapcastClientVolumeCommandHandler(
     private readonly ILogger<SetSnapcastClientVolumeCommandHandler> _logger = logger;
 
     [LoggerMessage(
-        3001,
-        LogLevel.Information,
-        "Setting volume for Snapcast client {ClientIndex} to {Volume}% (Source: {Source})"
+        EventId = 2900,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Setting volume for Snapcast client {ClientIndex} to {Volume}% (Source: {Source})"
     )]
     private partial void LogSettingClientVolume(string clientIndex, int volume, string source);
 
-    [LoggerMessage(3002, LogLevel.Error, "Failed to set volume for Snapcast client {ClientIndex}")]
+    [LoggerMessage(
+        EventId = 2901,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Failed to set volume for Snapcast client {ClientIndex}"
+    )]
     private partial void LogSetClientVolumeFailed(string clientIndex, Exception ex);
 
     public async Task<Result> Handle(SetSnapcastClientVolumeCommand command, CancellationToken cancellationToken)

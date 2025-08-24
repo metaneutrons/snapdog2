@@ -40,71 +40,143 @@ public partial class ClientManager : IClientManager
     private readonly List<ClientConfig> _clientConfigs;
     private readonly SnapDogConfiguration _configuration;
 
-    [LoggerMessage(7001, LogLevel.Debug, "Getting client {ClientIndex}")]
+    [LoggerMessage(
+        EventId = 6300,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Getting client {ClientIndex}"
+    )]
     private partial void LogGettingClient(int clientIndex);
 
-    [LoggerMessage(7002, LogLevel.Warning, "Client {ClientIndex} not found")]
+    [LoggerMessage(
+        EventId = 6301,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Client {ClientIndex} not found"
+    )]
     private partial void LogClientNotFound(int clientIndex);
 
-    [LoggerMessage(7003, LogLevel.Debug, "Getting all clients")]
+    [LoggerMessage(
+        EventId = 6302,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Getting all clients"
+    )]
     private partial void LogGettingAllClients();
 
-    [LoggerMessage(7004, LogLevel.Debug, "Getting clients for zone {ZoneIndex}")]
+    [LoggerMessage(
+        EventId = 6303,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Getting clients for zone {ZoneIndex}"
+    )]
     private partial void LogGettingClientsByZone(int zoneIndex);
 
-    [LoggerMessage(7005, LogLevel.Information, "Assigning client {ClientIndex} to zone {ZoneIndex}")]
+    [LoggerMessage(
+        EventId = 6304,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Assigning client {ClientIndex} to zone {ZoneIndex}"
+    )]
     private partial void LogAssigningClientToZone(int clientIndex, int zoneIndex);
 
-    [LoggerMessage(7006, LogLevel.Debug, "Initialized ClientManager with {ClientCount} configured clients")]
+    [LoggerMessage(
+        EventId = 6305,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Initialized ClientManager with {ClientCount} configured clients"
+    )]
     private partial void LogInitialized(int clientCount);
 
-    [LoggerMessage(7010, LogLevel.Debug, "Getting client by Snapcast ID {SnapcastClientId}")]
+    [LoggerMessage(
+        EventId = 6306,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Getting client by Snapcast ID {SnapcastClientId}"
+    )]
     private partial void LogGettingClientBySnapcastId(string snapcastClientId);
 
-    [LoggerMessage(7011, LogLevel.Warning, "Snapcast client {SnapcastClientId} not found")]
+    [LoggerMessage(
+        EventId = 6307,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Snapcast client {SnapcastClientId} not found"
+    )]
     private partial void LogSnapcastClientNotFound(string snapcastClientId);
 
-    [LoggerMessage(7012, LogLevel.Warning, "MAC address not found for Snapcast client {SnapcastClientId}")]
+    [LoggerMessage(
+        EventId = 6308,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "MAC address not found for Snapcast client {SnapcastClientId}"
+    )]
     private partial void LogMacAddressNotFound(string snapcastClientId);
 
-    [LoggerMessage(7013, LogLevel.Warning, "Client config not found for MAC address {MacAddress}")]
+    [LoggerMessage(
+        EventId = 6309,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Client config not found for MAC address {MacAddress}"
+    )]
     private partial void LogClientConfigNotFoundByMac(string macAddress);
 
     [LoggerMessage(
-        7014,
-        LogLevel.Debug,
-        "Found client {SnapcastClientId} with MAC {MacAddress} mapped to client index {ClientIndex}"
+        EventId = 6310,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Found client {SnapcastClientId} with MAC {MacAddress} mapped to client index {ClientIndex}"
     )]
     private partial void LogClientFoundByMac(string snapcastClientId, string macAddress, int clientIndex);
 
-    [LoggerMessage(7015, LogLevel.Error, "Error getting client by Snapcast ID {SnapcastClientId}")]
+    [LoggerMessage(
+        EventId = 6311,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Error getting client by Snapcast ID {SnapcastClientId}"
+    )]
     private partial void LogGetClientBySnapcastIdError(string snapcastClientId, Exception ex);
 
-    [LoggerMessage(7016, LogLevel.Debug, "Found client {ClientIndex} with Snapcast ID: {SnapcastClientId}")]
+    [LoggerMessage(
+        EventId = 6312,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Found client {ClientIndex} with Snapcast ID: {SnapcastClientId}"
+    )]
     private partial void LogFoundClientWithSnapcastId(int ClientIndex, string SnapcastClientId);
 
-    [LoggerMessage(7017, LogLevel.Debug, "Target zone {ZoneIndex} maps to stream: {StreamId}")]
+    [LoggerMessage(
+        EventId = 6313,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Target zone {ZoneIndex} maps to stream: {StreamId}"
+    )]
     private partial void LogTargetZoneMapsToStream(int ZoneIndex, string StreamId);
 
-    [LoggerMessage(7018, LogLevel.Debug, "Using group {GroupId} for zone {ZoneIndex}")]
+    [LoggerMessage(
+        EventId = 6314,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Using group {GroupId} for zone {ZoneIndex}"
+    )]
     private partial void LogUsingGroupForZone(string GroupId, int ZoneIndex);
 
-    [LoggerMessage(7019, LogLevel.Warning, "Failed to move client {ClientId} to group {GroupId}: {Error}")]
+    [LoggerMessage(
+        EventId = 6315,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to move client {ClientId} to group {GroupId}: {Error}"
+    )]
     private partial void LogFailedToMoveClientToGroup(string ClientId, string GroupId, string? Error);
 
-    [LoggerMessage(7020, LogLevel.Debug, "Refreshing server state after zone assignment")]
+    [LoggerMessage(
+        EventId = 6316,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Refreshing server state after zone assignment"
+    )]
     private partial void LogRefreshingServerStateAfterZoneAssignment();
 
-    [LoggerMessage(7021, LogLevel.Debug, "Server state refreshed successfully")]
+    [LoggerMessage(
+        EventId = 6317,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Server state refreshed successfully"
+    )]
     private partial void LogServerStateRefreshedSuccessfully();
 
-    [LoggerMessage(7022, LogLevel.Warning, "Failed to refresh server state after zone assignment: {Error}")]
+    [LoggerMessage(
+        EventId = 6318,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to refresh server state after zone assignment: {Error}"
+    )]
     private partial void LogFailedToRefreshServerState(string? Error);
 
     [LoggerMessage(
-        7023,
-        LogLevel.Information,
-        "Successfully assigned client {ClientIndex} ({ClientId}) to zone {ZoneIndex} (group {GroupId})"
+        EventId = 6319,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Successfully assigned client {ClientIndex} ({ClientId}) to zone {ZoneIndex} (group {GroupId})"
     )]
     private partial void LogSuccessfullyAssignedClientToZone(
         int ClientIndex,
@@ -113,25 +185,53 @@ public partial class ClientManager : IClientManager
         string GroupId
     );
 
-    [LoggerMessage(7024, LogLevel.Error, "Error assigning client {ClientIndex} to zone {ZoneIndex}")]
+    [LoggerMessage(
+        EventId = 6320,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Error assigning client {ClientIndex} to zone {ZoneIndex}"
+    )]
     private partial void LogErrorAssigningClientToZone(Exception ex, int ClientIndex, int ZoneIndex);
 
-    [LoggerMessage(7025, LogLevel.Debug, "Found existing group {GroupId} for stream {StreamId}")]
+    [LoggerMessage(
+        EventId = 6321,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Found existing group {GroupId} for stream {StreamId}"
+    )]
     private partial void LogFoundExistingGroupForStream(string GroupId, string StreamId);
 
-    [LoggerMessage(7026, LogLevel.Debug, "Assigning group {GroupId} to stream {StreamId}")]
+    [LoggerMessage(
+        EventId = 6322,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Assigning group {GroupId} to stream {StreamId}"
+    )]
     private partial void LogAssigningGroupToStream(string GroupId, string StreamId);
 
-    [LoggerMessage(7027, LogLevel.Debug, "Successfully assigned group {GroupId} to stream {StreamId}")]
+    [LoggerMessage(
+        EventId = 6323,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Successfully assigned group {GroupId} to stream {StreamId}"
+    )]
     private partial void LogSuccessfullyAssignedGroupToStream(string GroupId, string StreamId);
 
-    [LoggerMessage(7028, LogLevel.Warning, "Failed to assign group {GroupId} to stream {StreamId}: {Error}")]
+    [LoggerMessage(
+        EventId = 6324,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to assign group {GroupId} to stream {StreamId}: {Error}"
+    )]
     private partial void LogFailedToAssignGroupToStream(string GroupId, string StreamId, string? Error);
 
-    [LoggerMessage(7029, LogLevel.Warning, "No available groups found for stream {StreamId}")]
+    [LoggerMessage(
+        EventId = 6325,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "No available groups found for stream {StreamId}"
+    )]
     private partial void LogNoAvailableGroupsFoundForStream(string StreamId);
 
-    [LoggerMessage(7030, LogLevel.Error, "Error finding or creating group for stream {StreamId}")]
+    [LoggerMessage(
+        EventId = 6326,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Error finding or creating group for stream {StreamId}"
+    )]
     private partial void LogErrorFindingOrCreatingGroupForStream(Exception ex, string StreamId);
 
     public ClientManager(

@@ -221,28 +221,28 @@ public partial class BusinessMetricsCollectionService : BackgroundService
     );
 
     [LoggerMessage(
-        EventId = 4002,
+        EventId = 7101,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
         Message = "BusinessMetricsCollectionService started with {CollectionInterval} interval"
     )]
     private static partial void LogServiceStarted(ILogger logger, TimeSpan collectionInterval);
 
     [LoggerMessage(
-        EventId = 4003,
+        EventId = 7102,
         Level = Microsoft.Extensions.Logging.LogLevel.Error,
         Message = "Error occurred while collecting business metrics"
     )]
     private static partial void LogErrorCollectingMetrics(ILogger logger, Exception ex);
 
     [LoggerMessage(
-        EventId = 4004,
+        EventId = 7103,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
         Message = "BusinessMetricsCollectionService stopped"
     )]
     private static partial void LogServiceStopped(ILogger logger);
 
     [LoggerMessage(
-        EventId = 4005,
+        EventId = 7104,
         Level = Microsoft.Extensions.Logging.LogLevel.Warning,
         Message = "Failed to collect business metrics"
     )]

@@ -269,9 +269,9 @@ public partial class EnterpriseMetricsService : IMetricsService, IDisposable
     #region Logging
 
     [LoggerMessage(
-        6001,
-        LogLevel.Debug,
-        "Recording {RequestType} request '{RequestName}' duration: {DurationMs}ms, Success: {Success}"
+        EventId = 6001,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Recording {RequestType} request '{RequestName}' duration: {DurationMs}ms, Success: {Success}"
     )]
     private partial void LogRecordingRequestDuration(
         string requestType,
@@ -280,38 +280,50 @@ public partial class EnterpriseMetricsService : IMetricsService, IDisposable
         bool success
     );
 
-    [LoggerMessage(6002, LogLevel.Debug, "Getting server statistics")]
+    [LoggerMessage(
+        EventId = 6002,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Getting server statistics"
+    )]
     private partial void LogGettingServerStats();
 
-    [LoggerMessage(6003, LogLevel.Debug, "Metric counter increment: {Name} += {Delta} {Labels}")]
+    [LoggerMessage(
+        EventId = 6003,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Metric counter increment: {Name} += {Delta} {Labels}"
+    )]
     private partial void LogCounterIncrement(string name, long delta, string labels);
 
-    [LoggerMessage(6004, LogLevel.Debug, "Metric gauge set: {Name} = {Value} {Labels}")]
+    [LoggerMessage(
+        EventId = 6004,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Metric gauge set: {Name} = {Value} {Labels}"
+    )]
     private partial void LogGaugeSet(string name, double value, string labels);
 
     [LoggerMessage(
-        EventId = 6005,
+        EventId = 6000,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
         Message = "EnterpriseMetricsService initialized with system metrics collection"
     )]
     private static partial void LogServiceInitialized(ILogger logger);
 
     [LoggerMessage(
-        EventId = 6006,
+        EventId = 6001,
         Level = Microsoft.Extensions.Logging.LogLevel.Warning,
         Message = "Failed to collect system metrics"
     )]
     private static partial void LogFailedToCollectSystemMetrics(ILogger logger, Exception ex);
 
     [LoggerMessage(
-        EventId = 6007,
+        EventId = 6002,
         Level = Microsoft.Extensions.Logging.LogLevel.Debug,
         Message = "Failed to get CPU usage"
     )]
     private static partial void LogFailedToGetCpuUsage(ILogger logger, Exception ex);
 
     [LoggerMessage(
-        EventId = 6008,
+        EventId = 6003,
         Level = Microsoft.Extensions.Logging.LogLevel.Debug,
         Message = "Failed to get CPU usage synchronously"
     )]

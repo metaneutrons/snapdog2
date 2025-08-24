@@ -30,13 +30,25 @@ public partial class StatusFactory(ILogger<StatusFactory> logger) : IStatusFacto
 {
     private readonly ILogger<StatusFactory> _logger = logger;
 
-    [LoggerMessage(9001, LogLevel.Debug, "Creating {NotificationType} for {EntityType} {EntityIndex}")]
+    [LoggerMessage(
+        EventId = 1300,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Creating {NotificationType} for {EntityType} {EntityIndex}"
+    )]
     private partial void LogStatusCreation(string notificationType, string entityType, int entityIndex);
 
-    [LoggerMessage(9002, LogLevel.Debug, "Creating global {NotificationType}")]
+    [LoggerMessage(
+        EventId = 1301,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Creating global {NotificationType}"
+    )]
     private partial void LogGlobalStatusCreation(string notificationType);
 
-    [LoggerMessage(9003, LogLevel.Warning, "Invalid parameter for {NotificationType}: {ParameterName} = {Value}")]
+    [LoggerMessage(
+        EventId = 1302,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Invalid parameter for {NotificationType}: {ParameterName} = {Value}"
+    )]
     private partial void LogInvalidParameter(string notificationType, string parameterName, object value);
 
     #region Global Status Notifications

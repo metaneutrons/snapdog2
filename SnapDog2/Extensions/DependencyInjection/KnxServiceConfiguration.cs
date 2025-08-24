@@ -211,16 +211,32 @@ public static partial class KnxServiceConfiguration
         }
     }
 
-    [LoggerMessage(13001, LogLevel.Information, "KNX service is disabled in configuration - skipping registration")]
+    [LoggerMessage(
+        EventId = 3000,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "KNX service is disabled in configuration - skipping registration"
+    )]
     private static partial void LogKnxServiceDisabled(ILogger logger);
 
-    [LoggerMessage(13002, LogLevel.Error, "KNX configuration validation failed: {Errors}")]
+    [LoggerMessage(
+        EventId = 3001,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "KNX configuration validation failed: {Errors}"
+    )]
     private static partial void LogKnxConfigurationValidationFailed(ILogger logger, string errors);
 
-    [LoggerMessage(13003, LogLevel.Information, "Registering KNX service with {ConnectionType} connection")]
+    [LoggerMessage(
+        EventId = 3002,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Registering KNX service with {ConnectionType} connection"
+    )]
     private static partial void LogKnxServiceRegistering(ILogger logger, string connectionType);
 
-    [LoggerMessage(13004, LogLevel.Information, "KNX {ConnectionType}: {Gateway}:{Port}")]
+    [LoggerMessage(
+        EventId = 3003,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "KNX {ConnectionType}: {Gateway}:{Port}"
+    )]
     private static partial void LogKnxConnectionDetails(
         ILogger logger,
         string connectionType,
@@ -229,9 +245,9 @@ public static partial class KnxServiceConfiguration
     );
 
     [LoggerMessage(
-        13005,
-        LogLevel.Information,
-        "KNX integration configured for {ZoneCount} zones and {ClientCount} clients"
+        EventId = 3004,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "KNX integration configured for {ZoneCount} zones and {ClientCount} clients"
     )]
     private static partial void LogKnxIntegrationConfigured(ILogger logger, int zoneCount, int clientCount);
 

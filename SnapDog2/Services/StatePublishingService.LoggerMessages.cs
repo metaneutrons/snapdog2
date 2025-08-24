@@ -22,6 +22,10 @@ namespace SnapDog2.Services;
 public partial class StatePublishingService
 {
     // State Publishing Operations (10701)
-    [LoggerMessage(10701, LogLevel.Information, "State publishing cancelled during shutdown")]
+    [LoggerMessage(
+        EventId = 5100,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "State publishing cancelled during shutdown"
+    )]
     private partial void LogStatePublishingCancelledDuringShutdown();
 }

@@ -140,12 +140,24 @@ public sealed partial class NotificationQueue : INotificationQueue
         this._queue.Writer.TryComplete();
     }
 
-    [LoggerMessage(4001, LogLevel.Debug, "Enqueued notification {EventType} for zone {ZoneIndex}")]
+    [LoggerMessage(
+        EventId = 6900,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Enqueued notification {EventType} for zone {ZoneIndex}"
+    )]
     private partial void LogZoneNotificationEnqueued(string eventType, int zoneIndex);
 
-    [LoggerMessage(4002, LogLevel.Debug, "Enqueued notification {EventType} for client {ClientIndex}")]
+    [LoggerMessage(
+        EventId = 6901,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Enqueued notification {EventType} for client {ClientIndex}"
+    )]
     private partial void LogClientNotificationEnqueued(string eventType, string clientIndex);
 
-    [LoggerMessage(4003, LogLevel.Debug, "Enqueued notification {EventType} for global system")]
+    [LoggerMessage(
+        EventId = 6902,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Enqueued notification {EventType} for global system"
+    )]
     private partial void LogGlobalNotificationEnqueued(string eventType);
 }

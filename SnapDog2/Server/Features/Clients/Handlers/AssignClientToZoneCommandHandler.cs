@@ -39,19 +39,31 @@ public partial class AssignClientToZoneCommandHandler(
     private readonly IMediator _mediator = mediator;
     private readonly ILogger<AssignClientToZoneCommandHandler> _logger = logger;
 
-    [LoggerMessage(3101, LogLevel.Information, "Assigning Client {ClientIndex} to Zone {ZoneIndex} from {Source}")]
+    [LoggerMessage(
+        EventId = 8100,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Assigning Client {ClientIndex} to Zone {ZoneIndex} from {Source}"
+    )]
     private partial void LogHandling(int clientIndex, int zoneIndex, CommandSource source);
 
-    [LoggerMessage(3102, LogLevel.Warning, "Client {ClientIndex} not found for AssignClientToZoneCommand")]
+    [LoggerMessage(
+        EventId = 8101,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Client {ClientIndex} not found for AssignClientToZoneCommand"
+    )]
     private partial void LogClientNotFound(int clientIndex);
 
-    [LoggerMessage(3103, LogLevel.Warning, "Zone {ZoneIndex} not found for AssignClientToZoneCommand")]
+    [LoggerMessage(
+        EventId = 8102,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Zone {ZoneIndex} not found for AssignClientToZoneCommand"
+    )]
     private partial void LogZoneNotFound(int zoneIndex);
 
     [LoggerMessage(
-        3104,
-        LogLevel.Error,
-        "Failed to publish ClientZoneAssignmentChangedNotification for client {ClientIndex}"
+        EventId = 8103,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Failed to publish ClientZoneAssignmentChangedNotification for client {ClientIndex}"
     )]
     private partial void LogNotificationPublishingFailed(Exception ex, int clientIndex);
 

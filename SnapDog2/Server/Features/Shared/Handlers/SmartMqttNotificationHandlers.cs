@@ -317,90 +317,150 @@ public partial class SmartMqttNotificationHandlers(
     #region Logging
 
     // Client logging
-    [LoggerMessage(9001, LogLevel.Information, "Client {ClientIndex} volume changed to {Volume}")]
+    [LoggerMessage(
+        EventId = 5003,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Client {ClientIndex} volume changed to {Volume}"
+    )]
     private partial void LogClientVolumeChange(int clientIndex, int volume);
 
-    [LoggerMessage(9002, LogLevel.Information, "Client {ClientIndex} mute changed to {IsMuted}")]
+    [LoggerMessage(
+        EventId = 5004,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Client {ClientIndex} mute changed to {IsMuted}"
+    )]
     private partial void LogClientMuteChange(int clientIndex, bool isMuted);
 
-    [LoggerMessage(9003, LogLevel.Information, "Client {ClientIndex} latency changed to {LatencyMs}ms")]
+    [LoggerMessage(
+        EventId = 5005,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Client {ClientIndex} latency changed to {LatencyMs}ms"
+    )]
     private partial void LogClientLatencyChange(int clientIndex, int latencyMs);
 
     [LoggerMessage(
-        9004,
-        LogLevel.Information,
-        "Client {ClientIndex} zone changed from {PreviousZoneIndex} to {ZoneIndex}"
+        EventId = 5006,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Client {ClientIndex} zone changed from {PreviousZoneIndex} to {ZoneIndex}"
     )]
     private partial void LogClientZoneChange(int clientIndex, int? previousZoneIndex, int? zoneIndex);
 
-    [LoggerMessage(9005, LogLevel.Information, "Client {ClientIndex} connection changed to {IsConnected}")]
+    [LoggerMessage(
+        EventId = 5007,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Client {ClientIndex} connection changed to {IsConnected}"
+    )]
     private partial void LogClientConnectionChange(int clientIndex, bool isConnected);
 
-    [LoggerMessage(9006, LogLevel.Information, "Client {ClientIndex} complete state changed")]
+    [LoggerMessage(
+        EventId = 5008,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Client {ClientIndex} complete state changed"
+    )]
     private partial void LogClientStateChange(int clientIndex);
 
     // Zone logging
-    [LoggerMessage(9011, LogLevel.Information, "Zone {ZoneIndex} volume changed to {Volume}")]
+    [LoggerMessage(
+        EventId = 5009,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Zone {ZoneIndex} volume changed to {Volume}"
+    )]
     private partial void LogZoneVolumeChange(int zoneIndex, int volume);
 
-    [LoggerMessage(9012, LogLevel.Information, "Zone {ZoneIndex} mute changed to {IsMuted}")]
+    [LoggerMessage(
+        EventId = 5010,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Zone {ZoneIndex} mute changed to {IsMuted}"
+    )]
     private partial void LogZoneMuteChange(int zoneIndex, bool isMuted);
 
-    [LoggerMessage(9013, LogLevel.Information, "Zone {ZoneIndex} playback state changed to {PlaybackState}")]
+    [LoggerMessage(
+        EventId = 5011,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Zone {ZoneIndex} playback state changed to {PlaybackState}"
+    )]
     private partial void LogZonePlaybackStateChange(int zoneIndex, string playbackState);
 
-    [LoggerMessage(9014, LogLevel.Information, "Zone {ZoneIndex} track changed to {TrackTitle} by {Artist}")]
+    [LoggerMessage(
+        EventId = 5012,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Zone {ZoneIndex} track changed to {TrackTitle} by {Artist}"
+    )]
     private partial void LogZoneTrackChange(int zoneIndex, string trackTitle, string artist);
 
     [LoggerMessage(
-        9015,
-        LogLevel.Information,
-        "Zone {ZoneIndex} playlist changed to {PlaylistName} (Index: {PlaylistIndex})"
+        EventId = 5013,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Zone {ZoneIndex} playlist changed to {PlaylistName} (Index: {PlaylistIndex})"
     )]
     private partial void LogZonePlaylistChange(int zoneIndex, string playlistName, int playlistIndex);
 
-    [LoggerMessage(9016, LogLevel.Information, "Zone {ZoneIndex} track repeat changed to {TrackRepeatEnabled}")]
+    [LoggerMessage(
+        EventId = 5014,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Zone {ZoneIndex} track repeat changed to {TrackRepeatEnabled}"
+    )]
     private partial void LogZoneTrackRepeatChange(int zoneIndex, bool trackRepeatEnabled);
 
-    [LoggerMessage(9017, LogLevel.Information, "Zone {ZoneIndex} playlist repeat changed to {PlaylistRepeatEnabled}")]
+    [LoggerMessage(
+        EventId = 5015,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Zone {ZoneIndex} playlist repeat changed to {PlaylistRepeatEnabled}"
+    )]
     private partial void LogZonePlaylistRepeatChange(int zoneIndex, bool playlistRepeatEnabled);
 
-    [LoggerMessage(9018, LogLevel.Information, "Zone {ZoneIndex} shuffle mode changed to {ShuffleEnabled}")]
+    [LoggerMessage(
+        EventId = 5016,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Zone {ZoneIndex} shuffle mode changed to {ShuffleEnabled}"
+    )]
     private partial void LogZoneShuffleModeChange(int zoneIndex, bool shuffleEnabled);
 
-    [LoggerMessage(9019, LogLevel.Information, "Zone {ZoneIndex} track album changed to {Album}")]
+    [LoggerMessage(
+        EventId = 5017,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Zone {ZoneIndex} track album changed to {Album}"
+    )]
     private partial void LogZoneTrackAlbumChange(int zoneIndex, string album);
 
-    [LoggerMessage(9019, LogLevel.Debug, "Zone {ZoneIndex} complete state changed")]
+    [LoggerMessage(
+        EventId = 5017,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Zone {ZoneIndex} complete state changed"
+    )]
     private partial void LogZoneStateChange(int zoneIndex);
 
     // Error logging
     [LoggerMessage(
-        9020,
-        LogLevel.Warning,
-        "Smart MQTT publisher not available for {EntityType} {EntityId} {EventType}"
+        EventId = 5018,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Smart MQTT publisher not available for {EntityType} {EntityId} {EventType}"
     )]
     private partial void LogSmartPublisherNotAvailable(string entityType, string entityId, string eventType);
 
-    [LoggerMessage(9021, LogLevel.Error, "Failed to publish {EntityType} {EntityId} {EventType} to MQTT")]
+    [LoggerMessage(
+        EventId = 5019,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Failed to publish {EntityType} {EntityId} {EventType} to MQTT"
+    )]
     private partial void LogPublishError(string entityType, string entityId, string eventType, Exception ex);
 
     [LoggerMessage(
-        EventId = 9022,
+        EventId = 5000,
         Level = Microsoft.Extensions.Logging.LogLevel.Debug,
         Message = "Attempting to publish zone status: {EventType} for Zone {ZoneIndex}"
     )]
     private static partial void LogAttemptingToPublishZoneStatus(ILogger logger, string eventType, int zoneIndex);
 
     [LoggerMessage(
-        EventId = 9023,
+        EventId = 5001,
         Level = Microsoft.Extensions.Logging.LogLevel.Debug,
         Message = "Smart publisher found, publishing zone status"
     )]
     private static partial void LogSmartPublisherFound(ILogger logger);
 
     [LoggerMessage(
-        EventId = 9024,
+        EventId = 5002,
         Level = Microsoft.Extensions.Logging.LogLevel.Warning,
         Message = "❌ Smart publisher not available"
     )]

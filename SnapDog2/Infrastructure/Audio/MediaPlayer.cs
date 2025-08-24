@@ -302,42 +302,42 @@ public sealed partial class MediaPlayer(
     private static partial void LogPlayerDisposed(ILogger logger, int zoneIndex);
 
     [LoggerMessage(
-        EventId = 1,
+        EventId = 2200,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
         Message = "Starting audio streaming for zone {ZoneIndex}: {StreamUrl}"
     )]
     private static partial void LogStartingStreaming(ILogger logger, int zoneIndex, string streamUrl);
 
     [LoggerMessage(
-        EventId = 2,
+        EventId = 2201,
         Level = Microsoft.Extensions.Logging.LogLevel.Error,
         Message = "Audio processing failed: {ErrorMessage}"
     )]
     private static partial void LogAudioProcessingFailed(ILogger logger, string errorMessage);
 
     [LoggerMessage(
-        EventId = 3,
+        EventId = 2202,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
         Message = "Audio streaming completed successfully for zone {ZoneIndex}"
     )]
     private static partial void LogAudioStreamingCompleted(ILogger logger, int zoneIndex);
 
     [LoggerMessage(
-        EventId = 4,
+        EventId = 2203,
         Level = Microsoft.Extensions.Logging.LogLevel.Debug,
         Message = "Audio streaming was cancelled for zone {ZoneIndex}"
     )]
     private static partial void LogStreamingCancelled(ILogger logger, int zoneIndex);
 
     [LoggerMessage(
-        EventId = 5,
+        EventId = 2204,
         Level = Microsoft.Extensions.Logging.LogLevel.Error,
         Message = "Error during audio streaming for zone {ZoneIndex}"
     )]
     private static partial void LogStreamingError(ILogger logger, Exception ex, int zoneIndex);
 
     [LoggerMessage(
-        EventId = 6,
+        EventId = 2205,
         Level = Microsoft.Extensions.Logging.LogLevel.Debug,
         Message = "MediaPlayer.GetStatus() - ProcessingContext: {HasContext}, IsPlaying: {IsPlaying}, Disposed: {Disposed}, CurrentTrack: {HasTrack}"
     )]
@@ -350,28 +350,28 @@ public sealed partial class MediaPlayer(
     );
 
     [LoggerMessage(
-        EventId = 7,
+        EventId = 2206,
         Level = Microsoft.Extensions.Logging.LogLevel.Debug,
         Message = "Updating track position from LibVLC..."
     )]
     private static partial void LogUpdatingTrackPosition(ILogger logger);
 
     [LoggerMessage(
-        EventId = 8,
+        EventId = 2207,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
         Message = "❌ NOT updating position - CurrentTrack: {HasTrack}, ProcessingContext: {HasContext}, IsPlaying: {IsPlaying}"
     )]
     private static partial void LogNotUpdatingPosition(ILogger logger, bool hasTrack, bool hasContext, bool isPlaying);
 
     [LoggerMessage(
-        EventId = 9,
+        EventId = 2208,
         Level = Microsoft.Extensions.Logging.LogLevel.Warning,
         Message = "Error forwarding position changed event for zone {ZoneIndex}"
     )]
     private static partial void LogPositionEventError(ILogger logger, Exception ex, int zoneIndex);
 
     [LoggerMessage(
-        EventId = 10,
+        EventId = 2209,
         Level = Microsoft.Extensions.Logging.LogLevel.Warning,
         Message = "Error forwarding playback state changed event for zone {ZoneIndex}"
     )]

@@ -22,15 +22,31 @@ namespace SnapDog2.Worker.Services;
 public partial class IntegrationServicesHostedService
 {
     // Service Lifecycle Operations (10001-10004)
-    [LoggerMessage(10001, LogLevel.Information, "Integration services initialization cancelled")]
+    [LoggerMessage(
+        EventId = 5200,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Integration services initialization cancelled"
+    )]
     private partial void LogIntegrationServicesInitializationCancelled();
 
-    [LoggerMessage(10002, LogLevel.Error, "Failed to initialize integration services")]
+    [LoggerMessage(
+        EventId = 5201,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Failed to initialize integration services"
+    )]
     private partial void LogFailedToInitializeIntegrationServices(Exception ex);
 
-    [LoggerMessage(10003, LogLevel.Information, "Stopping integration services...")]
+    [LoggerMessage(
+        EventId = 5202,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Stopping integration services..."
+    )]
     private partial void LogStoppingIntegrationServices();
 
-    [LoggerMessage(10004, LogLevel.Information, "Integration services stopped")]
+    [LoggerMessage(
+        EventId = 5203,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Integration services stopped"
+    )]
     private partial void LogIntegrationServicesStopped();
 }

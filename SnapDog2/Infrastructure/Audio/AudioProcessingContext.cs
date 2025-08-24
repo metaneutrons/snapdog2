@@ -529,196 +529,196 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
 
     // LoggerMessage methods for high-performance logging
     [LoggerMessage(
-        EventId = 1,
+        EventId = 2100,
         Level = Microsoft.Extensions.Logging.LogLevel.Debug,
         Message = "Audio processing context initialized with temp directory: {TempDirectory}"
     )]
     private partial void LogAudioProcessingContextInitialized(string TempDirectory);
 
     [LoggerMessage(
-        EventId = 2,
+        EventId = 2101,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
         Message = "Starting audio processing: Source={SourceUrl}, Output={OutputPath}"
     )]
     private partial void LogStartingAudioProcessing(string SourceUrl, string OutputPath);
 
     [LoggerMessage(
-        EventId = 3,
+        EventId = 2102,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
         Message = "Audio streaming started successfully: {OutputPath}"
     )]
     private partial void LogAudioStreamingStartedSuccessfully(string OutputPath);
 
     [LoggerMessage(
-        EventId = 4,
+        EventId = 2103,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
         Message = "Maintaining continuous stream for URL source: {SourceUrl}"
     )]
     private partial void LogMaintainingContinuousStream(string SourceUrl);
 
     [LoggerMessage(
-        EventId = 5,
+        EventId = 2104,
         Level = Microsoft.Extensions.Logging.LogLevel.Debug,
         Message = "Stream status: State={State}, IsPlaying={IsPlaying}"
     )]
     private partial void LogStreamStatus(VLCState State, bool IsPlaying);
 
     [LoggerMessage(
-        EventId = 6,
+        EventId = 2105,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
         Message = "Stream cancelled for: {SourceUrl}"
     )]
     private partial void LogStreamCancelled(string SourceUrl);
 
     [LoggerMessage(
-        EventId = 7,
+        EventId = 2106,
         Level = Microsoft.Extensions.Logging.LogLevel.Warning,
         Message = "Stream ended with error for: {SourceUrl}"
     )]
     private partial void LogStreamEndedWithError(string SourceUrl);
 
     [LoggerMessage(
-        EventId = 8,
+        EventId = 2107,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
         Message = "Stream ended naturally for: {SourceUrl}"
     )]
     private partial void LogStreamEndedNaturally(string SourceUrl);
 
     [LoggerMessage(
-        EventId = 9,
+        EventId = 2108,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
         Message = "Audio processing completed: {OutputPath}"
     )]
     private partial void LogAudioProcessingCompleted(string OutputPath);
 
     [LoggerMessage(
-        EventId = 10,
+        EventId = 2109,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
         Message = "Audio processing was cancelled"
     )]
     private partial void LogAudioProcessingWasCancelled();
 
     [LoggerMessage(
-        EventId = 11,
+        EventId = 2110,
         Level = Microsoft.Extensions.Logging.LogLevel.Error,
         Message = "Failed to process audio stream: {SourceUrl}"
     )]
     private partial void LogFailedToProcessAudioStream(Exception ex, string SourceUrl);
 
     [LoggerMessage(
-        EventId = 12,
+        EventId = 2111,
         Level = Microsoft.Extensions.Logging.LogLevel.Debug,
         Message = "Built media options for pipe streaming: Codec={AudioCodec}, SampleRate={SampleRate}, Channels={Channels}, Options={Options}"
     )]
     private partial void LogBuiltMediaOptions(string AudioCodec, int SampleRate, int Channels, string Options);
 
     [LoggerMessage(
-        EventId = 13,
+        EventId = 2112,
         Level = Microsoft.Extensions.Logging.LogLevel.Debug,
         Message = "Stopped media playback"
     )]
     private partial void LogStoppedMediaPlayback();
 
     [LoggerMessage(
-        EventId = 14,
+        EventId = 2113,
         Level = Microsoft.Extensions.Logging.LogLevel.Debug,
         Message = "LibVLC IsPlaying Check - IsPlaying: {IsPlaying}, State: {State}"
     )]
     private partial void LogLibVlcIsPlayingCheck(bool IsPlaying, VLCState State);
 
     [LoggerMessage(
-        EventId = 15,
+        EventId = 2114,
         Level = Microsoft.Extensions.Logging.LogLevel.Debug,
         Message = "LibVLC Direct Access - Time: {Time}ms, State: {State}, IsPlaying: {IsPlaying}"
     )]
     private partial void LogLibVlcDirectAccess(long Time, VLCState State, bool IsPlaying);
 
     [LoggerMessage(
-        EventId = 16,
+        EventId = 2115,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
         Message = "🔧 Setting up LibVLC event handlers"
     )]
     private partial void LogSettingUpLibVlcEventHandlers();
 
     [LoggerMessage(
-        EventId = 17,
+        EventId = 2116,
         Level = Microsoft.Extensions.Logging.LogLevel.Debug,
         Message = "📍 LibVLC PositionChanged event: {Position}% = {PositionMs}ms"
     )]
     private partial void LogLibVlcPositionChanged(float Position, long PositionMs);
 
     [LoggerMessage(
-        EventId = 18,
+        EventId = 2117,
         Level = Microsoft.Extensions.Logging.LogLevel.Warning,
         Message = "Error handling PositionChanged event"
     )]
     private partial void LogErrorHandlingPositionChangedEvent(Exception ex);
 
     [LoggerMessage(
-        EventId = 19,
+        EventId = 2118,
         Level = Microsoft.Extensions.Logging.LogLevel.Debug,
         Message = "⏰ LibVLC TimeChanged event: {Time}ms"
     )]
     private partial void LogLibVlcTimeChanged(long Time);
 
     [LoggerMessage(
-        EventId = 20,
+        EventId = 2119,
         Level = Microsoft.Extensions.Logging.LogLevel.Warning,
         Message = "Error handling TimeChanged event"
     )]
     private partial void LogErrorHandlingTimeChangedEvent(Exception ex);
 
     [LoggerMessage(
-        EventId = 21,
+        EventId = 2120,
         Level = Microsoft.Extensions.Logging.LogLevel.Warning,
         Message = "Error handling Playing event"
     )]
     private partial void LogErrorHandlingPlayingEvent(Exception ex);
 
     [LoggerMessage(
-        EventId = 22,
+        EventId = 2121,
         Level = Microsoft.Extensions.Logging.LogLevel.Warning,
         Message = "Error handling Paused event"
     )]
     private partial void LogErrorHandlingPausedEvent(Exception ex);
 
     [LoggerMessage(
-        EventId = 23,
+        EventId = 2122,
         Level = Microsoft.Extensions.Logging.LogLevel.Warning,
         Message = "Error handling Stopped event"
     )]
     private partial void LogErrorHandlingStoppedEvent(Exception ex);
 
     [LoggerMessage(
-        EventId = 24,
+        EventId = 2123,
         Level = Microsoft.Extensions.Logging.LogLevel.Warning,
         Message = "Error handling EndReached event"
     )]
     private partial void LogErrorHandlingEndReachedEvent(Exception ex);
 
     [LoggerMessage(
-        EventId = 25,
+        EventId = 2124,
         Level = Microsoft.Extensions.Logging.LogLevel.Debug,
         Message = "Audio processing context disposed"
     )]
     private partial void LogAudioProcessingContextDisposed();
 
     [LoggerMessage(
-        EventId = 26,
+        EventId = 2125,
         Level = Microsoft.Extensions.Logging.LogLevel.Debug,
         Message = "Audio processing context disposed asynchronously"
     )]
     private partial void LogAudioProcessingContextDisposedAsynchronously();
 
     [LoggerMessage(
-        EventId = 27,
+        EventId = 2126,
         Level = Microsoft.Extensions.Logging.LogLevel.Error,
         Message = "Failed to initialize LibVLCSharp Core. Ensure LibVLC native libraries are properly installed."
     )]
     private partial void LogLibVLCCoreInitializationFailed(Exception ex);
 
     [LoggerMessage(
-        EventId = 28,
+        EventId = 2127,
         Level = Microsoft.Extensions.Logging.LogLevel.Error,
         Message = "Failed to create LibVLC instance with args: {Args}"
     )]

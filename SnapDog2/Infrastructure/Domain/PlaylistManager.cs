@@ -30,19 +30,39 @@ public partial class PlaylistManager : IPlaylistManager
     private readonly Dictionary<string, PlaylistInfo> _playlists;
     private readonly Dictionary<string, List<TrackInfo>> _playlistTracks;
 
-    [LoggerMessage(8001, LogLevel.Debug, "Getting all playlists")]
+    [LoggerMessage(
+        EventId = 6400,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Getting all playlists"
+    )]
     private partial void LogGettingAllPlaylists();
 
-    [LoggerMessage(8002, LogLevel.Debug, "Getting tracks for playlist ID: {PlaylistIndex}")]
+    [LoggerMessage(
+        EventId = 6401,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Getting tracks for playlist ID: {PlaylistIndex}"
+    )]
     private partial void LogGettingTracksByPlaylistIndex(string playlistIndex);
 
-    [LoggerMessage(8003, LogLevel.Debug, "Getting tracks for playlist index: {PlaylistIndex}")]
+    [LoggerMessage(
+        EventId = 6402,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Getting tracks for playlist index: {PlaylistIndex}"
+    )]
     private partial void LogGettingTracksByPlaylistIndex(int playlistIndex);
 
-    [LoggerMessage(8004, LogLevel.Warning, "Playlist {PlaylistIndex} not found")]
+    [LoggerMessage(
+        EventId = 6403,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Playlist {PlaylistIndex} not found"
+    )]
     private partial void LogPlaylistNotFound(string playlistIndex);
 
-    [LoggerMessage(8005, LogLevel.Warning, "Playlist index {PlaylistIndex} not found")]
+    [LoggerMessage(
+        EventId = 6404,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Playlist index {PlaylistIndex} not found"
+    )]
     private partial void LogPlaylistIndexNotFound(int playlistIndex);
 
     public PlaylistManager(ILogger<PlaylistManager> logger)

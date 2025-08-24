@@ -552,161 +552,161 @@ public sealed partial class MediaPlayerService(
 
     // Logger messages
     [LoggerMessage(
-        EventId = 911,
+        EventId = 2300,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
         Message = "[LibVLCService] Started playback for zone {ZoneIndex}: {TrackTitle} from {StreamUrl}"
     )]
     private static partial void LogPlaybackStarted(ILogger logger, int zoneIndex, string trackTitle, string streamUrl);
 
     [LoggerMessage(
-        EventId = 912,
+        EventId = 2301,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
         Message = "[LibVLCService] Stopped playback for zone {ZoneIndex}"
     )]
     private static partial void LogPlaybackStopped(ILogger logger, int zoneIndex);
 
     [LoggerMessage(
-        EventId = 913,
+        EventId = 2302,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
         Message = "[LibVLCService] Paused playback for zone {ZoneIndex}"
     )]
     private static partial void LogPlaybackPaused(ILogger logger, int zoneIndex);
 
     [LoggerMessage(
-        EventId = 914,
+        EventId = 2303,
         Level = Microsoft.Extensions.Logging.LogLevel.Error,
         Message = "[LibVLCService] Playback error for zone {ZoneIndex}"
     )]
     private static partial void LogPlaybackError(ILogger logger, int zoneIndex, Exception exception);
 
     [LoggerMessage(
-        EventId = 915,
+        EventId = 2304,
         Level = Microsoft.Extensions.Logging.LogLevel.Warning,
         Message = "[LibVLCService] Maximum concurrent streams reached: {MaxStreams}"
     )]
     private static partial void LogMaxStreamsReached(ILogger logger, int maxStreams);
 
     [LoggerMessage(
-        EventId = 916,
+        EventId = 2305,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
         Message = "[LibVLCService] Stopped all playback - {ActiveStreams} streams stopped"
     )]
     private static partial void LogAllPlaybackStopped(ILogger logger, int activeStreams);
 
     [LoggerMessage(
-        EventId = 917,
+        EventId = 2306,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
         Message = "[LibVLCService] Service disposed"
     )]
     private static partial void LogServiceDisposed(ILogger logger);
 
     [LoggerMessage(
-        EventId = 918,
+        EventId = 2307,
         Level = Microsoft.Extensions.Logging.LogLevel.Debug,
         Message = "[LibVLCService] Seeking zone {ZoneIndex} to position {PositionMs}ms"
     )]
     private static partial void LogSeekingToPosition(ILogger logger, int zoneIndex, long positionMs);
 
     [LoggerMessage(
-        EventId = 919,
+        EventId = 2308,
         Level = Microsoft.Extensions.Logging.LogLevel.Debug,
         Message = "[LibVLCService] Seeking zone {ZoneIndex} to progress {Progress:P1}"
     )]
     private static partial void LogSeekingToProgress(ILogger logger, int zoneIndex, float progress);
 
     [LoggerMessage(
-        EventId = 920,
+        EventId = 2309,
         Level = Microsoft.Extensions.Logging.LogLevel.Warning,
         Message = "[LibVLCService] Seek not implemented for zone {ZoneIndex} - returning success"
     )]
     private static partial void LogSeekNotImplemented(ILogger logger, int zoneIndex);
 
     [LoggerMessage(
-        EventId = 921,
+        EventId = 2310,
         Level = Microsoft.Extensions.Logging.LogLevel.Error,
         Message = "[LibVLCService] Seek error for zone {ZoneIndex}"
     )]
     private static partial void LogSeekError(ILogger logger, int zoneIndex, Exception ex);
 
     [LoggerMessage(
-        EventId = 922,
+        EventId = 2311,
         Level = Microsoft.Extensions.Logging.LogLevel.Warning,
         Message = "[LibVLCService] No active player found for zone {ZoneIndex}"
     )]
     private static partial void LogPlayerNotFound(ILogger logger, int zoneIndex);
 
     [LoggerMessage(
-        EventId = 923,
+        EventId = 2312,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
         Message = "MediaPlayerService: Looking for zone {ZoneIndex}"
     )]
     private static partial void LogLookingForZone(ILogger logger, int zoneIndex);
 
     [LoggerMessage(
-        EventId = 924,
+        EventId = 2313,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
         Message = "MediaPlayerService: Available zone configs count: {Count}"
     )]
     private static partial void LogAvailableZoneConfigs(ILogger logger, int count);
 
     [LoggerMessage(
-        EventId = 925,
+        EventId = 2314,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
         Message = "MediaPlayerService: Zone config {Index}: {Name}"
     )]
     private static partial void LogZoneConfig(ILogger logger, int index, string name);
 
     [LoggerMessage(
-        EventId = 926,
+        EventId = 2315,
         Level = Microsoft.Extensions.Logging.LogLevel.Error,
         Message = "MediaPlayerService: Zone {ZoneIndex} not found. Requested index in array: {ArrayIndex}"
     )]
     private static partial void LogZoneNotFound(ILogger logger, int zoneIndex, int arrayIndex);
 
     [LoggerMessage(
-        EventId = 927,
+        EventId = 2316,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
         Message = "MediaPlayerService: Found zone config for zone {ZoneIndex}: {ZoneName}"
     )]
     private static partial void LogFoundZoneConfig(ILogger logger, int zoneIndex, string zoneName);
 
     [LoggerMessage(
-        EventId = 928,
+        EventId = 2317,
         Level = Microsoft.Extensions.Logging.LogLevel.Debug,
         Message = "Converted Subsonic media ID {MediaId} to stream URL: {StreamUrl}"
     )]
     private static partial void LogConvertedSubsonicUrl(ILogger logger, string mediaId, string streamUrl);
 
     [LoggerMessage(
-        EventId = 929,
+        EventId = 2318,
         Level = Microsoft.Extensions.Logging.LogLevel.Warning,
         Message = "Error disposing MediaPlayer during service cleanup"
     )]
     private static partial void LogDisposalWarning(ILogger logger, Exception ex);
 
     [LoggerMessage(
-        EventId = 930,
+        EventId = 2319,
         Level = Microsoft.Extensions.Logging.LogLevel.Error,
         Message = "Error during MediaPlayerService disposal"
     )]
     private static partial void LogDisposalError(ILogger logger, Exception ex);
 
     [LoggerMessage(
-        EventId = 931,
+        EventId = 2320,
         Level = Microsoft.Extensions.Logging.LogLevel.Warning,
         Message = "Error disposing MediaPlayer during background cleanup"
     )]
     private static partial void LogBackgroundDisposalWarning(ILogger logger, Exception ex);
 
     [LoggerMessage(
-        EventId = 932,
+        EventId = 2321,
         Level = Microsoft.Extensions.Logging.LogLevel.Error,
         Message = "Error during background MediaPlayerService disposal"
     )]
     private static partial void LogBackgroundDisposalError(ILogger logger, Exception ex);
 
     [LoggerMessage(
-        EventId = 933,
+        EventId = 2322,
         Level = Microsoft.Extensions.Logging.LogLevel.Error,
         Message = "Error starting background disposal task"
     )]

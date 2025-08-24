@@ -30,10 +30,18 @@ public partial class ClientVolumeUpCommandHandler(
     private readonly IClientManager _clientManager = clientManager;
     private readonly ILogger<ClientVolumeUpCommandHandler> _logger = logger;
 
-    [LoggerMessage(3011, LogLevel.Information, "Increasing volume for Client {ClientIndex} by {Step} from {Source}")]
+    [LoggerMessage(
+        EventId = 8300,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Increasing volume for Client {ClientIndex} by {Step} from {Source}"
+    )]
     private partial void LogHandling(int clientIndex, int step, CommandSource source);
 
-    [LoggerMessage(3012, LogLevel.Warning, "Client {ClientIndex} not found for ClientVolumeUpCommand")]
+    [LoggerMessage(
+        EventId = 8301,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Client {ClientIndex} not found for ClientVolumeUpCommand"
+    )]
     private partial void LogClientNotFound(int clientIndex);
 
     public async Task<Result> Handle(ClientVolumeUpCommand request, CancellationToken cancellationToken)

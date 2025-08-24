@@ -40,47 +40,79 @@ public partial class SnapcastStateRepository(
     #region Logging
 
     [LoggerMessage(
-        1,
-        LogLevel.Debug,
-        "Updating full Snapcast server state. Groups: {GroupCount}, Clients: {ClientCount}, Streams: {StreamCount}"
+        EventId = 2700,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Updating full Snapcast server state. Groups: {GroupCount}, Clients: {ClientCount}, Streams: {StreamCount}"
     )]
     private partial void LogUpdatingServerState(int groupCount, int clientCount, int streamCount);
 
-    [LoggerMessage(2, LogLevel.Debug, "Updating Snapcast client {ClientIndex}")]
+    [LoggerMessage(
+        EventId = 2701,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Updating Snapcast client {ClientIndex}"
+    )]
     private partial void LogUpdatingClient(string clientIndex);
 
-    [LoggerMessage(3, LogLevel.Debug, "Removing Snapcast client {ClientIndex}")]
+    [LoggerMessage(
+        EventId = 2702,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Removing Snapcast client {ClientIndex}"
+    )]
     private partial void LogRemovingClient(string clientIndex);
 
-    [LoggerMessage(4, LogLevel.Debug, "Updating Snapcast group {GroupId}")]
+    [LoggerMessage(
+        EventId = 2703,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Updating Snapcast group {GroupId}"
+    )]
     private partial void LogUpdatingGroup(string groupId);
 
-    [LoggerMessage(5, LogLevel.Debug, "Removing Snapcast group {GroupId}")]
+    [LoggerMessage(
+        EventId = 2704,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Removing Snapcast group {GroupId}"
+    )]
     private partial void LogRemovingGroup(string groupId);
 
-    [LoggerMessage(6, LogLevel.Debug, "Updating Snapcast stream {StreamId}")]
+    [LoggerMessage(
+        EventId = 2705,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Updating Snapcast stream {StreamId}"
+    )]
     private partial void LogUpdatingStream(string streamId);
 
-    [LoggerMessage(7, LogLevel.Debug, "Removing Snapcast stream {StreamId}")]
+    [LoggerMessage(
+        EventId = 2706,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Removing Snapcast stream {StreamId}"
+    )]
     private partial void LogRemovingStream(string streamId);
 
-    [LoggerMessage(8, LogLevel.Warning, "Client index {ClientIndex} is out of range. Valid range: 1-{MaxClients}")]
+    [LoggerMessage(
+        EventId = 2707,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Client index {ClientIndex} is out of range. Valid range: 1-{MaxClients}"
+    )]
     private partial void LogClientIndexOutOfRange(int clientIndex, int maxClients);
 
-    [LoggerMessage(9, LogLevel.Warning, "Client {ClientIndex} ({ClientName}) has no MAC address configured")]
+    [LoggerMessage(
+        EventId = 2708,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Client {ClientIndex} ({ClientName}) has no MAC address configured"
+    )]
     private partial void LogClientMacNotConfigured(int clientIndex, string clientName);
 
     [LoggerMessage(
-        10,
-        LogLevel.Warning,
-        "Client {ClientIndex} ({ClientName}) with MAC {MacAddress} not found in Snapcast"
+        EventId = 2709,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Client {ClientIndex} ({ClientName}) with MAC {MacAddress} not found in Snapcast"
     )]
     private partial void LogClientNotFoundByMac(int clientIndex, string clientName, string macAddress);
 
     [LoggerMessage(
-        11,
-        LogLevel.Debug,
-        "Client {ClientIndex} ({ClientName}) with MAC {MacAddress} found as Snapcast client {SnapcastClientIndex}"
+        EventId = 2710,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Client {ClientIndex} ({ClientName}) with MAC {MacAddress} found as Snapcast client {SnapcastClientIndex}"
     )]
     private partial void LogClientFoundByMac(
         int clientIndex,
@@ -89,19 +121,39 @@ public partial class SnapcastStateRepository(
         string snapcastClientIndex
     );
 
-    [LoggerMessage(12, LogLevel.Debug, "Available Snapcast clients: {AvailableClients}")]
+    [LoggerMessage(
+        EventId = 2711,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Available Snapcast clients: {AvailableClients}"
+    )]
     private partial void LogAvailableClients(string availableClients);
 
-    [LoggerMessage(13, LogLevel.Debug, "Total Snapcast clients in repository: {ClientCount}")]
+    [LoggerMessage(
+        EventId = 2712,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Total Snapcast clients in repository: {ClientCount}"
+    )]
     private partial void LogTotalClientCount(int clientCount);
 
-    [LoggerMessage(14, LogLevel.Debug, "🔄 UpdateServerState called with {GroupCount} groups")]
+    [LoggerMessage(
+        EventId = 2713,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "🔄 UpdateServerState called with {GroupCount} groups"
+    )]
     private partial void LogUpdateServerStateCalled(int groupCount);
 
-    [LoggerMessage(15, LogLevel.Debug, "📝 Processing group {GroupId} with {ClientCount} clients")]
+    [LoggerMessage(
+        EventId = 2714,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "📝 Processing group {GroupId} with {ClientCount} clients"
+    )]
     private partial void LogProcessingGroup(string groupId, int clientCount);
 
-    [LoggerMessage(16, LogLevel.Debug, "👤 Adding/updating client {ClientIndex} (MAC: {MacAddress})")]
+    [LoggerMessage(
+        EventId = 2715,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "👤 Adding/updating client {ClientIndex} (MAC: {MacAddress})"
+    )]
     private partial void LogAddingClient(string clientIndex, string macAddress);
 
     #endregion

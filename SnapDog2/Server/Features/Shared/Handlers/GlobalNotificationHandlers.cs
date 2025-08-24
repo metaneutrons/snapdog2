@@ -39,19 +39,39 @@ public partial class GlobalStateNotificationHandler(
     private readonly IServiceProvider _serviceProvider = serviceProvider;
     private readonly ILogger<GlobalStateNotificationHandler> _logger = logger;
 
-    [LoggerMessage(6201, LogLevel.Information, "System status changed to online: {IsOnline}")]
+    [LoggerMessage(
+        EventId = 9700,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "System status changed to online: {IsOnline}"
+    )]
     private partial void LogSystemStatusChange(bool isOnline);
 
-    [LoggerMessage(6202, LogLevel.Information, "Version info updated: {Version} (Build: {BuildDate})")]
+    [LoggerMessage(
+        EventId = 9701,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Version info updated: {Version} (Build: {BuildDate})"
+    )]
     private partial void LogVersionInfoChange(string version, DateTime buildDate);
 
-    [LoggerMessage(6203, LogLevel.Information, "Server stats updated - CPU: {CpuUsage}%, Memory: {MemoryUsage}MB")]
+    [LoggerMessage(
+        EventId = 9702,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Server stats updated - CPU: {CpuUsage}%, Memory: {MemoryUsage}MB"
+    )]
     private partial void LogServerStatsChange(double cpuUsage, double memoryUsage);
 
-    [LoggerMessage(6204, LogLevel.Error, "System error occurred: {ErrorCode} - {Message}")]
+    [LoggerMessage(
+        EventId = 9703,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "System error occurred: {ErrorCode} - {Message}"
+    )]
     private partial void LogSystemError(string errorCode, string message);
 
-    [LoggerMessage(6205, LogLevel.Information, "Zones info updated - Available zones: [{ZoneIndices}]")]
+    [LoggerMessage(
+        EventId = 9704,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Zones info updated - Available zones: [{ZoneIndices}]"
+    )]
     private partial void LogZonesInfoChange(string zoneIndices);
 
     public async Task Handle(SystemStatusChangedNotification notification, CancellationToken cancellationToken)

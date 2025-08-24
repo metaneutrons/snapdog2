@@ -37,10 +37,18 @@ public partial class CommandErrorsQueryHandler(
     private readonly ICommandStatusService _commandStatusService = commandStatusService;
     private readonly ILogger<CommandErrorsQueryHandler> _logger = logger;
 
-    [LoggerMessage(5003, LogLevel.Debug, "Retrieving recent command errors")]
+    [LoggerMessage(
+        EventId = 9200,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Retrieving recent command errors"
+    )]
     private partial void LogRetrievingCommandErrors();
 
-    [LoggerMessage(5004, LogLevel.Warning, "Failed to retrieve command errors: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 9201,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to retrieve command errors: {ErrorMessage}"
+    )]
     private partial void LogFailedToRetrieveCommandErrors(string errorMessage);
 
     /// <summary>

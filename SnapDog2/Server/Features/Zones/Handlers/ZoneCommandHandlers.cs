@@ -60,10 +60,18 @@ public partial class PlayCommandHandler(IZoneManager zoneManager, ILogger<PlayCo
         }
     }
 
-    [LoggerMessage(9001, LogLevel.Information, "Starting playback for Zone {ZoneIndex} from {Source}")]
+    [LoggerMessage(
+        EventId = 10000,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Starting playback for Zone {ZoneIndex} from {Source}"
+    )]
     private partial void LogStartingPlayback(int zoneIndex, SnapDog2.Core.Enums.CommandSource source);
 
-    [LoggerMessage(9002, LogLevel.Warning, "Zone {ZoneIndex} not found for {CommandName}")]
+    [LoggerMessage(
+        EventId = 10001,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Zone {ZoneIndex} not found for {CommandName}"
+    )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
 
@@ -91,10 +99,18 @@ public partial class PauseCommandHandler(IZoneManager zoneManager, ILogger<Pause
         return await zone.PauseAsync().ConfigureAwait(false);
     }
 
-    [LoggerMessage(9003, LogLevel.Information, "Pausing playback for Zone {ZoneIndex} from {Source}")]
+    [LoggerMessage(
+        EventId = 10002,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Pausing playback for Zone {ZoneIndex} from {Source}"
+    )]
     private partial void LogPausingPlayback(int zoneIndex, SnapDog2.Core.Enums.CommandSource source);
 
-    [LoggerMessage(9004, LogLevel.Warning, "Zone {ZoneIndex} not found for {CommandName}")]
+    [LoggerMessage(
+        EventId = 10003,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Zone {ZoneIndex} not found for {CommandName}"
+    )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
 
@@ -122,10 +138,18 @@ public partial class StopCommandHandler(IZoneManager zoneManager, ILogger<StopCo
         return await zone.StopAsync().ConfigureAwait(false);
     }
 
-    [LoggerMessage(9005, LogLevel.Information, "Stopping playback for Zone {ZoneIndex} from {Source}")]
+    [LoggerMessage(
+        EventId = 10004,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Stopping playback for Zone {ZoneIndex} from {Source}"
+    )]
     private partial void LogStoppingPlayback(int zoneIndex, SnapDog2.Core.Enums.CommandSource source);
 
-    [LoggerMessage(9006, LogLevel.Warning, "Zone {ZoneIndex} not found for {CommandName}")]
+    [LoggerMessage(
+        EventId = 10005,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Zone {ZoneIndex} not found for {CommandName}"
+    )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
 
@@ -153,10 +177,18 @@ public partial class SetZoneVolumeCommandHandler(IZoneManager zoneManager, ILogg
         return await zone.SetVolumeAsync(request.Volume).ConfigureAwait(false);
     }
 
-    [LoggerMessage(9007, LogLevel.Information, "Setting volume for Zone {ZoneIndex} to {Volume} from {Source}")]
+    [LoggerMessage(
+        EventId = 10006,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Setting volume for Zone {ZoneIndex} to {Volume} from {Source}"
+    )]
     private partial void LogSettingVolume(int zoneIndex, int volume, SnapDog2.Core.Enums.CommandSource source);
 
-    [LoggerMessage(9008, LogLevel.Warning, "Zone {ZoneIndex} not found for {CommandName}")]
+    [LoggerMessage(
+        EventId = 10007,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Zone {ZoneIndex} not found for {CommandName}"
+    )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
 
@@ -184,10 +216,18 @@ public partial class VolumeUpCommandHandler(IZoneManager zoneManager, ILogger<Vo
         return await zone.VolumeUpAsync(request.Step).ConfigureAwait(false);
     }
 
-    [LoggerMessage(9009, LogLevel.Information, "Increasing volume for Zone {ZoneIndex} by {Step} from {Source}")]
+    [LoggerMessage(
+        EventId = 10008,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Increasing volume for Zone {ZoneIndex} by {Step} from {Source}"
+    )]
     private partial void LogIncreasingVolume(int zoneIndex, int step, SnapDog2.Core.Enums.CommandSource source);
 
-    [LoggerMessage(9010, LogLevel.Warning, "Zone {ZoneIndex} not found for {CommandName}")]
+    [LoggerMessage(
+        EventId = 10009,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Zone {ZoneIndex} not found for {CommandName}"
+    )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
 
@@ -215,10 +255,18 @@ public partial class VolumeDownCommandHandler(IZoneManager zoneManager, ILogger<
         return await zone.VolumeDownAsync(request.Step).ConfigureAwait(false);
     }
 
-    [LoggerMessage(9011, LogLevel.Information, "Decreasing volume for Zone {ZoneIndex} by {Step} from {Source}")]
+    [LoggerMessage(
+        EventId = 10010,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Decreasing volume for Zone {ZoneIndex} by {Step} from {Source}"
+    )]
     private partial void LogDecreasingVolume(int zoneIndex, int step, SnapDog2.Core.Enums.CommandSource source);
 
-    [LoggerMessage(9012, LogLevel.Warning, "Zone {ZoneIndex} not found for {CommandName}")]
+    [LoggerMessage(
+        EventId = 10011,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Zone {ZoneIndex} not found for {CommandName}"
+    )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
 
@@ -246,10 +294,18 @@ public partial class SetZoneMuteCommandHandler(IZoneManager zoneManager, ILogger
         return await zone.SetMuteAsync(request.Enabled).ConfigureAwait(false);
     }
 
-    [LoggerMessage(9013, LogLevel.Information, "Setting mute for Zone {ZoneIndex} to {Enabled} from {Source}")]
+    [LoggerMessage(
+        EventId = 10012,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Setting mute for Zone {ZoneIndex} to {Enabled} from {Source}"
+    )]
     private partial void LogSettingMute(int zoneIndex, bool enabled, SnapDog2.Core.Enums.CommandSource source);
 
-    [LoggerMessage(9014, LogLevel.Warning, "Zone {ZoneIndex} not found for {CommandName}")]
+    [LoggerMessage(
+        EventId = 10013,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Zone {ZoneIndex} not found for {CommandName}"
+    )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
 
@@ -279,10 +335,18 @@ public partial class ToggleZoneMuteCommandHandler(
         return await zone.ToggleMuteAsync().ConfigureAwait(false);
     }
 
-    [LoggerMessage(9015, LogLevel.Information, "Toggling mute for Zone {ZoneIndex} from {Source}")]
+    [LoggerMessage(
+        EventId = 10014,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Toggling mute for Zone {ZoneIndex} from {Source}"
+    )]
     private partial void LogTogglingMute(int zoneIndex, SnapDog2.Core.Enums.CommandSource source);
 
-    [LoggerMessage(9016, LogLevel.Warning, "Zone {ZoneIndex} not found for {CommandName}")]
+    [LoggerMessage(
+        EventId = 10015,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Zone {ZoneIndex} not found for {CommandName}"
+    )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
 
@@ -310,10 +374,18 @@ public partial class SetTrackCommandHandler(IZoneManager zoneManager, ILogger<Se
         return await zone.SetTrackAsync(request.TrackIndex).ConfigureAwait(false);
     }
 
-    [LoggerMessage(9017, LogLevel.Information, "Setting track for Zone {ZoneIndex} to {TrackIndex} from {Source}")]
+    [LoggerMessage(
+        EventId = 10016,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Setting track for Zone {ZoneIndex} to {TrackIndex} from {Source}"
+    )]
     private partial void LogSettingTrack(int zoneIndex, int trackIndex, SnapDog2.Core.Enums.CommandSource source);
 
-    [LoggerMessage(9018, LogLevel.Warning, "Zone {ZoneIndex} not found for {CommandName}")]
+    [LoggerMessage(
+        EventId = 10017,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Zone {ZoneIndex} not found for {CommandName}"
+    )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
 
@@ -341,10 +413,18 @@ public partial class NextTrackCommandHandler(IZoneManager zoneManager, ILogger<N
         return await zone.NextTrackAsync().ConfigureAwait(false);
     }
 
-    [LoggerMessage(9019, LogLevel.Information, "Playing next track for Zone {ZoneIndex} from {Source}")]
+    [LoggerMessage(
+        EventId = 10018,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Playing next track for Zone {ZoneIndex} from {Source}"
+    )]
     private partial void LogPlayingNextTrack(int zoneIndex, SnapDog2.Core.Enums.CommandSource source);
 
-    [LoggerMessage(9020, LogLevel.Warning, "Zone {ZoneIndex} not found for {CommandName}")]
+    [LoggerMessage(
+        EventId = 10019,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Zone {ZoneIndex} not found for {CommandName}"
+    )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
 
@@ -372,10 +452,18 @@ public partial class PreviousTrackCommandHandler(IZoneManager zoneManager, ILogg
         return await zone.PreviousTrackAsync().ConfigureAwait(false);
     }
 
-    [LoggerMessage(9021, LogLevel.Information, "Playing previous track for Zone {ZoneIndex} from {Source}")]
+    [LoggerMessage(
+        EventId = 10020,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Playing previous track for Zone {ZoneIndex} from {Source}"
+    )]
     private partial void LogPlayingPreviousTrack(int zoneIndex, SnapDog2.Core.Enums.CommandSource source);
 
-    [LoggerMessage(9022, LogLevel.Warning, "Zone {ZoneIndex} not found for {CommandName}")]
+    [LoggerMessage(
+        EventId = 10021,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Zone {ZoneIndex} not found for {CommandName}"
+    )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
 
@@ -404,10 +492,18 @@ public partial class SetPlaylistCommandHandler(IZoneManager zoneManager, ILogger
         return await zone.SetPlaylistAsync(request.PlaylistIndex).ConfigureAwait(false);
     }
 
-    [LoggerMessage(9023, LogLevel.Information, "Setting playlist for Zone {ZoneIndex} from {Source}")]
+    [LoggerMessage(
+        EventId = 10022,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Setting playlist for Zone {ZoneIndex} from {Source}"
+    )]
     private partial void LogSettingPlaylist(int zoneIndex, SnapDog2.Core.Enums.CommandSource source);
 
-    [LoggerMessage(9024, LogLevel.Warning, "Zone {ZoneIndex} not found for {CommandName}")]
+    [LoggerMessage(
+        EventId = 10023,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Zone {ZoneIndex} not found for {CommandName}"
+    )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
 
@@ -435,10 +531,18 @@ public partial class NextPlaylistCommandHandler(IZoneManager zoneManager, ILogge
         return await zone.NextPlaylistAsync().ConfigureAwait(false);
     }
 
-    [LoggerMessage(9025, LogLevel.Information, "Playing next playlist for Zone {ZoneIndex} from {Source}")]
+    [LoggerMessage(
+        EventId = 10024,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Playing next playlist for Zone {ZoneIndex} from {Source}"
+    )]
     private partial void LogPlayingNextPlaylist(int zoneIndex, SnapDog2.Core.Enums.CommandSource source);
 
-    [LoggerMessage(9026, LogLevel.Warning, "Zone {ZoneIndex} not found for {CommandName}")]
+    [LoggerMessage(
+        EventId = 10025,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Zone {ZoneIndex} not found for {CommandName}"
+    )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
 
@@ -468,10 +572,18 @@ public partial class PreviousPlaylistCommandHandler(
         return await zone.PreviousPlaylistAsync().ConfigureAwait(false);
     }
 
-    [LoggerMessage(9027, LogLevel.Information, "Playing previous playlist for Zone {ZoneIndex} from {Source}")]
+    [LoggerMessage(
+        EventId = 10026,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Playing previous playlist for Zone {ZoneIndex} from {Source}"
+    )]
     private partial void LogPlayingPreviousPlaylist(int zoneIndex, SnapDog2.Core.Enums.CommandSource source);
 
-    [LoggerMessage(9028, LogLevel.Warning, "Zone {ZoneIndex} not found for {CommandName}")]
+    [LoggerMessage(
+        EventId = 10027,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Zone {ZoneIndex} not found for {CommandName}"
+    )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
 
@@ -501,10 +613,18 @@ public partial class SetTrackRepeatCommandHandler(
         return await zone.SetTrackRepeatAsync(request.Enabled).ConfigureAwait(false);
     }
 
-    [LoggerMessage(9029, LogLevel.Information, "Setting track repeat for Zone {ZoneIndex} to {Enabled} from {Source}")]
+    [LoggerMessage(
+        EventId = 10028,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Setting track repeat for Zone {ZoneIndex} to {Enabled} from {Source}"
+    )]
     private partial void LogSettingTrackRepeat(int zoneIndex, bool enabled, SnapDog2.Core.Enums.CommandSource source);
 
-    [LoggerMessage(9030, LogLevel.Warning, "Zone {ZoneIndex} not found for {CommandName}")]
+    [LoggerMessage(
+        EventId = 10029,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Zone {ZoneIndex} not found for {CommandName}"
+    )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
 
@@ -534,10 +654,18 @@ public partial class ToggleTrackRepeatCommandHandler(
         return await zone.ToggleTrackRepeatAsync().ConfigureAwait(false);
     }
 
-    [LoggerMessage(9031, LogLevel.Information, "Toggling track repeat for Zone {ZoneIndex} from {Source}")]
+    [LoggerMessage(
+        EventId = 10030,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Toggling track repeat for Zone {ZoneIndex} from {Source}"
+    )]
     private partial void LogTogglingTrackRepeat(int zoneIndex, SnapDog2.Core.Enums.CommandSource source);
 
-    [LoggerMessage(9032, LogLevel.Warning, "Zone {ZoneIndex} not found for {CommandName}")]
+    [LoggerMessage(
+        EventId = 10031,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Zone {ZoneIndex} not found for {CommandName}"
+    )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
 
@@ -568,9 +696,9 @@ public partial class SetPlaylistShuffleCommandHandler(
     }
 
     [LoggerMessage(
-        9033,
-        LogLevel.Information,
-        "Setting playlist shuffle for Zone {ZoneIndex} to {Enabled} from {Source}"
+        EventId = 10032,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Setting playlist shuffle for Zone {ZoneIndex} to {Enabled} from {Source}"
     )]
     private partial void LogSettingPlaylistShuffle(
         int zoneIndex,
@@ -578,7 +706,11 @@ public partial class SetPlaylistShuffleCommandHandler(
         SnapDog2.Core.Enums.CommandSource source
     );
 
-    [LoggerMessage(9034, LogLevel.Warning, "Zone {ZoneIndex} not found for {CommandName}")]
+    [LoggerMessage(
+        EventId = 10033,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Zone {ZoneIndex} not found for {CommandName}"
+    )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
 
@@ -608,10 +740,18 @@ public partial class TogglePlaylistShuffleCommandHandler(
         return await zone.TogglePlaylistShuffleAsync().ConfigureAwait(false);
     }
 
-    [LoggerMessage(9035, LogLevel.Information, "Toggling playlist shuffle for Zone {ZoneIndex} from {Source}")]
+    [LoggerMessage(
+        EventId = 10034,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Toggling playlist shuffle for Zone {ZoneIndex} from {Source}"
+    )]
     private partial void LogTogglingPlaylistShuffle(int zoneIndex, SnapDog2.Core.Enums.CommandSource source);
 
-    [LoggerMessage(9036, LogLevel.Warning, "Zone {ZoneIndex} not found for {CommandName}")]
+    [LoggerMessage(
+        EventId = 10035,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Zone {ZoneIndex} not found for {CommandName}"
+    )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
 
@@ -642,9 +782,9 @@ public partial class SetPlaylistRepeatCommandHandler(
     }
 
     [LoggerMessage(
-        9037,
-        LogLevel.Information,
-        "Setting playlist repeat for Zone {ZoneIndex} to {Enabled} from {Source}"
+        EventId = 10036,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Setting playlist repeat for Zone {ZoneIndex} to {Enabled} from {Source}"
     )]
     private partial void LogSettingPlaylistRepeat(
         int zoneIndex,
@@ -652,7 +792,11 @@ public partial class SetPlaylistRepeatCommandHandler(
         SnapDog2.Core.Enums.CommandSource source
     );
 
-    [LoggerMessage(9038, LogLevel.Warning, "Zone {ZoneIndex} not found for {CommandName}")]
+    [LoggerMessage(
+        EventId = 10037,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Zone {ZoneIndex} not found for {CommandName}"
+    )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
 
@@ -682,10 +826,18 @@ public partial class TogglePlaylistRepeatCommandHandler(
         return await zone.TogglePlaylistRepeatAsync().ConfigureAwait(false);
     }
 
-    [LoggerMessage(9039, LogLevel.Information, "Toggling playlist repeat for Zone {ZoneIndex} from {Source}")]
+    [LoggerMessage(
+        EventId = 10038,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Toggling playlist repeat for Zone {ZoneIndex} from {Source}"
+    )]
     private partial void LogTogglingPlaylistRepeat(int zoneIndex, SnapDog2.Core.Enums.CommandSource source);
 
-    [LoggerMessage(9040, LogLevel.Warning, "Zone {ZoneIndex} not found for {CommandName}")]
+    [LoggerMessage(
+        EventId = 10039,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Zone {ZoneIndex} not found for {CommandName}"
+    )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
 
@@ -713,10 +865,18 @@ public partial class SeekPositionCommandHandler(IZoneManager zoneManager, ILogge
         return await zone.SeekToPositionAsync(request.PositionMs).ConfigureAwait(false);
     }
 
-    [LoggerMessage(9041, LogLevel.Information, "Seeking Zone {ZoneIndex} to position {PositionMs}ms from {Source}")]
+    [LoggerMessage(
+        EventId = 10040,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Seeking Zone {ZoneIndex} to position {PositionMs}ms from {Source}"
+    )]
     private partial void LogSeekingToPosition(int zoneIndex, long positionMs, SnapDog2.Core.Enums.CommandSource source);
 
-    [LoggerMessage(9042, LogLevel.Warning, "Zone {ZoneIndex} not found for {CommandName}")]
+    [LoggerMessage(
+        EventId = 10041,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Zone {ZoneIndex} not found for {CommandName}"
+    )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
 
@@ -744,10 +904,18 @@ public partial class SeekProgressCommandHandler(IZoneManager zoneManager, ILogge
         return await zone.SeekToProgressAsync(request.Progress).ConfigureAwait(false);
     }
 
-    [LoggerMessage(9043, LogLevel.Information, "Seeking Zone {ZoneIndex} to progress {Progress:P1} from {Source}")]
+    [LoggerMessage(
+        EventId = 10042,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Seeking Zone {ZoneIndex} to progress {Progress:P1} from {Source}"
+    )]
     private partial void LogSeekingToProgress(int zoneIndex, float progress, SnapDog2.Core.Enums.CommandSource source);
 
-    [LoggerMessage(9044, LogLevel.Warning, "Zone {ZoneIndex} not found for {CommandName}")]
+    [LoggerMessage(
+        EventId = 10043,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Zone {ZoneIndex} not found for {CommandName}"
+    )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
 
@@ -783,14 +951,22 @@ public partial class PlayTrackByIndexCommandHandler(
         return await zone.PlayAsync().ConfigureAwait(false);
     }
 
-    [LoggerMessage(9045, LogLevel.Information, "Playing track {TrackIndex} for Zone {ZoneIndex} from {Source}")]
+    [LoggerMessage(
+        EventId = 10044,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Playing track {TrackIndex} for Zone {ZoneIndex} from {Source}"
+    )]
     private partial void LogPlayingTrackByIndex(
         int zoneIndex,
         int trackIndex,
         SnapDog2.Core.Enums.CommandSource source
     );
 
-    [LoggerMessage(9046, LogLevel.Warning, "Zone {ZoneIndex} not found for {CommandName}")]
+    [LoggerMessage(
+        EventId = 10045,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Zone {ZoneIndex} not found for {CommandName}"
+    )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
 
@@ -818,9 +994,17 @@ public partial class PlayUrlCommandHandler(IZoneManager zoneManager, ILogger<Pla
         return await zone.PlayUrlAsync(request.Url).ConfigureAwait(false);
     }
 
-    [LoggerMessage(9047, LogLevel.Information, "Playing URL '{Url}' for Zone {ZoneIndex} from {Source}")]
+    [LoggerMessage(
+        EventId = 10046,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Playing URL '{Url}' for Zone {ZoneIndex} from {Source}"
+    )]
     private partial void LogPlayingUrl(int zoneIndex, string url, SnapDog2.Core.Enums.CommandSource source);
 
-    [LoggerMessage(9048, LogLevel.Warning, "Zone {ZoneIndex} not found for {CommandName}")]
+    [LoggerMessage(
+        EventId = 10047,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Zone {ZoneIndex} not found for {CommandName}"
+    )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }

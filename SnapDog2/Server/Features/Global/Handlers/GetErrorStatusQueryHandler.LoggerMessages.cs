@@ -22,12 +22,24 @@ namespace SnapDog2.Server.Features.Global.Handlers;
 public partial class GetErrorStatusQueryHandler
 {
     // Error Status Query Operations (10201-10203)
-    [LoggerMessage(10201, LogLevel.Debug, "Getting latest system error status")]
+    [LoggerMessage(
+        EventId = 4700,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Getting latest system error status"
+    )]
     private partial void LogGettingLatestSystemErrorStatus();
 
-    [LoggerMessage(10202, LogLevel.Debug, "Successfully retrieved error status: {HasError}")]
+    [LoggerMessage(
+        EventId = 4701,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Successfully retrieved error status: {HasError}"
+    )]
     private partial void LogSuccessfullyRetrievedErrorStatus(bool hasError);
 
-    [LoggerMessage(10203, LogLevel.Error, "Failed to get error status")]
+    [LoggerMessage(
+        EventId = 4702,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Failed to get error status"
+    )]
     private partial void LogFailedToGetErrorStatus(Exception ex);
 }

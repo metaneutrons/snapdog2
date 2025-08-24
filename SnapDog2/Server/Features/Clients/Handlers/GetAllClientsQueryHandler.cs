@@ -32,10 +32,18 @@ public partial class GetAllClientsQueryHandler(IClientManager clientManager, ILo
     private readonly IClientManager _clientManager = clientManager;
     private readonly ILogger<GetAllClientsQueryHandler> _logger = logger;
 
-    [LoggerMessage(4001, LogLevel.Information, "Handling GetAllClientsQuery")]
+    [LoggerMessage(
+        EventId = 8400,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Handling GetAllClientsQuery"
+    )]
     private partial void LogHandling();
 
-    [LoggerMessage(4002, LogLevel.Error, "Error retrieving all clients: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 8401,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Error retrieving all clients: {ErrorMessage}"
+    )]
     private partial void LogError(string errorMessage);
 
     public async Task<Result<List<ClientState>>> Handle(GetAllClientsQuery request, CancellationToken cancellationToken)

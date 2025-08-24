@@ -33,26 +33,46 @@ public partial class SnapcastEventNotificationHandler(ILogger<SnapcastEventNotif
 
     #region Logging
 
-    [LoggerMessage(4001, LogLevel.Information, "Snapcast client connected: {ClientIndex} ({ClientName})")]
+    [LoggerMessage(
+        EventId = 3000,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Snapcast client connected: {ClientIndex} ({ClientName})"
+    )]
     private partial void LogClientConnected(string clientIndex, string clientName);
 
-    [LoggerMessage(4002, LogLevel.Information, "Snapcast client disconnected: {ClientIndex} ({ClientName})")]
+    [LoggerMessage(
+        EventId = 3001,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Snapcast client disconnected: {ClientIndex} ({ClientName})"
+    )]
     private partial void LogClientDisconnected(string clientIndex, string clientName);
 
     [LoggerMessage(
-        4003,
-        LogLevel.Information,
-        "Snapcast client volume changed: {ClientIndex} -> {Volume}% (Muted: {Muted})"
+        EventId = 3002,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Snapcast client volume changed: {ClientIndex} -> {Volume}% (Muted: {Muted})"
     )]
     private partial void LogClientVolumeChanged(string clientIndex, int volume, bool muted);
 
-    [LoggerMessage(4004, LogLevel.Information, "Snapcast group mute changed: {GroupId} -> Muted: {Muted}")]
+    [LoggerMessage(
+        EventId = 3003,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Snapcast group mute changed: {GroupId} -> Muted: {Muted}"
+    )]
     private partial void LogGroupMuteChanged(string groupId, bool muted);
 
-    [LoggerMessage(4005, LogLevel.Information, "Snapcast connection established")]
+    [LoggerMessage(
+        EventId = 3004,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Snapcast connection established"
+    )]
     private partial void LogConnectionEstablished();
 
-    [LoggerMessage(4006, LogLevel.Warning, "Snapcast connection lost: {Reason}")]
+    [LoggerMessage(
+        EventId = 3005,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Snapcast connection lost: {Reason}"
+    )]
     private partial void LogConnectionLost(string reason);
 
     #endregion

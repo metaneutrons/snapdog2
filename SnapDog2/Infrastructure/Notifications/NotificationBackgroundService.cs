@@ -216,21 +216,21 @@ public sealed partial class NotificationBackgroundService(
 
     // LoggerMessage methods for high-performance logging
     [LoggerMessage(
-        EventId = 1,
+        EventId = 6800,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
         Message = "Notification background service started"
     )]
     private static partial void LogServiceStarted(ILogger logger);
 
     [LoggerMessage(
-        EventId = 2,
+        EventId = 6801,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
         Message = "Notification background service stopped"
     )]
     private static partial void LogServiceStopped(ILogger logger);
 
     [LoggerMessage(
-        EventId = 3,
+        EventId = 6802,
         Level = Microsoft.Extensions.Logging.LogLevel.Error,
         Message = "Unhandled error processing notification {EventType} for {EntityType} {EntityId}"
     )]
@@ -243,7 +243,7 @@ public sealed partial class NotificationBackgroundService(
     );
 
     [LoggerMessage(
-        EventId = 4,
+        EventId = 6803,
         Level = Microsoft.Extensions.Logging.LogLevel.Debug,
         Message = "Notification {EventType} for {EntityType} {EntityId} processed"
     )]
@@ -255,7 +255,7 @@ public sealed partial class NotificationBackgroundService(
     );
 
     [LoggerMessage(
-        EventId = 5,
+        EventId = 6804,
         Level = Microsoft.Extensions.Logging.LogLevel.Error,
         Message = "Notification {EventType} for {EntityType} {EntityId} failed after {Attempts} attempts; dead-lettering"
     )]
@@ -269,7 +269,7 @@ public sealed partial class NotificationBackgroundService(
     );
 
     [LoggerMessage(
-        EventId = 6,
+        EventId = 6805,
         Level = Microsoft.Extensions.Logging.LogLevel.Warning,
         Message = "Retrying notification {EventType} for {EntityType} {EntityId} (attempt {Attempt}/{MaxAttempts}) after {Delay}ms"
     )]

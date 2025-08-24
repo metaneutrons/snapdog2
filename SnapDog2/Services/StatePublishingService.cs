@@ -53,46 +53,102 @@ public partial class StatePublishingService(
 
     #region Logging
 
-    [LoggerMessage(8001, LogLevel.Information, "🚀 Starting initial state publishing for all integrations...")]
+    [LoggerMessage(
+        EventId = 7300,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "🚀 Starting initial state publishing for all integrations..."
+    )]
     private partial void LogStatePublishingStarted();
 
-    [LoggerMessage(8002, LogLevel.Information, "📊 Publishing global system state...")]
+    [LoggerMessage(
+        EventId = 7301,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "📊 Publishing global system state..."
+    )]
     private partial void LogPublishingGlobalState();
 
-    [LoggerMessage(8003, LogLevel.Information, "🎵 Publishing initial state for {ZoneCount} zones...")]
+    [LoggerMessage(
+        EventId = 7302,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "🎵 Publishing initial state for {ZoneCount} zones..."
+    )]
     private partial void LogPublishingZoneStates(int zoneCount);
 
-    [LoggerMessage(8004, LogLevel.Information, "📱 Publishing initial state for {ClientCount} clients...")]
+    [LoggerMessage(
+        EventId = 7303,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "📱 Publishing initial state for {ClientCount} clients..."
+    )]
     private partial void LogPublishingClientStates(int clientCount);
 
-    [LoggerMessage(8005, LogLevel.Information, "✅ Zone {ZoneIndex} initial state published successfully")]
+    [LoggerMessage(
+        EventId = 7304,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "✅ Zone {ZoneIndex} initial state published successfully"
+    )]
     private partial void LogZoneStatePublished(int zoneIndex);
 
-    [LoggerMessage(8006, LogLevel.Information, "✅ Client {ClientIndex} initial state published successfully")]
+    [LoggerMessage(
+        EventId = 7305,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "✅ Client {ClientIndex} initial state published successfully"
+    )]
     private partial void LogClientStatePublished(int clientIndex);
 
-    [LoggerMessage(8007, LogLevel.Information, "✅ Global system state published successfully")]
+    [LoggerMessage(
+        EventId = 7306,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "✅ Global system state published successfully"
+    )]
     private partial void LogGlobalStatePublished();
 
-    [LoggerMessage(8008, LogLevel.Warning, "⚠️ Failed to publish zone {ZoneIndex} state: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 7307,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "⚠️ Failed to publish zone {ZoneIndex} state: {ErrorMessage}"
+    )]
     private partial void LogZoneStatePublishFailed(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(8009, LogLevel.Warning, "⚠️ Failed to publish client {ClientIndex} state: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 7308,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "⚠️ Failed to publish client {ClientIndex} state: {ErrorMessage}"
+    )]
     private partial void LogClientStatePublishFailed(int clientIndex, string errorMessage);
 
-    [LoggerMessage(8010, LogLevel.Warning, "⚠️ Failed to publish global state: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 7309,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "⚠️ Failed to publish global state: {ErrorMessage}"
+    )]
     private partial void LogGlobalStatePublishFailed(string errorMessage);
 
-    [LoggerMessage(8011, LogLevel.Information, "✅ Initial state publishing completed successfully")]
+    [LoggerMessage(
+        EventId = 7310,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "✅ Initial state publishing completed successfully"
+    )]
     private partial void LogStatePublishingCompleted();
 
-    [LoggerMessage(8012, LogLevel.Warning, "⚠️ State publishing completed with some failures")]
+    [LoggerMessage(
+        EventId = 7311,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "⚠️ State publishing completed with some failures"
+    )]
     private partial void LogStatePublishingCompletedWithFailures();
 
-    [LoggerMessage(8013, LogLevel.Information, "📴 No integration services available - skipping state publishing")]
+    [LoggerMessage(
+        EventId = 7312,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "📴 No integration services available - skipping state publishing"
+    )]
     private partial void LogNoIntegrationServices();
 
-    [LoggerMessage(8014, LogLevel.Error, "❌ Critical error during state publishing: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 7313,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "❌ Critical error during state publishing: {ErrorMessage}"
+    )]
     private partial void LogCriticalError(string errorMessage, Exception ex);
 
     #endregion

@@ -22,6 +22,10 @@ namespace SnapDog2.Infrastructure.Integrations.Snapcast;
 public partial class SnapcastService
 {
     // Service Disposal Operations (10801)
-    [LoggerMessage(10801, LogLevel.Error, "Error during SnapcastService disposal")]
+    [LoggerMessage(
+        EventId = 2500,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Error during SnapcastService disposal"
+    )]
     private partial void LogErrorDuringSnapcastServiceDisposal(Exception ex);
 }

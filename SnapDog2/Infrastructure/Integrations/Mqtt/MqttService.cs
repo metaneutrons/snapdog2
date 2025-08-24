@@ -117,37 +117,73 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
 
     #region Logging
 
-    [LoggerMessage(7001, LogLevel.Information, "MQTT service created for {BrokerAddress}:{Port}, enabled: {Enabled}")]
+    [LoggerMessage(
+        EventId = 4401,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "MQTT service created for {BrokerAddress}:{Port}, enabled: {Enabled}"
+    )]
     private partial void LogServiceCreated(string brokerAddress, int port, bool enabled);
 
-    [LoggerMessage(7002, LogLevel.Information, "Initializing MQTT connection to {BrokerAddress}:{Port}")]
+    [LoggerMessage(
+        EventId = 4402,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Initializing MQTT connection to {BrokerAddress}:{Port}"
+    )]
     private partial void LogInitializing(string brokerAddress, int port);
 
-    [LoggerMessage(7003, LogLevel.Information, "MQTT connection established successfully")]
+    [LoggerMessage(
+        EventId = 4403,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "MQTT connection established successfully"
+    )]
     private partial void LogConnectionEstablished();
 
-    [LoggerMessage(7004, LogLevel.Warning, "MQTT connection lost: {Reason}")]
+    [LoggerMessage(
+        EventId = 4404,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "MQTT connection lost: {Reason}"
+    )]
     private partial void LogConnectionLost(string reason);
 
-    [LoggerMessage(7005, LogLevel.Error, "Failed to initialize MQTT connection")]
+    [LoggerMessage(
+        EventId = 4405,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Failed to initialize MQTT connection"
+    )]
     private partial void LogInitializationFailed(Exception ex);
 
-    [LoggerMessage(7009, LogLevel.Error, "MQTT connection error: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 4409,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "MQTT connection error: {ErrorMessage}"
+    )]
     private partial void LogConnectionErrorMessage(string errorMessage);
 
-    [LoggerMessage(7006, LogLevel.Error, "MQTT operation {Operation} failed")]
+    [LoggerMessage(
+        EventId = 4406,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "MQTT operation {Operation} failed"
+    )]
     private partial void LogOperationFailed(string operation, Exception ex);
 
-    [LoggerMessage(7007, LogLevel.Information, "MQTT service disposed")]
+    [LoggerMessage(
+        EventId = 4407,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "MQTT service disposed"
+    )]
     private partial void LogServiceDisposed();
 
-    [LoggerMessage(7008, LogLevel.Warning, "MQTT service not connected for operation: {Operation}")]
+    [LoggerMessage(
+        EventId = 4408,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "MQTT service not connected for operation: {Operation}"
+    )]
     private partial void LogNotConnected(string operation);
 
     [LoggerMessage(
-        2010,
-        LogLevel.Information,
-        "🚀 Attempting MQTT connection to {BrokerAddress}:{Port} (attempt {AttemptNumber}/{MaxAttempts}: {ErrorMessage})"
+        EventId = 4400,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "🚀 Attempting MQTT connection to {BrokerAddress}:{Port} (attempt {AttemptNumber}/{MaxAttempts}: {ErrorMessage})"
     )]
     private partial void LogConnectionRetryAttempt(
         string brokerAddress,

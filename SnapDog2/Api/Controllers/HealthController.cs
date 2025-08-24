@@ -134,18 +134,18 @@ public partial class HealthController(HealthCheckService healthCheckService, ILo
 
     // Health check operations
     [LoggerMessage(
-        EventId = 2805,
+        EventId = 5000,
         Level = LogLevel.Information,
         Message = "Health check completed with status {status} in {duration}ms"
     )]
     private partial void LogHealthCheckCompleted(HealthStatus status, double duration);
 
-    [LoggerMessage(EventId = 2806, Level = LogLevel.Error, Message = "Health check failed with exception")]
+    [LoggerMessage(EventId = 5001, Level = LogLevel.Error, Message = "Health check failed with exception")]
     private partial void LogHealthCheckFailed(Exception ex);
 
-    [LoggerMessage(EventId = 2807, Level = LogLevel.Error, Message = "Ready check failed with exception")]
+    [LoggerMessage(EventId = 5002, Level = LogLevel.Error, Message = "Ready check failed with exception")]
     private partial void LogReadyCheckFailed(Exception ex);
 
-    [LoggerMessage(EventId = 2808, Level = LogLevel.Error, Message = "Live check failed with exception")]
+    [LoggerMessage(EventId = 5003, Level = LogLevel.Error, Message = "Live check failed with exception")]
     private partial void LogLiveCheckFailed(Exception ex);
 }

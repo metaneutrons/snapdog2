@@ -33,7 +33,11 @@ public partial class GetClientsByZoneQueryHandler(
     private readonly IClientManager _clientManager = clientManager;
     private readonly ILogger<GetClientsByZoneQueryHandler> _logger = logger;
 
-    [LoggerMessage(4201, LogLevel.Information, "Handling GetClientsByZoneQuery for Zone {ZoneIndex}")]
+    [LoggerMessage(
+        EventId = 8600,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Handling GetClientsByZoneQuery for Zone {ZoneIndex}"
+    )]
     private partial void LogHandling(int zoneIndex);
 
     public async Task<Result<List<ClientState>>> Handle(

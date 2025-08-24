@@ -30,13 +30,25 @@ public partial class ZoneNameCommandHandler(IZoneManager zoneManager, ILogger<Zo
     private readonly IZoneManager _zoneManager = zoneManager;
     private readonly ILogger<ZoneNameCommandHandler> _logger = logger;
 
-    [LoggerMessage(5001, LogLevel.Information, "Setting name for Zone {ZoneIndex} to '{Name}'")]
+    [LoggerMessage(
+        EventId = 8000,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Setting name for Zone {ZoneIndex} to '{Name}'"
+    )]
     private partial void LogHandling(int zoneIndex, string name);
 
-    [LoggerMessage(5002, LogLevel.Warning, "Zone {ZoneIndex} not found for ZoneNameCommand")]
+    [LoggerMessage(
+        EventId = 8001,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Zone {ZoneIndex} not found for ZoneNameCommand"
+    )]
     private partial void LogZoneNotFound(int zoneIndex);
 
-    [LoggerMessage(5003, LogLevel.Warning, "Zone name setting not yet implemented for Zone {ZoneIndex}")]
+    [LoggerMessage(
+        EventId = 8002,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Zone name setting not yet implemented for Zone {ZoneIndex}"
+    )]
     private partial void LogNotImplemented(int zoneIndex);
 
     public async Task<Result> Handle(ZoneNameCommand request, CancellationToken cancellationToken)

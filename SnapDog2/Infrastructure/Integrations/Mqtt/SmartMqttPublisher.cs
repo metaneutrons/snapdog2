@@ -218,14 +218,14 @@ public sealed partial class SmartMqttPublisher : ISmartMqttPublisher
     #region Logging
 
     [LoggerMessage(
-        EventId = 1,
+        EventId = 4500,
         Level = Microsoft.Extensions.Logging.LogLevel.Debug,
         Message = "✅ Direct MQTT publish success: {EntityType} {EntityId} {EventType}"
     )]
     private partial void LogDirectPublishSuccess(string entityType, string entityId, string eventType);
 
     [LoggerMessage(
-        EventId = 2,
+        EventId = 4501,
         Level = Microsoft.Extensions.Logging.LogLevel.Warning,
         Message = "❌ Direct MQTT publish failed: {EntityType} {EntityId} {EventType} - {ErrorMessage} (Failure #{FailureCount})"
     )]
@@ -238,28 +238,28 @@ public sealed partial class SmartMqttPublisher : ISmartMqttPublisher
     );
 
     [LoggerMessage(
-        EventId = 3,
+        EventId = 4502,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
         Message = "🔄 Falling back to queue: {EntityType} {EntityId} {EventType}"
     )]
     private partial void LogFallingBackToQueue(string entityType, string entityId, string eventType);
 
     [LoggerMessage(
-        EventId = 4,
+        EventId = 4503,
         Level = Microsoft.Extensions.Logging.LogLevel.Warning,
         Message = "🚫 Circuit breaker opened after {FailureCount} failures - switching to queue-only mode for {ResetTimeMinutes} minutes"
     )]
     private partial void LogCircuitBreakerOpened(int failureCount, double resetTimeMinutes);
 
     [LoggerMessage(
-        EventId = 5,
+        EventId = 4504,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
         Message = "✅ Circuit breaker reset - direct publishing re-enabled"
     )]
     private partial void LogCircuitBreakerReset();
 
     [LoggerMessage(
-        EventId = 6,
+        EventId = 4505,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
         Message = "🔄 Circuit breaker auto-reset after timeout - direct publishing re-enabled"
     )]

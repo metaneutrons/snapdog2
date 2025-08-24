@@ -69,9 +69,17 @@ public partial class ValidationCommandBehavior<TCommand, TResponse>(
         return await next().ConfigureAwait(false);
     }
 
-    [LoggerMessage(2401, LogLevel.Debug, "Validating command {CommandName}")]
+    [LoggerMessage(
+        EventId = 1100,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Validating command {CommandName}"
+    )]
     private partial void LogValidatingCommand(string commandName);
 
-    [LoggerMessage(2402, LogLevel.Warning, "Validation failed for command {CommandName} with {FailureCount} errors")]
+    [LoggerMessage(
+        EventId = 1101,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Validation failed for command {CommandName} with {FailureCount} errors"
+    )]
     private partial void LogValidationFailed(string commandName, int failureCount);
 }

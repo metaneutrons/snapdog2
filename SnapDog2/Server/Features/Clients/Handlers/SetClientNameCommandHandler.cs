@@ -33,10 +33,18 @@ public partial class SetClientNameCommandHandler(
     private readonly IClientManager _clientManager = clientManager;
     private readonly ILogger<SetClientNameCommandHandler> _logger = logger;
 
-    [LoggerMessage(3010, LogLevel.Information, "Setting name for Client {ClientIndex} to '{Name}' from {Source}")]
+    [LoggerMessage(
+        EventId = 8900,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Setting name for Client {ClientIndex} to '{Name}' from {Source}"
+    )]
     private partial void LogHandling(int clientIndex, string name, CommandSource source);
 
-    [LoggerMessage(3011, LogLevel.Warning, "Client {ClientIndex} not found for SetClientNameCommand")]
+    [LoggerMessage(
+        EventId = 8901,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Client {ClientIndex} not found for SetClientNameCommand"
+    )]
     private partial void LogClientNotFound(int clientIndex);
 
     public async Task<Result> Handle(SetClientNameCommand request, CancellationToken cancellationToken)

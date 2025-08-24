@@ -22,10 +22,18 @@ namespace SnapDog2.Hosting;
 public partial class ResilientHost
 {
     // Startup Validation Errors (10001-10002)
-    [LoggerMessage(10001, LogLevel.Critical, "🚨 STARTUP VALIDATION FAILED: {ValidationStep}")]
+    [LoggerMessage(
+        EventId = 4000,
+        Level = Microsoft.Extensions.Logging.LogLevel.Critical,
+        Message = "🚨 STARTUP VALIDATION FAILED: {ValidationStep}"
+    )]
     private static partial void LogStartupValidationFailedDebug(ILogger logger, Exception ex, string validationStep);
 
-    [LoggerMessage(10002, LogLevel.Critical, "🚨 STARTUP VALIDATION FAILED: {ValidationStep} - {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 4001,
+        Level = Microsoft.Extensions.Logging.LogLevel.Critical,
+        Message = "🚨 STARTUP VALIDATION FAILED: {ValidationStep} - {ErrorMessage}"
+    )]
     private static partial void LogStartupValidationFailedProduction(
         ILogger logger,
         string validationStep,
@@ -33,17 +41,33 @@ public partial class ResilientHost
     );
 
     // Expected Startup Errors (10003-10004)
-    [LoggerMessage(10003, LogLevel.Critical, "🚨 STARTUP FAILED: Expected startup error occurred")]
+    [LoggerMessage(
+        EventId = 4002,
+        Level = Microsoft.Extensions.Logging.LogLevel.Critical,
+        Message = "🚨 STARTUP FAILED: Expected startup error occurred"
+    )]
     private static partial void LogStartupFailedDebug(ILogger logger, Exception ex);
 
-    [LoggerMessage(10004, LogLevel.Critical, "🚨 STARTUP FAILED: {ErrorType} - {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 4003,
+        Level = Microsoft.Extensions.Logging.LogLevel.Critical,
+        Message = "🚨 STARTUP FAILED: {ErrorType} - {ErrorMessage}"
+    )]
     private static partial void LogStartupFailedProduction(ILogger logger, string errorType, string errorMessage);
 
     // Unexpected Startup Errors (10005-10006)
-    [LoggerMessage(10005, LogLevel.Critical, "🚨 UNEXPECTED STARTUP FAILURE: Unhandled exception during host startup")]
+    [LoggerMessage(
+        EventId = 4004,
+        Level = Microsoft.Extensions.Logging.LogLevel.Critical,
+        Message = "🚨 UNEXPECTED STARTUP FAILURE: Unhandled exception during host startup"
+    )]
     private static partial void LogUnexpectedStartupFailureDebug(ILogger logger, Exception ex);
 
-    [LoggerMessage(10006, LogLevel.Critical, "🚨 UNEXPECTED STARTUP FAILURE: {ErrorType} - {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 4005,
+        Level = Microsoft.Extensions.Logging.LogLevel.Critical,
+        Message = "🚨 UNEXPECTED STARTUP FAILURE: {ErrorType} - {ErrorMessage}"
+    )]
     private static partial void LogUnexpectedStartupFailureProduction(
         ILogger logger,
         string errorType,
@@ -51,9 +75,17 @@ public partial class ResilientHost
     );
 
     // Host Shutdown Error Operations (10501-10502)
-    [LoggerMessage(10501, LogLevel.Error, "Error during host shutdown")]
+    [LoggerMessage(
+        EventId = 4006,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Error during host shutdown"
+    )]
     private partial void LogErrorDuringHostShutdown(Exception ex);
 
-    [LoggerMessage(10502, LogLevel.Error, "Error during host shutdown: {ErrorType} - {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 4007,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Error during host shutdown: {ErrorType} - {ErrorMessage}"
+    )]
     private partial void LogErrorDuringHostShutdownProduction(string errorType, string errorMessage);
 }

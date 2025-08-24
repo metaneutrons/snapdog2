@@ -108,9 +108,9 @@ public partial class MetricsService(ILogger<MetricsService> logger) : IMetricsSe
     }
 
     [LoggerMessage(
-        6001,
-        LogLevel.Debug,
-        "Recording {RequestType} request '{RequestName}' duration: {DurationMs}ms, Success: {Success}"
+        EventId = 6100,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Recording {RequestType} request '{RequestName}' duration: {DurationMs}ms, Success: {Success}"
     )]
     private partial void LogRecordingRequestDuration(
         string requestType,
@@ -119,13 +119,25 @@ public partial class MetricsService(ILogger<MetricsService> logger) : IMetricsSe
         bool success
     );
 
-    [LoggerMessage(6002, LogLevel.Debug, "Getting server statistics")]
+    [LoggerMessage(
+        EventId = 6101,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Getting server statistics"
+    )]
     private partial void LogGettingServerStats();
 
-    [LoggerMessage(6003, LogLevel.Debug, "Metric counter increment: {Name} += {Delta} {Labels}")]
+    [LoggerMessage(
+        EventId = 6102,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Metric counter increment: {Name} += {Delta} {Labels}"
+    )]
     private partial void LogCounterIncrement(string name, long delta, string labels);
 
-    [LoggerMessage(6004, LogLevel.Debug, "Metric gauge set: {Name} = {Value} {Labels}")]
+    [LoggerMessage(
+        EventId = 6103,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Metric gauge set: {Name} = {Value} {Labels}"
+    )]
     private partial void LogGaugeSet(string name, double value, string labels);
 
     private static string FormatLabels((string Key, string Value)[] labels)

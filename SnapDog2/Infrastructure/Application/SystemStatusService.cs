@@ -111,12 +111,24 @@ public partial class AppStatusService(ILogger<AppStatusService> logger) : IAppSt
 #endif
     }
 
-    [LoggerMessage(5001, LogLevel.Debug, "Getting system status")]
+    [LoggerMessage(
+        EventId = 6200,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Getting system status"
+    )]
     private partial void LogGettingSystemStatus();
 
-    [LoggerMessage(5002, LogLevel.Debug, "Getting version information")]
+    [LoggerMessage(
+        EventId = 6201,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Getting version information"
+    )]
     private partial void LogGettingVersionInfo();
 
-    [LoggerMessage(5003, LogLevel.Debug, "Getting server statistics")]
+    [LoggerMessage(
+        EventId = 6202,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Getting server statistics"
+    )]
     private partial void LogGettingServerStats();
 }

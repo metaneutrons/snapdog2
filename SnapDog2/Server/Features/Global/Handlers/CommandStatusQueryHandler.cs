@@ -37,10 +37,18 @@ public partial class CommandStatusQueryHandler(
     private readonly ICommandStatusService _commandStatusService = commandStatusService;
     private readonly ILogger<CommandStatusQueryHandler> _logger = logger;
 
-    [LoggerMessage(5001, LogLevel.Debug, "Retrieving command processing status")]
+    [LoggerMessage(
+        EventId = 9300,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Retrieving command processing status"
+    )]
     private partial void LogRetrievingCommandStatus();
 
-    [LoggerMessage(5002, LogLevel.Warning, "Failed to retrieve command status: {ErrorMessage}")]
+    [LoggerMessage(
+        EventId = 9301,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to retrieve command status: {ErrorMessage}"
+    )]
     private partial void LogFailedToRetrieveCommandStatus(string errorMessage);
 
     /// <summary>

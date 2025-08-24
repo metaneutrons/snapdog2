@@ -184,21 +184,21 @@ public sealed partial class MetadataManager(LibVLC libvlc, ILogger<MetadataManag
 
     // LoggerMessage methods for high-performance logging
     [LoggerMessage(
-        EventId = 1,
+        EventId = 2400,
         Level = Microsoft.Extensions.Logging.LogLevel.Debug,
         Message = "Starting metadata extraction for media: {MediaMrl}"
     )]
     private static partial void LogStartingMetadataExtraction(ILogger logger, string mediaMrl);
 
     [LoggerMessage(
-        EventId = 2,
+        EventId = 2401,
         Level = Microsoft.Extensions.Logging.LogLevel.Warning,
         Message = "Media parsing incomplete. Status: {ParseStatus}"
     )]
     private static partial void LogMediaParsingIncomplete(ILogger logger, string parseStatus);
 
     [LoggerMessage(
-        EventId = 3,
+        EventId = 2402,
         Level = Microsoft.Extensions.Logging.LogLevel.Debug,
         Message = "Metadata extraction completed. Title: {Title}, Artist: {Artist}, Duration: {Duration}ms"
     )]
@@ -210,28 +210,28 @@ public sealed partial class MetadataManager(LibVLC libvlc, ILogger<MetadataManag
     );
 
     [LoggerMessage(
-        EventId = 4,
+        EventId = 2403,
         Level = Microsoft.Extensions.Logging.LogLevel.Error,
         Message = "Failed to extract metadata from media: {MediaMrl}"
     )]
     private static partial void LogFailedToExtractMetadata(ILogger logger, Exception ex, string mediaMrl);
 
     [LoggerMessage(
-        EventId = 5,
+        EventId = 2404,
         Level = Microsoft.Extensions.Logging.LogLevel.Debug,
         Message = "Metadata saved to: {FilePath}"
     )]
     private static partial void LogMetadataSaved(ILogger logger, string filePath);
 
     [LoggerMessage(
-        EventId = 6,
+        EventId = 2405,
         Level = Microsoft.Extensions.Logging.LogLevel.Error,
         Message = "Failed to save metadata to: {FilePath}"
     )]
     private static partial void LogFailedToSaveMetadata(ILogger logger, Exception ex, string filePath);
 
     [LoggerMessage(
-        EventId = 7,
+        EventId = 2406,
         Level = Microsoft.Extensions.Logging.LogLevel.Warning,
         Message = "Failed to extract technical details from media"
     )]
