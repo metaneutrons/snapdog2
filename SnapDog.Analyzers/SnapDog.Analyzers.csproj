@@ -12,7 +12,8 @@
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <!-- Suppress NU5128 - analyzers don't provide lib assemblies, only analyzer assemblies -->
     <!-- Suppress RS2007 - release tracking file format warnings -->
-    <NoWarn>$(NoWarn);NU5128;RS2007</NoWarn>
+    <!-- Suppress RS1038 - CodeFixProvider requires Workspaces but is safe in this context -->
+    <NoWarn>$(NoWarn);NU5128;RS2007;RS1038</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
