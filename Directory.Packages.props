@@ -19,18 +19,18 @@
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="9.0.8" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="9.0.8" />
     <!-- OpenTelemetry Observability -->
-    <PackageVersion Include="OpenTelemetry" Version="1.9.0" />
-    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.9.0" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.9.0" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.9.0" />
-    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.9.0" />
+    <PackageVersion Include="OpenTelemetry" Version="1.12.0" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.12.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.12.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.12.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.12.0" />
     <!-- Terminal UI -->
     <PackageVersion Include="Spectre.Console" Version="0.50.0" />
     <PackageVersion Include="Terminal.Gui" Version="2.0.0-develop.4533" />
     <!-- SubSonic Integration -->
     <PackageVersion Include="SubSonicMedia" Version="1.0.5" />
     <!-- Snapcast Integration -->
-    <PackageVersion Include="SnapcastClient" Version="0.3.6" />
+    <PackageVersion Include="SnapcastClient" Version="0.3.7" />
     <!-- LibVLC Integration -->
     <PackageVersion Include="LibVLCSharp" Version="3.9.4" />
     <!-- MQTT Integration -->
@@ -38,12 +38,18 @@
     <!-- KNX Integration -->
     <PackageVersion Include="Knx.Falcon.Sdk" Version="6.3.7959" />
     <!-- Resilience -->
-    <PackageVersion Include="Polly" Version="8.6.2" />
+    <PackageVersion Include="Polly" Version="8.6.3" />
     <!-- Analyzers -->
     <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.556" />
     <PackageVersion Include="SonarAnalyzer.CSharp" Version="9.21.0.86780" />
     <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="9.0.0-preview.24472.1" />
     <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.10.48" />
+    <!-- Analyzer Development -->
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.5.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.5.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" Version="1.1.1" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.CodeFix.Testing" Version="1.1.1" />
     <!-- ASP.NET Core Web API -->
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.8" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="9.0.3" />
@@ -70,7 +76,7 @@
     <PackageVersion Include="Moq" Version="4.20.72" />
     <PackageVersion Include="Testcontainers" Version="4.6.0" />
     <PackageVersion Include="xunit" Version="2.9.3" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.3">
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>

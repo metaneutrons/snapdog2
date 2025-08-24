@@ -1,17 +1,31 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <IncludeBuildOutput>false</IncludeBuildOutput>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>SnapDog.Analyzers</PackageId>
+    <PackageVersion>1.0.0</PackageVersion>
+    <Authors>SnapDog Team</Authors>
+    <Description>Roslyn analyzers for SnapDog2 LoggerMessage patterns</Description>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.5.0" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="tools\install.ps1" Pack="true" PackagePath="tools\install.ps1" />
-    <None Include="tools\uninstall.ps1" Pack="true" PackagePath="tools\uninstall.ps1" />
+    <None Include="AnalyzerReleases.Shipped.md" />
+    <None Include="AnalyzerReleases.Unshipped.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <None
+      Include="$(OutputPath)\$(AssemblyName).dll"
+      Pack="true"
+      PackagePath="analyzers\dotnet\cs\$(AssemblyName).dll"
+      Visible="false"
+    />
   </ItemGroup>
 </Project>
