@@ -318,6 +318,12 @@ public partial class IntegrationPublishingHandlers(
     {
         using var scope = _serviceProvider.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+
+        // Debug log to verify we're publishing the notification
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<IntegrationPublishingHandlers>>();
+        logger.LogInformation("🚀 Publishing StatusChangedNotification: {StatusType} for target {TargetIndex} with value {Value}",
+            statusType, targetIndex, value?.ToString() ?? "null");
+
         await mediator.PublishAsync(
             new StatusChangedNotification
             {
@@ -327,6 +333,8 @@ public partial class IntegrationPublishingHandlers(
             },
             cancellationToken
         );
+
+        logger.LogInformation("✅ StatusChangedNotification published successfully");
     }
 
     /// <summary>

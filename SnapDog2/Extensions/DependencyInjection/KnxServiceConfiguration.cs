@@ -83,10 +83,13 @@ public static partial class KnxServiceConfiguration
         // Register the actual KNX service
         services.AddSingleton<IKnxService, KnxService>();
 
-        // Register KNX service as notification handler for StatusChangedNotification
-        services.AddSingleton<
+        // Register dedicated KNX notification handler
+        services.AddScoped<KnxNotificationHandler>();
+
+        // Manually register as INotificationHandler for MediatR
+        services.AddScoped<
             Cortex.Mediator.Notifications.INotificationHandler<SnapDog2.Server.Features.Shared.Notifications.StatusChangedNotification>,
-            KnxService
+            KnxNotificationHandler
         >();
 
         return services;

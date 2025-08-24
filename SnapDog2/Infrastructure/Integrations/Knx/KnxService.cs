@@ -384,8 +384,12 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
     /// <inheritdoc />
     public async Task Handle(StatusChangedNotification notification, CancellationToken cancellationToken)
     {
+        // Debug log to verify we're receiving notifications
+        this.LogKnxDebugMessage($"🔔 KNX service received StatusChangedNotification: {notification.StatusType} for target {notification.TargetIndex} with value {notification.Value}");
+
         if (!this.IsConnected || !this._config.Enabled)
         {
+            this.LogKnxDebugMessage($"⚠️ KNX service not ready: Connected={this.IsConnected}, Enabled={this._config.Enabled}");
             return;
         }
 
