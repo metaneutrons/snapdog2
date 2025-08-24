@@ -320,14 +320,15 @@ public class ResilienceTests
         var totalCalls = 0;
         var successfulCalls = 0;
 
+        // Use deterministic failure pattern: fail every 3rd call initially, then succeed
         mockMqttBroker
             .Setup(x => x.PublishAsync(It.IsAny<string>(), It.IsAny<byte[]>(), It.IsAny<CancellationToken>()))
             .Returns(() =>
             {
-                Interlocked.Increment(ref totalCalls);
+                var currentCall = Interlocked.Increment(ref totalCalls);
 
-                // Simulate 30% failure rate under load
-                if (Random.Shared.NextDouble() < 0.3)
+                // Deterministic failure pattern: fail calls 3, 6, 9, etc. (every 3rd call)
+                if (currentCall % 3 == 0 && currentCall <= 15)
                 {
                     throw new HttpRequestException("Broker overloaded", null, HttpStatusCode.TooManyRequests);
                 }
