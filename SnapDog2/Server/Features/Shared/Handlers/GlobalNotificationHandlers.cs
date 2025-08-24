@@ -56,7 +56,7 @@ public partial class GlobalStateNotificationHandler(
     [LoggerMessage(
         EventId = 9702,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
-        Message = "Server stats updated - CPU: {CpuUsage}%, Memory: {MemoryUsage}MB"
+        Message = "Server stats updated - CPU: {CpuUsage:F2}%, Memory: {MemoryUsage:F2}MB"
     )]
     private partial void LogServerStatsChange(double cpuUsage, double memoryUsage);
 

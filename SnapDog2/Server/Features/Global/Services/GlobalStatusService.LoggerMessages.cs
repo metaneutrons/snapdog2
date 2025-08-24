@@ -84,7 +84,7 @@ public partial class GlobalStatusService
     [LoggerMessage(
         EventId = 4808,
         Level = Microsoft.Extensions.Logging.LogLevel.Debug,
-        Message = "Server stats retrieved: CPU={CpuUsage}%, Memory={MemoryUsage}MB"
+        Message = "Server stats retrieved: CPU={CpuUsage:F2}%, Memory={MemoryUsage:F2}MB"
     )]
     private partial void LogServerStatsRetrieved(double cpuUsage, double memoryUsage);
 
