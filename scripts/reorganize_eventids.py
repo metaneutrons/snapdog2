@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
-Enhanced EventId Reorganization Script for SnapDog2
-1. First standardizes LoggerMessage format (positional -> named parameters)
-2. Then reorganizes EventIds based on logger-config.json structure
+Fixed EventId Reorganization Script for SnapDog2
+Handles mixed formats and multi-line positional LoggerMessage patterns
 """
 
 import os
@@ -64,44 +63,58 @@ def get_category_base(category):
 def standardize_loggermessage_format(content):
     """
     Convert positional LoggerMessage to named parameter format
-    From: [LoggerMessage(6004, LogLevel.Debug, "Message")]
-    To:   [LoggerMessage(
-              EventId = 6004,
-              Level = Microsoft.Extensions.Logging.LogLevel.Debug,
-              Message = "Message"
-          )]
+    Handles both single-line and multi-line patterns
     """
     
-    # Pattern to match positional LoggerMessage attributes
-    # Handles: [LoggerMessage(eventId, LogLevel.Level, "message")]
-    positional_pattern = r'\[LoggerMessage\(\s*(\d+)\s*,\s*(LogLevel\.\w+)\s*,\s*(".*?")\s*\)\]'
+    # Pattern 1: Single-line positional format
+    # [LoggerMessage(eventId, LogLevel.Level, "message")]
+    single_line_pattern = r'\[LoggerMessage\(\s*(\d+)\s*,\s*(LogLevel\.\w+)\s*,\s*(".*?")\s*\)\]'
     
-    def replace_positional(match):
+    def replace_single_line(match):
         event_id = match.group(1)
         log_level = match.group(2)
         message = match.group(3)
         
-        # Convert LogLevel.X to Microsoft.Extensions.Logging.LogLevel.X
         full_log_level = f"Microsoft.Extensions.Logging.{log_level}"
         
-        # Create multi-line format
         return f"""[LoggerMessage(
         EventId = {event_id},
         Level = {full_log_level},
         Message = {message}
     )]"""
     
-    # Replace all positional LoggerMessage patterns
-    standardized_content = re.sub(positional_pattern, replace_positional, content)
+    # Pattern 2: Multi-line positional format
+    # [LoggerMessage(
+    #     eventId,
+    #     LogLevel.Level,
+    #     "message"
+    # )]
+    multi_line_pattern = r'\[LoggerMessage\(\s*\n\s*(\d+)\s*,\s*\n\s*(LogLevel\.\w+)\s*,\s*\n\s*(".*?")\s*\n\s*\)\]'
     
-    return standardized_content
+    def replace_multi_line(match):
+        event_id = match.group(1)
+        log_level = match.group(2)
+        message = match.group(3)
+        
+        full_log_level = f"Microsoft.Extensions.Logging.{log_level}"
+        
+        return f"""[LoggerMessage(
+        EventId = {event_id},
+        Level = {full_log_level},
+        Message = {message}
+    )]"""
+    
+    # Apply replacements
+    content = re.sub(single_line_pattern, replace_single_line, content)
+    content = re.sub(multi_line_pattern, replace_multi_line, content, flags=re.MULTILINE | re.DOTALL)
+    
+    return content
 
 def extract_eventids(file_path):
-    """Extract EventId patterns from file (handles both formats)"""
+    """Extract EventId patterns from file (handles all formats)"""
     try:
         content = file_path.read_text(encoding='utf-8')
         
-        # Find all EventId patterns (both positional and named)
         eventids = []
         
         # Named format: EventId = number
@@ -109,16 +122,35 @@ def extract_eventids(file_path):
         named_matches = re.findall(named_pattern, content)
         eventids.extend([int(match) for match in named_matches])
         
-        # Positional format: [LoggerMessage(number, ...)]
-        positional_pattern = r'\[LoggerMessage\(\s*(\d+)\s*,'
-        positional_matches = re.findall(positional_pattern, content)
-        eventids.extend([int(match) for match in positional_matches])
+        # Single-line positional format: [LoggerMessage(number, ...)]
+        single_positional_pattern = r'\[LoggerMessage\(\s*(\d+)\s*,'
+        single_matches = re.findall(single_positional_pattern, content)
+        eventids.extend([int(match) for match in single_matches])
+        
+        # Multi-line positional format: [LoggerMessage(\n    number,
+        multi_positional_pattern = r'\[LoggerMessage\(\s*\n\s*(\d+)\s*,'
+        multi_matches = re.findall(multi_positional_pattern, content, re.MULTILINE)
+        eventids.extend([int(match) for match in multi_matches])
         
         return sorted(list(set(eventids)))  # Remove duplicates and sort
         
     except Exception as e:
         print_colored(f"Error reading {file_path}: {e}", Colors.RED)
         return []
+
+def has_positional_format(content):
+    """Check if file has any positional LoggerMessage patterns"""
+    # Single-line positional
+    single_pattern = r'\[LoggerMessage\(\s*\d+\s*,\s*LogLevel\.\w+\s*,'
+    if re.search(single_pattern, content):
+        return True
+    
+    # Multi-line positional
+    multi_pattern = r'\[LoggerMessage\(\s*\n\s*\d+\s*,\s*\n\s*LogLevel\.\w+\s*,'
+    if re.search(multi_pattern, content, re.MULTILINE):
+        return True
+    
+    return False
 
 def standardize_file_format(file_path):
     """Standardize LoggerMessage format in a file"""
@@ -158,8 +190,8 @@ def replace_eventids(file_path, replacements):
         return False
 
 def main():
-    print_colored("🔍 Enhanced EventId Reorganization Script", Colors.BLUE)
-    print_colored("=========================================", Colors.BLUE)
+    print_colored("🔍 Fixed EventId Reorganization Script", Colors.BLUE)
+    print_colored("=====================================", Colors.BLUE)
     
     # Setup paths
     script_dir = Path(__file__).parent
@@ -196,12 +228,16 @@ def main():
         
         # Check if file has positional LoggerMessage patterns
         content = file_path.read_text(encoding='utf-8')
-        positional_pattern = r'\[LoggerMessage\(\s*\d+\s*,\s*LogLevel\.\w+\s*,'
         
-        if re.search(positional_pattern, content):
+        if has_positional_format(content):
             print_colored(f"📄 Standardizing: {relative_path}", Colors.GREEN)
             if standardize_file_format(file_path):
                 standardized_count += 1
+                
+                # Show what was changed
+                old_eventids = extract_eventids(file_path)
+                if old_eventids:
+                    print(f"   Found EventIds: {old_eventids}")
     
     if standardized_count > 0:
         print_colored(f"✅ Standardized {standardized_count} files", Colors.GREEN)
@@ -211,7 +247,7 @@ def main():
     # Phase 2: Reorganize EventIds
     print_colored("\n🔄 Phase 2: Reorganizing EventIds...", Colors.BLUE)
     
-    # Analyze files and collect EventIds (after standardization)
+    # Re-scan files after standardization
     file_data = {}
     category_counters = defaultdict(int)
     
