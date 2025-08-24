@@ -208,9 +208,9 @@ public partial class BusinessMetricsCollectionService : BackgroundService
     }
 
     [LoggerMessage(
-        4001,
-        LogLevel.Debug,
-        "Business metrics collected - Zones: {ZonesTotal} total, {ZonesActive} active; "
+        EventId = 7100,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Business metrics collected - Zones: {ZonesTotal} total, {ZonesActive} active; "
             + "Clients: {ClientsConnected} connected; Tracks: {TracksPlaying} playing"
     )]
     private partial void LogBusinessMetricsCollected(
