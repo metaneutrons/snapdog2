@@ -41,7 +41,7 @@ public partial class GetErrorStatusQueryHandler(
             // In a full implementation, this would query an error tracking service
             // that maintains the latest system error information
 
-            var errorDetails = await this.GetLatestErrorAsync(cancellationToken);
+            var errorDetails = await GetLatestErrorAsync(cancellationToken);
 
             this.LogSuccessfullyRetrievedErrorStatus(errorDetails != null);
 
@@ -54,7 +54,7 @@ public partial class GetErrorStatusQueryHandler(
         }
     }
 
-    private async Task<ErrorDetails?> GetLatestErrorAsync(CancellationToken cancellationToken)
+    private static async Task<ErrorDetails?> GetLatestErrorAsync(CancellationToken cancellationToken)
     {
         // TODO: Implement actual error tracking
         // This could be:

@@ -30,7 +30,9 @@ public partial class GetClientsByZoneQueryHandler(
     {
         this.LogHandling(request.ZoneIndex);
 
-        var result = await this._clientManager.GetClientsByZoneAsync(request.ZoneIndex).ConfigureAwait(false);
+        var result = await this
+            ._clientManager.GetClientsByZoneAsync(request.ZoneIndex, cancellationToken)
+            .ConfigureAwait(false);
         return result;
     }
 }

@@ -261,7 +261,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
         var options = new List<string>();
 
         // Generate the appropriate LibVLC audio codec based on bit depth
-        var audioCodec = this.GetLibVLCAudioCodec(this.Config.BitsPerSample);
+        var audioCodec = GetLibVLCAudioCodec(this.Config.BitsPerSample);
 
         // For named pipes (Snapcast sinks), we need to use raw audio output
         // Use transcode with dynamic audio codec based on configuration
@@ -296,7 +296,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
     /// </summary>
     /// <param name="bitsPerSample">Bit depth from configuration.</param>
     /// <returns>LibVLC audio codec string.</returns>
-    private string GetLibVLCAudioCodec(int bitsPerSample)
+    private static string GetLibVLCAudioCodec(int bitsPerSample)
     {
         return bitsPerSample switch
         {

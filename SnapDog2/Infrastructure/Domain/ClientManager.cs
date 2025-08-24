@@ -515,7 +515,7 @@ public partial class ClientManager : IClientManager
                 // Zone1 -> 1, Zone2 -> 2, etc.
                 if (
                     clientGroup.StreamId.StartsWith("Zone")
-                    && int.TryParse(clientGroup.StreamId.Substring(4), out int zoneIndex)
+                    && int.TryParse(clientGroup.StreamId.AsSpan(4), out int zoneIndex)
                 )
                 {
                     return zoneIndex;

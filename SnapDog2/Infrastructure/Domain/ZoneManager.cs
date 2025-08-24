@@ -722,7 +722,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             }
 
             var playlist = playlistResult.Value;
-            if (playlist?.Tracks == null || !playlist.Tracks.Any())
+            if (playlist?.Tracks == null || playlist.Tracks.Count == 0)
             {
                 return Result.Failure("Playlist has no tracks");
             }

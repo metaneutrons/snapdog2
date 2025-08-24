@@ -191,7 +191,7 @@ public partial class AttributeBasedMqttCommandMapper(
     /// <summary>
     /// Sets a simple payload property (usually "Value" or similar).
     /// </summary>
-    private void SetSimplePayloadProperty(object command, string payload)
+    private static void SetSimplePayloadProperty(object command, string payload)
     {
         var commandType = command.GetType();
 

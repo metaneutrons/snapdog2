@@ -50,7 +50,7 @@ public partial class ZoneGroupingService : IZoneGroupingService
             }
 
             var zones = zonesResult.Value?.Select(z => z.Id).ToList() ?? new List<int>();
-            if (!zones.Any())
+            if (zones.Count == 0)
             {
                 LogNoZonesConfigured();
                 return Result.Success();
@@ -102,7 +102,7 @@ public partial class ZoneGroupingService : IZoneGroupingService
             var clientIds =
                 zoneClients.Value?.Select(c => c.SnapcastId).Where(id => !string.IsNullOrEmpty(id)).ToList()
                 ?? new List<string>();
-            if (!clientIds.Any())
+            if (clientIds.Count == 0)
             {
                 LogNoClientsAssigned(zoneId);
                 return Result.Success();
@@ -285,7 +285,7 @@ public partial class ZoneGroupingService : IZoneGroupingService
     /// <summary>
     /// Gets the expected zone name for a given zone ID.
     /// </summary>
-    private string GetExpectedZoneName(int zoneId)
+    private static string GetExpectedZoneName(int zoneId)
     {
         // This should match the zone names from configuration
         // Zone 1 = "Ground Floor", Zone 2 = "1st Floor"

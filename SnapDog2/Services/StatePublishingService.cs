@@ -147,7 +147,7 @@ public partial class StatePublishingService(
                 {
                     var zoneIndex = i + 1; // 1-based indexing
                     publishingTasks.Add(
-                        this.PublishZoneStateAsync(mediator, zoneIndex, stoppingToken)
+                        PublishZoneStateAsync(mediator, zoneIndex, stoppingToken)
                             .ContinueWith(
                                 t =>
                                 {
@@ -178,7 +178,7 @@ public partial class StatePublishingService(
                 {
                     var clientIndex = i + 1; // 1-based indexing
                     publishingTasks.Add(
-                        this.PublishClientStateAsync(mediator, clientIndex, stoppingToken)
+                        PublishClientStateAsync(mediator, clientIndex, stoppingToken)
                             .ContinueWith(
                                 t =>
                                 {
@@ -287,7 +287,7 @@ public partial class StatePublishingService(
     /// Publishes complete zone state including all "publish" direction states.
     /// Uses Mediator to publish notifications that are handled by existing notification handlers.
     /// </summary>
-    private async Task<bool> PublishZoneStateAsync(
+    private static async Task<bool> PublishZoneStateAsync(
         IMediator mediator,
         int zoneIndex,
         CancellationToken cancellationToken
@@ -391,7 +391,7 @@ public partial class StatePublishingService(
     /// Publishes complete client state including all "publish" direction states.
     /// Uses Mediator to publish notifications that are handled by existing notification handlers.
     /// </summary>
-    private async Task<bool> PublishClientStateAsync(
+    private static async Task<bool> PublishClientStateAsync(
         IMediator mediator,
         int clientIndex,
         CancellationToken cancellationToken

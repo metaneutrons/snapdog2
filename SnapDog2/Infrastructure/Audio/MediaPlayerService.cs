@@ -331,7 +331,7 @@ public sealed partial class MediaPlayerService(
             var activeStreamsCount = this._players.Count;
 
             var failures = results.Where(r => !r.IsSuccess).ToList();
-            if (failures.Any())
+            if (failures.Count != 0)
             {
                 var aggregateException = new AggregateException(failures.Select(f => f.Exception!));
                 return Result.Failure(aggregateException);

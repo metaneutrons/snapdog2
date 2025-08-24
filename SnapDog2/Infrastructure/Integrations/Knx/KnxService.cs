@@ -260,7 +260,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
                 async (ct) =>
                 {
                     var ga = new GroupAddress(groupAddress);
-                    var value = await this._knxBus!.ReadGroupValueAsync(ga);
+                    var value = await this._knxBus!.ReadGroupValueAsync(ga, cancellationToken: ct);
                     return value;
                 },
                 cancellationToken
@@ -418,7 +418,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             this._knxBus.GroupMessageReceived += this.OnGroupMessageReceived;
 
             // Connect to KNX bus - this should throw an exception if it fails
-            await this._knxBus.ConnectAsync();
+            await this._knxBus.ConnectAsync(cancellationToken);
 
             if (this._knxBus.ConnectionState != BusConnectionState.Connected)
             {
@@ -591,100 +591,91 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
             {
                 // Zone Volume Commands
                 SetZoneVolumeCommand cmd =>
-                    await this.GetHandler<Server.Features.Zones.Handlers.SetZoneVolumeCommandHandler>(scope)
+                    await GetHandler<Server.Features.Zones.Handlers.SetZoneVolumeCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
-                VolumeUpCommand cmd => await this.GetHandler<Server.Features.Zones.Handlers.VolumeUpCommandHandler>(
+                VolumeUpCommand cmd => await GetHandler<Server.Features.Zones.Handlers.VolumeUpCommandHandler>(scope)
+                    .Handle(cmd, cancellationToken),
+                VolumeDownCommand cmd => await GetHandler<Server.Features.Zones.Handlers.VolumeDownCommandHandler>(
                         scope
                     )
                     .Handle(cmd, cancellationToken),
-                VolumeDownCommand cmd => await this.GetHandler<Server.Features.Zones.Handlers.VolumeDownCommandHandler>(
+                SetZoneMuteCommand cmd => await GetHandler<Server.Features.Zones.Handlers.SetZoneMuteCommandHandler>(
                         scope
                     )
                     .Handle(cmd, cancellationToken),
-                SetZoneMuteCommand cmd =>
-                    await this.GetHandler<Server.Features.Zones.Handlers.SetZoneMuteCommandHandler>(scope)
-                        .Handle(cmd, cancellationToken),
                 ToggleZoneMuteCommand cmd =>
-                    await this.GetHandler<Server.Features.Zones.Handlers.ToggleZoneMuteCommandHandler>(scope)
+                    await GetHandler<Server.Features.Zones.Handlers.ToggleZoneMuteCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
 
                 // Zone Playback Commands
-                PlayCommand cmd => await this.GetHandler<Server.Features.Zones.Handlers.PlayCommandHandler>(scope)
+                PlayCommand cmd => await GetHandler<Server.Features.Zones.Handlers.PlayCommandHandler>(scope)
                     .Handle(cmd, cancellationToken),
-                PauseCommand cmd => await this.GetHandler<Server.Features.Zones.Handlers.PauseCommandHandler>(scope)
+                PauseCommand cmd => await GetHandler<Server.Features.Zones.Handlers.PauseCommandHandler>(scope)
                     .Handle(cmd, cancellationToken),
-                StopCommand cmd => await this.GetHandler<Server.Features.Zones.Handlers.StopCommandHandler>(scope)
+                StopCommand cmd => await GetHandler<Server.Features.Zones.Handlers.StopCommandHandler>(scope)
                     .Handle(cmd, cancellationToken),
 
                 // Zone Track Commands
-                SetTrackCommand cmd => await this.GetHandler<Server.Features.Zones.Handlers.SetTrackCommandHandler>(
-                        scope
-                    )
+                SetTrackCommand cmd => await GetHandler<Server.Features.Zones.Handlers.SetTrackCommandHandler>(scope)
                     .Handle(cmd, cancellationToken),
-                NextTrackCommand cmd => await this.GetHandler<Server.Features.Zones.Handlers.NextTrackCommandHandler>(
-                        scope
-                    )
+                NextTrackCommand cmd => await GetHandler<Server.Features.Zones.Handlers.NextTrackCommandHandler>(scope)
                     .Handle(cmd, cancellationToken),
                 PreviousTrackCommand cmd =>
-                    await this.GetHandler<Server.Features.Zones.Handlers.PreviousTrackCommandHandler>(scope)
+                    await GetHandler<Server.Features.Zones.Handlers.PreviousTrackCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
                 SetTrackRepeatCommand cmd =>
-                    await this.GetHandler<Server.Features.Zones.Handlers.SetTrackRepeatCommandHandler>(scope)
+                    await GetHandler<Server.Features.Zones.Handlers.SetTrackRepeatCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
                 ToggleTrackRepeatCommand cmd =>
-                    await this.GetHandler<Server.Features.Zones.Handlers.ToggleTrackRepeatCommandHandler>(scope)
+                    await GetHandler<Server.Features.Zones.Handlers.ToggleTrackRepeatCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
                 PlayTrackByIndexCommand cmd =>
-                    await this.GetHandler<Server.Features.Zones.Handlers.PlayTrackByIndexCommandHandler>(scope)
+                    await GetHandler<Server.Features.Zones.Handlers.PlayTrackByIndexCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
 
                 // Zone Playlist Commands
-                SetPlaylistCommand cmd =>
-                    await this.GetHandler<Server.Features.Zones.Handlers.SetPlaylistCommandHandler>(scope)
-                        .Handle(cmd, cancellationToken),
-                NextPlaylistCommand cmd =>
-                    await this.GetHandler<Server.Features.Zones.Handlers.NextPlaylistCommandHandler>(scope)
-                        .Handle(cmd, cancellationToken),
+                SetPlaylistCommand cmd => await GetHandler<Server.Features.Zones.Handlers.SetPlaylistCommandHandler>(
+                        scope
+                    )
+                    .Handle(cmd, cancellationToken),
+                NextPlaylistCommand cmd => await GetHandler<Server.Features.Zones.Handlers.NextPlaylistCommandHandler>(
+                        scope
+                    )
+                    .Handle(cmd, cancellationToken),
                 PreviousPlaylistCommand cmd =>
-                    await this.GetHandler<Server.Features.Zones.Handlers.PreviousPlaylistCommandHandler>(scope)
+                    await GetHandler<Server.Features.Zones.Handlers.PreviousPlaylistCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
                 SetPlaylistRepeatCommand cmd =>
-                    await this.GetHandler<Server.Features.Zones.Handlers.SetPlaylistRepeatCommandHandler>(scope)
+                    await GetHandler<Server.Features.Zones.Handlers.SetPlaylistRepeatCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
                 TogglePlaylistRepeatCommand cmd =>
-                    await this.GetHandler<Server.Features.Zones.Handlers.TogglePlaylistRepeatCommandHandler>(scope)
+                    await GetHandler<Server.Features.Zones.Handlers.TogglePlaylistRepeatCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
                 SetPlaylistShuffleCommand cmd =>
-                    await this.GetHandler<Server.Features.Zones.Handlers.SetPlaylistShuffleCommandHandler>(scope)
+                    await GetHandler<Server.Features.Zones.Handlers.SetPlaylistShuffleCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
                 TogglePlaylistShuffleCommand cmd =>
-                    await this.GetHandler<Server.Features.Zones.Handlers.TogglePlaylistShuffleCommandHandler>(scope)
+                    await GetHandler<Server.Features.Zones.Handlers.TogglePlaylistShuffleCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
 
                 // Client Volume Commands
                 SetClientVolumeCommand cmd =>
-                    await this.GetHandler<Server.Features.Clients.Handlers.SetClientVolumeCommandHandler>(scope)
+                    await GetHandler<Server.Features.Clients.Handlers.SetClientVolumeCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
-                ClientVolumeUpCommand cmd =>
-                    await this.GetHandler<SnapDog2.Server.Features.Clients.Commands.Volume.ClientVolumeUpCommandHandler>(
-                            scope
-                        )
-                        .Handle(cmd, cancellationToken),
-                ClientVolumeDownCommand cmd =>
-                    await this.GetHandler<SnapDog2.Server.Features.Clients.Commands.Volume.ClientVolumeDownCommandHandler>(
-                            scope
-                        )
-                        .Handle(cmd, cancellationToken),
+                ClientVolumeUpCommand cmd => await GetHandler<ClientVolumeUpCommandHandler>(scope)
+                    .Handle(cmd, cancellationToken),
+                ClientVolumeDownCommand cmd => await GetHandler<ClientVolumeDownCommandHandler>(scope)
+                    .Handle(cmd, cancellationToken),
                 SetClientMuteCommand cmd =>
-                    await this.GetHandler<Server.Features.Clients.Handlers.SetClientMuteCommandHandler>(scope)
+                    await GetHandler<Server.Features.Clients.Handlers.SetClientMuteCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
                 ToggleClientMuteCommand cmd =>
-                    await this.GetHandler<Server.Features.Clients.Handlers.ToggleClientMuteCommandHandler>(scope)
+                    await GetHandler<Server.Features.Clients.Handlers.ToggleClientMuteCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
 
                 // Client Configuration Commands
                 AssignClientToZoneCommand cmd =>
-                    await this.GetHandler<Server.Features.Clients.Handlers.AssignClientToZoneCommandHandler>(scope)
+                    await GetHandler<Server.Features.Clients.Handlers.AssignClientToZoneCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
 
                 // Intentionally excluded commands (see comments in MapGroupAddressToCommand):
@@ -989,7 +980,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
                         ),
                     };
 
-                    await this._knxBus!.WriteGroupValueAsync(ga, groupValue);
+                    await this._knxBus!.WriteGroupValueAsync(ga, groupValue, cancellationToken: ct);
                     return Result.Success();
                 },
                 cancellationToken
@@ -1121,7 +1112,7 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
         GC.SuppressFinalize(this);
     }
 
-    private T GetHandler<T>(IServiceScope scope)
+    private static T GetHandler<T>(IServiceScope scope)
         where T : class
     {
         var handler = scope.ServiceProvider.GetService<T>();

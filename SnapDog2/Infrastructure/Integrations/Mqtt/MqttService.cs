@@ -647,7 +647,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
                     command,
                     payload
                 ),
-                "client" when int.TryParse(entityId, out var clientIndex) => this.MapClientCommand(
+                "client" when int.TryParse(entityId, out var clientIndex) => MapClientCommand(
                     clientIndex,
                     command,
                     payload
@@ -821,7 +821,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     /// <summary>
     /// Maps client-specific MQTT commands to Mediator commands.
     /// </summary>
-    private ICommand<Result>? MapClientCommand(int clientIndex, string command, string payload)
+    private static ICommand<Result>? MapClientCommand(int clientIndex, string command, string payload)
     {
         return command switch
         {
@@ -1130,7 +1130,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             var jsonPayload = System.Text.Json.JsonSerializer.Serialize(payload);
 
             // Publish to MQTT with retain flag for status topics
-            var retain = eventType.ToUpperInvariant() != "ERROR_STATUS"; // Don't retain error messages
+            var retain = !eventType.Equals("ERROR_STATUS", StringComparison.InvariantCultureIgnoreCase); // Don't retain error messages
             return await this.PublishAsync(topic, jsonPayload, retain, cancellationToken);
         }
         catch (Exception ex)

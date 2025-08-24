@@ -212,11 +212,11 @@ public partial class StartupService : IHostedService
 
             try
             {
-                var isAvailable = await this.IsPortAvailableAsync(port, cancellationToken);
+                var isAvailable = await IsPortAvailableAsync(port, cancellationToken);
 
                 if (!isAvailable)
                 {
-                    var conflictDetails = await this.GetPortConflictDetailsAsync(port, cancellationToken);
+                    var conflictDetails = await GetPortConflictDetailsAsync(port, cancellationToken);
                     portConflicts.Add((serviceName, port, conflictDetails));
 
                     this.LogPortConflictDetected(serviceName, port, conflictDetails);
@@ -248,7 +248,7 @@ public partial class StartupService : IHostedService
             }
         }
 
-        if (portConflicts.Any())
+        if (portConflicts.Count != 0)
         {
             var conflictSummary = string.Join(", ", portConflicts.Select(c => $"{c.Service}:{c.Port}"));
 
@@ -383,7 +383,7 @@ public partial class StartupService : IHostedService
         }
     }
 
-    private Task<bool> IsPortAvailableAsync(int port, CancellationToken cancellationToken)
+    private static Task<bool> IsPortAvailableAsync(int port, CancellationToken cancellationToken)
     {
         try
         {
@@ -398,7 +398,7 @@ public partial class StartupService : IHostedService
         }
     }
 
-    private Task<string> GetPortConflictDetailsAsync(int port, CancellationToken cancellationToken)
+    private static Task<string> GetPortConflictDetailsAsync(int port, CancellationToken cancellationToken)
     {
         try
         {
@@ -423,7 +423,7 @@ public partial class StartupService : IHostedService
                 break;
             }
 
-            if (await this.IsPortAvailableAsync(candidatePort, cancellationToken))
+            if (await IsPortAvailableAsync(candidatePort, cancellationToken))
             {
                 return candidatePort;
             }

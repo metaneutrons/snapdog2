@@ -134,7 +134,7 @@ public static class StartupInformationHelper
             }
         }
 
-        if (thirdPartyAssemblies.Any())
+        if (thirdPartyAssemblies.Count != 0)
         {
             Console.WriteLine("  📚 Third-Party Assemblies:");
             foreach (var assembly in thirdPartyAssemblies)
@@ -143,7 +143,7 @@ public static class StartupInformationHelper
             }
         }
 
-        if (systemAssemblies.Any())
+        if (systemAssemblies.Count != 0)
         {
             Console.WriteLine("  📚 System Assemblies:");
             foreach (var assembly in systemAssemblies.Take(10)) // Limit to first 10 to avoid spam

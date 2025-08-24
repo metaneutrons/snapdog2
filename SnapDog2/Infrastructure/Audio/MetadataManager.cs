@@ -26,7 +26,7 @@ public sealed partial class MetadataManager(LibVLC libvlc, ILogger<MetadataManag
             LogStartingMetadataExtraction(this._logger, media.Mrl);
 
             // Parse the media to extract metadata (asynchronous in LibVLCSharp)
-            var parseResult = await media.Parse(MediaParseOptions.ParseNetwork);
+            var parseResult = await media.Parse(MediaParseOptions.ParseNetwork, cancellationToken: cancellationToken);
 
             if (parseResult != MediaParsedStatus.Done)
             {
@@ -146,7 +146,7 @@ public sealed partial class MetadataManager(LibVLC libvlc, ILogger<MetadataManag
 
             // Find the first audio track
             var audioTracks = tracks.Where(t => t.TrackType == TrackType.Audio).ToList();
-            if (!audioTracks.Any())
+            if (audioTracks.Count == 0)
             {
                 return null;
             }

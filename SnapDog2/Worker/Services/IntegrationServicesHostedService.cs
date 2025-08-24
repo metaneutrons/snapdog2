@@ -239,7 +239,7 @@ public partial class IntegrationServicesHostedService(
                 var nonCriticalFailures = failedServices.Where(s => !s.IsCritical).ToList();
 
                 // Assess system health and take appropriate action
-                if (criticalFailures.Any())
+                if (criticalFailures.Count != 0)
                 {
                     // System is non-functional - critical services failed
                     this.LogSystemNonFunctional(
@@ -254,7 +254,7 @@ public partial class IntegrationServicesHostedService(
                     // Terminate application - system cannot function without critical services
                     Environment.Exit(1);
                 }
-                else if (nonCriticalFailures.Any())
+                else if (nonCriticalFailures.Count != 0)
                 {
                     // System is degraded but functional - only non-critical services failed
                     this.LogSystemDegraded(

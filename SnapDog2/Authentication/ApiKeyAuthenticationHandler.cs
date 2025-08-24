@@ -44,7 +44,7 @@ public class ApiKeyAuthenticationHandler(
         {
             this.Logger.LogWarning(
                 "Invalid API key attempted: {ApiKey}",
-                apiKey.Substring(0, Math.Min(8, apiKey.Length)) + "..."
+                string.Concat(apiKey.AsSpan(0, Math.Min(8, apiKey.Length)), "...")
             );
             return Task.FromResult(AuthenticateResult.Fail("Invalid API key"));
         }

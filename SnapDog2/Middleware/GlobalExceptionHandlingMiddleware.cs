@@ -69,7 +69,7 @@ public partial class GlobalExceptionHandlingMiddleware(
         {
             AddressInUseException => (
                 HttpStatusCode.ServiceUnavailable,
-                this.CreateErrorResponse(
+                CreateErrorResponse(
                     "SERVICE_UNAVAILABLE",
                     "Service is temporarily unavailable due to port conflicts",
                     correlationId,
@@ -79,7 +79,7 @@ public partial class GlobalExceptionHandlingMiddleware(
 
             SocketException => (
                 HttpStatusCode.ServiceUnavailable,
-                this.CreateErrorResponse(
+                CreateErrorResponse(
                     "NETWORK_ERROR",
                     "Network connectivity issue",
                     correlationId,
@@ -89,7 +89,7 @@ public partial class GlobalExceptionHandlingMiddleware(
 
             TimeoutException => (
                 HttpStatusCode.RequestTimeout,
-                this.CreateErrorResponse(
+                CreateErrorResponse(
                     "TIMEOUT",
                     "Request timed out",
                     correlationId,
@@ -99,7 +99,7 @@ public partial class GlobalExceptionHandlingMiddleware(
 
             UnauthorizedAccessException => (
                 HttpStatusCode.Forbidden,
-                this.CreateErrorResponse(
+                CreateErrorResponse(
                     "ACCESS_DENIED",
                     "Access denied",
                     correlationId,
@@ -109,7 +109,7 @@ public partial class GlobalExceptionHandlingMiddleware(
 
             ArgumentException => (
                 HttpStatusCode.BadRequest,
-                this.CreateErrorResponse(
+                CreateErrorResponse(
                     "INVALID_ARGUMENT",
                     "Invalid request parameters",
                     correlationId,
@@ -119,7 +119,7 @@ public partial class GlobalExceptionHandlingMiddleware(
 
             InvalidOperationException => (
                 HttpStatusCode.Conflict,
-                this.CreateErrorResponse(
+                CreateErrorResponse(
                     "INVALID_OPERATION",
                     "Invalid operation",
                     correlationId,
@@ -129,7 +129,7 @@ public partial class GlobalExceptionHandlingMiddleware(
 
             NotImplementedException => (
                 HttpStatusCode.NotImplemented,
-                this.CreateErrorResponse(
+                CreateErrorResponse(
                     "NOT_IMPLEMENTED",
                     "Feature not implemented",
                     correlationId,
@@ -139,7 +139,7 @@ public partial class GlobalExceptionHandlingMiddleware(
 
             _ => (
                 HttpStatusCode.InternalServerError,
-                this.CreateErrorResponse(
+                CreateErrorResponse(
                     "INTERNAL_ERROR",
                     "An unexpected error occurred",
                     correlationId,
@@ -172,7 +172,7 @@ public partial class GlobalExceptionHandlingMiddleware(
         this.LogExceptionResponseSent((int)statusCode, errorResponse.ErrorCode, correlationId);
     }
 
-    private ErrorResponse CreateErrorResponse(
+    private static ErrorResponse CreateErrorResponse(
         string errorCode,
         string message,
         string correlationId,
