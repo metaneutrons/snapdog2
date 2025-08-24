@@ -166,19 +166,14 @@ public static class CortexMediatorConfiguration
     /// </summary>
     private static void RegisterIntegrationNotificationHandlers(IServiceCollection services)
     {
-        // Register services that implement INotificationHandler<StatusChangedNotification>
-        var integrationServiceTypes = new[] { typeof(ISnapcastService), typeof(IKnxService), typeof(IMqttService) };
-
-        foreach (var serviceType in integrationServiceTypes)
+        // Register only KNX service as it's the only one that implements INotificationHandler<StatusChangedNotification>
+        services.AddScoped<INotificationHandler<StatusChangedNotification>>(provider =>
         {
-            services.AddScoped<INotificationHandler<StatusChangedNotification>>(provider =>
-            {
-                var service = provider.GetRequiredService(serviceType);
-                return service as INotificationHandler<StatusChangedNotification>
-                    ?? throw new InvalidOperationException(
-                        $"{serviceType.Name} does not implement INotificationHandler<StatusChangedNotification>"
-                    );
-            });
-        }
+            var knxService = provider.GetRequiredService<IKnxService>();
+            return knxService as INotificationHandler<StatusChangedNotification>
+                ?? throw new InvalidOperationException(
+                    $"KnxService does not implement INotificationHandler<StatusChangedNotification>"
+                );
+        });
     }
 }
