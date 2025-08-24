@@ -35,6 +35,6 @@
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
   </ItemGroup>
   <ItemGroup>
-    <Analyzer Include="..\SnapDog.Analyzers\SnapDog.Analyzers.csproj" />
+    <Analyzer Include="..\SnapDog.Analyzers\bin\Debug\netstandard2.0\SnapDog.Analyzers.dll" />
   </ItemGroup>
 </Project>
