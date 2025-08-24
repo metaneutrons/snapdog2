@@ -1,12 +1,12 @@
-# 27. Deployment and Operations
+# 28. Deployment and Operations
 
 This section outlines the recommended deployment strategies for SnapDog2, along with approaches for ongoing monitoring, maintenance, and operational procedures necessary for running the system reliably.
 
-## 27.1. Deployment Options
+## 28.1. Deployment Options
 
 SnapDog2 is designed primarily for containerized deployment using Docker, but other options are possible.
 
-### 27.1.1. Docker Deployment (Recommended)
+### 28.1.1. Docker Deployment (Recommended)
 
 This is the preferred method, offering consistency, isolation, and simplified dependency management. It typically involves using Docker Compose to orchestrate the necessary containers.
 
@@ -73,11 +73,11 @@ graph TD
 
 *(See Section 17.4 for a detailed production `docker-compose.yml` example)*
 
-### 27.1.2. Kubernetes Deployment
+### 28.1.2. Kubernetes Deployment
 
 For larger scale or more managed environments, SnapDog2 can be deployed to Kubernetes using Helm charts or standard manifests (Deployment, Service, ConfigMap, Secret, PersistentVolumeClaim). The core components (SnapDog2, Snapcast, MQTT, Subsonic) would run as distinct Deployments/StatefulSets with associated Services and Persistent Volumes. Observability tools can also be deployed within the cluster or use external managed services. This requires creating appropriate Kubernetes manifests or a Helm chart.
 
-### 27.1.3. Bare Metal / Virtual Machine Deployment
+### 28.1.3. Bare Metal / Virtual Machine Deployment
 
 Direct deployment onto a Linux or Windows host is possible but requires manual installation and configuration of all dependencies:
 
@@ -92,11 +92,11 @@ Direct deployment onto a Linux or Windows host is possible but requires manual i
 
 This approach offers less isolation and requires more platform-specific setup.
 
-## 27.2. Monitoring and Observability
+## 28.2. Monitoring and Observability
 
 Comprehensive monitoring is crucial for ensuring reliable operation.
 
-### 27.2.1. Logging
+### 28.2.1. Logging
 
 * **Strategy:** Structured logging using Serilog.
 * **Backend:** Configured via `appsettings.json` or environment variables (Sec 10).
@@ -107,7 +107,7 @@ Comprehensive monitoring is crucial for ensuring reliable operation.
 * **Enrichment:** Logs are enriched with `TraceId` and `SpanId` via OpenTelemetry integration, `SourceContext`, `ThreadId`, `MachineName`, etc.
 * **Levels:** Configurable via `SNAPDOG_LOG_LEVEL` (Default: `Information`). Use `Debug` or `Trace` for troubleshooting.
 
-### 27.2.2. Metrics
+### 28.2.2. Metrics
 
 * **Strategy:** Expose metrics using OpenTelemetry Metrics API (`System.Diagnostics.Metrics.Meter`).
 * **Exporter:** Prometheus exporter enabled via `SNAPDOG_PROMETHEUS_ENABLED=true`.
@@ -122,7 +122,7 @@ Comprehensive monitoring is crucial for ensuring reliable operation.
   * .NET Runtime metrics (GC counts, heap size, thread pool stats, etc. via instrumentation).
 * **Visualization:** Use Grafana connected to Prometheus datasource to build dashboards monitoring key metrics.
 
-### 27.2.3. Distributed Tracing
+### 28.2.3. Distributed Tracing
 
 * **Strategy:** Use OpenTelemetry Tracing (`System.Diagnostics.ActivitySource`).
 * **Exporter:** OTLP Exporter configured via environment variables (`SNAPDOG_TELEMETRY_OTLP_*`) sending traces to Jaeger or another compatible backend (e.g., Tempo, Grafana Agent). Enabled via `SNAPDOG_TELEMETRY_ENABLED=true`.
@@ -130,7 +130,7 @@ Comprehensive monitoring is crucial for ensuring reliable operation.
 * **Sampling:** Configurable via `SNAPDOG_TELEMETRY_SAMPLING_RATE` (Default: 1.0 - sample all traces).
 * **Visualization:** Use Jaeger UI or Grafana (with Tempo/Jaeger datasource) to visualize request flows and identify bottlenecks.
 
-### 27.2.4. Health Checks
+### 28.2.4. Health Checks
 
 * **Strategy:** Implement ASP.NET Core Health Checks exposed via HTTP endpoints.
 * **Endpoints:**
@@ -144,9 +144,9 @@ Comprehensive monitoring is crucial for ensuring reliable operation.
   * KNX Gateway connectivity check (check connection status of `KnxBus`).
 * **Integration:** Used by container orchestrators (Docker Swarm, Kubernetes) for automated restarts and rolling updates.
 
-## 27.3. Operational Procedures
+## 28.3. Operational Procedures
 
-### 27.3.1. Deployment/Update Process (Docker Compose Example)
+### 28.3.1. Deployment/Update Process (Docker Compose Example)
 
 1. **Build Images:**
     * `docker build -t your-registry/snapdog:new-version -f docker/snapdog/Dockerfile .`
@@ -161,13 +161,13 @@ Comprehensive monitoring is crucial for ensuring reliable operation.
     * `docker compose up -d` (recreates containers using new images/config, preserving volumes)
 5. **Verify:** Check container logs (`docker logs snapdog`), health endpoints (`curl http://localhost:8080/health/ready`), and metrics/traces.
 
-### 27.3.2. Configuration Updates
+### 28.3.2. Configuration Updates
 
 * **Environment Variables:** Modify the `.env` file (or relevant configuration source) and redeploy containers (`docker compose up -d`).
 * **External Config Files (e.g., `mosquitto.conf`, `prometheus.yml`):** Modify the mounted configuration files on the host and restart the *specific* affected container (`docker compose restart mosquitto`).
 * **Runtime (API):** If specific configurations are exposed via API endpoints (not currently planned for core items), use those endpoints.
 
-### 27.3.3. Backup and Restore
+### 28.3.3. Backup and Restore
 
 * **Configuration:** Regularly back up the `.env` file and any mounted configuration files (e.g., `mosquitto.conf`, `prometheus.yml`).
 * **Persistent Data:** Back up Docker named volumes using standard Docker volume backup procedures (e.g., run a temporary container mounting the volume and creating a tarball). This applies mainly to:
@@ -176,7 +176,7 @@ Comprehensive monitoring is crucial for ensuring reliable operation.
   * `grafana_data`
 * **Restore:** Stop containers (`docker compose down`), restore configuration files and volume data from backups, restart containers (`docker compose up -d`).
 
-### 27.3.4. Troubleshooting
+### 28.3.4. Troubleshooting
 
 1. **Check Container Status:** `docker compose ps` - Are all required containers running?
 2. **Check Logs:** `docker logs <container_name>` (e.g., `docker logs snapdog`) - Look for errors or warnings. Increase log level via `SNAPDOG_LOG_LEVEL=Debug` and restart if necessary.
@@ -187,27 +187,27 @@ Comprehensive monitoring is crucial for ensuring reliable operation.
 7. **Restart Service:** Restart the problematic container (`docker compose restart <service_name>`).
 8. **Restart Stack:** Restart the entire stack (`docker compose down && docker compose up -d`).
 
-### 27.3.5. Scaling
+### 28.3.5. Scaling
 
 * **Stateless Design:** The core SnapDog2 service aims to be largely stateless, relying on the external Snapcast server and potentially MQTT for shared state/events. This allows for horizontal scaling.
 * **Horizontal Scaling:** Deploy multiple replicas of the `snapdog` container behind a load balancer (using Docker Swarm services or Kubernetes Deployments). Ensure all instances connect to the *same* Snapcast server and MQTT broker. The `SnapcastStateRepository` is in-memory per instance; consistent state relies on timely updates from Snapcast events broadcast via `SnapcastService` notifications (potential for minor eventual consistency issues between scaled instances needs consideration if actions depend on immediate cross-instance state).
 * **Dependencies:** Ensure external dependencies (Snapcast, MQTT, Subsonic) can handle the load from multiple SnapDog2 instances.
 
-## 27.4. Security Considerations
+## 28.4. Security Considerations
 
-### 27.4.1. Network Security
+### 28.4.1. Network Security
 
 * **Exposure:** Expose only necessary ports externally (typically the API port, maybe Snapweb). Use a reverse proxy (Nginx, Traefik, Caddy) in front of the API.
 * **Firewall/Network Policies:** Restrict network access between containers and from external sources to only necessary ports/protocols.
 
-### 27.4.2. Authentication and Authorization
+### 28.4.2. Authentication and Authorization
 
 * **API:** Use strong, unique API keys (`SNAPDOG_API_APIKEY_*`) as configured. Ensure API Key authentication is enabled (`SNAPDOG_API_AUTH_ENABLED=true`).
 * **MQTT:** Configure username/password authentication on the Mosquitto broker and set `SNAPDOG_SYSTEM_MQTT_USERNAME`/`PASSWORD` accordingly. Use ACLs on the broker to restrict SnapDog2's topic access if needed.
 * **Subsonic:** Use strong credentials (`SNAPDOG_SUBSONIC_USERNAME`/`PASSWORD`).
 * **KNX:** KNX security features (IP Secure, Data Secure) are handled by the Falcon SDK and gateway configuration, outside the scope of SnapDog2's direct implementation, but ensure the gateway is secured appropriately.
 
-### 27.4.3. Secrets Management
+### 28.4.3. Secrets Management
 
 * **Environment Variables:** Primary mechanism for passing secrets (API Keys, passwords). Load from `.env` file (ensure `.env` is not committed to Git) or orchestration platform secrets (Docker Swarm Secrets, Kubernetes Secrets).
 * **Avoid Hardcoding:** Never store secrets directly in configuration files (`stylecop.json`, `appsettings.json`, `docker-compose.yml`) or source code.

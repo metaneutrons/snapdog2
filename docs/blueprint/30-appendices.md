@@ -1,8 +1,8 @@
-# 29. Appendices
+# 30. Appendices
 
 This section contains supplementary information, including a glossary of terms, references to external systems and design patterns, and specific technical details like KNX Datapoint mappings.
 
-## 29.1. Glossary
+## 30.1. Glossary
 
 This glossary defines key terms used throughout the SnapDog2 blueprint for clarity and consistency.
 
@@ -69,9 +69,9 @@ This glossary defines key terms used throughout the SnapDog2 blueprint for clari
 | **Worker Layer**        | The top-level logical layer (`/Worker` folder) containing the application entry point (`Program.cs`), main hosted service, and Dependency Injection setup/composition root. |
 | **Zone** (SnapDog2)     | SnapDog2's logical representation of an audio zone, managing playback state, associated clients, and mapping 1:1 to a Snapcast Group. Identified by an internal integer ID. |
 
-## 29.2. References
+## 30.2. References
 
-### 29.2.1. External Systems & Libraries
+### 30.2.1. External Systems & Libraries
 
 * **Snapcast Server:** [badaix/snapcast (GitHub)](https://github.com/badaix/snapcast)
 * **Snapcast Client Library:** [SnapCastNet (GitHub)](https://github.com/metaneutrons/snapcast-net) / [GitHub Packages](https://github.com/metaneutrons/snapcast-net/packages) (v1.0.0+)
@@ -87,7 +87,7 @@ This glossary defines key terms used throughout the SnapDog2 blueprint for clari
 * **VLC Bindings:** [LibVLCSharp (GitHub)](https://github.com/videolan/libvlcsharp) / [NuGet](https://www.nuget.org/packages/LibVLCSharp/) (v3.8.2)
 * **Native LibVLC Binaries:** [VideoLAN.LibVLC.* (NuGet)](https://www.nuget.org/profiles/VideoLAN)
 
-### 29.2.2. .NET & Core Libraries
+### 30.2.2. .NET & Core Libraries
 
 * **.NET 9:** [Microsoft .NET Documentation](https://learn.microsoft.com/en-us/dotnet/)
 * **ASP.NET Core:** [Microsoft ASP.NET Core Documentation](https://learn.microsoft.com/en-us/aspnet/core/)
@@ -101,13 +101,13 @@ This glossary defines key terms used throughout the SnapDog2 blueprint for clari
 * **Moq:** [moq/moq4 (GitHub)](https://github.com/moq/moq4)
 * **FluentAssertions:** [fluentassertions.com](https://fluentassertions.com/)
 
-### 29.2.3. Analysis & Style Tools
+### 30.2.3. Analysis & Style Tools
 
 * **StyleCop Analyzers:** [DotNetAnalyzers/StyleCopAnalyzers (GitHub)](https://github.com/DotNetAnalyzers/StyleCopAnalyzers)
 * **SonarAnalyzer for C#:** [SonarSource/sonar-dotnet (GitHub)](https://github.com/SonarSource/sonar-dotnet)
 * **.editorconfig:** [editorconfig.org](https://editorconfig.org/)
 
-### 29.2.4. Design Patterns & Principles
+### 30.2.4. Design Patterns & Principles
 
 * **SOLID Principles:** [Wikipedia](https://en.wikipedia.org/wiki/SOLID)
 * **CQRS (Command Query Responsibility Segregation):** [Martin Fowler's Bliki](https://martinfowler.com/bliki/CQRS.html)
@@ -116,7 +116,7 @@ This glossary defines key terms used throughout the SnapDog2 blueprint for clari
 * **Circuit Breaker Pattern:** [Microsoft Learn](https://learn.microsoft.com/en-us/azure/architecture/patterns/circuit-breaker)
 * **Clean Architecture:** [Uncle Bob Martin Blog (Conceptual)](http://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 
-## 29.3. KNX DPT Value Mapping Summary
+## 30.3. KNX DPT Value Mapping Summary
 
 This section summarizes the mapping between SnapDog2 internal values/states and KNX Datapoint Types (DPTs) used for communication via configured Group Addresses. Implementation occurs in `KnxService`.
 
@@ -159,7 +159,7 @@ This section summarizes the mapping between SnapDog2 internal values/states and 
   * Used for: `CLIENT_CONNECTED` Status (`_KNX_CONNECTED_STATUS`).
   * Mapping: Send `1` for Connected (`true`), `0` for Disconnected (`false`).
 
-## 29.4. Error Codes Reference
+## 30.4. Error Codes Reference
 
 *(This section to be populated during implementation)*
 

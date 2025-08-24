@@ -1,24 +1,24 @@
-# 25. DRY Transformation Architecture
+# 26. DRY Transformation Architecture
 
-## 25.1. Overview
+## 26.1. Overview
 
 This blueprint defines the comprehensive DRY (Don't Repeat Yourself) transformation architecture implemented in SnapDog2, establishing standards for identifier management, code maintainability, and type safety. The transformation eliminates all hardcoded strings from the notification and command systems through a sophisticated attribute-based architecture with automated consistency validation.
 
-## 25.2. Architectural Principles
+## 26.2. Architectural Principles
 
-### 25.2.1. Single Source of Truth
+### 26.2.1. Single Source of Truth
 
 All system identifiers (status IDs, command IDs) are defined once using type-safe attributes and accessed through compile-time validated methods. This eliminates duplication and ensures consistency across all layers.
 
-### 25.2.2. Type Safety
+### 26.2.2. Type Safety
 
 The attribute system provides compile-time validation, preventing identifier mismatches and enabling safe refactoring operations across the entire codebase.
 
-### 25.2.3. Blueprint Integration
+### 26.2.3. Blueprint Integration
 
 All attributes include blueprint references, creating direct traceability from code to documentation and ensuring architectural consistency through automated testing.
 
-### 25.2.4. Automated Consistency Validation
+### 26.2.4. Automated Consistency Validation
 
 The system includes comprehensive test suites that validate:
 
@@ -27,13 +27,13 @@ The system includes comprehensive test suites that validate:
 - Naming conventions are consistently followed
 - Cross-protocol consistency is maintained
 
-### 25.2.5. Developer Experience
+### 26.2.5. Developer Experience
 
 The system provides IntelliSense support, clear error messages, automated validation, and reverse-direction testing to catch architectural drift.
 
-## 25.3. Attribute System Architecture
+## 26.3. Attribute System Architecture
 
-### 25.3.1. StatusIdAttribute
+### 26.3.1. StatusIdAttribute
 
 ```csharp
 [AttributeUsage(AttributeTargets.Class)]
@@ -71,7 +71,7 @@ public record ClientVolumeChangedNotification : INotification
 var statusId = StatusIdAttribute.GetStatusId<ClientVolumeChangedNotification>();
 ```
 
-### 25.3.2. CommandAttribute
+### 26.3.2. CommandAttribute
 
 ```csharp
 [AttributeUsage(AttributeTargets.Class)]
@@ -109,9 +109,9 @@ public record SetClientVolumeCommand : ICommand<Result>
 var commandId = CommandAttribute.GetCommandId<SetClientVolumeCommand>();
 ```
 
-## 25.4. Registry System Architecture
+## 26.4. Registry System Architecture
 
-### 25.4.1. StatusIdRegistry
+### 26.4.1. StatusIdRegistry
 
 ```csharp
 public static class StatusIdRegistry
@@ -149,7 +149,7 @@ public static class StatusIdRegistry
 }
 ```
 
-### 25.4.2. CommandIdRegistry
+### 26.4.2. CommandIdRegistry
 
 ```csharp
 public static class CommandIdRegistry
@@ -195,11 +195,11 @@ public static class CommandIdRegistry
 - Read-only public interface for safety
 - High-performance HashSet lookups
 
-## 25.5. Implementation Categories
+## 26.5. Implementation Categories
 
-### 25.5.1. Status Notification System (Blueprint Compliant)
+### 26.5.1. Status Notification System (Blueprint Compliant)
 
-#### 25.5.1.1. Client Status Notifications (7 Classes)
+#### 26.5.1.1. Client Status Notifications (7 Classes)
 
 - `ClientVolumeChangedNotification` → `[StatusId("CLIENT_VOLUME_STATUS")]`
 - `ClientMuteChangedNotification` → `[StatusId("CLIENT_MUTE_STATUS")]`
@@ -209,7 +209,7 @@ public static class CommandIdRegistry
 - `ClientStateChangedNotification` → `[StatusId("CLIENT_STATE")]`
 - `ClientNameChangedNotification` → `[StatusId("CLIENT_NAME_STATUS")]`
 
-#### 25.5.1.2. Zone Status Notifications (6 Classes)
+#### 26.5.1.2. Zone Status Notifications (6 Classes)
 
 - `ZonePlaybackStateChangedNotification` → `[StatusId("PLAYBACK_STATE")]`
 - `ZoneVolumeChangedNotification` → `[StatusId("VOLUME_STATUS")]`
@@ -218,7 +218,7 @@ public static class CommandIdRegistry
 - `ZonePlaylistChangedNotification` → `[StatusId("PLAYLIST_STATUS")]`
 - `ZoneStateChangedNotification` → `[StatusId("ZONE_STATE")]`
 
-#### 25.5.1.3. Global Status Notifications (5 Classes)
+#### 26.5.1.3. Global Status Notifications (5 Classes)
 
 - `SystemStatusChangedNotification` → `[StatusId("SYSTEM_STATUS")]`
 - `VersionInfoChangedNotification` → `[StatusId("VERSION_INFO")]`
@@ -226,7 +226,7 @@ public static class CommandIdRegistry
 - `SystemErrorNotification` → `[StatusId("SYSTEM_ERROR")]`
 - `ZoneNameStatusNotification` → `[StatusId("ZONE_NAME_STATUS")]`
 
-#### 25.5.1.4. Additional Status Notifications (3 Classes)
+#### 26.5.1.4. Additional Status Notifications (3 Classes)
 
 - `ControlStatusNotification` → `[StatusId("CONTROL_STATUS")]`
 - `PlaylistCountStatusNotification` → `[StatusId("PLAYLIST_COUNT_STATUS")]`
@@ -234,9 +234,9 @@ public static class CommandIdRegistry
 
 **Total**: 21 Status Notifications (Blueprint Compliant)
 
-### 25.5.2. Command System (Blueprint Compliant)
+### 26.5.2. Command System (Blueprint Compliant)
 
-#### 25.5.2.1. Client Commands (8 Classes)
+#### 26.5.2.1. Client Commands (8 Classes)
 
 - `SetClientVolumeCommand` → `[Command("CLIENT_VOLUME")]`
 - `ClientVolumeUpCommand` → `[Command("CLIENT_VOLUME_UP")]`
@@ -247,13 +247,13 @@ public static class CommandIdRegistry
 - `AssignClientToZoneCommand` → `[Command("CLIENT_ZONE")]`
 - `SetClientNameCommand` → `[Command("CLIENT_NAME")]`
 
-#### 25.5.2.2. Zone Playback Commands (3 Classes)
+#### 26.5.2.2. Zone Playback Commands (3 Classes)
 
 - `PlayCommand` → `[Command("PLAY")]`
 - `PauseCommand` → `[Command("PAUSE")]`
 - `StopCommand` → `[Command("STOP")]`
 
-#### 25.5.2.3. Zone Volume Commands (5 Classes)
+#### 26.5.2.3. Zone Volume Commands (5 Classes)
 
 - `SetZoneVolumeCommand` → `[Command("VOLUME")]`
 - `VolumeUpCommand` → `[Command("VOLUME_UP")]`
@@ -261,7 +261,7 @@ public static class CommandIdRegistry
 - `SetZoneMuteCommand` → `[Command("MUTE")]`
 - `ToggleZoneMuteCommand` → `[Command("MUTE_TOGGLE")]`
 
-#### 25.5.2.4. Zone Track Commands (6 Classes)
+#### 26.5.2.4. Zone Track Commands (6 Classes)
 
 - `SetTrackCommand` → `[Command("TRACK")]`
 - `NextTrackCommand` → `[Command("TRACK_NEXT")]`
@@ -270,7 +270,7 @@ public static class CommandIdRegistry
 - `ToggleTrackRepeatCommand` → `[Command("TRACK_REPEAT_TOGGLE")]`
 - `PlayUrlCommand` → `[Command("PLAY_URL")]`
 
-#### 25.5.2.5. Zone Playlist Commands (7 Classes)
+#### 26.5.2.5. Zone Playlist Commands (7 Classes)
 
 - `SetPlaylistCommand` → `[Command("PLAYLIST")]`
 - `NextPlaylistCommand` → `[Command("PLAYLIST_NEXT")]`
@@ -280,7 +280,7 @@ public static class CommandIdRegistry
 - `SetPlaylistShuffleCommand` → `[Command("PLAYLIST_SHUFFLE")]`
 - `TogglePlaylistShuffleCommand` → `[Command("PLAYLIST_SHUFFLE_TOGGLE")]`
 
-#### 25.5.2.6. Additional Commands (3 Classes)
+#### 26.5.2.6. Additional Commands (3 Classes)
 
 - `ZoneNameCommand` → `[Command("ZONE_NAME")]`
 - `ControlSetCommand` → `[Command("CONTROL")]`
@@ -288,13 +288,13 @@ public static class CommandIdRegistry
 
 **Total**: 32 Commands (Blueprint Compliant)
 
-## 25.6. Automated Consistency Validation
+## 26.6. Automated Consistency Validation
 
-### 25.6.1. Comprehensive Test Suite
+### 26.6.1. Comprehensive Test Suite
 
 The DRY architecture includes a comprehensive test suite that validates architectural consistency and prevents drift from blueprint specifications:
 
-#### 25.6.1.1. Command Framework Consistency Tests
+#### 26.6.1.1. Command Framework Consistency Tests
 
 ```csharp
 [Test]
@@ -324,7 +324,7 @@ public void StatusIdRegistry_ShouldNotContainExtraStatus()
 }
 ```
 
-#### 25.6.1.2. Cross-Protocol Consistency Tests
+#### 26.6.1.2. Cross-Protocol Consistency Tests
 
 ```csharp
 [Test]
@@ -354,7 +354,7 @@ public void AllRegisteredStatus_ShouldHaveMqttPublishers()
 }
 ```
 
-### 25.6.2. Reverse-Direction Testing
+### 26.6.2. Reverse-Direction Testing
 
 The test suite implements reverse-direction testing to catch architectural drift:
 
@@ -362,7 +362,7 @@ The test suite implements reverse-direction testing to catch architectural drift
 - **Reverse Testing**: Validates that no surplus implementations exist beyond blueprint
 - **Cross-Protocol Testing**: Ensures consistency across API, MQTT, and KNX protocols
 
-### 25.6.3. Obsolete Implementation Detection
+### 26.6.3. Obsolete Implementation Detection
 
 The system successfully detected and eliminated obsolete implementations:
 
@@ -371,7 +371,7 @@ The system successfully detected and eliminated obsolete implementations:
 - **Obsolete File Removed**: `ZoneStatusNotifications.cs` containing 6 incorrect implementations
 - **References Cleaned**: Systematic removal across 4 architectural layers
 
-### 25.6.4. Blueprint Compliance Validation
+### 26.6.4. Blueprint Compliance Validation
 
 ```csharp
 [Test]
@@ -392,9 +392,9 @@ public void Blueprint_ShouldHaveAllRequiredStatusIds()
 }
 ```
 
-## 25.7. Integration Patterns
+## 26.7. Integration Patterns
 
-### 25.7.1. Notification Handler Pattern
+### 26.7.1. Notification Handler Pattern
 
 ```csharp
 public class SmartMqttNotificationHandlers :
@@ -426,7 +426,7 @@ public class SmartMqttNotificationHandlers :
 }
 ```
 
-### 25.7.2. Command Processing Pattern
+### 26.7.2. Command Processing Pattern
 
 ```csharp
 public class MqttService
@@ -451,7 +451,7 @@ public class MqttService
 }
 ```
 
-### 25.7.3. Status Factory Pattern
+### 26.7.3. Status Factory Pattern
 
 ```csharp
 public class StatusFactory : IStatusFactory
@@ -478,9 +478,9 @@ public class StatusFactory : IStatusFactory
 }
 ```
 
-## 25.8. Quality Assurance and Metrics
+## 26.8. Quality Assurance and Metrics
 
-### 25.8.1. Compile-Time Validation
+### 26.8.1. Compile-Time Validation
 
 The attribute system provides comprehensive compile-time validation:
 
@@ -489,7 +489,7 @@ The attribute system provides comprehensive compile-time validation:
 - **Type Safety**: Prevents identifier mismatches across the codebase
 - **Refactoring Safety**: Rename operations work across entire solution
 
-### 25.8.2. Runtime Validation
+### 26.8.2. Runtime Validation
 
 ```csharp
 // Throws InvalidOperationException if attribute is missing
@@ -504,7 +504,7 @@ if (!StatusIdRegistry.IsRegistered(incomingStatusId))
 }
 ```
 
-### 25.8.3. Architectural Cleanup Results
+### 26.8.3. Architectural Cleanup Results
 
 **Obsolete Implementation Removal**:
 
@@ -519,7 +519,7 @@ if (!StatusIdRegistry.IsRegistered(incomingStatusId))
 - **Command IDs**: 32 implemented (100% blueprint compliant)
 - **Missing Blueprint Items**: Added `COMMAND_STATUS` and `COMMAND_ERROR`
 
-### 25.8.4. Code Quality Metrics
+### 26.8.4. Code Quality Metrics
 
 - **Hardcoded Strings**: 0 (completely eliminated)
 - **Build Warnings**: 0
@@ -527,16 +527,16 @@ if (!StatusIdRegistry.IsRegistered(incomingStatusId))
 - **Test Coverage**: 100% for consistency tests
 - **Consistency Tests**: All passing (44 total tests)
 
-### 25.8.5. Performance Characteristics
+### 26.8.5. Performance Characteristics
 
 - **Registry Initialization**: Lazy loading with thread safety
 - **Attribute Access**: Direct reflection with caching
 - **HashSet Lookups**: O(1) performance for validation
 - **Memory Overhead**: Minimal with lazy initialization
 
-## 25.9. Future Extensibility
+## 26.9. Future Extensibility
 
-### 25.9.1. Adding New Notifications
+### 26.9.1. Adding New Notifications
 
 ```csharp
 [StatusId("NEW_FEATURE_STATUS")]
@@ -548,7 +548,7 @@ public record NewFeatureStatusChangedNotification : INotification
 }
 ```
 
-### 25.9.2. Adding New Commands
+### 26.9.2. Adding New Commands
 
 ```csharp
 [Command("NEW_FEATURE_COMMAND")]
@@ -560,7 +560,7 @@ public record NewFeatureCommand : ICommand<Result>
 }
 ```
 
-### 25.9.3. Automatic Integration
+### 26.9.3. Automatic Integration
 
 New commands and status notifications are automatically:
 
@@ -569,32 +569,32 @@ New commands and status notifications are automatically:
 - Integrated into cross-protocol validation
 - Available for MQTT, API, and KNX protocols
 
-## 25.10. Conclusion
+## 26.10. Conclusion
 
 The DRY transformation architecture represents a significant advancement in code quality, maintainability, and developer experience. Through systematic elimination of hardcoded strings and implementation of type-safe attribute systems, SnapDog2 achieves:
 
-### 25.10.1. Architectural Excellence
+### 26.10.1. Architectural Excellence
 
 - **Zero Hardcoded Strings**: Complete elimination across entire codebase
 - **100% Blueprint Compliance**: All 21 status IDs and 32 command IDs implemented
 - **Automated Consistency Validation**: 44 tests ensuring architectural integrity
 - **Systematic Cleanup**: 67% reduction in surplus implementations
 
-### 25.10.2. Developer Experience
+### 26.10.2. Developer Experience
 
 - **Type Safety**: Compile-time validation prevents identifier mismatches
 - **IntelliSense Support**: Full IDE support for all identifiers
 - **Refactoring Safety**: Rename operations work across entire solution
 - **Clear Error Messages**: Descriptive exceptions for missing attributes
 
-### 25.10.3. Quality Metrics
+### 26.10.3. Quality Metrics
 
 - **Build Quality**: 0 warnings, 0 errors
 - **Test Coverage**: 100% for consistency validation
 - **Performance**: Optimized with lazy loading and O(1) lookups
 - **Maintainability**: Single source of truth with automatic discovery
 
-### 25.10.4. Architectural Impact
+### 26.10.4. Architectural Impact
 
 This architecture serves as the foundation for future development, ensuring consistency, safety, and maintainability across all system components. The comprehensive test suite prevents architectural drift and maintains blueprint compliance, while the attribute-based system provides excellent developer experience through compile-time validation and IntelliSense support.
 
