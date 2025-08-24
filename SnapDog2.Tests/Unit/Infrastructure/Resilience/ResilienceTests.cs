@@ -40,17 +40,15 @@ public class ResilienceTests
 
         var mockKnxGateway = new Mock<IKnxGateway>();
         var callCount = 0;
-        var networkPartitionDuration = TimeSpan.FromMilliseconds(200);
-        var partitionStart = DateTime.UtcNow;
+        var failureCount = 3; // Fail first 3 attempts, then succeed
 
         mockKnxGateway
             .Setup(x => x.ConnectAsync(It.IsAny<CancellationToken>()))
             .Returns(() =>
             {
                 callCount++;
-                var elapsed = DateTime.UtcNow - partitionStart;
 
-                if (elapsed < networkPartitionDuration)
+                if (callCount <= failureCount)
                 {
                     throw new SocketException((int)SocketError.NetworkUnreachable, "KNX gateway network unreachable");
                 }
@@ -67,9 +65,9 @@ public class ResilienceTests
         var endTime = DateTime.UtcNow;
 
         // Assert
-        callCount.Should().BeGreaterThan(1, "should retry during network partition");
-        (endTime - startTime).Should().BeGreaterThan(networkPartitionDuration, "should wait for network recovery");
-        mockKnxGateway.Verify(x => x.ConnectAsync(It.IsAny<CancellationToken>()), Times.AtLeast(2));
+        callCount.Should().Be(failureCount + 1, "should retry exactly the expected number of times");
+        (endTime - startTime).Should().BeGreaterThan(TimeSpan.FromMilliseconds(50), "should have some retry delay");
+        mockKnxGateway.Verify(x => x.ConnectAsync(It.IsAny<CancellationToken>()), Times.Exactly(failureCount + 1));
     }
 
     #endregion
