@@ -5,6 +5,7 @@ using System.Text.Json;
 using Cortex.Mediator.Commands;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Attributes;
+using SnapDog2.Core.Configuration;
 using SnapDog2.Core.Enums;
 using SnapDog2.Core.Models;
 
@@ -12,9 +13,13 @@ using SnapDog2.Core.Models;
 /// Attribute-based MQTT command mapper that uses MqttTopicAttribute decorations
 /// to automatically discover and route MQTT topics to commands, similar to API routing.
 /// </summary>
-public partial class AttributeBasedMqttCommandMapper(ILogger<AttributeBasedMqttCommandMapper> logger)
+public partial class AttributeBasedMqttCommandMapper(
+    ILogger<AttributeBasedMqttCommandMapper> logger,
+    MqttConfig mqttConfig
+)
 {
     private readonly ILogger<AttributeBasedMqttCommandMapper> _logger = logger;
+    private readonly MqttConfig _mqttConfig = mqttConfig;
     private readonly Dictionary<string, (Type CommandType, MqttTopicAttribute Attribute)> _topicMappings = new();
     private bool _initialized = false;
 
@@ -85,7 +90,7 @@ public partial class AttributeBasedMqttCommandMapper(ILogger<AttributeBasedMqttC
             // Try to find a matching topic pattern
             foreach (var (topicPattern, (commandType, attribute)) in _topicMappings)
             {
-                if (attribute.TryMatchTopic(topic, out var parameters))
+                if (attribute.TryMatchTopic(topic, out var parameters, _mqttConfig.MqttBaseTopic))
                 {
                     return CreateCommandInstance(commandType, parameters, payload, attribute);
                 }

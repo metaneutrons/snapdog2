@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Sockets;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using SnapDog2.Core.Configuration;
 
 namespace SnapDog2.Extensions;
@@ -12,13 +13,17 @@ namespace SnapDog2.Extensions;
 public static partial class WebHostExtensions
 {
     /// <summary>
-    /// Configures Kestrel with resilient port binding and fallback logic using ApiConfig
+    /// Configures Kestrel with resilient port binding and fallback logic using ApiConfig.
+    /// Uses NullLogger to avoid early service provider creation issues.
     /// </summary>
-    public static IWebHostBuilder UseResilientKestrel(this IWebHostBuilder builder, ApiConfig apiConfig, ILogger logger)
+    public static IWebHostBuilder UseResilientKestrel(this IWebHostBuilder builder, ApiConfig apiConfig)
     {
         return builder.UseKestrel(
             (context, options) =>
             {
+                // Use NullLogger for infrastructure setup to avoid service provider issues
+                var logger = NullLogger.Instance;
+
                 if (!apiConfig.Enabled)
                 {
                     LogApiDisabled(logger);
@@ -91,67 +96,64 @@ public static partial class WebHostExtensions
     {
         try
         {
-            using var listener = new TcpListener(IPAddress.Any, port);
-            listener.Start();
-            listener.Stop();
+            using var tcpListener = new TcpListener(IPAddress.Any, port);
+            tcpListener.Start();
+            tcpListener.Stop();
             return true;
         }
         catch (SocketException)
         {
             return false;
         }
-        catch
-        {
-            return false;
-        }
     }
 
-    [LoggerMessage(12001, LogLevel.Information, "🌐 API is disabled - Kestrel will not bind to any ports")]
+    // LoggerMessage methods for structured logging
+    [LoggerMessage(
+        EventId = 1,
+        Level = LogLevel.Information,
+        Message = "🚫 API is disabled - skipping Kestrel configuration"
+    )]
     private static partial void LogApiDisabled(ILogger logger);
 
-    [LoggerMessage(12002, LogLevel.Information, "🌐 Configuring Kestrel with resilient port binding")]
+    [LoggerMessage(EventId = 2, Level = LogLevel.Information, Message = "🌐 Configuring Kestrel web server...")]
     private static partial void LogKestrelConfiguring(ILogger logger);
 
-    [LoggerMessage(12003, LogLevel.Information, "   Preferred HTTP port: {HttpPort}")]
-    private static partial void LogPreferredHttpPort(ILogger logger, int httpPort);
+    [LoggerMessage(EventId = 3, Level = LogLevel.Information, Message = "🎯 Preferred HTTP port: {Port}")]
+    private static partial void LogPreferredHttpPort(ILogger logger, int Port);
 
-    [LoggerMessage(12004, LogLevel.Information, "✅ Kestrel configured successfully")]
+    [LoggerMessage(EventId = 4, Level = LogLevel.Information, Message = "✅ Kestrel configured successfully")]
     private static partial void LogKestrelConfigured(ILogger logger);
 
-    [LoggerMessage(12005, LogLevel.Information, "   Actual HTTP port: {ActualHttpPort}")]
-    private static partial void LogActualHttpPort(ILogger logger, int actualHttpPort);
+    [LoggerMessage(EventId = 5, Level = LogLevel.Information, Message = "🌐 HTTP server listening on port: {Port}")]
+    private static partial void LogActualHttpPort(ILogger logger, int Port);
 
-    [LoggerMessage(12006, LogLevel.Critical, "💥 Failed to configure Kestrel endpoints. No available ports found.")]
+    [LoggerMessage(EventId = 6, Level = LogLevel.Error, Message = "❌ Kestrel configuration failed")]
     private static partial void LogKestrelConfigurationFailed(ILogger logger, Exception ex);
 
     [LoggerMessage(
-        12007,
-        LogLevel.Warning,
-        "⚠️ HTTP port {PreferredPort} was not available. Using fallback port {ActualPort}"
+        EventId = 7,
+        Level = LogLevel.Warning,
+        Message = "🔄 HTTP port fallback: {PreferredPort} → {ActualPort}"
     )]
-    private static partial void LogHttpPortFallback(ILogger logger, int preferredPort, int actualPort);
+    private static partial void LogHttpPortFallback(ILogger logger, int PreferredPort, int ActualPort);
 
-    [LoggerMessage(12008, LogLevel.Debug, "🚫 HTTP port {Port} is not available (attempt {Attempt}/{MaxAttempts})")]
-    private static partial void LogHttpPortUnavailable(ILogger logger, int port, int attempt, int maxAttempts);
+    [LoggerMessage(
+        EventId = 8,
+        Level = LogLevel.Warning,
+        Message = "⚠️ HTTP port {Port} unavailable (attempt {Attempt}/{MaxAttempts})"
+    )]
+    private static partial void LogHttpPortUnavailable(ILogger logger, int Port, int Attempt, int MaxAttempts);
 
-    [LoggerMessage(12009, LogLevel.Warning, "❌ Failed to bind to HTTP port {Port} (attempt {Attempt}/{MaxAttempts})")]
+    [LoggerMessage(
+        EventId = 9,
+        Level = LogLevel.Warning,
+        Message = "⚠️ Failed to bind HTTP port {Port} (attempt {Attempt}/{MaxAttempts})"
+    )]
     private static partial void LogHttpPortBindFailed(
         ILogger logger,
         Exception ex,
-        int port,
-        int attempt,
-        int maxAttempts
+        int Port,
+        int Attempt,
+        int MaxAttempts
     );
-}
-
-/// <summary>
-/// Exception thrown when web host configuration fails
-/// </summary>
-public class WebHostConfigurationException : Exception
-{
-    public WebHostConfigurationException(string message)
-        : base(message) { }
-
-    public WebHostConfigurationException(string message, Exception innerException)
-        : base(message, innerException) { }
 }

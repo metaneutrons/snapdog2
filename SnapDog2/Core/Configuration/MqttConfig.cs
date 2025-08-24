@@ -15,6 +15,13 @@ public class MqttConfig
     public bool Enabled { get; set; } = true;
 
     /// <summary>
+    /// Base MQTT topic prefix for all system topics.
+    /// Maps to: SNAPDOG_SERVICES_MQTT_MQTT_BASE_TOPIC
+    /// </summary>
+    [Env(Key = "MQTT_BASE_TOPIC", Default = "snapdog")]
+    public string MqttBaseTopic { get; set; } = "snapdog";
+
+    /// <summary>
     /// MQTT broker address.
     /// Maps to: SNAPDOG_SERVICES_MQTT_BROKER_ADDRESS
     /// </summary>

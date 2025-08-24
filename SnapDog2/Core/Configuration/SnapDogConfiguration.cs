@@ -66,4 +66,9 @@ public class SnapDogConfiguration
     /// </summary>
     [Env(NestedListPrefix = "RADIO_", NestedListSuffix = "_")]
     public List<RadioStationConfig> RadioStations { get; set; } = [];
+
+    /// <summary>
+    /// Base MQTT topic prefix. Convenience property that maps to Services.Mqtt.MqttBaseTopic.
+    /// </summary>
+    public string MqttBaseTopic => Services.Mqtt.MqttBaseTopic;
 }

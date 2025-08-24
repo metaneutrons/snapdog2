@@ -48,11 +48,4 @@ public class SystemConfig
     /// </summary>
     [Env(Key = "LOG_FILE")]
     public string? LogFile { get; set; }
-
-    /// <summary>
-    /// Base MQTT topic prefix for all system topics.
-    /// Maps to: SNAPDOG_SYSTEM_MQTT_BASE_TOPIC
-    /// </summary>
-    [Env(Key = "MQTT_BASE_TOPIC", Default = "snapdog")]
-    public string MqttBaseTopic { get; set; } = "snapdog";
 }

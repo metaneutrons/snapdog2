@@ -23,7 +23,7 @@ public static class MqttTopicParser
     /// </summary>
     /// <param name="topic">The MQTT topic to parse.</param>
     /// <returns>Parsed topic parts or null if invalid.</returns>
-    public static MqttTopicParts? Parse(string topic)
+    public static MqttTopicParts? Parse(string topic, string baseTopic = "snapdog")
     {
         if (string.IsNullOrWhiteSpace(topic))
         {
@@ -32,14 +32,14 @@ public static class MqttTopicParser
 
         var parts = topic.Split('/');
 
-        // Basic structure: snapdog/{entity}/{index}/{command}[/set]
+        // Basic structure: {baseTopic}/{entity}/{index}/{command}[/set]
         if (parts.Length < 4 || parts.Length > 5)
         {
             return null;
         }
 
-        // Must start with snapdog
-        if (!parts[0].Equals(MqttConstants.ROOT_TOPIC, StringComparison.OrdinalIgnoreCase))
+        // Must start with configured base topic
+        if (!parts[0].Equals(baseTopic.TrimEnd('/'), StringComparison.OrdinalIgnoreCase))
         {
             return null;
         }
@@ -82,6 +82,21 @@ public static class MqttTopicParser
 
     /// <summary>
     /// Validates that a topic follows the expected MQTT topic structure.
+    /// </summary>
+    /// <param name="topic">The topic to validate.</param>
+    /// <param name="baseTopic">The configured base topic (default: "snapdog").</param>
+    /// <returns>True if the topic is valid, false otherwise.</returns>
+    public static bool IsValid(string topic, string baseTopic = "snapdog") => Parse(topic, baseTopic) != null;
+
+    /// <summary>
+    /// Parses an MQTT topic using the default "snapdog" base topic for backward compatibility.
+    /// </summary>
+    /// <param name="topic">The MQTT topic to parse.</param>
+    /// <returns>Parsed topic parts or null if invalid.</returns>
+    public static MqttTopicParts? Parse(string topic) => Parse(topic, "snapdog");
+
+    /// <summary>
+    /// Validates that a topic follows the expected MQTT topic structure using default base topic.
     /// </summary>
     /// <param name="topic">The topic to validate.</param>
     /// <returns>True if the topic is valid, false otherwise.</returns>

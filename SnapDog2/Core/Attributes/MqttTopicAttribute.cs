@@ -68,15 +68,20 @@ public class MqttTopicAttribute(string topicPattern) : Attribute
 
     /// <summary>
     /// Checks if a topic matches the pattern, extracting parameters.
+    /// Supports configurable base topic by replacing "snapdog" with the actual base topic.
     /// </summary>
     /// <param name="topic">Actual MQTT topic received.</param>
     /// <param name="parameters">Extracted parameters from the topic.</param>
+    /// <param name="baseTopic">The configured base topic (e.g., "snapdog", "myapp", etc.)</param>
     /// <returns>True if the topic matches the pattern.</returns>
-    public bool TryMatchTopic(string topic, out Dictionary<string, string> parameters)
+    public bool TryMatchTopic(string topic, out Dictionary<string, string> parameters, string baseTopic = "snapdog")
     {
         parameters = new Dictionary<string, string>();
 
-        var patternParts = TopicPattern.Split('/');
+        // Replace the hardcoded "snapdog" in the pattern with the actual base topic
+        var actualPattern = TopicPattern.Replace("snapdog", baseTopic.TrimEnd('/'), StringComparison.OrdinalIgnoreCase);
+
+        var patternParts = actualPattern.Split('/');
         var topicParts = topic.Split('/');
 
         if (patternParts.Length != topicParts.Length)
@@ -100,5 +105,17 @@ public class MqttTopicAttribute(string topicPattern) : Attribute
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Checks if a topic matches the pattern, extracting parameters.
+    /// Uses default "snapdog" base topic for backward compatibility.
+    /// </summary>
+    /// <param name="topic">Actual MQTT topic received.</param>
+    /// <param name="parameters">Extracted parameters from the topic.</param>
+    /// <returns>True if the topic matches the pattern.</returns>
+    public bool TryMatchTopic(string topic, out Dictionary<string, string> parameters)
+    {
+        return TryMatchTopic(topic, out parameters, "snapdog");
     }
 }

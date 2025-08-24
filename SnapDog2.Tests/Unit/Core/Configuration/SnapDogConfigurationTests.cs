@@ -21,6 +21,29 @@ public class SnapDogConfigurationTests
 
     [Fact]
     [Trait("Category", "Unit")]
+    public void MqttBaseTopic_ShouldReturnConfiguredValue()
+    {
+        // Arrange
+        var config = new SnapDogConfiguration();
+        config.Services.Mqtt.MqttBaseTopic = "myapp";
+
+        // Act & Assert
+        config.MqttBaseTopic.Should().Be("myapp");
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public void MqttBaseTopic_ShouldHaveDefaultValue()
+    {
+        // Act
+        var config = new SnapDogConfiguration();
+
+        // Assert
+        config.MqttBaseTopic.Should().Be("snapdog");
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
     [Trait("Category", "Unit")]
     public void SystemConfig_ShouldHaveDefaultValues()
     {
@@ -33,7 +56,6 @@ public class SnapDogConfigurationTests
         config.HealthChecksEnabled.Should().BeTrue();
         config.HealthChecksTimeout.Should().Be(30);
         config.HealthChecksTags.Should().Be("ready,live");
-        config.MqttBaseTopic.Should().Be("snapdog");
         config.LogFile.Should().BeNull();
     }
 

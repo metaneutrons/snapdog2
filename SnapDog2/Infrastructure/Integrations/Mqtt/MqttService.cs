@@ -47,6 +47,35 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     private readonly ResiliencePipeline _connectionPolicy;
     private readonly ResiliencePipeline _operationPolicy;
 
+    /// <summary>
+    /// Constructs a full MQTT topic using the configured base topic.
+    /// </summary>
+    /// <param name="topicSuffix">The topic suffix (e.g., "zone/1/volume")</param>
+    /// <returns>Full topic with base prefix (e.g., "snapdog/zone/1/volume")</returns>
+    private string BuildTopic(string topicSuffix)
+    {
+        var baseTopic = _config.MqttBaseTopic.TrimEnd('/');
+        return $"{baseTopic}/{topicSuffix}";
+    }
+
+    /// <summary>
+    /// Extracts the topic suffix by removing the configured base topic prefix.
+    /// </summary>
+    /// <param name="fullTopic">The full MQTT topic</param>
+    /// <returns>Topic suffix without base prefix, or null if doesn't match base</returns>
+    private string? ExtractTopicSuffix(string fullTopic)
+    {
+        var baseTopic = _config.MqttBaseTopic.TrimEnd('/');
+        var expectedPrefix = $"{baseTopic}/";
+
+        if (fullTopic.StartsWith(expectedPrefix, StringComparison.OrdinalIgnoreCase))
+        {
+            return fullTopic[expectedPrefix.Length..];
+        }
+
+        return null;
+    }
+
     private IMqttClient? _mqttClient;
     private bool _initialized = false;
     private bool _disposed = false;
@@ -336,7 +365,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         try
         {
             // Use simple zone state topic that matches blueprint pattern
-            var stateTopic = $"snapdog/zone/{zoneIndex}/state";
+            var stateTopic = BuildTopic($"zone/{zoneIndex}/state");
 
             // Publish comprehensive state as JSON
             var stateJson = JsonSerializer.Serialize(
@@ -381,7 +410,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         try
         {
             // Use simple client state topic that matches blueprint pattern
-            var clientStateTopic = $"snapdog/client/{parsedClientIndex}/state";
+            var clientStateTopic = BuildTopic($"client/{parsedClientIndex}/state");
 
             // Publish comprehensive state as JSON
             var stateJson = JsonSerializer.Serialize(
@@ -593,16 +622,23 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     {
         try
         {
-            // Parse the topic structure: snapdog/{zone|client}/{index}/{command}
-            var topicParts = topic.Split('/');
-            if (topicParts.Length < 4 || !topicParts[0].Equals("snapdog", StringComparison.OrdinalIgnoreCase))
+            // Extract topic suffix and parse: {zone|client}/{index}/{command}
+            var topicSuffix = ExtractTopicSuffix(topic);
+            if (topicSuffix == null)
+            {
+                this.LogNoCommandMappingFoundForTopic(topic);
+                return null;
+            }
+
+            var topicParts = topicSuffix.Split('/');
+            if (topicParts.Length < 3)
             {
                 return null;
             }
 
-            var entityType = topicParts[1].ToLowerInvariant();
-            var entityId = topicParts[2];
-            var command = topicParts[3].ToLowerInvariant();
+            var entityType = topicParts[0].ToLowerInvariant();
+            var entityId = topicParts[1];
+            var command = topicParts[2].ToLowerInvariant();
 
             return entityType switch
             {
@@ -983,12 +1019,12 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         // Use simple topic patterns that match the blueprint
         return eventType.ToUpperInvariant() switch
         {
-            "CLIENT_VOLUME_STATUS" => $"snapdog/client/{clientIndex}/volume",
-            "CLIENT_MUTE_STATUS" => $"snapdog/client/{clientIndex}/mute",
-            "CLIENT_LATENCY_STATUS" => $"snapdog/client/{clientIndex}/latency",
-            "CLIENT_CONNECTED" => $"snapdog/client/{clientIndex}/connected",
-            "CLIENT_ZONE_STATUS" => $"snapdog/client/{clientIndex}/zone",
-            "CLIENT_STATE" => $"snapdog/client/{clientIndex}/state",
+            "CLIENT_VOLUME_STATUS" => BuildTopic($"client/{clientIndex}/volume"),
+            "CLIENT_MUTE_STATUS" => BuildTopic($"client/{clientIndex}/mute"),
+            "CLIENT_LATENCY_STATUS" => BuildTopic($"client/{clientIndex}/latency"),
+            "CLIENT_CONNECTED" => BuildTopic($"client/{clientIndex}/connected"),
+            "CLIENT_ZONE_STATUS" => BuildTopic($"client/{clientIndex}/zone"),
+            "CLIENT_STATE" => BuildTopic($"client/{clientIndex}/state"),
             _ => null,
         };
     }
@@ -1004,10 +1040,10 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         // Use simple topic patterns that match the blueprint
         return eventType.ToUpperInvariant() switch
         {
-            "VOLUME_STATUS" => $"snapdog/zone/{zoneIndex}/volume",
-            "MUTE_STATUS" => $"snapdog/zone/{zoneIndex}/mute",
-            "PLAYBACK_STATE" => $"snapdog/zone/{zoneIndex}/playing",
-            "ZONE_STATE" => $"snapdog/zone/{zoneIndex}/state",
+            "VOLUME_STATUS" => BuildTopic($"zone/{zoneIndex}/volume"),
+            "MUTE_STATUS" => BuildTopic($"zone/{zoneIndex}/mute"),
+            "PLAYBACK_STATE" => BuildTopic($"zone/{zoneIndex}/playing"),
+            "ZONE_STATE" => BuildTopic($"zone/{zoneIndex}/state"),
             _ => null,
         };
     }
@@ -1078,9 +1114,9 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             // Use simple topic patterns that match the blueprint
             var topic = eventType.ToUpperInvariant() switch
             {
-                "SYSTEM_STATUS" => "snapdog/system/status",
-                "VERSION_INFO" => "snapdog/system/version",
-                "SERVER_STATS" => "snapdog/system/stats",
+                "SYSTEM_STATUS" => BuildTopic("system/status"),
+                "VERSION_INFO" => BuildTopic("system/version"),
+                "SERVER_STATS" => BuildTopic("system/stats"),
                 _ => null,
             };
 

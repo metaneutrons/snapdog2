@@ -2,6 +2,7 @@ namespace SnapDog2.Infrastructure.Integrations.Mqtt;
 
 using Cortex.Mediator.Commands;
 using Microsoft.Extensions.Logging;
+using SnapDog2.Core.Configuration;
 using SnapDog2.Core.Models;
 using SnapDog2.Server.Features.Shared.Factories;
 
@@ -9,9 +10,10 @@ using SnapDog2.Server.Features.Shared.Factories;
 /// Modern MQTT command mapper using constants, dictionaries, and type-safe parsing.
 /// Eliminates magic strings and provides maintainable command mapping.
 /// </summary>
-public partial class MqttCommandMapper(ILogger<MqttCommandMapper> logger)
+public partial class MqttCommandMapper(ILogger<MqttCommandMapper> logger, MqttConfig mqttConfig)
 {
     private readonly ILogger<MqttCommandMapper> _logger = logger;
+    private readonly MqttConfig _mqttConfig = mqttConfig;
 
     [LoggerMessage(8001, LogLevel.Debug, "Mapping MQTT command: {Topic} -> {Payload}")]
     private partial void LogMappingCommand(string topic, string payload);
@@ -59,7 +61,7 @@ public partial class MqttCommandMapper(ILogger<MqttCommandMapper> logger)
             this.LogMappingCommand(topic, payload);
 
             // Parse topic using structured parser
-            var topicParts = MqttTopicParser.Parse(topic);
+            var topicParts = MqttTopicParser.Parse(topic, _mqttConfig.MqttBaseTopic);
             if (topicParts == null || !topicParts.IsControlTopic)
             {
                 return null;
@@ -101,20 +103,20 @@ public partial class MqttCommandMapper(ILogger<MqttCommandMapper> logger)
     /// <summary>
     /// Validates that a topic follows the expected MQTT topic structure.
     /// </summary>
-    public bool IsValidMqttTopic(string topic) => MqttTopicParser.IsValid(topic);
+    public bool IsValidMqttTopic(string topic) => MqttTopicParser.IsValid(topic, _mqttConfig.MqttBaseTopic);
 
     /// <summary>
     /// Gets the entity type (zone/client) from an MQTT topic.
     /// </summary>
-    public string? GetEntityType(string topic) => MqttTopicParser.Parse(topic)?.EntityType;
+    public string? GetEntityType(string topic) => MqttTopicParser.Parse(topic, _mqttConfig.MqttBaseTopic)?.EntityType;
 
     /// <summary>
     /// Gets the entity ID from an MQTT topic.
     /// </summary>
-    public int? GetEntityId(string topic) => MqttTopicParser.Parse(topic)?.EntityId;
+    public int? GetEntityId(string topic) => MqttTopicParser.Parse(topic, _mqttConfig.MqttBaseTopic)?.EntityId;
 
     /// <summary>
     /// Gets the command name from an MQTT topic.
     /// </summary>
-    public string? GetCommandName(string topic) => MqttTopicParser.Parse(topic)?.Command;
+    public string? GetCommandName(string topic) => MqttTopicParser.Parse(topic, _mqttConfig.MqttBaseTopic)?.Command;
 }
