@@ -396,9 +396,9 @@ public static class SnapDogBlueprint
         //
         .Status("PLAYBACK_STATE")
         .Zone()
-        .Mqtt("snapdog/zone/{zoneIndex}/playing")
         .Get("/api/v1/zones/{zoneIndex:int}/playback")
         .Exclude(Protocol.Knx, "string-based playback state not actionable via KNX")
+        .Exclude(Protocol.Mqtt, "string-based playback state not actionable via MQTT")
         .Description("Current playback state")
         //
         // === TRACK STATUS ===
