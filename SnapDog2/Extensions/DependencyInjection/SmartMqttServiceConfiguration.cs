@@ -32,7 +32,7 @@ public static class SmartMqttServiceConfiguration
         services.AddSingleton<ISmartMqttPublisher, SmartMqttPublisher>();
 
         // Register the unified notification handlers
-        services.AddScoped<SnapDog2.Server.Features.Shared.Handlers.SmartMqttNotificationHandlers>();
+        services.AddScoped<SnapDog2.Server.Features.Shared.Handlers.IntegrationPublishingHandlers>();
 
         return services;
     }

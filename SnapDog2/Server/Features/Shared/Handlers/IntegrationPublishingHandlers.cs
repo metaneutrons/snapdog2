@@ -16,22 +16,25 @@ namespace SnapDog2.Server.Features.Shared.Handlers;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Cortex.Mediator;
 using Cortex.Mediator.Notifications;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Attributes;
+using SnapDog2.Core.Constants;
 using SnapDog2.Infrastructure.Integrations.Mqtt;
 using SnapDog2.Server.Features.Clients.Notifications;
+using SnapDog2.Server.Features.Shared.Notifications;
 using SnapDog2.Server.Features.Zones.Notifications;
 
 /// <summary>
-/// Smart MQTT notification handlers that use the hybrid direct/queue publishing approach.
-/// Replaces the inconsistent pattern with a unified, reliable MQTT publishing strategy.
+/// Integration publishing handlers that publish status changes to all external integrations (MQTT, KNX, etc.).
+/// Implements the Command-Status Flow pattern by consolidating all integration publishing logic.
 /// </summary>
-public partial class SmartMqttNotificationHandlers(
+public partial class IntegrationPublishingHandlers(
     IServiceProvider serviceProvider,
-    ILogger<SmartMqttNotificationHandlers> logger
+    ILogger<IntegrationPublishingHandlers> logger
 )
     :
     // Client notification handlers
@@ -55,7 +58,7 @@ public partial class SmartMqttNotificationHandlers(
         INotificationHandler<ZoneTrackAlbumChangedNotification>
 {
     private readonly IServiceProvider _serviceProvider = serviceProvider;
-    private readonly ILogger<SmartMqttNotificationHandlers> _logger = logger;
+    private readonly ILogger<IntegrationPublishingHandlers> _logger = logger;
 
     #region Client Notification Handlers
 
@@ -66,6 +69,19 @@ public partial class SmartMqttNotificationHandlers(
             StatusIdAttribute.GetStatusId<ClientVolumeStatusNotification>(),
             notification.ClientIndex.ToString(),
             notification.Volume,
+            cancellationToken
+        );
+
+        // Also publish StatusChangedNotification for KNX integration
+        using var scope = _serviceProvider.CreateScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        await mediator.PublishAsync(
+            new StatusChangedNotification
+            {
+                StatusType = StatusIds.ClientVolumeStatus,
+                TargetId = notification.ClientIndex.ToString(),
+                Value = notification.Volume
+            },
             cancellationToken
         );
     }
