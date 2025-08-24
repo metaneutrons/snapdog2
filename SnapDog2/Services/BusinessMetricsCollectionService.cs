@@ -102,7 +102,9 @@ public partial class BusinessMetricsCollectionService : BackgroundService
         try
         {
             if (zoneManager == null)
+            {
                 return Task.FromResult(0);
+            }
 
             // In a real implementation, you would call a method to get all zones
             // For now, return a placeholder value
@@ -125,7 +127,9 @@ public partial class BusinessMetricsCollectionService : BackgroundService
         try
         {
             if (zoneManager == null)
+            {
                 return Task.FromResult(0);
+            }
 
             // In a real implementation, you would:
             // 1. Get all zones
@@ -148,7 +152,9 @@ public partial class BusinessMetricsCollectionService : BackgroundService
         try
         {
             if (clientManager == null)
+            {
                 return Task.FromResult(0);
+            }
 
             // In a real implementation, you would:
             // 1. Get all clients
@@ -171,7 +177,9 @@ public partial class BusinessMetricsCollectionService : BackgroundService
         try
         {
             if (zoneManager == null)
+            {
                 return Task.FromResult(0);
+            }
 
             // In a real implementation, you would:
             // 1. Get all zones

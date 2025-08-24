@@ -1,0 +1,23 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+## SnapDog2 Pre-push Hook
+## Runs tests before push to ensure code quality
+
+echo '🧪 Running tests before push...'
+
+# Build first to ensure everything compiles
+dotnet build --verbosity quiet
+if [ $? -ne 0 ]; then
+    echo "❌ Build failed. Cannot run tests."
+    exit 1
+fi
+
+# Run all tests
+dotnet test --verbosity quiet --no-build
+if [ $? -ne 0 ]; then
+    echo "❌ Tests failed. Please fix failing tests before pushing."
+    exit 1
+fi
+
+echo '✅ All tests passed! Push approved.'

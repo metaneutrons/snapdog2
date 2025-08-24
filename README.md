@@ -25,6 +25,38 @@ make dev
 
 **Access everything at:** <http://localhost:8000> 🎉
 
+## Code Quality & Git Hooks
+
+This project uses **Husky.Net** for git hooks and **dotnet format** for code formatting.
+
+### Pre-commit Hook
+- ✅ **Code Formatting**: Runs `dotnet format` to ensure consistent code style
+- ✅ **Build Verification**: Ensures code compiles before commit
+- 🔄 **Auto-fix**: Automatically formats code if issues are found (requires re-commit)
+
+### Pre-push Hook  
+- ✅ **Test Execution**: Runs all tests before push to prevent broken builds
+- ✅ **Build Verification**: Double-checks build before running tests
+
+### Manual Commands
+
+```bash
+# Format code manually
+dotnet format
+
+# Check formatting without changes
+dotnet format --verify-no-changes
+
+# Run specific Husky.Net tasks
+dotnet husky run --name format-check
+dotnet husky run --name build
+dotnet husky run --name test
+
+# Run tasks by group
+dotnet husky run --group code-quality
+dotnet husky run --group build
+```
+
 ## Development Commands
 
 ### 🏗️ Development

@@ -27,7 +27,9 @@ public class LoggerMessageCodeFixProvider : CodeFixProvider
     {
         var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
         if (root == null)
+        {
             return;
+        }
 
         foreach (var diagnostic in context.Diagnostics)
         {
@@ -55,7 +57,9 @@ public class LoggerMessageCodeFixProvider : CodeFixProvider
     {
         var attribute = node.FirstAncestorOrSelf<AttributeSyntax>();
         if (attribute?.ArgumentList?.Arguments == null)
+        {
             return;
+        }
 
         var action = CodeAction.Create(
             title: "Convert to named parameters",
@@ -75,7 +79,9 @@ public class LoggerMessageCodeFixProvider : CodeFixProvider
     {
         var method = node.FirstAncestorOrSelf<MethodDeclarationSyntax>();
         if (method == null)
+        {
             return;
+        }
 
         var action = CodeAction.Create(
             title: "Move LoggerMessage method to end of class",
@@ -135,7 +141,9 @@ public class LoggerMessageCodeFixProvider : CodeFixProvider
     {
         var containingClass = method.FirstAncestorOrSelf<ClassDeclarationSyntax>();
         if (containingClass == null)
+        {
             return Task.FromResult(document);
+        }
 
         // Get all members and find LoggerMessage methods
         var members = containingClass.Members.ToList();

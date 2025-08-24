@@ -85,7 +85,9 @@ public class MqttTopicAttribute(string topicPattern) : Attribute
         var topicParts = topic.Split('/');
 
         if (patternParts.Length != topicParts.Length)
+        {
             return false;
+        }
 
         for (int i = 0; i < patternParts.Length; i++)
         {

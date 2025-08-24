@@ -1,0 +1,45 @@
+{
+   "$schema": "https://alirezanet.github.io/Husky.Net/schema.json",
+   "tasks": [
+      {
+         "name": "format",
+         "group": "code-quality",
+         "command": "dotnet",
+         "args": [ "format", "--verbosity", "diagnostic" ],
+         "windows": {
+            "command": "dotnet",
+            "args": [ "format", "--verbosity", "diagnostic" ]
+         }
+      },
+      {
+         "name": "format-check",
+         "group": "code-quality", 
+         "command": "dotnet",
+         "args": [ "format", "--verbosity", "diagnostic", "--verify-no-changes" ],
+         "windows": {
+            "command": "dotnet",
+            "args": [ "format", "--verbosity", "diagnostic", "--verify-no-changes" ]
+         }
+      },
+      {
+         "name": "build",
+         "group": "build",
+         "command": "dotnet",
+         "args": [ "build", "--verbosity", "quiet" ],
+         "windows": {
+            "command": "dotnet",
+            "args": [ "build", "--verbosity", "quiet" ]
+         }
+      },
+      {
+         "name": "test",
+         "group": "build",
+         "command": "dotnet",
+         "args": [ "test", "--verbosity", "quiet" ],
+         "windows": {
+            "command": "dotnet",
+            "args": [ "test", "--verbosity", "quiet" ]
+         }
+      }
+   ]
+}

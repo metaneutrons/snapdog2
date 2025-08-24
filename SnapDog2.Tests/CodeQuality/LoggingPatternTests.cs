@@ -131,7 +131,9 @@ public class LoggingPatternTests
         foreach (var (namespaceName, eventIds) in eventIdsByNamespace)
         {
             if (eventIds.Count <= 1)
+            {
                 continue; // Skip single-event namespaces
+            }
 
             var sortedIds = eventIds.OrderBy(x => x).ToList();
             var expectedRange = GetExpectedEventIdRange(namespaceName);
@@ -156,7 +158,9 @@ public class LoggingPatternTests
     )
     {
         if (ExcludedDirectories.Any(excluded => directory.Contains(excluded, StringComparison.OrdinalIgnoreCase)))
+        {
             return;
+        }
 
         foreach (var file in Directory.GetFiles(directory, "*.cs"))
         {
@@ -165,7 +169,9 @@ public class LoggingPatternTests
                     Path.GetFileName(file).Equals(excluded, StringComparison.OrdinalIgnoreCase)
                 )
             )
+            {
                 continue;
+            }
 
             var lines = File.ReadAllLines(file);
             for (int i = 0; i < lines.Length; i++)
@@ -203,7 +209,9 @@ public class LoggingPatternTests
     )
     {
         if (ExcludedDirectories.Any(excluded => directory.Contains(excluded, StringComparison.OrdinalIgnoreCase)))
+        {
             return;
+        }
 
         foreach (var file in Directory.GetFiles(directory, "*.cs"))
         {
@@ -212,7 +220,9 @@ public class LoggingPatternTests
                     Path.GetFileName(file).Equals(excluded, StringComparison.OrdinalIgnoreCase)
                 )
             )
+            {
                 continue;
+            }
 
             var content = File.ReadAllText(file);
             loggerMessageCount += loggerMessagePattern.Matches(content).Count;
@@ -238,7 +248,9 @@ public class LoggingPatternTests
     )
     {
         if (ExcludedDirectories.Any(excluded => directory.Contains(excluded, StringComparison.OrdinalIgnoreCase)))
+        {
             return;
+        }
 
         foreach (var file in Directory.GetFiles(directory, "*.cs"))
         {
@@ -247,7 +259,9 @@ public class LoggingPatternTests
                     Path.GetFileName(file).Equals(excluded, StringComparison.OrdinalIgnoreCase)
                 )
             )
+            {
                 continue;
+            }
 
             var content = File.ReadAllText(file);
             var matches = eventIdPattern.Matches(content);
@@ -258,7 +272,9 @@ public class LoggingPatternTests
                 if (int.TryParse(match.Groups[1].Value, out var eventId))
                 {
                     if (!eventIds.ContainsKey(eventId))
+                    {
                         eventIds[eventId] = new List<string>();
+                    }
 
                     eventIds[eventId].Add(relativePath);
                 }
@@ -278,7 +294,9 @@ public class LoggingPatternTests
     )
     {
         if (ExcludedDirectories.Any(excluded => directory.Contains(excluded, StringComparison.OrdinalIgnoreCase)))
+        {
             return;
+        }
 
         foreach (var file in Directory.GetFiles(directory, "*.cs"))
         {
@@ -287,12 +305,16 @@ public class LoggingPatternTests
                     Path.GetFileName(file).Equals(excluded, StringComparison.OrdinalIgnoreCase)
                 )
             )
+            {
                 continue;
+            }
 
             var content = File.ReadAllText(file);
             var namespaceMatch = Regex.Match(content, @"namespace\s+([\w\.]+)");
             if (!namespaceMatch.Success)
+            {
                 continue;
+            }
 
             var namespaceName = namespaceMatch.Groups[1].Value;
             var matches = eventIdPattern.Matches(content);
@@ -302,7 +324,9 @@ public class LoggingPatternTests
                 if (int.TryParse(match.Groups[1].Value, out var eventId))
                 {
                     if (!eventIdsByNamespace.ContainsKey(namespaceName))
+                    {
                         eventIdsByNamespace[namespaceName] = new List<int>();
+                    }
 
                     eventIdsByNamespace[namespaceName].Add(eventId);
                 }

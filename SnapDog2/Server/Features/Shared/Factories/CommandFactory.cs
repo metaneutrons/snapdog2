@@ -863,13 +863,17 @@ public static class CommandFactoryExtensions
     {
         var parts = topic.Split('/');
         if (parts.Length < 4 || !parts[0].Equals("snapdog", StringComparison.OrdinalIgnoreCase))
+        {
             return null;
+        }
 
         var entityType = parts[1].ToLowerInvariant();
         var entityIdStr = parts[2];
 
         if (!int.TryParse(entityIdStr, out var entityId))
+        {
             return null;
+        }
 
         // Handle hierarchical commands (e.g., repeat/track, repeat/set)
         var commandParts = parts.Skip(3).ToArray();

@@ -44,7 +44,9 @@ public partial class AttributeBasedMqttCommandMapper(
     public void Initialize()
     {
         if (_initialized)
+        {
             return;
+        }
 
         LogInitializingMappings();
 
@@ -121,7 +123,9 @@ public partial class AttributeBasedMqttCommandMapper(
             // Create command instance
             var command = Activator.CreateInstance(commandType);
             if (command is not ICommand<Result> typedCommand)
+            {
                 return null;
+            }
 
             // Set properties from topic parameters
             foreach (var (paramName, paramValue) in parameters)
@@ -234,19 +238,29 @@ public partial class AttributeBasedMqttCommandMapper(
     private static object? ConvertParameter(string value, Type targetType)
     {
         if (targetType == typeof(string))
+        {
             return value;
+        }
 
         if (targetType == typeof(int) || targetType == typeof(int?))
+        {
             return int.TryParse(value, out var intValue) ? intValue : null;
+        }
 
         if (targetType == typeof(bool) || targetType == typeof(bool?))
+        {
             return bool.TryParse(value, out var boolValue) ? boolValue : null;
+        }
 
         if (targetType == typeof(double) || targetType == typeof(double?))
+        {
             return double.TryParse(value, out var doubleValue) ? doubleValue : null;
+        }
 
         if (targetType.IsEnum)
+        {
             return Enum.TryParse(targetType, value, true, out var enumValue) ? enumValue : null;
+        }
 
         return value;
     }
@@ -257,7 +271,9 @@ public partial class AttributeBasedMqttCommandMapper(
     public IEnumerable<string> GetRegisteredTopicPatterns()
     {
         if (!_initialized)
+        {
             Initialize();
+        }
 
         return _topicMappings.Keys;
     }

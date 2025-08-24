@@ -1297,7 +1297,9 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     private void StartPositionUpdateTimer()
     {
         if (this._positionUpdateTimer != null)
+        {
             return; // Timer already running
+        }
 
         LogStartingPositionUpdateTimer(this._zoneIndex);
 
@@ -1308,7 +1310,9 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 {
                     // Only update if we're playing and not disposed
                     if (this._disposed || this._currentState.PlaybackState != SnapDog2.Core.Enums.PlaybackState.Playing)
+                    {
                         return;
+                    }
 
                     // Update state from MediaPlayer and publish if position changed
                     await this.UpdateStateFromSnapcastAsync().ConfigureAwait(false);
@@ -1331,7 +1335,9 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     private void StopPositionUpdateTimer()
     {
         if (this._positionUpdateTimer == null)
+        {
             return;
+        }
 
         LogStoppingPositionUpdateTimer(this._zoneIndex);
 

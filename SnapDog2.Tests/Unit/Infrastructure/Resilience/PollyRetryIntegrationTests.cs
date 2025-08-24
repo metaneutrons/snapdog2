@@ -36,7 +36,10 @@ public class PollyRetryIntegrationTests
             {
                 callCount++;
                 if (callCount <= 2) // Fail first 2 attempts
+                {
                     throw new InvalidOperationException("KNX gateway temporarily unavailable");
+                }
+
                 return Task.CompletedTask; // Succeed on 3rd attempt
             });
 
@@ -72,7 +75,10 @@ public class PollyRetryIntegrationTests
                 callTimestamps.Add(DateTime.UtcNow);
 
                 if (callCount <= 3) // Fail first 3 attempts
+                {
                     throw new HttpRequestException("Network unreachable");
+                }
+
                 return Task.CompletedTask; // Succeed on 4th attempt
             });
 
@@ -147,11 +153,13 @@ public class PollyRetryIntegrationTests
             {
                 callCount++;
                 if (callCount <= 2) // Fail first 2 attempts
+                {
                     throw new HttpRequestException(
                         "Server temporarily overloaded",
                         null,
                         HttpStatusCode.ServiceUnavailable
                     );
+                }
 
                 return Task.FromResult(new List<string> { "Playlist1", "Playlist2" });
             });
@@ -187,7 +195,10 @@ public class PollyRetryIntegrationTests
                 callTimestamps.Add(DateTime.UtcNow);
 
                 if (callCount <= 2) // Fail first 2 attempts
+                {
                     throw new TimeoutException("KNX command timeout");
+                }
+
                 return Task.CompletedTask; // Succeed on 3rd attempt
             });
 
@@ -311,7 +322,10 @@ public class PollyRetryIntegrationTests
             {
                 mqttCallCount++;
                 if (mqttCallCount == 1)
+                {
                     throw new HttpRequestException("MQTT broker busy");
+                }
+
                 return Task.CompletedTask;
             });
 

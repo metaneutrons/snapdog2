@@ -235,7 +235,10 @@ public class ResilienceTests
             {
                 mqttCallCount++;
                 if (mqttCallCount <= 2)
+                {
                     throw new SocketException((int)SocketError.ConnectionReset, "Connection reset");
+                }
+
                 return Task.CompletedTask;
             });
 

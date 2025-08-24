@@ -15,7 +15,7 @@ public class LoggerMessageAnalyzer : DiagnosticAnalyzer
         "LoggerMessage should use named parameters",
         "LoggerMessage attribute should use named parameters instead of positional parameters",
         "Usage",
-        DiagnosticSeverity.Info,
+        DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
         description: "LoggerMessage attributes should use named parameters for better readability and maintainability."
     );
@@ -25,7 +25,7 @@ public class LoggerMessageAnalyzer : DiagnosticAnalyzer
         "LoggerMessage methods should be moved to end of class",
         "LoggerMessage method '{0}' should be moved to the end of the class",
         "Organization",
-        DiagnosticSeverity.Info,
+        DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
         description: "LoggerMessage methods should be grouped together at the end of the class for better organization."
     );
@@ -50,7 +50,9 @@ public class LoggerMessageAnalyzer : DiagnosticAnalyzer
             .FirstOrDefault(attr => IsLoggerMessageAttribute(attr));
 
         if (loggerMessageAttribute == null)
+        {
             return;
+        }
 
         // Check for positional parameters that should be named
         if (HasPositionalParameters(loggerMessageAttribute))
@@ -87,7 +89,9 @@ public class LoggerMessageAnalyzer : DiagnosticAnalyzer
     private static bool HasPositionalParameters(AttributeSyntax attribute)
     {
         if (attribute.ArgumentList?.Arguments == null)
+        {
             return false;
+        }
 
         // Check if any arguments are positional (not named)
         return attribute.ArgumentList.Arguments.Any(arg => arg.NameEquals == null && arg.NameColon == null);
@@ -98,14 +102,18 @@ public class LoggerMessageAnalyzer : DiagnosticAnalyzer
         // Get the containing class
         var containingClass = method.FirstAncestorOrSelf<ClassDeclarationSyntax>();
         if (containingClass == null)
+        {
             return false;
+        }
 
         // Get all members of the class
         var members = containingClass.Members.ToList();
         var methodIndex = members.IndexOf(method);
 
         if (methodIndex == -1)
+        {
             return false;
+        }
 
         // Check if there are any non-LoggerMessage members after this method
         for (int i = methodIndex + 1; i < members.Count; i++)
@@ -118,7 +126,9 @@ public class LoggerMessageAnalyzer : DiagnosticAnalyzer
                     .Any(IsLoggerMessageAttribute);
 
                 if (!hasLoggerMessage)
+                {
                     return true;
+                }
             }
             else
             {
