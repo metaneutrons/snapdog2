@@ -38,14 +38,20 @@ public partial class KnxNotificationHandler : INotificationHandler<StatusChanged
         // Debug log to verify we're receiving notifications
         LogKnxNotificationReceived(notification.StatusType, notification.TargetIndex, notification.Value?.ToString() ?? "null");
 
-        // Forward to KNX service if it implements the handler interface
-        if (_knxService is INotificationHandler<StatusChangedNotification> knxHandler)
+        // Forward to KNX service using its actual interface methods
+        try
         {
-            await knxHandler.Handle(notification, cancellationToken);
+            await _knxService.SendStatusAsync(
+                notification.StatusType,
+                notification.TargetIndex,
+                notification.Value ?? string.Empty,
+                cancellationToken);
+                
+            LogKnxNotificationForwarded(notification.StatusType, notification.TargetIndex);
         }
-        else
+        catch (Exception ex)
         {
-            LogKnxServiceNotHandler();
+            LogKnxNotificationFailed(notification.StatusType, notification.TargetIndex, ex.Message);
         }
     }
 
@@ -58,8 +64,15 @@ public partial class KnxNotificationHandler : INotificationHandler<StatusChanged
 
     [LoggerMessage(
         EventId = 3301,
-        Level = LogLevel.Warning,
-        Message = "KNX service does not implement INotificationHandler<StatusChangedNotification>"
+        Level = LogLevel.Debug,
+        Message = "✅ KNX notification forwarded: {StatusType} for target {TargetIndex}"
     )]
-    private partial void LogKnxServiceNotHandler();
+    private partial void LogKnxNotificationForwarded(string statusType, int targetIndex);
+
+    [LoggerMessage(
+        EventId = 3302,
+        Level = LogLevel.Error,
+        Message = "❌ KNX notification failed: {StatusType} for target {TargetIndex} - {Error}"
+    )]
+    private partial void LogKnxNotificationFailed(string statusType, int targetIndex, string error);
 }
