@@ -813,12 +813,109 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         try
         {
             var currentIndex = this._currentState.Track?.Index ?? 1;
-            return await this.SetTrackAsync(currentIndex + 1).ConfigureAwait(false);
+            var nextIndex = currentIndex + 1;
+
+            // Check if we're currently playing
+            var wasPlaying = this._currentState.PlaybackState == SnapDog2.Core.Enums.PlaybackState.Playing;
+
+            // Set the track (inline implementation to avoid nested lock)
+            var setResult = await this.SetTrackInternalAsync(nextIndex).ConfigureAwait(false);
+            if (setResult.IsFailure)
+            {
+                return setResult;
+            }
+
+            // If we were playing, start playing the new track (inline implementation to avoid nested lock)
+            if (wasPlaying)
+            {
+                var targetTrack = this._currentState.Track!;
+                var playResult = await this._mediaPlayerService.PlayAsync(this._zoneIndex, targetTrack).ConfigureAwait(false);
+                if (playResult.IsFailure)
+                {
+                    return playResult;
+                }
+
+                // Update state to playing
+                this._currentState = this._currentState with
+                {
+                    PlaybackState = SnapDog2.Core.Enums.PlaybackState.Playing
+                };
+
+                // Start timer for reliable updates + events for immediate updates
+                this.StartPositionUpdateTimer();
+                this.SubscribeToMediaPlayerEvents();
+
+                this.PublishZoneStateChangedAsync();
+            }
+
+            return Result.Success();
         }
         finally
         {
             this._stateLock.Release();
         }
+    }
+
+    /// <summary>
+    /// Internal method to set track without acquiring lock (assumes lock is already held)
+    /// </summary>
+    private async Task<Result> SetTrackInternalAsync(int trackIndex)
+    {
+        // Get tracks from the current playlist
+        if (this._currentState.Playlist == null)
+        {
+            return Result.Failure("No playlist selected. Please set a playlist first.");
+        }
+
+        // Get the playlist with tracks
+        if (this._currentState.Playlist.Index == null)
+        {
+            return Result.Failure("Current playlist has no index");
+        }
+
+        var playlistIndex = this._currentState.Playlist.Index.Value;
+        var getPlaylistQuery = new GetPlaylistQuery { PlaylistIndex = playlistIndex };
+
+        var scope = this._serviceScopeFactory.CreateScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var playlistResult = await mediator
+            .SendQueryAsync<GetPlaylistQuery, Result<Api.Models.PlaylistWithTracks>>(getPlaylistQuery)
+            .ConfigureAwait(false);
+
+        if (playlistResult.IsFailure)
+        {
+            return Result.Failure($"Failed to get playlist tracks: {playlistResult.ErrorMessage}");
+        }
+
+        var playlist = playlistResult.Value;
+        if (playlist?.Tracks == null || playlist.Tracks.Count == 0)
+        {
+            return Result.Failure("Playlist has no tracks");
+        }
+
+        // Find the track by index (1-based)
+        var targetTrack = playlist.Tracks.FirstOrDefault(t => t.Index == trackIndex);
+        if (targetTrack == null)
+        {
+            return Result.Failure($"Track {trackIndex} not found in playlist");
+        }
+
+        this._currentState = this._currentState with { Track = targetTrack };
+        this.PublishZoneStateChangedAsync();
+
+        // Publish individual track metadata notifications for KNX integration
+        await this.PublishTrackMetadataNotificationsAsync(targetTrack).ConfigureAwait(false);
+
+        // Log successful track change with meaningful information
+        LogZonePlaying(
+            this._zoneIndex,
+            targetTrack.Title,
+            this._currentState.Playlist.Source,
+            this._currentState.Playlist.Index.ToString(),
+            targetTrack.Index.ToString()
+        );
+
+        return Result.Success();
     }
 
     public async Task<Result> PreviousTrackAsync()
@@ -827,8 +924,42 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         try
         {
             var currentIndex = this._currentState.Track?.Index ?? 1;
-            var newIndex = Math.Max(1, currentIndex - 1);
-            return await this.SetTrackAsync(newIndex).ConfigureAwait(false);
+            var previousIndex = Math.Max(1, currentIndex - 1);
+
+            // Check if we're currently playing
+            var wasPlaying = this._currentState.PlaybackState == SnapDog2.Core.Enums.PlaybackState.Playing;
+
+            // Set the track (inline implementation to avoid nested lock)
+            var setResult = await this.SetTrackInternalAsync(previousIndex).ConfigureAwait(false);
+            if (setResult.IsFailure)
+            {
+                return setResult;
+            }
+
+            // If we were playing, start playing the new track (inline implementation to avoid nested lock)
+            if (wasPlaying)
+            {
+                var targetTrack = this._currentState.Track!;
+                var playResult = await this._mediaPlayerService.PlayAsync(this._zoneIndex, targetTrack).ConfigureAwait(false);
+                if (playResult.IsFailure)
+                {
+                    return playResult;
+                }
+
+                // Update state to playing
+                this._currentState = this._currentState with
+                {
+                    PlaybackState = SnapDog2.Core.Enums.PlaybackState.Playing
+                };
+
+                // Start timer for reliable updates + events for immediate updates
+                this.StartPositionUpdateTimer();
+                this.SubscribeToMediaPlayerEvents();
+
+                this.PublishZoneStateChangedAsync();
+            }
+
+            return Result.Success();
         }
         finally
         {
@@ -1942,6 +2073,87 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         Message = "MediaPlayer state changed for zone {ZoneIndex}: {State}"
     )]
     private partial void LogMediaPlayerStateChanged(int ZoneIndex, string State);
+
+    /// <summary>
+    /// Publishes individual track metadata notifications for KNX integration
+    /// </summary>
+    private async Task PublishTrackMetadataNotificationsAsync(SnapDog2.Core.Models.TrackInfo track)
+    {
+        try
+        {
+            using var scope = this._serviceScopeFactory.CreateScope();
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+
+            // Publish complete metadata notification
+            var metadataNotification = new ZoneTrackMetadataChangedNotification
+            {
+                ZoneIndex = this._zoneIndex,
+                TrackInfo = new SnapDog2.Core.Models.TrackInfo
+                {
+                    Index = track.Index,
+                    Title = track.Title ?? "Unknown",
+                    Artist = track.Artist ?? "Unknown",
+                    Album = track.Album ?? "Unknown",
+                    Source = track.Source ?? "unknown",
+                    Url = track.Url ?? "unknown://no-url",
+                    DurationMs = track.DurationMs,
+                    PositionMs = track.PositionMs,
+                    Progress = track.Progress,
+                    IsPlaying = track.IsPlaying,
+                    CoverArtUrl = track.CoverArtUrl,
+                    Genre = track.Genre,
+                    TrackNumber = track.TrackNumber,
+                    Year = track.Year,
+                    Rating = track.Rating,
+                    TimestampUtc = track.TimestampUtc,
+                    Metadata = track.Metadata
+                }
+            };
+            await mediator.PublishAsync(metadataNotification).ConfigureAwait(false);
+
+            // Publish individual field notifications
+            if (!string.IsNullOrEmpty(track.Title))
+            {
+                var titleNotification = new ZoneTrackTitleChangedNotification
+                {
+                    ZoneIndex = this._zoneIndex,
+                    Title = track.Title
+                };
+                await mediator.PublishAsync(titleNotification).ConfigureAwait(false);
+            }
+
+            if (!string.IsNullOrEmpty(track.Artist))
+            {
+                var artistNotification = new ZoneTrackArtistChangedNotification
+                {
+                    ZoneIndex = this._zoneIndex,
+                    Artist = track.Artist
+                };
+                await mediator.PublishAsync(artistNotification).ConfigureAwait(false);
+            }
+
+            if (!string.IsNullOrEmpty(track.Album))
+            {
+                var albumNotification = new ZoneTrackAlbumChangedNotification
+                {
+                    ZoneIndex = this._zoneIndex,
+                    Album = track.Album
+                };
+                await mediator.PublishAsync(albumNotification).ConfigureAwait(false);
+            }
+        }
+        catch (Exception ex)
+        {
+            LogErrorPublishingTrackMetadata(ex, this._zoneIndex);
+        }
+    }
+
+    [LoggerMessage(
+        EventId = 6553,
+        Level = LogLevel.Warning,
+        Message = "Error publishing track metadata notifications for zone {ZoneIndex}"
+    )]
+    private partial void LogErrorPublishingTrackMetadata(Exception ex, int ZoneIndex);
 
     [LoggerMessage(
         EventId = 6552,

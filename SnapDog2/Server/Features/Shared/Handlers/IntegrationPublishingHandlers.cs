@@ -55,6 +55,9 @@ public partial class IntegrationPublishingHandlers(
         INotificationHandler<ZoneShuffleModeChangedNotification>,
         INotificationHandler<ZoneStateChangedNotification>,
         // Track metadata notification handlers
+        INotificationHandler<ZoneTrackMetadataChangedNotification>,
+        INotificationHandler<ZoneTrackTitleChangedNotification>,
+        INotificationHandler<ZoneTrackArtistChangedNotification>,
         INotificationHandler<ZoneTrackAlbumChangedNotification>
 {
     private readonly IServiceProvider _serviceProvider = serviceProvider;
@@ -296,11 +299,68 @@ public partial class IntegrationPublishingHandlers(
         );
     }
 
+    public async Task Handle(ZoneTrackMetadataChangedNotification notification, CancellationToken cancellationToken)
+    {
+        LogZoneTrackMetadataChange(notification.ZoneIndex, notification.TrackInfo.Title, notification.TrackInfo.Artist, notification.TrackInfo.Album ?? "Unknown");
+        await PublishZoneStatusAsync(
+            StatusIdAttribute.GetStatusId<ZoneTrackMetadataChangedNotification>(),
+            notification.ZoneIndex,
+            notification.TrackInfo,
+            cancellationToken
+        );
+    }
+
+    public async Task Handle(ZoneTrackTitleChangedNotification notification, CancellationToken cancellationToken)
+    {
+        LogZoneTrackTitleChange(notification.ZoneIndex, notification.Title);
+        await PublishZoneStatusAsync(
+            StatusIdAttribute.GetStatusId<ZoneTrackTitleChangedNotification>(),
+            notification.ZoneIndex,
+            notification.Title,
+            cancellationToken
+        );
+
+        // Also publish StatusChangedNotification for KNX integration
+        await PublishKnxStatusAsync(
+            StatusIds.TrackMetadataTitle,
+            notification.ZoneIndex,
+            notification.Title,
+            cancellationToken
+        );
+    }
+
+    public async Task Handle(ZoneTrackArtistChangedNotification notification, CancellationToken cancellationToken)
+    {
+        LogZoneTrackArtistChange(notification.ZoneIndex, notification.Artist);
+        await PublishZoneStatusAsync(
+            StatusIdAttribute.GetStatusId<ZoneTrackArtistChangedNotification>(),
+            notification.ZoneIndex,
+            notification.Artist,
+            cancellationToken
+        );
+
+        // Also publish StatusChangedNotification for KNX integration
+        await PublishKnxStatusAsync(
+            StatusIds.TrackMetadataArtist,
+            notification.ZoneIndex,
+            notification.Artist,
+            cancellationToken
+        );
+    }
+
     public async Task Handle(ZoneTrackAlbumChangedNotification notification, CancellationToken cancellationToken)
     {
         LogZoneTrackAlbumChange(notification.ZoneIndex, notification.Album);
         await PublishZoneStatusAsync(
             StatusIdAttribute.GetStatusId<ZoneTrackAlbumChangedNotification>(),
+            notification.ZoneIndex,
+            notification.Album,
+            cancellationToken
+        );
+
+        // Also publish StatusChangedNotification for KNX integration
+        await PublishKnxStatusAsync(
+            StatusIds.TrackMetadataAlbum,
             notification.ZoneIndex,
             notification.Album,
             cancellationToken
@@ -508,6 +568,27 @@ public partial class IntegrationPublishingHandlers(
         Message = "Zone {ZoneIndex} shuffle mode changed to {ShuffleEnabled}"
     )]
     private partial void LogZoneShuffleModeChange(int zoneIndex, bool shuffleEnabled);
+
+    [LoggerMessage(
+        EventId = 5013,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Zone {ZoneIndex} track metadata changed: {Title} by {Artist} from {Album}"
+    )]
+    private partial void LogZoneTrackMetadataChange(int zoneIndex, string title, string artist, string album);
+
+    [LoggerMessage(
+        EventId = 5014,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Zone {ZoneIndex} track title changed to {Title}"
+    )]
+    private partial void LogZoneTrackTitleChange(int zoneIndex, string title);
+
+    [LoggerMessage(
+        EventId = 5015,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Zone {ZoneIndex} track artist changed to {Artist}"
+    )]
+    private partial void LogZoneTrackArtistChange(int zoneIndex, string artist);
 
     [LoggerMessage(
         EventId = 5017,
