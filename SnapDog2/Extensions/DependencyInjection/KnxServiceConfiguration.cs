@@ -83,8 +83,8 @@ public static partial class KnxServiceConfiguration
         // Register the actual KNX service
         services.AddSingleton<IKnxService, KnxService>();
 
-        // Register KNX integration handler (in same file as other handlers for MediatR auto-discovery)
-        services.AddScoped<SnapDog2.Server.Features.Shared.Handlers.KnxIntegrationHandler>();
+        // Register KNX integration handler as singleton to match KnxService lifecycle
+        services.AddSingleton<SnapDog2.Server.Features.Shared.Handlers.KnxIntegrationHandler>();
 
         return services;
     }

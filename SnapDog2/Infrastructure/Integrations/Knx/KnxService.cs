@@ -45,7 +45,7 @@ using SnapDog2.Server.Features.Zones.Commands.Volume;
 /// Provides bi-directional KNX communication with automatic reconnection and command mapping.
 /// Updated to use IServiceProvider to resolve scoped IMediator.
 /// </summary>
-public partial class KnxService : IKnxService, INotificationHandler<StatusChangedNotification>
+public partial class KnxService : IKnxService
 {
     private readonly KnxConfig _config;
     private readonly List<ZoneConfig> _zones;
@@ -88,7 +88,23 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
     }
 
     /// <inheritdoc />
-    public bool IsConnected => this._knxBus?.ConnectionState == BusConnectionState.Connected;
+    public bool IsConnected
+    {
+        get
+        {
+            try
+            {
+                var isConnected = this._knxBus?.ConnectionState == BusConnectionState.Connected;
+                this.LogKnxDebugMessage($"🔍 IsConnected check: _knxBus={this._knxBus != null}, ConnectionState={this._knxBus?.ConnectionState}, Result={isConnected}");
+                return isConnected;
+            }
+            catch (ObjectDisposedException)
+            {
+                this.LogKnxDebugMessage("⚠️ IsConnected check failed: KNX bus object disposed");
+                return false;
+            }
+        }
+    }
 
     /// <inheritdoc />
     public ServiceStatus Status =>
@@ -169,6 +185,12 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
     /// <inheritdoc />
     public async Task<Result> StopAsync(CancellationToken cancellationToken = default)
     {
+        if (this._disposed)
+        {
+            this.LogKnxDebugMessage("⚠️ StopAsync called on already disposed service - skipping");
+            return Result.Success();
+        }
+
         await this._connectionSemaphore.WaitAsync(cancellationToken);
         try
         {
@@ -185,13 +207,24 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
                         await this._knxBus.DisposeAsync();
                     }
                 }
+                catch (ObjectDisposedException)
+                {
+                    this.LogKnxDebugMessage("⚠️ KNX bus already disposed during stop");
+                }
                 catch (Exception ex)
                 {
                     this.LogDisconnectionError(ex);
                 }
                 finally
                 {
-                    this._knxBus.Dispose();
+                    try
+                    {
+                        this._knxBus?.Dispose();
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        // Already disposed, ignore
+                    }
                     this._knxBus = null;
                 }
             }
@@ -382,27 +415,6 @@ public partial class KnxService : IKnxService, INotificationHandler<StatusChange
     }
 
     /// <inheritdoc />
-    public async Task Handle(StatusChangedNotification notification, CancellationToken cancellationToken)
-    {
-        // Debug log to verify we're receiving notifications
-        this.LogKnxDebugMessage($"🔔 KNX service received StatusChangedNotification: {notification.StatusType} for target {notification.TargetIndex} with value {notification.Value}");
-
-        if (!this.IsConnected || !this._config.Enabled)
-        {
-            this.LogKnxDebugMessage($"⚠️ KNX service not ready: Connected={this.IsConnected}, Enabled={this._config.Enabled}");
-            return;
-        }
-
-        try
-        {
-            await this.SendStatusAsync(notification.StatusType, notification.TargetIndex, notification.Value, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            this.LogStatusNotificationError(notification.StatusType, notification.TargetIndex, ex);
-        }
-    }
-
     private async Task<Result> ConnectToKnxBusAsync(CancellationToken cancellationToken)
     {
         try

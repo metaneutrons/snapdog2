@@ -68,9 +68,6 @@ public static class CortexMediatorConfiguration
         // Enhanced auto-discovery with comprehensive handler registration (but suppress duplicate warnings)
         RegisterHandlersWithAutoDiscovery(services, assemblies);
 
-        // Register integration services as notification handlers using elegant approach
-        RegisterIntegrationNotificationHandlers(services);
-
         // Auto-register all FluentValidation validators from all assemblies
         foreach (var assembly in assemblies)
         {
@@ -161,19 +158,4 @@ public static class CortexMediatorConfiguration
             || genericTypeDefinition == typeof(INotificationHandler<>);
     }
 
-    /// <summary>
-    /// Registers integration services as notification handlers.
-    /// </summary>
-    private static void RegisterIntegrationNotificationHandlers(IServiceCollection services)
-    {
-        // Register only KNX service as it's the only one that implements INotificationHandler<StatusChangedNotification>
-        services.AddScoped<INotificationHandler<StatusChangedNotification>>(provider =>
-        {
-            var knxService = provider.GetRequiredService<IKnxService>();
-            return knxService as INotificationHandler<StatusChangedNotification>
-                ?? throw new InvalidOperationException(
-                    $"KnxService does not implement INotificationHandler<StatusChangedNotification>"
-                );
-        });
-    }
 }
