@@ -46,7 +46,7 @@ public partial class KnxNotificationHandler : INotificationHandler<StatusChanged
                 notification.TargetIndex,
                 notification.Value ?? string.Empty,
                 cancellationToken);
-                
+
             LogKnxNotificationForwarded(notification.StatusType, notification.TargetIndex);
         }
         catch (Exception ex)
