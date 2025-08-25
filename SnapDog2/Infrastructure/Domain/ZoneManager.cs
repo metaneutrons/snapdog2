@@ -1599,6 +1599,27 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 // Publish updated state to MQTT
                 this.PublishZoneStateChangedAsync();
                 LogPublishedMqttUpdateForPositionChange();
+                
+                // Publish track progress notification for KNX integration (throttled)
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        using var scope = this._serviceScopeFactory.CreateScope();
+                        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+                        
+                        var progressNotification = new ZoneTrackProgressChangedNotification
+                        {
+                            ZoneIndex = this._zoneIndex,
+                            Progress = e.Progress
+                        };
+                        await mediator.PublishAsync(progressNotification).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        LogErrorPublishingTrackProgress(ex, this._zoneIndex);
+                    }
+                });
             }
         }
         catch (Exception ex)
@@ -1626,6 +1647,27 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             {
                 this._currentState = this._currentState with { PlaybackState = newPlaybackState };
                 this.PublishZoneStateChangedAsync();
+                
+                // Publish track playing status notification for KNX integration
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        using var scope = this._serviceScopeFactory.CreateScope();
+                        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+                        
+                        var playingStatusNotification = new ZoneTrackPlayingStatusChangedNotification
+                        {
+                            ZoneIndex = this._zoneIndex,
+                            IsPlaying = newPlaybackState == SnapDog2.Core.Enums.PlaybackState.Playing
+                        };
+                        await mediator.PublishAsync(playingStatusNotification).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        LogErrorPublishingTrackPlayingStatus(ex, this._zoneIndex);
+                    }
+                });
             }
         }
         catch (Exception ex)
@@ -2161,4 +2203,18 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         Message = "Error handling state change for zone {ZoneIndex}"
     )]
     private partial void LogErrorHandlingStateChange(Exception ex, int ZoneIndex);
+
+    [LoggerMessage(
+        EventId = 6554,
+        Level = LogLevel.Warning,
+        Message = "Error publishing track playing status notification for zone {ZoneIndex}"
+    )]
+    private partial void LogErrorPublishingTrackPlayingStatus(Exception ex, int ZoneIndex);
+
+    [LoggerMessage(
+        EventId = 6555,
+        Level = LogLevel.Warning,
+        Message = "Error publishing track progress notification for zone {ZoneIndex}"
+    )]
+    private partial void LogErrorPublishingTrackProgress(Exception ex, int ZoneIndex);
 }

@@ -471,6 +471,7 @@ public static class SnapDogBlueprint
         .Mqtt("snapdog/zone/{zoneIndex}/track/position")
         .Get("/api/v1/zones/{zoneIndex:int}/track/position")
         .Description("Current track position")
+        .Exclude(Protocol.Knx, "KNX lacks precision for millisecond-based position tracking")
         //
         .Status("TRACK_PROGRESS_STATUS")
         .Zone()

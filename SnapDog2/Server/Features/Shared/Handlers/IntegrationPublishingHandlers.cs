@@ -58,7 +58,10 @@ public partial class IntegrationPublishingHandlers(
         INotificationHandler<ZoneTrackMetadataChangedNotification>,
         INotificationHandler<ZoneTrackTitleChangedNotification>,
         INotificationHandler<ZoneTrackArtistChangedNotification>,
-        INotificationHandler<ZoneTrackAlbumChangedNotification>
+        INotificationHandler<ZoneTrackAlbumChangedNotification>,
+        // Track playback status notification handlers
+        INotificationHandler<ZoneTrackProgressChangedNotification>,
+        INotificationHandler<ZoneTrackPlayingStatusChangedNotification>
 {
     private readonly IServiceProvider _serviceProvider = serviceProvider;
     private readonly ILogger<IntegrationPublishingHandlers> _logger = logger;
@@ -242,6 +245,14 @@ public partial class IntegrationPublishingHandlers(
             notification.TrackInfo,
             cancellationToken
         );
+
+        // Also publish StatusChangedNotification for KNX integration (send track index, not full TrackInfo)
+        await PublishKnxStatusAsync(
+            StatusIds.TrackIndex,
+            notification.ZoneIndex,
+            notification.TrackInfo.Index,
+            cancellationToken
+        );
     }
 
     public async Task Handle(ZonePlaylistChangedNotification notification, CancellationToken cancellationToken)
@@ -260,6 +271,14 @@ public partial class IntegrationPublishingHandlers(
         LogZoneTrackRepeatChange(notification.ZoneIndex, notification.Enabled);
         await PublishZoneStatusAsync(
             StatusIdAttribute.GetStatusId<ZoneTrackRepeatChangedNotification>(),
+            notification.ZoneIndex,
+            notification.Enabled,
+            cancellationToken
+        );
+
+        // Also publish StatusChangedNotification for KNX integration
+        await PublishKnxStatusAsync(
+            StatusIds.TrackRepeatStatus,
             notification.ZoneIndex,
             notification.Enabled,
             cancellationToken
@@ -363,6 +382,44 @@ public partial class IntegrationPublishingHandlers(
             StatusIds.TrackMetadataAlbum,
             notification.ZoneIndex,
             notification.Album,
+            cancellationToken
+        );
+    }
+
+    public async Task Handle(ZoneTrackProgressChangedNotification notification, CancellationToken cancellationToken)
+    {
+        LogZoneTrackProgressChange(notification.ZoneIndex, notification.Progress);
+        await PublishZoneStatusAsync(
+            StatusIdAttribute.GetStatusId<ZoneTrackProgressChangedNotification>(),
+            notification.ZoneIndex,
+            notification.Progress,
+            cancellationToken
+        );
+
+        // Also publish StatusChangedNotification for KNX integration
+        await PublishKnxStatusAsync(
+            StatusIds.TrackProgressStatus,
+            notification.ZoneIndex,
+            notification.Progress,
+            cancellationToken
+        );
+    }
+
+    public async Task Handle(ZoneTrackPlayingStatusChangedNotification notification, CancellationToken cancellationToken)
+    {
+        LogZoneTrackPlayingStatusChange(notification.ZoneIndex, notification.IsPlaying);
+        await PublishZoneStatusAsync(
+            StatusIdAttribute.GetStatusId<ZoneTrackPlayingStatusChangedNotification>(),
+            notification.ZoneIndex,
+            notification.IsPlaying,
+            cancellationToken
+        );
+
+        // Also publish StatusChangedNotification for KNX integration
+        await PublishKnxStatusAsync(
+            StatusIds.TrackPlayingStatus,
+            notification.ZoneIndex,
+            notification.IsPlaying,
             cancellationToken
         );
     }
@@ -598,7 +655,21 @@ public partial class IntegrationPublishingHandlers(
     private partial void LogZoneTrackAlbumChange(int zoneIndex, string album);
 
     [LoggerMessage(
-        EventId = 5017,
+        EventId = 5018,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Zone {ZoneIndex} track progress changed to {Progress}%"
+    )]
+    private partial void LogZoneTrackProgressChange(int zoneIndex, double progress);
+
+    [LoggerMessage(
+        EventId = 5019,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Zone {ZoneIndex} track playing status changed to {IsPlaying}"
+    )]
+    private partial void LogZoneTrackPlayingStatusChange(int zoneIndex, bool isPlaying);
+
+    [LoggerMessage(
+        EventId = 5020,
         Level = Microsoft.Extensions.Logging.LogLevel.Debug,
         Message = "Zone {ZoneIndex} complete state changed"
     )]
@@ -606,14 +677,14 @@ public partial class IntegrationPublishingHandlers(
 
     // Error logging
     [LoggerMessage(
-        EventId = 5018,
+        EventId = 5021,
         Level = Microsoft.Extensions.Logging.LogLevel.Warning,
         Message = "Smart MQTT publisher not available for {EntityType} {EntityId} {EventType}"
     )]
     private partial void LogSmartPublisherNotAvailable(string entityType, string entityId, string eventType);
 
     [LoggerMessage(
-        EventId = 5019,
+        EventId = 5022,
         Level = Microsoft.Extensions.Logging.LogLevel.Error,
         Message = "Failed to publish {EntityType} {EntityId} {EventType} to MQTT"
     )]
