@@ -1599,7 +1599,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 // Publish updated state to MQTT
                 this.PublishZoneStateChangedAsync();
                 LogPublishedMqttUpdateForPositionChange();
-                
+
                 // Publish track progress notification for KNX integration (throttled)
                 Task.Run(async () =>
                 {
@@ -1607,7 +1607,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                     {
                         using var scope = this._serviceScopeFactory.CreateScope();
                         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-                        
+
                         var progressNotification = new ZoneTrackProgressChangedNotification
                         {
                             ZoneIndex = this._zoneIndex,
@@ -1647,7 +1647,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             {
                 this._currentState = this._currentState with { PlaybackState = newPlaybackState };
                 this.PublishZoneStateChangedAsync();
-                
+
                 // Publish track playing status notification for KNX integration
                 Task.Run(async () =>
                 {
@@ -1655,7 +1655,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                     {
                         using var scope = this._serviceScopeFactory.CreateScope();
                         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-                        
+
                         var playingStatusNotification = new ZoneTrackPlayingStatusChangedNotification
                         {
                             ZoneIndex = this._zoneIndex,
