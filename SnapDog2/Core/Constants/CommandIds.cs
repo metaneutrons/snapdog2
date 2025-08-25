@@ -49,6 +49,7 @@ public static class CommandIds
     public static readonly string TrackSeekPosition = CommandIdAttribute.GetCommandId<SeekPositionCommand>();
     public static readonly string TrackSeekProgress = CommandIdAttribute.GetCommandId<SeekProgressCommand>();
     public static readonly string TrackPlayByIndex = CommandIdAttribute.GetCommandId<PlayTrackByIndexCommand>();
+    public static readonly string TrackPlayFromPlaylist = CommandIdAttribute.GetCommandId<PlayTrackFromPlaylistCommand>();
     public static readonly string TrackPlayUrl = CommandIdAttribute.GetCommandId<PlayUrlCommand>();
 
     // Zone Playlist Commands

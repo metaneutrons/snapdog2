@@ -1260,6 +1260,47 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
         return this.Accepted(url);
     }
 
+    /// <summary>
+    /// Play a specific track from a specific playlist and start playback immediately.
+    /// </summary>
+    /// <param name="zoneIndex">Zone index (1-based)</param>
+    /// <param name="playlistIndex">Playlist index (1-based)</param>
+    /// <param name="trackIndex">Track index within the playlist (1-based)</param>
+    /// <returns>Track index that started playing</returns>
+    [HttpPost("{zoneIndex:int}/play/playlist/{playlistIndex:int}/track")]
+    [ProducesResponseType<int>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<int>> PlayTrackFromPlaylist(int zoneIndex, int playlistIndex, [FromBody] int trackIndex)
+    {
+        if (playlistIndex < 1)
+        {
+            return this.BadRequest("Playlist index must be greater than 0");
+        }
+
+        if (trackIndex < 1)
+        {
+            return this.BadRequest("Track index must be greater than 0");
+        }
+
+        var command = new PlayTrackFromPlaylistCommand
+        {
+            ZoneIndex = zoneIndex,
+            PlaylistIndex = playlistIndex,
+            TrackIndex = trackIndex
+        };
+        var result = await this._mediator.SendCommandAsync<PlayTrackFromPlaylistCommand, Result>(command);
+
+        if (result.IsFailure)
+        {
+            LogFailedToPlayTrackFromPlaylist(zoneIndex, playlistIndex, trackIndex, result.ErrorMessage ?? "Unknown error");
+            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+        }
+
+        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
+        return this.Accepted(trackIndex);
+    }
+
     // ═══════════════════════════════════════════════════════════════════════════════
     // LOGGING METHODS FOR NEW ENDPOINTS
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -1437,7 +1478,14 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
     private partial void LogFailedToPlayUrl(int zoneIndex, string url, string errorMessage);
 
     [LoggerMessage(
-        EventId = 5338,
+        EventId = 5337,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to play track {TrackIndex} from playlist {PlaylistIndex} for zone {ZoneIndex}: {ErrorMessage}"
+    )]
+    private partial void LogFailedToPlayTrackFromPlaylist(int zoneIndex, int playlistIndex, int trackIndex, string errorMessage);
+
+    [LoggerMessage(
+        EventId = 5339,
         Level = Microsoft.Extensions.Logging.LogLevel.Warning,
         Message = "Failed to get zone {ZoneIndex} track title: {ErrorMessage}"
     )]

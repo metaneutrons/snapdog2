@@ -120,6 +120,13 @@ public static class SnapDogBlueprint
         .Description("Play direct URL stream")
         .Exclude(Protocol.Knx, "KNX cannot transmit URL strings effectively")
         //
+        .Command("TRACK_PLAY_PLAYLIST")
+        .Zone()
+        .Mqtt("snapdog/zone/{zoneIndex}/play/playlist/{playlistIndex}/track")
+        .Knx()
+        .Post("/api/v1/zones/{zoneIndex:int}/play/playlist/{playlistIndex:int}/track")
+        .Description("Play specific track from specific playlist")
+        //
         .Command("TRACK_POSITION")
         .Zone()
         .Mqtt("snapdog/zone/{zoneIndex}/track/position/set")

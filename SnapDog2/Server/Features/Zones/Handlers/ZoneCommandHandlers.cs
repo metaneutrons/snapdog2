@@ -1008,3 +1008,65 @@ public partial class PlayUrlCommandHandler(IZoneManager zoneManager, ILogger<Pla
     )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
+
+/// <summary>
+/// Handles the PlayTrackFromPlaylistCommand.
+/// </summary>
+public partial class PlayTrackFromPlaylistCommandHandler(
+    IZoneManager zoneManager,
+    ILogger<PlayTrackFromPlaylistCommandHandler> logger
+) : ICommandHandler<PlayTrackFromPlaylistCommand, Result>
+{
+    private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly ILogger<PlayTrackFromPlaylistCommandHandler> _logger = logger;
+
+    public async Task<Result> Handle(PlayTrackFromPlaylistCommand request, CancellationToken cancellationToken)
+    {
+        this.LogPlayingTrackFromPlaylist(request.ZoneIndex, request.PlaylistIndex, request.TrackIndex, request.Source);
+
+        var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneIndex).ConfigureAwait(false);
+        if (zoneResult.IsFailure)
+        {
+            this.LogZoneNotFound(request.ZoneIndex, nameof(PlayTrackFromPlaylistCommand));
+            return zoneResult;
+        }
+
+        var zone = zoneResult.Value!;
+
+        // First set the playlist
+        var playlistResult = await zone.SetPlaylistAsync(request.PlaylistIndex).ConfigureAwait(false);
+        if (playlistResult.IsFailure)
+        {
+            return playlistResult;
+        }
+
+        // Then set the track within that playlist
+        var trackResult = await zone.SetTrackAsync(request.TrackIndex).ConfigureAwait(false);
+        if (trackResult.IsFailure)
+        {
+            return trackResult;
+        }
+
+        // Finally start playback
+        return await zone.PlayAsync().ConfigureAwait(false);
+    }
+
+    [LoggerMessage(
+        EventId = 10048,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Playing track {TrackIndex} from playlist {PlaylistIndex} for Zone {ZoneIndex} from {Source}"
+    )]
+    private partial void LogPlayingTrackFromPlaylist(
+        int zoneIndex,
+        int playlistIndex,
+        int trackIndex,
+        SnapDog2.Core.Enums.CommandSource source
+    );
+
+    [LoggerMessage(
+        EventId = 10049,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Zone {ZoneIndex} not found for {CommandName}"
+    )]
+    private partial void LogZoneNotFound(int zoneIndex, string commandName);
+}
