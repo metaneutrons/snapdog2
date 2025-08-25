@@ -1182,11 +1182,11 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             {
                 // Use existing group
                 this._snapcastGroupId = existingGroup.Id;
-                
+
                 // Update current state with real group ID
                 this._currentState = this._currentState with { SnapcastGroupId = existingGroup.Id };
                 this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
-                
+
                 this.LogSnapcastSync(this._zoneIndex, this._snapcastGroupId);
             }
             else
