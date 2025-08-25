@@ -580,17 +580,18 @@ public partial class KnxIntegrationHandler : INotificationHandler<StatusChangedN
     public async Task Handle(StatusChangedNotification notification, CancellationToken cancellationToken)
     {
         // Debug log to verify we're receiving notifications
-        _logger.LogDebug("🔔 KNX integration received: {StatusType} for target {TargetIndex} with value {Value}",
+        _logger.LogInformation("🔔 KNX integration received: {StatusType} for target {TargetIndex} with value {Value}",
             notification.StatusType, notification.TargetIndex, notification.Value?.ToString() ?? "null");
 
-        // Forward to KNX service if it implements the handler interface
-        if (_knxService is INotificationHandler<StatusChangedNotification> knxHandler)
+        try
         {
-            await knxHandler.Handle(notification, cancellationToken);
+            _logger.LogInformation("✅ Calling KNX service SendStatusAsync method");
+            await _knxService.SendStatusAsync(notification.StatusType, notification.TargetIndex, notification.Value, cancellationToken);
+            _logger.LogInformation("✅ KNX service SendStatusAsync method completed");
         }
-        else
+        catch (Exception ex)
         {
-            _logger.LogWarning("KNX service does not implement INotificationHandler<StatusChangedNotification>");
+            _logger.LogError(ex, "❌ Error calling KNX service SendStatusAsync: {Error}", ex.Message);
         }
     }
 }
