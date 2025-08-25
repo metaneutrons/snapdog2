@@ -7,19 +7,15 @@
 echo '🎨 Checking code formatting with dotnet format...'
 
 # Check if code is properly formatted
-dotnet format --verbosity diagnostic --verify-no-changes
-format_exit_code=$?
 
-if [ $format_exit_code -ne 0 ]; then
-    echo "❌ Code formatting issues found. Running formatter..."
-    dotnet format --verbosity diagnostic
-    format_fix_exit_code=$?
-    
-    if [ $format_fix_exit_code -eq 0 ]; then
-        echo "✅ Code formatted successfully. Please review changes and commit again."
-    else
-        echo "❌ Failed to format code. Please check for syntax errors."
-    fi
+echo "❌ Code formatting issues found. Running formatter..."
+dotnet format --verbosity diagnostic
+format_fix_exit_code=$?
+
+if [ $format_fix_exit_code -eq 0 ]; then
+    echo "✅ Code formatted successfully. Please review changes and commit again."
+else
+    echo "❌ Failed to format code. Please check for syntax errors."
     exit 1
 fi
 
