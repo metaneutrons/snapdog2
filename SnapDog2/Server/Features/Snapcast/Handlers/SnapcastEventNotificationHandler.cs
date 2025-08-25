@@ -282,8 +282,11 @@ public partial class SnapcastEventNotificationHandler(
             LogClientStateNotFoundForVolume(clientIndex);
         }
 
-        // 2. Publish status notification to trigger integration publishing
+        // 2. Publish status notifications to trigger integration publishing
         await this._mediator.PublishAsync(new ClientVolumeStatusNotification(clientIndex, notification.Volume.Percent), cancellationToken);
+
+        // Also publish mute status notification for KNX integration
+        await this._mediator.PublishAsync(new ClientMuteStatusNotification(clientIndex, notification.Volume.Muted), cancellationToken);
     }
 
     public async Task Handle(SnapcastClientLatencyChangedNotification notification, CancellationToken cancellationToken)
