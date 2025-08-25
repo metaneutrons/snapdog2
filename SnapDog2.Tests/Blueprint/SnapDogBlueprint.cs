@@ -110,7 +110,7 @@ public static class SnapDogBlueprint
         .Zone()
         .Mqtt("snapdog/zone/{zoneIndex}/play/track")
         .Knx()
-        .Post("/api/v1/zones/{zoneIndex:int}/play/{trackIndex:int}")
+        .Post("/api/v1/zones/{zoneIndex:int}/play/track")
         .Description("Play specific track by index")
         //
         .Command("TRACK_PLAY_URL")

@@ -1201,11 +1201,11 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
     /// <param name="zoneIndex">Zone index (1-based)</param>
     /// <param name="trackIndex">Track index (1-based)</param>
     /// <returns>Track index that started playing</returns>
-    [HttpPost("{zoneIndex:int}/play/{trackIndex:int}")]
+    [HttpPost("{zoneIndex:int}/play/track")]
     [ProducesResponseType<int>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<int>> PlayTrackByIndex(int zoneIndex, int trackIndex)
+    public async Task<ActionResult<int>> PlayTrackByIndex(int zoneIndex, [FromBody] int trackIndex)
     {
         if (trackIndex < 1)
         {
