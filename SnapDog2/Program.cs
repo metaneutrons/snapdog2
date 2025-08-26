@@ -424,10 +424,18 @@ static WebApplication CreateWebApplication(string[] args)
 
     // Enterprise-grade metrics services
     builder.Services.AddSingleton<SnapDog2.Infrastructure.Metrics.ApplicationMetrics>();
+    builder.Services.AddSingleton<SnapDog2.Core.Abstractions.IApplicationMetrics>(provider =>
+        provider.GetRequiredService<SnapDog2.Infrastructure.Metrics.ApplicationMetrics>());
     builder.Services.AddSingleton<SnapDog2.Infrastructure.Application.EnterpriseMetricsService>();
     builder.Services.AddSingleton<SnapDog2.Infrastructure.Metrics.ZoneGroupingMetrics>();
 
-    // Replace basic MetricsService with enterprise implementation
+    // Error tracking service
+    builder.Services.AddSingleton<
+        SnapDog2.Core.Abstractions.IErrorTrackingService,
+        SnapDog2.Infrastructure.Application.ErrorTrackingService
+    >();
+
+    // Register EnterpriseMetricsService as the IMetricsService implementation
     builder.Services.AddSingleton<SnapDog2.Core.Abstractions.IMetricsService>(provider =>
         provider.GetRequiredService<SnapDog2.Infrastructure.Application.EnterpriseMetricsService>()
     );
@@ -575,6 +583,12 @@ static WebApplication CreateWebApplication(string[] args)
                 tags: ["ready"]
             );
         }
+
+        // Register health check service wrapper for testability
+        builder.Services.AddScoped<
+            SnapDog2.Core.Abstractions.IAppHealthCheckService,
+            SnapDog2.Infrastructure.Application.AppHealthCheckService
+        >();
     }
 
     var app = builder.Build();
