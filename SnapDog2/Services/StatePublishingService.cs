@@ -410,7 +410,7 @@ public partial class StatePublishingService(
                     {
                         ZoneIndex = zoneIndex,
                         TrackInfo = zoneState.Track,
-                        TrackIndex = zoneState.Track.Index,
+                        TrackIndex = zoneState.Track.Index ?? 0,
                     },
                     cancellationToken
                 );

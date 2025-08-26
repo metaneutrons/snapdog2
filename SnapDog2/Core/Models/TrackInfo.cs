@@ -23,7 +23,7 @@ public record TrackInfo
     /// Gets the track index within the current playlist (1-based).
     /// Maps to TRACK_STATUS status.
     /// </summary>
-    public required int Index { get; init; }
+    public int? Index { get; init; }
 
     /// <summary>
     /// Gets the track title.
@@ -53,13 +53,13 @@ public record TrackInfo
     /// Gets the current playback position in milliseconds.
     /// Maps to TRACK_POSITION_STATUS from MediaPlayer position.
     /// </summary>
-    public long PositionMs { get; init; }
+    public long? PositionMs { get; init; }
 
     /// <summary>
     /// Gets the current playback progress as percentage (0.0-1.0).
     /// Maps to TRACK_PROGRESS_STATUS calculated from position/duration.
     /// </summary>
-    public float Progress { get; init; }
+    public float? Progress { get; init; }
 
     /// <summary>
     /// Gets the cover art URL.
@@ -101,7 +101,7 @@ public record TrackInfo
     public bool IsPlaying { get; init; }
 
     /// <summary>
-    /// Gets the source type ("subsonic", "radio", "file", "stream").
+    /// Gets the source type ("subsonic", "radio", "stream").
     /// TODO: This should be an Enum.
     /// </summary>
     public required string Source { get; init; }
@@ -116,9 +116,4 @@ public record TrackInfo
     /// Gets the UTC timestamp when the track info was recorded.
     /// </summary>
     public DateTime TimestampUtc { get; init; } = DateTime.UtcNow;
-
-    /// <summary>
-    /// Gets the complete metadata object with all LibVLC metadata.
-    /// </summary>
-    public AudioMetadata? Metadata { get; init; }
 }

@@ -36,7 +36,9 @@ using SnapDog2.Core.Configuration;
 using SnapDog2.Core.Constants;
 using SnapDog2.Core.Enums;
 using SnapDog2.Core.Helpers;
+using SnapDog2.Core.Mappers;
 using SnapDog2.Core.Models;
+using SnapDog2.Core.Models.Mqtt;
 using SnapDog2.Server.Features.Clients.Commands.Config;
 using SnapDog2.Server.Features.Clients.Commands.Volume;
 using SnapDog2.Server.Features.Zones.Commands.Playback;
@@ -59,6 +61,12 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     private readonly List<ClientConfig> _clientConfigs;
     private readonly ResiliencePipeline _connectionPolicy;
     private readonly ResiliencePipeline _operationPolicy;
+    
+    /// <summary>
+    /// Cache of last published MQTT zone states to detect changes.
+    /// Key: zoneIndex, Value: last published MqttZoneState
+    /// </summary>
+    private readonly ConcurrentDictionary<int, MqttZoneState> _lastPublishedZoneStates = new();
 
     /// <summary>
     /// Constructs a full MQTT topic using the configured base topic.
@@ -413,15 +421,29 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
 
         try
         {
+            // Convert to simplified MQTT format
+            var mqttZoneState = MqttStateMapper.ToMqttZoneState(state);
+            
+            // Check if this represents a meaningful change
+            var lastPublished = _lastPublishedZoneStates.GetValueOrDefault(zoneIndex);
+            if (!MqttStateMapper.HasMeaningfulChange(lastPublished, mqttZoneState))
+            {
+                // No meaningful change, skip publishing
+                return Result.Success();
+            }
+
             // Use simple zone state topic that matches blueprint pattern
             var stateTopic = BuildTopic($"zone/{zoneIndex}/state");
 
-            // Publish comprehensive state as JSON
+            // Publish simplified state as JSON
             var stateJson = JsonSerializer.Serialize(
-                state,
+                mqttZoneState,
                 new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
             );
             await this.PublishAsync(stateTopic, stateJson, true, cancellationToken);
+
+            // Cache the published state for future change detection
+            _lastPublishedZoneStates[zoneIndex] = mqttZoneState;
 
             return Result.Success();
         }

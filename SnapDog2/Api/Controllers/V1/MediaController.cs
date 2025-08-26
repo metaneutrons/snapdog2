@@ -434,7 +434,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
             {
                 // Try finding by track index
                 targetTrack = tracks.FirstOrDefault(t =>
-                    t.Index.ToString().Equals(trackIndex, StringComparison.OrdinalIgnoreCase)
+                    (t.Index?.ToString() ?? "0").Equals(trackIndex, StringComparison.OrdinalIgnoreCase)
                 );
             }
 

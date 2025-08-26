@@ -1491,9 +1491,9 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                     }
 
                     // Log position updates every 30 seconds (simpler approach)
-                    var positionSeconds = status.CurrentTrack.PositionMs / 1000.0;
+                    var positionSeconds = (status.CurrentTrack.PositionMs ?? 0) / 1000.0;
                     var durationSeconds = (updatedTrack.DurationMs ?? 0) / 1000.0;
-                    var progressPercent = status.CurrentTrack.Progress * 100;
+                    var progressPercent = (status.CurrentTrack.Progress ?? 0) * 100;
 
                     // Log every 30 seconds of playback
                     var positionSecondsInt = (int)positionSeconds;
@@ -1517,7 +1517,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                     {
                         LogLibVLCPositionData(
                             status.CurrentTrack.PositionMs,
-                            status.CurrentTrack.Progress,
+                            status.CurrentTrack.Progress ?? 0,
                             updatedTrack.DurationMs
                         );
                     }
@@ -1533,8 +1533,8 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
                     LogUpdatedTrackState(
                         updatedTrack.IsPlaying,
-                        updatedTrack.PositionMs,
-                        updatedTrack.Progress
+                        updatedTrack.PositionMs ?? 0,
+                        updatedTrack.Progress ?? 0
                     );
                 }
                 else
@@ -2294,8 +2294,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                     TrackNumber = track.TrackNumber,
                     Year = track.Year,
                     Rating = track.Rating,
-                    TimestampUtc = track.TimestampUtc,
-                    Metadata = track.Metadata
+                    TimestampUtc = track.TimestampUtc
                 }
             };
             await mediator.PublishAsync(metadataNotification).ConfigureAwait(false);
