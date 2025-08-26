@@ -107,7 +107,7 @@ public partial class PlaylistManager : IPlaylistManager
         await Task.Delay(1); // TODO: Fix simulation async operation
 
         var playlist = this._playlists.Values.FirstOrDefault(p => p.Index == playlistIndex);
-        if (playlist != null && this._playlistTracks.TryGetValue(playlist.Id, out var tracks))
+        if (playlist != null && this._playlistTracks.TryGetValue(playlist.SubsonicPlaylistId, out var tracks))
         {
             return Result<List<TrackInfo>>.Success(tracks);
         }
@@ -184,7 +184,7 @@ public partial class PlaylistManager : IPlaylistManager
         {
             var playlist = new PlaylistInfo
             {
-                Id = playlistInfo.Id,
+                SubsonicPlaylistId = playlistInfo.Id,
                 Source = "placeholder",
                 Index = playlistInfo.Index,
                 Name = playlistInfo.Name,

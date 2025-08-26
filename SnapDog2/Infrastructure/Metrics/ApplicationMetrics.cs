@@ -16,6 +16,7 @@ namespace SnapDog2.Infrastructure.Metrics;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using Microsoft.Extensions.Logging;
+using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Models;
 
 /// <summary>
@@ -23,7 +24,7 @@ using SnapDog2.Core.Models;
 /// Provides comprehensive monitoring across all application layers.
 /// Follows Prometheus naming conventions and OpenTelemetry best practices.
 /// </summary>
-public partial class ApplicationMetrics : IDisposable
+public partial class ApplicationMetrics : IApplicationMetrics
 {
     private readonly Meter _meter;
     private readonly ILogger<ApplicationMetrics> _logger;

@@ -61,4 +61,11 @@ public class SystemConfig
     /// </summary>
     [Env(Key = "LOG_FILE")]
     public string? LogFile { get; set; }
+
+    /// <summary>
+    /// Progress update interval in milliseconds for track position updates.
+    /// Maps to: SNAPDOG_SYSTEM_PROGRESS_UPDATE_INTERVAL_MS
+    /// </summary>
+    [Env(Key = "PROGRESS_UPDATE_INTERVAL_MS", Default = 1000)]
+    public int ProgressUpdateIntervalMs { get; set; } = 1000;
 }

@@ -38,12 +38,27 @@ public sealed partial class MetadataManager(LibVLC libvlc, ILogger<MetadataManag
         {
             LogStartingMetadataExtraction(this._logger, media.Mrl);
 
-            // Parse the media to extract metadata (asynchronous in LibVLCSharp)
-            var parseResult = await media.Parse(MediaParseOptions.ParseNetwork, cancellationToken: cancellationToken);
+            // Use faster parsing options with timeout
+            using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            timeoutCts.CancelAfter(TimeSpan.FromSeconds(5)); // 5 second timeout for metadata
+
+            // Use ParseLocal for faster parsing, fallback to ParseNetwork if needed
+            var parseOptions = media.Mrl.StartsWith("http")
+                ? MediaParseOptions.ParseNetwork | MediaParseOptions.FetchLocal
+                : MediaParseOptions.ParseLocal;
+
+            var parseResult = await media.Parse(parseOptions, cancellationToken: timeoutCts.Token);
 
             if (parseResult != MediaParsedStatus.Done)
             {
                 LogMediaParsingIncomplete(this._logger, parseResult.ToString());
+
+                // If parsing failed, try with minimal network parsing
+                if (media.Mrl.StartsWith("http") && parseResult == MediaParsedStatus.Failed)
+                {
+                    LogRetryingWithMinimalParsing(this._logger, media.Mrl);
+                    parseResult = await media.Parse(MediaParseOptions.FetchLocal, cancellationToken: timeoutCts.Token);
+                }
             }
 
             var metadata = new AudioMetadata
@@ -236,4 +251,11 @@ public sealed partial class MetadataManager(LibVLC libvlc, ILogger<MetadataManag
         Message = "Failed to extract technical details from media"
     )]
     private static partial void LogFailedToExtractTechnicalDetails(ILogger logger, Exception ex);
+
+    [LoggerMessage(
+        EventId = 2407,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Retrying metadata extraction with minimal parsing for: {MediaUrl}"
+    )]
+    private static partial void LogRetryingWithMinimalParsing(ILogger logger, string mediaUrl);
 }

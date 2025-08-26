@@ -37,6 +37,9 @@ public enum StatusEventType
     [Description("CLIENT_ZONE_STATUS")]
     ClientZoneStatus,
 
+    [Description("CLIENT_NAME_STATUS")]
+    ClientNameStatus,
+
     [Description("CLIENT_STATE")]
     ClientState,
 
@@ -89,6 +92,18 @@ public enum StatusEventType
     [Description("TRACK_REPEAT_STATUS")]
     TrackRepeatStatus,
 
+    [Description("PLAYLIST_NAME_STATUS")]
+    PlaylistNameStatus,
+
+    [Description("PLAYLIST_COUNT_STATUS")]
+    PlaylistCountStatus,
+
+    [Description("ZONE_NAME_STATUS")]
+    ZoneNameStatus,
+
+    [Description("CONTROL_STATUS")]
+    ControlStatus,
+
     [Description("PLAYLIST_REPEAT_STATUS")]
     PlaylistRepeatStatus,
 
@@ -100,6 +115,9 @@ public enum StatusEventType
 
     [Description("ZONES_INFO")]
     ZonesInfo,
+
+    [Description("CLIENTS_INFO")]
+    ClientsInfo,
 
     // Global Status Events
     [Description("VERSION_INFO")]

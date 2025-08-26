@@ -15,21 +15,24 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text.Json;
 using Microsoft.AspNetCore.Connections;
+using SnapDog2.Core.Abstractions;
 
 namespace SnapDog2.Middleware;
 
 /// <summary>
-/// global exception handling middleware
+/// Global exception handling middleware with error tracking integration.
 /// </summary>
 public partial class GlobalExceptionHandlingMiddleware(
     RequestDelegate next,
     ILogger<GlobalExceptionHandlingMiddleware> logger,
-    IHostEnvironment environment
+    IHostEnvironment environment,
+    IErrorTrackingService errorTrackingService
 )
 {
     private readonly RequestDelegate _next = next;
     private readonly ILogger<GlobalExceptionHandlingMiddleware> _logger = logger;
     private readonly IHostEnvironment _environment = environment;
+    private readonly IErrorTrackingService _errorTrackingService = errorTrackingService;
     private readonly bool _includeStackTraces = environment.IsDevelopment() || logger.IsEnabled(LogLevel.Debug);
 
     public async Task InvokeAsync(HttpContext context)
@@ -76,6 +79,13 @@ public partial class GlobalExceptionHandlingMiddleware(
                 exception.Message
             );
         }
+
+        // Record the exception in the error tracking service
+        _errorTrackingService.RecordException(
+            exception,
+            "HttpPipeline",
+            $"{requestMethod} {requestPath}"
+        );
 
         // Determine response based on exception type
         var (statusCode, errorResponse) = exception switch

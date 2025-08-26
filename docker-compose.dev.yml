@@ -139,8 +139,8 @@ services:
     volumes:
       - ./devcontainer/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
       - ./devcontainer/mosquitto/passwd:/mosquitto/config/passwd
-      - mqtt_data:/mosquitto/data
-      - mqtt_logs:/mosquitto/log
+    #      - mqtt_data:/mosquitto/data
+    #      - mqtt_logs:/mosquitto/log
     ports:
       - "1883:1883" # MQTT port
     environment:

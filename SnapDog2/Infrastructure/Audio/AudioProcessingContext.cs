@@ -40,6 +40,14 @@ public class PlaybackStateChangedEventArgs : EventArgs
 }
 
 /// <summary>
+/// Event arguments for track info changes.
+/// </summary>
+public class TrackInfoChangedEventArgs : EventArgs
+{
+    public required TrackInfo TrackInfo { get; init; }
+}
+
+/// <summary>
 /// Audio processing context using LibVLC for streaming and metadata extraction.
 /// </summary>
 public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposable

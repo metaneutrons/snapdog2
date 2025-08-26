@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 //
 // SnapDog
 // The Snapcast-based Smart Home Audio System with MQTT & KNX integration
@@ -20,8 +22,10 @@ public record PlaylistInfo
 {
     /// <summary>
     /// Gets the playlist identifier (can be "radio" for radio stations).
+    /// Internal use only - not exposed in API responses.
     /// </summary>
-    public required string Id { get; init; }
+    [JsonIgnore]
+    public string SubsonicPlaylistId { get; init; } = string.Empty;
 
     /// <summary>
     /// Gets the playlist name (can be "Radio Stations" for radio).

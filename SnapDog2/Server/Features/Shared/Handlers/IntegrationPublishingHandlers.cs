@@ -438,20 +438,19 @@ public partial class IntegrationPublishingHandlers(
 
         // Debug log to verify we're publishing the notification
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<IntegrationPublishingHandlers>>();
-        logger.LogInformation("🚀 Publishing StatusChangedNotification: {StatusType} for target {TargetIndex} with value {Value}",
-            statusType, targetIndex, value?.ToString() ?? "null");
+        LogPublishingStatusChangedNotification(logger, statusType, targetIndex, value?.ToString() ?? "null");
 
         await mediator.PublishAsync(
             new StatusChangedNotification
             {
                 StatusType = statusType,
                 TargetIndex = targetIndex,
-                Value = value
+                Value = value ?? (object)"null"
             },
             cancellationToken
         );
 
-        logger.LogInformation("✅ StatusChangedNotification published successfully");
+        LogStatusChangedNotificationPublished(logger);
     }
 
     /// <summary>
@@ -711,6 +710,20 @@ public partial class IntegrationPublishingHandlers(
     )]
     private static partial void LogSmartPublisherNotAvailableWarning(ILogger logger);
 
+    [LoggerMessage(
+        EventId = 5023,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "🚀 Publishing StatusChangedNotification: {StatusType} for target {TargetIndex} with value {Value}"
+    )]
+    private static partial void LogPublishingStatusChangedNotification(ILogger logger, string StatusType, int TargetIndex, string Value);
+
+    [LoggerMessage(
+        EventId = 5024,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "✅ StatusChangedNotification published successfully"
+    )]
+    private static partial void LogStatusChangedNotificationPublished(ILogger logger);
+
     #endregion
 }
 
@@ -732,18 +745,51 @@ public partial class KnxIntegrationHandler : INotificationHandler<StatusChangedN
     public async Task Handle(StatusChangedNotification notification, CancellationToken cancellationToken)
     {
         // Debug log to verify we're receiving notifications
-        _logger.LogInformation("🔔 KNX integration received: {StatusType} for target {TargetIndex} with value {Value}",
-            notification.StatusType, notification.TargetIndex, notification.Value?.ToString() ?? "null");
+        LogKnxIntegrationReceived(notification.StatusType, notification.TargetIndex, notification.Value?.ToString() ?? "null");
 
         try
         {
-            _logger.LogInformation("✅ Calling KNX service SendStatusAsync method");
-            await _knxService.SendStatusAsync(notification.StatusType, notification.TargetIndex, notification.Value, cancellationToken);
-            _logger.LogInformation("✅ KNX service SendStatusAsync method completed");
+            LogCallingKnxService();
+            // Ensure we have a non-null value for KNX service
+            var knxValue = notification.Value ?? "null";
+            await _knxService.SendStatusAsync(notification.StatusType, notification.TargetIndex, knxValue, cancellationToken);
+            LogKnxServiceCompleted();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ Error calling KNX service SendStatusAsync: {Error}", ex.Message);
+            LogKnxServiceError(ex, ex.Message);
         }
     }
+
+    #region LoggerMessage Methods
+
+    [LoggerMessage(
+        EventId = 5025,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "🔔 KNX integration received: {StatusType} for target {TargetIndex} with value {Value}"
+    )]
+    private partial void LogKnxIntegrationReceived(string StatusType, int TargetIndex, string Value);
+
+    [LoggerMessage(
+        EventId = 5026,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "✅ Calling KNX service SendStatusAsync method"
+    )]
+    private partial void LogCallingKnxService();
+
+    [LoggerMessage(
+        EventId = 5027,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "✅ KNX service SendStatusAsync method completed"
+    )]
+    private partial void LogKnxServiceCompleted();
+
+    [LoggerMessage(
+        EventId = 5028,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "❌ Error calling KNX service SendStatusAsync: {Error}"
+    )]
+    private partial void LogKnxServiceError(Exception ex, string Error);
+
+    #endregion
 }

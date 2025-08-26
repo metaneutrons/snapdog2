@@ -84,7 +84,7 @@ public partial class GetAllPlaylistsQueryHandler(
 
         return new PlaylistInfo
         {
-            Id = "radio",
+            SubsonicPlaylistId = "radio",
             Name = "Radio Stations",
             Index = 1,
             TrackCount = radioStations.Count,
@@ -188,7 +188,7 @@ public partial class GetPlaylistQueryHandler(
         var targetPlaylist = subsonicPlaylists[subsonicIndex];
 
         // Get the full playlist with tracks using the Subsonic ID
-        var result = await this._subsonicService.GetPlaylistAsync(targetPlaylist.Id, cancellationToken);
+        var result = await this._subsonicService.GetPlaylistAsync(targetPlaylist.SubsonicPlaylistId, cancellationToken);
         if (result.IsSuccess)
         {
             LogPlaylistRetrieved(this._logger, query.PlaylistIndex.ToString(), result.Value?.Tracks?.Count ?? 0);
@@ -210,7 +210,7 @@ public partial class GetPlaylistQueryHandler(
 
         var playlist = new PlaylistInfo
         {
-            Id = "radio",
+            SubsonicPlaylistId = "radio",
             Name = "Radio Stations",
             Index = 1,
             TrackCount = radioStations.Count,

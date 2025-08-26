@@ -39,5 +39,7 @@ public interface IMetricsService
     void IncrementCounter(string name, long delta = 1, params (string Key, string Value)[] labels);
     void SetGauge(string name, double value, params (string Key, string Value)[] labels);
 
-    // TODO: Add other metric recording methods as needed
+    // Additional metric recording methods for comprehensive monitoring
+    void RecordError(string errorType, string component, string? operation = null);
+    void RecordException(Exception exception, string component, string? operation = null);
 }

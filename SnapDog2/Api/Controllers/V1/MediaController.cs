@@ -233,7 +233,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
 
             var allPlaylists = allPlaylistsResult.Value ?? new List<PlaylistInfo>();
             var targetPlaylist = allPlaylists.FirstOrDefault(p =>
-                p.Id.Equals(playlistIndex, StringComparison.OrdinalIgnoreCase)
+                p.SubsonicPlaylistId.Equals(playlistIndex, StringComparison.OrdinalIgnoreCase)
             );
 
             if (targetPlaylist == null || !targetPlaylist.Index.HasValue)
@@ -574,7 +574,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
 
         var allPlaylists = allPlaylistsResult.Value ?? new List<PlaylistInfo>();
         var targetPlaylist = allPlaylists.FirstOrDefault(p =>
-            p.Id.Equals(playlistIndex, StringComparison.OrdinalIgnoreCase)
+            p.SubsonicPlaylistId.Equals(playlistIndex, StringComparison.OrdinalIgnoreCase)
         );
 
         if (targetPlaylist == null || !targetPlaylist.Index.HasValue)

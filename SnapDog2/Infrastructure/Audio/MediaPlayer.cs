@@ -47,6 +47,7 @@ public sealed partial class MediaPlayer(
     // Events for real-time updates
     public event EventHandler<PositionChangedEventArgs>? PositionChanged;
     public event EventHandler<PlaybackStateChangedEventArgs>? PlaybackStateChanged;
+    public event EventHandler<TrackInfoChangedEventArgs>? TrackInfoChanged;
 
     /// <summary>
     /// Starts streaming audio from the specified URL to the Snapcast sink.
@@ -114,6 +115,36 @@ public sealed partial class MediaPlayer(
                         }
                         else
                         {
+                            LogAudioProcessingSuccess(this._logger, this._zoneIndex, result.Metadata != null);
+
+                            // Update track info with extracted metadata from LibVLC
+                            if (result.Metadata != null)
+                            {
+                                var updatedTrack = this._currentTrack with
+                                {
+                                    Title = !string.IsNullOrWhiteSpace(result.Metadata.Title) ? result.Metadata.Title : this._currentTrack.Title,
+                                    Artist = !string.IsNullOrWhiteSpace(result.Metadata.Artist) ? result.Metadata.Artist : this._currentTrack.Artist,
+                                    Album = !string.IsNullOrWhiteSpace(result.Metadata.Album) ? result.Metadata.Album : this._currentTrack.Album,
+                                    DurationMs = result.Metadata.Duration > 0 ? (int)result.Metadata.Duration : this._currentTrack.DurationMs,
+                                };
+
+                                this._currentTrack = updatedTrack;
+
+                                LogMetadataExtracted(this._logger, this._zoneIndex,
+                                    updatedTrack.Title ?? "Unknown",
+                                    updatedTrack.Artist ?? "Unknown");
+
+                                // Fire event to notify Zone of track info change
+                                this.TrackInfoChanged?.Invoke(this, new TrackInfoChangedEventArgs
+                                {
+                                    TrackInfo = updatedTrack
+                                });
+                            }
+                            else
+                            {
+                                LogNoMetadataAvailable(this._logger, this._zoneIndex);
+                            }
+
                             LogAudioStreamingCompleted(this._logger, this._zoneIndex);
                         }
                     }
@@ -271,6 +302,30 @@ public sealed partial class MediaPlayer(
         Message = "Audio streaming started for zone {ZoneIndex}: {StreamUrl} - {TrackTitle}"
     )]
     private static partial void LogStreamingStarted(ILogger logger, int zoneIndex, string streamUrl, string trackTitle);
+
+    [LoggerMessage(
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "✅ Metadata extracted for zone {ZoneIndex}: '{Title}' by '{Artist}'"
+    )]
+    private static partial void LogMetadataExtracted(ILogger logger, int zoneIndex, string title, string artist);
+
+    [LoggerMessage(
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "🔍 Audio processing result for zone {ZoneIndex}: Success=true, HasMetadata={HasMetadata}"
+    )]
+    private static partial void LogAudioProcessingSuccess(ILogger logger, int zoneIndex, bool hasMetadata);
+
+    [LoggerMessage(
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "⚠️ No metadata available for zone {ZoneIndex}"
+    )]
+    private static partial void LogNoMetadataAvailable(ILogger logger, int zoneIndex);
+
+    [LoggerMessage(
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "🎵 Audio streaming started for zone {ZoneIndex}"
+    )]
+    private static partial void LogAudioStreamingStarted(ILogger logger, int zoneIndex);
 
     [LoggerMessage(
         Level = Microsoft.Extensions.Logging.LogLevel.Information,

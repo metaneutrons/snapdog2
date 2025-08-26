@@ -269,13 +269,15 @@ public static class SnapDogBlueprint
         .Zone()
         .Mqtt("snapdog/zone/{zoneIndex}/control/set")
         .Post("/api/v1/zones/{zoneIndex:int}/control")
-        .Description("General zone control command")
+        .Description("Set unified zone control state")
+        .Exclude(Protocol.Knx, "Complex control state not suitable for KNX")
         //
         .Command("ZONE_NAME")
         .Zone()
+        .Mqtt("snapdog/zone/{zoneIndex}/name/set")
+        .Put("/api/v1/zones/{zoneIndex:int}/name")
         .Description("Set zone name")
         .Exclude(Protocol.Knx, "KNX cannot transmit string names effectively")
-        .Exclude(Protocol.Mqtt, "MQTT should not change zone name")
         .Exclude(Protocol.Api, "API should not change zone name")
         //
         // === SYSTEM STATUS ===
@@ -328,6 +330,13 @@ public static class SnapDogBlueprint
         .Description("Information about all zones")
         .Exclude(Protocol.Knx, "Read-only system information not actionable via KNX")
         .Exclude(Protocol.Mqtt, "No single MQTT topic for all zones info")
+        //
+        .Status("CLIENTS_INFO")
+        .Global()
+        .Get("/api/v1/clients")
+        .Description("Information about all clients")
+        .Exclude(Protocol.Knx, "Read-only system information not actionable via KNX")
+        .Exclude(Protocol.Mqtt, "No single MQTT topic for all clients info")
         //
         // === MEDIA ENDPOINTS ===
         //

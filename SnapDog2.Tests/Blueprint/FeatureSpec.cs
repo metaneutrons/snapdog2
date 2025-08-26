@@ -72,11 +72,11 @@ public class FeatureCollection<T> : IEnumerable<T>
     }
 
     // Protocol filters
-    public FeatureCollection<T> WithApi() => Filter(f => f.HasApi);
+    public FeatureCollection<T> WithApi() => Filter(f => f.HasApi && !f.IsExcludedFrom(Protocol.Api));
 
-    public FeatureCollection<T> WithMqtt() => Filter(f => f.HasMqtt);
+    public FeatureCollection<T> WithMqtt() => Filter(f => f.HasMqtt && !f.IsExcludedFrom(Protocol.Mqtt));
 
-    public FeatureCollection<T> WithKnx() => Filter(f => f.HasKnx);
+    public FeatureCollection<T> WithKnx() => Filter(f => f.HasKnx && !f.IsExcludedFrom(Protocol.Knx));
 
     public FeatureCollection<T> WithoutApi() => Filter(f => !f.HasApi);
 

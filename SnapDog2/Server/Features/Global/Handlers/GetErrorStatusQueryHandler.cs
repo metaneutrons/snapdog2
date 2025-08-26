@@ -28,14 +28,14 @@ using SnapDog2.Server.Features.Global.Queries;
 /// Initializes a new instance of the <see cref="GetErrorStatusQueryHandler"/> class.
 /// </remarks>
 /// <param name="logger">The logger instance.</param>
-/// <param name="metricsService">The metrics service instance.</param>
+/// <param name="errorTrackingService">The error tracking service instance.</param>
 public partial class GetErrorStatusQueryHandler(
     ILogger<GetErrorStatusQueryHandler> logger,
-    IMetricsService metricsService
+    IErrorTrackingService errorTrackingService
 ) : IQueryHandler<GetErrorStatusQuery, Result<ErrorDetails?>>
 {
     private readonly ILogger<GetErrorStatusQueryHandler> _logger = logger;
-    private readonly IMetricsService _metricsService = metricsService;
+    private readonly IErrorTrackingService _errorTrackingService = errorTrackingService;
 
     /// <summary>
     /// Handles the get error status query.
@@ -49,12 +49,8 @@ public partial class GetErrorStatusQueryHandler(
         {
             this.LogGettingLatestSystemErrorStatus();
 
-            // TODO: Implement error status tracking service
-            // For now, return null indicating no recent errors
-            // In a full implementation, this would query an error tracking service
-            // that maintains the latest system error information
-
-            var errorDetails = await GetLatestErrorAsync(cancellationToken);
+            // Get the latest error from the error tracking service
+            var errorDetails = await _errorTrackingService.GetLatestErrorAsync();
 
             this.LogSuccessfullyRetrievedErrorStatus(errorDetails != null);
 
@@ -65,18 +61,5 @@ public partial class GetErrorStatusQueryHandler(
             this.LogFailedToGetErrorStatus(ex);
             return Result<ErrorDetails?>.Failure("Failed to retrieve error status");
         }
-    }
-
-    private static async Task<ErrorDetails?> GetLatestErrorAsync(CancellationToken cancellationToken)
-    {
-        // TODO: Implement actual error tracking
-        // This could be:
-        // - Query from a database of recent errors
-        // - Get from an in-memory error cache
-        // - Query from a logging service
-        // - Return the most recent error from an error tracking service
-
-        await Task.CompletedTask; // Placeholder for async operation
-        return null; // No recent errors for now
     }
 }

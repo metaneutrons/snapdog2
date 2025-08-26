@@ -38,10 +38,10 @@ public class SystemStatusServiceTests
         _mockLogger = new Mock<ILogger<AppStatusService>>();
         _mockMetricsService = new Mock<IMetricsService>();
         _mockHealthCheckService = new Mock<IAppHealthCheckService>();
-        
+
         // Setup logger to enable Debug level for LoggerMessage patterns
         _mockLogger.Setup(x => x.IsEnabled(LogLevel.Debug)).Returns(true);
-        
+
         _statusService = new AppStatusService(
             _mockLogger.Object,
             _mockMetricsService.Object,
@@ -108,10 +108,10 @@ public class SystemStatusServiceTests
         Assert.NotNull(result.GitCommit);
         Assert.NotNull(result.GitBranch);
         Assert.NotNull(result.BuildConfiguration);
-        
+
         // Build configuration should be Debug or Release
-        Assert.True(result.BuildConfiguration == "Debug" || 
-                   result.BuildConfiguration == "Release" || 
+        Assert.True(result.BuildConfiguration == "Debug" ||
+                   result.BuildConfiguration == "Release" ||
                    result.BuildConfiguration == "Unknown");
     }
 
@@ -139,7 +139,7 @@ public class SystemStatusServiceTests
 
         // Assert
         Assert.Equal(expectedStats, result);
-        
+
         // Verify metrics service was called
         _mockMetricsService.Verify(
             x => x.GetServerStatsAsync(),
@@ -186,8 +186,8 @@ public class SystemStatusServiceTests
         // Arrange
         _mockMetricsService
             .Setup(x => x.GetServerStatsAsync())
-            .ReturnsAsync(new ServerStats 
-            { 
+            .ReturnsAsync(new ServerStats
+            {
                 TimestampUtc = DateTime.UtcNow,
                 CpuUsagePercent = 25.5,
                 MemoryUsageMb = 512.0,
