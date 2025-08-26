@@ -51,6 +51,7 @@ public partial class ZoneManager(
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
     private readonly IZoneStateStore _zoneStateStore = zoneStateStore;
     private readonly IStatusFactory _statusFactory = statusFactory;
+    private readonly IOptions<SnapDogConfiguration> _configuration = configuration;
     private readonly List<ZoneConfig> _zoneConfigs = configuration.Value.Zones;
     private readonly ConcurrentDictionary<int, IZoneService> _zones = new ConcurrentDictionary<int, IZoneService>();
     private readonly SemaphoreSlim _initializationLock = new SemaphoreSlim(1, 1);
@@ -131,7 +132,8 @@ public partial class ZoneManager(
                         this._serviceScopeFactory,
                         this._zoneStateStore,
                         this._statusFactory,
-                        this._logger
+                        this._logger,
+                        this._configuration
                     );
 
                     await zoneService.InitializeAsync(cancellationToken).ConfigureAwait(false);
@@ -300,6 +302,8 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     private readonly IZoneStateStore _zoneStateStore;
     private readonly IStatusFactory _statusFactory;
     private readonly ILogger _logger;
+    private readonly IOptions<SnapDogConfiguration> _configuration;
+    private readonly string _instanceId = Guid.NewGuid().ToString("N")[..8]; // Short instance ID for debugging
     private readonly SemaphoreSlim _stateLock;
     private ZoneState _currentState;
     private string? _snapcastGroupId;
@@ -345,7 +349,8 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         IServiceScopeFactory serviceScopeFactory,
         IZoneStateStore zoneStateStore,
         IStatusFactory statusFactory,
-        ILogger logger
+        ILogger logger,
+        IOptions<SnapDogConfiguration> configuration
     )
     {
         this._zoneIndex = zoneIndex;
@@ -357,6 +362,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         this._zoneStateStore = zoneStateStore;
         this._statusFactory = statusFactory;
         this._logger = logger;
+        this._configuration = configuration;
         this._stateLock = new SemaphoreSlim(1, 1);
 
         // Initialize state from store or create default
@@ -1118,7 +1124,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            var newPlaylist = this._currentState.Playlist! with { Id = playlistIndex, Name = playlistIndex };
+            var newPlaylist = this._currentState.Playlist! with { SubsonicPlaylistId = playlistIndex, Name = playlistIndex };
 
             this._currentState = this._currentState with { Playlist = newPlaylist };
             this.PublishZoneStateChangedAsync();
@@ -1285,7 +1291,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             },
             Playlist = new PlaylistInfo
             {
-                Id = "none",
+                SubsonicPlaylistId = "none",
                 Source = "none",
                 Index = 1,
                 Name = "No Playlist",
@@ -1368,24 +1374,125 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
                 LogMediaPlayerStatus(status.IsPlaying, status.CurrentTrack?.Title);
 
-                // Update track playing state if we have a current track
-                if (this._currentState.Track != null && status.CurrentTrack != null)
+                // Check for playing state changes regardless of whether CurrentTrack is null
+                // This handles cases where MediaPlayer returns null CurrentTrack when paused
+                if (this._currentState.Track != null)
                 {
-                    // Only log track state changes at INFO level if something actually changed
-                    var stateChanged = this._currentState.Track.IsPlaying != status.IsPlaying;
-
-                    if (stateChanged)
+                    var playingStateChanged = this._currentState.Track.IsPlaying != status.IsPlaying;
+                    if (playingStateChanged)
                     {
                         LogTrackStateChanged(this._currentState.Track.IsPlaying, status.IsPlaying);
+
+                        // Publish track playing status notification for KNX integration
+                        _ = Task.Run(async () =>
+                        {
+                            try
+                            {
+                                using var scope = this._serviceScopeFactory.CreateScope();
+                                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+
+                                var playingStatusNotification = new ZoneTrackPlayingStatusChangedNotification
+                                {
+                                    ZoneIndex = this._zoneIndex,
+                                    IsPlaying = status.IsPlaying
+                                };
+                                await mediator.PublishAsync(playingStatusNotification).ConfigureAwait(false);
+                            }
+                            catch (Exception ex)
+                            {
+                                LogErrorPublishingTrackPlayingStatus(ex, this._zoneIndex);
+                            }
+                        });
+                    }
+                }
+
+                // Update track playing state - handle both existing tracks and new tracks from MediaPlayer
+                if (status.CurrentTrack != null)
+                {
+                    TrackInfo updatedTrack;
+
+                    if (this._currentState.Track != null)
+                    {
+                        // We have an existing track - preserve its rich metadata and update only playback info
+                        var stateChanged = this._currentState.Track.IsPlaying != status.IsPlaying;
+
+                        if (stateChanged)
+                        {
+                            LogTrackStateChanged(this._currentState.Track.IsPlaying, status.IsPlaying);
+
+                            // Publish track playing status notification for KNX integration
+                            _ = Task.Run(async () =>
+                            {
+                                try
+                                {
+                                    using var scope = this._serviceScopeFactory.CreateScope();
+                                    var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+
+                                    var playingStatusNotification = new ZoneTrackPlayingStatusChangedNotification
+                                    {
+                                        ZoneIndex = this._zoneIndex,
+                                        IsPlaying = status.IsPlaying
+                                    };
+                                    await mediator.PublishAsync(playingStatusNotification).ConfigureAwait(false);
+                                }
+                                catch (Exception ex)
+                                {
+                                    LogErrorPublishingTrackPlayingStatus(ex, this._zoneIndex);
+                                }
+                            });
+                        }
+                        else
+                        {
+                            LogUpdatingTrackState(this._currentState.Track.IsPlaying, status.IsPlaying);
+                        }
+
+                        // Preserve ALL existing metadata, only update playback status and position
+                        // This ensures playlist metadata (artist, album, etc.) is not lost
+                        updatedTrack = this._currentState.Track with
+                        {
+                            IsPlaying = status.IsPlaying,
+                            PositionMs = status.CurrentTrack.PositionMs,
+                            Progress = status.CurrentTrack.Progress,
+                            // Only update duration if MediaPlayer provides it and we don't have it
+                            DurationMs = status.CurrentTrack.DurationMs ?? this._currentState.Track.DurationMs,
+                            // Preserve all other metadata: Title, Artist, Album, Source, Index, etc.
+                        };
                     }
                     else
                     {
-                        LogUpdatingTrackState(this._currentState.Track.IsPlaying, status.IsPlaying);
+                        // No existing track - use MediaPlayer track as-is (this handles stream URLs, etc.)
+                        LogTrackStateChanged(false, status.IsPlaying);
+
+                        // Publish track playing status notification for KNX integration (new track)
+                        _ = Task.Run(async () =>
+                        {
+                            try
+                            {
+                                using var scope = this._serviceScopeFactory.CreateScope();
+                                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+
+                                var playingStatusNotification = new ZoneTrackPlayingStatusChangedNotification
+                                {
+                                    ZoneIndex = this._zoneIndex,
+                                    IsPlaying = status.IsPlaying
+                                };
+                                await mediator.PublishAsync(playingStatusNotification).ConfigureAwait(false);
+                            }
+                            catch (Exception ex)
+                            {
+                                LogErrorPublishingTrackPlayingStatus(ex, this._zoneIndex);
+                            }
+                        });
+
+                        updatedTrack = status.CurrentTrack with
+                        {
+                            IsPlaying = status.IsPlaying,
+                        };
                     }
 
                     // Log position updates every 30 seconds (simpler approach)
                     var positionSeconds = status.CurrentTrack.PositionMs / 1000.0;
-                    var durationSeconds = status.CurrentTrack.DurationMs / 1000.0;
+                    var durationSeconds = (updatedTrack.DurationMs ?? 0) / 1000.0;
                     var progressPercent = status.CurrentTrack.Progress * 100;
 
                     // Log every 30 seconds of playback
@@ -1399,7 +1506,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                     {
                         LogZonePlayingWithPosition(
                             this._zoneIndex,
-                            status.CurrentTrack.Title ?? "Unknown",
+                            updatedTrack.Title ?? "Unknown",
                             positionSeconds,
                             durationSeconds,
                             progressPercent
@@ -1411,36 +1518,48 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                         LogLibVLCPositionData(
                             status.CurrentTrack.PositionMs,
                             status.CurrentTrack.Progress,
-                            status.CurrentTrack.DurationMs
+                            updatedTrack.DurationMs
                         );
                     }
 
-                    // Update the track with current playback information
+                    // Update the zone state with the updated track
                     this._currentState = this._currentState with
                     {
-                        Track = this._currentState.Track with
-                        {
-                            IsPlaying = status.IsPlaying,
-                            PositionMs = status.CurrentTrack.PositionMs,
-                            Progress = status.CurrentTrack.Progress,
-                        },
+                        Track = updatedTrack,
                         PlaybackState = status.IsPlaying
                             ? SnapDog2.Core.Enums.PlaybackState.Playing
                             : SnapDog2.Core.Enums.PlaybackState.Stopped,
                     };
 
                     LogUpdatedTrackState(
-                        this._currentState.Track.IsPlaying,
-                        this._currentState.Track.PositionMs,
-                        this._currentState.Track.Progress
+                        updatedTrack.IsPlaying,
+                        updatedTrack.PositionMs,
+                        updatedTrack.Progress
                     );
                 }
                 else
                 {
                     LogSkippingUpdate(
                         this._currentState.Track != null ? "NotNull" : "Null",
-                        status.CurrentTrack != null ? "NotNull" : "Null"
+                        "Null"
                     );
+
+                    // Even when CurrentTrack is null, update the playing state of existing track
+                    if (this._currentState.Track != null)
+                    {
+                        var updatedTrack = this._currentState.Track with
+                        {
+                            IsPlaying = status.IsPlaying
+                        };
+
+                        this._currentState = this._currentState with
+                        {
+                            Track = updatedTrack,
+                            PlaybackState = status.IsPlaying
+                                ? SnapDog2.Core.Enums.PlaybackState.Playing
+                                : SnapDog2.Core.Enums.PlaybackState.Paused
+                        };
+                    }
                 }
             }
             else
@@ -1492,6 +1611,9 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
         LogStartingPositionUpdateTimer(this._zoneIndex);
 
+        var intervalMs = this._configuration.Value.System.ProgressUpdateIntervalMs;
+        var interval = TimeSpan.FromMilliseconds(intervalMs);
+
         this._positionUpdateTimer = new Timer(
             async _ =>
             {
@@ -1513,8 +1635,8 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 }
             },
             null,
-            TimeSpan.FromSeconds(1),
-            TimeSpan.FromSeconds(1)
+            interval,
+            interval
         );
     }
 
@@ -1546,6 +1668,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
             mediaPlayer.PositionChanged += this.OnMediaPlayerPositionChanged;
             mediaPlayer.PlaybackStateChanged += this.OnMediaPlayerStateChanged;
+            mediaPlayer.TrackInfoChanged += this.OnMediaPlayerTrackInfoChanged;
         }
         else
         {
@@ -1565,6 +1688,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
             mediaPlayer.PositionChanged -= this.OnMediaPlayerPositionChanged;
             mediaPlayer.PlaybackStateChanged -= this.OnMediaPlayerStateChanged;
+            mediaPlayer.TrackInfoChanged -= this.OnMediaPlayerTrackInfoChanged;
         }
     }
 
@@ -1673,6 +1797,29 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         catch (Exception ex)
         {
             LogErrorHandlingStateChange(ex, this._zoneIndex);
+        }
+    }
+
+    /// <summary>
+    /// Handles track info changes from MediaPlayer and updates Zone state.
+    /// </summary>
+    private void OnMediaPlayerTrackInfoChanged(object? sender, TrackInfoChangedEventArgs e)
+    {
+        try
+        {
+            LogTrackInfoChanged(this._zoneIndex, e.TrackInfo.Title ?? "Unknown", e.TrackInfo.Artist ?? "Unknown");
+
+            // Update the Zone's current state with the new track info
+            this._currentState = this._currentState with { Track = e.TrackInfo };
+
+            // Publish state change to notify other components
+            this.PublishZoneStateChangedAsync();
+
+            LogTrackInfoUpdated(this._zoneIndex, e.TrackInfo.Title ?? "Unknown");
+        }
+        catch (Exception ex)
+        {
+            LogErrorHandlingTrackInfoChange(ex, this._zoneIndex);
         }
     }
 
@@ -2217,4 +2364,25 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         Message = "Error publishing track progress notification for zone {ZoneIndex}"
     )]
     private partial void LogErrorPublishingTrackProgress(Exception ex, int ZoneIndex);
+
+    [LoggerMessage(
+        EventId = 6556,
+        Level = LogLevel.Debug,
+        Message = "🎵 Track info changed for zone {ZoneIndex}: '{Title}' by '{Artist}'"
+    )]
+    private partial void LogTrackInfoChanged(int ZoneIndex, string Title, string Artist);
+
+    [LoggerMessage(
+        EventId = 6557,
+        Level = LogLevel.Information,
+        Message = "✅ Track info updated for zone {ZoneIndex}: '{Title}'"
+    )]
+    private partial void LogTrackInfoUpdated(int ZoneIndex, string Title);
+
+    [LoggerMessage(
+        EventId = 6558,
+        Level = LogLevel.Warning,
+        Message = "Error handling track info change for zone {ZoneIndex}"
+    )]
+    private partial void LogErrorHandlingTrackInfoChange(Exception ex, int ZoneIndex);
 }

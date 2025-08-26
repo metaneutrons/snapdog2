@@ -463,7 +463,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
     {
         return new PlaylistInfo
         {
-            Id = playlistSummary.Id ?? string.Empty,
+            SubsonicPlaylistId = playlistSummary.Id ?? string.Empty,
             Name = playlistSummary.Name ?? "Unknown Playlist",
             TrackCount = playlistSummary.SongCount,
             TotalDurationSec = playlistSummary.Duration > 0 ? playlistSummary.Duration : null,
@@ -480,7 +480,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
     {
         return new PlaylistInfo
         {
-            Id = playlist.Id ?? string.Empty,
+            SubsonicPlaylistId = playlist.Id ?? string.Empty,
             Name = playlist.Name ?? "Unknown Playlist",
             TrackCount = playlist.SongCount,
             TotalDurationSec = playlist.Duration > 0 ? playlist.Duration : null,
