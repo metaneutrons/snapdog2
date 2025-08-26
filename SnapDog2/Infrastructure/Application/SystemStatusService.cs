@@ -15,36 +15,49 @@ namespace SnapDog2.Infrastructure.Application;
 
 using System.Diagnostics;
 using System.Reflection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Models;
 using SnapDog2.Helpers;
 
 /// <summary>
-/// Implementation of system status service.
-/// TODO: This is a placeholder implementation - will be enhanced with real metrics.
+/// Implementation of system status service with real metrics integration.
+/// Provides comprehensive system health, version, and performance information.
 /// </summary>
 /// <remarks>
 /// Initializes a new instance of the <see cref="AppStatusService"/> class.
 /// </remarks>
 /// <param name="logger">The logger instance.</param>
-public partial class AppStatusService(ILogger<AppStatusService> logger) : IAppStatusService
+/// <param name="metricsService">The metrics service for real performance data.</param>
+/// <param name="healthCheckService">The health check service for system health.</param>
+public partial class AppStatusService(
+    ILogger<AppStatusService> logger,
+    IMetricsService metricsService,
+    IAppHealthCheckService healthCheckService
+) : IAppStatusService
 {
     private readonly ILogger<AppStatusService> _logger = logger;
+    private readonly IMetricsService _metricsService = metricsService;
+    private readonly IAppHealthCheckService _healthCheckService = healthCheckService;
     private static readonly DateTime _startTime = DateTime.UtcNow;
 
     /// <inheritdoc/>
-    public Task<SystemStatus> GetCurrentStatusAsync()
+    public async Task<SystemStatus> GetCurrentStatusAsync()
     {
         this.LogGettingSystemStatus();
 
+        // Get real health check results
+        var healthReport = await _healthCheckService.CheckHealthAsync();
+        var isOnline = healthReport.Status == HealthStatus.Healthy;
+
         var status = new SystemStatus
         {
-            IsOnline = true, // TODO: Implement real health checks
+            IsOnline = isOnline,
             TimestampUtc = DateTime.UtcNow,
         };
 
-        return Task.FromResult(status);
+        return status;
     }
 
     /// <inheritdoc/>
@@ -72,31 +85,43 @@ public partial class AppStatusService(ILogger<AppStatusService> logger) : IAppSt
     }
 
     /// <inheritdoc/>
-    public Task<ServerStats> GetServerStatsAsync()
+    public async Task<ServerStats> GetServerStatsAsync()
     {
         this.LogGettingServerStats();
 
-        // TODO: Implement real performance metrics
-        var process = Process.GetCurrentProcess();
-        var uptime = DateTime.UtcNow - _startTime;
+        // Use the real metrics service to get accurate server statistics
+        var stats = await _metricsService.GetServerStatsAsync();
 
-        var stats = new ServerStats
-        {
-            TimestampUtc = DateTime.UtcNow,
-            CpuUsagePercent = 0.0, // TODO: Implement CPU monitoring
-            MemoryUsageMb = process.WorkingSet64 / (1024.0 * 1024.0),
-            TotalMemoryMb = GC.GetTotalMemory(false) / (1024.0 * 1024.0), // TODO: Get system memory
-            Uptime = uptime,
-            ActiveConnections = 0, // TODO: Implement connection tracking
-            ProcessedRequests = 0, // TODO: Implement request counting
-        };
-
-        return Task.FromResult(stats);
+        return stats;
     }
 
-    private static DateTime? GetBuildDate(Assembly assembly)
+    private DateTime? GetBuildDate(Assembly assembly)
     {
-        // TODO: Implement build date extraction from assembly attributes
+        try
+        {
+            // Extract build date from assembly metadata
+            var buildDateAttribute = assembly.GetCustomAttributes<AssemblyMetadataAttribute>()
+                .FirstOrDefault(attr => attr.Key == "BuildDate");
+
+            if (buildDateAttribute?.Value != null &&
+                DateTime.TryParse(buildDateAttribute.Value, out var buildDate))
+            {
+                return buildDate;
+            }
+
+            // Fallback: use file creation time
+            var assemblyLocation = assembly.Location;
+            if (!string.IsNullOrEmpty(assemblyLocation) && File.Exists(assemblyLocation))
+            {
+                return File.GetCreationTimeUtc(assemblyLocation);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log but don't throw - build date is not critical
+            LogBuildDateExtractionFailed(_logger, ex);
+        }
+
         return null;
     }
 
@@ -131,4 +156,11 @@ public partial class AppStatusService(ILogger<AppStatusService> logger) : IAppSt
         Message = "Getting server statistics"
     )]
     private partial void LogGettingServerStats();
+
+    [LoggerMessage(
+        EventId = 6203,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Failed to extract build date from assembly"
+    )]
+    private static partial void LogBuildDateExtractionFailed(ILogger logger, Exception ex);
 }

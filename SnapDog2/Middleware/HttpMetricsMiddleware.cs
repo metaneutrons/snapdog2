@@ -15,6 +15,7 @@ namespace SnapDog2.Middleware;
 
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
+using SnapDog2.Core.Abstractions;
 using SnapDog2.Infrastructure.Application;
 
 /// <summary>
@@ -25,12 +26,12 @@ public partial class HttpMetricsMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<HttpMetricsMiddleware> _logger;
-    private readonly EnterpriseMetricsService _metricsService;
+    private readonly IApplicationMetrics _metricsService;
 
     public HttpMetricsMiddleware(
         RequestDelegate next,
         ILogger<HttpMetricsMiddleware> logger,
-        EnterpriseMetricsService metricsService
+        IApplicationMetrics metricsService
     )
     {
         _next = next;

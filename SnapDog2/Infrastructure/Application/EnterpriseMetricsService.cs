@@ -26,13 +26,13 @@ using SnapDog2.Infrastructure.Metrics;
 public partial class EnterpriseMetricsService : IMetricsService, IDisposable
 {
     private readonly ILogger<EnterpriseMetricsService> _logger;
-    private readonly ApplicationMetrics _applicationMetrics;
+    private readonly IApplicationMetrics _applicationMetrics;
     private readonly Timer _systemMetricsTimer;
 
     private static readonly DateTime _startTime = DateTime.UtcNow;
     private long _processedRequests = 0;
 
-    public EnterpriseMetricsService(ILogger<EnterpriseMetricsService> logger, ApplicationMetrics applicationMetrics)
+    public EnterpriseMetricsService(ILogger<EnterpriseMetricsService> logger, IApplicationMetrics applicationMetrics)
     {
         _logger = logger;
         _applicationMetrics = applicationMetrics;
