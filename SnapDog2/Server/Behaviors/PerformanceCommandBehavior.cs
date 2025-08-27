@@ -105,7 +105,7 @@ public partial class PerformanceCommandBehavior<TCommand, TResponse>(
             // Track volume changes
             if (commandName.Contains("Volume", StringComparison.OrdinalIgnoreCase))
             {
-                // Extract zone/client info if available through reflection or known patterns
+                // Extract zones/client info if available through reflection or known patterns
                 var targetId = ExtractTargetId(command);
                 var targetType = commandName.Contains("Zone") ? "zone" : "client";
 
