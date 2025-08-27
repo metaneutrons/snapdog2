@@ -49,7 +49,7 @@ public partial class MetricsService(ILogger<MetricsService> logger) : IMetricsSe
     public void RecordError(string errorType, string component, string? operation = null)
     {
         this.LogRecordingError(errorType, component, operation ?? "unknown");
-        
+
         // TODO: Implement actual error metrics recording
         // For now, we just log the error metrics
     }
@@ -58,7 +58,7 @@ public partial class MetricsService(ILogger<MetricsService> logger) : IMetricsSe
     public void RecordException(Exception exception, string component, string? operation = null)
     {
         this.LogRecordingException(exception.GetType().Name, component, operation ?? "unknown", exception.Message);
-        
+
         // TODO: Implement actual exception metrics recording
         // For now, we just log the exception metrics
     }
