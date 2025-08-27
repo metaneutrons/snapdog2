@@ -19,11 +19,6 @@ namespace SnapDog2.Core.Models;
 public record ZoneState
 {
     /// <summary>
-    /// Gets the zone ID.
-    /// </summary>
-    public required int Id { get; init; }
-
-    /// <summary>
     /// Gets the zone name.
     /// </summary>
     public required string Name { get; init; }
@@ -67,11 +62,6 @@ public record ZoneState
     /// Gets the Snapcast stream ID.
     /// </summary>
     public required string SnapcastStreamId { get; init; }
-
-    /// <summary>
-    /// Gets whether the Snapcast group is muted (raw state from Snapcast).
-    /// </summary>
-    public required bool IsSnapcastGroupMuted { get; init; }
 
     /// <summary>
     /// Gets the current playlist information.

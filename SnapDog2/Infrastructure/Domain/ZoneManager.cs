@@ -1269,7 +1269,6 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     {
         return new ZoneState
         {
-            Id = this._zoneIndex,
             Name = this._config.Name,
             PlaybackState = SnapDog2.Core.Enums.PlaybackState.Stopped,
             Volume = 50,
@@ -1279,7 +1278,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             PlaylistShuffle = false,
             SnapcastGroupId = $"group_{this._zoneIndex}",
             SnapcastStreamId = this._config.Sink,
-            IsSnapcastGroupMuted = false,
+
             Track = new TrackInfo
             {
                 Source = "none",

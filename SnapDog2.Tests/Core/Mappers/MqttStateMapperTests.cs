@@ -27,7 +27,6 @@ public class MqttStateMapperTests
         // Arrange
         var zoneState = new ZoneState
         {
-            Id = 1,
             Name = "Living Room",
             PlaybackState = PlaybackState.Playing,
             Volume = 75,
@@ -37,7 +36,6 @@ public class MqttStateMapperTests
             PlaylistShuffle = true,
             SnapcastGroupId = "group-123",
             SnapcastStreamId = "/stream/1",
-            IsSnapcastGroupMuted = false,
             Clients = [1, 2],
             Playlist = new PlaylistInfo
             {
@@ -97,7 +95,6 @@ public class MqttStateMapperTests
         // Arrange
         var zoneState = new ZoneState
         {
-            Id = 1,
             Name = "Test Zone",
             PlaybackState = PlaybackState.Paused,
             Volume = 50,
@@ -107,7 +104,6 @@ public class MqttStateMapperTests
             PlaylistShuffle = false,
             SnapcastGroupId = "group-123",
             SnapcastStreamId = "/stream/1",
-            IsSnapcastGroupMuted = false,
             Clients = []
         };
 
@@ -124,7 +120,6 @@ public class MqttStateMapperTests
         // Arrange
         var zoneState = new ZoneState
         {
-            Id = 1,
             Name = "Test Zone",
             PlaybackState = PlaybackState.Stopped,
             Volume = 50,
@@ -134,7 +129,6 @@ public class MqttStateMapperTests
             PlaylistShuffle = false,
             SnapcastGroupId = "group-123",
             SnapcastStreamId = "/stream/1",
-            IsSnapcastGroupMuted = false,
             Clients = [],
             Playlist = new PlaylistInfo
             {

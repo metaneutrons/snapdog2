@@ -191,7 +191,6 @@ public partial class StateRestorationService : BackgroundService
         {
             var initialState = new ZoneState
             {
-                Id = zoneIndex,
                 Name = zoneConfig.Name,
                 Volume = 50, // Default volume
                 Mute = false,
@@ -201,7 +200,7 @@ public partial class StateRestorationService : BackgroundService
                 PlaylistShuffle = false,
                 SnapcastGroupId = "", // Will be set by Snapcast integration
                 SnapcastStreamId = "", // Will be set by Snapcast integration
-                IsSnapcastGroupMuted = false,
+
                 Playlist = null, // Will be loaded when playlist is actually loaded
                 Track = null, // Will be loaded when track is actually loaded
                 Clients = Array.Empty<int>(), // Will be populated by client management

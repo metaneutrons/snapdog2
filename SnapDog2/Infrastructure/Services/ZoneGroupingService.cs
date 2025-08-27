@@ -12,6 +12,7 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
 using System.Diagnostics;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Models;
@@ -55,14 +56,25 @@ public partial class ZoneGroupingService : IZoneGroupingService
         {
             LogStartingZoneGroupingCheck();
 
-            // Get all available zones
+            // Get all available zone services to extract their indices
             var zonesResult = await _zoneManager.GetAllZonesAsync(cancellationToken);
             if (!zonesResult.IsSuccess)
             {
                 return Result.Failure($"Failed to get available zones: {zonesResult.ErrorMessage}");
             }
 
-            var zones = zonesResult.Value?.Select(z => z.Id).ToList() ?? new List<int>();
+            // We need to get the zone indices. Since we can't access the internal _zones dictionary,
+            // let's try to get zone states and infer indices from successful zone retrievals
+            var zones = new List<int>();
+            
+            // Try zones 1-10 (reasonable upper limit) and see which ones exist
+            for (int i = 1; i <= 10; i++)
+            {
+                if (await _zoneManager.ZoneExistsAsync(i))
+                {
+                    zones.Add(i);
+                }
+            }
             if (zones.Count == 0)
             {
                 LogNoZonesConfigured();
