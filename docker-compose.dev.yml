@@ -217,6 +217,7 @@ services:
       - "4317:4317" # OTLP gRPC receiver
       - "4318:4318" # OTLP HTTP receiver
       - "8889:8889" # Prometheus metrics endpoint
+      - "8888:8888" # OTEL collector own metrics
     networks:
       snapdog-dev:
     #        ipv4_address: 172.25.0.20
