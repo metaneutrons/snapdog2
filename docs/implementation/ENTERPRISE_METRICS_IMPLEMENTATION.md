@@ -206,7 +206,7 @@ builder.Services.AddHostedService<BusinessMetricsCollectionService>();
 
 ### **Phase 2 - Advanced Metrics**
 
-- Custom business metrics per zone/client
+- Custom business metrics per zones/client
 - Audio quality metrics (bitrate, sample rate, dropouts)
 - Network performance metrics (latency, bandwidth)
 - User behavior analytics (most played tracks, peak usage times)

@@ -281,7 +281,7 @@ public async Task<Result<List<ClientState>>> Handle(GetAllClientsQuery request, 
 
 - `GET /api/clients/{clientIndex}/state` - Get specific client state
 - `GET /api/clients/states` - Get all client states
-- `GET /api/clients/by-zone/{zoneIndex}` - Get clients by zone
+- `GET /api/clients/by-zones/{zoneIndex}` - Get clients by zone
 
 **Command Endpoints:**
 
@@ -406,7 +406,7 @@ curl http://localhost:5000/api/clients/1/state
 # Returns: Living Room client state
 
 # Get clients by zone
-curl http://localhost:5000/api/clients/by-zone/1
+curl http://localhost:5000/api/clients/by-zones/1
 # Returns: Array with Living Room client
 ```
 

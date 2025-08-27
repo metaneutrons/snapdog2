@@ -106,9 +106,9 @@ public static class StatusIdUsageExamples
         // Use enum in switch for compile-time safety
         return statusEventType switch
         {
-            StatusEventType.ClientVolumeStatus => "client/volume",
-            StatusEventType.ClientMuteStatus => "client/mute",
-            StatusEventType.ClientLatencyStatus => "client/latency",
+            StatusEventType.ClientVolumeStatus => "clients/volume",
+            StatusEventType.ClientMuteStatus => "clients/mute",
+            StatusEventType.ClientLatencyStatus => "clients/latency",
             _ => null,
         };
     }

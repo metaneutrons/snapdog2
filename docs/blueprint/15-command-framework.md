@@ -527,7 +527,7 @@ Base topic: `SNAPDOG_CLIENT_m_MQTT_BASE_TOPIC` (default: `snapdog/clients/{m}/`)
 | Command ID        | Env Var Suffix       | Default Rel. Topic | Example Payloads              |
 | :---------------- | :------------------- | :------------------- | :---------------------------- |
 | `CLIENT_LATENCY`  | `_LATENCY_SET_TOPIC` | `latency/set`        | `<ms>`                        |
-| `CLIENT_ZONE`     | `_ZONE_SET_TOPIC`    | `zone/set`           | `<zone_id>` (1-based)         |
+| `CLIENT_ZONE`     | `_ZONE_SET_TOPIC`    | `zones/set`           | `<zone_id>` (1-based)         |
 | `CLIENT_NAME`     | `_NAME_SET_TOPIC`    | `name/set`           | `<name>` (string)             |
 
 #### 14.4.2.2. Client Status Topics (Read-Only)

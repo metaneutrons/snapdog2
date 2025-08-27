@@ -9,7 +9,7 @@ The recommended production deployment consists of several collaborating containe
 **Core Containers:**
 
 1. **`snapdog`**: The main application container built from `/docker/snapdog/Dockerfile`. Runs the .NET 9 SnapDog2 application (`SnapDog2.Worker`). Connects to other services on the Docker network. Requires access to mounted FIFO pipes for audio output if `snapserver` sinks are file-based.
-2. **`snapserver`**: Runs the Snapcast server. This typically uses a **customized Docker image** (built from `/docker/snapserver/Dockerfile` or similar) to ensure correct configuration for SnapDog2's zone/sink requirements.
+2. **`snapserver`**: Runs the Snapcast server. This typically uses a **customized Docker image** (built from `/docker/snapserver/Dockerfile` or similar) to ensure correct configuration for SnapDog2's zones/sink requirements.
 3. **`mosquitto`**: Runs the Eclipse Mosquitto MQTT broker (or another MQTT broker). Used for command/status communication if MQTT is enabled.
 
 **Optional Supporting Containers (Enabled via Docker Compose Profiles):**

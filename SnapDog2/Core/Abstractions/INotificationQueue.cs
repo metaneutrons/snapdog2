@@ -17,7 +17,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 /// <summary>
-/// Asynchronous notification queue for publishing zone/client status updates to external systems.
+/// Asynchronous notification queue for publishing zones/client status updates to external systems.
 /// Producers enqueue lightweight items and return immediately; a background service processes items.
 /// </summary>
 public interface INotificationQueue

@@ -56,7 +56,7 @@ snapdog/
     ├── latency                    # current latency in ms
     ├── latency/set                # set latency in ms
     ├── zone                       # 1 (current zone)
-    └── zone/set                   # 2 (assign to zone)
+    └── zones/set                   # 2 (assign to zone)
 
 ## 15.2. Status Id & Command Id Mapping
 

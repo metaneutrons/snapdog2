@@ -319,7 +319,7 @@ public static class MqttServiceConfiguration
 - `volume/set` - Set client volume
 - `mute/set` - Set client mute state
 - `latency/set` - Set client latency
-- `zone/set` - Assign client to zone
+- `zones/set` - Assign client to zone
 
 **Status Topics (Publish - Outgoing Status):**
 

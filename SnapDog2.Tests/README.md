@@ -7,7 +7,7 @@ Welcome to the **enterprise-grade test suite** for SnapDog2! This comprehensive 
 ```
 SnapDog2.Tests/
 ├── 📁 Unit/                    # Pure unit tests (no external dependencies)
-├── 📁 Integration/             # Integration tests with real services  
+├── 📁 Integration/             # Integration tests with real services
 ├── 📁 Container/               # Testcontainer-based tests
 ├── 📁 Performance/             # Performance and load tests
 ├── 📁 Fixtures/                # Test fixtures and infrastructure
@@ -18,11 +18,13 @@ SnapDog2.Tests/
 ## 🚀 **Quick Start**
 
 ### **Run All Tests**
+
 ```bash
 ./run-tests.sh
 ```
 
 ### **Run Specific Categories**
+
 ```bash
 ./run-tests.sh -c Unit                    # Unit tests only
 ./run-tests.sh -c Integration             # Integration tests
@@ -31,6 +33,7 @@ SnapDog2.Tests/
 ```
 
 ### **Run with Filters**
+
 ```bash
 ./run-tests.sh -t Service -s Fast         # Fast service tests
 ./run-tests.sh -c Unit --no-coverage      # Unit tests without coverage
@@ -40,60 +43,70 @@ SnapDog2.Tests/
 ## 📊 **Test Categories**
 
 ### **🔧 Unit Tests** (`Unit/`)
+
 - **Purpose**: Pure unit tests with no external dependencies
 - **Speed**: Fast (< 100ms)
 - **Isolation**: Complete isolation using mocks and stubs
 - **Coverage**: High code coverage with edge case testing
 
 **Examples:**
+
 - Configuration validation
 - Domain model behavior
 - Service logic without I/O
 - Utility functions
 
 ### **🔗 Integration Tests** (`Integration/`)
+
 - **Purpose**: Test component interactions with real services
 - **Speed**: Medium to Slow (100ms - 10s)
 - **Dependencies**: Real MQTT, Snapcast, KNX services
 - **Scope**: API endpoints, service integration, workflows
 
 **Examples:**
+
 - API controller integration
 - Service communication
 - Database operations
 - Message queue processing
 
 ### **🐳 Container Tests** (`Container/`)
+
 - **Purpose**: Test with real containerized services
 - **Speed**: Slow (1s - 30s)
 - **Infrastructure**: Docker containers via Testcontainers
 - **Realism**: Production-like environment
 
 **Examples:**
+
 - Multi-room audio streaming
 - MQTT broker communication
-- Snapcast client/server interaction
+- Snapcast clients/server interaction
 - Network configuration testing
 
 ### **⚡ Performance Tests** (`Performance/`)
+
 - **Purpose**: Measure performance, throughput, and resource usage
 - **Speed**: Very Slow (10s+)
 - **Metrics**: Response time, throughput, memory usage
 - **Load Testing**: Concurrent users, stress testing
 
 **Examples:**
+
 - API response time benchmarks
 - Concurrent request handling
 - Memory leak detection
 - Throughput measurement
 
 ### **🔄 Workflow Tests** (`Integration/Workflows/`)
+
 - **Purpose**: End-to-end business scenarios
 - **Speed**: Slow (5s - 60s)
 - **Scope**: Complete user journeys
 - **Validation**: Business logic correctness
 
 **Examples:**
+
 - Zone change workflows
 - Client discovery processes
 - Audio streaming scenarios
@@ -102,6 +115,7 @@ SnapDog2.Tests/
 ## 🏷️ **Test Attributes & Traits**
 
 ### **Categories**
+
 ```csharp
 [Trait("Category", TestCategories.Unit)]
 [Trait("Category", TestCategories.Integration)]
@@ -111,6 +125,7 @@ SnapDog2.Tests/
 ```
 
 ### **Types**
+
 ```csharp
 [Trait("Type", TestTypes.Service)]
 [Trait("Type", TestTypes.Controller)]
@@ -119,6 +134,7 @@ SnapDog2.Tests/
 ```
 
 ### **Speed Classifications**
+
 ```csharp
 [TestSpeed(TestSpeed.Fast)]      // < 100ms
 [TestSpeed(TestSpeed.Medium)]    // 100ms - 1s
@@ -127,6 +143,7 @@ SnapDog2.Tests/
 ```
 
 ### **Requirements**
+
 ```csharp
 [Requires(TestRequirements.Docker)]
 [Requires(TestRequirements.Network)]
@@ -136,23 +153,25 @@ SnapDog2.Tests/
 ## 🛠️ **Enterprise Features**
 
 ### **🔍 Advanced Assertions**
+
 ```csharp
 // HTTP Response Assertions
 response.Should().BeSuccessful();
 await response.Should().ContainValidJsonAsync<ApiResponse>();
 
-// Result Pattern Assertions  
+// Result Pattern Assertions
 result.Should().BeSuccessful();
 result.Should().BeSuccessfulWithValue(expectedValue);
 result.Should().BeFailureWithError("Expected error message");
 
 // Async Collection Assertions
 await collection.Should().ContainMatchingItemsWithinAsync(
-    item => item.Status == "Ready", 
+    item => item.Status == "Ready",
     TimeSpan.FromSeconds(30));
 ```
 
 ### **📊 Performance Measurement**
+
 ```csharp
 // Automatic performance logging
 var result = await _output.MeasureAsync("Operation Name", async () =>
@@ -165,6 +184,7 @@ _output.WritePerformance("Database Query", duration, "Additional info");
 ```
 
 ### **🏗️ Test Data Builders**
+
 ```csharp
 // Fluent test data creation
 var client = ClientConfigBuilder
@@ -180,6 +200,7 @@ var zone = ZoneConfigBuilder
 ```
 
 ### **📝 Structured Logging**
+
 ```csharp
 // Structured test output
 _output.WriteSection("Test Section Name");
@@ -192,18 +213,21 @@ _output.WriteJson(complexObject, "Object State");
 ## 🔧 **Configuration**
 
 ### **Test Execution Settings** (`xunit.runner.json`)
+
 - Parallel execution optimization
 - Test discovery configuration
 - Timeout settings
 - Reporter configuration
 
 ### **Build Configuration** (`Directory.Build.props`)
+
 - Code coverage settings
 - Performance optimization
 - Warning configuration
 - Global usings
 
 ### **Project Configuration** (`SnapDog2.Tests.csproj`)
+
 - Enterprise testing packages
 - Performance benchmarking tools
 - Code coverage tools
@@ -212,16 +236,19 @@ _output.WriteJson(complexObject, "Object State");
 ## 📈 **Code Coverage**
 
 ### **Generate Coverage Report**
+
 ```bash
 ./run-tests.sh --coverage
 ```
 
 ### **Coverage Thresholds**
+
 - **Minimum**: 80% line coverage
-- **Branch**: 80% branch coverage  
+- **Branch**: 80% branch coverage
 - **Method**: 80% method coverage
 
 ### **Coverage Exclusions**
+
 - Generated code
 - Third-party integrations
 - Test infrastructure
@@ -229,16 +256,19 @@ _output.WriteJson(complexObject, "Object State");
 ## 🚀 **CI/CD Integration**
 
 ### **GitHub Actions**
+
 ```bash
 ./run-tests.sh --ci
 ```
 
 ### **Azure DevOps**
+
 ```bash
 ./run-tests.sh --ci -o $(Agent.TempDirectory)/TestResults
 ```
 
 ### **Jenkins**
+
 ```bash
 ./run-tests.sh --ci -o $WORKSPACE/TestResults
 ```
@@ -246,11 +276,13 @@ _output.WriteJson(complexObject, "Object State");
 ## 🐳 **Container Requirements**
 
 ### **Docker Setup**
+
 - Docker Desktop or Docker Engine
 - Minimum 4GB RAM allocated
 - Network access for image pulls
 
 ### **Container Images Used**
+
 - `eclipse-mosquitto:2.0` - MQTT broker
 - `badaix/snapserver:latest` - Snapcast server
 - `badaix/snapclient:latest` - Snapcast clients
@@ -258,16 +290,19 @@ _output.WriteJson(complexObject, "Object State");
 ## 📊 **Performance Benchmarks**
 
 ### **Response Time Targets**
+
 - **API Endpoints**: < 100ms average
 - **Service Operations**: < 50ms average
 - **Database Queries**: < 25ms average
 
 ### **Throughput Targets**
+
 - **API Requests**: > 100 req/sec
 - **Message Processing**: > 1000 msg/sec
 - **Concurrent Users**: > 50 users
 
 ### **Resource Usage Limits**
+
 - **Memory Growth**: < 50% during test execution
 - **CPU Usage**: < 80% sustained
 - **Network Bandwidth**: Efficient usage
@@ -275,16 +310,19 @@ _output.WriteJson(complexObject, "Object State");
 ## 🔍 **Debugging Tests**
 
 ### **Visual Studio / Rider**
+
 1. Set breakpoints in test code
 2. Run tests in debug mode
 3. Attach to test process
 
 ### **VS Code**
+
 1. Use C# Dev Kit extension
 2. Configure launch.json for test debugging
 3. Set breakpoints and run
 
 ### **Command Line Debugging**
+
 ```bash
 ./run-tests.sh -v --no-parallel    # Verbose, sequential execution
 ```
@@ -292,6 +330,7 @@ _output.WriteJson(complexObject, "Object State");
 ## 📚 **Best Practices**
 
 ### **✅ Do's**
+
 - Use descriptive test names that explain behavior
 - Follow AAA pattern (Arrange, Act, Assert)
 - Use appropriate test categories and traits
@@ -301,6 +340,7 @@ _output.WriteJson(complexObject, "Object State");
 - Use structured logging for test output
 
 ### **❌ Don'ts**
+
 - Don't use Thread.Sleep in tests
 - Don't test implementation details
 - Don't create interdependent tests
@@ -309,6 +349,7 @@ _output.WriteJson(complexObject, "Object State");
 - Don't use production data in tests
 
 ### **🏗️ Test Structure**
+
 ```csharp
 [Collection(TestCategories.Integration)]
 [Trait("Category", TestCategories.Integration)]
@@ -351,6 +392,7 @@ public class ServiceIntegrationTests
 ### **Common Issues**
 
 **Docker not available**
+
 ```bash
 # Check Docker status
 docker info
@@ -361,6 +403,7 @@ sudo systemctl start docker
 ```
 
 **Port conflicts**
+
 ```bash
 # Check for port usage
 lsof -i :1883  # MQTT
@@ -370,12 +413,14 @@ lsof -i :1705  # Snapcast
 ```
 
 **Memory issues**
+
 ```bash
 # Increase Docker memory allocation
 # Docker Desktop -> Settings -> Resources -> Memory
 ```
 
 **Test timeouts**
+
 ```bash
 # Run with increased verbosity
 ./run-tests.sh -v
