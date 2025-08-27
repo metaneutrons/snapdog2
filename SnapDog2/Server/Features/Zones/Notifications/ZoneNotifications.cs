@@ -203,25 +203,3 @@ public record ZoneShuffleModeChangedNotification : INotification
     /// </summary>
     public DateTime TimestampUtc { get; init; } = DateTime.UtcNow;
 }
-
-/// <summary>
-/// Notification published when a zone's complete state changes.
-/// </summary>
-[StatusId("ZONE_STATE")]
-public record ZoneStateChangedNotification : INotification
-{
-    /// <summary>
-    /// Gets the zone ID.
-    /// </summary>
-    public required int ZoneIndex { get; init; }
-
-    /// <summary>
-    /// Gets the complete zone state.
-    /// </summary>
-    public required ZoneState ZoneState { get; init; }
-
-    /// <summary>
-    /// Gets the UTC timestamp when the state changed.
-    /// </summary>
-    public DateTime TimestampUtc { get; init; } = DateTime.UtcNow;
-}
