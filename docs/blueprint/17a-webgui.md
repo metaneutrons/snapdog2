@@ -2,9 +2,7 @@
 
 > Goal: A modern .NET web interface fully integrated into the monolithic application, supporting Dark/Light mode, zone control, client status & drag‑and‑drop reassignment, with **no external asset dependencies** (all static assets embedded). Blueprint is AI‑implementable (fine‑grained tasks, code skeletons, tests).
 
----
-
-## 24.1. ) Product Goals & Principles
+## 24.1. Product Goals & Principles
 
 **Goals**
 
@@ -19,9 +17,7 @@
 - No separate frontend repository, no SPA‑only approach (focus on Server Rendering + Progressive Interactivity).
 - No complex theming framework – lightweight design tokens (CSS vars) and accessible components.
 
----
-
-## 24.2. ) Technology Stack & Packaging
+## 24.2. Technology Stack & Packaging
 
 - **Framework:** ASP.NET Core (Razor Components, SSR + interactive server components). No external Node build.
 - **Runtime Model:** UI hosted **in‑process** with the monolith.
@@ -34,11 +30,9 @@
 - **Publish:** Single‑file, trim‑capable, ReadyToRun optional. No external webroot files.
 - **Telemetry:** OpenTelemetry (tracing + metrics), Serilog/ETW, UI events (ZoneMove, VolumeChange) as custom events.
 
----
+## 24.3. Solution Layout
 
-## 24.3. ) Solution Layout
-
-```
+```plaintext
 SnapDog2.sln
 ├─ SnapDog2/                         # existing monolith (host)
 ├─ SnapDog2.Tests/                   # existing tests
@@ -54,9 +48,7 @@ SnapDog2.sln
 - **Build & CI:** NSwag codegen isolated, UI tests target `/SnapDog2.WebUi`.
 - **Single‑file/Trim:** Assets embedded, no loose wwwroot.
 
----
-
-## 24.4. ) Integration into Monolith (/SnapDog2)
+## 24.4. Integration into Monolith (/SnapDog2)
 
 ### 24.4.1. Project References
 
@@ -118,26 +110,20 @@ app.Run();
 </Project>
 ```
 
----
-
-## 24.5. ) Tests
+## 24.5. Tests
 
 - Continue using `/SnapDog2.Tests` but add two test tracks:
   - **bUnit** for Razor component unit tests → reference `/SnapDog2.WebUi`.
   - **Playwright** for E2E tests → launches `SnapDog2` as test host.
 
----
-
-## 24.6. ) Advantages of Project Split
+## 24.6. Advantages of Project Split
 
 - Clear **separation**: host logic ≠ UI ≠ API client ≠ assets.
 - **Clean build**: NSwag codegen decoupled from host.
 - **Testability:** UI & integration tests run isolated.
 - **Deployment** remains simple: all assemblies bundled in single‑file publish.
 
----
-
-## 24.7. ) Folder Reality & Quickstart
+## 24.7. Folder Reality & Quickstart
 
 - **Host project:** `/SnapDog2`
 - **Tests:** `/SnapDog2.Tests`
@@ -156,20 +142,9 @@ app.Run();
 6. Add first components (`ZoneCard`, `ClientChip`) + embedded CSS (RCL assets).
 7. Run `dotnet run` in `/SnapDog2` → UI available, assets embedded, no external wwwroot.
 
----
-
-## 24.8. ) TL;DR
-
-- **Yes**, extra projects are recommended: `SnapDog2.WebUi`, `SnapDog2.WebUi.Assets`, `SnapDog2.WebUi.ApiClient`.
-- **Integration:** via `ProjectReference`, `AddRazorComponents`, `UseStaticFiles` with `ManifestEmbeddedFileProvider`.
-- **Result:** Clean, single‑file‑ready setup, maintainable and AI‑friendly.
-
----
-
-## 24.9. ) Next Steps
+## 24.8. Next Steps
 
 - Scaffold projects (`dotnet new classlib` for Assets + ApiClient, `dotnet new razorclasslib` for WebUi).
 - Reference them in `SnapDog2` and extend `Program.cs` with `MapRazorComponents<App>()`.
 - Implement dummy components (`ZoneCard`, `ClientChip`) + embedded CSS.
 - Extend CI build: NSwag codegen + bUnit + Playwright.
-

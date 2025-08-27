@@ -429,18 +429,17 @@
 
 24. [SnapDog2 Web UI – Architecture & Implementation Blueprint (v3, English)](17a-webgui.md#24-snapdog2-web-ui-architecture-implementation-blueprint-v3-english)
 
-- [24.1 ) Product Goals & Principles](17a-webgui.md#241-product-goals-principles)
-- [24.2 ) Technology Stack & Packaging](17a-webgui.md#242-technology-stack-packaging)
-- [24.3 ) Solution Layout](17a-webgui.md#243-solution-layout)
-- [24.4 ) Integration into Monolith (/SnapDog2)](17a-webgui.md#244-integration-into-monolith-snapdog2)
+- [24.1 Product Goals & Principles](17a-webgui.md#241-product-goals-principles)
+- [24.2 Technology Stack & Packaging](17a-webgui.md#242-technology-stack-packaging)
+- [24.3 Solution Layout](17a-webgui.md#243-solution-layout)
+- [24.4 Integration into Monolith (/SnapDog2)](17a-webgui.md#244-integration-into-monolith-snapdog2)
 - [24.4.1 Project References](17a-webgui.md#2441-project-references)
 - [24.4.2 Program.cs (Host)](17a-webgui.md#2442-programcs-host)
 - [24.4.3 SnapDog2.WebUi.Assets.csproj](17a-webgui.md#2443-snapdog2webuiassetscsproj)
-- [24.5 ) Tests](17a-webgui.md#245-tests)
-- [24.6 ) Advantages of Project Split](17a-webgui.md#246-advantages-of-project-split)
-- [24.7 ) Folder Reality & Quickstart](17a-webgui.md#247-folder-reality-quickstart)
-- [24.8 ) TL;DR](17a-webgui.md#248-tldr)
-- [24.9 ) Next Steps](17a-webgui.md#249-next-steps)
+- [24.5 Tests](17a-webgui.md#245-tests)
+- [24.6 Advantages of Project Split](17a-webgui.md#246-advantages-of-project-split)
+- [24.7 Folder Reality & Quickstart](17a-webgui.md#247-folder-reality-quickstart)
+- [24.8 Next Steps](17a-webgui.md#248-next-steps)
 
 25. [Testing Strategy](18-testing-strategy.md#25-testing-strategy)
 
