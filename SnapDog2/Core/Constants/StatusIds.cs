@@ -62,7 +62,6 @@ public static class StatusIds
         StatusIdAttribute.GetStatusId<ZonePlaylistRepeatChangedNotification>();
     public static readonly string PlaylistShuffleStatus =
         StatusIdAttribute.GetStatusId<ZoneShuffleModeChangedNotification>();
-    public static readonly string ZoneState = StatusIdAttribute.GetStatusId<ZoneStateChangedNotification>();
 
     // Track Metadata Status IDs (Static information about media files)
     public static readonly string TrackMetadata = StatusIdAttribute.GetStatusId<ZoneTrackMetadataChangedNotification>();
