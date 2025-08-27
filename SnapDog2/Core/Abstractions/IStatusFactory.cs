@@ -117,12 +117,6 @@ public interface IStatusFactory
 
     /// <summary>
     /// Creates a zone complete state changed notification.
-    /// </summary>
-    /// <param name="zoneIndex">Zone index (1-based).</param>
-    /// <param name="zoneState">Complete zone state.</param>
-    /// <returns>Zone state changed notification.</returns>
-    ZoneStateChangedNotification CreateZoneStateChangedNotification(int zoneIndex, ZoneState zoneState);
-
     #endregion
 
     // Note: Obsolete Zone Status Notifications (Blueprint Compliance - Status Publishing) methods removed

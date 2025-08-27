@@ -237,10 +237,4 @@ public interface IZoneService
     /// <returns>Task representing the async operation.</returns>
     Task PublishPlaylistStatusAsync(Core.Models.PlaylistInfo playlistInfo, int playlistIndex);
 
-    /// <summary>
-    /// Publishes the complete zone state status.
-    /// </summary>
-    /// <param name="zoneState">The zone state to publish.</param>
-    /// <returns>Task representing the async operation.</returns>
-    Task PublishZoneStateStatusAsync(Core.Models.ZoneState zoneState);
 }

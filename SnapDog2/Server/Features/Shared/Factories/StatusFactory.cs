@@ -162,15 +162,6 @@ public partial class StatusFactory(ILogger<StatusFactory> logger) : IStatusFacto
         };
     }
 
-    /// <inheritdoc />
-    public ZoneStateChangedNotification CreateZoneStateChangedNotification(int zoneIndex, ZoneState zoneState)
-    {
-        ValidateZoneIndex(zoneIndex, nameof(ZoneStateChangedNotification));
-        ArgumentNullException.ThrowIfNull(zoneState);
-        this.LogStatusCreation(nameof(ZoneStateChangedNotification), "Zone", zoneIndex);
-        return new ZoneStateChangedNotification { ZoneIndex = zoneIndex, ZoneState = zoneState };
-    }
-
     #endregion
 
     // Note: Obsolete Zone Status Notifications (Blueprint Compliance - Status Publishing) methods removed
