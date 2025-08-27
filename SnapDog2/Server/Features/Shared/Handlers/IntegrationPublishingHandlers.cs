@@ -56,7 +56,6 @@ public partial class IntegrationPublishingHandlers(
         INotificationHandler<ZoneTrackRepeatChangedNotification>,
         INotificationHandler<ZonePlaylistRepeatChangedNotification>,
         INotificationHandler<ZoneShuffleModeChangedNotification>,
-        INotificationHandler<ZoneStateChangedNotification>,
         // Track metadata notification handlers
         INotificationHandler<ZoneTrackMetadataChangedNotification>,
         INotificationHandler<ZoneTrackTitleChangedNotification>,
@@ -335,40 +334,6 @@ public partial class IntegrationPublishingHandlers(
             StatusIdAttribute.GetStatusId<ZoneShuffleModeChangedNotification>(),
             notification.ZoneIndex,
             notification.ShuffleEnabled,
-            cancellationToken
-        );
-    }
-
-    public async Task Handle(ZoneStateChangedNotification notification, CancellationToken cancellationToken)
-    {
-        // Convert to simplified publishable format for MQTT
-        var publishableZoneState = PublishableZoneStateMapper.ToMqttZoneState(notification.ZoneState);
-
-        // Check if this represents a meaningful change compared to the previous state
-        var previousState = _previousZoneStates.GetValueOrDefault(notification.ZoneIndex);
-
-        if (!PublishableZoneStateMapper.HasMeaningfulChange(previousState, publishableZoneState))
-        {
-            return; // No meaningful changes - don't publish at all
-        }
-
-        // We have meaningful changes - now check debouncing to prevent rapid-fire publishing
-        var now = DateTime.UtcNow;
-        var lastPublishTime = _lastZonePublishTime.GetValueOrDefault(notification.ZoneIndex, DateTime.MinValue);
-
-        if (now - lastPublishTime < _zonePublishDebounceTime)
-        {
-            return; // Meaningful changes exist, but publishing too rapidly - debounce
-        }
-
-        // Update cache with new state and publish time
-        _previousZoneStates[notification.ZoneIndex] = publishableZoneState;
-        _lastZonePublishTime[notification.ZoneIndex] = now;
-
-        await PublishZoneStatusAsync(
-            StatusIdAttribute.GetStatusId<ZoneStateChangedNotification>(),
-            notification.ZoneIndex,
-            publishableZoneState,
             cancellationToken
         );
     }

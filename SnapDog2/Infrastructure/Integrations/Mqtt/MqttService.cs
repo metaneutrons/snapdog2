@@ -1113,7 +1113,6 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             "VOLUME_STATUS" => BuildTopic($"zones/{zoneIndex}/volume"),
             "MUTE_STATUS" => BuildTopic($"zones/{zoneIndex}/mute"),
             "PLAYBACK_STATE" => BuildTopic($"zones/{zoneIndex}/playing"),
-            "ZONE_STATE" => BuildTopic($"zones/{zoneIndex}"),
             _ => null,
         };
     }
