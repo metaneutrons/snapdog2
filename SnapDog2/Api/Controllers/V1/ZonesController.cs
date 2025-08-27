@@ -13,10 +13,12 @@
 //
 namespace SnapDog2.Api.Controllers.V1;
 
+using System.Linq;
 using Cortex.Mediator;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SnapDog2.Api.Models;
+using SnapDog2.Core.Mappers;
 using SnapDog2.Core.Models;
 using SnapDog2.Server.Features.Zones.Commands.Control;
 using SnapDog2.Server.Features.Zones.Commands.Playback;
@@ -51,12 +53,12 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
     /// <summary>
     /// Lists configured zones with clean pagination.
-    /// Returns data directly without wrapper objects.
+    /// Returns simplified zone state format consistent with MQTT publishing.
     /// </summary>
     [HttpGet]
-    [ProducesResponseType<Page<ZoneState>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<Page<PublishableZoneState>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<Page<ZoneState>>> GetZones([FromQuery] int page = 1, [FromQuery] int size = 20)
+    public async Task<ActionResult<Page<PublishableZoneState>>> GetZones([FromQuery] int page = 1, [FromQuery] int size = 20)
     {
         if (page < 1)
         {
@@ -78,21 +80,25 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
         }
 
         var zones = result.Value!;
-        var pagedZones = zones.Skip((page - 1) * size).Take(size).ToArray();
-        var pageResult = new Page<ZoneState>(pagedZones, zones.Count, size, page);
+
+        // Convert to simplified external format
+        var simplifiedZones = zones.Select(zone => PublishableZoneStateMapper.ToMqttZoneState(zone)).ToArray();
+        var pagedZones = simplifiedZones.Skip((page - 1) * size).Take(size).ToArray();
+        var pageResult = new Page<PublishableZoneState>(pagedZones, zones.Count, size, page);
 
         return this.Ok(pageResult);
     }
 
     /// <summary>
     /// Get detailed information for a specific zone.
+    /// Returns simplified zone state format consistent with MQTT publishing.
     /// </summary>
     /// <param name="zoneIndex">Zone index (1-based)</param>
-    /// <returns>Zone state information</returns>
+    /// <returns>Simplified zone state information</returns>
     [HttpGet("{zoneIndex:int}")]
-    [ProducesResponseType<ZoneState>(StatusCodes.Status200OK)]
+    [ProducesResponseType<PublishableZoneState>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<ZoneState>> GetZone(int zoneIndex)
+    public async Task<ActionResult<PublishableZoneState>> GetZone(int zoneIndex)
     {
         var query = new GetZoneStateQuery { ZoneIndex = zoneIndex };
         var result = await this._mediator.SendQueryAsync<GetZoneStateQuery, Result<ZoneState>>(query);
@@ -103,7 +109,9 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
             return this.NotFound($"Zone {zoneIndex} not found");
         }
 
-        return Ok(result.Value!);
+        // Convert to simplified external format
+        var simplifiedZone = PublishableZoneStateMapper.ToMqttZoneState(result.Value!);
+        return Ok(simplifiedZone);
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════

@@ -131,7 +131,7 @@ public partial class MqttCommandMapper(ILogger<MqttCommandMapper> logger, MqttCo
     public bool IsValidMqttTopic(string topic) => MqttTopicParser.IsValid(topic, _mqttConfig.MqttBaseTopic);
 
     /// <summary>
-    /// Gets the entity type (zone/client) from an MQTT topic.
+    /// Gets the entity type (zones/client) from an MQTT topic.
     /// </summary>
     public string? GetEntityType(string topic) => MqttTopicParser.Parse(topic, _mqttConfig.MqttBaseTopic)?.EntityType;
 

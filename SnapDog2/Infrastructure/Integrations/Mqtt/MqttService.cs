@@ -38,7 +38,6 @@ using SnapDog2.Core.Enums;
 using SnapDog2.Core.Helpers;
 using SnapDog2.Core.Mappers;
 using SnapDog2.Core.Models;
-using SnapDog2.Core.Models.Mqtt;
 using SnapDog2.Server.Features.Clients.Commands.Config;
 using SnapDog2.Server.Features.Clients.Commands.Volume;
 using SnapDog2.Server.Features.Zones.Commands.Playback;
@@ -66,12 +65,12 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     /// Cache of last published MQTT zone states to detect changes.
     /// Key: zoneIndex, Value: last published MqttZoneState
     /// </summary>
-    private readonly ConcurrentDictionary<int, MqttZoneState> _lastPublishedZoneStates = new();
+    private readonly ConcurrentDictionary<int, PublishableZoneState> _lastPublishedZoneStates = new();
 
     /// <summary>
     /// Constructs a full MQTT topic using the configured base topic.
     /// </summary>
-    /// <param name="topicSuffix">The topic suffix (e.g., "zone/1/volume")</param>
+    /// <param name="topicSuffix">The topic suffix (e.g., "zones/1/volume")</param>
     /// <returns>Full topic with base prefix (e.g., "snapdog/zones/1/volume")</returns>
     private string BuildTopic(string topicSuffix)
     {
@@ -422,18 +421,18 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         try
         {
             // Convert to simplified MQTT format
-            var mqttZoneState = MqttStateMapper.ToMqttZoneState(state);
+            var mqttZoneState = PublishableZoneStateMapper.ToMqttZoneState(state);
 
             // Check if this represents a meaningful change
             var lastPublished = _lastPublishedZoneStates.GetValueOrDefault(zoneIndex);
-            if (!MqttStateMapper.HasMeaningfulChange(lastPublished, mqttZoneState))
+            if (!PublishableZoneStateMapper.HasMeaningfulChange(lastPublished, mqttZoneState))
             {
                 // No meaningful change, skip publishing
                 return Result.Success();
             }
 
             // Use simple zone state topic that matches blueprint pattern
-            var stateTopic = BuildTopic($"zone/{zoneIndex}/state");
+            var stateTopic = BuildTopic($"zones/{zoneIndex}/state");
 
             // Publish simplified state as JSON
             var stateJson = JsonSerializer.Serialize(
@@ -1090,12 +1089,12 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         // Use simple topic patterns that match the blueprint
         return eventType.ToUpperInvariant() switch
         {
-            "CLIENT_VOLUME_STATUS" => BuildTopic($"client/{clientIndex}/volume"),
-            "CLIENT_MUTE_STATUS" => BuildTopic($"client/{clientIndex}/mute"),
-            "CLIENT_LATENCY_STATUS" => BuildTopic($"client/{clientIndex}/latency"),
-            "CLIENT_CONNECTED" => BuildTopic($"client/{clientIndex}/connected"),
-            "CLIENT_ZONE_STATUS" => BuildTopic($"client/{clientIndex}/zone"),
-            "CLIENT_STATE" => BuildTopic($"client/{clientIndex}/state"),
+            "CLIENT_VOLUME_STATUS" => BuildTopic($"clients/{clientIndex}/volume"),
+            "CLIENT_MUTE_STATUS" => BuildTopic($"clients/{clientIndex}/mute"),
+            "CLIENT_LATENCY_STATUS" => BuildTopic($"clients/{clientIndex}/latency"),
+            "CLIENT_CONNECTED" => BuildTopic($"clients/{clientIndex}/connected"),
+            "CLIENT_ZONE_STATUS" => BuildTopic($"clients/{clientIndex}/zone"),
+            "CLIENT_STATE" => BuildTopic($"clients/{clientIndex}"),
             _ => null,
         };
     }
@@ -1111,10 +1110,10 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         // Use simple topic patterns that match the blueprint
         return eventType.ToUpperInvariant() switch
         {
-            "VOLUME_STATUS" => BuildTopic($"zone/{zoneIndex}/volume"),
-            "MUTE_STATUS" => BuildTopic($"zone/{zoneIndex}/mute"),
-            "PLAYBACK_STATE" => BuildTopic($"zone/{zoneIndex}/playing"),
-            "ZONE_STATE" => BuildTopic($"zone/{zoneIndex}/state"),
+            "VOLUME_STATUS" => BuildTopic($"zones/{zoneIndex}/volume"),
+            "MUTE_STATUS" => BuildTopic($"zones/{zoneIndex}/mute"),
+            "PLAYBACK_STATE" => BuildTopic($"zones/{zoneIndex}/playing"),
+            "ZONE_STATE" => BuildTopic($"zones/{zoneIndex}"),
             _ => null,
         };
     }
