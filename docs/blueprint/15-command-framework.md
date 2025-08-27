@@ -273,10 +273,6 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 
 **General**
 
-| Status ID         | Env Var Suffix | Default Rel. Topic | Example Payload                   | Retained | Notes                 |
-| :---------------- | :------------- | :----------------- | :-------------------------------- | :------- | :-------------------- |
-| `ZONE_STATE`      | `_STATE_TOPIC` | `state`            | **Full JSON object (see 13.5.1)** | Yes      | Includes all status |
-
 #### 14.3.2.3. System-Level Topics (Discovery & Global Status)
 
 System-level topics provide discovery and global status information across all zones.

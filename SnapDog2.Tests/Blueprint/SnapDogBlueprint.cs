@@ -387,8 +387,9 @@ public static class SnapDogBlueprint
         //
         .Status("ZONE_STATE")
         .Zone()
-        .Mqtt("snapdog/zones/{zoneIndex}/state")
         .Get("/api/v1/zones/{zoneIndex:int}")
+        .Exclude(Protocol.Mqtt, "No single MQTT topic for complete zone state")
+        .Exclude(Protocol.Knx, "Read-only zone information not actionable via KNX")
         .Description("Complete zone state information")
         //
         .Status("ZONE_NAME_STATUS")

@@ -86,7 +86,6 @@ snapdog/
 | `zones/{index}/name` | `ZONE_NAME_STATUS` | Status | Name of the zone |
 | `zones/{index}/control` | `multiple` | Status | Control status in one topic(see framework 14.3.2.4)|
 | `zones/{index}/control/set` | `multiple` | Command | Control commands (see framework 14.3.2.4) |
-| `zones/{index}/state` | `ZONE_STATE` | Status | Complete zone state |
 | `zones/{index}/playing` | `TRACK_PLAYING_STATUS` | Status | Track playing state |
 | `zones/{index}/play` | `PLAY` | Command | Play command |
 | `zones/{index}/pause` | `PAUSE` | Command | Pause command |
