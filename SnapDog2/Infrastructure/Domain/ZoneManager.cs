@@ -450,7 +450,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             this.SubscribeToMediaPlayerEvents();
 
             // Publish notification
-            this.PublishZoneStateChangedAsync();
+            this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
 
             // Publish status notification for blueprint compliance
             await PublishPlaybackStateStatusAsync(Core.Enums.PlaybackState.Playing);
@@ -496,7 +496,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             this.StartPositionUpdateTimer();
             this.SubscribeToMediaPlayerEvents();
 
-            this.PublishZoneStateChangedAsync();
+            this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
             return Result.Success();
         }
         finally
@@ -540,7 +540,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             this.StartPositionUpdateTimer();
             this.SubscribeToMediaPlayerEvents();
 
-            this.PublishZoneStateChangedAsync();
+            this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
             return Result.Success();
         }
         finally
@@ -568,7 +568,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             this.StopPositionUpdateTimer();
             this.UnsubscribeFromMediaPlayerEvents();
 
-            this.PublishZoneStateChangedAsync();
+            this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
             return Result.Success();
         }
         finally
@@ -596,7 +596,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             this.StopPositionUpdateTimer();
             this.UnsubscribeFromMediaPlayerEvents();
 
-            this.PublishZoneStateChangedAsync();
+            this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
             return Result.Success();
         }
         finally
@@ -643,7 +643,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         }
 
         this._currentState = this._currentState with { Volume = clampedVolume };
-        this.PublishZoneStateChangedAsync();
+        this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
         return Result.Success();
     }
 
@@ -728,7 +728,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         }
 
         this._currentState = this._currentState with { Mute = enabled };
-        this.PublishZoneStateChangedAsync();
+        this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
         return Result.Success();
     }
 
@@ -794,7 +794,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             }
 
             this._currentState = this._currentState with { Track = targetTrack };
-            this.PublishZoneStateChangedAsync();
+            this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
 
             // Log successful track change with meaningful information
             LogZonePlaying(
@@ -851,7 +851,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 this.StartPositionUpdateTimer();
                 this.SubscribeToMediaPlayerEvents();
 
-                this.PublishZoneStateChangedAsync();
+                this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
             }
 
             return Result.Success();
@@ -907,7 +907,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         }
 
         this._currentState = this._currentState with { Track = targetTrack };
-        this.PublishZoneStateChangedAsync();
+        this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
 
         // Publish individual track metadata notifications for KNX integration
         await this.PublishTrackMetadataNotificationsAsync(targetTrack).ConfigureAwait(false);
@@ -962,7 +962,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 this.StartPositionUpdateTimer();
                 this.SubscribeToMediaPlayerEvents();
 
-                this.PublishZoneStateChangedAsync();
+                this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
             }
 
             return Result.Success();
@@ -1047,7 +1047,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         try
         {
             this._currentState = this._currentState with { TrackRepeat = enabled };
-            this.PublishZoneStateChangedAsync();
+            this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
             return Result.Success();
         }
         finally
@@ -1068,7 +1068,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 newValue ? "Enable track repeat" : "Disable track repeat"
             );
             this._currentState = this._currentState with { TrackRepeat = newValue };
-            this.PublishZoneStateChangedAsync();
+            this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
             return Result.Success();
         }
         finally
@@ -1108,7 +1108,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             }
 
             this._currentState = this._currentState with { Playlist = targetPlaylist };
-            this.PublishZoneStateChangedAsync();
+            this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
             return Result.Success();
         }
         finally
@@ -1127,7 +1127,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             var newPlaylist = this._currentState.Playlist! with { SubsonicPlaylistId = playlistIndex, Name = playlistIndex };
 
             this._currentState = this._currentState with { Playlist = newPlaylist };
-            this.PublishZoneStateChangedAsync();
+            this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
             return Result.Success();
         }
         finally
@@ -1177,7 +1177,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         try
         {
             this._currentState = this._currentState with { PlaylistShuffle = enabled };
-            this.PublishZoneStateChangedAsync();
+            this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
             return Result.Success();
         }
         finally
@@ -1198,7 +1198,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 newValue ? "Enable playlist shuffle" : "Disable playlist shuffle"
             );
             this._currentState = this._currentState with { PlaylistShuffle = newValue };
-            this.PublishZoneStateChangedAsync();
+            this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
             return Result.Success();
         }
         finally
@@ -1219,7 +1219,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         try
         {
             this._currentState = this._currentState with { PlaylistRepeat = enabled };
-            this.PublishZoneStateChangedAsync();
+            this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
             return Result.Success();
         }
         finally
@@ -1240,7 +1240,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 newValue ? "Enable playlist repeat" : "Disable playlist repeat"
             );
             this._currentState = this._currentState with { PlaylistRepeat = newValue };
-            this.PublishZoneStateChangedAsync();
+            this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
             return Result.Success();
         }
         finally
@@ -1573,31 +1573,6 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         }
     }
 
-    private void PublishZoneStateChangedAsync()
-    {
-        // Persist state to store for future requests
-        this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
-
-        // Publish notification via mediator using fire-and-forget to prevent blocking
-        var notification = this._statusFactory.CreateZoneStateChangedNotification(this._zoneIndex, this._currentState);
-
-        // Use Task.Run to avoid blocking the calling thread
-        _ = Task.Run(async () =>
-        {
-            try
-            {
-                using var scope = this._serviceScopeFactory.CreateScope();
-                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-                await mediator.PublishAsync(notification).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                // Log error but don't propagate to avoid breaking the main operation
-                LogFailedToPublishZoneStateNotification(ex, this._zoneIndex);
-            }
-        });
-    }
-
     /// <summary>
     /// Starts the position update timer for reliable MQTT position updates when playing.
     /// </summary>
@@ -1626,7 +1601,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
                     // Update state from MediaPlayer and publish if position changed
                     await this.UpdateStateFromSnapcastAsync().ConfigureAwait(false);
-                    this.PublishZoneStateChangedAsync();
+                    this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
                 }
                 catch (Exception ex)
                 {
@@ -1720,7 +1695,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 };
 
                 // Publish updated state to MQTT
-                this.PublishZoneStateChangedAsync();
+                this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
                 LogPublishedMqttUpdateForPositionChange();
 
                 // Publish track progress notification for KNX integration (throttled)
@@ -1769,7 +1744,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             if (this._currentState.PlaybackState != newPlaybackState)
             {
                 this._currentState = this._currentState with { PlaybackState = newPlaybackState };
-                this.PublishZoneStateChangedAsync();
+                this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
 
                 // Publish track playing status notification for KNX integration
                 Task.Run(async () =>
@@ -1812,7 +1787,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             this._currentState = this._currentState with { Track = e.TrackInfo };
 
             // Publish state change to notify other components
-            this.PublishZoneStateChangedAsync();
+            this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
 
             LogTrackInfoUpdated(this._zoneIndex, e.TrackInfo.Title ?? "Unknown");
         }
@@ -1874,15 +1849,6 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             playlistInfo,
             playlistIndex
         );
-
-        using var scope = this._serviceScopeFactory.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-        await mediator.PublishAsync(notification).ConfigureAwait(false);
-    }
-
-    public async Task PublishZoneStateStatusAsync(Core.Models.ZoneState zoneState)
-    {
-        var notification = this._statusFactory.CreateZoneStateChangedNotification(this._zoneIndex, zoneState);
 
         using var scope = this._serviceScopeFactory.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
@@ -2202,13 +2168,6 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         Message = "Failed to update zone {ZoneIndex} state from media player"
     )]
     private partial void LogFailedToUpdateZoneState(Exception ex, int ZoneIndex);
-
-    [LoggerMessage(
-        EventId = 6543,
-        Level = LogLevel.Error,
-        Message = "Failed to publish zone state notification for zone {ZoneIndex}"
-    )]
-    private partial void LogFailedToPublishZoneStateNotification(Exception ex, int ZoneIndex);
 
     [LoggerMessage(
         EventId = 6544,
