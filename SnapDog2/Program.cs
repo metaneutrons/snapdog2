@@ -230,6 +230,7 @@ static WebApplication CreateWebApplication(string[] args)
                 metrics
                     .AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
+                    .AddMeter("SnapDog2.Application")
                     .AddMeter("SnapDog2.*")
                     .AddOtlpExporter(options =>
                     {
@@ -376,11 +377,7 @@ static WebApplication CreateWebApplication(string[] args)
             return new SnapDog2.Infrastructure.Storage.RedisPersistentStateStore(redis, snapDogConfig.Redis, logger);
         });
 
-        // Register persistent state notification handler
-        builder.Services.AddSingleton<
-            Cortex.Mediator.Notifications.INotificationHandler<SnapDog2.Server.Features.Zones.Notifications.ZoneStateChangedNotification>,
-            SnapDog2.Infrastructure.Notifications.PersistentStateNotificationHandler
-        >();
+        // Register persistent state notification handler for client state changes
         builder.Services.AddSingleton<
             Cortex.Mediator.Notifications.INotificationHandler<SnapDog2.Server.Features.Clients.Notifications.ClientStateChangedNotification>,
             SnapDog2.Infrastructure.Notifications.PersistentStateNotificationHandler

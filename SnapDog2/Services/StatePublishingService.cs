@@ -377,13 +377,6 @@ public partial class StatePublishingService(
 
             var zoneState = zoneStateResult.Value;
 
-            // Publish comprehensive zone state notification
-            // The existing ZoneStateNotificationHandler will handle publishing to integrations
-            await mediator.PublishAsync(
-                new ZoneStateChangedNotification { ZoneIndex = zoneIndex, ZoneState = zoneState },
-                cancellationToken
-            );
-
             // PlaybackState is already an enum, no conversion needed
             var playbackStateEnum = zoneState.PlaybackState;
 

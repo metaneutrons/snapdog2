@@ -25,7 +25,6 @@ using SnapDog2.Server.Features.Zones.Notifications;
 /// Provides event-based state persistence with debouncing for high-frequency updates.
 /// </summary>
 public partial class PersistentStateNotificationHandler :
-    INotificationHandler<ZoneStateChangedNotification>,
     INotificationHandler<ClientStateChangedNotification>
 {
     private readonly IPersistentStateStore _persistentStore;
@@ -42,33 +41,6 @@ public partial class PersistentStateNotificationHandler :
     {
         _persistentStore = persistentStore;
         _logger = logger;
-    }
-
-    /// <summary>
-    /// Handles zone state changes and persists them immediately.
-    /// </summary>
-    public async Task Handle(ZoneStateChangedNotification notification, CancellationToken cancellationToken)
-    {
-        try
-        {
-            LogZoneStatePersisting(notification.ZoneIndex);
-
-            // For position updates, use debouncing to avoid excessive writes
-            if (IsPositionOnlyUpdate(notification))
-            {
-                DebounceZoneSave(notification.ZoneIndex, notification.ZoneState);
-                return;
-            }
-
-            // For important state changes (volume, mute, track, etc.), save immediately
-            await _persistentStore.SaveZoneStateAsync(notification.ZoneIndex, notification.ZoneState);
-
-            LogZoneStatePersisted(notification.ZoneIndex, notification.ZoneState.Name);
-        }
-        catch (Exception ex)
-        {
-            LogZoneStatePersistFailed(ex, notification.ZoneIndex);
-        }
     }
 
     /// <summary>
@@ -135,14 +107,6 @@ public partial class PersistentStateNotificationHandler :
     /// <summary>
     /// Determines if this is a position-only update that should be debounced.
     /// </summary>
-    private static bool IsPositionOnlyUpdate(ZoneStateChangedNotification notification)
-    {
-        // This is a heuristic - in a real implementation, you might want to 
-        // compare with the previous state to see what actually changed
-        // For now, we'll debounce all updates during playback
-        return notification.ZoneState.PlaybackState == SnapDog2.Core.Enums.PlaybackState.Playing;
-    }
-
     #region LoggerMessage Methods
 
     [LoggerMessage(
