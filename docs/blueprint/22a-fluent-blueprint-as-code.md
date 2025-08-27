@@ -1,10 +1,10 @@
-# 27. a. Fluent Blueprint-as-Code
+# 28. a. Fluent Blueprint-as-Code
 
-## 27.1. Overview
+## 28.1. Overview
 
 A fluent DSL approach for maintaining the SnapDog2 system specification as executable code, providing a single source of truth for all commands, status, protocols, and implementation requirements.
 
-## 27.2. Problem
+## 28.2. Problem
 
 Current testing suffers from:
 
@@ -13,9 +13,9 @@ Current testing suffers from:
 - **Maintenance Burden**: Changes require editing multiple hard-to-debug files
 - **Poor Readability**: Verbose record syntax obscures the specification
 
-## 27.3. Solution: Fluent Blueprint DSL
+## 28.3. Solution: Fluent Blueprint DSL
 
-### 27.3.1. Core Example
+### 28.3.1. Core Example
 
 ```csharp
 public static class SnapDogBlueprint
@@ -92,9 +92,9 @@ public static class SnapDogBlueprint
 }
 ```
 
-## 27.4. DSL API
+## 28.4. DSL API
 
-### 27.4.1. Fluent Chain Structure
+### 28.4.1. Fluent Chain Structure
 
 ```
 Blueprint.Define()
@@ -107,7 +107,7 @@ Blueprint.Define()
     .Modifiers()                   // Exclude() | RecentlyAdded() | Optional()
 ```
 
-### 27.4.2. Methods
+### 28.4.2. Methods
 
 **Entry Points**
 
@@ -143,27 +143,27 @@ Blueprint.Define()
 - `RecentlyAdded()` - Grace period feature
 - `Optional()` - Implementation optional (default: required)
 
-## 27.5. Design Principles
+## 28.5. Design Principles
 
-### 27.5.1. Explicit Inclusion
+### 28.5.1. Explicit Inclusion
 
 - Only specify protocols that ARE supported
 - No protocol mentioned = not supported
 - Clear and unambiguous
 
-### 27.5.2. Explicit Exclusion for Clarity
+### 28.5.2. Explicit Exclusion for Clarity
 
 - Use `Exclude(Protocol.Knx, reason)` when you want to be explicit about why something is excluded
 - Helpful for documentation and understanding design decisions
 
-### 27.5.3. Required by Default
+### 28.5.3. Required by Default
 
 - All features required unless marked `Optional()`
 - Simpler and cleaner than marking everything `Required()`
 
-## 27.6. Usage in Tests
+## 28.6. Usage in Tests
 
-### 27.6.1. Automatic Validation
+### 28.6.1. Automatic Validation
 
 ```csharp
 [Fact]
@@ -223,7 +223,7 @@ public void KnxExclusions_ShouldBeDocumented()
 }
 ```
 
-### 27.6.2. Query API
+### 28.6.2. Query API
 
 ```csharp
 // Get all API commands
@@ -259,9 +259,9 @@ var invalidTopics = Spec.Commands.WithMqtt()
     .Select(c => c.Id);
 ```
 
-## 27.7. Benefits
+## 28.7. Benefits
 
-## 27.8. Benefits
+## 28.8. Benefits
 
 - Single Source of Truth
   - All specification in one fluent chain
@@ -288,7 +288,7 @@ var invalidTopics = Spec.Commands.WithMqtt()
   - Automatic test generation from blueprint
   - No hard-coded test data
 
-## 27.9. Implementation Strategy
+## 28.9. Implementation Strategy
 
 1. **Create DSL Classes** - Implement fluent API
 2. **Define Specification** - Convert scattered config to fluent chain
@@ -296,7 +296,7 @@ var invalidTopics = Spec.Commands.WithMqtt()
 4. **Validate** - Ensure existing tests pass
 5. **Clean Up** - Remove fragmented files
 
-## 27.10. Future Extensions
+## 28.10. Future Extensions
 
 - **Code Generation** - Generate controllers from blueprint
 - **Documentation** - Auto-generate API docs
