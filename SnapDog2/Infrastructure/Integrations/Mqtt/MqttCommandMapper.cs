@@ -77,7 +77,7 @@ public partial class MqttCommandMapper(ILogger<MqttCommandMapper> logger, MqttCo
 
     /// <summary>
     /// Maps complex control topics using modern parsing and dictionary-based command mapping.
-    /// Example: snapdog/zone/1/control/set with payload "play track 5"
+    /// Example: snapdog/zones/1/control/set with payload "play track 5"
     /// </summary>
     public ICommand<Result>? MapControlTopicToCommand(string topic, string payload)
     {

@@ -22,7 +22,7 @@ using SnapDog2.Core.Models;
 /// Command to decrease a client's volume by a specified step.
 /// </summary>
 [CommandId("CLIENT_VOLUME_DOWN")]
-[MqttTopic("snapdog/client/{clientIndex}/volume/down")]
+[MqttTopic("snapdog/clients/{clientIndex}/volume/down")]
 public record ClientVolumeDownCommand : ICommand<Result>
 {
     /// <summary>

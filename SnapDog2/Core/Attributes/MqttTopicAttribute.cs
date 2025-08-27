@@ -25,7 +25,7 @@ public class MqttTopicAttribute(string topicPattern) : Attribute
     /// <summary>
     /// The MQTT topic pattern used for this command.
     /// Supports placeholders like {zoneIndex} and {clientIndex}.
-    /// Example: "snapdog/zone/{zoneIndex}/volume/set"
+    /// Example: "snapdog/zones/{zoneIndex}/volume/set"
     /// </summary>
     public string TopicPattern { get; } = topicPattern ?? throw new ArgumentNullException(nameof(topicPattern));
 

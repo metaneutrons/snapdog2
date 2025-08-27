@@ -134,21 +134,21 @@ public static class CommandIdUsageExamples
         return commandType.Value switch
         {
             // Playback commands
-            CommandEventType.Play => "snapdog/zone/1/control/play",
-            CommandEventType.Pause => "snapdog/zone/1/control/pause",
-            CommandEventType.Stop => "snapdog/zone/1/control/stop",
+            CommandEventType.Play => "snapdog/zones/1/control/play",
+            CommandEventType.Pause => "snapdog/zones/1/control/pause",
+            CommandEventType.Stop => "snapdog/zones/1/control/stop",
 
             // Volume commands
-            CommandEventType.Volume => "snapdog/zone/1/volume/set",
-            CommandEventType.VolumeUp => "snapdog/zone/1/volume/up",
-            CommandEventType.VolumeDown => "snapdog/zone/1/volume/down",
-            CommandEventType.Mute => "snapdog/zone/1/mute/set",
-            CommandEventType.MuteToggle => "snapdog/zone/1/mute/toggle",
+            CommandEventType.Volume => "snapdog/zones/1/volume/set",
+            CommandEventType.VolumeUp => "snapdog/zones/1/volume/up",
+            CommandEventType.VolumeDown => "snapdog/zones/1/volume/down",
+            CommandEventType.Mute => "snapdog/zones/1/mute/set",
+            CommandEventType.MuteToggle => "snapdog/zones/1/mute/toggle",
 
             // Client commands
-            CommandEventType.ClientVolume => "snapdog/client/1/volume/set",
-            CommandEventType.ClientMute => "snapdog/client/1/mute/set",
-            CommandEventType.ClientMuteToggle => "snapdog/client/1/mute/toggle",
+            CommandEventType.ClientVolume => "snapdog/clients/1/volume/set",
+            CommandEventType.ClientMute => "snapdog/clients/1/mute/set",
+            CommandEventType.ClientMuteToggle => "snapdog/clients/1/mute/toggle",
 
             _ => null, // Unmapped command
         };

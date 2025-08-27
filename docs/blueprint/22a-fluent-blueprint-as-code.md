@@ -27,14 +27,14 @@ public static class SnapDogBlueprint
         .Command("PLAY")
             .Zone().Api().Mqtt()
             .Post("/api/v1/zones/{zoneIndex:int}/play")
-            .MqttTopic("snapdog/zone/{zoneIndex}/play/set")
+            .MqttTopic("snapdog/zones/{zoneIndex}/play/set")
             .Description("Start playback in a zone")
 
         //
         .Command("VOLUME")
             .Zone().Api().Mqtt()
             .Put("/api/v1/zones/{zoneIndex:int}/volume")
-            .MqttTopic("snapdog/zone/{zoneIndex}/volume/set")
+            .MqttTopic("snapdog/zones/{zoneIndex}/volume/set")
             .Description("Set zone volume level")
             .Exclude(Protocol.Knx, "Handled by dedicated KNX actuators")
 
@@ -43,7 +43,7 @@ public static class SnapDogBlueprint
         .Command("CLIENT_VOLUME")
             .Client().Api().Mqtt()
             .Put("/api/v1/clients/{clientIndex:int}/volume")
-            .MqttTopic("snapdog/client/{clientIndex}/volume/set")
+            .MqttTopic("snapdog/clients/{clientIndex}/volume/set")
             .Description("Set client volume level")
             .Exclude(Protocol.Knx, "Network-specific setting")
 
@@ -60,14 +60,14 @@ public static class SnapDogBlueprint
         .Status("VOLUME_STATUS")
             .Zone().Api().Mqtt()
             .Get("/api/v1/zones/{zoneIndex:int}/volume")
-            .MqttTopic("snapdog/zone/{zoneIndex}/volume")
+            .MqttTopic("snapdog/zones/{zoneIndex}/volume")
             .Description("Current zone volume level")
 
         // MQTT-only Status - just specify MQTT with topic
         //
         .Status("CONTROL_STATUS")
             .Zone().Mqtt()
-            .MqttTopic("snapdog/zone/{zoneIndex}/control/status")
+            .MqttTopic("snapdog/zones/{zoneIndex}/control/status")
             .Description("Control command execution status")
             .RecentlyAdded()
 
@@ -76,7 +76,7 @@ public static class SnapDogBlueprint
         .Command("STOP")
             .Zone().Api().Mqtt().Knx()
             .Post("/api/v1/zones/{zoneIndex:int}/stop")
-            .MqttTopic("snapdog/zone/{zoneIndex}/stop/set")
+            .MqttTopic("snapdog/zones/{zoneIndex}/stop/set")
             .Description("Basic stop command suitable for building automation")
 
         // Optional implementation
@@ -84,7 +84,7 @@ public static class SnapDogBlueprint
         .Command("ADVANCED_EQ")
             .Zone().Api().Mqtt()
             .Put("/api/v1/zones/{zoneIndex:int}/equalizer")
-            .MqttTopic("snapdog/zone/{zoneIndex}/equalizer/set")
+            .MqttTopic("snapdog/zones/{zoneIndex}/equalizer/set")
             .Description("Advanced equalizer settings")
             .Optional()
 

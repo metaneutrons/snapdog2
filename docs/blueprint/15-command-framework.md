@@ -336,9 +336,9 @@ All boolean topics accept consistent payload formats for maximum compatibility:
 **Examples:**
 
 ```plaintext
-snapdog/zone/1/repeat/track     → "true" | "false" | "1" | "0" | "on" | "off" | "toggle"
-snapdog/zone/1/shuffle/set      → "true" | "false" | "1" | "0" | "on" | "off" | "toggle"
-snapdog/zone/1/mute/set         → "true" | "false" | "1" | "0" | "on" | "off" | "toggle"
+snapdog/zones/1/repeat/track     → "true" | "false" | "1" | "0" | "on" | "off" | "toggle"
+snapdog/zones/1/shuffle/set      → "true" | "false" | "1" | "0" | "on" | "off" | "toggle"
+snapdog/zones/1/mute/set         → "true" | "false" | "1" | "0" | "on" | "off" | "toggle"
 ```
 
 **Numeric Values**

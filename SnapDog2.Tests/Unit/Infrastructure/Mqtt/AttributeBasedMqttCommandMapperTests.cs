@@ -62,7 +62,7 @@ public class AttributeBasedMqttCommandMapperTests(ITestOutputHelper output)
         registeredPatterns.Should().NotBeEmpty("Mapper should discover topic patterns from attributes");
 
         // Check that key blueprint topics are discovered
-        var keyTopics = new[] { "snapdog/zone/{zoneIndex}/play/set", "snapdog/zone/{zoneIndex}/volume/set" };
+        var keyTopics = new[] { "snapdog/zones/{zoneIndex}/play/set", "snapdog/zones/{zoneIndex}/volume/set" };
         foreach (var keyTopic in keyTopics)
         {
             if (blueprintTopics.Contains(keyTopic))
@@ -80,19 +80,19 @@ public class AttributeBasedMqttCommandMapperTests(ITestOutputHelper output)
         {
             new
             {
-                Topic = "snapdog/zone/1/play/set",
+                Topic = "snapdog/zones/1/play/set",
                 Payload = "",
                 Description = "Zone play command",
             },
             new
             {
-                Topic = "snapdog/zone/2/volume/set",
+                Topic = "snapdog/zones/2/volume/set",
                 Payload = "75",
                 Description = "Zone volume command",
             },
             new
             {
-                Topic = "snapdog/client/3/volume/set",
+                Topic = "snapdog/clients/3/volume/set",
                 Payload = "50",
                 Description = "Client volume command",
             },

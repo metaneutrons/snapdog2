@@ -150,4 +150,4 @@ snapdog/
 | `clients/{index}/latency` | `CLIENT_LATENCY_STATUS` | Status | Current client latency |
 | `clients/{index}/latency/set` | `CLIENT_LATENCY` | Command | Set client latency |
 | `clients/{index}/zone` | `CLIENT_ZONE_STATUS` | Status | Current assigned zone |
-| `clients/{index}/zone/set` | `CLIENT_ZONE` | Command | Assign client to zone |
+| `clients/{index}/zones/set` | `CLIENT_ZONE` | Command | Assign client to zone |

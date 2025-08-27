@@ -79,19 +79,19 @@ public class MqttBlueprintValidationTests(ITestOutputHelper output)
         {
             new
             {
-                Topic = "snapdog/zone/1/play/set",
+                Topic = "snapdog/zones/1/play/set",
                 CommandId = "PLAY",
                 ExpectedType = "PlayCommand",
             },
             new
             {
-                Topic = "snapdog/zone/2/volume/set",
+                Topic = "snapdog/zones/2/volume/set",
                 CommandId = "VOLUME",
                 ExpectedType = "SetZoneVolumeCommand",
             },
             new
             {
-                Topic = "snapdog/client/3/volume/set",
+                Topic = "snapdog/clients/3/volume/set",
                 CommandId = "CLIENT_VOLUME",
                 ExpectedType = "SetClientVolumeCommand",
             },

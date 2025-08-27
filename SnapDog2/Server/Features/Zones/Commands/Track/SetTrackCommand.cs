@@ -22,7 +22,7 @@ using SnapDog2.Core.Models;
 /// Command to set the current track in a zone. Changes to a specific track by index.
 /// </summary>
 [CommandId("TRACK")]
-[MqttTopic("snapdog/zone/{zoneIndex}/track/set")]
+[MqttTopic("snapdog/zones/{zoneIndex}/track/set")]
 public record SetTrackCommand : ICommand<Result>
 {
     /// <summary>

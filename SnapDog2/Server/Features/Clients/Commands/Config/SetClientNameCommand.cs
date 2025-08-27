@@ -22,7 +22,7 @@ using SnapDog2.Core.Models;
 /// Command to set the display name of a Snapcast client.
 /// </summary>
 [CommandId("CLIENT_NAME")]
-[MqttTopic("snapdog/client/{clientIndex}/name/set")]
+[MqttTopic("snapdog/clients/{clientIndex}/name/set")]
 public record SetClientNameCommand : ICommand<Result>
 {
     /// <summary>

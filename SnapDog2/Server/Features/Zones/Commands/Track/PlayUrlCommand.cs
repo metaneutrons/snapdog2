@@ -22,7 +22,7 @@ using SnapDog2.Core.Models;
 /// Command to play a direct URL stream and start playback immediately.
 /// </summary>
 [CommandId("TRACK_PLAY_URL")]
-[MqttTopic("snapdog/zone/{zoneIndex}/play/url")]
+[MqttTopic("snapdog/zones/{zoneIndex}/play/url")]
 public record PlayUrlCommand : ICommand<Result>
 {
     /// <summary>

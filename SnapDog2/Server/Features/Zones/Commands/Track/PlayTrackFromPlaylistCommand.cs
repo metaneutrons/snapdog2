@@ -22,7 +22,7 @@ using SnapDog2.Core.Models;
 /// Command to play a specific track from a specific playlist and start playback immediately.
 /// </summary>
 [CommandId("TRACK_PLAY_PLAYLIST")]
-[MqttTopic("snapdog/zone/{zoneIndex}/play/playlist/{playlistIndex}/track")]
+[MqttTopic("snapdog/zones/{zoneIndex}/play/playlist/{playlistIndex}/track")]
 public record PlayTrackFromPlaylistCommand : ICommand<Result>
 {
     /// <summary>

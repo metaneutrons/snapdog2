@@ -91,7 +91,9 @@ public static class MqttStateMapper
     public static bool HasMeaningfulChange(MqttZoneState? previous, MqttZoneState current)
     {
         if (previous == null)
+        {
             return true; // First time publishing
+        }
 
         // Check basic zone properties
         if (previous.Name != current.Name ||
@@ -122,8 +124,15 @@ public static class MqttStateMapper
 
     private static bool PlaylistsEqual(MqttPlaylistInfo? a, MqttPlaylistInfo? b)
     {
-        if (a == null && b == null) return true;
-        if (a == null || b == null) return false;
+        if (a == null && b == null)
+        {
+            return true;
+        }
+
+        if (a == null || b == null)
+        {
+            return false;
+        }
 
         return a.Index == b.Index &&
                a.Name == b.Name &&
@@ -135,8 +144,15 @@ public static class MqttStateMapper
 
     private static bool TracksEqual(MqttTrackInfo? a, MqttTrackInfo? b)
     {
-        if (a == null && b == null) return true;
-        if (a == null || b == null) return false;
+        if (a == null && b == null)
+        {
+            return true;
+        }
+
+        if (a == null || b == null)
+        {
+            return false;
+        }
 
         return a.Index == b.Index &&
                a.Title == b.Title &&

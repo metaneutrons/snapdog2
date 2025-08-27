@@ -22,7 +22,7 @@ using SnapDog2.Core.Models;
 /// Command to play a specific track by index and start playback immediately.
 /// </summary>
 [CommandId("TRACK_PLAY_INDEX")]
-[MqttTopic("snapdog/zone/{zoneIndex}/play/track")]
+[MqttTopic("snapdog/zones/{zoneIndex}/play/track")]
 public record PlayTrackByIndexCommand : ICommand<Result>
 {
     /// <summary>

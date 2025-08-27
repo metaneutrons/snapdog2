@@ -22,7 +22,7 @@ using SnapDog2.Core.Models;
 /// Command to set playlist shuffle mode in a zone.
 /// </summary>
 [CommandId("PLAYLIST_SHUFFLE")]
-[MqttTopic("snapdog/zone/{zoneIndex}/shuffle/set")]
+[MqttTopic("snapdog/zones/{zoneIndex}/shuffle/set")]
 public record SetPlaylistShuffleCommand : ICommand<Result>
 {
     /// <summary>

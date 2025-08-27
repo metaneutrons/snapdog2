@@ -61,7 +61,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     private readonly List<ClientConfig> _clientConfigs;
     private readonly ResiliencePipeline _connectionPolicy;
     private readonly ResiliencePipeline _operationPolicy;
-    
+
     /// <summary>
     /// Cache of last published MQTT zone states to detect changes.
     /// Key: zoneIndex, Value: last published MqttZoneState
@@ -72,7 +72,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     /// Constructs a full MQTT topic using the configured base topic.
     /// </summary>
     /// <param name="topicSuffix">The topic suffix (e.g., "zone/1/volume")</param>
-    /// <returns>Full topic with base prefix (e.g., "snapdog/zone/1/volume")</returns>
+    /// <returns>Full topic with base prefix (e.g., "snapdog/zones/1/volume")</returns>
     private string BuildTopic(string topicSuffix)
     {
         var baseTopic = _config.MqttBaseTopic.TrimEnd('/');
@@ -423,7 +423,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         {
             // Convert to simplified MQTT format
             var mqttZoneState = MqttStateMapper.ToMqttZoneState(state);
-            
+
             // Check if this represents a meaningful change
             var lastPublished = _lastPublishedZoneStates.GetValueOrDefault(zoneIndex);
             if (!MqttStateMapper.HasMeaningfulChange(lastPublished, mqttZoneState))

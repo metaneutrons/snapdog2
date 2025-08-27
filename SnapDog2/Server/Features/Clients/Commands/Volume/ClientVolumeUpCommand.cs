@@ -22,7 +22,7 @@ using SnapDog2.Core.Models;
 /// Command to increase a client's volume by a specified step.
 /// </summary>
 [CommandId("CLIENT_VOLUME_UP")]
-[MqttTopic("snapdog/client/{clientIndex}/volume/up")]
+[MqttTopic("snapdog/clients/{clientIndex}/volume/up")]
 public record ClientVolumeUpCommand : ICommand<Result>
 {
     /// <summary>

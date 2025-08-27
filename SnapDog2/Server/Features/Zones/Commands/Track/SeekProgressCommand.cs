@@ -22,7 +22,7 @@ using SnapDog2.Core.Models;
 /// Command to seek to a specific progress percentage in the current track.
 /// </summary>
 [CommandId("TRACK_PROGRESS")]
-[MqttTopic("snapdog/zone/{zoneIndex}/track/progress/set")]
+[MqttTopic("snapdog/zones/{zoneIndex}/track/progress/set")]
 public record SeekProgressCommand : ICommand<Result>
 {
     /// <summary>

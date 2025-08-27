@@ -66,7 +66,7 @@ public partial class ZoneGroupingService : IZoneGroupingService
             // We need to get the zone indices. Since we can't access the internal _zones dictionary,
             // let's try to get zone states and infer indices from successful zone retrievals
             var zones = new List<int>();
-            
+
             // Try zones 1-10 (reasonable upper limit) and see which ones exist
             for (int i = 1; i <= 10; i++)
             {

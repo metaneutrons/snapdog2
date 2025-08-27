@@ -22,7 +22,7 @@ using SnapDog2.Core.Models;
 /// Command to skip to the next playlist in a zone.
 /// </summary>
 [CommandId("PLAYLIST_NEXT")]
-[MqttTopic("snapdog/zone/{zoneIndex}/next/playlist")]
+[MqttTopic("snapdog/zones/{zoneIndex}/next/playlist")]
 public record NextPlaylistCommand : ICommand<Result>
 {
     /// <summary>

@@ -22,7 +22,7 @@ using SnapDog2.Core.Models;
 /// Command to assign a client to a specific zone. Moves a Snapcast client to a different audio zone.
 /// </summary>
 [CommandId("CLIENT_ZONE")]
-[MqttTopic("snapdog/client/{clientIndex}/zone/set")]
+[MqttTopic("snapdog/clients/{clientIndex}/zones/set")]
 public record AssignClientToZoneCommand : ICommand<Result>
 {
     /// <summary>

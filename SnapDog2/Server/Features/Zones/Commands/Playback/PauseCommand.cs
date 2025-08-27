@@ -22,7 +22,7 @@ using SnapDog2.Core.Models;
 /// Command to pause playback in a zone. Pauses the currently playing media.
 /// </summary>
 [CommandId("PAUSE")]
-[MqttTopic("snapdog/zone/{zoneIndex}/pause")]
+[MqttTopic("snapdog/zones/{zoneIndex}/pause")]
 public record PauseCommand : ICommand<Result>
 {
     /// <summary>

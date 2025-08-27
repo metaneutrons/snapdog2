@@ -22,7 +22,7 @@ using SnapDog2.Core.Models;
 /// Command to toggle zone mute state. Toggles the mute state of all clients in the zone.
 /// </summary>
 [CommandId("MUTE_TOGGLE")]
-[MqttTopic("snapdog/zone/{zoneIndex}/mute/toggle")]
+[MqttTopic("snapdog/zones/{zoneIndex}/mute/toggle")]
 public record ToggleZoneMuteCommand : ICommand<Result>
 {
     /// <summary>

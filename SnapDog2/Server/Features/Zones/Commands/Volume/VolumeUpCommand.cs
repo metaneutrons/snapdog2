@@ -22,7 +22,7 @@ using SnapDog2.Core.Models;
 /// Command to increase zone volume by a specified step. Increases the volume for all clients in the zone.
 /// </summary>
 [CommandId("VOLUME_UP")]
-[MqttTopic("snapdog/zone/{zoneIndex}/volume/up")]
+[MqttTopic("snapdog/zones/{zoneIndex}/volume/up")]
 public record VolumeUpCommand : ICommand<Result>
 {
     /// <summary>

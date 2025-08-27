@@ -22,7 +22,7 @@ using SnapDog2.Core.Models;
 /// Command to set zone mute state. Mutes or unmutes all clients in the zone.
 /// </summary>
 [CommandId("MUTE")]
-[MqttTopic("snapdog/zone/{zoneIndex}/mute/set")]
+[MqttTopic("snapdog/zones/{zoneIndex}/mute/set")]
 public record SetZoneMuteCommand : ICommand<Result>
 {
     /// <summary>

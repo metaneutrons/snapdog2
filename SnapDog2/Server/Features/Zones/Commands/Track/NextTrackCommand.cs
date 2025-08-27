@@ -22,7 +22,7 @@ using SnapDog2.Core.Models;
 /// Command to skip to the next track in a zone.
 /// </summary>
 [CommandId("TRACK_NEXT")]
-[MqttTopic("snapdog/zone/{zoneIndex}/next")]
+[MqttTopic("snapdog/zones/{zoneIndex}/next")]
 public record NextTrackCommand : ICommand<Result>
 {
     /// <summary>

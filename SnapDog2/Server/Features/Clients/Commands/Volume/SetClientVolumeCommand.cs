@@ -22,7 +22,7 @@ using SnapDog2.Core.Models;
 /// Command to set the volume for a specific client. Sets the absolute volume level for an individual Snapcast client.
 /// </summary>
 [CommandId("CLIENT_VOLUME")]
-[MqttTopic("snapdog/client/{clientIndex}/volume/set")]
+[MqttTopic("snapdog/clients/{clientIndex}/volume/set")]
 public record SetClientVolumeCommand : ICommand<Result>
 {
     /// <summary>

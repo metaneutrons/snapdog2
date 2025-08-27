@@ -22,5 +22,5 @@ using SnapDog2.Core.Models;
 /// Command to set the name of a zone.
 /// </summary>
 [CommandId("ZONE_NAME")]
-[MqttTopic("snapdog/zone/{zoneIndex}/name/set")]
+[MqttTopic("snapdog/zones/{zoneIndex}/name/set")]
 public record ZoneNameCommand(int ZoneIndex, string Name, CommandSource CommandSource = CommandSource.Api) : ICommand<Result>;

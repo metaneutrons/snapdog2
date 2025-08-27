@@ -23,7 +23,7 @@ using SnapDog2.Core.Models;
 /// This command provides a single endpoint for various control operations using string commands.
 /// </summary>
 [CommandId("CONTROL")]
-[MqttTopic("snapdog/zone/{zoneIndex}/control/set")]
+[MqttTopic("snapdog/zones/{zoneIndex}/control/set")]
 public record ControlSetCommand : ICommand<Result>
 {
     /// <summary>
