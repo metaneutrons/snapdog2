@@ -13,12 +13,12 @@
 //
 using System.Text.Json.Serialization;
 
-namespace SnapDog2.Core.Models.Mqtt;
+namespace SnapDog2.Core.Models;
 
 /// <summary>
 /// Simplified playlist information for MQTT publishing.
 /// </summary>
-public record MqttPlaylistInfo
+public record PublishablePlaylistInfo
 {
     /// <summary>
     /// Gets the current track index in the playlist (0-based).

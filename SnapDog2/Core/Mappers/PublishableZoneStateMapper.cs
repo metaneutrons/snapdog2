@@ -13,23 +13,23 @@
 //
 using SnapDog2.Core.Enums;
 using SnapDog2.Core.Models;
-using SnapDog2.Core.Models.Mqtt;
 
 namespace SnapDog2.Core.Mappers;
 
 /// <summary>
-/// Maps internal state models to simplified MQTT-friendly formats.
+/// Maps internal state models to simplified external formats for MQTT publishing and API responses.
+/// Provides a consistent, user-friendly representation across all external integrations.
 /// </summary>
-public static class MqttStateMapper
+public static class PublishableZoneStateMapper
 {
     /// <summary>
     /// Converts a ZoneState to a simplified MqttZoneState for publishing.
     /// </summary>
     /// <param name="zoneState">The full zone state.</param>
     /// <returns>Simplified MQTT zone state with only user-facing information.</returns>
-    public static MqttZoneState ToMqttZoneState(ZoneState zoneState)
+    public static PublishableZoneState ToMqttZoneState(ZoneState zoneState)
     {
-        return new MqttZoneState
+        return new PublishableZoneState
         {
             Name = zoneState.Name,
             PlaybackState = zoneState.PlaybackState == PlaybackState.Playing,
@@ -48,9 +48,9 @@ public static class MqttStateMapper
     /// </summary>
     /// <param name="playlistInfo">The full playlist info.</param>
     /// <returns>Simplified MQTT playlist info.</returns>
-    private static MqttPlaylistInfo ToMqttPlaylistInfo(PlaylistInfo playlistInfo)
+    private static PublishablePlaylistInfo ToMqttPlaylistInfo(PlaylistInfo playlistInfo)
     {
-        return new MqttPlaylistInfo
+        return new PublishablePlaylistInfo
         {
             Index = playlistInfo.Index ?? 0,
             Name = playlistInfo.Name,
@@ -66,9 +66,9 @@ public static class MqttStateMapper
     /// </summary>
     /// <param name="trackInfo">The full track info.</param>
     /// <returns>Simplified MQTT track info.</returns>
-    private static MqttTrackInfo ToMqttTrackInfo(TrackInfo trackInfo)
+    private static PublishableTrackInfo ToMqttTrackInfo(TrackInfo trackInfo)
     {
-        return new MqttTrackInfo
+        return new PublishableTrackInfo
         {
             Index = trackInfo.Index ?? 0,
             Title = trackInfo.Title ?? string.Empty,
@@ -88,7 +88,7 @@ public static class MqttStateMapper
     /// <param name="previous">The previous state (can be null).</param>
     /// <param name="current">The current state.</param>
     /// <returns>True if the states are different enough to warrant publishing.</returns>
-    public static bool HasMeaningfulChange(MqttZoneState? previous, MqttZoneState current)
+    public static bool HasMeaningfulChange(PublishableZoneState? previous, PublishableZoneState current)
     {
         if (previous == null)
         {
@@ -122,7 +122,7 @@ public static class MqttStateMapper
         return false; // No meaningful changes
     }
 
-    private static bool PlaylistsEqual(MqttPlaylistInfo? a, MqttPlaylistInfo? b)
+    public static bool PlaylistsEqual(PublishablePlaylistInfo? a, PublishablePlaylistInfo? b)
     {
         if (a == null && b == null)
         {
@@ -142,7 +142,7 @@ public static class MqttStateMapper
                a.Source == b.Source;
     }
 
-    private static bool TracksEqual(MqttTrackInfo? a, MqttTrackInfo? b)
+    public static bool TracksEqual(PublishableTrackInfo? a, PublishableTrackInfo? b)
     {
         if (a == null && b == null)
         {

@@ -13,12 +13,12 @@
 //
 using System.Text.Json.Serialization;
 
-namespace SnapDog2.Core.Models.Mqtt;
+namespace SnapDog2.Core.Models;
 
 /// <summary>
 /// Simplified zone state for MQTT publishing - contains only user-facing information.
 /// </summary>
-public record MqttZoneState
+public record PublishableZoneState
 {
     /// <summary>
     /// Gets the zone name.
@@ -66,11 +66,11 @@ public record MqttZoneState
     /// Gets the current playlist information (if any).
     /// </summary>
     [JsonPropertyName("Playlist")]
-    public MqttPlaylistInfo? Playlist { get; init; }
+    public PublishablePlaylistInfo? Playlist { get; init; }
 
     /// <summary>
     /// Gets the current track information (if any).
     /// </summary>
     [JsonPropertyName("Track")]
-    public MqttTrackInfo? Track { get; init; }
+    public PublishableTrackInfo? Track { get; init; }
 }

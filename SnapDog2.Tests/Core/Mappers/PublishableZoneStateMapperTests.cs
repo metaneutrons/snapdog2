@@ -14,12 +14,11 @@
 using SnapDog2.Core.Enums;
 using SnapDog2.Core.Mappers;
 using SnapDog2.Core.Models;
-using SnapDog2.Core.Models.Mqtt;
 using Xunit;
 
 namespace SnapDog2.Tests.Core.Mappers;
 
-public class MqttStateMapperTests
+public class PublishableZoneStateMapperTests
 {
     [Fact]
     public void ToMqttZoneState_ShouldMapAllProperties_WhenZoneStateIsComplete()
@@ -59,7 +58,7 @@ public class MqttStateMapperTests
         };
 
         // Act
-        var mqttState = MqttStateMapper.ToMqttZoneState(zoneState);
+        var mqttState = PublishableZoneStateMapper.ToMqttZoneState(zoneState);
 
         // Assert
         Assert.Equal("Living Room", mqttState.Name);
@@ -108,7 +107,7 @@ public class MqttStateMapperTests
         };
 
         // Act
-        var mqttState = MqttStateMapper.ToMqttZoneState(zoneState);
+        var mqttState = PublishableZoneStateMapper.ToMqttZoneState(zoneState);
 
         // Assert
         Assert.False(mqttState.PlaybackState); // Paused = false
@@ -141,7 +140,7 @@ public class MqttStateMapperTests
         };
 
         // Act
-        var mqttState = MqttStateMapper.ToMqttZoneState(zoneState);
+        var mqttState = PublishableZoneStateMapper.ToMqttZoneState(zoneState);
 
         // Assert
         Assert.NotNull(mqttState.Playlist);
@@ -153,7 +152,7 @@ public class MqttStateMapperTests
     public void HasMeaningfulChange_ShouldReturnTrue_WhenPreviousIsNull()
     {
         // Arrange
-        var current = new MqttZoneState
+        var current = new PublishableZoneState
         {
             Name = "Test",
             PlaybackState = true,
@@ -167,7 +166,7 @@ public class MqttStateMapperTests
         };
 
         // Act
-        var hasChange = MqttStateMapper.HasMeaningfulChange(null, current);
+        var hasChange = PublishableZoneStateMapper.HasMeaningfulChange(null, current);
 
         // Assert
         Assert.True(hasChange);
@@ -177,7 +176,7 @@ public class MqttStateMapperTests
     public void HasMeaningfulChange_ShouldReturnFalse_WhenStatesAreIdentical()
     {
         // Arrange
-        var state = new MqttZoneState
+        var state = new PublishableZoneState
         {
             Name = "Test",
             PlaybackState = true,
@@ -191,7 +190,7 @@ public class MqttStateMapperTests
         };
 
         // Act
-        var hasChange = MqttStateMapper.HasMeaningfulChange(state, state);
+        var hasChange = PublishableZoneStateMapper.HasMeaningfulChange(state, state);
 
         // Assert
         Assert.False(hasChange);
@@ -201,7 +200,7 @@ public class MqttStateMapperTests
     public void HasMeaningfulChange_ShouldReturnTrue_WhenVolumeChanges()
     {
         // Arrange
-        var previous = new MqttZoneState
+        var previous = new PublishableZoneState
         {
             Name = "Test",
             PlaybackState = true,
@@ -217,7 +216,7 @@ public class MqttStateMapperTests
         var current = previous with { Volume = 75 };
 
         // Act
-        var hasChange = MqttStateMapper.HasMeaningfulChange(previous, current);
+        var hasChange = PublishableZoneStateMapper.HasMeaningfulChange(previous, current);
 
         // Assert
         Assert.True(hasChange);
@@ -227,7 +226,7 @@ public class MqttStateMapperTests
     public void HasMeaningfulChange_ShouldReturnTrue_WhenTrackChanges()
     {
         // Arrange
-        var track1 = new MqttTrackInfo
+        var track1 = new PublishableTrackInfo
         {
             Index = 1,
             Title = "Track 1",
@@ -236,7 +235,7 @@ public class MqttStateMapperTests
             Source = "subsonic"
         };
 
-        var track2 = new MqttTrackInfo
+        var track2 = new PublishableTrackInfo
         {
             Index = 2,
             Title = "Track 2",
@@ -245,7 +244,7 @@ public class MqttStateMapperTests
             Source = "subsonic"
         };
 
-        var previous = new MqttZoneState
+        var previous = new PublishableZoneState
         {
             Name = "Test",
             PlaybackState = true,
@@ -261,7 +260,7 @@ public class MqttStateMapperTests
         var current = previous with { Track = track2 };
 
         // Act
-        var hasChange = MqttStateMapper.HasMeaningfulChange(previous, current);
+        var hasChange = PublishableZoneStateMapper.HasMeaningfulChange(previous, current);
 
         // Assert
         Assert.True(hasChange);
