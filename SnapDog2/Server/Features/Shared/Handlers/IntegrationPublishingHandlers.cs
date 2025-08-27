@@ -14,6 +14,7 @@
 namespace SnapDog2.Server.Features.Shared.Handlers;
 
 using System;
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using Cortex.Mediator;
@@ -23,6 +24,8 @@ using Microsoft.Extensions.Logging;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Attributes;
 using SnapDog2.Core.Constants;
+using SnapDog2.Core.Mappers;
+using SnapDog2.Core.Models;
 using SnapDog2.Infrastructure.Integrations.Mqtt;
 using SnapDog2.Server.Features.Clients.Notifications;
 using SnapDog2.Server.Features.Shared.Notifications;
@@ -65,6 +68,16 @@ public partial class IntegrationPublishingHandlers(
 {
     private readonly IServiceProvider _serviceProvider = serviceProvider;
     private readonly ILogger<IntegrationPublishingHandlers> _logger = logger;
+
+    // Cache for previous zone states to enable change detection
+    private readonly ConcurrentDictionary<int, PublishableZoneState> _previousZoneStates = new();
+
+    // Cache for previous client states to enable change detection
+    private readonly ConcurrentDictionary<int, PublishableClientState> _previousClientStates = new();
+
+    // Debouncing: Track last publish time for each zone to prevent rapid-fire publishing
+    private readonly ConcurrentDictionary<int, DateTime> _lastZonePublishTime = new();
+    private readonly TimeSpan _zonePublishDebounceTime = TimeSpan.FromMilliseconds(500); // 500ms debounce
 
     #region Client Notification Handlers
 
@@ -166,12 +179,31 @@ public partial class IntegrationPublishingHandlers(
     public async Task Handle(ClientStateNotification notification, CancellationToken cancellationToken)
     {
         LogClientStateChange(notification.ClientIndex);
-        await PublishClientStatusAsync(
-            StatusIdAttribute.GetStatusId<ClientStateNotification>(),
-            notification.ClientIndex.ToString(),
-            notification,
-            cancellationToken
-        );
+
+        // Convert to simplified publishable format for MQTT
+        var publishableClientState = PublishableClientStateMapper.ToPublishableClientState(notification.State);
+
+        // Check if this represents a meaningful change compared to the previous state
+        var previousState = _previousClientStates.GetValueOrDefault(notification.ClientIndex);
+
+        if (PublishableClientStateMapper.HasMeaningfulChange(previousState, publishableClientState))
+        {
+            LogClientStatePublishing(notification.ClientIndex, previousState == null ? "first-time" : "changed");
+
+            // Update cache with new state
+            _previousClientStates[notification.ClientIndex] = publishableClientState;
+
+            await PublishClientStatusAsync(
+                StatusIdAttribute.GetStatusId<ClientStateNotification>(),
+                notification.ClientIndex.ToString(),
+                publishableClientState,
+                cancellationToken
+            );
+        }
+        else
+        {
+            LogClientStateSkipped(notification.ClientIndex);
+        }
     }
 
     #endregion
@@ -309,11 +341,34 @@ public partial class IntegrationPublishingHandlers(
 
     public async Task Handle(ZoneStateChangedNotification notification, CancellationToken cancellationToken)
     {
-        LogZoneStateChange(notification.ZoneIndex);
+        // Convert to simplified publishable format for MQTT
+        var publishableZoneState = PublishableZoneStateMapper.ToMqttZoneState(notification.ZoneState);
+
+        // Check if this represents a meaningful change compared to the previous state
+        var previousState = _previousZoneStates.GetValueOrDefault(notification.ZoneIndex);
+
+        if (!PublishableZoneStateMapper.HasMeaningfulChange(previousState, publishableZoneState))
+        {
+            return; // No meaningful changes - don't publish at all
+        }
+
+        // We have meaningful changes - now check debouncing to prevent rapid-fire publishing
+        var now = DateTime.UtcNow;
+        var lastPublishTime = _lastZonePublishTime.GetValueOrDefault(notification.ZoneIndex, DateTime.MinValue);
+
+        if (now - lastPublishTime < _zonePublishDebounceTime)
+        {
+            return; // Meaningful changes exist, but publishing too rapidly - debounce
+        }
+
+        // Update cache with new state and publish time
+        _previousZoneStates[notification.ZoneIndex] = publishableZoneState;
+        _lastZonePublishTime[notification.ZoneIndex] = now;
+
         await PublishZoneStatusAsync(
             StatusIdAttribute.GetStatusId<ZoneStateChangedNotification>(),
             notification.ZoneIndex,
-            notification,
+            publishableZoneState,
             cancellationToken
         );
     }
@@ -567,6 +622,20 @@ public partial class IntegrationPublishingHandlers(
         Message = "Client {ClientIndex} complete state changed"
     )]
     private partial void LogClientStateChange(int clientIndex);
+
+    [LoggerMessage(
+        EventId = 5031,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "📤 Publishing client {ClientIndex} state to MQTT ({ChangeType})"
+    )]
+    private partial void LogClientStatePublishing(int clientIndex, string changeType);
+
+    [LoggerMessage(
+        EventId = 5032,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "⏭️ Skipping client {ClientIndex} state publish - no meaningful changes"
+    )]
+    private partial void LogClientStateSkipped(int clientIndex);
 
     // Zone logging
     [LoggerMessage(
