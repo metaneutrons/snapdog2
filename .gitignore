@@ -225,3 +225,5 @@ devcontainer/music/*
 docs/FalconExamples
 
 eventid-mappings.txt
+
+swagger.json
