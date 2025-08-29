@@ -25,13 +25,13 @@ using Xunit;
 /// <summary>
 /// Tests for the EnterpriseMetricsService class.
 /// </summary>
-public class EnterpriseMetricsServiceTests : IDisposable
+public class MetricsServiceTests : IDisposable
 {
     private readonly Mock<ILogger<EnterpriseMetricsService>> _mockLogger;
     private readonly Mock<IApplicationMetrics> _mockApplicationMetrics;
     private readonly EnterpriseMetricsService _metricsService;
 
-    public EnterpriseMetricsServiceTests()
+    public MetricsServiceTests()
     {
         _mockLogger = new Mock<ILogger<EnterpriseMetricsService>>();
         _mockApplicationMetrics = new Mock<IApplicationMetrics>();
@@ -197,16 +197,16 @@ public class EnterpriseMetricsServiceTests : IDisposable
     public void RecordTrackChange_ShouldCallApplicationMetrics()
     {
         // Arrange
-        const string zoneId = "zone-1";
+        const string zoneIndex = "zone-1";
         const string fromTrack = "Track A";
         const string toTrack = "Track B";
 
         // Act
-        _metricsService.RecordTrackChange(zoneId, fromTrack, toTrack);
+        _metricsService.RecordTrackChange(zoneIndex, fromTrack, toTrack);
 
         // Assert
         _mockApplicationMetrics.Verify(
-            x => x.RecordTrackChange(zoneId, fromTrack, toTrack),
+            x => x.RecordTrackChange(zoneIndex, fromTrack, toTrack),
             Times.Once);
     }
 
