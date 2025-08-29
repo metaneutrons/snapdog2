@@ -11,7 +11,7 @@ using Microsoft.OpenApi.Writers;
 using Swashbuckle.AspNetCore.Swagger;
 
 // Parse command line arguments
-var outputPath = "swagger.json";
+var outputPath = Path.Combine(Directory.GetCurrentDirectory(), "swagger.json");
 var verbose = false;
 var showHelp = false;
 
