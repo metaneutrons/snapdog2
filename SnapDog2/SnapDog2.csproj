@@ -38,4 +38,9 @@
   <ItemGroup>
     <Analyzer Include="..\SnapDog.Analyzers\bin\Debug\netstandard2.0\SnapDog.Analyzers.dll" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SnapDog2.WebUi\SnapDog2.WebUi.csproj" />
+    <ProjectReference Include="..\SnapDog2.WebUi.ApiClient\SnapDog2.WebUi.ApiClient.csproj" />
+    <ProjectReference Include="..\SnapDog2.WebUi.Assets\SnapDog2.WebUi.Assets.csproj" />
+  </ItemGroup>
 </Project>
