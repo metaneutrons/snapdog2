@@ -26,10 +26,10 @@ namespace SnapDog2.Extensions;
 public static partial class WebHostExtensions
 {
     /// <summary>
-    /// Configures Kestrel with resilient port binding and fallback logic using ApiConfig.
+    /// Configures Kestrel with resilient port binding and fallback logic using HttpConfig.
     /// Uses NullLogger to avoid early service provider creation issues.
     /// </summary>
-    public static IWebHostBuilder UseResilientKestrel(this IWebHostBuilder builder, ApiConfig apiConfig)
+    public static IWebHostBuilder UseResilientKestrel(this IWebHostBuilder builder, HttpConfig httpConfig)
     {
         return builder.UseKestrel(
             (context, options) =>
@@ -37,19 +37,19 @@ public static partial class WebHostExtensions
                 // Use NullLogger for infrastructure setup to avoid service provider issues
                 var logger = NullLogger.Instance;
 
-                if (!apiConfig.Enabled)
+                if (!httpConfig.ApiEnabled)
                 {
                     LogApiDisabled(logger);
                     return;
                 }
 
                 LogKestrelConfiguring(logger);
-                LogPreferredHttpPort(logger, apiConfig.Port);
+                LogPreferredHttpPort(logger, httpConfig.HttpPort);
 
                 try
                 {
                     // Configure HTTP endpoint with fallback
-                    var actualHttpPort = ConfigureHttpEndpointWithFallback(options, apiConfig.Port, logger);
+                    var actualHttpPort = ConfigureHttpEndpointWithFallback(options, httpConfig.HttpPort, logger);
 
                     LogKestrelConfigured(logger);
                     LogActualHttpPort(logger, actualHttpPort);

@@ -104,7 +104,7 @@ public static class ServiceCollectionConfigurationExtensions
             .AddSingleton(snapDogConfig)
             .AddSingleton(snapDogConfig.System)
             .AddSingleton(snapDogConfig.Telemetry)
-            .AddSingleton(snapDogConfig.Api)
+            .AddSingleton(snapDogConfig.Http)
             .AddSingleton(snapDogConfig.Services)
             .AddSingleton(snapDogConfig.SnapcastServer)
             // Register for IOptions pattern using elegant methods

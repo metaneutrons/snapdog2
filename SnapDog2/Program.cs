@@ -463,9 +463,9 @@ static WebApplication CreateWebApplication(string[] args)
     }
 
     // Configure resilient web host with port from configuration
-    if (snapDogConfig.Api.Enabled)
+    if (snapDogConfig.Http.ApiEnabled)
     {
-        builder.WebHost.UseResilientKestrel(snapDogConfig.Api);
+        builder.WebHost.UseResilientKestrel(snapDogConfig.Http);
     }
     else if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Testing")
     {
@@ -480,14 +480,14 @@ static WebApplication CreateWebApplication(string[] args)
     }
 
     // Add services to the container (conditionally based on API configuration)
-    if (snapDogConfig.Api.Enabled)
+    if (snapDogConfig.Http.ApiEnabled)
     {
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
         // Add authentication and authorization
-        if (snapDogConfig.Api.AuthEnabled && snapDogConfig.Api.ApiKeys.Count > 0)
+        if (snapDogConfig.Http.ApiAuthEnabled && snapDogConfig.Http.ApiKeys.Count > 0)
         {
             // Configure API Key authentication
             builder
@@ -499,9 +499,9 @@ static WebApplication CreateWebApplication(string[] args)
 
             builder.Services.AddAuthorization();
 
-            Log.Information("API authentication enabled with {KeyCount} API keys", snapDogConfig.Api.ApiKeys.Count);
+            Log.Information("API authentication enabled with {KeyCount} API keys", snapDogConfig.Http.ApiKeys.Count);
         }
-        else if (snapDogConfig.Api.AuthEnabled)
+        else if (snapDogConfig.Http.ApiAuthEnabled)
         {
             // Auth is enabled but no API keys configured - use dummy authentication for development
             builder
@@ -532,7 +532,7 @@ static WebApplication CreateWebApplication(string[] args)
             Log.Information("API authentication disabled - using dummy authentication");
         }
 
-        Log.Information("API server enabled on port {Port}", snapDogConfig.Api.Port);
+        Log.Information("API server enabled on port {Port}", snapDogConfig.Http.HttpPort);
     }
     else
     {
@@ -597,7 +597,7 @@ static WebApplication CreateWebApplication(string[] args)
     app.UseMiddleware<SnapDog2.Middleware.HttpMetricsMiddleware>();
 
     // Configure the HTTP request pipeline (conditionally based on API configuration)
-    if (snapDogConfig.Api.Enabled)
+    if (snapDogConfig.Http.ApiEnabled)
     {
         app.UseSwagger();
         app.UseSwaggerUI();

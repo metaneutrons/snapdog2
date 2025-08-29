@@ -28,7 +28,7 @@ public class SnapDogConfigurationTests
         // Assert
         config.System.Should().NotBeNull();
         config.Telemetry.Should().NotBeNull();
-        config.Api.Should().NotBeNull();
+        config.Http.Should().NotBeNull();
         config.Services.Should().NotBeNull();
     }
 
@@ -105,13 +105,13 @@ public class SnapDogConfigurationTests
     [Fact]
     [Trait("Category", "Unit")]
     [Trait("Category", "Unit")]
-    public void ApiConfig_ShouldHaveDefaultValues()
+    public void HttpConfig_ShouldHaveDefaultValues()
     {
         // Act
-        var config = new ApiConfig();
+        var config = new HttpConfig();
 
         // Assert
-        config.AuthEnabled.Should().BeTrue();
+        config.ApiAuthEnabled.Should().BeTrue();
         config.ApiKeys.Should().NotBeNull();
         config.ApiKeys.Should().BeEmpty();
     }

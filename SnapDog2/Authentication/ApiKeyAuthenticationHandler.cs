@@ -27,13 +27,13 @@ public class ApiKeyAuthenticationHandler(
     IOptionsMonitor<AuthenticationSchemeOptions> options,
     ILoggerFactory logger,
     UrlEncoder encoder,
-    ApiConfig apiConfig
+    HttpConfig httpConfig
 ) : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
     private const string ApiKeyHeaderName = "X-API-Key";
     private const string ApiKeyQueryParameter = "apikey";
 
-    private readonly ApiConfig _apiConfig = apiConfig;
+    private readonly HttpConfig _httpConfig = httpConfig;
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
@@ -53,7 +53,7 @@ public class ApiKeyAuthenticationHandler(
         }
 
         // Validate API key against configured keys
-        if (!this._apiConfig.ApiKeys.Contains(apiKey))
+        if (!this._httpConfig.ApiKeys.Contains(apiKey))
         {
             this.Logger.LogWarning(
                 "Invalid API key attempted: {ApiKey}",

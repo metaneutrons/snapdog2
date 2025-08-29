@@ -343,14 +343,14 @@ public static class StartupInformationHelper
 
         // API Configuration
         Console.WriteLine("   🌐 API Server:");
-        if (config.Api.Enabled)
+        if (config.Http.ApiEnabled)
         {
-            Console.WriteLine($"     Status: Enabled on port {config.Api.Port}");
+            Console.WriteLine($"     Status: Enabled on port {config.Http.HttpPort}");
             Console.WriteLine(
-                $"     Authentication: {(config.Api.AuthEnabled ? "Enabled" : "Disabled")} ({config.Api.ApiKeys.Count} API keys configured)"
+                $"     Authentication: {(config.Http.ApiAuthEnabled ? "Enabled" : "Disabled")} ({config.Http.ApiKeys.Count} API keys configured)"
             );
 
-            if (config.Api.AuthEnabled && config.Api.ApiKeys.Count == 0)
+            if (config.Http.ApiAuthEnabled && config.Http.ApiKeys.Count == 0)
             {
                 Console.WriteLine("     ⚠️ Authentication is enabled but no API keys are configured!");
             }

@@ -36,11 +36,11 @@ public class SnapDogConfiguration
     public TelemetryConfig Telemetry { get; set; } = new();
 
     /// <summary>
-    /// API authentication and security configuration.
-    /// Maps environment variables with prefix: SNAPDOG_API_*
+    /// HTTP server and authentication configuration.
+    /// Maps environment variables with prefix: SNAPDOG_HTTP_*
     /// </summary>
-    [Env(NestedPrefix = "API_")]
-    public ApiConfig Api { get; set; } = new();
+    [Env(NestedPrefix = "HTTP_")]
+    public HttpConfig Http { get; set; } = new();
 
     /// <summary>
     /// Redis persistent state storage configuration.
