@@ -49,7 +49,7 @@ public class MqttConfig
     public int Port { get; set; } = 1883;
 
     /// <summary>
-    /// MQTT client ID.
+    /// MQTT client Index.
     /// Maps to: SNAPDOG_SERVICES_MQTT_CLIENT_ID
     /// </summary>
     [Env(Key = "CLIENT_ID", Default = "snapdog-server")]

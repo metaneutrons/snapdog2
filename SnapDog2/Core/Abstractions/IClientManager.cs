@@ -25,14 +25,14 @@ public interface IClientManager
     /// <summary>
     /// Gets a client by its ID.
     /// </summary>
-    /// <param name="clientIndex">The client ID.</param>
+    /// <param name="clientIndex">The client Index.</param>
     /// <returns>A result containing the client if found.</returns>
     Task<Result<IClient>> GetClientAsync(int clientIndex);
 
     /// <summary>
     /// Gets a client by its ID.
     /// </summary>
-    /// <param name="clientIndex">The client ID.</param>
+    /// <param name="clientIndex">The client Index.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A result containing the client state if found.</returns>
     Task<Result<ClientState>> GetClientAsync(int clientIndex, CancellationToken cancellationToken = default);
@@ -40,7 +40,7 @@ public interface IClientManager
     /// <summary>
     /// Gets the state of a specific client.
     /// </summary>
-    /// <param name="clientIndex">The client ID.</param>
+    /// <param name="clientIndex">The client Index.</param>
     /// <returns>A result containing the client state if found.</returns>
     Task<Result<ClientState>> GetClientStateAsync(int clientIndex);
 
@@ -75,16 +75,16 @@ public interface IClientManager
     /// <summary>
     /// Assigns a client to a zone.
     /// </summary>
-    /// <param name="clientIndex">The client ID.</param>
+    /// <param name="clientIndex">The client Index.</param>
     /// <param name="zoneIndex">The zone ID.</param>
     /// <returns>A result indicating success or failure.</returns>
     Task<Result> AssignClientToZoneAsync(int clientIndex, int zoneIndex);
 
     /// <summary>
-    /// Gets a client by its Snapcast client ID for event bridging.
+    /// Gets a client by its Snapcast client Index for event bridging.
     /// Used internally by SnapcastService to bridge external events to IClient notifications.
     /// </summary>
-    /// <param name="snapcastClientId">The Snapcast client ID.</param>
+    /// <param name="snapcastClientId">The Snapcast client Index.</param>
     /// <returns>The client if found, null otherwise.</returns>
     Task<IClient?> GetClientBySnapcastIdAsync(string snapcastClientId);
 }

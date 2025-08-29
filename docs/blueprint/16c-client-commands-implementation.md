@@ -142,7 +142,7 @@ public class SetClientVolumeCommandValidator : AbstractValidator<SetClientVolume
     {
         RuleFor(x => x.ClientIndex)
             .GreaterThan(0)
-            .WithMessage("Client ID must be a positive integer.");
+            .WithMessage("Client Index must be a positive integer.");
 
         RuleFor(x => x.Volume)
             .InclusiveBetween(0, 100)
@@ -163,7 +163,7 @@ public class SetClientMuteCommandValidator : AbstractValidator<SetClientMuteComm
     {
         RuleFor(x => x.ClientIndex)
             .GreaterThan(0)
-            .WithMessage("Client ID must be a positive integer.");
+            .WithMessage("Client Index must be a positive integer.");
 
         RuleFor(x => x.Source)
             .IsInEnum()
@@ -180,7 +180,7 @@ public class ToggleClientMuteCommandValidator : AbstractValidator<ToggleClientMu
     {
         RuleFor(x => x.ClientIndex)
             .GreaterThan(0)
-            .WithMessage("Client ID must be a positive integer.");
+            .WithMessage("Client Index must be a positive integer.");
 
         RuleFor(x => x.Source)
             .IsInEnum()
@@ -197,7 +197,7 @@ public class SetClientLatencyCommandValidator : AbstractValidator<SetClientLaten
     {
         RuleFor(x => x.ClientIndex)
             .GreaterThan(0)
-            .WithMessage("Client ID must be a positive integer.");
+            .WithMessage("Client Index must be a positive integer.");
 
         RuleFor(x => x.LatencyMs)
             .InclusiveBetween(0, 10000)
@@ -218,7 +218,7 @@ public class AssignClientToZoneCommandValidator : AbstractValidator<AssignClient
     {
         RuleFor(x => x.ClientIndex)
             .GreaterThan(0)
-            .WithMessage("Client ID must be a positive integer.");
+            .WithMessage("Client Index must be a positive integer.");
 
         RuleFor(x => x.ZoneIndex)
             .GreaterThan(0)

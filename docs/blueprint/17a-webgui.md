@@ -138,7 +138,7 @@ The application uses a simple, single-layout design focused on audio control fun
 - **Source:** [Google Fonts Orbitron](https://fonts.google.com/specimen/Orbitron)
 - **Character:** Futuristic, geometric sans-serif with distinctive digital/tech aesthetic
 - **Weights:** 400 (Regular), 500 (Medium), 700 (Bold), 900 (Black)
-- **Usage:** Headers, navigation, zone names, client identifiers, button labels
+- **Usage:** Headers, navigation, zone names, client indexentifiers, button labels
 - **Embedding:** Via Google Fonts CDN or self-hosted for offline capability
 
 #### 24.3.3.2. Secondary Font: System Font Stack

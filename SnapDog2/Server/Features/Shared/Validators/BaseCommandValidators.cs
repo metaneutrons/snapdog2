@@ -41,20 +41,20 @@ public abstract class BaseZoneCommandValidator<T> : AbstractValidator<T>
 }
 
 /// <summary>
-/// Base validator for commands that require a client ID and command source.
+/// Base validator for commands that require a client Index and command source.
 /// </summary>
 public abstract class BaseClientCommandValidator<T> : AbstractValidator<T>
     where T : class
 {
     protected BaseClientCommandValidator()
     {
-        RuleFor(x => GetClientIndex(x)).GreaterThan(0).WithMessage("Client ID must be a positive integer.");
+        RuleFor(x => GetClientIndex(x)).GreaterThan(0).WithMessage("Client Index must be a positive integer.");
 
         RuleFor(x => GetSource(x)).IsInEnum().WithMessage("Invalid command source specified.");
     }
 
     /// <summary>
-    /// Extract the client ID from the command. Must be implemented by derived validators.
+    /// Extract the client Index from the command. Must be implemented by derived validators.
     /// </summary>
     protected abstract int GetClientIndex(T command);
 

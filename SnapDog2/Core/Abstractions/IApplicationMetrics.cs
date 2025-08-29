@@ -59,7 +59,7 @@ public interface IApplicationMetrics : IDisposable
     /// <summary>
     /// Records track change events for audio playback monitoring.
     /// </summary>
-    void RecordTrackChange(string zoneId, string? fromTrack, string? toTrack);
+    void RecordTrackChange(string zoneIndex, string? fromTrack, string? toTrack);
 
     /// <summary>
     /// Records volume change events for audio control monitoring.

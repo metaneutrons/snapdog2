@@ -461,10 +461,10 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             return Result.Failure("MQTT client is not connected");
         }
 
-        // Parse client ID - now expecting integer format (1, 2, 3, etc.)
+        // Parse client Index - now expecting integer format (1, 2, 3, etc.)
         if (!int.TryParse(clientIndex, out var parsedClientIndex))
         {
-            return Result.Failure($"Invalid client ID format: {clientIndex}. Expected integer.");
+            return Result.Failure($"Invalid client Index format: {clientIndex}. Expected integer.");
         }
 
         // Convert to 0-based index for configuration array
@@ -1036,7 +1036,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
                 return Result.Failure("MQTT client is not connected");
             }
 
-            // Parse client ID - now expecting integer format (1, 2, 3, etc.)
+            // Parse client Index - now expecting integer format (1, 2, 3, etc.)
             if (!int.TryParse(clientIndex, out var parsedClientIndex))
             {
                 this.LogInvalidClientIndexFormat(clientIndex);
@@ -1251,7 +1251,10 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     /// </summary>
     private static bool HasMeaningfulChange(ZoneState? previous, ZoneState current)
     {
-        if (previous == null) return true;
+        if (previous == null)
+        {
+            return true;
+        }
 
         // Check for meaningful changes in key properties
         return previous.Name != current.Name ||
@@ -1267,8 +1270,15 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
 
     private static bool TrackInfoEquals(TrackInfo? a, TrackInfo? b)
     {
-        if (a == null && b == null) return true;
-        if (a == null || b == null) return false;
+        if (a == null && b == null)
+        {
+            return true;
+        }
+
+        if (a == null || b == null)
+        {
+            return false;
+        }
 
         return a.Index == b.Index &&
                a.Title == b.Title &&
@@ -1279,8 +1289,15 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
 
     private static bool PlaylistInfoEquals(PlaylistInfo? a, PlaylistInfo? b)
     {
-        if (a == null && b == null) return true;
-        if (a == null || b == null) return false;
+        if (a == null && b == null)
+        {
+            return true;
+        }
+
+        if (a == null || b == null)
+        {
+            return false;
+        }
 
         return a.Index == b.Index &&
                a.Name == b.Name &&

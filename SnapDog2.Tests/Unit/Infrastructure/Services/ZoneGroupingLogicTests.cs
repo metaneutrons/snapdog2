@@ -33,7 +33,7 @@ public class ZoneGroupingLogicTests
         {
             ZoneId = 1,
             ZoneStreamId = "/snapsinks/zone1",
-            ClientId = "living-room",
+            ClientIndex = "living-room",
             Groups = new[]
             {
                 CreateGroup("group1", "/snapsinks/zone1", "living-room", "kitchen"),
@@ -59,7 +59,7 @@ public class ZoneGroupingLogicTests
         {
             ZoneId = 2,
             ZoneStreamId = "/snapsinks/zone2",
-            ClientId = "bedroom",
+            ClientIndex = "bedroom",
             Groups = new[]
             {
                 CreateGroup("group1", "/snapsinks/zone1", "living-room", "kitchen", "bedroom"), // Wrong!
@@ -85,7 +85,7 @@ public class ZoneGroupingLogicTests
         {
             ZoneId = 1,
             ZoneStreamId = "/snapsinks/zone1",
-            ClientId = "missing-client",
+            ClientIndex = "missing-client",
             Groups = new[]
             {
                 CreateGroup("group1", "/snapsinks/zone1", "living-room"),
@@ -111,7 +111,7 @@ public class ZoneGroupingLogicTests
         {
             ZoneId = 3,
             ZoneStreamId = "/snapsinks/zone3",
-            ClientId = "office-client",
+            ClientIndex = "office-client",
             Groups = new[]
             {
                 CreateGroup("group1", "/snapsinks/zone1", "living-room"),
@@ -145,10 +145,10 @@ public class ZoneGroupingLogicTests
 
         var scenarios = new[]
         {
-            new { ClientId = "living-room", ZoneStreamId = "/snapsinks/zone1" },
-            new { ClientId = "kitchen", ZoneStreamId = "/snapsinks/zone1" },
-            new { ClientId = "bedroom", ZoneStreamId = "/snapsinks/zone2" },
-            new { ClientId = "office", ZoneStreamId = "/snapsinks/zone2" },
+            new { ClientIndex = "living-room", ZoneStreamId = "/snapsinks/zone1" },
+            new { ClientIndex = "kitchen", ZoneStreamId = "/snapsinks/zone1" },
+            new { ClientIndex = "bedroom", ZoneStreamId = "/snapsinks/zone2" },
+            new { ClientIndex = "office", ZoneStreamId = "/snapsinks/zone2" },
         };
 
         // Act & Assert
@@ -158,12 +158,12 @@ public class ZoneGroupingLogicTests
             {
                 ZoneId = 1,
                 ZoneStreamId = scenario.ZoneStreamId,
-                ClientId = scenario.ClientId,
+                ClientIndex = scenario.ClientIndex,
                 Groups = groups,
             };
 
             var result = ValidateClientGrouping(testScenario);
-            result.IsValid.Should().BeTrue($"Client {scenario.ClientId} should be valid");
+            result.IsValid.Should().BeTrue($"Client {scenario.ClientIndex} should be valid");
         }
     }
 
@@ -183,7 +183,7 @@ public class ZoneGroupingLogicTests
             {
                 ZoneId = 1,
                 ZoneStreamId = "/snapsinks/zone1",
-                ClientId = "living-room",
+                ClientIndex = "living-room",
                 Groups = groups,
             }
         );
@@ -193,7 +193,7 @@ public class ZoneGroupingLogicTests
             {
                 ZoneId = 2,
                 ZoneStreamId = "/snapsinks/zone2",
-                ClientId = "bedroom",
+                ClientIndex = "bedroom",
                 Groups = groups,
             }
         );
@@ -212,14 +212,14 @@ public class ZoneGroupingLogicTests
     [InlineData("")]
     [InlineData("   ")]
     [InlineData(null)]
-    public void ValidateZoneGrouping_WithInvalidClientId_ShouldHandleGracefully(string? invalidClientId)
+    public void ValidateZoneGrouping_WithInvalidClientIndex_ShouldHandleGracefully(string? invalidClientIndex)
     {
         // Arrange
         var scenario = new ZoneGroupingScenario
         {
             ZoneId = 1,
             ZoneStreamId = "/snapsinks/zone1",
-            ClientId = invalidClientId!,
+            ClientIndex = invalidClientIndex!,
             Groups = new[] { CreateGroup("group1", "/snapsinks/zone1", "valid-client") },
         };
 
@@ -239,7 +239,7 @@ public class ZoneGroupingLogicTests
         {
             ZoneId = 1,
             ZoneStreamId = "/snapsinks/zone1",
-            ClientId = "test-client",
+            ClientIndex = "test-client",
             Groups = Array.Empty<TestGroup>(),
         };
 
@@ -262,14 +262,14 @@ public class ZoneGroupingLogicTests
     private static ValidationResult ValidateClientGrouping(ZoneGroupingScenario scenario)
     {
         // Handle edge cases
-        if (string.IsNullOrWhiteSpace(scenario.ClientId))
+        if (string.IsNullOrWhiteSpace(scenario.ClientIndex))
         {
             return new ValidationResult
             {
                 IsValid = false,
                 ExpectedGroupId = null,
                 ActualGroupId = null,
-                ValidationMessage = $"Client ID '{scenario.ClientId}' not found in any group",
+                ValidationMessage = $"Client Index '{scenario.ClientIndex}' not found in any group",
             };
         }
 
@@ -289,7 +289,7 @@ public class ZoneGroupingLogicTests
         }
 
         // Find which group the client is actually in
-        var actualGroup = scenario.Groups.FirstOrDefault(g => g.ClientIds.Contains(scenario.ClientId));
+        var actualGroup = scenario.Groups.FirstOrDefault(g => g.ClientIndexs.Contains(scenario.ClientIndex));
         var actualGroupId = actualGroup?.Id;
 
         // Validate
@@ -298,12 +298,12 @@ public class ZoneGroupingLogicTests
         string? validationMessage = null;
         if (actualGroupId == null)
         {
-            validationMessage = $"Client {scenario.ClientId} not found in any group";
+            validationMessage = $"Client {scenario.ClientIndex} not found in any group";
         }
         else if (!isValid)
         {
             validationMessage =
-                $"Client {scenario.ClientId} is in group {actualGroupId} but should be in group {expectedGroupId}";
+                $"Client {scenario.ClientIndex} is in group {actualGroupId} but should be in group {expectedGroupId}";
         }
 
         return new ValidationResult
@@ -315,12 +315,12 @@ public class ZoneGroupingLogicTests
         };
     }
 
-    private static TestGroup CreateGroup(string id, string streamId, params string[] clientIds) =>
+    private static TestGroup CreateGroup(string id, string streamId, params string[] clientIndexs) =>
         new()
         {
             Id = id,
             StreamId = streamId,
-            ClientIds = clientIds.ToList(),
+            ClientIndexs = clientIndexs.ToList(),
         };
 
     #endregion
@@ -331,7 +331,7 @@ public class ZoneGroupingLogicTests
     {
         public required int ZoneId { get; init; }
         public required string ZoneStreamId { get; init; }
-        public required string ClientId { get; init; }
+        public required string ClientIndex { get; init; }
         public required TestGroup[] Groups { get; init; }
     }
 
@@ -339,7 +339,7 @@ public class ZoneGroupingLogicTests
     {
         public required string Id { get; init; }
         public required string StreamId { get; init; }
-        public required List<string> ClientIds { get; init; }
+        public required List<string> ClientIndexs { get; init; }
     }
 
     private record ValidationResult

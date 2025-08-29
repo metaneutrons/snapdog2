@@ -74,7 +74,7 @@ public record ZoneState
     public TrackInfo? Track { get; init; }
 
     /// <summary>
-    /// Gets the list of SnapDog2 Client IDs currently in this zone.
+    /// Gets the list of SnapDog2 Client Indexs currently in this zone.
     /// </summary>
     public required int[] Clients { get; init; }
 

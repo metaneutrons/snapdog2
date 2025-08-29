@@ -194,7 +194,7 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     /// <summary>
     /// Get detailed information for a specific client.
     /// </summary>
-    /// <param name="clientIndex">Client ID</param>
+    /// <param name="clientIndex">Client Index</param>
     /// <returns>Client state information</returns>
     [HttpGet("{clientIndex:int}")]
     [ProducesResponseType<ClientState>(StatusCodes.Status200OK)]
@@ -216,7 +216,7 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     /// <summary>
     /// Set client volume level.
     /// </summary>
-    /// <param name="clientIndex">Client ID</param>
+    /// <param name="clientIndex">Client Index</param>
     /// <param name="volume">Volume level (0-100)</param>
     /// <returns>New volume level</returns>
     [HttpPut("{clientIndex:int}/volume")]
@@ -247,7 +247,7 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     /// <summary>
     /// Get current client volume level.
     /// </summary>
-    /// <param name="clientIndex">Client ID</param>
+    /// <param name="clientIndex">Client Index</param>
     /// <returns>Current volume level (0-100)</returns>
     [HttpGet("{clientIndex:int}/volume")]
     [ProducesResponseType<int>(StatusCodes.Status200OK)]
@@ -269,7 +269,7 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     /// <summary>
     /// Increase client volume by specified step.
     /// </summary>
-    /// <param name="clientIndex">Client ID</param>
+    /// <param name="clientIndex">Client Index</param>
     /// <param name="step">Volume increase step (default: 5)</param>
     /// <returns>New volume level</returns>
     [HttpPost("{clientIndex:int}/volume/up")]
@@ -300,7 +300,7 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     /// <summary>
     /// Decrease client volume by specified step.
     /// </summary>
-    /// <param name="clientIndex">Client ID</param>
+    /// <param name="clientIndex">Client Index</param>
     /// <param name="step">Volume decrease step (default: 5)</param>
     /// <returns>New volume level</returns>
     [HttpPost("{clientIndex:int}/volume/down")]
@@ -331,7 +331,7 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     /// <summary>
     /// Set client mute state.
     /// </summary>
-    /// <param name="clientIndex">Client ID</param>
+    /// <param name="clientIndex">Client Index</param>
     /// <param name="muted">Mute state (true = muted, false = unmuted)</param>
     /// <returns>New mute state</returns>
     [HttpPut("{clientIndex:int}/mute")]
@@ -355,7 +355,7 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     /// <summary>
     /// Get current client mute state.
     /// </summary>
-    /// <param name="clientIndex">Client ID</param>
+    /// <param name="clientIndex">Client Index</param>
     /// <returns>Current mute state</returns>
     [HttpGet("{clientIndex:int}/mute")]
     [ProducesResponseType<bool>(StatusCodes.Status200OK)]
@@ -377,7 +377,7 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     /// <summary>
     /// Toggle client mute state.
     /// </summary>
-    /// <param name="clientIndex">Client ID</param>
+    /// <param name="clientIndex">Client Index</param>
     /// <returns>New mute state</returns>
     [HttpPost("{clientIndex:int}/mute/toggle")]
     [ProducesResponseType<bool>(StatusCodes.Status200OK)]
@@ -402,7 +402,7 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     /// <summary>
     /// Set client audio latency compensation.
     /// </summary>
-    /// <param name="clientIndex">Client ID</param>
+    /// <param name="clientIndex">Client Index</param>
     /// <param name="latency">Latency in milliseconds</param>
     /// <returns>New latency value</returns>
     [HttpPut("{clientIndex:int}/latency")]
@@ -432,7 +432,7 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     /// <summary>
     /// Get current client audio latency compensation.
     /// </summary>
-    /// <param name="clientIndex">Client ID</param>
+    /// <param name="clientIndex">Client Index</param>
     /// <returns>Current latency in milliseconds</returns>
     [HttpGet("{clientIndex:int}/latency")]
     [ProducesResponseType<int>(StatusCodes.Status200OK)]
@@ -454,7 +454,7 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     /// <summary>
     /// Assign client to a specific zone.
     /// </summary>
-    /// <param name="clientIndex">Client ID</param>
+    /// <param name="clientIndex">Client Index</param>
     /// <param name="zoneIndex">Zone ID (1-based)</param>
     /// <returns>No content on success</returns>
     [HttpPut("{clientIndex:int}/zone")]
@@ -485,7 +485,7 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     /// <summary>
     /// Get the zone assignment for a client.
     /// </summary>
-    /// <param name="clientIndex">Client ID</param>
+    /// <param name="clientIndex">Client Index</param>
     /// <returns>Zone ID if assigned, null if unassigned</returns>
     [HttpGet("{clientIndex:int}/zone")]
     [ProducesResponseType<int?>(StatusCodes.Status200OK)]
@@ -507,7 +507,7 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     /// <summary>
     /// Set client display name.
     /// </summary>
-    /// <param name="clientIndex">Client ID</param>
+    /// <param name="clientIndex">Client Index</param>
     /// <param name="name">New client name</param>
     /// <returns>Updated client name</returns>
     [HttpPut("{clientIndex:int}/name")]
@@ -542,7 +542,7 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     /// <summary>
     /// Get client connection status.
     /// </summary>
-    /// <param name="clientIndex">Client ID</param>
+    /// <param name="clientIndex">Client Index</param>
     /// <returns>Client connection status</returns>
     [HttpGet("{clientIndex:int}/connected")]
     [ProducesResponseType<bool>(StatusCodes.Status200OK)]
@@ -564,7 +564,7 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     /// <summary>
     /// Get client name.
     /// </summary>
-    /// <param name="clientIndex">Client ID</param>
+    /// <param name="clientIndex">Client Index</param>
     /// <returns>Client name</returns>
     [HttpGet("{clientIndex:int}/name")]
     [ProducesResponseType<string>(StatusCodes.Status200OK)]

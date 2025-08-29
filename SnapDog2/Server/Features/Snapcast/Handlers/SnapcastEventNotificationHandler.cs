@@ -95,9 +95,9 @@ public partial class SnapcastEventNotificationHandler(
     [LoggerMessage(
         EventId = 3007,
         Level = Microsoft.Extensions.Logging.LogLevel.Warning,
-        Message = "Invalid client index format for connection: {ClientId}"
+        Message = "Invalid client index format for connection: {ClientIndex}"
     )]
-    private partial void LogInvalidClientIndexForConnection(string clientId);
+    private partial void LogInvalidClientIndexForConnection(string clientIndex);
 
     [LoggerMessage(
         EventId = 3008,
@@ -116,9 +116,9 @@ public partial class SnapcastEventNotificationHandler(
     [LoggerMessage(
         EventId = 3010,
         Level = Microsoft.Extensions.Logging.LogLevel.Warning,
-        Message = "Invalid client index format for disconnection: {ClientId}"
+        Message = "Invalid client index format for disconnection: {ClientIndex}"
     )]
-    private partial void LogInvalidClientIndexForDisconnection(string clientId);
+    private partial void LogInvalidClientIndexForDisconnection(string clientIndex);
 
     [LoggerMessage(
         EventId = 3011,
@@ -257,7 +257,7 @@ public partial class SnapcastEventNotificationHandler(
     {
         this.LogClientVolumeChanged(notification.ClientIndex, notification.Volume.Percent, notification.Volume.Muted);
 
-        // Parse client index from string to int (now it should be a proper client ID)
+        // Parse client index from string to int (now it should be a proper client Index)
         if (!int.TryParse(notification.ClientIndex, out var clientIndex))
         {
             LogInvalidClientIndexFormat(notification.ClientIndex);

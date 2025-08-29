@@ -123,10 +123,10 @@ public partial class PerformanceCommandBehavior<TCommand, TResponse>(
                 || commandName.Contains("Play", StringComparison.OrdinalIgnoreCase)
             )
             {
-                var zoneId = ExtractZoneId(command);
-                if (!string.IsNullOrEmpty(zoneId))
+                var zoneIndex = ExtractZoneId(command);
+                if (!string.IsNullOrEmpty(zoneIndex))
                 {
-                    _metricsService.RecordTrackChange(zoneId, null, null);
+                    _metricsService.RecordTrackChange(zoneIndex, null, null);
                 }
             }
         }
@@ -152,12 +152,12 @@ public partial class PerformanceCommandBehavior<TCommand, TResponse>(
                 return zoneIndex?.ToString();
             }
 
-            // Try to get ClientId property
-            var clientIdProperty = typeof(TCommand).GetProperty("ClientId");
-            if (clientIdProperty != null)
+            // Try to get ClientIndex property
+            var clientIndexProperty = typeof(TCommand).GetProperty("ClientIndex");
+            if (clientIndexProperty != null)
             {
-                var clientId = clientIdProperty.GetValue(command);
-                return clientId?.ToString();
+                var clientIndex = clientIndexProperty.GetValue(command);
+                return clientIndex?.ToString();
             }
 
             return null;

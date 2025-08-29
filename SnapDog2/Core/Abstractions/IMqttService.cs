@@ -45,7 +45,7 @@ public interface IMqttService : IAsyncDisposable
     /// Publishes client state to configured MQTT topics.
     /// Publishes to both individual status topics and comprehensive state topic.
     /// </summary>
-    /// <param name="clientIndex">Client identifier.</param>
+    /// <param name="clientIndex">Client index.</param>
     /// <param name="state">Client state to publish.</param>
     /// <param name="cancellationToken">Cancellation token for the operation.</param>
     /// <returns>Result indicating success or failure.</returns>
@@ -95,7 +95,7 @@ public interface IMqttService : IAsyncDisposable
     /// <summary>
     /// Publishes client status updates to MQTT topics.
     /// </summary>
-    /// <param name="clientIndex">Client identifier.</param>
+    /// <param name="clientIndex">Client index.</param>
     /// <param name="eventType">Type of event (use StatusIds constants like StatusIds.ClientVolumeStatus).</param>
     /// <param name="payload">Event payload.</param>
     /// <param name="cancellationToken">Cancellation token for the operation.</param>

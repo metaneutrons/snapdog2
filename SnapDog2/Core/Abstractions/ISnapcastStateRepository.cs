@@ -37,13 +37,13 @@ public interface ISnapcastStateRepository
     /// <summary>
     /// Removes a client from the state repository.
     /// </summary>
-    /// <param name="clientIndex">Client ID to remove.</param>
+    /// <param name="clientIndex">Client Index to remove.</param>
     void RemoveClient(string clientIndex);
 
     /// <summary>
     /// Gets a specific client by ID.
     /// </summary>
-    /// <param name="clientIndex">Client ID to retrieve.</param>
+    /// <param name="clientIndex">Client Index to retrieve.</param>
     /// <returns>Client information or null if not found.</returns>
     SnapClient? GetClient(string clientIndex);
 

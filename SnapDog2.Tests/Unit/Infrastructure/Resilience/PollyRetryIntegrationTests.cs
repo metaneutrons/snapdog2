@@ -434,7 +434,7 @@ public class PollyRetryIntegrationTests
     public interface ISnapcastClient
     {
         Task ConnectAsync(CancellationToken cancellationToken);
-        Task SetVolumeAsync(string clientId, int volume, CancellationToken cancellationToken);
+        Task SetVolumeAsync(string clientIndex, int volume, CancellationToken cancellationToken);
     }
 
     public interface ISubsonicClient

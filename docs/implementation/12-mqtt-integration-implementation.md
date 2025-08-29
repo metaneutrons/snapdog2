@@ -203,7 +203,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             // Configure client options with enterprise features
             var optionsBuilder = new MqttClientOptionsBuilder()
                 .WithTcpServer(_config.BrokerAddress, _config.Port)
-                .WithClientIndex(_config.ClientIndex)
+                .WithClientId(_config.ClientIndex)
                 .WithKeepAlivePeriod(TimeSpan.FromSeconds(_config.KeepAlive))
                 .WithCleanSession(true);
 

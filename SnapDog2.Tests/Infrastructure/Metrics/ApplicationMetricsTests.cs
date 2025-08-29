@@ -135,13 +135,13 @@ public class ApplicationMetricsTests : IDisposable
     public void RecordTrackChange_ShouldNotThrow()
     {
         // Arrange
-        const string zoneId = "zone-1";
+        const string zoneIndex = "zone-1";
         const string fromTrack = "Track A";
         const string toTrack = "Track B";
 
         // Act & Assert
         var exception = Record.Exception(() =>
-            _applicationMetrics.RecordTrackChange(zoneId, fromTrack, toTrack));
+            _applicationMetrics.RecordTrackChange(zoneIndex, fromTrack, toTrack));
 
         Assert.Null(exception);
     }

@@ -254,9 +254,9 @@ public partial class EnterpriseMetricsService : IMetricsService, IDisposable
         _applicationMetrics.UpdateBusinessMetrics(businessMetrics);
     }
 
-    public void RecordTrackChange(string zoneId, string? fromTrack, string? toTrack)
+    public void RecordTrackChange(string zoneIndex, string? fromTrack, string? toTrack)
     {
-        _applicationMetrics.RecordTrackChange(zoneId, fromTrack, toTrack);
+        _applicationMetrics.RecordTrackChange(zoneIndex, fromTrack, toTrack);
     }
 
     public void RecordVolumeChange(string targetId, string targetType, int fromVolume, int toVolume)

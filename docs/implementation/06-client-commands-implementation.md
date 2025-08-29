@@ -181,7 +181,7 @@ public class SetClientVolumeCommandValidator : AbstractValidator<SetClientVolume
     {
         RuleFor(x => x.ClientIndex)
             .GreaterThan(0)
-            .WithMessage("Client ID must be a positive integer.");
+            .WithMessage("Client Index must be a positive integer.");
 
         RuleFor(x => x.Volume)
             .InclusiveBetween(0, 100)
@@ -196,7 +196,7 @@ public class SetClientVolumeCommandValidator : AbstractValidator<SetClientVolume
 
 **Validation Rules Implemented:**
 
-- Client ID validation (positive integers)
+- Client Index validation (positive integers)
 - Volume validation (0-100 range)
 - Latency validation (0-10000ms range)
 - Zone ID validation (positive integers)
@@ -441,7 +441,7 @@ curl -X POST http://localhost:5000/api/clients/1/assign-zone \
 **✅ Error Handling:**
 
 ```bash
-# Invalid client ID
+# Invalid client Index
 curl http://localhost:5000/api/clients/999/state
 # Returns: {"error": "Client 999 not found"}
 

@@ -152,9 +152,9 @@ public partial class ClientManager : IClientManager
     [LoggerMessage(
         EventId = 6315,
         Level = Microsoft.Extensions.Logging.LogLevel.Warning,
-        Message = "Failed to move client {ClientId} to group {GroupId}: {Error}"
+        Message = "Failed to move client {ClientIndex} to group {GroupId}: {Error}"
     )]
-    private partial void LogFailedToMoveClientToGroup(string ClientId, string GroupId, string? Error);
+    private partial void LogFailedToMoveClientToGroup(string ClientIndex, string GroupId, string? Error);
 
     [LoggerMessage(
         EventId = 6316,
@@ -180,7 +180,7 @@ public partial class ClientManager : IClientManager
     [LoggerMessage(
         EventId = 6319,
         Level = Microsoft.Extensions.Logging.LogLevel.Information,
-        Message = "Successfully assigned client {ClientIndex} ({ClientId}) to zone {ZoneIndex} (group {GroupId})"
+        Message = "Successfully assigned client {ClientIndex} - ({ClientId}) to zone {ZoneIndex} (group {GroupId})"
     )]
     private partial void LogSuccessfullyAssignedClientToZone(
         int ClientIndex,
@@ -297,7 +297,7 @@ public partial class ClientManager : IClientManager
 
         await Task.Delay(1); // Maintain async signature
 
-        // Validate client ID range
+        // Validate client Index range
         if (clientIndex < 1 || clientIndex > this._clientConfigs.Count)
         {
             this.LogClientNotFound(clientIndex);

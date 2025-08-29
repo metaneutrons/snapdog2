@@ -76,7 +76,7 @@ public sealed partial class MqttService
     [LoggerMessage(
         EventId = 4307,
         Level = Microsoft.Extensions.Logging.LogLevel.Warning,
-        Message = "Invalid client ID format: {ClientIndex}. Expected integer."
+        Message = "Invalid client Index format: {ClientIndex}. Expected integer."
     )]
     private partial void LogInvalidClientIndexFormat(string clientIndex);
 

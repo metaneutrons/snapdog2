@@ -103,7 +103,7 @@ public record SnapcastGroupInfo
 public record SnapcastClientInfo
 {
     /// <summary>
-    /// Unique client identifier.
+    /// Unique client indexentifier.
     /// </summary>
     public required string Id { get; init; }
 

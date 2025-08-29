@@ -64,12 +64,12 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     public async Task<Result> InitializeAsync(CancellationToken cancellationToken) { /* ... Connect logic using _reconnectionPolicy ... */ return Result.Success();}
 
     // --- Wrapper Methods ---
-    public async Task<Result> SetClientVolumeAsync(string snapcastClientIndex, int volumePercent)
+    public async Task<Result> SetClientVolumeAsync(string snapcastClientId, int volumePercent)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         var volumeData = new ClientVolume { Percent = volumePercent, Muted = volumePercent == 0 }; // Using SnapcastClient model
         var policyResult = await _operationPolicy.ExecuteAndCaptureAsync(
-          async ct => await _client.SetClientVolumeAsync(snapcastClientIndex, volumeData, ct).ConfigureAwait(false)
+          async ct => await _client.SetClientVolumeAsync(snapcastClientId, volumeData, ct).ConfigureAwait(false)
         ).ConfigureAwait(false);
 
         if(policyResult.Outcome == OutcomeType.Failure) {
@@ -278,6 +278,7 @@ public class AudioConfig
 ```
 
 **Key Benefits:**
+
 * **Single Source of Truth**: Audio format defined once, used by both Snapcast and LibVLC
 * **Automatic Consistency**: Impossible to configure mismatched audio settings
 * **Smart Automation**: MAX_STREAMS calculated from actual zone configuration

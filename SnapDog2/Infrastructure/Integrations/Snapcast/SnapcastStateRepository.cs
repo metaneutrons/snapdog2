@@ -112,13 +112,13 @@ public partial class SnapcastStateRepository(
     [LoggerMessage(
         EventId = 2710,
         Level = Microsoft.Extensions.Logging.LogLevel.Debug,
-        Message = "Client {ClientIndex} ({ClientName}) with MAC {MacAddress} found as Snapcast client {SnapcastClientIndex}"
+        Message = "Client {ClientIndex} ({ClientName}) with MAC {MacAddress} found as Snapcast client {SnapcastClientId}"
     )]
     private partial void LogClientFoundByMac(
         int clientIndex,
         string clientName,
         string macAddress,
-        string snapcastClientIndex
+        string snapcastClientId
     );
 
     [LoggerMessage(

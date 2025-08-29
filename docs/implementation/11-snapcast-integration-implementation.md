@@ -52,9 +52,9 @@ public interface ISnapcastService : IAsyncDisposable
     Task<Result> InitializeAsync(CancellationToken cancellationToken = default);
     Task<Result<SnapcastServerStatus>> GetServerStatusAsync(CancellationToken cancellationToken = default);
     Task<Result<VersionDetails>> GetRpcVersionAsync(CancellationToken cancellationToken = default);
-    Task<Result> SetClientVolumeAsync(string snapcastClientIndex, int volume, CancellationToken cancellationToken = default);
-    Task<Result> SetClientMuteAsync(string snapcastClientIndex, bool muted, CancellationToken cancellationToken = default);
-    Task<Result> SetClientGroupAsync(string snapcastClientIndex, string groupId, CancellationToken cancellationToken = default);
+    Task<Result> SetClientVolumeAsync(string snapcastClientId, int volume, CancellationToken cancellationToken = default);
+    Task<Result> SetClientMuteAsync(string snapcastClientId, bool muted, CancellationToken cancellationToken = default);
+    Task<Result> SetClientGroupAsync(string snapcastClientId, string groupId, CancellationToken cancellationToken = default);
     Task<Result<string>> CreateGroupAsync(IEnumerable<string> clientIndexs, CancellationToken cancellationToken = default);
     Task<Result> DeleteGroupAsync(string groupId, CancellationToken cancellationToken = default);
 }
@@ -209,7 +209,7 @@ public class SetSnapcastClientVolumeCommandValidator : AbstractValidator<SetSnap
 {
     public SetSnapcastClientVolumeCommandValidator()
     {
-        RuleFor(x => x.ClientIndex).NotEmpty().WithMessage("Client ID is required");
+        RuleFor(x => x.ClientIndex).NotEmpty().WithMessage("Client Index is required");
         RuleFor(x => x.Volume).InclusiveBetween(0, 100).WithMessage("Volume must be between 0 and 100");
     }
 }

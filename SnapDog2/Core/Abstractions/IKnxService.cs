@@ -49,7 +49,7 @@ public interface IKnxService : IDisposable, IAsyncDisposable
     /// Sends a status update to the configured KNX group address.
     /// </summary>
     /// <param name="statusId">The status identifier.</param>
-    /// <param name="targetId">The target identifier (zone or client ID).</param>
+    /// <param name="targetId">The target identifier (zone or client Index).</param>
     /// <param name="value">The value to send.</param>
     /// <param name="cancellationToken">Cancellation token for the operation.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -80,7 +80,7 @@ public interface IKnxService : IDisposable, IAsyncDisposable
     /// <summary>
     /// Publishes client status updates to KNX group addresses.
     /// </summary>
-    /// <param name="clientIndex">Client identifier.</param>
+    /// <param name="clientIndex">Client index.</param>
     /// <param name="eventType">Type of event (use StatusIds constants like StatusIds.ClientVolumeStatus).</param>
     /// <param name="payload">Event payload.</param>
     /// <param name="cancellationToken">Cancellation token for the operation.</param>

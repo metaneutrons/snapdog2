@@ -43,12 +43,12 @@ public interface ISnapcastService
     /// <summary>
     /// Sets the volume for a specific client.
     /// </summary>
-    /// <param name="snapcastClientIndex">Snapcast client ID.</param>
+    /// <param name="snapcastClientId">Snapcast client Index.</param>
     /// <param name="volumePercent">Volume percentage (0-100).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Result indicating success or failure.</returns>
     Task<Result> SetClientVolumeAsync(
-        string snapcastClientIndex,
+        string snapcastClientId,
         int volumePercent,
         CancellationToken cancellationToken = default
     );
@@ -56,12 +56,12 @@ public interface ISnapcastService
     /// <summary>
     /// Sets the mute state for a specific client.
     /// </summary>
-    /// <param name="snapcastClientIndex">Snapcast client ID.</param>
+    /// <param name="snapcastClientId">Snapcast client Index.</param>
     /// <param name="muted">Whether the client should be muted.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Result indicating success or failure.</returns>
     Task<Result> SetClientMuteAsync(
-        string snapcastClientIndex,
+        string snapcastClientId,
         bool muted,
         CancellationToken cancellationToken = default
     );
@@ -69,12 +69,12 @@ public interface ISnapcastService
     /// <summary>
     /// Sets the latency for a specific client.
     /// </summary>
-    /// <param name="snapcastClientIndex">Snapcast client ID.</param>
+    /// <param name="snapcastClientId">Snapcast client Index.</param>
     /// <param name="latencyMs">Latency in milliseconds.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Result indicating success or failure.</returns>
     Task<Result> SetClientLatencyAsync(
-        string snapcastClientIndex,
+        string snapcastClientId,
         int latencyMs,
         CancellationToken cancellationToken = default
     );
@@ -82,12 +82,12 @@ public interface ISnapcastService
     /// <summary>
     /// Sets the name for a specific client.
     /// </summary>
-    /// <param name="snapcastClientIndex">Snapcast client ID.</param>
+    /// <param name="snapcastClientId">Snapcast client Index.</param>
     /// <param name="name">New client name.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Result indicating success or failure.</returns>
     Task<Result> SetClientNameAsync(
-        string snapcastClientIndex,
+        string snapcastClientId,
         string name,
         CancellationToken cancellationToken = default
     );
@@ -95,12 +95,12 @@ public interface ISnapcastService
     /// <summary>
     /// Assigns a client to a specific group.
     /// </summary>
-    /// <param name="snapcastClientIndex">Snapcast client ID.</param>
+    /// <param name="snapcastClientId">Snapcast client Index.</param>
     /// <param name="groupId">Target group ID.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Result indicating success or failure.</returns>
     Task<Result> SetClientGroupAsync(
-        string snapcastClientIndex,
+        string snapcastClientId,
         string groupId,
         CancellationToken cancellationToken = default
     );
@@ -135,7 +135,7 @@ public interface ISnapcastService
     /// <summary>
     /// Creates a new group with the specified clients.
     /// </summary>
-    /// <param name="clientIndexs">List of client IDs to include in the group.</param>
+    /// <param name="clientIndexs">List of client Indexs to include in the group.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Result containing the new group ID or error.</returns>
     Task<Result<string>> CreateGroupAsync(
@@ -154,21 +154,21 @@ public interface ISnapcastService
     /// <summary>
     /// Removes a client from the server.
     /// </summary>
-    /// <param name="snapcastClientIndex">Snapcast client ID.</param>
+    /// <param name="snapcastClientId">Snapcast client Index.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Result indicating success or failure.</returns>
-    Task<Result> DeleteClientAsync(string snapcastClientIndex, CancellationToken cancellationToken = default);
+    Task<Result> DeleteClientAsync(string snapcastClientId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Sets the clients for a specific group, moving them from their current groups.
     /// </summary>
     /// <param name="groupId">Target group ID.</param>
-    /// <param name="clientIds">List of client IDs to assign to the group.</param>
+    /// <param name="clientIndexs">List of client Indexs to assign to the group.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Result indicating success or failure.</returns>
     Task<Result> SetGroupClientsAsync(
         string groupId,
-        IEnumerable<string> clientIds,
+        IEnumerable<string> clientIndexs,
         CancellationToken cancellationToken = default
     );
 

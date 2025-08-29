@@ -32,19 +32,19 @@ public interface IZoneGroupingService
     /// <summary>
     /// Ensures all clients assigned to a specific zone are grouped together in Snapcast.
     /// </summary>
-    /// <param name="zoneId">The zone ID to synchronize grouping for</param>
+    /// <param name="zoneIndex">The zone ID to synchronize grouping for</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Result indicating success or failure of the grouping operation</returns>
-    Task<Result> SynchronizeZoneGroupingAsync(int zoneId, CancellationToken cancellationToken = default);
+    Task<Result> SynchronizeZoneGroupingAsync(int zoneIndex, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Ensures a specific client is placed in the correct Snapcast group for its assigned zone.
     /// </summary>
-    /// <param name="clientId">The client ID to group</param>
-    /// <param name="zoneId">The zone ID the client should be grouped with</param>
+    /// <param name="clientIndex">The client Index to group</param>
+    /// <param name="zoneIndex">The zone ID the client should be grouped with</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Result indicating success or failure of the client grouping</returns>
-    Task<Result> EnsureClientInZoneGroupAsync(int clientId, int zoneId, CancellationToken cancellationToken = default);
+    Task<Result> EnsureClientInZoneGroupAsync(int clientIndex, int zoneIndex, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Validates that the current Snapcast grouping matches the logical zone assignments.

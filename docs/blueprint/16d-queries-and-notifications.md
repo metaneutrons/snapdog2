@@ -422,7 +422,7 @@ using SnapDog2.Core.Models;
 public record ClientVolumeChangedNotification : INotification
 {
     /// <summary>
-    /// Gets the client ID.
+    /// Gets the client Index.
     /// </summary>
     public required int ClientIndex { get; init; }
 
@@ -443,7 +443,7 @@ public record ClientVolumeChangedNotification : INotification
 public record ClientMuteChangedNotification : INotification
 {
     /// <summary>
-    /// Gets the client ID.
+    /// Gets the client Index.
     /// </summary>
     public required int ClientIndex { get; init; }
 
@@ -464,7 +464,7 @@ public record ClientMuteChangedNotification : INotification
 public record ClientLatencyChangedNotification : INotification
 {
     /// <summary>
-    /// Gets the client ID.
+    /// Gets the client Index.
     /// </summary>
     public required int ClientIndex { get; init; }
 
@@ -485,7 +485,7 @@ public record ClientLatencyChangedNotification : INotification
 public record ClientZoneAssignmentChangedNotification : INotification
 {
     /// <summary>
-    /// Gets the client ID.
+    /// Gets the client Index.
     /// </summary>
     public required int ClientIndex { get; init; }
 
@@ -511,7 +511,7 @@ public record ClientZoneAssignmentChangedNotification : INotification
 public record ClientConnectionChangedNotification : INotification
 {
     /// <summary>
-    /// Gets the client ID.
+    /// Gets the client Index.
     /// </summary>
     public required int ClientIndex { get; init; }
 
@@ -532,7 +532,7 @@ public record ClientConnectionChangedNotification : INotification
 public record ClientStateChangedNotification : INotification
 {
     /// <summary>
-    /// Gets the client ID.
+    /// Gets the client Index.
     /// </summary>
     public required int ClientIndex { get; init; }
 

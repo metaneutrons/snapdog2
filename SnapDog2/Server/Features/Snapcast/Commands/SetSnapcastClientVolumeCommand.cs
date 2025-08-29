@@ -23,7 +23,7 @@ using SnapDog2.Core.Models;
 public record SetSnapcastClientVolumeCommand : ICommand<Result>
 {
     /// <summary>
-    /// The Snapcast client ID.
+    /// The Snapcast client Index.
     /// </summary>
     public required string ClientIndex { get; init; }
 

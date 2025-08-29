@@ -19,7 +19,7 @@ namespace SnapDog2.Core.Models;
 public record ClientState
 {
     /// <summary>
-    /// Gets the client ID.
+    /// Gets the client Index.
     /// </summary>
     public required int Id { get; init; }
 
@@ -34,7 +34,7 @@ public record ClientState
     public required string Mac { get; init; }
 
     /// <summary>
-    /// Gets the Snapcast client ID (UUID from Snapcast server).
+    /// Gets the Snapcast client Index (UUID from Snapcast server).
     /// </summary>
     public required string SnapcastId { get; init; }
 

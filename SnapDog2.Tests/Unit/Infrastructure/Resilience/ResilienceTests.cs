@@ -423,7 +423,7 @@ public class ResilienceTests
     public interface ISnapcastServer
     {
         Task ConnectAsync(CancellationToken cancellationToken);
-        Task SetVolumeAsync(string clientId, int volume, CancellationToken cancellationToken);
+        Task SetVolumeAsync(string clientIndex, int volume, CancellationToken cancellationToken);
     }
 
     public interface ISubsonicServer

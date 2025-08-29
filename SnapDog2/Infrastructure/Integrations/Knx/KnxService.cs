@@ -346,7 +346,7 @@ public partial class KnxService : IKnxService
                 return Result.Success();
             }
 
-            // For KNX, we need to convert client ID to integer if possible
+            // For KNX, we need to convert client Index to integer if possible
             if (int.TryParse(clientIndex, out var clientIndexInt))
             {
                 return await this.SendStatusAsync(statusId, clientIndexInt, knxValue, cancellationToken);
@@ -354,7 +354,7 @@ public partial class KnxService : IKnxService
             else
             {
                 this.LogInvalidTargetId(statusId, clientIndex);
-                return Result.Failure($"Invalid client ID for KNX: {clientIndex}");
+                return Result.Failure($"Invalid client Index for KNX: {clientIndex}");
             }
         }
         catch (Exception ex)
@@ -816,7 +816,7 @@ public partial class KnxService : IKnxService
         for (int i = 0; i < this._clients.Count; i++)
         {
             var client = this._clients[i];
-            var clientIndex = i + 1; // 1-based client ID
+            var clientIndex = i + 1; // 1-based client Index
 
             if (!client.Knx.Enabled)
             {
@@ -1175,7 +1175,7 @@ public partial class KnxService : IKnxService
         for (int i = 0; i < this._clients.Count; i++)
         {
             var client = this._clients[i];
-            var clientIndex = i + 1; // 1-based client ID
+            var clientIndex = i + 1; // 1-based client Index
 
             if (!client.Knx.Enabled)
             {

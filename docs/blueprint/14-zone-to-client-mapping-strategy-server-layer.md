@@ -38,7 +38,7 @@ The mapping and synchronization logic is primarily implemented within the core m
 
 ### 13.3.2. `ClientManager` (/Server/Managers/ClientManager.cs)
 
-* **Responsibilities:** Discovers clients, maps Snapcast Client IDs to internal SnapDog2 Client IDs, manages `ClientState`, handles assigning clients to zones, responds to Snapcast client events.
+* **Responsibilities:** Discovers clients, maps Snapcast Client Indexs to internal SnapDog2 Client Indexs, manages `ClientState`, handles assigning clients to zones, responds to Snapcast client events.
 * **Dependencies:** `ISnapcastService`, `ISnapcastStateRepository`, `IZoneManager`, `IMediator`, `List<ClientConfig>`, `ILogger<ClientManager>`.
 * **Mapping:** Maintains internal mappings: `ConcurrentDictionary<string, int> _snapcastIdToInternalId` and `ConcurrentDictionary<int, ClientState> _internalClientStates`. Also `ConcurrentDictionary<string, int> _lastKnownZoneAssignment`.
 * **Initialization (`InitializeAsync` called by Worker):**
@@ -50,11 +50,11 @@ The mapping and synchronization logic is primarily implemented within the core m
         * **If Yes:** Assign the client to this existing `ZoneIndex` in its `ClientState` and update `_lastKnownZoneAssignment`.
         * **If No (or not in a group):** Get the `DefaultZoneIndex` from the client's corresponding `ClientConfig`. If valid, call `AssignClientToZoneAsync` to assign it to the default zone.
 * **Client Assignment (`AssignClientToZoneAsync(int clientIndex, int zoneIndex)`):**
-    1. Finds the internal `clientIndex` and corresponding `snapcastClientIndex`.
+    1. Finds the internal `clientIndex` and corresponding `snapcastClientId`.
     2. Uses `_zoneManager.GetZoneAsync(zoneIndex)` to get the target `ZoneService` and its `SnapcastGroupId`.
-    3. Calls `_snapcastService.AssignClientToGroupAsync(snapcastClientIndex, snapcastGroupId)`.
+    3. Calls `_snapcastService.AssignClientToGroupAsync(snapcastClientId, snapcastGroupId)`.
     4. If successful, updates the internal `_internalClientStates[clientIndex]` record with the new `ZoneIndex`.
-    5. Updates `_lastKnownZoneAssignment[snapcastClientIndex] = zoneIndex`.
+    5. Updates `_lastKnownZoneAssignment[snapcastClientId] = zoneIndex`.
     6. Publishes a `StatusChangedNotification` for `CLIENT_ZONE_STATUS`.
 * **Event Handling:** Implements `INotificationHandler` for Snapcast events published by `SnapcastService`:
   * `Handle(SnapcastClientConnectedNotification)`: Updates the corresponding `ClientState` (sets `Connected = true`, updates `LastSeenUtc`). Checks `_lastKnownZoneAssignment`. If the client isn't currently in a managed group (check state repo), calls `AssignClientToZoneAsync` to restore it to its last known zone. Publishes `StatusChangedNotification("CLIENT_CONNECTED", ..., true)`.
@@ -85,11 +85,11 @@ using Sturd.SnapcastNet.Models; // Use raw models from library
 
 // Published by SnapcastService when underlying library raises event
 public record SnapcastClientConnectedNotification(Client Client) : INotification;
-public record SnapcastClientDisconnectedNotification(string SnapcastClientIndex) : INotification; // Only ID needed usually
+public record SnapcastClientDisconnectedNotification(string SnapcastClientId) : INotification; // Only ID needed usually
 public record SnapcastGroupChangedNotification(Group Group) : INotification; // Carries full Group info including clients
-public record SnapcastClientVolumeChangedNotification(string SnapcastClientIndex, ClientVolume Volume) : INotification;
-public record SnapcastClientLatencyChangedNotification(string SnapcastClientIndex, int Latency) : INotification; // Assuming event args provide this
-public record SnapcastClientNameChangedNotification(string SnapcastClientIndex, string NewName) : INotification; // Assuming event args provide this
+public record SnapcastClientVolumeChangedNotification(string SnapcastClientId, ClientVolume Volume) : INotification;
+public record SnapcastClientLatencyChangedNotification(string SnapcastClientId, int Latency) : INotification; // Assuming event args provide this
+public record SnapcastClientNameChangedNotification(string SnapcastClientId, string NewName) : INotification; // Assuming event args provide this
 public record SnapcastGroupMuteChangedNotification(string GroupId, bool IsMuted) : INotification; // Assuming event args provide this
 public record SnapcastStreamChangedNotification(string StreamId, Stream Stream) : INotification; // Example for stream updates
 // ... other notifications as needed based on Sturd.SnapcastNet events ...

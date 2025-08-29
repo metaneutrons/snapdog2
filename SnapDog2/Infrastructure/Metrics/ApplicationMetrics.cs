@@ -285,9 +285,9 @@ public partial class ApplicationMetrics : IApplicationMetrics
         _businessState = state;
     }
 
-    public void RecordTrackChange(string zoneId, string? fromTrack, string? toTrack)
+    public void RecordTrackChange(string zoneIndex, string? fromTrack, string? toTrack)
     {
-        var tags = new KeyValuePair<string, object?>[] { new("zone_id", zoneId) };
+        var tags = new KeyValuePair<string, object?>[] { new("zone_id", zoneIndex) };
 
         _trackChangesTotal.Add(1, tags);
     }

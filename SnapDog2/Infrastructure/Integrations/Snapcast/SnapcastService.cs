@@ -513,7 +513,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     #region Client Operations
 
     public async Task<Result> SetClientVolumeAsync(
-        string snapcastClientIndex,
+        string snapcastClientId,
         int volumePercent,
         CancellationToken cancellationToken = default
     )
@@ -534,7 +534,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
             return await this._operationPolicy.ExecuteAsync(
                 async (ct) =>
                 {
-                    await this._snapcastClient!.ClientSetVolumeAsync(snapcastClientIndex, volumePercent);
+                    await this._snapcastClient!.ClientSetVolumeAsync(snapcastClientId, volumePercent);
                     return Result.Success();
                 },
                 cancellationToken
@@ -548,7 +548,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     }
 
     public async Task<Result> SetClientMuteAsync(
-        string snapcastClientIndex,
+        string snapcastClientId,
         bool muted,
         CancellationToken cancellationToken = default
     )
@@ -561,16 +561,16 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         try
         {
             // Get current client to preserve volume when muting/unmuting
-            var client = this._stateRepository.GetClient(snapcastClientIndex);
+            var client = this._stateRepository.GetClient(snapcastClientId);
             if (client == null)
             {
-                return Result.Failure($"Client {snapcastClientIndex} not found");
+                return Result.Failure($"Client {snapcastClientId} not found");
             }
 
             var currentVolume = client.Value.Config.Volume.Percent;
             var newVolume = muted ? 0 : currentVolume;
 
-            await this._snapcastClient!.ClientSetVolumeAsync(snapcastClientIndex, newVolume).ConfigureAwait(false);
+            await this._snapcastClient!.ClientSetVolumeAsync(snapcastClientId, newVolume).ConfigureAwait(false);
             return Result.Success();
         }
         catch (Exception ex)
@@ -581,7 +581,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     }
 
     public async Task<Result> SetClientLatencyAsync(
-        string snapcastClientIndex,
+        string snapcastClientId,
         int latencyMs,
         CancellationToken cancellationToken = default
     )
@@ -593,7 +593,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
 
         try
         {
-            await this._snapcastClient!.ClientSetLatencyAsync(snapcastClientIndex, latencyMs).ConfigureAwait(false);
+            await this._snapcastClient!.ClientSetLatencyAsync(snapcastClientId, latencyMs).ConfigureAwait(false);
             return Result.Success();
         }
         catch (Exception ex)
@@ -604,7 +604,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     }
 
     public async Task<Result> SetClientNameAsync(
-        string snapcastClientIndex,
+        string snapcastClientId,
         string name,
         CancellationToken cancellationToken = default
     )
@@ -616,7 +616,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
 
         try
         {
-            await this._snapcastClient!.ClientSetNameAsync(snapcastClientIndex, name).ConfigureAwait(false);
+            await this._snapcastClient!.ClientSetNameAsync(snapcastClientId, name).ConfigureAwait(false);
             return Result.Success();
         }
         catch (Exception ex)
@@ -627,7 +627,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     }
 
     public async Task<Result> SetClientGroupAsync(
-        string snapcastClientIndex,
+        string snapcastClientId,
         string groupId,
         CancellationToken cancellationToken = default
     )
@@ -639,7 +639,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
 
         try
         {
-            await this._snapcastClient!.GroupSetClientsAsync(groupId, new List<string> { snapcastClientIndex })
+            await this._snapcastClient!.GroupSetClientsAsync(groupId, new List<string> { snapcastClientId })
                 .ConfigureAwait(false);
             return Result.Success();
         }
@@ -651,7 +651,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     }
 
     public async Task<Result> DeleteClientAsync(
-        string snapcastClientIndex,
+        string snapcastClientId,
         CancellationToken cancellationToken = default
     )
     {
@@ -662,7 +662,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
 
         try
         {
-            await this._snapcastClient!.ServerDeleteClientAsync(snapcastClientIndex).ConfigureAwait(false);
+            await this._snapcastClient!.ServerDeleteClientAsync(snapcastClientId).ConfigureAwait(false);
             return Result.Success();
         }
         catch (Exception ex)
@@ -751,7 +751,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
 
     public async Task<Result> SetGroupClientsAsync(
         string groupId,
-        IEnumerable<string> clientIds,
+        IEnumerable<string> clientIndexs,
         CancellationToken cancellationToken = default
     )
     {
@@ -762,13 +762,13 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
 
         try
         {
-            var clientIdList = clientIds.ToList();
-            LogSettingGroupClients(this._logger, groupId, string.Join(", ", clientIdList));
+            var clientIndexList = clientIndexs.ToList();
+            LogSettingGroupClients(this._logger, groupId, string.Join(", ", clientIndexList));
 
             // Use the Snapcast client library to set group clients
-            await this._snapcastClient!.GroupSetClientsAsync(groupId, clientIdList).ConfigureAwait(false);
+            await this._snapcastClient!.GroupSetClientsAsync(groupId, clientIndexList).ConfigureAwait(false);
 
-            LogGroupClientsSetSuccessfully(this._logger, clientIdList.Count, groupId);
+            LogGroupClientsSetSuccessfully(this._logger, clientIndexList.Count, groupId);
             return Result.Success();
         }
         catch (Exception ex)
@@ -794,7 +794,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
             var clientIndexArray = clientIndexs.ToArray();
             if (clientIndexArray.Length == 0)
             {
-                return Task.FromResult(Result<string>.Failure("At least one client ID is required"));
+                return Task.FromResult(Result<string>.Failure("At least one client Index is required"));
             }
 
             // For now, we'll use the first client's current group as a template
@@ -926,7 +926,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
                 Percent = volumeChange.Volume.Percent,
             };
 
-            // Get the proper client ID (1-based index) instead of using Snapcast client name
+            // Get the proper client Index (1-based index) instead of using Snapcast client name
             var client = await this.GetClientBySnapcastIdAsync(volumeChange.Id);
             if (client != null)
             {
@@ -965,7 +965,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
                 this._stateRepository.UpdateClient(updatedClient);
             }
 
-            // Get the proper client ID (1-based index) instead of using Snapcast client name
+            // Get the proper client Index (1-based index) instead of using Snapcast client name
             var client = await this.GetClientBySnapcastIdAsync(latencyChange.Id);
             if (client != null)
             {
@@ -1000,7 +1000,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
                 this._stateRepository.UpdateClient(updatedClient);
             }
 
-            // Get the proper client ID (1-based index) instead of using Snapcast client name
+            // Get the proper client Index (1-based index) instead of using Snapcast client name
             var client = await this.GetClientBySnapcastIdAsync(nameChange.Id);
             if (client != null)
             {
@@ -1283,9 +1283,9 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     [LoggerMessage(
         EventId = 2618,
         Level = Microsoft.Extensions.Logging.LogLevel.Debug,
-        Message = "Bridged {EventType} event from Snapcast client {SnapcastClientId} to IClient {ClientId}"
+        Message = "Bridged {EventType} event from Snapcast client {SnapcastClientId} to IClient {ClientIndex}"
     )]
-    private partial void LogEventBridged(string eventType, string snapcastClientId, int clientId);
+    private partial void LogEventBridged(string eventType, string snapcastClientId, int clientIndex);
 
     [LoggerMessage(
         EventId = 2619,
@@ -1330,9 +1330,9 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     [LoggerMessage(
         EventId = 2624,
         Level = Microsoft.Extensions.Logging.LogLevel.Debug,
-        Message = "Setting group {GroupId} clients to: {ClientIds}"
+        Message = "Setting group {GroupId} clients to: {ClientIndexs}"
     )]
-    private static partial void LogSettingGroupClients(ILogger logger, string groupId, string clientIds);
+    private static partial void LogSettingGroupClients(ILogger logger, string groupId, string clientIndexs);
 
     [LoggerMessage(
         EventId = 2625,

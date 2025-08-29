@@ -22,7 +22,7 @@ using SnapDog2.Core.Models;
 public interface IClient
 {
     /// <summary>
-    /// Gets the client ID.
+    /// Gets the client Index.
     /// </summary>
     int Id { get; }
 
