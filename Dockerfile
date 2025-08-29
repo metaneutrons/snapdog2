@@ -34,7 +34,7 @@ RUN useradd -m -s /bin/bash -u 1000 vscode && \
 USER vscode
 
 # Expose only HTTP port
-EXPOSE 5000
+EXPOSE 5555
 
 # Direct entrypoint - no script needed!
 # Volume mounts provide source code and local packages at runtime

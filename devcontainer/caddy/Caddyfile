@@ -13,6 +13,7 @@
         not path /knx*
         not path /api*
         not path /swagger*
+        not path /webui*
     }
 
     handle @not_server {
@@ -89,12 +90,25 @@
 
     # SnapDog API
     handle /api* {
-        reverse_proxy http://app:5000
+        reverse_proxy http://app:5555
     }
 
     # Swagger UI
     handle /swagger* {
-        reverse_proxy http://app:5000
+        reverse_proxy http://app:5555
+    }
+
+    # SnapDog WebUI - Enterprise reverse proxy configuration
+    handle /webui* {
+        uri strip_prefix /webui
+        reverse_proxy http://app:5555 {
+            header_up Host {upstream_hostport}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+            header_up X-Forwarded-Host {host}
+            header_up X-Forwarded-Prefix /webui
+        }
     }
 
     # Clients with trailing slashes (mapped to our service names)

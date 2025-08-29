@@ -15,7 +15,6 @@ services:
       - DOTNET_ENVIRONMENT=Development
       - DOTNET_USE_POLLING_FILE_WATCHER=true
       - DOTNET_WATCH_RESTART_ON_RUDE_EDIT=true
-      - ASPNETCORE_URLS="" # Let UseResilientKestrel handle all binding configuration
     depends_on:
       - redis
       - snapcast-server
@@ -26,6 +25,8 @@ services:
       snapdog-dev:
     #        ipv4_address: 172.25.0.2
     # Enable debugger
+    ports:
+      - "5555:5555"
     stdin_open: true
     tty: true
   # Redis for persistent state storage
