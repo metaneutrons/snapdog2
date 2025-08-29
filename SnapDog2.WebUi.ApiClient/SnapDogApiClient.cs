@@ -1,6 +1,6 @@
+using System.Net;
 using Microsoft.Extensions.Logging;
 using Polly;
-using System.Net;
 using SnapDog2.WebUi.ApiClient.Generated;
 
 namespace SnapDog2.WebUi.ApiClient;
@@ -60,13 +60,20 @@ public partial class SnapDogApiClient : ISnapDogApiClient
     public async Task AssignClientToZoneAsync(int clientIndex, int zoneIndex, CancellationToken cancellationToken = default)
     {
         // Business validation
-        if (clientIndex < 1) throw new ArgumentException("Client index must be >= 1", nameof(clientIndex));
-        if (zoneIndex < 1) throw new ArgumentException("Zone index must be >= 1", nameof(zoneIndex));
+        if (clientIndex < 1)
+        {
+            throw new ArgumentException("Client index must be >= 1", nameof(clientIndex));
+        }
+
+        if (zoneIndex < 1)
+        {
+            throw new ArgumentException("Zone index must be >= 1", nameof(zoneIndex));
+        }
 
         await _retryPolicy.ExecuteAsync(async () =>
         {
             LogAssigningClient(clientIndex, zoneIndex);
-            
+
             try
             {
                 await _generatedClient.ZonePUTAsync(clientIndex, zoneIndex, cancellationToken);
@@ -82,7 +89,10 @@ public partial class SnapDogApiClient : ISnapDogApiClient
 
     public async Task PlayZoneAsync(int zoneIndex, CancellationToken cancellationToken = default)
     {
-        if (zoneIndex < 1) throw new ArgumentException("Zone index must be >= 1", nameof(zoneIndex));
+        if (zoneIndex < 1)
+        {
+            throw new ArgumentException("Zone index must be >= 1", nameof(zoneIndex));
+        }
 
         await _retryPolicy.ExecuteAsync(async () =>
         {
@@ -94,7 +104,10 @@ public partial class SnapDogApiClient : ISnapDogApiClient
 
     public async Task PauseZoneAsync(int zoneIndex, CancellationToken cancellationToken = default)
     {
-        if (zoneIndex < 1) throw new ArgumentException("Zone index must be >= 1", nameof(zoneIndex));
+        if (zoneIndex < 1)
+        {
+            throw new ArgumentException("Zone index must be >= 1", nameof(zoneIndex));
+        }
 
         await _retryPolicy.ExecuteAsync(async () =>
         {
@@ -106,7 +119,10 @@ public partial class SnapDogApiClient : ISnapDogApiClient
 
     public async Task StopZoneAsync(int zoneIndex, CancellationToken cancellationToken = default)
     {
-        if (zoneIndex < 1) throw new ArgumentException("Zone index must be >= 1", nameof(zoneIndex));
+        if (zoneIndex < 1)
+        {
+            throw new ArgumentException("Zone index must be >= 1", nameof(zoneIndex));
+        }
 
         await _retryPolicy.ExecuteAsync(async () =>
         {
@@ -118,7 +134,10 @@ public partial class SnapDogApiClient : ISnapDogApiClient
 
     public async Task<int> NextTrackAsync(int zoneIndex, CancellationToken cancellationToken = default)
     {
-        if (zoneIndex < 1) throw new ArgumentException("Zone index must be >= 1", nameof(zoneIndex));
+        if (zoneIndex < 1)
+        {
+            throw new ArgumentException("Zone index must be >= 1", nameof(zoneIndex));
+        }
 
         return await _retryPolicy.ExecuteAsync(async () =>
         {
@@ -131,7 +150,10 @@ public partial class SnapDogApiClient : ISnapDogApiClient
 
     public async Task<int> PreviousTrackAsync(int zoneIndex, CancellationToken cancellationToken = default)
     {
-        if (zoneIndex < 1) throw new ArgumentException("Zone index must be >= 1", nameof(zoneIndex));
+        if (zoneIndex < 1)
+        {
+            throw new ArgumentException("Zone index must be >= 1", nameof(zoneIndex));
+        }
 
         return await _retryPolicy.ExecuteAsync(async () =>
         {
@@ -144,7 +166,10 @@ public partial class SnapDogApiClient : ISnapDogApiClient
 
     public async Task<bool> ToggleMuteAsync(int zoneIndex, CancellationToken cancellationToken = default)
     {
-        if (zoneIndex < 1) throw new ArgumentException("Zone index must be >= 1", nameof(zoneIndex));
+        if (zoneIndex < 1)
+        {
+            throw new ArgumentException("Zone index must be >= 1", nameof(zoneIndex));
+        }
 
         return await _retryPolicy.ExecuteAsync(async () =>
         {
@@ -157,8 +182,15 @@ public partial class SnapDogApiClient : ISnapDogApiClient
 
     public async Task<int> SetVolumeAsync(int zoneIndex, int volume, CancellationToken cancellationToken = default)
     {
-        if (zoneIndex < 1) throw new ArgumentException("Zone index must be >= 1", nameof(zoneIndex));
-        if (volume < 0 || volume > 100) throw new ArgumentException("Volume must be between 0 and 100", nameof(volume));
+        if (zoneIndex < 1)
+        {
+            throw new ArgumentException("Zone index must be >= 1", nameof(zoneIndex));
+        }
+
+        if (volume < 0 || volume > 100)
+        {
+            throw new ArgumentException("Volume must be between 0 and 100", nameof(volume));
+        }
 
         return await _retryPolicy.ExecuteAsync(async () =>
         {

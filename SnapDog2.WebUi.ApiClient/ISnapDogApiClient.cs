@@ -8,7 +8,7 @@ public interface ISnapDogApiClient
     Task<ClientState[]> GetAllClientsAsync(CancellationToken cancellationToken = default);
     Task<SystemStatusApiResponse> GetSystemStatusAsync(CancellationToken cancellationToken = default);
     Task AssignClientToZoneAsync(int clientIndex, int zoneIndex, CancellationToken cancellationToken = default);
-    
+
     // Media Controls
     Task PlayZoneAsync(int zoneIndex, CancellationToken cancellationToken = default);
     Task PauseZoneAsync(int zoneIndex, CancellationToken cancellationToken = default);
