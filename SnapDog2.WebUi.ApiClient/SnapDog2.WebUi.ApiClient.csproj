@@ -22,23 +22,17 @@
   </PropertyGroup>
 
   <Target Name="ValidateOpenApiSpec" BeforeTargets="GenerateApiClient">
-    <Error Text="OpenAPI specification not found at: $(OpenApiSpecPath). Run 'dotnet run --project SnapDog2.SwaggerGen' first."
-           Condition="!Exists('$(OpenApiSpecPath)')" />
+    <Error Text="OpenAPI specification not found at: $(OpenApiSpecPath). Run 'dotnet run --project SnapDog2.SwaggerGen' first." Condition="!Exists('$(OpenApiSpecPath)')" />
     <Message Text="✅ OpenAPI specification found: $(OpenApiSpecPath)" Importance="high" />
   </Target>
 
-  <Target Name="GenerateApiClient"
-          BeforeTargets="CoreCompile"
-          DependsOnTargets="ValidateOpenApiSpec"
-          Inputs="$(OpenApiSpecPath)"
-          Outputs="$(GeneratedClientPath)">
+  <Target Name="GenerateApiClient" BeforeTargets="CoreCompile" DependsOnTargets="ValidateOpenApiSpec" Inputs="$(OpenApiSpecPath)" Outputs="$(GeneratedClientPath)">
 
     <Message Text="🔄 Generating API client from OpenAPI specification..." Importance="high" />
 
     <MakeDir Directories="$(MSBuildProjectDirectory)/Generated" />
 
-    <Exec Command="dotnet $(NuGetPackageRoot)nswag.msbuild/14.2.0/tools/Net90/dotnet-nswag.dll openapi2csclient /input:&quot;$(OpenApiSpecPath)&quot; /output:&quot;$(GeneratedClientPath)&quot; /namespace:SnapDog2.WebUi.ApiClient.Generated /className:GeneratedSnapDogClient /generateClientInterfaces:true /injectHttpClient:true /useBaseUrl:false /generateExceptionClasses:true /exceptionClass:ApiException /jsonLibrary:SystemTextJson"
-          ContinueOnError="false" />
+    <Exec Command="dotnet $(NuGetPackageRoot)nswag.msbuild/14.2.0/tools/Net90/dotnet-nswag.dll openapi2csclient /input:&quot;$(OpenApiSpecPath)&quot; /output:&quot;$(GeneratedClientPath)&quot; /namespace:SnapDog2.WebUi.ApiClient.Generated /className:GeneratedSnapDogClient /generateClientInterfaces:true /injectHttpClient:true /useBaseUrl:false /generateExceptionClasses:true /exceptionClass:ApiException /jsonLibrary:SystemTextJson" ContinueOnError="false" />
 
     <Message Text="✅ API client generated successfully: $(GeneratedClientPath)" Importance="high" />
   </Target>

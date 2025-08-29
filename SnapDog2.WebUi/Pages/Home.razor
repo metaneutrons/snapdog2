@@ -1,15 +1,65 @@
 @page "/"
+@using SnapDog2.WebUi.ApiClient
+@inject ISnapDogApiClient ApiClient
 
 <PageTitle>SnapDog2 WebUI</PageTitle>
 
 <div class="zones-container">
-    <h1 class="text-h1">🎵 SnapDog2 WebUI</h1>
-    <p class="text-body">Enterprise-grade multi-room audio control system</p>
+    <h1 class="text-h1">🎵 SnapDog2 Multi-Room Audio</h1>
     
-    <div class="zone-section">
-        <h2 class="text-h2">System Status</h2>
-        <p class="text-body">WebUI is now enterprise-ready with reverse proxy support!</p>
-        <div class="status-indicator status-connected"></div>
-        <span class="text-small">Connected</span>
-    </div>
+    @if (isLoading)
+    {
+        <div class="zone-section">
+            <p class="text-body">Loading zones...</p>
+        </div>
+    }
+    else if (zones?.Any() == true)
+    {
+        @foreach (var zone in zones)
+        {
+            <ZoneSection Zone="zone" OnZoneChanged="RefreshZones" @key="zone.Index" />
+        }
+    }
+    else
+    {
+        <div class="zone-section">
+            <h2 class="text-h2">No Zones Available</h2>
+            <p class="text-body">No audio zones are currently configured or available.</p>
+        </div>
+    }
 </div>
+
+@code {
+    private List<ZoneState>? zones;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadZones();
+    }
+
+    private async Task LoadZones()
+    {
+        try
+        {
+            isLoading = true;
+            var zoneArray = await ApiClient.GetAllZonesAsync();
+            zones = zoneArray?.ToList() ?? new List<ZoneState>();
+        }
+        catch (Exception)
+        {
+            // Log error and show fallback
+            zones = new List<ZoneState>();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task RefreshZones(ZoneState updatedZone)
+    {
+        await LoadZones();
+        StateHasChanged();
+    }
+}

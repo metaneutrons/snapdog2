@@ -1,0 +1,155 @@
+@using SnapDog2.WebUi.ApiClient
+@inject ISnapDogApiClient ApiClient
+@inject IJSRuntime JS
+
+<div class="zone-section">
+    <h2 class="text-h2">🎵 Zone @Zone.Index</h2>
+    
+    <div class="media-controls">
+        <div class="track-info">
+            @if (Zone.CurrentTrack != null)
+            {
+                <div class="track-title">@Zone.CurrentTrack.Title</div>
+                <div class="track-artist">@Zone.CurrentTrack.Artist</div>
+            }
+            else
+            {
+                <div class="track-title">No track playing</div>
+            }
+        </div>
+        
+        <div class="transport-controls">
+            <button class="control-button" @onclick="() => TogglePlayPause()" disabled="@isLoading">
+                @(Zone.IsPlaying ? "⏸️" : "▶️")
+            </button>
+            <button class="control-button" @onclick="() => PreviousTrack()" disabled="@isLoading">⏮️</button>
+            <button class="control-button" @onclick="() => NextTrack()" disabled="@isLoading">⏭️</button>
+        </div>
+        
+        <div class="volume-controls">
+            <button class="control-button" @onclick="() => ToggleMute()" disabled="@isLoading">
+                @(Zone.IsMuted ? "🔇" : "🔊")
+            </button>
+            <input type="range" min="0" max="100" @bind="volumeValue" @oninput="OnVolumeChange" disabled="@isLoading" />
+            <span class="text-small">@Zone.Volume%</span>
+        </div>
+    </div>
+    
+    <div class="client-zone" @ondrop="OnClientDrop" @ondragover="OnDragOver" @ondragenter="OnDragEnter" @ondragleave="OnDragLeave">
+        <h3 class="text-h3">Clients</h3>
+        <div class="client-chips">
+            @foreach (var client in Zone.Clients)
+            {
+                <ClientChip Client="client" @key="client.Index" />
+            }
+        </div>
+        @if (!Zone.Clients.Any())
+        {
+            <div class="drop-zone">Drop clients here</div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public ZoneState Zone { get; set; } = null!;
+    [Parameter] public EventCallback<ZoneState> OnZoneChanged { get; set; }
+    
+    private bool isLoading = false;
+    private int volumeValue;
+    
+    protected override void OnParametersSet()
+    {
+        volumeValue = Zone.Volume;
+    }
+    
+    private async Task TogglePlayPause()
+    {
+        if (isLoading) return;
+        isLoading = true;
+        
+        try
+        {
+            if (Zone.IsPlaying)
+                await ApiClient.PauseZoneAsync(Zone.Index);
+            else
+                await ApiClient.PlayZoneAsync(Zone.Index);
+                
+            await OnZoneChanged.InvokeAsync(Zone);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+    
+    private async Task PreviousTrack()
+    {
+        if (isLoading) return;
+        isLoading = true;
+        
+        try
+        {
+            await ApiClient.PreviousTrackAsync(Zone.Index);
+            await OnZoneChanged.InvokeAsync(Zone);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+    
+    private async Task NextTrack()
+    {
+        if (isLoading) return;
+        isLoading = true;
+        
+        try
+        {
+            await ApiClient.NextTrackAsync(Zone.Index);
+            await OnZoneChanged.InvokeAsync(Zone);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+    
+    private async Task ToggleMute()
+    {
+        if (isLoading) return;
+        isLoading = true;
+        
+        try
+        {
+            await ApiClient.ToggleZoneMuteAsync(Zone.Index);
+            await OnZoneChanged.InvokeAsync(Zone);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+    
+    private async Task OnVolumeChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var newVolume))
+        {
+            volumeValue = newVolume;
+            await ApiClient.SetZoneVolumeAsync(Zone.Index, newVolume);
+        }
+    }
+    
+    private async Task OnClientDrop(DragEventArgs e)
+    {
+        var clientIndexStr = await JS.InvokeAsync<string>("getDragData");
+        if (int.TryParse(clientIndexStr, out var clientIndex))
+        {
+            await ApiClient.AssignClientToZoneAsync(clientIndex, Zone.Index);
+            await OnZoneChanged.InvokeAsync(Zone);
+        }
+    }
+    
+    private void OnDragOver(DragEventArgs e) { }
+    private void OnDragEnter(DragEventArgs e) { }
+    private void OnDragLeave(DragEventArgs e) { }
+}

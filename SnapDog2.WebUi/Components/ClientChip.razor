@@ -1,0 +1,23 @@
+@inject IJSRuntime JS
+
+<div class="client-chip" 
+     draggable="true" 
+     @ondragstart="OnDragStart"
+     @ondragend="OnDragEnd">
+    <div class="status-indicator @(Client.IsConnected ? "status-connected" : "status-disconnected")"></div>
+    <span class="text-h3">@Client.Name</span>
+</div>
+
+@code {
+    [Parameter] public ClientState Client { get; set; } = null!;
+    
+    private async Task OnDragStart(DragEventArgs e)
+    {
+        await JS.InvokeVoidAsync("setDragData", Client.Index.ToString());
+    }
+    
+    private void OnDragEnd(DragEventArgs e)
+    {
+        // Cleanup if needed
+    }
+}

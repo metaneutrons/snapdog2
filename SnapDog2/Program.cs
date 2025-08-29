@@ -606,20 +606,8 @@ static WebApplication CreateWebApplication(string[] args)
             options.KnownProxies.Clear();
         });
 
-        // Register generated transport client
-        builder.Services.AddHttpClient<SnapDog2.WebUi.ApiClient.Generated.IGeneratedSnapDogClient, SnapDog2.WebUi.ApiClient.Generated.GeneratedSnapDogClient>(client =>
-        {
-            var baseUrl = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development"
-                ? $"http://localhost:{snapDogConfig.Http.HttpPort}/api/v1/"
-                : $"http://127.0.0.1:{snapDogConfig.Http.HttpPort}/api/v1/";
-
-            client.BaseAddress = new Uri(baseUrl);
-            client.Timeout = TimeSpan.FromSeconds(30);
-            client.DefaultRequestHeaders.Add("User-Agent", "SnapDog2-WebUI/1.0");
-        });
-
         // Register business API client
-        builder.Services.AddScoped<SnapDog2.WebUi.ApiClient.ISnapDogApiClient, SnapDog2.WebUi.ApiClient.SnapDogApiClient>();
+        builder.Services.AddScoped<SnapDog2.WebUi.ApiClient.ISnapDogApiClient, SnapDog2.WebUi.ApiClient.MockSnapDogApiClient>();
 
         Log.Information("🌐 WebUI enabled with resilient API client configured");
     }
