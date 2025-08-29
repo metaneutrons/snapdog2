@@ -53,28 +53,44 @@ public class MockSnapDogApiClient : ISnapDogApiClient
     public Task SetZoneVolumeAsync(int zoneIndex, int volume, CancellationToken cancellationToken = default)
     {
         var zone = _zones.FirstOrDefault(z => z.Index == zoneIndex);
-        if (zone != null) zone.Volume = Math.Clamp(volume, 0, 100);
+        if (zone != null)
+        {
+            zone.Volume = Math.Clamp(volume, 0, 100);
+        }
+
         return Task.CompletedTask;
     }
 
     public Task ToggleZoneMuteAsync(int zoneIndex, CancellationToken cancellationToken = default)
     {
         var zone = _zones.FirstOrDefault(z => z.Index == zoneIndex);
-        if (zone != null) zone.IsMuted = !zone.IsMuted;
+        if (zone != null)
+        {
+            zone.IsMuted = !zone.IsMuted;
+        }
+
         return Task.CompletedTask;
     }
 
     public Task PlayZoneAsync(int zoneIndex, CancellationToken cancellationToken = default)
     {
         var zone = _zones.FirstOrDefault(z => z.Index == zoneIndex);
-        if (zone != null) zone.IsPlaying = true;
+        if (zone != null)
+        {
+            zone.IsPlaying = true;
+        }
+
         return Task.CompletedTask;
     }
 
     public Task PauseZoneAsync(int zoneIndex, CancellationToken cancellationToken = default)
     {
         var zone = _zones.FirstOrDefault(z => z.Index == zoneIndex);
-        if (zone != null) zone.IsPlaying = false;
+        if (zone != null)
+        {
+            zone.IsPlaying = false;
+        }
+
         return Task.CompletedTask;
     }
 
@@ -106,7 +122,7 @@ public class MockSnapDogApiClient : ISnapDogApiClient
             {
                 zone.Clients.Remove(client);
                 client.ZoneIndex = zoneIndex;
-                
+
                 var targetZone = _zones.FirstOrDefault(z => z.Index == zoneIndex);
                 targetZone?.Clients.Add(client);
                 break;
