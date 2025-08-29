@@ -297,21 +297,21 @@ namespace SnapDog2.WebUi.ApiClient.Generated
 
         /// <returns>OK</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<PublishableZoneStatePage> ZonesAsync(int? page, int? size);
+        System.Threading.Tasks.Task<ZoneStatePage> ZonesAsync(int? page, int? size);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<PublishableZoneStatePage> ZonesAsync(int? page, int? size, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<ZoneStatePage> ZonesAsync(int? page, int? size, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>OK</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<PublishableZoneState> Zones2Async(int zoneIndex);
+        System.Threading.Tasks.Task<ZoneState> Zones2Async(int zoneIndex);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<PublishableZoneState> Zones2Async(int zoneIndex, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<ZoneState> Zones2Async(int zoneIndex, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>OK</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
@@ -3655,7 +3655,7 @@ namespace SnapDog2.WebUi.ApiClient.Generated
 
         /// <returns>OK</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<PublishableZoneStatePage> ZonesAsync(int? page, int? size)
+        public virtual System.Threading.Tasks.Task<ZoneStatePage> ZonesAsync(int? page, int? size)
         {
             return ZonesAsync(page, size, System.Threading.CancellationToken.None);
         }
@@ -3663,7 +3663,7 @@ namespace SnapDog2.WebUi.ApiClient.Generated
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<PublishableZoneStatePage> ZonesAsync(int? page, int? size, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<ZoneStatePage> ZonesAsync(int? page, int? size, System.Threading.CancellationToken cancellationToken)
         {
             var client_ = _httpClient;
             var disposeClient_ = false;
@@ -3714,7 +3714,7 @@ namespace SnapDog2.WebUi.ApiClient.Generated
                         var status_ = (int)response_.StatusCode;
                         if (status_ == 200)
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<PublishableZoneStatePage>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            var objectResponse_ = await ReadObjectResponseAsync<ZoneStatePage>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
                             {
                                 throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
@@ -3753,7 +3753,7 @@ namespace SnapDog2.WebUi.ApiClient.Generated
 
         /// <returns>OK</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<PublishableZoneState> Zones2Async(int zoneIndex)
+        public virtual System.Threading.Tasks.Task<ZoneState> Zones2Async(int zoneIndex)
         {
             return Zones2Async(zoneIndex, System.Threading.CancellationToken.None);
         }
@@ -3761,7 +3761,7 @@ namespace SnapDog2.WebUi.ApiClient.Generated
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<PublishableZoneState> Zones2Async(int zoneIndex, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<ZoneState> Zones2Async(int zoneIndex, System.Threading.CancellationToken cancellationToken)
         {
             if (zoneIndex == null)
                 throw new System.ArgumentNullException("zoneIndex");
@@ -3806,7 +3806,7 @@ namespace SnapDog2.WebUi.ApiClient.Generated
                         var status_ = (int)response_.StatusCode;
                         if (status_ == 200)
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<PublishableZoneState>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            var objectResponse_ = await ReadObjectResponseAsync<ZoneState>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
                             {
                                 throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
@@ -8606,6 +8606,18 @@ namespace SnapDog2.WebUi.ApiClient.Generated
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.2.0.0 (NJsonSchema v11.1.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum PlaybackState
+    {
+
+        _0 = 0,
+
+        _1 = 1,
+
+        _2 = 2,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.2.0.0 (NJsonSchema v11.1.0.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class PlaylistInfo
     {
 
@@ -8737,123 +8749,6 @@ namespace SnapDog2.WebUi.ApiClient.Generated
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
         }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.2.0.0 (NJsonSchema v11.1.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class PublishablePlaylistInfo
-    {
-
-        [System.Text.Json.Serialization.JsonPropertyName("Index")]
-        public int Index { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("Name")]
-        public string Name { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("TrackCount")]
-        public int TrackCount { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("TotalDurationSec")]
-        public int TotalDurationSec { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("CoverArtUrl")]
-        public string CoverArtUrl { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("Source")]
-        public string Source { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.2.0.0 (NJsonSchema v11.1.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class PublishableTrackInfo
-    {
-
-        [System.Text.Json.Serialization.JsonPropertyName("Index")]
-        public int Index { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("Title")]
-        public string Title { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("Artist")]
-        public string Artist { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("Album")]
-        public string Album { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("CoverArtUrl")]
-        public string CoverArtUrl { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("Genre")]
-        public string Genre { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("TrackNumber")]
-        public int? TrackNumber { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("Year")]
-        public int? Year { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("Source")]
-        public string Source { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.2.0.0 (NJsonSchema v11.1.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class PublishableZoneState
-    {
-
-        [System.Text.Json.Serialization.JsonPropertyName("Name")]
-        public string Name { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("PlaybackState")]
-        public bool PlaybackState { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("Volume")]
-        public int Volume { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("Mute")]
-        public bool Mute { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("RepeatTrack")]
-        public bool RepeatTrack { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("RepeatPlaylist")]
-        public bool RepeatPlaylist { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("Shuffle")]
-        public bool Shuffle { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("Playlist")]
-        public PublishablePlaylistInfo Playlist { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("Track")]
-        public PublishableTrackInfo Track { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.2.0.0 (NJsonSchema v11.1.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class PublishableZoneStatePage
-    {
-
-        [System.Text.Json.Serialization.JsonPropertyName("items")]
-        public System.Collections.Generic.ICollection<PublishableZoneState> Items { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("total")]
-        public int Total { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("pageSize")]
-        public int PageSize { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("pageNumber")]
-        public int PageNumber { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("totalPages")]
-        public int TotalPages { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("hasNext")]
-        public bool HasNext { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("hasPrevious")]
-        public bool HasPrevious { get; set; }
 
     }
 
@@ -9098,6 +8993,78 @@ namespace SnapDog2.WebUi.ApiClient.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("requestId")]
         public string RequestId { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.2.0.0 (NJsonSchema v11.1.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ZoneState
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("playbackState")]
+        public PlaybackState PlaybackState { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("volume")]
+        public int Volume { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("mute")]
+        public bool Mute { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("trackRepeat")]
+        public bool TrackRepeat { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("playlistRepeat")]
+        public bool PlaylistRepeat { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("playlistShuffle")]
+        public bool PlaylistShuffle { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("snapcastGroupId")]
+        public string SnapcastGroupId { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("snapcastStreamId")]
+        public string SnapcastStreamId { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("playlist")]
+        public PlaylistInfo Playlist { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("track")]
+        public TrackInfo Track { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("clients")]
+        public System.Collections.Generic.ICollection<int> Clients { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("timestampUtc")]
+        public System.DateTimeOffset TimestampUtc { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.2.0.0 (NJsonSchema v11.1.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ZoneStatePage
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("items")]
+        public System.Collections.Generic.ICollection<ZoneState> Items { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("total")]
+        public int Total { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("pageSize")]
+        public int PageSize { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("pageNumber")]
+        public int PageNumber { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("totalPages")]
+        public int TotalPages { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("hasNext")]
+        public bool HasNext { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("hasPrevious")]
+        public bool HasPrevious { get; set; }
 
     }
 

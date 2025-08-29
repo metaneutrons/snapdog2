@@ -50,7 +50,6 @@ The MQTT integration has been fully implemented as an solution that provides bi-
 public interface IMqttService : IAsyncDisposable
 {
     Task<Result> InitializeAsync(CancellationToken cancellationToken = default);
-    Task<Result> PublishZoneStateAsync(int zoneIndex, ZoneState state, CancellationToken cancellationToken = default);
     Task<Result> PublishClientStateAsync(string clientIndex, ClientState state, CancellationToken cancellationToken = default);
     Task<Result> PublishAsync(string topic, string payload, bool retain = false, CancellationToken cancellationToken = default);
     Task<Result> SubscribeAsync(IEnumerable<string> topics, CancellationToken cancellationToken = default);

@@ -1,4 +1,5 @@
 @using SnapDog2.WebUi.ApiClient
+@using SnapDog2.WebUi.ApiClient.Models
 @inject ISnapDogApiClient ApiClient
 @inject IJSRuntime JS
 
@@ -51,8 +52,8 @@
 </div>
 
 @code {
-    [Parameter] public ZoneState Zone { get; set; } = null!;
-    [Parameter] public EventCallback<ZoneState> OnZoneChanged { get; set; }
+    [Parameter] public WebUiZoneState Zone { get; set; } = null!;
+    [Parameter] public EventCallback<WebUiZoneState> OnZoneChanged { get; set; }
     
     private bool isLoading = false;
     private int volumeValue;

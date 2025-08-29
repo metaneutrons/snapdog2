@@ -1,3 +1,5 @@
+using SnapDog2.WebUi.ApiClient.Generated;
+
 namespace SnapDog2.WebUi.ApiClient;
 
 public interface ISnapDogApiClient

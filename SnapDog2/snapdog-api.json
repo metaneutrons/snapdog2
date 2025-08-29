@@ -1573,7 +1573,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PublishableZoneStatePage"
+                  "$ref": "#/components/schemas/ZoneStatePage"
                 }
               }
             }
@@ -1613,7 +1613,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PublishableZoneState"
+                  "$ref": "#/components/schemas/ZoneState"
                 }
               }
             }
@@ -4052,6 +4052,15 @@
         },
         "additionalProperties": false
       },
+      "PlaybackState": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
       "PlaylistInfo": {
         "required": [
           "name",
@@ -4214,176 +4223,6 @@
           }
         },
         "additionalProperties": { }
-      },
-      "PublishablePlaylistInfo": {
-        "required": [
-          "Index",
-          "Name",
-          "Source",
-          "TotalDurationSec",
-          "TrackCount"
-        ],
-        "type": "object",
-        "properties": {
-          "Index": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "Name": {
-            "type": "string",
-            "nullable": true
-          },
-          "TrackCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "TotalDurationSec": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "CoverArtUrl": {
-            "type": "string",
-            "nullable": true
-          },
-          "Source": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "PublishableTrackInfo": {
-        "required": [
-          "Album",
-          "Artist",
-          "Index",
-          "Source",
-          "Title"
-        ],
-        "type": "object",
-        "properties": {
-          "Index": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "Title": {
-            "type": "string",
-            "nullable": true
-          },
-          "Artist": {
-            "type": "string",
-            "nullable": true
-          },
-          "Album": {
-            "type": "string",
-            "nullable": true
-          },
-          "CoverArtUrl": {
-            "type": "string",
-            "nullable": true
-          },
-          "Genre": {
-            "type": "string",
-            "nullable": true
-          },
-          "TrackNumber": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "Year": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "Source": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "PublishableZoneState": {
-        "required": [
-          "Mute",
-          "Name",
-          "PlaybackState",
-          "RepeatPlaylist",
-          "RepeatTrack",
-          "Shuffle",
-          "Volume"
-        ],
-        "type": "object",
-        "properties": {
-          "Name": {
-            "type": "string",
-            "nullable": true
-          },
-          "PlaybackState": {
-            "type": "boolean"
-          },
-          "Volume": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "Mute": {
-            "type": "boolean"
-          },
-          "RepeatTrack": {
-            "type": "boolean"
-          },
-          "RepeatPlaylist": {
-            "type": "boolean"
-          },
-          "Shuffle": {
-            "type": "boolean"
-          },
-          "Playlist": {
-            "$ref": "#/components/schemas/PublishablePlaylistInfo"
-          },
-          "Track": {
-            "$ref": "#/components/schemas/PublishableTrackInfo"
-          }
-        },
-        "additionalProperties": false
-      },
-      "PublishableZoneStatePage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PublishableZoneState"
-            },
-            "nullable": true
-          },
-          "total": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "pageSize": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "pageNumber": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32",
-            "readOnly": true
-          },
-          "hasNext": {
-            "type": "boolean",
-            "readOnly": true
-          },
-          "hasPrevious": {
-            "type": "boolean",
-            "readOnly": true
-          }
-        },
-        "additionalProperties": false
       },
       "ServerStats": {
         "required": [
@@ -4698,6 +4537,111 @@
           "requestId": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ZoneState": {
+        "required": [
+          "clients",
+          "mute",
+          "name",
+          "playbackState",
+          "playlistRepeat",
+          "playlistShuffle",
+          "snapcastGroupId",
+          "snapcastStreamId",
+          "trackRepeat",
+          "volume"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "playbackState": {
+            "$ref": "#/components/schemas/PlaybackState"
+          },
+          "volume": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mute": {
+            "type": "boolean"
+          },
+          "trackRepeat": {
+            "type": "boolean"
+          },
+          "playlistRepeat": {
+            "type": "boolean"
+          },
+          "playlistShuffle": {
+            "type": "boolean"
+          },
+          "snapcastGroupId": {
+            "type": "string",
+            "nullable": true
+          },
+          "snapcastStreamId": {
+            "type": "string",
+            "nullable": true
+          },
+          "playlist": {
+            "$ref": "#/components/schemas/PlaylistInfo"
+          },
+          "track": {
+            "$ref": "#/components/schemas/TrackInfo"
+          },
+          "clients": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "timestampUtc": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ZoneStatePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ZoneState"
+            },
+            "nullable": true
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "hasNext": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "hasPrevious": {
+            "type": "boolean",
+            "readOnly": true
           }
         },
         "additionalProperties": false

@@ -63,9 +63,9 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
 
     /// <summary>
     /// Cache of last published MQTT zone states to detect changes.
-    /// Key: zoneIndex, Value: last published MqttZoneState
+    /// Key: zoneIndex, Value: last published ZoneState
     /// </summary>
-    private readonly ConcurrentDictionary<int, PublishableZoneState> _lastPublishedZoneStates = new();
+    private readonly ConcurrentDictionary<int, ZoneState> _lastPublishedZoneStates = new();
 
     /// <summary>
     /// Constructs a full MQTT topic using the configured base topic.
@@ -420,12 +420,9 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
 
         try
         {
-            // Convert to simplified MQTT format
-            var mqttZoneState = PublishableZoneStateMapper.ToMqttZoneState(state);
-
             // Check if this represents a meaningful change
             var lastPublished = _lastPublishedZoneStates.GetValueOrDefault(zoneIndex);
-            if (!PublishableZoneStateMapper.HasMeaningfulChange(lastPublished, mqttZoneState))
+            if (!HasMeaningfulChange(lastPublished, state))
             {
                 // No meaningful change, skip publishing
                 return Result.Success();
@@ -434,15 +431,15 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             // Use simple zone state topic that matches blueprint pattern
             var stateTopic = BuildTopic($"zones/{zoneIndex}/state");
 
-            // Publish simplified state as JSON
+            // Publish zone state as JSON
             var stateJson = JsonSerializer.Serialize(
-                mqttZoneState,
+                state,
                 new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
             );
             await this.PublishAsync(stateTopic, stateJson, true, cancellationToken);
 
             // Cache the published state for future change detection
-            _lastPublishedZoneStates[zoneIndex] = mqttZoneState;
+            _lastPublishedZoneStates[zoneIndex] = state;
 
             return Result.Success();
         }
@@ -1249,6 +1246,46 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     }
 
     #endregion
+    /// <summary>
+    /// Determines if there's a meaningful change between two zone states that warrants publishing.
+    /// </summary>
+    private static bool HasMeaningfulChange(ZoneState? previous, ZoneState current)
+    {
+        if (previous == null) return true;
+
+        // Check for meaningful changes in key properties
+        return previous.Name != current.Name ||
+               previous.PlaybackState != current.PlaybackState ||
+               previous.Volume != current.Volume ||
+               previous.Mute != current.Mute ||
+               previous.TrackRepeat != current.TrackRepeat ||
+               previous.PlaylistRepeat != current.PlaylistRepeat ||
+               previous.PlaylistShuffle != current.PlaylistShuffle ||
+               !TrackInfoEquals(previous.Track, current.Track) ||
+               !PlaylistInfoEquals(previous.Playlist, current.Playlist);
+    }
+
+    private static bool TrackInfoEquals(TrackInfo? a, TrackInfo? b)
+    {
+        if (a == null && b == null) return true;
+        if (a == null || b == null) return false;
+
+        return a.Index == b.Index &&
+               a.Title == b.Title &&
+               a.Artist == b.Artist &&
+               a.Album == b.Album &&
+               Math.Abs((a.Progress ?? 0f) - (b.Progress ?? 0f)) < 0.01f; // Small tolerance for progress
+    }
+
+    private static bool PlaylistInfoEquals(PlaylistInfo? a, PlaylistInfo? b)
+    {
+        if (a == null && b == null) return true;
+        if (a == null || b == null) return false;
+
+        return a.Index == b.Index &&
+               a.Name == b.Name &&
+               a.TrackCount == b.TrackCount;
+    }
 }
 
 /// <summary>

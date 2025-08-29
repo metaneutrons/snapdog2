@@ -1,5 +1,7 @@
 @page "/"
 @using SnapDog2.WebUi.ApiClient
+@using SnapDog2.WebUi.ApiClient.Models
+@using SnapDog2.WebUi.ApiClient.Generated
 @inject ISnapDogApiClient ApiClient
 
 <PageTitle>SnapDog2 WebUI</PageTitle>
@@ -30,7 +32,7 @@
 </div>
 
 @code {
-    private List<ZoneState>? zones;
+    private List<WebUiZoneState>? zones;
     private bool isLoading = true;
 
     protected override async Task OnInitializedAsync()
@@ -43,13 +45,24 @@
         try
         {
             isLoading = true;
-            var zoneArray = await ApiClient.GetAllZonesAsync();
-            zones = zoneArray?.ToList() ?? new List<ZoneState>();
+            
+            // Load zones and clients in parallel
+            var zonesTask = ApiClient.GetAllZonesAsync();
+            var clientsTask = ApiClient.GetAllClientsAsync();
+            
+            await Task.WhenAll(zonesTask, clientsTask);
+            
+            var zoneArray = zonesTask.Result ?? Array.Empty<ZoneState>();
+            var clientArray = clientsTask.Result ?? Array.Empty<ClientState>();
+            
+            // Create WebUI adapter objects
+            zones = zoneArray.Select((zone, index) => 
+                new WebUiZoneState(zone, index, clientArray)).ToList();
         }
         catch (Exception)
         {
             // Log error and show fallback
-            zones = new List<ZoneState>();
+            zones = new List<WebUiZoneState>();
         }
         finally
         {
@@ -57,7 +70,7 @@
         }
     }
 
-    private async Task RefreshZones(ZoneState updatedZone)
+    private async Task RefreshZones(WebUiZoneState updatedZone)
     {
         await LoadZones();
         StateHasChanged();

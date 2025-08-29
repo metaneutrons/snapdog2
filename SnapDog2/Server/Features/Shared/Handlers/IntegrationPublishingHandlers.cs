@@ -69,7 +69,7 @@ public partial class IntegrationPublishingHandlers(
     private readonly ILogger<IntegrationPublishingHandlers> _logger = logger;
 
     // Cache for previous zone states to enable change detection
-    private readonly ConcurrentDictionary<int, PublishableZoneState> _previousZoneStates = new();
+    private readonly ConcurrentDictionary<int, ZoneState> _previousZoneStates = new();
 
     // Cache for previous client states to enable change detection
     private readonly ConcurrentDictionary<int, PublishableClientState> _previousClientStates = new();
