@@ -1,0 +1,41 @@
+@inject IJSRuntime JS
+
+<div class="theme-toggle" @onclick="ToggleTheme" title="Toggle theme">
+    @if (isDarkMode)
+    {
+        <span>☀️</span>
+    }
+    else
+    {
+        <span>🌙</span>
+    }
+</div>
+
+@code {
+    private bool isDarkMode = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Check system preference or localStorage
+            await JS.InvokeVoidAsync("eval", @"
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const stored = localStorage.getItem('theme');
+                const theme = stored || (prefersDark ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-theme', theme);
+            ");
+        }
+    }
+
+    private async Task ToggleTheme()
+    {
+        isDarkMode = !isDarkMode;
+        var theme = isDarkMode ? "dark" : "light";
+        
+        await JS.InvokeVoidAsync("eval", $@"
+            document.documentElement.setAttribute('data-theme', '{theme}');
+            localStorage.setItem('theme', '{theme}');
+        ");
+    }
+}

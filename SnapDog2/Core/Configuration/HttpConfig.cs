@@ -24,8 +24,8 @@ public class HttpConfig
     /// Port number for the HTTP server (API and WebUI).
     /// Maps to: SNAPDOG_HTTP_PORT
     /// </summary>
-    [Env(Key = "PORT", Default = 5000)]
-    public int HttpPort { get; set; } = 5000;
+    [Env(Key = "PORT", Default = 5555)]
+    public int HttpPort { get; set; } = 5555;
 
     /// <summary>
     /// Whether the API server is enabled.

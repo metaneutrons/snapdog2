@@ -14,6 +14,7 @@
 using System.CommandLine;
 using dotenv.net;
 using EnvoyConfig;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 using OpenTelemetry;
@@ -588,6 +589,41 @@ static WebApplication CreateWebApplication(string[] args)
         >();
     }
 
+    // WebUI Configuration (add after existing service registrations)
+    if (snapDogConfig.Http.WebUiEnabled)
+    {
+        builder.Services.AddRazorComponents()
+            .AddInteractiveServerComponents();
+
+        // Add anti-forgery services for enterprise security
+        builder.Services.AddAntiforgery();
+
+        // Configure forwarded headers for reverse proxy awareness
+        builder.Services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+            options.KnownNetworks.Clear();
+            options.KnownProxies.Clear();
+        });
+
+        // Register generated transport client
+        builder.Services.AddHttpClient<SnapDog2.WebUi.ApiClient.Generated.IGeneratedSnapDogClient, SnapDog2.WebUi.ApiClient.Generated.GeneratedSnapDogClient>(client =>
+        {
+            var baseUrl = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development"
+                ? $"http://localhost:{snapDogConfig.Http.HttpPort}/api/v1/"
+                : $"http://127.0.0.1:{snapDogConfig.Http.HttpPort}/api/v1/";
+
+            client.BaseAddress = new Uri(baseUrl);
+            client.Timeout = TimeSpan.FromSeconds(30);
+            client.DefaultRequestHeaders.Add("User-Agent", "SnapDog2-WebUI/1.0");
+        });
+
+        // Register business API client
+        builder.Services.AddScoped<SnapDog2.WebUi.ApiClient.ISnapDogApiClient, SnapDog2.WebUi.ApiClient.SnapDogApiClient>();
+
+        Log.Information("🌐 WebUI enabled with resilient API client configured");
+    }
+
     var app = builder.Build();
 
     // Add global exception handling as the first middleware
@@ -628,6 +664,42 @@ static WebApplication CreateWebApplication(string[] args)
                     Predicate = check => check.Tags.Contains("live"),
                 }
             );
+        }
+    }
+
+    // Add at the end of the app configuration
+    if (snapDogConfig.Http.WebUiEnabled)
+    {
+        try
+        {
+            // Use forwarded headers for reverse proxy
+            app.UseForwardedHeaders();
+
+            // Configure path base for reverse proxy
+            if (!string.IsNullOrEmpty(snapDogConfig.Http.WebUiPath) && snapDogConfig.Http.WebUiPath != "/")
+            {
+                app.UsePathBase(snapDogConfig.Http.WebUiPath);
+            }
+
+            // Configure path base for reverse proxy
+            if (!string.IsNullOrEmpty(snapDogConfig.Http.WebUiPath) && snapDogConfig.Http.WebUiPath != "/")
+            {
+                app.UsePathBase(snapDogConfig.Http.WebUiPath);
+            }
+
+            // Add anti-forgery middleware
+            app.UseAntiforgery();
+
+            // Map Razor components with base path
+            app.MapRazorComponents<SnapDog2.WebUi.App>()
+                .AddInteractiveServerRenderMode();
+
+            Log.Information("🌐 WebUI routes configured at {Path}", snapDogConfig.Http.WebUiPath);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to configure WebUI");
+            throw;
         }
     }
 

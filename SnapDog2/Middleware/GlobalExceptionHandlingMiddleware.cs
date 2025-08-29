@@ -209,11 +209,6 @@ public partial class GlobalExceptionHandlingMiddleware(
             UserMessage = userMessage,
             CorrelationId = correlationId,
             Timestamp = DateTimeOffset.UtcNow,
-            SupportInfo = new SupportInfo
-            {
-                ContactEmail = "github@schmieder.eu",
-                DocumentationUrl = "https://github.com/metaneutrons/snapdog2",
-            },
         };
     }
 
@@ -288,16 +283,6 @@ public class ErrorResponse
     public string UserMessage { get; set; } = string.Empty;
     public string CorrelationId { get; set; } = string.Empty;
     public DateTimeOffset Timestamp { get; set; }
-    public SupportInfo SupportInfo { get; set; } = new();
-}
-
-/// <summary>
-/// Support information for error responses
-/// </summary>
-public class SupportInfo
-{
-    public string ContactEmail { get; set; } = string.Empty;
-    public string DocumentationUrl { get; set; } = string.Empty;
 }
 
 /// <summary>

@@ -101,6 +101,10 @@ h1 {
     color: var(--secondary);
 }
 
+.webui-card .card-icon {
+    color: var(--primary);
+}
+
 .api-card .card-icon {
     color: var(--success);
 }

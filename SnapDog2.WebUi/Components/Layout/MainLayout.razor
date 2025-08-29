@@ -1,0 +1,19 @@
+@inherits LayoutComponentBase
+
+<ThemeToggle />
+
+<main>
+    @Body
+</main>
+
+<div id="blazor-error-ui">
+    Environment: @Environment
+    <br />
+    An error has occurred. This application may no longer respond until reloaded.
+    <a class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>
+
+@code {
+    private string Environment => System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
+}
