@@ -471,24 +471,24 @@ dotnet add SnapDog2.WebUi/SnapDog2.WebUi.csproj reference SnapDog2.WebUi.ApiClie
   </PropertyGroup>
 
   <Target Name="ValidateOpenApiSpec" BeforeTargets="GenerateApiClient">
-    <Error Text="OpenAPI specification not found at: $(OpenApiSpecPath). Run 'dotnet run --project SnapDog2.SwaggerGen' first." 
+    <Error Text="OpenAPI specification not found at: $(OpenApiSpecPath). Run 'dotnet run --project SnapDog2.SwaggerGen' first."
            Condition="!Exists('$(OpenApiSpecPath)')" />
     <Message Text="✅ OpenAPI specification found: $(OpenApiSpecPath)" Importance="high" />
   </Target>
 
-  <Target Name="GenerateApiClient" 
-          BeforeTargets="CoreCompile" 
+  <Target Name="GenerateApiClient"
+          BeforeTargets="CoreCompile"
           DependsOnTargets="ValidateOpenApiSpec"
-          Inputs="$(OpenApiSpecPath)" 
+          Inputs="$(OpenApiSpecPath)"
           Outputs="$(GeneratedClientPath)">
-    
+
     <Message Text="🔄 Generating API client from OpenAPI specification..." Importance="high" />
-    
+
     <MakeDir Directories="$(MSBuildProjectDirectory)/Generated" />
-    
+
     <Exec Command="$(NSwagExe_Net90) openapi2csclient /input:&quot;$(OpenApiSpecPath)&quot; /output:&quot;$(GeneratedClientPath)&quot; /namespace:SnapDog2.WebUi.ApiClient.Generated /className:GeneratedSnapDogClient /generateClientInterfaces:true /clientInterfaceName:IGeneratedSnapDogClient /injectHttpClient:true /useBaseUrl:false /generateExceptionClasses:true /exceptionClass:ApiException /wrapDtoExceptions:true /useHttpClientCreationMethod:false /generateOptionalParameters:true /generateJsonMethods:false /enforceFlagEnums:false /nullValue:Null /generateDefaultValues:true /generateDataAnnotations:false /excludedTypeNames: /handleReferences:false /generateImmutableArrayProperties:false /generateImmutableDictionaryProperties:false /jsonLibrary:SystemTextJson /arrayType:System.Collections.Generic.ICollection /dictionaryType:System.Collections.Generic.IDictionary /arrayInstanceType:System.Collections.Generic.List /dictionaryInstanceType:System.Collections.Generic.Dictionary /arrayBaseType:System.Collections.Generic.ICollection /dictionaryBaseType:System.Collections.Generic.IDictionary"
           ContinueOnError="false" />
-    
+
     <Message Text="✅ API client generated successfully: $(GeneratedClientPath)" Importance="high" />
   </Target>
 
@@ -724,11 +724,11 @@ public interface ISnapDogApiClient
     Task<ZoneState> GetZoneAsync(int zoneIndex, CancellationToken cancellationToken = default);
     Task SetZoneVolumeAsync(int zoneIndex, int volume, CancellationToken cancellationToken = default);
     Task ToggleZoneMuteAsync(int zoneIndex, CancellationToken cancellationToken = default);
-    
-    // Client Operations  
+
+    // Client Operations
     Task<ClientState[]> GetAllClientsAsync(CancellationToken cancellationToken = default);
     Task AssignClientToZoneAsync(int clientIndex, int zoneIndex, CancellationToken cancellationToken = default);
-    
+
     // Playlist Operations
     Task<PlaylistInfo[]> GetPlaylistsAsync(CancellationToken cancellationToken = default);
     Task SetZonePlaylistAsync(int zoneIndex, int playlistIndex, CancellationToken cancellationToken = default);
@@ -748,7 +748,7 @@ namespace SnapDog2.WebUi.ApiClient;
 /// Enterprise API client implementation with resilience, logging, and business logic.
 /// Wraps the generated transport client with enterprise patterns.
 /// </summary>
-public class SnapDogApiClient : ISnapDogApiClient
+public partial class SnapDogApiClient : ISnapDogApiClient
 {
     private readonly IGeneratedSnapDogClient _generatedClient;
     private readonly ILogger<SnapDogApiClient> _logger;
@@ -767,9 +767,9 @@ public class SnapDogApiClient : ISnapDogApiClient
     {
         return await _retryPolicy.ExecuteAsync(async () =>
         {
-            _logger.LogDebug("Fetching all zones");
+            LogFetchingZones();
             var zones = await _generatedClient.GetZonesAsync(cancellationToken);
-            _logger.LogDebug("Retrieved {ZoneCount} zones", zones.Count);
+            LogRetrievedZones(zones.Count);
             return zones.ToArray();
         });
     }
@@ -782,16 +782,16 @@ public class SnapDogApiClient : ISnapDogApiClient
 
         await _retryPolicy.ExecuteAsync(async () =>
         {
-            _logger.LogInformation("Assigning client {ClientIndex} to zone {ZoneIndex}", clientIndex, zoneIndex);
-            
+            LogAssigningClient(clientIndex, zoneIndex);
+
             try
             {
                 await _generatedClient.AssignClientToZoneAsync(clientIndex, zoneIndex, cancellationToken);
-                _logger.LogInformation("Successfully assigned client {ClientIndex} to zone {ZoneIndex}", clientIndex, zoneIndex);
+                LogClientAssigned(clientIndex, zoneIndex);
             }
             catch (ApiException ex) when (ex.StatusCode == (int)HttpStatusCode.NotFound)
             {
-                _logger.LogWarning("Client {ClientIndex} or zone {ZoneIndex} not found", clientIndex, zoneIndex);
+                LogClientOrZoneNotFound(clientIndex, zoneIndex);
                 throw new InvalidOperationException($"Client {clientIndex} or zone {zoneIndex} not found", ex);
             }
         });
@@ -811,6 +811,21 @@ public class SnapDogApiClient : ISnapDogApiClient
                 });
     }
 
+    [LoggerMessage(EventId = 1, Level = LogLevel.Debug, Message = "Fetching all zones")]
+    private partial void LogFetchingZones();
+
+    [LoggerMessage(EventId = 2, Level = LogLevel.Debug, Message = "Retrieved {ZoneCount} zones")]
+    private partial void LogRetrievedZones(int ZoneCount);
+
+    [LoggerMessage(EventId = 3, Level = LogLevel.Information, Message = "Assigning client {ClientIndex} to zone {ZoneIndex}")]
+    private partial void LogAssigningClient(int ClientIndex, int ZoneIndex);
+
+    [LoggerMessage(EventId = 4, Level = LogLevel.Information, Message = "Successfully assigned client {ClientIndex} to zone {ZoneIndex}")]
+    private partial void LogClientAssigned(int ClientIndex, int ZoneIndex);
+
+    [LoggerMessage(EventId = 5, Level = LogLevel.Warning, Message = "Client {ClientIndex} or zone {ZoneIndex} not found")]
+    private partial void LogClientOrZoneNotFound(int ClientIndex, int ZoneIndex);
+
     // Implement other methods...
 }
 ```
@@ -829,10 +844,10 @@ if (snapDogConfig.Http.WebUiEnabled)
     // Register generated transport client
     builder.Services.AddHttpClient<IGeneratedSnapDogClient, GeneratedSnapDogClient>(client =>
     {
-        var baseUrl = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development" 
+        var baseUrl = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development"
             ? $"http://localhost:{snapDogConfig.Http.HttpPort}/api/v1/"
             : $"http://127.0.0.1:{snapDogConfig.Http.HttpPort}/api/v1/";
-            
+
         client.BaseAddress = new Uri(baseUrl);
         client.Timeout = TimeSpan.FromSeconds(30);
         client.DefaultRequestHeaders.Add("User-Agent", "SnapDog2-WebUI/1.0");
@@ -907,10 +922,8 @@ dotnet build SnapDog2.sln
 dotnet build SnapDog2
 
 # Generate swagger.json using dedicated tool
+# Creates swagger.json in root of code base
 dotnet run --project SnapDog2.SwaggerGen
-
-# Copy to standardized location for API client generation
-cp SnapDog2.SwaggerGen/swagger.json SnapDog2/snapdog-api.json
 ```
 
 **Step 3: Build API Client (with automatic generation)**
