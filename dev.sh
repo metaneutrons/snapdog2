@@ -37,6 +37,12 @@ restart_dev() {
     start_dev
 }
 
+restart_app() {
+    echo "🔄 Restarting SnapDog2 app only (full recreation)..."
+    docker compose -f docker-compose.dev.yml up -d --force-recreate --no-deps app
+    echo "✅ App restarted with latest code changes"
+}
+
 show_logs() {
     docker compose -f docker-compose.dev.yml logs -f
 }
@@ -65,15 +71,16 @@ show_help() {
     echo "Usage: $0 [command]"
     echo ""
     echo "Commands:"
-    echo "  start      Start development environment"
-    echo "  stop       Stop development environment"
-    echo "  restart    Restart development environment"
-    echo "  status     Show service status"
-    echo "  logs       Show logs"
-    echo "  urls       Show service URLs"
-    echo "  clean      Clean up containers and volumes"
-    echo "  test       Run tests with services"
-    echo "  help       Show this help"
+    echo "  start        Start development environment"
+    echo "  stop         Stop development environment"
+    echo "  restart      Restart development environment"
+    echo "  restart-app  Restart only SnapDog2 app (fast code reload)"
+    echo "  status       Show service status"
+    echo "  logs         Show logs"
+    echo "  urls         Show service URLs"
+    echo "  clean        Clean up containers and volumes"
+    echo "  test         Run tests with services"
+    echo "  help         Show this help"
     echo ""
 }
 
@@ -87,6 +94,9 @@ case "${1:-start}" in
         ;;
     "restart")
         restart_dev
+        ;;
+    "restart-app")
+        restart_app
         ;;
     "status")
         show_status
