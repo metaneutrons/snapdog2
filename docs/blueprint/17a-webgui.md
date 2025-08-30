@@ -466,7 +466,7 @@ dotnet add SnapDog2.WebUi/SnapDog2.WebUi.csproj reference SnapDog2.WebUi.ApiClie
 
   <!-- Enterprise-Grade NSwag API Client Generation -->
   <PropertyGroup>
-    <OpenApiSpecPath>$(MSBuildProjectDirectory)/../SnapDog2/snapdog-api.json</OpenApiSpecPath>
+    <OpenApiSpecPath>$(MSBuildProjectDirectory)/../SnapDog2/swagger.json</OpenApiSpecPath>
     <GeneratedClientPath>$(MSBuildProjectDirectory)/Generated/SnapDogApiClient.cs</GeneratedClientPath>
   </PropertyGroup>
 
