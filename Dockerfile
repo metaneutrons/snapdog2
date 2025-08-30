@@ -57,9 +57,12 @@ COPY ["Directory.Packages.props", "./"]
 COPY ["global.json", "./"]
 COPY ["stylecop.json", "./"]
 COPY ["nuget.config", "./"]
+COPY [".config/dotnet-tools.json", "./.config/"]
 COPY ["SnapDog2/SnapDog2.csproj", "./SnapDog2/"]
 COPY ["SnapDog2.Tests/SnapDog2.Tests.csproj", "./SnapDog2.Tests/"]
+COPY ["SnapDog2.WebUi.ApiClient/SnapDog2.WebUi.ApiClient.csproj", "./SnapDog2.WebUi.ApiClient/"]
 RUN dotnet restore
+RUN dotnet tool restore
 
 # Copy the rest of the code
 COPY . .

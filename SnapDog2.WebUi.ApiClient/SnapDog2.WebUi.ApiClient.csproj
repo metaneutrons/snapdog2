@@ -37,7 +37,7 @@
     <MakeDir Directories="$(MSBuildProjectDirectory)/Generated" />
 
     <Exec
-      Command="dotnet $(NuGetPackageRoot)nswag.msbuild/14.2.0/tools/Net90/dotnet-nswag.dll openapi2csclient /input:&quot;$(OpenApiSpecPath)&quot; /output:&quot;$(GeneratedClientPath)&quot; /namespace:SnapDog2.WebUi.ApiClient.Generated /className:GeneratedSnapDogClient /generateClientInterfaces:true /injectHttpClient:true /useBaseUrl:false /generateExceptionClasses:true /exceptionClass:ApiException /jsonLibrary:SystemTextJson"
+      Command="dotnet nswag openapi2csclient /input:&quot;$(OpenApiSpecPath)&quot; /output:&quot;$(GeneratedClientPath)&quot; /namespace:SnapDog2.WebUi.ApiClient.Generated /className:GeneratedSnapDogClient /generateClientInterfaces:true /injectHttpClient:true /useBaseUrl:false /generateExceptionClasses:true /exceptionClass:ApiException /jsonLibrary:SystemTextJson"
       ContinueOnError="false" />
 
     <Message Text="✅ API client generated successfully: $(GeneratedClientPath)" Importance="high" />
