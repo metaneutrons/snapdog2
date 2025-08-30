@@ -619,7 +619,7 @@ static WebApplication CreateWebApplication(string[] args)
         });
 
         // Register business API client wrapper
-        builder.Services.AddScoped<SnapDog2.WebUi.ApiClient.ISnapDogApiClient, SnapDog2.WebUi.ApiClient.RealSnapDogApiClient>();
+        builder.Services.AddScoped<SnapDog2.WebUi.ApiClient.ISnapDogApiClient, SnapDog2.WebUi.ApiClient.SnapDogApiClient>();
 
         Log.Information("🌐 WebUI enabled with resilient API client configured");
     }

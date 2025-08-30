@@ -2,11 +2,11 @@ using SnapDog2.WebUi.ApiClient.Generated;
 
 namespace SnapDog2.WebUi.ApiClient;
 
-public class RealSnapDogApiClient : ISnapDogApiClient
+public class SnapDogApiClient : ISnapDogApiClient
 {
     private readonly IGeneratedSnapDogClient _client;
 
-    public RealSnapDogApiClient(IGeneratedSnapDogClient client)
+    public SnapDogApiClient(IGeneratedSnapDogClient client)
     {
         _client = client;
     }

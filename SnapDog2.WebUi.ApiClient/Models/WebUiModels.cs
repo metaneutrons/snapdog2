@@ -24,12 +24,12 @@ public class WebUiZoneState
     public PlaybackState PlaybackState => _zoneState.PlaybackState;
     public bool TrackRepeat => _zoneState.TrackRepeat;
     public bool PlaylistRepeat => _zoneState.PlaylistRepeat;
-    
+
     public TrackInfo? CurrentTrack => _zoneState.Track;
     public bool IsPlaying => _zoneState.PlaybackState == PlaybackState._1; // Assuming 1 = Playing
     public bool IsMuted => _zoneState.Mute;
-    
-    public IEnumerable<WebUiClientState> Clients => 
+
+    public IEnumerable<WebUiClientState> Clients =>
         _clientStates.Where(c => _zoneState.Clients?.Contains(c.Id) == true)
                     .Select(c => new WebUiClientState(c));
 }
