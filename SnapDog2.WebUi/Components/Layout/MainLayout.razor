@@ -1,4 +1,5 @@
 @inherits LayoutComponentBase
+@inject IJSRuntime JSRuntime
 
 <div class="theme-toggle" @onclick="ToggleTheme">
     @(isDarkMode ? "☀️" : "🌙")
@@ -11,23 +12,26 @@
 @code {
     private bool isDarkMode = false;
 
-    protected override void OnInitialized()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        // Check system preference or localStorage
-        isDarkMode = false; // Default to light mode for now
-        UpdateTheme();
+        if (firstRender)
+        {
+            // Check system preference
+            isDarkMode = await JSRuntime.InvokeAsync<bool>("matchMedia", "(prefers-color-scheme: dark)");
+            await UpdateTheme();
+            StateHasChanged();
+        }
     }
 
-    private void ToggleTheme()
+    private async Task ToggleTheme()
     {
         isDarkMode = !isDarkMode;
-        UpdateTheme();
+        await UpdateTheme();
     }
 
-    private void UpdateTheme()
+    private async Task UpdateTheme()
     {
         var theme = isDarkMode ? "dark" : "light";
-        // This would normally use JS interop to set document.documentElement.setAttribute("data-theme", theme)
-        // For now, we'll implement basic theme switching
+        await JSRuntime.InvokeVoidAsync("eval", $"document.documentElement.setAttribute('data-theme', '{theme}')");
     }
 }
