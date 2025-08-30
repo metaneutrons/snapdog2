@@ -1,7 +1,33 @@
 @inherits LayoutComponentBase
 
-<ThemeToggle />
+<div class="theme-toggle" @onclick="ToggleTheme">
+    @(isDarkMode ? "☀️" : "🌙")
+</div>
 
 <main>
     @Body
 </main>
+
+@code {
+    private bool isDarkMode = false;
+
+    protected override void OnInitialized()
+    {
+        // Check system preference or localStorage
+        isDarkMode = false; // Default to light mode for now
+        UpdateTheme();
+    }
+
+    private void ToggleTheme()
+    {
+        isDarkMode = !isDarkMode;
+        UpdateTheme();
+    }
+
+    private void UpdateTheme()
+    {
+        var theme = isDarkMode ? "dark" : "light";
+        // This would normally use JS interop to set document.documentElement.setAttribute("data-theme", theme)
+        // For now, we'll implement basic theme switching
+    }
+}

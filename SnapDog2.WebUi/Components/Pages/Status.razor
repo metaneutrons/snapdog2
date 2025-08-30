@@ -1,0 +1,179 @@
+@page "/status"
+@using SnapDog2.WebUi.ApiClient
+@inject ISnapDogApiClient ApiClient
+
+<PageTitle>System Status - SnapDog2</PageTitle>
+
+<h1 class="text-h1">System Status</h1>
+
+<div class="zones-container">
+    <div class="zone-section">
+        <h2 class="text-h2">System Health</h2>
+        <div class="status-grid">
+            <div class="status-item">
+                <span class="text-h3">Zones</span>
+                <span class="text-body">@zonesCount total</span>
+            </div>
+            <div class="status-item">
+                <span class="text-h3">Clients</span>
+                <span class="text-body">@clientsCount total (@connectedClients connected)</span>
+            </div>
+            <div class="status-item">
+                <span class="text-h3">API Status</span>
+                <span class="text-body @(apiHealthy ? "status-connected" : "status-disconnected")">
+                    @(apiHealthy ? "Healthy" : "Unhealthy")
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="zone-section">
+        <h2 class="text-h2">Configuration</h2>
+        <div class="config-info">
+            <p class="text-body">
+                <strong>Environment:</strong> @Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")<br/>
+                <strong>Version:</strong> 2.0.0<br/>
+                <strong>Build:</strong> Development<br/>
+                <strong>WebUI Path:</strong> @Environment.GetEnvironmentVariable("SNAPDOG_HTTP_WEBUIPATH")
+            </p>
+        </div>
+    </div>
+
+    @if (zones != null)
+    {
+        <div class="zone-section">
+            <h2 class="text-h2">Zone Details</h2>
+            @foreach (var zone in zones)
+            {
+                <div class="status-zone">
+                    <h3 class="text-h3">@zone.Name (Zone @zone.Index)</h3>
+                    <div class="zone-details">
+                        <span class="status-indicator @(zone.IsPlaying ? "status-connected" : "status-disconnected")"></span>
+                        <span>@(zone.IsPlaying ? "Playing" : "Stopped")</span>
+                        <span>Volume: @zone.Volume%</span>
+                        <span>@(zone.IsMuted ? "Muted" : "Unmuted")</span>
+                        <span>Clients: @zone.ClientIndices.Length</span>
+                    </div>
+                    @if (zone.CurrentTrack != null)
+                    {
+                        <div class="track-details">
+                            <strong>Now Playing:</strong> @zone.CurrentTrack.Artist - @zone.CurrentTrack.Title
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+
+    @if (clients != null)
+    {
+        <div class="zone-section">
+            <h2 class="text-h2">Client Details</h2>
+            @foreach (var client in clients)
+            {
+                <div class="status-client">
+                    <span class="status-indicator @(client.IsConnected ? "status-connected" : "status-disconnected")"></span>
+                    <span class="text-h3">@client.Name</span>
+                    <span>Zone: @(client.ZoneIndex?.ToString() ?? "Unassigned")</span>
+                    <span>Volume: @client.Volume%</span>
+                    <span>@(client.IsMuted ? "Muted" : "Unmuted")</span>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<style>
+.status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.status-item {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+}
+
+.status-zone, .status-client {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    margin: 0.5rem 0;
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+}
+
+.zone-details {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.track-details {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+}
+
+.config-info {
+    padding: 1rem;
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+}
+</style>
+
+@code {
+    private ZoneState[]? zones;
+    private ClientState[]? clients;
+    private int zonesCount = 0;
+    private int clientsCount = 0;
+    private int connectedClients = 0;
+    private bool apiHealthy = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadStatusData();
+    }
+
+    private async Task LoadStatusData()
+    {
+        try
+        {
+            // Load counts using specialized endpoints
+            var zonesCountTask = ApiClient.GetZonesCountAsync();
+            var clientsCountTask = ApiClient.GetClientsCountAsync();
+            
+            // Load detailed data
+            var zonesTask = ApiClient.GetAllZonesAsync();
+            var clientsTask = ApiClient.GetAllClientsAsync();
+
+            await Task.WhenAll(zonesCountTask, clientsCountTask, zonesTask, clientsTask);
+
+            zonesCount = await zonesCountTask;
+            clientsCount = await clientsCountTask;
+            zones = await zonesTask;
+            clients = await clientsTask;
+
+            connectedClients = clients?.Count(c => c.IsConnected) ?? 0;
+            apiHealthy = true;
+        }
+        catch (Exception)
+        {
+            apiHealthy = false;
+            // Use fallback values
+            zonesCount = zones?.Length ?? 0;
+            clientsCount = clients?.Length ?? 0;
+            connectedClients = clients?.Count(c => c.IsConnected) ?? 0;
+        }
+    }
+}

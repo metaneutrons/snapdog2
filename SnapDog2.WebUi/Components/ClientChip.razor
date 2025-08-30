@@ -1,24 +1,33 @@
-@using SnapDog2.WebUi.ApiClient.Models
-@inject IJSRuntime JS
+@using SnapDog2.WebUi.ApiClient
 
-<div class="client-chip" 
-     draggable="true" 
-     @ondragstart="OnDragStart"
-     @ondragend="OnDragEnd">
+<div class="client-chip @(isDragging ? "dragging" : "")"
+     draggable="true"
+     @ondragstart="HandleDragStart"
+     @ondragend="HandleDragEnd">
+    
     <div class="status-indicator @(Client.IsConnected ? "status-connected" : "status-disconnected")"></div>
     <span class="text-h3">@Client.Name</span>
+    
+    @if (Client.IsMuted)
+    {
+        <span style="margin-left: 0.5rem;">🔇</span>
+    }
 </div>
 
 @code {
-    [Parameter] public WebUiClientState Client { get; set; } = null!;
-    
-    private async Task OnDragStart(DragEventArgs e)
+    [Parameter] public ClientState Client { get; set; } = null!;
+    [Parameter] public EventCallback<int> OnDragStart { get; set; }
+
+    private bool isDragging = false;
+
+    private async Task HandleDragStart(DragEventArgs e)
     {
-        await JS.InvokeVoidAsync("setDragData", Client.Index.ToString());
+        isDragging = true;
+        await OnDragStart.InvokeAsync(Client.Index);
     }
-    
-    private void OnDragEnd(DragEventArgs e)
+
+    private void HandleDragEnd(DragEventArgs e)
     {
-        // Cleanup if needed
+        isDragging = false;
     }
 }

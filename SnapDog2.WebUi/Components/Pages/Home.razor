@@ -1,0 +1,201 @@
+@page "/"
+@using SnapDog2.WebUi.ApiClient
+@inject ISnapDogApiClient ApiClient
+@rendermode InteractiveServer
+
+<PageTitle>SnapDog2</PageTitle>
+
+<h1 class="text-h1">SnapDog2 Multi-Room Audio</h1>
+
+<div class="zones-container">
+    @if (zones != null && clients != null)
+    {
+        @foreach (var zone in zones)
+        {
+            <ZoneSection Zone="zone" 
+                        Clients="GetClientsForZone(zone.Index)" 
+                        AllClients="clients"
+                        OnClientMoved="HandleClientMoved"
+                        OnVolumeChanged="HandleVolumeChanged"
+                        OnMuteToggled="HandleMuteToggled"
+                        OnPlayPause="HandlePlayPause"
+                        OnNextTrack="HandleNextTrack"
+                        OnPreviousTrack="HandlePreviousTrack"
+                        @key="zone.Index" />
+        }
+
+        @if (GetUnassignedClients().Any())
+        {
+            <div class="zone-section">
+                <h2 class="text-h2">Unassigned Clients</h2>
+                <div class="clients-zone">
+                    <div class="clients-grid">
+                        @foreach (var client in GetUnassignedClients())
+                        {
+                            <ClientChip Client="client" 
+                                       OnDragStart="HandleUnassignedClientDragStart"
+                                       @key="client.Index" />
+                        }
+                    </div>
+                    <p class="text-small" style="color: var(--color-text-secondary); margin-top: 1rem;">
+                        Drag clients from here to assign them to zones
+                    </p>
+                </div>
+            </div>
+        }
+    }
+    else if (isLoading)
+    {
+        <div class="loading">Loading zones and clients...</div>
+    }
+    else if (error != null)
+    {
+        <div class="error">Error: @error</div>
+        <button class="control-button" @onclick="LoadData" style="margin-top: 1rem;">
+            Retry
+        </button>
+    }
+</div>
+
+@code {
+    private ZoneState[]? zones;
+    private ClientState[]? clients;
+    private bool isLoading = true;
+    private string? error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            isLoading = true;
+            error = null;
+
+            var zonesTask = ApiClient.GetAllZonesAsync();
+            var clientsTask = ApiClient.GetAllClientsAsync();
+
+            await Task.WhenAll(zonesTask, clientsTask);
+
+            zones = await zonesTask;
+            clients = await clientsTask;
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private ClientState[] GetClientsForZone(int zoneIndex)
+    {
+        if (clients == null) return Array.Empty<ClientState>();
+        return clients.Where(c => c.ZoneIndex == zoneIndex).ToArray();
+    }
+
+    private ClientState[] GetUnassignedClients()
+    {
+        if (clients == null) return Array.Empty<ClientState>();
+        return clients.Where(c => c.ZoneIndex == null).ToArray();
+    }
+
+    private void HandleUnassignedClientDragStart(int clientIndex)
+    {
+        // This is handled by the individual ClientChip components
+        // The drag data is managed at the ZoneSection level
+    }
+
+    private async Task HandleClientMoved((int clientIndex, int targetZoneIndex) args)
+    {
+        try
+        {
+            await ApiClient.AssignClientToZoneAsync(args.clientIndex, args.targetZoneIndex);
+            await LoadData(); // Refresh data after successful move
+        }
+        catch (Exception ex)
+        {
+            error = $"Failed to move client: {ex.Message}";
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleVolumeChanged((int zoneIndex, int volume) args)
+    {
+        try
+        {
+            await ApiClient.SetZoneVolumeAsync(args.zoneIndex, args.volume);
+        }
+        catch (Exception ex)
+        {
+            error = $"Failed to set volume: {ex.Message}";
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleMuteToggled(int zoneIndex)
+    {
+        try
+        {
+            await ApiClient.ToggleZoneMuteAsync(zoneIndex);
+            await LoadData(); // Refresh to get updated mute state
+        }
+        catch (Exception ex)
+        {
+            error = $"Failed to toggle mute: {ex.Message}";
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandlePlayPause((int zoneIndex, bool isPlaying) args)
+    {
+        try
+        {
+            if (args.isPlaying)
+                await ApiClient.PauseZoneAsync(args.zoneIndex);
+            else
+                await ApiClient.PlayZoneAsync(args.zoneIndex);
+            
+            await LoadData(); // Refresh to get updated play state
+        }
+        catch (Exception ex)
+        {
+            error = $"Failed to toggle playback: {ex.Message}";
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleNextTrack(int zoneIndex)
+    {
+        try
+        {
+            await ApiClient.NextTrackAsync(zoneIndex);
+            await LoadData(); // Refresh to get updated track info
+        }
+        catch (Exception ex)
+        {
+            error = $"Failed to skip track: {ex.Message}";
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandlePreviousTrack(int zoneIndex)
+    {
+        try
+        {
+            await ApiClient.PreviousTrackAsync(zoneIndex);
+            await LoadData(); // Refresh to get updated track info
+        }
+        catch (Exception ex)
+        {
+            error = $"Failed to go to previous track: {ex.Message}";
+            StateHasChanged();
+        }
+    }
+}
