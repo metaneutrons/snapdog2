@@ -64,6 +64,7 @@ dotnet husky run --group build
 - `./dev.sh start` - Start full development environment
 - `./dev.sh stop` - Stop all services
 - `./dev.sh restart` - Quick restart
+- `./dev.sh restart-app` - Restart only SnapDog2 app (fast code reload)
 - `./dev.sh status` - Show status of all services
 - `./dev.sh logs` - Show logs from all services
 

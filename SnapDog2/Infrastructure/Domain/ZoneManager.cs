@@ -397,13 +397,35 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     {
         LogGetStateAsyncCalled(this._zoneIndex);
 
-        await this._stateLock.WaitAsync().ConfigureAwait(false);
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+
         try
         {
-            // Update state from Snapcast if available
-            await this.UpdateStateFromSnapcastAsync().ConfigureAwait(false);
+            await this._stateLock.WaitAsync(cts.Token).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            return Result<ZoneState>.Failure($"Zone {this._zoneIndex} state retrieval timed out waiting for lock");
+        }
+
+        try
+        {
+            // Update state from Snapcast if available with timeout
+            var updateTask = this.UpdateStateFromSnapcastAsync();
+            var completedTask = await Task.WhenAny(updateTask, Task.Delay(3000, cts.Token)).ConfigureAwait(false);
+
+            if (completedTask != updateTask)
+            {
+                LogGetStateAsyncTimeout(this._zoneIndex);
+                // Return current state without update if timeout
+                return Result<ZoneState>.Success(this._currentState with { TimestampUtc = DateTime.UtcNow });
+            }
 
             return Result<ZoneState>.Success(this._currentState with { TimestampUtc = DateTime.UtcNow });
+        }
+        catch (OperationCanceledException)
+        {
+            return Result<ZoneState>.Failure($"Zone {this._zoneIndex} state retrieval timed out");
         }
         finally
         {
@@ -1896,6 +1918,9 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     [LoggerMessage(EventId = 6502, Level = LogLevel.Debug, Message = "GetStateAsync: Called for zone {ZoneIndex}")]
     private partial void LogGetStateAsyncCalled(int ZoneIndex);
+
+    [LoggerMessage(EventId = 6503, Level = LogLevel.Warning, Message = "GetStateAsync: Timeout for zone {ZoneIndex} - returning cached state")]
+    private partial void LogGetStateAsyncTimeout(int ZoneIndex);
 
     [LoggerMessage(
         EventId = 6503,

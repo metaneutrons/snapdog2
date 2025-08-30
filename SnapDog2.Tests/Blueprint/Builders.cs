@@ -30,6 +30,7 @@ public abstract class FeatureBuilder<TBuilder>
     protected string? _httpMethod;
     protected string? _apiPath;
     protected string? _mqttTopic;
+    protected Type? _apiReturnType;
 
     protected FeatureBuilder(BlueprintBuilder blueprintBuilder, string id)
     {
@@ -117,6 +118,13 @@ public abstract class FeatureBuilder<TBuilder>
         return Api();
     }
 
+    // API return type method
+    public TBuilder ApiReturns<T>()
+    {
+        _apiReturnType = typeof(T);
+        return (TBuilder)this;
+    }
+
     // Documentation methods
     public TBuilder Description(string description)
     {
@@ -186,6 +194,7 @@ public class CommandBuilder : FeatureBuilder<CommandBuilder>
             HttpMethod = _httpMethod,
             ApiPath = _apiPath,
             MqttTopic = _mqttTopic,
+            ApiReturnType = _apiReturnType,
         };
 
         _blueprintBuilder.AddCommand(command);
@@ -232,6 +241,7 @@ public class StatusBuilder : FeatureBuilder<StatusBuilder>
             HttpMethod = _httpMethod,
             ApiPath = _apiPath,
             MqttTopic = _mqttTopic,
+            ApiReturnType = _apiReturnType,
         };
 
         _blueprintBuilder.AddStatus(status);

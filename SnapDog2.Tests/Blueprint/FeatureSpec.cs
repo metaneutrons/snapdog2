@@ -46,6 +46,7 @@ public record CommandSpec(string Id) : FeatureSpec(Id)
     public string? HttpMethod { get; init; }
     public string? ApiPath { get; init; }
     public string? MqttTopic { get; init; }
+    public Type? ApiReturnType { get; init; }
 }
 
 /// <summary>
@@ -56,6 +57,7 @@ public record StatusSpec(string Id) : FeatureSpec(Id)
     public string? HttpMethod { get; init; }
     public string? ApiPath { get; init; }
     public string? MqttTopic { get; init; }
+    public Type? ApiReturnType { get; init; }
 }
 
 /// <summary>
