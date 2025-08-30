@@ -1,6 +1,6 @@
-using Microsoft.Extensions.Logging;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace SnapDog2.WebUi.ApiClient;
 
@@ -12,14 +12,14 @@ public partial class SnapDogApiClient : ISnapDogApiClient
     private readonly HttpClient _httpClient;
     private readonly ILogger<SnapDogApiClient> _logger;
     private readonly JsonSerializerOptions _jsonOptions;
-    
+
     // Mock state that actually changes
     private static readonly List<ZoneState> _mockZones = new()
     {
-        new(1, "Living Room", false, false, 75, 
+        new(1, "Living Room", false, false, 75,
             new TrackInfo("Sample Track", "Sample Artist", "Sample Album", TimeSpan.FromMinutes(3), TimeSpan.FromSeconds(45)),
             new[] { 1, 2 }),
-        new(2, "Kitchen", true, false, 60, 
+        new(2, "Kitchen", true, false, 60,
             new TrackInfo("Another Track", "Another Artist", "Another Album", TimeSpan.FromMinutes(4), TimeSpan.FromMinutes(1)),
             new[] { 3 }),
         new(3, "Bedroom", false, true, 0, null, Array.Empty<int>())
@@ -52,7 +52,11 @@ public partial class SnapDogApiClient : ISnapDogApiClient
     {
         await Task.Delay(50, cancellationToken);
         var zone = _mockZones.FirstOrDefault(z => z.Index == zoneIndex);
-        if (zone == null) throw new InvalidOperationException($"Zone {zoneIndex} not found");
+        if (zone == null)
+        {
+            throw new InvalidOperationException($"Zone {zoneIndex} not found");
+        }
+
         return zone;
     }
 
