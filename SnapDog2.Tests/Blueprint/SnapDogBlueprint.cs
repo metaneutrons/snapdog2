@@ -44,6 +44,20 @@ public static class SnapDogBlueprint
         .Post("/api/v1/zones/{zoneIndex:int}/stop")
         .Description("Stop playback in a zone")
         //
+        // === CONFIGURATION QUERIES ===
+        //
+        .Query("ZONE_COUNT")
+        .Global()
+        .Get("/api/v1/zones/count")
+        .Returns<int>()
+        .Description("Get total number of configured zones")
+        //
+        .Query("CLIENT_COUNT")
+        .Global()
+        .Get("/api/v1/clients/count")
+        .Returns<int>()
+        .Description("Get total number of configured clients")
+        //
         // === VOLUME COMMANDS ===
         //
         .Command("VOLUME")

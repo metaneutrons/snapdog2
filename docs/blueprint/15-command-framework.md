@@ -36,7 +36,9 @@ For each level, this section defines:
 | `VERSION_INFO`  | Software version information | `VersionDetails` object (`Core.Models`)   | Status (Publish) | Contains version, build date etc. |
 | `SERVER_STATS`  | Server performance stats     | `ServerStats` object (`Core.Models`)      | Status (Publish) | CPU, Memory, Uptime               |
 | `ZONES_INFO`    | Available zones list         | JSON `ZoneIndex[]` (int array, 1-based)   | Status (Publish) | List of configured zone indices   |
+| `ZONE_COUNT`   | Total configured zones count | `Count` (int)                             | Status (Publish) | Number of configured zones        |
 | `CLIENTS_INFO`  | Available clients list       | JSON `ClientIndex[]` (int array, 1-based) | Status (Publish) | List of configured client indices |
+| `CLIENT_COUNT` | Total configured clients count | `Count` (int)                           | Status (Publish) | Number of configured clients      |
 
 *(The C# Record definitions for `ErrorDetails`, `VersionDetails`, `ServerStats` are implemented in `SnapDog2.Core.Models` namespace)*
 

@@ -18,6 +18,7 @@ using Cortex.Mediator;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SnapDog2.Api.Models;
+using SnapDog2.Core.Attributes;
 using SnapDog2.Core.Models;
 using SnapDog2.Server.Features.Zones.Commands.Control;
 using SnapDog2.Server.Features.Zones.Commands.Playback;
@@ -38,7 +39,6 @@ using SnapDog2.Server.Features.Zones.Queries;
 /// </summary>
 [ApiController]
 [Route("api/v1/zones")]
-[Authorize]
 [Produces("application/json")]
 [Tags("Zones")]
 public partial class ZonesController(IMediator mediator, ILogger<ZonesController> logger) : ControllerBase
@@ -54,6 +54,21 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
     /// Lists configured zones with clean pagination.
     /// Returns zone state format for direct consumption.
     /// </summary>
+    [HttpGet("count")]
+    [ProducesResponseType<int>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<int>> GetZonesCount()
+    {
+        var query = new GetZonesCountQuery();
+        var result = await _mediator.SendQueryAsync<GetZonesCountQuery, Result<int>>(query);
+
+        if (result.IsFailure)
+        {
+            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+        }
+
+        return Ok(result.Value);
+    }
+
     [HttpGet]
     [ProducesResponseType<Page<ZoneState>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]

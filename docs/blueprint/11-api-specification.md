@@ -84,6 +84,7 @@ Endpoints for interacting with configured audio zones. **Zone creation/deletion/
 | Method | Path                                       | Command/Status ID         | Description                          | Request Body / Params                           | Success Response (Direct Primitive)  | HTTP Status |
 | :----- | :----------------------------------------- | :------------------------ | :----------------------------------- | :---------------------------------------------- | :----------------------------------- | :---------- |
 | `GET`  | `/zones`                                   | `ZONES_INFO`              | List configured zones                | Query: `?page=1&size=20`                       | `Page<Zone>`                         | 200 OK      |
+| `GET`  | `/zones/count`                             | `ZONE_COUNT`             | Get total configured zones count     | None                                            | `int` (count)                        | 200 OK      |
 | `GET`  | `/zones/{zoneIndex}`                       | `ZONE_STATE`              | Get details & full state for zone   | Path: `{zoneIndex}`                             | `ZoneState`                          | 200 OK      |
 | `POST` | `/zones/{zoneIndex}/play`                  | `PLAY`                    | Start/resume playback                | Path: `{zoneIndex}`                             | No content                           | 204 No Content|
 | `POST` | `/zones/{zoneIndex}/pause`                 | `PAUSE`                   | Pause playback                       | Path: `{zoneIndex}`                             | No content                           | 204 No Content|
@@ -184,6 +185,7 @@ Endpoints for interacting with discovered Snapcast clients.
 | Method | Path                                    | Command/Status ID      | Description                | Request Body / Params           | Success Response (Direct Primitive) | HTTP Status |
 | :----- | :-------------------------------------- | :--------------------- | :------------------------- | :------------------------------ | :----------------------------------- | :---------- |
 | `GET`  | `/clients`                              | -                      | List discovered clients    | Query: `?page=1&size=20`        | `Page<Client>`                       | 200 OK      |
+| `GET`  | `/clients/count`                        | `CLIENT_COUNT`        | Get total configured clients count | None                        | `int` (count)                        | 200 OK      |
 | `GET`  | `/clients/{clientIndex}`                | `CLIENT_STATE`         | Get details for a client   | Path: `{clientIndex}` (int)      | `ClientState`                        | 200 OK      |
 | `PUT`  | `/clients/{clientIndex}/volume`         | `CLIENT_VOLUME`        | Set client volume          | Path: `{clientIndex}`; Body: `int` (0-100) | `int` (volume level)              | 200 OK      |
 | `GET`  | `/clients/{clientIndex}/volume`         | `CLIENT_VOLUME_STATUS` | Get client volume          | Path: `{clientIndex}`            | `int` (volume level)                 | 200 OK      |

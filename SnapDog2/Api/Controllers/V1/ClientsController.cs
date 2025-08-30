@@ -174,6 +174,21 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     /// Get all discovered Snapcast clients.
     /// </summary>
     /// <returns>List of all clients</returns>
+    [HttpGet("count")]
+    [ProducesResponseType<int>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<int>> GetClientsCount()
+    {
+        var query = new GetClientsCountQuery();
+        var result = await _mediator.SendQueryAsync<GetClientsCountQuery, Result<int>>(query);
+
+        if (result.IsFailure)
+        {
+            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+        }
+
+        return Ok(result.Value);
+    }
+
     [HttpGet]
     [ProducesResponseType<List<ClientState>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
