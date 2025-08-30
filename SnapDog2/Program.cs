@@ -463,6 +463,10 @@ static WebApplication CreateWebApplication(string[] args)
         Log.Information("Subsonic is disabled in configuration (SNAPDOG_SERVICES_SUBSONIC_ENABLED=false)");
     }
 
+    // Remove .NET 9 default port override to use SnapDog configuration
+    Environment.SetEnvironmentVariable("ASPNETCORE_HTTP_PORTS", null);
+    Environment.SetEnvironmentVariable("ASPNETCORE_HTTPS_PORTS", null);
+
     // Configure resilient web host with port from configuration
     if (snapDogConfig.Http.ApiEnabled)
     {
@@ -595,6 +599,28 @@ static WebApplication CreateWebApplication(string[] args)
         builder.Services.AddRazorComponents()
             .AddInteractiveServerComponents();
 
+        // Add SignalR for real-time updates
+        builder.Services.AddSignalR();
+        builder.Services.AddScoped<SnapDog2.Infrastructure.Services.IZoneUpdateService, SnapDog2.Infrastructure.Services.ZoneUpdateService>();
+
+        // Register SignalR notification handlers
+        builder.Services.AddScoped<
+            Cortex.Mediator.Notifications.INotificationHandler<SnapDog2.Server.Features.Zones.Notifications.ZonePlaybackStateChangedNotification>,
+            SnapDog2.Infrastructure.Notifications.ZoneStateSignalRHandler
+        >();
+        builder.Services.AddScoped<
+            Cortex.Mediator.Notifications.INotificationHandler<SnapDog2.Server.Features.Zones.Notifications.ZoneVolumeChangedNotification>,
+            SnapDog2.Infrastructure.Notifications.ZoneStateSignalRHandler
+        >();
+        builder.Services.AddScoped<
+            Cortex.Mediator.Notifications.INotificationHandler<SnapDog2.Server.Features.Zones.Notifications.ZoneMuteChangedNotification>,
+            SnapDog2.Infrastructure.Notifications.ZoneStateSignalRHandler
+        >();
+        builder.Services.AddScoped<
+            Cortex.Mediator.Notifications.INotificationHandler<SnapDog2.Server.Features.Zones.Notifications.ZoneTrackChangedNotification>,
+            SnapDog2.Infrastructure.Notifications.ZoneStateSignalRHandler
+        >();
+
         // Add anti-forgery services for enterprise security
         builder.Services.AddAntiforgery();
 
@@ -606,20 +632,17 @@ static WebApplication CreateWebApplication(string[] args)
             options.KnownProxies.Clear();
         });
 
-        // Register generated transport client
-        builder.Services.AddHttpClient<SnapDog2.WebUi.ApiClient.Generated.IGeneratedSnapDogClient, SnapDog2.WebUi.ApiClient.Generated.GeneratedSnapDogClient>(client =>
+        // Register HttpClient for WebUI API client (specialized endpoints only)
+        builder.Services.AddHttpClient<SnapDog2.WebUi.ApiClient.ISnapDogApiClient, SnapDog2.WebUi.ApiClient.SnapDogApiClient>(client =>
         {
             var baseUrl = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development"
-                ? $"http://localhost:{snapDogConfig.Http.HttpPort}/api/v1/"
-                : $"http://127.0.0.1:{snapDogConfig.Http.HttpPort}/api/v1/";
+                ? $"http://localhost:{snapDogConfig.Http.HttpPort}/"
+                : $"http://127.0.0.1:{snapDogConfig.Http.HttpPort}/";
 
             client.BaseAddress = new Uri(baseUrl);
             client.Timeout = TimeSpan.FromSeconds(30);
             client.DefaultRequestHeaders.Add("User-Agent", "SnapDog2-WebUI/1.0");
         });
-
-        // Register business API client wrapper
-        builder.Services.AddScoped<SnapDog2.WebUi.ApiClient.ISnapDogApiClient, SnapDog2.WebUi.ApiClient.SnapDogApiClient>();
 
         Log.Information("🌐 WebUI enabled with resilient API client configured");
     }
@@ -693,6 +716,9 @@ static WebApplication CreateWebApplication(string[] args)
             // Map Razor components with base path
             app.MapRazorComponents<SnapDog2.WebUi.App>()
                 .AddInteractiveServerRenderMode();
+
+            // Map SignalR hub
+            app.MapHub<SnapDog2.Infrastructure.Hubs.ZoneHub>("/zonehub");
 
             Log.Information("🌐 WebUI routes configured at {Path}", snapDogConfig.Http.WebUiPath);
         }
