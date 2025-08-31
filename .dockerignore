@@ -36,3 +36,5 @@ README.md
 # Temporary files
 *.tmp
 *.temp
+.DS_Store
+thumbs.db
