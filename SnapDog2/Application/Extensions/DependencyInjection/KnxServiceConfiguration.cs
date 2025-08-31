@@ -119,7 +119,7 @@ public static partial class KnxServiceConfiguration
         }
 
         // Validate zone KNX configurations
-        for (int i = 0; i < zones.Count; i++)
+        for (var i = 0; i < zones.Count; i++)
         {
             var zone = zones[i];
             if (zone.Knx.Enabled)
@@ -129,7 +129,7 @@ public static partial class KnxServiceConfiguration
         }
 
         // Validate client KNX configurations
-        for (int i = 0; i < clients.Count; i++)
+        for (var i = 0; i < clients.Count; i++)
         {
             var client = clients[i];
             if (client.Knx.Enabled)
@@ -185,7 +185,7 @@ public static partial class KnxServiceConfiguration
             return;
         }
 
-        for (int i = 0; i < parts.Length; i++)
+        for (var i = 0; i < parts.Length; i++)
         {
             if (!int.TryParse(parts[i], out var value) || value < 0)
             {

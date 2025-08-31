@@ -100,7 +100,7 @@ public partial class HttpMetricsMiddleware
                 var controller = segments[2]; // e.g., "zones", "clients"
 
                 // Replace numeric IDs with placeholders
-                for (int i = 3; i < segments.Length; i++)
+                for (var i = 3; i < segments.Length; i++)
                 {
                     if (int.TryParse(segments[i], out _))
                     {

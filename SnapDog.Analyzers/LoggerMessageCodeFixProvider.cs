@@ -115,7 +115,7 @@ public class LoggerMessageCodeFixProvider : CodeFixProvider
         var arguments = attribute.ArgumentList!.Arguments;
         var newArguments = SyntaxFactory.SeparatedList<AttributeArgumentSyntax>();
 
-        for (int i = 0; i < arguments.Count; i++)
+        for (var i = 0; i < arguments.Count; i++)
         {
             var argument = arguments[i];
 

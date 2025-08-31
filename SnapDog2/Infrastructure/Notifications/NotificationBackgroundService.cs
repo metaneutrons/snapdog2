@@ -50,7 +50,7 @@ public sealed partial class NotificationBackgroundService(
 
         var readers = new List<Task>();
         var concurrency = Math.Max(1, this._options.MaxConcurrency);
-        for (int i = 0; i < concurrency; i++)
+        for (var i = 0; i < concurrency; i++)
         {
             readers.Add(this.RunReaderAsync(stoppingToken));
         }

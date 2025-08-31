@@ -222,7 +222,7 @@ public sealed partial class MediaPlayer(
         );
 
         // Create updated track info with current position if we have a track and processing context
-        TrackInfo? currentTrack = this._currentTrack;
+        var currentTrack = this._currentTrack;
         if (currentTrack != null && this._processingContext != null && isPlaying)
         {
             LogUpdatingTrackPosition(this._logger);

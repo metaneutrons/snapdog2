@@ -111,7 +111,7 @@ public partial class StateRestorationService : BackgroundService
         var zonesToResumePlayback = new List<(int zoneIndex, ZoneState zoneState)>();
 
         // Process each configured zone
-        for (int i = 0; i < this._config.Zones.Count; i++)
+        for (var i = 0; i < this._config.Zones.Count; i++)
         {
             var zoneIndex = i + 1; // 1-based indexing
             var zoneConfig = this._config.Zones[i];
@@ -145,7 +145,7 @@ public partial class StateRestorationService : BackgroundService
 
         // Restore client states
         var clientStates = await this._persistentStore.LoadAllClientStatesAsync();
-        for (int i = 0; i < this._config.Clients.Count; i++)
+        for (var i = 0; i < this._config.Clients.Count; i++)
         {
             var clientIndex = i + 1; // 1-based indexing
             var clientConfig = this._config.Clients[i];

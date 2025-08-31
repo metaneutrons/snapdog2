@@ -74,7 +74,7 @@ public sealed partial class MediaPlayerService(
             LogAvailableZoneConfigs(this._logger, this._zoneConfigs.Count());
 
             var zoneConfigsList = this._zoneConfigs.ToList();
-            for (int i = 0; i < zoneConfigsList.Count; i++)
+            for (var i = 0; i < zoneConfigsList.Count; i++)
             {
                 LogZoneConfig(this._logger, i, zoneConfigsList[i].Name);
             }
@@ -284,7 +284,7 @@ public sealed partial class MediaPlayerService(
             var maxStreams = this._zoneConfigs.Count();
 
             // Get status for all configured zones
-            for (int i = 0; i < this._zoneConfigs.Count(); i++)
+            for (var i = 0; i < this._zoneConfigs.Count(); i++)
             {
                 var zoneIndex = i + 1; // Zone IDs are 1-based
                 var zoneConfig = this._zoneConfigs.ElementAt(i);

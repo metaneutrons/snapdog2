@@ -116,7 +116,7 @@ public partial class ZoneManager(
             this.LogInitializing(this._zoneConfigs.Count);
 
             // Initialize zones based on configuration
-            for (int i = 0; i < this._zoneConfigs.Count; i++)
+            for (var i = 0; i < this._zoneConfigs.Count; i++)
             {
                 var zoneConfig = this._zoneConfigs[i];
                 var zoneIndex = i + 1; // 1-based zone IDs

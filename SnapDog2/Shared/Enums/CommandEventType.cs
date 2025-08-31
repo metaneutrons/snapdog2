@@ -150,7 +150,7 @@ public static class CommandEventTypeExtensions
     /// <returns>The CommandEventType enum value, or null if no match is found.</returns>
     public static CommandEventType? FromCommandString(string commandString)
     {
-        foreach (CommandEventType eventType in Enum.GetValues<CommandEventType>())
+        foreach (var eventType in Enum.GetValues<CommandEventType>())
         {
             if (eventType.ToCommandString().Equals(commandString, StringComparison.OrdinalIgnoreCase))
             {

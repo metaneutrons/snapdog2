@@ -187,7 +187,7 @@ public class LoggingPatternTests
             }
 
             var lines = File.ReadAllLines(file);
-            for (int i = 0; i < lines.Length; i++)
+            for (var i = 0; i < lines.Length; i++)
             {
                 var line = lines[i];
                 foreach (var pattern in patterns)

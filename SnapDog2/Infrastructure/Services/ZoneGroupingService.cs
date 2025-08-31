@@ -68,7 +68,7 @@ public partial class ZoneGroupingService : IZoneGroupingService
             var zones = new List<int>();
 
             // Try zones 1-10 (reasonable upper limit) and see which ones exist
-            for (int i = 1; i <= 10; i++)
+            for (var i = 1; i <= 10; i++)
             {
                 if (await this._zoneManager.ZoneExistsAsync(i))
                 {

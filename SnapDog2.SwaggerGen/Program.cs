@@ -15,7 +15,7 @@ var outputPath = Path.Combine(Directory.GetCurrentDirectory(), "swagger.json");
 var verbose = false;
 var showHelp = false;
 
-for (int i = 0; i < args.Length; i++)
+for (var i = 0; i < args.Length; i++)
 {
     var arg = args[i];
     switch (arg.ToLowerInvariant())

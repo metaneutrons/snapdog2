@@ -102,7 +102,7 @@ public class MqttTopicAttribute(string topicPattern) : Attribute
             return false;
         }
 
-        for (int i = 0; i < patternParts.Length; i++)
+        for (var i = 0; i < patternParts.Length; i++)
         {
             var patternPart = patternParts[i];
             var topicPart = topicParts[i];

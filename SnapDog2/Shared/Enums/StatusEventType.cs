@@ -163,7 +163,7 @@ public static class StatusEventTypeExtensions
     /// <returns>The corresponding StatusEventType, or null if not found.</returns>
     public static StatusEventType? FromStatusString(string statusString)
     {
-        foreach (StatusEventType eventType in Enum.GetValues<StatusEventType>())
+        foreach (var eventType in Enum.GetValues<StatusEventType>())
         {
             if (eventType.ToStatusString().Equals(statusString, StringComparison.OrdinalIgnoreCase))
             {

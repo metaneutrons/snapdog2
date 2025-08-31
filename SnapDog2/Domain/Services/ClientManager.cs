@@ -256,7 +256,7 @@ public partial class ClientManager : IClientManager
         this._configuration = configuration;
 
         // Initialize state locks and default states for each configured client
-        for (int i = 0; i < this._clientConfigs.Count; i++)
+        for (var i = 0; i < this._clientConfigs.Count; i++)
         {
             var clientIndex = i + 1; // 1-based indexing
             var clientConfig = this._clientConfigs[i];
@@ -369,7 +369,7 @@ public partial class ClientManager : IClientManager
 
         var clientStates = new List<ClientState>();
 
-        for (int clientIndex = 1; clientIndex <= this._clientConfigs.Count; clientIndex++)
+        for (var clientIndex = 1; clientIndex <= this._clientConfigs.Count; clientIndex++)
         {
             var stateResult = await this.GetClientStateAsync(clientIndex);
             if (stateResult.IsSuccess)
@@ -841,7 +841,7 @@ public partial class ClientManager : IClientManager
                 // Zone1 -> 1, Zone2 -> 2, etc.
                 if (
                     clientGroup.StreamId.StartsWith("Zone")
-                    && int.TryParse(clientGroup.StreamId.AsSpan(4), out int zoneIndex)
+                    && int.TryParse(clientGroup.StreamId.AsSpan(4), out var zoneIndex)
                 )
                 {
                     return zoneIndex;

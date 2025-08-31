@@ -129,7 +129,7 @@ public class LoggerMessageAnalyzer : DiagnosticAnalyzer
         }
 
         // Check if there are any non-LoggerMessage members after this method
-        for (int i = methodIndex + 1; i < members.Count; i++)
+        for (var i = methodIndex + 1; i < members.Count; i++)
         {
             if (members[i] is MethodDeclarationSyntax otherMethod)
             {

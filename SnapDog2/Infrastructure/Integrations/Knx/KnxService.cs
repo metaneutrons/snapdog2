@@ -742,7 +742,7 @@ public partial class KnxService : IKnxService
     private StatusInfo? MapGroupAddressToStatusInfo(string groupAddress)
     {
         // Check zone status addresses
-        for (int i = 0; i < this._zones.Count; i++)
+        for (var i = 0; i < this._zones.Count; i++)
         {
             var zone = this._zones[i];
             var zoneIndex = i + 1; // 1-based zone ID
@@ -815,7 +815,7 @@ public partial class KnxService : IKnxService
         }
 
         // Check client status addresses
-        for (int i = 0; i < this._clients.Count; i++)
+        for (var i = 0; i < this._clients.Count; i++)
         {
             var client = this._clients[i];
             var clientIndex = i + 1; // 1-based client Index
@@ -1052,7 +1052,7 @@ public partial class KnxService : IKnxService
         // - SetClientNameCommand (CLIENT_NAME): KNX cannot transmit string names effectively
 
         // Check zones for matching group addresses
-        for (int i = 0; i < this._zones.Count; i++)
+        for (var i = 0; i < this._zones.Count; i++)
         {
             var zone = this._zones[i];
             var zoneIndex = i + 1; // 1-based zone ID
@@ -1174,7 +1174,7 @@ public partial class KnxService : IKnxService
         }
 
         // Check clients for matching group addresses
-        for (int i = 0; i < this._clients.Count; i++)
+        for (var i = 0; i < this._clients.Count; i++)
         {
             var client = this._clients[i];
             var clientIndex = i + 1; // 1-based client Index
@@ -1228,7 +1228,7 @@ public partial class KnxService : IKnxService
     private string? GetStatusGroupAddress(string statusId, int targetId)
     {
         // First determine if this is a zone or client StatusId based on the StatusId itself
-        bool isClientStatusId =
+        var isClientStatusId =
             statusId == StatusIds.ClientVolumeStatus
             || statusId == StatusIds.ClientMuteStatus
             || statusId == StatusIds.ClientConnected
@@ -1300,7 +1300,7 @@ public partial class KnxService : IKnxService
                     var ga = new GroupAddress(groupAddress);
 
                     // Convert value to appropriate type for GroupValue
-                    GroupValue groupValue = value switch
+                    var groupValue = value switch
                     {
                         // DPT 1.001 - Boolean (1-bit)
                         bool boolValue => new GroupValue(boolValue),
