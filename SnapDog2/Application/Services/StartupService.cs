@@ -228,7 +228,7 @@ public partial class StartupService : IHostedService
 
                 if (!isAvailable)
                 {
-                    var conflictDetails = await GetPortConflictDetailsAsync(port, cancellationToken);
+                    var conflictDetails = await GetPortConflictDetailsAsync(port);
                     portConflicts.Add((serviceName, port, conflictDetails));
 
                     this.LogPortConflictDetected(serviceName, port, conflictDetails);
@@ -410,7 +410,7 @@ public partial class StartupService : IHostedService
         }
     }
 
-    private static Task<string> GetPortConflictDetailsAsync(int port, CancellationToken cancellationToken)
+    private static Task<string> GetPortConflictDetailsAsync(int port)
     {
         try
         {
