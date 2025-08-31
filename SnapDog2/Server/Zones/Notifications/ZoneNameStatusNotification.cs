@@ -11,7 +11,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
-namespace SnapDog2.Server.Zone.Notifications;
+namespace SnapDog2.Server.Zones.Notifications;
 
 using Cortex.Mediator.Notifications;
 using SnapDog2.Shared.Attributes;

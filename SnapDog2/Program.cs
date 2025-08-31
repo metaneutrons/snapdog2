@@ -11,13 +11,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
+
 using System.CommandLine;
 using dotenv.net;
 using EnvoyConfig;
-using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Options;
-using OpenTelemetry;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -646,4 +644,7 @@ static WebApplication CreateWebApplication(string[] args)
 }
 
 // Make Program class accessible to tests
-public partial class Program { }
+namespace SnapDog2
+{
+    public partial class Program { }
+}

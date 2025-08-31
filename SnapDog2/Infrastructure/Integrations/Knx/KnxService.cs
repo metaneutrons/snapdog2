@@ -39,6 +39,8 @@ using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Constants;
 using SnapDog2.Shared.Enums;
 using SnapDog2.Shared.Models;
+using ClientVolumeDownCommandHandler = SnapDog2.Server.Clients.Handlers.ClientVolumeDownCommandHandler;
+using ClientVolumeUpCommandHandler = SnapDog2.Server.Clients.Handlers.ClientVolumeUpCommandHandler;
 
 /// <summary>
 /// Enterprise-grade KNX integration service using Knx.Falcon.Sdk.
