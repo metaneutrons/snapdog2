@@ -15,7 +15,7 @@ using Cortex.Mediator.Commands;
 using SnapDog2.Core.Attributes;
 using SnapDog2.Core.Models;
 
-namespace SnapDog2.Core.Commands;
+namespace SnapDog2.Server.Features.Zones.Commands;
 
 /// <summary>
 /// Command to set zone name.

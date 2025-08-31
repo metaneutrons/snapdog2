@@ -19,7 +19,7 @@ using Moq;
 using Polly;
 using Polly.Timeout;
 using SnapDog2.Core.Configuration;
-using SnapDog2.Core.Helpers;
+using SnapDog2.Infrastructure.Resilience;
 
 namespace SnapDog2.Tests.Unit.Infrastructure.Resilience;
 

@@ -72,7 +72,7 @@ public partial class IntegrationPublishingHandlers(
     private readonly ConcurrentDictionary<int, ZoneState> _previousZoneStates = new();
 
     // Cache for previous client states to enable change detection
-    private readonly ConcurrentDictionary<int, PublishableClientState> _previousClientStates = new();
+    private readonly ConcurrentDictionary<int, ClientState> _previousClientStates = new();
 
     // Debouncing: Track last publish time for each zone to prevent rapid-fire publishing
     private readonly ConcurrentDictionary<int, DateTime> _lastZonePublishTime = new();
@@ -179,23 +179,20 @@ public partial class IntegrationPublishingHandlers(
     {
         LogClientStateChange(notification.ClientIndex);
 
-        // Convert to simplified publishable format for MQTT
-        var publishableClientState = PublishableClientStateMapper.ToPublishableClientState(notification.State);
-
         // Check if this represents a meaningful change compared to the previous state
         var previousState = _previousClientStates.GetValueOrDefault(notification.ClientIndex);
 
-        if (PublishableClientStateMapper.HasMeaningfulChange(previousState, publishableClientState))
+        if (HasMeaningfulClientChange(previousState, notification.State))
         {
             LogClientStatePublishing(notification.ClientIndex, previousState == null ? "first-time" : "changed");
 
             // Update cache with new state
-            _previousClientStates[notification.ClientIndex] = publishableClientState;
+            _previousClientStates[notification.ClientIndex] = notification.State;
 
             await PublishClientStatusAsync(
                 StatusIdAttribute.GetStatusId<ClientStateNotification>(),
                 notification.ClientIndex.ToString(),
-                publishableClientState,
+                notification.State,
                 cancellationToken
             );
         }
@@ -601,6 +598,20 @@ public partial class IntegrationPublishingHandlers(
         Message = "⏭️ Skipping client {ClientIndex} state publish - no meaningful changes"
     )]
     private partial void LogClientStateSkipped(int clientIndex);
+
+    /// <summary>
+    /// Determines if there's a meaningful change between client states.
+    /// </summary>
+    private static bool HasMeaningfulClientChange(ClientState? previous, ClientState current)
+    {
+        if (previous == null) return true;
+        
+        return previous.Name != current.Name ||
+               previous.Volume != current.Volume ||
+               previous.Mute != current.Mute ||
+               previous.Connected != current.Connected ||
+               previous.ZoneIndex != current.ZoneIndex;
+    }
 
     // Zone logging
     [LoggerMessage(
