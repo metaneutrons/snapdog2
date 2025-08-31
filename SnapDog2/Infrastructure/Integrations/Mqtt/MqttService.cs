@@ -44,7 +44,7 @@ using SnapDog2.Shared.Models;
 /// Provides bi-directional MQTT communication with Polly resilience policies,
 /// configurable topic structure, and comprehensive error handling.
 /// </summary>
-public sealed partial class MqttService : IMqttService, IAsyncDisposable
+public sealed partial class MqttService : IMqttService
 {
     private readonly MqttConfig _config;
     private readonly SystemConfig _systemConfig;
