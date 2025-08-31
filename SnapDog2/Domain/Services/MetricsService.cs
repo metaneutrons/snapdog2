@@ -139,7 +139,7 @@ public partial class MetricsService(ILogger<MetricsService> logger) : IMetricsSe
 
     private static string FormatLabels((string Key, string Value)[] labels)
     {
-        if (labels == null || labels.Length == 0)
+        if (labels.Length == 0)
         {
             return string.Empty;
         }

@@ -341,7 +341,7 @@ public partial class EnterpriseMetricsService : IMetricsService, IDisposable
 
     public void Dispose()
     {
-        this._systemMetricsTimer?.Dispose();
-        this._applicationMetrics?.Dispose();
+        this._systemMetricsTimer.Dispose();
+        this._applicationMetrics.Dispose();
     }
 }

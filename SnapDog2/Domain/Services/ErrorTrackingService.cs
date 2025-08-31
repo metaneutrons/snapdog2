@@ -31,11 +31,6 @@ public partial class ErrorTrackingService(ILogger<ErrorTrackingService> logger) 
     /// <inheritdoc/>
     public void RecordError(ErrorDetails error)
     {
-        if (error == null)
-        {
-            return;
-        }
-
         lock (this._lock)
         {
             this._errors.Enqueue(error);
@@ -48,11 +43,6 @@ public partial class ErrorTrackingService(ILogger<ErrorTrackingService> logger) 
     /// <inheritdoc/>
     public void RecordException(Exception exception, string component, string? operation = null)
     {
-        if (exception == null)
-        {
-            return;
-        }
-
         var error = new ErrorDetails
         {
             TimestampUtc = DateTime.UtcNow,

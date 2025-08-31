@@ -38,7 +38,6 @@ public partial class AppStatusService(
     private readonly ILogger<AppStatusService> _logger = logger;
     private readonly IMetricsService _metricsService = metricsService;
     private readonly IAppHealthCheckService _healthCheckService = healthCheckService;
-    private static readonly DateTime _startTime = DateTime.UtcNow;
 
     /// <inheritdoc/>
     public async Task<SystemStatus> GetCurrentStatusAsync()
