@@ -42,7 +42,7 @@ public static class ResiliencePolicyFactory
                     Delay = TimeSpan.FromMilliseconds(config.RetryDelayMs),
                     BackoffType = ParseBackoffType(config.BackoffType),
                     UseJitter = config.UseJitter,
-                    OnRetry = args =>
+                    OnRetry = _ =>
                     {
                         // Optional: Add logging here if needed
                         return ValueTask.CompletedTask;

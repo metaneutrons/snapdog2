@@ -352,7 +352,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
 
                 // Use Polly resilience for connection establishment
                 var result = await this._connectionPolicy.ExecuteAsync(
-                    async ct =>
+                    async _ =>
                     {
                         // Check if client is available
                         if (this._snapcastClient == null)
@@ -530,7 +530,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         try
         {
             return await this._operationPolicy.ExecuteAsync(
-                async ct =>
+                async _ =>
                 {
                     await this._snapcastClient!.ClientSetVolumeAsync(snapcastClientId, volumePercent);
                     return Result.Success();

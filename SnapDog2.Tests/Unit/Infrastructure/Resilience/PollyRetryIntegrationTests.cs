@@ -261,7 +261,7 @@ public class PollyRetryIntegrationTests
         mockMqttClient
             .Setup(x => x.PublishAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .Returns(
-                async (string topic, string payload, CancellationToken ct) =>
+                async (string _, string _, CancellationToken ct) =>
                 {
                     // Simulate long-running operation
                     await Task.Delay(TimeSpan.FromSeconds(5), ct);

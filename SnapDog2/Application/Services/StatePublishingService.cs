@@ -332,7 +332,7 @@ public partial class StatePublishingService(
 
             // Publish zones info for system discovery
             var zoneIndices =
-                this._configuration.Zones?.Select((zone, index) => index + 1) // Zones are 1-based
+                this._configuration.Zones?.Select((_, index) => index + 1) // Zones are 1-based
                     .ToList() ?? new List<int>();
             await mediator.PublishAsync(new ZonesInfoChangedNotification(zoneIndices), cancellationToken);
 

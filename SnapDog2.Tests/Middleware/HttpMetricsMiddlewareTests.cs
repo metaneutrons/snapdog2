@@ -38,7 +38,7 @@ public class HttpMetricsMiddlewareTests
         this._mockMetricsService = new Mock<IApplicationMetrics>();
 
         // Create a simple next delegate that does nothing
-        RequestDelegate next = context => Task.CompletedTask;
+        RequestDelegate next = _ => Task.CompletedTask;
 
         this._middleware = new HttpMetricsMiddleware(next, this._mockLogger.Object, this._mockMetricsService.Object);
     }
@@ -70,7 +70,7 @@ public class HttpMetricsMiddlewareTests
         var testException = new InvalidOperationException("Test exception");
 
         // Create middleware with next delegate that throws
-        RequestDelegate next = ctx => throw testException;
+        RequestDelegate next = _ => throw testException;
         var middleware = new HttpMetricsMiddleware(next, this._mockLogger.Object, this._mockMetricsService.Object);
 
         // Act & Assert
@@ -138,7 +138,7 @@ public class HttpMetricsMiddlewareTests
         var context = CreateHttpContext("GET", "/api/v1/zones");
 
         // Create middleware with slow next delegate
-        RequestDelegate slowNext = async ctx =>
+        RequestDelegate slowNext = async _ =>
         {
             await Task.Delay(1100); // Simulate slow request (> 1 second)
         };

@@ -398,7 +398,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
         this.LogSettingUpLibVlcEventHandlers();
 
         // Position change events (percentage-based)
-        this._mediaPlayer.PositionChanged += (sender, e) =>
+        this._mediaPlayer.PositionChanged += (_, e) =>
         {
             try
             {
@@ -422,7 +422,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
         };
 
         // Also keep TimeChanged as backup
-        this._mediaPlayer.TimeChanged += (sender, e) =>
+        this._mediaPlayer.TimeChanged += (_, e) =>
         {
             try
             {
@@ -444,7 +444,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
         };
 
         // Playback state change events
-        this._mediaPlayer.Playing += (sender, e) =>
+        this._mediaPlayer.Playing += (_, _) =>
         {
             try
             {
@@ -459,7 +459,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             }
         };
 
-        this._mediaPlayer.Paused += (sender, e) =>
+        this._mediaPlayer.Paused += (_, _) =>
         {
             try
             {
@@ -474,7 +474,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             }
         };
 
-        this._mediaPlayer.Stopped += (sender, e) =>
+        this._mediaPlayer.Stopped += (_, _) =>
         {
             try
             {
@@ -489,7 +489,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             }
         };
 
-        this._mediaPlayer.EndReached += (sender, e) =>
+        this._mediaPlayer.EndReached += (_, _) =>
         {
             try
             {

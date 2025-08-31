@@ -32,7 +32,7 @@ public static partial class WebHostExtensions
     public static IWebHostBuilder UseResilientKestrel(this IWebHostBuilder builder, HttpConfig httpConfig)
     {
         return builder.UseKestrel(
-            (context, options) =>
+            (_, options) =>
             {
                 // Use NullLogger for infrastructure setup to avoid service provider issues
                 var logger = NullLogger.Instance;

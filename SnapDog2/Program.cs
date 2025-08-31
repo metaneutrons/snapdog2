@@ -374,7 +374,7 @@ static WebApplication CreateWebApplication(string[] args)
     if (snapDogConfig.Redis.Enabled)
     {
         // Register Redis connection multiplexer
-        builder.Services.AddSingleton<IConnectionMultiplexer>(provider =>
+        builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
         {
             var configuration = ConfigurationOptions.Parse(snapDogConfig.Redis.ConnectionString);
             configuration.ConnectTimeout = snapDogConfig.Redis.TimeoutSeconds * 1000;

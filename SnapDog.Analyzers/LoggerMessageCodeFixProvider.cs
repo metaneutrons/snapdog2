@@ -76,7 +76,7 @@ public class LoggerMessageCodeFixProvider : CodeFixProvider
 
         var action = CodeAction.Create(
             title: "Convert to named parameters",
-            createChangedDocument: c => ConvertToNamedParameters(context.Document, root, attribute),
+            createChangedDocument: _ => ConvertToNamedParameters(context.Document, root, attribute),
             equivalenceKey: "ConvertToNamedParameters"
         );
 
@@ -98,7 +98,7 @@ public class LoggerMessageCodeFixProvider : CodeFixProvider
 
         var action = CodeAction.Create(
             title: "Move LoggerMessage method to end of class",
-            createChangedDocument: c => MoveMethodToEnd(context.Document, root, method),
+            createChangedDocument: _ => MoveMethodToEnd(context.Document, root, method),
             equivalenceKey: "MoveLoggerMessageToEnd"
         );
 
