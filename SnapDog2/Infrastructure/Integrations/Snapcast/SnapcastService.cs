@@ -270,7 +270,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
                 {
                     MaxRetryAttempts = validatedConfig.MaxRetries,
                     Delay = TimeSpan.FromMilliseconds(validatedConfig.RetryDelayMs),
-                    BackoffType = validatedConfig.BackoffType?.ToLowerInvariant() switch
+                    BackoffType = validatedConfig.BackoffType.ToLowerInvariant() switch
                     {
                         "linear" => DelayBackoffType.Linear,
                         "constant" => DelayBackoffType.Constant,
@@ -455,9 +455,9 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
             var serverStatus = await this._snapcastClient!.ServerGetStatusAsync().ConfigureAwait(false);
 
             this.LogServerStatusRetrieved(
-                serverStatus.Groups?.Count ?? 0,
-                serverStatus.Groups?.SelectMany(g => g.Clients)?.Count() ?? 0,
-                serverStatus.Streams?.Count ?? 0
+                serverStatus.Groups.Count,
+                serverStatus.Groups.SelectMany(g => g.Clients).Count(),
+                serverStatus.Streams.Count
             );
 
             this.LogUpdatingStateRepository();
@@ -1465,18 +1465,19 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
                 this._snapcastClient.OnStreamProperties = null;
                 this._snapcastClient.OnServerUpdate = null;
 
-                // Dispose the client if it implements IAsyncDisposable
-                if (this._snapcastClient is IAsyncDisposable asyncDisposable)
+                switch (this._snapcastClient)
                 {
-                    await asyncDisposable.DisposeAsync().ConfigureAwait(false);
-                }
-                else if (this._snapcastClient is IDisposable disposable)
-                {
-                    disposable.Dispose();
+                    // Dispose the client if it implements IAsyncDisposable
+                    case IAsyncDisposable asyncDisposable:
+                        await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+                        break;
+                    case IDisposable disposable:
+                        disposable.Dispose();
+                        break;
                 }
             }
 
-            this._operationLock?.Dispose();
+            this._operationLock.Dispose();
             this.LogServiceDisposed();
         }
         catch (Exception ex)

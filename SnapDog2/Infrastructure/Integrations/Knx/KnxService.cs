@@ -56,7 +56,6 @@ public partial class KnxService : IKnxService
     private readonly ILogger<KnxService> _logger;
     private readonly ResiliencePipeline _connectionPolicy;
     private readonly ResiliencePipeline _operationPolicy;
-    private readonly ConcurrentDictionary<string, string> _groupAddressCache;
     private readonly Timer _reconnectTimer;
     private readonly SemaphoreSlim _connectionSemaphore;
 
@@ -76,7 +75,7 @@ public partial class KnxService : IKnxService
         this._clients = config.Clients;
         this._serviceProvider = serviceProvider;
         this._logger = logger;
-        this._groupAddressCache = new ConcurrentDictionary<string, string>();
+        new ConcurrentDictionary<string, string>();
         this._connectionSemaphore = new SemaphoreSlim(1, 1);
 
         // Configure resilience policies

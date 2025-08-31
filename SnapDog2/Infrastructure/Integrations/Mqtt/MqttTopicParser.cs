@@ -35,8 +35,9 @@ public static class MqttTopicParser
     /// Parses an MQTT topic into its component parts.
     /// </summary>
     /// <param name="topic">The MQTT topic to parse.</param>
+    /// <param name="baseTopic">The MQTT base topic</param>
     /// <returns>Parsed topic parts or null if invalid.</returns>
-    public static MqttTopicParts? Parse(string topic, string baseTopic = "snapdog")
+    public static MqttTopicParts? Parse(string topic, string baseTopic)
     {
         if (string.IsNullOrWhiteSpace(topic))
         {
@@ -99,7 +100,7 @@ public static class MqttTopicParser
     /// <param name="topic">The topic to validate.</param>
     /// <param name="baseTopic">The configured base topic (default: "snapdog").</param>
     /// <returns>True if the topic is valid, false otherwise.</returns>
-    public static bool IsValid(string topic, string baseTopic = "snapdog") => Parse(topic, baseTopic) != null;
+    public static bool IsValid(string topic, string baseTopic) => Parse(topic, baseTopic) != null;
 
     /// <summary>
     /// Parses an MQTT topic using the default "snapdog" base topic for backward compatibility.

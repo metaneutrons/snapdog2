@@ -161,7 +161,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
                 {
                     MaxRetryAttempts = validatedConfig.MaxRetries,
                     Delay = TimeSpan.FromMilliseconds(validatedConfig.RetryDelayMs),
-                    BackoffType = validatedConfig.BackoffType?.ToLowerInvariant() switch
+                    BackoffType = validatedConfig.BackoffType.ToLowerInvariant() switch
                     {
                         "linear" => DelayBackoffType.Linear,
                         "constant" => DelayBackoffType.Constant,
@@ -204,10 +204,10 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
             LogGettingPlaylists(this._logger);
 
             var result = await this._operationPolicy.ExecuteAsync(
-                async cancellationToken =>
+                async innerCancellationToken =>
                 {
                     var playlistsResponse = await this._subsonicClient.Playlists.GetPlaylistsAsync(
-                        cancellationToken: cancellationToken
+                        cancellationToken: innerCancellationToken
                     );
 
                     if (!playlistsResponse.IsSuccess)
@@ -217,9 +217,9 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
                     }
 
                     return playlistsResponse
-                            .Playlists.Playlist?.Select(MapToPlaylistInfoFromSummary)
+                            .Playlists.Playlist.Select(MapToPlaylistInfoFromSummary)
                             .ToList()
-                            .AsReadOnly() ?? new List<PlaylistInfo>().AsReadOnly();
+                            .AsReadOnly();
                 },
                 cancellationToken
             );
@@ -295,8 +295,8 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
                     var playlistInfo = MapToPlaylistInfo(playlist);
                     var tracks =
                         playlist
-                            .Entry?.Select<Song, TrackInfo>((song, index) => MapToTrackInfo(song, index + 1))
-                            .ToList() ?? new List<TrackInfo>();
+                            .Entry.Select<Song, TrackInfo>((song, index) => MapToTrackInfo(song, index + 1))
+                            .ToList();
 
                     return new PlaylistWithTracks(playlistInfo, tracks);
                 },
@@ -455,8 +455,8 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
     {
         return new PlaylistInfo
         {
-            SubsonicPlaylistId = playlistSummary.Id ?? string.Empty,
-            Name = playlistSummary.Name ?? "Unknown Playlist",
+            SubsonicPlaylistId = playlistSummary.Id,
+            Name = playlistSummary.Name,
             TrackCount = playlistSummary.SongCount,
             TotalDurationSec = playlistSummary.Duration > 0 ? playlistSummary.Duration : null,
             Description = playlistSummary.Comment,
@@ -472,8 +472,8 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
     {
         return new PlaylistInfo
         {
-            SubsonicPlaylistId = playlist.Id ?? string.Empty,
-            Name = playlist.Name ?? "Unknown Playlist",
+            SubsonicPlaylistId = playlist.Id,
+            Name = playlist.Name,
             TrackCount = playlist.SongCount,
             TotalDurationSec = playlist.Duration > 0 ? playlist.Duration : null,
             Description = playlist.Comment,
@@ -490,14 +490,14 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         return new TrackInfo
         {
             Index = index,
-            Title = song.Title ?? "Unknown Track",
-            Artist = song.Artist ?? "Unknown Artist",
+            Title = song.Title,
+            Artist = song.Artist,
             Album = song.Album,
             DurationMs = song.Duration > 0 ? song.Duration * 1000 : null, // Convert seconds to milliseconds
             PositionMs = 0, // Always start at beginning
             CoverArtUrl = song.CoverArt,
             Source = "subsonic",
-            Url = song.Id ?? string.Empty, // Use song ID as URL for Subsonic tracks
+            Url = song.Id, // Use song ID as URL for Subsonic tracks
         };
     }
 
@@ -623,14 +623,8 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
             // Use the SubsonicClient to ping the server
             var pingResponse = await this._subsonicClient.System.PingAsync(cancellationToken);
 
-            if (pingResponse != null)
-            {
-                LogConnectionTestSuccessful(this._logger);
-                return Result.Success();
-            }
-
-            LogConnectionTestFailed(this._logger);
-            return Result.Failure("Ping response was null");
+            LogConnectionTestSuccessful(this._logger);
+            return Result.Success();
         }
         catch (Exception ex)
         {
@@ -653,7 +647,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         this.PublishNotificationFireAndForget(new SubsonicServiceDisposedNotification(this._config.Url ?? "unknown"));
 
         this._operationLock.Dispose();
-        this._subsonicClient?.Dispose();
+        this._subsonicClient.Dispose();
 
         LogSubsonicServiceDisposed(this._logger);
         return ValueTask.CompletedTask;

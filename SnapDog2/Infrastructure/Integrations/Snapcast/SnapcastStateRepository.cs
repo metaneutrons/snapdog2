@@ -161,28 +161,22 @@ public partial class SnapcastStateRepository(
     public void UpdateServerState(Server server)
     {
         var allClients =
-            server.Groups?.SelectMany(g => g.Clients).DistinctBy(c => c.Id) ?? Enumerable.Empty<SnapClient>();
+            server.Groups.SelectMany(g => g.Clients).DistinctBy(c => c.Id);
         var clientCount = allClients.Count();
-        var groupCount = server.Groups?.Count ?? 0;
-        var streamCount = server.Streams?.Count ?? 0;
+        var groupCount = server.Groups.Count;
+        var streamCount = server.Streams.Count;
 
         this.LogUpdateServerStateCalled(groupCount);
         this.LogUpdatingServerState(groupCount, clientCount, streamCount);
 
         // Debug: Log each group and its clients
-        if (server.Groups != null)
+        foreach (var group in server.Groups)
         {
-            foreach (var group in server.Groups)
-            {
-                this.LogProcessingGroup(group.Id, group.Clients?.Count ?? 0);
+            this.LogProcessingGroup(group.Id, group.Clients.Count);
 
-                if (group.Clients != null)
-                {
-                    foreach (var client in group.Clients)
-                    {
-                        this.LogAddingClient(client.Id, client.Host.Mac ?? "unknown");
-                    }
-                }
+            foreach (var client in group.Clients)
+            {
+                this.LogAddingClient(client.Id, client.Host.Mac);
             }
         }
 
@@ -193,7 +187,7 @@ public partial class SnapcastStateRepository(
         }
 
         // Update groups
-        var newGroups = server.Groups?.ToDictionary(g => g.Id, g => g) ?? new Dictionary<string, Group>();
+        var newGroups = server.Groups.ToDictionary(g => g.Id, g => g);
         UpdateDictionary(this._groups, newGroups);
 
         // Update clients from all groups
