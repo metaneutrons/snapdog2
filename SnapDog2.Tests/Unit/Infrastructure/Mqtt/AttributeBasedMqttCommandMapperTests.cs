@@ -15,8 +15,8 @@ namespace SnapDog2.Tests.Unit.Infrastructure.Mqtt;
 
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
-using SnapDog2.Core.Configuration;
 using SnapDog2.Infrastructure.Integrations.Mqtt;
+using SnapDog2.Shared.Configuration;
 using SnapDog2.Tests.Blueprint;
 using Xunit;
 using Xunit.Abstractions;

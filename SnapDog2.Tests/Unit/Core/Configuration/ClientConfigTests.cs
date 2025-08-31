@@ -14,7 +14,7 @@
 namespace SnapDog2.Tests.Unit.Core.Configuration;
 
 using FluentAssertions;
-using SnapDog2.Core.Configuration;
+using SnapDog2.Shared.Configuration;
 
 public class ClientConfigTests
 {

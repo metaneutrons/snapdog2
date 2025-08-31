@@ -16,8 +16,8 @@ using System.Net.Sockets;
 using FluentAssertions;
 using Moq;
 using Polly;
-using SnapDog2.Core.Configuration;
 using SnapDog2.Infrastructure.Resilience;
+using SnapDog2.Shared.Configuration;
 
 namespace SnapDog2.Tests.Unit.Infrastructure.Resilience;
 

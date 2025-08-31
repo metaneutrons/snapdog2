@@ -18,10 +18,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Moq;
-using SnapDog2.Core.Abstractions;
-using SnapDog2.Core.Models;
-using SnapDog2.Server.Features.Global.Handlers;
-using SnapDog2.Server.Features.Global.Queries;
+using SnapDog2.Domain.Abstractions;
+using SnapDog2.Server.Global.Handlers;
+using SnapDog2.Server.Global.Queries;
+using SnapDog2.Shared.Models;
 using Xunit;
 
 /// <summary>

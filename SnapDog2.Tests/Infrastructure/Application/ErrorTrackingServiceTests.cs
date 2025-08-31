@@ -17,8 +17,8 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Moq;
-using SnapDog2.Core.Models;
-using SnapDog2.Infrastructure.Application;
+using SnapDog2.Domain.Services;
+using SnapDog2.Shared.Models;
 using Xunit;
 
 /// <summary>

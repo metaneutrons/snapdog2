@@ -18,9 +18,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Moq;
-using SnapDog2.Core.Abstractions;
-using SnapDog2.Infrastructure.Application;
-using SnapDog2.Middleware;
+using SnapDog2.Api.Middleware;
+using SnapDog2.Domain.Abstractions;
 using Xunit;
 
 /// <summary>
