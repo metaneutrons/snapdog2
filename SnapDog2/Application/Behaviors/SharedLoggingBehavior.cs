@@ -33,8 +33,7 @@ public partial class SharedLoggingCommandBehavior<TCommand, TResponse>(
     where TCommand : ICommand<TResponse>
     where TResponse : IResult
 {
-    private readonly ILogger<SharedLoggingCommandBehavior<TCommand, TResponse>> _logger = logger;
-    private static readonly ActivitySource ActivitySource = new("SnapDog2.CortexMediator");
+    private static readonly ActivitySource _activitySource = new("SnapDog2.CortexMediator");
 
     /// <inheritdoc/>
     public async Task<TResponse> Handle(
@@ -44,7 +43,7 @@ public partial class SharedLoggingCommandBehavior<TCommand, TResponse>(
     )
     {
         var commandName = typeof(TCommand).Name;
-        using var activity = ActivitySource.StartActivity($"CortexMediator.Command.{commandName}");
+        using var activity = _activitySource.StartActivity($"CortexMediator.Command.{commandName}");
 
         this.LogStartingCommand(commandName);
         var stopwatch = Stopwatch.StartNew();
@@ -82,7 +81,7 @@ public partial class SharedLoggingQueryBehavior<TQuery, TResponse>(
     where TResponse : IResult
 {
     private readonly ILogger<SharedLoggingQueryBehavior<TQuery, TResponse>> _logger = logger;
-    private static readonly ActivitySource ActivitySource = new("SnapDog2.CortexMediator");
+    private static readonly ActivitySource _activitySource = new("SnapDog2.CortexMediator");
 
     /// <inheritdoc/>
     public async Task<TResponse> Handle(
@@ -92,7 +91,7 @@ public partial class SharedLoggingQueryBehavior<TQuery, TResponse>(
     )
     {
         var queryName = typeof(TQuery).Name;
-        using var activity = ActivitySource.StartActivity($"CortexMediator.Query.{queryName}");
+        using var activity = _activitySource.StartActivity($"CortexMediator.Query.{queryName}");
 
         this.LogStartingQuery(queryName);
         var stopwatch = Stopwatch.StartNew();

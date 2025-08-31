@@ -29,7 +29,6 @@ public partial class StartupService : IHostedService
     private readonly ILogger<StartupService> _logger;
     private readonly IHostApplicationLifetime _applicationLifetime;
     private readonly SnapDogConfiguration _config;
-    private readonly IServiceProvider _serviceProvider;
     private readonly IWebHostEnvironment _environment;
     private readonly bool _isDebugLoggingEnabled;
 
@@ -49,7 +48,6 @@ public partial class StartupService : IHostedService
         this._logger = logger;
         this._applicationLifetime = applicationLifetime;
         this._config = config.Value;
-        this._serviceProvider = serviceProvider;
         this._environment = environment;
 
         // Determine if debug logging is enabled
@@ -135,7 +133,7 @@ public partial class StartupService : IHostedService
         var attempt = 0;
         var delay = BaseDelayMs;
 
-        while (attempt < MaxRetryAttempts)
+        while (true)
         {
             attempt++;
 
@@ -226,7 +224,7 @@ public partial class StartupService : IHostedService
 
             try
             {
-                var isAvailable = await IsPortAvailableAsync(port, cancellationToken);
+                var isAvailable = await IsPortAvailableAsync(port);
 
                 if (!isAvailable)
                 {
@@ -397,7 +395,7 @@ public partial class StartupService : IHostedService
         }
     }
 
-    private static Task<bool> IsPortAvailableAsync(int port, CancellationToken cancellationToken)
+    private static Task<bool> IsPortAvailableAsync(int port)
     {
         try
         {
@@ -437,7 +435,7 @@ public partial class StartupService : IHostedService
                 break;
             }
 
-            if (await IsPortAvailableAsync(candidatePort, cancellationToken))
+            if (await IsPortAvailableAsync(candidatePort))
             {
                 return candidatePort;
             }
