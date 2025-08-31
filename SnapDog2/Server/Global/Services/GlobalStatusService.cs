@@ -34,12 +34,10 @@ using SnapDog2.Shared.Models;
 /// <param name="logger">The logger instance.</param>
 public partial class GlobalStatusService(
     GetSystemStatusQueryHandler systemStatusHandler,
-    GetErrorStatusQueryHandler errorStatusHandler,
     GetVersionInfoQueryHandler versionInfoHandler,
     GetServerStatsQueryHandler serverStatsHandler,
     IMediator mediator,
-    ILogger<GlobalStatusService> logger
-) : IGlobalStatusService
+    ILogger<GlobalStatusService> logger) : IGlobalStatusService
 {
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
