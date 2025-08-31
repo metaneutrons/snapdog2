@@ -35,9 +35,9 @@ For each level, this section defines:
 | `SYSTEM_ERROR`  | System error information     | `ErrorDetails` object (`Core.Models`)     | Status (Publish) | Published on significant errors   |
 | `VERSION_INFO`  | Software version information | `VersionDetails` object (`Core.Models`)   | Status (Publish) | Contains version, build date etc. |
 | `SERVER_STATS`  | Server performance stats     | `ServerStats` object (`Core.Models`)      | Status (Publish) | CPU, Memory, Uptime               |
-| `ZONE_INFO`    | Available zones list         | JSON `ZoneIndex[]` (int array, 1-based)   | Status (Publish) | List of configured zone indices   |
+| `ZONE_STATES`    | All zone infos from ZoneState object | JSON `ZoneIndex[]` (int array, 1-based)   | Status (Publish) | zone infos from ZoneState object |
 | `ZONE_COUNT`   | Total configured zones count | `Count` (int)                             | Status (Publish) | Number of configured zones        |
-| `CLIENT_INFO`  | Available clients list       | JSON `ClientIndex[]` (int array, 1-based) | Status (Publish) | List of configured client indices |
+| `CLIENT_STATES`  | JSON object with complete client states  | JSON `ClientState` | Status (Publish) | List of configured client indices |
 | `CLIENT_COUNT` | Total configured clients count | `Count` (int)                           | Status (Publish) | Number of configured clients      |
 
 *(The C# Record definitions for `ErrorDetails`, `VersionDetails`, `ServerStats` are implemented in `SnapDog2.Core.Models` namespace)*
@@ -283,7 +283,7 @@ System-level topics provide discovery and global status information across all z
 
 | Status ID             | Env Var Suffix           | Default Topic          | Example Payload                    | Retained | Notes                      |
 | :-------------------- | :----------------------- | :--------------------- | :--------------------------------- | :------- | :------------------------- |
-| `ZONE_INFO`          | `_SYSTEM_MQTT_ZONE_TOPIC` | `snapdog/system/zones` | `[1, 2, 3]`                      | Yes      | List of available zones    |
+| `ZONE_STATES`          | `_SYSTEM_MQTT_ZONE_TOPIC` | `snapdog/system/zones` | `[1, 2, 3]`                      | Yes      | List of available zones    |
 
 **Global System Status**
 

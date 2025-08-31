@@ -336,38 +336,15 @@ public static class SnapDogBlueprint
         .Get("/api/v1/system/stats")
         .Description("Server performance statistics")
         //
-        // === HEALTH ENDPOINTS ===
-        //
-        .Status("HEALTH_STATUS")
-        .Global()
-        .Get("/api/health")
-        .Description("Overall health status")
-        .Exclude(Protocol.Mqtt, "Infrastructure endpoint not suitable for MQTT")
-        .Exclude(Protocol.Knx, "Infrastructure endpoint not suitable for KNX")
-        //
-        .Status("HEALTH_READY")
-        .Global()
-        .Get("/api/health/ready")
-        .Description("Readiness probe for container orchestration")
-        .Exclude(Protocol.Mqtt, "Infrastructure endpoint not suitable for MQTT")
-        .Exclude(Protocol.Knx, "Infrastructure endpoint not suitable for KNX")
-        //
-        .Status("HEALTH_LIVE")
-        .Global()
-        .Get("/api/health/live")
-        .Description("Liveness probe for container orchestration")
-        .Exclude(Protocol.Mqtt, "Infrastructure endpoint not suitable for MQTT")
-        .Exclude(Protocol.Knx, "Infrastructure endpoint not suitable for KNX")
-        //
-        .Status("ZONE_INFO")
+        .Status("ZONE_STATES")
         .Global()
         .Get("/api/v1/zones")
-        .ApiReturns<int?>()
+        .ApiReturns<SnapDog2.Api.Models.Page<SnapDog2.Shared.Models.ZoneState>>()
         .Description("Information about all zones")
         .Exclude(Protocol.Knx, "Read-only system information not actionable via KNX")
         .Exclude(Protocol.Mqtt, "No single MQTT topic for all zones info")
         //
-        .Status("CLIENT_INFO")
+        .Status("CLIENT_STATES")
         .Global()
         .Get("/api/v1/clients")
         .Description("Information about all clients")
@@ -414,7 +391,7 @@ public static class SnapDogBlueprint
         .Exclude(Protocol.Mqtt, "Media browsing not suitable for MQTT")
         .Exclude(Protocol.Knx, "Media browsing not suitable for KNX")
         //
-        .Status("CLIENT_INFO")
+        .Status("CLIENT_STATES")
         .Global()
         .Get("/api/v1/clients")
         .Description("Information about all clients")

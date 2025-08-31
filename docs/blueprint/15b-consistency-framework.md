@@ -8,7 +8,7 @@ The Command Framework Consistency Framework ensures that all command and status 
 
 During recent analysis, we discovered that 6 out of 8 newly added command/status IDs were not implemented across protocols:
 
-- **Missing Global Status**: `CLIENT_INFO`
+- **Missing Global Status**: `CLIENT_STATES`
 - **Missing Zone Commands**: `CONTROL` (partial), `ZONE_NAME`
 - **Missing Zone Status**: `PLAYLIST_NAME_STATUS`, `PLAYLIST_COUNT_STATUS`, `ZONE_NAME_STATUS`, `CONTROL_STATUS`
 - **Missing Client Status**: `CLIENT_NAME_STATUS`
@@ -250,7 +250,7 @@ private bool IsRecentlyAddedFeature(string featureId)
 {
     var recentlyAdded = new[]
     {
-        "CONTROL", "ZONE_NAME", "CLIENT_INFO",
+        "CONTROL", "ZONE_NAME", "CLIENT_STATES",
         "PLAYLIST_NAME_STATUS", "CLIENT_NAME_STATUS"
     };
     return recentlyAdded.Contains(featureId);
@@ -291,8 +291,8 @@ Overall Completion: 92.3% (72/78 features)
 └── KNX Coverage: 94.0% (47/50 suitable features)
 
 Missing Implementations (6):
-├── API: CLIENT_INFO, CONTROL, ZONE_NAME, PLAYLIST_NAME_STATUS, CLIENT_NAME_STATUS
-├── MQTT: CLIENT_INFO, CONTROL, ZONE_NAME, PLAYLIST_NAME_STATUS, CLIENT_NAME_STATUS
+├── API: CLIENT_STATES, CONTROL, ZONE_NAME, PLAYLIST_NAME_STATUS, CLIENT_NAME_STATUS
+├── MQTT: CLIENT_STATES, CONTROL, ZONE_NAME, PLAYLIST_NAME_STATUS, CLIENT_NAME_STATUS
 └── KNX: CONTROL, ZONE_NAME, PLAYLIST_NAME_STATUS, CLIENT_NAME_STATUS
 
 Recently Added Features (Grace Period):

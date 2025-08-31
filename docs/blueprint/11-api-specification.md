@@ -83,7 +83,7 @@ Endpoints for interacting with configured audio zones. **Zone creation/deletion/
 
 | Method | Path                                       | Command/Status ID         | Description                          | Request Body / Params                           | Success Response (Direct Primitive)  | HTTP Status |
 | :----- | :----------------------------------------- | :------------------------ | :----------------------------------- | :---------------------------------------------- | :----------------------------------- | :---------- |
-| `GET`  | `/zones`                                   | `ZONE_INFO`              | List configured zones                | Query: `?page=1&size=20`                       | `Page<Zone>`                         | 200 OK      |
+| `GET`  | `/zones`                                   | `ZONE_STATES`              | List configured zones                | Query: `?page=1&size=20`                       | `Page<Zone>`                         | 200 OK      |
 | `GET`  | `/zones/count`                             | `ZONE_COUNT`             | Get total configured zones count     | None                                            | `int` (count)                        | 200 OK      |
 | `GET`  | `/zones/{zoneIndex}`                       | `ZONE_STATE`              | Get details & full state for zone   | Path: `{zoneIndex}`                             | `ZoneState`                          | 200 OK      |
 | `POST` | `/zones/{zoneIndex}/play`                  | `PLAY`                    | Start/resume playback                | Path: `{zoneIndex}`                             | No content                           | 204 No Content|

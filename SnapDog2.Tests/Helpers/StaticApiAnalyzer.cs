@@ -122,32 +122,42 @@ public static class StaticApiAnalyzer
     /// </summary>
     public static (HashSet<string> missing, HashSet<string> extra) CompareStatusImplementation()
     {
-        var blueprintStatus = GetBlueprintApiStatus();
-        var implementedEndpoints = GetImplementedApiEndpoints();
+        var blueprintStatus = GetBlueprintApiStatusWithTypes();
+        var implementedEndpoints = GetImplementedApiEndpointsWithTypes();
 
         var missing = new HashSet<string>();
         var blueprintEndpoints = new HashSet<string>();
 
-        // Check for missing implementations
-        foreach (var (statusId, expectedPath, expectedMethod) in blueprintStatus)
+        // Check for missing implementations and return type mismatches
+        foreach (var (statusId, expectedPath, expectedMethod, expectedReturnType) in blueprintStatus)
         {
             var endpointKey = $"{expectedMethod.ToUpper()} {expectedPath}";
             blueprintEndpoints.Add(endpointKey);
 
-            if (
-                !implementedEndpoints.TryGetValue(expectedPath, out var methods)
-                || !methods.Contains(expectedMethod.ToUpper())
-            )
+            if (!implementedEndpoints.TryGetValue(expectedPath, out var methodsWithTypes))
             {
                 missing.Add(statusId);
+                continue;
+            }
+
+            if (!methodsWithTypes.TryGetValue(expectedMethod.ToUpper(), out var actualReturnType))
+            {
+                missing.Add(statusId);
+                continue;
+            }
+
+            // Check return type compatibility
+            if (expectedReturnType != null && !AreTypesCompatible(expectedReturnType, actualReturnType))
+            {
+                missing.Add($"{statusId} (return type mismatch: expected {expectedReturnType.Name}, got {actualReturnType?.Name ?? "void"})");
             }
         }
 
         // Check for extra implementations (orphaned) - only GET methods for status
         var extra = new HashSet<string>();
-        foreach (var (path, methods) in implementedEndpoints)
+        foreach (var (path, methodsWithTypes) in implementedEndpoints)
         {
-            foreach (var method in methods)
+            foreach (var (method, returnType) in methodsWithTypes)
             {
                 // Only check GET methods for orphaned status endpoints
                 if (method == "GET")
@@ -241,14 +251,117 @@ public static class StaticApiAnalyzer
             .ToList();
     }
 
-    private static List<(string statusId, string path, string method)> GetBlueprintApiStatus()
+    private static List<(string statusId, string path, string method, Type? returnType)> GetBlueprintApiStatusWithTypes()
     {
         return SnapDogBlueprint
             .Spec.Status.Required()
             .WithApi()
-            .Select(status => (status.Id, status.ApiPath ?? "", status.HttpMethod ?? ""))
+            .Select(status => (status.Id, status.ApiPath ?? "", status.HttpMethod ?? "", status.ApiReturnType))
             .Where(x => !string.IsNullOrEmpty(x.Item2) && !string.IsNullOrEmpty(x.Item3))
             .ToList();
+    }
+
+    private static Dictionary<string, Dictionary<string, Type?>> GetImplementedApiEndpointsWithTypes()
+    {
+        var endpoints = new Dictionary<string, Dictionary<string, Type?>>();
+
+        var assembly = Assembly.Load("SnapDog2");
+        var controllerTypes = assembly
+            .GetTypes()
+            .Where(t => t.IsSubclassOf(typeof(ControllerBase)) && t.Name.EndsWith("Controller"))
+            .ToList();
+
+        foreach (var controllerType in controllerTypes)
+        {
+            var controllerRoute = GetControllerRoute(controllerType);
+
+            var methods = controllerType
+                .GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                .Where(m => m.IsPublic && !m.IsSpecialName && m.DeclaringType != typeof(ControllerBase))
+                .ToList();
+
+            foreach (var method in methods)
+            {
+                var (httpMethods, routePath) = GetMethodRouteInfo(method);
+                var returnType = GetActionReturnType(method);
+
+                if (httpMethods.Any() && !string.IsNullOrEmpty(routePath))
+                {
+                    var fullPath = CombinePaths(controllerRoute, routePath);
+
+                    if (!endpoints.ContainsKey(fullPath))
+                    {
+                        endpoints[fullPath] = new Dictionary<string, Type?>();
+                    }
+
+                    foreach (var httpMethod in httpMethods)
+                    {
+                        endpoints[fullPath][httpMethod.ToUpper()] = returnType;
+                    }
+                }
+            }
+        }
+
+        return endpoints;
+    }
+
+    private static Type? GetActionReturnType(MethodInfo method)
+    {
+        var returnType = method.ReturnType;
+
+        // Handle Task<T> - unwrap to T
+        if (returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(Task<>))
+        {
+            returnType = returnType.GetGenericArguments()[0];
+        }
+
+        // Handle ActionResult<T> - unwrap to T
+        if (returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(ActionResult<>))
+        {
+            return returnType.GetGenericArguments()[0];
+        }
+
+        // Handle IActionResult - try to get from ProducesResponseType attribute
+        if (returnType == typeof(IActionResult) || returnType.IsSubclassOf(typeof(ActionResult)))
+        {
+            var producesAttrs = method.GetCustomAttributes<ProducesResponseTypeAttribute>();
+            return producesAttrs.FirstOrDefault(a => a.StatusCode == 200)?.Type;
+        }
+
+        return returnType == typeof(void) ? null : returnType;
+    }
+
+    private static bool AreTypesCompatible(Type expected, Type? actual)
+    {
+        if (actual == null)
+        {
+            return expected == typeof(void);
+        }
+
+        if (expected == actual)
+        {
+            return true;
+        }
+
+        // Handle nullable types
+        if (expected.IsGenericType && expected.GetGenericTypeDefinition() == typeof(Nullable<>))
+        {
+            var underlyingType = Nullable.GetUnderlyingType(expected);
+            return underlyingType == actual;
+        }
+
+        // Handle common type conversions
+        if (expected == typeof(int) && actual == typeof(int?))
+        {
+            return true;
+        }
+
+        if (expected == typeof(int?) && actual == typeof(int))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     /// <summary>
