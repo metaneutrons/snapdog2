@@ -115,13 +115,7 @@ public interface IStatusFactory
         int playlistIndex
     );
 
-    /// <summary>
-    /// Creates a zone complete state changed notification.
     #endregion
-
-    // Note: Obsolete Zone Status Notifications (Blueprint Compliance - Status Publishing) methods removed
-    // These used incorrect ZONE_* prefixed status IDs that don't match blueprint specification
-    // Use the correct state change notifications above instead
 
     #region Client Status Notifications (State Changes)
 
