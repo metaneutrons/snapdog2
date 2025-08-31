@@ -424,7 +424,7 @@ public partial class StartupService : IHostedService
         }
     }
 
-    private static async Task<int?> FindAlternativePortAsync(int preferredPort)
+    private async static Task<int?> FindAlternativePortAsync(int preferredPort)
     {
         for (var offset = 1; offset <= PortScanRange; offset++)
         {

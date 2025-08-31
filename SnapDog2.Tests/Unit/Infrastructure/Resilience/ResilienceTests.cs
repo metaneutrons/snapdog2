@@ -389,7 +389,7 @@ public class ResilienceTests
         };
     }
 
-    private static async Task<(bool Success, T? Result, Exception? Exception)> TryExecuteAsync<T>(
+    private async static Task<(bool Success, T? Result, Exception? Exception)> TryExecuteAsync<T>(
         Func<Task<T>> operation
     )
     {

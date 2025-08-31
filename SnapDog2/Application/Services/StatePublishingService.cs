@@ -145,7 +145,7 @@ public partial class StatePublishingService(
 
     #endregion
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    async protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         try
         {
@@ -348,7 +348,7 @@ public partial class StatePublishingService(
     /// Publishes complete zone state including all "publish" direction states.
     /// Uses Mediator to publish notifications that are handled by existing notification handlers.
     /// </summary>
-    private static async Task<bool> PublishZoneStateAsync(
+    private async static Task<bool> PublishZoneStateAsync(
         IMediator mediator,
         int zoneIndex,
         CancellationToken cancellationToken
@@ -445,7 +445,7 @@ public partial class StatePublishingService(
     /// Publishes complete client state including all "publish" direction states.
     /// Uses Mediator to publish notifications that are handled by existing notification handlers.
     /// </summary>
-    private static async Task<bool> PublishClientStateAsync(
+    private async static Task<bool> PublishClientStateAsync(
         IMediator mediator,
         int clientIndex,
         CancellationToken cancellationToken
