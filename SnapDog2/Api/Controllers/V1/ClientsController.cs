@@ -190,12 +190,22 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     }
 
     [HttpGet]
-    [ProducesResponseType<List<ClientState>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<Page<ClientState>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<List<ClientState>>> GetClients()
+    public async Task<ActionResult<Page<ClientState>>> GetClients([FromQuery] int page = 1, [FromQuery] int size = 20)
     {
+        if (page < 1)
+        {
+            return BadRequest("Page must be greater than 0");
+        }
+
+        if (size < 1 || size > 100)
+        {
+            return BadRequest("Size must be between 1 and 100");
+        }
+
         var query = new GetAllClientsQuery();
-        var result = await this._mediator.SendQueryAsync<GetAllClientsQuery, Result<List<ClientState>>>(query);
+        var result = await _mediator.SendQueryAsync<GetAllClientsQuery, Result<List<ClientState>>>(query);
 
         if (result.IsFailure)
         {
@@ -203,7 +213,14 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return Ok(result.Value!);
+        var clients = result.Value ?? [];
+        var totalCount = clients.Count;
+        var startIndex = (page - 1) * size;
+        var pagedClients = clients.Skip(startIndex).Take(size).ToArray();
+
+        var pageResult = new Page<ClientState>(pagedClients, totalCount, size, page);
+
+        return Ok(pageResult);
     }
 
     /// <summary>

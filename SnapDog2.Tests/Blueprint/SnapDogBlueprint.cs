@@ -13,6 +13,7 @@
 //
 namespace SnapDog2.Tests.Blueprint;
 
+using SnapDog2.Api.Models;
 using SnapDog2.Shared.Models;
 
 /// <summary>
@@ -344,7 +345,7 @@ public static class SnapDogBlueprint
         .Status("ZONE_STATES")
         .Global()
         .Get("/api/v1/zones")
-        .ApiReturns<SnapDog2.Api.Models.Page<SnapDog2.Shared.Models.ZoneState>>()
+        .ApiReturns<Page<ZoneState>>()
         .Description("Information about all zones")
         .Exclude(Protocol.Knx, "Read-only system information not actionable via KNX")
         .Exclude(Protocol.Mqtt, "No single MQTT topic for all zones info")
@@ -353,7 +354,7 @@ public static class SnapDogBlueprint
         .Status("CLIENT_STATES")
         .Global()
         .Get("/api/v1/clients")
-        .ApiReturns<SnapDog2.Api.Models.Page<SnapDog2.Shared.Models.ClientState>>()
+        .ApiReturns<Page<ClientState>>()
         .Description("Information about all clients")
         .Exclude(Protocol.Knx, "Read-only system information not actionable via KNX")
         .Exclude(Protocol.Mqtt, "No single MQTT topic for all clients info")
