@@ -593,22 +593,6 @@ static WebApplication CreateWebApplication(string[] args)
         >();
     }
 
-    // WebUI Configuration (minimal approach without API client)
-    if (snapDogConfig.Http.WebUiEnabled)
-    {
-        builder.Services.AddRazorComponents()
-            .AddInteractiveServerComponents();
-
-        // Add SignalR for real-time updates
-        builder.Services.AddSignalR();
-        builder.Services.AddScoped<SnapDog2.Infrastructure.Services.IZoneUpdateService, SnapDog2.Infrastructure.Services.ZoneUpdateService>();
-
-        // Add anti-forgery services
-        builder.Services.AddAntiforgery();
-
-        Log.Information("🌐 WebUI enabled (minimal mode)");
-    }
-
     var app = builder.Build();
 
     // Add global exception handling as the first middleware
@@ -649,47 +633,6 @@ static WebApplication CreateWebApplication(string[] args)
                     Predicate = check => check.Tags.Contains("live"),
                 }
             );
-        }
-    }
-
-    // WebUI routing
-    if (snapDogConfig.Http.WebUiEnabled)
-    {
-        try
-        {
-            // Use forwarded headers for reverse proxy
-            app.UseForwardedHeaders();
-
-            // Add default static files middleware first
-            app.UseStaticFiles();
-
-            // Configure embedded assets
-            var assetsAssembly = typeof(SnapDog2.WebUi.Assets.Marker).Assembly;
-            var embedded = new Microsoft.Extensions.FileProviders.ManifestEmbeddedFileProvider(assetsAssembly, "EmbeddedWebRoot");
-            app.UseStaticFiles(new StaticFileOptions { FileProvider = embedded });
-
-            // Configure path base for reverse proxy
-            if (!string.IsNullOrEmpty(snapDogConfig.Http.WebUiPath) && snapDogConfig.Http.WebUiPath != "/")
-            {
-                app.UsePathBase(snapDogConfig.Http.WebUiPath);
-            }
-
-            // Add anti-forgery middleware
-            app.UseAntiforgery();
-
-            // Map Razor components with base path
-            app.MapRazorComponents<SnapDog2.WebUi.App>()
-                .AddInteractiveServerRenderMode();
-
-            // Map SignalR hub
-            app.MapHub<SnapDog2.Infrastructure.Hubs.ZoneHub>("/zonehub");
-
-            Log.Information("🌐 WebUI routes configured at {Path}", snapDogConfig.Http.WebUiPath);
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Failed to configure WebUI");
-            throw;
         }
     }
 
