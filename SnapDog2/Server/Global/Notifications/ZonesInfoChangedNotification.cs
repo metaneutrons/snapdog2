@@ -20,5 +20,4 @@ using SnapDog2.Shared.Attributes;
 /// <summary>
 /// Notification published when the system zones information changes.
 /// </summary>
-[StatusId("ZONES_INFO")]
 public record ZonesInfoChangedNotification(IReadOnlyList<int> ZoneIndices) : INotification;

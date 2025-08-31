@@ -46,14 +46,14 @@ public static class SnapDogBlueprint
         //
         // === CONFIGURATION QUERIES ===
         //
-        .Status("ZONES_COUNT")
+        .Status("ZONE_COUNT")
         .Global()
         .Get("/api/v1/zones/count")
         .ApiReturns<int>()
         .ApiReturns<int>()
         .Description("Get total number of configured zones")
         //
-        .Status("CLIENTS_COUNT")
+        .Status("CLIENT_COUNT")
         .Global()
         .Get("/api/v1/clients/count")
         .ApiReturns<int>()
@@ -359,7 +359,7 @@ public static class SnapDogBlueprint
         .Exclude(Protocol.Mqtt, "Infrastructure endpoint not suitable for MQTT")
         .Exclude(Protocol.Knx, "Infrastructure endpoint not suitable for KNX")
         //
-        .Status("ZONES_INFO")
+        .Status("ZONE_INFO")
         .Global()
         .Get("/api/v1/zones")
         .ApiReturns<int?>()
@@ -367,7 +367,7 @@ public static class SnapDogBlueprint
         .Exclude(Protocol.Knx, "Read-only system information not actionable via KNX")
         .Exclude(Protocol.Mqtt, "No single MQTT topic for all zones info")
         //
-        .Status("CLIENTS_INFO")
+        .Status("CLIENT_INFO")
         .Global()
         .Get("/api/v1/clients")
         .Description("Information about all clients")
@@ -414,7 +414,7 @@ public static class SnapDogBlueprint
         .Exclude(Protocol.Mqtt, "Media browsing not suitable for MQTT")
         .Exclude(Protocol.Knx, "Media browsing not suitable for KNX")
         //
-        .Status("CLIENTS_INFO")
+        .Status("CLIENT_INFO")
         .Global()
         .Get("/api/v1/clients")
         .Description("Information about all clients")

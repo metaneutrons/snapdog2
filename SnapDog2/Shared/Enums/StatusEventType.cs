@@ -110,10 +110,10 @@ public enum StatusEventType
     [Description("PLAYLIST_SHUFFLE_STATUS")]
     PlaylistShuffleStatus,
 
-    [Description("ZONES_INFO")]
+    [Description("ZONE_INFO")]
     ZonesInfo,
 
-    [Description("CLIENTS_INFO")]
+    [Description("CLIENT_INFO")]
     ClientsInfo,
 
     // Global Status Events

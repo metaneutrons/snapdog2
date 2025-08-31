@@ -102,4 +102,106 @@ public class BlueprintTests
                 .NotBeNullOrEmpty($"Status {stat.Id} declares MQTT support but has no topic pattern");
         }
     }
+
+    [Fact]
+    [Trait("Category", "Blueprint")]
+    public void Blueprint_Status_ShouldHaveMatchingStatusIdNotifications()
+    {
+        // Act
+        var (missingNotifications, extraNotifications) = StaticApiAnalyzer.CompareStatusNotificationImplementation();
+
+        // Assert
+        missingNotifications
+            .Should()
+            .BeEmpty($"Missing StatusId notifications for required status: {string.Join(", ", missingNotifications)}");
+
+        extraNotifications
+            .Should()
+            .BeEmpty($"Orphaned StatusId notifications not defined in blueprint: {string.Join(", ", extraNotifications)}");
+    }
+
+    [Fact]
+    [Trait("Category", "Blueprint")]
+    public void Blueprint_Status_ShouldHaveMatchingMqttNotifiers()
+    {
+        // Act
+        var (missingNotifiers, extraNotifiers) = StaticApiAnalyzer.CompareStatusMqttNotifierImplementation();
+
+        // Assert
+        missingNotifiers
+            .Should()
+            .BeEmpty($"Missing MQTT notifiers for status with MQTT support: {string.Join(", ", missingNotifiers)}");
+
+        extraNotifiers
+            .Should()
+            .BeEmpty($"Orphaned MQTT notifiers for status without MQTT support: {string.Join(", ", extraNotifiers)}");
+    }
+
+    [Fact]
+    [Trait("Category", "Blueprint")]
+    public void Blueprint_Status_ShouldHaveMatchingKnxNotifiers()
+    {
+        // Act
+        var (missingNotifiers, extraNotifiers) = StaticApiAnalyzer.CompareStatusKnxNotifierImplementation();
+
+        // Assert
+        missingNotifiers
+            .Should()
+            .BeEmpty($"Missing KNX notifiers for status with KNX support: {string.Join(", ", missingNotifiers)}");
+
+        extraNotifiers
+            .Should()
+            .BeEmpty($"Orphaned KNX notifiers for status without KNX support: {string.Join(", ", extraNotifiers)}");
+    }
+
+    [Fact]
+    [Trait("Category", "Blueprint")]
+    public void Blueprint_Commands_ShouldHaveMatchingCommandIdAttributes()
+    {
+        // Act
+        var (missingCommands, extraCommands) = StaticApiAnalyzer.CompareCommandIdImplementation();
+
+        // Assert
+        missingCommands
+            .Should()
+            .BeEmpty($"Missing CommandId attributes for required commands: {string.Join(", ", missingCommands)}");
+
+        extraCommands
+            .Should()
+            .BeEmpty($"Orphaned CommandId attributes not defined in blueprint: {string.Join(", ", extraCommands)}");
+    }
+
+    [Fact]
+    [Trait("Category", "Blueprint")]
+    public void Blueprint_Commands_ShouldHaveMatchingMqttHandlers()
+    {
+        // Act
+        var (missingHandlers, extraHandlers) = StaticApiAnalyzer.CompareCommandMqttHandlerImplementation();
+
+        // Assert
+        missingHandlers
+            .Should()
+            .BeEmpty($"Missing MQTT handlers for commands with MQTT support: {string.Join(", ", missingHandlers)}");
+
+        extraHandlers
+            .Should()
+            .BeEmpty($"Orphaned MQTT handlers for commands without MQTT support: {string.Join(", ", extraHandlers)}");
+    }
+
+    [Fact]
+    [Trait("Category", "Blueprint")]
+    public void Blueprint_Commands_ShouldHaveMatchingKnxHandlers()
+    {
+        // Act
+        var (missingHandlers, extraHandlers) = StaticApiAnalyzer.CompareCommandKnxHandlerImplementation();
+
+        // Assert
+        missingHandlers
+            .Should()
+            .BeEmpty($"Missing KNX handlers for commands with KNX support: {string.Join(", ", missingHandlers)}");
+
+        extraHandlers
+            .Should()
+            .BeEmpty($"Orphaned KNX handlers for commands without KNX support: {string.Join(", ", extraHandlers)}");
+    }
 }

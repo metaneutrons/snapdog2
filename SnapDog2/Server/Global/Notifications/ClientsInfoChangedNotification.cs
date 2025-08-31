@@ -20,5 +20,4 @@ using SnapDog2.Shared.Attributes;
 /// <summary>
 /// Notification published when the system clients information changes.
 /// </summary>
-[StatusId("CLIENTS_INFO")]
 public record ClientsInfoChangedNotification(IReadOnlyList<int> ClientIndices) : INotification;

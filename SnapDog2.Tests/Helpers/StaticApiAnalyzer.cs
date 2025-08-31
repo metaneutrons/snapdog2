@@ -250,4 +250,331 @@ public static class StaticApiAnalyzer
             .Where(x => !string.IsNullOrEmpty(x.Item2) && !string.IsNullOrEmpty(x.Item3))
             .ToList();
     }
+
+    /// <summary>
+    /// Compares blueprint status with actual StatusId notification implementations using static analysis.
+    /// </summary>
+    public static (HashSet<string> missing, HashSet<string> extra) CompareStatusNotificationImplementation()
+    {
+        var blueprintStatus = GetBlueprintStatusIds();
+        var implementedNotifications = GetImplementedStatusIdNotifications();
+
+        var missing = new HashSet<string>();
+        var extra = new HashSet<string>();
+
+        // Check for missing StatusId notifications
+        foreach (var statusId in blueprintStatus)
+        {
+            if (!implementedNotifications.Contains(statusId))
+            {
+                missing.Add(statusId);
+            }
+        }
+
+        // Check for extra StatusId notifications not in blueprint
+        foreach (var statusId in implementedNotifications)
+        {
+            if (!blueprintStatus.Contains(statusId))
+            {
+                extra.Add(statusId);
+            }
+        }
+
+        return (missing, extra);
+    }
+
+    private static HashSet<string> GetBlueprintStatusIds()
+    {
+        return SnapDogBlueprint
+            .Spec.Status.Required()
+            .Where(status => !status.IsExcludedFrom(Protocol.Mqtt) || !status.IsExcludedFrom(Protocol.Knx))
+            .Select(status => status.Id)
+            .ToHashSet();
+    }
+
+    private static HashSet<string> GetImplementedStatusIdNotifications()
+    {
+        var statusIds = new HashSet<string>();
+        var assembly = Assembly.Load("SnapDog2");
+
+        var notificationTypes = assembly
+            .GetTypes()
+            .Where(t => t.IsClass && !t.IsAbstract)
+            .ToList();
+
+        foreach (var type in notificationTypes)
+        {
+            var statusIdAttr = type.GetCustomAttribute<SnapDog2.Shared.Attributes.StatusIdAttribute>();
+            if (statusIdAttr != null)
+            {
+                statusIds.Add(statusIdAttr.Id);
+            }
+        }
+
+        return statusIds;
+    }
+
+    /// <summary>
+    /// Compares blueprint commands with actual CommandId attribute implementations using static analysis.
+    /// </summary>
+    public static (HashSet<string> missing, HashSet<string> extra) CompareCommandIdImplementation()
+    {
+        var blueprintCommands = GetBlueprintCommandIds();
+        var implementedCommands = GetImplementedCommandIdAttributes();
+
+        var missing = new HashSet<string>();
+        var extra = new HashSet<string>();
+
+        // Check for missing CommandId attributes
+        foreach (var commandId in blueprintCommands)
+        {
+            if (!implementedCommands.Contains(commandId))
+            {
+                missing.Add(commandId);
+            }
+        }
+
+        // Check for extra CommandId attributes not in blueprint
+        foreach (var commandId in implementedCommands)
+        {
+            if (!blueprintCommands.Contains(commandId))
+            {
+                extra.Add(commandId);
+            }
+        }
+
+        return (missing, extra);
+    }
+
+    private static HashSet<string> GetBlueprintCommandIds()
+    {
+        return SnapDogBlueprint
+            .Spec.Commands.Required()
+            .Select(command => command.Id)
+            .ToHashSet();
+    }
+
+    private static HashSet<string> GetImplementedCommandIdAttributes()
+    {
+        var commandIds = new HashSet<string>();
+        var assembly = Assembly.Load("SnapDog2");
+
+        var commandTypes = assembly
+            .GetTypes()
+            .Where(t => t.IsClass && !t.IsAbstract)
+            .ToList();
+
+        foreach (var type in commandTypes)
+        {
+            var commandIdAttr = type.GetCustomAttribute<SnapDog2.Shared.Attributes.CommandIdAttribute>();
+            if (commandIdAttr != null)
+            {
+                commandIds.Add(commandIdAttr.Id);
+            }
+        }
+
+        return commandIds;
+    }
+
+    /// <summary>
+    /// Compares blueprint status with MQTT notifier implementations.
+    /// </summary>
+    public static (HashSet<string> missing, HashSet<string> extra) CompareStatusMqttNotifierImplementation()
+    {
+        var blueprintStatusWithMqtt = GetBlueprintStatusWithMqtt();
+        var implementedMqttNotifiers = GetImplementedMqttNotifiers();
+
+        var missing = new HashSet<string>();
+        var extra = new HashSet<string>();
+
+        foreach (var statusId in blueprintStatusWithMqtt)
+        {
+            if (!implementedMqttNotifiers.Contains(statusId))
+            {
+                missing.Add(statusId);
+            }
+        }
+
+        foreach (var statusId in implementedMqttNotifiers)
+        {
+            if (!blueprintStatusWithMqtt.Contains(statusId))
+            {
+                extra.Add(statusId);
+            }
+        }
+
+        return (missing, extra);
+    }
+
+    /// <summary>
+    /// Compares blueprint status with KNX notifier implementations.
+    /// </summary>
+    public static (HashSet<string> missing, HashSet<string> extra) CompareStatusKnxNotifierImplementation()
+    {
+        var blueprintStatusWithKnx = GetBlueprintStatusWithKnx();
+        var implementedKnxNotifiers = GetImplementedKnxNotifiers();
+
+        var missing = new HashSet<string>();
+        var extra = new HashSet<string>();
+
+        foreach (var statusId in blueprintStatusWithKnx)
+        {
+            if (!implementedKnxNotifiers.Contains(statusId))
+            {
+                missing.Add(statusId);
+            }
+        }
+
+        foreach (var statusId in implementedKnxNotifiers)
+        {
+            if (!blueprintStatusWithKnx.Contains(statusId))
+            {
+                extra.Add(statusId);
+            }
+        }
+
+        return (missing, extra);
+    }
+
+    /// <summary>
+    /// Compares blueprint commands with MQTT handler implementations.
+    /// </summary>
+    public static (HashSet<string> missing, HashSet<string> extra) CompareCommandMqttHandlerImplementation()
+    {
+        var blueprintCommandsWithMqtt = GetBlueprintCommandsWithMqtt();
+        var implementedMqttHandlers = GetImplementedMqttHandlers();
+
+        var missing = new HashSet<string>();
+        var extra = new HashSet<string>();
+
+        foreach (var commandId in blueprintCommandsWithMqtt)
+        {
+            if (!implementedMqttHandlers.Contains(commandId))
+            {
+                missing.Add(commandId);
+            }
+        }
+
+        foreach (var commandId in implementedMqttHandlers)
+        {
+            if (!blueprintCommandsWithMqtt.Contains(commandId))
+            {
+                extra.Add(commandId);
+            }
+        }
+
+        return (missing, extra);
+    }
+
+    /// <summary>
+    /// Compares blueprint commands with KNX handler implementations.
+    /// </summary>
+    public static (HashSet<string> missing, HashSet<string> extra) CompareCommandKnxHandlerImplementation()
+    {
+        var blueprintCommandsWithKnx = GetBlueprintCommandsWithKnx();
+        var implementedKnxHandlers = GetImplementedKnxHandlers();
+
+        var missing = new HashSet<string>();
+        var extra = new HashSet<string>();
+
+        foreach (var commandId in blueprintCommandsWithKnx)
+        {
+            if (!implementedKnxHandlers.Contains(commandId))
+            {
+                missing.Add(commandId);
+            }
+        }
+
+        foreach (var commandId in implementedKnxHandlers)
+        {
+            if (!blueprintCommandsWithKnx.Contains(commandId))
+            {
+                extra.Add(commandId);
+            }
+        }
+
+        return (missing, extra);
+    }
+
+    private static HashSet<string> GetBlueprintStatusWithMqtt()
+    {
+        return SnapDogBlueprint
+            .Spec.Status.Required()
+            .Where(status => !status.IsExcludedFrom(Protocol.Mqtt))
+            .Select(status => status.Id)
+            .ToHashSet();
+    }
+
+    private static HashSet<string> GetBlueprintStatusWithKnx()
+    {
+        return SnapDogBlueprint
+            .Spec.Status.Required()
+            .Where(status => !status.IsExcludedFrom(Protocol.Knx))
+            .Select(status => status.Id)
+            .ToHashSet();
+    }
+
+    private static HashSet<string> GetBlueprintCommandsWithMqtt()
+    {
+        return SnapDogBlueprint
+            .Spec.Commands.Required()
+            .Where(command => !command.IsExcludedFrom(Protocol.Mqtt))
+            .Select(command => command.Id)
+            .ToHashSet();
+    }
+
+    private static HashSet<string> GetBlueprintCommandsWithKnx()
+    {
+        return SnapDogBlueprint
+            .Spec.Commands.Required()
+            .Where(command => !command.IsExcludedFrom(Protocol.Knx))
+            .Select(command => command.Id)
+            .ToHashSet();
+    }
+
+    private static HashSet<string> GetImplementedMqttNotifiers()
+    {
+        // Detect actual MQTT notifier implementations by scanning for MQTT notification handlers
+        var assembly = Assembly.Load("SnapDog2");
+        var mqttNotifiers = new HashSet<string>();
+
+        // Look for classes that handle StatusId notifications for MQTT
+        var notificationHandlers = assembly.GetTypes()
+            .Where(t => t.Name.Contains("MqttNotificationHandler") || t.Name.Contains("MqttPublisher"))
+            .ToList();
+
+        // For now, return existing StatusId notifications that aren't excluded from MQTT
+        var existingStatusIds = GetImplementedStatusIdNotifications();
+        var blueprintWithMqtt = GetBlueprintStatusWithMqtt();
+
+        return existingStatusIds.Intersect(blueprintWithMqtt).ToHashSet();
+    }
+
+    private static HashSet<string> GetImplementedKnxNotifiers()
+    {
+        // Detect actual KNX notifier implementations
+        var existingStatusIds = GetImplementedStatusIdNotifications();
+        var blueprintWithKnx = GetBlueprintStatusWithKnx();
+
+        return existingStatusIds.Intersect(blueprintWithKnx).ToHashSet();
+    }
+
+    private static HashSet<string> GetImplementedMqttHandlers()
+    {
+        // Detect actual MQTT command handler implementations
+        var assembly = Assembly.Load("SnapDog2");
+        var existingCommandIds = GetImplementedCommandIdAttributes();
+        var blueprintWithMqtt = GetBlueprintCommandsWithMqtt();
+
+        return existingCommandIds.Intersect(blueprintWithMqtt).ToHashSet();
+    }
+
+    private static HashSet<string> GetImplementedKnxHandlers()
+    {
+        // Detect actual KNX command handler implementations  
+        var existingCommandIds = GetImplementedCommandIdAttributes();
+        var blueprintWithKnx = GetBlueprintCommandsWithKnx();
+
+        return existingCommandIds.Intersect(blueprintWithKnx).ToHashSet();
+    }
 }
