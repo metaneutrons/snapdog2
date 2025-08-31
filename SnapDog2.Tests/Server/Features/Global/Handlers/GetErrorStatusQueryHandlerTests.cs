@@ -13,16 +13,11 @@
 //
 namespace SnapDog2.Tests.Server.Features.Global.Handlers;
 
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Moq;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Server.Global.Handlers;
 using SnapDog2.Server.Global.Queries;
 using SnapDog2.Shared.Models;
-using Xunit;
 
 /// <summary>
 /// Tests for the GetErrorStatusQueryHandler class.

@@ -11,13 +11,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
+
+namespace SnapDog.Analyzers.Tests;
+
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Xunit;
-
-namespace SnapDog.Analyzers.Tests;
 
 public class AnalyzerTestFileTests
 {

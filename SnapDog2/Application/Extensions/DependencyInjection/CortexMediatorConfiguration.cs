@@ -19,10 +19,8 @@ using Cortex.Mediator.DependencyInjection;
 using Cortex.Mediator.Notifications;
 using Cortex.Mediator.Queries;
 using FluentValidation;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using SnapDog2.Application.Behaviors;
+using SnapDog2.Shared.Models;
 
 /// <summary>
 /// Extension methods for configuring Cortex.Mediator services with auto-discovery.
@@ -39,7 +37,7 @@ public static class CortexMediatorConfiguration
     {
         // Get assemblies for auto-discovery
         var serverAssembly = typeof(SharedLoggingCommandBehavior<,>).Assembly;
-        var coreAssembly = typeof(SnapDog2.Shared.Models.IResult).Assembly;
+        var coreAssembly = typeof(IResult).Assembly;
         var assemblies = new[] { serverAssembly, coreAssembly };
 
         // Add Cortex.Mediator with enhanced auto-discovery

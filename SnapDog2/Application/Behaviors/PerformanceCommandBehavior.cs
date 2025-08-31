@@ -15,7 +15,6 @@ namespace SnapDog2.Application.Behaviors;
 
 using System.Diagnostics;
 using Cortex.Mediator.Commands;
-using Microsoft.Extensions.Logging;
 using SnapDog2.Domain.Services;
 using SnapDog2.Shared.Models;
 

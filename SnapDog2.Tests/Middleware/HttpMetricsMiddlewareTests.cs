@@ -13,14 +13,10 @@
 //
 namespace SnapDog2.Tests.Middleware;
 
-using System;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Moq;
 using SnapDog2.Api.Middleware;
 using SnapDog2.Domain.Abstractions;
-using Xunit;
 
 /// <summary>
 /// Tests for the HttpMetricsMiddleware class.
@@ -42,7 +38,7 @@ public class HttpMetricsMiddlewareTests
         this._mockMetricsService = new Mock<IApplicationMetrics>();
 
         // Create a simple next delegate that does nothing
-        RequestDelegate next = (HttpContext context) => Task.CompletedTask;
+        RequestDelegate next = context => Task.CompletedTask;
 
         this._middleware = new HttpMetricsMiddleware(next, this._mockLogger.Object, this._mockMetricsService.Object);
     }
@@ -74,7 +70,7 @@ public class HttpMetricsMiddlewareTests
         var testException = new InvalidOperationException("Test exception");
 
         // Create middleware with next delegate that throws
-        RequestDelegate next = (HttpContext ctx) => throw testException;
+        RequestDelegate next = ctx => throw testException;
         var middleware = new HttpMetricsMiddleware(next, this._mockLogger.Object, this._mockMetricsService.Object);
 
         // Act & Assert
@@ -142,7 +138,7 @@ public class HttpMetricsMiddlewareTests
         var context = CreateHttpContext("GET", "/api/v1/zones");
 
         // Create middleware with slow next delegate
-        RequestDelegate slowNext = async (HttpContext ctx) =>
+        RequestDelegate slowNext = async ctx =>
         {
             await Task.Delay(1100); // Simulate slow request (> 1 second)
         };

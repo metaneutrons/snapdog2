@@ -14,7 +14,6 @@
 namespace SnapDog2.Server.Clients.Handlers;
 
 using Cortex.Mediator.Commands;
-using Microsoft.Extensions.Logging;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Server.Clients.Commands.Volume;
 using SnapDog2.Shared.Enums;

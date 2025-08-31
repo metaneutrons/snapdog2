@@ -13,9 +13,6 @@
 //
 namespace SnapDog2.Domain.Abstractions;
 
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using SnapDog2.Shared.Models;
 
 /// <summary>

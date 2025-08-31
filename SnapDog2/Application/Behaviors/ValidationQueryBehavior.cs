@@ -15,7 +15,6 @@ namespace SnapDog2.Application.Behaviors;
 
 using Cortex.Mediator.Queries;
 using FluentValidation;
-using Microsoft.Extensions.Logging;
 using SnapDog2.Shared.Models;
 
 /// <summary>

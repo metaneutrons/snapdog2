@@ -13,6 +13,7 @@
 //
 namespace SnapDog2.Domain.Abstractions;
 
+using SnapDog2.Api.Models;
 using SnapDog2.Shared.Models;
 
 /// <summary>
@@ -35,7 +36,7 @@ public interface ISubsonicService
     /// <param name="playlistIndex">The playlist identifier.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Result containing playlist with tracks.</returns>
-    Task<Result<Api.Models.PlaylistWithTracks>> GetPlaylistAsync(
+    Task<Result<PlaylistWithTracks>> GetPlaylistAsync(
         string playlistIndex,
         CancellationToken cancellationToken = default
     );

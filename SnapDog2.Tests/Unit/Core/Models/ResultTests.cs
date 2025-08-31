@@ -13,7 +13,6 @@
 //
 namespace SnapDog2.Tests.Unit.Core.Models;
 
-using FluentAssertions;
 using SnapDog2.Shared.Models;
 
 public class ResultTests

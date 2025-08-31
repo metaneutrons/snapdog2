@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+
 
 //
 // SnapDog
@@ -14,6 +14,8 @@ using System.Text.Json.Serialization;
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
 namespace SnapDog2.Shared.Models;
+
+using System.Text.Json.Serialization;
 
 /// <summary>
 /// Represents detailed information about a playlist.

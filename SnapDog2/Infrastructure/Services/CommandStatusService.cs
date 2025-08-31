@@ -13,10 +13,7 @@
 //
 namespace SnapDog2.Infrastructure.Services;
 
-using System;
 using System.Collections.Concurrent;
-using System.Linq;
-using System.Threading.Tasks;
 using SnapDog2.Domain.Abstractions;
 
 /// <summary>

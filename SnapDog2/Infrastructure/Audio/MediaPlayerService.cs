@@ -13,13 +13,8 @@
 //
 namespace SnapDog2.Infrastructure.Audio;
 
-using System;
 using System.Collections.Concurrent;
-using System.Threading;
-using System.Threading.Tasks;
 using Cortex.Mediator;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Server.Zones.Notifications;

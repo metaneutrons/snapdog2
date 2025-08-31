@@ -14,7 +14,7 @@
 namespace SnapDog2.Infrastructure.Storage;
 
 using System.Text.Json;
-using Microsoft.Extensions.Logging;
+using System.Text.Json.Serialization;
 using Polly;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Infrastructure.Resilience;
@@ -38,7 +38,7 @@ public partial class RedisPersistentStateStore(
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         WriteIndented = false,
-        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
     private readonly ResiliencePipeline _connectionPipeline = ResiliencePolicyFactory.CreatePipeline(
         redisConfig.Resilience.Connection,

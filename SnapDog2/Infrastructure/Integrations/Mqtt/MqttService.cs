@@ -13,18 +13,14 @@
 //
 namespace SnapDog2.Infrastructure.Integrations.Mqtt;
 
-using System;
 using System.Buffers;
 using System.Collections.Concurrent;
+using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using Cortex.Mediator;
 using Cortex.Mediator.Commands;
 using Cortex.Mediator.Notifications;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MQTTnet;
 using MQTTnet.Protocol;
@@ -95,8 +91,8 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     }
 
     private IMqttClient? _mqttClient;
-    private bool _initialized = false;
-    private bool _disposed = false;
+    private bool _initialized;
+    private bool _disposed;
 
     public MqttService(
         IOptions<SnapDogConfiguration> configOptions,
@@ -332,7 +328,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             );
 
             var result = await this._connectionPolicy.ExecuteAsync(
-                async (ct) =>
+                async ct =>
                 {
                     // Create MQTT client using v5 API
                     var factory = new MqttClientFactory();
@@ -343,7 +339,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
                         .WithTcpServer(this._config.BrokerAddress, this._config.Port)
                         .WithClientId(this._config.ClientIndex)
                         .WithKeepAlivePeriod(TimeSpan.FromSeconds(this._config.KeepAlive))
-                        .WithCleanSession(true);
+                        .WithCleanSession();
 
                     // Add authentication if configured
                     if (!string.IsNullOrEmpty(this._config.Username))
@@ -381,7 +377,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         {
             // For common MQTT connection errors, only log the message without stack trace to reduce noise
             if (
-                ex is System.Net.Sockets.SocketException
+                ex is SocketException
                 || ex is TimeoutException
                 || ex.Message.Contains("connection", StringComparison.OrdinalIgnoreCase)
                 || ex.Message.Contains("broker", StringComparison.OrdinalIgnoreCase)
@@ -508,7 +504,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         try
         {
             return await this._operationPolicy.ExecuteAsync(
-                async (ct) =>
+                async ct =>
                 {
                     var message = new MqttApplicationMessageBuilder()
                         .WithTopic(topic)
@@ -753,7 +749,8 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             this.LogUnknownMqttCommand(command, commandId);
             return null;
         }
-        else if (commandId == null)
+
+        if (commandId == null)
         {
             // Command not mapped - this is normal for unsupported commands
             return null;
@@ -985,7 +982,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         value = false;
         return payload.ToLowerInvariant() switch
         {
-            "true" or "1" or "on" or "yes" => (value = true) == true,
+            "true" or "1" or "on" or "yes" => (value = true),
             "false" or "0" or "off" or "no" => (value = false) == false,
             _ => false,
         };

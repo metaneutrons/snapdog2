@@ -14,7 +14,6 @@
 namespace SnapDog2.Domain.Services;
 
 using System.Diagnostics;
-using Microsoft.Extensions.Logging;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Infrastructure.Metrics;
 using SnapDog2.Shared.Models;
@@ -30,7 +29,7 @@ public partial class EnterpriseMetricsService : IMetricsService, IDisposable
     private readonly Timer _systemMetricsTimer;
 
     private static readonly DateTime _startTime = DateTime.UtcNow;
-    private long _processedRequests = 0;
+    private long _processedRequests;
 
     public EnterpriseMetricsService(ILogger<EnterpriseMetricsService> logger, IApplicationMetrics applicationMetrics)
     {

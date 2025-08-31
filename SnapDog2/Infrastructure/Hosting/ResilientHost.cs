@@ -11,9 +11,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
-using SnapDog2.Application.Services;
 
 namespace SnapDog2.Infrastructure.Hosting;
+
+using System.Net.Sockets;
+using Microsoft.AspNetCore.Connections;
+using SnapDog2.Application.Services;
 
 /// <summary>
 /// Custom host wrapper that handles startup exceptions gracefully
@@ -123,8 +126,8 @@ public partial class ResilientHost(IHost innerHost, ILogger<ResilientHost> logge
             typeof(UnauthorizedAccessException),
             typeof(DirectoryNotFoundException),
             typeof(IOException),
-            typeof(System.Net.Sockets.SocketException),
-            typeof(Microsoft.AspNetCore.Connections.AddressInUseException),
+            typeof(SocketException),
+            typeof(AddressInUseException),
         };
 
         return expectedTypes.Contains(ex.GetType())
@@ -152,10 +155,10 @@ public partial class ResilientHost(IHost innerHost, ILogger<ResilientHost> logge
             IOException ioEx when ioEx.Message.Contains("Permission denied") =>
                 "Permission denied. Please check file/directory permissions.",
             IOException ioEx when ioEx.Message.Contains("No space left") => "Insufficient disk space available.",
-            System.Net.Sockets.SocketException =>
+            SocketException =>
                 "Network connection failed. Please check network connectivity and firewall settings.",
             TimeoutException => "Operation timed out. The service may be overloaded or unreachable.",
-            Microsoft.AspNetCore.Connections.AddressInUseException =>
+            AddressInUseException =>
                 "Port is already in use. Please stop conflicting services or change the port configuration.",
             _ => ex.Message,
         };

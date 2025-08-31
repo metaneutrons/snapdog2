@@ -13,7 +13,6 @@
 //
 namespace SnapDog2.Application.Extensions.DependencyInjection;
 
-using Microsoft.Extensions.DependencyInjection;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Infrastructure.Integrations.Mqtt;
 using SnapDog2.Shared.Configuration;

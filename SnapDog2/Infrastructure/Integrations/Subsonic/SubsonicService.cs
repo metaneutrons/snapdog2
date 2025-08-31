@@ -13,19 +13,13 @@
 //
 namespace SnapDog2.Infrastructure.Integrations.Subsonic;
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Cortex.Mediator;
 using Cortex.Mediator.Notifications;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Polly;
 using Polly.Retry;
+using SnapDog2.Api.Models;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Infrastructure.Resilience;
 using SnapDog2.Server.Subsonic.Notifications;
@@ -33,6 +27,7 @@ using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Models;
 using SubSonicMedia;
 using SubSonicMedia.Models;
+using SubSonicMedia.Responses.Playlists.Models;
 using SubSonicMedia.Responses.Search.Models;
 
 /// <summary>
@@ -48,8 +43,8 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
     private readonly ResiliencePipeline _connectionPolicy;
     private readonly ResiliencePipeline _operationPolicy;
     private readonly SemaphoreSlim _operationLock = new(1, 1);
-    private bool _initialized = false;
-    private bool _disposed = false;
+    private bool _initialized;
+    private bool _disposed;
 
     /// <summary>
     /// Gets a value indicating whether the Subsonic service is connected and ready.
@@ -209,7 +204,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
             LogGettingPlaylists(this._logger);
 
             var result = await this._operationPolicy.ExecuteAsync(
-                async (cancellationToken) =>
+                async cancellationToken =>
                 {
                     var playlistsResponse = await this._subsonicClient.Playlists.GetPlaylistsAsync(
                         cancellationToken: cancellationToken
@@ -222,10 +217,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
                     }
 
                     return playlistsResponse
-                            .Playlists.Playlist?.Select<
-                                SubSonicMedia.Responses.Playlists.Models.PlaylistSummary,
-                                PlaylistInfo
-                            >(MapToPlaylistInfoFromSummary)
+                            .Playlists.Playlist?.Select(MapToPlaylistInfoFromSummary)
                             .ToList()
                             .AsReadOnly() ?? new List<PlaylistInfo>().AsReadOnly();
                 },
@@ -265,19 +257,19 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
     }
 
     /// <inheritdoc />
-    public async Task<Result<Api.Models.PlaylistWithTracks>> GetPlaylistAsync(
+    public async Task<Result<PlaylistWithTracks>> GetPlaylistAsync(
         string playlistIndex,
         CancellationToken cancellationToken = default
     )
     {
         if (this._disposed)
         {
-            return Result<Api.Models.PlaylistWithTracks>.Failure("Service has been disposed");
+            return Result<PlaylistWithTracks>.Failure("Service has been disposed");
         }
 
         if (string.IsNullOrEmpty(playlistIndex))
         {
-            return Result<Api.Models.PlaylistWithTracks>.Failure("Playlist Index cannot be null or empty");
+            return Result<PlaylistWithTracks>.Failure("Playlist Index cannot be null or empty");
         }
 
         await this._operationLock.WaitAsync(cancellationToken);
@@ -286,7 +278,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
             LogGettingPlaylist(this._logger, playlistIndex);
 
             var result = await this._operationPolicy.ExecuteAsync(
-                async (ct) =>
+                async ct =>
                 {
                     var playlistResponse = await this._subsonicClient.Playlists.GetPlaylistAsync(playlistIndex, ct);
 
@@ -306,7 +298,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
                             .Entry?.Select<Song, TrackInfo>((song, index) => MapToTrackInfo(song, index + 1))
                             .ToList() ?? new List<TrackInfo>();
 
-                    return new Api.Models.PlaylistWithTracks(playlistInfo, tracks);
+                    return new PlaylistWithTracks(playlistInfo, tracks);
                 },
                 cancellationToken
             );
@@ -323,7 +315,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
                 )
             );
 
-            return Result<Api.Models.PlaylistWithTracks>.Success(result);
+            return Result<PlaylistWithTracks>.Success(result);
         }
         catch (Exception ex)
         {
@@ -334,7 +326,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
                 new SubsonicPlaylistAccessFailedNotification(this._config.Url ?? "unknown", playlistIndex, ex.Message)
             );
 
-            return Result<Api.Models.PlaylistWithTracks>.Failure(
+            return Result<PlaylistWithTracks>.Failure(
                 $"Failed to get playlist '{playlistIndex}': {ex.Message}"
             );
         }
@@ -366,7 +358,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
             // For SnapDog2's use case, we need to construct the URL manually
             // This follows the Subsonic API specification for stream URLs
             var result = await this._operationPolicy.ExecuteAsync(
-                async (ct) =>
+                async ct =>
                 {
                     // Test that the track exists by attempting to get a stream
                     // This validates the track ID without actually downloading content
@@ -426,7 +418,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
             LogTestingConnection(this._logger);
 
             await this._connectionPolicy.ExecuteAsync(
-                async (ct) =>
+                async ct =>
                 {
                     var pingResult = await this._subsonicClient.System.PingAsync(ct);
 
@@ -458,7 +450,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
     /// Maps SubsonicMedia PlaylistSummary to SnapDog2 PlaylistInfo.
     /// </summary>
     private static PlaylistInfo MapToPlaylistInfoFromSummary(
-        SubSonicMedia.Responses.Playlists.Models.PlaylistSummary playlistSummary
+        PlaylistSummary playlistSummary
     )
     {
         return new PlaylistInfo
@@ -476,7 +468,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
     /// <summary>
     /// Maps SubsonicMedia Playlist to SnapDog2 PlaylistInfo.
     /// </summary>
-    private static PlaylistInfo MapToPlaylistInfo(SubSonicMedia.Responses.Playlists.Models.Playlist playlist)
+    private static PlaylistInfo MapToPlaylistInfo(Playlist playlist)
     {
         return new PlaylistInfo
         {
@@ -551,7 +543,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
 
                 // Use Polly resilience for connection establishment
                 var result = await this._connectionPolicy.ExecuteAsync(
-                    async (ct) =>
+                    async ct =>
                     {
                         // Test the connection by making a ping call
                         var pingResult = await this.TestConnectionInternalAsync(ct);
@@ -636,11 +628,9 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
                 LogConnectionTestSuccessful(this._logger);
                 return Result.Success();
             }
-            else
-            {
-                LogConnectionTestFailed(this._logger);
-                return Result.Failure("Ping response was null");
-            }
+
+            LogConnectionTestFailed(this._logger);
+            return Result.Failure("Ping response was null");
         }
         catch (Exception ex)
         {

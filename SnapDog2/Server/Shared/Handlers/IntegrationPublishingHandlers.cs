@@ -13,14 +13,9 @@
 //
 namespace SnapDog2.Server.Shared.Handlers;
 
-using System;
 using System.Collections.Concurrent;
-using System.Threading;
-using System.Threading.Tasks;
 using Cortex.Mediator;
 using Cortex.Mediator.Notifications;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Infrastructure.Integrations.Mqtt;
 using SnapDog2.Server.Clients.Notifications;
@@ -288,7 +283,7 @@ public partial class IntegrationPublishingHandlers(
         await this.PublishZoneStatusAsync(
             StatusIdAttribute.GetStatusId<ZonePlaylistChangedNotification>(),
             notification.ZoneIndex,
-            new { PlaylistInfo = notification.PlaylistInfo, PlaylistIndex = notification.PlaylistIndex },
+            new { notification.PlaylistInfo, notification.PlaylistIndex },
             cancellationToken
         );
     }

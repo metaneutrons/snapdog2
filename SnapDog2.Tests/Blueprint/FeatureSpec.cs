@@ -13,6 +13,8 @@
 //
 namespace SnapDog2.Tests.Blueprint;
 
+using System.Collections;
+
 /// <summary>
 /// Base class for all feature specifications.
 /// </summary>
@@ -120,5 +122,5 @@ public class FeatureCollection<T>(IEnumerable<T> features) : IEnumerable<T>
 
     public IEnumerator<T> GetEnumerator() => this._features.GetEnumerator();
 
-    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => this.GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 }

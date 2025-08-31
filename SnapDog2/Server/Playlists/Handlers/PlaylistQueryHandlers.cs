@@ -13,13 +13,9 @@
 //
 namespace SnapDog2.Server.Playlists.Handlers;
 
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Cortex.Mediator.Queries;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SnapDog2.Api.Models;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Server.Playlists.Queries;
 using SnapDog2.Shared.Configuration;
@@ -135,13 +131,13 @@ public partial class GetPlaylistQueryHandler(
     ISubsonicService subsonicService,
     IOptions<SnapDogConfiguration> configOptions,
     ILogger<GetPlaylistQueryHandler> logger
-) : IQueryHandler<GetPlaylistQuery, Result<Api.Models.PlaylistWithTracks>>
+) : IQueryHandler<GetPlaylistQuery, Result<PlaylistWithTracks>>
 {
     private readonly ISubsonicService _subsonicService = subsonicService;
     private readonly SnapDogConfiguration _config = configOptions.Value;
     private readonly ILogger<GetPlaylistQueryHandler> _logger = logger;
 
-    public async Task<Result<Api.Models.PlaylistWithTracks>> Handle(
+    public async Task<Result<PlaylistWithTracks>> Handle(
         GetPlaylistQuery query,
         CancellationToken cancellationToken
     )
@@ -158,7 +154,7 @@ public partial class GetPlaylistQueryHandler(
         if (!this._config.Services.Subsonic.Enabled)
         {
             LogSubsonicDisabled(this._logger);
-            return Result<Api.Models.PlaylistWithTracks>.Failure("Subsonic service is disabled");
+            return Result<PlaylistWithTracks>.Failure("Subsonic service is disabled");
         }
 
         // Get all Subsonic playlists to find the one at the requested index
@@ -170,7 +166,7 @@ public partial class GetPlaylistQueryHandler(
                 query.PlaylistIndex.ToString(),
                 subsonicPlaylistsResult.ErrorMessage ?? "Unknown error"
             );
-            return Result<Api.Models.PlaylistWithTracks>.Failure(
+            return Result<PlaylistWithTracks>.Failure(
                 $"Failed to get Subsonic playlists: {subsonicPlaylistsResult.ErrorMessage}"
             );
         }
@@ -182,7 +178,7 @@ public partial class GetPlaylistQueryHandler(
         if (subsonicIndex < 0 || subsonicIndex >= subsonicPlaylists.Count)
         {
             LogPlaylistError(this._logger, query.PlaylistIndex.ToString(), "Playlist index out of range");
-            return Result<Api.Models.PlaylistWithTracks>.Failure($"Playlist {query.PlaylistIndex} not found");
+            return Result<PlaylistWithTracks>.Failure($"Playlist {query.PlaylistIndex} not found");
         }
 
         var targetPlaylist = subsonicPlaylists[subsonicIndex];
@@ -204,7 +200,7 @@ public partial class GetPlaylistQueryHandler(
     /// <summary>
     /// Creates the radio stations playlist with tracks from environment configuration.
     /// </summary>
-    private Result<Api.Models.PlaylistWithTracks> CreateRadioPlaylistWithTracks()
+    private Result<PlaylistWithTracks> CreateRadioPlaylistWithTracks()
     {
         var radioStations = this._config.RadioStations ?? new List<RadioStationConfig>();
 
@@ -238,10 +234,10 @@ public partial class GetPlaylistQueryHandler(
             )
             .ToList();
 
-        var playlistWithTracks = new Api.Models.PlaylistWithTracks(playlist, tracks);
+        var playlistWithTracks = new PlaylistWithTracks(playlist, tracks);
 
         LogRadioPlaylistCreated(this._logger, tracks.Count);
-        return Result<Api.Models.PlaylistWithTracks>.Success(playlistWithTracks);
+        return Result<PlaylistWithTracks>.Success(playlistWithTracks);
     }
 
     #region Logging

@@ -13,13 +13,9 @@
 //
 namespace SnapDog2.Infrastructure.Integrations.Snapcast;
 
-using System;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Net.Sockets;
 using Cortex.Mediator;
 using Cortex.Mediator.Notifications;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Polly;
 using Polly.Retry;
@@ -31,6 +27,8 @@ using SnapDog2.Server.Snapcast.Notifications;
 using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Enums;
 using SnapDog2.Shared.Models;
+using ClientVolume = SnapcastClient.Models.ClientVolume;
+using IClient = SnapcastClient.IClient;
 
 /// <summary>
 /// Enterprise-grade Snapcast service implementation using SnapcastClient library.
@@ -42,17 +40,17 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     private readonly IServiceProvider _serviceProvider;
     private readonly ISnapcastStateRepository _stateRepository;
     private readonly ILogger<SnapcastService> _logger;
-    private readonly SnapcastClient.IClient? _snapcastClient;
+    private readonly IClient? _snapcastClient;
     private readonly ResiliencePipeline _connectionPolicy;
     private readonly ResiliencePipeline _operationPolicy;
     private readonly SemaphoreSlim _operationLock = new(1, 1);
-    private bool _disposed = false;
-    private bool _initialized = false;
+    private bool _disposed;
+    private bool _initialized;
 
     /// <summary>
     /// Helper method to resolve IClientManager in a scoped way to avoid service lifetime issues.
     /// </summary>
-    private async Task<IClient?> GetClientBySnapcastIdAsync(string snapcastClientId)
+    private async Task<Domain.Abstractions.IClient?> GetClientBySnapcastIdAsync(string snapcastClientId)
     {
         using var scope = this._serviceProvider.CreateScope();
         var clientManager = scope.ServiceProvider.GetRequiredService<IClientManager>();
@@ -64,7 +62,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         IServiceProvider serviceProvider,
         ISnapcastStateRepository stateRepository,
         ILogger<SnapcastService> logger,
-        SnapcastClient.IClient? snapcastClient
+        IClient? snapcastClient
     )
     {
         this._config = configOptions.Value.Services.Snapcast;
@@ -354,7 +352,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
 
                 // Use Polly resilience for connection establishment
                 var result = await this._connectionPolicy.ExecuteAsync(
-                    async (ct) =>
+                    async ct =>
                     {
                         // Check if client is available
                         if (this._snapcastClient == null)
@@ -401,7 +399,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         {
             // For common Snapcast connection errors, only log the message without stack trace to reduce noise
             if (
-                ex is System.Net.Sockets.SocketException
+                ex is SocketException
                 || ex is TimeoutException
                 || ex.Message.Contains("connection", StringComparison.OrdinalIgnoreCase)
                 || ex.Message.Contains("refused", StringComparison.OrdinalIgnoreCase)
@@ -532,7 +530,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
         try
         {
             return await this._operationPolicy.ExecuteAsync(
-                async (ct) =>
+                async ct =>
                 {
                     await this._snapcastClient!.ClientSetVolumeAsync(snapcastClientId, volumePercent);
                     return Result.Success();
@@ -909,7 +907,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
                 {
                     Config = snapcastClient.Value.Config with
                     {
-                        Volume = new SnapcastClient.Models.ClientVolume
+                        Volume = new ClientVolume
                         {
                             Muted = volumeChange.Volume.Muted,
                             Percent = volumeChange.Volume.Percent,
@@ -920,7 +918,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
             }
 
             // Convert Params.ClientVolume to Models.ClientVolume for the notification
-            var modelVolume = new SnapcastClient.Models.ClientVolume
+            var modelVolume = new ClientVolume
             {
                 Muted = volumeChange.Volume.Muted,
                 Percent = volumeChange.Volume.Percent,

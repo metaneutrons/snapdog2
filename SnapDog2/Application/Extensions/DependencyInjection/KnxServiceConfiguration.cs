@@ -13,10 +13,9 @@
 //
 namespace SnapDog2.Application.Extensions.DependencyInjection;
 
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Infrastructure.Integrations.Knx;
+using SnapDog2.Server.Shared.Handlers;
 using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Enums;
 
@@ -84,7 +83,7 @@ public static partial class KnxServiceConfiguration
         services.AddSingleton<IKnxService, KnxService>();
 
         // Register KNX integration handler as singleton to match KnxService lifecycle
-        services.AddSingleton<SnapDog2.Server.Shared.Handlers.KnxIntegrationHandler>();
+        services.AddSingleton<KnxIntegrationHandler>();
 
         return services;
     }

@@ -13,10 +13,7 @@
 //
 namespace SnapDog2.Server.Subsonic.Handlers;
 
-using System.Threading;
-using System.Threading.Tasks;
 using Cortex.Mediator.Notifications;
-using Microsoft.Extensions.Logging;
 using SnapDog2.Server.Subsonic.Notifications;
 
 /// <summary>

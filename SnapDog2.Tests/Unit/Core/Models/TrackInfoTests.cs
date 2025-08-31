@@ -13,9 +13,7 @@
 //
 namespace SnapDog2.Tests.Unit.Core.Models;
 
-using FluentAssertions;
 using SnapDog2.Shared.Models;
-using Xunit;
 
 /// <summary>
 /// Unit tests for TrackInfo model to verify the new structure without Id field.

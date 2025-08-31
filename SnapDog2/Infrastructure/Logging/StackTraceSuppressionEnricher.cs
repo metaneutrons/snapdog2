@@ -11,10 +11,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
-using Serilog.Core;
-using Serilog.Events;
 
 namespace SnapDog2.Infrastructure.Logging;
+
+using System.Net.Sockets;
+using Serilog.Core;
+using Serilog.Events;
 
 /// <summary>
 /// Serilog enricher that suppresses stack traces for expected exceptions in non-debug mode
@@ -63,7 +65,7 @@ public class StackTraceSuppressionEnricher(bool isDebugMode) : ILogEventEnricher
             typeof(UnauthorizedAccessException),
             typeof(DirectoryNotFoundException),
             typeof(IOException),
-            typeof(System.Net.Sockets.SocketException),
+            typeof(SocketException),
             typeof(TimeoutException),
             typeof(ArgumentException),
             typeof(InvalidOperationException),
@@ -93,7 +95,7 @@ public class StackTraceSuppressionEnricher(bool isDebugMode) : ILogEventEnricher
             IOException ioEx when ioEx.Message.Contains("Permission denied") =>
                 "Permission denied. Please check file/directory permissions.",
             IOException ioEx when ioEx.Message.Contains("No space left") => "Insufficient disk space available.",
-            System.Net.Sockets.SocketException =>
+            SocketException =>
                 "Network connection failed. Please check network connectivity and firewall settings.",
             TimeoutException => "Operation timed out. The service may be overloaded or unreachable.",
             _ => ex.Message,

@@ -13,8 +13,6 @@
 //
 namespace SnapDog2.Domain.Abstractions;
 
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using SnapDog2.Shared.Models;
 
 /// <summary>

@@ -13,17 +13,14 @@
 //
 namespace SnapDog2.Domain.Services;
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Diagnostics;
 using Cortex.Mediator;
-using Microsoft.Extensions.Logging;
+using SnapcastClient.Models;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Server.Clients.Notifications;
 using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Models;
+using ClientConfig = SnapDog2.Shared.Configuration.ClientConfig;
 
 /// <summary>
 /// Production implementation of IClientManager with Snapcast integration.
@@ -583,10 +580,8 @@ public partial class ClientManager : IClientManager
                     this.LogSuccessfullyAssignedGroupToStream(availableGroup.Id, streamId);
                     return availableGroup.Id;
                 }
-                else
-                {
-                    this.LogFailedToAssignGroupToStream(availableGroup.Id, streamId, result.ErrorMessage);
-                }
+
+                this.LogFailedToAssignGroupToStream(availableGroup.Id, streamId, result.ErrorMessage);
             }
 
             this.LogNoAvailableGroupsFoundForStream(streamId);
@@ -784,7 +779,7 @@ public partial class ClientManager : IClientManager
             catch (Exception ex)
             {
                 // Log other unexpected exceptions but don't rethrow to avoid breaking the event flow
-                System.Diagnostics.Debug.WriteLine($"Error publishing client state for client {clientIndex}: {ex.Message}");
+                Debug.WriteLine($"Error publishing client state for client {clientIndex}: {ex.Message}");
             }
         }, CancellationToken.None);
     }
@@ -796,7 +791,7 @@ public partial class ClientManager : IClientManager
     /// </summary>
     private class SnapDogClient(
         int id,
-        SnapcastClient.Models.SnapClient snapcastClient,
+        SnapClient snapcastClient,
         ClientConfig config,
         ISnapcastService snapcastService,
         ISnapcastStateRepository snapcastStateRepository,
@@ -804,7 +799,7 @@ public partial class ClientManager : IClientManager
         IClientManager clientManager
     ) : IClient
     {
-        internal readonly SnapcastClient.Models.SnapClient _snapcastClient = snapcastClient;
+        internal readonly SnapClient _snapcastClient = snapcastClient;
         private readonly ClientConfig _config = config;
         private readonly ISnapcastService _snapcastService = snapcastService;
         private readonly ISnapcastStateRepository _snapcastStateRepository = snapcastStateRepository;
@@ -989,7 +984,7 @@ public partial class ClientManager : IClientManager
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine(
+                Debug.WriteLine(
                     $"Error publishing volume status for client {this.Id}: {ex.Message}"
                 );
             }
@@ -1008,7 +1003,7 @@ public partial class ClientManager : IClientManager
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error publishing mute status for client {this.Id}: {ex.Message}");
+                Debug.WriteLine($"Error publishing mute status for client {this.Id}: {ex.Message}");
             }
         }
 
@@ -1025,7 +1020,7 @@ public partial class ClientManager : IClientManager
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine(
+                Debug.WriteLine(
                     $"Error publishing latency status for client {this.Id}: {ex.Message}"
                 );
             }
@@ -1044,7 +1039,7 @@ public partial class ClientManager : IClientManager
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error publishing zone status for client {this.Id}: {ex.Message}");
+                Debug.WriteLine($"Error publishing zone status for client {this.Id}: {ex.Message}");
             }
         }
 
@@ -1063,7 +1058,7 @@ public partial class ClientManager : IClientManager
             catch (Exception ex)
             {
                 // Log other unexpected exceptions but don't rethrow to avoid breaking the event flow
-                System.Diagnostics.Debug.WriteLine(
+                Debug.WriteLine(
                     $"Error publishing connection status for client {this.Id}: {ex.Message}"
                 );
             }
@@ -1084,7 +1079,7 @@ public partial class ClientManager : IClientManager
             catch (Exception ex)
             {
                 // Log other unexpected exceptions but don't rethrow to avoid breaking the event flow
-                System.Diagnostics.Debug.WriteLine($"Error publishing state for client {this.Id}: {ex.Message}");
+                Debug.WriteLine($"Error publishing state for client {this.Id}: {ex.Message}");
             }
         }
 

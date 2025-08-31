@@ -24,7 +24,7 @@ public static class StatusIdRegistry
 {
     private static readonly ConcurrentDictionary<string, Type> _statusIdToTypeMap = new();
     private static readonly ConcurrentDictionary<Type, string> _typeToStatusIdMap = new();
-    private static bool _isInitialized = false;
+    private static bool _isInitialized;
     private static readonly object _initLock = new();
 
     /// <summary>

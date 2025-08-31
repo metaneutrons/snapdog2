@@ -13,7 +13,6 @@
 //
 namespace SnapDog2.Api.Controllers.V1;
 
-using System.Linq;
 using Cortex.Mediator;
 using Microsoft.AspNetCore.Mvc;
 using SnapDog2.Api.Models;
@@ -23,6 +22,7 @@ using SnapDog2.Server.Zones.Commands.Playlist;
 using SnapDog2.Server.Zones.Commands.Track;
 using SnapDog2.Server.Zones.Commands.Volume;
 using SnapDog2.Server.Zones.Queries;
+using SnapDog2.Shared.Enums;
 using SnapDog2.Shared.Models;
 
 /// <summary>
@@ -1103,7 +1103,7 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
             return this.NotFound($"Zone {zoneIndex} not found");
         }
 
-        return this.Ok(result.Value!.PlaybackState == Shared.Enums.PlaybackState.Playing);
+        return this.Ok(result.Value!.PlaybackState == PlaybackState.Playing);
     }
 
     /// <summary>

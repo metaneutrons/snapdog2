@@ -13,11 +13,8 @@
 //
 namespace SnapDog2.Tests.Infrastructure.Metrics;
 
-using System;
 using Microsoft.Extensions.Logging;
-using Moq;
 using SnapDog2.Infrastructure.Metrics;
-using Xunit;
 
 /// <summary>
 /// Tests for the ApplicationMetrics class.

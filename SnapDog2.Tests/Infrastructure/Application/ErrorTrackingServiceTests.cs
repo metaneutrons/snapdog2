@@ -13,13 +13,9 @@
 //
 namespace SnapDog2.Tests.Infrastructure.Application;
 
-using System;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Moq;
 using SnapDog2.Domain.Services;
 using SnapDog2.Shared.Models;
-using Xunit;
 
 /// <summary>
 /// Tests for the ErrorTrackingService class.

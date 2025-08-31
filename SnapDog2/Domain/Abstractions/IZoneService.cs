@@ -13,6 +13,7 @@
 //
 namespace SnapDog2.Domain.Abstractions;
 
+using SnapDog2.Shared.Enums;
 using SnapDog2.Shared.Models;
 
 /// <summary>
@@ -205,7 +206,7 @@ public interface IZoneService
     /// </summary>
     /// <param name="playbackState">The playback state to publish.</param>
     /// <returns>Task representing the async operation.</returns>
-    Task PublishPlaybackStateStatusAsync(Shared.Enums.PlaybackState playbackState);
+    Task PublishPlaybackStateStatusAsync(PlaybackState playbackState);
 
     /// <summary>
     /// Publishes the current volume status.

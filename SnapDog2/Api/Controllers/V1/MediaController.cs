@@ -16,7 +16,6 @@ namespace SnapDog2.Api.Controllers.V1;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
 using SnapDog2.Api.Models;
 using SnapDog2.Server.Playlists.Handlers;
 using SnapDog2.Server.Playlists.Queries;

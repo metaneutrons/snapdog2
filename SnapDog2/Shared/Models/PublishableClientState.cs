@@ -11,9 +11,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
-using System.Text.Json.Serialization;
 
 namespace SnapDog2.Shared.Models;
+
+using System.Text.Json.Serialization;
 
 /// <summary>
 /// Simplified client state for MQTT publishing - contains only user-facing information.

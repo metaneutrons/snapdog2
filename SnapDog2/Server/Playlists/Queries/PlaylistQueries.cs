@@ -13,8 +13,8 @@
 //
 namespace SnapDog2.Server.Playlists.Queries;
 
-using System.Collections.Generic;
 using Cortex.Mediator.Queries;
+using SnapDog2.Api.Models;
 using SnapDog2.Shared.Models;
 
 /// <summary>
@@ -25,7 +25,7 @@ public record GetAllPlaylistsQuery : IQuery<Result<List<PlaylistInfo>>>;
 /// <summary>
 /// Query to retrieve a specific playlist with all its tracks.
 /// </summary>
-public record GetPlaylistQuery : IQuery<Result<Api.Models.PlaylistWithTracks>>
+public record GetPlaylistQuery : IQuery<Result<PlaylistWithTracks>>
 {
     /// <summary>
     /// Gets the playlist index (1-based). Index 1 is always radio stations, 2+ are Subsonic playlists.
@@ -36,7 +36,7 @@ public record GetPlaylistQuery : IQuery<Result<Api.Models.PlaylistWithTracks>>
 /// <summary>
 /// Query to retrieve a specific playlist by string identifier (for API compatibility).
 /// </summary>
-public record GetPlaylistByIdQuery : IQuery<Result<Api.Models.PlaylistWithTracks>>
+public record GetPlaylistByIdQuery : IQuery<Result<PlaylistWithTracks>>
 {
     /// <summary>
     /// Gets the playlist identifier (string format for API compatibility).

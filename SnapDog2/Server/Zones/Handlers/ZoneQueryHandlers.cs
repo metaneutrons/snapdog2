@@ -13,15 +13,10 @@
 //
 namespace SnapDog2.Server.Zones.Handlers;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Cortex.Mediator.Queries;
-using Microsoft.Extensions.Logging;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Server.Zones.Queries;
+using SnapDog2.Shared.Enums;
 using SnapDog2.Shared.Models;
 
 /// <summary>
@@ -160,7 +155,7 @@ public partial class GetAllZoneStatesQueryHandler(
 public partial class GetZonePlaybackStateQueryHandler(
     IZoneManager zoneManager,
     ILogger<GetZonePlaybackStateQueryHandler> logger
-) : IQueryHandler<GetZonePlaybackStateQuery, Result<SnapDog2.Shared.Enums.PlaybackState>>
+) : IQueryHandler<GetZonePlaybackStateQuery, Result<PlaybackState>>
 {
     private readonly IZoneManager _zoneManager = zoneManager;
     private readonly ILogger<GetZonePlaybackStateQueryHandler> _logger = logger;
@@ -179,7 +174,7 @@ public partial class GetZonePlaybackStateQueryHandler(
     )]
     private partial void LogZoneNotFound(int zoneIndex);
 
-    public async Task<Result<SnapDog2.Shared.Enums.PlaybackState>> Handle(
+    public async Task<Result<PlaybackState>> Handle(
         GetZonePlaybackStateQuery request,
         CancellationToken cancellationToken
     )
@@ -190,7 +185,7 @@ public partial class GetZonePlaybackStateQueryHandler(
         if (zoneResult.IsFailure)
         {
             this.LogZoneNotFound(request.ZoneIndex);
-            return Result<SnapDog2.Shared.Enums.PlaybackState>.Failure(
+            return Result<PlaybackState>.Failure(
                 zoneResult.ErrorMessage ?? "Zone not found"
             );
         }
@@ -200,12 +195,12 @@ public partial class GetZonePlaybackStateQueryHandler(
 
         if (stateResult.IsFailure)
         {
-            return Result<SnapDog2.Shared.Enums.PlaybackState>.Failure(
+            return Result<PlaybackState>.Failure(
                 stateResult.ErrorMessage ?? "Failed to get zone state"
             );
         }
 
-        return Result<SnapDog2.Shared.Enums.PlaybackState>.Success(stateResult.Value!.PlaybackState);
+        return Result<PlaybackState>.Success(stateResult.Value!.PlaybackState);
     }
 }
 

@@ -13,8 +13,6 @@
 //
 namespace SnapDog2.Server.Shared.Factories;
 
-using System;
-using Microsoft.Extensions.Logging;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Server.Clients.Notifications;
 using SnapDog2.Server.Global.Notifications;

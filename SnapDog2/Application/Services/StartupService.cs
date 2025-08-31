@@ -11,13 +11,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
+
+namespace SnapDog2.Application.Services;
+
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using Microsoft.AspNetCore.Connections;
 using Microsoft.Extensions.Options;
 using SnapDog2.Shared.Configuration;
-
-namespace SnapDog2.Application.Services;
 
 /// <summary>
 /// resilient startup service that handles port conflicts and other startup failures
@@ -415,7 +417,7 @@ public partial class StartupService : IHostedService
         try
         {
             // This is a simplified version - in production you might want to use platform-specific APIs
-            var processes = System.Diagnostics.Process.GetProcesses().Where(p => !p.HasExited).ToList();
+            var processes = Process.GetProcesses().Where(p => !p.HasExited).ToList();
 
             return Task.FromResult($"Port {port} is occupied by another process");
         }

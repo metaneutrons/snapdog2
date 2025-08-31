@@ -52,8 +52,8 @@ public partial class HealthController(HealthCheckService healthCheckService, ILo
                     Name = entry.Key,
                     Status = entry.Value.Status.ToString(),
                     Duration = entry.Value.Duration.TotalMilliseconds,
-                    Description = entry.Value.Description,
-                    Data = entry.Value.Data,
+                    entry.Value.Description,
+                    entry.Value.Data,
                     Exception = entry.Value.Exception?.Message,
                 }),
             };

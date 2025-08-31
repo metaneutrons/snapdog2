@@ -11,13 +11,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
+
+namespace SnapDog2.Application.Extensions;
+
 using System.Net;
 using System.Net.Sockets;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Logging.Abstractions;
 using SnapDog2.Shared.Configuration;
-
-namespace SnapDog2.Application.Extensions;
 
 /// <summary>
 /// Extensions for creating resilient web host configurations
@@ -86,11 +87,9 @@ public static partial class WebHostExtensions
 
                     return currentPort;
                 }
-                else
-                {
-                    LogHttpPortUnavailable(logger, currentPort, attempt, maxAttempts);
-                    currentPort++;
-                }
+
+                LogHttpPortUnavailable(logger, currentPort, attempt, maxAttempts);
+                currentPort++;
             }
             catch (Exception ex)
             {

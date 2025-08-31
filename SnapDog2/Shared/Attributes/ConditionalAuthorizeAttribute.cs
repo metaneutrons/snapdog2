@@ -1,10 +1,10 @@
+namespace SnapDog2.Shared.Attributes;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Options;
 using SnapDog2.Shared.Configuration;
-
-namespace SnapDog2.Shared.Attributes;
 
 /// <summary>
 /// Conditional authorization attribute that respects the API auth configuration.

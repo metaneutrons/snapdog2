@@ -1,8 +1,6 @@
 namespace SnapDog2.Domain.Services;
 
 using System.Diagnostics;
-using System.Linq;
-using Microsoft.Extensions.Logging;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Shared.Models;
 

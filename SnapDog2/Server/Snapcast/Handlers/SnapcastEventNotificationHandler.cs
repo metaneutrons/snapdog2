@@ -15,7 +15,6 @@ namespace SnapDog2.Server.Snapcast.Handlers;
 
 using Cortex.Mediator;
 using Cortex.Mediator.Notifications;
-using Microsoft.Extensions.Logging;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Server.Clients.Notifications;
 using SnapDog2.Server.Snapcast.Notifications;

@@ -11,9 +11,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
-using System.Reflection;
 
 namespace SnapDog2.Application.Extensions;
+
+using System.Reflection;
 
 /// <summary>
 /// Extension methods for Assembly to help with version information extraction

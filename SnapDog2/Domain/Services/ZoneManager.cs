@@ -13,19 +13,17 @@
 //
 namespace SnapDog2.Domain.Services;
 
-using System;
 using System.Collections.Concurrent;
-using System.IO;
-using System.Linq;
 using Cortex.Mediator;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SnapcastClient.Models;
+using SnapDog2.Api.Models;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Infrastructure.Audio;
 using SnapDog2.Server.Playlists.Queries;
 using SnapDog2.Server.Zones.Notifications;
 using SnapDog2.Shared.Configuration;
+using SnapDog2.Shared.Enums;
 using SnapDog2.Shared.Models;
 using LibVLC = LibVLCSharp.Shared;
 
@@ -436,7 +434,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             // Update state
             this._currentState = this._currentState with
             {
-                PlaybackState = Shared.Enums.PlaybackState.Playing,
+                PlaybackState = PlaybackState.Playing,
             };
 
             // Start position update timer for reliable MQTT updates + subscribe to events for immediate updates
@@ -447,7 +445,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
 
             // Publish status notification for blueprint compliance
-            await this.PublishPlaybackStateStatusAsync(Shared.Enums.PlaybackState.Playing);
+            await this.PublishPlaybackStateStatusAsync(PlaybackState.Playing);
 
             return Result.Success();
         }
@@ -482,7 +480,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             // Update state
             this._currentState = this._currentState with
             {
-                PlaybackState = Shared.Enums.PlaybackState.Playing,
+                PlaybackState = PlaybackState.Playing,
                 Track = newTrack,
             };
 
@@ -526,7 +524,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
             this._currentState = this._currentState with
             {
-                PlaybackState = Shared.Enums.PlaybackState.Playing,
+                PlaybackState = PlaybackState.Playing,
                 Track = streamTrack,
             };
 
@@ -556,7 +554,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 return pauseResult;
             }
 
-            this._currentState = this._currentState with { PlaybackState = Shared.Enums.PlaybackState.Paused };
+            this._currentState = this._currentState with { PlaybackState = PlaybackState.Paused };
 
             // Stop timer and unsubscribe from events when not playing
             this.StopPositionUpdateTimer();
@@ -584,7 +582,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 return stopResult;
             }
 
-            this._currentState = this._currentState with { PlaybackState = Shared.Enums.PlaybackState.Stopped };
+            this._currentState = this._currentState with { PlaybackState = PlaybackState.Stopped };
 
             // Stop timer and unsubscribe from events when not playing
             this.StopPositionUpdateTimer();
@@ -766,7 +764,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             var scope = this._serviceScopeFactory.CreateScope();
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
             var playlistResult = await mediator
-                .SendQueryAsync<GetPlaylistQuery, Result<Api.Models.PlaylistWithTracks>>(getPlaylistQuery)
+                .SendQueryAsync<GetPlaylistQuery, Result<PlaylistWithTracks>>(getPlaylistQuery)
                 .ConfigureAwait(false);
 
             if (playlistResult.IsFailure)
@@ -816,7 +814,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             var nextIndex = currentIndex + 1;
 
             // Check if we're currently playing
-            var wasPlaying = this._currentState.PlaybackState == Shared.Enums.PlaybackState.Playing;
+            var wasPlaying = this._currentState.PlaybackState == PlaybackState.Playing;
 
             // Set the track (inline implementation to avoid nested lock)
             var setResult = await this.SetTrackInternalAsync(nextIndex).ConfigureAwait(false);
@@ -838,7 +836,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 // Update state to playing
                 this._currentState = this._currentState with
                 {
-                    PlaybackState = Shared.Enums.PlaybackState.Playing
+                    PlaybackState = PlaybackState.Playing
                 };
 
                 // Start timer for reliable updates + events for immediate updates
@@ -879,7 +877,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         var scope = this._serviceScopeFactory.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
         var playlistResult = await mediator
-            .SendQueryAsync<GetPlaylistQuery, Result<Api.Models.PlaylistWithTracks>>(getPlaylistQuery)
+            .SendQueryAsync<GetPlaylistQuery, Result<PlaylistWithTracks>>(getPlaylistQuery)
             .ConfigureAwait(false);
 
         if (playlistResult.IsFailure)
@@ -927,7 +925,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             var previousIndex = Math.Max(1, currentIndex - 1);
 
             // Check if we're currently playing
-            var wasPlaying = this._currentState.PlaybackState == Shared.Enums.PlaybackState.Playing;
+            var wasPlaying = this._currentState.PlaybackState == PlaybackState.Playing;
 
             // Set the track (inline implementation to avoid nested lock)
             var setResult = await this.SetTrackInternalAsync(previousIndex).ConfigureAwait(false);
@@ -949,7 +947,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 // Update state to playing
                 this._currentState = this._currentState with
                 {
-                    PlaybackState = Shared.Enums.PlaybackState.Playing
+                    PlaybackState = PlaybackState.Playing
                 };
 
                 // Start timer for reliable updates + events for immediate updates
@@ -1244,7 +1242,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     }
 
     // Internal synchronization methods
-    internal async Task SynchronizeWithSnapcastAsync(IEnumerable<SnapcastClient.Models.Group> snapcastGroups)
+    internal async Task SynchronizeWithSnapcastAsync(IEnumerable<Group> snapcastGroups)
     {
         await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
@@ -1264,7 +1262,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         return new ZoneState
         {
             Name = this._config.Name,
-            PlaybackState = Shared.Enums.PlaybackState.Stopped,
+            PlaybackState = PlaybackState.Stopped,
             Volume = 50,
             Mute = false,
             TrackRepeat = false,
@@ -1520,8 +1518,8 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                     {
                         Track = updatedTrack,
                         PlaybackState = status.IsPlaying
-                            ? Shared.Enums.PlaybackState.Playing
-                            : Shared.Enums.PlaybackState.Stopped,
+                            ? PlaybackState.Playing
+                            : PlaybackState.Stopped,
                     };
 
                     this.LogUpdatedTrackState(
@@ -1549,8 +1547,8 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                         {
                             Track = updatedTrack,
                             PlaybackState = status.IsPlaying
-                                ? Shared.Enums.PlaybackState.Playing
-                                : Shared.Enums.PlaybackState.Paused
+                                ? PlaybackState.Playing
+                                : PlaybackState.Paused
                         };
                     }
                 }
@@ -1588,7 +1586,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 try
                 {
                     // Only update if we're playing and not disposed
-                    if (this._disposed || this._currentState.PlaybackState != Shared.Enums.PlaybackState.Playing)
+                    if (this._disposed || this._currentState.PlaybackState != PlaybackState.Playing)
                     {
                         return;
                     }
@@ -1669,7 +1667,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         {
             this.LogPositionChangedForZone(this._zoneIndex, e.PositionMs, e.Progress);
 
-            if (this._disposed || this._currentState.PlaybackState != Shared.Enums.PlaybackState.Playing)
+            if (this._disposed || this._currentState.PlaybackState != PlaybackState.Playing)
             {
                 this.LogSkippingPositionUpdate(this._disposed, this._currentState.PlaybackState.ToString());
                 return;
@@ -1731,9 +1729,9 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
             // Update playback state based on LibVLC state
             var newPlaybackState =
-                e.IsPlaying ? Shared.Enums.PlaybackState.Playing
-                : e.State == LibVLC.VLCState.Paused ? Shared.Enums.PlaybackState.Paused
-                : Shared.Enums.PlaybackState.Stopped;
+                e.IsPlaying ? PlaybackState.Playing
+                : e.State == LibVLC.VLCState.Paused ? PlaybackState.Paused
+                : PlaybackState.Stopped;
 
             if (this._currentState.PlaybackState != newPlaybackState)
             {
@@ -1751,7 +1749,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                         var playingStatusNotification = new ZoneTrackPlayingStatusChangedNotification
                         {
                             ZoneIndex = this._zoneIndex,
-                            IsPlaying = newPlaybackState == Shared.Enums.PlaybackState.Playing
+                            IsPlaying = newPlaybackState == PlaybackState.Playing
                         };
                         await mediator.PublishAsync(playingStatusNotification).ConfigureAwait(false);
                     }
@@ -1793,7 +1791,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     #region Status Publishing Methods (Blueprint Compliance)
 
-    public async Task PublishPlaybackStateStatusAsync(Shared.Enums.PlaybackState playbackState)
+    public async Task PublishPlaybackStateStatusAsync(PlaybackState playbackState)
     {
         var notification = this._statusFactory.CreateZonePlaybackStateChangedNotification(
             this._zoneIndex,

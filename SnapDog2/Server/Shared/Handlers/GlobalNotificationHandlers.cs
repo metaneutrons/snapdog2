@@ -13,12 +13,7 @@
 //
 namespace SnapDog2.Server.Shared.Handlers;
 
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Cortex.Mediator.Notifications;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Server.Global.Notifications;
 using SnapDog2.Shared.Attributes;

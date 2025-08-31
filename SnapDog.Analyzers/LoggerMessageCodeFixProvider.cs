@@ -11,6 +11,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
+
+namespace SnapDog.Analyzers;
+
 using System.Collections.Immutable;
 using System.Composition;
 using System.Linq;
@@ -21,8 +24,6 @@ using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-
-namespace SnapDog.Analyzers;
 
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(LoggerMessageCodeFixProvider))]
 [Shared]

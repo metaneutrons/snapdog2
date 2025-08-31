@@ -14,8 +14,6 @@
 namespace SnapDog2.Infrastructure.Integrations.Snapcast;
 
 using System.Collections.Concurrent;
-using System.Linq;
-using Microsoft.Extensions.Logging;
 using SnapcastClient.Models;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Shared.Configuration;
@@ -32,7 +30,7 @@ public partial class SnapcastStateRepository(
     private readonly ConcurrentDictionary<string, SnapClient> _clients = new();
     private readonly ConcurrentDictionary<string, Group> _groups = new();
     private readonly ConcurrentDictionary<string, Stream> _streams = new();
-    private Server _serverInfo = new Server();
+    private Server _serverInfo;
     private readonly object _serverInfoLock = new();
     private readonly ILogger<SnapcastStateRepository> _logger = logger;
     private readonly SnapDogConfiguration _configuration = configuration;
@@ -276,10 +274,8 @@ public partial class SnapcastStateRepository(
             this.LogTotalClientCount(this._clients.Count);
             return null;
         }
-        else
-        {
-            this.LogClientFoundByMac(clientIndex, clientConfig.Name, clientConfig.Mac, matchingClient.Id);
-        }
+
+        this.LogClientFoundByMac(clientIndex, clientConfig.Name, clientConfig.Mac, matchingClient.Id);
 
         return matchingClient;
     }

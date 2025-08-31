@@ -13,15 +13,13 @@
 //
 namespace SnapDog2.Server.Zones.Handlers;
 
-using System.Threading;
-using System.Threading.Tasks;
 using Cortex.Mediator.Commands;
-using Microsoft.Extensions.Logging;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Server.Zones.Commands.Playback;
 using SnapDog2.Server.Zones.Commands.Playlist;
 using SnapDog2.Server.Zones.Commands.Track;
 using SnapDog2.Server.Zones.Commands.Volume;
+using SnapDog2.Shared.Enums;
 using SnapDog2.Shared.Models;
 
 /// <summary>
@@ -50,14 +48,13 @@ public partial class PlayCommandHandler(IZoneManager zoneManager, ILogger<PlayCo
         {
             return await zone.PlayTrackAsync(request.TrackIndex.Value).ConfigureAwait(false);
         }
-        else if (!string.IsNullOrEmpty(request.MediaUrl))
+
+        if (!string.IsNullOrEmpty(request.MediaUrl))
         {
             return await zone.PlayUrlAsync(request.MediaUrl).ConfigureAwait(false);
         }
-        else
-        {
-            return await zone.PlayAsync().ConfigureAwait(false);
-        }
+
+        return await zone.PlayAsync().ConfigureAwait(false);
     }
 
     [LoggerMessage(
@@ -65,7 +62,7 @@ public partial class PlayCommandHandler(IZoneManager zoneManager, ILogger<PlayCo
         Level = LogLevel.Information,
         Message = "Starting playback for Zone {ZoneIndex} from {Source}"
     )]
-    private partial void LogStartingPlayback(int zoneIndex, SnapDog2.Shared.Enums.CommandSource source);
+    private partial void LogStartingPlayback(int zoneIndex, CommandSource source);
 
     [LoggerMessage(
         EventId = 10001,
@@ -104,7 +101,7 @@ public partial class PauseCommandHandler(IZoneManager zoneManager, ILogger<Pause
         Level = LogLevel.Information,
         Message = "Pausing playback for Zone {ZoneIndex} from {Source}"
     )]
-    private partial void LogPausingPlayback(int zoneIndex, SnapDog2.Shared.Enums.CommandSource source);
+    private partial void LogPausingPlayback(int zoneIndex, CommandSource source);
 
     [LoggerMessage(
         EventId = 10003,
@@ -143,7 +140,7 @@ public partial class StopCommandHandler(IZoneManager zoneManager, ILogger<StopCo
         Level = LogLevel.Information,
         Message = "Stopping playback for Zone {ZoneIndex} from {Source}"
     )]
-    private partial void LogStoppingPlayback(int zoneIndex, SnapDog2.Shared.Enums.CommandSource source);
+    private partial void LogStoppingPlayback(int zoneIndex, CommandSource source);
 
     [LoggerMessage(
         EventId = 10005,
@@ -182,7 +179,7 @@ public partial class SetZoneVolumeCommandHandler(IZoneManager zoneManager, ILogg
         Level = LogLevel.Information,
         Message = "Setting volume for Zone {ZoneIndex} to {Volume} from {Source}"
     )]
-    private partial void LogSettingVolume(int zoneIndex, int volume, SnapDog2.Shared.Enums.CommandSource source);
+    private partial void LogSettingVolume(int zoneIndex, int volume, CommandSource source);
 
     [LoggerMessage(
         EventId = 10007,
@@ -221,7 +218,7 @@ public partial class VolumeUpCommandHandler(IZoneManager zoneManager, ILogger<Vo
         Level = LogLevel.Information,
         Message = "Increasing volume for Zone {ZoneIndex} by {Step} from {Source}"
     )]
-    private partial void LogIncreasingVolume(int zoneIndex, int step, SnapDog2.Shared.Enums.CommandSource source);
+    private partial void LogIncreasingVolume(int zoneIndex, int step, CommandSource source);
 
     [LoggerMessage(
         EventId = 10009,
@@ -260,7 +257,7 @@ public partial class VolumeDownCommandHandler(IZoneManager zoneManager, ILogger<
         Level = LogLevel.Information,
         Message = "Decreasing volume for Zone {ZoneIndex} by {Step} from {Source}"
     )]
-    private partial void LogDecreasingVolume(int zoneIndex, int step, SnapDog2.Shared.Enums.CommandSource source);
+    private partial void LogDecreasingVolume(int zoneIndex, int step, CommandSource source);
 
     [LoggerMessage(
         EventId = 10011,
@@ -299,7 +296,7 @@ public partial class SetZoneMuteCommandHandler(IZoneManager zoneManager, ILogger
         Level = LogLevel.Information,
         Message = "Setting mute for Zone {ZoneIndex} to {Enabled} from {Source}"
     )]
-    private partial void LogSettingMute(int zoneIndex, bool enabled, SnapDog2.Shared.Enums.CommandSource source);
+    private partial void LogSettingMute(int zoneIndex, bool enabled, CommandSource source);
 
     [LoggerMessage(
         EventId = 10013,
@@ -340,7 +337,7 @@ public partial class ToggleZoneMuteCommandHandler(
         Level = LogLevel.Information,
         Message = "Toggling mute for Zone {ZoneIndex} from {Source}"
     )]
-    private partial void LogTogglingMute(int zoneIndex, SnapDog2.Shared.Enums.CommandSource source);
+    private partial void LogTogglingMute(int zoneIndex, CommandSource source);
 
     [LoggerMessage(
         EventId = 10015,
@@ -379,7 +376,7 @@ public partial class SetTrackCommandHandler(IZoneManager zoneManager, ILogger<Se
         Level = LogLevel.Information,
         Message = "Setting track for Zone {ZoneIndex} to {TrackIndex} from {Source}"
     )]
-    private partial void LogSettingTrack(int zoneIndex, int trackIndex, SnapDog2.Shared.Enums.CommandSource source);
+    private partial void LogSettingTrack(int zoneIndex, int trackIndex, CommandSource source);
 
     [LoggerMessage(
         EventId = 10017,
@@ -418,7 +415,7 @@ public partial class NextTrackCommandHandler(IZoneManager zoneManager, ILogger<N
         Level = LogLevel.Information,
         Message = "Playing next track for Zone {ZoneIndex} from {Source}"
     )]
-    private partial void LogPlayingNextTrack(int zoneIndex, SnapDog2.Shared.Enums.CommandSource source);
+    private partial void LogPlayingNextTrack(int zoneIndex, CommandSource source);
 
     [LoggerMessage(
         EventId = 10019,
@@ -457,7 +454,7 @@ public partial class PreviousTrackCommandHandler(IZoneManager zoneManager, ILogg
         Level = LogLevel.Information,
         Message = "Playing previous track for Zone {ZoneIndex} from {Source}"
     )]
-    private partial void LogPlayingPreviousTrack(int zoneIndex, SnapDog2.Shared.Enums.CommandSource source);
+    private partial void LogPlayingPreviousTrack(int zoneIndex, CommandSource source);
 
     [LoggerMessage(
         EventId = 10021,
@@ -497,7 +494,7 @@ public partial class SetPlaylistCommandHandler(IZoneManager zoneManager, ILogger
         Level = LogLevel.Information,
         Message = "Setting playlist for Zone {ZoneIndex} from {Source}"
     )]
-    private partial void LogSettingPlaylist(int zoneIndex, SnapDog2.Shared.Enums.CommandSource source);
+    private partial void LogSettingPlaylist(int zoneIndex, CommandSource source);
 
     [LoggerMessage(
         EventId = 10023,
@@ -536,7 +533,7 @@ public partial class NextPlaylistCommandHandler(IZoneManager zoneManager, ILogge
         Level = LogLevel.Information,
         Message = "Playing next playlist for Zone {ZoneIndex} from {Source}"
     )]
-    private partial void LogPlayingNextPlaylist(int zoneIndex, SnapDog2.Shared.Enums.CommandSource source);
+    private partial void LogPlayingNextPlaylist(int zoneIndex, CommandSource source);
 
     [LoggerMessage(
         EventId = 10025,
@@ -577,7 +574,7 @@ public partial class PreviousPlaylistCommandHandler(
         Level = LogLevel.Information,
         Message = "Playing previous playlist for Zone {ZoneIndex} from {Source}"
     )]
-    private partial void LogPlayingPreviousPlaylist(int zoneIndex, SnapDog2.Shared.Enums.CommandSource source);
+    private partial void LogPlayingPreviousPlaylist(int zoneIndex, CommandSource source);
 
     [LoggerMessage(
         EventId = 10027,
@@ -618,7 +615,7 @@ public partial class SetTrackRepeatCommandHandler(
         Level = LogLevel.Information,
         Message = "Setting track repeat for Zone {ZoneIndex} to {Enabled} from {Source}"
     )]
-    private partial void LogSettingTrackRepeat(int zoneIndex, bool enabled, SnapDog2.Shared.Enums.CommandSource source);
+    private partial void LogSettingTrackRepeat(int zoneIndex, bool enabled, CommandSource source);
 
     [LoggerMessage(
         EventId = 10029,
@@ -659,7 +656,7 @@ public partial class ToggleTrackRepeatCommandHandler(
         Level = LogLevel.Information,
         Message = "Toggling track repeat for Zone {ZoneIndex} from {Source}"
     )]
-    private partial void LogTogglingTrackRepeat(int zoneIndex, SnapDog2.Shared.Enums.CommandSource source);
+    private partial void LogTogglingTrackRepeat(int zoneIndex, CommandSource source);
 
     [LoggerMessage(
         EventId = 10031,
@@ -703,7 +700,7 @@ public partial class SetPlaylistShuffleCommandHandler(
     private partial void LogSettingPlaylistShuffle(
         int zoneIndex,
         bool enabled,
-        SnapDog2.Shared.Enums.CommandSource source
+        CommandSource source
     );
 
     [LoggerMessage(
@@ -745,7 +742,7 @@ public partial class TogglePlaylistShuffleCommandHandler(
         Level = LogLevel.Information,
         Message = "Toggling playlist shuffle for Zone {ZoneIndex} from {Source}"
     )]
-    private partial void LogTogglingPlaylistShuffle(int zoneIndex, SnapDog2.Shared.Enums.CommandSource source);
+    private partial void LogTogglingPlaylistShuffle(int zoneIndex, CommandSource source);
 
     [LoggerMessage(
         EventId = 10035,
@@ -789,7 +786,7 @@ public partial class SetPlaylistRepeatCommandHandler(
     private partial void LogSettingPlaylistRepeat(
         int zoneIndex,
         bool enabled,
-        SnapDog2.Shared.Enums.CommandSource source
+        CommandSource source
     );
 
     [LoggerMessage(
@@ -831,7 +828,7 @@ public partial class TogglePlaylistRepeatCommandHandler(
         Level = LogLevel.Information,
         Message = "Toggling playlist repeat for Zone {ZoneIndex} from {Source}"
     )]
-    private partial void LogTogglingPlaylistRepeat(int zoneIndex, SnapDog2.Shared.Enums.CommandSource source);
+    private partial void LogTogglingPlaylistRepeat(int zoneIndex, CommandSource source);
 
     [LoggerMessage(
         EventId = 10039,
@@ -870,7 +867,7 @@ public partial class SeekPositionCommandHandler(IZoneManager zoneManager, ILogge
         Level = LogLevel.Information,
         Message = "Seeking Zone {ZoneIndex} to position {PositionMs}ms from {Source}"
     )]
-    private partial void LogSeekingToPosition(int zoneIndex, long positionMs, SnapDog2.Shared.Enums.CommandSource source);
+    private partial void LogSeekingToPosition(int zoneIndex, long positionMs, CommandSource source);
 
     [LoggerMessage(
         EventId = 10041,
@@ -909,7 +906,7 @@ public partial class SeekProgressCommandHandler(IZoneManager zoneManager, ILogge
         Level = LogLevel.Information,
         Message = "Seeking Zone {ZoneIndex} to progress {Progress:P1} from {Source}"
     )]
-    private partial void LogSeekingToProgress(int zoneIndex, float progress, SnapDog2.Shared.Enums.CommandSource source);
+    private partial void LogSeekingToProgress(int zoneIndex, float progress, CommandSource source);
 
     [LoggerMessage(
         EventId = 10043,
@@ -959,7 +956,7 @@ public partial class PlayTrackByIndexCommandHandler(
     private partial void LogPlayingTrackByIndex(
         int zoneIndex,
         int trackIndex,
-        SnapDog2.Shared.Enums.CommandSource source
+        CommandSource source
     );
 
     [LoggerMessage(
@@ -999,7 +996,7 @@ public partial class PlayUrlCommandHandler(IZoneManager zoneManager, ILogger<Pla
         Level = LogLevel.Information,
         Message = "Playing URL '{Url}' for Zone {ZoneIndex} from {Source}"
     )]
-    private partial void LogPlayingUrl(int zoneIndex, string url, SnapDog2.Shared.Enums.CommandSource source);
+    private partial void LogPlayingUrl(int zoneIndex, string url, CommandSource source);
 
     [LoggerMessage(
         EventId = 10047,
@@ -1060,7 +1057,7 @@ public partial class PlayTrackFromPlaylistCommandHandler(
         int zoneIndex,
         int playlistIndex,
         int trackIndex,
-        SnapDog2.Shared.Enums.CommandSource source
+        CommandSource source
     );
 
     [LoggerMessage(

@@ -15,7 +15,6 @@ namespace SnapDog2.Domain.Services;
 
 using System.Reflection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Logging;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Shared.Helpers;
 using SnapDog2.Shared.Models;

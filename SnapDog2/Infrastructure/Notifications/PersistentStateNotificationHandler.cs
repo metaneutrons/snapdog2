@@ -15,9 +15,9 @@ namespace SnapDog2.Infrastructure.Notifications;
 
 using System.Collections.Concurrent;
 using Cortex.Mediator.Notifications;
-using Microsoft.Extensions.Logging;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Server.Clients.Notifications;
+using SnapDog2.Shared.Models;
 
 /// <summary>
 /// Handles state change notifications and persists them immediately to Redis.
@@ -57,7 +57,7 @@ public partial class PersistentStateNotificationHandler(
     /// <summary>
     /// Debounces zone state saves for high-frequency updates like position changes.
     /// </summary>
-    private void DebounceZoneSave(int zoneIndex, Shared.Models.ZoneState zoneState)
+    private void DebounceZoneSave(int zoneIndex, ZoneState zoneState)
     {
         // Cancel existing timer
         if (this._zoneDebounceTimers.TryGetValue(zoneIndex, out var existingTimer))

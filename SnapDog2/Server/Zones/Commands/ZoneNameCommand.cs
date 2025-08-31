@@ -11,11 +11,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
+
+namespace SnapDog2.Server.Zones.Commands;
+
 using Cortex.Mediator.Commands;
 using SnapDog2.Shared.Attributes;
 using SnapDog2.Shared.Models;
-
-namespace SnapDog2.Server.Zones.Commands;
 
 /// <summary>
 /// Command to set zone name.

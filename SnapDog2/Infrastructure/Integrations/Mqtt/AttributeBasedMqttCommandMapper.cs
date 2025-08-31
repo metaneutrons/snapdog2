@@ -16,7 +16,6 @@ namespace SnapDog2.Infrastructure.Integrations.Mqtt;
 using System.Reflection;
 using System.Text.Json;
 using Cortex.Mediator.Commands;
-using Microsoft.Extensions.Logging;
 using SnapDog2.Shared.Attributes;
 using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Enums;
@@ -34,7 +33,7 @@ public partial class AttributeBasedMqttCommandMapper(
     private readonly ILogger<AttributeBasedMqttCommandMapper> _logger = logger;
     private readonly MqttConfig _mqttConfig = mqttConfig;
     private readonly Dictionary<string, (Type CommandType, MqttTopicAttribute Attribute)> _topicMappings = new();
-    private bool _initialized = false;
+    private bool _initialized;
 
     [LoggerMessage(
         EventId = 4100,

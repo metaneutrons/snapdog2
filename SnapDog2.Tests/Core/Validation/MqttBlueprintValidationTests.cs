@@ -13,12 +13,10 @@
 //
 namespace SnapDog2.Tests.Core.Validation;
 
-using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using SnapDog2.Infrastructure.Integrations.Mqtt;
 using SnapDog2.Shared.Configuration;
 using SnapDog2.Tests.Blueprint;
-using Xunit;
-using Xunit.Abstractions;
 
 /// <summary>
 /// Blueprint-based validation tests for MQTT integration.
@@ -34,7 +32,7 @@ public class MqttBlueprintValidationTests(ITestOutputHelper output)
     {
         // Arrange
         var mapper = new AttributeBasedMqttCommandMapper(
-            Microsoft.Extensions.Logging.Abstractions.NullLogger<AttributeBasedMqttCommandMapper>.Instance,
+            NullLogger<AttributeBasedMqttCommandMapper>.Instance,
             new MqttConfig { MqttBaseTopic = "snapdog" }
         );
         var blueprintTopics = SnapDogBlueprint
@@ -71,7 +69,7 @@ public class MqttBlueprintValidationTests(ITestOutputHelper output)
     {
         // Arrange
         var mapper = new AttributeBasedMqttCommandMapper(
-            Microsoft.Extensions.Logging.Abstractions.NullLogger<AttributeBasedMqttCommandMapper>.Instance,
+            NullLogger<AttributeBasedMqttCommandMapper>.Instance,
             new MqttConfig { MqttBaseTopic = "snapdog" }
         );
         var testCases = new[]

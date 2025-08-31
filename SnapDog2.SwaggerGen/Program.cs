@@ -6,6 +6,7 @@ using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Writers;
 using Swashbuckle.AspNetCore.Swagger;
 
@@ -175,7 +176,7 @@ try
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(options =>
     {
-        options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+        options.SwaggerDoc("v1", new OpenApiInfo
         {
             Title = "SnapDog2 API",
             Version = "v1"
@@ -195,7 +196,7 @@ try
     }
 
     // Generate swagger document with error handling
-    Microsoft.OpenApi.Models.OpenApiDocument swagger;
+    OpenApiDocument swagger;
     try
     {
         var swaggerProvider = app.Services.GetRequiredService<ISwaggerProvider>();

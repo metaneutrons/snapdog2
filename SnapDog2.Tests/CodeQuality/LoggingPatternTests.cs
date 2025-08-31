@@ -14,7 +14,6 @@
 namespace SnapDog2.Tests.CodeQuality;
 
 using System.Text.RegularExpressions;
-using Xunit;
 
 /// <summary>
 /// Tests to ensure code quality standards are maintained, specifically around logging patterns.

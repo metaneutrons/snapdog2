@@ -13,9 +13,9 @@
 //
 namespace SnapDog2.Server.Zones.Notifications;
 
-using System;
 using Cortex.Mediator.Notifications;
 using SnapDog2.Shared.Attributes;
+using SnapDog2.Shared.Enums;
 using SnapDog2.Shared.Models;
 
 /// <summary>
@@ -31,7 +31,7 @@ public record ZonePlaybackStateChangedNotification : INotification
     /// <summary>
     /// Gets the new playback state.
     /// </summary>
-    public required SnapDog2.Shared.Enums.PlaybackState PlaybackState { get; init; }
+    public required PlaybackState PlaybackState { get; init; }
 
     /// <summary>
     /// Gets the UTC timestamp when the state changed.

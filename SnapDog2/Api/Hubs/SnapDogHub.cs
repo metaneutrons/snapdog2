@@ -1,6 +1,6 @@
-using Microsoft.AspNetCore.SignalR;
-
 namespace SnapDog2.Api.Hubs;
+
+using Microsoft.AspNetCore.SignalR;
 
 public class SnapDogHub : Hub
 {

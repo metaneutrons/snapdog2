@@ -12,12 +12,12 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
 
+namespace SnapDog2.Server.Zones.Handlers;
+
 using Cortex.Mediator.Commands;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Server.Zones.Commands;
 using SnapDog2.Shared.Models;
-
-namespace SnapDog2.Server.Zones.Handlers;
 
 /// <summary>
 /// Handles the ZoneNameCommand for setting zone names.

@@ -16,8 +16,6 @@ namespace SnapDog2.Infrastructure.Services;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Enums;

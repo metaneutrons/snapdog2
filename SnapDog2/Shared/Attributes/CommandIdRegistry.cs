@@ -26,7 +26,7 @@ public static class CommandIdRegistry
     private static readonly ConcurrentDictionary<string, Type> _commandIdToTypeMap = new();
     private static readonly ConcurrentDictionary<Type, string> _typeToCommandIdMap = new();
     private static readonly object _initializationLock = new();
-    private static bool _isInitialized = false;
+    private static bool _isInitialized;
 
     /// <summary>
     /// Initializes the registry by scanning all loaded assemblies for CommandId attributes.

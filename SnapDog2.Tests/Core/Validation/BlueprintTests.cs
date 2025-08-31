@@ -13,10 +13,8 @@
 //
 namespace SnapDog2.Tests.Core.Validation;
 
-using FluentAssertions;
 using SnapDog2.Tests.Blueprint;
 using SnapDog2.Tests.Helpers;
-using Xunit;
 
 /// <summary>
 /// Simplified blueprint validation tests.

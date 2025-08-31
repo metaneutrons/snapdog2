@@ -13,8 +13,6 @@
 //
 namespace SnapDog2.Domain.Abstractions;
 
-using System.Threading.Tasks;
-
 /// <summary>
 /// Service for tracking command processing status and errors.
 /// </summary>

@@ -12,9 +12,10 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
 
-using SnapDog2.Infrastructure.Integrations.Mqtt;
-
 namespace SnapDog2.Application.Extensions.DependencyInjection;
+
+using SnapDog2.Infrastructure.Integrations.Mqtt;
+using SnapDog2.Server.Shared.Handlers;
 
 /// <summary>
 /// Service collection extensions for smart MQTT publishing configuration.
@@ -32,7 +33,7 @@ public static class SmartMqttServiceConfiguration
         services.AddSingleton<ISmartMqttPublisher, SmartMqttPublisher>();
 
         // Register the unified notification handlers
-        services.AddScoped<SnapDog2.Server.Shared.Handlers.IntegrationPublishingHandlers>();
+        services.AddScoped<IntegrationPublishingHandlers>();
 
         return services;
     }

@@ -11,11 +11,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
+
+namespace SnapDog2.Infrastructure.Services;
+
 using System.Diagnostics;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Shared.Models;
-
-namespace SnapDog2.Infrastructure.Services;
 
 /// <summary>
 /// Simple zone grouping service using periodic checks only.

@@ -13,7 +13,6 @@
 //
 namespace SnapDog2.Server.Shared.Notifications;
 
-using System;
 using Cortex.Mediator.Notifications;
 
 /// <summary>

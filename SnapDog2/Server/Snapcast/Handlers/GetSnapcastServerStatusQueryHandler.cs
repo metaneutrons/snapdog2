@@ -14,7 +14,6 @@
 namespace SnapDog2.Server.Snapcast.Handlers;
 
 using Cortex.Mediator.Queries;
-using Microsoft.Extensions.Logging;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Server.Snapcast.Queries;
 using SnapDog2.Shared.Models;

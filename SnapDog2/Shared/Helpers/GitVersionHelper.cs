@@ -12,9 +12,9 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
 
-using SnapDog2.Shared.Models;
-
 namespace SnapDog2.Shared.Helpers;
+
+using SnapDog2.Shared.Models;
 
 /// <summary>
 /// Helper class to extract GitVersion information from generated constants

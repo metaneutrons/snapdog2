@@ -11,13 +11,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
+
+namespace SnapDog2.Tests.Unit.Infrastructure.Resilience;
+
 using System.Net;
 using System.Net.Sockets;
 using Polly.Timeout;
 using SnapDog2.Infrastructure.Resilience;
 using SnapDog2.Shared.Configuration;
-
-namespace SnapDog2.Tests.Unit.Infrastructure.Resilience;
 
 /// <summary>
 /// Integration tests for Polly-based retry mechanisms across all external services.
@@ -346,7 +347,7 @@ public class PollyRetryIntegrationTests
             });
 
         // Act
-        var snapcastResult = await TryExecuteAsync<bool>(() =>
+        var snapcastResult = await TryExecuteAsync(() =>
             snapcastPipeline
                 .ExecuteAsync(async _ =>
                 {
@@ -356,7 +357,7 @@ public class PollyRetryIntegrationTests
                 .AsTask()
         );
 
-        var mqttResult = await TryExecuteAsync<bool>(() =>
+        var mqttResult = await TryExecuteAsync(() =>
             mqttPipeline
                 .ExecuteAsync(async _ =>
                 {

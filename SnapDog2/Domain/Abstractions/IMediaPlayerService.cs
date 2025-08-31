@@ -13,6 +13,7 @@
 //
 namespace SnapDog2.Domain.Abstractions;
 
+using SnapDog2.Infrastructure.Audio;
 using SnapDog2.Shared.Models;
 
 /// <summary>
@@ -66,7 +67,7 @@ public interface IMediaPlayerService
     /// </summary>
     /// <param name="zoneIndex">Zone index</param>
     /// <returns>MediaPlayer instance or null if not found</returns>
-    Infrastructure.Audio.MediaPlayer? GetMediaPlayer(int zoneIndex);
+    MediaPlayer? GetMediaPlayer(int zoneIndex);
 
     /// <summary>
     /// Stops all active playback across all zones.

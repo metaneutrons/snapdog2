@@ -13,8 +13,6 @@
 //
 namespace SnapDog2.Application.Services;
 
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Domain.Services;
 using SnapDog2.Infrastructure.Metrics;

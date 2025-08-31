@@ -14,7 +14,6 @@
 namespace SnapDog2.Infrastructure.Integrations.Mqtt;
 
 using Cortex.Mediator.Commands;
-using Microsoft.Extensions.Logging;
 using SnapDog2.Server.Shared.Factories;
 using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Models;

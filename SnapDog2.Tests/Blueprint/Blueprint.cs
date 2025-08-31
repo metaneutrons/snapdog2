@@ -28,7 +28,7 @@ public class Blueprint
         this.Status = new FeatureCollection<StatusSpec>(status);
 
         // Combine commands and status into a single collection
-        var allFeatures = commands.Cast<FeatureSpec>().Concat(status.Cast<FeatureSpec>());
+        var allFeatures = commands.Concat(status.Cast<FeatureSpec>());
         this.All = new FeatureCollection<FeatureSpec>(allFeatures);
     }
 

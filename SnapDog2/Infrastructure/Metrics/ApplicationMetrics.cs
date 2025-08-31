@@ -14,7 +14,6 @@
 namespace SnapDog2.Infrastructure.Metrics;
 
 using System.Diagnostics.Metrics;
-using Microsoft.Extensions.Logging;
 using SnapDog2.Domain.Abstractions;
 
 /// <summary>
@@ -122,62 +121,62 @@ public partial class ApplicationMetrics : IApplicationMetrics
         );
 
         // System Metrics
-        this._cpuUsagePercent = this._meter.CreateObservableGauge<double>(
+        this._cpuUsagePercent = this._meter.CreateObservableGauge(
             "snapdog_system_cpu_usage_percent",
             observeValue: () => this._systemState.CpuUsagePercent,
             description: "Current CPU usage percentage"
         );
 
-        this._memoryUsageMb = this._meter.CreateObservableGauge<double>(
+        this._memoryUsageMb = this._meter.CreateObservableGauge(
             "snapdog_system_memory_usage_mb",
             observeValue: () => this._systemState.MemoryUsageMb,
             description: "Current memory usage in megabytes"
         );
 
-        this._memoryUsagePercent = this._meter.CreateObservableGauge<double>(
+        this._memoryUsagePercent = this._meter.CreateObservableGauge(
             "snapdog_system_memory_usage_percent",
             observeValue: () => this._systemState.MemoryUsagePercent,
             description: "Current memory usage percentage"
         );
 
-        this._uptimeSeconds = this._meter.CreateObservableGauge<long>(
+        this._uptimeSeconds = this._meter.CreateObservableGauge(
             "snapdog_system_uptime_seconds",
             observeValue: () => (long)(DateTime.UtcNow - _startTime).TotalSeconds,
             description: "Application uptime in seconds"
         );
 
-        this._activeConnections = this._meter.CreateObservableGauge<int>(
+        this._activeConnections = this._meter.CreateObservableGauge(
             "snapdog_system_connections_active",
             observeValue: () => this._systemState.ActiveConnections,
             description: "Number of active connections"
         );
 
-        this._threadPoolThreads = this._meter.CreateObservableGauge<int>(
+        this._threadPoolThreads = this._meter.CreateObservableGauge(
             "snapdog_system_threadpool_threads",
             observeValue: () => this._systemState.ThreadPoolThreads,
             description: "Number of thread pool threads"
         );
 
         // Business Metrics
-        this._zonesTotal = this._meter.CreateObservableGauge<int>(
+        this._zonesTotal = this._meter.CreateObservableGauge(
             "snapdog_zones_total",
             observeValue: () => this._businessState.ZonesTotal,
             description: "Total number of configured zones"
         );
 
-        this._zonesActive = this._meter.CreateObservableGauge<int>(
+        this._zonesActive = this._meter.CreateObservableGauge(
             "snapdog_zones_active",
             observeValue: () => this._businessState.ZonesActive,
             description: "Number of zones currently active"
         );
 
-        this._clientsConnected = this._meter.CreateObservableGauge<int>(
+        this._clientsConnected = this._meter.CreateObservableGauge(
             "snapdog_clients_connected",
             observeValue: () => this._businessState.ClientsConnected,
             description: "Number of connected Snapcast clients"
         );
 
-        this._tracksPlaying = this._meter.CreateObservableGauge<int>(
+        this._tracksPlaying = this._meter.CreateObservableGauge(
             "snapdog_tracks_playing",
             observeValue: () => this._businessState.TracksPlaying,
             description: "Number of tracks currently playing"

@@ -13,13 +13,12 @@
 //
 namespace SnapDog2.Application.Extensions.DependencyInjection;
 
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SnapcastClient;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Infrastructure.Integrations.Snapcast;
 using SnapDog2.Shared.Configuration;
+using IClient = SnapcastClient.IClient;
 
 /// <summary>
 /// Extension methods for configuring Snapcast services.
@@ -38,7 +37,7 @@ public static class SnapcastServiceConfiguration
 
         // Register a factory for creating SnapcastClient instances
         // This avoids nullable type parameter issues while still handling connection failures gracefully
-        services.AddSingleton<Func<SnapcastClient.IClient?>>(serviceProvider =>
+        services.AddSingleton<Func<IClient?>>(serviceProvider =>
         {
             return () =>
             {
@@ -76,7 +75,7 @@ public static class SnapcastServiceConfiguration
             var config = serviceProvider.GetRequiredService<IOptions<SnapDogConfiguration>>();
             var stateRepository = serviceProvider.GetRequiredService<ISnapcastStateRepository>();
             var logger = serviceProvider.GetRequiredService<ILogger<SnapcastService>>();
-            var clientFactory = serviceProvider.GetRequiredService<Func<SnapcastClient.IClient?>>();
+            var clientFactory = serviceProvider.GetRequiredService<Func<IClient?>>();
 
             // Create the client using the factory
             var snapcastClient = clientFactory();

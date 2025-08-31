@@ -15,6 +15,7 @@ namespace SnapDog2.Tests.Helpers;
 
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
+using SnapDog2.Shared.Attributes;
 using SnapDog2.Tests.Blueprint;
 
 /// <summary>
@@ -416,7 +417,7 @@ public static class StaticApiAnalyzer
 
         foreach (var type in notificationTypes)
         {
-            var statusIdAttr = type.GetCustomAttribute<Shared.Attributes.StatusIdAttribute>();
+            var statusIdAttr = type.GetCustomAttribute<StatusIdAttribute>();
             if (statusIdAttr != null)
             {
                 statusIds.Add(statusIdAttr.Id);
@@ -478,7 +479,7 @@ public static class StaticApiAnalyzer
 
         foreach (var type in commandTypes)
         {
-            var commandIdAttr = type.GetCustomAttribute<Shared.Attributes.CommandIdAttribute>();
+            var commandIdAttr = type.GetCustomAttribute<CommandIdAttribute>();
             if (commandIdAttr != null)
             {
                 commandIds.Add(commandIdAttr.Id);

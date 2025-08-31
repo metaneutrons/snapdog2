@@ -12,10 +12,10 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
 
+namespace SnapDog2.Infrastructure.Integrations.Mqtt;
+
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Shared.Models;
-
-namespace SnapDog2.Infrastructure.Integrations.Mqtt;
 
 /// <summary>
 /// Smart MQTT publisher that uses direct publishing with queue fallback for maximum reliability and performance.
@@ -29,7 +29,7 @@ public sealed partial class SmartMqttPublisher(
 {
     // Circuit breaker state for intelligent fallback
     private volatile bool _directPublishingEnabled = true;
-    private volatile int _consecutiveFailures = 0;
+    private volatile int _consecutiveFailures;
     private readonly int _maxConsecutiveFailures = 3;
     private DateTime _lastFailureTime = DateTime.MinValue;
     private readonly TimeSpan _circuitBreakerResetTime = TimeSpan.FromMinutes(1);

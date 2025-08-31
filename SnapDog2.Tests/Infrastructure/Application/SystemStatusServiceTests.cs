@@ -13,15 +13,11 @@
 //
 namespace SnapDog2.Tests.Infrastructure.Application;
 
-using System;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
-using Moq;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Domain.Services;
 using SnapDog2.Shared.Models;
-using Xunit;
 
 /// <summary>
 /// Tests for the AppStatusService class.

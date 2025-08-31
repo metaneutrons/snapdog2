@@ -11,13 +11,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
+
+namespace SnapDog2.Api.Middleware;
+
 using System.Net;
 using System.Net.Sockets;
 using System.Text.Json;
 using Microsoft.AspNetCore.Connections;
 using SnapDog2.Domain.Abstractions;
-
-namespace SnapDog2.Api.Middleware;
 
 /// <summary>
 /// Global exception handling middleware with error tracking integration.

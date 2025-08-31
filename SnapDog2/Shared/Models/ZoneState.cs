@@ -13,6 +13,8 @@
 //
 namespace SnapDog2.Shared.Models;
 
+using SnapDog2.Shared.Enums;
+
 /// <summary>
 /// Represents the complete state of a zone.
 /// </summary>
@@ -26,7 +28,7 @@ public record ZoneState
     /// <summary>
     /// Gets the current playback state.
     /// </summary>
-    public required Enums.PlaybackState PlaybackState { get; init; }
+    public required PlaybackState PlaybackState { get; init; }
 
     /// <summary>
     /// Gets the zone volume (0-100).

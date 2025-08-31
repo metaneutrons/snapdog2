@@ -12,10 +12,10 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
 
+namespace SnapDog.Analyzers.Tests;
+
 using Microsoft.CodeAnalysis.CodeFixes;
 using Xunit;
-
-namespace SnapDog.Analyzers.Tests;
 
 public class LoggerMessageCodeFixTests
 {

@@ -13,13 +13,9 @@
 //
 namespace SnapDog2.Tests.Infrastructure.Application;
 
-using System;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Moq;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Domain.Services;
-using Xunit;
 
 /// <summary>
 /// Tests for the EnterpriseMetricsService class.

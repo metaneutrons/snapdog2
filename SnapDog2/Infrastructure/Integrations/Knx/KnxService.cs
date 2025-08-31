@@ -14,13 +14,13 @@
 namespace SnapDog2.Infrastructure.Integrations.Knx;
 
 using System.Collections.Concurrent;
-using System.Linq;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
 using Cortex.Mediator.Commands;
 using global::Knx.Falcon;
 using global::Knx.Falcon.Configuration;
 using global::Knx.Falcon.Sdk;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Polly;
 using Polly.Retry;
@@ -28,11 +28,13 @@ using SnapDog2.Domain.Abstractions;
 using SnapDog2.Infrastructure.Resilience;
 using SnapDog2.Server.Clients.Commands.Config;
 using SnapDog2.Server.Clients.Commands.Volume;
+using SnapDog2.Server.Clients.Handlers;
 using SnapDog2.Server.Shared.Factories;
 using SnapDog2.Server.Zones.Commands.Playback;
 using SnapDog2.Server.Zones.Commands.Playlist;
 using SnapDog2.Server.Zones.Commands.Track;
 using SnapDog2.Server.Zones.Commands.Volume;
+using SnapDog2.Server.Zones.Handlers;
 using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Constants;
 using SnapDog2.Shared.Enums;
@@ -148,7 +150,7 @@ public partial class KnxService : IKnxService
             try
             {
                 var result = await this._connectionPolicy.ExecuteAsync(
-                    async (ct) =>
+                    async ct =>
                     {
                         return await this.ConnectToKnxBusAsync(ct);
                     },
@@ -303,7 +305,7 @@ public partial class KnxService : IKnxService
         try
         {
             var result = await this._operationPolicy.ExecuteAsync(
-                async (ct) =>
+                async ct =>
                 {
                     var ga = new GroupAddress(groupAddress);
                     var value = await this._knxBus!.ReadGroupValueAsync(ga, cancellationToken: ct);
@@ -351,11 +353,9 @@ public partial class KnxService : IKnxService
             {
                 return await this.SendStatusAsync(statusId, clientIndexInt, knxValue, cancellationToken);
             }
-            else
-            {
-                this.LogInvalidTargetId(statusId, clientIndex);
-                return Result.Failure($"Invalid client Index for KNX: {clientIndex}");
-            }
+
+            this.LogInvalidTargetId(statusId, clientIndex);
+            return Result.Failure($"Invalid client Index for KNX: {clientIndex}");
         }
         catch (Exception ex)
         {
@@ -504,16 +504,16 @@ public partial class KnxService : IKnxService
         try
         {
             // Try to parse as IP address first
-            if (System.Net.IPAddress.TryParse(multicastAddress, out var ipAddress))
+            if (IPAddress.TryParse(multicastAddress, out var ipAddress))
             {
                 this.LogUsingIpRouting(multicastAddress);
                 return new IpRoutingConnectorParameters(ipAddress);
             }
 
             // If not an IP address, resolve hostname to IP address
-            var hostEntry = System.Net.Dns.GetHostEntry(multicastAddress);
+            var hostEntry = Dns.GetHostEntry(multicastAddress);
             var resolvedIp = hostEntry.AddressList.FirstOrDefault(addr =>
-                addr.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork
+                addr.AddressFamily == AddressFamily.InterNetwork
             );
 
             if (resolvedIp == null)
@@ -553,11 +553,9 @@ public partial class KnxService : IKnxService
                 this.LogUsingSpecificUsbDevice(this._config.UsbDevice, specificDevice.ToString());
                 return UsbConnectorParameters.FromDiscovery(specificDevice);
             }
-            else
-            {
-                this.LogSpecificUsbDeviceNotFound(this._config.UsbDevice);
-                // Fall back to first available device
-            }
+
+            this.LogSpecificUsbDeviceNotFound(this._config.UsbDevice);
+            // Fall back to first available device
         }
 
         // Use first available USB device
@@ -889,7 +887,8 @@ public partial class KnxService : IKnxService
                     _ => null
                 };
             }
-            else if (statusInfo.EntityType == "Zone")
+
+            if (statusInfo.EntityType == "Zone")
             {
                 var zoneStateStore = scope.ServiceProvider.GetService<IZoneStateStore>();
                 if (zoneStateStore == null)
@@ -941,91 +940,91 @@ public partial class KnxService : IKnxService
             {
                 // Zone Volume Commands
                 SetZoneVolumeCommand cmd =>
-                    await GetHandler<Server.Zones.Handlers.SetZoneVolumeCommandHandler>(scope)
+                    await GetHandler<SetZoneVolumeCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
-                VolumeUpCommand cmd => await GetHandler<Server.Zones.Handlers.VolumeUpCommandHandler>(scope)
+                VolumeUpCommand cmd => await GetHandler<VolumeUpCommandHandler>(scope)
                     .Handle(cmd, cancellationToken),
-                VolumeDownCommand cmd => await GetHandler<Server.Zones.Handlers.VolumeDownCommandHandler>(
+                VolumeDownCommand cmd => await GetHandler<VolumeDownCommandHandler>(
                         scope
                     )
                     .Handle(cmd, cancellationToken),
-                SetZoneMuteCommand cmd => await GetHandler<Server.Zones.Handlers.SetZoneMuteCommandHandler>(
+                SetZoneMuteCommand cmd => await GetHandler<SetZoneMuteCommandHandler>(
                         scope
                     )
                     .Handle(cmd, cancellationToken),
                 ToggleZoneMuteCommand cmd =>
-                    await GetHandler<Server.Zones.Handlers.ToggleZoneMuteCommandHandler>(scope)
+                    await GetHandler<ToggleZoneMuteCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
 
                 // Zone Playback Commands
-                PlayCommand cmd => await GetHandler<Server.Zones.Handlers.PlayCommandHandler>(scope)
+                PlayCommand cmd => await GetHandler<PlayCommandHandler>(scope)
                     .Handle(cmd, cancellationToken),
-                PauseCommand cmd => await GetHandler<Server.Zones.Handlers.PauseCommandHandler>(scope)
+                PauseCommand cmd => await GetHandler<PauseCommandHandler>(scope)
                     .Handle(cmd, cancellationToken),
-                StopCommand cmd => await GetHandler<Server.Zones.Handlers.StopCommandHandler>(scope)
+                StopCommand cmd => await GetHandler<StopCommandHandler>(scope)
                     .Handle(cmd, cancellationToken),
 
                 // Zone Track Commands
-                SetTrackCommand cmd => await GetHandler<Server.Zones.Handlers.SetTrackCommandHandler>(scope)
+                SetTrackCommand cmd => await GetHandler<SetTrackCommandHandler>(scope)
                     .Handle(cmd, cancellationToken),
-                NextTrackCommand cmd => await GetHandler<Server.Zones.Handlers.NextTrackCommandHandler>(scope)
+                NextTrackCommand cmd => await GetHandler<NextTrackCommandHandler>(scope)
                     .Handle(cmd, cancellationToken),
                 PreviousTrackCommand cmd =>
-                    await GetHandler<Server.Zones.Handlers.PreviousTrackCommandHandler>(scope)
+                    await GetHandler<PreviousTrackCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
                 SetTrackRepeatCommand cmd =>
-                    await GetHandler<Server.Zones.Handlers.SetTrackRepeatCommandHandler>(scope)
+                    await GetHandler<SetTrackRepeatCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
                 ToggleTrackRepeatCommand cmd =>
-                    await GetHandler<Server.Zones.Handlers.ToggleTrackRepeatCommandHandler>(scope)
+                    await GetHandler<ToggleTrackRepeatCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
                 PlayTrackByIndexCommand cmd =>
-                    await GetHandler<Server.Zones.Handlers.PlayTrackByIndexCommandHandler>(scope)
+                    await GetHandler<PlayTrackByIndexCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
 
                 // Zone Playlist Commands
-                SetPlaylistCommand cmd => await GetHandler<Server.Zones.Handlers.SetPlaylistCommandHandler>(
+                SetPlaylistCommand cmd => await GetHandler<SetPlaylistCommandHandler>(
                         scope
                     )
                     .Handle(cmd, cancellationToken),
-                NextPlaylistCommand cmd => await GetHandler<Server.Zones.Handlers.NextPlaylistCommandHandler>(
+                NextPlaylistCommand cmd => await GetHandler<NextPlaylistCommandHandler>(
                         scope
                     )
                     .Handle(cmd, cancellationToken),
                 PreviousPlaylistCommand cmd =>
-                    await GetHandler<Server.Zones.Handlers.PreviousPlaylistCommandHandler>(scope)
+                    await GetHandler<PreviousPlaylistCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
                 SetPlaylistRepeatCommand cmd =>
-                    await GetHandler<Server.Zones.Handlers.SetPlaylistRepeatCommandHandler>(scope)
+                    await GetHandler<SetPlaylistRepeatCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
                 TogglePlaylistRepeatCommand cmd =>
-                    await GetHandler<Server.Zones.Handlers.TogglePlaylistRepeatCommandHandler>(scope)
+                    await GetHandler<TogglePlaylistRepeatCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
                 SetPlaylistShuffleCommand cmd =>
-                    await GetHandler<Server.Zones.Handlers.SetPlaylistShuffleCommandHandler>(scope)
+                    await GetHandler<SetPlaylistShuffleCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
                 TogglePlaylistShuffleCommand cmd =>
-                    await GetHandler<Server.Zones.Handlers.TogglePlaylistShuffleCommandHandler>(scope)
+                    await GetHandler<TogglePlaylistShuffleCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
 
                 // Client Volume Commands
                 SetClientVolumeCommand cmd =>
-                    await GetHandler<Server.Clients.Handlers.SetClientVolumeCommandHandler>(scope)
+                    await GetHandler<SetClientVolumeCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
                 ClientVolumeUpCommand cmd => await GetHandler<ClientVolumeUpCommandHandler>(scope)
                     .Handle(cmd, cancellationToken),
                 ClientVolumeDownCommand cmd => await GetHandler<ClientVolumeDownCommandHandler>(scope)
                     .Handle(cmd, cancellationToken),
                 SetClientMuteCommand cmd =>
-                    await GetHandler<Server.Clients.Handlers.SetClientMuteCommandHandler>(scope)
+                    await GetHandler<SetClientMuteCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
                 ToggleClientMuteCommand cmd =>
-                    await GetHandler<Server.Clients.Handlers.ToggleClientMuteCommandHandler>(scope)
+                    await GetHandler<ToggleClientMuteCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
 
                 // Client Configuration Commands
                 AssignClientToZoneCommand cmd =>
-                    await GetHandler<Server.Clients.Handlers.AssignClientToZoneCommandHandler>(scope)
+                    await GetHandler<AssignClientToZoneCommandHandler>(scope)
                         .Handle(cmd, cancellationToken),
 
                 // Intentionally excluded commands (see comments in MapGroupAddressToCommand):
@@ -1295,7 +1294,7 @@ public partial class KnxService : IKnxService
         try
         {
             var result = await this._operationPolicy.ExecuteAsync(
-                async (ct) =>
+                async ct =>
                 {
                     var ga = new GroupAddress(groupAddress);
 
@@ -1319,10 +1318,10 @@ public partial class KnxService : IKnxService
 
                         // DPT 16.001 - 14-byte string (ASCII)
                         string stringValue when stringValue.Length <= 14 => new GroupValue(
-                            System.Text.Encoding.ASCII.GetBytes(stringValue.PadRight(14, '\0'))
+                            Encoding.ASCII.GetBytes(stringValue.PadRight(14, '\0'))
                         ),
                         string stringValue => new GroupValue(
-                            System.Text.Encoding.ASCII.GetBytes(stringValue.Substring(0, 14))
+                            Encoding.ASCII.GetBytes(stringValue.Substring(0, 14))
                         ),
 
                         _ => throw new ArgumentException(
@@ -1624,12 +1623,12 @@ public partial class KnxService : IKnxService
 
             // String values (DPT 16.001 - 14-byte ASCII)
             string stringValue when stringValue.Length <= 14 =>
-                new GroupValue(System.Text.Encoding.ASCII.GetBytes(stringValue.PadRight(14, '\0'))),
+                new GroupValue(Encoding.ASCII.GetBytes(stringValue.PadRight(14, '\0'))),
             string stringValue =>
-                new GroupValue(System.Text.Encoding.ASCII.GetBytes(stringValue.Substring(0, 14))),
+                new GroupValue(Encoding.ASCII.GetBytes(stringValue.Substring(0, 14))),
 
             // Default: try to convert to byte for most KNX data types
-            _ => new GroupValue((byte)0)
+            _ => new GroupValue(0)
         };
     }
 

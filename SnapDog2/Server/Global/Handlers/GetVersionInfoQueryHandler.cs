@@ -14,10 +14,7 @@
 namespace SnapDog2.Server.Global.Handlers;
 
 using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 using Cortex.Mediator.Queries;
-using Microsoft.Extensions.Logging;
 using SnapDog2.Server.Global.Queries;
 using SnapDog2.Shared.Models;
 

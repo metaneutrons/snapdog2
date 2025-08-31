@@ -11,12 +11,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
-using System.Net;
-using System.Net.Sockets;
-using SnapDog2.Infrastructure.Resilience;
-using SnapDog2.Shared.Configuration;
 
 namespace SnapDog2.Tests.Unit.Infrastructure.Resilience;
+
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using SnapDog2.Infrastructure.Resilience;
+using SnapDog2.Shared.Configuration;
 
 /// <summary>
 /// Real-world resilience scenario tests that simulate actual failure patterns
@@ -105,7 +107,7 @@ public class ResilienceTests
         {
             await mockMqttBroker.Object.PublishAsync(
                 "home/living-room/light",
-                System.Text.Encoding.UTF8.GetBytes("ON"),
+                Encoding.UTF8.GetBytes("ON"),
                 CancellationToken.None
             );
         });
@@ -272,7 +274,7 @@ public class ResilienceTests
                 {
                     await mockMqtt.Object.PublishAsync(
                         "status",
-                        System.Text.Encoding.UTF8.GetBytes("online"),
+                        Encoding.UTF8.GetBytes("online"),
                         CancellationToken.None
                     );
                     return "MQTT Success";
@@ -341,7 +343,7 @@ public class ResilienceTests
                     {
                         await mockMqttBroker.Object.PublishAsync(
                             $"sensor/{i}",
-                            System.Text.Encoding.UTF8.GetBytes($"value_{i}"),
+                            Encoding.UTF8.GetBytes($"value_{i}"),
                             CancellationToken.None
                         );
                         return i;

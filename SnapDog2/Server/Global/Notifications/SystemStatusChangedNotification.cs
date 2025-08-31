@@ -13,7 +13,6 @@
 //
 namespace SnapDog2.Server.Global.Notifications;
 
-using System;
 using Cortex.Mediator.Notifications;
 using SnapDog2.Shared.Attributes;
 using SnapDog2.Shared.Models;

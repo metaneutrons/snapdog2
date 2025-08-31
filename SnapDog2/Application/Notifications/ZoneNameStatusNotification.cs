@@ -11,9 +11,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
-using SnapDog2.Shared.Attributes;
 
 namespace SnapDog2.Application.Notifications;
+
+using SnapDog2.Shared.Attributes;
 
 /// <summary>
 /// Notification for zone name status changes.

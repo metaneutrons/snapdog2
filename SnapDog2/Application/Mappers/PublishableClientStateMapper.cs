@@ -11,9 +11,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
-using SnapDog2.Shared.Models;
 
 namespace SnapDog2.Application.Mappers;
+
+using SnapDog2.Shared.Models;
 
 /// <summary>
 /// Maps internal client state models to simplified external formats for MQTT publishing and API responses.

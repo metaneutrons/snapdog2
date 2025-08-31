@@ -13,8 +13,11 @@
 //
 
 using System.CommandLine;
+using Cortex.Mediator.Notifications;
 using dotenv.net;
 using EnvoyConfig;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
@@ -23,12 +26,29 @@ using OpenTelemetry.Trace;
 using Serilog;
 using Serilog.Events;
 using SnapDog2.Api.Authentication;
+using SnapDog2.Api.Hubs;
 using SnapDog2.Api.Middleware;
 using SnapDog2.Application.Extensions;
 using SnapDog2.Application.Extensions.DependencyInjection;
+using SnapDog2.Application.Services;
+using SnapDog2.Application.Worker.Services;
+using SnapDog2.Domain.Abstractions;
+using SnapDog2.Domain.Services;
+using SnapDog2.Infrastructure.Audio;
+using SnapDog2.Infrastructure.HealthChecks;
 using SnapDog2.Infrastructure.Hosting;
+using SnapDog2.Infrastructure.Integrations.Subsonic;
+using SnapDog2.Infrastructure.Metrics;
+using SnapDog2.Infrastructure.Notifications;
+using SnapDog2.Infrastructure.Services;
+using SnapDog2.Infrastructure.Storage;
+using SnapDog2.Server.Clients.Notifications;
+using SnapDog2.Server.Global.Services;
+using SnapDog2.Server.Global.Services.Abstractions;
+using SnapDog2.Server.Shared.Factories;
 using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Helpers;
+using StackExchange.Redis;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // System.CommandLine Flow - Command-Line Argument Parsing
@@ -295,162 +315,162 @@ static WebApplication CreateWebApplication(string[] args)
 
     // Notification processing configuration and services
     builder.Services.ConfigureNotificationProcessing();
-    builder.Services.AddSingleton<SnapDog2.Infrastructure.Notifications.NotificationQueue>();
-    builder.Services.AddSingleton<SnapDog2.Domain.Abstractions.INotificationQueue>(sp =>
-        sp.GetRequiredService<SnapDog2.Infrastructure.Notifications.NotificationQueue>()
+    builder.Services.AddSingleton<NotificationQueue>();
+    builder.Services.AddSingleton<INotificationQueue>(sp =>
+        sp.GetRequiredService<NotificationQueue>()
     );
-    builder.Services.AddHostedService<SnapDog2.Infrastructure.Notifications.NotificationBackgroundService>();
+    builder.Services.AddHostedService<NotificationBackgroundService>();
 
     // Skip hosted services in test environment
     if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "Testing")
     {
         // Add resilient startup service as first hosted service (check if everything is healthy)
-        builder.Services.AddHostedService<SnapDog2.Application.Services.StartupService>();
+        builder.Services.AddHostedService<StartupService>();
 
         // Add hosted service to initialize integration services on startup
-        builder.Services.AddHostedService<SnapDog2.Application.Worker.Services.IntegrationServicesHostedService>();
+        builder.Services.AddHostedService<IntegrationServicesHostedService>();
 
         // Add zone grouping configuration
         builder.Services.Configure<SnapcastConfig>(_ => { });
 
         // Add continuous background service for automatic zone grouping
-        builder.Services.AddHostedService<SnapDog2.Application.Services.ZoneGroupingBackgroundService>();
+        builder.Services.AddHostedService<ZoneGroupingBackgroundService>();
 
         // Add hosted service to publish initial state after integration services are initialized
         // Skip in test environment to prevent hanging issues
         if (!builder.Environment.IsEnvironment("Testing"))
         {
-            builder.Services.AddHostedService<SnapDog2.Application.Services.StatePublishingService>();
+            builder.Services.AddHostedService<StatePublishingService>();
         }
     }
 
     // Register status services
     builder.Services.AddScoped<
-        SnapDog2.Domain.Abstractions.IAppStatusService,
-        SnapDog2.Domain.Services.AppStatusService
+        IAppStatusService,
+        AppStatusService
     >();
     builder.Services.AddSingleton<
-        SnapDog2.Domain.Abstractions.ICommandStatusService,
-        SnapDog2.Infrastructure.Services.CommandStatusService
+        ICommandStatusService,
+        CommandStatusService
     >();
     builder.Services.AddScoped<
-        SnapDog2.Server.Global.Services.Abstractions.IGlobalStatusService,
-        SnapDog2.Server.Global.Services.GlobalStatusService
+        IGlobalStatusService,
+        GlobalStatusService
     >();
 
     // Zone management services
     builder.Services.AddSingleton<
-        SnapDog2.Domain.Abstractions.IZoneStateStore,
-        SnapDog2.Infrastructure.Storage.InMemoryZoneStateStore
+        IZoneStateStore,
+        InMemoryZoneStateStore
     >();
 
     // Client management services
     builder.Services.AddSingleton<
-        SnapDog2.Domain.Abstractions.IClientStateStore,
-        SnapDog2.Infrastructure.Storage.InMemoryClientStateStore
+        IClientStateStore,
+        InMemoryClientStateStore
     >();
 
     // Redis persistent state storage services
     if (snapDogConfig.Redis.Enabled)
     {
         // Register Redis connection multiplexer
-        builder.Services.AddSingleton<StackExchange.Redis.IConnectionMultiplexer>(provider =>
+        builder.Services.AddSingleton<IConnectionMultiplexer>(provider =>
         {
-            var configuration = StackExchange.Redis.ConfigurationOptions.Parse(snapDogConfig.Redis.ConnectionString);
+            var configuration = ConfigurationOptions.Parse(snapDogConfig.Redis.ConnectionString);
             configuration.ConnectTimeout = snapDogConfig.Redis.TimeoutSeconds * 1000;
             configuration.SyncTimeout = snapDogConfig.Redis.TimeoutSeconds * 1000;
             configuration.DefaultDatabase = snapDogConfig.Redis.Database;
             configuration.AbortOnConnectFail = false; // Allow retries
             configuration.ConnectRetry = 3;
 
-            return StackExchange.Redis.ConnectionMultiplexer.Connect(configuration);
+            return ConnectionMultiplexer.Connect(configuration);
         });
 
         // Register persistent state store
         builder.Services.AddSingleton<
-            SnapDog2.Domain.Abstractions.IPersistentStateStore
+            IPersistentStateStore
         >(provider =>
         {
-            var redis = provider.GetRequiredService<StackExchange.Redis.IConnectionMultiplexer>();
-            var logger = provider.GetRequiredService<ILogger<SnapDog2.Infrastructure.Storage.RedisPersistentStateStore>>();
-            return new SnapDog2.Infrastructure.Storage.RedisPersistentStateStore(redis, snapDogConfig.Redis, logger);
+            var redis = provider.GetRequiredService<IConnectionMultiplexer>();
+            var logger = provider.GetRequiredService<ILogger<RedisPersistentStateStore>>();
+            return new RedisPersistentStateStore(redis, snapDogConfig.Redis, logger);
         });
 
         // Register persistent state notification handler for client state changes
         builder.Services.AddSingleton<
-            Cortex.Mediator.Notifications.INotificationHandler<SnapDog2.Server.Clients.Notifications.ClientStateChangedNotification>,
-            SnapDog2.Infrastructure.Notifications.PersistentStateNotificationHandler
+            INotificationHandler<ClientStateChangedNotification>,
+            PersistentStateNotificationHandler
         >();
 
         // Register state restoration service (only if Redis is enabled)
-        builder.Services.AddHostedService<SnapDog2.Infrastructure.Services.StateRestorationService>();
+        builder.Services.AddHostedService<StateRestorationService>();
     }
     else
     {
         Log.Information("🚫 Redis persistent state storage is disabled");
     }
     builder.Services.AddSingleton<
-        SnapDog2.Domain.Abstractions.IZoneManager,
-        SnapDog2.Domain.Services.ZoneManager
+        IZoneManager,
+        ZoneManager
     >();
 
     // Status factory for centralized status notification creation - Singleton for performance
     builder.Services.AddSingleton<
-        SnapDog2.Domain.Abstractions.IStatusFactory,
-        SnapDog2.Server.Shared.Factories.StatusFactory
+        IStatusFactory,
+        StatusFactory
     >();
 
     // Media player services - Singleton to persist across requests and scopes
     builder.Services.AddSingleton<
-        SnapDog2.Domain.Abstractions.IMediaPlayerService,
-        SnapDog2.Infrastructure.Audio.MediaPlayerService
+        IMediaPlayerService,
+        MediaPlayerService
     >();
 
     // Client management services
     builder.Services.AddScoped<
-        SnapDog2.Domain.Abstractions.IClientManager,
-        SnapDog2.Domain.Services.ClientManager
+        IClientManager,
+        ClientManager
     >();
 
     // Zone grouping service for managing Snapcast client grouping based on zone assignments
     builder.Services.AddScoped<
-        SnapDog2.Domain.Abstractions.IZoneGroupingService,
-        SnapDog2.Infrastructure.Services.ZoneGroupingService
+        IZoneGroupingService,
+        ZoneGroupingService
     >();
 
     // Enterprise-grade metrics services
-    builder.Services.AddSingleton<SnapDog2.Infrastructure.Metrics.ApplicationMetrics>();
-    builder.Services.AddSingleton<SnapDog2.Domain.Abstractions.IApplicationMetrics>(provider =>
-        provider.GetRequiredService<SnapDog2.Infrastructure.Metrics.ApplicationMetrics>());
-    builder.Services.AddSingleton<SnapDog2.Domain.Services.EnterpriseMetricsService>();
-    builder.Services.AddSingleton<SnapDog2.Infrastructure.Metrics.ZoneGroupingMetrics>();
+    builder.Services.AddSingleton<ApplicationMetrics>();
+    builder.Services.AddSingleton<IApplicationMetrics>(provider =>
+        provider.GetRequiredService<ApplicationMetrics>());
+    builder.Services.AddSingleton<EnterpriseMetricsService>();
+    builder.Services.AddSingleton<ZoneGroupingMetrics>();
 
     // Error tracking service
     builder.Services.AddSingleton<
-        SnapDog2.Domain.Abstractions.IErrorTrackingService,
-        SnapDog2.Domain.Services.ErrorTrackingService
+        IErrorTrackingService,
+        ErrorTrackingService
     >();
 
     // Register EnterpriseMetricsService as the IMetricsService implementation
-    builder.Services.AddSingleton<SnapDog2.Domain.Abstractions.IMetricsService>(provider =>
-        provider.GetRequiredService<SnapDog2.Domain.Services.EnterpriseMetricsService>()
+    builder.Services.AddSingleton<IMetricsService>(provider =>
+        provider.GetRequiredService<EnterpriseMetricsService>()
     );
 
     // Business metrics collection service
-    builder.Services.AddHostedService<SnapDog2.Application.Services.BusinessMetricsCollectionService>();
+    builder.Services.AddHostedService<BusinessMetricsCollectionService>();
 
     // Playlist management services
     builder.Services.AddScoped<
-        SnapDog2.Domain.Abstractions.IPlaylistManager,
-        SnapDog2.Domain.Services.PlaylistManager
+        IPlaylistManager,
+        PlaylistManager
     >();
 
     // Subsonic integration service
     if (snapDogConfig.Services.Subsonic.Enabled)
     {
         builder.Services.AddHttpClient<
-            SnapDog2.Domain.Abstractions.ISubsonicService,
-            SnapDog2.Infrastructure.Integrations.Subsonic.SubsonicService
+            ISubsonicService,
+            SubsonicService
         >(client =>
         {
             client.Timeout = TimeSpan.FromMilliseconds(snapDogConfig.Services.Subsonic.Timeout);
@@ -499,7 +519,7 @@ static WebApplication CreateWebApplication(string[] args)
             builder
                 .Services.AddAuthentication("ApiKey")
                 .AddScheme<
-                    Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions,
+                    AuthenticationSchemeOptions,
                     ApiKeyAuthenticationHandler
                 >("ApiKey", null);
 
@@ -512,7 +532,7 @@ static WebApplication CreateWebApplication(string[] args)
             // Auth is enabled but no API keys configured - use dummy authentication for development
             builder
                 .Services.AddAuthentication("Dummy")
-                .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, DummyAuthenticationHandler>(
+                .AddScheme<AuthenticationSchemeOptions, DummyAuthenticationHandler>(
                     "Dummy",
                     null
                 );
@@ -528,7 +548,7 @@ static WebApplication CreateWebApplication(string[] args)
             // Auth is disabled - use dummy authentication to satisfy [Authorize] attributes
             builder
                 .Services.AddAuthentication("Dummy")
-                .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, DummyAuthenticationHandler>(
+                .AddScheme<AuthenticationSchemeOptions, DummyAuthenticationHandler>(
                     "Dummy",
                     null
                 );
@@ -581,7 +601,7 @@ static WebApplication CreateWebApplication(string[] args)
 
         if (snapDogConfig.Services.Knx.Enabled)
         {
-            healthChecksBuilder.AddCheck<SnapDog2.Infrastructure.HealthChecks.KnxHealthCheck>(
+            healthChecksBuilder.AddCheck<KnxHealthCheck>(
                 "knx",
                 tags: ["ready"]
             );
@@ -589,8 +609,8 @@ static WebApplication CreateWebApplication(string[] args)
 
         // Register health check service wrapper for testability
         builder.Services.AddScoped<
-            SnapDog2.Domain.Abstractions.IAppHealthCheckService,
-            SnapDog2.Domain.Services.AppHealthCheckService
+            IAppHealthCheckService,
+            AppHealthCheckService
         >();
     }
 
@@ -617,7 +637,7 @@ static WebApplication CreateWebApplication(string[] args)
         app.MapControllers();
 
         // Map SignalR hub
-        app.MapHub<SnapDog2.Api.Hubs.SnapDogHub>("/hubs/snapdog/v1");
+        app.MapHub<SnapDogHub>("/hubs/snapdog/v1");
 
         // Map health check endpoints
         if (snapDogConfig.System.HealthChecksEnabled)
@@ -625,14 +645,14 @@ static WebApplication CreateWebApplication(string[] args)
             app.MapHealthChecks("/health");
             app.MapHealthChecks(
                 "/health/ready",
-                new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+                new HealthCheckOptions
                 {
                     Predicate = check => check.Tags.Contains("ready"),
                 }
             );
             app.MapHealthChecks(
                 "/health/live",
-                new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+                new HealthCheckOptions
                 {
                     Predicate = check => check.Tags.Contains("live"),
                 }
@@ -646,5 +666,5 @@ static WebApplication CreateWebApplication(string[] args)
 // Make Program class accessible to tests
 namespace SnapDog2
 {
-    public partial class Program { }
+    public class Program { }
 }

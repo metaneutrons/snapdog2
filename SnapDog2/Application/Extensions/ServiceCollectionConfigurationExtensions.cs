@@ -11,10 +11,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
-using Microsoft.Extensions.Options;
-using SnapDog2.Shared.Configuration;
 
 namespace SnapDog2.Application.Extensions;
+
+using Microsoft.Extensions.Options;
+using SnapDog2.Shared.Configuration;
 
 /// <summary>
 /// Extension methods for IServiceCollection to simplify configuration registration.

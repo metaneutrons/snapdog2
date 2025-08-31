@@ -13,8 +13,6 @@
 //
 namespace SnapDog2.Server.Clients.Handlers;
 
-using System.Threading;
-using System.Threading.Tasks;
 using Cortex.Mediator.Queries;
 using Microsoft.Extensions.Options;
 using SnapDog2.Server.Clients.Queries;

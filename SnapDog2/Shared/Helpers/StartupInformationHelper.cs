@@ -11,13 +11,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
+
+namespace SnapDog2.Shared.Helpers;
+
+using System.Collections;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using SnapDog2.Application.Extensions;
 using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Enums;
-
-namespace SnapDog2.Shared.Helpers;
 
 /// <summary>
 /// Helper class for displaying comprehensive startup information.
@@ -188,7 +190,7 @@ public static class StartupInformationHelper
         // Log SnapDog2 specific environment variables
         var snapdogEnvVars = Environment
             .GetEnvironmentVariables()
-            .Cast<System.Collections.DictionaryEntry>()
+            .Cast<DictionaryEntry>()
             .Where(entry => entry.Key.ToString()?.StartsWith("SNAPDOG", StringComparison.OrdinalIgnoreCase) == true)
             .OrderBy(entry => entry.Key.ToString())
             .ToList();

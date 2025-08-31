@@ -14,7 +14,6 @@
 namespace SnapDog2.Infrastructure.Integrations.Knx;
 
 using Cortex.Mediator.Notifications;
-using Microsoft.Extensions.Logging;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Server.Shared.Notifications;
 

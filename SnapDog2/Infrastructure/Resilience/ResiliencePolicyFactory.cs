@@ -13,7 +13,6 @@
 //
 namespace SnapDog2.Infrastructure.Resilience;
 
-using System;
 using Polly;
 using Polly.Retry;
 using SnapDog2.Shared.Configuration;

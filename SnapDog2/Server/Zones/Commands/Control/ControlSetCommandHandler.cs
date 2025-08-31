@@ -13,10 +13,7 @@
 //
 namespace SnapDog2.Server.Zones.Commands.Control;
 
-using System.Threading;
-using System.Threading.Tasks;
 using Cortex.Mediator.Commands;
-using Microsoft.Extensions.Logging;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Shared.Enums;
 using SnapDog2.Shared.Models;

@@ -13,7 +13,6 @@
 //
 namespace SnapDog2.Server.Clients.Queries;
 
-using System.Collections.Generic;
 using Cortex.Mediator.Queries;
 using SnapDog2.Shared.Models;
 

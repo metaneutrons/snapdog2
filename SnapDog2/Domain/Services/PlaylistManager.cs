@@ -13,10 +13,6 @@
 //
 namespace SnapDog2.Domain.Services;
 
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Shared.Models;
 

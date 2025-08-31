@@ -14,7 +14,6 @@
 namespace SnapDog2.Domain.Services;
 
 using System.Collections.Concurrent;
-using Microsoft.Extensions.Logging;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Shared.Models;
 
