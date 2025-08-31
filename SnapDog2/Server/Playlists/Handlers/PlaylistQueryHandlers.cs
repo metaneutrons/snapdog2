@@ -76,7 +76,7 @@ public partial class GetAllPlaylistsQueryHandler(
     /// </summary>
     private PlaylistInfo CreateRadioPlaylist()
     {
-        var radioStations = this._config.RadioStations ?? new List<RadioStationConfig>();
+        var radioStations = this._config.RadioStations;
 
         return new PlaylistInfo
         {
@@ -187,7 +187,7 @@ public partial class GetPlaylistQueryHandler(
         var result = await this._subsonicService.GetPlaylistAsync(targetPlaylist.SubsonicPlaylistId, cancellationToken);
         if (result.IsSuccess)
         {
-            LogPlaylistRetrieved(this._logger, query.PlaylistIndex.ToString(), result.Value?.Tracks?.Count ?? 0);
+            LogPlaylistRetrieved(this._logger, query.PlaylistIndex.ToString(), result.Value?.Tracks.Count ?? 0);
         }
         else
         {
@@ -202,7 +202,7 @@ public partial class GetPlaylistQueryHandler(
     /// </summary>
     private Result<PlaylistWithTracks> CreateRadioPlaylistWithTracks()
     {
-        var radioStations = this._config.RadioStations ?? new List<RadioStationConfig>();
+        var radioStations = this._config.RadioStations;
 
         var playlist = new PlaylistInfo
         {
@@ -222,14 +222,14 @@ public partial class GetPlaylistQueryHandler(
                     new TrackInfo
                     {
                         Index = index + 1,
-                        Title = station.Name ?? "Unknown Station",
+                        Title = station.Name,
                         Artist = "Radio",
                         Album = "Radio Stations",
                         DurationMs = null, // Radio streams don't have duration
                         PositionMs = 0,
                         CoverArtUrl = null,
                         Source = "radio",
-                        Url = station.Url ?? string.Empty,
+                        Url = station.Url,
                     }
             )
             .ToList();
@@ -377,30 +377,27 @@ public partial class GetStreamUrlQueryHandler(
 /// Handler for getting track details.
 /// </summary>
 public partial class GetTrackQueryHandler(
-    ISubsonicService subsonicService,
     IOptions<SnapDogConfiguration> configOptions,
     ILogger<GetTrackQueryHandler> logger
 ) : IQueryHandler<GetTrackQuery, Result<TrackInfo>>
 {
-    private readonly ISubsonicService _subsonicService = subsonicService;
     private readonly SnapDogConfiguration _config = configOptions.Value;
-    private readonly ILogger<GetTrackQueryHandler> _logger = logger;
 
     public Task<Result<TrackInfo>> Handle(GetTrackQuery query, CancellationToken cancellationToken)
     {
-        LogGettingTrack(this._logger, query.TrackId);
+        LogGettingTrack(logger, query.TrackId);
 
         // For radio stations, check if it's a radio URL and create a TrackInfo
         if (IsRadioStreamUrl(query.TrackId))
         {
             var radioTrack = this.CreateRadioTrackInfo(query.TrackId);
-            LogRadioTrackRetrieved(this._logger, query.TrackId);
+            LogRadioTrackRetrieved(logger, query.TrackId);
             return Task.FromResult(Result<TrackInfo>.Success(radioTrack));
         }
 
         // Handle Subsonic tracks - for now, we don't have a direct track lookup in Subsonic service
         // This would require extending the Subsonic service or searching through playlists
-        LogTrackNotImplemented(this._logger, query.TrackId);
+        LogTrackNotImplemented(logger, query.TrackId);
         return Task.FromResult(
             Result<TrackInfo>.Failure($"Track lookup not implemented for track ID: {query.TrackId}")
         );
@@ -421,7 +418,7 @@ public partial class GetTrackQueryHandler(
     private TrackInfo CreateRadioTrackInfo(string url)
     {
         // Try to find the radio station in configuration
-        var radioStations = this._config.RadioStations ?? new List<RadioStationConfig>();
+        var radioStations = this._config.RadioStations;
         var station = radioStations.FirstOrDefault(s => s.Url == url);
 
         return new TrackInfo

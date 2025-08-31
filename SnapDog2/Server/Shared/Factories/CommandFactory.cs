@@ -822,7 +822,6 @@ public static class CommandFactory
         result = value.ToLowerInvariant() switch
         {
             "true" or "1" or "on" or "yes" => true,
-            "false" or "0" or "off" or "no" => false,
             _ => false,
         };
 

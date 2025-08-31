@@ -214,6 +214,6 @@ public partial class GlobalStatusService(
     /// </summary>
     public void Dispose()
     {
-        this._cancellationTokenSource?.Dispose();
+        this._cancellationTokenSource.Dispose();
     }
 }
