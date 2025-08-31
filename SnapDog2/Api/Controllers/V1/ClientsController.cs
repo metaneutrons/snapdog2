@@ -613,10 +613,6 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
         }
 
         var s = result.Value!.Name;
-        if (s == null)
-        {
-            s = $"Client {clientIndex}";
-        }
 
         return this.Ok(s);
     }

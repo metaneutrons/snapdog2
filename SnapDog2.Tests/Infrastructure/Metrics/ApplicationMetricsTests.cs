@@ -194,6 +194,6 @@ public class ApplicationMetricsTests : IDisposable
 
     public void Dispose()
     {
-        this._applicationMetrics?.Dispose();
+        this._applicationMetrics.Dispose();
     }
 }

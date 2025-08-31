@@ -239,6 +239,6 @@ public class MetricsServiceTests : IDisposable
 
     public void Dispose()
     {
-        this._metricsService?.Dispose();
+        this._metricsService.Dispose();
     }
 }

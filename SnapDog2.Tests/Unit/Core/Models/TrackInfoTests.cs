@@ -65,7 +65,7 @@ public class TrackInfoTests
 
         // Assert
         urlProperty.Should().NotBeNull("TrackInfo should have a Url property");
-        urlProperty!.PropertyType.Should().Be<string>("Url should be a string");
+        urlProperty.PropertyType.Should().Be<string>("Url should be a string");
     }
 
     [Fact]

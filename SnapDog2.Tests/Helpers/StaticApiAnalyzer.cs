@@ -180,7 +180,7 @@ public static class StaticApiAnalyzer
         var routeAttribute = controllerType.GetCustomAttribute<RouteAttribute>();
         if (routeAttribute != null)
         {
-            var template = routeAttribute.Template ?? "";
+            var template = routeAttribute.Template;
             // Ensure leading slash for consistency with blueprint paths
             return template.StartsWith("/") ? template : "/" + template;
         }
@@ -683,7 +683,7 @@ public static class StaticApiAnalyzer
 
     private static HashSet<string> GetImplementedKnxHandlers()
     {
-        // Detect actual KNX command handler implementations  
+        // Detect actual KNX command handler implementations
         var existingCommandIds = GetImplementedCommandIdAttributes();
         var blueprintWithKnx = GetBlueprintCommandsWithKnx();
 
