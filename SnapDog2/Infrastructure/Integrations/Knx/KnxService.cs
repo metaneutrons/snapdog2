@@ -414,7 +414,9 @@ public partial class KnxService : IKnxService
         return await Task.FromResult(Result.Success());
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Connects to the KNX bus with automatic retries using Polly.
+    /// </summary>
     private async Task<Result> ConnectToKnxBusAsync(CancellationToken cancellationToken)
     {
         try
@@ -1324,7 +1326,7 @@ public partial class KnxService : IKnxService
                         ),
 
                         _ => throw new ArgumentException(
-                            $"Unsupported value type: {value?.GetType()} with value: {value}"
+                            $"Unsupported value type: {value.GetType()} with value: {value}"
                         ),
                     };
 
@@ -1358,7 +1360,7 @@ public partial class KnxService : IKnxService
                 {
                     MaxRetryAttempts = validatedConfig.MaxRetries,
                     Delay = TimeSpan.FromMilliseconds(validatedConfig.RetryDelayMs),
-                    BackoffType = validatedConfig.BackoffType?.ToLowerInvariant() switch
+                    BackoffType = validatedConfig.BackoffType.ToLowerInvariant() switch
                     {
                         "linear" => DelayBackoffType.Linear,
                         "constant" => DelayBackoffType.Constant,
@@ -1618,7 +1620,7 @@ public partial class KnxService : IKnxService
             bool boolValue => new GroupValue(boolValue),
 
             // Integer values (DPT 5.001 - Percentage 0-100, DPT 5.010 - Counter 0-255)
-            int intValue when intValue >= 0 && intValue <= 255 => new GroupValue((byte)intValue),
+            int intValue and >= 0 and <= 255 => new GroupValue((byte)intValue),
 
             // String values (DPT 16.001 - 14-byte ASCII)
             string stringValue when stringValue.Length <= 14 =>
