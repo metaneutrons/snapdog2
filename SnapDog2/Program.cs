@@ -103,7 +103,7 @@ if (parseResult.Errors.Count > 0 || args.Contains("--help") || args.Contains("-h
 }
 
 // Handle environment file option
-if (parseResult.GetValue(envFileOption) is FileInfo parsedFile)
+if (parseResult.GetValue(envFileOption) is { } parsedFile)
 {
     try
     {

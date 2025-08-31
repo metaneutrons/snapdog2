@@ -41,12 +41,6 @@ public partial class GlobalStatusService(
     ILogger<GlobalStatusService> logger
 ) : IGlobalStatusService
 {
-    private readonly GetSystemStatusQueryHandler _systemStatusHandler = systemStatusHandler;
-    private readonly GetErrorStatusQueryHandler _errorStatusHandler = errorStatusHandler;
-    private readonly GetVersionInfoQueryHandler _versionInfoHandler = versionInfoHandler;
-    private readonly GetServerStatsQueryHandler _serverStatsHandler = serverStatsHandler;
-    private readonly IMediator _mediator = mediator;
-    private readonly ILogger<GlobalStatusService> _logger = logger;
     private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
     /// <inheritdoc />
@@ -54,12 +48,12 @@ public partial class GlobalStatusService(
     {
         try
         {
-            var result = await this._systemStatusHandler.Handle(new GetSystemStatusQuery(), cancellationToken);
+            var result = await systemStatusHandler.Handle(new GetSystemStatusQuery(), cancellationToken);
 
             if (result.IsSuccess && result.Value != null)
             {
                 // Publish notification to external systems (MQTT, KNX) via mediator
-                await this._mediator.PublishAsync(
+                await mediator.PublishAsync(
                     new SystemStatusChangedNotification { Status = result.Value },
                     cancellationToken
                 );
@@ -82,7 +76,7 @@ public partial class GlobalStatusService(
         try
         {
             // Publish error notification to external systems (MQTT, KNX) via mediator
-            await this._mediator.PublishAsync(new SystemErrorNotification { Error = errorDetails }, cancellationToken);
+            await mediator.PublishAsync(new SystemErrorNotification { Error = errorDetails }, cancellationToken);
             this.LogErrorStatusToPublish(errorDetails.ErrorCode);
         }
         catch (Exception ex)
@@ -96,12 +90,12 @@ public partial class GlobalStatusService(
     {
         try
         {
-            var result = await this._versionInfoHandler.Handle(new GetVersionInfoQuery(), cancellationToken);
+            var result = await versionInfoHandler.Handle(new GetVersionInfoQuery(), cancellationToken);
 
             if (result.IsSuccess && result.Value != null)
             {
                 // Publish version info to external systems (MQTT, KNX) via mediator
-                await this._mediator.PublishAsync(
+                await mediator.PublishAsync(
                     new VersionInfoChangedNotification { VersionInfo = result.Value },
                     cancellationToken
                 );
@@ -123,12 +117,12 @@ public partial class GlobalStatusService(
     {
         try
         {
-            var result = await this._serverStatsHandler.Handle(new GetServerStatsQuery(), cancellationToken);
+            var result = await serverStatsHandler.Handle(new GetServerStatsQuery(), cancellationToken);
 
             if (result.IsSuccess && result.Value != null)
             {
                 // Publish server stats to external systems (MQTT, KNX) via mediator
-                await this._mediator.PublishAsync(
+                await mediator.PublishAsync(
                     new ServerStatsChangedNotification { Stats = result.Value },
                     cancellationToken
                 );

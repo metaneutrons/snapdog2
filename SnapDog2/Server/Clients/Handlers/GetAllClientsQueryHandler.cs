@@ -53,7 +53,7 @@ public partial class GetAllClientsQueryHandler(IClientManager clientManager, ILo
         catch (Exception ex)
         {
             this.LogError(ex.Message);
-            return Result<List<ClientState>>.Failure(ex.Message ?? "An error occurred while retrieving all clients");
+            return Result<List<ClientState>>.Failure(ex.Message);
         }
     }
 }
