@@ -4,6 +4,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <GitVersionTaskEnabled Condition="'$(CI)' == 'true'">true</GitVersionTaskEnabled>
+    <EnableDefaultContentItems>false</EnableDefaultContentItems>
+    <GenerateStaticWebAssetsManifest>false</GenerateStaticWebAssetsManifest>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Cortex.Mediator" />
