@@ -44,7 +44,7 @@ public partial class PerformanceCommandBehavior<TCommand, TResponse>(
     {
         var commandName = typeof(TCommand).Name;
         var stopwatch = Stopwatch.StartNew();
-        var success = false;
+        bool success;
 
         try
         {
@@ -76,7 +76,6 @@ public partial class PerformanceCommandBehavior<TCommand, TResponse>(
         catch (Exception ex)
         {
             stopwatch.Stop();
-            success = false;
 
             // Record error metrics
             this._metricsService.RecordCortexMediatorRequestDuration(

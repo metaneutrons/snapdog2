@@ -166,7 +166,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
                     );
                 }
 
-                LogPlaylistRetrieved(this._logger, playlistIndex, radioResult.Value?.Tracks?.Count ?? 0);
+                LogPlaylistRetrieved(this._logger, playlistIndex, radioResult.Value?.Tracks.Count ?? 0);
                 return this.Ok(ApiResponse<PlaylistWithTracks>.CreateSuccess(radioResult.Value!));
             }
 
@@ -199,7 +199,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
                     );
                 }
 
-                LogPlaylistRetrieved(this._logger, playlistIndex, indexResult.Value?.Tracks?.Count ?? 0);
+                LogPlaylistRetrieved(this._logger, playlistIndex, indexResult.Value?.Tracks.Count ?? 0);
                 return this.Ok(ApiResponse<PlaylistWithTracks>.CreateSuccess(indexResult.Value!));
             }
 
@@ -262,7 +262,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
                 );
             }
 
-            LogPlaylistRetrieved(this._logger, playlistIndex, result.Value?.Tracks?.Count ?? 0);
+            LogPlaylistRetrieved(this._logger, playlistIndex, result.Value?.Tracks.Count ?? 0);
             return this.Ok(ApiResponse<PlaylistWithTracks>.CreateSuccess(result.Value!));
         }
         catch (Exception ex)
@@ -422,7 +422,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
             var tracks = playlistResult.Value?.Tracks ?? new List<TrackInfo>();
 
             // Try to find track by index (1-based) or by ID
-            TrackInfo? targetTrack = null;
+            TrackInfo? targetTrack;
 
             // Try parsing as 1-based index first
             if (int.TryParse(trackIndex, out var trackNumber) && trackNumber > 0 && trackNumber <= tracks.Count)
