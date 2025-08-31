@@ -695,13 +695,16 @@ static WebApplication CreateWebApplication(string[] args)
     {
         try
         {
+            // Use forwarded headers for reverse proxy
+            app.UseForwardedHeaders();
+
+            // Add default static files middleware first
+            app.UseStaticFiles();
+
             // Configure embedded assets
             var assetsAssembly = typeof(SnapDog2.WebUi.Assets.Marker).Assembly;
             var embedded = new Microsoft.Extensions.FileProviders.ManifestEmbeddedFileProvider(assetsAssembly, "EmbeddedWebRoot");
             app.UseStaticFiles(new StaticFileOptions { FileProvider = embedded });
-
-            // Use forwarded headers for reverse proxy
-            app.UseForwardedHeaders();
 
             // Configure path base for reverse proxy
             if (!string.IsNullOrEmpty(snapDogConfig.Http.WebUiPath) && snapDogConfig.Http.WebUiPath != "/")

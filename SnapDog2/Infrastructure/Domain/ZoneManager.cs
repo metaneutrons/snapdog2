@@ -310,34 +310,6 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     private bool _disposed;
     private Timer? _positionUpdateTimer;
 
-    [LoggerMessage(
-        EventId = 6559,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
-        Message = "Zone {ZoneIndex} ({ZoneName}): {Action}"
-    )]
-    private partial void LogZoneAction(int zoneIndex, string zoneName, string action);
-
-    [LoggerMessage(
-        EventId = 6560,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
-        Message = "Zone {ZoneIndex} synchronized with Snapcast group {GroupId}"
-    )]
-    private partial void LogSnapcastSync(int zoneIndex, string groupId);
-
-    [LoggerMessage(
-        EventId = 6561,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
-        Message = "Zone {ZoneIndex} Snapcast group {GroupId} not found"
-    )]
-    private partial void LogSnapcastGroupNotFound(int zoneIndex, string groupId);
-
-    [LoggerMessage(
-        EventId = 6562,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
-        Message = "Zone {ZoneIndex} ({ZoneName}): {Action} - {Error}"
-    )]
-    private partial void LogZoneError(int zoneIndex, string zoneName, string action, string error);
-
     public int ZoneIndex => this._zoneIndex;
 
     public ZoneService(
@@ -1895,6 +1867,107 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         return ValueTask.CompletedTask;
     }
 
+    /// <summary>
+    /// Publishes individual track metadata notifications for KNX integration
+    /// </summary>
+    private async Task PublishTrackMetadataNotificationsAsync(SnapDog2.Core.Models.TrackInfo track)
+    {
+        try
+        {
+            using var scope = this._serviceScopeFactory.CreateScope();
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+
+            // Publish complete metadata notification
+            var metadataNotification = new ZoneTrackMetadataChangedNotification
+            {
+                ZoneIndex = this._zoneIndex,
+                TrackInfo = new SnapDog2.Core.Models.TrackInfo
+                {
+                    Index = track.Index,
+                    Title = track.Title ?? "Unknown",
+                    Artist = track.Artist ?? "Unknown",
+                    Album = track.Album ?? "Unknown",
+                    Source = track.Source ?? "unknown",
+                    Url = track.Url ?? "unknown://no-url",
+                    DurationMs = track.DurationMs,
+                    PositionMs = track.PositionMs,
+                    Progress = track.Progress,
+                    IsPlaying = track.IsPlaying,
+                    CoverArtUrl = track.CoverArtUrl,
+                    Genre = track.Genre,
+                    TrackNumber = track.TrackNumber,
+                    Year = track.Year,
+                    Rating = track.Rating,
+                    TimestampUtc = track.TimestampUtc
+                }
+            };
+            await mediator.PublishAsync(metadataNotification).ConfigureAwait(false);
+
+            // Publish individual field notifications
+            if (!string.IsNullOrEmpty(track.Title))
+            {
+                var titleNotification = new ZoneTrackTitleChangedNotification
+                {
+                    ZoneIndex = this._zoneIndex,
+                    Title = track.Title
+                };
+                await mediator.PublishAsync(titleNotification).ConfigureAwait(false);
+            }
+
+            if (!string.IsNullOrEmpty(track.Artist))
+            {
+                var artistNotification = new ZoneTrackArtistChangedNotification
+                {
+                    ZoneIndex = this._zoneIndex,
+                    Artist = track.Artist
+                };
+                await mediator.PublishAsync(artistNotification).ConfigureAwait(false);
+            }
+
+            if (!string.IsNullOrEmpty(track.Album))
+            {
+                var albumNotification = new ZoneTrackAlbumChangedNotification
+                {
+                    ZoneIndex = this._zoneIndex,
+                    Album = track.Album
+                };
+                await mediator.PublishAsync(albumNotification).ConfigureAwait(false);
+            }
+        }
+        catch (Exception ex)
+        {
+            LogErrorPublishingTrackMetadata(ex, this._zoneIndex);
+        }
+    }
+
+    [LoggerMessage(
+        EventId = 6559,
+        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Message = "Zone {ZoneIndex} ({ZoneName}): {Action}"
+    )]
+    private partial void LogZoneAction(int zoneIndex, string zoneName, string action);
+
+    [LoggerMessage(
+        EventId = 6560,
+        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Message = "Zone {ZoneIndex} synchronized with Snapcast group {GroupId}"
+    )]
+    private partial void LogSnapcastSync(int zoneIndex, string groupId);
+
+    [LoggerMessage(
+        EventId = 6561,
+        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Message = "Zone {ZoneIndex} Snapcast group {GroupId} not found"
+    )]
+    private partial void LogSnapcastGroupNotFound(int zoneIndex, string groupId);
+
+    [LoggerMessage(
+        EventId = 6562,
+        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Message = "Zone {ZoneIndex} ({ZoneName}): {Action} - {Error}"
+    )]
+    private partial void LogZoneError(int zoneIndex, string zoneName, string action, string error);
+
     // LoggerMessage methods for high-performance logging
     [LoggerMessage(
         EventId = 6500,
@@ -2245,79 +2318,6 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         Message = "MediaPlayer state changed for zone {ZoneIndex}: {State}"
     )]
     private partial void LogMediaPlayerStateChanged(int ZoneIndex, string State);
-
-    /// <summary>
-    /// Publishes individual track metadata notifications for KNX integration
-    /// </summary>
-    private async Task PublishTrackMetadataNotificationsAsync(SnapDog2.Core.Models.TrackInfo track)
-    {
-        try
-        {
-            using var scope = this._serviceScopeFactory.CreateScope();
-            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-
-            // Publish complete metadata notification
-            var metadataNotification = new ZoneTrackMetadataChangedNotification
-            {
-                ZoneIndex = this._zoneIndex,
-                TrackInfo = new SnapDog2.Core.Models.TrackInfo
-                {
-                    Index = track.Index,
-                    Title = track.Title ?? "Unknown",
-                    Artist = track.Artist ?? "Unknown",
-                    Album = track.Album ?? "Unknown",
-                    Source = track.Source ?? "unknown",
-                    Url = track.Url ?? "unknown://no-url",
-                    DurationMs = track.DurationMs,
-                    PositionMs = track.PositionMs,
-                    Progress = track.Progress,
-                    IsPlaying = track.IsPlaying,
-                    CoverArtUrl = track.CoverArtUrl,
-                    Genre = track.Genre,
-                    TrackNumber = track.TrackNumber,
-                    Year = track.Year,
-                    Rating = track.Rating,
-                    TimestampUtc = track.TimestampUtc
-                }
-            };
-            await mediator.PublishAsync(metadataNotification).ConfigureAwait(false);
-
-            // Publish individual field notifications
-            if (!string.IsNullOrEmpty(track.Title))
-            {
-                var titleNotification = new ZoneTrackTitleChangedNotification
-                {
-                    ZoneIndex = this._zoneIndex,
-                    Title = track.Title
-                };
-                await mediator.PublishAsync(titleNotification).ConfigureAwait(false);
-            }
-
-            if (!string.IsNullOrEmpty(track.Artist))
-            {
-                var artistNotification = new ZoneTrackArtistChangedNotification
-                {
-                    ZoneIndex = this._zoneIndex,
-                    Artist = track.Artist
-                };
-                await mediator.PublishAsync(artistNotification).ConfigureAwait(false);
-            }
-
-            if (!string.IsNullOrEmpty(track.Album))
-            {
-                var albumNotification = new ZoneTrackAlbumChangedNotification
-                {
-                    ZoneIndex = this._zoneIndex,
-                    Album = track.Album
-                };
-                await mediator.PublishAsync(albumNotification).ConfigureAwait(false);
-            }
-        }
-        catch (Exception ex)
-        {
-            LogErrorPublishingTrackMetadata(ex, this._zoneIndex);
-        }
-    }
 
     [LoggerMessage(
         EventId = 6553,

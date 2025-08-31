@@ -1,4 +1,4 @@
-﻿namespace SnapDog2.WebUi.Assets;
+namespace SnapDog2.WebUi.Assets;
 
 public class Class1
 {
