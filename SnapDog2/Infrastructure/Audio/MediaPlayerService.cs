@@ -149,7 +149,7 @@ public sealed partial class MediaPlayerService(
 
             if (result.IsSuccess)
             {
-                LogPlaybackStarted(this._logger, zoneIndex, trackInfo.Title ?? "Unknown", streamUrl);
+                LogPlaybackStarted(this._logger, zoneIndex, trackInfo.Title, streamUrl);
 
                 // Publish playback started notification using scoped mediator
                 using var scope = this._serviceScopeFactory.CreateScope();

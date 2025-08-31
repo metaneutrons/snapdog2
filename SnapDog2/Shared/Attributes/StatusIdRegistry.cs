@@ -64,7 +64,6 @@ public static class StatusIdRegistry
                 catch (ReflectionTypeLoadException)
                 {
                     // Skip assemblies that can't be loaded
-                    continue;
                 }
             }
 

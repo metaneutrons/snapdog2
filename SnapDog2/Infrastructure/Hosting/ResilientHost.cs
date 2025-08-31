@@ -46,7 +46,6 @@ public partial class ResilientHost(IHost innerHost, ILogger<ResilientHost> logge
 
             // Don't re-throw - let the application exit gracefully
             Environment.ExitCode = 1;
-            return;
         }
         catch (Exception ex) when (IsExpectedStartupException(ex))
         {
@@ -61,7 +60,6 @@ public partial class ResilientHost(IHost innerHost, ILogger<ResilientHost> logge
             }
 
             Environment.ExitCode = 1;
-            return;
         }
         catch (Exception ex)
         {

@@ -167,7 +167,7 @@ public sealed partial class MetadataManager(LibVLC libvlc, ILogger<MetadataManag
         try
         {
             var tracks = media.Tracks;
-            if (tracks == null || tracks.Length == 0)
+            if (tracks.Length == 0)
             {
                 return null;
             }

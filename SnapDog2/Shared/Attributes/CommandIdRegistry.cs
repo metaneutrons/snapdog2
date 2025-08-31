@@ -65,7 +65,6 @@ public static class CommandIdRegistry
                 catch (ReflectionTypeLoadException)
                 {
                     // Skip assemblies that can't be loaded
-                    continue;
                 }
             }
 

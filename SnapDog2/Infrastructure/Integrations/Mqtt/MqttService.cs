@@ -231,7 +231,6 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         catch (ObjectDisposedException)
         {
             // Benign during shutdown
-            return;
         }
         catch (Exception ex)
         {
