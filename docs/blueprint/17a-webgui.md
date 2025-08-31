@@ -1,8 +1,8 @@
-# 24. SnapDog2 Web UI – Architecture & Implementation Blueprint (v3, English)
+# 25. SnapDog2 Web UI – Architecture & Implementation Blueprint (v3, English)
 
 > Goal: A modern .NET web interface fully integrated into the monolithic application, supporting Dark/Light mode, zone control, client status & drag‑and‑drop reassignment, with **no external asset dependencies** (all static assets embedded). Blueprint is AI‑implementable (fine‑grained tasks, code skeletons, tests).
 
-## 24.1. Product Goals & Principles
+## 25.1. Product Goals & Principles
 
 **Goals**
 
@@ -17,7 +17,7 @@
 - No separate frontend repository, no SPA‑only approach (focus on Server Rendering + Progressive Interactivity).
 - No complex theming framework – lightweight design tokens (CSS vars) and accessible components.
 
-## 24.2. Technology Stack & Packaging
+## 25.2. Technology Stack & Packaging
 
 - **Framework:** ASP.NET Core (Razor Components, SSR + interactive server components). No external Node build.
 - **Runtime Model:** UI hosted **in‑process** with the monolith.
@@ -30,20 +30,20 @@
 - **Publish:** Single‑file, trim‑capable, ReadyToRun optional. No external webroot files.
 - **Telemetry:** OpenTelemetry (tracing + metrics), Serilog/ETW, UI events (ZoneMove, VolumeChange) as custom events.
 
-## 24.3. Visual Design & Typography
+## 25.3. Visual Design & Typography
 
-### 24.3.1. UI Layout Structure
+### 25.3.1. UI Layout Structure
 
 The application uses a simple, single-layout design focused on audio control functionality.
 
-#### 24.3.1.1. Main Interface Layout (`/`)
+#### 25.3.1.1. Main Interface Layout (`/`)
 
 - Single-page application with vertical scrolling layout
 - Each zone gets its own dedicated section, stacked vertically
 - No separate routes for zones, clients, or settings
 - Clean, focused interface optimized for audio control
 
-#### 24.3.1.2. Zone Section Components
+#### 25.3.1.2. Zone Section Components
 
 **Zone Header**
 
@@ -75,7 +75,7 @@ The application uses a simple, single-layout design focused on audio control fun
 - Drag-and-drop functionality between zones
 - Real-time visual feedback during drag operations
 
-#### 24.3.1.3. Additional Endpoints
+#### 25.3.1.3. Additional Endpoints
 
 **Status Page (`/status`)**
 
@@ -85,9 +85,9 @@ The application uses a simple, single-layout design focused on audio control fun
 - Telemetry and diagnostic information
 - No configuration editing capabilities (strict env-var based config)
 
-### 24.3.2. Technical Implementation Details
+### 25.3.2. Technical Implementation Details
 
-#### 24.3.2.1. Drag-and-Drop Client Assignment
+#### 25.3.2.1. Drag-and-Drop Client Assignment
 
 **API Integration**
 
@@ -111,7 +111,7 @@ The application uses a simple, single-layout design focused on audio control fun
 - SignalR or polling for real-time state synchronization
 - Smooth animations using CSS transitions
 
-#### 24.3.2.2. Data Fetching Strategy
+#### 25.3.2.2. Data Fetching Strategy
 
 **Playlist Data**
 
@@ -131,9 +131,9 @@ The application uses a simple, single-layout design focused on audio control fun
 - Real-time updates for connection status changes
 - Efficient diff-based UI updates
 
-### 24.3.3. Typography Foundation
+### 25.3.3. Typography Foundation
 
-#### 24.3.3.1. Primary Font: Orbitron
+#### 25.3.3.1. Primary Font: Orbitron
 
 - **Source:** [Google Fonts Orbitron](https://fonts.google.com/specimen/Orbitron)
 - **Character:** Futuristic, geometric sans-serif with distinctive digital/tech aesthetic
@@ -141,31 +141,31 @@ The application uses a simple, single-layout design focused on audio control fun
 - **Usage:** Headers, navigation, zone names, client indexentifiers, button labels
 - **Embedding:** Via Google Fonts CDN or self-hosted for offline capability
 
-#### 24.3.3.2. Secondary Font: System Font Stack
+#### 25.3.3.2. Secondary Font: System Font Stack
 
 - **Fallback:** `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`
 - **Usage:** Body text, descriptions, metadata, secondary information
 - **Rationale:** Optimal readability for longer text content
 
-### 24.3.4. Design Language
+### 25.3.4. Design Language
 
-#### 24.3.4.1. Theme: Modern Audio Control Interface
+#### 25.3.4.1. Theme: Modern Audio Control Interface
 
 - **Aesthetic:** Clean, minimalist with subtle sci-fi/digital influence from Orbitron
 - **Visual Hierarchy:** Strong typography contrast (Orbitron headers vs. system body text)
 - **Spacing:** Generous whitespace, consistent 8px grid system
 - **Interaction:** Smooth transitions, hover states, progressive disclosure
 
-#### 24.3.4.2. Component Styling Principles
+#### 25.3.4.2. Component Styling Principles
 
 - **Zone Cards:** Prominent Orbitron titles, clear status indicators, rounded corners
 - **Client Chips:** Compact Orbitron labels, drag handles, status badges
 - **Controls:** Geometric buttons echoing Orbitron's angular character
 - **Navigation:** Clean Orbitron headers with subtle spacing
 
-### 24.3.5. Color Palette & Dark/Light Mode
+### 25.3.5. Color Palette & Dark/Light Mode
 
-#### 24.3.5.1. Light Mode
+#### 25.3.5.1. Light Mode
 
 ```css
 :root {
@@ -178,7 +178,7 @@ The application uses a simple, single-layout design focused on audio control fun
 }
 ```
 
-## 24.4. Dark Mode
+## 25.4. Dark Mode
 
 ```css
 [data-theme="dark"] {
@@ -191,14 +191,14 @@ The application uses a simple, single-layout design focused on audio control fun
 }
 ```
 
-## 24.5. Semantic Colors
+## 25.5. Semantic Colors
 
 - **Success:** `#10b981` (Green) - Playing state, connected clients
 - **Warning:** `#f59e0b` (Amber) - Buffering, reconnecting
 - **Error:** `#ef4444` (Red) - Disconnected, errors
 - **Info:** `#06b6d4` (Cyan) - Information states
 
-## 24.6. Typography Scale
+## 25.6. Typography Scale
 
 ```css
 .text-display {
@@ -244,30 +244,30 @@ The application uses a simple, single-layout design focused on audio control fun
 }
 ```
 
-## 24.7. Component Visual Guidelines
+## 25.7. Component Visual Guidelines
 
-## 24.8. Zone Cards
+## 25.8. Zone Cards
 
 - Orbitron font for zone names (text-h2)
 - System font for track metadata
 - Rounded corners (8px)
 - Subtle shadows in light mode, borders in dark mode
 
-## 24.9. Client Management
+## 25.9. Client Management
 
 - Orbitron font for client names (text-h3)
 - Compact chips with clear drag affordances
 - Status indicators using semantic colors
 - Smooth drag-and-drop animations
 
-## 24.10. Navigation & Controls
+## 25.10. Navigation & Controls
 
 - Orbitron for primary navigation items
 - Consistent button sizing and spacing
 - Clear focus states for accessibility
 - Hover effects that respect motion preferences
 
-## 24.11. Solution Layout
+## 25.11. Solution Layout
 
 ```plaintext
 SnapDog2.sln
@@ -285,9 +285,9 @@ SnapDog2.sln
 - **Build & CI:** NSwag codegen isolated, UI tests target `/SnapDog2.WebUi`.
 - **Single‑file/Trim:** Assets embedded, no loose wwwroot.
 
-## 24.12. Integration into Monolith (/SnapDog2)
+## 25.12. Integration into Monolith (/SnapDog2)
 
-### 24.12.1. Project References
+### 25.12.1. Project References
 
 In `SnapDog2.csproj`:
 
@@ -299,7 +299,7 @@ In `SnapDog2.csproj`:
 </ItemGroup>
 ```
 
-### 24.12.2. Program.cs (Host)
+### 25.12.2. Program.cs (Host)
 
 **Note:** The WebUi is built as a **Razor Class Library (RCL)** and has **no own Program.cs**. It is mapped only inside the monolith (`/SnapDog2`) via `MapRazorComponents<App>()`.
 
@@ -333,7 +333,7 @@ if (snapDogConfig.Http.WebUiEnabled)
 app.Run();
 ```
 
-### 24.12.3. SnapDog2.WebUi.Assets.csproj
+### 25.12.3. SnapDog2.WebUi.Assets.csproj
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -349,26 +349,26 @@ app.Run();
 </Project>
 ```
 
-## 24.13. Tests
+## 25.13. Tests
 
 - Continue using `/SnapDog2.Tests` but add two test tracks:
   - **bUnit** for Razor component unit tests → reference `/SnapDog2.WebUi`.
   - **Playwright** for E2E tests → launches `SnapDog2` as test host.
 
-## 24.14. Advantages of Project Split
+## 25.14. Advantages of Project Split
 
 - Clear **separation**: host logic ≠ UI ≠ API client ≠ assets.
 - **Clean build**: NSwag codegen decoupled from host.
 - **Testability:** UI & integration tests run isolated.
 - **Deployment** remains simple: all assemblies bundled in single‑file publish.
 
-## 24.15. Folder Reality & Quickstart
+## 25.15. Folder Reality & Quickstart
 
 - **Host project:** `/SnapDog2`
 - **Tests:** `/SnapDog2.Tests`
 - **New projects:** `/SnapDog2.WebUi`, `/SnapDog2.WebUi.ApiClient`, `/SnapDog2.WebUi.Assets`
 
-### 24.15.1. Quickstart
+### 25.15.1. Quickstart
 
 1. Create new projects: `SnapDog2.WebUi` (**Razor Class Library**), `SnapDog2.WebUi.ApiClient` (ClassLib), `SnapDog2.WebUi.Assets` (ClassLib).
 2. Add project references (see 4.1) into `/SnapDog2.csproj`.
@@ -381,18 +381,18 @@ app.Run();
 6. Add first components (`ZoneCard`, `ClientChip`) + embedded CSS (RCL assets).
 7. Run `dotnet run` in `/SnapDog2` → UI available, assets embedded, no external wwwroot.
 
-## 24.16. Next Steps
+## 25.16. Next Steps
 
 - Scaffold projects (`dotnet new classlib` for Assets + ApiClient, `dotnet new razorclasslib` for WebUi).
 - Reference them in `SnapDog2` and extend `Program.cs` with `MapRazorComponents<App>()`.
 - Implement dummy components (`ZoneCard`, `ClientChip`) + embedded CSS.
 - Extend CI build: NSwag codegen + bUnit + Playwright.
 
-## 24.17. Implementation Guide
+## 25.17. Implementation Guide
 
 > **Critical for AI Success**: This section provides exact file contents, commands, and validation steps to ensure reliable AI implementation of the WebUI blueprint.
 
-## 24.18. Project Creation Commands (Exact Sequence)
+## 25.18. Project Creation Commands (Exact Sequence)
 
 **Step 1: Create Projects**
 
@@ -420,7 +420,7 @@ dotnet add SnapDog2/SnapDog2.csproj reference SnapDog2.WebUi.Assets/SnapDog2.Web
 dotnet add SnapDog2.WebUi/SnapDog2.WebUi.csproj reference SnapDog2.WebUi.ApiClient/SnapDog2.WebUi.ApiClient.csproj
 ```
 
-## 24.19. Exact Project File Contents
+## 25.19. Exact Project File Contents
 
 **SnapDog2.WebUi.Assets/SnapDog2.WebUi.Assets.csproj**
 
@@ -523,7 +523,7 @@ dotnet add SnapDog2.WebUi/SnapDog2.WebUi.csproj reference SnapDog2.WebUi.ApiClie
 </Project>
 ```
 
-## 24.20. Required File Structure and Contents
+## 25.20. Required File Structure and Contents
 
 **SnapDog2.WebUi.Assets/Marker.cs**
 
@@ -618,7 +618,7 @@ public static class Marker
 }
 ```
 
-## 24.21. Core Component Skeletons
+## 25.21. Core Component Skeletons
 
 **SnapDog2.WebUi/App.razor**
 
@@ -706,7 +706,7 @@ public static class Marker
 }
 ```
 
-## 24.22. API Client Integration Pattern
+## 25.22. API Client Integration Pattern
 
 **SnapDog2.WebUi.ApiClient/ISnapDogApiClient.cs**
 
@@ -830,7 +830,7 @@ public partial class SnapDogApiClient : ISnapDogApiClient
 }
 ```
 
-## 24.23. Program.cs Integration
+## 25.23. Program.cs Integration
 
 **Add to SnapDog2/Program.cs (after existing services)**
 
@@ -906,7 +906,7 @@ static IAsyncPolicy<HttpResponseMessage> GetTimeoutPolicy()
 }
 ```
 
-## 24.24. Build and Validation Steps
+## 25.24. Build and Validation Steps
 
 **Step 1: Initial Build Test**
 
@@ -943,9 +943,9 @@ ls -la SnapDog2.WebUi.ApiClient/Generated/SnapDogApiClient.cs
 dotnet build SnapDog2.sln --configuration Release
 ```
 
-## 24.25. Implementation Success Factors
+## 25.25. Implementation Success Factors
 
-### 24.25.1. Requirements for AI Success
+### 25.25.1. Requirements for AI Success
 
 1. **Exact project references**: Follow the reference chain exactly as specified
 2. **Embedded assets**: Ensure `GenerateEmbeddedFilesManifest=true` and correct EmbeddedResource pattern
@@ -953,7 +953,7 @@ dotnet build SnapDog2.sln --configuration Release
 4. **API client generation**: NSwag must run after API specification is available
 5. **Component hierarchy**: App.razor → Routes.razor → MainLayout.razor → Pages
 
-### 24.25.2. Common Implementation Failures
+### 25.25.2. Common Implementation Failures
 
 - Missing ManifestEmbeddedFileProvider configuration
 - Incorrect project reference order
@@ -961,7 +961,7 @@ dotnet build SnapDog2.sln --configuration Release
 - Missing AddRazorComponents() service registration
 - Forgetting InteractiveServerComponents configuration
 
-### 24.25.3. Implementation Validation
+### 25.25.3. Implementation Validation
 
 - [ ] All projects build without errors
 - [ ] Assets are properly embedded (check .deps.json for EmbeddedWebRoot)
@@ -973,7 +973,7 @@ dotnet build SnapDog2.sln --configuration Release
 
 This implementation guide provides prescriptive instructions that eliminate common AI implementation failures through exact commands, file contents, and validation steps.
 
-## 24.26. Blueprint Completion
+## 25.26. Blueprint Completion
 
 The SnapDog2 WebUI blueprint is now complete and ready for AI-assisted implementation:
 

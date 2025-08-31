@@ -1,8 +1,8 @@
-# 12. Metrics and Telemetry (Infrastructure Layer)
+# 13. Metrics and Telemetry (Infrastructure Layer)
 
 This chapter details the strategy and implementation for observability within SnapDog2, encompassing metrics, distributed tracing, and correlated logging. The framework used is **OpenTelemetry with OTLP (OpenTelemetry Protocol)** for vendor-neutral telemetry export. SnapDog2 implements only OTLP - the choice of observability backend (Jaeger, SigNoz, Prometheus, etc.) is a deployment concern.
 
-## 12.1. Overview
+## 13.1. Overview
 
 SnapDog2 follows a **vendor-neutral observability approach** using OpenTelemetry Protocol (OTLP). This provides maximum flexibility in choosing observability backends without requiring application code changes. The application exports all three observability signals (traces, metrics, logs) via OTLP to any compatible backend.
 
@@ -24,9 +24,9 @@ The three pillars of observability are:
 * **Metrics:** Quantify performance, resource usage, and operational counts
 * **Correlated Logging:** Link log events to specific traces and spans for simplified debugging
 
-## 12.2. Configuration
+## 13.2. Configuration
 
-### 12.2.1. Environment Variables
+### 13.2.1. Environment Variables
 
 All telemetry configuration uses the `SNAPDOG_TELEMETRY_` prefix:
 
@@ -44,7 +44,7 @@ SNAPDOG_TELEMETRY_OTLP_HEADERS=key1=value1,key2=value2 # Optional authentication
 SNAPDOG_TELEMETRY_OTLP_TIMEOUT=30                     # Default: 30 (seconds)
 ```
 
-### 12.2.2. Backend-Specific Examples
+### 13.2.2. Backend-Specific Examples
 
 **Jaeger:**
 ```bash
@@ -65,9 +65,9 @@ SNAPDOG_TELEMETRY_OTLP_PROTOCOL=grpc
 SNAPDOG_TELEMETRY_OTLP_HEADERS=authorization=Bearer token123
 ```
 
-## 12.3. Implementation
+## 13.3. Implementation
 
-### 12.3.1. TelemetryConfig Class
+### 13.3.1. TelemetryConfig Class
 
 ```csharp
 namespace SnapDog2.Core.Configuration;
@@ -113,7 +113,7 @@ public class OtlpConfig
 }
 ```
 
-### 12.3.2. OpenTelemetry Setup
+### 13.3.2. OpenTelemetry Setup
 
 ```csharp
 // Program.cs - OpenTelemetry configuration
@@ -156,7 +156,7 @@ if (snapDogConfig.Telemetry.Enabled && snapDogConfig.Telemetry.Otlp.Enabled)
 }
 ```
 
-## 12.4. Scope
+## 13.4. Scope
 
 OpenTelemetry instrumentation covers critical application paths:
 
@@ -167,44 +167,44 @@ OpenTelemetry instrumentation covers critical application paths:
   * Manual instrumentation for infrastructure services (`SnapcastService`, `KnxService`, `MqttService`)
 * **Custom Metrics:** Application-specific events and performance indicators
 
-## 12.5. Telemetry Types
+## 13.5. Telemetry Types
 
-### 12.5.1. Traces
+### 13.5.1. Traces
 - **Goal:** Visualize operation flow and duration across components
 - **Implementation:** `System.Diagnostics.ActivitySource` with automatic and manual instrumentation
 - **Export:** OTLP to any compatible backend (Jaeger, SigNoz, etc.)
 - **Sampling:** Configurable via `SNAPDOG_TELEMETRY_SAMPLING_RATE`
 
-### 12.5.2. Metrics
+### 13.5.2. Metrics
 - **Goal:** Quantitative data on application health and performance
 - **Implementation:** `System.Diagnostics.Metrics.Meter` with custom instruments
 - **Export:** OTLP to any compatible backend (Prometheus via collector, SigNoz, etc.)
 - **Instruments:** Counters, histograms, gauges for key application events
 
-### 12.5.3. Logs
+### 13.5.3. Logs
 - **Goal:** Detailed contextual information correlated with traces
 - **Implementation:** `Microsoft.Extensions.Logging.ILogger<T>` with Serilog
 - **Correlation:** Automatic enrichment with `TraceId` and `SpanId`
 - **Export:** Structured logging with trace correlation
 
-## 12.6. Benefits
+## 13.6. Benefits
 
-### 12.6.1. Vendor Neutrality
+### 13.6.1. Vendor Neutrality
 - **Backend Agnostic:** Switch observability platforms without code changes
 - **Future Proof:** Works with emerging OTLP-compatible platforms
 - **Cost Flexibility:** Choose between self-hosted and managed solutions
 
-### 12.6.2. Operational Benefits
+### 13.6.2. Operational Benefits
 - **Unified Configuration:** Single OTLP endpoint for all telemetry signals
 - **Simple Deployment:** No backend-specific configuration in application
 - **Easy Migration:** Change backends by updating deployment configuration
 
-### 12.6.3. Development Experience
+### 13.6.3. Development Experience
 - **Consistent Instrumentation:** Same code works with any backend
 - **Local Development:** Easy to enable/disable observability
 - **Testing:** Mock OTLP endpoints for integration tests
 
-## 12.7. OpenTelemetry Setup (DI / `/Worker/DI/ObservabilityExtensions.cs`)
+## 13.7. OpenTelemetry Setup (DI / `/Worker/DI/ObservabilityExtensions.cs`)
 
 OpenTelemetry pipelines for tracing, metrics, and logging are configured during application startup using Dependency Injection.
 
@@ -390,7 +390,7 @@ public static class ObservabilityExtensions
 }
 ```
 
-## 12.8. Custom Metrics (`IMetricsService` / `OpenTelemetryMetricsService`)
+## 13.8. Custom Metrics (`IMetricsService` / `OpenTelemetryMetricsService`)
 
 Define application-specific metrics using `System.Diagnostics.Metrics.Meter` via a dedicated service abstraction (`IMetricsService`) implemented in `/Infrastructure/Observability`.
 
@@ -500,7 +500,7 @@ public class OpenTelemetryMetricsService : IMetricsService
 
 Inject `IMetricsService` into components (like Cortex.Mediator Behaviors, Infrastructure Services) where metrics need to be recorded.
 
-## 12.9. Manual Tracing Instrumentation
+## 13.9. Manual Tracing Instrumentation
 
 Use the shared `ActivitySource` (`ObservabilityExtensions.SnapDogActivitySource`) to manually create Activities (spans) for important operations not covered by automatic instrumentation. Use `using var activity = _activitySource.StartActivity(...)`, add relevant tags (`activity.SetTag`), record exceptions (`activity.RecordException`), and set status (`activity.SetStatus`).
 
@@ -546,6 +546,6 @@ public partial class SubsonicService : ISubsonicService
 // ... set tags, status, record exceptions based on handler outcome ...
 ```
 
-## 12.10. Logging Correlation
+## 13.10. Logging Correlation
 
 Ensure Serilog (or chosen logging provider) is configured with OpenTelemetry integration (`loggingBuilder.AddOpenTelemetry(...)` in DI setup) and output templates include `{TraceId}` and `{SpanId}`. This automatically links logs to the currently active trace span.

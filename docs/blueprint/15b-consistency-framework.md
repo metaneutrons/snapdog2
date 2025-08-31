@@ -1,10 +1,10 @@
-# 16. b. Command Framework Consistency Framework
+# 17. b. Command Framework Consistency Framework
 
-## 16.1. b.1. Overview
+## 17.1. b.1. Overview
 
 The Command Framework Consistency Framework ensures that all command and status IDs defined in the blueprint (Section 15) are properly implemented across all protocols (API, MQTT, KNX). This framework prevents implementation drift and catches missing features early in the development cycle.
 
-### 16.1.1. b.1.1. Problem Statement
+### 17.1.1. b.1.1. Problem Statement
 
 During recent analysis, we discovered that 6 out of 8 newly added command/status IDs were not implemented across protocols:
 
@@ -15,7 +15,7 @@ During recent analysis, we discovered that 6 out of 8 newly added command/status
 
 This indicates a gap between blueprint specification and actual implementation that needs systematic prevention.
 
-### 16.1.2. b.1.2. Design Principles
+### 17.1.2. b.1.2. Design Principles
 
 1. **Fail Fast**: Catch inconsistencies at build time, not runtime
 2. **Zero Runtime Overhead**: Validation only during testing/CI
@@ -23,9 +23,9 @@ This indicates a gap between blueprint specification and actual implementation t
 4. **Developer Friendly**: Clear error messages and actionable feedback
 5. **Maintainable**: Self-updating as new commands/status are added
 
-## 16.2. b.2. Architecture
+## 17.2. b.2. Architecture
 
-### 16.2.1. b.2.1. Validation Layers
+### 17.2.1. b.2.1. Validation Layers
 
 ```mermaid
 graph TB
@@ -78,7 +78,7 @@ graph TB
     BUILD --> REPORT
 ```
 
-### 16.2.2. b.2.2. Test-Based Validation Strategy
+### 17.2.2. b.2.2. Test-Based Validation Strategy
 
 The consistency framework is implemented as **unit tests** rather than runtime services for the following reasons:
 
@@ -97,9 +97,9 @@ The consistency framework is implemented as **unit tests** rather than runtime s
 - Health check complexity for static validation
 - Unnecessary production dependencies
 
-## 16.3. b.3. Consistency Test Categories
+## 17.3. b.3. Consistency Test Categories
 
-### 16.3.1. b.3.1. Core Registry Tests
+### 17.3.1. b.3.1. Core Registry Tests
 
 **Purpose**: Validate the integrity and consistency of the command/status registries themselves.
 
@@ -116,11 +116,11 @@ The consistency framework is implemented as **unit tests** rather than runtime s
 | `AllCommandIds_FollowNamingConvention` | UPPER_CASE_UNDERSCORE format | Naming consistency |
 | `AllStatusIds_FollowNamingConvention` | UPPER_CASE_UNDERSCORE format | Naming consistency |
 
-### 16.3.2. b.3.2. Protocol Implementation Tests
+### 17.3.2. b.3.2. Protocol Implementation Tests
 
 **Purpose**: Validate that each protocol properly implements all applicable commands and status notifications.
 
-#### 16.3.2.1. b.3.2.1. API Protocol Tests
+#### 17.3.2.1. b.3.2.1. API Protocol Tests
 
 | Test Name | Description | Validation |
 |:----------|:------------|:-----------|
@@ -133,7 +133,7 @@ The consistency framework is implemented as **unit tests** rather than runtime s
 | `ApiControllers_HandleAllClientCommands` | Client commands in ClientsController | Controller organization |
 | `ApiControllers_HandleAllGlobalStatus` | Global status in SystemController | Controller organization |
 
-#### 16.3.2.2. b.3.2.2. MQTT Protocol Tests
+#### 17.3.2.2. b.3.2.2. MQTT Protocol Tests
 
 | Test Name | Description | Validation |
 |:----------|:------------|:-----------|
@@ -145,7 +145,7 @@ The consistency framework is implemented as **unit tests** rather than runtime s
 | `MqttTopicStructure_FollowsConventions` | Hierarchical topic naming | Topic naming consistency |
 | `MqttRetainedMessages_ConfiguredCorrectly` | Status topics use retained messages | Retention policy validation |
 
-#### 16.3.2.3. b.3.2.3. KNX Protocol Tests
+#### 17.3.2.3. b.3.2.3. KNX Protocol Tests
 
 | Test Name | Description | Validation |
 |:----------|:------------|:-----------|
@@ -157,7 +157,7 @@ The consistency framework is implemented as **unit tests** rather than runtime s
 | `KnxGroupAddresses_AreUnique` | No duplicate group addresses | Address uniqueness |
 | `KnxCommandHandling_SupportsAllMappedCommands` | KNX service handles mapped commands | Command processing validation |
 
-### 16.3.3. b.3.3. Cross-Protocol Consistency Tests
+### 17.3.3. b.3.3. Cross-Protocol Consistency Tests
 
 **Purpose**: Validate consistency across all protocols and identify gaps.
 
@@ -169,9 +169,9 @@ The consistency framework is implemented as **unit tests** rather than runtime s
 | `NewlyAddedFeatures_AreTracked` | Recent additions identified | Implementation tracking |
 | `ImplementationGaps_AreReported` | Missing implementations listed | Gap reporting |
 
-## 16.4. b.4. Implementation Strategy
+## 17.4. b.4. Implementation Strategy
 
-### 16.4.1. b.4.1. Test Organization
+### 17.4.1. b.4.1. Test Organization
 
 ```
 SnapDog2.Tests/
@@ -186,9 +186,9 @@ SnapDog2.Tests/
     └── ConsistencyTestHelpers.cs                    # Shared test utilities
 ```
 
-### 16.4.2. b.4.2. Test Execution Strategy
+### 17.4.2. b.4.2. Test Execution Strategy
 
-#### 16.4.2.1. b.4.2.1. Local Development
+#### 17.4.2.1. b.4.2.1. Local Development
 
 ```bash
 # Run all consistency tests
@@ -203,7 +203,7 @@ dotnet test --filter "Category=KnxConsistency"
 dotnet test --logger "trx;LogFileName=consistency-report.trx"
 ```
 
-#### 16.4.2.2. b.4.2.2. CI/CD Integration
+#### 17.4.2.2. b.4.2.2. CI/CD Integration
 
 ```yaml
 # GitHub Actions / Azure DevOps
@@ -220,9 +220,9 @@ dotnet test --logger "trx;LogFileName=consistency-report.trx"
     path: consistency-report.trx
 ```
 
-### 16.4.3. b.4.3. Error Reporting Strategy
+### 17.4.3. b.4.3. Error Reporting Strategy
 
-#### 16.4.3.1. b.4.3.1. Test Failure Messages
+#### 17.4.3.1. b.4.3.1. Test Failure Messages
 
 ```csharp
 Assert.That(missingCommands, Is.Empty,
@@ -231,7 +231,7 @@ Assert.That(missingCommands, Is.Empty,
     $"{GenerateEndpointSuggestions(missingCommands)}");
 ```
 
-#### 16.4.3.2. b.4.3.2. Implementation Suggestions
+#### 17.4.3.2. b.4.3.2. Implementation Suggestions
 
 ```csharp
 private string GenerateEndpointSuggestions(IEnumerable<string> missingCommands)
@@ -241,7 +241,7 @@ private string GenerateEndpointSuggestions(IEnumerable<string> missingCommands)
 }
 ```
 
-### 16.4.4. b.4.4. Tolerance for New Features
+### 17.4.4. b.4.4. Tolerance for New Features
 
 The framework includes tolerance for recently added features that may not be fully implemented:
 
@@ -264,9 +264,9 @@ private bool IsRecentlyAddedFeature(string featureId)
 - **Tracking**: Progress tracking for incomplete implementations
 - **Documentation**: Clear TODO items for missing implementations
 
-## 16.5. b.5. Reporting and Metrics
+## 17.5. b.5. Reporting and Metrics
 
-### 16.5.1. b.5.1. Consistency Metrics
+### 17.5.1. b.5.1. Consistency Metrics
 
 | Metric | Description | Target |
 |:-------|:------------|:-------|
@@ -276,9 +276,9 @@ private bool IsRecentlyAddedFeature(string featureId)
 | **KNX Coverage** | (KNX Support / KNX-Suitable Features) × 100 | ≥ 90% |
 | **Registry Integrity** | All registered features have implementations | 100% |
 
-### 16.5.2. b.5.2. Report Generation
+### 17.5.2. b.5.2. Report Generation
 
-#### 16.5.2.1. b.5.2.1. Console Output
+#### 17.5.2.1. b.5.2.1. Console Output
 
 ```
 Command Framework Consistency Report
@@ -299,7 +299,7 @@ Recently Added Features (Grace Period):
 └── All missing items are from recent blueprint additions (commit ff7db9d)
 ```
 
-#### 16.5.2.2. b.5.2.2. Markdown Report Generation
+#### 17.5.2.2. b.5.2.2. Markdown Report Generation
 
 ```csharp
 public string GenerateMarkdownReport()
@@ -323,7 +323,7 @@ public string GenerateMarkdownReport()
 }
 ```
 
-### 16.5.3. b.5.3. Integration with Implementation Status Document
+### 17.5.3. b.5.3. Integration with Implementation Status Document
 
 The consistency framework automatically updates the implementation status document:
 
@@ -344,9 +344,9 @@ public void ImplementationStatusDocument_ShouldReflectActualState()
 }
 ```
 
-## 16.6. b.6. Maintenance and Evolution
+## 17.6. b.6. Maintenance and Evolution
 
-### 16.6.1. b.6.1. Adding New Commands/Status
+### 17.6.1. b.6.1. Adding New Commands/Status
 
 When new commands or status are added to the blueprint:
 
@@ -356,7 +356,7 @@ When new commands or status are added to the blueprint:
 4. **Grace Period**: New features get 2-week implementation window
 5. **Documentation Update**: Implementation status document reflects changes
 
-### 16.6.2. b.6.2. Protocol Evolution
+### 17.6.2. b.6.2. Protocol Evolution
 
 When protocols evolve (new endpoints, topics, group addresses):
 
@@ -365,7 +365,7 @@ When protocols evolve (new endpoints, topics, group addresses):
 3. **Validation Rules**: Adjust validation rules for new protocol features
 4. **Backward Compatibility**: Ensure existing implementations remain valid
 
-### 16.6.3. b.6.3. Continuous Improvement
+### 17.6.3. b.6.3. Continuous Improvement
 
 The consistency framework itself evolves based on:
 
@@ -374,23 +374,23 @@ The consistency framework itself evolves based on:
 - **Developer Feedback**: Improve error messages and suggestions
 - **Performance**: Optimize test execution time
 
-## 16.7. b.7. Benefits and ROI
+## 17.7. b.7. Benefits and ROI
 
-### 16.7.1. b.7.1. Immediate Benefits
+### 17.7.1. b.7.1. Immediate Benefits
 
 - **Catch Missing Implementations**: Automatically detect the 6 missing items found manually
 - **Prevent Regression**: Ensure new features don't break existing consistency
 - **Developer Productivity**: Clear guidance on what needs implementation
 - **Quality Assurance**: Systematic validation of blueprint adherence
 
-### 16.7.2. b.7.2. Long-term Benefits
+### 17.7.2. b.7.2. Long-term Benefits
 
 - **Reduced Maintenance**: Automatic detection prevents manual audits
 - **Faster Development**: Clear implementation requirements
 - **Better Documentation**: Always up-to-date implementation status
 - **Architectural Integrity**: Maintain clean separation between protocols
 
-### 16.7.3. b.7.3. Risk Mitigation
+### 17.7.3. b.7.3. Risk Mitigation
 
 - **Implementation Drift**: Prevent protocols from diverging
 - **Feature Gaps**: Catch missing functionality early

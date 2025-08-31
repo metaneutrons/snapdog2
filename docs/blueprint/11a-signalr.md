@@ -1,6 +1,6 @@
-# 11a. SignalR Real-Time Communication
+# 11. SignalR Real-Time Communication
 
-## 11a.1. SignalR Design Philosophy
+## 11.1. SignalR Design Philosophy
 
 The SnapDog2 SignalR implementation provides **real-time bidirectional communication** between the server and connected clients, enabling immediate notification of state changes without polling. It serves as the primary mechanism for building responsive user interfaces and real-time monitoring applications.
 
@@ -14,7 +14,7 @@ Key design principles:
 4. **Lightweight Payloads**: Events carry minimal, focused data to reduce bandwidth and improve responsiveness.
 5. **Hub-Based Architecture**: Uses ASP.NET Core SignalR hubs for connection management and event broadcasting.
 
-## 11a.2. Connection and Authentication
+## 11.2. Connection and Authentication
 
 SignalR connections follow the same authentication model as the REST API:
 
@@ -23,6 +23,7 @@ SignalR connections follow the same authentication model as the REST API:
 * **Hub Endpoint**: SignalR hub is available at `/hubs/snapdog` relative to the base server URL.
 
 Example JavaScript connection:
+
 ```javascript
 const connection = new signalR.HubConnectionBuilder()
     .withUrl("/hubs/snapdog", {
@@ -31,22 +32,25 @@ const connection = new signalR.HubConnectionBuilder()
     .build();
 ```
 
-## 11a.3. Event Categories
+## 11.3. Event Categories
 
 SignalR events are organized into three main categories corresponding to the Command Framework structure:
 
-### 11a.3.1. Zone Events
+### 11.3.1. Zone Events
+
 Real-time notifications for zone state changes affecting audio playback and control.
 
-### 11a.3.2. Client Events  
+### 11.3.2. Client Events
+
 Real-time notifications for Snapcast client state changes affecting individual audio endpoints.
 
-### 11a.3.3. System Events
+### 11.3.3. System Events
+
 Real-time notifications for system-wide status changes and error conditions.
 
-## 11a.4. SignalR Event Specification
+## 11.4. SignalR Event Specification
 
-### 11a.4.1. Zone Events
+### 11.4.1. Zone Events
 
 Events related to audio zone state changes. All zone events include the affected zone index (1-based).
 
@@ -61,7 +65,7 @@ Events related to audio zone state changes. All zone events include the affected
 | `ZoneShuffleChanged` | `ZONE_SHUFFLE_STATUS` | Shuffle mode changes | `{ zoneIndex: int, shuffled: bool }` | Shuffle enabled/disabled |
 | `ZonePlaylistChanged` | `ZONE_PLAYLIST_STATUS` | Active playlist changes | `{ zoneIndex: int, playlistIndex: int }` | Current playlist index |
 
-### 11a.4.2. Client Events
+### 11.4.2. Client Events
 
 Events related to Snapcast client state changes. All client events include the affected client index.
 
@@ -73,7 +77,7 @@ Events related to Snapcast client state changes. All client events include the a
 | `ClientZoneChanged` | `CLIENT_ZONE_STATUS` | Client zone assignment | `{ clientIndex: int, zoneIndex: int? }` | Zone assignment (null = unassigned) |
 | `ClientConnected` | `CLIENT_CONNECTED_STATUS` | Client connection state | `{ clientIndex: int, connected: bool }` | Connection status |
 
-### 11a.4.3. System Events
+### 11.4.3. System Events
 
 Events related to system-wide status and error conditions.
 
@@ -82,33 +86,42 @@ Events related to system-wide status and error conditions.
 | `SystemStatusChanged` | `SYSTEM_STATUS` | System status changes | `{ status: string, timestamp: string }` | System online/offline |
 | `ErrorOccurred` | `ERROR_STATUS` | System errors | `{ error: string, timestamp: string, severity: string }` | Error notifications |
 
-## 11a.5. Event Exclusions
+## 11.5. Event Exclusions
 
 The following status types are **explicitly excluded** from SignalR events for performance and architectural reasons:
 
-### 11a.5.1. Static Configuration Data
-- `VERSION_INFO`: Software version information (static)
-- `ZONE_COUNT`: Total zone count (configuration-based)
-- `CLIENT_COUNT`: Total client count (configuration-based)
+### 11.5.1. Static Configuration Data
 
-### 11a.5.2. Bulk Data Collections
-- `ZONE_STATES`: Complete zone list (use individual zone events)
-- `CLIENT_STATES`: Complete client list (use individual client events)
-- `MEDIA_PLAYLISTS`: Playlist collections (large, infrequently changed)
-- `MEDIA_PLAYLIST_INFO`: Detailed playlist data (large payloads)
-- `MEDIA_PLAYLIST_TRACKS`: Track listings (large collections)
+* `VERSION_INFO`: Software version information (static)
 
-### 11a.5.3. Alternative Notification Paths
-- `COMMAND_STATUS`: Command processing status (has dedicated error handling)
-- `SERVER_STATS`: Performance statistics (polling-appropriate)
+* `ZONE_COUNT`: Total zone count (configuration-based)
+* `CLIENT_COUNT`: Total client count (configuration-based)
 
-### 11a.5.4. Media Browsing Data
-- `MEDIA_TRACK_INFO`: Individual track details (on-demand retrieval)
-- Media browsing endpoints (large, hierarchical data)
+### 11.5.2. Bulk Data Collections
 
-## 11a.6. Implementation Architecture
+* `ZONE_STATES`: Complete zone list (use individual zone events)
 
-### 11a.6.1. Hub Structure
+* `CLIENT_STATES`: Complete client list (use individual client events)
+* `MEDIA_PLAYLISTS`: Playlist collections (large, infrequently changed)
+* `MEDIA_PLAYLIST_INFO`: Detailed playlist data (large payloads)
+* `MEDIA_PLAYLIST_TRACKS`: Track listings (large collections)
+
+### 11.5.3. Alternative Notification Paths
+
+* `COMMAND_STATUS`: Command processing status (has dedicated error handling)
+
+* `SERVER_STATS`: Performance statistics (polling-appropriate)
+
+### 11.5.4. Media Browsing Data
+
+* `MEDIA_TRACK_INFO`: Individual track details (on-demand retrieval)
+
+* Media browsing endpoints (large, hierarchical data)
+
+## 11.6. Implementation Architecture
+
+### 11.6.1. Hub Structure
+
 ```csharp
 public class SnapDogHub : Hub
 {
@@ -117,21 +130,25 @@ public class SnapDogHub : Hub
 }
 ```
 
-### 11a.6.2. Event Broadcasting
+### 11.6.2. Event Broadcasting
+
 Events are broadcast to all connected clients using the hub context:
+
 ```csharp
-await _hubContext.Clients.All.SendAsync("ZoneVolumeChanged", new { 
-    zoneIndex = 1, 
-    volume = 75 
+await _hubContext.Clients.All.SendAsync("ZoneVolumeChanged", new {
+    zoneIndex = 1,
+    volume = 75
 });
 ```
 
-### 11a.6.3. Notification Integration
+### 11.6.3. Notification Integration
+
 SignalR events are triggered by the same notification handlers that process MQTT and other integrations, ensuring consistency across all notification channels.
 
-## 11a.7. Client Implementation Examples
+## 11.7. Client Implementation Examples
 
-### 11a.7.1. JavaScript/TypeScript
+### 11.7.1. JavaScript/TypeScript
+
 ```javascript
 // Connection setup
 const connection = new signalR.HubConnectionBuilder()
@@ -155,10 +172,11 @@ connection.on("ZonePlaybackChanged", (data) => {
 await connection.start();
 ```
 
-### 11a.7.2. C# Client
+### 11.7.2. C# Client
+
 ```csharp
-var connection = new HubConnectionBuilder()
-    .WithUrl("http://localhost:5000/hubs/snapdog", options => {
+var connection = new HubConnectionBui glder()
+    .WithUrl("http://localhost:5555/hubs/snapdog", options => {
         options.Headers.Add("X-API-Key", "your-api-key");
     })
     .Build();
@@ -170,42 +188,55 @@ connection.On<object>("ZoneVolumeChanged", (data) => {
 await connection.StartAsync();
 ```
 
-## 11a.8. Performance Considerations
+## 11.8. Performance Considerations
 
-### 11a.8.1. Event Frequency
-- **High Frequency**: Track progress updates (every second during playback)
-- **Medium Frequency**: Volume changes, playback state changes
-- **Low Frequency**: Zone assignments, client connections, system status
+### 11.8.1. Event Frequency
 
-### 11a.8.2. Bandwidth Optimization
-- Minimal payload sizes (only essential data)
-- No redundant information in events
-- Efficient JSON serialization
+* **High Frequency**: Track progress updates (every second during playback)
 
-### 11a.8.3. Connection Management
-- Automatic reconnection handling
-- Connection cleanup on client disconnect
-- Scalable to multiple concurrent clients
+* **Medium Frequency**: Volume changes, playback state changes
+* **Low Frequency**: Zone assignments, client connections, system status
 
-## 11a.9. Error Handling
+### 11.8.2. Bandwidth Optimization
 
-### 11a.9.1. Connection Errors
-- Authentication failures return 401 Unauthorized
-- Network issues trigger automatic reconnection
-- Hub exceptions are logged but don't disconnect clients
+* Minimal payload sizes (only essential data)
 
-### 11a.9.2. Event Delivery
-- Events are fire-and-forget (no acknowledgment required)
-- Failed deliveries are logged but don't block other clients
-- No event queuing for disconnected clients
+* No redundant information in events
+* Efficient JSON serialization
 
-## 11a.10. Future Enhancements
+### 11.8.3. Connection Management
 
-### 11a.10.1. Selective Subscriptions
+* Automatic reconnection handling
+
+* Connection cleanup on client disconnect
+* Scalable to multiple concurrent clients
+
+## 11.9. Error Handling
+
+### 11.9.1. Connection Errors
+
+* Authentication failures return 401 Unauthorized
+
+* Network issues trigger automatic reconnection
+* Hub exceptions are logged but don't disconnect clients
+
+### 11.9.2. Event Delivery
+
+* Events are fire-and-forget (no acknowledgment required)
+
+* Failed deliveries are logged but don't block other clients
+* No event queuing for disconnected clients
+
+## 11.10. Future Enhancements
+
+### 11.10.1. Selective Subscriptions
+
 Future versions may support client-specific event subscriptions to reduce bandwidth for clients interested in specific zones or event types.
 
-### 11a.10.2. Event History
+### 11.10.2. Event History
+
 Potential addition of recent event history for newly connected clients to synchronize state without full API calls.
 
-### 11a.10.3. Bidirectional Commands
+### 11.10.3. Bidirectional Commands
+
 While currently server-to-client only, future versions may support client-to-server command execution via SignalR methods.

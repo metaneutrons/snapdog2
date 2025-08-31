@@ -1,20 +1,20 @@
-# 23. Command-Status Flow Pattern -- Updating State Values
+# 24. Command-Status Flow Pattern -- Updating State Values
 
-## 23.1. Overview
+## 24.1. Overview
 
 The Command-Status Flow Pattern is a robust, event-driven architectural pattern that ensures eventual consistency and single-source-of-truth semantics across distributed systems. This pattern decouples command execution from state management and integration publishing, creating a resilient system that accurately reflects the real state of external systems.
 
-## 23.2. Pattern Definition
+## 24.2. Pattern Definition
 
-### 23.2.1. Core Flow
+### 24.2.1. Core Flow
 
 ```plaintext
 Command → Service Action → External System → Notification → Storage Update → Integration Publishing
 ```
 
-### 23.2.2. Detailed Breakdown
+### 24.2.2. Detailed Breakdown
 
-#### 23.2.2.1. Command (Input Layer)
+#### 24.2.2.1. Command (Input Layer)
 
 **Definition**: A request to change system state, originating from any integration point.
 
@@ -32,7 +32,7 @@ Command → Service Action → External System → Notification → Storage Upda
 - `SetZoneMuteCommand(zoneIndex=2, muted=true)`
 - `PlayTrackCommand(zoneIndex=1, trackIndex=2)`
 
-#### 23.2.2.2. Service Action (Command Processing)
+#### 24.2.2.2. Service Action (Command Processing)
 
 **Definition**: The business logic that translates commands into external system operations.
 
@@ -53,7 +53,7 @@ Command → Service Action → External System → Notification → Storage Upda
 - Error handling and logging
 - Result reporting
 
-#### 23.2.2.3. External System (State Authority)
+#### 24.2.2.3. External System (State Authority)
 
 **Definition**: The authoritative source of truth for specific domain state.
 
@@ -70,7 +70,7 @@ Command → Service Action → External System → Notification → Storage Upda
 - Snapcast Server (audio client state)
 - LibVLC (media playback state)
 
-#### 23.2.2.4. Notification (Event Layer)
+#### 24.2.2.4. Notification (Event Layer)
 
 **Definition**: Asynchronous events emitted by external systems when state changes occur.
 
@@ -89,7 +89,7 @@ Command → Service Action → External System → Notification → Storage Upda
 - Error notifications
 - Connection status changes
 
-#### 23.2.2.5. Storage Update (State Synchronization)
+#### 24.2.2.5. Storage Update (State Synchronization)
 
 **Definition**: The process of updating internal storage to reflect confirmed external system state.
 
@@ -107,7 +107,7 @@ Command → Service Action → External System → Notification → Storage Upda
 - Zone state (playback, track, playlist)
 - System state (connection status, errors)
 
-#### 23.2.2.6. Integration Publishing (Output Layer)
+#### 24.2.2.6. Integration Publishing (Output Layer)
 
 **Definition**: Broadcasting confirmed state changes to all integration endpoints.
 
@@ -126,41 +126,41 @@ Command → Service Action → External System → Notification → Storage Upda
 - REST API caches
 - Metrics systems
 
-## 23.3. Architectural Benefits
+## 24.3. Architectural Benefits
 
-### 23.3.1. Single Source of Truth
+### 24.3.1. Single Source of Truth
 
 - Internal storage reflects only confirmed external state
 - All integrations receive identical, consistent data
 - No phantom states or race conditions
 - Clear audit trail of actual vs requested changes
 
-### 23.3.2. Eventually Consistent
+### 24.3.2. Eventually Consistent
 
 - System converges to correct state regardless of command failures
 - Handles network partitions and temporary failures gracefully
 - Self-healing through external system notifications
 - Resilient to integration endpoint failures
 
-### 23.3.3. Decoupled Architecture
+### 24.3.3. Decoupled Architecture
 
 - Commands don't directly affect integrations
 - External systems operate independently
 - Integration changes don't affect core logic
 - Easy to add/remove integration endpoints
 
-### 23.3.4. Error Resilience
+### 24.3.4. Error Resilience
 
 - Failed commands don't pollute integration state
 - External system rejections are handled naturally
 - Integration failures don't affect core functionality
 - Clear separation of concerns for debugging
 
-## 23.4. Implementation Examples
+## 24.4. Implementation Examples
 
-### 23.4.1. Example 1: Snapcast Server Integration
+### 24.4.1. Example 1: Snapcast Server Integration
 
-#### 23.4.1.1. Scenario: User sets client volume via API
+#### 24.4.1.1. Scenario: User sets client volume via API
 
 ```mermaid
 sequenceDiagram
@@ -194,7 +194,7 @@ sequenceDiagram
     end
 ```
 
-#### 23.4.1.2. Code Implementation
+#### 24.4.1.2. Code Implementation
 
 **Command Handler**:
 
@@ -258,7 +258,7 @@ public class SmartMqttNotificationHandlers : INotificationHandler<ClientVolumeSt
 }
 ```
 
-#### 23.4.1.3. Edge Cases Handled
+#### 24.4.1.3. Edge Cases Handled
 
 **Volume Clamping**:
 
@@ -280,9 +280,9 @@ Storage: Unchanged
 Integrations: No updates (correct behavior)
 ```
 
-### 23.4.2. Example 2: LibVLC Integration
+### 24.4.2. Example 2: LibVLC Integration
 
-#### 23.4.2.1. Scenario: Zone playback control via KNX
+#### 24.4.2.1. Scenario: Zone playback control via KNX
 
 ```mermaid
 sequenceDiagram
@@ -314,7 +314,7 @@ sequenceDiagram
     end
 ```
 
-#### 23.4.2.2. Code Implementation
+#### 24.4.2.2. Code Implementation
 
 **Command Handler**:
 
@@ -358,7 +358,7 @@ public class LibVlcEventNotificationHandler : INotificationHandler<LibVlcPlaybac
 }
 ```
 
-#### 23.4.2.3. Complex Scenario: Track Change with Metadata
+#### 24.4.2.3. Complex Scenario: Track Change with Metadata
 
 ```mermaid
 sequenceDiagram
@@ -401,9 +401,9 @@ sequenceDiagram
     end
 ```
 
-## 23.5. Pattern Variations
+## 24.5. Pattern Variations
 
-### 23.5.1. Immediate Response Pattern
+### 24.5.1. Immediate Response Pattern
 
 For commands requiring immediate feedback (UI responsiveness):
 
@@ -428,7 +428,7 @@ public async Task<Result> Handle(SetClientVolumeCommand request, CancellationTok
 }
 ```
 
-### 23.5.2. Batch Operation Pattern
+### 24.5.2. Batch Operation Pattern
 
 For operations affecting multiple entities:
 
@@ -451,7 +451,7 @@ public async Task<Result> Handle(SetZoneVolumeCommand request, CancellationToken
 }
 ```
 
-### 23.5.3. Compensation Pattern
+### 24.5.3. Compensation Pattern
 
 For operations requiring rollback:
 
@@ -488,9 +488,9 @@ public async Task<Result> Handle(SynchronizeZoneCommand request, CancellationTok
 }
 ```
 
-## 23.6. Testing Strategies
+## 24.6. Testing Strategies
 
-### 23.6.1. Unit Testing Commands
+### 24.6.1. Unit Testing Commands
 
 ```csharp
 [Test]
@@ -511,7 +511,7 @@ public async Task SetClientVolumeCommand_Should_CallSnapcastClient()
 }
 ```
 
-### 23.6.2. Integration Testing Flow
+### 24.6.2. Integration Testing Flow
 
 ```csharp
 [Test]
@@ -534,7 +534,7 @@ public async Task VolumeChangeFlow_Should_UpdateStorageAndPublishToIntegrations(
 }
 ```
 
-### 23.6.3. End-to-End Testing
+### 24.6.3. End-to-End Testing
 
 ```csharp
 [Test]
@@ -567,46 +567,46 @@ public async Task CompleteVolumeChangeFlow_Should_PropagateToAllIntegrations()
 }
 ```
 
-## 23.7. Migration Strategy
+## 24.7. Migration Strategy
 
-### 23.7.1. Phase 1: Identify Command Handlers
+### 24.7.1. Phase 1: Identify Command Handlers
 
 1. Audit existing command handlers
 2. Identify handlers that directly update storage
 3. Identify handlers that directly publish to integrations
 4. Create migration priority list
 
-### 23.7.2. Phase 2: Implement Event Handlers
+### 24.7.2. Phase 2: Implement Event Handlers
 
 1. Create notification handlers for external system events
 2. Implement storage update logic
 3. Add integration publishing triggers
 4. Test event flow independently
 
-### 23.7.3. Phase 3: Refactor Command Handlers
+### 24.7.3. Phase 3: Refactor Command Handlers
 
 1. Remove storage updates from command handlers
 2. Remove integration publishing from command handlers
 3. Ensure commands only interact with external systems
 4. Update unit tests
 
-### 23.7.4. Phase 4: Validation and Cleanup
+### 24.7.4. Phase 4: Validation and Cleanup
 
 1. End-to-end testing of complete flows
 2. Performance testing of event-driven architecture
 3. Remove obsolete direct integration code
 4. Update documentation and training materials
 
-## 23.8. Monitoring and Observability
+## 24.8. Monitoring and Observability
 
-### 23.8.1. Key Metrics
+### 24.8.1. Key Metrics
 
 - **Command Success Rate**: Percentage of commands successfully executed
 - **Event Processing Latency**: Time from external notification to storage update
 - **Integration Publishing Latency**: Time from storage update to integration delivery
 - **Storage Consistency**: Comparison between external system state and internal storage
 
-### 23.8.2. Logging Strategy
+### 24.8.2. Logging Strategy
 
 ```csharp
 // Command execution
@@ -630,7 +630,7 @@ _logger.LogInformation("Published {EntityType} {EntityId} {Property} change to {
     entityType, entityId, property, integrationType);
 ```
 
-### 23.8.3. Health Checks
+### 24.8.3. Health Checks
 
 ```csharp
 public class CommandStatusFlowHealthCheck : IHealthCheck
@@ -659,7 +659,7 @@ public class CommandStatusFlowHealthCheck : IHealthCheck
 }
 ```
 
-## 23.9. Conclusion
+## 24.9. Conclusion
 
 The Command-Status Flow Pattern provides a robust, scalable, and maintainable architecture for managing state changes across distributed systems. By decoupling command execution from state management and integration publishing, this pattern ensures eventual consistency, improves error resilience, and simplifies system maintenance.
 

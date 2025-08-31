@@ -1,8 +1,8 @@
-# 19. Zone Commands Implementation
+# 20. Zone Commands Implementation
 
 This document continues the Cortex.Mediator implementation with detailed Zone Commands.
 
-## 19.1. Volume and Mute Commands
+## 20.1. Volume and Mute Commands
 
 ```csharp
 // /Server/Features/Zones/Commands/SetZoneVolumeCommand.cs
@@ -113,7 +113,7 @@ public record ToggleZoneMuteCommand : ICommand<Result>
 }
 ```
 
-## 19.2. Track Management Commands
+## 20.2. Track Management Commands
 
 ```csharp
 // /Server/Features/Zones/Commands/TrackCommands.cs
@@ -214,7 +214,7 @@ public record ToggleTrackRepeatCommand : ICommand<Result>
 }
 ```
 
-## 19.3. Playlist Management Commands
+## 20.3. Playlist Management Commands
 
 ```csharp
 // /Server/Features/Zones/Commands/PlaylistCommands.cs
@@ -357,7 +357,7 @@ public record TogglePlaylistRepeatCommand : ICommand<Result>
 }
 ```
 
-## 19.4. Zone Command Validators
+## 20.4. Zone Command Validators
 
 ```csharp
 // /Server/Features/Zones/Validators/ZoneCommandValidators.cs
@@ -482,7 +482,7 @@ public class SetPlaylistCommandValidator : AbstractValidator<SetPlaylistCommand>
 }
 ```
 
-## 19.5. Zone Command Handlers
+## 20.5. Zone Command Handlers
 
 ```csharp
 // /Server/Features/Zones/Handlers/SetZoneVolumeCommandHandler.cs

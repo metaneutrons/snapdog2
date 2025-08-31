@@ -1,6 +1,6 @@
-# 15. MQTT Integration
+# 16. MQTT Integration
 
-## 15.1. Topic Structure
+## 16.1. Topic Structure
 
 snapdog/
 ├── system/
@@ -58,7 +58,7 @@ snapdog/
     ├── zone                       # 1 (current zone)
     └── zones/set                   # 2 (assign to zone)
 
-## 15.2. Status Id & Command Id Mapping
+## 16.2. Status Id & Command Id Mapping
 
 **Note:** Some Command/Status IDs from the framework are intentionally NOT mapped to MQTT topics:
 
@@ -70,7 +70,7 @@ snapdog/
 - `CLIENT_COMMAND_STATUS` (Status) - Command success/failure inferred from state changes
 - `CLIENT_COMMAND_ERROR` (Status) - Command success/failure inferred from state changes
 
-### 15.2.1. System Level
+### 16.2.1. System Level
 
 | MQTT Topic       | Command/Status ID | Type   | Description                 |
 |------------------|-------------------|--------|-----------------------------|
@@ -79,7 +79,7 @@ snapdog/
 | `system/error`   | `SYSTEM_ERROR`    | Status | System error information    |
 | `system/stats`   | `SERVER_STATS`    | Status | Server performance stats    |
 
-### 15.2.2. Zone Level
+### 16.2.2. Zone Level
 
 | MQTT Topic | Command/Status ID | Type | Description |
 |------------|-------------------|------|-------------|
@@ -132,7 +132,7 @@ snapdog/
 | `zones/{index}/play/track` | `TRACK_PLAY_INDEX` | Command | Play specific track |
 | `zones/{index}/play/url` | `TRACK_PLAY_URL` | Command | Play direct URL stream |
 
-### 15.2.3. Client Level
+### 16.2.3. Client Level
 
 | MQTT Topic | Command/Status ID | Type | Description |
 |------------|------------------|------|-------------|

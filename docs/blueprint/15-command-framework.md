@@ -1,6 +1,6 @@
-# 14. Command Framework
+# 15. Command Framework
 
-## 14.1. Overview of Command Structure
+## 15.1. Overview of Command Structure
 
 The command framework provides a unified approach to controlling SnapDog2 across different communication protocols. It defines the **logical commands (actions) and status information (state)** required by the system, independent of the specific implementation (MQTT, KNX, API, Cortex.Mediator). This definition serves as the canonical specification for system interactions.
 
@@ -25,9 +25,9 @@ For each level, this section defines:
 * **Cortex.Mediator:** Conceptual commands map to Cortex.Mediator `ICommand<Result<T>>` or `IQuery<Result<T>>` objects, while status updates correspond to Cortex.Mediator `INotification` publications handled by relevant infrastructure adapters. See Section 16 for Cortex.Mediator implementation details.
 * **Configuration:** MQTT Topic structures and KNX Group Addresses are configurable via environment variables detailed in Section 10. The tables below list the default relative topic paths and environment variable *suffixes*.
 
-## 14.2. Global Commands and Status
+## 15.2. Global Commands and Status
 
-### 14.2.1. Global Functionality (Status Only)
+### 15.2.1. Global Functionality (Status Only)
 
 | Status ID       | Description                  | Essential Information / Type              | Direction        | Notes                             |
 | :-------------- | :--------------------------- | :---------------------------------------- | :--------------- | :-------------------------------- |
@@ -42,7 +42,7 @@ For each level, this section defines:
 
 *(The C# Record definitions for `ErrorDetails`, `VersionDetails`, `ServerStats` are implemented in `SnapDog2.Core.Models` namespace)*
 
-### 14.2.2. Global MQTT Implementation
+### 15.2.2. Global MQTT Implementation
 
 Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics relative to base, configurable via `SNAPDOG_SYSTEM_MQTT_*_TOPIC` vars (Sec 10).
 
@@ -53,7 +53,7 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 | `VERSION_INFO`    | `version`              | Yes      | `{"version":"1.3.0","timestampUtc":"...","buildDateUtc":"..."}`          |
 | `SERVER_STATS`    | `stats`                | No       | `{"timestampUtc":"...","cpuUsagePercent":12.5,"memoryUsageMb":128.5,...}`|
 
-### 14.2.3. Global MQTT Last Will and Testament (LWT)
+### 15.2.3. Global MQTT Last Will and Testament (LWT)
 
 * **Topic:** `{BaseTopic}/{StatusTopic}` (e.g., `snapdog/status`)
 * **Payload:** `{"status": 0}`
@@ -62,9 +62,9 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 
 (When online, publishes `{"status": 1}` to the same topic with retain=true).
 
-## 14.3. Zone Commands and Status
+## 15.3. Zone Commands and Status
 
-### 14.3.1. Zone Functionality
+### 15.3.1. Zone Functionality
 
 *(Grouped by function)*
 
@@ -162,11 +162,11 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 | `ZONE_NAME_STATUS`  | Zone Name               | `ZoneIndex` (int), `ZoneName` (string)              | Status (Publish) |                                  |
 | `ZONE_STATE`        | Complete zone state     | `ZoneIndex` (int), JSON `ZoneState` (object/record) | Status (Publish) | State: Full state incl. modes    |
 
-### 14.3.2. Zone MQTT Implementation
+### 15.3.2. Zone MQTT Implementation
 
 * Base topic: `SNAPDOG_ZONE_n_MQTT_BASE_TOPIC` (default: `snapdog/zones/{n}/`). **Indices are 1-based.** Relative topic paths configured via `SNAPDOG_ZONE_{n}_MQTT_{SUFFIX}` variables (Sec 10).
 
-#### 14.3.2.1. Zone Command Topics
+#### 15.3.2.1. Zone Command Topics
 
 **Playback/Mode Control**
 
@@ -218,7 +218,7 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 | `MUTE`/`TOGGLE`       | `_MUTE_SET_TOPIC`   | `mute/set`         | `"true"`/`"false"`, `"1"`/`"0"`, `"toggle"` |                           |
 | `MUTE_TOGGLE`         | `_MUTE_TOGGLE_TOPIC`| `mute/toggle`      | (no payload needed)                         | Dedicated mute toggle     |
 
-#### 14.3.2.2. Zone Status Topics (Read-Only)
+#### 15.3.2.2. Zone Status Topics (Read-Only)
 
 **Important Topic Distinction:**
 
@@ -275,7 +275,7 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 
 **General**
 
-#### 14.3.2.3. System-Level Topics (Discovery & Global Status)
+#### 15.3.2.3. System-Level Topics (Discovery & Global Status)
 
 System-level topics provide discovery and global status information across all zones.
 
@@ -294,7 +294,7 @@ System-level topics provide discovery and global status information across all z
 | `SERVER_STATS`        | `_SYSTEM_MQTT_STATS_TOPIC` | `snapdog/stats`        | `{"cpu": 15.2, "memory": 512}`    | Yes      | Server performance stats   |
 | `ERROR_STATUS`        | `_SYSTEM_MQTT_ERROR_TOPIC` | `snapdog/error`        | `{"error": "Service unavailable"}` | No       | System-level errors        |
 
-#### 14.3.2.4. Payloads for `{zoneBaseTopic}control/set`
+#### 15.3.2.4. Payloads for `{zoneBaseTopic}control/set`
 
 This topic accepts various string payloads to control multiple aspects:
 
@@ -321,7 +321,7 @@ This topic accepts various string payloads to control multiple aspects:
 | `VOLUME_UP`               | `volume_up`, `volume +<step>`            |
 | `VOLUME_DOWN`             | `volume_down`, `volume -<step>`          |
 
-#### 14.3.2.5. Standardized Payload Patterns
+#### 15.3.2.5. Standardized Payload Patterns
 
 All boolean topics accept consistent payload formats for maximum compatibility:
 
@@ -345,7 +345,7 @@ snapdog/zones/1/mute/set         → "true" | "false" | "1" | "0" | "on" | "off"
 * **Track/Playlist Index**: `1`-based integers
 * **Volume Steps**: `+5`, `-3`, `+`, `-` (default step: 5)
 
-#### 14.3.2.6. Status Values for `{zoneBaseTopic}control`
+#### 15.3.2.6. Status Values for `{zoneBaseTopic}control`
 
 This topic publishes simple string representations for various states:
 
@@ -357,11 +357,11 @@ This topic publishes simple string representations for various states:
 | `PLAYLIST_REPEAT_STATUS`| `repeat_on`, `repeat_off`   |
 | `MUTE_STATUS`           | `mute_on`, `mute_off`                         |
 
-### 14.3.3. Zone KNX Implementation
+### 15.3.3. Zone KNX Implementation
 
 Uses `Knx.Falcon.GroupAddress`. GAs configured via `SNAPDOG_ZONE_{n}_KNX_{SUFFIX}` Env Vars (Sec 10). DPT Value Mapping follows standard KNX conventions (see Section 20 for dependencies). **Indices 1-based.** Report `0` on Status GA if > 255.
 
-#### 14.3.3.1. KNX Zone Command Group Addresses
+#### 15.3.3.1. KNX Zone Command Group Addresses
 
 **Playback Control**
 
@@ -418,7 +418,7 @@ The following commands are **intentionally not implemented** in KNX due to proto
 | `CLIENT_LATENCY` | KNX latency adjustment not practical via bus |
 | `CLIENT_NAME` | KNX cannot transmit string names effectively |
 
-#### 14.3.3.2. KNX Zone Status Group Addresses
+#### 15.3.3.2. KNX Zone Status Group Addresses
 
 **Playback Control**
 
@@ -475,9 +475,9 @@ The following commands are **intentionally not implemented** in KNX due to proto
 | `VOLUME_STATUS`   | 5.001   | `_KNX_VOLUME_STATUS`   | Send 0-100%       |
 | `MUTE_STATUS`     | 1.001   | `_KNX_MUTE_STATUS`     | Send 0=Off, 1=On  |
 
-## 14.4. Client Commands and Status
+## 15.4. Client Commands and Status
 
-### 14.4.1. Client Functionality
+### 15.4.1. Client Functionality
 
 **Volume & Mute**
 
@@ -504,11 +504,11 @@ The following commands are **intentionally not implemented** in KNX due to proto
 | `CLIENT_CONNECTED`   | Client connection status| `ClientIndex` (int), `IsConnected` (bool)  | Status (Publish) |                           |
 | `CLIENT_STATE`       | Complete client state   | `ClientIndex` (int), `ClientState` object  | Status (Publish) |                           |
 
-### 14.4.2. Client MQTT Implementation
+### 15.4.2. Client MQTT Implementation
 
 Base topic: `SNAPDOG_CLIENT_m_MQTT_BASE_TOPIC` (default: `snapdog/clients/{m}/`).
 
-#### 14.4.2.1. Client Command Topics (`/set`)
+#### 15.4.2.1. Client Command Topics (`/set`)
 
 **Volume/Mute**
 
@@ -528,7 +528,7 @@ Base topic: `SNAPDOG_CLIENT_m_MQTT_BASE_TOPIC` (default: `snapdog/clients/{m}/`)
 | `CLIENT_ZONE`     | `_ZONE_SET_TOPIC`    | `zones/set`           | `<zone_id>` (1-based)         |
 | `CLIENT_NAME`     | `_NAME_SET_TOPIC`    | `name/set`           | `<name>` (string)             |
 
-#### 14.4.2.2. Client Status Topics (Read-Only)
+#### 15.4.2.2. Client Status Topics (Read-Only)
 
 **Volume/Mute**
 
@@ -546,11 +546,11 @@ Base topic: `SNAPDOG_CLIENT_m_MQTT_BASE_TOPIC` (default: `snapdog/clients/{m}/`)
 | `CLIENT_ZONE_STATUS`    | `_ZONE_TOPIC`          | `zone`                 | `1`                       | Yes      |
 | `CLIENT_STATE`          | `_STATE_TOPIC`         | `state`                | Full JSON object (13.5.2)  | Yes      |
 
-### 14.4.3. Client KNX Implementation
+### 15.4.3. Client KNX Implementation
 
 Uses `Knx.Falcon.GroupAddress`. GAs configured via `SNAPDOG_CLIENT_{m}_KNX_{SUFFIX}` Env Vars (Sec 10). DPT Value Mapping follows standard KNX conventions (see Section 20 for dependencies). **Zone indices 1-based.** Report `0` on Status GA if index > 255.
 
-#### 14.4.3.1. KNX Client Command Group Addresses
+#### 15.4.3.1. KNX Client Command Group Addresses
 
 **Volume/Mute**
 
@@ -573,7 +573,7 @@ Uses `Knx.Falcon.GroupAddress`. GAs configured via `SNAPDOG_CLIENT_{m}_KNX_{SUFF
 | `CLIENT_LATENCY`  | 7.001   | `_KNX_LATENCY`   | Send ms            |
 | `CLIENT_ZONE`     | 5.010   | `_KNX_ZONE`      | Send 1-based index |
 
-#### 14.4.3.2. KNX Client Status Group Addresses
+#### 15.4.3.2. KNX Client Status Group Addresses
 
 **Volume/Mute**
 
@@ -590,9 +590,9 @@ Uses `Knx.Falcon.GroupAddress`. GAs configured via `SNAPDOG_CLIENT_{m}_KNX_{SUFF
 | `CLIENT_ZONE_STATUS`    | 5.010   | `_KNX_ZONE_STATUS`     | Send 1-based, 0 if>255|
 | `CLIENT_CONNECTED`      | 1.002   | `_KNX_CONNECTED_STATUS`| Send 0=Off, 1=On      |
 
-## 14.5. Zone and Client State Objects (JSON Examples)
+## 15.5. Zone and Client State Objects (JSON Examples)
 
-### 14.5.1. Complete Zone State (JSON)
+### 15.5.1. Complete Zone State (JSON)
 
 Published to `{zoneBaseTopic}/state`.
 
@@ -632,7 +632,7 @@ Published to `{zoneBaseTopic}/state`.
 }
 ```
 
-### 14.5.2. Complete Client State (JSON)
+### 15.5.2. Complete Client State (JSON)
 
 Published to `{clientBaseTopic}/state`.
 
