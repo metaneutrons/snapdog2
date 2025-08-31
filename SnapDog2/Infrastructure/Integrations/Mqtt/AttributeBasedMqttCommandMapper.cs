@@ -172,7 +172,7 @@ public partial class AttributeBasedMqttCommandMapper(
             }
 
             // Set payload-based properties
-            this.SetPayloadProperties(command, payload, attribute);
+            SetPayloadProperties(command, payload, attribute);
 
             // Set command source
             var sourceProperty = commandType.GetProperty("Source");
@@ -190,7 +190,7 @@ public partial class AttributeBasedMqttCommandMapper(
     /// <summary>
     /// Sets properties from the MQTT payload.
     /// </summary>
-    private void SetPayloadProperties(object command, string payload, MqttTopicAttribute attribute)
+    private static void SetPayloadProperties(object command, string payload, MqttTopicAttribute attribute)
     {
         var commandType = command.GetType();
 

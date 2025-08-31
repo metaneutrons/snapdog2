@@ -234,7 +234,7 @@ public partial class StartupService : IHostedService
                     this.LogPortConflictDetected(serviceName, port, conflictDetails);
 
                     // Attempt to find alternative port
-                    var alternativePort = await this.FindAlternativePortAsync(port, cancellationToken);
+                    var alternativePort = await FindAlternativePortAsync(port, cancellationToken);
                     if (alternativePort.HasValue)
                     {
                         this.LogAlternativePortFound(serviceName, alternativePort.Value);
@@ -425,7 +425,7 @@ public partial class StartupService : IHostedService
         }
     }
 
-    private async Task<int?> FindAlternativePortAsync(int preferredPort, CancellationToken cancellationToken)
+    private static async Task<int?> FindAlternativePortAsync(int preferredPort, CancellationToken cancellationToken)
     {
         for (var offset = 1; offset <= PortScanRange; offset++)
         {

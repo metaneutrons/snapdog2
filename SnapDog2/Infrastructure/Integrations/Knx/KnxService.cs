@@ -717,7 +717,7 @@ public partial class KnxService : IKnxService
             }
 
             // Convert to KNX-compatible value
-            var knxValue = this.ConvertToKnxValue(currentValue, statusInfo.StatusId);
+            var knxValue = ConvertToKnxValue(currentValue, statusInfo.StatusId);
 
             // Send response via KNX bus
             await this._knxBus!.WriteGroupValueAsync(groupAddress, knxValue, cancellationToken: cancellationToken);
@@ -1612,7 +1612,7 @@ public partial class KnxService : IKnxService
     /// Converts a state value to KNX-compatible GroupValue format.
     /// Reuses existing KNX value conversion logic.
     /// </summary>
-    private GroupValue ConvertToKnxValue(object value, string statusId)
+    private static GroupValue ConvertToKnxValue(object value, string statusId)
     {
         return value switch
         {
