@@ -355,7 +355,7 @@ public partial class StateRestorationService(
         Level = LogLevel.Information,
         Message = "🔄 Configuration changed: {OldHash} → {NewHash} - clearing old state"
     )]
-    private partial void LogConfigurationChanged(string OldHash, string NewHash);
+    private partial void LogConfigurationChanged(string oldHash, string newHash);
 
     [LoggerMessage(
         EventId = 7103,
@@ -369,35 +369,35 @@ public partial class StateRestorationService(
         Level = LogLevel.Debug,
         Message = "✅ Zone {ZoneIndex} ({ZoneName}) state restored"
     )]
-    private partial void LogZoneStateRestored(int ZoneIndex, string ZoneName);
+    private partial void LogZoneStateRestored(int zoneIndex, string zoneName);
 
     [LoggerMessage(
         EventId = 7105,
         Level = LogLevel.Error,
         Message = "❌ Failed to restore zone {ZoneIndex} state"
     )]
-    private partial void LogZoneStateRestoreFailed(Exception ex, int ZoneIndex);
+    private partial void LogZoneStateRestoreFailed(Exception ex, int zoneIndex);
 
     [LoggerMessage(
         EventId = 7106,
         Level = LogLevel.Debug,
         Message = "✅ Client {ClientIndex} ({ClientName}) state restored"
     )]
-    private partial void LogClientStateRestored(int ClientIndex, string ClientName);
+    private partial void LogClientStateRestored(int clientIndex, string clientName);
 
     [LoggerMessage(
         EventId = 7107,
         Level = LogLevel.Error,
         Message = "❌ Failed to restore client {ClientIndex} state"
     )]
-    private partial void LogClientStateRestoreFailed(Exception ex, int ClientIndex);
+    private partial void LogClientStateRestoreFailed(Exception ex, int clientIndex);
 
     [LoggerMessage(
         EventId = 7108,
         Level = LogLevel.Information,
         Message = "✅ State restoration completed: {ZoneCount} zones, {ClientCount} clients restored"
     )]
-    private partial void LogStatesRestored(int ZoneCount, int ClientCount);
+    private partial void LogStatesRestored(int zoneCount, int clientCount);
 
     [LoggerMessage(
         EventId = 7109,
@@ -418,70 +418,70 @@ public partial class StateRestorationService(
         Level = LogLevel.Information,
         Message = "🆕 Created initial state for zone {ZoneIndex} ({ZoneName}) - Playlist 1, Track 1, Stopped"
     )]
-    private partial void LogInitialZoneStateCreated(int ZoneIndex, string ZoneName);
+    private partial void LogInitialZoneStateCreated(int zoneIndex, string zoneName);
 
     [LoggerMessage(
         EventId = 9013,
         Level = LogLevel.Error,
         Message = "❌ Failed to create initial state for zone {ZoneIndex} ({ZoneName})"
     )]
-    private partial void LogInitialZoneStateCreationFailed(Exception ex, int ZoneIndex, string ZoneName);
+    private partial void LogInitialZoneStateCreationFailed(Exception ex, int zoneIndex, string zoneName);
 
     [LoggerMessage(
         EventId = 9014,
         Level = LogLevel.Debug,
         Message = "🎵 Zone {ZoneIndex} ({ZoneName}) was playing - will resume playback"
     )]
-    private partial void LogZonePlaybackWillResume(int ZoneIndex, string ZoneName);
+    private partial void LogZonePlaybackWillResume(int zoneIndex, string zoneName);
 
     [LoggerMessage(
         EventId = 9015,
         Level = LogLevel.Information,
         Message = "▶️ Resuming playback for zone {ZoneIndex} ({ZoneName})"
     )]
-    private partial void LogResumingPlayback(int ZoneIndex, string ZoneName);
+    private partial void LogResumingPlayback(int zoneIndex, string zoneName);
 
     [LoggerMessage(
         EventId = 9016,
         Level = LogLevel.Information,
         Message = "✅ Playback resumed for zone {ZoneIndex} ({ZoneName})"
     )]
-    private partial void LogPlaybackResumed(int ZoneIndex, string ZoneName);
+    private partial void LogPlaybackResumed(int zoneIndex, string zoneName);
 
     [LoggerMessage(
         EventId = 9017,
         Level = LogLevel.Error,
         Message = "❌ Failed to resume playback for zone {ZoneIndex} ({ZoneName})"
     )]
-    private partial void LogPlaybackResumeFailed(Exception ex, int ZoneIndex, string ZoneName);
+    private partial void LogPlaybackResumeFailed(Exception ex, int zoneIndex, string zoneName);
 
     [LoggerMessage(
         EventId = 9018,
         Level = LogLevel.Debug,
         Message = "ℹ️ No persisted state found for client {ClientIndex} ({ClientName})"
     )]
-    private partial void LogClientStateNotFound(int ClientIndex, string ClientName);
+    private partial void LogClientStateNotFound(int clientIndex, string clientName);
 
     [LoggerMessage(
         EventId = 9019,
         Level = LogLevel.Debug,
         Message = "🎵 Preloading playlist 1, track 1 for zone {ZoneIndex} ({ZoneName})"
     )]
-    private partial void LogPreloadingInitialPlaylist(int ZoneIndex, string ZoneName);
+    private partial void LogPreloadingInitialPlaylist(int zoneIndex, string zoneName);
 
     [LoggerMessage(
         EventId = 9020,
         Level = LogLevel.Information,
         Message = "✅ Initial playlist preloaded for zone {ZoneIndex} ({ZoneName}) - Playlist 1, Track 1"
     )]
-    private partial void LogInitialPlaylistPreloaded(int ZoneIndex, string ZoneName);
+    private partial void LogInitialPlaylistPreloaded(int zoneIndex, string zoneName);
 
     [LoggerMessage(
         EventId = 9021,
         Level = LogLevel.Warning,
         Message = "⚠️ Failed to preload initial playlist for zone {ZoneIndex} ({ZoneName})"
     )]
-    private partial void LogInitialPlaylistPreloadFailed(Exception ex, int ZoneIndex, string ZoneName);
+    private partial void LogInitialPlaylistPreloadFailed(Exception ex, int zoneIndex, string zoneName);
 
     #endregion
 }
