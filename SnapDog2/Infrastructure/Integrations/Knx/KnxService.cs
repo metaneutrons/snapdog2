@@ -1628,7 +1628,7 @@ public partial class KnxService : IKnxService
                 new GroupValue(Encoding.ASCII.GetBytes(stringValue.Substring(0, 14))),
 
             // Default: try to convert to byte for most KNX data types
-            _ => new GroupValue(0)
+            _ => new GroupValue(((byte)value))
         };
     }
 
