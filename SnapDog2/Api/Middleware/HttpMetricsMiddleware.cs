@@ -21,23 +21,11 @@ using SnapDog2.Domain.Abstractions;
 /// Middleware that records comprehensive HTTP request metrics.
 /// Tracks request duration, status codes, endpoints, and error rates.
 /// </summary>
-public partial class HttpMetricsMiddleware
+public partial class HttpMetricsMiddleware(
+    RequestDelegate next,
+    ILogger<HttpMetricsMiddleware> logger,
+    IApplicationMetrics metricsService)
 {
-    private readonly RequestDelegate _next;
-    private readonly ILogger<HttpMetricsMiddleware> _logger;
-    private readonly IApplicationMetrics _metricsService;
-
-    public HttpMetricsMiddleware(
-        RequestDelegate next,
-        ILogger<HttpMetricsMiddleware> logger,
-        IApplicationMetrics metricsService
-    )
-    {
-        this._next = next;
-        this._logger = logger;
-        this._metricsService = metricsService;
-    }
-
     public async Task InvokeAsync(HttpContext context)
     {
         var stopwatch = Stopwatch.StartNew();
@@ -47,12 +35,12 @@ public partial class HttpMetricsMiddleware
 
         try
         {
-            await this._next(context);
+            await next(context);
         }
         catch (Exception ex)
         {
             // Record the exception but don't handle it - let it bubble up
-            this._metricsService.RecordException(ex, "HttpPipeline", $"{method} {path}");
+            metricsService.RecordException(ex, "HttpPipeline", $"{method} {path}");
             throw;
         }
         finally
@@ -62,7 +50,7 @@ public partial class HttpMetricsMiddleware
             var durationSeconds = stopwatch.ElapsedMilliseconds / 1000.0;
 
             // Record HTTP metrics
-            this._metricsService.RecordHttpRequest(method, path, statusCode, durationSeconds);
+            metricsService.RecordHttpRequest(method, path, statusCode, durationSeconds);
 
             // Log slow requests
             if (stopwatch.ElapsedMilliseconds > 1000) // 1 second threshold
@@ -74,7 +62,7 @@ public partial class HttpMetricsMiddleware
             if (statusCode >= 400)
             {
                 var errorType = GetErrorType(statusCode);
-                this._metricsService.RecordError(errorType, "HttpPipeline", $"{method} {path}");
+                metricsService.RecordError(errorType, "HttpPipeline", $"{method} {path}");
 
                 this.LogHttpError(method, path, statusCode, stopwatch.ElapsedMilliseconds);
             }

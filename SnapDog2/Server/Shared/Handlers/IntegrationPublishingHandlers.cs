@@ -778,17 +778,9 @@ public partial class IntegrationPublishingHandlers(
 /// KNX notification handler that forwards StatusChangedNotification to KNX service.
 /// Located in same file as other handlers to ensure MediatR auto-discovery works.
 /// </summary>
-public partial class KnxIntegrationHandler : INotificationHandler<StatusChangedNotification>
+public partial class KnxIntegrationHandler(IKnxService knxService, ILogger<KnxIntegrationHandler> logger)
+    : INotificationHandler<StatusChangedNotification>
 {
-    private readonly IKnxService _knxService;
-    private readonly ILogger<KnxIntegrationHandler> _logger;
-
-    public KnxIntegrationHandler(IKnxService knxService, ILogger<KnxIntegrationHandler> logger)
-    {
-        this._knxService = knxService;
-        this._logger = logger;
-    }
-
     public async Task Handle(StatusChangedNotification notification, CancellationToken cancellationToken)
     {
         // Debug log to verify we're receiving notifications
@@ -799,7 +791,7 @@ public partial class KnxIntegrationHandler : INotificationHandler<StatusChangedN
             this.LogCallingKnxService();
             // Ensure we have a non-null value for KNX service
             var knxValue = notification.Value ?? "null";
-            await this._knxService.SendStatusAsync(notification.StatusType, notification.TargetIndex, knxValue, cancellationToken);
+            await knxService.SendStatusAsync(notification.StatusType, notification.TargetIndex, knxValue, cancellationToken);
             this.LogKnxServiceCompleted();
         }
         catch (Exception ex)

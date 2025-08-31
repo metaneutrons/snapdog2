@@ -21,29 +21,18 @@ namespace SnapDog2.Infrastructure.Integrations.Mqtt;
 /// Smart MQTT publisher that uses direct publishing with queue fallback for maximum reliability and performance.
 /// Implements the hybrid pattern: Direct publish for speed, queue for resilience.
 /// </summary>
-public sealed partial class SmartMqttPublisher : ISmartMqttPublisher
+public sealed partial class SmartMqttPublisher(
+    IMqttService mqttService,
+    INotificationQueue notificationQueue,
+    ILogger<SmartMqttPublisher> logger)
+    : ISmartMqttPublisher
 {
-    private readonly IMqttService _mqttService;
-    private readonly INotificationQueue _notificationQueue;
-    private readonly ILogger<SmartMqttPublisher> _logger;
-
     // Circuit breaker state for intelligent fallback
     private volatile bool _directPublishingEnabled = true;
     private volatile int _consecutiveFailures = 0;
     private readonly int _maxConsecutiveFailures = 3;
     private DateTime _lastFailureTime = DateTime.MinValue;
     private readonly TimeSpan _circuitBreakerResetTime = TimeSpan.FromMinutes(1);
-
-    public SmartMqttPublisher(
-        IMqttService mqttService,
-        INotificationQueue notificationQueue,
-        ILogger<SmartMqttPublisher> logger
-    )
-    {
-        this._mqttService = mqttService;
-        this._notificationQueue = notificationQueue;
-        this._logger = logger;
-    }
 
     /// <summary>
     /// Publishes zone status using smart hybrid approach.
@@ -56,11 +45,11 @@ public sealed partial class SmartMqttPublisher : ISmartMqttPublisher
     )
     {
         // Try direct publishing first if circuit breaker is closed
-        if (this._directPublishingEnabled && this._mqttService.IsConnected)
+        if (this._directPublishingEnabled && mqttService.IsConnected)
         {
             try
             {
-                var result = await this._mqttService.PublishZoneStatusAsync(
+                var result = await mqttService.PublishZoneStatusAsync(
                     zoneIndex,
                     eventType,
                     payload,
@@ -86,7 +75,7 @@ public sealed partial class SmartMqttPublisher : ISmartMqttPublisher
 
         // Fallback to queue-based publishing
         this.LogFallingBackToQueue("Zone", zoneIndex.ToString(), eventType);
-        await this._notificationQueue.EnqueueZoneAsync(eventType, zoneIndex, payload, cancellationToken);
+        await notificationQueue.EnqueueZoneAsync(eventType, zoneIndex, payload, cancellationToken);
         return Result.Success(); // Queue always succeeds
     }
 
@@ -101,11 +90,11 @@ public sealed partial class SmartMqttPublisher : ISmartMqttPublisher
     )
     {
         // Try direct publishing first if circuit breaker is closed
-        if (this._directPublishingEnabled && this._mqttService.IsConnected)
+        if (this._directPublishingEnabled && mqttService.IsConnected)
         {
             try
             {
-                var result = await this._mqttService.PublishClientStatusAsync(
+                var result = await mqttService.PublishClientStatusAsync(
                     clientIndex,
                     eventType,
                     payload,
@@ -131,7 +120,7 @@ public sealed partial class SmartMqttPublisher : ISmartMqttPublisher
 
         // Fallback to queue-based publishing
         this.LogFallingBackToQueue("Client", clientIndex, eventType);
-        await this._notificationQueue.EnqueueClientAsync(eventType, clientIndex, payload, cancellationToken);
+        await notificationQueue.EnqueueClientAsync(eventType, clientIndex, payload, cancellationToken);
         return Result.Success(); // Queue always succeeds
     }
 
@@ -145,11 +134,11 @@ public sealed partial class SmartMqttPublisher : ISmartMqttPublisher
     )
     {
         // Try direct publishing first if circuit breaker is closed
-        if (this._directPublishingEnabled && this._mqttService.IsConnected)
+        if (this._directPublishingEnabled && mqttService.IsConnected)
         {
             try
             {
-                var result = await this._mqttService.PublishGlobalStatusAsync(eventType, payload, cancellationToken);
+                var result = await mqttService.PublishGlobalStatusAsync(eventType, payload, cancellationToken);
 
                 if (result.IsSuccess)
                 {
@@ -170,7 +159,7 @@ public sealed partial class SmartMqttPublisher : ISmartMqttPublisher
 
         // Fallback to queue-based publishing
         this.LogFallingBackToQueue("Global", "system", eventType);
-        await this._notificationQueue.EnqueueGlobalAsync(eventType, payload, cancellationToken);
+        await notificationQueue.EnqueueGlobalAsync(eventType, payload, cancellationToken);
         return Result.Success(); // Queue always succeeds
     }
 

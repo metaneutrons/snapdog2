@@ -21,14 +21,9 @@ using SnapDog2.Shared.Enums;
 /// Health check for KNX integration using Falcon SDK connection status.
 /// Provides accurate health assessment based on actual KNX bus connection state.
 /// </summary>
-public class KnxHealthCheck : IHealthCheck
+public class KnxHealthCheck(IKnxService knxService) : IHealthCheck
 {
-    private readonly IKnxService _knxService;
-
-    public KnxHealthCheck(IKnxService knxService)
-    {
-        this._knxService = knxService ?? throw new ArgumentNullException(nameof(knxService));
-    }
+    private readonly IKnxService _knxService = knxService ?? throw new ArgumentNullException(nameof(knxService));
 
     public Task<HealthCheckResult> CheckHealthAsync(
         HealthCheckContext context,

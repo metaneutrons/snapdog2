@@ -65,15 +65,10 @@ public record StatusSpec(string Id) : FeatureSpec(Id)
 /// <summary>
 /// Collection of features with query methods.
 /// </summary>
-public class FeatureCollection<T> : IEnumerable<T>
+public class FeatureCollection<T>(IEnumerable<T> features) : IEnumerable<T>
     where T : FeatureSpec
 {
-    private readonly List<T> _features;
-
-    public FeatureCollection(IEnumerable<T> features)
-    {
-        this._features = features.ToList();
-    }
+    private readonly List<T> _features = features.ToList();
 
     // Protocol filters
     public FeatureCollection<T> WithApi() => this.Filter(f => f.HasApi && !f.IsExcludedFrom(Protocol.Api));

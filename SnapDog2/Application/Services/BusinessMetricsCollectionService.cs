@@ -23,27 +23,17 @@ using SnapDog2.Infrastructure.Metrics;
 /// Background service that periodically collects and updates business metrics.
 /// Provides real-time insights into zone activity, client connections, and audio playback.
 /// </summary>
-public partial class BusinessMetricsCollectionService : BackgroundService
+public partial class BusinessMetricsCollectionService(
+    ILogger<BusinessMetricsCollectionService> logger,
+    EnterpriseMetricsService metricsService,
+    IServiceProvider serviceProvider)
+    : BackgroundService
 {
-    private readonly ILogger<BusinessMetricsCollectionService> _logger;
-    private readonly EnterpriseMetricsService _metricsService;
-    private readonly IServiceProvider _serviceProvider;
     private readonly TimeSpan _collectionInterval = TimeSpan.FromSeconds(15); // Collect every 15 seconds
-
-    public BusinessMetricsCollectionService(
-        ILogger<BusinessMetricsCollectionService> logger,
-        EnterpriseMetricsService metricsService,
-        IServiceProvider serviceProvider
-    )
-    {
-        this._logger = logger;
-        this._metricsService = metricsService;
-        this._serviceProvider = serviceProvider;
-    }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        LogServiceStarted(this._logger, this._collectionInterval);
+        LogServiceStarted(logger, this._collectionInterval);
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -59,17 +49,17 @@ public partial class BusinessMetricsCollectionService : BackgroundService
             }
             catch (Exception ex)
             {
-                LogErrorCollectingMetrics(this._logger, ex);
+                LogErrorCollectingMetrics(logger, ex);
 
                 // Record the error in metrics
-                this._metricsService.RecordException(ex, "BusinessMetricsCollection");
+                metricsService.RecordException(ex, "BusinessMetricsCollection");
 
                 // Wait a bit before retrying
                 await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
             }
         }
 
-        LogServiceStopped(this._logger);
+        LogServiceStopped(logger);
     }
 
     /// <summary>
@@ -79,7 +69,7 @@ public partial class BusinessMetricsCollectionService : BackgroundService
     {
         try
         {
-            using var scope = this._serviceProvider.CreateScope();
+            using var scope = serviceProvider.CreateScope();
 
             var zoneManager = scope.ServiceProvider.GetService<IZoneManager>();
             var clientManager = scope.ServiceProvider.GetService<IClientManager>();
@@ -92,7 +82,7 @@ public partial class BusinessMetricsCollectionService : BackgroundService
                 TracksPlaying = await GetPlayingTracksAsync(zoneManager),
             };
 
-            this._metricsService.UpdateBusinessMetrics(businessMetrics);
+            metricsService.UpdateBusinessMetrics(businessMetrics);
 
             this.LogBusinessMetricsCollected(
                 businessMetrics.ZonesTotal,
@@ -103,7 +93,7 @@ public partial class BusinessMetricsCollectionService : BackgroundService
         }
         catch (Exception ex)
         {
-            LogFailedToCollectMetrics(this._logger, ex);
+            LogFailedToCollectMetrics(logger, ex);
         }
     }
 

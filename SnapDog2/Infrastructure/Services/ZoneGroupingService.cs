@@ -21,26 +21,18 @@ namespace SnapDog2.Infrastructure.Services;
 /// Simple zone grouping service using periodic checks only.
 /// Ensures clients assigned to the same zone are grouped together for synchronized audio playback.
 /// </summary>
-public partial class ZoneGroupingService : IZoneGroupingService
+public partial class ZoneGroupingService(
+    ISnapcastService snapcastService,
+    IClientManager clientManager,
+    IZoneManager zoneManager,
+    ILogger<ZoneGroupingService> logger)
+    : IZoneGroupingService
 {
-    private readonly ISnapcastService _snapcastService;
-    private readonly IClientManager _clientManager;
-    private readonly IZoneManager _zoneManager;
-    private readonly ILogger<ZoneGroupingService> _logger;
+    private readonly ISnapcastService _snapcastService = snapcastService ?? throw new ArgumentNullException(nameof(snapcastService));
+    private readonly IClientManager _clientManager = clientManager ?? throw new ArgumentNullException(nameof(clientManager));
+    private readonly IZoneManager _zoneManager = zoneManager ?? throw new ArgumentNullException(nameof(zoneManager));
+    private readonly ILogger<ZoneGroupingService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private static readonly ActivitySource ActivitySource = new("SnapDog2.ZoneGrouping");
-
-    public ZoneGroupingService(
-        ISnapcastService snapcastService,
-        IClientManager clientManager,
-        IZoneManager zoneManager,
-        ILogger<ZoneGroupingService> logger
-    )
-    {
-        this._snapcastService = snapcastService ?? throw new ArgumentNullException(nameof(snapcastService));
-        this._clientManager = clientManager ?? throw new ArgumentNullException(nameof(clientManager));
-        this._zoneManager = zoneManager ?? throw new ArgumentNullException(nameof(zoneManager));
-        this._logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
 
     /// <summary>
     /// Simple periodic check: ensure all zones are properly configured.

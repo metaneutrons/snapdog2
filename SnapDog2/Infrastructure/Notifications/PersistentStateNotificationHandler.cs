@@ -23,24 +23,16 @@ using SnapDog2.Server.Clients.Notifications;
 /// Handles state change notifications and persists them immediately to Redis.
 /// Provides event-based state persistence with debouncing for high-frequency updates.
 /// </summary>
-public partial class PersistentStateNotificationHandler :
-    INotificationHandler<ClientStateChangedNotification>
+public partial class PersistentStateNotificationHandler(
+    IPersistentStateStore persistentStore,
+    ILogger<PersistentStateNotificationHandler> logger)
+    :
+        INotificationHandler<ClientStateChangedNotification>
 {
-    private readonly IPersistentStateStore _persistentStore;
-    private readonly ILogger<PersistentStateNotificationHandler> _logger;
-
     // Debouncing for high-frequency updates (like position changes)
     private readonly ConcurrentDictionary<int, Timer> _zoneDebounceTimers = new();
     private readonly ConcurrentDictionary<int, Timer> _clientDebounceTimers = new();
     private readonly TimeSpan _debounceDelay = TimeSpan.FromSeconds(2);
-
-    public PersistentStateNotificationHandler(
-        IPersistentStateStore persistentStore,
-        ILogger<PersistentStateNotificationHandler> logger)
-    {
-        this._persistentStore = persistentStore;
-        this._logger = logger;
-    }
 
     /// <summary>
     /// Handles client state changes and persists them immediately.
@@ -52,7 +44,7 @@ public partial class PersistentStateNotificationHandler :
             this.LogClientStatePersisting(notification.ClientIndex);
 
             // Client state changes are typically less frequent, save immediately
-            await this._persistentStore.SaveClientStateAsync(notification.ClientIndex, notification.ClientState);
+            await persistentStore.SaveClientStateAsync(notification.ClientIndex, notification.ClientState);
 
             this.LogClientStatePersisted(notification.ClientIndex, notification.ClientState.Name);
         }
@@ -79,7 +71,7 @@ public partial class PersistentStateNotificationHandler :
             {
                 try
                 {
-                    await this._persistentStore.SaveZoneStateAsync(zoneIndex, zoneState);
+                    await persistentStore.SaveZoneStateAsync(zoneIndex, zoneState);
                     this.LogZoneStateDebounced(zoneIndex, zoneState.Name);
                 }
                 catch (Exception ex)

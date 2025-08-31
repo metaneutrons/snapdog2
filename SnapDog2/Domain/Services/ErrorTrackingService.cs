@@ -22,18 +22,12 @@ using SnapDog2.Shared.Models;
 /// In-memory implementation of error tracking service.
 /// Maintains a rolling window of recent system errors for monitoring and diagnostics.
 /// </summary>
-public partial class ErrorTrackingService : IErrorTrackingService
+public partial class ErrorTrackingService(ILogger<ErrorTrackingService> logger) : IErrorTrackingService
 {
-    private readonly ILogger<ErrorTrackingService> _logger;
     private readonly ConcurrentQueue<ErrorDetails> _errors = new();
     private readonly object _lock = new();
     private const int MaxErrorCount = 100; // Keep last 100 errors
     private const int MaxErrorAgeHours = 24; // Keep errors for 24 hours
-
-    public ErrorTrackingService(ILogger<ErrorTrackingService> logger)
-    {
-        this._logger = logger;
-    }
 
     /// <inheritdoc/>
     public void RecordError(ErrorDetails error)
@@ -49,7 +43,7 @@ public partial class ErrorTrackingService : IErrorTrackingService
             this.CleanupOldErrors();
         }
 
-        LogErrorRecorded(this._logger, error.Component ?? "Unknown", error.Context ?? "Unknown", error.Message);
+        LogErrorRecorded(logger, error.Component ?? "Unknown", error.Context ?? "Unknown", error.Message);
     }
 
     /// <inheritdoc/>
@@ -113,7 +107,7 @@ public partial class ErrorTrackingService : IErrorTrackingService
             this._errors.Clear();
         }
 
-        LogErrorsCleared(this._logger);
+        LogErrorsCleared(logger);
     }
 
     private void CleanupOldErrors()
@@ -131,7 +125,7 @@ public partial class ErrorTrackingService : IErrorTrackingService
         var removedCount = initialCount - this._errors.Count;
         if (removedCount > 0)
         {
-            LogOldErrorsRemoved(this._logger, removedCount, this._errors.Count);
+            LogOldErrorsRemoved(logger, removedCount, this._errors.Count);
         }
     }
 

@@ -16,11 +16,11 @@ namespace SnapDog2.Tests.Blueprint;
 /// <summary>
 /// Base builder for features with common fluent methods.
 /// </summary>
-public abstract class FeatureBuilder<TBuilder>
+public abstract class FeatureBuilder<TBuilder>(BlueprintBuilder blueprintBuilder, string id)
     where TBuilder : FeatureBuilder<TBuilder>
 {
-    protected readonly BlueprintBuilder _blueprintBuilder;
-    protected readonly string _id;
+    protected readonly BlueprintBuilder _blueprintBuilder = blueprintBuilder;
+    protected readonly string _id = id;
     protected FeatureCategory _category;
     protected Protocol _protocols = Protocol.None;
     protected string? _description;
@@ -32,12 +32,6 @@ public abstract class FeatureBuilder<TBuilder>
     protected string? _mqttTopic;
     protected string? _signalREvent;
     protected Type? _apiReturnType;
-
-    protected FeatureBuilder(BlueprintBuilder blueprintBuilder, string id)
-    {
-        this._blueprintBuilder = blueprintBuilder;
-        this._id = id;
-    }
 
     // Category methods
     public TBuilder Zone()
@@ -165,11 +159,9 @@ public abstract class FeatureBuilder<TBuilder>
 /// <summary>
 /// Builder for command specifications.
 /// </summary>
-public class CommandBuilder : FeatureBuilder<CommandBuilder>
+public class CommandBuilder(BlueprintBuilder blueprintBuilder, string id)
+    : FeatureBuilder<CommandBuilder>(blueprintBuilder, id)
 {
-    public CommandBuilder(BlueprintBuilder blueprintBuilder, string id)
-        : base(blueprintBuilder, id) { }
-
     // Fluent continuation methods
     public CommandBuilder Command(string id)
     {
@@ -213,11 +205,9 @@ public class CommandBuilder : FeatureBuilder<CommandBuilder>
 /// <summary>
 /// Builder for status specifications.
 /// </summary>
-public class StatusBuilder : FeatureBuilder<StatusBuilder>
+public class StatusBuilder(BlueprintBuilder blueprintBuilder, string id)
+    : FeatureBuilder<StatusBuilder>(blueprintBuilder, id)
 {
-    public StatusBuilder(BlueprintBuilder blueprintBuilder, string id)
-        : base(blueprintBuilder, id) { }
-
     // Fluent continuation methods
     public CommandBuilder Command(string id)
     {

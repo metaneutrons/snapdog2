@@ -27,31 +27,15 @@ using SnapDog2.Shared.Models;
 /// Background service that restores persisted state on application startup.
 /// Handles configuration change detection and state migration.
 /// </summary>
-public partial class StateRestorationService : BackgroundService
+public partial class StateRestorationService(
+    IPersistentStateStore persistentStore,
+    IZoneStateStore zoneStateStore,
+    IClientStateStore clientStateStore,
+    IZoneManager zoneManager,
+    SnapDogConfiguration config,
+    ILogger<StateRestorationService> logger)
+    : BackgroundService
 {
-    private readonly IPersistentStateStore _persistentStore;
-    private readonly IZoneStateStore _zoneStateStore;
-    private readonly IClientStateStore _clientStateStore;
-    private readonly IZoneManager _zoneManager;
-    private readonly SnapDogConfiguration _config;
-    private readonly ILogger<StateRestorationService> _logger;
-
-    public StateRestorationService(
-        IPersistentStateStore persistentStore,
-        IZoneStateStore zoneStateStore,
-        IClientStateStore clientStateStore,
-        IZoneManager zoneManager,
-        SnapDogConfiguration config,
-        ILogger<StateRestorationService> logger)
-    {
-        this._persistentStore = persistentStore;
-        this._zoneStateStore = zoneStateStore;
-        this._clientStateStore = clientStateStore;
-        this._zoneManager = zoneManager;
-        this._config = config;
-        this._logger = logger;
-    }
-
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         try
@@ -59,7 +43,7 @@ public partial class StateRestorationService : BackgroundService
             this.LogStateRestorationStarting();
 
             // Check if persistent store is available
-            if (!await this._persistentStore.IsHealthyAsync())
+            if (!await persistentStore.IsHealthyAsync())
             {
                 this.LogPersistentStoreUnavailable();
                 return;
@@ -69,7 +53,7 @@ public partial class StateRestorationService : BackgroundService
             var currentFingerprint = this.GenerateConfigurationFingerprint();
 
             // Check if configuration has changed
-            var storedFingerprint = await this._persistentStore.GetConfigurationFingerprintAsync();
+            var storedFingerprint = await persistentStore.GetConfigurationFingerprintAsync();
 
             if (storedFingerprint != null && !ConfigurationChanged(currentFingerprint, storedFingerprint))
             {
@@ -82,14 +66,14 @@ public partial class StateRestorationService : BackgroundService
                 if (storedFingerprint != null)
                 {
                     this.LogConfigurationChanged(storedFingerprint.Hash, currentFingerprint.Hash);
-                    await this._persistentStore.ClearAllStateAsync();
+                    await persistentStore.ClearAllStateAsync();
                 }
                 else
                 {
                     this.LogFirstRun();
                 }
 
-                await this._persistentStore.SaveConfigurationFingerprintAsync(currentFingerprint);
+                await persistentStore.SaveConfigurationFingerprintAsync(currentFingerprint);
             }
 
             this.LogStateRestorationCompleted();
@@ -107,21 +91,21 @@ public partial class StateRestorationService : BackgroundService
     private async Task RestoreStatesAsync()
     {
         // Restore zone states
-        var zoneStates = await this._persistentStore.LoadAllZoneStatesAsync();
+        var zoneStates = await persistentStore.LoadAllZoneStatesAsync();
         var zonesToResumePlayback = new List<(int zoneIndex, ZoneState zoneState)>();
 
         // Process each configured zone
-        for (var i = 0; i < this._config.Zones.Count; i++)
+        for (var i = 0; i < config.Zones.Count; i++)
         {
             var zoneIndex = i + 1; // 1-based indexing
-            var zoneConfig = this._config.Zones[i];
+            var zoneConfig = config.Zones[i];
 
             if (zoneStates.TryGetValue(zoneIndex, out var persistedState))
             {
                 // Restore persisted state
                 try
                 {
-                    this._zoneStateStore.SetZoneState(zoneIndex, persistedState);
+                    zoneStateStore.SetZoneState(zoneIndex, persistedState);
                     this.LogZoneStateRestored(zoneIndex, persistedState.Name);
 
                     // Track zones that were playing for later resumption
@@ -144,17 +128,17 @@ public partial class StateRestorationService : BackgroundService
         }
 
         // Restore client states
-        var clientStates = await this._persistentStore.LoadAllClientStatesAsync();
-        for (var i = 0; i < this._config.Clients.Count; i++)
+        var clientStates = await persistentStore.LoadAllClientStatesAsync();
+        for (var i = 0; i < config.Clients.Count; i++)
         {
             var clientIndex = i + 1; // 1-based indexing
-            var clientConfig = this._config.Clients[i];
+            var clientConfig = config.Clients[i];
 
             if (clientStates.TryGetValue(clientIndex, out var persistedClientState))
             {
                 try
                 {
-                    this._clientStateStore.SetClientState(clientIndex, persistedClientState);
+                    clientStateStore.SetClientState(clientIndex, persistedClientState);
                     this.LogClientStateRestored(clientIndex, persistedClientState.Name);
                 }
                 catch (Exception ex)
@@ -207,7 +191,7 @@ public partial class StateRestorationService : BackgroundService
                 TimestampUtc = DateTime.UtcNow
             };
 
-            this._zoneStateStore.SetZoneState(zoneIndex, initialState);
+            zoneStateStore.SetZoneState(zoneIndex, initialState);
             this.LogInitialZoneStateCreated(zoneIndex, zoneConfig.Name);
 
             // Preload playlist 1, track 1 (but don't start playing)
@@ -229,7 +213,7 @@ public partial class StateRestorationService : BackgroundService
             this.LogPreloadingInitialPlaylist(zoneIndex, zoneName);
 
             // Get the zone service
-            var zoneResult = await this._zoneManager.GetZoneAsync(zoneIndex);
+            var zoneResult = await zoneManager.GetZoneAsync(zoneIndex);
             if (zoneResult.IsSuccess)
             {
                 var zoneService = zoneResult.Value!;
@@ -277,7 +261,7 @@ public partial class StateRestorationService : BackgroundService
                 this.LogResumingPlayback(zoneIndex, zoneState.Name);
 
                 // Get the zone service and resume playback
-                var zoneResult = await this._zoneManager.GetZoneAsync(zoneIndex);
+                var zoneResult = await zoneManager.GetZoneAsync(zoneIndex);
                 if (zoneResult.IsSuccess)
                 {
                     var zoneService = zoneResult.Value!;
@@ -313,12 +297,12 @@ public partial class StateRestorationService : BackgroundService
     {
         var configData = new
         {
-            ZoneCount = this._config.Zones.Count,
-            ClientCount = this._config.Clients.Count,
-            ZoneNames = this._config.Zones.Select(z => z.Name).ToArray(),
-            ClientNames = this._config.Clients.Select(c => c.Name).ToArray(),
-            ZoneConfigs = this._config.Zones.Select(z => new { z.Name, z.Sink }).ToArray(),
-            ClientConfigs = this._config.Clients.Select(c => new { c.Name, c.Mac, c.DefaultZone }).ToArray()
+            ZoneCount = config.Zones.Count,
+            ClientCount = config.Clients.Count,
+            ZoneNames = config.Zones.Select(z => z.Name).ToArray(),
+            ClientNames = config.Clients.Select(c => c.Name).ToArray(),
+            ZoneConfigs = config.Zones.Select(z => new { z.Name, z.Sink }).ToArray(),
+            ClientConfigs = config.Clients.Select(c => new { c.Name, c.Mac, c.DefaultZone }).ToArray()
         };
 
         var json = JsonSerializer.Serialize(configData, new JsonSerializerOptions { WriteIndented = false });
@@ -328,10 +312,10 @@ public partial class StateRestorationService : BackgroundService
         {
             Hash = hash,
             CreatedAt = DateTime.UtcNow,
-            ZoneCount = this._config.Zones.Count,
-            ClientCount = this._config.Clients.Count,
-            ZoneNames = this._config.Zones.Select(z => z.Name).ToArray(),
-            ClientNames = this._config.Clients.Select(c => c.Name).ToArray()
+            ZoneCount = config.Zones.Count,
+            ClientCount = config.Clients.Count,
+            ZoneNames = config.Zones.Select(z => z.Name).ToArray(),
+            ClientNames = config.Clients.Select(c => c.Name).ToArray()
         };
     }
 

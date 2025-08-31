@@ -22,17 +22,9 @@ using SnapDog2.Server.Shared.Notifications;
 /// Dedicated notification handler that forwards StatusChangedNotification to KNX service.
 /// This wrapper ensures proper MediatR registration and notification routing.
 /// </summary>
-public partial class KnxNotificationHandler : INotificationHandler<StatusChangedNotification>
+public partial class KnxNotificationHandler(IKnxService knxService, ILogger<KnxNotificationHandler> logger)
+    : INotificationHandler<StatusChangedNotification>
 {
-    private readonly IKnxService _knxService;
-    private readonly ILogger<KnxNotificationHandler> _logger;
-
-    public KnxNotificationHandler(IKnxService knxService, ILogger<KnxNotificationHandler> logger)
-    {
-        this._knxService = knxService;
-        this._logger = logger;
-    }
-
     public async Task Handle(StatusChangedNotification notification, CancellationToken cancellationToken)
     {
         // Debug log to verify we're receiving notifications
@@ -41,7 +33,7 @@ public partial class KnxNotificationHandler : INotificationHandler<StatusChanged
         // Forward to KNX service using its actual interface methods
         try
         {
-            await this._knxService.SendStatusAsync(
+            await knxService.SendStatusAsync(
                 notification.StatusType,
                 notification.TargetIndex,
                 notification.Value ?? string.Empty,

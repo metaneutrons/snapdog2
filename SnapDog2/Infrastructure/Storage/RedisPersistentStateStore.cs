@@ -26,14 +26,28 @@ using StackExchange.Redis;
 /// Redis-based implementation of persistent state storage.
 /// Provides fast, reliable state persistence with atomic operations.
 /// </summary>
-public partial class RedisPersistentStateStore : IPersistentStateStore, IDisposable
+public partial class RedisPersistentStateStore(
+    IConnectionMultiplexer redis,
+    RedisConfig redisConfig,
+    ILogger<RedisPersistentStateStore> logger)
+    : IPersistentStateStore, IDisposable
 {
-    private readonly IConnectionMultiplexer _redis;
-    private readonly IDatabase _database;
-    private readonly ILogger<RedisPersistentStateStore> _logger;
-    private readonly JsonSerializerOptions _jsonOptions;
-    private readonly ResiliencePipeline _connectionPipeline;
-    private readonly ResiliencePipeline _operationPipeline;
+    private readonly IDatabase _database = redis.GetDatabase();
+
+    private readonly JsonSerializerOptions _jsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = false,
+        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+    };
+    private readonly ResiliencePipeline _connectionPipeline = ResiliencePolicyFactory.CreatePipeline(
+        redisConfig.Resilience.Connection,
+        "Redis-Connection"
+    );
+    private readonly ResiliencePipeline _operationPipeline = ResiliencePolicyFactory.CreatePipeline(
+        redisConfig.Resilience.Operation,
+        "Redis-Operation"
+    );
 
     // Redis key prefixes
     private const string ZoneStatePrefix = "snapdog:zone:";
@@ -41,32 +55,7 @@ public partial class RedisPersistentStateStore : IPersistentStateStore, IDisposa
     private const string ConfigFingerprintKey = "snapdog:config:fingerprint";
     private const string StatsKey = "snapdog:stats";
 
-    public RedisPersistentStateStore(
-        IConnectionMultiplexer redis,
-        RedisConfig redisConfig,
-        ILogger<RedisPersistentStateStore> logger)
-    {
-        this._redis = redis;
-        this._database = redis.GetDatabase();
-        this._logger = logger;
-
-        // Create resilience pipelines using approved pattern
-        this._connectionPipeline = ResiliencePolicyFactory.CreatePipeline(
-            redisConfig.Resilience.Connection,
-            "Redis-Connection"
-        );
-        this._operationPipeline = ResiliencePolicyFactory.CreatePipeline(
-            redisConfig.Resilience.Operation,
-            "Redis-Operation"
-        );
-
-        this._jsonOptions = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            WriteIndented = false,
-            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
-        };
-    }
+    // Create resilience pipelines using approved pattern
 
     #region Zone State Persistence
 
@@ -343,7 +332,7 @@ public partial class RedisPersistentStateStore : IPersistentStateStore, IDisposa
 
     private Task<IEnumerable<RedisKey>> GetKeysAsync(string pattern)
     {
-        var server = this._redis.GetServer(this._redis.GetEndPoints().First());
+        var server = redis.GetServer(redis.GetEndPoints().First());
         return Task.FromResult(server.Keys(pattern: pattern));
     }
 
