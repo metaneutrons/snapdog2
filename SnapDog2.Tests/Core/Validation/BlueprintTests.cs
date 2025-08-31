@@ -111,7 +111,7 @@ public class BlueprintTests
     public void Blueprint_Status_ShouldHaveMatchingStatusIdNotifications()
     {
         // Act
-        var (missingNotifications, extraNotifications) = StaticApiAnalyzer.CompareStatusNotificationImplementation();
+        var (_, extraNotifications) = StaticApiAnalyzer.CompareStatusNotificationImplementation();
 
         // Assert - Only check for orphaned notifications, not missing ones
         // Not every blueprint status needs a StatusId notification (e.g., bulk data endpoints)

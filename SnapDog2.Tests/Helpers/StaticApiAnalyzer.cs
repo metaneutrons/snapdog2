@@ -158,7 +158,7 @@ public static class StaticApiAnalyzer
         var extra = new HashSet<string>();
         foreach (var (path, methodsWithTypes) in implementedEndpoints)
         {
-            foreach (var (method, returnType) in methodsWithTypes)
+            foreach (var (method, _) in methodsWithTypes)
             {
                 // Only check GET methods for orphaned status endpoints
                 if (method == "GET")
@@ -649,10 +649,9 @@ public static class StaticApiAnalyzer
     {
         // Detect actual MQTT notifier implementations by scanning for MQTT notification handlers
         var assembly = Assembly.Load("SnapDog2");
-        var mqttNotifiers = new HashSet<string>();
 
         // Look for classes that handle StatusId notifications for MQTT
-        var notificationHandlers = assembly.GetTypes()
+        assembly.GetTypes()
             .Where(t => t.Name.Contains("MqttNotificationHandler") || t.Name.Contains("MqttPublisher"))
             .ToList();
 
@@ -675,7 +674,7 @@ public static class StaticApiAnalyzer
     private static HashSet<string> GetImplementedMqttHandlers()
     {
         // Detect actual MQTT command handler implementations
-        var assembly = Assembly.Load("SnapDog2");
+        Assembly.Load("SnapDog2");
         var existingCommandIds = GetImplementedCommandIdAttributes();
         var blueprintWithMqtt = GetBlueprintCommandsWithMqtt();
 

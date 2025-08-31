@@ -282,7 +282,6 @@ public sealed partial class MediaPlayerService(
             for (var i = 0; i < this._zoneConfigs.Count(); i++)
             {
                 var zoneIndex = i + 1; // Zone IDs are 1-based
-                var zoneConfig = this._zoneConfigs.ElementAt(i);
 
                 if (this._players.TryGetValue(zoneIndex, out var player))
                 {
@@ -398,7 +397,7 @@ public sealed partial class MediaPlayerService(
         {
             LogSeekingToPosition(this._logger, zoneIndex, positionMs);
 
-            if (!this._players.TryGetValue(zoneIndex, out var player))
+            if (!this._players.TryGetValue(zoneIndex, out _))
             {
                 LogPlayerNotFound(this._logger, zoneIndex);
                 return Task.FromResult(Result.Failure($"No active player found for zone {zoneIndex}"));
@@ -429,7 +428,7 @@ public sealed partial class MediaPlayerService(
         {
             LogSeekingToProgress(this._logger, zoneIndex, progress);
 
-            if (!this._players.TryGetValue(zoneIndex, out var player))
+            if (!this._players.TryGetValue(zoneIndex, out _))
             {
                 LogPlayerNotFound(this._logger, zoneIndex);
                 return Task.FromResult(Result.Failure($"No active player found for zone {zoneIndex}"));

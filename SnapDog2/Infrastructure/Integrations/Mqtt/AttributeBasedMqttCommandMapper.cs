@@ -122,7 +122,7 @@ public partial class AttributeBasedMqttCommandMapper(
         try
         {
             // Try to find a matching topic pattern
-            foreach (var (topicPattern, (commandType, attribute)) in this._topicMappings)
+            foreach (var (_, (commandType, attribute)) in this._topicMappings)
             {
                 if (attribute.TryMatchTopic(topic, out var parameters, this._mqttConfig.MqttBaseTopic))
                 {

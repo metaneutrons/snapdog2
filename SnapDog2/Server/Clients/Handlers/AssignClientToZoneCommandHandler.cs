@@ -67,8 +67,6 @@ public partial class AssignClientToZoneCommandHandler(
             return clientStateResult;
         }
 
-        var previousZoneIndex = clientStateResult.Value!.ZoneIndex;
-
         // Validate client exists (get IClient for the assignment operation)
         var clientResult = await this._clientManager.GetClientAsync(request.ClientIndex).ConfigureAwait(false);
         if (clientResult.IsFailure)

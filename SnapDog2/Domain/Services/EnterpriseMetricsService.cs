@@ -95,7 +95,6 @@ public partial class EnterpriseMetricsService : IMetricsService, IDisposable
         // Get system memory info
         var totalMemoryMb = GetTotalSystemMemoryMb();
         var processMemoryMb = process.WorkingSet64 / (1024.0 * 1024.0);
-        var memoryUsagePercent = totalMemoryMb > 0 ? (processMemoryMb / totalMemoryMb) * 100 : 0;
 
         var stats = new ServerStats
         {
@@ -124,8 +123,8 @@ public partial class EnterpriseMetricsService : IMetricsService, IDisposable
             var totalMemoryMb = GetTotalSystemMemoryMb();
             var memoryUsagePercent = totalMemoryMb > 0 ? (memoryUsageMb / totalMemoryMb) * 100 : 0;
 
-            ThreadPool.GetAvailableThreads(out var availableWorkerThreads, out var availableCompletionPortThreads);
-            ThreadPool.GetMaxThreads(out var maxWorkerThreads, out var maxCompletionPortThreads);
+            ThreadPool.GetAvailableThreads(out var availableWorkerThreads, out _);
+            ThreadPool.GetMaxThreads(out var maxWorkerThreads, out _);
             var threadPoolThreads = maxWorkerThreads - availableWorkerThreads;
 
             var systemMetrics = new SystemMetricsState

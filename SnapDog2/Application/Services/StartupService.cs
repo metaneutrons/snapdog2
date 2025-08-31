@@ -417,7 +417,7 @@ public partial class StartupService : IHostedService
         try
         {
             // This is a simplified version - in production you might want to use platform-specific APIs
-            var processes = Process.GetProcesses().Where(p => !p.HasExited).ToList();
+            Process.GetProcesses().Where(p => !p.HasExited).ToList();
 
             return Task.FromResult($"Port {port} is occupied by another process");
         }

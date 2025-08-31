@@ -83,8 +83,6 @@ public partial class HttpMetricsMiddleware(
 
             if (segments.Length >= 3)
             {
-                var controller = segments[2]; // e.g., "zones", "clients"
-
                 // Replace numeric IDs with placeholders
                 for (var i = 3; i < segments.Length; i++)
                 {

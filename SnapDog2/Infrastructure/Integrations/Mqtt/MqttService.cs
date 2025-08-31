@@ -47,7 +47,6 @@ using SnapDog2.Shared.Models;
 public sealed partial class MqttService : IMqttService
 {
     private readonly MqttConfig _config;
-    private readonly SystemConfig _systemConfig;
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<MqttService> _logger;
     private readonly List<ZoneConfig> _zoneConfigs;
@@ -103,7 +102,6 @@ public sealed partial class MqttService : IMqttService
     )
     {
         this._config = configOptions.Value.Services.Mqtt;
-        this._systemConfig = configOptions.Value.System;
         this._serviceProvider = serviceProvider;
         this._logger = logger;
         this._zoneConfigs = zoneConfigOptions.Value;
@@ -249,7 +247,7 @@ public sealed partial class MqttService : IMqttService
                 {
                     MaxRetryAttempts = validatedConfig.MaxRetries,
                     Delay = TimeSpan.FromMilliseconds(validatedConfig.RetryDelayMs),
-                    BackoffType = validatedConfig.BackoffType?.ToLowerInvariant() switch
+                    BackoffType = validatedConfig.BackoffType.ToLowerInvariant() switch
                     {
                         "linear" => DelayBackoffType.Linear,
                         "constant" => DelayBackoffType.Constant,
@@ -1044,8 +1042,6 @@ public sealed partial class MqttService : IMqttService
                 this.LogNoMqttConfigurationForClient(parsedClientIndex.ToString());
                 return Result.Success();
             }
-
-            var clientConfig = this._clientConfigs[configIndex];
 
             // Get the appropriate MQTT topic for this event type using simple patterns
             var topic = this.GetClientMqttTopic(eventType, parsedClientIndex);
