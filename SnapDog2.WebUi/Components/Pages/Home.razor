@@ -1,6 +1,6 @@
 @page "/"
 @using SnapDog2.WebUi.ApiClient
-@inject ISnapDogApiClient ApiClient
+@* @inject ISnapDogApiClient ApiClient *@
 @rendermode InteractiveServer
 
 <PageTitle>SnapDog2</PageTitle>
@@ -75,8 +75,9 @@
             isLoading = true;
             error = null;
 
-            var zonesTask = ApiClient.GetAllZonesAsync();
-            var clientsTask = ApiClient.GetAllClientsAsync();
+            // TODO: Temporarily disabled due to assembly signature issues
+            // var zonesTask = ApiClient.GetAllZonesAsync();
+            // var clientsTask = ApiClient.GetAllClientsAsync();
 
             await Task.WhenAll(zonesTask, clientsTask);
 
@@ -116,7 +117,8 @@
     {
         try
         {
-            await ApiClient.AssignClientToZoneAsync(args.clientIndex, args.targetZoneIndex);
+            // TODO: Temporarily disabled due to assembly signature issues
+            // await ApiClient.AssignClientToZoneAsync(args.clientIndex, args.targetZoneIndex);
             await LoadData(); // Refresh data after successful move
         }
         catch (Exception ex)
@@ -130,7 +132,8 @@
     {
         try
         {
-            await ApiClient.SetZoneVolumeAsync(args.zoneIndex, args.volume);
+            // TODO: Temporarily disabled due to assembly signature issues
+            // await ApiClient.SetZoneVolumeAsync(args.zoneIndex, args.volume);
         }
         catch (Exception ex)
         {
@@ -143,7 +146,8 @@
     {
         try
         {
-            await ApiClient.ToggleZoneMuteAsync(zoneIndex);
+            // TODO: Temporarily disabled due to assembly signature issues
+            // await ApiClient.ToggleZoneMuteAsync(zoneIndex);
             await LoadData(); // Refresh to get updated mute state
         }
         catch (Exception ex)
@@ -158,9 +162,11 @@
         try
         {
             if (args.isPlaying)
-                await ApiClient.PauseZoneAsync(args.zoneIndex);
+                // TODO: Temporarily disabled due to assembly signature issues
+                // await ApiClient.PauseZoneAsync(args.zoneIndex);
             else
-                await ApiClient.PlayZoneAsync(args.zoneIndex);
+                // TODO: Temporarily disabled due to assembly signature issues
+                // await ApiClient.PlayZoneAsync(args.zoneIndex);
             
             await LoadData(); // Refresh to get updated play state
         }
@@ -175,7 +181,8 @@
     {
         try
         {
-            await ApiClient.NextTrackAsync(zoneIndex);
+            // TODO: Temporarily disabled due to assembly signature issues
+            // await ApiClient.NextTrackAsync(zoneIndex);
             await LoadData(); // Refresh to get updated track info
         }
         catch (Exception ex)
@@ -189,7 +196,8 @@
     {
         try
         {
-            await ApiClient.PreviousTrackAsync(zoneIndex);
+            // TODO: Temporarily disabled due to assembly signature issues
+            // await ApiClient.PreviousTrackAsync(zoneIndex);
             await LoadData(); // Refresh to get updated track info
         }
         catch (Exception ex)

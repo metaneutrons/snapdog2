@@ -3,7 +3,6 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,5 +15,6 @@
 
   <ItemGroup>
     <ProjectReference Include="../SnapDog2.WebUi.ApiClient/SnapDog2.WebUi.ApiClient.csproj" />
+    <ProjectReference Include="../SnapDog2.WebUi.Assets/SnapDog2.WebUi.Assets.csproj" />
   </ItemGroup>
 </Project>

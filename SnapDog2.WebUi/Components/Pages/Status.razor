@@ -1,6 +1,6 @@
 @page "/status"
 @using SnapDog2.WebUi.ApiClient
-@inject ISnapDogApiClient ApiClient
+@* @inject ISnapDogApiClient ApiClient *@
 
 <PageTitle>System Status - SnapDog2</PageTitle>
 
@@ -149,13 +149,14 @@
     {
         try
         {
+            // TODO: Temporarily disabled due to assembly signature issues
             // Load counts using specialized endpoints
-            var zonesCountTask = ApiClient.GetZonesCountAsync();
-            var clientsCountTask = ApiClient.GetClientsCountAsync();
+            // var zonesCountTask = ApiClient.GetZonesCountAsync();
+            // var clientsCountTask = ApiClient.GetClientsCountAsync();
             
             // Load detailed data
-            var zonesTask = ApiClient.GetAllZonesAsync();
-            var clientsTask = ApiClient.GetAllClientsAsync();
+            // var zonesTask = ApiClient.GetAllZonesAsync();
+            // var clientsTask = ApiClient.GetAllClientsAsync();
 
             await Task.WhenAll(zonesCountTask, clientsCountTask, zonesTask, clientsTask);
 
