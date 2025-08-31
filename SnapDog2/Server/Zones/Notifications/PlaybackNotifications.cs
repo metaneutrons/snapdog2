@@ -51,15 +51,6 @@ public record TrackEndedNotification(int ZoneIndex, TrackInfo Track) : INotifica
 public record PlaybackErrorNotification(int ZoneIndex, TrackInfo? Track, string Error) : INotification;
 
 /// <summary>
-/// Notification published when audio format changes in a zone.
-/// </summary>
-/// <param name="ZoneIndex">The zone where the format changed</param>
-/// <param name="OldFormat">The previous audio format</param>
-/// <param name="NewFormat">The new audio format</param>
-public record AudioFormatChangedNotification(int ZoneIndex, AudioFormat? OldFormat, AudioFormat NewFormat)
-    : INotification;
-
-/// <summary>
 /// Notification published when streaming buffer underrun occurs.
 /// </summary>
 /// <param name="ZoneIndex">The zone where the underrun occurred</param>

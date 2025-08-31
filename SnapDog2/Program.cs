@@ -491,6 +491,9 @@ static WebApplication CreateWebApplication(string[] args)
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
+        // Add SignalR
+        builder.Services.AddSignalR();
+
         // Add authentication and authorization
         if (snapDogConfig.Http.ApiAuthEnabled && snapDogConfig.Http.ApiKeys.Count > 0)
         {
@@ -614,6 +617,9 @@ static WebApplication CreateWebApplication(string[] args)
         app.UseAuthorization();
 
         app.MapControllers();
+
+        // Map SignalR hub
+        app.MapHub<SnapDog2.Api.Hubs.SnapDogHub>("/hubs/snapdog/v1");
 
         // Map health check endpoints
         if (snapDogConfig.System.HealthChecksEnabled)

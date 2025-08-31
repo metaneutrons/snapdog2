@@ -76,6 +76,7 @@ public enum Protocol
     Api = 1,
     Mqtt = 2,
     Knx = 4,
+    SignalR = 8,
 }
 
 /// <summary>

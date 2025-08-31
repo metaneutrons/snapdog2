@@ -50,15 +50,15 @@ public static class SnapDogBlueprint
         .Global()
         .Get("/api/v1/zones/count")
         .ApiReturns<int>()
-        .ApiReturns<int>()
         .Description("Get total number of configured zones")
+        .Exclude(Protocol.SignalR, "Count values are static configuration data")
         //
         .Status("CLIENT_COUNT")
         .Global()
         .Get("/api/v1/clients/count")
         .ApiReturns<int>()
-        .ApiReturns<int>()
         .Description("Get total number of configured clients")
+        .Exclude(Protocol.SignalR, "Count values are static configuration data")
         //
         // === VOLUME COMMANDS ===
         //
@@ -321,6 +321,7 @@ public static class SnapDogBlueprint
         .Global()
         .Mqtt("snapdog/system/status")
         .Get("/api/v1/system/status")
+        .SignalR("SystemStatusChanged")
         .Description("Overall system health and status")
         .Exclude(Protocol.Knx, "Read-only system information not actionable via KNX")
         //
@@ -329,12 +330,14 @@ public static class SnapDogBlueprint
         .Mqtt("snapdog/system/version")
         .Get("/api/v1/system/version")
         .Description("System version information")
+        .Exclude(Protocol.SignalR, "Version information is static and doesn't need real-time updates")
         //
         .Status("SERVER_STATS")
         .Global()
         .Mqtt("snapdog/system/stats")
         .Get("/api/v1/system/stats")
         .Description("Server performance statistics")
+        .Exclude(Protocol.SignalR, "Performance statistics are bulk data better suited for polling")
         //
         .Status("ZONE_STATES")
         .Global()
@@ -343,13 +346,16 @@ public static class SnapDogBlueprint
         .Description("Information about all zones")
         .Exclude(Protocol.Knx, "Read-only system information not actionable via KNX")
         .Exclude(Protocol.Mqtt, "No single MQTT topic for all zones info")
+        .Exclude(Protocol.SignalR, "Bulk zone data is heavy - use individual zone events instead")
         //
         .Status("CLIENT_STATES")
         .Global()
         .Get("/api/v1/clients")
+        .ApiReturns<SnapDog2.Api.Models.Page<SnapDog2.Shared.Models.ClientState>>()
         .Description("Information about all clients")
         .Exclude(Protocol.Knx, "Read-only system information not actionable via KNX")
         .Exclude(Protocol.Mqtt, "No single MQTT topic for all clients info")
+        .Exclude(Protocol.SignalR, "Bulk client data is heavy - use individual client events instead")
         //
         // === MEDIA ENDPOINTS ===
         //
@@ -359,6 +365,7 @@ public static class SnapDogBlueprint
         .Description("List of all available playlists")
         .Exclude(Protocol.Mqtt, "Media browsing not suitable for MQTT")
         .Exclude(Protocol.Knx, "Media browsing not suitable for KNX")
+        .Exclude(Protocol.SignalR, "Playlist lists are bulk data better suited for on-demand fetching")
         //
         .Status("MEDIA_PLAYLIST_INFO")
         .Global()
@@ -366,6 +373,7 @@ public static class SnapDogBlueprint
         .Description("Detailed information about a specific playlist")
         .Exclude(Protocol.Mqtt, "Media browsing not suitable for MQTT")
         .Exclude(Protocol.Knx, "Media browsing not suitable for KNX")
+        .Exclude(Protocol.SignalR, "Playlist metadata is static and fetched on-demand")
         //
         .Status("MEDIA_PLAYLIST_TRACKS")
         .Global()
@@ -374,6 +382,7 @@ public static class SnapDogBlueprint
         .Description("List of tracks in a specific playlist")
         .Exclude(Protocol.Mqtt, "Media browsing not suitable for MQTT")
         .Exclude(Protocol.Knx, "Media browsing not suitable for KNX")
+        .Exclude(Protocol.SignalR, "Track lists are bulk data better suited for on-demand fetching")
         //
         .Status("MEDIA_PLAYLIST_TRACK_INFO")
         .Global()
@@ -382,6 +391,7 @@ public static class SnapDogBlueprint
         .Description("Information about a specific track in a playlist")
         .Exclude(Protocol.Mqtt, "Media browsing not suitable for MQTT")
         .Exclude(Protocol.Knx, "Media browsing not suitable for KNX")
+        .Exclude(Protocol.SignalR, "Individual track metadata is static and fetched on-demand")
         //
         .Status("MEDIA_TRACK_INFO")
         .Global()
@@ -390,30 +400,9 @@ public static class SnapDogBlueprint
         .Description("Information about a specific track")
         .Exclude(Protocol.Mqtt, "Media browsing not suitable for MQTT")
         .Exclude(Protocol.Knx, "Media browsing not suitable for KNX")
-        //
-        .Status("CLIENT_STATES")
-        .Global()
-        .Get("/api/v1/clients")
-        .Description("Information about all clients")
-        .Exclude(Protocol.Knx, "Read-only system information not actionable via KNX")
-        .Exclude(Protocol.Mqtt, "No single MQTT topic for all clients info")
-        .Exclude(Protocol.Mqtt, "No single MQTT topic for all clients info")
+        .Exclude(Protocol.SignalR, "Track metadata is static and fetched on-demand")
         //
         // === ZONE STATUS ===
-        //
-        .Status("ZONE_COUNT")
-        .Zone()
-        .Get("/api/v1/zones/count")
-        .ApiReturns<int>()
-        .ApiReturns<int>()
-        .Description("Get total number of configured zones")
-        .Status("ZONE_STATE")
-        .Zone()
-        .Get("/api/v1/zones/{zoneIndex:int}")
-        .ApiReturns<SnapDog2.Shared.Models.ZoneState>()
-        .Exclude(Protocol.Mqtt, "No single MQTT topic for complete zone state")
-        .Exclude(Protocol.Knx, "Read-only zone information not actionable via KNX")
-        .Description("Complete zone state information")
         //
         .Status("ZONE_NAME_STATUS")
         .Zone()
@@ -421,12 +410,12 @@ public static class SnapDogBlueprint
         .Get("/api/v1/zones/{zoneIndex:int}/name")
         .ApiReturns<string>()
         .Description("Zone name")
-        .Exclude(Protocol.Knx, "Read-only string information not actionable via KNX")
         //
         .Status("VOLUME_STATUS")
         .Zone()
         .Mqtt("snapdog/zones/{zoneIndex}/volume")
         .Get("/api/v1/zones/{zoneIndex:int}/volume")
+        .SignalR("ZoneVolumeChanged")
         .ApiReturns<int>()
         .Description("Current zone volume level")
         //
@@ -434,12 +423,14 @@ public static class SnapDogBlueprint
         .Zone()
         .Mqtt("snapdog/zones/{zoneIndex}/mute")
         .Get("/api/v1/zones/{zoneIndex:int}/mute")
+        .SignalR("ZoneMuteChanged")
         .ApiReturns<bool>()
         .Description("Current zone mute state")
         //
         .Status("PLAYBACK_STATE")
         .Zone()
         .Get("/api/v1/zones/{zoneIndex:int}/playback")
+        .SignalR("ZonePlaybackChanged")
         .ApiReturns<string>()
         .Exclude(Protocol.Knx, "string-based playback state not actionable via KNX")
         .Exclude(Protocol.Mqtt, "string-based playback state not actionable via MQTT")
@@ -452,13 +443,16 @@ public static class SnapDogBlueprint
         .Mqtt("snapdog/zones/{zoneIndex}/track")
         .Knx()
         .Get("/api/v1/zones/{zoneIndex:int}/track")
+        .SignalR("ZoneTrackChanged")
         .ApiReturns<int>()
+        .Description("Current track information")
         .Description("Current track information")
         //
         .Status("TRACK_METADATA")
         .Zone()
         .Mqtt("snapdog/zones/{zoneIndex}/track/metadata")
         .Get("/api/v1/zones/{zoneIndex:int}/track/metadata")
+        .SignalR("ZoneTrackMetadataChanged")
         .ApiReturns<SnapDog2.Shared.Models.TrackInfo>()
         .Description("Track metadata (title, artist, album, etc.)")
         .Exclude(Protocol.Knx, "Read-only metadata not actionable via KNX")
@@ -469,6 +463,7 @@ public static class SnapDogBlueprint
         .Get("/api/v1/zones/{zoneIndex:int}/track/duration")
         .ApiReturns<long>()
         .Description("Track duration in milliseconds")
+        .Exclude(Protocol.SignalR, "Individual metadata covered by ZoneTrackMetadataChanged event")
         .Exclude(Protocol.Knx, "Read-only metadata not actionable via KNX")
         //
         .Status("TRACK_METADATA_TITLE")
@@ -478,6 +473,7 @@ public static class SnapDogBlueprint
         .Get("/api/v1/zones/{zoneIndex:int}/track/title")
         .ApiReturns<string>()
         .Description("Track title")
+        .Exclude(Protocol.SignalR, "Individual metadata covered by ZoneTrackMetadataChanged event")
         //
         .Status("TRACK_METADATA_ARTIST")
         .Zone()
@@ -486,6 +482,7 @@ public static class SnapDogBlueprint
         .Get("/api/v1/zones/{zoneIndex:int}/track/artist")
         .ApiReturns<string>()
         .Description("Track artist")
+        .Exclude(Protocol.SignalR, "Individual metadata covered by ZoneTrackMetadataChanged event")
         //
         .Status("TRACK_METADATA_ALBUM")
         .Zone()
@@ -494,6 +491,7 @@ public static class SnapDogBlueprint
         .Get("/api/v1/zones/{zoneIndex:int}/track/album")
         .ApiReturns<string>()
         .Description("Track album")
+        .Exclude(Protocol.SignalR, "Individual metadata covered by ZoneTrackMetadataChanged event")
         //
         .Status("TRACK_METADATA_COVER")
         .Zone()
@@ -501,6 +499,7 @@ public static class SnapDogBlueprint
         .Get("/api/v1/zones/{zoneIndex:int}/track/cover")
         .ApiReturns<string>()
         .Description("Track cover art URL")
+        .Exclude(Protocol.SignalR, "Individual metadata covered by ZoneTrackMetadataChanged event")
         .Exclude(Protocol.Knx, "KNX cannot transmit URL strings effectively")
         //
         .Status("TRACK_PLAYING_STATUS")
@@ -508,6 +507,7 @@ public static class SnapDogBlueprint
         .Mqtt("snapdog/zones/{zoneIndex}/playing")
         .Knx()
         .Get("/api/v1/zones/{zoneIndex:int}/track/playing")
+        .SignalR("ZoneTrackPlayingChanged")
         .ApiReturns<bool>()
         .Description("Current playing state")
         //
@@ -517,6 +517,7 @@ public static class SnapDogBlueprint
         .Get("/api/v1/zones/{zoneIndex:int}/track/position")
         .ApiReturns<long>()
         .Description("Current track position")
+        .Exclude(Protocol.SignalR, "Position updates are covered by progress event")
         .Exclude(Protocol.Knx, "KNX lacks precision for millisecond-based position tracking")
         //
         .Status("TRACK_PROGRESS_STATUS")
@@ -524,6 +525,7 @@ public static class SnapDogBlueprint
         .Mqtt("snapdog/zones/{zoneIndex}/track/progress")
         .Knx()
         .Get("/api/v1/zones/{zoneIndex:int}/track/progress")
+        .SignalR("ZoneProgressChanged")
         .ApiReturns<float>()
         .Description("Track progress percentage")
         //
@@ -532,6 +534,7 @@ public static class SnapDogBlueprint
         .Mqtt("snapdog/zones/{zoneIndex}/repeat/track")
         .Knx()
         .Get("/api/v1/zones/{zoneIndex:int}/repeat/track")
+        .SignalR("ZoneRepeatModeChanged")
         .ApiReturns<bool>()
         .Description("Track repeat mode status")
         //
@@ -541,23 +544,25 @@ public static class SnapDogBlueprint
         .Zone()
         .Mqtt("snapdog/zones/{zoneIndex}/playlist")
         .Get("/api/v1/zones/{zoneIndex:int}/playlist")
+        .SignalR("ZonePlaylistChanged")
         .ApiReturns<int?>()
         .Description("Current playlist information")
         //
         .Status("PLAYLIST_INFO")
+        .Description("Detailed playlist information")
         .Zone()
         .Get("/api/v1/zones/{zoneIndex:int}/playlist/info")
         .ApiReturns<SnapDog2.Shared.Models.PlaylistInfo>()
         .Exclude(Protocol.Mqtt, "Playlist info available via individual playlist/* topics")
-        .Description("Detailed playlist information")
+        .Exclude(Protocol.SignalR, "Covered by other events or static data")
         //
         .Status("PLAYLIST_NAME_STATUS")
+        .Description("Current playlist name")
         .Zone()
         .Mqtt("snapdog/zones/{zoneIndex}/playlist/name")
         .Get("/api/v1/zones/{zoneIndex:int}/playlist/name")
         .ApiReturns<string>()
-        .Description("Current playlist name")
-        .RecentlyAdded()
+        .Exclude(Protocol.SignalR, "Covered by other events or static data")
         //
         .Status("PLAYLIST_COUNT_STATUS")
         .Zone()
@@ -565,12 +570,13 @@ public static class SnapDogBlueprint
         .Get("/api/v1/zones/{zoneIndex:int}/playlist/count")
         .ApiReturns<int>()
         .Description("Number of tracks in current playlist")
-        .RecentlyAdded()
+        .Exclude(Protocol.SignalR, "Covered by other events or static data")
         //
         .Status("PLAYLIST_SHUFFLE_STATUS")
         .Zone()
         .Mqtt("snapdog/zones/{zoneIndex}/shuffle")
         .Get("/api/v1/zones/{zoneIndex:int}/shuffle")
+        .SignalR("ZoneShuffleChanged")
         .ApiReturns<bool>()
         .Description("Playlist shuffle mode status")
         //
@@ -580,35 +586,15 @@ public static class SnapDogBlueprint
         .Get("/api/v1/zones/{zoneIndex:int}/repeat")
         .ApiReturns<bool>()
         .Description("Playlist repeat mode status")
+        .Exclude(Protocol.SignalR, "Covered by ZoneRepeatModeChanged event")
         //
         // === CLIENT STATUS ===
-        //
-        .Status("CLIENT_COUNT")
-        .Client()
-        .Get("/api/v1/clients/count")
-        .ApiReturns<int>()
-        .Exclude(Protocol.Knx, "KNX cannot query total client count effectively")
-        .Exclude(Protocol.Mqtt, "No single MQTT topic for total client count")
-        .ApiReturns<int>()
-        .Description("Get total number of configured clients")
-        //
-        .Status("CLIENT_STATE")
-        .Client()
-        .Mqtt("snapdog/clients/{clientIndex}/state")
-        .Get("/api/v1/clients/{clientIndex:int}")
-        .Description("Complete client state information")
-        //
-        .Status("CLIENT_VOLUME_STATUS")
-        .Client()
-        .Mqtt("snapdog/clients/{clientIndex}/volume")
-        .Get("/api/v1/clients/{clientIndex:int}/volume")
-        .ApiReturns<int>()
-        .Description("Current client volume level")
         //
         .Status("CLIENT_MUTE_STATUS")
         .Client()
         .Mqtt("snapdog/clients/{clientIndex}/mute")
         .Get("/api/v1/clients/{clientIndex:int}/mute")
+        .SignalR("ClientMuteChanged")
         .ApiReturns<bool>()
         .Description("Current client mute state")
         //
@@ -616,6 +602,7 @@ public static class SnapDogBlueprint
         .Client()
         .Mqtt("snapdog/clients/{clientIndex}/latency")
         .Get("/api/v1/clients/{clientIndex:int}/latency")
+        .SignalR("ClientLatencyChanged")
         .ApiReturns<int>()
         .Description("Current client latency setting")
         //
@@ -623,6 +610,7 @@ public static class SnapDogBlueprint
         .Client()
         .Mqtt("snapdog/clients/{clientIndex}/zone")
         .Get("/api/v1/clients/{clientIndex:int}/zone")
+        .SignalR("ClientZoneChanged")
         .ApiReturns<int?>()
         .Description("Client zone assignment")
         //
@@ -634,10 +622,26 @@ public static class SnapDogBlueprint
         .Description("Client name")
         .RecentlyAdded()
         //
+        .Status("CLIENT_VOLUME_STATUS")
+        .Client()
+        .Mqtt("snapdog/clients/{clientIndex}/volume")
+        .Get("/api/v1/clients/{clientIndex:int}/volume")
+        .SignalR("ClientVolumeChanged")
+        .ApiReturns<int>()
+        .Description("Client volume level")
+        //
+        .Status("CLIENT_STATE")
+        .Client()
+        .Mqtt("snapdog/clients/{clientIndex}/state")
+        .Get("/api/v1/clients/{clientIndex:int}/state")
+        .ApiReturns<object>()
+        .Description("Complete client state information")
+        //
         .Status("CLIENT_CONNECTED")
         .Client()
         .Mqtt("snapdog/clients/{clientIndex}/connected")
         .Get("/api/v1/clients/{clientIndex:int}/connected")
+        .SignalR("ClientConnected")
         .ApiReturns<bool>()
         .Description("Client connection status")
         //
@@ -647,13 +651,16 @@ public static class SnapDogBlueprint
         .Zone()
         .Mqtt("snapdog/zones/{zoneIndex}/control")
         .Description("Control command execution status (MQTT notifications only)")
-        //
+        .Description("Control command execution status (MQTT notifications only)")
+        .Exclude(Protocol.SignalR, "Covered by other events or static data")
         // === COMMAND RESPONSE STATUS ===
         //
         .Status("COMMAND_STATUS")
         .Global()
         .Get("/api/v1/system/commands/status")
+        .SignalR("CommandStatusChanged")
         .Exclude(Protocol.Mqtt, "Command success/failure inferred from state changes")
+        .Exclude(Protocol.Knx, "KNX does not provide direct command feedback")
         .Description("Command execution status")
         //
         .Status("COMMAND_ERROR")
@@ -661,11 +668,13 @@ public static class SnapDogBlueprint
         .Get("/api/v1/system/commands/errors")
         .Exclude(Protocol.Mqtt, "Command success/failure inferred from state changes")
         .Description("Command execution errors")
+        .Exclude(Protocol.SignalR, "Mqtt only")
         //
         .Status("SYSTEM_ERROR")
         .Global()
         .Mqtt("snapdog/system/error")
         .Get("/api/v1/system/errors")
+        .SignalR("ErrorOccurred")
         .Description("System-level errors")
         .Build();
 }

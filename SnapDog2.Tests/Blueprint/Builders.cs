@@ -30,6 +30,7 @@ public abstract class FeatureBuilder<TBuilder>
     protected string? _httpMethod;
     protected string? _apiPath;
     protected string? _mqttTopic;
+    protected string? _signalREvent;
     protected Type? _apiReturnType;
 
     protected FeatureBuilder(BlueprintBuilder blueprintBuilder, string id)
@@ -86,6 +87,13 @@ public abstract class FeatureBuilder<TBuilder>
     public TBuilder Knx()
     {
         _protocols |= Protocol.Knx;
+        return (TBuilder)this;
+    }
+
+    public TBuilder SignalR(string eventName)
+    {
+        _protocols |= Protocol.SignalR;
+        _signalREvent = eventName;
         return (TBuilder)this;
     }
 
@@ -194,6 +202,7 @@ public class CommandBuilder : FeatureBuilder<CommandBuilder>
             HttpMethod = _httpMethod,
             ApiPath = _apiPath,
             MqttTopic = _mqttTopic,
+            SignalREvent = _signalREvent,
             ApiReturnType = _apiReturnType,
         };
 
@@ -241,6 +250,7 @@ public class StatusBuilder : FeatureBuilder<StatusBuilder>
             HttpMethod = _httpMethod,
             ApiPath = _apiPath,
             MqttTopic = _mqttTopic,
+            SignalREvent = _signalREvent,
             ApiReturnType = _apiReturnType,
         };
 

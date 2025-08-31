@@ -400,7 +400,6 @@ public static class StaticApiAnalyzer
     {
         return SnapDogBlueprint
             .Spec.Status.Required()
-            .Where(status => !status.IsExcludedFrom(Protocol.Mqtt) || !status.IsExcludedFrom(Protocol.Knx))
             .Select(status => status.Id)
             .ToHashSet();
     }

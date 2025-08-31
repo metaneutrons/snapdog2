@@ -29,6 +29,7 @@ public abstract record FeatureSpec(string Id)
     public bool HasApi => Protocols.HasFlag(Protocol.Api);
     public bool HasMqtt => Protocols.HasFlag(Protocol.Mqtt);
     public bool HasKnx => Protocols.HasFlag(Protocol.Knx);
+    public bool HasSignalR => Protocols.HasFlag(Protocol.SignalR);
     public bool IsRequired => !IsOptional;
 
     // Exclusion checks
@@ -46,6 +47,7 @@ public record CommandSpec(string Id) : FeatureSpec(Id)
     public string? HttpMethod { get; init; }
     public string? ApiPath { get; init; }
     public string? MqttTopic { get; init; }
+    public string? SignalREvent { get; init; }
     public Type? ApiReturnType { get; init; }
 }
 
@@ -57,6 +59,7 @@ public record StatusSpec(string Id) : FeatureSpec(Id)
     public string? HttpMethod { get; init; }
     public string? ApiPath { get; init; }
     public string? MqttTopic { get; init; }
+    public string? SignalREvent { get; init; }
     public Type? ApiReturnType { get; init; }
 }
 
@@ -80,11 +83,15 @@ public class FeatureCollection<T> : IEnumerable<T>
 
     public FeatureCollection<T> WithKnx() => Filter(f => f.HasKnx && !f.IsExcludedFrom(Protocol.Knx));
 
+    public FeatureCollection<T> WithSignalR() => Filter(f => f.HasSignalR && !f.IsExcludedFrom(Protocol.SignalR));
+
     public FeatureCollection<T> WithoutApi() => Filter(f => !f.HasApi);
 
     public FeatureCollection<T> WithoutMqtt() => Filter(f => !f.HasMqtt);
 
     public FeatureCollection<T> WithoutKnx() => Filter(f => !f.HasKnx);
+
+    public FeatureCollection<T> WithoutSignalR() => Filter(f => !f.HasSignalR);
 
     // Category filters
     public FeatureCollection<T> Zone() => Filter(f => f.Category == FeatureCategory.Zone);
