@@ -62,7 +62,6 @@ public partial class HealthController(HealthCheckService healthCheckService, ILo
             {
                 HealthStatus.Healthy => StatusCodes.Status200OK,
                 HealthStatus.Degraded => StatusCodes.Status200OK,
-                HealthStatus.Unhealthy => StatusCodes.Status503ServiceUnavailable,
                 _ => StatusCodes.Status503ServiceUnavailable,
             };
 

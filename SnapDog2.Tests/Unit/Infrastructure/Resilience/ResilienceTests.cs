@@ -254,11 +254,11 @@ public class ResilienceTests
 
         // Snapcast works immediately
         mockSnapcast
-            .Setup(x => x.SetVolumeAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.SetVolumeAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
         // Act - Execute operations in parallel to simulate real scenario
-        var knxTask = TryExecuteAsync<string>(() =>
+        var knxTask = TryExecuteAsync(() =>
             knxPipeline
                 .ExecuteAsync(async _ =>
                 {
@@ -268,7 +268,7 @@ public class ResilienceTests
                 .AsTask()
         );
 
-        var mqttTask = TryExecuteAsync<string>(() =>
+        var mqttTask = TryExecuteAsync(() =>
             mqttPipeline
                 .ExecuteAsync(async _ =>
                 {
@@ -282,11 +282,11 @@ public class ResilienceTests
                 .AsTask()
         );
 
-        var snapcastTask = TryExecuteAsync<string>(() =>
+        var snapcastTask = TryExecuteAsync(() =>
             snapcastPipeline
                 .ExecuteAsync(async _ =>
                 {
-                    await mockSnapcast.Object.SetVolumeAsync("client1", 75, CancellationToken.None);
+                    await mockSnapcast.Object.SetVolumeAsync(1, 75, CancellationToken.None);
                     return "Snapcast Success";
                 })
                 .AsTask()
@@ -422,7 +422,7 @@ public class ResilienceTests
     public interface ISnapcastServer
     {
         Task ConnectAsync(CancellationToken cancellationToken);
-        Task SetVolumeAsync(string clientIndex, int volume, CancellationToken cancellationToken);
+        Task SetVolumeAsync(int clientIndex, int volume, CancellationToken cancellationToken);
     }
 
     public interface ISubsonicServer
