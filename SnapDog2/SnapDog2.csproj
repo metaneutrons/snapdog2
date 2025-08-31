@@ -39,6 +39,14 @@
   <ItemGroup>
     <Analyzer Include="..\SnapDog.Analyzers\bin\Debug\netstandard2.0\SnapDog.Analyzers.dll" />
   </ItemGroup>
-  <ItemGroup>
-  </ItemGroup>
+
+  <!-- Auto-generate swagger.json when API changes -->
+  <Target Name="GenerateSwaggerJson" AfterTargets="Build" Condition="'$(Configuration)' == 'Debug'">
+    <Message Text="🔄 Generating swagger.json..." Importance="high" />
+    <Exec Command="dotnet run --project $(MSBuildProjectDirectory)/../SnapDog2.SwaggerGen/SnapDog2.SwaggerGen.csproj -- $(MSBuildProjectDirectory)/swagger.json" 
+          ContinueOnError="false" 
+          WorkingDirectory="$(MSBuildProjectDirectory)" />
+    <Message Text="✅ swagger.json generated successfully" Importance="high" />
+  </Target>
+
 </Project>
