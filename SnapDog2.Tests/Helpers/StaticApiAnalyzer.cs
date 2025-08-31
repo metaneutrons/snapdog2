@@ -251,7 +251,7 @@ public static class StaticApiAnalyzer
             .ToList();
     }
 
-    private static List<(string statusId, string path, string method, Type? returnType)> GetBlueprintApiStatusWithTypes()
+    public static List<(string statusId, string path, string method, Type? returnType)> GetBlueprintApiStatusWithTypes()
     {
         return SnapDogBlueprint
             .Spec.Status.Required()
@@ -261,7 +261,7 @@ public static class StaticApiAnalyzer
             .ToList();
     }
 
-    private static Dictionary<string, Dictionary<string, Type?>> GetImplementedApiEndpointsWithTypes()
+    public static Dictionary<string, Dictionary<string, Type?>> GetImplementedApiEndpointsWithTypes()
     {
         var endpoints = new Dictionary<string, Dictionary<string, Type?>>();
 
