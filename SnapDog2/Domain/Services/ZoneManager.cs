@@ -1242,7 +1242,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     }
 
     // Internal synchronization methods
-    internal async Task SynchronizeWithSnapcastAsync(IEnumerable<Group> snapcastGroups)
+    async internal Task SynchronizeWithSnapcastAsync(IEnumerable<Group> snapcastGroups)
     {
         await this._stateLock.WaitAsync().ConfigureAwait(false);
         try

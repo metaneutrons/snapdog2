@@ -28,15 +28,15 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 [Shared]
 public class LoggerMessageCodeFixProvider : CodeFixProvider
 {
-    public sealed override ImmutableArray<string> FixableDiagnosticIds =>
+    public override sealed ImmutableArray<string> FixableDiagnosticIds =>
         ImmutableArray.Create(
             LoggerMessageAnalyzer.UseNamedParametersRule.Id,
             LoggerMessageAnalyzer.MoveToEndOfClassRule.Id
         );
 
-    public sealed override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
+    public override sealed FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 
-    public sealed override async Task RegisterCodeFixesAsync(CodeFixContext context)
+    public async override sealed Task RegisterCodeFixesAsync(CodeFixContext context)
     {
         var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
         if (root == null)

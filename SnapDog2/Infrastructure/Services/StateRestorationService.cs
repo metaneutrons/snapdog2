@@ -34,7 +34,7 @@ public partial class StateRestorationService(
     ILogger<StateRestorationService> logger)
     : BackgroundService
 {
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    async protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         try
         {

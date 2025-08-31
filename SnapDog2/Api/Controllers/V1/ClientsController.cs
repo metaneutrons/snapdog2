@@ -612,7 +612,13 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
             return this.NotFound($"Client {clientIndex} not found");
         }
 
-        return this.Ok(result.Value!.Name ?? $"Client {clientIndex}");
+        var s = result.Value!.Name;
+        if (s == null)
+        {
+            s = $"Client {clientIndex}";
+        }
+
+        return this.Ok(s);
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════

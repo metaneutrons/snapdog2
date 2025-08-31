@@ -399,7 +399,7 @@ public class PollyRetryIntegrationTests
         return new ResilienceConfig { Connection = policyConfig, Operation = policyConfig };
     }
 
-    private static async Task<(bool Success, Exception? Exception)> TryExecuteAsync<T>(Func<Task<T>> operation)
+    private async static Task<(bool Success, Exception? Exception)> TryExecuteAsync<T>(Func<Task<T>> operation)
     {
         try
         {

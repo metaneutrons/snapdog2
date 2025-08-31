@@ -29,7 +29,7 @@ public partial class BusinessMetricsCollectionService(
 {
     private readonly TimeSpan _collectionInterval = TimeSpan.FromSeconds(15); // Collect every 15 seconds
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    async protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         LogServiceStarted(logger, this._collectionInterval);
 

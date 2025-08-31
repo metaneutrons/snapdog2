@@ -224,7 +224,7 @@ public partial class IntegrationServicesHostedService(
 
     #endregion
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    async protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         this.LogInitializationStarted();
 
@@ -539,7 +539,7 @@ public partial class IntegrationServicesHostedService(
         await Task.CompletedTask; // Placeholder for any async cleanup operations
     }
 
-    public override async Task StopAsync(CancellationToken cancellationToken)
+    public async override Task StopAsync(CancellationToken cancellationToken)
     {
         this.LogStoppingIntegrationServices();
         await base.StopAsync(cancellationToken);

@@ -45,7 +45,7 @@ public partial class ZoneGroupingBackgroundService : BackgroundService
         this._reconciliationInterval = TimeSpan.FromMilliseconds(this._config.ZoneGroupingCheckIntervalMs);
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    async protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         this.LogZoneGroupingServiceStarting(this._config.ZoneGroupingCheckIntervalMs);
 

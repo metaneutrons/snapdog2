@@ -41,7 +41,6 @@ public partial class StartupService : IHostedService
         ILogger<StartupService> logger,
         IHostApplicationLifetime applicationLifetime,
         IOptions<SnapDogConfiguration> config,
-        IServiceProvider serviceProvider,
         IWebHostEnvironment environment
     )
     {
@@ -64,7 +63,7 @@ public partial class StartupService : IHostedService
         {
             await this.ExecuteWithRetryAsync(
                 "Port Availability Check",
-                async () => await this.ValidatePortAvailabilityAsync(cancellationToken),
+                async () => await this.ValidatePortAvailabilityAsync(),
                 cancellationToken
             );
 
@@ -205,7 +204,7 @@ public partial class StartupService : IHostedService
         }
     }
 
-    private async Task ValidatePortAvailabilityAsync(CancellationToken cancellationToken)
+    private async Task ValidatePortAvailabilityAsync()
     {
         var portsToCheck = new[]
         {
@@ -234,7 +233,7 @@ public partial class StartupService : IHostedService
                     this.LogPortConflictDetected(serviceName, port, conflictDetails);
 
                     // Attempt to find alternative port
-                    var alternativePort = await FindAlternativePortAsync(port, cancellationToken);
+                    var alternativePort = await FindAlternativePortAsync(port);
                     if (alternativePort.HasValue)
                     {
                         this.LogAlternativePortFound(serviceName, alternativePort.Value);
@@ -425,7 +424,7 @@ public partial class StartupService : IHostedService
         }
     }
 
-    private static async Task<int?> FindAlternativePortAsync(int preferredPort, CancellationToken cancellationToken)
+    private static async Task<int?> FindAlternativePortAsync(int preferredPort)
     {
         for (var offset = 1; offset <= PortScanRange; offset++)
         {

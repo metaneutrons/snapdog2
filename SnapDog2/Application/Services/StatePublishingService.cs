@@ -190,7 +190,7 @@ public partial class StatePublishingService(
                             }
                             else
                             {
-                                var error = t.Exception?.GetBaseException()?.Message ?? "Unknown error";
+                                var error = t.Exception?.GetBaseException().Message ?? "Unknown error";
                                 this.LogGlobalStatePublishFailed(error);
                                 Interlocked.Increment(ref failureCount);
                             }
@@ -200,7 +200,7 @@ public partial class StatePublishingService(
             );
 
             // 2. Publish zone states for all configured zones
-            if (this._configuration.Zones?.Any() == true)
+            if (this._configuration.Zones.Count != 0)
             {
                 this.LogPublishingZoneStates(this._configuration.Zones.Count);
 
@@ -219,7 +219,7 @@ public partial class StatePublishingService(
                                     }
                                     else
                                     {
-                                        var error = t.Exception?.GetBaseException()?.Message ?? "Unknown error";
+                                        var error = t.Exception?.GetBaseException().Message ?? "Unknown error";
                                         this.LogZoneStatePublishFailed(zoneIndex, error);
                                         Interlocked.Increment(ref failureCount);
                                     }
@@ -231,7 +231,7 @@ public partial class StatePublishingService(
             }
 
             // 3. Publish client states for all configured clients
-            if (this._configuration.Clients?.Any() == true)
+            if (this._configuration.Clients.Count != 0)
             {
                 this.LogPublishingClientStates(this._configuration.Clients.Count);
 
@@ -250,7 +250,7 @@ public partial class StatePublishingService(
                                     }
                                     else
                                     {
-                                        var error = t.Exception?.GetBaseException()?.Message ?? "Unknown error";
+                                        var error = t.Exception?.GetBaseException().Message ?? "Unknown error";
                                         this.LogClientStatePublishFailed(clientIndex, error);
                                         Interlocked.Increment(ref failureCount);
                                     }
@@ -332,8 +332,8 @@ public partial class StatePublishingService(
 
             // Publish zones info for system discovery
             var zoneIndices =
-                this._configuration.Zones?.Select((_, index) => index + 1) // Zones are 1-based
-                    .ToList() ?? new List<int>();
+                this._configuration.Zones.Select((_, index) => index + 1) // Zones are 1-based
+                    .ToList();
             await mediator.PublishAsync(new ZonesInfoChangedNotification(zoneIndices), cancellationToken);
 
             return true;

@@ -37,7 +37,7 @@ public sealed partial class NotificationBackgroundService(
     private readonly ILogger<NotificationBackgroundService> _logger = logger;
     private readonly IMetricsService? _metrics = metrics;
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    async protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         LogServiceStarted(this._logger);
 
@@ -189,7 +189,7 @@ public sealed partial class NotificationBackgroundService(
         }
     }
 
-    public override async Task StopAsync(CancellationToken cancellationToken)
+    public async override Task StopAsync(CancellationToken cancellationToken)
     {
         // Graceful drain: complete writer and wait up to configured timeout
         this._queue.CompleteWriter();

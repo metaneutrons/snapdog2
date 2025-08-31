@@ -173,7 +173,7 @@ public partial class EnterpriseMetricsService : IMetricsService, IDisposable
         }
     }
 
-    private static async Task<double> GetCpuUsageCrossPlatformAsync()
+    private async static Task<double> GetCpuUsageCrossPlatformAsync()
     {
         // Cross-platform CPU usage calculation using Process.TotalProcessorTime
         var startTime = DateTime.UtcNow;
