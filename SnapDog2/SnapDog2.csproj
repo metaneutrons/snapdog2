@@ -3,6 +3,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <GitVersionTaskEnabled Condition="'$(CI)' != 'true'">true</GitVersionTaskEnabled>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Cortex.Mediator" />
@@ -25,7 +26,9 @@
     <PackageReference Include="Knx.Falcon.Sdk" />
     <PackageReference Include="Polly" />
     <PackageReference Include="Microsoft.Extensions.Http.Polly" />
-    <PackageReference Include="GitVersion.MsBuild" PrivateAssets="All" />
+    <PackageReference Include="GitVersion.MsBuild" PrivateAssets="All">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="System.CommandLine" />
     <PackageReference Include="SubsonicMedia" />
     <PackageReference Include="LibVLCSharp" />
