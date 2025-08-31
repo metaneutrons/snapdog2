@@ -86,7 +86,7 @@ public partial class MqttCommandMapper(ILogger<MqttCommandMapper> logger, MqttCo
             this.LogMappingCommand(topic, payload);
 
             // Parse topic using structured parser
-            var topicParts = MqttTopicParser.Parse(topic, _mqttConfig.MqttBaseTopic);
+            var topicParts = MqttTopicParser.Parse(topic, this._mqttConfig.MqttBaseTopic);
             if (topicParts == null || !topicParts.IsControlTopic)
             {
                 return null;
@@ -128,20 +128,20 @@ public partial class MqttCommandMapper(ILogger<MqttCommandMapper> logger, MqttCo
     /// <summary>
     /// Validates that a topic follows the expected MQTT topic structure.
     /// </summary>
-    public bool IsValidMqttTopic(string topic) => MqttTopicParser.IsValid(topic, _mqttConfig.MqttBaseTopic);
+    public bool IsValidMqttTopic(string topic) => MqttTopicParser.IsValid(topic, this._mqttConfig.MqttBaseTopic);
 
     /// <summary>
     /// Gets the entity type (zones/client) from an MQTT topic.
     /// </summary>
-    public string? GetEntityType(string topic) => MqttTopicParser.Parse(topic, _mqttConfig.MqttBaseTopic)?.EntityType;
+    public string? GetEntityType(string topic) => MqttTopicParser.Parse(topic, this._mqttConfig.MqttBaseTopic)?.EntityType;
 
     /// <summary>
     /// Gets the entity ID from an MQTT topic.
     /// </summary>
-    public int? GetEntityId(string topic) => MqttTopicParser.Parse(topic, _mqttConfig.MqttBaseTopic)?.EntityId;
+    public int? GetEntityId(string topic) => MqttTopicParser.Parse(topic, this._mqttConfig.MqttBaseTopic)?.EntityId;
 
     /// <summary>
     /// Gets the command name from an MQTT topic.
     /// </summary>
-    public string? GetCommandName(string topic) => MqttTopicParser.Parse(topic, _mqttConfig.MqttBaseTopic)?.Command;
+    public string? GetCommandName(string topic) => MqttTopicParser.Parse(topic, this._mqttConfig.MqttBaseTopic)?.Command;
 }

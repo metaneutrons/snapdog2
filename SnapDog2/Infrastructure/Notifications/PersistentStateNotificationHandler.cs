@@ -39,8 +39,8 @@ public partial class PersistentStateNotificationHandler :
         IPersistentStateStore persistentStore,
         ILogger<PersistentStateNotificationHandler> logger)
     {
-        _persistentStore = persistentStore;
-        _logger = logger;
+        this._persistentStore = persistentStore;
+        this._logger = logger;
     }
 
     /// <summary>
@@ -50,16 +50,16 @@ public partial class PersistentStateNotificationHandler :
     {
         try
         {
-            LogClientStatePersisting(notification.ClientIndex);
+            this.LogClientStatePersisting(notification.ClientIndex);
 
             // Client state changes are typically less frequent, save immediately
-            await _persistentStore.SaveClientStateAsync(notification.ClientIndex, notification.ClientState);
+            await this._persistentStore.SaveClientStateAsync(notification.ClientIndex, notification.ClientState);
 
-            LogClientStatePersisted(notification.ClientIndex, notification.ClientState.Name);
+            this.LogClientStatePersisted(notification.ClientIndex, notification.ClientState.Name);
         }
         catch (Exception ex)
         {
-            LogClientStatePersistFailed(ex, notification.ClientIndex);
+            this.LogClientStatePersistFailed(ex, notification.ClientIndex);
         }
     }
 
@@ -69,39 +69,38 @@ public partial class PersistentStateNotificationHandler :
     private void DebounceZoneSave(int zoneIndex, SnapDog2.Shared.Models.ZoneState zoneState)
     {
         // Cancel existing timer
-        if (_zoneDebounceTimers.TryGetValue(zoneIndex, out var existingTimer))
+        if (this._zoneDebounceTimers.TryGetValue(zoneIndex, out var existingTimer))
         {
             existingTimer.Dispose();
         }
 
         // Create new timer for delayed save
-        _zoneDebounceTimers[zoneIndex] = new Timer(
+        this._zoneDebounceTimers[zoneIndex] = new Timer(
             async _ =>
             {
                 try
                 {
-                    await _persistentStore.SaveZoneStateAsync(zoneIndex, zoneState);
-                    LogZoneStateDebounced(zoneIndex, zoneState.Name);
+                    await this._persistentStore.SaveZoneStateAsync(zoneIndex, zoneState);
+                    this.LogZoneStateDebounced(zoneIndex, zoneState.Name);
                 }
                 catch (Exception ex)
                 {
-                    LogZoneStatePersistFailed(ex, zoneIndex);
+                    this.LogZoneStatePersistFailed(ex, zoneIndex);
                 }
                 finally
                 {
                     // Clean up timer
-                    if (_zoneDebounceTimers.TryRemove(zoneIndex, out var timer))
+                    if (this._zoneDebounceTimers.TryRemove(zoneIndex, out var timer))
                     {
                         timer.Dispose();
                     }
                 }
             },
-            null,
-            _debounceDelay,
+            null, this._debounceDelay,
             Timeout.InfiniteTimeSpan
         );
 
-        LogZoneStateDebouncing(zoneIndex);
+        this.LogZoneStateDebouncing(zoneIndex);
     }
 
     /// <summary>

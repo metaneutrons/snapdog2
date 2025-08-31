@@ -26,17 +26,16 @@ public abstract record FeatureSpec(string Id)
     public List<ProtocolExclusion> Exclusions { get; init; } = new();
 
     // Protocol checks
-    public bool HasApi => Protocols.HasFlag(Protocol.Api);
-    public bool HasMqtt => Protocols.HasFlag(Protocol.Mqtt);
-    public bool HasKnx => Protocols.HasFlag(Protocol.Knx);
-    public bool HasSignalR => Protocols.HasFlag(Protocol.SignalR);
-    public bool IsRequired => !IsOptional;
+    public bool HasApi => this.Protocols.HasFlag(Protocol.Api);
+    public bool HasMqtt => this.Protocols.HasFlag(Protocol.Mqtt);
+    public bool HasKnx => this.Protocols.HasFlag(Protocol.Knx);
+    public bool HasSignalR => this.Protocols.HasFlag(Protocol.SignalR);
+    public bool IsRequired => !this.IsOptional;
 
     // Exclusion checks
-    public bool IsExcludedFrom(Protocol protocol) => Exclusions.Any(e => e.Protocol == protocol);
+    public bool IsExcludedFrom(Protocol protocol) => this.Exclusions.Any(e => e.Protocol == protocol);
 
-    public string? GetExclusionReason(Protocol protocol) =>
-        Exclusions.FirstOrDefault(e => e.Protocol == protocol)?.Reason;
+    public string? GetExclusionReason(Protocol protocol) => this.Exclusions.FirstOrDefault(e => e.Protocol == protocol)?.Reason;
 }
 
 /// <summary>
@@ -73,46 +72,46 @@ public class FeatureCollection<T> : IEnumerable<T>
 
     public FeatureCollection(IEnumerable<T> features)
     {
-        _features = features.ToList();
+        this._features = features.ToList();
     }
 
     // Protocol filters
-    public FeatureCollection<T> WithApi() => Filter(f => f.HasApi && !f.IsExcludedFrom(Protocol.Api));
+    public FeatureCollection<T> WithApi() => this.Filter(f => f.HasApi && !f.IsExcludedFrom(Protocol.Api));
 
-    public FeatureCollection<T> WithMqtt() => Filter(f => f.HasMqtt && !f.IsExcludedFrom(Protocol.Mqtt));
+    public FeatureCollection<T> WithMqtt() => this.Filter(f => f.HasMqtt && !f.IsExcludedFrom(Protocol.Mqtt));
 
-    public FeatureCollection<T> WithKnx() => Filter(f => f.HasKnx && !f.IsExcludedFrom(Protocol.Knx));
+    public FeatureCollection<T> WithKnx() => this.Filter(f => f.HasKnx && !f.IsExcludedFrom(Protocol.Knx));
 
-    public FeatureCollection<T> WithSignalR() => Filter(f => f.HasSignalR && !f.IsExcludedFrom(Protocol.SignalR));
+    public FeatureCollection<T> WithSignalR() => this.Filter(f => f.HasSignalR && !f.IsExcludedFrom(Protocol.SignalR));
 
-    public FeatureCollection<T> WithoutApi() => Filter(f => !f.HasApi);
+    public FeatureCollection<T> WithoutApi() => this.Filter(f => !f.HasApi);
 
-    public FeatureCollection<T> WithoutMqtt() => Filter(f => !f.HasMqtt);
+    public FeatureCollection<T> WithoutMqtt() => this.Filter(f => !f.HasMqtt);
 
-    public FeatureCollection<T> WithoutKnx() => Filter(f => !f.HasKnx);
+    public FeatureCollection<T> WithoutKnx() => this.Filter(f => !f.HasKnx);
 
-    public FeatureCollection<T> WithoutSignalR() => Filter(f => !f.HasSignalR);
+    public FeatureCollection<T> WithoutSignalR() => this.Filter(f => !f.HasSignalR);
 
     // Category filters
-    public FeatureCollection<T> Zone() => Filter(f => f.Category == FeatureCategory.Zone);
+    public FeatureCollection<T> Zone() => this.Filter(f => f.Category == FeatureCategory.Zone);
 
-    public FeatureCollection<T> Client() => Filter(f => f.Category == FeatureCategory.Client);
+    public FeatureCollection<T> Client() => this.Filter(f => f.Category == FeatureCategory.Client);
 
-    public FeatureCollection<T> Global() => Filter(f => f.Category == FeatureCategory.Global);
+    public FeatureCollection<T> Global() => this.Filter(f => f.Category == FeatureCategory.Global);
 
     // Requirement filters
-    public FeatureCollection<T> Required() => Filter(f => f.IsRequired);
+    public FeatureCollection<T> Required() => this.Filter(f => f.IsRequired);
 
-    public FeatureCollection<T> Optional() => Filter(f => f.IsOptional);
+    public FeatureCollection<T> Optional() => this.Filter(f => f.IsOptional);
 
-    public FeatureCollection<T> RecentlyAdded() => Filter(f => f.IsRecentlyAdded);
+    public FeatureCollection<T> RecentlyAdded() => this.Filter(f => f.IsRecentlyAdded);
 
     // Exclusion filters
-    public FeatureCollection<T> ExcludedFrom(Protocol protocol) => Filter(f => f.IsExcludedFrom(protocol));
+    public FeatureCollection<T> ExcludedFrom(Protocol protocol) => this.Filter(f => f.IsExcludedFrom(protocol));
 
     // HTTP method filters (for commands/status with API endpoints)
     public FeatureCollection<T> WithMethod(string method) =>
-        Filter(f =>
+        this.Filter(f =>
             f switch
             {
                 CommandSpec c => c.HttpMethod == method,
@@ -122,9 +121,9 @@ public class FeatureCollection<T> : IEnumerable<T>
         );
 
     // Utility methods
-    private FeatureCollection<T> Filter(Func<T, bool> predicate) => new(_features.Where(predicate));
+    private FeatureCollection<T> Filter(Func<T, bool> predicate) => new(this._features.Where(predicate));
 
-    public IEnumerator<T> GetEnumerator() => _features.GetEnumerator();
+    public IEnumerator<T> GetEnumerator() => this._features.GetEnumerator();
 
-    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => this.GetEnumerator();
 }

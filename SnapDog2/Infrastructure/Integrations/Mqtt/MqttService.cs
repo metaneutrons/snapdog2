@@ -74,7 +74,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     /// <returns>Full topic with base prefix (e.g., "snapdog/zones/1/volume")</returns>
     private string BuildTopic(string topicSuffix)
     {
-        var baseTopic = _config.MqttBaseTopic.TrimEnd('/');
+        var baseTopic = this._config.MqttBaseTopic.TrimEnd('/');
         return $"{baseTopic}/{topicSuffix}";
     }
 
@@ -85,7 +85,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
     /// <returns>Topic suffix without base prefix, or null if doesn't match base</returns>
     private string? ExtractTopicSuffix(string fullTopic)
     {
-        var baseTopic = _config.MqttBaseTopic.TrimEnd('/');
+        var baseTopic = this._config.MqttBaseTopic.TrimEnd('/');
         var expectedPrefix = $"{baseTopic}/";
 
         if (fullTopic.StartsWith(expectedPrefix, StringComparison.OrdinalIgnoreCase))
@@ -421,7 +421,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         try
         {
             // Check if this represents a meaningful change
-            var lastPublished = _lastPublishedZoneStates.GetValueOrDefault(zoneIndex);
+            var lastPublished = this._lastPublishedZoneStates.GetValueOrDefault(zoneIndex);
             if (!HasMeaningfulChange(lastPublished, state))
             {
                 // No meaningful change, skip publishing
@@ -429,7 +429,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             }
 
             // Use simple zone state topic that matches blueprint pattern
-            var stateTopic = BuildTopic($"zones/{zoneIndex}/state");
+            var stateTopic = this.BuildTopic($"zones/{zoneIndex}/state");
 
             // Publish zone state as JSON
             var stateJson = JsonSerializer.Serialize(
@@ -439,7 +439,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             await this.PublishAsync(stateTopic, stateJson, true, cancellationToken);
 
             // Cache the published state for future change detection
-            _lastPublishedZoneStates[zoneIndex] = state;
+            this._lastPublishedZoneStates[zoneIndex] = state;
 
             return Result.Success();
         }
@@ -477,7 +477,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         try
         {
             // Use simple client state topic that matches blueprint pattern
-            var clientStateTopic = BuildTopic($"client/{parsedClientIndex}/state");
+            var clientStateTopic = this.BuildTopic($"client/{parsedClientIndex}/state");
 
             // Publish comprehensive state as JSON
             var stateJson = JsonSerializer.Serialize(
@@ -690,7 +690,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         try
         {
             // Extract topic suffix and parse: {zone|client}/{index}/{command}
-            var topicSuffix = ExtractTopicSuffix(topic);
+            var topicSuffix = this.ExtractTopicSuffix(topic);
             if (topicSuffix == null)
             {
                 this.LogNoCommandMappingFoundForTopic(topic);
@@ -1086,12 +1086,12 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         // Use simple topic patterns that match the blueprint
         return eventType.ToUpperInvariant() switch
         {
-            "CLIENT_VOLUME_STATUS" => BuildTopic($"clients/{clientIndex}/volume"),
-            "CLIENT_MUTE_STATUS" => BuildTopic($"clients/{clientIndex}/mute"),
-            "CLIENT_LATENCY_STATUS" => BuildTopic($"clients/{clientIndex}/latency"),
-            "CLIENT_CONNECTED" => BuildTopic($"clients/{clientIndex}/connected"),
-            "CLIENT_ZONE_STATUS" => BuildTopic($"clients/{clientIndex}/zone"),
-            "CLIENT_STATE" => BuildTopic($"clients/{clientIndex}"),
+            "CLIENT_VOLUME_STATUS" => this.BuildTopic($"clients/{clientIndex}/volume"),
+            "CLIENT_MUTE_STATUS" => this.BuildTopic($"clients/{clientIndex}/mute"),
+            "CLIENT_LATENCY_STATUS" => this.BuildTopic($"clients/{clientIndex}/latency"),
+            "CLIENT_CONNECTED" => this.BuildTopic($"clients/{clientIndex}/connected"),
+            "CLIENT_ZONE_STATUS" => this.BuildTopic($"clients/{clientIndex}/zone"),
+            "CLIENT_STATE" => this.BuildTopic($"clients/{clientIndex}"),
             _ => null,
         };
     }
@@ -1107,9 +1107,9 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
         // Use simple topic patterns that match the blueprint
         return eventType.ToUpperInvariant() switch
         {
-            "VOLUME_STATUS" => BuildTopic($"zones/{zoneIndex}/volume"),
-            "MUTE_STATUS" => BuildTopic($"zones/{zoneIndex}/mute"),
-            "PLAYBACK_STATE" => BuildTopic($"zones/{zoneIndex}/playing"),
+            "VOLUME_STATUS" => this.BuildTopic($"zones/{zoneIndex}/volume"),
+            "MUTE_STATUS" => this.BuildTopic($"zones/{zoneIndex}/mute"),
+            "PLAYBACK_STATE" => this.BuildTopic($"zones/{zoneIndex}/playing"),
             _ => null,
         };
     }
@@ -1180,9 +1180,9 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             // Use simple topic patterns that match the blueprint
             var topic = eventType.ToUpperInvariant() switch
             {
-                "SYSTEM_STATUS" => BuildTopic("system/status"),
-                "VERSION_INFO" => BuildTopic("system/version"),
-                "SERVER_STATS" => BuildTopic("system/stats"),
+                "SYSTEM_STATUS" => this.BuildTopic("system/status"),
+                "VERSION_INFO" => this.BuildTopic("system/version"),
+                "SERVER_STATS" => this.BuildTopic("system/stats"),
                 _ => null,
             };
 

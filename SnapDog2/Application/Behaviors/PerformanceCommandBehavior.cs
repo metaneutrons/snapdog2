@@ -56,7 +56,7 @@ public partial class PerformanceCommandBehavior<TCommand, TResponse>(
             var durationSeconds = stopwatch.ElapsedMilliseconds / 1000.0;
 
             // Record metrics
-            _metricsService.RecordCortexMediatorRequestDuration(
+            this._metricsService.RecordCortexMediatorRequestDuration(
                 "Command",
                 commandName,
                 stopwatch.ElapsedMilliseconds,
@@ -70,7 +70,7 @@ public partial class PerformanceCommandBehavior<TCommand, TResponse>(
             }
 
             // Record specific command metrics based on command type
-            RecordCommandSpecificMetrics(command, response, durationSeconds);
+            this.RecordCommandSpecificMetrics(command, response, durationSeconds);
 
             return response;
         }
@@ -80,13 +80,13 @@ public partial class PerformanceCommandBehavior<TCommand, TResponse>(
             success = false;
 
             // Record error metrics
-            _metricsService.RecordCortexMediatorRequestDuration(
+            this._metricsService.RecordCortexMediatorRequestDuration(
                 "Command",
                 commandName,
                 stopwatch.ElapsedMilliseconds,
                 false
             );
-            _metricsService.RecordException(ex, "CommandPipeline", commandName);
+            this._metricsService.RecordException(ex, "CommandPipeline", commandName);
 
             this.LogCommandException(commandName, stopwatch.ElapsedMilliseconds, ex);
             throw;
@@ -113,7 +113,7 @@ public partial class PerformanceCommandBehavior<TCommand, TResponse>(
                 {
                     // For volume commands, we'd need the old/new values
                     // This is a simplified version - in practice you'd extract actual values
-                    _metricsService.RecordVolumeChange(targetId, targetType, 0, 0);
+                    this._metricsService.RecordVolumeChange(targetId, targetType, 0, 0);
                 }
             }
 
@@ -126,14 +126,14 @@ public partial class PerformanceCommandBehavior<TCommand, TResponse>(
                 var zoneIndex = ExtractZoneId(command);
                 if (!string.IsNullOrEmpty(zoneIndex))
                 {
-                    _metricsService.RecordTrackChange(zoneIndex, null, null);
+                    this._metricsService.RecordTrackChange(zoneIndex, null, null);
                 }
             }
         }
         catch (Exception ex)
         {
             // Don't let metrics recording failures affect command execution
-            LogMetricsRecordingFailed(_logger, ex, typeof(TCommand).Name);
+            LogMetricsRecordingFailed(this._logger, ex, typeof(TCommand).Name);
         }
     }
 

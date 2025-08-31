@@ -90,5 +90,5 @@ public class SnapDogConfiguration
     /// <summary>
     /// Base MQTT topic prefix. Convenience property that maps to Services.Mqtt.MqttBaseTopic.
     /// </summary>
-    public string MqttBaseTopic => Services.Mqtt.MqttBaseTopic;
+    public string MqttBaseTopic => this.Services.Mqtt.MqttBaseTopic;
 }

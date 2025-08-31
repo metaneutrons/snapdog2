@@ -35,127 +35,127 @@ public abstract class FeatureBuilder<TBuilder>
 
     protected FeatureBuilder(BlueprintBuilder blueprintBuilder, string id)
     {
-        _blueprintBuilder = blueprintBuilder;
-        _id = id;
+        this._blueprintBuilder = blueprintBuilder;
+        this._id = id;
     }
 
     // Category methods
     public TBuilder Zone()
     {
-        _category = FeatureCategory.Zone;
+        this._category = FeatureCategory.Zone;
         return (TBuilder)this;
     }
 
     public TBuilder Client()
     {
-        _category = FeatureCategory.Client;
+        this._category = FeatureCategory.Client;
         return (TBuilder)this;
     }
 
     public TBuilder Global()
     {
-        _category = FeatureCategory.Global;
+        this._category = FeatureCategory.Global;
         return (TBuilder)this;
     }
 
     public TBuilder Media()
     {
-        _category = FeatureCategory.Media;
+        this._category = FeatureCategory.Media;
         return (TBuilder)this;
     }
 
     // Protocol methods
     public TBuilder Api()
     {
-        _protocols |= Protocol.Api;
+        this._protocols |= Protocol.Api;
         return (TBuilder)this;
     }
 
     public TBuilder Mqtt()
     {
-        _protocols |= Protocol.Mqtt;
+        this._protocols |= Protocol.Mqtt;
         return (TBuilder)this;
     }
 
     public TBuilder Mqtt(string topicPattern)
     {
-        _protocols |= Protocol.Mqtt;
-        _mqttTopic = topicPattern;
+        this._protocols |= Protocol.Mqtt;
+        this._mqttTopic = topicPattern;
         return (TBuilder)this;
     }
 
     public TBuilder Knx()
     {
-        _protocols |= Protocol.Knx;
+        this._protocols |= Protocol.Knx;
         return (TBuilder)this;
     }
 
     public TBuilder SignalR(string eventName)
     {
-        _protocols |= Protocol.SignalR;
-        _signalREvent = eventName;
+        this._protocols |= Protocol.SignalR;
+        this._signalREvent = eventName;
         return (TBuilder)this;
     }
 
     // HTTP method methods
     public TBuilder Get(string path)
     {
-        _httpMethod = "GET";
-        _apiPath = path;
-        return Api();
+        this._httpMethod = "GET";
+        this._apiPath = path;
+        return this.Api();
     }
 
     public TBuilder Post(string path)
     {
-        _httpMethod = "POST";
-        _apiPath = path;
-        return Api();
+        this._httpMethod = "POST";
+        this._apiPath = path;
+        return this.Api();
     }
 
     public TBuilder Put(string path)
     {
-        _httpMethod = "PUT";
-        _apiPath = path;
-        return Api();
+        this._httpMethod = "PUT";
+        this._apiPath = path;
+        return this.Api();
     }
 
     public TBuilder Delete(string path)
     {
-        _httpMethod = "DELETE";
-        _apiPath = path;
-        return Api();
+        this._httpMethod = "DELETE";
+        this._apiPath = path;
+        return this.Api();
     }
 
     // API return type method
     public TBuilder ApiReturns<T>()
     {
-        _apiReturnType = typeof(T);
+        this._apiReturnType = typeof(T);
         return (TBuilder)this;
     }
 
     // Documentation methods
     public TBuilder Description(string description)
     {
-        _description = description;
+        this._description = description;
         return (TBuilder)this;
     }
 
     // Modifier methods
     public TBuilder Exclude(Protocol protocol, string reason)
     {
-        _exclusions.Add(new ProtocolExclusion(protocol, reason));
+        this._exclusions.Add(new ProtocolExclusion(protocol, reason));
         return (TBuilder)this;
     }
 
     public TBuilder RecentlyAdded()
     {
-        _isRecentlyAdded = true;
+        this._isRecentlyAdded = true;
         return (TBuilder)this;
     }
 
     public TBuilder Optional()
     {
-        _isOptional = true;
+        this._isOptional = true;
         return (TBuilder)this;
     }
 
@@ -173,40 +173,40 @@ public class CommandBuilder : FeatureBuilder<CommandBuilder>
     // Fluent continuation methods
     public CommandBuilder Command(string id)
     {
-        BuildFeature();
-        return _blueprintBuilder.Command(id);
+        this.BuildFeature();
+        return this._blueprintBuilder.Command(id);
     }
 
     public StatusBuilder Status(string id)
     {
-        BuildFeature();
-        return _blueprintBuilder.Status(id);
+        this.BuildFeature();
+        return this._blueprintBuilder.Status(id);
     }
 
     public Blueprint Build()
     {
-        BuildFeature();
-        return _blueprintBuilder.Build();
+        this.BuildFeature();
+        return this._blueprintBuilder.Build();
     }
 
     protected override void BuildFeature()
     {
-        var command = new CommandSpec(_id)
+        var command = new CommandSpec(this._id)
         {
-            Category = _category,
-            Protocols = _protocols,
-            Description = _description,
-            IsOptional = _isOptional,
-            IsRecentlyAdded = _isRecentlyAdded,
-            Exclusions = _exclusions,
-            HttpMethod = _httpMethod,
-            ApiPath = _apiPath,
-            MqttTopic = _mqttTopic,
-            SignalREvent = _signalREvent,
-            ApiReturnType = _apiReturnType,
+            Category = this._category,
+            Protocols = this._protocols,
+            Description = this._description,
+            IsOptional = this._isOptional,
+            IsRecentlyAdded = this._isRecentlyAdded,
+            Exclusions = this._exclusions,
+            HttpMethod = this._httpMethod,
+            ApiPath = this._apiPath,
+            MqttTopic = this._mqttTopic,
+            SignalREvent = this._signalREvent,
+            ApiReturnType = this._apiReturnType,
         };
 
-        _blueprintBuilder.AddCommand(command);
+        this._blueprintBuilder.AddCommand(command);
     }
 }
 
@@ -221,39 +221,39 @@ public class StatusBuilder : FeatureBuilder<StatusBuilder>
     // Fluent continuation methods
     public CommandBuilder Command(string id)
     {
-        BuildFeature();
-        return _blueprintBuilder.Command(id);
+        this.BuildFeature();
+        return this._blueprintBuilder.Command(id);
     }
 
     public StatusBuilder Status(string id)
     {
-        BuildFeature();
-        return _blueprintBuilder.Status(id);
+        this.BuildFeature();
+        return this._blueprintBuilder.Status(id);
     }
 
     public Blueprint Build()
     {
-        BuildFeature();
-        return _blueprintBuilder.Build();
+        this.BuildFeature();
+        return this._blueprintBuilder.Build();
     }
 
     protected override void BuildFeature()
     {
-        var status = new StatusSpec(_id)
+        var status = new StatusSpec(this._id)
         {
-            Category = _category,
-            Protocols = _protocols,
-            Description = _description,
-            IsOptional = _isOptional,
-            IsRecentlyAdded = _isRecentlyAdded,
-            Exclusions = _exclusions,
-            HttpMethod = _httpMethod,
-            ApiPath = _apiPath,
-            MqttTopic = _mqttTopic,
-            SignalREvent = _signalREvent,
-            ApiReturnType = _apiReturnType,
+            Category = this._category,
+            Protocols = this._protocols,
+            Description = this._description,
+            IsOptional = this._isOptional,
+            IsRecentlyAdded = this._isRecentlyAdded,
+            Exclusions = this._exclusions,
+            HttpMethod = this._httpMethod,
+            ApiPath = this._apiPath,
+            MqttTopic = this._mqttTopic,
+            SignalREvent = this._signalREvent,
+            ApiReturnType = this._apiReturnType,
         };
 
-        _blueprintBuilder.AddStatus(status);
+        this._blueprintBuilder.AddStatus(status);
     }
 }

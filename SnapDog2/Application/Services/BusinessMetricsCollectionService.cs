@@ -36,21 +36,21 @@ public partial class BusinessMetricsCollectionService : BackgroundService
         IServiceProvider serviceProvider
     )
     {
-        _logger = logger;
-        _metricsService = metricsService;
-        _serviceProvider = serviceProvider;
+        this._logger = logger;
+        this._metricsService = metricsService;
+        this._serviceProvider = serviceProvider;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        LogServiceStarted(_logger, _collectionInterval);
+        LogServiceStarted(this._logger, this._collectionInterval);
 
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
-                await CollectBusinessMetricsAsync();
-                await Task.Delay(_collectionInterval, stoppingToken);
+                await this.CollectBusinessMetricsAsync();
+                await Task.Delay(this._collectionInterval, stoppingToken);
             }
             catch (OperationCanceledException)
             {
@@ -59,17 +59,17 @@ public partial class BusinessMetricsCollectionService : BackgroundService
             }
             catch (Exception ex)
             {
-                LogErrorCollectingMetrics(_logger, ex);
+                LogErrorCollectingMetrics(this._logger, ex);
 
                 // Record the error in metrics
-                _metricsService.RecordException(ex, "BusinessMetricsCollection");
+                this._metricsService.RecordException(ex, "BusinessMetricsCollection");
 
                 // Wait a bit before retrying
                 await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
             }
         }
 
-        LogServiceStopped(_logger);
+        LogServiceStopped(this._logger);
     }
 
     /// <summary>
@@ -79,7 +79,7 @@ public partial class BusinessMetricsCollectionService : BackgroundService
     {
         try
         {
-            using var scope = _serviceProvider.CreateScope();
+            using var scope = this._serviceProvider.CreateScope();
 
             var zoneManager = scope.ServiceProvider.GetService<IZoneManager>();
             var clientManager = scope.ServiceProvider.GetService<IClientManager>();
@@ -92,7 +92,7 @@ public partial class BusinessMetricsCollectionService : BackgroundService
                 TracksPlaying = await GetPlayingTracksAsync(zoneManager),
             };
 
-            _metricsService.UpdateBusinessMetrics(businessMetrics);
+            this._metricsService.UpdateBusinessMetrics(businessMetrics);
 
             this.LogBusinessMetricsCollected(
                 businessMetrics.ZonesTotal,
@@ -103,7 +103,7 @@ public partial class BusinessMetricsCollectionService : BackgroundService
         }
         catch (Exception ex)
         {
-            LogFailedToCollectMetrics(_logger, ex);
+            LogFailedToCollectMetrics(this._logger, ex);
         }
     }
 

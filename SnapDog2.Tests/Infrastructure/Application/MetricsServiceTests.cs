@@ -33,24 +33,24 @@ public class MetricsServiceTests : IDisposable
 
     public MetricsServiceTests()
     {
-        _mockLogger = new Mock<ILogger<EnterpriseMetricsService>>();
-        _mockApplicationMetrics = new Mock<IApplicationMetrics>();
+        this._mockLogger = new Mock<ILogger<EnterpriseMetricsService>>();
+        this._mockApplicationMetrics = new Mock<IApplicationMetrics>();
 
         // Setup logger to enable Debug and Information levels for LoggerMessage patterns
-        _mockLogger.Setup(x => x.IsEnabled(LogLevel.Debug)).Returns(true);
-        _mockLogger.Setup(x => x.IsEnabled(LogLevel.Information)).Returns(true);
+        this._mockLogger.Setup(x => x.IsEnabled(LogLevel.Debug)).Returns(true);
+        this._mockLogger.Setup(x => x.IsEnabled(LogLevel.Information)).Returns(true);
 
-        _metricsService = new EnterpriseMetricsService(_mockLogger.Object, _mockApplicationMetrics.Object);
+        this._metricsService = new EnterpriseMetricsService(this._mockLogger.Object, this._mockApplicationMetrics.Object);
     }
 
     [Fact]
     public void Constructor_ShouldInitializeSuccessfully()
     {
         // Act & Assert - Constructor should not throw
-        using var service = new EnterpriseMetricsService(_mockLogger.Object, _mockApplicationMetrics.Object);
+        using var service = new EnterpriseMetricsService(this._mockLogger.Object, this._mockApplicationMetrics.Object);
 
         // Verify initialization logging - LoggerMessage patterns use IsEnabled checks
-        _mockLogger.Verify(
+        this._mockLogger.Verify(
             x => x.IsEnabled(LogLevel.Information),
             Times.AtLeastOnce);
     }
@@ -65,10 +65,10 @@ public class MetricsServiceTests : IDisposable
         const bool success = true;
 
         // Act
-        _metricsService.RecordCortexMediatorRequestDuration(requestType, requestName, durationMs, success);
+        this._metricsService.RecordCortexMediatorRequestDuration(requestType, requestName, durationMs, success);
 
         // Assert
-        _mockApplicationMetrics.Verify(
+        this._mockApplicationMetrics.Verify(
             x => x.RecordCommand(requestName, 0.045, success),
             Times.Once);
     }
@@ -83,10 +83,10 @@ public class MetricsServiceTests : IDisposable
         const bool success = true;
 
         // Act
-        _metricsService.RecordCortexMediatorRequestDuration(requestType, requestName, durationMs, success);
+        this._metricsService.RecordCortexMediatorRequestDuration(requestType, requestName, durationMs, success);
 
         // Assert
-        _mockApplicationMetrics.Verify(
+        this._mockApplicationMetrics.Verify(
             x => x.RecordQuery(requestName, 0.012, success),
             Times.Once);
     }
@@ -100,10 +100,10 @@ public class MetricsServiceTests : IDisposable
         var labels = new[] { ("component", "test"), ("operation", "increment") };
 
         // Act
-        _metricsService.IncrementCounter(name, delta, labels);
+        this._metricsService.IncrementCounter(name, delta, labels);
 
         // Assert - LoggerMessage patterns use IsEnabled checks
-        _mockLogger.Verify(
+        this._mockLogger.Verify(
             x => x.IsEnabled(LogLevel.Debug),
             Times.AtLeastOnce);
     }
@@ -117,10 +117,10 @@ public class MetricsServiceTests : IDisposable
         var labels = new[] { ("component", "test") };
 
         // Act
-        _metricsService.SetGauge(name, value, labels);
+        this._metricsService.SetGauge(name, value, labels);
 
         // Assert - LoggerMessage patterns use IsEnabled checks
-        _mockLogger.Verify(
+        this._mockLogger.Verify(
             x => x.IsEnabled(LogLevel.Debug),
             Times.AtLeastOnce);
     }
@@ -129,7 +129,7 @@ public class MetricsServiceTests : IDisposable
     public async Task GetServerStatsAsync_ShouldReturnValidStats()
     {
         // Act
-        var stats = await _metricsService.GetServerStatsAsync();
+        var stats = await this._metricsService.GetServerStatsAsync();
 
         // Assert
         Assert.NotNull(stats);
@@ -151,10 +151,10 @@ public class MetricsServiceTests : IDisposable
         const double duration = 0.123;
 
         // Act
-        _metricsService.RecordHttpRequest(method, endpoint, statusCode, duration);
+        this._metricsService.RecordHttpRequest(method, endpoint, statusCode, duration);
 
         // Assert
-        _mockApplicationMetrics.Verify(
+        this._mockApplicationMetrics.Verify(
             x => x.RecordHttpRequest(method, endpoint, statusCode, duration),
             Times.Once);
     }
@@ -168,10 +168,10 @@ public class MetricsServiceTests : IDisposable
         const string operation = "SetVolume";
 
         // Act
-        _metricsService.RecordError(errorType, component, operation);
+        this._metricsService.RecordError(errorType, component, operation);
 
         // Assert
-        _mockApplicationMetrics.Verify(
+        this._mockApplicationMetrics.Verify(
             x => x.RecordError(errorType, component, operation),
             Times.Once);
     }
@@ -185,10 +185,10 @@ public class MetricsServiceTests : IDisposable
         const string operation = "TestOperation";
 
         // Act
-        _metricsService.RecordException(exception, component, operation);
+        this._metricsService.RecordException(exception, component, operation);
 
         // Assert
-        _mockApplicationMetrics.Verify(
+        this._mockApplicationMetrics.Verify(
             x => x.RecordException(exception, component, operation),
             Times.Once);
     }
@@ -202,10 +202,10 @@ public class MetricsServiceTests : IDisposable
         const string toTrack = "Track B";
 
         // Act
-        _metricsService.RecordTrackChange(zoneIndex, fromTrack, toTrack);
+        this._metricsService.RecordTrackChange(zoneIndex, fromTrack, toTrack);
 
         // Assert
-        _mockApplicationMetrics.Verify(
+        this._mockApplicationMetrics.Verify(
             x => x.RecordTrackChange(zoneIndex, fromTrack, toTrack),
             Times.Once);
     }
@@ -220,10 +220,10 @@ public class MetricsServiceTests : IDisposable
         const int toVolume = 75;
 
         // Act
-        _metricsService.RecordVolumeChange(targetId, targetType, fromVolume, toVolume);
+        this._metricsService.RecordVolumeChange(targetId, targetType, fromVolume, toVolume);
 
         // Assert
-        _mockApplicationMetrics.Verify(
+        this._mockApplicationMetrics.Verify(
             x => x.RecordVolumeChange(targetId, targetType, fromVolume, toVolume),
             Times.Once);
     }
@@ -237,14 +237,13 @@ public class MetricsServiceTests : IDisposable
         string requestType, string requestName, long durationMs, bool success)
     {
         // Act & Assert - Should not throw
-        var exception = Record.Exception(() =>
-            _metricsService.RecordCortexMediatorRequestDuration(requestType, requestName, durationMs, success));
+        var exception = Record.Exception(() => this._metricsService.RecordCortexMediatorRequestDuration(requestType, requestName, durationMs, success));
 
         Assert.Null(exception);
     }
 
     public void Dispose()
     {
-        _metricsService?.Dispose();
+        this._metricsService?.Dispose();
     }
 }

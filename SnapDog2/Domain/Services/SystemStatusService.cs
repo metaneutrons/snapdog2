@@ -48,7 +48,7 @@ public partial class AppStatusService(
         this.LogGettingSystemStatus();
 
         // Get real health check results
-        var healthReport = await _healthCheckService.CheckHealthAsync();
+        var healthReport = await this._healthCheckService.CheckHealthAsync();
         var isOnline = healthReport.Status == HealthStatus.Healthy;
 
         var status = new SystemStatus
@@ -75,7 +75,7 @@ public partial class AppStatusService(
             Minor = gitVersionInfo.Minor,
             Patch = gitVersionInfo.Patch,
             TimestampUtc = DateTime.UtcNow,
-            BuildDateUtc = GetBuildDate(assembly),
+            BuildDateUtc = this.GetBuildDate(assembly),
             GitCommit = gitVersionInfo.Sha,
             GitBranch = gitVersionInfo.BranchName,
             BuildConfiguration = GetBuildConfiguration(),
@@ -90,7 +90,7 @@ public partial class AppStatusService(
         this.LogGettingServerStats();
 
         // Use the real metrics service to get accurate server statistics
-        var stats = await _metricsService.GetServerStatsAsync();
+        var stats = await this._metricsService.GetServerStatsAsync();
 
         return stats;
     }
@@ -119,7 +119,7 @@ public partial class AppStatusService(
         catch (Exception ex)
         {
             // Log but don't throw - build date is not critical
-            LogBuildDateExtractionFailed(_logger, ex);
+            LogBuildDateExtractionFailed(this._logger, ex);
         }
 
         return null;

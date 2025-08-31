@@ -43,9 +43,9 @@ public sealed partial class SmartMqttPublisher : ISmartMqttPublisher
         ILogger<SmartMqttPublisher> logger
     )
     {
-        _mqttService = mqttService;
-        _notificationQueue = notificationQueue;
-        _logger = logger;
+        this._mqttService = mqttService;
+        this._notificationQueue = notificationQueue;
+        this._logger = logger;
     }
 
     /// <summary>
@@ -59,11 +59,11 @@ public sealed partial class SmartMqttPublisher : ISmartMqttPublisher
     )
     {
         // Try direct publishing first if circuit breaker is closed
-        if (_directPublishingEnabled && _mqttService.IsConnected)
+        if (this._directPublishingEnabled && this._mqttService.IsConnected)
         {
             try
             {
-                var result = await _mqttService.PublishZoneStatusAsync(
+                var result = await this._mqttService.PublishZoneStatusAsync(
                     zoneIndex,
                     eventType,
                     payload,
@@ -73,23 +73,23 @@ public sealed partial class SmartMqttPublisher : ISmartMqttPublisher
                 if (result.IsSuccess)
                 {
                     // Reset circuit breaker on success
-                    ResetCircuitBreaker();
-                    LogDirectPublishSuccess("Zone", zoneIndex.ToString(), eventType);
+                    this.ResetCircuitBreaker();
+                    this.LogDirectPublishSuccess("Zone", zoneIndex.ToString(), eventType);
                     return result;
                 }
 
                 // Direct publish failed - handle failure
-                HandleDirectPublishFailure("Zone", zoneIndex.ToString(), eventType, result.ErrorMessage);
+                this.HandleDirectPublishFailure("Zone", zoneIndex.ToString(), eventType, result.ErrorMessage);
             }
             catch (Exception ex)
             {
-                HandleDirectPublishFailure("Zone", zoneIndex.ToString(), eventType, ex.Message);
+                this.HandleDirectPublishFailure("Zone", zoneIndex.ToString(), eventType, ex.Message);
             }
         }
 
         // Fallback to queue-based publishing
-        LogFallingBackToQueue("Zone", zoneIndex.ToString(), eventType);
-        await _notificationQueue.EnqueueZoneAsync(eventType, zoneIndex, payload, cancellationToken);
+        this.LogFallingBackToQueue("Zone", zoneIndex.ToString(), eventType);
+        await this._notificationQueue.EnqueueZoneAsync(eventType, zoneIndex, payload, cancellationToken);
         return Result.Success(); // Queue always succeeds
     }
 
@@ -104,11 +104,11 @@ public sealed partial class SmartMqttPublisher : ISmartMqttPublisher
     )
     {
         // Try direct publishing first if circuit breaker is closed
-        if (_directPublishingEnabled && _mqttService.IsConnected)
+        if (this._directPublishingEnabled && this._mqttService.IsConnected)
         {
             try
             {
-                var result = await _mqttService.PublishClientStatusAsync(
+                var result = await this._mqttService.PublishClientStatusAsync(
                     clientIndex,
                     eventType,
                     payload,
@@ -118,23 +118,23 @@ public sealed partial class SmartMqttPublisher : ISmartMqttPublisher
                 if (result.IsSuccess)
                 {
                     // Reset circuit breaker on success
-                    ResetCircuitBreaker();
-                    LogDirectPublishSuccess("Client", clientIndex, eventType);
+                    this.ResetCircuitBreaker();
+                    this.LogDirectPublishSuccess("Client", clientIndex, eventType);
                     return result;
                 }
 
                 // Direct publish failed - handle failure
-                HandleDirectPublishFailure("Client", clientIndex, eventType, result.ErrorMessage);
+                this.HandleDirectPublishFailure("Client", clientIndex, eventType, result.ErrorMessage);
             }
             catch (Exception ex)
             {
-                HandleDirectPublishFailure("Client", clientIndex, eventType, ex.Message);
+                this.HandleDirectPublishFailure("Client", clientIndex, eventType, ex.Message);
             }
         }
 
         // Fallback to queue-based publishing
-        LogFallingBackToQueue("Client", clientIndex, eventType);
-        await _notificationQueue.EnqueueClientAsync(eventType, clientIndex, payload, cancellationToken);
+        this.LogFallingBackToQueue("Client", clientIndex, eventType);
+        await this._notificationQueue.EnqueueClientAsync(eventType, clientIndex, payload, cancellationToken);
         return Result.Success(); // Queue always succeeds
     }
 
@@ -148,57 +148,57 @@ public sealed partial class SmartMqttPublisher : ISmartMqttPublisher
     )
     {
         // Try direct publishing first if circuit breaker is closed
-        if (_directPublishingEnabled && _mqttService.IsConnected)
+        if (this._directPublishingEnabled && this._mqttService.IsConnected)
         {
             try
             {
-                var result = await _mqttService.PublishGlobalStatusAsync(eventType, payload, cancellationToken);
+                var result = await this._mqttService.PublishGlobalStatusAsync(eventType, payload, cancellationToken);
 
                 if (result.IsSuccess)
                 {
                     // Reset circuit breaker on success
-                    ResetCircuitBreaker();
-                    LogDirectPublishSuccess("Global", "system", eventType);
+                    this.ResetCircuitBreaker();
+                    this.LogDirectPublishSuccess("Global", "system", eventType);
                     return result;
                 }
 
                 // Direct publish failed - handle failure
-                HandleDirectPublishFailure("Global", "system", eventType, result.ErrorMessage);
+                this.HandleDirectPublishFailure("Global", "system", eventType, result.ErrorMessage);
             }
             catch (Exception ex)
             {
-                HandleDirectPublishFailure("Global", "system", eventType, ex.Message);
+                this.HandleDirectPublishFailure("Global", "system", eventType, ex.Message);
             }
         }
 
         // Fallback to queue-based publishing
-        LogFallingBackToQueue("Global", "system", eventType);
-        await _notificationQueue.EnqueueGlobalAsync(eventType, payload, cancellationToken);
+        this.LogFallingBackToQueue("Global", "system", eventType);
+        await this._notificationQueue.EnqueueGlobalAsync(eventType, payload, cancellationToken);
         return Result.Success(); // Queue always succeeds
     }
 
     private void HandleDirectPublishFailure(string entityType, string entityId, string eventType, string? errorMessage)
     {
-        _consecutiveFailures++;
-        _lastFailureTime = DateTime.UtcNow;
+        this._consecutiveFailures++;
+        this._lastFailureTime = DateTime.UtcNow;
 
-        LogDirectPublishFailure(entityType, entityId, eventType, errorMessage ?? "Unknown error", _consecutiveFailures);
+        this.LogDirectPublishFailure(entityType, entityId, eventType, errorMessage ?? "Unknown error", this._consecutiveFailures);
 
         // Open circuit breaker if too many consecutive failures
-        if (_consecutiveFailures >= _maxConsecutiveFailures)
+        if (this._consecutiveFailures >= this._maxConsecutiveFailures)
         {
-            _directPublishingEnabled = false;
-            LogCircuitBreakerOpened(_consecutiveFailures, _circuitBreakerResetTime.TotalMinutes);
+            this._directPublishingEnabled = false;
+            this.LogCircuitBreakerOpened(this._consecutiveFailures, this._circuitBreakerResetTime.TotalMinutes);
         }
     }
 
     private void ResetCircuitBreaker()
     {
-        if (_consecutiveFailures > 0)
+        if (this._consecutiveFailures > 0)
         {
-            _consecutiveFailures = 0;
-            _directPublishingEnabled = true;
-            LogCircuitBreakerReset();
+            this._consecutiveFailures = 0;
+            this._directPublishingEnabled = true;
+            this.LogCircuitBreakerReset();
         }
     }
 
@@ -207,11 +207,11 @@ public sealed partial class SmartMqttPublisher : ISmartMqttPublisher
     /// </summary>
     public void CheckCircuitBreakerReset()
     {
-        if (!_directPublishingEnabled && DateTime.UtcNow - _lastFailureTime > _circuitBreakerResetTime)
+        if (!this._directPublishingEnabled && DateTime.UtcNow - this._lastFailureTime > this._circuitBreakerResetTime)
         {
-            _directPublishingEnabled = true;
-            _consecutiveFailures = 0;
-            LogCircuitBreakerAutoReset();
+            this._directPublishingEnabled = true;
+            this._consecutiveFailures = 0;
+            this.LogCircuitBreakerAutoReset();
         }
     }
 

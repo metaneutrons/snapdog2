@@ -34,13 +34,13 @@ public partial class EnterpriseMetricsService : IMetricsService, IDisposable
 
     public EnterpriseMetricsService(ILogger<EnterpriseMetricsService> logger, IApplicationMetrics applicationMetrics)
     {
-        _logger = logger;
-        _applicationMetrics = applicationMetrics;
+        this._logger = logger;
+        this._applicationMetrics = applicationMetrics;
 
         // Start system metrics collection timer (every 30 seconds)
-        _systemMetricsTimer = new Timer(CollectSystemMetrics, null, TimeSpan.Zero, TimeSpan.FromSeconds(30));
+        this._systemMetricsTimer = new Timer(this.CollectSystemMetrics, null, TimeSpan.Zero, TimeSpan.FromSeconds(30));
 
-        LogServiceInitialized(_logger);
+        LogServiceInitialized(this._logger);
     }
 
     #region IMetricsService Implementation
@@ -56,11 +56,11 @@ public partial class EnterpriseMetricsService : IMetricsService, IDisposable
 
         if (requestType.Equals("Command", StringComparison.OrdinalIgnoreCase))
         {
-            _applicationMetrics.RecordCommand(requestName, durationSeconds, success);
+            this._applicationMetrics.RecordCommand(requestName, durationSeconds, success);
         }
         else if (requestType.Equals("Query", StringComparison.OrdinalIgnoreCase))
         {
-            _applicationMetrics.RecordQuery(requestName, durationSeconds, success);
+            this._applicationMetrics.RecordQuery(requestName, durationSeconds, success);
         }
 
         this.LogRecordingRequestDuration(requestType, requestName, durationMs, success);
@@ -75,7 +75,7 @@ public partial class EnterpriseMetricsService : IMetricsService, IDisposable
         // Track processed requests for server stats
         if (name.Contains("request", StringComparison.OrdinalIgnoreCase))
         {
-            Interlocked.Add(ref _processedRequests, delta);
+            Interlocked.Add(ref this._processedRequests, delta);
         }
     }
 
@@ -101,12 +101,12 @@ public partial class EnterpriseMetricsService : IMetricsService, IDisposable
         var stats = new ServerStats
         {
             TimestampUtc = DateTime.UtcNow,
-            CpuUsagePercent = await GetCpuUsageAsync(),
+            CpuUsagePercent = await this.GetCpuUsageAsync(),
             MemoryUsageMb = processMemoryMb,
             TotalMemoryMb = totalMemoryMb,
             Uptime = uptime,
             ActiveConnections = GetActiveConnections(),
-            ProcessedRequests = Interlocked.Read(ref _processedRequests),
+            ProcessedRequests = Interlocked.Read(ref this._processedRequests),
         };
 
         return stats;
@@ -131,18 +131,18 @@ public partial class EnterpriseMetricsService : IMetricsService, IDisposable
 
             var systemMetrics = new SystemMetricsState
             {
-                CpuUsagePercent = GetCpuUsageSync(),
+                CpuUsagePercent = this.GetCpuUsageSync(),
                 MemoryUsageMb = memoryUsageMb,
                 MemoryUsagePercent = memoryUsagePercent,
                 ActiveConnections = GetActiveConnections(),
                 ThreadPoolThreads = threadPoolThreads,
             };
 
-            _applicationMetrics.UpdateSystemMetrics(systemMetrics);
+            this._applicationMetrics.UpdateSystemMetrics(systemMetrics);
         }
         catch (Exception ex)
         {
-            LogFailedToCollectSystemMetrics(_logger, ex);
+            LogFailedToCollectSystemMetrics(this._logger, ex);
         }
     }
 
@@ -155,7 +155,7 @@ public partial class EnterpriseMetricsService : IMetricsService, IDisposable
         }
         catch (Exception ex)
         {
-            LogFailedToGetCpuUsage(_logger, ex);
+            LogFailedToGetCpuUsage(this._logger, ex);
             return 0.0;
         }
     }
@@ -170,7 +170,7 @@ public partial class EnterpriseMetricsService : IMetricsService, IDisposable
         }
         catch (Exception ex)
         {
-            LogFailedToGetCpuUsageSync(_logger, ex);
+            LogFailedToGetCpuUsageSync(this._logger, ex);
             return 0.0;
         }
     }
@@ -235,33 +235,33 @@ public partial class EnterpriseMetricsService : IMetricsService, IDisposable
 
     public void RecordHttpRequest(string method, string endpoint, int statusCode, double durationSeconds)
     {
-        _applicationMetrics.RecordHttpRequest(method, endpoint, statusCode, durationSeconds);
-        Interlocked.Increment(ref _processedRequests);
+        this._applicationMetrics.RecordHttpRequest(method, endpoint, statusCode, durationSeconds);
+        Interlocked.Increment(ref this._processedRequests);
     }
 
     public void RecordError(string errorType, string component, string? operation = null)
     {
-        _applicationMetrics.RecordError(errorType, component, operation);
+        this._applicationMetrics.RecordError(errorType, component, operation);
     }
 
     public void RecordException(Exception exception, string component, string? operation = null)
     {
-        _applicationMetrics.RecordException(exception, component, operation);
+        this._applicationMetrics.RecordException(exception, component, operation);
     }
 
     public void UpdateBusinessMetrics(BusinessMetricsState businessMetrics)
     {
-        _applicationMetrics.UpdateBusinessMetrics(businessMetrics);
+        this._applicationMetrics.UpdateBusinessMetrics(businessMetrics);
     }
 
     public void RecordTrackChange(string zoneIndex, string? fromTrack, string? toTrack)
     {
-        _applicationMetrics.RecordTrackChange(zoneIndex, fromTrack, toTrack);
+        this._applicationMetrics.RecordTrackChange(zoneIndex, fromTrack, toTrack);
     }
 
     public void RecordVolumeChange(string targetId, string targetType, int fromVolume, int toVolume)
     {
-        _applicationMetrics.RecordVolumeChange(targetId, targetType, fromVolume, toVolume);
+        this._applicationMetrics.RecordVolumeChange(targetId, targetType, fromVolume, toVolume);
     }
 
     #endregion
@@ -343,7 +343,7 @@ public partial class EnterpriseMetricsService : IMetricsService, IDisposable
 
     public void Dispose()
     {
-        _systemMetricsTimer?.Dispose();
-        _applicationMetrics?.Dispose();
+        this._systemMetricsTimer?.Dispose();
+        this._applicationMetrics?.Dispose();
     }
 }

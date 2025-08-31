@@ -79,7 +79,7 @@ public partial class ControlSetCommandHandler(IZoneManager zoneManager, ILogger<
             "repeat_off" => await zone.SetPlaylistRepeatAsync(false).ConfigureAwait(false),
             "mute_on" => await zone.SetMuteAsync(true).ConfigureAwait(false),
             "mute_off" => await zone.SetMuteAsync(false).ConfigureAwait(false),
-            _ => HandleUnknownCommand(request.Command, request.ZoneIndex),
+            _ => this.HandleUnknownCommand(request.Command, request.ZoneIndex),
         };
     }
 

@@ -70,143 +70,143 @@ public partial class ApplicationMetrics : IApplicationMetrics
 
     public ApplicationMetrics(ILogger<ApplicationMetrics> logger)
     {
-        _logger = logger;
-        _meter = new Meter("SnapDog2.Application", "2.0.0");
+        this._logger = logger;
+        this._meter = new Meter("SnapDog2.Application", "2.0.0");
 
         // HTTP Metrics
-        _httpRequestsTotal = _meter.CreateCounter<long>(
+        this._httpRequestsTotal = this._meter.CreateCounter<long>(
             "snapdog_http_requests_total",
             description: "Total number of HTTP requests processed"
         );
 
-        _httpRequestDuration = _meter.CreateHistogram<double>(
+        this._httpRequestDuration = this._meter.CreateHistogram<double>(
             "snapdog_http_request_duration_seconds",
             unit: "s",
             description: "Duration of HTTP requests in seconds"
         );
 
-        _httpRequestsErrors = _meter.CreateCounter<long>(
+        this._httpRequestsErrors = this._meter.CreateCounter<long>(
             "snapdog_http_requests_errors_total",
             description: "Total number of HTTP request errors"
         );
 
         // Command/Query Metrics
-        _commandsTotal = _meter.CreateCounter<long>(
+        this._commandsTotal = this._meter.CreateCounter<long>(
             "snapdog_commands_total",
             description: "Total number of commands processed"
         );
 
-        _queriesTotal = _meter.CreateCounter<long>(
+        this._queriesTotal = this._meter.CreateCounter<long>(
             "snapdog_queries_total",
             description: "Total number of queries processed"
         );
 
-        _commandDuration = _meter.CreateHistogram<double>(
+        this._commandDuration = this._meter.CreateHistogram<double>(
             "snapdog_command_duration_seconds",
             unit: "s",
             description: "Duration of command processing in seconds"
         );
 
-        _queryDuration = _meter.CreateHistogram<double>(
+        this._queryDuration = this._meter.CreateHistogram<double>(
             "snapdog_query_duration_seconds",
             unit: "s",
             description: "Duration of query processing in seconds"
         );
 
-        _commandErrors = _meter.CreateCounter<long>(
+        this._commandErrors = this._meter.CreateCounter<long>(
             "snapdog_command_errors_total",
             description: "Total number of command processing errors"
         );
 
-        _queryErrors = _meter.CreateCounter<long>(
+        this._queryErrors = this._meter.CreateCounter<long>(
             "snapdog_query_errors_total",
             description: "Total number of query processing errors"
         );
 
         // System Metrics
-        _cpuUsagePercent = _meter.CreateObservableGauge<double>(
+        this._cpuUsagePercent = this._meter.CreateObservableGauge<double>(
             "snapdog_system_cpu_usage_percent",
-            observeValue: () => _systemState.CpuUsagePercent,
+            observeValue: () => this._systemState.CpuUsagePercent,
             description: "Current CPU usage percentage"
         );
 
-        _memoryUsageMb = _meter.CreateObservableGauge<double>(
+        this._memoryUsageMb = this._meter.CreateObservableGauge<double>(
             "snapdog_system_memory_usage_mb",
-            observeValue: () => _systemState.MemoryUsageMb,
+            observeValue: () => this._systemState.MemoryUsageMb,
             description: "Current memory usage in megabytes"
         );
 
-        _memoryUsagePercent = _meter.CreateObservableGauge<double>(
+        this._memoryUsagePercent = this._meter.CreateObservableGauge<double>(
             "snapdog_system_memory_usage_percent",
-            observeValue: () => _systemState.MemoryUsagePercent,
+            observeValue: () => this._systemState.MemoryUsagePercent,
             description: "Current memory usage percentage"
         );
 
-        _uptimeSeconds = _meter.CreateObservableGauge<long>(
+        this._uptimeSeconds = this._meter.CreateObservableGauge<long>(
             "snapdog_system_uptime_seconds",
             observeValue: () => (long)(DateTime.UtcNow - _startTime).TotalSeconds,
             description: "Application uptime in seconds"
         );
 
-        _activeConnections = _meter.CreateObservableGauge<int>(
+        this._activeConnections = this._meter.CreateObservableGauge<int>(
             "snapdog_system_connections_active",
-            observeValue: () => _systemState.ActiveConnections,
+            observeValue: () => this._systemState.ActiveConnections,
             description: "Number of active connections"
         );
 
-        _threadPoolThreads = _meter.CreateObservableGauge<int>(
+        this._threadPoolThreads = this._meter.CreateObservableGauge<int>(
             "snapdog_system_threadpool_threads",
-            observeValue: () => _systemState.ThreadPoolThreads,
+            observeValue: () => this._systemState.ThreadPoolThreads,
             description: "Number of thread pool threads"
         );
 
         // Business Metrics
-        _zonesTotal = _meter.CreateObservableGauge<int>(
+        this._zonesTotal = this._meter.CreateObservableGauge<int>(
             "snapdog_zones_total",
-            observeValue: () => _businessState.ZonesTotal,
+            observeValue: () => this._businessState.ZonesTotal,
             description: "Total number of configured zones"
         );
 
-        _zonesActive = _meter.CreateObservableGauge<int>(
+        this._zonesActive = this._meter.CreateObservableGauge<int>(
             "snapdog_zones_active",
-            observeValue: () => _businessState.ZonesActive,
+            observeValue: () => this._businessState.ZonesActive,
             description: "Number of zones currently active"
         );
 
-        _clientsConnected = _meter.CreateObservableGauge<int>(
+        this._clientsConnected = this._meter.CreateObservableGauge<int>(
             "snapdog_clients_connected",
-            observeValue: () => _businessState.ClientsConnected,
+            observeValue: () => this._businessState.ClientsConnected,
             description: "Number of connected Snapcast clients"
         );
 
-        _tracksPlaying = _meter.CreateObservableGauge<int>(
+        this._tracksPlaying = this._meter.CreateObservableGauge<int>(
             "snapdog_tracks_playing",
-            observeValue: () => _businessState.TracksPlaying,
+            observeValue: () => this._businessState.TracksPlaying,
             description: "Number of tracks currently playing"
         );
 
-        _trackChangesTotal = _meter.CreateCounter<long>(
+        this._trackChangesTotal = this._meter.CreateCounter<long>(
             "snapdog_track_changes_total",
             description: "Total number of track changes"
         );
 
-        _volumeChangesTotal = _meter.CreateCounter<long>(
+        this._volumeChangesTotal = this._meter.CreateCounter<long>(
             "snapdog_volume_changes_total",
             description: "Total number of volume changes"
         );
 
         // Error Tracking
-        _errorsTotal = _meter.CreateCounter<long>(
+        this._errorsTotal = this._meter.CreateCounter<long>(
             "snapdog_errors_total",
             description: "Total number of application errors"
         );
 
-        _exceptionsTotal = _meter.CreateCounter<long>(
+        this._exceptionsTotal = this._meter.CreateCounter<long>(
             "snapdog_exceptions_total",
             description: "Total number of unhandled exceptions"
         );
 
-        this.LogApplicationMetricsInitialized(_meter.Name, _meter.Version);
+        this.LogApplicationMetricsInitialized(this._meter.Name, this._meter.Version);
     }
 
     #region HTTP Metrics
@@ -220,12 +220,12 @@ public partial class ApplicationMetrics : IApplicationMetrics
             new("status_code", statusCode.ToString()),
         };
 
-        _httpRequestsTotal.Add(1, tags);
-        _httpRequestDuration.Record(durationSeconds, tags);
+        this._httpRequestsTotal.Add(1, tags);
+        this._httpRequestDuration.Record(durationSeconds, tags);
 
         if (statusCode >= 400)
         {
-            _httpRequestsErrors.Add(1, tags);
+            this._httpRequestsErrors.Add(1, tags);
         }
     }
 
@@ -241,12 +241,12 @@ public partial class ApplicationMetrics : IApplicationMetrics
             new("success", success.ToString().ToLowerInvariant()),
         };
 
-        _commandsTotal.Add(1, tags);
-        _commandDuration.Record(durationSeconds, tags);
+        this._commandsTotal.Add(1, tags);
+        this._commandDuration.Record(durationSeconds, tags);
 
         if (!success)
         {
-            _commandErrors.Add(1, tags);
+            this._commandErrors.Add(1, tags);
         }
     }
 
@@ -258,12 +258,12 @@ public partial class ApplicationMetrics : IApplicationMetrics
             new("success", success.ToString().ToLowerInvariant()),
         };
 
-        _queriesTotal.Add(1, tags);
-        _queryDuration.Record(durationSeconds, tags);
+        this._queriesTotal.Add(1, tags);
+        this._queryDuration.Record(durationSeconds, tags);
 
         if (!success)
         {
-            _queryErrors.Add(1, tags);
+            this._queryErrors.Add(1, tags);
         }
     }
 
@@ -273,7 +273,7 @@ public partial class ApplicationMetrics : IApplicationMetrics
 
     public void UpdateSystemMetrics(SystemMetricsState state)
     {
-        _systemState = state;
+        this._systemState = state;
     }
 
     #endregion
@@ -282,21 +282,21 @@ public partial class ApplicationMetrics : IApplicationMetrics
 
     public void UpdateBusinessMetrics(BusinessMetricsState state)
     {
-        _businessState = state;
+        this._businessState = state;
     }
 
     public void RecordTrackChange(string zoneIndex, string? fromTrack, string? toTrack)
     {
         var tags = new KeyValuePair<string, object?>[] { new("zone_id", zoneIndex) };
 
-        _trackChangesTotal.Add(1, tags);
+        this._trackChangesTotal.Add(1, tags);
     }
 
     public void RecordVolumeChange(string targetId, string targetType, int fromVolume, int toVolume)
     {
         var tags = new KeyValuePair<string, object?>[] { new("target_id", targetId), new("target_type", targetType) };
 
-        _volumeChangesTotal.Add(1, tags);
+        this._volumeChangesTotal.Add(1, tags);
     }
 
     #endregion
@@ -316,7 +316,7 @@ public partial class ApplicationMetrics : IApplicationMetrics
             tags.Add(new("operation", operation));
         }
 
-        _errorsTotal.Add(1, tags.ToArray());
+        this._errorsTotal.Add(1, tags.ToArray());
     }
 
     public void RecordException(Exception exception, string component, string? operation = null)
@@ -332,14 +332,14 @@ public partial class ApplicationMetrics : IApplicationMetrics
             tags.Add(new("operation", operation));
         }
 
-        _exceptionsTotal.Add(1, tags.ToArray());
+        this._exceptionsTotal.Add(1, tags.ToArray());
     }
 
     #endregion
 
     public void Dispose()
     {
-        _meter?.Dispose();
+        this._meter?.Dispose();
     }
 
     [LoggerMessage(

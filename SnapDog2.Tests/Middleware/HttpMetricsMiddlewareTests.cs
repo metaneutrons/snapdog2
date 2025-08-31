@@ -33,18 +33,18 @@ public class HttpMetricsMiddlewareTests
 
     public HttpMetricsMiddlewareTests()
     {
-        _mockLogger = new Mock<ILogger<HttpMetricsMiddleware>>();
+        this._mockLogger = new Mock<ILogger<HttpMetricsMiddleware>>();
 
         // Setup logger to enable Warning level for LoggerMessage patterns
-        _mockLogger.Setup(x => x.IsEnabled(LogLevel.Warning)).Returns(true);
+        this._mockLogger.Setup(x => x.IsEnabled(LogLevel.Warning)).Returns(true);
 
         // Create mock for IApplicationMetrics
-        _mockMetricsService = new Mock<IApplicationMetrics>();
+        this._mockMetricsService = new Mock<IApplicationMetrics>();
 
         // Create a simple next delegate that does nothing
         RequestDelegate next = (HttpContext context) => Task.CompletedTask;
 
-        _middleware = new HttpMetricsMiddleware(next, _mockLogger.Object, _mockMetricsService.Object);
+        this._middleware = new HttpMetricsMiddleware(next, this._mockLogger.Object, this._mockMetricsService.Object);
     }
 
     [Fact]
@@ -54,10 +54,10 @@ public class HttpMetricsMiddlewareTests
         var context = CreateHttpContext("GET", "/api/v1/zones");
 
         // Act
-        await _middleware.InvokeAsync(context);
+        await this._middleware.InvokeAsync(context);
 
         // Assert
-        _mockMetricsService.Verify(
+        this._mockMetricsService.Verify(
             x => x.RecordHttpRequest(
                 "GET",
                 "/api/v1/zones",
@@ -75,7 +75,7 @@ public class HttpMetricsMiddlewareTests
 
         // Create middleware with next delegate that throws
         RequestDelegate next = (HttpContext ctx) => throw testException;
-        var middleware = new HttpMetricsMiddleware(next, _mockLogger.Object, _mockMetricsService.Object);
+        var middleware = new HttpMetricsMiddleware(next, this._mockLogger.Object, this._mockMetricsService.Object);
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
@@ -84,7 +84,7 @@ public class HttpMetricsMiddlewareTests
         Assert.Equal("Test exception", exception.Message);
 
         // Verify exception was recorded
-        _mockMetricsService.Verify(
+        this._mockMetricsService.Verify(
             x => x.RecordException(testException, "HttpPipeline", "POST /api/v1/zones"),
             Times.Once);
     }
@@ -102,10 +102,10 @@ public class HttpMetricsMiddlewareTests
         var context = CreateHttpContext("GET", originalPath);
 
         // Act
-        await _middleware.InvokeAsync(context);
+        await this._middleware.InvokeAsync(context);
 
         // Assert
-        _mockMetricsService.Verify(
+        this._mockMetricsService.Verify(
             x => x.RecordHttpRequest(
                 "GET",
                 expectedNormalizedPath,
@@ -127,10 +127,10 @@ public class HttpMetricsMiddlewareTests
         context.Response.StatusCode = statusCode;
 
         // Act
-        await _middleware.InvokeAsync(context);
+        await this._middleware.InvokeAsync(context);
 
         // Assert
-        _mockMetricsService.Verify(
+        this._mockMetricsService.Verify(
             x => x.RecordError(expectedErrorType, "HttpPipeline", "GET /api/v1/zones"),
             Times.Once);
     }
@@ -146,13 +146,13 @@ public class HttpMetricsMiddlewareTests
         {
             await Task.Delay(1100); // Simulate slow request (> 1 second)
         };
-        var middleware = new HttpMetricsMiddleware(slowNext, _mockLogger.Object, _mockMetricsService.Object);
+        var middleware = new HttpMetricsMiddleware(slowNext, this._mockLogger.Object, this._mockMetricsService.Object);
 
         // Act
         await middleware.InvokeAsync(context);
 
         // Assert - LoggerMessage patterns use IsEnabled checks
-        _mockLogger.Verify(
+        this._mockLogger.Verify(
             x => x.IsEnabled(LogLevel.Warning),
             Times.AtLeastOnce);
     }

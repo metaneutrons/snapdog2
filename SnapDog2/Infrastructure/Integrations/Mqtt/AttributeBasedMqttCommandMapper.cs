@@ -76,12 +76,12 @@ public partial class AttributeBasedMqttCommandMapper(
     /// </summary>
     public void Initialize()
     {
-        if (_initialized)
+        if (this._initialized)
         {
             return;
         }
 
-        LogInitializingMappings();
+        this.LogInitializingMappings();
 
         // Scan all assemblies for commands with MqttTopicAttribute
         var assemblies = new[]
@@ -97,12 +97,12 @@ public partial class AttributeBasedMqttCommandMapper(
             foreach (var (topicPattern, commandType) in mqttCommands)
             {
                 var attribute = commandType.GetCustomAttribute<MqttTopicAttribute>()!;
-                _topicMappings[topicPattern] = (commandType, attribute);
-                LogFoundCommand(commandType.Name, topicPattern);
+                this._topicMappings[topicPattern] = (commandType, attribute);
+                this.LogFoundCommand(commandType.Name, topicPattern);
             }
         }
 
-        _initialized = true;
+        this._initialized = true;
     }
 
     /// <summary>
@@ -113,30 +113,30 @@ public partial class AttributeBasedMqttCommandMapper(
     /// <returns>The mapped command or null if no match found.</returns>
     public ICommand<Result>? MapTopicToCommand(string topic, string payload)
     {
-        if (!_initialized)
+        if (!this._initialized)
         {
-            Initialize();
+            this.Initialize();
         }
 
-        LogMappingTopic(topic, payload);
+        this.LogMappingTopic(topic, payload);
 
         try
         {
             // Try to find a matching topic pattern
-            foreach (var (topicPattern, (commandType, attribute)) in _topicMappings)
+            foreach (var (topicPattern, (commandType, attribute)) in this._topicMappings)
             {
-                if (attribute.TryMatchTopic(topic, out var parameters, _mqttConfig.MqttBaseTopic))
+                if (attribute.TryMatchTopic(topic, out var parameters, this._mqttConfig.MqttBaseTopic))
                 {
-                    return CreateCommandInstance(commandType, parameters, payload, attribute);
+                    return this.CreateCommandInstance(commandType, parameters, payload, attribute);
                 }
             }
 
-            LogNoMatchingCommand(topic);
+            this.LogNoMatchingCommand(topic);
             return null;
         }
         catch (Exception ex)
         {
-            LogCommandCreationError(topic, ex.Message);
+            this.LogCommandCreationError(topic, ex.Message);
             return null;
         }
     }
@@ -172,7 +172,7 @@ public partial class AttributeBasedMqttCommandMapper(
             }
 
             // Set payload-based properties
-            SetPayloadProperties(command, payload, attribute);
+            this.SetPayloadProperties(command, payload, attribute);
 
             // Set command source
             var sourceProperty = commandType.GetProperty("Source");
@@ -303,12 +303,12 @@ public partial class AttributeBasedMqttCommandMapper(
     /// </summary>
     public IEnumerable<string> GetRegisteredTopicPatterns()
     {
-        if (!_initialized)
+        if (!this._initialized)
         {
-            Initialize();
+            this.Initialize();
         }
 
-        return _topicMappings.Keys;
+        return this._topicMappings.Keys;
     }
 
     [LoggerMessage(

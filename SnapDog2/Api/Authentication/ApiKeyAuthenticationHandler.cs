@@ -38,7 +38,7 @@ public class ApiKeyAuthenticationHandler(
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         // Try to get API key from header first
-        string? apiKey = this.Request.Headers[ApiKeyHeaderName].FirstOrDefault();
+        var apiKey = this.Request.Headers[ApiKeyHeaderName].FirstOrDefault();
 
         // If not in header, try query parameter
         if (string.IsNullOrEmpty(apiKey))

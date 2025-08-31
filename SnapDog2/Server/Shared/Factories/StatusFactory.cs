@@ -102,7 +102,7 @@ public partial class StatusFactory(ILogger<StatusFactory> logger) : IStatusFacto
         PlaybackState playbackState
     )
     {
-        ValidateZoneIndex(zoneIndex, nameof(ZonePlaybackStateChangedNotification));
+        this.ValidateZoneIndex(zoneIndex, nameof(ZonePlaybackStateChangedNotification));
         this.LogStatusCreation(nameof(ZonePlaybackStateChangedNotification), "Zone", zoneIndex);
         return new ZonePlaybackStateChangedNotification { ZoneIndex = zoneIndex, PlaybackState = playbackState };
     }
@@ -110,8 +110,8 @@ public partial class StatusFactory(ILogger<StatusFactory> logger) : IStatusFacto
     /// <inheritdoc />
     public ZoneVolumeChangedNotification CreateZoneVolumeChangedNotification(int zoneIndex, int volume)
     {
-        ValidateZoneIndex(zoneIndex, nameof(ZoneVolumeChangedNotification));
-        var clampedVolume = ValidateAndClampVolume(volume, nameof(ZoneVolumeChangedNotification));
+        this.ValidateZoneIndex(zoneIndex, nameof(ZoneVolumeChangedNotification));
+        var clampedVolume = this.ValidateAndClampVolume(volume, nameof(ZoneVolumeChangedNotification));
         this.LogStatusCreation(nameof(ZoneVolumeChangedNotification), "Zone", zoneIndex);
         return new ZoneVolumeChangedNotification { ZoneIndex = zoneIndex, Volume = clampedVolume };
     }
@@ -119,7 +119,7 @@ public partial class StatusFactory(ILogger<StatusFactory> logger) : IStatusFacto
     /// <inheritdoc />
     public ZoneMuteChangedNotification CreateZoneMuteChangedNotification(int zoneIndex, bool isMuted)
     {
-        ValidateZoneIndex(zoneIndex, nameof(ZoneMuteChangedNotification));
+        this.ValidateZoneIndex(zoneIndex, nameof(ZoneMuteChangedNotification));
         this.LogStatusCreation(nameof(ZoneMuteChangedNotification), "Zone", zoneIndex);
         return new ZoneMuteChangedNotification { ZoneIndex = zoneIndex, IsMuted = isMuted };
     }
@@ -131,9 +131,9 @@ public partial class StatusFactory(ILogger<StatusFactory> logger) : IStatusFacto
         int trackIndex
     )
     {
-        ValidateZoneIndex(zoneIndex, nameof(ZoneTrackChangedNotification));
+        this.ValidateZoneIndex(zoneIndex, nameof(ZoneTrackChangedNotification));
         ArgumentNullException.ThrowIfNull(trackInfo);
-        var validatedTrackIndex = ValidateTrackIndex(trackIndex, nameof(ZoneTrackChangedNotification));
+        var validatedTrackIndex = this.ValidateTrackIndex(trackIndex, nameof(ZoneTrackChangedNotification));
         this.LogStatusCreation(nameof(ZoneTrackChangedNotification), "Zone", zoneIndex);
         return new ZoneTrackChangedNotification
         {
@@ -150,9 +150,9 @@ public partial class StatusFactory(ILogger<StatusFactory> logger) : IStatusFacto
         int playlistIndex
     )
     {
-        ValidateZoneIndex(zoneIndex, nameof(ZonePlaylistChangedNotification));
+        this.ValidateZoneIndex(zoneIndex, nameof(ZonePlaylistChangedNotification));
         ArgumentNullException.ThrowIfNull(playlistInfo);
-        var validatedPlaylistIndex = ValidatePlaylistIndex(playlistIndex, nameof(ZonePlaylistChangedNotification));
+        var validatedPlaylistIndex = this.ValidatePlaylistIndex(playlistIndex, nameof(ZonePlaylistChangedNotification));
         this.LogStatusCreation(nameof(ZonePlaylistChangedNotification), "Zone", zoneIndex);
         return new ZonePlaylistChangedNotification
         {
@@ -173,8 +173,8 @@ public partial class StatusFactory(ILogger<StatusFactory> logger) : IStatusFacto
     /// <inheritdoc />
     public ClientVolumeChangedNotification CreateClientVolumeChangedNotification(int clientIndex, int volume)
     {
-        ValidateClientIndex(clientIndex, nameof(ClientVolumeChangedNotification));
-        var clampedVolume = ValidateAndClampVolume(volume, nameof(ClientVolumeChangedNotification));
+        this.ValidateClientIndex(clientIndex, nameof(ClientVolumeChangedNotification));
+        var clampedVolume = this.ValidateAndClampVolume(volume, nameof(ClientVolumeChangedNotification));
         this.LogStatusCreation(nameof(ClientVolumeChangedNotification), "Client", clientIndex);
         return new ClientVolumeChangedNotification { ClientIndex = clientIndex, Volume = clampedVolume };
     }
@@ -182,7 +182,7 @@ public partial class StatusFactory(ILogger<StatusFactory> logger) : IStatusFacto
     /// <inheritdoc />
     public ClientMuteChangedNotification CreateClientMuteChangedNotification(int clientIndex, bool isMuted)
     {
-        ValidateClientIndex(clientIndex, nameof(ClientMuteChangedNotification));
+        this.ValidateClientIndex(clientIndex, nameof(ClientMuteChangedNotification));
         this.LogStatusCreation(nameof(ClientMuteChangedNotification), "Client", clientIndex);
         return new ClientMuteChangedNotification { ClientIndex = clientIndex, IsMuted = isMuted };
     }
@@ -190,8 +190,8 @@ public partial class StatusFactory(ILogger<StatusFactory> logger) : IStatusFacto
     /// <inheritdoc />
     public ClientLatencyChangedNotification CreateClientLatencyChangedNotification(int clientIndex, int latencyMs)
     {
-        ValidateClientIndex(clientIndex, nameof(ClientLatencyChangedNotification));
-        var validatedLatency = ValidateLatency(latencyMs, nameof(ClientLatencyChangedNotification));
+        this.ValidateClientIndex(clientIndex, nameof(ClientLatencyChangedNotification));
+        var validatedLatency = this.ValidateLatency(latencyMs, nameof(ClientLatencyChangedNotification));
         this.LogStatusCreation(nameof(ClientLatencyChangedNotification), "Client", clientIndex);
         return new ClientLatencyChangedNotification { ClientIndex = clientIndex, LatencyMs = validatedLatency };
     }
@@ -202,7 +202,7 @@ public partial class StatusFactory(ILogger<StatusFactory> logger) : IStatusFacto
         bool isConnected
     )
     {
-        ValidateClientIndex(clientIndex, nameof(ClientConnectionChangedNotification));
+        this.ValidateClientIndex(clientIndex, nameof(ClientConnectionChangedNotification));
         this.LogStatusCreation(nameof(ClientConnectionChangedNotification), "Client", clientIndex);
         return new ClientConnectionChangedNotification { ClientIndex = clientIndex, IsConnected = isConnected };
     }
@@ -213,10 +213,10 @@ public partial class StatusFactory(ILogger<StatusFactory> logger) : IStatusFacto
         int? zoneIndex
     )
     {
-        ValidateClientIndex(clientIndex, nameof(ClientZoneAssignmentChangedNotification));
+        this.ValidateClientIndex(clientIndex, nameof(ClientZoneAssignmentChangedNotification));
         if (zoneIndex.HasValue)
         {
-            ValidateZoneIndex(zoneIndex.Value, nameof(ClientZoneAssignmentChangedNotification));
+            this.ValidateZoneIndex(zoneIndex.Value, nameof(ClientZoneAssignmentChangedNotification));
         }
         this.LogStatusCreation(nameof(ClientZoneAssignmentChangedNotification), "Client", clientIndex);
         return new ClientZoneAssignmentChangedNotification { ClientIndex = clientIndex, ZoneIndex = zoneIndex };
@@ -225,7 +225,7 @@ public partial class StatusFactory(ILogger<StatusFactory> logger) : IStatusFacto
     /// <inheritdoc />
     public ClientNameChangedNotification CreateClientNameChangedNotification(int clientIndex, string name)
     {
-        ValidateClientIndex(clientIndex, nameof(ClientNameChangedNotification));
+        this.ValidateClientIndex(clientIndex, nameof(ClientNameChangedNotification));
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         this.LogStatusCreation(nameof(ClientNameChangedNotification), "Client", clientIndex);
         return new ClientNameChangedNotification { ClientIndex = clientIndex, Name = name };
@@ -234,7 +234,7 @@ public partial class StatusFactory(ILogger<StatusFactory> logger) : IStatusFacto
     /// <inheritdoc />
     public ClientStateChangedNotification CreateClientStateChangedNotification(int clientIndex, ClientState clientState)
     {
-        ValidateClientIndex(clientIndex, nameof(ClientStateChangedNotification));
+        this.ValidateClientIndex(clientIndex, nameof(ClientStateChangedNotification));
         ArgumentNullException.ThrowIfNull(clientState);
         this.LogStatusCreation(nameof(ClientStateChangedNotification), "Client", clientIndex);
         return new ClientStateChangedNotification { ClientIndex = clientIndex, ClientState = clientState };
@@ -247,8 +247,8 @@ public partial class StatusFactory(ILogger<StatusFactory> logger) : IStatusFacto
     /// <inheritdoc />
     public ClientVolumeStatusNotification CreateClientVolumeStatusNotification(int clientIndex, int volume)
     {
-        ValidateClientIndex(clientIndex, nameof(ClientVolumeStatusNotification));
-        var clampedVolume = ValidateAndClampVolume(volume, nameof(ClientVolumeStatusNotification));
+        this.ValidateClientIndex(clientIndex, nameof(ClientVolumeStatusNotification));
+        var clampedVolume = this.ValidateAndClampVolume(volume, nameof(ClientVolumeStatusNotification));
         this.LogStatusCreation(nameof(ClientVolumeStatusNotification), "Client", clientIndex);
         return new ClientVolumeStatusNotification(clientIndex, clampedVolume);
     }
@@ -256,7 +256,7 @@ public partial class StatusFactory(ILogger<StatusFactory> logger) : IStatusFacto
     /// <inheritdoc />
     public ClientMuteStatusNotification CreateClientMuteStatusNotification(int clientIndex, bool isMuted)
     {
-        ValidateClientIndex(clientIndex, nameof(ClientMuteStatusNotification));
+        this.ValidateClientIndex(clientIndex, nameof(ClientMuteStatusNotification));
         this.LogStatusCreation(nameof(ClientMuteStatusNotification), "Client", clientIndex);
         return new ClientMuteStatusNotification(clientIndex, isMuted);
     }
@@ -264,8 +264,8 @@ public partial class StatusFactory(ILogger<StatusFactory> logger) : IStatusFacto
     /// <inheritdoc />
     public ClientLatencyStatusNotification CreateClientLatencyStatusNotification(int clientIndex, int latencyMs)
     {
-        ValidateClientIndex(clientIndex, nameof(ClientLatencyStatusNotification));
-        var validatedLatency = ValidateLatency(latencyMs, nameof(ClientLatencyStatusNotification));
+        this.ValidateClientIndex(clientIndex, nameof(ClientLatencyStatusNotification));
+        var validatedLatency = this.ValidateLatency(latencyMs, nameof(ClientLatencyStatusNotification));
         this.LogStatusCreation(nameof(ClientLatencyStatusNotification), "Client", clientIndex);
         return new ClientLatencyStatusNotification(clientIndex, validatedLatency);
     }
@@ -273,10 +273,10 @@ public partial class StatusFactory(ILogger<StatusFactory> logger) : IStatusFacto
     /// <inheritdoc />
     public ClientZoneStatusNotification CreateClientZoneStatusNotification(int clientIndex, int? zoneIndex)
     {
-        ValidateClientIndex(clientIndex, nameof(ClientZoneStatusNotification));
+        this.ValidateClientIndex(clientIndex, nameof(ClientZoneStatusNotification));
         if (zoneIndex.HasValue)
         {
-            ValidateZoneIndex(zoneIndex.Value, nameof(ClientZoneStatusNotification));
+            this.ValidateZoneIndex(zoneIndex.Value, nameof(ClientZoneStatusNotification));
         }
         this.LogStatusCreation(nameof(ClientZoneStatusNotification), "Client", clientIndex);
         return new ClientZoneStatusNotification(clientIndex, zoneIndex);
@@ -288,7 +288,7 @@ public partial class StatusFactory(ILogger<StatusFactory> logger) : IStatusFacto
         bool isConnected
     )
     {
-        ValidateClientIndex(clientIndex, nameof(ClientConnectionStatusNotification));
+        this.ValidateClientIndex(clientIndex, nameof(ClientConnectionStatusNotification));
         this.LogStatusCreation(nameof(ClientConnectionStatusNotification), "Client", clientIndex);
         return new ClientConnectionStatusNotification(clientIndex, isConnected);
     }
@@ -296,7 +296,7 @@ public partial class StatusFactory(ILogger<StatusFactory> logger) : IStatusFacto
     /// <inheritdoc />
     public ClientStateNotification CreateClientStateStatusNotification(int clientIndex, ClientState clientState)
     {
-        ValidateClientIndex(clientIndex, nameof(ClientStateNotification));
+        this.ValidateClientIndex(clientIndex, nameof(ClientStateNotification));
         ArgumentNullException.ThrowIfNull(clientState);
         this.LogStatusCreation(nameof(ClientStateNotification), "Client", clientIndex);
         return new ClientStateNotification(clientIndex, clientState);

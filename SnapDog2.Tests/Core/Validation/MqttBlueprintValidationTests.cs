@@ -52,11 +52,11 @@ public class MqttBlueprintValidationTests(ITestOutputHelper output)
         {
             if (discoveredTopics.Contains(blueprintTopic))
             {
-                _output.WriteLine($"✓ Discovered: {blueprintTopic}");
+                this._output.WriteLine($"✓ Discovered: {blueprintTopic}");
             }
             else
             {
-                _output.WriteLine($"✗ Missing: {blueprintTopic}");
+                this._output.WriteLine($"✗ Missing: {blueprintTopic}");
             }
         }
 
@@ -108,11 +108,11 @@ public class MqttBlueprintValidationTests(ITestOutputHelper output)
                     .GetType()
                     .Name.Should()
                     .Be(testCase.ExpectedType, $"Topic {testCase.Topic} should map to {testCase.ExpectedType}");
-                _output.WriteLine($"✓ {testCase.Topic} → {command.GetType().Name}");
+                this._output.WriteLine($"✓ {testCase.Topic} → {command.GetType().Name}");
             }
             else
             {
-                _output.WriteLine($"✗ {testCase.Topic} → null (no mapping found)");
+                this._output.WriteLine($"✗ {testCase.Topic} → null (no mapping found)");
             }
         }
     }

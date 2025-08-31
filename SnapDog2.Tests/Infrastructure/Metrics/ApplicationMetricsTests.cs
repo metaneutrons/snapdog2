@@ -30,18 +30,18 @@ public class ApplicationMetricsTests : IDisposable
 
     public ApplicationMetricsTests()
     {
-        _mockLogger = new Mock<ILogger<ApplicationMetrics>>();
-        _applicationMetrics = new ApplicationMetrics(_mockLogger.Object);
+        this._mockLogger = new Mock<ILogger<ApplicationMetrics>>();
+        this._applicationMetrics = new ApplicationMetrics(this._mockLogger.Object);
     }
 
     [Fact]
     public void Constructor_ShouldInitializeSuccessfully()
     {
         // Act & Assert - Constructor should not throw
-        using var metrics = new ApplicationMetrics(_mockLogger.Object);
+        using var metrics = new ApplicationMetrics(this._mockLogger.Object);
 
         // Verify logger IsEnabled was called (LoggerMessage pattern)
-        _mockLogger.Verify(
+        this._mockLogger.Verify(
             x => x.IsEnabled(LogLevel.Information),
             Times.AtLeastOnce);
     }
@@ -56,8 +56,7 @@ public class ApplicationMetricsTests : IDisposable
         const double duration = 0.123;
 
         // Act & Assert
-        var exception = Record.Exception(() =>
-            _applicationMetrics.RecordHttpRequest(method, endpoint, statusCode, duration));
+        var exception = Record.Exception(() => this._applicationMetrics.RecordHttpRequest(method, endpoint, statusCode, duration));
 
         Assert.Null(exception);
     }
@@ -71,8 +70,7 @@ public class ApplicationMetricsTests : IDisposable
         const bool success = true;
 
         // Act & Assert
-        var exception = Record.Exception(() =>
-            _applicationMetrics.RecordCommand(commandName, duration, success));
+        var exception = Record.Exception(() => this._applicationMetrics.RecordCommand(commandName, duration, success));
 
         Assert.Null(exception);
     }
@@ -86,8 +84,7 @@ public class ApplicationMetricsTests : IDisposable
         const bool success = true;
 
         // Act & Assert
-        var exception = Record.Exception(() =>
-            _applicationMetrics.RecordQuery(queryName, duration, success));
+        var exception = Record.Exception(() => this._applicationMetrics.RecordQuery(queryName, duration, success));
 
         Assert.Null(exception);
     }
@@ -106,8 +103,7 @@ public class ApplicationMetricsTests : IDisposable
         };
 
         // Act & Assert
-        var exception = Record.Exception(() =>
-            _applicationMetrics.UpdateSystemMetrics(systemState));
+        var exception = Record.Exception(() => this._applicationMetrics.UpdateSystemMetrics(systemState));
 
         Assert.Null(exception);
     }
@@ -125,8 +121,7 @@ public class ApplicationMetricsTests : IDisposable
         };
 
         // Act & Assert
-        var exception = Record.Exception(() =>
-            _applicationMetrics.UpdateBusinessMetrics(businessState));
+        var exception = Record.Exception(() => this._applicationMetrics.UpdateBusinessMetrics(businessState));
 
         Assert.Null(exception);
     }
@@ -140,8 +135,7 @@ public class ApplicationMetricsTests : IDisposable
         const string toTrack = "Track B";
 
         // Act & Assert
-        var exception = Record.Exception(() =>
-            _applicationMetrics.RecordTrackChange(zoneIndex, fromTrack, toTrack));
+        var exception = Record.Exception(() => this._applicationMetrics.RecordTrackChange(zoneIndex, fromTrack, toTrack));
 
         Assert.Null(exception);
     }
@@ -156,8 +150,7 @@ public class ApplicationMetricsTests : IDisposable
         const int toVolume = 75;
 
         // Act & Assert
-        var exception = Record.Exception(() =>
-            _applicationMetrics.RecordVolumeChange(targetId, targetType, fromVolume, toVolume));
+        var exception = Record.Exception(() => this._applicationMetrics.RecordVolumeChange(targetId, targetType, fromVolume, toVolume));
 
         Assert.Null(exception);
     }
@@ -171,8 +164,7 @@ public class ApplicationMetricsTests : IDisposable
         const string operation = "SetVolume";
 
         // Act & Assert
-        var exception = Record.Exception(() =>
-            _applicationMetrics.RecordError(errorType, component, operation));
+        var exception = Record.Exception(() => this._applicationMetrics.RecordError(errorType, component, operation));
 
         Assert.Null(exception);
     }
@@ -186,8 +178,7 @@ public class ApplicationMetricsTests : IDisposable
         const string operation = "TestOperation";
 
         // Act & Assert
-        var exception = Record.Exception(() =>
-            _applicationMetrics.RecordException(testException, component, operation));
+        var exception = Record.Exception(() => this._applicationMetrics.RecordException(testException, component, operation));
 
         Assert.Null(exception);
     }
@@ -200,14 +191,13 @@ public class ApplicationMetricsTests : IDisposable
         string method, string endpoint, int statusCode, double duration)
     {
         // Act & Assert
-        var exception = Record.Exception(() =>
-            _applicationMetrics.RecordHttpRequest(method, endpoint, statusCode, duration));
+        var exception = Record.Exception(() => this._applicationMetrics.RecordHttpRequest(method, endpoint, statusCode, duration));
 
         Assert.Null(exception);
     }
 
     public void Dispose()
     {
-        _applicationMetrics?.Dispose();
+        this._applicationMetrics?.Dispose();
     }
 }

@@ -44,19 +44,19 @@ public class AttributeBasedMqttCommandMapperTests(ITestOutputHelper output)
             .ToList();
 
         // Act
-        var registeredPatterns = _mapper.GetRegisteredTopicPatterns().ToList();
+        var registeredPatterns = this._mapper.GetRegisteredTopicPatterns().ToList();
 
         // Assert
-        _output.WriteLine($"Found {registeredPatterns.Count} registered topic patterns:");
+        this._output.WriteLine($"Found {registeredPatterns.Count} registered topic patterns:");
         foreach (var pattern in registeredPatterns.Take(10))
         {
-            _output.WriteLine($"  - {pattern}");
+            this._output.WriteLine($"  - {pattern}");
         }
 
-        _output.WriteLine($"\nBlueprint defines {blueprintTopics.Count} MQTT command topics:");
+        this._output.WriteLine($"\nBlueprint defines {blueprintTopics.Count} MQTT command topics:");
         foreach (var topic in blueprintTopics)
         {
-            _output.WriteLine($"  - {topic}");
+            this._output.WriteLine($"  - {topic}");
         }
 
         registeredPatterns.Should().NotBeEmpty("Mapper should discover topic patterns from attributes");
@@ -101,16 +101,16 @@ public class AttributeBasedMqttCommandMapperTests(ITestOutputHelper output)
         // Act & Assert
         foreach (var testCase in testCases)
         {
-            var command = _mapper.MapTopicToCommand(testCase.Topic, testCase.Payload);
+            var command = this._mapper.MapTopicToCommand(testCase.Topic, testCase.Payload);
 
             if (command != null)
             {
-                _output.WriteLine($"✓ {testCase.Description}: {testCase.Topic} → {command.GetType().Name}");
+                this._output.WriteLine($"✓ {testCase.Description}: {testCase.Topic} → {command.GetType().Name}");
                 command.Should().NotBeNull($"Topic {testCase.Topic} should map to a command");
             }
             else
             {
-                _output.WriteLine($"✗ {testCase.Description}: {testCase.Topic} → null (no mapping)");
+                this._output.WriteLine($"✗ {testCase.Description}: {testCase.Topic} → null (no mapping)");
                 // Don't fail the test if mapping doesn't exist yet - this is expected during development
             }
         }
@@ -125,22 +125,22 @@ public class AttributeBasedMqttCommandMapperTests(ITestOutputHelper output)
         // Act & Assert
         var commandsWithoutTopics = mqttCommands.Where(c => string.IsNullOrEmpty(c.MqttTopic)).ToList();
 
-        _output.WriteLine($"MQTT Commands in Blueprint: {mqttCommands.Count}");
-        _output.WriteLine($"Commands with topic patterns: {mqttCommands.Count - commandsWithoutTopics.Count}");
-        _output.WriteLine($"Commands without topic patterns: {commandsWithoutTopics.Count}");
+        this._output.WriteLine($"MQTT Commands in Blueprint: {mqttCommands.Count}");
+        this._output.WriteLine($"Commands with topic patterns: {mqttCommands.Count - commandsWithoutTopics.Count}");
+        this._output.WriteLine($"Commands without topic patterns: {commandsWithoutTopics.Count}");
 
         if (commandsWithoutTopics.Any())
         {
-            _output.WriteLine("\nCommands missing MQTT topic patterns:");
+            this._output.WriteLine("\nCommands missing MQTT topic patterns:");
             foreach (var cmd in commandsWithoutTopics)
             {
-                _output.WriteLine($"  - {cmd.Id}: {cmd.Description}");
+                this._output.WriteLine($"  - {cmd.Id}: {cmd.Description}");
             }
         }
 
         // This assertion will help track progress of adding MQTT topics to blueprint
         var topicCoverage = (double)(mqttCommands.Count - commandsWithoutTopics.Count) / mqttCommands.Count;
-        _output.WriteLine($"\nMQTT Topic Coverage: {topicCoverage:P1}");
+        this._output.WriteLine($"\nMQTT Topic Coverage: {topicCoverage:P1}");
 
         // STRICT REQUIREMENT: All commands with .Mqtt() MUST have topic patterns
         commandsWithoutTopics
@@ -162,25 +162,25 @@ public class AttributeBasedMqttCommandMapperTests(ITestOutputHelper output)
 
         var commandsWithoutMethods = apiCommands.Where(c => string.IsNullOrEmpty(c.HttpMethod)).ToList();
 
-        _output.WriteLine($"API Commands in Blueprint: {apiCommands.Count}");
-        _output.WriteLine($"Commands without API paths: {commandsWithoutPaths.Count}");
-        _output.WriteLine($"Commands without HTTP methods: {commandsWithoutMethods.Count}");
+        this._output.WriteLine($"API Commands in Blueprint: {apiCommands.Count}");
+        this._output.WriteLine($"Commands without API paths: {commandsWithoutPaths.Count}");
+        this._output.WriteLine($"Commands without HTTP methods: {commandsWithoutMethods.Count}");
 
         if (commandsWithoutPaths.Any())
         {
-            _output.WriteLine("\nCommands missing API paths:");
+            this._output.WriteLine("\nCommands missing API paths:");
             foreach (var cmd in commandsWithoutPaths)
             {
-                _output.WriteLine($"  - {cmd.Id}: {cmd.Description}");
+                this._output.WriteLine($"  - {cmd.Id}: {cmd.Description}");
             }
         }
 
         if (commandsWithoutMethods.Any())
         {
-            _output.WriteLine("\nCommands missing HTTP methods:");
+            this._output.WriteLine("\nCommands missing HTTP methods:");
             foreach (var cmd in commandsWithoutMethods)
             {
-                _output.WriteLine($"  - {cmd.Id}: {cmd.Description}");
+                this._output.WriteLine($"  - {cmd.Id}: {cmd.Description}");
             }
         }
 
@@ -189,25 +189,25 @@ public class AttributeBasedMqttCommandMapperTests(ITestOutputHelper output)
 
         var statusWithoutMethods = apiStatus.Where(s => string.IsNullOrEmpty(s.HttpMethod)).ToList();
 
-        _output.WriteLine($"\nAPI Status in Blueprint: {apiStatus.Count}");
-        _output.WriteLine($"Status without API paths: {statusWithoutPaths.Count}");
-        _output.WriteLine($"Status without HTTP methods: {statusWithoutMethods.Count}");
+        this._output.WriteLine($"\nAPI Status in Blueprint: {apiStatus.Count}");
+        this._output.WriteLine($"Status without API paths: {statusWithoutPaths.Count}");
+        this._output.WriteLine($"Status without HTTP methods: {statusWithoutMethods.Count}");
 
         if (statusWithoutPaths.Any())
         {
-            _output.WriteLine("\nStatus missing API paths:");
+            this._output.WriteLine("\nStatus missing API paths:");
             foreach (var status in statusWithoutPaths)
             {
-                _output.WriteLine($"  - {status.Id}: {status.Description}");
+                this._output.WriteLine($"  - {status.Id}: {status.Description}");
             }
         }
 
         if (statusWithoutMethods.Any())
         {
-            _output.WriteLine("\nStatus missing HTTP methods:");
+            this._output.WriteLine("\nStatus missing HTTP methods:");
             foreach (var status in statusWithoutMethods)
             {
-                _output.WriteLine($"  - {status.Id}: {status.Description}");
+                this._output.WriteLine($"  - {status.Id}: {status.Description}");
             }
         }
 

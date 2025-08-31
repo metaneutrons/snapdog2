@@ -81,7 +81,7 @@ public partial class GlobalExceptionHandlingMiddleware(
         }
 
         // Record the exception in the error tracking service
-        _errorTrackingService.RecordException(
+        this._errorTrackingService.RecordException(
             exception,
             "HttpPipeline",
             $"{requestMethod} {requestPath}"

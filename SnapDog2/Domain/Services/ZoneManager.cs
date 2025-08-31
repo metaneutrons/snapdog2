@@ -278,12 +278,12 @@ public partial class ZoneManager(
 
     public async Task<Result<ZoneState>> GetZoneAsync(int zoneIndex, CancellationToken cancellationToken = default)
     {
-        return await GetZoneStateAsync(zoneIndex);
+        return await this.GetZoneStateAsync(zoneIndex);
     }
 
     public async Task<Result<List<ZoneState>>> GetAllZonesAsync(CancellationToken cancellationToken = default)
     {
-        return await GetAllZoneStatesAsync();
+        return await this.GetAllZoneStatesAsync();
     }
 }
 
@@ -341,7 +341,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         var storedState = this._zoneStateStore.GetZoneState(zoneIndex);
         if (storedState != null)
         {
-            LogZoneInitializing(
+            this.LogZoneInitializing(
                 zoneIndex,
                 storedState.Playlist?.Source ?? "none",
                 storedState.Playlist?.Index.ToString() ?? "none",
@@ -352,7 +352,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         }
         else
         {
-            LogNoStoredStateFound(zoneIndex);
+            this.LogNoStoredStateFound(zoneIndex);
             this._currentState = this.CreateInitialState();
             // Store the initial state
             this._zoneStateStore.SetZoneState(zoneIndex, this._currentState);
@@ -367,7 +367,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     public async Task<Result<ZoneState>> GetStateAsync()
     {
-        LogGetStateAsyncCalled(this._zoneIndex);
+        this.LogGetStateAsyncCalled(this._zoneIndex);
 
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
@@ -388,7 +388,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
             if (completedTask != updateTask)
             {
-                LogGetStateAsyncTimeout(this._zoneIndex);
+                this.LogGetStateAsyncTimeout(this._zoneIndex);
                 // Return current state without update if timeout
                 return Result<ZoneState>.Success(this._currentState with { TimestampUtc = DateTime.UtcNow });
             }
@@ -447,7 +447,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
 
             // Publish status notification for blueprint compliance
-            await PublishPlaybackStateStatusAsync(SnapDog2.Shared.Enums.PlaybackState.Playing);
+            await this.PublishPlaybackStateStatusAsync(SnapDog2.Shared.Enums.PlaybackState.Playing);
 
             return Result.Success();
         }
@@ -611,7 +611,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
             if (result.IsSuccess)
             {
-                await PublishVolumeStatusAsync(Math.Clamp(volume, 0, 100));
+                await this.PublishVolumeStatusAsync(Math.Clamp(volume, 0, 100));
             }
 
             return result;
@@ -652,7 +652,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
             if (result.IsSuccess)
             {
-                await PublishVolumeStatusAsync(newVolume);
+                await this.PublishVolumeStatusAsync(newVolume);
             }
 
             return result;
@@ -674,7 +674,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
             if (result.IsSuccess)
             {
-                await PublishVolumeStatusAsync(newVolume);
+                await this.PublishVolumeStatusAsync(newVolume);
             }
 
             return result;
@@ -696,7 +696,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
             if (result.IsSuccess)
             {
-                await PublishMuteStatusAsync(enabled);
+                await this.PublishMuteStatusAsync(enabled);
             }
 
             return result;
@@ -791,7 +791,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
 
             // Log successful track change with meaningful information
-            LogZonePlaying(
+            this.LogZonePlaying(
                 this._zoneIndex,
                 targetTrack.Title,
                 this._currentState.Playlist.Source,
@@ -907,7 +907,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         await this.PublishTrackMetadataNotificationsAsync(targetTrack).ConfigureAwait(false);
 
         // Log successful track change with meaningful information
-        LogZonePlaying(
+        this.LogZonePlaying(
             this._zoneIndex,
             targetTrack.Title,
             this._currentState.Playlist.Source,
@@ -1354,18 +1354,18 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     {
         try
         {
-            LogUpdateStateFromSnapcastStarting(this._zoneIndex);
+            this.LogUpdateStateFromSnapcastStarting(this._zoneIndex);
 
             // Get current playback status from MediaPlayerService
             var playbackStatus = await this._mediaPlayerService.GetStatusAsync(this._zoneIndex).ConfigureAwait(false);
 
-            LogMediaPlayerStatusResult(playbackStatus.IsSuccess, playbackStatus.Value != null ? "NotNull" : "Null");
+            this.LogMediaPlayerStatusResult(playbackStatus.IsSuccess, playbackStatus.Value != null ? "NotNull" : "Null");
 
             if (playbackStatus.IsSuccess && playbackStatus.Value != null)
             {
                 var status = playbackStatus.Value;
 
-                LogMediaPlayerStatus(status.IsPlaying, status.CurrentTrack?.Title);
+                this.LogMediaPlayerStatus(status.IsPlaying, status.CurrentTrack?.Title);
 
                 // Check for playing state changes regardless of whether CurrentTrack is null
                 // This handles cases where MediaPlayer returns null CurrentTrack when paused
@@ -1374,7 +1374,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                     var playingStateChanged = this._currentState.Track.IsPlaying != status.IsPlaying;
                     if (playingStateChanged)
                     {
-                        LogTrackStateChanged(this._currentState.Track.IsPlaying, status.IsPlaying);
+                        this.LogTrackStateChanged(this._currentState.Track.IsPlaying, status.IsPlaying);
 
                         // Publish track playing status notification for KNX integration
                         _ = Task.Run(async () =>
@@ -1393,7 +1393,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                             }
                             catch (Exception ex)
                             {
-                                LogErrorPublishingTrackPlayingStatus(ex, this._zoneIndex);
+                                this.LogErrorPublishingTrackPlayingStatus(ex, this._zoneIndex);
                             }
                         });
                     }
@@ -1411,7 +1411,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
                         if (stateChanged)
                         {
-                            LogTrackStateChanged(this._currentState.Track.IsPlaying, status.IsPlaying);
+                            this.LogTrackStateChanged(this._currentState.Track.IsPlaying, status.IsPlaying);
 
                             // Publish track playing status notification for KNX integration
                             _ = Task.Run(async () =>
@@ -1430,13 +1430,13 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                                 }
                                 catch (Exception ex)
                                 {
-                                    LogErrorPublishingTrackPlayingStatus(ex, this._zoneIndex);
+                                    this.LogErrorPublishingTrackPlayingStatus(ex, this._zoneIndex);
                                 }
                             });
                         }
                         else
                         {
-                            LogUpdatingTrackState(this._currentState.Track.IsPlaying, status.IsPlaying);
+                            this.LogUpdatingTrackState(this._currentState.Track.IsPlaying, status.IsPlaying);
                         }
 
                         // Preserve ALL existing metadata, only update playback status and position
@@ -1454,7 +1454,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                     else
                     {
                         // No existing track - use MediaPlayer track as-is (this handles stream URLs, etc.)
-                        LogTrackStateChanged(false, status.IsPlaying);
+                        this.LogTrackStateChanged(false, status.IsPlaying);
 
                         // Publish track playing status notification for KNX integration (new track)
                         _ = Task.Run(async () =>
@@ -1473,7 +1473,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                             }
                             catch (Exception ex)
                             {
-                                LogErrorPublishingTrackPlayingStatus(ex, this._zoneIndex);
+                                this.LogErrorPublishingTrackPlayingStatus(ex, this._zoneIndex);
                             }
                         });
 
@@ -1497,7 +1497,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
                     if (shouldLogPosition)
                     {
-                        LogZonePlayingWithPosition(
+                        this.LogZonePlayingWithPosition(
                             this._zoneIndex,
                             updatedTrack.Title ?? "Unknown",
                             positionSeconds,
@@ -1508,7 +1508,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                     }
                     else
                     {
-                        LogLibVLCPositionData(
+                        this.LogLibVLCPositionData(
                             status.CurrentTrack.PositionMs,
                             status.CurrentTrack.Progress ?? 0,
                             updatedTrack.DurationMs
@@ -1524,7 +1524,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                             : SnapDog2.Shared.Enums.PlaybackState.Stopped,
                     };
 
-                    LogUpdatedTrackState(
+                    this.LogUpdatedTrackState(
                         updatedTrack.IsPlaying,
                         updatedTrack.PositionMs ?? 0,
                         updatedTrack.Progress ?? 0
@@ -1532,7 +1532,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 }
                 else
                 {
-                    LogSkippingUpdate(
+                    this.LogSkippingUpdate(
                         this._currentState.Track != null ? "NotNull" : "Null",
                         "Null"
                     );
@@ -1557,13 +1557,13 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             }
             else
             {
-                LogMediaPlayerStatusFailed(playbackStatus.IsSuccess, playbackStatus.ErrorMessage);
+                this.LogMediaPlayerStatusFailed(playbackStatus.IsSuccess, playbackStatus.ErrorMessage);
             }
         }
         catch (Exception ex)
         {
             // Log error but don't fail the state update
-            LogFailedToUpdateZoneState(ex, this._zoneIndex);
+            this.LogFailedToUpdateZoneState(ex, this._zoneIndex);
         }
     }
 
@@ -1577,7 +1577,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             return; // Timer already running
         }
 
-        LogStartingPositionUpdateTimer(this._zoneIndex);
+        this.LogStartingPositionUpdateTimer(this._zoneIndex);
 
         var intervalMs = this._configuration.Value.System.ProgressUpdateIntervalMs;
         var interval = TimeSpan.FromMilliseconds(intervalMs);
@@ -1599,7 +1599,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 }
                 catch (Exception ex)
                 {
-                    LogErrorDuringPositionUpdate(ex, this._zoneIndex);
+                    this.LogErrorDuringPositionUpdate(ex, this._zoneIndex);
                 }
             },
             null,
@@ -1618,7 +1618,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             return;
         }
 
-        LogStoppingPositionUpdateTimer(this._zoneIndex);
+        this.LogStoppingPositionUpdateTimer(this._zoneIndex);
 
         this._positionUpdateTimer?.Dispose();
         this._positionUpdateTimer = null;
@@ -1632,7 +1632,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         var mediaPlayer = this._mediaPlayerService.GetMediaPlayer(this._zoneIndex);
         if (mediaPlayer != null)
         {
-            LogSubscribingToMediaPlayerEvents(this._zoneIndex);
+            this.LogSubscribingToMediaPlayerEvents(this._zoneIndex);
 
             mediaPlayer.PositionChanged += this.OnMediaPlayerPositionChanged;
             mediaPlayer.PlaybackStateChanged += this.OnMediaPlayerStateChanged;
@@ -1640,7 +1640,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         }
         else
         {
-            LogMediaPlayerNullOnSubscribe(this._zoneIndex);
+            this.LogMediaPlayerNullOnSubscribe(this._zoneIndex);
         }
     }
 
@@ -1652,7 +1652,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         var mediaPlayer = this._mediaPlayerService.GetMediaPlayer(this._zoneIndex);
         if (mediaPlayer != null)
         {
-            LogUnsubscribingFromMediaPlayerEvents(this._zoneIndex);
+            this.LogUnsubscribingFromMediaPlayerEvents(this._zoneIndex);
 
             mediaPlayer.PositionChanged -= this.OnMediaPlayerPositionChanged;
             mediaPlayer.PlaybackStateChanged -= this.OnMediaPlayerStateChanged;
@@ -1667,11 +1667,11 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     {
         try
         {
-            LogPositionChangedForZone(this._zoneIndex, e.PositionMs, e.Progress);
+            this.LogPositionChangedForZone(this._zoneIndex, e.PositionMs, e.Progress);
 
             if (this._disposed || this._currentState.PlaybackState != SnapDog2.Shared.Enums.PlaybackState.Playing)
             {
-                LogSkippingPositionUpdate(this._disposed, this._currentState.PlaybackState.ToString());
+                this.LogSkippingPositionUpdate(this._disposed, this._currentState.PlaybackState.ToString());
                 return;
             }
 
@@ -1690,7 +1690,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
                 // Publish updated state to MQTT
                 this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
-                LogPublishedMqttUpdateForPositionChange();
+                this.LogPublishedMqttUpdateForPositionChange();
 
                 // Publish track progress notification for KNX integration (throttled)
                 Task.Run(async () =>
@@ -1709,14 +1709,14 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                     }
                     catch (Exception ex)
                     {
-                        LogErrorPublishingTrackProgress(ex, this._zoneIndex);
+                        this.LogErrorPublishingTrackProgress(ex, this._zoneIndex);
                     }
                 });
             }
         }
         catch (Exception ex)
         {
-            LogErrorHandlingPositionChange(ex, this._zoneIndex);
+            this.LogErrorHandlingPositionChange(ex, this._zoneIndex);
         }
     }
 
@@ -1727,7 +1727,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     {
         try
         {
-            LogMediaPlayerStateChanged(this._zoneIndex, e.State.ToString());
+            this.LogMediaPlayerStateChanged(this._zoneIndex, e.State.ToString());
 
             // Update playback state based on LibVLC state
             var newPlaybackState =
@@ -1757,14 +1757,14 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                     }
                     catch (Exception ex)
                     {
-                        LogErrorPublishingTrackPlayingStatus(ex, this._zoneIndex);
+                        this.LogErrorPublishingTrackPlayingStatus(ex, this._zoneIndex);
                     }
                 });
             }
         }
         catch (Exception ex)
         {
-            LogErrorHandlingStateChange(ex, this._zoneIndex);
+            this.LogErrorHandlingStateChange(ex, this._zoneIndex);
         }
     }
 
@@ -1775,7 +1775,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     {
         try
         {
-            LogTrackInfoChanged(this._zoneIndex, e.TrackInfo.Title ?? "Unknown", e.TrackInfo.Artist ?? "Unknown");
+            this.LogTrackInfoChanged(this._zoneIndex, e.TrackInfo.Title ?? "Unknown", e.TrackInfo.Artist ?? "Unknown");
 
             // Update the Zone's current state with the new track info
             this._currentState = this._currentState with { Track = e.TrackInfo };
@@ -1783,11 +1783,11 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             // Publish state change to notify other components
             this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
 
-            LogTrackInfoUpdated(this._zoneIndex, e.TrackInfo.Title ?? "Unknown");
+            this.LogTrackInfoUpdated(this._zoneIndex, e.TrackInfo.Title ?? "Unknown");
         }
         catch (Exception ex)
         {
-            LogErrorHandlingTrackInfoChange(ex, this._zoneIndex);
+            this.LogErrorHandlingTrackInfoChange(ex, this._zoneIndex);
         }
     }
 
@@ -1936,7 +1936,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            LogErrorPublishingTrackMetadata(ex, this._zoneIndex);
+            this.LogErrorPublishingTrackMetadata(ex, this._zoneIndex);
         }
     }
 

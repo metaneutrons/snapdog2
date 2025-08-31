@@ -59,14 +59,14 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
     public async Task<ActionResult<int>> GetZonesCount()
     {
         var query = new GetZonesCountQuery();
-        var result = await _mediator.SendQueryAsync<GetZonesCountQuery, Result<int>>(query);
+        var result = await this._mediator.SendQueryAsync<GetZonesCountQuery, Result<int>>(query);
 
         if (result.IsFailure)
         {
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return Ok(result.Value);
+        return this.Ok(result.Value);
     }
 
     [HttpGet]
@@ -89,8 +89,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToGetZones(result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToGetZones(result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         var zones = result.Value!;
@@ -116,11 +116,11 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToGetZone(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            this.LogFailedToGetZone(zoneIndex, result.ErrorMessage ?? "Unknown error");
             return this.NotFound($"Zone {zoneIndex} not found");
         }
 
-        return Ok(result.Value!);
+        return this.Ok(result.Value!);
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -149,8 +149,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToSetZoneVolume(zoneIndex, volume, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToSetZoneVolume(zoneIndex, volume, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -172,11 +172,11 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToGetZoneVolume(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            this.LogFailedToGetZoneVolume(zoneIndex, result.ErrorMessage ?? "Unknown error");
             return this.NotFound($"Zone {zoneIndex} not found");
         }
 
-        return Ok(result.Value);
+        return this.Ok(result.Value);
     }
 
     /// <summary>
@@ -201,8 +201,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToIncreaseZoneVolume(zoneIndex, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToIncreaseZoneVolume(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -231,8 +231,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToDecreaseZoneVolume(zoneIndex, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToDecreaseZoneVolume(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -259,8 +259,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToSetZoneMute(zoneIndex, muted, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToSetZoneMute(zoneIndex, muted, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -282,11 +282,11 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToGetZoneMuteState(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            this.LogFailedToGetZoneMuteState(zoneIndex, result.ErrorMessage ?? "Unknown error");
             return this.NotFound($"Zone {zoneIndex} not found");
         }
 
-        return Ok(result.Value!.Mute);
+        return this.Ok(result.Value!.Mute);
     }
 
     /// <summary>
@@ -304,8 +304,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToToggleZoneMute(zoneIndex, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToToggleZoneMute(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -332,8 +332,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToPlayZone(zoneIndex, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToPlayZone(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -355,8 +355,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToPauseZone(zoneIndex, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToPauseZone(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -378,8 +378,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToStopZone(zoneIndex, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToStopZone(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -408,8 +408,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToSetZonePlaylist(zoneIndex, playlistIndex, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToSetZonePlaylist(zoneIndex, playlistIndex, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -528,8 +528,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToSetZoneTrack(zoneIndex, trackIndex, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToSetZoneTrack(zoneIndex, trackIndex, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -562,11 +562,11 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToGetZoneTrackRepeat(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            this.LogFailedToGetZoneTrackRepeat(zoneIndex, result.ErrorMessage ?? "Unknown error");
             return this.NotFound($"Zone {zoneIndex} not found");
         }
 
-        return Ok(result.Value!.TrackRepeat);
+        return this.Ok(result.Value!.TrackRepeat);
     }
 
     /// <summary>
@@ -585,8 +585,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToSetZoneTrackRepeat(zoneIndex, enabled, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToSetZoneTrackRepeat(zoneIndex, enabled, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -608,8 +608,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToToggleZoneTrackRepeat(zoneIndex, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToToggleZoneTrackRepeat(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -632,11 +632,11 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToGetZonePlaylistRepeat(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            this.LogFailedToGetZonePlaylistRepeat(zoneIndex, result.ErrorMessage ?? "Unknown error");
             return this.NotFound($"Zone {zoneIndex} not found");
         }
 
-        return Ok(result.Value!.PlaylistRepeat);
+        return this.Ok(result.Value!.PlaylistRepeat);
     }
 
     /// <summary>
@@ -655,8 +655,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToSetZonePlaylistRepeat(zoneIndex, enabled, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToSetZonePlaylistRepeat(zoneIndex, enabled, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -678,8 +678,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToToggleZonePlaylistRepeat(zoneIndex, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToToggleZonePlaylistRepeat(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -706,11 +706,11 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToGetZonePlaylistShuffle(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            this.LogFailedToGetZonePlaylistShuffle(zoneIndex, result.ErrorMessage ?? "Unknown error");
             return this.NotFound($"Zone {zoneIndex} not found");
         }
 
-        return Ok(result.Value!.PlaylistShuffle);
+        return this.Ok(result.Value!.PlaylistShuffle);
     }
 
     /// <summary>
@@ -729,8 +729,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToSetZonePlaylistShuffle(zoneIndex, enabled, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToSetZonePlaylistShuffle(zoneIndex, enabled, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -752,8 +752,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToToggleZonePlaylistShuffle(zoneIndex, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToToggleZonePlaylistShuffle(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -780,8 +780,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToSkipToNextTrack(zoneIndex, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToSkipToNextTrack(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -804,8 +804,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToSkipToPreviousTrack(zoneIndex, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToSkipToPreviousTrack(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -832,8 +832,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToSwitchToNextPlaylist(zoneIndex, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToSwitchToNextPlaylist(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -856,8 +856,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToSwitchToPreviousPlaylist(zoneIndex, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToSwitchToPreviousPlaylist(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -884,11 +884,11 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToGetZoneTrackIndex(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            this.LogFailedToGetZoneTrackIndex(zoneIndex, result.ErrorMessage ?? "Unknown error");
             return this.NotFound($"Zone {zoneIndex} not found");
         }
 
-        return Ok(result.Value!.Track?.Index ?? 1);
+        return this.Ok(result.Value!.Track?.Index ?? 1);
     }
 
     /// <summary>
@@ -906,11 +906,11 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToGetZonePlaylistIndex(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            this.LogFailedToGetZonePlaylistIndex(zoneIndex, result.ErrorMessage ?? "Unknown error");
             return this.NotFound($"Zone {zoneIndex} not found");
         }
 
-        return Ok(result.Value!.Playlist?.Index ?? 1);
+        return this.Ok(result.Value!.Playlist?.Index ?? 1);
     }
 
     /// <summary>
@@ -928,11 +928,11 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToGetZonePlaylistInfo(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            this.LogFailedToGetZonePlaylistInfo(zoneIndex, result.ErrorMessage ?? "Unknown error");
             return this.NotFound($"Zone {zoneIndex} not found");
         }
 
-        return Ok(result.Value!);
+        return this.Ok(result.Value!);
     }
 
     /// <summary>
@@ -950,7 +950,7 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToGetZoneTrackMetadata(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            this.LogFailedToGetZoneTrackMetadata(zoneIndex, result.ErrorMessage ?? "Unknown error");
             return this.NotFound($"Zone {zoneIndex} not found");
         }
 
@@ -973,7 +973,7 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
             );
         }
 
-        return Ok(track);
+        return this.Ok(track);
     }
 
     /// <summary>
@@ -991,11 +991,11 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToGetZoneTrackTitle(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            this.LogFailedToGetZoneTrackTitle(zoneIndex, result.ErrorMessage ?? "Unknown error");
             return this.NotFound($"Zone {zoneIndex} not found");
         }
 
-        return Ok(result.Value!.Track?.Title ?? "No Track");
+        return this.Ok(result.Value!.Track?.Title ?? "No Track");
     }
 
     /// <summary>
@@ -1013,11 +1013,11 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToGetZoneTrackArtist(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            this.LogFailedToGetZoneTrackArtist(zoneIndex, result.ErrorMessage ?? "Unknown error");
             return this.NotFound($"Zone {zoneIndex} not found");
         }
 
-        return Ok(result.Value!.Track?.Artist ?? "Unknown");
+        return this.Ok(result.Value!.Track?.Artist ?? "Unknown");
     }
 
     /// <summary>
@@ -1035,11 +1035,11 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToGetZoneTrackAlbum(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            this.LogFailedToGetZoneTrackAlbum(zoneIndex, result.ErrorMessage ?? "Unknown error");
             return this.NotFound($"Zone {zoneIndex} not found");
         }
 
-        return Ok(result.Value!.Track?.Album ?? "Unknown");
+        return this.Ok(result.Value!.Track?.Album ?? "Unknown");
     }
 
     /// <summary>
@@ -1057,11 +1057,11 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToGetZoneTrackCover(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            this.LogFailedToGetZoneTrackCover(zoneIndex, result.ErrorMessage ?? "Unknown error");
             return this.NotFound($"Zone {zoneIndex} not found");
         }
 
-        return Ok(result.Value!.Track?.CoverArtUrl ?? "");
+        return this.Ok(result.Value!.Track?.CoverArtUrl ?? "");
     }
 
     /// <summary>
@@ -1079,11 +1079,11 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToGetZoneTrackDuration(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            this.LogFailedToGetZoneTrackDuration(zoneIndex, result.ErrorMessage ?? "Unknown error");
             return this.NotFound($"Zone {zoneIndex} not found");
         }
 
-        return Ok(result.Value!.Track?.DurationMs ?? 0L);
+        return this.Ok(result.Value!.Track?.DurationMs ?? 0L);
     }
 
     /// <summary>
@@ -1101,7 +1101,7 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToGetZoneTrackPlaying(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            this.LogFailedToGetZoneTrackPlaying(zoneIndex, result.ErrorMessage ?? "Unknown error");
             return this.NotFound($"Zone {zoneIndex} not found");
         }
 
@@ -1123,11 +1123,11 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToGetZoneTrackPosition(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            this.LogFailedToGetZoneTrackPosition(zoneIndex, result.ErrorMessage ?? "Unknown error");
             return this.NotFound($"Zone {zoneIndex} not found");
         }
 
-        return Ok(result.Value!.Track?.PositionMs ?? 0L);
+        return this.Ok(result.Value!.Track?.PositionMs ?? 0L);
     }
 
     /// <summary>
@@ -1145,11 +1145,11 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToGetZoneTrackProgress(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            this.LogFailedToGetZoneTrackProgress(zoneIndex, result.ErrorMessage ?? "Unknown error");
             return this.NotFound($"Zone {zoneIndex} not found");
         }
 
-        return Ok(result.Value!.Track?.Progress ?? 0.0f);
+        return this.Ok(result.Value!.Track?.Progress ?? 0.0f);
     }
 
     /// <summary>
@@ -1174,8 +1174,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToSetZoneTrackPosition(zoneIndex, positionMs, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToSetZoneTrackPosition(zoneIndex, positionMs, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -1204,8 +1204,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToSetZoneTrackProgress(zoneIndex, progress, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToSetZoneTrackProgress(zoneIndex, progress, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -1234,8 +1234,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToPlayTrackByIndex(zoneIndex, trackIndex, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToPlayTrackByIndex(zoneIndex, trackIndex, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -1269,8 +1269,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToPlayUrl(zoneIndex, url, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToPlayUrl(zoneIndex, url, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -1310,8 +1310,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToPlayTrackFromPlaylist(zoneIndex, playlistIndex, trackIndex, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToPlayTrackFromPlaylist(zoneIndex, playlistIndex, trackIndex, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -1555,11 +1555,11 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToGetZoneName(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            this.LogFailedToGetZoneName(zoneIndex, result.ErrorMessage ?? "Unknown error");
             return this.NotFound($"Zone {zoneIndex} not found");
         }
 
-        return Ok(result.Value!.Name ?? $"Zone {zoneIndex}");
+        return this.Ok(result.Value!.Name ?? $"Zone {zoneIndex}");
     }
 
     [LoggerMessage(
@@ -1588,13 +1588,13 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToGetPlaybackState(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            this.LogFailedToGetPlaybackState(zoneIndex, result.ErrorMessage ?? "Unknown error");
             return this.NotFound($"Zone {zoneIndex} not found");
         }
 
         // Return playback state as string (Playing, Paused, Stopped)
         var playbackState = result.Value?.PlaybackState.ToString() ?? "Unknown";
-        return Ok(playbackState);
+        return this.Ok(playbackState);
     }
 
     /// <summary>
@@ -1612,11 +1612,11 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToGetPlaylistName(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            this.LogFailedToGetPlaylistName(zoneIndex, result.ErrorMessage ?? "Unknown error");
             return this.NotFound($"Zone {zoneIndex} not found");
         }
 
-        return Ok(result.Value?.Name ?? "Unknown Playlist");
+        return this.Ok(result.Value?.Name ?? "Unknown Playlist");
     }
 
     /// <summary>
@@ -1634,11 +1634,11 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToGetPlaylistCount(zoneIndex, result.ErrorMessage ?? "Unknown error");
+            this.LogFailedToGetPlaylistCount(zoneIndex, result.ErrorMessage ?? "Unknown error");
             return this.NotFound($"Zone {zoneIndex} not found");
         }
 
-        return Ok(result.Value?.TrackCount ?? 0);
+        return this.Ok(result.Value?.TrackCount ?? 0);
     }
 
     [LoggerMessage(
@@ -1689,8 +1689,8 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
 
         if (result.IsFailure)
         {
-            LogFailedToExecuteControlCommand(zoneIndex, command, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToExecuteControlCommand(zoneIndex, command, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation

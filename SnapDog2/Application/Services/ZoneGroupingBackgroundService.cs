@@ -40,41 +40,41 @@ public partial class ZoneGroupingBackgroundService : BackgroundService
         IOptions<SnapcastConfig> config
     )
     {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-        _metrics = metrics ?? throw new ArgumentNullException(nameof(metrics));
-        _config = config?.Value ?? throw new ArgumentNullException(nameof(config));
-        _reconciliationInterval = TimeSpan.FromMilliseconds(_config.ZoneGroupingCheckIntervalMs);
+        this._logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        this._serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        this._metrics = metrics ?? throw new ArgumentNullException(nameof(metrics));
+        this._config = config?.Value ?? throw new ArgumentNullException(nameof(config));
+        this._reconciliationInterval = TimeSpan.FromMilliseconds(this._config.ZoneGroupingCheckIntervalMs);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        LogZoneGroupingServiceStarting(_config.ZoneGroupingCheckIntervalMs);
+        this.LogZoneGroupingServiceStarting(this._config.ZoneGroupingCheckIntervalMs);
 
         // Wait for services to be ready
-        LogWaitingForServicesToBeReady();
+        this.LogWaitingForServicesToBeReady();
         await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
-        LogStartingPeriodicZoneGroupingChecks();
+        this.LogStartingPeriodicZoneGroupingChecks();
 
         // Start periodic checks
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
-                LogStartingPeriodicZoneGroupingCheck();
-                await PerformPeriodicCheckAsync(stoppingToken);
-                LogPeriodicZoneGroupingCheckCompleted(_config.ZoneGroupingCheckIntervalMs);
-                await Task.Delay(_reconciliationInterval, stoppingToken);
+                this.LogStartingPeriodicZoneGroupingCheck();
+                await this.PerformPeriodicCheckAsync(stoppingToken);
+                this.LogPeriodicZoneGroupingCheckCompleted(this._config.ZoneGroupingCheckIntervalMs);
+                await Task.Delay(this._reconciliationInterval, stoppingToken);
             }
             catch (OperationCanceledException)
             {
-                LogZoneGroupingMonitoringCancelled();
+                this.LogZoneGroupingMonitoringCancelled();
                 break;
             }
             catch (Exception ex)
             {
-                _metrics.RecordError("exception", "periodic_check");
-                LogExceptionInPeriodicCheckLoop(ex);
+                this._metrics.RecordError("exception", "periodic_check");
+                this.LogExceptionInPeriodicCheckLoop(ex);
                 await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
             }
         }
@@ -86,29 +86,29 @@ public partial class ZoneGroupingBackgroundService : BackgroundService
 
         try
         {
-            using var scope = _serviceProvider.CreateScope();
+            using var scope = this._serviceProvider.CreateScope();
             var zoneGroupingService = scope.ServiceProvider.GetRequiredService<IZoneGroupingService>();
 
-            LogCheckingZoneGroupingConfiguration();
+            this.LogCheckingZoneGroupingConfiguration();
 
             // Simple periodic check - just ensure zones are properly configured
             var result = await zoneGroupingService.EnsureZoneGroupingAsync(cancellationToken);
 
             if (result.IsSuccess)
             {
-                _metrics.RecordReconciliation(stopwatch.Elapsed.TotalSeconds, true);
-                LogZoneGroupingCheckCompletedSuccessfully();
+                this._metrics.RecordReconciliation(stopwatch.Elapsed.TotalSeconds, true);
+                this.LogZoneGroupingCheckCompletedSuccessfully();
             }
             else
             {
-                _metrics.RecordReconciliation(stopwatch.Elapsed.TotalSeconds, false, errorType: "ensure_failed");
-                LogPeriodicZoneGroupingCheckFailed(result.ErrorMessage);
+                this._metrics.RecordReconciliation(stopwatch.Elapsed.TotalSeconds, false, errorType: "ensure_failed");
+                this.LogPeriodicZoneGroupingCheckFailed(result.ErrorMessage);
             }
         }
         catch (Exception ex)
         {
-            _metrics.RecordError("exception", "periodic_check");
-            LogExceptionDuringPeriodicZoneGroupingCheck(ex);
+            this._metrics.RecordError("exception", "periodic_check");
+            this.LogExceptionDuringPeriodicZoneGroupingCheck(ex);
         }
     }
 

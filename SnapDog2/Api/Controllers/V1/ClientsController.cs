@@ -179,14 +179,14 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     public async Task<ActionResult<int>> GetClientsCount()
     {
         var query = new GetClientsCountQuery();
-        var result = await _mediator.SendQueryAsync<GetClientsCountQuery, Result<int>>(query);
+        var result = await this._mediator.SendQueryAsync<GetClientsCountQuery, Result<int>>(query);
 
         if (result.IsFailure)
         {
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return Ok(result.Value);
+        return this.Ok(result.Value);
     }
 
     [HttpGet]
@@ -196,21 +196,21 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     {
         if (page < 1)
         {
-            return BadRequest("Page must be greater than 0");
+            return this.BadRequest("Page must be greater than 0");
         }
 
         if (size < 1 || size > 100)
         {
-            return BadRequest("Size must be between 1 and 100");
+            return this.BadRequest("Size must be between 1 and 100");
         }
 
         var query = new GetAllClientsQuery();
-        var result = await _mediator.SendQueryAsync<GetAllClientsQuery, Result<List<ClientState>>>(query);
+        var result = await this._mediator.SendQueryAsync<GetAllClientsQuery, Result<List<ClientState>>>(query);
 
         if (result.IsFailure)
         {
-            LogFailedToGetClients(result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToGetClients(result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         var clients = result.Value ?? [];
@@ -220,7 +220,7 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
 
         var pageResult = new Page<ClientState>(pagedClients, totalCount, size, page);
 
-        return Ok(pageResult);
+        return this.Ok(pageResult);
     }
 
     /// <summary>
@@ -238,11 +238,11 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
 
         if (result.IsFailure)
         {
-            LogFailedToGetClient(clientIndex, result.ErrorMessage ?? "Unknown error");
+            this.LogFailedToGetClient(clientIndex, result.ErrorMessage ?? "Unknown error");
             return this.NotFound($"Client {clientIndex} not found");
         }
 
-        return Ok(result.Value!);
+        return this.Ok(result.Value!);
     }
 
     /// <summary>
@@ -267,8 +267,8 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
 
         if (result.IsFailure)
         {
-            LogFailedToSetClientVolume(clientIndex, volume, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToSetClientVolume(clientIndex, volume, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -291,11 +291,11 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
 
         if (result.IsFailure)
         {
-            LogFailedToGetClientVolume(clientIndex, result.ErrorMessage ?? "Unknown error");
+            this.LogFailedToGetClientVolume(clientIndex, result.ErrorMessage ?? "Unknown error");
             return this.NotFound($"Client {clientIndex} not found");
         }
 
-        return Ok(result.Value!.Volume);
+        return this.Ok(result.Value!.Volume);
     }
 
     /// <summary>
@@ -320,8 +320,8 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
 
         if (result.IsFailure)
         {
-            LogFailedToIncreaseClientVolume(clientIndex, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToIncreaseClientVolume(clientIndex, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -351,8 +351,8 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
 
         if (result.IsFailure)
         {
-            LogFailedToDecreaseClientVolume(clientIndex, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToDecreaseClientVolume(clientIndex, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -376,8 +376,8 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
 
         if (result.IsFailure)
         {
-            LogFailedToSetClientMute(clientIndex, muted, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToSetClientMute(clientIndex, muted, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -399,11 +399,11 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
 
         if (result.IsFailure)
         {
-            LogFailedToGetClientMuteState(clientIndex, result.ErrorMessage ?? "Unknown error");
+            this.LogFailedToGetClientMuteState(clientIndex, result.ErrorMessage ?? "Unknown error");
             return this.NotFound($"Client {clientIndex} not found");
         }
 
-        return Ok(result.Value!.Mute);
+        return this.Ok(result.Value!.Mute);
     }
 
     /// <summary>
@@ -421,8 +421,8 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
 
         if (result.IsFailure)
         {
-            LogFailedToToggleClientMute(clientIndex, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToToggleClientMute(clientIndex, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -453,8 +453,8 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
 
         if (result.IsFailure)
         {
-            LogFailedToSetClientLatency(clientIndex, latency, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToSetClientLatency(clientIndex, latency, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -476,11 +476,11 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
 
         if (result.IsFailure)
         {
-            LogFailedToGetClientLatency(clientIndex, result.ErrorMessage ?? "Unknown error");
+            this.LogFailedToGetClientLatency(clientIndex, result.ErrorMessage ?? "Unknown error");
             return this.NotFound($"Client {clientIndex} not found");
         }
 
-        return Ok(result.Value!.LatencyMs);
+        return this.Ok(result.Value!.LatencyMs);
     }
 
     /// <summary>
@@ -505,8 +505,8 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
 
         if (result.IsFailure)
         {
-            LogFailedToAssignClientToZone(clientIndex, zoneIndex, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToAssignClientToZone(clientIndex, zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -529,11 +529,11 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
 
         if (result.IsFailure)
         {
-            LogFailedToGetClientZoneAssignment(clientIndex, result.ErrorMessage ?? "Unknown error");
+            this.LogFailedToGetClientZoneAssignment(clientIndex, result.ErrorMessage ?? "Unknown error");
             return this.NotFound($"Client {clientIndex} not found");
         }
 
-        return Ok(result.Value!.ZoneIndex);
+        return this.Ok(result.Value!.ZoneIndex);
     }
 
     /// <summary>
@@ -563,8 +563,8 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
 
         if (result.IsFailure)
         {
-            LogFailedToSetClientName(clientIndex, name, result.ErrorMessage ?? "Unknown error");
-            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            this.LogFailedToSetClientName(clientIndex, name, result.ErrorMessage ?? "Unknown error");
+            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
@@ -586,11 +586,11 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
 
         if (result.IsFailure)
         {
-            LogFailedToGetClientConnectionStatus(clientIndex, result.ErrorMessage ?? "Unknown error");
+            this.LogFailedToGetClientConnectionStatus(clientIndex, result.ErrorMessage ?? "Unknown error");
             return this.NotFound($"Client {clientIndex} not found");
         }
 
-        return Ok(result.Value!.Connected);
+        return this.Ok(result.Value!.Connected);
     }
 
     /// <summary>
@@ -608,11 +608,11 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
 
         if (result.IsFailure)
         {
-            LogFailedToGetClientName(clientIndex, result.ErrorMessage ?? "Unknown error");
+            this.LogFailedToGetClientName(clientIndex, result.ErrorMessage ?? "Unknown error");
             return this.NotFound($"Client {clientIndex} not found");
         }
 
-        return Ok(result.Value!.Name ?? $"Client {clientIndex}");
+        return this.Ok(result.Value!.Name ?? $"Client {clientIndex}");
     }
 
     // ═══════════════════════════════════════════════════════════════════════════════

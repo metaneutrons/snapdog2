@@ -31,7 +31,7 @@ public class GetZonesCountQueryHandler(IOptions<SnapDogConfiguration> config)
 
     public Task<Result<int>> Handle(GetZonesCountQuery request, CancellationToken cancellationToken)
     {
-        var count = _config.Zones.Count;
+        var count = this._config.Zones.Count;
         return Task.FromResult(Result<int>.Success(count));
     }
 }

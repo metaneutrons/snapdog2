@@ -46,21 +46,21 @@ public partial class RedisPersistentStateStore : IPersistentStateStore, IDisposa
         RedisConfig redisConfig,
         ILogger<RedisPersistentStateStore> logger)
     {
-        _redis = redis;
-        _database = redis.GetDatabase();
-        _logger = logger;
+        this._redis = redis;
+        this._database = redis.GetDatabase();
+        this._logger = logger;
 
         // Create resilience pipelines using approved pattern
-        _connectionPipeline = ResiliencePolicyFactory.CreatePipeline(
+        this._connectionPipeline = ResiliencePolicyFactory.CreatePipeline(
             redisConfig.Resilience.Connection,
             "Redis-Connection"
         );
-        _operationPipeline = ResiliencePolicyFactory.CreatePipeline(
+        this._operationPipeline = ResiliencePolicyFactory.CreatePipeline(
             redisConfig.Resilience.Operation,
             "Redis-Operation"
         );
 
-        _jsonOptions = new JsonSerializerOptions
+        this._jsonOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             WriteIndented = false,
@@ -75,19 +75,19 @@ public partial class RedisPersistentStateStore : IPersistentStateStore, IDisposa
         try
         {
             var key = $"{ZoneStatePrefix}{zoneIndex}";
-            var json = JsonSerializer.Serialize(zoneState, _jsonOptions);
+            var json = JsonSerializer.Serialize(zoneState, this._jsonOptions);
 
-            await _operationPipeline.ExecuteAsync(async _ =>
+            await this._operationPipeline.ExecuteAsync(async _ =>
             {
-                await _database.StringSetAsync(key, json);
-                await UpdateStatsAsync("zone", zoneIndex);
+                await this._database.StringSetAsync(key, json);
+                await this.UpdateStatsAsync("zone", zoneIndex);
             });
 
-            LogZoneStateSaved(zoneIndex, zoneState.Name);
+            this.LogZoneStateSaved(zoneIndex, zoneState.Name);
         }
         catch (Exception ex)
         {
-            LogZoneStateSaveFailed(ex, zoneIndex);
+            this.LogZoneStateSaveFailed(ex, zoneIndex);
             throw;
         }
     }
@@ -96,18 +96,18 @@ public partial class RedisPersistentStateStore : IPersistentStateStore, IDisposa
     {
         try
         {
-            return await _operationPipeline.ExecuteAsync(async _ =>
+            return await this._operationPipeline.ExecuteAsync(async _ =>
             {
                 var pattern = $"{ZoneStatePrefix}*";
-                var keys = await GetKeysAsync(pattern);
+                var keys = await this.GetKeysAsync(pattern);
                 var states = new Dictionary<int, ZoneState>();
 
                 foreach (var key in keys)
                 {
-                    var json = await _database.StringGetAsync(key);
+                    var json = await this._database.StringGetAsync(key);
                     if (json.HasValue)
                     {
-                        var zoneState = JsonSerializer.Deserialize<ZoneState>(json!, _jsonOptions);
+                        var zoneState = JsonSerializer.Deserialize<ZoneState>(json!, this._jsonOptions);
                         if (zoneState != null)
                         {
                             // Extract zone index from key
@@ -121,13 +121,13 @@ public partial class RedisPersistentStateStore : IPersistentStateStore, IDisposa
                     }
                 }
 
-                LogZoneStatesLoaded(states.Count);
+                this.LogZoneStatesLoaded(states.Count);
                 return states;
             });
         }
         catch (Exception ex)
         {
-            LogZoneStatesLoadFailed(ex);
+            this.LogZoneStatesLoadFailed(ex);
             throw;
         }
     }
@@ -141,19 +141,19 @@ public partial class RedisPersistentStateStore : IPersistentStateStore, IDisposa
         try
         {
             var key = $"{ClientStatePrefix}{clientIndex}";
-            var json = JsonSerializer.Serialize(clientState, _jsonOptions);
+            var json = JsonSerializer.Serialize(clientState, this._jsonOptions);
 
-            await _operationPipeline.ExecuteAsync(async _ =>
+            await this._operationPipeline.ExecuteAsync(async _ =>
             {
-                await _database.StringSetAsync(key, json);
-                await UpdateStatsAsync("client", clientIndex);
+                await this._database.StringSetAsync(key, json);
+                await this.UpdateStatsAsync("client", clientIndex);
             });
 
-            LogClientStateSaved(clientIndex, clientState.Name);
+            this.LogClientStateSaved(clientIndex, clientState.Name);
         }
         catch (Exception ex)
         {
-            LogClientStateSaveFailed(ex, clientIndex);
+            this.LogClientStateSaveFailed(ex, clientIndex);
             throw;
         }
     }
@@ -163,15 +163,15 @@ public partial class RedisPersistentStateStore : IPersistentStateStore, IDisposa
         try
         {
             var pattern = $"{ClientStatePrefix}*";
-            var keys = await GetKeysAsync(pattern);
+            var keys = await this.GetKeysAsync(pattern);
             var states = new Dictionary<int, ClientState>();
 
             foreach (var key in keys)
             {
-                var json = await _database.StringGetAsync(key);
+                var json = await this._database.StringGetAsync(key);
                 if (json.HasValue)
                 {
-                    var clientState = JsonSerializer.Deserialize<ClientState>(json!, _jsonOptions);
+                    var clientState = JsonSerializer.Deserialize<ClientState>(json!, this._jsonOptions);
                     if (clientState != null)
                     {
                         // Extract client index from key
@@ -185,12 +185,12 @@ public partial class RedisPersistentStateStore : IPersistentStateStore, IDisposa
                 }
             }
 
-            LogClientStatesLoaded(states.Count);
+            this.LogClientStatesLoaded(states.Count);
             return states;
         }
         catch (Exception ex)
         {
-            LogClientStatesLoadFailed(ex);
+            this.LogClientStatesLoadFailed(ex);
             throw;
         }
     }
@@ -203,17 +203,17 @@ public partial class RedisPersistentStateStore : IPersistentStateStore, IDisposa
     {
         try
         {
-            var json = await _database.StringGetAsync(ConfigFingerprintKey);
+            var json = await this._database.StringGetAsync(ConfigFingerprintKey);
             if (!json.HasValue)
             {
                 return null;
             }
 
-            return JsonSerializer.Deserialize<ConfigurationFingerprint>(json!, _jsonOptions);
+            return JsonSerializer.Deserialize<ConfigurationFingerprint>(json!, this._jsonOptions);
         }
         catch (Exception ex)
         {
-            LogConfigFingerprintLoadFailed(ex);
+            this.LogConfigFingerprintLoadFailed(ex);
             return null;
         }
     }
@@ -222,14 +222,14 @@ public partial class RedisPersistentStateStore : IPersistentStateStore, IDisposa
     {
         try
         {
-            var json = JsonSerializer.Serialize(fingerprint, _jsonOptions);
-            await _database.StringSetAsync(ConfigFingerprintKey, json);
+            var json = JsonSerializer.Serialize(fingerprint, this._jsonOptions);
+            await this._database.StringSetAsync(ConfigFingerprintKey, json);
 
-            LogConfigFingerprintSaved(fingerprint.Hash);
+            this.LogConfigFingerprintSaved(fingerprint.Hash);
         }
         catch (Exception ex)
         {
-            LogConfigFingerprintSaveFailed(ex);
+            this.LogConfigFingerprintSaveFailed(ex);
             throw;
         }
     }
@@ -239,30 +239,30 @@ public partial class RedisPersistentStateStore : IPersistentStateStore, IDisposa
         try
         {
             // Clear zone states
-            var zoneKeys = await GetKeysAsync($"{ZoneStatePrefix}*");
+            var zoneKeys = await this.GetKeysAsync($"{ZoneStatePrefix}*");
             if (zoneKeys.Any())
             {
-                await _database.KeyDeleteAsync(zoneKeys.ToArray());
+                await this._database.KeyDeleteAsync(zoneKeys.ToArray());
             }
 
             // Clear client states
-            var clientKeys = await GetKeysAsync($"{ClientStatePrefix}*");
+            var clientKeys = await this.GetKeysAsync($"{ClientStatePrefix}*");
             if (clientKeys.Any())
             {
-                await _database.KeyDeleteAsync(clientKeys.ToArray());
+                await this._database.KeyDeleteAsync(clientKeys.ToArray());
             }
 
             // Clear configuration fingerprint
-            await _database.KeyDeleteAsync(ConfigFingerprintKey);
+            await this._database.KeyDeleteAsync(ConfigFingerprintKey);
 
             // Clear stats
-            await _database.KeyDeleteAsync(StatsKey);
+            await this._database.KeyDeleteAsync(StatsKey);
 
-            LogAllStateCleared();
+            this.LogAllStateCleared();
         }
         catch (Exception ex)
         {
-            LogAllStateClearFailed(ex);
+            this.LogAllStateClearFailed(ex);
             throw;
         }
     }
@@ -275,10 +275,10 @@ public partial class RedisPersistentStateStore : IPersistentStateStore, IDisposa
     {
         try
         {
-            return await _connectionPipeline.ExecuteAsync(async _ =>
+            return await this._connectionPipeline.ExecuteAsync(async _ =>
             {
                 // Simple ping test
-                var pong = await _database.PingAsync();
+                var pong = await this._database.PingAsync();
                 return pong.TotalMilliseconds < 1000; // Consider healthy if ping < 1s
             });
         }
@@ -292,15 +292,15 @@ public partial class RedisPersistentStateStore : IPersistentStateStore, IDisposa
     {
         try
         {
-            var zoneKeys = await GetKeysAsync($"{ZoneStatePrefix}*");
-            var clientKeys = await GetKeysAsync($"{ClientStatePrefix}*");
+            var zoneKeys = await this.GetKeysAsync($"{ZoneStatePrefix}*");
+            var clientKeys = await this.GetKeysAsync($"{ClientStatePrefix}*");
 
-            var statsJson = await _database.StringGetAsync(StatsKey);
+            var statsJson = await this._database.StringGetAsync(StatsKey);
             var lastSaveTime = DateTime.UtcNow;
 
             if (statsJson.HasValue)
             {
-                var statsData = JsonSerializer.Deserialize<Dictionary<string, object>>(statsJson!, _jsonOptions);
+                var statsData = JsonSerializer.Deserialize<Dictionary<string, object>>(statsJson!, this._jsonOptions);
                 if (statsData?.TryGetValue("lastSaveTime", out var lastSaveObj) == true)
                 {
                     if (DateTime.TryParse(lastSaveObj.ToString(), out var parsedTime))
@@ -319,12 +319,12 @@ public partial class RedisPersistentStateStore : IPersistentStateStore, IDisposa
                 ClientStatesCount = clientKeys.Count(),
                 LastSaveTime = lastSaveTime,
                 StorageSizeBytes = storageSizeBytes,
-                IsHealthy = await IsHealthyAsync()
+                IsHealthy = await this.IsHealthyAsync()
             };
         }
         catch (Exception ex)
         {
-            LogStatsRetrievalFailed(ex);
+            this.LogStatsRetrievalFailed(ex);
 
             return new PersistentStoreStats
             {
@@ -343,7 +343,7 @@ public partial class RedisPersistentStateStore : IPersistentStateStore, IDisposa
 
     private Task<IEnumerable<RedisKey>> GetKeysAsync(string pattern)
     {
-        var server = _redis.GetServer(_redis.GetEndPoints().First());
+        var server = this._redis.GetServer(this._redis.GetEndPoints().First());
         return Task.FromResult(server.Keys(pattern: pattern));
     }
 
@@ -357,8 +357,8 @@ public partial class RedisPersistentStateStore : IPersistentStateStore, IDisposa
                 [$"last{type}Index"] = index
             };
 
-            var json = JsonSerializer.Serialize(stats, _jsonOptions);
-            await _database.StringSetAsync(StatsKey, json);
+            var json = JsonSerializer.Serialize(stats, this._jsonOptions);
+            await this._database.StringSetAsync(StatsKey, json);
         }
         catch
         {

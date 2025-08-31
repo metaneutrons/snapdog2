@@ -92,7 +92,7 @@ public class MqttTopicAttribute(string topicPattern) : Attribute
         parameters = new Dictionary<string, string>();
 
         // Replace the hardcoded "snapdog" in the pattern with the actual base topic
-        var actualPattern = TopicPattern.Replace("snapdog", baseTopic.TrimEnd('/'), StringComparison.OrdinalIgnoreCase);
+        var actualPattern = this.TopicPattern.Replace("snapdog", baseTopic.TrimEnd('/'), StringComparison.OrdinalIgnoreCase);
 
         var patternParts = actualPattern.Split('/');
         var topicParts = topic.Split('/');
@@ -131,6 +131,6 @@ public class MqttTopicAttribute(string topicPattern) : Attribute
     /// <returns>True if the topic matches the pattern.</returns>
     public bool TryMatchTopic(string topic, out Dictionary<string, string> parameters)
     {
-        return TryMatchTopic(topic, out parameters, "snapdog");
+        return this.TryMatchTopic(topic, out parameters, "snapdog");
     }
 }

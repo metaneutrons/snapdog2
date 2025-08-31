@@ -24,9 +24,9 @@ public abstract class BaseZoneCommandValidator<T> : AbstractValidator<T>
 {
     protected BaseZoneCommandValidator()
     {
-        RuleFor(x => GetZoneIndex(x)).GreaterThan(0).WithMessage("Zone ID must be a positive integer.");
+        this.RuleFor(x => this.GetZoneIndex(x)).GreaterThan(0).WithMessage("Zone ID must be a positive integer.");
 
-        RuleFor(x => GetSource(x)).IsInEnum().WithMessage("Invalid command source specified.");
+        this.RuleFor(x => this.GetSource(x)).IsInEnum().WithMessage("Invalid command source specified.");
     }
 
     /// <summary>
@@ -48,9 +48,9 @@ public abstract class BaseClientCommandValidator<T> : AbstractValidator<T>
 {
     protected BaseClientCommandValidator()
     {
-        RuleFor(x => GetClientIndex(x)).GreaterThan(0).WithMessage("Client Index must be a positive integer.");
+        this.RuleFor(x => this.GetClientIndex(x)).GreaterThan(0).WithMessage("Client Index must be a positive integer.");
 
-        RuleFor(x => GetSource(x)).IsInEnum().WithMessage("Invalid command source specified.");
+        this.RuleFor(x => this.GetSource(x)).IsInEnum().WithMessage("Invalid command source specified.");
     }
 
     /// <summary>
@@ -73,7 +73,7 @@ public abstract class BaseVolumeCommandValidator<T> : AbstractValidator<T>
 {
     protected BaseVolumeCommandValidator()
     {
-        RuleFor(x => GetVolume(x)).InclusiveBetween(0, 100).WithMessage("Volume must be between 0 and 100.");
+        this.RuleFor(x => this.GetVolume(x)).InclusiveBetween(0, 100).WithMessage("Volume must be between 0 and 100.");
     }
 
     /// <summary>
@@ -91,7 +91,7 @@ public abstract class BaseVolumeStepCommandValidator<T> : AbstractValidator<T>
 {
     protected BaseVolumeStepCommandValidator()
     {
-        RuleFor(x => GetStep(x)).InclusiveBetween(1, 50).WithMessage("Volume step must be between 1 and 50.");
+        this.RuleFor(x => this.GetStep(x)).InclusiveBetween(1, 50).WithMessage("Volume step must be between 1 and 50.");
     }
 
     /// <summary>
@@ -109,7 +109,7 @@ public abstract class BaseTrackCommandValidator<T> : AbstractValidator<T>
 {
     protected BaseTrackCommandValidator()
     {
-        RuleFor(x => GetTrackIndex(x)).GreaterThan(0).WithMessage("Track index must be a positive integer (1-based).");
+        this.RuleFor(x => this.GetTrackIndex(x)).GreaterThan(0).WithMessage("Track index must be a positive integer (1-based).");
     }
 
     /// <summary>
@@ -128,7 +128,7 @@ public abstract class BasePlaylistCommandValidator<T> : AbstractValidator<T>
     protected BasePlaylistCommandValidator()
     {
         // Playlist index validation (required)
-        RuleFor(x => GetPlaylistIndex(x))
+        this.RuleFor(x => this.GetPlaylistIndex(x))
             .GreaterThan(0)
             .WithMessage("Playlist index must be a positive integer (1-based).");
     }
@@ -148,7 +148,7 @@ public abstract class BaseLatencyCommandValidator<T> : AbstractValidator<T>
 {
     protected BaseLatencyCommandValidator()
     {
-        RuleFor(x => GetLatencyMs(x))
+        this.RuleFor(x => this.GetLatencyMs(x))
             .InclusiveBetween(0, 10000)
             .WithMessage("Latency must be between 0 and 10000 milliseconds.");
     }
@@ -168,7 +168,7 @@ public abstract class CompositeZoneVolumeCommandValidator<T> : BaseZoneCommandVa
 {
     protected CompositeZoneVolumeCommandValidator()
     {
-        RuleFor(x => GetVolume(x)).InclusiveBetween(0, 100).WithMessage("Volume must be between 0 and 100.");
+        this.RuleFor(x => this.GetVolume(x)).InclusiveBetween(0, 100).WithMessage("Volume must be between 0 and 100.");
     }
 
     /// <summary>
@@ -185,7 +185,7 @@ public abstract class CompositeZoneVolumeStepCommandValidator<T> : BaseZoneComma
 {
     protected CompositeZoneVolumeStepCommandValidator()
     {
-        RuleFor(x => GetStep(x)).InclusiveBetween(1, 50).WithMessage("Volume step must be between 1 and 50.");
+        this.RuleFor(x => this.GetStep(x)).InclusiveBetween(1, 50).WithMessage("Volume step must be between 1 and 50.");
     }
 
     /// <summary>
@@ -202,7 +202,7 @@ public abstract class CompositeClientVolumeCommandValidator<T> : BaseClientComma
 {
     protected CompositeClientVolumeCommandValidator()
     {
-        RuleFor(x => GetVolume(x)).InclusiveBetween(0, 100).WithMessage("Volume must be between 0 and 100.");
+        this.RuleFor(x => this.GetVolume(x)).InclusiveBetween(0, 100).WithMessage("Volume must be between 0 and 100.");
     }
 
     /// <summary>
@@ -219,7 +219,7 @@ public abstract class CompositeZoneTrackCommandValidator<T> : BaseZoneCommandVal
 {
     protected CompositeZoneTrackCommandValidator()
     {
-        RuleFor(x => GetTrackIndex(x)).GreaterThan(0).WithMessage("Track index must be a positive integer (1-based).");
+        this.RuleFor(x => this.GetTrackIndex(x)).GreaterThan(0).WithMessage("Track index must be a positive integer (1-based).");
     }
 
     /// <summary>
@@ -237,7 +237,7 @@ public abstract class CompositeZonePlaylistCommandValidator<T> : BaseZoneCommand
     protected CompositeZonePlaylistCommandValidator()
     {
         // Playlist index validation (required)
-        RuleFor(x => GetPlaylistIndex(x))
+        this.RuleFor(x => this.GetPlaylistIndex(x))
             .GreaterThan(0)
             .WithMessage("Playlist index must be a positive integer (1-based).");
     }
@@ -256,7 +256,7 @@ public abstract class CompositeClientLatencyCommandValidator<T> : BaseClientComm
 {
     protected CompositeClientLatencyCommandValidator()
     {
-        RuleFor(x => GetLatencyMs(x))
+        this.RuleFor(x => this.GetLatencyMs(x))
             .InclusiveBetween(0, 10000)
             .WithMessage("Latency must be between 0 and 10000 milliseconds.");
     }
@@ -275,7 +275,7 @@ public abstract class CompositeClientZoneAssignmentValidator<T> : BaseClientComm
 {
     protected CompositeClientZoneAssignmentValidator()
     {
-        RuleFor(x => GetZoneIndex(x)).GreaterThan(0).WithMessage("Zone ID must be a positive integer.");
+        this.RuleFor(x => this.GetZoneIndex(x)).GreaterThan(0).WithMessage("Zone ID must be a positive integer.");
     }
 
     /// <summary>

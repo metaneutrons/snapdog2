@@ -50,7 +50,7 @@ public partial class GetErrorStatusQueryHandler(
             this.LogGettingLatestSystemErrorStatus();
 
             // Get the latest error from the error tracking service
-            var errorDetails = await _errorTrackingService.GetLatestErrorAsync();
+            var errorDetails = await this._errorTrackingService.GetLatestErrorAsync();
 
             this.LogSuccessfullyRetrievedErrorStatus(errorDetails != null);
 

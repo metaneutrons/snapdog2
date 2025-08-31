@@ -56,7 +56,7 @@ public partial class PerformanceQueryBehavior<TQuery, TResponse>(
             var durationSeconds = stopwatch.ElapsedMilliseconds / 1000.0;
 
             // Record metrics
-            _metricsService.RecordCortexMediatorRequestDuration(
+            this._metricsService.RecordCortexMediatorRequestDuration(
                 "Query",
                 queryName,
                 stopwatch.ElapsedMilliseconds,
@@ -70,7 +70,7 @@ public partial class PerformanceQueryBehavior<TQuery, TResponse>(
             }
 
             // Record query-specific metrics
-            RecordQuerySpecificMetrics(query, response, durationSeconds);
+            this.RecordQuerySpecificMetrics(query, response, durationSeconds);
 
             return response;
         }
@@ -80,13 +80,13 @@ public partial class PerformanceQueryBehavior<TQuery, TResponse>(
             success = false;
 
             // Record error metrics
-            _metricsService.RecordCortexMediatorRequestDuration(
+            this._metricsService.RecordCortexMediatorRequestDuration(
                 "Query",
                 queryName,
                 stopwatch.ElapsedMilliseconds,
                 false
             );
-            _metricsService.RecordException(ex, "QueryPipeline", queryName);
+            this._metricsService.RecordException(ex, "QueryPipeline", queryName);
 
             this.LogQueryException(queryName, stopwatch.ElapsedMilliseconds, ex);
             throw;
@@ -110,13 +110,13 @@ public partial class PerformanceQueryBehavior<TQuery, TResponse>(
             {
                 // These queries provide zone information that could be used for business metrics
                 // In a full implementation, you'd extract the actual data from the response
-                UpdateBusinessMetricsFromZoneQuery(response);
+                this.UpdateBusinessMetricsFromZoneQuery(response);
             }
 
             if (queryName.Contains("Client", StringComparison.OrdinalIgnoreCase))
             {
                 // Client queries could provide client connection information
-                UpdateBusinessMetricsFromClientQuery(response);
+                this.UpdateBusinessMetricsFromClientQuery(response);
             }
         }
         catch (Exception ex)

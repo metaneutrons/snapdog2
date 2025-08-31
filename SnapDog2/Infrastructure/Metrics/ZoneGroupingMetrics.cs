@@ -29,26 +29,26 @@ public class ZoneGroupingMetrics : IDisposable
 
     public ZoneGroupingMetrics()
     {
-        _meter = new Meter("SnapDog2.ZoneGrouping", "1.0.0");
+        this._meter = new Meter("SnapDog2.ZoneGrouping", "1.0.0");
 
         // Counters for events
-        _reconciliationCounter = _meter.CreateCounter<long>(
+        this._reconciliationCounter = this._meter.CreateCounter<long>(
             "zone_grouping_reconciliations_total",
             description: "Total number of zone grouping reconciliations performed"
         );
 
-        _clientUpdatesCounter = _meter.CreateCounter<long>(
+        this._clientUpdatesCounter = this._meter.CreateCounter<long>(
             "zone_grouping_client_updates_total",
             description: "Total number of client name updates performed"
         );
 
-        _errorsCounter = _meter.CreateCounter<long>(
+        this._errorsCounter = this._meter.CreateCounter<long>(
             "zone_grouping_errors_total",
             description: "Total number of zone grouping errors encountered"
         );
 
         // Histogram for performance
-        _reconciliationDuration = _meter.CreateHistogram<double>(
+        this._reconciliationDuration = this._meter.CreateHistogram<double>(
             "zone_grouping_reconciliation_duration_seconds",
             unit: "s",
             description: "Duration of zone grouping reconciliation operations"
@@ -71,17 +71,17 @@ public class ZoneGroupingMetrics : IDisposable
     {
         var tags = new KeyValuePair<string, object?>[] { new("success", success.ToString().ToLowerInvariant()) };
 
-        _reconciliationCounter.Add(1, tags);
-        _reconciliationDuration.Record(durationSeconds, tags);
+        this._reconciliationCounter.Add(1, tags);
+        this._reconciliationDuration.Record(durationSeconds, tags);
 
         if (clientUpdates > 0)
         {
-            _clientUpdatesCounter.Add(clientUpdates);
+            this._clientUpdatesCounter.Add(clientUpdates);
         }
 
         if (!success && !string.IsNullOrEmpty(errorType))
         {
-            _errorsCounter.Add(1, new KeyValuePair<string, object?>[] { new("error_type", errorType) });
+            this._errorsCounter.Add(1, new KeyValuePair<string, object?>[] { new("error_type", errorType) });
         }
     }
 
@@ -92,7 +92,7 @@ public class ZoneGroupingMetrics : IDisposable
     /// <param name="operation">Operation where error occurred</param>
     public void RecordError(string errorType, string operation)
     {
-        _errorsCounter.Add(
+        this._errorsCounter.Add(
             1,
             new KeyValuePair<string, object?>[] { new("error_type", errorType), new("operation", operation) }
         );
@@ -100,6 +100,6 @@ public class ZoneGroupingMetrics : IDisposable
 
     public void Dispose()
     {
-        _meter?.Dispose();
+        this._meter?.Dispose();
     }
 }

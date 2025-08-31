@@ -422,7 +422,7 @@ public partial class ClientManager : IClientManager
                 return Result.Failure($"Client {clientIndex} has no valid ID");
             }
 
-            LogFoundClientWithSnapcastId(clientIndex, snapcastClientId);
+            this.LogFoundClientWithSnapcastId(clientIndex, snapcastClientId);
 
             // Get target zone's stream ID
             var zoneConfigs = this._configuration.Zones;
@@ -434,7 +434,7 @@ public partial class ClientManager : IClientManager
             var targetZoneConfig = zoneConfigs[zoneIndex - 1];
             var targetStreamId = ExtractStreamIdFromSink(targetZoneConfig.Sink);
 
-            LogTargetZoneMapsToStream(zoneIndex, targetStreamId);
+            this.LogTargetZoneMapsToStream(zoneIndex, targetStreamId);
 
             // Find or create group for target zone
             var targetGroupId = await this.FindOrCreateGroupForStreamAsync(targetStreamId);
@@ -443,30 +443,30 @@ public partial class ClientManager : IClientManager
                 return Result.Failure($"Failed to find or create group for zone {zoneIndex}");
             }
 
-            LogUsingGroupForZone(targetGroupId, zoneIndex);
+            this.LogUsingGroupForZone(targetGroupId, zoneIndex);
 
             // Move client to target group
             var result = await this._snapcastService.SetClientGroupAsync(snapcastClientId, targetGroupId);
             if (result.IsFailure)
             {
-                LogFailedToMoveClientToGroup(snapcastClientId, targetGroupId, result.ErrorMessage);
+                this.LogFailedToMoveClientToGroup(snapcastClientId, targetGroupId, result.ErrorMessage);
                 return Result.Failure($"Failed to move client to zone {zoneIndex}: {result.ErrorMessage}");
             }
 
             // Refresh server state to update our local repository
-            LogRefreshingServerStateAfterZoneAssignment();
+            this.LogRefreshingServerStateAfterZoneAssignment();
             var serverStatusResult = await this._snapcastService.GetServerStatusAsync();
             if (serverStatusResult.IsSuccess)
             {
                 // The GetServerStatusAsync should trigger state repository updates via event handlers
-                LogServerStateRefreshedSuccessfully();
+                this.LogServerStateRefreshedSuccessfully();
             }
             else
             {
-                LogFailedToRefreshServerState(serverStatusResult.ErrorMessage);
+                this.LogFailedToRefreshServerState(serverStatusResult.ErrorMessage);
             }
 
-            LogSuccessfullyAssignedClientToZone(clientIndex, snapcastClientId, zoneIndex, targetGroupId);
+            this.LogSuccessfullyAssignedClientToZone(clientIndex, snapcastClientId, zoneIndex, targetGroupId);
 
             // Update internal client state
             if (this._clientStateLocks.TryGetValue(clientIndex, out var stateLock))
@@ -487,7 +487,7 @@ public partial class ClientManager : IClientManager
         }
         catch (Exception ex)
         {
-            LogErrorAssigningClientToZone(ex, clientIndex, zoneIndex);
+            this.LogErrorAssigningClientToZone(ex, clientIndex, zoneIndex);
             return Result.Failure($"Error assigning client {clientIndex} to zone {zoneIndex}: {ex.Message}");
         }
     }
@@ -560,7 +560,7 @@ public partial class ClientManager : IClientManager
 
             if (existingGroup.Id != null)
             {
-                LogFoundExistingGroupForStream(existingGroup.Id, streamId);
+                this.LogFoundExistingGroupForStream(existingGroup.Id, streamId);
                 return existingGroup.Id;
             }
 
@@ -576,27 +576,27 @@ public partial class ClientManager : IClientManager
 
             if (availableGroup.Id != null)
             {
-                LogAssigningGroupToStream(availableGroup.Id, streamId);
+                this.LogAssigningGroupToStream(availableGroup.Id, streamId);
 
                 // Set the group to use our target stream
                 var result = await this._snapcastService.SetGroupStreamAsync(availableGroup.Id, streamId);
                 if (result.IsSuccess)
                 {
-                    LogSuccessfullyAssignedGroupToStream(availableGroup.Id, streamId);
+                    this.LogSuccessfullyAssignedGroupToStream(availableGroup.Id, streamId);
                     return availableGroup.Id;
                 }
                 else
                 {
-                    LogFailedToAssignGroupToStream(availableGroup.Id, streamId, result.ErrorMessage);
+                    this.LogFailedToAssignGroupToStream(availableGroup.Id, streamId, result.ErrorMessage);
                 }
             }
 
-            LogNoAvailableGroupsFoundForStream(streamId);
+            this.LogNoAvailableGroupsFoundForStream(streamId);
             return null;
         }
         catch (Exception ex)
         {
-            LogErrorFindingOrCreatingGroupForStream(ex, streamId);
+            this.LogErrorFindingOrCreatingGroupForStream(ex, streamId);
             return null;
         }
     }
@@ -606,13 +606,13 @@ public partial class ClientManager : IClientManager
         CancellationToken cancellationToken = default
     )
     {
-        var clientResult = await GetClientStateAsync(clientIndex);
+        var clientResult = await this.GetClientStateAsync(clientIndex);
         return clientResult;
     }
 
     public async Task<Result<List<ClientState>>> GetAllClientsAsync(CancellationToken cancellationToken = default)
     {
-        return await GetAllClientsAsync();
+        return await this.GetAllClientsAsync();
     }
 
     public async Task<Result<List<ClientState>>> GetClientsByZoneAsync(
@@ -620,7 +620,7 @@ public partial class ClientManager : IClientManager
         CancellationToken cancellationToken = default
     )
     {
-        return await GetClientsByZoneAsync(zoneIndex);
+        return await this.GetClientsByZoneAsync(zoneIndex);
     }
 
     private static string ExtractStreamIdFromSink(string sink)
@@ -870,7 +870,7 @@ public partial class ClientManager : IClientManager
 
             if (result.IsSuccess)
             {
-                await PublishVolumeStatusAsync(volume);
+                await this.PublishVolumeStatusAsync(volume);
             }
 
             return result;
@@ -882,7 +882,7 @@ public partial class ClientManager : IClientManager
 
             if (result.IsSuccess)
             {
-                await PublishMuteStatusAsync(mute);
+                await this.PublishMuteStatusAsync(mute);
             }
 
             return result;
@@ -894,7 +894,7 @@ public partial class ClientManager : IClientManager
 
             if (result.IsSuccess)
             {
-                await PublishLatencyStatusAsync(latencyMs);
+                await this.PublishLatencyStatusAsync(latencyMs);
             }
 
             return result;
@@ -923,7 +923,7 @@ public partial class ClientManager : IClientManager
 
             if (result.IsSuccess)
             {
-                await PublishVolumeStatusAsync(newVolume);
+                await this.PublishVolumeStatusAsync(newVolume);
             }
 
             return result;
@@ -939,7 +939,7 @@ public partial class ClientManager : IClientManager
 
             if (result.IsSuccess)
             {
-                await PublishVolumeStatusAsync(newVolume);
+                await this.PublishVolumeStatusAsync(newVolume);
             }
 
             return result;
@@ -955,7 +955,7 @@ public partial class ClientManager : IClientManager
 
             if (result.IsSuccess)
             {
-                await PublishMuteStatusAsync(newMuted);
+                await this.PublishMuteStatusAsync(newMuted);
             }
 
             return result;
@@ -968,7 +968,7 @@ public partial class ClientManager : IClientManager
 
             if (result.IsSuccess)
             {
-                await PublishZoneStatusAsync(zoneIndex);
+                await this.PublishZoneStatusAsync(zoneIndex);
             }
 
             return result;

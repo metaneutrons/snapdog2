@@ -29,29 +29,29 @@ public partial class KnxNotificationHandler : INotificationHandler<StatusChanged
 
     public KnxNotificationHandler(IKnxService knxService, ILogger<KnxNotificationHandler> logger)
     {
-        _knxService = knxService;
-        _logger = logger;
+        this._knxService = knxService;
+        this._logger = logger;
     }
 
     public async Task Handle(StatusChangedNotification notification, CancellationToken cancellationToken)
     {
         // Debug log to verify we're receiving notifications
-        LogKnxNotificationReceived(notification.StatusType, notification.TargetIndex, notification.Value?.ToString() ?? "null");
+        this.LogKnxNotificationReceived(notification.StatusType, notification.TargetIndex, notification.Value?.ToString() ?? "null");
 
         // Forward to KNX service using its actual interface methods
         try
         {
-            await _knxService.SendStatusAsync(
+            await this._knxService.SendStatusAsync(
                 notification.StatusType,
                 notification.TargetIndex,
                 notification.Value ?? string.Empty,
                 cancellationToken);
 
-            LogKnxNotificationForwarded(notification.StatusType, notification.TargetIndex);
+            this.LogKnxNotificationForwarded(notification.StatusType, notification.TargetIndex);
         }
         catch (Exception ex)
         {
-            LogKnxNotificationFailed(notification.StatusType, notification.TargetIndex, ex.Message);
+            this.LogKnxNotificationFailed(notification.StatusType, notification.TargetIndex, ex.Message);
         }
     }
 

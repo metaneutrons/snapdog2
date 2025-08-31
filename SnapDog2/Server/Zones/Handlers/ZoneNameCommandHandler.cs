@@ -47,10 +47,10 @@ public partial class ZoneNameCommandHandler(IZoneManager zoneManager, ILogger<Zo
 
     public async Task<Result> Handle(ZoneNameCommand command, CancellationToken cancellationToken = default)
     {
-        LogHandling(command.ZoneIndex, command.Name);
+        this.LogHandling(command.ZoneIndex, command.Name);
 
         // TODO: Implement zone name setting logic
-        LogNotImplemented(command.ZoneIndex);
+        this.LogNotImplemented(command.ZoneIndex);
 
         return await Task.FromResult(Result.Success());
     }

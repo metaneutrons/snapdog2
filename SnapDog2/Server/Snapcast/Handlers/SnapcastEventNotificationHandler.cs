@@ -194,7 +194,7 @@ public partial class SnapcastEventNotificationHandler(
         // Parse client index from Snapcast ID
         if (!int.TryParse(notification.Client.Id, out var clientIndex))
         {
-            LogInvalidClientIndexForConnection(notification.Client.Id);
+            this.LogInvalidClientIndexForConnection(notification.Client.Id);
             return;
         }
 
@@ -205,11 +205,11 @@ public partial class SnapcastEventNotificationHandler(
             var updatedState = currentState with { Connected = true };
             this._clientStateStore.SetClientState(clientIndex, updatedState);
 
-            LogClientStorageUpdatedConnected(clientIndex);
+            this.LogClientStorageUpdatedConnected(clientIndex);
         }
         else
         {
-            LogClientStateNotFoundForConnection(clientIndex);
+            this.LogClientStateNotFoundForConnection(clientIndex);
         }
 
         // 2. Publish status notification to trigger integration publishing
@@ -227,7 +227,7 @@ public partial class SnapcastEventNotificationHandler(
         // Parse client index from Snapcast ID
         if (!int.TryParse(notification.Client.Id, out var clientIndex))
         {
-            LogInvalidClientIndexForDisconnection(notification.Client.Id);
+            this.LogInvalidClientIndexForDisconnection(notification.Client.Id);
             return;
         }
 
@@ -238,11 +238,11 @@ public partial class SnapcastEventNotificationHandler(
             var updatedState = currentState with { Connected = false };
             this._clientStateStore.SetClientState(clientIndex, updatedState);
 
-            LogClientStorageUpdatedDisconnected(clientIndex);
+            this.LogClientStorageUpdatedDisconnected(clientIndex);
         }
         else
         {
-            LogClientStateNotFoundForDisconnection(clientIndex);
+            this.LogClientStateNotFoundForDisconnection(clientIndex);
         }
 
         // 2. Publish status notification to trigger integration publishing
@@ -260,7 +260,7 @@ public partial class SnapcastEventNotificationHandler(
         // Parse client index from string to int (now it should be a proper client Index)
         if (!int.TryParse(notification.ClientIndex, out var clientIndex))
         {
-            LogInvalidClientIndexFormat(notification.ClientIndex);
+            this.LogInvalidClientIndexFormat(notification.ClientIndex);
             return;
         }
 
@@ -275,11 +275,11 @@ public partial class SnapcastEventNotificationHandler(
             };
             this._clientStateStore.SetClientState(clientIndex, updatedState);
 
-            LogClientStorageUpdatedVolume(clientIndex, notification.Volume.Percent, notification.Volume.Muted);
+            this.LogClientStorageUpdatedVolume(clientIndex, notification.Volume.Percent, notification.Volume.Muted);
         }
         else
         {
-            LogClientStateNotFoundForVolume(clientIndex);
+            this.LogClientStateNotFoundForVolume(clientIndex);
         }
 
         // 2. Publish status notifications to trigger integration publishing
@@ -294,7 +294,7 @@ public partial class SnapcastEventNotificationHandler(
         // Parse client index from string to int
         if (!int.TryParse(notification.ClientIndex, out var clientIndex))
         {
-            LogInvalidClientIndexForLatency(notification.ClientIndex);
+            this.LogInvalidClientIndexForLatency(notification.ClientIndex);
             return;
         }
 
@@ -307,11 +307,11 @@ public partial class SnapcastEventNotificationHandler(
             var updatedState = currentState with { LatencyMs = notification.LatencyMs };
             this._clientStateStore.SetClientState(clientIndex, updatedState);
 
-            LogClientStorageUpdatedLatency(clientIndex, notification.LatencyMs);
+            this.LogClientStorageUpdatedLatency(clientIndex, notification.LatencyMs);
         }
         else
         {
-            LogClientStateNotFoundForLatency(clientIndex);
+            this.LogClientStateNotFoundForLatency(clientIndex);
         }
 
         // 2. Publish status notification to trigger integration publishing
@@ -323,7 +323,7 @@ public partial class SnapcastEventNotificationHandler(
         // Parse client index from string to int
         if (!int.TryParse(notification.ClientIndex, out var clientIndex))
         {
-            LogInvalidClientIndexForName(notification.ClientIndex);
+            this.LogInvalidClientIndexForName(notification.ClientIndex);
             return;
         }
 

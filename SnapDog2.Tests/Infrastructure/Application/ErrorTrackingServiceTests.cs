@@ -31,13 +31,13 @@ public class ErrorTrackingServiceTests
 
     public ErrorTrackingServiceTests()
     {
-        _mockLogger = new Mock<ILogger<ErrorTrackingService>>();
+        this._mockLogger = new Mock<ILogger<ErrorTrackingService>>();
 
         // Setup logger to enable Warning and Information levels for LoggerMessage patterns
-        _mockLogger.Setup(x => x.IsEnabled(LogLevel.Warning)).Returns(true);
-        _mockLogger.Setup(x => x.IsEnabled(LogLevel.Information)).Returns(true);
+        this._mockLogger.Setup(x => x.IsEnabled(LogLevel.Warning)).Returns(true);
+        this._mockLogger.Setup(x => x.IsEnabled(LogLevel.Information)).Returns(true);
 
-        _errorTrackingService = new ErrorTrackingService(_mockLogger.Object);
+        this._errorTrackingService = new ErrorTrackingService(this._mockLogger.Object);
     }
 
     [Fact]
@@ -54,10 +54,10 @@ public class ErrorTrackingServiceTests
         };
 
         // Act
-        _errorTrackingService.RecordError(error);
+        this._errorTrackingService.RecordError(error);
 
         // Assert - LoggerMessage patterns use IsEnabled checks
-        _mockLogger.Verify(
+        this._mockLogger.Verify(
             x => x.IsEnabled(LogLevel.Warning),
             Times.AtLeastOnce);
     }
@@ -66,7 +66,7 @@ public class ErrorTrackingServiceTests
     public void RecordError_WithNullError_ShouldNotThrow()
     {
         // Act & Assert
-        var exception = Record.Exception(() => _errorTrackingService.RecordError(null!));
+        var exception = Record.Exception(() => this._errorTrackingService.RecordError(null!));
         Assert.Null(exception);
     }
 
@@ -79,10 +79,10 @@ public class ErrorTrackingServiceTests
         const string operation = "TestOperation";
 
         // Act
-        _errorTrackingService.RecordException(testException, component, operation);
+        this._errorTrackingService.RecordException(testException, component, operation);
 
         // Assert - LoggerMessage patterns use IsEnabled checks
-        _mockLogger.Verify(
+        this._mockLogger.Verify(
             x => x.IsEnabled(LogLevel.Warning),
             Times.AtLeastOnce);
     }
@@ -91,8 +91,7 @@ public class ErrorTrackingServiceTests
     public void RecordException_WithNullException_ShouldNotThrow()
     {
         // Act & Assert
-        var exception = Record.Exception(() =>
-            _errorTrackingService.RecordException(null!, "TestComponent"));
+        var exception = Record.Exception(() => this._errorTrackingService.RecordException(null!, "TestComponent"));
         Assert.Null(exception);
     }
 
@@ -100,7 +99,7 @@ public class ErrorTrackingServiceTests
     public async Task GetLatestErrorAsync_WithNoErrors_ShouldReturnNull()
     {
         // Act
-        var result = await _errorTrackingService.GetLatestErrorAsync();
+        var result = await this._errorTrackingService.GetLatestErrorAsync();
 
         // Assert
         Assert.Null(result);
@@ -128,11 +127,11 @@ public class ErrorTrackingServiceTests
             Component = "TestComponent"
         };
 
-        _errorTrackingService.RecordError(firstError);
-        _errorTrackingService.RecordError(secondError);
+        this._errorTrackingService.RecordError(firstError);
+        this._errorTrackingService.RecordError(secondError);
 
         // Act
-        var result = await _errorTrackingService.GetLatestErrorAsync();
+        var result = await this._errorTrackingService.GetLatestErrorAsync();
 
         // Assert
         Assert.NotNull(result);
@@ -162,11 +161,11 @@ public class ErrorTrackingServiceTests
             Component = "TestComponent"
         };
 
-        _errorTrackingService.RecordError(oldError);
-        _errorTrackingService.RecordError(recentError);
+        this._errorTrackingService.RecordError(oldError);
+        this._errorTrackingService.RecordError(recentError);
 
         // Act
-        var result = await _errorTrackingService.GetRecentErrorsAsync(TimeSpan.FromHours(1));
+        var result = await this._errorTrackingService.GetRecentErrorsAsync(TimeSpan.FromHours(1));
 
         // Assert
         Assert.Single(result);
@@ -186,17 +185,17 @@ public class ErrorTrackingServiceTests
             Component = "TestComponent"
         };
 
-        _errorTrackingService.RecordError(error);
+        this._errorTrackingService.RecordError(error);
 
         // Act
-        _errorTrackingService.ClearErrors();
+        this._errorTrackingService.ClearErrors();
 
         // Assert
-        var result = await _errorTrackingService.GetLatestErrorAsync();
+        var result = await this._errorTrackingService.GetLatestErrorAsync();
         Assert.Null(result);
 
         // Verify logging - LoggerMessage patterns use IsEnabled checks
-        _mockLogger.Verify(
+        this._mockLogger.Verify(
             x => x.IsEnabled(LogLevel.Information),
             Times.AtLeastOnce);
     }
@@ -213,10 +212,10 @@ public class ErrorTrackingServiceTests
         const string component = "TestComponent";
 
         // Act
-        _errorTrackingService.RecordException(exception, component);
+        this._errorTrackingService.RecordException(exception, component);
 
         // Assert
-        var result = await _errorTrackingService.GetLatestErrorAsync();
+        var result = await this._errorTrackingService.GetLatestErrorAsync();
         Assert.NotNull(result);
         Assert.Equal(expectedErrorCode, result.ErrorCode);
         Assert.Equal(component, result.Component);
@@ -256,11 +255,11 @@ public class ErrorTrackingServiceTests
 
         foreach (var error in errors)
         {
-            _errorTrackingService.RecordError(error);
+            this._errorTrackingService.RecordError(error);
         }
 
         // Act
-        var result = await _errorTrackingService.GetRecentErrorsAsync(TimeSpan.FromHours(1));
+        var result = await this._errorTrackingService.GetRecentErrorsAsync(TimeSpan.FromHours(1));
 
         // Assert
         Assert.Equal(3, result.Count);

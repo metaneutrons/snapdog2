@@ -38,10 +38,10 @@ public partial class ZoneGroupingService : IZoneGroupingService
         ILogger<ZoneGroupingService> logger
     )
     {
-        _snapcastService = snapcastService ?? throw new ArgumentNullException(nameof(snapcastService));
-        _clientManager = clientManager ?? throw new ArgumentNullException(nameof(clientManager));
-        _zoneManager = zoneManager ?? throw new ArgumentNullException(nameof(zoneManager));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        this._snapcastService = snapcastService ?? throw new ArgumentNullException(nameof(snapcastService));
+        this._clientManager = clientManager ?? throw new ArgumentNullException(nameof(clientManager));
+        this._zoneManager = zoneManager ?? throw new ArgumentNullException(nameof(zoneManager));
+        this._logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <summary>
@@ -54,10 +54,10 @@ public partial class ZoneGroupingService : IZoneGroupingService
 
         try
         {
-            LogStartingZoneGroupingCheck();
+            this.LogStartingZoneGroupingCheck();
 
             // Get all available zone services to extract their indices
-            var zonesResult = await _zoneManager.GetAllZonesAsync(cancellationToken);
+            var zonesResult = await this._zoneManager.GetAllZonesAsync(cancellationToken);
             if (!zonesResult.IsSuccess)
             {
                 return Result.Failure($"Failed to get available zones: {zonesResult.ErrorMessage}");
@@ -70,40 +70,40 @@ public partial class ZoneGroupingService : IZoneGroupingService
             // Try zones 1-10 (reasonable upper limit) and see which ones exist
             for (int i = 1; i <= 10; i++)
             {
-                if (await _zoneManager.ZoneExistsAsync(i))
+                if (await this._zoneManager.ZoneExistsAsync(i))
                 {
                     zones.Add(i);
                 }
             }
             if (zones.Count == 0)
             {
-                LogNoZonesConfigured();
+                this.LogNoZonesConfigured();
                 return Result.Success();
             }
 
-            LogCheckingZones(zones.Count, string.Join(",", zones));
+            this.LogCheckingZones(zones.Count, string.Join(",", zones));
 
             // Synchronize each zone
             foreach (var zoneIndex in zones)
             {
-                LogCheckingZone(zoneIndex);
-                var result = await SynchronizeZoneGroupingAsync(zoneIndex, cancellationToken);
+                this.LogCheckingZone(zoneIndex);
+                var result = await this.SynchronizeZoneGroupingAsync(zoneIndex, cancellationToken);
                 if (!result.IsSuccess)
                 {
-                    LogFailedSynchronizeZone(zoneIndex, result.ErrorMessage);
+                    this.LogFailedSynchronizeZone(zoneIndex, result.ErrorMessage);
                 }
                 else
                 {
-                    LogZoneCheckCompleted(zoneIndex);
+                    this.LogZoneCheckCompleted(zoneIndex);
                 }
             }
 
-            LogAllZoneGroupingChecksCompleted();
+            this.LogAllZoneGroupingChecksCompleted();
             return Result.Success();
         }
         catch (Exception ex)
         {
-            LogErrorDuringPeriodicCheck(ex);
+            this.LogErrorDuringPeriodicCheck(ex);
             return Result.Failure($"Error during zone grouping check: {ex.Message}");
         }
     }
@@ -115,10 +115,10 @@ public partial class ZoneGroupingService : IZoneGroupingService
 
         try
         {
-            LogSynchronizingZone(zoneIndex);
+            this.LogSynchronizingZone(zoneIndex);
 
             // Get zone clients - who should be in this zone?
-            var zoneClients = await _clientManager.GetClientsByZoneAsync(zoneIndex, cancellationToken);
+            var zoneClients = await this._clientManager.GetClientsByZoneAsync(zoneIndex, cancellationToken);
             if (!zoneClients.IsSuccess)
             {
                 return Result.Failure($"Failed to get zone clients: {zoneClients.ErrorMessage}");
@@ -129,12 +129,12 @@ public partial class ZoneGroupingService : IZoneGroupingService
                 ?? new List<string>();
             if (clientIndexs.Count == 0)
             {
-                LogNoClientsAssigned(zoneIndex);
+                this.LogNoClientsAssigned(zoneIndex);
                 return Result.Success();
             }
 
             // Get current server status
-            var serverStatus = await _snapcastService.GetServerStatusAsync(cancellationToken);
+            var serverStatus = await this._snapcastService.GetServerStatusAsync(cancellationToken);
             if (!serverStatus.IsSuccess)
             {
                 return Result.Failure($"Failed to get server status: {serverStatus.ErrorMessage}");
@@ -143,14 +143,14 @@ public partial class ZoneGroupingService : IZoneGroupingService
             var expectedStreamId = $"Zone{zoneIndex}";
 
             // Check if zone is already properly configured
-            if (IsZoneProperlyConfigured(serverStatus.Value, clientIndexs, expectedStreamId))
+            if (this.IsZoneProperlyConfigured(serverStatus.Value, clientIndexs, expectedStreamId))
             {
-                LogZoneAlreadyConfigured(zoneIndex, string.Join(",", clientIndexs), expectedStreamId);
+                this.LogZoneAlreadyConfigured(zoneIndex, string.Join(",", clientIndexs), expectedStreamId);
                 return Result.Success();
             }
 
             // Zone needs configuration - provision it (KEEP THIS AT INFO - actual work!)
-            LogProvisioningZone(zoneIndex, clientIndexs.Count, string.Join(",", clientIndexs), expectedStreamId);
+            this.LogProvisioningZone(zoneIndex, clientIndexs.Count, string.Join(",", clientIndexs), expectedStreamId);
 
             // Find a group that has any of our zone's clients, or use any available group
             var targetGroup =
@@ -165,18 +165,18 @@ public partial class ZoneGroupingService : IZoneGroupingService
             // Set the correct stream for this zone
             if (targetGroup.StreamId != expectedStreamId)
             {
-                var setStreamResult = await _snapcastService.SetGroupStreamAsync(
+                var setStreamResult = await this._snapcastService.SetGroupStreamAsync(
                     targetGroup.Id,
                     expectedStreamId,
                     cancellationToken
                 );
                 if (!setStreamResult.IsSuccess)
                 {
-                    LogFailedSetGroupStream(targetGroup.Id, setStreamResult.ErrorMessage);
+                    this.LogFailedSetGroupStream(targetGroup.Id, setStreamResult.ErrorMessage);
                 }
                 else
                 {
-                    LogSetGroupStream(targetGroup.Id, expectedStreamId);
+                    this.LogSetGroupStream(targetGroup.Id, expectedStreamId);
                 }
             }
 
@@ -184,23 +184,23 @@ public partial class ZoneGroupingService : IZoneGroupingService
             var expectedGroupName = GetExpectedZoneName(zoneIndex);
             if (targetGroup.Name != expectedGroupName)
             {
-                var setGroupNameResult = await _snapcastService.SetGroupNameAsync(
+                var setGroupNameResult = await this._snapcastService.SetGroupNameAsync(
                     targetGroup.Id,
                     expectedGroupName,
                     cancellationToken
                 );
                 if (!setGroupNameResult.IsSuccess)
                 {
-                    LogFailedSetGroupName(targetGroup.Id, setGroupNameResult.ErrorMessage);
+                    this.LogFailedSetGroupName(targetGroup.Id, setGroupNameResult.ErrorMessage);
                 }
                 else
                 {
-                    LogSetGroupName(targetGroup.Id, expectedGroupName);
+                    this.LogSetGroupName(targetGroup.Id, expectedGroupName);
                 }
             }
 
             // Put ALL zone clients in this group
-            var setClientsResult = await _snapcastService.SetGroupClientsAsync(
+            var setClientsResult = await this._snapcastService.SetGroupClientsAsync(
                 targetGroup.Id,
                 clientIndexs,
                 cancellationToken
@@ -211,15 +211,15 @@ public partial class ZoneGroupingService : IZoneGroupingService
             }
 
             // Synchronize client names to match configuration
-            await SynchronizeClientNamesAsync(zoneIndex, cancellationToken);
+            await this.SynchronizeClientNamesAsync(zoneIndex, cancellationToken);
 
-            LogZoneSynchronized(zoneIndex, clientIndexs.Count, targetGroup.Id, expectedStreamId);
+            this.LogZoneSynchronized(zoneIndex, clientIndexs.Count, targetGroup.Id, expectedStreamId);
 
             return Result.Success();
         }
         catch (Exception ex)
         {
-            LogErrorSynchronizingZone(ex, zoneIndex);
+            this.LogErrorSynchronizingZone(ex, zoneIndex);
             return Result.Failure($"Zone synchronization failed: {ex.Message}");
         }
     }
@@ -235,7 +235,7 @@ public partial class ZoneGroupingService : IZoneGroupingService
     {
         if (serverStatus?.Groups == null)
         {
-            LogNoServerStatusOrGroups();
+            this.LogNoServerStatusOrGroups();
             return false;
         }
 
@@ -244,12 +244,12 @@ public partial class ZoneGroupingService : IZoneGroupingService
             .Groups.Where(g => g.Clients?.Any(c => clientIndexs.Contains(c.Id)) == true)
             .ToList();
 
-        LogZoneCheckDetails(expectedStreamId, groupsWithOurClients.Count, string.Join(",", clientIndexs));
+        this.LogZoneCheckDetails(expectedStreamId, groupsWithOurClients.Count, string.Join(",", clientIndexs));
 
         // All our clients should be in exactly one group with the correct stream
         if (groupsWithOurClients.Count != 1)
         {
-            LogZoneMisconfiguredMultipleGroups(groupsWithOurClients.Count);
+            this.LogZoneMisconfiguredMultipleGroups(groupsWithOurClients.Count);
             return false;
         }
 
@@ -280,7 +280,7 @@ public partial class ZoneGroupingService : IZoneGroupingService
             }
         }
 
-        LogZoneCheckDetailsVerbose(
+        this.LogZoneCheckDetailsVerbose(
             allOurClientsPresent,
             noForeignClients,
             correctStream,
@@ -295,7 +295,7 @@ public partial class ZoneGroupingService : IZoneGroupingService
 
         if (!isProperlyConfigured)
         {
-            LogZoneMisconfiguredDetails(
+            this.LogZoneMisconfiguredDetails(
                 allOurClientsPresent,
                 noForeignClients,
                 correctStream,
@@ -329,12 +329,12 @@ public partial class ZoneGroupingService : IZoneGroupingService
         CancellationToken cancellationToken = default
     )
     {
-        return await SynchronizeZoneGroupingAsync(zoneIndex, cancellationToken);
+        return await this.SynchronizeZoneGroupingAsync(zoneIndex, cancellationToken);
     }
 
     public async Task<Result> ValidateGroupingConsistencyAsync(CancellationToken cancellationToken = default)
     {
-        return await EnsureZoneGroupingAsync(cancellationToken);
+        return await this.EnsureZoneGroupingAsync(cancellationToken);
     }
 
     /// <summary>
@@ -344,27 +344,27 @@ public partial class ZoneGroupingService : IZoneGroupingService
     {
         try
         {
-            LogStartingClientNameSync(zoneIndex);
+            this.LogStartingClientNameSync(zoneIndex);
 
             // Get zone clients with their configured names
-            var zoneClients = await _clientManager.GetClientsByZoneAsync(zoneIndex, cancellationToken);
+            var zoneClients = await this._clientManager.GetClientsByZoneAsync(zoneIndex, cancellationToken);
             if (!zoneClients.IsSuccess || zoneClients.Value == null)
             {
-                LogFailedGetZoneClients(zoneClients.ErrorMessage);
+                this.LogFailedGetZoneClients(zoneClients.ErrorMessage);
                 return;
             }
 
-            LogFoundZoneClients(
+            this.LogFoundZoneClients(
                 zoneClients.Value.Count,
                 zoneIndex,
                 string.Join(", ", zoneClients.Value.Select(c => $"{c.SnapcastId}='{c.Name}'"))
             );
 
             // Get current server status to check actual client names
-            var serverStatus = await _snapcastService.GetServerStatusAsync(cancellationToken);
+            var serverStatus = await this._snapcastService.GetServerStatusAsync(cancellationToken);
             if (!serverStatus.IsSuccess || serverStatus.Value?.Groups == null)
             {
-                LogFailedGetServerStatusForNameSync(serverStatus.ErrorMessage);
+                this.LogFailedGetServerStatusForNameSync(serverStatus.ErrorMessage);
                 return;
             }
 
@@ -381,7 +381,7 @@ public partial class ZoneGroupingService : IZoneGroupingService
                 }
             }
 
-            LogCurrentSnapcastClientNames(
+            this.LogCurrentSnapcastClientNames(
                 string.Join(", ", currentClientNames.Select(kvp => $"{kvp.Key}='{kvp.Value}'"))
             );
 
@@ -396,14 +396,14 @@ public partial class ZoneGroupingService : IZoneGroupingService
                 var expectedName = client.Name;
                 var currentName = currentClientNames.GetValueOrDefault(client.SnapcastId);
 
-                LogCheckingClientName(client.SnapcastId, expectedName, currentName);
+                this.LogCheckingClientName(client.SnapcastId, expectedName, currentName);
 
                 if (currentName != expectedName)
                 {
                     // KEEP THIS AT INFO - actual work being done!
-                    LogSettingClientName(client.SnapcastId, currentName, expectedName);
+                    this.LogSettingClientName(client.SnapcastId, currentName, expectedName);
 
-                    var setNameResult = await _snapcastService.SetClientNameAsync(
+                    var setNameResult = await this._snapcastService.SetClientNameAsync(
                         client.SnapcastId,
                         expectedName,
                         cancellationToken
@@ -412,24 +412,24 @@ public partial class ZoneGroupingService : IZoneGroupingService
                     if (setNameResult.IsSuccess)
                     {
                         // KEEP THIS AT INFO - successful work completed!
-                        LogClientNameSet(client.SnapcastId, expectedName);
+                        this.LogClientNameSet(client.SnapcastId, expectedName);
                     }
                     else
                     {
-                        LogFailedSetClientName(client.SnapcastId, setNameResult.ErrorMessage);
+                        this.LogFailedSetClientName(client.SnapcastId, setNameResult.ErrorMessage);
                     }
                 }
                 else
                 {
-                    LogClientNameAlreadyCorrect(client.SnapcastId, expectedName);
+                    this.LogClientNameAlreadyCorrect(client.SnapcastId, expectedName);
                 }
             }
 
-            LogClientNameSyncCompleted(zoneIndex);
+            this.LogClientNameSyncCompleted(zoneIndex);
         }
         catch (Exception ex)
         {
-            LogErrorSynchronizingClientNames(ex, zoneIndex);
+            this.LogErrorSynchronizingClientNames(ex, zoneIndex);
         }
     }
 

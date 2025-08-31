@@ -24,12 +24,12 @@ public class Blueprint
 
     internal Blueprint(IEnumerable<CommandSpec> commands, IEnumerable<StatusSpec> status)
     {
-        Commands = new FeatureCollection<CommandSpec>(commands);
-        Status = new FeatureCollection<StatusSpec>(status);
+        this.Commands = new FeatureCollection<CommandSpec>(commands);
+        this.Status = new FeatureCollection<StatusSpec>(status);
 
         // Combine commands and status into a single collection
         var allFeatures = commands.Cast<FeatureSpec>().Concat(status.Cast<FeatureSpec>());
-        All = new FeatureCollection<FeatureSpec>(allFeatures);
+        this.All = new FeatureCollection<FeatureSpec>(allFeatures);
     }
 
     /// <summary>
@@ -59,11 +59,11 @@ public class BlueprintBuilder
     /// <summary>
     /// Build the final blueprint.
     /// </summary>
-    public Blueprint Build() => new(_commands, _status);
+    public Blueprint Build() => new(this._commands, this._status);
 
-    internal void AddCommand(CommandSpec command) => _commands.Add(command);
+    internal void AddCommand(CommandSpec command) => this._commands.Add(command);
 
-    internal void AddStatus(StatusSpec status) => _status.Add(status);
+    internal void AddStatus(StatusSpec status) => this._status.Add(status);
 }
 
 /// <summary>

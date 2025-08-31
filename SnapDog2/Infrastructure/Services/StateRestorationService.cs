@@ -44,59 +44,59 @@ public partial class StateRestorationService : BackgroundService
         SnapDogConfiguration config,
         ILogger<StateRestorationService> logger)
     {
-        _persistentStore = persistentStore;
-        _zoneStateStore = zoneStateStore;
-        _clientStateStore = clientStateStore;
-        _zoneManager = zoneManager;
-        _config = config;
-        _logger = logger;
+        this._persistentStore = persistentStore;
+        this._zoneStateStore = zoneStateStore;
+        this._clientStateStore = clientStateStore;
+        this._zoneManager = zoneManager;
+        this._config = config;
+        this._logger = logger;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         try
         {
-            LogStateRestorationStarting();
+            this.LogStateRestorationStarting();
 
             // Check if persistent store is available
-            if (!await _persistentStore.IsHealthyAsync())
+            if (!await this._persistentStore.IsHealthyAsync())
             {
-                LogPersistentStoreUnavailable();
+                this.LogPersistentStoreUnavailable();
                 return;
             }
 
             // Generate current configuration fingerprint
-            var currentFingerprint = GenerateConfigurationFingerprint();
+            var currentFingerprint = this.GenerateConfigurationFingerprint();
 
             // Check if configuration has changed
-            var storedFingerprint = await _persistentStore.GetConfigurationFingerprintAsync();
+            var storedFingerprint = await this._persistentStore.GetConfigurationFingerprintAsync();
 
             if (storedFingerprint != null && !ConfigurationChanged(currentFingerprint, storedFingerprint))
             {
                 // Configuration unchanged, restore states
-                await RestoreStatesAsync();
+                await this.RestoreStatesAsync();
             }
             else
             {
                 // Configuration changed or first run, clear old state and save new fingerprint
                 if (storedFingerprint != null)
                 {
-                    LogConfigurationChanged(storedFingerprint.Hash, currentFingerprint.Hash);
-                    await _persistentStore.ClearAllStateAsync();
+                    this.LogConfigurationChanged(storedFingerprint.Hash, currentFingerprint.Hash);
+                    await this._persistentStore.ClearAllStateAsync();
                 }
                 else
                 {
-                    LogFirstRun();
+                    this.LogFirstRun();
                 }
 
-                await _persistentStore.SaveConfigurationFingerprintAsync(currentFingerprint);
+                await this._persistentStore.SaveConfigurationFingerprintAsync(currentFingerprint);
             }
 
-            LogStateRestorationCompleted();
+            this.LogStateRestorationCompleted();
         }
         catch (Exception ex)
         {
-            LogStateRestorationFailed(ex);
+            this.LogStateRestorationFailed(ex);
         }
     }
 
@@ -107,69 +107,69 @@ public partial class StateRestorationService : BackgroundService
     private async Task RestoreStatesAsync()
     {
         // Restore zone states
-        var zoneStates = await _persistentStore.LoadAllZoneStatesAsync();
+        var zoneStates = await this._persistentStore.LoadAllZoneStatesAsync();
         var zonesToResumePlayback = new List<(int zoneIndex, ZoneState zoneState)>();
 
         // Process each configured zone
-        for (int i = 0; i < _config.Zones.Count; i++)
+        for (int i = 0; i < this._config.Zones.Count; i++)
         {
             var zoneIndex = i + 1; // 1-based indexing
-            var zoneConfig = _config.Zones[i];
+            var zoneConfig = this._config.Zones[i];
 
             if (zoneStates.TryGetValue(zoneIndex, out var persistedState))
             {
                 // Restore persisted state
                 try
                 {
-                    _zoneStateStore.SetZoneState(zoneIndex, persistedState);
-                    LogZoneStateRestored(zoneIndex, persistedState.Name);
+                    this._zoneStateStore.SetZoneState(zoneIndex, persistedState);
+                    this.LogZoneStateRestored(zoneIndex, persistedState.Name);
 
                     // Track zones that were playing for later resumption
                     if (persistedState.PlaybackState == PlaybackState.Playing)
                     {
                         zonesToResumePlayback.Add((zoneIndex, persistedState));
-                        LogZonePlaybackWillResume(zoneIndex, persistedState.Name);
+                        this.LogZonePlaybackWillResume(zoneIndex, persistedState.Name);
                     }
                 }
                 catch (Exception ex)
                 {
-                    LogZoneStateRestoreFailed(ex, zoneIndex);
+                    this.LogZoneStateRestoreFailed(ex, zoneIndex);
                 }
             }
             else
             {
                 // Create initial state for new zone
-                await SetupInitialZoneStateAsync(zoneIndex, zoneConfig);
+                await this.SetupInitialZoneStateAsync(zoneIndex, zoneConfig);
             }
         }
 
         // Restore client states
-        var clientStates = await _persistentStore.LoadAllClientStatesAsync();
-        for (int i = 0; i < _config.Clients.Count; i++)
+        var clientStates = await this._persistentStore.LoadAllClientStatesAsync();
+        for (int i = 0; i < this._config.Clients.Count; i++)
         {
             var clientIndex = i + 1; // 1-based indexing
-            var clientConfig = _config.Clients[i];
+            var clientConfig = this._config.Clients[i];
 
             if (clientStates.TryGetValue(clientIndex, out var persistedClientState))
             {
                 try
                 {
-                    _clientStateStore.SetClientState(clientIndex, persistedClientState);
-                    LogClientStateRestored(clientIndex, persistedClientState.Name);
+                    this._clientStateStore.SetClientState(clientIndex, persistedClientState);
+                    this.LogClientStateRestored(clientIndex, persistedClientState.Name);
                 }
                 catch (Exception ex)
                 {
-                    LogClientStateRestoreFailed(ex, clientIndex);
+                    this.LogClientStateRestoreFailed(ex, clientIndex);
                 }
             }
             else
             {
                 // Create initial client state if needed
-                LogClientStateNotFound(clientIndex, clientConfig.Name);
+                this.LogClientStateNotFound(clientIndex, clientConfig.Name);
             }
         }
 
-        LogStatesRestored(zoneStates.Count, clientStates.Count);
+        this.LogStatesRestored(zoneStates.Count, clientStates.Count);
 
         // Resume playback for zones that were playing (after a delay to ensure system is ready)
         if (zonesToResumePlayback.Any())
@@ -177,7 +177,7 @@ public partial class StateRestorationService : BackgroundService
             _ = Task.Run(async () =>
             {
                 await Task.Delay(TimeSpan.FromSeconds(3)); // Wait for system initialization
-                await ResumePlaybackAsync(zonesToResumePlayback);
+                await this.ResumePlaybackAsync(zonesToResumePlayback);
             });
         }
     }
@@ -207,15 +207,15 @@ public partial class StateRestorationService : BackgroundService
                 TimestampUtc = DateTime.UtcNow
             };
 
-            _zoneStateStore.SetZoneState(zoneIndex, initialState);
-            LogInitialZoneStateCreated(zoneIndex, zoneConfig.Name);
+            this._zoneStateStore.SetZoneState(zoneIndex, initialState);
+            this.LogInitialZoneStateCreated(zoneIndex, zoneConfig.Name);
 
             // Preload playlist 1, track 1 (but don't start playing)
-            await PreloadInitialPlaylistAsync(zoneIndex, zoneConfig.Name);
+            await this.PreloadInitialPlaylistAsync(zoneIndex, zoneConfig.Name);
         }
         catch (Exception ex)
         {
-            LogInitialZoneStateCreationFailed(ex, zoneIndex, zoneConfig.Name);
+            this.LogInitialZoneStateCreationFailed(ex, zoneIndex, zoneConfig.Name);
         }
     }
 
@@ -226,10 +226,10 @@ public partial class StateRestorationService : BackgroundService
     {
         try
         {
-            LogPreloadingInitialPlaylist(zoneIndex, zoneName);
+            this.LogPreloadingInitialPlaylist(zoneIndex, zoneName);
 
             // Get the zone service
-            var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex);
+            var zoneResult = await this._zoneManager.GetZoneAsync(zoneIndex);
             if (zoneResult.IsSuccess)
             {
                 var zoneService = zoneResult.Value!;
@@ -242,26 +242,26 @@ public partial class StateRestorationService : BackgroundService
                     var trackResult = await zoneService.SetTrackAsync(1);
                     if (trackResult.IsSuccess)
                     {
-                        LogInitialPlaylistPreloaded(zoneIndex, zoneName);
+                        this.LogInitialPlaylistPreloaded(zoneIndex, zoneName);
                     }
                     else
                     {
-                        LogInitialPlaylistPreloadFailed(new Exception($"Failed to set track 1: {trackResult.ErrorMessage}"), zoneIndex, zoneName);
+                        this.LogInitialPlaylistPreloadFailed(new Exception($"Failed to set track 1: {trackResult.ErrorMessage}"), zoneIndex, zoneName);
                     }
                 }
                 else
                 {
-                    LogInitialPlaylistPreloadFailed(new Exception($"Failed to set playlist 1: {playlistResult.ErrorMessage}"), zoneIndex, zoneName);
+                    this.LogInitialPlaylistPreloadFailed(new Exception($"Failed to set playlist 1: {playlistResult.ErrorMessage}"), zoneIndex, zoneName);
                 }
             }
             else
             {
-                LogInitialPlaylistPreloadFailed(new Exception($"Zone {zoneIndex} not found: {zoneResult.ErrorMessage}"), zoneIndex, zoneName);
+                this.LogInitialPlaylistPreloadFailed(new Exception($"Zone {zoneIndex} not found: {zoneResult.ErrorMessage}"), zoneIndex, zoneName);
             }
         }
         catch (Exception ex)
         {
-            LogInitialPlaylistPreloadFailed(ex, zoneIndex, zoneName);
+            this.LogInitialPlaylistPreloadFailed(ex, zoneIndex, zoneName);
         }
     }
 
@@ -274,10 +274,10 @@ public partial class StateRestorationService : BackgroundService
         {
             try
             {
-                LogResumingPlayback(zoneIndex, zoneState.Name);
+                this.LogResumingPlayback(zoneIndex, zoneState.Name);
 
                 // Get the zone service and resume playback
-                var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex);
+                var zoneResult = await this._zoneManager.GetZoneAsync(zoneIndex);
                 if (zoneResult.IsSuccess)
                 {
                     var zoneService = zoneResult.Value!;
@@ -287,21 +287,21 @@ public partial class StateRestorationService : BackgroundService
 
                     if (playResult.IsSuccess)
                     {
-                        LogPlaybackResumed(zoneIndex, zoneState.Name);
+                        this.LogPlaybackResumed(zoneIndex, zoneState.Name);
                     }
                     else
                     {
-                        LogPlaybackResumeFailed(new Exception(playResult.ErrorMessage), zoneIndex, zoneState.Name);
+                        this.LogPlaybackResumeFailed(new Exception(playResult.ErrorMessage), zoneIndex, zoneState.Name);
                     }
                 }
                 else
                 {
-                    LogPlaybackResumeFailed(new Exception($"Zone {zoneIndex} not found: {zoneResult.ErrorMessage}"), zoneIndex, zoneState.Name);
+                    this.LogPlaybackResumeFailed(new Exception($"Zone {zoneIndex} not found: {zoneResult.ErrorMessage}"), zoneIndex, zoneState.Name);
                 }
             }
             catch (Exception ex)
             {
-                LogPlaybackResumeFailed(ex, zoneIndex, zoneState.Name);
+                this.LogPlaybackResumeFailed(ex, zoneIndex, zoneState.Name);
             }
         }
     }
@@ -313,12 +313,12 @@ public partial class StateRestorationService : BackgroundService
     {
         var configData = new
         {
-            ZoneCount = _config.Zones.Count,
-            ClientCount = _config.Clients.Count,
-            ZoneNames = _config.Zones.Select(z => z.Name).ToArray(),
-            ClientNames = _config.Clients.Select(c => c.Name).ToArray(),
-            ZoneConfigs = _config.Zones.Select(z => new { z.Name, z.Sink }).ToArray(),
-            ClientConfigs = _config.Clients.Select(c => new { c.Name, c.Mac, c.DefaultZone }).ToArray()
+            ZoneCount = this._config.Zones.Count,
+            ClientCount = this._config.Clients.Count,
+            ZoneNames = this._config.Zones.Select(z => z.Name).ToArray(),
+            ClientNames = this._config.Clients.Select(c => c.Name).ToArray(),
+            ZoneConfigs = this._config.Zones.Select(z => new { z.Name, z.Sink }).ToArray(),
+            ClientConfigs = this._config.Clients.Select(c => new { c.Name, c.Mac, c.DefaultZone }).ToArray()
         };
 
         var json = JsonSerializer.Serialize(configData, new JsonSerializerOptions { WriteIndented = false });
@@ -328,10 +328,10 @@ public partial class StateRestorationService : BackgroundService
         {
             Hash = hash,
             CreatedAt = DateTime.UtcNow,
-            ZoneCount = _config.Zones.Count,
-            ClientCount = _config.Clients.Count,
-            ZoneNames = _config.Zones.Select(z => z.Name).ToArray(),
-            ClientNames = _config.Clients.Select(c => c.Name).ToArray()
+            ZoneCount = this._config.Zones.Count,
+            ClientCount = this._config.Clients.Count,
+            ZoneNames = this._config.Zones.Select(z => z.Name).ToArray(),
+            ClientNames = this._config.Clients.Select(c => c.Name).ToArray()
         };
     }
 

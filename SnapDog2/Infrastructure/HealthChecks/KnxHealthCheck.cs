@@ -27,7 +27,7 @@ public class KnxHealthCheck : IHealthCheck
 
     public KnxHealthCheck(IKnxService knxService)
     {
-        _knxService = knxService ?? throw new ArgumentNullException(nameof(knxService));
+        this._knxService = knxService ?? throw new ArgumentNullException(nameof(knxService));
     }
 
     public Task<HealthCheckResult> CheckHealthAsync(
@@ -36,8 +36,8 @@ public class KnxHealthCheck : IHealthCheck
     {
         try
         {
-            var status = _knxService.Status;
-            var isConnected = _knxService.IsConnected;
+            var status = this._knxService.Status;
+            var isConnected = this._knxService.IsConnected;
 
             return status switch
             {

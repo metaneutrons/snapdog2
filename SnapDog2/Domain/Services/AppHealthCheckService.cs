@@ -27,6 +27,6 @@ public class AppHealthCheckService(HealthCheckService healthCheckService) : IApp
     /// <inheritdoc/>
     public async Task<HealthReport> CheckHealthAsync(CancellationToken cancellationToken = default)
     {
-        return await _healthCheckService.CheckHealthAsync(cancellationToken);
+        return await this._healthCheckService.CheckHealthAsync(cancellationToken);
     }
 }

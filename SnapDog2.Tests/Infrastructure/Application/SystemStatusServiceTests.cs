@@ -35,17 +35,14 @@ public class SystemStatusServiceTests
 
     public SystemStatusServiceTests()
     {
-        _mockLogger = new Mock<ILogger<AppStatusService>>();
-        _mockMetricsService = new Mock<IMetricsService>();
-        _mockHealthCheckService = new Mock<IAppHealthCheckService>();
+        this._mockLogger = new Mock<ILogger<AppStatusService>>();
+        this._mockMetricsService = new Mock<IMetricsService>();
+        this._mockHealthCheckService = new Mock<IAppHealthCheckService>();
 
         // Setup logger to enable Debug level for LoggerMessage patterns
-        _mockLogger.Setup(x => x.IsEnabled(LogLevel.Debug)).Returns(true);
+        this._mockLogger.Setup(x => x.IsEnabled(LogLevel.Debug)).Returns(true);
 
-        _statusService = new AppStatusService(
-            _mockLogger.Object,
-            _mockMetricsService.Object,
-            _mockHealthCheckService.Object);
+        this._statusService = new AppStatusService(this._mockLogger.Object, this._mockMetricsService.Object, this._mockHealthCheckService.Object);
     }
 
     [Fact]
@@ -57,12 +54,12 @@ public class SystemStatusServiceTests
             HealthStatus.Healthy,
             TimeSpan.FromMilliseconds(100));
 
-        _mockHealthCheckService
+        this._mockHealthCheckService
             .Setup(x => x.CheckHealthAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(healthReport);
 
         // Act
-        var result = await _statusService.GetCurrentStatusAsync();
+        var result = await this._statusService.GetCurrentStatusAsync();
 
         // Assert
         Assert.NotNull(result);
@@ -80,12 +77,12 @@ public class SystemStatusServiceTests
             HealthStatus.Unhealthy,
             TimeSpan.FromMilliseconds(100));
 
-        _mockHealthCheckService
+        this._mockHealthCheckService
             .Setup(x => x.CheckHealthAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(healthReport);
 
         // Act
-        var result = await _statusService.GetCurrentStatusAsync();
+        var result = await this._statusService.GetCurrentStatusAsync();
 
         // Assert
         Assert.NotNull(result);
@@ -96,7 +93,7 @@ public class SystemStatusServiceTests
     public async Task GetVersionInfoAsync_ShouldReturnValidVersionDetails()
     {
         // Act
-        var result = await _statusService.GetVersionInfoAsync();
+        var result = await this._statusService.GetVersionInfoAsync();
 
         // Assert
         Assert.NotNull(result);
@@ -130,18 +127,18 @@ public class SystemStatusServiceTests
             ProcessedRequests = 1000
         };
 
-        _mockMetricsService
+        this._mockMetricsService
             .Setup(x => x.GetServerStatsAsync())
             .ReturnsAsync(expectedStats);
 
         // Act
-        var result = await _statusService.GetServerStatsAsync();
+        var result = await this._statusService.GetServerStatsAsync();
 
         // Assert
         Assert.Equal(expectedStats, result);
 
         // Verify metrics service was called
-        _mockMetricsService.Verify(
+        this._mockMetricsService.Verify(
             x => x.GetServerStatsAsync(),
             Times.Once);
     }
@@ -155,15 +152,15 @@ public class SystemStatusServiceTests
             HealthStatus.Healthy,
             TimeSpan.FromMilliseconds(100));
 
-        _mockHealthCheckService
+        this._mockHealthCheckService
             .Setup(x => x.CheckHealthAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(healthReport);
 
         // Act
-        await _statusService.GetCurrentStatusAsync();
+        await this._statusService.GetCurrentStatusAsync();
 
         // Assert - LoggerMessage patterns use IsEnabled checks
-        _mockLogger.Verify(
+        this._mockLogger.Verify(
             x => x.IsEnabled(LogLevel.Debug),
             Times.AtLeastOnce);
     }
@@ -172,10 +169,10 @@ public class SystemStatusServiceTests
     public async Task GetVersionInfoAsync_ShouldLogGettingVersionInfo()
     {
         // Act
-        await _statusService.GetVersionInfoAsync();
+        await this._statusService.GetVersionInfoAsync();
 
         // Assert - LoggerMessage patterns use IsEnabled checks
-        _mockLogger.Verify(
+        this._mockLogger.Verify(
             x => x.IsEnabled(LogLevel.Debug),
             Times.AtLeastOnce);
     }
@@ -184,7 +181,7 @@ public class SystemStatusServiceTests
     public async Task GetServerStatsAsync_ShouldLogGettingServerStats()
     {
         // Arrange
-        _mockMetricsService
+        this._mockMetricsService
             .Setup(x => x.GetServerStatsAsync())
             .ReturnsAsync(new ServerStats
             {
@@ -196,10 +193,10 @@ public class SystemStatusServiceTests
             });
 
         // Act
-        await _statusService.GetServerStatsAsync();
+        await this._statusService.GetServerStatsAsync();
 
         // Assert - Verify LoggerMessage pattern (IsEnabled check)
-        _mockLogger.Verify(
+        this._mockLogger.Verify(
             x => x.IsEnabled(LogLevel.Debug),
             Times.AtLeastOnce);
     }

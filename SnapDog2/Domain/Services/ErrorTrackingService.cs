@@ -32,7 +32,7 @@ public partial class ErrorTrackingService : IErrorTrackingService
 
     public ErrorTrackingService(ILogger<ErrorTrackingService> logger)
     {
-        _logger = logger;
+        this._logger = logger;
     }
 
     /// <inheritdoc/>
@@ -43,13 +43,13 @@ public partial class ErrorTrackingService : IErrorTrackingService
             return;
         }
 
-        lock (_lock)
+        lock (this._lock)
         {
-            _errors.Enqueue(error);
-            CleanupOldErrors();
+            this._errors.Enqueue(error);
+            this.CleanupOldErrors();
         }
 
-        LogErrorRecorded(_logger, error.Component ?? "Unknown", error.Context ?? "Unknown", error.Message);
+        LogErrorRecorded(this._logger, error.Component ?? "Unknown", error.Context ?? "Unknown", error.Message);
     }
 
     /// <inheritdoc/>
@@ -70,18 +70,18 @@ public partial class ErrorTrackingService : IErrorTrackingService
             Component = component
         };
 
-        RecordError(error);
+        this.RecordError(error);
     }
 
     /// <inheritdoc/>
     public Task<ErrorDetails?> GetLatestErrorAsync()
     {
-        lock (_lock)
+        lock (this._lock)
         {
-            CleanupOldErrors();
+            this.CleanupOldErrors();
 
             // Get the most recent error
-            var errors = _errors.ToArray();
+            var errors = this._errors.ToArray();
             var latestError = errors.LastOrDefault();
 
             return Task.FromResult(latestError);
@@ -91,12 +91,12 @@ public partial class ErrorTrackingService : IErrorTrackingService
     /// <inheritdoc/>
     public Task<List<ErrorDetails>> GetRecentErrorsAsync(TimeSpan timeWindow)
     {
-        lock (_lock)
+        lock (this._lock)
         {
-            CleanupOldErrors();
+            this.CleanupOldErrors();
 
             var cutoffTime = DateTime.UtcNow - timeWindow;
-            var recentErrors = _errors
+            var recentErrors = this._errors
                 .Where(e => e.TimestampUtc >= cutoffTime)
                 .OrderByDescending(e => e.TimestampUtc)
                 .ToList();
@@ -108,30 +108,30 @@ public partial class ErrorTrackingService : IErrorTrackingService
     /// <inheritdoc/>
     public void ClearErrors()
     {
-        lock (_lock)
+        lock (this._lock)
         {
-            _errors.Clear();
+            this._errors.Clear();
         }
 
-        LogErrorsCleared(_logger);
+        LogErrorsCleared(this._logger);
     }
 
     private void CleanupOldErrors()
     {
         var cutoffTime = DateTime.UtcNow.AddHours(-MaxErrorAgeHours);
-        var initialCount = _errors.Count;
+        var initialCount = this._errors.Count;
 
         // Remove old errors
-        while (_errors.TryPeek(out var oldestError) &&
-               (oldestError.TimestampUtc < cutoffTime || _errors.Count > MaxErrorCount))
+        while (this._errors.TryPeek(out var oldestError) &&
+               (oldestError.TimestampUtc < cutoffTime || this._errors.Count > MaxErrorCount))
         {
-            _errors.TryDequeue(out _);
+            this._errors.TryDequeue(out _);
         }
 
-        var removedCount = initialCount - _errors.Count;
+        var removedCount = initialCount - this._errors.Count;
         if (removedCount > 0)
         {
-            LogOldErrorsRemoved(_logger, removedCount, _errors.Count);
+            LogOldErrorsRemoved(this._logger, removedCount, this._errors.Count);
         }
     }
 

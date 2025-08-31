@@ -35,13 +35,13 @@ public class GetErrorStatusQueryHandlerTests
 
     public GetErrorStatusQueryHandlerTests()
     {
-        _mockLogger = new Mock<ILogger<GetErrorStatusQueryHandler>>();
+        this._mockLogger = new Mock<ILogger<GetErrorStatusQueryHandler>>();
 
         // Setup logger to enable Debug level for LoggerMessage patterns
-        _mockLogger.Setup(x => x.IsEnabled(LogLevel.Debug)).Returns(true);
+        this._mockLogger.Setup(x => x.IsEnabled(LogLevel.Debug)).Returns(true);
 
-        _mockErrorTrackingService = new Mock<IErrorTrackingService>();
-        _handler = new GetErrorStatusQueryHandler(_mockLogger.Object, _mockErrorTrackingService.Object);
+        this._mockErrorTrackingService = new Mock<IErrorTrackingService>();
+        this._handler = new GetErrorStatusQueryHandler(this._mockLogger.Object, this._mockErrorTrackingService.Object);
     }
 
     [Fact]
@@ -49,19 +49,19 @@ public class GetErrorStatusQueryHandlerTests
     {
         // Arrange
         var query = new GetErrorStatusQuery();
-        _mockErrorTrackingService
+        this._mockErrorTrackingService
             .Setup(x => x.GetLatestErrorAsync())
             .ReturnsAsync((ErrorDetails?)null);
 
         // Act
-        var result = await _handler.Handle(query, CancellationToken.None);
+        var result = await this._handler.Handle(query, CancellationToken.None);
 
         // Assert
         Assert.True(result.IsSuccess);
         Assert.Null(result.Value);
 
         // Verify logging - LoggerMessage patterns use IsEnabled checks
-        _mockLogger.Verify(
+        this._mockLogger.Verify(
             x => x.IsEnabled(LogLevel.Debug),
             Times.AtLeastOnce);
     }
@@ -80,12 +80,12 @@ public class GetErrorStatusQueryHandlerTests
             Component = "TestComponent"
         };
 
-        _mockErrorTrackingService
+        this._mockErrorTrackingService
             .Setup(x => x.GetLatestErrorAsync())
             .ReturnsAsync(errorDetails);
 
         // Act
-        var result = await _handler.Handle(query, CancellationToken.None);
+        var result = await this._handler.Handle(query, CancellationToken.None);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -102,19 +102,19 @@ public class GetErrorStatusQueryHandlerTests
         var query = new GetErrorStatusQuery();
         var expectedException = new InvalidOperationException("Service error");
 
-        _mockErrorTrackingService
+        this._mockErrorTrackingService
             .Setup(x => x.GetLatestErrorAsync())
             .ThrowsAsync(expectedException);
 
         // Act
-        var result = await _handler.Handle(query, CancellationToken.None);
+        var result = await this._handler.Handle(query, CancellationToken.None);
 
         // Assert
         Assert.False(result.IsSuccess);
         Assert.Equal("Failed to retrieve error status", result.ErrorMessage);
 
         // Verify error logging (LoggerMessage pattern)
-        _mockLogger.Verify(
+        this._mockLogger.Verify(
             x => x.IsEnabled(LogLevel.Error),
             Times.AtLeastOnce);
     }
@@ -124,15 +124,15 @@ public class GetErrorStatusQueryHandlerTests
     {
         // Arrange
         var query = new GetErrorStatusQuery();
-        _mockErrorTrackingService
+        this._mockErrorTrackingService
             .Setup(x => x.GetLatestErrorAsync())
             .ReturnsAsync((ErrorDetails?)null);
 
         // Act
-        await _handler.Handle(query, CancellationToken.None);
+        await this._handler.Handle(query, CancellationToken.None);
 
         // Assert
-        _mockErrorTrackingService.Verify(
+        this._mockErrorTrackingService.Verify(
             x => x.GetLatestErrorAsync(),
             Times.Once);
     }
@@ -144,15 +144,15 @@ public class GetErrorStatusQueryHandlerTests
         var query = new GetErrorStatusQuery();
         var cancellationToken = new CancellationToken();
 
-        _mockErrorTrackingService
+        this._mockErrorTrackingService
             .Setup(x => x.GetLatestErrorAsync())
             .ReturnsAsync((ErrorDetails?)null);
 
         // Act
-        await _handler.Handle(query, cancellationToken);
+        await this._handler.Handle(query, cancellationToken);
 
         // Assert
-        _mockErrorTrackingService.Verify(
+        this._mockErrorTrackingService.Verify(
             x => x.GetLatestErrorAsync(),
             Times.Once);
     }

@@ -31,7 +31,7 @@ public class GetClientsCountQueryHandler(IOptions<SnapDogConfiguration> config)
 
     public Task<Result<int>> Handle(GetClientsCountQuery request, CancellationToken cancellationToken)
     {
-        var count = _config.Clients.Count;
+        var count = this._config.Clients.Count;
         return Task.FromResult(Result<int>.Success(count));
     }
 }

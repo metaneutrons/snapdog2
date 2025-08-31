@@ -120,7 +120,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
 
         this.MetadataManager = new MetadataManager(this._libvlc, metadataLogger);
 
-        LogAudioProcessingContextInitialized(this._tempDirectory.FullName);
+        this.LogAudioProcessingContextInitialized(this._tempDirectory.FullName);
     }
 
     /// <summary>
@@ -153,7 +153,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
                 outputPath ?? Path.Combine(this._tempDirectory.FullName, $"{sourceId}.{this.Config.Format}");
             var metadataPath = Path.ChangeExtension(finalOutputPath, ".json");
 
-            LogStartingAudioProcessing(sourceUrl, finalOutputPath);
+            this.LogStartingAudioProcessing(sourceUrl, finalOutputPath);
 
             // Build media options for raw audio output
             var mediaOptions = this.BuildMediaOptions(finalOutputPath);
@@ -207,7 +207,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             // Save metadata to JSON file (disabled - metadata available programmatically)
             // await this.MetadataManager.SaveMetadataAsync(metadata, metadataPath, cancellationToken);
 
-            LogAudioStreamingStartedSuccessfully(finalOutputPath);
+            this.LogAudioStreamingStartedSuccessfully(finalOutputPath);
 
             // For streaming sources (like radio), keep the stream alive until cancelled
             if (
@@ -215,7 +215,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
                 && (sourceUrl.StartsWith("http://") || sourceUrl.StartsWith("https://"))
             )
             {
-                LogMaintainingContinuousStream(sourceUrl);
+                this.LogMaintainingContinuousStream(sourceUrl);
 
                 // Keep streaming until cancelled or error occurs
                 while (
@@ -229,25 +229,25 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
                     // Log periodic status for debugging
                     if (DateTime.UtcNow.Second % 30 == 0) // Every 30 seconds
                     {
-                        LogStreamStatus(this._mediaPlayer.State, this._mediaPlayer.IsPlaying);
+                        this.LogStreamStatus(this._mediaPlayer.State, this._mediaPlayer.IsPlaying);
                     }
                 }
 
                 if (cancellationToken.IsCancellationRequested)
                 {
-                    LogStreamCancelled(sourceUrl);
+                    this.LogStreamCancelled(sourceUrl);
                 }
                 else if (this._mediaPlayer.State == VLCState.Error)
                 {
-                    LogStreamEndedWithError(sourceUrl);
+                    this.LogStreamEndedWithError(sourceUrl);
                 }
                 else
                 {
-                    LogStreamEndedNaturally(sourceUrl);
+                    this.LogStreamEndedNaturally(sourceUrl);
                 }
             }
 
-            LogAudioProcessingCompleted(finalOutputPath);
+            this.LogAudioProcessingCompleted(finalOutputPath);
 
             return new AudioProcessingResult
             {
@@ -261,12 +261,12 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
         }
         catch (OperationCanceledException)
         {
-            LogAudioProcessingWasCancelled();
+            this.LogAudioProcessingWasCancelled();
             return new AudioProcessingResult { Success = false, ErrorMessage = "Operation was cancelled" };
         }
         catch (Exception ex)
         {
-            LogFailedToProcessAudioStream(ex, sourceUrl);
+            this.LogFailedToProcessAudioStream(ex, sourceUrl);
             return new AudioProcessingResult { Success = false, ErrorMessage = ex.Message };
         }
     }
@@ -306,7 +306,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
         options.Add(":no-sout-standard-sap");
         options.Add(":sout-all"); // Keep streaming even if no one is reading
 
-        LogBuiltMediaOptions(audioCodec, this.Config.SampleRate, this.Config.Channels, string.Join(", ", options));
+        this.LogBuiltMediaOptions(audioCodec, this.Config.SampleRate, this.Config.Channels, string.Join(", ", options));
 
         return options;
     }
@@ -340,7 +340,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
         if (!this._disposed && this._mediaPlayer.IsPlaying)
         {
             this._mediaPlayer.Stop();
-            LogStoppedMediaPlayback();
+            this.LogStoppedMediaPlayback();
         }
     }
 
@@ -359,7 +359,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             var isPlaying = this._mediaPlayer.IsPlaying;
             var state = this._mediaPlayer.State;
 
-            LogLibVlcIsPlayingCheck(isPlaying, state);
+            this.LogLibVlcIsPlayingCheck(isPlaying, state);
 
             return isPlaying;
         }
@@ -376,7 +376,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             var state = this._mediaPlayer.State;
             var isPlaying = this._mediaPlayer.IsPlaying;
 
-            LogLibVlcDirectAccess(time, state, isPlaying);
+            this.LogLibVlcDirectAccess(time, state, isPlaying);
 
             return time;
         }
@@ -397,7 +397,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
     /// </summary>
     private void SetupEventHandlers()
     {
-        LogSettingUpLibVlcEventHandlers();
+        this.LogSettingUpLibVlcEventHandlers();
 
         // Position change events (percentage-based)
         this._mediaPlayer.PositionChanged += (sender, e) =>
@@ -405,7 +405,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             try
             {
                 var positionMs = (long)(e.Position * this._mediaPlayer.Length);
-                LogLibVlcPositionChanged(e.Position, positionMs);
+                this.LogLibVlcPositionChanged(e.Position, positionMs);
 
                 this.PositionChanged?.Invoke(
                     this,
@@ -419,7 +419,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             }
             catch (Exception ex)
             {
-                LogErrorHandlingPositionChangedEvent(ex);
+                this.LogErrorHandlingPositionChangedEvent(ex);
             }
         };
 
@@ -428,7 +428,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
         {
             try
             {
-                LogLibVlcTimeChanged(e.Time);
+                this.LogLibVlcTimeChanged(e.Time);
                 this.PositionChanged?.Invoke(
                     this,
                     new PositionChangedEventArgs
@@ -441,7 +441,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             }
             catch (Exception ex)
             {
-                LogErrorHandlingTimeChangedEvent(ex);
+                this.LogErrorHandlingTimeChangedEvent(ex);
             }
         };
 
@@ -457,7 +457,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             }
             catch (Exception ex)
             {
-                LogErrorHandlingPlayingEvent(ex);
+                this.LogErrorHandlingPlayingEvent(ex);
             }
         };
 
@@ -472,7 +472,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             }
             catch (Exception ex)
             {
-                LogErrorHandlingPausedEvent(ex);
+                this.LogErrorHandlingPausedEvent(ex);
             }
         };
 
@@ -487,7 +487,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             }
             catch (Exception ex)
             {
-                LogErrorHandlingStoppedEvent(ex);
+                this.LogErrorHandlingStoppedEvent(ex);
             }
         };
 
@@ -502,7 +502,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             }
             catch (Exception ex)
             {
-                LogErrorHandlingEndReachedEvent(ex);
+                this.LogErrorHandlingEndReachedEvent(ex);
             }
         };
     }
@@ -516,7 +516,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             this._libvlc?.Dispose();
             this._disposed = true;
 
-            LogAudioProcessingContextDisposed();
+            this.LogAudioProcessingContextDisposed();
         }
     }
 
@@ -529,7 +529,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             this._libvlc?.Dispose();
             this._disposed = true;
 
-            LogAudioProcessingContextDisposedAsynchronously();
+            this.LogAudioProcessingContextDisposedAsynchronously();
         }
 
         await Task.CompletedTask;

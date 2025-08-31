@@ -82,8 +82,8 @@ public partial class IntegrationPublishingHandlers(
 
     public async Task Handle(ClientVolumeStatusNotification notification, CancellationToken cancellationToken)
     {
-        LogClientVolumeChange(notification.ClientIndex, notification.Volume);
-        await PublishClientStatusAsync(
+        this.LogClientVolumeChange(notification.ClientIndex, notification.Volume);
+        await this.PublishClientStatusAsync(
             StatusIdAttribute.GetStatusId<ClientVolumeStatusNotification>(),
             notification.ClientIndex.ToString(),
             notification.Volume,
@@ -91,7 +91,7 @@ public partial class IntegrationPublishingHandlers(
         );
 
         // Also publish StatusChangedNotification for KNX integration
-        await PublishKnxStatusAsync(
+        await this.PublishKnxStatusAsync(
             StatusIds.ClientVolumeStatus,
             notification.ClientIndex,
             notification.Volume,
@@ -101,8 +101,8 @@ public partial class IntegrationPublishingHandlers(
 
     public async Task Handle(ClientMuteStatusNotification notification, CancellationToken cancellationToken)
     {
-        LogClientMuteChange(notification.ClientIndex, notification.Muted);
-        await PublishClientStatusAsync(
+        this.LogClientMuteChange(notification.ClientIndex, notification.Muted);
+        await this.PublishClientStatusAsync(
             StatusIdAttribute.GetStatusId<ClientMuteStatusNotification>(),
             notification.ClientIndex.ToString(),
             notification.Muted,
@@ -110,7 +110,7 @@ public partial class IntegrationPublishingHandlers(
         );
 
         // Also publish StatusChangedNotification for KNX integration
-        await PublishKnxStatusAsync(
+        await this.PublishKnxStatusAsync(
             StatusIds.ClientMuteStatus,
             notification.ClientIndex,
             notification.Muted,
@@ -120,8 +120,8 @@ public partial class IntegrationPublishingHandlers(
 
     public async Task Handle(ClientLatencyStatusNotification notification, CancellationToken cancellationToken)
     {
-        LogClientLatencyChange(notification.ClientIndex, notification.LatencyMs);
-        await PublishClientStatusAsync(
+        this.LogClientLatencyChange(notification.ClientIndex, notification.LatencyMs);
+        await this.PublishClientStatusAsync(
             StatusIdAttribute.GetStatusId<ClientLatencyStatusNotification>(),
             notification.ClientIndex.ToString(),
             notification.LatencyMs,
@@ -129,7 +129,7 @@ public partial class IntegrationPublishingHandlers(
         );
 
         // Also publish StatusChangedNotification for KNX integration
-        await PublishKnxStatusAsync(
+        await this.PublishKnxStatusAsync(
             StatusIds.ClientLatencyStatus,
             notification.ClientIndex,
             notification.LatencyMs,
@@ -139,8 +139,8 @@ public partial class IntegrationPublishingHandlers(
 
     public async Task Handle(ClientZoneStatusNotification notification, CancellationToken cancellationToken)
     {
-        LogClientZoneChange(notification.ClientIndex, null, notification.ZoneIndex);
-        await PublishClientStatusAsync(
+        this.LogClientZoneChange(notification.ClientIndex, null, notification.ZoneIndex);
+        await this.PublishClientStatusAsync(
             StatusIdAttribute.GetStatusId<ClientZoneStatusNotification>(),
             notification.ClientIndex.ToString(),
             notification.ZoneIndex,
@@ -148,7 +148,7 @@ public partial class IntegrationPublishingHandlers(
         );
 
         // Also publish StatusChangedNotification for KNX integration
-        await PublishKnxStatusAsync(
+        await this.PublishKnxStatusAsync(
             StatusIds.ClientZoneStatus,
             notification.ClientIndex,
             notification.ZoneIndex,
@@ -158,8 +158,8 @@ public partial class IntegrationPublishingHandlers(
 
     public async Task Handle(ClientConnectionStatusNotification notification, CancellationToken cancellationToken)
     {
-        LogClientConnectionChange(notification.ClientIndex, notification.IsConnected);
-        await PublishClientStatusAsync(
+        this.LogClientConnectionChange(notification.ClientIndex, notification.IsConnected);
+        await this.PublishClientStatusAsync(
             StatusIdAttribute.GetStatusId<ClientConnectionStatusNotification>(),
             notification.ClientIndex.ToString(),
             notification.IsConnected,
@@ -167,7 +167,7 @@ public partial class IntegrationPublishingHandlers(
         );
 
         // Also publish StatusChangedNotification for KNX integration
-        await PublishKnxStatusAsync(
+        await this.PublishKnxStatusAsync(
             StatusIds.ClientConnected,
             notification.ClientIndex,
             notification.IsConnected,
@@ -177,19 +177,19 @@ public partial class IntegrationPublishingHandlers(
 
     public async Task Handle(ClientStateNotification notification, CancellationToken cancellationToken)
     {
-        LogClientStateChange(notification.ClientIndex);
+        this.LogClientStateChange(notification.ClientIndex);
 
         // Check if this represents a meaningful change compared to the previous state
-        var previousState = _previousClientStates.GetValueOrDefault(notification.ClientIndex);
+        var previousState = this._previousClientStates.GetValueOrDefault(notification.ClientIndex);
 
         if (HasMeaningfulClientChange(previousState, notification.State))
         {
-            LogClientStatePublishing(notification.ClientIndex, previousState == null ? "first-time" : "changed");
+            this.LogClientStatePublishing(notification.ClientIndex, previousState == null ? "first-time" : "changed");
 
             // Update cache with new state
-            _previousClientStates[notification.ClientIndex] = notification.State;
+            this._previousClientStates[notification.ClientIndex] = notification.State;
 
-            await PublishClientStatusAsync(
+            await this.PublishClientStatusAsync(
                 StatusIdAttribute.GetStatusId<ClientStateNotification>(),
                 notification.ClientIndex.ToString(),
                 notification.State,
@@ -198,7 +198,7 @@ public partial class IntegrationPublishingHandlers(
         }
         else
         {
-            LogClientStateSkipped(notification.ClientIndex);
+            this.LogClientStateSkipped(notification.ClientIndex);
         }
     }
 
@@ -208,8 +208,8 @@ public partial class IntegrationPublishingHandlers(
 
     public async Task Handle(ZoneVolumeChangedNotification notification, CancellationToken cancellationToken)
     {
-        LogZoneVolumeChange(notification.ZoneIndex, notification.Volume);
-        await PublishZoneStatusAsync(
+        this.LogZoneVolumeChange(notification.ZoneIndex, notification.Volume);
+        await this.PublishZoneStatusAsync(
             StatusIdAttribute.GetStatusId<ZoneVolumeChangedNotification>(),
             notification.ZoneIndex,
             notification.Volume,
@@ -217,7 +217,7 @@ public partial class IntegrationPublishingHandlers(
         );
 
         // Also publish StatusChangedNotification for KNX integration
-        await PublishKnxStatusAsync(
+        await this.PublishKnxStatusAsync(
             StatusIds.VolumeStatus,
             notification.ZoneIndex,
             notification.Volume,
@@ -227,8 +227,8 @@ public partial class IntegrationPublishingHandlers(
 
     public async Task Handle(ZoneMuteChangedNotification notification, CancellationToken cancellationToken)
     {
-        LogZoneMuteChange(notification.ZoneIndex, notification.IsMuted);
-        await PublishZoneStatusAsync(
+        this.LogZoneMuteChange(notification.ZoneIndex, notification.IsMuted);
+        await this.PublishZoneStatusAsync(
             StatusIdAttribute.GetStatusId<ZoneMuteChangedNotification>(),
             notification.ZoneIndex,
             notification.IsMuted,
@@ -236,7 +236,7 @@ public partial class IntegrationPublishingHandlers(
         );
 
         // Also publish StatusChangedNotification for KNX integration
-        await PublishKnxStatusAsync(
+        await this.PublishKnxStatusAsync(
             StatusIds.MuteStatus,
             notification.ZoneIndex,
             notification.IsMuted,
@@ -247,8 +247,8 @@ public partial class IntegrationPublishingHandlers(
     public async Task Handle(ZonePlaybackStateChangedNotification notification, CancellationToken cancellationToken)
     {
         var playbackStateString = notification.PlaybackState.ToString().ToLowerInvariant();
-        LogZonePlaybackStateChange(notification.ZoneIndex, playbackStateString);
-        await PublishZoneStatusAsync(
+        this.LogZonePlaybackStateChange(notification.ZoneIndex, playbackStateString);
+        await this.PublishZoneStatusAsync(
             StatusIdAttribute.GetStatusId<ZonePlaybackStateChangedNotification>(),
             notification.ZoneIndex,
             playbackStateString,
@@ -256,7 +256,7 @@ public partial class IntegrationPublishingHandlers(
         );
 
         // Also publish StatusChangedNotification for KNX integration
-        await PublishKnxStatusAsync(
+        await this.PublishKnxStatusAsync(
             StatusIds.PlaybackState,
             notification.ZoneIndex,
             playbackStateString,
@@ -266,8 +266,8 @@ public partial class IntegrationPublishingHandlers(
 
     public async Task Handle(ZoneTrackChangedNotification notification, CancellationToken cancellationToken)
     {
-        LogZoneTrackChange(notification.ZoneIndex, notification.TrackInfo.Title, notification.TrackInfo.Artist);
-        await PublishZoneStatusAsync(
+        this.LogZoneTrackChange(notification.ZoneIndex, notification.TrackInfo.Title, notification.TrackInfo.Artist);
+        await this.PublishZoneStatusAsync(
             StatusIdAttribute.GetStatusId<ZoneTrackChangedNotification>(),
             notification.ZoneIndex,
             notification.TrackInfo,
@@ -275,7 +275,7 @@ public partial class IntegrationPublishingHandlers(
         );
 
         // Also publish StatusChangedNotification for KNX integration (send track index, not full TrackInfo)
-        await PublishKnxStatusAsync(
+        await this.PublishKnxStatusAsync(
             StatusIds.TrackIndex,
             notification.ZoneIndex,
             notification.TrackInfo.Index,
@@ -285,8 +285,8 @@ public partial class IntegrationPublishingHandlers(
 
     public async Task Handle(ZonePlaylistChangedNotification notification, CancellationToken cancellationToken)
     {
-        LogZonePlaylistChange(notification.ZoneIndex, notification.PlaylistInfo.Name, notification.PlaylistIndex);
-        await PublishZoneStatusAsync(
+        this.LogZonePlaylistChange(notification.ZoneIndex, notification.PlaylistInfo.Name, notification.PlaylistIndex);
+        await this.PublishZoneStatusAsync(
             StatusIdAttribute.GetStatusId<ZonePlaylistChangedNotification>(),
             notification.ZoneIndex,
             new { PlaylistInfo = notification.PlaylistInfo, PlaylistIndex = notification.PlaylistIndex },
@@ -296,8 +296,8 @@ public partial class IntegrationPublishingHandlers(
 
     public async Task Handle(ZoneTrackRepeatChangedNotification notification, CancellationToken cancellationToken)
     {
-        LogZoneTrackRepeatChange(notification.ZoneIndex, notification.Enabled);
-        await PublishZoneStatusAsync(
+        this.LogZoneTrackRepeatChange(notification.ZoneIndex, notification.Enabled);
+        await this.PublishZoneStatusAsync(
             StatusIdAttribute.GetStatusId<ZoneTrackRepeatChangedNotification>(),
             notification.ZoneIndex,
             notification.Enabled,
@@ -305,7 +305,7 @@ public partial class IntegrationPublishingHandlers(
         );
 
         // Also publish StatusChangedNotification for KNX integration
-        await PublishKnxStatusAsync(
+        await this.PublishKnxStatusAsync(
             StatusIds.TrackRepeatStatus,
             notification.ZoneIndex,
             notification.Enabled,
@@ -315,8 +315,8 @@ public partial class IntegrationPublishingHandlers(
 
     public async Task Handle(ZonePlaylistRepeatChangedNotification notification, CancellationToken cancellationToken)
     {
-        LogZonePlaylistRepeatChange(notification.ZoneIndex, notification.Enabled);
-        await PublishZoneStatusAsync(
+        this.LogZonePlaylistRepeatChange(notification.ZoneIndex, notification.Enabled);
+        await this.PublishZoneStatusAsync(
             StatusIdAttribute.GetStatusId<ZonePlaylistRepeatChangedNotification>(),
             notification.ZoneIndex,
             notification.Enabled,
@@ -326,8 +326,8 @@ public partial class IntegrationPublishingHandlers(
 
     public async Task Handle(ZoneShuffleModeChangedNotification notification, CancellationToken cancellationToken)
     {
-        LogZoneShuffleModeChange(notification.ZoneIndex, notification.ShuffleEnabled);
-        await PublishZoneStatusAsync(
+        this.LogZoneShuffleModeChange(notification.ZoneIndex, notification.ShuffleEnabled);
+        await this.PublishZoneStatusAsync(
             StatusIdAttribute.GetStatusId<ZoneShuffleModeChangedNotification>(),
             notification.ZoneIndex,
             notification.ShuffleEnabled,
@@ -337,8 +337,8 @@ public partial class IntegrationPublishingHandlers(
 
     public async Task Handle(ZoneTrackMetadataChangedNotification notification, CancellationToken cancellationToken)
     {
-        LogZoneTrackMetadataChange(notification.ZoneIndex, notification.TrackInfo.Title, notification.TrackInfo.Artist, notification.TrackInfo.Album ?? "Unknown");
-        await PublishZoneStatusAsync(
+        this.LogZoneTrackMetadataChange(notification.ZoneIndex, notification.TrackInfo.Title, notification.TrackInfo.Artist, notification.TrackInfo.Album ?? "Unknown");
+        await this.PublishZoneStatusAsync(
             StatusIdAttribute.GetStatusId<ZoneTrackMetadataChangedNotification>(),
             notification.ZoneIndex,
             notification.TrackInfo,
@@ -348,8 +348,8 @@ public partial class IntegrationPublishingHandlers(
 
     public async Task Handle(ZoneTrackTitleChangedNotification notification, CancellationToken cancellationToken)
     {
-        LogZoneTrackTitleChange(notification.ZoneIndex, notification.Title);
-        await PublishZoneStatusAsync(
+        this.LogZoneTrackTitleChange(notification.ZoneIndex, notification.Title);
+        await this.PublishZoneStatusAsync(
             StatusIdAttribute.GetStatusId<ZoneTrackTitleChangedNotification>(),
             notification.ZoneIndex,
             notification.Title,
@@ -357,7 +357,7 @@ public partial class IntegrationPublishingHandlers(
         );
 
         // Also publish StatusChangedNotification for KNX integration
-        await PublishKnxStatusAsync(
+        await this.PublishKnxStatusAsync(
             StatusIds.TrackMetadataTitle,
             notification.ZoneIndex,
             notification.Title,
@@ -367,8 +367,8 @@ public partial class IntegrationPublishingHandlers(
 
     public async Task Handle(ZoneTrackArtistChangedNotification notification, CancellationToken cancellationToken)
     {
-        LogZoneTrackArtistChange(notification.ZoneIndex, notification.Artist);
-        await PublishZoneStatusAsync(
+        this.LogZoneTrackArtistChange(notification.ZoneIndex, notification.Artist);
+        await this.PublishZoneStatusAsync(
             StatusIdAttribute.GetStatusId<ZoneTrackArtistChangedNotification>(),
             notification.ZoneIndex,
             notification.Artist,
@@ -376,7 +376,7 @@ public partial class IntegrationPublishingHandlers(
         );
 
         // Also publish StatusChangedNotification for KNX integration
-        await PublishKnxStatusAsync(
+        await this.PublishKnxStatusAsync(
             StatusIds.TrackMetadataArtist,
             notification.ZoneIndex,
             notification.Artist,
@@ -386,8 +386,8 @@ public partial class IntegrationPublishingHandlers(
 
     public async Task Handle(ZoneTrackAlbumChangedNotification notification, CancellationToken cancellationToken)
     {
-        LogZoneTrackAlbumChange(notification.ZoneIndex, notification.Album);
-        await PublishZoneStatusAsync(
+        this.LogZoneTrackAlbumChange(notification.ZoneIndex, notification.Album);
+        await this.PublishZoneStatusAsync(
             StatusIdAttribute.GetStatusId<ZoneTrackAlbumChangedNotification>(),
             notification.ZoneIndex,
             notification.Album,
@@ -395,7 +395,7 @@ public partial class IntegrationPublishingHandlers(
         );
 
         // Also publish StatusChangedNotification for KNX integration
-        await PublishKnxStatusAsync(
+        await this.PublishKnxStatusAsync(
             StatusIds.TrackMetadataAlbum,
             notification.ZoneIndex,
             notification.Album,
@@ -405,8 +405,8 @@ public partial class IntegrationPublishingHandlers(
 
     public async Task Handle(ZoneTrackProgressChangedNotification notification, CancellationToken cancellationToken)
     {
-        LogZoneTrackProgressChange(notification.ZoneIndex, notification.Progress);
-        await PublishZoneStatusAsync(
+        this.LogZoneTrackProgressChange(notification.ZoneIndex, notification.Progress);
+        await this.PublishZoneStatusAsync(
             StatusIdAttribute.GetStatusId<ZoneTrackProgressChangedNotification>(),
             notification.ZoneIndex,
             notification.Progress,
@@ -414,7 +414,7 @@ public partial class IntegrationPublishingHandlers(
         );
 
         // Also publish StatusChangedNotification for KNX integration
-        await PublishKnxStatusAsync(
+        await this.PublishKnxStatusAsync(
             StatusIds.TrackProgressStatus,
             notification.ZoneIndex,
             notification.Progress,
@@ -424,8 +424,8 @@ public partial class IntegrationPublishingHandlers(
 
     public async Task Handle(ZoneTrackPlayingStatusChangedNotification notification, CancellationToken cancellationToken)
     {
-        LogZoneTrackPlayingStatusChange(notification.ZoneIndex, notification.IsPlaying);
-        await PublishZoneStatusAsync(
+        this.LogZoneTrackPlayingStatusChange(notification.ZoneIndex, notification.IsPlaying);
+        await this.PublishZoneStatusAsync(
             StatusIdAttribute.GetStatusId<ZoneTrackPlayingStatusChangedNotification>(),
             notification.ZoneIndex,
             notification.IsPlaying,
@@ -433,7 +433,7 @@ public partial class IntegrationPublishingHandlers(
         );
 
         // Also publish StatusChangedNotification for KNX integration
-        await PublishKnxStatusAsync(
+        await this.PublishKnxStatusAsync(
             StatusIds.TrackPlayingStatus,
             notification.ZoneIndex,
             notification.IsPlaying,
@@ -450,7 +450,7 @@ public partial class IntegrationPublishingHandlers(
     /// </summary>
     private async Task PublishKnxStatusAsync<T>(string statusType, int targetIndex, T value, CancellationToken cancellationToken)
     {
-        using var scope = _serviceProvider.CreateScope();
+        using var scope = this._serviceProvider.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
         // Debug log to verify we're publishing the notification
@@ -482,14 +482,14 @@ public partial class IntegrationPublishingHandlers(
     {
         try
         {
-            var smartPublisher = _serviceProvider.GetService<ISmartMqttPublisher>();
+            var smartPublisher = this._serviceProvider.GetService<ISmartMqttPublisher>();
             if (smartPublisher != null)
             {
                 await smartPublisher.PublishClientStatusAsync(clientIndex, eventType, payload, cancellationToken);
             }
             else
             {
-                LogSmartPublisherNotAvailable("Client", clientIndex, eventType);
+                this.LogSmartPublisherNotAvailable("Client", clientIndex, eventType);
             }
         }
         catch (ObjectDisposedException)
@@ -498,7 +498,7 @@ public partial class IntegrationPublishingHandlers(
         }
         catch (Exception ex)
         {
-            LogPublishError("Client", clientIndex, eventType, ex);
+            this.LogPublishError("Client", clientIndex, eventType, ex);
         }
     }
 
@@ -514,18 +514,18 @@ public partial class IntegrationPublishingHandlers(
     {
         try
         {
-            LogAttemptingToPublishZoneStatus(_logger, eventType, zoneIndex);
+            LogAttemptingToPublishZoneStatus(this._logger, eventType, zoneIndex);
 
-            var smartPublisher = _serviceProvider.GetService<ISmartMqttPublisher>();
+            var smartPublisher = this._serviceProvider.GetService<ISmartMqttPublisher>();
             if (smartPublisher != null)
             {
-                LogSmartPublisherFound(_logger);
+                LogSmartPublisherFound(this._logger);
                 await smartPublisher.PublishZoneStatusAsync(zoneIndex, eventType, payload, cancellationToken);
             }
             else
             {
-                LogSmartPublisherNotAvailableWarning(_logger);
-                LogSmartPublisherNotAvailable("Zone", zoneIndex.ToString(), eventType);
+                LogSmartPublisherNotAvailableWarning(this._logger);
+                this.LogSmartPublisherNotAvailable("Zone", zoneIndex.ToString(), eventType);
             }
         }
         catch (ObjectDisposedException)
@@ -534,7 +534,7 @@ public partial class IntegrationPublishingHandlers(
         }
         catch (Exception ex)
         {
-            LogPublishError("Zone", zoneIndex.ToString(), eventType, ex);
+            this.LogPublishError("Zone", zoneIndex.ToString(), eventType, ex);
         }
     }
 
@@ -786,26 +786,26 @@ public partial class KnxIntegrationHandler : INotificationHandler<StatusChangedN
 
     public KnxIntegrationHandler(IKnxService knxService, ILogger<KnxIntegrationHandler> logger)
     {
-        _knxService = knxService;
-        _logger = logger;
+        this._knxService = knxService;
+        this._logger = logger;
     }
 
     public async Task Handle(StatusChangedNotification notification, CancellationToken cancellationToken)
     {
         // Debug log to verify we're receiving notifications
-        LogKnxIntegrationReceived(notification.StatusType, notification.TargetIndex, notification.Value?.ToString() ?? "null");
+        this.LogKnxIntegrationReceived(notification.StatusType, notification.TargetIndex, notification.Value?.ToString() ?? "null");
 
         try
         {
-            LogCallingKnxService();
+            this.LogCallingKnxService();
             // Ensure we have a non-null value for KNX service
             var knxValue = notification.Value ?? "null";
-            await _knxService.SendStatusAsync(notification.StatusType, notification.TargetIndex, knxValue, cancellationToken);
-            LogKnxServiceCompleted();
+            await this._knxService.SendStatusAsync(notification.StatusType, notification.TargetIndex, knxValue, cancellationToken);
+            this.LogKnxServiceCompleted();
         }
         catch (Exception ex)
         {
-            LogKnxServiceError(ex, ex.Message);
+            this.LogKnxServiceError(ex, ex.Message);
         }
     }
 

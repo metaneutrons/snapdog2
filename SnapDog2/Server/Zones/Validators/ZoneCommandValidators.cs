@@ -209,22 +209,22 @@ public class PlayCommandValidator : BaseZoneCommandValidator<PlayCommand>
     public PlayCommandValidator()
     {
         // Additional validation for optional track index
-        When(
+        this.When(
             x => x.TrackIndex.HasValue,
             () =>
             {
-                RuleFor(x => x.TrackIndex!.Value)
+                this.RuleFor(x => x.TrackIndex!.Value)
                     .GreaterThan(0)
                     .WithMessage("Track index must be a positive integer (1-based) when specified.");
             }
         );
 
         // Additional validation for optional media URL
-        When(
+        this.When(
             x => !string.IsNullOrEmpty(x.MediaUrl),
             () =>
             {
-                RuleFor(x => x.MediaUrl).Must(BeValidUrl).WithMessage("Media URL must be a valid URL when specified.");
+                this.RuleFor(x => x.MediaUrl).Must(BeValidUrl).WithMessage("Media URL must be a valid URL when specified.");
             }
         );
     }
