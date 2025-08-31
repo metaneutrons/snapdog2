@@ -19,9 +19,17 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Xunit;
+using Xunit.Abstractions;
 
 public class AnalyzerTestFileTests
 {
+    private readonly ITestOutputHelper _testOutputHelper;
+
+    public AnalyzerTestFileTests(ITestOutputHelper testOutputHelper)
+    {
+        this._testOutputHelper = testOutputHelper;
+    }
+
     private const string TestCode =
         @"
 using Microsoft.Extensions.Logging;
@@ -95,7 +103,7 @@ public partial class TestService
         foreach (var diagnostic in diagnostics)
         {
             var lineSpan = diagnostic.Location.GetLineSpan();
-            Console.WriteLine(
+            this._testOutputHelper.WriteLine(
                 $"{diagnostic.Id}: {diagnostic.GetMessage()} at line {lineSpan.StartLinePosition.Line + 1}"
             );
         }

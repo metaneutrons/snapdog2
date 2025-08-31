@@ -17,7 +17,6 @@ namespace SnapDog.Analyzers;
 using System.Collections.Immutable;
 using System.Composition;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
@@ -77,7 +76,7 @@ public class LoggerMessageCodeFixProvider : CodeFixProvider
 
         var action = CodeAction.Create(
             title: "Convert to named parameters",
-            createChangedDocument: c => ConvertToNamedParameters(context.Document, root, attribute, c),
+            createChangedDocument: c => ConvertToNamedParameters(context.Document, root, attribute),
             equivalenceKey: "ConvertToNamedParameters"
         );
 
@@ -99,7 +98,7 @@ public class LoggerMessageCodeFixProvider : CodeFixProvider
 
         var action = CodeAction.Create(
             title: "Move LoggerMessage method to end of class",
-            createChangedDocument: c => MoveMethodToEnd(context.Document, root, method, c),
+            createChangedDocument: c => MoveMethodToEnd(context.Document, root, method),
             equivalenceKey: "MoveLoggerMessageToEnd"
         );
 
@@ -109,8 +108,7 @@ public class LoggerMessageCodeFixProvider : CodeFixProvider
     private static Task<Document> ConvertToNamedParameters(
         Document document,
         SyntaxNode root,
-        AttributeSyntax attribute,
-        CancellationToken cancellationToken
+        AttributeSyntax attribute
     )
     {
         var arguments = attribute.ArgumentList!.Arguments;
@@ -149,8 +147,7 @@ public class LoggerMessageCodeFixProvider : CodeFixProvider
     private static Task<Document> MoveMethodToEnd(
         Document document,
         SyntaxNode root,
-        MethodDeclarationSyntax method,
-        CancellationToken cancellationToken
+        MethodDeclarationSyntax method
     )
     {
         var containingClass = method.FirstAncestorOrSelf<ClassDeclarationSyntax>();
@@ -171,7 +168,7 @@ public class LoggerMessageCodeFixProvider : CodeFixProvider
         // Add all LoggerMessage methods at the end
         newMembers.AddRange(loggerMessageMethods);
 
-        var newClass = containingClass.WithMembers(SyntaxFactory.List<MemberDeclarationSyntax>(newMembers));
+        var newClass = containingClass.WithMembers(SyntaxFactory.List(newMembers));
         var newRoot = root.ReplaceNode(containingClass, newClass);
 
         return Task.FromResult(document.WithSyntaxRoot(newRoot));
