@@ -30,7 +30,6 @@ using MQTTnet;
 using MQTTnet.Protocol;
 using Polly;
 using Polly.Retry;
-using SnapDog2.Application.Mappers;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Infrastructure.Resilience;
 using SnapDog2.Server.Clients.Commands.Config;
@@ -41,7 +40,6 @@ using SnapDog2.Server.Zones.Commands.Track;
 using SnapDog2.Server.Zones.Commands.Volume;
 using SnapDog2.Shared.Attributes;
 using SnapDog2.Shared.Configuration;
-using SnapDog2.Shared.Constants;
 using SnapDog2.Shared.Enums;
 using SnapDog2.Shared.Models;
 

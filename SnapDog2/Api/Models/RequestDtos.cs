@@ -1,7 +1,5 @@
 namespace SnapDog2.Api.Models;
 
-using System.ComponentModel.DataAnnotations;
-
 // ═══════════════════════════════════════════════════════════════════════════════
 // ZERO REQUEST DTOS - ULTIMATE SIMPLIFICATION ACHIEVED!
 // ═══════════════════════════════════════════════════════════════════════════════

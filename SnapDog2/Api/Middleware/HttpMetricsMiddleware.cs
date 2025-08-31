@@ -16,7 +16,6 @@ namespace SnapDog2.Api.Middleware;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Domain.Abstractions;
-using SnapDog2.Domain.Services;
 
 /// <summary>
 /// Middleware that records comprehensive HTTP request metrics.

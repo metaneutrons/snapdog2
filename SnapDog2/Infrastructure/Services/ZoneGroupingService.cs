@@ -12,8 +12,6 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
 using System.Diagnostics;
-using System.Linq;
-using Microsoft.Extensions.Logging;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Shared.Models;
 

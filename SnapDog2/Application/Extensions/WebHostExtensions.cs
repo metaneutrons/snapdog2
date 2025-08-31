@@ -14,7 +14,6 @@
 using System.Net;
 using System.Net.Sockets;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using SnapDog2.Shared.Configuration;
 

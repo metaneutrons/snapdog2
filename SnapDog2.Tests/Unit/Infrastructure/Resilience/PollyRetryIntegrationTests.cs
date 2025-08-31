@@ -13,10 +13,6 @@
 //
 using System.Net;
 using System.Net.Sockets;
-using FluentAssertions;
-using Microsoft.Extensions.Logging;
-using Moq;
-using Polly;
 using Polly.Timeout;
 using SnapDog2.Infrastructure.Resilience;
 using SnapDog2.Shared.Configuration;

@@ -18,7 +18,6 @@ using Cortex.Mediator.Notifications;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Server.Clients.Notifications;
-using SnapDog2.Server.Zones.Notifications;
 
 /// <summary>
 /// Handles state change notifications and persists them immediately to Redis.

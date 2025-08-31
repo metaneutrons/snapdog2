@@ -13,11 +13,9 @@
 //
 namespace SnapDog2.Infrastructure.Metrics;
 
-using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Domain.Abstractions;
-using SnapDog2.Shared.Models;
 
 /// <summary>
 /// Enterprise-grade application metrics using OpenTelemetry.

@@ -14,7 +14,6 @@
 using System.Net;
 using System.Net.Sockets;
 using Microsoft.AspNetCore.Connections;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Options;
 using SnapDog2.Shared.Configuration;
 

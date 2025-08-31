@@ -15,7 +15,6 @@ namespace SnapDog2.Server.Global.Notifications;
 
 using System.Collections.Generic;
 using Cortex.Mediator.Notifications;
-using SnapDog2.Shared.Attributes;
 
 /// <summary>
 /// Notification published when the system zones information changes.

@@ -15,7 +15,6 @@ namespace SnapDog2.Tests.Core.Validation;
 
 using FluentAssertions;
 using SnapDog2.Infrastructure.Integrations.Mqtt;
-using SnapDog2.Shared.Attributes;
 using SnapDog2.Shared.Configuration;
 using SnapDog2.Tests.Blueprint;
 using Xunit;

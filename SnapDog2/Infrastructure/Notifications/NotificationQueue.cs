@@ -14,7 +14,6 @@
 namespace SnapDog2.Infrastructure.Notifications;
 
 using System;
-using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;

@@ -12,7 +12,6 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
 using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;

@@ -23,8 +23,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Application.Behaviors;
-using SnapDog2.Domain.Abstractions;
-using SnapDog2.Server.Shared.Notifications;
 
 /// <summary>
 /// Extension methods for configuring Cortex.Mediator services with auto-discovery.

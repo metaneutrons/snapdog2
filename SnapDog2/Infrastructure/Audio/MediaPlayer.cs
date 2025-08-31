@@ -13,7 +13,6 @@
 //
 namespace SnapDog2.Infrastructure.Audio;
 
-using LibVLCSharp.Shared;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Models;

@@ -100,7 +100,7 @@ public partial class ResilientHost(IHost innerHost, ILogger<ResilientHost> logge
 
     public void Dispose()
     {
-        this._innerHost?.Dispose();
+        this._innerHost.Dispose();
     }
 
     private static bool IsExpectedStartupException(Exception ex)

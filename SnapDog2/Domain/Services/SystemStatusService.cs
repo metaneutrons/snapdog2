@@ -13,7 +13,6 @@
 //
 namespace SnapDog2.Domain.Services;
 
-using System.Diagnostics;
 using System.Reflection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;

@@ -14,7 +14,6 @@
 namespace SnapDog2.Tests.Infrastructure.Metrics;
 
 using System;
-using System.Diagnostics.Metrics;
 using Microsoft.Extensions.Logging;
 using Moq;
 using SnapDog2.Infrastructure.Metrics;

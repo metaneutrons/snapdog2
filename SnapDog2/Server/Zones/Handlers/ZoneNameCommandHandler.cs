@@ -11,10 +11,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
-using System.Threading;
-using System.Threading.Tasks;
+
 using Cortex.Mediator.Commands;
-using Microsoft.Extensions.Logging;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Server.Zones.Commands;
 using SnapDog2.Shared.Models;

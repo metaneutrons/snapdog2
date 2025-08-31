@@ -15,7 +15,6 @@ namespace SnapDog2.Api.Controllers.V1;
 
 using System.Linq;
 using Cortex.Mediator;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SnapDog2.Api.Models;
 using SnapDog2.Server.Zones.Commands.Control;
@@ -24,7 +23,6 @@ using SnapDog2.Server.Zones.Commands.Playlist;
 using SnapDog2.Server.Zones.Commands.Track;
 using SnapDog2.Server.Zones.Commands.Volume;
 using SnapDog2.Server.Zones.Queries;
-using SnapDog2.Shared.Attributes;
 using SnapDog2.Shared.Models;
 
 /// <summary>

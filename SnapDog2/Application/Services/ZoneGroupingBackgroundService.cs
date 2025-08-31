@@ -12,9 +12,6 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
 using System.Diagnostics;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Infrastructure.Metrics;

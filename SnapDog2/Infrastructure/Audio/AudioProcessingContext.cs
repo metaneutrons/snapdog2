@@ -14,7 +14,6 @@
 namespace SnapDog2.Infrastructure.Audio;
 
 using System;
-using System.Text.Json;
 using LibVLCSharp.Shared;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Shared.Configuration;
