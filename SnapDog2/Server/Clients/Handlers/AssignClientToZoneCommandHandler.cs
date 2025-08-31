@@ -59,7 +59,7 @@ public partial class AssignClientToZoneCommandHandler(
 
         // Get the current client state to capture the previous zone assignment
         var clientStateResult = await this
-            ._clientManager.GetClientAsync(request.ClientIndex, cancellationToken)
+            ._clientManager.GetClientAsync(request.ClientIndex)
             .ConfigureAwait(false);
         if (clientStateResult.IsFailure)
         {

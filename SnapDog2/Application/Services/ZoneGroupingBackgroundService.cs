@@ -41,7 +41,7 @@ public partial class ZoneGroupingBackgroundService : BackgroundService
         this._logger = logger ?? throw new ArgumentNullException(nameof(logger));
         this._serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         this._metrics = metrics ?? throw new ArgumentNullException(nameof(metrics));
-        this._config = config?.Value ?? throw new ArgumentNullException(nameof(config));
+        this._config = config.Value ?? throw new ArgumentNullException(nameof(config));
         this._reconciliationInterval = TimeSpan.FromMilliseconds(this._config.ZoneGroupingCheckIntervalMs);
     }
 

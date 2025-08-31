@@ -47,7 +47,7 @@ public partial class GetAllClientsQueryHandler(IClientManager clientManager, ILo
 
         try
         {
-            var result = await this._clientManager.GetAllClientsAsync(cancellationToken).ConfigureAwait(false);
+            var result = await this._clientManager.GetAllClientsAsync().ConfigureAwait(false);
             return result;
         }
         catch (Exception ex)

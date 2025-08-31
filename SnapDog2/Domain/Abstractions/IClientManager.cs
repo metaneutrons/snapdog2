@@ -28,14 +28,6 @@ public interface IClientManager
     Task<Result<IClient>> GetClientAsync(int clientIndex);
 
     /// <summary>
-    /// Gets a client by its ID.
-    /// </summary>
-    /// <param name="clientIndex">The client Index.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>A result containing the client state if found.</returns>
-    Task<Result<ClientState>> GetClientAsync(int clientIndex, CancellationToken cancellationToken = default);
-
-    /// <summary>
     /// Gets the state of a specific client.
     /// </summary>
     /// <param name="clientIndex">The client Index.</param>
@@ -47,13 +39,6 @@ public interface IClientManager
     /// </summary>
     /// <returns>A result containing the list of all client states.</returns>
     Task<Result<List<ClientState>>> GetAllClientsAsync();
-
-    /// <summary>
-    /// Gets the state of all known clients.
-    /// </summary>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>A result containing the list of all client states.</returns>
-    Task<Result<List<ClientState>>> GetAllClientsAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets all clients assigned to a specific zone.
