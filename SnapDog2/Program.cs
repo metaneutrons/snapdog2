@@ -593,61 +593,21 @@ static WebApplication CreateWebApplication(string[] args)
         >();
     }
 
-    // TODO: Temporarily disabled WebUI due to assembly signature issues
-    // WebUI Configuration (add after existing service registrations)
-    // if (snapDogConfig.Http.WebUiEnabled)
-    // {
-    //     builder.Services.AddRazorComponents()
-    //         .AddInteractiveServerComponents();
+    // WebUI Configuration (minimal approach without API client)
+    if (snapDogConfig.Http.WebUiEnabled)
+    {
+        builder.Services.AddRazorComponents()
+            .AddInteractiveServerComponents();
 
-    //     // Add SignalR for real-time updates
-    //     builder.Services.AddSignalR();
-    //     builder.Services.AddScoped<SnapDog2.Infrastructure.Services.IZoneUpdateService, SnapDog2.Infrastructure.Services.ZoneUpdateService>();
+        // Add SignalR for real-time updates
+        builder.Services.AddSignalR();
+        builder.Services.AddScoped<SnapDog2.Infrastructure.Services.IZoneUpdateService, SnapDog2.Infrastructure.Services.ZoneUpdateService>();
 
-    //     // Register SignalR notification handlers
-    //     builder.Services.AddScoped<
-    //         Cortex.Mediator.Notifications.INotificationHandler<SnapDog2.Server.Features.Zones.Notifications.ZonePlaybackStateChangedNotification>,
-    //         SnapDog2.Infrastructure.Notifications.ZoneStateSignalRHandler
-    //     >();
-    //     builder.Services.AddScoped<
-    //         Cortex.Mediator.Notifications.INotificationHandler<SnapDog2.Server.Features.Zones.Notifications.ZoneVolumeChangedNotification>,
-    //         SnapDog2.Infrastructure.Notifications.ZoneStateSignalRHandler
-    //     >();
-    //     builder.Services.AddScoped<
-    //         Cortex.Mediator.Notifications.INotificationHandler<SnapDog2.Server.Features.Zones.Notifications.ZoneMuteChangedNotification>,
-    //         SnapDog2.Infrastructure.Notifications.ZoneStateSignalRHandler
-    //     >();
-    //     builder.Services.AddScoped<
-    //         Cortex.Mediator.Notifications.INotificationHandler<SnapDog2.Server.Features.Zones.Notifications.ZoneTrackChangedNotification>,
-    //         SnapDog2.Infrastructure.Notifications.ZoneStateSignalRHandler
-    //     >();
+        // Add anti-forgery services
+        builder.Services.AddAntiforgery();
 
-    //     // Add anti-forgery services for enterprise security
-    //     builder.Services.AddAntiforgery();
-
-    //     // Configure forwarded headers for reverse proxy awareness
-    //     builder.Services.Configure<ForwardedHeadersOptions>(options =>
-    //     {
-    //         options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
-    //         options.KnownNetworks.Clear();
-    //         options.KnownProxies.Clear();
-    //     });
-
-    //     // TODO: Temporarily disabled WebUI API client due to assembly signature issues
-    //     // Register HttpClient for WebUI API client (specialized endpoints only)
-    //     // builder.Services.AddHttpClient<SnapDog2.WebUi.ApiClient.ISnapDogApiClient, SnapDog2.WebUi.ApiClient.SnapDogApiClient>(client =>
-    //     // {
-    //     //     var baseUrl = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development"
-    //     //         ? $"http://localhost:{snapDogConfig.Http.HttpPort}/"
-    //     //         : $"http://127.0.0.1:{snapDogConfig.Http.HttpPort}/";
-
-    //     //     client.BaseAddress = new Uri(baseUrl);
-    //     //     client.Timeout = TimeSpan.FromSeconds(30);
-    //     //     client.DefaultRequestHeaders.Add("User-Agent", "SnapDog2-WebUI/1.0");
-    //     // });
-
-    //     Log.Information("🌐 WebUI enabled with resilient API client configured");
-    // }
+        Log.Information("🌐 WebUI enabled (minimal mode)");
+    }
 
     var app = builder.Build();
 
@@ -692,8 +652,8 @@ static WebApplication CreateWebApplication(string[] args)
         }
     }
 
-    // TODO: Temporarily disabled WebUI routing due to assembly signature issues
-    // if (snapDogConfig.Http.WebUiEnabled)
+    // WebUI routing
+    if (snapDogConfig.Http.WebUiEnabled)
     {
         try
         {
@@ -703,11 +663,10 @@ static WebApplication CreateWebApplication(string[] args)
             // Add default static files middleware first
             app.UseStaticFiles();
 
-            // TODO: Temporarily disabled due to assembly signature issues
             // Configure embedded assets
-            // var assetsAssembly = typeof(SnapDog2.WebUi.Assets.Marker).Assembly;
-            // var embedded = new Microsoft.Extensions.FileProviders.ManifestEmbeddedFileProvider(assetsAssembly, "EmbeddedWebRoot");
-            // app.UseStaticFiles(new StaticFileOptions { FileProvider = embedded });
+            var assetsAssembly = typeof(SnapDog2.WebUi.Assets.Marker).Assembly;
+            var embedded = new Microsoft.Extensions.FileProviders.ManifestEmbeddedFileProvider(assetsAssembly, "EmbeddedWebRoot");
+            app.UseStaticFiles(new StaticFileOptions { FileProvider = embedded });
 
             // Configure path base for reverse proxy
             if (!string.IsNullOrEmpty(snapDogConfig.Http.WebUiPath) && snapDogConfig.Http.WebUiPath != "/")
@@ -718,10 +677,9 @@ static WebApplication CreateWebApplication(string[] args)
             // Add anti-forgery middleware
             app.UseAntiforgery();
 
-            // TODO: Temporarily disabled due to assembly signature issues
             // Map Razor components with base path
-            // app.MapRazorComponents<SnapDog2.WebUi.App>()
-            //     .AddInteractiveServerRenderMode();
+            app.MapRazorComponents<SnapDog2.WebUi.App>()
+                .AddInteractiveServerRenderMode();
 
             // Map SignalR hub
             app.MapHub<SnapDog2.Infrastructure.Hubs.ZoneHub>("/zonehub");

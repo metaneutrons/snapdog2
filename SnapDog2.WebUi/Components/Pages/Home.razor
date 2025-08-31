@@ -1,209 +1,153 @@
 @page "/"
-@using SnapDog2.WebUi.ApiClient
-@* @inject ISnapDogApiClient ApiClient *@
 @rendermode InteractiveServer
 
-<PageTitle>SnapDog2</PageTitle>
+<PageTitle>SnapDog2 - Multi-Room Audio Control</PageTitle>
 
-<h1 class="text-h1">SnapDog2 Multi-Room Audio</h1>
+<div class="container">
+    <header class="header">
+        <h1>🎵 SnapDog2</h1>
+        <p>Multi-Room Audio Control System</p>
+    </header>
 
-<div class="zones-container">
-    @if (zones != null && clients != null)
-    {
-        @foreach (var zone in zones)
-        {
-            <ZoneSection Zone="zone" 
-                        Clients="GetClientsForZone(zone.Index)" 
-                        AllClients="clients"
-                        OnClientMoved="HandleClientMoved"
-                        OnVolumeChanged="HandleVolumeChanged"
-                        OnMuteToggled="HandleMuteToggled"
-                        OnPlayPause="HandlePlayPause"
-                        OnNextTrack="HandleNextTrack"
-                        OnPreviousTrack="HandlePreviousTrack"
-                        @key="zone.Index" />
-        }
-
-        @if (GetUnassignedClients().Any())
-        {
-            <div class="zone-section">
-                <h2 class="text-h2">Unassigned Clients</h2>
-                <div class="clients-zone">
-                    <div class="clients-grid">
-                        @foreach (var client in GetUnassignedClients())
-                        {
-                            <ClientChip Client="client" 
-                                       OnDragStart="HandleUnassignedClientDragStart"
-                                       @key="client.Index" />
-                        }
-                    </div>
-                    <p class="text-small" style="color: var(--color-text-secondary); margin-top: 1rem;">
-                        Drag clients from here to assign them to zones
-                    </p>
+    <main class="main-content">
+        <div class="zones-grid">
+            <div class="zone-card">
+                <h3>🛋️ Living Room</h3>
+                <div class="zone-controls">
+                    <button class="btn btn-primary">▶️ Play</button>
+                    <button class="btn btn-secondary">⏸️ Pause</button>
+                    <input type="range" min="0" max="100" value="50" class="volume-slider" />
                 </div>
             </div>
-        }
-    }
-    else if (isLoading)
-    {
-        <div class="loading">Loading zones and clients...</div>
-    }
-    else if (error != null)
-    {
-        <div class="error">Error: @error</div>
-        <button class="control-button" @onclick="LoadData" style="margin-top: 1rem;">
-            Retry
-        </button>
-    }
+
+            <div class="zone-card">
+                <h3>🍽️ Kitchen</h3>
+                <div class="zone-controls">
+                    <button class="btn btn-primary">▶️ Play</button>
+                    <button class="btn btn-secondary">⏸️ Pause</button>
+                    <input type="range" min="0" max="100" value="30" class="volume-slider" />
+                </div>
+            </div>
+
+            <div class="zone-card">
+                <h3>🛏️ Bedroom</h3>
+                <div class="zone-controls">
+                    <button class="btn btn-primary">▶️ Play</button>
+                    <button class="btn btn-secondary">⏸️ Pause</button>
+                    <input type="range" min="0" max="100" value="20" class="volume-slider" />
+                </div>
+            </div>
+        </div>
+
+        <div class="status-section">
+            <h2>System Status</h2>
+            <div class="status-grid">
+                <div class="status-card">
+                    <h4>Zones</h4>
+                    <span class="status-value">3</span>
+                </div>
+                <div class="status-card">
+                    <h4>Active</h4>
+                    <span class="status-value">1</span>
+                </div>
+                <div class="status-card">
+                    <h4>Clients</h4>
+                    <span class="status-value">3</span>
+                </div>
+            </div>
+        </div>
+    </main>
 </div>
 
-@code {
-    private ZoneState[]? zones;
-    private ClientState[]? clients;
-    private bool isLoading = true;
-    private string? error;
-
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadData();
+<style>
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        font-family: 'Orbitron', monospace;
+        background: #0a0a0a;
+        color: #fff;
+        min-height: 100vh;
     }
 
-    private async Task LoadData()
-    {
-        try
-        {
-            isLoading = true;
-            error = null;
-
-            // TODO: Temporarily disabled due to assembly signature issues
-            // var zonesTask = ApiClient.GetAllZonesAsync();
-            // var clientsTask = ApiClient.GetAllClientsAsync();
-
-            await Task.WhenAll(zonesTask, clientsTask);
-
-            zones = await zonesTask;
-            clients = await clientsTask;
-        }
-        catch (Exception ex)
-        {
-            error = ex.Message;
-        }
-        finally
-        {
-            isLoading = false;
-            StateHasChanged();
-        }
+    .header {
+        text-align: center;
+        margin-bottom: 40px;
+        color: #00ff88;
     }
 
-    private ClientState[] GetClientsForZone(int zoneIndex)
-    {
-        if (clients == null) return Array.Empty<ClientState>();
-        return clients.Where(c => c.ZoneIndex == zoneIndex).ToArray();
+    .zones-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 40px;
     }
 
-    private ClientState[] GetUnassignedClients()
-    {
-        if (clients == null) return Array.Empty<ClientState>();
-        return clients.Where(c => c.ZoneIndex == null).ToArray();
+    .zone-card {
+        background: #1a1a1a;
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 20px;
+        color: #fff;
     }
 
-    private void HandleUnassignedClientDragStart(int clientIndex)
-    {
-        // This is handled by the individual ClientChip components
-        // The drag data is managed at the ZoneSection level
+    .zone-controls {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-top: 15px;
     }
 
-    private async Task HandleClientMoved((int clientIndex, int targetZoneIndex) args)
-    {
-        try
-        {
-            // TODO: Temporarily disabled due to assembly signature issues
-            // await ApiClient.AssignClientToZoneAsync(args.clientIndex, args.targetZoneIndex);
-            await LoadData(); // Refresh data after successful move
-        }
-        catch (Exception ex)
-        {
-            error = $"Failed to move client: {ex.Message}";
-            StateHasChanged();
-        }
+    .btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-family: inherit;
     }
 
-    private async Task HandleVolumeChanged((int zoneIndex, int volume) args)
-    {
-        try
-        {
-            // TODO: Temporarily disabled due to assembly signature issues
-            // await ApiClient.SetZoneVolumeAsync(args.zoneIndex, args.volume);
-        }
-        catch (Exception ex)
-        {
-            error = $"Failed to set volume: {ex.Message}";
-            StateHasChanged();
-        }
+    .btn-primary {
+        background: #00ff88;
+        color: #000;
     }
 
-    private async Task HandleMuteToggled(int zoneIndex)
-    {
-        try
-        {
-            // TODO: Temporarily disabled due to assembly signature issues
-            // await ApiClient.ToggleZoneMuteAsync(zoneIndex);
-            await LoadData(); // Refresh to get updated mute state
-        }
-        catch (Exception ex)
-        {
-            error = $"Failed to toggle mute: {ex.Message}";
-            StateHasChanged();
-        }
+    .btn-secondary {
+        background: #666;
+        color: #fff;
     }
 
-    private async Task HandlePlayPause((int zoneIndex, bool isPlaying) args)
-    {
-        try
-        {
-            if (args.isPlaying)
-                // TODO: Temporarily disabled due to assembly signature issues
-                // await ApiClient.PauseZoneAsync(args.zoneIndex);
-            else
-                // TODO: Temporarily disabled due to assembly signature issues
-                // await ApiClient.PlayZoneAsync(args.zoneIndex);
-            
-            await LoadData(); // Refresh to get updated play state
-        }
-        catch (Exception ex)
-        {
-            error = $"Failed to toggle playback: {ex.Message}";
-            StateHasChanged();
-        }
+    .volume-slider {
+        flex: 1;
+        margin-left: 10px;
     }
 
-    private async Task HandleNextTrack(int zoneIndex)
-    {
-        try
-        {
-            // TODO: Temporarily disabled due to assembly signature issues
-            // await ApiClient.NextTrackAsync(zoneIndex);
-            await LoadData(); // Refresh to get updated track info
-        }
-        catch (Exception ex)
-        {
-            error = $"Failed to skip track: {ex.Message}";
-            StateHasChanged();
-        }
+    .status-section {
+        background: #1a1a1a;
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 20px;
+        color: #fff;
     }
 
-    private async Task HandlePreviousTrack(int zoneIndex)
-    {
-        try
-        {
-            // TODO: Temporarily disabled due to assembly signature issues
-            // await ApiClient.PreviousTrackAsync(zoneIndex);
-            await LoadData(); // Refresh to get updated track info
-        }
-        catch (Exception ex)
-        {
-            error = $"Failed to go to previous track: {ex.Message}";
-            StateHasChanged();
-        }
+    .status-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
     }
-}
+
+    .status-card {
+        text-align: center;
+        padding: 15px;
+        background: #2a2a2a;
+        border-radius: 4px;
+    }
+
+    .status-value {
+        display: block;
+        font-size: 2em;
+        font-weight: bold;
+        color: #00ff88;
+        margin-top: 5px;
+    }
+</style>
