@@ -25,6 +25,137 @@ make dev
 
 **Access everything at:** <http://localhost:8000> 🎉
 
+### Development Dashboard & Monitoring
+
+The development environment provides a **unified dashboard** through Caddy reverse proxy:
+
+| Service | URL | Purpose |
+|---------|-----|---------|
+| 🎵 **SnapDog2 WebUI** | <http://localhost:8000/webui> | Main application interface |
+| 📚 **API Documentation** | <http://localhost:8000/swagger> | Interactive API explorer |
+| 🎵 **Snapcast Server** | <http://localhost:8000/server/> | Multi-room audio server |
+| 💿 **Navidrome Music** | <http://localhost:8000/music/> | Music library & streaming |
+| 🛋️ **Living Room Client** | <http://localhost:8000/clients/living-room/> | Audio client control |
+| 🍽️ **Kitchen Client** | <http://localhost:8000/clients/kitchen/> | Audio client control |
+| 🛏️ **Bedroom Client** | <http://localhost:8000/clients/bedroom/> | Audio client control |
+| 📊 **Grafana Dashboards** | <http://localhost:8000/grafana/> | Metrics & monitoring |
+
+### Direct Service Access (Development)
+
+For debugging and direct access:
+
+| Service | Port | Internal URL |
+|---------|------|--------------|
+| SnapDog2 API | 5555 | <http://localhost:5555> |
+| Grafana | 3301 | <http://localhost:3301> |
+| MQTT Broker | 1883 | `mqtt://localhost:1883` |
+| Snapcast Server | 1705 | `tcp://localhost:1705` |
+
+### Container Architecture
+
+```mermaid
+graph TB
+    subgraph "Host: localhost:8000"
+        CADDY[🌐 Caddy Reverse Proxy]
+    end
+    
+    subgraph "Application Services"
+        APP[🎵 SnapDog2<br/>:5555]
+        WEBUI[💻 WebUI<br/>Embedded]
+    end
+    
+    subgraph "Audio Services"
+        SNAP[📻 Snapcast Server<br/>:1705]
+        NAVI[💿 Navidrome<br/>:4533]
+        LIVING[🛋️ Living Room Client]
+        KITCHEN[🍽️ Kitchen Client]
+        BEDROOM[🛏️ Bedroom Client]
+    end
+    
+    subgraph "Infrastructure"
+        MQTT[📡 MQTT Broker<br/>:1883]
+        REDIS[🗄️ Redis<br/>:6379]
+        KNX[🏠 KNX Gateway<br/>:6720]
+    end
+    
+    subgraph "Monitoring"
+        GRAFANA[📊 Grafana<br/>:3000]
+        OTEL[📊 OTEL Collector<br/>:4317]
+    end
+    
+    CADDY --> APP
+    CADDY --> SNAP
+    CADDY --> NAVI
+    CADDY --> LIVING
+    CADDY --> KITCHEN
+    CADDY --> BEDROOM
+    CADDY --> GRAFANA
+    
+    APP --> WEBUI
+    APP --> SNAP
+    APP --> MQTT
+    APP --> REDIS
+    APP --> KNX
+    APP --> OTEL
+```
+
+### Development Workflow
+
+#### Daily Development
+```bash
+# Start everything
+./dev.sh start
+
+# Check what's running
+./dev.sh status
+./dev.sh urls
+
+# Monitor logs (all services)
+./dev.sh logs
+
+# Monitor specific service
+docker logs snapdog-app-1 -f
+
+# Quick app restart (preserves other services)
+./dev.sh restart-app
+
+# Full restart
+./dev.sh restart
+
+# Stop everything
+./dev.sh stop
+```
+
+#### Debugging & Troubleshooting
+
+**Check Service Health:**
+```bash
+# Overall status
+./dev.sh status
+
+# Individual service logs
+docker logs snapdog-app-1 -f          # Main app
+docker logs snapdog-caddy-1 -f        # Reverse proxy
+docker logs snapdog-snapcast-server-1 # Audio server
+```
+
+**Common Issues:**
+- **502 Bad Gateway**: App container not responding → `./dev.sh restart-app`
+- **Port conflicts**: Check if ports 8000/5555 are free → `lsof -i :8000`
+- **Build errors**: Clean rebuild → `./dev.sh clean && ./dev.sh start`
+
+**Network Debugging:**
+```bash
+# Test direct app access
+curl http://localhost:5555/health
+
+# Test reverse proxy
+curl http://localhost:8000/api/health
+
+# Check container networking
+docker network inspect snapdog_default
+```
+
 ## Code Quality & Git Hooks
 
 This project uses **Husky.Net** for git hooks and **dotnet format** for code formatting.
