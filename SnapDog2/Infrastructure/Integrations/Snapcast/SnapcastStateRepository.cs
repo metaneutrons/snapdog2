@@ -17,8 +17,8 @@ using System.Collections.Concurrent;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using SnapcastClient.Models;
-using SnapDog2.Core.Abstractions;
-using SnapDog2.Core.Configuration;
+using SnapDog2.Domain.Abstractions;
+using SnapDog2.Shared.Configuration;
 
 /// <summary>
 /// Thread-safe repository holding the last known state received from Snapcast server.

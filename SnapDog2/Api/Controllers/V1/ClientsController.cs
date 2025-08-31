@@ -17,10 +17,10 @@ using Cortex.Mediator;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SnapDog2.Api.Models;
-using SnapDog2.Core.Models;
-using SnapDog2.Server.Features.Clients.Commands.Config;
-using SnapDog2.Server.Features.Clients.Commands.Volume;
-using SnapDog2.Server.Features.Clients.Queries;
+using SnapDog2.Server.Clients.Commands.Config;
+using SnapDog2.Server.Clients.Commands.Volume;
+using SnapDog2.Server.Clients.Queries;
+using SnapDog2.Shared.Models;
 
 /// <summary>
 /// Modern API controller for Snapcast client management.

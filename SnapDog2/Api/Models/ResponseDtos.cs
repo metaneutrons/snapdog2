@@ -13,7 +13,7 @@
 //
 namespace SnapDog2.Api.Models;
 
-using SnapDog2.Core.Models;
+using SnapDog2.Shared.Models;
 
 /// <summary>
 /// Paginated collection with metadata.

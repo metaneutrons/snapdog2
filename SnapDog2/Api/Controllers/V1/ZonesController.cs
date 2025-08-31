@@ -18,14 +18,14 @@ using Cortex.Mediator;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SnapDog2.Api.Models;
-using SnapDog2.Core.Attributes;
-using SnapDog2.Core.Models;
-using SnapDog2.Server.Features.Zones.Commands.Control;
-using SnapDog2.Server.Features.Zones.Commands.Playback;
-using SnapDog2.Server.Features.Zones.Commands.Playlist;
-using SnapDog2.Server.Features.Zones.Commands.Track;
-using SnapDog2.Server.Features.Zones.Commands.Volume;
-using SnapDog2.Server.Features.Zones.Queries;
+using SnapDog2.Server.Zones.Commands.Control;
+using SnapDog2.Server.Zones.Commands.Playback;
+using SnapDog2.Server.Zones.Commands.Playlist;
+using SnapDog2.Server.Zones.Commands.Track;
+using SnapDog2.Server.Zones.Commands.Volume;
+using SnapDog2.Server.Zones.Queries;
+using SnapDog2.Shared.Attributes;
+using SnapDog2.Shared.Models;
 
 /// <summary>
 /// Modern simplified zones controller with direct primitive responses.
@@ -1105,7 +1105,7 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
             return this.NotFound($"Zone {zoneIndex} not found");
         }
 
-        return this.Ok(result.Value!.PlaybackState == SnapDog2.Core.Enums.PlaybackState.Playing);
+        return this.Ok(result.Value!.PlaybackState == SnapDog2.Shared.Enums.PlaybackState.Playing);
     }
 
     /// <summary>

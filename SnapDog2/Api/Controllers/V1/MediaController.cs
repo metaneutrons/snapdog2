@@ -18,9 +18,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using SnapDog2.Api.Models;
-using SnapDog2.Core.Models;
-using SnapDog2.Server.Features.Playlists.Handlers;
-using SnapDog2.Server.Features.Playlists.Queries;
+using SnapDog2.Server.Playlists.Handlers;
+using SnapDog2.Server.Playlists.Queries;
+using SnapDog2.Shared.Models;
 
 /// <summary>
 /// Media controller for managing playlists and tracks.

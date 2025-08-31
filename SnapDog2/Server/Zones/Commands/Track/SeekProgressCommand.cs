@@ -1,0 +1,43 @@
+//
+// SnapDog
+// The Snapcast-based Smart Home Audio System with MQTT & KNX integration
+// Copyright (C) 2025 Fabian Schmieder
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <https://www.gnu.org/licenses/>.
+//
+namespace SnapDog2.Server.Zones.Commands.Track;
+
+using Cortex.Mediator.Commands;
+using SnapDog2.Shared.Attributes;
+using SnapDog2.Shared.Enums;
+using SnapDog2.Shared.Models;
+
+/// <summary>
+/// Command to seek to a specific progress percentage in the current track.
+/// </summary>
+[CommandId("TRACK_PROGRESS")]
+[MqttTopic("snapdog/zones/{zoneIndex}/track/progress/set")]
+public record SeekProgressCommand : ICommand<Result>
+{
+    /// <summary>
+    /// Gets the ID of the target zone.
+    /// </summary>
+    public required int ZoneIndex { get; init; }
+
+    /// <summary>
+    /// Gets the progress percentage to seek to (0.0-1.0).
+    /// </summary>
+    public required float Progress { get; init; }
+
+    /// <summary>
+    /// Gets the source that initiated the command.
+    /// Used for tracking command origin and audit purposes.
+    /// </summary>
+    public CommandSource Source { get; init; } = CommandSource.Internal;
+}

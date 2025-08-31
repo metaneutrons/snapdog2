@@ -1,0 +1,75 @@
+//
+// SnapDog
+// The Snapcast-based Smart Home Audio System with MQTT & KNX integration
+// Copyright (C) 2025 Fabian Schmieder
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <https://www.gnu.org/licenses/>.
+//
+namespace SnapDog2.Shared.Constants;
+
+using SnapDog2.Server.Clients.Commands.Config;
+using SnapDog2.Server.Clients.Commands.Volume;
+using SnapDog2.Server.Zones.Commands.Playback;
+using SnapDog2.Server.Zones.Commands.Playlist;
+using SnapDog2.Server.Zones.Commands.Track;
+using SnapDog2.Server.Zones.Commands.Volume;
+using SnapDog2.Shared.Attributes;
+
+/// <summary>
+/// Strongly-typed constants for CommandId values.
+/// These are derived from the CommandIdAttribute on command classes,
+/// ensuring compile-time safety and eliminating hardcoded strings.
+/// </summary>
+public static class CommandIds
+{
+    // Zone Playback Commands
+    public static readonly string Play = CommandIdAttribute.GetCommandId<PlayCommand>();
+    public static readonly string Pause = CommandIdAttribute.GetCommandId<PauseCommand>();
+    public static readonly string Stop = CommandIdAttribute.GetCommandId<StopCommand>();
+
+    // Zone Volume Commands
+    public static readonly string Volume = CommandIdAttribute.GetCommandId<SetZoneVolumeCommand>();
+    public static readonly string VolumeUp = CommandIdAttribute.GetCommandId<VolumeUpCommand>();
+    public static readonly string VolumeDown = CommandIdAttribute.GetCommandId<VolumeDownCommand>();
+    public static readonly string Mute = CommandIdAttribute.GetCommandId<SetZoneMuteCommand>();
+    public static readonly string MuteToggle = CommandIdAttribute.GetCommandId<ToggleZoneMuteCommand>();
+
+    // Zone Track Commands
+    public static readonly string Track = CommandIdAttribute.GetCommandId<SetTrackCommand>();
+    public static readonly string TrackNext = CommandIdAttribute.GetCommandId<NextTrackCommand>();
+    public static readonly string TrackPrevious = CommandIdAttribute.GetCommandId<PreviousTrackCommand>();
+    public static readonly string TrackRepeat = CommandIdAttribute.GetCommandId<SetTrackRepeatCommand>();
+    public static readonly string TrackRepeatToggle = CommandIdAttribute.GetCommandId<ToggleTrackRepeatCommand>();
+    public static readonly string TrackSeekPosition = CommandIdAttribute.GetCommandId<SeekPositionCommand>();
+    public static readonly string TrackSeekProgress = CommandIdAttribute.GetCommandId<SeekProgressCommand>();
+    public static readonly string TrackPlayByIndex = CommandIdAttribute.GetCommandId<PlayTrackByIndexCommand>();
+    public static readonly string TrackPlayFromPlaylist = CommandIdAttribute.GetCommandId<PlayTrackFromPlaylistCommand>();
+    public static readonly string TrackPlayUrl = CommandIdAttribute.GetCommandId<PlayUrlCommand>();
+
+    // Zone Playlist Commands
+    public static readonly string Playlist = CommandIdAttribute.GetCommandId<SetPlaylistCommand>();
+    public static readonly string PlaylistNext = CommandIdAttribute.GetCommandId<NextPlaylistCommand>();
+    public static readonly string PlaylistPrevious = CommandIdAttribute.GetCommandId<PreviousPlaylistCommand>();
+    public static readonly string PlaylistRepeat = CommandIdAttribute.GetCommandId<SetPlaylistRepeatCommand>();
+    public static readonly string PlaylistRepeatToggle = CommandIdAttribute.GetCommandId<TogglePlaylistRepeatCommand>();
+    public static readonly string PlaylistShuffle = CommandIdAttribute.GetCommandId<SetPlaylistShuffleCommand>();
+    public static readonly string PlaylistShuffleToggle =
+        CommandIdAttribute.GetCommandId<TogglePlaylistShuffleCommand>();
+
+    // Client Volume Commands
+    public static readonly string ClientVolume = CommandIdAttribute.GetCommandId<SetClientVolumeCommand>();
+    public static readonly string ClientVolumeUp = CommandIdAttribute.GetCommandId<ClientVolumeUpCommand>();
+    public static readonly string ClientVolumeDown = CommandIdAttribute.GetCommandId<ClientVolumeDownCommand>();
+    public static readonly string ClientMute = CommandIdAttribute.GetCommandId<SetClientMuteCommand>();
+    public static readonly string ClientMuteToggle = CommandIdAttribute.GetCommandId<ToggleClientMuteCommand>();
+
+    // Client Configuration Commands
+    public static readonly string ClientLatency = CommandIdAttribute.GetCommandId<SetClientLatencyCommand>();
+    public static readonly string ClientZone = CommandIdAttribute.GetCommandId<AssignClientToZoneCommand>();
+}

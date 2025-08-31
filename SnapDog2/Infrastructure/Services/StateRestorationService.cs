@@ -18,10 +18,10 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using SnapDog2.Core.Abstractions;
-using SnapDog2.Core.Configuration;
-using SnapDog2.Core.Enums;
-using SnapDog2.Core.Models;
+using SnapDog2.Domain.Abstractions;
+using SnapDog2.Shared.Configuration;
+using SnapDog2.Shared.Enums;
+using SnapDog2.Shared.Models;
 
 /// <summary>
 /// Background service that restores persisted state on application startup.

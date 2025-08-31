@@ -14,8 +14,8 @@
 namespace SnapDog2.Infrastructure.HealthChecks;
 
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using SnapDog2.Core.Abstractions;
-using SnapDog2.Core.Enums;
+using SnapDog2.Domain.Abstractions;
+using SnapDog2.Shared.Enums;
 
 /// <summary>
 /// Health check for KNX integration using Falcon SDK connection status.

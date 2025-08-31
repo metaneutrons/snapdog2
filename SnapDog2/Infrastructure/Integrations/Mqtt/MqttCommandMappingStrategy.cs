@@ -14,9 +14,9 @@
 namespace SnapDog2.Infrastructure.Integrations.Mqtt;
 
 using Cortex.Mediator.Commands;
-using SnapDog2.Core.Enums;
-using SnapDog2.Core.Models;
-using SnapDog2.Server.Features.Shared.Factories;
+using SnapDog2.Server.Shared.Factories;
+using SnapDog2.Shared.Enums;
+using SnapDog2.Shared.Models;
 
 /// <summary>
 /// Delegate for mapping MQTT commands to Cortex.Mediator commands.

@@ -21,8 +21,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SnapDog2.Api.Models;
-using SnapDog2.Core.Models;
-using SnapDog2.Server.Features.Global.Queries;
+using SnapDog2.Server.Global.Queries;
+using SnapDog2.Shared.Models;
 
 /// <summary>
 /// Controller for system-wide information endpoints.
@@ -59,7 +59,7 @@ public partial class SystemController(
             this.LogGettingSystemStatus();
 
             var handler =
-                this._serviceProvider.GetService<Server.Features.Global.Handlers.GetSystemStatusQueryHandler>();
+                this._serviceProvider.GetService<Server.Global.Handlers.GetSystemStatusQueryHandler>();
             if (handler == null)
             {
                 this.LogCriticalHandlerNotFound("GetSystemStatusQueryHandler");
@@ -112,7 +112,7 @@ public partial class SystemController(
             this.LogGettingSystemErrors();
 
             var handler =
-                this._serviceProvider.GetService<Server.Features.Global.Handlers.GetErrorStatusQueryHandler>();
+                this._serviceProvider.GetService<Server.Global.Handlers.GetErrorStatusQueryHandler>();
             if (handler == null)
             {
                 this.LogCriticalHandlerNotFound("GetErrorStatusQueryHandler");
@@ -169,7 +169,7 @@ public partial class SystemController(
             this.LogGettingSystemVersion();
 
             var handler =
-                this._serviceProvider.GetService<Server.Features.Global.Handlers.GetVersionInfoQueryHandler>();
+                this._serviceProvider.GetService<Server.Global.Handlers.GetVersionInfoQueryHandler>();
             if (handler == null)
             {
                 this.LogCriticalHandlerNotFound("GetVersionInfoQueryHandler");
@@ -220,7 +220,7 @@ public partial class SystemController(
             this.LogGettingSystemStatistics();
 
             var handler =
-                this._serviceProvider.GetService<Server.Features.Global.Handlers.GetServerStatsQueryHandler>();
+                this._serviceProvider.GetService<Server.Global.Handlers.GetServerStatsQueryHandler>();
             if (handler == null)
             {
                 this.LogCriticalHandlerNotFound("GetServerStatsQueryHandler");

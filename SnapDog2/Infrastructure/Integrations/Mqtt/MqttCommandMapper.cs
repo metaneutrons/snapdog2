@@ -15,9 +15,9 @@ namespace SnapDog2.Infrastructure.Integrations.Mqtt;
 
 using Cortex.Mediator.Commands;
 using Microsoft.Extensions.Logging;
-using SnapDog2.Core.Configuration;
-using SnapDog2.Core.Models;
-using SnapDog2.Server.Features.Shared.Factories;
+using SnapDog2.Server.Shared.Factories;
+using SnapDog2.Shared.Configuration;
+using SnapDog2.Shared.Models;
 
 /// <summary>
 /// Modern MQTT command mapper using constants, dictionaries, and type-safe parsing.

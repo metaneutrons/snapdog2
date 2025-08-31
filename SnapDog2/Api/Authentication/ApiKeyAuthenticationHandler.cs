@@ -17,83 +17,65 @@ using System.Security.Claims;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
+using SnapDog2.Shared.Configuration;
 
 /// <summary>
-/// Authentication handler for API key authentication.
+/// API Key authentication handler that validates requests against configured API keys.
+/// Supports both header-based and query parameter-based API key authentication.
 /// </summary>
-/// <remarks>
-/// Initializes a new instance of the <see cref="ApiKeyAuthenticationHandler"/> class.
-/// </remarks>
 public class ApiKeyAuthenticationHandler(
-    IOptionsMonitor<ApiKeyAuthenticationSchemeOptions> options,
+    IOptionsMonitor<AuthenticationSchemeOptions> options,
     ILoggerFactory logger,
     UrlEncoder encoder,
-    IConfiguration configuration
-) : AuthenticationHandler<ApiKeyAuthenticationSchemeOptions>(options, logger, encoder)
+    HttpConfig httpConfig
+) : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
     private const string ApiKeyHeaderName = "X-API-Key";
-    private readonly IConfiguration _configuration = configuration;
+    private const string ApiKeyQueryParameter = "apikey";
 
-    /// <inheritdoc/>
+    private readonly HttpConfig _httpConfig = httpConfig;
+
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        if (!this.Request.Headers.TryGetValue(ApiKeyHeaderName, out var apiKeyHeaderValues))
+        // Try to get API key from header first
+        string? apiKey = this.Request.Headers[ApiKeyHeaderName].FirstOrDefault();
+
+        // If not in header, try query parameter
+        if (string.IsNullOrEmpty(apiKey))
         {
-            return Task.FromResult(AuthenticateResult.NoResult());
+            apiKey = this.Request.Query[ApiKeyQueryParameter].FirstOrDefault();
         }
 
-        var providedApiKey = apiKeyHeaderValues.FirstOrDefault();
-
-        if (string.IsNullOrWhiteSpace(providedApiKey))
+        // If no API key provided
+        if (string.IsNullOrEmpty(apiKey))
         {
-            return Task.FromResult(AuthenticateResult.NoResult());
+            return Task.FromResult(AuthenticateResult.Fail("API key not provided"));
         }
 
-        if (this.IsValidApiKey(providedApiKey))
+        // Validate API key against configured keys
+        if (!this._httpConfig.ApiKeys.Contains(apiKey))
         {
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.Name, "ApiKeyUser"),
-                new Claim(ClaimTypes.NameIdentifier, providedApiKey),
-            };
-
-            var identity = new ClaimsIdentity(claims, this.Scheme.Name);
-            var principal = new ClaimsPrincipal(identity);
-            var ticket = new AuthenticationTicket(principal, this.Scheme.Name);
-
-            return Task.FromResult(AuthenticateResult.Success(ticket));
+            this.Logger.LogWarning(
+                "Invalid API key attempted: {ApiKey}",
+                string.Concat(apiKey.AsSpan(0, Math.Min(8, apiKey.Length)), "...")
+            );
+            return Task.FromResult(AuthenticateResult.Fail("Invalid API key"));
         }
 
-        return Task.FromResult(AuthenticateResult.Fail("Invalid API Key"));
-    }
-
-    private bool IsValidApiKey(string providedApiKey)
-    {
-        // Check against configured API keys
-        var configuredKeys = new List<string>();
-
-        // Load API keys from configuration
-        for (var i = 1; i <= 10; i++) // Support up to 10 API keys
+        // Create authenticated identity
+        var claims = new[]
         {
-            var key = this._configuration[$"SNAPDOG_API_APIKEY_{i}"];
-            if (!string.IsNullOrEmpty(key))
-            {
-                configuredKeys.Add(key);
-            }
-        }
+            new Claim(ClaimTypes.Name, "ApiKeyUser"),
+            new Claim(ClaimTypes.NameIdentifier, $"apikey-{apiKey.GetHashCode():X}"),
+            new Claim("scope", "api"),
+            new Claim("auth_method", "apikey"),
+        };
 
-        // Fallback to default key if none configured
-        if (configuredKeys.Count == 0)
-        {
-            var defaultKey = this._configuration["SNAPDOG_API_APIKEY"] ?? "snapdog-dev-key";
-            configuredKeys.Add(defaultKey);
-        }
+        var identity = new ClaimsIdentity(claims, this.Scheme.Name);
+        var principal = new ClaimsPrincipal(identity);
+        var ticket = new AuthenticationTicket(principal, this.Scheme.Name);
 
-        return configuredKeys.Contains(providedApiKey);
+        this.Logger.LogDebug("API key authentication successful");
+        return Task.FromResult(AuthenticateResult.Success(ticket));
     }
 }
-
-/// <summary>
-/// Options for API key authentication scheme.
-/// </summary>
-public class ApiKeyAuthenticationSchemeOptions : AuthenticationSchemeOptions { }

@@ -17,10 +17,10 @@ using System.Reflection;
 using System.Text.Json;
 using Cortex.Mediator.Commands;
 using Microsoft.Extensions.Logging;
-using SnapDog2.Core.Attributes;
-using SnapDog2.Core.Configuration;
-using SnapDog2.Core.Enums;
-using SnapDog2.Core.Models;
+using SnapDog2.Shared.Attributes;
+using SnapDog2.Shared.Configuration;
+using SnapDog2.Shared.Enums;
+using SnapDog2.Shared.Models;
 
 /// <summary>
 /// Attribute-based MQTT command mapper that uses MqttTopicAttribute decorations

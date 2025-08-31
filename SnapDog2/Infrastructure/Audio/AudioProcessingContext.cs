@@ -17,8 +17,8 @@ using System;
 using System.Text.Json;
 using LibVLCSharp.Shared;
 using Microsoft.Extensions.Logging;
-using SnapDog2.Core.Configuration;
-using SnapDog2.Core.Models;
+using SnapDog2.Shared.Configuration;
+using SnapDog2.Shared.Models;
 
 /// <summary>
 /// Event arguments for position changes.
@@ -66,7 +66,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
     public MetadataManager MetadataManager { get; }
 
     public AudioProcessingContext(
-        SnapDog2.Core.Configuration.AudioConfig config,
+        SnapDog2.Shared.Configuration.AudioConfig config,
         ILogger logger,
         ILogger<MetadataManager> metadataLogger,
         string? tempDirectory = null

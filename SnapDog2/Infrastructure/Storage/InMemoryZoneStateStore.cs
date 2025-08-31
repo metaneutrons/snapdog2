@@ -14,8 +14,8 @@
 namespace SnapDog2.Infrastructure.Storage;
 
 using System.Collections.Concurrent;
-using SnapDog2.Core.Abstractions;
-using SnapDog2.Core.Models;
+using SnapDog2.Domain.Abstractions;
+using SnapDog2.Shared.Models;
 
 /// <summary>
 /// In-memory implementation of zone state storage.

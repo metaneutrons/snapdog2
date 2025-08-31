@@ -21,24 +21,24 @@ using Cortex.Mediator;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using SnapDog2.Core.Abstractions;
-using SnapDog2.Core.Configuration;
-using SnapDog2.Core.Models;
-using SnapDog2.Server.Features.Zones.Notifications;
+using SnapDog2.Domain.Abstractions;
+using SnapDog2.Server.Zones.Notifications;
+using SnapDog2.Shared.Configuration;
+using SnapDog2.Shared.Models;
 
 /// <summary>
 /// LibVLC-based implementation of media player service.
 /// Provides cross-platform audio streaming with LibVLC implementation.
 /// </summary>
 public sealed partial class MediaPlayerService(
-    IOptions<SnapDog2.Core.Configuration.AudioConfig> config,
+    IOptions<SnapDog2.Shared.Configuration.AudioConfig> config,
     ILogger<MediaPlayerService> logger,
     ILoggerFactory loggerFactory,
     IServiceScopeFactory serviceScopeFactory,
     IEnumerable<ZoneConfig> zoneConfigs
 ) : IMediaPlayerService, IAsyncDisposable, IDisposable
 {
-    private readonly SnapDog2.Core.Configuration.AudioConfig _config =
+    private readonly SnapDog2.Shared.Configuration.AudioConfig _config =
         config?.Value ?? throw new ArgumentNullException(nameof(config));
     private readonly ILogger<MediaPlayerService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly ILoggerFactory _loggerFactory =
@@ -363,7 +363,7 @@ public sealed partial class MediaPlayerService(
     /// <summary>
     /// Gets system-wide playback statistics.
     /// </summary>
-    public Task<SnapDog2.Core.Models.Result<SnapDog2.Core.Models.PlaybackStatistics>> GetStatisticsAsync(
+    public Task<SnapDog2.Shared.Models.Result<SnapDog2.Shared.Models.PlaybackStatistics>> GetStatisticsAsync(
         CancellationToken cancellationToken = default
     )
     {
@@ -381,12 +381,12 @@ public sealed partial class MediaPlayerService(
             };
 
             return Task.FromResult(
-                SnapDog2.Core.Models.Result<SnapDog2.Core.Models.PlaybackStatistics>.Success(statistics)
+                SnapDog2.Shared.Models.Result<SnapDog2.Shared.Models.PlaybackStatistics>.Success(statistics)
             );
         }
         catch (Exception ex)
         {
-            return Task.FromResult(SnapDog2.Core.Models.Result<SnapDog2.Core.Models.PlaybackStatistics>.Failure(ex));
+            return Task.FromResult(SnapDog2.Shared.Models.Result<SnapDog2.Shared.Models.PlaybackStatistics>.Failure(ex));
         }
     }
 

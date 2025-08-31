@@ -16,7 +16,7 @@ namespace SnapDog2.Infrastructure.Audio;
 using System.Text.Json;
 using LibVLCSharp.Shared;
 using Microsoft.Extensions.Logging;
-using SnapDog2.Core.Models;
+using SnapDog2.Shared.Models;
 
 /// <summary>
 /// Manages metadata extraction from media files using LibVLC.

@@ -15,8 +15,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using SnapDog2.Core.Abstractions;
-using SnapDog2.Core.Models;
+using SnapDog2.Domain.Abstractions;
+using SnapDog2.Shared.Models;
 
 namespace SnapDog2.Infrastructure.Integrations.Mqtt;
 

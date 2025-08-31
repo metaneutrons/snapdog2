@@ -20,8 +20,8 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using SnapDog2.Core.Abstractions;
-using SnapDog2.Core.Configuration;
+using SnapDog2.Domain.Abstractions;
+using SnapDog2.Shared.Configuration;
 
 internal sealed class NotificationItem
 {

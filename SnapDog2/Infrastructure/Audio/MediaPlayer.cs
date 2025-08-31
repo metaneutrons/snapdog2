@@ -15,22 +15,22 @@ namespace SnapDog2.Infrastructure.Audio;
 
 using LibVLCSharp.Shared;
 using Microsoft.Extensions.Logging;
-using SnapDog2.Core.Configuration;
-using SnapDog2.Core.Models;
+using SnapDog2.Shared.Configuration;
+using SnapDog2.Shared.Models;
 
 /// <summary>
 /// LibVLC-based audio player for streaming to Snapcast sinks.
 /// Handles HTTP audio streaming with format conversion and metadata extraction.
 /// </summary>
 public sealed partial class MediaPlayer(
-    SnapDog2.Core.Configuration.AudioConfig config,
+    SnapDog2.Shared.Configuration.AudioConfig config,
     ILogger<MediaPlayer> logger,
     ILogger<MetadataManager> metadataLogger,
     int zoneIndex,
     string sinkPath
 ) : IAsyncDisposable
 {
-    private readonly SnapDog2.Core.Configuration.AudioConfig _config =
+    private readonly SnapDog2.Shared.Configuration.AudioConfig _config =
         config ?? throw new ArgumentNullException(nameof(config));
     private readonly ILogger<MediaPlayer> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly ILogger<MetadataManager> _metadataLogger =

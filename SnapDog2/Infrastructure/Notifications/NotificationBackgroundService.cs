@@ -21,9 +21,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using SnapDog2.Core.Abstractions;
-using SnapDog2.Core.Configuration;
-using SnapDog2.Core.Models;
+using SnapDog2.Domain.Abstractions;
+using SnapDog2.Shared.Configuration;
+using SnapDog2.Shared.Models;
 
 /// <summary>
 /// Background service that reads notifications from the queue and publishes

@@ -16,7 +16,7 @@ namespace SnapDog2.Infrastructure.Resilience;
 using System;
 using Polly;
 using Polly.Retry;
-using SnapDog2.Core.Configuration;
+using SnapDog2.Shared.Configuration;
 
 /// <summary>
 /// Factory for creating Polly resilience pipelines from configuration.

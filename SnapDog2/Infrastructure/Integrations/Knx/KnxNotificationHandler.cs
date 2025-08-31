@@ -15,8 +15,8 @@ namespace SnapDog2.Infrastructure.Integrations.Knx;
 
 using Cortex.Mediator.Notifications;
 using Microsoft.Extensions.Logging;
-using SnapDog2.Core.Abstractions;
-using SnapDog2.Server.Features.Shared.Notifications;
+using SnapDog2.Domain.Abstractions;
+using SnapDog2.Server.Shared.Notifications;
 
 /// <summary>
 /// Dedicated notification handler that forwards StatusChangedNotification to KNX service.

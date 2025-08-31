@@ -16,10 +16,10 @@ namespace SnapDog2.Infrastructure.Storage;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Polly;
-using SnapDog2.Core.Abstractions;
-using SnapDog2.Core.Configuration;
-using SnapDog2.Core.Models;
+using SnapDog2.Domain.Abstractions;
 using SnapDog2.Infrastructure.Resilience;
+using SnapDog2.Shared.Configuration;
+using SnapDog2.Shared.Models;
 using StackExchange.Redis;
 
 /// <summary>

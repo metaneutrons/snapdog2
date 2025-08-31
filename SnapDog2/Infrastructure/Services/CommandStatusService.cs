@@ -17,7 +17,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
-using SnapDog2.Core.Abstractions;
+using SnapDog2.Domain.Abstractions;
 
 /// <summary>
 /// Simple in-memory implementation of command status tracking.
