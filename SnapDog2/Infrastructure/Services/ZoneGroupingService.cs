@@ -145,8 +145,8 @@ public partial class ZoneGroupingService(
 
             // Find a group that has any of our zone's clients, or use any available group
             var targetGroup =
-                serverStatus.Value?.Groups?.FirstOrDefault(g => g.Clients?.Any(c => clientIndexs.Contains(c.Id)) == true)
-                ?? serverStatus.Value?.Groups?.FirstOrDefault();
+                serverStatus.Value?.Groups.FirstOrDefault(g => g.Clients.Any(c => clientIndexs.Contains(c.Id)))
+                ?? serverStatus.Value?.Groups.FirstOrDefault();
 
             if (targetGroup == null)
             {
@@ -232,7 +232,7 @@ public partial class ZoneGroupingService(
 
         // Find groups that contain any of our zone clients
         var groupsWithOurClients = serverStatus
-            .Groups.Where(g => g.Clients?.Any(c => clientIndexs.Contains(c.Id)) == true)
+            .Groups.Where(g => g.Clients.Any(c => clientIndexs.Contains(c.Id)))
             .ToList();
 
         this.LogZoneCheckDetails(expectedStreamId, groupsWithOurClients.Count, string.Join(",", clientIndexs));
@@ -247,7 +247,7 @@ public partial class ZoneGroupingService(
         var targetGroup = groupsWithOurClients.First();
 
         // Check if all our clients are in this group and no foreign clients
-        var groupClientIndexs = targetGroup.Clients?.Select(c => c.Id).ToList() ?? new List<string>();
+        var groupClientIndexs = targetGroup.Clients.Select(c => c.Id).ToList();
         var allOurClientsPresent = clientIndexs.All(id => groupClientIndexs.Contains(id));
         var noForeignClients = groupClientIndexs.All(id => clientIndexs.Contains(id));
         var correctStream = targetGroup.StreamId == expectedStreamId;
@@ -258,18 +258,7 @@ public partial class ZoneGroupingService(
         var correctGroupName = targetGroup.Name == expectedGroupName;
 
         // Check client names - all clients should have their configured names (not null)
-        var correctClientNames = true;
-        if (targetGroup.Clients != null)
-        {
-            foreach (var client in targetGroup.Clients)
-            {
-                if (string.IsNullOrEmpty(client.Name))
-                {
-                    correctClientNames = false;
-                    break;
-                }
-            }
-        }
+        var correctClientNames = targetGroup.Clients.All(client => !string.IsNullOrEmpty(client.Name));
 
         this.LogZoneCheckDetailsVerbose(
             allOurClientsPresent,
@@ -363,12 +352,9 @@ public partial class ZoneGroupingService(
             var currentClientNames = new Dictionary<string, string?>();
             foreach (var group in serverStatus.Value.Groups)
             {
-                if (group.Clients != null)
+                foreach (var client in group.Clients)
                 {
-                    foreach (var client in group.Clients)
-                    {
-                        currentClientNames[client.Id] = client.Name;
-                    }
+                    currentClientNames[client.Id] = client.Name;
                 }
             }
 

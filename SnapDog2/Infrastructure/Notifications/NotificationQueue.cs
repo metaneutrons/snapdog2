@@ -28,7 +28,7 @@ internal sealed class NotificationItem
 }
 
 /// <summary>
-/// Default queue implementation using bounded Channel<T> with backpressure.
+/// Default queue implementation using bounded Channel with backpressure.
 /// </summary>
 public sealed partial class NotificationQueue : INotificationQueue
 {

@@ -95,7 +95,7 @@ public static class ResiliencePolicyFactory
     /// <returns>Corresponding DelayBackoffType.</returns>
     private static DelayBackoffType ParseBackoffType(string backoffType)
     {
-        return backoffType?.ToLowerInvariant() switch
+        return backoffType.ToLowerInvariant() switch
         {
             "linear" => DelayBackoffType.Linear,
             "exponential" => DelayBackoffType.Exponential,
@@ -129,7 +129,7 @@ public static class ResiliencePolicyFactory
     /// <returns>True if valid, false otherwise.</returns>
     private static bool IsValidBackoffType(string backoffType)
     {
-        return backoffType?.ToLowerInvariant() switch
+        return backoffType.ToLowerInvariant() switch
         {
             "linear" or "exponential" or "constant" => true,
             _ => false,

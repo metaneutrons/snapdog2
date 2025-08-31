@@ -31,7 +31,6 @@ public partial class PersistentStateNotificationHandler(
 {
     // Debouncing for high-frequency updates (like position changes)
     private readonly ConcurrentDictionary<int, Timer> _zoneDebounceTimers = new();
-    private readonly ConcurrentDictionary<int, Timer> _clientDebounceTimers = new();
     private readonly TimeSpan _debounceDelay = TimeSpan.FromSeconds(2);
 
     /// <summary>
@@ -59,6 +58,8 @@ public partial class PersistentStateNotificationHandler(
     /// </summary>
     private void DebounceZoneSave(int zoneIndex, ZoneState zoneState)
     {
+        // TODO: Why is this method never used?
+
         // Cancel existing timer
         if (this._zoneDebounceTimers.TryGetValue(zoneIndex, out var existingTimer))
         {
@@ -67,7 +68,7 @@ public partial class PersistentStateNotificationHandler(
 
         // Create new timer for delayed save
         this._zoneDebounceTimers[zoneIndex] = new Timer(
-            async _ =>
+            async void (_) =>
             {
                 try
                 {

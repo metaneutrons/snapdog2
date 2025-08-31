@@ -204,7 +204,7 @@ public sealed partial class NotificationBackgroundService(
             // ignore
         }
 
-        await base.StopAsync(cancellationToken);
+        await base.StopAsync(drainCts.Token);
     }
 
     // LoggerMessage methods for high-performance logging

@@ -198,7 +198,7 @@ public partial class SnapcastStateRepository(
         this.LogTotalClientCount(this._clients.Count);
 
         // Update streams
-        var newStreams = server.Streams?.ToDictionary(s => s.Id, s => s) ?? new Dictionary<string, Stream>();
+        var newStreams = server.Streams.ToDictionary(s => s.Id, s => s);
         UpdateDictionary(this._streams, newStreams);
     }
 
