@@ -26,22 +26,23 @@ public partial class ZoneNameCommandHandler(IZoneManager zoneManager, ILogger<Zo
     : ICommandHandler<ZoneNameCommand, Result>
 {
     private readonly IZoneManager _zoneManager = zoneManager;
-    private readonly ILogger<ZoneNameCommandHandler> _logger = logger;
 
     /// <summary>
     /// Handles the ZoneNameCommand asynchronously.
     /// </summary>
-    /// <param name="command">The command to handle.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <param>The cancellation token.</param>
+    /// <param name="zoneIndex">Zone to be renamed.</param>
+    /// <param name="name">Name of the zone.</param>
     /// <returns>A task representing the asynchronous operation with a Result.</returns>
+    /// TODO: Why is this never called?
     [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Handling zone name command for zone {ZoneIndex} with name '{Name}'")]
-    private partial void LogHandling(int ZoneIndex, string Name);
+    private partial void LogHandling(int zoneIndex, string name);
 
     [LoggerMessage(EventId = 2, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found")]
-    private partial void LogZoneNotFound(int ZoneIndex);
+    private partial void LogZoneNotFound(int zoneIndex);
 
     [LoggerMessage(EventId = 3, Level = LogLevel.Warning, Message = "Zone name setting not implemented for zone {ZoneIndex}")]
-    private partial void LogNotImplemented(int ZoneIndex);
+    private partial void LogNotImplemented(int zoneIndex);
 
     public async Task<Result> Handle(ZoneNameCommand command, CancellationToken cancellationToken = default)
     {

@@ -87,7 +87,7 @@ public class MqttTopicAttribute(string topicPattern) : Attribute
     /// <param name="parameters">Extracted parameters from the topic.</param>
     /// <param name="baseTopic">The configured base topic (e.g., "snapdog", "myapp", etc.)</param>
     /// <returns>True if the topic matches the pattern.</returns>
-    public bool TryMatchTopic(string topic, out Dictionary<string, string> parameters, string baseTopic = "snapdog")
+    public bool TryMatchTopic(string topic, out Dictionary<string, string> parameters, string baseTopic)
     {
         parameters = new Dictionary<string, string>();
 

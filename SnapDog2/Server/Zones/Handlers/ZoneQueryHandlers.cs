@@ -54,7 +54,7 @@ public partial class GetAllZonesQueryHandler(IZoneManager zoneManager, ILogger<G
         catch (Exception ex)
         {
             this.LogError(ex.Message);
-            return Result<List<ZoneState>>.Failure(ex.Message ?? "An error occurred while retrieving all zones");
+            return Result<List<ZoneState>>.Failure(ex.Message);
         }
     }
 }
@@ -143,7 +143,7 @@ public partial class GetAllZoneStatesQueryHandler(
         {
             this.LogError(ex.Message);
             return Result<IEnumerable<ZoneState>>.Failure(
-                ex.Message ?? "An error occurred while retrieving all zone states"
+                ex.Message
             );
         }
     }
@@ -401,7 +401,7 @@ public partial class GetAllPlaylistsQueryHandler(
         catch (Exception ex)
         {
             this.LogError(ex.Message);
-            return Result<List<PlaylistInfo>>.Failure(ex.Message ?? "An error occurred while retrieving all playlists");
+            return Result<List<PlaylistInfo>>.Failure(ex.Message);
         }
     }
 }
@@ -454,7 +454,7 @@ public partial class GetPlaylistTracksQueryHandler(
         catch (Exception ex)
         {
             this.LogError(ex.Message);
-            return Result<List<TrackInfo>>.Failure(ex.Message ?? "An error occurred while retrieving playlist tracks");
+            return Result<List<TrackInfo>>.Failure(ex.Message);
         }
     }
 }

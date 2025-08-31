@@ -16,7 +16,7 @@ public class ConditionalAuthorizeAttribute : Attribute, IAuthorizationFilter
         var config = context.HttpContext.RequestServices.GetService<IOptions<SnapDogConfiguration>>();
 
         // Skip authorization if API auth is disabled
-        if (config?.Value?.Http?.ApiAuthEnabled == false)
+        if (config?.Value.Http.ApiAuthEnabled == false)
         {
             return;
         }
