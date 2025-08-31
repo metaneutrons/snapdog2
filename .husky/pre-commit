@@ -15,6 +15,15 @@ if [ -n "$code_files_changed" ]; then
 
     if [ $format_exit_code -eq 0 ]; then
         echo "✅ Code formatting verified."
+        
+        # Check if formatting made any changes
+        formatted_files=$(git diff --name-only | grep -E '\.(cs|csproj|props|targets|sln|config|json)$' || true)
+        
+        if [ -n "$formatted_files" ]; then
+            echo "🔧 Auto-staging formatted files..."
+            git add $formatted_files
+            echo "✅ Formatted files added to commit."
+        fi
     else
         echo "❌ Failed to format code. Please check for syntax errors."
         exit 1
