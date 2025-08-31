@@ -13,6 +13,8 @@
 //
 namespace SnapDog2.Tests.Blueprint;
 
+using SnapDog2.Shared.Models;
+
 /// <summary>
 /// Complete SnapDog2 system specification as fluent blueprint.
 /// Single source of truth for all commands, status, protocols, and implementation requirements.
@@ -633,8 +635,8 @@ public static class SnapDogBlueprint
         .Status("CLIENT_STATE")
         .Client()
         .Mqtt("snapdog/clients/{clientIndex}/state")
-        .Get("/api/v1/clients/{clientIndex:int}/state")
-        .ApiReturns<object>()
+        .Get("/api/v1/clients/{clientIndex:int}")
+        .ApiReturns<ClientState>()
         .Description("Complete client state information")
         //
         .Status("CLIENT_CONNECTED")
