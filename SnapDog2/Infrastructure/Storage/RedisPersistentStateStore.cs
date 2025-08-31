@@ -18,8 +18,8 @@ using Microsoft.Extensions.Logging;
 using Polly;
 using SnapDog2.Core.Abstractions;
 using SnapDog2.Core.Configuration;
-using SnapDog2.Infrastructure.Resilience;
 using SnapDog2.Core.Models;
+using SnapDog2.Infrastructure.Resilience;
 using StackExchange.Redis;
 
 /// <summary>

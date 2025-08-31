@@ -604,8 +604,11 @@ public partial class IntegrationPublishingHandlers(
     /// </summary>
     private static bool HasMeaningfulClientChange(ClientState? previous, ClientState current)
     {
-        if (previous == null) return true;
-        
+        if (previous == null)
+        {
+            return true;
+        }
+
         return previous.Name != current.Name ||
                previous.Volume != current.Volume ||
                previous.Mute != current.Mute ||
