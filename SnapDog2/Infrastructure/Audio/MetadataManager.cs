@@ -21,9 +21,8 @@ using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 /// <summary>
 /// Manages metadata extraction from media files using LibVLC.
 /// </summary>
-public sealed partial class MetadataManager(LibVLC libvlc, ILogger<MetadataManager> logger)
+public sealed partial class MetadataManager(ILogger<MetadataManager> logger)
 {
-    private readonly LibVLC _libvlc = libvlc ?? throw new ArgumentNullException(nameof(libvlc));
     private readonly ILogger<MetadataManager> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     /// <summary>

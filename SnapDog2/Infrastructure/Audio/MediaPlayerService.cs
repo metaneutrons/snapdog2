@@ -34,7 +34,7 @@ public sealed partial class MediaPlayerService(
 ) : IMediaPlayerService, IAsyncDisposable, IDisposable
 {
     private readonly AudioConfig _config =
-        config?.Value ?? throw new ArgumentNullException(nameof(config));
+        config.Value ?? throw new ArgumentNullException(nameof(config));
     private readonly ILogger<MediaPlayerService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly ILoggerFactory _loggerFactory =
         loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
@@ -58,11 +58,6 @@ public sealed partial class MediaPlayerService(
         try
         {
             ObjectDisposedException.ThrowIf(this._disposed, this);
-
-            if (trackInfo == null)
-            {
-                return Result.Failure(new ArgumentNullException(nameof(trackInfo)));
-            }
 
             // Debug logging for zone lookup
             LogLookingForZone(this._logger, zoneIndex);

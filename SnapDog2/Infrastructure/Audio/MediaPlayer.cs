@@ -158,7 +158,7 @@ public sealed partial class MediaPlayer(
                 this._streamingCts.Token
             );
 
-            LogStreamingStarted(this._logger, this._zoneIndex, streamUrl, trackInfo.Title ?? "Unknown");
+            LogStreamingStarted(this._logger, this._zoneIndex, streamUrl, trackInfo.Title);
             return Result.Success();
         }
         catch (Exception ex)

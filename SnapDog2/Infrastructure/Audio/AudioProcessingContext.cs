@@ -116,7 +116,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             Format = config.OutputFormat,
         };
 
-        this.MetadataManager = new MetadataManager(this._libvlc, metadataLogger);
+        this.MetadataManager = new MetadataManager(metadataLogger);
 
         this.LogAudioProcessingContextInitialized(this._tempDirectory.FullName);
     }
@@ -395,6 +395,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
     /// </summary>
     private void SetupEventHandlers()
     {
+        // TODO: Why is this method never called? Investigate LibVLC issue.
         this.LogSettingUpLibVlcEventHandlers();
 
         // Position change events (percentage-based)
@@ -509,9 +510,9 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
     {
         if (!this._disposed)
         {
-            this._mediaPlayer?.Stop();
-            this._mediaPlayer?.Dispose();
-            this._libvlc?.Dispose();
+            this._mediaPlayer.Stop();
+            this._mediaPlayer.Dispose();
+            this._libvlc.Dispose();
             this._disposed = true;
 
             this.LogAudioProcessingContextDisposed();
@@ -522,9 +523,9 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
     {
         if (!this._disposed)
         {
-            this._mediaPlayer?.Stop();
-            this._mediaPlayer?.Dispose();
-            this._libvlc?.Dispose();
+            this._mediaPlayer.Stop();
+            this._mediaPlayer.Dispose();
+            this._libvlc.Dispose();
             this._disposed = true;
 
             this.LogAudioProcessingContextDisposedAsynchronously();
