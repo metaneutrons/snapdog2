@@ -32,35 +32,35 @@ public partial class PlaylistManager : IPlaylistManager
 
     [LoggerMessage(
         EventId = 6400,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Getting all playlists"
     )]
     private partial void LogGettingAllPlaylists();
 
     [LoggerMessage(
         EventId = 6401,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Getting tracks for playlist ID: {PlaylistIndex}"
     )]
     private partial void LogGettingTracksByPlaylistIndex(string playlistIndex);
 
     [LoggerMessage(
         EventId = 6402,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Getting tracks for playlist index: {PlaylistIndex}"
     )]
     private partial void LogGettingTracksByPlaylistIndex(int playlistIndex);
 
     [LoggerMessage(
         EventId = 6403,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Playlist {PlaylistIndex} not found"
     )]
     private partial void LogPlaylistNotFound(string playlistIndex);
 
     [LoggerMessage(
         EventId = 6404,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Playlist index {PlaylistIndex} not found"
     )]
     private partial void LogPlaylistIndexNotFound(int playlistIndex);

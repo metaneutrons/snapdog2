@@ -30,21 +30,21 @@ public partial class MqttCommandMapper(ILogger<MqttCommandMapper> logger, MqttCo
 
     [LoggerMessage(
         EventId = 4200,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Mapping MQTT command: {Topic} -> {Payload}"
     )]
     private partial void LogMappingCommand(string topic, string payload);
 
     [LoggerMessage(
         EventId = 4201,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Failed to map MQTT topic: {Topic}"
     )]
     private partial void LogMappingFailed(string topic);
 
     [LoggerMessage(
         EventId = 4202,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "Error mapping MQTT command for topic {Topic}: {Error}"
     )]
     private partial void LogMappingError(string topic, string error);

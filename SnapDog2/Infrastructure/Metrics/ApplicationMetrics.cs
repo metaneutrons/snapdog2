@@ -344,7 +344,7 @@ public partial class ApplicationMetrics : IApplicationMetrics
 
     [LoggerMessage(
         EventId = 6700,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "ApplicationMetrics initialized with {MeterName} v{MeterVersion}"
     )]
     private partial void LogApplicationMetricsInitialized(string? meterName, string? meterVersion);

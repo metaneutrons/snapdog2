@@ -174,35 +174,35 @@ public partial class PerformanceQueryBehavior<TQuery, TResponse>(
 
     [LoggerMessage(
         EventId = 7100,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Slow query detected: {QueryName} took {ElapsedMilliseconds}ms"
     )]
     private partial void LogSlowQuery(string queryName, long elapsedMilliseconds);
 
     [LoggerMessage(
         EventId = 7101,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "Query {QueryName} threw exception after {ElapsedMilliseconds}ms"
     )]
     private partial void LogQueryException(string queryName, long elapsedMilliseconds, Exception ex);
 
     [LoggerMessage(
         EventId = 7102,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Failed to record query-specific metrics for {QueryName}"
     )]
     private partial void LogQueryMetricsFailure(string queryName, Exception ex);
 
     [LoggerMessage(
         EventId = 7103,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Failed to update business metrics from zone query"
     )]
     private partial void LogZoneMetricsFailure(Exception ex);
 
     [LoggerMessage(
         EventId = 7104,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Failed to update business metrics from client query"
     )]
     private partial void LogClientMetricsFailure(Exception ex);

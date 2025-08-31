@@ -66,7 +66,7 @@ public partial class PersistentStateNotificationHandler :
     /// <summary>
     /// Debounces zone state saves for high-frequency updates like position changes.
     /// </summary>
-    private void DebounceZoneSave(int zoneIndex, SnapDog2.Shared.Models.ZoneState zoneState)
+    private void DebounceZoneSave(int zoneIndex, Shared.Models.ZoneState zoneState)
     {
         // Cancel existing timer
         if (this._zoneDebounceTimers.TryGetValue(zoneIndex, out var existingTimer))

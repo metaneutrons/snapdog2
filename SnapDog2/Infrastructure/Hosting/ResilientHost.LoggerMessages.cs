@@ -24,14 +24,14 @@ public partial class ResilientHost
     // Startup Validation Errors (10001-10002)
     [LoggerMessage(
         EventId = 4000,
-        Level = Microsoft.Extensions.Logging.LogLevel.Critical,
+        Level = LogLevel.Critical,
         Message = "🚨 STARTUP VALIDATION FAILED: {ValidationStep}"
     )]
     private static partial void LogStartupValidationFailedDebug(ILogger logger, Exception ex, string validationStep);
 
     [LoggerMessage(
         EventId = 4001,
-        Level = Microsoft.Extensions.Logging.LogLevel.Critical,
+        Level = LogLevel.Critical,
         Message = "🚨 STARTUP VALIDATION FAILED: {ValidationStep} - {ErrorMessage}"
     )]
     private static partial void LogStartupValidationFailedProduction(
@@ -43,14 +43,14 @@ public partial class ResilientHost
     // Expected Startup Errors (10003-10004)
     [LoggerMessage(
         EventId = 4002,
-        Level = Microsoft.Extensions.Logging.LogLevel.Critical,
+        Level = LogLevel.Critical,
         Message = "🚨 STARTUP FAILED: Expected startup error occurred"
     )]
     private static partial void LogStartupFailedDebug(ILogger logger, Exception ex);
 
     [LoggerMessage(
         EventId = 4003,
-        Level = Microsoft.Extensions.Logging.LogLevel.Critical,
+        Level = LogLevel.Critical,
         Message = "🚨 STARTUP FAILED: {ErrorType} - {ErrorMessage}"
     )]
     private static partial void LogStartupFailedProduction(ILogger logger, string errorType, string errorMessage);
@@ -58,14 +58,14 @@ public partial class ResilientHost
     // Unexpected Startup Errors (10005-10006)
     [LoggerMessage(
         EventId = 4004,
-        Level = Microsoft.Extensions.Logging.LogLevel.Critical,
+        Level = LogLevel.Critical,
         Message = "🚨 UNEXPECTED STARTUP FAILURE: Unhandled exception during host startup"
     )]
     private static partial void LogUnexpectedStartupFailureDebug(ILogger logger, Exception ex);
 
     [LoggerMessage(
         EventId = 4005,
-        Level = Microsoft.Extensions.Logging.LogLevel.Critical,
+        Level = LogLevel.Critical,
         Message = "🚨 UNEXPECTED STARTUP FAILURE: {ErrorType} - {ErrorMessage}"
     )]
     private static partial void LogUnexpectedStartupFailureProduction(
@@ -77,14 +77,14 @@ public partial class ResilientHost
     // Host Shutdown Error Operations (10501-10502)
     [LoggerMessage(
         EventId = 4006,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "Error during host shutdown"
     )]
     private partial void LogErrorDuringHostShutdown(Exception ex);
 
     [LoggerMessage(
         EventId = 4007,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "Error during host shutdown: {ErrorType} - {ErrorMessage}"
     )]
     private partial void LogErrorDuringHostShutdownProduction(string errorType, string errorMessage);

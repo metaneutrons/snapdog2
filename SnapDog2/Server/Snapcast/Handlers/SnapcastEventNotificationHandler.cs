@@ -45,140 +45,140 @@ public partial class SnapcastEventNotificationHandler(
 
     [LoggerMessage(
         EventId = 3000,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Snapcast client connected: {ClientIndex} ({ClientName})"
     )]
     private partial void LogClientConnected(string clientIndex, string clientName);
 
     [LoggerMessage(
         EventId = 3001,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Snapcast client disconnected: {ClientIndex} ({ClientName})"
     )]
     private partial void LogClientDisconnected(string clientIndex, string clientName);
 
     [LoggerMessage(
         EventId = 3002,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Snapcast client volume changed: {ClientIndex} -> {Volume}% (Muted: {Muted})"
     )]
     private partial void LogClientVolumeChanged(string clientIndex, int volume, bool muted);
 
     [LoggerMessage(
         EventId = 3003,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Snapcast group mute changed: {GroupId} -> Muted: {Muted}"
     )]
     private partial void LogGroupMuteChanged(string groupId, bool muted);
 
     [LoggerMessage(
         EventId = 3004,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Snapcast connection established"
     )]
     private partial void LogConnectionEstablished();
 
     [LoggerMessage(
         EventId = 3005,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Snapcast connection lost: {Reason}"
     )]
     private partial void LogConnectionLost(string reason);
 
     [LoggerMessage(
         EventId = 3006,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Snapcast client latency changed: {ClientIndex} -> {LatencyMs}ms"
     )]
     private partial void LogClientLatencyChanged(int clientIndex, int latencyMs);
 
     [LoggerMessage(
         EventId = 3007,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Invalid client index format for connection: {ClientIndex}"
     )]
     private partial void LogInvalidClientIndexForConnection(string clientIndex);
 
     [LoggerMessage(
         EventId = 3008,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Updated client {ClientIndex} storage: Connected=true"
     )]
     private partial void LogClientStorageUpdatedConnected(int clientIndex);
 
     [LoggerMessage(
         EventId = 3009,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Client {ClientIndex} state not found in storage for connection update"
     )]
     private partial void LogClientStateNotFoundForConnection(int clientIndex);
 
     [LoggerMessage(
         EventId = 3010,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Invalid client index format for disconnection: {ClientIndex}"
     )]
     private partial void LogInvalidClientIndexForDisconnection(string clientIndex);
 
     [LoggerMessage(
         EventId = 3011,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Updated client {ClientIndex} storage: Connected=false"
     )]
     private partial void LogClientStorageUpdatedDisconnected(int clientIndex);
 
     [LoggerMessage(
         EventId = 3012,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Client {ClientIndex} state not found in storage for disconnection update"
     )]
     private partial void LogClientStateNotFoundForDisconnection(int clientIndex);
 
     [LoggerMessage(
         EventId = 3013,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Invalid client index format: {ClientIndex}"
     )]
     private partial void LogInvalidClientIndexFormat(string clientIndex);
 
     [LoggerMessage(
         EventId = 3014,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Updated client {ClientIndex} storage: Volume={Volume}, Mute={Mute}"
     )]
     private partial void LogClientStorageUpdatedVolume(int clientIndex, int volume, bool mute);
 
     [LoggerMessage(
         EventId = 3015,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Client {ClientIndex} state not found in storage for volume update"
     )]
     private partial void LogClientStateNotFoundForVolume(int clientIndex);
 
     [LoggerMessage(
         EventId = 3016,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Invalid client index format for latency change: {ClientIndex}"
     )]
     private partial void LogInvalidClientIndexForLatency(string clientIndex);
 
     [LoggerMessage(
         EventId = 3017,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Updated client {ClientIndex} storage: LatencyMs={LatencyMs}"
     )]
     private partial void LogClientStorageUpdatedLatency(int clientIndex, int latencyMs);
 
     [LoggerMessage(
         EventId = 3018,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Client {ClientIndex} state not found in storage for latency update"
     )]
     private partial void LogClientStateNotFoundForLatency(int clientIndex);
 
     [LoggerMessage(
         EventId = 3019,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Invalid client index format for name change: {ClientIndex}"
     )]
     private partial void LogInvalidClientIndexForName(string clientIndex);

@@ -39,14 +39,14 @@ public partial class CommandStatusQueryHandler(
 
     [LoggerMessage(
         EventId = 9300,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Retrieving command processing status"
     )]
     private partial void LogRetrievingCommandStatus();
 
     [LoggerMessage(
         EventId = 9301,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Failed to retrieve command status: {ErrorMessage}"
     )]
     private partial void LogFailedToRetrieveCommandStatus(string errorMessage);
@@ -66,7 +66,7 @@ public partial class CommandStatusQueryHandler(
             var status = await this._commandStatusService.GetStatusAsync().ConfigureAwait(false);
             return Result<string>.Success(status);
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
             this.LogFailedToRetrieveCommandStatus(ex.Message);
             return Result<string>.Failure($"Failed to retrieve command status: {ex.Message}");

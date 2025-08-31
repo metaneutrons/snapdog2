@@ -24,7 +24,7 @@ public partial class StatePublishingService
     // State Publishing Operations (10701)
     [LoggerMessage(
         EventId = 5100,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "State publishing cancelled during shutdown"
     )]
     private partial void LogStatePublishingCancelledDuringShutdown();

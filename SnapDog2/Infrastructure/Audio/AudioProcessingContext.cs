@@ -66,7 +66,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
     public MetadataManager MetadataManager { get; }
 
     public AudioProcessingContext(
-        SnapDog2.Shared.Configuration.AudioConfig config,
+        AudioConfig config,
         ILogger logger,
         ILogger<MetadataManager> metadataLogger,
         string? tempDirectory = null

@@ -42,126 +42,126 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
 
     [LoggerMessage(
         EventId = 5100,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Failed to get clients: {ErrorMessage}"
     )]
     private partial void LogFailedToGetClients(string errorMessage);
 
     [LoggerMessage(
         EventId = 5101,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Failed to get client {ClientIndex}: {ErrorMessage}"
     )]
     private partial void LogFailedToGetClient(int clientIndex, string errorMessage);
 
     [LoggerMessage(
         EventId = 5102,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Failed to set client {ClientIndex} volume to {Volume}: {ErrorMessage}"
     )]
     private partial void LogFailedToSetClientVolume(int clientIndex, int volume, string errorMessage);
 
     [LoggerMessage(
         EventId = 5103,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Failed to get client {ClientIndex} volume: {ErrorMessage}"
     )]
     private partial void LogFailedToGetClientVolume(int clientIndex, string errorMessage);
 
     [LoggerMessage(
         EventId = 5104,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Failed to get client {ClientIndex} for volume up: {ErrorMessage}"
     )]
     private partial void LogFailedToGetClientForVolumeUp(int clientIndex, string errorMessage);
 
     [LoggerMessage(
         EventId = 5105,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Failed to increase client {ClientIndex} volume: {ErrorMessage}"
     )]
     private partial void LogFailedToIncreaseClientVolume(int clientIndex, string errorMessage);
 
     [LoggerMessage(
         EventId = 5106,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Failed to get client {ClientIndex} for volume down: {ErrorMessage}"
     )]
     private partial void LogFailedToGetClientForVolumeDown(int clientIndex, string errorMessage);
 
     [LoggerMessage(
         EventId = 5107,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Failed to decrease client {ClientIndex} volume: {ErrorMessage}"
     )]
     private partial void LogFailedToDecreaseClientVolume(int clientIndex, string errorMessage);
 
     [LoggerMessage(
         EventId = 5108,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Failed to set client {ClientIndex} mute to {Muted}: {ErrorMessage}"
     )]
     private partial void LogFailedToSetClientMute(int clientIndex, bool muted, string errorMessage);
 
     [LoggerMessage(
         EventId = 5109,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Failed to get client {ClientIndex} mute state: {ErrorMessage}"
     )]
     private partial void LogFailedToGetClientMuteState(int clientIndex, string errorMessage);
 
     [LoggerMessage(
         EventId = 5110,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Failed to toggle client {ClientIndex} mute: {ErrorMessage}"
     )]
     private partial void LogFailedToToggleClientMute(int clientIndex, string errorMessage);
 
     [LoggerMessage(
         EventId = 5111,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Failed to get client {ClientIndex} after mute toggle: {ErrorMessage}"
     )]
     private partial void LogFailedToGetClientAfterMuteToggle(int clientIndex, string errorMessage);
 
     [LoggerMessage(
         EventId = 5112,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Failed to set client {ClientIndex} latency to {Latency}ms: {ErrorMessage}"
     )]
     private partial void LogFailedToSetClientLatency(int clientIndex, int latency, string errorMessage);
 
     [LoggerMessage(
         EventId = 5113,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Failed to get client {ClientIndex} latency: {ErrorMessage}"
     )]
     private partial void LogFailedToGetClientLatency(int clientIndex, string errorMessage);
 
     [LoggerMessage(
         EventId = 5114,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Failed to assign client {ClientIndex} to zone {ZoneIndex}: {ErrorMessage}"
     )]
     private partial void LogFailedToAssignClientToZone(int clientIndex, int zoneIndex, string errorMessage);
 
     [LoggerMessage(
         EventId = 5115,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Failed to get client {ClientIndex} zone assignment: {ErrorMessage}"
     )]
     private partial void LogFailedToGetClientZoneAssignment(int clientIndex, string errorMessage);
 
     [LoggerMessage(
         EventId = 5116,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Setting client {ClientIndex} name to '{Name}'"
     )]
     private partial void LogSettingClientName(int clientIndex, string name);
 
     [LoggerMessage(
         EventId = 5118,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Failed to set client {ClientIndex} name to '{Name}': {ErrorMessage}"
     )]
     private partial void LogFailedToSetClientName(int clientIndex, string name, string errorMessage);
@@ -621,14 +621,14 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
 
     [LoggerMessage(
         EventId = 5117,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Failed to get client {ClientIndex} connection status: {ErrorMessage}"
     )]
     private partial void LogFailedToGetClientConnectionStatus(int clientIndex, string errorMessage);
 
     [LoggerMessage(
         EventId = 5118,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Failed to get client {ClientIndex} name: {ErrorMessage}"
     )]
     private partial void LogFailedToGetClientName(int clientIndex, string errorMessage);

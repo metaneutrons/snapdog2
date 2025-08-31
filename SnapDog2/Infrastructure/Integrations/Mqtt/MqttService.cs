@@ -126,70 +126,70 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
 
     [LoggerMessage(
         EventId = 4401,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "MQTT service created for {BrokerAddress}:{Port}, enabled: {Enabled}"
     )]
     private partial void LogServiceCreated(string brokerAddress, int port, bool enabled);
 
     [LoggerMessage(
         EventId = 4402,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Initializing MQTT connection to {BrokerAddress}:{Port}"
     )]
     private partial void LogInitializing(string brokerAddress, int port);
 
     [LoggerMessage(
         EventId = 4403,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "MQTT connection established successfully"
     )]
     private partial void LogConnectionEstablished();
 
     [LoggerMessage(
         EventId = 4404,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "MQTT connection lost: {Reason}"
     )]
     private partial void LogConnectionLost(string reason);
 
     [LoggerMessage(
         EventId = 4405,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "Failed to initialize MQTT connection"
     )]
     private partial void LogInitializationFailed(Exception ex);
 
     [LoggerMessage(
         EventId = 4409,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "MQTT connection error: {ErrorMessage}"
     )]
     private partial void LogConnectionErrorMessage(string errorMessage);
 
     [LoggerMessage(
         EventId = 4406,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "MQTT operation {Operation} failed"
     )]
     private partial void LogOperationFailed(string operation, Exception ex);
 
     [LoggerMessage(
         EventId = 4407,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "MQTT service disposed"
     )]
     private partial void LogServiceDisposed();
 
     [LoggerMessage(
         EventId = 4408,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "MQTT service not connected for operation: {Operation}"
     )]
     private partial void LogNotConnected(string operation);
 
     [LoggerMessage(
         EventId = 4400,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "🚀 Attempting MQTT connection to {BrokerAddress}:{Port} (attempt {AttemptNumber}/{MaxAttempts}: {ErrorMessage})"
     )]
     private partial void LogConnectionRetryAttempt(
@@ -643,7 +643,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             if (command != null)
             {
                 using var scope = this._serviceProvider.CreateScope();
-                var mediator = scope.ServiceProvider.GetRequiredService<Cortex.Mediator.IMediator>();
+                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
                 // Send the command - the mediator will handle the type resolution
                 switch (command)
@@ -1063,7 +1063,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             }
 
             // Serialize payload
-            var jsonPayload = System.Text.Json.JsonSerializer.Serialize(payload);
+            var jsonPayload = JsonSerializer.Serialize(payload);
 
             // Publish to MQTT
             return await this.PublishAsync(topic, jsonPayload, retain: true, cancellationToken);
@@ -1149,7 +1149,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             }
 
             // Serialize payload
-            var jsonPayload = System.Text.Json.JsonSerializer.Serialize(payload);
+            var jsonPayload = JsonSerializer.Serialize(payload);
 
             // Publish to MQTT
             return await this.PublishAsync(topic, jsonPayload, retain: true, cancellationToken);
@@ -1193,7 +1193,7 @@ public sealed partial class MqttService : IMqttService, IAsyncDisposable
             }
 
             // Serialize payload
-            var jsonPayload = System.Text.Json.JsonSerializer.Serialize(payload);
+            var jsonPayload = JsonSerializer.Serialize(payload);
 
             // Publish to MQTT with retain flag for status topics
             var retain = !eventType.Equals("ERROR_STATUS", StringComparison.InvariantCultureIgnoreCase); // Don't retain error messages

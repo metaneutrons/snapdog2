@@ -35,21 +35,21 @@ public partial class ToggleClientMuteCommandHandler(
 
     [LoggerMessage(
         EventId = 9100,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Toggling mute for Client {ClientIndex} from {Source}"
     )]
     private partial void LogHandling(int clientIndex, CommandSource source);
 
     [LoggerMessage(
         EventId = 9101,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Client {ClientIndex} not found for ToggleClientMuteCommand"
     )]
     private partial void LogClientNotFound(int clientIndex);
 
     [LoggerMessage(
         EventId = 9102,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Toggled mute for Client {ClientIndex} to {NewMuteState}"
     )]
     private partial void LogToggleResult(int clientIndex, bool newMuteState);

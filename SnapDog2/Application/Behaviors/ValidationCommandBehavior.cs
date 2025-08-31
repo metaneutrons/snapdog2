@@ -71,14 +71,14 @@ public partial class ValidationCommandBehavior<TCommand, TResponse>(
 
     [LoggerMessage(
         EventId = 1100,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Validating command {CommandName}"
     )]
     private partial void LogValidatingCommand(string commandName);
 
     [LoggerMessage(
         EventId = 1101,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Validation failed for command {CommandName} with {FailureCount} errors"
     )]
     private partial void LogValidationFailed(string commandName, int failureCount);

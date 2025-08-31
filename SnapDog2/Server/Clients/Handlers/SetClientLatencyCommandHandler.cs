@@ -35,14 +35,14 @@ public partial class SetClientLatencyCommandHandler(
 
     [LoggerMessage(
         EventId = 8700,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Setting latency for Client {ClientIndex} to {LatencyMs}ms from {Source}"
     )]
     private partial void LogHandling(int clientIndex, int latencyMs, CommandSource source);
 
     [LoggerMessage(
         EventId = 8701,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Client {ClientIndex} not found for SetClientLatencyCommand"
     )]
     private partial void LogClientNotFound(int clientIndex);

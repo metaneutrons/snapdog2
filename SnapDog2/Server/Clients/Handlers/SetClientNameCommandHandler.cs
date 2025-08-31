@@ -35,14 +35,14 @@ public partial class SetClientNameCommandHandler(
 
     [LoggerMessage(
         EventId = 8900,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Setting name for Client {ClientIndex} to '{Name}' from {Source}"
     )]
     private partial void LogHandling(int clientIndex, string name, CommandSource source);
 
     [LoggerMessage(
         EventId = 8901,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Client {ClientIndex} not found for SetClientNameCommand"
     )]
     private partial void LogClientNotFound(int clientIndex);

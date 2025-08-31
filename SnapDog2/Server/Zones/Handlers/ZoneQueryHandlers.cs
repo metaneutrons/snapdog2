@@ -35,14 +35,14 @@ public partial class GetAllZonesQueryHandler(IZoneManager zoneManager, ILogger<G
 
     [LoggerMessage(
         EventId = 10100,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Handling GetAllZonesQuery"
     )]
     private partial void LogHandling();
 
     [LoggerMessage(
         EventId = 10101,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "Error retrieving all zones: {ErrorMessage}"
     )]
     private partial void LogError(string errorMessage);
@@ -75,14 +75,14 @@ public partial class GetZoneStateQueryHandler(IZoneManager zoneManager, ILogger<
 
     [LoggerMessage(
         EventId = 10102,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Handling GetZoneStateQuery for Zone {ZoneIndex}"
     )]
     private partial void LogHandling(int zoneIndex);
 
     [LoggerMessage(
         EventId = 10103,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Zone {ZoneIndex} not found for GetZoneStateQuery"
     )]
     private partial void LogZoneNotFound(int zoneIndex);
@@ -115,14 +115,14 @@ public partial class GetAllZoneStatesQueryHandler(
 
     [LoggerMessage(
         EventId = 10104,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Handling GetAllZoneStatesQuery"
     )]
     private partial void LogHandling();
 
     [LoggerMessage(
         EventId = 10105,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "Error retrieving all zone states: {ErrorMessage}"
     )]
     private partial void LogError(string errorMessage);
@@ -167,14 +167,14 @@ public partial class GetZonePlaybackStateQueryHandler(
 
     [LoggerMessage(
         EventId = 10106,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Handling GetZonePlaybackStateQuery for Zone {ZoneIndex}"
     )]
     private partial void LogHandling(int zoneIndex);
 
     [LoggerMessage(
         EventId = 10107,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Zone {ZoneIndex} not found for GetZonePlaybackStateQuery"
     )]
     private partial void LogZoneNotFound(int zoneIndex);
@@ -190,7 +190,7 @@ public partial class GetZonePlaybackStateQueryHandler(
         if (zoneResult.IsFailure)
         {
             this.LogZoneNotFound(request.ZoneIndex);
-            return SnapDog2.Shared.Models.Result<SnapDog2.Shared.Enums.PlaybackState>.Failure(
+            return Result<SnapDog2.Shared.Enums.PlaybackState>.Failure(
                 zoneResult.ErrorMessage ?? "Zone not found"
             );
         }
@@ -200,12 +200,12 @@ public partial class GetZonePlaybackStateQueryHandler(
 
         if (stateResult.IsFailure)
         {
-            return SnapDog2.Shared.Models.Result<SnapDog2.Shared.Enums.PlaybackState>.Failure(
+            return Result<SnapDog2.Shared.Enums.PlaybackState>.Failure(
                 stateResult.ErrorMessage ?? "Failed to get zone state"
             );
         }
 
-        return SnapDog2.Shared.Models.Result<SnapDog2.Shared.Enums.PlaybackState>.Success(stateResult.Value!.PlaybackState);
+        return Result<SnapDog2.Shared.Enums.PlaybackState>.Success(stateResult.Value!.PlaybackState);
     }
 }
 
@@ -220,14 +220,14 @@ public partial class GetZoneVolumeQueryHandler(IZoneManager zoneManager, ILogger
 
     [LoggerMessage(
         EventId = 10108,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Handling GetZoneVolumeQuery for Zone {ZoneIndex}"
     )]
     private partial void LogHandling(int zoneIndex);
 
     [LoggerMessage(
         EventId = 10109,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Zone {ZoneIndex} not found for GetZoneVolumeQuery"
     )]
     private partial void LogZoneNotFound(int zoneIndex);
@@ -268,14 +268,14 @@ public partial class GetZoneTrackInfoQueryHandler(
 
     [LoggerMessage(
         EventId = 10110,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Handling GetZoneTrackInfoQuery for Zone {ZoneIndex}"
     )]
     private partial void LogHandling(int zoneIndex);
 
     [LoggerMessage(
         EventId = 10111,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Zone {ZoneIndex} not found for GetZoneTrackInfoQuery"
     )]
     private partial void LogZoneNotFound(int zoneIndex);
@@ -322,14 +322,14 @@ public partial class GetZonePlaylistInfoQueryHandler(
 
     [LoggerMessage(
         EventId = 10112,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Handling GetZonePlaylistInfoQuery for Zone {ZoneIndex}"
     )]
     private partial void LogHandling(int zoneIndex);
 
     [LoggerMessage(
         EventId = 10113,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Zone {ZoneIndex} not found for GetZonePlaylistInfoQuery"
     )]
     private partial void LogZoneNotFound(int zoneIndex);
@@ -379,14 +379,14 @@ public partial class GetAllPlaylistsQueryHandler(
 
     [LoggerMessage(
         EventId = 10114,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Handling GetAllPlaylistsQuery"
     )]
     private partial void LogHandling();
 
     [LoggerMessage(
         EventId = 10115,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "Error retrieving all playlists: {ErrorMessage}"
     )]
     private partial void LogError(string errorMessage);
@@ -424,21 +424,21 @@ public partial class GetPlaylistTracksQueryHandler(
 
     [LoggerMessage(
         EventId = 10116,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Handling GetPlaylistTracksQuery for PlaylistIndex: {PlaylistIndex}"
     )]
     private partial void LogHandling(int playlistIndex);
 
     [LoggerMessage(
         EventId = 10117,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "PlaylistIndex is required for GetPlaylistTracksQuery"
     )]
     private partial void LogMissingParameters();
 
     [LoggerMessage(
         EventId = 10118,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "Error retrieving playlist tracks: {ErrorMessage}"
     )]
     private partial void LogError(string errorMessage);

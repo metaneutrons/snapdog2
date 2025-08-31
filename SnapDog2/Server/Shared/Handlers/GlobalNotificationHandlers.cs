@@ -41,35 +41,35 @@ public partial class GlobalStateNotificationHandler(
 
     [LoggerMessage(
         EventId = 9700,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "System status changed to online: {IsOnline}"
     )]
     private partial void LogSystemStatusChange(bool isOnline);
 
     [LoggerMessage(
         EventId = 9701,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Version info updated: {Version} (Build: {BuildDate})"
     )]
     private partial void LogVersionInfoChange(string version, DateTime buildDate);
 
     [LoggerMessage(
         EventId = 9702,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Server stats updated - CPU: {CpuUsage:F2}%, Memory: {MemoryUsage:F2}MB"
     )]
     private partial void LogServerStatsChange(double cpuUsage, double memoryUsage);
 
     [LoggerMessage(
         EventId = 9703,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "System error occurred: {ErrorCode} - {Message}"
     )]
     private partial void LogSystemError(string errorCode, string message);
 
     [LoggerMessage(
         EventId = 9704,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Zones info updated - Available zones: [{ZoneIndices}]"
     )]
     private partial void LogZonesInfoChange(string zoneIndices);

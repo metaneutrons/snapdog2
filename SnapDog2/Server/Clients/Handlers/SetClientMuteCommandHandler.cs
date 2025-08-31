@@ -35,14 +35,14 @@ public partial class SetClientMuteCommandHandler(
 
     [LoggerMessage(
         EventId = 8800,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Setting mute for Client {ClientIndex} to {Enabled} from {Source}"
     )]
     private partial void LogHandling(int clientIndex, bool enabled, CommandSource source);
 
     [LoggerMessage(
         EventId = 8801,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Client {ClientIndex} not found for SetClientMuteCommand"
     )]
     private partial void LogClientNotFound(int clientIndex);

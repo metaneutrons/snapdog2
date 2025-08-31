@@ -35,7 +35,7 @@ public partial class GetClientsByZoneQueryHandler(
 
     [LoggerMessage(
         EventId = 8600,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Handling GetClientsByZoneQuery for Zone {ZoneIndex}"
     )]
     private partial void LogHandling(int zoneIndex);

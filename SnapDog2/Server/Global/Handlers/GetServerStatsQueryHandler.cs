@@ -56,14 +56,14 @@ public partial class GetServerStatsQueryHandler(
 
     [LoggerMessage(
         EventId = 7200,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Handling GetServerStatsQuery"
     )]
     private partial void LogHandling();
 
     [LoggerMessage(
         EventId = 7201,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "Error retrieving server statistics"
     )]
     private partial void LogError(Exception ex);

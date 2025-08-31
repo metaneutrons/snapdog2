@@ -60,42 +60,42 @@ public partial class ZoneManager(
 
     [LoggerMessage(
         EventId = 6553,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Initializing ZoneManager with {ZoneCount} configured zones"
     )]
     private partial void LogInitializing(int zoneCount);
 
     [LoggerMessage(
         EventId = 6554,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Zone {ZoneIndex} ({ZoneName}) initialized successfully"
     )]
     private partial void LogZoneInitialized(int zoneIndex, string zoneName);
 
     [LoggerMessage(
         EventId = 6555,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Zone {ZoneIndex} not found"
     )]
     private partial void LogZoneNotFound(int zoneIndex);
 
     [LoggerMessage(
         EventId = 6556,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "Failed to initialize zone {ZoneIndex}: {Error}"
     )]
     private partial void LogZoneInitializationFailed(int zoneIndex, string error);
 
     [LoggerMessage(
         EventId = 6557,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Getting zone {ZoneIndex}"
     )]
     private partial void LogGettingZone(int zoneIndex);
 
     [LoggerMessage(
         EventId = 6558,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Getting all zones"
     )]
     private partial void LogGettingAllZones();
@@ -436,7 +436,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             // Update state
             this._currentState = this._currentState with
             {
-                PlaybackState = SnapDog2.Shared.Enums.PlaybackState.Playing,
+                PlaybackState = Shared.Enums.PlaybackState.Playing,
             };
 
             // Start position update timer for reliable MQTT updates + subscribe to events for immediate updates
@@ -447,7 +447,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
 
             // Publish status notification for blueprint compliance
-            await this.PublishPlaybackStateStatusAsync(SnapDog2.Shared.Enums.PlaybackState.Playing);
+            await this.PublishPlaybackStateStatusAsync(Shared.Enums.PlaybackState.Playing);
 
             return Result.Success();
         }
@@ -482,7 +482,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             // Update state
             this._currentState = this._currentState with
             {
-                PlaybackState = SnapDog2.Shared.Enums.PlaybackState.Playing,
+                PlaybackState = Shared.Enums.PlaybackState.Playing,
                 Track = newTrack,
             };
 
@@ -526,7 +526,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
             this._currentState = this._currentState with
             {
-                PlaybackState = SnapDog2.Shared.Enums.PlaybackState.Playing,
+                PlaybackState = Shared.Enums.PlaybackState.Playing,
                 Track = streamTrack,
             };
 
@@ -556,7 +556,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 return pauseResult;
             }
 
-            this._currentState = this._currentState with { PlaybackState = SnapDog2.Shared.Enums.PlaybackState.Paused };
+            this._currentState = this._currentState with { PlaybackState = Shared.Enums.PlaybackState.Paused };
 
             // Stop timer and unsubscribe from events when not playing
             this.StopPositionUpdateTimer();
@@ -584,7 +584,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 return stopResult;
             }
 
-            this._currentState = this._currentState with { PlaybackState = SnapDog2.Shared.Enums.PlaybackState.Stopped };
+            this._currentState = this._currentState with { PlaybackState = Shared.Enums.PlaybackState.Stopped };
 
             // Stop timer and unsubscribe from events when not playing
             this.StopPositionUpdateTimer();
@@ -816,7 +816,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             var nextIndex = currentIndex + 1;
 
             // Check if we're currently playing
-            var wasPlaying = this._currentState.PlaybackState == SnapDog2.Shared.Enums.PlaybackState.Playing;
+            var wasPlaying = this._currentState.PlaybackState == Shared.Enums.PlaybackState.Playing;
 
             // Set the track (inline implementation to avoid nested lock)
             var setResult = await this.SetTrackInternalAsync(nextIndex).ConfigureAwait(false);
@@ -838,7 +838,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 // Update state to playing
                 this._currentState = this._currentState with
                 {
-                    PlaybackState = SnapDog2.Shared.Enums.PlaybackState.Playing
+                    PlaybackState = Shared.Enums.PlaybackState.Playing
                 };
 
                 // Start timer for reliable updates + events for immediate updates
@@ -927,7 +927,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             var previousIndex = Math.Max(1, currentIndex - 1);
 
             // Check if we're currently playing
-            var wasPlaying = this._currentState.PlaybackState == SnapDog2.Shared.Enums.PlaybackState.Playing;
+            var wasPlaying = this._currentState.PlaybackState == Shared.Enums.PlaybackState.Playing;
 
             // Set the track (inline implementation to avoid nested lock)
             var setResult = await this.SetTrackInternalAsync(previousIndex).ConfigureAwait(false);
@@ -949,7 +949,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 // Update state to playing
                 this._currentState = this._currentState with
                 {
-                    PlaybackState = SnapDog2.Shared.Enums.PlaybackState.Playing
+                    PlaybackState = Shared.Enums.PlaybackState.Playing
                 };
 
                 // Start timer for reliable updates + events for immediate updates
@@ -1264,7 +1264,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         return new ZoneState
         {
             Name = this._config.Name,
-            PlaybackState = SnapDog2.Shared.Enums.PlaybackState.Stopped,
+            PlaybackState = Shared.Enums.PlaybackState.Stopped,
             Volume = 50,
             Mute = false,
             TrackRepeat = false,
@@ -1520,8 +1520,8 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                     {
                         Track = updatedTrack,
                         PlaybackState = status.IsPlaying
-                            ? SnapDog2.Shared.Enums.PlaybackState.Playing
-                            : SnapDog2.Shared.Enums.PlaybackState.Stopped,
+                            ? Shared.Enums.PlaybackState.Playing
+                            : Shared.Enums.PlaybackState.Stopped,
                     };
 
                     this.LogUpdatedTrackState(
@@ -1549,8 +1549,8 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                         {
                             Track = updatedTrack,
                             PlaybackState = status.IsPlaying
-                                ? SnapDog2.Shared.Enums.PlaybackState.Playing
-                                : SnapDog2.Shared.Enums.PlaybackState.Paused
+                                ? Shared.Enums.PlaybackState.Playing
+                                : Shared.Enums.PlaybackState.Paused
                         };
                     }
                 }
@@ -1588,7 +1588,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 try
                 {
                     // Only update if we're playing and not disposed
-                    if (this._disposed || this._currentState.PlaybackState != SnapDog2.Shared.Enums.PlaybackState.Playing)
+                    if (this._disposed || this._currentState.PlaybackState != Shared.Enums.PlaybackState.Playing)
                     {
                         return;
                     }
@@ -1669,7 +1669,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         {
             this.LogPositionChangedForZone(this._zoneIndex, e.PositionMs, e.Progress);
 
-            if (this._disposed || this._currentState.PlaybackState != SnapDog2.Shared.Enums.PlaybackState.Playing)
+            if (this._disposed || this._currentState.PlaybackState != Shared.Enums.PlaybackState.Playing)
             {
                 this.LogSkippingPositionUpdate(this._disposed, this._currentState.PlaybackState.ToString());
                 return;
@@ -1731,9 +1731,9 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
             // Update playback state based on LibVLC state
             var newPlaybackState =
-                e.IsPlaying ? SnapDog2.Shared.Enums.PlaybackState.Playing
-                : e.State == LibVLC.VLCState.Paused ? SnapDog2.Shared.Enums.PlaybackState.Paused
-                : SnapDog2.Shared.Enums.PlaybackState.Stopped;
+                e.IsPlaying ? Shared.Enums.PlaybackState.Playing
+                : e.State == LibVLC.VLCState.Paused ? Shared.Enums.PlaybackState.Paused
+                : Shared.Enums.PlaybackState.Stopped;
 
             if (this._currentState.PlaybackState != newPlaybackState)
             {
@@ -1751,7 +1751,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                         var playingStatusNotification = new ZoneTrackPlayingStatusChangedNotification
                         {
                             ZoneIndex = this._zoneIndex,
-                            IsPlaying = newPlaybackState == SnapDog2.Shared.Enums.PlaybackState.Playing
+                            IsPlaying = newPlaybackState == Shared.Enums.PlaybackState.Playing
                         };
                         await mediator.PublishAsync(playingStatusNotification).ConfigureAwait(false);
                     }
@@ -1793,7 +1793,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     #region Status Publishing Methods (Blueprint Compliance)
 
-    public async Task PublishPlaybackStateStatusAsync(SnapDog2.Shared.Enums.PlaybackState playbackState)
+    public async Task PublishPlaybackStateStatusAsync(Shared.Enums.PlaybackState playbackState)
     {
         var notification = this._statusFactory.CreateZonePlaybackStateChangedNotification(
             this._zoneIndex,
@@ -1823,7 +1823,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         await mediator.PublishAsync(notification).ConfigureAwait(false);
     }
 
-    public async Task PublishTrackStatusAsync(SnapDog2.Shared.Models.TrackInfo trackInfo, int trackIndex)
+    public async Task PublishTrackStatusAsync(TrackInfo trackInfo, int trackIndex)
     {
         var notification = this._statusFactory.CreateZoneTrackChangedNotification(
             this._zoneIndex,
@@ -1836,7 +1836,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         await mediator.PublishAsync(notification).ConfigureAwait(false);
     }
 
-    public async Task PublishPlaylistStatusAsync(SnapDog2.Shared.Models.PlaylistInfo playlistInfo, int playlistIndex)
+    public async Task PublishPlaylistStatusAsync(PlaylistInfo playlistInfo, int playlistIndex)
     {
         var notification = this._statusFactory.CreateZonePlaylistChangedNotification(
             this._zoneIndex,
@@ -1870,7 +1870,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     /// <summary>
     /// Publishes individual track metadata notifications for KNX integration
     /// </summary>
-    private async Task PublishTrackMetadataNotificationsAsync(SnapDog2.Shared.Models.TrackInfo track)
+    private async Task PublishTrackMetadataNotificationsAsync(TrackInfo track)
     {
         try
         {
@@ -1881,7 +1881,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             var metadataNotification = new ZoneTrackMetadataChangedNotification
             {
                 ZoneIndex = this._zoneIndex,
-                TrackInfo = new SnapDog2.Shared.Models.TrackInfo
+                TrackInfo = new TrackInfo
                 {
                     Index = track.Index,
                     Title = track.Title ?? "Unknown",
@@ -1942,28 +1942,28 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     [LoggerMessage(
         EventId = 6559,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Zone {ZoneIndex} ({ZoneName}): {Action}"
     )]
     private partial void LogZoneAction(int zoneIndex, string zoneName, string action);
 
     [LoggerMessage(
         EventId = 6560,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Zone {ZoneIndex} synchronized with Snapcast group {GroupId}"
     )]
     private partial void LogSnapcastSync(int zoneIndex, string groupId);
 
     [LoggerMessage(
         EventId = 6561,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Zone {ZoneIndex} Snapcast group {GroupId} not found"
     )]
     private partial void LogSnapcastGroupNotFound(int zoneIndex, string groupId);
 
     [LoggerMessage(
         EventId = 6562,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "Zone {ZoneIndex} ({ZoneName}): {Action} - {Error}"
     )]
     private partial void LogZoneError(int zoneIndex, string zoneName, string action, string error);

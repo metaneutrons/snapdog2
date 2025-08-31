@@ -416,7 +416,7 @@ public static class StaticApiAnalyzer
 
         foreach (var type in notificationTypes)
         {
-            var statusIdAttr = type.GetCustomAttribute<SnapDog2.Shared.Attributes.StatusIdAttribute>();
+            var statusIdAttr = type.GetCustomAttribute<Shared.Attributes.StatusIdAttribute>();
             if (statusIdAttr != null)
             {
                 statusIds.Add(statusIdAttr.Id);
@@ -478,7 +478,7 @@ public static class StaticApiAnalyzer
 
         foreach (var type in commandTypes)
         {
-            var commandIdAttr = type.GetCustomAttribute<SnapDog2.Shared.Attributes.CommandIdAttribute>();
+            var commandIdAttr = type.GetCustomAttribute<Shared.Attributes.CommandIdAttribute>();
             if (commandIdAttr != null)
             {
                 commandIds.Add(commandIdAttr.Id);

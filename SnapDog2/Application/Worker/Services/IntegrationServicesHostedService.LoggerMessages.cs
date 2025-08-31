@@ -24,28 +24,28 @@ public partial class IntegrationServicesHostedService
     // Service Lifecycle Operations (10001-10004)
     [LoggerMessage(
         EventId = 5200,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Integration services initialization cancelled"
     )]
     private partial void LogIntegrationServicesInitializationCancelled();
 
     [LoggerMessage(
         EventId = 5201,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "Failed to initialize integration services"
     )]
     private partial void LogFailedToInitializeIntegrationServices(Exception ex);
 
     [LoggerMessage(
         EventId = 5202,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Stopping integration services..."
     )]
     private partial void LogStoppingIntegrationServices();
 
     [LoggerMessage(
         EventId = 5203,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Integration services stopped"
     )]
     private partial void LogIntegrationServicesStopped();

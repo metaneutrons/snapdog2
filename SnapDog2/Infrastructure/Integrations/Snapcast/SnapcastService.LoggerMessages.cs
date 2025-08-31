@@ -24,7 +24,7 @@ public partial class SnapcastService
     // Service Disposal Operations (2500)
     [LoggerMessage(
         EventId = 2500,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "Error during SnapcastService disposal"
     )]
     private partial void LogErrorDuringSnapcastServiceDisposal(Exception ex);

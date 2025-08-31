@@ -236,7 +236,7 @@ public partial class GlobalExceptionHandlingMiddleware(
 
     [LoggerMessage(
         EventId = 1000,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "🚨 UNHANDLED EXCEPTION in {RequestMethod} {RequestPath} | CorrelationId: {CorrelationId} | RemoteIP: {RemoteIp} | UserAgent: {UserAgent}"
     )]
     private partial void LogUnhandledExceptionWithStackTrace(
@@ -250,7 +250,7 @@ public partial class GlobalExceptionHandlingMiddleware(
 
     [LoggerMessage(
         EventId = 1001,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "🚨 UNHANDLED EXCEPTION in {RequestMethod} {RequestPath} | CorrelationId: {CorrelationId} | RemoteIP: {RemoteIp} | UserAgent: {UserAgent} | Error: {ExceptionType} - {ExceptionMessage}"
     )]
     private partial void LogUnhandledException(
@@ -265,7 +265,7 @@ public partial class GlobalExceptionHandlingMiddleware(
 
     [LoggerMessage(
         EventId = 1002,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "🔄 Exception response sent: {StatusCode} {ErrorCode} | CorrelationId: {CorrelationId}"
     )]
     private partial void LogExceptionResponseSent(int statusCode, string errorCode, string correlationId);

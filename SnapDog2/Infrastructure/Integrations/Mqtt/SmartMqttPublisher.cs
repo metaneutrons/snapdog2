@@ -219,14 +219,14 @@ public sealed partial class SmartMqttPublisher : ISmartMqttPublisher
 
     [LoggerMessage(
         EventId = 4500,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "✅ Direct MQTT publish success: {EntityType} {EntityId} {EventType}"
     )]
     private partial void LogDirectPublishSuccess(string entityType, string entityId, string eventType);
 
     [LoggerMessage(
         EventId = 4501,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "❌ Direct MQTT publish failed: {EntityType} {EntityId} {EventType} - {ErrorMessage} (Failure #{FailureCount})"
     )]
     private partial void LogDirectPublishFailure(
@@ -239,28 +239,28 @@ public sealed partial class SmartMqttPublisher : ISmartMqttPublisher
 
     [LoggerMessage(
         EventId = 4502,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "🔄 Falling back to queue: {EntityType} {EntityId} {EventType}"
     )]
     private partial void LogFallingBackToQueue(string entityType, string entityId, string eventType);
 
     [LoggerMessage(
         EventId = 4503,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "🚫 Circuit breaker opened after {FailureCount} failures - switching to queue-only mode for {ResetTimeMinutes} minutes"
     )]
     private partial void LogCircuitBreakerOpened(int failureCount, double resetTimeMinutes);
 
     [LoggerMessage(
         EventId = 4504,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "✅ Circuit breaker reset - direct publishing re-enabled"
     )]
     private partial void LogCircuitBreakerReset();
 
     [LoggerMessage(
         EventId = 4505,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "🔄 Circuit breaker auto-reset after timeout - direct publishing re-enabled"
     )]
     private partial void LogCircuitBreakerAutoReset();

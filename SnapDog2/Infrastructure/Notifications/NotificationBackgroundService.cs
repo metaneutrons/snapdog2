@@ -217,21 +217,21 @@ public sealed partial class NotificationBackgroundService(
     // LoggerMessage methods for high-performance logging
     [LoggerMessage(
         EventId = 6800,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Notification background service started"
     )]
     private static partial void LogServiceStarted(ILogger logger);
 
     [LoggerMessage(
         EventId = 6801,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Notification background service stopped"
     )]
     private static partial void LogServiceStopped(ILogger logger);
 
     [LoggerMessage(
         EventId = 6802,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "Unhandled error processing notification {EventType} for {EntityType} {EntityId}"
     )]
     private static partial void LogUnhandledError(
@@ -244,7 +244,7 @@ public sealed partial class NotificationBackgroundService(
 
     [LoggerMessage(
         EventId = 6803,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Notification {EventType} for {EntityType} {EntityId} processed"
     )]
     private static partial void LogNotificationProcessed(
@@ -256,7 +256,7 @@ public sealed partial class NotificationBackgroundService(
 
     [LoggerMessage(
         EventId = 6804,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "Notification {EventType} for {EntityType} {EntityId} failed after {Attempts} attempts; dead-lettering"
     )]
     private static partial void LogNotificationFailed(
@@ -270,7 +270,7 @@ public sealed partial class NotificationBackgroundService(
 
     [LoggerMessage(
         EventId = 6805,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Retrying notification {EventType} for {EntityType} {EntityId} (attempt {Attempt}/{MaxAttempts}) after {Delay}ms"
     )]
     private static partial void LogRetryingNotification(

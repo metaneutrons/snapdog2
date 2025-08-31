@@ -32,21 +32,21 @@ public partial class ControlSetCommandHandler(IZoneManager zoneManager, ILogger<
 
     [LoggerMessage(
         EventId = 9900,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Executing control command '{Command}' for Zone {ZoneIndex} from {Source}"
     )]
     private partial void LogHandling(string command, int zoneIndex, CommandSource source);
 
     [LoggerMessage(
         EventId = 9901,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Zone {ZoneIndex} not found for ControlSetCommand"
     )]
     private partial void LogZoneNotFound(int zoneIndex);
 
     [LoggerMessage(
         EventId = 9902,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Unknown control command '{Command}' for Zone {ZoneIndex}"
     )]
     private partial void LogUnknownCommand(string command, int zoneIndex);

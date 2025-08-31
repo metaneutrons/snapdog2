@@ -142,21 +142,21 @@ public sealed partial class NotificationQueue : INotificationQueue
 
     [LoggerMessage(
         EventId = 6900,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Enqueued notification {EventType} for zone {ZoneIndex}"
     )]
     private partial void LogZoneNotificationEnqueued(string eventType, int zoneIndex);
 
     [LoggerMessage(
         EventId = 6901,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Enqueued notification {EventType} for client {ClientIndex}"
     )]
     private partial void LogClientNotificationEnqueued(string eventType, string clientIndex);
 
     [LoggerMessage(
         EventId = 6902,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Enqueued notification {EventType} for global system"
     )]
     private partial void LogGlobalNotificationEnqueued(string eventType);

@@ -39,14 +39,14 @@ public partial class CommandErrorsQueryHandler(
 
     [LoggerMessage(
         EventId = 9200,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Retrieving recent command errors"
     )]
     private partial void LogRetrievingCommandErrors();
 
     [LoggerMessage(
         EventId = 9201,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Failed to retrieve command errors: {ErrorMessage}"
     )]
     private partial void LogFailedToRetrieveCommandErrors(string errorMessage);
@@ -66,7 +66,7 @@ public partial class CommandErrorsQueryHandler(
             var errors = await this._commandStatusService.GetRecentErrorsAsync().ConfigureAwait(false);
             return Result<string[]>.Success(errors);
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
             this.LogFailedToRetrieveCommandErrors(ex.Message);
             return Result<string[]>.Failure($"Failed to retrieve command errors: {ex.Message}");

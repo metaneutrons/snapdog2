@@ -137,21 +137,21 @@ public partial class ErrorTrackingService : IErrorTrackingService
 
     [LoggerMessage(
         EventId = 6300,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Error recorded in {Component}.{Operation}: {Message}"
     )]
     private static partial void LogErrorRecorded(ILogger logger, string component, string operation, string message);
 
     [LoggerMessage(
         EventId = 6301,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Error tracking cleared"
     )]
     private static partial void LogErrorsCleared(ILogger logger);
 
     [LoggerMessage(
         EventId = 6302,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Removed {RemovedCount} old errors, {RemainingCount} errors remaining"
     )]
     private static partial void LogOldErrorsRemoved(ILogger logger, int removedCount, int remainingCount);

@@ -71,14 +71,14 @@ public partial class ValidationQueryBehavior<TQuery, TResponse>(
 
     [LoggerMessage(
         EventId = 1200,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Validating query {QueryName}"
     )]
     private partial void LogValidatingQuery(string queryName);
 
     [LoggerMessage(
         EventId = 1201,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Validation failed for query {QueryName} with {FailureCount} errors"
     )]
     private partial void LogValidationFailed(string queryName, int failureCount);

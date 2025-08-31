@@ -38,35 +38,35 @@ public partial class AttributeBasedMqttCommandMapper(
 
     [LoggerMessage(
         EventId = 4100,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Initializing MQTT command mappings from attributes"
     )]
     private partial void LogInitializingMappings();
 
     [LoggerMessage(
         EventId = 4101,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Found MQTT command: {CommandType} -> {TopicPattern}"
     )]
     private partial void LogFoundCommand(string commandType, string topicPattern);
 
     [LoggerMessage(
         EventId = 4102,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Mapping MQTT topic: {Topic} -> {Payload}"
     )]
     private partial void LogMappingTopic(string topic, string payload);
 
     [LoggerMessage(
         EventId = 4103,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "No matching command found for MQTT topic: {Topic}"
     )]
     private partial void LogNoMatchingCommand(string topic);
 
     [LoggerMessage(
         EventId = 4104,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "Error creating command for topic {Topic}: {Error}"
     )]
     private partial void LogCommandCreationError(string topic, string error);
@@ -313,7 +313,7 @@ public partial class AttributeBasedMqttCommandMapper(
 
     [LoggerMessage(
         EventId = 4105,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "Failed to create command instance for type {CommandType}"
     )]
     private partial void LogCommandInstanceCreationError(string commandType, Exception ex);

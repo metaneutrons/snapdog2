@@ -24,7 +24,7 @@ public sealed partial class MqttService
     // Initialization and Configuration (9301)
     [LoggerMessage(
         EventId = 4300,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "MQTT integration is disabled"
     )]
     private partial void LogMqttIntegrationIsDisabled();
@@ -32,42 +32,42 @@ public sealed partial class MqttService
     // Message Processing Operations (9302-9307)
     [LoggerMessage(
         EventId = 4301,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Processing MQTT message on topic {Topic}: {Payload}"
     )]
     private partial void LogProcessingMqttMessageOnTopic(string topic, string payload);
 
     [LoggerMessage(
         EventId = 4302,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Unknown command type: {CommandType}"
     )]
     private partial void LogUnknownCommandType(string commandType);
 
     [LoggerMessage(
         EventId = 4303,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Successfully processed MQTT command for topic {Topic}"
     )]
     private partial void LogSuccessfullyProcessedMqttCommandForTopic(string topic);
 
     [LoggerMessage(
         EventId = 4304,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "No command mapping found for topic {Topic}"
     )]
     private partial void LogNoCommandMappingFoundForTopic(string topic);
 
     [LoggerMessage(
         EventId = 4305,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "Failed to process MQTT message on topic {Topic}"
     )]
     private partial void LogFailedToProcessMqttMessageOnTopic(Exception ex, string topic);
 
     [LoggerMessage(
         EventId = 4306,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "Failed to map topic {Topic} to command"
     )]
     private partial void LogFailedToMapTopicToCommand(Exception ex, string topic);
@@ -75,35 +75,35 @@ public sealed partial class MqttService
     // Client Status Publishing Operations (9308-9312)
     [LoggerMessage(
         EventId = 4307,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Invalid client Index format: {ClientIndex}. Expected integer."
     )]
     private partial void LogInvalidClientIndexFormat(string clientIndex);
 
     [LoggerMessage(
         EventId = 4308,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "No MQTT configuration for client {ClientIndex}"
     )]
     private partial void LogNoMqttConfigurationForClient(string clientIndex);
 
     [LoggerMessage(
         EventId = 4309,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Client {ClientIndex} has no MQTT configuration"
     )]
     private partial void LogClientHasNoMqttConfiguration(string clientIndex);
 
     [LoggerMessage(
         EventId = 4310,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "No MQTT topic mapping for event type {EventType}"
     )]
     private partial void LogNoMqttTopicMappingForEventType(string eventType);
 
     [LoggerMessage(
         EventId = 4311,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "Failed to publish client status {EventType} for client {ClientIndex}"
     )]
     private partial void LogFailedToPublishClientStatus(Exception ex, string eventType, string clientIndex);
@@ -111,21 +111,21 @@ public sealed partial class MqttService
     // Zone Status Publishing Operations (9313-9315)
     [LoggerMessage(
         EventId = 4312,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "No MQTT configuration for zone {ZoneIndex}"
     )]
     private partial void LogNoMqttConfigurationForZone(int zoneIndex);
 
     [LoggerMessage(
         EventId = 4313,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Zone {ZoneIndex} has no MQTT configuration"
     )]
     private partial void LogZoneHasNoMqttConfiguration(int zoneIndex);
 
     [LoggerMessage(
         EventId = 4314,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "Failed to publish zone status {EventType} for zone {ZoneIndex}"
     )]
     private partial void LogFailedToPublishZoneStatus(Exception ex, string eventType, int zoneIndex);
@@ -133,14 +133,14 @@ public sealed partial class MqttService
     // Global Status Publishing Operations (9316-9317)
     [LoggerMessage(
         EventId = 4315,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "No MQTT topic mapping for global event type {EventType}"
     )]
     private partial void LogNoMqttTopicMappingForGlobalEventType(string eventType);
 
     [LoggerMessage(
         EventId = 4316,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "Failed to publish global status {EventType}"
     )]
     private partial void LogFailedToPublishGlobalStatus(Exception ex, string eventType);
@@ -148,7 +148,7 @@ public sealed partial class MqttService
     // Registry Validation Operations (9318)
     [LoggerMessage(
         EventId = 4317,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Unknown MQTT command '{Command}' with command ID '{CommandId}' not found in registry"
     )]
     private partial void LogUnknownMqttCommand(string command, string commandId);

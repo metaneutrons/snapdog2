@@ -35,14 +35,14 @@ public partial class SetClientVolumeCommandHandler(
 
     [LoggerMessage(
         EventId = 9000,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Setting volume for Client {ClientIndex} to {Volume} from {Source}"
     )]
     private partial void LogHandling(int clientIndex, int volume, CommandSource source);
 
     [LoggerMessage(
         EventId = 9001,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Client {ClientIndex} not found for SetClientVolumeCommand"
     )]
     private partial void LogClientNotFound(int clientIndex);

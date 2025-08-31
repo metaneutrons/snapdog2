@@ -192,21 +192,21 @@ public partial class PerformanceCommandBehavior<TCommand, TResponse>(
 
     [LoggerMessage(
         EventId = 7000,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Slow command detected: {CommandName} took {ElapsedMilliseconds}ms"
     )]
     private partial void LogSlowCommand(string commandName, long elapsedMilliseconds);
 
     [LoggerMessage(
         EventId = 7001,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "Command {CommandName} threw exception after {ElapsedMilliseconds}ms"
     )]
     private partial void LogCommandException(string commandName, long elapsedMilliseconds, Exception ex);
 
     [LoggerMessage(
         EventId = 7002,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Failed to record command-specific metrics for {CommandName}"
     )]
     private static partial void LogMetricsRecordingFailed(ILogger logger, Exception ex, string commandName);

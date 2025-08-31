@@ -311,7 +311,7 @@ static WebApplication CreateWebApplication(string[] args)
         builder.Services.AddHostedService<SnapDog2.Application.Worker.Services.IntegrationServicesHostedService>();
 
         // Add zone grouping configuration
-        builder.Services.Configure<SnapDog2.Shared.Configuration.SnapcastConfig>(_ => { });
+        builder.Services.Configure<SnapcastConfig>(_ => { });
 
         // Add continuous background service for automatic zone grouping
         builder.Services.AddHostedService<SnapDog2.Application.Services.ZoneGroupingBackgroundService>();
@@ -600,7 +600,7 @@ static WebApplication CreateWebApplication(string[] args)
     app.UseGlobalExceptionHandling();
 
     // Add HTTP metrics middleware (after exception handling, before other middleware)
-    app.UseMiddleware<SnapDog2.Api.Middleware.HttpMetricsMiddleware>();
+    app.UseMiddleware<HttpMetricsMiddleware>();
 
     // Configure the HTTP request pipeline (conditionally based on API configuration)
     if (snapDogConfig.Http.ApiEnabled)

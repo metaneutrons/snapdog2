@@ -41,77 +41,77 @@ public partial class SnapcastStateRepository(
 
     [LoggerMessage(
         EventId = 2700,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Updating full Snapcast server state. Groups: {GroupCount}, Clients: {ClientCount}, Streams: {StreamCount}"
     )]
     private partial void LogUpdatingServerState(int groupCount, int clientCount, int streamCount);
 
     [LoggerMessage(
         EventId = 2701,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Updating Snapcast client {ClientIndex}"
     )]
     private partial void LogUpdatingClient(string clientIndex);
 
     [LoggerMessage(
         EventId = 2702,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Removing Snapcast client {ClientIndex}"
     )]
     private partial void LogRemovingClient(string clientIndex);
 
     [LoggerMessage(
         EventId = 2703,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Updating Snapcast group {GroupId}"
     )]
     private partial void LogUpdatingGroup(string groupId);
 
     [LoggerMessage(
         EventId = 2704,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Removing Snapcast group {GroupId}"
     )]
     private partial void LogRemovingGroup(string groupId);
 
     [LoggerMessage(
         EventId = 2705,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Updating Snapcast stream {StreamId}"
     )]
     private partial void LogUpdatingStream(string streamId);
 
     [LoggerMessage(
         EventId = 2706,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Removing Snapcast stream {StreamId}"
     )]
     private partial void LogRemovingStream(string streamId);
 
     [LoggerMessage(
         EventId = 2707,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Client index {ClientIndex} is out of range. Valid range: 1-{MaxClients}"
     )]
     private partial void LogClientIndexOutOfRange(int clientIndex, int maxClients);
 
     [LoggerMessage(
         EventId = 2708,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Client {ClientIndex} ({ClientName}) has no MAC address configured"
     )]
     private partial void LogClientMacNotConfigured(int clientIndex, string clientName);
 
     [LoggerMessage(
         EventId = 2709,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Client {ClientIndex} ({ClientName}) with MAC {MacAddress} not found in Snapcast"
     )]
     private partial void LogClientNotFoundByMac(int clientIndex, string clientName, string macAddress);
 
     [LoggerMessage(
         EventId = 2710,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Client {ClientIndex} ({ClientName}) with MAC {MacAddress} found as Snapcast client {SnapcastClientId}"
     )]
     private partial void LogClientFoundByMac(
@@ -123,35 +123,35 @@ public partial class SnapcastStateRepository(
 
     [LoggerMessage(
         EventId = 2711,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Available Snapcast clients: {AvailableClients}"
     )]
     private partial void LogAvailableClients(string availableClients);
 
     [LoggerMessage(
         EventId = 2712,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Total Snapcast clients in repository: {ClientCount}"
     )]
     private partial void LogTotalClientCount(int clientCount);
 
     [LoggerMessage(
         EventId = 2713,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "🔄 UpdateServerState called with {GroupCount} groups"
     )]
     private partial void LogUpdateServerStateCalled(int groupCount);
 
     [LoggerMessage(
         EventId = 2714,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "📝 Processing group {GroupId} with {ClientCount} clients"
     )]
     private partial void LogProcessingGroup(string groupId, int clientCount);
 
     [LoggerMessage(
         EventId = 2715,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "👤 Adding/updating client {ClientIndex} (MAC: {MacAddress})"
     )]
     private partial void LogAddingClient(string clientIndex, string macAddress);

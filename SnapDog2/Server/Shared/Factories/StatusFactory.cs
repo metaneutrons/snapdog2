@@ -32,21 +32,21 @@ public partial class StatusFactory(ILogger<StatusFactory> logger) : IStatusFacto
 
     [LoggerMessage(
         EventId = 1300,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Creating {NotificationType} for {EntityType} {EntityIndex}"
     )]
     private partial void LogStatusCreation(string notificationType, string entityType, int entityIndex);
 
     [LoggerMessage(
         EventId = 1301,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Creating global {NotificationType}"
     )]
     private partial void LogGlobalStatusCreation(string notificationType);
 
     [LoggerMessage(
         EventId = 1302,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Invalid parameter for {NotificationType}: {ParameterName} = {Value}"
     )]
     private partial void LogInvalidParameter(string notificationType, string parameterName, object value);

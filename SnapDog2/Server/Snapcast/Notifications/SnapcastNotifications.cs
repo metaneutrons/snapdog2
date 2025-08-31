@@ -40,7 +40,7 @@ public record SnapcastClientDisconnectedNotification(SnapClient Client) : Snapca
 /// <summary>
 /// Notification sent when a Snapcast client's volume changes.
 /// </summary>
-public record SnapcastClientVolumeChangedNotification(string ClientIndex, SnapcastClient.Models.ClientVolume Volume)
+public record SnapcastClientVolumeChangedNotification(string ClientIndex, ClientVolume Volume)
     : SnapcastNotification;
 
 /// <summary>

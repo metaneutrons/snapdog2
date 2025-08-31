@@ -33,14 +33,14 @@ public partial class ClientVolumeUpCommandHandler(
 
     [LoggerMessage(
         EventId = 8300,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Increasing volume for Client {ClientIndex} by {Step} from {Source}"
     )]
     private partial void LogHandling(int clientIndex, int step, CommandSource source);
 
     [LoggerMessage(
         EventId = 8301,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Client {ClientIndex} not found for ClientVolumeUpCommand"
     )]
     private partial void LogClientNotFound(int clientIndex);

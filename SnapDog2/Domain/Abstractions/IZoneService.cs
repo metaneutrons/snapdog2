@@ -205,7 +205,7 @@ public interface IZoneService
     /// </summary>
     /// <param name="playbackState">The playback state to publish.</param>
     /// <returns>Task representing the async operation.</returns>
-    Task PublishPlaybackStateStatusAsync(SnapDog2.Shared.Enums.PlaybackState playbackState);
+    Task PublishPlaybackStateStatusAsync(Shared.Enums.PlaybackState playbackState);
 
     /// <summary>
     /// Publishes the current volume status.
@@ -227,7 +227,7 @@ public interface IZoneService
     /// <param name="trackInfo">The track information to publish.</param>
     /// <param name="trackIndex">The track index to publish (1-based).</param>
     /// <returns>Task representing the async operation.</returns>
-    Task PublishTrackStatusAsync(SnapDog2.Shared.Models.TrackInfo trackInfo, int trackIndex);
+    Task PublishTrackStatusAsync(TrackInfo trackInfo, int trackIndex);
 
     /// <summary>
     /// Publishes the current playlist status.
@@ -235,6 +235,6 @@ public interface IZoneService
     /// <param name="playlistInfo">The playlist information to publish.</param>
     /// <param name="playlistIndex">The playlist index to publish (1-based).</param>
     /// <returns>Task representing the async operation.</returns>
-    Task PublishPlaylistStatusAsync(SnapDog2.Shared.Models.PlaylistInfo playlistInfo, int playlistIndex);
+    Task PublishPlaylistStatusAsync(PlaylistInfo playlistInfo, int playlistIndex);
 
 }

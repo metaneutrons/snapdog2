@@ -261,7 +261,7 @@ public partial class SystemController(
     // ARCHITECTURAL PROBLEM - This should never happen in production
     [LoggerMessage(
         EventId = 5200,
-        Level = Microsoft.Extensions.Logging.LogLevel.Critical,
+        Level = LogLevel.Critical,
         Message = "🚨 CRITICAL: Handler {HandlerType} not found in DI container - This is a configuration BUG!"
     )]
     private partial void LogCriticalHandlerNotFound(string handlerType);
@@ -269,21 +269,21 @@ public partial class SystemController(
     // System Status (2310-2319)
     [LoggerMessage(
         EventId = 5201,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Getting system status"
     )]
     private partial void LogGettingSystemStatus();
 
     [LoggerMessage(
         EventId = 5202,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Failed to get system status: {Error}"
     )]
     private partial void LogFailedToGetSystemStatus(string? error);
 
     [LoggerMessage(
         EventId = 5203,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "Error getting system status"
     )]
     private partial void LogErrorGettingSystemStatus(Exception exception);
@@ -291,21 +291,21 @@ public partial class SystemController(
     // System Errors (2320-2329)
     [LoggerMessage(
         EventId = 5204,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Getting system errors"
     )]
     private partial void LogGettingSystemErrors();
 
     [LoggerMessage(
         EventId = 5205,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Failed to get system errors: {Error}"
     )]
     private partial void LogFailedToGetSystemErrors(string? error);
 
     [LoggerMessage(
         EventId = 5206,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "Error getting system errors"
     )]
     private partial void LogErrorGettingSystemErrors(Exception exception);
@@ -313,21 +313,21 @@ public partial class SystemController(
     // System Version (2330-2339)
     [LoggerMessage(
         EventId = 5207,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Getting system version"
     )]
     private partial void LogGettingSystemVersion();
 
     [LoggerMessage(
         EventId = 5208,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Failed to get system version: {Error}"
     )]
     private partial void LogFailedToGetSystemVersion(string? error);
 
     [LoggerMessage(
         EventId = 5209,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "Error getting system version"
     )]
     private partial void LogErrorGettingSystemVersion(Exception exception);
@@ -335,21 +335,21 @@ public partial class SystemController(
     // System Statistics (2340-2349)
     [LoggerMessage(
         EventId = 5210,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Getting system statistics"
     )]
     private partial void LogGettingSystemStatistics();
 
     [LoggerMessage(
         EventId = 5211,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Failed to get system statistics: {Error}"
     )]
     private partial void LogFailedToGetSystemStatistics(string? error);
 
     [LoggerMessage(
         EventId = 5212,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "Error getting system statistics"
     )]
     private partial void LogErrorGettingSystemStatistics(Exception exception);
@@ -357,42 +357,42 @@ public partial class SystemController(
     // Command Status (2350-2359)
     [LoggerMessage(
         EventId = 5213,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Getting command processing status"
     )]
     private partial void LogGettingCommandStatus();
 
     [LoggerMessage(
         EventId = 5214,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Failed to get command status: {Error}"
     )]
     private partial void LogFailedToGetCommandStatus(string? error);
 
     [LoggerMessage(
         EventId = 5215,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "Error getting command status"
     )]
     private partial void LogErrorGettingCommandStatus(Exception exception);
 
     [LoggerMessage(
         EventId = 5216,
-        Level = Microsoft.Extensions.Logging.LogLevel.Debug,
+        Level = LogLevel.Debug,
         Message = "Getting command errors"
     )]
     private partial void LogGettingCommandErrors();
 
     [LoggerMessage(
         EventId = 5217,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Failed to get command errors: {Error}"
     )]
     private partial void LogFailedToGetCommandErrors(string? error);
 
     [LoggerMessage(
         EventId = 5218,
-        Level = Microsoft.Extensions.Logging.LogLevel.Error,
+        Level = LogLevel.Error,
         Message = "Error getting command errors"
     )]
     private partial void LogErrorGettingCommandErrors(Exception exception);

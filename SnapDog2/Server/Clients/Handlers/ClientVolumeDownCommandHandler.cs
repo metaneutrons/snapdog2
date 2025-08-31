@@ -33,14 +33,14 @@ public partial class ClientVolumeDownCommandHandler(
 
     [LoggerMessage(
         EventId = 8200,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Decreasing volume for Client {ClientIndex} by {Step} from {Source}"
     )]
     private partial void LogHandling(int clientIndex, int step, CommandSource source);
 
     [LoggerMessage(
         EventId = 8201,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Client {ClientIndex} not found for ClientVolumeDownCommand"
     )]
     private partial void LogClientNotFound(int clientIndex);

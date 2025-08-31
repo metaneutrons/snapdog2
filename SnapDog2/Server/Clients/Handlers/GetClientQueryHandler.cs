@@ -32,7 +32,7 @@ public partial class GetClientQueryHandler(IClientManager clientManager, ILogger
 
     [LoggerMessage(
         EventId = 8500,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Handling GetClientQuery for Client {ClientIndex}"
     )]
     private partial void LogHandling(int clientIndex);

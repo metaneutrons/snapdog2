@@ -23,14 +23,14 @@ using SnapDog2.Shared.Models;
 /// Handles HTTP audio streaming with format conversion and metadata extraction.
 /// </summary>
 public sealed partial class MediaPlayer(
-    SnapDog2.Shared.Configuration.AudioConfig config,
+    AudioConfig config,
     ILogger<MediaPlayer> logger,
     ILogger<MetadataManager> metadataLogger,
     int zoneIndex,
     string sinkPath
 ) : IAsyncDisposable
 {
-    private readonly SnapDog2.Shared.Configuration.AudioConfig _config =
+    private readonly AudioConfig _config =
         config ?? throw new ArgumentNullException(nameof(config));
     private readonly ILogger<MediaPlayer> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly ILogger<MetadataManager> _metadataLogger =

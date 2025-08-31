@@ -37,21 +37,21 @@ public partial class AssignClientToZoneCommandHandler(
 
     [LoggerMessage(
         EventId = 8100,
-        Level = Microsoft.Extensions.Logging.LogLevel.Information,
+        Level = LogLevel.Information,
         Message = "Assigning Client {ClientIndex} to Zone {ZoneIndex} from {Source}"
     )]
     private partial void LogHandling(int clientIndex, int zoneIndex, CommandSource source);
 
     [LoggerMessage(
         EventId = 8101,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Client {ClientIndex} not found for AssignClientToZoneCommand"
     )]
     private partial void LogClientNotFound(int clientIndex);
 
     [LoggerMessage(
         EventId = 8102,
-        Level = Microsoft.Extensions.Logging.LogLevel.Warning,
+        Level = LogLevel.Warning,
         Message = "Zone {ZoneIndex} not found for AssignClientToZoneCommand"
     )]
     private partial void LogZoneNotFound(int zoneIndex);

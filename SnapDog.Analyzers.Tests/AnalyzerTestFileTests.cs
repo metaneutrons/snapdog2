@@ -95,7 +95,7 @@ public partial class TestService
         foreach (var diagnostic in diagnostics)
         {
             var lineSpan = diagnostic.Location.GetLineSpan();
-            System.Console.WriteLine(
+            Console.WriteLine(
                 $"{diagnostic.Id}: {diagnostic.GetMessage()} at line {lineSpan.StartLinePosition.Line + 1}"
             );
         }
@@ -139,7 +139,7 @@ public partial class TestService
         var references = new[]
         {
             MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
-            MetadataReference.CreateFromFile(typeof(System.Console).Assembly.Location),
+            MetadataReference.CreateFromFile(typeof(Console).Assembly.Location),
         };
 
         var compilation = CSharpCompilation.Create("TestAssembly", new[] { syntaxTree }, references);
