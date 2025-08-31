@@ -51,8 +51,8 @@ public partial class ZoneManager(
     private readonly IStatusFactory _statusFactory = statusFactory;
     private readonly IOptions<SnapDogConfiguration> _configuration = configuration;
     private readonly List<ZoneConfig> _zoneConfigs = configuration.Value.Zones;
-    private readonly ConcurrentDictionary<int, IZoneService> _zones = new ConcurrentDictionary<int, IZoneService>();
-    private readonly SemaphoreSlim _initializationLock = new SemaphoreSlim(1, 1);
+    private readonly ConcurrentDictionary<int, IZoneService> _zones = new();
+    private readonly SemaphoreSlim _initializationLock = new(1, 1);
     private bool _isInitialized;
     private bool _disposed;
 

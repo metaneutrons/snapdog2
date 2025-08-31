@@ -41,7 +41,7 @@ public partial class GlobalStatusService(
     ILogger<GlobalStatusService> logger
 ) : IGlobalStatusService
 {
-    private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
 
     /// <inheritdoc />
     public async Task PublishSystemStatusAsync(CancellationToken cancellationToken = default)
