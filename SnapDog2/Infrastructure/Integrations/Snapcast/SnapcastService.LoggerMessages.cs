@@ -22,7 +22,7 @@ public partial class SnapcastService
 {
     // Service Disposal Operations (2500)
     [LoggerMessage(
-        EventId = 2500,
+        EventId = 7300,
         Level = LogLevel.Error,
         Message = "Error during SnapcastService disposal"
     )]

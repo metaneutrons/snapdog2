@@ -22,7 +22,7 @@ public partial class StatePublishingService
 {
     // State Publishing Operations (10701)
     [LoggerMessage(
-        EventId = 5100,
+        EventId = 6200,
         Level = LogLevel.Information,
         Message = "State publishing cancelled during shutdown"
     )]

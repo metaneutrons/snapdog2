@@ -31,21 +31,21 @@ public partial class ToggleClientMuteCommandHandler(
     private readonly ILogger<ToggleClientMuteCommandHandler> _logger = logger;
 
     [LoggerMessage(
-        EventId = 9100,
+        EventId = 11300,
         Level = LogLevel.Information,
         Message = "Toggling mute for Client {ClientIndex} from {Source}"
     )]
     private partial void LogHandling(int clientIndex, CommandSource source);
 
     [LoggerMessage(
-        EventId = 9101,
+        EventId = 11301,
         Level = LogLevel.Warning,
         Message = "Client {ClientIndex} not found for ToggleClientMuteCommand"
     )]
     private partial void LogClientNotFound(int clientIndex);
 
     [LoggerMessage(
-        EventId = 9102,
+        EventId = 11302,
         Level = LogLevel.Information,
         Message = "Toggled mute for Client {ClientIndex} to {NewMuteState}"
     )]

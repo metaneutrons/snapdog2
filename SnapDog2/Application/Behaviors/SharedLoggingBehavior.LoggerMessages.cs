@@ -22,21 +22,21 @@ public partial class SharedLoggingCommandBehavior<TCommand, TResponse>
 {
     // Command Lifecycle Operations (9701-9703)
     [LoggerMessage(
-        EventId = 4600,
+        EventId = 1000,
         Level = LogLevel.Information,
         Message = "Starting Command {CommandName}"
     )]
     private partial void LogStartingCommand(string commandName);
 
     [LoggerMessage(
-        EventId = 4601,
+        EventId = 1001,
         Level = LogLevel.Information,
         Message = "Completed Command {CommandName} in {ElapsedMilliseconds}ms"
     )]
     private partial void LogCompletedCommand(string commandName, long elapsedMilliseconds);
 
     [LoggerMessage(
-        EventId = 4602,
+        EventId = 1002,
         Level = LogLevel.Error,
         Message = "Command {CommandName} failed after {ElapsedMilliseconds}ms"
     )]
@@ -51,21 +51,21 @@ public partial class SharedLoggingQueryBehavior<TQuery, TResponse>
 {
     // Query Lifecycle Operations (9704-9706)
     [LoggerMessage(
-        EventId = 4603,
+        EventId = 1003,
         Level = LogLevel.Information,
         Message = "Starting Query {QueryName}"
     )]
     private partial void LogStartingQuery(string queryName);
 
     [LoggerMessage(
-        EventId = 4604,
+        EventId = 1004,
         Level = LogLevel.Information,
         Message = "Completed Query {QueryName} in {ElapsedMilliseconds}ms"
     )]
     private partial void LogCompletedQuery(string queryName, long elapsedMilliseconds);
 
     [LoggerMessage(
-        EventId = 4605,
+        EventId = 1005,
         Level = LogLevel.Error,
         Message = "Query {QueryName} failed after {ElapsedMilliseconds}ms"
     )]

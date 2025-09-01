@@ -57,42 +57,42 @@ public partial class ZoneManager(
     private bool _disposed;
 
     [LoggerMessage(
-        EventId = 6553,
+        EventId = 7062,
         Level = LogLevel.Information,
         Message = "Initializing ZoneManager with {ZoneCount} configured zones"
     )]
     private partial void LogInitializing(int zoneCount);
 
     [LoggerMessage(
-        EventId = 6554,
+        EventId = 7064,
         Level = LogLevel.Information,
         Message = "Zone {ZoneIndex} ({ZoneName}) initialized successfully"
     )]
     private partial void LogZoneInitialized(int zoneIndex, string zoneName);
 
     [LoggerMessage(
-        EventId = 6555,
+        EventId = 7065,
         Level = LogLevel.Warning,
         Message = "Zone {ZoneIndex} not found"
     )]
     private partial void LogZoneNotFound(int zoneIndex);
 
     [LoggerMessage(
-        EventId = 6556,
+        EventId = 7066,
         Level = LogLevel.Error,
         Message = "Failed to initialize zone {ZoneIndex}: {Error}"
     )]
     private partial void LogZoneInitializationFailed(int zoneIndex, string error);
 
     [LoggerMessage(
-        EventId = 6557,
+        EventId = 7067,
         Level = LogLevel.Debug,
         Message = "Getting zone {ZoneIndex}"
     )]
     private partial void LogGettingZone(int zoneIndex);
 
     [LoggerMessage(
-        EventId = 6558,
+        EventId = 7068,
         Level = LogLevel.Debug,
         Message = "Getting all zones"
     )]
@@ -1926,28 +1926,28 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     }
 
     [LoggerMessage(
-        EventId = 6559,
+        EventId = 7006,
         Level = LogLevel.Information,
         Message = "Zone {ZoneIndex} ({ZoneName}): {Action}"
     )]
     private partial void LogZoneAction(int zoneIndex, string zoneName, string action);
 
     [LoggerMessage(
-        EventId = 6560,
+        EventId = 7007,
         Level = LogLevel.Debug,
         Message = "Zone {ZoneIndex} synchronized with Snapcast group {GroupId}"
     )]
     private partial void LogSnapcastSync(int zoneIndex, string groupId);
 
     [LoggerMessage(
-        EventId = 6561,
+        EventId = 7008,
         Level = LogLevel.Warning,
         Message = "Zone {ZoneIndex} Snapcast group {GroupId} not found"
     )]
     private partial void LogSnapcastGroupNotFound(int zoneIndex, string groupId);
 
     [LoggerMessage(
-        EventId = 6562,
+        EventId = 7009,
         Level = LogLevel.Error,
         Message = "Zone {ZoneIndex} ({ZoneName}): {Action} - {Error}"
     )]
@@ -1955,7 +1955,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     // LoggerMessage methods for high-performance logging
     [LoggerMessage(
-        EventId = 6500,
+        EventId = 7010,
         Level = LogLevel.Information,
         Message = "Zone {ZoneIndex}: Loaded state from store - Source: {Source}; Playlist: {PlaylistIndex}, Track: {TrackIndex} ({TrackTitle})"
     )]
@@ -1968,34 +1968,34 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     );
 
     [LoggerMessage(
-        EventId = 6501,
+        EventId = 7011,
         Level = LogLevel.Information,
         Message = "Zone {ZoneIndex}: No stored state found, creating initial state"
     )]
     private partial void LogNoStoredStateFound(int zoneIndex);
 
-    [LoggerMessage(EventId = 6502, Level = LogLevel.Debug, Message = "GetStateAsync: Called for zone {ZoneIndex}")]
+    [LoggerMessage(EventId = 7012, Level = LogLevel.Debug, Message = "GetStateAsync: Called for zone {ZoneIndex}")]
     private partial void LogGetStateAsyncCalled(int zoneIndex);
 
-    [LoggerMessage(EventId = 6503, Level = LogLevel.Warning, Message = "GetStateAsync: Timeout for zone {ZoneIndex} - returning cached state")]
+    [LoggerMessage(EventId = 7014, Level = LogLevel.Warning, Message = "GetStateAsync: Timeout for zone {ZoneIndex} - returning cached state")]
     private partial void LogGetStateAsyncTimeout(int zoneIndex);
 
     [LoggerMessage(
-        EventId = 6503,
+        EventId = 7014,
         Level = LogLevel.Information,
         Message = "Zone {ZoneIndex}: State updated - {StateInfo}"
     )]
     private partial void LogZoneStateUpdated(int zoneIndex, string stateInfo);
 
     [LoggerMessage(
-        EventId = 6504,
+        EventId = 7015,
         Level = LogLevel.Debug,
         Message = "UpdateStateFromSnapcastAsync: Starting for zone {ZoneIndex}"
     )]
     private partial void LogUpdateStateFromSnapcastStarting(int zoneIndex);
 
     [LoggerMessage(
-        EventId = 6505,
+        EventId = 7016,
         Level = LogLevel.Information,
         Message = "🎵 Zone {ZoneIndex} playing: {TrackTitle} from {Source} (playlist {PlaylistIndex}, track {TrackIndex})"
     )]
@@ -2008,204 +2008,204 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     );
 
     [LoggerMessage(
-        EventId = 6506,
+        EventId = 7017,
         Level = LogLevel.Debug,
         Message = "UpdateStateFromSnapcastAsync: Getting server status for zone {ZoneIndex}"
     )]
     private partial void LogGettingServerStatus(int zoneIndex);
 
     [LoggerMessage(
-        EventId = 6507,
+        EventId = 7018,
         Level = LogLevel.Debug,
         Message = "UpdateStateFromSnapcastAsync: Found group {GroupId} for zone {ZoneIndex}"
     )]
     private partial void LogFoundGroup(int zoneIndex, string groupId);
 
     [LoggerMessage(
-        EventId = 6508,
+        EventId = 7019,
         Level = LogLevel.Information,
         Message = "Zone {ZoneIndex}: Stream changed from {OldStream} to {NewStream}"
     )]
     private partial void LogStreamChanged(int zoneIndex, string oldStream, string newStream);
 
-    [LoggerMessage(EventId = 6509, Level = LogLevel.Debug, Message = "Zone {ZoneIndex}: Stream unchanged: {StreamId}")]
+    [LoggerMessage(EventId = 7020, Level = LogLevel.Debug, Message = "Zone {ZoneIndex}: Stream unchanged: {StreamId}")]
     private partial void LogStreamUnchanged(int zoneIndex, string streamId);
 
     [LoggerMessage(
-        EventId = 6510,
+        EventId = 7021,
         Level = LogLevel.Information,
         Message = "Zone {ZoneIndex}: Volume changed from {OldVolume}% to {NewVolume}%"
     )]
     private partial void LogVolumeChanged(int zoneIndex, int oldVolume, int newVolume);
 
-    [LoggerMessage(EventId = 6511, Level = LogLevel.Debug, Message = "Zone {ZoneIndex}: Volume unchanged: {Volume}%")]
+    [LoggerMessage(EventId = 7022, Level = LogLevel.Debug, Message = "Zone {ZoneIndex}: Volume unchanged: {Volume}%")]
     private partial void LogVolumeUnchanged(int zoneIndex, int volume);
 
-    [LoggerMessage(EventId = 6512, Level = LogLevel.Debug, Message = "Zone {ZoneIndex}: No group found in Snapcast")]
+    [LoggerMessage(EventId = 7023, Level = LogLevel.Debug, Message = "Zone {ZoneIndex}: No group found in Snapcast")]
     private partial void LogNoGroupFound(int zoneIndex);
 
-    [LoggerMessage(EventId = 6513, Level = LogLevel.Debug, Message = "Zone {ZoneIndex}: No server status available")]
+    [LoggerMessage(EventId = 7024, Level = LogLevel.Debug, Message = "Zone {ZoneIndex}: No server status available")]
     private partial void LogNoServerStatus(int zoneIndex);
 
     [LoggerMessage(
-        EventId = 6514,
+        EventId = 7025,
         Level = LogLevel.Information,
         Message = "Zone {ZoneIndex}: State synchronized from Snapcast"
     )]
     private partial void LogStateSynchronized(int zoneIndex);
 
     [LoggerMessage(
-        EventId = 6515,
+        EventId = 7026,
         Level = LogLevel.Warning,
         Message = "Failed to update zone {ZoneIndex} state from media player"
     )]
     private partial void LogFailedUpdateFromMediaPlayer(Exception ex, int zoneIndex);
 
     [LoggerMessage(
-        EventId = 6516,
+        EventId = 7027,
         Level = LogLevel.Error,
         Message = "Failed to update zone {ZoneIndex} state from Snapcast"
     )]
     private partial void LogFailedUpdateFromSnapcast(Exception ex, int zoneIndex);
 
     [LoggerMessage(
-        EventId = 6517,
+        EventId = 7028,
         Level = LogLevel.Debug,
         Message = "Starting position update timer for zone {ZoneIndex}"
     )]
     private partial void LogStartingPositionTimer(int zoneIndex);
 
     [LoggerMessage(
-        EventId = 6518,
+        EventId = 7029,
         Level = LogLevel.Warning,
         Message = "Error during position update for zone {ZoneIndex}"
     )]
     private partial void LogPositionUpdateError(Exception ex, int zoneIndex);
 
     [LoggerMessage(
-        EventId = 6519,
+        EventId = 7030,
         Level = LogLevel.Debug,
         Message = "Stopping position update timer for zone {ZoneIndex}"
     )]
     private partial void LogStoppingPositionTimer(int zoneIndex);
 
     [LoggerMessage(
-        EventId = 6520,
+        EventId = 7031,
         Level = LogLevel.Information,
         Message = "✅ Subscribing to MediaPlayer events for zone {ZoneIndex}"
     )]
     private partial void LogSubscribingToMediaPlayerEvents(int zoneIndex);
 
     [LoggerMessage(
-        EventId = 6521,
+        EventId = 7032,
         Level = LogLevel.Warning,
         Message = "⚠️ MediaPlayer is null when trying to subscribe to events for zone {ZoneIndex}"
     )]
     private partial void LogMediaPlayerNullOnSubscribe(int zoneIndex);
 
     [LoggerMessage(
-        EventId = 6522,
+        EventId = 7033,
         Level = LogLevel.Debug,
         Message = "Unsubscribing from MediaPlayer events for zone {ZoneIndex}"
     )]
     private partial void LogUnsubscribingFromMediaPlayerEvents(int zoneIndex);
 
     [LoggerMessage(
-        EventId = 6523,
+        EventId = 7034,
         Level = LogLevel.Information,
         Message = "🎵 Zone {ZoneIndex} position: {PositionMs}ms / {DurationMs}ms ({Progress:P1})"
     )]
     private partial void LogPositionUpdate(int zoneIndex, long positionMs, long durationMs, float progress);
 
-    [LoggerMessage(EventId = 6524, Level = LogLevel.Debug, Message = "📡 Published MQTT update for position change")]
+    [LoggerMessage(EventId = 7035, Level = LogLevel.Debug, Message = "📡 Published MQTT update for position change")]
     private partial void LogPublishedMqttPositionUpdate();
 
     [LoggerMessage(
-        EventId = 6525,
+        EventId = 7036,
         Level = LogLevel.Warning,
         Message = "Error handling position change for zone {ZoneIndex}"
     )]
     private partial void LogPositionChangeError(Exception ex, int zoneIndex);
 
     [LoggerMessage(
-        EventId = 6526,
+        EventId = 7037,
         Level = LogLevel.Debug,
         Message = "MediaPlayer state changed for zone {ZoneIndex}: {State}"
     )]
     private partial void LogMediaPlayerStateChanged(int zoneIndex, LibVLC.VLCState state);
 
     [LoggerMessage(
-        EventId = 6527,
+        EventId = 7038,
         Level = LogLevel.Warning,
         Message = "Error handling state change for zone {ZoneIndex}"
     )]
     private partial void LogStateChangeError(Exception ex, int zoneIndex);
 
     [LoggerMessage(
-        EventId = 6528,
+        EventId = 7039,
         Level = LogLevel.Debug,
         Message = "UpdateStateFromSnapcastAsync: MediaPlayer status result - Success: {Success}, Value: {Value}"
     )]
     private partial void LogMediaPlayerStatusResult(bool success, string value);
 
     [LoggerMessage(
-        EventId = 6529,
+        EventId = 7040,
         Level = LogLevel.Debug,
         Message = "UpdateStateFromSnapcastAsync: Status - IsPlaying: {IsPlaying}, CurrentTrack: {CurrentTrack}"
     )]
     private partial void LogMediaPlayerStatus(bool isPlaying, string? currentTrack);
 
     [LoggerMessage(
-        EventId = 6530,
+        EventId = 7041,
         Level = LogLevel.Information,
         Message = "UpdateStateFromSnapcastAsync: Track state changed - Old IsPlaying: {OldIsPlaying}, New IsPlaying: {NewIsPlaying}"
     )]
     private partial void LogTrackStateChanged(bool oldIsPlaying, bool newIsPlaying);
 
     [LoggerMessage(
-        EventId = 6531,
+        EventId = 7042,
         Level = LogLevel.Debug,
         Message = "UpdateStateFromSnapcastAsync: Updating track state - Old IsPlaying: {OldIsPlaying}, New IsPlaying: {NewIsPlaying}"
     )]
     private partial void LogUpdatingTrackState(bool oldIsPlaying, bool newIsPlaying);
 
     [LoggerMessage(
-        EventId = 6532,
+        EventId = 7043,
         Level = LogLevel.Information,
         Message = "UpdateStateFromSnapcastAsync: Position update - Position: {PositionMs}ms, Duration: {DurationMs}ms"
     )]
     private partial void LogPositionUpdateFromSnapcast(long positionMs, long durationMs);
 
     [LoggerMessage(
-        EventId = 6533,
+        EventId = 7044,
         Level = LogLevel.Debug,
         Message = "UpdateStateFromSnapcastAsync: Position unchanged - Position: {PositionMs}ms"
     )]
     private partial void LogPositionUnchanged(long positionMs);
 
     [LoggerMessage(
-        EventId = 6534,
+        EventId = 7045,
         Level = LogLevel.Debug,
         Message = "UpdateStateFromSnapcastAsync: No group found for zone {ZoneIndex}"
     )]
     private partial void LogNoGroupFoundForZone(int zoneIndex);
 
     [LoggerMessage(
-        EventId = 6535,
+        EventId = 7046,
         Level = LogLevel.Debug,
         Message = "UpdateStateFromSnapcastAsync: No server status available for zone {ZoneIndex}"
     )]
     private partial void LogNoServerStatusForZone(int zoneIndex);
 
     [LoggerMessage(
-        EventId = 6536,
+        EventId = 7047,
         Level = LogLevel.Information,
         Message = "UpdateStateFromSnapcastAsync: State synchronized for zone {ZoneIndex}"
     )]
     private partial void LogStateSynchronizedForZone(int zoneIndex);
 
     [LoggerMessage(
-        EventId = 6537,
+        EventId = 7048,
         Level = LogLevel.Information,
         Message = "Zone {ZoneIndex}: Playing \"{Title}\" - {Position:F1}s / {Duration:F1}s ({Progress:F1}%)"
     )]
@@ -2218,136 +2218,136 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     );
 
     [LoggerMessage(
-        EventId = 6538,
+        EventId = 7049,
         Level = LogLevel.Debug,
         Message = "UpdateStateFromSnapcastAsync: LibVLC Position Data - PositionMs: {PositionMs}, Progress: {Progress}, DurationMs: {DurationMs}"
     )]
     private partial void LogLibVlcPositionData(long? positionMs, float progress, long? durationMs);
 
     [LoggerMessage(
-        EventId = 6539,
+        EventId = 7050,
         Level = LogLevel.Debug,
         Message = "UpdateStateFromSnapcastAsync: Updated track state - IsPlaying: {IsPlaying}, PositionMs: {PositionMs}, Progress: {Progress}"
     )]
     private partial void LogUpdatedTrackState(bool isPlaying, long positionMs, float progress);
 
     [LoggerMessage(
-        EventId = 6540,
+        EventId = 7051,
         Level = LogLevel.Debug,
         Message = "UpdateStateFromSnapcastAsync: Skipping update - CurrentState.Track: {CurrentTrack}, Status.CurrentTrack: {StatusCurrentTrack}"
     )]
     private partial void LogSkippingUpdate(string currentTrack, string statusCurrentTrack);
 
     [LoggerMessage(
-        EventId = 6541,
+        EventId = 7052,
         Level = LogLevel.Information,
         Message = "UpdateStateFromSnapcastAsync: MediaPlayer status failed or null - Success: {Success}, ErrorMessage: {ErrorMessage}"
     )]
     private partial void LogMediaPlayerStatusFailed(bool success, string? errorMessage);
 
     [LoggerMessage(
-        EventId = 6542,
+        EventId = 7053,
         Level = LogLevel.Warning,
         Message = "Failed to update zone {ZoneIndex} state from media player"
     )]
     private partial void LogFailedToUpdateZoneState(Exception ex, int zoneIndex);
 
     [LoggerMessage(
-        EventId = 6544,
+        EventId = 7054,
         Level = LogLevel.Debug,
         Message = "Starting position update timer for zone {ZoneIndex}"
     )]
     private partial void LogStartingPositionUpdateTimer(int zoneIndex);
 
     [LoggerMessage(
-        EventId = 6545,
+        EventId = 7055,
         Level = LogLevel.Warning,
         Message = "Error during position update for zone {ZoneIndex}"
     )]
     private partial void LogErrorDuringPositionUpdate(Exception ex, int zoneIndex);
 
     [LoggerMessage(
-        EventId = 6546,
+        EventId = 7056,
         Level = LogLevel.Debug,
         Message = "Stopping position update timer for zone {ZoneIndex}"
     )]
     private partial void LogStoppingPositionUpdateTimer(int zoneIndex);
 
     [LoggerMessage(
-        EventId = 6547,
+        EventId = 7057,
         Level = LogLevel.Information,
         Message = "🎵 LibVLC Position Event: Zone {ZoneIndex}, PositionMs: {PositionMs}, Progress: {Progress}"
     )]
     private partial void LogPositionChangedForZone(int zoneIndex, long positionMs, float progress);
 
     [LoggerMessage(
-        EventId = 6548,
+        EventId = 7058,
         Level = LogLevel.Debug,
         Message = "Skipping position update - disposed: {Disposed}, state: {State}"
     )]
     private partial void LogSkippingPositionUpdate(bool disposed, string state);
 
-    [LoggerMessage(EventId = 6549, Level = LogLevel.Debug, Message = "📡 Published MQTT update for position change")]
+    [LoggerMessage(EventId = 7059, Level = LogLevel.Debug, Message = "📡 Published MQTT update for position change")]
     private partial void LogPublishedMqttUpdateForPositionChange();
 
     [LoggerMessage(
-        EventId = 6550,
+        EventId = 7060,
         Level = LogLevel.Warning,
         Message = "Error handling position change for zone {ZoneIndex}"
     )]
     private partial void LogErrorHandlingPositionChange(Exception ex, int zoneIndex);
 
     [LoggerMessage(
-        EventId = 6551,
+        EventId = 7061,
         Level = LogLevel.Debug,
         Message = "MediaPlayer state changed for zone {ZoneIndex}: {State}"
     )]
     private partial void LogMediaPlayerStateChanged(int zoneIndex, string state);
 
     [LoggerMessage(
-        EventId = 6553,
+        EventId = 7062,
         Level = LogLevel.Warning,
         Message = "Error publishing track metadata notifications for zone {ZoneIndex}"
     )]
     private partial void LogErrorPublishingTrackMetadata(Exception ex, int zoneIndex);
 
     [LoggerMessage(
-        EventId = 6552,
+        EventId = 7063,
         Level = LogLevel.Warning,
         Message = "Error handling state change for zone {ZoneIndex}"
     )]
     private partial void LogErrorHandlingStateChange(Exception ex, int zoneIndex);
 
     [LoggerMessage(
-        EventId = 6554,
+        EventId = 7064,
         Level = LogLevel.Warning,
         Message = "Error publishing track playing status notification for zone {ZoneIndex}"
     )]
     private partial void LogErrorPublishingTrackPlayingStatus(Exception ex, int zoneIndex);
 
     [LoggerMessage(
-        EventId = 6555,
+        EventId = 7065,
         Level = LogLevel.Warning,
         Message = "Error publishing track progress notification for zone {ZoneIndex}"
     )]
     private partial void LogErrorPublishingTrackProgress(Exception ex, int zoneIndex);
 
     [LoggerMessage(
-        EventId = 6556,
+        EventId = 7066,
         Level = LogLevel.Debug,
         Message = "🎵 Track info changed for zone {ZoneIndex}: '{Title}' by '{Artist}'"
     )]
     private partial void LogTrackInfoChanged(int zoneIndex, string title, string artist);
 
     [LoggerMessage(
-        EventId = 6557,
+        EventId = 7067,
         Level = LogLevel.Information,
         Message = "✅ Track info updated for zone {ZoneIndex}: '{Title}'"
     )]
     private partial void LogTrackInfoUpdated(int zoneIndex, string title);
 
     [LoggerMessage(
-        EventId = 6558,
+        EventId = 7068,
         Level = LogLevel.Warning,
         Message = "Error handling track info change for zone {ZoneIndex}"
     )]

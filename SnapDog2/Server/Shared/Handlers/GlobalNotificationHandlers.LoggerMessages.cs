@@ -22,7 +22,7 @@ public partial class GlobalStateNotificationHandler
 {
     // Global Event Publishing Operations (11101)
     [LoggerMessage(
-        EventId = 4900,
+        EventId = 12200,
         Level = LogLevel.Warning,
         Message = "Failed to publish {EventType} to external systems"
     )]

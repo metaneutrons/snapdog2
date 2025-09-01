@@ -27,35 +27,35 @@ public partial class PlaylistManager : IPlaylistManager
     private readonly Dictionary<string, List<TrackInfo>> _playlistTracks;
 
     [LoggerMessage(
-        EventId = 6400,
+        EventId = 6800,
         Level = LogLevel.Debug,
         Message = "Getting all playlists"
     )]
     private partial void LogGettingAllPlaylists();
 
     [LoggerMessage(
-        EventId = 6401,
+        EventId = 6801,
         Level = LogLevel.Debug,
         Message = "Getting tracks for playlist ID: {PlaylistIndex}"
     )]
     private partial void LogGettingTracksByPlaylistIndex(string playlistIndex);
 
     [LoggerMessage(
-        EventId = 6402,
+        EventId = 6802,
         Level = LogLevel.Debug,
         Message = "Getting tracks for playlist index: {PlaylistIndex}"
     )]
     private partial void LogGettingTracksByPlaylistIndex(int playlistIndex);
 
     [LoggerMessage(
-        EventId = 6403,
+        EventId = 6803,
         Level = LogLevel.Warning,
         Message = "Playlist {PlaylistIndex} not found"
     )]
     private partial void LogPlaylistNotFound(string playlistIndex);
 
     [LoggerMessage(
-        EventId = 6404,
+        EventId = 6804,
         Level = LogLevel.Warning,
         Message = "Playlist index {PlaylistIndex} not found"
     )]

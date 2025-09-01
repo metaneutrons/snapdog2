@@ -360,98 +360,98 @@ public partial class RedisPersistentStateStore(
     #region LoggerMessage Methods
 
     [LoggerMessage(
-        EventId = 7300,
+        EventId = 7800,
         Level = LogLevel.Debug,
         Message = "💾 Zone {ZoneIndex} ({ZoneName}) state saved to Redis"
     )]
     private partial void LogZoneStateSaved(int ZoneIndex, string ZoneName);
 
     [LoggerMessage(
-        EventId = 7301,
+        EventId = 7801,
         Level = LogLevel.Error,
         Message = "❌ Failed to save zone {ZoneIndex} state to Redis"
     )]
     private partial void LogZoneStateSaveFailed(Exception ex, int ZoneIndex);
 
     [LoggerMessage(
-        EventId = 7302,
+        EventId = 7802,
         Level = LogLevel.Information,
         Message = "📥 Loaded {Count} zone states from Redis"
     )]
     private partial void LogZoneStatesLoaded(int Count);
 
     [LoggerMessage(
-        EventId = 7303,
+        EventId = 7803,
         Level = LogLevel.Error,
         Message = "❌ Failed to load zone states from Redis"
     )]
     private partial void LogZoneStatesLoadFailed(Exception ex);
 
     [LoggerMessage(
-        EventId = 7304,
+        EventId = 7804,
         Level = LogLevel.Debug,
         Message = "💾 Client {ClientIndex} ({ClientName}) state saved to Redis"
     )]
     private partial void LogClientStateSaved(int ClientIndex, string ClientName);
 
     [LoggerMessage(
-        EventId = 7305,
+        EventId = 7805,
         Level = LogLevel.Error,
         Message = "❌ Failed to save client {ClientIndex} state to Redis"
     )]
     private partial void LogClientStateSaveFailed(Exception ex, int ClientIndex);
 
     [LoggerMessage(
-        EventId = 7306,
+        EventId = 7806,
         Level = LogLevel.Information,
         Message = "📥 Loaded {Count} client states from Redis"
     )]
     private partial void LogClientStatesLoaded(int Count);
 
     [LoggerMessage(
-        EventId = 7307,
+        EventId = 7807,
         Level = LogLevel.Error,
         Message = "❌ Failed to load client states from Redis"
     )]
     private partial void LogClientStatesLoadFailed(Exception ex);
 
     [LoggerMessage(
-        EventId = 7308,
+        EventId = 7808,
         Level = LogLevel.Debug,
         Message = "🔍 Configuration fingerprint saved: {Hash}"
     )]
     private partial void LogConfigFingerprintSaved(string Hash);
 
     [LoggerMessage(
-        EventId = 7309,
+        EventId = 7809,
         Level = LogLevel.Error,
         Message = "❌ Failed to save configuration fingerprint"
     )]
     private partial void LogConfigFingerprintSaveFailed(Exception ex);
 
     [LoggerMessage(
-        EventId = 7310,
+        EventId = 7810,
         Level = LogLevel.Error,
         Message = "❌ Failed to load configuration fingerprint"
     )]
     private partial void LogConfigFingerprintLoadFailed(Exception ex);
 
     [LoggerMessage(
-        EventId = 7311,
+        EventId = 7811,
         Level = LogLevel.Warning,
         Message = "🧹 All persistent state cleared from Redis"
     )]
     private partial void LogAllStateCleared();
 
     [LoggerMessage(
-        EventId = 7312,
+        EventId = 7812,
         Level = LogLevel.Error,
         Message = "❌ Failed to clear all state from Redis"
     )]
     private partial void LogAllStateClearFailed(Exception ex);
 
     [LoggerMessage(
-        EventId = 7313,
+        EventId = 7813,
         Level = LogLevel.Error,
         Message = "❌ Failed to retrieve stats from Redis"
     )]

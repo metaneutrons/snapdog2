@@ -58,14 +58,14 @@ public partial class GetVersionInfoQueryHandler(ILogger<GetVersionInfoQueryHandl
     }
 
     [LoggerMessage(
-        EventId = 9500,
+        EventId = 11900,
         Level = LogLevel.Information,
         Message = "Handling GetVersionInfoQuery"
     )]
     private partial void LogHandling();
 
     [LoggerMessage(
-        EventId = 9501,
+        EventId = 11901,
         Level = LogLevel.Error,
         Message = "Error retrieving version information"
     )]

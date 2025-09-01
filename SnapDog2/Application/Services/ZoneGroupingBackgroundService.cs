@@ -112,47 +112,47 @@ public partial class ZoneGroupingBackgroundService : BackgroundService
 
     // LoggerMessage methods for high-performance logging
     [LoggerMessage(
-        EventId = 7700,
+        EventId = 6300,
         Level = LogLevel.Information,
         Message = "🎵 Zone grouping background service starting with {Interval}ms interval..."
     )]
     private partial void LogZoneGroupingServiceStarting(int Interval);
 
     [LoggerMessage(
-        EventId = 7701,
+        EventId = 6301,
         Level = LogLevel.Information,
         Message = "⏳ Waiting 5 seconds for services to be ready..."
     )]
     private partial void LogWaitingForServicesToBeReady();
 
-    [LoggerMessage(EventId = 7702, Level = LogLevel.Information, Message = "✅ Starting periodic zone grouping checks...")]
+    [LoggerMessage(EventId = 6302, Level = LogLevel.Information, Message = "✅ Starting periodic zone grouping checks...")]
     private partial void LogStartingPeriodicZoneGroupingChecks();
 
-    [LoggerMessage(EventId = 7703, Level = LogLevel.Debug, Message = "🔄 Starting periodic zone grouping check...")]
+    [LoggerMessage(EventId = 6303, Level = LogLevel.Debug, Message = "🔄 Starting periodic zone grouping check...")]
     private partial void LogStartingPeriodicZoneGroupingCheck();
 
     [LoggerMessage(
-        EventId = 7704,
+        EventId = 6304,
         Level = LogLevel.Debug,
         Message = "✅ Periodic zone grouping check completed, waiting {Interval}ms..."
     )]
     private partial void LogPeriodicZoneGroupingCheckCompleted(int Interval);
 
-    [LoggerMessage(EventId = 7705, Level = LogLevel.Information, Message = "🛑 Zone grouping monitoring cancelled")]
+    [LoggerMessage(EventId = 6305, Level = LogLevel.Information, Message = "🛑 Zone grouping monitoring cancelled")]
     private partial void LogZoneGroupingMonitoringCancelled();
 
-    [LoggerMessage(EventId = 7706, Level = LogLevel.Error, Message = "💥 Exception in periodic check loop")]
+    [LoggerMessage(EventId = 6306, Level = LogLevel.Error, Message = "💥 Exception in periodic check loop")]
     private partial void LogExceptionInPeriodicCheckLoop(Exception ex);
 
-    [LoggerMessage(EventId = 7707, Level = LogLevel.Debug, Message = "🔍 Checking zone grouping configuration...")]
+    [LoggerMessage(EventId = 6307, Level = LogLevel.Debug, Message = "🔍 Checking zone grouping configuration...")]
     private partial void LogCheckingZoneGroupingConfiguration();
 
-    [LoggerMessage(EventId = 7708, Level = LogLevel.Debug, Message = "✅ Zone grouping check completed successfully")]
+    [LoggerMessage(EventId = 6308, Level = LogLevel.Debug, Message = "✅ Zone grouping check completed successfully")]
     private partial void LogZoneGroupingCheckCompletedSuccessfully();
 
-    [LoggerMessage(EventId = 7709, Level = LogLevel.Warning, Message = "⚠️ Periodic zone grouping check failed: {Error}")]
+    [LoggerMessage(EventId = 6309, Level = LogLevel.Warning, Message = "⚠️ Periodic zone grouping check failed: {Error}")]
     private partial void LogPeriodicZoneGroupingCheckFailed(string? Error);
 
-    [LoggerMessage(EventId = 7710, Level = LogLevel.Error, Message = "💥 Exception during periodic zone grouping check")]
+    [LoggerMessage(EventId = 6310, Level = LogLevel.Error, Message = "💥 Exception during periodic zone grouping check")]
     private partial void LogExceptionDuringPeriodicZoneGroupingCheck(Exception ex);
 }

@@ -267,7 +267,7 @@ public partial class EnterpriseMetricsService : IMetricsService, IDisposable
     #region Logging
 
     [LoggerMessage(
-        EventId = 6001,
+        EventId = 8305,
         Level = LogLevel.Debug,
         Message = "Recording {RequestType} request '{RequestName}' duration: {DurationMs}ms, Success: {Success}"
     )]
@@ -279,49 +279,49 @@ public partial class EnterpriseMetricsService : IMetricsService, IDisposable
     );
 
     [LoggerMessage(
-        EventId = 6002,
+        EventId = 8306,
         Level = LogLevel.Debug,
         Message = "Getting server statistics"
     )]
     private partial void LogGettingServerStats();
 
     [LoggerMessage(
-        EventId = 6003,
+        EventId = 8307,
         Level = LogLevel.Debug,
         Message = "Metric counter increment: {Name} += {Delta} {Labels}"
     )]
     private partial void LogCounterIncrement(string name, long delta, string labels);
 
     [LoggerMessage(
-        EventId = 6004,
+        EventId = 8303,
         Level = LogLevel.Debug,
         Message = "Metric gauge set: {Name} = {Value} {Labels}"
     )]
     private partial void LogGaugeSet(string name, double value, string labels);
 
     [LoggerMessage(
-        EventId = 6000,
+        EventId = 8304,
         Level = LogLevel.Information,
         Message = "EnterpriseMetricsService initialized with system metrics collection"
     )]
     private static partial void LogServiceInitialized(ILogger logger);
 
     [LoggerMessage(
-        EventId = 6001,
+        EventId = 8305,
         Level = LogLevel.Warning,
         Message = "Failed to collect system metrics"
     )]
     private static partial void LogFailedToCollectSystemMetrics(ILogger logger, Exception ex);
 
     [LoggerMessage(
-        EventId = 6002,
+        EventId = 8306,
         Level = LogLevel.Debug,
         Message = "Failed to get CPU usage"
     )]
     private static partial void LogFailedToGetCpuUsage(ILogger logger, Exception ex);
 
     [LoggerMessage(
-        EventId = 6003,
+        EventId = 8307,
         Level = LogLevel.Debug,
         Message = "Failed to get CPU usage synchronously"
     )]

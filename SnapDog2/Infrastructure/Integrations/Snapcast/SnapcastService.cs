@@ -100,49 +100,49 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     #region Logging
 
     [LoggerMessage(
-        EventId = 2600,
+        EventId = 7200,
         Level = LogLevel.Information,
         Message = "Snapcast service created for {Host}:{Port}, auto-reconnect: {AutoReconnect}"
     )]
     private partial void LogServiceCreated(string host, int port, bool autoReconnect);
 
     [LoggerMessage(
-        EventId = 2603,
+        EventId = 7201,
         Level = LogLevel.Information,
         Message = "🚀 Initializing Snapcast connection to {Host}:{Port}"
     )]
     private partial void LogInitializing(string host, int port);
 
     [LoggerMessage(
-        EventId = 2604,
+        EventId = 7202,
         Level = LogLevel.Information,
         Message = "Snapcast connection established successfully"
     )]
     private partial void LogConnectionEstablished();
 
     [LoggerMessage(
-        EventId = 2605,
+        EventId = 7203,
         Level = LogLevel.Warning,
         Message = "Snapcast connection lost: {Reason}"
     )]
     private partial void LogConnectionLost(string reason);
 
     [LoggerMessage(
-        EventId = 2606,
+        EventId = 7204,
         Level = LogLevel.Error,
         Message = "Failed to initialize Snapcast connection"
     )]
     private partial void LogInitializationFailed(Exception ex);
 
     [LoggerMessage(
-        EventId = 2613,
+        EventId = 7205,
         Level = LogLevel.Error,
         Message = "Snapcast connection error: {ErrorMessage}"
     )]
     private partial void LogConnectionErrorMessage(string errorMessage);
 
     [LoggerMessage(
-        EventId = 2602,
+        EventId = 7206,
         Level = LogLevel.Information,
         Message = "🚀 Attempting Snapcast connection to {Host}:{Port} (attempt {AttemptNumber}/{MaxAttempts}: {ErrorMessage})"
     )]
@@ -155,77 +155,77 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     );
 
     [LoggerMessage(
-        EventId = 2607,
+        EventId = 7207,
         Level = LogLevel.Error,
         Message = "Snapcast operation {Operation} failed"
     )]
     private partial void LogOperationFailed(string operation, Exception ex);
 
     [LoggerMessage(
-        EventId = 2608,
+        EventId = 7208,
         Level = LogLevel.Debug,
         Message = "Processing Snapcast event: {EventType}"
     )]
     private partial void LogProcessingEvent(string eventType);
 
     [LoggerMessage(
-        EventId = 2609,
+        EventId = 7209,
         Level = LogLevel.Error,
         Message = "Error processing Snapcast event {EventType}"
     )]
     private partial void LogEventProcessingError(string eventType, Exception ex);
 
     [LoggerMessage(
-        EventId = 2610,
+        EventId = 7210,
         Level = LogLevel.Information,
         Message = "Snapcast service disposed"
     )]
     private partial void LogServiceDisposed();
 
     [LoggerMessage(
-        EventId = 2611,
+        EventId = 7211,
         Level = LogLevel.Warning,
         Message = "Snapcast service not connected for operation: {Operation}"
     )]
     private partial void LogNotConnected(string operation);
 
     [LoggerMessage(
-        EventId = 2601,
+        EventId = 7212,
         Level = LogLevel.Error,
         Message = "Error handling Snapcast status notification {StatusType} for target {TargetId}"
     )]
     private partial void LogStatusNotificationError(string statusType, string targetId, Exception exception);
 
     [LoggerMessage(
-        EventId = 2612,
+        EventId = 7213,
         Level = LogLevel.Information,
         Message = "Snapcast service stopped successfully"
     )]
     private partial void LogServiceStopped();
 
     [LoggerMessage(
-        EventId = 2614,
+        EventId = 7214,
         Level = LogLevel.Debug,
         Message = "🔍 Getting server status from Snapcast"
     )]
     private partial void LogGettingServerStatus();
 
     [LoggerMessage(
-        EventId = 2615,
+        EventId = 7215,
         Level = LogLevel.Debug,
         Message = "📊 Retrieved server status: {GroupCount} groups, {ClientCount} clients, {StreamCount} streams"
     )]
     private partial void LogServerStatusRetrieved(int groupCount, int clientCount, int streamCount);
 
     [LoggerMessage(
-        EventId = 2616,
+        EventId = 7216,
         Level = LogLevel.Warning,
         Message = "⚠️ Failed to get server status: {Error}"
     )]
     private partial void LogServerStatusFailed(string error);
 
     [LoggerMessage(
-        EventId = 2617,
+        EventId = 7217,
         Level = LogLevel.Debug,
         Message = "🔍 Updating state repository with server status"
     )]
@@ -1279,42 +1279,42 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     }
 
     [LoggerMessage(
-        EventId = 2618,
+        EventId = 7218,
         Level = LogLevel.Debug,
         Message = "Bridged {EventType} event from Snapcast client {SnapcastClientId} to IClient {ClientIndex}"
     )]
     private partial void LogEventBridged(string eventType, string snapcastClientId, int clientIndex);
 
     [LoggerMessage(
-        EventId = 2619,
+        EventId = 7219,
         Level = LogLevel.Warning,
         Message = "Client not found for bridging {EventType} event from Snapcast client {SnapcastClientId}"
     )]
     private partial void LogClientNotFoundForBridge(string snapcastClientId, string eventType);
 
     [LoggerMessage(
-        EventId = 2620,
+        EventId = 7220,
         Level = LogLevel.Error,
         Message = "Error bridging {EventType} event from Snapcast client {SnapcastClientId}"
     )]
     private partial void LogEventBridgeError(string eventType, string snapcastClientId, Exception ex);
 
     [LoggerMessage(
-        EventId = 2621,
+        EventId = 7221,
         Level = LogLevel.Debug,
         Message = "Setting group {GroupId} to stream {StreamId}"
     )]
     private static partial void LogSettingGroupStream(ILogger logger, string groupId, string streamId);
 
     [LoggerMessage(
-        EventId = 2622,
+        EventId = 7222,
         Level = LogLevel.Debug,
         Message = "Successfully set group {GroupId} to stream {StreamId}"
     )]
     private static partial void LogGroupStreamSetSuccessfully(ILogger logger, string groupId, string streamId);
 
     [LoggerMessage(
-        EventId = 2623,
+        EventId = 7223,
         Level = LogLevel.Error,
         Message = "Failed to set group {GroupId} to stream {StreamId}"
     )]
@@ -1326,35 +1326,35 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     );
 
     [LoggerMessage(
-        EventId = 2624,
+        EventId = 7224,
         Level = LogLevel.Debug,
         Message = "Setting group {GroupId} clients to: {ClientIndexs}"
     )]
     private static partial void LogSettingGroupClients(ILogger logger, string groupId, string clientIndexs);
 
     [LoggerMessage(
-        EventId = 2625,
+        EventId = 7225,
         Level = LogLevel.Information,
         Message = "Successfully set {ClientCount} clients for group {GroupId}"
     )]
     private static partial void LogGroupClientsSetSuccessfully(ILogger logger, int clientCount, string groupId);
 
     [LoggerMessage(
-        EventId = 2626,
+        EventId = 7226,
         Level = LogLevel.Error,
         Message = "Failed to set clients for group {GroupId}"
     )]
     private static partial void LogFailedToSetGroupClients(ILogger logger, Exception ex, string groupId);
 
     [LoggerMessage(
-        EventId = 2627,
+        EventId = 7227,
         Level = LogLevel.Warning,
         Message = "Cannot subscribe to Snapcast events - client is not available"
     )]
     private static partial void LogCannotSubscribeToEvents(ILogger logger);
 
     [LoggerMessage(
-        EventId = 2628,
+        EventId = 7228,
         Level = LogLevel.Warning,
         Message = "Client not found for Snapcast ID: {SnapcastClientId}"
     )]

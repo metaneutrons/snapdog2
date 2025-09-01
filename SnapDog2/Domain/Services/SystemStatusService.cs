@@ -134,28 +134,28 @@ public partial class AppStatusService(
     }
 
     [LoggerMessage(
-        EventId = 6200,
+        EventId = 6900,
         Level = LogLevel.Debug,
         Message = "Getting system status"
     )]
     private partial void LogGettingSystemStatus();
 
     [LoggerMessage(
-        EventId = 6201,
+        EventId = 6901,
         Level = LogLevel.Debug,
         Message = "Getting version information"
     )]
     private partial void LogGettingVersionInfo();
 
     [LoggerMessage(
-        EventId = 6202,
+        EventId = 6902,
         Level = LogLevel.Debug,
         Message = "Getting server statistics"
     )]
     private partial void LogGettingServerStats();
 
     [LoggerMessage(
-        EventId = 6203,
+        EventId = 6903,
         Level = LogLevel.Warning,
         Message = "Failed to extract build date from assembly"
     )]

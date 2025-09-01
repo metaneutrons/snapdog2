@@ -656,14 +656,14 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
     #region Logging
 
     [LoggerMessage(
-        EventId = 6600,
+        EventId = 7500,
         Level = LogLevel.Information,
         Message = "🚀 Initializing Subsonic connection to {Url}"
     )]
     private static partial void LogInitializing(ILogger logger, string url);
 
     [LoggerMessage(
-        EventId = 6601,
+        EventId = 7501,
         Level = LogLevel.Information,
         Message = "🚀 Attempting Subsonic connection to {Url} (attempt {AttemptNumber}/{MaxAttempts}: {ErrorMessage})"
     )]
@@ -676,147 +676,147 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
     );
 
     [LoggerMessage(
-        EventId = 6602,
+        EventId = 7502,
         Level = LogLevel.Information,
         Message = "Subsonic connection established successfully to {Url}"
     )]
     private static partial void LogConnectionEstablished(ILogger logger, string url);
 
     [LoggerMessage(
-        EventId = 6603,
+        EventId = 7503,
         Level = LogLevel.Information,
         Message = "Subsonic service initialized for server: {Url}, user: {Username}"
     )]
     private static partial void LogSubsonicServiceInitialized(ILogger logger, string url, string username);
 
     [LoggerMessage(
-        EventId = 6604,
+        EventId = 7504,
         Level = LogLevel.Error,
         Message = "Subsonic service initialization failed: {ErrorMessage}"
     )]
     private static partial void LogInitializationFailed(ILogger logger, string errorMessage);
 
     [LoggerMessage(
-        EventId = 6605,
+        EventId = 7505,
         Level = LogLevel.Warning,
         Message = "Subsonic service is disabled in configuration"
     )]
     private static partial void LogSubsonicDisabled(ILogger logger);
 
     [LoggerMessage(
-        EventId = 6606,
+        EventId = 7506,
         Level = LogLevel.Debug,
         Message = "Getting playlists from Subsonic server"
     )]
     private static partial void LogGettingPlaylists(ILogger logger);
 
     [LoggerMessage(
-        EventId = 6607,
+        EventId = 7507,
         Level = LogLevel.Information,
         Message = "Retrieved {Count} playlists from Subsonic server"
     )]
     private static partial void LogPlaylistsRetrieved(ILogger logger, int count);
 
     [LoggerMessage(
-        EventId = 6608,
+        EventId = 7508,
         Level = LogLevel.Error,
         Message = "Failed to get playlists from Subsonic server"
     )]
     private static partial void LogGetPlaylistsError(ILogger logger, Exception ex);
 
     [LoggerMessage(
-        EventId = 6609,
+        EventId = 7509,
         Level = LogLevel.Debug,
         Message = "Getting playlist: {PlaylistIndex}"
     )]
     private static partial void LogGettingPlaylist(ILogger logger, string playlistIndex);
 
     [LoggerMessage(
-        EventId = 6610,
+        EventId = 7510,
         Level = LogLevel.Information,
         Message = "Retrieved playlist: {PlaylistIndex} with {TrackCount} tracks"
     )]
     private static partial void LogPlaylistRetrieved(ILogger logger, string playlistIndex, int trackCount);
 
     [LoggerMessage(
-        EventId = 6611,
+        EventId = 7511,
         Level = LogLevel.Warning,
         Message = "Playlist not found: {PlaylistIndex}"
     )]
     private static partial void LogPlaylistNotFound(ILogger logger, string playlistIndex);
 
     [LoggerMessage(
-        EventId = 6612,
+        EventId = 7512,
         Level = LogLevel.Error,
         Message = "Failed to get playlist: {PlaylistIndex}"
     )]
     private static partial void LogGetPlaylistError(ILogger logger, string playlistIndex, Exception ex);
 
     [LoggerMessage(
-        EventId = 6613,
+        EventId = 7513,
         Level = LogLevel.Debug,
         Message = "Getting stream URL for track: {TrackId}"
     )]
     private static partial void LogGettingStreamUrl(ILogger logger, string trackId);
 
     [LoggerMessage(
-        EventId = 6614,
+        EventId = 7514,
         Level = LogLevel.Debug,
         Message = "Retrieved stream URL for track: {TrackId}"
     )]
     private static partial void LogStreamUrlRetrieved(ILogger logger, string trackId);
 
     [LoggerMessage(
-        EventId = 6615,
+        EventId = 7515,
         Level = LogLevel.Warning,
         Message = "Stream URL not found for track: {TrackId}"
     )]
     private static partial void LogStreamUrlNotFound(ILogger logger, string trackId);
 
     [LoggerMessage(
-        EventId = 6616,
+        EventId = 7516,
         Level = LogLevel.Error,
         Message = "Failed to get stream URL for track: {TrackId}"
     )]
     private static partial void LogGetStreamUrlError(ILogger logger, string trackId, Exception ex);
 
     [LoggerMessage(
-        EventId = 6617,
+        EventId = 7517,
         Level = LogLevel.Debug,
         Message = "Testing connection to Subsonic server"
     )]
     private static partial void LogTestingConnection(ILogger logger);
 
     [LoggerMessage(
-        EventId = 6618,
+        EventId = 7518,
         Level = LogLevel.Information,
         Message = "Subsonic connection test successful"
     )]
     private static partial void LogConnectionTestSuccessful(ILogger logger);
 
     [LoggerMessage(
-        EventId = 6619,
+        EventId = 7519,
         Level = LogLevel.Warning,
         Message = "Subsonic connection test failed"
     )]
     private static partial void LogConnectionTestFailed(ILogger logger);
 
     [LoggerMessage(
-        EventId = 6620,
+        EventId = 7520,
         Level = LogLevel.Error,
         Message = "Subsonic connection test error"
     )]
     private static partial void LogConnectionTestError(ILogger logger, Exception ex);
 
     [LoggerMessage(
-        EventId = 6621,
+        EventId = 7521,
         Level = LogLevel.Information,
         Message = "Subsonic service disposed"
     )]
     private static partial void LogSubsonicServiceDisposed(ILogger logger);
 
     [LoggerMessage(
-        EventId = 6622,
+        EventId = 7522,
         Level = LogLevel.Warning,
         Message = "Failed to publish notification {NotificationType}"
     )]

@@ -28,7 +28,7 @@ public partial class GetClientQueryHandler(IClientManager clientManager, ILogger
     private readonly ILogger<GetClientQueryHandler> _logger = logger;
 
     [LoggerMessage(
-        EventId = 8500,
+        EventId = 10700,
         Level = LogLevel.Information,
         Message = "Handling GetClientQuery for Client {ClientIndex}"
     )]

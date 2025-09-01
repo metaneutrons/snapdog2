@@ -94,28 +94,28 @@ public partial class GetAllPlaylistsQueryHandler(
     #region Logging
 
     [LoggerMessage(
-        EventId = 9600,
+        EventId = 12000,
         Level = LogLevel.Debug,
         Message = "Getting all playlists (radio + subsonic)"
     )]
     private static partial void LogGettingAllPlaylists(ILogger logger);
 
     [LoggerMessage(
-        EventId = 9601,
+        EventId = 12001,
         Level = LogLevel.Information,
         Message = "Added {Count} Subsonic playlists"
     )]
     private static partial void LogSubsonicPlaylistsAdded(ILogger logger, int count);
 
     [LoggerMessage(
-        EventId = 9602,
+        EventId = 12002,
         Level = LogLevel.Warning,
         Message = "Failed to get Subsonic playlists: {Error}"
     )]
     private static partial void LogSubsonicPlaylistsError(ILogger logger, string error);
 
     [LoggerMessage(
-        EventId = 9603,
+        EventId = 12003,
         Level = LogLevel.Information,
         Message = "Retrieved {Count} total playlists"
     )]
@@ -243,35 +243,35 @@ public partial class GetPlaylistQueryHandler(
     #region Logging
 
     [LoggerMessage(
-        EventId = 9604,
+        EventId = 12004,
         Level = LogLevel.Debug,
         Message = "Getting playlist: {PlaylistIndex}"
     )]
     private static partial void LogGettingPlaylist(ILogger logger, int playlistIndex);
 
     [LoggerMessage(
-        EventId = 9605,
+        EventId = 12005,
         Level = LogLevel.Warning,
         Message = "Subsonic service is disabled"
     )]
     private static partial void LogSubsonicDisabled(ILogger logger);
 
     [LoggerMessage(
-        EventId = 9606,
+        EventId = 12006,
         Level = LogLevel.Information,
         Message = "Retrieved playlist: {PlaylistIndex} with {TrackCount} tracks"
     )]
     private static partial void LogPlaylistRetrieved(ILogger logger, string playlistIndex, int trackCount);
 
     [LoggerMessage(
-        EventId = 9607,
+        EventId = 12007,
         Level = LogLevel.Error,
         Message = "Failed to get playlist: {PlaylistIndex}, error: {Error}"
     )]
     private static partial void LogPlaylistError(ILogger logger, string playlistIndex, string error);
 
     [LoggerMessage(
-        EventId = 9608,
+        EventId = 12008,
         Level = LogLevel.Debug,
         Message = "Created radio playlist with {TrackCount} stations"
     )]
@@ -336,35 +336,35 @@ public partial class GetStreamUrlQueryHandler(
     #region Logging
 
     [LoggerMessage(
-        EventId = 9609,
+        EventId = 12009,
         Level = LogLevel.Debug,
         Message = "Getting stream URL for track: {TrackId}"
     )]
     private static partial void LogGettingStreamUrl(ILogger logger, string trackId);
 
     [LoggerMessage(
-        EventId = 9610,
+        EventId = 12010,
         Level = LogLevel.Debug,
         Message = "Track is radio stream URL: {TrackId}"
     )]
     private static partial void LogRadioStreamUrl(ILogger logger, string trackId);
 
     [LoggerMessage(
-        EventId = 9611,
+        EventId = 12011,
         Level = LogLevel.Warning,
         Message = "Subsonic service is disabled"
     )]
     private static partial void LogSubsonicDisabled(ILogger logger);
 
     [LoggerMessage(
-        EventId = 9612,
+        EventId = 12012,
         Level = LogLevel.Debug,
         Message = "Retrieved stream URL for track: {TrackId}"
     )]
     private static partial void LogStreamUrlRetrieved(ILogger logger, string trackId);
 
     [LoggerMessage(
-        EventId = 9613,
+        EventId = 12013,
         Level = LogLevel.Error,
         Message = "Failed to get stream URL for track: {TrackId}, error: {Error}"
     )]
@@ -438,21 +438,21 @@ public partial class GetTrackQueryHandler(
     #region Logging
 
     [LoggerMessage(
-        EventId = 9618,
+        EventId = 12014,
         Level = LogLevel.Debug,
         Message = "Getting track: {TrackId}"
     )]
     private static partial void LogGettingTrack(ILogger logger, string trackId);
 
     [LoggerMessage(
-        EventId = 9619,
+        EventId = 12015,
         Level = LogLevel.Debug,
         Message = "Retrieved radio track: {TrackId}"
     )]
     private static partial void LogRadioTrackRetrieved(ILogger logger, string trackId);
 
     [LoggerMessage(
-        EventId = 9620,
+        EventId = 12016,
         Level = LogLevel.Warning,
         Message = "Track lookup not implemented for: {TrackId}"
     )]
@@ -500,28 +500,28 @@ public partial class TestSubsonicConnectionQueryHandler(
     #region Logging
 
     [LoggerMessage(
-        EventId = 9614,
+        EventId = 12017,
         Level = LogLevel.Debug,
         Message = "Testing Subsonic connection"
     )]
     private static partial void LogTestingSubsonicConnection(ILogger logger);
 
     [LoggerMessage(
-        EventId = 9615,
+        EventId = 12018,
         Level = LogLevel.Warning,
         Message = "Subsonic service is disabled"
     )]
     private static partial void LogSubsonicDisabled(ILogger logger);
 
     [LoggerMessage(
-        EventId = 9616,
+        EventId = 12019,
         Level = LogLevel.Information,
         Message = "Subsonic connection test successful"
     )]
     private static partial void LogConnectionTestSuccessful(ILogger logger);
 
     [LoggerMessage(
-        EventId = 9617,
+        EventId = 12020,
         Level = LogLevel.Error,
         Message = "Subsonic connection test failed: {Error}"
     )]

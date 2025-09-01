@@ -35,14 +35,14 @@ public partial class CommandErrorsQueryHandler(
     private readonly ILogger<CommandErrorsQueryHandler> _logger = logger;
 
     [LoggerMessage(
-        EventId = 9200,
+        EventId = 11400,
         Level = LogLevel.Debug,
         Message = "Retrieving recent command errors"
     )]
     private partial void LogRetrievingCommandErrors();
 
     [LoggerMessage(
-        EventId = 9201,
+        EventId = 11401,
         Level = LogLevel.Warning,
         Message = "Failed to retrieve command errors: {ErrorMessage}"
     )]

@@ -22,14 +22,14 @@ public partial class KnxService
 {
     // Status Publishing Operations (10101-10102)
     [LoggerMessage(
-        EventId = 3100,
+        EventId = 3300,
         Level = LogLevel.Debug,
         Message = "KNX global status publishing not implemented for event type {EventType}"
     )]
     private partial void LogKnxGlobalStatusPublishingNotImplemented(string eventType);
 
     [LoggerMessage(
-        EventId = 3101,
+        EventId = 3301,
         Level = LogLevel.Debug,
         Message = "{Message}"
     )]
@@ -37,14 +37,14 @@ public partial class KnxService
 
     // Configuration and Error Operations (10103-10104)
     [LoggerMessage(
-        EventId = 3102,
+        EventId = 3302,
         Level = LogLevel.Debug,
         Message = "No KNX group address configured for status {StatusId} on {TargetDescription} - skipping (this is normal)"
     )]
     private partial void LogNoKnxGroupAddressConfigured(string statusId, string targetDescription);
 
     [LoggerMessage(
-        EventId = 3103,
+        EventId = 3303,
         Level = LogLevel.Error,
         Message = "Error sending KNX status {StatusId} to {TargetDescription}"
     )]

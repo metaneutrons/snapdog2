@@ -35,14 +35,14 @@ public partial class CommandStatusQueryHandler(
     private readonly ILogger<CommandStatusQueryHandler> _logger = logger;
 
     [LoggerMessage(
-        EventId = 9300,
+        EventId = 11500,
         Level = LogLevel.Debug,
         Message = "Retrieving command processing status"
     )]
     private partial void LogRetrievingCommandStatus();
 
     [LoggerMessage(
-        EventId = 9301,
+        EventId = 11501,
         Level = LogLevel.Warning,
         Message = "Failed to retrieve command status: {ErrorMessage}"
     )]

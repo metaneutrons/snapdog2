@@ -35,35 +35,35 @@ public partial class GlobalStateNotificationHandler(
     private readonly ILogger<GlobalStateNotificationHandler> _logger = logger;
 
     [LoggerMessage(
-        EventId = 9700,
+        EventId = 12100,
         Level = LogLevel.Information,
         Message = "System status changed to online: {IsOnline}"
     )]
     private partial void LogSystemStatusChange(bool isOnline);
 
     [LoggerMessage(
-        EventId = 9701,
+        EventId = 12101,
         Level = LogLevel.Information,
         Message = "Version info updated: {Version} (Build: {BuildDate})"
     )]
     private partial void LogVersionInfoChange(string version, DateTime buildDate);
 
     [LoggerMessage(
-        EventId = 9702,
+        EventId = 12102,
         Level = LogLevel.Information,
         Message = "Server stats updated - CPU: {CpuUsage:F2}%, Memory: {MemoryUsage:F2}MB"
     )]
     private partial void LogServerStatsChange(double cpuUsage, double memoryUsage);
 
     [LoggerMessage(
-        EventId = 9703,
+        EventId = 12103,
         Level = LogLevel.Error,
         Message = "System error occurred: {ErrorCode} - {Message}"
     )]
     private partial void LogSystemError(string errorCode, string message);
 
     [LoggerMessage(
-        EventId = 9704,
+        EventId = 12104,
         Level = LogLevel.Information,
         Message = "Zones info updated - Available zones: [{ZoneIndices}]"
     )]

@@ -101,56 +101,56 @@ public partial class PersistentStateNotificationHandler(
     #region LoggerMessage Methods
 
     [LoggerMessage(
-        EventId = 7000,
+        EventId = 10200,
         Level = LogLevel.Debug,
         Message = "💾 Persisting zone {ZoneIndex} state..."
     )]
     private partial void LogZoneStatePersisting(int ZoneIndex);
 
     [LoggerMessage(
-        EventId = 7001,
+        EventId = 10201,
         Level = LogLevel.Debug,
         Message = "✅ Zone {ZoneIndex} ({ZoneName}) state persisted successfully"
     )]
     private partial void LogZoneStatePersisted(int ZoneIndex, string ZoneName);
 
     [LoggerMessage(
-        EventId = 7002,
+        EventId = 10202,
         Level = LogLevel.Error,
         Message = "❌ Failed to persist zone {ZoneIndex} state"
     )]
     private partial void LogZoneStatePersistFailed(Exception ex, int ZoneIndex);
 
     [LoggerMessage(
-        EventId = 7003,
+        EventId = 10203,
         Level = LogLevel.Debug,
         Message = "💾 Persisting client {ClientIndex} state..."
     )]
     private partial void LogClientStatePersisting(int ClientIndex);
 
     [LoggerMessage(
-        EventId = 7004,
+        EventId = 10204,
         Level = LogLevel.Debug,
         Message = "✅ Client {ClientIndex} ({ClientName}) state persisted successfully"
     )]
     private partial void LogClientStatePersisted(int ClientIndex, string ClientName);
 
     [LoggerMessage(
-        EventId = 7005,
+        EventId = 10205,
         Level = LogLevel.Error,
         Message = "❌ Failed to persist client {ClientIndex} state"
     )]
     private partial void LogClientStatePersistFailed(Exception ex, int ClientIndex);
 
     [LoggerMessage(
-        EventId = 7006,
+        EventId = 10206,
         Level = LogLevel.Trace,
         Message = "⏱️ Debouncing zone {ZoneIndex} state save..."
     )]
     private partial void LogZoneStateDebouncing(int ZoneIndex);
 
     [LoggerMessage(
-        EventId = 7007,
+        EventId = 10207,
         Level = LogLevel.Debug,
         Message = "⏱️ Zone {ZoneIndex} ({ZoneName}) state saved after debounce"
     )]

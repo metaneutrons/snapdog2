@@ -22,21 +22,21 @@ public partial class GetErrorStatusQueryHandler
 {
     // Error Status Query Operations (10201-10203)
     [LoggerMessage(
-        EventId = 4700,
+        EventId = 11600,
         Level = LogLevel.Debug,
         Message = "Getting latest system error status"
     )]
     private partial void LogGettingLatestSystemErrorStatus();
 
     [LoggerMessage(
-        EventId = 4701,
+        EventId = 11601,
         Level = LogLevel.Debug,
         Message = "Successfully retrieved error status: {HasError}"
     )]
     private partial void LogSuccessfullyRetrievedErrorStatus(bool hasError);
 
     [LoggerMessage(
-        EventId = 4702,
+        EventId = 11602,
         Level = LogLevel.Error,
         Message = "Failed to get error status"
     )]

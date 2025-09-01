@@ -32,7 +32,7 @@ public partial class SubsonicConnectionEstablishedNotificationHandler(
     }
 
     [LoggerMessage(
-        EventId = 9800,
+        EventId = 12700,
         Level = LogLevel.Information,
         Message = "🎵 Subsonic connection established to {ServerUrl} for user {Username}"
     )]
@@ -55,7 +55,7 @@ public partial class SubsonicConnectionLostNotificationHandler(
     }
 
     [LoggerMessage(
-        EventId = 9801,
+        EventId = 12701,
         Level = LogLevel.Warning,
         Message = "⚠️ Subsonic connection lost to {ServerUrl}: {Reason}"
     )]
@@ -82,7 +82,7 @@ public partial class SubsonicPlaylistsRetrievedNotificationHandler(
     }
 
     [LoggerMessage(
-        EventId = 9802,
+        EventId = 12702,
         Level = LogLevel.Debug,
         Message = "📊 Retrieved {PlaylistCount} playlists in {RetrievalTimeMs:F2}ms"
     )]
@@ -109,7 +109,7 @@ public partial class SubsonicPlaylistAccessedNotificationHandler(
     }
 
     [LoggerMessage(
-        EventId = 9803,
+        EventId = 12703,
         Level = LogLevel.Debug,
         Message = "🎵 Accessed playlist '{PlaylistName}' with {TrackCount} tracks"
     )]
@@ -136,7 +136,7 @@ public partial class SubsonicStreamRequestedNotificationHandler(
     }
 
     [LoggerMessage(
-        EventId = 9804,
+        EventId = 12704,
         Level = LogLevel.Debug,
         Message = "🎧 Stream requested for track {TrackId}"
     )]
@@ -162,7 +162,7 @@ public partial class SubsonicServiceErrorNotificationHandler(ILogger<SubsonicSer
     }
 
     [LoggerMessage(
-        EventId = 9805,
+        EventId = 12705,
         Level = LogLevel.Error,
         Message = "❌ Subsonic service error in {Operation}: {ErrorMessage}"
     )]
@@ -185,7 +185,7 @@ public partial class SubsonicInitializationStartedNotificationHandler(
     }
 
     [LoggerMessage(
-        EventId = 9806,
+        EventId = 12706,
         Level = LogLevel.Information,
         Message = "🚀 Subsonic service initialization started for {ServerUrl}"
     )]
@@ -208,7 +208,7 @@ public partial class SubsonicServiceDisposedNotificationHandler(
     }
 
     [LoggerMessage(
-        EventId = 9807,
+        EventId = 12707,
         Level = LogLevel.Information,
         Message = "🗑️ Subsonic service disposed for {ServerUrl}"
     )]

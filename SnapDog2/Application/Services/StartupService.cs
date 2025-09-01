@@ -564,63 +564,63 @@ public partial class StartupService : IHostedService
     #region Logging
 
     [LoggerMessage(
-        EventId = 7500,
+        EventId = 6000,
         Level = LogLevel.Information,
         Message = "🛡️ Initiating startup sequence"
     )]
     private partial void LogStartupSequenceInitiated();
 
     [LoggerMessage(
-        EventId = 7501,
+        EventId = 6001,
         Level = LogLevel.Information,
         Message = "✅ All startup validations completed successfully"
     )]
     private partial void LogStartupValidationsCompleted();
 
     [LoggerMessage(
-        EventId = 7502,
+        EventId = 6002,
         Level = LogLevel.Critical,
         Message = "🚨 STARTUP VALIDATION FAILED: {ErrorMessage}. Application will terminate to prevent undefined behavior."
     )]
     private partial void LogStartupValidationFailed(string errorMessage);
 
     [LoggerMessage(
-        EventId = 7503,
+        EventId = 6003,
         Level = LogLevel.Critical,
         Message = "🚨 STARTUP VALIDATION FAILED: {ErrorMessage}. Application will terminate to prevent undefined behavior."
     )]
     private partial void LogStartupValidationFailedWithException(string errorMessage, Exception exception);
 
     [LoggerMessage(
-        EventId = 7504,
+        EventId = 6004,
         Level = LogLevel.Critical,
         Message = "🚨 UNEXPECTED STARTUP FAILURE: {ErrorMessage}. Application will terminate."
     )]
     private partial void LogUnexpectedStartupFailure(string errorMessage);
 
     [LoggerMessage(
-        EventId = 7505,
+        EventId = 6005,
         Level = LogLevel.Critical,
         Message = "🚨 UNEXPECTED STARTUP FAILURE: {ErrorMessage}. Application will terminate."
     )]
     private partial void LogUnexpectedStartupFailureWithException(string errorMessage, Exception exception);
 
     [LoggerMessage(
-        EventId = 7506,
+        EventId = 6006,
         Level = LogLevel.Information,
         Message = "🛡️ Graceful shutdown initiated"
     )]
     private partial void LogGracefulShutdownInitiated();
 
     [LoggerMessage(
-        EventId = 7507,
+        EventId = 6007,
         Level = LogLevel.Information,
         Message = "🔄 {ValidationStep}: Attempt {AttemptNumber}/{MaxAttempts}"
     )]
     private partial void LogValidationAttempt(string validationStep, int attemptNumber, int maxAttempts);
 
     [LoggerMessage(
-        EventId = 7508,
+        EventId = 6008,
         Level = LogLevel.Information,
         Message = "🔄 {ValidationStep}: Attempt {AttemptNumber}/{MaxAttempts}"
     )]
@@ -632,7 +632,7 @@ public partial class StartupService : IHostedService
     );
 
     [LoggerMessage(
-        EventId = 7509,
+        EventId = 6009,
         Level = LogLevel.Warning,
         Message = "⚠️ {ValidationStep} failed (attempt {AttemptNumber}/{MaxAttempts}): {ErrorMessage}"
     )]
@@ -644,7 +644,7 @@ public partial class StartupService : IHostedService
     );
 
     [LoggerMessage(
-        EventId = 7510,
+        EventId = 6010,
         Level = LogLevel.Warning,
         Message = "⚠️ {ValidationStep} failed (attempt {AttemptNumber}/{MaxAttempts}): {ErrorMessage}"
     )]
@@ -657,14 +657,14 @@ public partial class StartupService : IHostedService
     );
 
     [LoggerMessage(
-        EventId = 7511,
+        EventId = 6011,
         Level = LogLevel.Error,
         Message = "❌ {ValidationStep} failed after {MaxAttempts} attempts: {ErrorMessage}"
     )]
     private partial void LogValidationFailedFinal(string validationStep, int maxAttempts, string errorMessage);
 
     [LoggerMessage(
-        EventId = 7512,
+        EventId = 6012,
         Level = LogLevel.Error,
         Message = "❌ {ValidationStep} failed after {MaxAttempts} attempts: {ErrorMessage}"
     )]
@@ -676,35 +676,35 @@ public partial class StartupService : IHostedService
     );
 
     [LoggerMessage(
-        EventId = 7513,
+        EventId = 6013,
         Level = LogLevel.Warning,
         Message = "🔌 Port {Port} ({ServiceName}) is already in use by another process"
     )]
     private partial void LogPortInUse(int port, string serviceName);
 
     [LoggerMessage(
-        EventId = 7514,
+        EventId = 6014,
         Level = LogLevel.Information,
         Message = "🔄 Waiting {DelaySeconds}s before retry..."
     )]
     private partial void LogRetryDelay(int delaySeconds);
 
     [LoggerMessage(
-        EventId = 7515,
+        EventId = 6015,
         Level = LogLevel.Debug,
         Message = "✅ Port {Port} ({ServiceName}) is available"
     )]
     private partial void LogPortAvailable(int port, string serviceName);
 
     [LoggerMessage(
-        EventId = 7516,
+        EventId = 6016,
         Level = LogLevel.Error,
         Message = "❌ Failed to check port {Port} ({ServiceName}): {ErrorMessage}"
     )]
     private partial void LogPortCheckFailed(int port, string serviceName, string errorMessage);
 
     [LoggerMessage(
-        EventId = 7517,
+        EventId = 6017,
         Level = LogLevel.Error,
         Message = "❌ Failed to check port {Port} ({ServiceName}): {ErrorMessage}"
     )]
@@ -716,35 +716,35 @@ public partial class StartupService : IHostedService
     );
 
     [LoggerMessage(
-        EventId = 7518,
+        EventId = 6018,
         Level = LogLevel.Warning,
         Message = "🔌 {ServiceName} is not reachable ({Address}:{Port}): {ErrorMessage}"
     )]
     private partial void LogServiceNotReachable(string serviceName, string address, int port, string errorMessage);
 
     [LoggerMessage(
-        EventId = 7519,
+        EventId = 6019,
         Level = LogLevel.Warning,
         Message = "🔌 {ServiceName} is not reachable ({Address}): {ErrorMessage}"
     )]
     private partial void LogServiceNotReachableNoPort(string serviceName, string address, string errorMessage);
 
     [LoggerMessage(
-        EventId = 7520,
+        EventId = 6020,
         Level = LogLevel.Debug,
         Message = "✅ {ServiceName} is reachable ({Address}:{Port})"
     )]
     private partial void LogServiceReachable(string serviceName, string address, int port);
 
     [LoggerMessage(
-        EventId = 7521,
+        EventId = 6021,
         Level = LogLevel.Warning,
         Message = "⚠️ Failed to check connectivity to {ServiceName} ({Address}:{Port}): {ErrorMessage}"
     )]
     private partial void LogConnectivityCheckFailed(string serviceName, string address, int port, string errorMessage);
 
     [LoggerMessage(
-        EventId = 7522,
+        EventId = 6024,
         Level = LogLevel.Warning,
         Message = "⚠️ Failed to check connectivity to {ServiceName} ({Address}:{Port}): {ErrorMessage}"
     )]
@@ -757,147 +757,147 @@ public partial class StartupService : IHostedService
     );
 
     [LoggerMessage(
-        EventId = 7523,
+        EventId = 6023,
         Level = LogLevel.Information,
         Message = "📁 Created required directory: {Directory}"
     )]
     private partial void LogDirectoryCreated(string directory);
 
     [LoggerMessage(
-        EventId = 7522,
+        EventId = 6024,
         Level = LogLevel.Information,
         Message = "🧪 Directory validation skipped in test environment"
     )]
     private partial void LogDirectoryValidationSkipped();
 
     [LoggerMessage(
-        EventId = 7524,
+        EventId = 6025,
         Level = LogLevel.Debug,
         Message = "✅ Directory {Directory} is accessible and writable"
     )]
     private partial void LogDirectoryAccessible(string directory);
 
     [LoggerMessage(
-        EventId = 7525,
+        EventId = 6026,
         Level = LogLevel.Error,
         Message = "❌ Directory {Directory} is not accessible or writable"
     )]
     private partial void LogDirectoryNotAccessible(string directory, Exception exception);
 
     [LoggerMessage(
-        EventId = 7526,
+        EventId = 6027,
         Level = LogLevel.Error,
         Message = "❌ Directory {Directory} is not accessible or writable: {ErrorMessage}"
     )]
     private partial void LogDirectoryNotAccessibleWithMessage(string directory, string errorMessage);
 
     [LoggerMessage(
-        EventId = 7527,
+        EventId = 6028,
         Level = LogLevel.Critical,
         Message = "🚨 STARTUP FAILURE ANALYSIS:"
     )]
     private partial void LogStartupFailureAnalysisHeader();
 
     [LoggerMessage(
-        EventId = 7528,
+        EventId = 6029,
         Level = LogLevel.Critical,
         Message = "   Validation Step: {ValidationStep}"
     )]
     private partial void LogFailureValidationStep(string validationStep);
 
     [LoggerMessage(
-        EventId = 7529,
+        EventId = 6030,
         Level = LogLevel.Critical,
         Message = "   Attempts Made: {Attempts}"
     )]
     private partial void LogFailureAttempts(int attempts);
 
     [LoggerMessage(
-        EventId = 7530,
+        EventId = 6031,
         Level = LogLevel.Critical,
         Message = "   Final Error: {ErrorMessage}"
     )]
     private partial void LogFailureFinalError(string errorMessage);
 
     [LoggerMessage(
-        EventId = 7531,
+        EventId = 6032,
         Level = LogLevel.Critical,
         Message = "   Timestamp: {Timestamp:yyyy-MM-dd HH:mm:ss.fff} UTC"
     )]
     private partial void LogFailureTimestamp(DateTime timestamp);
 
     [LoggerMessage(
-        EventId = 7532,
+        EventId = 6033,
         Level = LogLevel.Critical,
         Message = "   Machine: {MachineName}"
     )]
     private partial void LogFailureMachine(string machineName);
 
     [LoggerMessage(
-        EventId = 7533,
+        EventId = 6034,
         Level = LogLevel.Critical,
         Message = "   Process ID: {ProcessId}"
     )]
     private partial void LogFailureProcessId(int processId);
 
     [LoggerMessage(
-        EventId = 7534,
+        EventId = 6035,
         Level = LogLevel.Critical,
         Message = "   Working Directory: {WorkingDirectory}"
     )]
     private partial void LogFailureWorkingDirectory(string workingDirectory);
 
     [LoggerMessage(
-        EventId = 7535,
+        EventId = 6036,
         Level = LogLevel.Critical,
         Message = "   Port Conflicts:"
     )]
     private partial void LogFailurePortConflictsHeader();
 
     [LoggerMessage(
-        EventId = 7536,
+        EventId = 6037,
         Level = LogLevel.Critical,
         Message = "     - {Service} on port {Port}: {ConflictDetails}"
     )]
     private partial void LogFailurePortConflict(string service, int port, string conflictDetails);
 
     [LoggerMessage(
-        EventId = 7537,
+        EventId = 6038,
         Level = LogLevel.Critical,
         Message = "   Exception Details: {ExceptionDetails}"
     )]
     private partial void LogFailureExceptionDetails(string exceptionDetails);
 
     [LoggerMessage(
-        EventId = 7538,
+        EventId = 6039,
         Level = LogLevel.Critical,
         Message = "🚨 UNEXPECTED FAILURE ANALYSIS:"
     )]
     private partial void LogUnexpectedFailureAnalysisHeader();
 
     [LoggerMessage(
-        EventId = 7539,
+        EventId = 6040,
         Level = LogLevel.Critical,
         Message = "   Exception Type: {ExceptionType}"
     )]
     private partial void LogUnexpectedFailureExceptionType(string exceptionType);
 
     [LoggerMessage(
-        EventId = 7540,
+        EventId = 6041,
         Level = LogLevel.Critical,
         Message = "   Error Message: {ErrorMessage}"
     )]
     private partial void LogUnexpectedFailureErrorMessage(string errorMessage);
 
     [LoggerMessage(
-        EventId = 7541,
+        EventId = 6042,
         Level = LogLevel.Critical,
         Message = "   Stack Trace: {StackTrace}"
     )]
     private partial void LogUnexpectedFailureStackTrace(string stackTrace);
 
     [LoggerMessage(
-        EventId = 7542,
+        EventId = 6043,
         Level = LogLevel.Critical,
         Message = "   Inner Exception {Depth}: {InnerExceptionType} - {InnerMessage}"
     )]
@@ -908,7 +908,7 @@ public partial class StartupService : IHostedService
     );
 
     [LoggerMessage(
-        EventId = 7543,
+        EventId = 6044,
         Level = LogLevel.Critical,
         Message = "💥 CRITICAL STARTUP FAILURE: {ValidationStep} failed after {MaxAttempts} attempts. Application cannot continue safely. Initiating graceful shutdown."
     )]
@@ -919,42 +919,42 @@ public partial class StartupService : IHostedService
     );
 
     [LoggerMessage(
-        EventId = 7544,
+        EventId = 6045,
         Level = LogLevel.Critical,
         Message = "💥 CRITICAL STARTUP FAILURE: {ValidationStep} failed after {MaxAttempts} attempts. Application cannot continue safely. Reason: {ErrorMessage}"
     )]
     private partial void LogCriticalStartupFailure(string validationStep, int maxAttempts, string errorMessage);
 
     [LoggerMessage(
-        EventId = 7545,
+        EventId = 6046,
         Level = LogLevel.Critical,
         Message = "💥 UNEXPECTED CRITICAL FAILURE: Application encountered an unexpected error during startup. Initiating emergency shutdown."
     )]
     private partial void LogUnexpectedCriticalFailureWithException(Exception exception);
 
     [LoggerMessage(
-        EventId = 7546,
+        EventId = 6047,
         Level = LogLevel.Critical,
         Message = "💥 UNEXPECTED CRITICAL FAILURE: {ErrorMessage}. Application cannot continue safely."
     )]
     private partial void LogUnexpectedCriticalFailure(string errorMessage);
 
     [LoggerMessage(
-        EventId = 7547,
+        EventId = 6048,
         Level = LogLevel.Information,
         Message = "🔄 {OperationName}: Attempt {Attempt}/{MaxAttempts}"
     )]
     private partial void LogOperationAttempt(string operationName, int attempt, int maxAttempts);
 
     [LoggerMessage(
-        EventId = 7548,
+        EventId = 6049,
         Level = LogLevel.Information,
         Message = "✅ {OperationName}: Succeeded on attempt {Attempt}"
     )]
     private partial void LogOperationSucceededOnRetry(string operationName, int attempt);
 
     [LoggerMessage(
-        EventId = 7549,
+        EventId = 6050,
         Level = LogLevel.Warning,
         Message = "⚠️ {OperationName} failed (attempt {Attempt}/{MaxAttempts}): {ErrorMessage}"
     )]
@@ -966,7 +966,7 @@ public partial class StartupService : IHostedService
     );
 
     [LoggerMessage(
-        EventId = 7550,
+        EventId = 6051,
         Level = LogLevel.Warning,
         Message = "⚠️ {OperationName} failed (attempt {Attempt}/{MaxAttempts}): {ErrorMessage}"
     )]
@@ -979,14 +979,14 @@ public partial class StartupService : IHostedService
     );
 
     [LoggerMessage(
-        EventId = 7551,
+        EventId = 6052,
         Level = LogLevel.Error,
         Message = "❌ {OperationName} failed after {MaxAttempts} attempts: {ErrorMessage}"
     )]
     private partial void LogOperationFailedFinal(string operationName, int maxAttempts, string errorMessage);
 
     [LoggerMessage(
-        EventId = 7552,
+        EventId = 6053,
         Level = LogLevel.Error,
         Message = "❌ {OperationName} failed after {MaxAttempts} attempts: {ErrorMessage}"
     )]
@@ -998,7 +998,7 @@ public partial class StartupService : IHostedService
     );
 
     [LoggerMessage(
-        EventId = 7553,
+        EventId = 6054,
         Level = LogLevel.Warning,
         Message = "⚠️ {OperationName}: Attempt {Attempt}/{MaxAttempts} failed. Retrying in {DelayMs} ms. Error: {ErrorMessage}"
     )]
@@ -1011,7 +1011,7 @@ public partial class StartupService : IHostedService
     );
 
     [LoggerMessage(
-        EventId = 7554,
+        EventId = 6055,
         Level = LogLevel.Warning,
         Message = "⚠️ {OperationName}: Attempt {Attempt}/{MaxAttempts} failed. Retrying in {DelayMs} ms. Error: {ErrorMessage}"
     )]
@@ -1025,7 +1025,7 @@ public partial class StartupService : IHostedService
     );
 
     [LoggerMessage(
-        EventId = 7555,
+        EventId = 6056,
         Level = LogLevel.Error,
         Message = "❌ {OperationName}: Final attempt {Attempt}/{MaxAttempts} failed. Operation cannot be completed."
     )]
@@ -1037,7 +1037,7 @@ public partial class StartupService : IHostedService
     );
 
     [LoggerMessage(
-        EventId = 7556,
+        EventId = 6057,
         Level = LogLevel.Error,
         Message = "❌ {OperationName}: Final attempt {Attempt}/{MaxAttempts} failed. Operation cannot be completed. Error: {ErrorType} - {ErrorMessage}"
     )]
@@ -1050,14 +1050,14 @@ public partial class StartupService : IHostedService
     );
 
     [LoggerMessage(
-        EventId = 7557,
+        EventId = 6058,
         Level = LogLevel.Error,
         Message = "❌ Failed to check port availability for {ServiceName} on port {Port}"
     )]
     private partial void LogPortAvailabilityCheckFailedWithException(string serviceName, int port, Exception exception);
 
     [LoggerMessage(
-        EventId = 7558,
+        EventId = 6059,
         Level = LogLevel.Error,
         Message = "❌ Failed to check port availability for {ServiceName} on port {Port}: {ErrorType} - {ErrorMessage}"
     )]
@@ -1069,7 +1069,7 @@ public partial class StartupService : IHostedService
     );
 
     [LoggerMessage(
-        EventId = 7559,
+        EventId = 6060,
         Level = LogLevel.Warning,
         Message = "❌ Failed to verify {ServiceName} connectivity ({Address}:{Port})"
     )]
@@ -1081,7 +1081,7 @@ public partial class StartupService : IHostedService
     );
 
     [LoggerMessage(
-        EventId = 7560,
+        EventId = 6061,
         Level = LogLevel.Warning,
         Message = "❌ Failed to verify {ServiceName} connectivity ({Address}:{Port}): {ErrorMessage}"
     )]
@@ -1093,28 +1093,28 @@ public partial class StartupService : IHostedService
     );
 
     [LoggerMessage(
-        EventId = 7561,
+        EventId = 6062,
         Level = LogLevel.Warning,
         Message = "🚫 Port conflict detected: {ServiceName} port {Port} is in use. {ConflictDetails}"
     )]
     private partial void LogPortConflictDetected(string serviceName, int port, string conflictDetails);
 
     [LoggerMessage(
-        EventId = 7562,
+        EventId = 6063,
         Level = LogLevel.Information,
         Message = "🔄 Alternative port found for {ServiceName}: {AlternativePort}"
     )]
     private partial void LogAlternativePortFound(string serviceName, int alternativePort);
 
     [LoggerMessage(
-        EventId = 7563,
+        EventId = 6064,
         Level = LogLevel.Warning,
         Message = "⏱️  {ServiceName} connectivity check timed out ({Address}:{Port})"
     )]
     private partial void LogConnectivityCheckTimedOut(string serviceName, string address, int port);
 
     [LoggerMessage(
-        EventId = 7564,
+        EventId = 6065,
         Level = LogLevel.Debug,
         Message = "✅ {ServiceName} connectivity verified ({Address}:{Port})"
     )]

@@ -160,7 +160,7 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     private partial void LogSettingClientName(int clientIndex, string name);
 
     [LoggerMessage(
-        EventId = 5118,
+        EventId = 5119,
         Level = LogLevel.Warning,
         Message = "Failed to set client {ClientIndex} name to '{Name}': {ErrorMessage}"
     )]
@@ -622,14 +622,14 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     // ═══════════════════════════════════════════════════════════════════════════════
 
     [LoggerMessage(
-        EventId = 5117,
+        EventId = 5118,
         Level = LogLevel.Warning,
         Message = "Failed to get client {ClientIndex} connection status: {ErrorMessage}"
     )]
     private partial void LogFailedToGetClientConnectionStatus(int clientIndex, string errorMessage);
 
     [LoggerMessage(
-        EventId = 5118,
+        EventId = 5119,
         Level = LogLevel.Warning,
         Message = "Failed to get client {ClientIndex} name: {ErrorMessage}"
     )]

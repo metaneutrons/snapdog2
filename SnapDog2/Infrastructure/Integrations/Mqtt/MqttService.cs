@@ -117,70 +117,70 @@ public sealed partial class MqttService : IMqttService
     #region Logging
 
     [LoggerMessage(
-        EventId = 4401,
+        EventId = 4200,
         Level = LogLevel.Information,
         Message = "MQTT service created for {BrokerAddress}:{Port}, enabled: {Enabled}"
     )]
     private partial void LogServiceCreated(string brokerAddress, int port, bool enabled);
 
     [LoggerMessage(
-        EventId = 4402,
+        EventId = 4201,
         Level = LogLevel.Information,
         Message = "Initializing MQTT connection to {BrokerAddress}:{Port}"
     )]
     private partial void LogInitializing(string brokerAddress, int port);
 
     [LoggerMessage(
-        EventId = 4403,
+        EventId = 4202,
         Level = LogLevel.Information,
         Message = "MQTT connection established successfully"
     )]
     private partial void LogConnectionEstablished();
 
     [LoggerMessage(
-        EventId = 4404,
+        EventId = 4203,
         Level = LogLevel.Warning,
         Message = "MQTT connection lost: {Reason}"
     )]
     private partial void LogConnectionLost(string reason);
 
     [LoggerMessage(
-        EventId = 4405,
+        EventId = 4204,
         Level = LogLevel.Error,
         Message = "Failed to initialize MQTT connection"
     )]
     private partial void LogInitializationFailed(Exception ex);
 
     [LoggerMessage(
-        EventId = 4409,
+        EventId = 4205,
         Level = LogLevel.Error,
         Message = "MQTT connection error: {ErrorMessage}"
     )]
     private partial void LogConnectionErrorMessage(string errorMessage);
 
     [LoggerMessage(
-        EventId = 4406,
+        EventId = 4206,
         Level = LogLevel.Error,
         Message = "MQTT operation {Operation} failed"
     )]
     private partial void LogOperationFailed(string operation, Exception ex);
 
     [LoggerMessage(
-        EventId = 4407,
+        EventId = 4207,
         Level = LogLevel.Information,
         Message = "MQTT service disposed"
     )]
     private partial void LogServiceDisposed();
 
     [LoggerMessage(
-        EventId = 4408,
+        EventId = 4208,
         Level = LogLevel.Warning,
         Message = "MQTT service not connected for operation: {Operation}"
     )]
     private partial void LogNotConnected(string operation);
 
     [LoggerMessage(
-        EventId = 4400,
+        EventId = 4209,
         Level = LogLevel.Information,
         Message = "🚀 Attempting MQTT connection to {BrokerAddress}:{Port} (attempt {AttemptNumber}/{MaxAttempts}: {ErrorMessage})"
     )]

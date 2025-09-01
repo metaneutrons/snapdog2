@@ -30,7 +30,7 @@ public partial class GetClientsByZoneQueryHandler(
     private readonly ILogger<GetClientsByZoneQueryHandler> _logger = logger;
 
     [LoggerMessage(
-        EventId = 8600,
+        EventId = 10800,
         Level = LogLevel.Information,
         Message = "Handling GetClientsByZoneQuery for Zone {ZoneIndex}"
     )]
