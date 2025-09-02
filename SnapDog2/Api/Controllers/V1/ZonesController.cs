@@ -14,6 +14,7 @@
 namespace SnapDog2.Api.Controllers.V1;
 
 using Cortex.Mediator;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SnapDog2.Api.Models;
 using SnapDog2.Server.Zones.Commands.Control;
@@ -37,6 +38,7 @@ using SnapDog2.Shared.Models;
 /// </summary>
 [ApiController]
 [Route("api/v1/zones")]
+[Authorize]
 [Produces("application/json")]
 [Tags("Zones")]
 public partial class ZonesController(IMediator mediator, ILogger<ZonesController> logger) : ControllerBase

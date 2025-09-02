@@ -16,6 +16,7 @@ namespace SnapDog2.Application.Services;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Domain.Services;
 using SnapDog2.Infrastructure.Metrics;
+using SnapDog2.Shared.Enums;
 
 /// <summary>
 /// Background service that periodically collects and updates business metrics.
@@ -98,100 +99,102 @@ public partial class BusinessMetricsCollectionService(
     /// <summary>
     /// Gets the total number of configured zones.
     /// </summary>
-    private static Task<int> GetTotalZonesAsync(IZoneManager? zoneManager)
+    private static async Task<int> GetTotalZonesAsync(IZoneManager? zoneManager)
     {
         try
         {
             if (zoneManager == null)
             {
-                return Task.FromResult(0);
+                return 0;
             }
 
-            // In a real implementation, you would call a method to get all zones
-            // For now, return a placeholder value
-            // Example: var zones = await zoneManager.GetAllZonesAsync();
-            // return zones.Count;
-
-            return Task.FromResult(0); // Placeholder - implement based on your IZoneManager interface
+            var result = await zoneManager.GetAllZoneStatesAsync();
+            return result.IsSuccess ? result.Value!.Count : 0;
         }
         catch
         {
-            return Task.FromResult(0);
+            return 0;
         }
     }
 
     /// <summary>
     /// Gets the number of currently active zones (zones with activity).
     /// </summary>
-    private static Task<int> GetActiveZonesAsync(IZoneManager? zoneManager)
+    private static async Task<int> GetActiveZonesAsync(IZoneManager? zoneManager)
     {
         try
         {
             if (zoneManager == null)
             {
-                return Task.FromResult(0);
+                return 0;
             }
 
-            // In a real implementation, you would:
-            // 1. Get all zones
-            // 2. Check which ones are active (have clients, are playing, etc.)
-            // 3. Return the count
+            var result = await zoneManager.GetAllZoneStatesAsync();
+            if (!result.IsSuccess || result.Value == null)
+            {
+                return 0;
+            }
 
-            return Task.FromResult(0); // Placeholder - implement based on your zone state logic
+            // Count zones that are not stopped (playing or paused)
+            return result.Value.Count(zone => zone.PlaybackState != PlaybackState.Stopped);
         }
         catch
         {
-            return Task.FromResult(0);
+            return 0;
         }
     }
 
     /// <summary>
     /// Gets the number of connected Snapcast clients.
     /// </summary>
-    private static Task<int> GetConnectedClientsAsync(IClientManager? clientManager)
+    private static async Task<int> GetConnectedClientsAsync(IClientManager? clientManager)
     {
         try
         {
             if (clientManager == null)
             {
-                return Task.FromResult(0);
+                return 0;
             }
 
-            // In a real implementation, you would:
-            // 1. Get all clients
-            // 2. Check which ones are connected
-            // 3. Return the count
+            var result = await clientManager.GetAllClientsAsync();
+            if (!result.IsSuccess || result.Value == null)
+            {
+                return 0;
+            }
 
-            return Task.FromResult(0); // Placeholder - implement based on your IClientManager interface
+            // Count clients that are connected
+            return result.Value.Count(client => client.Connected);
         }
         catch
         {
-            return Task.FromResult(0);
+            return 0;
         }
     }
 
     /// <summary>
     /// Gets the number of tracks currently playing across all zones.
     /// </summary>
-    private static Task<int> GetPlayingTracksAsync(IZoneManager? zoneManager)
+    private static async Task<int> GetPlayingTracksAsync(IZoneManager? zoneManager)
     {
         try
         {
             if (zoneManager == null)
             {
-                return Task.FromResult(0);
+                return 0;
             }
 
-            // In a real implementation, you would:
-            // 1. Get all zones
-            // 2. Check which ones are currently playing
-            // 3. Return the count
+            var result = await zoneManager.GetAllZoneStatesAsync();
+            if (!result.IsSuccess || result.Value == null)
+            {
+                return 0;
+            }
 
-            return Task.FromResult(0); // Placeholder - implement based on your zone playback state logic
+            // Count zones that are currently playing
+            return result.Value.Count(zone => zone.PlaybackState == PlaybackState.Playing);
         }
         catch
         {
-            return Task.FromResult(0);
+            return 0;
         }
     }
 

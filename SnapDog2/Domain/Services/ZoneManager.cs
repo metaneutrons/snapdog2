@@ -459,7 +459,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            // Update track info (this would normally come from playlist manager)
+            // FIXME: Update track info (this would normally come from playlist manager)
             var newTrack = this._currentState.Track! with
             {
                 Index = trackIndex,
