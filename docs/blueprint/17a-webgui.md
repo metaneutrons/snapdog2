@@ -1,30 +1,28 @@
-# 25. SnapDog2 Web UI — Explicit REST + Realtime Hub (v1)
+# 25. SnapDog2 Web UI — Separate Services + AI-Optimized Stack (v2)
 
-**Goal**: Ship a modern, reliable audio control UI with only explicit REST calls (no bulky /zones or /clients lists) and server-push updates via SignalR. Develop like a normal TS app; publish as a single .NET artifact with embedded assets.
+**Goal**: Ship a modern, reliable audio control UI using separate frontend/backend services with explicit REST calls and realtime SignalR. Optimized for AI code generation with React + TypeScript.
 
 ## 25.1. Scope & Principles
 
-- **Explicit HTTP only**: UI never calls aggregate/list endpoints for state. All reads/writes are explicit (e.g., PUT /zones/{zoneIndex}/volume).
-- **Realtime first**: State hydration and live UX come from the hub, not from "read-all" HTTP.
-- **DX vs Ops**: Dev in TypeScript (Vite/HMR). At build time, emit static assets → embed into a .NET Assets project. No Node in production.
-- **Single page, minimal routes**: Focused control surface; no complex router needed.
-- **No external assets**: Fonts, CSS, icons are embedded as resources.
+- **Separate services**: Frontend (React SPA) and backend (.NET API) as independent containers
+- **Explicit HTTP only**: UI never calls aggregate/list endpoints for state. All reads/writes are explicit (e.g., PUT /zones/{zoneIndex}/volume)
+- **Realtime first**: State hydration and live UX come from SignalR hub, not from "read-all" HTTP
+- **AI-friendly stack**: React + TypeScript + Vite + Tailwind for optimal AI code generation
+- **Standard patterns**: Conventional React structure for predictable AI output
+- **Container orchestration**: Docker Compose for development and production
 
 ## 25.2. High-Level Architecture
 
 ```plaintext
-[ SnapDog2 (monolith, .NET 9) ]
-   ├─ REST (explicit actions & scalars)      ← UI uses only small endpoints
-   ├─ SignalR Hub (/hubs/snapdog)            ← UI subscribes, gets snapshots+deltas
-   ├─ Static Files (embedded)                 ← Built TS assets (index.html, JS, CSS, fonts)
-   └─ Audio Engine                            ← Emits events to Hub (throttled)
+Development:
+[ Frontend Container (React + Vite) :5173 ]  ← Hot reload, proxy to backend
+[ Backend Container (.NET API) :5000 ]       ← SignalR hub, REST endpoints
+[ Caddy Reverse Proxy :8000 ]               ← Single entry point
 
-[ Web UI (TypeScript, React/Vite in dev) ]
-   ├─ fetch-wrapper.ts  (only explicit endpoints)
-   ├─ signalr.ts        (hub connection, handlers)
-   ├─ store.ts          (reducer/query cache with optimistic updates)
-   ├─ components/       (ZoneCard, ClientChip, Transport, Volume)
-   └─ index.html        (mounts app)
+Production:
+[ Frontend Container (Nginx + React SPA) ]   ← Static files, optimized build
+[ Backend Container (.NET API) ]             ← Same as development
+[ Caddy Reverse Proxy :80 ]                 ← SSL termination, routing
 ```
 
 ## 25.3. Interaction Model
@@ -96,17 +94,17 @@ public record ZoneTrackMetadataChangedNotification(int ZoneIndex, TrackInfo Trac
 [StatusId("VOLUME_STATUS")]
 public record ZoneVolumeChangedNotification(int ZoneIndex, int Volume) : INotification;
 
-[StatusId("ZONE_MUTE_STATUS")]
+[StatusId("MUTE_STATUS")]
 public record ZoneMuteChangedNotification(int ZoneIndex, bool Muted) : INotification;
 
 [StatusId("TRACK_REPEAT_STATUS")]
 public record ZoneRepeatModeChangedNotification(int ZoneIndex, bool TrackRepeat, bool PlaylistRepeat) : INotification;
 
-[StatusId("ZONE_SHUFFLE_STATUS")]
-public record ZoneShuffleChangedNotification(int ZoneIndex, bool Shuffled) : INotification;
+[StatusId("PLAYLIST_SHUFFLE_STATUS")]
+public record ZoneShuffleChangedNotification(int ZoneIndex, bool Shuffle) : INotification;
 
-[StatusId("ZONE_PLAYLIST_STATUS")]
-public record ZonePlaylistChangedNotification(int ZoneIndex, int PlaylistIndex, string PlaylistName) : INotification;
+[StatusId("PLAYLIST_STATUS")]
+public record ZonePlaylistChangedNotification(int ZoneIndex, PlaylistInfo? Playlist) : INotification;
 
 // Client notifications
 [StatusId("CLIENT_CONNECTED")]
@@ -122,7 +120,7 @@ public record ClientVolumeChangedNotification(int ClientIndex, int Volume) : INo
 public record ClientMuteChangedNotification(int ClientIndex, bool Muted) : INotification;
 
 [StatusId("CLIENT_LATENCY_STATUS")]
-public record ClientLatencyChangedNotification(int ClientIndex, int Latency) : INotification;
+public record ClientLatencyChangedNotification(int ClientIndex, int LatencyMs) : INotification;
 
 // System notifications
 [StatusId("SYSTEM_ERROR")]
@@ -247,7 +245,7 @@ public class SignalRNotificationHandler :
 
 **Key differences from original blueprint**:
 
-- Uses `zoneIndex` and `clientIndex` (1-based) instead of `zoneId`/`clientId`
+- Uses `zoneIndex` and `clientIndex` (1-based) instead of `zoneIndex`/`clientId`
 - Separate track repeat vs playlist repeat endpoints
 - Unified control endpoint for blueprint commands
 - All endpoints return 202 Accepted for async operations
@@ -321,316 +319,1080 @@ public partial class SignalRNotificationHandler :
 
 **Auto-registration**: Handlers are automatically discovered and registered via `AddCommandProcessing()` in Program.cs.
 
-### 5.3 Current Program.cs Configuration
+### 25.5.3. Current Program.cs Configuration
 
 ```csharp
 // Already implemented in Program.cs
 builder.Services.AddSignalR();
 
-// Hub mapping (line 640)
+// Hub mapping
 app.MapHub<SnapDogHub>("/hubs/snapdog/v1");
 
-// Serve embedded static files
-var assetsAssembly = typeof(AssetsMarker).Assembly;
-var embedded = new ManifestEmbeddedFileProvider(assetsAssembly, "EmbeddedWebRoot");
-app.UseStaticFiles(new StaticFileOptions { FileProvider = embedded });
-
-// Map SPA index (hash-router or simple "/")
-app.MapGet("/", async ctx =>
+// CORS for development (frontend container)
+if (app.Environment.IsDevelopment())
 {
-    var file = embedded.GetFileInfo("index.html");
-    ctx.Response.ContentType = "text/html; charset=utf-8";
-    await using var s = file.CreateReadStream();
-    await s.CopyToAsync(ctx.Response.Body);
-});
+    app.UseCors(policy => policy
+        .WithOrigins("http://localhost:5173", "http://frontend:5173")
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .AllowCredentials());
+}
 
-// Map REST (your existing controllers) …
+// Health check endpoint
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
 
-// Map hub
-app.MapHub<SnapDogHub>("/hubs/snapdog");
+// Map REST controllers
+app.MapControllers();
 ```
 
-## 25.6. Client Implementation (TypeScript)
+## 25.6. Frontend Implementation (React + TypeScript)
 
-### 25.6.1. Project Layout
+### 25.6.1. Project Layout (AI-Optimized)
 
 ```plaintext
-apps/webui/
+SnapDog2.WebUI/                    # Frontend service (separate container)
   src/
-    main.tsx
-    signalr.ts
-    fetch-wrapper.ts
-    store.ts
     components/
-      ZoneCard.tsx
-      ClientChip.tsx
-      Transport.tsx
-      Volume.tsx
-  index.html
-  vite.config.ts       → outDir: ../SnapDog2.WebUi.Assets/EmbeddedWebRoot
+      ZoneCard.tsx                 # Zone control component
+      ClientChip.tsx               # Draggable client component
+      VolumeSlider.tsx             # Volume control
+      TransportControls.tsx        # Play/pause/next/prev
+      PlaylistSelector.tsx         # Playlist dropdown
+    hooks/
+      useSignalR.ts               # SignalR connection hook
+      useZoneState.ts             # Zone state management
+      useClientState.ts           # Client state management
+    services/
+      api.ts                      # REST API wrapper
+      signalr.ts                  # SignalR service
+    store/
+      index.ts                    # Zustand store
+      types.ts                    # TypeScript interfaces
+    App.tsx                       # Main app component
+    main.tsx                      # React entry point
+  public/
+    fonts/                        # Local fonts
+    icons/                        # SVG icons
+  package.json                    # Dependencies
+  vite.config.ts                  # Standard Vite config
+  tailwind.config.js              # Tailwind CSS config
+  tsconfig.json                   # TypeScript config
+  Dockerfile                      # Production container
 ```
 
-### 25.6.2. SignalR client
+### 25.6.2. SignalR Hook (React Pattern)
 
 ```typescript
-// src/signalr.ts
-import { HubConnectionBuilder, LogLevel, HubConnectionState } from "@microsoft/signalr";
-import { store } from "./store";
+// src/hooks/useSignalR.ts
+import { useEffect, useRef } from 'react';
+import { HubConnectionBuilder, HubConnection, LogLevel } from '@microsoft/signalr';
+import { useAppStore } from '../store';
 
-export function startHub(baseUrl: string) {
-  const conn = new HubConnectionBuilder()
-    .withUrl(`${baseUrl}/hubs/snapdog/v1`)  // Current endpoint
-    .withAutomaticReconnect()
-    .configureLogging(LogLevel.Information)
-    .build();
+export function useSignalR(baseUrl: string = '') {
+  const connectionRef = useRef<HubConnection | null>(null);
+  const {
+    updateZoneProgress,
+    updateZoneTrack,
+    updateZoneVolume,
+    updateZonePlayback,
+    updateZoneMute,
+    updateZoneRepeat,
+    updateZoneShuffle,
+    updateZonePlaylist,
+    updateClientConnection,
+    updateClientZone,
+    updateClientVolume,
+    updateClientMute,
+    updateClientLatency,
+  } = useAppStore();
 
-  // Listen for current notification events (when handlers are implemented)
-  conn.on("ZoneProgressChanged", (zoneIndex, position, progress) =>
-    store.dispatch({ t:"zone/progress", zoneIndex, position, progress }));
+  useEffect(() => {
+    const connection = new HubConnectionBuilder()
+      .withUrl(`${baseUrl}/hubs/snapdog/v1`)
+      .withAutomaticReconnect()
+      .configureLogging(LogLevel.Information)
+      .build();
 
-  conn.on("ZoneTrackMetadataChanged", (zoneIndex, track) =>
-    store.dispatch({ t:"zone/track", zoneIndex, track }));
+    // Zone event handlers
+    connection.on('ZoneProgressChanged', (zoneIndex: number, position: number, progress: number) => {
+      updateZoneProgress(zoneIndex, { position, progress });
+    });
 
-  conn.on("ZoneVolumeChanged", (zoneIndex, volume) =>
-    store.dispatch({ t:"zone/volume", zoneIndex, volume }));
+    connection.on('ZoneTrackMetadataChanged', (zoneIndex: number, track: any) => {
+      updateZoneTrack(zoneIndex, track);
+    });
 
-  conn.on("ZonePlaybackChanged", (zoneIndex, playbackState) =>
-    store.dispatch({ t:"zone/playback", zoneIndex, playbackState }));
+    connection.on('ZoneVolumeChanged', (zoneIndex: number, volume: number) => {
+      updateZoneVolume(zoneIndex, volume);
+    });
 
-  conn.on("ClientZoneChanged", (clientIndex, zoneIndex) =>
-    store.dispatch({ t:"client/zone", clientIndex, zoneIndex }));
+    connection.on('ZonePlaybackChanged', (zoneIndex: number, playbackState: string) => {
+      updateZonePlayback(zoneIndex, playbackState);
+    });
 
-  conn.on("ClientConnected", (clientIndex, connected) =>
-    store.dispatch({ t:"client/connected", clientIndex, connected }));
+    connection.on('ZoneMuteChanged', (zoneIndex: number, muted: boolean) => {
+      updateZoneMute(zoneIndex, muted);
+    });
 
-  async function start() {
-    if (conn.state === HubConnectionState.Disconnected) {
+    connection.on('ZoneRepeatModeChanged', (zoneIndex: number, trackRepeat: boolean, playlistRepeat: boolean) => {
+      updateZoneRepeat(zoneIndex, trackRepeat, playlistRepeat);
+    });
+
+    connection.on('ZoneShuffleChanged', (zoneIndex: number, shuffle: boolean) => {
+      updateZoneShuffle(zoneIndex, shuffle);
+    });
+
+    connection.on('ZonePlaylistChanged', (zoneIndex: number, playlistIndex: number, playlistName: string) => {
+      updateZonePlaylist(zoneIndex, playlistIndex, playlistName);
+    });
+
+    // Client event handlers
+    connection.on('ClientConnected', (clientIndex: number, connected: boolean) => {
+      updateClientConnection(clientIndex, connected);
+    });
+
+    connection.on('ClientZoneChanged', (clientIndex: number, zoneIndex?: number) => {
+      updateClientZone(clientIndex, zoneIndex);
+    });
+
+    connection.on('ClientVolumeChanged', (clientIndex: number, volume: number) => {
+      updateClientVolume(clientIndex, volume);
+    });
+
+    connection.on('ClientMuteChanged', (clientIndex: number, muted: boolean) => {
+      updateClientMute(clientIndex, muted);
+    });
+
+    connection.on('ClientLatencyChanged', (clientIndex: number, latency: number) => {
+      updateClientLatency(clientIndex, latency);
+    });
+
+    // System event handlers
+    connection.on('ErrorOccurred', (errorCode: string, message: string, context?: string) => {
+      console.error(`System error ${errorCode}: ${message}`, context);
+    });
+
+    connection.on('SystemStatusChanged', (status: any) => {
+      console.log('System status changed:', status);
+    });
+
+    const startConnection = async () => {
       try {
-        await conn.start();
-        // Join groups for zones/clients you want to monitor
-        await conn.invoke("JoinSystem");
-      } catch {
-        setTimeout(start, 1500);
+        await connection.start();
+        await connection.invoke('JoinSystem');
+        console.log('SignalR connected');
+      } catch (error) {
+        console.error('SignalR connection failed:', error);
+        setTimeout(startConnection, 5000);
       }
-    }
-  }
-  start();
+    };
+
+    startConnection();
+    connectionRef.current = connection;
+
+    return () => {
+      connection.stop();
+    };
+  }, [baseUrl, updateZoneProgress, updateZoneTrack, updateZoneVolume, updateZonePlayback]);
 
   return {
-    joinZone: (zoneIndex: number) => conn.invoke("JoinZone", zoneIndex),
-    leaveZone: (zoneIndex: number) => conn.invoke("LeaveZone", zoneIndex),
-    joinClient: (clientIndex: number) => conn.invoke("JoinClient", clientIndex),
-    leaveClient: (clientIndex: number) => conn.invoke("LeaveClient", clientIndex),
-    joinSystem: () => conn.invoke("JoinSystem"),
-    leaveSystem: () => conn.invoke("LeaveSystem")
+    joinZone: (zoneIndex: number) => connectionRef.current?.invoke('JoinZone', zoneIndex),
+    leaveZone: (zoneIndex: number) => connectionRef.current?.invoke('LeaveZone', zoneIndex),
+    joinClient: (clientIndex: number) => connectionRef.current?.invoke('JoinClient', clientIndex),
+    leaveClient: (clientIndex: number) => connectionRef.current?.invoke('LeaveClient', clientIndex),
+    joinSystem: () => connectionRef.current?.invoke('JoinSystem'),
+    leaveSystem: () => connectionRef.current?.invoke('LeaveSystem'),
   };
 }
 ```
 
-### 25.6.3. Explicit REST wrapper
+### 25.6.3. API Service (Explicit REST)
 
 ```typescript
-// src/fetch-wrapper.ts
-const BASE = "/api/v1";
+// src/services/api.ts
+const BASE_URL = '/api/v1';
 
-async function req(method: string, path: string, body?: unknown) {
-  const r = await fetch(`${BASE}${path}`, {
-    method,
-    headers: body ? { "Content-Type": "application/json" } : undefined,
-    body: body ? JSON.stringify(body) : undefined,
-    credentials: "same-origin",
-  });
-  if (!r.ok) throw new Error(`${method} ${path} -> ${r.status}`);
-  return r;
-}
+class ApiService {
+  private async request(method: string, path: string, body?: unknown) {
+    const response = await fetch(`${BASE_URL}${path}`, {
+      method,
+      headers: body ? { 'Content-Type': 'application/json' } : undefined,
+      body: body ? JSON.stringify(body) : undefined,
+      credentials: 'same-origin',
+    });
 
-export const api = {
-  zones: {
-    play: (id: number) => req("POST", `/zones/${zoneIndex}/play`),
-    pause: (id: number) => req("POST", `/zones/${zoneIndex}/pause`),
-    next: (id: number) => req("POST", `/zones/${zoneIndex}/next`),
-    previous: (id: number) => req("POST", `/zones/${zoneIndex}/previous`),
-    seek: (id: number, positionMs: number) => req("PUT", `/zones/${zoneIndex}/track/position`, { positionMs }),
-    volume: (id: number, volume: number) => req("PUT", `/zones/${zoneIndex}/volume`, { volume }),
-    toggleMute: (id: number) => req("PUT", `/zones/${zoneIndex}/mute/toggle`),
-    toggleShuffle: (id: number) => req("PUT", `/zones/${zoneIndex}/shuffle/toggle`),
-    repeat: (id: number, mode: "Off"|"One"|"All") => req("PUT", `/zones/${zoneIndex}/repeat`, { mode }),
-    setPlaylist: (id: number, playlistIndex: number) => req("PUT", `/zones/${zoneIndex}/playlist`, { playlistIndex }),
-  },
-  clients: {
-    assign: (clientIndex: number, zoneId: number, uiActionId?: string) =>
-      req("PUT", `/clients/${clientIndex}/zone`, { zoneId, uiActionId }),
-  }
-};
-```
-
-### 25.6.4. Store (minimal reducer)
-
-```typescript
-// src/store.ts
-type State = {
-  zones: Record<number, {
-    now?: { title:string; artist:string; album:string; durationMs:number; coverUrl?:string };
-    controls: { volume:number; mute:boolean; shuffle:boolean; repeat:"Off"|"One"|"All" };
-    clients: number[];
-    progress?: { pos:number; dur:number };
-  }>;
-  clients: Record<number, { connected:boolean; zoneId:number; volume?:number; mute?:boolean }>;
-};
-
-export const store = (() => {
-  let state: State = { zones:{}, clients:{} };
-  const listeners = new Set<() => void>();
-  const emit = () => listeners.forEach(fn => fn());
-  const get = () => state;
-  const on = (fn: () => void) => (listeners.add(fn), () => listeners.delete(fn));
-
-  function dispatch(a: any) {
-    switch (a.t) {
-      case "zones/index":
-        a.ids.forEach((id:number) => state.zones[id] ??= { controls:{volume:0,mute:false,shuffle:false,repeat:"Off"}, clients:[] });
-        break;
-      case "zone/snapshot":
-        state.zones[a.snap.zoneId] = {
-          now: a.snap.nowPlaying ?? undefined,
-          controls: a.snap.controls,
-          clients: [...a.snap.clients],
-          progress: state.zones[a.snap.zoneId]?.progress
-        };
-        break;
-      case "zone/progress":
-        (state.zones[a.zoneId] ??= {controls:{volume:0,mute:false,shuffle:false,repeat:"Off"}, clients:[]}).progress = { pos:a.pos, dur:a.dur };
-        break;
-      case "zone/nowPlaying":
-        (state.zones[a.zoneId] ??= {controls:{volume:0,mute:false,shuffle:false,repeat:"Off"}, clients:[]}).now = a.np;
-        break;
-      case "zone/controls":
-        (state.zones[a.zoneId] ??= {controls:{volume:0,mute:false,shuffle:false,repeat:"Off"}, clients:[]}).controls = a.c;
-        break;
-      case "client/status":
-        state.clients[a.i] = { connected:a.connected, zoneId:a.zoneId, volume:a.volume, mute:a.mute };
-        // Move client in zone list:
-        Object.values(state.zones).forEach(z => z.clients = z.clients.filter(c => c !== a.i));
-        (state.zones[a.zoneId] ??= {controls:{volume:0,mute:false,shuffle:false,repeat:"Off"}, clients:[]}).clients.push(a.i);
-        break;
+    if (!response.ok) {
+      throw new Error(`${method} ${path} -> ${response.status}`);
     }
-    emit();
+
+    return response;
   }
 
-  return { get, on, dispatch };
-})();
-```
+  // Zone controls
+  zones = {
+    play: (zoneIndex: number) => this.request('POST', `/zones/${zoneIndex}/play`),
+    pause: (zoneIndex: number) => this.request('POST', `/zones/${zoneIndex}/pause`),
+    stop: (zoneIndex: number) => this.request('POST', `/zones/${zoneIndex}/stop`),
+    next: (zoneIndex: number) => this.request('POST', `/zones/${zoneIndex}/next`),
+    previous: (zoneIndex: number) => this.request('POST', `/zones/${zoneIndex}/previous`),
+    setVolume: (zoneIndex: number, volume: number) =>
+      this.request('PUT', `/zones/${zoneIndex}/volume`, { volume }),
+    toggleMute: (zoneIndex: number) => this.request('POST', `/zones/${zoneIndex}/mute/toggle`),
+    toggleShuffle: (zoneIndex: number) => this.request('POST', `/zones/${zoneIndex}/shuffle/toggle`),
+    setRepeat: (zoneIndex: number, enabled: boolean) =>
+      this.request('PUT', `/zones/${zoneIndex}/repeat`, { enabled }),
+    setTrackRepeat: (zoneIndex: number, enabled: boolean) =>
+      this.request('PUT', `/zones/${zoneIndex}/repeat/track`, { enabled }),
+    setPlaylist: (zoneIndex: number, playlistIndex: number) =>
+      this.request('PUT', `/zones/${zoneIndex}/playlist`, { playlistIndex }),
+    setTrack: (zoneIndex: number, trackIndex: number) =>
+      this.request('PUT', `/zones/${zoneIndex}/track`, { trackIndex }),
+    seekPosition: (zoneIndex: number, positionMs: number) =>
+      this.request('PUT', `/zones/${zoneIndex}/track/position`, { positionMs }),
+  };
 
-### 25.6.5. Components (sketch)
+  // Client controls
+  clients = {
+    assignZone: (clientIndex: number, zoneIndex: number) =>
+      this.request('PUT', `/clients/${clientIndex}/zone`, { zoneIndex }),
+    setVolume: (clientIndex: number, volume: number) =>
+      this.request('PUT', `/clients/${clientIndex}/volume`, { volume }),
+    toggleMute: (clientIndex: number) => this.request('POST', `/clients/${clientIndex}/mute/toggle`),
+    volumeUp: (clientIndex: number, step = 5) =>
+      this.request('POST', `/clients/${clientIndex}/volume/up?step=${step}`),
+    volumeDown: (clientIndex: number, step = 5) =>
+      this.request('POST', `/clients/${clientIndex}/volume/down?step=${step}`),
+  };
 
-- **ZoneCard** renders name, now playing, progress, controls, and ClientChip list.
-- **ClientChip** is draggable (@dnd-kit) and on drop calls api.clients.assign.
-
-## 25.7. Packaging (embed everything)
-
-### 25.7.1. Assets project
-
-```plaintext
-SnapDog2.WebUi.Assets/
-  EmbeddedWebRoot/
-    index.html
-    assets/...(JS/CSS)
-    css/app.css
-    fonts/Orbitron-Regular.woff2
-    icons/...
-  AssetsMarker.cs
-  SnapDog2.WebUi.Assets.csproj
-```
-
-**SnapDog2.WebUi.Assets.csproj**:
-
-```xml
-<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
-    <EnableDefaultItems>false</EnableDefaultItems>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="EmbeddedWebRoot/**/*" />
-    <Compile Include="AssetsMarker.cs" />
-  </ItemGroup>
-</Project>
-```
-
-**Local font (no CDN) in css/app.css**:
-
-```css
-@font-face {
-  font-family: "OrbitronLocal";
-  src: url("/fonts/Orbitron-Regular.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
+  // Scalar reads (when needed)
+  get = {
+    zoneCount: () => this.request('GET', '/zones/count').then(r => r.json()),
+    clientCount: () => this.request('GET', '/clients/count').then(r => r.json()),
+    zoneMetadata: (zoneIndex: number) =>
+      this.request('GET', `/zones/${zoneIndex}/track/metadata`).then(r => r.json()),
+    zonePlaylist: (zoneIndex: number) =>
+      this.request('GET', `/zones/${zoneIndex}/playlist/info`).then(r => r.json()),
+  };
 }
-:root {
-  --font-orbitron: "OrbitronLocal", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-system: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
-  /* Light tokens */
-  --color-primary:#2563eb; --bg:#fff; --surface:#f8fafc;
-  --text:#1e293b; --text-muted:#64748b; --border:#e2e8f0;
-
-  /* Semantic */
-  --success:#10b981; --warn:#f59e0b; --error:#ef4444; --info:#06b6d4;
-}
-[data-theme="dark"] {
-  --color-primary:#3b82f6; --bg:#0f172a; --surface:#1e293b;
-  --text:#f1f5f9; --text-muted:#94a3b8; --border:#334155;
-}
+export const api = new ApiService();
 ```
 
-### 25.7.2. Vite output
-
-**apps/webui/vite.config.ts**:
+### 25.6.4. State Management (Zustand)
 
 ```typescript
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+// src/store/types.ts
+export interface TrackInfo {
+  index?: number;
+  title: string;
+  artist: string;
+  album?: string;
+  durationMs?: number;
+  positionMs?: number;
+  progress?: number;
+  coverArtUrl?: string;
+  isPlaying: boolean;
+  source: string;
+  url: string;
+}
+
+export interface ZoneState {
+  volume: number;
+  muted: boolean;
+  shuffle: boolean;
+  trackRepeat: boolean;
+  playlistRepeat: boolean;
+  playbackState: 'playing' | 'paused' | 'stopped';
+  currentTrack?: TrackInfo;
+  progress?: { position: number; progress: number };
+  playlistIndex?: number;
+  playlistName?: string;
+  clients: number[];
+}
+
+export interface ClientState {
+  connected: boolean;
+  zoneIndex?: number;
+  volume: number;
+  muted: boolean;
+  latency?: number;
+}
+
+// src/store/index.ts
+import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
+import type { TrackInfo, ZoneState, ClientState } from './types';
+
+interface AppState {
+  zones: Record<number, ZoneState>;
+  clients: Record<number, ClientState>;
+
+  // Zone actions
+  updateZoneProgress: (zoneIndex: number, progress: { position: number; progress: number }) => void;
+  updateZoneTrack: (zoneIndex: number, track: TrackInfo) => void;
+  updateZoneVolume: (zoneIndex: number, volume: number) => void;
+  updateZonePlayback: (zoneIndex: number, playbackState: string) => void;
+  updateZoneMute: (zoneIndex: number, muted: boolean) => void;
+  updateZoneRepeat: (zoneIndex: number, trackRepeat: boolean, playlistRepeat: boolean) => void;
+  updateZoneShuffle: (zoneIndex: number, shuffle: boolean) => void;
+  updateZonePlaylist: (zoneIndex: number, playlistIndex: number, playlistName: string) => void;
+
+  // Client actions
+  updateClientConnection: (clientIndex: number, connected: boolean) => void;
+  updateClientZone: (clientIndex: number, zoneIndex?: number) => void;
+  updateClientVolume: (clientIndex: number, volume: number) => void;
+  updateClientMute: (clientIndex: number, muted: boolean) => void;
+  updateClientLatency: (clientIndex: number, latency: number) => void;
+
+  // Utility actions
+  initializeZone: (zoneIndex: number) => void;
+  initializeClient: (clientIndex: number) => void;
+}
+
+const defaultZoneState: ZoneState = {
+  volume: 0,
+  muted: false,
+  shuffle: false,
+  trackRepeat: false,
+  playlistRepeat: false,
+  playbackState: 'stopped',
+  clients: [],
+};
+
+const defaultClientState: ClientState = {
+  connected: false,
+  volume: 0,
+  muted: false,
+};
+
+export const useAppStore = create<AppState>()(
+  devtools(
+    (set, get) => ({
+      zones: {},
+      clients: {},
+
+      // Zone actions
+      updateZoneProgress: (zoneIndex, progress) =>
+        set((state) => ({
+          zones: {
+            ...state.zones,
+            [zoneIndex]: {
+              ...state.zones[zoneIndex] || defaultZoneState,
+              progress
+            },
+          },
+        }), false, 'updateZoneProgress'),
+
+      updateZoneTrack: (zoneIndex, track) =>
+        set((state) => ({
+          zones: {
+            ...state.zones,
+            [zoneIndex]: {
+              ...state.zones[zoneIndex] || defaultZoneState,
+              currentTrack: track
+            },
+          },
+        }), false, 'updateZoneTrack'),
+
+      updateZoneVolume: (zoneIndex, volume) =>
+        set((state) => ({
+          zones: {
+            ...state.zones,
+            [zoneIndex]: {
+              ...state.zones[zoneIndex] || defaultZoneState,
+              volume
+            },
+          },
+        }), false, 'updateZoneVolume'),
+
+      updateZonePlayback: (zoneIndex, playbackState) =>
+        set((state) => ({
+          zones: {
+            ...state.zones,
+            [zoneIndex]: {
+              ...state.zones[zoneIndex] || defaultZoneState,
+              playbackState: playbackState as any
+            },
+          },
+        }), false, 'updateZonePlayback'),
+
+      updateZoneMute: (zoneIndex, muted) =>
+        set((state) => ({
+          zones: {
+            ...state.zones,
+            [zoneIndex]: {
+              ...state.zones[zoneIndex] || defaultZoneState,
+              muted
+            },
+          },
+        }), false, 'updateZoneMute'),
+
+      updateZoneRepeat: (zoneIndex, trackRepeat, playlistRepeat) =>
+        set((state) => ({
+          zones: {
+            ...state.zones,
+            [zoneIndex]: {
+              ...state.zones[zoneIndex] || defaultZoneState,
+              trackRepeat,
+              playlistRepeat
+            },
+          },
+        }), false, 'updateZoneRepeat'),
+
+      updateZoneShuffle: (zoneIndex, shuffle) =>
+        set((state) => ({
+          zones: {
+            ...state.zones,
+            [zoneIndex]: {
+              ...state.zones[zoneIndex] || defaultZoneState,
+              shuffle
+            },
+          },
+        }), false, 'updateZoneShuffle'),
+
+      updateZonePlaylist: (zoneIndex, playlistIndex, playlistName) =>
+        set((state) => ({
+          zones: {
+            ...state.zones,
+            [zoneIndex]: {
+              ...state.zones[zoneIndex] || defaultZoneState,
+              playlistIndex,
+              playlistName
+            },
+          },
+        }), false, 'updateZonePlaylist'),
+
+      // Client actions
+      updateClientConnection: (clientIndex, connected) =>
+        set((state) => ({
+          clients: {
+            ...state.clients,
+            [clientIndex]: {
+              ...state.clients[clientIndex] || defaultClientState,
+              connected
+            },
+          },
+        }), false, 'updateClientConnection'),
+
+      updateClientZone: (clientIndex, zoneIndex) => {
+        set((state) => {
+          // Remove client from all zones
+          const updatedZones = { ...state.zones };
+          Object.keys(updatedZones).forEach(zId => {
+            updatedZones[parseInt(zId)] = {
+              ...updatedZones[parseInt(zId)],
+              clients: updatedZones[parseInt(zId)].clients.filter(c => c !== clientIndex)
+            };
+          });
+
+          // Add client to new zone if specified
+          if (zoneIndex !== undefined) {
+            updatedZones[zoneIndex] = {
+              ...updatedZones[zoneIndex] || defaultZoneState,
+              clients: [...(updatedZones[zoneIndex]?.clients || []), clientIndex]
+            };
+          }
+
+          return {
+            zones: updatedZones,
+            clients: {
+              ...state.clients,
+              [clientIndex]: {
+                ...state.clients[clientIndex] || defaultClientState,
+                zoneIndex
+              },
+            },
+          };
+        }, false, 'updateClientZone');
+      },
+
+      updateClientVolume: (clientIndex, volume) =>
+        set((state) => ({
+          clients: {
+            ...state.clients,
+            [clientIndex]: {
+              ...state.clients[clientIndex] || defaultClientState,
+              volume
+            },
+          },
+        }), false, 'updateClientVolume'),
+
+      updateClientMute: (clientIndex, muted) =>
+        set((state) => ({
+          clients: {
+            ...state.clients,
+            [clientIndex]: {
+              ...state.clients[clientIndex] || defaultClientState,
+              muted
+            },
+          },
+        }), false, 'updateClientMute'),
+
+      updateClientLatency: (clientIndex, latency) =>
+        set((state) => ({
+          clients: {
+            ...state.clients,
+            [clientIndex]: {
+              ...state.clients[clientIndex] || defaultClientState,
+              latency
+            },
+          },
+        }), false, 'updateClientLatency'),
+
+      // Utility actions
+      initializeZone: (zoneIndex) =>
+        set((state) => ({
+          zones: {
+            ...state.zones,
+            [zoneIndex]: state.zones[zoneIndex] || defaultZoneState,
+          },
+        }), false, 'initializeZone'),
+
+      initializeClient: (clientIndex) =>
+        set((state) => ({
+          clients: {
+            ...state.clients,
+            [clientIndex]: state.clients[clientIndex] || defaultClientState,
+          },
+        }), false, 'initializeClient'),
+    }),
+    { name: 'snapdog-store' }
+  )
+);
+
+// Convenience selectors
+export const useZone = (zoneIndex: number) =>
+  useAppStore((state) => state.zones[zoneIndex]);
+
+export const useClient = (clientIndex: number) =>
+  useAppStore((state) => state.clients[clientIndex]);
+
+export const useZoneClients = (zoneIndex: number) =>
+  useAppStore((state) => state.zones[zoneIndex]?.clients || []);
+```
+
+### 25.6.5. React Components (Enterprise-Grade)
+
+```typescript
+// src/components/ZoneCard.tsx
+import React, { useEffect } from 'react';
+import { useZone, useZoneClients, useAppStore } from '../store';
+import { useSignalR } from '../hooks/useSignalR';
+import { api } from '../services/api';
+import { TransportControls } from './TransportControls';
+import { VolumeSlider } from './VolumeSlider';
+import { ClientList } from './ClientList';
+import { PlaylistSelector } from './PlaylistSelector';
+
+interface ZoneCardProps {
+  zoneIndex: number;
+  className?: string;
+}
+
+export function ZoneCard({ zoneIndex, className = '' }: ZoneCardProps) {
+  const zone = useZone(zoneIndex);
+  const clients = useZoneClients(zoneIndex);
+  const initializeZone = useAppStore((state) => state.initializeZone);
+  const { joinZone } = useSignalR();
+
+  useEffect(() => {
+    initializeZone(zoneIndex);
+    joinZone(zoneIndex);
+  }, [zoneIndex, initializeZone, joinZone]);
+
+  const handleVolumeChange = async (volume: number) => {
+    try {
+      await api.zones.setVolume(zoneIndex, volume);
+    } catch (error) {
+      console.error('Failed to set zone volume:', error);
+    }
+  };
+
+  const handleMuteToggle = async () => {
+    try {
+      await api.zones.toggleMute(zoneIndex);
+    } catch (error) {
+      console.error('Failed to toggle zone mute:', error);
+    }
+  };
+
+  if (!zone) {
+    return (
+      <div className={`bg-gray-100 rounded-lg p-6 animate-pulse ${className}`}>
+        <div className="h-6 bg-gray-300 rounded mb-4"></div>
+        <div className="h-4 bg-gray-300 rounded mb-2"></div>
+        <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`bg-white rounded-lg shadow-md p-6 border border-gray-200 ${className}`}>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold text-gray-900">Zone {zoneIndex}</h3>
+        <div className="flex items-center space-x-2">
+          <div className={`w-2 h-2 rounded-full ${zone.playbackState === 'playing' ? 'bg-green-500' : 'bg-gray-400'}`} />
+          <span className="text-sm text-gray-500 capitalize">{zone.playbackState}</span>
+        </div>
+      </div>
+
+      {zone.currentTrack && (
+        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+          <div className="flex items-start space-x-4">
+            {zone.currentTrack.coverArtUrl && (
+              <img
+                src={zone.currentTrack.coverArtUrl}
+                alt="Album cover"
+                className="w-16 h-16 rounded-md object-cover"
+              />
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-gray-900 truncate">{zone.currentTrack.title}</p>
+              <p className="text-gray-600 truncate">{zone.currentTrack.artist}</p>
+              {zone.currentTrack.album && (
+                <p className="text-sm text-gray-500 truncate">{zone.currentTrack.album}</p>
+              )}
+            </div>
+          </div>
+
+          {zone.progress && zone.currentTrack.durationMs && (
+            <div className="mt-3">
+              <div className="flex justify-between text-xs text-gray-500 mb-1">
+                <span>{formatTime(zone.progress.position)}</span>
+                <span>{formatTime(zone.currentTrack.durationMs)}</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-1">
+                <div
+                  className="bg-blue-600 h-1 rounded-full transition-all duration-300"
+                  style={{ width: `${zone.progress.progress * 100}%` }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="space-y-4">
+        <TransportControls zoneIndex={zoneIndex} />
+
+        <div className="flex items-center space-x-4">
+          <VolumeSlider
+            value={zone.volume}
+            muted={zone.muted}
+            onChange={handleVolumeChange}
+            onMuteToggle={handleMuteToggle}
+            className="flex-1"
+          />
+        </div>
+
+        <PlaylistSelector
+          zoneIndex={zoneIndex}
+          currentPlaylistIndex={zone.playlistIndex}
+          currentPlaylistName={zone.playlistName}
+        />
+
+        <div>
+          <h4 className="text-sm font-medium text-gray-700 mb-2">
+            Clients ({clients.length})
+          </h4>
+          <ClientList zoneIndex={zoneIndex} clientIndices={clients} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// src/components/ClientChip.tsx
+import React from 'react';
+import { useClient, useAppStore } from '../store';
+import { api } from '../services/api';
+import { VolumeSlider } from './VolumeSlider';
+
+interface ClientChipProps {
+  clientIndex: number;
+  isDragging?: boolean;
+  onDragStart?: (clientIndex: number) => void;
+  onDragEnd?: () => void;
+  className?: string;
+}
+
+export function ClientChip({
+  clientIndex,
+  isDragging = false,
+  onDragStart,
+  onDragEnd,
+  className = ''
+}: ClientChipProps) {
+  const client = useClient(clientIndex);
+  const initializeClient = useAppStore((state) => state.initializeClient);
+
+  React.useEffect(() => {
+    initializeClient(clientIndex);
+  }, [clientIndex, initializeClient]);
+
+  const handleVolumeChange = async (volume: number) => {
+    try {
+      await api.clients.setVolume(clientIndex, volume);
+    } catch (error) {
+      console.error('Failed to set client volume:', error);
+    }
+  };
+
+  const handleMuteToggle = async () => {
+    try {
+      await api.clients.toggleMute(clientIndex);
+    } catch (error) {
+      console.error('Failed to toggle client mute:', error);
+    }
+  };
+
+  const handleDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.setData('text/plain', clientIndex.toString());
+    e.dataTransfer.effectAllowed = 'move';
+    onDragStart?.(clientIndex);
+  };
+
+  if (!client) {
+    return (
+      <div className={`bg-gray-200 rounded-lg p-3 animate-pulse ${className}`}>
+        <div className="h-4 bg-gray-300 rounded"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`
+        bg-white border-2 rounded-lg p-3 cursor-move transition-all duration-200
+        ${client.connected ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-gray-50'}
+        ${isDragging ? 'opacity-50 scale-95' : 'hover:shadow-md'}
+        ${className}
+      `}
+      draggable
+      onDragStart={handleDragStart}
+      onDragEnd={onDragEnd}
+    >
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center space-x-2">
+          <div className={`w-2 h-2 rounded-full ${client.connected ? 'bg-green-500' : 'bg-red-500'}`} />
+          <span className="text-sm font-medium text-gray-900">Client {clientIndex}</span>
+        </div>
+        {client.latency !== undefined && (
+          <span className="text-xs text-gray-500">{client.latency}ms</span>
+        )}
+      </div>
+
+      <VolumeSlider
+        value={client.volume}
+        muted={client.muted}
+        onChange={handleVolumeChange}
+        onMuteToggle={handleMuteToggle}
+        size="sm"
+        showLabel={false}
+      />
+    </div>
+  );
+}
+
+// src/components/VolumeSlider.tsx
+import React from 'react';
+import { VolumeX, Volume2 } from 'lucide-react';
+
+interface VolumeSliderProps {
+  value: number;
+  muted: boolean;
+  onChange: (value: number) => void;
+  onMuteToggle: () => void;
+  size?: 'sm' | 'md' | 'lg';
+  showLabel?: boolean;
+  className?: string;
+}
+
+export function VolumeSlider({
+  value,
+  muted,
+  onChange,
+  onMuteToggle,
+  size = 'md',
+  showLabel = true,
+  className = ''
+}: VolumeSliderProps) {
+  const sizeClasses = {
+    sm: 'h-1',
+    md: 'h-2',
+    lg: 'h-3'
+  };
+
+  const iconSizes = {
+    sm: 16,
+    md: 20,
+    lg: 24
+  };
+
+  return (
+    <div className={`flex items-center space-x-3 ${className}`}>
+      <button
+        onClick={onMuteToggle}
+        className="p-1 rounded-md hover:bg-gray-100 transition-colors"
+        aria-label={muted ? 'Unmute' : 'Mute'}
+      >
+        {muted ? (
+          <VolumeX size={iconSizes[size]} className="text-red-500" />
+        ) : (
+          <Volume2 size={iconSizes[size]} className="text-gray-600" />
+        )}
+      </button>
+
+      <div className="flex-1 flex items-center space-x-2">
+        <input
+          type="range"
+          min="0"
+          max="100"
+          value={muted ? 0 : value}
+          onChange={(e) => onChange(parseInt(e.target.value))}
+          disabled={muted}
+          className={`
+            flex-1 appearance-none bg-gray-200 rounded-full ${sizeClasses[size]}
+            disabled:opacity-50 cursor-pointer
+            [&::-webkit-slider-thumb]:appearance-none
+            [&::-webkit-slider-thumb]:w-4
+            [&::-webkit-slider-thumb]:h-4
+            [&::-webkit-slider-thumb]:rounded-full
+            [&::-webkit-slider-thumb]:bg-blue-600
+            [&::-webkit-slider-thumb]:cursor-pointer
+            [&::-moz-range-thumb]:w-4
+            [&::-moz-range-thumb]:h-4
+            [&::-moz-range-thumb]:rounded-full
+            [&::-moz-range-thumb]:bg-blue-600
+            [&::-moz-range-thumb]:border-0
+            [&::-moz-range-thumb]:cursor-pointer
+          `}
+        />
+
+        {showLabel && (
+          <span className="text-sm text-gray-600 w-8 text-right">
+            {muted ? '0' : value}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Utility function
+function formatTime(ms: number): string {
+  const seconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+```
+
+## 25.7. Container Setup
+
+### 25.7.1. Frontend Dockerfile
+
+```dockerfile
+# SnapDog2.WebUI/Dockerfile
+FROM node:20-alpine AS build
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+
+COPY . .
+RUN npm run build
+
+# Production stage
+FROM nginx:alpine
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/nginx.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+### 25.7.2. Development Docker Compose
+
+```yaml
+# docker-compose.dev.yml (updated section)
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app:cached
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+
+  frontend:
+    build:
+      context: ./SnapDog2.WebUI
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./SnapDog2.WebUI:/app:cached
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    command: npm run dev -- --host 0.0.0.0
+
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "8000:80"
+    volumes:
+      - ./Caddyfile.dev:/etc/caddy/Caddyfile
+    depends_on:
+      - backend
+      - frontend
+```
+
+### 25.7.3. Production Docker Compose
+
+```yaml
+# docker-compose.prod.yml
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+
+  frontend:
+    build:
+      context: ./SnapDog2.WebUI
+      dockerfile: Dockerfile
+
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile.prod:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+```
+
+## 25.8. Development & Build Commands
+
+### 25.8.1. Frontend Package.json
+
+```json
+{
+  "name": "snapdog2-webui",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@microsoft/signalr": "^8.0.0",
+    "zustand": "^4.4.0",
+    "lucide-react": "^0.294.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@vitejs/plugin-react": "^4.0.0",
+    "typescript": "^5.0.0",
+    "vite": "^5.0.0",
+    "tailwindcss": "^3.3.0",
+    "autoprefixer": "^10.4.0",
+    "postcss": "^8.4.0",
+    "eslint": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0"
+  }
+}
+```
+
+### 25.8.2. Vite Configuration
+
+```typescript
+// SnapDog2.WebUI/vite.config.ts
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  build: {
-    outDir: "../SnapDog2.WebUi.Assets/EmbeddedWebRoot",
-    emptyOutDir: true,
-    sourcemap: false
-  },
   server: {
+    host: '0.0.0.0',
     port: 5173,
     proxy: {
-      "/api": "http://localhost:5000",
-      "/hubs": { target: "http://localhost:5000", ws: true }
-    }
-  }
+      '/api': {
+        target: 'http://backend:5000',
+        changeOrigin: true,
+      },
+      '/hubs': {
+        target: 'http://backend:5000',
+        changeOrigin: true,
+        ws: true,
+      },
+    },
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          signalr: ['@microsoft/signalr'],
+        },
+      },
+    },
+  },
 });
 ```
 
-## 25.8. Dev & Build Commands
+### 25.8.3. Development Workflow
 
 ```bash
-# From solution root: create assets project (once)
-dotnet new classlib -n SnapDog2.WebUi.Assets -o SnapDog2.WebUi.Assets
-dotnet sln add SnapDog2.WebUi.Assets/SnapDog2.WebUi.Assets.csproj
-dotnet add SnapDog2/SnapDog2.csproj reference SnapDog2.WebUi.Assets/SnapDog2.WebUi.Assets.csproj
+# Start all services
+docker compose -f docker-compose.dev.yml up -d
 
-# Frontend
-cd apps/webui
-pnpm i
-pnpm dev            # HMR dev server (proxy to backend)
-pnpm build          # emits to EmbeddedWebRoot
+# View logs
+docker compose -f docker-compose.dev.yml logs -f
 
-# Backend
-dotnet run -p SnapDog2
+# Frontend development (local)
+cd SnapDog2.WebUI
+npm install
+npm run dev
+
+# Backend development (local)
+dotnet watch --project SnapDog2/SnapDog2.csproj run
+
+# Access application
+open http://localhost:8000
 ```
 
-**CI**: run `pnpm build` before `dotnet publish`. The publish then includes the embedded files automatically. No Node in prod.
+### 25.8.4. Production Build & Deploy
+
+```bash
+# Build frontend
+cd SnapDog2.WebUI && npm run build
+
+# Build and deploy all services
+docker compose -f docker-compose.prod.yml up -d --build
+
+# Health check
+curl http://localhost/api/health
+```
 
 ## 25.9. Testing
 
@@ -677,46 +1439,91 @@ dotnet run -p SnapDog2
 
 ## 25.14. Validation Checklist
 
-- No UI call to /zones or /clients aggregates.
-- ZoneSnapshotV1 arrives on subscribe and renders first paint.
-- TrackProgressV1 ≤ 5/sec per zone; smooth progress bar.
-- Controls update via deltas (no polling).
-- DnD reassign triggers explicit PUT, hub echo confirms.
-- All static assets (index.html, js, css, fonts) are embedded (check .deps.json).
-- Dark/Light theme tokens applied; no external font/CDN.
-- Single-file publish runs with no external webroot.
+### 25.14.1. Architecture Validation
 
-## 25.15. Minimal Code You'll Actually Add (summary)
+- ✅ Frontend and backend run as separate containers
+- ✅ No UI calls to /zones or /clients aggregates
+- ✅ All state updates via SignalR realtime events
+- ✅ Explicit REST calls for user actions only
+- ✅ Single port access via Caddy reverse proxy
 
-- **Server**: SnapDogHub, ZoneEvents emitters, IZoneReadModel, Program.cs mappings.
-- **Client**: signalr.ts, fetch-wrapper.ts, store.ts, 2–3 components, vite.config.ts.
-- **Assets**: SnapDog2.WebUi.Assets with EmbeddedWebRoot + CSS + (optional) local font.
-- **CI**: pnpm build before dotnet publish.
+### 25.14.2. Performance Validation
 
-## 25.16. Appendix A — Assets Marker
+- ✅ TrackProgress events ≤ 5/sec per zone with smooth progress bar
+- ✅ Controls update via SignalR deltas (no polling)
+- ✅ Optimistic UI updates with server reconciliation
+- ✅ Frontend bundle size < 500KB gzipped
+- ✅ Initial page load < 2 seconds
 
-```csharp
-// SnapDog2.WebUi.Assets/AssetsMarker.cs
-namespace SnapDog2.WebUi.Assets
-{
-    public sealed class AssetsMarker { }
-}
-```
+### 25.14.3. Functionality Validation
 
-## 25.17. Appendix B — Example index.html
+- ✅ Drag & drop client reassignment triggers PUT /clients/{i}/zone
+- ✅ Hub echo confirms all user actions
+- ✅ SignalR reconnection preserves state
+- ✅ All transport controls (play/pause/next/prev) functional
+- ✅ Volume and mute controls for zones and clients
+- ✅ Playlist selection and track navigation
 
-```html
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>SnapDog2</title>
-  <link rel="stylesheet" href="/css/app.css"/>
-</head>
-<body>
-  <div id="root"></div>
-  <script type="module" src="/assets/main.js"></script>
-</body>
-</html>
+### 25.14.4. Development Experience
+
+- ✅ Hot reload for both frontend (Vite) and backend (dotnet watch)
+- ✅ TypeScript strict mode with zero errors
+- ✅ ESLint with zero warnings
+- ✅ Zustand DevTools integration
+- ✅ Container logs accessible via docker compose logs
+
+### 25.14.5. Production Readiness
+
+- ✅ Frontend builds to optimized static files
+- ✅ Backend runs in production container
+- ✅ Health check endpoints respond correctly
+- ✅ CORS configured for development only
+- ✅ Error boundaries handle SignalR disconnections
+- ✅ Graceful degradation when services unavailable
+
+## 25.15. Implementation Summary
+
+### 25.15.1. Backend (Already Implemented ✅)
+
+- **SignalR Hub**: SnapDogHub with group management
+- **Notification Handlers**: SignalRNotificationHandler emits to clients
+- **REST Controllers**: ZonesController, ClientsController with explicit endpoints
+- **Program.cs**: Hub mapping, CORS, health checks
+
+### 25.15.2. Frontend (To Implement)
+
+- **React Components**: ZoneCard, ClientChip, VolumeSlider, TransportControls
+- **State Management**: Zustand store with TypeScript interfaces
+- **SignalR Integration**: useSignalR hook with automatic reconnection
+- **API Service**: Explicit REST wrapper with error handling
+- **Styling**: Tailwind CSS with responsive design
+
+### 25.15.3. Infrastructure (To Implement)
+
+- **Frontend Dockerfile**: Multi-stage build with Nginx
+- **Docker Compose**: Development and production configurations
+- **Caddy Configuration**: Reverse proxy with WebSocket support
+- **CI/CD Pipeline**: Automated build and deployment
+
+### 25.15.4. Key Files to Create
+
+```plaintext
+SnapDog2.WebUI/
+├── src/
+│   ├── components/ZoneCard.tsx
+│   ├── components/ClientChip.tsx
+│   ├── components/VolumeSlider.tsx
+│   ├── hooks/useSignalR.ts
+│   ├── services/api.ts
+│   ├── store/index.ts
+│   └── store/types.ts
+├── package.json
+├── vite.config.ts
+├── tailwind.config.js
+└── Dockerfile
+
+docker-compose.dev.yml    # Development services
+docker-compose.prod.yml   # Production services
+Caddyfile.dev            # Development proxy
+Caddyfile.prod           # Production proxy
 ```

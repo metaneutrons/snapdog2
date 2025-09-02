@@ -18,6 +18,17 @@ x86/
 bld/
 [Bb]uild/
 msbuild.log
+
+# Frontend build outputs
+SnapDog2.WebUI/dist/
+SnapDog2.WebUI/node_modules/
+SnapDog2.WebUI.Assets/EmbeddedWebRoot/
+node_modules/
+*.log
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 msbuild.err
 msbuild.wrn
 [Ll]og/
