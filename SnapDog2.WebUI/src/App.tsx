@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAppStore } from './store';
 import { api } from './services/api';
 import { ZoneCard } from './components/ZoneCard';
-import { UnassignedClients } from './components/UnassignedClients';
 import { useSignalR } from './hooks/useSignalR';
 
 function App() {
@@ -26,11 +25,9 @@ function App() {
 
       setZoneCount(fetchedZoneCount);
 
-      // Initialize placeholders
       for (let i = 1; i <= fetchedZoneCount; i++) initializeZone(i);
       for (let i = 1; i <= fetchedClientCount; i++) initializeClient(i);
 
-      // Fetch full initial state
       const zoneStatePromises = Array.from({ length: fetchedZoneCount }, (_, i) => api.get.zone(i + 1));
       const clientStatePromises = Array.from({ length: fetchedClientCount }, (_, i) => api.get.client(i + 1));
 
@@ -89,25 +86,16 @@ function App() {
         </div>
       </header>
       <main className="p-4 sm:p-6 lg:p-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {Array.from({ length: zoneCount }, (_, i) => i + 1).map((zoneIndex) => (
-              <ZoneCard 
-                key={zoneIndex} 
-                zoneIndex={zoneIndex} 
-                draggingClientIndex={draggingClientIndex}
-                onClientDragStart={handleDragStart}
-                onClientDragEnd={handleDragEnd}
-              />
-            ))}
-          </div>
-          <div className="lg:col-span-1">
-             <UnassignedClients 
-                onClientDragStart={handleDragStart}
-                onClientDragEnd={handleDragEnd}
-                draggingClientIndex={draggingClientIndex}
-             />
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 max-w-7xl mx-auto">
+          {Array.from({ length: zoneCount }, (_, i) => i + 1).map((zoneIndex) => (
+            <ZoneCard 
+              key={zoneIndex} 
+              zoneIndex={zoneIndex} 
+              draggingClientIndex={draggingClientIndex}
+              onClientDragStart={handleDragStart}
+              onClientDragEnd={handleDragEnd}
+            />
+          ))}
         </div>
       </main>
     </div>

@@ -9,13 +9,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "zustand": "^5.0.8",
+    "@microsoft/signalr": "^9.0.6",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "@microsoft/signalr": "^9.0.6"
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"
   }

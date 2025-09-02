@@ -21,6 +21,7 @@ using SnapDog2.Shared.Models;
 /// <summary>
 /// Notification published when a zone's playback state changes.
 /// </summary>
+[StatusId("PLAYBACK_STATE")]
 public record ZonePlaybackStateChangedNotification : INotification
 {
     /// <summary>
