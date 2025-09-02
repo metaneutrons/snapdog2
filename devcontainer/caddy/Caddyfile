@@ -14,12 +14,36 @@
         not path /api*
         not path /swagger*
         not path /webui*
+        not path /hubs*
     }
 
     handle @not_server {
         root * /srv
         file_server
         try_files {path} /index.html
+    }
+
+    # SnapDog WebUI - Frontend development server with hot reload (FIRST!)
+    handle /webui* {
+        reverse_proxy http://frontend:5173
+    }
+
+    # SignalR Hub - WebSocket support for real-time updates
+    handle /hubs* {
+        reverse_proxy http://app:5555 {
+            header_up Connection {>Connection}
+            header_up Upgrade {>Upgrade}
+        }
+    }
+
+    # SnapDog API
+    handle /api* {
+        reverse_proxy http://app:5555
+    }
+
+    # Swagger UI
+    handle /swagger* {
+        reverse_proxy http://app:5555
     }
 
     # Snapcast server - redirect /server to /server/ for proper relative paths
@@ -86,29 +110,6 @@
 
     handle @client_bedroom_exact {
         redir * /clients/bedroom/ 301
-    }
-
-    # SnapDog API
-    handle /api* {
-        reverse_proxy http://app:5555
-    }
-
-    # Swagger UI
-    handle /swagger* {
-        reverse_proxy http://app:5555
-    }
-
-    # SnapDog WebUI - Enterprise reverse proxy configuration
-    handle /webui* {
-        uri strip_prefix /webui
-        reverse_proxy http://app:5555 {
-            header_up Host {upstream_hostport}
-            header_up X-Real-IP {remote_host}
-            header_up X-Forwarded-For {remote_host}
-            header_up X-Forwarded-Proto {scheme}
-            header_up X-Forwarded-Host {host}
-            header_up X-Forwarded-Prefix /webui
-        }
     }
 
     # Clients with trailing slashes (mapped to our service names)

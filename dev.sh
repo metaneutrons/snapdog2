@@ -6,7 +6,7 @@
 show_urls() {
     echo ""
     echo "🎵 SnapDog2 Services (http://localhost:8000):"
-    echo "  🎵 SnapDog2 Web:      http://localhost:8000/webui"
+    echo "  🎵 SnapDog2 WebUI:    http://localhost:8000/webui (React + Vite HMR)"
     echo "  🎵 SnapDog2 API:      http://localhost:8000/api"
     echo "  🎵 SnapDog2 Swagger:  http://localhost:8000/swagger"
     echo "  💿 Navidrome Music:   http://localhost:8000/music/"
@@ -17,6 +17,11 @@ show_urls() {
     echo ""
     echo "🔍 Observability:"
     echo "  📊 Grafana:           http://localhost:8000/grafana/"
+    echo ""
+    echo "🔧 Development:"
+    echo "  🔥 Frontend HMR:      Vite dev server with hot reload"
+    echo "  🔥 Backend HMR:       dotnet watch with auto-restart"
+    echo "  🔌 SignalR Hub:       Real-time WebSocket updates"
     echo ""
 }
 
