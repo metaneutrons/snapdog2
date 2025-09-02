@@ -2,17 +2,17 @@
 
 **Goal**: Ship a modern, reliable audio control UI with only explicit REST calls (no bulky /zones or /clients lists) and server-push updates via SignalR. Develop like a normal TS app; publish as a single .NET artifact with embedded assets.
 
-## 25.1. ) Scope & Principles
+## 25.1. Scope & Principles
 
-- **Explicit HTTP only**: UI never calls aggregate/list endpoints for state. All reads/writes are explicit (e.g., PUT /zones/{id}/volume).
+- **Explicit HTTP only**: UI never calls aggregate/list endpoints for state. All reads/writes are explicit (e.g., PUT /zones/{zoneIndex}/volume).
 - **Realtime first**: State hydration and live UX come from the hub, not from "read-all" HTTP.
 - **DX vs Ops**: Dev in TypeScript (Vite/HMR). At build time, emit static assets → embed into a .NET Assets project. No Node in production.
 - **Single page, minimal routes**: Focused control surface; no complex router needed.
 - **No external assets**: Fonts, CSS, icons are embedded as resources.
 
-## 25.2. ) High-Level Architecture
+## 25.2. High-Level Architecture
 
-```
+```plaintext
 [ SnapDog2 (monolith, .NET 9) ]
    ├─ REST (explicit actions & scalars)      ← UI uses only small endpoints
    ├─ SignalR Hub (/hubs/snapdog)            ← UI subscribes, gets snapshots+deltas
@@ -27,7 +27,7 @@
    └─ index.html        (mounts app)
 ```
 
-## 25.3. ) Interaction Model
+## 25.3. Interaction Model
 
 **Initial paint**:
 
@@ -37,7 +37,7 @@
 
 **Live updates**: Server pushes deltas (progress, track change, control change, client status).
 
-**User actions**: UI calls explicit REST (e.g., POST /zones/{id}/play) and updates state optimistically. Hub echo confirms/reconciles.
+**User actions**: UI calls explicit REST (e.g., POST /zones/{zoneIndex}/play) and updates state optimistically. Hub echo confirms/reconciles.
 
 ## 25.4. Public Contracts
 
@@ -106,7 +106,7 @@ public record ZoneRepeatModeChangedNotification(int ZoneIndex, bool TrackRepeat,
 public record ZoneShuffleChangedNotification(int ZoneIndex, bool Shuffled) : INotification;
 
 [StatusId("ZONE_PLAYLIST_STATUS")]
-public record ZonePlaylistChangedNotification(int ZoneIndex, int PlaylistId, string PlaylistName) : INotification;
+public record ZonePlaylistChangedNotification(int ZoneIndex, int PlaylistIndex, string PlaylistName) : INotification;
 
 // Client notifications
 [StatusId("CLIENT_CONNECTED")]
@@ -217,6 +217,7 @@ public class SignalRNotificationHandler :
 
 **Scalar reads (when UI needs specific values)**:
 
+- GET  /api/v1/zones/count (return int ZoneCount)
 - GET  /api/v1/zones/{zoneIndex}/name
 - GET  /api/v1/zones/{zoneIndex}/volume
 - GET  /api/v1/zones/{zoneIndex}/mute
@@ -233,10 +234,12 @@ public class SignalRNotificationHandler :
 - GET  /api/v1/zones/{zoneIndex}/track/progress
 - GET  /api/v1/zones/{zoneIndex}/track/playing
 - GET  /api/v1/zones/{zoneIndex}/track/metadata (returns TrackInfo)
-- GET  /api/v1/zones/{zoneIndex}/playlist
+- GET  /api/v1/zones/{zoneIndex}/track (returns int TrackIndex)
+- GET  /api/v1/zones/{zoneIndex}/playlist (returns int PlaylistIndex)
 - GET  /api/v1/zones/{zoneIndex}/playlist/name
 - GET  /api/v1/zones/{zoneIndex}/playlist/count
 - GET  /api/v1/zones/{zoneIndex}/playlist/info (returns PlaylistInfo)
+- GET  /api/v1/clients/count (returns int ClientCount)
 - GET  /api/v1/clients/{clientIndex}/name
 - GET  /api/v1/clients/{clientIndex}/volume
 - GET  /api/v1/clients/{clientIndex}/mute
@@ -250,7 +253,7 @@ public class SignalRNotificationHandler :
 - All endpoints return 202 Accepted for async operations
 - Scalar GET endpoints for individual properties
 
-## 25.5. ) Server Implementation (C#)
+## 25.5. Server Implementation (C#)
 
 ### 25.5.1. Current Hub Implementation
 
@@ -296,7 +299,7 @@ public class SnapDogHub : Hub
 
 ```csharp
 // Implemented in SnapDog2/Api/Hubs/Handlers/SignalRNotificationHandler.cs
-public partial class SignalRNotificationHandler : 
+public partial class SignalRNotificationHandler :
     INotificationHandler<ZoneProgressChangedNotification>,
     INotificationHandler<ZoneTrackMetadataChangedNotification>,
     INotificationHandler<ZoneVolumeChangedNotification>,
@@ -317,7 +320,6 @@ public partial class SignalRNotificationHandler :
 ```
 
 **Auto-registration**: Handlers are automatically discovered and registered via `AddCommandProcessing()` in Program.cs.
-```
 
 ### 5.3 Current Program.cs Configuration
 
@@ -327,7 +329,6 @@ builder.Services.AddSignalR();
 
 // Hub mapping (line 640)
 app.MapHub<SnapDogHub>("/hubs/snapdog/v1");
-```
 
 // Serve embedded static files
 var assetsAssembly = typeof(AssetsMarker).Assembly;
@@ -347,15 +348,13 @@ app.MapGet("/", async ctx =>
 
 // Map hub
 app.MapHub<SnapDogHub>("/hubs/snapdog");
-
 ```
 
-## 25.6. ) Client Implementation (TypeScript)
+## 25.6. Client Implementation (TypeScript)
 
 ### 25.6.1. Project Layout
 
-```
-
+```plaintext
 apps/webui/
   src/
     main.tsx
@@ -369,7 +368,6 @@ apps/webui/
       Volume.tsx
   index.html
   vite.config.ts       → outDir: ../SnapDog2.WebUi.Assets/EmbeddedWebRoot
-
 ```
 
 ### 25.6.2. SignalR client
@@ -448,16 +446,16 @@ async function req(method: string, path: string, body?: unknown) {
 
 export const api = {
   zones: {
-    play: (id: number) => req("POST", `/zones/${id}/play`),
-    pause: (id: number) => req("POST", `/zones/${id}/pause`),
-    next: (id: number) => req("POST", `/zones/${id}/next`),
-    previous: (id: number) => req("POST", `/zones/${id}/previous`),
-    seek: (id: number, positionMs: number) => req("PUT", `/zones/${id}/track/position`, { positionMs }),
-    volume: (id: number, volume: number) => req("PUT", `/zones/${id}/volume`, { volume }),
-    toggleMute: (id: number) => req("PUT", `/zones/${id}/mute/toggle`),
-    toggleShuffle: (id: number) => req("PUT", `/zones/${id}/shuffle/toggle`),
-    repeat: (id: number, mode: "Off"|"One"|"All") => req("PUT", `/zones/${id}/repeat`, { mode }),
-    setPlaylist: (id: number, playlistId: number) => req("PUT", `/zones/${id}/playlist`, { playlistId }),
+    play: (id: number) => req("POST", `/zones/${zoneIndex}/play`),
+    pause: (id: number) => req("POST", `/zones/${zoneIndex}/pause`),
+    next: (id: number) => req("POST", `/zones/${zoneIndex}/next`),
+    previous: (id: number) => req("POST", `/zones/${zoneIndex}/previous`),
+    seek: (id: number, positionMs: number) => req("PUT", `/zones/${zoneIndex}/track/position`, { positionMs }),
+    volume: (id: number, volume: number) => req("PUT", `/zones/${zoneIndex}/volume`, { volume }),
+    toggleMute: (id: number) => req("PUT", `/zones/${zoneIndex}/mute/toggle`),
+    toggleShuffle: (id: number) => req("PUT", `/zones/${zoneIndex}/shuffle/toggle`),
+    repeat: (id: number, mode: "Off"|"One"|"All") => req("PUT", `/zones/${zoneIndex}/repeat`, { mode }),
+    setPlaylist: (id: number, playlistIndex: number) => req("PUT", `/zones/${zoneIndex}/playlist`, { playlistIndex }),
   },
   clients: {
     assign: (clientIndex: number, zoneId: number, uiActionId?: string) =>
@@ -528,11 +526,11 @@ export const store = (() => {
 - **ZoneCard** renders name, now playing, progress, controls, and ClientChip list.
 - **ClientChip** is draggable (@dnd-kit) and on drop calls api.clients.assign.
 
-## 25.7. ) Packaging (embed everything)
+## 25.7. Packaging (embed everything)
 
 ### 25.7.1. Assets project
 
-```
+```plaintext
 SnapDog2.WebUi.Assets/
   EmbeddedWebRoot/
     index.html
@@ -614,7 +612,7 @@ export default defineConfig({
 });
 ```
 
-## 25.8. ) Dev & Build Commands
+## 25.8. Dev & Build Commands
 
 ```bash
 # From solution root: create assets project (once)
@@ -634,7 +632,7 @@ dotnet run -p SnapDog2
 
 **CI**: run `pnpm build` before `dotnet publish`. The publish then includes the embedded files automatically. No Node in prod.
 
-## 25.9. ) Testing
+## 25.9. Testing
 
 **Server unit/integration**:
 
@@ -648,13 +646,13 @@ dotnet run -p SnapDog2
 - Progress bar advances; play/pause changes icons instantly.
 - A11y: @axe-core/playwright for violations; tab order & ARIA roles for controls.
 
-## 25.10. ) Performance & Reliability
+## 25.10. Performance & Reliability
 
 - **Backpressure**: coalesce multiple changes within a 50–100 ms window; last-write-wins per zone tick.
 - **Reconnect**: on hub reconnect, re-issue SubscribeZone(id) (or SubscribeAllZones) and re-paint from snapshots.
 - **Fallback** (only if hub down): poll one or two cheap scalars for the currently visible zone (e.g., /track/position, /playing) every 3–5s. Do not poll lists.
 
-## 25.11. ) Security & Ops
+## 25.11. Security & Ops
 
 - **Same-origin serving**: no CORS needed in prod. Dev proxy handles cross-origin during HMR.
 - **CSRF for REST**: same-site cookies or antiforgery tokens if authenticated.
@@ -662,14 +660,14 @@ dotnet run -p SnapDog2
 - **Compression**: enable response compression; long-poll fallback disabled (WebSocket preferred).
 - **Observability**: OpenTelemetry traces for REST + custom hub meters (events/sec, connected clients, dropped updates).
 
-## 25.12. ) Accessibility & UX Notes
+## 25.12. Accessibility & UX Notes
 
 - Keyboard action bindings for transport & volume.
 - Respect prefers-reduced-motion.
 - Progress bar with ARIA slider; announce time changes on seek.
 - Color contrast meets WCAG AA in both themes.
 
-## 25.13. ) Rollout Plan (phased)
+## 25.13. Rollout Plan (phased)
 
 1. **P0**: Add SnapDogHub, implement SubscribeZone, fake progress emitter for 1 zone, show in a tiny TS page.
 2. **P1**: Real progress/track change emitters; implement ZoneSnapshotV1 and deltas; play/pause/next endpoints wired.
@@ -677,7 +675,7 @@ dotnet run -p SnapDog2
 4. **P3**: CI: pnpm build → embed → dotnet publish /p:PublishSingleFile=true.
 5. **P4**: E2E + a11y tests; add optional playlist change events if needed.
 
-## 25.14. ) Validation Checklist
+## 25.14. Validation Checklist
 
 - No UI call to /zones or /clients aggregates.
 - ZoneSnapshotV1 arrives on subscribe and renders first paint.
@@ -688,7 +686,7 @@ dotnet run -p SnapDog2
 - Dark/Light theme tokens applied; no external font/CDN.
 - Single-file publish runs with no external webroot.
 
-## 25.15. ) Minimal Code You'll Actually Add (summary)
+## 25.15. Minimal Code You'll Actually Add (summary)
 
 - **Server**: SnapDogHub, ZoneEvents emitters, IZoneReadModel, Program.cs mappings.
 - **Client**: signalr.ts, fetch-wrapper.ts, store.ts, 2–3 components, vite.config.ts.
@@ -722,7 +720,3 @@ namespace SnapDog2.WebUi.Assets
 </body>
 </html>
 ```
-
----
-
-**Bottom line**: This blueprint gives you a lean, fail-proof path: explicit REST for actions only, SignalR snapshots+deltas for state, TS DX in dev, and embedded assets in production—keeping your single-file .NET deployment simple and robust.

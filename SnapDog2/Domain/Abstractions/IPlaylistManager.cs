@@ -16,41 +16,28 @@ namespace SnapDog2.Domain.Abstractions;
 using SnapDog2.Shared.Models;
 
 /// <summary>
-/// Provides management operations for playlists and tracks.
+/// Interface for playlist management operations.
+/// Works with 1-based playlist indices: 1=Radio, 2+=Subsonic playlists.
 /// </summary>
 public interface IPlaylistManager
 {
     /// <summary>
-    /// Gets all available playlists.
+    /// Gets all available playlists with their 1-based indices.
     /// </summary>
-    /// <returns>A result containing the list of all playlists.</returns>
+    /// <returns>Result containing list of playlist information.</returns>
     Task<Result<List<PlaylistInfo>>> GetAllPlaylistsAsync();
 
     /// <summary>
-    /// Gets tracks for a specific playlist by ID.
+    /// Gets tracks from a playlist by its 1-based index.
     /// </summary>
-    /// <param name="playlistIndex">The playlist ID.</param>
-    /// <returns>A result containing the list of tracks in the playlist.</returns>
-    Task<Result<List<TrackInfo>>> GetPlaylistTracksByIdAsync(string playlistIndex);
+    /// <param name="playlistIndex">1-based playlist index (1=Radio, 2+=Subsonic).</param>
+    /// <returns>Result containing list of tracks.</returns>
+    Task<Result<List<TrackInfo>>> GetPlaylistTracksAsync(int playlistIndex);
 
     /// <summary>
-    /// Gets tracks for a specific playlist by index.
+    /// Gets playlist information by its 1-based index.
     /// </summary>
-    /// <param name="playlistIndex">The playlist index (1-based).</param>
-    /// <returns>A result containing the list of tracks in the playlist.</returns>
-    Task<Result<List<TrackInfo>>> GetPlaylistTracksByIndexAsync(int playlistIndex);
-
-    /// <summary>
-    /// Gets a specific playlist by ID.
-    /// </summary>
-    /// <param name="playlistIndex">The playlist ID.</param>
-    /// <returns>A result containing the playlist information.</returns>
-    Task<Result<PlaylistInfo>> GetPlaylistByIdAsync(string playlistIndex);
-
-    /// <summary>
-    /// Gets a specific playlist by index.
-    /// </summary>
-    /// <param name="playlistIndex">The playlist index (1-based).</param>
-    /// <returns>A result containing the playlist information.</returns>
-    Task<Result<PlaylistInfo>> GetPlaylistByIndexAsync(int playlistIndex);
+    /// <param name="playlistIndex">1-based playlist index (1=Radio, 2+=Subsonic).</param>
+    /// <returns>Result containing playlist information.</returns>
+    Task<Result<PlaylistInfo>> GetPlaylistAsync(int playlistIndex);
 }

@@ -448,7 +448,7 @@ public partial class GetPlaylistTracksQueryHandler(
         try
         {
             return await this
-                ._playlistManager.GetPlaylistTracksByIndexAsync(request.PlaylistIndex)
+                ._playlistManager.GetPlaylistTracksAsync(request.PlaylistIndex)
                 .ConfigureAwait(false);
         }
         catch (Exception ex)

@@ -13,32 +13,27 @@
 //
 namespace SnapDog2.Domain.Services;
 
+using Cortex.Mediator;
+using SnapDog2.Api.Models;
 using SnapDog2.Domain.Abstractions;
+using SnapDog2.Server.Playlists.Queries;
 using SnapDog2.Shared.Models;
 
 /// <summary>
-/// Placeholder implementation of IPlaylistManager.
-/// This will be replaced with actual music service integration later.
+/// Production implementation of IPlaylistManager that delegates to playlist query handlers.
+/// Properly handles radio stations (index 1) and Subsonic playlists (index 2+) with 1-based indexing.
 /// </summary>
 public partial class PlaylistManager : IPlaylistManager
 {
     private readonly ILogger<PlaylistManager> _logger;
-    private readonly Dictionary<string, PlaylistInfo> _playlists;
-    private readonly Dictionary<string, List<TrackInfo>> _playlistTracks;
+    private readonly IMediator _mediator;
 
     [LoggerMessage(
         EventId = 6800,
         Level = LogLevel.Debug,
-        Message = "Getting all playlists"
+        Message = "Getting all playlists via query handlers"
     )]
     private partial void LogGettingAllPlaylists();
-
-    [LoggerMessage(
-        EventId = 6801,
-        Level = LogLevel.Debug,
-        Message = "Getting tracks for playlist ID: {PlaylistIndex}"
-    )]
-    private partial void LogGettingTracksByPlaylistIndex(string playlistIndex);
 
     [LoggerMessage(
         EventId = 6802,
@@ -48,169 +43,98 @@ public partial class PlaylistManager : IPlaylistManager
     private partial void LogGettingTracksByPlaylistIndex(int playlistIndex);
 
     [LoggerMessage(
-        EventId = 6803,
-        Level = LogLevel.Warning,
-        Message = "Playlist {PlaylistIndex} not found"
-    )]
-    private partial void LogPlaylistNotFound(string playlistIndex);
-
-    [LoggerMessage(
         EventId = 6804,
         Level = LogLevel.Warning,
         Message = "Playlist index {PlaylistIndex} not found"
     )]
     private partial void LogPlaylistIndexNotFound(int playlistIndex);
 
-    public PlaylistManager(ILogger<PlaylistManager> logger)
+    [LoggerMessage(
+        EventId = 6805,
+        Level = LogLevel.Error,
+        Message = "Failed to get playlists: {Error}"
+    )]
+    private partial void LogPlaylistError(string error);
+
+    public PlaylistManager(ILogger<PlaylistManager> logger, IMediator mediator)
     {
         this._logger = logger;
-        this._playlists = new Dictionary<string, PlaylistInfo>();
-        this._playlistTracks = new Dictionary<string, List<TrackInfo>>();
-
-        // FIXME: Initialize with placeholder playlists
-        this.InitializePlaceholderPlaylists();
+        this._mediator = mediator;
     }
 
     public async Task<Result<List<PlaylistInfo>>> GetAllPlaylistsAsync()
     {
         this.LogGettingAllPlaylists();
 
-        await Task.Delay(1); // TODO: Fix simulation async operation
-
-        var allPlaylists = this._playlists.Values.ToList();
-        return Result<List<PlaylistInfo>>.Success(allPlaylists);
-    }
-
-    public async Task<Result<List<TrackInfo>>> GetPlaylistTracksByIdAsync(string playlistIndex)
-    {
-        this.LogGettingTracksByPlaylistIndex(playlistIndex);
-
-        await Task.Delay(1); // TODO: Fix simulation async operation
-
-        if (this._playlistTracks.TryGetValue(playlistIndex, out var tracks))
+        try
         {
-            return Result<List<TrackInfo>>.Success(tracks);
-        }
+            var query = new GetAllPlaylistsQuery();
+            var result = await this._mediator.SendQueryAsync<GetAllPlaylistsQuery, Result<List<PlaylistInfo>>>(query).ConfigureAwait(false);
 
-        this.LogPlaylistNotFound(playlistIndex);
-        return Result<List<TrackInfo>>.Failure($"Playlist {playlistIndex} not found");
-    }
-
-    public async Task<Result<List<TrackInfo>>> GetPlaylistTracksByIndexAsync(int playlistIndex)
-    {
-        this.LogGettingTracksByPlaylistIndex(playlistIndex);
-
-        await Task.Delay(1); // TODO: Fix simulation async operation
-
-        var playlist = this._playlists.Values.FirstOrDefault(p => p.Index == playlistIndex);
-        if (playlist != null && this._playlistTracks.TryGetValue(playlist.SubsonicPlaylistId, out var tracks))
-        {
-            return Result<List<TrackInfo>>.Success(tracks);
-        }
-
-        this.LogPlaylistIndexNotFound(playlistIndex);
-        return Result<List<TrackInfo>>.Failure($"Playlist at index {playlistIndex} not found");
-    }
-
-    public async Task<Result<PlaylistInfo>> GetPlaylistByIdAsync(string playlistIndex)
-    {
-        await Task.Delay(1); // TODO: Fix simulation async operation
-
-        if (this._playlists.TryGetValue(playlistIndex, out var playlist))
-        {
-            return Result<PlaylistInfo>.Success(playlist);
-        }
-
-        this.LogPlaylistNotFound(playlistIndex);
-        return Result<PlaylistInfo>.Failure($"Playlist {playlistIndex} not found");
-    }
-
-    public async Task<Result<PlaylistInfo>> GetPlaylistByIndexAsync(int playlistIndex)
-    {
-        await Task.Delay(1); // TODO: Fix simulation async operation
-
-        var playlist = this._playlists.Values.FirstOrDefault(p => p.Index == playlistIndex);
-        if (playlist != null)
-        {
-            return Result<PlaylistInfo>.Success(playlist);
-        }
-
-        this.LogPlaylistIndexNotFound(playlistIndex);
-        return Result<PlaylistInfo>.Failure($"Playlist at index {playlistIndex} not found");
-    }
-
-    private void InitializePlaceholderPlaylists()
-    {
-        // FIXME: Create placeholder playlists with sample tracks
-        var playlists = new[]
-        {
-            new
+            if (result.IsFailure)
             {
-                Id = "rock_classics",
-                Name = "Rock Classics",
-                Index = 1,
-            },
-            new
-            {
-                Id = "jazz_standards",
-                Name = "Jazz Standards",
-                Index = 2,
-            },
-            new
-            {
-                Id = "electronic_mix",
-                Name = "Electronic Mix",
-                Index = 3,
-            },
-            new
-            {
-                Id = "acoustic_favorites",
-                Name = "Acoustic Favorites",
-                Index = 4,
-            },
-            new
-            {
-                Id = "workout_hits",
-                Name = "Workout Hits",
-                Index = 5,
-            },
-        };
-
-        foreach (var playlistInfo in playlists)
-        {
-            var playlist = new PlaylistInfo
-            {
-                SubsonicPlaylistId = playlistInfo.Id,
-                Source = "placeholder",
-                Index = playlistInfo.Index,
-                Name = playlistInfo.Name,
-                TrackCount = 10 + playlistInfo.Index * 5, // Varying track counts
-            };
-
-            this._playlists[playlistInfo.Id] = playlist;
-
-            // Create sample tracks for each playlist
-            var tracks = new List<TrackInfo>();
-            for (var i = 1; i <= playlist.TrackCount; i++)
-            {
-                var track = new TrackInfo
-                {
-                    Source = "placeholder",
-                    Index = i,
-                    Title = $"{playlistInfo.Name} Track {i}",
-                    Artist = $"Artist {i}",
-                    Album = $"{playlistInfo.Name} Album",
-                    DurationMs = (180 + i % 4 * 60) * 1000, // 3-6 minute tracks in milliseconds
-                    PositionMs = 0,
-                    CoverArtUrl = null,
-                    TimestampUtc = DateTime.UtcNow,
-                    Url = $"placeholder://track/{playlistInfo.Id}/{i}",
-                };
-
-                tracks.Add(track);
+                this.LogPlaylistError(result.ErrorMessage ?? "Unknown error");
+                return Result<List<PlaylistInfo>>.Failure(result.ErrorMessage ?? "Failed to get playlists");
             }
 
-            this._playlistTracks[playlistInfo.Id] = tracks;
+            return result;
+        }
+        catch (Exception ex)
+        {
+            this.LogPlaylistError(ex.Message);
+            return Result<List<PlaylistInfo>>.Failure($"Exception getting playlists: {ex.Message}");
+        }
+    }
+
+    public async Task<Result<List<TrackInfo>>> GetPlaylistTracksAsync(int playlistIndex)
+    {
+        this.LogGettingTracksByPlaylistIndex(playlistIndex);
+
+        try
+        {
+            var query = new GetPlaylistQuery { PlaylistIndex = playlistIndex };
+            var result = await this._mediator.SendQueryAsync<GetPlaylistQuery, Result<PlaylistWithTracks>>(query).ConfigureAwait(false);
+
+            if (result.IsFailure)
+            {
+                this.LogPlaylistIndexNotFound(playlistIndex);
+                return Result<List<TrackInfo>>.Failure(result.ErrorMessage ?? $"Playlist at index {playlistIndex} not found");
+            }
+
+            var tracks = result.Value?.Tracks ?? new List<TrackInfo>();
+            return Result<List<TrackInfo>>.Success(tracks);
+        }
+        catch (Exception ex)
+        {
+            this.LogPlaylistError(ex.Message);
+            return Result<List<TrackInfo>>.Failure($"Exception getting playlist by index: {ex.Message}");
+        }
+    }
+
+    public async Task<Result<PlaylistInfo>> GetPlaylistAsync(int playlistIndex)
+    {
+        try
+        {
+            // Get all playlists and find the matching index
+            var allPlaylistsResult = await this.GetAllPlaylistsAsync().ConfigureAwait(false);
+            if (allPlaylistsResult.IsFailure)
+            {
+                return Result<PlaylistInfo>.Failure(allPlaylistsResult.ErrorMessage ?? "Failed to get playlists");
+            }
+
+            var playlist = allPlaylistsResult.Value?.FirstOrDefault(p => p.Index == playlistIndex);
+            if (playlist == null)
+            {
+                this.LogPlaylistIndexNotFound(playlistIndex);
+                return Result<PlaylistInfo>.Failure($"Playlist at index {playlistIndex} not found");
+            }
+
+            return Result<PlaylistInfo>.Success(playlist);
+        }
+        catch (Exception ex)
+        {
+            this.LogPlaylistError(ex.Message);
+            return Result<PlaylistInfo>.Failure($"Exception getting playlist by index: {ex.Message}");
         }
     }
 }

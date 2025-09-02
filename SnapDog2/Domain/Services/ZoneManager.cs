@@ -459,16 +459,40 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            // FIXME: Update track info (this would normally come from playlist manager)
-            var newTrack = this._currentState.Track! with
+            // Get track from current playlist using playlist manager
+            if (this._currentState.Playlist == null || this._currentState.Playlist.Index == null)
             {
-                Index = trackIndex,
-                Title = $"Track {trackIndex}",
-                Url = $"placeholder://track/{trackIndex}",
-            };
+                return Result.Failure("No playlist selected. Please set a playlist first.");
+            }
 
-            // Start playback
-            var playResult = await this._mediaPlayerService.PlayAsync(this._zoneIndex, newTrack).ConfigureAwait(false);
+            var playlistIndex = this._currentState.Playlist.Index.Value;
+            var getPlaylistQuery = new GetPlaylistQuery { PlaylistIndex = playlistIndex };
+
+            using var scope = this._serviceScopeFactory.CreateScope();
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+            var playlistResult = await mediator
+                .SendQueryAsync<GetPlaylistQuery, Result<PlaylistWithTracks>>(getPlaylistQuery)
+                .ConfigureAwait(false);
+
+            if (playlistResult.IsFailure)
+            {
+                return Result.Failure($"Failed to get playlist: {playlistResult.ErrorMessage}");
+            }
+
+            var playlist = playlistResult.Value;
+            if (playlist?.Tracks == null || playlist.Tracks.Count == 0)
+            {
+                return Result.Failure("Playlist has no tracks");
+            }
+
+            var targetTrack = playlist.Tracks.FirstOrDefault(t => t.Index == trackIndex);
+            if (targetTrack == null)
+            {
+                return Result.Failure($"Track {trackIndex} not found in playlist");
+            }
+
+            // Start playback with the actual track from playlist
+            var playResult = await this._mediaPlayerService.PlayAsync(this._zoneIndex, targetTrack).ConfigureAwait(false);
             if (playResult.IsFailure)
             {
                 return playResult;
@@ -478,7 +502,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             this._currentState = this._currentState with
             {
                 PlaybackState = PlaybackState.Playing,
-                Track = newTrack,
+                Track = targetTrack,
             };
 
             // Start timer for reliable updates + events for immediate updates

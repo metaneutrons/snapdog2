@@ -104,7 +104,7 @@ Events sent to clients subscribed to specific zones via `JoinZone(zoneIndex)`.
 | `ZoneProgressChanged` | `TRACK_PROGRESS_STATUS` | Track position updates | `(int zoneIndex, long position, float progress)` | Position (ms) and progress (0.0-1.0) |
 | `ZoneRepeatModeChanged` | `TRACK_REPEAT_STATUS` | Repeat mode changes | `(int zoneIndex, bool trackRepeat, bool playlistRepeat)` | Repeat modes |
 | `ZoneShuffleChanged` | `ZONE_SHUFFLE_STATUS` | Shuffle mode changes | `(int zoneIndex, bool shuffled)` | Shuffle enabled/disabled |
-| `ZonePlaylistChanged` | `ZONE_PLAYLIST_STATUS` | Active playlist changes | `(int zoneIndex, int playlistId, string playlistName)` | Current playlist |
+| `ZonePlaylistChanged` | `ZONE_PLAYLIST_STATUS` | Active playlist changes | `(int zoneIndex, int playlistIndex, string playlistName)` | Current playlist |
 
 ### 11.5.2. Client Events
 
