@@ -1,551 +1,341 @@
-# 13. Metrics and Telemetry (Infrastructure Layer)
+# 13. Metrics and Telemetry Infrastructure Layer
 
-This chapter details the strategy and implementation for observability within SnapDog2, encompassing metrics, distributed tracing, and correlated logging. The framework used is **OpenTelemetry with OTLP (OpenTelemetry Protocol)** for vendor-neutral telemetry export. SnapDog2 implements only OTLP - the choice of observability backend (Jaeger, SigNoz, Prometheus, etc.) is a deployment concern.
+## ✅ Implementation Status: FULLY IMPLEMENTED
 
-## 13.1. Overview
+The SnapDog2 metrics and telemetry system is **fully implemented** using OpenTelemetry, Prometheus, and Grafana for enterprise-grade observability.
 
-SnapDog2 follows a **vendor-neutral observability approach** using OpenTelemetry Protocol (OTLP). This provides maximum flexibility in choosing observability backends without requiring application code changes. The application exports all three observability signals (traces, metrics, logs) via OTLP to any compatible backend.
+## 13.1. Architecture Overview
 
-**Architecture:**
-```
-SnapDog2 Application → OTLP → [Jaeger | SigNoz | Prometheus | Any OTLP Backend]
-```
-
-**Supported Backends:**
-- **Jaeger**: Distributed tracing
-- **SigNoz**: Unified observability (traces, metrics, logs)
-- **Prometheus**: Metrics collection (via OpenTelemetry Collector)
-- **Grafana Cloud**: Managed observability
-- **Any OTLP-compatible backend**
-
-The three pillars of observability are:
-
-* **Distributed Tracing:** Track request flow across components (API, Cortex.Mediator, Infrastructure Services)
-* **Metrics:** Quantify performance, resource usage, and operational counts
-* **Correlated Logging:** Link log events to specific traces and spans for simplified debugging
-
-## 13.2. Configuration
-
-### 13.2.1. Environment Variables
-
-All telemetry configuration uses the `SNAPDOG_TELEMETRY_` prefix:
-
-```bash
-# Core telemetry settings
-SNAPDOG_TELEMETRY_ENABLED=true                        # Default: false
-SNAPDOG_TELEMETRY_SERVICE_NAME=SnapDog2               # Default: SnapDog2
-SNAPDOG_TELEMETRY_SAMPLING_RATE=1.0                   # Default: 1.0
-
-# OTLP Configuration (vendor-neutral)
-SNAPDOG_TELEMETRY_OTLP_ENABLED=true                   # Default: false
-SNAPDOG_TELEMETRY_OTLP_ENDPOINT=http://localhost:4317 # Default: http://localhost:4317
-SNAPDOG_TELEMETRY_OTLP_PROTOCOL=grpc                  # Default: grpc (grpc|http/protobuf)
-SNAPDOG_TELEMETRY_OTLP_HEADERS=key1=value1,key2=value2 # Optional authentication headers
-SNAPDOG_TELEMETRY_OTLP_TIMEOUT=30                     # Default: 30 (seconds)
+```mermaid
+graph TB
+    subgraph "Application Layer"
+        BMS[BusinessMetricsCollectionService<br/>Collects business metrics every 15s]
+    end
+    
+    subgraph "Domain Layer"
+        EMS[EnterpriseMetricsService<br/>IMetricsService implementation]
+    end
+    
+    subgraph "Infrastructure Layer"
+        AM[ApplicationMetrics<br/>OpenTelemetry implementation]
+        ZGM[ZoneGroupingMetrics<br/>Specialized zone metrics]
+    end
+    
+    subgraph "OpenTelemetry Stack"
+        OTEL[OpenTelemetry Collector<br/>:4317 gRPC, :4318 HTTP]
+        PROM[Prometheus Exporter<br/>:8889]
+        GRAFANA[Grafana Dashboard<br/>:3000]
+    end
+    
+    BMS --> EMS
+    EMS --> AM
+    EMS --> ZGM
+    AM --> OTEL
+    ZGM --> OTEL
+    OTEL --> PROM
+    PROM --> GRAFANA
+    
+    classDef implemented fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
+    classDef infrastructure fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    
+    class BMS,EMS,AM,ZGM implemented
+    class OTEL,PROM,GRAFANA infrastructure
 ```
 
-### 13.2.2. Backend-Specific Examples
+## 13.2. Metrics Categories
 
-**Jaeger:**
-```bash
-SNAPDOG_TELEMETRY_OTLP_ENDPOINT=http://jaeger:14268/api/traces
-SNAPDOG_TELEMETRY_OTLP_PROTOCOL=http/protobuf
-```
+### 13.2.1. Business Metrics (Real-time)
 
-**SigNoz:**
-```bash
-SNAPDOG_TELEMETRY_OTLP_ENDPOINT=http://signoz-otel-collector:4317
-SNAPDOG_TELEMETRY_OTLP_PROTOCOL=grpc
-```
+**Collected every 15 seconds by BusinessMetricsCollectionService**:
 
-**OpenTelemetry Collector:**
-```bash
-SNAPDOG_TELEMETRY_OTLP_ENDPOINT=http://otel-collector:4317
-SNAPDOG_TELEMETRY_OTLP_PROTOCOL=grpc
-SNAPDOG_TELEMETRY_OTLP_HEADERS=authorization=Bearer token123
-```
+| Metric | Description | Implementation |
+|--------|-------------|----------------|
+| `snapdog_zones_total` | Total configured zones | `IZoneManager.GetAllZoneStatesAsync().Count` |
+| `snapdog_zones_active` | Zones not stopped | `zones.Count(z => z.PlaybackState != Stopped)` |
+| `snapdog_clients_connected` | Connected Snapcast clients | `clients.Count(c => c.Connected)` |
+| `snapdog_tracks_playing` | Currently playing tracks | `zones.Count(z => z.PlaybackState == Playing)` |
 
-## 13.3. Implementation
+### 13.2.2. System Metrics (Real-time)
 
-### 13.3.1. TelemetryConfig Class
+**Collected every 30 seconds by EnterpriseMetricsService**:
+
+| Metric | Description | Source |
+|--------|-------------|--------|
+| `snapdog_system_cpu_usage_percent` | CPU usage percentage | Process.TotalProcessorTime |
+| `snapdog_system_memory_usage_mb` | Memory usage in MB | Process.WorkingSet64 |
+| `snapdog_system_memory_usage_percent` | Memory usage percentage | GC.GetGCMemoryInfo() |
+| `snapdog_system_uptime_seconds` | Application uptime | DateTime.UtcNow - startTime |
+| `snapdog_system_connections_active` | Active connections | ThreadPool metrics |
+| `snapdog_system_threadpool_threads` | Thread pool threads | ThreadPool.GetAvailableThreads() |
+
+### 13.2.3. HTTP Metrics (Per-request)
+
+| Metric | Description | Labels |
+|--------|-------------|--------|
+| `snapdog_http_requests_total` | Total HTTP requests | method, endpoint, status_code |
+| `snapdog_http_request_duration_seconds` | Request duration histogram | method, endpoint, status_code |
+| `snapdog_http_requests_errors_total` | HTTP errors (4xx/5xx) | method, endpoint, status_code |
+
+### 13.2.4. Command/Query Metrics (Per-operation)
+
+| Metric | Description | Labels |
+|--------|-------------|--------|
+| `snapdog_commands_total` | Total commands processed | command, success |
+| `snapdog_queries_total` | Total queries processed | query, success |
+| `snapdog_command_duration_seconds` | Command duration histogram | command, success |
+| `snapdog_query_duration_seconds` | Query duration histogram | query, success |
+| `snapdog_command_errors_total` | Command processing errors | command |
+| `snapdog_query_errors_total` | Query processing errors | query |
+
+### 13.2.5. Zone Grouping Metrics (Per-operation)
+
+| Metric | Description | Labels |
+|--------|-------------|--------|
+| `zone_grouping_reconciliations_total` | Zone grouping reconciliations | success |
+| `zone_grouping_reconciliation_duration_seconds` | Reconciliation duration | success |
+| `zone_grouping_client_updates_total` | Client name updates | - |
+| `zone_grouping_errors_total` | Zone grouping errors | error_type, operation |
+
+### 13.2.6. Error Tracking (Per-error)
+
+| Metric | Description | Labels |
+|--------|-------------|--------|
+| `snapdog_errors_total` | Application errors | error_type, component, operation |
+| `snapdog_exceptions_total` | Unhandled exceptions | exception_type, component, operation |
+| `snapdog_track_changes_total` | Track changes | zone_id |
+| `snapdog_volume_changes_total` | Volume changes | target_id, target_type |
+
+## 13.3. Implementation Details
+
+### 13.3.1. Service Registration (Program.cs)
 
 ```csharp
-namespace SnapDog2.Core.Configuration;
+// OpenTelemetry metrics infrastructure
+builder.Services.AddSingleton<ApplicationMetrics>();
+builder.Services.AddSingleton<IApplicationMetrics>(provider =>
+    provider.GetRequiredService<ApplicationMetrics>());
 
-/// <summary>
-/// Telemetry and observability configuration.
-/// SnapDog2 uses OpenTelemetry Protocol (OTLP) for vendor-neutral telemetry export.
-/// </summary>
-public class TelemetryConfig
-{
-    [Env(Key = "ENABLED", Default = false)]
-    public bool Enabled { get; set; } = false;
+// Enterprise metrics service (implements IMetricsService)
+builder.Services.AddSingleton<EnterpriseMetricsService>();
+builder.Services.AddSingleton<IMetricsService>(provider =>
+    provider.GetRequiredService<EnterpriseMetricsService>());
 
-    [Env(Key = "SERVICE_NAME", Default = "SnapDog2")]
-    public string ServiceName { get; set; } = "SnapDog2";
+// Business metrics collection background service
+builder.Services.AddHostedService<BusinessMetricsCollectionService>();
 
-    [Env(Key = "SAMPLING_RATE", Default = 1.0)]
-    public double SamplingRate { get; set; } = 1.0;
-
-    [Env(NestedPrefix = "OTLP_")]
-    public OtlpConfig Otlp { get; set; } = new();
-}
-
-/// <summary>
-/// OTLP configuration for vendor-neutral telemetry export.
-/// </summary>
-public class OtlpConfig
-{
-    [Env(Key = "ENABLED", Default = false)]
-    public bool Enabled { get; set; } = false;
-
-    [Env(Key = "ENDPOINT", Default = "http://localhost:4317")]
-    public string Endpoint { get; set; } = "http://localhost:4317";
-
-    [Env(Key = "PROTOCOL", Default = "grpc")]
-    public string Protocol { get; set; } = "grpc";
-
-    [Env(Key = "HEADERS")]
-    public string? Headers { get; set; }
-
-    [Env(Key = "TIMEOUT", Default = 30)]
-    public int TimeoutSeconds { get; set; } = 30;
-}
+// Zone grouping metrics
+builder.Services.AddSingleton<ZoneGroupingMetrics>();
 ```
 
-### 13.3.2. OpenTelemetry Setup
+### 13.3.2. OpenTelemetry Configuration
 
-```csharp
-// Program.cs - OpenTelemetry configuration
-if (snapDogConfig.Telemetry.Enabled && snapDogConfig.Telemetry.Otlp.Enabled)
-{
-    builder.Services.AddOpenTelemetry()
-        .ConfigureResource(resource => resource
-            .AddService(snapDogConfig.Telemetry.ServiceName, "2.0.0")
-            .AddAttributes(new Dictionary<string, object>
-            {
-                ["deployment.environment"] = builder.Environment.EnvironmentName,
-                ["service.namespace"] = "snapdog"
-            }))
-        .WithTracing(tracing => tracing
-            .SetSampler(new TraceIdRatioBasedSampler(snapDogConfig.Telemetry.SamplingRate))
-            .AddAspNetCoreInstrumentation(options => options.RecordException = true)
-            .AddHttpClientInstrumentation()
-            .AddSource("SnapDog2.*")
-            .AddOtlpExporter(options =>
-            {
-                options.Endpoint = new Uri(snapDogConfig.Telemetry.Otlp.Endpoint);
-                options.Protocol = snapDogConfig.Telemetry.Otlp.Protocol.ToLowerInvariant() switch
-                {
-                    "grpc" => OtlpExportProtocol.Grpc,
-                    "http/protobuf" => OtlpExportProtocol.HttpProtobuf,
-                    _ => OtlpExportProtocol.Grpc
-                };
-                options.TimeoutMilliseconds = snapDogConfig.Telemetry.Otlp.TimeoutSeconds * 1000;
-                
-                if (!string.IsNullOrEmpty(snapDogConfig.Telemetry.Otlp.Headers))
-                {
-                    options.Headers = snapDogConfig.Telemetry.Otlp.Headers;
-                }
-            }))
-        .WithMetrics(metrics => metrics
-            .AddAspNetCoreInstrumentation()
-            .AddHttpClientInstrumentation()
-            .AddMeter("SnapDog2.*")
-            .AddOtlpExporter(/* same configuration as tracing */));
-}
+**Collector Configuration** (`devcontainer/otel/otel-collector-config.yaml`):
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+    timeout: 1s
+    send_batch_size: 1024
+  resource:
+    attributes:
+      - key: service.namespace
+        value: snapdog
+      - key: deployment.environment
+        value: development
+
+exporters:
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+    const_labels:
+      environment: development
+      service: snapdog
+  debug:
+    verbosity: normal
+
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      processors: [batch, resource]
+      exporters: [prometheus, debug]
 ```
 
-## 13.4. Scope
+### 13.3.3. Docker Compose Integration
 
-OpenTelemetry instrumentation covers critical application paths:
+```yaml
+# OpenTelemetry Collector
+otel-collector:
+  image: otel/opentelemetry-collector-contrib:0.112.0
+  container_name: snapdog-otel-collector
+  command: ["--config=/etc/otel-collector-config.yaml"]
+  volumes:
+    - ./devcontainer/otel/otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+  networks:
+    snapdog-dev:
 
-* **Incoming Requests:** ASP.NET Core instrumentation automatically traces API requests
-* **Internal Processing:** Cortex.Mediator pipeline behaviors create spans for command/query handling
-* **External Dependencies:**
-  * `HttpClient` instrumentation automatically traces outgoing HTTP requests (Subsonic, etc.)
-  * Manual instrumentation for infrastructure services (`SnapcastService`, `KnxService`, `MqttService`)
-* **Custom Metrics:** Application-specific events and performance indicators
+# Grafana Dashboard
+grafana:
+  image: grafana/grafana:latest
+  container_name: snapdog-grafana
+  environment:
+    - GF_SECURITY_ADMIN_PASSWORD=admin
+  volumes:
+    - grafana-storage:/var/lib/grafana
+  networks:
+    snapdog-dev:
+```
 
-## 13.5. Telemetry Types
+## 13.4. Grafana Dashboard Access
 
-### 13.5.1. Traces
-- **Goal:** Visualize operation flow and duration across components
-- **Implementation:** `System.Diagnostics.ActivitySource` with automatic and manual instrumentation
-- **Export:** OTLP to any compatible backend (Jaeger, SigNoz, etc.)
-- **Sampling:** Configurable via `SNAPDOG_TELEMETRY_SAMPLING_RATE`
+**Development Environment**:
+- **URL**: http://localhost:8000/grafana/
+- **Credentials**: admin/admin
+- **Prometheus Data Source**: http://otel-collector:8889
 
-### 13.5.2. Metrics
-- **Goal:** Quantitative data on application health and performance
-- **Implementation:** `System.Diagnostics.Metrics.Meter` with custom instruments
-- **Export:** OTLP to any compatible backend (Prometheus via collector, SigNoz, etc.)
-- **Instruments:** Counters, histograms, gauges for key application events
+**Key Dashboards**:
+1. **Business Metrics**: Zones, clients, tracks playing
+2. **System Performance**: CPU, memory, uptime, connections
+3. **API Performance**: HTTP request rates, durations, errors
+4. **Command/Query Performance**: CQRS operation metrics
+5. **Error Tracking**: Application errors and exceptions
 
-### 13.5.3. Logs
-- **Goal:** Detailed contextual information correlated with traces
-- **Implementation:** `Microsoft.Extensions.Logging.ILogger<T>` with Serilog
-- **Correlation:** Automatic enrichment with `TraceId` and `SpanId`
-- **Export:** Structured logging with trace correlation
+## 13.5. Metrics Collection Patterns
 
-## 13.6. Benefits
-
-### 13.6.1. Vendor Neutrality
-- **Backend Agnostic:** Switch observability platforms without code changes
-- **Future Proof:** Works with emerging OTLP-compatible platforms
-- **Cost Flexibility:** Choose between self-hosted and managed solutions
-
-### 13.6.2. Operational Benefits
-- **Unified Configuration:** Single OTLP endpoint for all telemetry signals
-- **Simple Deployment:** No backend-specific configuration in application
-- **Easy Migration:** Change backends by updating deployment configuration
-
-### 13.6.3. Development Experience
-- **Consistent Instrumentation:** Same code works with any backend
-- **Local Development:** Easy to enable/disable observability
-- **Testing:** Mock OTLP endpoints for integration tests
-
-## 13.7. OpenTelemetry Setup (DI / `/Worker/DI/ObservabilityExtensions.cs`)
-
-OpenTelemetry pipelines for tracing, metrics, and logging are configured during application startup using Dependency Injection.
+### 13.5.1. Automatic Collection
 
 ```csharp
-// Located in /Worker/DI/ObservabilityExtensions.cs
-namespace SnapDog2.Extensions.DependencyInjection;
-
-using System;
-using System.Diagnostics;
-using System.Diagnostics.Metrics;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using OpenTelemetry.Logs;
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
-using SnapDog2.Core.Configuration; // For TelemetryOptions, OtlpProtocol
-using SnapDog2.Infrastructure.Observability; // For IMetricsService and its implementation
-using OpenTelemetry.Exporter; // For OtlpExportProtocol
-using Microsoft.AspNetCore.Builder; // For WebApplication extension method
-
-/// <summary>
-/// Extension methods for configuring observability (Telemetry, Metrics, Logging).
-/// </summary>
-public static class ObservabilityExtensions
+// Business metrics - collected every 15 seconds
+public class BusinessMetricsCollectionService : BackgroundService
 {
-    // Define shared ActivitySource and Meter for the application.
-    // Services/components should obtain these or use DI if preferred.
-    public static readonly ActivitySource SnapDogActivitySource = new("SnapDog2", GetVersion()); // Include version
-    public static readonly Meter SnapDogMeter = new("SnapDog2", GetVersion()); // Include version
-
-    /// <summary>
-    /// Adds OpenTelemetry tracing, metrics, and logging integration.
-    /// </summary>
-    /// <param name="services">The service collection.</param>
-    /// <param name="configuration">The application configuration.</param>
-    /// <returns>The service collection for chaining.</returns>
-    public static IServiceCollection AddSnapDogObservability(this IServiceCollection services, IConfiguration configuration)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // Bind TelemetryOptions from configuration (e.g., "Telemetry" section)
-        services.Configure<TelemetryOptions>(configuration.GetSection("Telemetry"));
-        // Resolve options for immediate use during setup
-        var telemetryOptions = configuration.GetSection("Telemetry").Get<TelemetryOptions>() ?? new TelemetryOptions();
-
-        // Skip configuration if telemetry is disabled globally
-        if (!telemetryOptions.Enabled)
+        while (!stoppingToken.IsCancellationRequested)
         {
-            Console.WriteLine("Telemetry is disabled via configuration."); // Use console before logger is fully configured
-            return services;
+            await CollectBusinessMetricsAsync();
+            await Task.Delay(TimeSpan.FromSeconds(15), stoppingToken);
         }
-
-        // Define shared resource attributes for all telemetry signals
-        var resourceBuilder = ResourceBuilder.CreateDefault()
-            .AddService(telemetryOptions.ServiceName, serviceVersion: GetVersion())
-            .AddTelemetrySdk() // Includes basic SDK info
-            .AddEnvironmentVariableDetector(); // Adds environment variables as resource attributes
-
-        // Configure OpenTelemetry services
-        services.AddOpenTelemetry()
-            // --- Tracing Configuration ---
-            .WithTracing(tracerProviderBuilder =>
-            {
-                tracerProviderBuilder
-                    .SetResourceBuilder(resourceBuilder)
-                    .AddSource(SnapDogActivitySource.Name) // Register the application's ActivitySource
-                    // Add automatic instrumentation libraries:
-                    .AddAspNetCoreInstrumentation(opts => { // Instrument ASP.NET Core requests
-                        opts.RecordException = true; // Automatically record exceptions on spans
-                        // Optionally filter out noisy endpoints like metrics/health/swagger
-                        opts.Filter = ctx => !ctx.Request.Path.StartsWithSegments(telemetryOptions.Prometheus.Path) &&
-                                             !ctx.Request.Path.StartsWithSegments("/health") &&
-                                             !ctx.Request.Path.StartsWithSegments("/swagger");
-                     })
-                    .AddHttpClientInstrumentation(opts => opts.RecordException = true); // Instrument outgoing HttpClient calls
-
-                // Configure the OTLP Exporter for traces
-                tracerProviderBuilder.AddOtlpExporter(otlpOptions =>
-                {
-                    try {
-                        otlpOptions.Endpoint = new Uri(telemetryOptions.OtlpExporter.Endpoint);
-                    } catch (UriFormatException ex) {
-                        // Log configuration error - startup validation should catch this ideally
-                         Console.Error.WriteLine($"ERROR: Invalid OTLP Endpoint format: {telemetryOptions.OtlpExporter.Endpoint}. {ex.Message}");
-                         // Potentially default to a safe value or prevent startup?
-                         otlpOptions.Endpoint = new Uri("http://localhost:4317"); // Safe default
-                    }
-
-                    if (telemetryOptions.OtlpExporter.Protocol == OtlpProtocol.Grpc) {
-                         otlpOptions.Protocol = OtlpExportProtocol.Grpc;
-                    } else if (telemetryOptions.OtlpExporter.Protocol == OtlpProtocol.HttpProtobuf) {
-                         otlpOptions.Protocol = OtlpExportProtocol.HttpProtobuf;
-                    } else {
-                         Console.Error.WriteLine($"WARN: Invalid OTLP Protocol '{telemetryOptions.OtlpExporter.Protocol}'. Defaulting to gRPC.");
-                         otlpOptions.Protocol = OtlpExportProtocol.Grpc; // Default protocol
-                    }
-
-                    if(!string.IsNullOrWhiteSpace(telemetryOptions.OtlpExporter.Headers)) {
-                         otlpOptions.Headers = telemetryOptions.OtlpExporter.Headers;
-                    }
-                });
-
-                // Add ConsoleExporter for debugging traces locally if needed
-                // tracerProviderBuilder.AddConsoleExporter();
-
-                // Configure Sampling strategy
-                tracerProviderBuilder.SetSampler(new TraceIdRatioBasedSampler(telemetryOptions.SamplingRate));
-            })
-            // --- Metrics Configuration ---
-            .WithMetrics(meterProviderBuilder =>
-            {
-                 meterProviderBuilder
-                    .SetResourceBuilder(resourceBuilder)
-                    .AddMeter(SnapDogMeter.Name) // Register the application's Meter
-                    // Add automatic instrumentation libraries:
-                    .AddRuntimeInstrumentation() // Collects GC counts, heap size, etc.
-                    .AddProcessInstrumentation() // Collects CPU, memory usage for the process
-                    .AddAspNetCoreInstrumentation() // Collects request duration, active requests, etc.
-                    .AddHttpClientInstrumentation(); // Collects outgoing request duration, etc.
-
-                // Configure the Prometheus Exporter if enabled
-                if (telemetryOptions.Prometheus.Enabled) {
-                     meterProviderBuilder.AddPrometheusExporter(opts => {
-                        // Can configure scraping endpoint options here if needed, but usually done via MapPrometheusScrapingEndpoint
-                     });
-                } else {
-                     // Add ConsoleExporter as a fallback if Prometheus is disabled
-                      meterProviderBuilder.AddConsoleExporter((exporterOptions, metricReaderOptions) => {
-                            metricReaderOptions.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = 15000; // Export metrics to console every 15s
-                      });
-                }
-            });
-
-        // --- Logging Configuration (Integration with OpenTelemetry) ---
-        // This ensures TraceId and SpanId are available to the logging pipeline (e.g., Serilog)
-        services.AddLogging(loggingBuilder =>
-        {
-            // Clear default providers if Serilog is the sole provider
-            // loggingBuilder.ClearProviders(); // Do this in Program.cs before UseSerilog() if needed
-
-            loggingBuilder.AddOpenTelemetry(options =>
-            {
-                options.SetResourceBuilder(resourceBuilder);
-                options.IncludeFormattedMessage = true; // Include formatted message in log records
-                options.IncludeScopes = true; // Include logger scopes
-                options.ParseStateValues = true; // Attempt to parse state values
-
-                // Configure exporting logs via OTLP (Optional - separate from traces/metrics)
-                // options.AddOtlpExporter(otlpOptions => { /* Configure OTLP endpoint/protocol for logs */ });
-
-                // Add ConsoleExporter for logs (useful for seeing OTel-formatted logs)
-                 options.AddConsoleExporter();
-            });
-        });
-
-        // Register custom Metrics Service implementation
-        services.AddSingleton<IMetricsService, OpenTelemetryMetricsService>();
-
-        Console.WriteLine("OpenTelemetry Observability enabled and configured."); // Use console before logger might be ready
-        return services;
     }
-
-     /// <summary>
-     /// Maps the Prometheus scraping endpoint if enabled in configuration.
-     /// Call this on the `WebApplication` instance in Program.cs.
-     /// </summary>
-     public static WebApplication MapSnapDogObservability(this WebApplication app) {
-          // Resolve options from the fully built host
-          var telemetryOptions = app.Services.GetRequiredService<IOptions<TelemetryOptions>>().Value;
-          if(telemetryOptions.Enabled && telemetryOptions.Prometheus.Enabled) {
-               app.MapPrometheusScrapingEndpoint(telemetryOptions.Prometheus.Path);
-               app.Logger.LogInformation("Prometheus metrics scraping endpoint configured at {Path}", telemetryOptions.Prometheus.Path);
-          }
-          return app;
-     }
-
-
-    private static string GetVersion() =>
-        System.Reflection.Assembly.GetEntryAssembly()?.GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>()?.InformationalVersion ??
-        System.Reflection.Assembly.GetEntryAssembly()?.GetName()?.Version?.ToString() ??
-        "unknown";
 }
+
+// System metrics - collected every 30 seconds
+private readonly Timer _systemMetricsTimer = new Timer(
+    CollectSystemMetrics, null, TimeSpan.Zero, TimeSpan.FromSeconds(30));
 ```
 
-## 13.8. Custom Metrics (`IMetricsService` / `OpenTelemetryMetricsService`)
-
-Define application-specific metrics using `System.Diagnostics.Metrics.Meter` via a dedicated service abstraction (`IMetricsService`) implemented in `/Infrastructure/Observability`.
+### 13.5.2. Event-Driven Collection
 
 ```csharp
-// Abstraction (/Core/Abstractions/IMetricsService.cs)
-namespace SnapDog2.Core.Abstractions;
-
-/// <summary>
-/// Defines methods for recording application-specific metrics.
-/// </summary>
-public interface IMetricsService
+// HTTP requests - collected per request
+public void RecordHttpRequest(string method, string endpoint, int statusCode, double durationSeconds)
 {
-    void RecordCortexMediatorRequestDuration(string requestType, string requestName, double durationMs, bool success);
-    void RecordZonePlaybackEvent(int zoneIndex, string eventType); // e.g., "play", "stop", "pause", "next", "prev"
-    void IncrementClientConnectionCounter(bool connected); // True for connect, false for disconnect
-    void RecordExternalCallDuration(string serviceName, string operation, double durationMs, bool success);
-    // Add more specific metric recording methods as needed
+    _httpRequestsTotal.Add(1, new[] { 
+        new("method", method),
+        new("endpoint", endpoint),
+        new("status_code", statusCode.ToString())
+    });
 }
 
-// Implementation (/Infrastructure/Observability/OpenTelemetryMetricsService.cs)
-namespace SnapDog2.Infrastructure.Observability;
-
-using System.Diagnostics.Metrics;
-using System.Collections.Generic;
-using SnapDog2.Core.Abstractions;
-using SnapDog2.Extensions.DependencyInjection; // To access the static Meter instance defined in ObservabilityExtensions
-
-/// <summary>
-/// Implements IMetricsService using System.Diagnostics.Metrics for OpenTelemetry.
-/// </summary>
-public class OpenTelemetryMetricsService : IMetricsService
+// Commands/Queries - collected per operation
+public void RecordCommand(string commandName, double durationSeconds, bool success)
 {
-    // Define instruments using the shared Meter
-    private readonly Counter<long> _cortexMediatorRequestCounter;
-    private readonly Histogram<double>_cortexMediatorRequestDuration;
-    private readonly Counter<long> _playbackEventCounter;
-    private readonly Counter<long>_clientConnectionCounter;
-    private readonly Histogram<double> _externalCallDuration;
-
-    public OpenTelemetryMetricsService()
-    {
-        // Use the static Meter defined in ObservabilityExtensions
-        var meter = ObservabilityExtensions.SnapDogMeter;
-
-        _cortexMediatorRequestCounter = meter.CreateCounter<long>(
-            "snapdog.cortex_mediator.requests.count",
-            description: "Number of Cortex.Mediator requests processed.");
-
-        _cortexMediatorRequestDuration = meter.CreateHistogram<double>(
-            "snapdog.cortex_mediator.requests.duration",
-            unit: "ms",
-            description: "Duration of Cortex.Mediator request handling.");
-
-        _playbackEventCounter = meter.CreateCounter<long>(
-             "snapdog.zone.playback.events.count",
-             description: "Number of zone playback events.");
-
-        _clientConnectionCounter = meter.CreateCounter<long>(
-             "snapdog.client.connections.count",
-             description: "Number of client connect/disconnect events.");
-
-         _externalCallDuration = meter.CreateHistogram<double>(
-             "snapdog.external.calls.duration",
-             unit: "ms",
-             description: "Duration of calls to external services (Snapcast, Subsonic, KNX, etc.).");
-    }
-
-    public void RecordCortexMediatorRequestDuration(string requestType, string requestName, double durationMs, bool success)
-    {
-        var tags = new TagList // Use TagList for performance
-        {
-            { "request.type", requestType },
-            { "request.name", requestName },
-            { "success", success }
-         };
-        _cortexMediatorRequestCounter.Add(1, tags);
-        _cortexMediatorRequestDuration.Record(durationMs, tags);
-    }
-
-    public void RecordZonePlaybackEvent(int zoneIndex, string eventType)
-    {
-         var tags = new TagList {
-            { "zone.id", zoneIndex },
-            { "event.type", eventType }
-         };
-        _playbackEventCounter.Add(1, tags);
-    }
-
-     public void IncrementClientConnectionCounter(bool connected) {
-          var tags = new TagList {
-               { "event.type", connected ? "connect" : "disconnect" }
-          };
-          _clientConnectionCounter.Add(1, tags);
-     }
-
-     public void RecordExternalCallDuration(string serviceName, string operation, double durationMs, bool success)
-     {
-          var tags = new TagList {
-               { "external.service", serviceName }, // e.g., "Snapcast", "Subsonic", "KNX"
-               { "external.operation", operation }, // e.g., "SetClientVolume", "GetPlaylists", "WriteGroupValue"
-               { "success", success }
-          };
-          _externalCallDuration.Record(durationMs, tags);
-     }
+    _commandsTotal.Add(1, new[] {
+        new("command", commandName),
+        new("success", success.ToString().ToLowerInvariant())
+    });
 }
 ```
 
-Inject `IMetricsService` into components (like Cortex.Mediator Behaviors, Infrastructure Services) where metrics need to be recorded.
+## 13.6. Performance Characteristics
 
-## 13.9. Manual Tracing Instrumentation
+### 13.6.1. Collection Overhead
 
-Use the shared `ActivitySource` (`ObservabilityExtensions.SnapDogActivitySource`) to manually create Activities (spans) for important operations not covered by automatic instrumentation. Use `using var activity = _activitySource.StartActivity(...)`, add relevant tags (`activity.SetTag`), record exceptions (`activity.RecordException`), and set status (`activity.SetStatus`).
+| Component | Frequency | Overhead | Impact |
+|-----------|-----------|----------|---------|
+| Business Metrics | 15s | ~5ms | Minimal |
+| System Metrics | 30s | ~10ms | Minimal |
+| HTTP Metrics | Per-request | ~0.1ms | Negligible |
+| Command Metrics | Per-operation | ~0.05ms | Negligible |
 
-```csharp
-// Example in a service method (/Infrastructure/Subsonic/SubsonicService.cs)
-public partial class SubsonicService : ISubsonicService
-{
-     private readonly HttpClient _httpClient;
-     private static readonly ActivitySource _activitySource = ObservabilityExtensions.SnapDogActivitySource;
-     private readonly IMetricsService _metricsService; // Inject metrics service
-     // ... logger, config ...
+### 13.6.2. Storage Requirements
 
-     public async Task<Result<List<PlaylistInfo>>> GetPlaylistsAsync(CancellationToken cancellationToken = default)
-     {
-          // Start a custom activity span for this specific operation
-          using var activity = _activitySource.StartActivity("Subsonic.GetPlaylists", ActivityKind.Client);
-          activity?.SetTag("subsonic.operation", "getPlaylists"); // Specific tag
-          var stopwatch = Stopwatch.StartNew(); // Time the external call duration
-          bool success = false;
+| Metric Type | Cardinality | Storage/Day | Retention |
+|-------------|-------------|-------------|-----------|
+| Business | ~10 series | ~1MB | 30 days |
+| System | ~20 series | ~2MB | 30 days |
+| HTTP | ~100 series | ~10MB | 7 days |
+| Commands | ~200 series | ~20MB | 7 days |
 
-          try {
-               // HttpClient call is automatically instrumented, creating a child span
-               var result = await _subsonicClient.GetPlaylistsAsync(cancellationToken).ConfigureAwait(false);
-               // ... mapping logic ...
-               success = true; // Assume success if no exception from library/mapping
-               activity?.SetStatus(ActivityStatusCode.Ok); // Set span status to OK
-               return Result<List<PlaylistInfo>>.Success(mappedPlaylists);
-          } catch (Exception ex) {
-               activity?.SetStatus(ActivityStatusCode.Error, ex.Message); // Set span status to Error
-               activity?.RecordException(ex); // Record exception details on the span
-               LogApiError(nameof(GetPlaylistsAsync), ex); // Log the error
-               return Result<List<PlaylistInfo>>.Failure(ex);
-          } finally {
-               stopwatch.Stop();
-               // Record custom duration metric for this specific external call
-               _metricsService.RecordExternalCallDuration("Subsonic", "GetPlaylists", stopwatch.ElapsedMilliseconds, success);
-          }
-     }
-}
+## 13.7. Monitoring and Alerting
 
-// In Cortex.Mediator LoggingBehavior (/Server/Behaviors/LoggingBehavior.cs)
-// using var activity = _activitySource.StartActivity($"{requestType}:{requestName}", ActivityKind.Internal);
-// ... set tags, status, record exceptions based on handler outcome ...
+### 13.7.1. Key Performance Indicators (KPIs)
+
+```promql
+# Business Health
+snapdog_zones_active / snapdog_zones_total * 100  # Zone utilization %
+snapdog_clients_connected                          # Client connectivity
+snapdog_tracks_playing                             # Active playback
+
+# System Health  
+snapdog_system_cpu_usage_percent                   # CPU utilization
+snapdog_system_memory_usage_percent                # Memory utilization
+rate(snapdog_http_requests_errors_total[5m])       # Error rate
+
+# Performance
+histogram_quantile(0.95, snapdog_http_request_duration_seconds)  # 95th percentile latency
+histogram_quantile(0.95, snapdog_command_duration_seconds)       # Command latency
 ```
 
-## 13.10. Logging Correlation
+### 13.7.2. Recommended Alerts
 
-Ensure Serilog (or chosen logging provider) is configured with OpenTelemetry integration (`loggingBuilder.AddOpenTelemetry(...)` in DI setup) and output templates include `{TraceId}` and `{SpanId}`. This automatically links logs to the currently active trace span.
+| Alert | Condition | Severity |
+|-------|-----------|----------|
+| High Error Rate | `rate(snapdog_errors_total[5m]) > 10` | Warning |
+| High CPU Usage | `snapdog_system_cpu_usage_percent > 80` | Warning |
+| High Memory Usage | `snapdog_system_memory_usage_percent > 90` | Critical |
+| No Connected Clients | `snapdog_clients_connected == 0` | Warning |
+| High Request Latency | `histogram_quantile(0.95, snapdog_http_request_duration_seconds) > 1` | Warning |
+
+## 13.8. Development and Production
+
+### 13.8.1. Development Environment
+
+- **OpenTelemetry Collector**: Standalone container with debug exporters
+- **Grafana**: Pre-configured with Prometheus data source
+- **Debug Logging**: Detailed metrics logging for development
+- **Hot Reload**: Metrics collection continues during code changes
+
+### 13.8.2. Production Considerations
+
+- **Collector Scaling**: Deploy collector as sidecar or dedicated service
+- **Storage**: Use persistent Prometheus or cloud metrics service
+- **Retention**: Configure appropriate retention policies
+- **Security**: Enable authentication and TLS for production
+- **Monitoring**: Monitor the monitoring system itself
+
+## 13.9. Future Enhancements
+
+### 13.9.1. Planned Features
+
+- **Distributed Tracing**: Add OpenTelemetry tracing for request flows
+- **Custom Dashboards**: Zone-specific and client-specific dashboards
+- **Anomaly Detection**: ML-based anomaly detection for metrics
+- **SLA Monitoring**: Service level agreement tracking and reporting
+
+### 13.9.2. Integration Opportunities
+
+- **MQTT Metrics**: Publish key metrics via MQTT for external systems
+- **KNX Integration**: Expose system health via KNX for building automation
+- **Mobile Notifications**: Push critical alerts to mobile devices
+- **External APIs**: Expose metrics via REST API for third-party integration
+
+---
+
+**The SnapDog2 metrics and telemetry system provides enterprise-grade observability with minimal overhead and comprehensive coverage of all system components.**
