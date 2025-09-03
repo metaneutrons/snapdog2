@@ -120,7 +120,8 @@ public sealed partial class MediaPlayer(
                             {
                                 var updatedTrack = this._currentTrack with
                                 {
-                                    Title = !string.IsNullOrWhiteSpace(result.Metadata.Title) ? result.Metadata.Title : this._currentTrack.Title,
+                                    // Only update title if we don't already have a good one from playlist
+                                    Title = !string.IsNullOrWhiteSpace(this._currentTrack.Title) ? this._currentTrack.Title : (result.Metadata.Title ?? this._currentTrack.Title),
                                     Artist = !string.IsNullOrWhiteSpace(result.Metadata.Artist) ? result.Metadata.Artist : this._currentTrack.Artist,
                                     Album = !string.IsNullOrWhiteSpace(result.Metadata.Album) ? result.Metadata.Album : this._currentTrack.Album,
                                     DurationMs = result.Metadata.Duration > 0 ? (int)result.Metadata.Duration : this._currentTrack.DurationMs,
