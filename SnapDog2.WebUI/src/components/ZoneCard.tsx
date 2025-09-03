@@ -28,11 +28,16 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({ zoneIndex, draggingClientInd
   const zone = useZone(zoneIndex);
   const { initializeZone } = useAppStore();
   const [isDropTarget, setIsDropTarget] = useState(false);
+  const [playlists, setPlaylists] = useState<PlaylistInfo[]>([]);
   const [showTrackList, setShowTrackList] = useState(false);
 
   useEffect(() => {
     initializeZone(zoneIndex);
   }, [zoneIndex, initializeZone]);
+
+  useEffect(() => {
+    playlistApi.getPlaylists().then(setPlaylists).catch(console.error);
+  }, []);
 
   const handleVolumeChange = (volume: number) => api.zones.setVolume(zoneIndex, volume).catch(console.error);
   const handleMuteToggle = () => api.zones.toggleMute(zoneIndex).catch(console.error);
@@ -151,6 +156,7 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({ zoneIndex, draggingClientInd
       <PlaylistNavigation
         zoneIndex={zoneIndex}
         currentPlaylist={zone.playlist}
+        playlists={playlists}
         onPlaylistChange={handlePlaylistChange}
         onShowTrackList={() => setShowTrackList(true)}
         isChangingPlaylist={false}
