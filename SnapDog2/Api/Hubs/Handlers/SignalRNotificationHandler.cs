@@ -18,7 +18,8 @@ public class SignalRNotificationHandler :
     INotificationHandler<ZonePlaylistRepeatChangedNotification>,
     INotificationHandler<ZoneShuffleModeChangedNotification>,
     INotificationHandler<ClientVolumeChangedNotification>,
-    INotificationHandler<ClientMuteChangedNotification>
+    INotificationHandler<ClientMuteChangedNotification>,
+    INotificationHandler<ClientZoneStatusNotification>
 {
     private readonly IHubContext<SnapDogHub> _hubContext;
     private readonly ILogger<SignalRNotificationHandler> _logger;
@@ -87,5 +88,11 @@ public class SignalRNotificationHandler :
     {
         _logger.LogInformation("🔔 SignalR: Client {ClientIndex} mute changed to {IsMuted}", notification.ClientIndex, notification.IsMuted);
         await _hubContext.Clients.All.SendAsync("ClientMuteChanged", notification.ClientIndex, notification.IsMuted, cancellationToken);
+    }
+
+    public async Task Handle(ClientZoneStatusNotification notification, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("🔔 SignalR: Client {ClientIndex} zone changed to {ZoneIndex}", notification.ClientIndex, notification.ZoneIndex?.ToString() ?? "unassigned");
+        await _hubContext.Clients.All.SendAsync("ClientZoneChanged", notification.ClientIndex, notification.ZoneIndex, cancellationToken);
     }
 }
