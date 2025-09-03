@@ -4,7 +4,7 @@ import { api } from '../services/api';
 import { TransportControls } from './TransportControls';
 import { VolumeSlider } from './VolumeSlider';
 import { ClientList } from './ClientList';
-import { PlaylistNavigation } from './PlaylistNavigation';
+import { PlaylistNavigation } from './PlaylistNavigationStub';
 
 interface ZoneCardProps {
   zoneIndex: number;
@@ -121,6 +121,14 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({ zoneIndex, draggingClientInd
       )}
 
       <TransportControls zoneIndex={zoneIndex} />
+
+      <PlaylistNavigation
+        zoneIndex={zoneIndex}
+        currentPlaylist={zone.playlist}
+        onPlaylistChange={() => {}}
+        onShowTrackList={() => {}}
+        isChangingPlaylist={false}
+      />
 
       <VolumeSlider
         value={zone.volume}
