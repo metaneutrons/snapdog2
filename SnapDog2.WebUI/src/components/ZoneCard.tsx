@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useZone, useAppStore, useZoneLoadingState } from '../store';
 import { api } from '../services/api';
+import { playlistApi } from '../services/playlistApi';
 import { TransportControls } from './TransportControls';
 import { VolumeSlider } from './VolumeSlider';
 import { ClientList } from './ClientList';
@@ -39,7 +40,8 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({ zoneIndex, draggingClientInd
   const handlePlaylistChange = async (playlist: PlaylistInfo) => {
     try {
       console.log('🎵 Changing playlist to:', playlist.name);
-      // TODO: Add actual playlist change API call
+      await playlistApi.setZonePlaylist(zoneIndex, playlist.index!);
+      console.log('✅ Playlist changed successfully');
     } catch (error) {
       console.error('❌ Failed to change playlist:', error);
     }
