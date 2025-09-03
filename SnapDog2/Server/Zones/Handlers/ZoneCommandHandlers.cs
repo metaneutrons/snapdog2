@@ -15,14 +15,12 @@ namespace SnapDog2.Server.Zones.Handlers;
 
 using Cortex.Mediator;
 using Cortex.Mediator.Commands;
-using Cortex.Mediator.Notifications;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Server.Zones.Commands.Playback;
 using SnapDog2.Server.Zones.Commands.Playlist;
 using SnapDog2.Server.Zones.Commands.Track;
 using SnapDog2.Server.Zones.Commands.Volume;
 using SnapDog2.Server.Zones.Notifications;
-using SnapDog2.Shared.Enums;
 using SnapDog2.Shared.Enums;
 using SnapDog2.Shared.Models;
 

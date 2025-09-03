@@ -17,6 +17,7 @@ using System.Collections.Concurrent;
 using Cortex.Mediator;
 using Microsoft.Extensions.Options;
 using SnapcastClient.Models;
+using SnapDog2.Api.Hubs.Notifications;
 using SnapDog2.Api.Models;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Infrastructure.Audio;
@@ -78,21 +79,21 @@ public partial class ZoneManager(
     private partial void LogZoneNotFound(int zoneIndex);
 
     [LoggerMessage(
-        EventId = 7066,
+        EventId = 7067,
         Level = LogLevel.Error,
         Message = "Failed to initialize zone {ZoneIndex}: {Error}"
     )]
     private partial void LogZoneInitializationFailed(int zoneIndex, string error);
 
     [LoggerMessage(
-        EventId = 7067,
+        EventId = 7068,
         Level = LogLevel.Debug,
         Message = "Getting zone {ZoneIndex}"
     )]
     private partial void LogGettingZone(int zoneIndex);
 
     [LoggerMessage(
-        EventId = 7068,
+        EventId = 7069,
         Level = LogLevel.Debug,
         Message = "Getting all zones"
     )]
@@ -1541,6 +1542,35 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                         updatedTrack.PositionMs ?? 0,
                         updatedTrack.Progress ?? 0
                     );
+
+                    // Publish progress notification for real-time UI updates
+                    if (updatedTrack.IsPlaying && updatedTrack.PositionMs.HasValue)
+                    {
+                        Task.Run(async () =>
+                        {
+                            try
+                            {
+                                using var scope = this._serviceScopeFactory.CreateScope();
+                                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+
+                                var progressPercent = updatedTrack.DurationMs.HasValue && updatedTrack.DurationMs > 0
+                                    ? (updatedTrack.Progress ?? 0) * 100
+                                    : 0; // For radio streams, progress is always 0
+
+                                var progressNotification = new ZoneProgressChangedNotification(
+                                    this._zoneIndex,
+                                    updatedTrack.PositionMs.Value,
+                                    progressPercent
+                                );
+
+                                await mediator.PublishAsync(progressNotification).ConfigureAwait(false);
+                            }
+                            catch (Exception ex)
+                            {
+                                this.LogErrorPublishingTrackProgress(ex, this._zoneIndex);
+                            }
+                        });
+                    }
                 }
                 else
                 {
@@ -1718,6 +1748,19 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                             Progress = e.Progress
                         };
                         await mediator.PublishAsync(progressNotification).ConfigureAwait(false);
+
+                        // Publish progress notification for real-time UI updates
+                        var progressPercent = this._currentState.Track.DurationMs.HasValue && this._currentState.Track.DurationMs > 0
+                            ? e.Progress * 100
+                            : 0; // For radio streams, progress is always 0
+
+                        var signalRProgressNotification = new ZoneProgressChangedNotification(
+                            this._zoneIndex,
+                            e.PositionMs,
+                            progressPercent
+                        );
+
+                        await mediator.PublishAsync(signalRProgressNotification).ConfigureAwait(false);
                     }
                     catch (Exception ex)
                     {
@@ -1890,7 +1933,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
             // Publish complete metadata notification
-            var metadataNotification = new ZoneTrackMetadataChangedNotification
+            var metadataNotification = new SnapDog2.Server.Zones.Notifications.ZoneTrackMetadataChangedNotification
             {
                 ZoneIndex = this._zoneIndex,
                 TrackInfo = new TrackInfo
@@ -2360,21 +2403,28 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     private partial void LogErrorPublishingTrackProgress(Exception ex, int zoneIndex);
 
     [LoggerMessage(
-        EventId = 7066,
+        EventId = 7067,
+        Level = LogLevel.Debug,
+        Message = "📡 Publishing SignalR progress: Zone {ZoneIndex}, Position: {PositionMs}ms, Progress: {ProgressPercent}%"
+    )]
+    private partial void LogPublishingSignalRProgress(int zoneIndex, long positionMs, float progressPercent);
+
+    [LoggerMessage(
+        EventId = 7067,
         Level = LogLevel.Debug,
         Message = "🎵 Track info changed for zone {ZoneIndex}: '{Title}' by '{Artist}'"
     )]
     private partial void LogTrackInfoChanged(int zoneIndex, string title, string artist);
 
     [LoggerMessage(
-        EventId = 7067,
+        EventId = 7068,
         Level = LogLevel.Information,
         Message = "✅ Track info updated for zone {ZoneIndex}: '{Title}'"
     )]
     private partial void LogTrackInfoUpdated(int zoneIndex, string title);
 
     [LoggerMessage(
-        EventId = 7068,
+        EventId = 7069,
         Level = LogLevel.Warning,
         Message = "Error handling track info change for zone {ZoneIndex}"
     )]

@@ -25,12 +25,29 @@ function App() {
       setInitialClientState(clientIndex, clientState);
     };
 
+    const handleTrackProgress = (zoneIndex: number, positionMs: number, progressPercent: number) => {
+      useAppStore.setState((state) => ({
+        zones: {
+          ...state.zones,
+          [zoneIndex]: {
+            ...state.zones[zoneIndex],
+            progress: {
+              position: positionMs,
+              progress: progressPercent
+            }
+          }
+        }
+      }));
+    };
+
     connection.on('ZoneUpdated', handleZoneUpdate);
     connection.on('ClientUpdated', handleClientUpdate);
+    connection.on('TrackProgress', handleTrackProgress);
 
     return () => {
       connection.off('ZoneUpdated', handleZoneUpdate);
       connection.off('ClientUpdated', handleClientUpdate);
+      connection.off('TrackProgress', handleTrackProgress);
     };
   }, [connection]);
 

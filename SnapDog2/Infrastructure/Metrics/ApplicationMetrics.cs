@@ -340,7 +340,7 @@ public partial class ApplicationMetrics : IApplicationMetrics
     }
 
     [LoggerMessage(
-        EventId = 8500,
+        EventId = 8400,
         Level = LogLevel.Information,
         Message = "ApplicationMetrics initialized with {MeterName} v{MeterVersion}"
     )]

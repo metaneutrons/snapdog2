@@ -255,6 +255,7 @@ public partial class SnapcastEventNotificationHandler(
     public async Task Handle(SnapcastClientVolumeChangedNotification notification, CancellationToken cancellationToken)
     {
         this.LogClientVolumeChanged(notification.ClientIndex, notification.Volume.Percent, notification.Volume.Muted);
+        this._logger.LogDebug("🔊 DEBUG: SnapcastClientVolumeChangedNotification received for client {ClientIndex}", notification.ClientIndex);
 
         // Parse client index from string to int (now it should be a proper client Index)
         if (!int.TryParse(notification.ClientIndex, out var clientIndex))
@@ -286,6 +287,21 @@ public partial class SnapcastEventNotificationHandler(
 
         // Also publish mute status notification for KNX integration
         await this._mediator.PublishAsync(new ClientMuteStatusNotification(clientIndex, notification.Volume.Muted), cancellationToken);
+
+        // 3. Publish SignalR notifications for real-time UI updates
+        this._logger.LogDebug("🔊 DEBUG: Publishing ClientVolumeChangedNotification for SignalR - Client {ClientIndex}, Volume {Volume}", clientIndex, notification.Volume.Percent);
+        await this._mediator.PublishAsync(new ClientVolumeChangedNotification
+        {
+            ClientIndex = clientIndex,
+            Volume = notification.Volume.Percent
+        }, cancellationToken);
+
+        this._logger.LogDebug("🔇 DEBUG: Publishing ClientMuteChangedNotification for SignalR - Client {ClientIndex}, Muted {IsMuted}", clientIndex, notification.Volume.Muted);
+        await this._mediator.PublishAsync(new ClientMuteChangedNotification
+        {
+            ClientIndex = clientIndex,
+            IsMuted = notification.Volume.Muted
+        }, cancellationToken);
     }
 
     public async Task Handle(SnapcastClientLatencyChangedNotification notification, CancellationToken cancellationToken)

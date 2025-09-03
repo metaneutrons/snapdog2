@@ -36,21 +36,21 @@ public partial class PlaylistManager : IPlaylistManager
     private partial void LogGettingAllPlaylists();
 
     [LoggerMessage(
-        EventId = 6802,
+        EventId = 6801,
         Level = LogLevel.Debug,
         Message = "Getting tracks for playlist index: {PlaylistIndex}"
     )]
     private partial void LogGettingTracksByPlaylistIndex(int playlistIndex);
 
     [LoggerMessage(
-        EventId = 6804,
+        EventId = 6802,
         Level = LogLevel.Warning,
         Message = "Playlist index {PlaylistIndex} not found"
     )]
     private partial void LogPlaylistIndexNotFound(int playlistIndex);
 
     [LoggerMessage(
-        EventId = 6805,
+        EventId = 6803,
         Level = LogLevel.Error,
         Message = "Failed to get playlists: {Error}"
     )]
