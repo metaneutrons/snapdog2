@@ -14,7 +14,9 @@ function App() {
   const connection = useSignalR('');
 
   const fetchInitialData = useCallback(async () => {
+    console.log('📡 fetchInitialData started');
     try {
+      console.log('🔍 Fetching zone and client counts...');
       const [zonesCount, clientsCount] = await Promise.all([
         api.get.zoneCount(),
         api.get.clientCount(),
@@ -22,35 +24,44 @@ function App() {
       
       const fetchedZoneCount = Number(zonesCount);
       const fetchedClientCount = Number(clientsCount);
+      console.log('📊 Counts:', { zones: fetchedZoneCount, clients: fetchedClientCount });
 
       setZoneCount(fetchedZoneCount);
 
       for (let i = 1; i <= fetchedZoneCount; i++) initializeZone(i);
       for (let i = 1; i <= fetchedClientCount; i++) initializeClient(i);
 
+      console.log('🔄 Fetching zone and client states...');
       const zoneStatePromises = Array.from({ length: fetchedZoneCount }, (_, i) => api.get.zone(i + 1));
       const clientStatePromises = Array.from({ length: fetchedClientCount }, (_, i) => api.get.client(i + 1));
 
       const zoneStates = await Promise.all(zoneStatePromises);
       const clientStates = await Promise.all(clientStatePromises);
+      console.log('✅ States fetched successfully');
 
       zoneStates.forEach((zoneState, i) => setInitialZoneState(i + 1, zoneState));
       clientStates.forEach((clientState, i) => setInitialClientState(i + 1, clientState));
       
       if (connection) {
+        console.log('🔗 Joining SignalR zones...');
         for (let i = 1; i <= fetchedZoneCount; i++) {
           await connection.invoke('JoinZone', i);
         }
+        console.log('✅ SignalR zones joined');
       }
+      
+      console.log('✅ fetchInitialData completed successfully');
     } catch (e) {
-      console.error('Failed to fetch initial data:', e);
-      setError('Could not connect to the backend. Please ensure it is running and accessible.');
+      console.error('❌ Failed to fetch initial data:', e);
+      setError('Failed to load application data');
     } finally {
+      console.log('🏁 Setting loading to false');
       setIsLoading(false);
     }
   }, [initializeZone, initializeClient, setInitialZoneState, setInitialClientState, connection]);
   
   useEffect(() => {
+    console.log('🚀 Starting fetchInitialData...');
     fetchInitialData();
   }, [fetchInitialData]);
 
