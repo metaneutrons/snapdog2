@@ -5,6 +5,8 @@ import type { TrackInfo, ZoneState, ClientState, PlaybackState, PlaylistInfo } f
 interface AppState {
   zones: Record<number, ZoneState>;
   clients: Record<number, ClientState>;
+  playlists: PlaylistInfo[];
+  loadingStates: Record<number, { changingPlaylist?: boolean; changingTrack?: boolean }>;
 
   // Zone actions
   updateZoneProgress: (zoneIndex: number, progress: { position: number; progress: number }) => void;
@@ -28,6 +30,10 @@ interface AppState {
   setInitialClientState: (clientIndex: number, clientState: any) => void;
   initializeZone: (zoneIndex: number) => void;
   initializeClient: (clientIndex: number) => void;
+  
+  // Playlist actions
+  setPlaylists: (playlists: PlaylistInfo[]) => void;
+  setZoneLoadingState: (zoneIndex: number, loadingState: { changingPlaylist?: boolean; changingTrack?: boolean }) => void;
 }
 
 const defaultZoneState: ZoneState = {
@@ -53,6 +59,8 @@ export const useAppStore = create<AppState>()(
     (set) => ({
       zones: {},
       clients: {},
+      playlists: [],
+      loadingStates: {},
 
       // Zone actions
       updateZoneProgress: (zoneIndex, progress) =>
@@ -293,6 +301,23 @@ export const useAppStore = create<AppState>()(
           clients: {
             ...state.clients,
             [clientIndex]: state.clients[clientIndex] || { ...defaultClientState, name: `Client ${clientIndex}` },
+          },
+        })),
+
+      // Playlist actions
+      setPlaylists: (playlists) =>
+        set(() => ({
+          playlists,
+        })),
+
+      setZoneLoadingState: (zoneIndex, loadingState) =>
+        set((state) => ({
+          loadingStates: {
+            ...state.loadingStates,
+            [zoneIndex]: {
+              ...state.loadingStates[zoneIndex],
+              ...loadingState,
+            },
           },
         })),
     }),

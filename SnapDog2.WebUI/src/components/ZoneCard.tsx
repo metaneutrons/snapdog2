@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useZone, useAppStore } from '../store';
+import { useZone, useAppStore, useZoneLoadingState } from '../store';
 import { api } from '../services/api';
 import { TransportControls } from './TransportControls';
 import { VolumeSlider } from './VolumeSlider';
 import { ClientList } from './ClientList';
+import { PlaylistNavigation } from './PlaylistNavigation';
 
 interface ZoneCardProps {
   zoneIndex: number;
