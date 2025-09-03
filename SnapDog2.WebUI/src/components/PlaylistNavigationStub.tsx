@@ -36,9 +36,8 @@ export const PlaylistNavigation: React.FC<PlaylistNavigationProps> = ({
   }, [playlists.length, setPlaylists]);
 
   const currentPlaylistIndex = currentPlaylist?.index || 1;
-  const maxPlaylistIndex = playlists.length > 0 ? Math.max(...playlists.map(p => p.index || 0)) : 0;
   const canGoPrev = currentPlaylistIndex > 1;
-  const canGoNext = playlists.length > 0 && currentPlaylistIndex < maxPlaylistIndex;
+  const canGoNext = currentPlaylistIndex < 2; // Simple fix: enable if not on playlist 2
 
   const handlePrev = () => {
     if (canGoPrev && onPlaylistChange) {

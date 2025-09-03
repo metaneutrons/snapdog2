@@ -36,7 +36,11 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({ zoneIndex, draggingClientInd
   }, [zoneIndex, initializeZone]);
 
   useEffect(() => {
-    playlistApi.getPlaylists().then(setPlaylists).catch(console.error);
+    playlistApi.getPlaylists()
+      .then(playlists => {
+        setPlaylists(playlists);
+      })
+      .catch(console.error);
   }, []);
 
   const handleVolumeChange = (volume: number) => api.zones.setVolume(zoneIndex, volume).catch(console.error);
