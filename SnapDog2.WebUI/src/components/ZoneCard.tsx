@@ -39,9 +39,11 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({ zoneIndex, draggingClientInd
 
   const handlePlaylistChange = async (playlist: PlaylistInfo) => {
     try {
-      console.log('🎵 Changing playlist to:', playlist.name);
+      console.log('🎵 Changing playlist to:', playlist.name, 'index:', playlist.index);
       await playlistApi.setZonePlaylist(zoneIndex, playlist.index!);
-      console.log('✅ Playlist changed successfully');
+      console.log('✅ API call completed - refreshing zone data...');
+      // Force refresh zone data after playlist change
+      await refreshZone();
     } catch (error) {
       console.error('❌ Failed to change playlist:', error);
     }
