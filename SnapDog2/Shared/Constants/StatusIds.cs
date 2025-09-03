@@ -51,9 +51,9 @@ public static class StatusIds
     public static readonly string ClientStateStatusPublish = StatusIdAttribute.GetStatusId<ClientStateNotification>();
 
     // Zone Status IDs
-    public static readonly string PlaybackState = StatusIdAttribute.GetStatusId<ZonePlaybackStateChangedNotification>();
-    public static readonly string VolumeStatus = StatusIdAttribute.GetStatusId<ZoneVolumeChangedNotification>();
-    public static readonly string MuteStatus = StatusIdAttribute.GetStatusId<ZoneMuteChangedNotification>();
+    public static readonly string PlaybackState = StatusIdAttribute.GetStatusId<SnapDog2.Server.Zones.Notifications.ZonePlaybackStateChangedNotification>();
+    public static readonly string VolumeStatus = StatusIdAttribute.GetStatusId<SnapDog2.Server.Zones.Notifications.ZoneVolumeChangedNotification>();
+    public static readonly string MuteStatus = StatusIdAttribute.GetStatusId<SnapDog2.Server.Zones.Notifications.ZoneMuteChangedNotification>();
     public static readonly string TrackIndex = StatusIdAttribute.GetStatusId<ZoneTrackChangedNotification>();
     public static readonly string PlaylistIndex = StatusIdAttribute.GetStatusId<ZonePlaylistChangedNotification>();
     public static readonly string TrackRepeatStatus =
@@ -92,11 +92,11 @@ public static class StatusIds
     public static readonly string CommandError = StatusIdAttribute.GetStatusId<CommandErrorNotification>();
 
     // Global Status IDs
-    public static readonly string VersionInfo = StatusIdAttribute.GetStatusId<VersionInfoChangedNotification>();
-    public static readonly string SystemStatus = StatusIdAttribute.GetStatusId<SystemStatusChangedNotification>();
-    public static readonly string ServerStats = StatusIdAttribute.GetStatusId<ServerStatsChangedNotification>();
-    public static readonly string SystemError = StatusIdAttribute.GetStatusId<SystemErrorNotification>();
-    public static readonly string ZonesInfo = StatusIdAttribute.GetStatusId<ZonesInfoChangedNotification>();
+    public static readonly string VersionInfo = StatusIdAttribute.GetStatusId<SnapDog2.Server.Global.Notifications.VersionInfoChangedNotification>();
+    public static readonly string SystemStatus = StatusIdAttribute.GetStatusId<SnapDog2.Server.Global.Notifications.SystemStatusChangedNotification>();
+    public static readonly string ServerStats = StatusIdAttribute.GetStatusId<SnapDog2.Server.Global.Notifications.ServerStatsChangedNotification>();
+    public static readonly string SystemError = StatusIdAttribute.GetStatusId<SnapDog2.Server.Global.Notifications.SystemErrorNotification>();
+    public static readonly string ZonesInfo = StatusIdAttribute.GetStatusId<SnapDog2.Server.Global.Notifications.ZonesInfoChangedNotification>();
 
     // Zone Status Notification IDs (Blueprint Compliance - Status Publishing)
     // Note: These obsolete status notifications have been removed as they don't match blueprint specification

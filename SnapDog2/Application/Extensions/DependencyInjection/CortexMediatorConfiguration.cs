@@ -38,7 +38,8 @@ public static class CortexMediatorConfiguration
         // Get assemblies for auto-discovery
         var serverAssembly = typeof(SharedLoggingCommandBehavior<,>).Assembly;
         var coreAssembly = typeof(IResult).Assembly;
-        var assemblies = new[] { serverAssembly, coreAssembly };
+        var apiAssembly = typeof(SnapDog2.Api.Hubs.SnapDogHub).Assembly;
+        var assemblies = new[] { serverAssembly, coreAssembly, apiAssembly };
 
         // Add Cortex.Mediator with enhanced auto-discovery
         services.AddCortexMediator(
