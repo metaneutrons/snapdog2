@@ -68,6 +68,6 @@ public interface IClientManager
     /// Used internally by SnapcastService to bridge external events to IClient notifications.
     /// </summary>
     /// <param name="snapcastClientId">The Snapcast client Index.</param>
-    /// <returns>The client if found, null otherwise.</returns>
-    Task<IClient?> GetClientBySnapcastIdAsync(string snapcastClientId);
+    /// <returns>The client and its index if found, null and 0 otherwise.</returns>
+    Task<(IClient? Client, int ClientIndex)> GetClientBySnapcastIdAsync(string snapcastClientId);
 }

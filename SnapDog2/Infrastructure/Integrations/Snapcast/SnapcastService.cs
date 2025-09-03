@@ -50,7 +50,7 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     /// <summary>
     /// Helper method to resolve IClientManager in a scoped way to avoid service lifetime issues.
     /// </summary>
-    private async Task<Domain.Abstractions.IClient?> GetClientBySnapcastIdAsync(string snapcastClientId)
+    private async Task<(Domain.Abstractions.IClient? Client, int ClientIndex)> GetClientBySnapcastIdAsync(string snapcastClientId)
     {
         using var scope = this._serviceProvider.CreateScope();
         var clientManager = scope.ServiceProvider.GetRequiredService<IClientManager>();
@@ -925,11 +925,11 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
             };
 
             // Get the proper client Index (1-based index) instead of using Snapcast client name
-            var client = await this.GetClientBySnapcastIdAsync(volumeChange.Id);
+            var (client, clientIndex) = await this.GetClientBySnapcastIdAsync(volumeChange.Id);
             if (client != null)
             {
                 _ = this.PublishNotificationAsync(
-                    new SnapcastClientVolumeChangedNotification(client.Id.ToString(), modelVolume)
+                    new SnapcastClientVolumeChangedNotification(clientIndex.ToString(), modelVolume)
                 );
             }
             else
@@ -964,11 +964,11 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
             }
 
             // Get the proper client Index (1-based index) instead of using Snapcast client name
-            var client = await this.GetClientBySnapcastIdAsync(latencyChange.Id);
+            var (client, clientIndex) = await this.GetClientBySnapcastIdAsync(latencyChange.Id);
             if (client != null)
             {
                 _ = this.PublishNotificationAsync(
-                    new SnapcastClientLatencyChangedNotification(client.Id.ToString(), latencyChange.Latency)
+                    new SnapcastClientLatencyChangedNotification(clientIndex.ToString(), latencyChange.Latency)
                 );
             }
             else
@@ -999,11 +999,11 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
             }
 
             // Get the proper client Index (1-based index) instead of using Snapcast client name
-            var client = await this.GetClientBySnapcastIdAsync(nameChange.Id);
+            var (client, clientIndex) = await this.GetClientBySnapcastIdAsync(nameChange.Id);
             if (client != null)
             {
                 _ = this.PublishNotificationAsync(
-                    new SnapcastClientNameChangedNotification(client.Id.ToString(), nameChange.Name)
+                    new SnapcastClientNameChangedNotification(clientIndex.ToString(), nameChange.Name)
                 );
             }
             else
@@ -1169,11 +1169,11 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     {
         try
         {
-            var client = await this.GetClientBySnapcastIdAsync(snapcastClientId);
+            var (client, clientIndex) = await this.GetClientBySnapcastIdAsync(snapcastClientId);
             if (client != null)
             {
                 await client.PublishConnectionStatusAsync(isConnected);
-                this.LogEventBridged("ClientConnection", snapcastClientId, client.Id);
+                this.LogEventBridged("ClientConnection", snapcastClientId, clientIndex);
             }
             else
             {
@@ -1198,11 +1198,11 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     {
         try
         {
-            var client = await this.GetClientBySnapcastIdAsync(snapcastClientId);
+            var (client, clientIndex) = await this.GetClientBySnapcastIdAsync(snapcastClientId);
             if (client != null)
             {
                 await client.PublishVolumeStatusAsync(volume);
-                this.LogEventBridged("ClientVolume", snapcastClientId, client.Id);
+                this.LogEventBridged("ClientVolume", snapcastClientId, clientIndex);
             }
             else
             {
@@ -1227,11 +1227,11 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     {
         try
         {
-            var client = await this.GetClientBySnapcastIdAsync(snapcastClientId);
+            var (client, clientIndex) = await this.GetClientBySnapcastIdAsync(snapcastClientId);
             if (client != null)
             {
                 await client.PublishMuteStatusAsync(muted);
-                this.LogEventBridged("ClientMute", snapcastClientId, client.Id);
+                this.LogEventBridged("ClientMute", snapcastClientId, clientIndex);
             }
             else
             {
@@ -1256,11 +1256,11 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
     {
         try
         {
-            var client = await this.GetClientBySnapcastIdAsync(snapcastClientId);
+            var (client, clientIndex) = await this.GetClientBySnapcastIdAsync(snapcastClientId);
             if (client != null)
             {
                 await client.PublishLatencyStatusAsync(latencyMs);
-                this.LogEventBridged("ClientLatency", snapcastClientId, client.Id);
+                this.LogEventBridged("ClientLatency", snapcastClientId, clientIndex);
             }
             else
             {

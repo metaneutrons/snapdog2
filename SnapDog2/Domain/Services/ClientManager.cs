@@ -487,7 +487,7 @@ public partial class ClientManager : IClientManager
         }
     }
 
-    public Task<IClient?> GetClientBySnapcastIdAsync(string snapcastClientId)
+    public Task<(IClient? Client, int ClientIndex)> GetClientBySnapcastIdAsync(string snapcastClientId)
     {
         this.LogGettingClientBySnapcastId(snapcastClientId);
 
@@ -501,7 +501,7 @@ public partial class ClientManager : IClientManager
             if (string.IsNullOrEmpty(snapcastClient.Id)) // Check if default struct was returned
             {
                 this.LogSnapcastClientNotFound(snapcastClientId);
-                return Task.FromResult<IClient?>(null);
+                return Task.FromResult<(IClient?, int)>((null, 0));
             }
 
             // Get the MAC address from the Snapcast client
@@ -509,7 +509,7 @@ public partial class ClientManager : IClientManager
             if (string.IsNullOrEmpty(macAddress))
             {
                 this.LogMacAddressNotFound(snapcastClientId);
-                return Task.FromResult<IClient?>(null);
+                return Task.FromResult<(IClient?, int)>((null, 0));
             }
 
             // Find the corresponding client index by MAC address in our configuration
@@ -521,7 +521,7 @@ public partial class ClientManager : IClientManager
             if (clientIndex == 0) // Not found (-1 + 1 = 0)
             {
                 this.LogClientConfigNotFoundByMac(macAddress);
-                return Task.FromResult<IClient?>(null);
+                return Task.FromResult<(IClient?, int)>((null, 0));
             }
 
             // Create and return the IClient wrapper
@@ -536,12 +536,12 @@ public partial class ClientManager : IClientManager
             );
 
             this.LogClientFoundByMac(snapcastClientId, macAddress, clientIndex);
-            return Task.FromResult<IClient?>(client);
+            return Task.FromResult<(IClient?, int)>((client, clientIndex));
         }
         catch (Exception ex)
         {
             this.LogGetClientBySnapcastIdError(snapcastClientId, ex);
-            return Task.FromResult<IClient?>(null);
+            return Task.FromResult<(IClient?, int)>((null, 0));
         }
     }
 
@@ -790,7 +790,7 @@ public partial class ClientManager : IClientManager
     /// Internal implementation of IClient that wraps a Snapcast client with SnapDog2 configuration.
     /// </summary>
     private class SnapDogClient(
-        int id,
+        int clientIndex,
         SnapClient snapcastClient,
         ClientConfig config,
         ISnapcastService snapcastService,
@@ -805,8 +805,8 @@ public partial class ClientManager : IClientManager
         private readonly ISnapcastStateRepository _snapcastStateRepository = snapcastStateRepository;
         private readonly IMediator _mediator = mediator;
         private readonly IClientManager _clientManager = clientManager;
+        private readonly int _clientIndex = clientIndex; // Internal only, not exposed as public property
 
-        public int Id { get; } = id;
         public string Name => this._config.Name;
 
         // Internal properties for ClientState mapping
@@ -957,7 +957,7 @@ public partial class ClientManager : IClientManager
         public async Task<Result> AssignToZoneAsync(int zoneIndex)
         {
             // Use the ClientManager's zone assignment logic
-            var result = await this._clientManager.AssignClientToZoneAsync(this.Id, zoneIndex);
+            var result = await this._clientManager.AssignClientToZoneAsync(this._clientIndex, zoneIndex);
 
             if (result.IsSuccess)
             {
@@ -975,7 +975,7 @@ public partial class ClientManager : IClientManager
         {
             try
             {
-                var notification = new ClientVolumeStatusNotification(this.Id, volume);
+                var notification = new ClientVolumeStatusNotification(this._clientIndex, volume);
                 await this._mediator.PublishAsync(notification);
             }
             catch (ObjectDisposedException)
@@ -985,7 +985,7 @@ public partial class ClientManager : IClientManager
             catch (Exception ex)
             {
                 Debug.WriteLine(
-                    $"Error publishing volume status for client {this.Id}: {ex.Message}"
+                    $"Error publishing volume status for client {this._clientIndex}: {ex.Message}"
                 );
             }
         }
@@ -994,7 +994,7 @@ public partial class ClientManager : IClientManager
         {
             try
             {
-                var notification = new ClientMuteStatusNotification(this.Id, muted);
+                var notification = new ClientMuteStatusNotification(this._clientIndex, muted);
                 await this._mediator.PublishAsync(notification);
             }
             catch (ObjectDisposedException)
@@ -1003,7 +1003,7 @@ public partial class ClientManager : IClientManager
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Error publishing mute status for client {this.Id}: {ex.Message}");
+                Debug.WriteLine($"Error publishing mute status for client {this._clientIndex}: {ex.Message}");
             }
         }
 
@@ -1011,7 +1011,7 @@ public partial class ClientManager : IClientManager
         {
             try
             {
-                var notification = new ClientLatencyStatusNotification(this.Id, latencyMs);
+                var notification = new ClientLatencyStatusNotification(this._clientIndex, latencyMs);
                 await this._mediator.PublishAsync(notification);
             }
             catch (ObjectDisposedException)
@@ -1021,7 +1021,7 @@ public partial class ClientManager : IClientManager
             catch (Exception ex)
             {
                 Debug.WriteLine(
-                    $"Error publishing latency status for client {this.Id}: {ex.Message}"
+                    $"Error publishing latency status for client {this._clientIndex}: {ex.Message}"
                 );
             }
         }
@@ -1030,7 +1030,7 @@ public partial class ClientManager : IClientManager
         {
             try
             {
-                var notification = new ClientZoneStatusNotification(this.Id, zoneIndex);
+                var notification = new ClientZoneStatusNotification(this._clientIndex, zoneIndex);
                 await this._mediator.PublishAsync(notification);
             }
             catch (ObjectDisposedException)
@@ -1039,7 +1039,7 @@ public partial class ClientManager : IClientManager
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Error publishing zone status for client {this.Id}: {ex.Message}");
+                Debug.WriteLine($"Error publishing zone status for client {this._clientIndex}: {ex.Message}");
             }
         }
 
@@ -1047,7 +1047,7 @@ public partial class ClientManager : IClientManager
         {
             try
             {
-                var notification = new ClientConnectionStatusNotification(this.Id, isConnected);
+                var notification = new ClientConnectionStatusNotification(this._clientIndex, isConnected);
                 await this._mediator.PublishAsync(notification);
             }
             catch (ObjectDisposedException)
@@ -1059,7 +1059,7 @@ public partial class ClientManager : IClientManager
             {
                 // Log other unexpected exceptions but don't rethrow to avoid breaking the event flow
                 Debug.WriteLine(
-                    $"Error publishing connection status for client {this.Id}: {ex.Message}"
+                    $"Error publishing connection status for client {this._clientIndex}: {ex.Message}"
                 );
             }
         }
@@ -1068,7 +1068,7 @@ public partial class ClientManager : IClientManager
         {
             try
             {
-                var notification = new ClientStateNotification(this.Id, state);
+                var notification = new ClientStateNotification(this._clientIndex, state);
                 await this._mediator.PublishAsync(notification);
             }
             catch (ObjectDisposedException)
@@ -1079,7 +1079,7 @@ public partial class ClientManager : IClientManager
             catch (Exception ex)
             {
                 // Log other unexpected exceptions but don't rethrow to avoid breaking the event flow
-                Debug.WriteLine($"Error publishing state for client {this.Id}: {ex.Message}");
+                Debug.WriteLine($"Error publishing state for client {this._clientIndex}: {ex.Message}");
             }
         }
 

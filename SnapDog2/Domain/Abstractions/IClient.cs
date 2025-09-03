@@ -21,11 +21,6 @@ using SnapDog2.Shared.Models;
 public interface IClient
 {
     /// <summary>
-    /// Gets the client Index.
-    /// </summary>
-    int Id { get; }
-
-    /// <summary>
     /// Gets the client name.
     /// </summary>
     string Name { get; }
