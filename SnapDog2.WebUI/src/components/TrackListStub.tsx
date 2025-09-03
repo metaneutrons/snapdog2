@@ -86,17 +86,18 @@ export const TrackList: React.FC<TrackListProps> = ({
                       isCurrentTrack ? 'bg-blue-50 border-l-4 border-blue-500' : ''
                     }`}
                   >
-                    <div className="flex items-center space-x-3">
-                      <span className="text-xs text-gray-400 w-6">{index + 1}</span>
-                      
-                      {isCurrentTrack && (
-                        <div className="flex items-center space-x-0.5">
-                          <div className="w-0.5 h-3 bg-green-500 animate-pulse"></div>
-                          <div className="w-0.5 h-2 bg-green-500 animate-pulse" style={{animationDelay: '0.1s'}}></div>
-                          <div className="w-0.5 h-4 bg-green-500 animate-pulse" style={{animationDelay: '0.2s'}}></div>
-                          <div className="w-0.5 h-2 bg-green-500 animate-pulse" style={{animationDelay: '0.3s'}}></div>
-                        </div>
-                      )}
+                    <div className="flex items-center space-x-2">
+                      <div className="flex items-center w-12">
+                        <span className="text-xs text-gray-400 w-6">{index + 1}</span>
+                        {isCurrentTrack && (
+                          <div className="flex items-center space-x-0.5 ml-1">
+                            <div className="w-0.5 h-3 bg-green-500 animate-pulse"></div>
+                            <div className="w-0.5 h-2 bg-green-500 animate-pulse" style={{animationDelay: '0.1s'}}></div>
+                            <div className="w-0.5 h-4 bg-green-500 animate-pulse" style={{animationDelay: '0.2s'}}></div>
+                            <div className="w-0.5 h-2 bg-green-500 animate-pulse" style={{animationDelay: '0.3s'}}></div>
+                          </div>
+                        )}
+                      </div>
                       
                       <div className="w-10 h-10 bg-gray-200 rounded flex items-center justify-center flex-shrink-0">
                         {track.coverArtUrl ? (
