@@ -102,8 +102,18 @@ export const TrackList: React.FC<TrackListProps> = ({
                       </div>
                       
                       <div className="flex-1">
-                        <div className="text-sm font-medium">
-                          {track.title} {isCurrentTrack ? '● Playing' : ''}
+                        <div className="flex items-center space-x-2">
+                          <div className="text-sm font-medium">
+                            {track.title}
+                          </div>
+                          {isCurrentTrack && (
+                            <div className="flex items-center space-x-0.5">
+                              <div className="w-0.5 h-3 bg-green-500 animate-pulse"></div>
+                              <div className="w-0.5 h-2 bg-green-500 animate-pulse" style={{animationDelay: '0.1s'}}></div>
+                              <div className="w-0.5 h-4 bg-green-500 animate-pulse" style={{animationDelay: '0.2s'}}></div>
+                              <div className="w-0.5 h-2 bg-green-500 animate-pulse" style={{animationDelay: '0.3s'}}></div>
+                            </div>
+                          )}
                         </div>
                         <div className="text-xs text-gray-500">
                           {track.artist} • {track.album}
