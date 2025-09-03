@@ -249,21 +249,36 @@ export const useAppStore = create<AppState>()(
         }),
 
       setInitialClientState: (clientIndex, clientData) =>
-        set(state => ({
-          clients: {
-            ...state.clients,
-            [clientIndex]: {
-              ...defaultClientState,
-              ...state.clients[clientIndex],
-              name: clientData.name,
-              connected: clientData.connected,
-              zoneIndex: clientData.zoneIndex,
-              volume: clientData.volume,
-              muted: clientData.mute,
-              latency: clientData.latencyMs,
+        set(state => {
+          const updatedZones = { ...state.zones };
+          
+          // If client has a zone assignment, add it to that zone's client list
+          if (clientData.zoneIndex) {
+            if (!updatedZones[clientData.zoneIndex]) {
+              updatedZones[clientData.zoneIndex] = { ...defaultZoneState, name: `Zone ${clientData.zoneIndex}` };
+            }
+            if (!updatedZones[clientData.zoneIndex].clients.includes(clientIndex)) {
+              updatedZones[clientData.zoneIndex].clients = [...updatedZones[clientData.zoneIndex].clients, clientIndex];
             }
           }
-        })),
+
+          return {
+            zones: updatedZones,
+            clients: {
+              ...state.clients,
+              [clientIndex]: {
+                ...defaultClientState,
+                ...state.clients[clientIndex],
+                name: clientData.name,
+                connected: clientData.connected,
+                zoneIndex: clientData.zoneIndex,
+                volume: clientData.volume,
+                muted: clientData.mute,
+                latency: clientData.latencyMs,
+              }
+            }
+          };
+        }),
 
       initializeZone: (zoneIndex) =>
         set((state) => ({
