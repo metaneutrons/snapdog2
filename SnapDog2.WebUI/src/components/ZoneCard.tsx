@@ -29,6 +29,7 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({ zoneIndex, draggingClientInd
   const { initializeZone } = useAppStore();
   const [isDropTarget, setIsDropTarget] = useState(false);
   const [playlists, setPlaylists] = useState<PlaylistInfo[]>([]);
+  const [playlistsLoaded, setPlaylistsLoaded] = useState(false);
   const [showTrackList, setShowTrackList] = useState(false);
 
   useEffect(() => {
@@ -39,6 +40,7 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({ zoneIndex, draggingClientInd
     playlistApi.getPlaylists()
       .then(playlists => {
         setPlaylists(playlists);
+        setPlaylistsLoaded(true);
       })
       .catch(console.error);
   }, []);
@@ -46,11 +48,18 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({ zoneIndex, draggingClientInd
   const handleVolumeChange = (volume: number) => api.zones.setVolume(zoneIndex, volume).catch(console.error);
   const handleMuteToggle = () => api.zones.toggleMute(zoneIndex).catch(console.error);
 
+  const refreshZone = async () => {
+    try {
+      const updatedZone = await api.info.zone(zoneIndex);
+      setZone(updatedZone);
+    } catch (error) {
+      console.error('Failed to refresh zone:', error);
+    }
+  };
+
   const handlePlaylistChange = async (playlist: PlaylistInfo) => {
     try {
-      console.log('🎵 Changing playlist to:', playlist.name, 'index:', playlist.index);
       await playlistApi.setZonePlaylist(zoneIndex, playlist.index!);
-      console.log('✅ API call completed - refreshing zone data...');
       // Force refresh zone data after playlist change
       await refreshZone();
     } catch (error) {
@@ -160,7 +169,7 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({ zoneIndex, draggingClientInd
       <PlaylistNavigation
         zoneIndex={zoneIndex}
         currentPlaylist={zone.playlist}
-        playlists={playlists}
+        playlists={playlistsLoaded ? playlists : []}
         onPlaylistChange={handlePlaylistChange}
         onShowTrackList={() => setShowTrackList(true)}
         isChangingPlaylist={false}

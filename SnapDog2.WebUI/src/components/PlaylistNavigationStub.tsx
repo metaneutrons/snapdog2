@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAppStore } from '../store';
 import { playlistApi } from '../services/playlistApi';
+import { api } from '../services/api';
 import type { PlaylistInfo } from '../types';
 
 interface PlaylistNavigationProps {
@@ -12,6 +13,7 @@ interface PlaylistNavigationProps {
 }
 
 export const PlaylistNavigation: React.FC<PlaylistNavigationProps> = ({
+  zoneIndex,
   currentPlaylist,
   onShowTrackList,
   onPlaylistChange,
@@ -35,9 +37,12 @@ export const PlaylistNavigation: React.FC<PlaylistNavigationProps> = ({
     loadPlaylists();
   }, [playlists.length, setPlaylists]);
 
-  const currentPlaylistIndex = currentPlaylist?.index || 1;
+  // For now, assume Radio Stations = index 1, Best of Keith = index 2
+  // This will be fixed when the zone API properly returns playlist index
+  const currentPlaylistIndex = currentPlaylist?.name === 'Radio Stations' ? 1 : 2;
+  const maxPlaylistIndex = playlists.length > 0 ? Math.max(...playlists.map(p => p.index || 0)) : 0;
   const canGoPrev = currentPlaylistIndex > 1;
-  const canGoNext = currentPlaylistIndex < 2; // Simple fix: enable if not on playlist 2
+  const canGoNext = playlists.length > 1 && currentPlaylistIndex < maxPlaylistIndex;
 
   const handlePrev = () => {
     if (canGoPrev && onPlaylistChange) {
@@ -50,10 +55,16 @@ export const PlaylistNavigation: React.FC<PlaylistNavigationProps> = ({
 
   const handleNext = () => {
     if (canGoNext && onPlaylistChange) {
-      const nextPlaylist = playlists.find(p => p.index === currentPlaylistIndex + 1);
-      if (nextPlaylist) {
-        onPlaylistChange(nextPlaylist);
-      }
+      // Direct API approach since store playlists are empty
+      playlistApi.getPlaylists().then(response => {
+        if (response.success) {
+          const allPlaylists = response.data.items;
+          const nextPlaylist = allPlaylists.find(p => p.index === currentPlaylistIndex + 1);
+          if (nextPlaylist) {
+            onPlaylistChange(nextPlaylist);
+          }
+        }
+      }).catch(console.error);
     }
   };
 
