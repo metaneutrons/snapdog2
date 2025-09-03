@@ -302,6 +302,7 @@ export const useAppStore = create<AppState>()(
 
 export const useZone = (zoneIndex: number) => useAppStore((state) => state.zones[zoneIndex]);
 export const useClient = (clientIndex: number) => useAppStore((state) => state.clients[clientIndex]);
+export const useZoneLoadingState = (zoneIndex: number) => useAppStore((state) => state.loadingStates[zoneIndex] || {});
 export const useUnassignedClients = () => useAppStore((state) => 
     Object.entries(state.clients)
         .filter(([, client]: [string, ClientState]) => client.zoneIndex === undefined || client.zoneIndex === null)
