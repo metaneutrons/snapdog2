@@ -419,11 +419,12 @@ public partial class SetTrackCommandHandler(IZoneManager zoneManager, ILogger<Se
 /// <summary>
 /// Handles the NextTrackCommand.
 /// </summary>
-public partial class NextTrackCommandHandler(IZoneManager zoneManager, ILogger<NextTrackCommandHandler> logger)
+public partial class NextTrackCommandHandler(IZoneManager zoneManager, ILogger<NextTrackCommandHandler> logger, IMediator mediator)
     : ICommandHandler<NextTrackCommand, Result>
 {
     private readonly IZoneManager _zoneManager = zoneManager;
     private readonly ILogger<NextTrackCommandHandler> _logger = logger;
+    private readonly IMediator _mediator = mediator;
 
     public async Task<Result> Handle(NextTrackCommand request, CancellationToken cancellationToken)
     {
@@ -437,7 +438,24 @@ public partial class NextTrackCommandHandler(IZoneManager zoneManager, ILogger<N
         }
 
         var zone = zoneResult.Value!;
-        return await zone.NextTrackAsync().ConfigureAwait(false);
+        var result = await zone.NextTrackAsync().ConfigureAwait(false);
+
+        if (result.IsSuccess)
+        {
+            // Get updated zone state to publish track change notification
+            var stateResult = await zone.GetStateAsync().ConfigureAwait(false);
+            if (stateResult.IsSuccess && stateResult.Value?.Track != null)
+            {
+                await _mediator.PublishAsync(new ZoneTrackChangedNotification
+                {
+                    ZoneIndex = request.ZoneIndex,
+                    TrackIndex = stateResult.Value.Track.Index ?? 0,
+                    TrackInfo = stateResult.Value.Track
+                }, cancellationToken);
+            }
+        }
+
+        return result;
     }
 
     [LoggerMessage(
