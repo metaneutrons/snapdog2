@@ -36,9 +36,9 @@ export const PlaylistNavigation: React.FC<PlaylistNavigationProps> = ({
   }, [playlists.length, setPlaylists]);
 
   const currentPlaylistIndex = currentPlaylist?.index || 1;
-  const totalPlaylists = Math.max(...playlists.map(p => p.index || 0));
+  const maxPlaylistIndex = Math.max(...playlists.map(p => p.index || 0));
   const canGoPrev = currentPlaylistIndex > 1;
-  const canGoNext = currentPlaylistIndex < totalPlaylists;
+  const canGoNext = currentPlaylistIndex < maxPlaylistIndex;
 
   const handlePrev = () => {
     if (canGoPrev && onPlaylistChange) {
