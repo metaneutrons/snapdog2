@@ -25,12 +25,12 @@ export const TrackList: React.FC<TrackListProps> = ({
     const loadTracks = async () => {
       try {
         setLoading(true);
-        const response = await playlistApi.getPlaylistTracks(playlist.index);
-        if (response.success) {
-          setTracks(response.data.items);
-        }
+        console.log('🔍 Loading tracks for playlist:', playlist.index);
+        const tracks = await playlistApi.getPlaylistTracks(playlist.index);
+        console.log('✅ Tracks loaded:', tracks.length);
+        setTracks(tracks);
       } catch (error) {
-        console.error('Failed to load tracks:', error);
+        console.error('❌ Failed to load tracks:', error);
       } finally {
         setLoading(false);
       }
