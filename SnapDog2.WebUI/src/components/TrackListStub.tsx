@@ -89,6 +89,15 @@ export const TrackList: React.FC<TrackListProps> = ({
                     <div className="flex items-center space-x-3">
                       <span className="text-xs text-gray-400 w-6">{index + 1}</span>
                       
+                      {isCurrentTrack && (
+                        <div className="flex items-center space-x-0.5">
+                          <div className="w-0.5 h-3 bg-green-500 animate-pulse"></div>
+                          <div className="w-0.5 h-2 bg-green-500 animate-pulse" style={{animationDelay: '0.1s'}}></div>
+                          <div className="w-0.5 h-4 bg-green-500 animate-pulse" style={{animationDelay: '0.2s'}}></div>
+                          <div className="w-0.5 h-2 bg-green-500 animate-pulse" style={{animationDelay: '0.3s'}}></div>
+                        </div>
+                      )}
+                      
                       <div className="w-10 h-10 bg-gray-200 rounded flex items-center justify-center flex-shrink-0">
                         {track.coverArtUrl ? (
                           <img 
@@ -102,18 +111,8 @@ export const TrackList: React.FC<TrackListProps> = ({
                       </div>
                       
                       <div className="flex-1">
-                        <div className="flex items-center space-x-2">
-                          <div className="text-sm font-medium">
-                            {track.title}
-                          </div>
-                          {isCurrentTrack && (
-                            <div className="flex items-center space-x-0.5">
-                              <div className="w-0.5 h-3 bg-green-500 animate-pulse"></div>
-                              <div className="w-0.5 h-2 bg-green-500 animate-pulse" style={{animationDelay: '0.1s'}}></div>
-                              <div className="w-0.5 h-4 bg-green-500 animate-pulse" style={{animationDelay: '0.2s'}}></div>
-                              <div className="w-0.5 h-2 bg-green-500 animate-pulse" style={{animationDelay: '0.3s'}}></div>
-                            </div>
-                          )}
+                        <div className="text-sm font-medium">
+                          {track.title}
                         </div>
                         <div className="text-xs text-gray-500">
                           {track.artist} • {track.album}
