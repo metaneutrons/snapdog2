@@ -446,6 +446,93 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         }
     }
 
+    /// <inheritdoc />
+    public async Task<Result<CoverArtData>> GetCoverArtAsync(string coverId, CancellationToken cancellationToken = default)
+    {
+        if (this._disposed)
+        {
+            return Result<CoverArtData>.Failure("Service has been disposed");
+        }
+
+        if (string.IsNullOrWhiteSpace(coverId))
+        {
+            return Result<CoverArtData>.Failure("Cover ID cannot be null or empty");
+        }
+
+        await this._operationLock.WaitAsync(cancellationToken);
+        try
+        {
+            LogGettingCoverArt(this._logger, coverId);
+
+            var coverResult = await this._operationPolicy.ExecuteAsync(
+                async ct =>
+                {
+                    // Create HTTP client for direct Subsonic API call
+                    using var httpClient = new HttpClient();
+                    var coverUrl = $"{this._config.Url}/rest/getCoverArt?id={coverId}&u={this._config.Username}&p={this._config.Password}&v=1.16.1&c=SnapDog2&f=json";
+
+                    var response = await httpClient.GetAsync(coverUrl, ct);
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        throw new InvalidOperationException($"Cover art not found: {response.StatusCode}");
+                    }
+
+                    return await response.Content.ReadAsByteArrayAsync(ct);
+                },
+                cancellationToken
+            );
+
+            // Determine content type from image data
+            var contentType = GetImageContentType(coverResult);
+
+            var coverArtData = new CoverArtData
+            {
+                Data = coverResult,
+                ContentType = contentType,
+                ETag = coverId
+            };
+
+            LogCoverArtRetrieved(this._logger, coverId, coverResult.Length);
+            return Result<CoverArtData>.Success(coverArtData);
+        }
+        catch (Exception ex)
+        {
+            LogGetCoverArtError(this._logger, coverId, ex);
+            return Result<CoverArtData>.Failure($"Failed to get cover art: {ex.Message}");
+        }
+        finally
+        {
+            this._operationLock.Release();
+        }
+    }
+
+    /// <summary>
+    /// Determines the content type of an image from its binary data.
+    /// </summary>
+    private static string GetImageContentType(byte[] imageData)
+    {
+        if (imageData.Length >= 2)
+        {
+            // Check for JPEG magic bytes
+            if (imageData[0] == 0xFF && imageData[1] == 0xD8)
+            {
+                return "image/jpeg";
+            }
+
+            // Check for PNG magic bytes
+            if (imageData.Length >= 8 &&
+                imageData[0] == 0x89 && imageData[1] == 0x50 &&
+                imageData[2] == 0x4E && imageData[3] == 0x47)
+            {
+                return "image/png";
+            }
+        }
+
+        // Default to JPEG
+        return "image/jpeg";
+    }
+
     /// <summary>
     /// Maps SubsonicMedia PlaylistSummary to SnapDog2 PlaylistInfo.
     /// </summary>
@@ -460,7 +547,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
             TrackCount = playlistSummary.SongCount,
             TotalDurationSec = playlistSummary.Duration > 0 ? playlistSummary.Duration : null,
             Description = playlistSummary.Comment,
-            CoverArtUrl = playlistSummary.CoverArt,
+            CoverArtUrl = GetFullCoverUrl(playlistSummary.CoverArt),
             Source = "subsonic",
         };
     }
@@ -477,7 +564,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
             TrackCount = playlist.SongCount,
             TotalDurationSec = playlist.Duration > 0 ? playlist.Duration : null,
             Description = playlist.Comment,
-            CoverArtUrl = playlist.CoverArt,
+            CoverArtUrl = GetFullCoverUrl(playlist.CoverArt),
             Source = "subsonic",
         };
     }
@@ -495,10 +582,18 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
             Album = song.Album,
             DurationMs = song.Duration > 0 ? song.Duration * 1000 : null, // Convert seconds to milliseconds
             PositionMs = 0, // Always start at beginning
-            CoverArtUrl = song.CoverArt,
+            CoverArtUrl = GetFullCoverUrl(song.CoverArt),
             Source = "subsonic",
             Url = song.Id, // Use song ID as URL for Subsonic tracks
         };
+    }
+
+    /// <summary>
+    /// Converts internal Subsonic cover ID to full API URL.
+    /// </summary>
+    private static string? GetFullCoverUrl(string? coverId)
+    {
+        return string.IsNullOrWhiteSpace(coverId) ? null : $"/api/v1/cover/{coverId}";
     }
 
     /// <inheritdoc />
@@ -821,6 +916,27 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         Message = "Failed to publish notification {NotificationType}"
     )]
     private static partial void LogNotificationPublishError(ILogger logger, string notificationType, Exception ex);
+
+    [LoggerMessage(
+        EventId = 7523,
+        Level = LogLevel.Debug,
+        Message = "Getting cover art: {CoverId}"
+    )]
+    private static partial void LogGettingCoverArt(ILogger logger, string coverId);
+
+    [LoggerMessage(
+        EventId = 7524,
+        Level = LogLevel.Debug,
+        Message = "Cover art retrieved: {CoverId}, size: {Size} bytes"
+    )]
+    private static partial void LogCoverArtRetrieved(ILogger logger, string coverId, int size);
+
+    [LoggerMessage(
+        EventId = 7525,
+        Level = LogLevel.Error,
+        Message = "Failed to get cover art: {CoverId}"
+    )]
+    private static partial void LogGetCoverArtError(ILogger logger, string coverId, Exception ex);
 
     #endregion
 }

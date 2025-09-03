@@ -221,6 +221,37 @@ Endpoints for browsing available media sources (initially Subsonic and Radio).
 | `GET`  | `/media/playlists/{playlistIndex}/tracks` | List tracks in a playlist    | Paginated `List<TrackInfo>`       |
 | `GET`  | `/media/tracks/{trackIndex}`               | Get details for a track        | `TrackInfo`                       |
 
+### 10.4.5. Cover Art Endpoints
+
+Endpoints for retrieving cover art images from media sources.
+
+| Method | Path                                    | Description                    | Success Response                    | HTTP Status |
+| :----- | :-------------------------------------- | :----------------------------- | :---------------------------------- | :---------- |
+| `GET`  | `/cover/{coverId}`                      | Get cover art image            | Binary image data (JPEG/PNG)       | 200 OK      |
+
+**Cover Art Endpoint Details:**
+
+* **Purpose**: Maps internal Subsonic cover IDs to actual image data
+* **Response**: Returns binary image data with appropriate `Content-Type` header (`image/jpeg`, `image/png`, etc.)
+* **Caching**: Includes HTTP caching headers (`Cache-Control`, `ETag`) for optimal performance
+* **Error Handling**: Returns `404 Not Found` if cover ID doesn't exist, `500 Internal Server Error` for upstream failures
+* **Authentication**: Requires valid API key like all other endpoints
+* **URL Format**: All metadata responses (tracks, playlists) use full URLs pointing to this endpoint: `/api/v1/cover/{coverId}`
+
+**Example Usage:**
+```
+GET /api/v1/cover/pl-b3ee7c6f-0db0-4007-acc5-bf47d91749f9_67d6b485
+Authorization: X-API-Key: your-api-key
+
+Response:
+Content-Type: image/jpeg
+Cache-Control: public, max-age=3600
+ETag: "67d6b485"
+Content-Length: 45231
+
+[Binary JPEG data]
+```
+
 *(Note: `playlistIndex` accepts `1` for the Radio playlist, `2+` for others.*
 
 ## 10.5. Request and Response Format

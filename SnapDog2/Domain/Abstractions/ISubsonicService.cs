@@ -50,6 +50,14 @@ public interface ISubsonicService
     Task<Result<string>> GetStreamUrlAsync(string trackId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Gets cover art image data by cover ID.
+    /// </summary>
+    /// <param name="coverId">The cover art identifier.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Result containing cover art data.</returns>
+    Task<Result<CoverArtData>> GetCoverArtAsync(string coverId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Tests the connection to the Subsonic server.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>
