@@ -20,7 +20,7 @@ using SnapDog2.Shared.Models;
 
 /// <summary>
 /// Enhanced pipeline behavior that measures command execution performance and records metrics.
-/// Replaces the basic PerformanceCommandBehavior with enterprise-grade metrics collection.
+/// Replaces the basic PerformanceCommandBehavior with metrics collection.
 /// </summary>
 /// <typeparam name="TCommand">The command type.</typeparam>
 /// <typeparam name="TResponse">The response type.</typeparam>

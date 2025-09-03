@@ -20,7 +20,7 @@ using SnapDog2.Shared.Models;
 
 /// <summary>
 /// Enhanced pipeline behavior that measures query execution performance and records metrics.
-/// Replaces the basic PerformanceQueryBehavior with enterprise-grade metrics collection.
+/// Replaces the basic PerformanceQueryBehavior with metrics collection.
 /// </summary>
 /// <typeparam name="TQuery">The query type.</typeparam>
 /// <typeparam name="TResponse">The response type.</typeparam>

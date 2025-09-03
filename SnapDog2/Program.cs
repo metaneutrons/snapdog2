@@ -333,11 +333,9 @@ static WebApplication CreateWebApplication(string[] args)
         // Add zone grouping configuration
         builder.Services.Configure<SnapcastConfig>(_ => { });
 
-        // Add continuous background service for automatic zone grouping
-        // Zone grouping service (now includes hosted service functionality)
-        builder.Services.AddSingleton<IZoneGroupingService, ZoneGroupingService>();
-        builder.Services.AddHostedService<ZoneGroupingService>(provider =>
-            (ZoneGroupingService)provider.GetRequiredService<IZoneGroupingService>());
+        // Zone grouping service
+        builder.Services.AddScoped<IZoneGroupingService, ZoneGroupingService>();
+        builder.Services.AddHostedService<ZoneGroupingBackgroundService>();
 
         // Add hosted service to publish initial state after integration services are initialized
         // Skip in test environment to prevent hanging issues
@@ -433,12 +431,6 @@ static WebApplication CreateWebApplication(string[] args)
     builder.Services.AddScoped<
         IClientManager,
         ClientManager
-    >();
-
-    // Zone grouping service for managing Snapcast client grouping based on zone assignments
-    builder.Services.AddScoped<
-        IZoneGroupingService,
-        ZoneGroupingService
     >();
 
     // Enterprise-grade metrics services
