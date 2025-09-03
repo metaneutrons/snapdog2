@@ -12,6 +12,11 @@ public class SignalRNotificationHandler :
     INotificationHandler<ZoneVolumeChangedNotification>,
     INotificationHandler<ZoneMuteChangedNotification>,
     INotificationHandler<ZonePlaybackStateChangedNotification>,
+    INotificationHandler<ZoneTrackChangedNotification>,
+    INotificationHandler<ZonePlaylistChangedNotification>,
+    INotificationHandler<ZoneTrackRepeatChangedNotification>,
+    INotificationHandler<ZonePlaylistRepeatChangedNotification>,
+    INotificationHandler<ZoneShuffleModeChangedNotification>,
     INotificationHandler<ClientVolumeChangedNotification>,
     INotificationHandler<ClientMuteChangedNotification>
 {
@@ -39,7 +44,37 @@ public class SignalRNotificationHandler :
     public async Task Handle(ZonePlaybackStateChangedNotification notification, CancellationToken cancellationToken)
     {
         _logger.LogInformation("🔔 SignalR: Zone {ZoneIndex} playback changed to {PlaybackState}", notification.ZoneIndex, notification.PlaybackState);
-        await _hubContext.Clients.All.SendAsync("ZonePlaybackChanged", notification.ZoneIndex, notification.PlaybackState.ToString(), cancellationToken);
+        await _hubContext.Clients.All.SendAsync("ZonePlaybackChanged", notification.ZoneIndex, notification.PlaybackState.ToString().ToLowerInvariant(), cancellationToken);
+    }
+
+    public async Task Handle(ZoneTrackChangedNotification notification, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("🔔 SignalR: Zone {ZoneIndex} track changed to {TrackIndex}", notification.ZoneIndex, notification.TrackIndex);
+        await _hubContext.Clients.All.SendAsync("ZoneTrackMetadataChanged", notification.ZoneIndex, notification.TrackInfo, cancellationToken);
+    }
+
+    public async Task Handle(ZonePlaylistChangedNotification notification, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("🔔 SignalR: Zone {ZoneIndex} playlist changed to {PlaylistIndex}", notification.ZoneIndex, notification.PlaylistIndex);
+        await _hubContext.Clients.All.SendAsync("ZonePlaylistChanged", notification.ZoneIndex, notification.PlaylistInfo, cancellationToken);
+    }
+
+    public async Task Handle(ZoneTrackRepeatChangedNotification notification, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("🔔 SignalR: Zone {ZoneIndex} track repeat changed to {Enabled}", notification.ZoneIndex, notification.Enabled);
+        await _hubContext.Clients.All.SendAsync("ZoneRepeatModeChanged", notification.ZoneIndex, notification.Enabled, false, cancellationToken);
+    }
+
+    public async Task Handle(ZonePlaylistRepeatChangedNotification notification, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("🔔 SignalR: Zone {ZoneIndex} playlist repeat changed to {Enabled}", notification.ZoneIndex, notification.Enabled);
+        await _hubContext.Clients.All.SendAsync("ZoneRepeatModeChanged", notification.ZoneIndex, false, notification.Enabled, cancellationToken);
+    }
+
+    public async Task Handle(ZoneShuffleModeChangedNotification notification, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("🔔 SignalR: Zone {ZoneIndex} shuffle changed to {ShuffleEnabled}", notification.ZoneIndex, notification.ShuffleEnabled);
+        await _hubContext.Clients.All.SendAsync("ZoneShuffleChanged", notification.ZoneIndex, notification.ShuffleEnabled, cancellationToken);
     }
 
     public async Task Handle(ClientVolumeChangedNotification notification, CancellationToken cancellationToken)

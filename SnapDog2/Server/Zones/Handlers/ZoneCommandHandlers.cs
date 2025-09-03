@@ -13,23 +13,28 @@
 //
 namespace SnapDog2.Server.Zones.Handlers;
 
+using Cortex.Mediator;
 using Cortex.Mediator.Commands;
+using Cortex.Mediator.Notifications;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Server.Zones.Commands.Playback;
 using SnapDog2.Server.Zones.Commands.Playlist;
 using SnapDog2.Server.Zones.Commands.Track;
 using SnapDog2.Server.Zones.Commands.Volume;
+using SnapDog2.Server.Zones.Notifications;
+using SnapDog2.Shared.Enums;
 using SnapDog2.Shared.Enums;
 using SnapDog2.Shared.Models;
 
 /// <summary>
 /// Handles the PlayCommand.
 /// </summary>
-public partial class PlayCommandHandler(IZoneManager zoneManager, ILogger<PlayCommandHandler> logger)
+public partial class PlayCommandHandler(IZoneManager zoneManager, ILogger<PlayCommandHandler> logger, IMediator mediator)
     : ICommandHandler<PlayCommand, Result>
 {
     private readonly IZoneManager _zoneManager = zoneManager;
     private readonly ILogger<PlayCommandHandler> _logger = logger;
+    private readonly IMediator _mediator = mediator;
 
     public async Task<Result> Handle(PlayCommand request, CancellationToken cancellationToken)
     {
@@ -43,18 +48,31 @@ public partial class PlayCommandHandler(IZoneManager zoneManager, ILogger<PlayCo
         }
 
         var zone = zoneResult.Value!;
+        Result result;
 
         if (request.TrackIndex.HasValue)
         {
-            return await zone.PlayTrackAsync(request.TrackIndex.Value).ConfigureAwait(false);
+            result = await zone.PlayTrackAsync(request.TrackIndex.Value).ConfigureAwait(false);
         }
-
-        if (!string.IsNullOrEmpty(request.MediaUrl))
+        else if (!string.IsNullOrEmpty(request.MediaUrl))
         {
-            return await zone.PlayUrlAsync(request.MediaUrl).ConfigureAwait(false);
+            result = await zone.PlayUrlAsync(request.MediaUrl).ConfigureAwait(false);
+        }
+        else
+        {
+            result = await zone.PlayAsync().ConfigureAwait(false);
         }
 
-        return await zone.PlayAsync().ConfigureAwait(false);
+        if (result.IsSuccess)
+        {
+            await _mediator.PublishAsync(new ZonePlaybackStateChangedNotification
+            {
+                ZoneIndex = request.ZoneIndex,
+                PlaybackState = PlaybackState.Playing
+            }, cancellationToken);
+        }
+
+        return result;
     }
 
     [LoggerMessage(
@@ -75,11 +93,12 @@ public partial class PlayCommandHandler(IZoneManager zoneManager, ILogger<PlayCo
 /// <summary>
 /// Handles the PauseCommand.
 /// </summary>
-public partial class PauseCommandHandler(IZoneManager zoneManager, ILogger<PauseCommandHandler> logger)
+public partial class PauseCommandHandler(IZoneManager zoneManager, ILogger<PauseCommandHandler> logger, IMediator mediator)
     : ICommandHandler<PauseCommand, Result>
 {
     private readonly IZoneManager _zoneManager = zoneManager;
     private readonly ILogger<PauseCommandHandler> _logger = logger;
+    private readonly IMediator _mediator = mediator;
 
     public async Task<Result> Handle(PauseCommand request, CancellationToken cancellationToken)
     {
@@ -93,7 +112,18 @@ public partial class PauseCommandHandler(IZoneManager zoneManager, ILogger<Pause
         }
 
         var zone = zoneResult.Value!;
-        return await zone.PauseAsync().ConfigureAwait(false);
+        var result = await zone.PauseAsync().ConfigureAwait(false);
+
+        if (result.IsSuccess)
+        {
+            await _mediator.PublishAsync(new ZonePlaybackStateChangedNotification
+            {
+                ZoneIndex = request.ZoneIndex,
+                PlaybackState = PlaybackState.Paused
+            }, cancellationToken);
+        }
+
+        return result;
     }
 
     [LoggerMessage(
@@ -630,11 +660,13 @@ public partial class SetTrackRepeatCommandHandler(
 /// </summary>
 public partial class ToggleTrackRepeatCommandHandler(
     IZoneManager zoneManager,
-    ILogger<ToggleTrackRepeatCommandHandler> logger
+    ILogger<ToggleTrackRepeatCommandHandler> logger,
+    IMediator mediator
 ) : ICommandHandler<ToggleTrackRepeatCommand, Result>
 {
     private readonly IZoneManager _zoneManager = zoneManager;
     private readonly ILogger<ToggleTrackRepeatCommandHandler> _logger = logger;
+    private readonly IMediator _mediator = mediator;
 
     public async Task<Result> Handle(ToggleTrackRepeatCommand request, CancellationToken cancellationToken)
     {
@@ -648,7 +680,22 @@ public partial class ToggleTrackRepeatCommandHandler(
         }
 
         var zone = zoneResult.Value!;
-        return await zone.ToggleTrackRepeatAsync().ConfigureAwait(false);
+        var result = await zone.ToggleTrackRepeatAsync().ConfigureAwait(false);
+
+        if (result.IsSuccess)
+        {
+            var stateResult = await this._zoneManager.GetZoneStateAsync(request.ZoneIndex).ConfigureAwait(false);
+            if (stateResult.IsSuccess)
+            {
+                await _mediator.PublishAsync(new ZoneTrackRepeatChangedNotification
+                {
+                    ZoneIndex = request.ZoneIndex,
+                    Enabled = stateResult.Value!.TrackRepeat
+                }, cancellationToken);
+            }
+        }
+
+        return result;
     }
 
     [LoggerMessage(
@@ -716,11 +763,13 @@ public partial class SetPlaylistShuffleCommandHandler(
 /// </summary>
 public partial class TogglePlaylistShuffleCommandHandler(
     IZoneManager zoneManager,
-    ILogger<TogglePlaylistShuffleCommandHandler> logger
+    ILogger<TogglePlaylistShuffleCommandHandler> logger,
+    IMediator mediator
 ) : ICommandHandler<TogglePlaylistShuffleCommand, Result>
 {
     private readonly IZoneManager _zoneManager = zoneManager;
     private readonly ILogger<TogglePlaylistShuffleCommandHandler> _logger = logger;
+    private readonly IMediator _mediator = mediator;
 
     public async Task<Result> Handle(TogglePlaylistShuffleCommand request, CancellationToken cancellationToken)
     {
@@ -734,7 +783,22 @@ public partial class TogglePlaylistShuffleCommandHandler(
         }
 
         var zone = zoneResult.Value!;
-        return await zone.TogglePlaylistShuffleAsync().ConfigureAwait(false);
+        var result = await zone.TogglePlaylistShuffleAsync().ConfigureAwait(false);
+
+        if (result.IsSuccess)
+        {
+            var stateResult = await this._zoneManager.GetZoneStateAsync(request.ZoneIndex).ConfigureAwait(false);
+            if (stateResult.IsSuccess)
+            {
+                await _mediator.PublishAsync(new ZoneShuffleModeChangedNotification
+                {
+                    ZoneIndex = request.ZoneIndex,
+                    ShuffleEnabled = stateResult.Value!.PlaylistShuffle
+                }, cancellationToken);
+            }
+        }
+
+        return result;
     }
 
     [LoggerMessage(
@@ -802,11 +866,13 @@ public partial class SetPlaylistRepeatCommandHandler(
 /// </summary>
 public partial class TogglePlaylistRepeatCommandHandler(
     IZoneManager zoneManager,
-    ILogger<TogglePlaylistRepeatCommandHandler> logger
+    ILogger<TogglePlaylistRepeatCommandHandler> logger,
+    IMediator mediator
 ) : ICommandHandler<TogglePlaylistRepeatCommand, Result>
 {
     private readonly IZoneManager _zoneManager = zoneManager;
     private readonly ILogger<TogglePlaylistRepeatCommandHandler> _logger = logger;
+    private readonly IMediator _mediator = mediator;
 
     public async Task<Result> Handle(TogglePlaylistRepeatCommand request, CancellationToken cancellationToken)
     {
@@ -820,7 +886,22 @@ public partial class TogglePlaylistRepeatCommandHandler(
         }
 
         var zone = zoneResult.Value!;
-        return await zone.TogglePlaylistRepeatAsync().ConfigureAwait(false);
+        var result = await zone.TogglePlaylistRepeatAsync().ConfigureAwait(false);
+
+        if (result.IsSuccess)
+        {
+            var stateResult = await this._zoneManager.GetZoneStateAsync(request.ZoneIndex).ConfigureAwait(false);
+            if (stateResult.IsSuccess)
+            {
+                await _mediator.PublishAsync(new ZonePlaylistRepeatChangedNotification
+                {
+                    ZoneIndex = request.ZoneIndex,
+                    Enabled = stateResult.Value!.PlaylistRepeat
+                }, cancellationToken);
+            }
+        }
+
+        return result;
     }
 
     [LoggerMessage(
