@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { api } from '../services/api';
+import { playlistApi } from '../services/playlistApi';
 import type { TrackInfo, ZoneState, ClientState, PlaybackState, PlaylistInfo } from '../types';
 
 interface AppState {
@@ -34,6 +36,18 @@ interface AppState {
   // Playlist actions
   setPlaylists: (playlists: PlaylistInfo[]) => void;
   setZoneLoadingState: (zoneIndex: number, loadingState: { changingPlaylist?: boolean; changingTrack?: boolean }) => void;
+  
+  // Zone control actions (API + optimistic updates)
+  changeZonePlaylist: (zoneIndex: number, playlistIndex: number) => Promise<void>;
+  setZoneVolume: (zoneIndex: number, volume: number) => Promise<void>;
+  toggleZoneMute: (zoneIndex: number) => Promise<void>;
+  playZone: (zoneIndex: number) => Promise<void>;
+  pauseZone: (zoneIndex: number) => Promise<void>;
+  nextTrack: (zoneIndex: number) => Promise<void>;
+  prevTrack: (zoneIndex: number) => Promise<void>;
+  toggleShuffle: (zoneIndex: number) => Promise<void>;
+  toggleRepeat: (zoneIndex: number) => Promise<void>;
+  moveClientToZone: (clientIndex: number, targetZoneIndex: number) => Promise<void>;
 }
 
 const defaultZoneState: ZoneState = {
@@ -320,6 +334,227 @@ export const useAppStore = create<AppState>()(
             },
           },
         })),
+
+      // Zone control actions (API + optimistic updates)
+      changeZonePlaylist: async (zoneIndex, playlistIndex) => {
+        // Optimistic update
+        useAppStore.setState((state) => ({
+          loadingStates: {
+            ...state.loadingStates,
+            [zoneIndex]: { ...state.loadingStates[zoneIndex], changingPlaylist: true },
+          },
+        }));
+
+        try {
+          await playlistApi.setZonePlaylist(zoneIndex, playlistIndex);
+          // SignalR will handle the actual playlist update
+        } catch (error) {
+          console.error('Failed to change playlist:', error);
+          // Revert optimistic update on error
+          useAppStore.setState((state) => ({
+            loadingStates: {
+              ...state.loadingStates,
+              [zoneIndex]: { ...state.loadingStates[zoneIndex], changingPlaylist: false },
+            },
+          }));
+          throw error;
+        }
+      },
+
+      setZoneVolume: async (zoneIndex, volume) => {
+        // Optimistic update
+        useAppStore.setState((state) => ({
+          zones: {
+            ...state.zones,
+            [zoneIndex]: {
+              ...state.zones[zoneIndex] || defaultZoneState,
+              volume,
+            },
+          },
+        }));
+
+        try {
+          await api.zones.setVolume(zoneIndex, volume);
+        } catch (error) {
+          console.error('Failed to set volume:', error);
+          throw error;
+        }
+      },
+
+      toggleZoneMute: async (zoneIndex) => {
+        const currentZone = useAppStore.getState().zones[zoneIndex];
+        const newMuted = !currentZone?.muted;
+        
+        // Optimistic update
+        useAppStore.setState((state) => ({
+          zones: {
+            ...state.zones,
+            [zoneIndex]: {
+              ...state.zones[zoneIndex] || defaultZoneState,
+              muted: newMuted,
+            },
+          },
+        }));
+
+        try {
+          await api.zones.toggleMute(zoneIndex);
+        } catch (error) {
+          console.error('Failed to toggle mute:', error);
+          throw error;
+        }
+      },
+
+      playZone: async (zoneIndex) => {
+        // Optimistic update
+        useAppStore.setState((state) => ({
+          zones: {
+            ...state.zones,
+            [zoneIndex]: {
+              ...state.zones[zoneIndex] || defaultZoneState,
+              playbackState: 'playing',
+            },
+          },
+        }));
+
+        try {
+          await api.zones.play(zoneIndex);
+        } catch (error) {
+          console.error('Failed to play:', error);
+          throw error;
+        }
+      },
+
+      pauseZone: async (zoneIndex) => {
+        // Optimistic update
+        useAppStore.setState((state) => ({
+          zones: {
+            ...state.zones,
+            [zoneIndex]: {
+              ...state.zones[zoneIndex] || defaultZoneState,
+              playbackState: 'paused',
+            },
+          },
+        }));
+
+        try {
+          await api.zones.pause(zoneIndex);
+        } catch (error) {
+          console.error('Failed to pause:', error);
+          throw error;
+        }
+      },
+
+      nextTrack: async (zoneIndex) => {
+        try {
+          await api.zones.next(zoneIndex);
+        } catch (error) {
+          console.error('Failed to skip to next track:', error);
+          throw error;
+        }
+      },
+
+      prevTrack: async (zoneIndex) => {
+        try {
+          await api.zones.previous(zoneIndex);
+        } catch (error) {
+          console.error('Failed to skip to previous track:', error);
+          throw error;
+        }
+      },
+
+      toggleShuffle: async (zoneIndex) => {
+        const currentZone = useAppStore.getState().zones[zoneIndex];
+        const newShuffle = !currentZone?.playlistShuffle;
+        
+        // Optimistic update
+        useAppStore.setState((state) => ({
+          zones: {
+            ...state.zones,
+            [zoneIndex]: {
+              ...state.zones[zoneIndex] || defaultZoneState,
+              playlistShuffle: newShuffle,
+            },
+          },
+        }));
+
+        try {
+          await api.zones.toggleShuffle(zoneIndex);
+        } catch (error) {
+          console.error('Failed to toggle shuffle:', error);
+          throw error;
+        }
+      },
+
+      toggleRepeat: async (zoneIndex) => {
+        const currentZone = useAppStore.getState().zones[zoneIndex];
+        const newRepeat = !currentZone?.trackRepeat;
+        
+        // Optimistic update
+        useAppStore.setState((state) => ({
+          zones: {
+            ...state.zones,
+            [zoneIndex]: {
+              ...state.zones[zoneIndex] || defaultZoneState,
+              trackRepeat: newRepeat,
+            },
+          },
+        }));
+
+        try {
+          await api.zones.toggleRepeat(zoneIndex);
+        } catch (error) {
+          console.error('Failed to toggle repeat:', error);
+          throw error;
+        }
+      },
+
+      moveClientToZone: async (clientIndex, targetZoneIndex) => {
+        const state = useAppStore.getState();
+        const client = state.clients[clientIndex];
+        const currentZoneIndex = client?.zoneIndex;
+
+        // Optimistic update - remove from current zone and add to target zone
+        useAppStore.setState((state) => {
+          const newState = { ...state };
+          
+          // Update client's zone assignment
+          newState.clients = {
+            ...state.clients,
+            [clientIndex]: {
+              ...state.clients[clientIndex],
+              zoneIndex: targetZoneIndex,
+            },
+          };
+
+          // Remove from current zone's client list
+          if (currentZoneIndex && newState.zones[currentZoneIndex]) {
+            newState.zones[currentZoneIndex] = {
+              ...newState.zones[currentZoneIndex],
+              clients: newState.zones[currentZoneIndex].clients.filter(id => id !== clientIndex),
+            };
+          }
+
+          // Add to target zone's client list
+          if (newState.zones[targetZoneIndex]) {
+            const targetClients = newState.zones[targetZoneIndex].clients || [];
+            if (!targetClients.includes(clientIndex)) {
+              newState.zones[targetZoneIndex] = {
+                ...newState.zones[targetZoneIndex],
+                clients: [...targetClients, clientIndex],
+              };
+            }
+          }
+
+          return newState;
+        });
+
+        try {
+          await api.clients.assignZone(clientIndex, targetZoneIndex);
+        } catch (error) {
+          console.error('Failed to move client:', error);
+          throw error;
+        }
+      },
     }),
     { name: 'snapdog-store' }
   )
@@ -328,6 +563,7 @@ export const useAppStore = create<AppState>()(
 export const useZone = (zoneIndex: number) => useAppStore((state) => state.zones[zoneIndex]);
 export const useClient = (clientIndex: number) => useAppStore((state) => state.clients[clientIndex]);
 export const useZoneLoadingState = (zoneIndex: number) => useAppStore((state) => state.loadingStates[zoneIndex] || {});
+export const usePlaylists = () => useAppStore((state) => state.playlists);
 export const useUnassignedClients = () => useAppStore((state) => 
     Object.entries(state.clients)
         .filter(([, client]: [string, ClientState]) => client.zoneIndex === undefined || client.zoneIndex === null)

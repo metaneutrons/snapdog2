@@ -1,29 +1,36 @@
-
 import React from 'react';
+import { useZone } from '../store';
 import { ClientChip } from './ClientChip';
 
 interface ClientListProps {
-  clientIndices: number[];
-  isDropTarget: boolean;
-  onDragStart: (clientIndex: number) => void;
-  onDragEnd: () => void;
+  zoneIndex: number;
+  draggingClientIndex: number | null;
+  onClientDragStart: (clientIndex: number) => void;
+  onClientDragEnd: () => void;
 }
 
-export function ClientList({ clientIndices, isDropTarget, onDragStart, onDragEnd }: ClientListProps) {
+export function ClientList({ zoneIndex, draggingClientIndex, onClientDragStart, onClientDragEnd }: ClientListProps) {
+  const zone = useZone(zoneIndex);
+  
+  if (!zone) return null;
+
+  const clientIndices = zone.clients || [];
+  const isDropTarget = draggingClientIndex !== null;
+
   return (
     <div className={`space-y-2 p-2 rounded-lg transition-colors duration-200 min-h-[6rem] ${isDropTarget ? 'bg-blue-100 border-2 border-dashed border-blue-400' : 'bg-gray-100'}`}>
       {clientIndices.length > 0 ? (
-        clientIndices.map(clientIndex => (
+        clientIndices.map((clientIndex) => (
           <ClientChip
             key={clientIndex}
             clientIndex={clientIndex}
-            onDragStart={onDragStart}
-            onDragEnd={onDragEnd}
+            onDragStart={onClientDragStart}
+            onDragEnd={onClientDragEnd}
           />
         ))
       ) : (
-        <div className="flex items-center justify-center h-full text-sm text-gray-500 p-4">
-          {isDropTarget ? 'Drop client here' : 'No clients assigned'}
+        <div className="text-gray-500 text-sm text-center py-4">
+          No clients assigned
         </div>
       )}
     </div>

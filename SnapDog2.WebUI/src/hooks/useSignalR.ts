@@ -71,6 +71,8 @@ export function useSignalR(baseUrl: string = '') {
     connection.on('ZonePlaylistChanged', (zoneIndex: number, playlist: PlaylistInfo | null) => {
       console.log('📡 SignalR: ZonePlaylistChanged', { zoneIndex, playlist });
       updateZonePlaylist(zoneIndex, playlist);
+      // Clear loading state when playlist change is complete
+      useAppStore.getState().setZoneLoadingState(zoneIndex, { changingPlaylist: false });
     });
 
     // Client event handlers

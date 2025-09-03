@@ -1,6 +1,5 @@
 import React from 'react';
-import { useZone } from '../store';
-import { api } from '../services/api';
+import { useZone, useAppStore } from '../store';
 import { PlayIcon, PauseIcon, SkipBackIcon, SkipForwardIcon, ShuffleIcon, RepeatIcon, Repeat1Icon } from './icons';
 
 interface TransportControlsProps {
@@ -25,6 +24,7 @@ const ControlButton: React.FC<{
 
 export function TransportControls({ zoneIndex }: TransportControlsProps) {
   const zone = useZone(zoneIndex);
+  const { playZone, pauseZone, nextTrack, prevTrack, toggleShuffle, toggleRepeat } = useAppStore();
 
   if (!zone) return null;
 
@@ -33,17 +33,17 @@ export function TransportControls({ zoneIndex }: TransportControlsProps) {
 
   const handlePlayPause = () => {
     if (isPlaying) {
-      api.zones.pause(zoneIndex);
+      pauseZone(zoneIndex).catch(console.error);
     } else {
-      api.zones.play(zoneIndex);
+      playZone(zoneIndex).catch(console.error);
     }
   };
 
-  const handleNext = () => api.zones.next(zoneIndex);
-  const handlePrevious = () => api.zones.previous(zoneIndex);
-  const handleToggleShuffle = () => api.zones.toggleShuffle(zoneIndex);
-  const handleToggleRepeat = () => api.zones.toggleRepeat(zoneIndex);
-  const handleToggleTrackRepeat = () => api.zones.toggleTrackRepeat(zoneIndex);
+  const handleNext = () => nextTrack(zoneIndex).catch(console.error);
+  const handlePrevious = () => prevTrack(zoneIndex).catch(console.error);
+  const handleToggleShuffle = () => toggleShuffle(zoneIndex).catch(console.error);
+  const handleToggleRepeat = () => toggleRepeat(zoneIndex).catch(console.error);
+  const handleToggleTrackRepeat = () => toggleRepeat(zoneIndex).catch(console.error);
 
   return (
     <div className="flex items-center justify-between">
