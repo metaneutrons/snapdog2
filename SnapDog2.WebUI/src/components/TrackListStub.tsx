@@ -28,6 +28,7 @@ export const TrackList: React.FC<TrackListProps> = ({
         console.log('🔍 Loading tracks for playlist:', playlist.index);
         const tracks = await playlistApi.getPlaylistTracks(playlist.index);
         console.log('✅ Tracks loaded:', tracks.length);
+        console.log('🖼️ First track data:', tracks[0]);
         setTracks(tracks);
       } catch (error) {
         console.error('❌ Failed to load tracks:', error);
@@ -88,13 +89,17 @@ export const TrackList: React.FC<TrackListProps> = ({
                     <div className="flex items-center space-x-3">
                       <span className="text-xs text-gray-400 w-6">{index + 1}</span>
                       
-                      {track.coverArt && (
-                        <img 
-                          src={track.coverArt} 
-                          alt="Cover" 
-                          className="w-10 h-10 rounded object-cover"
-                        />
-                      )}
+                      <div className="w-10 h-10 bg-gray-200 rounded flex items-center justify-center flex-shrink-0">
+                        {track.coverArtUrl ? (
+                          <img 
+                            src={track.coverArtUrl} 
+                            alt="Cover" 
+                            className="w-10 h-10 rounded object-cover"
+                          />
+                        ) : (
+                          <span className="text-xs text-gray-400">🎵</span>
+                        )}
+                      </div>
                       
                       <div className="flex-1">
                         <div className="text-sm font-medium">
