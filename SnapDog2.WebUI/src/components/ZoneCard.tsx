@@ -5,6 +5,7 @@ import { TransportControls } from './TransportControls';
 import { VolumeSlider } from './VolumeSlider';
 import { ClientList } from './ClientList';
 import { PlaylistNavigation } from './PlaylistNavigationStub';
+import { TrackList } from './TrackListStub';
 
 interface ZoneCardProps {
   zoneIndex: number;
@@ -25,6 +26,7 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({ zoneIndex, draggingClientInd
   const zone = useZone(zoneIndex);
   const { initializeZone } = useAppStore();
   const [isDropTarget, setIsDropTarget] = useState(false);
+  const [showTrackList, setShowTrackList] = useState(false);
 
   useEffect(() => {
     initializeZone(zoneIndex);
@@ -126,7 +128,7 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({ zoneIndex, draggingClientInd
         zoneIndex={zoneIndex}
         currentPlaylist={zone.playlist}
         onPlaylistChange={() => {}}
-        onShowTrackList={() => {}}
+        onShowTrackList={() => setShowTrackList(true)}
         isChangingPlaylist={false}
       />
 
@@ -148,6 +150,17 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({ zoneIndex, draggingClientInd
             onDragEnd={onClientDragEnd}
         />
       </div>
+      
+      {showTrackList && zone.playlist && (
+        <TrackList
+          zoneIndex={zoneIndex}
+          playlist={zone.playlist}
+          currentTrack={zone.track}
+          onClose={() => setShowTrackList(false)}
+          onTrackSelect={() => {}}
+          isChangingTrack={false}
+        />
+      )}
     </div>
   );
 };
