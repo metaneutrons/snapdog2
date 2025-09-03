@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { playlistApi } from '../services/playlistApi';
 import type { PlaylistInfo, TrackInfo } from '../types';
 
 interface TrackListProps {
@@ -14,8 +15,34 @@ export const TrackList: React.FC<TrackListProps> = ({
   playlist,
   currentTrack,
   onClose,
+  onTrackSelect,
   isChangingTrack = false
 }) => {
+  const [tracks, setTracks] = useState<TrackInfo[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadTracks = async () => {
+      try {
+        setLoading(true);
+        const response = await playlistApi.getPlaylistTracks(playlist.index);
+        if (response.success) {
+          setTracks(response.data.items);
+        }
+      } catch (error) {
+        console.error('Failed to load tracks:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadTracks();
+  }, [playlist.index]);
+
+  const handleTrackClick = (track: TrackInfo) => {
+    console.log('🎵 Selecting track:', track.title);
+    onTrackSelect(track);
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-96">
@@ -38,38 +65,46 @@ export const TrackList: React.FC<TrackListProps> = ({
             </div>
           )}
           
-          <div className="space-y-2">
-            <div className="text-sm text-gray-500 mb-2">
-              {playlist.trackCount || 0} tracks
+          {loading ? (
+            <div className="text-center text-gray-500 py-8">
+              Loading tracks...
             </div>
-            
-            {/* Mock tracks for now */}
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div
-                key={i}
-                className={`p-2 rounded cursor-pointer hover:bg-gray-100 ${
-                  i === 1 ? 'bg-blue-50 border-l-4 border-blue-500' : ''
-                }`}
-              >
-                <div className="flex items-center space-x-2">
-                  <span className="text-xs text-gray-400 w-6">{i}</span>
-                  <div className="flex-1">
-                    <div className="text-sm font-medium">
-                      Track {i} {i === 1 ? '● Playing' : ''}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      Artist {i} • Album {i}
+          ) : (
+            <div className="space-y-2">
+              <div className="text-sm text-gray-500 mb-2">
+                {tracks.length} tracks
+              </div>
+              
+              {tracks.map((track, index) => {
+                const isCurrentTrack = currentTrack && track.index === currentTrack.index;
+                return (
+                  <div
+                    key={track.index}
+                    onClick={() => handleTrackClick(track)}
+                    className={`p-2 rounded cursor-pointer hover:bg-gray-100 ${
+                      isCurrentTrack ? 'bg-blue-50 border-l-4 border-blue-500' : ''
+                    }`}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xs text-gray-400 w-6">{index + 1}</span>
+                      <div className="flex-1">
+                        <div className="text-sm font-medium">
+                          {track.title} {isCurrentTrack ? '● Playing' : ''}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {track.artist} • {track.album}
+                        </div>
+                      </div>
+                      <span className="text-xs text-gray-400">
+                        {track.durationMs ? Math.floor(track.durationMs / 60000) + ':' + 
+                         String(Math.floor((track.durationMs % 60000) / 1000)).padStart(2, '0') : '0:00'}
+                      </span>
                     </div>
                   </div>
-                  <span className="text-xs text-gray-400">3:45</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        
-        <div className="p-4 border-t bg-gray-50 text-center text-xs text-gray-500">
-          Track List - Coming Soon
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>

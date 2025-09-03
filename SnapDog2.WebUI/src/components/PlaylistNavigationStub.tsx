@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useAppStore } from '../store';
+import { playlistApi } from '../services/playlistApi';
 import type { PlaylistInfo } from '../types';
 
 interface PlaylistNavigationProps {
@@ -12,14 +14,50 @@ interface PlaylistNavigationProps {
 export const PlaylistNavigation: React.FC<PlaylistNavigationProps> = ({
   currentPlaylist,
   onShowTrackList,
+  onPlaylistChange,
   isChangingPlaylist = false
 }) => {
+  const { playlists, setPlaylists } = useAppStore();
+
+  useEffect(() => {
+    const loadPlaylists = async () => {
+      if (playlists.length === 0) {
+        try {
+          const response = await playlistApi.getPlaylists();
+          if (response.success) {
+            setPlaylists(response.data.items);
+          }
+        } catch (error) {
+          console.error('Failed to load playlists:', error);
+        }
+      }
+    };
+    loadPlaylists();
+  }, [playlists.length, setPlaylists]);
+
+  const currentIndex = currentPlaylist ? playlists.findIndex(p => p.index === currentPlaylist.index) : -1;
+  const canGoPrev = currentIndex > 0;
+  const canGoNext = currentIndex >= 0 && currentIndex < playlists.length - 1;
+
+  const handlePrev = () => {
+    if (canGoPrev && onPlaylistChange) {
+      onPlaylistChange(playlists[currentIndex - 1]);
+    }
+  };
+
+  const handleNext = () => {
+    if (canGoNext && onPlaylistChange) {
+      onPlaylistChange(playlists[currentIndex + 1]);
+    }
+  };
+
   return (
     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
       <div className="flex items-center space-x-2">
         <button 
           className="px-2 py-1 text-gray-400 hover:text-gray-600 disabled:opacity-50 text-sm"
-          disabled={true}
+          disabled={!canGoPrev || isChangingPlaylist}
+          onClick={handlePrev}
           title="Previous Playlist"
         >
           ◀
@@ -38,7 +76,8 @@ export const PlaylistNavigation: React.FC<PlaylistNavigationProps> = ({
         
         <button 
           className="px-2 py-1 text-gray-400 hover:text-gray-600 disabled:opacity-50 text-sm"
-          disabled={true}
+          disabled={!canGoNext || isChangingPlaylist}
+          onClick={handleNext}
           title="Next Playlist"
         >
           ▶

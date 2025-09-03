@@ -6,6 +6,7 @@ import { VolumeSlider } from './VolumeSlider';
 import { ClientList } from './ClientList';
 import { PlaylistNavigation } from './PlaylistNavigationStub';
 import { TrackList } from './TrackListStub';
+import type { PlaylistInfo, TrackInfo } from '../types';
 
 interface ZoneCardProps {
   zoneIndex: number;
@@ -34,6 +35,25 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({ zoneIndex, draggingClientInd
 
   const handleVolumeChange = (volume: number) => api.zones.setVolume(zoneIndex, volume).catch(console.error);
   const handleMuteToggle = () => api.zones.toggleMute(zoneIndex).catch(console.error);
+
+  const handlePlaylistChange = async (playlist: PlaylistInfo) => {
+    try {
+      console.log('🎵 Changing playlist to:', playlist.name);
+      // TODO: Add actual playlist change API call
+    } catch (error) {
+      console.error('❌ Failed to change playlist:', error);
+    }
+  };
+
+  const handleTrackSelect = async (track: TrackInfo) => {
+    try {
+      console.log('🎵 Selecting track:', track.title);
+      setShowTrackList(false);
+      // TODO: Add actual track selection API call
+    } catch (error) {
+      console.error('❌ Failed to select track:', error);
+    }
+  };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -127,7 +147,7 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({ zoneIndex, draggingClientInd
       <PlaylistNavigation
         zoneIndex={zoneIndex}
         currentPlaylist={zone.playlist}
-        onPlaylistChange={() => {}}
+        onPlaylistChange={handlePlaylistChange}
         onShowTrackList={() => setShowTrackList(true)}
         isChangingPlaylist={false}
       />
@@ -157,7 +177,7 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({ zoneIndex, draggingClientInd
           playlist={zone.playlist}
           currentTrack={zone.track}
           onClose={() => setShowTrackList(false)}
-          onTrackSelect={() => {}}
+          onTrackSelect={handleTrackSelect}
           isChangingTrack={false}
         />
       )}
