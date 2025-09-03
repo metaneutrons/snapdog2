@@ -118,12 +118,9 @@ public sealed partial class MediaPlayer(
                             // Update track info with extracted metadata from LibVLC
                             if (result.Metadata != null)
                             {
-                                // Improve title for radio streams by mapping URLs to station names
-                                var improvedTitle = ImproveRadioStationTitle(result.Metadata.Title, this._currentTrack.Url);
-
                                 var updatedTrack = this._currentTrack with
                                 {
-                                    Title = !string.IsNullOrWhiteSpace(improvedTitle) ? improvedTitle : this._currentTrack.Title,
+                                    Title = !string.IsNullOrWhiteSpace(result.Metadata.Title) ? result.Metadata.Title : this._currentTrack.Title,
                                     Artist = !string.IsNullOrWhiteSpace(result.Metadata.Artist) ? result.Metadata.Artist : this._currentTrack.Artist,
                                     Album = !string.IsNullOrWhiteSpace(result.Metadata.Album) ? result.Metadata.Album : this._currentTrack.Album,
                                     DurationMs = result.Metadata.Duration > 0 ? (int)result.Metadata.Duration : this._currentTrack.DurationMs,
@@ -432,73 +429,4 @@ public sealed partial class MediaPlayer(
         Message = "Error forwarding playback state changed event for zone {ZoneIndex}"
     )]
     private static partial void LogPlaybackStateEventError(ILogger logger, Exception ex, int zoneIndex);
-
-    /// <summary>
-    /// Improves radio station titles by mapping common URLs to proper station names.
-    /// </summary>
-    private static string ImproveRadioStationTitle(string? extractedTitle, string url)
-    {
-        // If we have a good extracted title that's not just a filename, use it
-        if (!string.IsNullOrWhiteSpace(extractedTitle) &&
-            !extractedTitle.EndsWith(".m3u", StringComparison.OrdinalIgnoreCase) &&
-            !extractedTitle.EndsWith(".pls", StringComparison.OrdinalIgnoreCase))
-        {
-            return extractedTitle;
-        }
-
-        // Map common German radio station URLs to proper names
-        var stationMappings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            { "ndr903", "NDR 90.3" },
-            { "ndr2", "NDR 2" },
-            { "ndr1", "NDR 1" },
-            { "dlf", "Deutschlandfunk" },
-            { "dlfkultur", "Deutschlandfunk Kultur" },
-            { "dlfnova", "Deutschlandfunk Nova" },
-            { "wdr2", "WDR 2" },
-            { "wdr3", "WDR 3" },
-            { "wdr4", "WDR 4" },
-            { "wdr5", "WDR 5" },
-            { "swr1", "SWR1" },
-            { "swr2", "SWR2" },
-            { "swr3", "SWR3" },
-            { "br1", "Bayern 1" },
-            { "br2", "Bayern 2" },
-            { "br3", "Bayern 3" },
-            { "rbb", "rbb" },
-            { "mdr", "MDR" },
-            { "hr1", "hr1" },
-            { "hr2", "hr2" },
-            { "hr3", "hr3" },
-            { "antenne", "Antenne" },
-            { "ffn", "radio ffn" },
-            { "energy", "ENERGY" },
-            { "radiobob", "Radio BOB" }
-        };
-
-        // Check URL for station identifiers
-        foreach (var mapping in stationMappings)
-        {
-            if (url.Contains(mapping.Key, StringComparison.OrdinalIgnoreCase))
-            {
-                return mapping.Value;
-            }
-        }
-
-        // If no mapping found, try to clean up the extracted title
-        if (!string.IsNullOrWhiteSpace(extractedTitle))
-        {
-            // Remove file extensions and clean up
-            var cleaned = extractedTitle
-                .Replace(".m3u", "", StringComparison.OrdinalIgnoreCase)
-                .Replace(".pls", "", StringComparison.OrdinalIgnoreCase)
-                .Replace("_", " ")
-                .Replace("-", " ");
-
-            // Capitalize first letter of each word
-            return System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(cleaned.ToLower());
-        }
-
-        return extractedTitle ?? "Radio Stream";
-    }
 }

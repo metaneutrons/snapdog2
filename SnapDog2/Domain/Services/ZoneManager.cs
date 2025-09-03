@@ -1792,27 +1792,6 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             // Publish state change to notify other components
             this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
 
-            // Publish SignalR notification for real-time updates
-            _ = Task.Run(async () =>
-            {
-                try
-                {
-                    using var scope = this._serviceScopeFactory.CreateScope();
-                    var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-
-                    await mediator.PublishAsync(new ZoneTrackChangedNotification
-                    {
-                        ZoneIndex = this._zoneIndex,
-                        TrackInfo = e.TrackInfo,
-                        TrackIndex = e.TrackInfo.Index ?? 0
-                    });
-                }
-                catch (Exception ex)
-                {
-                    this.LogErrorPublishingTrackInfo(ex, this._zoneIndex);
-                }
-            });
-
             this.LogTrackInfoUpdated(this._zoneIndex, e.TrackInfo.Title);
         }
         catch (Exception ex)
@@ -2397,11 +2376,4 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         Message = "Error handling track info change for zone {ZoneIndex}"
     )]
     private partial void LogErrorHandlingTrackInfoChange(Exception ex, int zoneIndex);
-
-    [LoggerMessage(
-        EventId = 7069,
-        Level = LogLevel.Warning,
-        Message = "Error publishing track info notification for zone {ZoneIndex}"
-    )]
-    private partial void LogErrorPublishingTrackInfo(Exception ex, int zoneIndex);
 }

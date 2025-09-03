@@ -100,11 +100,6 @@ public sealed partial class MediaPlayerService(
                 zoneConfig.Sink
             );
 
-            // Subscribe to LibVLC events for real-time SignalR updates
-            player.PositionChanged += (sender, e) => this.OnPlayerPositionChanged(zoneIndex, e);
-            player.PlaybackStateChanged += (sender, e) => this.OnPlayerPlaybackStateChanged(zoneIndex, e);
-            player.TrackInfoChanged += (sender, e) => this.OnPlayerTrackInfoChanged(zoneIndex, e);
-
             this._players[zoneIndex] = player;
 
             // Resolve stream URL based on source type
@@ -705,89 +700,4 @@ public sealed partial class MediaPlayerService(
         Message = "Error starting background disposal task"
     )]
     private static partial void LogTaskStartError(ILogger logger, Exception ex);
-
-    #region LibVLC Event Handlers for Real-Time Updates
-
-    /// <summary>
-    /// Handles LibVLC position changes and publishes SignalR notifications.
-    /// </summary>
-    private void OnPlayerPositionChanged(int zoneIndex, PositionChangedEventArgs e)
-    {
-        _ = Task.Run(async () =>
-        {
-            try
-            {
-                using var scope = this._serviceScopeFactory.CreateScope();
-                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-
-                await mediator.PublishAsync(new ZoneTrackProgressChangedNotification
-                {
-                    ZoneIndex = zoneIndex,
-                    Progress = e.Progress
-                });
-            }
-            catch (Exception ex)
-            {
-                this._logger.LogError(ex, "Failed to publish position change notification for zone {ZoneIndex}", zoneIndex);
-            }
-        });
-    }
-
-    /// <summary>
-    /// Handles LibVLC playback state changes and publishes SignalR notifications.
-    /// </summary>
-    private void OnPlayerPlaybackStateChanged(int zoneIndex, PlaybackStateChangedEventArgs e)
-    {
-        _ = Task.Run(async () =>
-        {
-            try
-            {
-                using var scope = this._serviceScopeFactory.CreateScope();
-                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-
-                // Convert VLCState to PlaybackState
-                var playbackState = e.IsPlaying ?
-                    SnapDog2.Shared.Enums.PlaybackState.Playing :
-                    SnapDog2.Shared.Enums.PlaybackState.Paused;
-
-                await mediator.PublishAsync(new ZonePlaybackStateChangedNotification
-                {
-                    ZoneIndex = zoneIndex,
-                    PlaybackState = playbackState
-                });
-            }
-            catch (Exception ex)
-            {
-                this._logger.LogError(ex, "Failed to publish playback state change notification for zone {ZoneIndex}", zoneIndex);
-            }
-        });
-    }
-
-    /// <summary>
-    /// Handles LibVLC track info changes and publishes SignalR notifications.
-    /// </summary>
-    private void OnPlayerTrackInfoChanged(int zoneIndex, TrackInfoChangedEventArgs e)
-    {
-        _ = Task.Run(async () =>
-        {
-            try
-            {
-                using var scope = this._serviceScopeFactory.CreateScope();
-                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-
-                await mediator.PublishAsync(new ZoneTrackChangedNotification
-                {
-                    ZoneIndex = zoneIndex,
-                    TrackInfo = e.TrackInfo,
-                    TrackIndex = e.TrackInfo.Index ?? 0
-                });
-            }
-            catch (Exception ex)
-            {
-                this._logger.LogError(ex, "Failed to publish track info change notification for zone {ZoneIndex}", zoneIndex);
-            }
-        });
-    }
-
-    #endregion
 }
