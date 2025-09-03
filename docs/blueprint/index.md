@@ -174,6 +174,7 @@
 - [10.4.2 Zone Endpoints](11-api-specification.md#1042-zone-endpoints)
 - [10.4.3 Client Endpoints](11-api-specification.md#1043-client-endpoints)
 - [10.4.4 Media Management Endpoints](11-api-specification.md#1044-media-management-endpoints)
+- [10.4.5 Cover Art Endpoints](11-api-specification.md#1045-cover-art-endpoints)
 - [10.5 Request and Response Format](11-api-specification.md#105-request-and-response-format)
 - [10.5.1 Modern Direct Response Design](11-api-specification.md#1051-modern-direct-response-design)
 - [10.5.2 Legacy Response Wrapper (Deprecated)](11-api-specification.md#1052-legacy-response-wrapper-deprecated)

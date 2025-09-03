@@ -336,4 +336,4 @@ histogram_quantile(0.95, snapdog_command_duration_seconds)       # Command laten
 
 ---
 
-**The SnapDog2 metrics and telemetry system provides enterprise-grade observability with minimal overhead and comprehensive coverage of all system components.**
+**The SnapDog2 metrics and telemetry system provides observability with minimal overhead and comprehensive coverage of all system components.**

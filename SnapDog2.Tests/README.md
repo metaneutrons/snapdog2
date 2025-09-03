@@ -1,6 +1,6 @@
 # 🧪 SnapDog2 Enterprise Test Suite
 
-Welcome to the **enterprise-grade test suite** for SnapDog2! This comprehensive testing framework provides **100% modern, best-practice testing** with advanced features for unit, integration, container, performance, and workflow testing.
+Welcome to the **test suite** for SnapDog2! This comprehensive testing framework provides **100% modern, best-practice testing** with advanced features for unit, integration, container, performance, and workflow testing.
 
 ## 🏗️ **Test Architecture**
 
