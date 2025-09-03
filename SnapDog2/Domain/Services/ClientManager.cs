@@ -790,7 +790,7 @@ public partial class ClientManager : IClientManager
     /// Internal implementation of IClient that wraps a Snapcast client with SnapDog2 configuration.
     /// </summary>
     private class SnapDogClient(
-        int clientIndex,
+        int clientIndex, // TODO: Implement real client index handling, but this index is needed in the context
         SnapClient snapcastClient,
         ClientConfig config,
         ISnapcastService snapcastService,
