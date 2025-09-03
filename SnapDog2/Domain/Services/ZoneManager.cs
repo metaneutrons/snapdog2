@@ -922,6 +922,9 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         this._currentState = this._currentState with { Track = targetTrack };
         this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
 
+        // Publish track change notification for SignalR
+        await this.PublishTrackStatusAsync(targetTrack, trackIndex).ConfigureAwait(false);
+
         // Publish individual track metadata notifications for KNX integration
         await this.PublishTrackMetadataNotificationsAsync(targetTrack).ConfigureAwait(false);
 
