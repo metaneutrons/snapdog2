@@ -36,18 +36,28 @@ export const PlaylistNavigation: React.FC<PlaylistNavigationProps> = ({
   }, [playlists.length, setPlaylists]);
 
   const currentIndex = currentPlaylist ? playlists.findIndex(p => p.index === currentPlaylist.index) : -1;
-  const canGoPrev = currentIndex > 0;
-  const canGoNext = currentIndex >= 0 && currentIndex < playlists.length - 1;
+  const canGoPrev = playlists.length > 0 && (currentIndex > 0 || currentIndex === -1);
+  const canGoNext = playlists.length > 0 && (currentIndex < playlists.length - 1 || currentIndex === -1);
+
+  console.log('🔍 Navigation state:', { 
+    playlistsCount: playlists.length, 
+    currentIndex, 
+    canGoPrev, 
+    canGoNext,
+    currentPlaylistName: currentPlaylist?.name 
+  });
 
   const handlePrev = () => {
-    if (canGoPrev && onPlaylistChange) {
-      onPlaylistChange(playlists[currentIndex - 1]);
+    if (playlists.length > 0 && onPlaylistChange) {
+      const targetIndex = currentIndex > 0 ? currentIndex - 1 : playlists.length - 1;
+      onPlaylistChange(playlists[targetIndex]);
     }
   };
 
   const handleNext = () => {
-    if (canGoNext && onPlaylistChange) {
-      onPlaylistChange(playlists[currentIndex + 1]);
+    if (playlists.length > 0 && onPlaylistChange) {
+      const targetIndex = currentIndex >= 0 && currentIndex < playlists.length - 1 ? currentIndex + 1 : 0;
+      onPlaylistChange(playlists[targetIndex]);
     }
   };
 
