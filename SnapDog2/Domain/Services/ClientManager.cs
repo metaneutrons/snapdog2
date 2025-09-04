@@ -814,7 +814,9 @@ public partial class ClientManager : IClientManager
         internal int Volume => this._snapcastClient.Config.Volume.Percent;
         internal bool Muted => this._snapcastClient.Config.Volume.Muted;
         internal int LatencyMs => this._snapcastClient.Config.Latency;
-        internal int ZoneIndex => this._config.DefaultZone;
+        internal int ZoneIndex => ((ClientManager)this._clientManager)._clientStates.TryGetValue(this._clientIndex, out var state)
+            ? state.ZoneIndex
+            : this._config.DefaultZone;
 
         private int GetActualZoneFromSnapcast()
         {
