@@ -529,10 +529,19 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
 
         try
         {
+            // Get current client to preserve mute state when changing volume
+            var client = this._stateRepository.GetClient(snapcastClientId);
+            if (client == null)
+            {
+                return Result.Failure($"Client {snapcastClientId} not found");
+            }
+
+            var currentMuteState = client.Value.Config.Volume.Muted;
+
             return await this._operationPolicy.ExecuteAsync(
                 async _ =>
                 {
-                    await this._snapcastClient!.ClientSetVolumeAsync(snapcastClientId, volumePercent);
+                    await this._snapcastClient!.ClientSetVolumeAsync(snapcastClientId, volumePercent, currentMuteState);
                     return Result.Success();
                 },
                 cancellationToken
@@ -556,6 +565,12 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
             return Result.Failure("Service has been disposed");
         }
 
+        if (!this.IsConnected)
+        {
+            this.LogNotConnected(nameof(this.SetClientMuteAsync));
+            return Result.Failure("Snapcast service is not connected");
+        }
+
         try
         {
             // Get current client to preserve volume when muting/unmuting
@@ -567,9 +582,14 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
 
             var currentVolume = client.Value.Config.Volume.Percent;
 
-            // Use proper Snapcast mute functionality instead of setting volume to 0
-            await this._snapcastClient!.ClientSetVolumeAsync(snapcastClientId, currentVolume, muted).ConfigureAwait(false);
-            return Result.Success();
+            return await this._operationPolicy.ExecuteAsync(
+                async _ =>
+                {
+                    await this._snapcastClient!.ClientSetVolumeAsync(snapcastClientId, currentVolume, muted);
+                    return Result.Success();
+                },
+                cancellationToken
+            );
         }
         catch (Exception ex)
         {
