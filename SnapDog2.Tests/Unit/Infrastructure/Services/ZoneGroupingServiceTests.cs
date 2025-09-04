@@ -420,14 +420,6 @@ public class ZoneGroupingServiceTests
         };
     }
 
-    private static TestGroup CreateGroup(string id, string streamId, params string[] clientIndexs) =>
-        new()
-        {
-            Id = id,
-            StreamId = streamId,
-            ClientIndexs = clientIndexs.ToList(),
-        };
-
     #endregion
 
     #region Test Models

@@ -5,7 +5,9 @@ const BASE_URL = '/api/v1';
 
 class ApiService {
   private async request(method: string, path: string, body?: unknown) {
-    const headers: HeadersInit = {};
+    const headers: HeadersInit = {
+      'X-API-Key': 'dev-key'
+    };
     let requestBody: BodyInit | undefined;
 
     if (body !== undefined) {

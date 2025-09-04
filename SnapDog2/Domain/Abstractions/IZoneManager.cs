@@ -23,14 +23,14 @@ public interface IZoneManager
     /// <summary>
     /// Gets a zone by its ID.
     /// </summary>
-    /// <param name="zoneIndex">The zone ID.</param>
+    /// <param name="zoneIndex">The zone index.</param>
     /// <returns>The zone service if found.</returns>
     Task<Result<IZoneService>> GetZoneAsync(int zoneIndex);
 
     /// <summary>
     /// Gets a zone by its ID.
     /// </summary>
-    /// <param name="zoneIndex">The zone ID.</param>
+    /// <param name="zoneIndex">The zone index.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The zone state if found.</returns>
     Task<Result<ZoneState>> GetZoneAsync(int zoneIndex, CancellationToken cancellationToken = default);
@@ -51,7 +51,7 @@ public interface IZoneManager
     /// <summary>
     /// Gets the state of a specific zone.
     /// </summary>
-    /// <param name="zoneIndex">The zone ID.</param>
+    /// <param name="zoneIndex">The zone index.</param>
     /// <returns>The zone state if found.</returns>
     Task<Result<ZoneState>> GetZoneStateAsync(int zoneIndex);
 

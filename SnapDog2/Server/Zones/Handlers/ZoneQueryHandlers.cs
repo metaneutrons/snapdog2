@@ -207,10 +207,11 @@ public partial class GetZonePlaybackStateQueryHandler(
 /// <summary>
 /// Handles the GetZoneVolumeQuery.
 /// </summary>
-public partial class GetZoneVolumeQueryHandler(IZoneManager zoneManager, ILogger<GetZoneVolumeQueryHandler> logger)
+public partial class GetZoneVolumeQueryHandler(IZoneManager zoneManager, IClientManager clientManager, ILogger<GetZoneVolumeQueryHandler> logger)
     : IQueryHandler<GetZoneVolumeQuery, Result<int>>
 {
     private readonly IZoneManager _zoneManager = zoneManager;
+    private readonly IClientManager _clientManager = clientManager;
     private readonly ILogger<GetZoneVolumeQueryHandler> _logger = logger;
 
     [LoggerMessage(
@@ -231,6 +232,7 @@ public partial class GetZoneVolumeQueryHandler(IZoneManager zoneManager, ILogger
     {
         this.LogHandling(request.ZoneIndex);
 
+        // Check if zone exists
         var zoneResult = await this._zoneManager.GetZoneAsync(request.ZoneIndex).ConfigureAwait(false);
         if (zoneResult.IsFailure)
         {
@@ -238,15 +240,28 @@ public partial class GetZoneVolumeQueryHandler(IZoneManager zoneManager, ILogger
             return Result<int>.Failure(zoneResult.ErrorMessage ?? "Zone not found");
         }
 
-        var zone = zoneResult.Value!;
-        var stateResult = await zone.GetStateAsync().ConfigureAwait(false);
-
-        if (stateResult.IsFailure)
+        // Calculate volume on-demand from client volumes (like snapweb getGroupVolume)
+        var allClientsResult = await this._clientManager.GetAllClientsAsync().ConfigureAwait(false);
+        if (allClientsResult.IsFailure)
         {
-            return Result<int>.Failure(stateResult.ErrorMessage ?? "Failed to get zone state");
+            return Result<int>.Failure("Failed to get clients");
         }
 
-        return Result<int>.Success(stateResult.Value!.Volume);
+        var zoneClients = allClientsResult.Value!
+            .Where(c => c.ZoneIndex == request.ZoneIndex)
+            .ToList();
+
+        if (zoneClients.Count == 0)
+        {
+            return Result<int>.Success(0);
+        }
+
+        // Single client = client volume, multiple clients = average (like snapweb)
+        var volume = zoneClients.Count == 1
+            ? zoneClients[0].Volume
+            : (int)Math.Round(zoneClients.Average(c => c.Volume));
+
+        return Result<int>.Success(volume);
     }
 }
 

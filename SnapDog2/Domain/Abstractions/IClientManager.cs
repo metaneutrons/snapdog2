@@ -43,14 +43,14 @@ public interface IClientManager
     /// <summary>
     /// Gets all clients assigned to a specific zone.
     /// </summary>
-    /// <param name="zoneIndex">The zone ID.</param>
+    /// <param name="zoneIndex">The zone index.</param>
     /// <returns>A result containing the list of client states for the zone.</returns>
     Task<Result<List<ClientState>>> GetClientsByZoneAsync(int zoneIndex);
 
     /// <summary>
     /// Gets all clients assigned to a specific zone.
     /// </summary>
-    /// <param name="zoneIndex">The zone ID.</param>
+    /// <param name="zoneIndex">The zone index.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A result containing the list of client states for the zone.</returns>
     Task<Result<List<ClientState>>> GetClientsByZoneAsync(int zoneIndex, CancellationToken cancellationToken = default);
@@ -59,7 +59,7 @@ public interface IClientManager
     /// Assigns a client to a zone.
     /// </summary>
     /// <param name="clientIndex">The client Index.</param>
-    /// <param name="zoneIndex">The zone ID.</param>
+    /// <param name="zoneIndex">The zone index.</param>
     /// <returns>A result indicating success or failure.</returns>
     Task<Result> AssignClientToZoneAsync(int clientIndex, int zoneIndex);
 
