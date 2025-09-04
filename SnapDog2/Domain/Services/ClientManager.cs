@@ -975,7 +975,7 @@ public partial class ClientManager : IClientManager
         {
             try
             {
-                var notification = new ClientVolumeStatusNotification(this._clientIndex, volume);
+                var notification = new ClientVolumeChangedNotification { ClientIndex = this._clientIndex, Volume = volume };
                 await this._mediator.PublishAsync(notification);
             }
             catch (ObjectDisposedException)
@@ -994,7 +994,7 @@ public partial class ClientManager : IClientManager
         {
             try
             {
-                var notification = new ClientMuteStatusNotification(this._clientIndex, muted);
+                var notification = new ClientMuteChangedNotification { ClientIndex = this._clientIndex, IsMuted = muted };
                 await this._mediator.PublishAsync(notification);
             }
             catch (ObjectDisposedException)

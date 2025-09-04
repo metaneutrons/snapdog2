@@ -627,7 +627,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            var result = this.SetVolumeInternal(volume);
+            var result = await this.SetVolumeInternal(volume);
 
             if (result.IsSuccess)
             {
@@ -642,18 +642,59 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         }
     }
 
-    private Result SetVolumeInternal(int volume)
+    private async Task<Result> SetVolumeInternal(int volume)
     {
         var clampedVolume = Math.Clamp(volume, 0, 100);
 
-        // Update Snapcast group volume if available
+        // Update Snapcast group volume using proportional scaling like snapweb
         if (!string.IsNullOrEmpty(this._snapcastGroupId))
         {
-            // For now, we'll set individual client volumes since there's no SetGroupVolumeAsync
-            // This would need to be implemented by iterating through group clients
-            // var snapcastResult = await _snapcastService.SetGroupVolumeAsync(_snapcastGroupId, clampedVolume).ConfigureAwait(false);
-            // if (snapcastResult.IsFailure)
-            //     return snapcastResult;
+            this.LogZoneAction(this._zoneIndex, this._config.Name, $"Setting group volume {clampedVolume} for group {_snapcastGroupId}");
+
+            // Get group status to find all clients
+            var serverStatus = await this._snapcastService.GetServerStatusAsync();
+            if (serverStatus.IsSuccess)
+            {
+                var group = serverStatus.Value?.Groups?.FirstOrDefault(g => g.Id == this._snapcastGroupId);
+                if (group?.Clients != null && group.Clients.Count > 0)
+                {
+                    // Calculate current group volume (average of all client volumes)
+                    var currentGroupVolume = group.Clients.Average(c => (double)c.Volume);
+                    var delta = clampedVolume - currentGroupVolume;
+
+                    this.LogZoneAction(this._zoneIndex, this._config.Name, $"Current group volume: {currentGroupVolume:F1}, target: {clampedVolume}, delta: {delta:F1}");
+
+                    // Apply proportional scaling to each client (snapweb algorithm)
+                    foreach (var client in group.Clients)
+                    {
+                        var currentClientVolume = (double)client.Volume;
+                        double newClientVolume;
+
+                        if (delta < 0)
+                        {
+                            // Decreasing volume: scale down proportionally
+                            var ratio = Math.Abs(delta) / currentGroupVolume;
+                            newClientVolume = currentClientVolume - (ratio * currentClientVolume);
+                        }
+                        else
+                        {
+                            // Increasing volume: scale up proportionally
+                            var ratio = delta / (100 - currentGroupVolume);
+                            newClientVolume = currentClientVolume + (ratio * (100 - currentClientVolume));
+                        }
+
+                        var finalVolume = Math.Clamp((int)Math.Round(newClientVolume), 0, 100);
+
+                        var clientResult = await this._snapcastService.SetClientVolumeAsync(client.Id, finalVolume);
+                        if (clientResult.IsFailure)
+                        {
+                            this.LogZoneAction(this._zoneIndex, this._config.Name, $"Failed to set volume for client {client.Id}: {clientResult.ErrorMessage}");
+                            return clientResult;
+                        }
+                    }
+                    this.LogZoneAction(this._zoneIndex, this._config.Name, $"Successfully applied proportional volume scaling to {group.Clients.Count} clients");
+                }
+            }
         }
 
         this._currentState = this._currentState with { Volume = clampedVolume };
@@ -668,7 +709,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         {
             var newVolume = Math.Clamp(this._currentState.Volume + step, 0, 100);
             this.LogZoneAction(this._zoneIndex, this._config.Name, $"Set volume to {newVolume}");
-            var result = this.SetVolumeInternal(newVolume);
+            var result = await this.SetVolumeInternal(newVolume);
 
             if (result.IsSuccess)
             {
@@ -690,7 +731,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         {
             var newVolume = Math.Clamp(this._currentState.Volume - step, 0, 100);
             this.LogZoneAction(this._zoneIndex, this._config.Name, $"Set volume to {newVolume}");
-            var result = this.SetVolumeInternal(newVolume);
+            var result = await this.SetVolumeInternal(newVolume);
 
             if (result.IsSuccess)
             {
