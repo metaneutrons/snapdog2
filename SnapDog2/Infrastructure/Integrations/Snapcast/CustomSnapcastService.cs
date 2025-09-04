@@ -70,7 +70,24 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
 
     public async Task<Result> SetClientMuteAsync(string snapcastClientId, bool muted, CancellationToken cancellationToken = default)
     {
-        return await SetClientVolumeAsync(snapcastClientId, 0, muted);
+        // Get current server status to preserve the client's current volume
+        var serverStatus = await GetServerStatusAsync();
+        if (serverStatus.IsFailure)
+        {
+            return serverStatus;
+        }
+
+        var snapcastClient = serverStatus.Value?.Groups
+            ?.SelectMany(g => g.Clients)
+            ?.FirstOrDefault(c => c.Id == snapcastClientId);
+
+        if (snapcastClient == null)
+        {
+            return Result.Failure($"Snapcast client {snapcastClientId} not found in server status");
+        }
+
+        // Preserve current volume when muting/unmuting
+        return await SetClientVolumeAsync(snapcastClientId, snapcastClient.Volume, muted);
     }
 
     public async Task<Result> SetClientLatencyAsync(string snapcastClientId, int latencyMs, CancellationToken cancellationToken = default)
@@ -190,7 +207,24 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
             return Result.Failure($"Client {clientIndex} not found or not configured");
         }
 
-        return await SetClientVolumeAsync(snapcastClientId, 0, muted); // Volume doesn't matter for mute-only
+        // Get current server status to preserve the client's current volume
+        var serverStatus = await GetServerStatusAsync();
+        if (serverStatus.IsFailure)
+        {
+            return serverStatus;
+        }
+
+        var snapcastClient = serverStatus.Value?.Groups
+            ?.SelectMany(g => g.Clients)
+            ?.FirstOrDefault(c => c.Id == snapcastClientId);
+
+        if (snapcastClient == null)
+        {
+            return Result.Failure($"Snapcast client {snapcastClientId} not found in server status");
+        }
+
+        // Preserve current volume when muting/unmuting
+        return await SetClientVolumeAsync(snapcastClientId, snapcastClient.Volume, muted);
     }
 
     public async Task<Result> SetClientLatencyAsync(string snapcastClientId, int latencyMs)
