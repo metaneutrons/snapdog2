@@ -4,182 +4,360 @@ This chapter details the concrete implementations of the infrastructure services
 
 ## 12.1. Snapcast Integration (`/Infrastructure/Snapcast/`)
 
-This component handles all direct communication with the Snapcast server.
+This component handles all direct communication with the Snapcast server using a custom JSON-RPC WebSocket implementation that provides real-time audio streaming control and notification processing.
 
-### 12.1.1. `SnapcastService`
+### 12.1.1. Architecture Overview
+
+The Snapcast integration uses a custom implementation that communicates directly with the Snapcast server's JSON-RPC WebSocket interface, eliminating third-party library dependencies and providing full control over the communication protocol.
+
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   SnapDog API   │───▶│ CustomSnapcast   │───▶│ Snapcast Server │
+│                 │    │     Service      │    │   (JSON-RPC)    │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+                              │                         │
+                              ▼                         │
+                       ┌──────────────────┐             │
+                       │ SnapcastState    │             │
+                       │   Repository     │             │
+                       └──────────────────┘             │
+                              │                         │
+                              ▼                         │
+                       ┌──────────────────┐             │
+                       │   ClientManager  │◀────────────┘
+                       │  (MAC Mapping)   │
+                       └──────────────────┘
+```
+
+### 12.1.2. `CustomSnapcastService`
 
 * **Implements:** `SnapDog2.Core.Abstractions.ISnapcastService`
-* **Purpose:** Manages the connection to the Snapcast server's control port, wraps the underlying library calls, handles server events, and keeps the raw state repository updated.
-* **Key Library:** `SnapcastClient` (v0.3.1) - Uses `SnapcastClient` for communication.
-* **Dependencies:** `IOptions<SnapcastOptions>`, `IMediator`, `ISnapcastStateRepository`, `ILogger<SnapcastService>`.
-* **Core Logic:**
-  * **Connection Management:** Implements `InitializeAsync` to establish a connection using `SnapcastClient.ConnectAsync`. Applies the `_reconnectionPolicy` (Polly indefinite retry with backoff, Sec 7.1) for initial connection and automatic reconnection triggered by the library's `Disconnected` event. Uses `SemaphoreSlim` to prevent concurrent connection attempts.
-  * **Operation Wrapping:** Implements methods defined in `ISnapcastService` (e.g., `GetStatusAsync`, `SetClientGroupAsync`, `SetClientVolumeAsync`, `SetClientNameAsync`, `CreateGroupAsync`, `DeleteGroupAsync`, etc.). Each wrapper method:
-    * Checks disposal status using `ObjectDisposedException.ThrowIf`.
-    * Applies the `_operationPolicy` (Polly limited retry, Sec 7.1) around the call to the corresponding `SnapcastClient.SnapcastClient` method (e.g., `_client.SetClientVolumeAsync(...)`).
-    * Uses `try/catch` around the policy execution to capture final exceptions after retries are exhausted.
-    * Logs operations and errors using the LoggerMessage pattern.
-    * Returns `Result` or `Result<T>` indicating success or failure, converting exceptions to `Result.Failure(ex)`.
-  * **Event Handling:** Subscribes to events exposed by `SnapcastClient.SnapcastClient` (e.g., `ClientConnected`, `ClientDisconnected`, `GroupChanged`, `ClientVolumeChanged`, `Disconnected`). Event handlers perform two main actions:
-        1. **Update State Repository:** Call the appropriate method on the injected `ISnapcastStateRepository` to update the raw in-memory state (e.g., `_stateRepository.UpdateClient(eventArgs.Client)`).
-        2. **Publish Cortex.Mediator Notification:** Publish a corresponding internal notification (defined in `/Server/Notifications`, e.g., `SnapcastClientConnectedNotification(eventArgs.Client)`) using the injected `IMediator`. These notifications carry the raw `SnapcastClient` model data received in the event.
-  * **State Synchronization:** On initial successful connection (`InitializeAsync`) and potentially periodically or after reconnection, calls `_client.GetStatusAsync` to fetch the complete server state and populates the `ISnapcastStateRepository` using `_stateRepository.UpdateServerState`.
-  * **Disposal:** Implements `IAsyncDisposable` to unhook event handlers, gracefully disconnect the `SnapcastClient`, and dispose resources.
+* **Purpose:** Main service implementing ISnapcastService interface with direct JSON-RPC WebSocket communication to Snapcast server.
+* **Key Features:** WebSocket connection management, real-time notification processing, client MAC address to ID mapping, automatic state repository synchronization.
+* **Dependencies:** `SnapcastJsonRpcClient`, `SnapcastStateRepository`, `IServiceProvider`, `ILogger<CustomSnapcastService>`.
+
+**Core Logic:**
+* **Connection Management:** Establishes persistent WebSocket connection to Snapcast server on port 1705. Implements automatic reconnection with exponential backoff strategy.
+* **State Initialization:** Calls `RefreshServerState()` during service startup to populate the state repository with current server state via `Server.GetStatus` command.
+* **Real-time Notifications:** Processes incoming JSON-RPC notifications (`Client.OnVolumeChanged`, `Client.OnConnect`, `Server.OnUpdate`) and publishes corresponding Cortex.Mediator events.
+* **Client Mapping:** Resolves Snapcast client IDs to SnapDog clients using MAC address mapping through the ClientManager.
+* **Operation Wrapping:** Implements all ISnapcastService methods by sending appropriate JSON-RPC commands to the Snapcast server.
 
 ```csharp
-// Example Snippet: /Infrastructure/Snapcast/SnapcastService.cs
-namespace SnapDog2.Infrastructure.Snapcast;
-
-using SnapcastClient;
-using SnapcastClient.Models;
-// ... other usings (Core Abstractions, Models, Config, Logging, Cortex.Mediator, Polly) ...
-
-public partial class SnapcastService : ISnapcastService, IAsyncDisposable
+// Core Implementation: /Infrastructure/Snapcast/CustomSnapcastService.cs
+public partial class CustomSnapcastService : ISnapcastService, IDisposable
 {
-    private readonly SnapcastOptions _config;
-    private readonly IMediator _mediator;
-    private readonly ISnapcastStateRepository _stateRepository;
-    private readonly ILogger<SnapcastService> _logger;
-    private readonly SnapcastClient _client;
-    private readonly IAsyncPolicy _reconnectionPolicy;
-    private readonly IAsyncPolicy _operationPolicy;
-    private bool _disposed = false;
-    private readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(1, 1);
-    private CancellationTokenSource _disconnectCts = new CancellationTokenSource();
+    private readonly SnapcastJsonRpcClient _jsonRpcClient;
+    private readonly SnapcastStateRepository _stateRepository;
+    private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger<CustomSnapcastService> _logger;
 
-    // --- LoggerMessage Definitions ---
-    [LoggerMessage(/*...*/)] private partial void LogInitializing(string host, int port);
-    [LoggerMessage(/*...*/)] private partial void LogConnectAttemptFailed(Exception ex);
-    // ... other loggers ...
-
-    public SnapcastService(IOptions<SnapcastOptions> configOptions, IMediator mediator, ISnapcastStateRepository stateRepository, ILogger<SnapcastService> logger)
+    public async Task<Result> InitializeAsync()
     {
-        // ... Assign injected dependencies ...
-        _stateRepository = stateRepository;
-        // ... Initialize _client, policies, hook events ...
-        _client.ClientVolumeChanged += OnSnapcastClientVolumeChangedHandler; // Example hook
-        _client.Disconnected += OnSnapcastServerDisconnectedHandler;
-    }
-
-    public async Task<Result> InitializeAsync(CancellationToken cancellationToken) { /* ... Connect logic using _reconnectionPolicy ... */ return Result.Success();}
-
-    // --- Wrapper Methods ---
-    public async Task<Result> SetClientVolumeAsync(string snapcastClientId, int volumePercent)
-    {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        var volumeData = new ClientVolume { Percent = volumePercent, Muted = volumePercent == 0 }; // Using SnapcastClient model
-        var policyResult = await _operationPolicy.ExecuteAndCaptureAsync(
-          async ct => await _client.SetClientVolumeAsync(snapcastClientId, volumeData, ct).ConfigureAwait(false)
-        ).ConfigureAwait(false);
-
-        if(policyResult.Outcome == OutcomeType.Failure) {
-            LogOperationFailed(nameof(SetClientVolumeAsync), policyResult.FinalException!);
-            return Result.Failure(policyResult.FinalException!);
-        }
-        return Result.Success();
-    }
-    // ... other wrappers (GetStatusAsync, SetClientGroupAsync etc.) ...
-
-
-    // --- Event Handlers ---
-    private void OnSnapcastClientVolumeChangedHandler(object? sender, ClientVolumeEventArgs e)
-    {
-        if (_disposed) return;
-        LogSnapcastEvent("ClientVolumeChanged", e.ClientIndex); // Example log
         try
         {
-            // 1. Update State Repository (using raw event args/models)
-            var client = _stateRepository.GetClient(e.ClientIndex);
-            if (client != null) { _stateRepository.UpdateClient(client with { Config = client.Config with { Volume = e.Volume }}); }
-
-            // 2. Publish Cortex.Mediator Notification (using raw event args/models)
-            _ = _mediator.Publish(new SnapcastClientVolumeChangedNotification(e.ClientIndex, e.Volume)); // Fire-and-forget publish
-        } catch(Exception ex) { LogEventHandlerError("ClientVolumeChanged", ex); }
+            await _jsonRpcClient.ConnectAsync();
+            
+            // Initialize state repository with current server state
+            await RefreshServerState();
+            
+            _logger.LogInformation("Custom Snapcast service initialized successfully");
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to initialize custom Snapcast service");
+            return Result.Failure(ex);
+        }
     }
-     private void OnSnapcastServerDisconnectedHandler(object? sender, EventArgs e) { /* Trigger Reconnect */ }
-    // ... other event handlers ...
 
-    public async ValueTask DisposeAsync() { /* ... Implementation ... */ await ValueTask.CompletedTask; }
+    private async Task RefreshServerState()
+    {
+        try
+        {
+            var response = await _jsonRpcClient.SendRequestAsync<ServerGetStatusResponse>("Server.GetStatus");
+            var server = ConvertToServer(response.Server);
+            _stateRepository.UpdateServerState(server);
+            _logger.LogDebug("Server state refreshed with {GroupCount} groups", response.Server.Groups.Length);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to refresh server state");
+        }
+    }
 
-    // Internal logger for event handler errors
-    [LoggerMessage(Level = LogLevel.Error, Message = "Error processing Snapcast event {EventType}.")]
-    private partial void LogEventHandlerError(string eventType, Exception ex);
+    // Notification handlers
+    private async Task HandleClientVolumeChanged(ClientOnVolumeChangedNotification notification)
+    {
+        _logger.LogDebug("🔊 Client volume changed: {ClientId} -> {Volume}% (muted: {Muted})", 
+            notification.Id, notification.Volume.Percent, notification.Volume.Muted);
+
+        var (client, clientIndex) = await GetClientBySnapcastIdAsync(notification.Id);
+        if (client == null)
+        {
+            _logger.LogDebug("Ignoring volume change for unconfigured client: {ClientId}", notification.Id);
+            return;
+        }
+
+        // Publish SnapDog notifications using 1-based client index
+        var volumeNotification = new SnapcastClientVolumeChangedNotification(
+            clientIndex.ToString(), 
+            new Models.ClientVolume { Muted = notification.Volume.Muted, Percent = notification.Volume.Percent });
+        
+        using var scope = _serviceProvider.CreateScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        await mediator.PublishAsync(volumeNotification);
+    }
 }
 ```
 
-### 12.1.2. `SnapcastStateRepository`
+### 12.1.3. `SnapcastJsonRpcClient`
 
-* **Implements:** `SnapDog2.Core.Abstractions.ISnapcastStateRepository`
-* **Purpose:** Provides a thread-safe, in-memory store for the *latest known raw state* received from the Snapcast server. This acts as a cache reflecting the server's perspective, updated by `SnapcastService` based on events and status pulls.
-* **Key Library:** Uses `System.Collections.Concurrent.ConcurrentDictionary` for storing `Sturd.SnapcastNet.Models.Client`, `Group`, `Stream`. Uses `lock` for updating the `ServerInfo` struct.
-* **Dependencies:** `ILogger<SnapcastStateRepository>`.
-* **Core Logic:** Implements the `ISnapcastStateRepository` interface methods (`UpdateServerState`, `UpdateClient`, `GetClient`, `GetAllClients`, etc.) using thread-safe dictionary operations (`AddOrUpdate`, `TryRemove`, `TryGetValue`). `UpdateServerState` replaces the entire known state based on a full status dump.
+* **Purpose:** Low-level JSON-RPC WebSocket communication with Snapcast server.
+* **Key Features:** Persistent WebSocket connection management, request/response correlation with unique IDs, automatic reconnection with exponential backoff, comprehensive error handling.
+* **Dependencies:** `ILogger<SnapcastJsonRpcClient>`, `IOptions<SnapcastOptions>`.
+
+**Core Logic:**
+* **WebSocket Management:** Maintains persistent `ClientWebSocket` connection to `ws://localhost:1705/jsonrpc`.
+* **Request Correlation:** Uses `ConcurrentDictionary<string, TaskCompletionSource<JsonElement>>` to correlate requests with responses using unique IDs.
+* **Message Processing:** Handles incoming JSON-RPC messages, distinguishing between responses (with `id`) and notifications (without `id`).
+* **Error Handling:** Comprehensive error handling for connection failures, message parsing errors, and protocol violations.
 
 ```csharp
-// Example Snippet: /Infrastructure/Snapcast/SnapcastStateRepository.cs
-namespace SnapDog2.Infrastructure.Snapcast;
+public class SnapcastJsonRpcClient : IDisposable
+{
+    private ClientWebSocket _webSocket;
+    private readonly ConcurrentDictionary<string, TaskCompletionSource<JsonElement>> _pendingRequests;
 
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Extensions.Logging;
-using SnapDog2.Core.Abstractions;
-using Sturd.SnapcastNet.Models; // Use models from library
+    public async Task<T> SendRequestAsync<T>(string method, object parameters = null)
+    {
+        var id = Guid.NewGuid().ToString();
+        var request = new { id, jsonrpc = "2.0", method, @params = parameters };
+        
+        var tcs = new TaskCompletionSource<JsonElement>();
+        _pendingRequests[id] = tcs;
+        
+        var json = JsonSerializer.Serialize(request);
+        var bytes = Encoding.UTF8.GetBytes(json);
+        
+        await _webSocket.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
+        
+        var response = await tcs.Task;
+        return JsonSerializer.Deserialize<T>(response);
+    }
 
-/// <summary>
-/// Thread-safe repository holding the last known state received from Snapcast server.
-/// </summary>
+    public event Func<string, JsonElement, Task> NotificationReceived;
+    
+    private async Task HandleIncomingMessages()
+    {
+        var buffer = new byte[4096];
+        while (_webSocket.State == WebSocketState.Open)
+        {
+            var result = await _webSocket.ReceiveAsync(buffer, CancellationToken.None);
+            var json = Encoding.UTF8.GetString(buffer, 0, result.Count);
+            var message = JsonDocument.Parse(json);
+            
+            if (message.RootElement.TryGetProperty("id", out var idProperty))
+            {
+                // Response - complete pending request
+                var id = idProperty.GetString();
+                if (_pendingRequests.TryRemove(id, out var tcs))
+                {
+                    tcs.SetResult(message.RootElement.GetProperty("result"));
+                }
+            }
+            else
+            {
+                // Notification - publish event
+                var method = message.RootElement.GetProperty("method").GetString();
+                var parameters = message.RootElement.GetProperty("params");
+                await NotificationReceived?.Invoke(method, parameters);
+            }
+        }
+    }
+}
+```
+
+### 12.1.4. Client MAC Address Mapping System
+
+**Purpose:** Maps Snapcast client IDs to SnapDog client configurations using MAC addresses as the authoritative identifier.
+
+**Problem Solved:** Snapcast clients may have dynamic names but consistent MAC addresses. SnapDog configuration uses MAC addresses to identify clients, while Snapcast notifications use client IDs (names). This system bridges the gap.
+
+**Mapping Flow:**
+1. Snapcast notification contains client ID (e.g., "kitchen")
+2. Query SnapcastStateRepository for client details
+3. Extract MAC address from client host information  
+4. Match MAC address to SnapDog client configuration
+5. Return mapped SnapDog client with 1-based index
+
+```csharp
+public async Task<(IClient? Client, int ClientIndex)> GetClientBySnapcastIdAsync(string snapcastClientId)
+{
+    // Get all Snapcast clients from state repository
+    var allSnapcastClients = this._snapcastStateRepository.GetAllClients();
+
+    // Find the Snapcast client by ID
+    var snapcastClient = allSnapcastClients.FirstOrDefault(c => c.Id == snapcastClientId);
+    if (string.IsNullOrEmpty(snapcastClient.Id))
+    {
+        this.LogSnapcastClientNotFound(snapcastClientId);
+        return (null, 0);
+    }
+
+    // Get the MAC address from the Snapcast client
+    var macAddress = snapcastClient.Host.Mac;
+    if (string.IsNullOrEmpty(macAddress))
+    {
+        this.LogMacAddressNotFound(snapcastClientId);
+        return (null, 0);
+    }
+
+    // Find the corresponding client index by MAC address in our configuration
+    var clientIndex = this._clientConfigs.FindIndex(config =>
+        string.Equals(config.Mac, macAddress, StringComparison.OrdinalIgnoreCase)) + 1; // 1-based index
+
+    if (clientIndex == 0) // Not found (-1 + 1 = 0)
+    {
+        this.LogClientConfigNotFoundByMac(macAddress);
+        return (null, 0);
+    }
+
+    // Create and return the IClient wrapper
+    var client = new SnapDogClient(clientIndex, snapcastClient, this._clientConfigs[clientIndex - 1]);
+    return (client, clientIndex);
+}
+```
+
+### 12.1.5. Protocol Implementation
+
+**JSON-RPC Message Formats:**
+
+**Request Structure:**
+```json
+{
+  "id": 1,
+  "jsonrpc": "2.0", 
+  "method": "Client.SetVolume",
+  "params": {
+    "id": "kitchen",
+    "volume": {
+      "muted": false,
+      "percent": 75
+    }
+  }
+}
+```
+
+**Notification Structure:**
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "Client.OnVolumeChanged", 
+  "params": {
+    "id": "kitchen",
+    "volume": {
+      "muted": false,
+      "percent": 75
+    }
+  }
+}
+```
+
+**Supported Commands:**
+- `Client.SetVolume` - Set client volume and mute state
+- `Client.SetLatency` - Adjust client audio latency  
+- `Client.SetName` - Update client display name
+- `Group.SetClients` - Assign clients to groups (zones)
+- `Group.SetMute` - Mute/unmute entire group
+- `Group.SetStream` - Change group audio stream
+- `Server.GetStatus` - Retrieve complete server state
+
+**Critical Notifications:**
+- `Client.OnVolumeChanged` - Volume/mute state changes
+- `Client.OnConnect` - Client connection events
+- `Client.OnDisconnect` - Client disconnection events
+- `Server.OnUpdate` - Complete server state synchronization
+
+### 12.1.6. `SnapcastStateRepository`
+
+* **Implements:** `SnapDog2.Core.Abstractions.ISnapcastStateRepository`
+* **Purpose:** Thread-safe, in-memory store for the latest known raw state received from the Snapcast server. Acts as a cache reflecting the server's perspective, updated by CustomSnapcastService based on events and status pulls.
+* **Key Features:** Thread-safe operations using `ConcurrentDictionary`, complete state synchronization, MAC address-based client lookup.
+* **Dependencies:** `ILogger<SnapcastStateRepository>`.
+
+**Core Logic:** 
+* Implements thread-safe dictionary operations for storing `SnapClient`, `Group`, `Stream` objects
+* `UpdateServerState` replaces entire known state based on full status dump from `Server.GetStatus`
+* Provides efficient lookup methods for client MAC address resolution
+* Maintains comprehensive logging for all state changes
+
+```csharp
 public partial class SnapcastStateRepository : ISnapcastStateRepository
 {
-    private readonly ConcurrentDictionary<string, Client> _clients = new();
-    private readonly ConcurrentDictionary<string, Group>_groups = new();
+    private readonly ConcurrentDictionary<string, SnapClient> _clients = new();
+    private readonly ConcurrentDictionary<string, Group> _groups = new();
     private readonly ConcurrentDictionary<string, Stream> _streams = new();
-    private ServerInfo_serverInfo;
+    private Server _serverInfo;
     private readonly object _serverInfoLock = new();
-    private readonly ILogger<SnapcastStateRepository>_logger;
-
-    // Logger Messages
-    [LoggerMessage(1, LogLevel.Debug, "Updating full Snapcast server state. Groups: {GroupCount}, Clients: {ClientCount}, Streams: {StreamCount}")]
-    private partial void LogUpdatingServerState(int groupCount, int clientCount, int streamCount);
-    [LoggerMessage(2, LogLevel.Debug, "Updating Snapcast Client {SnapcastId}")] private partial void LogUpdatingClient(string snapcastId);
-    [LoggerMessage(3, LogLevel.Debug, "Removing Snapcast Client {SnapcastId}")] private partial void LogRemovingClient(string snapcastId);
-    [LoggerMessage(4, LogLevel.Debug, "Updating Snapcast Group {GroupId}")] private partial void LogUpdatingGroup(string groupId);
-    [LoggerMessage(5, LogLevel.Debug, "Removing Snapcast Group {GroupId}")] private partial void LogRemovingGroup(string groupId);
-    // ... Loggers for Streams ...
-
-    public SnapcastStateRepository(ILogger<SnapcastStateRepository> logger)
-    {
-        _logger = logger;
-    }
 
     public void UpdateServerState(Server server)
     {
-        LogUpdatingServerState(server.Groups?.Count ?? 0, server.Groups?.SelectMany(g => g.Clients).Count() ?? 0, server.Streams?.Count ?? 0);
-        lock(_serverInfoLock) { _serverInfo = server.ServerInfo; }
+        var allClients = server.Groups?.SelectMany(g => g.Clients).DistinctBy(c => c.Id) ?? Enumerable.Empty<SnapClient>();
+        var clientCount = allClients.Count();
+        var groupCount = server.Groups?.Length ?? 0;
+        var streamCount = server.Streams?.Length ?? 0;
+
+        LogUpdatingServerState(groupCount, clientCount, streamCount);
+        
+        lock (_serverInfoLock) { _serverInfo = server; }
+        
         UpdateDictionary(_groups, server.Groups?.ToDictionary(g => g.Id, g => g) ?? new Dictionary<string, Group>());
-        var allClients = server.Groups?.SelectMany(g => g.Clients).DistinctBy(c => c.Id) ?? Enumerable.Empty<Client>();
         UpdateDictionary(_clients, allClients.ToDictionary(c => c.Id, c => c));
         UpdateDictionary(_streams, server.Streams?.ToDictionary(s => s.Id, s => s) ?? new Dictionary<string, Stream>());
     }
-    public void UpdateClient(Client client) { LogUpdatingClient(client.Id); _clients[client.Id] = client; }
-    public void RemoveClient(string id) { LogRemovingClient(id); _clients.TryRemove(id, out _); }
-    public Client? GetClient(string id) => _clients.TryGetValue(id, out var client) ? client : null;
-    public IEnumerable<Client> GetAllClients() => _clients.Values.ToList(); // Return copy
-    public void UpdateGroup(Group group) { LogUpdatingGroup(group.Id); _groups[group.Id] = group; foreach(var client in group.Clients) UpdateClient(client); }
-    public void RemoveGroup(string id) { LogRemovingGroup(id); _groups.TryRemove(id, out _); }
-    public Group? GetGroup(string id) => _groups.TryGetValue(id, out var group) ? group : null;
-    public IEnumerable<Group> GetAllGroups() => _groups.Values.ToList(); // Return copy
-    public ServerInfo GetServerInfo() { lock(_serverInfoLock) return _serverInfo; }
-    public void UpdateStream(Stream stream) { /* Log */ _streams[stream.Id] = stream; }
-    public void RemoveStream(string id) { /* Log */ _streams.TryRemove(id, out _); }
-    public Stream? GetStream(string id) => _streams.TryGetValue(id, out var stream) ? stream : null;
-    public IEnumerable<Stream> GetAllStreams() => _streams.Values.ToList();
 
-    private static void UpdateDictionary<TKey, TValue>(ConcurrentDictionary<TKey, TValue> target, IDictionary<TKey, TValue> source) where TKey : notnull
+    public SnapClient? GetClientByMac(string macAddress)
     {
-        foreach (var key in target.Keys.Except(source.Keys)) { target.TryRemove(key, out _); }
-        foreach (var kvp in source) { target[kvp.Key] = kvp.Value; }
+        return _clients.Values.FirstOrDefault(c => 
+            string.Equals(c.Host.Mac, macAddress, StringComparison.OrdinalIgnoreCase));
     }
+
+    public IEnumerable<SnapClient> GetAllClients() => _clients.Values.ToList();
+}
+```
+
+### 12.1.7. Integration Points
+
+**Event Publishing Flow:**
+1. Snapcast sends `Client.OnVolumeChanged` notification via WebSocket
+2. `CustomSnapcastService` receives and processes notification  
+3. MAC address mapping resolves SnapDog client using `ClientManager`
+4. `SnapcastClientVolumeChangedNotification` published via Cortex.Mediator
+5. Multiple handlers process the event:
+   - Storage update in `SnapcastEventNotificationHandler`
+   - MQTT publishing via `IntegrationPublishingHandlers`
+   - KNX integration via `KnxIntegrationHandler`
+   - SignalR real-time updates via `SignalRNotificationHandler`
+
+**Service Registration:**
+```csharp
+// Program.cs - Infrastructure Services
+services.AddSingleton<SnapcastJsonRpcClient>();
+services.AddSingleton<ISnapcastService, CustomSnapcastService>();
+services.AddSingleton<SnapcastStateRepository>();
+```
+
+**Configuration:**
+```json
+{
+  "Snapcast": {
+    "Host": "localhost",
+    "Port": 1705,
+    "ConnectionTimeout": "00:00:30",
+    "ReconnectDelay": "00:00:05", 
+    "MaxReconnectAttempts": 10
+  }
 }
 ```
 
