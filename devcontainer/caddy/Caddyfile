@@ -25,7 +25,6 @@
 
     # SnapDog WebUI - Frontend development server with hot reload (FIRST!)
     handle /webui* {
-        uri strip_prefix /webui
         reverse_proxy http://frontend:5173
     }
 
