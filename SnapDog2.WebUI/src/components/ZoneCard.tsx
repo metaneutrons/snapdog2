@@ -25,9 +25,9 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({ zoneIndex, draggingClientInd
 
   if (!zone) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h3 className="text-lg font-semibold mb-4">Zone {zoneIndex}</h3>
-        <p className="text-gray-500">Loading...</p>
+      <div className="bg-theme-secondary rounded-lg shadow-theme p-6 border border-theme-primary">
+        <h3 className="text-lg font-semibold mb-4 text-theme-primary">Zone {zoneIndex}</h3>
+        <p className="text-theme-secondary">Loading...</p>
       </div>
     );
   }
@@ -36,13 +36,13 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({ zoneIndex, draggingClientInd
   const handleMuteToggle = () => toggleZoneMute(zoneIndex).catch(console.error);
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h3 className="text-lg font-semibold mb-4">Zone {zoneIndex}</h3>
+    <div className="bg-theme-secondary rounded-lg shadow-theme p-6 border border-theme-primary">
+      <h3 className="text-lg font-semibold mb-4 text-theme-primary">Zone {zoneIndex}</h3>
       
       {/* Current track info */}
-      <div className="mb-4 p-3 bg-gray-50 rounded">
+      <div className="mb-4 p-3 bg-theme-tertiary rounded border border-theme-primary">
         <div className="flex gap-3 mb-2">
-          <div className="w-16 h-16 bg-gray-300 rounded flex-shrink-0 flex items-center justify-center">
+          <div className="w-16 h-16 bg-theme-primary rounded flex-shrink-0 flex items-center justify-center border border-theme-secondary">
             {zone.track?.coverArtUrl ? (
               <img 
                 src={zone.track.coverArtUrl} 
@@ -50,13 +50,13 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({ zoneIndex, draggingClientInd
                 className="w-full h-full object-cover rounded"
               />
             ) : (
-              <span className="text-gray-500 text-xs">No cover</span>
+              <span className="text-theme-tertiary text-xs">No cover</span>
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <h4 className="font-medium truncate">{zone.track?.title || 'No track'}</h4>
-            <p className="text-sm text-gray-600 truncate">{zone.track?.artist || 'Unknown artist'}</p>
-            <p className="text-xs text-gray-500 truncate">{zone.track?.album || 'Unknown album'}</p>
+            <h4 className="font-medium truncate text-theme-primary">{zone.track?.title || 'No track'}</h4>
+            <p className="text-sm text-theme-secondary truncate">{zone.track?.artist || 'Unknown artist'}</p>
+            <p className="text-xs text-theme-tertiary truncate">{zone.track?.album || 'Unknown album'}</p>
           </div>
         </div>
         
@@ -65,21 +65,21 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({ zoneIndex, draggingClientInd
           <div className="space-y-1">
             {zone.track.durationMs ? (
               <>
-                <div className="w-full bg-gray-200 rounded-full h-1">
+                <div className="w-full bg-theme-primary rounded-full h-1 border border-theme-secondary">
                   <div 
-                    className="bg-blue-600 h-1 rounded-full transition-all duration-1000" 
+                    className="bg-blue-500 h-1 rounded-full transition-all duration-1000" 
                     style={{ 
                       width: `${zone.progress?.progress || 0}%` 
                     }}
                   />
                 </div>
-                <div className="flex justify-between text-xs text-gray-500">
+                <div className="flex justify-between text-xs text-theme-tertiary">
                   <span>{formatTime(zone.progress?.position || 0)}</span>
                   <span>{formatTime(zone.track.durationMs)}</span>
                 </div>
               </>
             ) : (
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-theme-tertiary">
                 {formatTime(zone.progress?.position || 0)}
               </div>
             )}
@@ -96,7 +96,7 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({ zoneIndex, draggingClientInd
       />
       
       <div className="mt-4">
-        <h5 className="text-sm font-medium mb-2">Clients</h5>
+        <h5 className="text-sm font-medium mb-2 text-theme-primary">Clients</h5>
         <ClientList 
           zoneIndex={zoneIndex}
           draggingClientIndex={draggingClientIndex}

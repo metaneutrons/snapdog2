@@ -3,6 +3,7 @@ import { useAppStore } from './store';
 import { api } from './services/api';
 import { playlistApi } from './services/playlistApi';
 import { ZoneCard } from './components/ZoneCard';
+import { ThemeToggle } from './components/ThemeToggle';
 import { useSignalR } from './hooks/useSignalR';
 
 function App() {
@@ -107,14 +108,21 @@ function App() {
   };
 
   if (isLoading) {
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-theme-primary">
+        <div className="text-theme-primary text-lg">Loading...</div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm sticky top-0 z-10">
+    <div className="min-h-screen bg-theme-primary">
+      <header className="bg-theme-secondary shadow-theme sticky top-0 z-10 border-b border-theme-primary">
         <div className="max-w-7xl mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold">SnapDog Audio Control</h1>
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold text-theme-primary">SnapDog Audio Control</h1>
+            <ThemeToggle />
+          </div>
         </div>
       </header>
       <main className="p-6">

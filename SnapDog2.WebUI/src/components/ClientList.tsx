@@ -18,7 +18,7 @@ export function ClientList({ zoneIndex, draggingClientIndex, onClientDragStart, 
   const isDropTarget = draggingClientIndex !== null;
 
   return (
-    <div className={`space-y-2 p-2 rounded-lg transition-colors duration-200 min-h-[6rem] ${isDropTarget ? 'bg-blue-100 border-2 border-dashed border-blue-400' : 'bg-gray-100'}`}>
+    <div className={`space-y-2 p-2 rounded-lg transition-colors duration-200 min-h-[6rem] border ${isDropTarget ? 'bg-blue-100 border-2 border-dashed border-blue-400' : 'bg-theme-primary border-theme-secondary'}`}>
       {clientIndices.length > 0 ? (
         clientIndices.map((clientIndex) => (
           <ClientChip
@@ -29,7 +29,7 @@ export function ClientList({ zoneIndex, draggingClientIndex, onClientDragStart, 
           />
         ))
       ) : (
-        <div className="text-gray-500 text-sm text-center py-4">
+        <div className="text-theme-tertiary text-sm text-center py-4">
           No clients assigned
         </div>
       )}

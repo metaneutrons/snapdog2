@@ -50,9 +50,9 @@ export const ClientChip: React.FC<ClientChipProps> = ({
 
   if (!client) {
     return (
-      <div className={`bg-gray-200 rounded-lg p-3 animate-pulse ${className}`}>
-        <div className="h-4 bg-gray-300 rounded mb-2"></div>
-        <div className="h-2 bg-gray-300 rounded"></div>
+      <div className={`bg-theme-tertiary rounded-lg p-3 animate-pulse border border-theme-secondary ${className}`}>
+        <div className="h-4 bg-theme-primary rounded mb-2"></div>
+        <div className="h-2 bg-theme-primary rounded"></div>
       </div>
     );
   }
@@ -60,9 +60,9 @@ export const ClientChip: React.FC<ClientChipProps> = ({
   return (
     <div
       className={`
-        bg-white border rounded-lg p-3 cursor-move transition-all duration-200 space-y-2
-        ${client.connected ? 'border-green-300' : 'border-gray-300'}
-        ${isDragging ? 'opacity-50 scale-95 shadow-lg' : 'hover:shadow-md hover:border-blue-400'}
+        bg-theme-secondary border rounded-lg p-3 cursor-move transition-all duration-200 space-y-2
+        ${client.connected ? 'border-green-400' : 'border-theme-secondary'}
+        ${isDragging ? 'opacity-50 scale-95 shadow-theme-lg' : 'hover:shadow-theme hover:border-blue-400'}
         ${className}
       `}
       draggable
@@ -72,10 +72,10 @@ export const ClientChip: React.FC<ClientChipProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2 min-w-0">
           <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${client.connected ? 'bg-green-500' : 'bg-red-500'}`} />
-          <span className="text-sm font-semibold text-gray-800 truncate">{client.name || `Client ${clientIndex}`}</span>
+          <span className="text-sm font-semibold text-theme-primary truncate">{client.name || `Client ${clientIndex}`}</span>
         </div>
         {client.latency !== undefined && (
-          <span className="text-xs text-gray-500 flex-shrink-0">{client.latency}ms</span>
+          <span className="text-xs text-theme-tertiary flex-shrink-0">{client.latency}ms</span>
         )}
       </div>
 
