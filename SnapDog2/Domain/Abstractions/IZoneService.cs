@@ -238,4 +238,10 @@ public interface IZoneService
     /// <returns>Task representing the async operation.</returns>
     Task PublishPlaylistStatusAsync(PlaylistInfo playlistInfo, int playlistIndex);
 
+    /// <summary>
+    /// Updates the Snapcast group ID for this zone.
+    /// </summary>
+    /// <param name="groupId">The new group ID, or null to clear it.</param>
+    void UpdateSnapcastGroupId(string? groupId);
+
 }

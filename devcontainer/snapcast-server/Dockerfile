@@ -10,7 +10,7 @@
 FROM alpine:3.21 AS builder
 
 # Build configuration
-ARG SNAPCAST_VERSION=0.31.0
+ARG SNAPCAST_VERSION=0.32.3
 ARG MAKEFLAGS="-j$(nproc)"
 
 # Install build dependencies (minimal set for development)

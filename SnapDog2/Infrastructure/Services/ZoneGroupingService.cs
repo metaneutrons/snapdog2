@@ -146,6 +146,19 @@ public partial class ZoneGroupingService(
             // Check if zone is already properly configured
             if (this.IsZoneProperlyConfigured(serverStatus.Value, clientIndexs, expectedStreamId))
             {
+                // Find the group that contains our clients and update the zone manager
+                var existingGroup = serverStatus.Value?.Groups
+                    .FirstOrDefault(g => g.Clients.Any(c => clientIndexs.Contains(c.Id)));
+
+                if (existingGroup != null)
+                {
+                    var zone = await this._zoneManager.GetZoneAsync(zoneIndex);
+                    if (zone.IsSuccess)
+                    {
+                        zone.Value.UpdateSnapcastGroupId(existingGroup.Id);
+                    }
+                }
+
                 this.LogZoneAlreadyConfigured(zoneIndex, string.Join(",", clientIndexs), expectedStreamId);
                 return Result.Success();
             }

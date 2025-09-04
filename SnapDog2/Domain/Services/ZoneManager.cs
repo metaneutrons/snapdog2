@@ -729,16 +729,25 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     private async Task<Result> SetMuteInternalAsync(bool enabled)
     {
+        this.LogZoneAction(this._zoneIndex, this._config.Name, $"SetMuteInternal: enabled={enabled}, snapcastGroupId={_snapcastGroupId ?? "null"}");
+
         // Update Snapcast group mute if available
         if (!string.IsNullOrEmpty(this._snapcastGroupId))
         {
+            this.LogZoneAction(this._zoneIndex, this._config.Name, $"Calling SetGroupMuteAsync for group {_snapcastGroupId}");
             var snapcastResult = await this
                 ._snapcastService.SetGroupMuteAsync(this._snapcastGroupId, enabled)
                 .ConfigureAwait(false);
             if (snapcastResult.IsFailure)
             {
+                this.LogZoneAction(this._zoneIndex, this._config.Name, $"SetGroupMuteAsync failed: {snapcastResult.ErrorMessage}");
                 return snapcastResult;
             }
+            this.LogZoneAction(this._zoneIndex, this._config.Name, $"SetGroupMuteAsync succeeded");
+        }
+        else
+        {
+            this.LogZoneAction(this._zoneIndex, this._config.Name, "Skipping Snapcast group mute - no group ID set");
         }
 
         this._currentState = this._currentState with { Mute = enabled };
@@ -1306,6 +1315,12 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             Clients = Array.Empty<int>(),
             TimestampUtc = DateTime.UtcNow,
         };
+    }
+
+    public void UpdateSnapcastGroupId(string? groupId)
+    {
+        this._snapcastGroupId = groupId;
+        this.LogZoneAction(this._zoneIndex, this._config.Name, $"Updated Snapcast group ID to: {groupId ?? "null"}");
     }
 
     private async Task EnsureSnapcastGroupAsync()
