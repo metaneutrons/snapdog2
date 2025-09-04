@@ -61,7 +61,7 @@ export const ClientChip: React.FC<ClientChipProps> = ({
     <div
       className={`
         bg-theme-secondary border rounded-lg p-3 cursor-move transition-all duration-200 space-y-2
-        ${client.connected ? 'border-green-400' : 'border-theme-secondary'}
+        ${client.connected ? 'border-theme-secondary' : 'border-red-300'}
         ${isDragging ? 'opacity-50 scale-95 shadow-theme-lg' : 'hover:shadow-theme hover:border-blue-400'}
         ${className}
       `}
