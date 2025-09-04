@@ -52,12 +52,12 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
             // Initialize state repository with current server state
             await RefreshServerState();
 
-            _logger.LogInformation("Custom Snapcast service initialized successfully");
+            LogServiceInitialized();
             return Result.Success();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to initialize custom Snapcast service");
+            LogInitializationFailed(ex);
             return Result.Failure($"Failed to initialize: {ex.Message}");
         }
     }
@@ -118,7 +118,7 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to delete client {ClientId}", snapcastClientId);
+            LogDeleteClientFailed(ex, snapcastClientId);
             return Result.Failure($"Failed to delete client: {ex.Message}");
         }
     }
@@ -144,7 +144,7 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to get RPC version");
+            LogGetRpcVersionFailed(ex);
             return Result<VersionDetails>.Failure($"Failed to get version: {ex.Message}");
         }
     }
@@ -159,14 +159,13 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
 
             await _jsonRpcClient.SendRequestAsync<ClientSetVolumeResponse>("Client.SetVolume", request);
 
-            _logger.LogDebug("Set client {ClientId} volume to {Volume}% (muted: {Muted})",
-                snapcastClientId, volumePercent, muted);
+            LogSetClientVolume(snapcastClientId, volumePercent, muted);
 
             return Result.Success();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to set client volume for {ClientId}", snapcastClientId);
+            LogSetClientVolumeFailed(ex, snapcastClientId);
             return Result.Failure($"Failed to set volume: {ex.Message}");
         }
     }
@@ -201,12 +200,12 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
             var request = new ClientSetLatencyRequest(snapcastClientId, latencyMs);
             await _jsonRpcClient.SendRequestAsync<ClientSetLatencyResponse>("Client.SetLatency", request);
 
-            _logger.LogDebug("Set client {ClientId} latency to {Latency}ms", snapcastClientId, latencyMs);
+            LogSetClientLatency(snapcastClientId, latencyMs);
             return Result.Success();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to set client latency for {ClientId}", snapcastClientId);
+            LogSetClientLatencyFailed(ex, snapcastClientId);
             return Result.Failure($"Failed to set latency: {ex.Message}");
         }
     }
@@ -218,12 +217,12 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
             var request = new ClientSetNameRequest(snapcastClientId, name);
             await _jsonRpcClient.SendRequestAsync<ClientSetNameResponse>("Client.SetName", request);
 
-            _logger.LogDebug("Set client {ClientId} name to {Name}", snapcastClientId, name);
+            LogSetClientName(snapcastClientId, name);
             return Result.Success();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to set client name for {ClientId}", snapcastClientId);
+            LogSetClientNameFailed(ex, snapcastClientId);
             return Result.Failure($"Failed to set name: {ex.Message}");
         }
     }
@@ -235,12 +234,12 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
             var request = new GroupSetMuteRequest(groupId, muted);
             await _jsonRpcClient.SendRequestAsync<GroupSetMuteResponse>("Group.SetMute", request);
 
-            _logger.LogDebug("Set group {GroupId} mute to {Muted}", groupId, muted);
+            LogSetGroupMute(groupId, muted);
             return Result.Success();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to set group mute for {GroupId}", groupId);
+            LogSetGroupMuteFailed(ex, groupId);
             return Result.Failure($"Failed to set mute: {ex.Message}");
         }
     }
@@ -252,12 +251,12 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
             var request = new GroupSetStreamRequest(groupId, streamId);
             await _jsonRpcClient.SendRequestAsync<GroupSetStreamResponse>("Group.SetStream", request);
 
-            _logger.LogDebug("Set group {GroupId} stream to {StreamId}", groupId, streamId);
+            LogSetGroupStream(groupId, streamId);
             return Result.Success();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to set group stream for {GroupId}", groupId);
+            LogSetGroupStreamFailed(ex, groupId);
             return Result.Failure($"Failed to set stream: {ex.Message}");
         }
     }
@@ -269,12 +268,12 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
             var request = new GroupSetNameRequest(groupId, name);
             await _jsonRpcClient.SendRequestAsync<GroupSetNameResponse>("Group.SetName", request);
 
-            _logger.LogDebug("Set group {GroupId} name to {Name}", groupId, name);
+            LogSetGroupName(groupId, name);
             return Result.Success();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to set group name for {GroupId}", groupId);
+            LogSetGroupNameFailed(ex, groupId);
             return Result.Failure($"Failed to set name: {ex.Message}");
         }
     }
@@ -286,12 +285,12 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
             var request = new GroupSetClientsRequest(groupId, clientIds.ToArray());
             await _jsonRpcClient.SendRequestAsync<ServerGetStatusResponse>("Group.SetClients", request);
 
-            _logger.LogDebug("Set group {GroupId} clients to {Clients}", groupId, string.Join(",", clientIds));
+            LogSetGroupClients(groupId, string.Join(",", clientIds));
             return Result.Success();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to set group clients for {GroupId}", groupId);
+            LogSetGroupClientsFailed(ex, groupId);
             return Result.Failure($"Failed to set clients: {ex.Message}");
         }
     }
@@ -312,7 +311,7 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to get server status");
+            LogGetServerStatusFailed(ex);
             return Result<SnapcastServerStatus>.Failure($"Failed to get status: {ex.Message}");
         }
     }
@@ -327,7 +326,7 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to get RPC version");
+            LogGetRpcVersionFailed(ex);
             return Result<RpcVersion>.Failure($"Failed to get version: {ex.Message}");
         }
     }
@@ -420,26 +419,25 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
                     break;
 
                 default:
-                    _logger.LogDebug("Unhandled notification: {Method}", method);
+                    LogUnhandledNotification(method);
                     break;
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error handling notification {Method}", method);
+            LogNotificationHandlingError(ex, method);
         }
     }
 
     private async Task HandleClientVolumeChanged(ClientOnVolumeChangedNotification notification)
     {
-        _logger.LogDebug("🔊 Client volume changed: {ClientId} -> {Volume}% (muted: {Muted})",
-            notification.Id, notification.Volume.Percent, notification.Volume.Muted);
+        LogClientVolumeChanged(notification.Id, notification.Volume.Percent, notification.Volume.Muted);
 
         // Only process notifications for explicitly configured clients
         var (client, clientIndex) = await GetClientBySnapcastIdAsync(notification.Id);
         if (client == null)
         {
-            _logger.LogDebug("Ignoring volume change for unconfigured client: {ClientId}", notification.Id);
+            LogIgnoringVolumeChange(notification.Id);
             return;
         }
 
@@ -552,11 +550,11 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
             var response = await _jsonRpcClient.SendRequestAsync<ServerGetStatusResponse>("Server.GetStatus");
             var server = ConvertToServer(response.Server);
             _stateRepository.UpdateServerState(server);
-            _logger.LogDebug("Server state refreshed with {GroupCount} groups", response.Server.Groups.Length);
+            LogServerStateRefreshed(response.Server.Groups.Length);
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Failed to refresh server state");
+            LogRefreshServerStateFailed(ex);
         }
     }
 
@@ -761,14 +759,14 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Health check failed, attempting reconnection");
+            LogHealthCheckFailed(ex);
             try
             {
                 await _jsonRpcClient.ConnectAsync();
             }
             catch (Exception reconnectEx)
             {
-                _logger.LogError(reconnectEx, "Failed to reconnect during health check");
+                LogReconnectFailed(reconnectEx);
             }
         }
     }
@@ -778,4 +776,86 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
         _healthCheckTimer?.Dispose();
         _jsonRpcClient?.Dispose();
     }
+
+    // LoggerMessage patterns
+    [LoggerMessage(EventId = 1001, Level = LogLevel.Information, Message = "Custom Snapcast service initialized successfully")]
+    private partial void LogServiceInitialized();
+
+    [LoggerMessage(EventId = 1002, Level = LogLevel.Error, Message = "Failed to initialize custom Snapcast service")]
+    private partial void LogInitializationFailed(Exception ex);
+
+    [LoggerMessage(EventId = 1003, Level = LogLevel.Error, Message = "Failed to delete client {ClientId}")]
+    private partial void LogDeleteClientFailed(Exception ex, string clientId);
+
+    [LoggerMessage(EventId = 1004, Level = LogLevel.Error, Message = "Failed to get RPC version")]
+    private partial void LogGetRpcVersionFailed(Exception ex);
+
+    [LoggerMessage(EventId = 1005, Level = LogLevel.Debug, Message = "Set client {ClientId} volume to {Volume}% (muted: {Muted})")]
+    private partial void LogSetClientVolume(string clientId, int volume, bool muted);
+
+    [LoggerMessage(EventId = 1006, Level = LogLevel.Error, Message = "Failed to set client volume for {ClientId}")]
+    private partial void LogSetClientVolumeFailed(Exception ex, string clientId);
+
+    [LoggerMessage(EventId = 1007, Level = LogLevel.Debug, Message = "Set client {ClientId} latency to {Latency}ms")]
+    private partial void LogSetClientLatency(string clientId, int latency);
+
+    [LoggerMessage(EventId = 1008, Level = LogLevel.Error, Message = "Failed to set client latency for {ClientId}")]
+    private partial void LogSetClientLatencyFailed(Exception ex, string clientId);
+
+    [LoggerMessage(EventId = 1009, Level = LogLevel.Debug, Message = "Set client {ClientId} name to {Name}")]
+    private partial void LogSetClientName(string clientId, string name);
+
+    [LoggerMessage(EventId = 1010, Level = LogLevel.Error, Message = "Failed to set client name for {ClientId}")]
+    private partial void LogSetClientNameFailed(Exception ex, string clientId);
+
+    [LoggerMessage(EventId = 1011, Level = LogLevel.Debug, Message = "Set group {GroupId} mute to {Muted}")]
+    private partial void LogSetGroupMute(string groupId, bool muted);
+
+    [LoggerMessage(EventId = 1012, Level = LogLevel.Error, Message = "Failed to set group mute for {GroupId}")]
+    private partial void LogSetGroupMuteFailed(Exception ex, string groupId);
+
+    [LoggerMessage(EventId = 1013, Level = LogLevel.Debug, Message = "Set group {GroupId} stream to {StreamId}")]
+    private partial void LogSetGroupStream(string groupId, string streamId);
+
+    [LoggerMessage(EventId = 1014, Level = LogLevel.Error, Message = "Failed to set group stream for {GroupId}")]
+    private partial void LogSetGroupStreamFailed(Exception ex, string groupId);
+
+    [LoggerMessage(EventId = 1015, Level = LogLevel.Debug, Message = "Set group {GroupId} name to {Name}")]
+    private partial void LogSetGroupName(string groupId, string name);
+
+    [LoggerMessage(EventId = 1016, Level = LogLevel.Error, Message = "Failed to set group name for {GroupId}")]
+    private partial void LogSetGroupNameFailed(Exception ex, string groupId);
+
+    [LoggerMessage(EventId = 1017, Level = LogLevel.Debug, Message = "Set group {GroupId} clients to {Clients}")]
+    private partial void LogSetGroupClients(string groupId, string clients);
+
+    [LoggerMessage(EventId = 1018, Level = LogLevel.Error, Message = "Failed to set group clients for {GroupId}")]
+    private partial void LogSetGroupClientsFailed(Exception ex, string groupId);
+
+    [LoggerMessage(EventId = 1019, Level = LogLevel.Error, Message = "Failed to get server status")]
+    private partial void LogGetServerStatusFailed(Exception ex);
+
+    [LoggerMessage(EventId = 1020, Level = LogLevel.Debug, Message = "Unhandled notification: {Method}")]
+    private partial void LogUnhandledNotification(string method);
+
+    [LoggerMessage(EventId = 1021, Level = LogLevel.Error, Message = "Error handling notification {Method}")]
+    private partial void LogNotificationHandlingError(Exception ex, string method);
+
+    [LoggerMessage(EventId = 1022, Level = LogLevel.Debug, Message = "🔊 Client volume changed: {ClientId} -> {Volume}% (muted: {Muted})")]
+    private partial void LogClientVolumeChanged(string clientId, int volume, bool muted);
+
+    [LoggerMessage(EventId = 1023, Level = LogLevel.Debug, Message = "Ignoring volume change for unconfigured client: {ClientId}")]
+    private partial void LogIgnoringVolumeChange(string clientId);
+
+    [LoggerMessage(EventId = 1024, Level = LogLevel.Debug, Message = "Server state refreshed with {GroupCount} groups")]
+    private partial void LogServerStateRefreshed(int groupCount);
+
+    [LoggerMessage(EventId = 1025, Level = LogLevel.Warning, Message = "Failed to refresh server state")]
+    private partial void LogRefreshServerStateFailed(Exception ex);
+
+    [LoggerMessage(EventId = 1026, Level = LogLevel.Warning, Message = "Health check failed, attempting reconnection")]
+    private partial void LogHealthCheckFailed(Exception ex);
+
+    [LoggerMessage(EventId = 1027, Level = LogLevel.Error, Message = "Failed to reconnect during health check")]
+    private partial void LogReconnectFailed(Exception ex);
 }

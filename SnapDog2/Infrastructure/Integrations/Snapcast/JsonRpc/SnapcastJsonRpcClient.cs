@@ -5,7 +5,7 @@ using System.Text.Json;
 
 namespace SnapDog2.Infrastructure.Integrations.Snapcast.JsonRpc;
 
-public class SnapcastJsonRpcClient : IDisposable
+public partial class SnapcastJsonRpcClient : IDisposable
 {
     private readonly string _webSocketUrl;
     private readonly ILogger<SnapcastJsonRpcClient> _logger;
@@ -34,7 +34,7 @@ public class SnapcastJsonRpcClient : IDisposable
         _webSocket = new ClientWebSocket();
 
         await _webSocket.ConnectAsync(new Uri(_webSocketUrl), _cancellationTokenSource.Token);
-        _logger.LogInformation("Connected to Snapcast WebSocket: {Url}", _webSocketUrl);
+        LogConnected(_webSocketUrl);
 
         _receiveTask = Task.Run(HandleIncomingMessages, _cancellationTokenSource.Token);
     }
@@ -64,7 +64,7 @@ public class SnapcastJsonRpcClient : IDisposable
                 true,
                 _cancellationTokenSource.Token);
 
-            _logger.LogDebug("Sent request: {Method} with ID: {RequestId}", method, requestId);
+            LogRequestSent(method, requestId);
 
             var response = await tcs.Task;
             return JsonSerializer.Deserialize<T>(response.GetRawText())!;
@@ -104,7 +104,7 @@ public class SnapcastJsonRpcClient : IDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in message handling loop");
+            LogMessageHandlingError(ex);
         }
     }
 
@@ -138,13 +138,13 @@ public class SnapcastJsonRpcClient : IDisposable
                 var method = methodElement.GetString()!;
                 var parameters = root.TryGetProperty("params", out var paramsElement) ? paramsElement : default;
 
-                _logger.LogDebug("Received notification: {Method}", method);
+                LogNotificationReceived(method);
                 NotificationReceived?.Invoke(method, parameters);
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error processing message: {Message}", message);
+            LogMessageProcessingError(ex, message);
         }
     }
 
@@ -169,4 +169,20 @@ public class SnapcastJsonRpcClient : IDisposable
         _webSocket?.Dispose();
         _cancellationTokenSource.Dispose();
     }
+
+    // LoggerMessage patterns
+    [LoggerMessage(EventId = 2001, Level = LogLevel.Information, Message = "Connected to Snapcast WebSocket: {Url}")]
+    private partial void LogConnected(string url);
+
+    [LoggerMessage(EventId = 2002, Level = LogLevel.Debug, Message = "Sent request: {Method} with ID: {RequestId}")]
+    private partial void LogRequestSent(string method, string requestId);
+
+    [LoggerMessage(EventId = 2003, Level = LogLevel.Error, Message = "Error in message handling loop")]
+    private partial void LogMessageHandlingError(Exception ex);
+
+    [LoggerMessage(EventId = 2004, Level = LogLevel.Debug, Message = "Received notification: {Method}")]
+    private partial void LogNotificationReceived(string method);
+
+    [LoggerMessage(EventId = 2005, Level = LogLevel.Error, Message = "Error processing message: {Message}")]
+    private partial void LogMessageProcessingError(Exception ex, string message);
 }
