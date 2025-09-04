@@ -302,8 +302,9 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
         {
             var response = await _jsonRpcClient.SendRequestAsync<ServerGetStatusResponse>("Server.GetStatus");
 
-            // TODO: Update state repository with fresh data
-            // _stateRepository.UpdateServerState(response.Server.Groups);
+            // Update state repository with fresh data
+            var server = ConvertToServer(response.Server);
+            _stateRepository.UpdateServerState(server);
 
             // Convert to existing SnapcastServerStatus model
             var serverStatus = ConvertToSnapcastServerStatus(response.Server);
