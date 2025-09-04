@@ -225,9 +225,9 @@ Endpoints for browsing available media sources (initially Subsonic and Radio).
 
 Endpoints for retrieving cover art images from media sources.
 
-| Method | Path                                    | Description                    | Success Response                    | HTTP Status |
-| :----- | :-------------------------------------- | :----------------------------- | :---------------------------------- | :---------- |
-| `GET`  | `/cover/{coverId}`                      | Get cover art image            | Binary image data (JPEG/PNG)       | 200 OK      |
+| Method | Path                                    | Status ID              | Description                    | Success Response                    | HTTP Status |
+| :----- | :-------------------------------------- | :--------------------- | :----------------------------- | :---------------------------------- | :---------- |
+| `GET`  | `/cover/{coverId}`                      | `COVER`                | Get cover art image            | Binary image data (JPEG/PNG)       | 200 OK      |
 
 **Cover Art Endpoint Details:**
 

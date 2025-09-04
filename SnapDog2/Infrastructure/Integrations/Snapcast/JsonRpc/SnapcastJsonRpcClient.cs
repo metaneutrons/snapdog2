@@ -97,7 +97,7 @@ public partial class SnapcastJsonRpcClient : IDisposable
                         var message = messageBuilder.ToString();
                         messageBuilder.Clear();
 
-                        await ProcessMessage(message);
+                        ProcessMessage(message);
                     }
                 }
             }
@@ -108,7 +108,7 @@ public partial class SnapcastJsonRpcClient : IDisposable
         }
     }
 
-    private async Task ProcessMessage(string message)
+    private void ProcessMessage(string message)
     {
         try
         {

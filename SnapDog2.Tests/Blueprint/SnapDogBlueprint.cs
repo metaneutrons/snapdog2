@@ -704,5 +704,13 @@ public static class SnapDogBlueprint
         .Get("/api/v1/system/errors")
         .SignalR("ErrorOccurred")
         .Description("System-level errors")
+        //
+        .Status("COVER")
+        .Global()
+        .Get("/api/v1/cover/{coverId}")
+        .Description("Cover art image data")
+        .Exclude(Protocol.Mqtt, "Binary data not suitable for MQTT")
+        .Exclude(Protocol.SignalR, "Binary data not suitable for SignalR")
+        .Exclude(Protocol.Knx, "Binary data not suitable for KNX")
         .Build();
 }

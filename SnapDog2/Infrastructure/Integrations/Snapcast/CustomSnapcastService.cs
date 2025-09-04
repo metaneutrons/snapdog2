@@ -103,10 +103,10 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
         return await SetGroupNameAsync(groupId, name);
     }
 
-    public async Task<Result> DeleteGroupAsync(string groupId, CancellationToken cancellationToken = default)
+    public Task<Result> DeleteGroupAsync(string groupId, CancellationToken cancellationToken = default)
     {
         // This would require deleting a group - not implemented in basic JSON-RPC
-        return Result.Failure("DeleteGroup not supported in JSON-RPC protocol");
+        return Task.FromResult(Result.Failure("DeleteGroup not supported in JSON-RPC protocol"));
     }
 
     public async Task<Result> DeleteClientAsync(string snapcastClientId, CancellationToken cancellationToken = default)
