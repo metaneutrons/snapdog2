@@ -3,6 +3,7 @@ namespace SnapDog2.Api.Hubs.Handlers;
 using Cortex.Mediator.Notifications;
 using Microsoft.AspNetCore.SignalR;
 using SnapDog2.Api.Hubs.Notifications;
+using SnapDog2.Server.Clients.Notifications;
 using ServerClientNotifications = SnapDog2.Server.Clients.Notifications;
 using ServerZoneNotifications = SnapDog2.Server.Zones.Notifications;
 
@@ -21,7 +22,9 @@ public class SignalRNotificationHandler :
     INotificationHandler<ZoneProgressChangedNotification>,
     INotificationHandler<ServerClientNotifications.ClientVolumeChangedNotification>,
     INotificationHandler<ServerClientNotifications.ClientMuteChangedNotification>,
-    INotificationHandler<ServerClientNotifications.ClientZoneStatusNotification>
+    INotificationHandler<ServerClientNotifications.ClientZoneStatusNotification>,
+    INotificationHandler<ServerClientNotifications.ClientConnectionChangedNotification>,
+    INotificationHandler<ClientLatencyStatusNotification>
 {
     private readonly IHubContext<SnapDogHub> _hubContext;
     private readonly ILogger<SignalRNotificationHandler> _logger;
@@ -102,5 +105,17 @@ public class SignalRNotificationHandler :
     {
         _logger.LogInformation("🔔 SignalR: Client {ClientIndex} zone changed to {ZoneIndex}", notification.ClientIndex, notification.ZoneIndex?.ToString() ?? "unassigned");
         await _hubContext.Clients.All.SendAsync("ClientZoneChanged", notification.ClientIndex, notification.ZoneIndex, cancellationToken);
+    }
+
+    public async Task Handle(ServerClientNotifications.ClientConnectionChangedNotification notification, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("🔔 SignalR: Client {ClientIndex} connection changed to {Connected}", notification.ClientIndex, notification.IsConnected);
+        await _hubContext.Clients.All.SendAsync("ClientConnected", notification.ClientIndex, notification.IsConnected, cancellationToken);
+    }
+
+    public async Task Handle(ClientLatencyStatusNotification notification, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("🔔 SignalR: Client {ClientIndex} latency changed to {Latency}ms", notification.ClientIndex, notification.LatencyMs);
+        await _hubContext.Clients.All.SendAsync("ClientLatencyChanged", notification.ClientIndex, notification.LatencyMs, cancellationToken);
     }
 }

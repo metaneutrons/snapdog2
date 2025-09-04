@@ -62,6 +62,13 @@ public interface ISnapcastStateRepository
     IEnumerable<SnapClient> GetAllClients();
 
     /// <summary>
+    /// Gets the SnapDog client index (1-based) for a given Snapcast client ID by matching MAC addresses.
+    /// </summary>
+    /// <param name="snapcastClientId">The Snapcast client ID</param>
+    /// <returns>The 1-based client index, or null if not found</returns>
+    int? GetClientIndexBySnapcastId(string snapcastClientId);
+
+    /// <summary>
     /// Updates a specific group's state.
     /// </summary>
     /// <param name="group">Updated group information.</param>

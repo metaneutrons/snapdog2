@@ -279,6 +279,37 @@ public partial class SnapcastStateRepository(
         return this._clients.Values.ToList(); // Return a copy to avoid concurrent modification
     }
 
+    /// <summary>
+    /// Gets the SnapDog client index (1-based) for a given Snapcast client ID by matching MAC addresses.
+    /// </summary>
+    /// <param name="snapcastClientId">The Snapcast client ID (e.g., "bedroom", "living-room")</param>
+    /// <returns>The 1-based client index, or null if not found</returns>
+    public int? GetClientIndexBySnapcastId(string snapcastClientId)
+    {
+        if (string.IsNullOrEmpty(snapcastClientId))
+        {
+            return null;
+        }
+
+        // Find the Snapcast client with this ID
+        if (!this._clients.TryGetValue(snapcastClientId, out var snapcastClient))
+        {
+            return null;
+        }
+
+        // Find the matching SnapDog client config by MAC address
+        for (int i = 0; i < this._configuration.Clients.Count; i++)
+        {
+            var clientConfig = this._configuration.Clients[i];
+            if (string.Equals(clientConfig.Mac, snapcastClient.Host.Mac, StringComparison.OrdinalIgnoreCase))
+            {
+                return i + 1; // Convert 0-based to 1-based index
+            }
+        }
+
+        return null;
+    }
+
     #endregion
 
     #region Group Management

@@ -26,6 +26,7 @@ using SnapDog2.Server.Snapcast.Notifications;
 public partial class SnapcastEventNotificationHandler(
     IMediator mediator,
     IClientStateStore clientStateStore,
+    ISnapcastStateRepository snapcastStateRepository,
     ILogger<SnapcastEventNotificationHandler> logger)
     : INotificationHandler<SnapcastClientConnectedNotification>,
         INotificationHandler<SnapcastClientDisconnectedNotification>,
@@ -38,6 +39,7 @@ public partial class SnapcastEventNotificationHandler(
 {
     private readonly IMediator _mediator = mediator;
     private readonly IClientStateStore _clientStateStore = clientStateStore;
+    private readonly ISnapcastStateRepository _snapcastStateRepository = snapcastStateRepository;
     private readonly ILogger<SnapcastEventNotificationHandler> _logger = logger;
 
     #region Logging
@@ -190,31 +192,32 @@ public partial class SnapcastEventNotificationHandler(
     {
         this.LogClientConnected(notification.Client.Id, notification.Client.Config.Name);
 
-        // Parse client index from Snapcast ID
-        if (!int.TryParse(notification.Client.Id, out var clientIndex))
+        // Map Snapcast client ID to SnapDog client index using MAC address
+        var clientIndex = this._snapcastStateRepository.GetClientIndexBySnapcastId(notification.Client.Id);
+        if (clientIndex == null)
         {
             this.LogInvalidClientIndexForConnection(notification.Client.Id);
             return;
         }
 
         // 1. Update storage (single source of truth) - Command-Status Flow Pattern
-        var currentState = this._clientStateStore.GetClientState(clientIndex);
+        var currentState = this._clientStateStore.GetClientState(clientIndex.Value);
         if (currentState != null)
         {
             var updatedState = currentState with { Connected = true };
-            this._clientStateStore.SetClientState(clientIndex, updatedState);
+            this._clientStateStore.SetClientState(clientIndex.Value, updatedState);
 
-            this.LogClientStorageUpdatedConnected(clientIndex);
+            this.LogClientStorageUpdatedConnected(clientIndex.Value);
         }
         else
         {
-            this.LogClientStateNotFoundForConnection(clientIndex);
+            this.LogClientStateNotFoundForConnection(clientIndex.Value);
         }
 
         // 2. Publish status notification to trigger integration publishing
         await this._mediator.PublishAsync(new ClientConnectionChangedNotification
         {
-            ClientIndex = clientIndex,
+            ClientIndex = clientIndex.Value,
             IsConnected = true
         }, cancellationToken);
     }
@@ -223,31 +226,32 @@ public partial class SnapcastEventNotificationHandler(
     {
         this.LogClientDisconnected(notification.Client.Id, notification.Client.Config.Name);
 
-        // Parse client index from Snapcast ID
-        if (!int.TryParse(notification.Client.Id, out var clientIndex))
+        // Map Snapcast client ID to SnapDog client index using MAC address
+        var clientIndex = this._snapcastStateRepository.GetClientIndexBySnapcastId(notification.Client.Id);
+        if (clientIndex == null)
         {
             this.LogInvalidClientIndexForDisconnection(notification.Client.Id);
             return;
         }
 
         // 1. Update storage (single source of truth) - Command-Status Flow Pattern
-        var currentState = this._clientStateStore.GetClientState(clientIndex);
+        var currentState = this._clientStateStore.GetClientState(clientIndex.Value);
         if (currentState != null)
         {
             var updatedState = currentState with { Connected = false };
-            this._clientStateStore.SetClientState(clientIndex, updatedState);
+            this._clientStateStore.SetClientState(clientIndex.Value, updatedState);
 
-            this.LogClientStorageUpdatedDisconnected(clientIndex);
+            this.LogClientStorageUpdatedDisconnected(clientIndex.Value);
         }
         else
         {
-            this.LogClientStateNotFoundForDisconnection(clientIndex);
+            this.LogClientStateNotFoundForDisconnection(clientIndex.Value);
         }
 
         // 2. Publish status notification to trigger integration publishing
         await this._mediator.PublishAsync(new ClientConnectionChangedNotification
         {
-            ClientIndex = clientIndex,
+            ClientIndex = clientIndex.Value,
             IsConnected = false
         }, cancellationToken);
     }
