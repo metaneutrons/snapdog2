@@ -1546,7 +1546,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                     // Publish progress notification for real-time UI updates
                     if (updatedTrack.IsPlaying && updatedTrack.PositionMs.HasValue)
                     {
-                        Task.Run(async () =>
+                        _ = Task.Run(async () =>
                         {
                             try
                             {

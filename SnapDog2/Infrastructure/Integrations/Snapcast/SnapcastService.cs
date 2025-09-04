@@ -566,9 +566,9 @@ public partial class SnapcastService : ISnapcastService, IAsyncDisposable
             }
 
             var currentVolume = client.Value.Config.Volume.Percent;
-            var newVolume = muted ? 0 : currentVolume;
 
-            await this._snapcastClient!.ClientSetVolumeAsync(snapcastClientId, newVolume).ConfigureAwait(false);
+            // Use proper Snapcast mute functionality instead of setting volume to 0
+            await this._snapcastClient!.ClientSetVolumeAsync(snapcastClientId, currentVolume, muted).ConfigureAwait(false);
             return Result.Success();
         }
         catch (Exception ex)
