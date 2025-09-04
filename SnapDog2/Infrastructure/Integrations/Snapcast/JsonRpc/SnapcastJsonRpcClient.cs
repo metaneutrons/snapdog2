@@ -123,7 +123,9 @@ public partial class SnapcastJsonRpcClient : IDisposable
                 {
                     if (root.TryGetProperty("result", out var result))
                     {
-                        tcs.SetResult(result);
+                        // Clone the JsonElement to avoid disposal issues
+                        var clonedResult = result.Clone();
+                        tcs.SetResult(clonedResult);
                     }
                     else if (root.TryGetProperty("error", out var error))
                     {
@@ -136,7 +138,7 @@ public partial class SnapcastJsonRpcClient : IDisposable
             {
                 // Notification
                 var method = methodElement.GetString()!;
-                var parameters = root.TryGetProperty("params", out var paramsElement) ? paramsElement : default;
+                var parameters = root.TryGetProperty("params", out var paramsElement) ? paramsElement.Clone() : default;
 
                 LogNotificationReceived(method);
                 NotificationReceived?.Invoke(method, parameters);
