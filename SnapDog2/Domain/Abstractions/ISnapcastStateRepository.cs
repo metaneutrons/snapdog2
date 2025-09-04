@@ -13,7 +13,7 @@
 //
 namespace SnapDog2.Domain.Abstractions;
 
-using SnapcastClient.Models;
+using SnapDog2.Infrastructure.Integrations.Snapcast.Models;
 
 /// <summary>
 /// Repository for managing raw Snapcast server state.

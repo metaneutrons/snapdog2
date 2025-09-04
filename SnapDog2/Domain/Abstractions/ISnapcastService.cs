@@ -133,17 +133,6 @@ public interface ISnapcastService
     Task<Result> SetGroupNameAsync(string groupId, string name, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Creates a new group with the specified clients.
-    /// </summary>
-    /// <param name="clientIndexs">List of client Indexs to include in the group.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>Result containing the new group ID or error.</returns>
-    Task<Result<string>> CreateGroupAsync(
-        IEnumerable<string> clientIndexs,
-        CancellationToken cancellationToken = default
-    );
-
-    /// <summary>
     /// Deletes a group and reassigns its clients to other groups.
     /// </summary>
     /// <param name="groupId">Group ID to delete.</param>

@@ -14,8 +14,8 @@
 namespace SnapDog2.Infrastructure.Integrations.Snapcast;
 
 using System.Collections.Concurrent;
-using SnapcastClient.Models;
 using SnapDog2.Domain.Abstractions;
+using SnapDog2.Infrastructure.Integrations.Snapcast.Models;
 using SnapDog2.Shared.Configuration;
 
 /// <summary>
@@ -163,8 +163,8 @@ public partial class SnapcastStateRepository(
         var allClients =
             server.Groups.SelectMany(g => g.Clients).DistinctBy(c => c.Id);
         var clientCount = allClients.Count();
-        var groupCount = server.Groups.Count;
-        var streamCount = server.Streams.Count;
+        var groupCount = server.Groups.Length;
+        var streamCount = server.Streams.Length;
 
         this.LogUpdateServerStateCalled(groupCount);
         this.LogUpdatingServerState(groupCount, clientCount, streamCount);
@@ -172,7 +172,7 @@ public partial class SnapcastStateRepository(
         // Debug: Log each group and its clients
         foreach (var group in server.Groups)
         {
-            this.LogProcessingGroup(group.Id, group.Clients.Count);
+            this.LogProcessingGroup(group.Id, group.Clients.Length);
 
             foreach (var client in group.Clients)
             {

@@ -102,4 +102,11 @@ public class SnapcastConfig
     /// </summary>
     [Env(Key = "BASE_URL", Default = "")]
     public string BaseUrl { get; set; } = "";
+
+    /// <summary>
+    /// Snapcast WebSocket URL for JSON-RPC communication.
+    /// Maps to: SNAPDOG_SERVICES_SNAPCAST_WEBSOCKET_URL
+    /// </summary>
+    [Env(Key = "WEBSOCKET_URL", Default = "ws://localhost:1780/jsonrpc")]
+    public string WebSocketUrl { get; set; } = "ws://localhost:1780/jsonrpc";
 }

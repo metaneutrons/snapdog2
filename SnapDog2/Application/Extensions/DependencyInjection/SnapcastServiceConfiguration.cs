@@ -14,11 +14,9 @@
 namespace SnapDog2.Application.Extensions.DependencyInjection;
 
 using Microsoft.Extensions.Options;
-using SnapcastClient;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Infrastructure.Integrations.Snapcast;
 using SnapDog2.Shared.Configuration;
-using IClient = SnapcastClient.IClient;
 
 /// <summary>
 /// Extension methods for configuring Snapcast services.
@@ -35,55 +33,8 @@ public static class SnapcastServiceConfiguration
         // Register the state repository as singleton since it holds shared state
         services.AddSingleton<ISnapcastStateRepository, SnapcastStateRepository>();
 
-        // Register a factory for creating SnapcastClient instances
-        // This avoids nullable type parameter issues while still handling connection failures gracefully
-        services.AddSingleton<Func<IClient?>>(serviceProvider =>
-        {
-            return () =>
-            {
-                var config = serviceProvider
-                    .GetRequiredService<IOptions<SnapDogConfiguration>>()
-                    .Value.Services.Snapcast;
-                var logger = serviceProvider.GetService<ILogger<Client>>();
-
-                try
-                {
-                    // Attempt to create TCP connection
-                    var connection = new TcpConnection(config.Address, config.JsonRpcPort);
-                    return new Client(connection, logger);
-                }
-                catch (Exception ex)
-                {
-                    // Log the connection failure but don't fail the entire DI container setup
-                    var serviceLogger = serviceProvider.GetService<ILogger<Client>>();
-                    serviceLogger?.LogWarning(
-                        ex,
-                        "Failed to connect to Snapcast server at {Address}:{Port} during startup. Service will retry later.",
-                        config.Address,
-                        config.JsonRpcPort
-                    );
-
-                    // Return null - the SnapcastService will handle this gracefully
-                    return null;
-                }
-            };
-        });
-
-        // Register our Snapcast service as singleton with mediator injection
-        services.AddSingleton<ISnapcastService>(serviceProvider =>
-        {
-            var config = serviceProvider.GetRequiredService<IOptions<SnapDogConfiguration>>();
-            var stateRepository = serviceProvider.GetRequiredService<ISnapcastStateRepository>();
-            var logger = serviceProvider.GetRequiredService<ILogger<SnapcastService>>();
-            var clientFactory = serviceProvider.GetRequiredService<Func<IClient?>>();
-
-            // Create the client using the factory
-            var snapcastClient = clientFactory();
-
-            // Don't resolve IClientManager here - pass IServiceProvider instead
-            // SnapcastService will create scopes when it needs to access IClientManager
-            return new SnapcastService(config, serviceProvider, stateRepository, logger, snapcastClient);
-        });
+        // Register our custom Snapcast service as singleton
+        services.AddSingleton<ISnapcastService, CustomSnapcastService>();
 
         return services;
     }

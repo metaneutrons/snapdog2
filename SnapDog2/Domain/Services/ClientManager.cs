@@ -15,8 +15,8 @@ namespace SnapDog2.Domain.Services;
 
 using System.Diagnostics;
 using Cortex.Mediator;
-using SnapcastClient.Models;
 using SnapDog2.Domain.Abstractions;
+using SnapDog2.Infrastructure.Integrations.Snapcast.Models;
 using SnapDog2.Server.Clients.Notifications;
 using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Models;
