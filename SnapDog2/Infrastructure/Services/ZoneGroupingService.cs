@@ -15,9 +15,11 @@
 namespace SnapDog2.Infrastructure.Services;
 
 using System.Diagnostics;
+using Cortex.Mediator.Notifications;
 using Microsoft.Extensions.Options;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Infrastructure.Metrics;
+using SnapDog2.Server.Clients.Notifications;
 using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Models;
 
@@ -33,7 +35,7 @@ public partial class ZoneGroupingService(
     ZoneGroupingMetrics metrics,
     IOptions<SnapcastConfig> config,
     ILogger<ZoneGroupingService> logger)
-    : IZoneGroupingService, IHostedService
+    : IZoneGroupingService, IHostedService, INotificationHandler<ClientZoneChangedNotification>
 {
     private readonly ISnapcastService _snapcastService = snapcastService ?? throw new ArgumentNullException(nameof(snapcastService));
     private readonly IClientManager _clientManager = clientManager ?? throw new ArgumentNullException(nameof(clientManager));
@@ -46,12 +48,46 @@ public partial class ZoneGroupingService(
 
     private Timer? _timer;
     private readonly TimeSpan _reconciliationInterval = TimeSpan.FromMilliseconds(config.Value.ZoneGroupingCheckIntervalMs);
+    private readonly SemaphoreSlim _regroupingSemaphore = new(1, 1);
+
+    /// <summary>
+    /// Triggers immediate zone regrouping without waiting for the periodic timer.
+    /// Useful for immediate response to manual zone changes.
+    /// </summary>
+    public async Task TriggerImmediateRegroupingAsync()
+    {
+        if (this._regroupingSemaphore.Wait(0)) // Non-blocking check
+        {
+            try
+            {
+                await this.EnsureZoneGroupingAsync(CancellationToken.None);
+            }
+            finally
+            {
+                this._regroupingSemaphore.Release();
+            }
+        }
+        // If already running, skip - the running operation will handle the latest state
+    }
 
     /// <summary>
     /// Simple periodic check: ensure all zones are properly configured.
     /// This is the main method called by the background service.
     /// </summary>
     public async Task<Result> EnsureZoneGroupingAsync(CancellationToken cancellationToken = default)
+    {
+        await this._regroupingSemaphore.WaitAsync(cancellationToken);
+        try
+        {
+            return await this.EnsureZoneGroupingInternalAsync(cancellationToken);
+        }
+        finally
+        {
+            this._regroupingSemaphore.Release();
+        }
+    }
+
+    private async Task<Result> EnsureZoneGroupingInternalAsync(CancellationToken cancellationToken = default)
     {
         using var activity = ActivitySource.StartActivity("ZoneGrouping.EnsureAll");
 
@@ -701,6 +737,14 @@ public partial class ZoneGroupingService(
             _metrics.RecordReconciliation(stopwatch.Elapsed.TotalSeconds, false);
             _logger.LogError(ex, "💥 Error during periodic zone grouping check");
         }
+    }
+
+    /// <summary>
+    /// Handles client zone change notifications by triggering immediate regrouping.
+    /// </summary>
+    public async Task Handle(ClientZoneChangedNotification notification, CancellationToken cancellationToken = default)
+    {
+        await this.TriggerImmediateRegroupingAsync();
     }
 
     #endregion

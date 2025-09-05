@@ -31,6 +31,12 @@ public interface IZoneGroupingService
     Task<Result> EnsureZoneGroupingAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Triggers immediate zone regrouping without waiting for the periodic timer.
+    /// Useful for immediate response to manual zone changes.
+    /// </summary>
+    Task TriggerImmediateRegroupingAsync();
+
+    /// <summary>
     /// Ensures all clients assigned to a specific zone are grouped together in Snapcast.
     /// </summary>
     /// <param name="zoneIndex">The zone ID to synchronize grouping for</param>

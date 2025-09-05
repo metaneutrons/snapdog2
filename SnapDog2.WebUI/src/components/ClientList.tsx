@@ -24,6 +24,7 @@ export function ClientList({ zoneIndex, draggingClientIndex, onClientDragStart, 
           <ClientChip
             key={clientIndex}
             clientIndex={clientIndex}
+            isDragging={draggingClientIndex === clientIndex}
             onDragStart={onClientDragStart}
             onDragEnd={onClientDragEnd}
           />

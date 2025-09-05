@@ -103,6 +103,9 @@ function App() {
         await moveClientToZone(draggingClientIndex, targetZoneIndex);
       } catch (e) {
         console.error('Failed to move client:', e);
+      } finally {
+        // Always reset drag state after drop attempt
+        setDraggingClientIndex(null);
       }
     }
   };

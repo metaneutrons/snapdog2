@@ -192,6 +192,20 @@ public partial class ClientManager : IClientManager
 
     [LoggerMessage(
         EventId = 6621,
+        Level = LogLevel.Warning,
+        Message = "Client state not found for client {ClientIndex}"
+    )]
+    private partial void LogClientStateNotFound(int ClientIndex);
+
+    [LoggerMessage(
+        EventId = 6622,
+        Level = LogLevel.Warning,
+        Message = "Client state lock not found for client {ClientIndex}"
+    )]
+    private partial void LogClientStateLockNotFound(int ClientIndex);
+
+    [LoggerMessage(
+        EventId = 6621,
         Level = LogLevel.Debug,
         Message = "Found existing group {GroupId} for stream {StreamId}"
     )]
@@ -444,24 +458,58 @@ public partial class ClientManager : IClientManager
 
             this.LogUsingGroupForZone(targetGroupId, zoneIndex);
 
-            // Update client state in store - ZoneGrouping will handle the actual Snapcast grouping
+            // Update client state in store - publish event for immediate regrouping
             if (this._clientStateLocks.TryGetValue(clientIndex, out var stateLock))
             {
                 await stateLock.WaitAsync().ConfigureAwait(false);
                 try
                 {
                     var currentState = this._clientStateStore.GetClientState(clientIndex);
-                    if (currentState != null)
+                    if (currentState == null)
                     {
-                        var updatedState = currentState with { ZoneIndex = zoneIndex };
-                        this._clientStateStore.SetClientState(clientIndex, updatedState);
-                        this.PublishClientStateChangedAsync(clientIndex);
+                        // Initialize state if it doesn't exist
+                        var clientConfig = this._clientConfigs.FirstOrDefault(c => c.Id == clientIndex);
+                        if (clientConfig != null)
+                        {
+                            var defaultState = new ClientState
+                            {
+                                Id = clientIndex,
+                                Name = clientConfig.Name,
+                                ZoneIndex = clientConfig.DefaultZone,
+                                Volume = 50,
+                                Mute = false,
+                                Connected = false,
+                                TimestampUtc = DateTime.UtcNow
+                            };
+                            this._clientStateStore.SetClientState(clientIndex, defaultState);
+                            currentState = defaultState;
+                        }
+                        else
+                        {
+                            this.LogClientStateNotFound(clientIndex);
+                            return Result.Failure($"Client {clientIndex} not found in configuration");
+                        }
                     }
+
+                    var oldZone = currentState.ZoneIndex;
+                    var updatedState = currentState with { ZoneIndex = zoneIndex };
+                    this._clientStateStore.SetClientState(clientIndex, updatedState);
+                    this.PublishClientStateChangedAsync(clientIndex);
+
+                    // Publish event for immediate regrouping
+                    Console.WriteLine($"DEBUG: Publishing ClientZoneChangedNotification - clientIndex: {clientIndex}, oldZone: {oldZone}, newZone: {zoneIndex}");
+                    Console.WriteLine($"DEBUG: Mediator is null: {this._mediator == null}");
+                    await this._mediator.PublishAsync(new ClientZoneChangedNotification(clientIndex, oldZone, zoneIndex));
                 }
                 finally
                 {
                     stateLock.Release();
                 }
+            }
+            else
+            {
+                this.LogClientStateLockNotFound(clientIndex);
+                return Result.Failure($"Client state lock not found for client {clientIndex}");
             }
 
             return Result.Success();
