@@ -39,6 +39,7 @@ public partial class ZoneManager(
     IMediaPlayerService mediaPlayerService,
     IServiceScopeFactory serviceScopeFactory,
     IZoneStateStore zoneStateStore,
+    IClientStateStore clientStateStore,
     IStatusFactory statusFactory,
     IOptions<SnapDogConfiguration> configuration
 ) : IZoneManager, IAsyncDisposable, IDisposable
@@ -130,6 +131,7 @@ public partial class ZoneManager(
                         this._mediaPlayerService,
                         this._serviceScopeFactory,
                         this._zoneStateStore,
+                        clientStateStore,
                         this._statusFactory,
                         this._logger,
                         this._configuration
@@ -299,6 +301,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     private readonly IMediaPlayerService _mediaPlayerService;
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly IZoneStateStore _zoneStateStore;
+    private readonly IClientStateStore _clientStateStore;
     private readonly IStatusFactory _statusFactory;
     private readonly ILogger _logger;
     private readonly IOptions<SnapDogConfiguration> _configuration;
@@ -318,6 +321,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         IMediaPlayerService mediaPlayerService,
         IServiceScopeFactory serviceScopeFactory,
         IZoneStateStore zoneStateStore,
+        IClientStateStore clientStateStore,
         IStatusFactory statusFactory,
         ILogger logger,
         IOptions<SnapDogConfiguration> configuration
@@ -330,6 +334,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         this._mediaPlayerService = mediaPlayerService;
         this._serviceScopeFactory = serviceScopeFactory;
         this._zoneStateStore = zoneStateStore;
+        this._clientStateStore = clientStateStore;
         this._statusFactory = statusFactory;
         this._logger = logger;
         this._configuration = configuration;
@@ -389,7 +394,22 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 this.LogGetStateAsyncTimeout(this._zoneIndex);
             }
 
-            return Result<ZoneState>.Success(this._currentState with { TimestampUtc = DateTime.UtcNow });
+            // Get clients assigned to this zone
+            var zoneClients = Array.Empty<int>();
+            if (this._clientStateStore != null)
+            {
+                var allClientStates = this._clientStateStore.GetAllClientStates();
+                zoneClients = allClientStates
+                    .Where(kvp => kvp.Value.ZoneIndex == this._zoneIndex)
+                    .Select(kvp => kvp.Key)
+                    .ToArray();
+            }
+
+            return Result<ZoneState>.Success(this._currentState with
+            {
+                Clients = zoneClients,
+                TimestampUtc = DateTime.UtcNow
+            });
         }
         catch (OperationCanceledException)
         {

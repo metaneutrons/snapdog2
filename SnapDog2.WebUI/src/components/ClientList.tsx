@@ -7,9 +7,10 @@ interface ClientListProps {
   draggingClientIndex: number | null;
   onClientDragStart: (clientIndex: number) => void;
   onClientDragEnd: () => void;
+  onDrop?: (zoneIndex: number) => void;
 }
 
-export function ClientList({ zoneIndex, draggingClientIndex, onClientDragStart, onClientDragEnd }: ClientListProps) {
+export function ClientList({ zoneIndex, draggingClientIndex, onClientDragStart, onClientDragEnd, onDrop }: ClientListProps) {
   const zone = useZone(zoneIndex);
   
   if (!zone) return null;
@@ -17,8 +18,25 @@ export function ClientList({ zoneIndex, draggingClientIndex, onClientDragStart, 
   const clientIndices = zone.clients || [];
   const isDropTarget = draggingClientIndex !== null;
 
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (onDrop) {
+      onDrop(zoneIndex);
+    }
+    // Always reset drag state after drop
+    onClientDragEnd();
+  };
+
   return (
-    <div className={`space-y-2 p-2 rounded-lg transition-colors duration-200 min-h-[6rem] border ${isDropTarget ? 'bg-gray-400 border-2 border-dashed border-blue-400' : 'bg-theme-tertiary border-theme-secondary'}`}>
+    <div 
+      className={`space-y-2 p-2 rounded-lg transition-colors duration-200 min-h-[6rem] border ${isDropTarget ? 'bg-theme-primary border-2 border-dashed border-blue-400' : 'bg-theme-tertiary border-theme-secondary'}`}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+    >
       {clientIndices.length > 0 ? (
         clientIndices.map((clientIndex) => (
           <ClientChip

@@ -131,19 +131,13 @@ function App() {
       <main className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 max-w-7xl mx-auto">
           {Array.from({ length: zoneCount }, (_, i) => i + 1).map((zoneIndex) => (
-            <div
-              key={zoneIndex}
-              onDrop={(e) => {
-                e.preventDefault();
-                handleZoneDrop(zoneIndex);
-              }}
-              onDragOver={(e) => e.preventDefault()}
-            >
+            <div key={zoneIndex}>
               <ZoneCard 
                 zoneIndex={zoneIndex} 
                 draggingClientIndex={draggingClientIndex}
                 onClientDragStart={handleClientDragStart}
                 onClientDragEnd={handleClientDragEnd}
+                onDrop={handleZoneDrop}
               />
             </div>
           ))}

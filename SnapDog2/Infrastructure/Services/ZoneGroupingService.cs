@@ -35,7 +35,7 @@ public partial class ZoneGroupingService(
     ZoneGroupingMetrics metrics,
     IOptions<SnapcastConfig> config,
     ILogger<ZoneGroupingService> logger)
-    : IZoneGroupingService, IHostedService, INotificationHandler<ClientZoneChangedNotification>
+    : IZoneGroupingService, INotificationHandler<ClientZoneChangedNotification>
 {
     private readonly ISnapcastService _snapcastService = snapcastService ?? throw new ArgumentNullException(nameof(snapcastService));
     private readonly IClientManager _clientManager = clientManager ?? throw new ArgumentNullException(nameof(clientManager));
@@ -46,7 +46,6 @@ public partial class ZoneGroupingService(
     private readonly ILogger<ZoneGroupingService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private static readonly ActivitySource ActivitySource = new("SnapDog2.ZoneGrouping");
 
-    private Timer? _timer;
     private readonly TimeSpan _reconciliationInterval = TimeSpan.FromMilliseconds(config.Value.ZoneGroupingCheckIntervalMs);
     private readonly SemaphoreSlim _regroupingSemaphore = new(1, 1);
 
@@ -694,51 +693,6 @@ public partial class ZoneGroupingService(
     )]
     private partial void LogErrorSynchronizingClientNames(Exception ex, int ZoneId);
 
-    #region IHostedService Implementation
-
-    public Task StartAsync(CancellationToken cancellationToken)
-    {
-        _logger.LogInformation("🔄 Zone grouping service starting with interval {IntervalMs}ms", _config.ZoneGroupingCheckIntervalMs);
-
-        // Start timer after 5 second delay
-        _timer = new Timer(PerformPeriodicCheck, null, TimeSpan.FromSeconds(5), _reconciliationInterval);
-
-        return Task.CompletedTask;
-    }
-
-    public Task StopAsync(CancellationToken cancellationToken)
-    {
-        _logger.LogInformation("⏹️ Zone grouping service stopping");
-        _timer?.Dispose();
-        return Task.CompletedTask;
-    }
-
-    private async void PerformPeriodicCheck(object? state)
-    {
-        var stopwatch = Stopwatch.StartNew();
-
-        try
-        {
-            var result = await EnsureZoneGroupingAsync();
-
-            if (result.IsSuccess)
-            {
-                _metrics.RecordReconciliation(stopwatch.Elapsed.TotalSeconds, true);
-                _logger.LogDebug("✅ Zone grouping check completed successfully");
-            }
-            else
-            {
-                _metrics.RecordReconciliation(stopwatch.Elapsed.TotalSeconds, false);
-                _logger.LogWarning("⚠️ Zone grouping check failed");
-            }
-        }
-        catch (Exception ex)
-        {
-            _metrics.RecordReconciliation(stopwatch.Elapsed.TotalSeconds, false);
-            _logger.LogError(ex, "💥 Error during periodic zone grouping check");
-        }
-    }
-
     /// <summary>
     /// Handles client zone change notifications by triggering immediate regrouping.
     /// </summary>
@@ -746,6 +700,4 @@ public partial class ZoneGroupingService(
     {
         await this.TriggerImmediateRegroupingAsync();
     }
-
-    #endregion
 }

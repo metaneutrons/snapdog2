@@ -17,9 +17,10 @@ interface ZoneCardProps {
   draggingClientIndex: number | null;
   onClientDragStart: (clientIndex: number) => void;
   onClientDragEnd: () => void;
+  onDrop?: (zoneIndex: number) => void;
 }
 
-export const ZoneCard: React.FC<ZoneCardProps> = ({ zoneIndex, draggingClientIndex, onClientDragStart, onClientDragEnd }) => {
+export const ZoneCard: React.FC<ZoneCardProps> = ({ zoneIndex, draggingClientIndex, onClientDragStart, onClientDragEnd, onDrop }) => {
   const zone = useZone(zoneIndex);
   const { setZoneVolume, toggleZoneMute } = useAppStore();
 
@@ -102,6 +103,7 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({ zoneIndex, draggingClientInd
           draggingClientIndex={draggingClientIndex}
           onClientDragStart={onClientDragStart}
           onClientDragEnd={onClientDragEnd}
+          onDrop={onDrop}
         />
       </div>
     </div>
