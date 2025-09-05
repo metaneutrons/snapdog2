@@ -468,9 +468,9 @@ public partial class ClientManager : IClientManager
                     if (currentState == null)
                     {
                         // Initialize state if it doesn't exist
-                        var clientConfig = this._clientConfigs.FirstOrDefault(c => c.Index == clientIndex);
-                        if (clientConfig != null)
+                        if (clientIndex > 0 && clientIndex <= this._clientConfigs.Count)
                         {
+                            var clientConfig = this._clientConfigs[clientIndex - 1]; // 0-based array access
                             var defaultState = new ClientState
                             {
                                 Id = clientIndex,
