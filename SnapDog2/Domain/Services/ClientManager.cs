@@ -468,17 +468,26 @@ public partial class ClientManager : IClientManager
                     if (currentState == null)
                     {
                         // Initialize state if it doesn't exist
-                        var clientConfig = this._clientConfigs.FirstOrDefault(c => c.Id == clientIndex);
+                        var clientConfig = this._clientConfigs.FirstOrDefault(c => c.Index == clientIndex);
                         if (clientConfig != null)
                         {
                             var defaultState = new ClientState
                             {
                                 Id = clientIndex,
+                                SnapcastId = string.Empty,
                                 Name = clientConfig.Name,
-                                ZoneIndex = clientConfig.DefaultZone,
+                                Mac = string.Empty,
+                                Connected = false,
                                 Volume = 50,
                                 Mute = false,
-                                Connected = false,
+                                LatencyMs = 0,
+                                ZoneIndex = clientConfig.DefaultZone,
+                                ConfiguredSnapcastName = string.Empty,
+                                LastSeenUtc = DateTime.UtcNow,
+                                HostIpAddress = string.Empty,
+                                HostName = string.Empty,
+                                HostOs = string.Empty,
+                                HostArch = string.Empty,
                                 TimestampUtc = DateTime.UtcNow
                             };
                             this._clientStateStore.SetClientState(clientIndex, defaultState);

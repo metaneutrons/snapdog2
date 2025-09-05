@@ -362,6 +362,9 @@ export const useAppStore = create<AppState>()(
       },
 
       setZoneVolume: async (zoneIndex, volume) => {
+        // Store original value for rollback
+        const originalVolume = useAppStore.getState().zones[zoneIndex]?.volume || 0;
+        
         // Optimistic update
         useAppStore.setState((state) => ({
           zones: {
@@ -376,6 +379,16 @@ export const useAppStore = create<AppState>()(
         try {
           await api.zones.setVolume(zoneIndex, volume);
         } catch (error) {
+          // Rollback on failure
+          useAppStore.setState((state) => ({
+            zones: {
+              ...state.zones,
+              [zoneIndex]: {
+                ...state.zones[zoneIndex] || defaultZoneState,
+                volume: originalVolume,
+              },
+            },
+          }));
           console.error('Failed to set volume:', error);
           throw error;
         }
