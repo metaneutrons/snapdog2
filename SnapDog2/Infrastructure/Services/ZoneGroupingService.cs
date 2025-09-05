@@ -28,6 +28,7 @@ using SnapDog2.Shared.Models;
 public partial class ZoneGroupingService(
     ISnapcastService snapcastService,
     IClientManager clientManager,
+    IClientStateStore clientStateStore,
     IZoneManager zoneManager,
     ZoneGroupingMetrics metrics,
     IOptions<SnapcastConfig> config,
@@ -36,6 +37,7 @@ public partial class ZoneGroupingService(
 {
     private readonly ISnapcastService _snapcastService = snapcastService ?? throw new ArgumentNullException(nameof(snapcastService));
     private readonly IClientManager _clientManager = clientManager ?? throw new ArgumentNullException(nameof(clientManager));
+    private readonly IClientStateStore _clientStateStore = clientStateStore ?? throw new ArgumentNullException(nameof(clientStateStore));
     private readonly IZoneManager _zoneManager = zoneManager ?? throw new ArgumentNullException(nameof(zoneManager));
     private readonly ZoneGroupingMetrics _metrics = metrics ?? throw new ArgumentNullException(nameof(metrics));
     private readonly SnapcastConfig _config = config.Value ?? throw new ArgumentNullException(nameof(config));
@@ -118,16 +120,39 @@ public partial class ZoneGroupingService(
         {
             this.LogSynchronizingZone(zoneIndex);
 
-            // Get zone clients - who should be in this zone?
-            var zoneClients = await this._clientManager.GetClientsByZoneAsync(zoneIndex, cancellationToken);
-            if (!zoneClients.IsSuccess)
+            // Get zone clients from state store (for zone assignments) and merge with live Snapcast data (for SnapcastId)
+            var allClientStates = this._clientStateStore.GetAllClientStates();
+            Console.WriteLine($"DEBUG: State store for zone {zoneIndex}:");
+            foreach (var kvp in allClientStates)
             {
-                return Result.Failure($"Failed to get zone clients: {zoneClients.ErrorMessage}");
+                Console.WriteLine($"DEBUG:   Client {kvp.Key} -> Zone {kvp.Value.ZoneIndex}");
             }
 
-            var clientIndexs =
-                zoneClients.Value?.Select(c => c.SnapcastId).Where(id => !string.IsNullOrEmpty(id)).ToList()
-                ?? new List<string>();
+            var zoneClientStates = allClientStates.Values
+                .Where(c => c.ZoneIndex == zoneIndex)
+                .ToList();
+            Console.WriteLine($"DEBUG: Found {zoneClientStates.Count} clients assigned to zone {zoneIndex}");
+
+            // Get live SnapcastId for each client in this zone
+            var clientIndexs = new List<string>();
+            foreach (var clientState in zoneClientStates)
+            {
+                Console.WriteLine($"DEBUG: Processing client {clientState.Id} for zone {zoneIndex}");
+                // Get fresh client data to get current SnapcastId
+                var clientResult = await this._clientManager.GetAllClientsAsync();
+                if (clientResult.IsSuccess)
+                {
+                    var liveClient = clientResult.Value?.FirstOrDefault(c => c.Id == clientState.Id);
+                    if (liveClient != null && !string.IsNullOrEmpty(liveClient.SnapcastId))
+                    {
+                        Console.WriteLine($"DEBUG: Adding {liveClient.SnapcastId} to zone {zoneIndex}");
+                        clientIndexs.Add(liveClient.SnapcastId);
+                    }
+                }
+            }
+
+            Console.WriteLine($"DEBUG: Zone {zoneIndex} has {clientIndexs.Count} clients: [{string.Join(", ", clientIndexs)}]");
+
             if (clientIndexs.Count == 0)
             {
                 this.LogNoClientsAssigned(zoneIndex);

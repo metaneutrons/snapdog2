@@ -1,5 +1,16 @@
 # SnapDog2
 
+## Development Setup
+- **Container Development**: Uses dotnet watch - no rebuild needed for code changes
+- **Debugging**: `docker compose logs -f app` to watch live logs
+- **Testing**: `docker compose up -d` starts full stack with Snapcast clients
+
+## Current Fix Status
+- **Zone Grouping Issue**: Fixed Client.ZoneIndex to read from _clientStates instead of static DefaultZone
+- **Problem**: Manual client moves were being overridden by ZoneGrouping every 5 seconds
+- **Solution**: Client wrapper now returns updated zone from AssignClientToZoneAsync
+- **Testing**: Container uses dotnet watch - no rebuild needed for code changes
+
 ![SnapDog2 Logo](assets/icons/png/snapdog-128.png)
 
 ## Overview

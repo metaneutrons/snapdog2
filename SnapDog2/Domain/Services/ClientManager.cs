@@ -36,7 +36,6 @@ public partial class ClientManager : IClientManager
     private readonly IClientStateStore _clientStateStore;
     private readonly List<ClientConfig> _clientConfigs;
     private readonly SnapDogConfiguration _configuration;
-    private readonly Dictionary<int, ClientState> _clientStates = new();
     private readonly Dictionary<int, SemaphoreSlim> _clientStateLocks = new();
 
     [LoggerMessage(
@@ -279,7 +278,6 @@ public partial class ClientManager : IClientManager
                 TimestampUtc = DateTime.UtcNow
             };
 
-            this._clientStates[clientIndex] = defaultState;
             this._clientStateStore.InitializeClientState(clientIndex, defaultState);
         }
 
@@ -334,6 +332,12 @@ public partial class ClientManager : IClientManager
 
         var client = clientResult.Value!;
         var snapDogClient = (SnapDogClient)client;
+        // Get current zone from state store (includes manual moves)
+        var currentState = this._clientStateStore.GetClientState(clientIndex);
+        var currentZone = currentState?.ZoneIndex ?? snapDogClient.ZoneIndex;
+
+        Console.WriteLine($"DEBUG API: Client {clientIndex} - State store zone: {(currentState?.ZoneIndex ?? -1)}, Wrapper zone: {snapDogClient.ZoneIndex}, Using: {currentZone}");
+
         var state = new ClientState
         {
             Id = clientIndex,
@@ -344,7 +348,7 @@ public partial class ClientManager : IClientManager
             Volume = snapDogClient.Volume,
             Mute = snapDogClient.Muted,
             LatencyMs = snapDogClient.LatencyMs,
-            ZoneIndex = snapDogClient.ZoneIndex,
+            ZoneIndex = currentZone,
             ConfiguredSnapcastName = snapDogClient._snapcastClient.Config.Name,
             LastSeenUtc = snapDogClient.LastSeenUtc,
             HostIpAddress = snapDogClient.IpAddress,
@@ -440,37 +444,19 @@ public partial class ClientManager : IClientManager
 
             this.LogUsingGroupForZone(targetGroupId, zoneIndex);
 
-            // Move client to target group
-            var result = await this._snapcastService.SetClientGroupAsync(snapcastClientId, targetGroupId);
-            if (result.IsFailure)
-            {
-                this.LogFailedToMoveClientToGroup(snapcastClientId, targetGroupId, result.ErrorMessage);
-                return Result.Failure($"Failed to move client to zone {zoneIndex}: {result.ErrorMessage}");
-            }
-
-            // Refresh server state to update our local repository
-            this.LogRefreshingServerStateAfterZoneAssignment();
-            var serverStatusResult = await this._snapcastService.GetServerStatusAsync();
-            if (serverStatusResult.IsSuccess)
-            {
-                // The GetServerStatusAsync should trigger state repository updates via event handlers
-                this.LogServerStateRefreshedSuccessfully();
-            }
-            else
-            {
-                this.LogFailedToRefreshServerState(serverStatusResult.ErrorMessage);
-            }
-
-            this.LogSuccessfullyAssignedClientToZone(clientIndex, snapcastClientId, zoneIndex, targetGroupId);
-
-            // Update internal client state
+            // Update client state in store - ZoneGrouping will handle the actual Snapcast grouping
             if (this._clientStateLocks.TryGetValue(clientIndex, out var stateLock))
             {
                 await stateLock.WaitAsync().ConfigureAwait(false);
                 try
                 {
-                    this._clientStates[clientIndex] = this._clientStates[clientIndex] with { ZoneIndex = zoneIndex };
-                    this.PublishClientStateChangedAsync(clientIndex);
+                    var currentState = this._clientStateStore.GetClientState(clientIndex);
+                    if (currentState != null)
+                    {
+                        var updatedState = currentState with { ZoneIndex = zoneIndex };
+                        this._clientStateStore.SetClientState(clientIndex, updatedState);
+                        this.PublishClientStateChangedAsync(clientIndex);
+                    }
                 }
                 finally
                 {
@@ -659,7 +645,12 @@ public partial class ClientManager : IClientManager
 
             // Update internal state
             var clampedVolume = Math.Clamp(volume, 0, 100);
-            this._clientStates[clientIndex] = this._clientStates[clientIndex] with { Volume = clampedVolume };
+            var currentState = this._clientStateStore.GetClientState(clientIndex);
+            if (currentState != null)
+            {
+                var updatedState = currentState with { Volume = clampedVolume };
+                this._clientStateStore.SetClientState(clientIndex, updatedState);
+            }
             this.PublishClientStateChangedAsync(clientIndex);
 
             return Result.Success();
@@ -698,7 +689,12 @@ public partial class ClientManager : IClientManager
             }
 
             // Update internal state
-            this._clientStates[clientIndex] = this._clientStates[clientIndex] with { Mute = mute };
+            var currentState = this._clientStateStore.GetClientState(clientIndex);
+            if (currentState != null)
+            {
+                var updatedState = currentState with { Mute = mute };
+                this._clientStateStore.SetClientState(clientIndex, updatedState);
+            }
             this.PublishClientStateChangedAsync(clientIndex);
 
             return Result.Success();
@@ -723,10 +719,14 @@ public partial class ClientManager : IClientManager
         }
 
         var client = snapcastClient.Value;
-        var currentState = this._clientStates[clientIndex];
+        var currentState = this._clientStateStore.GetClientState(clientIndex);
+        if (currentState == null)
+        {
+            return;
+        }
 
         // Update state from Snapcast data
-        this._clientStates[clientIndex] = currentState with
+        var updatedState = currentState with
         {
             SnapcastId = client.Id,
             Volume = client.Config.Volume.Percent,
@@ -742,6 +742,8 @@ public partial class ClientManager : IClientManager
             // ZoneIndex is determined by group assignment - will be updated by zone assignment logic
             TimestampUtc = DateTime.UtcNow
         };
+
+        this._clientStateStore.SetClientState(clientIndex, updatedState);
     }
 
     /// <summary>
@@ -750,15 +752,13 @@ public partial class ClientManager : IClientManager
     /// </summary>
     private void PublishClientStateChangedAsync(int clientIndex)
     {
-        if (!this._clientStates.TryGetValue(clientIndex, out var currentState))
+        var currentState = this._clientStateStore.GetClientState(clientIndex);
+        if (currentState == null)
         {
             return; // No state to publish
         }
 
-        // Persist state to store for future requests
-        this._clientStateStore.SetClientState(clientIndex, currentState);
-
-        // Publish notification via mediator using fire-and-forget to prevent blocking
+        // State is already in store, just publish notification
         // Use Task.Run to avoid blocking the calling thread
         _ = Task.Run(async () =>
         {
@@ -814,9 +814,7 @@ public partial class ClientManager : IClientManager
         internal int Volume => this._snapcastClient.Config.Volume.Percent;
         internal bool Muted => this._snapcastClient.Config.Volume.Muted;
         internal int LatencyMs => this._snapcastClient.Config.Latency;
-        internal int ZoneIndex => ((ClientManager)this._clientManager)._clientStates.TryGetValue(this._clientIndex, out var state)
-            ? state.ZoneIndex
-            : this._config.DefaultZone;
+        internal int ZoneIndex => this._config.DefaultZone;
 
         private int GetActualZoneFromSnapcast()
         {
