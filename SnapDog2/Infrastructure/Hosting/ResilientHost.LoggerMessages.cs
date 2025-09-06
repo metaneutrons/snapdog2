@@ -22,14 +22,14 @@ public partial class ResilientHost
 {
     // Startup Validation Errors (10001-10002)
     [LoggerMessage(
-        EventId = 7100,
+        EventId = 7000,
         Level = LogLevel.Critical,
         Message = "🚨 STARTUP VALIDATION FAILED: {ValidationStep}"
     )]
     private static partial void LogStartupValidationFailedDebug(ILogger logger, Exception ex, string validationStep);
 
     [LoggerMessage(
-        EventId = 7101,
+        EventId = 7001,
         Level = LogLevel.Critical,
         Message = "🚨 STARTUP VALIDATION FAILED: {ValidationStep} - {ErrorMessage}"
     )]
@@ -41,14 +41,14 @@ public partial class ResilientHost
 
     // Expected Startup Errors (10003-10004)
     [LoggerMessage(
-        EventId = 7102,
+        EventId = 7002,
         Level = LogLevel.Critical,
         Message = "🚨 STARTUP FAILED: Expected startup error occurred"
     )]
     private static partial void LogStartupFailedDebug(ILogger logger, Exception ex);
 
     [LoggerMessage(
-        EventId = 7103,
+        EventId = 7003,
         Level = LogLevel.Critical,
         Message = "🚨 STARTUP FAILED: {ErrorType} - {ErrorMessage}"
     )]
@@ -56,14 +56,14 @@ public partial class ResilientHost
 
     // Unexpected Startup Errors (10005-10006)
     [LoggerMessage(
-        EventId = 7104,
+        EventId = 7004,
         Level = LogLevel.Critical,
         Message = "🚨 UNEXPECTED STARTUP FAILURE: Unhandled exception during host startup"
     )]
     private static partial void LogUnexpectedStartupFailureDebug(ILogger logger, Exception ex);
 
     [LoggerMessage(
-        EventId = 7105,
+        EventId = 7005,
         Level = LogLevel.Critical,
         Message = "🚨 UNEXPECTED STARTUP FAILURE: {ErrorType} - {ErrorMessage}"
     )]
@@ -75,14 +75,14 @@ public partial class ResilientHost
 
     // Host Shutdown Error Operations (10501-10502)
     [LoggerMessage(
-        EventId = 7106,
+        EventId = 7006,
         Level = LogLevel.Error,
         Message = "Error during host shutdown"
     )]
     private partial void LogErrorDuringHostShutdown(Exception ex);
 
     [LoggerMessage(
-        EventId = 7107,
+        EventId = 7007,
         Level = LogLevel.Error,
         Message = "Error during host shutdown: {ErrorType} - {ErrorMessage}"
     )]

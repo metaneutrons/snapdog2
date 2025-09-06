@@ -236,7 +236,7 @@ public partial class GlobalExceptionHandlingMiddleware(
     #region Logging
 
     [LoggerMessage(
-        EventId = 5400,
+        EventId = 5700,
         Level = LogLevel.Error,
         Message = "🚨 UNHANDLED EXCEPTION in {RequestMethod} {RequestPath} | CorrelationId: {CorrelationId} | RemoteIP: {RemoteIp} | UserAgent: {UserAgent}"
     )]
@@ -250,7 +250,7 @@ public partial class GlobalExceptionHandlingMiddleware(
     );
 
     [LoggerMessage(
-        EventId = 5401,
+        EventId = 5701,
         Level = LogLevel.Error,
         Message = "🚨 UNHANDLED EXCEPTION in {RequestMethod} {RequestPath} | CorrelationId: {CorrelationId} | RemoteIP: {RemoteIp} | UserAgent: {UserAgent} | Error: {ExceptionType} - {ExceptionMessage}"
     )]
@@ -265,7 +265,7 @@ public partial class GlobalExceptionHandlingMiddleware(
     );
 
     [LoggerMessage(
-        EventId = 5402,
+        EventId = 5702,
         Level = LogLevel.Information,
         Message = "🔄 Exception response sent: {StatusCode} {ErrorCode} | CorrelationId: {CorrelationId}"
     )]

@@ -29,28 +29,28 @@ public partial class PlaylistManager : IPlaylistManager
     private readonly IMediator _mediator;
 
     [LoggerMessage(
-        EventId = 6800,
+        EventId = 6700,
         Level = LogLevel.Debug,
         Message = "Getting all playlists via query handlers"
     )]
     private partial void LogGettingAllPlaylists();
 
     [LoggerMessage(
-        EventId = 6801,
+        EventId = 6701,
         Level = LogLevel.Debug,
         Message = "Getting tracks for playlist index: {PlaylistIndex}"
     )]
     private partial void LogGettingTracksByPlaylistIndex(int playlistIndex);
 
     [LoggerMessage(
-        EventId = 6802,
+        EventId = 6702,
         Level = LogLevel.Warning,
         Message = "Playlist index {PlaylistIndex} not found"
     )]
     private partial void LogPlaylistIndexNotFound(int playlistIndex);
 
     [LoggerMessage(
-        EventId = 6803,
+        EventId = 6703,
         Level = LogLevel.Error,
         Message = "Failed to get playlists: {Error}"
     )]

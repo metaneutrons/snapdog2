@@ -149,14 +149,14 @@ public partial class HttpMetricsMiddleware(
     }
 
     [LoggerMessage(
-        EventId = 5500,
+        EventId = 5800,
         Level = LogLevel.Warning,
         Message = "Slow HTTP request: {Method} {Path} took {ElapsedMilliseconds}ms (Status: {StatusCode})"
     )]
     private partial void LogSlowHttpRequest(string method, string path, long elapsedMilliseconds, int statusCode);
 
     [LoggerMessage(
-        EventId = 5501,
+        EventId = 5801,
         Level = LogLevel.Warning,
         Message = "HTTP error: {Method} {Path} returned {StatusCode} in {ElapsedMilliseconds}ms"
     )]

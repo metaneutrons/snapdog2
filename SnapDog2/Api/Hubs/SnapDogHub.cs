@@ -16,56 +16,56 @@ public partial class SnapDogHub : Hub
     #region Logging
 
     [LoggerMessage(
-        EventId = 13000,
+        EventId = 5600,
         Level = LogLevel.Information,
         Message = "SignalR client connected: {ConnectionId}"
     )]
     private partial void LogClientConnected(string connectionId);
 
     [LoggerMessage(
-        EventId = 13001,
+        EventId = 5601,
         Level = LogLevel.Information,
         Message = "SignalR client disconnected: {ConnectionId}, Exception: {Exception}"
     )]
     private partial void LogClientDisconnected(string connectionId, string? exception);
 
     [LoggerMessage(
-        EventId = 13002,
+        EventId = 5602,
         Level = LogLevel.Debug,
         Message = "Client {ConnectionId} joined zone {ZoneIndex}"
     )]
     private partial void LogClientJoinedZone(string connectionId, int zoneIndex);
 
     [LoggerMessage(
-        EventId = 13003,
+        EventId = 5603,
         Level = LogLevel.Debug,
         Message = "Client {ConnectionId} left zone {ZoneIndex}"
     )]
     private partial void LogClientLeftZone(string connectionId, int zoneIndex);
 
     [LoggerMessage(
-        EventId = 13004,
+        EventId = 5604,
         Level = LogLevel.Debug,
         Message = "Client {ConnectionId} joined client {ClientIndex}"
     )]
     private partial void LogClientJoinedClient(string connectionId, int clientIndex);
 
     [LoggerMessage(
-        EventId = 13005,
+        EventId = 5605,
         Level = LogLevel.Debug,
         Message = "Client {ConnectionId} left client {ClientIndex}"
     )]
     private partial void LogClientLeftClient(string connectionId, int clientIndex);
 
     [LoggerMessage(
-        EventId = 13006,
+        EventId = 5606,
         Level = LogLevel.Information,
         Message = "Client {ConnectionId} joined system group"
     )]
     private partial void LogClientJoinedSystem(string connectionId);
 
     [LoggerMessage(
-        EventId = 13007,
+        EventId = 5607,
         Level = LogLevel.Information,
         Message = "Client {ConnectionId} left system group"
     )]
