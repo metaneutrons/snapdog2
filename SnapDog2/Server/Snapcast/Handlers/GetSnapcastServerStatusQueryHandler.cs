@@ -33,7 +33,7 @@ public partial class GetSnapcastServerStatusQueryHandler(
 )]
     private partial void LogGettingServerStatus();
 
-    [LoggerMessage(EventId = 113151, Level = LogLevel.Error, Message = "Failed to get Snapcast server status"
+    [LoggerMessage(EventId = 113151, Level = LogLevel.Error, Message = "Failed → get Snapcast server status"
 )]
     private partial void LogGetServerStatusFailed(Exception ex);
 

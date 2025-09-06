@@ -30,7 +30,7 @@ public partial class SetClientNameCommandHandler(
     private readonly IClientManager _clientManager = clientManager;
     private readonly ILogger<SetClientNameCommandHandler> _logger = logger;
 
-    [LoggerMessage(EventId = 112400, Level = LogLevel.Information, Message = "Setting name for Client {ClientIndex} to '{Name}' from {Source}"
+    [LoggerMessage(EventId = 112400, Level = LogLevel.Information, Message = "Setting name for Client {ClientIndex} → '{Name}' from {Source}"
 )]
     private partial void LogHandling(int clientIndex, string name, CommandSource source);
 

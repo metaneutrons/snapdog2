@@ -25,20 +25,20 @@ public partial class GlobalStatusService
 )]
     private partial void LogSystemStatusRetrieved(bool isOnline);
 
-    [LoggerMessage(EventId = 112851, Level = LogLevel.Warning, Message = "Failed to get system status for publishing: {Error}"
+    [LoggerMessage(EventId = 112851, Level = LogLevel.Warning, Message = "Failed → get system status for publishing: {Error}"
 )]
     private partial void LogFailedToGetSystemStatusForPublishing(string? error);
 
-    [LoggerMessage(EventId = 112852, Level = LogLevel.Error, Message = "Failed to publish system status"
+    [LoggerMessage(EventId = 112852, Level = LogLevel.Error, Message = "Failed → publish system status"
 )]
     private partial void LogFailedToPublishSystemStatus(Exception ex);
 
     // Error Status Publishing Operations (9404-9405)
-    [LoggerMessage(EventId = 112853, Level = LogLevel.Debug, Message = "Error status to publish: {ErrorCode}"
+    [LoggerMessage(EventId = 112853, Level = LogLevel.Debug, Message = "Error status → publish: {ErrorCode}"
 )]
     private partial void LogErrorStatusToPublish(string errorCode);
 
-    [LoggerMessage(EventId = 112854, Level = LogLevel.Error, Message = "Failed to publish error status"
+    [LoggerMessage(EventId = 112854, Level = LogLevel.Error, Message = "Failed → publish error status"
 )]
     private partial void LogFailedToPublishErrorStatus(Exception ex);
 
@@ -47,11 +47,11 @@ public partial class GlobalStatusService
 )]
     private partial void LogVersionInfoRetrieved(string version);
 
-    [LoggerMessage(EventId = 112856, Level = LogLevel.Warning, Message = "Failed to get version info for publishing: {Error}"
+    [LoggerMessage(EventId = 112856, Level = LogLevel.Warning, Message = "Failed → get version info for publishing: {Error}"
 )]
     private partial void LogFailedToGetVersionInfoForPublishing(string? error);
 
-    [LoggerMessage(EventId = 112857, Level = LogLevel.Error, Message = "Failed to publish version info"
+    [LoggerMessage(EventId = 112857, Level = LogLevel.Error, Message = "Failed → publish version info"
 )]
     private partial void LogFailedToPublishVersionInfo(Exception ex);
 
@@ -60,11 +60,11 @@ public partial class GlobalStatusService
 )]
     private partial void LogServerStatsRetrieved(double cpuUsage, double memoryUsage);
 
-    [LoggerMessage(EventId = 112859, Level = LogLevel.Warning, Message = "Failed to get server stats for publishing: {Error}"
+    [LoggerMessage(EventId = 112859, Level = LogLevel.Warning, Message = "Failed → get server stats for publishing: {Error}"
 )]
     private partial void LogFailedToGetServerStatsForPublishing(string? error);
 
-    [LoggerMessage(EventId = 112860, Level = LogLevel.Error, Message = "Failed to publish server stats"
+    [LoggerMessage(EventId = 112860, Level = LogLevel.Error, Message = "Failed → publish server stats"
 )]
     private partial void LogFailedToPublishServerStats(Exception ex);
 

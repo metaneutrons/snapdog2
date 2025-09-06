@@ -750,11 +750,11 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
 
     #region Logging
 
-    [LoggerMessage(EventId = 115550, Level = LogLevel.Information, Message = "🚀 Initializing Subsonic connection to {Url}"
+    [LoggerMessage(EventId = 115550, Level = LogLevel.Information, Message = "🚀 Initializing Subsonic connection → {Url}"
 )]
     private static partial void LogInitializing(ILogger logger, string url);
 
-    [LoggerMessage(EventId = 115551, Level = LogLevel.Information, Message = "🚀 Attempting Subsonic connection to {Url} (attempt {AttemptNumber}/{MaxAttempts}: {ErrorMessage})"
+    [LoggerMessage(EventId = 115551, Level = LogLevel.Information, Message = "🚀 Attempting Subsonic connection → {Url} (attempt {AttemptNumber}/{MaxAttempts}: {ErrorMessage})"
 )]
     private static partial void LogConnectionRetryAttempt(
         ILogger logger,
@@ -764,7 +764,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         string errorMessage
     );
 
-    [LoggerMessage(EventId = 115552, Level = LogLevel.Information, Message = "Subsonic connection established successfully to {Url}"
+    [LoggerMessage(EventId = 115552, Level = LogLevel.Information, Message = "Subsonic connection established successfully → {Url}"
 )]
     private static partial void LogConnectionEstablished(ILogger logger, string url);
 
@@ -788,7 +788,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
 )]
     private static partial void LogPlaylistsRetrieved(ILogger logger, int count);
 
-    [LoggerMessage(EventId = 115558, Level = LogLevel.Error, Message = "Failed to get playlists from Subsonic server"
+    [LoggerMessage(EventId = 115558, Level = LogLevel.Error, Message = "Failed → get playlists from Subsonic server"
 )]
     private static partial void LogGetPlaylistsError(ILogger logger, Exception ex);
 
@@ -804,7 +804,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
 )]
     private static partial void LogPlaylistNotFound(ILogger logger, string playlistIndex);
 
-    [LoggerMessage(EventId = 115562, Level = LogLevel.Error, Message = "Failed to get playlist: {PlaylistIndex}"
+    [LoggerMessage(EventId = 115562, Level = LogLevel.Error, Message = "Failed → get playlist: {PlaylistIndex}"
 )]
     private static partial void LogGetPlaylistError(ILogger logger, string playlistIndex, Exception ex);
 
@@ -820,11 +820,11 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
 )]
     private static partial void LogStreamUrlNotFound(ILogger logger, string trackId);
 
-    [LoggerMessage(EventId = 115566, Level = LogLevel.Error, Message = "Failed to get stream URL for track: {TrackId}"
+    [LoggerMessage(EventId = 115566, Level = LogLevel.Error, Message = "Failed → get stream URL for track: {TrackId}"
 )]
     private static partial void LogGetStreamUrlError(ILogger logger, string trackId, Exception ex);
 
-    [LoggerMessage(EventId = 115567, Level = LogLevel.Debug, Message = "Testing connection to Subsonic server"
+    [LoggerMessage(EventId = 115567, Level = LogLevel.Debug, Message = "Testing connection → Subsonic server"
 )]
     private static partial void LogTestingConnection(ILogger logger);
 
@@ -844,7 +844,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
 )]
     private static partial void LogSubsonicServiceDisposed(ILogger logger);
 
-    [LoggerMessage(EventId = 115572, Level = LogLevel.Warning, Message = "Failed to publish notification {NotificationType}"
+    [LoggerMessage(EventId = 115572, Level = LogLevel.Warning, Message = "Failed → publish notification {NotificationType}"
 )]
     private static partial void LogNotificationPublishError(ILogger logger, string notificationType, Exception ex);
 
@@ -856,7 +856,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
 )]
     private static partial void LogCoverArtRetrieved(ILogger logger, string coverId, int size);
 
-    [LoggerMessage(EventId = 115575, Level = LogLevel.Error, Message = "Failed to get cover art: {CoverId}"
+    [LoggerMessage(EventId = 115575, Level = LogLevel.Error, Message = "Failed → get cover art: {CoverId}"
 )]
     private static partial void LogGetCoverArtError(ILogger logger, string coverId, Exception ex);
 

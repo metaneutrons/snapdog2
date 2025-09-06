@@ -184,7 +184,7 @@ public partial class SetZoneVolumeCommandHandler(IZoneManager zoneManager, ILogg
         return await zone.SetVolumeAsync(request.Volume).ConfigureAwait(false);
     }
 
-    [LoggerMessage(EventId = 113406, Level = LogLevel.Information, Message = "Setting volume for Zone {ZoneIndex} to {Volume} from {Source}"
+    [LoggerMessage(EventId = 113406, Level = LogLevel.Information, Message = "Setting volume for Zone {ZoneIndex} → {Volume} from {Source}"
 )]
     private partial void LogSettingVolume(int zoneIndex, int volume, CommandSource source);
 
@@ -283,7 +283,7 @@ public partial class SetZoneMuteCommandHandler(IZoneManager zoneManager, ILogger
         return await zone.SetMuteAsync(request.Enabled).ConfigureAwait(false);
     }
 
-    [LoggerMessage(EventId = 113412, Level = LogLevel.Information, Message = "Setting mute for Zone {ZoneIndex} to {Enabled} from {Source}"
+    [LoggerMessage(EventId = 113412, Level = LogLevel.Information, Message = "Setting mute for Zone {ZoneIndex} → {Enabled} from {Source}"
 )]
     private partial void LogSettingMute(int zoneIndex, bool enabled, CommandSource source);
 
@@ -351,7 +351,7 @@ public partial class SetTrackCommandHandler(IZoneManager zoneManager, ILogger<Se
         return await zone.SetTrackAsync(request.TrackIndex).ConfigureAwait(false);
     }
 
-    [LoggerMessage(EventId = 113416, Level = LogLevel.Information, Message = "Setting track for Zone {ZoneIndex} to {TrackIndex} from {Source}"
+    [LoggerMessage(EventId = 113416, Level = LogLevel.Information, Message = "Setting track for Zone {ZoneIndex} → {TrackIndex} from {Source}"
 )]
     private partial void LogSettingTrack(int zoneIndex, int trackIndex, CommandSource source);
 
@@ -554,7 +554,7 @@ public partial class SetTrackRepeatCommandHandler(
         return await zone.SetTrackRepeatAsync(request.Enabled).ConfigureAwait(false);
     }
 
-    [LoggerMessage(EventId = 113428, Level = LogLevel.Information, Message = "Setting track repeat for Zone {ZoneIndex} to {Enabled} from {Source}"
+    [LoggerMessage(EventId = 113428, Level = LogLevel.Information, Message = "Setting track repeat for Zone {ZoneIndex} → {Enabled} from {Source}"
 )]
     private partial void LogSettingTrackRepeat(int zoneIndex, bool enabled, CommandSource source);
 
@@ -641,7 +641,7 @@ public partial class SetPlaylistShuffleCommandHandler(
         return await zone.SetPlaylistShuffleAsync(request.Enabled).ConfigureAwait(false);
     }
 
-    [LoggerMessage(EventId = 113432, Level = LogLevel.Information, Message = "Setting playlist shuffle for Zone {ZoneIndex} to {Enabled} from {Source}"
+    [LoggerMessage(EventId = 113432, Level = LogLevel.Information, Message = "Setting playlist shuffle for Zone {ZoneIndex} → {Enabled} from {Source}"
 )]
     private partial void LogSettingPlaylistShuffle(
         int zoneIndex,
@@ -732,7 +732,7 @@ public partial class SetPlaylistRepeatCommandHandler(
         return await zone.SetPlaylistRepeatAsync(request.Enabled).ConfigureAwait(false);
     }
 
-    [LoggerMessage(EventId = 113436, Level = LogLevel.Information, Message = "Setting playlist repeat for Zone {ZoneIndex} to {Enabled} from {Source}"
+    [LoggerMessage(EventId = 113436, Level = LogLevel.Information, Message = "Setting playlist repeat for Zone {ZoneIndex} → {Enabled} from {Source}"
 )]
     private partial void LogSettingPlaylistRepeat(
         int zoneIndex,
@@ -821,7 +821,7 @@ public partial class SeekPositionCommandHandler(IZoneManager zoneManager, ILogge
         return await zone.SeekToPositionAsync(request.PositionMs).ConfigureAwait(false);
     }
 
-    [LoggerMessage(EventId = 113440, Level = LogLevel.Information, Message = "Seeking Zone {ZoneIndex} to position {PositionMs}ms from {Source}"
+    [LoggerMessage(EventId = 113440, Level = LogLevel.Information, Message = "Seeking Zone {ZoneIndex} → position {PositionMs}ms from {Source}"
 )]
     private partial void LogSeekingToPosition(int zoneIndex, long positionMs, CommandSource source);
 
@@ -854,7 +854,7 @@ public partial class SeekProgressCommandHandler(IZoneManager zoneManager, ILogge
         return await zone.SeekToProgressAsync(request.Progress).ConfigureAwait(false);
     }
 
-    [LoggerMessage(EventId = 113442, Level = LogLevel.Information, Message = "Seeking Zone {ZoneIndex} to progress {Progress:P1} from {Source}"
+    [LoggerMessage(EventId = 113442, Level = LogLevel.Information, Message = "Seeking Zone {ZoneIndex} → progress {Progress:P1} from {Source}"
 )]
     private partial void LogSeekingToProgress(int zoneIndex, float progress, CommandSource source);
 

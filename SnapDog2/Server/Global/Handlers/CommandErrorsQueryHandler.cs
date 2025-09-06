@@ -38,7 +38,7 @@ public partial class CommandErrorsQueryHandler(
 )]
     private partial void LogRetrievingCommandErrors();
 
-    [LoggerMessage(EventId = 112551, Level = LogLevel.Warning, Message = "Failed to retrieve command errors: {ErrorMessage}"
+    [LoggerMessage(EventId = 112551, Level = LogLevel.Warning, Message = "Failed → retrieve command errors: {ErrorMessage}"
 )]
     private partial void LogFailedToRetrieveCommandErrors(string errorMessage);
 

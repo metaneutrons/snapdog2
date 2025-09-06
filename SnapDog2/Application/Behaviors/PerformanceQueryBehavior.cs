@@ -178,15 +178,15 @@ public partial class PerformanceQueryBehavior<TQuery, TResponse>(
 )]
     private partial void LogQueryException(string queryName, long elapsedMilliseconds, Exception ex);
 
-    [LoggerMessage(EventId = 118052, Level = LogLevel.Debug, Message = "Failed to record query-specific metrics for {QueryName}"
+    [LoggerMessage(EventId = 118052, Level = LogLevel.Debug, Message = "Failed → record query-specific metrics for {QueryName}"
 )]
     private partial void LogQueryMetricsFailure(string queryName, Exception ex);
 
-    [LoggerMessage(EventId = 118053, Level = LogLevel.Debug, Message = "Failed to update business metrics from zone query"
+    [LoggerMessage(EventId = 118053, Level = LogLevel.Debug, Message = "Failed → update business metrics from zone query"
 )]
     private partial void LogZoneMetricsFailure(Exception ex);
 
-    [LoggerMessage(EventId = 118054, Level = LogLevel.Debug, Message = "Failed to update business metrics from client query"
+    [LoggerMessage(EventId = 118054, Level = LogLevel.Debug, Message = "Failed → update business metrics from client query"
 )]
     private partial void LogClientMetricsFailure(Exception ex);
 }

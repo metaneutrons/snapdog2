@@ -101,7 +101,7 @@ public partial class GetAllPlaylistsQueryHandler(
 )]
     private static partial void LogSubsonicPlaylistsAdded(ILogger logger, int count);
 
-    [LoggerMessage(EventId = 112902, Level = LogLevel.Warning, Message = "Failed to get Subsonic playlists: {Error}"
+    [LoggerMessage(EventId = 112902, Level = LogLevel.Warning, Message = "Failed → get Subsonic playlists: {Error}"
 )]
     private static partial void LogSubsonicPlaylistsError(ILogger logger, string error);
 
@@ -242,7 +242,7 @@ public partial class GetPlaylistQueryHandler(
 )]
     private static partial void LogPlaylistRetrieved(ILogger logger, string playlistIndex, int trackCount);
 
-    [LoggerMessage(EventId = 112907, Level = LogLevel.Error, Message = "Failed to get playlist: {PlaylistIndex}, error: {Error}"
+    [LoggerMessage(EventId = 112907, Level = LogLevel.Error, Message = "Failed → get playlist: {PlaylistIndex}, error: {Error}"
 )]
     private static partial void LogPlaylistError(ILogger logger, string playlistIndex, string error);
 
@@ -324,7 +324,7 @@ public partial class GetStreamUrlQueryHandler(
 )]
     private static partial void LogStreamUrlRetrieved(ILogger logger, string trackId);
 
-    [LoggerMessage(EventId = 112913, Level = LogLevel.Error, Message = "Failed to get stream URL for track: {TrackId}, error: {Error}"
+    [LoggerMessage(EventId = 112913, Level = LogLevel.Error, Message = "Failed → get stream URL for track: {TrackId}, error: {Error}"
 )]
     private static partial void LogStreamUrlError(ILogger logger, string trackId, string error);
 

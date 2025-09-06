@@ -32,7 +32,7 @@ public partial class AssignClientToZoneCommandHandler(
     private readonly IZoneManager _zoneManager = zoneManager;
     private readonly ILogger<AssignClientToZoneCommandHandler> _logger = logger;
 
-    [LoggerMessage(EventId = 112000, Level = LogLevel.Information, Message = "Assigning Client {ClientIndex} to Zone {ZoneIndex} from {Source}"
+    [LoggerMessage(EventId = 112000, Level = LogLevel.Information, Message = "Assigning Client {ClientIndex} → Zone {ZoneIndex} from {Source}"
 )]
     private partial void LogHandling(int clientIndex, int zoneIndex, CommandSource source);
 

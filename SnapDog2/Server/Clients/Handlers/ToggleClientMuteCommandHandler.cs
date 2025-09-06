@@ -38,7 +38,7 @@ public partial class ToggleClientMuteCommandHandler(
 )]
     private partial void LogClientNotFound(int clientIndex);
 
-    [LoggerMessage(EventId = 112502, Level = LogLevel.Information, Message = "Toggled mute for Client {ClientIndex} to {NewMuteState}"
+    [LoggerMessage(EventId = 112502, Level = LogLevel.Information, Message = "Toggled mute for Client {ClientIndex} → {NewMuteState}"
 )]
     private partial void LogToggleResult(int clientIndex, bool newMuteState);
 

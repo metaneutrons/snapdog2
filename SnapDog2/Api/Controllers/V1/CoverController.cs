@@ -26,7 +26,7 @@ public partial class CoverController : ControllerBase
 )]
     private partial void LogCoverNotFound(string coverId);
 
-    [LoggerMessage(EventId = 113101, Level = LogLevel.Error, Message = "Failed to retrieve cover art: {CoverId}"
+    [LoggerMessage(EventId = 113101, Level = LogLevel.Error, Message = "Failed → retrieve cover art: {CoverId}"
 )]
     private partial void LogCoverRetrievalFailed(Exception ex, string coverId);
 

@@ -39,11 +39,11 @@ public partial class AttributeBasedMqttCommandMapper(
 )]
     private partial void LogInitializingMappings();
 
-    [LoggerMessage(EventId = 115151, Level = LogLevel.Debug, Message = "Found MQTT command: {CommandType} -> {TopicPattern}"
+    [LoggerMessage(EventId = 115151, Level = LogLevel.Debug, Message = "Found MQTT command: {CommandType} → {TopicPattern}"
 )]
     private partial void LogFoundCommand(string commandType, string topicPattern);
 
-    [LoggerMessage(EventId = 115152, Level = LogLevel.Debug, Message = "Mapping MQTT topic: {Topic} -> {Payload}"
+    [LoggerMessage(EventId = 115152, Level = LogLevel.Debug, Message = "Mapping MQTT topic: {Topic} → {Payload}"
 )]
     private partial void LogMappingTopic(string topic, string payload);
 
@@ -295,7 +295,7 @@ public partial class AttributeBasedMqttCommandMapper(
         return this._topicMappings.Keys;
     }
 
-    [LoggerMessage(EventId = 115155, Level = LogLevel.Error, Message = "Failed to create command instance for type {CommandType}"
+    [LoggerMessage(EventId = 115155, Level = LogLevel.Error, Message = "Failed → create command instance for type {CommandType}"
 )]
     private partial void LogCommandInstanceCreationError(string commandType, Exception ex);
 }

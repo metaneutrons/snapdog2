@@ -29,11 +29,11 @@ public partial class SetSnapcastClientVolumeCommandHandler(
     private readonly ISnapcastService _snapcastService = snapcastService;
     private readonly ILogger<SetSnapcastClientVolumeCommandHandler> _logger = logger;
 
-    [LoggerMessage(EventId = 113200, Level = LogLevel.Information, Message = "Setting volume for Snapcast client {ClientIndex} to {Volume}% (Source: {Source})"
+    [LoggerMessage(EventId = 113200, Level = LogLevel.Information, Message = "Setting volume for Snapcast client {ClientIndex} → {Volume}% (Source: {Source})"
 )]
     private partial void LogSettingClientVolume(string clientIndex, int volume, string source);
 
-    [LoggerMessage(EventId = 113201, Level = LogLevel.Error, Message = "Failed to set volume for Snapcast client {ClientIndex}"
+    [LoggerMessage(EventId = 113201, Level = LogLevel.Error, Message = "Failed → set volume for Snapcast client {ClientIndex}"
 )]
     private partial void LogSetClientVolumeFailed(string clientIndex, Exception ex);
 

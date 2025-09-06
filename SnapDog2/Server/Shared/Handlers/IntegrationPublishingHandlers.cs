@@ -537,23 +537,23 @@ public partial class IntegrationPublishingHandlers(
     #region Logging
 
     // Client logging
-    [LoggerMessage(EventId = 113100, Level = LogLevel.Information, Message = "Client {ClientIndex} volume changed to {Volume}"
+    [LoggerMessage(EventId = 113100, Level = LogLevel.Information, Message = "Client {ClientIndex} volume changed → {Volume}"
 )]
     private partial void LogClientVolumeChange(int clientIndex, int volume);
 
-    [LoggerMessage(EventId = 113101, Level = LogLevel.Information, Message = "Client {ClientIndex} mute changed to {IsMuted}"
+    [LoggerMessage(EventId = 113101, Level = LogLevel.Information, Message = "Client {ClientIndex} mute changed → {IsMuted}"
 )]
     private partial void LogClientMuteChange(int clientIndex, bool isMuted);
 
-    [LoggerMessage(EventId = 113102, Level = LogLevel.Information, Message = "Client {ClientIndex} latency changed to {LatencyMs}ms"
+    [LoggerMessage(EventId = 113102, Level = LogLevel.Information, Message = "Client {ClientIndex} latency changed → {LatencyMs}ms"
 )]
     private partial void LogClientLatencyChange(int clientIndex, int latencyMs);
 
-    [LoggerMessage(EventId = 113103, Level = LogLevel.Information, Message = "Client {ClientIndex} zone changed from {PreviousZoneIndex} to {ZoneIndex}"
+    [LoggerMessage(EventId = 113103, Level = LogLevel.Information, Message = "Client {ClientIndex} zone changed from {PreviousZoneIndex} → {ZoneIndex}"
 )]
     private partial void LogClientZoneChange(int clientIndex, int? previousZoneIndex, int? zoneIndex);
 
-    [LoggerMessage(EventId = 113104, Level = LogLevel.Information, Message = "Client {ClientIndex} connection changed to {IsConnected}"
+    [LoggerMessage(EventId = 113104, Level = LogLevel.Information, Message = "Client {ClientIndex} connection changed → {IsConnected}"
 )]
     private partial void LogClientConnectionChange(int clientIndex, bool isConnected);
 
@@ -561,7 +561,7 @@ public partial class IntegrationPublishingHandlers(
 )]
     private partial void LogClientStateChange(int clientIndex);
 
-    [LoggerMessage(EventId = 113106, Level = LogLevel.Debug, Message = "📤 Publishing client {ClientIndex} state to MQTT ({ChangeType})"
+    [LoggerMessage(EventId = 113106, Level = LogLevel.Debug, Message = "Publishing client {ClientIndex} state → MQTT ({ChangeType})"
 )]
     private partial void LogClientStatePublishing(int clientIndex, string changeType);
 
@@ -587,35 +587,35 @@ public partial class IntegrationPublishingHandlers(
     }
 
     // Zone logging
-    [LoggerMessage(EventId = 113108, Level = LogLevel.Information, Message = "Zone {ZoneIndex} volume changed to {Volume}"
+    [LoggerMessage(EventId = 113108, Level = LogLevel.Information, Message = "Zone {ZoneIndex} volume changed → {Volume}"
 )]
     private partial void LogZoneVolumeChange(int zoneIndex, int volume);
 
-    [LoggerMessage(EventId = 113109, Level = LogLevel.Information, Message = "Zone {ZoneIndex} mute changed to {IsMuted}"
+    [LoggerMessage(EventId = 113109, Level = LogLevel.Information, Message = "Zone {ZoneIndex} mute changed → {IsMuted}"
 )]
     private partial void LogZoneMuteChange(int zoneIndex, bool isMuted);
 
-    [LoggerMessage(EventId = 113110, Level = LogLevel.Information, Message = "Zone {ZoneIndex} playback state changed to {PlaybackState}"
+    [LoggerMessage(EventId = 113110, Level = LogLevel.Information, Message = "Zone {ZoneIndex} playback state changed → {PlaybackState}"
 )]
     private partial void LogZonePlaybackStateChange(int zoneIndex, string playbackState);
 
-    [LoggerMessage(EventId = 113111, Level = LogLevel.Information, Message = "Zone {ZoneIndex} track changed to {TrackTitle} by {Artist}"
+    [LoggerMessage(EventId = 113111, Level = LogLevel.Information, Message = "Zone {ZoneIndex} track changed → {TrackTitle} by {Artist}"
 )]
     private partial void LogZoneTrackChange(int zoneIndex, string trackTitle, string artist);
 
-    [LoggerMessage(EventId = 113116, Level = LogLevel.Information, Message = "Zone {ZoneIndex} playlist changed to {PlaylistName} (Index: {PlaylistIndex})"
+    [LoggerMessage(EventId = 113116, Level = LogLevel.Information, Message = "Zone {ZoneIndex} playlist changed → {PlaylistName} (Index: {PlaylistIndex})"
 )]
     private partial void LogZonePlaylistChange(int zoneIndex, string playlistName, int playlistIndex);
 
-    [LoggerMessage(EventId = 113117, Level = LogLevel.Information, Message = "Zone {ZoneIndex} track repeat changed to {TrackRepeatEnabled}"
+    [LoggerMessage(EventId = 113117, Level = LogLevel.Information, Message = "Zone {ZoneIndex} track repeat changed → {TrackRepeatEnabled}"
 )]
     private partial void LogZoneTrackRepeatChange(int zoneIndex, bool trackRepeatEnabled);
 
-    [LoggerMessage(EventId = 113118, Level = LogLevel.Information, Message = "Zone {ZoneIndex} playlist repeat changed to {PlaylistRepeatEnabled}"
+    [LoggerMessage(EventId = 113118, Level = LogLevel.Information, Message = "Zone {ZoneIndex} playlist repeat changed → {PlaylistRepeatEnabled}"
 )]
     private partial void LogZonePlaylistRepeatChange(int zoneIndex, bool playlistRepeatEnabled);
 
-    [LoggerMessage(EventId = 113115, Level = LogLevel.Information, Message = "Zone {ZoneIndex} shuffle mode changed to {ShuffleEnabled}"
+    [LoggerMessage(EventId = 113115, Level = LogLevel.Information, Message = "Zone {ZoneIndex} shuffle mode changed → {ShuffleEnabled}"
 )]
     private partial void LogZoneShuffleModeChange(int zoneIndex, bool shuffleEnabled);
 
@@ -623,23 +623,23 @@ public partial class IntegrationPublishingHandlers(
 )]
     private partial void LogZoneTrackMetadataChange(int zoneIndex, string title, string artist, string album);
 
-    [LoggerMessage(EventId = 113117, Level = LogLevel.Information, Message = "Zone {ZoneIndex} track title changed to {Title}"
+    [LoggerMessage(EventId = 113117, Level = LogLevel.Information, Message = "Zone {ZoneIndex} track title changed → {Title}"
 )]
     private partial void LogZoneTrackTitleChange(int zoneIndex, string title);
 
-    [LoggerMessage(EventId = 113118, Level = LogLevel.Information, Message = "Zone {ZoneIndex} track artist changed to {Artist}"
+    [LoggerMessage(EventId = 113118, Level = LogLevel.Information, Message = "Zone {ZoneIndex} track artist changed → {Artist}"
 )]
     private partial void LogZoneTrackArtistChange(int zoneIndex, string artist);
 
-    [LoggerMessage(EventId = 113119, Level = LogLevel.Information, Message = "Zone {ZoneIndex} track album changed to {Album}"
+    [LoggerMessage(EventId = 113119, Level = LogLevel.Information, Message = "Zone {ZoneIndex} track album changed → {Album}"
 )]
     private partial void LogZoneTrackAlbumChange(int zoneIndex, string album);
 
-    [LoggerMessage(EventId = 113120, Level = LogLevel.Information, Message = "Zone {ZoneIndex} track progress changed to {Progress}%"
+    [LoggerMessage(EventId = 113120, Level = LogLevel.Information, Message = "Zone {ZoneIndex} track progress changed → {Progress}%"
 )]
     private partial void LogZoneTrackProgressChange(int zoneIndex, double progress);
 
-    [LoggerMessage(EventId = 113121, Level = LogLevel.Information, Message = "Zone {ZoneIndex} track playing status changed to {IsPlaying}"
+    [LoggerMessage(EventId = 113121, Level = LogLevel.Information, Message = "Zone {ZoneIndex} track playing status changed → {IsPlaying}"
 )]
     private partial void LogZoneTrackPlayingStatusChange(int zoneIndex, bool isPlaying);
 
@@ -652,11 +652,11 @@ public partial class IntegrationPublishingHandlers(
 )]
     private partial void LogSmartPublisherNotAvailable(string entityType, string entityId, string eventType);
 
-    [LoggerMessage(EventId = 113124, Level = LogLevel.Error, Message = "Failed to publish {EntityType} {EntityId} {EventType} to MQTT"
+    [LoggerMessage(EventId = 113124, Level = LogLevel.Error, Message = "Failed → publish {EntityType} {EntityId} {EventType} → MQTT"
 )]
     private partial void LogPublishError(string entityType, string entityId, string eventType, Exception ex);
 
-    [LoggerMessage(EventId = 113125, Level = LogLevel.Debug, Message = "Attempting to publish zone status: {EventType} for Zone {ZoneIndex}"
+    [LoggerMessage(EventId = 113125, Level = LogLevel.Debug, Message = "Attempting → publish zone status: {EventType} for Zone {ZoneIndex}"
 )]
     private static partial void LogAttemptingToPublishZoneStatus(ILogger logger, string eventType, int zoneIndex);
 
@@ -707,7 +707,7 @@ public partial class KnxIntegrationHandler(IKnxService knxService, ILogger<KnxIn
 
     #region LoggerMessage Methods
 
-    [LoggerMessage(EventId = 113130, Level = LogLevel.Information, Message = "🔔 KNX integration received: {StatusType} for target {TargetIndex} with value {Value}"
+    [LoggerMessage(EventId = 113130, Level = LogLevel.Information, Message = "KNX integration received: {StatusType} for target {TargetIndex} with value {Value}"
 )]
     private partial void LogKnxIntegrationReceived(string StatusType, int TargetIndex, string Value);
 

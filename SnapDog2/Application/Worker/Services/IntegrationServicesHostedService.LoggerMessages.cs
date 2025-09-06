@@ -25,7 +25,7 @@ public partial class IntegrationServicesHostedService
 )]
     private partial void LogIntegrationServicesInitializationCancelled();
 
-    [LoggerMessage(EventId = 114301, Level = LogLevel.Error, Message = "Failed to initialize integration services"
+    [LoggerMessage(EventId = 114301, Level = LogLevel.Error, Message = "Failed → initialize integration services"
 )]
     private partial void LogFailedToInitializeIntegrationServices(Exception ex);
 

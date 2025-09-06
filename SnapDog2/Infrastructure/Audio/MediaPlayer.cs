@@ -334,7 +334,7 @@ public sealed partial class MediaPlayer(
 
     [LoggerMessage(
         Level = LogLevel.Error,
-        Message = "Failed to start audio streaming for zone {ZoneIndex}: {StreamUrl}"
+        Message = "Failed → start audio streaming for zone {ZoneIndex}: {StreamUrl}"
     )]
     private static partial void LogStreamingFailed(
         ILogger logger,
@@ -345,7 +345,7 @@ public sealed partial class MediaPlayer(
 
     [LoggerMessage(
         Level = LogLevel.Error,
-        Message = "Failed to stop audio streaming for zone {ZoneIndex}"
+        Message = "Failed → stop audio streaming for zone {ZoneIndex}"
     )]
     private static partial void LogStreamingStopFailed(ILogger logger, Exception exception, int zoneIndex);
 

@@ -214,7 +214,7 @@ public sealed partial class MetadataManager(ILogger<MetadataManager> logger)
         long duration
     );
 
-    [LoggerMessage(EventId = 116153, Level = LogLevel.Error, Message = "Failed to extract metadata from media: {MediaMrl}"
+    [LoggerMessage(EventId = 116153, Level = LogLevel.Error, Message = "Failed → extract metadata from media: {MediaMrl}"
 )]
     private static partial void LogFailedToExtractMetadata(ILogger logger, Exception ex, string mediaMrl);
 
@@ -222,11 +222,11 @@ public sealed partial class MetadataManager(ILogger<MetadataManager> logger)
 )]
     private static partial void LogMetadataSaved(ILogger logger, string filePath);
 
-    [LoggerMessage(EventId = 116155, Level = LogLevel.Error, Message = "Failed to save metadata to: {FilePath}"
+    [LoggerMessage(EventId = 116155, Level = LogLevel.Error, Message = "Failed → save metadata to: {FilePath}"
 )]
     private static partial void LogFailedToSaveMetadata(ILogger logger, Exception ex, string filePath);
 
-    [LoggerMessage(EventId = 116156, Level = LogLevel.Warning, Message = "Failed to extract technical details from media"
+    [LoggerMessage(EventId = 116156, Level = LogLevel.Warning, Message = "Failed → extract technical details from media"
 )]
     private static partial void LogFailedToExtractTechnicalDetails(ILogger logger, Exception ex);
 

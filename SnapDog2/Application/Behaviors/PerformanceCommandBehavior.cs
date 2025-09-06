@@ -196,7 +196,7 @@ public partial class PerformanceCommandBehavior<TCommand, TResponse>(
 )]
     private partial void LogCommandException(string commandName, long elapsedMilliseconds, Exception ex);
 
-    [LoggerMessage(EventId = 118002, Level = LogLevel.Debug, Message = "Failed to record command-specific metrics for {CommandName}"
+    [LoggerMessage(EventId = 118002, Level = LogLevel.Debug, Message = "Failed → record command-specific metrics for {CommandName}"
 )]
     private static partial void LogMetricsRecordingFailed(ILogger logger, Exception ex, string commandName);
 }

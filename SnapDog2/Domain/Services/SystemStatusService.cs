@@ -145,7 +145,7 @@ public partial class AppStatusService(
 )]
     private partial void LogGettingServerStats();
 
-    [LoggerMessage(EventId = 110203, Level = LogLevel.Warning, Message = "Failed to extract build date from assembly"
+    [LoggerMessage(EventId = 110203, Level = LogLevel.Warning, Message = "Failed → extract build date from assembly"
 )]
     private static partial void LogBuildDateExtractionFailed(ILogger logger, Exception ex);
 }

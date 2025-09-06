@@ -54,7 +54,7 @@ public partial class ClientManager : IClientManager
 )]
     private partial void LogGettingClientsByZone(int zoneIndex);
 
-    [LoggerMessage(EventId = 110004, Level = LogLevel.Information, Message = "Assigning client {ClientIndex} to zone {ZoneIndex}"
+    [LoggerMessage(EventId = 110004, Level = LogLevel.Information, Message = "Assigning client {ClientIndex} → zone {ZoneIndex}"
 )]
     private partial void LogAssigningClientToZone(int clientIndex, int zoneIndex);
 
@@ -66,7 +66,7 @@ public partial class ClientManager : IClientManager
 )]
     private partial void LogGettingClientBySnapcastId(string snapcastClientId);
 
-    [LoggerMessage(EventId = 110007, Level = LogLevel.Warning, Message = "Snapcast client {SnapcastClientId} not found"
+    [LoggerMessage(EventId = 110007, Level = LogLevel.Warning, Message = "client {SnapcastClientId} not found"
 )]
     private partial void LogSnapcastClientNotFound(string snapcastClientId);
 
@@ -78,7 +78,7 @@ public partial class ClientManager : IClientManager
 )]
     private partial void LogClientConfigNotFoundByMac(string macAddress);
 
-    [LoggerMessage(EventId = 110010, Level = LogLevel.Debug, Message = "Found client {SnapcastClientId} with MAC {MacAddress} mapped to client index {ClientIndex}"
+    [LoggerMessage(EventId = 110010, Level = LogLevel.Debug, Message = "Found client {SnapcastClientId} with MAC {MacAddress} mapped → client index {ClientIndex}"
 )]
     private partial void LogClientFoundByMac(string snapcastClientId, string macAddress, int clientIndex);
 
@@ -90,7 +90,7 @@ public partial class ClientManager : IClientManager
 )]
     private partial void LogFoundClientWithSnapcastId(int ClientIndex, string SnapcastClientId);
 
-    [LoggerMessage(EventId = 110013, Level = LogLevel.Debug, Message = "Target zone {ZoneIndex} maps to stream: {StreamId}"
+    [LoggerMessage(EventId = 110013, Level = LogLevel.Debug, Message = "Target zone {ZoneIndex} maps → stream: {StreamId}"
 )]
     private partial void LogTargetZoneMapsToStream(int ZoneIndex, string StreamId);
 
@@ -98,7 +98,7 @@ public partial class ClientManager : IClientManager
 )]
     private partial void LogUsingGroupForZone(string GroupId, int ZoneIndex);
 
-    [LoggerMessage(EventId = 110015, Level = LogLevel.Warning, Message = "Failed to move client {ClientIndex} to group {GroupId}: {Error}"
+    [LoggerMessage(EventId = 110015, Level = LogLevel.Warning, Message = "Failed → move client {ClientIndex} → group {GroupId}: {Error}"
 )]
     private partial void LogFailedToMoveClientToGroup(string ClientIndex, string GroupId, string? Error);
 
@@ -110,11 +110,11 @@ public partial class ClientManager : IClientManager
 )]
     private partial void LogServerStateRefreshedSuccessfully();
 
-    [LoggerMessage(EventId = 110018, Level = LogLevel.Warning, Message = "Failed to refresh server state after zone assignment: {Error}"
+    [LoggerMessage(EventId = 110018, Level = LogLevel.Warning, Message = "Failed → refresh server state after zone assignment: {Error}"
 )]
     private partial void LogFailedToRefreshServerState(string? Error);
 
-    [LoggerMessage(EventId = 110019, Level = LogLevel.Information, Message = "Successfully assigned client {ClientIndex} - ({ClientId}) to zone {ZoneIndex} (group {GroupId})"
+    [LoggerMessage(EventId = 110019, Level = LogLevel.Information, Message = "Successfully assigned client {ClientIndex} - ({ClientId}) → zone {ZoneIndex} (group {GroupId})"
 )]
     private partial void LogSuccessfullyAssignedClientToZone(
         int ClientIndex,
@@ -123,7 +123,7 @@ public partial class ClientManager : IClientManager
         string GroupId
     );
 
-    [LoggerMessage(EventId = 110020, Level = LogLevel.Error, Message = "Error assigning client {ClientIndex} to zone {ZoneIndex}"
+    [LoggerMessage(EventId = 110020, Level = LogLevel.Error, Message = "Error assigning client {ClientIndex} → zone {ZoneIndex}"
 )]
     private partial void LogErrorAssigningClientToZone(Exception ex, int ClientIndex, int ZoneIndex);
 
@@ -139,15 +139,15 @@ public partial class ClientManager : IClientManager
 )]
     private partial void LogFoundExistingGroupForStream(string GroupId, string StreamId);
 
-    [LoggerMessage(EventId = 110024, Level = LogLevel.Debug, Message = "Assigning group {GroupId} to stream {StreamId}"
+    [LoggerMessage(EventId = 110024, Level = LogLevel.Debug, Message = "Assigning group {GroupId} → stream {StreamId}"
 )]
     private partial void LogAssigningGroupToStream(string GroupId, string StreamId);
 
-    [LoggerMessage(EventId = 110025, Level = LogLevel.Debug, Message = "Successfully assigned group {GroupId} to stream {StreamId}"
+    [LoggerMessage(EventId = 110025, Level = LogLevel.Debug, Message = "Successfully assigned group {GroupId} → stream {StreamId}"
 )]
     private partial void LogSuccessfullyAssignedGroupToStream(string GroupId, string StreamId);
 
-    [LoggerMessage(EventId = 110026, Level = LogLevel.Warning, Message = "Failed to assign group {GroupId} to stream {StreamId}: {Error}"
+    [LoggerMessage(EventId = 110026, Level = LogLevel.Warning, Message = "Failed → assign group {GroupId} → stream {StreamId}: {Error}"
 )]
     private partial void LogFailedToAssignGroupToStream(string GroupId, string StreamId, string? Error);
 

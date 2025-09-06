@@ -120,7 +120,7 @@ public sealed partial class MqttService : IMqttService
 )]
     private partial void LogServiceCreated(string brokerAddress, int port, bool enabled);
 
-    [LoggerMessage(EventId = 115251, Level = LogLevel.Information, Message = "Initializing MQTT connection to {BrokerAddress}:{Port}"
+    [LoggerMessage(EventId = 115251, Level = LogLevel.Information, Message = "Initializing MQTT connection → {BrokerAddress}:{Port}"
 )]
     private partial void LogInitializing(string brokerAddress, int port);
 
@@ -132,7 +132,7 @@ public sealed partial class MqttService : IMqttService
 )]
     private partial void LogConnectionLost(string reason);
 
-    [LoggerMessage(EventId = 115254, Level = LogLevel.Error, Message = "Failed to initialize MQTT connection"
+    [LoggerMessage(EventId = 115254, Level = LogLevel.Error, Message = "Failed → initialize MQTT connection"
 )]
     private partial void LogInitializationFailed(Exception ex);
 
@@ -152,7 +152,7 @@ public sealed partial class MqttService : IMqttService
 )]
     private partial void LogNotConnected(string operation);
 
-    [LoggerMessage(EventId = 115259, Level = LogLevel.Information, Message = "🚀 Attempting MQTT connection to {BrokerAddress}:{Port} (attempt {AttemptNumber}/{MaxAttempts}: {ErrorMessage})"
+    [LoggerMessage(EventId = 115259, Level = LogLevel.Information, Message = "🚀 Attempting MQTT connection → {BrokerAddress}:{Port} (attempt {AttemptNumber}/{MaxAttempts}: {ErrorMessage})"
 )]
     private partial void LogConnectionRetryAttempt(
         string brokerAddress,

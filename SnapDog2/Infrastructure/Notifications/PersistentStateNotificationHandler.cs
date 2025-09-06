@@ -108,7 +108,7 @@ public partial class PersistentStateNotificationHandler(
 )]
     private partial void LogZoneStatePersisted(int ZoneIndex, string ZoneName);
 
-    [LoggerMessage(EventId = 117102, Level = LogLevel.Error, Message = "❌ Failed to persist zone {ZoneIndex} state"
+    [LoggerMessage(EventId = 117102, Level = LogLevel.Error, Message = "❌ Failed → persist zone {ZoneIndex} state"
 )]
     private partial void LogZoneStatePersistFailed(Exception ex, int ZoneIndex);
 
@@ -120,7 +120,7 @@ public partial class PersistentStateNotificationHandler(
 )]
     private partial void LogClientStatePersisted(int ClientIndex, string ClientName);
 
-    [LoggerMessage(EventId = 117105, Level = LogLevel.Error, Message = "❌ Failed to persist client {ClientIndex} state"
+    [LoggerMessage(EventId = 117105, Level = LogLevel.Error, Message = "❌ Failed → persist client {ClientIndex} state"
 )]
     private partial void LogClientStatePersistFailed(Exception ex, int ClientIndex);
 

@@ -35,46 +35,46 @@ public partial class SignalRNotificationHandler :
         _logger = logger;
     }
 
-    [LoggerMessage(EventId = 113300, Level = LogLevel.Information, Message = "SignalR: Zone {ZoneIndex} volume changed to {Volume}")]
+    [LoggerMessage(EventId = 113300, Level = LogLevel.Information, Message = "Zone {ZoneIndex} volume changed → {Volume}")]
     private partial void LogZoneVolumeChanged(int zoneIndex, int volume);
 
-    [LoggerMessage(EventId = 113301, Level = LogLevel.Information, Message = "SignalR: Zone {ZoneIndex} mute changed to {IsMuted}")]
+    [LoggerMessage(EventId = 113301, Level = LogLevel.Information, Message = "Zone {ZoneIndex} mute changed → {IsMuted}")]
     private partial void LogZoneMuteChanged(int zoneIndex, bool isMuted);
 
-    [LoggerMessage(EventId = 113302, Level = LogLevel.Information, Message = "SignalR: Zone {ZoneIndex} playback changed to {PlaybackState}")]
+    [LoggerMessage(EventId = 113302, Level = LogLevel.Information, Message = "Zone {ZoneIndex} playback changed → {PlaybackState}")]
     private partial void LogZonePlaybackChanged(int zoneIndex, string playbackState);
 
-    [LoggerMessage(EventId = 113303, Level = LogLevel.Information, Message = "SignalR: Zone {ZoneIndex} track changed to {TrackIndex}")]
+    [LoggerMessage(EventId = 113303, Level = LogLevel.Information, Message = "Zone {ZoneIndex} track changed → {TrackIndex}")]
     private partial void LogZoneTrackChanged(int zoneIndex, int? trackIndex);
 
-    [LoggerMessage(EventId = 113304, Level = LogLevel.Information, Message = "SignalR: Zone {ZoneIndex} playlist changed to {PlaylistIndex}")]
+    [LoggerMessage(EventId = 113304, Level = LogLevel.Information, Message = "Zone {ZoneIndex} playlist changed → {PlaylistIndex}")]
     private partial void LogZonePlaylistChanged(int zoneIndex, int? playlistIndex);
 
-    [LoggerMessage(EventId = 113305, Level = LogLevel.Information, Message = "SignalR: Zone {ZoneIndex} track repeat changed to {Enabled}")]
+    [LoggerMessage(EventId = 113305, Level = LogLevel.Information, Message = "Zone {ZoneIndex} track repeat changed → {Enabled}")]
     private partial void LogZoneTrackRepeatChanged(int zoneIndex, bool enabled);
 
-    [LoggerMessage(EventId = 113306, Level = LogLevel.Information, Message = "SignalR: Zone {ZoneIndex} playlist repeat changed to {Enabled}")]
+    [LoggerMessage(EventId = 113306, Level = LogLevel.Information, Message = "Zone {ZoneIndex} playlist repeat changed → {Enabled}")]
     private partial void LogZonePlaylistRepeatChanged(int zoneIndex, bool enabled);
 
-    [LoggerMessage(EventId = 113307, Level = LogLevel.Information, Message = "SignalR: Zone {ZoneIndex} shuffle changed to {ShuffleEnabled}")]
+    [LoggerMessage(EventId = 113307, Level = LogLevel.Information, Message = "Zone {ZoneIndex} shuffle changed → {ShuffleEnabled}")]
     private partial void LogZoneShuffleChanged(int zoneIndex, bool shuffleEnabled);
 
-    [LoggerMessage(EventId = 113308, Level = LogLevel.Debug, Message = "SignalR: Zone {ZoneIndex} progress: {Position}ms ({Progress}%)")]
+    [LoggerMessage(EventId = 113308, Level = LogLevel.Debug, Message = "Zone {ZoneIndex} progress: {Position}ms ({Progress}%)")]
     private partial void LogZoneProgress(int zoneIndex, long position, double progress);
 
-    [LoggerMessage(EventId = 113309, Level = LogLevel.Information, Message = "SignalR: Client {ClientIndex} volume changed to {Volume}")]
+    [LoggerMessage(EventId = 113309, Level = LogLevel.Information, Message = "Client {ClientIndex} volume changed → {Volume}")]
     private partial void LogClientVolumeChanged(int clientIndex, int volume);
 
-    [LoggerMessage(EventId = 113310, Level = LogLevel.Information, Message = "SignalR: Client {ClientIndex} mute changed to {IsMuted}")]
+    [LoggerMessage(EventId = 113310, Level = LogLevel.Information, Message = "Client {ClientIndex} mute changed → {IsMuted}")]
     private partial void LogClientMuteChanged(int clientIndex, bool isMuted);
 
-    [LoggerMessage(EventId = 113311, Level = LogLevel.Information, Message = "SignalR: Client {ClientIndex} zone changed to {ZoneIndex}")]
+    [LoggerMessage(EventId = 113311, Level = LogLevel.Information, Message = "Client {ClientIndex} zone changed → {ZoneIndex}")]
     private partial void LogClientZoneChanged(int clientIndex, string zoneIndex);
 
-    [LoggerMessage(EventId = 113312, Level = LogLevel.Information, Message = "SignalR: Client {ClientIndex} connection changed to {Connected}")]
+    [LoggerMessage(EventId = 113312, Level = LogLevel.Information, Message = "Client {ClientIndex} connection changed → {Connected}")]
     private partial void LogClientConnectionChanged(int clientIndex, bool connected);
 
-    [LoggerMessage(EventId = 113313, Level = LogLevel.Information, Message = "SignalR: Client {ClientIndex} latency changed to {Latency}ms")]
+    [LoggerMessage(EventId = 113313, Level = LogLevel.Information, Message = "Client {ClientIndex} latency changed → {Latency}ms")]
     private partial void LogClientLatencyChanged(int clientIndex, int latency);
 
     public async Task Handle(ServerZoneNotifications.ZoneVolumeChangedNotification notification, CancellationToken cancellationToken)

@@ -571,11 +571,11 @@ public partial class StartupService : IHostedService
 )]
     private partial void LogStartupValidationsCompleted();
 
-    [LoggerMessage(EventId = 111052, Level = LogLevel.Critical, Message = "🚨 STARTUP VALIDATION FAILED: {ErrorMessage}. Application will terminate to prevent undefined behavior."
+    [LoggerMessage(EventId = 111052, Level = LogLevel.Critical, Message = "🚨 STARTUP VALIDATION FAILED: {ErrorMessage}. Application will terminate → prevent undefined behavior."
 )]
     private partial void LogStartupValidationFailed(string errorMessage);
 
-    [LoggerMessage(EventId = 111053, Level = LogLevel.Critical, Message = "🚨 STARTUP VALIDATION FAILED: {ErrorMessage}. Application will terminate to prevent undefined behavior."
+    [LoggerMessage(EventId = 111053, Level = LogLevel.Critical, Message = "🚨 STARTUP VALIDATION FAILED: {ErrorMessage}. Application will terminate → prevent undefined behavior."
 )]
     private partial void LogStartupValidationFailedWithException(string errorMessage, Exception exception);
 
@@ -648,11 +648,11 @@ public partial class StartupService : IHostedService
 )]
     private partial void LogPortAvailable(int port, string serviceName);
 
-    [LoggerMessage(EventId = 111066, Level = LogLevel.Error, Message = "❌ Failed to check port {Port} ({ServiceName}): {ErrorMessage}"
+    [LoggerMessage(EventId = 111066, Level = LogLevel.Error, Message = "❌ Failed → check port {Port} ({ServiceName}): {ErrorMessage}"
 )]
     private partial void LogPortCheckFailed(int port, string serviceName, string errorMessage);
 
-    [LoggerMessage(EventId = 111067, Level = LogLevel.Error, Message = "❌ Failed to check port {Port} ({ServiceName}): {ErrorMessage}"
+    [LoggerMessage(EventId = 111067, Level = LogLevel.Error, Message = "❌ Failed → check port {Port} ({ServiceName}): {ErrorMessage}"
 )]
     private partial void LogPortCheckFailedWithException(
         int port,
@@ -673,11 +673,11 @@ public partial class StartupService : IHostedService
 )]
     private partial void LogServiceReachable(string serviceName, string address, int port);
 
-    [LoggerMessage(EventId = 111071, Level = LogLevel.Warning, Message = "⚠️ Failed to check connectivity to {ServiceName} ({Address}:{Port}): {ErrorMessage}"
+    [LoggerMessage(EventId = 111071, Level = LogLevel.Warning, Message = "⚠️ Failed → check connectivity → {ServiceName} ({Address}:{Port}): {ErrorMessage}"
 )]
     private partial void LogConnectivityCheckFailed(string serviceName, string address, int port, string errorMessage);
 
-    [LoggerMessage(EventId = 111074, Level = LogLevel.Warning, Message = "⚠️ Failed to check connectivity to {ServiceName} ({Address}:{Port}): {ErrorMessage}"
+    [LoggerMessage(EventId = 111074, Level = LogLevel.Warning, Message = "⚠️ Failed → check connectivity → {ServiceName} ({Address}:{Port}): {ErrorMessage}"
 )]
     private partial void LogConnectivityCheckFailedWithException(
         string serviceName,
@@ -875,11 +875,11 @@ public partial class StartupService : IHostedService
         string errorMessage
     );
 
-    [LoggerMessage(EventId = 111108, Level = LogLevel.Error, Message = "❌ Failed to check port availability for {ServiceName} on port {Port}"
+    [LoggerMessage(EventId = 111108, Level = LogLevel.Error, Message = "❌ Failed → check port availability for {ServiceName} on port {Port}"
 )]
     private partial void LogPortAvailabilityCheckFailedWithException(string serviceName, int port, Exception exception);
 
-    [LoggerMessage(EventId = 111109, Level = LogLevel.Error, Message = "❌ Failed to check port availability for {ServiceName} on port {Port}: {ErrorType} - {ErrorMessage}"
+    [LoggerMessage(EventId = 111109, Level = LogLevel.Error, Message = "❌ Failed → check port availability for {ServiceName} on port {Port}: {ErrorType} - {ErrorMessage}"
 )]
     private partial void LogPortAvailabilityCheckFailed(
         string serviceName,
@@ -888,7 +888,7 @@ public partial class StartupService : IHostedService
         string errorMessage
     );
 
-    [LoggerMessage(EventId = 111110, Level = LogLevel.Warning, Message = "❌ Failed to verify {ServiceName} connectivity ({Address}:{Port})"
+    [LoggerMessage(EventId = 111110, Level = LogLevel.Warning, Message = "❌ Failed → verify {ServiceName} connectivity ({Address}:{Port})"
 )]
     private partial void LogConnectivityVerificationFailedWithException(
         string serviceName,
@@ -897,7 +897,7 @@ public partial class StartupService : IHostedService
         Exception exception
     );
 
-    [LoggerMessage(EventId = 111111, Level = LogLevel.Warning, Message = "❌ Failed to verify {ServiceName} connectivity ({Address}:{Port}): {ErrorMessage}"
+    [LoggerMessage(EventId = 111111, Level = LogLevel.Warning, Message = "❌ Failed → verify {ServiceName} connectivity ({Address}:{Port}): {ErrorMessage}"
 )]
     private partial void LogConnectivityVerificationFailed(
         string serviceName,

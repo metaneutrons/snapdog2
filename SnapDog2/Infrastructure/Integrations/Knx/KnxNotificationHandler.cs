@@ -46,7 +46,7 @@ public partial class KnxNotificationHandler(IKnxService knxService, ILogger<KnxN
         }
     }
 
-    [LoggerMessage(EventId = 115000, Level = LogLevel.Debug, Message = "🔔 KNX notification handler received: {StatusType} for target {TargetIndex} with value {Value}"
+    [LoggerMessage(EventId = 115000, Level = LogLevel.Debug, Message = "KNX notification handler received: {StatusType} for target {TargetIndex} with value {Value}"
 )]
     private partial void LogKnxNotificationReceived(string statusType, int targetIndex, string value);
 

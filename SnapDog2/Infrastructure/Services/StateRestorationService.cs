@@ -356,7 +356,7 @@ public partial class StateRestorationService(
 )]
     private partial void LogZoneStateRestored(int zoneIndex, string zoneName);
 
-    [LoggerMessage(EventId = 114405, Level = LogLevel.Error, Message = "❌ Failed to restore zone {ZoneIndex} state"
+    [LoggerMessage(EventId = 114405, Level = LogLevel.Error, Message = "❌ Failed → restore zone {ZoneIndex} state"
 )]
     private partial void LogZoneStateRestoreFailed(Exception ex, int zoneIndex);
 
@@ -364,7 +364,7 @@ public partial class StateRestorationService(
 )]
     private partial void LogClientStateRestored(int clientIndex, string clientName);
 
-    [LoggerMessage(EventId = 114407, Level = LogLevel.Error, Message = "❌ Failed to restore client {ClientIndex} state"
+    [LoggerMessage(EventId = 114407, Level = LogLevel.Error, Message = "❌ Failed → restore client {ClientIndex} state"
 )]
     private partial void LogClientStateRestoreFailed(Exception ex, int clientIndex);
 
@@ -384,7 +384,7 @@ public partial class StateRestorationService(
 )]
     private partial void LogInitialZoneStateCreated(int zoneIndex, string zoneName);
 
-    [LoggerMessage(EventId = 114412, Level = LogLevel.Error, Message = "❌ Failed to create initial state for zone {ZoneIndex} ({ZoneName})"
+    [LoggerMessage(EventId = 114412, Level = LogLevel.Error, Message = "❌ Failed → create initial state for zone {ZoneIndex} ({ZoneName})"
 )]
     private partial void LogInitialZoneStateCreationFailed(Exception ex, int zoneIndex, string zoneName);
 
@@ -400,7 +400,7 @@ public partial class StateRestorationService(
 )]
     private partial void LogPlaybackResumed(int zoneIndex, string zoneName);
 
-    [LoggerMessage(EventId = 114416, Level = LogLevel.Error, Message = "❌ Failed to resume playback for zone {ZoneIndex} ({ZoneName})"
+    [LoggerMessage(EventId = 114416, Level = LogLevel.Error, Message = "❌ Failed → resume playback for zone {ZoneIndex} ({ZoneName})"
 )]
     private partial void LogPlaybackResumeFailed(Exception ex, int zoneIndex, string zoneName);
 
@@ -416,7 +416,7 @@ public partial class StateRestorationService(
 )]
     private partial void LogInitialPlaylistPreloaded(int zoneIndex, string zoneName);
 
-    [LoggerMessage(EventId = 114420, Level = LogLevel.Warning, Message = "⚠️ Failed to preload initial playlist for zone {ZoneIndex} ({ZoneName})"
+    [LoggerMessage(EventId = 114420, Level = LogLevel.Warning, Message = "⚠️ Failed → preload initial playlist for zone {ZoneIndex} ({ZoneName})"
 )]
     private partial void LogInitialPlaylistPreloadFailed(Exception ex, int zoneIndex, string zoneName);
 

@@ -44,31 +44,31 @@ public partial class SnapcastEventNotificationHandler(
 
     #region Logging
 
-    [LoggerMessage(EventId = 113250, Level = LogLevel.Information, Message = "Snapcast client connected: {ClientIndex} ({ClientName})"
+    [LoggerMessage(EventId = 113250, Level = LogLevel.Information, Message = "client connected: {ClientIndex} ({ClientName})"
 )]
     private partial void LogClientConnected(string clientIndex, string clientName);
 
-    [LoggerMessage(EventId = 113251, Level = LogLevel.Information, Message = "Snapcast client disconnected: {ClientIndex} ({ClientName})"
+    [LoggerMessage(EventId = 113251, Level = LogLevel.Information, Message = "client disconnected: {ClientIndex} ({ClientName})"
 )]
     private partial void LogClientDisconnected(string clientIndex, string clientName);
 
-    [LoggerMessage(EventId = 113252, Level = LogLevel.Information, Message = "Snapcast client volume changed: {ClientIndex} -> {Volume}% (Muted: {Muted})"
+    [LoggerMessage(EventId = 113252, Level = LogLevel.Information, Message = "client volume changed: {ClientIndex} → {Volume}% (muted: {Muted})"
 )]
     private partial void LogClientVolumeChanged(string clientIndex, int volume, bool muted);
 
-    [LoggerMessage(EventId = 113253, Level = LogLevel.Information, Message = "Snapcast group mute changed: {GroupId} -> Muted: {Muted}"
+    [LoggerMessage(EventId = 113253, Level = LogLevel.Information, Message = "group mute changed: {GroupId} → Muted: {Muted}"
 )]
     private partial void LogGroupMuteChanged(string groupId, bool muted);
 
-    [LoggerMessage(EventId = 113254, Level = LogLevel.Information, Message = "Snapcast connection established"
+    [LoggerMessage(EventId = 113254, Level = LogLevel.Information, Message = "connection established"
 )]
     private partial void LogConnectionEstablished();
 
-    [LoggerMessage(EventId = 113255, Level = LogLevel.Warning, Message = "Snapcast connection lost: {Reason}"
+    [LoggerMessage(EventId = 113255, Level = LogLevel.Warning, Message = "connection lost: {Reason}"
 )]
     private partial void LogConnectionLost(string reason);
 
-    [LoggerMessage(EventId = 113256, Level = LogLevel.Information, Message = "Snapcast client latency changed: {ClientIndex} -> {LatencyMs}ms"
+    [LoggerMessage(EventId = 113256, Level = LogLevel.Information, Message = "client latency changed: {ClientIndex} → {LatencyMs}ms"
 )]
     private partial void LogClientLatencyChanged(int clientIndex, int latencyMs);
 

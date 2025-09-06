@@ -568,11 +568,11 @@ public sealed partial class MediaPlayerService(
 )]
     private static partial void LogServiceDisposed(ILogger logger);
 
-    [LoggerMessage(EventId = 116107, Level = LogLevel.Debug, Message = "[LibVLCService] Seeking zone {ZoneIndex} to position {PositionMs}ms"
+    [LoggerMessage(EventId = 116107, Level = LogLevel.Debug, Message = "[LibVLCService] Seeking zone {ZoneIndex} → position {PositionMs}ms"
 )]
     private static partial void LogSeekingToPosition(ILogger logger, int zoneIndex, long positionMs);
 
-    [LoggerMessage(EventId = 116108, Level = LogLevel.Debug, Message = "[LibVLCService] Seeking zone {ZoneIndex} to progress {Progress:P1}"
+    [LoggerMessage(EventId = 116108, Level = LogLevel.Debug, Message = "[LibVLCService] Seeking zone {ZoneIndex} → progress {Progress:P1}"
 )]
     private static partial void LogSeekingToProgress(ILogger logger, int zoneIndex, float progress);
 
@@ -608,7 +608,7 @@ public sealed partial class MediaPlayerService(
 )]
     private static partial void LogFoundZoneConfig(ILogger logger, int zoneIndex, string zoneName);
 
-    [LoggerMessage(EventId = 116117, Level = LogLevel.Debug, Message = "Converted Subsonic media ID {MediaId} to stream URL: {StreamUrl}"
+    [LoggerMessage(EventId = 116117, Level = LogLevel.Debug, Message = "Converted Subsonic media ID {MediaId} → stream URL: {StreamUrl}"
 )]
     private static partial void LogConvertedSubsonicUrl(ILogger logger, string mediaId, string streamUrl);
 

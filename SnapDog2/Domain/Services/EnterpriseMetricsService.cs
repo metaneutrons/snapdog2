@@ -291,15 +291,15 @@ public partial class EnterpriseMetricsService : IMetricsService, IDisposable
 )]
     private static partial void LogServiceInitialized(ILogger logger);
 
-    [LoggerMessage(EventId = 110055, Level = LogLevel.Warning, Message = "Failed to collect system metrics"
+    [LoggerMessage(EventId = 110055, Level = LogLevel.Warning, Message = "Failed → collect system metrics"
 )]
     private static partial void LogFailedToCollectSystemMetrics(ILogger logger, Exception ex);
 
-    [LoggerMessage(EventId = 110056, Level = LogLevel.Debug, Message = "Failed to get CPU usage"
+    [LoggerMessage(EventId = 110056, Level = LogLevel.Debug, Message = "Failed → get CPU usage"
 )]
     private static partial void LogFailedToGetCpuUsage(ILogger logger, Exception ex);
 
-    [LoggerMessage(EventId = 110057, Level = LogLevel.Debug, Message = "Failed to get CPU usage synchronously"
+    [LoggerMessage(EventId = 110057, Level = LogLevel.Debug, Message = "Failed → get CPU usage synchronously"
 )]
     private static partial void LogFailedToGetCpuUsageSync(ILogger logger, Exception ex);
 

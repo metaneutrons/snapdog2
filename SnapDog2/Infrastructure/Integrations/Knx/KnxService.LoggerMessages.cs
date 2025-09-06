@@ -34,7 +34,7 @@ public partial class KnxService
 )]
     private partial void LogNoKnxGroupAddressConfigured(string statusId, string targetDescription);
 
-    [LoggerMessage(EventId = 115103, Level = LogLevel.Error, Message = "Error sending KNX status {StatusId} to {TargetDescription}"
+    [LoggerMessage(EventId = 115103, Level = LogLevel.Error, Message = "Error sending KNX status {StatusId} → {TargetDescription}"
 )]
     private partial void LogErrorSendingKnxStatus(Exception exception, string statusId, string targetDescription);
 }

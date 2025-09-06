@@ -220,7 +220,7 @@ public partial class BusinessMetricsCollectionService(
 )]
     private static partial void LogServiceStopped(ILogger logger);
 
-    [LoggerMessage(EventId = 111004, Level = LogLevel.Warning, Message = "Failed to collect business metrics"
+    [LoggerMessage(EventId = 111004, Level = LogLevel.Warning, Message = "Failed → collect business metrics"
 )]
     private static partial void LogFailedToCollectMetrics(ILogger logger, Exception ex);
 }

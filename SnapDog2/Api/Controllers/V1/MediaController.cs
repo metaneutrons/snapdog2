@@ -596,7 +596,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
 )]
     private static partial void LogPlaylistsRetrieved(ILogger logger, int count, int total);
 
-    [LoggerMessage(EventId = 113152, Level = LogLevel.Error, Message = "Failed to get playlists: {ErrorMessage}"
+    [LoggerMessage(EventId = 113152, Level = LogLevel.Error, Message = "Failed → get playlists: {ErrorMessage}"
 )]
     private static partial void LogGetPlaylistsError(ILogger logger, string errorMessage);
 
@@ -612,7 +612,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
 )]
     private static partial void LogPlaylistNotFound(ILogger logger, string playlistId);
 
-    [LoggerMessage(EventId = 113156, Level = LogLevel.Error, Message = "Failed to get playlist: {PlaylistId}, error: {ErrorMessage}"
+    [LoggerMessage(EventId = 113156, Level = LogLevel.Error, Message = "Failed → get playlist: {PlaylistId}, error: {ErrorMessage}"
 )]
     private static partial void LogGetPlaylistError(ILogger logger, string playlistId, string errorMessage);
 
@@ -636,7 +636,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
 )]
     private static partial void LogTrackNotFound(ILogger logger, string trackId);
 
-    [LoggerMessage(EventId = 113162, Level = LogLevel.Error, Message = "Failed to get track: {TrackId}, error: {ErrorMessage}"
+    [LoggerMessage(EventId = 113162, Level = LogLevel.Error, Message = "Failed → get track: {TrackId}, error: {ErrorMessage}"
 )]
     private static partial void LogGetTrackError(ILogger logger, string trackId, string errorMessage);
 
@@ -656,7 +656,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
 )]
     private static partial void LogTrackNotFound(ILogger logger, string trackId, string playlistId);
 
-    [LoggerMessage(EventId = 113167, Level = LogLevel.Error, Message = "Failed to get track {TrackId} from playlist {PlaylistId}: {ErrorMessage}"
+    [LoggerMessage(EventId = 113167, Level = LogLevel.Error, Message = "Failed → get track {TrackId} from playlist {PlaylistId}: {ErrorMessage}"
 )]
     private static partial void LogGetPlaylistTrackError(
         ILogger logger,

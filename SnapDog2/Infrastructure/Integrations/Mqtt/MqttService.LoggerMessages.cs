@@ -42,11 +42,11 @@ public sealed partial class MqttService
 )]
     private partial void LogNoCommandMappingFoundForTopic(string topic);
 
-    [LoggerMessage(EventId = 115305, Level = LogLevel.Error, Message = "Failed to process MQTT message on topic {Topic}"
+    [LoggerMessage(EventId = 115305, Level = LogLevel.Error, Message = "Failed → process MQTT message on topic {Topic}"
 )]
     private partial void LogFailedToProcessMqttMessageOnTopic(Exception ex, string topic);
 
-    [LoggerMessage(EventId = 115306, Level = LogLevel.Error, Message = "Failed to map topic {Topic} to command"
+    [LoggerMessage(EventId = 115306, Level = LogLevel.Error, Message = "Failed → map topic {Topic} → command"
 )]
     private partial void LogFailedToMapTopicToCommand(Exception ex, string topic);
 
@@ -67,7 +67,7 @@ public sealed partial class MqttService
 )]
     private partial void LogNoMqttTopicMappingForEventType(string eventType);
 
-    [LoggerMessage(EventId = 115311, Level = LogLevel.Error, Message = "Failed to publish client status {EventType} for client {ClientIndex}"
+    [LoggerMessage(EventId = 115311, Level = LogLevel.Error, Message = "Failed → publish client status {EventType} for client {ClientIndex}"
 )]
     private partial void LogFailedToPublishClientStatus(Exception ex, string eventType, string clientIndex);
 
@@ -80,7 +80,7 @@ public sealed partial class MqttService
 )]
     private partial void LogZoneHasNoMqttConfiguration(int zoneIndex);
 
-    [LoggerMessage(EventId = 115314, Level = LogLevel.Error, Message = "Failed to publish zone status {EventType} for zone {ZoneIndex}"
+    [LoggerMessage(EventId = 115314, Level = LogLevel.Error, Message = "Failed → publish zone status {EventType} for zone {ZoneIndex}"
 )]
     private partial void LogFailedToPublishZoneStatus(Exception ex, string eventType, int zoneIndex);
 
@@ -89,7 +89,7 @@ public sealed partial class MqttService
 )]
     private partial void LogNoMqttTopicMappingForGlobalEventType(string eventType);
 
-    [LoggerMessage(EventId = 115316, Level = LogLevel.Error, Message = "Failed to publish global status {EventType}"
+    [LoggerMessage(EventId = 115316, Level = LogLevel.Error, Message = "Failed → publish global status {EventType}"
 )]
     private partial void LogFailedToPublishGlobalStatus(Exception ex, string eventType);
 

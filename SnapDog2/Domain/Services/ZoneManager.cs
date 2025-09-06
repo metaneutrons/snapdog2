@@ -70,7 +70,7 @@ public partial class ZoneManager(
 )]
     private partial void LogZoneNotFound(int zoneIndex);
 
-    [LoggerMessage(EventId = 110317, Level = LogLevel.Error, Message = "Failed to initialize zone {ZoneIndex}: {Error}"
+    [LoggerMessage(EventId = 110317, Level = LogLevel.Error, Message = "Failed → initialize zone {ZoneIndex}: {Error}"
 )]
     private partial void LogZoneInitializationFailed(int zoneIndex, string error);
 
@@ -2116,14 +2116,14 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 )]
     private partial void LogFoundGroup(int zoneIndex, string groupId);
 
-    [LoggerMessage(EventId = 110269, Level = LogLevel.Information, Message = "Zone {ZoneIndex}: Stream changed from {OldStream} to {NewStream}"
+    [LoggerMessage(EventId = 110269, Level = LogLevel.Information, Message = "Zone {ZoneIndex}: Stream changed from {OldStream} → {NewStream}"
 )]
     private partial void LogStreamChanged(int zoneIndex, string oldStream, string newStream);
 
     [LoggerMessage(EventId = 110270, Level = LogLevel.Debug, Message = "Zone {ZoneIndex}: Stream unchanged: {StreamId}")]
     private partial void LogStreamUnchanged(int zoneIndex, string streamId);
 
-    [LoggerMessage(EventId = 110271, Level = LogLevel.Information, Message = "Zone {ZoneIndex}: Volume changed from {OldVolume}% to {NewVolume}%"
+    [LoggerMessage(EventId = 110271, Level = LogLevel.Information, Message = "Zone {ZoneIndex}: Volume changed from {OldVolume}% → {NewVolume}%"
 )]
     private partial void LogVolumeChanged(int zoneIndex, int oldVolume, int newVolume);
 
@@ -2140,11 +2140,11 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 )]
     private partial void LogStateSynchronized(int zoneIndex);
 
-    [LoggerMessage(EventId = 110276, Level = LogLevel.Warning, Message = "Failed to update zone {ZoneIndex} state from media player"
+    [LoggerMessage(EventId = 110276, Level = LogLevel.Warning, Message = "Failed → update zone {ZoneIndex} state from media player"
 )]
     private partial void LogFailedUpdateFromMediaPlayer(Exception ex, int zoneIndex);
 
-    [LoggerMessage(EventId = 110277, Level = LogLevel.Error, Message = "Failed to update zone {ZoneIndex} state from Snapcast"
+    [LoggerMessage(EventId = 110277, Level = LogLevel.Error, Message = "Failed → update zone {ZoneIndex} state from Snapcast"
 )]
     private partial void LogFailedUpdateFromSnapcast(Exception ex, int zoneIndex);
 
@@ -2160,11 +2160,11 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 )]
     private partial void LogStoppingPositionTimer(int zoneIndex);
 
-    [LoggerMessage(EventId = 110281, Level = LogLevel.Information, Message = "✅ Subscribing to MediaPlayer events for zone {ZoneIndex}"
+    [LoggerMessage(EventId = 110281, Level = LogLevel.Information, Message = "✅ Subscribing → MediaPlayer events for zone {ZoneIndex}"
 )]
     private partial void LogSubscribingToMediaPlayerEvents(int zoneIndex);
 
-    [LoggerMessage(EventId = 110282, Level = LogLevel.Warning, Message = "⚠️ MediaPlayer is null when trying to subscribe to events for zone {ZoneIndex}"
+    [LoggerMessage(EventId = 110282, Level = LogLevel.Warning, Message = "⚠️ MediaPlayer is null when trying → subscribe → events for zone {ZoneIndex}"
 )]
     private partial void LogMediaPlayerNullOnSubscribe(int zoneIndex);
 
@@ -2176,7 +2176,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 )]
     private partial void LogPositionUpdate(int zoneIndex, long positionMs, long durationMs, float progress);
 
-    [LoggerMessage(EventId = 110285, Level = LogLevel.Debug, Message = "📡 Published MQTT update for position change")]
+    [LoggerMessage(EventId = 110285, Level = LogLevel.Debug, Message = "Published MQTT update for position change")]
     private partial void LogPublishedMqttPositionUpdate();
 
     [LoggerMessage(EventId = 110286, Level = LogLevel.Warning, Message = "Error handling position change for zone {ZoneIndex}"
@@ -2253,7 +2253,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 )]
     private partial void LogMediaPlayerStatusFailed(bool success, string? errorMessage);
 
-    [LoggerMessage(EventId = 110303, Level = LogLevel.Warning, Message = "Failed to update zone {ZoneIndex} state from media player"
+    [LoggerMessage(EventId = 110303, Level = LogLevel.Warning, Message = "Failed → update zone {ZoneIndex} state from media player"
 )]
     private partial void LogFailedToUpdateZoneState(Exception ex, int zoneIndex);
 
@@ -2277,7 +2277,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 )]
     private partial void LogSkippingPositionUpdate(bool disposed, string state);
 
-    [LoggerMessage(EventId = 110309, Level = LogLevel.Debug, Message = "📡 Published MQTT update for position change")]
+    [LoggerMessage(EventId = 110309, Level = LogLevel.Debug, Message = "Published MQTT update for position change")]
     private partial void LogPublishedMqttUpdateForPositionChange();
 
     [LoggerMessage(EventId = 110310, Level = LogLevel.Warning, Message = "Error handling position change for zone {ZoneIndex}"
@@ -2304,7 +2304,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 )]
     private partial void LogErrorPublishingTrackProgress(Exception ex, int zoneIndex);
 
-    [LoggerMessage(EventId = 110317, Level = LogLevel.Debug, Message = "📡 Publishing SignalR progress: Zone {ZoneIndex}, Position: {PositionMs}ms, Progress: {ProgressPercent}%"
+    [LoggerMessage(EventId = 110317, Level = LogLevel.Debug, Message = "Publishing SignalR progress: Zone {ZoneIndex}, Position: {PositionMs}ms, Progress: {ProgressPercent}%"
 )]
     private partial void LogPublishingSignalRProgress(int zoneIndex, long positionMs, float progressPercent);
 

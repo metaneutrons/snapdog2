@@ -30,7 +30,7 @@ public partial class SetClientLatencyCommandHandler(
     private readonly IClientManager _clientManager = clientManager;
     private readonly ILogger<SetClientLatencyCommandHandler> _logger = logger;
 
-    [LoggerMessage(EventId = 112300, Level = LogLevel.Information, Message = "Setting latency for Client {ClientIndex} to {LatencyMs}ms from {Source}"
+    [LoggerMessage(EventId = 112300, Level = LogLevel.Information, Message = "Setting latency for Client {ClientIndex} → {LatencyMs}ms from {Source}"
 )]
     private partial void LogHandling(int clientIndex, int latencyMs, CommandSource source);
 

@@ -37,7 +37,7 @@ public partial class IntegrationServicesHostedService(
 )]
     private partial void LogInitializingSnapcast();
 
-    [LoggerMessage(EventId = 114252, Level = LogLevel.Warning, Message = "Snapcast service not registered - skipping initialization"
+    [LoggerMessage(EventId = 114252, Level = LogLevel.Warning, Message = "service not registered - skipping initialization"
 )]
     private partial void LogSnapcastNotRegistered();
 
@@ -81,19 +81,19 @@ public partial class IntegrationServicesHostedService(
 )]
     private partial void LogSubsonicInitialized();
 
-    [LoggerMessage(EventId = 114263, Level = LogLevel.Error, Message = "❌ Failed to initialize Snapcast service: {ErrorMessage}"
+    [LoggerMessage(EventId = 114263, Level = LogLevel.Error, Message = "❌ Failed → initialize Snapcast service: {ErrorMessage}"
 )]
     private partial void LogSnapcastInitializationFailed(string errorMessage);
 
-    [LoggerMessage(EventId = 114264, Level = LogLevel.Error, Message = "❌ Failed to initialize MQTT service: {ErrorMessage}"
+    [LoggerMessage(EventId = 114264, Level = LogLevel.Error, Message = "❌ Failed → initialize MQTT service: {ErrorMessage}"
 )]
     private partial void LogMqttInitializationFailed(string errorMessage);
 
-    [LoggerMessage(EventId = 114269, Level = LogLevel.Error, Message = "❌ Failed to initialize KNX service: {ErrorMessage}"
+    [LoggerMessage(EventId = 114269, Level = LogLevel.Error, Message = "❌ Failed → initialize KNX service: {ErrorMessage}"
 )]
     private partial void LogKnxInitializationFailed(string errorMessage);
 
-    [LoggerMessage(EventId = 114270, Level = LogLevel.Error, Message = "❌ Failed to initialize Subsonic service: {ErrorMessage}"
+    [LoggerMessage(EventId = 114270, Level = LogLevel.Error, Message = "❌ Failed → initialize Subsonic service: {ErrorMessage}"
 )]
     private partial void LogSubsonicInitializationFailed(string errorMessage);
 
@@ -113,7 +113,7 @@ public partial class IntegrationServicesHostedService(
         string successfulServices
     );
 
-    [LoggerMessage(EventId = 114270, Level = LogLevel.Warning, Message = "No integration services found to initialize"
+    [LoggerMessage(EventId = 114270, Level = LogLevel.Warning, Message = "No integration services found → initialize"
 )]
     private partial void LogNoServicesFound();
 
@@ -129,7 +129,7 @@ public partial class IntegrationServicesHostedService(
 )]
     private partial void LogUnknownServiceName(string serviceName);
 
-    [LoggerMessage(EventId = 114274, Level = LogLevel.Error, Message = "❌ Failed to disable service: {ServiceName}"
+    [LoggerMessage(EventId = 114274, Level = LogLevel.Error, Message = "❌ Failed → disable service: {ServiceName}"
 )]
     private partial void LogServiceDisableFailed(string serviceName, Exception exception);
 

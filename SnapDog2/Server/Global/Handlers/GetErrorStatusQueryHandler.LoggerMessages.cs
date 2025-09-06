@@ -29,7 +29,7 @@ public partial class GetErrorStatusQueryHandler
 )]
     private partial void LogSuccessfullyRetrievedErrorStatus(bool hasError);
 
-    [LoggerMessage(EventId = 112652, Level = LogLevel.Error, Message = "Failed to get error status"
+    [LoggerMessage(EventId = 112652, Level = LogLevel.Error, Message = "Failed → get error status"
 )]
     private partial void LogFailedToGetErrorStatus(Exception ex);
 }

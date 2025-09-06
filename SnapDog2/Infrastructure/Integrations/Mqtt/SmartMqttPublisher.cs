@@ -217,11 +217,11 @@ public sealed partial class SmartMqttPublisher(
         int failureCount
     );
 
-    [LoggerMessage(EventId = 115352, Level = LogLevel.Information, Message = "🔄 Falling back to queue: {EntityType} {EntityId} {EventType}"
+    [LoggerMessage(EventId = 115352, Level = LogLevel.Information, Message = "🔄 Falling back → queue: {EntityType} {EntityId} {EventType}"
 )]
     private partial void LogFallingBackToQueue(string entityType, string entityId, string eventType);
 
-    [LoggerMessage(EventId = 115353, Level = LogLevel.Warning, Message = "🚫 Circuit breaker opened after {FailureCount} failures - switching to queue-only mode for {ResetTimeMinutes} minutes"
+    [LoggerMessage(EventId = 115353, Level = LogLevel.Warning, Message = "🚫 Circuit breaker opened after {FailureCount} failures - switching → queue-only mode for {ResetTimeMinutes} minutes"
 )]
     private partial void LogCircuitBreakerOpened(int failureCount, double resetTimeMinutes);
 

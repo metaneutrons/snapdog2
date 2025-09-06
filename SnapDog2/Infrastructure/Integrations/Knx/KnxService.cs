@@ -1669,7 +1669,7 @@ public partial class KnxService : IKnxService
 )]
     private partial void LogDisconnectionError(Exception exception);
 
-    [LoggerMessage(EventId = 115059, Level = LogLevel.Information, Message = "KNX connection established to {Gateway}:{Port}"
+    [LoggerMessage(EventId = 115059, Level = LogLevel.Information, Message = "KNX connection established → {Gateway}:{Port}"
 )]
     private partial void LogConnectionEstablished(string gateway, int port);
 
@@ -1681,7 +1681,7 @@ public partial class KnxService : IKnxService
 )]
     private partial void LogConnectionErrorMessage(string errorMessage);
 
-    [LoggerMessage(EventId = 115062, Level = LogLevel.Information, Message = "🚀 Attempting KNX connection to {Gateway}:{Port} (attempt {AttemptNumber}/{MaxAttempts}: {ErrorMessage})"
+    [LoggerMessage(EventId = 115062, Level = LogLevel.Information, Message = "🚀 Attempting KNX connection → {Gateway}:{Port} (attempt {AttemptNumber}/{MaxAttempts}: {ErrorMessage})"
 )]
     private partial void LogConnectionRetryAttempt(
         string gateway,
@@ -1691,11 +1691,11 @@ public partial class KnxService : IKnxService
         string errorMessage
     );
 
-    [LoggerMessage(EventId = 115063, Level = LogLevel.Debug, Message = "Using KNX IP tunneling connection to {Gateway}:{Port}"
+    [LoggerMessage(EventId = 115063, Level = LogLevel.Debug, Message = "Using KNX IP tunneling connection → {Gateway}:{Port}"
 )]
     private partial void LogUsingIpTunneling(string gateway, int port);
 
-    [LoggerMessage(EventId = 115064, Level = LogLevel.Debug, Message = "Using KNX IP routing connection to {Gateway}"
+    [LoggerMessage(EventId = 115064, Level = LogLevel.Debug, Message = "Using KNX IP routing connection → {Gateway}"
 )]
     private partial void LogUsingIpRouting(string gateway);
 
@@ -1715,7 +1715,7 @@ public partial class KnxService : IKnxService
 )]
     private partial void LogConnectorParametersError(Exception exception);
 
-    [LoggerMessage(EventId = 115069, Level = LogLevel.Error, Message = "Failed to resolve multicast address '{MulticastAddress}' to IPv4 address"
+    [LoggerMessage(EventId = 115069, Level = LogLevel.Error, Message = "Failed → resolve multicast address '{MulticastAddress}' → IPv4 address"
 )]
     private partial void LogMulticastAddressResolutionFailed(string multicastAddress);
 
@@ -1735,7 +1735,7 @@ public partial class KnxService : IKnxService
 )]
     private partial void LogGroupValueReceived(string groupAddress, object value);
 
-    [LoggerMessage(EventId = 115074, Level = LogLevel.Debug, Message = "KNX command mapped: {GroupAddress} -> {CommandType}"
+    [LoggerMessage(EventId = 115074, Level = LogLevel.Debug, Message = "KNX command mapped: {GroupAddress} → {CommandType}"
 )]
     private partial void LogCommandMapped(string groupAddress, string commandType);
 
@@ -1751,7 +1751,7 @@ public partial class KnxService : IKnxService
 )]
     private partial void LogGroupAddressNotFound(string statusId, int targetId);
 
-    [LoggerMessage(EventId = 115078, Level = LogLevel.Error, Message = "Error sending KNX status {StatusId} to target {TargetId}"
+    [LoggerMessage(EventId = 115078, Level = LogLevel.Error, Message = "Error sending KNX status {StatusId} → target {TargetId}"
 )]
     private partial void LogSendStatusError(string statusId, int targetId, Exception exception);
 

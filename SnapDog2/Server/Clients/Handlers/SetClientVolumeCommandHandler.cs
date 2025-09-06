@@ -30,7 +30,7 @@ public partial class SetClientVolumeCommandHandler(
     private readonly IClientManager _clientManager = clientManager;
     private readonly ILogger<SetClientVolumeCommandHandler> _logger = logger;
 
-    [LoggerMessage(EventId = 112450, Level = LogLevel.Information, Message = "Setting volume for Client {ClientIndex} to {Volume} from {Source}"
+    [LoggerMessage(EventId = 112450, Level = LogLevel.Information, Message = "Setting volume for Client {ClientIndex} → {Volume} from {Source}"
 )]
     private partial void LogHandling(int clientIndex, int volume, CommandSource source);
 

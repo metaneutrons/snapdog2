@@ -40,7 +40,7 @@ public partial class PlaylistManager : IPlaylistManager
 )]
     private partial void LogPlaylistIndexNotFound(int playlistIndex);
 
-    [LoggerMessage(EventId = 110153, Level = LogLevel.Error, Message = "Failed to get playlists: {Error}"
+    [LoggerMessage(EventId = 110153, Level = LogLevel.Error, Message = "Failed → get playlists: {Error}"
 )]
     private partial void LogPlaylistError(string error);
 

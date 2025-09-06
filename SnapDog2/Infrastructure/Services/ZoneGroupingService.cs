@@ -506,7 +506,7 @@ public partial class ZoneGroupingService(
     [LoggerMessage(EventId = 114503, Level = LogLevel.Debug, Message = "🔧 Checking zone {ZoneId}...")]
     private partial void LogCheckingZone(int ZoneId);
 
-    [LoggerMessage(EventId = 114504, Level = LogLevel.Warning, Message = "⚠️ Failed to synchronize zone {ZoneId}: {Error}")]
+    [LoggerMessage(EventId = 114504, Level = LogLevel.Warning, Message = "⚠️ Failed → synchronize zone {ZoneId}: {Error}")]
     private partial void LogFailedSynchronizeZone(int ZoneId, string? Error);
 
     [LoggerMessage(EventId = 114505, Level = LogLevel.Debug, Message = "✅ Zone {ZoneId} check completed")]
@@ -521,7 +521,7 @@ public partial class ZoneGroupingService(
     [LoggerMessage(EventId = 114508, Level = LogLevel.Debug, Message = "🔄 Synchronizing zone {ZoneId}")]
     private partial void LogSynchronizingZone(int ZoneId);
 
-    [LoggerMessage(EventId = 114509, Level = LogLevel.Debug, Message = "ℹ️ No clients assigned to zone {ZoneId}, skipping")]
+    [LoggerMessage(EventId = 114509, Level = LogLevel.Debug, Message = "ℹ️ No clients assigned → zone {ZoneId}, skipping")]
     private partial void LogNoClientsAssigned(int ZoneId);
 
     [LoggerMessage(EventId = 114510, Level = LogLevel.Debug, Message = "✅ Zone {ZoneId} is already properly configured (clients: {ClientIndexs}, stream: {StreamId})"
@@ -532,18 +532,18 @@ public partial class ZoneGroupingService(
 )]
     private partial void LogProvisioningZone(int ZoneId, int ClientCount, string ClientIndexs, string StreamId);
 
-    [LoggerMessage(EventId = 114512, Level = LogLevel.Warning, Message = "⚠️ Failed to set stream for group {GroupId}: {Error}"
+    [LoggerMessage(EventId = 114512, Level = LogLevel.Warning, Message = "⚠️ Failed → set stream for group {GroupId}: {Error}"
 )]
     private partial void LogFailedSetGroupStream(string GroupId, string? Error);
 
-    [LoggerMessage(EventId = 114513, Level = LogLevel.Debug, Message = "✅ Set group {GroupId} stream to {StreamId}")]
+    [LoggerMessage(EventId = 114513, Level = LogLevel.Debug, Message = "✅ Set group {GroupId} stream → {StreamId}")]
     private partial void LogSetGroupStream(string GroupId, string StreamId);
 
-    [LoggerMessage(EventId = 114514, Level = LogLevel.Warning, Message = "⚠️ Failed to set name for group {GroupId}: {Error}"
+    [LoggerMessage(EventId = 114514, Level = LogLevel.Warning, Message = "⚠️ Failed → set name for group {GroupId}: {Error}"
 )]
     private partial void LogFailedSetGroupName(string GroupId, string? Error);
 
-    [LoggerMessage(EventId = 114515, Level = LogLevel.Information, Message = "✅ Set group {GroupId} name to '{GroupName}'")]
+    [LoggerMessage(EventId = 114515, Level = LogLevel.Information, Message = "✅ Set group {GroupId} name → '{GroupName}'")]
     private partial void LogSetGroupName(string GroupId, string GroupName);
 
     [LoggerMessage(EventId = 114516, Level = LogLevel.Information, Message = "✅ Zone {ZoneId} synchronized: {ClientCount} clients in group {GroupId} with stream {StreamId}"
@@ -590,7 +590,7 @@ public partial class ZoneGroupingService(
 )]
     private partial void LogStartingClientNameSync(int ZoneId);
 
-    [LoggerMessage(EventId = 114524, Level = LogLevel.Warning, Message = "⚠️ Failed to get zone clients for name synchronization: {Error}"
+    [LoggerMessage(EventId = 114524, Level = LogLevel.Warning, Message = "⚠️ Failed → get zone clients for name synchronization: {Error}"
 )]
     private partial void LogFailedGetZoneClients(string? Error);
 
@@ -598,7 +598,7 @@ public partial class ZoneGroupingService(
 )]
     private partial void LogFoundZoneClients(int ClientCount, int ZoneId, string ClientNames);
 
-    [LoggerMessage(EventId = 114526, Level = LogLevel.Warning, Message = "⚠️ Failed to get server status for client name synchronization: {Error}"
+    [LoggerMessage(EventId = 114526, Level = LogLevel.Warning, Message = "⚠️ Failed → get server status for client name synchronization: {Error}"
 )]
     private partial void LogFailedGetServerStatusForNameSync(string? Error);
 
@@ -609,15 +609,15 @@ public partial class ZoneGroupingService(
 )]
     private partial void LogCheckingClientName(string ClientIndex, string ExpectedName, string? CurrentName);
 
-    [LoggerMessage(EventId = 114529, Level = LogLevel.Information, Message = "🏷️ Setting client {ClientIndex} name from '{CurrentName}' to '{ExpectedName}'"
+    [LoggerMessage(EventId = 114529, Level = LogLevel.Information, Message = "🏷️ Setting client {ClientIndex} name from '{CurrentName}' → '{ExpectedName}'"
 )]
     private partial void LogSettingClientName(string ClientIndex, string? CurrentName, string ExpectedName);
 
-    [LoggerMessage(EventId = 114530, Level = LogLevel.Information, Message = "✅ Set client {ClientIndex} name to '{ClientName}'"
+    [LoggerMessage(EventId = 114530, Level = LogLevel.Information, Message = "✅ Set client {ClientIndex} name → '{ClientName}'"
 )]
     private partial void LogClientNameSet(string ClientIndex, string ClientName);
 
-    [LoggerMessage(EventId = 114531, Level = LogLevel.Warning, Message = "⚠️ Failed to set name for client {ClientIndex}: {Error}"
+    [LoggerMessage(EventId = 114531, Level = LogLevel.Warning, Message = "⚠️ Failed → set name for client {ClientIndex}: {Error}"
 )]
     private partial void LogFailedSetClientName(string ClientIndex, string? Error);
 

@@ -146,7 +146,7 @@ public static partial class WebHostExtensions
 )]
     private static partial void LogHttpPortUnavailable(ILogger logger, int Port, int Attempt, int MaxAttempts);
 
-    [LoggerMessage(EventId = 114208, Level = LogLevel.Warning, Message = "⚠️ Failed to bind HTTP port {Port} (attempt {Attempt}/{MaxAttempts})"
+    [LoggerMessage(EventId = 114208, Level = LogLevel.Warning, Message = "⚠️ Failed → bind HTTP port {Port} (attempt {Attempt}/{MaxAttempts})"
 )]
     private static partial void LogHttpPortBindFailed(
         ILogger logger,

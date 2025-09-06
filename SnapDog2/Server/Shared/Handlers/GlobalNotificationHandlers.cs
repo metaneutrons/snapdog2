@@ -34,7 +34,7 @@ public partial class GlobalStateNotificationHandler(
     private readonly IServiceProvider _serviceProvider = serviceProvider;
     private readonly ILogger<GlobalStateNotificationHandler> _logger = logger;
 
-    [LoggerMessage(EventId = 113000, Level = LogLevel.Information, Message = "System status changed to online: {IsOnline}"
+    [LoggerMessage(EventId = 113000, Level = LogLevel.Information, Message = "System status changed → online: {IsOnline}"
 )]
     private partial void LogSystemStatusChange(bool isOnline);
 

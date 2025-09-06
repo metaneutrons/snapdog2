@@ -30,7 +30,7 @@ public partial class SetClientMuteCommandHandler(
     private readonly IClientManager _clientManager = clientManager;
     private readonly ILogger<SetClientMuteCommandHandler> _logger = logger;
 
-    [LoggerMessage(EventId = 112350, Level = LogLevel.Information, Message = "Setting mute for Client {ClientIndex} to {Enabled} from {Source}"
+    [LoggerMessage(EventId = 112350, Level = LogLevel.Information, Message = "Setting mute for Client {ClientIndex} → {Enabled} from {Source}"
 )]
     private partial void LogHandling(int clientIndex, bool enabled, CommandSource source);
 

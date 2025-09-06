@@ -38,7 +38,7 @@ public partial class CommandStatusQueryHandler(
 )]
     private partial void LogRetrievingCommandStatus();
 
-    [LoggerMessage(EventId = 112601, Level = LogLevel.Warning, Message = "Failed to retrieve command status: {ErrorMessage}"
+    [LoggerMessage(EventId = 112601, Level = LogLevel.Warning, Message = "Failed → retrieve command status: {ErrorMessage}"
 )]
     private partial void LogFailedToRetrieveCommandStatus(string errorMessage);
 

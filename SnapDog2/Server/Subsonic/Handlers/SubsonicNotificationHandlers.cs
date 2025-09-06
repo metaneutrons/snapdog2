@@ -31,7 +31,7 @@ public partial class SubsonicConnectionEstablishedNotificationHandler(
         return Task.CompletedTask;
     }
 
-    [LoggerMessage(EventId = 113300, Level = LogLevel.Information, Message = "🎵 Subsonic connection established to {ServerUrl} for user {Username}"
+    [LoggerMessage(EventId = 113300, Level = LogLevel.Information, Message = "🎵 Subsonic connection established → {ServerUrl} for user {Username}"
 )]
     private static partial void LogSubsonicConnectionEstablished(ILogger logger, string serverUrl, string username);
 }
@@ -51,7 +51,7 @@ public partial class SubsonicConnectionLostNotificationHandler(
         return Task.CompletedTask;
     }
 
-    [LoggerMessage(EventId = 113301, Level = LogLevel.Warning, Message = "⚠️ Subsonic connection lost to {ServerUrl}: {Reason}"
+    [LoggerMessage(EventId = 113301, Level = LogLevel.Warning, Message = "⚠️ Subsonic connection lost → {ServerUrl}: {Reason}"
 )]
     private static partial void LogSubsonicConnectionLost(ILogger logger, string serverUrl, string reason);
 }

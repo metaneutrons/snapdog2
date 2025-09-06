@@ -73,15 +73,15 @@ public partial class StatePublishingService(
 )]
     private partial void LogGlobalStatePublished();
 
-    [LoggerMessage(EventId = 111107, Level = LogLevel.Warning, Message = "⚠️ Failed to publish zone {ZoneIndex} state: {ErrorMessage}"
+    [LoggerMessage(EventId = 111107, Level = LogLevel.Warning, Message = "⚠️ Failed → publish zone {ZoneIndex} state: {ErrorMessage}"
 )]
     private partial void LogZoneStatePublishFailed(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 111108, Level = LogLevel.Warning, Message = "⚠️ Failed to publish client {ClientIndex} state: {ErrorMessage}"
+    [LoggerMessage(EventId = 111108, Level = LogLevel.Warning, Message = "⚠️ Failed → publish client {ClientIndex} state: {ErrorMessage}"
 )]
     private partial void LogClientStatePublishFailed(int clientIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 111109, Level = LogLevel.Warning, Message = "⚠️ Failed to publish global state: {ErrorMessage}"
+    [LoggerMessage(EventId = 111109, Level = LogLevel.Warning, Message = "⚠️ Failed → publish global state: {ErrorMessage}"
 )]
     private partial void LogGlobalStatePublishFailed(string errorMessage);
 

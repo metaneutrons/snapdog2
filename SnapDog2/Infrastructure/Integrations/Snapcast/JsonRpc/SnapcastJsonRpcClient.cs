@@ -173,7 +173,7 @@ public partial class SnapcastJsonRpcClient : IDisposable
     }
 
     // LoggerMessage patterns
-    [LoggerMessage(EventId = 115450, Level = LogLevel.Information, Message = "Connected to Snapcast WebSocket: {Url}")]
+    [LoggerMessage(EventId = 115450, Level = LogLevel.Information, Message = "Connected → Snapcast WebSocket: {Url}")]
     private partial void LogConnected(string url);
 
     [LoggerMessage(EventId = 115451, Level = LogLevel.Debug, Message = "Sent request: {Method} with ID: {RequestId}")]

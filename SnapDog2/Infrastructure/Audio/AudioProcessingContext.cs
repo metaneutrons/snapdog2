@@ -168,7 +168,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             var playResult = this._mediaPlayer.Play();
             if (!playResult)
             {
-                return new AudioProcessingResult { Success = false, ErrorMessage = "Failed to start media playback" };
+                return new AudioProcessingResult { Success = false, ErrorMessage = "Failed → start media playback" };
             }
 
             // Wait for playback to start
@@ -189,7 +189,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
                     return new AudioProcessingResult
                     {
                         Success = false,
-                        ErrorMessage = "Timeout waiting for playback to start",
+                        ErrorMessage = "Timeout waiting for playback → start",
                     };
                 }
 
@@ -575,7 +575,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
 )]
     private partial void LogAudioProcessingWasCancelled();
 
-    [LoggerMessage(EventId = 116010, Level = LogLevel.Error, Message = "Failed to process audio stream: {SourceUrl}"
+    [LoggerMessage(EventId = 116010, Level = LogLevel.Error, Message = "Failed → process audio stream: {SourceUrl}"
 )]
     private partial void LogFailedToProcessAudioStream(Exception ex, string SourceUrl);
 
@@ -639,11 +639,11 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
 )]
     private partial void LogAudioProcessingContextDisposedAsynchronously();
 
-    [LoggerMessage(EventId = 116026, Level = LogLevel.Error, Message = "Failed to initialize LibVLCSharp Core. Ensure LibVLC native libraries are properly installed."
+    [LoggerMessage(EventId = 116026, Level = LogLevel.Error, Message = "Failed → initialize LibVLCSharp Core. Ensure LibVLC native libraries are properly installed."
 )]
     private partial void LogLibVLCCoreInitializationFailed(Exception ex);
 
-    [LoggerMessage(EventId = 116027, Level = LogLevel.Error, Message = "Failed to create LibVLC instance with args: {Args}"
+    [LoggerMessage(EventId = 116027, Level = LogLevel.Error, Message = "Failed → create LibVLC instance with args: {Args}"
 )]
     private partial void LogLibVLCInstanceCreationFailed(Exception ex, string args);
 }
