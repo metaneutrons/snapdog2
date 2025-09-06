@@ -38,7 +38,7 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({ zoneIndex, draggingClientInd
 
   return (
     <div className="bg-theme-secondary rounded-lg shadow-theme p-6 border border-theme-primary">
-      <h3 className="text-lg font-semibold mb-4 text-theme-primary">Zone {zoneIndex}</h3>
+      <h3 className="text-lg font-semibold mb-4 text-theme-primary">{zone.name}</h3>
       
       {/* Current track info */}
       <div className="mb-4 p-3 bg-theme-tertiary rounded border border-theme-primary">
