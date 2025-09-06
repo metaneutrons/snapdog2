@@ -131,7 +131,7 @@ public partial class PerformanceCommandBehavior<TCommand, TResponse>(
         catch (Exception ex)
         {
             // Don't let metrics recording failures affect command execution
-            LogMetricsRecordingFailed(this._logger, ex, typeof(TCommand).Name);
+            _logger.LogInformation("MetricsRecordingFailed: {Details}", ex, typeof(TCommand).Name);
         }
     }
 
@@ -196,7 +196,4 @@ public partial class PerformanceCommandBehavior<TCommand, TResponse>(
 )]
     private partial void LogCommandException(string commandName, long elapsedMilliseconds, Exception ex);
 
-    [LoggerMessage(EventId = 18002, Level = LogLevel.Debug, Message = "Failed → record command-specific metrics for {CommandName}"
-)]
-    private static partial void LogMetricsRecordingFailed(ILogger logger, Exception ex, string commandName);
 }

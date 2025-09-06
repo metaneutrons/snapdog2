@@ -41,7 +41,7 @@ public static partial class KnxServiceConfiguration
         // Check if KNX service is enabled
         if (!knxConfig.Enabled)
         {
-            LogKnxServiceDisabled(logger);
+            logger.LogInformation("KnxServiceDisabled");
             return services;
         }
 
@@ -49,7 +49,7 @@ public static partial class KnxServiceConfiguration
         var validationResult = ValidateKnxConfiguration(knxConfig, configuration.Zones, configuration.Clients);
         if (!validationResult.IsValid)
         {
-            LogKnxConfigurationValidationFailed(logger, string.Join(", ", validationResult.Errors));
+            logger.LogInformation("KnxConfigurationValidationFailed: {Details}", string.Join(", ", validationResult.Errors));
         }
 
         var connectionTypeText = knxConfig.ConnectionType switch
@@ -60,7 +60,7 @@ public static partial class KnxServiceConfiguration
             _ => "Unknown",
         };
 
-        LogKnxServiceRegistering(logger, connectionTypeText);
+        logger.LogInformation("KnxServiceRegistering: {Details}", connectionTypeText);
 
         if (!string.IsNullOrEmpty(knxConfig.Gateway))
         {
@@ -70,14 +70,14 @@ public static partial class KnxServiceConfiguration
                 KnxConnectionType.Router => "IP Routing",
                 _ => "IP Connection",
             };
-            LogKnxConnectionDetails(logger, ipConnectionTypeText, knxConfig.Gateway, knxConfig.Port);
+            logger.LogInformation("KnxConnectionDetails: {Details}", ipConnectionTypeText, knxConfig.Gateway, knxConfig.Port);
         }
 
         // Count configured KNX zones and clients
         var knxZoneCount = configuration.Zones.Count(z => z.Knx.Enabled);
         var knxClientCount = configuration.Clients.Count(c => c.Knx.Enabled);
 
-        LogKnxIntegrationConfigured(logger, knxZoneCount, knxClientCount);
+        logger.LogInformation("KnxIntegrationConfigured: {Details}", knxZoneCount, knxClientCount);
 
         // Register the actual KNX service
         services.AddSingleton<IKnxService, KnxService>();
@@ -212,31 +212,6 @@ public static partial class KnxServiceConfiguration
             }
         }
     }
-
-    [LoggerMessage(EventId = 114300, Level = LogLevel.Information, Message = "KNX service is disabled in configuration - skipping registration"
-)]
-    private static partial void LogKnxServiceDisabled(ILogger logger);
-
-    [LoggerMessage(EventId = 114301, Level = LogLevel.Error, Message = "KNX configuration validation failed: {Errors}"
-)]
-    private static partial void LogKnxConfigurationValidationFailed(ILogger logger, string errors);
-
-    [LoggerMessage(EventId = 114302, Level = LogLevel.Information, Message = "Registering KNX service with {ConnectionType} connection"
-)]
-    private static partial void LogKnxServiceRegistering(ILogger logger, string connectionType);
-
-    [LoggerMessage(EventId = 114303, Level = LogLevel.Information, Message = "KNX {ConnectionType}: {Gateway}:{Port}"
-)]
-    private static partial void LogKnxConnectionDetails(
-        ILogger logger,
-        string connectionType,
-        string gateway,
-        int port
-    );
-
-    [LoggerMessage(EventId = 114304, Level = LogLevel.Information, Message = "KNX integration configured for {ZoneCount} zones and {ClientCount} clients"
-)]
-    private static partial void LogKnxIntegrationConfigured(ILogger logger, int zoneCount, int clientCount);
 
     private class ValidationResult
     {

@@ -42,7 +42,7 @@ public partial class ErrorTrackingService(ILogger<ErrorTrackingService> logger) 
             this.CleanupOldErrors();
         }
 
-        LogErrorRecorded(logger, error.Component ?? "Unknown", error.Context ?? "Unknown", error.Message);
+        logger.LogInformation("ErrorRecorded: {Details}", error.Component ?? "Unknown", error.Context ?? "Unknown", error.Message);
     }
 
     /// <inheritdoc/>
@@ -106,7 +106,7 @@ public partial class ErrorTrackingService(ILogger<ErrorTrackingService> logger) 
             this._errors.Clear();
         }
 
-        LogErrorsCleared(logger);
+        logger.LogInformation("ErrorsCleared");
     }
 
     private void CleanupOldErrors()
@@ -124,19 +124,8 @@ public partial class ErrorTrackingService(ILogger<ErrorTrackingService> logger) 
         var removedCount = initialCount - this._errors.Count;
         if (removedCount > 0)
         {
-            LogOldErrorsRemoved(logger, removedCount, this._errors.Count);
+            logger.LogInformation("OldErrorsRemoved: {Details}", removedCount, this._errors.Count);
         }
     }
 
-    [LoggerMessage(EventId = 110200, Level = LogLevel.Warning, Message = "Error recorded in {Component}.{Operation}: {Message}"
-)]
-    private static partial void LogErrorRecorded(ILogger logger, string component, string operation, string message);
-
-    [LoggerMessage(EventId = 110201, Level = LogLevel.Information, Message = "Error tracking cleared"
-)]
-    private static partial void LogErrorsCleared(ILogger logger);
-
-    [LoggerMessage(EventId = 110202, Level = LogLevel.Debug, Message = "Removed {RemovedCount} old errors, {RemainingCount} errors remaining"
-)]
-    private static partial void LogOldErrorsRemoved(ILogger logger, int removedCount, int remainingCount);
 }

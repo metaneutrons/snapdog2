@@ -27,13 +27,10 @@ public partial class SubsonicConnectionEstablishedNotificationHandler(
 
     public Task Handle(SubsonicConnectionEstablishedNotification notification, CancellationToken cancellationToken)
     {
-        LogSubsonicConnectionEstablished(this._logger, notification.ServerUrl, notification.Username);
+        _logger.LogInformation("SubsonicConnectionEstablished: {Details}", notification.ServerUrl, notification.Username);
         return Task.CompletedTask;
     }
 
-    [LoggerMessage(EventId = 114600, Level = LogLevel.Information, Message = "Subsonic connection established → {ServerUrl} for user {Username}"
-)]
-    private static partial void LogSubsonicConnectionEstablished(ILogger logger, string serverUrl, string username);
 }
 
 /// <summary>
@@ -47,13 +44,10 @@ public partial class SubsonicConnectionLostNotificationHandler(
 
     public Task Handle(SubsonicConnectionLostNotification notification, CancellationToken cancellationToken)
     {
-        LogSubsonicConnectionLost(this._logger, notification.ServerUrl, notification.Reason);
+        _logger.LogInformation("SubsonicConnectionLost: {Details}", notification.ServerUrl, notification.Reason);
         return Task.CompletedTask;
     }
 
-    [LoggerMessage(EventId = 114601, Level = LogLevel.Warning, Message = "⚠️ Subsonic connection lost → {ServerUrl}: {Reason}"
-)]
-    private static partial void LogSubsonicConnectionLost(ILogger logger, string serverUrl, string reason);
 }
 
 /// <summary>
@@ -67,7 +61,7 @@ public partial class SubsonicPlaylistsRetrievedNotificationHandler(
 
     public Task Handle(SubsonicPlaylistsRetrievedNotification notification, CancellationToken cancellationToken)
     {
-        LogPlaylistsRetrieved(this._logger, notification.PlaylistCount, notification.RetrievalTime.TotalMilliseconds);
+        _logger.LogInformation("PlaylistsRetrieved: {Details}", notification.PlaylistCount, notification.RetrievalTime.TotalMilliseconds);
 
         // Future: Could implement caching logic here
         // Future: Could update metrics/analytics here
@@ -75,9 +69,6 @@ public partial class SubsonicPlaylistsRetrievedNotificationHandler(
         return Task.CompletedTask;
     }
 
-    [LoggerMessage(EventId = 114602, Level = LogLevel.Debug, Message = "Retrieved {PlaylistCount} playlists in {RetrievalTimeMs:F2}ms"
-)]
-    private static partial void LogPlaylistsRetrieved(ILogger logger, int playlistCount, double retrievalTimeMs);
 }
 
 /// <summary>
@@ -91,7 +82,7 @@ public partial class SubsonicPlaylistAccessedNotificationHandler(
 
     public Task Handle(SubsonicPlaylistAccessedNotification notification, CancellationToken cancellationToken)
     {
-        LogPlaylistAccessed(this._logger, notification.PlaylistName, notification.TrackCount);
+        _logger.LogInformation("PlaylistAccessed: {Details}", notification.PlaylistName, notification.TrackCount);
 
         // Future: Could implement usage analytics here
         // Future: Could implement playlist popularity tracking here
@@ -99,9 +90,6 @@ public partial class SubsonicPlaylistAccessedNotificationHandler(
         return Task.CompletedTask;
     }
 
-    [LoggerMessage(EventId = 114603, Level = LogLevel.Debug, Message = "Accessed playlist '{PlaylistName}' with {TrackCount} tracks"
-)]
-    private static partial void LogPlaylistAccessed(ILogger logger, string playlistName, int trackCount);
 }
 
 /// <summary>
@@ -115,7 +103,7 @@ public partial class SubsonicStreamRequestedNotificationHandler(
 
     public Task Handle(SubsonicStreamRequestedNotification notification, CancellationToken cancellationToken)
     {
-        LogStreamRequested(this._logger, notification.TrackId);
+        _logger.LogInformation("StreamRequested: {Details}", notification.TrackId);
 
         // Future: Could implement stream analytics here
         // Future: Could implement track popularity tracking here
@@ -123,9 +111,6 @@ public partial class SubsonicStreamRequestedNotificationHandler(
         return Task.CompletedTask;
     }
 
-    [LoggerMessage(EventId = 114604, Level = LogLevel.Debug, Message = "🎧 Stream requested for track {TrackId}"
-)]
-    private static partial void LogStreamRequested(ILogger logger, string trackId);
 }
 
 /// <summary>
@@ -138,7 +123,7 @@ public partial class SubsonicServiceErrorNotificationHandler(ILogger<SubsonicSer
 
     public Task Handle(SubsonicServiceErrorNotification notification, CancellationToken cancellationToken)
     {
-        LogServiceError(this._logger, notification.Operation, notification.ErrorMessage);
+        _logger.LogInformation("ServiceError: {Details}", notification.Operation, notification.ErrorMessage);
 
         // Future: Could implement alerting logic here
         // Future: Could implement error rate monitoring here
@@ -146,9 +131,6 @@ public partial class SubsonicServiceErrorNotificationHandler(ILogger<SubsonicSer
         return Task.CompletedTask;
     }
 
-    [LoggerMessage(EventId = 114605, Level = LogLevel.Error, Message = "❌ Subsonic service error in {Operation}: {ErrorMessage}"
-)]
-    private static partial void LogServiceError(ILogger logger, string operation, string errorMessage);
 }
 
 /// <summary>
@@ -162,13 +144,10 @@ public partial class SubsonicInitializationStartedNotificationHandler(
 
     public Task Handle(SubsonicInitializationStartedNotification notification, CancellationToken cancellationToken)
     {
-        LogInitializationStarted(this._logger, notification.ServerUrl);
+        _logger.LogInformation("InitializationStarted: {Details}", notification.ServerUrl);
         return Task.CompletedTask;
     }
 
-    [LoggerMessage(EventId = 114606, Level = LogLevel.Information, Message = "Subsonic service initialization started for {ServerUrl}"
-)]
-    private static partial void LogInitializationStarted(ILogger logger, string serverUrl);
 }
 
 /// <summary>
@@ -182,11 +161,8 @@ public partial class SubsonicServiceDisposedNotificationHandler(
 
     public Task Handle(SubsonicServiceDisposedNotification notification, CancellationToken cancellationToken)
     {
-        LogServiceDisposed(this._logger, notification.ServerUrl);
+        _logger.LogInformation("ServiceDisposed: {Details}", notification.ServerUrl);
         return Task.CompletedTask;
     }
 
-    [LoggerMessage(EventId = 114607, Level = LogLevel.Information, Message = "🗑️ Subsonic service disposed for {ServerUrl}"
-)]
-    private static partial void LogServiceDisposed(ILogger logger, string serverUrl);
 }

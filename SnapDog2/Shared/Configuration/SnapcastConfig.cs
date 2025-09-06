@@ -100,6 +100,7 @@ public class SnapcastConfig
     /// <summary>
     /// Snapcast base URL for reverse proxy support.
     /// Maps to: SNAPDOG_SERVICES_SNAPCAST_BASE_URL
+    /// TODO: Why is this not used?
     /// </summary>
     [Env(Key = "BASE_URL", Default = "")]
     public string BaseUrl { get; set; } = "";

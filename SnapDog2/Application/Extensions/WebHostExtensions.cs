@@ -39,24 +39,24 @@ public static partial class WebHostExtensions
 
                 if (!httpConfig.ApiEnabled)
                 {
-                    LogApiDisabled(logger);
+                    logger.LogInformation("ApiDisabled");
                     return;
                 }
 
-                LogKestrelConfiguring(logger);
-                LogPreferredHttpPort(logger, httpConfig.HttpPort);
+                logger.LogInformation("KestrelConfiguring");
+                logger.LogInformation("PreferredHttpPort: {Details}", httpConfig.HttpPort);
 
                 try
                 {
                     // Configure HTTP endpoint with fallback
                     var actualHttpPort = ConfigureHttpEndpointWithFallback(options, httpConfig.HttpPort, logger);
 
-                    LogKestrelConfigured(logger);
-                    LogActualHttpPort(logger, actualHttpPort);
+                    logger.LogInformation("KestrelConfigured");
+                    logger.LogInformation("ActualHttpPort: {Details}", actualHttpPort);
                 }
                 catch (Exception ex)
                 {
-                    LogKestrelConfigurationFailed(logger, ex);
+                    logger.LogInformation("KestrelConfigurationFailed: {Details}", ex);
                     throw new InvalidOperationException("Unable to bind to any available port", ex);
                 }
             }
@@ -82,18 +82,18 @@ public static partial class WebHostExtensions
 
                     if (currentPort != preferredPort)
                     {
-                        LogHttpPortFallback(logger, preferredPort, currentPort);
+                        logger.LogInformation("HttpPortFallback: {Details}", preferredPort, currentPort);
                     }
 
                     return currentPort;
                 }
 
-                LogHttpPortUnavailable(logger, currentPort, attempt, maxAttempts);
+                logger.LogInformation("HttpPortUnavailable: {Details}", currentPort, attempt, maxAttempts);
                 currentPort++;
             }
             catch (Exception ex)
             {
-                LogHttpPortBindFailed(logger, ex, currentPort, attempt, maxAttempts);
+                logger.LogInformation("HttpPortBindFailed: {Details}", ex, currentPort, attempt, maxAttempts);
                 currentPort++;
             }
         }
@@ -119,40 +119,4 @@ public static partial class WebHostExtensions
     }
 
     // LoggerMessage methods for structured logging
-    [LoggerMessage(EventId = 114400, Level = LogLevel.Information, Message = "API is disabled - skipping Kestrel configuration"
-)]
-    private static partial void LogApiDisabled(ILogger logger);
-
-    [LoggerMessage(EventId = 114401, Level = LogLevel.Information, Message = "🌐 Configuring Kestrel web server...")]
-    private static partial void LogKestrelConfiguring(ILogger logger);
-
-    [LoggerMessage(EventId = 114402, Level = LogLevel.Information, Message = "🎯 Preferred HTTP port: {Port}")]
-    private static partial void LogPreferredHttpPort(ILogger logger, int Port);
-
-    [LoggerMessage(EventId = 114403, Level = LogLevel.Information, Message = "✅ Kestrel configured successfully")]
-    private static partial void LogKestrelConfigured(ILogger logger);
-
-    [LoggerMessage(EventId = 114404, Level = LogLevel.Information, Message = "🌐 HTTP server listening on port: {Port}")]
-    private static partial void LogActualHttpPort(ILogger logger, int Port);
-
-    [LoggerMessage(EventId = 114405, Level = LogLevel.Error, Message = "❌ Kestrel configuration failed")]
-    private static partial void LogKestrelConfigurationFailed(ILogger logger, Exception ex);
-
-    [LoggerMessage(EventId = 114406, Level = LogLevel.Warning, Message = "HTTP port fallback: {PreferredPort} → {ActualPort}"
-)]
-    private static partial void LogHttpPortFallback(ILogger logger, int PreferredPort, int ActualPort);
-
-    [LoggerMessage(EventId = 114407, Level = LogLevel.Warning, Message = "⚠️ HTTP port {Port} unavailable (attempt {Attempt}/{MaxAttempts})"
-)]
-    private static partial void LogHttpPortUnavailable(ILogger logger, int Port, int Attempt, int MaxAttempts);
-
-    [LoggerMessage(EventId = 114408, Level = LogLevel.Warning, Message = "⚠️ Failed → bind HTTP port {Port} (attempt {Attempt}/{MaxAttempts})"
-)]
-    private static partial void LogHttpPortBindFailed(
-        ILogger logger,
-        Exception ex,
-        int Port,
-        int Attempt,
-        int MaxAttempts
-    );
 }

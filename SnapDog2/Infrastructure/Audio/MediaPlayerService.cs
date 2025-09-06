@@ -60,29 +60,29 @@ public sealed partial class MediaPlayerService(
             ObjectDisposedException.ThrowIf(this._disposed, this);
 
             // Debug logging for zone lookup
-            LogLookingForZone(this._logger, zoneIndex);
-            LogAvailableZoneConfigs(this._logger, this._zoneConfigs.Count());
+            _logger.LogInformation("LookingForZone: {Details}", zoneIndex);
+            _logger.LogInformation("AvailableZoneConfigs: {Details}", this._zoneConfigs.Count());
 
             var zoneConfigsList = this._zoneConfigs.ToList();
             for (var i = 0; i < zoneConfigsList.Count; i++)
             {
-                LogZoneConfig(this._logger, i, zoneConfigsList[i].Name);
+                _logger.LogInformation("ZoneConfig: {Details}", i, zoneConfigsList[i].Name);
             }
 
             var zoneConfig = this._zoneConfigs.ElementAtOrDefault(zoneIndex - 1); // Zone IDs are 1-based
             if (zoneConfig == null)
             {
-                LogZoneNotFound(this._logger, zoneIndex, zoneIndex - 1);
+                _logger.LogInformation("ZoneNotFound: {Details}", zoneIndex, zoneIndex - 1);
                 return Result.Failure(new ArgumentException($"Zone {zoneIndex} not found"));
             }
 
-            LogFoundZoneConfig(this._logger, zoneIndex, zoneConfig.Name);
+            _logger.LogInformation("FoundZoneConfig: {Details}", zoneIndex, zoneConfig.Name);
 
             // Check if we're at the stream limit (max = number of configured zones)
             var maxStreams = this._zoneConfigs.Count();
             if (this._players.Count >= maxStreams)
             {
-                LogMaxStreamsReached(this._logger, maxStreams);
+                _logger.LogInformation("MaxStreamsReached: {Details}", maxStreams);
                 return Result.Failure(
                     new InvalidOperationException($"Maximum number of concurrent streams ({maxStreams}) reached")
                 );
@@ -122,7 +122,7 @@ public sealed partial class MediaPlayerService(
                     }
 
                     streamUrl = streamUrlResult.Value!;
-                    LogConvertedSubsonicUrl(this._logger, trackInfo.Url, streamUrl);
+                    _logger.LogInformation("ConvertedSubsonicUrl: {Details}", trackInfo.Url, streamUrl);
                 }
                 finally
                 {
@@ -139,7 +139,7 @@ public sealed partial class MediaPlayerService(
 
             if (result.IsSuccess)
             {
-                LogPlaybackStarted(this._logger, zoneIndex, trackInfo.Title, streamUrl);
+                _logger.LogInformation("PlaybackStarted: {Details}", zoneIndex, trackInfo.Title, streamUrl);
 
                 // Publish playback started notification using scoped mediator
                 using var scope = this._serviceScopeFactory.CreateScope();
@@ -159,7 +159,7 @@ public sealed partial class MediaPlayerService(
         }
         catch (Exception ex)
         {
-            LogPlaybackError(this._logger, zoneIndex, ex);
+            _logger.LogInformation("PlaybackError: {Details}", zoneIndex, ex);
             return Result.Failure(ex);
         }
     }
@@ -176,7 +176,7 @@ public sealed partial class MediaPlayerService(
                 await player.StopStreamingAsync();
                 await player.DisposeAsync();
 
-                LogPlaybackStopped(this._logger, zoneIndex);
+                _logger.LogInformation("PlaybackStopped: {Details}", zoneIndex);
 
                 // Publish playback stopped notification using scoped mediator
                 using var scope = this._serviceScopeFactory.CreateScope();
@@ -188,7 +188,7 @@ public sealed partial class MediaPlayerService(
         }
         catch (Exception ex)
         {
-            LogPlaybackError(this._logger, zoneIndex, ex);
+            _logger.LogInformation("PlaybackError: {Details}", zoneIndex, ex);
             return Result.Failure(ex);
         }
     }
@@ -206,7 +206,7 @@ public sealed partial class MediaPlayerService(
 
             if (result.IsSuccess)
             {
-                LogPlaybackPaused(this._logger, zoneIndex);
+                _logger.LogInformation("PlaybackPaused: {Details}", zoneIndex);
 
                 // Publish playback paused notification using scoped mediator
                 using var scope = this._serviceScopeFactory.CreateScope();
@@ -218,7 +218,7 @@ public sealed partial class MediaPlayerService(
         }
         catch (Exception ex)
         {
-            LogPlaybackError(this._logger, zoneIndex, ex);
+            _logger.LogInformation("PlaybackError: {Details}", zoneIndex, ex);
             return Result.Failure(ex);
         }
     }
@@ -339,12 +339,12 @@ public sealed partial class MediaPlayerService(
                 return Result.Failure(aggregateException);
             }
 
-            LogAllPlaybackStopped(this._logger, activeStreamsCount);
+            _logger.LogInformation("AllPlaybackStopped: {Details}", activeStreamsCount);
             return Result.Success();
         }
         catch (Exception ex)
         {
-            LogPlaybackError(this._logger, -1, ex);
+            _logger.LogInformation("PlaybackError: {Details}", -1, ex);
             return Result.Failure(ex);
         }
     }
@@ -390,22 +390,22 @@ public sealed partial class MediaPlayerService(
     {
         try
         {
-            LogSeekingToPosition(this._logger, zoneIndex, positionMs);
+            _logger.LogInformation("SeekingToPosition: {Details}", zoneIndex, positionMs);
 
             if (!this._players.TryGetValue(zoneIndex, out _))
             {
-                LogPlayerNotFound(this._logger, zoneIndex);
+                _logger.LogInformation("PlayerNotFound: {Details}", zoneIndex);
                 return Task.FromResult(Result.Failure($"No active player found for zone {zoneIndex}"));
             }
 
             // For now, return success as seeking is not implemented in the LibVLC wrapper
             // This would need to be implemented in the actual media player
-            LogSeekNotImplemented(this._logger, zoneIndex);
+            _logger.LogInformation("SeekNotImplemented: {Details}", zoneIndex);
             return Task.FromResult(Result.Success());
         }
         catch (Exception ex)
         {
-            LogSeekError(this._logger, zoneIndex, ex);
+            _logger.LogInformation("SeekError: {Details}", zoneIndex, ex);
             return Task.FromResult(Result.Failure(ex));
         }
     }
@@ -421,22 +421,22 @@ public sealed partial class MediaPlayerService(
     {
         try
         {
-            LogSeekingToProgress(this._logger, zoneIndex, progress);
+            _logger.LogInformation("SeekingToProgress: {Details}", zoneIndex, progress);
 
             if (!this._players.TryGetValue(zoneIndex, out _))
             {
-                LogPlayerNotFound(this._logger, zoneIndex);
+                _logger.LogInformation("PlayerNotFound: {Details}", zoneIndex);
                 return Task.FromResult(Result.Failure($"No active player found for zone {zoneIndex}"));
             }
 
             // For now, return success as seeking is not implemented in the LibVLC wrapper
             // This would need to be implemented in the actual media player
-            LogSeekNotImplemented(this._logger, zoneIndex);
+            _logger.LogInformation("SeekNotImplemented: {Details}", zoneIndex);
             return Task.FromResult(Result.Success());
         }
         catch (Exception ex)
         {
-            LogSeekError(this._logger, zoneIndex, ex);
+            _logger.LogInformation("SeekError: {Details}", zoneIndex, ex);
             return Task.FromResult(Result.Failure(ex));
         }
     }
@@ -465,18 +465,18 @@ public sealed partial class MediaPlayerService(
                         catch (Exception ex)
                         {
                             // Log but don't throw during disposal
-                            LogDisposalWarning(this._logger, ex);
+                            _logger.LogInformation("DisposalWarning: {Details}", ex);
                         }
                     });
 
                     await Task.WhenAll(disposeTasks);
                 }
 
-                LogServiceDisposed(this._logger);
+                _logger.LogInformation("ServiceDisposed");
             }
             catch (Exception ex)
             {
-                LogDisposalError(this._logger, ex);
+                _logger.LogInformation("DisposalError: {Details}", ex);
             }
         }
     }
@@ -517,24 +517,24 @@ public sealed partial class MediaPlayerService(
                                 catch (Exception ex)
                                 {
                                     // Log but don't throw during disposal
-                                    LogBackgroundDisposalWarning(this._logger, ex);
+                                    _logger.LogInformation("BackgroundDisposalWarning: {Details}", ex);
                                 }
                             });
 
                             await Task.WhenAll(disposeTasks);
                         }
 
-                        LogServiceDisposed(this._logger);
+                        _logger.LogInformation("ServiceDisposed");
                     }
                     catch (Exception ex)
                     {
-                        LogBackgroundDisposalError(this._logger, ex);
+                        _logger.LogInformation("BackgroundDisposalError: {Details}", ex);
                     }
                 });
             }
             catch (Exception ex)
             {
-                LogTaskStartError(this._logger, ex);
+                _logger.LogInformation("TaskStartError: {Details}", ex);
             }
         }
     }
@@ -588,47 +588,4 @@ public sealed partial class MediaPlayerService(
 )]
     private static partial void LogPlayerNotFound(ILogger logger, int zoneIndex);
 
-    [LoggerMessage(EventId = 116212, Level = LogLevel.Information, Message = "MediaPlayerService: Looking for zone {ZoneIndex}"
-)]
-    private static partial void LogLookingForZone(ILogger logger, int zoneIndex);
-
-    [LoggerMessage(EventId = 116213, Level = LogLevel.Information, Message = "MediaPlayerService: Available zone configs count: {Count}"
-)]
-    private static partial void LogAvailableZoneConfigs(ILogger logger, int count);
-
-    [LoggerMessage(EventId = 116214, Level = LogLevel.Information, Message = "MediaPlayerService: Zone config {Index}: {Name}"
-)]
-    private static partial void LogZoneConfig(ILogger logger, int index, string name);
-
-    [LoggerMessage(EventId = 116215, Level = LogLevel.Error, Message = "MediaPlayerService: Zone {ZoneIndex} not found. Requested index in array: {ArrayIndex}"
-)]
-    private static partial void LogZoneNotFound(ILogger logger, int zoneIndex, int arrayIndex);
-
-    [LoggerMessage(EventId = 116216, Level = LogLevel.Information, Message = "MediaPlayerService: Found zone config for zone {ZoneIndex}: {ZoneName}"
-)]
-    private static partial void LogFoundZoneConfig(ILogger logger, int zoneIndex, string zoneName);
-
-    [LoggerMessage(EventId = 116217, Level = LogLevel.Debug, Message = "Converted Subsonic media ID {MediaId} → stream URL: {StreamUrl}"
-)]
-    private static partial void LogConvertedSubsonicUrl(ILogger logger, string mediaId, string streamUrl);
-
-    [LoggerMessage(EventId = 116218, Level = LogLevel.Warning, Message = "Error disposing MediaPlayer during service cleanup"
-)]
-    private static partial void LogDisposalWarning(ILogger logger, Exception ex);
-
-    [LoggerMessage(EventId = 116219, Level = LogLevel.Error, Message = "Error during MediaPlayerService disposal"
-)]
-    private static partial void LogDisposalError(ILogger logger, Exception ex);
-
-    [LoggerMessage(EventId = 116220, Level = LogLevel.Warning, Message = "Error disposing MediaPlayer during background cleanup"
-)]
-    private static partial void LogBackgroundDisposalWarning(ILogger logger, Exception ex);
-
-    [LoggerMessage(EventId = 116221, Level = LogLevel.Error, Message = "Error during background MediaPlayerService disposal"
-)]
-    private static partial void LogBackgroundDisposalError(ILogger logger, Exception ex);
-
-    [LoggerMessage(EventId = 116222, Level = LogLevel.Error, Message = "Error starting background disposal task"
-)]
-    private static partial void LogTaskStartError(ILogger logger, Exception ex);
 }

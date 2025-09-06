@@ -39,7 +39,7 @@ public partial class EnterpriseMetricsService : IMetricsService, IDisposable
         // Start system metrics collection timer (every 30 seconds)
         this._systemMetricsTimer = new Timer(this.CollectSystemMetrics, null, TimeSpan.Zero, TimeSpan.FromSeconds(30));
 
-        LogServiceInitialized(this._logger);
+        _logger.LogInformation("ServiceInitialized");
     }
 
     #region IMetricsService Implementation
@@ -140,7 +140,7 @@ public partial class EnterpriseMetricsService : IMetricsService, IDisposable
         }
         catch (Exception ex)
         {
-            LogFailedToCollectSystemMetrics(this._logger, ex);
+            _logger.LogInformation("FailedToCollectSystemMetrics: {Details}", ex);
         }
     }
 
@@ -153,7 +153,7 @@ public partial class EnterpriseMetricsService : IMetricsService, IDisposable
         }
         catch (Exception ex)
         {
-            LogFailedToGetCpuUsage(this._logger, ex);
+            _logger.LogInformation("FailedToGetCpuUsage: {Details}", ex);
             return 0.0;
         }
     }
@@ -168,7 +168,7 @@ public partial class EnterpriseMetricsService : IMetricsService, IDisposable
         }
         catch (Exception ex)
         {
-            LogFailedToGetCpuUsageSync(this._logger, ex);
+            _logger.LogInformation("FailedToGetCpuUsageSync: {Details}", ex);
             return 0.0;
         }
     }
@@ -286,22 +286,6 @@ public partial class EnterpriseMetricsService : IMetricsService, IDisposable
     [LoggerMessage(EventId = 110103, Level = LogLevel.Debug, Message = "Metric gauge set: {Name} = {Value} {Labels}"
 )]
     private partial void LogGaugeSet(string name, double value, string labels);
-
-    [LoggerMessage(EventId = 110104, Level = LogLevel.Information, Message = "EnterpriseMetricsService initialized with system metrics collection"
-)]
-    private static partial void LogServiceInitialized(ILogger logger);
-
-    [LoggerMessage(EventId = 110105, Level = LogLevel.Warning, Message = "Failed → collect system metrics"
-)]
-    private static partial void LogFailedToCollectSystemMetrics(ILogger logger, Exception ex);
-
-    [LoggerMessage(EventId = 110106, Level = LogLevel.Debug, Message = "Failed → get CPU usage"
-)]
-    private static partial void LogFailedToGetCpuUsage(ILogger logger, Exception ex);
-
-    [LoggerMessage(EventId = 110107, Level = LogLevel.Debug, Message = "Failed → get CPU usage synchronously"
-)]
-    private static partial void LogFailedToGetCpuUsageSync(ILogger logger, Exception ex);
 
     private static string FormatLabels((string Key, string Value)[] labels)
     {

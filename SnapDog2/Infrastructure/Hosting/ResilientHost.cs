@@ -40,11 +40,11 @@ public partial class ResilientHost(IHost innerHost, ILogger<ResilientHost> logge
             // Handle our custom startup validation exceptions gracefully
             if (this._isDebugMode)
             {
-                LogStartupValidationFailedDebug(this._logger, ex, ex.ValidationStep);
+                _logger.LogInformation("StartupValidationFailedDebug: {Details}", ex, ex.ValidationStep);
             }
             else
             {
-                LogStartupValidationFailedProduction(this._logger, ex.ValidationStep, GetCleanErrorMessage(ex));
+                _logger.LogInformation("StartupValidationFailedProduction: {Details}", ex.ValidationStep, GetCleanErrorMessage(ex));
             }
 
             // Don't re-throw - let the application exit gracefully
@@ -55,11 +55,11 @@ public partial class ResilientHost(IHost innerHost, ILogger<ResilientHost> logge
             // Handle expected startup exceptions
             if (this._isDebugMode)
             {
-                LogStartupFailedDebug(this._logger, ex);
+                _logger.LogInformation("StartupFailedDebug: {Details}", ex);
             }
             else
             {
-                LogStartupFailedProduction(this._logger, ex.GetType().Name, ex.Message);
+                _logger.LogInformation("StartupFailedProduction: {Details}", ex.GetType().Name, ex.Message);
             }
 
             Environment.ExitCode = 1;
@@ -69,11 +69,11 @@ public partial class ResilientHost(IHost innerHost, ILogger<ResilientHost> logge
             // Handle unexpected startup exceptions
             if (this._isDebugMode)
             {
-                LogUnexpectedStartupFailureDebug(this._logger, ex);
+                _logger.LogInformation("UnexpectedStartupFailureDebug: {Details}", ex);
             }
             else
             {
-                LogUnexpectedStartupFailureProduction(this._logger, ex.GetType().Name, ex.Message);
+                _logger.LogInformation("UnexpectedStartupFailureProduction: {Details}", ex.GetType().Name, ex.Message);
             }
 
             Environment.ExitCode = 2;

@@ -116,7 +116,7 @@ public partial class AppStatusService(
         catch (Exception ex)
         {
             // Log but don't throw - build date is not critical
-            LogBuildDateExtractionFailed(this._logger, ex);
+            _logger.LogInformation("BuildDateExtractionFailed: {Details}", ex);
         }
 
         return null;
@@ -145,7 +145,4 @@ public partial class AppStatusService(
 )]
     private partial void LogGettingServerStats();
 
-    [LoggerMessage(EventId = 110403, Level = LogLevel.Warning, Message = "Failed → extract build date from assembly"
-)]
-    private static partial void LogBuildDateExtractionFailed(ILogger logger, Exception ex);
 }

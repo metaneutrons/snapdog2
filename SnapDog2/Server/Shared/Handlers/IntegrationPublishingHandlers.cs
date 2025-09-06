@@ -449,7 +449,7 @@ public partial class IntegrationPublishingHandlers(
 
         // Debug log to verify we're publishing the notification
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<IntegrationPublishingHandlers>>();
-        LogPublishingStatusChangedNotification(logger, statusType, targetIndex, value?.ToString() ?? "null");
+        logger.LogInformation("PublishingStatusChangedNotification: {Details}", statusType, targetIndex, value?.ToString() ?? "null");
 
         await mediator.PublishAsync(
             new StatusChangedNotification
@@ -461,7 +461,7 @@ public partial class IntegrationPublishingHandlers(
             cancellationToken
         );
 
-        LogStatusChangedNotificationPublished(logger);
+        logger.LogInformation("StatusChangedNotificationPublished");
     }
 
     /// <summary>
@@ -508,17 +508,17 @@ public partial class IntegrationPublishingHandlers(
     {
         try
         {
-            LogAttemptingToPublishZoneStatus(this._logger, eventType, zoneIndex);
+            _logger.LogInformation("AttemptingToPublishZoneStatus: {Details}", eventType, zoneIndex);
 
             var smartPublisher = this._serviceProvider.GetService<ISmartMqttPublisher>();
             if (smartPublisher != null)
             {
-                LogSmartPublisherFound(this._logger);
+                _logger.LogInformation("SmartPublisherFound");
                 await smartPublisher.PublishZoneStatusAsync(zoneIndex, eventType, payload, cancellationToken);
             }
             else
             {
-                LogSmartPublisherNotAvailableWarning(this._logger);
+                _logger.LogInformation("SmartPublisherNotAvailableWarning");
                 this.LogSmartPublisherNotAvailable("Zone", zoneIndex.ToString(), eventType);
             }
         }
@@ -655,26 +655,6 @@ public partial class IntegrationPublishingHandlers(
     [LoggerMessage(EventId = 114224, Level = LogLevel.Error, Message = "Failed → publish {EntityType} {EntityId} {EventType} → MQTT"
 )]
     private partial void LogPublishError(string entityType, string entityId, string eventType, Exception ex);
-
-    [LoggerMessage(EventId = 114225, Level = LogLevel.Debug, Message = "Attempting → publish zone status: {EventType} for Zone {ZoneIndex}"
-)]
-    private static partial void LogAttemptingToPublishZoneStatus(ILogger logger, string eventType, int zoneIndex);
-
-    [LoggerMessage(EventId = 114226, Level = LogLevel.Debug, Message = "Smart publisher found, publishing zone status"
-)]
-    private static partial void LogSmartPublisherFound(ILogger logger);
-
-    [LoggerMessage(EventId = 114227, Level = LogLevel.Warning, Message = "❌ Smart publisher not available"
-)]
-    private static partial void LogSmartPublisherNotAvailableWarning(ILogger logger);
-
-    [LoggerMessage(EventId = 114228, Level = LogLevel.Information, Message = "Publishing StatusChangedNotification: {StatusType} for target {TargetIndex} with value {Value}"
-)]
-    private static partial void LogPublishingStatusChangedNotification(ILogger logger, string StatusType, int TargetIndex, string Value);
-
-    [LoggerMessage(EventId = 114229, Level = LogLevel.Information, Message = "✅ StatusChangedNotification published successfully"
-)]
-    private static partial void LogStatusChangedNotificationPublished(ILogger logger);
 
     #endregion
 }
