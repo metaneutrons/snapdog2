@@ -34,23 +34,23 @@ public partial class GlobalStateNotificationHandler(
     private readonly IServiceProvider _serviceProvider = serviceProvider;
     private readonly ILogger<GlobalStateNotificationHandler> _logger = logger;
 
-    [LoggerMessage(EventId = 113000, Level = LogLevel.Information, Message = "System status changed → online: {IsOnline}"
+    [LoggerMessage(EventId = 114000, Level = LogLevel.Information, Message = "System status changed → online: {IsOnline}"
 )]
     private partial void LogSystemStatusChange(bool isOnline);
 
-    [LoggerMessage(EventId = 113001, Level = LogLevel.Information, Message = "Version info updated: {Version} (Build: {BuildDate})"
+    [LoggerMessage(EventId = 114001, Level = LogLevel.Information, Message = "Version info updated: {Version} (Build: {BuildDate})"
 )]
     private partial void LogVersionInfoChange(string version, DateTime buildDate);
 
-    [LoggerMessage(EventId = 113002, Level = LogLevel.Information, Message = "Server stats updated - CPU: {CpuUsage:F2}%, Memory: {MemoryUsage:F2}MB"
+    [LoggerMessage(EventId = 114002, Level = LogLevel.Information, Message = "Server stats updated - CPU: {CpuUsage:P1}, Memory: {MemoryUsage:F2}MB"
 )]
     private partial void LogServerStatsChange(double cpuUsage, double memoryUsage);
 
-    [LoggerMessage(EventId = 113003, Level = LogLevel.Error, Message = "System error occurred: {ErrorCode} - {Message}"
+    [LoggerMessage(EventId = 114003, Level = LogLevel.Error, Message = "System error occurred: {ErrorCode} - {Message}"
 )]
     private partial void LogSystemError(string errorCode, string message);
 
-    [LoggerMessage(EventId = 113004, Level = LogLevel.Information, Message = "Zones info updated - Available zones: [{ZoneIndices}]"
+    [LoggerMessage(EventId = 114004, Level = LogLevel.Information, Message = "Zones info updated - Available zones: [{ZoneIndices}]"
 )]
     private partial void LogZonesInfoChange(string zoneIndices);
 

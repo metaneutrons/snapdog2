@@ -100,35 +100,35 @@ public partial class PersistentStateNotificationHandler(
     /// </summary>
     #region LoggerMessage Methods
 
-    [LoggerMessage(EventId = 117100, Level = LogLevel.Debug, Message = "💾 Persisting zone {ZoneIndex} state..."
+    [LoggerMessage(EventId = 117200, Level = LogLevel.Debug, Message = "Persisting zone {ZoneIndex} state..."
 )]
     private partial void LogZoneStatePersisting(int ZoneIndex);
 
-    [LoggerMessage(EventId = 117101, Level = LogLevel.Debug, Message = "✅ Zone {ZoneIndex} ({ZoneName}) state persisted successfully"
+    [LoggerMessage(EventId = 117201, Level = LogLevel.Debug, Message = "✅ Zone {ZoneIndex} ({ZoneName}) state persisted successfully"
 )]
     private partial void LogZoneStatePersisted(int ZoneIndex, string ZoneName);
 
-    [LoggerMessage(EventId = 117102, Level = LogLevel.Error, Message = "❌ Failed → persist zone {ZoneIndex} state"
+    [LoggerMessage(EventId = 117202, Level = LogLevel.Error, Message = "❌ Failed → persist zone {ZoneIndex} state"
 )]
     private partial void LogZoneStatePersistFailed(Exception ex, int ZoneIndex);
 
-    [LoggerMessage(EventId = 117103, Level = LogLevel.Debug, Message = "💾 Persisting client {ClientIndex} state..."
+    [LoggerMessage(EventId = 117203, Level = LogLevel.Debug, Message = "Persisting client {ClientIndex} state..."
 )]
     private partial void LogClientStatePersisting(int ClientIndex);
 
-    [LoggerMessage(EventId = 117104, Level = LogLevel.Debug, Message = "✅ Client {ClientIndex} ({ClientName}) state persisted successfully"
+    [LoggerMessage(EventId = 117204, Level = LogLevel.Debug, Message = "✅ Client {ClientIndex} ({ClientName}) state persisted successfully"
 )]
     private partial void LogClientStatePersisted(int ClientIndex, string ClientName);
 
-    [LoggerMessage(EventId = 117105, Level = LogLevel.Error, Message = "❌ Failed → persist client {ClientIndex} state"
+    [LoggerMessage(EventId = 117205, Level = LogLevel.Error, Message = "❌ Failed → persist client {ClientIndex} state"
 )]
     private partial void LogClientStatePersistFailed(Exception ex, int ClientIndex);
 
-    [LoggerMessage(EventId = 117106, Level = LogLevel.Trace, Message = "⏱️ Debouncing zone {ZoneIndex} state save..."
+    [LoggerMessage(EventId = 117206, Level = LogLevel.Trace, Message = "Debouncing zone {ZoneIndex} state save..."
 )]
     private partial void LogZoneStateDebouncing(int ZoneIndex);
 
-    [LoggerMessage(EventId = 117107, Level = LogLevel.Debug, Message = "⏱️ Zone {ZoneIndex} ({ZoneName}) state saved after debounce"
+    [LoggerMessage(EventId = 117207, Level = LogLevel.Debug, Message = "Zone {ZoneIndex} ({ZoneName}) state saved after debounce"
 )]
     private partial void LogZoneStateDebounced(int ZoneIndex, string ZoneName);
 

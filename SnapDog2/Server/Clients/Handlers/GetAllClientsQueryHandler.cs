@@ -27,11 +27,11 @@ public partial class GetAllClientsQueryHandler(IClientManager clientManager, ILo
     private readonly IClientManager _clientManager = clientManager;
     private readonly ILogger<GetAllClientsQueryHandler> _logger = logger;
 
-    [LoggerMessage(EventId = 112150, Level = LogLevel.Information, Message = "Handling GetAllClientsQuery"
+    [LoggerMessage(EventId = 112300, Level = LogLevel.Information, Message = "Handling GetAllClientsQuery"
 )]
     private partial void LogHandling();
 
-    [LoggerMessage(EventId = 112151, Level = LogLevel.Error, Message = "Error retrieving all clients: {ErrorMessage}"
+    [LoggerMessage(EventId = 112301, Level = LogLevel.Error, Message = "Error retrieving all clients: {ErrorMessage}"
 )]
     private partial void LogError(string errorMessage);
 

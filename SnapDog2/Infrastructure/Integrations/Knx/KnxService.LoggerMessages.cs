@@ -21,20 +21,20 @@ namespace SnapDog2.Infrastructure.Integrations.Knx;
 public partial class KnxService
 {
     // Status Publishing Operations (10101-10102)
-    [LoggerMessage(EventId = 115100, Level = LogLevel.Debug, Message = "KNX global status publishing not implemented for event type {EventType}"
+    [LoggerMessage(EventId = 115200, Level = LogLevel.Debug, Message = "KNX global status publishing not implemented for event type {EventType}"
 )]
     private partial void LogKnxGlobalStatusPublishingNotImplemented(string eventType);
 
-    [LoggerMessage(EventId = 115101, Level = LogLevel.Debug, Message = "{Message}"
+    [LoggerMessage(EventId = 115201, Level = LogLevel.Debug, Message = "{Message}"
 )]
     private partial void LogKnxDebugMessage(string message);
 
     // Configuration and Error Operations (10103-10104)
-    [LoggerMessage(EventId = 115102, Level = LogLevel.Debug, Message = "No KNX group address configured for status {StatusId} on {TargetDescription} - skipping (this is normal)"
+    [LoggerMessage(EventId = 115202, Level = LogLevel.Debug, Message = "No KNX group address configured for status {StatusId} on {TargetDescription} - skipping (this is normal)"
 )]
     private partial void LogNoKnxGroupAddressConfigured(string statusId, string targetDescription);
 
-    [LoggerMessage(EventId = 115103, Level = LogLevel.Error, Message = "Error sending KNX status {StatusId} → {TargetDescription}"
+    [LoggerMessage(EventId = 115203, Level = LogLevel.Error, Message = "Error sending KNX status {StatusId} → {TargetDescription}"
 )]
     private partial void LogErrorSendingKnxStatus(Exception exception, string statusId, string targetDescription);
 }

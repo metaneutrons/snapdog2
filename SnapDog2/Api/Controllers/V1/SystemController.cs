@@ -256,84 +256,84 @@ public partial class SystemController(
     #region Logging
 
     // ARCHITECTURAL PROBLEM - This should never happen in production
-    [LoggerMessage(EventId = 113200, Level = LogLevel.Critical, Message = "🚨 CRITICAL: Handler {HandlerType} not found in DI container - This is a configuration BUG!"
+    [LoggerMessage(EventId = 113400, Level = LogLevel.Critical, Message = "🚨 CRITICAL: Handler {HandlerType} not found in DI container - This is a configuration BUG!"
 )]
     private partial void LogCriticalHandlerNotFound(string handlerType);
 
     // System Status (2310-2319)
-    [LoggerMessage(EventId = 113201, Level = LogLevel.Debug, Message = "Getting system status"
+    [LoggerMessage(EventId = 113401, Level = LogLevel.Debug, Message = "Getting system status"
 )]
     private partial void LogGettingSystemStatus();
 
-    [LoggerMessage(EventId = 113202, Level = LogLevel.Warning, Message = "Failed → get system status: {Error}"
+    [LoggerMessage(EventId = 113402, Level = LogLevel.Warning, Message = "Failed → get system status: {Error}"
 )]
     private partial void LogFailedToGetSystemStatus(string? error);
 
-    [LoggerMessage(EventId = 113203, Level = LogLevel.Error, Message = "Error getting system status"
+    [LoggerMessage(EventId = 113403, Level = LogLevel.Error, Message = "Error getting system status"
 )]
     private partial void LogErrorGettingSystemStatus(Exception exception);
 
     // System Errors (2320-2329)
-    [LoggerMessage(EventId = 113204, Level = LogLevel.Debug, Message = "Getting system errors"
+    [LoggerMessage(EventId = 113404, Level = LogLevel.Debug, Message = "Getting system errors"
 )]
     private partial void LogGettingSystemErrors();
 
-    [LoggerMessage(EventId = 113205, Level = LogLevel.Warning, Message = "Failed → get system errors: {Error}"
+    [LoggerMessage(EventId = 113405, Level = LogLevel.Warning, Message = "Failed → get system errors: {Error}"
 )]
     private partial void LogFailedToGetSystemErrors(string? error);
 
-    [LoggerMessage(EventId = 113206, Level = LogLevel.Error, Message = "Error getting system errors"
+    [LoggerMessage(EventId = 113406, Level = LogLevel.Error, Message = "Error getting system errors"
 )]
     private partial void LogErrorGettingSystemErrors(Exception exception);
 
     // System Version (2330-2339)
-    [LoggerMessage(EventId = 113207, Level = LogLevel.Debug, Message = "Getting system version"
+    [LoggerMessage(EventId = 113407, Level = LogLevel.Debug, Message = "Getting system version"
 )]
     private partial void LogGettingSystemVersion();
 
-    [LoggerMessage(EventId = 113208, Level = LogLevel.Warning, Message = "Failed → get system version: {Error}"
+    [LoggerMessage(EventId = 113408, Level = LogLevel.Warning, Message = "Failed → get system version: {Error}"
 )]
     private partial void LogFailedToGetSystemVersion(string? error);
 
-    [LoggerMessage(EventId = 113209, Level = LogLevel.Error, Message = "Error getting system version"
+    [LoggerMessage(EventId = 113409, Level = LogLevel.Error, Message = "Error getting system version"
 )]
     private partial void LogErrorGettingSystemVersion(Exception exception);
 
     // System Statistics (2340-2349)
-    [LoggerMessage(EventId = 113210, Level = LogLevel.Debug, Message = "Getting system statistics"
+    [LoggerMessage(EventId = 113410, Level = LogLevel.Debug, Message = "Getting system statistics"
 )]
     private partial void LogGettingSystemStatistics();
 
-    [LoggerMessage(EventId = 113211, Level = LogLevel.Warning, Message = "Failed → get system statistics: {Error}"
+    [LoggerMessage(EventId = 113411, Level = LogLevel.Warning, Message = "Failed → get system statistics: {Error}"
 )]
     private partial void LogFailedToGetSystemStatistics(string? error);
 
-    [LoggerMessage(EventId = 113212, Level = LogLevel.Error, Message = "Error getting system statistics"
+    [LoggerMessage(EventId = 113412, Level = LogLevel.Error, Message = "Error getting system statistics"
 )]
     private partial void LogErrorGettingSystemStatistics(Exception exception);
 
     // Command Status (2350-2359)
-    [LoggerMessage(EventId = 113213, Level = LogLevel.Debug, Message = "Getting command processing status"
+    [LoggerMessage(EventId = 113413, Level = LogLevel.Debug, Message = "Getting command processing status"
 )]
     private partial void LogGettingCommandStatus();
 
-    [LoggerMessage(EventId = 113214, Level = LogLevel.Warning, Message = "Failed → get command status: {Error}"
+    [LoggerMessage(EventId = 113414, Level = LogLevel.Warning, Message = "Failed → get command status: {Error}"
 )]
     private partial void LogFailedToGetCommandStatus(string? error);
 
-    [LoggerMessage(EventId = 113215, Level = LogLevel.Error, Message = "Error getting command status"
+    [LoggerMessage(EventId = 113415, Level = LogLevel.Error, Message = "Error getting command status"
 )]
     private partial void LogErrorGettingCommandStatus(Exception exception);
 
-    [LoggerMessage(EventId = 113216, Level = LogLevel.Debug, Message = "Getting command errors"
+    [LoggerMessage(EventId = 113416, Level = LogLevel.Debug, Message = "Getting command errors"
 )]
     private partial void LogGettingCommandErrors();
 
-    [LoggerMessage(EventId = 113217, Level = LogLevel.Warning, Message = "Failed → get command errors: {Error}"
+    [LoggerMessage(EventId = 113417, Level = LogLevel.Warning, Message = "Failed → get command errors: {Error}"
 )]
     private partial void LogFailedToGetCommandErrors(string? error);
 
-    [LoggerMessage(EventId = 113218, Level = LogLevel.Error, Message = "Error getting command errors"
+    [LoggerMessage(EventId = 113418, Level = LogLevel.Error, Message = "Error getting command errors"
 )]
     private partial void LogErrorGettingCommandErrors(Exception exception);
 

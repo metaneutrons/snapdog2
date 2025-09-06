@@ -73,11 +73,11 @@ public partial class PlayCommandHandler(IZoneManager zoneManager, ILogger<PlayCo
         return result;
     }
 
-    [LoggerMessage(EventId = 113400, Level = LogLevel.Information, Message = "Starting playback for Zone {ZoneIndex} from {Source}"
+    [LoggerMessage(EventId = 114800, Level = LogLevel.Information, Message = "Starting playback for Zone {ZoneIndex} from {Source}"
 )]
     private partial void LogStartingPlayback(int zoneIndex, CommandSource source);
 
-    [LoggerMessage(EventId = 113401, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
+    [LoggerMessage(EventId = 114801, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
 )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
@@ -118,11 +118,11 @@ public partial class PauseCommandHandler(IZoneManager zoneManager, ILogger<Pause
         return result;
     }
 
-    [LoggerMessage(EventId = 113402, Level = LogLevel.Information, Message = "Pausing playback for Zone {ZoneIndex} from {Source}"
+    [LoggerMessage(EventId = 114802, Level = LogLevel.Information, Message = "Pausing playback for Zone {ZoneIndex} from {Source}"
 )]
     private partial void LogPausingPlayback(int zoneIndex, CommandSource source);
 
-    [LoggerMessage(EventId = 113403, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
+    [LoggerMessage(EventId = 114803, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
 )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
@@ -151,11 +151,11 @@ public partial class StopCommandHandler(IZoneManager zoneManager, ILogger<StopCo
         return await zone.StopAsync().ConfigureAwait(false);
     }
 
-    [LoggerMessage(EventId = 113404, Level = LogLevel.Information, Message = "Stopping playback for Zone {ZoneIndex} from {Source}"
+    [LoggerMessage(EventId = 114804, Level = LogLevel.Information, Message = "Stopping playback for Zone {ZoneIndex} from {Source}"
 )]
     private partial void LogStoppingPlayback(int zoneIndex, CommandSource source);
 
-    [LoggerMessage(EventId = 113405, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
+    [LoggerMessage(EventId = 114805, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
 )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
@@ -184,11 +184,11 @@ public partial class SetZoneVolumeCommandHandler(IZoneManager zoneManager, ILogg
         return await zone.SetVolumeAsync(request.Volume).ConfigureAwait(false);
     }
 
-    [LoggerMessage(EventId = 113406, Level = LogLevel.Information, Message = "Setting volume for Zone {ZoneIndex} → {Volume} from {Source}"
+    [LoggerMessage(EventId = 114806, Level = LogLevel.Information, Message = "Setting volume for Zone {ZoneIndex} → {Volume} from {Source}"
 )]
     private partial void LogSettingVolume(int zoneIndex, int volume, CommandSource source);
 
-    [LoggerMessage(EventId = 113407, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
+    [LoggerMessage(EventId = 114807, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
 )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
@@ -217,11 +217,11 @@ public partial class VolumeUpCommandHandler(IZoneManager zoneManager, ILogger<Vo
         return await zone.VolumeUpAsync(request.Step).ConfigureAwait(false);
     }
 
-    [LoggerMessage(EventId = 113408, Level = LogLevel.Information, Message = "Increasing volume for Zone {ZoneIndex} by {Step} from {Source}"
+    [LoggerMessage(EventId = 114808, Level = LogLevel.Information, Message = "Increasing volume for Zone {ZoneIndex} by {Step} from {Source}"
 )]
     private partial void LogIncreasingVolume(int zoneIndex, int step, CommandSource source);
 
-    [LoggerMessage(EventId = 113409, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
+    [LoggerMessage(EventId = 114809, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
 )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
@@ -250,11 +250,11 @@ public partial class VolumeDownCommandHandler(IZoneManager zoneManager, ILogger<
         return await zone.VolumeDownAsync(request.Step).ConfigureAwait(false);
     }
 
-    [LoggerMessage(EventId = 113410, Level = LogLevel.Information, Message = "Decreasing volume for Zone {ZoneIndex} by {Step} from {Source}"
+    [LoggerMessage(EventId = 114810, Level = LogLevel.Information, Message = "Decreasing volume for Zone {ZoneIndex} by {Step} from {Source}"
 )]
     private partial void LogDecreasingVolume(int zoneIndex, int step, CommandSource source);
 
-    [LoggerMessage(EventId = 113411, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
+    [LoggerMessage(EventId = 114811, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
 )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
@@ -283,11 +283,11 @@ public partial class SetZoneMuteCommandHandler(IZoneManager zoneManager, ILogger
         return await zone.SetMuteAsync(request.Enabled).ConfigureAwait(false);
     }
 
-    [LoggerMessage(EventId = 113412, Level = LogLevel.Information, Message = "Setting mute for Zone {ZoneIndex} → {Enabled} from {Source}"
+    [LoggerMessage(EventId = 114812, Level = LogLevel.Information, Message = "Setting mute for Zone {ZoneIndex} → {Enabled} from {Source}"
 )]
     private partial void LogSettingMute(int zoneIndex, bool enabled, CommandSource source);
 
-    [LoggerMessage(EventId = 113413, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
+    [LoggerMessage(EventId = 114813, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
 )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
@@ -318,11 +318,11 @@ public partial class ToggleZoneMuteCommandHandler(
         return await zone.ToggleMuteAsync().ConfigureAwait(false);
     }
 
-    [LoggerMessage(EventId = 113414, Level = LogLevel.Information, Message = "Toggling mute for Zone {ZoneIndex} from {Source}"
+    [LoggerMessage(EventId = 114814, Level = LogLevel.Information, Message = "Toggling mute for Zone {ZoneIndex} from {Source}"
 )]
     private partial void LogTogglingMute(int zoneIndex, CommandSource source);
 
-    [LoggerMessage(EventId = 113415, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
+    [LoggerMessage(EventId = 114815, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
 )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
@@ -351,11 +351,11 @@ public partial class SetTrackCommandHandler(IZoneManager zoneManager, ILogger<Se
         return await zone.SetTrackAsync(request.TrackIndex).ConfigureAwait(false);
     }
 
-    [LoggerMessage(EventId = 113416, Level = LogLevel.Information, Message = "Setting track for Zone {ZoneIndex} → {TrackIndex} from {Source}"
+    [LoggerMessage(EventId = 114816, Level = LogLevel.Information, Message = "Setting track for Zone {ZoneIndex} → {TrackIndex} from {Source}"
 )]
     private partial void LogSettingTrack(int zoneIndex, int trackIndex, CommandSource source);
 
-    [LoggerMessage(EventId = 113417, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
+    [LoggerMessage(EventId = 114817, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
 )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
@@ -384,11 +384,11 @@ public partial class NextTrackCommandHandler(IZoneManager zoneManager, ILogger<N
         return await zone.NextTrackAsync().ConfigureAwait(false);
     }
 
-    [LoggerMessage(EventId = 113418, Level = LogLevel.Information, Message = "Playing next track for Zone {ZoneIndex} from {Source}"
+    [LoggerMessage(EventId = 114818, Level = LogLevel.Information, Message = "Playing next track for Zone {ZoneIndex} from {Source}"
 )]
     private partial void LogPlayingNextTrack(int zoneIndex, CommandSource source);
 
-    [LoggerMessage(EventId = 113419, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
+    [LoggerMessage(EventId = 114819, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
 )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
@@ -417,11 +417,11 @@ public partial class PreviousTrackCommandHandler(IZoneManager zoneManager, ILogg
         return await zone.PreviousTrackAsync().ConfigureAwait(false);
     }
 
-    [LoggerMessage(EventId = 113420, Level = LogLevel.Information, Message = "Playing previous track for Zone {ZoneIndex} from {Source}"
+    [LoggerMessage(EventId = 114820, Level = LogLevel.Information, Message = "Playing previous track for Zone {ZoneIndex} from {Source}"
 )]
     private partial void LogPlayingPreviousTrack(int zoneIndex, CommandSource source);
 
-    [LoggerMessage(EventId = 113421, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
+    [LoggerMessage(EventId = 114821, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
 )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
@@ -451,11 +451,11 @@ public partial class SetPlaylistCommandHandler(IZoneManager zoneManager, ILogger
         return await zone.SetPlaylistAsync(request.PlaylistIndex).ConfigureAwait(false);
     }
 
-    [LoggerMessage(EventId = 113422, Level = LogLevel.Information, Message = "Setting playlist for Zone {ZoneIndex} from {Source}"
+    [LoggerMessage(EventId = 114822, Level = LogLevel.Information, Message = "Setting playlist for Zone {ZoneIndex} from {Source}"
 )]
     private partial void LogSettingPlaylist(int zoneIndex, CommandSource source);
 
-    [LoggerMessage(EventId = 113423, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
+    [LoggerMessage(EventId = 114823, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
 )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
@@ -484,11 +484,11 @@ public partial class NextPlaylistCommandHandler(IZoneManager zoneManager, ILogge
         return await zone.NextPlaylistAsync().ConfigureAwait(false);
     }
 
-    [LoggerMessage(EventId = 113424, Level = LogLevel.Information, Message = "Playing next playlist for Zone {ZoneIndex} from {Source}"
+    [LoggerMessage(EventId = 114824, Level = LogLevel.Information, Message = "Playing next playlist for Zone {ZoneIndex} from {Source}"
 )]
     private partial void LogPlayingNextPlaylist(int zoneIndex, CommandSource source);
 
-    [LoggerMessage(EventId = 113425, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
+    [LoggerMessage(EventId = 114825, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
 )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
@@ -519,11 +519,11 @@ public partial class PreviousPlaylistCommandHandler(
         return await zone.PreviousPlaylistAsync().ConfigureAwait(false);
     }
 
-    [LoggerMessage(EventId = 113426, Level = LogLevel.Information, Message = "Playing previous playlist for Zone {ZoneIndex} from {Source}"
+    [LoggerMessage(EventId = 114826, Level = LogLevel.Information, Message = "Playing previous playlist for Zone {ZoneIndex} from {Source}"
 )]
     private partial void LogPlayingPreviousPlaylist(int zoneIndex, CommandSource source);
 
-    [LoggerMessage(EventId = 113427, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
+    [LoggerMessage(EventId = 114827, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
 )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
@@ -554,11 +554,11 @@ public partial class SetTrackRepeatCommandHandler(
         return await zone.SetTrackRepeatAsync(request.Enabled).ConfigureAwait(false);
     }
 
-    [LoggerMessage(EventId = 113428, Level = LogLevel.Information, Message = "Setting track repeat for Zone {ZoneIndex} → {Enabled} from {Source}"
+    [LoggerMessage(EventId = 114828, Level = LogLevel.Information, Message = "Setting track repeat for Zone {ZoneIndex} → {Enabled} from {Source}"
 )]
     private partial void LogSettingTrackRepeat(int zoneIndex, bool enabled, CommandSource source);
 
-    [LoggerMessage(EventId = 113429, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
+    [LoggerMessage(EventId = 114829, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
 )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
@@ -606,11 +606,11 @@ public partial class ToggleTrackRepeatCommandHandler(
         return result;
     }
 
-    [LoggerMessage(EventId = 113430, Level = LogLevel.Information, Message = "Toggling track repeat for Zone {ZoneIndex} from {Source}"
+    [LoggerMessage(EventId = 114830, Level = LogLevel.Information, Message = "Toggling track repeat for Zone {ZoneIndex} from {Source}"
 )]
     private partial void LogTogglingTrackRepeat(int zoneIndex, CommandSource source);
 
-    [LoggerMessage(EventId = 113431, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
+    [LoggerMessage(EventId = 114831, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
 )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
@@ -641,7 +641,7 @@ public partial class SetPlaylistShuffleCommandHandler(
         return await zone.SetPlaylistShuffleAsync(request.Enabled).ConfigureAwait(false);
     }
 
-    [LoggerMessage(EventId = 113432, Level = LogLevel.Information, Message = "Setting playlist shuffle for Zone {ZoneIndex} → {Enabled} from {Source}"
+    [LoggerMessage(EventId = 114832, Level = LogLevel.Information, Message = "Setting playlist shuffle for Zone {ZoneIndex} → {Enabled} from {Source}"
 )]
     private partial void LogSettingPlaylistShuffle(
         int zoneIndex,
@@ -649,7 +649,7 @@ public partial class SetPlaylistShuffleCommandHandler(
         CommandSource source
     );
 
-    [LoggerMessage(EventId = 113433, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
+    [LoggerMessage(EventId = 114833, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
 )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
@@ -697,11 +697,11 @@ public partial class TogglePlaylistShuffleCommandHandler(
         return result;
     }
 
-    [LoggerMessage(EventId = 113434, Level = LogLevel.Information, Message = "Toggling playlist shuffle for Zone {ZoneIndex} from {Source}"
+    [LoggerMessage(EventId = 114834, Level = LogLevel.Information, Message = "Toggling playlist shuffle for Zone {ZoneIndex} from {Source}"
 )]
     private partial void LogTogglingPlaylistShuffle(int zoneIndex, CommandSource source);
 
-    [LoggerMessage(EventId = 113435, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
+    [LoggerMessage(EventId = 114835, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
 )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
@@ -732,7 +732,7 @@ public partial class SetPlaylistRepeatCommandHandler(
         return await zone.SetPlaylistRepeatAsync(request.Enabled).ConfigureAwait(false);
     }
 
-    [LoggerMessage(EventId = 113436, Level = LogLevel.Information, Message = "Setting playlist repeat for Zone {ZoneIndex} → {Enabled} from {Source}"
+    [LoggerMessage(EventId = 114836, Level = LogLevel.Information, Message = "Setting playlist repeat for Zone {ZoneIndex} → {Enabled} from {Source}"
 )]
     private partial void LogSettingPlaylistRepeat(
         int zoneIndex,
@@ -740,7 +740,7 @@ public partial class SetPlaylistRepeatCommandHandler(
         CommandSource source
     );
 
-    [LoggerMessage(EventId = 113437, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
+    [LoggerMessage(EventId = 114837, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
 )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
@@ -788,11 +788,11 @@ public partial class TogglePlaylistRepeatCommandHandler(
         return result;
     }
 
-    [LoggerMessage(EventId = 113438, Level = LogLevel.Information, Message = "Toggling playlist repeat for Zone {ZoneIndex} from {Source}"
+    [LoggerMessage(EventId = 114838, Level = LogLevel.Information, Message = "Toggling playlist repeat for Zone {ZoneIndex} from {Source}"
 )]
     private partial void LogTogglingPlaylistRepeat(int zoneIndex, CommandSource source);
 
-    [LoggerMessage(EventId = 113439, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
+    [LoggerMessage(EventId = 114839, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
 )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
@@ -821,11 +821,11 @@ public partial class SeekPositionCommandHandler(IZoneManager zoneManager, ILogge
         return await zone.SeekToPositionAsync(request.PositionMs).ConfigureAwait(false);
     }
 
-    [LoggerMessage(EventId = 113440, Level = LogLevel.Information, Message = "Seeking Zone {ZoneIndex} → position {PositionMs}ms from {Source}"
+    [LoggerMessage(EventId = 114840, Level = LogLevel.Information, Message = "Seeking Zone {ZoneIndex} → position {PositionMs}ms from {Source}"
 )]
     private partial void LogSeekingToPosition(int zoneIndex, long positionMs, CommandSource source);
 
-    [LoggerMessage(EventId = 113441, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
+    [LoggerMessage(EventId = 114841, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
 )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
@@ -854,11 +854,11 @@ public partial class SeekProgressCommandHandler(IZoneManager zoneManager, ILogge
         return await zone.SeekToProgressAsync(request.Progress).ConfigureAwait(false);
     }
 
-    [LoggerMessage(EventId = 113442, Level = LogLevel.Information, Message = "Seeking Zone {ZoneIndex} → progress {Progress:P1} from {Source}"
+    [LoggerMessage(EventId = 114842, Level = LogLevel.Information, Message = "Seeking Zone {ZoneIndex} → progress {Progress:P1} from {Source}"
 )]
     private partial void LogSeekingToProgress(int zoneIndex, float progress, CommandSource source);
 
-    [LoggerMessage(EventId = 113443, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
+    [LoggerMessage(EventId = 114843, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
 )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
@@ -895,7 +895,7 @@ public partial class PlayTrackByIndexCommandHandler(
         return await zone.PlayAsync().ConfigureAwait(false);
     }
 
-    [LoggerMessage(EventId = 113444, Level = LogLevel.Information, Message = "Playing track {TrackIndex} for Zone {ZoneIndex} from {Source}"
+    [LoggerMessage(EventId = 114844, Level = LogLevel.Information, Message = "Playing track {TrackIndex} for Zone {ZoneIndex} from {Source}"
 )]
     private partial void LogPlayingTrackByIndex(
         int zoneIndex,
@@ -903,7 +903,7 @@ public partial class PlayTrackByIndexCommandHandler(
         CommandSource source
     );
 
-    [LoggerMessage(EventId = 113445, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
+    [LoggerMessage(EventId = 114845, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
 )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
@@ -932,11 +932,11 @@ public partial class PlayUrlCommandHandler(IZoneManager zoneManager, ILogger<Pla
         return await zone.PlayUrlAsync(request.Url).ConfigureAwait(false);
     }
 
-    [LoggerMessage(EventId = 113446, Level = LogLevel.Information, Message = "Playing URL '{Url}' for Zone {ZoneIndex} from {Source}"
+    [LoggerMessage(EventId = 114846, Level = LogLevel.Information, Message = "Playing URL '{Url}' for Zone {ZoneIndex} from {Source}"
 )]
     private partial void LogPlayingUrl(int zoneIndex, string url, CommandSource source);
 
-    [LoggerMessage(EventId = 113447, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
+    [LoggerMessage(EventId = 114847, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
 )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }
@@ -983,7 +983,7 @@ public partial class PlayTrackFromPlaylistCommandHandler(
         return await zone.PlayAsync().ConfigureAwait(false);
     }
 
-    [LoggerMessage(EventId = 113448, Level = LogLevel.Information, Message = "Playing track {TrackIndex} from playlist {PlaylistIndex} for Zone {ZoneIndex} from {Source}"
+    [LoggerMessage(EventId = 114848, Level = LogLevel.Information, Message = "Playing track {TrackIndex} from playlist {PlaylistIndex} for Zone {ZoneIndex} from {Source}"
 )]
     private partial void LogPlayingTrackFromPlaylist(
         int zoneIndex,
@@ -992,7 +992,7 @@ public partial class PlayTrackFromPlaylistCommandHandler(
         CommandSource source
     );
 
-    [LoggerMessage(EventId = 113449, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
+    [LoggerMessage(EventId = 114849, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for {CommandName}"
 )]
     private partial void LogZoneNotFound(int zoneIndex, string commandName);
 }

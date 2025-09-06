@@ -30,11 +30,11 @@ public partial class ClientVolumeUpCommandHandler(
     private readonly IClientManager _clientManager = clientManager;
     private readonly ILogger<ClientVolumeUpCommandHandler> _logger = logger;
 
-    [LoggerMessage(EventId = 112100, Level = LogLevel.Information, Message = "Increasing volume for Client {ClientIndex} by {Step} from {Source}"
+    [LoggerMessage(EventId = 112200, Level = LogLevel.Information, Message = "Increasing volume for Client {ClientIndex} by {Step} from {Source}"
 )]
     private partial void LogHandling(int clientIndex, int step, CommandSource source);
 
-    [LoggerMessage(EventId = 112101, Level = LogLevel.Warning, Message = "Client {ClientIndex} not found for ClientVolumeUpCommand"
+    [LoggerMessage(EventId = 112201, Level = LogLevel.Warning, Message = "Client {ClientIndex} not found for ClientVolumeUpCommand"
 )]
     private partial void LogClientNotFound(int clientIndex);
 

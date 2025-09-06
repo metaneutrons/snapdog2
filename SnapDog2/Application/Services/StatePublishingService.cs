@@ -45,59 +45,59 @@ public partial class StatePublishingService(
 
     #region Logging
 
-    [LoggerMessage(EventId = 111100, Level = LogLevel.Information, Message = "🚀 Starting initial state publishing for all integrations..."
+    [LoggerMessage(EventId = 111200, Level = LogLevel.Information, Message = "Starting initial state publishing for all integrations..."
 )]
     private partial void LogStatePublishingStarted();
 
-    [LoggerMessage(EventId = 111101, Level = LogLevel.Information, Message = "📊 Publishing global system state..."
+    [LoggerMessage(EventId = 111201, Level = LogLevel.Information, Message = "Publishing global system state..."
 )]
     private partial void LogPublishingGlobalState();
 
-    [LoggerMessage(EventId = 111102, Level = LogLevel.Information, Message = "🎵 Publishing initial state for {ZoneCount} zones..."
+    [LoggerMessage(EventId = 111202, Level = LogLevel.Information, Message = "Publishing initial state for {ZoneCount} zones..."
 )]
     private partial void LogPublishingZoneStates(int zoneCount);
 
-    [LoggerMessage(EventId = 111103, Level = LogLevel.Information, Message = "📱 Publishing initial state for {ClientCount} clients..."
+    [LoggerMessage(EventId = 111203, Level = LogLevel.Information, Message = "📱 Publishing initial state for {ClientCount} clients..."
 )]
     private partial void LogPublishingClientStates(int clientCount);
 
-    [LoggerMessage(EventId = 111104, Level = LogLevel.Information, Message = "✅ Zone {ZoneIndex} initial state published successfully"
+    [LoggerMessage(EventId = 111204, Level = LogLevel.Information, Message = "✅ Zone {ZoneIndex} initial state published successfully"
 )]
     private partial void LogZoneStatePublished(int zoneIndex);
 
-    [LoggerMessage(EventId = 111105, Level = LogLevel.Information, Message = "✅ Client {ClientIndex} initial state published successfully"
+    [LoggerMessage(EventId = 111205, Level = LogLevel.Information, Message = "✅ Client {ClientIndex} initial state published successfully"
 )]
     private partial void LogClientStatePublished(int clientIndex);
 
-    [LoggerMessage(EventId = 111106, Level = LogLevel.Information, Message = "✅ Global system state published successfully"
+    [LoggerMessage(EventId = 111206, Level = LogLevel.Information, Message = "✅ Global system state published successfully"
 )]
     private partial void LogGlobalStatePublished();
 
-    [LoggerMessage(EventId = 111107, Level = LogLevel.Warning, Message = "⚠️ Failed → publish zone {ZoneIndex} state: {ErrorMessage}"
+    [LoggerMessage(EventId = 111207, Level = LogLevel.Warning, Message = "⚠️ Failed → publish zone {ZoneIndex} state: {ErrorMessage}"
 )]
     private partial void LogZoneStatePublishFailed(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 111108, Level = LogLevel.Warning, Message = "⚠️ Failed → publish client {ClientIndex} state: {ErrorMessage}"
+    [LoggerMessage(EventId = 111208, Level = LogLevel.Warning, Message = "⚠️ Failed → publish client {ClientIndex} state: {ErrorMessage}"
 )]
     private partial void LogClientStatePublishFailed(int clientIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 111109, Level = LogLevel.Warning, Message = "⚠️ Failed → publish global state: {ErrorMessage}"
+    [LoggerMessage(EventId = 111209, Level = LogLevel.Warning, Message = "⚠️ Failed → publish global state: {ErrorMessage}"
 )]
     private partial void LogGlobalStatePublishFailed(string errorMessage);
 
-    [LoggerMessage(EventId = 111110, Level = LogLevel.Information, Message = "✅ Initial state publishing completed successfully"
+    [LoggerMessage(EventId = 111210, Level = LogLevel.Information, Message = "✅ Initial state publishing completed successfully"
 )]
     private partial void LogStatePublishingCompleted();
 
-    [LoggerMessage(EventId = 111111, Level = LogLevel.Warning, Message = "⚠️ State publishing completed with some failures"
+    [LoggerMessage(EventId = 111211, Level = LogLevel.Warning, Message = "⚠️ State publishing completed with some failures"
 )]
     private partial void LogStatePublishingCompletedWithFailures();
 
-    [LoggerMessage(EventId = 111112, Level = LogLevel.Information, Message = "📴 No integration services available - skipping state publishing"
+    [LoggerMessage(EventId = 111212, Level = LogLevel.Information, Message = "📴 No integration services available - skipping state publishing"
 )]
     private partial void LogNoIntegrationServices();
 
-    [LoggerMessage(EventId = 111113, Level = LogLevel.Error, Message = "❌ Critical error during state publishing: {ErrorMessage}"
+    [LoggerMessage(EventId = 111213, Level = LogLevel.Error, Message = "❌ Critical error during state publishing: {ErrorMessage}"
 )]
     private partial void LogCriticalError(string errorMessage, Exception ex);
 

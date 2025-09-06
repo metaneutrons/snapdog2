@@ -68,11 +68,11 @@ public partial class ValidationQueryBehavior<TQuery, TResponse>(
         return await next().ConfigureAwait(false);
     }
 
-    [LoggerMessage(EventId = 114100, Level = LogLevel.Debug, Message = "Validating query {QueryName}"
+    [LoggerMessage(EventId = 114200, Level = LogLevel.Debug, Message = "Validating query {QueryName}"
 )]
     private partial void LogValidatingQuery(string queryName);
 
-    [LoggerMessage(EventId = 114101, Level = LogLevel.Warning, Message = "Validation failed for query {QueryName} with {FailureCount} errors"
+    [LoggerMessage(EventId = 114201, Level = LogLevel.Warning, Message = "Validation failed for query {QueryName} with {FailureCount} errors"
 )]
     private partial void LogValidationFailed(string queryName, int failureCount);
 }

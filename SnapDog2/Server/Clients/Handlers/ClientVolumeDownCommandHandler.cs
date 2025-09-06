@@ -30,11 +30,11 @@ public partial class ClientVolumeDownCommandHandler(
     private readonly IClientManager _clientManager = clientManager;
     private readonly ILogger<ClientVolumeDownCommandHandler> _logger = logger;
 
-    [LoggerMessage(EventId = 112050, Level = LogLevel.Information, Message = "Decreasing volume for Client {ClientIndex} by {Step} from {Source}"
+    [LoggerMessage(EventId = 112100, Level = LogLevel.Information, Message = "Decreasing volume for Client {ClientIndex} by {Step} from {Source}"
 )]
     private partial void LogHandling(int clientIndex, int step, CommandSource source);
 
-    [LoggerMessage(EventId = 112051, Level = LogLevel.Warning, Message = "Client {ClientIndex} not found for ClientVolumeDownCommand"
+    [LoggerMessage(EventId = 112101, Level = LogLevel.Warning, Message = "Client {ClientIndex} not found for ClientVolumeDownCommand"
 )]
     private partial void LogClientNotFound(int clientIndex);
 

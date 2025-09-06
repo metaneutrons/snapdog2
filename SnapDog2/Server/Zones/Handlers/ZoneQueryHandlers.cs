@@ -28,11 +28,11 @@ public partial class GetAllZonesQueryHandler(IZoneManager zoneManager, ILogger<G
     private readonly IZoneManager _zoneManager = zoneManager;
     private readonly ILogger<GetAllZonesQueryHandler> _logger = logger;
 
-    [LoggerMessage(EventId = 113500, Level = LogLevel.Information, Message = "Handling GetAllZonesQuery"
+    [LoggerMessage(EventId = 115000, Level = LogLevel.Information, Message = "Handling GetAllZonesQuery"
 )]
     private partial void LogHandling();
 
-    [LoggerMessage(EventId = 113501, Level = LogLevel.Error, Message = "Error retrieving all zones: {ErrorMessage}"
+    [LoggerMessage(EventId = 115001, Level = LogLevel.Error, Message = "Error retrieving all zones: {ErrorMessage}"
 )]
     private partial void LogError(string errorMessage);
 
@@ -62,11 +62,11 @@ public partial class GetZoneStateQueryHandler(IZoneManager zoneManager, ILogger<
     private readonly IZoneManager _zoneManager = zoneManager;
     private readonly ILogger<GetZoneStateQueryHandler> _logger = logger;
 
-    [LoggerMessage(EventId = 113502, Level = LogLevel.Information, Message = "Handling GetZoneStateQuery for Zone {ZoneIndex}"
+    [LoggerMessage(EventId = 115002, Level = LogLevel.Information, Message = "Handling GetZoneStateQuery for Zone {ZoneIndex}"
 )]
     private partial void LogHandling(int zoneIndex);
 
-    [LoggerMessage(EventId = 113503, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for GetZoneStateQuery"
+    [LoggerMessage(EventId = 115003, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for GetZoneStateQuery"
 )]
     private partial void LogZoneNotFound(int zoneIndex);
 
@@ -96,11 +96,11 @@ public partial class GetAllZoneStatesQueryHandler(
     private readonly IZoneManager _zoneManager = zoneManager;
     private readonly ILogger<GetAllZoneStatesQueryHandler> _logger = logger;
 
-    [LoggerMessage(EventId = 113504, Level = LogLevel.Information, Message = "Handling GetAllZoneStatesQuery"
+    [LoggerMessage(EventId = 115004, Level = LogLevel.Information, Message = "Handling GetAllZoneStatesQuery"
 )]
     private partial void LogHandling();
 
-    [LoggerMessage(EventId = 113505, Level = LogLevel.Error, Message = "Error retrieving all zone states: {ErrorMessage}"
+    [LoggerMessage(EventId = 115005, Level = LogLevel.Error, Message = "Error retrieving all zone states: {ErrorMessage}"
 )]
     private partial void LogError(string errorMessage);
 
@@ -142,11 +142,11 @@ public partial class GetZonePlaybackStateQueryHandler(
     private readonly IZoneManager _zoneManager = zoneManager;
     private readonly ILogger<GetZonePlaybackStateQueryHandler> _logger = logger;
 
-    [LoggerMessage(EventId = 113506, Level = LogLevel.Information, Message = "Handling GetZonePlaybackStateQuery for Zone {ZoneIndex}"
+    [LoggerMessage(EventId = 115006, Level = LogLevel.Information, Message = "Handling GetZonePlaybackStateQuery for Zone {ZoneIndex}"
 )]
     private partial void LogHandling(int zoneIndex);
 
-    [LoggerMessage(EventId = 113507, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for GetZonePlaybackStateQuery"
+    [LoggerMessage(EventId = 115007, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for GetZonePlaybackStateQuery"
 )]
     private partial void LogZoneNotFound(int zoneIndex);
 
@@ -190,11 +190,11 @@ public partial class GetZoneVolumeQueryHandler(IZoneManager zoneManager, IClient
     private readonly IClientManager _clientManager = clientManager;
     private readonly ILogger<GetZoneVolumeQueryHandler> _logger = logger;
 
-    [LoggerMessage(EventId = 113508, Level = LogLevel.Information, Message = "Handling GetZoneVolumeQuery for Zone {ZoneIndex}"
+    [LoggerMessage(EventId = 115008, Level = LogLevel.Information, Message = "Handling GetZoneVolumeQuery for Zone {ZoneIndex}"
 )]
     private partial void LogHandling(int zoneIndex);
 
-    [LoggerMessage(EventId = 113509, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for GetZoneVolumeQuery"
+    [LoggerMessage(EventId = 115009, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for GetZoneVolumeQuery"
 )]
     private partial void LogZoneNotFound(int zoneIndex);
 
@@ -246,11 +246,11 @@ public partial class GetZoneTrackInfoQueryHandler(
     private readonly IZoneManager _zoneManager = zoneManager;
     private readonly ILogger<GetZoneTrackInfoQueryHandler> _logger = logger;
 
-    [LoggerMessage(EventId = 113510, Level = LogLevel.Information, Message = "Handling GetZoneTrackInfoQuery for Zone {ZoneIndex}"
+    [LoggerMessage(EventId = 115010, Level = LogLevel.Information, Message = "Handling GetZoneTrackInfoQuery for Zone {ZoneIndex}"
 )]
     private partial void LogHandling(int zoneIndex);
 
-    [LoggerMessage(EventId = 113511, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for GetZoneTrackInfoQuery"
+    [LoggerMessage(EventId = 115011, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for GetZoneTrackInfoQuery"
 )]
     private partial void LogZoneNotFound(int zoneIndex);
 
@@ -294,11 +294,11 @@ public partial class GetZonePlaylistInfoQueryHandler(
     private readonly IZoneManager _zoneManager = zoneManager;
     private readonly ILogger<GetZonePlaylistInfoQueryHandler> _logger = logger;
 
-    [LoggerMessage(EventId = 113512, Level = LogLevel.Information, Message = "Handling GetZonePlaylistInfoQuery for Zone {ZoneIndex}"
+    [LoggerMessage(EventId = 115012, Level = LogLevel.Information, Message = "Handling GetZonePlaylistInfoQuery for Zone {ZoneIndex}"
 )]
     private partial void LogHandling(int zoneIndex);
 
-    [LoggerMessage(EventId = 113513, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for GetZonePlaylistInfoQuery"
+    [LoggerMessage(EventId = 115013, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for GetZonePlaylistInfoQuery"
 )]
     private partial void LogZoneNotFound(int zoneIndex);
 
@@ -345,11 +345,11 @@ public partial class GetAllPlaylistsQueryHandler(
     private readonly IPlaylistManager _playlistManager = playlistManager;
     private readonly ILogger<GetAllPlaylistsQueryHandler> _logger = logger;
 
-    [LoggerMessage(EventId = 113514, Level = LogLevel.Information, Message = "Handling GetAllPlaylistsQuery"
+    [LoggerMessage(EventId = 115014, Level = LogLevel.Information, Message = "Handling GetAllPlaylistsQuery"
 )]
     private partial void LogHandling();
 
-    [LoggerMessage(EventId = 113515, Level = LogLevel.Error, Message = "Error retrieving all playlists: {ErrorMessage}"
+    [LoggerMessage(EventId = 115015, Level = LogLevel.Error, Message = "Error retrieving all playlists: {ErrorMessage}"
 )]
     private partial void LogError(string errorMessage);
 
@@ -384,15 +384,15 @@ public partial class GetPlaylistTracksQueryHandler(
     private readonly IPlaylistManager _playlistManager = playlistManager;
     private readonly ILogger<GetPlaylistTracksQueryHandler> _logger = logger;
 
-    [LoggerMessage(EventId = 113516, Level = LogLevel.Information, Message = "Handling GetPlaylistTracksQuery for PlaylistIndex: {PlaylistIndex}"
+    [LoggerMessage(EventId = 115016, Level = LogLevel.Information, Message = "Handling GetPlaylistTracksQuery for PlaylistIndex: {PlaylistIndex}"
 )]
     private partial void LogHandling(int playlistIndex);
 
-    [LoggerMessage(EventId = 113517, Level = LogLevel.Warning, Message = "PlaylistIndex is required for GetPlaylistTracksQuery"
+    [LoggerMessage(EventId = 115017, Level = LogLevel.Warning, Message = "PlaylistIndex is required for GetPlaylistTracksQuery"
 )]
     private partial void LogMissingParameters();
 
-    [LoggerMessage(EventId = 113518, Level = LogLevel.Error, Message = "Error retrieving playlist tracks: {ErrorMessage}"
+    [LoggerMessage(EventId = 115018, Level = LogLevel.Error, Message = "Error retrieving playlist tracks: {ErrorMessage}"
 )]
     private partial void LogError(string errorMessage);
 

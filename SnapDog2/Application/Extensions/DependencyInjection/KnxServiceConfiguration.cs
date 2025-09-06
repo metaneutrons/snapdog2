@@ -213,19 +213,19 @@ public static partial class KnxServiceConfiguration
         }
     }
 
-    [LoggerMessage(EventId = 114150, Level = LogLevel.Information, Message = "KNX service is disabled in configuration - skipping registration"
+    [LoggerMessage(EventId = 114300, Level = LogLevel.Information, Message = "KNX service is disabled in configuration - skipping registration"
 )]
     private static partial void LogKnxServiceDisabled(ILogger logger);
 
-    [LoggerMessage(EventId = 114151, Level = LogLevel.Error, Message = "KNX configuration validation failed: {Errors}"
+    [LoggerMessage(EventId = 114301, Level = LogLevel.Error, Message = "KNX configuration validation failed: {Errors}"
 )]
     private static partial void LogKnxConfigurationValidationFailed(ILogger logger, string errors);
 
-    [LoggerMessage(EventId = 114152, Level = LogLevel.Information, Message = "Registering KNX service with {ConnectionType} connection"
+    [LoggerMessage(EventId = 114302, Level = LogLevel.Information, Message = "Registering KNX service with {ConnectionType} connection"
 )]
     private static partial void LogKnxServiceRegistering(ILogger logger, string connectionType);
 
-    [LoggerMessage(EventId = 114153, Level = LogLevel.Information, Message = "KNX {ConnectionType}: {Gateway}:{Port}"
+    [LoggerMessage(EventId = 114303, Level = LogLevel.Information, Message = "KNX {ConnectionType}: {Gateway}:{Port}"
 )]
     private static partial void LogKnxConnectionDetails(
         ILogger logger,
@@ -234,7 +234,7 @@ public static partial class KnxServiceConfiguration
         int port
     );
 
-    [LoggerMessage(EventId = 114154, Level = LogLevel.Information, Message = "KNX integration configured for {ZoneCount} zones and {ClientCount} clients"
+    [LoggerMessage(EventId = 114304, Level = LogLevel.Information, Message = "KNX integration configured for {ZoneCount} zones and {ClientCount} clients"
 )]
     private static partial void LogKnxIntegrationConfigured(ILogger logger, int zoneCount, int clientCount);
 

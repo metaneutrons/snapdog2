@@ -208,15 +208,15 @@ public sealed partial class NotificationBackgroundService(
     }
 
     // LoggerMessage methods for high-performance logging
-    [LoggerMessage(EventId = 117000, Level = LogLevel.Information, Message = "Notification background service started"
+    [LoggerMessage(EventId = 17000, Level = LogLevel.Information, Message = "Notification background service started"
 )]
     private static partial void LogServiceStarted(ILogger logger);
 
-    [LoggerMessage(EventId = 117001, Level = LogLevel.Information, Message = "Notification background service stopped"
+    [LoggerMessage(EventId = 17001, Level = LogLevel.Information, Message = "Notification background service stopped"
 )]
     private static partial void LogServiceStopped(ILogger logger);
 
-    [LoggerMessage(EventId = 117002, Level = LogLevel.Error, Message = "Unhandled error processing notification {EventType} for {EntityType} {EntityId}"
+    [LoggerMessage(EventId = 17002, Level = LogLevel.Error, Message = "Unhandled error processing notification {EventType} for {EntityType} {EntityId}"
 )]
     private static partial void LogUnhandledError(
         ILogger logger,
@@ -226,7 +226,7 @@ public sealed partial class NotificationBackgroundService(
         string entityId
     );
 
-    [LoggerMessage(EventId = 117003, Level = LogLevel.Debug, Message = "Notification {EventType} for {EntityType} {EntityId} processed"
+    [LoggerMessage(EventId = 17003, Level = LogLevel.Debug, Message = "Notification {EventType} for {EntityType} {EntityId} processed"
 )]
     private static partial void LogNotificationProcessed(
         ILogger logger,
@@ -235,7 +235,7 @@ public sealed partial class NotificationBackgroundService(
         string entityId
     );
 
-    [LoggerMessage(EventId = 117004, Level = LogLevel.Error, Message = "Notification {EventType} for {EntityType} {EntityId} failed after {Attempts} attempts; dead-lettering"
+    [LoggerMessage(EventId = 17004, Level = LogLevel.Error, Message = "Notification {EventType} for {EntityType} {EntityId} failed after {Attempts} attempts; dead-lettering"
 )]
     private static partial void LogNotificationFailed(
         ILogger logger,
@@ -246,7 +246,7 @@ public sealed partial class NotificationBackgroundService(
         int attempts
     );
 
-    [LoggerMessage(EventId = 117005, Level = LogLevel.Warning, Message = "Retrying notification {EventType} for {EntityType} {EntityId} (attempt {Attempt}/{MaxAttempts}) after {Delay}ms"
+    [LoggerMessage(EventId = 17005, Level = LogLevel.Warning, Message = "Retrying notification {EventType} for {EntityType} {EntityId} (attempt {Attempt}/{MaxAttempts}) after {Delay}ms"
 )]
     private static partial void LogRetryingNotification(
         ILogger logger,

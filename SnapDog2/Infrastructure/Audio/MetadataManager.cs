@@ -197,15 +197,15 @@ public sealed partial class MetadataManager(ILogger<MetadataManager> logger)
     }
 
     // LoggerMessage methods for high-performance logging
-    [LoggerMessage(EventId = 116150, Level = LogLevel.Debug, Message = "Starting metadata extraction for media: {MediaMrl}"
+    [LoggerMessage(EventId = 116300, Level = LogLevel.Debug, Message = "Starting metadata extraction for media: {MediaMrl}"
 )]
     private static partial void LogStartingMetadataExtraction(ILogger logger, string mediaMrl);
 
-    [LoggerMessage(EventId = 116151, Level = LogLevel.Warning, Message = "Media parsing incomplete. Status: {ParseStatus}"
+    [LoggerMessage(EventId = 116301, Level = LogLevel.Warning, Message = "Media parsing incomplete. Status: {ParseStatus}"
 )]
     private static partial void LogMediaParsingIncomplete(ILogger logger, string parseStatus);
 
-    [LoggerMessage(EventId = 116152, Level = LogLevel.Debug, Message = "Metadata extraction completed. Title: {Title}, Artist: {Artist}, Duration: {Duration}ms"
+    [LoggerMessage(EventId = 116302, Level = LogLevel.Debug, Message = "Metadata extraction completed. Title: {Title}, Artist: {Artist}, Duration: {Duration}ms"
 )]
     private static partial void LogMetadataExtractionCompleted(
         ILogger logger,
@@ -214,23 +214,23 @@ public sealed partial class MetadataManager(ILogger<MetadataManager> logger)
         long duration
     );
 
-    [LoggerMessage(EventId = 116153, Level = LogLevel.Error, Message = "Failed → extract metadata from media: {MediaMrl}"
+    [LoggerMessage(EventId = 116303, Level = LogLevel.Error, Message = "Failed → extract metadata from media: {MediaMrl}"
 )]
     private static partial void LogFailedToExtractMetadata(ILogger logger, Exception ex, string mediaMrl);
 
-    [LoggerMessage(EventId = 116154, Level = LogLevel.Debug, Message = "Metadata saved to: {FilePath}"
+    [LoggerMessage(EventId = 116304, Level = LogLevel.Debug, Message = "Metadata saved to: {FilePath}"
 )]
     private static partial void LogMetadataSaved(ILogger logger, string filePath);
 
-    [LoggerMessage(EventId = 116155, Level = LogLevel.Error, Message = "Failed → save metadata to: {FilePath}"
+    [LoggerMessage(EventId = 116305, Level = LogLevel.Error, Message = "Failed → save metadata to: {FilePath}"
 )]
     private static partial void LogFailedToSaveMetadata(ILogger logger, Exception ex, string filePath);
 
-    [LoggerMessage(EventId = 116156, Level = LogLevel.Warning, Message = "Failed → extract technical details from media"
+    [LoggerMessage(EventId = 116306, Level = LogLevel.Warning, Message = "Failed → extract technical details from media"
 )]
     private static partial void LogFailedToExtractTechnicalDetails(ILogger logger, Exception ex);
 
-    [LoggerMessage(EventId = 116157, Level = LogLevel.Debug, Message = "Retrying metadata extraction with minimal parsing for: {MediaUrl}"
+    [LoggerMessage(EventId = 116307, Level = LogLevel.Debug, Message = "Retrying metadata extraction with minimal parsing for: {MediaUrl}"
 )]
     private static partial void LogRetryingWithMinimalParsing(ILogger logger, string mediaUrl);
 }

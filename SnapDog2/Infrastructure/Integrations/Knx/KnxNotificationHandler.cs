@@ -46,15 +46,15 @@ public partial class KnxNotificationHandler(IKnxService knxService, ILogger<KnxN
         }
     }
 
-    [LoggerMessage(EventId = 115000, Level = LogLevel.Debug, Message = "KNX notification handler received: {StatusType} for target {TargetIndex} with value {Value}"
+    [LoggerMessage(EventId = 15000, Level = LogLevel.Debug, Message = "KNX notification handler received: {StatusType} for target {TargetIndex} with value {Value}"
 )]
     private partial void LogKnxNotificationReceived(string statusType, int targetIndex, string value);
 
-    [LoggerMessage(EventId = 115001, Level = LogLevel.Debug, Message = "✅ KNX notification forwarded: {StatusType} for target {TargetIndex}"
+    [LoggerMessage(EventId = 15001, Level = LogLevel.Debug, Message = "✅ KNX notification forwarded: {StatusType} for target {TargetIndex}"
 )]
     private partial void LogKnxNotificationForwarded(string statusType, int targetIndex);
 
-    [LoggerMessage(EventId = 115002, Level = LogLevel.Error, Message = "❌ KNX notification failed: {StatusType} for target {TargetIndex} - {Error}"
+    [LoggerMessage(EventId = 15002, Level = LogLevel.Error, Message = "❌ KNX notification failed: {StatusType} for target {TargetIndex} - {Error}"
 )]
     private partial void LogKnxNotificationFailed(string statusType, int targetIndex, string error);
 }

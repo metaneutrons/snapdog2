@@ -1633,55 +1633,55 @@ public partial class KnxService : IKnxService
 
     #region Logging
 
-    [LoggerMessage(EventId = 115050, Level = LogLevel.Debug, Message = "KNX service created with gateway: {Gateway}, port: {Port}, enabled: {Enabled}"
+    [LoggerMessage(EventId = 115100, Level = LogLevel.Debug, Message = "KNX service created with gateway: {Gateway}, port: {Port}, enabled: {Enabled}"
 )]
     private partial void LogServiceCreated(string? gateway, int port, bool enabled);
 
-    [LoggerMessage(EventId = 115051, Level = LogLevel.Information, Message = "KNX service is disabled via configuration"
+    [LoggerMessage(EventId = 115101, Level = LogLevel.Information, Message = "KNX service is disabled via configuration"
 )]
     private partial void LogServiceDisabled();
 
-    [LoggerMessage(EventId = 115052, Level = LogLevel.Debug, Message = "KNX service already initialized"
+    [LoggerMessage(EventId = 115102, Level = LogLevel.Debug, Message = "KNX service already initialized"
 )]
     private partial void LogAlreadyInitialized();
 
-    [LoggerMessage(EventId = 115053, Level = LogLevel.Information, Message = "🚀 Starting KNX service initialization"
+    [LoggerMessage(EventId = 115103, Level = LogLevel.Information, Message = "Starting KNX service initialization"
 )]
     private partial void LogInitializationStarted();
 
-    [LoggerMessage(EventId = 115054, Level = LogLevel.Information, Message = "KNX service initialization completed successfully"
+    [LoggerMessage(EventId = 115104, Level = LogLevel.Information, Message = "KNX service initialization completed successfully"
 )]
     private partial void LogInitializationCompleted();
 
-    [LoggerMessage(EventId = 115055, Level = LogLevel.Error, Message = "KNX service initialization failed: {Error}"
+    [LoggerMessage(EventId = 115105, Level = LogLevel.Error, Message = "KNX service initialization failed: {Error}"
 )]
     private partial void LogInitializationFailed(string error);
 
-    [LoggerMessage(EventId = 115056, Level = LogLevel.Debug, Message = "Stopping KNX service"
+    [LoggerMessage(EventId = 115106, Level = LogLevel.Debug, Message = "Stopping KNX service"
 )]
     private partial void LogStoppingService();
 
-    [LoggerMessage(EventId = 115057, Level = LogLevel.Debug, Message = "KNX service stopped successfully"
+    [LoggerMessage(EventId = 115107, Level = LogLevel.Debug, Message = "KNX service stopped successfully"
 )]
     private partial void LogServiceStopped();
 
-    [LoggerMessage(EventId = 115058, Level = LogLevel.Warning, Message = "Error during KNX disconnection"
+    [LoggerMessage(EventId = 115108, Level = LogLevel.Warning, Message = "Error during KNX disconnection"
 )]
     private partial void LogDisconnectionError(Exception exception);
 
-    [LoggerMessage(EventId = 115059, Level = LogLevel.Information, Message = "KNX connection established → {Gateway}:{Port}"
+    [LoggerMessage(EventId = 115109, Level = LogLevel.Information, Message = "KNX connection established → {Gateway}:{Port}"
 )]
     private partial void LogConnectionEstablished(string gateway, int port);
 
-    [LoggerMessage(EventId = 115060, Level = LogLevel.Error, Message = "KNX connection error"
+    [LoggerMessage(EventId = 115110, Level = LogLevel.Error, Message = "KNX connection error"
 )]
     private partial void LogConnectionError(Exception exception);
 
-    [LoggerMessage(EventId = 115061, Level = LogLevel.Error, Message = "KNX connection error: {ErrorMessage}"
+    [LoggerMessage(EventId = 115111, Level = LogLevel.Error, Message = "KNX connection error: {ErrorMessage}"
 )]
     private partial void LogConnectionErrorMessage(string errorMessage);
 
-    [LoggerMessage(EventId = 115062, Level = LogLevel.Information, Message = "🚀 Attempting KNX connection → {Gateway}:{Port} (attempt {AttemptNumber}/{MaxAttempts}: {ErrorMessage})"
+    [LoggerMessage(EventId = 115112, Level = LogLevel.Information, Message = "Attempting KNX connection → {Gateway}:{Port} (attempt {AttemptNumber}/{MaxAttempts}: {ErrorMessage})"
 )]
     private partial void LogConnectionRetryAttempt(
         string gateway,
@@ -1691,131 +1691,131 @@ public partial class KnxService : IKnxService
         string errorMessage
     );
 
-    [LoggerMessage(EventId = 115063, Level = LogLevel.Debug, Message = "Using KNX IP tunneling connection → {Gateway}:{Port}"
+    [LoggerMessage(EventId = 115113, Level = LogLevel.Debug, Message = "Using KNX IP tunneling connection → {Gateway}:{Port}"
 )]
     private partial void LogUsingIpTunneling(string gateway, int port);
 
-    [LoggerMessage(EventId = 115064, Level = LogLevel.Debug, Message = "Using KNX IP routing connection → {Gateway}"
+    [LoggerMessage(EventId = 115114, Level = LogLevel.Debug, Message = "Using KNX IP routing connection → {Gateway}"
 )]
     private partial void LogUsingIpRouting(string gateway);
 
-    [LoggerMessage(EventId = 115065, Level = LogLevel.Debug, Message = "Using KNX USB device: {Device}"
+    [LoggerMessage(EventId = 115115, Level = LogLevel.Debug, Message = "Using KNX USB device: {Device}"
 )]
     private partial void LogUsingUsbDevice(string device);
 
-    [LoggerMessage(EventId = 115066, Level = LogLevel.Error, Message = "Gateway address is required for {ConnectionType} connection"
+    [LoggerMessage(EventId = 115116, Level = LogLevel.Error, Message = "Gateway address is required for {ConnectionType} connection"
 )]
     private partial void LogGatewayRequired(string connectionType);
 
-    [LoggerMessage(EventId = 115067, Level = LogLevel.Warning, Message = "No KNX USB devices found"
+    [LoggerMessage(EventId = 115117, Level = LogLevel.Warning, Message = "No KNX USB devices found"
 )]
     private partial void LogNoUsbDevicesFound();
 
-    [LoggerMessage(EventId = 115068, Level = LogLevel.Error, Message = "Error creating KNX connector parameters"
+    [LoggerMessage(EventId = 115118, Level = LogLevel.Error, Message = "Error creating KNX connector parameters"
 )]
     private partial void LogConnectorParametersError(Exception exception);
 
-    [LoggerMessage(EventId = 115069, Level = LogLevel.Error, Message = "Failed → resolve multicast address '{MulticastAddress}' → IPv4 address"
+    [LoggerMessage(EventId = 115119, Level = LogLevel.Error, Message = "Failed → resolve multicast address '{MulticastAddress}' → IPv4 address"
 )]
     private partial void LogMulticastAddressResolutionFailed(string multicastAddress);
 
-    [LoggerMessage(EventId = 115070, Level = LogLevel.Error, Message = "Error resolving multicast address '{MulticastAddress}': {ErrorMessage}"
+    [LoggerMessage(EventId = 115120, Level = LogLevel.Error, Message = "Error resolving multicast address '{MulticastAddress}': {ErrorMessage}"
 )]
     private partial void LogMulticastAddressError(string multicastAddress, string errorMessage);
 
-    [LoggerMessage(EventId = 115071, Level = LogLevel.Debug, Message = "Using specific KNX USB device '{ConfiguredDevice}': {ActualDevice}"
+    [LoggerMessage(EventId = 115121, Level = LogLevel.Debug, Message = "Using specific KNX USB device '{ConfiguredDevice}': {ActualDevice}"
 )]
     private partial void LogUsingSpecificUsbDevice(string configuredDevice, string actualDevice);
 
-    [LoggerMessage(EventId = 115072, Level = LogLevel.Warning, Message = "Configured USB device '{ConfiguredDevice}' not found, using first available device"
+    [LoggerMessage(EventId = 115122, Level = LogLevel.Warning, Message = "Configured USB device '{ConfiguredDevice}' not found, using first available device"
 )]
     private partial void LogSpecificUsbDeviceNotFound(string configuredDevice);
 
-    [LoggerMessage(EventId = 115073, Level = LogLevel.Debug, Message = "KNX group value received: {GroupAddress} = {Value}"
+    [LoggerMessage(EventId = 115123, Level = LogLevel.Debug, Message = "KNX group value received: {GroupAddress} = {Value}"
 )]
     private partial void LogGroupValueReceived(string groupAddress, object value);
 
-    [LoggerMessage(EventId = 115074, Level = LogLevel.Debug, Message = "KNX command mapped: {GroupAddress} → {CommandType}"
+    [LoggerMessage(EventId = 115124, Level = LogLevel.Debug, Message = "KNX command mapped: {GroupAddress} → {CommandType}"
 )]
     private partial void LogCommandMapped(string groupAddress, string commandType);
 
-    [LoggerMessage(EventId = 115075, Level = LogLevel.Error, Message = "Error processing KNX group value from {GroupAddress}"
+    [LoggerMessage(EventId = 115125, Level = LogLevel.Error, Message = "Error processing KNX group value from {GroupAddress}"
 )]
     private partial void LogGroupValueProcessingError(string groupAddress, Exception exception);
 
-    [LoggerMessage(EventId = 115076, Level = LogLevel.Warning, Message = "KNX service not connected for operation: {Operation}"
+    [LoggerMessage(EventId = 115126, Level = LogLevel.Warning, Message = "KNX service not connected for operation: {Operation}"
 )]
     private partial void LogNotConnected(string operation);
 
-    [LoggerMessage(EventId = 115077, Level = LogLevel.Warning, Message = "No KNX group address found for status {StatusId} on target {TargetId}"
+    [LoggerMessage(EventId = 115127, Level = LogLevel.Warning, Message = "No KNX group address found for status {StatusId} on target {TargetId}"
 )]
     private partial void LogGroupAddressNotFound(string statusId, int targetId);
 
-    [LoggerMessage(EventId = 115078, Level = LogLevel.Error, Message = "Error sending KNX status {StatusId} → target {TargetId}"
+    [LoggerMessage(EventId = 115128, Level = LogLevel.Error, Message = "Error sending KNX status {StatusId} → target {TargetId}"
 )]
     private partial void LogSendStatusError(string statusId, int targetId, Exception exception);
 
-    [LoggerMessage(EventId = 115079, Level = LogLevel.Debug, Message = "KNX group value written: {GroupAddress} = {Value}"
+    [LoggerMessage(EventId = 115129, Level = LogLevel.Debug, Message = "KNX group value written: {GroupAddress} = {Value}"
 )]
     private partial void LogGroupValueWritten(string groupAddress, object value);
 
-    [LoggerMessage(EventId = 115080, Level = LogLevel.Error, Message = "Error writing KNX group value {GroupAddress} = {Value}"
+    [LoggerMessage(EventId = 115130, Level = LogLevel.Error, Message = "Error writing KNX group value {GroupAddress} = {Value}"
 )]
     private partial void LogWriteGroupValueError(string groupAddress, object value, Exception exception);
 
-    [LoggerMessage(EventId = 115081, Level = LogLevel.Debug, Message = "KNX group value read: {GroupAddress} = {Value}"
+    [LoggerMessage(EventId = 115131, Level = LogLevel.Debug, Message = "KNX group value read: {GroupAddress} = {Value}"
 )]
     private partial void LogGroupValueRead(string groupAddress, object value);
 
-    [LoggerMessage(EventId = 115082, Level = LogLevel.Error, Message = "Error reading KNX group value from {GroupAddress}"
+    [LoggerMessage(EventId = 115132, Level = LogLevel.Error, Message = "Error reading KNX group value from {GroupAddress}"
 )]
     private partial void LogReadGroupValueError(string groupAddress, Exception exception);
 
-    [LoggerMessage(EventId = 115083, Level = LogLevel.Error, Message = "Error handling KNX status notification {StatusId} for target {TargetId}"
+    [LoggerMessage(EventId = 115133, Level = LogLevel.Error, Message = "Error handling KNX status notification {StatusId} for target {TargetId}"
 )]
     private partial void LogStatusNotificationError(string statusId, int targetId, Exception exception);
 
-    [LoggerMessage(EventId = 115084, Level = LogLevel.Debug, Message = "KNX reconnect timer started"
+    [LoggerMessage(EventId = 115134, Level = LogLevel.Debug, Message = "KNX reconnect timer started"
 )]
     private partial void LogReconnectTimerStarted();
 
-    [LoggerMessage(EventId = 115085, Level = LogLevel.Debug, Message = "Attempting KNX reconnection"
+    [LoggerMessage(EventId = 115135, Level = LogLevel.Debug, Message = "Attempting KNX reconnection"
 )]
     private partial void LogAttemptingReconnection();
 
-    [LoggerMessage(EventId = 115086, Level = LogLevel.Warning, Message = "Invalid target ID '{TargetId}' for status '{StatusId}' - expected integer"
+    [LoggerMessage(EventId = 115136, Level = LogLevel.Warning, Message = "Invalid target ID '{TargetId}' for status '{StatusId}' - expected integer"
 )]
     private partial void LogInvalidTargetId(string statusId, string targetId);
 
-    [LoggerMessage(EventId = 115087, Level = LogLevel.Error, Message = "Error executing KNX command {CommandType}"
+    [LoggerMessage(EventId = 115137, Level = LogLevel.Error, Message = "Error executing KNX command {CommandType}"
 )]
     private partial void LogCommandExecutionError(string commandType, Exception exception);
 
-    [LoggerMessage(EventId = 115088, Level = LogLevel.Warning, Message = "Error during KNX service disposal: {ErrorMessage}"
+    [LoggerMessage(EventId = 115138, Level = LogLevel.Warning, Message = "Error during KNX service disposal: {ErrorMessage}"
 )]
     private partial void LogKnxDisposalError(string errorMessage);
 
-    [LoggerMessage(EventId = 115089, Level = LogLevel.Debug, Message = "KNX read request received for status address {GroupAddress}"
+    [LoggerMessage(EventId = 115139, Level = LogLevel.Debug, Message = "KNX read request received for status address {GroupAddress}"
 )]
     private partial void LogReadRequestReceived(string groupAddress);
 
-    [LoggerMessage(EventId = 115090, Level = LogLevel.Debug, Message = "KNX read response sent: {GroupAddress} = {Value} (StatusId: {StatusId}, Target: {TargetId})"
+    [LoggerMessage(EventId = 115140, Level = LogLevel.Debug, Message = "KNX read response sent: {GroupAddress} = {Value} (StatusId: {StatusId}, Target: {TargetId})"
 )]
     private partial void LogReadResponseSent(string groupAddress, object value, string statusId, string targetId);
 
-    [LoggerMessage(EventId = 115091, Level = LogLevel.Warning, Message = "KNX read request for unmapped status address {GroupAddress} - no response sent"
+    [LoggerMessage(EventId = 115141, Level = LogLevel.Warning, Message = "KNX read request for unmapped status address {GroupAddress} - no response sent"
 )]
     private partial void LogUnmappedReadRequest(string groupAddress);
 
-    [LoggerMessage(EventId = 115092, Level = LogLevel.Error, Message = "Error handling KNX read request for {GroupAddress}"
+    [LoggerMessage(EventId = 115142, Level = LogLevel.Error, Message = "Error handling KNX read request for {GroupAddress}"
 )]
     private partial void LogReadRequestError(string groupAddress, Exception exception);
 
-    [LoggerMessage(EventId = 115093, Level = LogLevel.Warning, Message = "KNX read request for {GroupAddress} - current state not available for {EntityType} {EntityId}"
+    [LoggerMessage(EventId = 115143, Level = LogLevel.Warning, Message = "KNX read request for {GroupAddress} - current state not available for {EntityType} {EntityId}"
 )]
     private partial void LogReadRequestStateNotAvailable(string groupAddress, string entityType, string entityId);
 
-    [LoggerMessage(EventId = 115094, Level = LogLevel.Error, Message = "Error retrieving current state for {EntityType} {EntityId}, StatusId: {StatusId}"
+    [LoggerMessage(EventId = 115144, Level = LogLevel.Error, Message = "Error retrieving current state for {EntityType} {EntityId}, StatusId: {StatusId}"
 )]
     private partial void LogCurrentStateRetrievalError(string entityType, string entityId, string statusId, Exception exception);
 

@@ -21,7 +21,7 @@ namespace SnapDog2.Server.Shared.Handlers;
 public partial class GlobalStateNotificationHandler
 {
     // Global Event Publishing Operations (11101)
-    [LoggerMessage(EventId = 113050, Level = LogLevel.Warning, Message = "Failed → publish {EventType} → external systems"
+    [LoggerMessage(EventId = 114100, Level = LogLevel.Warning, Message = "Failed → publish {EventType} → external systems"
 )]
     private partial void LogFailedToPublishGlobalEventToExternalSystems(Exception ex, string eventType);
 }

@@ -203,11 +203,11 @@ public sealed partial class SmartMqttPublisher(
 
     #region Logging
 
-    [LoggerMessage(EventId = 115350, Level = LogLevel.Debug, Message = "✅ Direct MQTT publish success: {EntityType} {EntityId} {EventType}"
+    [LoggerMessage(EventId = 115700, Level = LogLevel.Debug, Message = "✅ Direct MQTT publish success: {EntityType} {EntityId} {EventType}"
 )]
     private partial void LogDirectPublishSuccess(string entityType, string entityId, string eventType);
 
-    [LoggerMessage(EventId = 115351, Level = LogLevel.Warning, Message = "❌ Direct MQTT publish failed: {EntityType} {EntityId} {EventType} - {ErrorMessage} (Failure #{FailureCount})"
+    [LoggerMessage(EventId = 115701, Level = LogLevel.Warning, Message = "❌ Direct MQTT publish failed: {EntityType} {EntityId} {EventType} - {ErrorMessage} (Failure #{FailureCount})"
 )]
     private partial void LogDirectPublishFailure(
         string entityType,
@@ -217,19 +217,19 @@ public sealed partial class SmartMqttPublisher(
         int failureCount
     );
 
-    [LoggerMessage(EventId = 115352, Level = LogLevel.Information, Message = "🔄 Falling back → queue: {EntityType} {EntityId} {EventType}"
+    [LoggerMessage(EventId = 115702, Level = LogLevel.Information, Message = "Falling back → queue: {EntityType} {EntityId} {EventType}"
 )]
     private partial void LogFallingBackToQueue(string entityType, string entityId, string eventType);
 
-    [LoggerMessage(EventId = 115353, Level = LogLevel.Warning, Message = "🚫 Circuit breaker opened after {FailureCount} failures - switching → queue-only mode for {ResetTimeMinutes} minutes"
+    [LoggerMessage(EventId = 115703, Level = LogLevel.Warning, Message = "Circuit breaker opened after {FailureCount} failures - switching → queue-only mode for {ResetTimeMinutes} minutes"
 )]
     private partial void LogCircuitBreakerOpened(int failureCount, double resetTimeMinutes);
 
-    [LoggerMessage(EventId = 115354, Level = LogLevel.Information, Message = "✅ Circuit breaker reset - direct publishing re-enabled"
+    [LoggerMessage(EventId = 115704, Level = LogLevel.Information, Message = "✅ Circuit breaker reset - direct publishing re-enabled"
 )]
     private partial void LogCircuitBreakerReset();
 
-    [LoggerMessage(EventId = 115355, Level = LogLevel.Information, Message = "🔄 Circuit breaker auto-reset after timeout - direct publishing re-enabled"
+    [LoggerMessage(EventId = 115705, Level = LogLevel.Information, Message = "Circuit breaker auto-reset after timeout - direct publishing re-enabled"
 )]
     private partial void LogCircuitBreakerAutoReset();
 

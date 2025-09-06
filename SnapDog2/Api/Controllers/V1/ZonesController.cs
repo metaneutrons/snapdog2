@@ -416,55 +416,55 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
         return this.Accepted(playlistIndex);
     }
 
-    [LoggerMessage(EventId = 113250, Level = LogLevel.Warning, Message = "Failed → get zones: {ErrorMessage}"
+    [LoggerMessage(EventId = 113500, Level = LogLevel.Warning, Message = "Failed → get zones: {ErrorMessage}"
 )]
     private partial void LogFailedToGetZones(string errorMessage);
 
-    [LoggerMessage(EventId = 113251, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex}: {ErrorMessage}"
+    [LoggerMessage(EventId = 113501, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex}: {ErrorMessage}"
 )]
     private partial void LogFailedToGetZone(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113252, Level = LogLevel.Warning, Message = "Failed → set zone {ZoneIndex} volume → {Volume}: {ErrorMessage}"
+    [LoggerMessage(EventId = 113502, Level = LogLevel.Warning, Message = "Failed → set zone {ZoneIndex} volume → {Volume}: {ErrorMessage}"
 )]
     private partial void LogFailedToSetZoneVolume(int zoneIndex, int volume, string errorMessage);
 
-    [LoggerMessage(EventId = 113253, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} volume: {ErrorMessage}"
+    [LoggerMessage(EventId = 113503, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} volume: {ErrorMessage}"
 )]
     private partial void LogFailedToGetZoneVolume(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113254, Level = LogLevel.Warning, Message = "Failed → increase zone {ZoneIndex} volume: {ErrorMessage}"
+    [LoggerMessage(EventId = 113504, Level = LogLevel.Warning, Message = "Failed → increase zone {ZoneIndex} volume: {ErrorMessage}"
 )]
     private partial void LogFailedToIncreaseZoneVolume(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113255, Level = LogLevel.Warning, Message = "Failed → decrease zone {ZoneIndex} volume: {ErrorMessage}"
+    [LoggerMessage(EventId = 113505, Level = LogLevel.Warning, Message = "Failed → decrease zone {ZoneIndex} volume: {ErrorMessage}"
 )]
     private partial void LogFailedToDecreaseZoneVolume(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113256, Level = LogLevel.Warning, Message = "Failed → set zone {ZoneIndex} mute → {Muted}: {ErrorMessage}"
+    [LoggerMessage(EventId = 113506, Level = LogLevel.Warning, Message = "Failed → set zone {ZoneIndex} mute → {Muted}: {ErrorMessage}"
 )]
     private partial void LogFailedToSetZoneMute(int zoneIndex, bool muted, string errorMessage);
 
-    [LoggerMessage(EventId = 113257, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} mute state: {ErrorMessage}"
+    [LoggerMessage(EventId = 113507, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} mute state: {ErrorMessage}"
 )]
     private partial void LogFailedToGetZoneMuteState(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113258, Level = LogLevel.Warning, Message = "Failed → toggle zone {ZoneIndex} mute: {ErrorMessage}"
+    [LoggerMessage(EventId = 113508, Level = LogLevel.Warning, Message = "Failed → toggle zone {ZoneIndex} mute: {ErrorMessage}"
 )]
     private partial void LogFailedToToggleZoneMute(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113259, Level = LogLevel.Warning, Message = "Failed → play zone {ZoneIndex}: {ErrorMessage}"
+    [LoggerMessage(EventId = 113509, Level = LogLevel.Warning, Message = "Failed → play zone {ZoneIndex}: {ErrorMessage}"
 )]
     private partial void LogFailedToPlayZone(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113260, Level = LogLevel.Warning, Message = "Failed → pause zone {ZoneIndex}: {ErrorMessage}"
+    [LoggerMessage(EventId = 113510, Level = LogLevel.Warning, Message = "Failed → pause zone {ZoneIndex}: {ErrorMessage}"
 )]
     private partial void LogFailedToPauseZone(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113261, Level = LogLevel.Warning, Message = "Failed → stop zone {ZoneIndex}: {ErrorMessage}"
+    [LoggerMessage(EventId = 113511, Level = LogLevel.Warning, Message = "Failed → stop zone {ZoneIndex}: {ErrorMessage}"
 )]
     private partial void LogFailedToStopZone(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113262, Level = LogLevel.Warning, Message = "Failed → set zone {ZoneIndex} playlist → {PlaylistIndex}: {ErrorMessage}"
+    [LoggerMessage(EventId = 113512, Level = LogLevel.Warning, Message = "Failed → set zone {ZoneIndex} playlist → {PlaylistIndex}: {ErrorMessage}"
 )]
     private partial void LogFailedToSetZonePlaylist(int zoneIndex, int playlistIndex, string errorMessage);
 
@@ -497,7 +497,7 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
         return this.Accepted(trackIndex);
     }
 
-    [LoggerMessage(EventId = 113263, Level = LogLevel.Warning, Message = "Failed → set zone {ZoneIndex} track → {TrackIndex}: {ErrorMessage}"
+    [LoggerMessage(EventId = 113513, Level = LogLevel.Warning, Message = "Failed → set zone {ZoneIndex} track → {TrackIndex}: {ErrorMessage}"
 )]
     private partial void LogFailedToSetZoneTrack(int zoneIndex, int trackIndex, string errorMessage);
 
@@ -1280,39 +1280,39 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
     // LOGGING METHODS FOR NEW ENDPOINTS
     // ═══════════════════════════════════════════════════════════════════════════════
 
-    [LoggerMessage(EventId = 113264, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} track repeat: {ErrorMessage}"
+    [LoggerMessage(EventId = 113514, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} track repeat: {ErrorMessage}"
 )]
     private partial void LogFailedToGetZoneTrackRepeat(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113265, Level = LogLevel.Warning, Message = "Failed → set zone {ZoneIndex} track repeat → {Enabled}: {ErrorMessage}"
+    [LoggerMessage(EventId = 113515, Level = LogLevel.Warning, Message = "Failed → set zone {ZoneIndex} track repeat → {Enabled}: {ErrorMessage}"
 )]
     private partial void LogFailedToSetZoneTrackRepeat(int zoneIndex, bool enabled, string errorMessage);
 
-    [LoggerMessage(EventId = 113266, Level = LogLevel.Warning, Message = "Failed → toggle zone {ZoneIndex} track repeat: {ErrorMessage}"
+    [LoggerMessage(EventId = 113516, Level = LogLevel.Warning, Message = "Failed → toggle zone {ZoneIndex} track repeat: {ErrorMessage}"
 )]
     private partial void LogFailedToToggleZoneTrackRepeat(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113267, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} playlist repeat: {ErrorMessage}"
+    [LoggerMessage(EventId = 113517, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} playlist repeat: {ErrorMessage}"
 )]
     private partial void LogFailedToGetZonePlaylistRepeat(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113268, Level = LogLevel.Warning, Message = "Failed → set zone {ZoneIndex} playlist repeat → {Enabled}: {ErrorMessage}"
+    [LoggerMessage(EventId = 113518, Level = LogLevel.Warning, Message = "Failed → set zone {ZoneIndex} playlist repeat → {Enabled}: {ErrorMessage}"
 )]
     private partial void LogFailedToSetZonePlaylistRepeat(int zoneIndex, bool enabled, string errorMessage);
 
-    [LoggerMessage(EventId = 113269, Level = LogLevel.Warning, Message = "Failed → toggle zone {ZoneIndex} playlist repeat: {ErrorMessage}"
+    [LoggerMessage(EventId = 113519, Level = LogLevel.Warning, Message = "Failed → toggle zone {ZoneIndex} playlist repeat: {ErrorMessage}"
 )]
     private partial void LogFailedToToggleZonePlaylistRepeat(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113270, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} playlist shuffle: {ErrorMessage}"
+    [LoggerMessage(EventId = 113520, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} playlist shuffle: {ErrorMessage}"
 )]
     private partial void LogFailedToGetZonePlaylistShuffle(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113271, Level = LogLevel.Warning, Message = "Failed → set zone {ZoneIndex} playlist shuffle → {Enabled}: {ErrorMessage}"
+    [LoggerMessage(EventId = 113521, Level = LogLevel.Warning, Message = "Failed → set zone {ZoneIndex} playlist shuffle → {Enabled}: {ErrorMessage}"
 )]
     private partial void LogFailedToSetZonePlaylistShuffle(int zoneIndex, bool enabled, string errorMessage);
 
-    [LoggerMessage(EventId = 113272, Level = LogLevel.Warning, Message = "Failed → toggle zone {ZoneIndex} playlist shuffle: {ErrorMessage}"
+    [LoggerMessage(EventId = 113522, Level = LogLevel.Warning, Message = "Failed → toggle zone {ZoneIndex} playlist shuffle: {ErrorMessage}"
 )]
     private partial void LogFailedToToggleZonePlaylistShuffle(int zoneIndex, string errorMessage);
 
@@ -1320,87 +1320,87 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
     // LOGGING METHODS FOR NEW TRACK NAVIGATION ENDPOINTS
     // ═══════════════════════════════════════════════════════════════════════════════
 
-    [LoggerMessage(EventId = 113273, Level = LogLevel.Warning, Message = "Failed → skip zone {ZoneIndex} → next track: {ErrorMessage}"
+    [LoggerMessage(EventId = 113523, Level = LogLevel.Warning, Message = "Failed → skip zone {ZoneIndex} → next track: {ErrorMessage}"
 )]
     private partial void LogFailedToSkipToNextTrack(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113274, Level = LogLevel.Warning, Message = "Failed → skip zone {ZoneIndex} → previous track: {ErrorMessage}"
+    [LoggerMessage(EventId = 113524, Level = LogLevel.Warning, Message = "Failed → skip zone {ZoneIndex} → previous track: {ErrorMessage}"
 )]
     private partial void LogFailedToSkipToPreviousTrack(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113275, Level = LogLevel.Warning, Message = "Failed → switch zone {ZoneIndex} → next playlist: {ErrorMessage}"
+    [LoggerMessage(EventId = 113525, Level = LogLevel.Warning, Message = "Failed → switch zone {ZoneIndex} → next playlist: {ErrorMessage}"
 )]
     private partial void LogFailedToSwitchToNextPlaylist(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113276, Level = LogLevel.Warning, Message = "Failed → switch zone {ZoneIndex} → previous playlist: {ErrorMessage}"
+    [LoggerMessage(EventId = 113526, Level = LogLevel.Warning, Message = "Failed → switch zone {ZoneIndex} → previous playlist: {ErrorMessage}"
 )]
     private partial void LogFailedToSwitchToPreviousPlaylist(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113277, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} track index: {ErrorMessage}"
+    [LoggerMessage(EventId = 113527, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} track index: {ErrorMessage}"
 )]
     private partial void LogFailedToGetZoneTrackIndex(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113278, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} playlist index: {ErrorMessage}"
+    [LoggerMessage(EventId = 113528, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} playlist index: {ErrorMessage}"
 )]
     private partial void LogFailedToGetZonePlaylistIndex(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113288, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} playlist info: {ErrorMessage}"
+    [LoggerMessage(EventId = 113538, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} playlist info: {ErrorMessage}"
 )]
     private partial void LogFailedToGetZonePlaylistInfo(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113280, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} track metadata: {ErrorMessage}"
+    [LoggerMessage(EventId = 113530, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} track metadata: {ErrorMessage}"
 )]
     private partial void LogFailedToGetZoneTrackMetadata(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113281, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} track playing status: {ErrorMessage}"
+    [LoggerMessage(EventId = 113531, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} track playing status: {ErrorMessage}"
 )]
     private partial void LogFailedToGetZoneTrackPlaying(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113282, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} track position: {ErrorMessage}"
+    [LoggerMessage(EventId = 113532, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} track position: {ErrorMessage}"
 )]
     private partial void LogFailedToGetZoneTrackPosition(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113283, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} track progress: {ErrorMessage}"
+    [LoggerMessage(EventId = 113533, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} track progress: {ErrorMessage}"
 )]
     private partial void LogFailedToGetZoneTrackProgress(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113284, Level = LogLevel.Warning, Message = "Failed → set zone {ZoneIndex} track position → {PositionMs}ms: {ErrorMessage}"
+    [LoggerMessage(EventId = 113534, Level = LogLevel.Warning, Message = "Failed → set zone {ZoneIndex} track position → {PositionMs}ms: {ErrorMessage}"
 )]
     private partial void LogFailedToSetZoneTrackPosition(int zoneIndex, long positionMs, string errorMessage);
 
-    [LoggerMessage(EventId = 113285, Level = LogLevel.Warning, Message = "Failed → set zone {ZoneIndex} track progress → {Progress:P1}: {ErrorMessage}"
+    [LoggerMessage(EventId = 113535, Level = LogLevel.Warning, Message = "Failed → set zone {ZoneIndex} track progress → {Progress:P1}: {ErrorMessage}"
 )]
     private partial void LogFailedToSetZoneTrackProgress(int zoneIndex, float progress, string errorMessage);
 
-    [LoggerMessage(EventId = 113286, Level = LogLevel.Warning, Message = "Failed → play track {TrackIndex} for zone {ZoneIndex}: {ErrorMessage}"
+    [LoggerMessage(EventId = 113536, Level = LogLevel.Warning, Message = "Failed → play track {TrackIndex} for zone {ZoneIndex}: {ErrorMessage}"
 )]
     private partial void LogFailedToPlayTrackByIndex(int zoneIndex, int trackIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113287, Level = LogLevel.Warning, Message = "Failed → play URL '{Url}' for zone {ZoneIndex}: {ErrorMessage}"
+    [LoggerMessage(EventId = 113537, Level = LogLevel.Warning, Message = "Failed → play URL '{Url}' for zone {ZoneIndex}: {ErrorMessage}"
 )]
     private partial void LogFailedToPlayUrl(int zoneIndex, string url, string errorMessage);
 
-    [LoggerMessage(EventId = 113288, Level = LogLevel.Warning, Message = "Failed → play track {TrackIndex} from playlist {PlaylistIndex} for zone {ZoneIndex}: {ErrorMessage}"
+    [LoggerMessage(EventId = 113538, Level = LogLevel.Warning, Message = "Failed → play track {TrackIndex} from playlist {PlaylistIndex} for zone {ZoneIndex}: {ErrorMessage}"
 )]
     private partial void LogFailedToPlayTrackFromPlaylist(int zoneIndex, int playlistIndex, int trackIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113290, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} track title: {ErrorMessage}"
+    [LoggerMessage(EventId = 113540, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} track title: {ErrorMessage}"
 )]
     private partial void LogFailedToGetZoneTrackTitle(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113290, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} track artist: {ErrorMessage}"
+    [LoggerMessage(EventId = 113540, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} track artist: {ErrorMessage}"
 )]
     private partial void LogFailedToGetZoneTrackArtist(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113291, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} track album: {ErrorMessage}"
+    [LoggerMessage(EventId = 113541, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} track album: {ErrorMessage}"
 )]
     private partial void LogFailedToGetZoneTrackAlbum(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113292, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} track cover: {ErrorMessage}"
+    [LoggerMessage(EventId = 113542, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} track cover: {ErrorMessage}"
 )]
     private partial void LogFailedToGetZoneTrackCover(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113293, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} track duration: {ErrorMessage}"
+    [LoggerMessage(EventId = 113543, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} track duration: {ErrorMessage}"
 )]
     private partial void LogFailedToGetZoneTrackDuration(int zoneIndex, string errorMessage);
 
@@ -1430,7 +1430,7 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
         return this.Ok(result.Value!.Name);
     }
 
-    [LoggerMessage(EventId = 113294, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} name: {ErrorMessage}"
+    [LoggerMessage(EventId = 113544, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} name: {ErrorMessage}"
 )]
     private partial void LogFailedToGetZoneName(int zoneIndex, string errorMessage);
 
@@ -1506,15 +1506,15 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
         return this.Ok(result.Value?.TrackCount ?? 0);
     }
 
-    [LoggerMessage(EventId = 113295, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} playback state: {ErrorMessage}"
+    [LoggerMessage(EventId = 113545, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} playback state: {ErrorMessage}"
 )]
     private partial void LogFailedToGetPlaybackState(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113296, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} playlist name: {ErrorMessage}"
+    [LoggerMessage(EventId = 113546, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} playlist name: {ErrorMessage}"
 )]
     private partial void LogFailedToGetPlaylistName(int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113297, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} playlist count: {ErrorMessage}"
+    [LoggerMessage(EventId = 113547, Level = LogLevel.Warning, Message = "Failed → get zone {ZoneIndex} playlist count: {ErrorMessage}"
 )]
     private partial void LogFailedToGetPlaylistCount(int zoneIndex, string errorMessage);
 
@@ -1553,7 +1553,7 @@ public partial class ZonesController(IMediator mediator, ILogger<ZonesController
         return this.Accepted();
     }
 
-    [LoggerMessage(EventId = 113298, Level = LogLevel.Warning, Message = "Failed → execute control command '{Command}' on zone {ZoneIndex}: {ErrorMessage}"
+    [LoggerMessage(EventId = 113548, Level = LogLevel.Warning, Message = "Failed → execute control command '{Command}' on zone {ZoneIndex}: {ErrorMessage}"
 )]
     private partial void LogFailedToExecuteControlCommand(int zoneIndex, string command, string errorMessage);
 }

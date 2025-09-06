@@ -300,7 +300,7 @@ try {
         $categoryCounters[$category]++
         
         $categoryBase = Get-CategoryBase -Category $category
-        $fileBase = $categoryBase + ($fileIndex * 25)  # 25 EventIds per file to fit more files
+        $fileBase = $categoryBase + ($fileIndex * 100)  # 100 EventIds per file to avoid overlaps
         
         $fileAssignments[$file.FullName] = @{
             Category = $category
@@ -315,7 +315,7 @@ try {
     foreach ($category in ($categoryCounters.Keys | Sort-Object)) {
         $count = $categoryCounters[$category]
         $base = Get-CategoryBase -Category $category
-        $maxRange = $base + ($count * 25) - 1  # Updated for 25-number blocks
+        $maxRange = $base + 999  # Full 1000-number range per category
         Write-ColoredOutput "  $category`: $count files ($base-$maxRange)" "White"
     }
     
@@ -338,7 +338,7 @@ try {
         
         for ($i = 0; $i -lt $eventIds.Count; $i++) {
             $oldId = $eventIds[$i].EventId
-            $newId = $fileBase + $i
+            $newId = $fileBase + $i  # Sequential within file
             $eventIdMapping[$oldId] = $newId
         }
         

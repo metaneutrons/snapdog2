@@ -44,95 +44,95 @@ public partial class SnapcastEventNotificationHandler(
 
     #region Logging
 
-    [LoggerMessage(EventId = 113250, Level = LogLevel.Information, Message = "client connected: {ClientIndex} ({ClientName})"
+    [LoggerMessage(EventId = 114500, Level = LogLevel.Information, Message = "client connected: {ClientIndex} ({ClientName})"
 )]
     private partial void LogClientConnected(string clientIndex, string clientName);
 
-    [LoggerMessage(EventId = 113251, Level = LogLevel.Information, Message = "client disconnected: {ClientIndex} ({ClientName})"
+    [LoggerMessage(EventId = 114501, Level = LogLevel.Information, Message = "client disconnected: {ClientIndex} ({ClientName})"
 )]
     private partial void LogClientDisconnected(string clientIndex, string clientName);
 
-    [LoggerMessage(EventId = 113252, Level = LogLevel.Information, Message = "client volume changed: {ClientIndex} → {Volume}% (muted: {Muted})"
+    [LoggerMessage(EventId = 114502, Level = LogLevel.Information, Message = "client volume changed: {ClientIndex} → {Volume}% (muted: {Muted})"
 )]
     private partial void LogClientVolumeChanged(string clientIndex, int volume, bool muted);
 
-    [LoggerMessage(EventId = 113253, Level = LogLevel.Information, Message = "group mute changed: {GroupId} → Muted: {Muted}"
+    [LoggerMessage(EventId = 114503, Level = LogLevel.Information, Message = "group mute changed: {GroupId} → Muted: {Muted}"
 )]
     private partial void LogGroupMuteChanged(string groupId, bool muted);
 
-    [LoggerMessage(EventId = 113254, Level = LogLevel.Information, Message = "connection established"
+    [LoggerMessage(EventId = 114504, Level = LogLevel.Information, Message = "connection established"
 )]
     private partial void LogConnectionEstablished();
 
-    [LoggerMessage(EventId = 113255, Level = LogLevel.Warning, Message = "connection lost: {Reason}"
+    [LoggerMessage(EventId = 114505, Level = LogLevel.Warning, Message = "connection lost: {Reason}"
 )]
     private partial void LogConnectionLost(string reason);
 
-    [LoggerMessage(EventId = 113256, Level = LogLevel.Information, Message = "client latency changed: {ClientIndex} → {LatencyMs}ms"
+    [LoggerMessage(EventId = 114506, Level = LogLevel.Information, Message = "client latency changed: {ClientIndex} → {LatencyMs}ms"
 )]
     private partial void LogClientLatencyChanged(int clientIndex, int latencyMs);
 
-    [LoggerMessage(EventId = 113257, Level = LogLevel.Warning, Message = "Invalid client index format for connection: {ClientIndex}"
+    [LoggerMessage(EventId = 114507, Level = LogLevel.Warning, Message = "Invalid client index format for connection: {ClientIndex}"
 )]
     private partial void LogInvalidClientIndexForConnection(string clientIndex);
 
-    [LoggerMessage(EventId = 113258, Level = LogLevel.Debug, Message = "Updated client {ClientIndex} storage: Connected=true"
+    [LoggerMessage(EventId = 114508, Level = LogLevel.Debug, Message = "Updated client {ClientIndex} storage: Connected=true"
 )]
     private partial void LogClientStorageUpdatedConnected(int clientIndex);
 
-    [LoggerMessage(EventId = 113259, Level = LogLevel.Warning, Message = "Client {ClientIndex} state not found in storage for connection update"
+    [LoggerMessage(EventId = 114509, Level = LogLevel.Warning, Message = "Client {ClientIndex} state not found in storage for connection update"
 )]
     private partial void LogClientStateNotFoundForConnection(int clientIndex);
 
-    [LoggerMessage(EventId = 113260, Level = LogLevel.Warning, Message = "Invalid client index format for disconnection: {ClientIndex}"
+    [LoggerMessage(EventId = 114510, Level = LogLevel.Warning, Message = "Invalid client index format for disconnection: {ClientIndex}"
 )]
     private partial void LogInvalidClientIndexForDisconnection(string clientIndex);
 
-    [LoggerMessage(EventId = 113261, Level = LogLevel.Debug, Message = "Updated client {ClientIndex} storage: Connected=false"
+    [LoggerMessage(EventId = 114511, Level = LogLevel.Debug, Message = "Updated client {ClientIndex} storage: Connected=false"
 )]
     private partial void LogClientStorageUpdatedDisconnected(int clientIndex);
 
-    [LoggerMessage(EventId = 113262, Level = LogLevel.Warning, Message = "Client {ClientIndex} state not found in storage for disconnection update"
+    [LoggerMessage(EventId = 114512, Level = LogLevel.Warning, Message = "Client {ClientIndex} state not found in storage for disconnection update"
 )]
     private partial void LogClientStateNotFoundForDisconnection(int clientIndex);
 
-    [LoggerMessage(EventId = 113263, Level = LogLevel.Warning, Message = "Invalid client index format: {ClientIndex}"
+    [LoggerMessage(EventId = 114513, Level = LogLevel.Warning, Message = "Invalid client index format: {ClientIndex}"
 )]
     private partial void LogInvalidClientIndexFormat(string clientIndex);
 
-    [LoggerMessage(EventId = 113264, Level = LogLevel.Debug, Message = "Updated client {ClientIndex} storage: Volume={Volume}, Mute={Mute}"
+    [LoggerMessage(EventId = 114514, Level = LogLevel.Debug, Message = "Updated client {ClientIndex} storage: Volume={Volume}, Mute={Mute}"
 )]
     private partial void LogClientStorageUpdatedVolume(int clientIndex, int volume, bool mute);
 
-    [LoggerMessage(EventId = 113265, Level = LogLevel.Warning, Message = "Client {ClientIndex} state not found in storage for volume update"
+    [LoggerMessage(EventId = 114515, Level = LogLevel.Warning, Message = "Client {ClientIndex} state not found in storage for volume update"
 )]
     private partial void LogClientStateNotFoundForVolume(int clientIndex);
 
-    [LoggerMessage(EventId = 113266, Level = LogLevel.Warning, Message = "Invalid client index format for latency change: {ClientIndex}"
+    [LoggerMessage(EventId = 114516, Level = LogLevel.Warning, Message = "Invalid client index format for latency change: {ClientIndex}"
 )]
     private partial void LogInvalidClientIndexForLatency(string clientIndex);
 
-    [LoggerMessage(EventId = 113267, Level = LogLevel.Debug, Message = "Updated client {ClientIndex} storage: LatencyMs={LatencyMs}"
+    [LoggerMessage(EventId = 114517, Level = LogLevel.Debug, Message = "Updated client {ClientIndex} storage: LatencyMs={LatencyMs}"
 )]
     private partial void LogClientStorageUpdatedLatency(int clientIndex, int latencyMs);
 
-    [LoggerMessage(EventId = 113268, Level = LogLevel.Warning, Message = "Client {ClientIndex} state not found in storage for latency update"
+    [LoggerMessage(EventId = 114518, Level = LogLevel.Warning, Message = "Client {ClientIndex} state not found in storage for latency update"
 )]
     private partial void LogClientStateNotFoundForLatency(int clientIndex);
 
-    [LoggerMessage(EventId = 113269, Level = LogLevel.Warning, Message = "Invalid client index format for name change: {ClientIndex}"
+    [LoggerMessage(EventId = 114519, Level = LogLevel.Warning, Message = "Invalid client index format for name change: {ClientIndex}"
 )]
     private partial void LogInvalidClientIndexForName(string clientIndex);
 
-    [LoggerMessage(EventId = 113270, Level = LogLevel.Debug, Message = "SnapcastClientVolumeChangedNotification received for client {ClientIndex}"
+    [LoggerMessage(EventId = 114520, Level = LogLevel.Debug, Message = "SnapcastClientVolumeChangedNotification received for client {ClientIndex}"
 )]
     private partial void LogVolumeNotificationReceived(string clientIndex);
 
-    [LoggerMessage(EventId = 113271, Level = LogLevel.Debug, Message = "Publishing ClientVolumeChangedNotification for SignalR - Client {ClientIndex}, Volume {Volume}"
+    [LoggerMessage(EventId = 114521, Level = LogLevel.Debug, Message = "Publishing ClientVolumeChangedNotification for SignalR - Client {ClientIndex}, Volume {Volume}"
 )]
     private partial void LogPublishingVolumeNotification(int clientIndex, int volume);
 
-    [LoggerMessage(EventId = 113272, Level = LogLevel.Debug, Message = "Publishing ClientMuteChangedNotification for SignalR - Client {ClientIndex}, Muted {IsMuted}"
+    [LoggerMessage(EventId = 114522, Level = LogLevel.Debug, Message = "Publishing ClientMuteChangedNotification for SignalR - Client {ClientIndex}, Muted {IsMuted}"
 )]
     private partial void LogPublishingMuteNotification(int clientIndex, bool isMuted);
 
