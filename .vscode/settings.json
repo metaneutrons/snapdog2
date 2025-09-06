@@ -122,6 +122,7 @@
     "unsubscriptions",
     "Vorbis",
     "WORKDIR",
-    "Xunit"
+    "Xunit",
+    "ZONEGROUPING"
   ]
 }

@@ -84,11 +84,11 @@ public class SnapcastConfig
     /// <summary>
     /// Gets or sets the interval in milliseconds between periodic zone grouping checks.
     /// This is the main interval for ensuring zones are properly configured.
-    /// Maps to: SNAPDOG_SERVICES_ZONE_GROUPING_CHECK_INTERVAL_MS
+    /// Maps to: SNAPDOG_SERVICES_SNAPCAST_ZONEGROUPING_INTERVALL_MS
     /// Default: 5000ms (5 seconds).
     /// </summary>
-    [Env("ZONE_GROUPING_CHECK_INTERVAL_MS")]
-    public int ZoneGroupingCheckIntervalMs { get; set; } = 5_000;
+    [Env("ZONEGROUPING_INTERVAL_MS")]
+    public int ZoneGroupingIntervalMs { get; set; } = 5_000;
 
     /// <summary>
     /// Snapcast HTTP port.

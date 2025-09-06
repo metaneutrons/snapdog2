@@ -46,7 +46,7 @@ public partial class ZoneGroupingService(
     private readonly ILogger<ZoneGroupingService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private static readonly ActivitySource ActivitySource = new("SnapDog2.ZoneGrouping");
 
-    private readonly TimeSpan _reconciliationInterval = TimeSpan.FromMilliseconds(config.Value.ZoneGroupingCheckIntervalMs);
+    private readonly TimeSpan _reconciliationInterval = TimeSpan.FromMilliseconds(config.Value.ZoneGroupingIntervalMs);
     private readonly SemaphoreSlim _regroupingSemaphore = new(1, 1);
 
     /// <summary>

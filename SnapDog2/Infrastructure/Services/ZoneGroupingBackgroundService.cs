@@ -40,7 +40,7 @@ public class ZoneGroupingBackgroundService : BackgroundService
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         _metrics = metrics ?? throw new ArgumentNullException(nameof(metrics));
-        _reconciliationInterval = TimeSpan.FromMilliseconds(config.Value.ZoneGroupingCheckIntervalMs);
+        _reconciliationInterval = TimeSpan.FromMilliseconds(config.Value.ZoneGroupingIntervalMs);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
