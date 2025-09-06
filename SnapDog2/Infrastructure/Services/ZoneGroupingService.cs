@@ -698,6 +698,17 @@ public partial class ZoneGroupingService(
     /// </summary>
     public async Task Handle(ClientZoneChangedNotification notification, CancellationToken cancellationToken = default)
     {
-        await this.TriggerImmediateRegroupingAsync();
+        // Fire-and-forget: Execute regrouping in background without blocking HTTP response
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await this.TriggerImmediateRegroupingAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during background zone regrouping for client {ClientIndex}", notification.ClientIndex);
+            }
+        });
     }
 }
