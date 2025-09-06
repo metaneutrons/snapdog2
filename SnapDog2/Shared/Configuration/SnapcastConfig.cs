@@ -84,6 +84,7 @@ public class SnapcastConfig
     /// <summary>
     /// Gets or sets the interval in milliseconds between periodic zone grouping checks.
     /// This is the main interval for ensuring zones are properly configured.
+    /// Maps to: SNAPDOG_SERVICES_ZONE_GROUPING_CHECK_INTERVAL_MS
     /// Default: 5000ms (5 seconds).
     /// </summary>
     [Env("ZONE_GROUPING_CHECK_INTERVAL_MS")]
