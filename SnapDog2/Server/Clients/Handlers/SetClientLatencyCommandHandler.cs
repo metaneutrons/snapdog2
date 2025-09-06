@@ -30,18 +30,12 @@ public partial class SetClientLatencyCommandHandler(
     private readonly IClientManager _clientManager = clientManager;
     private readonly ILogger<SetClientLatencyCommandHandler> _logger = logger;
 
-    [LoggerMessage(
-        EventId = 10900,
-        Level = LogLevel.Information,
-        Message = "Setting latency for Client {ClientIndex} to {LatencyMs}ms from {Source}"
-    )]
+    [LoggerMessage(EventId = 112300, Level = LogLevel.Information, Message = "Setting latency for Client {ClientIndex} to {LatencyMs}ms from {Source}"
+)]
     private partial void LogHandling(int clientIndex, int latencyMs, CommandSource source);
 
-    [LoggerMessage(
-        EventId = 10901,
-        Level = LogLevel.Warning,
-        Message = "Client {ClientIndex} not found for SetClientLatencyCommand"
-    )]
+    [LoggerMessage(EventId = 112301, Level = LogLevel.Warning, Message = "Client {ClientIndex} not found for SetClientLatencyCommand"
+)]
     private partial void LogClientNotFound(int clientIndex);
 
     public async Task<Result> Handle(SetClientLatencyCommand request, CancellationToken cancellationToken)

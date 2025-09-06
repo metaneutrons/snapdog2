@@ -494,102 +494,78 @@ public partial class ZoneGroupingService(
     }
 
     // LoggerMessage methods for high-performance logging
-    [LoggerMessage(EventId = 7700, Level = LogLevel.Debug, Message = "🔍 Starting zone grouping check for all zones")]
+    [LoggerMessage(EventId = 114500, Level = LogLevel.Debug, Message = "🔍 Starting zone grouping check for all zones")]
     private partial void LogStartingZoneGroupingCheck();
 
-    [LoggerMessage(EventId = 7701, Level = LogLevel.Debug, Message = "ℹ️ No zones configured, skipping zone grouping")]
+    [LoggerMessage(EventId = 114501, Level = LogLevel.Debug, Message = "ℹ️ No zones configured, skipping zone grouping")]
     private partial void LogNoZonesConfigured();
 
-    [LoggerMessage(EventId = 7702, Level = LogLevel.Debug, Message = "🔍 Checking {ZoneCount} zones: {ZoneIds}")]
+    [LoggerMessage(EventId = 114502, Level = LogLevel.Debug, Message = "🔍 Checking {ZoneCount} zones: {ZoneIds}")]
     private partial void LogCheckingZones(int ZoneCount, string ZoneIds);
 
-    [LoggerMessage(EventId = 7703, Level = LogLevel.Debug, Message = "🔧 Checking zone {ZoneId}...")]
+    [LoggerMessage(EventId = 114503, Level = LogLevel.Debug, Message = "🔧 Checking zone {ZoneId}...")]
     private partial void LogCheckingZone(int ZoneId);
 
-    [LoggerMessage(EventId = 7704, Level = LogLevel.Warning, Message = "⚠️ Failed to synchronize zone {ZoneId}: {Error}")]
+    [LoggerMessage(EventId = 114504, Level = LogLevel.Warning, Message = "⚠️ Failed to synchronize zone {ZoneId}: {Error}")]
     private partial void LogFailedSynchronizeZone(int ZoneId, string? Error);
 
-    [LoggerMessage(EventId = 7705, Level = LogLevel.Debug, Message = "✅ Zone {ZoneId} check completed")]
+    [LoggerMessage(EventId = 114505, Level = LogLevel.Debug, Message = "✅ Zone {ZoneId} check completed")]
     private partial void LogZoneCheckCompleted(int ZoneId);
 
-    [LoggerMessage(EventId = 7706, Level = LogLevel.Debug, Message = "✅ All zone grouping checks completed")]
+    [LoggerMessage(EventId = 114506, Level = LogLevel.Debug, Message = "✅ All zone grouping checks completed")]
     private partial void LogAllZoneGroupingChecksCompleted();
 
-    [LoggerMessage(EventId = 7707, Level = LogLevel.Error, Message = "❌ Error during periodic zone grouping check")]
+    [LoggerMessage(EventId = 114507, Level = LogLevel.Error, Message = "❌ Error during periodic zone grouping check")]
     private partial void LogErrorDuringPeriodicCheck(Exception ex);
 
-    [LoggerMessage(EventId = 7708, Level = LogLevel.Debug, Message = "🔄 Synchronizing zone {ZoneId}")]
+    [LoggerMessage(EventId = 114508, Level = LogLevel.Debug, Message = "🔄 Synchronizing zone {ZoneId}")]
     private partial void LogSynchronizingZone(int ZoneId);
 
-    [LoggerMessage(EventId = 7709, Level = LogLevel.Debug, Message = "ℹ️ No clients assigned to zone {ZoneId}, skipping")]
+    [LoggerMessage(EventId = 114509, Level = LogLevel.Debug, Message = "ℹ️ No clients assigned to zone {ZoneId}, skipping")]
     private partial void LogNoClientsAssigned(int ZoneId);
 
-    [LoggerMessage(
-        EventId = 7710,
-        Level = LogLevel.Debug,
-        Message = "✅ Zone {ZoneId} is already properly configured (clients: {ClientIndexs}, stream: {StreamId})"
-    )]
+    [LoggerMessage(EventId = 114510, Level = LogLevel.Debug, Message = "✅ Zone {ZoneId} is already properly configured (clients: {ClientIndexs}, stream: {StreamId})"
+)]
     private partial void LogZoneAlreadyConfigured(int ZoneId, string ClientIndexs, string StreamId);
 
-    [LoggerMessage(
-        EventId = 7711,
-        Level = LogLevel.Information,
-        Message = "🔧 Provisioning zone {ZoneId}: {ClientCount} clients ({ClientIndexs}) with stream {StreamId}"
-    )]
+    [LoggerMessage(EventId = 114511, Level = LogLevel.Information, Message = "🔧 Provisioning zone {ZoneId}: {ClientCount} clients ({ClientIndexs}) with stream {StreamId}"
+)]
     private partial void LogProvisioningZone(int ZoneId, int ClientCount, string ClientIndexs, string StreamId);
 
-    [LoggerMessage(
-        EventId = 7712,
-        Level = LogLevel.Warning,
-        Message = "⚠️ Failed to set stream for group {GroupId}: {Error}"
-    )]
+    [LoggerMessage(EventId = 114512, Level = LogLevel.Warning, Message = "⚠️ Failed to set stream for group {GroupId}: {Error}"
+)]
     private partial void LogFailedSetGroupStream(string GroupId, string? Error);
 
-    [LoggerMessage(EventId = 7713, Level = LogLevel.Debug, Message = "✅ Set group {GroupId} stream to {StreamId}")]
+    [LoggerMessage(EventId = 114513, Level = LogLevel.Debug, Message = "✅ Set group {GroupId} stream to {StreamId}")]
     private partial void LogSetGroupStream(string GroupId, string StreamId);
 
-    [LoggerMessage(
-        EventId = 7714,
-        Level = LogLevel.Warning,
-        Message = "⚠️ Failed to set name for group {GroupId}: {Error}"
-    )]
+    [LoggerMessage(EventId = 114514, Level = LogLevel.Warning, Message = "⚠️ Failed to set name for group {GroupId}: {Error}"
+)]
     private partial void LogFailedSetGroupName(string GroupId, string? Error);
 
-    [LoggerMessage(EventId = 7715, Level = LogLevel.Information, Message = "✅ Set group {GroupId} name to '{GroupName}'")]
+    [LoggerMessage(EventId = 114515, Level = LogLevel.Information, Message = "✅ Set group {GroupId} name to '{GroupName}'")]
     private partial void LogSetGroupName(string GroupId, string GroupName);
 
-    [LoggerMessage(
-        EventId = 7716,
-        Level = LogLevel.Information,
-        Message = "✅ Zone {ZoneId} synchronized: {ClientCount} clients in group {GroupId} with stream {StreamId}"
-    )]
+    [LoggerMessage(EventId = 114516, Level = LogLevel.Information, Message = "✅ Zone {ZoneId} synchronized: {ClientCount} clients in group {GroupId} with stream {StreamId}"
+)]
     private partial void LogZoneSynchronized(int ZoneId, int ClientCount, string GroupId, string StreamId);
 
-    [LoggerMessage(EventId = 7717, Level = LogLevel.Error, Message = "💥 Error synchronizing zone {ZoneId}")]
+    [LoggerMessage(EventId = 114517, Level = LogLevel.Error, Message = "💥 Error synchronizing zone {ZoneId}")]
     private partial void LogErrorSynchronizingZone(Exception ex, int ZoneId);
 
-    [LoggerMessage(EventId = 7718, Level = LogLevel.Debug, Message = "❌ No server status or groups available")]
+    [LoggerMessage(EventId = 114518, Level = LogLevel.Debug, Message = "❌ No server status or groups available")]
     private partial void LogNoServerStatusOrGroups();
 
-    [LoggerMessage(
-        EventId = 7719,
-        Level = LogLevel.Debug,
-        Message = "🔍 Zone check: Expected stream {ExpectedStream}, Found {GroupCount} groups with our clients {ClientIndexs}"
-    )]
+    [LoggerMessage(EventId = 114519, Level = LogLevel.Debug, Message = "🔍 Zone check: Expected stream {ExpectedStream}, Found {GroupCount} groups with our clients {ClientIndexs}"
+)]
     private partial void LogZoneCheckDetails(string ExpectedStream, int GroupCount, string ClientIndexs);
 
-    [LoggerMessage(
-        EventId = 7720,
-        Level = LogLevel.Information,
-        Message = "❌ Zone misconfigured: {GroupCount} groups contain our clients (should be 1)"
-    )]
+    [LoggerMessage(EventId = 114520, Level = LogLevel.Information, Message = "❌ Zone misconfigured: {GroupCount} groups contain our clients (should be 1)"
+)]
     private partial void LogZoneMisconfiguredMultipleGroups(int GroupCount);
 
-    [LoggerMessage(
-        EventId = 7721,
-        Level = LogLevel.Debug,
-        Message = "🔍 Zone check details: AllClientsPresent={AllPresent}, NoForeignClients={NoForeign}, CorrectStream={CorrectStream}, CorrectGroupName={CorrectGroupName} (expected '{ExpectedName}', actual '{ActualName}'), CorrectClientNames={CorrectClientNames}"
-    )]
+    [LoggerMessage(EventId = 114521, Level = LogLevel.Debug, Message = "🔍 Zone check details: AllClientsPresent={AllPresent}, NoForeignClients={NoForeign}, CorrectStream={CorrectStream}, CorrectGroupName={CorrectGroupName} (expected '{ExpectedName}', actual '{ActualName}'), CorrectClientNames={CorrectClientNames}"
+)]
     private partial void LogZoneCheckDetailsVerbose(
         bool AllPresent,
         bool NoForeign,
@@ -600,11 +576,8 @@ public partial class ZoneGroupingService(
         bool CorrectClientNames
     );
 
-    [LoggerMessage(
-        EventId = 7722,
-        Level = LogLevel.Information,
-        Message = "❌ Zone misconfigured: AllClientsPresent={AllPresent}, NoForeignClients={NoForeign}, CorrectStream={CorrectStream}, CorrectGroupName={CorrectGroupName}, CorrectClientNames={CorrectClientNames}"
-    )]
+    [LoggerMessage(EventId = 114522, Level = LogLevel.Information, Message = "❌ Zone misconfigured: AllClientsPresent={AllPresent}, NoForeignClients={NoForeign}, CorrectStream={CorrectStream}, CorrectGroupName={CorrectGroupName}, CorrectClientNames={CorrectClientNames}"
+)]
     private partial void LogZoneMisconfiguredDetails(
         bool AllPresent,
         bool NoForeign,
@@ -613,87 +586,54 @@ public partial class ZoneGroupingService(
         bool CorrectClientNames
     );
 
-    [LoggerMessage(
-        EventId = 7723,
-        Level = LogLevel.Debug,
-        Message = "🏷️ Starting client name synchronization for zone {ZoneId}"
-    )]
+    [LoggerMessage(EventId = 114523, Level = LogLevel.Debug, Message = "🏷️ Starting client name synchronization for zone {ZoneId}"
+)]
     private partial void LogStartingClientNameSync(int ZoneId);
 
-    [LoggerMessage(
-        EventId = 7724,
-        Level = LogLevel.Warning,
-        Message = "⚠️ Failed to get zone clients for name synchronization: {Error}"
-    )]
+    [LoggerMessage(EventId = 114524, Level = LogLevel.Warning, Message = "⚠️ Failed to get zone clients for name synchronization: {Error}"
+)]
     private partial void LogFailedGetZoneClients(string? Error);
 
-    [LoggerMessage(
-        EventId = 7725,
-        Level = LogLevel.Debug,
-        Message = "🔍 Found {ClientCount} clients for zone {ZoneId}: {ClientNames}"
-    )]
+    [LoggerMessage(EventId = 114525, Level = LogLevel.Debug, Message = "🔍 Found {ClientCount} clients for zone {ZoneId}: {ClientNames}"
+)]
     private partial void LogFoundZoneClients(int ClientCount, int ZoneId, string ClientNames);
 
-    [LoggerMessage(
-        EventId = 7726,
-        Level = LogLevel.Warning,
-        Message = "⚠️ Failed to get server status for client name synchronization: {Error}"
-    )]
+    [LoggerMessage(EventId = 114526, Level = LogLevel.Warning, Message = "⚠️ Failed to get server status for client name synchronization: {Error}"
+)]
     private partial void LogFailedGetServerStatusForNameSync(string? Error);
 
-    [LoggerMessage(EventId = 7727, Level = LogLevel.Debug, Message = "🔍 Current Snapcast client names: {CurrentNames}")]
+    [LoggerMessage(EventId = 114527, Level = LogLevel.Debug, Message = "🔍 Current Snapcast client names: {CurrentNames}")]
     private partial void LogCurrentSnapcastClientNames(string CurrentNames);
 
-    [LoggerMessage(
-        EventId = 7728,
-        Level = LogLevel.Debug,
-        Message = "🔍 Checking client {ClientIndex}: expected='{ExpectedName}', current='{CurrentName}'"
-    )]
+    [LoggerMessage(EventId = 114528, Level = LogLevel.Debug, Message = "🔍 Checking client {ClientIndex}: expected='{ExpectedName}', current='{CurrentName}'"
+)]
     private partial void LogCheckingClientName(string ClientIndex, string ExpectedName, string? CurrentName);
 
-    [LoggerMessage(
-        EventId = 7729,
-        Level = LogLevel.Information,
-        Message = "🏷️ Setting client {ClientIndex} name from '{CurrentName}' to '{ExpectedName}'"
-    )]
+    [LoggerMessage(EventId = 114529, Level = LogLevel.Information, Message = "🏷️ Setting client {ClientIndex} name from '{CurrentName}' to '{ExpectedName}'"
+)]
     private partial void LogSettingClientName(string ClientIndex, string? CurrentName, string ExpectedName);
 
-    [LoggerMessage(
-        EventId = 7730,
-        Level = LogLevel.Information,
-        Message = "✅ Set client {ClientIndex} name to '{ClientName}'"
-    )]
+    [LoggerMessage(EventId = 114530, Level = LogLevel.Information, Message = "✅ Set client {ClientIndex} name to '{ClientName}'"
+)]
     private partial void LogClientNameSet(string ClientIndex, string ClientName);
 
-    [LoggerMessage(
-        EventId = 7731,
-        Level = LogLevel.Warning,
-        Message = "⚠️ Failed to set name for client {ClientIndex}: {Error}"
-    )]
+    [LoggerMessage(EventId = 114531, Level = LogLevel.Warning, Message = "⚠️ Failed to set name for client {ClientIndex}: {Error}"
+)]
     private partial void LogFailedSetClientName(string ClientIndex, string? Error);
 
-    [LoggerMessage(
-        EventId = 7732,
-        Level = LogLevel.Debug,
-        Message = "✅ Client {ClientIndex} name is already correct: '{ClientName}'"
-    )]
+    [LoggerMessage(EventId = 114532, Level = LogLevel.Debug, Message = "✅ Client {ClientIndex} name is already correct: '{ClientName}'"
+)]
     private partial void LogClientNameAlreadyCorrect(string ClientIndex, string ClientName);
 
-    [LoggerMessage(
-        EventId = 7733,
-        Level = LogLevel.Debug,
-        Message = "✅ Client name synchronization completed for zone {ZoneId}"
-    )]
+    [LoggerMessage(EventId = 114533, Level = LogLevel.Debug, Message = "✅ Client name synchronization completed for zone {ZoneId}"
+)]
     private partial void LogClientNameSyncCompleted(int ZoneId);
 
-    [LoggerMessage(
-        EventId = 7734,
-        Level = LogLevel.Error,
-        Message = "💥 Error synchronizing client names for zone {ZoneId}"
-    )]
+    [LoggerMessage(EventId = 114534, Level = LogLevel.Error, Message = "💥 Error synchronizing client names for zone {ZoneId}"
+)]
     private partial void LogErrorSynchronizingClientNames(Exception ex, int ZoneId);
 
-    [LoggerMessage(EventId = 7735, Level = LogLevel.Error, Message = "Error during background zone regrouping for client {ClientIndex}")]
+    [LoggerMessage(EventId = 114535, Level = LogLevel.Error, Message = "Error during background zone regrouping for client {ClientIndex}")]
     private partial void LogBackgroundRegroupingError(Exception ex, int clientIndex);
 
     /// <summary>

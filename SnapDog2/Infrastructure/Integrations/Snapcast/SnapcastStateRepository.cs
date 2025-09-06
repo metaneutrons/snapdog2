@@ -37,81 +37,48 @@ public partial class SnapcastStateRepository(
 
     #region Logging
 
-    [LoggerMessage(
-        EventId = 7300,
-        Level = LogLevel.Debug,
-        Message = "Updating full Snapcast server state. Groups: {GroupCount}, Clients: {ClientCount}, Streams: {StreamCount}"
-    )]
+    [LoggerMessage(EventId = 115500, Level = LogLevel.Debug, Message = "Updating full Snapcast server state. Groups: {GroupCount}, Clients: {ClientCount}, Streams: {StreamCount}"
+)]
     private partial void LogUpdatingServerState(int groupCount, int clientCount, int streamCount);
 
-    [LoggerMessage(
-        EventId = 7301,
-        Level = LogLevel.Debug,
-        Message = "Updating Snapcast client {ClientIndex}"
-    )]
+    [LoggerMessage(EventId = 115501, Level = LogLevel.Debug, Message = "Updating Snapcast client {ClientIndex}"
+)]
     private partial void LogUpdatingClient(string clientIndex);
 
-    [LoggerMessage(
-        EventId = 7302,
-        Level = LogLevel.Debug,
-        Message = "Removing Snapcast client {ClientIndex}"
-    )]
+    [LoggerMessage(EventId = 115502, Level = LogLevel.Debug, Message = "Removing Snapcast client {ClientIndex}"
+)]
     private partial void LogRemovingClient(string clientIndex);
 
-    [LoggerMessage(
-        EventId = 7303,
-        Level = LogLevel.Debug,
-        Message = "Updating Snapcast group {GroupId}"
-    )]
+    [LoggerMessage(EventId = 115503, Level = LogLevel.Debug, Message = "Updating Snapcast group {GroupId}"
+)]
     private partial void LogUpdatingGroup(string groupId);
 
-    [LoggerMessage(
-        EventId = 7304,
-        Level = LogLevel.Debug,
-        Message = "Removing Snapcast group {GroupId}"
-    )]
+    [LoggerMessage(EventId = 115504, Level = LogLevel.Debug, Message = "Removing Snapcast group {GroupId}"
+)]
     private partial void LogRemovingGroup(string groupId);
 
-    [LoggerMessage(
-        EventId = 7305,
-        Level = LogLevel.Debug,
-        Message = "Updating Snapcast stream {StreamId}"
-    )]
+    [LoggerMessage(EventId = 115505, Level = LogLevel.Debug, Message = "Updating Snapcast stream {StreamId}"
+)]
     private partial void LogUpdatingStream(string streamId);
 
-    [LoggerMessage(
-        EventId = 7306,
-        Level = LogLevel.Debug,
-        Message = "Removing Snapcast stream {StreamId}"
-    )]
+    [LoggerMessage(EventId = 115506, Level = LogLevel.Debug, Message = "Removing Snapcast stream {StreamId}"
+)]
     private partial void LogRemovingStream(string streamId);
 
-    [LoggerMessage(
-        EventId = 7307,
-        Level = LogLevel.Warning,
-        Message = "Client index {ClientIndex} is out of range. Valid range: 1-{MaxClients}"
-    )]
+    [LoggerMessage(EventId = 115507, Level = LogLevel.Warning, Message = "Client index {ClientIndex} is out of range. Valid range: 1-{MaxClients}"
+)]
     private partial void LogClientIndexOutOfRange(int clientIndex, int maxClients);
 
-    [LoggerMessage(
-        EventId = 7308,
-        Level = LogLevel.Warning,
-        Message = "Client {ClientIndex} ({ClientName}) has no MAC address configured"
-    )]
+    [LoggerMessage(EventId = 115508, Level = LogLevel.Warning, Message = "Client {ClientIndex} ({ClientName}) has no MAC address configured"
+)]
     private partial void LogClientMacNotConfigured(int clientIndex, string clientName);
 
-    [LoggerMessage(
-        EventId = 7309,
-        Level = LogLevel.Warning,
-        Message = "Client {ClientIndex} ({ClientName}) with MAC {MacAddress} not found in Snapcast"
-    )]
+    [LoggerMessage(EventId = 115509, Level = LogLevel.Warning, Message = "Client {ClientIndex} ({ClientName}) with MAC {MacAddress} not found in Snapcast"
+)]
     private partial void LogClientNotFoundByMac(int clientIndex, string clientName, string macAddress);
 
-    [LoggerMessage(
-        EventId = 7310,
-        Level = LogLevel.Debug,
-        Message = "Client {ClientIndex} ({ClientName}) with MAC {MacAddress} found as Snapcast client {SnapcastClientId}"
-    )]
+    [LoggerMessage(EventId = 115510, Level = LogLevel.Debug, Message = "Client {ClientIndex} ({ClientName}) with MAC {MacAddress} found as Snapcast client {SnapcastClientId}"
+)]
     private partial void LogClientFoundByMac(
         int clientIndex,
         string clientName,
@@ -119,39 +86,24 @@ public partial class SnapcastStateRepository(
         string snapcastClientId
     );
 
-    [LoggerMessage(
-        EventId = 7311,
-        Level = LogLevel.Debug,
-        Message = "Available Snapcast clients: {AvailableClients}"
-    )]
+    [LoggerMessage(EventId = 115511, Level = LogLevel.Debug, Message = "Available Snapcast clients: {AvailableClients}"
+)]
     private partial void LogAvailableClients(string availableClients);
 
-    [LoggerMessage(
-        EventId = 7312,
-        Level = LogLevel.Debug,
-        Message = "Total Snapcast clients in repository: {ClientCount}"
-    )]
+    [LoggerMessage(EventId = 115512, Level = LogLevel.Debug, Message = "Total Snapcast clients in repository: {ClientCount}"
+)]
     private partial void LogTotalClientCount(int clientCount);
 
-    [LoggerMessage(
-        EventId = 7313,
-        Level = LogLevel.Debug,
-        Message = "🔄 UpdateServerState called with {GroupCount} groups"
-    )]
+    [LoggerMessage(EventId = 115513, Level = LogLevel.Debug, Message = "🔄 UpdateServerState called with {GroupCount} groups"
+)]
     private partial void LogUpdateServerStateCalled(int groupCount);
 
-    [LoggerMessage(
-        EventId = 7314,
-        Level = LogLevel.Debug,
-        Message = "📝 Processing group {GroupId} with {ClientCount} clients"
-    )]
+    [LoggerMessage(EventId = 115514, Level = LogLevel.Debug, Message = "📝 Processing group {GroupId} with {ClientCount} clients"
+)]
     private partial void LogProcessingGroup(string groupId, int clientCount);
 
-    [LoggerMessage(
-        EventId = 7315,
-        Level = LogLevel.Debug,
-        Message = "👤 Adding/updating client {ClientIndex} (MAC: {MacAddress})"
-    )]
+    [LoggerMessage(EventId = 115515, Level = LogLevel.Debug, Message = "👤 Adding/updating client {ClientIndex} (MAC: {MacAddress})"
+)]
     private partial void LogAddingClient(string clientIndex, string macAddress);
 
     #endregion

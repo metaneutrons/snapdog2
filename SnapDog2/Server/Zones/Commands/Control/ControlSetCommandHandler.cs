@@ -27,25 +27,16 @@ public partial class ControlSetCommandHandler(IZoneManager zoneManager, ILogger<
     private readonly IZoneManager _zoneManager = zoneManager;
     private readonly ILogger<ControlSetCommandHandler> _logger = logger;
 
-    [LoggerMessage(
-        EventId = 12800,
-        Level = LogLevel.Information,
-        Message = "Executing control command '{Command}' for Zone {ZoneIndex} from {Source}"
-    )]
+    [LoggerMessage(EventId = 113350, Level = LogLevel.Information, Message = "Executing control command '{Command}' for Zone {ZoneIndex} from {Source}"
+)]
     private partial void LogHandling(string command, int zoneIndex, CommandSource source);
 
-    [LoggerMessage(
-        EventId = 12801,
-        Level = LogLevel.Warning,
-        Message = "Zone {ZoneIndex} not found for ControlSetCommand"
-    )]
+    [LoggerMessage(EventId = 113351, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for ControlSetCommand"
+)]
     private partial void LogZoneNotFound(int zoneIndex);
 
-    [LoggerMessage(
-        EventId = 12802,
-        Level = LogLevel.Warning,
-        Message = "Unknown control command '{Command}' for Zone {ZoneIndex}"
-    )]
+    [LoggerMessage(EventId = 113352, Level = LogLevel.Warning, Message = "Unknown control command '{Command}' for Zone {ZoneIndex}"
+)]
     private partial void LogUnknownCommand(string command, int zoneIndex);
 
     public async Task<Result> Handle(ControlSetCommand request, CancellationToken cancellationToken)

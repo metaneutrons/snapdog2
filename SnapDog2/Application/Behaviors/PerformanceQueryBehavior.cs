@@ -170,38 +170,23 @@ public partial class PerformanceQueryBehavior<TQuery, TResponse>(
         }
     }
 
-    [LoggerMessage(
-        EventId = 8100,
-        Level = LogLevel.Warning,
-        Message = "Slow query detected: {QueryName} took {ElapsedMilliseconds}ms"
-    )]
+    [LoggerMessage(EventId = 118050, Level = LogLevel.Warning, Message = "Slow query detected: {QueryName} took {ElapsedMilliseconds}ms"
+)]
     private partial void LogSlowQuery(string queryName, long elapsedMilliseconds);
 
-    [LoggerMessage(
-        EventId = 8101,
-        Level = LogLevel.Error,
-        Message = "Query {QueryName} threw exception after {ElapsedMilliseconds}ms"
-    )]
+    [LoggerMessage(EventId = 118051, Level = LogLevel.Error, Message = "Query {QueryName} threw exception after {ElapsedMilliseconds}ms"
+)]
     private partial void LogQueryException(string queryName, long elapsedMilliseconds, Exception ex);
 
-    [LoggerMessage(
-        EventId = 8102,
-        Level = LogLevel.Debug,
-        Message = "Failed to record query-specific metrics for {QueryName}"
-    )]
+    [LoggerMessage(EventId = 118052, Level = LogLevel.Debug, Message = "Failed to record query-specific metrics for {QueryName}"
+)]
     private partial void LogQueryMetricsFailure(string queryName, Exception ex);
 
-    [LoggerMessage(
-        EventId = 8103,
-        Level = LogLevel.Debug,
-        Message = "Failed to update business metrics from zone query"
-    )]
+    [LoggerMessage(EventId = 118053, Level = LogLevel.Debug, Message = "Failed to update business metrics from zone query"
+)]
     private partial void LogZoneMetricsFailure(Exception ex);
 
-    [LoggerMessage(
-        EventId = 8104,
-        Level = LogLevel.Debug,
-        Message = "Failed to update business metrics from client query"
-    )]
+    [LoggerMessage(EventId = 118054, Level = LogLevel.Debug, Message = "Failed to update business metrics from client query"
+)]
     private partial void LogClientMetricsFailure(Exception ex);
 }

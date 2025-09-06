@@ -30,18 +30,12 @@ public partial class SetClientMuteCommandHandler(
     private readonly IClientManager _clientManager = clientManager;
     private readonly ILogger<SetClientMuteCommandHandler> _logger = logger;
 
-    [LoggerMessage(
-        EventId = 11000,
-        Level = LogLevel.Information,
-        Message = "Setting mute for Client {ClientIndex} to {Enabled} from {Source}"
-    )]
+    [LoggerMessage(EventId = 112350, Level = LogLevel.Information, Message = "Setting mute for Client {ClientIndex} to {Enabled} from {Source}"
+)]
     private partial void LogHandling(int clientIndex, bool enabled, CommandSource source);
 
-    [LoggerMessage(
-        EventId = 11001,
-        Level = LogLevel.Warning,
-        Message = "Client {ClientIndex} not found for SetClientMuteCommand"
-    )]
+    [LoggerMessage(EventId = 112351, Level = LogLevel.Warning, Message = "Client {ClientIndex} not found for SetClientMuteCommand"
+)]
     private partial void LogClientNotFound(int clientIndex);
 
     public async Task<Result> Handle(SetClientMuteCommand request, CancellationToken cancellationToken)

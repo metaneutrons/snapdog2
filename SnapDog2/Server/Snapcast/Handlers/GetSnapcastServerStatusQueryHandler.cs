@@ -29,18 +29,12 @@ public partial class GetSnapcastServerStatusQueryHandler(
     private readonly ISnapcastService _snapcastService = snapcastService;
     private readonly ILogger<GetSnapcastServerStatusQueryHandler> _logger = logger;
 
-    [LoggerMessage(
-        EventId = 12400,
-        Level = LogLevel.Information,
-        Message = "Getting Snapcast server status"
-    )]
+    [LoggerMessage(EventId = 113150, Level = LogLevel.Information, Message = "Getting Snapcast server status"
+)]
     private partial void LogGettingServerStatus();
 
-    [LoggerMessage(
-        EventId = 12401,
-        Level = LogLevel.Error,
-        Message = "Failed to get Snapcast server status"
-    )]
+    [LoggerMessage(EventId = 113151, Level = LogLevel.Error, Message = "Failed to get Snapcast server status"
+)]
     private partial void LogGetServerStatusFailed(Exception ex);
 
     public async Task<Result<SnapcastServerStatus>> Handle(

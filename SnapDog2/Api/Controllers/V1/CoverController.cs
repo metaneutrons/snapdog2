@@ -22,18 +22,12 @@ public partial class CoverController : ControllerBase
         _logger = logger;
     }
 
-    [LoggerMessage(
-        EventId = 5200,
-        Level = LogLevel.Warning,
-        Message = "Cover art not found: {CoverId}"
-    )]
+    [LoggerMessage(EventId = 113100, Level = LogLevel.Warning, Message = "Cover art not found: {CoverId}"
+)]
     private partial void LogCoverNotFound(string coverId);
 
-    [LoggerMessage(
-        EventId = 5201,
-        Level = LogLevel.Error,
-        Message = "Failed to retrieve cover art: {CoverId}"
-    )]
+    [LoggerMessage(EventId = 113101, Level = LogLevel.Error, Message = "Failed to retrieve cover art: {CoverId}"
+)]
     private partial void LogCoverRetrievalFailed(Exception ex, string coverId);
 
     /// <summary>

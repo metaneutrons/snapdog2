@@ -76,29 +76,36 @@ function Write-ColoredOutput {
 function Get-FileCategory {
     param([string]$RelativePath)
     
-    if ($RelativePath -match "(Audio|Media|LibVLC|Player)") {
-        return "Audio"
+    # More specific patterns first - match actual project structure
+    if ($RelativePath -match "Domain[/\\]Services") { 
+        return "Domain" 
     }
-    elseif ($RelativePath -match "(KNX|Knx)") {
-        return "KNX"
+    elseif ($RelativePath -match "Application[/\\]Services") { 
+        return "Application" 
     }
-    elseif ($RelativePath -match "(MQTT|Mqtt)") {
-        return "MQTT"
+    elseif ($RelativePath -match "Server[/\\]") { 
+        return "Server" 
     }
-    elseif ($RelativePath -match "(Api[/\\]|Controller|Health)") {
-        return "Web"
+    elseif ($RelativePath -match "Api[/\\]") { 
+        return "Api" 
     }
-    elseif ($RelativePath -match "(Performance|Metrics)") {
-        return "Performance"
+    elseif ($RelativePath -match "Infrastructure[/\\]Services") { 
+        return "Infrastructure" 
     }
-    elseif ($RelativePath -match "(Notification|Publisher|Handler)") {
-        return "Notifications"
+    elseif ($RelativePath -match "Infrastructure[/\\]Integrations") { 
+        return "Integration" 
     }
-    elseif ($RelativePath -match "(Infrastructure|Integration|Service|Storage)") {
-        return "Infrastructure"
+    elseif ($RelativePath -match "(Audio|Media|LibVLC|Player)") { 
+        return "Audio" 
     }
-    else {
-        return "Core"
+    elseif ($RelativePath -match "(Metrics|Performance)") { 
+        return "Metrics" 
+    }
+    elseif ($RelativePath -match "(Notification|Publisher)") { 
+        return "Notifications" 
+    }
+    else { 
+        return "Infrastructure" # Default fallback
     }
 }
 
@@ -107,14 +114,15 @@ function Get-CategoryBase {
     param([string]$Category)
     
     $categoryBases = @{
-        "Core" = 1000           # 1000-1999 (foundational components)
-        "Audio" = 2000          # 2000-2999 (audio processing)
-        "KNX" = 3000            # 3000-3999 (KNX automation)
-        "MQTT" = 4000           # 4000-4999 (MQTT messaging)
-        "Web" = 5000            # 5000-5999 (API, controllers)
-        "Infrastructure" = 6000 # 6000-7999 (services, integrations)
-        "Performance" = 8000    # 8000-8999 (metrics, monitoring)
-        "Notifications" = 10000 # 10000-15999 (handlers, publishers)
+        "Domain" = 10000        # 10000-10999: Domain Services (ClientManager, ZoneManager, etc.)
+        "Application" = 11000   # 11000-11999: Application Services (StartupService, BusinessMetrics, etc.)
+        "Server" = 12000        # 12000-12999: Server Handlers (Snapcast, Zones, Clients, etc.)
+        "Api" = 13000          # 13000-13999: API Layer (Controllers, Hubs, Middleware)
+        "Infrastructure" = 14000 # 14000-14999: Infrastructure Services (Background services, Storage)
+        "Integration" = 15000   # 15000-15999: Integration Services (MQTT, KNX, Subsonic)
+        "Audio" = 16000        # 16000-16999: Audio Services (MediaPlayer, MetadataManager)
+        "Notifications" = 17000 # 17000-17999: Notifications & Messaging
+        "Metrics" = 18000      # 18000-18999: Metrics & Monitoring
     }
     
     return $categoryBases[$Category]
@@ -292,7 +300,7 @@ try {
         $categoryCounters[$category]++
         
         $categoryBase = Get-CategoryBase -Category $category
-        $fileBase = $categoryBase + ($fileIndex * 100)
+        $fileBase = $categoryBase + ($fileIndex * 25)  # 25 EventIds per file to fit more files
         
         $fileAssignments[$file.FullName] = @{
             Category = $category
@@ -307,7 +315,7 @@ try {
     foreach ($category in ($categoryCounters.Keys | Sort-Object)) {
         $count = $categoryCounters[$category]
         $base = Get-CategoryBase -Category $category
-        $maxRange = $base + ($count * 100) - 1
+        $maxRange = $base + ($count * 25) - 1  # Updated for 25-number blocks
         Write-ColoredOutput "  $category`: $count files ($base-$maxRange)" "White"
     }
     

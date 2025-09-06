@@ -27,11 +27,8 @@ public partial class GetClientQueryHandler(IClientManager clientManager, ILogger
     private readonly IClientManager _clientManager = clientManager;
     private readonly ILogger<GetClientQueryHandler> _logger = logger;
 
-    [LoggerMessage(
-        EventId = 10700,
-        Level = LogLevel.Information,
-        Message = "Handling GetClientQuery for Client {ClientIndex}"
-    )]
+    [LoggerMessage(EventId = 112200, Level = LogLevel.Information, Message = "Handling GetClientQuery for Client {ClientIndex}"
+)]
     private partial void LogHandling(int clientIndex);
 
     public async Task<Result<ClientState>> Handle(GetClientQuery request, CancellationToken cancellationToken)

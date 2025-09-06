@@ -35,13 +35,13 @@ public partial class ZoneNameCommandHandler(IZoneManager zoneManager, ILogger<Zo
     /// <param name="name">Name of the zone.</param>
     /// <returns>A task representing the asynchronous operation with a Result.</returns>
     /// TODO: Why is this never called?
-    [LoggerMessage(EventId = 13000, Level = LogLevel.Information, Message = "Handling zone name command for zone {ZoneIndex} with name '{Name}'")]
+    [LoggerMessage(EventId = 113450, Level = LogLevel.Information, Message = "Handling zone name command for zone {ZoneIndex} with name '{Name}'")]
     private partial void LogHandling(int zoneIndex, string name);
 
-    [LoggerMessage(EventId = 13001, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found")]
+    [LoggerMessage(EventId = 113451, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found")]
     private partial void LogZoneNotFound(int zoneIndex);
 
-    [LoggerMessage(EventId = 13002, Level = LogLevel.Warning, Message = "Zone name setting not implemented for zone {ZoneIndex}")]
+    [LoggerMessage(EventId = 113452, Level = LogLevel.Warning, Message = "Zone name setting not implemented for zone {ZoneIndex}")]
     private partial void LogNotImplemented(int zoneIndex);
 
     public async Task<Result> Handle(ZoneNameCommand command, CancellationToken cancellationToken = default)

@@ -355,46 +355,28 @@ public sealed partial class MediaPlayer(
     )]
     private static partial void LogPlayerDisposed(ILogger logger, int zoneIndex);
 
-    [LoggerMessage(
-        EventId = 2200,
-        Level = LogLevel.Information,
-        Message = "Starting audio streaming for zone {ZoneIndex}: {StreamUrl}"
-    )]
+    [LoggerMessage(EventId = 116050, Level = LogLevel.Information, Message = "Starting audio streaming for zone {ZoneIndex}: {StreamUrl}"
+)]
     private static partial void LogStartingStreaming(ILogger logger, int zoneIndex, string streamUrl);
 
-    [LoggerMessage(
-        EventId = 2201,
-        Level = LogLevel.Error,
-        Message = "Audio processing failed: {ErrorMessage}"
-    )]
+    [LoggerMessage(EventId = 116051, Level = LogLevel.Error, Message = "Audio processing failed: {ErrorMessage}"
+)]
     private static partial void LogAudioProcessingFailed(ILogger logger, string errorMessage);
 
-    [LoggerMessage(
-        EventId = 2202,
-        Level = LogLevel.Information,
-        Message = "Audio streaming completed successfully for zone {ZoneIndex}"
-    )]
+    [LoggerMessage(EventId = 116052, Level = LogLevel.Information, Message = "Audio streaming completed successfully for zone {ZoneIndex}"
+)]
     private static partial void LogAudioStreamingCompleted(ILogger logger, int zoneIndex);
 
-    [LoggerMessage(
-        EventId = 2203,
-        Level = LogLevel.Debug,
-        Message = "Audio streaming was cancelled for zone {ZoneIndex}"
-    )]
+    [LoggerMessage(EventId = 116053, Level = LogLevel.Debug, Message = "Audio streaming was cancelled for zone {ZoneIndex}"
+)]
     private static partial void LogStreamingCancelled(ILogger logger, int zoneIndex);
 
-    [LoggerMessage(
-        EventId = 2204,
-        Level = LogLevel.Error,
-        Message = "Error during audio streaming for zone {ZoneIndex}"
-    )]
+    [LoggerMessage(EventId = 116054, Level = LogLevel.Error, Message = "Error during audio streaming for zone {ZoneIndex}"
+)]
     private static partial void LogStreamingError(ILogger logger, Exception ex, int zoneIndex);
 
-    [LoggerMessage(
-        EventId = 2205,
-        Level = LogLevel.Debug,
-        Message = "MediaPlayer.GetStatus() - ProcessingContext: {HasContext}, IsPlaying: {IsPlaying}, Disposed: {Disposed}, CurrentTrack: {HasTrack}"
-    )]
+    [LoggerMessage(EventId = 116055, Level = LogLevel.Debug, Message = "MediaPlayer.GetStatus() - ProcessingContext: {HasContext}, IsPlaying: {IsPlaying}, Disposed: {Disposed}, CurrentTrack: {HasTrack}"
+)]
     private static partial void LogGetStatusDebug(
         ILogger logger,
         bool hasContext,
@@ -403,31 +385,19 @@ public sealed partial class MediaPlayer(
         bool hasTrack
     );
 
-    [LoggerMessage(
-        EventId = 2206,
-        Level = LogLevel.Debug,
-        Message = "Updating track position from LibVLC..."
-    )]
+    [LoggerMessage(EventId = 116056, Level = LogLevel.Debug, Message = "Updating track position from LibVLC..."
+)]
     private static partial void LogUpdatingTrackPosition(ILogger logger);
 
-    [LoggerMessage(
-        EventId = 2207,
-        Level = LogLevel.Information,
-        Message = "❌ NOT updating position - CurrentTrack: {HasTrack}, ProcessingContext: {HasContext}, IsPlaying: {IsPlaying}"
-    )]
+    [LoggerMessage(EventId = 116057, Level = LogLevel.Information, Message = "❌ NOT updating position - CurrentTrack: {HasTrack}, ProcessingContext: {HasContext}, IsPlaying: {IsPlaying}"
+)]
     private static partial void LogNotUpdatingPosition(ILogger logger, bool hasTrack, bool hasContext, bool isPlaying);
 
-    [LoggerMessage(
-        EventId = 2208,
-        Level = LogLevel.Warning,
-        Message = "Error forwarding position changed event for zone {ZoneIndex}"
-    )]
+    [LoggerMessage(EventId = 116058, Level = LogLevel.Warning, Message = "Error forwarding position changed event for zone {ZoneIndex}"
+)]
     private static partial void LogPositionEventError(ILogger logger, Exception ex, int zoneIndex);
 
-    [LoggerMessage(
-        EventId = 2209,
-        Level = LogLevel.Warning,
-        Message = "Error forwarding playback state changed event for zone {ZoneIndex}"
-    )]
+    [LoggerMessage(EventId = 116059, Level = LogLevel.Warning, Message = "Error forwarding playback state changed event for zone {ZoneIndex}"
+)]
     private static partial void LogPlaybackStateEventError(ILogger logger, Exception ex, int zoneIndex);
 }

@@ -29,11 +29,8 @@ public partial class GetClientsByZoneQueryHandler(
     private readonly IClientManager _clientManager = clientManager;
     private readonly ILogger<GetClientsByZoneQueryHandler> _logger = logger;
 
-    [LoggerMessage(
-        EventId = 10800,
-        Level = LogLevel.Information,
-        Message = "Handling GetClientsByZoneQuery for Zone {ZoneIndex}"
-    )]
+    [LoggerMessage(EventId = 112250, Level = LogLevel.Information, Message = "Handling GetClientsByZoneQuery for Zone {ZoneIndex}"
+)]
     private partial void LogHandling(int zoneIndex);
 
     public async Task<Result<List<ClientState>>> Handle(

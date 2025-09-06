@@ -128,24 +128,15 @@ public partial class ErrorTrackingService(ILogger<ErrorTrackingService> logger) 
         }
     }
 
-    [LoggerMessage(
-        EventId = 6600,
-        Level = LogLevel.Warning,
-        Message = "Error recorded in {Component}.{Operation}: {Message}"
-    )]
+    [LoggerMessage(EventId = 110100, Level = LogLevel.Warning, Message = "Error recorded in {Component}.{Operation}: {Message}"
+)]
     private static partial void LogErrorRecorded(ILogger logger, string component, string operation, string message);
 
-    [LoggerMessage(
-        EventId = 6601,
-        Level = LogLevel.Information,
-        Message = "Error tracking cleared"
-    )]
+    [LoggerMessage(EventId = 110101, Level = LogLevel.Information, Message = "Error tracking cleared"
+)]
     private static partial void LogErrorsCleared(ILogger logger);
 
-    [LoggerMessage(
-        EventId = 6602,
-        Level = LogLevel.Debug,
-        Message = "Removed {RemovedCount} old errors, {RemainingCount} errors remaining"
-    )]
+    [LoggerMessage(EventId = 110102, Level = LogLevel.Debug, Message = "Removed {RemovedCount} old errors, {RemainingCount} errors remaining"
+)]
     private static partial void LogOldErrorsRemoved(ILogger logger, int removedCount, int remainingCount);
 }

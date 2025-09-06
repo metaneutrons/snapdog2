@@ -35,39 +35,24 @@ public partial class AttributeBasedMqttCommandMapper(
     private readonly Dictionary<string, (Type CommandType, MqttTopicAttribute Attribute)> _topicMappings = new();
     private bool _initialized;
 
-    [LoggerMessage(
-        EventId = 4000,
-        Level = LogLevel.Debug,
-        Message = "Initializing MQTT command mappings from attributes"
-    )]
+    [LoggerMessage(EventId = 115150, Level = LogLevel.Debug, Message = "Initializing MQTT command mappings from attributes"
+)]
     private partial void LogInitializingMappings();
 
-    [LoggerMessage(
-        EventId = 4001,
-        Level = LogLevel.Debug,
-        Message = "Found MQTT command: {CommandType} -> {TopicPattern}"
-    )]
+    [LoggerMessage(EventId = 115151, Level = LogLevel.Debug, Message = "Found MQTT command: {CommandType} -> {TopicPattern}"
+)]
     private partial void LogFoundCommand(string commandType, string topicPattern);
 
-    [LoggerMessage(
-        EventId = 4002,
-        Level = LogLevel.Debug,
-        Message = "Mapping MQTT topic: {Topic} -> {Payload}"
-    )]
+    [LoggerMessage(EventId = 115152, Level = LogLevel.Debug, Message = "Mapping MQTT topic: {Topic} -> {Payload}"
+)]
     private partial void LogMappingTopic(string topic, string payload);
 
-    [LoggerMessage(
-        EventId = 4003,
-        Level = LogLevel.Warning,
-        Message = "No matching command found for MQTT topic: {Topic}"
-    )]
+    [LoggerMessage(EventId = 115153, Level = LogLevel.Warning, Message = "No matching command found for MQTT topic: {Topic}"
+)]
     private partial void LogNoMatchingCommand(string topic);
 
-    [LoggerMessage(
-        EventId = 4004,
-        Level = LogLevel.Error,
-        Message = "Error creating command for topic {Topic}: {Error}"
-    )]
+    [LoggerMessage(EventId = 115154, Level = LogLevel.Error, Message = "Error creating command for topic {Topic}: {Error}"
+)]
     private partial void LogCommandCreationError(string topic, string error);
 
     /// <summary>
@@ -310,10 +295,7 @@ public partial class AttributeBasedMqttCommandMapper(
         return this._topicMappings.Keys;
     }
 
-    [LoggerMessage(
-        EventId = 4005,
-        Level = LogLevel.Error,
-        Message = "Failed to create command instance for type {CommandType}"
-    )]
+    [LoggerMessage(EventId = 115155, Level = LogLevel.Error, Message = "Failed to create command instance for type {CommandType}"
+)]
     private partial void LogCommandInstanceCreationError(string commandType, Exception ex);
 }

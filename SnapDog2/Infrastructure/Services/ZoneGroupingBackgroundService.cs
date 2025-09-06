@@ -43,39 +43,24 @@ public partial class ZoneGroupingBackgroundService : BackgroundService
         _reconciliationInterval = TimeSpan.FromMilliseconds(config.Value.ZoneGroupingIntervalMs);
     }
 
-    [LoggerMessage(
-        EventId = 7600,
-        Level = LogLevel.Information,
-        Message = "Zone grouping service starting with interval {IntervalMs}ms"
-    )]
+    [LoggerMessage(EventId = 114450, Level = LogLevel.Information, Message = "Zone grouping service starting with interval {IntervalMs}ms"
+)]
     private partial void LogServiceStarting(double intervalMs);
 
-    [LoggerMessage(
-        EventId = 7601,
-        Level = LogLevel.Information,
-        Message = "Zone grouping service stopping"
-    )]
+    [LoggerMessage(EventId = 114451, Level = LogLevel.Information, Message = "Zone grouping service stopping"
+)]
     private partial void LogServiceStopping();
 
-    [LoggerMessage(
-        EventId = 7602,
-        Level = LogLevel.Error,
-        Message = "Error during periodic zone grouping check"
-    )]
+    [LoggerMessage(EventId = 114452, Level = LogLevel.Error, Message = "Error during periodic zone grouping check"
+)]
     private partial void LogPeriodicCheckError(Exception ex);
 
-    [LoggerMessage(
-        EventId = 7603,
-        Level = LogLevel.Debug,
-        Message = "Zone grouping check completed successfully"
-    )]
+    [LoggerMessage(EventId = 114453, Level = LogLevel.Debug, Message = "Zone grouping check completed successfully"
+)]
     private partial void LogCheckCompleted();
 
-    [LoggerMessage(
-        EventId = 7604,
-        Level = LogLevel.Warning,
-        Message = "Zone grouping check failed"
-    )]
+    [LoggerMessage(EventId = 114454, Level = LogLevel.Warning, Message = "Zone grouping check failed"
+)]
     private partial void LogCheckFailed();
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)

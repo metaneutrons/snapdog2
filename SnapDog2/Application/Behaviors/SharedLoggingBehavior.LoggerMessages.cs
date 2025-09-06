@@ -21,25 +21,16 @@ namespace SnapDog2.Application.Behaviors;
 public partial class SharedLoggingCommandBehavior<TCommand, TResponse>
 {
     // Command Lifecycle Operations (9701-9703)
-    [LoggerMessage(
-        EventId = 1000,
-        Level = LogLevel.Information,
-        Message = "Starting Command {CommandName}"
-    )]
+    [LoggerMessage(EventId = 114000, Level = LogLevel.Information, Message = "Starting Command {CommandName}"
+)]
     private partial void LogStartingCommand(string commandName);
 
-    [LoggerMessage(
-        EventId = 1001,
-        Level = LogLevel.Information,
-        Message = "Completed Command {CommandName} in {ElapsedMilliseconds}ms"
-    )]
+    [LoggerMessage(EventId = 114001, Level = LogLevel.Information, Message = "Completed Command {CommandName} in {ElapsedMilliseconds}ms"
+)]
     private partial void LogCompletedCommand(string commandName, long elapsedMilliseconds);
 
-    [LoggerMessage(
-        EventId = 1002,
-        Level = LogLevel.Error,
-        Message = "Command {CommandName} failed after {ElapsedMilliseconds}ms"
-    )]
+    [LoggerMessage(EventId = 114002, Level = LogLevel.Error, Message = "Command {CommandName} failed after {ElapsedMilliseconds}ms"
+)]
     private partial void LogCommandFailed(Exception ex, string commandName, long elapsedMilliseconds);
 }
 
@@ -50,24 +41,15 @@ public partial class SharedLoggingCommandBehavior<TCommand, TResponse>
 public partial class SharedLoggingQueryBehavior<TQuery, TResponse>
 {
     // Query Lifecycle Operations (9704-9706)
-    [LoggerMessage(
-        EventId = 1003,
-        Level = LogLevel.Information,
-        Message = "Starting Query {QueryName}"
-    )]
+    [LoggerMessage(EventId = 114003, Level = LogLevel.Information, Message = "Starting Query {QueryName}"
+)]
     private partial void LogStartingQuery(string queryName);
 
-    [LoggerMessage(
-        EventId = 1004,
-        Level = LogLevel.Information,
-        Message = "Completed Query {QueryName} in {ElapsedMilliseconds}ms"
-    )]
+    [LoggerMessage(EventId = 114004, Level = LogLevel.Information, Message = "Completed Query {QueryName} in {ElapsedMilliseconds}ms"
+)]
     private partial void LogCompletedQuery(string queryName, long elapsedMilliseconds);
 
-    [LoggerMessage(
-        EventId = 1005,
-        Level = LogLevel.Error,
-        Message = "Query {QueryName} failed after {ElapsedMilliseconds}ms"
-    )]
+    [LoggerMessage(EventId = 114005, Level = LogLevel.Error, Message = "Query {QueryName} failed after {ElapsedMilliseconds}ms"
+)]
     private partial void LogQueryFailed(Exception ex, string queryName, long elapsedMilliseconds);
 }

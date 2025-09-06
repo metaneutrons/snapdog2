@@ -15,60 +15,36 @@ public partial class SnapDogHub : Hub
 
     #region Logging
 
-    [LoggerMessage(
-        EventId = 5600,
-        Level = LogLevel.Information,
-        Message = "SignalR client connected: {ConnectionId}"
-    )]
+    [LoggerMessage(EventId = 113350, Level = LogLevel.Information, Message = "SignalR client connected: {ConnectionId}"
+)]
     private partial void LogClientConnected(string connectionId);
 
-    [LoggerMessage(
-        EventId = 5601,
-        Level = LogLevel.Information,
-        Message = "SignalR client disconnected: {ConnectionId}, Exception: {Exception}"
-    )]
+    [LoggerMessage(EventId = 113351, Level = LogLevel.Information, Message = "SignalR client disconnected: {ConnectionId}, Exception: {Exception}"
+)]
     private partial void LogClientDisconnected(string connectionId, string? exception);
 
-    [LoggerMessage(
-        EventId = 5602,
-        Level = LogLevel.Debug,
-        Message = "Client {ConnectionId} joined zone {ZoneIndex}"
-    )]
+    [LoggerMessage(EventId = 113352, Level = LogLevel.Debug, Message = "Client {ConnectionId} joined zone {ZoneIndex}"
+)]
     private partial void LogClientJoinedZone(string connectionId, int zoneIndex);
 
-    [LoggerMessage(
-        EventId = 5603,
-        Level = LogLevel.Debug,
-        Message = "Client {ConnectionId} left zone {ZoneIndex}"
-    )]
+    [LoggerMessage(EventId = 113353, Level = LogLevel.Debug, Message = "Client {ConnectionId} left zone {ZoneIndex}"
+)]
     private partial void LogClientLeftZone(string connectionId, int zoneIndex);
 
-    [LoggerMessage(
-        EventId = 5604,
-        Level = LogLevel.Debug,
-        Message = "Client {ConnectionId} joined client {ClientIndex}"
-    )]
+    [LoggerMessage(EventId = 113354, Level = LogLevel.Debug, Message = "Client {ConnectionId} joined client {ClientIndex}"
+)]
     private partial void LogClientJoinedClient(string connectionId, int clientIndex);
 
-    [LoggerMessage(
-        EventId = 5605,
-        Level = LogLevel.Debug,
-        Message = "Client {ConnectionId} left client {ClientIndex}"
-    )]
+    [LoggerMessage(EventId = 113355, Level = LogLevel.Debug, Message = "Client {ConnectionId} left client {ClientIndex}"
+)]
     private partial void LogClientLeftClient(string connectionId, int clientIndex);
 
-    [LoggerMessage(
-        EventId = 5606,
-        Level = LogLevel.Information,
-        Message = "Client {ConnectionId} joined system group"
-    )]
+    [LoggerMessage(EventId = 113356, Level = LogLevel.Information, Message = "Client {ConnectionId} joined system group"
+)]
     private partial void LogClientJoinedSystem(string connectionId);
 
-    [LoggerMessage(
-        EventId = 5607,
-        Level = LogLevel.Information,
-        Message = "Client {ConnectionId} left system group"
-    )]
+    [LoggerMessage(EventId = 113357, Level = LogLevel.Information, Message = "Client {ConnectionId} left system group"
+)]
     private partial void LogClientLeftSystem(string connectionId);
 
     #endregion

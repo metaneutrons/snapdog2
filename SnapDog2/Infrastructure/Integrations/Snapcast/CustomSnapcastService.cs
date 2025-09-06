@@ -812,84 +812,84 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
     }
 
     // LoggerMessage patterns
-    [LoggerMessage(EventId = 7100, Level = LogLevel.Information, Message = "Custom Snapcast service initialized successfully")]
+    [LoggerMessage(EventId = 115400, Level = LogLevel.Information, Message = "Custom Snapcast service initialized successfully")]
     private partial void LogServiceInitialized();
 
-    [LoggerMessage(EventId = 7101, Level = LogLevel.Error, Message = "Failed to initialize custom Snapcast service")]
+    [LoggerMessage(EventId = 115401, Level = LogLevel.Error, Message = "Failed to initialize custom Snapcast service")]
     private partial void LogInitializationFailed(Exception ex);
 
-    [LoggerMessage(EventId = 7102, Level = LogLevel.Error, Message = "Failed to delete client {ClientId}")]
+    [LoggerMessage(EventId = 115402, Level = LogLevel.Error, Message = "Failed to delete client {ClientId}")]
     private partial void LogDeleteClientFailed(Exception ex, string clientId);
 
-    [LoggerMessage(EventId = 7103, Level = LogLevel.Error, Message = "Failed to get RPC version")]
+    [LoggerMessage(EventId = 115403, Level = LogLevel.Error, Message = "Failed to get RPC version")]
     private partial void LogGetRpcVersionFailed(Exception ex);
 
-    [LoggerMessage(EventId = 7104, Level = LogLevel.Debug, Message = "Set client {ClientId} volume to {Volume}% (muted: {Muted})")]
+    [LoggerMessage(EventId = 115404, Level = LogLevel.Debug, Message = "Set client {ClientId} volume to {Volume}% (muted: {Muted})")]
     private partial void LogSetClientVolume(string clientId, int volume, bool muted);
 
-    [LoggerMessage(EventId = 7105, Level = LogLevel.Error, Message = "Failed to set client volume for {ClientId}")]
+    [LoggerMessage(EventId = 115405, Level = LogLevel.Error, Message = "Failed to set client volume for {ClientId}")]
     private partial void LogSetClientVolumeFailed(Exception ex, string clientId);
 
-    [LoggerMessage(EventId = 7106, Level = LogLevel.Debug, Message = "Set client {ClientId} latency to {Latency}ms")]
+    [LoggerMessage(EventId = 115406, Level = LogLevel.Debug, Message = "Set client {ClientId} latency to {Latency}ms")]
     private partial void LogSetClientLatency(string clientId, int latency);
 
-    [LoggerMessage(EventId = 7107, Level = LogLevel.Error, Message = "Failed to set client latency for {ClientId}")]
+    [LoggerMessage(EventId = 115407, Level = LogLevel.Error, Message = "Failed to set client latency for {ClientId}")]
     private partial void LogSetClientLatencyFailed(Exception ex, string clientId);
 
-    [LoggerMessage(EventId = 7108, Level = LogLevel.Debug, Message = "Set client {ClientId} name to {Name}")]
+    [LoggerMessage(EventId = 115408, Level = LogLevel.Debug, Message = "Set client {ClientId} name to {Name}")]
     private partial void LogSetClientName(string clientId, string name);
 
-    [LoggerMessage(EventId = 7109, Level = LogLevel.Error, Message = "Failed to set client name for {ClientId}")]
+    [LoggerMessage(EventId = 115409, Level = LogLevel.Error, Message = "Failed to set client name for {ClientId}")]
     private partial void LogSetClientNameFailed(Exception ex, string clientId);
 
-    [LoggerMessage(EventId = 7110, Level = LogLevel.Debug, Message = "Set group {GroupId} mute to {Muted}")]
+    [LoggerMessage(EventId = 115410, Level = LogLevel.Debug, Message = "Set group {GroupId} mute to {Muted}")]
     private partial void LogSetGroupMute(string groupId, bool muted);
 
-    [LoggerMessage(EventId = 7111, Level = LogLevel.Error, Message = "Failed to set group mute for {GroupId}")]
+    [LoggerMessage(EventId = 115411, Level = LogLevel.Error, Message = "Failed to set group mute for {GroupId}")]
     private partial void LogSetGroupMuteFailed(Exception ex, string groupId);
 
-    [LoggerMessage(EventId = 7112, Level = LogLevel.Debug, Message = "Set group {GroupId} stream to {StreamId}")]
+    [LoggerMessage(EventId = 115412, Level = LogLevel.Debug, Message = "Set group {GroupId} stream to {StreamId}")]
     private partial void LogSetGroupStream(string groupId, string streamId);
 
-    [LoggerMessage(EventId = 7113, Level = LogLevel.Error, Message = "Failed to set group stream for {GroupId}")]
+    [LoggerMessage(EventId = 115413, Level = LogLevel.Error, Message = "Failed to set group stream for {GroupId}")]
     private partial void LogSetGroupStreamFailed(Exception ex, string groupId);
 
-    [LoggerMessage(EventId = 7114, Level = LogLevel.Debug, Message = "Set group {GroupId} name to {Name}")]
+    [LoggerMessage(EventId = 115414, Level = LogLevel.Debug, Message = "Set group {GroupId} name to {Name}")]
     private partial void LogSetGroupName(string groupId, string name);
 
-    [LoggerMessage(EventId = 7115, Level = LogLevel.Error, Message = "Failed to set group name for {GroupId}")]
+    [LoggerMessage(EventId = 115415, Level = LogLevel.Error, Message = "Failed to set group name for {GroupId}")]
     private partial void LogSetGroupNameFailed(Exception ex, string groupId);
 
-    [LoggerMessage(EventId = 7116, Level = LogLevel.Debug, Message = "Set group {GroupId} clients to {Clients}")]
+    [LoggerMessage(EventId = 115416, Level = LogLevel.Debug, Message = "Set group {GroupId} clients to {Clients}")]
     private partial void LogSetGroupClients(string groupId, string clients);
 
-    [LoggerMessage(EventId = 7117, Level = LogLevel.Error, Message = "Failed to set group clients for {GroupId}")]
+    [LoggerMessage(EventId = 115417, Level = LogLevel.Error, Message = "Failed to set group clients for {GroupId}")]
     private partial void LogSetGroupClientsFailed(Exception ex, string groupId);
 
-    [LoggerMessage(EventId = 7118, Level = LogLevel.Error, Message = "Failed to get server status")]
+    [LoggerMessage(EventId = 115418, Level = LogLevel.Error, Message = "Failed to get server status")]
     private partial void LogGetServerStatusFailed(Exception ex);
 
-    [LoggerMessage(EventId = 7119, Level = LogLevel.Debug, Message = "Unhandled notification: {Method}")]
+    [LoggerMessage(EventId = 115419, Level = LogLevel.Debug, Message = "Unhandled notification: {Method}")]
     private partial void LogUnhandledNotification(string method);
 
-    [LoggerMessage(EventId = 7120, Level = LogLevel.Error, Message = "Error handling notification {Method}")]
+    [LoggerMessage(EventId = 115420, Level = LogLevel.Error, Message = "Error handling notification {Method}")]
     private partial void LogNotificationHandlingError(Exception ex, string method);
 
-    [LoggerMessage(EventId = 7121, Level = LogLevel.Debug, Message = "🔊 Client volume changed: {ClientId} -> {Volume}% (muted: {Muted})")]
+    [LoggerMessage(EventId = 115421, Level = LogLevel.Debug, Message = "🔊 Client volume changed: {ClientId} -> {Volume}% (muted: {Muted})")]
     private partial void LogClientVolumeChanged(string clientId, int volume, bool muted);
 
-    [LoggerMessage(EventId = 7122, Level = LogLevel.Debug, Message = "Ignoring volume change for unconfigured client: {ClientId}")]
+    [LoggerMessage(EventId = 115422, Level = LogLevel.Debug, Message = "Ignoring volume change for unconfigured client: {ClientId}")]
     private partial void LogIgnoringVolumeChange(string clientId);
 
-    [LoggerMessage(EventId = 7123, Level = LogLevel.Debug, Message = "Server state refreshed with {GroupCount} groups")]
+    [LoggerMessage(EventId = 115423, Level = LogLevel.Debug, Message = "Server state refreshed with {GroupCount} groups")]
     private partial void LogServerStateRefreshed(int groupCount);
 
-    [LoggerMessage(EventId = 7124, Level = LogLevel.Warning, Message = "Failed to refresh server state")]
+    [LoggerMessage(EventId = 115424, Level = LogLevel.Warning, Message = "Failed to refresh server state")]
     private partial void LogRefreshServerStateFailed(Exception ex);
 
-    [LoggerMessage(EventId = 7125, Level = LogLevel.Warning, Message = "Health check failed, attempting reconnection")]
+    [LoggerMessage(EventId = 115425, Level = LogLevel.Warning, Message = "Health check failed, attempting reconnection")]
     private partial void LogHealthCheckFailed(Exception ex);
 
-    [LoggerMessage(EventId = 7126, Level = LogLevel.Error, Message = "Failed to reconnect during health check")]
+    [LoggerMessage(EventId = 115426, Level = LogLevel.Error, Message = "Failed to reconnect during health check")]
     private partial void LogReconnectFailed(Exception ex);
 }

@@ -339,11 +339,8 @@ public partial class ApplicationMetrics : IApplicationMetrics
         this._meter?.Dispose();
     }
 
-    [LoggerMessage(
-        EventId = 8400,
-        Level = LogLevel.Information,
-        Message = "ApplicationMetrics initialized with {MeterName} v{MeterVersion}"
-    )]
+    [LoggerMessage(EventId = 118100, Level = LogLevel.Information, Message = "ApplicationMetrics initialized with {MeterName} v{MeterVersion}"
+)]
     private partial void LogApplicationMetricsInitialized(string? meterName, string? meterVersion);
 }
 

@@ -198,12 +198,9 @@ public partial class BusinessMetricsCollectionService(
         }
     }
 
-    [LoggerMessage(
-        EventId = 8200,
-        Level = LogLevel.Debug,
-        Message = "Business metrics collected - Zones: {ZonesTotal} total, {ZonesActive} active; "
+    [LoggerMessage(EventId = 111000, Level = LogLevel.Debug, Message = "Business metrics collected - Zones: {ZonesTotal} total, {ZonesActive} active; "
             + "Clients: {ClientsConnected} connected; Tracks: {TracksPlaying} playing"
-    )]
+)]
     private partial void LogBusinessMetricsCollected(
         int zonesTotal,
         int zonesActive,
@@ -211,31 +208,19 @@ public partial class BusinessMetricsCollectionService(
         int tracksPlaying
     );
 
-    [LoggerMessage(
-        EventId = 8201,
-        Level = LogLevel.Information,
-        Message = "BusinessMetricsCollectionService started with {CollectionInterval} interval"
-    )]
+    [LoggerMessage(EventId = 111001, Level = LogLevel.Information, Message = "BusinessMetricsCollectionService started with {CollectionInterval} interval"
+)]
     private static partial void LogServiceStarted(ILogger logger, TimeSpan collectionInterval);
 
-    [LoggerMessage(
-        EventId = 8202,
-        Level = LogLevel.Error,
-        Message = "Error occurred while collecting business metrics"
-    )]
+    [LoggerMessage(EventId = 111002, Level = LogLevel.Error, Message = "Error occurred while collecting business metrics"
+)]
     private static partial void LogErrorCollectingMetrics(ILogger logger, Exception ex);
 
-    [LoggerMessage(
-        EventId = 8203,
-        Level = LogLevel.Information,
-        Message = "BusinessMetricsCollectionService stopped"
-    )]
+    [LoggerMessage(EventId = 111003, Level = LogLevel.Information, Message = "BusinessMetricsCollectionService stopped"
+)]
     private static partial void LogServiceStopped(ILogger logger);
 
-    [LoggerMessage(
-        EventId = 8204,
-        Level = LogLevel.Warning,
-        Message = "Failed to collect business metrics"
-    )]
+    [LoggerMessage(EventId = 111004, Level = LogLevel.Warning, Message = "Failed to collect business metrics"
+)]
     private static partial void LogFailedToCollectMetrics(ILogger logger, Exception ex);
 }

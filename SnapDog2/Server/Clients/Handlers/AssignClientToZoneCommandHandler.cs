@@ -32,25 +32,16 @@ public partial class AssignClientToZoneCommandHandler(
     private readonly IZoneManager _zoneManager = zoneManager;
     private readonly ILogger<AssignClientToZoneCommandHandler> _logger = logger;
 
-    [LoggerMessage(
-        EventId = 10300,
-        Level = LogLevel.Information,
-        Message = "Assigning Client {ClientIndex} to Zone {ZoneIndex} from {Source}"
-    )]
+    [LoggerMessage(EventId = 112000, Level = LogLevel.Information, Message = "Assigning Client {ClientIndex} to Zone {ZoneIndex} from {Source}"
+)]
     private partial void LogHandling(int clientIndex, int zoneIndex, CommandSource source);
 
-    [LoggerMessage(
-        EventId = 10301,
-        Level = LogLevel.Warning,
-        Message = "Client {ClientIndex} not found for AssignClientToZoneCommand"
-    )]
+    [LoggerMessage(EventId = 112001, Level = LogLevel.Warning, Message = "Client {ClientIndex} not found for AssignClientToZoneCommand"
+)]
     private partial void LogClientNotFound(int clientIndex);
 
-    [LoggerMessage(
-        EventId = 10302,
-        Level = LogLevel.Warning,
-        Message = "Zone {ZoneIndex} not found for AssignClientToZoneCommand"
-    )]
+    [LoggerMessage(EventId = 112002, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found for AssignClientToZoneCommand"
+)]
     private partial void LogZoneNotFound(int zoneIndex);
 
     public async Task<Result> Handle(AssignClientToZoneCommand request, CancellationToken cancellationToken)

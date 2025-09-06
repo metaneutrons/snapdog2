@@ -27,25 +27,16 @@ public partial class MqttCommandMapper(ILogger<MqttCommandMapper> logger, MqttCo
     private readonly ILogger<MqttCommandMapper> _logger = logger;
     private readonly MqttConfig _mqttConfig = mqttConfig;
 
-    [LoggerMessage(
-        EventId = 4100,
-        Level = LogLevel.Debug,
-        Message = "Mapping MQTT command: {Topic} -> {Payload}"
-    )]
+    [LoggerMessage(EventId = 115200, Level = LogLevel.Debug, Message = "Mapping MQTT command: {Topic} -> {Payload}"
+)]
     private partial void LogMappingCommand(string topic, string payload);
 
-    [LoggerMessage(
-        EventId = 4101,
-        Level = LogLevel.Warning,
-        Message = "Failed to map MQTT topic: {Topic}"
-    )]
+    [LoggerMessage(EventId = 115201, Level = LogLevel.Warning, Message = "Failed to map MQTT topic: {Topic}"
+)]
     private partial void LogMappingFailed(string topic);
 
-    [LoggerMessage(
-        EventId = 4102,
-        Level = LogLevel.Error,
-        Message = "Error mapping MQTT command for topic {Topic}: {Error}"
-    )]
+    [LoggerMessage(EventId = 115202, Level = LogLevel.Error, Message = "Error mapping MQTT command for topic {Topic}: {Error}"
+)]
     private partial void LogMappingError(string topic, string error);
 
     /// <summary>

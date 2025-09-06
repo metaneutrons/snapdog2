@@ -30,18 +30,12 @@ public partial class SetClientVolumeCommandHandler(
     private readonly IClientManager _clientManager = clientManager;
     private readonly ILogger<SetClientVolumeCommandHandler> _logger = logger;
 
-    [LoggerMessage(
-        EventId = 11200,
-        Level = LogLevel.Information,
-        Message = "Setting volume for Client {ClientIndex} to {Volume} from {Source}"
-    )]
+    [LoggerMessage(EventId = 112450, Level = LogLevel.Information, Message = "Setting volume for Client {ClientIndex} to {Volume} from {Source}"
+)]
     private partial void LogHandling(int clientIndex, int volume, CommandSource source);
 
-    [LoggerMessage(
-        EventId = 11201,
-        Level = LogLevel.Warning,
-        Message = "Client {ClientIndex} not found for SetClientVolumeCommand"
-    )]
+    [LoggerMessage(EventId = 112451, Level = LogLevel.Warning, Message = "Client {ClientIndex} not found for SetClientVolumeCommand"
+)]
     private partial void LogClientNotFound(int clientIndex);
 
     public async Task<Result> Handle(SetClientVolumeCommand request, CancellationToken cancellationToken)

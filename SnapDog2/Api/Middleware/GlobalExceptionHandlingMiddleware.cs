@@ -235,11 +235,8 @@ public partial class GlobalExceptionHandlingMiddleware(
 
     #region Logging
 
-    [LoggerMessage(
-        EventId = 5700,
-        Level = LogLevel.Error,
-        Message = "🚨 UNHANDLED EXCEPTION in {RequestMethod} {RequestPath} | CorrelationId: {CorrelationId} | RemoteIP: {RemoteIp} | UserAgent: {UserAgent}"
-    )]
+    [LoggerMessage(EventId = 113400, Level = LogLevel.Error, Message = "🚨 UNHANDLED EXCEPTION in {RequestMethod} {RequestPath} | CorrelationId: {CorrelationId} | RemoteIP: {RemoteIp} | UserAgent: {UserAgent}"
+)]
     private partial void LogUnhandledExceptionWithStackTrace(
         string requestMethod,
         string requestPath,
@@ -249,11 +246,8 @@ public partial class GlobalExceptionHandlingMiddleware(
         Exception exception
     );
 
-    [LoggerMessage(
-        EventId = 5701,
-        Level = LogLevel.Error,
-        Message = "🚨 UNHANDLED EXCEPTION in {RequestMethod} {RequestPath} | CorrelationId: {CorrelationId} | RemoteIP: {RemoteIp} | UserAgent: {UserAgent} | Error: {ExceptionType} - {ExceptionMessage}"
-    )]
+    [LoggerMessage(EventId = 113401, Level = LogLevel.Error, Message = "🚨 UNHANDLED EXCEPTION in {RequestMethod} {RequestPath} | CorrelationId: {CorrelationId} | RemoteIP: {RemoteIp} | UserAgent: {UserAgent} | Error: {ExceptionType} - {ExceptionMessage}"
+)]
     private partial void LogUnhandledException(
         string requestMethod,
         string requestPath,
@@ -264,11 +258,8 @@ public partial class GlobalExceptionHandlingMiddleware(
         string exceptionMessage
     );
 
-    [LoggerMessage(
-        EventId = 5702,
-        Level = LogLevel.Information,
-        Message = "🔄 Exception response sent: {StatusCode} {ErrorCode} | CorrelationId: {CorrelationId}"
-    )]
+    [LoggerMessage(EventId = 113402, Level = LogLevel.Information, Message = "🔄 Exception response sent: {StatusCode} {ErrorCode} | CorrelationId: {CorrelationId}"
+)]
     private partial void LogExceptionResponseSent(int statusCode, string errorCode, string correlationId);
 
     #endregion

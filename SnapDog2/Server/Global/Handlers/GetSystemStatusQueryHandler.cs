@@ -51,17 +51,11 @@ public partial class GetSystemStatusQueryHandler(
         }
     }
 
-    [LoggerMessage(
-        EventId = 11800,
-        Level = LogLevel.Information,
-        Message = "Handling GetSystemStatusQuery"
-    )]
+    [LoggerMessage(EventId = 112750, Level = LogLevel.Information, Message = "Handling GetSystemStatusQuery"
+)]
     private partial void LogHandling();
 
-    [LoggerMessage(
-        EventId = 11801,
-        Level = LogLevel.Error,
-        Message = "Error retrieving system status"
-    )]
+    [LoggerMessage(EventId = 112751, Level = LogLevel.Error, Message = "Error retrieving system status"
+)]
     private partial void LogError(Exception ex);
 }

@@ -30,25 +30,16 @@ public partial class ToggleClientMuteCommandHandler(
     private readonly IClientManager _clientManager = clientManager;
     private readonly ILogger<ToggleClientMuteCommandHandler> _logger = logger;
 
-    [LoggerMessage(
-        EventId = 11300,
-        Level = LogLevel.Information,
-        Message = "Toggling mute for Client {ClientIndex} from {Source}"
-    )]
+    [LoggerMessage(EventId = 112500, Level = LogLevel.Information, Message = "Toggling mute for Client {ClientIndex} from {Source}"
+)]
     private partial void LogHandling(int clientIndex, CommandSource source);
 
-    [LoggerMessage(
-        EventId = 11301,
-        Level = LogLevel.Warning,
-        Message = "Client {ClientIndex} not found for ToggleClientMuteCommand"
-    )]
+    [LoggerMessage(EventId = 112501, Level = LogLevel.Warning, Message = "Client {ClientIndex} not found for ToggleClientMuteCommand"
+)]
     private partial void LogClientNotFound(int clientIndex);
 
-    [LoggerMessage(
-        EventId = 11302,
-        Level = LogLevel.Information,
-        Message = "Toggled mute for Client {ClientIndex} to {NewMuteState}"
-    )]
+    [LoggerMessage(EventId = 112502, Level = LogLevel.Information, Message = "Toggled mute for Client {ClientIndex} to {NewMuteState}"
+)]
     private partial void LogToggleResult(int clientIndex, bool newMuteState);
 
     public async Task<Result> Handle(ToggleClientMuteCommand request, CancellationToken cancellationToken)
