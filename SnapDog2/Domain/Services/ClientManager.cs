@@ -508,7 +508,7 @@ public partial class ClientManager : IClientManager
                     // Publish event for immediate regrouping
                     Console.WriteLine($"DEBUG: Publishing ClientZoneChangedNotification - clientIndex: {clientIndex}, oldZone: {oldZone}, newZone: {zoneIndex}");
                     Console.WriteLine($"DEBUG: Mediator is null: {this._mediator == null}");
-                    await this._mediator.PublishAsync(new ClientZoneChangedNotification(clientIndex, oldZone, zoneIndex));
+                    await this._mediator!.PublishAsync(new ClientZoneChangedNotification(clientIndex, oldZone, zoneIndex));
                 }
                 finally
                 {

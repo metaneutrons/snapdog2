@@ -215,7 +215,7 @@ public partial class ZoneGroupingService(
                     var zone = await this._zoneManager.GetZoneAsync(zoneIndex);
                     if (zone.IsSuccess)
                     {
-                        zone.Value.UpdateSnapcastGroupId(existingGroup.Id);
+                        zone.Value!.UpdateSnapcastGroupId(existingGroup.Id);
                     }
                 }
 
