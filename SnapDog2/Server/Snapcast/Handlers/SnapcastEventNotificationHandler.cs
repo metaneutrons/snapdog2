@@ -184,6 +184,27 @@ public partial class SnapcastEventNotificationHandler(
     )]
     private partial void LogInvalidClientIndexForName(string clientIndex);
 
+    [LoggerMessage(
+        EventId = 12620,
+        Level = LogLevel.Debug,
+        Message = "SnapcastClientVolumeChangedNotification received for client {ClientIndex}"
+    )]
+    private partial void LogVolumeNotificationReceived(string clientIndex);
+
+    [LoggerMessage(
+        EventId = 12621,
+        Level = LogLevel.Debug,
+        Message = "Publishing ClientVolumeChangedNotification for SignalR - Client {ClientIndex}, Volume {Volume}"
+    )]
+    private partial void LogPublishingVolumeNotification(int clientIndex, int volume);
+
+    [LoggerMessage(
+        EventId = 12622,
+        Level = LogLevel.Debug,
+        Message = "Publishing ClientMuteChangedNotification for SignalR - Client {ClientIndex}, Muted {IsMuted}"
+    )]
+    private partial void LogPublishingMuteNotification(int clientIndex, bool isMuted);
+
     #endregion
 
     #region Client Events
@@ -259,7 +280,7 @@ public partial class SnapcastEventNotificationHandler(
     public async Task Handle(SnapcastClientVolumeChangedNotification notification, CancellationToken cancellationToken)
     {
         this.LogClientVolumeChanged(notification.ClientIndex, notification.Volume.Percent, notification.Volume.Muted);
-        this._logger.LogDebug("🔊 DEBUG: SnapcastClientVolumeChangedNotification received for client {ClientIndex}", notification.ClientIndex);
+        this.LogVolumeNotificationReceived(notification.ClientIndex);
 
         // Parse client index from string to int (now it should be a proper client Index)
         if (!int.TryParse(notification.ClientIndex, out var clientIndex))
@@ -293,14 +314,14 @@ public partial class SnapcastEventNotificationHandler(
         await this._mediator.PublishAsync(new ClientMuteStatusNotification(clientIndex, notification.Volume.Muted), cancellationToken);
 
         // 3. Publish SignalR notifications for real-time UI updates
-        this._logger.LogDebug("🔊 DEBUG: Publishing ClientVolumeChangedNotification for SignalR - Client {ClientIndex}, Volume {Volume}", clientIndex, notification.Volume.Percent);
+        this.LogPublishingVolumeNotification(clientIndex, notification.Volume.Percent);
         await this._mediator.PublishAsync(new ClientVolumeChangedNotification
         {
             ClientIndex = clientIndex,
             Volume = notification.Volume.Percent
         }, cancellationToken);
 
-        this._logger.LogDebug("🔇 DEBUG: Publishing ClientMuteChangedNotification for SignalR - Client {ClientIndex}, Muted {IsMuted}", clientIndex, notification.Volume.Muted);
+        this.LogPublishingMuteNotification(clientIndex, notification.Volume.Muted);
         await this._mediator.PublishAsync(new ClientMuteChangedNotification
         {
             ClientIndex = clientIndex,
