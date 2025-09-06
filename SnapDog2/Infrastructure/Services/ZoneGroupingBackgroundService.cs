@@ -23,7 +23,7 @@ using SnapDog2.Shared.Configuration;
 /// <summary>
 /// Simple background service that runs periodic zone grouping checks.
 /// </summary>
-public class ZoneGroupingBackgroundService : BackgroundService
+public partial class ZoneGroupingBackgroundService : BackgroundService
 {
     private readonly ILogger<ZoneGroupingBackgroundService> _logger;
     private readonly IServiceProvider _serviceProvider;
@@ -43,9 +43,44 @@ public class ZoneGroupingBackgroundService : BackgroundService
         _reconciliationInterval = TimeSpan.FromMilliseconds(config.Value.ZoneGroupingIntervalMs);
     }
 
+    [LoggerMessage(
+        EventId = 15000,
+        Level = LogLevel.Information,
+        Message = "Zone grouping service starting with interval {IntervalMs}ms"
+    )]
+    private partial void LogServiceStarting(double intervalMs);
+
+    [LoggerMessage(
+        EventId = 15001,
+        Level = LogLevel.Information,
+        Message = "Zone grouping service stopping"
+    )]
+    private partial void LogServiceStopping();
+
+    [LoggerMessage(
+        EventId = 15002,
+        Level = LogLevel.Error,
+        Message = "Error during periodic zone grouping check"
+    )]
+    private partial void LogPeriodicCheckError(Exception ex);
+
+    [LoggerMessage(
+        EventId = 15003,
+        Level = LogLevel.Debug,
+        Message = "Zone grouping check completed successfully"
+    )]
+    private partial void LogCheckCompleted();
+
+    [LoggerMessage(
+        EventId = 15004,
+        Level = LogLevel.Warning,
+        Message = "Zone grouping check failed"
+    )]
+    private partial void LogCheckFailed();
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("🔄 Zone grouping service starting with interval {IntervalMs}ms", _reconciliationInterval.TotalMilliseconds);
+        LogServiceStarting(_reconciliationInterval.TotalMilliseconds);
 
         // Wait for services to be ready
         await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
@@ -60,12 +95,12 @@ public class ZoneGroupingBackgroundService : BackgroundService
             }
             catch (OperationCanceledException)
             {
-                _logger.LogInformation("⏹️ Zone grouping service stopping");
+                LogServiceStopping();
                 break;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "💥 Error during periodic zone grouping check");
+                LogPeriodicCheckError(ex);
                 await Task.Delay(_reconciliationInterval, stoppingToken);
             }
         }
@@ -85,18 +120,18 @@ public class ZoneGroupingBackgroundService : BackgroundService
             if (result.IsSuccess)
             {
                 _metrics.RecordReconciliation(stopwatch.Elapsed.TotalSeconds, true);
-                _logger.LogDebug("✅ Zone grouping check completed successfully");
+                LogCheckCompleted();
             }
             else
             {
                 _metrics.RecordReconciliation(stopwatch.Elapsed.TotalSeconds, false);
-                _logger.LogWarning("⚠️ Zone grouping check failed");
+                LogCheckFailed();
             }
         }
         catch (Exception ex)
         {
             _metrics.RecordReconciliation(stopwatch.Elapsed.TotalSeconds, false);
-            _logger.LogError(ex, "💥 Error during periodic zone grouping check");
+            LogPeriodicCheckError(ex);
         }
     }
 }

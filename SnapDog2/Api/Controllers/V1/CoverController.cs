@@ -11,7 +11,7 @@ namespace SnapDog2.Api.Controllers.V1;
 [ApiController]
 [Route("api/v1/cover")]
 [Authorize]
-public class CoverController : ControllerBase
+public partial class CoverController : ControllerBase
 {
     private readonly ISubsonicService _subsonicService;
     private readonly ILogger<CoverController> _logger;
@@ -21,6 +21,20 @@ public class CoverController : ControllerBase
         _subsonicService = subsonicService;
         _logger = logger;
     }
+
+    [LoggerMessage(
+        EventId = 14000,
+        Level = LogLevel.Warning,
+        Message = "Cover art not found: {CoverId}"
+    )]
+    private partial void LogCoverNotFound(string coverId);
+
+    [LoggerMessage(
+        EventId = 14001,
+        Level = LogLevel.Error,
+        Message = "Failed to retrieve cover art: {CoverId}"
+    )]
+    private partial void LogCoverRetrievalFailed(Exception ex, string coverId);
 
     /// <summary>
     /// Gets cover art image by cover ID.
@@ -47,7 +61,7 @@ public class CoverController : ControllerBase
 
             if (!coverResult.IsSuccess || coverResult.Value == null)
             {
-                _logger.LogWarning("Cover art not found: {CoverId}", coverId);
+                LogCoverNotFound(coverId);
                 return NotFound();
             }
 
@@ -61,7 +75,7 @@ public class CoverController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to retrieve cover art: {CoverId}", coverId);
+            LogCoverRetrievalFailed(ex, coverId);
             return StatusCode(500, "Failed to retrieve cover art");
         }
     }
