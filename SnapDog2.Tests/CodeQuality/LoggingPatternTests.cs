@@ -32,7 +32,7 @@ public class LoggingPatternTests
 
     private static readonly string[] ExcludedFiles = { "GlobalSuppressions.cs", "AssemblyInfo.cs" };
 
-    [Fact(Skip = "Temporarily disabled - 68 logging patterns need conversion to LoggerMessage")]
+    [Fact]
     public void ShouldNotContainTraditionalLoggingPatterns()
     {
         // Arrange

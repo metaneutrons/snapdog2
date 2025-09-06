@@ -693,6 +693,9 @@ public partial class ZoneGroupingService(
     )]
     private partial void LogErrorSynchronizingClientNames(Exception ex, int ZoneId);
 
+    [LoggerMessage(EventId = 7735, Level = LogLevel.Error, Message = "Error during background zone regrouping for client {ClientIndex}")]
+    private partial void LogBackgroundRegroupingError(Exception ex, int clientIndex);
+
     /// <summary>
     /// Handles client zone change notifications by triggering immediate regrouping.
     /// </summary>
@@ -707,7 +710,7 @@ public partial class ZoneGroupingService(
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error during background zone regrouping for client {ClientIndex}", notification.ClientIndex);
+                LogBackgroundRegroupingError(ex, notification.ClientIndex);
             }
         });
 

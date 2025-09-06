@@ -10,7 +10,7 @@ using ServerZoneNotifications = SnapDog2.Server.Zones.Notifications;
 /// <summary>
 /// Bridges mediator notifications to SignalR hub notifications
 /// </summary>
-public class SignalRNotificationHandler :
+public partial class SignalRNotificationHandler :
     INotificationHandler<ServerZoneNotifications.ZoneVolumeChangedNotification>,
     INotificationHandler<ServerZoneNotifications.ZoneMuteChangedNotification>,
     INotificationHandler<ServerZoneNotifications.ZonePlaybackStateChangedNotification>,
@@ -35,15 +35,57 @@ public class SignalRNotificationHandler :
         _logger = logger;
     }
 
+    [LoggerMessage(EventId = 20001, Level = LogLevel.Information, Message = "🔔 SignalR: Zone {ZoneIndex} volume changed to {Volume}")]
+    private partial void LogZoneVolumeChanged(int zoneIndex, int volume);
+
+    [LoggerMessage(EventId = 20002, Level = LogLevel.Information, Message = "🔔 SignalR: Zone {ZoneIndex} mute changed to {IsMuted}")]
+    private partial void LogZoneMuteChanged(int zoneIndex, bool isMuted);
+
+    [LoggerMessage(EventId = 20003, Level = LogLevel.Information, Message = "🔔 SignalR: Zone {ZoneIndex} playback changed to {PlaybackState}")]
+    private partial void LogZonePlaybackChanged(int zoneIndex, string playbackState);
+
+    [LoggerMessage(EventId = 20004, Level = LogLevel.Information, Message = "🔔 SignalR: Zone {ZoneIndex} track changed to {TrackIndex}")]
+    private partial void LogZoneTrackChanged(int zoneIndex, int? trackIndex);
+
+    [LoggerMessage(EventId = 20005, Level = LogLevel.Information, Message = "🔔 SignalR: Zone {ZoneIndex} playlist changed to {PlaylistIndex}")]
+    private partial void LogZonePlaylistChanged(int zoneIndex, int? playlistIndex);
+
+    [LoggerMessage(EventId = 20006, Level = LogLevel.Information, Message = "🔔 SignalR: Zone {ZoneIndex} track repeat changed to {Enabled}")]
+    private partial void LogZoneTrackRepeatChanged(int zoneIndex, bool enabled);
+
+    [LoggerMessage(EventId = 20007, Level = LogLevel.Information, Message = "🔔 SignalR: Zone {ZoneIndex} playlist repeat changed to {Enabled}")]
+    private partial void LogZonePlaylistRepeatChanged(int zoneIndex, bool enabled);
+
+    [LoggerMessage(EventId = 20008, Level = LogLevel.Information, Message = "🔔 SignalR: Zone {ZoneIndex} shuffle changed to {ShuffleEnabled}")]
+    private partial void LogZoneShuffleChanged(int zoneIndex, bool shuffleEnabled);
+
+    [LoggerMessage(EventId = 20009, Level = LogLevel.Debug, Message = "🔔 SignalR: Zone {ZoneIndex} progress: {Position}ms ({Progress}%)")]
+    private partial void LogZoneProgress(int zoneIndex, long position, double progress);
+
+    [LoggerMessage(EventId = 20010, Level = LogLevel.Information, Message = "🔔 SignalR: Client {ClientIndex} volume changed to {Volume}")]
+    private partial void LogClientVolumeChanged(int clientIndex, int volume);
+
+    [LoggerMessage(EventId = 20011, Level = LogLevel.Information, Message = "🔔 SignalR: Client {ClientIndex} mute changed to {IsMuted}")]
+    private partial void LogClientMuteChanged(int clientIndex, bool isMuted);
+
+    [LoggerMessage(EventId = 20012, Level = LogLevel.Information, Message = "🔔 SignalR: Client {ClientIndex} zone changed to {ZoneIndex}")]
+    private partial void LogClientZoneChanged(int clientIndex, string zoneIndex);
+
+    [LoggerMessage(EventId = 20013, Level = LogLevel.Information, Message = "🔔 SignalR: Client {ClientIndex} connection changed to {Connected}")]
+    private partial void LogClientConnectionChanged(int clientIndex, bool connected);
+
+    [LoggerMessage(EventId = 20014, Level = LogLevel.Information, Message = "🔔 SignalR: Client {ClientIndex} latency changed to {Latency}ms")]
+    private partial void LogClientLatencyChanged(int clientIndex, int latency);
+
     public async Task Handle(ServerZoneNotifications.ZoneVolumeChangedNotification notification, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("🔔 SignalR: Zone {ZoneIndex} volume changed to {Volume}", notification.ZoneIndex, notification.Volume);
+        LogZoneVolumeChanged(notification.ZoneIndex, notification.Volume);
         await _hubContext.Clients.All.SendAsync("ZoneVolumeChanged", notification.ZoneIndex, notification.Volume, cancellationToken);
     }
 
     public async Task Handle(ServerZoneNotifications.ZoneMuteChangedNotification notification, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("🔔 SignalR: Zone {ZoneIndex} mute changed to {IsMuted}", notification.ZoneIndex, notification.IsMuted);
+        LogZoneMuteChanged(notification.ZoneIndex, notification.IsMuted);
         await _hubContext.Clients.All.SendAsync("ZoneMuteChanged", notification.ZoneIndex, notification.IsMuted, cancellationToken);
     }
 
