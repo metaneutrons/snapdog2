@@ -19,7 +19,7 @@ using System.Reflection;
 /// Attribute to mark command classes with their corresponding command ID.
 /// Used for inbound command processing from external systems (MQTT, KNX).
 /// </summary>
-[AttributeUsage(AttributeTargets.Class)]
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 public class CommandIdAttribute(string id) : Attribute
 {
     /// <summary>

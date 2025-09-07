@@ -1,16 +1,16 @@
-# SnapDog2 Architecture Transformation - Implementation Plan
+# 1. SnapDog2 Architecture Transformation - Implementation Plan
 
-## Overview
+## 1.1. Overview
 
 This document provides a comprehensive, step-by-step implementation plan to transform SnapDog2 from its current fragmented architecture to an enterprise-grade event-driven system with **complete mediator removal**. The plan systematically eliminates command/handler infrastructure while preserving blueprint validation through CommandId/StatusId attributes.
 
-## Phase 1: Foundation - Event-Driven State Management (Sprint 1-2)
+## 1.2. Phase 1: Foundation - Event-Driven State Management (Sprint 1-2)
 
-### 1.1 Enhanced State Store Interfaces with Events
+### 1.2.1. Enhanced State Store Interfaces with Events
 
 **Priority: HIGH** | **Effort: 2 days** | **Risk: LOW**
 
-#### Tasks
+#### 1.2.1.1. Tasks
 
 1. **Enhance IZoneStateStore Interface**
 
@@ -66,18 +66,18 @@ This document provides a comprehensive, step-by-step implementation plan to tran
    }
    ```
 
-#### Acceptance Criteria
+#### 1.2.1.2. Acceptance Criteria
 
 - [ ] All event interfaces defined with proper typing
 - [ ] Event args classes implement proper equality comparison
 - [ ] Backward compatibility maintained
 - [ ] Unit tests for event args classes
 
-### 1.2 Smart State Change Detection
+### 1.2.2. Smart State Change Detection
 
 **Priority: HIGH** | **Effort: 3 days** | **Risk: MEDIUM**
 
-#### Tasks
+#### 1.2.2.1. Tasks
 
 1. **Implement Smart ZoneStateStore**
 
@@ -135,18 +135,18 @@ This document provides a comprehensive, step-by-step implementation plan to tran
    }
    ```
 
-#### Acceptance Criteria
+#### 1.2.2.2. Acceptance Criteria
 
 - [ ] State stores detect and publish granular changes
 - [ ] Performance impact < 5ms per state change
 - [ ] No false positive events
 - [ ] Integration tests verify event firing
 
-### 1.3 Complete StatePublishingService Integration
+### 1.2.3. Complete StatePublishingService Integration
 
 **Priority: MEDIUM** | **Effort: 2 days** | **Risk: LOW**
 
-#### Tasks
+#### 1.2.3.1. Tasks
 
 1. **Wire StatePublishingService to Events**
 
@@ -184,7 +184,7 @@ This document provides a comprehensive, step-by-step implementation plan to tran
    }
    ```
 
-#### Acceptance Criteria
+#### 1.2.3.2. Acceptance Criteria
 
 - [ ] All state changes trigger appropriate notifications
 - [ ] SignalR receives real-time updates
@@ -192,13 +192,13 @@ This document provides a comprehensive, step-by-step implementation plan to tran
 - [ ] KNX receives state updates
 - [ ] No duplicate notifications
 
-## Phase 2: Integration Layer Unification (Sprint 3-4)
+## 1.3. Phase 2: Integration Layer Unification (Sprint 3-4)
 
-### 2.1 Integration Publisher Abstraction
+### 1.3.1. Integration Publisher Abstraction
 
 **Priority: HIGH** | **Effort: 4 days** | **Risk: MEDIUM**
 
-#### Tasks
+#### 1.3.1.1. Tasks
 
 1. **Create IIntegrationPublisher Interface**
 
@@ -256,18 +256,18 @@ This document provides a comprehensive, step-by-step implementation plan to tran
    }
    ```
 
-#### Acceptance Criteria
+#### 1.3.1.2. Acceptance Criteria
 
 - [ ] All integration publishers implement common interface
 - [ ] Each publisher handles its protocol-specific formatting
 - [ ] Error handling is consistent across publishers
 - [ ] Publishers can be enabled/disabled independently
 
-### 1.1 Enhanced State Store Interfaces with Events
+### 1.3.2. Enhanced State Store Interfaces with Events
 
 **Priority: HIGH** | **Effort: 2 days** | **Risk: LOW**
 
-#### Tasks
+#### 1.3.2.1. Tasks
 
 1. **Enhance IZoneStateStore Interface**
 
@@ -278,16 +278,16 @@ This document provides a comprehensive, step-by-step implementation plan to tran
        // Specific events for granular change detection
        [StatusId(StatusIds.ZoneStateChanged)]
        event EventHandler<ZoneStateChangedEventArgs> ZoneStateChanged;
-       
+
        [StatusId(StatusIds.PlaylistStatus)]
        event EventHandler<ZonePlaylistChangedEventArgs> ZonePlaylistChanged;
-       
+
        [StatusId(StatusIds.VolumeStatus)]
        event EventHandler<ZoneVolumeChangedEventArgs> ZoneVolumeChanged;
-       
+
        [StatusId(StatusIds.TrackStatus)]
        event EventHandler<ZoneTrackChangedEventArgs> ZoneTrackChanged;
-       
+
        [StatusId(StatusIds.PlaybackState)]
        event EventHandler<ZonePlaybackStateChangedEventArgs> ZonePlaybackStateChanged;
 
@@ -327,10 +327,10 @@ This document provides a comprehensive, step-by-step implementation plan to tran
    {
        [StatusId(StatusIds.ClientStateChanged)]
        event EventHandler<ClientStateChangedEventArgs> ClientStateChanged;
-       
+
        [StatusId(StatusIds.ClientVolumeStatus)]
        event EventHandler<ClientVolumeChangedEventArgs> ClientVolumeChanged;
-       
+
        [StatusId(StatusIds.ClientConnected)]
        event EventHandler<ClientConnectionChangedEventArgs> ClientConnectionChanged;
 
@@ -338,7 +338,7 @@ This document provides a comprehensive, step-by-step implementation plan to tran
    }
    ```
 
-#### Acceptance Criteria
+#### 1.3.2.2. Acceptance Criteria
 
 - [ ] All event interfaces defined with StatusId attributes
 - [ ] Event args classes implement proper equality comparison
@@ -346,11 +346,11 @@ This document provides a comprehensive, step-by-step implementation plan to tran
 - [ ] Blueprint tests validate StatusId attributes on events
 - [ ] Unit tests for event args classes
 
-### 1.2 Smart State Change Detection
+### 1.3.3. Smart State Change Detection
 
 **Priority: HIGH** | **Effort: 3 days** | **Risk: MEDIUM**
 
-#### Tasks
+#### 1.3.3.1. Tasks
 
 1. **Implement Smart ZoneStateStore**
 
@@ -360,10 +360,10 @@ This document provides a comprehensive, step-by-step implementation plan to tran
    {
        [StatusId(StatusIds.ZoneStateChanged)]
        public event EventHandler<ZoneStateChangedEventArgs>? ZoneStateChanged;
-       
+
        [StatusId(StatusIds.PlaylistStatus)]
        public event EventHandler<ZonePlaylistChangedEventArgs>? ZonePlaylistChanged;
-       
+
        [StatusId(StatusIds.VolumeStatus)]
        public event EventHandler<ZoneVolumeChangedEventArgs>? ZoneVolumeChanged;
 
@@ -413,7 +413,7 @@ This document provides a comprehensive, step-by-step implementation plan to tran
    }
    ```
 
-#### Acceptance Criteria
+#### 1.3.3.2. Acceptance Criteria
 
 - [ ] State stores detect and publish granular changes with StatusId attributes
 - [ ] Performance impact < 5ms per state change
@@ -421,11 +421,11 @@ This document provides a comprehensive, step-by-step implementation plan to tran
 - [ ] Blueprint tests validate StatusId attributes on all events
 - [ ] Integration tests verify event firing
 
-### 1.3 Complete StatePublishingService Integration
+### 1.3.4. Complete StatePublishingService Integration
 
 **Priority: HIGH** | **Effort: 2 days** | **Risk: LOW**
 
-#### Tasks
+#### 1.3.4.1. Tasks
 
 1. **Wire StatePublishingService to Events**
 
@@ -463,7 +463,7 @@ This document provides a comprehensive, step-by-step implementation plan to tran
    }
    ```
 
-#### Acceptance Criteria
+#### 1.3.4.2. Acceptance Criteria
 
 - [ ] All state changes trigger appropriate notifications
 - [ ] SignalR receives real-time updates
@@ -471,13 +471,13 @@ This document provides a comprehensive, step-by-step implementation plan to tran
 - [ ] KNX receives state updates
 - [ ] No duplicate notifications
 
-## Phase 2: Integration Layer Unification (Sprint 3-4)
+## 1.4. Phase 2: Integration Layer Unification (Sprint 3-4)
 
-### 2.1 Integration Publisher Abstraction
+### 1.4.1. Integration Publisher Abstraction
 
 **Priority: HIGH** | **Effort: 4 days** | **Risk: MEDIUM**
 
-#### Tasks
+#### 1.4.1.1. Tasks
 
 1. **Create IIntegrationPublisher Interface**
 
@@ -555,18 +555,18 @@ This document provides a comprehensive, step-by-step implementation plan to tran
    }
    ```
 
-#### Acceptance Criteria
+#### 1.4.1.2. Acceptance Criteria
 
 - [ ] All integration publishers implement common interface
 - [ ] Each publisher handles its protocol-specific formatting
 - [ ] Error handling is consistent across publishers
 - [ ] Publishers can be enabled/disabled independently
 
-### 2.2 Integration Coordinator
+### 1.4.2. Integration Coordinator
 
 **Priority: HIGH** | **Effort: 3 days** | **Risk: MEDIUM**
 
-#### Tasks
+#### 1.4.2.1. Tasks
 
 1. **Create IntegrationCoordinator**
 
@@ -620,18 +620,18 @@ This document provides a comprehensive, step-by-step implementation plan to tran
    }
    ```
 
-#### Acceptance Criteria
+#### 1.4.2.2. Acceptance Criteria
 
 - [ ] All integrations receive state changes simultaneously
 - [ ] Integration failures don't affect other integrations
 - [ ] Comprehensive error logging and monitoring
 - [ ] Performance metrics for each integration
 
-### 2.3 Remove Direct Integration Publishing
+### 1.4.3. Remove Direct Integration Publishing
 
 **Priority: MEDIUM** | **Effort: 2 days** | **Risk: LOW**
 
-#### Tasks
+#### 1.4.3.1. Tasks
 
 1. **Remove Direct Publishing from Domain Services**
    - Remove `PublishTrackStatusAsync` calls from ZoneManager
@@ -648,20 +648,20 @@ This document provides a comprehensive, step-by-step implementation plan to tran
    builder.Services.AddHostedService<IntegrationCoordinator>();
    ```
 
-#### Acceptance Criteria
+#### 1.4.3.2. Acceptance Criteria
 
 - [ ] No domain services directly publish to integrations
 - [ ] All integration publishing goes through IntegrationCoordinator
 - [ ] Existing functionality remains unchanged
 - [ ] Integration tests pass
 
-## Phase 3: Complete Mediator Removal (Sprint 5-6)
+## 1.5. Phase 3: Complete Mediator Removal (Sprint 5-6)
 
-### 3.2 Controller Layer Simplification
+### 1.5.1. Controller Layer Simplification
 
 **Priority: MEDIUM** | **Effort: 3 days** | **Risk: LOW**
 
-#### Tasks
+#### 1.5.1.1. Tasks
 
 1. **Create Method-Level CommandId Attributes**
 
@@ -710,16 +710,16 @@ This document provides a comprehensive, step-by-step implementation plan to tran
    {
        [CommandId(CommandIds.SetPlaylist)]
        Task<Result> SetPlaylistAsync(int zoneIndex, int playlistIndex);
-       
+
        [CommandId(CommandIds.SetZoneVolume)]
        Task<Result> SetVolumeAsync(int zoneIndex, int volume);
-       
+
        [CommandId(CommandIds.PlayTrack)]
        Task<Result> PlayTrackAsync(int zoneIndex, int trackIndex);
-       
+
        [CommandId(CommandIds.NextTrack)]
        Task<Result> NextTrackAsync(int zoneIndex);
-       
+
        [CommandId(CommandIds.PreviousTrack)]
        Task<Result> PreviousTrackAsync(int zoneIndex);
    }
@@ -733,16 +733,16 @@ This document provides a comprehensive, step-by-step implementation plan to tran
    {
        [CommandId(CommandIds.SetClientVolume)]
        Task<Result> SetVolumeAsync(int clientIndex, int volume);
-       
+
        [CommandId(CommandIds.SetClientMute)]
        Task<Result> SetMuteAsync(int clientIndex, bool muted);
-       
+
        [CommandId(CommandIds.AssignClientToZone)]
        Task<Result> AssignToZoneAsync(int clientIndex, int zoneIndex);
    }
    ```
 
-#### Acceptance Criteria
+#### 1.5.1.2. Acceptance Criteria
 
 - [ ] Controllers use direct service calls instead of mediator
 - [ ] CommandId attributes preserved on service methods and controller actions
@@ -750,11 +750,11 @@ This document provides a comprehensive, step-by-step implementation plan to tran
 - [ ] Stack traces are cleaner and easier to debug
 - [ ] Blueprint tests validate CommandId attributes on service methods
 
-### 3.3 Remove Command Infrastructure
+### 1.5.2. Remove Command Infrastructure
 
 **Priority: LOW** | **Effort: 2 days** | **Risk: LOW**
 
-#### Tasks
+#### 1.5.2.1. Tasks
 
 1. **Delete Command/Handler Infrastructure**
 
@@ -763,16 +763,16 @@ This document provides a comprehensive, step-by-step implementation plan to tran
    rm -rf SnapDog2/Server/Zones/Commands/
    rm -rf SnapDog2/Server/Clients/Commands/
    rm -rf SnapDog2/Server/Global/Commands/
-   
-   # Remove handler directories  
+
+   # Remove handler directories
    rm -rf SnapDog2/Server/Zones/Handlers/
    rm -rf SnapDog2/Server/Clients/Handlers/
    rm -rf SnapDog2/Server/Global/Handlers/
    rm -rf SnapDog2/Server/Shared/Handlers/
-   
+
    # Remove command factories
    rm -rf SnapDog2/Server/Shared/Factories/CommandFactory.cs
-   
+
    # Remove mediator configuration (keep notification parts)
    # Edit: Application/Extensions/DependencyInjection/MediatorConfiguration.cs
    # Remove: Command and handler registrations, keep notification registrations
@@ -783,7 +783,7 @@ This document provides a comprehensive, step-by-step implementation plan to tran
    ```xml
    <!-- Remove from SnapDog2.csproj -->
    <!-- <PackageReference Include="Cortex.Mediator" Version="x.x.x" /> -->
-   
+
    <!-- Keep only notification-related mediator usage -->
    <!-- Preserve INotification, INotificationHandler<T> for domain events -->
    ```
@@ -794,7 +794,7 @@ This document provides a comprehensive, step-by-step implementation plan to tran
    // File: Program.cs - Remove command registrations
    // Remove: builder.Services.AddMediatorCommands();
    // Keep: builder.Services.AddMediatorNotifications();
-   
+
    // Add direct service registrations
    builder.Services.AddScoped<IZoneService, ZoneService>();
    builder.Services.AddScoped<IClientService, ClientService>();
@@ -809,14 +809,14 @@ This document provides a comprehensive, step-by-step implementation plan to tran
    {
        var commandIds = typeof(CommandIds).GetFields();
        var serviceTypes = new[] { typeof(IZoneService), typeof(IClientService) };
-       
+
        foreach (var commandId in commandIds)
        {
            var commandIdValue = commandId.GetValue(null)?.ToString();
            var methodExists = serviceTypes
                .SelectMany(t => t.GetMethods())
                .Any(m => m.GetCustomAttribute<CommandIdAttribute>()?.Id == commandIdValue);
-               
+
            Assert.IsTrue(methodExists, $"No service method found for CommandId: {commandId.Name}");
        }
    }
@@ -828,13 +828,13 @@ This document provides a comprehensive, step-by-step implementation plan to tran
        var notificationTypes = Assembly.GetExecutingAssembly()
            .GetTypes()
            .Where(t => t.GetInterfaces().Contains(typeof(INotification)));
-       
+
        foreach (var statusId in statusIds)
        {
            var statusIdValue = statusId.GetValue(null)?.ToString();
            var notificationExists = notificationTypes
                .Any(t => t.GetCustomAttribute<StatusIdAttribute>()?.Id == statusIdValue);
-               
+
            Assert.IsTrue(notificationExists, $"No notification class found for StatusId: {statusId.Name}");
        }
    }
@@ -847,8 +847,8 @@ This document provides a comprehensive, step-by-step implementation plan to tran
    // Remove: All command-related using statements
    // Remove: GetHandler<T> method
    // Remove: ExecuteCommandAsync method (replaced with direct service calls)
-   
-   // File: Infrastructure/Integrations/Mqtt/MqttService.cs  
+
+   // File: Infrastructure/Integrations/Mqtt/MqttService.cs
    // Remove: All command-related using statements
    // Remove: GetHandler<T> method
    // Remove: ExecuteCommandAsync method (replaced with direct service calls)
@@ -864,9 +864,10 @@ This document provides a comprehensive, step-by-step implementation plan to tran
    // - StatePublishingService notification publishing
    ```
 
-#### Files to Delete
+#### 1.5.2.2. Files to Delete
 
 **Command Classes** (Complete removal):
+
 ```
 SnapDog2/Server/Zones/Commands/Playlist/SetPlaylistCommand.cs
 SnapDog2/Server/Zones/Commands/Volume/SetZoneVolumeCommand.cs
@@ -878,6 +879,7 @@ SnapDog2/Server/Clients/Commands/Config/AssignClientToZoneCommand.cs
 ```
 
 **Handler Classes** (Complete removal):
+
 ```
 SnapDog2/Server/Zones/Handlers/SetPlaylistCommandHandler.cs
 SnapDog2/Server/Zones/Handlers/SetZoneVolumeCommandHandler.cs
@@ -887,13 +889,15 @@ SnapDog2/Server/Clients/Handlers/SetClientVolumeCommandHandler.cs
 ```
 
 **Factory Classes** (Complete removal):
+
 ```
 SnapDog2/Server/Shared/Factories/CommandFactory.cs
 ```
 
-#### Files to Preserve
+#### 1.5.2.3. Files to Preserve
 
 **Registry Classes** (Essential for blueprint validation):
+
 ```
 SnapDog2/Shared/Constants/CommandIds.cs
 SnapDog2/Shared/Constants/StatusIds.cs
@@ -902,6 +906,7 @@ SnapDog2/Shared/Attributes/StatusIdAttribute.cs (for integration validation)
 ```
 
 **SignalR Hub Notifications** (Client contracts - NOT mediator):
+
 ```
 SnapDog2/Api/Hubs/Notifications/ZoneVolumeChangedNotification.cs
 SnapDog2/Api/Hubs/Notifications/ZonePlaylistChangedNotification.cs
@@ -909,9 +914,10 @@ SnapDog2/Api/Hubs/Notifications/ClientVolumeChangedNotification.cs
 ... (all SignalR client notification contracts)
 ```
 
-#### Files to Delete (Complete Mediator Removal)
+#### 1.5.2.4. Files to Delete (Complete Mediator Removal)
 
 **All Mediator Infrastructure**:
+
 ```
 # Remove Cortex.Mediator package entirely
 SnapDog2/Application/Services/StatePublishingService.cs (replaced by IntegrationCoordinator)
@@ -919,6 +925,7 @@ SnapDog2/Application/Extensions/DependencyInjection/MediatorConfiguration.cs
 ```
 
 **Server-Side Mediator Notifications** (NOT SignalR):
+
 ```
 SnapDog2/Server/Zones/Notifications/ZoneNotifications.cs
 SnapDog2/Server/Clients/Notifications/ClientNotifications.cs
@@ -926,20 +933,21 @@ SnapDog2/Application/Notifications/PlaylistCountStatusNotification.cs
 ... (all server-side mediator notification classes)
 ```
 
-#### New Architecture Flow
+#### 1.5.2.5. New Architecture Flow
 
 ```
 StateStore Events → IntegrationCoordinator → Integrations:
                                           ├── MQTT Publisher
-                                          ├── KNX Publisher  
+                                          ├── KNX Publisher
                                           └── SignalR Hub (sends hub notifications to clients)
 ```
 
 **Blueprint Validation**:
+
 - **CommandIds**: Validated on service methods with `[CommandId]` attributes
 - **StatusIds**: Validated by checking IntegrationCoordinator publishes correct status IDs
 
-#### Acceptance Criteria
+#### 1.5.2.6. Acceptance Criteria
 
 - [ ] All command/handler infrastructure removed (500+ files deleted)
 - [ ] **Complete Cortex.Mediator removal** (package uninstalled)
@@ -954,13 +962,13 @@ StateStore Events → IntegrationCoordinator → Integrations:
 - [ ] All integration tests pass
 - [ ] **Code reduction: ~4,000+ lines removed** (commands + handlers + server notifications)
 
-## Phase 4: Quality Assurance & Monitoring (Sprint 7)
+## 1.6. Phase 4: Quality Assurance & Monitoring (Sprint 7)
 
-### 4.1 Architectural Tests
+### 1.6.1. Architectural Tests
 
 **Priority: HIGH** | **Effort: 2 days** | **Risk: LOW**
 
-#### Tasks
+#### 1.6.1.1. Tasks
 
 1. **Create Architectural Rules Tests**
 
@@ -1011,11 +1019,11 @@ StateStore Events → IntegrationCoordinator → Integrations:
    }
    ```
 
-### 4.2 Performance Monitoring
+### 1.6.2. Performance Monitoring
 
 **Priority: MEDIUM** | **Effort: 2 days** | **Risk: LOW**
 
-#### Tasks
+#### 1.6.2.1. Tasks
 
 1. **Add Performance Metrics**
 
@@ -1065,39 +1073,39 @@ StateStore Events → IntegrationCoordinator → Integrations:
    }
    ```
 
-## Implementation Timeline
+## 1.7. Implementation Timeline
 
-### Sprint 1 (Week 1-2): Foundation
+### 1.7.1. Sprint 1 (Week 1-2): Foundation
 
 - **Days 1-2**: Enhanced State Store Interfaces with StatusId attributes
 - **Days 3-5**: Smart State Change Detection with events
 - **Days 6-7**: Complete StatePublishingService Integration
 - **Days 8-10**: Testing and Bug Fixes
 
-### Sprint 2 (Week 3-4): Integration Layer
+### 1.7.2. Sprint 2 (Week 3-4): Integration Layer
 
 - **Days 1-4**: Integration Publisher Abstraction with StatusId attributes
 - **Days 5-7**: Integration Coordinator
 - **Days 8-9**: Remove Direct Integration Publishing
 - **Day 10**: Integration Testing
 
-### Sprint 3 (Week 5-6): Complete Mediator Removal
+### 1.7.3. Sprint 3 (Week 5-6): Complete Mediator Removal
 
 - **Days 1-3**: Integration Services Migration (IKnxService, IMqttService)
 - **Days 4-6**: Controller Layer Simplification with CommandId preservation
 - **Days 7-8**: Remove Command Infrastructure
 - **Days 9-10**: Migration and Testing
 
-### Sprint 4 (Week 7): Quality Assurance
+### 1.7.4. Sprint 4 (Week 7): Quality Assurance
 
 - **Days 1-2**: Architectural Tests and Blueprint Validation
 - **Days 3-4**: Performance Monitoring
 - **Days 5**: Documentation Updates
 - **Days 6-7**: Final Integration Testing
 
-## Risk Mitigation
+## 1.8. Risk Mitigation
 
-### High-Risk Items
+### 1.8.1. High-Risk Items
 
 1. **State Change Detection Performance**
    - **Mitigation**: Implement with benchmarks, use efficient comparison algorithms
@@ -1111,7 +1119,7 @@ StateStore Events → IntegrationCoordinator → Integrations:
    - **Mitigation**: Maintain CommandId/StatusId attributes throughout migration
    - **Fallback**: Restore attribute validation if tests fail
 
-### Success Metrics
+### 1.8.2. Success Metrics
 
 - [ ] **Architecture**: 100% of state changes trigger appropriate events with StatusId attributes
 - [ ] **Performance**: 50-60% improvement in API response times
@@ -1121,7 +1129,7 @@ StateStore Events → IntegrationCoordinator → Integrations:
 - [ ] **Test Coverage**: 100% test coverage for new event-driven components
 - [ ] **Mediator Removal**: Complete elimination of command/handler infrastructure while preserving domain events
 
-## Final Architecture Achievement
+## 1.9. Final Architecture Achievement
 
 - **Layer Reduction**: 7+ layers → 3 layers (API → Service → StateStore)
 - **Performance**: 50-60% improvement through direct calls
@@ -1131,9 +1139,9 @@ StateStore Events → IntegrationCoordinator → Integrations:
 - **Blueprint Preservation**: CommandId/StatusId attributes maintained for validation
 - **Integration Services**: IKnxService and IMqttService migrated to direct service calls
 
-## Risk Mitigation
+## 1.10. Risk Mitigation
 
-### High-Risk Items
+### 1.10.1. High-Risk Items
 
 1. **State Change Detection Performance**
    - **Mitigation**: Implement with benchmarks, use efficient comparison algorithms
@@ -1147,7 +1155,7 @@ StateStore Events → IntegrationCoordinator → Integrations:
    - **Mitigation**: Gradual migration, maintain backward compatibility
    - **Fallback**: Keep existing mediator usage if migration proves too complex
 
-### Success Metrics
+### 1.10.2. Success Metrics
 
 - [ ] **Production Fix**: Docker container startup success (Phase 0)
 - [ ] **Performance**: 50-60% improvement in API response times
@@ -1158,7 +1166,7 @@ StateStore Events → IntegrationCoordinator → Integrations:
 - [ ] **Test Coverage**: 100% test coverage for new event-driven components
 - [ ] **Mediator Removal**: Complete elimination of command/handler infrastructure while preserving domain events
 
-## Final Architecture Achievement
+## 1.11. Final Architecture Achievement
 
 - **Layer Reduction**: 7+ layers → 3 layers (API → Service → StateStore)
 - **Performance**: 50-60% improvement through direct calls
@@ -1168,7 +1176,7 @@ StateStore Events → IntegrationCoordinator → Integrations:
 - **Blueprint Preservation**: CommandId/StatusId attributes maintained for validation
 - **Production Stability**: Critical IKnxService issue resolved immediately
 
-## Risk Mitigation
+## 1.12. Risk Mitigation
 
 - **Rollback Plan**: Git commits for each phase
 - **Testing**: Build verification after each step

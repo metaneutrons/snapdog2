@@ -818,7 +818,7 @@ public partial class SeekPositionCommandHandler(IZoneManager zoneManager, ILogge
         }
 
         var zone = zoneResult.Value!;
-        return await zone.SeekToPositionAsync(request.PositionMs).ConfigureAwait(false);
+        return await zone.SeekToPositionAsync(TimeSpan.FromMilliseconds(request.PositionMs)).ConfigureAwait(false);
     }
 
     [LoggerMessage(EventId = 114840, Level = LogLevel.Information, Message = "Seeking Zone {ZoneIndex} → position {PositionMs}ms from {Source}"

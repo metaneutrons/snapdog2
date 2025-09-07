@@ -13,219 +13,96 @@
 //
 namespace SnapDog2.Domain.Abstractions;
 
-using SnapDog2.Shared.Enums;
+using SnapDog2.Shared.Attributes;
 using SnapDog2.Shared.Models;
 
 /// <summary>
-/// Service for controlling a specific audio zone.
+/// Service interface for zone operations with CommandId-attributed methods.
+/// Replaces mediator pattern with direct service calls.
 /// </summary>
 public interface IZoneService
 {
     /// <summary>
-    /// Gets the zone ID.
+    /// Starts playback on the specified zone.
     /// </summary>
-    int ZoneIndex { get; }
+    [CommandId("PLAY")]
+    Task<Result> StartPlaybackAsync(TrackInfo trackInfo, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Gets the current zone state.
+    /// Stops playback on the specified zone.
     /// </summary>
-    /// <returns>The current zone state.</returns>
-    Task<Result<ZoneState>> GetStateAsync();
-
-    // Playback Control
-    /// <summary>
-    /// Starts or resumes playback.
-    /// </summary>
-    /// <returns>Result of the operation.</returns>
-    Task<Result> PlayAsync();
+    [CommandId("STOP")]
+    Task<Result> StopPlaybackAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Plays a specific track by index.
+    /// Pauses playback on the specified zone.
     /// </summary>
-    /// <param name="trackIndex">The track index (1-based).</param>
-    /// <returns>Result of the operation.</returns>
-    Task<Result> PlayTrackAsync(int trackIndex);
+    [CommandId("PAUSE")]
+    Task<Result> PausePlaybackAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Plays media from a URL.
+    /// Sets the volume for the specified zone.
     /// </summary>
-    /// <param name="mediaUrl">The media URL.</param>
-    /// <returns>Result of the operation.</returns>
-    Task<Result> PlayUrlAsync(string mediaUrl);
+    [CommandId("VOLUME")]
+    Task<Result> SetVolumeAsync(int volume, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Pauses playback.
+    /// Sets the mute state for the specified zone.
     /// </summary>
-    /// <returns>Result of the operation.</returns>
-    Task<Result> PauseAsync();
+    [CommandId("MUTE")]
+    Task<Result> SetMuteAsync(bool muted, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Stops playback.
+    /// Sets a specific track by index.
     /// </summary>
-    /// <returns>Result of the operation.</returns>
-    Task<Result> StopAsync();
-
-    // Volume Control
-    /// <summary>
-    /// Sets the zone volume.
-    /// </summary>
-    /// <param name="volume">The volume level (0-100).</param>
-    /// <returns>Result of the operation.</returns>
-    Task<Result> SetVolumeAsync(int volume);
-
-    /// <summary>
-    /// Increases the zone volume.
-    /// </summary>
-    /// <param name="step">The volume step to increase.</param>
-    /// <returns>Result of the operation.</returns>
-    Task<Result> VolumeUpAsync(int step = 5);
-
-    /// <summary>
-    /// Decreases the zone volume.
-    /// </summary>
-    /// <param name="step">The volume step to decrease.</param>
-    /// <returns>Result of the operation.</returns>
-    Task<Result> VolumeDownAsync(int step = 5);
-
-    /// <summary>
-    /// Sets the zone mute state.
-    /// </summary>
-    /// <param name="enabled">Whether to mute the zone.</param>
-    /// <returns>Result of the operation.</returns>
-    Task<Result> SetMuteAsync(bool enabled);
-
-    /// <summary>
-    /// Toggles the zone mute state.
-    /// </summary>
-    /// <returns>Result of the operation.</returns>
-    Task<Result> ToggleMuteAsync();
-
-    // Track Management
-    /// <summary>
-    /// Sets a specific track.
-    /// </summary>
-    /// <param name="trackIndex">The track index (1-based).</param>
-    /// <returns>Result of the operation.</returns>
-    Task<Result> SetTrackAsync(int trackIndex);
-
-    /// <summary>
-    /// Plays the next track.
-    /// </summary>
-    /// <returns>Result of the operation.</returns>
-    Task<Result> NextTrackAsync();
-
-    /// <summary>
-    /// Plays the previous track.
-    /// </summary>
-    /// <returns>Result of the operation.</returns>
-    Task<Result> PreviousTrackAsync();
-
-    /// <summary>
-    /// Sets track repeat mode.
-    /// </summary>
-    /// <param name="enabled">Whether to enable track repeat.</param>
-    /// <returns>Result of the operation.</returns>
-    Task<Result> SetTrackRepeatAsync(bool enabled);
-
-    /// <summary>
-    /// Toggles track repeat mode.
-    /// </summary>
-    /// <returns>Result of the operation.</returns>
-    Task<Result> ToggleTrackRepeatAsync();
-
-    // Playlist Management
-    /// <summary>
-    /// Sets a specific playlist by index.
-    /// </summary>
-    /// <param name="playlistIndex">The playlist index (1-based).</param>
-    /// <returns>Result of the operation.</returns>
-    Task<Result> SetPlaylistAsync(int playlistIndex);
-
-    /// <summary>
-    /// Sets a specific playlist by ID.
-    /// </summary>
-    /// <param name="playlistIndex">The playlist ID.</param>
-    /// <returns>Result of the operation.</returns>
-    Task<Result> SetPlaylistAsync(string playlistIndex);
-
-    /// <summary>
-    /// Plays the next playlist.
-    /// </summary>
-    /// <returns>Result of the operation.</returns>
-    Task<Result> NextPlaylistAsync();
-
-    /// <summary>
-    /// Plays the previous playlist.
-    /// </summary>
-    /// <returns>Result of the operation.</returns>
-    Task<Result> PreviousPlaylistAsync();
-
-    /// <summary>
-    /// Sets playlist shuffle mode.
-    /// </summary>
-    /// <param name="enabled">Whether to enable playlist shuffle.</param>
-    /// <returns>Result of the operation.</returns>
-    Task<Result> SetPlaylistShuffleAsync(bool enabled);
-
-    /// <summary>
-    /// Toggles playlist shuffle mode.
-    /// </summary>
-    /// <returns>Result of the operation.</returns>
-    Task<Result> TogglePlaylistShuffleAsync();
-
-    /// <summary>
-    /// Sets playlist repeat mode.
-    /// </summary>
-    /// <param name="enabled">Whether to enable playlist repeat.</param>
-    /// <returns>Result of the operation.</returns>
-    Task<Result> SetPlaylistRepeatAsync(bool enabled);
-
-    /// <summary>
-    /// Toggles playlist repeat mode.
-    /// </summary>
-    /// <returns>Result of the operation.</returns>
-    Task<Result> TogglePlaylistRepeatAsync();
+    [CommandId("TRACK")]
+    Task<Result> SetTrackAsync(int trackIndex, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Seeks to a specific position in the current track.
     /// </summary>
-    /// <param name="positionMs">Position in milliseconds</param>
-    /// <returns>Result of the operation.</returns>
-    Task<Result> SeekToPositionAsync(long positionMs);
+    [CommandId("TRACK_POSITION")]
+    Task<Result> SeekAsync(TimeSpan position, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Seeks to a specific progress percentage in the current track.
+    /// Sets a specific playlist by index.
     /// </summary>
-    /// <param name="progress">Progress percentage (0.0-1.0)</param>
-    /// <returns>Result of the operation.</returns>
-    Task<Result> SeekToProgressAsync(float progress);
-
-    // Status Publishing Methods (Blueprint Compliance)
-    /// <summary>
-    /// Publishes the current playback state status.
-    /// </summary>
-    /// <param name="playbackState">The playback state to publish.</param>
-    /// <returns>Task representing the async operation.</returns>
-    Task PublishPlaybackStateStatusAsync(PlaybackState playbackState);
+    [CommandId("PLAYLIST")]
+    Task<Result> SetPlaylistAsync(int playlistIndex, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Publishes the current volume status.
+    /// Gets the current state of the zone.
     /// </summary>
-    /// <param name="volume">The volume level to publish (0-100).</param>
-    /// <returns>Task representing the async operation.</returns>
-    Task PublishVolumeStatusAsync(int volume);
+    Task<Result<ZoneState>> GetStateAsync();
 
     /// <summary>
-    /// Publishes the current mute status.
+    /// Plays the current track.
     /// </summary>
-    /// <param name="isMuted">The mute state to publish.</param>
-    /// <returns>Task representing the async operation.</returns>
-    Task PublishMuteStatusAsync(bool isMuted);
+    Task<Result> PlayAsync();
 
     /// <summary>
-    /// Updates the Snapcast group ID for this zone.
+    /// Plays a URL directly.
     /// </summary>
-    /// <param name="groupId">The new group ID, or null to clear it.</param>
-    void UpdateSnapcastGroupId(string? groupId);
+    Task<Result> PlayUrlAsync(string mediaUrl);
 
+    // Additional methods required by handlers
+    Task<Result> UpdateSnapcastGroupId(string groupId);
+    Task<Result> PauseAsync(CancellationToken cancellationToken = default);
+    Task<Result> StopAsync(CancellationToken cancellationToken = default);
+    Task<Result> NextTrackAsync(CancellationToken cancellationToken = default);
+    Task<Result> PreviousTrackAsync(CancellationToken cancellationToken = default);
+    Task<Result> SetPlaylistShuffleAsync(bool shuffle, CancellationToken cancellationToken = default);
+    Task<Result> SetPlaylistRepeatAsync(bool repeat, CancellationToken cancellationToken = default);
+    Task<Result> SeekToProgressAsync(double progress, CancellationToken cancellationToken = default);
+    Task<Result> PlayTrackAsync(int trackIndex, CancellationToken cancellationToken = default);
+    Task<Result> SeekToPositionAsync(TimeSpan position, CancellationToken cancellationToken = default);
+    Task<Result> TogglePlaylistRepeatAsync(CancellationToken cancellationToken = default);
+    Task<Result> TogglePlaylistShuffleAsync(CancellationToken cancellationToken = default);
+    Task<Result> ToggleTrackRepeatAsync(CancellationToken cancellationToken = default);
+    Task<Result> SetTrackRepeatAsync(bool repeat, CancellationToken cancellationToken = default);
+    Task<Result> PreviousPlaylistAsync(CancellationToken cancellationToken = default);
+    Task<Result> NextPlaylistAsync(CancellationToken cancellationToken = default);
+    Task<Result> ToggleMuteAsync(CancellationToken cancellationToken = default);
+    Task<Result> VolumeDownAsync(int step = 5, CancellationToken cancellationToken = default);
+    Task<Result> VolumeUpAsync(int step = 5, CancellationToken cancellationToken = default);
 }

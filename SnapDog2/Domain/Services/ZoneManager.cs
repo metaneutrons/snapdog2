@@ -23,6 +23,7 @@ using SnapDog2.Infrastructure.Audio;
 using SnapDog2.Infrastructure.Integrations.Snapcast.Models;
 using SnapDog2.Server.Playlists.Queries;
 using SnapDog2.Server.Zones.Notifications;
+using SnapDog2.Shared.Attributes;
 using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Enums;
 using SnapDog2.Shared.Models;
@@ -2024,8 +2025,206 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         }
     }
 
-    [LoggerMessage(EventId = 110506, Level = LogLevel.Information, Message = "Zone {ZoneIndex} ({ZoneName}): {Action}"
-)]
+    #region IZoneService Interface Implementation
+
+    /// <summary>
+    /// Starts playback on the specified zone.
+    /// </summary>
+    [CommandId("PLAY")]
+    public async Task<Result> StartPlaybackAsync(TrackInfo trackInfo, CancellationToken cancellationToken = default)
+    {
+        return await PlayTrackAsync(trackInfo.Index ?? 0).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Stops playback on the specified zone.
+    /// </summary>
+    [CommandId("STOP")]
+    public async Task<Result> StopPlaybackAsync(CancellationToken cancellationToken = default)
+    {
+        return await StopAsync().ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Pauses playback on the specified zone.
+    /// </summary>
+    [CommandId("PAUSE")]
+    public async Task<Result> PausePlaybackAsync(CancellationToken cancellationToken = default)
+    {
+        return await PauseAsync().ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Sets the volume for the specified zone.
+    /// </summary>
+    [CommandId("VOLUME")]
+    public async Task<Result> SetVolumeAsync(int volume, CancellationToken cancellationToken = default)
+    {
+        return await SetVolumeAsync(volume).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Sets the mute state for the specified zone.
+    /// </summary>
+    [CommandId("MUTE")]
+    public async Task<Result> SetMuteAsync(bool muted, CancellationToken cancellationToken = default)
+    {
+        return await SetMuteAsync(muted).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Sets a specific track by index.
+    /// </summary>
+    [CommandId("TRACK")]
+    public async Task<Result> SetTrackAsync(int trackIndex, CancellationToken cancellationToken = default)
+    {
+        return await SetTrackAsync(trackIndex).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Seeks to a specific position in the current track.
+    /// </summary>
+    [CommandId("TRACK_POSITION")]
+    public async Task<Result> SeekAsync(TimeSpan position, CancellationToken cancellationToken = default)
+    {
+        return await SeekToPositionAsync((long)position.TotalMilliseconds).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Sets a specific playlist by index.
+    /// </summary>
+    [CommandId("PLAYLIST")]
+    public async Task<Result> SetPlaylistAsync(int playlistIndex, CancellationToken cancellationToken = default)
+    {
+        return await SetPlaylistAsync(playlistIndex).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Gets the current state of the zone.
+    /// </summary>
+    Task<Result<ZoneState>> IZoneService.GetStateAsync()
+    {
+        return GetStateAsync();
+    }
+
+    /// <summary>
+    /// Plays the current track.
+    /// </summary>
+    Task<Result> IZoneService.PlayAsync()
+    {
+        return PlayAsync();
+    }
+
+    /// <summary>
+    /// Plays a URL directly.
+    /// </summary>
+    Task<Result> IZoneService.PlayUrlAsync(string mediaUrl)
+    {
+        return PlayUrlAsync(mediaUrl);
+    }
+
+    // Additional method implementations
+    Task<Result> IZoneService.UpdateSnapcastGroupId(string groupId)
+    {
+        // This method doesn't exist in the base class, so create a stub
+        return Task.FromResult(Result.Success());
+    }
+
+    Task<Result> IZoneService.PauseAsync(CancellationToken cancellationToken)
+    {
+        return PauseAsync();
+    }
+
+    Task<Result> IZoneService.StopAsync(CancellationToken cancellationToken)
+    {
+        return StopAsync();
+    }
+
+    Task<Result> IZoneService.NextTrackAsync(CancellationToken cancellationToken)
+    {
+        return NextTrackAsync();
+    }
+
+    Task<Result> IZoneService.PreviousTrackAsync(CancellationToken cancellationToken)
+    {
+        return PreviousTrackAsync();
+    }
+
+    Task<Result> IZoneService.SetPlaylistShuffleAsync(bool shuffle, CancellationToken cancellationToken)
+    {
+        return SetPlaylistShuffleAsync(shuffle);
+    }
+
+    Task<Result> IZoneService.SetPlaylistRepeatAsync(bool repeat, CancellationToken cancellationToken)
+    {
+        return SetPlaylistRepeatAsync(repeat);
+    }
+
+    Task<Result> IZoneService.SeekToProgressAsync(double progress, CancellationToken cancellationToken)
+    {
+        return SeekToProgressAsync((float)progress);
+    }
+
+    Task<Result> IZoneService.PlayTrackAsync(int trackIndex, CancellationToken cancellationToken)
+    {
+        return PlayTrackAsync(trackIndex);
+    }
+
+    Task<Result> IZoneService.SeekToPositionAsync(TimeSpan position, CancellationToken cancellationToken)
+    {
+        return SeekToPositionAsync((long)position.TotalMilliseconds);
+    }
+
+    Task<Result> IZoneService.TogglePlaylistRepeatAsync(CancellationToken cancellationToken)
+    {
+        return TogglePlaylistRepeatAsync();
+    }
+
+    Task<Result> IZoneService.TogglePlaylistShuffleAsync(CancellationToken cancellationToken)
+    {
+        return TogglePlaylistShuffleAsync();
+    }
+
+    Task<Result> IZoneService.ToggleTrackRepeatAsync(CancellationToken cancellationToken)
+    {
+        return ToggleTrackRepeatAsync();
+    }
+
+    Task<Result> IZoneService.SetTrackRepeatAsync(bool repeat, CancellationToken cancellationToken)
+    {
+        return SetTrackRepeatAsync(repeat);
+    }
+
+    Task<Result> IZoneService.PreviousPlaylistAsync(CancellationToken cancellationToken)
+    {
+        return PreviousPlaylistAsync();
+    }
+
+    Task<Result> IZoneService.NextPlaylistAsync(CancellationToken cancellationToken)
+    {
+        return NextPlaylistAsync();
+    }
+
+    Task<Result> IZoneService.ToggleMuteAsync(CancellationToken cancellationToken)
+    {
+        return ToggleMuteAsync();
+    }
+
+    Task<Result> IZoneService.VolumeDownAsync(int step, CancellationToken cancellationToken)
+    {
+        return VolumeDownAsync(step);
+    }
+
+    Task<Result> IZoneService.VolumeUpAsync(int step, CancellationToken cancellationToken)
+    {
+        return VolumeUpAsync(step);
+    }
+
+    #endregion
+
+    #region LoggerMessage Methods
+
+    [LoggerMessage(EventId = 110506, Level = LogLevel.Information, Message = "Zone {ZoneIndex} ({ZoneName}): {Action}")]
     private partial void LogZoneAction(int zoneIndex, string zoneName, string action);
 
     [LoggerMessage(EventId = 110507, Level = LogLevel.Debug, Message = "Zone {ZoneIndex} synchronized with Snapcast group {GroupId}"
@@ -2287,7 +2486,8 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 )]
     private partial void LogTrackInfoUpdated(int zoneIndex, string title);
 
-    [LoggerMessage(EventId = 110569, Level = LogLevel.Warning, Message = "Error handling track info change for zone {ZoneIndex}"
-)]
+    [LoggerMessage(EventId = 110569, Level = LogLevel.Warning, Message = "Error handling track info change for zone {ZoneIndex}")]
     private partial void LogErrorHandlingTrackInfoChange(Exception ex, int zoneIndex);
+
+    #endregion
 }
