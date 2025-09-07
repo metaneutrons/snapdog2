@@ -3,6 +3,7 @@ import { useZone, useAppStore } from '../store';
 import { TransportControls } from './TransportControls';
 import { VolumeSlider } from './VolumeSlider';
 import { ClientList } from './ClientList';
+import { PlaylistSelector } from './PlaylistSelector';
 
 const formatTime = (ms: number): string => {
   if (!ms || ms < 0) return '0:00';
@@ -89,6 +90,15 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({ zoneIndex, draggingClientInd
       </div>
 
       <TransportControls zoneIndex={zoneIndex} />
+      
+      <div className="mt-4">
+        <PlaylistSelector 
+          zoneIndex={zoneIndex}
+          currentPlaylistIndex={zone.playlist?.index}
+          currentPlaylistName={zone.playlist?.name}
+        />
+      </div>
+      
       <VolumeSlider 
         value={zone.volume || 0}
         muted={zone.muted || false}
