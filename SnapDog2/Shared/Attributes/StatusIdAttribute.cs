@@ -19,7 +19,7 @@ using System.Reflection;
 /// Attribute to mark notification classes with their corresponding status ID.
 /// Used for outbound status events to external systems (MQTT, KNX).
 /// </summary>
-[AttributeUsage(AttributeTargets.Class)]
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Event | AttributeTargets.Method)]
 public class StatusIdAttribute(string id) : Attribute
 {
     /// <summary>

@@ -100,6 +100,36 @@ public class KnxIntegrationPublisher : IIntegrationPublisher
         }
     }
 
+    public async Task PublishClientVolumeChangedAsync(int clientIndex, int volume, CancellationToken cancellationToken = default)
+    {
+        if (_knxService == null)
+        {
+            return;
+        }
+
+        var knxValue = Math.Clamp(volume, 0, 100);
+        var groupAddress = GetClientVolumeStatusGA(clientIndex);
+        if (groupAddress != null)
+        {
+            await _knxService.WriteGroupValueAsync(groupAddress, knxValue, cancellationToken);
+        }
+    }
+
+    public async Task PublishClientConnectionChangedAsync(int clientIndex, bool connected, CancellationToken cancellationToken = default)
+    {
+        if (_knxService == null)
+        {
+            return;
+        }
+
+        var knxValue = connected ? 1 : 0;
+        var groupAddress = GetClientConnectionStatusGA(clientIndex);
+        if (groupAddress != null)
+        {
+            await _knxService.WriteGroupValueAsync(groupAddress, knxValue, cancellationToken);
+        }
+    }
+
     private string? GetZonePlaylistStatusGA(int zoneIndex)
     {
         return zoneIndex <= _configuration.Zones.Count
@@ -125,6 +155,20 @@ public class KnxIntegrationPublisher : IIntegrationPublisher
     {
         return zoneIndex <= _configuration.Zones.Count
             ? _configuration.Zones[zoneIndex - 1].Knx?.TrackPlayingStatus
+            : null;
+    }
+
+    private string? GetClientVolumeStatusGA(int clientIndex)
+    {
+        return clientIndex <= _configuration.Clients.Count
+            ? _configuration.Clients[clientIndex - 1].Knx?.VolumeStatus
+            : null;
+    }
+
+    private string? GetClientConnectionStatusGA(int clientIndex)
+    {
+        return clientIndex <= _configuration.Clients.Count
+            ? _configuration.Clients[clientIndex - 1].Knx?.ConnectedStatus
             : null;
     }
 }

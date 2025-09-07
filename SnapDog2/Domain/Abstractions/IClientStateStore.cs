@@ -13,6 +13,8 @@
 //
 namespace SnapDog2.Domain.Abstractions;
 
+using SnapDog2.Shared.Attributes;
+using SnapDog2.Shared.Events;
 using SnapDog2.Shared.Models;
 
 /// <summary>
@@ -20,6 +22,24 @@ using SnapDog2.Shared.Models;
 /// </summary>
 public interface IClientStateStore
 {
+    /// <summary>
+    /// Event raised when client state changes.
+    /// </summary>
+    [StatusId("CLIENT_STATE_CHANGED")]
+    event EventHandler<ClientStateChangedEventArgs>? ClientStateChanged;
+
+    /// <summary>
+    /// Event raised when client volume changes.
+    /// </summary>
+    [StatusId("CLIENT_VOLUME_STATUS")]
+    event EventHandler<ClientVolumeChangedEventArgs>? ClientVolumeChanged;
+
+    /// <summary>
+    /// Event raised when client connection changes.
+    /// </summary>
+    [StatusId("CLIENT_CONNECTED")]
+    event EventHandler<ClientConnectionChangedEventArgs>? ClientConnectionChanged;
+
     /// <summary>
     /// Gets the current state for a client.
     /// </summary>

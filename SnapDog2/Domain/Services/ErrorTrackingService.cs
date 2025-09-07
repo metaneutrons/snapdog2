@@ -42,7 +42,7 @@ public partial class ErrorTrackingService(ILogger<ErrorTrackingService> logger) 
             this.CleanupOldErrors();
         }
 
-        logger.LogInformation("ErrorRecorded: {Details}", error.Component ?? "Unknown", error.Context ?? "Unknown", error.Message);
+        logger.LogInformation("ErrorRecorded: {Component} - {Context} - {Message}", error.Component ?? "Unknown", error.Context ?? "Unknown", error.Message);
     }
 
     /// <inheritdoc/>
@@ -124,7 +124,7 @@ public partial class ErrorTrackingService(ILogger<ErrorTrackingService> logger) 
         var removedCount = initialCount - this._errors.Count;
         if (removedCount > 0)
         {
-            logger.LogInformation("OldErrorsRemoved: {Details}", removedCount, this._errors.Count);
+            logger.LogInformation("OldErrorsRemoved: {RemovedCount} errors, {RemainingCount} remaining", removedCount, this._errors.Count);
         }
     }
 

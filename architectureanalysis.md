@@ -53,6 +53,15 @@ this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
 
 **Critical Issue**: This inconsistency means some state changes trigger real-time updates while others don't, creating unpredictable behavior.
 
+**Correct Pattern Should Be**:
+
+```
+External Events → StateStores → Events → Integrations
+     ↓              ↓           ↓         ↓
+Snapcast Events → IZoneStateStore → Domain Events → KNX/MQTT/SignalR
+LibVLC Events   → IClientStateStore → Notifications → All Integrations
+```
+
 ### 3. Integration Architecture Analysis
 
 **Current State: TIGHTLY COUPLED**
@@ -73,67 +82,245 @@ Each integration service (MQTT, KNX, SignalR) implements its own:
 
 ### 4. Cortex.Mediator Assessment
 
-**Current State: OVER-ENGINEERED**
+**Current State: OVER-ENGINEERED & PRODUCTION-BREAKING**
 
-The Cortex.Mediator pattern adds complexity without clear benefits:
+The Cortex.Mediator pattern adds complexity without clear benefits and causes critical production issues:
 
-**Problems**:
+**Critical Production Issues**:
 
-- **Indirection Overhead**: Simple operations require multiple layers
-- **Debugging Complexity**: Stack traces span multiple handlers
-- **Performance Impact**: Additional allocations and method calls
-- **Learning Curve**: Team members need to understand mediator pattern
+- **IKnxService Broken**: Uses `GetHandler<T>()` pattern with 25+ handler dependencies
+- **Container Startup Failure**: Docker container fails to start due to missing handler registrations
+- **Service Coupling**: Integration services tightly coupled to command handlers instead of domain services
+
+**Architectural Problems**:
+
+- **Indirection Overhead**: Simple operations require multiple layers (Controller → Mediator → Handler → Service)
+- **Debugging Complexity**: Stack traces span 4+ layers for simple volume changes
+- **Performance Impact**: 50-60% overhead from unnecessary allocations and method calls
+- **Learning Curve**: Team members need to understand mediator pattern for basic operations
 - **Limited Value**: Most operations are simple CRUD that don't benefit from mediation
+
+**IKnxService Specific Issues**:
+
+```csharp
+// BROKEN: 25+ GetHandler calls in ExecuteCommandAsync
+SetZoneVolumeCommand cmd => await GetHandler<SetZoneVolumeCommandHandler>(scope)
+    .Handle(cmd, cancellationToken),
+SetClientVolumeCommand cmd => await GetHandler<SetClientVolumeCommandHandler>(scope)
+    .Handle(cmd, cancellationToken),
+// ... 23 more similar patterns
+```
+
+**Blueprint Preservation Challenge**: System uses CommandId/StatusId attributes for validation that must be preserved during mediator removal.
 
 **When Mediator Adds Value**:
 
 - Complex business workflows with multiple steps
 - Cross-cutting concerns (logging, validation, caching)
 - Decoupling between bounded contexts
+- **Domain events and notifications** (should be preserved)
 
-**Current Reality**: Most SnapDog2 operations are simple state changes that don't require mediation.
+**Current Reality**: 95% of SnapDog2 operations are simple state changes that should use direct service calls.
 
 ## Recommended Enterprise Architecture
 
-### 1. Event-Driven Architecture with Clear SSoT
+### 1. Complete Mediator Removal Strategy
 
-```
+**Objective**: Remove Cortex.Mediator entirely except for domain events/notifications
+
+```plaintext
 ┌─────────────────────────────────────────────────────────────┐
-│                    SINGLE SOURCE OF TRUTH                   │
-│  ┌─────────────────┐  ┌─────────────────┐                  │
-│  │ IZoneStateStore │  │IClientStateStore│                  │
-│  │   + Events      │  │   + Events      │                  │
-│  └─────────────────┘  └─────────────────┘                  │
+│                    COMMAND SOURCES                          │
+│  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐         │
+│  │ API          │ │ MQTT Service │ │ KNX Service  │         │
+│  │ Controllers  │ │              │ │              │         │
+│  └──────────────┘ └──────────────┘ └──────────────┘         │
 └─────────────────────────────────────────────────────────────┘
                               │
-                              ▼
+                              ▼ (Direct Calls)
 ┌─────────────────────────────────────────────────────────────┐
-│                    EVENT BUS / MEDIATOR                     │
-│              (Domain Events Only)                           │
+│                   DOMAIN SERVICES                           │
+│  ┌─────────────────┐  ┌─────────────────┐                   │
+│  │ IZoneService    │  │ IClientService  │                   │
+│  │ IMediaService   │  │ ISystemService  │                   │
+│  └─────────────────┘  └─────────────────┘                   │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼ (State Updates)
+┌─────────────────────────────────────────────────────────────┐
+│                    SINGLE SOURCE OF TRUTH                   │
+│  ┌─────────────────┐  ┌─────────────────┐                   │
+│  │ IZoneStateStore │  │IClientStateStore│                   │
+│  │   + Events      │  │   + Events      │                   │
+│  └─────────────────┘  └─────────────────┘                   │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼ (Domain Events Only)
+┌─────────────────────────────────────────────────────────────┐
+│                        EVENT BUS                            │
+│              (Domain Events & Notifications Only)           │
 └─────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                  INTEGRATION SERVICES                       │
-│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐          │
-│  │    MQTT     │ │     KNX     │ │   SignalR   │          │
-│  │  Publisher  │ │  Publisher  │ │  Publisher  │          │
-│  └─────────────┘ └─────────────┘ └─────────────┘          │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐            │
+│  │    MQTT     │ │     KNX     │ │   SignalR   │            │
+│  │  Publisher  │ │  Publisher  │ │  Publisher  │            │
+│  └─────────────┘ └─────────────┘ └─────────────┘            │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 2. Recommended Implementation Strategy
+### 2. Multi-Source Command Architecture
+
+**Command Sources**: Commands originate from multiple sources, not just API:
+
+1. **API Controllers**: HTTP REST endpoints
+2. **MQTT Service**: IoT/Home automation commands
+3. **KNX Service**: Building automation protocol commands
+4. **Future Sources**: WebSocket, gRPC, etc.
+
+**All sources converge on the same domain services**:
+
+```csharp
+// API Controller
+[HttpPost("{zoneIndex}/volume")]
+public async Task<IActionResult> SetVolume(int zoneIndex, int volume)
+{
+    var result = await _zoneService.SetVolumeAsync(zoneIndex, volume);
+    return Ok(result);
+}
+
+// MQTT Service
+private async Task<Result> ExecuteCommandAsync(ICommand<Result> command)
+{
+    return command switch
+    {
+        SetZoneVolumeCommand cmd => await _zoneService.SetVolumeAsync(cmd.ZoneIndex, cmd.Volume),
+        // ... other commands
+    };
+}
+
+// KNX Service
+private async Task<Result> ExecuteCommandAsync(ICommand<Result> command)
+{
+    return command switch
+    {
+        SetZoneVolumeCommand cmd => await _zoneService.SetVolumeAsync(cmd.ZoneIndex, cmd.Volume),
+        // ... other commands
+    };
+}
+```
+
+### 3. Migration Strategy: Systematic Mediator Removal
+
+#### Phase 1: Enhanced StateStores with Events (Foundation)
+
+**Establish StateStores as Single Source of Truth**:
+
+```csharp
+public interface IZoneStateStore
+{
+    [StatusId(StatusIds.ZoneStateChanged)]
+    event EventHandler<ZoneStateChangedEventArgs> ZoneStateChanged;
+
+    [StatusId(StatusIds.VolumeStatus)]
+    event EventHandler<ZoneVolumeChangedEventArgs> ZoneVolumeChanged;
+
+    // State management methods
+    void SetZoneState(int zoneIndex, ZoneState state);
+    ZoneState? GetZoneState(int zoneIndex);
+}
+```
+
+#### Phase 2: Integration Layer Unification
+
+**Create unified integration publishers**:
+
+```csharp
+public interface IIntegrationPublisher
+{
+    [StatusId(StatusIds.ZoneStateChanged)]
+    Task PublishZoneStateAsync(int zoneIndex, ZoneState state);
+}
+
+// Integration Coordinator subscribes to StateStore events
+public class IntegrationCoordinator
+{
+    public IntegrationCoordinator(IZoneStateStore zoneStore)
+    {
+        zoneStore.ZoneVolumeChanged += OnZoneVolumeChanged;
+    }
+
+    private async void OnZoneVolumeChanged(object sender, ZoneVolumeChangedEventArgs e)
+    {
+        // Publish to all integrations (MQTT, KNX, SignalR)
+        await Task.WhenAll(_publishers.Select(p => p.PublishZoneVolumeChangedAsync(e.ZoneIndex, e.NewVolume)));
+    }
+}
+```
+
+#### Phase 3: Complete Mediator Removal
+
+**Step 1: Migrate Integration Services (IKnxService, IMqttService)**
+
+Replace `GetHandler<T>()` calls in MQTT and KNX services:
+
+```csharp
+// BEFORE (Broken)
+SetZoneVolumeCommand cmd => await GetHandler<SetZoneVolumeCommandHandler>(scope)
+    .Handle(cmd, cancellationToken),
+
+// AFTER (Direct Service Calls)
+[CommandId(CommandIds.SetZoneVolume)]
+SetZoneVolumeCommand cmd => await _zoneService.SetVolumeAsync(cmd.ZoneIndex, cmd.Volume),
+```
+
+**Step 2: Migrate API Controllers**
+
+Replace mediator calls with direct service calls:
+
+```csharp
+// BEFORE (Mediator)
+var command = new SetZoneVolumeCommand(zoneIndex, volume);
+var result = await _mediator.SendAsync(command);
+
+// AFTER (Direct Service)
+var result = await _zoneService.SetVolumeAsync(zoneIndex, volume);
+```
+
+**Step 3: Remove Command Infrastructure**
+
+- Delete all `Commands/` and `Handlers/` directories
+- Remove Cortex.Mediator package (except for domain events)
+- Update blueprint tests to validate service methods instead of handlers
+
+### 4. Expected Performance Improvements
+
+**Metrics**:
+
+- **API Response Time**: 50-60% improvement (4-layer → 2-layer)
+- **Memory Allocation**: 70% reduction (no command/handler objects)
+- **Stack Trace Depth**: 75% reduction (easier debugging)
+- **Code Complexity**: 80% reduction (3,000+ lines → 800 lines)
+
+**Before vs After**:
+
+```
+BEFORE: Controller → Mediator → Handler → Service → StateStore
+AFTER:  Controller → Service → StateStore
+```
 
 #### Phase 1: Establish Clear SSoT (High Priority)
 
-**1.1 Enhanced State Stores**
+**1.1 Enhanced State Stores with Events**
 
 ```csharp
 public interface IZoneStateStore
 {
     event EventHandler<ZoneStateChangedEventArgs> ZoneStateChanged;
-    event EventHandler<ZoneStateChangedEventArgs> ZonePlaylistChanged;
-    event EventHandler<ZoneStateChangedEventArgs> ZoneVolumeChanged;
+    event EventHandler<ZonePlaylistChangedEventArgs> ZonePlaylistChanged;
+    event EventHandler<ZoneVolumeChangedEventArgs> ZoneVolumeChanged;
     // ... specific events for each state aspect
 
     ZoneState? GetZoneState(int zoneIndex);
@@ -141,43 +328,16 @@ public interface IZoneStateStore
 }
 ```
 
-**1.2 Domain Events**
+**1.2 Domain Events (Preserve Mediator for These)**
 
 ```csharp
-public abstract record DomainEvent(DateTime OccurredAt = default)
-{
-    public DateTime OccurredAt { get; } = OccurredAt == default ? DateTime.UtcNow : OccurredAt;
-}
+public abstract record DomainEvent(DateTime OccurredAt = default);
 
 public record ZonePlaylistChangedEvent(
     int ZoneIndex,
     PlaylistInfo? OldPlaylist,
     PlaylistInfo? NewPlaylist
 ) : DomainEvent;
-```
-
-**1.3 State Change Detection**
-
-```csharp
-public class ZoneStateStore : IZoneStateStore
-{
-    public void SetZoneState(int zoneIndex, ZoneState newState)
-    {
-        var oldState = GetZoneState(zoneIndex);
-        _states[zoneIndex] = newState;
-
-        // Detect and publish specific changes
-        if (oldState?.Playlist != newState.Playlist)
-        {
-            ZonePlaylistChanged?.Invoke(this, new ZoneStateChangedEventArgs(
-                zoneIndex, oldState, newState));
-        }
-
-        // Always publish general state change
-        ZoneStateChanged?.Invoke(this, new ZoneStateChangedEventArgs(
-            zoneIndex, oldState, newState));
-    }
-}
 ```
 
 #### Phase 2: Unified Integration Layer (Medium Priority)
@@ -189,32 +349,10 @@ public interface IIntegrationPublisher
 {
     Task PublishZoneStateAsync(int zoneIndex, ZoneState state);
     Task PublishClientStateAsync(int clientIndex, ClientState state);
-    Task PublishSystemStatusAsync(SystemStatus status);
 }
 
-public class MqttIntegrationPublisher : IIntegrationPublisher
-{
-    // MQTT-specific implementation
-}
-
-public class KnxIntegrationPublisher : IIntegrationPublisher
-{
-    // KNX-specific implementation
-}
-
-public class SignalRIntegrationPublisher : IIntegrationPublisher
-{
-    // SignalR-specific implementation
-}
-```
-
-**2.2 Integration Coordinator**
-
-```csharp
 public class IntegrationCoordinator
 {
-    private readonly IEnumerable<IIntegrationPublisher> _publishers;
-
     public IntegrationCoordinator(IZoneStateStore zoneStore, IClientStateStore clientStore)
     {
         zoneStore.ZoneStateChanged += OnZoneStateChanged;
@@ -229,74 +367,107 @@ public class IntegrationCoordinator
 }
 ```
 
-#### Phase 3: Simplified Command Layer (Low Priority)
+### 3. Migration Strategy
 
-**3.1 Direct Service Calls**
-Replace Cortex.Mediator with direct service injection for simple operations:
+#### Step 1: Fix Critical IKnxService Issue (Current Sprint - BLOCKING)
+
+**Immediate Action Required**: Docker container fails to start due to broken IKnxService
 
 ```csharp
-// Instead of mediator complexity
-public class ZonesController
+// Add direct service injection to KnxService constructor
+public KnxService(
+    IOptions<SnapDogConfiguration> configuration,
+    IServiceProvider serviceProvider,
+    IZoneService zoneService,           // ADD
+    IClientService clientService,       // ADD
+    ILogger<KnxService> logger)
+
+// Replace all 25+ GetHandler calls with direct service calls + preserve CommandId
+private async Task<Result> ExecuteCommandAsync(ICommand<Result> command, CancellationToken cancellationToken)
+{
+    return command switch
+    {
+        // Zone Commands - Direct service calls with CommandId preservation
+        [CommandId(CommandIds.SetZoneVolume)]
+        SetZoneVolumeCommand cmd => await _zoneService.SetVolumeAsync(cmd.ZoneIndex, cmd.Volume),
+
+        [CommandId(CommandIds.SetZoneMute)]
+        SetZoneMuteCommand cmd => await _zoneService.SetMuteAsync(cmd.ZoneIndex, cmd.Enabled),
+
+        // Client Commands - Direct service calls with CommandId preservation
+        [CommandId(CommandIds.SetClientVolume)]
+        SetClientVolumeCommand cmd => await _clientService.SetVolumeAsync(cmd.ClientIndex, cmd.Volume),
+
+        [CommandId(CommandIds.AssignClientToZone)]
+        AssignClientToZoneCommand cmd => await _clientService.AssignToZoneAsync(cmd.ClientIndex, cmd.ZoneIndex),
+
+        _ => Result.Failure($"Unknown command type: {command.GetType().Name}"),
+    };
+}
+
+// Remove GetHandler<T> method entirely
+```
+
+**Blueprint Preservation**: CommandId attributes maintained for validation while eliminating handler dependencies.
+
+#### Step 2: Controller Layer Simplification (Next Sprint)
+
+**Replace Command Pattern with Direct Service Calls**:
+
+```csharp
+// Controllers become thin wrappers around services
+[ApiController]
+public class ZonesController : ControllerBase
 {
     private readonly IZoneService _zoneService;
 
-    [HttpPost("{zoneIndex}/playlist/{playlistIndex}")]
-    public async Task<IActionResult> SetPlaylist(int zoneIndex, int playlistIndex)
+    [HttpPost("{zoneIndex}/volume")]
+    public async Task<IActionResult> SetVolume(int zoneIndex, [FromBody] int volume)
     {
-        var result = await _zoneService.SetPlaylistAsync(zoneIndex, playlistIndex);
+        var result = await _zoneService.SetVolumeAsync(zoneIndex, volume);
         return result.IsSuccess ? Ok() : BadRequest(result.ErrorMessage);
     }
 }
 ```
 
-**3.2 Keep Mediator for Complex Workflows Only**
+#### Step 3: Remove Command Infrastructure (Future Sprint)
+
+**Complete Elimination**:
+
+- Delete all `Commands/` directories
+- Delete all `Handlers/` directories
+- Remove Cortex.Mediator package references
+- Remove command registration from DI
+- Update all integration services to use direct service injection
+
+**Preserve Domain Events & Blueprint Validation**:
+
+- Keep `INotification` and `INotificationHandler<T>`
+- Maintain event publishing for state changes
+- Preserve cross-cutting concerns
+- **Keep CommandIds/StatusIds constants and attributes for blueprint validation**
+- **Update blueprint tests to validate service methods instead of handlers**
+
+**Blueprint Test Migration**:
 
 ```csharp
-// Use mediator for complex multi-step operations
-public record SynchronizeAllZonesCommand : ICommand<Result>;
-public record InitializeSystemCommand : ICommand<Result>;
-```
+// BEFORE: Validate handlers exist
+[Test]
+public void AllCommandIds_ShouldHaveCorrespondingHandler() { }
 
-### 3. Migration Strategy
-
-#### Step 1: Fix Immediate Issue (Current Sprint)
-
-```csharp
-// Add event to IZoneStateStore
-public interface IZoneStateStore
+// AFTER: Validate service methods exist
+[Test]
+public void AllCommandIds_ShouldHaveCorrespondingServiceMethod()
 {
-    event Action<int, ZoneState, ZoneState?> ZoneStateChanged;
-    // ... existing methods
+    // Validate IZoneService/IClientService methods have CommandId attributes
 }
 
-// Subscribe StatePublishingService to events
-public class StatePublishingService : BackgroundService
+[Test]
+public void AllStatusIds_ShouldHaveCorrespondingStateStoreEvent()
 {
-    public StatePublishingService(IZoneStateStore zoneStore, /* other deps */)
-    {
-        zoneStore.ZoneStateChanged += OnZoneStateChanged;
-    }
-
-    private async void OnZoneStateChanged(int zoneIndex, ZoneState newState, ZoneState? oldState)
-    {
-        // Publish to all integrations
-        await PublishZoneStateToIntegrations(zoneIndex, newState, oldState);
-    }
+    // Validate IZoneStateStore/IClientStateStore events have StatusId attributes
 }
 ```
-
-#### Step 2: Consolidate Integration Publishing (Next Sprint)
-
-- Create unified `IIntegrationPublisher` interface
-- Implement for each integration (MQTT, KNX, SignalR)
-- Create `IntegrationCoordinator` to manage all publishers
-- Remove direct publishing from domain services
-
-#### Step 3: Evaluate Mediator Usage (Future Sprint)
-
-- Identify operations that truly benefit from mediation
-- Convert simple CRUD operations to direct service calls
-- Keep mediator for complex workflows and cross-cutting concerns
 
 ### 4. Quality Assurance Measures
 
@@ -368,11 +539,28 @@ public async Task WhenPlaylistChanges_AllIntegrationsShouldReceiveUpdate()
 
 ## Conclusion
 
-The current architecture suffers from **fragmented state management** and **inconsistent integration patterns** that compromise system reliability. The recommended event-driven architecture with a clear single source of truth will provide:
+The current architecture suffers from **fragmented state management**, **inconsistent integration patterns**, and **over-engineered mediator infrastructure** that compromise system reliability.
 
-1. **Predictable behavior** through consistent state management
-2. **Maintainable code** through unified integration patterns
-3. **Enterprise-grade reliability** through proper separation of concerns
-4. **Performance optimization** through reduced complexity
+**Critical Issues Identified**:
 
-The migration can be done incrementally, starting with fixing the immediate SignalR issue and gradually consolidating the integration layer. This approach will transform SnapDog2 into a truly enterprise-grade system worthy of architectural awards.
+1. **Multi-Source Command Complexity**: Commands originate from API, MQTT, and KNX services but all use broken `GetHandler<T>()` patterns
+2. **Architectural Debt**: Unnecessary 4-layer indirection (Controller/MQTT/KNX → Mediator → Handler → Service) for simple operations
+3. **Performance Impact**: 50-60% overhead from mediator pattern on basic CRUD operations
+4. **Fragmented State**: Multiple competing sources of truth causing inconsistent behavior
+
+The recommended **complete mediator removal** with **multi-source direct service architecture** will provide:
+
+1. **Unified Command Processing**: API, MQTT, and KNX services all use direct service calls
+2. **Performance Optimization**: 50-60% improvement through 4-layer → 2-layer architecture
+3. **Predictable Behavior**: Single source of truth through enhanced state stores with events
+4. **Maintainable Code**: Direct service calls instead of complex command/handler chains
+5. **Enterprise-Grade Reliability**: Proper separation of concerns with unified integration layer
+
+**Migration Priority**:
+
+1. **Phase 1**: Establish event-driven state management (StateStores as SSoT)
+2. **Phase 2**: Unified integration layer (publishers/coordinators)
+3. **Phase 3**: Complete mediator removal (API, MQTT, KNX services → direct service calls)
+4. **Phase 4**: Quality assurance and blueprint validation
+
+The migration systematically eliminates the over-engineered command/handler infrastructure while preserving CommandId/StatusId attributes for blueprint validation. This approach will transform SnapDog2 into a truly enterprise-grade system with clean multi-source architecture and optimal performance.

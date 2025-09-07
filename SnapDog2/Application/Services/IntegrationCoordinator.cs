@@ -24,23 +24,31 @@ public class IntegrationCoordinator : IHostedService
     private readonly IEnumerable<IIntegrationPublisher> _publishers;
     private readonly ILogger<IntegrationCoordinator> _logger;
     private readonly IZoneStateStore _zoneStateStore;
+    private readonly IClientStateStore _clientStateStore;
 
     public IntegrationCoordinator(
         IZoneStateStore zoneStateStore,
+        IClientStateStore clientStateStore,
         IEnumerable<IIntegrationPublisher> publishers,
         ILogger<IntegrationCoordinator> logger)
     {
         _zoneStateStore = zoneStateStore;
+        _clientStateStore = clientStateStore;
         _publishers = publishers;
         _logger = logger;
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
+        // Subscribe to zone state events
         _zoneStateStore.ZonePlaylistChanged += OnZonePlaylistChanged;
         _zoneStateStore.ZoneVolumeChanged += OnZoneVolumeChanged;
         _zoneStateStore.ZoneTrackChanged += OnZoneTrackChanged;
         _zoneStateStore.ZonePlaybackStateChanged += OnZonePlaybackStateChanged;
+
+        // Subscribe to client state events
+        _clientStateStore.ClientVolumeChanged += OnClientVolumeChanged;
+        _clientStateStore.ClientConnectionChanged += OnClientConnectionChanged;
 
         _logger.LogInformation("IntegrationCoordinator started with {PublisherCount} publishers", _publishers.Count());
         return Task.CompletedTask;
@@ -48,10 +56,15 @@ public class IntegrationCoordinator : IHostedService
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
+        // Unsubscribe from zone state events
         _zoneStateStore.ZonePlaylistChanged -= OnZonePlaylistChanged;
         _zoneStateStore.ZoneVolumeChanged -= OnZoneVolumeChanged;
         _zoneStateStore.ZoneTrackChanged -= OnZoneTrackChanged;
         _zoneStateStore.ZonePlaybackStateChanged -= OnZonePlaybackStateChanged;
+
+        // Unsubscribe from client state events
+        _clientStateStore.ClientVolumeChanged -= OnClientVolumeChanged;
+        _clientStateStore.ClientConnectionChanged -= OnClientConnectionChanged;
 
         return Task.CompletedTask;
     }
@@ -100,6 +113,30 @@ public class IntegrationCoordinator : IHostedService
                 () => p.PublishZonePlaybackStateChangedAsync(e.ZoneIndex, e.NewPlaybackState),
                 p.Name,
                 "ZonePlaybackStateChanged"));
+
+        await Task.WhenAll(tasks);
+    }
+
+    private async void OnClientVolumeChanged(object? sender, ClientVolumeChangedEventArgs e)
+    {
+        var tasks = _publishers
+            .Where(p => p.IsEnabled)
+            .Select(p => PublishWithErrorHandling(
+                () => p.PublishClientVolumeChangedAsync(e.ClientIndex, e.NewVolume),
+                p.Name,
+                "ClientVolumeChanged"));
+
+        await Task.WhenAll(tasks);
+    }
+
+    private async void OnClientConnectionChanged(object? sender, ClientConnectionChangedEventArgs e)
+    {
+        var tasks = _publishers
+            .Where(p => p.IsEnabled)
+            .Select(p => PublishWithErrorHandling(
+                () => p.PublishClientConnectionChangedAsync(e.ClientIndex, e.NewConnected),
+                p.Name,
+                "ClientConnectionChanged"));
 
         await Task.WhenAll(tasks);
     }

@@ -56,7 +56,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
         [FromQuery, Range(1, 100)] int pageSize = 20
     )
     {
-        _logger.LogInformation("GettingPlaylists: {Details}", page, pageSize);
+        _logger.LogInformation("Operation completed: {Param1} {Param2}", page, pageSize);
 
         try
         {
@@ -98,7 +98,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
                 PageNumber: page
             );
 
-            _logger.LogInformation("PlaylistsRetrieved: {Details}", paginatedPlaylists.Length, totalCount);
+            _logger.LogInformation("Operation completed: {Param1} {Param2}", paginatedPlaylists.Length, totalCount);
             return this.Ok(ApiResponse<Page<PlaylistInfo>>.CreateSuccess(paginatedResponse));
         }
         catch (Exception ex)
@@ -156,7 +156,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
 
                 if (!radioResult.IsSuccess)
                 {
-                    _logger.LogInformation("GetPlaylistError: {Details}", playlistIndex, radioResult.ErrorMessage ?? "Unknown error");
+                    _logger.LogInformation("Operation completed: {Param1} {Param2}", playlistIndex, radioResult.ErrorMessage ?? "Unknown error");
                     return this.StatusCode(
                         500,
                         ApiResponse<PlaylistWithTracks>.CreateError(
@@ -166,7 +166,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
                     );
                 }
 
-                _logger.LogInformation("PlaylistRetrieved: {Details}", playlistIndex, radioResult.Value?.Tracks.Count ?? 0);
+                _logger.LogInformation("Operation completed: {Param1} {Param2}", playlistIndex, radioResult.Value?.Tracks.Count ?? 0);
                 return this.Ok(ApiResponse<PlaylistWithTracks>.CreateSuccess(radioResult.Value!));
             }
 
@@ -189,7 +189,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
                         );
                     }
 
-                    _logger.LogInformation("GetPlaylistError: {Details}", playlistIndex, indexResult.ErrorMessage ?? "Unknown error");
+                    _logger.LogInformation("Operation completed: {Param1} {Param2}", playlistIndex, indexResult.ErrorMessage ?? "Unknown error");
                     return this.StatusCode(
                         500,
                         ApiResponse<PlaylistWithTracks>.CreateError(
@@ -199,7 +199,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
                     );
                 }
 
-                _logger.LogInformation("PlaylistRetrieved: {Details}", playlistIndex, indexResult.Value?.Tracks.Count ?? 0);
+                _logger.LogInformation("Operation completed: {Param1} {Param2}", playlistIndex, indexResult.Value?.Tracks.Count ?? 0);
                 return this.Ok(ApiResponse<PlaylistWithTracks>.CreateSuccess(indexResult.Value!));
             }
 
@@ -220,7 +220,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
 
             if (!allPlaylistsResult.IsSuccess)
             {
-                _logger.LogInformation("GetPlaylistError: {Details}", playlistIndex, allPlaylistsResult.ErrorMessage ?? "Unknown error");
+                _logger.LogInformation("Operation completed: {Param1} {Param2}", playlistIndex, allPlaylistsResult.ErrorMessage ?? "Unknown error");
                 return this.StatusCode(
                     500,
                     ApiResponse<PlaylistWithTracks>.CreateError(
@@ -252,7 +252,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
 
             if (!result.IsSuccess)
             {
-                _logger.LogInformation("GetPlaylistError: {Details}", playlistIndex, result.ErrorMessage ?? "Unknown error");
+                _logger.LogInformation("Operation completed: {Param1} {Param2}", playlistIndex, result.ErrorMessage ?? "Unknown error");
                 return this.StatusCode(
                     500,
                     ApiResponse<PlaylistWithTracks>.CreateError(
@@ -262,12 +262,12 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
                 );
             }
 
-            _logger.LogInformation("PlaylistRetrieved: {Details}", playlistIndex, result.Value?.Tracks.Count ?? 0);
+            _logger.LogInformation("Operation completed: {Param1} {Param2}", playlistIndex, result.Value?.Tracks.Count ?? 0);
             return this.Ok(ApiResponse<PlaylistWithTracks>.CreateSuccess(result.Value!));
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("GetPlaylistError: {Details}", playlistIndex, ex.Message);
+            _logger.LogInformation("Operation completed: {Param1} {Param2}", playlistIndex, ex.Message);
             return this.StatusCode(
                 500,
                 ApiResponse<PlaylistWithTracks>.CreateError("INTERNAL_ERROR", "Failed to retrieve playlist")
@@ -302,7 +302,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
             return this.BadRequest(ApiResponse<Page<TrackInfo>>.CreateError("INVALID_ID", "Playlist ID is required"));
         }
 
-        _logger.LogInformation("GettingPlaylistTracks: {Details}", playlistIndex, page, pageSize);
+        _logger.LogInformation("Getting playlist {PlaylistIndex} tracks (page {Page}, size {PageSize})", playlistIndex, page, pageSize);
 
         try
         {
@@ -322,7 +322,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
                     );
                 }
 
-                _logger.LogInformation("GetPlaylistError: {Details}", playlistIndex, playlistResult.ErrorMessage ?? "Unknown error");
+                _logger.LogInformation("Operation completed: {Param1} {Param2}", playlistIndex, playlistResult.ErrorMessage ?? "Unknown error");
                 return this.StatusCode(
                     500,
                     ApiResponse<Page<TrackInfo>>.CreateError(
@@ -345,12 +345,12 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
                 PageNumber: page
             );
 
-            _logger.LogInformation("PlaylistTracksRetrieved: {Details}", playlistIndex, paginatedTracks.Length, totalCount);
+            _logger.LogInformation("Retrieved {TrackCount} tracks from playlist {PlaylistIndex} (total: {TotalCount})", paginatedTracks.Length, playlistIndex, totalCount);
             return this.Ok(ApiResponse<Page<TrackInfo>>.CreateSuccess(paginatedResponse));
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("GetPlaylistError: {Details}", playlistIndex, ex.Message);
+            _logger.LogInformation("Operation completed: {Param1} {Param2}", playlistIndex, ex.Message);
             return this.StatusCode(
                 500,
                 ApiResponse<Page<TrackInfo>>.CreateError("INTERNAL_ERROR", "Failed to retrieve playlist tracks")
@@ -390,7 +390,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
             return this.BadRequest(ApiResponse<TrackInfo>.CreateError("INVALID_TRACK_ID", "Track ID is required"));
         }
 
-        _logger.LogInformation("GettingPlaylistTrack: {Details}", playlistIndex, trackIndex);
+        _logger.LogInformation("Operation completed: {Param1} {Param2}", playlistIndex, trackIndex);
 
         try
         {
@@ -409,7 +409,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
                     );
                 }
 
-                _logger.LogInformation("GetPlaylistError: {Details}", playlistIndex, playlistResult.ErrorMessage ?? "Unknown error");
+                _logger.LogInformation("Operation completed: {Param1} {Param2}", playlistIndex, playlistResult.ErrorMessage ?? "Unknown error");
                 return this.StatusCode(
                     500,
                     ApiResponse<TrackInfo>.CreateError(
@@ -439,7 +439,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
 
             if (targetTrack == null)
             {
-                _logger.LogInformation("TrackNotFound: {Details}", trackIndex, playlistIndex);
+                _logger.LogInformation("Operation completed: {Param1} {Param2}", trackIndex, playlistIndex);
                 return this.NotFound(
                     ApiResponse<TrackInfo>.CreateError(
                         "TRACK_NOT_FOUND",
@@ -448,12 +448,12 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
                 );
             }
 
-            _logger.LogInformation("PlaylistTrackRetrieved: {Details}", playlistIndex, trackIndex);
+            _logger.LogInformation("Operation completed: {Param1} {Param2}", playlistIndex, trackIndex);
             return this.Ok(ApiResponse<TrackInfo>.CreateSuccess(targetTrack));
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("GetPlaylistTrackError: {Details}", playlistIndex, trackIndex, ex.Message);
+            _logger.LogInformation("Failed to get track {TrackIndex} from playlist {PlaylistIndex}: {Error}", trackIndex, playlistIndex, ex.Message);
             return this.StatusCode(
                 500,
                 ApiResponse<TrackInfo>.CreateError("INTERNAL_ERROR", "Failed to retrieve track from playlist")
@@ -509,7 +509,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
                     );
                 }
 
-                _logger.LogInformation("GetTrackError: {Details}", trackIndex, result.ErrorMessage ?? "Unknown error");
+                _logger.LogInformation("Operation completed: {Param1} {Param2}", trackIndex, result.ErrorMessage ?? "Unknown error");
                 return this.StatusCode(
                     500,
                     ApiResponse<TrackInfo>.CreateError("TRACK_ERROR", result.ErrorMessage ?? "Failed to retrieve track")
@@ -521,7 +521,7 @@ public partial class MediaController(IServiceProvider serviceProvider, ILogger<M
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("GetTrackError: {Details}", trackIndex, ex.Message);
+            _logger.LogInformation("Operation completed: {Param1} {Param2}", trackIndex, ex.Message);
             return this.StatusCode(
                 500,
                 ApiResponse<TrackInfo>.CreateError("INTERNAL_ERROR", "Failed to retrieve track")

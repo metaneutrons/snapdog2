@@ -87,4 +87,27 @@ public class MqttIntegrationPublisher : IIntegrationPublisher
         var payload = ((int)playbackState).ToString();
         await _mqttService.PublishAsync(topic, payload, retain: true, cancellationToken);
     }
+
+    public async Task PublishClientVolumeChangedAsync(int clientIndex, int volume, CancellationToken cancellationToken = default)
+    {
+        if (_mqttService == null)
+        {
+            return;
+        }
+
+        var topic = $"snapdog/clients/{clientIndex}/volume";
+        await _mqttService.PublishAsync(topic, volume.ToString(), retain: true, cancellationToken);
+    }
+
+    public async Task PublishClientConnectionChangedAsync(int clientIndex, bool connected, CancellationToken cancellationToken = default)
+    {
+        if (_mqttService == null)
+        {
+            return;
+        }
+
+        var topic = $"snapdog/clients/{clientIndex}/connected";
+        var payload = connected ? "1" : "0";
+        await _mqttService.PublishAsync(topic, payload, retain: true, cancellationToken);
+    }
 }

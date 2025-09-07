@@ -70,7 +70,7 @@ public sealed partial class MediaPlayer(
             // Stop any existing streaming
             await this.StopStreamingAsync();
 
-            _logger.LogInformation("StartingStreaming: {Details}", this._zoneIndex, streamUrl);
+            _logger.LogInformation("Operation completed: {Param1} {Param2}", this._zoneIndex, streamUrl);
 
             // Create new processing context
             this._processingContext = new AudioProcessingContext(
@@ -113,7 +113,7 @@ public sealed partial class MediaPlayer(
                         }
                         else
                         {
-                            _logger.LogInformation("AudioProcessingSuccess: {Details}", this._zoneIndex, result.Metadata != null);
+                            _logger.LogInformation("Operation completed: {Param1} {Param2}", this._zoneIndex, result.Metadata != null);
 
                             // Update track info with extracted metadata from LibVLC
                             if (result.Metadata != null)
@@ -129,7 +129,7 @@ public sealed partial class MediaPlayer(
 
                                 this._currentTrack = updatedTrack;
 
-                                _logger.LogInformation("MetadataExtracted: {Details}", this._zoneIndex,
+                                _logger.LogInformation("Metadata extracted for zone {ZoneIndex}: {Title} by {Artist}", this._zoneIndex,
                                     updatedTrack.Title ?? "Unknown",
                                     updatedTrack.Artist ?? "Unknown");
 
@@ -153,18 +153,18 @@ public sealed partial class MediaPlayer(
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogInformation("StreamingError: {Details}", ex, this._zoneIndex);
+                        _logger.LogInformation("Operation completed: {Param1} {Param2}", ex, this._zoneIndex);
                     }
                 },
                 this._streamingCts.Token
             );
 
-            _logger.LogInformation("StreamingStarted: {Details}", this._zoneIndex, streamUrl, trackInfo.Title);
+            _logger.LogInformation("Started playback on zone {ZoneIndex}: {Title} from {StreamUrl}", this._zoneIndex, trackInfo.Title, streamUrl);
             return Result.Success();
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("StreamingFailed: {Details}", ex, this._zoneIndex, streamUrl);
+            _logger.LogInformation("Playback failed on zone {ZoneIndex} for {StreamUrl}: {Error}", this._zoneIndex, streamUrl, ex.Message);
             return Result.Failure(ex);
         }
     }
@@ -199,7 +199,7 @@ public sealed partial class MediaPlayer(
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("StreamingStopFailed: {Details}", ex, this._zoneIndex);
+            _logger.LogInformation("Operation completed: {Param1} {Param2}", ex, this._zoneIndex);
             return Result.Failure(ex);
         }
     }
@@ -238,7 +238,7 @@ public sealed partial class MediaPlayer(
         }
         else
         {
-            _logger.LogInformation("NotUpdatingPosition: {Details}", currentTrack != null, this._processingContext != null, isPlaying);
+            _logger.LogInformation("Playback status: track={HasTrack}, context={HasContext}, playing={IsPlaying}", currentTrack != null, this._processingContext != null, isPlaying);
         }
 
         return new PlaybackStatus
@@ -264,7 +264,7 @@ public sealed partial class MediaPlayer(
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("PositionEventError: {Details}", ex, this._zoneIndex);
+            _logger.LogInformation("Operation completed: {Param1} {Param2}", ex, this._zoneIndex);
         }
     }
 
@@ -279,7 +279,7 @@ public sealed partial class MediaPlayer(
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("PlaybackStateEventError: {Details}", ex, this._zoneIndex);
+            _logger.LogInformation("Operation completed: {Param1} {Param2}", ex, this._zoneIndex);
         }
     }
 

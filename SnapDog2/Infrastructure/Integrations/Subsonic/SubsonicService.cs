@@ -104,7 +104,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         // Initialize SubsonicClient with the resilient HttpClient
         this._subsonicClient = new SubsonicClient(connectionInfo, httpClient: httpClient, logger: null);
 
-        _logger.LogInformation("SubsonicServiceInitialized: {Details}", this._config.Url, this._config.Username);
+        _logger.LogInformation("Operation completed: {Param1} {Param2}", this._config.Url, this._config.Username);
     }
 
     #region Helper Methods
@@ -123,7 +123,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("NotificationPublishError: {Details}", typeof(T).Name, ex);
+            _logger.LogInformation("Operation completed: {Param1} {Param2}", typeof(T).Name, ex);
         }
     }
 
@@ -301,7 +301,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
                 cancellationToken
             );
 
-            _logger.LogInformation("PlaylistRetrieved: {Details}", playlistIndex, result.Tracks.Count);
+            _logger.LogInformation("Operation completed: {Param1} {Param2}", playlistIndex, result.Tracks.Count);
 
             // Publish playlist accessed notification
             this.PublishNotificationFireAndForget(
@@ -317,7 +317,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("GetPlaylistError: {Details}", playlistIndex, ex);
+            _logger.LogInformation("Operation completed: {Param1} {Param2}", playlistIndex, ex);
 
             // Publish playlist access failed notification
             this.PublishNotificationFireAndForget(
@@ -387,7 +387,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("GetStreamUrlError: {Details}", trackId, ex);
+            _logger.LogInformation("Operation completed: {Param1} {Param2}", trackId, ex);
 
             // Publish stream request failed notification
             this.PublishNotificationFireAndForget(
@@ -491,12 +491,12 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
                 ETag = coverId
             };
 
-            _logger.LogInformation("CoverArtRetrieved: {Details}", coverId, coverResult.Length);
+            _logger.LogInformation("Operation completed: {Param1} {Param2}", coverId, coverResult.Length);
             return Result<CoverArtData>.Success(coverArtData);
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("GetCoverArtError: {Details}", coverId, ex);
+            _logger.LogInformation("Operation completed: {Param1} {Param2}", coverId, ex);
             return Result<CoverArtData>.Failure($"Failed to get cover art: {ex.Message}");
         }
         finally

@@ -82,18 +82,18 @@ public static partial class WebHostExtensions
 
                     if (currentPort != preferredPort)
                     {
-                        logger.LogInformation("HttpPortFallback: {Details}", preferredPort, currentPort);
+                        logger.LogInformation("HTTP port fallback from {PreferredPort} to {CurrentPort}", preferredPort, currentPort);
                     }
 
                     return currentPort;
                 }
 
-                logger.LogInformation("HttpPortUnavailable: {Details}", currentPort, attempt, maxAttempts);
+                logger.LogInformation("HTTP port {CurrentPort} unavailable (attempt {Attempt}/{MaxAttempts})", currentPort, attempt, maxAttempts);
                 currentPort++;
             }
             catch (Exception ex)
             {
-                logger.LogInformation("HttpPortBindFailed: {Details}", ex, currentPort, attempt, maxAttempts);
+                logger.LogInformation("HTTP port bind failed for {CurrentPort} (attempt {Attempt}/{MaxAttempts}): {Error}", currentPort, attempt, maxAttempts, ex.Message);
                 currentPort++;
             }
         }

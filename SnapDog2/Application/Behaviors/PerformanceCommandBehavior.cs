@@ -131,7 +131,7 @@ public partial class PerformanceCommandBehavior<TCommand, TResponse>(
         catch (Exception ex)
         {
             // Don't let metrics recording failures affect command execution
-            _logger.LogInformation("MetricsRecordingFailed: {Details}", ex, typeof(TCommand).Name);
+            _logger.LogInformation("Metrics recording failed for {CommandType}: {Error}", typeof(TCommand).Name, ex.Message);
         }
     }
 

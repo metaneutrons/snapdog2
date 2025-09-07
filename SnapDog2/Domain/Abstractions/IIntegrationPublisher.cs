@@ -50,4 +50,14 @@ public interface IIntegrationPublisher
     /// Publishes zone playback state change.
     /// </summary>
     Task PublishZonePlaybackStateChangedAsync(int zoneIndex, PlaybackState playbackState, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Publishes client volume change.
+    /// </summary>
+    Task PublishClientVolumeChangedAsync(int clientIndex, int volume, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Publishes client connection change.
+    /// </summary>
+    Task PublishClientConnectionChangedAsync(int clientIndex, bool connected, CancellationToken cancellationToken = default);
 }

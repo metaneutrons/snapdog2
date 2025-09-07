@@ -106,7 +106,7 @@ public sealed partial class MetadataManager(ILogger<MetadataManager> logger)
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("FailedToExtractMetadata: {Details}", ex, media.Mrl);
+            LogFailedToExtractMetadata(ex.Message, media.Mrl);
 
             // Return minimal metadata on error
             return new AudioMetadata
@@ -146,7 +146,7 @@ public sealed partial class MetadataManager(ILogger<MetadataManager> logger)
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("FailedToSaveMetadata: {Details}", ex, filePath);
+            LogFailedToSaveMetadata(ex.Message, filePath);
             throw;
         }
     }
@@ -192,4 +192,9 @@ public sealed partial class MetadataManager(ILogger<MetadataManager> logger)
     }
 
     // LoggerMessage methods for high-performance logging
+    [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Failed to extract metadata: {Details} for {FilePath}")]
+    private partial void LogFailedToExtractMetadata(string? details, string? filePath);
+
+    [LoggerMessage(EventId = 2, Level = LogLevel.Information, Message = "Failed to save metadata: {Details} for {FilePath}")]
+    private partial void LogFailedToSaveMetadata(string? details, string? filePath);
 }

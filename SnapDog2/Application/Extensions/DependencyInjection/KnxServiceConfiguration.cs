@@ -49,7 +49,7 @@ public static partial class KnxServiceConfiguration
         var validationResult = ValidateKnxConfiguration(knxConfig, configuration.Zones, configuration.Clients);
         if (!validationResult.IsValid)
         {
-            logger.LogInformation("KnxConfigurationValidationFailed: {Details}", string.Join(", ", validationResult.Errors));
+            logger.LogInformation("KNX configuration validation failed: {Errors}", string.Join(", ", validationResult.Errors));
         }
 
         var connectionTypeText = knxConfig.ConnectionType switch
@@ -70,14 +70,14 @@ public static partial class KnxServiceConfiguration
                 KnxConnectionType.Router => "IP Routing",
                 _ => "IP Connection",
             };
-            logger.LogInformation("KnxConnectionDetails: {Details}", ipConnectionTypeText, knxConfig.Gateway, knxConfig.Port);
+            logger.LogInformation("KNX connection: {ConnectionType} to {Gateway}:{Port}", ipConnectionTypeText, knxConfig.Gateway, knxConfig.Port);
         }
 
         // Count configured KNX zones and clients
         var knxZoneCount = configuration.Zones.Count(z => z.Knx.Enabled);
         var knxClientCount = configuration.Clients.Count(c => c.Knx.Enabled);
 
-        logger.LogInformation("KnxIntegrationConfigured: {Details}", knxZoneCount, knxClientCount);
+        logger.LogInformation("KNX integration configured: {ZoneCount} zones, {ClientCount} clients", knxZoneCount, knxClientCount);
 
         // Register the actual KNX service
         services.AddSingleton<IKnxService, KnxService>();

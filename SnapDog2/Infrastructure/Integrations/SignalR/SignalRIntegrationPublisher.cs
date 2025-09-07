@@ -74,4 +74,24 @@ public class SignalRIntegrationPublisher : IIntegrationPublisher
 
         await _hubContext.Clients.All.SendAsync("ZonePlaybackStateChanged", zoneIndex, playbackState, cancellationToken);
     }
+
+    public async Task PublishClientVolumeChangedAsync(int clientIndex, int volume, CancellationToken cancellationToken = default)
+    {
+        if (_hubContext == null)
+        {
+            return;
+        }
+
+        await _hubContext.Clients.All.SendAsync("ClientVolumeChanged", clientIndex, volume, cancellationToken);
+    }
+
+    public async Task PublishClientConnectionChangedAsync(int clientIndex, bool connected, CancellationToken cancellationToken = default)
+    {
+        if (_hubContext == null)
+        {
+            return;
+        }
+
+        await _hubContext.Clients.All.SendAsync("ClientConnectionChanged", clientIndex, connected, cancellationToken);
+    }
 }

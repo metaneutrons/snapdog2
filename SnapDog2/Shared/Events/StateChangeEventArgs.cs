@@ -13,6 +13,7 @@
 //
 namespace SnapDog2.Shared.Events;
 
+using SnapDog2.Shared.Attributes;
 using SnapDog2.Shared.Enums;
 using SnapDog2.Shared.Models;
 
@@ -32,6 +33,7 @@ public record ZoneStateChangedEventArgs(
 /// <summary>
 /// Event args for zone playlist changes.
 /// </summary>
+[StatusId("PLAYLIST_STATUS")]
 public record ZonePlaylistChangedEventArgs(
     int ZoneIndex,
     PlaylistInfo? OldPlaylist,
@@ -42,6 +44,7 @@ public record ZonePlaylistChangedEventArgs(
 /// <summary>
 /// Event args for zone volume changes.
 /// </summary>
+[StatusId("VOLUME_STATUS")]
 public record ZoneVolumeChangedEventArgs(
     int ZoneIndex,
     int OldVolume,
@@ -52,6 +55,7 @@ public record ZoneVolumeChangedEventArgs(
 /// <summary>
 /// Event args for zone track changes.
 /// </summary>
+[StatusId("TRACK_STATUS")]
 public record ZoneTrackChangedEventArgs(
     int ZoneIndex,
     TrackInfo? OldTrack,
@@ -62,9 +66,45 @@ public record ZoneTrackChangedEventArgs(
 /// <summary>
 /// Event args for zone playback state changes.
 /// </summary>
+[StatusId("PLAYBACK_STATE")]
 public record ZonePlaybackStateChangedEventArgs(
     int ZoneIndex,
     PlaybackState OldPlaybackState,
     PlaybackState NewPlaybackState,
     DateTime Timestamp = default
 ) : ZoneStateChangedEventArgs(ZoneIndex, null, null!, Timestamp);
+
+/// <summary>
+/// Base event args for client state changes.
+/// </summary>
+public record ClientStateChangedEventArgs(
+    int ClientIndex,
+    ClientState? OldState,
+    ClientState NewState,
+    DateTime Timestamp = default
+)
+{
+    public DateTime Timestamp { get; } = Timestamp == default ? DateTime.UtcNow : Timestamp;
+}
+
+/// <summary>
+/// Event args for client volume changes.
+/// </summary>
+[StatusId("CLIENT_VOLUME_STATUS")]
+public record ClientVolumeChangedEventArgs(
+    int ClientIndex,
+    int OldVolume,
+    int NewVolume,
+    DateTime Timestamp = default
+) : ClientStateChangedEventArgs(ClientIndex, null, null!, Timestamp);
+
+/// <summary>
+/// Event args for client connection changes.
+/// </summary>
+[StatusId("CLIENT_CONNECTED")]
+public record ClientConnectionChangedEventArgs(
+    int ClientIndex,
+    bool OldConnected,
+    bool NewConnected,
+    DateTime Timestamp = default
+) : ClientStateChangedEventArgs(ClientIndex, null, null!, Timestamp);

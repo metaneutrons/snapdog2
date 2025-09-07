@@ -66,23 +66,23 @@ public sealed partial class MediaPlayerService(
             var zoneConfigsList = this._zoneConfigs.ToList();
             for (var i = 0; i < zoneConfigsList.Count; i++)
             {
-                _logger.LogInformation("ZoneConfig: {Details}", i, zoneConfigsList[i].Name);
+                _logger.LogInformation("Zone config {ZoneIndex}: {ZoneName}", i, zoneConfigsList[i].Name);
             }
 
             var zoneConfig = this._zoneConfigs.ElementAtOrDefault(zoneIndex - 1); // Zone IDs are 1-based
             if (zoneConfig == null)
             {
-                _logger.LogInformation("ZoneNotFound: {Details}", zoneIndex, zoneIndex - 1);
+                _logger.LogInformation("Zone {ZoneIndex} not found (index {ZeroBasedIndex})", zoneIndex, zoneIndex - 1);
                 return Result.Failure(new ArgumentException($"Zone {zoneIndex} not found"));
             }
 
-            _logger.LogInformation("FoundZoneConfig: {Details}", zoneIndex, zoneConfig.Name);
+            _logger.LogInformation("Found zone config {ZoneIndex}: {ZoneName}", zoneIndex, zoneConfig.Name);
 
             // Check if we're at the stream limit (max = number of configured zones)
             var maxStreams = this._zoneConfigs.Count();
             if (this._players.Count >= maxStreams)
             {
-                _logger.LogInformation("MaxStreamsReached: {Details}", maxStreams);
+                LogMaxStreamsReached(_logger, maxStreams);
                 return Result.Failure(
                     new InvalidOperationException($"Maximum number of concurrent streams ({maxStreams}) reached")
                 );
@@ -122,7 +122,7 @@ public sealed partial class MediaPlayerService(
                     }
 
                     streamUrl = streamUrlResult.Value!;
-                    _logger.LogInformation("ConvertedSubsonicUrl: {Details}", trackInfo.Url, streamUrl);
+                    _logger.LogInformation("Converted Subsonic URL from {OriginalUrl} to {StreamUrl}", trackInfo.Url, streamUrl);
                 }
                 finally
                 {
@@ -139,7 +139,7 @@ public sealed partial class MediaPlayerService(
 
             if (result.IsSuccess)
             {
-                _logger.LogInformation("PlaybackStarted: {Details}", zoneIndex, trackInfo.Title, streamUrl);
+                _logger.LogInformation("Playing track {Title} on zone {ZoneIndex} from {StreamUrl}", trackInfo.Title, zoneIndex, streamUrl);
 
                 // Publish playback started notification using scoped mediator
                 using var scope = this._serviceScopeFactory.CreateScope();
@@ -159,7 +159,7 @@ public sealed partial class MediaPlayerService(
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("PlaybackError: {Details}", zoneIndex, ex);
+            _logger.LogInformation("Operation completed: {Param1} {Param2}", zoneIndex, ex);
             return Result.Failure(ex);
         }
     }
@@ -188,7 +188,7 @@ public sealed partial class MediaPlayerService(
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("PlaybackError: {Details}", zoneIndex, ex);
+            _logger.LogInformation("Operation completed: {Param1} {Param2}", zoneIndex, ex);
             return Result.Failure(ex);
         }
     }
@@ -218,7 +218,7 @@ public sealed partial class MediaPlayerService(
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("PlaybackError: {Details}", zoneIndex, ex);
+            _logger.LogInformation("Operation completed: {Param1} {Param2}", zoneIndex, ex);
             return Result.Failure(ex);
         }
     }
@@ -344,7 +344,7 @@ public sealed partial class MediaPlayerService(
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("PlaybackError: {Details}", -1, ex);
+            _logger.LogInformation("Operation completed: {Param1} {Param2}", -1, ex);
             return Result.Failure(ex);
         }
     }
@@ -390,7 +390,7 @@ public sealed partial class MediaPlayerService(
     {
         try
         {
-            _logger.LogInformation("SeekingToPosition: {Details}", zoneIndex, positionMs);
+            _logger.LogInformation("Operation completed: {Param1} {Param2}", zoneIndex, positionMs);
 
             if (!this._players.TryGetValue(zoneIndex, out _))
             {
@@ -405,7 +405,7 @@ public sealed partial class MediaPlayerService(
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("SeekError: {Details}", zoneIndex, ex);
+            _logger.LogInformation("Operation completed: {Param1} {Param2}", zoneIndex, ex);
             return Task.FromResult(Result.Failure(ex));
         }
     }
@@ -421,7 +421,7 @@ public sealed partial class MediaPlayerService(
     {
         try
         {
-            _logger.LogInformation("SeekingToProgress: {Details}", zoneIndex, progress);
+            _logger.LogInformation("Operation completed: {Param1} {Param2}", zoneIndex, progress);
 
             if (!this._players.TryGetValue(zoneIndex, out _))
             {
@@ -436,7 +436,7 @@ public sealed partial class MediaPlayerService(
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("SeekError: {Details}", zoneIndex, ex);
+            _logger.LogInformation("Operation completed: {Param1} {Param2}", zoneIndex, ex);
             return Task.FromResult(Result.Failure(ex));
         }
     }

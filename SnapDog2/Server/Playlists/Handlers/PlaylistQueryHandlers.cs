@@ -145,7 +145,7 @@ public partial class GetPlaylistQueryHandler(
         var subsonicIndex = query.PlaylistIndex - 2; // Convert to 0-based index for Subsonic playlists
         if (subsonicIndex < 0 || subsonicIndex >= subsonicPlaylists.Count)
         {
-            _logger.LogInformation("PlaylistError: {Details}", query.PlaylistIndex.ToString(), "Playlist index out of range");
+            _logger.LogInformation("Operation completed: {Param1} {Param2}", query.PlaylistIndex.ToString(), "Playlist index out of range");
             return Result<PlaylistWithTracks>.Failure($"Playlist {query.PlaylistIndex} not found");
         }
 
@@ -155,11 +155,11 @@ public partial class GetPlaylistQueryHandler(
         var result = await this._subsonicService.GetPlaylistAsync(targetPlaylist.SubsonicPlaylistId, cancellationToken);
         if (result.IsSuccess)
         {
-            _logger.LogInformation("PlaylistRetrieved: {Details}", query.PlaylistIndex.ToString(), result.Value?.Tracks.Count ?? 0);
+            _logger.LogInformation("Operation completed: {Param1} {Param2}", query.PlaylistIndex.ToString(), result.Value?.Tracks.Count ?? 0);
         }
         else
         {
-            _logger.LogInformation("PlaylistError: {Details}", query.PlaylistIndex.ToString(), result.ErrorMessage ?? "Unknown error");
+            _logger.LogInformation("Operation completed: {Param1} {Param2}", query.PlaylistIndex.ToString(), result.ErrorMessage ?? "Unknown error");
         }
 
         return result;
@@ -251,7 +251,7 @@ public partial class GetStreamUrlQueryHandler(
         }
         else
         {
-            _logger.LogInformation("StreamUrlError: {Details}", query.TrackId, result.ErrorMessage ?? "Unknown error");
+            _logger.LogInformation("Operation completed: {Param1} {Param2}", query.TrackId, result.ErrorMessage ?? "Unknown error");
         }
 
         return result;

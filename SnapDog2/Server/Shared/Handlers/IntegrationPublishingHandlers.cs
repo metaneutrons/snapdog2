@@ -449,7 +449,7 @@ public partial class IntegrationPublishingHandlers(
 
         // Debug log to verify we're publishing the notification
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<IntegrationPublishingHandlers>>();
-        logger.LogInformation("PublishingStatusChangedNotification: {Details}", statusType, targetIndex, value?.ToString() ?? "null");
+        logger.LogInformation("Publishing status change: {StatusType} for target {TargetIndex} = {Value}", statusType, targetIndex, value?.ToString() ?? "null");
 
         await mediator.PublishAsync(
             new StatusChangedNotification
@@ -508,7 +508,7 @@ public partial class IntegrationPublishingHandlers(
     {
         try
         {
-            _logger.LogInformation("AttemptingToPublishZoneStatus: {Details}", eventType, zoneIndex);
+            _logger.LogInformation("Operation completed: {Param1} {Param2}", eventType, zoneIndex);
 
             var smartPublisher = this._serviceProvider.GetService<ISmartMqttPublisher>();
             if (smartPublisher != null)

@@ -27,7 +27,7 @@ public partial class SubsonicConnectionEstablishedNotificationHandler(
 
     public Task Handle(SubsonicConnectionEstablishedNotification notification, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("SubsonicConnectionEstablished: {Details}", notification.ServerUrl, notification.Username);
+        _logger.LogInformation("Operation completed: {Param1} {Param2}", notification.ServerUrl, notification.Username);
         return Task.CompletedTask;
     }
 
@@ -44,7 +44,7 @@ public partial class SubsonicConnectionLostNotificationHandler(
 
     public Task Handle(SubsonicConnectionLostNotification notification, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("SubsonicConnectionLost: {Details}", notification.ServerUrl, notification.Reason);
+        _logger.LogInformation("Operation completed: {Param1} {Param2}", notification.ServerUrl, notification.Reason);
         return Task.CompletedTask;
     }
 
@@ -61,7 +61,7 @@ public partial class SubsonicPlaylistsRetrievedNotificationHandler(
 
     public Task Handle(SubsonicPlaylistsRetrievedNotification notification, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("PlaylistsRetrieved: {Details}", notification.PlaylistCount, notification.RetrievalTime.TotalMilliseconds);
+        _logger.LogInformation("Operation completed: {Param1} {Param2}", notification.PlaylistCount, notification.RetrievalTime.TotalMilliseconds);
 
         // Future: Could implement caching logic here
         // Future: Could update metrics/analytics here
@@ -82,7 +82,7 @@ public partial class SubsonicPlaylistAccessedNotificationHandler(
 
     public Task Handle(SubsonicPlaylistAccessedNotification notification, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("PlaylistAccessed: {Details}", notification.PlaylistName, notification.TrackCount);
+        _logger.LogInformation("Operation completed: {Param1} {Param2}", notification.PlaylistName, notification.TrackCount);
 
         // Future: Could implement usage analytics here
         // Future: Could implement playlist popularity tracking here
@@ -123,7 +123,7 @@ public partial class SubsonicServiceErrorNotificationHandler(ILogger<SubsonicSer
 
     public Task Handle(SubsonicServiceErrorNotification notification, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("ServiceError: {Details}", notification.Operation, notification.ErrorMessage);
+        _logger.LogInformation("Operation completed: {Param1} {Param2}", notification.Operation, notification.ErrorMessage);
 
         // Future: Could implement alerting logic here
         // Future: Could implement error rate monitoring here
