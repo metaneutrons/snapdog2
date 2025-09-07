@@ -13,6 +13,7 @@
 //
 namespace SnapDog2.Domain.Abstractions;
 
+using SnapDog2.Shared.Events;
 using SnapDog2.Shared.Models;
 
 /// <summary>
@@ -23,7 +24,27 @@ public interface IZoneStateStore
     /// <summary>
     /// Event raised when zone state changes.
     /// </summary>
-    event Action<int, ZoneState>? ZoneStateChanged;
+    event EventHandler<ZoneStateChangedEventArgs>? ZoneStateChanged;
+
+    /// <summary>
+    /// Event raised when zone playlist changes.
+    /// </summary>
+    event EventHandler<ZonePlaylistChangedEventArgs>? ZonePlaylistChanged;
+
+    /// <summary>
+    /// Event raised when zone volume changes.
+    /// </summary>
+    event EventHandler<ZoneVolumeChangedEventArgs>? ZoneVolumeChanged;
+
+    /// <summary>
+    /// Event raised when zone track changes.
+    /// </summary>
+    event EventHandler<ZoneTrackChangedEventArgs>? ZoneTrackChanged;
+
+    /// <summary>
+    /// Event raised when zone playback state changes.
+    /// </summary>
+    event EventHandler<ZonePlaybackStateChangedEventArgs>? ZonePlaybackStateChanged;
 
     /// <summary>
     /// Gets the current state for a zone.

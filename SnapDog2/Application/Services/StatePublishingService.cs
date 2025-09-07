@@ -22,6 +22,7 @@ using SnapDog2.Server.Global.Queries;
 using SnapDog2.Server.Zones.Notifications;
 using SnapDog2.Server.Zones.Queries;
 using SnapDog2.Shared.Configuration;
+using SnapDog2.Shared.Events;
 using SnapDog2.Shared.Models;
 
 /// <summary>
@@ -44,6 +45,16 @@ public partial class StatePublishingService(
     private readonly ILogger<StatePublishingService> _logger = logger;
     private readonly SnapDogConfiguration _configuration = configuration;
     private readonly IZoneStateStore _zoneStateStore = zoneStateStore;
+
+    public override Task StartAsync(CancellationToken cancellationToken)
+    {
+        return base.StartAsync(cancellationToken);
+    }
+
+    public override Task StopAsync(CancellationToken cancellationToken)
+    {
+        return base.StopAsync(cancellationToken);
+    }
 
     #region Logging
 

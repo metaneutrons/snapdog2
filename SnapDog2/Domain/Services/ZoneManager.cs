@@ -975,9 +975,6 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         this._currentState = this._currentState with { Track = targetTrack };
         this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
 
-        // Publish track change notification for SignalR
-        await this.PublishTrackStatusAsync(targetTrack, trackIndex).ConfigureAwait(false);
-
         // Publish individual track metadata notifications for KNX integration
         await this.PublishTrackMetadataNotificationsAsync(targetTrack).ConfigureAwait(false);
 
@@ -1930,32 +1927,6 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     public async Task PublishMuteStatusAsync(bool isMuted)
     {
         var notification = this._statusFactory.CreateZoneMuteChangedNotification(this._zoneIndex, isMuted);
-
-        using var scope = this._serviceScopeFactory.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-        await mediator.PublishAsync(notification).ConfigureAwait(false);
-    }
-
-    public async Task PublishTrackStatusAsync(TrackInfo trackInfo, int trackIndex)
-    {
-        var notification = this._statusFactory.CreateZoneTrackChangedNotification(
-            this._zoneIndex,
-            trackInfo,
-            trackIndex
-        );
-
-        using var scope = this._serviceScopeFactory.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-        await mediator.PublishAsync(notification).ConfigureAwait(false);
-    }
-
-    public async Task PublishPlaylistStatusAsync(PlaylistInfo playlistInfo, int playlistIndex)
-    {
-        var notification = this._statusFactory.CreateZonePlaylistChangedNotification(
-            this._zoneIndex,
-            playlistInfo,
-            playlistIndex
-        );
 
         using var scope = this._serviceScopeFactory.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();

@@ -37,6 +37,9 @@ using SnapDog2.Domain.Services;
 using SnapDog2.Infrastructure.Audio;
 using SnapDog2.Infrastructure.HealthChecks;
 using SnapDog2.Infrastructure.Hosting;
+using SnapDog2.Infrastructure.Integrations.Knx;
+using SnapDog2.Infrastructure.Integrations.Mqtt;
+using SnapDog2.Infrastructure.Integrations.SignalR;
 using SnapDog2.Infrastructure.Integrations.Subsonic;
 using SnapDog2.Infrastructure.Metrics;
 using SnapDog2.Infrastructure.Notifications;
@@ -343,6 +346,14 @@ static WebApplication CreateWebApplication(string[] args)
         {
             builder.Services.AddHostedService<StatePublishingService>();
         }
+
+        // Register integration publishers
+        builder.Services.AddSingleton<IIntegrationPublisher, MqttIntegrationPublisher>();
+        builder.Services.AddSingleton<IIntegrationPublisher, KnxIntegrationPublisher>();
+        builder.Services.AddSingleton<IIntegrationPublisher, SignalRIntegrationPublisher>();
+
+        // Register integration coordinator
+        builder.Services.AddHostedService<IntegrationCoordinator>();
     }
 
     // Register status services

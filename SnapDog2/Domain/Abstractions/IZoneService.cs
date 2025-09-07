@@ -223,22 +223,6 @@ public interface IZoneService
     Task PublishMuteStatusAsync(bool isMuted);
 
     /// <summary>
-    /// Publishes the current track status.
-    /// </summary>
-    /// <param name="trackInfo">The track information to publish.</param>
-    /// <param name="trackIndex">The track index to publish (1-based).</param>
-    /// <returns>Task representing the async operation.</returns>
-    Task PublishTrackStatusAsync(TrackInfo trackInfo, int trackIndex);
-
-    /// <summary>
-    /// Publishes the current playlist status.
-    /// </summary>
-    /// <param name="playlistInfo">The playlist information to publish.</param>
-    /// <param name="playlistIndex">The playlist index to publish (1-based).</param>
-    /// <returns>Task representing the async operation.</returns>
-    Task PublishPlaylistStatusAsync(PlaylistInfo playlistInfo, int playlistIndex);
-
-    /// <summary>
     /// Updates the Snapcast group ID for this zone.
     /// </summary>
     /// <param name="groupId">The new group ID, or null to clear it.</param>
