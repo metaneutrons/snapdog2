@@ -21,6 +21,11 @@ using SnapDog2.Shared.Models;
 public interface IZoneStateStore
 {
     /// <summary>
+    /// Event raised when zone state changes.
+    /// </summary>
+    event Action<int, ZoneState>? ZoneStateChanged;
+
+    /// <summary>
     /// Gets the current state for a zone.
     /// </summary>
     /// <param name="zoneIndex">Zone index (1-based)</param>

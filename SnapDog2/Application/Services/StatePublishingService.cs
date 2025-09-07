@@ -36,12 +36,14 @@ using SnapDog2.Shared.Models;
 public partial class StatePublishingService(
     IServiceScopeFactory serviceScopeFactory,
     ILogger<StatePublishingService> logger,
-    SnapDogConfiguration configuration
+    SnapDogConfiguration configuration,
+    IZoneStateStore zoneStateStore
 ) : BackgroundService
 {
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
     private readonly ILogger<StatePublishingService> _logger = logger;
     private readonly SnapDogConfiguration _configuration = configuration;
+    private readonly IZoneStateStore _zoneStateStore = zoneStateStore;
 
     #region Logging
 

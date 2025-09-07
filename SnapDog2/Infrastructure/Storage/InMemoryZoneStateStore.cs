@@ -25,6 +25,11 @@ public class InMemoryZoneStateStore : IZoneStateStore
 {
     private readonly ConcurrentDictionary<int, ZoneState> _zoneStates = new();
 
+    /// <summary>
+    /// Event raised when zone state changes.
+    /// </summary>
+    public event Action<int, ZoneState>? ZoneStateChanged;
+
     public ZoneState? GetZoneState(int zoneIndex)
     {
         return this._zoneStates.TryGetValue(zoneIndex, out var state) ? state : null;
@@ -33,6 +38,9 @@ public class InMemoryZoneStateStore : IZoneStateStore
     public void SetZoneState(int zoneIndex, ZoneState state)
     {
         this._zoneStates.AddOrUpdate(zoneIndex, state, (_, _) => state);
+
+        // Raise event to notify subscribers of state change
+        this.ZoneStateChanged?.Invoke(zoneIndex, state);
     }
 
     public Dictionary<int, ZoneState> GetAllZoneStates()

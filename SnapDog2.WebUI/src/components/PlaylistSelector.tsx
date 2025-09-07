@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDownIcon, MusicIcon } from './icons';
+import { ChevronDownIcon, MusicIcon, ChevronLeftIcon, ChevronRightIcon } from './icons';
 import { useAppStore } from '../store';
 import { playlistApi } from '../services/playlistApi';
 import type { PlaylistInfo } from '../types';
@@ -8,14 +8,12 @@ interface PlaylistSelectorProps {
   zoneIndex: number;
   currentPlaylistIndex?: number;
   currentPlaylistName?: string;
-  className?: string;
 }
 
 export const PlaylistSelector: React.FC<PlaylistSelectorProps> = ({
   zoneIndex,
   currentPlaylistIndex,
-  currentPlaylistName,
-  className = ''
+  currentPlaylistName
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -35,13 +33,11 @@ export const PlaylistSelector: React.FC<PlaylistSelectorProps> = ({
         }
       }
     };
-
     loadPlaylists();
   }, [playlists.length, setPlaylists]);
 
   const handlePlaylistSelect = async (playlist: PlaylistInfo) => {
     if (!playlist.index) return;
-    
     try {
       await playlistApi.setZonePlaylist(zoneIndex, playlist.index);
       setIsOpen(false);
@@ -50,50 +46,87 @@ export const PlaylistSelector: React.FC<PlaylistSelectorProps> = ({
     }
   };
 
+  const handlePreviousPlaylist = async () => {
+    try {
+      const response = await fetch(`/api/v1/zones/${zoneIndex}/previous/playlist`, {
+        method: 'POST',
+        headers: { 'X-API-Key': 'test-api-key' }
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    } catch (error) {
+      console.error('Failed to go to previous playlist:', error);
+    }
+  };
+
+  const handleNextPlaylist = async () => {
+    try {
+      const response = await fetch(`/api/v1/zones/${zoneIndex}/next/playlist`, {
+        method: 'POST',
+        headers: { 'X-API-Key': 'test-api-key' }
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    } catch (error) {
+      console.error('Failed to go to next playlist:', error);
+    }
+  };
+
   return (
-    <div className={`relative ${className}`}>
+    <div className="flex items-center space-x-1 mb-3">
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-3 bg-theme-secondary border border-theme-primary rounded-lg hover:bg-theme-accent transition-colors"
-        disabled={loading}
+        onClick={handlePreviousPlaylist}
+        className="p-1 bg-theme-secondary border border-theme-primary rounded hover:bg-theme-accent transition-colors"
+        title="Previous playlist"
       >
-        <div className="flex items-center space-x-2">
-          <MusicIcon className="w-4 h-4 text-theme-primary" />
-          <span className="text-sm font-medium text-theme-primary">
-            {currentPlaylistName || 'Select Playlist'}
-          </span>
-        </div>
-        <ChevronDownIcon 
-          className={`w-4 h-4 text-theme-primary transition-transform ${isOpen ? 'rotate-180' : ''}`} 
-        />
+        <ChevronLeftIcon className="w-3 h-3 text-theme-primary" />
       </button>
 
-      {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-theme-secondary border border-theme-primary rounded-lg shadow-theme z-10 max-h-60 overflow-y-auto">
-          {loading ? (
-            <div className="p-3 text-center text-theme-secondary">Loading...</div>
-          ) : playlists.length === 0 ? (
-            <div className="p-3 text-center text-theme-secondary">No playlists available</div>
-          ) : (
-            playlists.map((playlist) => (
-              <button
-                key={playlist.index || playlist.name}
-                onClick={() => handlePlaylistSelect(playlist)}
-                className={`w-full text-left p-3 hover:bg-theme-accent transition-colors border-b border-theme-primary last:border-b-0 ${
-                  playlist.index === currentPlaylistIndex ? 'bg-theme-accent text-theme-primary' : 'text-theme-primary'
-                }`}
-              >
-                <div className="flex justify-between items-center">
-                  <span className="font-medium">{playlist.name}</span>
-                  {playlist.trackCount && (
-                    <span className="text-xs text-theme-secondary">{playlist.trackCount} tracks</span>
-                  )}
-                </div>
-              </button>
-            ))
-          )}
-        </div>
-      )}
+      <div className="flex-1 relative">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-full flex items-center justify-between p-2 bg-theme-secondary border border-theme-primary rounded hover:bg-theme-accent transition-colors"
+          disabled={loading}
+        >
+          <div className="flex items-center space-x-1">
+            <MusicIcon className="w-3 h-3 text-theme-primary" />
+            <span className="text-xs font-medium text-theme-primary truncate">
+              {currentPlaylistName || 'Select Playlist'}
+            </span>
+          </div>
+          <ChevronDownIcon 
+            className={`w-3 h-3 text-theme-primary transition-transform ${isOpen ? 'rotate-180' : ''}`} 
+          />
+        </button>
+
+        {isOpen && (
+          <div className="absolute top-full left-0 right-0 mt-1 bg-theme-secondary border border-theme-primary rounded shadow-theme z-10 max-h-40 overflow-y-auto">
+            {loading ? (
+              <div className="p-2 text-center text-theme-secondary text-xs">Loading...</div>
+            ) : playlists.length === 0 ? (
+              <div className="p-2 text-center text-theme-secondary text-xs">No playlists</div>
+            ) : (
+              playlists.map((playlist) => (
+                <button
+                  key={playlist.index || playlist.name}
+                  onClick={() => handlePlaylistSelect(playlist)}
+                  className={`w-full text-left p-2 hover:bg-theme-accent transition-colors border-b border-theme-primary last:border-b-0 ${
+                    playlist.index === currentPlaylistIndex ? 'bg-theme-accent' : ''
+                  }`}
+                >
+                  <span className="text-xs font-medium text-theme-primary truncate block">{playlist.name}</span>
+                </button>
+              ))
+            )}
+          </div>
+        )}
+      </div>
+
+      <button
+        onClick={handleNextPlaylist}
+        className="p-1 bg-theme-secondary border border-theme-primary rounded hover:bg-theme-accent transition-colors"
+        title="Next playlist"
+      >
+        <ChevronRightIcon className="w-3 h-3 text-theme-primary" />
+      </button>
 
       {isOpen && (
         <div 

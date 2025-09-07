@@ -89,15 +89,13 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({ zoneIndex, draggingClientInd
         )}
       </div>
 
+      <PlaylistSelector 
+        zoneIndex={zoneIndex}
+        currentPlaylistIndex={zone.playlist?.index}
+        currentPlaylistName={zone.playlist?.name}
+      />
+
       <TransportControls zoneIndex={zoneIndex} />
-      
-      <div className="mt-4">
-        <PlaylistSelector 
-          zoneIndex={zoneIndex}
-          currentPlaylistIndex={zone.playlist?.index}
-          currentPlaylistName={zone.playlist?.name}
-        />
-      </div>
       
       <VolumeSlider 
         value={zone.volume || 0}
