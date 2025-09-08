@@ -29,9 +29,12 @@ public static class MqttServiceConfiguration
     /// <returns>Service collection for chaining.</returns>
     public static IServiceCollection AddMqttServices(this IServiceCollection services)
     {
-        // TODO: Re-enable after Phase 3.2 completion
+        // TODO: MqttService interface is complex - implement in Phase 3.2.4
         // Register the MQTT service as singleton with proper DI lifetime management
         // services.AddSingleton<IMqttService, MqttService>();
+
+        // Register MQTT command mapper for direct service calls
+        services.AddScoped<MqttCommandMapper>();
 
         return services;
     }

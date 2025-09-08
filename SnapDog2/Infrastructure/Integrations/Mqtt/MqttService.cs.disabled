@@ -1,0 +1,146 @@
+//
+// SnapDog
+// The Snapcast-based Smart Home Audio System with MQTT & KNX integration
+// Copyright (C) 2025 Fabian Schmieder
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <https://www.gnu.org/licenses/>.
+//
+namespace SnapDog2.Infrastructure.Integrations.Mqtt;
+
+using System.Text;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using MQTTnet;
+using MQTTnet.Client;
+using SnapDog2.Domain.Abstractions;
+using SnapDog2.Shared.Configuration;
+using SnapDog2.Shared.Models;
+
+/// <summary>
+/// MQTT integration service with direct service calls.
+/// Provides smart home integration through MQTT protocol.
+/// </summary>
+public partial class MqttService : IMqttService, IDisposable
+{
+    private readonly ILogger<MqttService> _logger;
+    private readonly MqttConfig _config;
+    private readonly MqttCommandMapper _commandMapper;
+    private IMqttClient? _mqttClient;
+    private bool _disposed;
+
+    public MqttService(
+        ILogger<MqttService> logger,
+        IOptions<MqttConfig> config,
+        MqttCommandMapper commandMapper)
+    {
+        _logger = logger;
+        _config = config.Value;
+        _commandMapper = commandMapper;
+    }
+
+    [LoggerMessage(EventId = 115300, Level = LogLevel.Information, Message = "MQTT service starting")]
+    private partial void LogServiceStarting();
+
+    [LoggerMessage(EventId = 115301, Level = LogLevel.Information, Message = "MQTT service stopped")]
+    private partial void LogServiceStopped();
+
+    [LoggerMessage(EventId = 115302, Level = LogLevel.Error, Message = "MQTT service error: {Error}")]
+    private partial void LogServiceError(string error);
+
+    public bool IsConnected => _mqttClient?.IsConnected ?? false;
+
+    public async Task StartAsync(CancellationToken cancellationToken = default)
+    {
+        LogServiceStarting();
+        
+        if (!_config.Enabled)
+        {
+            _logger.LogInformation("MQTT service disabled in configuration");
+            return;
+        }
+
+        try
+        {
+            var factory = new MqttFactory();
+            _mqttClient = factory.CreateMqttClient();
+
+            var options = new MqttClientOptionsBuilder()
+                .WithTcpServer(_config.Host, _config.Port)
+                .WithCredentials(_config.Username, _config.Password)
+                .WithClientId(_config.ClientId)
+                .Build();
+
+            _mqttClient.ApplicationMessageReceivedAsync += OnMessageReceived;
+            
+            await _mqttClient.ConnectAsync(options, cancellationToken);
+            
+            // Subscribe to command topics
+            await _mqttClient.SubscribeAsync("snapdog/zones/+/+", cancellationToken: cancellationToken);
+            await _mqttClient.SubscribeAsync("snapdog/clients/+/+", cancellationToken: cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            LogServiceError(ex.Message);
+            throw;
+        }
+    }
+
+    public async Task StopAsync(CancellationToken cancellationToken = default)
+    {
+        if (_mqttClient?.IsConnected == true)
+        {
+            await _mqttClient.DisconnectAsync(cancellationToken: cancellationToken);
+        }
+        
+        LogServiceStopped();
+    }
+
+    public async Task PublishAsync(string topic, string payload, bool retain = false, CancellationToken cancellationToken = default)
+    {
+        if (_mqttClient?.IsConnected != true) return;
+
+        var message = new MqttApplicationMessageBuilder()
+            .WithTopic(topic)
+            .WithPayload(Encoding.UTF8.GetBytes(payload))
+            .WithRetainFlag(retain)
+            .Build();
+
+        await _mqttClient.PublishAsync(message, cancellationToken);
+    }
+
+    private async Task OnMessageReceived(MqttApplicationMessageReceivedEventArgs e)
+    {
+        try
+        {
+            var topic = e.ApplicationMessage.Topic;
+            var payload = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
+
+            // Use the command mapper to execute the command directly
+            var result = await _commandMapper.ExecuteCommandFromTopicAsync(topic, payload);
+            
+            if (result.IsFailure)
+            {
+                _logger.LogWarning("Failed to execute MQTT command from topic {Topic}: {Error}", topic, result.ErrorMessage);
+            }
+        }
+        catch (Exception ex)
+        {
+            LogServiceError(ex.Message);
+        }
+    }
+
+    public void Dispose()
+    {
+        if (_disposed) return;
+        
+        _mqttClient?.Dispose();
+        _disposed = true;
+        GC.SuppressFinalize(this);
+    }
+}
