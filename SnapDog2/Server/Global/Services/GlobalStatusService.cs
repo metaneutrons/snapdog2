@@ -13,207 +13,24 @@
 //
 namespace SnapDog2.Server.Global.Services;
 
-using Cortex.Mediator;
+// TODO: GlobalStatusService temporarily disabled during mediator removal
+// This service needs to be updated to use direct service calls instead of query handlers
+// Will be restored with system status service in future update
+
+/*
+using Microsoft.Extensions.Hosting;
 using SnapDog2.Server.Global.Handlers;
-using SnapDog2.Server.Global.Notifications;
 using SnapDog2.Server.Global.Queries;
 using SnapDog2.Server.Global.Services.Abstractions;
 using SnapDog2.Shared.Models;
 
 /// <summary>
-/// Service for managing and publishing global system status.
+/// Background service that periodically collects and caches global system status information.
+/// Provides centralized access to system health, version info, and server statistics.
 /// </summary>
-/// <remarks>
-/// Initializes a new instance of the <see cref="GlobalStatusService"/> class.
-/// </remarks>
-/// <param name="systemStatusHandler">The system status query handler.</param>
-/// <param name="errorStatusHandler">The error status query handler.</param>
-/// <param name="versionInfoHandler">The version info query handler.</param>
-/// <param name="serverStatsHandler">The server stats query handler.</param>
-/// <param name="mediator">The mediator instance.</param>
-/// <param name="logger">The logger instance.</param>
-public partial class GlobalStatusService(
-    GetSystemStatusQueryHandler systemStatusHandler,
-    GetVersionInfoQueryHandler versionInfoHandler,
-    GetServerStatsQueryHandler serverStatsHandler,
-    IMediator mediator,
-    ILogger<GlobalStatusService> logger) : IGlobalStatusService
+public partial class GlobalStatusService : BackgroundService, IGlobalStatusService
 {
-    private readonly CancellationTokenSource _cancellationTokenSource = new();
-
-    /// <inheritdoc />
-    public async Task PublishSystemStatusAsync(CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var result = await systemStatusHandler.Handle(new GetSystemStatusQuery(), cancellationToken);
-
-            if (result.IsSuccess && result.Value != null)
-            {
-                // Publish notification to external systems (MQTT, KNX) via mediator
-                await mediator.PublishAsync(
-                    new SystemStatusChangedNotification { Status = result.Value },
-                    cancellationToken
-                );
-                this.LogSystemStatusRetrieved(result.Value.IsOnline);
-            }
-            else
-            {
-                this.LogFailedToGetSystemStatusForPublishing(result.ErrorMessage);
-            }
-        }
-        catch (Exception ex)
-        {
-            this.LogFailedToPublishSystemStatus(ex);
-        }
-    }
-
-    /// <inheritdoc />
-    public async Task PublishErrorStatusAsync(ErrorDetails errorDetails, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            // Publish error notification to external systems (MQTT, KNX) via mediator
-            await mediator.PublishAsync(new SystemErrorNotification { Error = errorDetails }, cancellationToken);
-            this.LogErrorStatusToPublish(errorDetails.ErrorCode);
-        }
-        catch (Exception ex)
-        {
-            this.LogFailedToPublishErrorStatus(ex);
-        }
-    }
-
-    /// <inheritdoc />
-    public async Task PublishVersionInfoAsync(CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var result = await versionInfoHandler.Handle(new GetVersionInfoQuery(), cancellationToken);
-
-            if (result.IsSuccess && result.Value != null)
-            {
-                // Publish version info to external systems (MQTT, KNX) via mediator
-                await mediator.PublishAsync(
-                    new VersionInfoChangedNotification { VersionInfo = result.Value },
-                    cancellationToken
-                );
-                this.LogVersionInfoRetrieved(result.Value.Version);
-            }
-            else
-            {
-                this.LogFailedToGetVersionInfoForPublishing(result.ErrorMessage);
-            }
-        }
-        catch (Exception ex)
-        {
-            this.LogFailedToPublishVersionInfo(ex);
-        }
-    }
-
-    /// <inheritdoc />
-    public async Task PublishServerStatsAsync(CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var result = await serverStatsHandler.Handle(new GetServerStatsQuery(), cancellationToken);
-
-            if (result.IsSuccess && result.Value != null)
-            {
-                // Publish server stats to external systems (MQTT, KNX) via mediator
-                await mediator.PublishAsync(
-                    new ServerStatsChangedNotification { Stats = result.Value },
-                    cancellationToken
-                );
-                this.LogServerStatsRetrieved(result.Value.CpuUsagePercent, result.Value.MemoryUsageMb);
-            }
-            else
-            {
-                this.LogFailedToGetServerStatsForPublishing(result.ErrorMessage);
-            }
-        }
-        catch (Exception ex)
-        {
-            this.LogFailedToPublishServerStats(ex);
-        }
-    }
-
-    /// <inheritdoc />
-    public async Task StartPeriodicPublishingAsync(CancellationToken cancellationToken = default)
-    {
-        this.LogStartingPeriodicGlobalStatusPublishing();
-
-        // Publish initial status
-        await this.PublishSystemStatusAsync(cancellationToken);
-        await this.PublishVersionInfoAsync(cancellationToken);
-
-        // Start periodic timers for status updates
-        _ = Task.Run(
-            async () =>
-            {
-                try
-                {
-                    // Publish system status every 30 seconds
-                    while (!cancellationToken.IsCancellationRequested)
-                    {
-                        await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
-                        await this.PublishSystemStatusAsync(cancellationToken);
-                    }
-                }
-                catch (OperationCanceledException)
-                {
-                    // Expected when cancellation is requested
-                }
-                catch (Exception ex)
-                {
-                    this.LogErrorInPeriodicSystemStatusPublishing(ex);
-                }
-            },
-            cancellationToken
-        );
-
-        _ = Task.Run(
-            async () =>
-            {
-                try
-                {
-                    // Publish server stats every 60 seconds
-                    while (!cancellationToken.IsCancellationRequested)
-                    {
-                        await Task.Delay(TimeSpan.FromSeconds(60), cancellationToken);
-                        await this.PublishServerStatsAsync(cancellationToken);
-                    }
-                }
-                catch (OperationCanceledException)
-                {
-                    // Expected when cancellation is requested
-                }
-                catch (Exception ex)
-                {
-                    this.LogErrorInPeriodicServerStatsPublishing(ex);
-                }
-            },
-            cancellationToken
-        );
-
-        this.LogPeriodicGlobalStatusPublishingStarted();
-    }
-
-    /// <inheritdoc />
-    public async Task StopPeriodicPublishingAsync()
-    {
-        this.LogStoppingPeriodicGlobalStatusPublishing();
-
-        this._cancellationTokenSource.Cancel();
-
-        this.LogPeriodicGlobalStatusPublishingStopped();
-        await Task.CompletedTask;
-    }
-
-    /// <summary>
-    /// Disposes the service and its resources.
-    /// </summary>
-    public void Dispose()
-    {
-        this._cancellationTokenSource.Dispose();
-    }
+    // Implementation temporarily removed during mediator infrastructure cleanup
+    // Will be restored with direct service calls in future update
 }
+*/

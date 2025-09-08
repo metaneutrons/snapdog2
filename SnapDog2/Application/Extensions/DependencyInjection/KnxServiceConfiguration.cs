@@ -15,7 +15,6 @@ namespace SnapDog2.Application.Extensions.DependencyInjection;
 
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Infrastructure.Integrations.Knx;
-using SnapDog2.Server.Shared.Handlers;
 using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Enums;
 
@@ -79,11 +78,12 @@ public static partial class KnxServiceConfiguration
 
         logger.LogInformation("KNX integration configured: {ZoneCount} zones, {ClientCount} clients", knxZoneCount, knxClientCount);
 
+        // TODO: Re-enable after Phase 3.2 completion
         // Register the actual KNX service
-        services.AddSingleton<IKnxService, KnxService>();
+        // services.AddSingleton<IKnxService, KnxService>();
 
         // Register KNX integration handler as singleton to match KnxService lifecycle
-        services.AddSingleton<KnxIntegrationHandler>();
+        // services.AddSingleton<KnxIntegrationHandler>();
 
         return services;
     }

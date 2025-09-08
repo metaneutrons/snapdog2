@@ -15,7 +15,6 @@
 namespace SnapDog2.Application.Extensions.DependencyInjection;
 
 using SnapDog2.Infrastructure.Integrations.Mqtt;
-using SnapDog2.Server.Shared.Handlers;
 
 /// <summary>
 /// Service collection extensions for smart MQTT publishing configuration.
@@ -32,8 +31,9 @@ public static class SmartMqttServiceConfiguration
         // Register the smart MQTT publisher
         services.AddSingleton<ISmartMqttPublisher, SmartMqttPublisher>();
 
+        // TODO: Re-enable after Phase 3.2 completion
         // Register the unified notification handlers
-        services.AddScoped<IntegrationPublishingHandlers>();
+        // services.AddScoped<IntegrationPublishingHandlers>();
 
         return services;
     }

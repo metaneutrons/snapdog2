@@ -13,13 +13,12 @@
 //
 namespace SnapDog2.Api.Controllers.V1;
 
-using Cortex.Mediator;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SnapDog2.Api.Models;
-using SnapDog2.Server.Clients.Commands.Config;
-using SnapDog2.Server.Clients.Commands.Volume;
-using SnapDog2.Server.Clients.Queries;
+using SnapDog2.Domain.Abstractions;
+using SnapDog2.Shared.Attributes;
+using SnapDog2.Shared.Constants;
 using SnapDog2.Shared.Models;
 
 /// <summary>
@@ -31,86 +30,74 @@ using SnapDog2.Shared.Models;
 [Authorize]
 [Produces("application/json")]
 [Tags("Clients")]
-public partial class ClientsController(IMediator mediator, ILogger<ClientsController> logger) : ControllerBase
+public partial class ClientsController(IClientService clientService, ILogger<ClientsController> logger) : ControllerBase
 {
-    private readonly IMediator _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+    private readonly IClientService _clientService = clientService ?? throw new ArgumentNullException(nameof(clientService));
     private readonly ILogger<ClientsController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     // ═══════════════════════════════════════════════════════════════════════════════
     // LOGGER MESSAGE DEFINITIONS - High-performance source generators
     // ═══════════════════════════════════════════════════════════════════════════════
 
-    [LoggerMessage(EventId = 113100, Level = LogLevel.Warning, Message = "Failed → get clients: {ErrorMessage}"
-)]
+    [LoggerMessage(EventId = 113100, Level = LogLevel.Warning, Message = "Failed → get clients: {ErrorMessage}")]
     private partial void LogFailedToGetClients(string errorMessage);
 
-    [LoggerMessage(EventId = 113101, Level = LogLevel.Warning, Message = "Failed → get client {ClientIndex}: {ErrorMessage}"
-)]
+    [LoggerMessage(EventId = 113101, Level = LogLevel.Warning, Message = "Failed → get client {ClientIndex}: {ErrorMessage}")]
     private partial void LogFailedToGetClient(int clientIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113102, Level = LogLevel.Warning, Message = "Failed → set client {ClientIndex} volume → {Volume}: {ErrorMessage}"
-)]
+    [LoggerMessage(EventId = 113102, Level = LogLevel.Warning, Message = "Failed → set client {ClientIndex} volume → {Volume}: {ErrorMessage}")]
     private partial void LogFailedToSetClientVolume(int clientIndex, int volume, string errorMessage);
 
-    [LoggerMessage(EventId = 113103, Level = LogLevel.Warning, Message = "Failed → get client {ClientIndex} volume: {ErrorMessage}"
-)]
+    [LoggerMessage(EventId = 113103, Level = LogLevel.Warning, Message = "Failed → get client {ClientIndex} volume: {ErrorMessage}")]
     private partial void LogFailedToGetClientVolume(int clientIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113104, Level = LogLevel.Warning, Message = "Failed → get client {ClientIndex} for volume up: {ErrorMessage}"
-)]
+    [LoggerMessage(EventId = 113104, Level = LogLevel.Warning, Message = "Failed → get client {ClientIndex} for volume up: {ErrorMessage}")]
     private partial void LogFailedToGetClientForVolumeUp(int clientIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113105, Level = LogLevel.Warning, Message = "Failed → increase client {ClientIndex} volume: {ErrorMessage}"
-)]
+    [LoggerMessage(EventId = 113105, Level = LogLevel.Warning, Message = "Failed → increase client {ClientIndex} volume: {ErrorMessage}")]
     private partial void LogFailedToIncreaseClientVolume(int clientIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113106, Level = LogLevel.Warning, Message = "Failed → get client {ClientIndex} for volume down: {ErrorMessage}"
-)]
+    [LoggerMessage(EventId = 113106, Level = LogLevel.Warning, Message = "Failed → get client {ClientIndex} for volume down: {ErrorMessage}")]
     private partial void LogFailedToGetClientForVolumeDown(int clientIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113107, Level = LogLevel.Warning, Message = "Failed → decrease client {ClientIndex} volume: {ErrorMessage}"
-)]
+    [LoggerMessage(EventId = 113107, Level = LogLevel.Warning, Message = "Failed → decrease client {ClientIndex} volume: {ErrorMessage}")]
     private partial void LogFailedToDecreaseClientVolume(int clientIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113108, Level = LogLevel.Warning, Message = "Failed → set client {ClientIndex} mute → {Muted}: {ErrorMessage}"
-)]
+    [LoggerMessage(EventId = 113108, Level = LogLevel.Warning, Message = "Failed → set client {ClientIndex} mute → {Muted}: {ErrorMessage}")]
     private partial void LogFailedToSetClientMute(int clientIndex, bool muted, string errorMessage);
 
-    [LoggerMessage(EventId = 113109, Level = LogLevel.Warning, Message = "Failed → get client {ClientIndex} mute state: {ErrorMessage}"
-)]
+    [LoggerMessage(EventId = 113109, Level = LogLevel.Warning, Message = "Failed → get client {ClientIndex} mute state: {ErrorMessage}")]
     private partial void LogFailedToGetClientMuteState(int clientIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113110, Level = LogLevel.Warning, Message = "Failed → toggle client {ClientIndex} mute: {ErrorMessage}"
-)]
+    [LoggerMessage(EventId = 113110, Level = LogLevel.Warning, Message = "Failed → toggle client {ClientIndex} mute: {ErrorMessage}")]
     private partial void LogFailedToToggleClientMute(int clientIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113111, Level = LogLevel.Warning, Message = "Failed → get client {ClientIndex} after mute toggle: {ErrorMessage}"
-)]
+    [LoggerMessage(EventId = 113111, Level = LogLevel.Warning, Message = "Failed → get client {ClientIndex} after mute toggle: {ErrorMessage}")]
     private partial void LogFailedToGetClientAfterMuteToggle(int clientIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113112, Level = LogLevel.Warning, Message = "Failed → set client {ClientIndex} latency → {Latency}ms: {ErrorMessage}"
-)]
+    [LoggerMessage(EventId = 113112, Level = LogLevel.Warning, Message = "Failed → set client {ClientIndex} latency → {Latency}ms: {ErrorMessage}")]
     private partial void LogFailedToSetClientLatency(int clientIndex, int latency, string errorMessage);
 
-    [LoggerMessage(EventId = 113113, Level = LogLevel.Warning, Message = "Failed → get client {ClientIndex} latency: {ErrorMessage}"
-)]
+    [LoggerMessage(EventId = 113113, Level = LogLevel.Warning, Message = "Failed → get client {ClientIndex} latency: {ErrorMessage}")]
     private partial void LogFailedToGetClientLatency(int clientIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113114, Level = LogLevel.Warning, Message = "Failed → assign client {ClientIndex} → zone {ZoneIndex}: {ErrorMessage}"
-)]
+    [LoggerMessage(EventId = 113114, Level = LogLevel.Warning, Message = "Failed → assign client {ClientIndex} → zone {ZoneIndex}: {ErrorMessage}")]
     private partial void LogFailedToAssignClientToZone(int clientIndex, int zoneIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113115, Level = LogLevel.Warning, Message = "Failed → get client {ClientIndex} zone assignment: {ErrorMessage}"
-)]
+    [LoggerMessage(EventId = 113115, Level = LogLevel.Warning, Message = "Failed → get client {ClientIndex} zone assignment: {ErrorMessage}")]
     private partial void LogFailedToGetClientZoneAssignment(int clientIndex, string errorMessage);
 
-    [LoggerMessage(EventId = 113116, Level = LogLevel.Information, Message = "Setting client {ClientIndex} name → '{Name}'"
-)]
+    [LoggerMessage(EventId = 113116, Level = LogLevel.Information, Message = "Setting client {ClientIndex} name → '{Name}'")]
     private partial void LogSettingClientName(int clientIndex, string name);
 
-    [LoggerMessage(EventId = 113119, Level = LogLevel.Warning, Message = "Failed → set client {ClientIndex} name → '{Name}': {ErrorMessage}"
-)]
+    [LoggerMessage(EventId = 113117, Level = LogLevel.Warning, Message = "Failed → set client {ClientIndex} name → '{Name}': {ErrorMessage}")]
     private partial void LogFailedToSetClientName(int clientIndex, string name, string errorMessage);
+
+    [LoggerMessage(EventId = 113118, Level = LogLevel.Warning, Message = "Failed → get client {ClientIndex} connection status: {ErrorMessage}")]
+    private partial void LogFailedToGetClientConnectionStatus(int clientIndex, string errorMessage);
+
+    [LoggerMessage(EventId = 113119, Level = LogLevel.Warning, Message = "Failed → get client {ClientIndex} name: {ErrorMessage}")]
+    private partial void LogFailedToGetClientName(int clientIndex, string errorMessage);
 
     // ═══════════════════════════════════════════════════════════════════════════════
     // API ENDPOINTS
@@ -124,15 +111,14 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     [ProducesResponseType<int>(StatusCodes.Status200OK)]
     public async Task<ActionResult<int>> GetClientsCount()
     {
-        var query = new GetClientsCountQuery();
-        var result = await this._mediator.SendQueryAsync<GetClientsCountQuery, Result<int>>(query);
+        var result = await _clientService.GetClientsCountAsync();
 
         if (result.IsFailure)
         {
-            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return this.Ok(result.Value);
+        return Ok(result.Value);
     }
 
     [HttpGet]
@@ -142,21 +128,20 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     {
         if (page < 1)
         {
-            return this.BadRequest("Page must be greater than 0");
+            return BadRequest("Page must be greater than 0");
         }
 
         if (size < 1 || size > 100)
         {
-            return this.BadRequest("Size must be between 1 and 100");
+            return BadRequest("Size must be between 1 and 100");
         }
 
-        var query = new GetAllClientsQuery();
-        var result = await this._mediator.SendQueryAsync<GetAllClientsQuery, Result<List<ClientState>>>(query);
+        var result = await _clientService.GetAllClientsAsync();
 
         if (result.IsFailure)
         {
-            this.LogFailedToGetClients(result.ErrorMessage ?? "Unknown error");
-            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            LogFailedToGetClients(result.ErrorMessage ?? "Unknown error");
+            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
         var clients = result.Value ?? [];
@@ -166,7 +151,7 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
 
         var pageResult = new Page<ClientState>(pagedClients, totalCount, size, page);
 
-        return this.Ok(pageResult);
+        return Ok(pageResult);
     }
 
     /// <summary>
@@ -179,16 +164,15 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ClientState>> GetClient(int clientIndex)
     {
-        var query = new GetClientQuery { ClientIndex = clientIndex };
-        var result = await this._mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
+        var result = await _clientService.GetClientAsync(clientIndex);
 
         if (result.IsFailure)
         {
-            this.LogFailedToGetClient(clientIndex, result.ErrorMessage ?? "Unknown error");
-            return this.NotFound($"Client {clientIndex} not found");
+            LogFailedToGetClient(clientIndex, result.ErrorMessage ?? "Unknown error");
+            return NotFound($"Client {clientIndex} not found");
         }
 
-        return this.Ok(result.Value!);
+        return Ok(result.Value!);
     }
 
     /// <summary>
@@ -198,6 +182,7 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     /// <param name="volume">Volume level (0-100)</param>
     /// <returns>New volume level</returns>
     [HttpPut("{clientIndex:int}/volume")]
+    [CommandId(CommandIds.ClientVolume)]
     [ProducesResponseType<int>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -205,21 +190,18 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     {
         if (volume < 0 || volume > 100)
         {
-            return this.BadRequest("Volume must be between 0 and 100");
+            return BadRequest("Volume must be between 0 and 100");
         }
 
-        var command = new SetClientVolumeCommand { ClientIndex = clientIndex, Volume = volume };
-        var result = await this._mediator.SendCommandAsync<SetClientVolumeCommand, Result>(command);
+        var result = await _clientService.SetVolumeAsync(clientIndex, volume);
 
         if (result.IsFailure)
         {
-            this.LogFailedToSetClientVolume(clientIndex, volume, result.ErrorMessage ?? "Unknown error");
-            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            LogFailedToSetClientVolume(clientIndex, volume, result.ErrorMessage ?? "Unknown error");
+            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
-        // The volume change will be applied asynchronously and published via MQTT/KNX
-        return this.Accepted(volume);
+        return Accepted(volume);
     }
 
     /// <summary>
@@ -232,16 +214,15 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<int>> GetVolume(int clientIndex)
     {
-        var query = new GetClientQuery { ClientIndex = clientIndex };
-        var result = await this._mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
+        var result = await _clientService.GetClientAsync(clientIndex);
 
         if (result.IsFailure)
         {
-            this.LogFailedToGetClientVolume(clientIndex, result.ErrorMessage ?? "Unknown error");
-            return this.NotFound($"Client {clientIndex} not found");
+            LogFailedToGetClientVolume(clientIndex, result.ErrorMessage ?? "Unknown error");
+            return NotFound($"Client {clientIndex} not found");
         }
 
-        return this.Ok(result.Value!.Volume);
+        return Ok(result.Value!.Volume);
     }
 
     /// <summary>
@@ -251,6 +232,7 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     /// <param name="step">Volume increase step (default: 5)</param>
     /// <returns>New volume level</returns>
     [HttpPost("{clientIndex:int}/volume/up")]
+    [CommandId(CommandIds.ClientVolumeUp)]
     [ProducesResponseType<int>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -258,21 +240,18 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     {
         if (step < 1 || step > 50)
         {
-            return this.BadRequest("Step must be between 1 and 50");
+            return BadRequest("Step must be between 1 and 50");
         }
 
-        var command = new ClientVolumeUpCommand { ClientIndex = clientIndex, Step = step };
-        var result = await this._mediator.SendCommandAsync<ClientVolumeUpCommand, Result>(command);
+        var result = await _clientService.VolumeUpAsync(clientIndex, step);
 
         if (result.IsFailure)
         {
-            this.LogFailedToIncreaseClientVolume(clientIndex, result.ErrorMessage ?? "Unknown error");
-            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            LogFailedToIncreaseClientVolume(clientIndex, result.ErrorMessage ?? "Unknown error");
+            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
-        // The volume change will be applied asynchronously and published via MQTT/KNX
-        return this.Accepted(step);
+        return Accepted(step);
     }
 
     /// <summary>
@@ -282,6 +261,7 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     /// <param name="step">Volume decrease step (default: 5)</param>
     /// <returns>New volume level</returns>
     [HttpPost("{clientIndex:int}/volume/down")]
+    [CommandId(CommandIds.ClientVolumeDown)]
     [ProducesResponseType<int>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -289,21 +269,18 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     {
         if (step < 1 || step > 50)
         {
-            return this.BadRequest("Step must be between 1 and 50");
+            return BadRequest("Step must be between 1 and 50");
         }
 
-        var command = new ClientVolumeDownCommand { ClientIndex = clientIndex, Step = step };
-        var result = await this._mediator.SendCommandAsync<ClientVolumeDownCommand, Result>(command);
+        var result = await _clientService.VolumeDownAsync(clientIndex, step);
 
         if (result.IsFailure)
         {
-            this.LogFailedToDecreaseClientVolume(clientIndex, result.ErrorMessage ?? "Unknown error");
-            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            LogFailedToDecreaseClientVolume(clientIndex, result.ErrorMessage ?? "Unknown error");
+            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
-        // The volume change will be applied asynchronously and published via MQTT/KNX
-        return this.Accepted(step);
+        return Accepted(step);
     }
 
     /// <summary>
@@ -313,21 +290,20 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     /// <param name="muted">Mute state (true = muted, false = unmuted)</param>
     /// <returns>New mute state</returns>
     [HttpPut("{clientIndex:int}/mute")]
+    [CommandId(CommandIds.ClientMute)]
     [ProducesResponseType<bool>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<bool>> SetMute(int clientIndex, [FromBody] bool muted)
     {
-        var command = new SetClientMuteCommand { ClientIndex = clientIndex, Enabled = muted };
-        var result = await this._mediator.SendCommandAsync<SetClientMuteCommand, Result>(command);
+        var result = await _clientService.SetMuteAsync(clientIndex, muted);
 
         if (result.IsFailure)
         {
-            this.LogFailedToSetClientMute(clientIndex, muted, result.ErrorMessage ?? "Unknown error");
-            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            LogFailedToSetClientMute(clientIndex, muted, result.ErrorMessage ?? "Unknown error");
+            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
-        return this.Accepted(muted);
+        return Accepted(muted);
     }
 
     /// <summary>
@@ -340,16 +316,15 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<bool>> GetMute(int clientIndex)
     {
-        var query = new GetClientQuery { ClientIndex = clientIndex };
-        var result = await this._mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
+        var result = await _clientService.GetClientAsync(clientIndex);
 
         if (result.IsFailure)
         {
-            this.LogFailedToGetClientMuteState(clientIndex, result.ErrorMessage ?? "Unknown error");
-            return this.NotFound($"Client {clientIndex} not found");
+            LogFailedToGetClientMuteState(clientIndex, result.ErrorMessage ?? "Unknown error");
+            return NotFound($"Client {clientIndex} not found");
         }
 
-        return this.Ok(result.Value!.Mute);
+        return Ok(result.Value!.Mute);
     }
 
     /// <summary>
@@ -358,23 +333,20 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     /// <param name="clientIndex">Client Index</param>
     /// <returns>New mute state</returns>
     [HttpPost("{clientIndex:int}/mute/toggle")]
+    [CommandId(CommandIds.ClientMuteToggle)]
     [ProducesResponseType<bool>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<bool>> ToggleMute(int clientIndex)
     {
-        var command = new ToggleClientMuteCommand { ClientIndex = clientIndex };
-        var result = await this._mediator.SendCommandAsync<ToggleClientMuteCommand, Result>(command);
+        var result = await _clientService.ToggleMuteAsync(clientIndex);
 
         if (result.IsFailure)
         {
-            this.LogFailedToToggleClientMute(clientIndex, result.ErrorMessage ?? "Unknown error");
-            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            LogFailedToToggleClientMute(clientIndex, result.ErrorMessage ?? "Unknown error");
+            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
-        // The mute toggle will be applied asynchronously and published via MQTT/KNX
-        // Client should query current state or listen to MQTT/KNX for the actual result
-        return this.Accepted();
+        return Accepted();
     }
 
     /// <summary>
@@ -384,6 +356,7 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     /// <param name="latency">Latency in milliseconds</param>
     /// <returns>New latency value</returns>
     [HttpPut("{clientIndex:int}/latency")]
+    [CommandId(CommandIds.ClientLatency)]
     [ProducesResponseType<int>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -391,20 +364,18 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     {
         if (latency < -2000 || latency > 2000)
         {
-            return this.BadRequest("Latency must be between -2000 and 2000 milliseconds");
+            return BadRequest("Latency must be between -2000 and 2000 milliseconds");
         }
 
-        var command = new SetClientLatencyCommand { ClientIndex = clientIndex, LatencyMs = latency };
-        var result = await this._mediator.SendCommandAsync<SetClientLatencyCommand, Result>(command);
+        var result = await _clientService.SetLatencyAsync(clientIndex, latency);
 
         if (result.IsFailure)
         {
-            this.LogFailedToSetClientLatency(clientIndex, latency, result.ErrorMessage ?? "Unknown error");
-            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            LogFailedToSetClientLatency(clientIndex, latency, result.ErrorMessage ?? "Unknown error");
+            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
-        return this.Accepted(latency);
+        return Accepted(latency);
     }
 
     /// <summary>
@@ -417,16 +388,15 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<int>> GetLatency(int clientIndex)
     {
-        var query = new GetClientQuery { ClientIndex = clientIndex };
-        var result = await this._mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
+        var result = await _clientService.GetClientAsync(clientIndex);
 
         if (result.IsFailure)
         {
-            this.LogFailedToGetClientLatency(clientIndex, result.ErrorMessage ?? "Unknown error");
-            return this.NotFound($"Client {clientIndex} not found");
+            LogFailedToGetClientLatency(clientIndex, result.ErrorMessage ?? "Unknown error");
+            return NotFound($"Client {clientIndex} not found");
         }
 
-        return this.Ok(result.Value!.LatencyMs);
+        return Ok(result.Value!.LatencyMs);
     }
 
     /// <summary>
@@ -436,6 +406,7 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     /// <param name="zoneIndex">Zone ID (1-based)</param>
     /// <returns>No content on success</returns>
     [HttpPut("{clientIndex:int}/zone")]
+    [CommandId(CommandIds.ClientZone)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -443,21 +414,18 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     {
         if (zoneIndex < 1)
         {
-            return this.BadRequest("Zone ID must be greater than 0");
+            return BadRequest("Zone ID must be greater than 0");
         }
 
-        var command = new AssignClientToZoneCommand { ClientIndex = clientIndex, ZoneIndex = zoneIndex };
-        var result = await this._mediator.SendCommandAsync<AssignClientToZoneCommand, Result>(command);
+        var result = await _clientService.AssignToZoneAsync(clientIndex, zoneIndex);
 
         if (result.IsFailure)
         {
-            this.LogFailedToAssignClientToZone(clientIndex, zoneIndex, result.ErrorMessage ?? "Unknown error");
-            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            LogFailedToAssignClientToZone(clientIndex, zoneIndex, result.ErrorMessage ?? "Unknown error");
+            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
-        // The zone assignment will be applied asynchronously and published via MQTT/KNX
-        return this.Accepted(zoneIndex);
+        return Accepted(zoneIndex);
     }
 
     /// <summary>
@@ -470,16 +438,15 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<int?>> GetZoneAssignment(int clientIndex)
     {
-        var query = new GetClientQuery { ClientIndex = clientIndex };
-        var result = await this._mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
+        var result = await _clientService.GetClientAsync(clientIndex);
 
         if (result.IsFailure)
         {
-            this.LogFailedToGetClientZoneAssignment(clientIndex, result.ErrorMessage ?? "Unknown error");
-            return this.NotFound($"Client {clientIndex} not found");
+            LogFailedToGetClientZoneAssignment(clientIndex, result.ErrorMessage ?? "Unknown error");
+            return NotFound($"Client {clientIndex} not found");
         }
 
-        return this.Ok(result.Value!.ZoneIndex);
+        return Ok(result.Value!.ZoneIndex);
     }
 
     /// <summary>
@@ -489,6 +456,7 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     /// <param name="name">New client name</param>
     /// <returns>Updated client name</returns>
     [HttpPut("{clientIndex:int}/name")]
+    [CommandId(CommandIds.ClientName)]
     [ProducesResponseType<string>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -496,25 +464,24 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     {
         if (string.IsNullOrWhiteSpace(name))
         {
-            return this.BadRequest("Name cannot be empty");
+            return BadRequest("Name cannot be empty");
         }
 
         if (name.Length > 100)
         {
-            return this.BadRequest("Name cannot exceed 100 characters");
+            return BadRequest("Name cannot exceed 100 characters");
         }
 
-        var command = new SetClientNameCommand { ClientIndex = clientIndex, Name = name.Trim() };
-        var result = await this._mediator.SendCommandAsync<SetClientNameCommand, Result>(command);
+        LogSettingClientName(clientIndex, name.Trim());
+        var result = await _clientService.SetNameAsync(clientIndex, name.Trim());
 
         if (result.IsFailure)
         {
-            this.LogFailedToSetClientName(clientIndex, name, result.ErrorMessage ?? "Unknown error");
-            return this.Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
+            LogFailedToSetClientName(clientIndex, name, result.ErrorMessage ?? "Unknown error");
+            return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        // ✅ Command-Status Flow: Return 202 Accepted for asynchronous operation
-        return this.Accepted(name.Trim());
+        return Accepted(name.Trim());
     }
 
     /// <summary>
@@ -527,16 +494,15 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<bool>> GetClientConnected(int clientIndex)
     {
-        var query = new GetClientQuery { ClientIndex = clientIndex };
-        var result = await this._mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
+        var result = await _clientService.GetClientAsync(clientIndex);
 
         if (result.IsFailure)
         {
-            this.LogFailedToGetClientConnectionStatus(clientIndex, result.ErrorMessage ?? "Unknown error");
-            return this.NotFound($"Client {clientIndex} not found");
+            LogFailedToGetClientConnectionStatus(clientIndex, result.ErrorMessage ?? "Unknown error");
+            return NotFound($"Client {clientIndex} not found");
         }
 
-        return this.Ok(result.Value!.Connected);
+        return Ok(result.Value!.Connected);
     }
 
     /// <summary>
@@ -549,29 +515,14 @@ public partial class ClientsController(IMediator mediator, ILogger<ClientsContro
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<string>> GetClientName(int clientIndex)
     {
-        var query = new GetClientQuery { ClientIndex = clientIndex };
-        var result = await this._mediator.SendQueryAsync<GetClientQuery, Result<ClientState>>(query);
+        var result = await _clientService.GetClientAsync(clientIndex);
 
         if (result.IsFailure)
         {
-            this.LogFailedToGetClientName(clientIndex, result.ErrorMessage ?? "Unknown error");
-            return this.NotFound($"Client {clientIndex} not found");
+            LogFailedToGetClientName(clientIndex, result.ErrorMessage ?? "Unknown error");
+            return NotFound($"Client {clientIndex} not found");
         }
 
-        var s = result.Value!.Name;
-
-        return this.Ok(s);
+        return Ok(result.Value!.Name);
     }
-
-    // ═══════════════════════════════════════════════════════════════════════════════
-    // LOGGING METHODS FOR NEW ENDPOINTS
-    // ═══════════════════════════════════════════════════════════════════════════════
-
-    [LoggerMessage(EventId = 113118, Level = LogLevel.Warning, Message = "Failed → get client {ClientIndex} connection status: {ErrorMessage}"
-)]
-    private partial void LogFailedToGetClientConnectionStatus(int clientIndex, string errorMessage);
-
-    [LoggerMessage(EventId = 113119, Level = LogLevel.Warning, Message = "Failed → get client {ClientIndex} name: {ErrorMessage}"
-)]
-    private partial void LogFailedToGetClientName(int clientIndex, string errorMessage);
 }

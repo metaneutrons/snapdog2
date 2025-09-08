@@ -365,10 +365,11 @@ static WebApplication CreateWebApplication(string[] args)
         ICommandStatusService,
         CommandStatusService
     >();
-    builder.Services.AddScoped<
-        IGlobalStatusService,
-        GlobalStatusService
-    >();
+    // TODO: Re-enable after Phase 3.2 completion
+    // builder.Services.AddScoped<
+    //     IGlobalStatusService,
+    //     GlobalStatusService
+    // >();
 
     // Zone management services
     builder.Services.AddSingleton<
