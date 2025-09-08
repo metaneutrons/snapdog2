@@ -14,7 +14,8 @@
 namespace SnapDog2.Domain.Services;
 
 using System.Diagnostics;
-using Cortex.Mediator;
+using Microsoft.AspNetCore.SignalR;
+using SnapDog2.Api.Hubs;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Infrastructure.Integrations.Snapcast.Models;
 using SnapDog2.Server.Clients.Notifications;
@@ -32,7 +33,7 @@ public partial class ClientManager : IClientManager
     private readonly ILogger<ClientManager> _logger;
     private readonly ISnapcastStateRepository _snapcastStateRepository;
     private readonly ISnapcastService _snapcastService;
-    private readonly IMediator _mediator;
+    private readonly IHubContext<SnapDogHub> _hubContext;
     private readonly IClientStateStore _clientStateStore;
     private readonly List<ClientConfig> _clientConfigs;
     private readonly SnapDogConfiguration _configuration;
@@ -163,7 +164,7 @@ public partial class ClientManager : IClientManager
         ILogger<ClientManager> logger,
         ISnapcastStateRepository snapcastStateRepository,
         ISnapcastService snapcastService,
-        IMediator mediator,
+        IHubContext<SnapDogHub> hubContext,
         IClientStateStore clientStateStore,
         SnapDogConfiguration configuration
     )
@@ -171,7 +172,7 @@ public partial class ClientManager : IClientManager
         this._logger = logger;
         this._snapcastStateRepository = snapcastStateRepository;
         this._snapcastService = snapcastService;
-        this._mediator = mediator;
+        this._hubContext = hubContext;
         this._clientStateStore = clientStateStore;
         this._clientConfigs = configuration.Clients;
         this._configuration = configuration;
@@ -241,7 +242,7 @@ public partial class ClientManager : IClientManager
             this._clientConfigs[clientIndex - 1],
             this._snapcastService,
             this._snapcastStateRepository,
-            this._mediator,
+            this._hubContext,
             this
         );
         return Result<IClient>.Success(client);
@@ -420,8 +421,7 @@ public partial class ClientManager : IClientManager
 
                     // Publish event for immediate regrouping
                     Console.WriteLine($"DEBUG: Publishing ClientZoneChangedNotification - clientIndex: {clientIndex}, oldZone: {oldZone}, newZone: {zoneIndex}");
-                    Console.WriteLine($"DEBUG: Mediator is null: {this._mediator == null}");
-                    await this._mediator!.PublishAsync(new ClientZoneChangedNotification(clientIndex, oldZone, zoneIndex));
+                    await this._hubContext.Clients.All.SendAsync("ClientZoneChanged", new { ClientIndex = clientIndex, OldZone = oldZone, NewZone = zoneIndex });
                 }
                 finally
                 {
@@ -487,7 +487,7 @@ public partial class ClientManager : IClientManager
                 this._clientConfigs[clientIndex - 1],
                 this._snapcastService,
                 this._snapcastStateRepository,
-                this._mediator,
+                this._hubContext,
                 this
             );
 
@@ -734,12 +734,7 @@ public partial class ClientManager : IClientManager
         {
             try
             {
-                var notification = new ClientStateChangedNotification
-                {
-                    ClientIndex = clientIndex,
-                    ClientState = currentState
-                };
-                await this._mediator.PublishAsync(notification);
+                await this._hubContext.Clients.All.SendAsync("ClientStateChanged", new { ClientIndex = clientIndex, ClientState = currentState });
             }
             catch (ObjectDisposedException)
             {
@@ -765,7 +760,7 @@ public partial class ClientManager : IClientManager
         ClientConfig config,
         ISnapcastService snapcastService,
         ISnapcastStateRepository snapcastStateRepository,
-        IMediator mediator,
+        IHubContext<SnapDogHub> hubContext,
         IClientManager clientManager
     ) : IClient
     {
@@ -773,7 +768,7 @@ public partial class ClientManager : IClientManager
         private readonly ClientConfig _config = config;
         private readonly ISnapcastService _snapcastService = snapcastService;
         private readonly ISnapcastStateRepository _snapcastStateRepository = snapcastStateRepository;
-        private readonly IMediator _mediator = mediator;
+        private readonly IHubContext<SnapDogHub> _hubContext = hubContext;
         private readonly IClientManager _clientManager = clientManager;
         private readonly int _clientIndex = clientIndex; // Internal only, not exposed as public property
 
@@ -945,8 +940,7 @@ public partial class ClientManager : IClientManager
         {
             try
             {
-                var notification = new ClientVolumeChangedNotification { ClientIndex = this._clientIndex, Volume = volume };
-                await this._mediator.PublishAsync(notification);
+                await this._hubContext.Clients.All.SendAsync("ClientVolumeChanged", new { ClientIndex = this._clientIndex, Volume = volume });
             }
             catch (ObjectDisposedException)
             {
@@ -964,8 +958,7 @@ public partial class ClientManager : IClientManager
         {
             try
             {
-                var notification = new ClientMuteChangedNotification { ClientIndex = this._clientIndex, IsMuted = muted };
-                await this._mediator.PublishAsync(notification);
+                await this._hubContext.Clients.All.SendAsync("ClientMuteChanged", new { ClientIndex = this._clientIndex, IsMuted = muted });
             }
             catch (ObjectDisposedException)
             {
@@ -981,8 +974,7 @@ public partial class ClientManager : IClientManager
         {
             try
             {
-                var notification = new ClientLatencyStatusNotification(this._clientIndex, latencyMs);
-                await this._mediator.PublishAsync(notification);
+                await this._hubContext.Clients.All.SendAsync("ClientLatencyChanged", new { ClientIndex = this._clientIndex, LatencyMs = latencyMs });
             }
             catch (ObjectDisposedException)
             {
@@ -1000,8 +992,7 @@ public partial class ClientManager : IClientManager
         {
             try
             {
-                var notification = new ClientZoneStatusNotification(this._clientIndex, zoneIndex);
-                await this._mediator.PublishAsync(notification);
+                await this._hubContext.Clients.All.SendAsync("ClientZoneChanged", new { ClientIndex = this._clientIndex, ZoneIndex = zoneIndex });
             }
             catch (ObjectDisposedException)
             {
@@ -1017,8 +1008,7 @@ public partial class ClientManager : IClientManager
         {
             try
             {
-                var notification = new ClientConnectionStatusNotification(this._clientIndex, isConnected);
-                await this._mediator.PublishAsync(notification);
+                await this._hubContext.Clients.All.SendAsync("ClientConnectionChanged", new { ClientIndex = this._clientIndex, IsConnected = isConnected });
             }
             catch (ObjectDisposedException)
             {
@@ -1038,8 +1028,7 @@ public partial class ClientManager : IClientManager
         {
             try
             {
-                var notification = new ClientStateNotification(this._clientIndex, state);
-                await this._mediator.PublishAsync(notification);
+                await this._hubContext.Clients.All.SendAsync("ClientStateChanged", new { ClientIndex = this._clientIndex, State = state });
             }
             catch (ObjectDisposedException)
             {
