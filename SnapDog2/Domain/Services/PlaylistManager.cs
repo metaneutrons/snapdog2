@@ -13,10 +13,11 @@
 //
 namespace SnapDog2.Domain.Services;
 
-using Cortex.Mediator;
+using Microsoft.AspNetCore.SignalR;
+using SnapDog2.Api.Hubs;
 using SnapDog2.Api.Models;
 using SnapDog2.Domain.Abstractions;
-using SnapDog2.Server.Playlists.Queries;
+using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Models;
 
 /// <summary>
@@ -26,7 +27,9 @@ using SnapDog2.Shared.Models;
 public partial class PlaylistManager : IPlaylistManager
 {
     private readonly ILogger<PlaylistManager> _logger;
-    private readonly IMediator _mediator;
+    private readonly ISubsonicService _subsonicService;
+    private readonly IHubContext<SnapDogHub> _hubContext;
+    private readonly SnapDogConfiguration _configuration;
 
     [LoggerMessage(EventId = 110300, Level = LogLevel.Debug, Message = "Getting all playlists via query handlers"
 )]
@@ -44,10 +47,16 @@ public partial class PlaylistManager : IPlaylistManager
 )]
     private partial void LogPlaylistError(string error);
 
-    public PlaylistManager(ILogger<PlaylistManager> logger, IMediator mediator)
+    public PlaylistManager(
+        ILogger<PlaylistManager> logger,
+        ISubsonicService subsonicService,
+        IHubContext<SnapDogHub> hubContext,
+        SnapDogConfiguration configuration)
     {
         this._logger = logger;
-        this._mediator = mediator;
+        this._subsonicService = subsonicService;
+        this._hubContext = hubContext;
+        this._configuration = configuration;
     }
 
     public async Task<Result<List<PlaylistInfo>>> GetAllPlaylistsAsync()
@@ -56,16 +65,39 @@ public partial class PlaylistManager : IPlaylistManager
 
         try
         {
-            var query = new GetAllPlaylistsQuery();
-            var result = await this._mediator.SendQueryAsync<GetAllPlaylistsQuery, Result<List<PlaylistInfo>>>(query).ConfigureAwait(false);
+            var playlists = new List<PlaylistInfo>();
 
-            if (result.IsFailure)
+            // Add radio stations as playlist index 1
+            if (this._configuration.RadioStations.Count > 0)
             {
-                this.LogPlaylistError(result.ErrorMessage ?? "Unknown error");
-                return Result<List<PlaylistInfo>>.Failure(result.ErrorMessage ?? "Failed to get playlists");
+                var radioPlaylist = new PlaylistInfo
+                {
+                    Index = 1,
+                    Name = "Radio Stations",
+                    TrackCount = this._configuration.RadioStations.Count,
+                    Source = "radio"
+                };
+                playlists.Add(radioPlaylist);
             }
 
-            return result;
+            // Add Subsonic playlists starting from index 2
+            var subsonicResult = await this._subsonicService.GetPlaylistsAsync();
+            if (subsonicResult.IsSuccess && subsonicResult.Value != null)
+            {
+                var subsonicPlaylists = subsonicResult.Value
+                    .Select((playlist, index) => new PlaylistInfo
+                    {
+                        Index = index + 2, // Start from index 2
+                        Name = playlist.Name,
+                        TrackCount = playlist.TrackCount,
+                        Source = "subsonic"
+                    })
+                    .ToList();
+
+                playlists.AddRange(subsonicPlaylists);
+            }
+
+            return Result<List<PlaylistInfo>>.Success(playlists);
         }
         catch (Exception ex)
         {
@@ -80,17 +112,58 @@ public partial class PlaylistManager : IPlaylistManager
 
         try
         {
-            var query = new GetPlaylistQuery { PlaylistIndex = playlistIndex };
-            var result = await this._mediator.SendQueryAsync<GetPlaylistQuery, Result<PlaylistWithTracks>>(query).ConfigureAwait(false);
-
-            if (result.IsFailure)
+            // Handle radio stations (index 1)
+            if (playlistIndex == 1)
             {
-                this.LogPlaylistIndexNotFound(playlistIndex);
-                return Result<List<TrackInfo>>.Failure(result.ErrorMessage ?? $"Playlist at index {playlistIndex} not found");
+                var radioTracks = this._configuration.RadioStations
+                    .Select((station, index) => new TrackInfo
+                    {
+                        Index = index + 1,
+                        Title = station.Name,
+                        Artist = "Radio Station",
+                        Album = "Radio Stations",
+                        Url = station.Url,
+                        Source = "radio"
+                    })
+                    .ToList();
+
+                return Result<List<TrackInfo>>.Success(radioTracks);
             }
 
-            var tracks = result.Value?.Tracks ?? new List<TrackInfo>();
-            return Result<List<TrackInfo>>.Success(tracks);
+            // Handle Subsonic playlists (index 2+)
+            if (playlistIndex >= 2)
+            {
+                // Get all Subsonic playlists to find the correct one
+                var subsonicResult = await this._subsonicService.GetPlaylistsAsync();
+                if (subsonicResult.IsFailure || subsonicResult.Value == null)
+                {
+                    this.LogPlaylistIndexNotFound(playlistIndex);
+                    return Result<List<TrackInfo>>.Failure($"Failed to get Subsonic playlists: {subsonicResult.ErrorMessage}");
+                }
+
+                var subsonicIndex = playlistIndex - 2; // Convert to 0-based index for Subsonic
+                var subsonicPlaylists = subsonicResult.Value.ToList();
+
+                if (subsonicIndex >= subsonicPlaylists.Count)
+                {
+                    this.LogPlaylistIndexNotFound(playlistIndex);
+                    return Result<List<TrackInfo>>.Failure($"Playlist at index {playlistIndex} not found");
+                }
+
+                var targetPlaylist = subsonicPlaylists[subsonicIndex];
+                var playlistResult = await this._subsonicService.GetPlaylistAsync(targetPlaylist.Index?.ToString() ?? "");
+
+                if (playlistResult.IsFailure || playlistResult.Value == null)
+                {
+                    this.LogPlaylistIndexNotFound(playlistIndex);
+                    return Result<List<TrackInfo>>.Failure($"Failed to get playlist tracks: {playlistResult.ErrorMessage}");
+                }
+
+                return Result<List<TrackInfo>>.Success(playlistResult.Value.Tracks);
+            }
+
+            this.LogPlaylistIndexNotFound(playlistIndex);
+            return Result<List<TrackInfo>>.Failure($"Invalid playlist index: {playlistIndex}");
         }
         catch (Exception ex)
         {
@@ -103,21 +176,60 @@ public partial class PlaylistManager : IPlaylistManager
     {
         try
         {
-            // Get all playlists and find the matching index
-            var allPlaylistsResult = await this.GetAllPlaylistsAsync().ConfigureAwait(false);
-            if (allPlaylistsResult.IsFailure)
+            // Handle radio stations (index 1)
+            if (playlistIndex == 1)
             {
-                return Result<PlaylistInfo>.Failure(allPlaylistsResult.ErrorMessage ?? "Failed to get playlists");
+                if (this._configuration.RadioStations.Count > 0)
+                {
+                    var radioPlaylist = new PlaylistInfo
+                    {
+                        Index = 1,
+                        Name = "Radio Stations",
+                        TrackCount = this._configuration.RadioStations.Count,
+                        Source = "radio"
+                    };
+                    return Result<PlaylistInfo>.Success(radioPlaylist);
+                }
+                else
+                {
+                    this.LogPlaylistIndexNotFound(playlistIndex);
+                    return Result<PlaylistInfo>.Failure("No radio stations configured");
+                }
             }
 
-            var playlist = allPlaylistsResult.Value?.FirstOrDefault(p => p.Index == playlistIndex);
-            if (playlist == null)
+            // Handle Subsonic playlists (index 2+)
+            if (playlistIndex >= 2)
             {
-                this.LogPlaylistIndexNotFound(playlistIndex);
-                return Result<PlaylistInfo>.Failure($"Playlist at index {playlistIndex} not found");
+                var subsonicResult = await this._subsonicService.GetPlaylistsAsync();
+                if (subsonicResult.IsFailure || subsonicResult.Value == null)
+                {
+                    this.LogPlaylistIndexNotFound(playlistIndex);
+                    return Result<PlaylistInfo>.Failure($"Failed to get Subsonic playlists: {subsonicResult.ErrorMessage}");
+                }
+
+                var subsonicIndex = playlistIndex - 2; // Convert to 0-based index for Subsonic
+                var subsonicPlaylists = subsonicResult.Value.ToList();
+
+                if (subsonicIndex >= subsonicPlaylists.Count)
+                {
+                    this.LogPlaylistIndexNotFound(playlistIndex);
+                    return Result<PlaylistInfo>.Failure($"Playlist at index {playlistIndex} not found");
+                }
+
+                var targetPlaylist = subsonicPlaylists[subsonicIndex];
+                var playlistInfo = new PlaylistInfo
+                {
+                    Index = playlistIndex,
+                    Name = targetPlaylist.Name,
+                    TrackCount = targetPlaylist.TrackCount,
+                    Source = "subsonic"
+                };
+
+                return Result<PlaylistInfo>.Success(playlistInfo);
             }
 
-            return Result<PlaylistInfo>.Success(playlist);
+            this.LogPlaylistIndexNotFound(playlistIndex);
+            return Result<PlaylistInfo>.Failure($"Invalid playlist index: {playlistIndex}");
         }
         catch (Exception ex)
         {
