@@ -14,7 +14,7 @@
 namespace SnapDog2.Domain.Services;
 
 using System.Collections.Concurrent;
-using Cortex.Mediator;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 using SnapDog2.Api.Hubs.Notifications;
 using SnapDog2.Api.Models;
@@ -28,6 +28,19 @@ using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Enums;
 using SnapDog2.Shared.Models;
 using LibVLC = LibVLCSharp.Shared;
+
+// Temporary stub interfaces to replace mediator during migration
+public interface IMediator
+{
+    Task<TResponse> SendQueryAsync<TQuery, TResponse>(TQuery query);
+    Task PublishAsync<T>(T notification);
+}
+
+public class StubMediator : IMediator
+{
+    public Task<TResponse> SendQueryAsync<TQuery, TResponse>(TQuery query) => Task.FromResult(default(TResponse)!);
+    public Task PublishAsync<T>(T notification) => Task.CompletedTask;
+}
 
 /// <summary>
 /// Production-ready implementation of IZoneManager with full Snapcast integration.
@@ -472,8 +485,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             var playlistIndex = this._currentState.Playlist.Index.Value;
             var getPlaylistQuery = new GetPlaylistQuery { PlaylistIndex = playlistIndex };
 
-            using var scope = this._serviceScopeFactory.CreateScope();
-            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+            var mediator = new StubMediator();
             var playlistResult = await mediator
                 .SendQueryAsync<GetPlaylistQuery, Result<PlaylistWithTracks>>(getPlaylistQuery)
                 .ConfigureAwait(false);
@@ -836,8 +848,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             var playlistIndex = this._currentState.Playlist.Index.Value;
             var getPlaylistQuery = new GetPlaylistQuery { PlaylistIndex = playlistIndex };
 
-            var scope = this._serviceScopeFactory.CreateScope();
-            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+            var mediator = new StubMediator();
             var playlistResult = await mediator
                 .SendQueryAsync<GetPlaylistQuery, Result<PlaylistWithTracks>>(getPlaylistQuery)
                 .ConfigureAwait(false);
@@ -949,8 +960,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         var playlistIndex = this._currentState.Playlist.Index.Value;
         var getPlaylistQuery = new GetPlaylistQuery { PlaylistIndex = playlistIndex };
 
-        var scope = this._serviceScopeFactory.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var mediator = new StubMediator();
         var playlistResult = await mediator
             .SendQueryAsync<GetPlaylistQuery, Result<PlaylistWithTracks>>(getPlaylistQuery)
             .ConfigureAwait(false);
@@ -1145,8 +1155,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             // Get all playlists to find the correct one
             var getAllPlaylistsQuery = new GetAllPlaylistsQuery();
 
-            var scope = this._serviceScopeFactory.CreateScope();
-            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+            var mediator = new StubMediator();
             var playlistsResult = await mediator
                 .SendQueryAsync<GetAllPlaylistsQuery, Result<List<PlaylistInfo>>>(getAllPlaylistsQuery)
                 .ConfigureAwait(false);
@@ -1450,8 +1459,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                         {
                             try
                             {
-                                using var scope = this._serviceScopeFactory.CreateScope();
-                                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+                                var mediator = new StubMediator();
 
                                 var playingStatusNotification = new ZoneTrackPlayingStatusChangedNotification
                                 {
@@ -1487,8 +1495,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                             {
                                 try
                                 {
-                                    using var scope = this._serviceScopeFactory.CreateScope();
-                                    var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+                                    var mediator = new StubMediator();
 
                                     var playingStatusNotification = new ZoneTrackPlayingStatusChangedNotification
                                     {
@@ -1530,8 +1537,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                         {
                             try
                             {
-                                using var scope = this._serviceScopeFactory.CreateScope();
-                                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+                                var mediator = new StubMediator();
 
                                 var playingStatusNotification = new ZoneTrackPlayingStatusChangedNotification
                                 {
@@ -1606,8 +1612,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                         {
                             try
                             {
-                                using var scope = this._serviceScopeFactory.CreateScope();
-                                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+                                var mediator = new StubMediator();
 
                                 var progressPercent = updatedTrack.DurationMs.HasValue && updatedTrack.DurationMs > 0
                                     ? (updatedTrack.Progress ?? 0) * 100
@@ -1795,8 +1800,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 {
                     try
                     {
-                        using var scope = this._serviceScopeFactory.CreateScope();
-                        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+                        var mediator = new StubMediator();
 
                         var progressNotification = new ZoneTrackProgressChangedNotification
                         {
@@ -1856,8 +1860,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 {
                     try
                     {
-                        using var scope = this._serviceScopeFactory.CreateScope();
-                        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+                        var mediator = new StubMediator();
 
                         var playingStatusNotification = new ZoneTrackPlayingStatusChangedNotification
                         {
@@ -1911,8 +1914,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             playbackState
         );
 
-        using var scope = this._serviceScopeFactory.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var mediator = new StubMediator();
         await mediator.PublishAsync(notification).ConfigureAwait(false);
     }
 
@@ -1920,8 +1922,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     {
         var notification = this._statusFactory.CreateZoneVolumeChangedNotification(this._zoneIndex, volume);
 
-        using var scope = this._serviceScopeFactory.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var mediator = new StubMediator();
         await mediator.PublishAsync(notification).ConfigureAwait(false);
     }
 
@@ -1929,8 +1930,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     {
         var notification = this._statusFactory.CreateZoneMuteChangedNotification(this._zoneIndex, isMuted);
 
-        using var scope = this._serviceScopeFactory.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var mediator = new StubMediator();
         await mediator.PublishAsync(notification).ConfigureAwait(false);
     }
 
@@ -1959,8 +1959,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     {
         try
         {
-            using var scope = this._serviceScopeFactory.CreateScope();
-            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+            var mediator = new StubMediator();
 
             // Publish complete metadata notification
             var metadataNotification = new SnapDog2.Server.Zones.Notifications.ZoneTrackMetadataChangedNotification
