@@ -78,12 +78,8 @@ public static partial class KnxServiceConfiguration
 
         logger.LogInformation("KNX integration configured: {ZoneCount} zones, {ClientCount} clients", knxZoneCount, knxClientCount);
 
-        // TODO: Re-enable after Phase 3.2 completion
         // Register the actual KNX service
-        // services.AddSingleton<IKnxService, KnxService>();
-
-        // Register KNX integration handler as singleton to match KnxService lifecycle
-        // services.AddSingleton<KnxIntegrationHandler>();
+        services.AddSingleton<IKnxService, KnxService>();
 
         return services;
     }

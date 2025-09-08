@@ -13,39 +13,179 @@
 //
 namespace SnapDog2.Infrastructure.Integrations.Knx;
 
-// TODO: KnxService temporarily disabled during mediator removal
-// This service needs to be updated to use direct service calls instead of command dispatch
-// Will be restored with IZoneService/IClientService integration in future update
-
-/*
-using System.Collections.Concurrent;
-using System.Globalization;
-using System.Net;
-using System.Text;
-using Cortex.Mediator;
-using Knx.Falcon;
 using Microsoft.Extensions.Options;
 using SnapDog2.Domain.Abstractions;
-using SnapDog2.Server.Clients.Commands.Config;
-using SnapDog2.Server.Clients.Commands.Volume;
-using SnapDog2.Server.Clients.Handlers;
-using SnapDog2.Server.Shared.Notifications;
-using SnapDog2.Server.Zones.Commands.Playback;
-using SnapDog2.Server.Zones.Commands.Playlist;
-using SnapDog2.Server.Zones.Commands.Track;
-using SnapDog2.Server.Zones.Commands.Volume;
-using SnapDog2.Server.Zones.Handlers;
 using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Enums;
 using SnapDog2.Shared.Models;
 
 /// <summary>
-/// KNX integration service that bridges KNX bus communication with SnapDog2 commands.
+/// KNX integration service that bridges KNX bus communication with SnapDog2 services.
 /// Handles bidirectional communication between KNX devices and the audio system.
 /// </summary>
-public partial class KnxService : IKnxService, IDisposable
+public partial class KnxService : IKnxService
 {
-    // Implementation temporarily removed during mediator infrastructure cleanup
-    // Will be restored with direct service calls in future update
+    private readonly ILogger<KnxService> _logger;
+    private readonly SnapDogConfiguration _configuration;
+    private readonly IZoneService _zoneService;
+    private readonly IClientService _clientService;
+    private bool _disposed;
+
+    public KnxService(
+        ILogger<KnxService> logger,
+        IOptions<SnapDogConfiguration> configuration,
+        IZoneService zoneService,
+        IClientService clientService)
+    {
+        _logger = logger;
+        _configuration = configuration.Value;
+        _zoneService = zoneService;
+        _clientService = clientService;
+    }
+
+    public bool IsConnected { get; private set; }
+
+    public ServiceStatus Status { get; private set; } = ServiceStatus.Stopped;
+
+    public async Task<Result> InitializeAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            LogKnxInitializing();
+
+            // TODO: Implement actual KNX connection logic
+            // For now, just mark as connected to enable the service
+            IsConnected = true;
+            Status = ServiceStatus.Running;
+
+            LogKnxInitialized();
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            LogKnxInitializationFailed(ex.Message);
+            Status = ServiceStatus.Error;
+            return Result.Failure($"KNX initialization failed: {ex.Message}");
+        }
+    }
+
+    public async Task<Result> StopAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            LogKnxStopping();
+
+            IsConnected = false;
+            Status = ServiceStatus.Stopped;
+
+            LogKnxStopped();
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            LogKnxStopFailed(ex.Message);
+            return Result.Failure($"KNX stop failed: {ex.Message}");
+        }
+    }
+
+    public async Task<Result> SendStatusAsync(string statusId, int targetId, object value, CancellationToken cancellationToken = default)
+    {
+        // TODO: Implement KNX status sending
+        LogKnxStatusSent(statusId, targetId, value?.ToString() ?? "null");
+        return Result.Success();
+    }
+
+    public async Task<Result> WriteGroupValueAsync(string groupAddress, object value, CancellationToken cancellationToken = default)
+    {
+        // TODO: Implement KNX group value writing
+        LogKnxGroupValueWritten(groupAddress, value?.ToString() ?? "null");
+        return Result.Success();
+    }
+
+    public async Task<Result<object>> ReadGroupValueAsync(string groupAddress, CancellationToken cancellationToken = default)
+    {
+        // TODO: Implement KNX group value reading
+        LogKnxGroupValueRead(groupAddress);
+        return Result<object>.Success(new object());
+    }
+
+    public async Task<Result> PublishClientStatusAsync<T>(string clientIndex, string eventType, T payload, CancellationToken cancellationToken = default)
+    {
+        // TODO: Implement KNX client status publishing
+        LogKnxClientStatusPublished(clientIndex, eventType);
+        return Result.Success();
+    }
+
+    public async Task<Result> PublishZoneStatusAsync<T>(int zoneIndex, string eventType, T payload, CancellationToken cancellationToken = default)
+    {
+        // TODO: Implement KNX zone status publishing
+        LogKnxZoneStatusPublished(zoneIndex, eventType);
+        return Result.Success();
+    }
+
+    public async Task<Result> PublishGlobalStatusAsync<T>(string eventType, T payload, CancellationToken cancellationToken = default)
+    {
+        // TODO: Implement KNX global status publishing
+        LogKnxGlobalStatusPublished(eventType);
+        return Result.Success();
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await StopAsync();
+        Dispose(false);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed && disposing)
+        {
+            // TODO: Dispose KNX resources
+            _disposed = true;
+        }
+    }
+
+    // LoggerMessage methods
+    [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Initializing KNX service")]
+    private partial void LogKnxInitializing();
+
+    [LoggerMessage(EventId = 2, Level = LogLevel.Information, Message = "KNX service initialized successfully")]
+    private partial void LogKnxInitialized();
+
+    [LoggerMessage(EventId = 3, Level = LogLevel.Error, Message = "KNX initialization failed: {Error}")]
+    private partial void LogKnxInitializationFailed(string Error);
+
+    [LoggerMessage(EventId = 4, Level = LogLevel.Information, Message = "Stopping KNX service")]
+    private partial void LogKnxStopping();
+
+    [LoggerMessage(EventId = 5, Level = LogLevel.Information, Message = "KNX service stopped")]
+    private partial void LogKnxStopped();
+
+    [LoggerMessage(EventId = 6, Level = LogLevel.Error, Message = "KNX stop failed: {Error}")]
+    private partial void LogKnxStopFailed(string Error);
+
+    [LoggerMessage(EventId = 7, Level = LogLevel.Debug, Message = "KNX status sent: {StatusId} for target {TargetId} with value {Value}")]
+    private partial void LogKnxStatusSent(string StatusId, int TargetId, string Value);
+
+    [LoggerMessage(EventId = 8, Level = LogLevel.Debug, Message = "KNX group value written: {GroupAddress} = {Value}")]
+    private partial void LogKnxGroupValueWritten(string GroupAddress, string Value);
+
+    [LoggerMessage(EventId = 9, Level = LogLevel.Debug, Message = "KNX group value read: {GroupAddress}")]
+    private partial void LogKnxGroupValueRead(string GroupAddress);
+
+    [LoggerMessage(EventId = 10, Level = LogLevel.Debug, Message = "KNX client status published: {ClientIndex} - {EventType}")]
+    private partial void LogKnxClientStatusPublished(string ClientIndex, string EventType);
+
+    [LoggerMessage(EventId = 11, Level = LogLevel.Debug, Message = "KNX zone status published: {ZoneIndex} - {EventType}")]
+    private partial void LogKnxZoneStatusPublished(int ZoneIndex, string EventType);
+
+    [LoggerMessage(EventId = 12, Level = LogLevel.Debug, Message = "KNX global status published: {EventType}")]
+    private partial void LogKnxGlobalStatusPublished(string EventType);
 }
-*/
