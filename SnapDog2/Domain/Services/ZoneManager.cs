@@ -16,6 +16,7 @@ namespace SnapDog2.Domain.Services;
 using System.Collections.Concurrent;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
+using SnapDog2.Api.Hubs;
 using SnapDog2.Api.Hubs.Notifications;
 using SnapDog2.Api.Models;
 using SnapDog2.Domain.Abstractions;
@@ -28,19 +29,6 @@ using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Enums;
 using SnapDog2.Shared.Models;
 using LibVLC = LibVLCSharp.Shared;
-
-// Temporary stub interfaces to replace mediator during migration
-public interface IMediator
-{
-    Task<TResponse> SendQueryAsync<TQuery, TResponse>(TQuery query);
-    Task PublishAsync<T>(T notification);
-}
-
-public class StubMediator : IMediator
-{
-    public Task<TResponse> SendQueryAsync<TQuery, TResponse>(TQuery query) => Task.FromResult(default(TResponse)!);
-    public Task PublishAsync<T>(T notification) => Task.CompletedTask;
-}
 
 /// <summary>
 /// Production-ready implementation of IZoneManager with full Snapcast integration.
@@ -55,6 +43,8 @@ public partial class ZoneManager(
     IZoneStateStore zoneStateStore,
     IClientStateStore clientStateStore,
     IStatusFactory statusFactory,
+    IPlaylistManager playlistManager,
+    IHubContext<SnapDogHub> hubContext,
     IOptions<SnapDogConfiguration> configuration
 ) : IZoneManager, IAsyncDisposable, IDisposable
 {
@@ -65,6 +55,8 @@ public partial class ZoneManager(
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
     private readonly IZoneStateStore _zoneStateStore = zoneStateStore;
     private readonly IStatusFactory _statusFactory = statusFactory;
+    private readonly IPlaylistManager _playlistManager = playlistManager;
+    private readonly IHubContext<SnapDogHub> _hubContext = hubContext;
     private readonly IOptions<SnapDogConfiguration> _configuration = configuration;
     private readonly List<ZoneConfig> _zoneConfigs = configuration.Value.Zones;
     private readonly ConcurrentDictionary<int, IZoneService> _zones = new();
@@ -129,6 +121,8 @@ public partial class ZoneManager(
                         this._zoneStateStore,
                         clientStateStore,
                         this._statusFactory,
+                        this._playlistManager,
+                        this._hubContext,
                         this._logger,
                         this._configuration
                     );
@@ -299,6 +293,8 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     private readonly IZoneStateStore _zoneStateStore;
     private readonly IClientStateStore _clientStateStore;
     private readonly IStatusFactory _statusFactory;
+    private readonly IPlaylistManager _playlistManager;
+    private readonly IHubContext<SnapDogHub> _hubContext;
     private readonly ILogger _logger;
     private readonly IOptions<SnapDogConfiguration> _configuration;
     private readonly SemaphoreSlim _stateLock;
@@ -319,6 +315,8 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         IZoneStateStore zoneStateStore,
         IClientStateStore clientStateStore,
         IStatusFactory statusFactory,
+        IPlaylistManager playlistManager,
+        IHubContext<SnapDogHub> hubContext,
         ILogger logger,
         IOptions<SnapDogConfiguration> configuration
     )
@@ -332,6 +330,8 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         this._zoneStateStore = zoneStateStore;
         this._clientStateStore = clientStateStore;
         this._statusFactory = statusFactory;
+        this._playlistManager = playlistManager;
+        this._hubContext = hubContext;
         this._logger = logger;
         this._configuration = configuration;
         this._stateLock = new SemaphoreSlim(1, 1);
@@ -483,19 +483,20 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             }
 
             var playlistIndex = this._currentState.Playlist.Index.Value;
-            var getPlaylistQuery = new GetPlaylistQuery { PlaylistIndex = playlistIndex };
 
-            var mediator = new StubMediator();
-            var playlistResult = await mediator
-                .SendQueryAsync<GetPlaylistQuery, Result<PlaylistWithTracks>>(getPlaylistQuery)
-                .ConfigureAwait(false);
-
-            if (playlistResult.IsFailure)
+            var playlistInfoResult = await this._playlistManager.GetPlaylistAsync(playlistIndex).ConfigureAwait(false);
+            if (playlistInfoResult.IsFailure)
             {
-                return Result.Failure($"Failed to get playlist: {playlistResult.ErrorMessage}");
+                return Result.Failure($"Failed to get playlist info: {playlistInfoResult.ErrorMessage}");
             }
 
-            var playlist = playlistResult.Value;
+            var tracksResult = await this._playlistManager.GetPlaylistTracksAsync(playlistIndex).ConfigureAwait(false);
+            if (tracksResult.IsFailure)
+            {
+                return Result.Failure($"Failed to get playlist tracks: {tracksResult.ErrorMessage}");
+            }
+
+            var playlist = new PlaylistWithTracks(playlistInfoResult.Value, tracksResult.Value);
             if (playlist?.Tracks == null || playlist.Tracks.Count == 0)
             {
                 return Result.Failure("Playlist has no tracks");
@@ -846,19 +847,20 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             }
 
             var playlistIndex = this._currentState.Playlist.Index.Value;
-            var getPlaylistQuery = new GetPlaylistQuery { PlaylistIndex = playlistIndex };
 
-            var mediator = new StubMediator();
-            var playlistResult = await mediator
-                .SendQueryAsync<GetPlaylistQuery, Result<PlaylistWithTracks>>(getPlaylistQuery)
-                .ConfigureAwait(false);
-
-            if (playlistResult.IsFailure)
+            var playlistInfoResult = await this._playlistManager.GetPlaylistAsync(playlistIndex).ConfigureAwait(false);
+            if (playlistInfoResult.IsFailure)
             {
-                return Result.Failure($"Failed to get playlist tracks: {playlistResult.ErrorMessage}");
+                return Result.Failure($"Failed to get playlist info: {playlistInfoResult.ErrorMessage}");
             }
 
-            var playlist = playlistResult.Value;
+            var tracksResult = await this._playlistManager.GetPlaylistTracksAsync(playlistIndex).ConfigureAwait(false);
+            if (tracksResult.IsFailure)
+            {
+                return Result.Failure($"Failed to get playlist tracks: {tracksResult.ErrorMessage}");
+            }
+
+            var playlist = new PlaylistWithTracks(playlistInfoResult.Value, tracksResult.Value);
             if (playlist?.Tracks == null || playlist.Tracks.Count == 0)
             {
                 return Result.Failure("Playlist has no tracks");
@@ -958,19 +960,20 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         }
 
         var playlistIndex = this._currentState.Playlist.Index.Value;
-        var getPlaylistQuery = new GetPlaylistQuery { PlaylistIndex = playlistIndex };
 
-        var mediator = new StubMediator();
-        var playlistResult = await mediator
-            .SendQueryAsync<GetPlaylistQuery, Result<PlaylistWithTracks>>(getPlaylistQuery)
-            .ConfigureAwait(false);
-
-        if (playlistResult.IsFailure)
+        var playlistInfoResult = await this._playlistManager.GetPlaylistAsync(playlistIndex).ConfigureAwait(false);
+        if (playlistInfoResult.IsFailure)
         {
-            return Result.Failure($"Failed to get playlist tracks: {playlistResult.ErrorMessage}");
+            return Result.Failure($"Failed to get playlist info: {playlistInfoResult.ErrorMessage}");
         }
 
-        var playlist = playlistResult.Value;
+        var tracksResult = await this._playlistManager.GetPlaylistTracksAsync(playlistIndex).ConfigureAwait(false);
+        if (tracksResult.IsFailure)
+        {
+            return Result.Failure($"Failed to get playlist tracks: {tracksResult.ErrorMessage}");
+        }
+
+        var playlist = new PlaylistWithTracks(playlistInfoResult.Value, tracksResult.Value);
         if (playlist?.Tracks == null || playlist.Tracks.Count == 0)
         {
             return Result.Failure("Playlist has no tracks");
@@ -1153,12 +1156,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         try
         {
             // Get all playlists to find the correct one
-            var getAllPlaylistsQuery = new GetAllPlaylistsQuery();
-
-            var mediator = new StubMediator();
-            var playlistsResult = await mediator
-                .SendQueryAsync<GetAllPlaylistsQuery, Result<List<PlaylistInfo>>>(getAllPlaylistsQuery)
-                .ConfigureAwait(false);
+            var playlistsResult = await this._playlistManager.GetAllPlaylistsAsync().ConfigureAwait(false);
 
             if (playlistsResult.IsFailure)
             {
@@ -1459,14 +1457,12 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                         {
                             try
                             {
-                                var mediator = new StubMediator();
-
-                                var playingStatusNotification = new ZoneTrackPlayingStatusChangedNotification
+                                var playingStatusNotification = new
                                 {
                                     ZoneIndex = this._zoneIndex,
                                     IsPlaying = status.IsPlaying
                                 };
-                                await mediator.PublishAsync(playingStatusNotification).ConfigureAwait(false);
+                                await this._hubContext.Clients.All.SendAsync("ZonePlaybackChanged", playingStatusNotification).ConfigureAwait(false);
                             }
                             catch (Exception ex)
                             {
@@ -1495,14 +1491,12 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                             {
                                 try
                                 {
-                                    var mediator = new StubMediator();
-
-                                    var playingStatusNotification = new ZoneTrackPlayingStatusChangedNotification
+                                    var playingStatusNotification = new
                                     {
                                         ZoneIndex = this._zoneIndex,
                                         IsPlaying = status.IsPlaying
                                     };
-                                    await mediator.PublishAsync(playingStatusNotification).ConfigureAwait(false);
+                                    await this._hubContext.Clients.All.SendAsync("ZonePlaybackChanged", playingStatusNotification).ConfigureAwait(false);
                                 }
                                 catch (Exception ex)
                                 {
@@ -1537,14 +1531,12 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                         {
                             try
                             {
-                                var mediator = new StubMediator();
-
-                                var playingStatusNotification = new ZoneTrackPlayingStatusChangedNotification
+                                var playingStatusNotification = new
                                 {
                                     ZoneIndex = this._zoneIndex,
                                     IsPlaying = status.IsPlaying
                                 };
-                                await mediator.PublishAsync(playingStatusNotification).ConfigureAwait(false);
+                                await this._hubContext.Clients.All.SendAsync("ZonePlaybackChanged", playingStatusNotification).ConfigureAwait(false);
                             }
                             catch (Exception ex)
                             {
@@ -1612,19 +1604,18 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                         {
                             try
                             {
-                                var mediator = new StubMediator();
-
                                 var progressPercent = updatedTrack.DurationMs.HasValue && updatedTrack.DurationMs > 0
                                     ? (updatedTrack.Progress ?? 0) * 100
                                     : 0; // For radio streams, progress is always 0
 
-                                var progressNotification = new ZoneProgressChangedNotification(
-                                    this._zoneIndex,
-                                    updatedTrack.PositionMs.Value,
-                                    progressPercent
-                                );
+                                var progressNotification = new
+                                {
+                                    ZoneIndex = this._zoneIndex,
+                                    PositionMs = updatedTrack.PositionMs.Value,
+                                    ProgressPercent = progressPercent
+                                };
 
-                                await mediator.PublishAsync(progressNotification).ConfigureAwait(false);
+                                await this._hubContext.Clients.All.SendAsync("ZoneProgressChanged", progressNotification).ConfigureAwait(false);
                             }
                             catch (Exception ex)
                             {
@@ -1800,14 +1791,12 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 {
                     try
                     {
-                        var mediator = new StubMediator();
-
-                        var progressNotification = new ZoneTrackProgressChangedNotification
+                        var progressNotification = new
                         {
                             ZoneIndex = this._zoneIndex,
                             Progress = e.Progress
                         };
-                        await mediator.PublishAsync(progressNotification).ConfigureAwait(false);
+                        await this._hubContext.Clients.All.SendAsync("ZoneProgressChanged", progressNotification).ConfigureAwait(false);
 
                         // Publish progress notification for real-time UI updates
                         var progressPercent = this._currentState.Track.DurationMs.HasValue && this._currentState.Track.DurationMs > 0
@@ -1820,7 +1809,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                             progressPercent
                         );
 
-                        await mediator.PublishAsync(signalRProgressNotification).ConfigureAwait(false);
+                        await this._hubContext.Clients.All.SendAsync("ZoneNotification", signalRProgressNotification).ConfigureAwait(false);
                     }
                     catch (Exception ex)
                     {
@@ -1860,14 +1849,12 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 {
                     try
                     {
-                        var mediator = new StubMediator();
-
-                        var playingStatusNotification = new ZoneTrackPlayingStatusChangedNotification
+                        var playingStatusNotification = new
                         {
                             ZoneIndex = this._zoneIndex,
                             IsPlaying = newPlaybackState == PlaybackState.Playing
                         };
-                        await mediator.PublishAsync(playingStatusNotification).ConfigureAwait(false);
+                        await this._hubContext.Clients.All.SendAsync("ZonePlaybackChanged", playingStatusNotification).ConfigureAwait(false);
                     }
                     catch (Exception ex)
                     {
@@ -1914,24 +1901,21 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             playbackState
         );
 
-        var mediator = new StubMediator();
-        await mediator.PublishAsync(notification).ConfigureAwait(false);
+        await this._hubContext.Clients.All.SendAsync("ZoneNotification", notification).ConfigureAwait(false);
     }
 
     public async Task PublishVolumeStatusAsync(int volume)
     {
         var notification = this._statusFactory.CreateZoneVolumeChangedNotification(this._zoneIndex, volume);
 
-        var mediator = new StubMediator();
-        await mediator.PublishAsync(notification).ConfigureAwait(false);
+        await this._hubContext.Clients.All.SendAsync("ZoneNotification", notification).ConfigureAwait(false);
     }
 
     public async Task PublishMuteStatusAsync(bool isMuted)
     {
         var notification = this._statusFactory.CreateZoneMuteChangedNotification(this._zoneIndex, isMuted);
 
-        var mediator = new StubMediator();
-        await mediator.PublishAsync(notification).ConfigureAwait(false);
+        await this._hubContext.Clients.All.SendAsync("ZoneNotification", notification).ConfigureAwait(false);
     }
 
     #endregion
@@ -1959,7 +1943,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     {
         try
         {
-            var mediator = new StubMediator();
+
 
             // Publish complete metadata notification
             var metadataNotification = new SnapDog2.Server.Zones.Notifications.ZoneTrackMetadataChangedNotification
@@ -1985,7 +1969,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                     TimestampUtc = track.TimestampUtc
                 }
             };
-            await mediator.PublishAsync(metadataNotification).ConfigureAwait(false);
+            await this._hubContext.Clients.All.SendAsync("ZoneNotification", metadataNotification).ConfigureAwait(false);
 
             // Publish individual field notifications
             if (!string.IsNullOrEmpty(track.Title))
@@ -1995,7 +1979,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                     ZoneIndex = this._zoneIndex,
                     Title = track.Title
                 };
-                await mediator.PublishAsync(titleNotification).ConfigureAwait(false);
+                await this._hubContext.Clients.All.SendAsync("ZoneNotification", titleNotification).ConfigureAwait(false);
             }
 
             if (!string.IsNullOrEmpty(track.Artist))
@@ -2005,7 +1989,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                     ZoneIndex = this._zoneIndex,
                     Artist = track.Artist
                 };
-                await mediator.PublishAsync(artistNotification).ConfigureAwait(false);
+                await this._hubContext.Clients.All.SendAsync("ZoneNotification", artistNotification).ConfigureAwait(false);
             }
 
             if (!string.IsNullOrEmpty(track.Album))
@@ -2015,7 +1999,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                     ZoneIndex = this._zoneIndex,
                     Album = track.Album
                 };
-                await mediator.PublishAsync(albumNotification).ConfigureAwait(false);
+                await this._hubContext.Clients.All.SendAsync("ZoneNotification", albumNotification).ConfigureAwait(false);
             }
         }
         catch (Exception ex)
