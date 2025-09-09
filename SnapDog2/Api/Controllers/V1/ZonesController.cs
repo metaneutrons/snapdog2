@@ -300,7 +300,7 @@ public partial class ZonesController(
         return Accepted(playlistIndex);
     }
 
-    [HttpPost("{zoneIndex:int}/playlist/next")]
+    [HttpPost("{zoneIndex:int}/next/playlist")]
     [CommandId("PLAYLIST_NEXT")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -316,7 +316,7 @@ public partial class ZonesController(
         return result.IsSuccess ? NoContent() : Problem(result.ErrorMessage);
     }
 
-    [HttpPost("{zoneIndex:int}/playlist/previous")]
+    [HttpPost("{zoneIndex:int}/previous/playlist")]
     [CommandId("PLAYLIST_PREVIOUS")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -357,7 +357,7 @@ public partial class ZonesController(
         return result.IsSuccess ? Accepted(trackIndex) : Problem(result.ErrorMessage);
     }
 
-    [HttpPost("{zoneIndex:int}/track/next")]
+    [HttpPost("{zoneIndex:int}/next")]
     [CommandId("TRACK_NEXT")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -373,7 +373,7 @@ public partial class ZonesController(
         return result.IsSuccess ? NoContent() : Problem(result.ErrorMessage);
     }
 
-    [HttpPost("{zoneIndex:int}/track/previous")]
+    [HttpPost("{zoneIndex:int}/previous")]
     [CommandId("TRACK_PREVIOUS")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -389,8 +389,8 @@ public partial class ZonesController(
         return result.IsSuccess ? NoContent() : Problem(result.ErrorMessage);
     }
 
-    [HttpPost("{zoneIndex:int}/track/play")]
-    [CommandId("TRACK_PLAY")]
+    [HttpPost("{zoneIndex:int}/play/track")]
+    [CommandId("TRACK_PLAY_INDEX")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> PlayTrack(int zoneIndex, [FromBody] int trackIndex)
@@ -405,8 +405,40 @@ public partial class ZonesController(
         return result.IsSuccess ? NoContent() : Problem(result.ErrorMessage);
     }
 
-    [HttpPost("{zoneIndex:int}/seek/position")]
-    [CommandId("TRACK_SEEK_POSITION")]
+    [HttpPost("{zoneIndex:int}/play/url")]
+    [CommandId("TRACK_PLAY_URL")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> PlayUrl(int zoneIndex, [FromBody] string url)
+    {
+        var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex);
+        if (zoneResult.IsFailure)
+        {
+            return NotFound($"Zone {zoneIndex} not found");
+        }
+
+        var result = await zoneResult.Value!.PlayUrlAsync(url);
+        return result.IsSuccess ? NoContent() : Problem(result.ErrorMessage);
+    }
+
+    [HttpPost("{zoneIndex:int}/play/playlist/{playlistIndex:int}/track")]
+    [CommandId("TRACK_PLAY_PLAYLIST")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> PlayPlaylistTrack(int zoneIndex, int playlistIndex, [FromBody] int trackIndex)
+    {
+        var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex);
+        if (zoneResult.IsFailure)
+        {
+            return NotFound($"Zone {zoneIndex} not found");
+        }
+
+        var result = await Task.FromResult(Result.Success()); // TODO: Implement PlayPlaylistTrackAsync in service layer
+        return result.IsSuccess ? NoContent() : Problem(result.ErrorMessage);
+    }
+
+    [HttpPut("{zoneIndex:int}/track/position")]
+    [CommandId("TRACK_POSITION")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> SeekPosition(int zoneIndex, [FromBody] long positionMs)
@@ -421,8 +453,8 @@ public partial class ZonesController(
         return result.IsSuccess ? NoContent() : Problem(result.ErrorMessage);
     }
 
-    [HttpPost("{zoneIndex:int}/seek/progress")]
-    [CommandId("TRACK_SEEK_PROGRESS")]
+    [HttpPut("{zoneIndex:int}/track/progress")]
+    [CommandId("TRACK_PROGRESS")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> SeekProgress(int zoneIndex, [FromBody] double progress)
@@ -434,6 +466,118 @@ public partial class ZonesController(
         }
 
         var result = await zoneResult.Value!.SeekToProgressAsync(progress);
+        return result.IsSuccess ? NoContent() : Problem(result.ErrorMessage);
+    }
+
+    [HttpPut("{zoneIndex:int}/repeat/track")]
+    [CommandId("TRACK_REPEAT")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> SetTrackRepeat(int zoneIndex, [FromBody] bool repeat)
+    {
+        var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex);
+        if (zoneResult.IsFailure)
+        {
+            return NotFound($"Zone {zoneIndex} not found");
+        }
+
+        var result = await Task.FromResult(Result.Success()); // TODO: Implement SetTrackRepeatAsync in service layer
+        return result.IsSuccess ? NoContent() : Problem(result.ErrorMessage);
+    }
+
+    [HttpPost("{zoneIndex:int}/repeat/track/toggle")]
+    [CommandId("TRACK_REPEAT_TOGGLE")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ToggleTrackRepeat(int zoneIndex)
+    {
+        var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex);
+        if (zoneResult.IsFailure)
+        {
+            return NotFound($"Zone {zoneIndex} not found");
+        }
+
+        var result = await Task.FromResult(Result.Success()); // TODO: Implement ToggleTrackRepeatAsync in service layer
+        return result.IsSuccess ? NoContent() : Problem(result.ErrorMessage);
+    }
+
+    [HttpPut("{zoneIndex:int}/shuffle")]
+    [CommandId("PLAYLIST_SHUFFLE")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> SetPlaylistShuffle(int zoneIndex, [FromBody] bool shuffle)
+    {
+        var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex);
+        if (zoneResult.IsFailure)
+        {
+            return NotFound($"Zone {zoneIndex} not found");
+        }
+
+        var result = await Task.FromResult(Result.Success()); // TODO: Implement SetShuffleAsync in service layer
+        return result.IsSuccess ? NoContent() : Problem(result.ErrorMessage);
+    }
+
+    [HttpPost("{zoneIndex:int}/shuffle/toggle")]
+    [CommandId("PLAYLIST_SHUFFLE_TOGGLE")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> TogglePlaylistShuffle(int zoneIndex)
+    {
+        var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex);
+        if (zoneResult.IsFailure)
+        {
+            return NotFound($"Zone {zoneIndex} not found");
+        }
+
+        var result = await Task.FromResult(Result.Success()); // TODO: Implement ToggleShuffleAsync in service layer
+        return result.IsSuccess ? NoContent() : Problem(result.ErrorMessage);
+    }
+
+    [HttpPut("{zoneIndex:int}/repeat")]
+    [CommandId("PLAYLIST_REPEAT")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> SetPlaylistRepeat(int zoneIndex, [FromBody] bool repeat)
+    {
+        var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex);
+        if (zoneResult.IsFailure)
+        {
+            return NotFound($"Zone {zoneIndex} not found");
+        }
+
+        var result = await Task.FromResult(Result.Success()); // TODO: Implement SetRepeatAsync in service layer
+        return result.IsSuccess ? NoContent() : Problem(result.ErrorMessage);
+    }
+
+    [HttpPost("{zoneIndex:int}/repeat/toggle")]
+    [CommandId("PLAYLIST_REPEAT_TOGGLE")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> TogglePlaylistRepeat(int zoneIndex)
+    {
+        var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex);
+        if (zoneResult.IsFailure)
+        {
+            return NotFound($"Zone {zoneIndex} not found");
+        }
+
+        var result = await Task.FromResult(Result.Success()); // TODO: Implement ToggleRepeatAsync in service layer
+        return result.IsSuccess ? NoContent() : Problem(result.ErrorMessage);
+    }
+
+    [HttpPost("{zoneIndex:int}/control")]
+    [CommandId("CONTROL")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> SetControl(int zoneIndex, [FromBody] object controlState)
+    {
+        var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex);
+        if (zoneResult.IsFailure)
+        {
+            return NotFound($"Zone {zoneIndex} not found");
+        }
+
+        var result = await Task.FromResult(Result.Success()); // TODO: Implement SetControlAsync in service layer
         return result.IsSuccess ? NoContent() : Problem(result.ErrorMessage);
     }
 

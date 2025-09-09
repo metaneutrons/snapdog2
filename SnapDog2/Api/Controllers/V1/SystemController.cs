@@ -13,4 +13,45 @@
 //
 namespace SnapDog2.Api.Controllers.V1;
 
-// SystemController disabled - will be restored with direct service calls in future update
+using Microsoft.AspNetCore.Mvc;
+using SnapDog2.Domain.Abstractions;
+using SnapDog2.Shared.Models;
+
+/// <summary>
+/// Controller for system status and information endpoints.
+/// </summary>
+[ApiController]
+[Route("api/v1/system")]
+public class SystemController : ControllerBase
+{
+    private readonly IAppStatusService _appStatusService;
+
+    public SystemController(IAppStatusService appStatusService)
+    {
+        _appStatusService = appStatusService;
+    }
+
+    [HttpGet("status")]
+    [ProducesResponseType<SystemStatus>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<SystemStatus>> GetSystemStatus()
+    {
+        var status = await _appStatusService.GetCurrentStatusAsync();
+        return Ok(status);
+    }
+
+    [HttpGet("version")]
+    [ProducesResponseType<VersionDetails>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<VersionDetails>> GetVersionInfo()
+    {
+        var version = await _appStatusService.GetVersionInfoAsync();
+        return Ok(version);
+    }
+
+    [HttpGet("stats")]
+    [ProducesResponseType<ServerStats>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<ServerStats>> GetServerStats()
+    {
+        var stats = await _appStatusService.GetServerStatsAsync();
+        return Ok(stats);
+    }
+}

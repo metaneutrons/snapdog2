@@ -345,6 +345,10 @@ static WebApplication CreateWebApplication(string[] args)
 
     // Register status services
     builder.Services.AddScoped<
+        IAppHealthCheckService,
+        AppHealthCheckService
+    >();
+    builder.Services.AddScoped<
         IAppStatusService,
         AppStatusService
     >();
