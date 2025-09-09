@@ -303,10 +303,13 @@ static WebApplication CreateWebApplication(string[] args)
     if (snapDogConfig.Services.Knx.Enabled)
     {
         builder.Services.AddKnxService(snapDogConfig);
+        builder.Services.AddScoped<IKnxCommandHandler, KnxCommandHandler>();
     }
     else
     {
         Log.Information("KNX is disabled in configuration (SNAPDOG_SERVICES_KNX_ENABLED=false)");
+        // Register dummy handler for when KNX is disabled
+        builder.Services.AddScoped<IKnxCommandHandler, KnxCommandHandler>();
     }
 
     // Notification processing configuration and services

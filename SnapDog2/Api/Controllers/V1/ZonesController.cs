@@ -32,9 +32,11 @@ using SnapDog2.Shared.Models;
 [Tags("Zones")]
 public partial class ZonesController(
     IZoneManager zoneManager,
+    IKnxCommandHandler knxCommandHandler,
     ILogger<ZonesController> logger) : ControllerBase
 {
     private readonly IZoneManager _zoneManager = zoneManager ?? throw new ArgumentNullException(nameof(zoneManager));
+    private readonly IKnxCommandHandler _knxCommandHandler = knxCommandHandler ?? throw new ArgumentNullException(nameof(knxCommandHandler));
     private readonly ILogger<ZonesController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -235,6 +237,10 @@ public partial class ZonesController(
         }
 
         var result = await zoneResult.Value!.PlayAsync();
+
+        // Send KNX command
+        await _knxCommandHandler.HandleCommandAsync("PLAY", zoneIndex);
+
         return result.IsSuccess ? NoContent() : Problem(result.ErrorMessage);
     }
 
@@ -251,6 +257,10 @@ public partial class ZonesController(
         }
 
         var result = await zoneResult.Value!.PauseAsync();
+
+        // Send KNX command
+        await _knxCommandHandler.HandleCommandAsync("PAUSE", zoneIndex);
+
         return result.IsSuccess ? NoContent() : Problem(result.ErrorMessage);
     }
 
@@ -267,6 +277,10 @@ public partial class ZonesController(
         }
 
         var result = await zoneResult.Value!.StopAsync();
+
+        // Send KNX command
+        await _knxCommandHandler.HandleCommandAsync("STOP", zoneIndex);
+
         return result.IsSuccess ? NoContent() : Problem(result.ErrorMessage);
     }
 
@@ -297,6 +311,10 @@ public partial class ZonesController(
             LogFailedToSetZonePlaylist(zoneIndex, playlistIndex, result.ErrorMessage ?? "Unknown error");
             return Problem(result.ErrorMessage, statusCode: StatusCodes.Status500InternalServerError);
         }
+
+        // Send KNX command
+        await _knxCommandHandler.HandleCommandAsync("PLAYLIST", zoneIndex, playlistIndex);
+
         return Accepted(playlistIndex);
     }
 
@@ -402,6 +420,10 @@ public partial class ZonesController(
         }
 
         var result = await zoneResult.Value!.PlayTrackAsync(trackIndex);
+
+        // Send KNX command
+        await _knxCommandHandler.HandleCommandAsync("TRACK_PLAY_INDEX", zoneIndex, trackIndex);
+
         return result.IsSuccess ? NoContent() : Problem(result.ErrorMessage);
     }
 
@@ -434,6 +456,10 @@ public partial class ZonesController(
         }
 
         var result = await Task.FromResult(Result.Success()); // TODO: Implement PlayPlaylistTrackAsync in service layer
+
+        // Send KNX command
+        await _knxCommandHandler.HandleCommandAsync("TRACK_PLAY_PLAYLIST", zoneIndex, new { playlistIndex, trackIndex });
+
         return result.IsSuccess ? NoContent() : Problem(result.ErrorMessage);
     }
 
@@ -482,6 +508,10 @@ public partial class ZonesController(
         }
 
         var result = await Task.FromResult(Result.Success()); // TODO: Implement SetTrackRepeatAsync in service layer
+
+        // Send KNX command
+        await _knxCommandHandler.HandleCommandAsync("TRACK_REPEAT", zoneIndex, repeat);
+
         return result.IsSuccess ? NoContent() : Problem(result.ErrorMessage);
     }
 
@@ -498,6 +528,10 @@ public partial class ZonesController(
         }
 
         var result = await Task.FromResult(Result.Success()); // TODO: Implement ToggleTrackRepeatAsync in service layer
+
+        // Send KNX command
+        await _knxCommandHandler.HandleCommandAsync("TRACK_REPEAT_TOGGLE", zoneIndex);
+
         return result.IsSuccess ? NoContent() : Problem(result.ErrorMessage);
     }
 
@@ -546,6 +580,10 @@ public partial class ZonesController(
         }
 
         var result = await Task.FromResult(Result.Success()); // TODO: Implement SetRepeatAsync in service layer
+
+        // Send KNX command
+        await _knxCommandHandler.HandleCommandAsync("PLAYLIST_REPEAT", zoneIndex, repeat);
+
         return result.IsSuccess ? NoContent() : Problem(result.ErrorMessage);
     }
 
@@ -562,6 +600,10 @@ public partial class ZonesController(
         }
 
         var result = await Task.FromResult(Result.Success()); // TODO: Implement ToggleRepeatAsync in service layer
+
+        // Send KNX command
+        await _knxCommandHandler.HandleCommandAsync("PLAYLIST_REPEAT_TOGGLE", zoneIndex);
+
         return result.IsSuccess ? NoContent() : Problem(result.ErrorMessage);
     }
 

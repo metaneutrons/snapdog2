@@ -683,10 +683,45 @@ public static class StaticApiAnalyzer
 
     private static HashSet<string> GetImplementedKnxHandlers()
     {
-        // Detect actual KNX command handler implementations
-        var existingCommandIds = GetImplementedCommandIdAttributes();
-        var blueprintWithKnx = GetBlueprintCommandsWithKnx();
+        // Detect actual KNX command handler implementations using reflection
+        var knxHandlers = new HashSet<string>();
 
-        return existingCommandIds.Intersect(blueprintWithKnx).ToHashSet();
+        try
+        {
+            var assembly = Assembly.Load("SnapDog2");
+            var types = assembly.GetTypes();
+
+            foreach (var type in types)
+            {
+                var methods = type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+                foreach (var method in methods)
+                {
+                    var knxCommandAttr = method.GetCustomAttributes(false)
+                        .FirstOrDefault(attr => attr.GetType().Name == "KnxCommandAttribute");
+
+                    if (knxCommandAttr != null)
+                    {
+                        var commandIdProperty = knxCommandAttr.GetType().GetProperty("CommandId");
+                        if (commandIdProperty != null)
+                        {
+                            var commandId = commandIdProperty.GetValue(knxCommandAttr) as string;
+                            if (!string.IsNullOrEmpty(commandId))
+                            {
+                                knxHandlers.Add(commandId);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception)
+        {
+            // Fallback to intersection method if reflection fails
+            var existingCommandIds = GetImplementedCommandIdAttributes();
+            var blueprintWithKnx = GetBlueprintCommandsWithKnx();
+            return existingCommandIds.Intersect(blueprintWithKnx).ToHashSet();
+        }
+
+        return knxHandlers;
     }
 }
