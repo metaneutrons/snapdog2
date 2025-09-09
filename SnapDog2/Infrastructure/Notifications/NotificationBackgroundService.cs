@@ -32,7 +32,7 @@ public sealed partial class NotificationBackgroundService(
 {
     private readonly NotificationQueue _queue = queue;
     private readonly IMqttService? _mqtt = services.GetService<IMqttService>();
-    private readonly IKnxService? _knx = services.GetService<IKnxService>();
+    private readonly IServiceScopeFactory _scopeFactory = services.GetRequiredService<IServiceScopeFactory>();
     private readonly NotificationProcessingOptions _options = options.Value;
     private readonly ILogger<NotificationBackgroundService> _logger = logger;
     private readonly IMetricsService? _metrics = metrics;
@@ -159,23 +159,25 @@ public sealed partial class NotificationBackgroundService(
         }
 
         // KNX
-        if (this._knx != null && this._knx.IsConnected)
+        using var scope = _scopeFactory.CreateScope();
+        var knx = scope.ServiceProvider.GetService<IKnxService>();
+        if (knx != null && knx.IsConnected)
         {
             Result knxResult = item.EntityType switch
             {
-                "Zone" when int.TryParse(item.EntityId, out var zoneIndex) => await this._knx.PublishZoneStatusAsync(
+                "Zone" when int.TryParse(item.EntityId, out var zoneIndex) => await knx.PublishZoneStatusAsync(
                     zoneIndex,
                     item.EventType,
                     (dynamic)item.Payload,
                     ct
                 ),
-                "Client" => await this._knx.PublishClientStatusAsync(
+                "Client" => await knx.PublishClientStatusAsync(
                     item.EntityId,
                     item.EventType,
                     (dynamic)item.Payload,
                     ct
                 ),
-                "Global" => await this._knx.PublishGlobalStatusAsync(item.EventType, (dynamic)item.Payload, ct),
+                "Global" => await knx.PublishGlobalStatusAsync(item.EventType, (dynamic)item.Payload, ct),
                 _ => Result.Failure($"Unknown entity type: {item.EntityType}"),
             };
 

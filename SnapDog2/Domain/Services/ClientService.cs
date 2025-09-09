@@ -24,69 +24,59 @@ using SnapDog2.Shared.Models;
 public class ClientService : IClientService
 {
     private readonly IClientStateStore _clientStateStore;
+    private readonly ISnapcastService _snapcastService;
+    private readonly IClientManager _clientManager;
     private readonly ILogger<ClientService> _logger;
 
     public ClientService(
         IClientStateStore clientStateStore,
+        ISnapcastService snapcastService,
+        IClientManager clientManager,
         ILogger<ClientService> logger)
     {
         _clientStateStore = clientStateStore;
+        _snapcastService = snapcastService;
+        _clientManager = clientManager;
         _logger = logger;
     }
 
     /// <summary>
     /// Gets the total count of clients.
     /// </summary>
-    public async Task<Result<int>> GetClientsCountAsync(CancellationToken cancellationToken = default)
+    public Task<Result<int>> GetClientsCountAsync(CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Getting clients count");
 
-        // TODO: Implement actual client count logic
-        return Result<int>.Success(0);
+        var clientStates = _clientStateStore.GetAllClientStates();
+        return Task.FromResult(Result<int>.Success(clientStates.Count));
     }
 
     /// <summary>
     /// Gets all clients.
     /// </summary>
-    public async Task<Result<List<ClientState>>> GetAllClientsAsync(CancellationToken cancellationToken = default)
+    public Task<Result<List<ClientState>>> GetAllClientsAsync(CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Getting all clients");
 
-        // TODO: Implement actual client retrieval logic
-        return Result<List<ClientState>>.Success(new List<ClientState>());
+        var clientStates = _clientStateStore.GetAllClientStates();
+        var clients = clientStates.Values.ToList();
+        return Task.FromResult(Result<List<ClientState>>.Success(clients));
     }
 
     /// <summary>
     /// Gets a specific client by index.
     /// </summary>
-    public async Task<Result<ClientState>> GetClientAsync(int clientIndex, CancellationToken cancellationToken = default)
+    public Task<Result<ClientState>> GetClientAsync(int clientIndex, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Getting client {ClientIndex}", clientIndex);
 
-        // TODO: Implement actual client retrieval logic
-        var clientState = new ClientState
+        var client = _clientStateStore.GetClientState(clientIndex);
+        if (client == null)
         {
-            Id = clientIndex,
-            Name = $"Client {clientIndex}",
-            Mac = "00:00:00:00:00:00",
-            SnapcastId = Guid.NewGuid().ToString(),
-            Volume = 50,
-            Mute = false,
-            Connected = true,
-            ZoneIndex = 1,
-            LatencyMs = 0,
-            ConfiguredSnapcastName = $"Client {clientIndex}",
-            LastSeenUtc = DateTime.UtcNow,
-            HostIpAddress = "127.0.0.1",
-            HostName = $"client-{clientIndex}",
-            HostOs = "Linux",
-            HostArch = "x86_64",
-            SnapClientVersion = "0.27.0",
-            SnapClientProtocolVersion = "2",
-            TimestampUtc = DateTime.UtcNow
-        };
+            return Task.FromResult(Result<ClientState>.Failure($"Client {clientIndex} not found"));
+        }
 
-        return Result<ClientState>.Success(clientState);
+        return Task.FromResult(Result<ClientState>.Success(client));
     }
 
     /// <summary>
@@ -97,8 +87,7 @@ public class ClientService : IClientService
     {
         _logger.LogInformation("Assigning client {ClientIndex} to zone {ZoneIndex}", clientIndex, zoneIndex);
 
-        // TODO: Implement actual client zone assignment logic
-        return Result.Success();
+        return await _clientManager.AssignClientToZoneAsync(clientIndex, zoneIndex);
     }
 
     /// <summary>
@@ -109,8 +98,13 @@ public class ClientService : IClientService
     {
         _logger.LogInformation("Setting client {ClientIndex} volume to {Volume}", clientIndex, volume);
 
-        // TODO: Implement actual client volume control logic
-        return Result.Success();
+        var client = _clientStateStore.GetClientState(clientIndex);
+        if (client == null)
+        {
+            return Result.Failure($"Client {clientIndex} not found");
+        }
+
+        return await _snapcastService.SetClientVolumeAsync(client.SnapcastId, volume, cancellationToken);
     }
 
     /// <summary>
@@ -121,8 +115,14 @@ public class ClientService : IClientService
     {
         _logger.LogInformation("Increasing client {ClientIndex} volume by {Step}", clientIndex, step);
 
-        // TODO: Implement actual volume up logic
-        return Result.Success();
+        var client = _clientStateStore.GetClientState(clientIndex);
+        if (client == null)
+        {
+            return Result.Failure($"Client {clientIndex} not found");
+        }
+
+        var newVolume = Math.Min(100, client.Volume + step);
+        return await SetVolumeAsync(clientIndex, newVolume, cancellationToken);
     }
 
     /// <summary>
@@ -133,8 +133,14 @@ public class ClientService : IClientService
     {
         _logger.LogInformation("Decreasing client {ClientIndex} volume by {Step}", clientIndex, step);
 
-        // TODO: Implement actual volume down logic
-        return Result.Success();
+        var client = _clientStateStore.GetClientState(clientIndex);
+        if (client == null)
+        {
+            return Result.Failure($"Client {clientIndex} not found");
+        }
+
+        var newVolume = Math.Max(0, client.Volume - step);
+        return await SetVolumeAsync(clientIndex, newVolume, cancellationToken);
     }
 
     /// <summary>
@@ -145,8 +151,13 @@ public class ClientService : IClientService
     {
         _logger.LogInformation("Setting client {ClientIndex} mute to {Muted}", clientIndex, muted);
 
-        // TODO: Implement actual client mute control logic
-        return Result.Success();
+        var client = _clientStateStore.GetClientState(clientIndex);
+        if (client == null)
+        {
+            return Result.Failure($"Client {clientIndex} not found");
+        }
+
+        return await _snapcastService.SetClientMuteAsync(client.SnapcastId, muted, cancellationToken);
     }
 
     /// <summary>
@@ -157,31 +168,36 @@ public class ClientService : IClientService
     {
         _logger.LogInformation("Toggling mute for client {ClientIndex}", clientIndex);
 
-        // TODO: Implement actual mute toggle logic
-        return Result.Success();
+        var client = _clientStateStore.GetClientState(clientIndex);
+        if (client == null)
+        {
+            return Result.Failure($"Client {clientIndex} not found");
+        }
+
+        return await SetMuteAsync(clientIndex, !client.Mute, cancellationToken);
     }
 
     /// <summary>
     /// Sets the latency compensation for a specific client.
     /// </summary>
     [CommandId("CLIENT_LATENCY")]
-    public async Task<Result> SetLatencyAsync(int clientIndex, int latencyMs, CancellationToken cancellationToken = default)
+    public Task<Result> SetLatencyAsync(int clientIndex, int latencyMs, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Setting client {ClientIndex} latency to {LatencyMs}ms", clientIndex, latencyMs);
 
         // TODO: Implement actual client latency control logic
-        return Result.Success();
+        return Task.FromResult(Result.Success());
     }
 
     /// <summary>
     /// Sets the name for a specific client.
     /// </summary>
     [CommandId("CLIENT_NAME")]
-    public async Task<Result> SetNameAsync(int clientIndex, string name, CancellationToken cancellationToken = default)
+    public Task<Result> SetNameAsync(int clientIndex, string name, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Setting client {ClientIndex} name to {Name}", clientIndex, name);
 
         // TODO: Implement actual client name setting logic
-        return Result.Success();
+        return Task.FromResult(Result.Success());
     }
 }

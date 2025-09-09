@@ -78,8 +78,8 @@ public static partial class KnxServiceConfiguration
 
         logger.LogInformation("KNX integration configured: {ZoneCount} zones, {ClientCount} clients", knxZoneCount, knxClientCount);
 
-        // Register the actual KNX service
-        services.AddSingleton<IKnxService, KnxService>();
+        // Register the actual KNX service (Scoped to match IClientService dependency)
+        services.AddScoped<IKnxService, KnxService>();
 
         return services;
     }

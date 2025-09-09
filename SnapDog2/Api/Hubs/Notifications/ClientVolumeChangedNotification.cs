@@ -1,7 +1,6 @@
 namespace SnapDog2.Api.Hubs.Notifications;
 
-using Cortex.Mediator.Notifications;
 using SnapDog2.Shared.Attributes;
 
 [StatusId("CLIENT_VOLUME_STATUS")]
-public record ClientVolumeChangedNotification(int ClientIndex, int Volume) : INotification;
+public record ClientVolumeChangedNotification(int ClientIndex, int Volume);

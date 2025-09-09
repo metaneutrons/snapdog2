@@ -8,7 +8,7 @@
     <GenerateStaticWebAssetsManifest>false</GenerateStaticWebAssetsManifest>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Cortex.Mediator" />
+
     <PackageReference Include="dotenv.net" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />

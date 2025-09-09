@@ -16,6 +16,7 @@ namespace SnapDog2.Api.Controllers.V1;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SnapDog2.Api.Models;
+using SnapDog2.Application.Services;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Shared.Attributes;
 using SnapDog2.Shared.Models;
@@ -29,7 +30,9 @@ using SnapDog2.Shared.Models;
 [Authorize]
 [Produces("application/json")]
 [Tags("Zones")]
-public partial class ZonesController(IZoneManager zoneManager, ILogger<ZonesController> logger) : ControllerBase
+public partial class ZonesController(
+    IZoneManager zoneManager,
+    ILogger<ZonesController> logger) : ControllerBase
 {
     private readonly IZoneManager _zoneManager = zoneManager ?? throw new ArgumentNullException(nameof(zoneManager));
     private readonly ILogger<ZonesController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));

@@ -44,7 +44,7 @@ public partial class EnterpriseMetricsService : IMetricsService, IDisposable
 
     #region IMetricsService Implementation
 
-    public void RecordCortexMediatorRequestDuration(
+    public void RecordServiceRequestDuration(
         string requestType,
         string requestName,
         long durationMs,

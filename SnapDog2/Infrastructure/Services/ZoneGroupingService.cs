@@ -15,11 +15,9 @@
 namespace SnapDog2.Infrastructure.Services;
 
 using System.Diagnostics;
-using Cortex.Mediator.Notifications;
 using Microsoft.Extensions.Options;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Infrastructure.Metrics;
-using SnapDog2.Server.Clients.Notifications;
 using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Models;
 
@@ -35,7 +33,7 @@ public partial class ZoneGroupingService(
     ZoneGroupingMetrics metrics,
     IOptions<SnapcastConfig> config,
     ILogger<ZoneGroupingService> logger)
-    : IZoneGroupingService, INotificationHandler<ClientZoneChangedNotification>
+    : IZoneGroupingService
 {
     private readonly ISnapcastService _snapcastService = snapcastService ?? throw new ArgumentNullException(nameof(snapcastService));
     private readonly IClientManager _clientManager = clientManager ?? throw new ArgumentNullException(nameof(clientManager));
@@ -215,7 +213,7 @@ public partial class ZoneGroupingService(
                     var zone = await this._zoneManager.GetZoneAsync(zoneIndex);
                     if (zone.IsSuccess)
                     {
-                        zone.Value!.UpdateSnapcastGroupId(existingGroup.Id);
+                        await zone.Value!.UpdateSnapcastGroupId(existingGroup.Id);
                     }
                 }
 
@@ -636,24 +634,6 @@ public partial class ZoneGroupingService(
     [LoggerMessage(EventId = 115035, Level = LogLevel.Error, Message = "Error during background zone regrouping for client {ClientIndex}")]
     private partial void LogBackgroundRegroupingError(Exception ex, int clientIndex);
 
-    /// <summary>
-    /// Handles client zone change notifications by triggering immediate regrouping.
-    /// </summary>
-    public Task Handle(ClientZoneChangedNotification notification, CancellationToken cancellationToken = default)
-    {
-        // Fire-and-forget: Execute regrouping in background without blocking HTTP response
-        _ = Task.Run(async () =>
-        {
-            try
-            {
-                await this.TriggerImmediateRegroupingAsync();
-            }
-            catch (Exception ex)
-            {
-                LogBackgroundRegroupingError(ex, notification.ClientIndex);
-            }
-        });
-
-        return Task.CompletedTask;
-    }
+    // Note: Immediate regrouping on client zone changes is now handled directly by ClientManager
+    // via TriggerImmediateRegroupingAsync() calls instead of notification handlers
 }

@@ -14,15 +14,12 @@
 namespace SnapDog2.Infrastructure.Integrations.Subsonic;
 
 using System.Diagnostics;
-using Cortex.Mediator;
-using Cortex.Mediator.Notifications;
 using Microsoft.Extensions.Options;
 using Polly;
 using Polly.Retry;
 using SnapDog2.Api.Models;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Infrastructure.Resilience;
-using SnapDog2.Server.Subsonic.Notifications;
 using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Models;
 using SubSonicMedia;
@@ -109,42 +106,12 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
 
     #region Helper Methods
 
-    /// <summary>
-    /// Publishes notifications using the injected mediator for better performance and reliability.
-    /// </summary>
-    private async Task PublishNotificationAsync<T>(T notification)
-        where T : INotification
-    {
-        try
-        {
-            using var scope = this._serviceProvider.CreateScope();
-            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-            await mediator.PublishAsync(notification);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogInformation("Operation completed: {Param1} {Param2}", typeof(T).Name, ex);
-        }
-    }
+    // Notification publishing removed - using direct service calls now
 
     /// <summary>
     /// Fire-and-forget notification publishing for non-critical events.
     /// </summary>
-    private void PublishNotificationFireAndForget<T>(T notification)
-        where T : INotification
-    {
-        _ = Task.Run(async () =>
-        {
-            try
-            {
-                await this.PublishNotificationAsync(notification);
-            }
-            catch
-            {
-                // Intentionally swallow exceptions in fire-and-forget scenarios
-            }
-        });
-    }
+    // Fire-and-forget notification publishing removed
 
     #endregion
 
@@ -225,14 +192,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
             stopwatch.Stop();
             _logger.LogInformation("PlaylistsRetrieved: {Details}", result.Count);
 
-            // Publish playlists retrieved notification
-            this.PublishNotificationFireAndForget(
-                new SubsonicPlaylistsRetrievedNotification(
-                    this._config.Url ?? "unknown",
-                    result.Count,
-                    stopwatch.Elapsed
-                )
-            );
+            // Notification publishing removed - using direct SignalR calls instead
 
             return Result<IReadOnlyList<PlaylistInfo>>.Success(result);
         }
@@ -242,9 +202,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
             _logger.LogInformation("GetPlaylistsError: {Details}", ex);
 
             // Publish playlist retrieval failed notification
-            this.PublishNotificationFireAndForget(
-                new SubsonicPlaylistRetrievalFailedNotification(this._config.Url ?? "unknown", ex.Message)
-            );
+            // Notification publishing removed - using direct SignalR calls instead
 
             return Result<IReadOnlyList<PlaylistInfo>>.Failure($"Failed to get playlists: {ex.Message}");
         }
@@ -303,15 +261,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
 
             _logger.LogInformation("Operation completed: {Param1} {Param2}", playlistIndex, result.Tracks.Count);
 
-            // Publish playlist accessed notification
-            this.PublishNotificationFireAndForget(
-                new SubsonicPlaylistAccessedNotification(
-                    this._config.Url ?? "unknown",
-                    playlistIndex,
-                    result.Info.Name,
-                    result.Tracks.Count
-                )
-            );
+            // Notification publishing removed - using direct SignalR calls instead
 
             return Result<PlaylistWithTracks>.Success(result);
         }
@@ -319,10 +269,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         {
             _logger.LogInformation("Operation completed: {Param1} {Param2}", playlistIndex, ex);
 
-            // Publish playlist access failed notification
-            this.PublishNotificationFireAndForget(
-                new SubsonicPlaylistAccessFailedNotification(this._config.Url ?? "unknown", playlistIndex, ex.Message)
-            );
+            // Notification publishing removed - using direct SignalR calls instead
 
             return Result<PlaylistWithTracks>.Failure(
                 $"Failed to get playlist '{playlistIndex}': {ex.Message}"
@@ -378,10 +325,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
 
             _logger.LogInformation("StreamUrlRetrieved: {Details}", trackId);
 
-            // Publish stream requested notification
-            this.PublishNotificationFireAndForget(
-                new SubsonicStreamRequestedNotification(this._config.Url ?? "unknown", trackId)
-            );
+            // Notification publishing removed - using direct SignalR calls instead
 
             return Result<string>.Success(result);
         }
@@ -389,10 +333,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         {
             _logger.LogInformation("Operation completed: {Param1} {Param2}", trackId, ex);
 
-            // Publish stream request failed notification
-            this.PublishNotificationFireAndForget(
-                new SubsonicStreamRequestFailedNotification(this._config.Url ?? "unknown", trackId, ex.Message)
-            );
+            // Notification publishing removed - using direct SignalR calls instead
 
             return Result<string>.Failure($"Failed to get stream URL for track '{trackId}': {ex.Message}");
         }
@@ -609,10 +550,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
 
         _logger.LogInformation("Initializing: {Details}", this._config.Url ?? "unknown");
 
-        // Publish initialization started notification
-        await this.PublishNotificationAsync(
-            new SubsonicInitializationStartedNotification(this._config.Url ?? "unknown")
-        );
+        // Initialization started - notification removed
 
         try
         {
@@ -655,13 +593,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
                         this._config.Url ?? "unknown",
                         this._config.Username ?? "unknown");
 
-                    // Publish connection established notification
-                    await this.PublishNotificationAsync(
-                        new SubsonicConnectionEstablishedNotification(
-                            this._config.Url ?? "unknown",
-                            this._config.Username ?? "unknown"
-                        )
-                    );
+                    // Connection established - notification removed
 
                     return Result.Success();
                 }
@@ -669,13 +601,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
                 {
                     _logger.LogInformation("InitializationFailed: {Details}", result.ErrorMessage ?? "Unknown error");
 
-                    // Publish connection test failed notification
-                    this.PublishNotificationFireAndForget(
-                        new SubsonicConnectionTestFailedNotification(
-                            this._config.Url ?? "unknown",
-                            result.ErrorMessage ?? "Unknown error"
-                        )
-                    );
+                    // Notification publishing removed - using direct SignalR calls instead
 
                     return Result.Failure(
                         $"Subsonic service initialization failed: {result.ErrorMessage ?? "Unknown error"}"
@@ -691,10 +617,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         {
             _logger.LogInformation("InitializationFailed: {Details}", ex.Message);
 
-            // Publish service error notification
-            this.PublishNotificationFireAndForget(
-                new SubsonicServiceErrorNotification(this._config.Url ?? "unknown", "Initialization", ex.Message)
-            );
+            // Notification publishing removed - using direct SignalR calls instead
 
             return Result.Failure($"Subsonic service initialization failed: {ex.Message}");
         }
@@ -732,8 +655,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
 
         this._disposed = true;
 
-        // Publish service disposed notification (fire-and-forget)
-        this.PublishNotificationFireAndForget(new SubsonicServiceDisposedNotification(this._config.Url ?? "unknown"));
+        // Notification publishing removed - using direct SignalR calls instead
 
         this._operationLock.Dispose();
         this._subsonicClient.Dispose();

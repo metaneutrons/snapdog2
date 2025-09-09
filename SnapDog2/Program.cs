@@ -13,7 +13,6 @@
 //
 
 using System.CommandLine;
-using Cortex.Mediator.Notifications;
 using dotenv.net;
 using EnvoyConfig;
 using Microsoft.AspNetCore.Authentication;
@@ -35,7 +34,6 @@ using SnapDog2.Application.Worker.Services;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Domain.Services;
 using SnapDog2.Infrastructure.Audio;
-using SnapDog2.Infrastructure.HealthChecks;
 using SnapDog2.Infrastructure.Hosting;
 using SnapDog2.Infrastructure.Integrations.Knx;
 using SnapDog2.Infrastructure.Integrations.Mqtt;
@@ -45,10 +43,6 @@ using SnapDog2.Infrastructure.Metrics;
 using SnapDog2.Infrastructure.Notifications;
 using SnapDog2.Infrastructure.Services;
 using SnapDog2.Infrastructure.Storage;
-using SnapDog2.Server.Clients.Notifications;
-using SnapDog2.Server.Global.Services;
-using SnapDog2.Server.Global.Services.Abstractions;
-using SnapDog2.Server.Shared.Factories;
 using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Helpers;
 using StackExchange.Redis;
@@ -286,8 +280,7 @@ static WebApplication CreateWebApplication(string[] args)
         );
     }
 
-    // Add command processing (Mediator, handlers, behaviors)
-    builder.Services.AddCommandProcessing();
+    // Command processing removed - using direct service calls now
 
     // Add HTTP client factory (required by MediaPlayerService and other services)
     builder.Services.AddHttpClient();
@@ -340,16 +333,10 @@ static WebApplication CreateWebApplication(string[] args)
         builder.Services.AddScoped<IZoneGroupingService, ZoneGroupingService>();
         builder.Services.AddHostedService<ZoneGroupingBackgroundService>();
 
-        // Add hosted service to publish initial state after integration services are initialized
-        // Skip in test environment to prevent hanging issues
-        if (!builder.Environment.IsEnvironment("Testing"))
-        {
-            builder.Services.AddHostedService<StatePublishingService>();
-        }
+        // StatePublishingService removed - using direct SignalR calls instead
 
         // Register integration publishers
         builder.Services.AddSingleton<IIntegrationPublisher, MqttIntegrationPublisher>();
-        builder.Services.AddSingleton<IIntegrationPublisher, KnxIntegrationPublisher>();
         builder.Services.AddSingleton<IIntegrationPublisher, SignalRIntegrationPublisher>();
 
         // Register integration coordinator
@@ -365,10 +352,7 @@ static WebApplication CreateWebApplication(string[] args)
         ICommandStatusService,
         CommandStatusService
     >();
-    builder.Services.AddScoped<
-        IGlobalStatusService,
-        GlobalStatusService
-    >();
+    // GlobalStatusService removed - using direct SignalR calls instead
 
     // Zone management services
     builder.Services.AddSingleton<
@@ -408,11 +392,7 @@ static WebApplication CreateWebApplication(string[] args)
             return new RedisPersistentStateStore(redis, snapDogConfig.Redis, logger);
         });
 
-        // Register persistent state notification handler for client state changes
-        builder.Services.AddSingleton<
-            INotificationHandler<ClientStateChangedNotification>,
-            PersistentStateNotificationHandler
-        >();
+        // PersistentStateNotificationHandler removed - using direct state store calls instead
 
         // Register state restoration service (only if Redis is enabled)
         builder.Services.AddHostedService<StateRestorationService>();
@@ -424,12 +404,6 @@ static WebApplication CreateWebApplication(string[] args)
     builder.Services.AddSingleton<
         IZoneManager,
         ZoneManager
-    >();
-
-    // Status factory for centralized status notification creation - Singleton for performance
-    builder.Services.AddSingleton<
-        IStatusFactory,
-        StatusFactory
     >();
 
     // Media player services - Singleton to persist across requests and scopes
@@ -465,11 +439,15 @@ static WebApplication CreateWebApplication(string[] args)
     // Business metrics collection service
     builder.Services.AddHostedService<BusinessMetricsCollectionService>();
 
-    // Playlist management services
-    builder.Services.AddScoped<
+    // Playlist management services - changed to Singleton to fix DI scoping issues
+    builder.Services.AddSingleton<
         IPlaylistManager,
         PlaylistManager
     >();
+
+    // Add missing service registrations for mediator removal (Phase 2)
+    // Note: ZoneService is created directly by ZoneManager, not registered in DI
+    builder.Services.AddScoped<IClientService, ClientService>();
 
     // Subsonic integration service
     if (snapDogConfig.Services.Subsonic.Enabled)
@@ -604,20 +582,6 @@ static WebApplication CreateWebApplication(string[] args)
                 tags: ["ready"]
             );
         }
-
-        if (snapDogConfig.Services.Knx.Enabled)
-        {
-            healthChecksBuilder.AddCheck<KnxHealthCheck>(
-                "knx",
-                tags: ["ready"]
-            );
-        }
-
-        // Register health check service wrapper for testability
-        builder.Services.AddScoped<
-            IAppHealthCheckService,
-            AppHealthCheckService
-        >();
     }
 
     var app = builder.Build();

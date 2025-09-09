@@ -181,7 +181,8 @@ public partial class IntegrationServicesHostedService(
             }
 
             // Initialize KNX service if available
-            var knxService = this._serviceProvider.GetService<IKnxService>();
+            using var scope = this._serviceProvider.CreateScope();
+            var knxService = scope.ServiceProvider.GetService<IKnxService>();
             if (knxService != null)
             {
                 this.LogInitializingKnx();

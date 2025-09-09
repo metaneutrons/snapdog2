@@ -16,7 +16,7 @@ namespace SnapDog2.Shared.Models;
 using System.Diagnostics.CodeAnalysis;
 
 /// <summary>
-/// Marker interface for Result types, useful for Cortex.Mediator behaviors and constraints.
+/// Marker interface for Result types, useful for operation result handling.
 /// </summary>
 public interface IResult
 {

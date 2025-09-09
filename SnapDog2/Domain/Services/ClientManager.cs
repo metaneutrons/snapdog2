@@ -18,7 +18,6 @@ using Microsoft.AspNetCore.SignalR;
 using SnapDog2.Api.Hubs;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Infrastructure.Integrations.Snapcast.Models;
-using SnapDog2.Server.Clients.Notifications;
 using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Models;
 using ClientConfig = SnapDog2.Shared.Configuration.ClientConfig;

@@ -70,4 +70,8 @@ public static class CommandIds
 
     // Zone Control Commands
     public const string Control = "CONTROL";
+
+    // Performance Monitoring Commands (Phase 4.2)
+    public const string GetPerformanceMetrics = "GET_PERFORMANCE_METRICS";
+    public const string GetOperationPerformance = "GET_OPERATION_PERFORMANCE";
 }

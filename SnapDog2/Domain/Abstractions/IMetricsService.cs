@@ -21,13 +21,13 @@ using SnapDog2.Shared.Models;
 public interface IMetricsService
 {
     /// <summary>
-    /// Records the duration of a Cortex.Mediator request.
+    /// Records the duration of a service request.
     /// </summary>
     /// <param name="requestType">The type of request (Command/Query).</param>
     /// <param name="requestName">The name of the request.</param>
     /// <param name="durationMs">The duration in milliseconds.</param>
     /// <param name="success">Whether the request was successful.</param>
-    void RecordCortexMediatorRequestDuration(string requestType, string requestName, long durationMs, bool success);
+    void RecordServiceRequestDuration(string requestType, string requestName, long durationMs, bool success);
 
     /// <summary>
     /// Gets the current server performance statistics.

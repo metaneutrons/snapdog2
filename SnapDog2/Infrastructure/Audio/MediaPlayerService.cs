@@ -14,10 +14,11 @@
 namespace SnapDog2.Infrastructure.Audio;
 
 using System.Collections.Concurrent;
-using Cortex.Mediator;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
+using SnapDog2.Api.Hubs;
 using SnapDog2.Domain.Abstractions;
-using SnapDog2.Server.Zones.Notifications;
+using SnapDog2.Infrastructure.Integrations.Subsonic;
 using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Models;
 
@@ -29,7 +30,8 @@ public sealed partial class MediaPlayerService(
     IOptions<AudioConfig> config,
     ILogger<MediaPlayerService> logger,
     ILoggerFactory loggerFactory,
-    IServiceScopeFactory serviceScopeFactory,
+    IHubContext<SnapDogHub> hubContext,
+    ISubsonicService subsonicService,
     IEnumerable<ZoneConfig> zoneConfigs
 ) : IMediaPlayerService, IAsyncDisposable, IDisposable
 {
@@ -38,8 +40,10 @@ public sealed partial class MediaPlayerService(
     private readonly ILogger<MediaPlayerService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly ILoggerFactory _loggerFactory =
         loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
-    private readonly IServiceScopeFactory _serviceScopeFactory =
-        serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
+    private readonly IHubContext<SnapDogHub> _hubContext =
+        hubContext ?? throw new ArgumentNullException(nameof(hubContext));
+    private readonly ISubsonicService _subsonicService =
+        subsonicService ?? throw new ArgumentNullException(nameof(subsonicService));
     private readonly IEnumerable<ZoneConfig> _zoneConfigs =
         zoneConfigs ?? throw new ArgumentNullException(nameof(zoneConfigs));
 
@@ -108,26 +112,16 @@ public sealed partial class MediaPlayerService(
             {
                 // For Subsonic tracks, the Url field contains the media ID, not a streamable URL
                 // We need to convert it to a proper stream URL using the SubsonicService
-                var scope = this._serviceScopeFactory.CreateAsyncScope();
-                try
+                var streamUrlResult = await this._subsonicService.GetStreamUrlAsync(trackInfo.Url, cancellationToken);
+                if (!streamUrlResult.IsSuccess)
                 {
-                    var subsonicService = scope.ServiceProvider.GetRequiredService<ISubsonicService>();
-
-                    var streamUrlResult = await subsonicService.GetStreamUrlAsync(trackInfo.Url, cancellationToken);
-                    if (!streamUrlResult.IsSuccess)
-                    {
-                        this._players.TryRemove(zoneIndex, out _);
-                        await player.DisposeAsync();
-                        return Result.Failure($"Failed to get Subsonic stream URL: {streamUrlResult.ErrorMessage}");
-                    }
-
-                    streamUrl = streamUrlResult.Value!;
-                    _logger.LogInformation("Converted Subsonic URL from {OriginalUrl} to {StreamUrl}", trackInfo.Url, streamUrl);
+                    this._players.TryRemove(zoneIndex, out _);
+                    await player.DisposeAsync();
+                    return Result.Failure($"Failed to get Subsonic stream URL: {streamUrlResult.ErrorMessage}");
                 }
-                finally
-                {
-                    await scope.DisposeAsync();
-                }
+
+                streamUrl = streamUrlResult.Value!;
+                _logger.LogInformation("Converted Subsonic URL from {OriginalUrl} to {StreamUrl}", trackInfo.Url, streamUrl);
             }
             else
             {
@@ -141,13 +135,8 @@ public sealed partial class MediaPlayerService(
             {
                 _logger.LogInformation("Playing track {Title} on zone {ZoneIndex} from {StreamUrl}", trackInfo.Title, zoneIndex, streamUrl);
 
-                // Publish playback started notification using scoped mediator
-                using var scope = this._serviceScopeFactory.CreateScope();
-                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-                await mediator.PublishAsync(
-                    new TrackPlaybackStartedNotification(zoneIndex, trackInfo),
-                    cancellationToken
-                );
+                // Publish playback started notification via SignalR
+                await _hubContext.Clients.All.SendAsync("TrackPlaybackStarted", zoneIndex, trackInfo, cancellationToken);
             }
             else
             {
@@ -178,10 +167,8 @@ public sealed partial class MediaPlayerService(
 
                 _logger.LogInformation("PlaybackStopped: {Details}", zoneIndex);
 
-                // Publish playback stopped notification using scoped mediator
-                using var scope = this._serviceScopeFactory.CreateScope();
-                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-                await mediator.PublishAsync(new TrackPlaybackStoppedNotification(zoneIndex), cancellationToken);
+                // Publish playback stopped notification via SignalR
+                await _hubContext.Clients.All.SendAsync("TrackPlaybackStopped", zoneIndex, cancellationToken);
             }
 
             return Result.Success();
@@ -208,10 +195,8 @@ public sealed partial class MediaPlayerService(
             {
                 _logger.LogInformation("PlaybackPaused: {Details}", zoneIndex);
 
-                // Publish playback paused notification using scoped mediator
-                using var scope = this._serviceScopeFactory.CreateScope();
-                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-                await mediator.PublishAsync(new TrackPlaybackPausedNotification(zoneIndex), cancellationToken);
+                // Publish playback paused notification via SignalR
+                await _hubContext.Clients.All.SendAsync("TrackPlaybackPaused", zoneIndex, cancellationToken);
             }
 
             return result;

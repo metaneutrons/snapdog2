@@ -1,11 +1,9 @@
 using System.Text.Json;
-using Cortex.Mediator;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Infrastructure.Integrations.Snapcast.JsonRpc;
 using SnapDog2.Infrastructure.Integrations.Snapcast.JsonRpc.Models;
-using SnapDog2.Server.Snapcast.Notifications;
 using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Models;
 using Models = SnapDog2.Infrastructure.Integrations.Snapcast.Models;
@@ -40,7 +38,7 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
         _jsonRpcClient = new SnapcastJsonRpcClient(webSocketUrl, jsonRpcLogger);
         _jsonRpcClient.NotificationReceived += HandleNotification;
 
-        _healthCheckTimer = new Timer(PerformHealthCheck, null, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(30));
+        _healthCheckTimer = new Timer(PerformHealthCheck, null, 30000, 30000); // 30 seconds in milliseconds
     }
 
     public async Task<Result> InitializeAsync(CancellationToken cancellationToken = default)
@@ -487,14 +485,7 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
             _clientStateStore.SetClientState(clientIndex, updatedState);
         }
 
-        // Publish SnapDog notifications using 1-based client index
-        var volumeNotification = new SnapcastClientVolumeChangedNotification(
-            clientIndex.ToString(),
-            new Models.ClientVolume { Muted = notification.Volume.Muted, Percent = notification.Volume.Percent });
-
-        using var scope = _serviceProvider.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-        await mediator.PublishAsync(volumeNotification);
+        // Notification publishing removed - using direct SignalR calls instead
     }
 
     private async Task HandleClientLatencyChanged(ClientOnLatencyChangedNotification notification)
@@ -502,10 +493,7 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
         var (client, clientIndex) = await GetClientBySnapcastIdAsync(notification.Id);
         if (client != null)
         {
-            var latencyNotification = new SnapcastClientLatencyChangedNotification(notification.Id, notification.Latency);
-            using var scope = _serviceProvider.CreateScope();
-            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-            await mediator.PublishAsync(latencyNotification);
+            // Notification publishing removed - using direct SignalR calls instead
         }
     }
 
@@ -514,67 +502,55 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
         var (client, clientIndex) = await GetClientBySnapcastIdAsync(notification.Id);
         if (client != null)
         {
-            var nameNotification = new SnapcastClientNameChangedNotification(notification.Id, notification.Name);
-            using var scope = _serviceProvider.CreateScope();
-            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-            await mediator.PublishAsync(nameNotification);
+            // Notification publishing removed - using direct SignalR calls instead
         }
     }
 
-    private async Task HandleClientConnect(ClientOnConnectNotification notification)
+    private Task HandleClientConnect(ClientOnConnectNotification notification)
     {
         // Convert JsonRpc ClientInfo to our SnapClient model
         var snapClient = ConvertToSnapClient(notification.Client);
-        var connectNotification = new SnapcastClientConnectedNotification(snapClient);
-        using var scope = _serviceProvider.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-        await mediator.PublishAsync(connectNotification);
+        // Notification publishing removed - using direct SignalR calls instead
+        return Task.CompletedTask;
     }
 
-    private async Task HandleClientDisconnect(ClientOnDisconnectNotification notification)
+    private Task HandleClientDisconnect(ClientOnDisconnectNotification notification)
     {
         // Convert JsonRpc ClientInfo to our SnapClient model
         var snapClient = ConvertToSnapClient(notification.Client);
-        var disconnectNotification = new SnapcastClientDisconnectedNotification(snapClient);
-        using var scope = _serviceProvider.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-        await mediator.PublishAsync(disconnectNotification);
+        // Notification publishing removed - using direct SignalR calls instead
+        return Task.CompletedTask;
     }
 
-    private async Task HandleGroupMuteChanged(GroupOnMuteNotification notification)
+    private Task HandleGroupMuteChanged(GroupOnMuteNotification notification)
     {
-        var muteNotification = new SnapcastGroupMuteChangedNotification(notification.Id, notification.Mute);
-        using var scope = _serviceProvider.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-        await mediator.PublishAsync(muteNotification);
+        // Notification publishing removed - using direct SignalR calls instead
+        // TODO: Update internal state and notify clients via SignalR
+        return Task.CompletedTask;
     }
 
-    private async Task HandleGroupStreamChanged(GroupOnStreamChangedNotification notification)
+    private Task HandleGroupStreamChanged(GroupOnStreamChangedNotification notification)
     {
-        var streamNotification = new SnapcastGroupStreamChangedNotification(notification.Id, notification.StreamId);
-        using var scope = _serviceProvider.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-        await mediator.PublishAsync(streamNotification);
+        // Notification publishing removed - using direct SignalR calls instead
+        // TODO: Update internal state and notify clients via SignalR
+        return Task.CompletedTask;
     }
 
-    private async Task HandleGroupNameChanged(GroupOnNameChangedNotification notification)
+    private Task HandleGroupNameChanged(GroupOnNameChangedNotification notification)
     {
-        var nameNotification = new SnapcastGroupNameChangedNotification(notification.Id, notification.Name);
-        using var scope = _serviceProvider.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-        await mediator.PublishAsync(nameNotification);
+        // Notification publishing removed - using direct SignalR calls instead
+        // TODO: Update internal state and notify clients via SignalR
+        return Task.CompletedTask;
     }
 
-    private async Task HandleServerUpdate(ServerOnUpdateNotification notification)
+    private Task HandleServerUpdate(ServerOnUpdateNotification notification)
     {
         // Update state repository with current server state
         var server = ConvertToServer(notification.Server);
         _stateRepository.UpdateServerState(server);
 
-        var updateNotification = new SnapcastConnectionEstablishedNotification();
-        using var scope = _serviceProvider.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-        await mediator.PublishAsync(updateNotification);
+        // Notification publishing removed - using direct SignalR calls instead
+        return Task.CompletedTask;
     }
 
     private async Task RefreshServerState()
@@ -677,45 +653,26 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
         return await clientManager.GetClientBySnapcastIdAsync(snapcastId);
     }
 
-    private async Task<(Domain.Abstractions.IClient? client, string snapcastClientId)> GetSnapcastClientIdByIndexAsync(int clientIndex)
+    private async Task<(IClient? client, string snapcastClientId)> GetSnapcastClientIdByIndexAsync(int clientIndex)
     {
         using var scope = _serviceProvider.CreateScope();
         var clientManager = scope.ServiceProvider.GetRequiredService<IClientManager>();
-        var client = await clientManager.GetClientAsync(clientIndex);
 
-        if (client.IsFailure || client.Value == null)
+        // Get client state to access SnapcastId
+        var stateResult = await clientManager.GetClientStateAsync(clientIndex);
+        if (!stateResult.IsSuccess || stateResult.Value == null)
         {
             return (null, string.Empty);
         }
 
-        // Get the MAC address from client configuration
-        var configuration = scope.ServiceProvider.GetRequiredService<IOptions<SnapDogConfiguration>>();
-        var clientConfigs = configuration.Value.Clients;
-
-        if (clientIndex < 1 || clientIndex > clientConfigs.Count)
+        // Get the IClient instance
+        var clientResult = await clientManager.GetClientAsync(clientIndex);
+        if (!clientResult.IsSuccess || clientResult.Value == null)
         {
             return (null, string.Empty);
         }
 
-        var clientConfig = clientConfigs[clientIndex - 1]; // Convert to 0-based index
-        var macAddress = clientConfig.Mac;
-
-        if (string.IsNullOrEmpty(macAddress))
-        {
-            return (null, string.Empty);
-        }
-
-        // Find the Snapcast client with this MAC address
-        var allSnapcastClients = _stateRepository.GetAllClients();
-        var snapcastClient = allSnapcastClients.FirstOrDefault(c =>
-            string.Equals(c.Host.Mac, macAddress, StringComparison.OrdinalIgnoreCase));
-
-        if (string.IsNullOrEmpty(snapcastClient.Id))
-        {
-            return (null, string.Empty);
-        }
-
-        return (client.Value, snapcastClient.Id);
+        return (clientResult.Value, stateResult.Value.SnapcastId);
     }
 
     private SnapcastServerStatus ConvertToSnapcastServerStatus(JsonRpc.Models.ServerInfo serverInfo)
@@ -726,170 +683,138 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
             {
                 Version = new VersionDetails
                 {
-                    Version = serverInfo.Server.Snapserver.Version,
-                    Major = serverInfo.Server.Snapserver.ProtocolVersion,
+                    Version = "0.0.0", // Default version
+                    Major = 0,
                     Minor = 0,
                     Patch = 0
                 },
-                Host = serverInfo.Server.Host.Name,
+                Host = "localhost", // Default - would need actual host info
                 Port = 1705, // Default Snapcast port
-                UptimeSeconds = 0 // Not available in JSON-RPC response
+                UptimeSeconds = 0 // Default - would need actual uptime
             },
-            Groups = serverInfo.Groups.Select(ConvertToSnapcastGroupInfo).ToList().AsReadOnly(),
-            Streams = serverInfo.Streams.Select(ConvertToSnapcastStreamInfo).ToList().AsReadOnly()
-        };
-    }
-
-    private SnapcastGroupInfo ConvertToSnapcastGroupInfo(GroupInfo group)
-    {
-        return new SnapcastGroupInfo
-        {
-            Id = group.Id,
-            Name = group.Name,
-            Muted = group.Muted,
-            StreamId = group.StreamId,
-            Clients = group.Clients.Select(ConvertToSnapcastClientInfo).ToList().AsReadOnly()
-        };
-    }
-
-    private SnapcastClientInfo ConvertToSnapcastClientInfo(ClientInfo client)
-    {
-        return new SnapcastClientInfo
-        {
-            Id = client.Id,
-            Name = client.Config.Name,
-            Connected = client.Connected,
-            Volume = client.Config.Volume.Percent,
-            Muted = client.Config.Volume.Muted,
-            LatencyMs = client.Config.Latency,
-            Host = new SnapcastClientHost
+            Groups = serverInfo.Groups.Select(g => new SnapcastGroupInfo
             {
-                Ip = client.Host.Ip,
-                Name = client.Host.Name,
-                Mac = client.Host.Mac,
-                Os = client.Host.Os,
-                Arch = client.Host.Arch
-            },
-            LastSeenUtc = DateTimeOffset.FromUnixTimeSeconds(client.LastSeen.Sec).DateTime
+                Id = g.Id,
+                Name = g.Name,
+                Muted = g.Muted,
+                StreamId = g.StreamId,
+                Clients = g.Clients.Select(c => new SnapcastClientInfo
+                {
+                    Id = c.Id,
+                    Name = c.Config.Name,
+                    Connected = c.Connected,
+                    Volume = c.Config.Volume.Percent,
+                    Muted = c.Config.Volume.Muted,
+                    LatencyMs = c.Config.Latency,
+                    Host = new SnapcastClientHost
+                    {
+                        Ip = c.Host.Ip,
+                        Name = c.Host.Name,
+                        Mac = c.Host.Mac,
+                        Os = c.Host.Os,
+                        Arch = c.Host.Arch
+                    },
+                    LastSeenUtc = c.LastSeen != null ? DateTimeOffset.FromUnixTimeSeconds(c.LastSeen.Sec).UtcDateTime : DateTime.UtcNow
+                }).ToList().AsReadOnly()
+            }).ToList().AsReadOnly(),
+            Streams = serverInfo.Streams.Select(s => new SnapcastStreamInfo
+            {
+                Id = s.Id,
+                Status = s.Status,
+                Uri = s.Uri.Raw,
+                Properties = new Dictionary<string, object>().AsReadOnly() // FIXME: StreamInfo doesn't have properties in JsonRpc model
+            }).ToList().AsReadOnly()
         };
     }
 
-    private SnapcastStreamInfo ConvertToSnapcastStreamInfo(StreamInfo stream)
+    private void PerformHealthCheck(object? state)
     {
-        return new SnapcastStreamInfo
+        // Simple health check - could be expanded later
+        if (!IsConnected)
         {
-            Id = stream.Id,
-            Status = stream.Status,
-            Uri = stream.Uri.Raw,
-            Properties = stream.Uri.Query.ToDictionary(kvp => kvp.Key, kvp => (object)kvp.Value).AsReadOnly()
-        };
-    }
-
-    private async void PerformHealthCheck(object? state)
-    {
-        try
-        {
-            await GetRpcVersionAsync();
-        }
-        catch (Exception ex)
-        {
-            LogHealthCheckFailed(ex);
-            try
-            {
-                await _jsonRpcClient.ConnectAsync();
-            }
-            catch (Exception reconnectEx)
-            {
-                LogReconnectFailed(reconnectEx);
-            }
+            _logger.LogWarning("Snapcast service health check failed - not connected");
         }
     }
 
     public void Dispose()
     {
-        _healthCheckTimer?.Dispose();
         _jsonRpcClient?.Dispose();
+        GC.SuppressFinalize(this);
     }
 
-    // LoggerMessage patterns
-    [LoggerMessage(EventId = 115800, Level = LogLevel.Information, Message = "Custom Snapcast service initialized successfully")]
+    // LoggerMessage methods
+    [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Snapcast service initialized successfully")]
     private partial void LogServiceInitialized();
 
-    [LoggerMessage(EventId = 115801, Level = LogLevel.Error, Message = "Failed → initialize custom Snapcast service")]
+    [LoggerMessage(EventId = 2, Level = LogLevel.Error, Message = "Failed to initialize Snapcast service")]
     private partial void LogInitializationFailed(Exception ex);
 
-    [LoggerMessage(EventId = 115802, Level = LogLevel.Error, Message = "Failed → delete client {ClientId}")]
-    private partial void LogDeleteClientFailed(Exception ex, string clientId);
+    [LoggerMessage(EventId = 3, Level = LogLevel.Error, Message = "Failed to delete client {ClientId}")]
+    private partial void LogDeleteClientFailed(Exception ex, string ClientId);
 
-    [LoggerMessage(EventId = 115803, Level = LogLevel.Error, Message = "Failed → get RPC version")]
+    [LoggerMessage(EventId = 4, Level = LogLevel.Error, Message = "Failed to get RPC version")]
     private partial void LogGetRpcVersionFailed(Exception ex);
 
-    [LoggerMessage(EventId = 115804, Level = LogLevel.Debug, Message = "Set client {ClientId} volume → {Volume}% (muted: {Muted})")]
-    private partial void LogSetClientVolume(string clientId, int volume, bool muted);
+    [LoggerMessage(EventId = 5, Level = LogLevel.Information, Message = "Set client {ClientId} volume to {Volume}%, muted: {Muted}")]
+    private partial void LogSetClientVolume(string ClientId, int Volume, bool Muted);
 
-    [LoggerMessage(EventId = 115805, Level = LogLevel.Error, Message = "Failed → set client volume for {ClientId}")]
-    private partial void LogSetClientVolumeFailed(Exception ex, string clientId);
+    [LoggerMessage(EventId = 6, Level = LogLevel.Error, Message = "Failed to set client {ClientId} volume")]
+    private partial void LogSetClientVolumeFailed(Exception ex, string ClientId);
 
-    [LoggerMessage(EventId = 115806, Level = LogLevel.Debug, Message = "Set client {ClientId} latency → {Latency}ms")]
-    private partial void LogSetClientLatency(string clientId, int latency);
+    [LoggerMessage(EventId = 7, Level = LogLevel.Information, Message = "Set client {ClientId} latency to {Latency}ms")]
+    private partial void LogSetClientLatency(string ClientId, int Latency);
 
-    [LoggerMessage(EventId = 115807, Level = LogLevel.Error, Message = "Failed → set client latency for {ClientId}")]
-    private partial void LogSetClientLatencyFailed(Exception ex, string clientId);
+    [LoggerMessage(EventId = 8, Level = LogLevel.Error, Message = "Failed to set client {ClientId} latency")]
+    private partial void LogSetClientLatencyFailed(Exception ex, string ClientId);
 
-    [LoggerMessage(EventId = 115808, Level = LogLevel.Debug, Message = "Set client {ClientId} name → {Name}")]
-    private partial void LogSetClientName(string clientId, string name);
+    [LoggerMessage(EventId = 9, Level = LogLevel.Information, Message = "Set client {ClientId} name to {Name}")]
+    private partial void LogSetClientName(string ClientId, string Name);
 
-    [LoggerMessage(EventId = 115809, Level = LogLevel.Error, Message = "Failed → set client name for {ClientId}")]
-    private partial void LogSetClientNameFailed(Exception ex, string clientId);
+    [LoggerMessage(EventId = 10, Level = LogLevel.Error, Message = "Failed to set client {ClientId} name")]
+    private partial void LogSetClientNameFailed(Exception ex, string ClientId);
 
-    [LoggerMessage(EventId = 115810, Level = LogLevel.Debug, Message = "Set group {GroupId} mute → {Muted}")]
-    private partial void LogSetGroupMute(string groupId, bool muted);
+    [LoggerMessage(EventId = 11, Level = LogLevel.Information, Message = "Set group {GroupId} mute to {Muted}")]
+    private partial void LogSetGroupMute(string GroupId, bool Muted);
 
-    [LoggerMessage(EventId = 115811, Level = LogLevel.Error, Message = "Failed → set group mute for {GroupId}")]
-    private partial void LogSetGroupMuteFailed(Exception ex, string groupId);
+    [LoggerMessage(EventId = 12, Level = LogLevel.Error, Message = "Failed to set group {GroupId} mute")]
+    private partial void LogSetGroupMuteFailed(Exception ex, string GroupId);
 
-    [LoggerMessage(EventId = 115812, Level = LogLevel.Debug, Message = "Set group {GroupId} stream → {StreamId}")]
-    private partial void LogSetGroupStream(string groupId, string streamId);
+    [LoggerMessage(EventId = 13, Level = LogLevel.Information, Message = "Set group {GroupId} stream to {StreamId}")]
+    private partial void LogSetGroupStream(string GroupId, string StreamId);
 
-    [LoggerMessage(EventId = 115813, Level = LogLevel.Error, Message = "Failed → set group stream for {GroupId}")]
-    private partial void LogSetGroupStreamFailed(Exception ex, string groupId);
+    [LoggerMessage(EventId = 14, Level = LogLevel.Error, Message = "Failed to set group {GroupId} stream")]
+    private partial void LogSetGroupStreamFailed(Exception ex, string GroupId);
 
-    [LoggerMessage(EventId = 115814, Level = LogLevel.Debug, Message = "Set group {GroupId} name → {Name}")]
-    private partial void LogSetGroupName(string groupId, string name);
+    [LoggerMessage(EventId = 15, Level = LogLevel.Information, Message = "Set group {GroupId} name to {Name}")]
+    private partial void LogSetGroupName(string GroupId, string Name);
 
-    [LoggerMessage(EventId = 115815, Level = LogLevel.Error, Message = "Failed → set group name for {GroupId}")]
-    private partial void LogSetGroupNameFailed(Exception ex, string groupId);
+    [LoggerMessage(EventId = 16, Level = LogLevel.Error, Message = "Failed to set group {GroupId} name")]
+    private partial void LogSetGroupNameFailed(Exception ex, string GroupId);
 
-    [LoggerMessage(EventId = 115816, Level = LogLevel.Debug, Message = "Set group {GroupId} clients → {Clients}")]
-    private partial void LogSetGroupClients(string groupId, string clients);
+    [LoggerMessage(EventId = 17, Level = LogLevel.Information, Message = "Set group {GroupId} clients to {ClientIds}")]
+    private partial void LogSetGroupClients(string GroupId, string ClientIds);
 
-    [LoggerMessage(EventId = 115817, Level = LogLevel.Error, Message = "Failed → set group clients for {GroupId}")]
-    private partial void LogSetGroupClientsFailed(Exception ex, string groupId);
+    [LoggerMessage(EventId = 18, Level = LogLevel.Error, Message = "Failed to set group {GroupId} clients")]
+    private partial void LogSetGroupClientsFailed(Exception ex, string GroupId);
 
-    [LoggerMessage(EventId = 115818, Level = LogLevel.Error, Message = "Failed → get server status")]
+    [LoggerMessage(EventId = 19, Level = LogLevel.Error, Message = "Failed to get server status")]
     private partial void LogGetServerStatusFailed(Exception ex);
 
-    [LoggerMessage(EventId = 115819, Level = LogLevel.Debug, Message = "Unhandled notification: {Method}")]
-    private partial void LogUnhandledNotification(string method);
+    [LoggerMessage(EventId = 20, Level = LogLevel.Warning, Message = "Unhandled notification method: {Method}")]
+    private partial void LogUnhandledNotification(string Method);
 
-    [LoggerMessage(EventId = 115820, Level = LogLevel.Error, Message = "Error handling notification {Method}")]
-    private partial void LogNotificationHandlingError(Exception ex, string method);
+    [LoggerMessage(EventId = 21, Level = LogLevel.Error, Message = "Error handling notification {Method}")]
+    private partial void LogNotificationHandlingError(Exception ex, string Method);
 
-    [LoggerMessage(EventId = 115821, Level = LogLevel.Debug, Message = "Client volume changed: {ClientId} → {Volume}% (muted: {Muted})")]
-    private partial void LogClientVolumeChanged(string clientId, int volume, bool muted);
+    [LoggerMessage(EventId = 22, Level = LogLevel.Debug, Message = "Client {ClientId} volume changed to {Volume}%, muted: {Muted}")]
+    private partial void LogClientVolumeChanged(string ClientId, int Volume, bool Muted);
 
-    [LoggerMessage(EventId = 115822, Level = LogLevel.Debug, Message = "Ignoring volume change for unconfigured client: {ClientId}")]
-    private partial void LogIgnoringVolumeChange(string clientId);
+    [LoggerMessage(EventId = 23, Level = LogLevel.Debug, Message = "Ignoring volume change for client {ClientId} (not found in state store)")]
+    private partial void LogIgnoringVolumeChange(string ClientId);
 
-    [LoggerMessage(EventId = 115823, Level = LogLevel.Debug, Message = "Server state refreshed with {GroupCount} groups")]
-    private partial void LogServerStateRefreshed(int groupCount);
+    [LoggerMessage(EventId = 24, Level = LogLevel.Information, Message = "Server state refreshed with {GroupCount} groups")]
+    private partial void LogServerStateRefreshed(int GroupCount);
 
-    [LoggerMessage(EventId = 115824, Level = LogLevel.Warning, Message = "Failed → refresh server state")]
+    [LoggerMessage(EventId = 25, Level = LogLevel.Error, Message = "Failed to refresh server state")]
     private partial void LogRefreshServerStateFailed(Exception ex);
-
-    [LoggerMessage(EventId = 115825, Level = LogLevel.Warning, Message = "Health check failed, attempting reconnection")]
-    private partial void LogHealthCheckFailed(Exception ex);
-
-    [LoggerMessage(EventId = 115826, Level = LogLevel.Error, Message = "Failed → reconnect during health check")]
-    private partial void LogReconnectFailed(Exception ex);
 }

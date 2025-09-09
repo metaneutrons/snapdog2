@@ -27,19 +27,22 @@ public partial class KnxService : IKnxService
 {
     private readonly ILogger<KnxService> _logger;
     private readonly SnapDogConfiguration _configuration;
-    private readonly IZoneService _zoneService;
+    // TODO: Re-add IZoneService dependency in Phase 3 when ZoneService is properly registered
+    // private readonly IZoneService _zoneService;
     private readonly IClientService _clientService;
     private bool _disposed;
 
     public KnxService(
         ILogger<KnxService> logger,
         IOptions<SnapDogConfiguration> configuration,
-        IZoneService zoneService,
+        // TODO: Re-add IZoneService parameter in Phase 3 when ZoneService is properly registered
+        // IZoneService zoneService,
         IClientService clientService)
     {
         _logger = logger;
         _configuration = configuration.Value;
-        _zoneService = zoneService;
+        // TODO: Re-add IZoneService assignment in Phase 3 when ZoneService is properly registered
+        // _zoneService = zoneService;
         _clientService = clientService;
     }
 
@@ -47,7 +50,7 @@ public partial class KnxService : IKnxService
 
     public ServiceStatus Status { get; private set; } = ServiceStatus.Stopped;
 
-    public async Task<Result> InitializeAsync(CancellationToken cancellationToken = default)
+    public Task<Result> InitializeAsync(CancellationToken cancellationToken = default)
     {
         try
         {
@@ -59,17 +62,17 @@ public partial class KnxService : IKnxService
             Status = ServiceStatus.Running;
 
             LogKnxInitialized();
-            return Result.Success();
+            return Task.FromResult(Result.Success());
         }
         catch (Exception ex)
         {
             LogKnxInitializationFailed(ex.Message);
             Status = ServiceStatus.Error;
-            return Result.Failure($"KNX initialization failed: {ex.Message}");
+            return Task.FromResult(Result.Failure($"KNX initialization failed: {ex.Message}"));
         }
     }
 
-    public async Task<Result> StopAsync(CancellationToken cancellationToken = default)
+    public Task<Result> StopAsync(CancellationToken cancellationToken = default)
     {
         try
         {
@@ -79,55 +82,55 @@ public partial class KnxService : IKnxService
             Status = ServiceStatus.Stopped;
 
             LogKnxStopped();
-            return Result.Success();
+            return Task.FromResult(Result.Success());
         }
         catch (Exception ex)
         {
             LogKnxStopFailed(ex.Message);
-            return Result.Failure($"KNX stop failed: {ex.Message}");
+            return Task.FromResult(Result.Failure($"KNX stop failed: {ex.Message}"));
         }
     }
 
-    public async Task<Result> SendStatusAsync(string statusId, int targetId, object value, CancellationToken cancellationToken = default)
+    public Task<Result> SendStatusAsync(string statusId, int targetId, object value, CancellationToken cancellationToken = default)
     {
         // TODO: Implement KNX status sending
         LogKnxStatusSent(statusId, targetId, value?.ToString() ?? "null");
-        return Result.Success();
+        return Task.FromResult(Result.Success());
     }
 
-    public async Task<Result> WriteGroupValueAsync(string groupAddress, object value, CancellationToken cancellationToken = default)
+    public Task<Result> WriteGroupValueAsync(string groupAddress, object value, CancellationToken cancellationToken = default)
     {
         // TODO: Implement KNX group value writing
         LogKnxGroupValueWritten(groupAddress, value?.ToString() ?? "null");
-        return Result.Success();
+        return Task.FromResult(Result.Success());
     }
 
-    public async Task<Result<object>> ReadGroupValueAsync(string groupAddress, CancellationToken cancellationToken = default)
+    public Task<Result<object>> ReadGroupValueAsync(string groupAddress, CancellationToken cancellationToken = default)
     {
         // TODO: Implement KNX group value reading
         LogKnxGroupValueRead(groupAddress);
-        return Result<object>.Success(new object());
+        return Task.FromResult(Result<object>.Success(new object()));
     }
 
-    public async Task<Result> PublishClientStatusAsync<T>(string clientIndex, string eventType, T payload, CancellationToken cancellationToken = default)
+    public Task<Result> PublishClientStatusAsync<T>(string clientIndex, string eventType, T payload, CancellationToken cancellationToken = default)
     {
         // TODO: Implement KNX client status publishing
         LogKnxClientStatusPublished(clientIndex, eventType);
-        return Result.Success();
+        return Task.FromResult(Result.Success());
     }
 
-    public async Task<Result> PublishZoneStatusAsync<T>(int zoneIndex, string eventType, T payload, CancellationToken cancellationToken = default)
+    public Task<Result> PublishZoneStatusAsync<T>(int zoneIndex, string eventType, T payload, CancellationToken cancellationToken = default)
     {
         // TODO: Implement KNX zone status publishing
         LogKnxZoneStatusPublished(zoneIndex, eventType);
-        return Result.Success();
+        return Task.FromResult(Result.Success());
     }
 
-    public async Task<Result> PublishGlobalStatusAsync<T>(string eventType, T payload, CancellationToken cancellationToken = default)
+    public Task<Result> PublishGlobalStatusAsync<T>(string eventType, T payload, CancellationToken cancellationToken = default)
     {
         // TODO: Implement KNX global status publishing
         LogKnxGlobalStatusPublished(eventType);
-        return Result.Success();
+        return Task.FromResult(Result.Success());
     }
 
     public void Dispose()

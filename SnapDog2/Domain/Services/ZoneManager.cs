@@ -22,8 +22,6 @@ using SnapDog2.Api.Models;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Infrastructure.Audio;
 using SnapDog2.Infrastructure.Integrations.Snapcast.Models;
-using SnapDog2.Server.Playlists.Queries;
-using SnapDog2.Server.Zones.Notifications;
 using SnapDog2.Shared.Attributes;
 using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Enums;
@@ -42,7 +40,6 @@ public partial class ZoneManager(
     IServiceScopeFactory serviceScopeFactory,
     IZoneStateStore zoneStateStore,
     IClientStateStore clientStateStore,
-    IStatusFactory statusFactory,
     IPlaylistManager playlistManager,
     IHubContext<SnapDogHub> hubContext,
     IOptions<SnapDogConfiguration> configuration
@@ -54,7 +51,6 @@ public partial class ZoneManager(
     private readonly IMediaPlayerService _mediaPlayerService = mediaPlayerService;
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
     private readonly IZoneStateStore _zoneStateStore = zoneStateStore;
-    private readonly IStatusFactory _statusFactory = statusFactory;
     private readonly IPlaylistManager _playlistManager = playlistManager;
     private readonly IHubContext<SnapDogHub> _hubContext = hubContext;
     private readonly IOptions<SnapDogConfiguration> _configuration = configuration;
@@ -120,7 +116,6 @@ public partial class ZoneManager(
                         this._serviceScopeFactory,
                         this._zoneStateStore,
                         clientStateStore,
-                        this._statusFactory,
                         this._playlistManager,
                         this._hubContext,
                         this._logger,
@@ -292,7 +287,6 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly IZoneStateStore _zoneStateStore;
     private readonly IClientStateStore _clientStateStore;
-    private readonly IStatusFactory _statusFactory;
     private readonly IPlaylistManager _playlistManager;
     private readonly IHubContext<SnapDogHub> _hubContext;
     private readonly ILogger _logger;
@@ -314,7 +308,6 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         IServiceScopeFactory serviceScopeFactory,
         IZoneStateStore zoneStateStore,
         IClientStateStore clientStateStore,
-        IStatusFactory statusFactory,
         IPlaylistManager playlistManager,
         IHubContext<SnapDogHub> hubContext,
         ILogger logger,
@@ -329,7 +322,6 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         this._serviceScopeFactory = serviceScopeFactory;
         this._zoneStateStore = zoneStateStore;
         this._clientStateStore = clientStateStore;
-        this._statusFactory = statusFactory;
         this._playlistManager = playlistManager;
         this._hubContext = hubContext;
         this._logger = logger;
@@ -496,7 +488,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 return Result.Failure($"Failed to get playlist tracks: {tracksResult.ErrorMessage}");
             }
 
-            var playlist = new PlaylistWithTracks(playlistInfoResult.Value, tracksResult.Value);
+            var playlist = new PlaylistWithTracks(playlistInfoResult.Value!, tracksResult.Value!);
             if (playlist?.Tracks == null || playlist.Tracks.Count == 0)
             {
                 return Result.Failure("Playlist has no tracks");
@@ -860,7 +852,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 return Result.Failure($"Failed to get playlist tracks: {tracksResult.ErrorMessage}");
             }
 
-            var playlist = new PlaylistWithTracks(playlistInfoResult.Value, tracksResult.Value);
+            var playlist = new PlaylistWithTracks(playlistInfoResult.Value!, tracksResult.Value!);
             if (playlist?.Tracks == null || playlist.Tracks.Count == 0)
             {
                 return Result.Failure("Playlist has no tracks");
@@ -973,7 +965,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             return Result.Failure($"Failed to get playlist tracks: {tracksResult.ErrorMessage}");
         }
 
-        var playlist = new PlaylistWithTracks(playlistInfoResult.Value, tracksResult.Value);
+        var playlist = new PlaylistWithTracks(playlistInfoResult.Value!, tracksResult.Value!);
         if (playlist?.Tracks == null || playlist.Tracks.Count == 0)
         {
             return Result.Failure("Playlist has no tracks");
@@ -1896,26 +1888,17 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     public async Task PublishPlaybackStateStatusAsync(PlaybackState playbackState)
     {
-        var notification = this._statusFactory.CreateZonePlaybackStateChangedNotification(
-            this._zoneIndex,
-            playbackState
-        );
-
-        await this._hubContext.Clients.All.SendAsync("ZoneNotification", notification).ConfigureAwait(false);
+        await this._hubContext.Clients.All.SendAsync("ZonePlaybackStateChanged", this._zoneIndex, playbackState).ConfigureAwait(false);
     }
 
     public async Task PublishVolumeStatusAsync(int volume)
     {
-        var notification = this._statusFactory.CreateZoneVolumeChangedNotification(this._zoneIndex, volume);
-
-        await this._hubContext.Clients.All.SendAsync("ZoneNotification", notification).ConfigureAwait(false);
+        await this._hubContext.Clients.All.SendAsync("ZoneVolumeChanged", this._zoneIndex, volume).ConfigureAwait(false);
     }
 
     public async Task PublishMuteStatusAsync(bool isMuted)
     {
-        var notification = this._statusFactory.CreateZoneMuteChangedNotification(this._zoneIndex, isMuted);
-
-        await this._hubContext.Clients.All.SendAsync("ZoneNotification", notification).ConfigureAwait(false);
+        await this._hubContext.Clients.All.SendAsync("ZoneMuteChanged", this._zoneIndex, isMuted).ConfigureAwait(false);
     }
 
     #endregion
@@ -1945,61 +1928,42 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         {
 
 
-            // Publish complete metadata notification
-            var metadataNotification = new SnapDog2.Server.Zones.Notifications.ZoneTrackMetadataChangedNotification
+            // Publish complete metadata notification using direct SignalR call
+            var trackInfo = new TrackInfo
             {
-                ZoneIndex = this._zoneIndex,
-                TrackInfo = new TrackInfo
-                {
-                    Index = track.Index,
-                    Title = track.Title,
-                    Artist = track.Artist,
-                    Album = track.Album ?? "Unknown", // TODO: Why can Album be null?
-                    Source = track.Source,
-                    Url = track.Url,
-                    DurationMs = track.DurationMs,
-                    PositionMs = track.PositionMs,
-                    Progress = track.Progress,
-                    IsPlaying = track.IsPlaying,
-                    CoverArtUrl = track.CoverArtUrl,
-                    Genre = track.Genre,
-                    TrackNumber = track.TrackNumber,
-                    Year = track.Year,
-                    Rating = track.Rating,
-                    TimestampUtc = track.TimestampUtc
-                }
+                Index = track.Index,
+                Title = track.Title,
+                Artist = track.Artist,
+                Album = track.Album ?? "Unknown", // TODO: Why can Album be null?
+                Source = track.Source,
+                Url = track.Url,
+                DurationMs = track.DurationMs,
+                PositionMs = track.PositionMs,
+                Progress = track.Progress,
+                IsPlaying = track.IsPlaying,
+                CoverArtUrl = track.CoverArtUrl,
+                Genre = track.Genre,
+                TrackNumber = track.TrackNumber,
+                Year = track.Year,
+                Rating = track.Rating,
+                TimestampUtc = track.TimestampUtc
             };
-            await this._hubContext.Clients.All.SendAsync("ZoneNotification", metadataNotification).ConfigureAwait(false);
+            await this._hubContext.Clients.All.SendAsync("ZoneTrackMetadataChanged", this._zoneIndex, trackInfo).ConfigureAwait(false);
 
-            // Publish individual field notifications
+            // Publish individual field notifications using direct SignalR calls
             if (!string.IsNullOrEmpty(track.Title))
             {
-                var titleNotification = new ZoneTrackTitleChangedNotification
-                {
-                    ZoneIndex = this._zoneIndex,
-                    Title = track.Title
-                };
-                await this._hubContext.Clients.All.SendAsync("ZoneNotification", titleNotification).ConfigureAwait(false);
+                await this._hubContext.Clients.All.SendAsync("ZoneTrackTitleChanged", this._zoneIndex, track.Title).ConfigureAwait(false);
             }
 
             if (!string.IsNullOrEmpty(track.Artist))
             {
-                var artistNotification = new ZoneTrackArtistChangedNotification
-                {
-                    ZoneIndex = this._zoneIndex,
-                    Artist = track.Artist
-                };
-                await this._hubContext.Clients.All.SendAsync("ZoneNotification", artistNotification).ConfigureAwait(false);
+                await this._hubContext.Clients.All.SendAsync("ZoneTrackArtistChanged", this._zoneIndex, track.Artist).ConfigureAwait(false);
             }
 
             if (!string.IsNullOrEmpty(track.Album))
             {
-                var albumNotification = new ZoneTrackAlbumChangedNotification
-                {
-                    ZoneIndex = this._zoneIndex,
-                    Album = track.Album
-                };
-                await this._hubContext.Clients.All.SendAsync("ZoneNotification", albumNotification).ConfigureAwait(false);
+                await this._hubContext.Clients.All.SendAsync("ZoneTrackAlbumChanged", this._zoneIndex, track.Album).ConfigureAwait(false);
             }
         }
         catch (Exception ex)

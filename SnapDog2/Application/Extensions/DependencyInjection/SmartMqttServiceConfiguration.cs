@@ -28,8 +28,9 @@ public static class SmartMqttServiceConfiguration
     /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddSmartMqttPublishing(this IServiceCollection services)
     {
+        // TODO: Re-enable after IMqttService implementation in Phase 3.2.4
         // Register the smart MQTT publisher
-        services.AddSingleton<ISmartMqttPublisher, SmartMqttPublisher>();
+        // services.AddSingleton<ISmartMqttPublisher, SmartMqttPublisher>();
 
         // TODO: Re-enable after Phase 3.2 completion
         // Register the unified notification handlers

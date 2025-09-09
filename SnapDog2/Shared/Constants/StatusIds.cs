@@ -13,92 +13,64 @@
 //
 namespace SnapDog2.Shared.Constants;
 
-using SnapDog2.Server.Clients.Notifications;
-using SnapDog2.Server.Global.Notifications;
-using SnapDog2.Server.Zones.Notifications;
-using SnapDog2.Shared.Attributes;
-
 /// <summary>
 /// Strongly-typed constants for StatusId values.
-/// These are derived from the StatusIdAttribute on notification classes,
-/// ensuring compile-time safety and eliminating hardcoded strings.
+/// These constants preserve the original StatusId values from deleted notification classes
+/// for blueprint validation and API contract compatibility.
 /// </summary>
 public static class StatusIds
 {
     // Client Status IDs
-    public static readonly string ClientVolumeStatus = StatusIdAttribute.GetStatusId<ClientVolumeChangedNotification>();
-    public static readonly string ClientMuteStatus = StatusIdAttribute.GetStatusId<ClientMuteChangedNotification>();
-    public static readonly string ClientLatencyStatus =
-        StatusIdAttribute.GetStatusId<ClientLatencyChangedNotification>();
-    public static readonly string ClientConnected =
-        StatusIdAttribute.GetStatusId<ClientConnectionChangedNotification>();
-    public static readonly string ClientZoneStatus =
-        StatusIdAttribute.GetStatusId<ClientZoneAssignmentChangedNotification>();
-    public static readonly string ClientState = StatusIdAttribute.GetStatusId<ClientStateChangedNotification>();
-    public static readonly string ClientName = StatusIdAttribute.GetStatusId<ClientNameChangedNotification>();
+    public static readonly string ClientVolumeStatus = "CLIENT_VOLUME_CHANGED";
+    public static readonly string ClientMuteStatus = "CLIENT_MUTE_CHANGED";
+    public static readonly string ClientLatencyStatus = "CLIENT_LATENCY_CHANGED";
+    public static readonly string ClientConnected = "CLIENT_CONNECTION_CHANGED";
+    public static readonly string ClientZoneStatus = "CLIENT_ZONE_ASSIGNMENT_CHANGED";
+    public static readonly string ClientState = "CLIENT_STATE_CHANGED";
+    public static readonly string ClientName = "CLIENT_NAME_CHANGED";
 
     // Client Status Notification IDs (Blueprint Compliance - Status Publishing)
-    public static readonly string ClientVolumeStatusPublish =
-        StatusIdAttribute.GetStatusId<ClientVolumeStatusNotification>();
-    public static readonly string ClientMuteStatusPublish =
-        StatusIdAttribute.GetStatusId<ClientMuteStatusNotification>();
-    public static readonly string ClientLatencyStatusPublish =
-        StatusIdAttribute.GetStatusId<ClientLatencyStatusNotification>();
-    public static readonly string ClientZoneStatusPublish =
-        StatusIdAttribute.GetStatusId<ClientZoneStatusNotification>();
-    public static readonly string ClientConnectionStatusPublish =
-        StatusIdAttribute.GetStatusId<ClientConnectionStatusNotification>();
-    public static readonly string ClientStateStatusPublish = StatusIdAttribute.GetStatusId<ClientStateNotification>();
+    public static readonly string ClientVolumeStatusPublish = "CLIENT_VOLUME_STATUS";
+    public static readonly string ClientMuteStatusPublish = "CLIENT_MUTE_STATUS";
+    public static readonly string ClientLatencyStatusPublish = "CLIENT_LATENCY_STATUS";
+    public static readonly string ClientZoneStatusPublish = "CLIENT_ZONE_STATUS";
+    public static readonly string ClientConnectionStatusPublish = "CLIENT_CONNECTION_STATUS";
+    public static readonly string ClientStateStatusPublish = "CLIENT_STATE_STATUS";
 
     // Zone Status IDs
-    public static readonly string PlaybackState = StatusIdAttribute.GetStatusId<SnapDog2.Server.Zones.Notifications.ZonePlaybackStateChangedNotification>();
-    public static readonly string VolumeStatus = StatusIdAttribute.GetStatusId<SnapDog2.Server.Zones.Notifications.ZoneVolumeChangedNotification>();
-    public static readonly string MuteStatus = StatusIdAttribute.GetStatusId<SnapDog2.Server.Zones.Notifications.ZoneMuteChangedNotification>();
-    public static readonly string TrackIndex = StatusIdAttribute.GetStatusId<ZoneTrackChangedNotification>();
-    public static readonly string PlaylistIndex = StatusIdAttribute.GetStatusId<ZonePlaylistChangedNotification>();
-    public static readonly string TrackRepeatStatus =
-        StatusIdAttribute.GetStatusId<ZoneTrackRepeatChangedNotification>();
-    public static readonly string PlaylistRepeatStatus =
-        StatusIdAttribute.GetStatusId<ZonePlaylistRepeatChangedNotification>();
-    public static readonly string PlaylistShuffleStatus =
-        StatusIdAttribute.GetStatusId<ZoneShuffleModeChangedNotification>();
+    public static readonly string PlaybackState = "ZONE_PLAYBACK_STATE_CHANGED";
+    public static readonly string VolumeStatus = "ZONE_VOLUME_CHANGED";
+    public static readonly string MuteStatus = "ZONE_MUTE_CHANGED";
+    public static readonly string TrackIndex = "ZONE_TRACK_CHANGED";
+    public static readonly string PlaylistIndex = "ZONE_PLAYLIST_CHANGED";
+    public static readonly string TrackRepeatStatus = "ZONE_TRACK_REPEAT_CHANGED";
+    public static readonly string PlaylistRepeatStatus = "ZONE_PLAYLIST_REPEAT_CHANGED";
+    public static readonly string PlaylistShuffleStatus = "ZONE_SHUFFLE_MODE_CHANGED";
 
     // Track Metadata Status IDs (Static information about media files)
-    public static readonly string TrackMetadata = StatusIdAttribute.GetStatusId<ZoneTrackMetadataChangedNotification>();
-    public static readonly string TrackMetadataDuration =
-        StatusIdAttribute.GetStatusId<ZoneTrackDurationChangedNotification>();
-    public static readonly string TrackMetadataTitle =
-        StatusIdAttribute.GetStatusId<ZoneTrackTitleChangedNotification>();
-    public static readonly string TrackMetadataArtist =
-        StatusIdAttribute.GetStatusId<ZoneTrackArtistChangedNotification>();
-    public static readonly string TrackMetadataAlbum =
-        StatusIdAttribute.GetStatusId<ZoneTrackAlbumChangedNotification>();
-    public static readonly string TrackMetadataCover =
-        StatusIdAttribute.GetStatusId<ZoneTrackCoverChangedNotification>();
+    public static readonly string TrackMetadata = "ZONE_TRACK_METADATA_CHANGED";
+    public static readonly string TrackMetadataDuration = "ZONE_TRACK_DURATION_CHANGED";
+    public static readonly string TrackMetadataTitle = "ZONE_TRACK_TITLE_CHANGED";
+    public static readonly string TrackMetadataArtist = "ZONE_TRACK_ARTIST_CHANGED";
+    public static readonly string TrackMetadataAlbum = "ZONE_TRACK_ALBUM_CHANGED";
+    public static readonly string TrackMetadataCover = "ZONE_TRACK_COVER_CHANGED";
 
     // Track Playback Status IDs (Dynamic playback state)
-    public static readonly string TrackPositionStatus =
-        StatusIdAttribute.GetStatusId<ZoneTrackPositionChangedNotification>();
-    public static readonly string TrackPlayingStatus =
-        StatusIdAttribute.GetStatusId<ZoneTrackPlayingStatusChangedNotification>();
-    public static readonly string TrackProgressStatus =
-        StatusIdAttribute.GetStatusId<ZoneTrackProgressChangedNotification>();
+    public static readonly string TrackPositionStatus = "ZONE_TRACK_POSITION_CHANGED";
+    public static readonly string TrackPlayingStatus = "ZONE_TRACK_PLAYING_STATUS_CHANGED";
+    public static readonly string TrackProgressStatus = "ZONE_TRACK_PROGRESS_CHANGED";
 
     // Playlist Information Status IDs
-    public static readonly string PlaylistInfo = StatusIdAttribute.GetStatusId<ZonePlaylistInfoChangedNotification>();
+    public static readonly string PlaylistInfo = "ZONE_PLAYLIST_INFO_CHANGED";
 
     // Command Response Status IDs
-    public static readonly string CommandStatus = StatusIdAttribute.GetStatusId<CommandStatusNotification>();
-    public static readonly string CommandError = StatusIdAttribute.GetStatusId<CommandErrorNotification>();
+    public static readonly string CommandStatus = "COMMAND_STATUS";
+    public static readonly string CommandError = "COMMAND_ERROR";
 
     // Global Status IDs
-    public static readonly string VersionInfo = StatusIdAttribute.GetStatusId<SnapDog2.Server.Global.Notifications.VersionInfoChangedNotification>();
-    public static readonly string SystemStatus = StatusIdAttribute.GetStatusId<SnapDog2.Server.Global.Notifications.SystemStatusChangedNotification>();
-    public static readonly string ServerStats = StatusIdAttribute.GetStatusId<SnapDog2.Server.Global.Notifications.ServerStatsChangedNotification>();
-    public static readonly string SystemError = StatusIdAttribute.GetStatusId<SnapDog2.Server.Global.Notifications.SystemErrorNotification>();
-    public static readonly string ZonesInfo = StatusIdAttribute.GetStatusId<SnapDog2.Server.Global.Notifications.ZonesInfoChangedNotification>();
-
-    // Zone Status Notification IDs (Blueprint Compliance - Status Publishing)
-    // Note: These obsolete status notifications have been removed as they don't match blueprint specification
-    // The correct status IDs are defined above without the ZONE_ prefix
+    public static readonly string VersionInfo = "VERSION_INFO_CHANGED";
+    public static readonly string SystemStatus = "SYSTEM_STATUS_CHANGED";
+    public static readonly string ServerStats = "SERVER_STATS_CHANGED";
+    public static readonly string SystemError = "SYSTEM_ERROR";
+    public static readonly string ZonesInfo = "ZONES_INFO_CHANGED";
 }
