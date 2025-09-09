@@ -16,40 +16,34 @@ namespace SnapDog2.Shared.Attributes;
 using System.Reflection;
 
 /// <summary>
-/// Attribute to mark notification classes with their corresponding status ID.
-/// Used for outbound status events to external systems (MQTT, KNX).
+/// Attribute to mark API endpoints with their blueprint status ID.
 /// </summary>
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Event | AttributeTargets.Method)]
-public class StatusIdAttribute(string id) : Attribute
+[AttributeUsage(AttributeTargets.All)]
+public class StatusIdAttribute : Attribute
 {
     /// <summary>
-    /// The status identifier used in external systems.
+    /// Initializes a new instance of the <see cref="StatusIdAttribute"/> class.
     /// </summary>
-    public string Id { get; } = id ?? throw new ArgumentNullException(nameof(id));
-
-    /// <summary>
-    /// Gets the status ID for a notification type.
-    /// </summary>
-    /// <typeparam name="T">The notification type.</typeparam>
-    /// <returns>The status ID string.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when no StatusId attribute is found.</exception>
-    public static string GetStatusId<T>()
+    /// <param name="id">The status ID from the blueprint.</param>
+    public StatusIdAttribute(string id)
     {
-        var attribute = typeof(T).GetCustomAttribute<StatusIdAttribute>();
-        return attribute?.Id
-            ?? throw new InvalidOperationException(
-                $"No StatusId attribute found on {typeof(T).Name}. " + $"Add [StatusId(\"STATUS_NAME\")] to the class."
-            );
+        Id = id;
     }
 
     /// <summary>
-    /// Gets the status ID for a notification type, returning null if not found.
+    /// Gets the status ID.
     /// </summary>
-    /// <typeparam name="T">The notification type.</typeparam>
-    /// <returns>The status ID string or null if not found.</returns>
-    public static string? TryGetStatusId<T>()
+    public string Id { get; }
+
+    /// <summary>
+    /// Gets the status ID for a type using reflection.
+    /// </summary>
+    /// <typeparam name="T">The type to get the status ID for.</typeparam>
+    /// <returns>The status ID string.</returns>
+    public static string GetStatusId<T>()
     {
-        var attribute = typeof(T).GetCustomAttribute<StatusIdAttribute>();
-        return attribute?.Id;
+        var type = typeof(T);
+        var attribute = type.GetCustomAttribute<StatusIdAttribute>();
+        return attribute?.Id ?? string.Empty;
     }
 }

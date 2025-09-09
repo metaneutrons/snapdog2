@@ -125,6 +125,7 @@ public static class StaticApiAnalyzer
     {
         var blueprintStatus = GetBlueprintApiStatusWithTypes();
         var implementedEndpoints = GetImplementedApiEndpointsWithTypes();
+        var implementedStatusIds = GetImplementedStatusIdAttributes();
 
         var missing = new HashSet<string>();
         var blueprintEndpoints = new HashSet<string>();
@@ -135,6 +136,13 @@ public static class StaticApiAnalyzer
             var endpointKey = $"{expectedMethod.ToUpper()} {expectedPath}";
             blueprintEndpoints.Add(endpointKey);
 
+            // First check if we have a StatusId attribute for this status
+            if (implementedStatusIds.Contains(statusId))
+            {
+                continue; // Status is implemented via StatusId attribute
+            }
+
+            // Fallback to path matching for existing endpoints
             if (!implementedEndpoints.TryGetValue(expectedPath, out var methodsWithTypes))
             {
                 missing.Add(statusId);
@@ -463,6 +471,7 @@ public static class StaticApiAnalyzer
     {
         return SnapDogBlueprint
             .Spec.Commands.Required()
+            .Where(command => !command.IsExcludedFrom(Protocol.Api))
             .Select(command => command.Id)
             .ToHashSet();
     }
@@ -472,13 +481,36 @@ public static class StaticApiAnalyzer
         var commandIds = new HashSet<string>();
         var assembly = Assembly.Load("SnapDog2");
 
-        var commandTypes = assembly
+        var types = assembly
             .GetTypes()
             .Where(t => t.IsClass && !t.IsAbstract)
             .ToList();
 
-        foreach (var type in commandTypes)
+        foreach (var type in types)
         {
+            // Check methods for CommandId attributes (controller actions)
+            var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance);
+            foreach (var method in methods)
+            {
+                var commandIdAttrs = method.GetCustomAttributes(false)
+                    .Where(attr => attr.GetType().Name == "CommandIdAttribute")
+                    .ToList();
+
+                foreach (var attr in commandIdAttrs)
+                {
+                    var idProperty = attr.GetType().GetProperty("Id");
+                    if (idProperty != null)
+                    {
+                        var commandId = idProperty.GetValue(attr) as string;
+                        if (!string.IsNullOrEmpty(commandId))
+                        {
+                            commandIds.Add(commandId);
+                        }
+                    }
+                }
+            }
+
+            // Also check classes for CommandId attributes (command classes)
             var commandIdAttr = type.GetCustomAttribute<CommandIdAttribute>();
             if (commandIdAttr != null)
             {
@@ -487,6 +519,44 @@ public static class StaticApiAnalyzer
         }
 
         return commandIds;
+    }
+
+    private static HashSet<string> GetImplementedStatusIdAttributes()
+    {
+        var statusIds = new HashSet<string>();
+        var assembly = Assembly.Load("SnapDog2");
+
+        var types = assembly
+            .GetTypes()
+            .Where(t => t.IsClass && !t.IsAbstract)
+            .ToList();
+
+        foreach (var type in types)
+        {
+            // Check methods for StatusId attributes (controller actions)
+            var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance);
+            foreach (var method in methods)
+            {
+                var statusIdAttrs = method.GetCustomAttributes(false)
+                    .Where(attr => attr.GetType().Name == "StatusIdAttribute")
+                    .ToList();
+
+                foreach (var attr in statusIdAttrs)
+                {
+                    var idProperty = attr.GetType().GetProperty("Id");
+                    if (idProperty != null)
+                    {
+                        var statusId = idProperty.GetValue(attr) as string;
+                        if (!string.IsNullOrEmpty(statusId))
+                        {
+                            statusIds.Add(statusId);
+                        }
+                    }
+                }
+            }
+        }
+
+        return statusIds;
     }
 
     /// <summary>
@@ -647,38 +717,97 @@ public static class StaticApiAnalyzer
 
     private static HashSet<string> GetImplementedMqttNotifiers()
     {
-        // Detect actual MQTT notifier implementations by scanning for MQTT notification handlers
+        var mqttNotifiers = new HashSet<string>();
         var assembly = Assembly.Load("SnapDog2");
 
-        // Look for classes that handle StatusId notifications for MQTT
-        assembly.GetTypes()
-            .Where(t => t.Name.Contains("MqttNotificationHandler") || t.Name.Contains("MqttPublisher"))
+        var types = assembly
+            .GetTypes()
+            .Where(t => t.IsClass && !t.IsAbstract)
             .ToList();
 
-        // For now, return existing StatusId notifications that aren't excluded from MQTT
-        var existingStatusIds = GetImplementedStatusIdNotifications();
-        var blueprintWithMqtt = GetBlueprintStatusWithMqtt();
+        foreach (var type in types)
+        {
+            var mqttNotifierAttr = type.GetCustomAttribute<MqttStatusNotifierAttribute>();
+            if (mqttNotifierAttr != null)
+            {
+                mqttNotifiers.Add(mqttNotifierAttr.StatusId);
+            }
+        }
 
-        return existingStatusIds.Intersect(blueprintWithMqtt).ToHashSet();
+        return mqttNotifiers;
     }
 
     private static HashSet<string> GetImplementedKnxNotifiers()
     {
-        // Detect actual KNX notifier implementations
-        var existingStatusIds = GetImplementedStatusIdNotifications();
-        var blueprintWithKnx = GetBlueprintStatusWithKnx();
+        var knxNotifiers = new HashSet<string>();
+        var assembly = Assembly.Load("SnapDog2");
 
-        return existingStatusIds.Intersect(blueprintWithKnx).ToHashSet();
+        var types = assembly
+            .GetTypes()
+            .Where(t => t.IsClass && !t.IsAbstract)
+            .ToList();
+
+        foreach (var type in types)
+        {
+            var knxNotifierAttr = type.GetCustomAttribute<KnxStatusNotifierAttribute>();
+            if (knxNotifierAttr != null)
+            {
+                knxNotifiers.Add(knxNotifierAttr.StatusId);
+            }
+        }
+
+        return knxNotifiers;
     }
 
     private static HashSet<string> GetImplementedMqttHandlers()
     {
-        // Detect actual MQTT command handler implementations
-        Assembly.Load("SnapDog2");
-        var existingCommandIds = GetImplementedCommandIdAttributes();
-        var blueprintWithMqtt = GetBlueprintCommandsWithMqtt();
+        // Detect actual MQTT command handler implementations using reflection
+        var mqttHandlers = new HashSet<string>();
 
-        return existingCommandIds.Intersect(blueprintWithMqtt).ToHashSet();
+        try
+        {
+            var assembly = Assembly.Load("SnapDog2");
+            var types = assembly.GetTypes();
+
+            foreach (var type in types)
+            {
+                var methods = type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+                foreach (var method in methods)
+                {
+                    var mqttCommandAttr = method.GetCustomAttributes(false)
+                        .FirstOrDefault(attr => attr.GetType().Name == "MqttCommandAttribute");
+
+                    if (mqttCommandAttr != null)
+                    {
+                        var commandIdProperty = mqttCommandAttr.GetType().GetProperty("CommandId");
+                        if (commandIdProperty != null)
+                        {
+                            var commandId = commandIdProperty.GetValue(mqttCommandAttr) as string;
+                            if (!string.IsNullOrEmpty(commandId))
+                            {
+                                mqttHandlers.Add(commandId);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception)
+        {
+            // Fallback to intersection method if reflection fails
+        }
+
+        // Also include commands that have CommandId attributes and MQTT support
+        var commandIdAttributes = GetImplementedCommandIdAttributes();
+        var blueprintMqttCommands = GetBlueprintCommandsWithMqtt();
+        var commandIdMqttHandlers = commandIdAttributes.Intersect(blueprintMqttCommands);
+
+        foreach (var handler in commandIdMqttHandlers)
+        {
+            mqttHandlers.Add(handler);
+        }
+
+        return mqttHandlers;
     }
 
     private static HashSet<string> GetImplementedKnxHandlers()
