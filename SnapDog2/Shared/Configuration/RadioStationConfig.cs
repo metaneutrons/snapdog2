@@ -38,4 +38,12 @@ public class RadioStationConfig
     [Required]
     [Url]
     public string Url { get; set; } = null!;
+
+    /// <summary>
+    /// Optional Cover URL of the radio station.
+    /// Maps to: SNAPDOG_RADIO_X_COVER_URL
+    /// </summary>
+    [Env(Key = "COVER_URL")]
+    [Url]
+    public string CoverUrl { get; set; } = null!;
 }

@@ -1,16 +1,3 @@
-//
-// SnapDog
-// The Snapcast-based Smart Home Audio System with MQTT & KNX integration
-// Copyright (C) 2025 Fabian Schmieder
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <https://www.gnu.org/licenses/>.
-//
 namespace SnapDog2.Api.Controllers.V1;
 
 using Microsoft.AspNetCore.Authorization;
@@ -28,15 +15,15 @@ using SnapDog2.Shared.Attributes;
 [Tags("Media")]
 public partial class MediaController : ControllerBase
 {
-    private readonly ISubsonicService _subsonicService;
+    private readonly IPlaylistManager _playlistManager;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MediaController"/> class.
     /// </summary>
-    /// <param name="subsonicService">The Subsonic service.</param>
-    public MediaController(ISubsonicService subsonicService)
+    /// <param name="playlistManager">The playlist manager.</param>
+    public MediaController(IPlaylistManager playlistManager)
     {
-        _subsonicService = subsonicService;
+        _playlistManager = playlistManager;
     }
 
     /// <summary>
@@ -47,7 +34,7 @@ public partial class MediaController : ControllerBase
     [ProducesResponseType<object[]>(StatusCodes.Status200OK)]
     public async Task<ActionResult<object[]>> GetPlaylists()
     {
-        var result = await _subsonicService.GetPlaylistsAsync(CancellationToken.None);
+        var result = await _playlistManager.GetAllPlaylistsAsync();
         if (result.IsFailure)
         {
             return Problem(result.ErrorMessage);
@@ -68,25 +55,23 @@ public partial class MediaController : ControllerBase
             return NotFound($"Invalid playlist index: {playlistIndex}");
         }
 
-        var playlistsResult = await _subsonicService.GetPlaylistsAsync(CancellationToken.None);
-        if (playlistsResult.IsFailure || playlistsResult.Value == null)
-        {
-            return NotFound($"No playlists available");
-        }
-
-        var playlists = playlistsResult.Value.ToArray();
-        if (index < 1 || index > playlists.Length)
+        var playlistResult = await _playlistManager.GetPlaylistAsync(index);
+        if (playlistResult.IsFailure)
         {
             return NotFound($"Playlist {playlistIndex} not found");
         }
 
-        var playlist = playlists[index - 1]; // Convert 1-based to 0-based
-        var result = await _subsonicService.GetPlaylistAsync(playlist.SubsonicPlaylistId, CancellationToken.None);
-        if (result.IsFailure)
+        var tracksResult = await _playlistManager.GetPlaylistTracksAsync(index);
+        if (tracksResult.IsFailure)
         {
-            return NotFound($"Playlist {playlistIndex} not found");
+            return NotFound($"Playlist {playlistIndex} tracks not found");
         }
-        return Ok(result.Value);
+
+        return Ok(new
+        {
+            info = playlistResult.Value,
+            tracks = tracksResult.Value
+        });
     }
 
     /// <summary>
@@ -102,25 +87,12 @@ public partial class MediaController : ControllerBase
             return NotFound($"Invalid playlist index: {playlistIndex}");
         }
 
-        var playlistsResult = await _subsonicService.GetPlaylistsAsync(CancellationToken.None);
-        if (playlistsResult.IsFailure || playlistsResult.Value == null)
-        {
-            return NotFound($"No playlists available");
-        }
-
-        var playlists = playlistsResult.Value.ToArray();
-        if (index < 1 || index > playlists.Length)
-        {
-            return NotFound($"Playlist {playlistIndex} not found");
-        }
-
-        var playlist = playlists[index - 1]; // Convert 1-based to 0-based
-        var result = await _subsonicService.GetPlaylistAsync(playlist.SubsonicPlaylistId, CancellationToken.None);
+        var result = await _playlistManager.GetPlaylistTracksAsync(index);
         if (result.IsFailure)
         {
             return NotFound($"Playlist {playlistIndex} not found");
         }
-        return Ok(result.Value?.Tracks?.ToArray() ?? Array.Empty<object>());
+        return Ok(result.Value?.ToArray() ?? Array.Empty<object>());
     }
 
     /// <summary>
@@ -136,26 +108,13 @@ public partial class MediaController : ControllerBase
             return NotFound($"Invalid playlist or track index");
         }
 
-        var playlistsResult = await _subsonicService.GetPlaylistsAsync(CancellationToken.None);
-        if (playlistsResult.IsFailure || playlistsResult.Value == null)
-        {
-            return NotFound($"No playlists available");
-        }
-
-        var playlists = playlistsResult.Value.ToArray();
-        if (pIndex < 1 || pIndex > playlists.Length)
+        var result = await _playlistManager.GetPlaylistTracksAsync(pIndex);
+        if (result.IsFailure || result.Value == null)
         {
             return NotFound($"Playlist {playlistIndex} not found");
         }
 
-        var playlist = playlists[pIndex - 1]; // Convert 1-based to 0-based
-        var playlistResult = await _subsonicService.GetPlaylistAsync(playlist.SubsonicPlaylistId, CancellationToken.None);
-        if (playlistResult.IsFailure || playlistResult.Value?.Tracks == null)
-        {
-            return NotFound($"Playlist {playlistIndex} not found");
-        }
-
-        var tracks = playlistResult.Value.Tracks.ToArray();
+        var tracks = result.Value.ToArray();
         if (tIndex < 1 || tIndex > tracks.Length)
         {
             return NotFound($"Track {trackIndex} not found in playlist {playlistIndex}");
@@ -173,24 +132,26 @@ public partial class MediaController : ControllerBase
     [ProducesResponseType<object>(StatusCodes.Status200OK)]
     public async Task<ActionResult<object>> GetTrackInfo(string trackIndex)
     {
-        // Try to find track in playlists since there's no direct GetTrack method
-        var playlistsResult = await _subsonicService.GetPlaylistsAsync(CancellationToken.None);
+        // Search through all playlists for the track
+        var playlistsResult = await _playlistManager.GetAllPlaylistsAsync();
         if (playlistsResult.IsFailure || playlistsResult.Value == null)
         {
             return NotFound($"Track {trackIndex} not found");
         }
 
-        // Search through all playlists for the track
         foreach (var playlist in playlistsResult.Value)
         {
-            var playlistResult = await _subsonicService.GetPlaylistAsync(playlist.SubsonicPlaylistId, CancellationToken.None);
-            if (playlistResult.IsSuccess && playlistResult.Value != null && playlistResult.Value.Tracks != null)
+            if (playlist.Index.HasValue)
             {
-                var track = playlistResult.Value.Tracks.FirstOrDefault(t =>
-                    t.Title == trackIndex || (t.Url != null && t.Url.Contains(trackIndex)));
-                if (track != null)
+                var tracksResult = await _playlistManager.GetPlaylistTracksAsync(playlist.Index.Value);
+                if (tracksResult.IsSuccess && tracksResult.Value != null)
                 {
-                    return Ok(track);
+                    var track = tracksResult.Value.FirstOrDefault(t =>
+                        t.Title == trackIndex || (t.Url != null && t.Url.Contains(trackIndex)));
+                    if (track != null)
+                    {
+                        return Ok(track);
+                    }
                 }
             }
         }

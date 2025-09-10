@@ -123,6 +123,7 @@ public partial class PlaylistManager : IPlaylistManager
                         Artist = "Radio Station",
                         Album = "Radio Stations",
                         Url = station.Url,
+                        CoverArtUrl = station.CoverUrl,
                         Source = "radio"
                     })
                     .ToList();
