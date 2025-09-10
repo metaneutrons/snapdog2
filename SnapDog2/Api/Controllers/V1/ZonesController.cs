@@ -451,8 +451,12 @@ public partial class ZonesController(
     public async Task<IActionResult> PlayPlaylistTrack(int zoneIndex, int playlistIndex, [FromBody] int trackIndex)
     {
         var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex);
+        if (zoneResult.IsFailure || zoneResult.Value == null)
+        {
+            return NotFound($"Zone {zoneIndex} not found");
+        }
 
-        var result = await Task.FromResult(Result.Success()); // TODO: Implement PlayPlaylistTrackAsync in service layer
+        var result = await zoneResult.Value.PlayTrackAsync(trackIndex, CancellationToken.None);
 
         // Send KNX command
         await _knxCommandHandler.HandleCommandAsync("TRACK_PLAY_PLAYLIST", zoneIndex, new { playlistIndex, trackIndex });
@@ -499,8 +503,12 @@ public partial class ZonesController(
     public async Task<IActionResult> SetTrackRepeat(int zoneIndex, [FromBody] bool repeat)
     {
         var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex);
+        if (zoneResult.IsFailure || zoneResult.Value == null)
+        {
+            return NotFound($"Zone {zoneIndex} not found");
+        }
 
-        var result = await Task.FromResult(Result.Success()); // TODO: Implement SetTrackRepeatAsync in service layer
+        var result = await zoneResult.Value.SetTrackRepeatAsync(repeat, CancellationToken.None);
 
         // Send KNX command
         await _knxCommandHandler.HandleCommandAsync("TRACK_REPEAT", zoneIndex, repeat);
@@ -515,8 +523,12 @@ public partial class ZonesController(
     public async Task<IActionResult> ToggleTrackRepeat(int zoneIndex)
     {
         var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex);
+        if (zoneResult.IsFailure || zoneResult.Value == null)
+        {
+            return NotFound($"Zone {zoneIndex} not found");
+        }
 
-        var result = await Task.FromResult(Result.Success()); // TODO: Implement ToggleTrackRepeatAsync in service layer
+        var result = await zoneResult.Value.ToggleTrackRepeatAsync(CancellationToken.None);
 
         // Send KNX command
         await _knxCommandHandler.HandleCommandAsync("TRACK_REPEAT_TOGGLE", zoneIndex);
@@ -531,8 +543,12 @@ public partial class ZonesController(
     public async Task<IActionResult> SetPlaylistShuffle(int zoneIndex, [FromBody] bool shuffle)
     {
         var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex);
+        if (zoneResult.IsFailure || zoneResult.Value == null)
+        {
+            return NotFound($"Zone {zoneIndex} not found");
+        }
 
-        var result = await Task.FromResult(Result.Success()); // TODO: Implement SetShuffleAsync in service layer
+        var result = await zoneResult.Value.SetPlaylistShuffleAsync(shuffle, CancellationToken.None);
         return result.IsSuccess ? NoContent() : Problem(result.ErrorMessage);
     }
 
@@ -543,8 +559,12 @@ public partial class ZonesController(
     public async Task<IActionResult> TogglePlaylistShuffle(int zoneIndex)
     {
         var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex);
+        if (zoneResult.IsFailure || zoneResult.Value == null)
+        {
+            return NotFound($"Zone {zoneIndex} not found");
+        }
 
-        var result = await Task.FromResult(Result.Success()); // TODO: Implement ToggleShuffleAsync in service layer
+        var result = await zoneResult.Value.TogglePlaylistShuffleAsync(CancellationToken.None);
         return result.IsSuccess ? NoContent() : Problem(result.ErrorMessage);
     }
 
@@ -555,8 +575,12 @@ public partial class ZonesController(
     public async Task<IActionResult> SetPlaylistRepeat(int zoneIndex, [FromBody] bool repeat)
     {
         var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex);
+        if (zoneResult.IsFailure || zoneResult.Value == null)
+        {
+            return NotFound($"Zone {zoneIndex} not found");
+        }
 
-        var result = await Task.FromResult(Result.Success()); // TODO: Implement SetRepeatAsync in service layer
+        var result = await zoneResult.Value.SetPlaylistRepeatAsync(repeat, CancellationToken.None);
 
         // Send KNX command
         await _knxCommandHandler.HandleCommandAsync("PLAYLIST_REPEAT", zoneIndex, repeat);
@@ -571,8 +595,12 @@ public partial class ZonesController(
     public async Task<IActionResult> TogglePlaylistRepeat(int zoneIndex)
     {
         var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex);
+        if (zoneResult.IsFailure || zoneResult.Value == null)
+        {
+            return NotFound($"Zone {zoneIndex} not found");
+        }
 
-        var result = await Task.FromResult(Result.Success()); // TODO: Implement ToggleRepeatAsync in service layer
+        var result = await zoneResult.Value.TogglePlaylistRepeatAsync(CancellationToken.None);
 
         // Send KNX command
         await _knxCommandHandler.HandleCommandAsync("PLAYLIST_REPEAT_TOGGLE", zoneIndex);
@@ -587,8 +615,13 @@ public partial class ZonesController(
     public async Task<IActionResult> SetControl(int zoneIndex, [FromBody] object controlState)
     {
         var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex);
+        if (zoneResult.IsFailure || zoneResult.Value == null)
+        {
+            return NotFound($"Zone {zoneIndex} not found");
+        }
 
-        var result = await Task.FromResult(Result.Success()); // TODO: Implement SetControlAsync in service layer
+        // Generic control endpoint - for now just validate zone exists and return success
+        var result = Result.Success();
         return result.IsSuccess ? NoContent() : Problem(result.ErrorMessage);
     }
 
@@ -601,7 +634,7 @@ public partial class ZonesController(
     public async Task<ActionResult<string>> GetZoneName(int zoneIndex)
     {
         var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex, CancellationToken.None);
-        if (zoneResult.IsFailure)
+        if (zoneResult.IsFailure || zoneResult.Value == null)
         {
             return NotFound($"Zone {zoneIndex} not found");
         }
@@ -614,7 +647,7 @@ public partial class ZonesController(
     public async Task<ActionResult<string>> GetTrackTitle(int zoneIndex)
     {
         var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex, CancellationToken.None);
-        if (zoneResult.IsFailure)
+        if (zoneResult.IsFailure || zoneResult.Value == null)
         {
             return NotFound($"Zone {zoneIndex} not found");
         }
@@ -627,7 +660,7 @@ public partial class ZonesController(
     public async Task<ActionResult<bool>> GetTrackPlayingStatus(int zoneIndex)
     {
         var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex, CancellationToken.None);
-        if (zoneResult.IsFailure)
+        if (zoneResult.IsFailure || zoneResult.Value == null)
         {
             return NotFound($"Zone {zoneIndex} not found");
         }
@@ -640,7 +673,7 @@ public partial class ZonesController(
     public async Task<ActionResult<string>> GetPlaylistName(int zoneIndex)
     {
         var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex, CancellationToken.None);
-        if (zoneResult.IsFailure)
+        if (zoneResult.IsFailure || zoneResult.Value == null)
         {
             return NotFound($"Zone {zoneIndex} not found");
         }
@@ -653,7 +686,7 @@ public partial class ZonesController(
     public async Task<ActionResult<string>> GetPlaybackState(int zoneIndex)
     {
         var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex, CancellationToken.None);
-        if (zoneResult.IsFailure)
+        if (zoneResult.IsFailure || zoneResult.Value == null)
         {
             return NotFound($"Zone {zoneIndex} not found");
         }
@@ -666,7 +699,7 @@ public partial class ZonesController(
     public async Task<ActionResult<object>> GetTrackStatus(int zoneIndex)
     {
         var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex, CancellationToken.None);
-        if (zoneResult.IsFailure)
+        if (zoneResult.IsFailure || zoneResult.Value == null)
         {
             return NotFound($"Zone {zoneIndex} not found");
         }
@@ -679,7 +712,7 @@ public partial class ZonesController(
     public async Task<ActionResult<object>> GetTrackMetadata(int zoneIndex)
     {
         var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex, CancellationToken.None);
-        if (zoneResult.IsFailure)
+        if (zoneResult.IsFailure || zoneResult.Value == null)
         {
             return NotFound($"Zone {zoneIndex} not found");
         }
@@ -692,7 +725,7 @@ public partial class ZonesController(
     public async Task<ActionResult<long>> GetTrackDuration(int zoneIndex)
     {
         var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex, CancellationToken.None);
-        if (zoneResult.IsFailure)
+        if (zoneResult.IsFailure || zoneResult.Value == null)
         {
             return NotFound($"Zone {zoneIndex} not found");
         }
@@ -705,7 +738,7 @@ public partial class ZonesController(
     public async Task<ActionResult<string>> GetTrackArtist(int zoneIndex)
     {
         var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex, CancellationToken.None);
-        if (zoneResult.IsFailure)
+        if (zoneResult.IsFailure || zoneResult.Value == null)
         {
             return NotFound($"Zone {zoneIndex} not found");
         }
@@ -718,7 +751,7 @@ public partial class ZonesController(
     public async Task<ActionResult<string>> GetTrackAlbum(int zoneIndex)
     {
         var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex, CancellationToken.None);
-        if (zoneResult.IsFailure)
+        if (zoneResult.IsFailure || zoneResult.Value == null)
         {
             return NotFound($"Zone {zoneIndex} not found");
         }
@@ -731,7 +764,7 @@ public partial class ZonesController(
     public async Task<ActionResult<string>> GetTrackCover(int zoneIndex)
     {
         var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex, CancellationToken.None);
-        if (zoneResult.IsFailure)
+        if (zoneResult.IsFailure || zoneResult.Value == null)
         {
             return NotFound($"Zone {zoneIndex} not found");
         }
@@ -744,7 +777,7 @@ public partial class ZonesController(
     public async Task<ActionResult<long>> GetTrackPosition(int zoneIndex)
     {
         var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex, CancellationToken.None);
-        if (zoneResult.IsFailure)
+        if (zoneResult.IsFailure || zoneResult.Value == null)
         {
             return NotFound($"Zone {zoneIndex} not found");
         }
@@ -757,7 +790,7 @@ public partial class ZonesController(
     public async Task<ActionResult<float>> GetTrackProgress(int zoneIndex)
     {
         var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex, CancellationToken.None);
-        if (zoneResult.IsFailure)
+        if (zoneResult.IsFailure || zoneResult.Value == null)
         {
             return NotFound($"Zone {zoneIndex} not found");
         }
@@ -770,7 +803,7 @@ public partial class ZonesController(
     public async Task<ActionResult<bool>> GetTrackRepeat(int zoneIndex)
     {
         var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex, CancellationToken.None);
-        if (zoneResult.IsFailure)
+        if (zoneResult.IsFailure || zoneResult.Value == null)
         {
             return NotFound($"Zone {zoneIndex} not found");
         }
@@ -783,7 +816,7 @@ public partial class ZonesController(
     public async Task<ActionResult<object>> GetPlaylistStatus(int zoneIndex)
     {
         var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex, CancellationToken.None);
-        if (zoneResult.IsFailure)
+        if (zoneResult.IsFailure || zoneResult.Value == null)
         {
             return NotFound($"Zone {zoneIndex} not found");
         }
@@ -796,7 +829,7 @@ public partial class ZonesController(
     public async Task<ActionResult<object>> GetPlaylistInfo(int zoneIndex)
     {
         var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex, CancellationToken.None);
-        if (zoneResult.IsFailure)
+        if (zoneResult.IsFailure || zoneResult.Value == null)
         {
             return NotFound($"Zone {zoneIndex} not found");
         }
@@ -809,7 +842,7 @@ public partial class ZonesController(
     public async Task<ActionResult<int>> GetPlaylistCount(int zoneIndex)
     {
         var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex, CancellationToken.None);
-        if (zoneResult.IsFailure)
+        if (zoneResult.IsFailure || zoneResult.Value == null)
         {
             return NotFound($"Zone {zoneIndex} not found");
         }
@@ -822,7 +855,7 @@ public partial class ZonesController(
     public async Task<ActionResult<bool>> GetPlaylistShuffle(int zoneIndex)
     {
         var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex, CancellationToken.None);
-        if (zoneResult.IsFailure)
+        if (zoneResult.IsFailure || zoneResult.Value == null)
         {
             return NotFound($"Zone {zoneIndex} not found");
         }
@@ -835,7 +868,7 @@ public partial class ZonesController(
     public async Task<ActionResult<string>> GetPlaylistRepeat(int zoneIndex)
     {
         var zoneResult = await _zoneManager.GetZoneAsync(zoneIndex, CancellationToken.None);
-        if (zoneResult.IsFailure)
+        if (zoneResult.IsFailure || zoneResult.Value == null)
         {
             return NotFound($"Zone {zoneIndex} not found");
         }

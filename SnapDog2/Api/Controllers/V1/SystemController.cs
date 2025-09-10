@@ -17,6 +17,7 @@ using System.Diagnostics;
 using System.Reflection;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SnapDog2.Domain.Abstractions;
 using SnapDog2.Shared.Attributes;
 
 /// <summary>
@@ -29,6 +30,21 @@ using SnapDog2.Shared.Attributes;
 [Tags("System")]
 public class SystemController : ControllerBase
 {
+    private readonly ICommandStatusService _commandStatusService;
+    private readonly IErrorTrackingService _errorTrackingService;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SystemController"/> class.
+    /// </summary>
+    /// <param name="commandStatusService">The command status service.</param>
+    /// <param name="errorTrackingService">The error tracking service.</param>
+    public SystemController(
+        ICommandStatusService commandStatusService,
+        IErrorTrackingService errorTrackingService)
+    {
+        _commandStatusService = commandStatusService;
+        _errorTrackingService = errorTrackingService;
+    }
     /// <summary>
     /// Gets command status.
     /// </summary>
@@ -37,12 +53,16 @@ public class SystemController : ControllerBase
     [ProducesResponseType<object>(StatusCodes.Status200OK)]
     public async Task<ActionResult<object>> GetCommandStatus()
     {
-        return await Task.FromResult(Ok(new
+        var status = await _commandStatusService.GetStatusAsync();
+        var errors = await _commandStatusService.GetRecentErrorsAsync();
+
+        return Ok(new
         {
-            status = "ready",
-            lastCommand = "",
-            timestamp = DateTimeOffset.UtcNow
-        }));
+            status = status,
+            lastCommand = errors.Length > 0 ? "error" : "",
+            timestamp = DateTimeOffset.UtcNow,
+            errorCount = errors.Length
+        });
     }
 
     /// <summary>
@@ -53,12 +73,16 @@ public class SystemController : ControllerBase
     [ProducesResponseType<object>(StatusCodes.Status200OK)]
     public async Task<ActionResult<object>> GetCommandError()
     {
-        return await Task.FromResult(Ok(new
+        var errors = await _commandStatusService.GetRecentErrorsAsync();
+        var latestError = errors.Length > 0 ? errors[0] : "";
+
+        return Ok(new
         {
-            error = "",
+            error = latestError,
             timestamp = DateTimeOffset.UtcNow,
-            command = ""
-        }));
+            command = latestError.Length > 0 ? "unknown" : "",
+            totalErrors = errors.Length
+        });
     }
 
     /// <summary>
@@ -69,12 +93,17 @@ public class SystemController : ControllerBase
     [ProducesResponseType<object>(StatusCodes.Status200OK)]
     public async Task<ActionResult<object>> GetSystemError()
     {
-        return await Task.FromResult(Ok(new
+        var latestError = await _errorTrackingService.GetLatestErrorAsync();
+
+        return Ok(new
         {
-            error = "",
-            timestamp = DateTimeOffset.UtcNow,
-            component = ""
-        }));
+            error = latestError?.Message ?? "",
+            timestamp = latestError?.TimestampUtc ?? DateTime.UtcNow,
+            component = latestError?.Component ?? "",
+            errorCode = latestError?.ErrorCode ?? "",
+            level = latestError?.Level ?? 0,
+            context = latestError?.Context ?? ""
+        });
     }
 
     /// <summary>

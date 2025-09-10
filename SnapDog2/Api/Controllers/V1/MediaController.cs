@@ -63,7 +63,25 @@ public partial class MediaController : ControllerBase
     [ProducesResponseType<object>(StatusCodes.Status200OK)]
     public async Task<ActionResult<object>> GetPlaylistInfo(string playlistIndex)
     {
-        var result = await _subsonicService.GetPlaylistAsync(playlistIndex, CancellationToken.None);
+        if (!int.TryParse(playlistIndex, out var index))
+        {
+            return NotFound($"Invalid playlist index: {playlistIndex}");
+        }
+
+        var playlistsResult = await _subsonicService.GetPlaylistsAsync(CancellationToken.None);
+        if (playlistsResult.IsFailure || playlistsResult.Value == null)
+        {
+            return NotFound($"No playlists available");
+        }
+
+        var playlists = playlistsResult.Value.ToArray();
+        if (index < 1 || index > playlists.Length)
+        {
+            return NotFound($"Playlist {playlistIndex} not found");
+        }
+
+        var playlist = playlists[index - 1]; // Convert 1-based to 0-based
+        var result = await _subsonicService.GetPlaylistAsync(playlist.SubsonicPlaylistId, CancellationToken.None);
         if (result.IsFailure)
         {
             return NotFound($"Playlist {playlistIndex} not found");
@@ -79,7 +97,25 @@ public partial class MediaController : ControllerBase
     [ProducesResponseType<object[]>(StatusCodes.Status200OK)]
     public async Task<ActionResult<object[]>> GetPlaylistTracks(string playlistIndex)
     {
-        var result = await _subsonicService.GetPlaylistAsync(playlistIndex, CancellationToken.None);
+        if (!int.TryParse(playlistIndex, out var index))
+        {
+            return NotFound($"Invalid playlist index: {playlistIndex}");
+        }
+
+        var playlistsResult = await _subsonicService.GetPlaylistsAsync(CancellationToken.None);
+        if (playlistsResult.IsFailure || playlistsResult.Value == null)
+        {
+            return NotFound($"No playlists available");
+        }
+
+        var playlists = playlistsResult.Value.ToArray();
+        if (index < 1 || index > playlists.Length)
+        {
+            return NotFound($"Playlist {playlistIndex} not found");
+        }
+
+        var playlist = playlists[index - 1]; // Convert 1-based to 0-based
+        var result = await _subsonicService.GetPlaylistAsync(playlist.SubsonicPlaylistId, CancellationToken.None);
         if (result.IsFailure)
         {
             return NotFound($"Playlist {playlistIndex} not found");
@@ -95,18 +131,37 @@ public partial class MediaController : ControllerBase
     [ProducesResponseType<object>(StatusCodes.Status200OK)]
     public async Task<ActionResult<object>> GetPlaylistTrackInfo(string playlistIndex, string trackIndex)
     {
-        var playlistResult = await _subsonicService.GetPlaylistAsync(playlistIndex, CancellationToken.None);
-        if (playlistResult.IsFailure)
+        if (!int.TryParse(playlistIndex, out var pIndex) || !int.TryParse(trackIndex, out var tIndex))
+        {
+            return NotFound($"Invalid playlist or track index");
+        }
+
+        var playlistsResult = await _subsonicService.GetPlaylistsAsync(CancellationToken.None);
+        if (playlistsResult.IsFailure || playlistsResult.Value == null)
+        {
+            return NotFound($"No playlists available");
+        }
+
+        var playlists = playlistsResult.Value.ToArray();
+        if (pIndex < 1 || pIndex > playlists.Length)
         {
             return NotFound($"Playlist {playlistIndex} not found");
         }
 
-        var track = playlistResult.Value?.Tracks?.FirstOrDefault(t => t.Title == trackIndex);
-        if (track == null)
+        var playlist = playlists[pIndex - 1]; // Convert 1-based to 0-based
+        var playlistResult = await _subsonicService.GetPlaylistAsync(playlist.SubsonicPlaylistId, CancellationToken.None);
+        if (playlistResult.IsFailure || playlistResult.Value?.Tracks == null)
+        {
+            return NotFound($"Playlist {playlistIndex} not found");
+        }
+
+        var tracks = playlistResult.Value.Tracks.ToArray();
+        if (tIndex < 1 || tIndex > tracks.Length)
         {
             return NotFound($"Track {trackIndex} not found in playlist {playlistIndex}");
         }
 
+        var track = tracks[tIndex - 1]; // Convert 1-based to 0-based
         return Ok(track);
     }
 
