@@ -141,17 +141,14 @@ public partial class MediaController : ControllerBase
 
         foreach (var playlist in playlistsResult.Value)
         {
-            if (playlist.Index.HasValue)
+            var tracksResult = await _playlistManager.GetPlaylistTracksAsync(playlist.Index);
+            if (tracksResult.IsSuccess && tracksResult.Value != null)
             {
-                var tracksResult = await _playlistManager.GetPlaylistTracksAsync(playlist.Index.Value);
-                if (tracksResult.IsSuccess && tracksResult.Value != null)
+                var track = tracksResult.Value.FirstOrDefault(t =>
+                    t.Title == trackIndex || (t.Url != null && t.Url.Contains(trackIndex)));
+                if (track != null)
                 {
-                    var track = tracksResult.Value.FirstOrDefault(t =>
-                        t.Title == trackIndex || (t.Url != null && t.Url.Contains(trackIndex)));
-                    if (track != null)
-                    {
-                        return Ok(track);
-                    }
+                    return Ok(track);
                 }
             }
         }

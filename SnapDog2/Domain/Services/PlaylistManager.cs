@@ -152,7 +152,7 @@ public partial class PlaylistManager : IPlaylistManager
                 }
 
                 var targetPlaylist = subsonicPlaylists[subsonicIndex];
-                var playlistResult = await this._subsonicService.GetPlaylistAsync(targetPlaylist.Index?.ToString() ?? "");
+                var playlistResult = await this._subsonicService.GetPlaylistAsync(targetPlaylist.SubsonicPlaylistId);
 
                 if (playlistResult.IsFailure || playlistResult.Value == null)
                 {

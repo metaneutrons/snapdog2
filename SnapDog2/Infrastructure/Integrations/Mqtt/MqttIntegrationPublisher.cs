@@ -41,7 +41,7 @@ public class MqttIntegrationPublisher : IIntegrationPublisher
         }
 
         var topic = $"snapdog/zones/{zoneIndex}/playlist";
-        var payload = playlist?.Index?.ToString() ?? "0";
+        var payload = playlist?.Index.ToString() ?? "0";
         await _mqttService.PublishAsync(topic, payload, retain: true, cancellationToken);
 
         var nameTopic = $"snapdog/zones/{zoneIndex}/playlist/name";

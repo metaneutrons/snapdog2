@@ -37,7 +37,7 @@ public record PlaylistInfo
     /// <summary>
     /// Gets the 1-based playlist index (1=Radio, 2=First Subsonic, etc.).
     /// </summary>
-    public int? Index { get; init; }
+    public int Index { get; init; }
 
     /// <summary>
     /// Gets the total number of tracks in the playlist.

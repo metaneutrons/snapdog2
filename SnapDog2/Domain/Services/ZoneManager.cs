@@ -469,12 +469,12 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         try
         {
             // Get track from current playlist using playlist manager
-            if (this._currentState.Playlist == null || this._currentState.Playlist.Index == null)
+            if (this._currentState.Playlist == null)
             {
                 return Result.Failure("No playlist selected. Please set a playlist first.");
             }
 
-            var playlistIndex = this._currentState.Playlist.Index.Value;
+            var playlistIndex = this._currentState.Playlist.Index;
 
             var playlistInfoResult = await this._playlistManager.GetPlaylistAsync(playlistIndex).ConfigureAwait(false);
             if (playlistInfoResult.IsFailure)
@@ -832,13 +832,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 return Result.Failure("No playlist selected. Please set a playlist first.");
             }
 
-            // Get the playlist with tracks
-            if (this._currentState.Playlist.Index == null)
-            {
-                return Result.Failure("Current playlist has no index");
-            }
-
-            var playlistIndex = this._currentState.Playlist.Index.Value;
+            var playlistIndex = this._currentState.Playlist.Index;
 
             var playlistInfoResult = await this._playlistManager.GetPlaylistAsync(playlistIndex).ConfigureAwait(false);
             if (playlistInfoResult.IsFailure)
@@ -946,12 +940,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         }
 
         // Get the playlist with tracks
-        if (this._currentState.Playlist.Index == null)
-        {
-            return Result.Failure("Current playlist has no index");
-        }
-
-        var playlistIndex = this._currentState.Playlist.Index.Value;
+        var playlistIndex = this._currentState.Playlist.Index;
 
         var playlistInfoResult = await this._playlistManager.GetPlaylistAsync(playlistIndex).ConfigureAwait(false);
         if (playlistInfoResult.IsFailure)

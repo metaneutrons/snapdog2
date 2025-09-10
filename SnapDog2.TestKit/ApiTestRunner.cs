@@ -185,7 +185,8 @@ public class ApiTestRunner
         await TestEndpoint("GET", "/v1/media/playlists/1", "Playlist Details", response =>
         {
             var json = JObject.Parse(response);
-            return json["info"]?["name"] != null;
+            return json["info"]?["name"]?.ToString() == "Radio Stations" &&
+                   json["info"]?["source"]?.ToString() == "radio";
         });
 
         await TestEndpoint("GET", "/v1/media/tracks/1", "Track Details", response =>
@@ -197,13 +198,22 @@ public class ApiTestRunner
         await TestEndpoint("GET", "/v1/media/playlists/1/tracks", "Playlist Tracks", response =>
         {
             var json = JArray.Parse(response);
-            return json.Count >= 0;
+            return json.Count > 0 && json[0]?["source"]?.ToString() == "radio" &&
+                   json[0]?["artist"]?.ToString() == "Radio Station";
+        });
+
+        await TestEndpoint("GET", "/v1/media/playlists/2", "Subsonic Playlist Details", response =>
+        {
+            var json = JObject.Parse(response);
+            return json["info"]?["source"]?.ToString() == "subsonic" &&
+                   json["info"]?["index"]?.ToObject<int>() == 2;
         });
 
         await TestEndpoint("GET", "/v1/media/playlists/1/tracks/1", "Playlist Track Details", response =>
         {
             var json = JObject.Parse(response);
-            return json["title"] != null;
+            return json["title"] != null && json["source"]?.ToString() == "radio" &&
+                   json["artist"]?.ToString() == "Radio Station";
         });
     }
 
