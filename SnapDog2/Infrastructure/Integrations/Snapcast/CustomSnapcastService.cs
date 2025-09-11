@@ -172,9 +172,25 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
                 snapcastClientId,
                 new VolumeInfo(muted, volumePercent));
 
-            await _jsonRpcClient.SendRequestAsync<ClientSetVolumeResponse>("Client.SetVolume", request);
+            var response = await _jsonRpcClient.SendRequestAsync<ClientSetVolumeResponse>("Client.SetVolume", request);
 
             LogSetClientVolume(snapcastClientId, volumePercent, muted);
+
+            // Update ClientStateStore with confirmed result from Snapcast
+            var (client, clientIndex) = await GetClientBySnapcastIdAsync(snapcastClientId);
+            if (client != null && response?.Volume != null)
+            {
+                var currentState = _clientStateStore.GetClientState(clientIndex);
+                if (currentState != null)
+                {
+                    var updatedState = currentState with
+                    {
+                        Volume = response.Volume.Percent,
+                        Mute = response.Volume.Muted
+                    };
+                    _clientStateStore.SetClientState(clientIndex, updatedState);
+                }
+            }
 
             return Result.Success();
         }
@@ -230,9 +246,22 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
         try
         {
             var request = new ClientSetLatencyRequest(snapcastClientId, latencyMs);
-            await _jsonRpcClient.SendRequestAsync<ClientSetLatencyResponse>("Client.SetLatency", request);
+            var response = await _jsonRpcClient.SendRequestAsync<ClientSetLatencyResponse>("Client.SetLatency", request);
 
             LogSetClientLatency(snapcastClientId, latencyMs);
+
+            // Update ClientStateStore with confirmed result from Snapcast
+            var (client, clientIndex) = await GetClientBySnapcastIdAsync(snapcastClientId);
+            if (client != null && response?.Latency != null)
+            {
+                var currentState = _clientStateStore.GetClientState(clientIndex);
+                if (currentState != null)
+                {
+                    var updatedState = currentState with { LatencyMs = response.Latency };
+                    _clientStateStore.SetClientState(clientIndex, updatedState);
+                }
+            }
+
             return Result.Success();
         }
         catch (Exception ex)
@@ -247,9 +276,22 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
         try
         {
             var request = new ClientSetNameRequest(snapcastClientId, name);
-            await _jsonRpcClient.SendRequestAsync<ClientSetNameResponse>("Client.SetName", request);
+            var response = await _jsonRpcClient.SendRequestAsync<ClientSetNameResponse>("Client.SetName", request);
 
             LogSetClientName(snapcastClientId, name);
+
+            // Update ClientStateStore with confirmed result from Snapcast
+            var (client, clientIndex) = await GetClientBySnapcastIdAsync(snapcastClientId);
+            if (client != null && response?.Name != null)
+            {
+                var currentState = _clientStateStore.GetClientState(clientIndex);
+                if (currentState != null)
+                {
+                    var updatedState = currentState with { Name = response.Name };
+                    _clientStateStore.SetClientState(clientIndex, updatedState);
+                }
+            }
+
             return Result.Success();
         }
         catch (Exception ex)

@@ -94,4 +94,24 @@ public class SignalRIntegrationPublisher : IIntegrationPublisher
 
         await _hubContext.Clients.All.SendAsync("ClientConnectionChanged", clientIndex, connected, cancellationToken);
     }
+
+    public async Task PublishClientNameChangedAsync(int clientIndex, string name, CancellationToken cancellationToken = default)
+    {
+        if (_hubContext == null)
+        {
+            return;
+        }
+
+        await _hubContext.Clients.All.SendAsync("ClientNameChanged", clientIndex, name, cancellationToken);
+    }
+
+    public async Task PublishClientLatencyChangedAsync(int clientIndex, int latencyMs, CancellationToken cancellationToken = default)
+    {
+        if (_hubContext == null)
+        {
+            return;
+        }
+
+        await _hubContext.Clients.All.SendAsync("ClientLatencyChanged", clientIndex, latencyMs, cancellationToken);
+    }
 }

@@ -81,6 +81,9 @@ public static partial class KnxServiceConfiguration
         // Register the actual KNX service (Scoped to match IClientService dependency)
         services.AddScoped<IKnxService, KnxService>();
 
+        // Register KNX integration publisher as Singleton to match IntegrationCoordinator
+        services.AddSingleton<IIntegrationPublisher, KnxIntegrationPublisher>();
+
         return services;
     }
 

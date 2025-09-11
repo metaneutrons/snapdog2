@@ -60,4 +60,14 @@ public interface IIntegrationPublisher
     /// Publishes client connection change.
     /// </summary>
     Task PublishClientConnectionChangedAsync(int clientIndex, bool connected, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Publishes client name change.
+    /// </summary>
+    Task PublishClientNameChangedAsync(int clientIndex, string name, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Publishes client latency change.
+    /// </summary>
+    Task PublishClientLatencyChangedAsync(int clientIndex, int latencyMs, CancellationToken cancellationToken = default);
 }

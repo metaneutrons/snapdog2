@@ -108,3 +108,25 @@ public record ClientConnectionChangedEventArgs(
     bool NewConnected,
     DateTime Timestamp = default
 ) : ClientStateChangedEventArgs(ClientIndex, null, null!, Timestamp);
+
+/// <summary>
+/// Event args for client name changes.
+/// </summary>
+[StatusId("CLIENT_NAME_STATUS")]
+public record ClientNameChangedEventArgs(
+    int ClientIndex,
+    string OldName,
+    string NewName,
+    DateTime Timestamp = default
+) : ClientStateChangedEventArgs(ClientIndex, null, null!, Timestamp);
+
+/// <summary>
+/// Event args for client latency changes.
+/// </summary>
+[StatusId("CLIENT_LATENCY_STATUS")]
+public record ClientLatencyChangedEventArgs(
+    int ClientIndex,
+    int OldLatencyMs,
+    int NewLatencyMs,
+    DateTime Timestamp = default
+) : ClientStateChangedEventArgs(ClientIndex, null, null!, Timestamp);

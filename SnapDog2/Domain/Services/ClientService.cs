@@ -193,11 +193,16 @@ public class ClientService : IClientService
     /// Sets the name for a specific client.
     /// </summary>
     [CommandId("CLIENT_NAME")]
-    public Task<Result> SetNameAsync(int clientIndex, string name, CancellationToken cancellationToken = default)
+    public async Task<Result> SetNameAsync(int clientIndex, string name, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Setting client {ClientIndex} name to {Name}", clientIndex, name);
 
-        // TODO: Implement actual client name setting logic
-        return Task.FromResult(Result.Success());
+        var client = _clientStateStore.GetClientState(clientIndex);
+        if (client == null)
+        {
+            return Result.Failure($"Client {clientIndex} not found");
+        }
+
+        return await _snapcastService.SetClientNameAsync(client.SnapcastId, name, cancellationToken);
     }
 }

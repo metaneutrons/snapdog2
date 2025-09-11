@@ -49,6 +49,8 @@ public class IntegrationCoordinator : IHostedService
         // Subscribe to client state events
         _clientStateStore.ClientVolumeChanged += OnClientVolumeChanged;
         _clientStateStore.ClientConnectionChanged += OnClientConnectionChanged;
+        _clientStateStore.ClientNameChanged += OnClientNameChanged;
+        _clientStateStore.ClientLatencyChanged += OnClientLatencyChanged;
 
         _logger.LogInformation("IntegrationCoordinator started with {PublisherCount} publishers", _publishers.Count());
         return Task.CompletedTask;
@@ -65,6 +67,8 @@ public class IntegrationCoordinator : IHostedService
         // Unsubscribe from client state events
         _clientStateStore.ClientVolumeChanged -= OnClientVolumeChanged;
         _clientStateStore.ClientConnectionChanged -= OnClientConnectionChanged;
+        _clientStateStore.ClientNameChanged -= OnClientNameChanged;
+        _clientStateStore.ClientLatencyChanged -= OnClientLatencyChanged;
 
         return Task.CompletedTask;
     }
@@ -137,6 +141,30 @@ public class IntegrationCoordinator : IHostedService
                 () => p.PublishClientConnectionChangedAsync(e.ClientIndex, e.NewConnected),
                 p.Name,
                 "ClientConnectionChanged"));
+
+        await Task.WhenAll(tasks);
+    }
+
+    private async void OnClientNameChanged(object? sender, ClientNameChangedEventArgs e)
+    {
+        var tasks = _publishers
+            .Where(p => p.IsEnabled)
+            .Select(p => PublishWithErrorHandling(
+                () => p.PublishClientNameChangedAsync(e.ClientIndex, e.NewName),
+                p.Name,
+                "ClientNameChanged"));
+
+        await Task.WhenAll(tasks);
+    }
+
+    private async void OnClientLatencyChanged(object? sender, ClientLatencyChangedEventArgs e)
+    {
+        var tasks = _publishers
+            .Where(p => p.IsEnabled)
+            .Select(p => PublishWithErrorHandling(
+                () => p.PublishClientLatencyChangedAsync(e.ClientIndex, e.NewLatencyMs),
+                p.Name,
+                "ClientLatencyChanged"));
 
         await Task.WhenAll(tasks);
     }

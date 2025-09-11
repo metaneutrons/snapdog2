@@ -41,6 +41,16 @@ public class InMemoryClientStateStore : IClientStateStore
     /// </summary>
     public event EventHandler<ClientConnectionChangedEventArgs>? ClientConnectionChanged;
 
+    /// <summary>
+    /// Event raised when client name changes.
+    /// </summary>
+    public event EventHandler<ClientNameChangedEventArgs>? ClientNameChanged;
+
+    /// <summary>
+    /// Event raised when client latency changes.
+    /// </summary>
+    public event EventHandler<ClientLatencyChangedEventArgs>? ClientLatencyChanged;
+
     public ClientState? GetClientState(int clientIndex)
     {
         return this._clientStates.TryGetValue(clientIndex, out var state) ? state : null;
@@ -82,6 +92,20 @@ public class InMemoryClientStateStore : IClientStateStore
         {
             ClientConnectionChanged?.Invoke(this, new ClientConnectionChangedEventArgs(
                 clientIndex, oldState?.Connected ?? false, newState.Connected));
+        }
+
+        // Name changes
+        if (oldState?.Name != newState.Name)
+        {
+            ClientNameChanged?.Invoke(this, new ClientNameChangedEventArgs(
+                clientIndex, oldState?.Name ?? "", newState.Name));
+        }
+
+        // Latency changes
+        if (oldState?.LatencyMs != newState.LatencyMs)
+        {
+            ClientLatencyChanged?.Invoke(this, new ClientLatencyChangedEventArgs(
+                clientIndex, oldState?.LatencyMs ?? 0, newState.LatencyMs));
         }
     }
 }

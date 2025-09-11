@@ -56,6 +56,8 @@ public partial class KnxCommandHandler : IKnxCommandHandler
             "PLAYLIST" => await HandlePlaylist(zoneIndex, parameters),
             "PLAYLIST_REPEAT" => await HandlePlaylistRepeat(zoneIndex, parameters),
             "PLAYLIST_REPEAT_TOGGLE" => await HandlePlaylistRepeatToggle(zoneIndex),
+            var cmd when cmd.StartsWith("CLIENT_") && cmd.EndsWith("_VOLUME") => await HandleClientVolume(cmd, parameters),
+            var cmd when cmd.StartsWith("CLIENT_") && cmd.EndsWith("_MUTE") => await HandleClientMute(cmd, parameters),
             _ => Result.Success() // Unknown commands are ignored
         };
     }
@@ -130,6 +132,37 @@ public partial class KnxCommandHandler : IKnxCommandHandler
         return await Task.FromResult(Result.Success());
     }
 
+    [KnxCommand("CLIENT_VOLUME")]
+    private async Task<Result> HandleClientVolume(string commandId, object? parameters)
+    {
+        // Extract client index from command like "CLIENT_1_VOLUME"
+        var parts = commandId.Split('_');
+        if (parts.Length >= 3 && int.TryParse(parts[1], out var clientIndex) && parameters is int volume)
+        {
+            LogClientKnxCommand("VOLUME", clientIndex, volume);
+            // TODO: Send actual KNX command to group address for client volume
+            return await Task.FromResult(Result.Success());
+        }
+        return Result.Failure($"Invalid client volume command: {commandId}");
+    }
+
+    [KnxCommand("CLIENT_MUTE")]
+    private async Task<Result> HandleClientMute(string commandId, object? parameters)
+    {
+        // Extract client index from command like "CLIENT_1_MUTE"
+        var parts = commandId.Split('_');
+        if (parts.Length >= 3 && int.TryParse(parts[1], out var clientIndex) && parameters is bool muted)
+        {
+            LogClientKnxCommand("MUTE", clientIndex, muted);
+            // TODO: Send actual KNX command to group address for client mute
+            return await Task.FromResult(Result.Success());
+        }
+        return Result.Failure($"Invalid client mute command: {commandId}");
+    }
+
     [LoggerMessage(EventId = 120001, Level = LogLevel.Debug, Message = "KNX command {CommandId} handled for zone {ZoneIndex}")]
     private partial void LogKnxCommand(string commandId, int zoneIndex);
+
+    [LoggerMessage(EventId = 120002, Level = LogLevel.Information, Message = "KNX client command {CommandType} handled for client {ClientIndex} with value {Value}")]
+    private partial void LogClientKnxCommand(string commandType, int clientIndex, object value);
 }

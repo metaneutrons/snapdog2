@@ -41,6 +41,18 @@ public interface IClientStateStore
     event EventHandler<ClientConnectionChangedEventArgs>? ClientConnectionChanged;
 
     /// <summary>
+    /// Event raised when client name changes.
+    /// </summary>
+    [StatusId("CLIENT_NAME_STATUS")]
+    event EventHandler<ClientNameChangedEventArgs>? ClientNameChanged;
+
+    /// <summary>
+    /// Event raised when client latency changes.
+    /// </summary>
+    [StatusId("CLIENT_LATENCY_STATUS")]
+    event EventHandler<ClientLatencyChangedEventArgs>? ClientLatencyChanged;
+
+    /// <summary>
     /// Gets the current state for a client.
     /// </summary>
     /// <param name="clientIndex">Client index (1-based)</param>

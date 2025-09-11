@@ -65,4 +65,7 @@ public class ClientKnxConfig
 
     [Env(Key = "CONNECTED_STATUS")]
     public string? ConnectedStatus { get; set; }
+
+    [Env(Key = "NAME_STATUS")]
+    public string? NameStatus { get; set; }
 }
