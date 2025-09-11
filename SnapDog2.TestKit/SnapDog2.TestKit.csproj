@@ -8,8 +8,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Knx.Falcon.Sdk" />
+    <PackageReference Include="MQTTnet" />
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="System.CommandLine" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SnapDog2\SnapDog2.csproj" />
   </ItemGroup>
 
 </Project>

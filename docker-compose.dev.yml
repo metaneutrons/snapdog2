@@ -202,7 +202,7 @@ services:
       - DEBUG_LEVEL=verbose # Debug level (verbose for troubleshooting)
       - FILTERS=single,pace:queue # Filters with queue to avoid warnings
     ports:
-      - "3671:3671/udp" # KNX/IP port
+      - "3671:3671" # KNX/IP port
     networks:
       snapdog-dev:
     #        ipv4_address: 172.25.0.10

@@ -589,6 +589,28 @@ static WebApplication CreateWebApplication(string[] args)
                 tags: ["ready"]
             );
         }
+
+        if (snapDogConfig.Services.Knx.Enabled)
+        {
+            healthChecksBuilder.AddCheck(
+                "knx",
+                () =>
+                {
+                    try
+                    {
+                        // Simple UDP connectivity check for KNX gateway
+                        using var client = new System.Net.Sockets.UdpClient();
+                        client.Connect(snapDogConfig.Services.Knx.Gateway!, snapDogConfig.Services.Knx.Port);
+                        return HealthCheckResult.Healthy($"KNX gateway reachable at {snapDogConfig.Services.Knx.Gateway}:{snapDogConfig.Services.Knx.Port}");
+                    }
+                    catch (Exception ex)
+                    {
+                        return HealthCheckResult.Unhealthy($"KNX gateway unreachable: {ex.Message}");
+                    }
+                },
+                tags: ["ready"]
+            );
+        }
     }
 
     var app = builder.Build();

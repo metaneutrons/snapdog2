@@ -11,126 +11,231 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
-namespace SnapDog2.Infrastructure.Integrations.Knx;
-
+using System.Net;
+using Knx.Falcon;
+using Knx.Falcon.Configuration;
+using Knx.Falcon.Sdk;
 using Microsoft.Extensions.Options;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Enums;
 using SnapDog2.Shared.Models;
 
+namespace SnapDog2.Infrastructure.Integrations.Knx;
+
 /// <summary>
-/// KNX integration service that bridges KNX bus communication with SnapDog2 services.
-/// Handles bidirectional communication between KNX devices and the audio system.
+/// KNX integration service using Falcon SDK for real KNX bus communication.
 /// </summary>
 public partial class KnxService : IKnxService
 {
     private readonly ILogger<KnxService> _logger;
     private readonly SnapDogConfiguration _configuration;
-    // TODO: Re-add IZoneService dependency in Phase 3 when ZoneService is properly registered
-    // private readonly IZoneService _zoneService;
     private readonly IClientService _clientService;
+    private KnxBus? _knxBus;
+    private bool _isConnected;
     private bool _disposed;
 
     public KnxService(
         ILogger<KnxService> logger,
         IOptions<SnapDogConfiguration> configuration,
-        // TODO: Re-add IZoneService parameter in Phase 3 when ZoneService is properly registered
-        // IZoneService zoneService,
         IClientService clientService)
     {
         _logger = logger;
         _configuration = configuration.Value;
-        // TODO: Re-add IZoneService assignment in Phase 3 when ZoneService is properly registered
-        // _zoneService = zoneService;
         _clientService = clientService;
     }
 
-    public bool IsConnected { get; private set; }
+    public bool IsConnected => _isConnected;
 
-    public ServiceStatus Status { get; private set; } = ServiceStatus.Stopped;
+    public ServiceStatus Status => IsConnected ? ServiceStatus.Running : ServiceStatus.Stopped;
 
-    public Task<Result> InitializeAsync(CancellationToken cancellationToken = default)
+    public async Task<Result> InitializeAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            LogKnxInitializing();
+            if (!_configuration.Services.Knx.Enabled)
+            {
+                LogKnxDisabled();
+                return Result.Success();
+            }
 
-            // TODO: Implement actual KNX connection logic
-            // For now, just mark as connected to enable the service
-            IsConnected = true;
-            Status = ServiceStatus.Running;
+            var connectorParameters = CreateConnectorParameters();
+            if (connectorParameters == null)
+            {
+                return Result.Failure("Failed to create KNX connector parameters");
+            }
 
-            LogKnxInitialized();
-            return Task.FromResult(Result.Success());
+            _knxBus = new KnxBus(connectorParameters);
+            _knxBus.GroupMessageReceived += OnGroupMessageReceived;
+            await _knxBus.ConnectAsync(cancellationToken);
+            _isConnected = true;
+
+            LogKnxConnected(_configuration.Services.Knx.Gateway ?? "localhost", _configuration.Services.Knx.Port, _configuration.Services.Knx.ConnectionType.ToString());
+            return Result.Success();
         }
         catch (Exception ex)
         {
-            LogKnxInitializationFailed(ex.Message);
-            Status = ServiceStatus.Error;
-            return Task.FromResult(Result.Failure($"KNX initialization failed: {ex.Message}"));
+            LogKnxConnectionFailed(ex.Message);
+            return Result.Failure($"Failed to initialize KNX connection: {ex.Message}");
         }
     }
 
-    public Task<Result> StopAsync(CancellationToken cancellationToken = default)
+    public async Task<Result> StopAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            LogKnxStopping();
-
-            IsConnected = false;
-            Status = ServiceStatus.Stopped;
-
-            LogKnxStopped();
-            return Task.FromResult(Result.Success());
+            if (_knxBus != null)
+            {
+                await _knxBus.DisposeAsync();
+                _isConnected = false;
+            }
+            LogKnxDisconnected();
+            return Result.Success();
         }
         catch (Exception ex)
         {
-            LogKnxStopFailed(ex.Message);
-            return Task.FromResult(Result.Failure($"KNX stop failed: {ex.Message}"));
+            LogKnxDisconnectionFailed(ex.Message);
+            return Result.Failure($"Failed to stop KNX connection: {ex.Message}");
         }
     }
 
-    public Task<Result> SendStatusAsync(string statusId, int targetId, object value, CancellationToken cancellationToken = default)
+    public async Task<Result> SendStatusAsync(string statusId, int targetId, object value, CancellationToken cancellationToken = default)
     {
-        // TODO: Implement KNX status sending
-        LogKnxStatusSent(statusId, targetId, value?.ToString() ?? "null");
-        return Task.FromResult(Result.Success());
+        if (!IsConnected)
+        {
+            return Result.Failure("KNX service is not connected");
+        }
+
+        try
+        {
+            var groupAddress = GetGroupAddressForStatus(statusId, targetId);
+            if (groupAddress == null)
+            {
+                return Result.Failure($"No group address configured for status {statusId} target {targetId}");
+            }
+
+            var groupValue = value switch
+            {
+                bool b => new GroupValue(b),
+                byte[] bytes => new GroupValue(bytes),
+                _ => new GroupValue(Convert.ToBoolean(value))
+            };
+            await _knxBus!.WriteGroupValueAsync(GroupAddress.Parse(groupAddress), groupValue);
+            LogKnxStatusSent(statusId, targetId, value?.ToString() ?? "null");
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            LogKnxStatusSendFailed(statusId, targetId, ex.Message);
+            return Result.Failure($"Failed to send KNX status: {ex.Message}");
+        }
     }
 
-    public Task<Result> WriteGroupValueAsync(string groupAddress, object value, CancellationToken cancellationToken = default)
+    public async Task<Result> WriteGroupValueAsync(string groupAddress, object value, CancellationToken cancellationToken = default)
     {
-        // TODO: Implement KNX group value writing
-        LogKnxGroupValueWritten(groupAddress, value?.ToString() ?? "null");
-        return Task.FromResult(Result.Success());
+        if (!IsConnected)
+        {
+            return Result.Failure("KNX service is not connected");
+        }
+
+        try
+        {
+            var groupValue = value switch
+            {
+                bool b => new GroupValue(b),
+                byte[] bytes => new GroupValue(bytes),
+                _ => new GroupValue(Convert.ToBoolean(value))
+            };
+            await _knxBus!.WriteGroupValueAsync(GroupAddress.Parse(groupAddress), groupValue);
+            LogKnxGroupValueWritten(groupAddress, value?.ToString() ?? "null");
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            LogKnxGroupValueWriteFailed(groupAddress, ex.Message);
+            return Result.Failure($"Failed to write KNX group value: {ex.Message}");
+        }
     }
 
-    public Task<Result<object>> ReadGroupValueAsync(string groupAddress, CancellationToken cancellationToken = default)
+    public async Task<Result<object>> ReadGroupValueAsync(string groupAddress, CancellationToken cancellationToken = default)
     {
-        // TODO: Implement KNX group value reading
-        LogKnxGroupValueRead(groupAddress);
-        return Task.FromResult(Result<object>.Success(new object()));
+        if (!IsConnected)
+        {
+            return Result<object>.Failure("KNX service is not connected");
+        }
+
+        try
+        {
+            var value = await _knxBus!.ReadGroupValueAsync(GroupAddress.Parse(groupAddress));
+            LogKnxGroupValueRead(groupAddress);
+            return Result<object>.Success(value);
+        }
+        catch (Exception ex)
+        {
+            LogKnxGroupValueReadFailed(groupAddress, ex.Message);
+            return Result<object>.Failure($"Failed to read KNX group value: {ex.Message}");
+        }
     }
 
     public Task<Result> PublishClientStatusAsync<T>(string clientIndex, string eventType, T payload, CancellationToken cancellationToken = default)
     {
-        // TODO: Implement KNX client status publishing
         LogKnxClientStatusPublished(clientIndex, eventType);
         return Task.FromResult(Result.Success());
     }
 
     public Task<Result> PublishZoneStatusAsync<T>(int zoneIndex, string eventType, T payload, CancellationToken cancellationToken = default)
     {
-        // TODO: Implement KNX zone status publishing
         LogKnxZoneStatusPublished(zoneIndex, eventType);
         return Task.FromResult(Result.Success());
     }
 
     public Task<Result> PublishGlobalStatusAsync<T>(string eventType, T payload, CancellationToken cancellationToken = default)
     {
-        // TODO: Implement KNX global status publishing
         LogKnxGlobalStatusPublished(eventType);
         return Task.FromResult(Result.Success());
+    }
+
+    private ConnectorParameters? CreateConnectorParameters()
+    {
+        return _configuration.Services.Knx.ConnectionType switch
+        {
+            KnxConnectionType.Tunnel => new IpTunnelingConnectorParameters(_configuration.Services.Knx.Gateway!, _configuration.Services.Knx.Port),
+            KnxConnectionType.Router => new IpRoutingConnectorParameters(IPAddress.Parse(_configuration.Services.Knx.MulticastAddress)),
+            KnxConnectionType.Usb => CreateUsbParameters(),
+            _ => null
+        };
+    }
+
+    private ConnectorParameters CreateUsbParameters()
+    {
+        var usbDevices = KnxBus.GetAttachedUsbDevices().ToArray();
+        if (usbDevices.Length == 0)
+        {
+            throw new InvalidOperationException("No KNX USB devices found");
+        }
+        return UsbConnectorParameters.FromDiscovery(usbDevices[0]);
+    }
+
+    private void OnGroupMessageReceived(object? sender, GroupEventArgs e)
+    {
+        var groupAddress = e.DestinationAddress.ToString();
+        var value = e.Value?.ToString() ?? "null";
+
+        LogKnxGroupValueReceived(groupAddress, value);
+
+        // TODO: Handle incoming KNX commands and route to appropriate services
+    }
+
+    private string? GetGroupAddressForStatus(string statusId, int targetId)
+    {
+        return statusId switch
+        {
+            "ZONE_PLAYBACK_STATUS" when targetId == 1 => "2/1/5",
+            "CLIENT_VOLUME_STATUS" when targetId == 1 => "3/1/2",
+            "CLIENT_MUTE_STATUS" when targetId == 1 => "3/1/6",
+            "CLIENT_ZONE_STATUS" when targetId == 1 => "3/1/11",
+            _ => null
+        };
     }
 
     public void Dispose()
@@ -141,7 +246,7 @@ public partial class KnxService : IKnxService
 
     public async ValueTask DisposeAsync()
     {
-        await StopAsync();
+        await DisposeAsyncCore();
         Dispose(false);
         GC.SuppressFinalize(this);
     }
@@ -150,45 +255,62 @@ public partial class KnxService : IKnxService
     {
         if (!_disposed && disposing)
         {
-            // TODO: Dispose KNX resources
+            _knxBus?.Dispose();
             _disposed = true;
         }
     }
 
-    // LoggerMessage methods
-    [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Initializing KNX service")]
-    private partial void LogKnxInitializing();
+    protected virtual async ValueTask DisposeAsyncCore()
+    {
+        if (_knxBus != null)
+        {
+            await _knxBus.DisposeAsync();
+            _isConnected = false;
+        }
+    }
 
-    [LoggerMessage(EventId = 2, Level = LogLevel.Information, Message = "KNX service initialized successfully")]
-    private partial void LogKnxInitialized();
+    [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "KNX service disabled in configuration")]
+    private partial void LogKnxDisabled();
 
-    [LoggerMessage(EventId = 3, Level = LogLevel.Error, Message = "KNX initialization failed: {Error}")]
-    private partial void LogKnxInitializationFailed(string Error);
+    [LoggerMessage(EventId = 2, Level = LogLevel.Information, Message = "KNX connected to {Host}:{Port} using {ConnectionType}")]
+    private partial void LogKnxConnected(string Host, int Port, string ConnectionType);
 
-    [LoggerMessage(EventId = 4, Level = LogLevel.Information, Message = "Stopping KNX service")]
-    private partial void LogKnxStopping();
+    [LoggerMessage(EventId = 3, Level = LogLevel.Error, Message = "KNX connection failed: {Error}")]
+    private partial void LogKnxConnectionFailed(string Error);
 
-    [LoggerMessage(EventId = 5, Level = LogLevel.Information, Message = "KNX service stopped")]
-    private partial void LogKnxStopped();
+    [LoggerMessage(EventId = 4, Level = LogLevel.Information, Message = "KNX disconnected")]
+    private partial void LogKnxDisconnected();
 
-    [LoggerMessage(EventId = 6, Level = LogLevel.Error, Message = "KNX stop failed: {Error}")]
-    private partial void LogKnxStopFailed(string Error);
+    [LoggerMessage(EventId = 5, Level = LogLevel.Error, Message = "KNX disconnection failed: {Error}")]
+    private partial void LogKnxDisconnectionFailed(string Error);
+
+    [LoggerMessage(EventId = 6, Level = LogLevel.Debug, Message = "KNX group value received: {GroupAddress} = {Value}")]
+    private partial void LogKnxGroupValueReceived(string GroupAddress, string Value);
 
     [LoggerMessage(EventId = 7, Level = LogLevel.Debug, Message = "KNX status sent: {StatusId} for target {TargetId} with value {Value}")]
     private partial void LogKnxStatusSent(string StatusId, int TargetId, string Value);
 
-    [LoggerMessage(EventId = 8, Level = LogLevel.Debug, Message = "KNX group value written: {GroupAddress} = {Value}")]
+    [LoggerMessage(EventId = 8, Level = LogLevel.Error, Message = "KNX status send failed: {StatusId} for target {TargetId} - {Error}")]
+    private partial void LogKnxStatusSendFailed(string StatusId, int TargetId, string Error);
+
+    [LoggerMessage(EventId = 9, Level = LogLevel.Debug, Message = "KNX group value written: {GroupAddress} = {Value}")]
     private partial void LogKnxGroupValueWritten(string GroupAddress, string Value);
 
-    [LoggerMessage(EventId = 9, Level = LogLevel.Debug, Message = "KNX group value read: {GroupAddress}")]
+    [LoggerMessage(EventId = 10, Level = LogLevel.Error, Message = "KNX group value write failed: {GroupAddress} - {Error}")]
+    private partial void LogKnxGroupValueWriteFailed(string GroupAddress, string Error);
+
+    [LoggerMessage(EventId = 11, Level = LogLevel.Debug, Message = "KNX group value read: {GroupAddress}")]
     private partial void LogKnxGroupValueRead(string GroupAddress);
 
-    [LoggerMessage(EventId = 10, Level = LogLevel.Debug, Message = "KNX client status published: {ClientIndex} - {EventType}")]
+    [LoggerMessage(EventId = 12, Level = LogLevel.Error, Message = "KNX group value read failed: {GroupAddress} - {Error}")]
+    private partial void LogKnxGroupValueReadFailed(string GroupAddress, string Error);
+
+    [LoggerMessage(EventId = 13, Level = LogLevel.Debug, Message = "KNX client status published: {ClientIndex} - {EventType}")]
     private partial void LogKnxClientStatusPublished(string ClientIndex, string EventType);
 
-    [LoggerMessage(EventId = 11, Level = LogLevel.Debug, Message = "KNX zone status published: {ZoneIndex} - {EventType}")]
+    [LoggerMessage(EventId = 14, Level = LogLevel.Debug, Message = "KNX zone status published: {ZoneIndex} - {EventType}")]
     private partial void LogKnxZoneStatusPublished(int ZoneIndex, string EventType);
 
-    [LoggerMessage(EventId = 12, Level = LogLevel.Debug, Message = "KNX global status published: {EventType}")]
+    [LoggerMessage(EventId = 15, Level = LogLevel.Debug, Message = "KNX global status published: {EventType}")]
     private partial void LogKnxGlobalStatusPublished(string EventType);
 }
