@@ -84,6 +84,8 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             );
         }
 
+        this._logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
         var args = config.LibVLCArgs;
         try
         {
@@ -91,8 +93,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             this._mediaPlayer = new LibVLCSharp.Shared.MediaPlayer(this._libvlc);
 
             // Subscribe to LibVLC events for real-time position updates
-            // Temporarily disabled to isolate LibVLC issue
-            // this.SetupEventHandlers();
+            this.SetupEventHandlers();
         }
         catch (Exception ex)
         {
@@ -102,8 +103,6 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
                 ex
             );
         }
-
-        this._logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         var tempDir = tempDirectory ?? config.TempDirectory;
         this._tempDirectory = Directory.CreateDirectory(tempDir);
@@ -201,6 +200,13 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             {
                 return new AudioProcessingResult { Success = false, ErrorMessage = "Media playback failed" };
             }
+
+            // Log media properties for debugging
+            this.LogMediaProperties(
+                this._mediaPlayer.Length,
+                this._mediaPlayer.IsSeekable,
+                this._mediaPlayer.State.ToString()
+            );
 
             // Save metadata to JSON file (disabled - metadata available programmatically)
             // await this.MetadataManager.SaveMetadataAsync(metadata, metadataPath, cancellationToken);
@@ -391,11 +397,38 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
     public long DurationMs => this._mediaPlayer.Length;
 
     /// <summary>
+    /// Seeks to a specific position in milliseconds.
+    /// </summary>
+    public bool SeekToPosition(long positionMs)
+    {
+        if (this._disposed || this._mediaPlayer == null || !this._mediaPlayer.IsSeekable)
+        {
+            return false;
+        }
+
+        this._mediaPlayer.Time = positionMs;
+        return true;
+    }
+
+    /// <summary>
+    /// Seeks to a specific progress percentage (0.0-1.0).
+    /// </summary>
+    public bool SeekToProgress(float progress)
+    {
+        if (this._disposed || this._mediaPlayer == null || !this._mediaPlayer.IsSeekable)
+        {
+            return false;
+        }
+
+        this._mediaPlayer.Position = Math.Clamp(progress, 0.0f, 1.0f);
+        return true;
+    }
+
+    /// <summary>
     /// Sets up LibVLC event handlers for real-time position and state updates.
     /// </summary>
     private void SetupEventHandlers()
     {
-        // TODO: Why is this method never called? Investigate LibVLC issue.
         this.LogSettingUpLibVlcEventHandlers();
 
         // Position change events (percentage-based)
@@ -403,16 +436,24 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
         {
             try
             {
-                var positionMs = (long)(e.Position * this._mediaPlayer.Length);
-                this.LogLibVlcPositionChanged(e.Position, positionMs);
+                if (this._disposed || this._mediaPlayer == null)
+                {
+                    return;
+                }
+
+                var length = this._mediaPlayer.Length;
+                var positionMs = length > 0 ? (long)(e.Position * length) : 0;
+                var progress = length > 0 ? e.Position : 0.0f;
+
+                this.LogLibVlcPositionChanged(progress, positionMs);
 
                 this.PositionChanged?.Invoke(
                     this,
                     new PositionChangedEventArgs
                     {
                         PositionMs = positionMs,
-                        Progress = e.Position,
-                        DurationMs = this._mediaPlayer.Length,
+                        Progress = progress,
+                        DurationMs = length,
                     }
                 );
             }
@@ -427,14 +468,22 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
         {
             try
             {
+                if (this._disposed || this._mediaPlayer == null)
+                {
+                    return;
+                }
+
+                var length = this._mediaPlayer.Length;
+                var progress = length > 0 ? (float)e.Time / length : 0.0f;
+
                 this.LogLibVlcTimeChanged(e.Time);
                 this.PositionChanged?.Invoke(
                     this,
                     new PositionChangedEventArgs
                     {
                         PositionMs = e.Time,
-                        Progress = this._mediaPlayer.Position,
-                        DurationMs = this._mediaPlayer.Length,
+                        Progress = progress,
+                        DurationMs = length,
                     }
                 );
             }
@@ -449,6 +498,11 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
         {
             try
             {
+                if (this._disposed)
+                {
+                    return;
+                }
+
                 this.PlaybackStateChanged?.Invoke(
                     this,
                     new PlaybackStateChangedEventArgs { IsPlaying = true, State = VLCState.Playing }
@@ -464,6 +518,11 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
         {
             try
             {
+                if (this._disposed)
+                {
+                    return;
+                }
+
                 this.PlaybackStateChanged?.Invoke(
                     this,
                     new PlaybackStateChangedEventArgs { IsPlaying = false, State = VLCState.Paused }
@@ -479,6 +538,11 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
         {
             try
             {
+                if (this._disposed)
+                {
+                    return;
+                }
+
                 this.PlaybackStateChanged?.Invoke(
                     this,
                     new PlaybackStateChangedEventArgs { IsPlaying = false, State = VLCState.Stopped }
@@ -494,6 +558,11 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
         {
             try
             {
+                if (this._disposed)
+                {
+                    return;
+                }
+
                 this.PlaybackStateChanged?.Invoke(
                     this,
                     new PlaybackStateChangedEventArgs { IsPlaying = false, State = VLCState.Ended }
@@ -510,10 +579,30 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
     {
         if (!this._disposed)
         {
-            this._mediaPlayer.Stop();
-            this._mediaPlayer.Dispose();
-            this._libvlc.Dispose();
             this._disposed = true;
+
+            // Unsubscribe from events before disposing
+            try
+            {
+                if (this._mediaPlayer != null)
+                {
+                    this._mediaPlayer.Stop();
+                    // Clear event handlers
+                    this._mediaPlayer.PositionChanged -= null;
+                    this._mediaPlayer.TimeChanged -= null;
+                    this._mediaPlayer.Playing -= null;
+                    this._mediaPlayer.Paused -= null;
+                    this._mediaPlayer.Stopped -= null;
+                    this._mediaPlayer.EndReached -= null;
+                    this._mediaPlayer.Dispose();
+                }
+                this._libvlc?.Dispose();
+            }
+            catch (Exception ex)
+            {
+                // Log but don't throw during disposal
+                this.LogErrorDuringDisposal(ex);
+            }
 
             this.LogAudioProcessingContextDisposed();
         }
@@ -523,10 +612,30 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
     {
         if (!this._disposed)
         {
-            this._mediaPlayer.Stop();
-            this._mediaPlayer.Dispose();
-            this._libvlc.Dispose();
             this._disposed = true;
+
+            // Unsubscribe from events before disposing
+            try
+            {
+                if (this._mediaPlayer != null)
+                {
+                    this._mediaPlayer.Stop();
+                    // Clear event handlers
+                    this._mediaPlayer.PositionChanged -= null;
+                    this._mediaPlayer.TimeChanged -= null;
+                    this._mediaPlayer.Playing -= null;
+                    this._mediaPlayer.Paused -= null;
+                    this._mediaPlayer.Stopped -= null;
+                    this._mediaPlayer.EndReached -= null;
+                    this._mediaPlayer.Dispose();
+                }
+                this._libvlc?.Dispose();
+            }
+            catch (Exception ex)
+            {
+                // Log but don't throw during disposal
+                this.LogErrorDuringDisposal(ex);
+            }
 
             this.LogAudioProcessingContextDisposedAsynchronously();
         }
@@ -638,6 +747,14 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
     [LoggerMessage(EventId = 16025, Level = LogLevel.Debug, Message = "Audio processing context disposed asynchronously"
 )]
     private partial void LogAudioProcessingContextDisposedAsynchronously();
+
+    [LoggerMessage(EventId = 16027, Level = LogLevel.Warning, Message = "Error during AudioProcessingContext disposal"
+)]
+    private partial void LogErrorDuringDisposal(Exception ex);
+
+    [LoggerMessage(EventId = 16028, Level = LogLevel.Information, Message = "LibVLC Media Properties - Duration: {DurationMs}ms, Seekable: {IsSeekable}, State: {State}"
+)]
+    private partial void LogMediaProperties(long durationMs, bool isSeekable, string state);
 
     [LoggerMessage(EventId = 16026, Level = LogLevel.Error, Message = "Failed → initialize LibVLCSharp Core. Ensure LibVLC native libraries are properly installed."
 )]

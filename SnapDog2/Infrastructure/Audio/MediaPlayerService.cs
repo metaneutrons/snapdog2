@@ -377,16 +377,23 @@ public sealed partial class MediaPlayerService(
         {
             _logger.LogInformation("Operation completed: {Param1} {Param2}", zoneIndex, positionMs);
 
-            if (!this._players.TryGetValue(zoneIndex, out _))
+            if (!this._players.TryGetValue(zoneIndex, out var player))
             {
                 _logger.LogInformation("PlayerNotFound: {Details}", zoneIndex);
                 return Task.FromResult(Result.Failure($"No active player found for zone {zoneIndex}"));
             }
 
-            // For now, return success as seeking is not implemented in the LibVLC wrapper
-            // This would need to be implemented in the actual media player
-            _logger.LogInformation("SeekNotImplemented: {Details}", zoneIndex);
-            return Task.FromResult(Result.Success());
+            // Implement seeking via LibVLC
+            var success = player.SeekToPosition(positionMs);
+            if (success)
+            {
+                return Task.FromResult(Result.Success());
+            }
+            else
+            {
+                _logger.LogInformation("SeekNotSupported: {Details}", zoneIndex);
+                return Task.FromResult(Result.Failure("Seeking not supported for this media"));
+            }
         }
         catch (Exception ex)
         {
@@ -408,16 +415,23 @@ public sealed partial class MediaPlayerService(
         {
             _logger.LogInformation("Operation completed: {Param1} {Param2}", zoneIndex, progress);
 
-            if (!this._players.TryGetValue(zoneIndex, out _))
+            if (!this._players.TryGetValue(zoneIndex, out var player))
             {
                 _logger.LogInformation("PlayerNotFound: {Details}", zoneIndex);
                 return Task.FromResult(Result.Failure($"No active player found for zone {zoneIndex}"));
             }
 
-            // For now, return success as seeking is not implemented in the LibVLC wrapper
-            // This would need to be implemented in the actual media player
-            _logger.LogInformation("SeekNotImplemented: {Details}", zoneIndex);
-            return Task.FromResult(Result.Success());
+            // Implement seeking via LibVLC
+            var success = player.SeekToProgress(progress);
+            if (success)
+            {
+                return Task.FromResult(Result.Success());
+            }
+            else
+            {
+                _logger.LogInformation("SeekNotSupported: {Details}", zoneIndex);
+                return Task.FromResult(Result.Failure("Seeking not supported for this media"));
+            }
         }
         catch (Exception ex)
         {

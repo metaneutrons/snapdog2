@@ -48,6 +48,22 @@ public sealed partial class MediaPlayer(
     public event EventHandler<TrackInfoChangedEventArgs>? TrackInfoChanged;
 
     /// <summary>
+    /// Seeks to a specific position in milliseconds.
+    /// </summary>
+    public bool SeekToPosition(long positionMs)
+    {
+        return _processingContext?.SeekToPosition(positionMs) ?? false;
+    }
+
+    /// <summary>
+    /// Seeks to a specific progress percentage (0.0-1.0).
+    /// </summary>
+    public bool SeekToProgress(float progress)
+    {
+        return _processingContext?.SeekToProgress(progress) ?? false;
+    }
+
+    /// <summary>
     /// Starts streaming audio from the specified URL to the Snapcast sink.
     /// </summary>
     /// <param name="streamUrl">The URL to stream from.</param>
@@ -73,16 +89,35 @@ public sealed partial class MediaPlayer(
             _logger.LogInformation("Operation completed: {Param1} {Param2}", this._zoneIndex, streamUrl);
 
             // Create new processing context
-            this._processingContext = new AudioProcessingContext(
-                this._config,
-                this._logger,
-                this._metadataLogger,
-                this._config.TempDirectory
-            );
+            try
+            {
+                this._processingContext = new AudioProcessingContext(
+                    this._config,
+                    this._logger,
+                    this._metadataLogger,
+                    this._config.TempDirectory
+                );
+
+                _logger.LogInformation("AudioProcessingContext created successfully for zone {ZoneIndex}", this._zoneIndex);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation("Failed to create AudioProcessingContext for zone {ZoneIndex}: {Error}", this._zoneIndex, ex.Message);
+                throw;
+            }
 
             // Subscribe to real-time events
-            this._processingContext.PositionChanged += this.OnPositionChanged;
-            this._processingContext.PlaybackStateChanged += this.OnPlaybackStateChanged;
+            try
+            {
+                this._processingContext.PositionChanged += this.OnPositionChanged;
+                this._processingContext.PlaybackStateChanged += this.OnPlaybackStateChanged;
+                _logger.LogInformation("Event handlers subscribed successfully for zone {ZoneIndex}", this._zoneIndex);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation("Failed to subscribe to events for zone {ZoneIndex}: {Error}", this._zoneIndex, ex.Message);
+                throw;
+            }
             this._streamingCts = new CancellationTokenSource();
             this._currentTrack = trackInfo;
             this._playbackStartedAt = DateTime.UtcNow;
