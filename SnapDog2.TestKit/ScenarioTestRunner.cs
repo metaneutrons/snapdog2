@@ -139,7 +139,10 @@ public class ScenarioTestRunner
             Console.WriteLine("   🎵 Testing Subsonic track progress (playlist 2)...");
             await PutCommand("/v1/zones/1/playlist", "2");
             await PostCommand("/v1/zones/1/play/playlist/2/track", "1");
-            await Task.Delay(5000);
+
+            // Wait longer for Subsonic stream buffering (HTTP streams need more time)
+            Console.WriteLine("   ⏳ Waiting for Subsonic stream to buffer...");
+            await Task.Delay(10000);
 
             var subPos1 = await GetAsync("/v1/zones/1/track/position");
             var subProgress1 = await GetAsync("/v1/zones/1/track/progress");
