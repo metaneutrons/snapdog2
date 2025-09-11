@@ -286,6 +286,9 @@ public class ScenarioTestRunner
 
     private async Task TestScenario(string name, Func<Task<bool>> test)
     {
+        // Print scenario name header first
+        Console.WriteLine($"🎮 {name}");
+
         try
         {
             var result = await test();
@@ -296,6 +299,7 @@ public class ScenarioTestRunner
             }
             else
             {
+                Console.WriteLine(); // Add blank line before failed scenario
                 Console.WriteLine($"❌ {name} - Test condition failed");
                 _failedTests++;
                 _failedTestNames.Add($"{name} - Test condition failed");
