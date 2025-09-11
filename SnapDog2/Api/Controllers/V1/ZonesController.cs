@@ -92,7 +92,7 @@ public partial class ZonesController(
         var result = await _zoneManager.GetZoneStateAsync(zoneIndex);
         if (result.IsFailure)
         {
-            return Ok("Zone " + zoneIndex);
+            return NotFound($"Zone {zoneIndex} not found: {result.ErrorMessage}");
         }
         return Ok(result.Value);
     }
@@ -456,6 +456,14 @@ public partial class ZonesController(
             return NotFound($"Zone {zoneIndex} not found");
         }
 
+        // First set the playlist
+        var playlistResult = await zoneResult.Value.SetPlaylistAsync(playlistIndex);
+        if (playlistResult.IsFailure)
+        {
+            return Problem(playlistResult.ErrorMessage);
+        }
+
+        // Then play the track
         var result = await zoneResult.Value.PlayTrackAsync(trackIndex, CancellationToken.None);
 
         // Send KNX command

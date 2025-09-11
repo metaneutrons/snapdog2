@@ -155,12 +155,18 @@ public class ScenarioTestRunner
 
             if (float.Parse(subProgress2) == 0)
             {
-                Console.WriteLine("   ⚠️  Subsonic progress is 0 (progress calculation may not be implemented yet)");
+                Console.WriteLine("   ❌ Subsonic progress is 0 - position tracking is not working!");
+                return false;
             }
 
             if (int.Parse(subPos2) > int.Parse(subPos1))
             {
                 Console.WriteLine("   ✅ Subsonic track: position increasing correctly");
+            }
+            else
+            {
+                Console.WriteLine("   ❌ Subsonic position not increasing - playback may not be working!");
+                return false;
             }
 
             return true;
@@ -218,20 +224,23 @@ public class ScenarioTestRunner
             int validCovers = 0;
             foreach (var track in tracks)
             {
-                var coverUrl = track["coverUrl"]?.ToString();
+                var coverUrl = track["coverArtUrl"]?.ToString();
                 if (!string.IsNullOrEmpty(coverUrl))
                 {
                     Console.WriteLine($"   🔍 Found cover URL: {coverUrl}");
 
-                    // Validate URL structure
-                    if (coverUrl.StartsWith("/api/v1/cover/"))
+                    // Validate URL structure (accept both relative and absolute URLs)
+                    if (coverUrl.StartsWith("/api/v1/cover/") || coverUrl.Contains("/api/v1/cover/"))
                     {
                         Console.WriteLine("   ✅ Valid cover URL structure");
 
                         // Test if the cover URL returns valid image data
                         try
                         {
-                            var imageResponse = await _httpClient.GetAsync($"{_baseUrl}{coverUrl}");
+                            // Handle both relative and absolute URLs
+                            var fullUrl = coverUrl.StartsWith("http") ? coverUrl : $"{_baseUrl}{coverUrl}";
+                            Console.WriteLine($"   🔗 Testing full URL: {fullUrl}");
+                            var imageResponse = await _httpClient.GetAsync(fullUrl);
                             if (imageResponse.IsSuccessStatusCode)
                             {
                                 var contentType = imageResponse.Content.Headers.ContentType?.MediaType;

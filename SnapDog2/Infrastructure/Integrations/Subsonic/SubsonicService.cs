@@ -35,6 +35,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
 {
     private readonly SubsonicClient _subsonicClient;
     private readonly SubsonicConfig _config;
+    private readonly HttpConfig _httpConfig;
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<SubsonicService> _logger;
     private readonly ResiliencePipeline _connectionPolicy;
@@ -63,6 +64,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
     )
     {
         this._config = configOptions.Value.Services.Subsonic;
+        this._httpConfig = configOptions.Value.Http;
         this._serviceProvider = serviceProvider;
         this._logger = logger;
 
@@ -475,7 +477,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
     /// <summary>
     /// Maps SubsonicMedia PlaylistSummary to SnapDog2 PlaylistInfo.
     /// </summary>
-    private static PlaylistInfo MapToPlaylistInfoFromSummary(
+    private PlaylistInfo MapToPlaylistInfoFromSummary(
         PlaylistSummary playlistSummary
     )
     {
@@ -494,7 +496,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
     /// <summary>
     /// Maps SubsonicMedia Playlist to SnapDog2 PlaylistInfo.
     /// </summary>
-    private static PlaylistInfo MapToPlaylistInfo(Playlist playlist)
+    private PlaylistInfo MapToPlaylistInfo(Playlist playlist)
     {
         return new PlaylistInfo
         {
@@ -533,11 +535,12 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
     }
 
     /// <summary>
-    /// Converts internal Subsonic cover ID to full API URL.
+    /// Converts internal Subsonic cover ID to full API URL using configurable base URL.
+    /// Enterprise-grade solution with reverse proxy support.
     /// </summary>
-    private static string? GetFullCoverUrl(string? coverId)
+    private string? GetFullCoverUrl(string? coverId)
     {
-        return string.IsNullOrWhiteSpace(coverId) ? null : $"/api/v1/cover/{coverId}";
+        return string.IsNullOrWhiteSpace(coverId) ? null : $"{_httpConfig.BaseUrl}/api/v1/cover/{coverId}";
     }
 
     /// <inheritdoc />

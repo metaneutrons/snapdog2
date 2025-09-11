@@ -62,4 +62,12 @@ public class HttpConfig
     /// </summary>
     [Env(Key = "WEBUI_PATH", Default = "/")]
     public string WebUiPath { get; set; } = "/";
+
+    /// <summary>
+    /// Base URL for generating absolute URLs (for reverse proxy support).
+    /// Maps to: SNAPDOG_HTTP_BASE_URL
+    /// Example: "https://snapdog.example.com" or "http://localhost:8000"
+    /// </summary>
+    [Env(Key = "BASE_URL", Default = "http://localhost:8000")]
+    public string BaseUrl { get; set; } = "http://localhost:8000";
 }
