@@ -13,7 +13,9 @@
 //
 namespace SnapDog2.Infrastructure.Integrations.Mqtt;
 
+using Microsoft.Extensions.Options;
 using SnapDog2.Domain.Abstractions;
+using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Enums;
 using SnapDog2.Shared.Models;
 
@@ -23,15 +25,17 @@ using SnapDog2.Shared.Models;
 public class MqttIntegrationPublisher : IIntegrationPublisher
 {
     private readonly IMqttService? _mqttService;
+    private readonly SnapDogConfiguration _configuration;
 
     public MqttIntegrationPublisher(IServiceProvider serviceProvider)
     {
         _mqttService = serviceProvider.GetService<IMqttService>();
+        _configuration = serviceProvider.GetRequiredService<IOptions<SnapDogConfiguration>>().Value;
     }
 
     public string Name => "MQTT";
 
-    public bool IsEnabled => _mqttService?.IsConnected == true;
+    public bool IsEnabled => _configuration.Services.Mqtt.Enabled;
 
     public async Task PublishZonePlaylistChangedAsync(int zoneIndex, PlaylistInfo? playlist, CancellationToken cancellationToken = default)
     {

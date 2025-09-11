@@ -243,10 +243,10 @@ public static class SnapDogBlueprint
         .Command("CLIENT_VOLUME")
         .Client()
         .Mqtt("snapdog/clients/{clientIndex}/volume/set")
+        .Knx()
         .Put("/api/v1/clients/{clientIndex:int}/volume")
         .ApiReturns<int>()
         .Description("Set client volume level")
-        .Exclude(Protocol.Knx, "Client-specific network settings not suitable for building automation")
         //
         .Command("CLIENT_VOLUME_UP")
         .Client()
@@ -267,10 +267,10 @@ public static class SnapDogBlueprint
         .Command("CLIENT_MUTE")
         .Client()
         .Mqtt("snapdog/clients/{clientIndex}/mute/set")
+        .Knx()
         .Put("/api/v1/clients/{clientIndex:int}/mute")
         .ApiReturns<bool>()
         .Description("Set client mute state")
-        .Exclude(Protocol.Knx, "Client-specific network settings not suitable for building automation")
         //
         .Command("CLIENT_MUTE_TOGGLE")
         .Client()
@@ -297,9 +297,9 @@ public static class SnapDogBlueprint
         .Command("CLIENT_ZONE")
         .Client()
         .Mqtt("snapdog/clients/{clientIndex}/zones/set")
+        .Knx()
         .Put("/api/v1/clients/{clientIndex:int}/zone")
         .Description("Assign client to zone")
-        .Exclude(Protocol.Knx, "Client-specific network settings not suitable for building automation")
         //
         // === CONTROL COMMANDS ===
         //

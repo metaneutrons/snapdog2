@@ -58,6 +58,7 @@ public partial class KnxCommandHandler : IKnxCommandHandler
             "PLAYLIST_REPEAT_TOGGLE" => await HandlePlaylistRepeatToggle(zoneIndex),
             var cmd when cmd.StartsWith("CLIENT_") && cmd.EndsWith("_VOLUME") => await HandleClientVolume(cmd, parameters),
             var cmd when cmd.StartsWith("CLIENT_") && cmd.EndsWith("_MUTE") => await HandleClientMute(cmd, parameters),
+            var cmd when cmd.StartsWith("CLIENT_") && cmd.EndsWith("_ZONE") => await HandleClientZone(cmd, parameters),
             _ => Result.Success() // Unknown commands are ignored
         };
     }
@@ -158,6 +159,20 @@ public partial class KnxCommandHandler : IKnxCommandHandler
             return await Task.FromResult(Result.Success());
         }
         return Result.Failure($"Invalid client mute command: {commandId}");
+    }
+
+    [KnxCommand("CLIENT_ZONE")]
+    private async Task<Result> HandleClientZone(string commandId, object? parameters)
+    {
+        // Extract client index from command like "CLIENT_1_ZONE"
+        var parts = commandId.Split('_');
+        if (parts.Length >= 3 && int.TryParse(parts[1], out var clientIndex) && parameters is int zoneIndex)
+        {
+            LogClientKnxCommand("ZONE", clientIndex, zoneIndex);
+            // TODO: Send actual KNX command to group address for client zone assignment
+            return await Task.FromResult(Result.Success());
+        }
+        return Result.Failure($"Invalid client zone command: {commandId}");
     }
 
     [LoggerMessage(EventId = 120001, Level = LogLevel.Debug, Message = "KNX command {CommandId} handled for zone {ZoneIndex}")]
