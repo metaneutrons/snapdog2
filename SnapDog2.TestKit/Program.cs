@@ -1,72 +1,50 @@
-using System.CommandLine;
-using System.CommandLine.Parsing;
-using SnapDog2.TestKit;
+//
+// SnapDog
+// The Snapcast-based Smart Home Audio System with MQTT & KNX integration
+// Copyright (C) 2025 Fabian Schmieder
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <https://www.gnu.org/licenses/>.
+//
+using SnapDog2.TestKit.Base;
 
-// Create options using modern System.CommandLine pattern
-Option<string> urlOption = new("--url", "-u")
+namespace SnapDog2.TestKit;
+
+/// <summary>
+/// SnapDog2 TestKit - Comprehensive scenario testing for the SnapDog2 API.
+/// </summary>
+internal static class Program
 {
-    Description = "Base URL for the SnapDog2 API",
-    DefaultValueFactory = _ => "http://localhost:8000/api",
-};
+    private static async Task Main(string[] args)
+    {
+        Console.WriteLine("⚠️  WARNING: SnapDog2 TestKit expects values from the dev container setup.");
+        Console.WriteLine("   Tests may fail if run against a different environment setup.");
+        Console.WriteLine();
+        Console.WriteLine();
 
-Option<bool> failEarlyOption = new("--fail-early", "-f")
-{
-    Description = "Stop immediately when a test fails",
-};
+        var baseUrl = "http://localhost:8000/api";
+        var testRunner = new TestRunner(baseUrl);
 
-Option<bool> baseOnlyOption = new("--base-only", "-b")
-{
-    Description = "Run only base API tests, skip scenario tests",
-};
+        if (args.Contains("--scenarios-only"))
+        {
+            await testRunner.RunAllScenariosAsync();
+        }
+        else
+        {
+            Console.WriteLine("🚀 SnapDog2 TestKit");
+            Console.WriteLine("═══════════════════");
+            Console.WriteLine("Available options:");
+            Console.WriteLine("  --scenarios-only    Run scenario tests only");
+            Console.WriteLine();
+            Console.WriteLine("Running scenario tests by default...");
+            Console.WriteLine();
 
-Option<bool> scenariosOnlyOption = new("--scenarios-only", "-s")
-{
-    Description = "Run only scenario tests, skip base tests",
-};
-
-// Create root command using modern pattern
-RootCommand rootCommand = new("SnapDog2 TestKit - Comprehensive API Testing Suite");
-rootCommand.Options.Add(urlOption);
-rootCommand.Options.Add(failEarlyOption);
-rootCommand.Options.Add(baseOnlyOption);
-rootCommand.Options.Add(scenariosOnlyOption);
-
-// Parse and handle commands
-var parseResult = rootCommand.Parse(args);
-
-// Check if parsing failed or help was requested
-if (parseResult.Errors.Count > 0 || args.Contains("--help") || args.Contains("-h"))
-{
-    var result = parseResult.Invoke();
-    return result;
+            await testRunner.RunAllScenariosAsync();
+        }
+    }
 }
-
-// Extract parsed values
-string url = parseResult.GetValue(urlOption) ?? "http://localhost:8000/api";
-bool failEarly = parseResult.GetValue(failEarlyOption);
-bool baseOnly = parseResult.GetValue(baseOnlyOption);
-bool scenariosOnly = parseResult.GetValue(scenariosOnlyOption);
-
-// Display warning message with icon
-Console.WriteLine("⚠️  WARNING: SnapDog2 TestKit expects values from the dev container setup.");
-Console.WriteLine("   Tests may fail if run against a different environment setup.");
-Console.WriteLine();
-
-var exitCode = 0;
-
-// Run base tests (unless scenarios-only)
-if (!scenariosOnly)
-{
-    var testRunner = new ApiTestRunner(url, failEarly);
-    exitCode = await testRunner.RunAllTestsAsync();
-}
-
-// Run scenario tests (unless base-only, and only if base tests passed)
-if (!baseOnly && exitCode == 0)
-{
-    var scenarioRunner = new ScenarioTestRunner(url);
-    await scenarioRunner.RunScenariosAsync();
-    scenarioRunner.Dispose();
-}
-
-return exitCode;
