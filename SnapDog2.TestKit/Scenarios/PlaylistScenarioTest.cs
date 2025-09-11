@@ -33,54 +33,57 @@ public class PlaylistScenarioTest : BaseScenarioTest
         var tracksResponse = await GetAsync("/v1/media/playlists/2/tracks");
         var tracks = JsonSerializer.Deserialize<JsonElement[]>(tracksResponse);
 
-        Console.WriteLine($"   📊 Found {tracks.Length} tracks in Subsonic playlist");
+        Console.WriteLine($"   📊 Found {tracks?.Length ?? 0} tracks in Subsonic playlist");
 
         var validCovers = 0;
-        foreach (var track in tracks)
+        if (tracks != null)
         {
-            var coverUrl = track.GetProperty("coverArtUrl").GetString();
-            if (!string.IsNullOrEmpty(coverUrl))
+            foreach (var track in tracks)
             {
-                Console.WriteLine($"   🔍 Found cover URL: {coverUrl}");
-
-                // Validate URL structure (accept both relative and absolute URLs)
-                if (coverUrl.StartsWith("/api/v1/cover/") || coverUrl.Contains("/api/v1/cover/"))
+                var coverUrl = track.GetProperty("coverArtUrl").GetString();
+                if (!string.IsNullOrEmpty(coverUrl))
                 {
-                    Console.WriteLine("   ✅ Valid cover URL structure");
+                    Console.WriteLine($"   🔍 Found cover URL: {coverUrl}");
 
-                    // Test if the cover URL returns valid image data
-                    try
+                    // Validate URL structure (accept both relative and absolute URLs)
+                    if (coverUrl.StartsWith("/api/v1/cover/") || coverUrl.Contains("/api/v1/cover/"))
                     {
-                        // Handle both relative and absolute URLs
-                        var fullUrl = coverUrl.StartsWith("http") ? coverUrl : $"{BaseUrl}{coverUrl}";
-                        Console.WriteLine($"   🔗 Testing full URL: {fullUrl}");
-                        var imageResponse = await HttpClient.GetAsync(fullUrl);
-                        if (imageResponse.IsSuccessStatusCode)
+                        Console.WriteLine("   ✅ Valid cover URL structure");
+
+                        // Test if the cover URL returns valid image data
+                        try
                         {
-                            var contentType = imageResponse.Content.Headers.ContentType?.MediaType;
-                            if (contentType?.StartsWith("image/") == true)
+                            // Handle both relative and absolute URLs
+                            var fullUrl = coverUrl.StartsWith("http") ? coverUrl : $"{BaseUrl}{coverUrl}";
+                            Console.WriteLine($"   🔗 Testing full URL: {fullUrl}");
+                            var imageResponse = await HttpClient.GetAsync(fullUrl);
+                            if (imageResponse.IsSuccessStatusCode)
                             {
-                                Console.WriteLine($"   ✅ Cover URL returns valid image ({contentType})");
-                                validCovers++;
+                                var contentType = imageResponse.Content.Headers.ContentType?.MediaType;
+                                if (contentType?.StartsWith("image/") == true)
+                                {
+                                    Console.WriteLine($"   ✅ Cover URL returns valid image ({contentType})");
+                                    validCovers++;
+                                }
+                                else
+                                {
+                                    Console.WriteLine($"   ⚠️  Cover URL returns non-image content: {contentType}");
+                                }
                             }
                             else
                             {
-                                Console.WriteLine($"   ⚠️  Cover URL returns non-image content: {contentType}");
+                                Console.WriteLine($"   ⚠️  Cover URL returns HTTP {imageResponse.StatusCode}");
                             }
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            Console.WriteLine($"   ⚠️  Cover URL returns HTTP {imageResponse.StatusCode}");
+                            Console.WriteLine($"   ⚠️  Error testing cover URL: {ex.Message}");
                         }
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        Console.WriteLine($"   ⚠️  Error testing cover URL: {ex.Message}");
+                        Console.WriteLine("   ❌ Invalid cover URL structure");
                     }
-                }
-                else
-                {
-                    Console.WriteLine("   ❌ Invalid cover URL structure");
                 }
             }
         }

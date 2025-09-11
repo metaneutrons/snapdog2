@@ -205,11 +205,30 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
                 return new AudioProcessingResult { Success = false, ErrorMessage = "Media playback failed" };
             }
 
-            // Log media properties for debugging
-            this.LogMediaProperties(
+            // Log media properties and format for debugging
+            var mediaFormat = this._mediaPlayer.Media?.Mrl ?? "Unknown";
+            var contentType = "Unknown";
+
+            // Try to detect format from URL or media info
+            if (mediaFormat.Contains(".mp3") || mediaFormat.Contains("format=mp3"))
+            {
+                contentType = "MP3";
+            }
+            else if (mediaFormat.Contains(".mp4") || mediaFormat.Contains(".m4a"))
+            {
+                contentType = "MP4/M4A";
+            }
+            else if (mediaFormat.Contains("radio") || mediaFormat.Contains("stream"))
+            {
+                contentType = "Radio Stream";
+            }
+
+            this.LogMediaPropertiesWithFormat(
                 this._mediaPlayer.Length,
                 this._mediaPlayer.IsSeekable,
-                this._mediaPlayer.State.ToString()
+                this._mediaPlayer.State.ToString(),
+                contentType,
+                mediaFormat
             );
 
             // Save metadata to JSON file (disabled - metadata available programmatically)
@@ -373,6 +392,10 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
         }
     }
 
+    private long _lastPositionMs = -1;
+    private DateTime _lastPositionCheck = DateTime.MinValue;
+    private int _stuckPositionCount = 0;
+
     /// <summary>
     /// Gets the current playback position in milliseconds.
     /// </summary>
@@ -385,6 +408,29 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             var isPlaying = this._mediaPlayer.IsPlaying;
 
             this.LogLibVlcDirectAccess(time, state, isPlaying);
+
+            // Position tracking validation - detect stuck position
+            if (isPlaying && state == VLCState.Playing)
+            {
+                var now = DateTime.UtcNow;
+                if (_lastPositionMs == time && time == 0 &&
+                    now - _lastPositionCheck > TimeSpan.FromSeconds(5))
+                {
+                    _stuckPositionCount++;
+                    if (_stuckPositionCount >= 3) // After 15 seconds of stuck position
+                    {
+                        this.LogPositionTrackingFailed(time, state.ToString());
+                        _stuckPositionCount = 0; // Reset to avoid spam
+                    }
+                }
+                else if (_lastPositionMs != time)
+                {
+                    _stuckPositionCount = 0; // Reset counter when position advances
+                }
+
+                _lastPositionMs = time;
+                _lastPositionCheck = now;
+            }
 
             return time;
         }
@@ -792,6 +838,14 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
     [LoggerMessage(EventId = 16028, Level = LogLevel.Information, Message = "LibVLC Media Properties - Duration: {DurationMs}ms, Seekable: {IsSeekable}, State: {State}"
 )]
     private partial void LogMediaProperties(long durationMs, bool isSeekable, string state);
+
+    [LoggerMessage(EventId = 16030, Level = LogLevel.Information, Message = "🎵 LibVLC Media Format - Duration: {DurationMs}ms, Seekable: {IsSeekable}, State: {State}, Format: {ContentType}, URL: {MediaUrl}"
+)]
+    private partial void LogMediaPropertiesWithFormat(long durationMs, bool isSeekable, string state, string contentType, string mediaUrl);
+
+    [LoggerMessage(EventId = 16031, Level = LogLevel.Warning, Message = "⚠️ Position tracking failed - Position stuck at {PositionMs}ms despite {State} state. Stream may not support seeking/position tracking."
+)]
+    private partial void LogPositionTrackingFailed(long positionMs, string state);
 
     [LoggerMessage(EventId = 16029, Level = LogLevel.Information, Message = "🔍 Streaming URL Debug: {StreamUrl}"
 )]

@@ -32,23 +32,23 @@ public class PlayTrackScenarioTest : BaseScenarioTest
 
         Console.WriteLine("   ▶️  Testing /play/playlist/1/track endpoint...");
         await PostAsync("/v1/zones/1/play/playlist/1/track", "1");
-        var playState1 = await GetAsync("/v1/zones/1/playback-state");
-        Console.WriteLine($"   📈 Playback state after /play/playlist/1/track: {playState1} (1=Playing)");
+        var playState1 = await GetAsync("/v1/zones/1/track/playing");
+        Console.WriteLine($"   📈 Playback state after /play/playlist/1/track: {playState1} (true=Playing)");
 
         Console.WriteLine("   ⏸️  Testing pause functionality...");
         await PostAsync("/v1/zones/1/pause");
-        var pauseState = await GetAsync("/v1/zones/1/playback-state");
-        Console.WriteLine($"   📊 Playback state after pause: {pauseState} (2=Paused)");
+        var pauseState = await GetAsync("/v1/zones/1/track/playing");
+        Console.WriteLine($"   📊 Playback state after pause: {pauseState} (false=Paused)");
 
         Console.WriteLine("   ▶️  Testing /play endpoint (resume)...");
         await PostAsync("/v1/zones/1/play");
-        var resumeState = await GetAsync("/v1/zones/1/playback-state");
-        Console.WriteLine($"   📈 Playback state after /play (resume): {resumeState} (1=Playing)");
+        var resumeState = await GetAsync("/v1/zones/1/track/playing");
+        Console.WriteLine($"   📈 Playback state after /play (resume): {resumeState} (true=Playing)");
 
         Console.WriteLine("   ⏹️  Testing stop functionality...");
         await PostAsync("/v1/zones/1/stop");
-        var stopState = await GetAsync("/v1/zones/1/playback-state");
-        Console.WriteLine($"   📈 Playback state after stop: {stopState} (0=Stopped, 2=Paused)");
+        var stopState = await GetAsync("/v1/zones/1/track/playing");
+        Console.WriteLine($"   📈 Playback state after stop: {stopState} (false=Stopped)");
 
         Console.WriteLine("   ✅ All play endpoints tested successfully");
         Console.WriteLine("   📋 Tested: /play/playlist/1/track ✅, /pause ✅, /play (resume) ✅, /stop ✅");

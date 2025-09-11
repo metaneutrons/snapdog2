@@ -316,9 +316,9 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
                     );
 
                     // Construct the stream URL manually following Subsonic API spec
-                    // Format: {serverUrl}/rest/stream?id={trackId}&u={username}&p={password}&v={apiVersion}&c={clientName}&f=json
+                    // Format: {serverUrl}/rest/stream?id={trackId}&u={username}&p={password}&v={apiVersion}&c={clientName}&f=json&format=mp3
                     var streamUrl =
-                        $"{this._config.Url?.TrimEnd('/') ?? string.Empty}/rest/stream?id={trackId}&u={this._config.Username}&p={this._config.Password}&v=1.16.1&c=SnapDog2&f=json";
+                        $"{this._config.Url?.TrimEnd('/') ?? string.Empty}/rest/stream?id={trackId}&u={this._config.Username}&p={this._config.Password}&v=1.16.1&c=SnapDog2&f=json&format=mp3";
 
                     return streamUrl;
                 },
@@ -515,8 +515,8 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
     /// </summary>
     private TrackInfo MapToTrackInfo(Song song, int index)
     {
-        // Construct the full streaming URL directly
-        var streamUrl = $"{this._config.Url?.TrimEnd('/') ?? string.Empty}/rest/stream?id={song.Id}&u={this._config.Username}&p={this._config.Password}&v=1.16.1&c=SnapDog2&f=json";
+        // Construct the full streaming URL directly with OPUS format for better quality and position tracking
+        var streamUrl = $"{this._config.Url?.TrimEnd('/') ?? string.Empty}/rest/stream?id={song.Id}&u={this._config.Username}&p={this._config.Password}&v=1.16.1&c=SnapDog2&f=json&format=opus&maxBitRate=192";
 
         _logger.LogInformation("🔗 Generated Subsonic streaming URL: {StreamUrl}", streamUrl);
 

@@ -64,9 +64,9 @@ public class ProgressPositionScenarioTest : BaseScenarioTest
         var subProgress2 = await GetAsync("/v1/zones/1/track/progress");
         Console.WriteLine($"   📊 Subsonic - Position: {subPos2}ms, Progress: {subProgress2}");
 
-        if (float.Parse(subProgress2) == 0)
+        if (float.Parse(subProgress2) <= 0.0001f) // Use small threshold instead of exact 0
         {
-            Console.WriteLine("   ❌ Subsonic progress is 0 - position tracking is not working!");
+            Console.WriteLine("   ❌ Subsonic progress is near 0 - position tracking is not working!");
             return false;
         }
 
