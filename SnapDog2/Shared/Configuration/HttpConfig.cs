@@ -57,13 +57,6 @@ public class HttpConfig
     public bool WebUiEnabled { get; set; } = true;
 
     /// <summary>
-    /// WebUI path for reverse proxy.
-    /// Maps environment variables with pattern: SNAPDOG_HTTP_WEBUI_PATH
-    /// </summary>
-    [Env(Key = "WEBUI_PATH", Default = "/")]
-    public string WebUiPath { get; set; } = "/";
-
-    /// <summary>
     /// Base URL for generating absolute URLs (for reverse proxy support).
     /// Maps to: SNAPDOG_HTTP_BASE_URL
     /// Example: "https://snapdog.example.com" or "http://localhost:8000"

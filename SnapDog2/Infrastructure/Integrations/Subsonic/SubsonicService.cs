@@ -515,8 +515,8 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
     /// </summary>
     private TrackInfo MapToTrackInfo(Song song, int index)
     {
-        // Construct the full streaming URL directly with OPUS format for better quality and position tracking
-        var streamUrl = $"{this._config.Url?.TrimEnd('/') ?? string.Empty}/rest/stream?id={song.Id}&u={this._config.Username}&p={this._config.Password}&v=1.16.1&c=SnapDog2&f=json&format=opus&maxBitRate=192";
+        // Construct the full streaming URL directly - testing AAC format for position tracking
+        var streamUrl = $"{this._config.Url?.TrimEnd('/') ?? string.Empty}/rest/stream?id={song.Id}&u={this._config.Username}&p={this._config.Password}&v=1.16.1&c=SnapDog2&f=json&format=aac&maxBitRate=256";
 
         _logger.LogInformation("🔗 Generated Subsonic streaming URL: {StreamUrl}", streamUrl);
 

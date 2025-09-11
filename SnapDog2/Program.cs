@@ -611,10 +611,28 @@ static WebApplication CreateWebApplication(string[] args)
         app.UseAuthentication();
         app.UseAuthorization();
 
+        // Add WebUI static files and routing (conditionally based on configuration)
+        if (snapDogConfig.Http.WebUiEnabled)
+        {
+            app.UseStaticFiles();
+            Log.Information("WebUI enabled - serving static files from wwwroot");
+        }
+        else
+        {
+            Log.Information("WebUI disabled via configuration (SNAPDOG_HTTP_WEBUI_ENABLED=false)");
+        }
+
         app.MapControllers();
 
         // Map SignalR hub
         app.MapHub<SnapDogHub>("/hubs/snapdog/v1");
+
+        // Add WebUI fallback routing (conditionally based on configuration)
+        if (snapDogConfig.Http.WebUiEnabled)
+        {
+            app.MapFallbackToFile("index.html");
+            Log.Information("WebUI fallback routing enabled - SPA routing to index.html");
+        }
 
         // Map health check endpoints
         if (snapDogConfig.System.HealthChecksEnabled)
