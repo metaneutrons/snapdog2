@@ -23,52 +23,136 @@ using SnapDog2.Shared.Models;
 public interface IZoneService
 {
     /// <summary>
-    /// Starts playback on the specified zone.
+    /// Plays/resumes playback on the zone.
     /// </summary>
     [CommandId("PLAY")]
-    Task<Result> StartPlaybackAsync(TrackInfo trackInfo, CancellationToken cancellationToken = default);
+    Task<Result> PlayAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Stops playback on the specified zone.
-    /// </summary>
-    [CommandId("STOP")]
-    Task<Result> StopPlaybackAsync(CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Pauses playback on the specified zone.
+    /// Pauses playback on the zone.
     /// </summary>
     [CommandId("PAUSE")]
-    Task<Result> PausePlaybackAsync(CancellationToken cancellationToken = default);
+    Task<Result> PauseAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Sets the volume for the specified zone.
+    /// Stops playback on the zone.
+    /// </summary>
+    [CommandId("STOP")]
+    Task<Result> StopAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Sets the volume for the zone.
     /// </summary>
     [CommandId("VOLUME")]
     Task<Result> SetVolumeAsync(int volume, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Sets the mute state for the specified zone.
+    /// Increases volume by step.
+    /// </summary>
+    [CommandId("VOLUME_UP")]
+    Task<Result> VolumeUpAsync(int step = 5, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Decreases volume by step.
+    /// </summary>
+    [CommandId("VOLUME_DOWN")]
+    Task<Result> VolumeDownAsync(int step = 5, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Sets the mute state for the zone.
     /// </summary>
     [CommandId("MUTE")]
     Task<Result> SetMuteAsync(bool muted, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Sets a specific track by index.
+    /// Toggles mute state.
+    /// </summary>
+    [CommandId("MUTE_TOGGLE")]
+    Task<Result> ToggleMuteAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Plays next track.
+    /// </summary>
+    [CommandId("TRACK_NEXT")]
+    Task<Result> NextTrackAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Plays previous track.
+    /// </summary>
+    [CommandId("TRACK_PREVIOUS")]
+    Task<Result> PreviousTrackAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Plays specific track by index.
     /// </summary>
     [CommandId("TRACK")]
-    Task<Result> SetTrackAsync(int trackIndex, CancellationToken cancellationToken = default);
+    Task<Result> PlayTrackAsync(int trackIndex, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Seeks to a specific position in the current track.
+    /// Seeks to specific position.
     /// </summary>
     [CommandId("TRACK_POSITION")]
-    Task<Result> SeekAsync(TimeSpan position, CancellationToken cancellationToken = default);
+    Task<Result> SeekToPositionAsync(TimeSpan position, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Sets a specific playlist by index.
+    /// Seeks to progress percentage (0.0-1.0).
+    /// </summary>
+    [CommandId("TRACK_PROGRESS")]
+    Task<Result> SeekToProgressAsync(double progress, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Sets specific playlist by index.
     /// </summary>
     [CommandId("PLAYLIST")]
     Task<Result> SetPlaylistAsync(int playlistIndex, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Plays next playlist.
+    /// </summary>
+    [CommandId("PLAYLIST_NEXT")]
+    Task<Result> NextPlaylistAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Plays previous playlist.
+    /// </summary>
+    [CommandId("PLAYLIST_PREVIOUS")]
+    Task<Result> PreviousPlaylistAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Sets playlist shuffle state.
+    /// </summary>
+    [CommandId("PLAYLIST_SHUFFLE")]
+    Task<Result> SetPlaylistShuffleAsync(bool shuffle, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Toggles playlist shuffle.
+    /// </summary>
+    [CommandId("PLAYLIST_SHUFFLE_TOGGLE")]
+    Task<Result> TogglePlaylistShuffleAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Sets playlist repeat state.
+    /// </summary>
+    [CommandId("PLAYLIST_REPEAT")]
+    Task<Result> SetPlaylistRepeatAsync(bool repeat, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Toggles playlist repeat.
+    /// </summary>
+    [CommandId("PLAYLIST_REPEAT_TOGGLE")]
+    Task<Result> TogglePlaylistRepeatAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Sets track repeat state.
+    /// </summary>
+    [CommandId("TRACK_REPEAT")]
+    Task<Result> SetTrackRepeatAsync(bool repeat, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Toggles track repeat.
+    /// </summary>
+    [CommandId("TRACK_REPEAT_TOGGLE")]
+    Task<Result> ToggleTrackRepeatAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets the current state of the zone.
@@ -76,33 +160,12 @@ public interface IZoneService
     Task<Result<ZoneState>> GetStateAsync();
 
     /// <summary>
-    /// Plays the current track.
-    /// </summary>
-    Task<Result> PlayAsync();
-
-    /// <summary>
     /// Plays a URL directly.
     /// </summary>
     Task<Result> PlayUrlAsync(string mediaUrl);
 
-    // Additional methods required by handlers
+    /// <summary>
+    /// Updates Snapcast group ID (internal).
+    /// </summary>
     Task<Result> UpdateSnapcastGroupId(string groupId);
-    Task<Result> PauseAsync(CancellationToken cancellationToken = default);
-    Task<Result> StopAsync(CancellationToken cancellationToken = default);
-    Task<Result> NextTrackAsync(CancellationToken cancellationToken = default);
-    Task<Result> PreviousTrackAsync(CancellationToken cancellationToken = default);
-    Task<Result> SetPlaylistShuffleAsync(bool shuffle, CancellationToken cancellationToken = default);
-    Task<Result> SetPlaylistRepeatAsync(bool repeat, CancellationToken cancellationToken = default);
-    Task<Result> SeekToProgressAsync(double progress, CancellationToken cancellationToken = default);
-    Task<Result> PlayTrackAsync(int trackIndex, CancellationToken cancellationToken = default);
-    Task<Result> SeekToPositionAsync(TimeSpan position, CancellationToken cancellationToken = default);
-    Task<Result> TogglePlaylistRepeatAsync(CancellationToken cancellationToken = default);
-    Task<Result> TogglePlaylistShuffleAsync(CancellationToken cancellationToken = default);
-    Task<Result> ToggleTrackRepeatAsync(CancellationToken cancellationToken = default);
-    Task<Result> SetTrackRepeatAsync(bool repeat, CancellationToken cancellationToken = default);
-    Task<Result> PreviousPlaylistAsync(CancellationToken cancellationToken = default);
-    Task<Result> NextPlaylistAsync(CancellationToken cancellationToken = default);
-    Task<Result> ToggleMuteAsync(CancellationToken cancellationToken = default);
-    Task<Result> VolumeDownAsync(int step = 5, CancellationToken cancellationToken = default);
-    Task<Result> VolumeUpAsync(int step = 5, CancellationToken cancellationToken = default);
 }

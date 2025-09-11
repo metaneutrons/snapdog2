@@ -221,7 +221,7 @@ public partial class StateRestorationService(
                 if (playlistResult.IsSuccess)
                 {
                     // Set track 1
-                    var trackResult = await zoneService.SetTrackAsync(1);
+                    var trackResult = await zoneService.PlayTrackAsync(1);
                     if (trackResult.IsSuccess)
                     {
                         this.LogInitialPlaylistPreloaded(zoneIndex, zoneName);

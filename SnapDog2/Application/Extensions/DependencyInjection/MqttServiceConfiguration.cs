@@ -38,7 +38,7 @@ public static class MqttServiceConfiguration
 
         // TODO: MqttService interface is complex - implement in Phase 3.2.4
         // Register the MQTT service as singleton with proper DI lifetime management
-        // services.AddSingleton<IMqttService, MqttService>();
+        services.AddSingleton<IMqttService, MqttService>();
 
         // TODO: Phase 2 - MqttCommandMapper depends on IZoneService which isn't registered yet
         // Register MQTT command mapper for direct service calls

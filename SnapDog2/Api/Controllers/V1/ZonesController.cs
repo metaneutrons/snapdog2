@@ -372,7 +372,7 @@ public partial class ZonesController(
         {
             return NotFound($"Zone {zoneIndex} not found");
         }
-        var result = await zoneResult.Value.SetTrackAsync(trackIndex);
+        var result = await zoneResult.Value.PlayTrackAsync(trackIndex);
         return result.IsSuccess ? Accepted(trackIndex) : Problem(result.ErrorMessage);
     }
 

@@ -12,6 +12,7 @@
     <PackageReference Include="dotenv.net" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="MQTTnet" />
     <PackageReference Include="SnapcastClient" />
     <PackageReference Include="StackExchange.Redis" />
     <PackageReference Include="Swashbuckle.AspNetCore" />
@@ -24,7 +25,6 @@
     <PackageReference Include="FluentValidation" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
     <PackageReference Include="FluentValidation.AspNetCore" />
-    <PackageReference Include="MQTTnet" />
     <PackageReference Include="Knx.Falcon.Sdk" />
     <PackageReference Include="Polly" />
     <PackageReference Include="Microsoft.Extensions.Http.Polly" />
@@ -48,9 +48,7 @@
   <!-- Auto-generate swagger.json when API changes -->
   <Target Name="GenerateSwaggerJson" AfterTargets="Build" Condition="'$(Configuration)' == 'Debug'">
     <Message Text="🔄 Generating swagger.json..." Importance="high" />
-    <Exec Command="dotnet run --project $(MSBuildProjectDirectory)/../SnapDog2.SwaggerGen/SnapDog2.SwaggerGen.csproj -- $(MSBuildProjectDirectory)/swagger.json" 
-          ContinueOnError="false" 
-          WorkingDirectory="$(MSBuildProjectDirectory)" />
+    <Exec Command="dotnet run --project $(MSBuildProjectDirectory)/../SnapDog2.SwaggerGen/SnapDog2.SwaggerGen.csproj -- $(MSBuildProjectDirectory)/swagger.json" ContinueOnError="false" WorkingDirectory="$(MSBuildProjectDirectory)" />
     <Message Text="✅ swagger.json generated successfully" Importance="high" />
   </Target>
 

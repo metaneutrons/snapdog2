@@ -2046,7 +2046,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     /// <summary>
     /// Plays the current track.
     /// </summary>
-    Task<Result> IZoneService.PlayAsync()
+    Task<Result> IZoneService.PlayAsync(CancellationToken cancellationToken)
     {
         return PlayAsync();
     }
@@ -2096,11 +2096,6 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         return SetPlaylistRepeatAsync(repeat);
     }
 
-    Task<Result> IZoneService.SeekToProgressAsync(double progress, CancellationToken cancellationToken)
-    {
-        return SeekToProgressAsync((float)progress);
-    }
-
     Task<Result> IZoneService.PlayTrackAsync(int trackIndex, CancellationToken cancellationToken)
     {
         return PlayTrackAsync(trackIndex);
@@ -2121,9 +2116,14 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         return TogglePlaylistShuffleAsync();
     }
 
-    Task<Result> IZoneService.ToggleTrackRepeatAsync(CancellationToken cancellationToken)
+    Task<Result> IZoneService.PreviousPlaylistAsync(CancellationToken cancellationToken)
     {
-        return ToggleTrackRepeatAsync();
+        return PreviousPlaylistAsync();
+    }
+
+    Task<Result> IZoneService.SeekToProgressAsync(double progress, CancellationToken cancellationToken)
+    {
+        return SeekToProgressAsync((float)progress);
     }
 
     Task<Result> IZoneService.SetTrackRepeatAsync(bool repeat, CancellationToken cancellationToken)
@@ -2131,9 +2131,9 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         return SetTrackRepeatAsync(repeat);
     }
 
-    Task<Result> IZoneService.PreviousPlaylistAsync(CancellationToken cancellationToken)
+    Task<Result> IZoneService.ToggleTrackRepeatAsync(CancellationToken cancellationToken)
     {
-        return PreviousPlaylistAsync();
+        return ToggleTrackRepeatAsync();
     }
 
     Task<Result> IZoneService.NextPlaylistAsync(CancellationToken cancellationToken)
