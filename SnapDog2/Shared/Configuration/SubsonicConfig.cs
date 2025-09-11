@@ -14,6 +14,7 @@
 namespace SnapDog2.Shared.Configuration;
 
 using EnvoyConfig.Attributes;
+using SnapDog2.Shared.Enums;
 
 /// <summary>
 /// Subsonic service configuration.
@@ -54,6 +55,20 @@ public class SubsonicConfig
     /// </summary>
     [Env(Key = "TIMEOUT", Default = 10000)]
     public int Timeout { get; set; } = 10000;
+
+    /// <summary>
+    /// Subsonic Transcoding configuration.
+    /// Maps environment variables with prefix: SNAPDOG_SERVICES_SUBSONIC_TRANSCODING_FORMAT
+    /// </summary>
+    [Env(Key = "TRANSCODING_FORMAT", Default = "disabled")]
+    public TranscodingFormat TranscodingFormat { get; set; } = TranscodingFormat.Disabled;
+
+    /// <summary>
+    /// Subsonic Transcoding configuration.
+    /// Maps environment variables with prefix: SNAPDOG_SERVICES_SUBSONIC_TRANSCODING_BITRATE_KBS
+    /// </summary>
+    [Env(Key = "TRANSCODING_BITRATE_KBS", Default = 192)]
+    public int TranscodingBitrate { get; set; } = 192;
 
     /// <summary>
     /// Resilience policy configuration for Subsonic operations.
