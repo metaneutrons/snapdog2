@@ -511,8 +511,13 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
     /// <summary>
     /// Maps SubsonicMedia Song to SnapDog2 TrackInfo.
     /// </summary>
-    private static TrackInfo MapToTrackInfo(Song song, int index)
+    private TrackInfo MapToTrackInfo(Song song, int index)
     {
+        // Construct the full streaming URL directly
+        var streamUrl = $"{this._config.Url?.TrimEnd('/') ?? string.Empty}/rest/stream?id={song.Id}&u={this._config.Username}&p={this._config.Password}&v=1.16.1&c=SnapDog2&f=json";
+
+        _logger.LogInformation("🔗 Generated Subsonic streaming URL: {StreamUrl}", streamUrl);
+
         return new TrackInfo
         {
             Index = index,
@@ -523,7 +528,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
             PositionMs = 0, // Always start at beginning
             CoverArtUrl = GetFullCoverUrl(song.CoverArt),
             Source = "subsonic",
-            Url = song.Id, // Use song ID as URL for Subsonic tracks
+            Url = streamUrl, // Use full streaming URL instead of just ID
         };
     }
 

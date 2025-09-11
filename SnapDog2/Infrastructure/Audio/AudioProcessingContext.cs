@@ -152,6 +152,9 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
 
             this.LogStartingAudioProcessing(sourceUrl, finalOutputPath);
 
+            // Debug: Log the actual URL being processed
+            this.LogStreamingUrlDebug(sourceUrl);
+
             // Build media options for raw audio output
             var mediaOptions = this.BuildMediaOptions(finalOutputPath);
 
@@ -394,7 +397,12 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
     /// <summary>
     /// Gets the total duration of the media in milliseconds.
     /// </summary>
-    public long DurationMs => this._mediaPlayer.Length;
+    public long DurationMs => this.MetadataDurationMs ?? this._mediaPlayer.Length;
+
+    /// <summary>
+    /// Gets or sets the duration from track metadata (overrides LibVLC duration for streams).
+    /// </summary>
+    public long? MetadataDurationMs { get; set; }
 
     /// <summary>
     /// Seeks to a specific position in milliseconds.
@@ -442,8 +450,9 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
                 }
 
                 var length = this._mediaPlayer.Length;
+                var effectiveDuration = this.MetadataDurationMs ?? length;
                 var positionMs = length > 0 ? (long)(e.Position * length) : 0;
-                var progress = length > 0 ? e.Position : 0.0f;
+                var progress = effectiveDuration > 0 ? (float)positionMs / effectiveDuration : 0.0f;
 
                 this.LogLibVlcPositionChanged(progress, positionMs);
 
@@ -453,7 +462,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
                     {
                         PositionMs = positionMs,
                         Progress = progress,
-                        DurationMs = length,
+                        DurationMs = effectiveDuration,
                     }
                 );
             }
@@ -474,7 +483,8 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
                 }
 
                 var length = this._mediaPlayer.Length;
-                var progress = length > 0 ? (float)e.Time / length : 0.0f;
+                var effectiveDuration = this.MetadataDurationMs ?? length;
+                var progress = effectiveDuration > 0 ? (float)e.Time / effectiveDuration : 0.0f;
 
                 this.LogLibVlcTimeChanged(e.Time);
                 this.PositionChanged?.Invoke(
@@ -483,7 +493,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
                     {
                         PositionMs = e.Time,
                         Progress = progress,
-                        DurationMs = length,
+                        DurationMs = effectiveDuration,
                     }
                 );
             }
@@ -755,6 +765,10 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
     [LoggerMessage(EventId = 16028, Level = LogLevel.Information, Message = "LibVLC Media Properties - Duration: {DurationMs}ms, Seekable: {IsSeekable}, State: {State}"
 )]
     private partial void LogMediaProperties(long durationMs, bool isSeekable, string state);
+
+    [LoggerMessage(EventId = 16029, Level = LogLevel.Information, Message = "🔍 Streaming URL Debug: {StreamUrl}"
+)]
+    private partial void LogStreamingUrlDebug(string streamUrl);
 
     [LoggerMessage(EventId = 16026, Level = LogLevel.Error, Message = "Failed → initialize LibVLCSharp Core. Ensure LibVLC native libraries are properly installed."
 )]

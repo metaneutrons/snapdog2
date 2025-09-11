@@ -64,6 +64,18 @@ public sealed partial class MediaPlayer(
     }
 
     /// <summary>
+    /// Sets the expected duration from track metadata (for streams where LibVLC can't determine duration).
+    /// </summary>
+    public void SetMetadataDuration(long? durationMs)
+    {
+        if (_processingContext != null)
+        {
+            _processingContext.MetadataDurationMs = durationMs;
+            _logger.LogInformation("🕒 Set metadata duration: {DurationMs}ms for progress calculation", durationMs);
+        }
+    }
+
+    /// <summary>
     /// Starts streaming audio from the specified URL to the Snapcast sink.
     /// </summary>
     /// <param name="streamUrl">The URL to stream from.</param>

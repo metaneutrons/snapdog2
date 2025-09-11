@@ -107,32 +107,17 @@ public sealed partial class MediaPlayerService(
             this._players[zoneIndex] = player;
 
             // Resolve stream URL based on source type
-            string streamUrl;
-            if (trackInfo.Source == "subsonic")
-            {
-                // For Subsonic tracks, the Url field contains the media ID, not a streamable URL
-                // We need to convert it to a proper stream URL using the SubsonicService
-                var streamUrlResult = await this._subsonicService.GetStreamUrlAsync(trackInfo.Url, cancellationToken);
-                if (!streamUrlResult.IsSuccess)
-                {
-                    this._players.TryRemove(zoneIndex, out _);
-                    await player.DisposeAsync();
-                    return Result.Failure($"Failed to get Subsonic stream URL: {streamUrlResult.ErrorMessage}");
-                }
-
-                streamUrl = streamUrlResult.Value!;
-                _logger.LogInformation("Converted Subsonic URL from {OriginalUrl} to {StreamUrl}", trackInfo.Url, streamUrl);
-            }
-            else
-            {
-                // For other sources (radio, etc.), use the URL directly
-                streamUrl = trackInfo.Url;
-            }
+            // All track sources now provide direct streaming URLs
+            var streamUrl = trackInfo.Url;
 
             var result = await player.StartStreamingAsync(streamUrl, trackInfo, cancellationToken);
 
             if (result.IsSuccess)
             {
+                // Set metadata duration for progress calculation (especially important for Subsonic streams)
+                _logger.LogInformation("🎵 Setting metadata duration: {DurationMs}ms for track: {Title}", trackInfo.DurationMs, trackInfo.Title);
+                player.SetMetadataDuration(trackInfo.DurationMs);
+
                 _logger.LogInformation("Playing track {Title} on zone {ZoneIndex} from {StreamUrl}", trackInfo.Title, zoneIndex, streamUrl);
 
                 // Publish playback started notification via SignalR
