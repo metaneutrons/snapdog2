@@ -15,6 +15,8 @@ snapdog/
 │   ├── stop                       # stop command
 │   ├── next                       # next track command
 │   ├── previous                   # previous track command
+│   ├── playlist/next              # next playlist command
+│   ├── playlist/previous          # previous playlist command
 │   ├── volume                     # 50 (current volume)
 │   ├── volume/up                  # volume up (optional payload: int step)
 │   ├── volume/down                # volume down (optional payload: int step)
@@ -39,6 +41,7 @@ snapdog/
 │   │   ├── artist                 # "Artist Name"
 │   │   ├── album                  # "Album Name"
 │   │   ├── cover                  # "<cover_image_url>"
+│   │   ├── genre                  # "Rock" (if available)
 │   │   ├── duration               # duration in ms (if available, otherwise "")
 │   │   ├── position               # position in ms (only when playing, otherwise "")
 │   │   ├── progress               # progress in percent (only when playing, otherwise "")
@@ -46,6 +49,10 @@ snapdog/
 │   ├── playlist/set               # index of playlist to set
 │   └── playlist/                  # current playlist information
 │       ├── name                   # "Best of Keith"
+│       ├── count                  # number of tracks in playlist
+│       ├── duration               # total playlist duration in ms (if available)
+│       ├── description            # playlist description (if available)
+│       ├── cover                  # playlist cover art URL (if available)
 └── clients/{index}/
     ├── name                       # client name
     ├── connected                  # true/false (LWT)
@@ -92,6 +99,8 @@ snapdog/
 | `zones/{index}/stop` | `STOP` | Command | Stop command |
 | `zones/{index}/next` | `TRACK_NEXT` | Command | Next track command |
 | `zones/{index}/previous` | `TRACK_PREVIOUS` | Command | Previous track command |
+| `zones/{index}/playlist/next` | `PLAYLIST_NEXT` | Command | Next playlist command |
+| `zones/{index}/playlist/previous` | `PLAYLIST_PREVIOUS` | Command | Previous playlist command |
 | `zones/{index}/volume` | `VOLUME_STATUS` | Status | Current volume |
 | `zones/{index}/volume/up` | `VOLUME_UP` | Command | Volume up |
 | `zones/{index}/volume/down` | `VOLUME_DOWN` | Command | Volume down |
