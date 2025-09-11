@@ -123,6 +123,7 @@ public sealed partial class MediaPlayer(
             {
                 this._processingContext.PositionChanged += this.OnPositionChanged;
                 this._processingContext.PlaybackStateChanged += this.OnPlaybackStateChanged;
+                this._processingContext.EncounteredError += this.OnEncounteredError;
                 _logger.LogInformation("Event handlers subscribed successfully for zone {ZoneIndex}", this._zoneIndex);
             }
             catch (Exception ex)
@@ -327,6 +328,23 @@ public sealed partial class MediaPlayer(
         catch (Exception ex)
         {
             _logger.LogInformation("Operation completed: {Param1} {Param2}", ex, this._zoneIndex);
+        }
+    }
+
+    /// <summary>
+    /// Handles LibVLC errors and logs them for debugging.
+    /// </summary>
+    private void OnEncounteredError(object? sender, EventArgs e)
+    {
+        try
+        {
+            _logger.LogError("LibVLC Error encountered for zone {ZoneIndex}: {ErrorDetails}",
+                this._zoneIndex, sender?.ToString() ?? "Unknown error");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Failed to handle LibVLC error for zone {ZoneIndex}: {Exception}",
+                this._zoneIndex, ex.Message);
         }
     }
 

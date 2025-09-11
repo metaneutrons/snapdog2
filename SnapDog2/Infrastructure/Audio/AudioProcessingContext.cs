@@ -59,6 +59,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
     // Event for position changes
     public event EventHandler<PositionChangedEventArgs>? PositionChanged;
     public event EventHandler<PlaybackStateChangedEventArgs>? PlaybackStateChanged;
+    public event EventHandler<EventArgs>? EncounteredError;
 
     public AudioProcessingConfig Config { get; }
     public MetadataManager MetadataManager { get; }
@@ -583,6 +584,24 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
                 this.LogErrorHandlingEndReachedEvent(ex);
             }
         };
+
+        this._mediaPlayer.EncounteredError += (_, _) =>
+        {
+            try
+            {
+                if (this._disposed)
+                {
+                    return;
+                }
+
+                this.LogLibVlcEncounteredError();
+                this.EncounteredError?.Invoke(this, EventArgs.Empty);
+            }
+            catch (Exception ex)
+            {
+                this.LogErrorHandlingEncounteredErrorEvent(ex);
+            }
+        };
     }
 
     public void Dispose()
@@ -749,6 +768,14 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
     [LoggerMessage(EventId = 16023, Level = LogLevel.Warning, Message = "Error handling EndReached event"
 )]
     private partial void LogErrorHandlingEndReachedEvent(Exception ex);
+
+    [LoggerMessage(EventId = 16026, Level = LogLevel.Error, Message = "LibVLC encountered an error during playback"
+)]
+    private partial void LogLibVlcEncounteredError();
+
+    [LoggerMessage(EventId = 16028, Level = LogLevel.Warning, Message = "Error handling EncounteredError event"
+)]
+    private partial void LogErrorHandlingEncounteredErrorEvent(Exception ex);
 
     [LoggerMessage(EventId = 16024, Level = LogLevel.Debug, Message = "Audio processing context disposed"
 )]
