@@ -117,13 +117,7 @@ public sealed partial class NotificationBackgroundService(
                 );
                 var totalDelay = delay + jitter;
                 this._metrics?.IncrementCounter("notifications_retried_total", 1, ("event", item.EventType));
-                _logger.LogWarning(ex, "RetryingNotification: {EventType} {EntityType} {EntityId} {Attempt}/{MaxAttempts} DelayMs={DelayMs}",
-                    item.EventType,
-                    item.EntityType,
-                    item.EntityId,
-                    attempt + 1,
-                    maxAttempts,
-                    (int)totalDelay.TotalMilliseconds);
+                LogRetryingNotification(ex, item.EventType, item.EntityType, item.EntityId, attempt + 1, maxAttempts, (int)totalDelay.TotalMilliseconds);
                 await Task.Delay(totalDelay, ct);
             }
         }

@@ -71,7 +71,7 @@ public sealed partial class MediaPlayer(
         if (_processingContext != null)
         {
             _processingContext.MetadataDurationMs = durationMs;
-            _logger.LogInformation("🕒 Set metadata duration: {DurationMs}ms for progress calculation", durationMs);
+            LogSetMetadataDuration(_logger, durationMs);
         }
     }
 
@@ -98,7 +98,7 @@ public sealed partial class MediaPlayer(
             // Stop any existing streaming
             await this.StopStreamingAsync();
 
-            _logger.LogInformation("Operation completed: {Param1} {Param2}", this._zoneIndex, streamUrl);
+            LogStartedStreaming(_logger, this._zoneIndex, streamUrl);
 
             // Create new processing context
             try
@@ -110,11 +110,11 @@ public sealed partial class MediaPlayer(
                     this._config.TempDirectory
                 );
 
-                _logger.LogInformation("AudioProcessingContext created successfully for zone {ZoneIndex}", this._zoneIndex);
+                LogAudioProcessingContextCreated(_logger, this._zoneIndex);
             }
             catch (Exception ex)
             {
-                _logger.LogInformation("Failed to create AudioProcessingContext for zone {ZoneIndex}: {Error}", this._zoneIndex, ex.Message);
+                LogAudioProcessingContextFailed(_logger, this._zoneIndex, ex.Message);
                 throw;
             }
 
@@ -124,11 +124,11 @@ public sealed partial class MediaPlayer(
                 this._processingContext.PositionChanged += this.OnPositionChanged;
                 this._processingContext.PlaybackStateChanged += this.OnPlaybackStateChanged;
                 this._processingContext.EncounteredError += this.OnEncounteredError;
-                _logger.LogInformation("Event handlers subscribed successfully for zone {ZoneIndex}", this._zoneIndex);
+                LogEventHandlersSubscribed(_logger, this._zoneIndex);
             }
             catch (Exception ex)
             {
-                _logger.LogInformation("Failed to subscribe to events for zone {ZoneIndex}: {Error}", this._zoneIndex, ex.Message);
+                LogEventSubscriptionFailed(_logger, this._zoneIndex, ex.Message);
                 throw;
             }
             this._streamingCts = new CancellationTokenSource();
@@ -157,11 +157,11 @@ public sealed partial class MediaPlayer(
 
                         if (!result.Success)
                         {
-                            _logger.LogInformation("AudioProcessingFailed: {Details}", result.ErrorMessage ?? "Unknown error");
+                            LogAudioProcessingFailedWithMessage(_logger, result.ErrorMessage ?? "Unknown error");
                         }
                         else
                         {
-                            _logger.LogInformation("Operation completed: {Param1} {Param2}", this._zoneIndex, result.Metadata != null);
+                            LogAudioProcessingCompleted(_logger, this._zoneIndex, result.Metadata != null);
 
                             // Update track info with extracted metadata from LibVLC
                             if (result.Metadata != null)
@@ -177,7 +177,7 @@ public sealed partial class MediaPlayer(
 
                                 this._currentTrack = updatedTrack;
 
-                                _logger.LogInformation("Metadata extracted for zone {ZoneIndex}: {Title} by {Artist}", this._zoneIndex,
+                                LogMetadataExtracted(_logger, this._zoneIndex,
                                     updatedTrack.Title ?? "Unknown",
                                     updatedTrack.Artist ?? "Unknown");
 
@@ -189,30 +189,30 @@ public sealed partial class MediaPlayer(
                             }
                             else
                             {
-                                _logger.LogInformation("NoMetadataAvailable: {Details}", this._zoneIndex);
+                                LogNoMetadataAvailable(_logger, this._zoneIndex);
                             }
 
-                            _logger.LogInformation("AudioStreamingCompleted: {Details}", this._zoneIndex);
+                            LogAudioStreamingCompleted(_logger, this._zoneIndex);
                         }
                     }
                     catch (OperationCanceledException)
                     {
-                        _logger.LogInformation("StreamingCancelled: {Details}", this._zoneIndex);
+                        LogStreamingCancelled(_logger, this._zoneIndex);
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogInformation("Operation completed: {Param1} {Param2}", ex, this._zoneIndex);
+                        LogStreamingOperationFailed(_logger, ex, this._zoneIndex);
                     }
                 },
                 this._streamingCts.Token
             );
 
-            _logger.LogInformation("Started playback on zone {ZoneIndex}: {Title} from {StreamUrl}", this._zoneIndex, trackInfo.Title, streamUrl);
+            LogStartedPlayback(_logger, this._zoneIndex, trackInfo.Title, streamUrl);
             return Result.Success();
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("Playback failed on zone {ZoneIndex} for {StreamUrl}: {Error}", this._zoneIndex, streamUrl, ex.Message);
+            LogPlaybackFailed(_logger, this._zoneIndex, streamUrl, ex.Message);
             return Result.Failure(ex);
         }
     }
@@ -242,12 +242,12 @@ public sealed partial class MediaPlayer(
             this._currentTrack = null;
             this._playbackStartedAt = null;
 
-            _logger.LogInformation("StreamingStopped: {Details}", this._zoneIndex);
+            LogStreamingStopped(_logger, this._zoneIndex);
             return Result.Success();
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("Operation completed: {Param1} {Param2}", ex, this._zoneIndex);
+            LogStreamingOperationFailed(_logger, ex, this._zoneIndex);
             return Result.Failure(ex);
         }
     }
@@ -260,7 +260,7 @@ public sealed partial class MediaPlayer(
     {
         var isPlaying = this._processingContext?.IsPlaying == true && !this._disposed;
 
-        _logger.LogDebug("GetStatusDebug: HasContext={HasContext} IsPlaying={IsPlaying} Disposed={Disposed} HasTrack={HasTrack}",
+        LogGetStatusDebug(_logger,
             this._processingContext != null,
             this._processingContext?.IsPlaying ?? false,
             this._disposed,
@@ -270,7 +270,7 @@ public sealed partial class MediaPlayer(
         var currentTrack = this._currentTrack;
         if (currentTrack != null && this._processingContext != null && isPlaying)
         {
-            _logger.LogInformation("UpdatingTrackPosition");
+            LogUpdatingTrackPosition(_logger);
 
             // Update track with real-time position information from LibVLC
             currentTrack = currentTrack with
@@ -286,7 +286,7 @@ public sealed partial class MediaPlayer(
         }
         else
         {
-            _logger.LogInformation("Playback status: track={HasTrack}, context={HasContext}, playing={IsPlaying}", currentTrack != null, this._processingContext != null, isPlaying);
+            LogPlaybackStatus(_logger, currentTrack != null, this._processingContext != null, isPlaying);
         }
 
         return new PlaybackStatus
@@ -312,7 +312,7 @@ public sealed partial class MediaPlayer(
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("Operation completed: {Param1} {Param2}", ex, this._zoneIndex);
+            LogStreamingOperationFailed(_logger, ex, this._zoneIndex);
         }
     }
 
@@ -327,7 +327,7 @@ public sealed partial class MediaPlayer(
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("Operation completed: {Param1} {Param2}", ex, this._zoneIndex);
+            LogStreamingOperationFailed(_logger, ex, this._zoneIndex);
         }
     }
 
@@ -338,13 +338,11 @@ public sealed partial class MediaPlayer(
     {
         try
         {
-            _logger.LogError("LibVLC Error encountered for zone {ZoneIndex}: {ErrorDetails}",
-                this._zoneIndex, sender?.ToString() ?? "Unknown error");
+            LogLibVlcError(_logger, this._zoneIndex, sender?.ToString() ?? "Unknown error");
         }
         catch (Exception ex)
         {
-            _logger.LogError("Failed to handle LibVLC error for zone {ZoneIndex}: {Exception}",
-                this._zoneIndex, ex.Message);
+            LogLibVlcErrorHandlingFailed(_logger, this._zoneIndex, ex);
         }
     }
 
@@ -354,9 +352,86 @@ public sealed partial class MediaPlayer(
         {
             await this.StopStreamingAsync();
             this._disposed = true;
-            _logger.LogInformation("PlayerDisposed: {Details}", this._zoneIndex);
+            LogPlayerDisposed(_logger, this._zoneIndex);
         }
     }
 
     // Logging methods using source generators for performance
+    [LoggerMessage(EventId = 117001, Level = LogLevel.Information, Message = "Set metadata duration: {DurationMs}ms for progress calculation")]
+    private static partial void LogSetMetadataDuration(ILogger logger, long? DurationMs);
+
+    [LoggerMessage(EventId = 117002, Level = LogLevel.Information, Message = "Started streaming for zone {ZoneIndex} from {StreamUrl}")]
+    private static partial void LogStartedStreaming(ILogger logger, int ZoneIndex, string StreamUrl);
+
+    [LoggerMessage(EventId = 117003, Level = LogLevel.Information, Message = "AudioProcessingContext created successfully for zone {ZoneIndex}")]
+    private static partial void LogAudioProcessingContextCreated(ILogger logger, int ZoneIndex);
+
+    [LoggerMessage(EventId = 117004, Level = LogLevel.Error, Message = "Failed to create AudioProcessingContext for zone {ZoneIndex}: {Error}")]
+    private static partial void LogAudioProcessingContextFailed(ILogger logger, int ZoneIndex, string Error);
+
+    [LoggerMessage(EventId = 117005, Level = LogLevel.Information, Message = "Event handlers subscribed successfully for zone {ZoneIndex}")]
+    private static partial void LogEventHandlersSubscribed(ILogger logger, int ZoneIndex);
+
+    [LoggerMessage(EventId = 117006, Level = LogLevel.Error, Message = "Failed to subscribe to events for zone {ZoneIndex}: {Error}")]
+    private static partial void LogEventSubscriptionFailed(ILogger logger, int ZoneIndex, string Error);
+
+    [LoggerMessage(EventId = 117007, Level = LogLevel.Error, Message = "Audio processing failed")]
+    private static partial void LogAudioProcessingFailed(ILogger logger, Exception ex);
+
+    [LoggerMessage(EventId = 117008, Level = LogLevel.Information, Message = "Audio processing completed for zone {ZoneIndex}, metadata available: {HasMetadata}")]
+    private static partial void LogAudioProcessingCompleted(ILogger logger, int ZoneIndex, bool HasMetadata);
+
+    [LoggerMessage(EventId = 117009, Level = LogLevel.Information, Message = "Metadata extracted for zone {ZoneIndex}: {Title} by {Artist}")]
+    private static partial void LogMetadataExtracted(ILogger logger, int ZoneIndex, string? Title, string? Artist);
+
+    [LoggerMessage(EventId = 117010, Level = LogLevel.Information, Message = "No metadata available for zone {ZoneIndex}")]
+    private static partial void LogNoMetadataAvailable(ILogger logger, int ZoneIndex);
+
+    [LoggerMessage(EventId = 117011, Level = LogLevel.Information, Message = "Updating track position")]
+    private static partial void LogUpdatingTrackPosition(ILogger logger);
+
+    [LoggerMessage(EventId = 117012, Level = LogLevel.Information, Message = "Player disposed for zone {ZoneIndex}")]
+    private static partial void LogPlayerDisposed(ILogger logger, int ZoneIndex);
+
+    [LoggerMessage(EventId = 117013, Level = LogLevel.Error, Message = "Audio processing failed: {ErrorMessage}")]
+    private static partial void LogAudioProcessingFailedWithMessage(ILogger logger, string ErrorMessage);
+
+    [LoggerMessage(EventId = 117014, Level = LogLevel.Information, Message = "Audio streaming completed for zone {ZoneIndex}")]
+    private static partial void LogAudioStreamingCompleted(ILogger logger, int ZoneIndex);
+
+    [LoggerMessage(EventId = 117015, Level = LogLevel.Information, Message = "Streaming cancelled for zone {ZoneIndex}")]
+    private static partial void LogStreamingCancelled(ILogger logger, int ZoneIndex);
+
+    [LoggerMessage(EventId = 117016, Level = LogLevel.Error, Message = "Streaming operation failed for zone {ZoneIndex}")]
+    private static partial void LogStreamingOperationFailed(ILogger logger, Exception ex, int ZoneIndex);
+
+    [LoggerMessage(EventId = 117017, Level = LogLevel.Information, Message = "Started playback on zone {ZoneIndex}: {Title} from {StreamUrl}")]
+    private static partial void LogStartedPlayback(ILogger logger, int ZoneIndex, string Title, string StreamUrl);
+
+    [LoggerMessage(EventId = 117018, Level = LogLevel.Error, Message = "Playback failed on zone {ZoneIndex} for {StreamUrl}: {Error}")]
+    private static partial void LogPlaybackFailed(ILogger logger, int ZoneIndex, string StreamUrl, string Error);
+
+    [LoggerMessage(EventId = 117019, Level = LogLevel.Information, Message = "Streaming stopped for zone {ZoneIndex}")]
+    private static partial void LogStreamingStopped(ILogger logger, int ZoneIndex);
+
+    [LoggerMessage(EventId = 117020, Level = LogLevel.Error, Message = "Stop streaming operation failed for zone {ZoneIndex}")]
+    private static partial void LogStopStreamingOperationFailed(ILogger logger, Exception ex, int ZoneIndex);
+
+    [LoggerMessage(EventId = 117021, Level = LogLevel.Debug, Message = "Status debug: HasContext={HasContext} IsPlaying={IsPlaying} Disposed={Disposed} HasTrack={HasTrack}")]
+    private static partial void LogGetStatusDebug(ILogger logger, bool HasContext, bool IsPlaying, bool Disposed, bool HasTrack);
+
+    [LoggerMessage(EventId = 117022, Level = LogLevel.Information, Message = "Playback status: track={HasTrack}, context={HasContext}, playing={IsPlaying}")]
+    private static partial void LogPlaybackStatus(ILogger logger, bool HasTrack, bool HasContext, bool IsPlaying);
+
+    [LoggerMessage(EventId = 117023, Level = LogLevel.Error, Message = "Get status operation failed for zone {ZoneIndex}")]
+    private static partial void LogGetStatusOperationFailed(ILogger logger, Exception ex, int ZoneIndex);
+
+    [LoggerMessage(EventId = 117024, Level = LogLevel.Error, Message = "Get progress operation failed for zone {ZoneIndex}")]
+    private static partial void LogGetProgressOperationFailed(ILogger logger, Exception ex, int ZoneIndex);
+
+    [LoggerMessage(EventId = 117025, Level = LogLevel.Error, Message = "LibVLC Error encountered for zone {ZoneIndex}: {ErrorDetails}")]
+    private static partial void LogLibVlcError(ILogger logger, int ZoneIndex, string ErrorDetails);
+
+    [LoggerMessage(EventId = 117026, Level = LogLevel.Error, Message = "Failed to handle LibVLC error for zone {ZoneIndex}")]
+    private static partial void LogLibVlcErrorHandlingFailed(ILogger logger, int ZoneIndex, Exception ex);
 }
