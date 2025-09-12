@@ -32,7 +32,7 @@ public partial class BusinessMetricsCollectionService(
 
     async protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        logger.LogInformation("ServiceStarted: {Details}", this._collectionInterval);
+        LogServiceStarted(this._collectionInterval);
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -48,7 +48,7 @@ public partial class BusinessMetricsCollectionService(
             }
             catch (Exception ex)
             {
-                logger.LogInformation("ErrorCollectingMetrics: {Details}", ex);
+                LogErrorCollectingMetrics(ex);
 
                 // Record the error in metrics
                 metricsService.RecordException(ex, "BusinessMetricsCollection");
@@ -58,7 +58,7 @@ public partial class BusinessMetricsCollectionService(
             }
         }
 
-        logger.LogInformation("ServiceStopped");
+        LogServiceStopped();
     }
 
     /// <summary>
@@ -92,7 +92,7 @@ public partial class BusinessMetricsCollectionService(
         }
         catch (Exception ex)
         {
-            logger.LogInformation("FailedToCollectMetrics: {Details}", ex);
+            LogFailedToCollectMetrics(ex);
         }
     }
 
@@ -197,6 +197,18 @@ public partial class BusinessMetricsCollectionService(
             return 0;
         }
     }
+
+    [LoggerMessage(EventId = 11001, Level = LogLevel.Information, Message = "ServiceStarted: {CollectionInterval}")]
+    private partial void LogServiceStarted(TimeSpan collectionInterval);
+
+    [LoggerMessage(EventId = 11002, Level = LogLevel.Warning, Message = "ErrorCollectingMetrics")]
+    private partial void LogErrorCollectingMetrics(Exception ex);
+
+    [LoggerMessage(EventId = 11003, Level = LogLevel.Information, Message = "ServiceStopped")]
+    private partial void LogServiceStopped();
+
+    [LoggerMessage(EventId = 11004, Level = LogLevel.Warning, Message = "FailedToCollectMetrics")]
+    private partial void LogFailedToCollectMetrics(Exception ex);
 
     [LoggerMessage(EventId = 11000, Level = LogLevel.Debug, Message = "Business metrics collected - Zones: {ZonesTotal} total, {ZonesActive} active;"
             + "Clients: {ClientsConnected} connected; Tracks: {TracksPlaying} playing"

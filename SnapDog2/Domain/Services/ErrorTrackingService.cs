@@ -116,6 +116,9 @@ public partial class ErrorTrackingService(ILogger<ErrorTrackingService> logger) 
     [LoggerMessage(EventId = 114001, Level = LogLevel.Information, Message = "ErrorsCleared")]
     private partial void LogErrorsCleared();
 
+    [LoggerMessage(EventId = 114002, Level = LogLevel.Debug, Message = "OldErrorsRemoved: {RemovedCount} errors, {RemainingCount} remaining")]
+    private partial void LogOldErrorsRemoved(int removedCount, int remainingCount);
+
     private void CleanupOldErrors()
     {
         var cutoffTime = DateTime.UtcNow.AddHours(-MaxErrorAgeHours);
@@ -131,7 +134,7 @@ public partial class ErrorTrackingService(ILogger<ErrorTrackingService> logger) 
         var removedCount = initialCount - this._errors.Count;
         if (removedCount > 0)
         {
-            logger.LogInformation("OldErrorsRemoved: {RemovedCount} errors, {RemainingCount} remaining", removedCount, this._errors.Count);
+            LogOldErrorsRemoved(removedCount, this._errors.Count);
         }
     }
 
