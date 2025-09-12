@@ -64,8 +64,24 @@ public class InMemoryClientStateStore : IClientStateStore
         // Detect and publish specific changes
         DetectAndPublishChanges(clientIndex, oldState, newState);
 
-        // Always fire general state change
-        ClientStateChanged?.Invoke(this, new ClientStateChangedEventArgs(clientIndex, oldState, newState));
+        // Only fire events if state actually changed
+        if (!AreStatesEqual(oldState, newState))
+        {
+            ClientStateChanged?.Invoke(this, new ClientStateChangedEventArgs(clientIndex, oldState, newState));
+        }
+    }
+
+    private static bool AreStatesEqual(ClientState? oldState, ClientState newState)
+    {
+        if (oldState == null)
+        {
+            return false;
+        }
+
+        return oldState.Volume == newState.Volume &&
+               oldState.Mute == newState.Mute &&
+               oldState.Connected == newState.Connected &&
+               oldState.ZoneIndex == newState.ZoneIndex;
     }
 
     public Dictionary<int, ClientState> GetAllClientStates()

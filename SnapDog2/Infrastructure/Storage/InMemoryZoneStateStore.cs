@@ -15,6 +15,7 @@ namespace SnapDog2.Infrastructure.Storage;
 
 using System.Collections.Concurrent;
 using SnapDog2.Domain.Abstractions;
+using SnapDog2.Shared.Enums;
 using SnapDog2.Shared.Events;
 using SnapDog2.Shared.Models;
 
@@ -26,6 +27,10 @@ public class InMemoryZoneStateStore : IZoneStateStore
 {
     private readonly ConcurrentDictionary<int, ZoneState> _zoneStates = new();
 
+    // Position debouncing (500ms)
+    private readonly ConcurrentDictionary<int, Timer> _positionTimers = new();
+    private readonly ConcurrentDictionary<int, ZoneState> _pendingPositionStates = new();
+
     /// <summary>
     /// Event raised when zone state changes.
     /// </summary>
@@ -35,6 +40,11 @@ public class InMemoryZoneStateStore : IZoneStateStore
     /// Event raised when zone playlist changes.
     /// </summary>
     public event EventHandler<ZonePlaylistChangedEventArgs>? ZonePlaylistChanged;
+
+    /// <summary>
+    /// Event raised when zone position changes (debounced to 500ms).
+    /// </summary>
+    public event EventHandler<ZonePositionChangedEventArgs>? ZonePositionChanged;
 
     /// <summary>
     /// Event raised when zone volume changes.
@@ -61,15 +71,213 @@ public class InMemoryZoneStateStore : IZoneStateStore
         var oldState = GetZoneState(zoneIndex);
         this._zoneStates.AddOrUpdate(zoneIndex, newState, (_, _) => newState);
 
-        // Debug logging
-        Console.WriteLine($"DEBUG: SetZoneState called for zone {zoneIndex}");
-        Console.WriteLine($"DEBUG: Old playlist index: {oldState?.Playlist?.Index}, New playlist index: {newState.Playlist?.Index}");
+        // Check if this is a position-only update (debounce these)
+        if (IsPositionOnlyUpdate(oldState, newState))
+        {
+            DebouncePositionUpdate(zoneIndex, newState);
+            return; // Don't fire other events for position-only changes
+        }
 
-        // Detect and publish specific changes
+        // For non-position changes, fire events immediately
         DetectAndPublishChanges(zoneIndex, oldState, newState);
-
-        // Always fire general state change
         ZoneStateChanged?.Invoke(this, new ZoneStateChangedEventArgs(zoneIndex, oldState, newState));
+    }
+
+    /// <summary>
+    /// Surgical updates - only trigger specific change events
+    /// </summary>
+    public void UpdateTrack(int zoneIndex, TrackInfo track)
+    {
+        var currentState = GetZoneState(zoneIndex);
+        if (currentState == null)
+        {
+            return;
+        }
+
+        var oldTrack = currentState.Track;
+        var newState = currentState with { Track = track };
+        _zoneStates.AddOrUpdate(zoneIndex, newState, (_, _) => newState);
+
+        // Only fire track change event
+        if (oldTrack?.Index != track?.Index || oldTrack?.Title != track?.Title)
+        {
+            ZoneTrackChanged?.Invoke(this, new ZoneTrackChangedEventArgs(zoneIndex, oldTrack, track));
+        }
+    }
+
+    public void UpdateVolume(int zoneIndex, int volume)
+    {
+        var currentState = GetZoneState(zoneIndex);
+        if (currentState == null)
+        {
+            return;
+        }
+
+        var oldVolume = currentState.Volume;
+        var newState = currentState with { Volume = volume };
+        _zoneStates.AddOrUpdate(zoneIndex, newState, (_, _) => newState);
+
+        // Only fire volume change event
+        if (oldVolume != volume)
+        {
+            ZoneVolumeChanged?.Invoke(this, new ZoneVolumeChangedEventArgs(zoneIndex, oldVolume, volume));
+        }
+    }
+
+    public void UpdatePlaybackState(int zoneIndex, PlaybackState state)
+    {
+        var currentState = GetZoneState(zoneIndex);
+        if (currentState == null)
+        {
+            return;
+        }
+
+        var oldState = currentState.PlaybackState;
+        var newZoneState = currentState with { PlaybackState = state };
+        _zoneStates.AddOrUpdate(zoneIndex, newZoneState, (_, _) => newZoneState);
+
+        // Only fire playback state change event
+        if (oldState != state)
+        {
+            ZonePlaybackStateChanged?.Invoke(this, new ZonePlaybackStateChangedEventArgs(zoneIndex, oldState, state));
+        }
+    }
+
+    public void UpdatePlaylist(int zoneIndex, PlaylistInfo playlist)
+    {
+        var currentState = GetZoneState(zoneIndex);
+        if (currentState == null)
+        {
+            return;
+        }
+
+        var oldPlaylist = currentState.Playlist;
+        var newState = currentState with { Playlist = playlist };
+        _zoneStates.AddOrUpdate(zoneIndex, newState, (_, _) => newState);
+
+        // Only fire playlist change event
+        if (oldPlaylist?.Index != playlist?.Index || oldPlaylist?.Name != playlist?.Name)
+        {
+            ZonePlaylistChanged?.Invoke(this, new ZonePlaylistChangedEventArgs(zoneIndex, oldPlaylist, playlist));
+        }
+    }
+
+    public void UpdatePosition(int zoneIndex, int positionMs, double progress)
+    {
+        var currentState = GetZoneState(zoneIndex);
+        if (currentState?.Track == null)
+        {
+            return;
+        }
+
+        var updatedTrack = currentState.Track with { PositionMs = positionMs, Progress = (float?)progress };
+        var newState = currentState with { Track = updatedTrack };
+
+        // Use debounced position update for high-frequency changes
+        DebouncePositionUpdate(zoneIndex, newState);
+    }
+
+    public void UpdateMute(int zoneIndex, bool mute)
+    {
+        var currentState = GetZoneState(zoneIndex);
+        if (currentState == null)
+        {
+            return;
+        }
+
+        var newState = currentState with { Mute = mute };
+        _zoneStates.AddOrUpdate(zoneIndex, newState, (_, _) => newState);
+
+        // Fire mute change event if needed (add to events if required)
+    }
+
+    public void UpdateRepeat(int zoneIndex, bool trackRepeat, bool playlistRepeat)
+    {
+        var currentState = GetZoneState(zoneIndex);
+        if (currentState == null)
+        {
+            return;
+        }
+
+        var newState = currentState with { TrackRepeat = trackRepeat, PlaylistRepeat = playlistRepeat };
+        _zoneStates.AddOrUpdate(zoneIndex, newState, (_, _) => newState);
+    }
+
+    public void UpdateShuffle(int zoneIndex, bool shuffle)
+    {
+        var currentState = GetZoneState(zoneIndex);
+        if (currentState == null)
+        {
+            return;
+        }
+
+        var newState = currentState with { PlaylistShuffle = shuffle };
+        _zoneStates.AddOrUpdate(zoneIndex, newState, (_, _) => newState);
+    }
+
+    public void UpdateClients(int zoneIndex, int[] clientIds)
+    {
+        var currentState = GetZoneState(zoneIndex);
+        if (currentState == null)
+        {
+            return;
+        }
+
+        var newState = currentState with { Clients = clientIds };
+        _zoneStates.AddOrUpdate(zoneIndex, newState, (_, _) => newState);
+    }
+
+    private static bool IsPositionOnlyUpdate(ZoneState? oldState, ZoneState newState)
+    {
+        if (oldState == null)
+        {
+            return false;
+        }
+
+        // Check if ONLY position/progress changed, everything else is identical
+        return oldState.Volume == newState.Volume &&
+               oldState.Mute == newState.Mute &&
+               oldState.PlaybackState == newState.PlaybackState &&
+               oldState.Playlist?.Index == newState.Playlist?.Index &&
+               oldState.Track?.Index == newState.Track?.Index &&
+               oldState.Track?.Title == newState.Track?.Title &&
+               oldState.Track?.Artist == newState.Track?.Artist &&
+               oldState.Track?.Album == newState.Track?.Album &&
+               // Only position/progress can be different
+               (oldState.Track?.PositionMs != newState.Track?.PositionMs ||
+                oldState.Track?.Progress != newState.Track?.Progress);
+    }
+
+    private void DebouncePositionUpdate(int zoneIndex, ZoneState newState)
+    {
+        _pendingPositionStates[zoneIndex] = newState;
+
+        // Cancel existing timer
+        if (_positionTimers.TryGetValue(zoneIndex, out var existingTimer))
+        {
+            existingTimer.Dispose();
+        }
+
+        // Start new 500ms timer
+        _positionTimers[zoneIndex] = new Timer(
+            callback: _ => PublishDebouncedPosition(zoneIndex),
+            state: null,
+            dueTime: TimeSpan.FromMilliseconds(500),
+            period: Timeout.InfiniteTimeSpan);
+    }
+
+    private void PublishDebouncedPosition(int zoneIndex)
+    {
+        if (_pendingPositionStates.TryRemove(zoneIndex, out var state))
+        {
+            // Fire debounced position event (max every 500ms)
+            ZonePositionChanged?.Invoke(this, new ZonePositionChangedEventArgs(zoneIndex, state.Track));
+        }
+
+        if (_positionTimers.TryRemove(zoneIndex, out var timer))
+        {
+            timer.Dispose();
+        }
     }
 
     public Dictionary<int, ZoneState> GetAllZoneStates()
@@ -86,16 +294,18 @@ public class InMemoryZoneStateStore : IZoneStateStore
     {
         Console.WriteLine($"DEBUG: DetectAndPublishChanges called for zone {zoneIndex}");
 
-        // Playlist changes
-        if (oldState?.Playlist?.Index != newState.Playlist?.Index)
+        // Playlist changes - check index, name, and other key properties
+        if (oldState?.Playlist?.Index != newState.Playlist?.Index ||
+            oldState?.Playlist?.Name != newState.Playlist?.Name ||
+            oldState?.Playlist?.TrackCount != newState.Playlist?.TrackCount)
         {
-            Console.WriteLine($"DEBUG: Playlist change detected! Old: {oldState?.Playlist?.Index}, New: {newState.Playlist?.Index}");
+            Console.WriteLine($"DEBUG: Playlist change detected! Old: {oldState?.Playlist?.Index}/{oldState?.Playlist?.Name}, New: {newState.Playlist?.Index}/{newState.Playlist?.Name}");
             ZonePlaylistChanged?.Invoke(this, new ZonePlaylistChangedEventArgs(
                 zoneIndex, oldState?.Playlist, newState.Playlist));
         }
         else
         {
-            Console.WriteLine($"DEBUG: No playlist change detected. Old: {oldState?.Playlist?.Index}, New: {newState.Playlist?.Index}");
+            Console.WriteLine($"DEBUG: No playlist change detected. Old: {oldState?.Playlist?.Index}/{oldState?.Playlist?.Name}, New: {newState.Playlist?.Index}/{newState.Playlist?.Name}");
         }
 
         // Volume changes

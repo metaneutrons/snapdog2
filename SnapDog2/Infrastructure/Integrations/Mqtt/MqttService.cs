@@ -35,8 +35,6 @@ public sealed partial class MqttService : IMqttService
     private readonly MqttConfig _config;
     private readonly ILogger<MqttService> _logger;
     private readonly IServiceProvider _serviceProvider;
-    private readonly ConcurrentDictionary<int, ZoneState> _lastZoneStates = new();
-    private readonly ConcurrentDictionary<string, ClientState> _lastClientStates = new();
     private IMqttClient? _mqttClient;
     private bool _disposed;
 
@@ -88,6 +86,9 @@ public sealed partial class MqttService : IMqttService
 
             // Subscribe to state change events
             await SubscribeToStateEvents();
+
+            // No initial state publishing - rely on events only
+            // await PublishInitialState();
 
             LogMqttServiceInitialized();
             Connected?.Invoke(this, EventArgs.Empty);
@@ -278,8 +279,11 @@ public sealed partial class MqttService : IMqttService
         var zoneStateStore = scope.ServiceProvider.GetRequiredService<IZoneStateStore>();
         var clientStateStore = scope.ServiceProvider.GetRequiredService<IClientStateStore>();
 
-        // Subscribe to zone state events
-        zoneStateStore.ZoneStateChanged += OnZoneStateChanged;
+        // Subscribe to granular zone events (excludes high-frequency position updates)
+        zoneStateStore.ZoneVolumeChanged += OnZoneVolumeChanged;
+        zoneStateStore.ZonePlaylistChanged += OnZonePlaylistChanged;
+        zoneStateStore.ZoneTrackChanged += OnZoneTrackChanged;
+        zoneStateStore.ZonePositionChanged += OnZonePositionChanged;
 
         // Subscribe to client state events
         clientStateStore.ClientStateChanged += OnClientStateChanged;
@@ -288,8 +292,8 @@ public sealed partial class MqttService : IMqttService
         await Task.CompletedTask;
     }
 
-    [StatusId("ZONE_STATE_CHANGED")]
-    private async void OnZoneStateChanged(object? sender, ZoneStateChangedEventArgs e)
+    [StatusId("ZONE_VOLUME_CHANGED")]
+    private async void OnZoneVolumeChanged(object? sender, ZoneVolumeChangedEventArgs e)
     {
         if (!IsConnected)
         {
@@ -298,11 +302,116 @@ public sealed partial class MqttService : IMqttService
 
         try
         {
-            await PublishZoneState(e.ZoneIndex, e.NewState);
+            // Use event data directly to avoid race conditions
+            await PublishAsync($"snapdog/zones/{e.ZoneIndex}/volume", e.NewVolume.ToString());
         }
         catch (Exception ex)
         {
-            LogMqttPublishError($"Zone {e.ZoneIndex} state", ex);
+            LogMqttPublishError($"Zone {e.ZoneIndex} volume", ex);
+        }
+    }
+
+    [StatusId("ZONE_PLAYLIST_CHANGED")]
+    private async void OnZonePlaylistChanged(object? sender, ZonePlaylistChangedEventArgs e)
+    {
+        if (!IsConnected)
+        {
+            return;
+        }
+
+        try
+        {
+            // Use event data directly to avoid race conditions
+            if (e.NewPlaylist != null)
+            {
+                var baseTopic = $"{_config.MqttBaseTopic}/zones/{e.ZoneIndex}";
+
+                await PublishAsync($"{baseTopic}/playlist", e.NewPlaylist.Index.ToString());
+                await PublishAsync($"{baseTopic}/playlist/name", e.NewPlaylist.Name ?? "");
+                await PublishAsync($"{baseTopic}/playlist/count", e.NewPlaylist.TrackCount.ToString());
+
+                if (e.NewPlaylist.TotalDurationSec.HasValue)
+                {
+                    await PublishAsync($"{baseTopic}/playlist/duration", (e.NewPlaylist.TotalDurationSec.Value * 1000).ToString());
+                }
+
+                if (!string.IsNullOrEmpty(e.NewPlaylist.Description))
+                {
+                    await PublishAsync($"{baseTopic}/playlist/description", e.NewPlaylist.Description);
+                }
+
+                if (!string.IsNullOrEmpty(e.NewPlaylist.CoverArtUrl))
+                {
+                    await PublishAsync($"{baseTopic}/playlist/cover", e.NewPlaylist.CoverArtUrl);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            LogMqttPublishError($"Zone {e.ZoneIndex} playlist", ex);
+        }
+    }
+
+    [StatusId("ZONE_TRACK_CHANGED")]
+    private async void OnZoneTrackChanged(object? sender, ZoneTrackChangedEventArgs e)
+    {
+        if (!IsConnected)
+        {
+            return;
+        }
+
+        try
+        {
+            // Use event data directly to avoid race conditions
+            if (e.NewTrack != null && !string.IsNullOrEmpty(e.NewTrack.Title) && e.NewTrack.Title != "No Track")
+            {
+                var baseTopic = $"{_config.MqttBaseTopic}/zones/{e.ZoneIndex}";
+
+                await PublishAsync($"{baseTopic}/track", (e.NewTrack.Index ?? 0).ToString());
+                await PublishAsync($"{baseTopic}/track/title", e.NewTrack.Title);
+                await PublishAsync($"{baseTopic}/track/artist", e.NewTrack.Artist ?? "");
+                await PublishAsync($"{baseTopic}/track/album", e.NewTrack.Album ?? "");
+                await PublishAsync($"{baseTopic}/track/duration", (e.NewTrack.DurationMs ?? 0).ToString());
+                await PublishAsync($"{baseTopic}/track/position", (e.NewTrack.PositionMs ?? 0).ToString());
+                await PublishAsync($"{baseTopic}/track/cover", e.NewTrack.CoverArtUrl ?? "");
+
+                var progress = e.NewTrack.DurationMs > 0
+                    ? (int)((double)(e.NewTrack.PositionMs ?? 0) / e.NewTrack.DurationMs.Value * 100)
+                    : 0;
+                await PublishAsync($"{baseTopic}/track/progress", progress.ToString());
+
+                if (!string.IsNullOrEmpty(e.NewTrack.Genre))
+                {
+                    await PublishAsync($"{baseTopic}/track/genre", e.NewTrack.Genre);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            LogMqttPublishError($"Zone {e.ZoneIndex} track", ex);
+        }
+    }
+
+    [StatusId("ZONE_POSITION_CHANGED")]
+    private async void OnZonePositionChanged(object? sender, ZonePositionChangedEventArgs e)
+    {
+        if (!IsConnected)
+        {
+            return;
+        }
+
+        try
+        {
+            // Publish only position data (debounced to 500ms max)
+            if (e.Track != null)
+            {
+                await PublishAsync($"snapdog/zones/{e.ZoneIndex}/position", e.Track.PositionMs?.ToString() ?? "0");
+                await PublishAsync($"snapdog/zones/{e.ZoneIndex}/progress", (e.Track.Progress ?? 0).ToString("F2"));
+            }
+        }
+        catch (Exception ex)
+        {
+            LogMqttPublishError($"Zone {e.ZoneIndex} position", ex);
         }
     }
 
@@ -353,49 +462,8 @@ public sealed partial class MqttService : IMqttService
         tasks.Add(PublishMessage($"{baseTopic}/playing", (state.PlaybackState == PlaybackState.Playing).ToString().ToLowerInvariant()));
         tasks.Add(PublishMessage($"{baseTopic}/volume", state.Volume.ToString()));
 
-        if (state.Track != null)
-        {
-            tasks.Add(PublishMessage($"{baseTopic}/track", state.Track.Index?.ToString() ?? "0"));
-            tasks.Add(PublishMessage($"{baseTopic}/track/title", state.Track.Title ?? ""));
-            tasks.Add(PublishMessage($"{baseTopic}/track/artist", state.Track.Artist ?? ""));
-            tasks.Add(PublishMessage($"{baseTopic}/track/album", state.Track.Album ?? ""));
-            tasks.Add(PublishMessage($"{baseTopic}/track/duration", state.Track.DurationMs?.ToString() ?? "0"));
-            tasks.Add(PublishMessage($"{baseTopic}/track/position", state.Track.PositionMs?.ToString() ?? "0"));
-            tasks.Add(PublishMessage($"{baseTopic}/track/cover", state.Track.CoverArtUrl ?? ""));
-
-            var progress = state.Track.DurationMs > 0
-                ? (int)((double)(state.Track.PositionMs ?? 0) / state.Track.DurationMs.Value * 100)
-                : 0;
-            tasks.Add(PublishMessage($"{baseTopic}/track/progress", progress.ToString()));
-
-            // Additional metadata
-            if (!string.IsNullOrEmpty(state.Track.Genre))
-            {
-                tasks.Add(PublishMessage($"{baseTopic}/track/genre", state.Track.Genre));
-            }
-        }
-
-        if (state.Playlist != null)
-        {
-            tasks.Add(PublishMessage($"{baseTopic}/playlist", state.Playlist.Index.ToString()));
-            tasks.Add(PublishMessage($"{baseTopic}/playlist/name", state.Playlist.Name ?? ""));
-            tasks.Add(PublishMessage($"{baseTopic}/playlist/count", state.Playlist.TrackCount.ToString()));
-
-            if (state.Playlist.TotalDurationSec.HasValue)
-            {
-                tasks.Add(PublishMessage($"{baseTopic}/playlist/duration", (state.Playlist.TotalDurationSec.Value * 1000).ToString())); // Convert to ms
-            }
-
-            if (!string.IsNullOrEmpty(state.Playlist.Description))
-            {
-                tasks.Add(PublishMessage($"{baseTopic}/playlist/description", state.Playlist.Description));
-            }
-
-            if (!string.IsNullOrEmpty(state.Playlist.CoverArtUrl))
-            {
-                tasks.Add(PublishMessage($"{baseTopic}/playlist/cover", state.Playlist.CoverArtUrl));
-            }
-        }
+        // Track data is published via OnZoneTrackChanged event handler to avoid race conditions
+        // Playlist data is published via OnZonePlaylistChanged event handler to avoid race conditions
 
         await Task.WhenAll(tasks);
     }

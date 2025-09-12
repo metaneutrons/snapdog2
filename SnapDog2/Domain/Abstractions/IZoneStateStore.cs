@@ -14,6 +14,7 @@
 namespace SnapDog2.Domain.Abstractions;
 
 using SnapDog2.Shared.Attributes;
+using SnapDog2.Shared.Enums;
 using SnapDog2.Shared.Events;
 using SnapDog2.Shared.Models;
 
@@ -33,6 +34,12 @@ public interface IZoneStateStore
     /// </summary>
     [StatusId("PLAYLIST_STATUS")]
     event EventHandler<ZonePlaylistChangedEventArgs>? ZonePlaylistChanged;
+
+    /// <summary>
+    /// Event raised when zone position changes (debounced to 500ms).
+    /// </summary>
+    [StatusId("ZONE_POSITION_CHANGED")]
+    event EventHandler<ZonePositionChangedEventArgs>? ZonePositionChanged;
 
     /// <summary>
     /// Event raised when zone volume changes.
@@ -65,6 +72,19 @@ public interface IZoneStateStore
     /// <param name="zoneIndex">Zone index (1-based)</param>
     /// <param name="state">Zone state to store</param>
     void SetZoneState(int zoneIndex, ZoneState state);
+
+    /// <summary>
+    /// Surgical updates - only trigger specific change events
+    /// </summary>
+    void UpdateTrack(int zoneIndex, TrackInfo track);
+    void UpdateVolume(int zoneIndex, int volume);
+    void UpdatePlaybackState(int zoneIndex, PlaybackState state);
+    void UpdatePlaylist(int zoneIndex, PlaylistInfo playlist);
+    void UpdatePosition(int zoneIndex, int positionMs, double progress);
+    void UpdateMute(int zoneIndex, bool mute);
+    void UpdateRepeat(int zoneIndex, bool trackRepeat, bool playlistRepeat);
+    void UpdateShuffle(int zoneIndex, bool shuffle);
+    void UpdateClients(int zoneIndex, int[] clientIds);
 
     /// <summary>
     /// Gets all zone states.

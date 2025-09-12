@@ -860,7 +860,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             }
 
             this._currentState = this._currentState with { Track = targetTrack };
-            this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
+            this._zoneStateStore.UpdateTrack(this._zoneIndex, targetTrack);
 
             // Log successful track change with meaningful information
             this.LogZonePlaying(
@@ -968,7 +968,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         }
 
         this._currentState = this._currentState with { Track = targetTrack };
-        this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
+        this._zoneStateStore.UpdateTrack(this._zoneIndex, targetTrack);
 
         // Publish individual track metadata notifications for KNX integration
         await this.PublishTrackMetadataNotificationsAsync(targetTrack).ConfigureAwait(false);
@@ -1098,7 +1098,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         try
         {
             this._currentState = this._currentState with { TrackRepeat = enabled };
-            this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
+            this._zoneStateStore.UpdateRepeat(this._zoneIndex, enabled, this._currentState.PlaylistRepeat);
             return Result.Success();
         }
         finally
@@ -1119,7 +1119,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 newValue ? "Enable track repeat" : "Disable track repeat"
             );
             this._currentState = this._currentState with { TrackRepeat = newValue };
-            this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
+            this._zoneStateStore.UpdateRepeat(this._zoneIndex, newValue, this._currentState.PlaylistRepeat);
             return Result.Success();
         }
         finally
@@ -1336,9 +1336,9 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             Playlist = new PlaylistInfo
             {
                 SubsonicPlaylistId = "none",
-                Source = "none",
+                Source = "radio",
                 Index = 1,
-                Name = "No Playlist",
+                Name = "Radio Stations",
                 TrackCount = 0,
             },
             Clients = Array.Empty<int>(),

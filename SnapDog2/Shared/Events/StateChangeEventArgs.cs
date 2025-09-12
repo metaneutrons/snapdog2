@@ -64,6 +64,16 @@ public record ZoneTrackChangedEventArgs(
 ) : ZoneStateChangedEventArgs(ZoneIndex, null, null!, Timestamp);
 
 /// <summary>
+/// Event args for zone position changes (debounced).
+/// </summary>
+[StatusId("ZONE_POSITION_CHANGED")]
+public record ZonePositionChangedEventArgs(
+    int ZoneIndex,
+    TrackInfo? Track,
+    DateTime Timestamp = default
+) : ZoneStateChangedEventArgs(ZoneIndex, null, null!, Timestamp);
+
+/// <summary>
 /// Event args for zone playback state changes.
 /// </summary>
 [StatusId("PLAYBACK_STATE")]
