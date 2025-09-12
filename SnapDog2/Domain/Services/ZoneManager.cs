@@ -1657,8 +1657,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
         this.LogStartingPositionUpdateTimer(this._zoneIndex);
 
-        var intervalMs = this._configuration.Value.System.ProgressUpdateIntervalMs;
-        var interval = TimeSpan.FromMilliseconds(intervalMs);
+        var interval = TimeSpan.FromMilliseconds(this._configuration.Value.System.ProgressUpdateIntervalMs);
 
         this._positionUpdateTimer = new Timer(
             async void (_) =>

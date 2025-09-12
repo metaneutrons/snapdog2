@@ -15,7 +15,9 @@ namespace SnapDog2.Infrastructure.Storage;
 
 using System.Collections.Concurrent;
 using System.Reflection;
+using Microsoft.Extensions.Options;
 using SnapDog2.Domain.Abstractions;
+using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Enums;
 using SnapDog2.Shared.Events;
 using SnapDog2.Shared.Models;
@@ -27,10 +29,16 @@ using SnapDog2.Shared.Models;
 public class InMemoryZoneStateStore : IZoneStateStore
 {
     private readonly ConcurrentDictionary<int, ZoneState> _zoneStates = new();
+    private readonly ServicesConfig _servicesConfig;
 
-    // Position debouncing (500ms)
+    // Position debouncing (configurable)
     private readonly ConcurrentDictionary<int, Timer> _positionTimers = new();
     private readonly ConcurrentDictionary<int, ZoneState> _pendingPositionStates = new();
+
+    public InMemoryZoneStateStore(IOptions<ServicesConfig> servicesOptions)
+    {
+        _servicesConfig = servicesOptions.Value;
+    }
 
     /// <summary>
     /// Event raised when zone state changes.
@@ -322,11 +330,11 @@ public class InMemoryZoneStateStore : IZoneStateStore
         // Only start timer if none exists (throttling, not debouncing)
         if (!_positionTimers.ContainsKey(zoneIndex))
         {
-            // Start new 500ms timer
+            // Start new configurable timer
             _positionTimers[zoneIndex] = new Timer(
                 callback: _ => PublishDebouncedPosition(zoneIndex),
                 state: null,
-                dueTime: TimeSpan.FromMilliseconds(500),
+                dueTime: TimeSpan.FromMilliseconds(_servicesConfig.DebouncingMs),
                 period: Timeout.InfiniteTimeSpan);
         }
         // If timer exists, just update the pending state (don't reset timer)

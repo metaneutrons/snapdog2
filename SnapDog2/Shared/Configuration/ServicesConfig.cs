@@ -49,6 +49,13 @@ public class ServicesConfig
     public SubsonicConfig Subsonic { get; set; } = new();
 
     /// <summary>
+    /// Position update debouncing interval in milliseconds.
+    /// Maps environment variable: SNAPDOG_SERVICES_DEBOUNCING_MS
+    /// </summary>
+    [Env("DEBOUNCING_MS")]
+    public int DebouncingMs { get; set; } = 500;
+
+    /// <summary>
     /// Global audio configuration for Snapcast and LibVLC.
     /// Maps environment variables with prefix: SNAPDOG_AUDIO_*
     /// </summary>

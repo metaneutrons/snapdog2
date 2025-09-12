@@ -115,7 +115,7 @@ public partial class PlaylistManager : IPlaylistManager
             // Handle radio stations (index 1)
             if (playlistIndex == 1)
             {
-                var radioTracks = this._configuration.RadioStations
+                return Result<List<TrackInfo>>.Success(this._configuration.RadioStations
                     .Select((station, index) => new TrackInfo
                     {
                         Index = index + 1,
@@ -126,9 +126,7 @@ public partial class PlaylistManager : IPlaylistManager
                         CoverArtUrl = station.CoverUrl,
                         Source = "radio"
                     })
-                    .ToList();
-
-                return Result<List<TrackInfo>>.Success(radioTracks);
+                    .ToList());
             }
 
             // Handle Subsonic playlists (index 2+)
