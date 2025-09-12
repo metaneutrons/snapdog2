@@ -40,11 +40,11 @@ public partial class ResilientHost(IHost innerHost, ILogger<ResilientHost> logge
             // Handle our custom startup validation exceptions gracefully
             if (this._isDebugMode)
             {
-                _logger.LogInformation("Operation completed: {Param1} {Param2}", ex, ex.ValidationStep);
+                LogStartupValidationFailedDebug(ex, ex.ValidationStep);
             }
             else
             {
-                _logger.LogInformation("Operation completed: {Param1} {Param2}", ex.ValidationStep, GetCleanErrorMessage(ex));
+                LogStartupValidationFailed(ex.ValidationStep, GetCleanErrorMessage(ex));
             }
 
             // Don't re-throw - let the application exit gracefully
@@ -55,11 +55,11 @@ public partial class ResilientHost(IHost innerHost, ILogger<ResilientHost> logge
             // Handle expected startup exceptions
             if (this._isDebugMode)
             {
-                _logger.LogInformation("StartupFailedDebug: {Details}", ex);
+                LogStartupFailedDebug(ex);
             }
             else
             {
-                _logger.LogInformation("Operation completed: {Param1} {Param2}", ex.GetType().Name, ex.Message);
+                LogStartupFailed(ex.GetType().Name, ex.Message);
             }
 
             Environment.ExitCode = 1;
@@ -69,11 +69,11 @@ public partial class ResilientHost(IHost innerHost, ILogger<ResilientHost> logge
             // Handle unexpected startup exceptions
             if (this._isDebugMode)
             {
-                _logger.LogInformation("UnexpectedStartupFailureDebug: {Details}", ex);
+                LogUnexpectedStartupFailureDebug(ex);
             }
             else
             {
-                _logger.LogInformation("Operation completed: {Param1} {Param2}", ex.GetType().Name, ex.Message);
+                LogStartupFailed(ex.GetType().Name, ex.Message);
             }
 
             Environment.ExitCode = 2;
@@ -163,6 +163,24 @@ public partial class ResilientHost(IHost innerHost, ILogger<ResilientHost> logge
             _ => ex.Message,
         };
     }
+
+    [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Startup validation failed: {ValidationStep}")]
+    private partial void LogStartupValidationFailedDebug(StartupValidationException ex, string ValidationStep);
+
+    [LoggerMessage(EventId = 2, Level = LogLevel.Information, Message = "Startup validation failed: {ValidationStep} - {ErrorMessage}")]
+    private partial void LogStartupValidationFailed(string ValidationStep, string ErrorMessage);
+
+    [LoggerMessage(EventId = 3, Level = LogLevel.Information, Message = "Startup failed")]
+    private partial void LogStartupFailedDebug(Exception ex);
+
+    [LoggerMessage(EventId = 4, Level = LogLevel.Information, Message = "Startup failed: {ExceptionType} - {Message}")]
+    private partial void LogStartupFailed(string ExceptionType, string Message);
+
+    [LoggerMessage(EventId = 5, Level = LogLevel.Information, Message = "Unexpected startup failure")]
+    private partial void LogUnexpectedStartupFailureDebug(Exception ex);
+
+    [LoggerMessage(EventId = 6, Level = LogLevel.Information, Message = "Unexpected startup failure: {ExceptionType} - {Message}")]
+    private partial void LogUnexpectedStartupFailure(string ExceptionType, string Message);
 }
 
 /// <summary>
