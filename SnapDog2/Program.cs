@@ -339,10 +339,10 @@ static WebApplication CreateWebApplication(string[] args)
         // StatePublishingService removed - using direct SignalR calls instead
 
         // Register integration publishers (MQTT now uses event-driven publishing)
-        builder.Services.AddSingleton<IIntegrationPublisher, SignalRIntegrationPublisher>();
+        // SignalR now uses direct state store connection
+        builder.Services.AddHostedService<SignalRStateNotifier>();
 
-        // Register integration coordinator
-        builder.Services.AddHostedService<IntegrationCoordinator>();
+        // All integrations now use direct state store connections
     }
 
     // Register status services

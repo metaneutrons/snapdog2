@@ -739,24 +739,9 @@ public static class StaticApiAnalyzer
 
     private static HashSet<string> GetImplementedKnxNotifiers()
     {
-        var knxNotifiers = new HashSet<string>();
-        var assembly = Assembly.Load("SnapDog2");
-
-        var types = assembly
-            .GetTypes()
-            .Where(t => t.IsClass && !t.IsAbstract)
-            .ToList();
-
-        foreach (var type in types)
-        {
-            var knxNotifierAttr = type.GetCustomAttribute<KnxStatusNotifierAttribute>();
-            if (knxNotifierAttr != null)
-            {
-                knxNotifiers.Add(knxNotifierAttr.StatusId);
-            }
-        }
-
-        return knxNotifiers;
+        // KNX now uses direct state store connection via KnxStateNotifier
+        // No attribute-based notifiers needed
+        return new HashSet<string>();
     }
 
     private static HashSet<string> GetImplementedMqttHandlers()
