@@ -87,6 +87,11 @@ public interface IZoneStateStore
     void UpdateClients(int zoneIndex, int[] clientIds);
 
     /// <summary>
+    /// Publish current state by firing all relevant events (for state restoration)
+    /// </summary>
+    void PublishCurrentState(int zoneIndex);
+
+    /// <summary>
     /// Gets all zone states.
     /// </summary>
     /// <returns>Dictionary of zone states by zone index</returns>

@@ -340,6 +340,9 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 storedState.Track?.Title ?? "No Track"
             );
             this._currentState = storedState;
+
+            // Trigger event firework to publish restored state to MQTT
+            this._zoneStateStore.PublishCurrentState(zoneIndex);
         }
         else
         {
@@ -706,7 +709,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         }
 
         this._currentState = this._currentState with { Volume = clampedVolume };
-        this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
+        this._zoneStateStore.UpdateVolume(this._zoneIndex, clampedVolume);
         return Result.Success();
     }
 
@@ -800,7 +803,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         }
 
         this._currentState = this._currentState with { Mute = enabled };
-        this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
+        this._zoneStateStore.UpdateMute(this._zoneIndex, enabled);
         return Result.Success();
     }
 
@@ -1153,7 +1156,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             }
 
             this._currentState = this._currentState with { Playlist = targetPlaylist };
-            this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
+            this._zoneStateStore.UpdatePlaylist(this._zoneIndex, targetPlaylist);
             return Result.Success();
         }
         finally
@@ -1172,7 +1175,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             var newPlaylist = this._currentState.Playlist! with { SubsonicPlaylistId = playlistIndex, Name = playlistIndex };
 
             this._currentState = this._currentState with { Playlist = newPlaylist };
-            this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
+            this._zoneStateStore.UpdatePlaylist(this._zoneIndex, newPlaylist);
             return Result.Success();
         }
         finally
@@ -1222,7 +1225,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         try
         {
             this._currentState = this._currentState with { PlaylistShuffle = enabled };
-            this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
+            this._zoneStateStore.UpdateShuffle(this._zoneIndex, enabled);
             return Result.Success();
         }
         finally
@@ -1243,7 +1246,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 newValue ? "Enable playlist shuffle" : "Disable playlist shuffle"
             );
             this._currentState = this._currentState with { PlaylistShuffle = newValue };
-            this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
+            this._zoneStateStore.UpdateShuffle(this._zoneIndex, newValue);
             return Result.Success();
         }
         finally
@@ -1264,7 +1267,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         try
         {
             this._currentState = this._currentState with { PlaylistRepeat = enabled };
-            this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
+            this._zoneStateStore.UpdateRepeat(this._zoneIndex, enabled, this._currentState.TrackRepeat);
             return Result.Success();
         }
         finally
@@ -1285,7 +1288,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 newValue ? "Enable playlist repeat" : "Disable playlist repeat"
             );
             this._currentState = this._currentState with { PlaylistRepeat = newValue };
-            this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
+            this._zoneStateStore.UpdateRepeat(this._zoneIndex, newValue, this._currentState.TrackRepeat);
             return Result.Success();
         }
         finally
@@ -1670,7 +1673,16 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
                     // Update state from MediaPlayer and publish if position changed
                     await this.UpdateStateFromSnapcastAsync().ConfigureAwait(false);
-                    this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
+
+                    // Use surgical position update instead of full state
+                    if (this._currentState.Track != null)
+                    {
+                        this._zoneStateStore.UpdatePosition(
+                            this._zoneIndex,
+                            (int)(this._currentState.Track.PositionMs ?? 0),
+                            this._currentState.Track.Progress ?? 0
+                        );
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -1763,8 +1775,8 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                     },
                 };
 
-                // Publish updated state to MQTT
-                this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
+                // Use surgical position update (debounced for MQTT)
+                this._zoneStateStore.UpdatePosition(this._zoneIndex, (int)e.PositionMs, e.Progress);
                 this.LogPublishedMqttUpdateForPositionChange();
 
                 // Publish track progress notification for KNX integration (throttled)
@@ -1823,7 +1835,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             if (this._currentState.PlaybackState != newPlaybackState)
             {
                 this._currentState = this._currentState with { PlaybackState = newPlaybackState };
-                this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
+                this._zoneStateStore.UpdatePlaybackState(this._zoneIndex, newPlaybackState);
 
                 // Publish track playing status notification for KNX integration
                 Task.Run(async () =>
@@ -1862,8 +1874,11 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             // Update the Zone's current state with the new track info
             this._currentState = this._currentState with { Track = e.TrackInfo };
 
-            // Publish state change to notify other components
-            this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
+            // Publish track change to notify other components
+            if (this._currentState.Track != null)
+            {
+                this._zoneStateStore.UpdateTrack(this._zoneIndex, this._currentState.Track);
+            }
 
             this.LogTrackInfoUpdated(this._zoneIndex, e.TrackInfo.Title);
         }

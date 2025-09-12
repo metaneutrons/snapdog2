@@ -14,6 +14,7 @@
 namespace SnapDog2.Infrastructure.Storage;
 
 using System.Collections.Concurrent;
+using System.Reflection;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Shared.Enums;
 using SnapDog2.Shared.Events;
@@ -170,8 +171,24 @@ public class InMemoryZoneStateStore : IZoneStateStore
             return;
         }
 
+        // Only update if position actually changed (avoid spam)
+        var currentPositionMs = currentState.Track.PositionMs ?? 0;
+
+        // For radio streams (progress=0), use position change threshold of 500ms
+        // For regular tracks, use both position and progress thresholds
+        var positionChanged = Math.Abs(currentPositionMs - positionMs) >= 500;
+        var progressChanged = progress > 0 && Math.Abs((double)(currentState.Track.Progress ?? 0) - progress) >= 0.01;
+
+        if (!positionChanged && !progressChanged)
+        {
+            return; // Skip if no significant change
+        }
+
         var updatedTrack = currentState.Track with { PositionMs = positionMs, Progress = (float?)progress };
         var newState = currentState with { Track = updatedTrack };
+
+        // Update state first
+        _zoneStates.AddOrUpdate(zoneIndex, newState, (_, _) => newState);
 
         // Use debounced position update for high-frequency changes
         DebouncePositionUpdate(zoneIndex, newState);
@@ -227,6 +244,56 @@ public class InMemoryZoneStateStore : IZoneStateStore
         _zoneStates.AddOrUpdate(zoneIndex, newState, (_, _) => newState);
     }
 
+    public void PublishCurrentState(int zoneIndex)
+    {
+        var currentState = GetZoneState(zoneIndex);
+        if (currentState == null)
+        {
+            return;
+        }
+
+        // Use reflection to fire all zone events automatically
+        var eventFields = GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
+            .Where(f => f.Name.StartsWith("Zone") && f.Name.EndsWith("Changed"));
+
+        foreach (var eventField in eventFields)
+        {
+            var eventDelegate = (MulticastDelegate?)eventField.GetValue(this);
+            if (eventDelegate == null)
+            {
+                continue;
+            }
+
+            var eventArgs = CreateEventArgs(eventField.Name, zoneIndex, currentState);
+            if (eventArgs != null)
+            {
+                eventDelegate.DynamicInvoke(this, eventArgs);
+            }
+        }
+    }
+
+    private object? CreateEventArgs(string eventName, int zoneIndex, ZoneState currentState)
+    {
+        return eventName switch
+        {
+            "ZoneTrackChanged" when currentState.Track != null &&
+                                   !string.IsNullOrEmpty(currentState.Track.Title) &&
+                                   currentState.Track.Title != "No Track"
+                => new ZoneTrackChangedEventArgs(zoneIndex, null, currentState.Track),
+
+            "ZonePlaylistChanged" when currentState.Playlist != null
+                => new ZonePlaylistChangedEventArgs(zoneIndex, null, currentState.Playlist),
+
+            "ZoneVolumeChanged"
+                => new ZoneVolumeChangedEventArgs(zoneIndex, 0, currentState.Volume),
+
+            "ZonePlaybackStateChanged"
+                => new ZonePlaybackStateChangedEventArgs(zoneIndex, PlaybackState.Stopped, currentState.PlaybackState),
+
+            _ => null // Skip unknown or conditional events
+        };
+    }
+
     private static bool IsPositionOnlyUpdate(ZoneState? oldState, ZoneState newState)
     {
         if (oldState == null)
@@ -252,18 +319,17 @@ public class InMemoryZoneStateStore : IZoneStateStore
     {
         _pendingPositionStates[zoneIndex] = newState;
 
-        // Cancel existing timer
-        if (_positionTimers.TryGetValue(zoneIndex, out var existingTimer))
+        // Only start timer if none exists (throttling, not debouncing)
+        if (!_positionTimers.ContainsKey(zoneIndex))
         {
-            existingTimer.Dispose();
+            // Start new 500ms timer
+            _positionTimers[zoneIndex] = new Timer(
+                callback: _ => PublishDebouncedPosition(zoneIndex),
+                state: null,
+                dueTime: TimeSpan.FromMilliseconds(500),
+                period: Timeout.InfiniteTimeSpan);
         }
-
-        // Start new 500ms timer
-        _positionTimers[zoneIndex] = new Timer(
-            callback: _ => PublishDebouncedPosition(zoneIndex),
-            state: null,
-            dueTime: TimeSpan.FromMilliseconds(500),
-            period: Timeout.InfiniteTimeSpan);
+        // If timer exists, just update the pending state (don't reset timer)
     }
 
     private void PublishDebouncedPosition(int zoneIndex)
