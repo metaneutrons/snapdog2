@@ -54,9 +54,9 @@ public class PlaylistScenarioTest : BaseScenarioTest
                         try
                         {
                             // Handle both relative and absolute URLs
-                            var fullUrl = coverUrl.StartsWith("http") ? coverUrl : $"{BaseUrl}{coverUrl}";
+                            var fullUrl = coverUrl.StartsWith("http") ? coverUrl : $"{_baseUrl}{coverUrl}";
                             Console.WriteLine($"   🔗 Testing full URL: {fullUrl}");
-                            var imageResponse = await HttpClient.GetAsync(fullUrl);
+                            var imageResponse = await _httpClient.GetAsync(fullUrl);
                             if (imageResponse.IsSuccessStatusCode)
                             {
                                 var contentType = imageResponse.Content.Headers.ContentType?.MediaType;

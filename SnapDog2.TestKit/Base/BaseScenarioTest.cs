@@ -20,13 +20,13 @@ using System.Text;
 /// </summary>
 public abstract class BaseScenarioTest : IScenarioTest
 {
-    protected readonly HttpClient HttpClient;
-    protected readonly string BaseUrl;
+    protected readonly HttpClient _httpClient;
+    protected readonly string _baseUrl;
 
     protected BaseScenarioTest(string baseUrl)
     {
-        BaseUrl = baseUrl;
-        HttpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
+        _baseUrl = baseUrl;
+        _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
     }
 
     /// <summary>
@@ -49,7 +49,7 @@ public abstract class BaseScenarioTest : IScenarioTest
     /// </summary>
     protected async Task<string> GetAsync(string endpoint)
     {
-        var response = await HttpClient.GetAsync($"{BaseUrl}{endpoint}");
+        var response = await _httpClient.GetAsync($"{_baseUrl}{endpoint}");
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadAsStringAsync();
     }
@@ -61,7 +61,7 @@ public abstract class BaseScenarioTest : IScenarioTest
     {
         var jsonBody = string.IsNullOrEmpty(body) ? "{}" : $"\"{body}\"";
         var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
-        var response = await HttpClient.PostAsync($"{BaseUrl}{endpoint}", content);
+        var response = await _httpClient.PostAsync($"{_baseUrl}{endpoint}", content);
         response.EnsureSuccessStatusCode();
     }
 
@@ -72,7 +72,7 @@ public abstract class BaseScenarioTest : IScenarioTest
     {
         var jsonBody = string.IsNullOrEmpty(body) ? "{}" : $"\"{body}\"";
         var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
-        var response = await HttpClient.PutAsync($"{BaseUrl}{endpoint}", content);
+        var response = await _httpClient.PutAsync($"{_baseUrl}{endpoint}", content);
         response.EnsureSuccessStatusCode();
     }
 
@@ -81,6 +81,6 @@ public abstract class BaseScenarioTest : IScenarioTest
     /// </summary>
     public virtual void Dispose()
     {
-        HttpClient?.Dispose();
+        _httpClient?.Dispose();
     }
 }
