@@ -53,6 +53,8 @@ public partial class KnxStateNotifier : IHostedService
         _zoneStateStore.ZonePlaybackStateChanged += OnZonePlaybackStateChanged;
         _zoneStateStore.ZonePlaylistChanged += OnZonePlaylistChanged;
         _zoneStateStore.ZoneTrackChanged += OnZoneTrackChanged;
+        _zoneStateStore.ZonePositionChanged += OnZonePositionChanged;
+        _zoneStateStore.ZoneStateChanged += OnZoneStateChanged;
 
         LogKnxNotifierStarted();
         return Task.CompletedTask;
@@ -69,6 +71,8 @@ public partial class KnxStateNotifier : IHostedService
         _zoneStateStore.ZonePlaybackStateChanged -= OnZonePlaybackStateChanged;
         _zoneStateStore.ZonePlaylistChanged -= OnZonePlaylistChanged;
         _zoneStateStore.ZoneTrackChanged -= OnZoneTrackChanged;
+        _zoneStateStore.ZonePositionChanged -= OnZonePositionChanged;
+        _zoneStateStore.ZoneStateChanged -= OnZoneStateChanged;
 
         return Task.CompletedTask;
     }
@@ -174,6 +178,87 @@ public partial class KnxStateNotifier : IHostedService
         if (!string.IsNullOrEmpty(knxConfig.TrackAlbumStatus))
         {
             await knxService.WriteGroupValueAsync(knxConfig.TrackAlbumStatus, e.NewTrack.Album ?? "");
+        }
+
+        // Send track index/number
+        if (!string.IsNullOrEmpty(knxConfig.TrackStatus))
+        {
+            await knxService.WriteGroupValueAsync(knxConfig.TrackStatus, e.NewTrack.Index ?? 0);
+        }
+    }
+
+    private async void OnZonePositionChanged(object? sender, ZonePositionChangedEventArgs e)
+    {
+        var zoneIndex = e.ZoneIndex - 1;
+        if (zoneIndex < 0 || zoneIndex >= _configuration.Zones.Count)
+        {
+            return;
+        }
+
+        var knxConfig = _configuration.Zones[zoneIndex].Knx;
+        if (!knxConfig.Enabled || e.Track == null)
+        {
+            return;
+        }
+
+        using var scope = _serviceProvider.CreateScope();
+        var knxService = scope.ServiceProvider.GetService<IKnxService>();
+        if (knxService == null)
+        {
+            return;
+        }
+
+        // Send track progress (0-100%)
+        if (!string.IsNullOrEmpty(knxConfig.TrackProgressStatus) && e.Track.Progress.HasValue)
+        {
+            var progressPercent = (int)(e.Track.Progress.Value * 100);
+            await knxService.WriteGroupValueAsync(knxConfig.TrackProgressStatus, progressPercent);
+        }
+    }
+
+    private async void OnZoneStateChanged(object? sender, ZoneStateChangedEventArgs e)
+    {
+        var zoneIndex = e.ZoneIndex - 1;
+        if (zoneIndex < 0 || zoneIndex >= _configuration.Zones.Count)
+        {
+            return;
+        }
+
+        var knxConfig = _configuration.Zones[zoneIndex].Knx;
+        if (!knxConfig.Enabled || e.NewState == null)
+        {
+            return;
+        }
+
+        using var scope = _serviceProvider.CreateScope();
+        var knxService = scope.ServiceProvider.GetService<IKnxService>();
+        if (knxService == null)
+        {
+            return;
+        }
+
+        // Send mute status
+        if (!string.IsNullOrEmpty(knxConfig.MuteStatus))
+        {
+            await knxService.WriteGroupValueAsync(knxConfig.MuteStatus, e.NewState.Mute ? 1 : 0);
+        }
+
+        // Send shuffle status
+        if (!string.IsNullOrEmpty(knxConfig.ShuffleStatus))
+        {
+            await knxService.WriteGroupValueAsync(knxConfig.ShuffleStatus, e.NewState.PlaylistShuffle ? 1 : 0);
+        }
+
+        // Send repeat status
+        if (!string.IsNullOrEmpty(knxConfig.RepeatStatus))
+        {
+            await knxService.WriteGroupValueAsync(knxConfig.RepeatStatus, e.NewState.PlaylistRepeat ? 1 : 0);
+        }
+
+        // Send track repeat status
+        if (!string.IsNullOrEmpty(knxConfig.TrackRepeatStatus))
+        {
+            await knxService.WriteGroupValueAsync(knxConfig.TrackRepeatStatus, e.NewState.TrackRepeat ? 1 : 0);
         }
     }
 

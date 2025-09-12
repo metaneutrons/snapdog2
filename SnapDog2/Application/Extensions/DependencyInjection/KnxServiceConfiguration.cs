@@ -84,6 +84,9 @@ public static partial class KnxServiceConfiguration
         // Register KNX state notifier for direct state store connection
         services.AddHostedService<KnxStateNotifier>();
 
+        // Register KNX command receiver for incoming KNX commands
+        services.AddHostedService<KnxCommandReceiver>();
+
         return services;
     }
 

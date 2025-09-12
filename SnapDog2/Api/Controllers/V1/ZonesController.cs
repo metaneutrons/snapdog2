@@ -128,6 +128,7 @@ public partial class ZonesController(
     }
 
     [HttpGet("{zoneIndex:int}/volume")]
+    [StatusId("VOLUME_STATUS")]
     [ProducesResponseType<int>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<int>> GetVolume(int zoneIndex)
@@ -193,6 +194,7 @@ public partial class ZonesController(
     }
 
     [HttpGet("{zoneIndex:int}/mute")]
+    [StatusId("MUTE_STATUS")]
     [ProducesResponseType<bool>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<bool>> GetMute(int zoneIndex)
