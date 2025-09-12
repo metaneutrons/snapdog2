@@ -44,6 +44,7 @@ public partial class ZonesController(
     // ZONE LISTING - Direct service calls
 
     [HttpGet("count")]
+    [StatusId("ZONE_COUNT")]
     [ProducesResponseType<int>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<int>> GetZonesCount()
@@ -57,6 +58,7 @@ public partial class ZonesController(
     }
 
     [HttpGet]
+    [StatusId("ZONE_STATES")]
     [ProducesResponseType<Page<ZoneState>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<Page<ZoneState>>> GetZones([FromQuery] int page = 1, [FromQuery] int size = 20)
@@ -85,6 +87,7 @@ public partial class ZonesController(
     }
 
     [HttpGet("{zoneIndex:int}")]
+    [StatusId("ZONE_STATE")]
     [ProducesResponseType<ZoneState>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ZoneState>> GetZone(int zoneIndex)

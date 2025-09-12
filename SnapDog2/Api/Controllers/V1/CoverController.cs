@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SnapDog2.Domain.Abstractions;
+using SnapDog2.Shared.Attributes;
 using SnapDog2.Shared.Models;
 
 namespace SnapDog2.Api.Controllers.V1;
@@ -39,6 +40,7 @@ public partial class CoverController : ControllerBase
     /// <response code="404">Cover art not found.</response>
     /// <response code="500">Internal server error.</response>
     [HttpGet("{coverId}")]
+    [StatusId("COVER")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]

@@ -108,6 +108,7 @@ public partial class ClientsController(IClientService clientService, ILogger<Cli
     /// </summary>
     /// <returns>List of all clients</returns>
     [HttpGet("count")]
+    [StatusId("CLIENT_COUNT")]
     [ProducesResponseType<int>(StatusCodes.Status200OK)]
     public async Task<ActionResult<int>> GetClientsCount()
     {
@@ -122,6 +123,7 @@ public partial class ClientsController(IClientService clientService, ILogger<Cli
     }
 
     [HttpGet]
+    [StatusId("CLIENT_STATES")]
     [ProducesResponseType<Page<ClientState>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<Page<ClientState>>> GetClients([FromQuery] int page = 1, [FromQuery] int size = 20)
@@ -160,6 +162,7 @@ public partial class ClientsController(IClientService clientService, ILogger<Cli
     /// <param name="clientIndex">Client Index</param>
     /// <returns>Client state information</returns>
     [HttpGet("{clientIndex:int}")]
+    [StatusId("CLIENT_STATE")]
     [ProducesResponseType<ClientState>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ClientState>> GetClient(int clientIndex)

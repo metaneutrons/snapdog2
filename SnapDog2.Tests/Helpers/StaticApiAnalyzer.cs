@@ -717,24 +717,9 @@ public static class StaticApiAnalyzer
 
     private static HashSet<string> GetImplementedMqttNotifiers()
     {
-        var mqttNotifiers = new HashSet<string>();
-        var assembly = Assembly.Load("SnapDog2");
-
-        var types = assembly
-            .GetTypes()
-            .Where(t => t.IsClass && !t.IsAbstract)
-            .ToList();
-
-        foreach (var type in types)
-        {
-            var mqttNotifierAttr = type.GetCustomAttribute<MqttStatusNotifierAttribute>();
-            if (mqttNotifierAttr != null)
-            {
-                mqttNotifiers.Add(mqttNotifierAttr.StatusId);
-            }
-        }
-
-        return mqttNotifiers;
+        // MQTT notifications are handled directly by MqttService event handlers
+        // with [StatusId] attributes - no separate notifier classes needed
+        return new HashSet<string>();
     }
 
     private static HashSet<string> GetImplementedKnxNotifiers()

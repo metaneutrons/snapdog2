@@ -15,6 +15,7 @@ namespace SnapDog2.Api.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using SnapDog2.Shared.Attributes;
 
 /// <summary>
 /// Health check controller providing application health status.
@@ -84,6 +85,7 @@ public partial class HealthController(HealthCheckService healthCheckService, ILo
     /// </summary>
     /// <returns>Ready status.</returns>
     [HttpGet("ready")]
+    [StatusId("HEALTH_READY")]
     public async Task<IActionResult> GetReadyAsync()
     {
         try
@@ -109,6 +111,7 @@ public partial class HealthController(HealthCheckService healthCheckService, ILo
     /// </summary>
     /// <returns>Live status.</returns>
     [HttpGet("live")]
+    [StatusId("HEALTH_LIVE")]
     public async Task<IActionResult> GetLiveAsync()
     {
         try
