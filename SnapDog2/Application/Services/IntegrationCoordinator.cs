@@ -19,7 +19,7 @@ using SnapDog2.Shared.Events;
 /// <summary>
 /// Coordinates state changes across all integration publishers.
 /// </summary>
-public class IntegrationCoordinator : IHostedService
+public partial class IntegrationCoordinator : IHostedService
 {
     private readonly IEnumerable<IIntegrationPublisher> _publishers;
     private readonly ILogger<IntegrationCoordinator> _logger;
@@ -52,7 +52,7 @@ public class IntegrationCoordinator : IHostedService
         _clientStateStore.ClientNameChanged += OnClientNameChanged;
         _clientStateStore.ClientLatencyChanged += OnClientLatencyChanged;
 
-        _logger.LogInformation("IntegrationCoordinator started with {PublisherCount} publishers", _publishers.Count());
+        LogCoordinatorStarted(_publishers.Count());
         return Task.CompletedTask;
     }
 
@@ -174,11 +174,20 @@ public class IntegrationCoordinator : IHostedService
         try
         {
             await publishAction();
-            _logger.LogDebug("Successfully published {EventType} to {Publisher}", eventType, publisherName);
+            LogPublishSuccess(eventType, publisherName);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to publish {EventType} to {Publisher}", eventType, publisherName);
+            LogPublishFailed(ex, eventType, publisherName);
         }
     }
+
+    [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "IntegrationCoordinator started with {PublisherCount} publishers")]
+    private partial void LogCoordinatorStarted(int PublisherCount);
+
+    [LoggerMessage(EventId = 2, Level = LogLevel.Debug, Message = "Successfully published {EventType} to {Publisher}")]
+    private partial void LogPublishSuccess(string EventType, string Publisher);
+
+    [LoggerMessage(EventId = 3, Level = LogLevel.Error, Message = "Failed to publish {EventType} to {Publisher}")]
+    private partial void LogPublishFailed(Exception ex, string EventType, string Publisher);
 }

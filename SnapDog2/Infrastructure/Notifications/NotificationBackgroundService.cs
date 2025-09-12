@@ -69,7 +69,7 @@ public sealed partial class NotificationBackgroundService(
             }
             catch (Exception ex)
             {
-                _logger.LogInformation("Notification processing failed for {EventType} {EntityType} {EntityId}: {Error}", item.EventType, item.EntityType, item.EntityId, ex.Message);
+                LogNotificationProcessingFailed(item.EventType, item.EntityType, item.EntityId, ex.Message);
             }
         }
     }
@@ -90,7 +90,7 @@ public sealed partial class NotificationBackgroundService(
             {
                 await this.PublishAsync(item, ct);
                 this._metrics?.IncrementCounter("notifications_processed_total", 1, ("event", item.EventType));
-                _logger.LogInformation("Notification processed: {EventType} {EntityType} {EntityId}", item.EventType, item.EntityType, item.EntityId);
+                LogNotificationProcessed(item.EventType, item.EntityType, item.EntityId);
                 return;
             }
             catch (OperationCanceledException)
@@ -102,7 +102,7 @@ public sealed partial class NotificationBackgroundService(
                 attempt++;
                 if (attempt >= maxAttempts)
                 {
-                    _logger.LogInformation("Notification failed after {Attempts} attempts for {EventType} {EntityType} {EntityId}: {Error}", attempt, item.EventType, item.EntityType, item.EntityId, ex.Message);
+                    LogNotificationFailedAfterRetries(attempt, item.EventType, item.EntityType, item.EntityId, ex.Message);
                     this._metrics?.IncrementCounter("notifications_dead_letter_total", 1, ("event", item.EventType));
                     // dead-letter hook: could enqueue to an external DLQ or emit metric/log for inspection
                     return;

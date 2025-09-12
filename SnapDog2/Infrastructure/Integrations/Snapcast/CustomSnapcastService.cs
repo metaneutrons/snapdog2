@@ -774,7 +774,7 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
         // Simple health check - could be expanded later
         if (!IsConnected)
         {
-            _logger.LogWarning("Snapcast service health check failed - not connected");
+            LogHealthCheckFailed();
         }
     }
 
@@ -859,4 +859,7 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
 
     [LoggerMessage(EventId = 25, Level = LogLevel.Error, Message = "Failed to refresh server state")]
     private partial void LogRefreshServerStateFailed(Exception ex);
+
+    [LoggerMessage(EventId = 26, Level = LogLevel.Warning, Message = "Snapcast service health check failed - not connected")]
+    private partial void LogHealthCheckFailed();
 }
