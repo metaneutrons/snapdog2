@@ -39,7 +39,7 @@ public sealed partial class NotificationBackgroundService(
 
     async protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("ServiceStarted");
+        LogServiceStarted();
 
         var readers = new List<Task>();
         var concurrency = Math.Max(1, this._options.MaxConcurrency);
@@ -50,7 +50,7 @@ public sealed partial class NotificationBackgroundService(
 
         await Task.WhenAll(readers);
 
-        _logger.LogInformation("ServiceStopped");
+        LogServiceStopped();
     }
 
     private async Task RunReaderAsync(CancellationToken stoppingToken)
@@ -207,4 +207,21 @@ public sealed partial class NotificationBackgroundService(
     }
 
     // LoggerMessage methods for high-performance logging
+    [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Notification service started")]
+    private partial void LogServiceStarted();
+
+    [LoggerMessage(EventId = 2, Level = LogLevel.Information, Message = "Notification service stopped")]
+    private partial void LogServiceStopped();
+
+    [LoggerMessage(EventId = 3, Level = LogLevel.Error, Message = "Notification processing failed for {EventType} {EntityType} {EntityId}: {Error}")]
+    private partial void LogNotificationProcessingFailed(string EventType, string EntityType, string EntityId, string Error);
+
+    [LoggerMessage(EventId = 4, Level = LogLevel.Information, Message = "Notification processed: {EventType} {EntityType} {EntityId}")]
+    private partial void LogNotificationProcessed(string EventType, string EntityType, string EntityId);
+
+    [LoggerMessage(EventId = 5, Level = LogLevel.Error, Message = "Notification failed after {Attempts} attempts for {EventType} {EntityType} {EntityId}: {Error}")]
+    private partial void LogNotificationFailedAfterRetries(int Attempts, string EventType, string EntityType, string EntityId, string Error);
+
+    [LoggerMessage(EventId = 6, Level = LogLevel.Warning, Message = "Retrying notification: {EventType} {EntityType} {EntityId} {Attempt}/{MaxAttempts} DelayMs={DelayMs}")]
+    private partial void LogRetryingNotification(Exception ex, string EventType, string EntityType, string EntityId, int Attempt, int MaxAttempts, int DelayMs);
 }

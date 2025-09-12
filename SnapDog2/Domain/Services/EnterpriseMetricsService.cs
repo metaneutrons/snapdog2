@@ -39,7 +39,7 @@ public partial class EnterpriseMetricsService : IMetricsService, IDisposable
         // Start system metrics collection timer (every 30 seconds)
         this._systemMetricsTimer = new Timer(this.CollectSystemMetrics, null, TimeSpan.Zero, TimeSpan.FromSeconds(30));
 
-        _logger.LogInformation("ServiceInitialized");
+        LogServiceInitialized();
     }
 
     #region IMetricsService Implementation
@@ -140,7 +140,7 @@ public partial class EnterpriseMetricsService : IMetricsService, IDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("FailedToCollectSystemMetrics: {Details}", ex);
+            LogFailedToCollectSystemMetrics(ex);
         }
     }
 
@@ -153,7 +153,7 @@ public partial class EnterpriseMetricsService : IMetricsService, IDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("FailedToGetCpuUsage: {Details}", ex);
+            LogFailedToGetCpuUsage(ex);
             return 0.0;
         }
     }
@@ -168,7 +168,7 @@ public partial class EnterpriseMetricsService : IMetricsService, IDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("FailedToGetCpuUsageSync: {Details}", ex);
+            LogFailedToGetCpuUsageSync(ex);
             return 0.0;
         }
     }
@@ -304,4 +304,16 @@ public partial class EnterpriseMetricsService : IMetricsService, IDisposable
         this._systemMetricsTimer.Dispose();
         this._applicationMetrics.Dispose();
     }
+
+    [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Enterprise metrics service initialized")]
+    private partial void LogServiceInitialized();
+
+    [LoggerMessage(EventId = 2, Level = LogLevel.Error, Message = "Failed to collect system metrics")]
+    private partial void LogFailedToCollectSystemMetrics(Exception ex);
+
+    [LoggerMessage(EventId = 3, Level = LogLevel.Error, Message = "Failed to get CPU usage")]
+    private partial void LogFailedToGetCpuUsage(Exception ex);
+
+    [LoggerMessage(EventId = 4, Level = LogLevel.Error, Message = "Failed to get CPU usage (sync)")]
+    private partial void LogFailedToGetCpuUsageSync(Exception ex);
 }

@@ -72,7 +72,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         // Validate configuration
         if (!this._config.Enabled)
         {
-            _logger.LogInformation("SubsonicDisabled");
+            LogSubsonicDisabled();
             throw new InvalidOperationException("Subsonic service is disabled in configuration");
         }
 
@@ -104,7 +104,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         // Initialize SubsonicClient with the resilient HttpClient
         this._subsonicClient = new SubsonicClient(connectionInfo, httpClient: httpClient, logger: null);
 
-        _logger.LogInformation("Operation completed: {Param1} {Param2}", this._config.Url, this._config.Username);
+        LogClientInitialized(this._config.Url, this._config.Username);
     }
 
     #region Helper Methods
@@ -142,11 +142,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
                     ShouldHandle = new PredicateBuilder().Handle<Exception>(),
                     OnRetry = args =>
                     {
-                        _logger.LogWarning("ConnectionRetryAttempt: {Url} {Attempt}/{MaxRetries} {Error}",
-                            this._config.Url ?? "unknown",
-                            args.AttemptNumber + 1,
-                            validatedConfig.MaxRetries + 1,
-                            args.Outcome.Exception?.Message ?? "Unknown error");
+                        LogConnectionRetryAttempt(this._config.Url ?? "unknown", args.AttemptNumber + 1, validatedConfig.MaxRetries + 1, args.Outcome.Exception?.Message ?? "Unknown error");
                         return ValueTask.CompletedTask;
                     },
                 }
@@ -169,7 +165,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         var stopwatch = Stopwatch.StartNew();
         try
         {
-            _logger.LogInformation("GettingPlaylists");
+            LogGettingPlaylists();
 
             var result = await this._operationPolicy.ExecuteAsync(
                 async innerCancellationToken =>
@@ -193,7 +189,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
             );
 
             stopwatch.Stop();
-            _logger.LogInformation("PlaylistsRetrieved: {Details}", result.Count);
+            LogPlaylistsRetrieved(result.Count);
 
             // Notification publishing removed - using direct SignalR calls instead
 
@@ -202,7 +198,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         catch (Exception ex)
         {
             stopwatch.Stop();
-            _logger.LogInformation("GetPlaylistsError: {Details}", ex);
+            LogGetPlaylistsError(ex);
 
             // Publish playlist retrieval failed notification
             // Notification publishing removed - using direct SignalR calls instead
@@ -234,7 +230,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         await this._operationLock.WaitAsync(cancellationToken);
         try
         {
-            _logger.LogInformation("GettingPlaylist: {Details}", playlistIndex);
+            LogGettingPlaylist(playlistIndex);
 
             var result = await this._operationPolicy.ExecuteAsync(
                 async ct =>
@@ -244,7 +240,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
                     if (!playlistResponse.IsSuccess)
                     {
                         var errorMessage = playlistResponse.Error?.Message ?? "Unknown error";
-                        _logger.LogInformation("PlaylistNotFound: {Details}", playlistIndex);
+                        LogPlaylistNotFound(playlistIndex);
                         throw new InvalidOperationException(
                             $"Playlist with ID '{playlistIndex}' not found: {errorMessage}"
                         );
@@ -262,7 +258,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
                 cancellationToken
             );
 
-            _logger.LogInformation("Operation completed: {Param1} {Param2}", playlistIndex, result.Tracks.Count);
+            LogPlaylistRetrieved(playlistIndex, result.Tracks.Count);
 
             // Notification publishing removed - using direct SignalR calls instead
 
@@ -270,7 +266,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("Operation completed: {Param1} {Param2}", playlistIndex, ex);
+            LogGetPlaylistError(playlistIndex, ex);
 
             // Notification publishing removed - using direct SignalR calls instead
 
@@ -300,7 +296,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         await this._operationLock.WaitAsync(cancellationToken);
         try
         {
-            _logger.LogInformation("GettingStreamUrl: {Details}", trackId);
+            LogGettingStreamUrl(trackId);
 
             // Note: SubsonicMedia library doesn't provide direct URL access, only streams
             // For SnapDog2's use case, we need to construct the URL manually
@@ -326,7 +322,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
                 cancellationToken
             );
 
-            _logger.LogInformation("StreamUrlRetrieved: {Details}", trackId);
+            LogStreamUrlRetrieved(trackId);
 
             // Notification publishing removed - using direct SignalR calls instead
 
@@ -334,7 +330,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("Operation completed: {Param1} {Param2}", trackId, ex);
+            LogGetStreamUrlError(trackId, ex);
 
             // Notification publishing removed - using direct SignalR calls instead
 
@@ -357,7 +353,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         await this._operationLock.WaitAsync(cancellationToken);
         try
         {
-            _logger.LogInformation("TestingConnection");
+            LogTestingConnection();
 
             await this._connectionPolicy.ExecuteAsync(
                 async ct =>
@@ -367,19 +363,19 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
                     if (!pingResult.IsSuccess)
                     {
                         var errorMessage = pingResult.Error?.Message ?? "Unknown error";
-                        _logger.LogInformation("ConnectionTestFailed");
+                        LogConnectionTestFailed();
                         throw new InvalidOperationException($"Subsonic server ping failed: {errorMessage}");
                     }
                 },
                 cancellationToken
             );
 
-            _logger.LogInformation("ConnectionTestSuccessful");
+            LogConnectionTestSuccessful();
             return Result.Success();
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("ConnectionTestError: {Details}", ex);
+            LogConnectionTestError(ex);
             return Result.Failure($"Connection test failed: {ex.Message}");
         }
         finally
@@ -404,7 +400,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         await this._operationLock.WaitAsync(cancellationToken);
         try
         {
-            _logger.LogInformation("GettingCoverArt: {Details}", coverId);
+            LogGettingCoverArt(coverId);
 
             var coverResult = await this._operationPolicy.ExecuteAsync(
                 async ct =>
@@ -435,12 +431,12 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
                 ETag = coverId
             };
 
-            _logger.LogInformation("Operation completed: {Param1} {Param2}", coverId, coverResult.Length);
+            LogCoverArtRetrieved(coverId, coverResult.Length);
             return Result<CoverArtData>.Success(coverArtData);
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("Operation completed: {Param1} {Param2}", coverId, ex);
+            LogGetCoverArtError(coverId, ex);
             return Result<CoverArtData>.Failure($"Failed to get cover art: {ex.Message}");
         }
         finally
@@ -526,7 +522,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
             streamUrl += $"&format={formatParam}&maxBitRate={this._config.TranscodingBitrate}";
         }
 
-        _logger.LogInformation("🔗 Generated Subsonic streaming URL: {StreamUrl}", streamUrl);
+        LogGeneratedStreamUrl(streamUrl);
 
         return new TrackInfo
         {
@@ -564,7 +560,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
             return Result.Success();
         }
 
-        _logger.LogInformation("Initializing: {Details}", this._config.Url ?? "unknown");
+        LogInitializing(this._config.Url ?? "unknown");
 
         // Initialization started - notification removed
 
@@ -580,11 +576,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
 
                 // Log first attempt before Polly execution
                 var config = ResiliencePolicyFactory.ValidateAndNormalize(this._config.Resilience.Connection);
-                _logger.LogWarning("ConnectionRetryAttempt: {Url} {Attempt}/{MaxRetries} {Error}",
-                    this._config.Url ?? "unknown",
-                    1,
-                    config.MaxRetries + 1,
-                    "Initial attempt");
+                LogConnectionRetryAttempt(this._config.Url ?? "unknown", 1, config.MaxRetries + 1, "Initial attempt");
 
                 // Use Polly resilience for connection establishment
                 var result = await this._connectionPolicy.ExecuteAsync(
@@ -604,10 +596,8 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
                 if (result.IsSuccess)
                 {
                     this._initialized = true;
-                    _logger.LogInformation("ConnectionEstablished: {Details}", this._config.Url ?? "unknown");
-                    _logger.LogInformation("SubsonicServiceInitialized: {Url} {Username}",
-                        this._config.Url ?? "unknown",
-                        this._config.Username ?? "unknown");
+                    LogConnectionEstablished(this._config.Url ?? "unknown");
+                    LogSubsonicServiceInitialized(this._config.Url ?? "unknown", this._config.Username ?? "unknown");
 
                     // Connection established - notification removed
 
@@ -615,7 +605,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
                 }
                 else
                 {
-                    _logger.LogInformation("InitializationFailed: {Details}", result.ErrorMessage ?? "Unknown error");
+                    LogInitializationFailed(new Exception(result.ErrorMessage ?? "Unknown error"));
 
                     // Notification publishing removed - using direct SignalR calls instead
 
@@ -631,7 +621,7 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("InitializationFailed: {Details}", ex.Message);
+            LogInitializationFailed(ex);
 
             // Notification publishing removed - using direct SignalR calls instead
 
@@ -646,17 +636,17 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
     {
         try
         {
-            _logger.LogInformation("TestingConnection");
+            LogTestingConnection();
 
             // Use the SubsonicClient to ping the server
             var pingResponse = await this._subsonicClient.System.PingAsync(cancellationToken);
 
-            _logger.LogInformation("ConnectionTestSuccessful");
+            LogConnectionTestSuccessful();
             return Result.Success();
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("ConnectionTestError: {Details}", ex);
+            LogConnectionTestError(ex);
             return Result.Failure($"Connection test failed: {ex.Message}");
         }
     }
@@ -676,11 +666,89 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
         this._operationLock.Dispose();
         this._subsonicClient.Dispose();
 
-        _logger.LogInformation("SubsonicServiceDisposed");
+        LogSubsonicServiceDisposed();
         return ValueTask.CompletedTask;
     }
 
     #region Logging
+
+    [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Subsonic service is disabled")]
+    private partial void LogSubsonicDisabled();
+
+    [LoggerMessage(EventId = 2, Level = LogLevel.Information, Message = "Subsonic client initialized: {Url} {Username}")]
+    private partial void LogClientInitialized(string? Url, string? Username);
+
+    [LoggerMessage(EventId = 3, Level = LogLevel.Warning, Message = "Connection retry attempt: {Url} {Attempt}/{MaxRetries} {Error}")]
+    private partial void LogConnectionRetryAttempt(string? Url, int Attempt, int MaxRetries, string? Error);
+
+    [LoggerMessage(EventId = 4, Level = LogLevel.Information, Message = "Getting playlists")]
+    private partial void LogGettingPlaylists();
+
+    [LoggerMessage(EventId = 5, Level = LogLevel.Information, Message = "Playlists retrieved: {Count}")]
+    private partial void LogPlaylistsRetrieved(int Count);
+
+    [LoggerMessage(EventId = 6, Level = LogLevel.Error, Message = "Get playlists error")]
+    private partial void LogGetPlaylistsError(Exception ex);
+
+    [LoggerMessage(EventId = 7, Level = LogLevel.Information, Message = "Getting playlist: {PlaylistIndex}")]
+    private partial void LogGettingPlaylist(string PlaylistIndex);
+
+    [LoggerMessage(EventId = 8, Level = LogLevel.Information, Message = "Playlist not found: {PlaylistIndex}")]
+    private partial void LogPlaylistNotFound(string PlaylistIndex);
+
+    [LoggerMessage(EventId = 9, Level = LogLevel.Information, Message = "Playlist retrieved: {PlaylistIndex} {TrackCount} tracks")]
+    private partial void LogPlaylistRetrieved(string PlaylistIndex, int TrackCount);
+
+    [LoggerMessage(EventId = 10, Level = LogLevel.Error, Message = "Get playlist error: {PlaylistIndex}")]
+    private partial void LogGetPlaylistError(string PlaylistIndex, Exception ex);
+
+    [LoggerMessage(EventId = 11, Level = LogLevel.Information, Message = "Getting stream URL: {TrackId}")]
+    private partial void LogGettingStreamUrl(string TrackId);
+
+    [LoggerMessage(EventId = 12, Level = LogLevel.Information, Message = "Stream URL retrieved: {TrackId}")]
+    private partial void LogStreamUrlRetrieved(string TrackId);
+
+    [LoggerMessage(EventId = 13, Level = LogLevel.Error, Message = "Get stream URL error: {TrackId}")]
+    private partial void LogGetStreamUrlError(string TrackId, Exception ex);
+
+    [LoggerMessage(EventId = 14, Level = LogLevel.Information, Message = "Testing connection")]
+    private partial void LogTestingConnection();
+
+    [LoggerMessage(EventId = 15, Level = LogLevel.Information, Message = "Connection test failed")]
+    private partial void LogConnectionTestFailed();
+
+    [LoggerMessage(EventId = 16, Level = LogLevel.Information, Message = "Connection test successful")]
+    private partial void LogConnectionTestSuccessful();
+
+    [LoggerMessage(EventId = 17, Level = LogLevel.Error, Message = "Connection test error")]
+    private partial void LogConnectionTestError(Exception ex);
+
+    [LoggerMessage(EventId = 18, Level = LogLevel.Information, Message = "Getting cover art: {CoverId}")]
+    private partial void LogGettingCoverArt(string CoverId);
+
+    [LoggerMessage(EventId = 19, Level = LogLevel.Information, Message = "Cover art retrieved: {CoverId} {Size} bytes")]
+    private partial void LogCoverArtRetrieved(string CoverId, int Size);
+
+    [LoggerMessage(EventId = 20, Level = LogLevel.Error, Message = "Get cover art error: {CoverId}")]
+    private partial void LogGetCoverArtError(string CoverId, Exception ex);
+
+    [LoggerMessage(EventId = 21, Level = LogLevel.Information, Message = "Generated Subsonic streaming URL: {StreamUrl}")]
+    private partial void LogGeneratedStreamUrl(string StreamUrl);
+
+    [LoggerMessage(EventId = 22, Level = LogLevel.Information, Message = "Initializing Subsonic service: {Url}")]
+    private partial void LogInitializing(string? Url);
+
+    [LoggerMessage(EventId = 23, Level = LogLevel.Information, Message = "Connection established: {Url}")]
+    private partial void LogConnectionEstablished(string? Url);
+
+    [LoggerMessage(EventId = 24, Level = LogLevel.Information, Message = "Subsonic service initialized: {Url} {Username}")]
+    private partial void LogSubsonicServiceInitialized(string? Url, string? Username);
+
+    [LoggerMessage(EventId = 25, Level = LogLevel.Error, Message = "Initialization failed")]
+    private partial void LogInitializationFailed(Exception ex);
+
+    [LoggerMessage(EventId = 26, Level = LogLevel.Information, Message = "Subsonic service disposed")]
+    private partial void LogSubsonicServiceDisposed();
 
     #endregion
 }

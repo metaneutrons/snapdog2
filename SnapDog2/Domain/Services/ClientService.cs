@@ -21,7 +21,7 @@ using SnapDog2.Shared.Models;
 /// <summary>
 /// Implementation of IClientService for client operations.
 /// </summary>
-public class ClientService : IClientService
+public partial class ClientService : IClientService
 {
     private readonly IClientStateStore _clientStateStore;
     private readonly ISnapcastService _snapcastService;
@@ -45,7 +45,7 @@ public class ClientService : IClientService
     /// </summary>
     public Task<Result<int>> GetClientsCountAsync(CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Getting clients count");
+        LogGettingClientsCount();
 
         var clientStates = _clientStateStore.GetAllClientStates();
         return Task.FromResult(Result<int>.Success(clientStates.Count));
@@ -56,7 +56,7 @@ public class ClientService : IClientService
     /// </summary>
     public Task<Result<List<ClientState>>> GetAllClientsAsync(CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Getting all clients");
+        LogGettingAllClients();
 
         var clientStates = _clientStateStore.GetAllClientStates();
         var clients = clientStates.Values.ToList();
@@ -68,7 +68,7 @@ public class ClientService : IClientService
     /// </summary>
     public Task<Result<ClientState>> GetClientAsync(int clientIndex, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Getting client {ClientIndex}", clientIndex);
+        LogGettingClient(clientIndex);
 
         var client = _clientStateStore.GetClientState(clientIndex);
         if (client == null)
@@ -85,7 +85,7 @@ public class ClientService : IClientService
     [CommandId("CLIENT_ZONE")]
     public async Task<Result> AssignToZoneAsync(int clientIndex, int zoneIndex, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Assigning client {ClientIndex} to zone {ZoneIndex}", clientIndex, zoneIndex);
+        LogAssigningClient(clientIndex, zoneIndex);
 
         return await _clientManager.AssignClientToZoneAsync(clientIndex, zoneIndex);
     }
@@ -96,7 +96,7 @@ public class ClientService : IClientService
     [CommandId("CLIENT_VOLUME")]
     public async Task<Result> SetVolumeAsync(int clientIndex, int volume, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Setting client {ClientIndex} volume to {Volume}", clientIndex, volume);
+        LogSettingVolume(clientIndex, volume);
 
         var client = _clientStateStore.GetClientState(clientIndex);
         if (client == null)
@@ -113,7 +113,7 @@ public class ClientService : IClientService
     [CommandId("CLIENT_VOLUME_UP")]
     public async Task<Result> VolumeUpAsync(int clientIndex, int step, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Increasing client {ClientIndex} volume by {Step}", clientIndex, step);
+        LogIncreasingVolume(clientIndex, step);
 
         var client = _clientStateStore.GetClientState(clientIndex);
         if (client == null)
@@ -131,7 +131,7 @@ public class ClientService : IClientService
     [CommandId("CLIENT_VOLUME_DOWN")]
     public async Task<Result> VolumeDownAsync(int clientIndex, int step, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Decreasing client {ClientIndex} volume by {Step}", clientIndex, step);
+        LogDecreasingVolume(clientIndex, step);
 
         var client = _clientStateStore.GetClientState(clientIndex);
         if (client == null)
@@ -149,7 +149,7 @@ public class ClientService : IClientService
     [CommandId("CLIENT_MUTE")]
     public async Task<Result> SetMuteAsync(int clientIndex, bool muted, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Setting client {ClientIndex} mute to {Muted}", clientIndex, muted);
+        LogSettingMute(clientIndex, muted);
 
         var client = _clientStateStore.GetClientState(clientIndex);
         if (client == null)
@@ -166,7 +166,7 @@ public class ClientService : IClientService
     [CommandId("CLIENT_MUTE_TOGGLE")]
     public async Task<Result> ToggleMuteAsync(int clientIndex, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Toggling mute for client {ClientIndex}", clientIndex);
+        LogTogglingMute(clientIndex);
 
         var client = _clientStateStore.GetClientState(clientIndex);
         if (client == null)
@@ -183,7 +183,7 @@ public class ClientService : IClientService
     [CommandId("CLIENT_LATENCY")]
     public Task<Result> SetLatencyAsync(int clientIndex, int latencyMs, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Setting client {ClientIndex} latency to {LatencyMs}ms", clientIndex, latencyMs);
+        LogSettingLatency(clientIndex, latencyMs);
 
         // TODO: Implement actual client latency control logic
         return Task.FromResult(Result.Success());
@@ -195,7 +195,7 @@ public class ClientService : IClientService
     [CommandId("CLIENT_NAME")]
     public async Task<Result> SetNameAsync(int clientIndex, string name, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Setting client {ClientIndex} name to {Name}", clientIndex, name);
+        LogSettingName(clientIndex, name);
 
         var client = _clientStateStore.GetClientState(clientIndex);
         if (client == null)
@@ -205,4 +205,37 @@ public class ClientService : IClientService
 
         return await _snapcastService.SetClientNameAsync(client.SnapcastId, name, cancellationToken);
     }
+
+    [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Getting clients count")]
+    private partial void LogGettingClientsCount();
+
+    [LoggerMessage(EventId = 2, Level = LogLevel.Information, Message = "Getting all clients")]
+    private partial void LogGettingAllClients();
+
+    [LoggerMessage(EventId = 3, Level = LogLevel.Information, Message = "Getting client {ClientIndex}")]
+    private partial void LogGettingClient(int ClientIndex);
+
+    [LoggerMessage(EventId = 4, Level = LogLevel.Information, Message = "Assigning client {ClientIndex} to zone {ZoneIndex}")]
+    private partial void LogAssigningClient(int ClientIndex, int ZoneIndex);
+
+    [LoggerMessage(EventId = 5, Level = LogLevel.Information, Message = "Setting client {ClientIndex} volume to {Volume}")]
+    private partial void LogSettingVolume(int ClientIndex, int Volume);
+
+    [LoggerMessage(EventId = 6, Level = LogLevel.Information, Message = "Increasing client {ClientIndex} volume by {Step}")]
+    private partial void LogIncreasingVolume(int ClientIndex, int Step);
+
+    [LoggerMessage(EventId = 7, Level = LogLevel.Information, Message = "Decreasing client {ClientIndex} volume by {Step}")]
+    private partial void LogDecreasingVolume(int ClientIndex, int Step);
+
+    [LoggerMessage(EventId = 8, Level = LogLevel.Information, Message = "Setting client {ClientIndex} mute to {Muted}")]
+    private partial void LogSettingMute(int ClientIndex, bool Muted);
+
+    [LoggerMessage(EventId = 9, Level = LogLevel.Information, Message = "Toggling mute for client {ClientIndex}")]
+    private partial void LogTogglingMute(int ClientIndex);
+
+    [LoggerMessage(EventId = 10, Level = LogLevel.Information, Message = "Setting client {ClientIndex} latency to {LatencyMs}ms")]
+    private partial void LogSettingLatency(int ClientIndex, int LatencyMs);
+
+    [LoggerMessage(EventId = 11, Level = LogLevel.Information, Message = "Setting client {ClientIndex} name to {Name}")]
+    private partial void LogSettingName(int ClientIndex, string Name);
 }
