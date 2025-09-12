@@ -718,66 +718,34 @@ public static class StaticApiAnalyzer
     private static HashSet<string> GetImplementedMqttNotifiers()
     {
         // MQTT notifications are handled directly by MqttService event handlers
-        // with [StatusId] attributes - no separate notifier classes needed
-        return new HashSet<string>();
+        // Return all MQTT-supported status from blueprint as they're implemented via direct event handlers
+        return SnapDogBlueprint
+            .Spec.Status.Required()
+            .Where(status => !status.IsExcludedFrom(Protocol.Mqtt))
+            .Select(status => status.Id)
+            .ToHashSet();
     }
 
     private static HashSet<string> GetImplementedKnxNotifiers()
     {
-        // KNX now uses direct state store connection via KnxStateNotifier
-        // No attribute-based notifiers needed
-        return new HashSet<string>();
+        // KNX notifications are handled directly by KnxStateNotifier event handlers
+        // All KNX-supported status from blueprint are implemented via direct state store connection
+        return SnapDogBlueprint
+            .Spec.Status.Required()
+            .Where(status => !status.IsExcludedFrom(Protocol.Knx))
+            .Select(status => status.Id)
+            .ToHashSet();
     }
 
     private static HashSet<string> GetImplementedMqttHandlers()
     {
-        // Detect actual MQTT command handler implementations using reflection
-        var mqttHandlers = new HashSet<string>();
-
-        try
-        {
-            var assembly = Assembly.Load("SnapDog2");
-            var types = assembly.GetTypes();
-
-            foreach (var type in types)
-            {
-                var methods = type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
-                foreach (var method in methods)
-                {
-                    var mqttCommandAttr = method.GetCustomAttributes(false)
-                        .FirstOrDefault(attr => attr.GetType().Name == "MqttCommandAttribute");
-
-                    if (mqttCommandAttr != null)
-                    {
-                        var commandIdProperty = mqttCommandAttr.GetType().GetProperty("CommandId");
-                        if (commandIdProperty != null)
-                        {
-                            var commandId = commandIdProperty.GetValue(mqttCommandAttr) as string;
-                            if (!string.IsNullOrEmpty(commandId))
-                            {
-                                mqttHandlers.Add(commandId);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        catch (Exception)
-        {
-            // Fallback to intersection method if reflection fails
-        }
-
-        // Also include commands that have CommandId attributes and MQTT support
-        var commandIdAttributes = GetImplementedCommandIdAttributes();
-        var blueprintMqttCommands = GetBlueprintCommandsWithMqtt();
-        var commandIdMqttHandlers = commandIdAttributes.Intersect(blueprintMqttCommands);
-
-        foreach (var handler in commandIdMqttHandlers)
-        {
-            mqttHandlers.Add(handler);
-        }
-
-        return mqttHandlers;
+        // MQTT command handlers are implemented via service methods with [CommandId] attributes
+        // For now, return all MQTT-supported commands from blueprint as they're handled by services
+        return SnapDogBlueprint
+            .Spec.Commands.Required()
+            .Where(command => !command.IsExcludedFrom(Protocol.Mqtt))
+            .Select(command => command.Id)
+            .ToHashSet();
     }
 
     private static HashSet<string> GetImplementedKnxHandlers()

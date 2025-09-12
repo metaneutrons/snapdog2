@@ -681,6 +681,13 @@ public static class SnapDogBlueprint
         .Description("Control command execution status (MQTT notifications only)")
         .Description("Control command execution status (MQTT notifications only)")
         .Exclude(Protocol.SignalR, "Covered by other events or static data")
+        .Status("ZONE_POSITION_CHANGED")
+        .Zone()
+        .Description("Zone position changes (internal event for debounced updates)")
+        .Exclude(Protocol.Api, "Internal event not exposed via API")
+        .Exclude(Protocol.SignalR, "Covered by ZoneProgressChanged event")
+        .Exclude(Protocol.Knx, "Internal event not suitable for KNX")
+        //
         // === COMMAND RESPONSE STATUS ===
         //
         .Status("COMMAND_STATUS")

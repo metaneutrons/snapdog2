@@ -42,7 +42,7 @@ public partial class ErrorTrackingService(ILogger<ErrorTrackingService> logger) 
             this.CleanupOldErrors();
         }
 
-        logger.LogInformation("ErrorRecorded: {Component} - {Context} - {Message}", error.Component ?? "Unknown", error.Context ?? "Unknown", error.Message);
+        LogErrorRecorded(error.Component ?? "Unknown", error.Context ?? "Unknown", error.Message);
     }
 
     /// <inheritdoc/>
@@ -106,8 +106,15 @@ public partial class ErrorTrackingService(ILogger<ErrorTrackingService> logger) 
             this._errors.Clear();
         }
 
-        logger.LogInformation("ErrorsCleared");
+        LogErrorsCleared();
     }
+
+    // LoggerMessage definitions for high-performance logging
+    [LoggerMessage(EventId = 114000, Level = LogLevel.Warning, Message = "ErrorRecorded: {Component} - {Context} - {Message}")]
+    private partial void LogErrorRecorded(string component, string context, string message);
+
+    [LoggerMessage(EventId = 114001, Level = LogLevel.Information, Message = "ErrorsCleared")]
+    private partial void LogErrorsCleared();
 
     private void CleanupOldErrors()
     {
