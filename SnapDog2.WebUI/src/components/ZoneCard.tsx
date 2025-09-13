@@ -31,9 +31,9 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
   const zone = useZone(zoneIndex);
   const { setZoneVolume, toggleZoneMute } = useAppStore();
 
-  const handleDrop = (clientIndex: number) => {
-    console.log(`Dropping client ${clientIndex} into zone ${zoneIndex}`);
-    onClientMove(clientIndex, zoneIndex);
+  const handleDrop = (clientIndex: number, targetZoneIndex: number) => {
+    console.log(`Dropping client ${clientIndex} into zone ${targetZoneIndex}`);
+    onClientMove(clientIndex, targetZoneIndex);
   };
 
   if (!zone) {

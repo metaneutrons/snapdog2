@@ -7,7 +7,7 @@ interface ClientListProps {
   draggingClientIndex: number | null;
   onClientDragStart: (clientIndex: number) => void;
   onClientDragEnd: () => void;
-  onDrop?: (zoneIndex: number) => void;
+  onDrop?: (clientIndex: number, zoneIndex: number) => void;
 }
 
 export function ClientList({ zoneIndex, draggingClientIndex, onClientDragStart, onClientDragEnd, onDrop }: ClientListProps) {
@@ -24,10 +24,9 @@ export function ClientList({ zoneIndex, draggingClientIndex, onClientDragStart, 
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    if (onDrop) {
-      onDrop(zoneIndex);
+    if (onDrop && draggingClientIndex !== null) {
+      onDrop(draggingClientIndex, zoneIndex);
     }
-    // Always reset drag state after drop
     onClientDragEnd();
   };
 
