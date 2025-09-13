@@ -1,8 +1,10 @@
 import path from 'path';
 import { defineConfig } from 'vite';
 
-export default defineConfig({
-    base: '/webui/',
+export default defineConfig(({ mode }) => ({
+    // Development: served at /webui/ via Caddy proxy
+    // Production: embedded in app, served at /
+    base: mode === 'development' ? '/webui/' : '/',
     resolve: {
         alias: {
             '@': path.resolve(__dirname, 'src'),
@@ -23,4 +25,4 @@ export default defineConfig({
             },
         },
     },
-});
+}));

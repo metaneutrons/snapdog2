@@ -42,7 +42,7 @@ The development environment provides a **unified dashboard** through Caddy rever
 
 | Service | URL | Purpose |
 |---------|-----|---------|
-| 🎵 **SnapDog2 WebUI** | <http://localhost:8000/webui> | Main application interface |
+| 🎵 **SnapDog2 WebUI** | <http://localhost:8000/webui> | Main application interface (dev container) |
 | 📚 **API Documentation** | <http://localhost:8000/swagger> | Interactive API explorer |
 | 🎵 **Snapcast Server** | <http://localhost:8000/server/> | Multi-room audio server |
 | 💿 **Navidrome Music** | <http://localhost:8000/music/> | Music library & streaming |
@@ -50,6 +50,8 @@ The development environment provides a **unified dashboard** through Caddy rever
 | 🍽️ **Kitchen Client** | <http://localhost:8000/clients/kitchen/> | Audio client control |
 | 🛏️ **Bedroom Client** | <http://localhost:8000/clients/bedroom/> | Audio client control |
 | 📊 **Grafana Dashboards** | <http://localhost:8000/grafana/> | Metrics & monitoring |
+
+> **Note**: In development mode, the WebUI runs in a separate container with Vite dev server and is served at `/webui`. In production, the WebUI will be embedded in the main app and served from root `/`.
 
 ### Direct Service Access (Development)
 
@@ -72,7 +74,7 @@ graph TB
     
     subgraph "Application Services"
         APP[🎵 SnapDog2<br/>:5555]
-        WEBUI[💻 WebUI<br/>Embedded]
+        WEBUI[💻 WebUI Dev Server<br/>:5173]
     end
     
     subgraph "Audio Services"
@@ -95,6 +97,7 @@ graph TB
     end
     
     CADDY --> APP
+    CADDY --> WEBUI
     CADDY --> SNAP
     CADDY --> NAVI
     CADDY --> LIVING
@@ -102,13 +105,14 @@ graph TB
     CADDY --> BEDROOM
     CADDY --> GRAFANA
     
-    APP --> WEBUI
     APP --> SNAP
     APP --> MQTT
     APP --> REDIS
     APP --> KNX
     APP --> OTEL
 ```
+
+> **Development Architecture**: WebUI runs in separate container with Vite dev server at `/webui`. In production, WebUI will be embedded in the main app container and served from root `/`.
 
 ### Development Workflow
 

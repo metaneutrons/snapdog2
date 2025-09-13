@@ -23,8 +23,18 @@
         try_files {path} /index.html
     }
 
-    # SnapDog WebUI - Frontend development server with hot reload (FIRST!)
-    handle /webui* {
+    # WebUI redirect - handle /webui -> /webui/ gracefully
+    @webui_exact {
+        path /webui
+        path_regexp webui ^/webui$
+    }
+
+    handle @webui_exact {
+        redir * /webui/ 301
+    }
+
+    # SnapDog WebUI - Frontend development server with hot reload
+    handle /webui/* {
         reverse_proxy http://frontend:5173
     }
 
