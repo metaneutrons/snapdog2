@@ -375,14 +375,8 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
         try
         {
-            // Update state from Snapcast if available with timeout
-            var updateTask = this.UpdateStateFromSnapcastAsync();
-            var completedTask = await Task.WhenAny(updateTask, Task.Delay(3000, cts.Token)).ConfigureAwait(false);
-
-            if (completedTask != updateTask)
-            {
-                this.LogGetStateAsyncTimeout(this._zoneIndex);
-            }
+            // Events handle all state updates - no need for polling
+            // PositionChanged, PlaybackStateChanged, TrackInfoChanged events keep state current
 
             // Get clients assigned to this zone
             var zoneClients = Array.Empty<int>();
@@ -651,6 +645,13 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     {
         var clampedVolume = Math.Clamp(volume, 0, 100);
 
+        // Skip if volume is already at target (prevent redundant calls)
+        if (this._currentState.Volume == clampedVolume)
+        {
+            this.LogZoneAction(this._zoneIndex, this._config.Name, $"Volume already at {clampedVolume}, skipping");
+            return Result.Success();
+        }
+
         // Update Snapcast group volume using proportional scaling like snapweb
         if (!string.IsNullOrEmpty(this._snapcastGroupId))
         {
@@ -668,6 +669,13 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                     var delta = clampedVolume - currentGroupVolume;
 
                     this.LogZoneAction(this._zoneIndex, this._config.Name, $"Current group volume: {currentGroupVolume:F1}, target: {clampedVolume}, delta: {delta:F1}");
+
+                    // Skip if volume is already at target (prevent infinite loops)
+                    if (Math.Abs(delta) < 0.1)
+                    {
+                        this.LogZoneAction(this._zoneIndex, this._config.Name, "Volume already at target, skipping adjustment");
+                        return Result.Success();
+                    }
 
                     // Apply proportional scaling to each client (snapweb algorithm)
                     foreach (var client in group.Clients)
@@ -1314,9 +1322,8 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            // Find matching Snapcast group and update state
-            // This would use actual Snapcast group data
-            await this.UpdateStateFromSnapcastAsync().ConfigureAwait(false);
+            // Events handle state synchronization - no polling needed
+            // await this.UpdateStateFromSnapcastAsync().ConfigureAwait(false);
         }
         finally
         {
@@ -1421,240 +1428,6 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         return fileName;
     }
 
-    private async Task UpdateStateFromSnapcastAsync()
-    {
-        try
-        {
-            this.LogUpdateStateFromSnapcastStarting(this._zoneIndex);
-
-            // Get current playback status from MediaPlayerService
-            var playbackStatus = await this._mediaPlayerService.GetStatusAsync(this._zoneIndex).ConfigureAwait(false);
-
-            this.LogMediaPlayerStatusResult(playbackStatus.IsSuccess, playbackStatus.Value != null ? "NotNull" : "Null");
-
-            if (playbackStatus.IsSuccess && playbackStatus.Value != null)
-            {
-                var status = playbackStatus.Value;
-
-                this.LogMediaPlayerStatus(status.IsPlaying, status.CurrentTrack?.Title);
-
-                // Check for playing state changes regardless of whether CurrentTrack is null
-                // This handles cases where MediaPlayer returns null CurrentTrack when paused
-                if (this._currentState.Track != null)
-                {
-                    var playingStateChanged = this._currentState.Track.IsPlaying != status.IsPlaying;
-                    if (playingStateChanged)
-                    {
-                        this.LogTrackStateChanged(this._currentState.Track.IsPlaying, status.IsPlaying);
-
-                        // Publish track playing status notification for KNX integration
-                        _ = Task.Run(async () =>
-                        {
-                            try
-                            {
-                                var playingStatusNotification = new
-                                {
-                                    ZoneIndex = this._zoneIndex,
-                                    IsPlaying = status.IsPlaying
-                                };
-                                await this._hubContext.Clients.All.SendAsync("ZonePlaybackChanged", playingStatusNotification).ConfigureAwait(false);
-                            }
-                            catch (Exception ex)
-                            {
-                                this.LogErrorPublishingTrackPlayingStatus(ex, this._zoneIndex);
-                            }
-                        });
-                    }
-                }
-
-                // Update track playing state - handle both existing tracks and new tracks from MediaPlayer
-                if (status.CurrentTrack != null)
-                {
-                    TrackInfo updatedTrack;
-
-                    if (this._currentState.Track != null)
-                    {
-                        // We have an existing track - preserve its rich metadata and update only playback info
-                        var stateChanged = this._currentState.Track.IsPlaying != status.IsPlaying;
-
-                        if (stateChanged)
-                        {
-                            this.LogTrackStateChanged(this._currentState.Track.IsPlaying, status.IsPlaying);
-
-                            // Publish track playing status notification for KNX integration
-                            _ = Task.Run(async () =>
-                            {
-                                try
-                                {
-                                    var playingStatusNotification = new
-                                    {
-                                        ZoneIndex = this._zoneIndex,
-                                        IsPlaying = status.IsPlaying
-                                    };
-                                    await this._hubContext.Clients.All.SendAsync("ZonePlaybackChanged", playingStatusNotification).ConfigureAwait(false);
-                                }
-                                catch (Exception ex)
-                                {
-                                    this.LogErrorPublishingTrackPlayingStatus(ex, this._zoneIndex);
-                                }
-                            });
-                        }
-                        else
-                        {
-                            this.LogUpdatingTrackState(this._currentState.Track.IsPlaying, status.IsPlaying);
-                        }
-
-                        // Preserve ALL existing metadata, only update playback status and position
-                        // This ensures playlist metadata (artist, album, etc.) is not lost
-                        updatedTrack = this._currentState.Track with
-                        {
-                            IsPlaying = status.IsPlaying,
-                            PositionMs = status.CurrentTrack.PositionMs,
-                            Progress = status.CurrentTrack.Progress,
-                            // Only update duration if MediaPlayer provides it and we don't have it
-                            DurationMs = status.CurrentTrack.DurationMs ?? this._currentState.Track.DurationMs,
-                            // Preserve all other metadata: Title, Artist, Album, Source, Index, etc.
-                        };
-                    }
-                    else
-                    {
-                        // No existing track - use MediaPlayer track as-is (this handles stream URLs, etc.)
-                        this.LogTrackStateChanged(false, status.IsPlaying);
-
-                        // Publish track playing status notification for KNX integration (new track)
-                        _ = Task.Run(async () =>
-                        {
-                            try
-                            {
-                                var playingStatusNotification = new
-                                {
-                                    ZoneIndex = this._zoneIndex,
-                                    IsPlaying = status.IsPlaying
-                                };
-                                await this._hubContext.Clients.All.SendAsync("ZonePlaybackChanged", playingStatusNotification).ConfigureAwait(false);
-                            }
-                            catch (Exception ex)
-                            {
-                                this.LogErrorPublishingTrackPlayingStatus(ex, this._zoneIndex);
-                            }
-                        });
-
-                        updatedTrack = status.CurrentTrack with
-                        {
-                            IsPlaying = status.IsPlaying,
-                        };
-                    }
-
-                    // Log position updates every 30 seconds (simpler approach)
-                    var positionSeconds = (status.CurrentTrack.PositionMs ?? 0) / 1000.0;
-                    var durationSeconds = (updatedTrack.DurationMs ?? 0) / 1000.0;
-                    var progressPercent = (status.CurrentTrack.Progress ?? 0) * 100;
-
-                    // Log every 30 seconds of playback
-                    var positionSecondsInt = (int)positionSeconds;
-                    var shouldLogPosition =
-                        positionSecondsInt > 0
-                        && positionSecondsInt % 30 == 0
-                        && (positionSecondsInt != this._lastLoggedPositionSeconds);
-
-                    if (shouldLogPosition)
-                    {
-                        this.LogZonePlayingWithPosition(
-                            this._zoneIndex,
-                            updatedTrack.Title,
-                            positionSeconds,
-                            durationSeconds,
-                            progressPercent
-                        );
-                        this._lastLoggedPositionSeconds = positionSecondsInt;
-                    }
-                    else
-                    {
-                        this.LogLibVlcPositionData(
-                            status.CurrentTrack.PositionMs,
-                            status.CurrentTrack.Progress ?? 0,
-                            updatedTrack.DurationMs
-                        );
-                    }
-
-                    // Update the zone state with the updated track
-                    this._currentState = this._currentState with
-                    {
-                        Track = updatedTrack,
-                        PlaybackState = status.IsPlaying
-                            ? PlaybackState.Playing
-                            : PlaybackState.Stopped,
-                    };
-
-                    this.LogUpdatedTrackState(
-                        updatedTrack.IsPlaying,
-                        updatedTrack.PositionMs ?? 0,
-                        updatedTrack.Progress ?? 0
-                    );
-
-                    // Publish progress notification for real-time UI updates
-                    if (updatedTrack.IsPlaying && updatedTrack.PositionMs.HasValue)
-                    {
-                        _ = Task.Run(async () =>
-                        {
-                            try
-                            {
-                                var progressPercent = updatedTrack.DurationMs.HasValue && updatedTrack.DurationMs > 0
-                                    ? (updatedTrack.Progress ?? 0) * 100
-                                    : 0; // For radio streams, progress is always 0
-
-                                var progressNotification = new
-                                {
-                                    ZoneIndex = this._zoneIndex,
-                                    PositionMs = updatedTrack.PositionMs.Value,
-                                    ProgressPercent = progressPercent
-                                };
-
-                                await this._hubContext.Clients.All.SendAsync("ZoneProgressChanged", progressNotification).ConfigureAwait(false);
-                            }
-                            catch (Exception ex)
-                            {
-                                this.LogErrorPublishingTrackProgress(ex, this._zoneIndex);
-                            }
-                        });
-                    }
-                }
-                else
-                {
-                    this.LogSkippingUpdate(
-                        this._currentState.Track != null ? "NotNull" : "Null",
-                        "Null"
-                    );
-
-                    // Even when CurrentTrack is null, update the playing state of existing track
-                    if (this._currentState.Track != null)
-                    {
-                        var updatedTrack = this._currentState.Track with
-                        {
-                            IsPlaying = status.IsPlaying
-                        };
-
-                        this._currentState = this._currentState with
-                        {
-                            Track = updatedTrack,
-                            PlaybackState = status.IsPlaying
-                                ? PlaybackState.Playing
-                                : PlaybackState.Paused
-                        };
-                    }
-                }
-            }
-            else
-            {
-                this.LogMediaPlayerStatusFailed(playbackStatus.IsSuccess, playbackStatus.ErrorMessage);
-            }
-        }
-        catch (Exception ex)
-        {
-            // Log error but don't fail the state update
-            this.LogFailedToUpdateZoneState(ex, this._zoneIndex);
-        }
-    }
 
     /// <summary>
     /// Starts the position update timer for reliable MQTT position updates when playing.

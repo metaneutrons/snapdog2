@@ -119,11 +119,27 @@ public partial class ZoneGroupingService(
 
             this.LogCheckingZones(zones.Count, string.Join(",", zones));
 
-            // Synchronize each zone
+            // OPTIMIZATION: Fetch all data once instead of per-zone
+            var allClientsResult = await this._clientManager.GetAllClientsAsync();
+            if (!allClientsResult.IsSuccess)
+            {
+                return Result.Failure($"Failed to get all clients: {allClientsResult.ErrorMessage}");
+            }
+
+            var serverStatusResult = await this._snapcastService.GetServerStatusAsync(cancellationToken);
+            if (!serverStatusResult.IsSuccess)
+            {
+                return Result.Failure($"Failed to get server status: {serverStatusResult.ErrorMessage}");
+            }
+
+            var allClients = allClientsResult.Value ?? new List<ClientState>();
+            var serverStatus = serverStatusResult.Value;
+
+            // Synchronize each zone with cached data
             foreach (var zoneIndex in zones)
             {
                 this.LogCheckingZone(zoneIndex);
-                var result = await this.SynchronizeZoneGroupingAsync(zoneIndex, cancellationToken);
+                var result = await this.SynchronizeZoneGroupingAsync(zoneIndex, allClients, serverStatus, cancellationToken);
                 if (!result.IsSuccess)
                 {
                     this.LogFailedSynchronizeZone(zoneIndex, result.ErrorMessage);
@@ -146,6 +162,24 @@ public partial class ZoneGroupingService(
 
     public async Task<Result> SynchronizeZoneGroupingAsync(int zoneIndex, CancellationToken cancellationToken = default)
     {
+        // For backward compatibility, fetch data if not provided
+        var allClientsResult = await this._clientManager.GetAllClientsAsync();
+        if (!allClientsResult.IsSuccess)
+        {
+            return Result.Failure($"Failed to get all clients: {allClientsResult.ErrorMessage}");
+        }
+
+        var serverStatusResult = await this._snapcastService.GetServerStatusAsync(cancellationToken);
+        if (!serverStatusResult.IsSuccess)
+        {
+            return Result.Failure($"Failed to get server status: {serverStatusResult.ErrorMessage}");
+        }
+
+        return await SynchronizeZoneGroupingAsync(zoneIndex, allClientsResult.Value ?? new List<ClientState>(), serverStatusResult.Value, cancellationToken);
+    }
+
+    private async Task<Result> SynchronizeZoneGroupingAsync(int zoneIndex, IList<ClientState> allClients, SnapcastServerStatus? serverStatus, CancellationToken cancellationToken = default)
+    {
         using var activity = ActivitySource.StartActivity("ZoneGrouping.SynchronizeZone");
         activity?.SetTag("zone.id", zoneIndex);
 
@@ -166,21 +200,17 @@ public partial class ZoneGroupingService(
                 .ToList();
             Console.WriteLine($"DEBUG: Found {zoneClientStates.Count} clients assigned to zone {zoneIndex}");
 
-            // Get live SnapcastId for each client in this zone
+            // OPTIMIZATION: Use cached client data instead of calling GetAllClientsAsync for each client
             var clientIndexs = new List<string>();
             foreach (var clientState in zoneClientStates)
             {
                 Console.WriteLine($"DEBUG: Processing client {clientState.Id} for zone {zoneIndex}");
-                // Get fresh client data to get current SnapcastId
-                var clientResult = await this._clientManager.GetAllClientsAsync();
-                if (clientResult.IsSuccess)
+                // Find client in cached data
+                var liveClient = allClients.FirstOrDefault(c => c.Id == clientState.Id);
+                if (liveClient != null && !string.IsNullOrEmpty(liveClient.SnapcastId))
                 {
-                    var liveClient = clientResult.Value?.FirstOrDefault(c => c.Id == clientState.Id);
-                    if (liveClient != null && !string.IsNullOrEmpty(liveClient.SnapcastId))
-                    {
-                        Console.WriteLine($"DEBUG: Adding {liveClient.SnapcastId} to zone {zoneIndex}");
-                        clientIndexs.Add(liveClient.SnapcastId);
-                    }
+                    Console.WriteLine($"DEBUG: Adding {liveClient.SnapcastId} to zone {zoneIndex}");
+                    clientIndexs.Add(liveClient.SnapcastId);
                 }
             }
 
@@ -192,20 +222,19 @@ public partial class ZoneGroupingService(
                 return Result.Success();
             }
 
-            // Get current server status
-            var serverStatus = await this._snapcastService.GetServerStatusAsync(cancellationToken);
-            if (!serverStatus.IsSuccess)
+            // OPTIMIZATION: Use cached server status instead of fetching again
+            if (serverStatus == null)
             {
-                return Result.Failure($"Failed to get server status: {serverStatus.ErrorMessage}");
+                return Result.Failure("Server status is null");
             }
 
             var expectedStreamId = $"Zone{zoneIndex}";
 
             // Check if zone is already properly configured
-            if (this.IsZoneProperlyConfigured(serverStatus.Value, clientIndexs, expectedStreamId))
+            if (this.IsZoneProperlyConfigured(serverStatus, clientIndexs, expectedStreamId))
             {
                 // Find the group that contains our clients and update the zone manager
-                var existingGroup = serverStatus.Value?.Groups
+                var existingGroup = serverStatus.Groups
                     .FirstOrDefault(g => g.Clients.Any(c => clientIndexs.Contains(c.Id)));
 
                 if (existingGroup != null)
@@ -226,8 +255,8 @@ public partial class ZoneGroupingService(
 
             // Find a group that has any of our zone's clients, or use any available group
             var targetGroup =
-                serverStatus.Value?.Groups.FirstOrDefault(g => g.Clients.Any(c => clientIndexs.Contains(c.Id)))
-                ?? serverStatus.Value?.Groups.FirstOrDefault();
+                serverStatus.Groups.FirstOrDefault(g => g.Clients.Any(c => clientIndexs.Contains(c.Id)))
+                ?? serverStatus.Groups.FirstOrDefault();
 
             if (targetGroup == null)
             {

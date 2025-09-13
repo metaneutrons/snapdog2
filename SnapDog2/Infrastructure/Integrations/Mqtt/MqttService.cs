@@ -129,6 +129,7 @@ public sealed partial class MqttService : IMqttService
                 .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
                 .Build();
 
+            // Re-enabled MQTT publishing with LibVLC optimization reducing CPU load
             await _mqttClient!.PublishAsync(message, cancellationToken);
             LogMessagePublished(topic, payload.Length, retain);
             return Result.Success();

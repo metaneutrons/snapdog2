@@ -70,7 +70,7 @@ public partial class ZoneGroupingBackgroundService : BackgroundService
         // Wait for services to be ready
         await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
 
-        // Start periodic checks
+        // Start periodic checks with longer intervals since LibVLC optimization reduced CPU load
         while (!stoppingToken.IsCancellationRequested)
         {
             try

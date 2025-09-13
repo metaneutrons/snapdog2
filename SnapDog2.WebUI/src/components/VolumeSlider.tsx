@@ -1,5 +1,5 @@
 
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { VolumeXIcon, Volume2Icon } from './icons';
 
 interface VolumeSliderProps {
@@ -20,27 +20,11 @@ export function VolumeSlider({
   className = ''
 }: VolumeSliderProps) {
   
-  const [localValue, setLocalValue] = useState(value);
-
-  // Sync local value with prop value
-  useEffect(() => {
-    setLocalValue(value);
-  }, [value]);
-
-  // Debounce API calls
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (localValue !== value) {
-        onChange(localValue);
-      }
-    }, 150); // 150ms debounce
-
-    return () => clearTimeout(timer);
-  }, [localValue, onChange, value]);
-  
   const handleSliderChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setLocalValue(parseInt(e.target.value, 10));
-  }, []);
+    const rawValue = parseInt(e.target.value, 10);
+    const clampedValue = Math.min(100, Math.max(0, rawValue));
+    onChange(clampedValue);
+  }, [onChange]);
 
   return (
     <div className={`flex items-center space-x-2 ${className}`}>
@@ -60,7 +44,7 @@ export function VolumeSlider({
         type="range"
         min="0"
         max="100"
-        value={muted ? 0 : localValue}
+        value={muted ? 0 : value}
         onChange={handleSliderChange}
         disabled={muted}
         className={`w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed`}

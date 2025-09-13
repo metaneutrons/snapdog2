@@ -24,7 +24,7 @@ function App() {
   on('client.move', async ({ clientIndex, targetZoneIndex }) => {
     try {
       console.log(`Event: Moving client ${clientIndex} to zone ${targetZoneIndex}`);
-      await api.post.moveClientToZone(clientIndex, targetZoneIndex);
+      await api.clients.moveToZone(clientIndex, targetZoneIndex);
       await moveClientToZone(clientIndex, targetZoneIndex);
       console.log('Event: Client move successful');
     } catch (error) {
@@ -35,7 +35,7 @@ function App() {
   on('zone.volume.change', async ({ zoneIndex, volume }) => {
     try {
       console.log(`Event: Changing zone ${zoneIndex} volume to ${volume}`);
-      await api.post.setZoneVolume(zoneIndex, volume);
+      await api.zones.setVolume(zoneIndex, volume);
       console.log('Event: Volume change successful');
     } catch (error) {
       console.error('Event: Failed to change volume:', error);
@@ -45,7 +45,7 @@ function App() {
   on('zone.mute.toggle', async ({ zoneIndex }) => {
     try {
       console.log(`Event: Toggling zone ${zoneIndex} mute`);
-      await api.post.toggleZoneMute(zoneIndex);
+      await api.zones.toggleMute(zoneIndex);
       console.log('Event: Mute toggle successful');
     } catch (error) {
       console.error('Event: Failed to toggle mute:', error);
@@ -55,7 +55,7 @@ function App() {
   on('client.volume.change', async ({ clientIndex, volume }) => {
     try {
       console.log(`Event: Changing client ${clientIndex} volume to ${volume}`);
-      await api.post.setClientVolume(clientIndex, volume);
+      await api.clients.setVolume(clientIndex, volume);
       console.log('Event: Client volume change successful');
     } catch (error) {
       console.error('Event: Failed to change client volume:', error);
@@ -65,7 +65,7 @@ function App() {
   on('client.mute.toggle', async ({ clientIndex }) => {
     try {
       console.log(`Event: Toggling client ${clientIndex} mute`);
-      await api.post.toggleClientMute(clientIndex);
+      await api.clients.toggleMute(clientIndex);
       console.log('Event: Client mute toggle successful');
     } catch (error) {
       console.error('Event: Failed to toggle client mute:', error);

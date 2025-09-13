@@ -56,6 +56,12 @@ public class ServicesConfig
     public int DebouncingMs { get; set; } = 500;
 
     /// <summary>
+    /// Minimum position change threshold in milliseconds to trigger position events.
+    /// </summary>
+    [Env("POSITION_THRESHOLD_MS")]
+    public int PositionThresholdMs { get; set; } = 1000;
+
+    /// <summary>
     /// Global audio configuration for Snapcast and LibVLC.
     /// Maps environment variables with prefix: SNAPDOG_AUDIO_*
     /// </summary>

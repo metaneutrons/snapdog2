@@ -492,6 +492,27 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
 
                     break;
 
+                case "Stream.OnUpdate":
+                    // Handle real-time stream status updates (idle/playing)
+                    try
+                    {
+                        var streamUpdate = JsonSerializer.Deserialize<JsonElement>(parameters.GetRawText());
+                        var streamId = streamUpdate.GetProperty("id").GetString() ?? "unknown";
+                        var status = streamUpdate.GetProperty("stream").GetProperty("status").GetString() ?? "unknown";
+
+                        // Only log when status actually changes to reduce spam
+                        if (!_lastStreamStatus.TryGetValue(streamId, out var lastStatus) || lastStatus != status)
+                        {
+                            _lastStreamStatus[streamId] = status;
+                            LogStreamStatusChanged(streamId, status);
+                        }
+                    }
+                    catch
+                    {
+                        LogStreamStatusChanged("unknown", "parse-error");
+                    }
+                    break;
+
                 default:
                     LogUnhandledNotification(method);
                     break;
@@ -844,6 +865,11 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
 
     [LoggerMessage(EventId = 15067, Level = LogLevel.Warning, Message = "Unhandled notification method: {Method}")]
     private partial void LogUnhandledNotification(string Method);
+
+    private readonly Dictionary<string, string> _lastStreamStatus = new();
+
+    [LoggerMessage(EventId = 15069, Level = LogLevel.Information, Message = "Stream status changed: {StreamId} -> {Status}")]
+    private partial void LogStreamStatusChanged(string StreamId, string Status);
 
     [LoggerMessage(EventId = 15068, Level = LogLevel.Error, Message = "Error handling notification {Method}")]
     private partial void LogNotificationHandlingError(Exception ex, string Method);

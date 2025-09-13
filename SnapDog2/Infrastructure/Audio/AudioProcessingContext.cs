@@ -314,22 +314,10 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
     {
         var options = new List<string>();
 
-        // Generate the appropriate LibVLC audio codec based on bit depth
+        // Use AudioConfig for consistent transcoding to configured PCM format
         var audioCodec = GetLibVLCAudioCodec(this.Config.BitsPerSample);
-
-        // For named pipes (Snapcast sinks), we need to use raw audio output
-        // Use transcode with dynamic audio codec based on configuration
-        var transcode =
-            $"#transcode{{"
-            + $"acodec={audioCodec}," // Dynamic codec based on bit depth
-            + $"channels={this.Config.Channels},"
-            + $"samplerate={this.Config.SampleRate}"
-            + $"}}";
-
-        // Use standard output with raw mux for named pipes
+        var transcode = $"#transcode{{acodec={audioCodec},channels={this.Config.Channels},samplerate={this.Config.SampleRate}}}";
         var standardOutput = $"standard{{access=file,mux=raw,dst={outputPath}}}";
-
-        // Combine transcode and output
         options.Add($":sout={transcode}:{standardOutput}");
 
         // Critical options for streaming to named pipes
@@ -338,6 +326,11 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
         options.Add(":no-sout-rtp-sap");
         options.Add(":no-sout-standard-sap");
         options.Add(":sout-all"); // Keep streaming even if no one is reading
+
+        // Additional options for continuous streaming
+        options.Add(":network-caching=1000"); // 1 second network cache
+        options.Add(":file-caching=300");     // 300ms file cache
+        options.Add(":live-caching=300");     // 300ms live stream cache
 
         this.LogBuiltMediaOptions(audioCodec, this.Config.SampleRate, this.Config.Channels, string.Join(", ", options));
 
@@ -515,17 +508,22 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
                 var positionMs = length > 0 ? (long)(e.Position * length) : 0;
                 var progress = effectiveDuration > 0 ? (float)positionMs / effectiveDuration : 0.0f;
 
-                this.LogLibVlcPositionChanged(progress, positionMs);
+                // Only log and publish if position actually changed meaningfully (using debounce threshold and not 0ms spam)
+                if (positionMs > 0 && Math.Abs(positionMs - this._lastPositionMs) > this._positionDebounce.TotalMilliseconds)
+                {
+                    this._lastPositionMs = positionMs;
+                    this.LogLibVlcPositionChanged(progress, positionMs);
 
-                this.PositionChanged?.Invoke(
-                    this,
-                    new PositionChangedEventArgs
-                    {
-                        PositionMs = positionMs,
-                        Progress = progress,
-                        DurationMs = effectiveDuration,
-                    }
-                );
+                    this.PositionChanged?.Invoke(
+                        this,
+                        new PositionChangedEventArgs
+                        {
+                            PositionMs = positionMs,
+                            Progress = progress,
+                            DurationMs = effectiveDuration,
+                        }
+                    );
+                }
             }
             catch (Exception ex)
             {
@@ -555,16 +553,21 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
                 var effectiveDuration = this.MetadataDurationMs ?? length;
                 var progress = effectiveDuration > 0 ? (float)e.Time / effectiveDuration : 0.0f;
 
-                this.LogLibVlcTimeChanged(e.Time);
-                this.PositionChanged?.Invoke(
-                    this,
-                    new PositionChangedEventArgs
-                    {
-                        PositionMs = e.Time,
-                        Progress = progress,
-                        DurationMs = effectiveDuration,
-                    }
-                );
+                // Only log and publish if position actually changed meaningfully (not 0ms spam)
+                if (e.Time > 0 && Math.Abs(e.Time - this._lastPositionMs) > this._positionDebounce.TotalMilliseconds)
+                {
+                    this._lastPositionMs = e.Time;
+                    this.LogLibVlcTimeChanged(e.Time);
+                    this.PositionChanged?.Invoke(
+                        this,
+                        new PositionChangedEventArgs
+                        {
+                            PositionMs = e.Time,
+                            Progress = progress,
+                            DurationMs = effectiveDuration,
+                        }
+                    );
+                }
             }
             catch (Exception ex)
             {

@@ -88,7 +88,7 @@ public class SnapcastConfig
     /// Default: 5000ms (5 seconds).
     /// </summary>
     [Env("ZONEGROUPING_INTERVAL_MS")]
-    public int ZoneGroupingIntervalMs { get; set; } = 5_000;
+    public int ZoneGroupingIntervalMs { get; set; } = 60_000; // 60 seconds
 
     /// <summary>
     /// Snapcast HTTP port.

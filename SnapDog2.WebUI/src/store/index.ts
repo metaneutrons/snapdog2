@@ -609,7 +609,7 @@ export const useAppStore = create<AppState>()(
         });
 
         try {
-          await api.clients.assignZone(clientIndex, targetZoneIndex);
+          await api.clients.moveToZone(clientIndex, targetZoneIndex);
         } catch (error) {
           console.error('Failed to move client:', error);
           throw error;
