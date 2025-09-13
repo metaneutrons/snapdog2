@@ -1,27 +1,40 @@
-# SnapDog2 WebUI
+# SnapDog2 WebUI Architecture
+
+## Development vs Production
+
+### Development (docker-compose.yml + Caddy)
+
+- **WebUI**: Separate container with Vite dev server
+- **Routing**: Caddy reverse proxy handles path-based routing
+- **Base URL**: `/webui/` (Vite serves with this base)
+
+```
+localhost:8000/api   → app container (API)
+localhost:8000/hubs  → app container (SignalR)
+localhost:8000/webui → frontend container (Vite dev server)
+```
+
+### Production (embedded in app)
+
+- **WebUI**: Built and embedded in SnapDog2 app container
+- **Routing**: App serves WebUI directly from root
+- **Base URL**: `/` (WebUI serves from root)
+
+```
+http://snapdog.schmieder.eu/     → app container (WebUI)
+http://snapdog.schmieder.eu/api  → app container (API)
+http://snapdog.schmieder.eu/hubs → app container (SignalR)
+```
 
 ## Configuration
 
-### Base URL Configuration
+### Vite Config
 
-The WebUI base URL is currently configured via environment variable:
-- `VITE_BASE_URL` - Set in docker-compose.yml (default: `/webui/`)
+- **Development**: `base: '/webui/'` (matches Caddy routing)
+- **Production**: `base: '/'` (embedded in app root)
 
-**Future Enhancement**: This should be dynamically configured from `HttpConfig.BaseUrl` in the backend configuration.
+### HttpConfig.BaseUrl
 
-### Development
-
-```bash
-npm install
-npm run dev
-```
-
-### Production Build
-
-```bash
-npm run build
-```
-
-## API Integration
-
-The WebUI connects to the SnapDog2 API via proxy configuration in `vite.config.ts`.
+- Controls the external base URL for the entire application
+- Used for generating absolute URLs in production
+- Example: `http://snapdog.schmieder.eu`
