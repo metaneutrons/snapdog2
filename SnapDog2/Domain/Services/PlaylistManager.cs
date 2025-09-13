@@ -31,19 +31,19 @@ public partial class PlaylistManager : IPlaylistManager
     private readonly IHubContext<SnapDogHub> _hubContext;
     private readonly SnapDogConfiguration _configuration;
 
-    [LoggerMessage(EventId = 110300, Level = LogLevel.Debug, Message = "Getting all playlists via query handlers"
+    [LoggerMessage(EventId = 10091, Level = LogLevel.Debug, Message = "Getting all playlists via query handlers"
 )]
     private partial void LogGettingAllPlaylists();
 
-    [LoggerMessage(EventId = 110301, Level = LogLevel.Debug, Message = "Getting tracks for playlist index: {PlaylistIndex}"
+    [LoggerMessage(EventId = 10092, Level = LogLevel.Debug, Message = "Getting tracks for playlist index: {PlaylistIndex}"
 )]
     private partial void LogGettingTracksByPlaylistIndex(int playlistIndex);
 
-    [LoggerMessage(EventId = 110302, Level = LogLevel.Warning, Message = "Playlist index {PlaylistIndex} not found"
+    [LoggerMessage(EventId = 10093, Level = LogLevel.Warning, Message = "Playlist index {PlaylistIndex} not found"
 )]
     private partial void LogPlaylistIndexNotFound(int playlistIndex);
 
-    [LoggerMessage(EventId = 110303, Level = LogLevel.Error, Message = "Failed → get playlists: {Error}"
+    [LoggerMessage(EventId = 10094, Level = LogLevel.Error, Message = "Failed → get playlists: {Error}"
 )]
     private partial void LogPlaylistError(string error);
 

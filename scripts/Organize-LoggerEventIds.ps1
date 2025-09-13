@@ -282,6 +282,23 @@ try {
     # Phase 3: Generate new EventId mappings with validation
     Write-ColoredOutput "`n📋 Phase 3: Generating EventId mappings..." "Blue"
     
+    # First, collect all current EventIds to detect conflicts
+    $allCurrentEventIds = @()
+    foreach ($fileInfo in $fileAnalysis) {
+        foreach ($eventId in $fileInfo.EventIds) {
+            $allCurrentEventIds += $eventId.EventId
+        }
+    }
+    
+    # Check for current conflicts
+    $currentConflicts = $allCurrentEventIds | Group-Object | Where-Object { $_.Count -gt 1 }
+    if ($currentConflicts) {
+        Write-ColoredOutput "⚠️ Found EventId conflicts that need fixing:" "Yellow"
+        foreach ($conflict in $currentConflicts) {
+            Write-ColoredOutput "  EventId $($conflict.Name) used $($conflict.Count) times" "Yellow"
+        }
+    }
+    
     $totalChanges = 0
     $allNewEventIds = @()
     
@@ -301,6 +318,12 @@ try {
         }
     }
     
+    # Force changes if there are conflicts, even if script thinks no changes needed
+    if ($currentConflicts -and $totalChanges -eq 0) {
+        Write-ColoredOutput "🔧 Forcing reorganization due to EventId conflicts..." "Yellow"
+        $totalChanges = $allCurrentEventIds.Count
+    }
+    
     # Phase 4: Verify no duplicates in new allocation
     $duplicateCheck = $allNewEventIds | Group-Object | Where-Object { $_.Count -gt 1 }
     if ($duplicateCheck) {
@@ -313,33 +336,44 @@ try {
     
     Write-ColoredOutput "✅ Verification passed: $($allNewEventIds.Count) unique EventIds, $totalChanges changes needed" "Green"
     
+    if ($currentConflicts) {
+        Write-ColoredOutput "🔧 Will fix $($currentConflicts.Count) EventId conflicts" "Yellow"
+    }
+    
     if ($WhatIf) {
         Write-ColoredOutput "`n🔍 WhatIf: Would reorganize $totalChanges EventIds across $($fileAnalysis.Count) files" "Yellow"
         Write-ColoredOutput "No duplicates would be created." "Green"
     } else {
         Write-ColoredOutput "`n✏️ Applying changes..." "Blue"
         
+        $actualChanges = 0
+        
         foreach ($allocation in $allAllocations.Values) {
             $fileInfo = $allocation.FileInfo
             $startId = $allocation.StartId
             $updatedContent = $fileInfo.Content.Clone()
+            $fileChanged = $false
             
             for ($i = 0; $i -lt $fileInfo.EventIds.Count; $i++) {
                 $eventIdInfo = $fileInfo.EventIds[$i]
                 $oldId = $eventIdInfo.EventId
                 $newId = $startId + $i
                 
-                if ($oldId -ne $newId) {
+                if ($oldId -ne $newId -or $currentConflicts) {
                     $oldLine = $updatedContent[$eventIdInfo.LineNumber]
-                    $newLine = $oldLine -replace "(EventId\s*=\s*)$oldId\b", ('$1' + $newId)
+                    $newLine = $oldLine -replace "EventId\s*=\s*$oldId\b", "EventId = $newId"
                     $updatedContent[$eventIdInfo.LineNumber] = $newLine
+                    $actualChanges++
+                    $fileChanged = $true
                 }
             }
             
-            $updatedContent | Set-Content -Path $fileInfo.File.FullName -Encoding UTF8
+            if ($fileChanged) {
+                $updatedContent | Set-Content -Path $fileInfo.File.FullName -Encoding UTF8
+            }
         }
         
-        Write-ColoredOutput "✅ Successfully reorganized $totalChanges EventIds with no duplicates!" "Green"
+        Write-ColoredOutput "✅ Successfully reorganized $actualChanges EventIds with no duplicates!" "Green"
     }
     
     Write-ColoredOutput "`n🎉 EventId organization completed successfully!" "Green"

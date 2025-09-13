@@ -672,82 +672,82 @@ public partial class SubsonicService : ISubsonicService, IAsyncDisposable
 
     #region Logging
 
-    [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Subsonic service is disabled")]
+    [LoggerMessage(EventId = 15012, Level = LogLevel.Information, Message = "Subsonic service is disabled")]
     private partial void LogSubsonicDisabled();
 
-    [LoggerMessage(EventId = 2, Level = LogLevel.Information, Message = "Subsonic client initialized: {Url} {Username}")]
+    [LoggerMessage(EventId = 15013, Level = LogLevel.Information, Message = "Subsonic client initialized: {Url} {Username}")]
     private partial void LogClientInitialized(string? Url, string? Username);
 
-    [LoggerMessage(EventId = 3, Level = LogLevel.Warning, Message = "Connection retry attempt: {Url} {Attempt}/{MaxRetries} {Error}")]
+    [LoggerMessage(EventId = 15014, Level = LogLevel.Warning, Message = "Connection retry attempt: {Url} {Attempt}/{MaxRetries} {Error}")]
     private partial void LogConnectionRetryAttempt(string? Url, int Attempt, int MaxRetries, string? Error);
 
-    [LoggerMessage(EventId = 4, Level = LogLevel.Information, Message = "Getting playlists")]
+    [LoggerMessage(EventId = 15015, Level = LogLevel.Information, Message = "Getting playlists")]
     private partial void LogGettingPlaylists();
 
-    [LoggerMessage(EventId = 5, Level = LogLevel.Information, Message = "Playlists retrieved: {Count}")]
+    [LoggerMessage(EventId = 15016, Level = LogLevel.Information, Message = "Playlists retrieved: {Count}")]
     private partial void LogPlaylistsRetrieved(int Count);
 
-    [LoggerMessage(EventId = 6, Level = LogLevel.Error, Message = "Get playlists error")]
+    [LoggerMessage(EventId = 15017, Level = LogLevel.Error, Message = "Get playlists error")]
     private partial void LogGetPlaylistsError(Exception ex);
 
-    [LoggerMessage(EventId = 7, Level = LogLevel.Information, Message = "Getting playlist: {PlaylistIndex}")]
+    [LoggerMessage(EventId = 15018, Level = LogLevel.Information, Message = "Getting playlist: {PlaylistIndex}")]
     private partial void LogGettingPlaylist(string PlaylistIndex);
 
-    [LoggerMessage(EventId = 8, Level = LogLevel.Information, Message = "Playlist not found: {PlaylistIndex}")]
+    [LoggerMessage(EventId = 15019, Level = LogLevel.Information, Message = "Playlist not found: {PlaylistIndex}")]
     private partial void LogPlaylistNotFound(string PlaylistIndex);
 
-    [LoggerMessage(EventId = 9, Level = LogLevel.Information, Message = "Playlist retrieved: {PlaylistIndex} {TrackCount} tracks")]
+    [LoggerMessage(EventId = 15020, Level = LogLevel.Information, Message = "Playlist retrieved: {PlaylistIndex} {TrackCount} tracks")]
     private partial void LogPlaylistRetrieved(string PlaylistIndex, int TrackCount);
 
-    [LoggerMessage(EventId = 10, Level = LogLevel.Error, Message = "Get playlist error: {PlaylistIndex}")]
+    [LoggerMessage(EventId = 15021, Level = LogLevel.Error, Message = "Get playlist error: {PlaylistIndex}")]
     private partial void LogGetPlaylistError(string PlaylistIndex, Exception ex);
 
-    [LoggerMessage(EventId = 11, Level = LogLevel.Information, Message = "Getting stream URL: {TrackId}")]
+    [LoggerMessage(EventId = 15022, Level = LogLevel.Information, Message = "Getting stream URL: {TrackId}")]
     private partial void LogGettingStreamUrl(string TrackId);
 
-    [LoggerMessage(EventId = 12, Level = LogLevel.Information, Message = "Stream URL retrieved: {TrackId}")]
+    [LoggerMessage(EventId = 15023, Level = LogLevel.Information, Message = "Stream URL retrieved: {TrackId}")]
     private partial void LogStreamUrlRetrieved(string TrackId);
 
-    [LoggerMessage(EventId = 13, Level = LogLevel.Error, Message = "Get stream URL error: {TrackId}")]
+    [LoggerMessage(EventId = 15024, Level = LogLevel.Error, Message = "Get stream URL error: {TrackId}")]
     private partial void LogGetStreamUrlError(string TrackId, Exception ex);
 
-    [LoggerMessage(EventId = 14, Level = LogLevel.Information, Message = "Testing connection")]
+    [LoggerMessage(EventId = 15025, Level = LogLevel.Information, Message = "Testing connection")]
     private partial void LogTestingConnection();
 
-    [LoggerMessage(EventId = 15, Level = LogLevel.Information, Message = "Connection test failed")]
+    [LoggerMessage(EventId = 15026, Level = LogLevel.Information, Message = "Connection test failed")]
     private partial void LogConnectionTestFailed();
 
-    [LoggerMessage(EventId = 16, Level = LogLevel.Information, Message = "Connection test successful")]
+    [LoggerMessage(EventId = 15027, Level = LogLevel.Information, Message = "Connection test successful")]
     private partial void LogConnectionTestSuccessful();
 
-    [LoggerMessage(EventId = 17, Level = LogLevel.Error, Message = "Connection test error")]
+    [LoggerMessage(EventId = 15028, Level = LogLevel.Error, Message = "Connection test error")]
     private partial void LogConnectionTestError(Exception ex);
 
-    [LoggerMessage(EventId = 18, Level = LogLevel.Information, Message = "Getting cover art: {CoverId}")]
+    [LoggerMessage(EventId = 15029, Level = LogLevel.Information, Message = "Getting cover art: {CoverId}")]
     private partial void LogGettingCoverArt(string CoverId);
 
-    [LoggerMessage(EventId = 19, Level = LogLevel.Information, Message = "Cover art retrieved: {CoverId} {Size} bytes")]
+    [LoggerMessage(EventId = 15030, Level = LogLevel.Information, Message = "Cover art retrieved: {CoverId} {Size} bytes")]
     private partial void LogCoverArtRetrieved(string CoverId, int Size);
 
-    [LoggerMessage(EventId = 20, Level = LogLevel.Error, Message = "Get cover art error: {CoverId}")]
+    [LoggerMessage(EventId = 15031, Level = LogLevel.Error, Message = "Get cover art error: {CoverId}")]
     private partial void LogGetCoverArtError(string CoverId, Exception ex);
 
-    [LoggerMessage(EventId = 21, Level = LogLevel.Information, Message = "Generated Subsonic streaming URL: {StreamUrl}")]
+    [LoggerMessage(EventId = 15032, Level = LogLevel.Information, Message = "Generated Subsonic streaming URL: {StreamUrl}")]
     private partial void LogGeneratedStreamUrl(string StreamUrl);
 
-    [LoggerMessage(EventId = 22, Level = LogLevel.Information, Message = "Initializing Subsonic service: {Url}")]
+    [LoggerMessage(EventId = 15033, Level = LogLevel.Information, Message = "Initializing Subsonic service: {Url}")]
     private partial void LogInitializing(string? Url);
 
-    [LoggerMessage(EventId = 23, Level = LogLevel.Information, Message = "Connection established: {Url}")]
+    [LoggerMessage(EventId = 15034, Level = LogLevel.Information, Message = "Connection established: {Url}")]
     private partial void LogConnectionEstablished(string? Url);
 
-    [LoggerMessage(EventId = 24, Level = LogLevel.Information, Message = "Subsonic service initialized: {Url} {Username}")]
+    [LoggerMessage(EventId = 15035, Level = LogLevel.Information, Message = "Subsonic service initialized: {Url} {Username}")]
     private partial void LogSubsonicServiceInitialized(string? Url, string? Username);
 
-    [LoggerMessage(EventId = 25, Level = LogLevel.Error, Message = "Initialization failed")]
+    [LoggerMessage(EventId = 15036, Level = LogLevel.Error, Message = "Initialization failed")]
     private partial void LogInitializationFailed(Exception ex);
 
-    [LoggerMessage(EventId = 26, Level = LogLevel.Information, Message = "Subsonic service disposed")]
+    [LoggerMessage(EventId = 15037, Level = LogLevel.Information, Message = "Subsonic service disposed")]
     private partial void LogSubsonicServiceDisposed();
 
     #endregion

@@ -192,27 +192,27 @@ public sealed partial class MetadataManager(ILogger<MetadataManager> logger)
     }
 
     // LoggerMessage methods for high-performance logging
-    [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Failed to extract metadata: {Details} for {FilePath}")]
+    [LoggerMessage(EventId = 16127, Level = LogLevel.Information, Message = "Failed to extract metadata: {Details} for {FilePath}")]
     private partial void LogFailedToExtractMetadata(string? details, string? filePath);
 
-    [LoggerMessage(EventId = 2, Level = LogLevel.Information, Message = "Failed to save metadata: {Details} for {FilePath}")]
+    [LoggerMessage(EventId = 16128, Level = LogLevel.Information, Message = "Failed to save metadata: {Details} for {FilePath}")]
     private partial void LogFailedToSaveMetadata(string? details, string? filePath);
 
-    [LoggerMessage(EventId = 3, Level = LogLevel.Information, Message = "Starting metadata extraction: {Mrl}")]
+    [LoggerMessage(EventId = 16129, Level = LogLevel.Information, Message = "Starting metadata extraction: {Mrl}")]
     private partial void LogStartingMetadataExtraction(string Mrl);
 
-    [LoggerMessage(EventId = 4, Level = LogLevel.Information, Message = "Media parsing incomplete: {ParseResult}")]
+    [LoggerMessage(EventId = 16130, Level = LogLevel.Information, Message = "Media parsing incomplete: {ParseResult}")]
     private partial void LogMediaParsingIncomplete(string ParseResult);
 
-    [LoggerMessage(EventId = 5, Level = LogLevel.Information, Message = "Retrying with minimal parsing: {Mrl}")]
+    [LoggerMessage(EventId = 16131, Level = LogLevel.Information, Message = "Retrying with minimal parsing: {Mrl}")]
     private partial void LogRetryingWithMinimalParsing(string Mrl);
 
-    [LoggerMessage(EventId = 6, Level = LogLevel.Information, Message = "Metadata extraction completed: {Title} {Artist} {Duration}")]
+    [LoggerMessage(EventId = 16132, Level = LogLevel.Information, Message = "Metadata extraction completed: {Title} {Artist} {Duration}")]
     private partial void LogMetadataExtractionCompleted(string Title, string Artist, long? Duration);
 
-    [LoggerMessage(EventId = 7, Level = LogLevel.Information, Message = "Metadata saved: {FilePath}")]
+    [LoggerMessage(EventId = 16133, Level = LogLevel.Information, Message = "Metadata saved: {FilePath}")]
     private partial void LogMetadataSaved(string FilePath);
 
-    [LoggerMessage(EventId = 8, Level = LogLevel.Error, Message = "Failed to extract technical details")]
+    [LoggerMessage(EventId = 16134, Level = LogLevel.Error, Message = "Failed to extract technical details")]
     private partial void LogFailedToExtractTechnicalDetails(Exception ex);
 }

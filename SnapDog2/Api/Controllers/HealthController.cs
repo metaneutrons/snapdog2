@@ -135,16 +135,16 @@ public partial class HealthController(HealthCheckService healthCheckService, ILo
     // LoggerMessage definitions for high-performance logging (ID range: 2805-2808)
 
     // Health check operations
-    [LoggerMessage(EventId = 13000, Level = LogLevel.Information, Message = "Health check completed with status {status} in {duration}ms"
+    [LoggerMessage(EventId = 13043, Level = LogLevel.Information, Message = "Health check completed with status {status} in {duration}ms"
 )]
     private partial void LogHealthCheckCompleted(HealthStatus status, double duration);
 
-    [LoggerMessage(EventId = 13001, Level = LogLevel.Error, Message = "Health check failed with exception")]
+    [LoggerMessage(EventId = 13044, Level = LogLevel.Error, Message = "Health check failed with exception")]
     private partial void LogHealthCheckFailed(Exception ex);
 
-    [LoggerMessage(EventId = 13002, Level = LogLevel.Error, Message = "Ready check failed with exception")]
+    [LoggerMessage(EventId = 13045, Level = LogLevel.Error, Message = "Ready check failed with exception")]
     private partial void LogReadyCheckFailed(Exception ex);
 
-    [LoggerMessage(EventId = 13003, Level = LogLevel.Error, Message = "Live check failed with exception")]
+    [LoggerMessage(EventId = 13046, Level = LogLevel.Error, Message = "Live check failed with exception")]
     private partial void LogLiveCheckFailed(Exception ex);
 }

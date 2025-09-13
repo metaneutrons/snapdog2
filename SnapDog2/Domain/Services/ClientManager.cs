@@ -127,11 +127,11 @@ public partial class ClientManager : IClientManager
 )]
     private partial void LogErrorAssigningClientToZone(Exception ex, int ClientIndex, int ZoneIndex);
 
-    [LoggerMessage(EventId = 110021, Level = LogLevel.Warning, Message = "Client state not found for client {ClientIndex}"
+    [LoggerMessage(EventId = 10021, Level = LogLevel.Warning, Message = "Client state not found for client {ClientIndex}"
 )]
     private partial void LogClientStateNotFound(int ClientIndex);
 
-    [LoggerMessage(EventId = 110022, Level = LogLevel.Warning, Message = "Client state lock not found for client {ClientIndex}"
+    [LoggerMessage(EventId = 10022, Level = LogLevel.Warning, Message = "Client state lock not found for client {ClientIndex}"
 )]
     private partial void LogClientStateLockNotFound(int ClientIndex);
 

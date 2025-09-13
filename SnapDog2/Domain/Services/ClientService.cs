@@ -206,36 +206,36 @@ public partial class ClientService : IClientService
         return await _snapcastService.SetClientNameAsync(client.SnapcastId, name, cancellationToken);
     }
 
-    [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Getting clients count")]
+    [LoggerMessage(EventId = 10039, Level = LogLevel.Information, Message = "Getting clients count")]
     private partial void LogGettingClientsCount();
 
-    [LoggerMessage(EventId = 2, Level = LogLevel.Information, Message = "Getting all clients")]
+    [LoggerMessage(EventId = 10040, Level = LogLevel.Information, Message = "Getting all clients")]
     private partial void LogGettingAllClients();
 
-    [LoggerMessage(EventId = 3, Level = LogLevel.Information, Message = "Getting client {ClientIndex}")]
+    [LoggerMessage(EventId = 10041, Level = LogLevel.Information, Message = "Getting client {ClientIndex}")]
     private partial void LogGettingClient(int ClientIndex);
 
-    [LoggerMessage(EventId = 4, Level = LogLevel.Information, Message = "Assigning client {ClientIndex} to zone {ZoneIndex}")]
+    [LoggerMessage(EventId = 10042, Level = LogLevel.Information, Message = "Assigning client {ClientIndex} to zone {ZoneIndex}")]
     private partial void LogAssigningClient(int ClientIndex, int ZoneIndex);
 
-    [LoggerMessage(EventId = 5, Level = LogLevel.Information, Message = "Setting client {ClientIndex} volume to {Volume}")]
+    [LoggerMessage(EventId = 10043, Level = LogLevel.Information, Message = "Setting client {ClientIndex} volume to {Volume}")]
     private partial void LogSettingVolume(int ClientIndex, int Volume);
 
-    [LoggerMessage(EventId = 6, Level = LogLevel.Information, Message = "Increasing client {ClientIndex} volume by {Step}")]
+    [LoggerMessage(EventId = 10044, Level = LogLevel.Information, Message = "Increasing client {ClientIndex} volume by {Step}")]
     private partial void LogIncreasingVolume(int ClientIndex, int Step);
 
-    [LoggerMessage(EventId = 7, Level = LogLevel.Information, Message = "Decreasing client {ClientIndex} volume by {Step}")]
+    [LoggerMessage(EventId = 10045, Level = LogLevel.Information, Message = "Decreasing client {ClientIndex} volume by {Step}")]
     private partial void LogDecreasingVolume(int ClientIndex, int Step);
 
-    [LoggerMessage(EventId = 8, Level = LogLevel.Information, Message = "Setting client {ClientIndex} mute to {Muted}")]
+    [LoggerMessage(EventId = 10046, Level = LogLevel.Information, Message = "Setting client {ClientIndex} mute to {Muted}")]
     private partial void LogSettingMute(int ClientIndex, bool Muted);
 
-    [LoggerMessage(EventId = 9, Level = LogLevel.Information, Message = "Toggling mute for client {ClientIndex}")]
+    [LoggerMessage(EventId = 10047, Level = LogLevel.Information, Message = "Toggling mute for client {ClientIndex}")]
     private partial void LogTogglingMute(int ClientIndex);
 
-    [LoggerMessage(EventId = 10, Level = LogLevel.Information, Message = "Setting client {ClientIndex} latency to {LatencyMs}ms")]
+    [LoggerMessage(EventId = 10048, Level = LogLevel.Information, Message = "Setting client {ClientIndex} latency to {LatencyMs}ms")]
     private partial void LogSettingLatency(int ClientIndex, int LatencyMs);
 
-    [LoggerMessage(EventId = 11, Level = LogLevel.Information, Message = "Setting client {ClientIndex} name to {Name}")]
+    [LoggerMessage(EventId = 10049, Level = LogLevel.Information, Message = "Setting client {ClientIndex} name to {Name}")]
     private partial void LogSettingName(int ClientIndex, string Name);
 }

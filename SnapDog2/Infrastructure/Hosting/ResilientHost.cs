@@ -164,22 +164,22 @@ public partial class ResilientHost(IHost innerHost, ILogger<ResilientHost> logge
         };
     }
 
-    [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Startup validation failed: {ValidationStep}")]
+    [LoggerMessage(EventId = 14109, Level = LogLevel.Information, Message = "Startup validation failed: {ValidationStep}")]
     private partial void LogStartupValidationFailedDebug(StartupValidationException ex, string ValidationStep);
 
-    [LoggerMessage(EventId = 2, Level = LogLevel.Information, Message = "Startup validation failed: {ValidationStep} - {ErrorMessage}")]
+    [LoggerMessage(EventId = 14110, Level = LogLevel.Information, Message = "Startup validation failed: {ValidationStep} - {ErrorMessage}")]
     private partial void LogStartupValidationFailed(string ValidationStep, string ErrorMessage);
 
-    [LoggerMessage(EventId = 3, Level = LogLevel.Information, Message = "Startup failed")]
+    [LoggerMessage(EventId = 14111, Level = LogLevel.Information, Message = "Startup failed")]
     private partial void LogStartupFailedDebug(Exception ex);
 
-    [LoggerMessage(EventId = 4, Level = LogLevel.Information, Message = "Startup failed: {ExceptionType} - {Message}")]
+    [LoggerMessage(EventId = 14112, Level = LogLevel.Information, Message = "Startup failed: {ExceptionType} - {Message}")]
     private partial void LogStartupFailed(string ExceptionType, string Message);
 
-    [LoggerMessage(EventId = 5, Level = LogLevel.Information, Message = "Unexpected startup failure")]
+    [LoggerMessage(EventId = 14113, Level = LogLevel.Information, Message = "Unexpected startup failure")]
     private partial void LogUnexpectedStartupFailureDebug(Exception ex);
 
-    [LoggerMessage(EventId = 6, Level = LogLevel.Information, Message = "Unexpected startup failure: {ExceptionType} - {Message}")]
+    [LoggerMessage(EventId = 14114, Level = LogLevel.Information, Message = "Unexpected startup failure: {ExceptionType} - {Message}")]
     private partial void LogUnexpectedStartupFailure(string ExceptionType, string Message);
 }
 

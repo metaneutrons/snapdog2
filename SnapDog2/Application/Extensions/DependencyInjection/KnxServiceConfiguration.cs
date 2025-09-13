@@ -216,19 +216,19 @@ public static partial class KnxServiceConfiguration
     }
 
     // LoggerMessage definitions for high-performance logging
-    [LoggerMessage(EventId = 116000, Level = LogLevel.Information, Message = "KnxServiceDisabled")]
+    [LoggerMessage(EventId = 14019, Level = LogLevel.Information, Message = "KnxServiceDisabled")]
     private static partial void LogKnxServiceDisabled(ILogger logger);
 
-    [LoggerMessage(EventId = 116001, Level = LogLevel.Warning, Message = "KNX configuration validation failed: {Errors}")]
+    [LoggerMessage(EventId = 14020, Level = LogLevel.Warning, Message = "KNX configuration validation failed: {Errors}")]
     private static partial void LogKnxConfigurationValidationFailed(ILogger logger, string errors);
 
-    [LoggerMessage(EventId = 116002, Level = LogLevel.Information, Message = "KnxServiceRegistering: {ConnectionType}")]
+    [LoggerMessage(EventId = 14021, Level = LogLevel.Information, Message = "KnxServiceRegistering: {ConnectionType}")]
     private static partial void LogKnxServiceRegistering(ILogger logger, string connectionType);
 
-    [LoggerMessage(EventId = 116003, Level = LogLevel.Information, Message = "KNX connection: {ConnectionType} to {Gateway}:{Port}")]
+    [LoggerMessage(EventId = 14022, Level = LogLevel.Information, Message = "KNX connection: {ConnectionType} to {Gateway}:{Port}")]
     private static partial void LogKnxConnection(ILogger logger, string connectionType, string gateway, int port);
 
-    [LoggerMessage(EventId = 116004, Level = LogLevel.Information, Message = "KNX integration configured: {ZoneCount} zones, {ClientCount} clients")]
+    [LoggerMessage(EventId = 14023, Level = LogLevel.Information, Message = "KNX integration configured: {ZoneCount} zones, {ClientCount} clients")]
     private static partial void LogKnxIntegrationConfigured(ILogger logger, int zoneCount, int clientCount);
 
     private class ValidationResult

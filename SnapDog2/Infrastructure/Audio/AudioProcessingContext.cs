@@ -815,47 +815,47 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
 )]
     private partial void LogErrorHandlingEndReachedEvent(Exception ex);
 
-    [LoggerMessage(EventId = 16026, Level = LogLevel.Error, Message = "LibVLC encountered an error during playback"
+    [LoggerMessage(EventId = 16024, Level = LogLevel.Error, Message = "LibVLC encountered an error during playback"
 )]
     private partial void LogLibVlcEncounteredError();
 
-    [LoggerMessage(EventId = 16028, Level = LogLevel.Warning, Message = "Error handling EncounteredError event"
+    [LoggerMessage(EventId = 16025, Level = LogLevel.Warning, Message = "Error handling EncounteredError event"
 )]
     private partial void LogErrorHandlingEncounteredErrorEvent(Exception ex);
 
-    [LoggerMessage(EventId = 16024, Level = LogLevel.Debug, Message = "Audio processing context disposed"
+    [LoggerMessage(EventId = 16026, Level = LogLevel.Debug, Message = "Audio processing context disposed"
 )]
     private partial void LogAudioProcessingContextDisposed();
 
-    [LoggerMessage(EventId = 16025, Level = LogLevel.Debug, Message = "Audio processing context disposed asynchronously"
+    [LoggerMessage(EventId = 16027, Level = LogLevel.Debug, Message = "Audio processing context disposed asynchronously"
 )]
     private partial void LogAudioProcessingContextDisposedAsynchronously();
 
-    [LoggerMessage(EventId = 16027, Level = LogLevel.Warning, Message = "Error during AudioProcessingContext disposal"
+    [LoggerMessage(EventId = 16028, Level = LogLevel.Warning, Message = "Error during AudioProcessingContext disposal"
 )]
     private partial void LogErrorDuringDisposal(Exception ex);
 
-    [LoggerMessage(EventId = 16028, Level = LogLevel.Information, Message = "LibVLC Media Properties - Duration: {DurationMs}ms, Seekable: {IsSeekable}, State: {State}"
+    [LoggerMessage(EventId = 16029, Level = LogLevel.Information, Message = "LibVLC Media Properties - Duration: {DurationMs}ms, Seekable: {IsSeekable}, State: {State}"
 )]
     private partial void LogMediaProperties(long durationMs, bool isSeekable, string state);
 
-    [LoggerMessage(EventId = 16030, Level = LogLevel.Information, Message = "🎵 LibVLC Media Format - Duration: {DurationMs}ms, Seekable: {IsSeekable}, State: {State}, Format: {ContentType}, URL: {MediaUrl}"
+    [LoggerMessage(EventId = 16030, Level = LogLevel.Information, Message = "[MEDIA] LibVLC Media Format - Duration: {DurationMs}ms, Seekable: {IsSeekable}, State: {State}, Format: {ContentType}, URL: {MediaUrl}"
 )]
     private partial void LogMediaPropertiesWithFormat(long durationMs, bool isSeekable, string state, string contentType, string mediaUrl);
 
-    [LoggerMessage(EventId = 16031, Level = LogLevel.Warning, Message = "⚠️ Position tracking failed - Position stuck at {PositionMs}ms despite {State} state. Stream may not support seeking/position tracking."
+    [LoggerMessage(EventId = 16031, Level = LogLevel.Warning, Message = "[WARNING] Position tracking failed - Position stuck at {PositionMs}ms despite {State} state. Stream may not support seeking/position tracking."
 )]
     private partial void LogPositionTrackingFailed(long positionMs, string state);
 
-    [LoggerMessage(EventId = 16029, Level = LogLevel.Information, Message = "🔍 Streaming URL Debug: {StreamUrl}"
+    [LoggerMessage(EventId = 16032, Level = LogLevel.Information, Message = "🔍 Streaming URL Debug: {StreamUrl}"
 )]
     private partial void LogStreamingUrlDebug(string streamUrl);
 
-    [LoggerMessage(EventId = 16026, Level = LogLevel.Error, Message = "Failed → initialize LibVLCSharp Core. Ensure LibVLC native libraries are properly installed."
+    [LoggerMessage(EventId = 16033, Level = LogLevel.Error, Message = "Failed → initialize LibVLCSharp Core. Ensure LibVLC native libraries are properly installed."
 )]
     private partial void LogLibVLCCoreInitializationFailed(Exception ex);
 
-    [LoggerMessage(EventId = 16027, Level = LogLevel.Error, Message = "Failed → create LibVLC instance with args: {Args}"
+    [LoggerMessage(EventId = 16034, Level = LogLevel.Error, Message = "Failed → create LibVLC instance with args: {Args}"
 )]
     private partial void LogLibVLCInstanceCreationFailed(Exception ex, string args);
 }

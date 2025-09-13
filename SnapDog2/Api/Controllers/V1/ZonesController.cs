@@ -891,12 +891,12 @@ public partial class ZonesController(
     // ═══════════════════════════════════════════════════════════════════════════════
     // LOGGER METHODS
 
-    [LoggerMessage(EventId = 113500, Level = LogLevel.Warning, Message = "Failed to get zones: {ErrorMessage}")]
+    [LoggerMessage(EventId = 13099, Level = LogLevel.Warning, Message = "Failed to get zones: {ErrorMessage}")]
     private partial void LogFailedToGetZones(string errorMessage);
 
-    [LoggerMessage(EventId = 113501, Level = LogLevel.Warning, Message = "Failed to set zone {ZoneIndex} volume to {Volume}: {ErrorMessage}")]
+    [LoggerMessage(EventId = 13100, Level = LogLevel.Warning, Message = "Failed to set zone {ZoneIndex} volume to {Volume}: {ErrorMessage}")]
     private partial void LogFailedToSetZoneVolume(int zoneIndex, int volume, string errorMessage);
 
-    [LoggerMessage(EventId = 113502, Level = LogLevel.Warning, Message = "Failed to set zone {ZoneIndex} playlist to {PlaylistIndex}: {ErrorMessage}")]
+    [LoggerMessage(EventId = 13101, Level = LogLevel.Warning, Message = "Failed to set zone {ZoneIndex} playlist to {PlaylistIndex}: {ErrorMessage}")]
     private partial void LogFailedToSetZonePlaylist(int zoneIndex, int playlistIndex, string errorMessage);
 }

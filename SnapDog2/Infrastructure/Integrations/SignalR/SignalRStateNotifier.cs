@@ -163,9 +163,9 @@ public partial class SignalRStateNotifier : IHostedService
         await _hubContext.Clients.All.SendAsync("ClientLatencyChanged", e.ClientIndex, e.NewLatencyMs);
     }
 
-    [LoggerMessage(EventId = 113800, Level = LogLevel.Information, Message = "SignalR state notifier started")]
+    [LoggerMessage(EventId = 15000, Level = LogLevel.Information, Message = "SignalR state notifier started")]
     private partial void LogSignalRNotifierStarted();
 
-    [LoggerMessage(EventId = 113801, Level = LogLevel.Warning, Message = "SignalR not available, state notifications disabled")]
+    [LoggerMessage(EventId = 15001, Level = LogLevel.Warning, Message = "SignalR not available, state notifications disabled")]
     private partial void LogSignalRNotAvailable();
 }

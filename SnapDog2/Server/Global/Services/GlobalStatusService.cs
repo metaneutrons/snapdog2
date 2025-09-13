@@ -133,36 +133,36 @@ public partial class GlobalStatusService : BackgroundService, IGlobalStatusServi
     }
 
     // LoggerMessage methods
-    [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Global status service started")]
+    [LoggerMessage(EventId = 12000, Level = LogLevel.Information, Message = "Global status service started")]
     private partial void LogGlobalStatusServiceStarted();
 
-    [LoggerMessage(EventId = 2, Level = LogLevel.Debug, Message = "Publishing system status")]
+    [LoggerMessage(EventId = 12001, Level = LogLevel.Debug, Message = "Publishing system status")]
     private partial void LogPublishingSystemStatus();
 
-    [LoggerMessage(EventId = 3, Level = LogLevel.Error, Message = "Failed to publish system status: {Error}")]
+    [LoggerMessage(EventId = 12002, Level = LogLevel.Error, Message = "Failed to publish system status: {Error}")]
     private partial void LogSystemStatusPublishFailed(string Error);
 
-    [LoggerMessage(EventId = 4, Level = LogLevel.Debug, Message = "Publishing error status: {ErrorMessage}")]
+    [LoggerMessage(EventId = 12003, Level = LogLevel.Debug, Message = "Publishing error status: {ErrorMessage}")]
     private partial void LogPublishingErrorStatus(string ErrorMessage);
 
-    [LoggerMessage(EventId = 5, Level = LogLevel.Error, Message = "Failed to publish error status: {Error}")]
+    [LoggerMessage(EventId = 12004, Level = LogLevel.Error, Message = "Failed to publish error status: {Error}")]
     private partial void LogErrorStatusPublishFailed(string Error);
 
-    [LoggerMessage(EventId = 6, Level = LogLevel.Debug, Message = "Publishing version info")]
+    [LoggerMessage(EventId = 12005, Level = LogLevel.Debug, Message = "Publishing version info")]
     private partial void LogPublishingVersionInfo();
 
-    [LoggerMessage(EventId = 7, Level = LogLevel.Error, Message = "Failed to publish version info: {Error}")]
+    [LoggerMessage(EventId = 12006, Level = LogLevel.Error, Message = "Failed to publish version info: {Error}")]
     private partial void LogVersionInfoPublishFailed(string Error);
 
-    [LoggerMessage(EventId = 8, Level = LogLevel.Debug, Message = "Publishing server stats")]
+    [LoggerMessage(EventId = 12007, Level = LogLevel.Debug, Message = "Publishing server stats")]
     private partial void LogPublishingServerStats();
 
-    [LoggerMessage(EventId = 9, Level = LogLevel.Error, Message = "Failed to publish server stats: {Error}")]
+    [LoggerMessage(EventId = 12008, Level = LogLevel.Error, Message = "Failed to publish server stats: {Error}")]
     private partial void LogServerStatsPublishFailed(string Error);
 
-    [LoggerMessage(EventId = 10, Level = LogLevel.Information, Message = "Starting periodic publishing")]
+    [LoggerMessage(EventId = 12009, Level = LogLevel.Information, Message = "Starting periodic publishing")]
     private partial void LogStartingPeriodicPublishing();
 
-    [LoggerMessage(EventId = 11, Level = LogLevel.Information, Message = "Stopping periodic publishing")]
+    [LoggerMessage(EventId = 12010, Level = LogLevel.Information, Message = "Stopping periodic publishing")]
     private partial void LogStoppingPeriodicPublishing();
 }

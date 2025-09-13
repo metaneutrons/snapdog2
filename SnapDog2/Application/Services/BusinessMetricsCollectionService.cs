@@ -198,19 +198,19 @@ public partial class BusinessMetricsCollectionService(
         }
     }
 
-    [LoggerMessage(EventId = 11001, Level = LogLevel.Information, Message = "ServiceStarted: {CollectionInterval}")]
+    [LoggerMessage(EventId = 11000, Level = LogLevel.Information, Message = "ServiceStarted: {CollectionInterval}")]
     private partial void LogServiceStarted(TimeSpan collectionInterval);
 
-    [LoggerMessage(EventId = 11002, Level = LogLevel.Warning, Message = "ErrorCollectingMetrics")]
+    [LoggerMessage(EventId = 11001, Level = LogLevel.Warning, Message = "ErrorCollectingMetrics")]
     private partial void LogErrorCollectingMetrics(Exception ex);
 
-    [LoggerMessage(EventId = 11003, Level = LogLevel.Information, Message = "ServiceStopped")]
+    [LoggerMessage(EventId = 11002, Level = LogLevel.Information, Message = "ServiceStopped")]
     private partial void LogServiceStopped();
 
-    [LoggerMessage(EventId = 11004, Level = LogLevel.Warning, Message = "FailedToCollectMetrics")]
+    [LoggerMessage(EventId = 11003, Level = LogLevel.Warning, Message = "FailedToCollectMetrics")]
     private partial void LogFailedToCollectMetrics(Exception ex);
 
-    [LoggerMessage(EventId = 11000, Level = LogLevel.Debug, Message = "Business metrics collected - Zones: {ZonesTotal} total, {ZonesActive} active;"
+    [LoggerMessage(EventId = 11004, Level = LogLevel.Debug, Message = "Business metrics collected - Zones: {ZonesTotal} total, {ZonesActive} active;"
             + "Clients: {ClientsConnected} connected; Tracks: {TracksPlaying} playing"
 )]
     private partial void LogBusinessMetricsCollected(

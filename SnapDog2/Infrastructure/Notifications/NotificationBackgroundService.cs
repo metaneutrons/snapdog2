@@ -201,21 +201,21 @@ public sealed partial class NotificationBackgroundService(
     }
 
     // LoggerMessage methods for high-performance logging
-    [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Notification service started")]
+    [LoggerMessage(EventId = 17000, Level = LogLevel.Information, Message = "Notification service started")]
     private partial void LogServiceStarted();
 
-    [LoggerMessage(EventId = 2, Level = LogLevel.Information, Message = "Notification service stopped")]
+    [LoggerMessage(EventId = 17001, Level = LogLevel.Information, Message = "Notification service stopped")]
     private partial void LogServiceStopped();
 
-    [LoggerMessage(EventId = 3, Level = LogLevel.Error, Message = "Notification processing failed for {EventType} {EntityType} {EntityId}: {Error}")]
+    [LoggerMessage(EventId = 17002, Level = LogLevel.Error, Message = "Notification processing failed for {EventType} {EntityType} {EntityId}: {Error}")]
     private partial void LogNotificationProcessingFailed(string EventType, string EntityType, string EntityId, string Error);
 
-    [LoggerMessage(EventId = 4, Level = LogLevel.Information, Message = "Notification processed: {EventType} {EntityType} {EntityId}")]
+    [LoggerMessage(EventId = 17003, Level = LogLevel.Information, Message = "Notification processed: {EventType} {EntityType} {EntityId}")]
     private partial void LogNotificationProcessed(string EventType, string EntityType, string EntityId);
 
-    [LoggerMessage(EventId = 5, Level = LogLevel.Error, Message = "Notification failed after {Attempts} attempts for {EventType} {EntityType} {EntityId}: {Error}")]
+    [LoggerMessage(EventId = 17004, Level = LogLevel.Error, Message = "Notification failed after {Attempts} attempts for {EventType} {EntityType} {EntityId}: {Error}")]
     private partial void LogNotificationFailedAfterRetries(int Attempts, string EventType, string EntityType, string EntityId, string Error);
 
-    [LoggerMessage(EventId = 6, Level = LogLevel.Warning, Message = "Retrying notification: {EventType} {EntityType} {EntityId} {Attempt}/{MaxAttempts} DelayMs={DelayMs}")]
+    [LoggerMessage(EventId = 17005, Level = LogLevel.Warning, Message = "Retrying notification: {EventType} {EntityType} {EntityId} {Attempt}/{MaxAttempts} DelayMs={DelayMs}")]
     private partial void LogRetryingNotification(Exception ex, string EventType, string EntityType, string EntityId, int Attempt, int MaxAttempts, int DelayMs);
 }

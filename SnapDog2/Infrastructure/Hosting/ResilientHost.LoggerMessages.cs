@@ -24,11 +24,11 @@ public partial class ResilientHost
     // Expected Startup Errors (10003-10004)
     // Unexpected Startup Errors (10005-10006)
     // Host Shutdown Error Operations (10501-10502)
-    [LoggerMessage(EventId = 114706, Level = LogLevel.Error, Message = "Error during host shutdown"
+    [LoggerMessage(EventId = 14125, Level = LogLevel.Error, Message = "Error during host shutdown"
 )]
     private partial void LogErrorDuringHostShutdown(Exception ex);
 
-    [LoggerMessage(EventId = 114707, Level = LogLevel.Error, Message = "Error during host shutdown: {ErrorType} - {ErrorMessage}"
+    [LoggerMessage(EventId = 14126, Level = LogLevel.Error, Message = "Error during host shutdown: {ErrorType} - {ErrorMessage}"
 )]
     private partial void LogErrorDuringHostShutdownProduction(string errorType, string errorMessage);
 }

@@ -262,9 +262,9 @@ public partial class KnxStateNotifier : IHostedService
         }
     }
 
-    [LoggerMessage(EventId = 121100, Level = LogLevel.Information, Message = "KNX state notifier started")]
+    [LoggerMessage(EventId = 15175, Level = LogLevel.Information, Message = "KNX state notifier started")]
     private partial void LogKnxNotifierStarted();
 
-    [LoggerMessage(EventId = 121101, Level = LogLevel.Warning, Message = "KNX not enabled, state notifications disabled")]
+    [LoggerMessage(EventId = 15176, Level = LogLevel.Warning, Message = "KNX not enabled, state notifications disabled")]
     private partial void LogKnxNotAvailable();
 }
