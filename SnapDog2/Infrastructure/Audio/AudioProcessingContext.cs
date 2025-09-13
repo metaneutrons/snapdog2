@@ -783,7 +783,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
 )]
     private partial void LogSettingUpLibVlcEventHandlers();
 
-    [LoggerMessage(EventId = 16016, Level = LogLevel.Debug, Message = "📍 LibVLC PositionChanged event: {Position}% = {PositionMs}ms"
+    [LoggerMessage(EventId = 16016, Level = LogLevel.Debug, Message = "[POSITION] LibVLC PositionChanged event: {Position}% = {PositionMs}ms"
 )]
     private partial void LogLibVlcPositionChanged(float Position, long PositionMs);
 

@@ -25,20 +25,17 @@ public partial class KnxCommandReceiver : IHostedService
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly IZoneManager _zoneManager;
-    private readonly IClientManager _clientManager;
     private readonly ILogger<KnxCommandReceiver> _logger;
     private readonly SnapDogConfiguration _configuration;
 
     public KnxCommandReceiver(
         IServiceProvider serviceProvider,
         IZoneManager zoneManager,
-        IClientManager clientManager,
         ILogger<KnxCommandReceiver> logger,
         IOptions<SnapDogConfiguration> configuration)
     {
         _serviceProvider = serviceProvider;
         _zoneManager = zoneManager;
-        _clientManager = clientManager;
         _logger = logger;
         _configuration = configuration.Value;
     }
@@ -224,7 +221,10 @@ public partial class KnxCommandReceiver : IHostedService
     [CommandId("CLIENT_VOLUME")]
     public async Task<bool> HandleClientVolumeCommand(int clientIndex, int volume)
     {
-        var clientResult = await _clientManager.GetClientAsync(clientIndex);
+        using var scope = _serviceProvider.CreateScope();
+        var clientManager = scope.ServiceProvider.GetRequiredService<IClientManager>();
+
+        var clientResult = await clientManager.GetClientAsync(clientIndex);
         if (!clientResult.IsSuccess || clientResult.Value == null)
         {
             return false;
@@ -238,7 +238,10 @@ public partial class KnxCommandReceiver : IHostedService
     [CommandId("CLIENT_MUTE")]
     public async Task<bool> HandleClientMuteCommand(int clientIndex, bool mute)
     {
-        var clientResult = await _clientManager.GetClientAsync(clientIndex);
+        using var scope = _serviceProvider.CreateScope();
+        var clientManager = scope.ServiceProvider.GetRequiredService<IClientManager>();
+
+        var clientResult = await clientManager.GetClientAsync(clientIndex);
         if (!clientResult.IsSuccess || clientResult.Value == null)
         {
             return false;
@@ -252,7 +255,10 @@ public partial class KnxCommandReceiver : IHostedService
     [CommandId("CLIENT_ZONE")]
     public async Task<bool> HandleClientZoneCommand(int clientIndex, int zoneIndex)
     {
-        var clientResult = await _clientManager.GetClientAsync(clientIndex);
+        using var scope = _serviceProvider.CreateScope();
+        var clientManager = scope.ServiceProvider.GetRequiredService<IClientManager>();
+
+        var clientResult = await clientManager.GetClientAsync(clientIndex);
         if (!clientResult.IsSuccess || clientResult.Value == null)
         {
             return false;
