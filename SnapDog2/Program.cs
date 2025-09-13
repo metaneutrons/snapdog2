@@ -418,8 +418,8 @@ static WebApplication CreateWebApplication(string[] args)
         MediaPlayerService
     >();
 
-    // Client management services
-    builder.Services.AddScoped<
+    // Client management services - Singleton to match ZoneManager lifetime
+    builder.Services.AddSingleton<
         IClientManager,
         ClientManager
     >();

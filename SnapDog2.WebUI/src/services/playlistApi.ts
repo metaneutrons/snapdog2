@@ -1,6 +1,7 @@
 import type { PlaylistInfo, TrackInfo } from '../types';
+import { config } from './config';
 
-const API_BASE = '/api/v1';
+const API_BASE = config.api.baseUrl;
 
 export interface PlaylistsResponse {
   success: boolean;
@@ -34,7 +35,7 @@ export const playlistApi = {
   async getPlaylists(): Promise<PlaylistInfo[]> {
     const response = await fetch(`${API_BASE}/media/playlists`, {
       headers: {
-        'X-API-Key': 'test-api-key'
+        'X-API-Key': config.api.key
       }
     });
     
@@ -42,14 +43,15 @@ export const playlistApi = {
       throw new Error(`Failed to fetch playlists: ${response.statusText}`);
     }
     
-    const data: PlaylistsResponse = await response.json();
-    return data.data.items;
+    // API returns direct array, not wrapped response
+    const data: PlaylistInfo[] = await response.json();
+    return data;
   },
 
   async getPlaylistTracks(playlistIndex: number): Promise<TrackInfo[]> {
     const response = await fetch(`${API_BASE}/media/playlists/${playlistIndex}/tracks`, {
       headers: {
-        'X-API-Key': 'test-api-key'
+        'X-API-Key': config.api.key
       }
     });
     
@@ -66,7 +68,7 @@ export const playlistApi = {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'X-API-Key': 'test-api-key'
+        'X-API-Key': config.api.key
       },
       body: JSON.stringify(playlistIndex)
     });
@@ -81,7 +83,7 @@ export const playlistApi = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-API-Key': 'test-api-key'
+        'X-API-Key': config.api.key
       },
       body: JSON.stringify(trackIndex)
     });

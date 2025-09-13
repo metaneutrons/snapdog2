@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChevronDownIcon, MusicIcon, ChevronLeftIcon, ChevronRightIcon } from './icons';
 import { useAppStore } from '../store';
 import { playlistApi } from '../services/playlistApi';
+import { config } from '../services/config';
 import type { PlaylistInfo } from '../types';
 
 interface PlaylistSelectorProps {
@@ -17,7 +18,28 @@ export const PlaylistSelector: React.FC<PlaylistSelectorProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { playlists, setPlaylists } = useAppStore();
+  const { playlists, setPlaylists, zones } = useAppStore();
+  
+  // Get current zone to check for playlist/track mismatch
+  const currentZone = zones[zoneIndex];
+  
+  // Detect if track source doesn't match playlist (backend issue workaround)
+  const getDisplayPlaylistName = () => {
+    if (!currentZone?.track || !currentZone?.playlist) {
+      return currentPlaylistName || 'Select Playlist';
+    }
+    
+    // If track is from subsonic but playlist is radio, try to find correct playlist
+    if (currentZone.track.source === 'subsonic' && currentZone.playlist.source === 'radio') {
+      // Look for a subsonic playlist that might match
+      const subsonicPlaylist = playlists.find(p => p.source === 'subsonic');
+      if (subsonicPlaylist) {
+        return subsonicPlaylist.name;
+      }
+    }
+    
+    return currentPlaylistName || 'Select Playlist';
+  };
 
   useEffect(() => {
     const loadPlaylists = async () => {
@@ -48,9 +70,9 @@ export const PlaylistSelector: React.FC<PlaylistSelectorProps> = ({
 
   const handlePreviousPlaylist = async () => {
     try {
-      const response = await fetch(`/api/v1/zones/${zoneIndex}/previous/playlist`, {
+      const response = await fetch(`${config.api.baseUrl}/zones/${zoneIndex}/previous/playlist`, {
         method: 'POST',
-        headers: { 'X-API-Key': 'test-api-key' }
+        headers: { 'X-API-Key': config.api.key }
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
     } catch (error) {
@@ -60,9 +82,9 @@ export const PlaylistSelector: React.FC<PlaylistSelectorProps> = ({
 
   const handleNextPlaylist = async () => {
     try {
-      const response = await fetch(`/api/v1/zones/${zoneIndex}/next/playlist`, {
+      const response = await fetch(`${config.api.baseUrl}/zones/${zoneIndex}/next/playlist`, {
         method: 'POST',
-        headers: { 'X-API-Key': 'test-api-key' }
+        headers: { 'X-API-Key': config.api.key }
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
     } catch (error) {
@@ -89,7 +111,7 @@ export const PlaylistSelector: React.FC<PlaylistSelectorProps> = ({
           <div className="flex items-center space-x-1">
             <MusicIcon className="w-3 h-3 text-theme-primary" />
             <span className="text-xs font-medium text-theme-primary truncate">
-              {currentPlaylistName || 'Select Playlist'}
+              {getDisplayPlaylistName()}
             </span>
           </div>
           <ChevronDownIcon 

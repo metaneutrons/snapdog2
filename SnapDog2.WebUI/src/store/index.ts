@@ -27,8 +27,11 @@ interface AppState {
   updateClientMute: (clientIndex: number, muted: boolean) => void;
   updateClientLatency: (clientIndex: number, latency: number) => void;
 
-  // Utility actions
-  setInitialZoneState: (zoneIndex: number, zoneState: any) => void;
+  // Zone update actions
+  updateZoneTrack: (zoneIndex: number, track: any) => void;
+  updateZonePlaylist: (zoneIndex: number, playlist: any) => void;
+  updateZonePlaybackState: (zoneIndex: number, playbackState: PlaybackState) => void;
+  updateZoneMute: (zoneIndex: number, muted: boolean) => void;
   setInitialClientState: (clientIndex: number, clientState: any) => void;
   initializeZone: (zoneIndex: number) => void;
   initializeClient: (clientIndex: number) => void;
@@ -238,7 +241,51 @@ export const useAppStore = create<AppState>()(
             },
           },
         })),
-        
+      // Zone update actions
+      updateZoneTrack: (zoneIndex, track) =>
+        set(state => ({
+          zones: {
+            ...state.zones,
+            [zoneIndex]: {
+              ...state.zones[zoneIndex] || defaultZoneState,
+              track
+            }
+          }
+        })),
+
+      updateZonePlaylist: (zoneIndex, playlist) =>
+        set(state => ({
+          zones: {
+            ...state.zones,
+            [zoneIndex]: {
+              ...state.zones[zoneIndex] || defaultZoneState,
+              playlist
+            }
+          }
+        })),
+
+      updateZonePlaybackState: (zoneIndex, playbackState) =>
+        set(state => ({
+          zones: {
+            ...state.zones,
+            [zoneIndex]: {
+              ...state.zones[zoneIndex] || defaultZoneState,
+              playbackState
+            }
+          }
+        })),
+
+      updateZoneMute: (zoneIndex, muted) =>
+        set(state => ({
+          zones: {
+            ...state.zones,
+            [zoneIndex]: {
+              ...state.zones[zoneIndex] || defaultZoneState,
+              muted
+            }
+          }
+        })),
+
       // Utility actions
       setInitialZoneState: (zoneIndex, zoneData) => 
         set(state => {

@@ -1,19 +1,66 @@
 import React, { useState, useEffect } from 'react';
 import { useAppStore } from './store';
+import { useSignalR } from './hooks/useSignalR';
+import { useEventBus } from './hooks/useEventBus';
 import { api } from './services/api';
 import { ZoneCard } from './components/ZoneCard';
+import { ZoneErrorBoundary } from './components/ZoneErrorBoundary';
 import { ThemeToggle } from './components/ThemeToggle';
 
 function App() {
   console.log('App component rendering...');
   
   const { initializeZone, initializeClient, setInitialZoneState, setInitialClientState, moveClientToZone } = useAppStore();
-  console.log('Store loaded successfully');
+  const { isConnected } = useSignalR();
+  const { on, emit } = useEventBus();
+  console.log('Store loaded successfully, SignalR connected:', isConnected);
   
   const [zoneCount, setZoneCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState('Initializing...');
   const [draggingClientIndex, setDraggingClientIndex] = useState<number | null>(null);
+
+  // Event handlers
+  on('client.move', async ({ clientIndex, targetZoneIndex }) => {
+    try {
+      console.log(`Event: Moving client ${clientIndex} to zone ${targetZoneIndex}`);
+      await api.post.moveClientToZone(clientIndex, targetZoneIndex);
+      await moveClientToZone(clientIndex, targetZoneIndex);
+      console.log('Event: Client move successful');
+    } catch (error) {
+      console.error('Event: Failed to move client:', error);
+    }
+  });
+
+  on('zone.volume.change', async ({ zoneIndex, volume }) => {
+    try {
+      console.log(`Event: Changing zone ${zoneIndex} volume to ${volume}`);
+      await api.post.setZoneVolume(zoneIndex, volume);
+      console.log('Event: Volume change successful');
+    } catch (error) {
+      console.error('Event: Failed to change volume:', error);
+    }
+  });
+
+  on('zone.mute.toggle', async ({ zoneIndex }) => {
+    try {
+      console.log(`Event: Toggling zone ${zoneIndex} mute`);
+      await api.post.toggleZoneMute(zoneIndex);
+      console.log('Event: Mute toggle successful');
+    } catch (error) {
+      console.error('Event: Failed to toggle mute:', error);
+    }
+  });
+
+  on('client.drag.start', ({ clientIndex }) => {
+    console.log(`Event: Drag started for client ${clientIndex}`);
+    setDraggingClientIndex(clientIndex);
+  });
+
+  on('client.drag.end', () => {
+    console.log('Event: Drag ended');
+    setDraggingClientIndex(null);
+  });
 
   useEffect(() => {
     const init = async () => {
@@ -21,7 +68,6 @@ function App() {
         console.log('Starting optimized initialization...');
         setLoadingProgress('Loading clients...');
         
-        // Load clients first (fast - 11ms)
         const clients = await api.get.clients();
         console.log('Clients loaded:', clients.length);
         
@@ -33,7 +79,6 @@ function App() {
         
         setLoadingProgress('Loading zones...');
         
-        // Load zones second (slow - 5000ms)
         const zones = await api.get.zones();
         console.log('Zones loaded:', zones.length);
         
@@ -57,32 +102,6 @@ function App() {
     init();
   }, []);
 
-  const handleClientMove = async (clientIndex: number, targetZoneIndex: number) => {
-    try {
-      console.log(`Moving client ${clientIndex} to zone ${targetZoneIndex}`);
-      
-      // Call API to move client
-      await api.post.moveClientToZone(clientIndex, targetZoneIndex);
-      
-      // Update store
-      await moveClientToZone(clientIndex, targetZoneIndex);
-      
-      console.log('Client move successful');
-    } catch (error) {
-      console.error('Failed to move client:', error);
-    }
-  };
-
-  const handleDragStart = (clientIndex: number) => {
-    console.log(`Drag started for client ${clientIndex}`);
-    setDraggingClientIndex(clientIndex);
-  };
-
-  const handleDragEnd = () => {
-    console.log('Drag ended');
-    setDraggingClientIndex(null);
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
@@ -98,9 +117,17 @@ function App() {
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <header className="bg-white dark:bg-gray-800 shadow">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            SnapDog Audio Control
-          </h1>
+          <div className="flex items-center space-x-4">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              SnapDog Audio Control
+            </h1>
+            <div className="flex items-center space-x-2">
+              <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                {isConnected ? 'Connected' : 'Disconnected'}
+              </span>
+            </div>
+          </div>
           <ThemeToggle />
         </div>
       </header>
@@ -108,14 +135,12 @@ function App() {
         <div className="px-4 py-6 sm:px-0">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: zoneCount }, (_, index) => (
-              <ZoneCard
-                key={index + 1}
-                zoneIndex={index + 1}
-                onClientMove={handleClientMove}
-                onClientDragStart={handleDragStart}
-                onClientDragEnd={handleDragEnd}
-                draggingClientIndex={draggingClientIndex}
-              />
+              <ZoneErrorBoundary key={index + 1} zoneIndex={index + 1}>
+                <ZoneCard
+                  zoneIndex={index + 1}
+                  draggingClientIndex={draggingClientIndex}
+                />
+              </ZoneErrorBoundary>
             ))}
           </div>
         </div>

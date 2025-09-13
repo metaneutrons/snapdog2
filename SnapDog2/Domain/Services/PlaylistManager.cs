@@ -59,7 +59,7 @@ public partial class PlaylistManager : IPlaylistManager
         this._configuration = configuration;
     }
 
-    public async Task<Result<List<PlaylistInfo>>> GetAllPlaylistsAsync()
+    public async Task<Result<List<PlaylistInfo>>> GetAllPlaylistsAsync(CancellationToken cancellationToken = default)
     {
         this.LogGettingAllPlaylists();
 
@@ -81,7 +81,7 @@ public partial class PlaylistManager : IPlaylistManager
             }
 
             // Add Subsonic playlists starting from index 2
-            var subsonicResult = await this._subsonicService.GetPlaylistsAsync();
+            var subsonicResult = await this._subsonicService.GetPlaylistsAsync(cancellationToken);
             if (subsonicResult.IsSuccess && subsonicResult.Value != null)
             {
                 var subsonicPlaylists = subsonicResult.Value
@@ -115,6 +115,16 @@ public partial class PlaylistManager : IPlaylistManager
             // Handle radio stations (index 1)
             if (playlistIndex == 1)
             {
+                // TODO: Radio Station Cover URL Enhancement
+                // Currently using station.CoverUrl from configuration, but we need to implement:
+                // 1. Add SNAPDOG_RADIO_X_COVER_URL environment variables for all stations in devcontainer/.env
+                // 2. Fallback mechanism: if CoverUrl is null/empty, try to fetch from:
+                //    - Station's favicon.ico or logo.png from domain
+                //    - Radio-Browser.info API lookup by stream URL
+                //    - Generic radio icon as last resort
+                // 3. Consider caching cover URLs in Redis to avoid repeated lookups
+                // 4. Validate URLs are accessible and return proper image content-type
+                // 5. Support for different image formats (PNG, JPG, SVG) with size optimization
                 return Result<List<TrackInfo>>.Success(this._configuration.RadioStations
                     .Select((station, index) => new TrackInfo
                     {

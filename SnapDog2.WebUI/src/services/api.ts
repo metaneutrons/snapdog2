@@ -1,6 +1,5 @@
 import type { ZoneState, ClientState } from '../types';
-
-const BASE_URL = '/api/v1';
+import { config } from './config';
 
 interface PaginatedResponse<T> {
   items: T[];
@@ -10,7 +9,7 @@ interface PaginatedResponse<T> {
 class ApiService {
   private async request<T>(method: string, path: string, body?: unknown): Promise<T> {
     const headers: HeadersInit = {
-      'X-API-Key': 'dev-key'
+      'X-API-Key': config.api.key
     };
     let requestBody: BodyInit | undefined;
 
@@ -19,18 +18,29 @@ class ApiService {
       requestBody = JSON.stringify(body);
     }
 
-    const response = await fetch(`${BASE_URL}${path}`, {
-      method,
-      headers,
-      body: requestBody,
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), config.api.timeout);
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`API Error ${response.status}: ${errorText}`);
+    try {
+      const response = await fetch(`${config.api.baseUrl}${path}`, {
+        method,
+        headers,
+        body: requestBody,
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API Error ${response.status}: ${errorText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      clearTimeout(timeoutId);
+      throw error;
     }
-
-    return response.json();
   }
 
   get = {
@@ -69,11 +79,37 @@ class ApiService {
     },
 
     setZoneVolume: async (zoneIndex: number, volume: number): Promise<void> => {
-      await this.request('PUT', `/zones/${zoneIndex}/volume`, { volume });
+      await this.request('PUT', `/zones/${zoneIndex}/volume`, volume);
     },
 
     toggleZoneMute: async (zoneIndex: number): Promise<void> => {
       await this.request('POST', `/zones/${zoneIndex}/mute/toggle`);
+    }
+  };
+
+  zones = {
+    play: async (zoneIndex: number): Promise<void> => {
+      await this.request('POST', `/zones/${zoneIndex}/play`);
+    },
+
+    pause: async (zoneIndex: number): Promise<void> => {
+      await this.request('POST', `/zones/${zoneIndex}/pause`);
+    },
+
+    next: async (zoneIndex: number): Promise<void> => {
+      await this.request('POST', `/zones/${zoneIndex}/next`);
+    },
+
+    previous: async (zoneIndex: number): Promise<void> => {
+      await this.request('POST', `/zones/${zoneIndex}/previous`);
+    },
+
+    toggleShuffle: async (zoneIndex: number): Promise<void> => {
+      await this.request('POST', `/zones/${zoneIndex}/shuffle/toggle`);
+    },
+
+    toggleRepeat: async (zoneIndex: number): Promise<void> => {
+      await this.request('POST', `/zones/${zoneIndex}/repeat/toggle`);
     }
   };
 }

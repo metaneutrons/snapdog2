@@ -1,157 +1,122 @@
-
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { HubConnectionBuilder, HubConnection, LogLevel } from '@microsoft/signalr';
 import { useAppStore } from '../store';
-import type { TrackInfo, PlaybackState, PlaylistInfo } from '../types';
+import { config } from '../services/config';
 
-export function useSignalR(baseUrl: string = '') {
+export function useSignalR() {
   const connectionRef = useRef<HubConnection | null>(null);
-  const {
-    updateZoneProgress,
-    updateZoneTrack,
-    updateZoneVolume,
-    updateZonePlayback,
-    updateZoneMute,
-    updateZoneRepeat,
-    updateZoneShuffle,
-    updateZonePlaylist,
-    updateClientConnection,
-    updateClientZone,
-    updateClientVolume,
-    updateClientMute,
-    updateClientLatency,
-  } = useAppStore();
+  const [isConnected, setIsConnected] = useState(false);
+  const { setInitialZoneState, setInitialClientState, setZoneVolume, toggleZoneMute, moveClientToZone, updateZoneTrack, updateZonePlaylist, updateZonePlaybackState, updateZoneMute } = useAppStore();
 
   useEffect(() => {
-    const hubUrl = baseUrl ? `${baseUrl}/hubs/snapdog/v1` : '/hubs/snapdog/v1';
     const connection = new HubConnectionBuilder()
-      .withUrl(hubUrl)
-      .withAutomaticReconnect([0, 2000, 10000, 30000])
-      .configureLogging(LogLevel.Information)
+      .withUrl(config.signalr.hubUrl)
+      .withAutomaticReconnect([0, 2000, 10000, config.signalr.reconnectDelay])
+      .configureLogging(LogLevel.Warning)
       .build();
 
     connectionRef.current = connection;
-    
-    // Zone event handlers
-    connection.on('ZoneProgressChanged', (zoneIndex: number, position: number, progress: number) => {
-      console.log('📡 SignalR: ZoneProgressChanged', { zoneIndex, position, progress });
-      updateZoneProgress(zoneIndex, { position, progress });
-    });
-    
-    connection.on('ZoneTrackMetadataChanged', (zoneIndex: number, track: TrackInfo) => {
-      console.log('📡 SignalR: ZoneTrackMetadataChanged', { zoneIndex, track });
-      updateZoneTrack(zoneIndex, track);
-    });
-    
-    connection.on('ZoneVolumeChanged', (zoneIndex: number, volume: number) => {
-      console.log('📡 SignalR: ZoneVolumeChanged', { zoneIndex, volume });
-      updateZoneVolume(zoneIndex, volume);
-    });
-    
-    connection.on('ZonePlaybackChanged', (zoneIndex: number, playbackState: PlaybackState) => {
-      console.log('📡 SignalR: ZonePlaybackChanged', { zoneIndex, playbackState });
-      updateZonePlayback(zoneIndex, playbackState);
-    });
-    
-    connection.on('ZoneMuteChanged', (zoneIndex: number, muted: boolean) => {
-      console.log('📡 SignalR: ZoneMuteChanged', { zoneIndex, muted });
-      updateZoneMute(zoneIndex, muted);
-    });
-    
-    connection.on('ZoneRepeatModeChanged', (zoneIndex: number, trackRepeat: boolean, playlistRepeat: boolean) => {
-      console.log('📡 SignalR: ZoneRepeatModeChanged', { zoneIndex, trackRepeat, playlistRepeat });
-      updateZoneRepeat(zoneIndex, trackRepeat, playlistRepeat);
-    });
-    
-    connection.on('ZoneShuffleChanged', (zoneIndex: number, shuffle: boolean) => {
-      console.log('📡 SignalR: ZoneShuffleChanged', { zoneIndex, shuffle });
-      updateZoneShuffle(zoneIndex, shuffle);
-    });
-    
-    connection.on('ZonePlaylistChanged', (zoneIndex: number, playlist: PlaylistInfo | null) => {
-      console.log('📡 SignalR: ZonePlaylistChanged', { zoneIndex, playlist });
-      updateZonePlaylist(zoneIndex, playlist);
-      // Clear loading state when playlist change is complete
-      useAppStore.getState().setZoneLoadingState(zoneIndex, { changingPlaylist: false });
-    });
-
-    // Client event handlers
-    connection.on('ClientConnected', (clientIndex: number, connected: boolean) => {
-      console.log('📡 SignalR: ClientConnected', { clientIndex, connected });
-      updateClientConnection(clientIndex, connected);
-    });
-    
-    connection.on('ClientZoneChanged', (clientIndex: number, zoneIndex?: number) => {
-      console.log('📡 SignalR: ClientZoneChanged', { clientIndex, zoneIndex });
-      updateClientZone(clientIndex, zoneIndex);
-    });
-    
-    connection.on('ClientVolumeChanged', (clientIndex: number, volume: number) => {
-      console.log('📡 SignalR: ClientVolumeChanged', { clientIndex, volume });
-      updateClientVolume(clientIndex, volume);
-    });
-    
-    connection.on('ClientMuteChanged', (clientIndex: number, muted: boolean) => {
-      console.log('📡 SignalR: ClientMuteChanged', { clientIndex, muted });
-      updateClientMute(clientIndex, muted);
-    });
-    
-    connection.on('ClientLatencyChanged', (clientIndex: number, latency: number) => {
-      console.log('📡 SignalR: ClientLatencyChanged', { clientIndex, latency });
-      updateClientLatency(clientIndex, latency);
-    });
-
-    // System event handlers
-    connection.on('ErrorOccurred', (errorCode: string, message: string, context?: string) => {
-      console.error('📡 SignalR: ErrorOccurred', { errorCode, message, context });
-    });
-    
-    connection.on('SystemStatusChanged', (status: any) => {
-      console.log('📡 SignalR: SystemStatusChanged', status);
-    });
 
     // Connection state handlers
-    connection.onreconnecting((error) => {
-      console.warn('🔄 SignalR reconnecting...', error);
+    connection.onreconnecting(() => {
+      console.log('SignalR: Reconnecting...');
+      setIsConnected(false);
     });
 
-    connection.onreconnected((connectionId) => {
-      console.log('✅ SignalR reconnected:', connectionId);
+    connection.onreconnected(() => {
+      console.log('SignalR: Reconnected');
+      setIsConnected(true);
     });
 
-    connection.onclose((error) => {
-      console.error('❌ SignalR connection closed:', error);
+    connection.onclose(() => {
+      console.log('SignalR: Connection closed');
+      setIsConnected(false);
     });
 
-    const startConnection = async () => {
-      try {
-        console.log('🚀 Starting SignalR connection to:', hubUrl);
-        await connection.start();
-        console.log('✅ SignalR connected successfully');
-        
-        // Join system group to receive all notifications
-        await connection.invoke('JoinSystem');
-        console.log('📡 Joined SignalR system group');
-        
-        // Store connection globally for debugging
-        (window as any).signalRConnection = connection;
-        
-      } catch (error) {
-        console.error('❌ SignalR connection failed:', error);
-        setTimeout(startConnection, 5000);
-      }
-    };
+    // Zone-related events (using actual SendAsync event names)
+    connection.on('ZoneVolumeChanged', (zoneIndex: number, volume: number) => {
+      console.log('SignalR: Zone volume changed', zoneIndex, volume);
+      setZoneVolume(zoneIndex, volume);
+    });
 
-    startConnection();
+    connection.on('ZoneMuteChanged', (zoneIndex: number, isMuted: boolean) => {
+      console.log('SignalR: Zone mute changed', zoneIndex, isMuted);
+      updateZoneMute(zoneIndex, isMuted);
+    });
 
+    connection.on('ZonePlaybackStateChanged', (zoneIndex: number, playbackState: string) => {
+      console.log('SignalR: Zone playback state changed', zoneIndex, playbackState);
+      updateZonePlaybackState(zoneIndex, playbackState as any);
+    });
+
+    connection.on('ZoneTrackChanged', (zoneIndex: number, track: any) => {
+      console.log('SignalR: Zone track changed', zoneIndex, track);
+      updateZoneTrack(zoneIndex, track);
+    });
+
+    connection.on('ZoneTrackMetadataChanged', (zoneIndex: number, trackInfo: any) => {
+      console.log('SignalR: Zone track metadata changed', zoneIndex, trackInfo);
+      updateZoneTrack(zoneIndex, trackInfo);
+    });
+
+    connection.on('ZoneProgressChanged', (zoneIndex: number, progress: any) => {
+      console.log('SignalR: Zone progress changed', zoneIndex, progress);
+      // For progress, we only want to update the track's position, not replace the whole track
+      updateZoneTrack(zoneIndex, progress);
+    });
+
+    connection.on('ZonePlaylistChanged', (zoneIndex: number, playlist: any) => {
+      console.log('SignalR: Zone playlist changed', zoneIndex, playlist);
+      updateZonePlaylist(zoneIndex, playlist);
+    });
+
+    // Client-related events (using actual SendAsync event names)
+    connection.on('ClientVolumeChanged', (clientIndex: number, volume: number) => {
+      console.log('SignalR: Client volume changed', clientIndex, volume);
+      // Update client volume in store
+      setInitialClientState(clientIndex, { volume });
+    });
+
+    connection.on('ClientConnectionChanged', (clientIndex: number, connected: boolean) => {
+      console.log('SignalR: Client connection changed', clientIndex, connected);
+      // Update client connection state
+      setInitialClientState(clientIndex, { connected });
+    });
+
+    connection.on('ClientNameChanged', (clientIndex: number, name: string) => {
+      console.log('SignalR: Client name changed', clientIndex, name);
+      // Update client name
+      setInitialClientState(clientIndex, { name });
+    });
+
+    connection.on('ClientLatencyChanged', (clientIndex: number, latencyMs: number) => {
+      console.log('SignalR: Client latency changed', clientIndex, latencyMs);
+      // Update client latency
+      setInitialClientState(clientIndex, { latencyMs });
+    });
+
+    // Start connection
+    connection.start()
+      .then(() => {
+        console.log('SignalR: Connected successfully to', config.signalr.hubUrl);
+        setIsConnected(true);
+      })
+      .catch((error) => {
+        console.warn('SignalR: Connection failed', error.message);
+        setIsConnected(false);
+      });
+
+    // Cleanup on unmount
     return () => {
       if (connectionRef.current) {
-        console.log('🔌 Stopping SignalR connection');
         connectionRef.current.stop();
+        console.log('SignalR: Connection stopped');
       }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [setInitialZoneState, setInitialClientState, setZoneVolume, toggleZoneMute, moveClientToZone, updateZoneTrack, updateZonePlaylist, updateZonePlaybackState, updateZoneMute]);
 
-  return connectionRef.current;
+  return {
+    connection: connectionRef.current,
+    isConnected
+  };
 }

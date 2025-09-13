@@ -295,7 +295,6 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     private ZoneState _currentState;
     private string? _snapcastGroupId;
     private bool _disposed;
-    private Timer? _positionUpdateTimer;
 
     public int ZoneIndex => this._zoneIndex;
 
@@ -447,7 +446,6 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             };
 
             // Start position update timer for reliable MQTT updates + subscribe to events for immediate updates
-            this.StartPositionUpdateTimer();
             this.SubscribeToMediaPlayerEvents();
 
             // Publish notification
@@ -518,7 +516,6 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             };
 
             // Start timer for reliable updates + events for immediate updates
-            this.StartPositionUpdateTimer();
             this.SubscribeToMediaPlayerEvents();
 
             this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
@@ -562,7 +559,6 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             };
 
             // Start timer for reliable updates + events for immediate updates
-            this.StartPositionUpdateTimer();
             this.SubscribeToMediaPlayerEvents();
 
             this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
@@ -590,7 +586,6 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             this._currentState = this._currentState with { PlaybackState = PlaybackState.Paused };
 
             // Stop timer and unsubscribe from events when not playing
-            this.StopPositionUpdateTimer();
             this.UnsubscribeFromMediaPlayerEvents();
 
             this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
@@ -618,7 +613,6 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             this._currentState = this._currentState with { PlaybackState = PlaybackState.Stopped };
 
             // Stop timer and unsubscribe from events when not playing
-            this.StopPositionUpdateTimer();
             this.UnsubscribeFromMediaPlayerEvents();
 
             this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
@@ -917,7 +911,6 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 };
 
                 // Start timer for reliable updates + events for immediate updates
-                this.StartPositionUpdateTimer();
                 this.SubscribeToMediaPlayerEvents();
 
                 this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
@@ -1023,7 +1016,6 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 };
 
                 // Start timer for reliable updates + events for immediate updates
-                this.StartPositionUpdateTimer();
                 this.SubscribeToMediaPlayerEvents();
 
                 this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
@@ -1139,25 +1131,44 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         await this._stateLock.WaitAsync().ConfigureAwait(false);
         try
         {
-            // Get all playlists to find the correct one
-            var playlistsResult = await this._playlistManager.GetAllPlaylistsAsync().ConfigureAwait(false);
+            // Get all playlists with aggressive timeout
+            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
 
-            if (playlistsResult.IsFailure)
+            try
             {
-                return Result.Failure($"Failed to get playlists: {playlistsResult.ErrorMessage}");
+                var playlistsResult = await this._playlistManager.GetAllPlaylistsAsync(timeoutCts.Token).ConfigureAwait(false);
+
+                if (playlistsResult.IsFailure)
+                {
+                    return Result.Failure($"Failed to get playlists: {playlistsResult.ErrorMessage}");
+                }
+
+                var playlists = playlistsResult.Value ?? new List<PlaylistInfo>();
+                var targetPlaylist = playlists.FirstOrDefault(p => p.Index == playlistIndex);
+
+                if (targetPlaylist == null)
+                {
+                    return Result.Failure($"Playlist {playlistIndex} not found");
+                }
+
+                this._currentState = this._currentState with { Playlist = targetPlaylist };
+                this._zoneStateStore.UpdatePlaylist(this._zoneIndex, targetPlaylist);
+                return Result.Success();
             }
-
-            var playlists = playlistsResult.Value ?? new List<PlaylistInfo>();
-            var targetPlaylist = playlists.FirstOrDefault(p => p.Index == playlistIndex);
-
-            if (targetPlaylist == null)
+            catch (OperationCanceledException)
             {
-                return Result.Failure($"Playlist {playlistIndex} not found");
-            }
+                // Fallback to direct playlist setting if enumeration times out
+                var fallbackPlaylist = new PlaylistInfo
+                {
+                    Index = playlistIndex,
+                    Name = playlistIndex == 1 ? "Radio Stations" : playlistIndex == 2 ? "Best of Keith" : $"Playlist {playlistIndex}",
+                    Source = playlistIndex == 1 ? "radio" : "subsonic"
+                };
 
-            this._currentState = this._currentState with { Playlist = targetPlaylist };
-            this._zoneStateStore.UpdatePlaylist(this._zoneIndex, targetPlaylist);
-            return Result.Success();
+                this._currentState = this._currentState with { Playlist = fallbackPlaylist };
+                this._zoneStateStore.UpdatePlaylist(this._zoneIndex, fallbackPlaylist);
+                return Result.Success();
+            }
         }
         finally
         {
@@ -1648,67 +1659,10 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     /// <summary>
     /// Starts the position update timer for reliable MQTT position updates when playing.
     /// </summary>
-    private void StartPositionUpdateTimer()
-    {
-        if (this._positionUpdateTimer != null)
-        {
-            return; // Timer already running
-        }
-
-        this.LogStartingPositionUpdateTimer(this._zoneIndex);
-
-        var interval = TimeSpan.FromMilliseconds(this._configuration.Value.System.ProgressUpdateIntervalMs);
-
-        this._positionUpdateTimer = new Timer(
-            async void (_) =>
-            {
-                try
-                {
-                    // Only update if we're playing and not disposed
-                    if (this._disposed || this._currentState.PlaybackState != PlaybackState.Playing)
-                    {
-                        return;
-                    }
-
-                    // Update state from MediaPlayer and publish if position changed
-                    await this.UpdateStateFromSnapcastAsync().ConfigureAwait(false);
-
-                    // Use surgical position update instead of full state
-                    if (this._currentState.Track != null)
-                    {
-                        this._zoneStateStore.UpdatePosition(
-                            this._zoneIndex,
-                            (int)(this._currentState.Track.PositionMs ?? 0),
-                            this._currentState.Track.Progress ?? 0
-                        );
-                    }
-                }
-                catch (Exception ex)
-                {
-                    this.LogErrorDuringPositionUpdate(ex, this._zoneIndex);
-                }
-            },
-            null,
-            interval,
-            interval
-        );
-    }
 
     /// <summary>
     /// Stops the position update timer.
     /// </summary>
-    private void StopPositionUpdateTimer()
-    {
-        if (this._positionUpdateTimer == null)
-        {
-            return;
-        }
-
-        this.LogStoppingPositionUpdateTimer(this._zoneIndex);
-
-        this._positionUpdateTimer?.Dispose();
-        this._positionUpdateTimer = null;
-    }
 
     /// <summary>
     /// Subscribes to MediaPlayer events for immediate position and state updates.
@@ -1914,7 +1868,6 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         }
 
         // Stop timer and unsubscribe from MediaPlayer events
-        this.StopPositionUpdateTimer();
         this.UnsubscribeFromMediaPlayerEvents();
 
         this._stateLock.Dispose();

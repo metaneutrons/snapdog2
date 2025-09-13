@@ -28,6 +28,7 @@ using SnapDog2.Shared.Models;
 /// </summary>
 public sealed partial class MediaPlayerService(
     IOptions<AudioConfig> config,
+    IOptions<ServicesConfig> servicesConfig,
     ILogger<MediaPlayerService> logger,
     ILoggerFactory loggerFactory,
     IHubContext<SnapDogHub> hubContext,
@@ -37,6 +38,8 @@ public sealed partial class MediaPlayerService(
 {
     private readonly AudioConfig _config =
         config.Value ?? throw new ArgumentNullException(nameof(config));
+    private readonly ServicesConfig _servicesConfig =
+        servicesConfig.Value ?? throw new ArgumentNullException(nameof(servicesConfig));
     private readonly ILogger<MediaPlayerService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly ILoggerFactory _loggerFactory =
         loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
@@ -98,6 +101,7 @@ public sealed partial class MediaPlayerService(
             // Create LibVLC player for this zone
             var player = new MediaPlayer(
                 this._config,
+                this._servicesConfig,
                 this._loggerFactory.CreateLogger<MediaPlayer>(),
                 this._loggerFactory.CreateLogger<MetadataManager>(),
                 zoneIndex,

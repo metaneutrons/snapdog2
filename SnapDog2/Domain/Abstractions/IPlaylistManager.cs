@@ -25,7 +25,7 @@ public interface IPlaylistManager
     /// Gets all available playlists with their 1-based indices.
     /// </summary>
     /// <returns>Result containing list of playlist information.</returns>
-    Task<Result<List<PlaylistInfo>>> GetAllPlaylistsAsync();
+    Task<Result<List<PlaylistInfo>>> GetAllPlaylistsAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets tracks from a playlist by its 1-based index.

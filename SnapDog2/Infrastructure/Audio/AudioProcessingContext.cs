@@ -56,6 +56,10 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
     private readonly DirectoryInfo _tempDirectory;
     private bool _disposed;
 
+    // Debouncing for position events using config
+    private DateTime _lastPositionUpdate = DateTime.MinValue;
+    private readonly TimeSpan _positionDebounce;
+
     // Event for position changes
     public event EventHandler<PositionChangedEventArgs>? PositionChanged;
     public event EventHandler<PlaybackStateChangedEventArgs>? PlaybackStateChanged;
@@ -68,6 +72,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
         AudioConfig config,
         ILogger logger,
         ILogger<MetadataManager> metadataLogger,
+        ServicesConfig servicesConfig,
         string? tempDirectory = null
     )
     {
@@ -86,6 +91,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
         }
 
         this._logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        this._positionDebounce = TimeSpan.FromMilliseconds(servicesConfig.DebouncingMs);
 
         var args = config.LibVLCArgs;
         try
@@ -486,7 +492,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
     {
         this.LogSettingUpLibVlcEventHandlers();
 
-        // Position change events (percentage-based)
+        // Position change events (percentage-based) with configurable debouncing
         this._mediaPlayer.PositionChanged += (_, e) =>
         {
             try
@@ -495,6 +501,14 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
                 {
                     return;
                 }
+
+                // Debounce position updates using config
+                var now = DateTime.UtcNow;
+                if (now - this._lastPositionUpdate < this._positionDebounce)
+                {
+                    return;
+                }
+                this._lastPositionUpdate = now;
 
                 var length = this._mediaPlayer.Length;
                 var effectiveDuration = this.MetadataDurationMs ?? length;
@@ -519,7 +533,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
             }
         };
 
-        // Also keep TimeChanged as backup
+        // Also keep TimeChanged as backup with configurable debouncing
         this._mediaPlayer.TimeChanged += (_, e) =>
         {
             try
@@ -528,6 +542,14 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
                 {
                     return;
                 }
+
+                // Debounce time updates using config
+                var now = DateTime.UtcNow;
+                if (now - this._lastPositionUpdate < this._positionDebounce)
+                {
+                    return;
+                }
+                this._lastPositionUpdate = now;
 
                 var length = this._mediaPlayer.Length;
                 var effectiveDuration = this.MetadataDurationMs ?? length;
