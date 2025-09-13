@@ -16,14 +16,25 @@ const formatTime = (ms: number): string => {
 interface ZoneCardProps {
   zoneIndex: number;
   draggingClientIndex: number | null;
+  onClientMove: (clientIndex: number, targetZoneIndex: number) => void;
   onClientDragStart: (clientIndex: number) => void;
   onClientDragEnd: () => void;
-  onDrop?: (zoneIndex: number) => void;
 }
 
-export const ZoneCard: React.FC<ZoneCardProps> = ({ zoneIndex, draggingClientIndex, onClientDragStart, onClientDragEnd, onDrop }) => {
+export const ZoneCard: React.FC<ZoneCardProps> = ({ 
+  zoneIndex, 
+  draggingClientIndex, 
+  onClientMove,
+  onClientDragStart, 
+  onClientDragEnd 
+}) => {
   const zone = useZone(zoneIndex);
   const { setZoneVolume, toggleZoneMute } = useAppStore();
+
+  const handleDrop = (clientIndex: number) => {
+    console.log(`Dropping client ${clientIndex} into zone ${zoneIndex}`);
+    onClientMove(clientIndex, zoneIndex);
+  };
 
   if (!zone) {
     return (
@@ -111,7 +122,7 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({ zoneIndex, draggingClientInd
           draggingClientIndex={draggingClientIndex}
           onClientDragStart={onClientDragStart}
           onClientDragEnd={onClientDragEnd}
-          onDrop={onDrop}
+          onDrop={handleDrop}
         />
       </div>
     </div>

@@ -7,37 +7,49 @@ import { ThemeToggle } from './components/ThemeToggle';
 function App() {
   console.log('App component rendering...');
   
-  const { initializeZone, initializeClient, setInitialZoneState, setInitialClientState } = useAppStore();
+  const { initializeZone, initializeClient, setInitialZoneState, setInitialClientState, moveClientToZone } = useAppStore();
   console.log('Store loaded successfully');
   
   const [zoneCount, setZoneCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState('Initializing...');
+  const [draggingClientIndex, setDraggingClientIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const init = async () => {
       try {
-        console.log('Starting API initialization...');
+        console.log('Starting optimized initialization...');
+        setLoadingProgress('Loading clients...');
         
-        // Get zone count from API
-        const zonesCount = await api.get.zoneCount();
-        console.log('Zone count from API:', zonesCount);
+        // Load clients first (fast - 11ms)
+        const clients = await api.get.clients();
+        console.log('Clients loaded:', clients.length);
         
-        const fetchedZoneCount = Number(zonesCount);
-        setZoneCount(fetchedZoneCount);
+        clients.forEach((clientData, index) => {
+          const clientIndex = index + 1;
+          initializeClient(clientIndex);
+          setInitialClientState(clientIndex, clientData);
+        });
+        
+        setLoadingProgress('Loading zones...');
+        
+        // Load zones second (slow - 5000ms)
+        const zones = await api.get.zones();
+        console.log('Zones loaded:', zones.length);
+        
+        setZoneCount(zones.length);
 
-        // Initialize zones in store
-        for (let i = 1; i <= fetchedZoneCount; i++) {
-          initializeZone(i);
-        }
+        zones.forEach((zoneData, index) => {
+          const zoneIndex = index + 1;
+          initializeZone(zoneIndex);
+          setInitialZoneState(zoneIndex, zoneData);
+        });
 
         setIsLoading(false);
-        console.log('Initialization complete');
+        console.log('Optimized initialization complete');
       } catch (error) {
-        console.error('API initialization failed:', error);
-        // Fallback to hardcoded
-        setZoneCount(2);
-        initializeZone(1);
-        initializeZone(2);
+        console.error('Initialization failed:', error);
+        setLoadingProgress('Failed to load. Please refresh.');
         setIsLoading(false);
       }
     };
@@ -45,10 +57,39 @@ function App() {
     init();
   }, []);
 
+  const handleClientMove = async (clientIndex: number, targetZoneIndex: number) => {
+    try {
+      console.log(`Moving client ${clientIndex} to zone ${targetZoneIndex}`);
+      
+      // Call API to move client
+      await api.post.moveClientToZone(clientIndex, targetZoneIndex);
+      
+      // Update store
+      await moveClientToZone(clientIndex, targetZoneIndex);
+      
+      console.log('Client move successful');
+    } catch (error) {
+      console.error('Failed to move client:', error);
+    }
+  };
+
+  const handleDragStart = (clientIndex: number) => {
+    console.log(`Drag started for client ${clientIndex}`);
+    setDraggingClientIndex(clientIndex);
+  };
+
+  const handleDragEnd = () => {
+    console.log('Drag ended');
+    setDraggingClientIndex(null);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-xl text-gray-600 dark:text-gray-400">Loading zones...</div>
+        <div className="text-center">
+          <div className="text-xl text-gray-600 dark:text-gray-400 mb-4">{loadingProgress}</div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+        </div>
       </div>
     );
   }
@@ -70,10 +111,10 @@ function App() {
               <ZoneCard
                 key={index + 1}
                 zoneIndex={index + 1}
-                onClientMove={() => {}}
-                onDragStart={() => {}}
-                onDragEnd={() => {}}
-                draggingClientIndex={null}
+                onClientMove={handleClientMove}
+                onClientDragStart={handleDragStart}
+                onClientDragEnd={handleDragEnd}
+                draggingClientIndex={draggingClientIndex}
               />
             ))}
           </div>
