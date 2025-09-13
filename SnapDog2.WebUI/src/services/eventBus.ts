@@ -2,6 +2,8 @@ type EventCallback<T = any> = (data: T) => void;
 
 interface AppEvents {
   'client.move': { clientIndex: number; targetZoneIndex: number };
+  'client.volume.change': { clientIndex: number; volume: number };
+  'client.mute.toggle': { clientIndex: number };
   'zone.volume.change': { zoneIndex: number; volume: number };
   'zone.mute.toggle': { zoneIndex: number };
   'client.drag.start': { clientIndex: number };

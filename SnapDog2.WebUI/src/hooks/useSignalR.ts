@@ -2,11 +2,33 @@ import { useEffect, useRef, useState } from 'react';
 import { HubConnectionBuilder, HubConnection, LogLevel } from '@microsoft/signalr';
 import { useAppStore } from '../store';
 import { config } from '../services/config';
+import { api } from '../services/api';
 
 export function useSignalR() {
   const connectionRef = useRef<HubConnection | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  const { setInitialZoneState, setInitialClientState, setZoneVolume, toggleZoneMute, moveClientToZone, updateZoneTrack, updateZonePlaylist, updateZonePlaybackState, updateZoneMute } = useAppStore();
+  const { setInitialZoneState, setInitialClientState, setZoneVolume, toggleZoneMute, moveClientToZone, updateZoneTrack, updateZonePlaylist, updateZonePlaybackState, updateZoneMute, updateClientVolume, updateClientMute } = useAppStore();
+
+  const refreshFullState = async () => {
+    try {
+      console.log('SignalR: Refreshing full state...');
+      const zoneCount = await api.get.zoneCount();
+      
+      for (let i = 1; i <= zoneCount; i++) {
+        const [zoneState, clients] = await Promise.all([
+          api.get.zoneState(i),
+          api.get.zoneClients(i)
+        ]);
+        
+        setInitialZoneState(i, zoneState);
+        clients.forEach(client => setInitialClientState(client.index, client));
+      }
+      
+      console.log('SignalR: Full state refresh complete');
+    } catch (error) {
+      console.error('SignalR: Failed to refresh full state:', error);
+    }
+  };
 
   useEffect(() => {
     const connection = new HubConnectionBuilder()
@@ -23,9 +45,10 @@ export function useSignalR() {
       setIsConnected(false);
     });
 
-    connection.onreconnected(() => {
+    connection.onreconnected(async () => {
       console.log('SignalR: Reconnected');
       setIsConnected(true);
+      await refreshFullState();
     });
 
     connection.onclose(() => {
@@ -73,8 +96,12 @@ export function useSignalR() {
     // Client-related events (using actual SendAsync event names)
     connection.on('ClientVolumeChanged', (clientIndex: number, volume: number) => {
       console.log('SignalR: Client volume changed', clientIndex, volume);
-      // Update client volume in store
-      setInitialClientState(clientIndex, { volume });
+      updateClientVolume(clientIndex, volume);
+    });
+
+    connection.on('ClientMuteChanged', (clientIndex: number, muted: boolean) => {
+      console.log('SignalR: Client mute changed', clientIndex, muted);
+      updateClientMute(clientIndex, muted);
     });
 
     connection.on('ClientConnectionChanged', (clientIndex: number, connected: boolean) => {
@@ -97,9 +124,10 @@ export function useSignalR() {
 
     // Start connection
     connection.start()
-      .then(() => {
+      .then(async () => {
         console.log('SignalR: Connected successfully to', config.signalr.hubUrl);
         setIsConnected(true);
+        await refreshFullState();
       })
       .catch((error) => {
         console.warn('SignalR: Connection failed', error.message);

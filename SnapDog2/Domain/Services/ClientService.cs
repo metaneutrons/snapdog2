@@ -13,7 +13,9 @@
 //
 namespace SnapDog2.Domain.Services;
 
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using SnapDog2.Api.Hubs;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Shared.Attributes;
 using SnapDog2.Shared.Models;
@@ -26,17 +28,20 @@ public partial class ClientService : IClientService
     private readonly IClientStateStore _clientStateStore;
     private readonly ISnapcastService _snapcastService;
     private readonly IClientManager _clientManager;
+    private readonly IHubContext<SnapDogHub> _hubContext;
     private readonly ILogger<ClientService> _logger;
 
     public ClientService(
         IClientStateStore clientStateStore,
         ISnapcastService snapcastService,
         IClientManager clientManager,
+        IHubContext<SnapDogHub> hubContext,
         ILogger<ClientService> logger)
     {
         _clientStateStore = clientStateStore;
         _snapcastService = snapcastService;
         _clientManager = clientManager;
+        _hubContext = hubContext;
         _logger = logger;
     }
 
@@ -98,13 +103,30 @@ public partial class ClientService : IClientService
     {
         LogSettingVolume(clientIndex, volume);
 
-        var client = _clientStateStore.GetClientState(clientIndex);
-        if (client == null)
+        var clientResult = await _clientManager.GetClientAsync(clientIndex);
+        if (clientResult.IsFailure || clientResult.Value == null)
         {
             return Result.Failure($"Client {clientIndex} not found");
         }
 
-        return await _snapcastService.SetClientVolumeAsync(client.SnapcastId, volume, cancellationToken);
+        var result = await clientResult.Value.SetVolumeAsync(volume);
+        _logger.LogDebug("ClientManager.SetVolumeAsync result: {IsSuccess}, {ErrorMessage}", result.IsSuccess, result.ErrorMessage);
+
+        if (result.IsSuccess)
+        {
+            try
+            {
+                _logger.LogDebug("Sending ClientVolumeChanged SignalR event for client {ClientIndex}, volume {Volume}", clientIndex, volume);
+                await _hubContext.Clients.All.SendAsync("ClientVolumeChanged", clientIndex, volume, cancellationToken);
+                _logger.LogDebug("ClientVolumeChanged SignalR event sent successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send ClientVolumeChanged SignalR event for client {ClientIndex}", clientIndex);
+            }
+        }
+
+        return result;
     }
 
     /// <summary>
@@ -151,13 +173,30 @@ public partial class ClientService : IClientService
     {
         LogSettingMute(clientIndex, muted);
 
-        var client = _clientStateStore.GetClientState(clientIndex);
-        if (client == null)
+        var clientResult = await _clientManager.GetClientAsync(clientIndex);
+        if (clientResult.IsFailure || clientResult.Value == null)
         {
             return Result.Failure($"Client {clientIndex} not found");
         }
 
-        return await _snapcastService.SetClientMuteAsync(client.SnapcastId, muted, cancellationToken);
+        var result = await clientResult.Value.SetMuteAsync(muted);
+        _logger.LogDebug("ClientManager.SetMuteAsync result: {IsSuccess}, {ErrorMessage}", result.IsSuccess, result.ErrorMessage);
+
+        if (result.IsSuccess)
+        {
+            try
+            {
+                _logger.LogDebug("Sending ClientMuteChanged SignalR event for client {ClientIndex}, muted {Muted}", clientIndex, muted);
+                await _hubContext.Clients.All.SendAsync("ClientMuteChanged", clientIndex, muted, cancellationToken);
+                _logger.LogDebug("ClientMuteChanged SignalR event sent successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send ClientMuteChanged SignalR event for client {ClientIndex}", clientIndex);
+            }
+        }
+
+        return result;
     }
 
     /// <summary>
@@ -181,12 +220,34 @@ public partial class ClientService : IClientService
     /// Sets the latency compensation for a specific client.
     /// </summary>
     [CommandId("CLIENT_LATENCY")]
-    public Task<Result> SetLatencyAsync(int clientIndex, int latencyMs, CancellationToken cancellationToken = default)
+    public async Task<Result> SetLatencyAsync(int clientIndex, int latencyMs, CancellationToken cancellationToken = default)
     {
         LogSettingLatency(clientIndex, latencyMs);
 
-        // TODO: Implement actual client latency control logic
-        return Task.FromResult(Result.Success());
+        var clientResult = await _clientManager.GetClientAsync(clientIndex);
+        if (clientResult.IsFailure || clientResult.Value == null)
+        {
+            return Result.Failure($"Client {clientIndex} not found");
+        }
+
+        var result = await clientResult.Value.SetLatencyAsync(latencyMs);
+        _logger.LogDebug("ClientManager.SetLatencyAsync result: {IsSuccess}, {ErrorMessage}", result.IsSuccess, result.ErrorMessage);
+
+        if (result.IsSuccess)
+        {
+            try
+            {
+                _logger.LogDebug("Sending ClientLatencyChanged SignalR event for client {ClientIndex}, latency {LatencyMs}ms", clientIndex, latencyMs);
+                await _hubContext.Clients.All.SendAsync("ClientLatencyChanged", clientIndex, latencyMs, cancellationToken);
+                _logger.LogDebug("ClientLatencyChanged SignalR event sent successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send ClientLatencyChanged SignalR event for client {ClientIndex}", clientIndex);
+            }
+        }
+
+        return result;
     }
 
     /// <summary>

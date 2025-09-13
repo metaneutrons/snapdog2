@@ -52,6 +52,26 @@ function App() {
     }
   });
 
+  on('client.volume.change', async ({ clientIndex, volume }) => {
+    try {
+      console.log(`Event: Changing client ${clientIndex} volume to ${volume}`);
+      await api.post.setClientVolume(clientIndex, volume);
+      console.log('Event: Client volume change successful');
+    } catch (error) {
+      console.error('Event: Failed to change client volume:', error);
+    }
+  });
+
+  on('client.mute.toggle', async ({ clientIndex }) => {
+    try {
+      console.log(`Event: Toggling client ${clientIndex} mute`);
+      await api.post.toggleClientMute(clientIndex);
+      console.log('Event: Client mute toggle successful');
+    } catch (error) {
+      console.error('Event: Failed to toggle client mute:', error);
+    }
+  });
+
   on('client.drag.start', ({ clientIndex }) => {
     console.log(`Event: Drag started for client ${clientIndex}`);
     setDraggingClientIndex(clientIndex);

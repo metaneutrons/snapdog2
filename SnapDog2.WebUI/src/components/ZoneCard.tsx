@@ -111,9 +111,9 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
       {/* Volume Control */}
       <div className="mb-4">
         <VolumeSlider
-          volume={zone.volume}
+          value={zone.volume}
           muted={zone.mute}
-          onVolumeChange={(volume) => emit('zone.volume.change', { zoneIndex, volume })}
+          onChange={(volume) => emit('zone.volume.change', { zoneIndex, volume })}
           onMuteToggle={() => emit('zone.mute.toggle', { zoneIndex })}
         />
       </div>

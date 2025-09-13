@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useClient, useAppStore } from '../store';
-import { api } from '../services/api';
+import { useEventBus } from '../hooks/useEventBus';
 import { VolumeSlider } from './VolumeSlider';
 
 interface ClientChipProps {
@@ -21,25 +21,18 @@ export const ClientChip: React.FC<ClientChipProps> = ({
 }) => {
   const client = useClient(clientIndex);
   const { initializeClient } = useAppStore();
+  const { emit } = useEventBus();
 
   useEffect(() => {
     initializeClient(clientIndex);
   }, [clientIndex, initializeClient]);
 
-  const handleVolumeChange = async (volume: number) => {
-    try {
-      await api.clients.setVolume(clientIndex, volume);
-    } catch (error) {
-      console.error('Failed to set client volume:', error);
-    }
+  const handleVolumeChange = (volume: number) => {
+    emit('client.volume.change', { clientIndex, volume });
   };
 
-  const handleMuteToggle = async () => {
-    try {
-      await api.clients.toggleMute(clientIndex);
-    } catch (error) {
-      console.error('Failed to toggle client mute:', error);
-    }
+  const handleMuteToggle = () => {
+    emit('client.mute.toggle', { clientIndex });
   };
 
   const handleDragStart = (e: React.DragEvent) => {

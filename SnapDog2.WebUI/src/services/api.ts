@@ -84,6 +84,14 @@ class ApiService {
 
     toggleZoneMute: async (zoneIndex: number): Promise<void> => {
       await this.request('POST', `/zones/${zoneIndex}/mute/toggle`);
+    },
+
+    setClientVolume: async (clientIndex: number, volume: number): Promise<void> => {
+      await this.request('PUT', `/clients/${clientIndex}/volume`, volume);
+    },
+
+    toggleClientMute: async (clientIndex: number): Promise<void> => {
+      await this.request('POST', `/clients/${clientIndex}/mute/toggle`);
     }
   };
 
