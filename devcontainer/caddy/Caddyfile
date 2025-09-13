@@ -33,6 +33,26 @@
         redir * /webui/ 301
     }
 
+    # WebUI API and hubs - proxy to app container
+    handle /webui/api/* {
+        uri strip_prefix /webui
+        reverse_proxy http://app:5555
+    }
+
+    handle /webui/hubs/* {
+        uri strip_prefix /webui
+        reverse_proxy http://app:5555
+    }
+
+    # Vite special routes (must come before general /webui/*)
+    handle /webui/@vite/* {
+        reverse_proxy http://frontend:5173
+    }
+
+    handle /webui/src/* {
+        reverse_proxy http://frontend:5173
+    }
+
     # SnapDog WebUI - Frontend development server with hot reload
     handle /webui/* {
         reverse_proxy http://frontend:5173
