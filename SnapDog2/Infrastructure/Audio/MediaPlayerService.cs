@@ -20,6 +20,7 @@ using SnapDog2.Api.Hubs;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Infrastructure.Integrations.Subsonic;
 using SnapDog2.Shared.Configuration;
+using SnapDog2.Shared.Enums;
 using SnapDog2.Shared.Models;
 
 /// <summary>
@@ -34,6 +35,7 @@ public sealed partial class MediaPlayerService(
     ILoggerFactory loggerFactory,
     IHubContext<SnapDogHub> hubContext,
     ISubsonicService subsonicService,
+    IZoneStateStore zoneStateStore,
     IEnumerable<ZoneConfig> zoneConfigs
 ) : IMediaPlayerService, IAsyncDisposable, IDisposable
 {
@@ -50,6 +52,8 @@ public sealed partial class MediaPlayerService(
         hubContext ?? throw new ArgumentNullException(nameof(hubContext));
     private readonly ISubsonicService _subsonicService =
         subsonicService ?? throw new ArgumentNullException(nameof(subsonicService));
+    private readonly IZoneStateStore _zoneStateStore =
+        zoneStateStore ?? throw new ArgumentNullException(nameof(zoneStateStore));
     private readonly IEnumerable<ZoneConfig> _zoneConfigs =
         zoneConfigs ?? throw new ArgumentNullException(nameof(zoneConfigs));
 
@@ -126,6 +130,9 @@ public sealed partial class MediaPlayerService(
                 LogSettingMetadataDuration(_logger, trackInfo.DurationMs, trackInfo.Title);
                 player.SetMetadataDuration(trackInfo.DurationMs);
 
+                // Update zone state to Playing
+                _zoneStateStore.UpdatePlaybackState(zoneIndex, PlaybackState.Playing);
+
                 LogPlayingTrack(_logger, trackInfo.Title, zoneIndex, streamUrl);
 
                 // Publish playback started notification via SignalR
@@ -158,6 +165,9 @@ public sealed partial class MediaPlayerService(
                 await player.StopStreamingAsync();
                 await player.DisposeAsync();
 
+                // Update zone state to Stopped
+                _zoneStateStore.UpdatePlaybackState(zoneIndex, PlaybackState.Stopped);
+
                 LogPlaybackStoppedInfo(_logger, zoneIndex);
 
                 // Publish playback stopped notification via SignalR
@@ -186,6 +196,9 @@ public sealed partial class MediaPlayerService(
 
             if (result.IsSuccess)
             {
+                // Update zone state to Paused
+                _zoneStateStore.UpdatePlaybackState(zoneIndex, PlaybackState.Paused);
+
                 LogPlaybackPausedInfo(_logger, zoneIndex);
 
                 // Publish playback paused notification via SignalR

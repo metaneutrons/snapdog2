@@ -48,7 +48,6 @@ public sealed partial class MediaPlayer(
     private TrackInfo? _currentTrack;
     private DateTime? _playbackStartedAt;
     private bool _disposed;
-    private int _libVlcRetryCount = 0;
     private const int MaxLibVlcRetries = 3;
     private readonly TimeSpan _retryDelay = TimeSpan.FromSeconds(2);
 
@@ -97,7 +96,6 @@ public sealed partial class MediaPlayer(
                 var result = await operation();
                 if (result.IsSuccess)
                 {
-                    _libVlcRetryCount = 0; // Reset on success
                     return result;
                 }
 

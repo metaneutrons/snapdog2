@@ -351,9 +351,9 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
         options.Add(":sout-all"); // Keep streaming even if no one is reading
 
         // Additional options for continuous streaming
-        options.Add(":network-caching=1000"); // 1 second network cache
-        options.Add(":file-caching=300");     // 300ms file cache
-        options.Add(":live-caching=300");     // 300ms live stream cache
+        // options.Add(":network-caching=1000"); // 1 second network cache
+        // options.Add(":file-caching=300");     // 300ms file cache
+        // options.Add(":live-caching=300");     // 300ms live stream cache
 
         var codecForLogging = isDevelopment ? "none (transcoding disabled)" : GetLibVLCAudioCodec(this.Config.BitsPerSample);
         this.LogBuiltMediaOptions(codecForLogging, this.Config.SampleRate, this.Config.Channels, string.Join(", ", options));

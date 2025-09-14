@@ -402,6 +402,9 @@ static WebApplication CreateWebApplication(string[] args)
 
         // Register state restoration service (only if Redis is enabled)
         builder.Services.AddHostedService<StateRestorationService>();
+
+        // Register shutdown state persistence service
+        builder.Services.AddHostedService<ShutdownStatePersistenceService>();
     }
     else
     {
