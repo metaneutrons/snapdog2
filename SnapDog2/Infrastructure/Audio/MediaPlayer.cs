@@ -24,6 +24,7 @@ using SnapDog2.Shared.Models;
 public sealed partial class MediaPlayer(
     AudioConfig config,
     ServicesConfig servicesConfig,
+    SystemConfig systemConfig,
     ILogger<MediaPlayer> logger,
     ILogger<MetadataManager> metadataLogger,
     int zoneIndex,
@@ -34,6 +35,8 @@ public sealed partial class MediaPlayer(
         config ?? throw new ArgumentNullException(nameof(config));
     private readonly ServicesConfig _servicesConfig =
         servicesConfig ?? throw new ArgumentNullException(nameof(servicesConfig));
+    private readonly SystemConfig _systemConfig =
+        systemConfig ?? throw new ArgumentNullException(nameof(systemConfig));
     private readonly ILogger<MediaPlayer> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly ILogger<MetadataManager> _metadataLogger =
         metadataLogger ?? throw new ArgumentNullException(nameof(metadataLogger));
@@ -179,6 +182,7 @@ public sealed partial class MediaPlayer(
                     this._logger,
                     this._metadataLogger,
                     this._servicesConfig,
+                    this._systemConfig,
                     this._config.TempDirectory
                 );
 

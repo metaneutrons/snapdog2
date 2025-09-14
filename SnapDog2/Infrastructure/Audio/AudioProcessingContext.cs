@@ -15,6 +15,7 @@ namespace SnapDog2.Infrastructure.Audio;
 
 using LibVLCSharp.Shared;
 using SnapDog2.Shared.Configuration;
+using SnapDog2.Shared.Enums;
 using SnapDog2.Shared.Models;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
@@ -54,6 +55,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
     private readonly LibVLCSharp.Shared.MediaPlayer _mediaPlayer;
     private readonly ILogger _logger;
     private readonly DirectoryInfo _tempDirectory;
+    private readonly SystemConfig _systemConfig;
     private bool _disposed;
 
     // Debouncing for position events using config
@@ -73,6 +75,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
         ILogger logger,
         ILogger<MetadataManager> metadataLogger,
         ServicesConfig servicesConfig,
+        SystemConfig systemConfig,
         string? tempDirectory = null
     )
     {
@@ -91,6 +94,7 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
         }
 
         this._logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        this._systemConfig = systemConfig ?? throw new ArgumentNullException(nameof(systemConfig));
         this._positionDebounce = TimeSpan.FromMilliseconds(servicesConfig.DebouncingMs);
 
         var args = config.LibVLCArgs;
@@ -314,11 +318,30 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
     {
         var options = new List<string>();
 
-        // Use AudioConfig for consistent transcoding to configured PCM format
-        var audioCodec = GetLibVLCAudioCodec(this.Config.BitsPerSample);
-        var transcode = $"#transcode{{acodec={audioCodec},channels={this.Config.Channels},samplerate={this.Config.SampleRate}}}";
-        var standardOutput = $"standard{{access=file,mux=raw,dst={outputPath}}}";
-        options.Add($":sout={transcode}:{standardOutput}");
+        // TODO: Find a more elegant and less resource-hungry solution than transcoding.
+        // We have fixed bitrate sinks only, so we need some other software to handle
+        // different bitrates and bit depths if VLC outputs varying formats.
+        // Consider using a lightweight audio format converter or buffer that can
+        // adapt to different input formats without full transcoding.
+
+        var isDevelopment = _systemConfig.Environment == ApplicationEnvironment.Development;
+
+        if (isDevelopment)
+        {
+            // Development mode: Disable transcoding to reduce resource usage
+            var standardOutput = $"standard{{access=file,mux=raw,dst={outputPath}}}";
+            options.Add($":sout=#{standardOutput}");
+            this.LogTranscodingDisabled();
+        }
+        else
+        {
+            // Production mode: Use transcoding for consistent PCM format
+            var audioCodec = GetLibVLCAudioCodec(this.Config.BitsPerSample);
+            var transcode = $"#transcode{{acodec={audioCodec},channels={this.Config.Channels},samplerate={this.Config.SampleRate}}}";
+            var standardOutput = $"standard{{access=file,mux=raw,dst={outputPath}}}";
+            options.Add($":sout={transcode}:{standardOutput}");
+            this.LogTranscodingEnabled(audioCodec, this.Config.Channels, this.Config.SampleRate);
+        }
 
         // Critical options for streaming to named pipes
         options.Add(":no-sout-video");
@@ -332,7 +355,8 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
         options.Add(":file-caching=300");     // 300ms file cache
         options.Add(":live-caching=300");     // 300ms live stream cache
 
-        this.LogBuiltMediaOptions(audioCodec, this.Config.SampleRate, this.Config.Channels, string.Join(", ", options));
+        var codecForLogging = isDevelopment ? "none (transcoding disabled)" : GetLibVLCAudioCodec(this.Config.BitsPerSample);
+        this.LogBuiltMediaOptions(codecForLogging, this.Config.SampleRate, this.Config.Channels, string.Join(", ", options));
 
         return options;
     }
@@ -883,4 +907,10 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
     [LoggerMessage(EventId = 16034, Level = LogLevel.Error, Message = "Failed → create LibVLC instance with args: {Args}"
 )]
     private partial void LogLibVLCInstanceCreationFailed(Exception ex, string args);
+
+    [LoggerMessage(EventId = 16035, Level = LogLevel.Information, Message = "Transcoding disabled in development mode for reduced resource usage")]
+    private partial void LogTranscodingDisabled();
+
+    [LoggerMessage(EventId = 16036, Level = LogLevel.Information, Message = "Transcoding enabled: codec={AudioCodec}, channels={Channels}, samplerate={SampleRate}")]
+    private partial void LogTranscodingEnabled(string AudioCodec, int Channels, int SampleRate);
 }

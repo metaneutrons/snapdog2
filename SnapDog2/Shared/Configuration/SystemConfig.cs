@@ -14,6 +14,7 @@
 namespace SnapDog2.Shared.Configuration;
 
 using EnvoyConfig.Attributes;
+using SnapDog2.Shared.Enums;
 
 /// <summary>
 /// Basic system configuration settings.
@@ -32,7 +33,7 @@ public class SystemConfig
     /// Maps to: SNAPDOG_SYSTEM_ENVIRONMENT
     /// </summary>
     [Env(Key = "ENVIRONMENT", Default = "Development")]
-    public string Environment { get; set; } = "Development";
+    public ApplicationEnvironment Environment { get; set; } = ApplicationEnvironment.Development;
 
     /// <summary>
     /// Whether health checks are enabled.

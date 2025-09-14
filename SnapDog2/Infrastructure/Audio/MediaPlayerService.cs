@@ -29,6 +29,7 @@ using SnapDog2.Shared.Models;
 public sealed partial class MediaPlayerService(
     IOptions<AudioConfig> config,
     IOptions<ServicesConfig> servicesConfig,
+    IOptions<SystemConfig> systemConfig,
     ILogger<MediaPlayerService> logger,
     ILoggerFactory loggerFactory,
     IHubContext<SnapDogHub> hubContext,
@@ -40,6 +41,8 @@ public sealed partial class MediaPlayerService(
         config.Value ?? throw new ArgumentNullException(nameof(config));
     private readonly ServicesConfig _servicesConfig =
         servicesConfig.Value ?? throw new ArgumentNullException(nameof(servicesConfig));
+    private readonly SystemConfig _systemConfig =
+        systemConfig.Value ?? throw new ArgumentNullException(nameof(systemConfig));
     private readonly ILogger<MediaPlayerService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly ILoggerFactory _loggerFactory =
         loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
@@ -102,6 +105,7 @@ public sealed partial class MediaPlayerService(
             var player = new MediaPlayer(
                 this._config,
                 this._servicesConfig,
+                this._systemConfig,
                 this._loggerFactory.CreateLogger<MediaPlayer>(),
                 this._loggerFactory.CreateLogger<MetadataManager>(),
                 zoneIndex,

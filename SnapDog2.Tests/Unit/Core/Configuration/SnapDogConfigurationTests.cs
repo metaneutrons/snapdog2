@@ -14,6 +14,7 @@
 namespace SnapDog2.Tests.Unit.Core.Configuration;
 
 using SnapDog2.Shared.Configuration;
+using SnapDog2.Shared.Enums;
 
 public class SnapDogConfigurationTests
 {
@@ -64,7 +65,7 @@ public class SnapDogConfigurationTests
 
         // Assert
         config.LogLevel.Should().Be("Information");
-        config.Environment.Should().Be("Development");
+        config.Environment.Should().Be(ApplicationEnvironment.Development);
         config.HealthChecksEnabled.Should().BeTrue();
         config.HealthChecksTimeout.Should().Be(30);
         config.HealthChecksTags.Should().Be("ready,live");
