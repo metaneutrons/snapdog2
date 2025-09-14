@@ -522,6 +522,12 @@ static WebApplication CreateWebApplication(string[] args)
         }
         else
         {
+            // Add minimal authentication scheme to satisfy authorization middleware
+            builder.Services.AddAuthentication("Bearer")
+                .AddScheme<AuthenticationSchemeOptions, NoOpAuthenticationHandler>("Bearer", null);
+
+            builder.Services.AddAuthorization();
+
             Log.Information("API authentication disabled - ConditionalAuthorize attributes will allow all requests");
         }
 

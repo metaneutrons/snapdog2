@@ -15,21 +15,14 @@ public class ConditionalAuthorizeAttribute : Attribute, IAuthorizationFilter
     {
         var config = context.HttpContext.RequestServices.GetService<IOptions<SnapDogConfiguration>>();
 
-        // Skip authorization if API auth is disabled
+        // Skip authorization completely if API auth is disabled
         if (config?.Value.Http.ApiAuthEnabled == false)
         {
+            // Allow the request to proceed without any authorization checks
             return;
         }
 
-        // Apply authorization if enabled
-        var authService = context.HttpContext.RequestServices.GetService<IAuthorizationService>();
-        if (authService == null)
-        {
-            context.Result = new UnauthorizedResult();
-            return;
-        }
-
-        // Check if user is authenticated
+        // Apply standard authorization if enabled
         if (!context.HttpContext.User.Identity?.IsAuthenticated ?? true)
         {
             context.Result = new UnauthorizedResult();
