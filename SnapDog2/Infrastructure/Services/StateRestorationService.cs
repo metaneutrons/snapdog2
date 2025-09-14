@@ -210,12 +210,17 @@ public partial class StateRestorationService(
         {
             this.LogPreloadingInitialPlaylist(zoneIndex, zoneName);
 
-            // Get the zone service
-            var zoneResult = await zoneManager.GetZoneAsync(zoneIndex);
-            if (zoneResult.IsSuccess)
+            // Get all zones and find the target zone
+            var allZonesResult = await zoneManager.GetAllZonesAsync();
+            if (!allZonesResult.IsSuccess || allZonesResult.Value == null)
             {
-                var zoneService = zoneResult.Value!;
+                this.LogInitialPlaylistPreloadFailed(new Exception("Failed to retrieve zones"), zoneIndex, zoneName);
+                return;
+            }
 
+            var zoneService = allZonesResult.Value.FirstOrDefault(z => z.ZoneIndex == zoneIndex);
+            if (zoneService != null)
+            {
                 // Set playlist 1
                 var playlistResult = await zoneService.SetPlaylistAsync(1);
                 if (playlistResult.IsSuccess)
@@ -238,7 +243,7 @@ public partial class StateRestorationService(
             }
             else
             {
-                this.LogInitialPlaylistPreloadFailed(new Exception($"Zone {zoneIndex} not found: {zoneResult.ErrorMessage}"), zoneIndex, zoneName);
+                this.LogInitialPlaylistPreloadFailed(new Exception($"Zone {zoneIndex} not found"), zoneIndex, zoneName);
             }
         }
         catch (Exception ex)
@@ -252,18 +257,26 @@ public partial class StateRestorationService(
     /// </summary>
     private async Task ResumePlaybackAsync(List<(int zoneIndex, ZoneState zoneState)> zonesToResume)
     {
+        // Get all zones once to avoid repeated lookups
+        var allZonesResult = await zoneManager.GetAllZonesAsync();
+        if (!allZonesResult.IsSuccess || allZonesResult.Value == null)
+        {
+            LogZoneRetrievalFailed();
+            return;
+        }
+
+        var allZones = allZonesResult.Value.ToList();
+
         foreach (var (zoneIndex, zoneState) in zonesToResume)
         {
             try
             {
                 this.LogResumingPlayback(zoneIndex, zoneState.Name);
 
-                // Get the zone service and resume playback
-                var zoneResult = await zoneManager.GetZoneAsync(zoneIndex);
-                if (zoneResult.IsSuccess)
+                // Find zone by index instead of calling GetZoneAsync
+                var zoneService = allZones.FirstOrDefault(z => z.ZoneIndex == zoneIndex);
+                if (zoneService != null)
                 {
-                    var zoneService = zoneResult.Value!;
-
                     // Start playback - the zone should resume from its persisted state
                     var playResult = await zoneService.PlayAsync();
 
@@ -278,7 +291,7 @@ public partial class StateRestorationService(
                 }
                 else
                 {
-                    this.LogPlaybackResumeFailed(new Exception($"Zone {zoneIndex} not found: {zoneResult.ErrorMessage}"), zoneIndex, zoneState.Name);
+                    this.LogPlaybackResumeFailed(new Exception($"Zone {zoneIndex} not found"), zoneIndex, zoneState.Name);
                 }
             }
             catch (Exception ex)
@@ -419,6 +432,9 @@ public partial class StateRestorationService(
     [LoggerMessage(EventId = 14157, Level = LogLevel.Warning, Message = "[WARNING] Failed → preload initial playlist for zone {ZoneIndex} ({ZoneName})"
 )]
     private partial void LogInitialPlaylistPreloadFailed(Exception ex, int zoneIndex, string zoneName);
+
+    [LoggerMessage(EventId = 14158, Level = LogLevel.Error, Message = "[ERROR] Failed to retrieve zones for state restoration")]
+    private partial void LogZoneRetrievalFailed();
 
     #endregion
 }

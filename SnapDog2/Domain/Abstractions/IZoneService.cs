@@ -23,6 +23,11 @@ using SnapDog2.Shared.Models;
 public interface IZoneService
 {
     /// <summary>
+    /// Gets the zone index.
+    /// </summary>
+    int ZoneIndex { get; }
+
+    /// <summary>
     /// Plays/resumes playback on the zone.
     /// </summary>
     [CommandId("PLAY")]

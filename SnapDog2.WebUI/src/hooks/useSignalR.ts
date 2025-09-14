@@ -7,7 +7,7 @@ import { api } from '../services/api';
 export function useSignalR() {
   const connectionRef = useRef<HubConnection | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  const { setInitialZoneState, setInitialClientState, setZoneVolume, toggleZoneMute, moveClientToZone, updateZoneTrack, updateZonePlaylist, updateZonePlaybackState, updateZoneMute, updateClientVolume, updateClientMute } = useAppStore();
+  const { setInitialZoneState, setInitialClientState, setZoneVolume, toggleZoneMute, moveClientToZone, updateZoneTrack, updateZonePlaylist, updateZonePlaybackState, updateZoneMute, updateClientVolume, updateClientMute, initializeZone, initializeClient } = useAppStore();
 
   const refreshFullState = async () => {
     try {
@@ -20,8 +20,12 @@ export function useSignalR() {
           api.get.zoneClients(i)
         ]);
         
+        initializeZone(i);
         setInitialZoneState(i, zoneState);
-        clients.forEach(client => setInitialClientState(client.index, client));
+        clients.forEach(client => {
+          initializeClient(client.index);
+          setInitialClientState(client.index, client);
+        });
       }
       
       console.log('SignalR: Full state refresh complete');
@@ -33,7 +37,7 @@ export function useSignalR() {
   useEffect(() => {
     const connection = new HubConnectionBuilder()
       .withUrl(config.signalr.hubUrl)
-      .withAutomaticReconnect([0, 2000, 10000, config.signalr.reconnectDelay])
+      .withAutomaticReconnect([0, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000])
       .configureLogging(LogLevel.Warning)
       .build();
 

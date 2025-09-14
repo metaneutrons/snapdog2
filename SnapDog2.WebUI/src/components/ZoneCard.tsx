@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useZone, useAppStore } from '../store';
 import { useEventBus } from '../hooks/useEventBus';
 import { TransportControls } from './TransportControls';
@@ -26,6 +26,7 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
   const zone = useZone(zoneIndex);
   const { setZoneVolume, toggleZoneMute } = useAppStore();
   const { emit } = useEventBus();
+  const [imageError, setImageError] = useState<boolean>(false);
 
   const handleClientMove = (clientIndex: number, targetZoneIndex: number) => {
     emit('client.move', { clientIndex, targetZoneIndex });
@@ -55,6 +56,11 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
   const currentTrack = zone.track;
   const currentPlaylist = zone.playlist;
 
+  // Reset image error when track changes
+  useEffect(() => {
+    setImageError(false);
+  }, [currentTrack?.coverArtUrl]);
+
   return (
     <div className="bg-theme-secondary rounded-lg shadow-theme p-6 border border-theme-primary">
       {/* Zone Header */}
@@ -70,18 +76,17 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
         <div className="mb-4 p-3 bg-theme-tertiary rounded-lg">
           <div className="flex items-center space-x-3">
             {/* Cover Art */}
-            {currentTrack.coverArt ? (
+            {currentTrack.coverArtUrl && !imageError ? (
               <img 
-                src={currentTrack.coverArt} 
+                src={currentTrack.coverArtUrl} 
                 alt="Album Cover"
-                className="w-12 h-12 rounded-md object-cover flex-shrink-0"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
+                className="w-24 h-24 rounded-md object-cover flex-shrink-0"
+                onError={() => setImageError(true)}
+                onLoad={() => setImageError(false)}
               />
             ) : (
-              <div className="w-12 h-12 bg-gray-300 dark:bg-gray-600 rounded-md flex items-center justify-center flex-shrink-0">
-                <span className="text-gray-500 dark:text-gray-400 text-xs">♪</span>
+              <div className="w-24 h-24 bg-gray-300 dark:bg-gray-600 rounded-md flex items-center justify-center flex-shrink-0">
+                <span className="text-gray-500 dark:text-gray-400 text-4xl">♪</span>
               </div>
             )}
             
@@ -106,16 +111,6 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
       {/* Transport Controls */}
       <div className="mb-4">
         <TransportControls zoneIndex={zoneIndex} />
-      </div>
-
-      {/* Volume Control */}
-      <div className="mb-4">
-        <VolumeSlider
-          value={zone.volume}
-          muted={zone.mute}
-          onChange={(volume) => emit('zone.volume.change', { zoneIndex, volume })}
-          onMuteToggle={() => emit('zone.mute.toggle', { zoneIndex })}
-        />
       </div>
 
       {/* Playlist Selector */}

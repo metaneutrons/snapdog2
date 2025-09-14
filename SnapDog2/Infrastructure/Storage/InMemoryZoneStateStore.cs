@@ -366,26 +366,22 @@ public class InMemoryZoneStateStore : IZoneStateStore
 
     private void DetectAndPublishChanges(int zoneIndex, ZoneState? oldState, ZoneState newState)
     {
-        Console.WriteLine($"DEBUG: DetectAndPublishChanges called for zone {zoneIndex}");
 
         // Playlist changes - check index, name, and other key properties
         if (oldState?.Playlist?.Index != newState.Playlist?.Index ||
             oldState?.Playlist?.Name != newState.Playlist?.Name ||
             oldState?.Playlist?.TrackCount != newState.Playlist?.TrackCount)
         {
-            Console.WriteLine($"DEBUG: Playlist change detected! Old: {oldState?.Playlist?.Index}/{oldState?.Playlist?.Name}, New: {newState.Playlist?.Index}/{newState.Playlist?.Name}");
             ZonePlaylistChanged?.Invoke(this, new ZonePlaylistChangedEventArgs(
                 zoneIndex, oldState?.Playlist, newState.Playlist));
         }
         else
         {
-            Console.WriteLine($"DEBUG: No playlist change detected. Old: {oldState?.Playlist?.Index}/{oldState?.Playlist?.Name}, New: {newState.Playlist?.Index}/{newState.Playlist?.Name}");
         }
 
         // Volume changes
         if (oldState?.Volume != newState.Volume)
         {
-            Console.WriteLine($"DEBUG: Volume change detected! Old: {oldState?.Volume}, New: {newState.Volume}");
             ZoneVolumeChanged?.Invoke(this, new ZoneVolumeChangedEventArgs(
                 zoneIndex, oldState?.Volume ?? 0, newState.Volume));
         }
@@ -393,7 +389,6 @@ public class InMemoryZoneStateStore : IZoneStateStore
         // Track changes
         if (oldState?.Track?.Index != newState.Track?.Index)
         {
-            Console.WriteLine($"DEBUG: Track change detected! Old: {oldState?.Track?.Index}, New: {newState.Track?.Index}");
             ZoneTrackChanged?.Invoke(this, new ZoneTrackChangedEventArgs(
                 zoneIndex, oldState?.Track, newState.Track));
         }
@@ -401,7 +396,6 @@ public class InMemoryZoneStateStore : IZoneStateStore
         // Playback state changes
         if (oldState?.PlaybackState != newState.PlaybackState)
         {
-            Console.WriteLine($"DEBUG: Playback state change detected! Old: {oldState?.PlaybackState}, New: {newState.PlaybackState}");
             ZonePlaybackStateChanged?.Invoke(this, new ZonePlaybackStateChangedEventArgs(
                 zoneIndex, oldState?.PlaybackState ?? Shared.Enums.PlaybackState.Stopped, newState.PlaybackState));
         }

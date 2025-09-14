@@ -96,7 +96,7 @@ export const PlaylistSelector: React.FC<PlaylistSelectorProps> = ({
     <div className="flex items-center space-x-1 mb-3">
       <button
         onClick={handlePreviousPlaylist}
-        className="p-1 bg-theme-secondary border border-theme-primary rounded hover:bg-theme-accent transition-colors"
+        className="p-2 bg-theme-secondary border border-theme-primary rounded hover:bg-theme-accent transition-colors"
         title="Previous playlist"
       >
         <ChevronLeftIcon className="w-3 h-3 text-theme-primary" />
@@ -144,7 +144,7 @@ export const PlaylistSelector: React.FC<PlaylistSelectorProps> = ({
 
       <button
         onClick={handleNextPlaylist}
-        className="p-1 bg-theme-secondary border border-theme-primary rounded hover:bg-theme-accent transition-colors"
+        className="p-2 bg-theme-secondary border border-theme-primary rounded hover:bg-theme-accent transition-colors"
         title="Next playlist"
       >
         <ChevronRightIcon className="w-3 h-3 text-theme-primary" />

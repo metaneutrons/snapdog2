@@ -259,11 +259,14 @@ public partial class ClientManager : IClientManager
 
         var client = clientResult.Value!;
         var snapDogClient = (SnapDogClient)client;
+
+        // Update state store with live Snapcast data
+        await UpdateClientStateFromSnapcastAsync(clientIndex);
+
         // Get current zone from state store (includes manual moves)
         var currentState = this._clientStateStore.GetClientState(clientIndex);
         var currentZone = currentState?.ZoneIndex ?? snapDogClient.ZoneIndex;
 
-        Console.WriteLine($"DEBUG API: Client {clientIndex} - State store zone: {(currentState?.ZoneIndex ?? -1)}, Wrapper zone: {snapDogClient.ZoneIndex}, Using: {currentZone}");
 
         var state = new ClientState
         {
@@ -419,7 +422,6 @@ public partial class ClientManager : IClientManager
                     this.PublishClientStateChangedAsync(clientIndex);
 
                     // Publish event for immediate regrouping
-                    Console.WriteLine($"DEBUG: Publishing ClientZoneChangedNotification - clientIndex: {clientIndex}, oldZone: {oldZone}, newZone: {zoneIndex}");
                     await this._hubContext.Clients.All.SendAsync("ClientZoneChanged", new { ClientIndex = clientIndex, OldZone = oldZone, NewZone = zoneIndex });
                 }
                 finally
@@ -693,6 +695,7 @@ public partial class ClientManager : IClientManager
         {
             return;
         }
+
 
         // Update state from Snapcast data
         var updatedState = currentState with

@@ -153,7 +153,7 @@ function App() {
       </header>
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 transition-all duration-300 ${!isConnected ? 'blur-sm pointer-events-none' : ''}`}>
             {Array.from({ length: zoneCount }, (_, index) => (
               <ZoneErrorBoundary key={index + 1} zoneIndex={index + 1}>
                 <ZoneCard
@@ -163,6 +163,15 @@ function App() {
               </ZoneErrorBoundary>
             ))}
           </div>
+          {!isConnected && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-20 z-50">
+              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg text-center">
+                <div className="text-xl text-gray-600 dark:text-gray-400 mb-4">Connection Lost</div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                <div className="text-sm text-gray-500 dark:text-gray-500 mt-2">Reconnecting...</div>
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </div>

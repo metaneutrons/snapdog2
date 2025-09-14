@@ -1,0 +1,12 @@
+*2
+$6
+SELECT
+$1
+0
+*3
+$3
+SET
+$26
+snapdog:config:fingerprint
+$239
+{"hash":"a898201bbd76ebfb41256271f38582ad4882502d5cee8d93e3bb449dddc824f6","createdAt":"2025-09-13T22:01:29.4299205Z","zoneCount":2,"clientCount":3,"zoneNames":["Ground Floor","1st Floor"],"clientNames":["Living Room","Kitchen","Bedroom"]}

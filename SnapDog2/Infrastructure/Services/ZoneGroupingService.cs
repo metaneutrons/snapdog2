@@ -92,25 +92,14 @@ public partial class ZoneGroupingService(
         {
             this.LogStartingZoneGroupingCheck();
 
-            // Get all available zone services to extract their indices
-            var zonesResult = await this._zoneManager.GetAllZonesAsync(cancellationToken);
+            // Get all available zone services and extract their indices
+            var zonesResult = await this._zoneManager.GetAllZonesAsync();
             if (!zonesResult.IsSuccess)
             {
                 return Result.Failure($"Failed to get available zones: {zonesResult.ErrorMessage}");
             }
 
-            // We need to get the zone indices. Since we can't access the internal _zones dictionary,
-            // let's try to get zone states and infer indices from successful zone retrievals
-            var zones = new List<int>();
-
-            // Try zones 1-10 (reasonable upper limit) and see which ones exist
-            for (var i = 1; i <= 10; i++)
-            {
-                if (await this._zoneManager.ZoneExistsAsync(i))
-                {
-                    zones.Add(i);
-                }
-            }
+            var zones = zonesResult.Value?.Select(z => z.ZoneIndex).ToList() ?? new List<int>();
             if (zones.Count == 0)
             {
                 this.LogNoZonesConfigured();
@@ -189,32 +178,26 @@ public partial class ZoneGroupingService(
 
             // Get zone clients from state store (for zone assignments) and merge with live Snapcast data (for SnapcastId)
             var allClientStates = this._clientStateStore.GetAllClientStates();
-            Console.WriteLine($"DEBUG: State store for zone {zoneIndex}:");
             foreach (var kvp in allClientStates)
             {
-                Console.WriteLine($"DEBUG:   Client {kvp.Key} -> Zone {kvp.Value.ZoneIndex}");
             }
 
             var zoneClientStates = allClientStates.Values
                 .Where(c => c.ZoneIndex == zoneIndex)
                 .ToList();
-            Console.WriteLine($"DEBUG: Found {zoneClientStates.Count} clients assigned to zone {zoneIndex}");
 
             // OPTIMIZATION: Use cached client data instead of calling GetAllClientsAsync for each client
             var clientIndexs = new List<string>();
             foreach (var clientState in zoneClientStates)
             {
-                Console.WriteLine($"DEBUG: Processing client {clientState.Id} for zone {zoneIndex}");
                 // Find client in cached data
                 var liveClient = allClients.FirstOrDefault(c => c.Id == clientState.Id);
                 if (liveClient != null && !string.IsNullOrEmpty(liveClient.SnapcastId))
                 {
-                    Console.WriteLine($"DEBUG: Adding {liveClient.SnapcastId} to zone {zoneIndex}");
                     clientIndexs.Add(liveClient.SnapcastId);
                 }
             }
 
-            Console.WriteLine($"DEBUG: Zone {zoneIndex} has {clientIndexs.Count} clients: [{string.Join(", ", clientIndexs)}]");
 
             if (clientIndexs.Count == 0)
             {
