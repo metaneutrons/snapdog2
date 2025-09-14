@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useClient, useAppStore } from '../store';
 import { useEventBus } from '../hooks/useEventBus';
 import { VolumeSlider } from './VolumeSlider';
@@ -53,16 +53,18 @@ export const ClientChip: React.FC<ClientChipProps> = ({
   return (
     <div
       className={`
-        bg-theme-secondary border rounded-lg p-3 cursor-move transition-all duration-200 space-y-2
+        bg-theme-secondary border rounded-lg p-3 transition-all duration-200 space-y-2
         ${client.connected ? 'border-theme-secondary' : 'border-red-300'}
         ${isDragging ? 'opacity-50 scale-95 shadow-theme-lg' : 'hover:shadow-theme hover:border-blue-400'}
         ${className}
       `}
-      draggable
-      onDragStart={handleDragStart}
-      onDragEnd={onDragEnd}
     >
-      <div className="flex items-center justify-between">
+      <div 
+        className="flex items-center justify-between cursor-move"
+        draggable
+        onDragStart={handleDragStart}
+        onDragEnd={onDragEnd}
+      >
         <div className="flex items-center space-x-2 min-w-0">
           <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${client.connected ? 'bg-green-500' : 'bg-red-500'}`} />
           <span className="text-sm font-semibold text-theme-primary truncate">{client.name || `Client ${clientIndex}`}</span>

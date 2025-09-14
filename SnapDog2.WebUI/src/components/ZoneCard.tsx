@@ -42,7 +42,17 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
 
   const handleDrop = (clientIndex: number, targetZoneIndex: number) => {
     console.log(`Dropping client ${clientIndex} into zone ${targetZoneIndex}`);
-    handleClientMove(clientIndex, targetZoneIndex);
+    
+    // Get current zone of the client
+    const client = useAppStore.getState().clients[clientIndex];
+    const currentZoneIndex = client?.zoneIndex;
+    
+    // Only move if dropping into a different zone
+    if (currentZoneIndex !== targetZoneIndex) {
+      handleClientMove(clientIndex, targetZoneIndex);
+    } else {
+      console.log(`Client ${clientIndex} dropped in same zone ${targetZoneIndex}, ignoring move`);
+    }
   };
 
   if (!zone) {
