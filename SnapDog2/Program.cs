@@ -520,35 +520,9 @@ static WebApplication CreateWebApplication(string[] args)
 
             Log.Information("API authentication enabled with {KeyCount} API keys", snapDogConfig.Http.ApiKeys.Count);
         }
-        else if (snapDogConfig.Http.ApiAuthEnabled)
-        {
-            // Auth is enabled but no API keys configured - use dummy authentication for development
-            builder
-                .Services.AddAuthentication("Dummy")
-                .AddScheme<AuthenticationSchemeOptions, DummyAuthenticationHandler>(
-                    "Dummy",
-                    null
-                );
-
-            builder.Services.AddAuthorization();
-
-            Log.Warning(
-                "API authentication enabled but no API keys configured - using dummy authentication for development"
-            );
-        }
         else
         {
-            // Auth is disabled - use dummy authentication to satisfy [Authorize] attributes
-            builder
-                .Services.AddAuthentication("Dummy")
-                .AddScheme<AuthenticationSchemeOptions, DummyAuthenticationHandler>(
-                    "Dummy",
-                    null
-                );
-
-            builder.Services.AddAuthorization();
-
-            Log.Information("API authentication disabled - using dummy authentication");
+            Log.Information("API authentication disabled - ConditionalAuthorize attributes will allow all requests");
         }
 
         Log.Information("API server enabled on port {Port}", snapDogConfig.Http.HttpPort);
