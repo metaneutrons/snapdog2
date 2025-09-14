@@ -53,7 +53,7 @@ services:
     image: redis:8-alpine
     command: redis-server --appendonly yes --appendfsync everysec
     volumes:
-      - ./devcontainer/redis/data:/data
+      - redis_data:/data
     networks:
       snapdog-dev:
     #        ipv4_address: 172.25.0.15
