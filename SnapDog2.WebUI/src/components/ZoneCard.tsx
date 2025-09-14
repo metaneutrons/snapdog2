@@ -109,9 +109,19 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
                 {currentTrack.artist || 'Unknown Artist'}
               </div>
               {currentTrack.durationMs && currentTrack.positionMs !== null && (
-                <div className="text-xs text-theme-tertiary mt-1">
-                  {formatTime(currentTrack.positionMs)} / {formatTime(currentTrack.durationMs)}
-                </div>
+                <>
+                  <div className="text-xs text-theme-tertiary mt-1">
+                    {formatTime(currentTrack.positionMs)} / {formatTime(currentTrack.durationMs)}
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-1.5 mt-2">
+                    <div 
+                      className="bg-blue-600 h-1.5 rounded-full transition-all duration-300 ease-out"
+                      style={{ 
+                        width: `${Math.min(100, Math.max(0, (currentTrack.positionMs / currentTrack.durationMs) * 100))}%` 
+                      }}
+                    ></div>
+                  </div>
+                </>
               )}
             </div>
           </div>

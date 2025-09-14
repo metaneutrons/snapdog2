@@ -13,6 +13,7 @@
 //
 namespace SnapDog2.Infrastructure.Audio;
 
+using System.Runtime.InteropServices;
 using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Models;
 
@@ -44,6 +45,9 @@ public sealed partial class MediaPlayer(
     private TrackInfo? _currentTrack;
     private DateTime? _playbackStartedAt;
     private bool _disposed;
+    private int _libVlcRetryCount = 0;
+    private const int MaxLibVlcRetries = 3;
+    private readonly TimeSpan _retryDelay = TimeSpan.FromSeconds(2);
 
     // Events for real-time updates
     public event EventHandler<PositionChangedEventArgs>? PositionChanged;
@@ -75,6 +79,70 @@ public sealed partial class MediaPlayer(
         {
             _processingContext.MetadataDurationMs = durationMs;
             LogSetMetadataDuration(_logger, durationMs);
+        }
+    }
+
+    /// <summary>
+    /// Executes a LibVLC operation with retry logic for resilience against crashes.
+    /// </summary>
+    private async Task<Result<T>> ExecuteResilientAsync<T>(Func<Task<Result<T>>> operation, string operationName)
+    {
+        for (int attempt = 1; attempt <= MaxLibVlcRetries; attempt++)
+        {
+            try
+            {
+                var result = await operation();
+                if (result.IsSuccess)
+                {
+                    _libVlcRetryCount = 0; // Reset on success
+                    return result;
+                }
+
+                LogLibVlcOperationFailed(_logger, _zoneIndex, operationName, attempt, result.ErrorMessage ?? "Unknown error");
+            }
+            catch (Exception ex) when (ex is AccessViolationException or SEHException or InvalidOperationException)
+            {
+                LogLibVlcCrashDetected(_logger, _zoneIndex, operationName, attempt, ex.GetType().Name);
+
+                // Clean up corrupted state
+                await CleanupCorruptedStateAsync();
+
+                if (attempt == MaxLibVlcRetries)
+                {
+                    LogLibVlcMaxRetriesReached(_logger, _zoneIndex, operationName);
+                    return Result<T>.Failure($"LibVLC operation '{operationName}' failed after {MaxLibVlcRetries} attempts: {ex.Message}");
+                }
+
+                // Wait before retry
+                await Task.Delay(_retryDelay);
+            }
+        }
+
+        return Result<T>.Failure($"LibVLC operation '{operationName}' failed after {MaxLibVlcRetries} attempts");
+    }
+
+    /// <summary>
+    /// Cleans up potentially corrupted LibVLC state after a crash.
+    /// </summary>
+    private async Task CleanupCorruptedStateAsync()
+    {
+        try
+        {
+            if (_processingContext != null)
+            {
+                await _processingContext.DisposeAsync();
+                _processingContext = null;
+            }
+
+            _streamingCts?.Cancel();
+            _streamingCts?.Dispose();
+            _streamingCts = null;
+
+            LogLibVlcStateCleanedUp(_logger, _zoneIndex);
+        }
+        catch (Exception ex)
+        {
+            LogLibVlcCleanupFailed(_logger, _zoneIndex, ex.Message);
         }
     }
 
@@ -438,4 +506,19 @@ public sealed partial class MediaPlayer(
 
     [LoggerMessage(EventId = 16070, Level = LogLevel.Error, Message = "Failed to handle LibVLC error for zone {ZoneIndex}")]
     private static partial void LogLibVlcErrorHandlingFailed(ILogger logger, int ZoneIndex, Exception ex);
+
+    [LoggerMessage(EventId = 16071, Level = LogLevel.Warning, Message = "LibVLC operation '{OperationName}' failed for zone {ZoneIndex} (attempt {Attempt}): {Error}")]
+    private static partial void LogLibVlcOperationFailed(ILogger logger, int ZoneIndex, string OperationName, int Attempt, string Error);
+
+    [LoggerMessage(EventId = 16072, Level = LogLevel.Error, Message = "LibVLC crash detected for zone {ZoneIndex} during '{OperationName}' (attempt {Attempt}): {ExceptionType}")]
+    private static partial void LogLibVlcCrashDetected(ILogger logger, int ZoneIndex, string OperationName, int Attempt, string ExceptionType);
+
+    [LoggerMessage(EventId = 16073, Level = LogLevel.Error, Message = "LibVLC operation '{OperationName}' failed for zone {ZoneIndex} after maximum retries")]
+    private static partial void LogLibVlcMaxRetriesReached(ILogger logger, int ZoneIndex, string OperationName);
+
+    [LoggerMessage(EventId = 16074, Level = LogLevel.Information, Message = "LibVLC state cleaned up for zone {ZoneIndex} after crash")]
+    private static partial void LogLibVlcStateCleanedUp(ILogger logger, int ZoneIndex);
+
+    [LoggerMessage(EventId = 16075, Level = LogLevel.Warning, Message = "Failed to cleanup LibVLC state for zone {ZoneIndex}: {Error}")]
+    private static partial void LogLibVlcCleanupFailed(ILogger logger, int ZoneIndex, string Error);
 }
