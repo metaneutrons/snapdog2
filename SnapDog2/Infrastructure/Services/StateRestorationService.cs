@@ -312,7 +312,7 @@ public partial class StateRestorationService(
             ClientCount = config.Clients.Count,
             ZoneNames = config.Zones.Select(z => z.Name).ToArray(),
             ClientNames = config.Clients.Select(c => c.Name).ToArray(),
-            ZoneConfigs = config.Zones.Select(z => new { z.Name, z.Sink }).ToArray(),
+            ZoneConfigs = config.Zones.Select(z => new { z.Name }).ToArray(),
             ClientConfigs = config.Clients.Select(c => new { c.Name, c.Mac, c.DefaultZone }).ToArray()
         };
 
