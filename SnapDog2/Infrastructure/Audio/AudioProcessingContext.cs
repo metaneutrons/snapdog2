@@ -326,22 +326,13 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
 
         var isDevelopment = _systemConfig.Environment == ApplicationEnvironment.Development;
 
-        if (isDevelopment)
-        {
-            // Development mode: Disable transcoding to reduce resource usage
-            var standardOutput = $"standard{{access=file,mux=raw,dst={outputPath}}}";
-            options.Add($":sout=#{standardOutput}");
-            this.LogTranscodingDisabled();
-        }
-        else
-        {
-            // Production mode: Use transcoding for consistent PCM format
-            var audioCodec = GetLibVLCAudioCodec(this.Config.BitsPerSample);
-            var transcode = $"#transcode{{acodec={audioCodec},channels={this.Config.Channels},samplerate={this.Config.SampleRate}}}";
-            var standardOutput = $"standard{{access=file,mux=raw,dst={outputPath}}}";
-            options.Add($":sout={transcode}:{standardOutput}");
-            this.LogTranscodingEnabled(audioCodec, this.Config.Channels, this.Config.SampleRate);
-        }
+        // Always use transcoding for consistent PCM format (fixes stream flickering)
+        // Raw audio output causes format incompatibility with Snapcast
+        var audioCodec = GetLibVLCAudioCodec(this.Config.BitsPerSample);
+        var transcode = $"#transcode{{acodec={audioCodec},channels={this.Config.Channels},samplerate={this.Config.SampleRate}}}";
+        var standardOutput = $"standard{{access=file,mux=raw,dst={outputPath}}}";
+        options.Add($":sout={transcode}:{standardOutput}");
+        this.LogTranscodingEnabled(audioCodec, this.Config.Channels, this.Config.SampleRate);
 
         // Critical options for streaming to named pipes
         options.Add(":no-sout-video");
@@ -351,11 +342,11 @@ public sealed partial class AudioProcessingContext : IAsyncDisposable, IDisposab
         options.Add(":sout-all"); // Keep streaming even if no one is reading
 
         // Additional options for continuous streaming
-        // options.Add(":network-caching=1000"); // 1 second network cache
-        // options.Add(":file-caching=300");     // 300ms file cache
-        // options.Add(":live-caching=300");     // 300ms live stream cache
+        options.Add(":network-caching=1000"); // 1 second network cache
+        options.Add(":file-caching=300");     // 300ms file cache
+        options.Add(":live-caching=300");     // 300ms live stream cache
 
-        var codecForLogging = isDevelopment ? "none (transcoding disabled)" : GetLibVLCAudioCodec(this.Config.BitsPerSample);
+        var codecForLogging = GetLibVLCAudioCodec(this.Config.BitsPerSample);
         this.LogBuiltMediaOptions(codecForLogging, this.Config.SampleRate, this.Config.Channels, string.Join(", ", options));
 
         return options;

@@ -215,24 +215,6 @@ public partial class ZoneManager(
         return this._zones.ContainsKey(zoneIndex);
     }
 
-    /// <summary>
-    /// Synchronizes zones with current Snapcast server state.
-    /// Called when Snapcast server state changes.
-    /// </summary>
-    public async Task SynchronizeWithSnapcastAsync()
-    {
-        if (!this._isInitialized)
-        {
-            return;
-        }
-
-        var snapcastGroups = this._snapcastStateRepository.GetAllGroups();
-
-        foreach (var zone in this._zones.Values.Cast<ZoneService>())
-        {
-            await zone.SynchronizeWithSnapcastAsync(snapcastGroups).ConfigureAwait(false);
-        }
-    }
 
     public async ValueTask DisposeAsync()
     {
@@ -293,7 +275,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     // Lock Architecture:
     // - _zoneStateLock: Protects zone state (_currentState) and playlist/playback operations
-    // - _clientStateLock: Protects client assignments and client-related operations  
+    // - _clientStateLock: Protects client assignments and client-related operations
     // - _snapcastSyncLock: Static lock for Snapcast synchronization operations (ZoneGroupingService)
     private readonly SemaphoreSlim _zoneStateLock;
     private readonly SemaphoreSlim _clientStateLock;
@@ -1354,19 +1336,6 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
     }
 
     // Internal synchronization methods
-    async internal Task SynchronizeWithSnapcastAsync(IEnumerable<Group> snapcastGroups)
-    {
-        await this._zoneStateLock.WaitAsync().ConfigureAwait(false);
-        try
-        {
-            // Events handle state synchronization - no polling needed
-            // await this.UpdateStateFromSnapcastAsync().ConfigureAwait(false);
-        }
-        finally
-        {
-            this._zoneStateLock.Release();
-        }
-    }
 
     private ZoneState CreateInitialState()
     {
@@ -1402,12 +1371,6 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             Clients = Array.Empty<int>(),
             TimestampUtc = DateTime.UtcNow,
         };
-    }
-
-    public void UpdateSnapcastGroupId(string? groupId)
-    {
-        this._snapcastGroupId = groupId;
-        this.LogZoneAction(this._zoneIndex, this._config.Name, $"Updated Snapcast group ID to: {groupId ?? "null"}");
     }
 
     private async Task EnsureSnapcastGroupAsync()
@@ -1464,15 +1427,6 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         }
         return fileName;
     }
-
-
-    /// <summary>
-    /// Starts the position update timer for reliable MQTT position updates when playing.
-    /// </summary>
-
-    /// <summary>
-    /// Stops the position update timer.
-    /// </summary>
 
     /// <summary>
     /// Subscribes to MediaPlayer events for immediate position and state updates.

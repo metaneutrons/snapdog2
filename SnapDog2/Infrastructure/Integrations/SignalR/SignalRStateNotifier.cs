@@ -53,6 +53,7 @@ public partial class SignalRStateNotifier : IHostedService
         _zoneStateStore.ZoneVolumeChanged += OnZoneVolumeChanged;
         _zoneStateStore.ZoneTrackChanged += OnZoneTrackChanged;
         _zoneStateStore.ZonePlaybackStateChanged += OnZonePlaybackStateChanged;
+        _zoneStateStore.ZonePositionChanged += OnZonePositionChanged;
 
         _clientStateStore.ClientVolumeChanged += OnClientVolumeChanged;
         _clientStateStore.ClientConnectionChanged += OnClientConnectionChanged;
@@ -74,6 +75,7 @@ public partial class SignalRStateNotifier : IHostedService
         _zoneStateStore.ZoneVolumeChanged -= OnZoneVolumeChanged;
         _zoneStateStore.ZoneTrackChanged -= OnZoneTrackChanged;
         _zoneStateStore.ZonePlaybackStateChanged -= OnZonePlaybackStateChanged;
+        _zoneStateStore.ZonePositionChanged -= OnZonePositionChanged;
 
         _clientStateStore.ClientVolumeChanged -= OnClientVolumeChanged;
         _clientStateStore.ClientConnectionChanged -= OnClientConnectionChanged;
@@ -121,6 +123,16 @@ public partial class SignalRStateNotifier : IHostedService
         }
 
         await _hubContext.Clients.All.SendAsync("ZonePlaybackStateChanged", e.ZoneIndex, e.NewPlaybackState);
+    }
+
+    private async void OnZonePositionChanged(object? sender, ZonePositionChangedEventArgs e)
+    {
+        if (_hubContext == null || e.Track == null)
+        {
+            return;
+        }
+
+        await _hubContext.Clients.All.SendAsync("ZonePositionChanged", e.ZoneIndex, e.Track.PositionMs, e.Track.Progress);
     }
 
     private async void OnClientVolumeChanged(object? sender, ClientVolumeChangedEventArgs e)
