@@ -545,122 +545,122 @@ public sealed partial class MediaPlayerService(
     }
 
     // Logger messages
-    [LoggerMessage(EventId = 16081, Level = LogLevel.Information, Message = "[LibVLCService] Started playback for zone {ZoneIndex}: {TrackTitle} from {StreamUrl}"
+    [LoggerMessage(EventId = 16088, Level = LogLevel.Information, Message = "[LibVLCService] Started playback for zone {ZoneIndex}: {TrackTitle} from {StreamUrl}"
 )]
     private static partial void LogPlaybackStarted(ILogger logger, int zoneIndex, string trackTitle, string streamUrl);
 
-    [LoggerMessage(EventId = 16082, Level = LogLevel.Information, Message = "[LibVLCService] Stopped playback for zone {ZoneIndex}"
+    [LoggerMessage(EventId = 16089, Level = LogLevel.Information, Message = "[LibVLCService] Stopped playback for zone {ZoneIndex}"
 )]
     private static partial void LogPlaybackStopped(ILogger logger, int zoneIndex);
 
-    [LoggerMessage(EventId = 16083, Level = LogLevel.Information, Message = "[LibVLCService] Paused playback for zone {ZoneIndex}"
+    [LoggerMessage(EventId = 16090, Level = LogLevel.Information, Message = "[LibVLCService] Paused playback for zone {ZoneIndex}"
 )]
     private static partial void LogPlaybackPaused(ILogger logger, int zoneIndex);
 
-    [LoggerMessage(EventId = 16084, Level = LogLevel.Error, Message = "[LibVLCService] Playback error for zone {ZoneIndex}"
+    [LoggerMessage(EventId = 16091, Level = LogLevel.Error, Message = "[LibVLCService] Playback error for zone {ZoneIndex}"
 )]
     private static partial void LogPlaybackError(ILogger logger, int zoneIndex, Exception exception);
 
-    [LoggerMessage(EventId = 16085, Level = LogLevel.Warning, Message = "[LibVLCService] Maximum concurrent streams reached: {MaxStreams}"
+    [LoggerMessage(EventId = 16092, Level = LogLevel.Warning, Message = "[LibVLCService] Maximum concurrent streams reached: {MaxStreams}"
 )]
     private static partial void LogMaxStreamsReached(ILogger logger, int maxStreams);
 
-    [LoggerMessage(EventId = 16086, Level = LogLevel.Information, Message = "[LibVLCService] Stopped all playback - {ActiveStreams} streams stopped"
+    [LoggerMessage(EventId = 16093, Level = LogLevel.Information, Message = "[LibVLCService] Stopped all playback - {ActiveStreams} streams stopped"
 )]
     private static partial void LogAllPlaybackStopped(ILogger logger, int activeStreams);
 
-    [LoggerMessage(EventId = 16087, Level = LogLevel.Information, Message = "[LibVLCService] Service disposed"
+    [LoggerMessage(EventId = 16094, Level = LogLevel.Information, Message = "[LibVLCService] Service disposed"
 )]
     private static partial void LogServiceDisposed(ILogger logger);
 
-    [LoggerMessage(EventId = 16088, Level = LogLevel.Debug, Message = "[LibVLCService] Seeking zone {ZoneIndex} → position {PositionMs}ms"
+    [LoggerMessage(EventId = 16095, Level = LogLevel.Debug, Message = "[LibVLCService] Seeking zone {ZoneIndex} → position {PositionMs}ms"
 )]
     private static partial void LogSeekingToPosition(ILogger logger, int zoneIndex, long positionMs);
 
-    [LoggerMessage(EventId = 16089, Level = LogLevel.Debug, Message = "[LibVLCService] Seeking zone {ZoneIndex} → progress {Progress:P1}"
+    [LoggerMessage(EventId = 16096, Level = LogLevel.Debug, Message = "[LibVLCService] Seeking zone {ZoneIndex} → progress {Progress:P1}"
 )]
     private static partial void LogSeekingToProgress(ILogger logger, int zoneIndex, float progress);
 
-    [LoggerMessage(EventId = 16090, Level = LogLevel.Warning, Message = "[LibVLCService] Seek not implemented for zone {ZoneIndex} - returning success"
+    [LoggerMessage(EventId = 16097, Level = LogLevel.Warning, Message = "[LibVLCService] Seek not implemented for zone {ZoneIndex} - returning success"
 )]
     private static partial void LogSeekNotImplemented(ILogger logger, int zoneIndex);
 
-    [LoggerMessage(EventId = 16091, Level = LogLevel.Error, Message = "[LibVLCService] Seek error for zone {ZoneIndex}"
+    [LoggerMessage(EventId = 16098, Level = LogLevel.Error, Message = "[LibVLCService] Seek error for zone {ZoneIndex}"
 )]
     private static partial void LogSeekError(ILogger logger, int zoneIndex, Exception ex);
 
-    [LoggerMessage(EventId = 16092, Level = LogLevel.Warning, Message = "[LibVLCService] No active player found for zone {ZoneIndex}")]
+    [LoggerMessage(EventId = 16099, Level = LogLevel.Warning, Message = "[LibVLCService] No active player found for zone {ZoneIndex}")]
     private static partial void LogPlayerNotFound(ILogger logger, int zoneIndex);
 
-    [LoggerMessage(EventId = 16093, Level = LogLevel.Information, Message = "Looking for zone: {ZoneIndex}")]
+    [LoggerMessage(EventId = 16100, Level = LogLevel.Information, Message = "Looking for zone: {ZoneIndex}")]
     private static partial void LogLookingForZone(ILogger logger, int zoneIndex);
 
-    [LoggerMessage(EventId = 16094, Level = LogLevel.Information, Message = "Available zone configs: {Count}")]
+    [LoggerMessage(EventId = 16101, Level = LogLevel.Information, Message = "Available zone configs: {Count}")]
     private static partial void LogAvailableZoneConfigs(ILogger logger, int Count);
 
-    [LoggerMessage(EventId = 16095, Level = LogLevel.Information, Message = "Zone config {ZoneIndex}: {ZoneName}")]
+    [LoggerMessage(EventId = 16102, Level = LogLevel.Information, Message = "Zone config {ZoneIndex}: {ZoneName}")]
     private static partial void LogZoneConfig(ILogger logger, int ZoneIndex, string ZoneName);
 
-    [LoggerMessage(EventId = 16096, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found (index {ZeroBasedIndex})")]
+    [LoggerMessage(EventId = 16103, Level = LogLevel.Warning, Message = "Zone {ZoneIndex} not found (index {ZeroBasedIndex})")]
     private static partial void LogZoneNotFound(ILogger logger, int ZoneIndex, int ZeroBasedIndex);
 
-    [LoggerMessage(EventId = 16097, Level = LogLevel.Information, Message = "Found zone config {ZoneIndex}: {ZoneName}")]
+    [LoggerMessage(EventId = 16104, Level = LogLevel.Information, Message = "Found zone config {ZoneIndex}: {ZoneName}")]
     private static partial void LogFoundZoneConfig(ILogger logger, int ZoneIndex, string ZoneName);
 
-    [LoggerMessage(EventId = 16098, Level = LogLevel.Information, Message = "Setting metadata duration: {DurationMs}ms for track: {Title}")]
+    [LoggerMessage(EventId = 16105, Level = LogLevel.Information, Message = "Setting metadata duration: {DurationMs}ms for track: {Title}")]
     private static partial void LogSettingMetadataDuration(ILogger logger, long? DurationMs, string Title);
 
-    [LoggerMessage(EventId = 16099, Level = LogLevel.Information, Message = "Playing track {Title} on zone {ZoneIndex} from {StreamUrl}")]
+    [LoggerMessage(EventId = 16106, Level = LogLevel.Information, Message = "Playing track {Title} on zone {ZoneIndex} from {StreamUrl}")]
     private static partial void LogPlayingTrack(ILogger logger, string Title, int ZoneIndex, string StreamUrl);
 
-    [LoggerMessage(EventId = 16100, Level = LogLevel.Error, Message = "Play operation failed for zone {ZoneIndex}")]
+    [LoggerMessage(EventId = 16107, Level = LogLevel.Error, Message = "Play operation failed for zone {ZoneIndex}")]
     private static partial void LogPlayOperationFailed(ILogger logger, int ZoneIndex, Exception ex);
 
-    [LoggerMessage(EventId = 16101, Level = LogLevel.Information, Message = "Playback stopped for zone {ZoneIndex}")]
+    [LoggerMessage(EventId = 16108, Level = LogLevel.Information, Message = "Playback stopped for zone {ZoneIndex}")]
     private static partial void LogPlaybackStoppedInfo(ILogger logger, int ZoneIndex);
 
-    [LoggerMessage(EventId = 16102, Level = LogLevel.Error, Message = "Stop operation failed for zone {ZoneIndex}")]
+    [LoggerMessage(EventId = 16109, Level = LogLevel.Error, Message = "Stop operation failed for zone {ZoneIndex}")]
     private static partial void LogStopOperationFailed(ILogger logger, int ZoneIndex, Exception ex);
 
-    [LoggerMessage(EventId = 16103, Level = LogLevel.Information, Message = "Playback paused for zone {ZoneIndex}")]
+    [LoggerMessage(EventId = 16110, Level = LogLevel.Information, Message = "Playback paused for zone {ZoneIndex}")]
     private static partial void LogPlaybackPausedInfo(ILogger logger, int ZoneIndex);
 
-    [LoggerMessage(EventId = 16104, Level = LogLevel.Error, Message = "Pause operation failed for zone {ZoneIndex}")]
+    [LoggerMessage(EventId = 16111, Level = LogLevel.Error, Message = "Pause operation failed for zone {ZoneIndex}")]
     private static partial void LogPauseOperationFailed(ILogger logger, int ZoneIndex, Exception ex);
 
-    [LoggerMessage(EventId = 16105, Level = LogLevel.Information, Message = "All playback stopped, active streams: {ActiveStreams}")]
+    [LoggerMessage(EventId = 16112, Level = LogLevel.Information, Message = "All playback stopped, active streams: {ActiveStreams}")]
     private static partial void LogAllPlaybackStoppedInfo(ILogger logger, int ActiveStreams);
 
-    [LoggerMessage(EventId = 16106, Level = LogLevel.Error, Message = "Stop all operation failed")]
+    [LoggerMessage(EventId = 16113, Level = LogLevel.Error, Message = "Stop all operation failed")]
     private static partial void LogStopAllOperationFailed(ILogger logger, Exception ex);
 
-    [LoggerMessage(EventId = 16107, Level = LogLevel.Information, Message = "Seeking to position {PositionMs}ms for zone {ZoneIndex}")]
+    [LoggerMessage(EventId = 16114, Level = LogLevel.Information, Message = "Seeking to position {PositionMs}ms for zone {ZoneIndex}")]
     private static partial void LogSeekingToPositionInfo(ILogger logger, int ZoneIndex, long PositionMs);
 
-    [LoggerMessage(EventId = 16108, Level = LogLevel.Warning, Message = "Player not found for zone {ZoneIndex}")]
+    [LoggerMessage(EventId = 16115, Level = LogLevel.Warning, Message = "Player not found for zone {ZoneIndex}")]
     private static partial void LogPlayerNotFoundWarning(ILogger logger, int ZoneIndex);
 
-    [LoggerMessage(EventId = 16109, Level = LogLevel.Warning, Message = "Seek not supported for zone {ZoneIndex}")]
+    [LoggerMessage(EventId = 16116, Level = LogLevel.Warning, Message = "Seek not supported for zone {ZoneIndex}")]
     private static partial void LogSeekNotSupported(ILogger logger, int ZoneIndex);
 
-    [LoggerMessage(EventId = 16110, Level = LogLevel.Information, Message = "Seeking to progress {Progress} for zone {ZoneIndex}")]
+    [LoggerMessage(EventId = 16117, Level = LogLevel.Information, Message = "Seeking to progress {Progress} for zone {ZoneIndex}")]
     private static partial void LogSeekingToProgressInfo(ILogger logger, int ZoneIndex, float Progress);
 
-    [LoggerMessage(EventId = 16111, Level = LogLevel.Warning, Message = "Disposal warning")]
+    [LoggerMessage(EventId = 16118, Level = LogLevel.Warning, Message = "Disposal warning")]
     private static partial void LogDisposalWarning(ILogger logger, Exception ex);
 
-    [LoggerMessage(EventId = 16112, Level = LogLevel.Information, Message = "Service disposed")]
+    [LoggerMessage(EventId = 16119, Level = LogLevel.Information, Message = "Service disposed")]
     private static partial void LogServiceDisposedInfo(ILogger logger);
 
-    [LoggerMessage(EventId = 16113, Level = LogLevel.Error, Message = "Disposal error")]
+    [LoggerMessage(EventId = 16120, Level = LogLevel.Error, Message = "Disposal error")]
     private static partial void LogDisposalError(ILogger logger, Exception ex);
 
-    [LoggerMessage(EventId = 16114, Level = LogLevel.Warning, Message = "Background disposal warning")]
+    [LoggerMessage(EventId = 16121, Level = LogLevel.Warning, Message = "Background disposal warning")]
     private static partial void LogBackgroundDisposalWarning(ILogger logger, Exception ex);
 
-    [LoggerMessage(EventId = 16115, Level = LogLevel.Error, Message = "Background disposal error")]
+    [LoggerMessage(EventId = 16122, Level = LogLevel.Error, Message = "Background disposal error")]
     private static partial void LogBackgroundDisposalError(ILogger logger, Exception ex);
 
-    [LoggerMessage(EventId = 16116, Level = LogLevel.Error, Message = "Task start error")]
+    [LoggerMessage(EventId = 16123, Level = LogLevel.Error, Message = "Task start error")]
     private static partial void LogTaskStartError(ILogger logger, Exception ex);
 }

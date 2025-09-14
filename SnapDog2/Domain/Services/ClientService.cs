@@ -110,19 +110,19 @@ public partial class ClientService : IClientService
         }
 
         var result = await clientResult.Value.SetVolumeAsync(volume);
-        _logger.LogDebug("ClientManager.SetVolumeAsync result: {IsSuccess}, {ErrorMessage}", result.IsSuccess, result.ErrorMessage);
+        LogSetVolumeResult(result.IsSuccess, result.ErrorMessage);
 
         if (result.IsSuccess)
         {
             try
             {
-                _logger.LogDebug("Sending ClientVolumeChanged SignalR event for client {ClientIndex}, volume {Volume}", clientIndex, volume);
+                LogSendingVolumeChangedEvent(clientIndex, volume);
                 await _hubContext.Clients.All.SendAsync("ClientVolumeChanged", clientIndex, volume, cancellationToken);
-                _logger.LogDebug("ClientVolumeChanged SignalR event sent successfully");
+                LogVolumeChangedEventSent();
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Failed to send ClientVolumeChanged SignalR event for client {ClientIndex}", clientIndex);
+                LogFailedToSendVolumeChangedEvent(ex, clientIndex);
             }
         }
 
@@ -180,19 +180,19 @@ public partial class ClientService : IClientService
         }
 
         var result = await clientResult.Value.SetMuteAsync(muted);
-        _logger.LogDebug("ClientManager.SetMuteAsync result: {IsSuccess}, {ErrorMessage}", result.IsSuccess, result.ErrorMessage);
+        LogSetMuteResult(result.IsSuccess, result.ErrorMessage);
 
         if (result.IsSuccess)
         {
             try
             {
-                _logger.LogDebug("Sending ClientMuteChanged SignalR event for client {ClientIndex}, muted {Muted}", clientIndex, muted);
+                LogSendingMuteChangedEvent(clientIndex, muted);
                 await _hubContext.Clients.All.SendAsync("ClientMuteChanged", clientIndex, muted, cancellationToken);
-                _logger.LogDebug("ClientMuteChanged SignalR event sent successfully");
+                LogMuteChangedEventSent();
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Failed to send ClientMuteChanged SignalR event for client {ClientIndex}", clientIndex);
+                LogFailedToSendMuteChangedEvent(ex, clientIndex);
             }
         }
 
@@ -231,19 +231,19 @@ public partial class ClientService : IClientService
         }
 
         var result = await clientResult.Value.SetLatencyAsync(latencyMs);
-        _logger.LogDebug("ClientManager.SetLatencyAsync result: {IsSuccess}, {ErrorMessage}", result.IsSuccess, result.ErrorMessage);
+        LogSetLatencyResult(result.IsSuccess, result.ErrorMessage);
 
         if (result.IsSuccess)
         {
             try
             {
-                _logger.LogDebug("Sending ClientLatencyChanged SignalR event for client {ClientIndex}, latency {LatencyMs}ms", clientIndex, latencyMs);
+                LogSendingLatencyChangedEvent(clientIndex, latencyMs);
                 await _hubContext.Clients.All.SendAsync("ClientLatencyChanged", clientIndex, latencyMs, cancellationToken);
-                _logger.LogDebug("ClientLatencyChanged SignalR event sent successfully");
+                LogLatencyChangedEventSent();
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Failed to send ClientLatencyChanged SignalR event for client {ClientIndex}", clientIndex);
+                LogFailedToSendLatencyChangedEvent(ex, clientIndex);
             }
         }
 
@@ -299,4 +299,40 @@ public partial class ClientService : IClientService
 
     [LoggerMessage(EventId = 10049, Level = LogLevel.Information, Message = "Setting client {ClientIndex} name to {Name}")]
     private partial void LogSettingName(int ClientIndex, string Name);
+
+    [LoggerMessage(EventId = 10050, Level = LogLevel.Debug, Message = "ClientManager.SetVolumeAsync result: {IsSuccess}, {ErrorMessage}")]
+    private partial void LogSetVolumeResult(bool IsSuccess, string? ErrorMessage);
+
+    [LoggerMessage(EventId = 10051, Level = LogLevel.Debug, Message = "Sending ClientVolumeChanged SignalR event for client {ClientIndex}, volume {Volume}")]
+    private partial void LogSendingVolumeChangedEvent(int ClientIndex, int Volume);
+
+    [LoggerMessage(EventId = 10052, Level = LogLevel.Debug, Message = "ClientVolumeChanged SignalR event sent successfully")]
+    private partial void LogVolumeChangedEventSent();
+
+    [LoggerMessage(EventId = 10053, Level = LogLevel.Warning, Message = "Failed to send ClientVolumeChanged SignalR event for client {ClientIndex}")]
+    private partial void LogFailedToSendVolumeChangedEvent(Exception ex, int ClientIndex);
+
+    [LoggerMessage(EventId = 10054, Level = LogLevel.Debug, Message = "ClientManager.SetMuteAsync result: {IsSuccess}, {ErrorMessage}")]
+    private partial void LogSetMuteResult(bool IsSuccess, string? ErrorMessage);
+
+    [LoggerMessage(EventId = 10055, Level = LogLevel.Debug, Message = "Sending ClientMuteChanged SignalR event for client {ClientIndex}, muted {Muted}")]
+    private partial void LogSendingMuteChangedEvent(int ClientIndex, bool Muted);
+
+    [LoggerMessage(EventId = 10056, Level = LogLevel.Debug, Message = "ClientMuteChanged SignalR event sent successfully")]
+    private partial void LogMuteChangedEventSent();
+
+    [LoggerMessage(EventId = 10057, Level = LogLevel.Warning, Message = "Failed to send ClientMuteChanged SignalR event for client {ClientIndex}")]
+    private partial void LogFailedToSendMuteChangedEvent(Exception ex, int ClientIndex);
+
+    [LoggerMessage(EventId = 10058, Level = LogLevel.Debug, Message = "ClientManager.SetLatencyAsync result: {IsSuccess}, {ErrorMessage}")]
+    private partial void LogSetLatencyResult(bool IsSuccess, string? ErrorMessage);
+
+    [LoggerMessage(EventId = 10059, Level = LogLevel.Debug, Message = "Sending ClientLatencyChanged SignalR event for client {ClientIndex}, latency {LatencyMs}ms")]
+    private partial void LogSendingLatencyChangedEvent(int ClientIndex, int LatencyMs);
+
+    [LoggerMessage(EventId = 10060, Level = LogLevel.Debug, Message = "ClientLatencyChanged SignalR event sent successfully")]
+    private partial void LogLatencyChangedEventSent();
+
+    [LoggerMessage(EventId = 10061, Level = LogLevel.Warning, Message = "Failed to send ClientLatencyChanged SignalR event for client {ClientIndex}")]
+    private partial void LogFailedToSendLatencyChangedEvent(Exception ex, int ClientIndex);
 }

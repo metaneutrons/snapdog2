@@ -101,25 +101,25 @@ public sealed partial class StatePersistenceService(
 
     #region Logging
 
-    [LoggerMessage(EventId = 15001, Level = LogLevel.Information, Message = "Redis disabled - state persistence service will not run")]
+    [LoggerMessage(EventId = 14137, Level = LogLevel.Information, Message = "Redis disabled - state persistence service will not run")]
     private partial void LogRedisDisabled();
 
-    [LoggerMessage(EventId = 15002, Level = LogLevel.Information, Message = "State persistence service started (60s intervals)")]
+    [LoggerMessage(EventId = 14138, Level = LogLevel.Information, Message = "State persistence service started (60s intervals)")]
     private partial void LogStatePersistenceStarted();
 
-    [LoggerMessage(EventId = 15003, Level = LogLevel.Information, Message = "State persistence service stopping")]
+    [LoggerMessage(EventId = 14139, Level = LogLevel.Information, Message = "State persistence service stopping")]
     private partial void LogStatePersistenceStopping();
 
-    [LoggerMessage(EventId = 15004, Level = LogLevel.Debug, Message = "Persisted {ZoneCount} zones and {ClientCount} clients")]
+    [LoggerMessage(EventId = 14140, Level = LogLevel.Debug, Message = "Persisted {ZoneCount} zones and {ClientCount} clients")]
     private partial void LogStatesPersisted(int ZoneCount, int ClientCount);
 
-    [LoggerMessage(EventId = 15005, Level = LogLevel.Information, Message = "Starting shutdown state persistence")]
+    [LoggerMessage(EventId = 14141, Level = LogLevel.Information, Message = "Starting shutdown state persistence")]
     private partial void LogShutdownPersistenceStarted();
 
-    [LoggerMessage(EventId = 15006, Level = LogLevel.Information, Message = "Shutdown state persistence completed")]
+    [LoggerMessage(EventId = 14142, Level = LogLevel.Information, Message = "Shutdown state persistence completed")]
     private partial void LogShutdownPersistenceCompleted();
 
-    [LoggerMessage(EventId = 15007, Level = LogLevel.Error, Message = "Error during periodic state persistence")]
+    [LoggerMessage(EventId = 14143, Level = LogLevel.Error, Message = "Error during periodic state persistence")]
     private partial void LogPeriodicPersistenceError(Exception ex);
 
     #endregion

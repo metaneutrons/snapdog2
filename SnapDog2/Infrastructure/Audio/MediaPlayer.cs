@@ -431,96 +431,96 @@ public sealed partial class MediaPlayer(
     }
 
     // Logging methods using source generators for performance
-    [LoggerMessage(EventId = 16045, Level = LogLevel.Information, Message = "Set metadata duration: {DurationMs}ms for progress calculation")]
+    [LoggerMessage(EventId = 16047, Level = LogLevel.Information, Message = "Set metadata duration: {DurationMs}ms for progress calculation")]
     private static partial void LogSetMetadataDuration(ILogger logger, long? DurationMs);
 
-    [LoggerMessage(EventId = 16046, Level = LogLevel.Information, Message = "Started streaming for zone {ZoneIndex} from {StreamUrl}")]
+    [LoggerMessage(EventId = 16048, Level = LogLevel.Information, Message = "Started streaming for zone {ZoneIndex} from {StreamUrl}")]
     private static partial void LogStartedStreaming(ILogger logger, int ZoneIndex, string StreamUrl);
 
-    [LoggerMessage(EventId = 16047, Level = LogLevel.Information, Message = "AudioProcessingContext created successfully for zone {ZoneIndex}")]
+    [LoggerMessage(EventId = 16049, Level = LogLevel.Information, Message = "AudioProcessingContext created successfully for zone {ZoneIndex}")]
     private static partial void LogAudioProcessingContextCreated(ILogger logger, int ZoneIndex);
 
-    [LoggerMessage(EventId = 16048, Level = LogLevel.Error, Message = "Failed to create AudioProcessingContext for zone {ZoneIndex}: {Error}")]
+    [LoggerMessage(EventId = 16050, Level = LogLevel.Error, Message = "Failed to create AudioProcessingContext for zone {ZoneIndex}: {Error}")]
     private static partial void LogAudioProcessingContextFailed(ILogger logger, int ZoneIndex, string Error);
 
-    [LoggerMessage(EventId = 16049, Level = LogLevel.Information, Message = "Event handlers subscribed successfully for zone {ZoneIndex}")]
+    [LoggerMessage(EventId = 16051, Level = LogLevel.Information, Message = "Event handlers subscribed successfully for zone {ZoneIndex}")]
     private static partial void LogEventHandlersSubscribed(ILogger logger, int ZoneIndex);
 
-    [LoggerMessage(EventId = 16050, Level = LogLevel.Error, Message = "Failed to subscribe to events for zone {ZoneIndex}: {Error}")]
+    [LoggerMessage(EventId = 16052, Level = LogLevel.Error, Message = "Failed to subscribe to events for zone {ZoneIndex}: {Error}")]
     private static partial void LogEventSubscriptionFailed(ILogger logger, int ZoneIndex, string Error);
 
-    [LoggerMessage(EventId = 16051, Level = LogLevel.Error, Message = "Audio processing failed")]
+    [LoggerMessage(EventId = 16053, Level = LogLevel.Error, Message = "Audio processing failed")]
     private static partial void LogAudioProcessingFailed(ILogger logger, Exception ex);
 
-    [LoggerMessage(EventId = 16052, Level = LogLevel.Information, Message = "Audio processing completed for zone {ZoneIndex}, metadata available: {HasMetadata}")]
+    [LoggerMessage(EventId = 16054, Level = LogLevel.Information, Message = "Audio processing completed for zone {ZoneIndex}, metadata available: {HasMetadata}")]
     private static partial void LogAudioProcessingCompleted(ILogger logger, int ZoneIndex, bool HasMetadata);
 
-    [LoggerMessage(EventId = 16053, Level = LogLevel.Information, Message = "Metadata extracted for zone {ZoneIndex}: {Title} by {Artist}")]
+    [LoggerMessage(EventId = 16055, Level = LogLevel.Information, Message = "Metadata extracted for zone {ZoneIndex}: {Title} by {Artist}")]
     private static partial void LogMetadataExtracted(ILogger logger, int ZoneIndex, string? Title, string? Artist);
 
-    [LoggerMessage(EventId = 16054, Level = LogLevel.Information, Message = "No metadata available for zone {ZoneIndex}")]
+    [LoggerMessage(EventId = 16056, Level = LogLevel.Information, Message = "No metadata available for zone {ZoneIndex}")]
     private static partial void LogNoMetadataAvailable(ILogger logger, int ZoneIndex);
 
-    [LoggerMessage(EventId = 16055, Level = LogLevel.Information, Message = "Updating track position")]
+    [LoggerMessage(EventId = 16057, Level = LogLevel.Information, Message = "Updating track position")]
     private static partial void LogUpdatingTrackPosition(ILogger logger);
 
-    [LoggerMessage(EventId = 16056, Level = LogLevel.Information, Message = "Player disposed for zone {ZoneIndex}")]
+    [LoggerMessage(EventId = 16058, Level = LogLevel.Information, Message = "Player disposed for zone {ZoneIndex}")]
     private static partial void LogPlayerDisposed(ILogger logger, int ZoneIndex);
 
-    [LoggerMessage(EventId = 16057, Level = LogLevel.Error, Message = "Audio processing failed: {ErrorMessage}")]
+    [LoggerMessage(EventId = 16059, Level = LogLevel.Error, Message = "Audio processing failed: {ErrorMessage}")]
     private static partial void LogAudioProcessingFailedWithMessage(ILogger logger, string ErrorMessage);
 
-    [LoggerMessage(EventId = 16058, Level = LogLevel.Information, Message = "Audio streaming completed for zone {ZoneIndex}")]
+    [LoggerMessage(EventId = 16060, Level = LogLevel.Information, Message = "Audio streaming completed for zone {ZoneIndex}")]
     private static partial void LogAudioStreamingCompleted(ILogger logger, int ZoneIndex);
 
-    [LoggerMessage(EventId = 16059, Level = LogLevel.Information, Message = "Streaming cancelled for zone {ZoneIndex}")]
+    [LoggerMessage(EventId = 16061, Level = LogLevel.Information, Message = "Streaming cancelled for zone {ZoneIndex}")]
     private static partial void LogStreamingCancelled(ILogger logger, int ZoneIndex);
 
-    [LoggerMessage(EventId = 16060, Level = LogLevel.Error, Message = "Streaming operation failed for zone {ZoneIndex}")]
+    [LoggerMessage(EventId = 16062, Level = LogLevel.Error, Message = "Streaming operation failed for zone {ZoneIndex}")]
     private static partial void LogStreamingOperationFailed(ILogger logger, Exception ex, int ZoneIndex);
 
-    [LoggerMessage(EventId = 16061, Level = LogLevel.Information, Message = "Started playback on zone {ZoneIndex}: {Title} from {StreamUrl}")]
+    [LoggerMessage(EventId = 16063, Level = LogLevel.Information, Message = "Started playback on zone {ZoneIndex}: {Title} from {StreamUrl}")]
     private static partial void LogStartedPlayback(ILogger logger, int ZoneIndex, string Title, string StreamUrl);
 
-    [LoggerMessage(EventId = 16062, Level = LogLevel.Error, Message = "Playback failed on zone {ZoneIndex} for {StreamUrl}: {Error}")]
+    [LoggerMessage(EventId = 16064, Level = LogLevel.Error, Message = "Playback failed on zone {ZoneIndex} for {StreamUrl}: {Error}")]
     private static partial void LogPlaybackFailed(ILogger logger, int ZoneIndex, string StreamUrl, string Error);
 
-    [LoggerMessage(EventId = 16063, Level = LogLevel.Information, Message = "Streaming stopped for zone {ZoneIndex}")]
+    [LoggerMessage(EventId = 16065, Level = LogLevel.Information, Message = "Streaming stopped for zone {ZoneIndex}")]
     private static partial void LogStreamingStopped(ILogger logger, int ZoneIndex);
 
-    [LoggerMessage(EventId = 16064, Level = LogLevel.Error, Message = "Stop streaming operation failed for zone {ZoneIndex}")]
+    [LoggerMessage(EventId = 16066, Level = LogLevel.Error, Message = "Stop streaming operation failed for zone {ZoneIndex}")]
     private static partial void LogStopStreamingOperationFailed(ILogger logger, Exception ex, int ZoneIndex);
 
-    [LoggerMessage(EventId = 16065, Level = LogLevel.Debug, Message = "Status debug: HasContext={HasContext} IsPlaying={IsPlaying} Disposed={Disposed} HasTrack={HasTrack}")]
+    [LoggerMessage(EventId = 16067, Level = LogLevel.Debug, Message = "Status debug: HasContext={HasContext} IsPlaying={IsPlaying} Disposed={Disposed} HasTrack={HasTrack}")]
     private static partial void LogGetStatusDebug(ILogger logger, bool HasContext, bool IsPlaying, bool Disposed, bool HasTrack);
 
-    [LoggerMessage(EventId = 16066, Level = LogLevel.Information, Message = "Playback status: track={HasTrack}, context={HasContext}, playing={IsPlaying}")]
+    [LoggerMessage(EventId = 16068, Level = LogLevel.Information, Message = "Playback status: track={HasTrack}, context={HasContext}, playing={IsPlaying}")]
     private static partial void LogPlaybackStatus(ILogger logger, bool HasTrack, bool HasContext, bool IsPlaying);
 
-    [LoggerMessage(EventId = 16067, Level = LogLevel.Error, Message = "Get status operation failed for zone {ZoneIndex}")]
+    [LoggerMessage(EventId = 16069, Level = LogLevel.Error, Message = "Get status operation failed for zone {ZoneIndex}")]
     private static partial void LogGetStatusOperationFailed(ILogger logger, Exception ex, int ZoneIndex);
 
-    [LoggerMessage(EventId = 16068, Level = LogLevel.Error, Message = "Get progress operation failed for zone {ZoneIndex}")]
+    [LoggerMessage(EventId = 16070, Level = LogLevel.Error, Message = "Get progress operation failed for zone {ZoneIndex}")]
     private static partial void LogGetProgressOperationFailed(ILogger logger, Exception ex, int ZoneIndex);
 
-    [LoggerMessage(EventId = 16069, Level = LogLevel.Error, Message = "LibVLC Error encountered for zone {ZoneIndex}: {ErrorDetails}")]
+    [LoggerMessage(EventId = 16071, Level = LogLevel.Error, Message = "LibVLC Error encountered for zone {ZoneIndex}: {ErrorDetails}")]
     private static partial void LogLibVlcError(ILogger logger, int ZoneIndex, string ErrorDetails);
 
-    [LoggerMessage(EventId = 16070, Level = LogLevel.Error, Message = "Failed to handle LibVLC error for zone {ZoneIndex}")]
+    [LoggerMessage(EventId = 16072, Level = LogLevel.Error, Message = "Failed to handle LibVLC error for zone {ZoneIndex}")]
     private static partial void LogLibVlcErrorHandlingFailed(ILogger logger, int ZoneIndex, Exception ex);
 
-    [LoggerMessage(EventId = 16071, Level = LogLevel.Warning, Message = "LibVLC operation '{OperationName}' failed for zone {ZoneIndex} (attempt {Attempt}): {Error}")]
+    [LoggerMessage(EventId = 16073, Level = LogLevel.Warning, Message = "LibVLC operation '{OperationName}' failed for zone {ZoneIndex} (attempt {Attempt}): {Error}")]
     private static partial void LogLibVlcOperationFailed(ILogger logger, int ZoneIndex, string OperationName, int Attempt, string Error);
 
-    [LoggerMessage(EventId = 16072, Level = LogLevel.Error, Message = "LibVLC crash detected for zone {ZoneIndex} during '{OperationName}' (attempt {Attempt}): {ExceptionType}")]
+    [LoggerMessage(EventId = 16074, Level = LogLevel.Error, Message = "LibVLC crash detected for zone {ZoneIndex} during '{OperationName}' (attempt {Attempt}): {ExceptionType}")]
     private static partial void LogLibVlcCrashDetected(ILogger logger, int ZoneIndex, string OperationName, int Attempt, string ExceptionType);
 
-    [LoggerMessage(EventId = 16073, Level = LogLevel.Error, Message = "LibVLC operation '{OperationName}' failed for zone {ZoneIndex} after maximum retries")]
+    [LoggerMessage(EventId = 16075, Level = LogLevel.Error, Message = "LibVLC operation '{OperationName}' failed for zone {ZoneIndex} after maximum retries")]
     private static partial void LogLibVlcMaxRetriesReached(ILogger logger, int ZoneIndex, string OperationName);
 
-    [LoggerMessage(EventId = 16074, Level = LogLevel.Information, Message = "LibVLC state cleaned up for zone {ZoneIndex} after crash")]
+    [LoggerMessage(EventId = 16076, Level = LogLevel.Information, Message = "LibVLC state cleaned up for zone {ZoneIndex} after crash")]
     private static partial void LogLibVlcStateCleanedUp(ILogger logger, int ZoneIndex);
 
-    [LoggerMessage(EventId = 16075, Level = LogLevel.Warning, Message = "Failed to cleanup LibVLC state for zone {ZoneIndex}: {Error}")]
+    [LoggerMessage(EventId = 16077, Level = LogLevel.Warning, Message = "Failed to cleanup LibVLC state for zone {ZoneIndex}: {Error}")]
     private static partial void LogLibVlcCleanupFailed(ILogger logger, int ZoneIndex, string Error);
 }

@@ -133,17 +133,17 @@ public partial class AppStatusService(
 #endif
     }
 
-    [LoggerMessage(EventId = 10105, Level = LogLevel.Debug, Message = "Getting system status"
+    [LoggerMessage(EventId = 10117, Level = LogLevel.Debug, Message = "Getting system status"
 )]
     private partial void LogGettingSystemStatus();
 
-    [LoggerMessage(EventId = 10106, Level = LogLevel.Debug, Message = "Getting version information"
+    [LoggerMessage(EventId = 10118, Level = LogLevel.Debug, Message = "Getting version information"
 )]
     private partial void LogGettingVersionInfo();
 
-    [LoggerMessage(EventId = 10107, Level = LogLevel.Debug, Message = "Getting server statistics")]
+    [LoggerMessage(EventId = 10119, Level = LogLevel.Debug, Message = "Getting server statistics")]
     private partial void LogGettingServerStats();
 
-    [LoggerMessage(EventId = 10108, Level = LogLevel.Error, Message = "Build date extraction failed")]
+    [LoggerMessage(EventId = 10120, Level = LogLevel.Error, Message = "Build date extraction failed")]
     private partial void LogBuildDateExtractionFailed(Exception ex);
 }

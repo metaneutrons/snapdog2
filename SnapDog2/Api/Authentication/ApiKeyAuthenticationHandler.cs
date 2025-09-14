@@ -23,7 +23,7 @@ using SnapDog2.Shared.Configuration;
 /// API Key authentication handler that validates requests against configured API keys.
 /// Supports both header-based and query parameter-based API key authentication.
 /// </summary>
-public class ApiKeyAuthenticationHandler(
+public partial class ApiKeyAuthenticationHandler(
     IOptionsMonitor<AuthenticationSchemeOptions> options,
     ILoggerFactory logger,
     UrlEncoder encoder,
@@ -34,6 +34,7 @@ public class ApiKeyAuthenticationHandler(
     private const string ApiKeyQueryParameter = "apikey";
 
     private readonly HttpConfig _httpConfig = httpConfig;
+    private readonly ILogger<ApiKeyAuthenticationHandler> _logger = logger.CreateLogger<ApiKeyAuthenticationHandler>();
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
@@ -55,10 +56,7 @@ public class ApiKeyAuthenticationHandler(
         // Validate API key against configured keys
         if (!this._httpConfig.ApiKeys.Contains(apiKey))
         {
-            this.Logger.LogWarning(
-                "Invalid API key attempted: {ApiKey}",
-                string.Concat(apiKey.AsSpan(0, Math.Min(8, apiKey.Length)), "...")
-            );
+            LogInvalidApiKeyAttempted(string.Concat(apiKey.AsSpan(0, Math.Min(8, apiKey.Length)), "..."));
             return Task.FromResult(AuthenticateResult.Fail("Invalid API key"));
         }
 
@@ -75,7 +73,13 @@ public class ApiKeyAuthenticationHandler(
         var principal = new ClaimsPrincipal(identity);
         var ticket = new AuthenticationTicket(principal, this.Scheme.Name);
 
-        this.Logger.LogDebug("API key authentication successful");
+        LogApiKeyAuthenticationSuccessful();
         return Task.FromResult(AuthenticateResult.Success(ticket));
     }
+
+    [LoggerMessage(EventId = 13112, Level = LogLevel.Warning, Message = "Invalid API key attempted: {ApiKey}")]
+    private partial void LogInvalidApiKeyAttempted(string ApiKey);
+
+    [LoggerMessage(EventId = 13113, Level = LogLevel.Debug, Message = "API key authentication successful")]
+    private partial void LogApiKeyAuthenticationSuccessful();
 }

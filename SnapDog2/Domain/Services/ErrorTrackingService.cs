@@ -110,13 +110,13 @@ public partial class ErrorTrackingService(ILogger<ErrorTrackingService> logger) 
     }
 
     // LoggerMessage definitions for high-performance logging
-    [LoggerMessage(EventId = 10078, Level = LogLevel.Warning, Message = "ErrorRecorded: {Component} - {Context} - {Message}")]
+    [LoggerMessage(EventId = 10090, Level = LogLevel.Warning, Message = "ErrorRecorded: {Component} - {Context} - {Message}")]
     private partial void LogErrorRecorded(string component, string context, string message);
 
-    [LoggerMessage(EventId = 10079, Level = LogLevel.Information, Message = "ErrorsCleared")]
+    [LoggerMessage(EventId = 10091, Level = LogLevel.Information, Message = "ErrorsCleared")]
     private partial void LogErrorsCleared();
 
-    [LoggerMessage(EventId = 10080, Level = LogLevel.Debug, Message = "OldErrorsRemoved: {RemovedCount} errors, {RemainingCount} remaining")]
+    [LoggerMessage(EventId = 10092, Level = LogLevel.Debug, Message = "OldErrorsRemoved: {RemovedCount} errors, {RemainingCount} remaining")]
     private partial void LogOldErrorsRemoved(int removedCount, int remainingCount);
 
     private void CleanupOldErrors()
