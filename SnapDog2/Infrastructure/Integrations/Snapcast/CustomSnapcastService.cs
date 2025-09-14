@@ -868,24 +868,24 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
 
     private readonly Dictionary<string, string> _lastStreamStatus = new();
 
-    [LoggerMessage(EventId = 15069, Level = LogLevel.Information, Message = "Stream status changed: {StreamId} -> {Status}")]
+    [LoggerMessage(EventId = 15068, Level = LogLevel.Information, Message = "Stream status changed: {StreamId} -> {Status}")]
     private partial void LogStreamStatusChanged(string StreamId, string Status);
 
-    [LoggerMessage(EventId = 15068, Level = LogLevel.Error, Message = "Error handling notification {Method}")]
+    [LoggerMessage(EventId = 15069, Level = LogLevel.Error, Message = "Error handling notification {Method}")]
     private partial void LogNotificationHandlingError(Exception ex, string Method);
 
-    [LoggerMessage(EventId = 15069, Level = LogLevel.Debug, Message = "Client {ClientId} volume changed to {Volume}%, muted: {Muted}")]
+    [LoggerMessage(EventId = 15070, Level = LogLevel.Debug, Message = "Client {ClientId} volume changed to {Volume}%, muted: {Muted}")]
     private partial void LogClientVolumeChanged(string ClientId, int Volume, bool Muted);
 
-    [LoggerMessage(EventId = 15070, Level = LogLevel.Debug, Message = "Ignoring volume change for client {ClientId} (not found in state store)")]
+    [LoggerMessage(EventId = 15071, Level = LogLevel.Debug, Message = "Ignoring volume change for client {ClientId} (not found in state store)")]
     private partial void LogIgnoringVolumeChange(string ClientId);
 
-    [LoggerMessage(EventId = 15071, Level = LogLevel.Information, Message = "Server state refreshed with {GroupCount} groups")]
+    [LoggerMessage(EventId = 15072, Level = LogLevel.Information, Message = "Server state refreshed with {GroupCount} groups")]
     private partial void LogServerStateRefreshed(int GroupCount);
 
-    [LoggerMessage(EventId = 15072, Level = LogLevel.Error, Message = "Failed to refresh server state")]
+    [LoggerMessage(EventId = 15073, Level = LogLevel.Error, Message = "Failed to refresh server state")]
     private partial void LogRefreshServerStateFailed(Exception ex);
 
-    [LoggerMessage(EventId = 15073, Level = LogLevel.Warning, Message = "Snapcast service health check failed - not connected")]
+    [LoggerMessage(EventId = 15074, Level = LogLevel.Warning, Message = "Snapcast service health check failed - not connected")]
     private partial void LogHealthCheckFailed();
 }

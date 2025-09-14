@@ -173,18 +173,18 @@ public partial class SnapcastJsonRpcClient : IDisposable
     }
 
     // LoggerMessage patterns
-    [LoggerMessage(EventId = 15110, Level = LogLevel.Information, Message = "Connected → Snapcast WebSocket: {Url}")]
+    [LoggerMessage(EventId = 15111, Level = LogLevel.Information, Message = "Connected → Snapcast WebSocket: {Url}")]
     private partial void LogConnected(string url);
 
-    [LoggerMessage(EventId = 15111, Level = LogLevel.Debug, Message = "Sent request: {Method} with ID: {RequestId}")]
+    [LoggerMessage(EventId = 15112, Level = LogLevel.Debug, Message = "Sent request: {Method} with ID: {RequestId}")]
     private partial void LogRequestSent(string method, string requestId);
 
-    [LoggerMessage(EventId = 15112, Level = LogLevel.Error, Message = "Error in message handling loop")]
+    [LoggerMessage(EventId = 15113, Level = LogLevel.Error, Message = "Error in message handling loop")]
     private partial void LogMessageHandlingError(Exception ex);
 
-    [LoggerMessage(EventId = 15113, Level = LogLevel.Debug, Message = "Received notification: {Method}")]
+    [LoggerMessage(EventId = 15114, Level = LogLevel.Debug, Message = "Received notification: {Method}")]
     private partial void LogNotificationReceived(string method);
 
-    [LoggerMessage(EventId = 15114, Level = LogLevel.Error, Message = "Error processing message: {Message}")]
+    [LoggerMessage(EventId = 15115, Level = LogLevel.Error, Message = "Error processing message: {Message}")]
     private partial void LogMessageProcessingError(Exception ex, string message);
 }

@@ -269,12 +269,12 @@ public partial class KnxCommandReceiver : IHostedService
         return result.IsSuccess;
     }
 
-    [LoggerMessage(EventId = 15137, Level = LogLevel.Information, Message = "KNX command receiver started")]
+    [LoggerMessage(EventId = 15138, Level = LogLevel.Information, Message = "KNX command receiver started")]
     private partial void LogKnxCommandReceiverStarted();
 
-    [LoggerMessage(EventId = 15138, Level = LogLevel.Warning, Message = "KNX not enabled, command receiver disabled")]
+    [LoggerMessage(EventId = 15139, Level = LogLevel.Warning, Message = "KNX not enabled, command receiver disabled")]
     private partial void LogKnxCommandReceiverDisabled();
 
-    [LoggerMessage(EventId = 15139, Level = LogLevel.Debug, Message = "KNX command {CommandId} handled for entity {EntityIndex}: {Success}")]
+    [LoggerMessage(EventId = 15140, Level = LogLevel.Debug, Message = "KNX command {CommandId} handled for entity {EntityIndex}: {Success}")]
     private partial void LogKnxCommandHandled(string CommandId, int EntityIndex, bool Success);
 }

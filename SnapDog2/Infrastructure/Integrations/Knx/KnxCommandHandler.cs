@@ -175,9 +175,9 @@ public partial class KnxCommandHandler : IKnxCommandHandler
         return Result.Failure($"Invalid client zone command: {commandId}");
     }
 
-    [LoggerMessage(EventId = 15125, Level = LogLevel.Debug, Message = "KNX command {CommandId} handled for zone {ZoneIndex}")]
+    [LoggerMessage(EventId = 15126, Level = LogLevel.Debug, Message = "KNX command {CommandId} handled for zone {ZoneIndex}")]
     private partial void LogKnxCommand(string commandId, int zoneIndex);
 
-    [LoggerMessage(EventId = 15126, Level = LogLevel.Information, Message = "KNX client command {CommandType} handled for client {ClientIndex} with value {Value}")]
+    [LoggerMessage(EventId = 15127, Level = LogLevel.Information, Message = "KNX client command {CommandType} handled for client {ClientIndex} with value {Value}")]
     private partial void LogClientKnxCommand(string commandType, int clientIndex, object value);
 }
