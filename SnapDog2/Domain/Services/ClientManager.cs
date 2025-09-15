@@ -267,7 +267,6 @@ public partial class ClientManager : IClientManager
         var currentState = this._clientStateStore.GetClientState(clientIndex);
         var currentZone = currentState?.ZoneIndex ?? snapDogClient.ZoneIndex;
 
-
         var state = new ClientState
         {
             Id = clientIndex,

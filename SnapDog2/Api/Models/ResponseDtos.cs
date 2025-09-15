@@ -28,12 +28,12 @@ public record Page<T>(T[] Items, int Total, int PageSize = 20, int PageNumber = 
 /// <summary>
 /// Zone summary for listings.
 /// </summary>
-public record Zone(string Name, int Index, bool Active, string Status);
+public record Zone(string Name, int Index, bool Active, string Status, string Icon = "");
 
 /// <summary>
 /// Client summary for listings.
 /// </summary>
-public record Client(int Id, string Name, bool Connected, int? Zone = null);
+public record Client(int Id, string Name, bool Connected, int? Zone = null, string Icon = "");
 
 /// <summary>
 /// Playlist with tracks for detailed endpoints.

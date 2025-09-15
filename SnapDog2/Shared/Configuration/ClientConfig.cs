@@ -50,6 +50,13 @@ public class ClientConfig
     public int DefaultZone { get; set; } = 1;
 
     /// <summary>
+    /// Optional UTF-8 icon character for the client (single character).
+    /// Maps to: SNAPDOG_CLIENT_X_ICON
+    /// </summary>
+    [Env(Key = "ICON")]
+    public string Icon { get; set; } = string.Empty;
+
+    /// <summary>
     /// KNX configuration for this client.
     /// Maps environment variables with prefix: SNAPDOG_CLIENT_X_KNX_*
     /// </summary>

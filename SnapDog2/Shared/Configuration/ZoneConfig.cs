@@ -39,6 +39,13 @@ public class ZoneConfig
     public string Sink { get; set; } = null!;
 
     /// <summary>
+    /// Optional UTF-8 icon character for the zone (single character).
+    /// Maps to: SNAPDOG_ZONE_X_ICON
+    /// </summary>
+    [Env(Key = "ICON")]
+    public string Icon { get; set; } = string.Empty;
+
+    /// <summary>
     /// KNX configuration for this zone.
     /// Maps environment variables with prefix: SNAPDOG_ZONE_X_KNX_*
     /// </summary>

@@ -157,6 +157,23 @@ static WebApplication CreateWebApplication(string[] args)
     try
     {
         snapDogConfig = EnvConfig.Load<SnapDogConfiguration>();
+
+        // Trim icons to single character
+        foreach (var zone in snapDogConfig.Zones)
+        {
+            if (!string.IsNullOrEmpty(zone.Icon))
+            {
+                zone.Icon = zone.Icon.Trim().Substring(0, Math.Min(1, zone.Icon.Trim().Length));
+            }
+        }
+
+        foreach (var client in snapDogConfig.Clients)
+        {
+            if (!string.IsNullOrEmpty(client.Icon))
+            {
+                client.Icon = client.Icon.Trim().Substring(0, Math.Min(1, client.Icon.Trim().Length));
+            }
+        }
     }
     catch (Exception ex)
     {
