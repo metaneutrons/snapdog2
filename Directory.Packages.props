@@ -51,7 +51,7 @@
     <!-- Configuration -->
     <PackageVersion Include="EnvoyConfig" Version="1.0.0" />
     <!-- Command Line Parsing -->
-    <PackageVersion Include="System.CommandLine" Version="2.0.0-beta6.25358.103" />
+    <PackageVersion Include="System.CommandLine" Version="2.0.0-rc.1.25451.107" />
     <!-- GitVersion -->
     <PackageVersion Include="GitVersion.MsBuild" Version="6.4.0" />
     <!-- JSON Serialization -->
