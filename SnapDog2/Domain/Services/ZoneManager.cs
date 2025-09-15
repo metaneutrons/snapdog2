@@ -1543,6 +1543,23 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         {
             this.LogMediaPlayerStateChanged(this._zoneIndex, e.State.ToString());
 
+            // Handle track ended - automatic progression
+            if (e.State == LibVLC.VLCState.Ended)
+            {
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        await this.HandleTrackEndedAsync().ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        this.LogErrorHandlingTrackEnded(ex, this._zoneIndex);
+                    }
+                });
+                return; // Skip normal state update for ended tracks
+            }
+
             // Update playback state based on LibVLC state
             var newPlaybackState =
                 e.IsPlaying ? PlaybackState.Playing
@@ -1577,6 +1594,119 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         {
             this.LogErrorHandlingStateChange(ex, this._zoneIndex);
         }
+    }
+
+    /// <summary>
+    /// Handles automatic track progression when a track ends.
+    /// </summary>
+    private async Task HandleTrackEndedAsync()
+    {
+        await this._zoneStateLock.WaitAsync().ConfigureAwait(false);
+        try
+        {
+            // Update state to stopped first
+            this._currentState = this._currentState with { PlaybackState = PlaybackState.Stopped };
+            this._zoneStateStore.UpdatePlaybackState(this._zoneIndex, PlaybackState.Stopped);
+
+            // Check track repeat first (highest priority)
+            if (this._currentState.TrackRepeat)
+            {
+                this.LogTrackRepeatRestarting(this._zoneIndex);
+                await this.PlayAsync().ConfigureAwait(false);
+                return;
+            }
+
+            // Get current playlist info
+            var currentTrackIndex = this._currentState.Track?.Index ?? 1;
+            var playlistResult = await this._playlistManager.GetPlaylistAsync(this._currentState.Playlist?.Index ?? 1);
+
+            if (!playlistResult.IsSuccess || playlistResult.Value == null)
+            {
+                this.LogPlaylistNotFoundForProgression(this._zoneIndex);
+                return;
+            }
+
+            var playlist = playlistResult.Value;
+
+            // Radio stations and URL streams don't auto-progress (endless nature)
+            if (playlist.Source == "radio")
+            {
+                this.LogRadioStationEnded(this._zoneIndex);
+                return;
+            }
+
+            // Check if current track is a URL stream
+            if (this._currentState.Track?.Source == "stream")
+            {
+                this.LogUrlStreamEnded(this._zoneIndex);
+                return;
+            }
+
+            // Determine next track
+            int nextTrackIndex;
+
+            if (this._currentState.PlaylistShuffle)
+            {
+                nextTrackIndex = this.GetNextShuffleTrack(currentTrackIndex, playlist.TrackCount);
+            }
+            else
+            {
+                nextTrackIndex = currentTrackIndex + 1;
+            }
+
+            // Check if at end of playlist
+            if (nextTrackIndex > playlist.TrackCount)
+            {
+                if (this._currentState.PlaylistRepeat)
+                {
+                    nextTrackIndex = 1; // Start from beginning
+                    this.LogPlaylistRepeating(this._zoneIndex);
+                }
+                else
+                {
+                    this.LogPlaylistEnded(this._zoneIndex);
+                    return; // Stop at end of playlist
+                }
+            }
+
+            // Play next track
+            this.LogAutoProgressingToTrack(this._zoneIndex, nextTrackIndex);
+            var setResult = await this.SetTrackInternalAsync(nextTrackIndex).ConfigureAwait(false);
+
+            if (setResult.IsSuccess)
+            {
+                await this.PlayAsync().ConfigureAwait(false);
+            }
+            else
+            {
+                this.LogAutoProgressionFailed(this._zoneIndex, nextTrackIndex, setResult.ErrorMessage);
+            }
+        }
+        finally
+        {
+            this._zoneStateLock.Release();
+        }
+    }
+
+    /// <summary>
+    /// Gets the next track index for shuffle mode.
+    /// </summary>
+    private int GetNextShuffleTrack(int currentTrackIndex, int totalTracks)
+    {
+        if (totalTracks <= 1)
+        {
+            return 1;
+        }
+
+        // Simple shuffle: pick random track that's not the current one
+        var random = new Random();
+        int nextTrack;
+        do
+        {
+            nextTrack = random.Next(1, totalTracks + 1);
+        } while (nextTrack == currentTrackIndex && totalTracks > 1);
+
+        return nextTrack;
     }
 
     /// <summary>
@@ -2155,6 +2285,33 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     [LoggerMessage(EventId = 10200, Level = LogLevel.Warning, Message = "Error handling track info change for zone {ZoneIndex}")]
     private partial void LogErrorHandlingTrackInfoChange(Exception ex, int zoneIndex);
+
+    [LoggerMessage(EventId = 10201, Level = LogLevel.Information, Message = "Track repeat: restarting current track for zone {ZoneIndex}")]
+    private partial void LogTrackRepeatRestarting(int zoneIndex);
+
+    [LoggerMessage(EventId = 10202, Level = LogLevel.Warning, Message = "Playlist not found for auto-progression in zone {ZoneIndex}")]
+    private partial void LogPlaylistNotFoundForProgression(int zoneIndex);
+
+    [LoggerMessage(EventId = 10203, Level = LogLevel.Debug, Message = "Radio station ended for zone {ZoneIndex} - no auto-progression")]
+    private partial void LogRadioStationEnded(int zoneIndex);
+
+    [LoggerMessage(EventId = 10204, Level = LogLevel.Debug, Message = "URL stream ended for zone {ZoneIndex} - no auto-progression")]
+    private partial void LogUrlStreamEnded(int zoneIndex);
+
+    [LoggerMessage(EventId = 10205, Level = LogLevel.Information, Message = "Playlist repeat: restarting from track 1 for zone {ZoneIndex}")]
+    private partial void LogPlaylistRepeating(int zoneIndex);
+
+    [LoggerMessage(EventId = 10206, Level = LogLevel.Information, Message = "Playlist ended for zone {ZoneIndex} - stopping playback")]
+    private partial void LogPlaylistEnded(int zoneIndex);
+
+    [LoggerMessage(EventId = 10207, Level = LogLevel.Information, Message = "Auto-progressing to track {TrackIndex} for zone {ZoneIndex}")]
+    private partial void LogAutoProgressingToTrack(int zoneIndex, int trackIndex);
+
+    [LoggerMessage(EventId = 10208, Level = LogLevel.Warning, Message = "Auto-progression failed for zone {ZoneIndex} to track {TrackIndex}: {Error}")]
+    private partial void LogAutoProgressionFailed(int zoneIndex, int trackIndex, string? error);
+
+    [LoggerMessage(EventId = 10209, Level = LogLevel.Warning, Message = "Error handling track ended for zone {ZoneIndex}")]
+    private partial void LogErrorHandlingTrackEnded(Exception ex, int zoneIndex);
 
     #endregion
 }
