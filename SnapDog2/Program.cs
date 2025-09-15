@@ -448,6 +448,9 @@ static WebApplication CreateWebApplication(string[] args)
     // Business metrics collection service
     builder.Services.AddHostedService<BusinessMetricsCollectionService>();
 
+    // Zeroconf/Bonjour service advertisement
+    builder.Services.AddHostedService<ZeroconfService>();
+
     // Playlist management services - changed to Singleton to fix DI scoping issues
     builder.Services.AddSingleton<
         IPlaylistManager,

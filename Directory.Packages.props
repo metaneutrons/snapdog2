@@ -36,6 +36,8 @@
     <PackageVersion Include="SnapcastClient" Version="0.3.9" />
     <!-- LibVLC Integration -->
     <PackageVersion Include="LibVLCSharp" Version="3.9.4" />
+    <!-- Zeroconf/Bonjour Integration -->
+    <PackageVersion Include="Makaretu.Dns.Multicast" Version="0.27.0" />
     <!-- MQTT Integration -->
     <PackageVersion Include="MQTTnet" Version="5.0.1.1416" />
     <!-- KNX Integration -->

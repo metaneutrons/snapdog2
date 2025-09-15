@@ -57,6 +57,13 @@ public class SnapDogConfiguration
     public ServicesConfig Services { get; set; } = new();
 
     /// <summary>
+    /// Zeroconf/Bonjour service advertisement configuration.
+    /// Maps environment variables with prefix: SNAPDOG_ZEROCONF_*
+    /// </summary>
+    [Env(NestedPrefix = "ZEROCONF_")]
+    public ZeroconfConfig Zeroconf { get; set; } = new();
+
+    /// <summary>
     /// Snapcast server configuration (for container setup).
     /// Maps environment variables with prefix: SNAPDOG_SNAPCAST_*
     /// </summary>

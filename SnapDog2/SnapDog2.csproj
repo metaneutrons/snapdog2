@@ -34,6 +34,7 @@
     <PackageReference Include="System.CommandLine" />
     <PackageReference Include="SubsonicMedia" />
     <PackageReference Include="LibVLCSharp" />
+    <PackageReference Include="Makaretu.Dns.Multicast" />
     <!-- OpenTelemetry packages for observability -->
     <PackageReference Include="OpenTelemetry" />
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
