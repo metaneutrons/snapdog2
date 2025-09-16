@@ -15,10 +15,12 @@ namespace SnapDog2.Api.Controllers.V1;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using SnapDog2.Api.Models;
 using SnapDog2.Application.Services;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Shared.Attributes;
+using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Enums;
 using SnapDog2.Shared.Models;
 
@@ -34,10 +36,12 @@ using SnapDog2.Shared.Models;
 public partial class ZonesController(
     IZoneManager zoneManager,
     IKnxCommandHandler knxCommandHandler,
+    IOptions<SnapDogConfiguration> snapDogConfig,
     ILogger<ZonesController> logger) : ControllerBase
 {
     private readonly IZoneManager _zoneManager = zoneManager ?? throw new ArgumentNullException(nameof(zoneManager));
     private readonly IKnxCommandHandler _knxCommandHandler = knxCommandHandler ?? throw new ArgumentNullException(nameof(knxCommandHandler));
+    private readonly SnapDogConfiguration _snapDogConfig = snapDogConfig?.Value ?? throw new ArgumentNullException(nameof(snapDogConfig));
     private readonly ILogger<ZonesController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -640,6 +644,21 @@ public partial class ZonesController(
 
     // ═══════════════════════════════════════════════════════════════════════════════
     // STATUS ENDPOINTS - Blueprint compliance
+
+    [HttpGet("{zoneIndex:int}/icon")]
+    [StatusId("ZONE_ICON_STATUS")]
+    [ProducesResponseType<string>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public ActionResult<string> GetZoneIcon(int zoneIndex)
+    {
+        if (zoneIndex < 1 || zoneIndex > _snapDogConfig.Zones.Count)
+        {
+            return NotFound($"Zone {zoneIndex} not found");
+        }
+
+        var zone = _snapDogConfig.Zones[zoneIndex - 1]; // 0-based array access
+        return Ok(zone.Icon);
+    }
 
     [HttpGet("{zoneIndex:int}/name")]
     [StatusId("ZONE_NAME_STATUS")]

@@ -15,9 +15,11 @@ namespace SnapDog2.Api.Controllers.V1;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using SnapDog2.Api.Models;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Shared.Attributes;
+using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Constants;
 using SnapDog2.Shared.Models;
 
@@ -30,9 +32,10 @@ using SnapDog2.Shared.Models;
 [Authorize]
 [Produces("application/json")]
 [Tags("Clients")]
-public partial class ClientsController(IClientService clientService, ILogger<ClientsController> logger) : ControllerBase
+public partial class ClientsController(IClientService clientService, IOptions<SnapDogConfiguration> snapDogConfig, ILogger<ClientsController> logger) : ControllerBase
 {
     private readonly IClientService _clientService = clientService ?? throw new ArgumentNullException(nameof(clientService));
+    private readonly SnapDogConfiguration _snapDogConfig = snapDogConfig?.Value ?? throw new ArgumentNullException(nameof(snapDogConfig));
     private readonly ILogger<ClientsController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -506,6 +509,25 @@ public partial class ClientsController(IClientService clientService, ILogger<Cli
         }
 
         return Ok(result.Value!.Connected);
+    }
+
+    /// <summary>
+    /// Get client icon.
+    /// </summary>
+    /// <param name="clientIndex">Client Index</param>
+    /// <returns>Client icon character or empty string</returns>
+    [HttpGet("{clientIndex:int}/icon")]
+    [ProducesResponseType<string>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public ActionResult<string> GetClientIcon(int clientIndex)
+    {
+        if (clientIndex < 1 || clientIndex > _snapDogConfig.Clients.Count)
+        {
+            return NotFound($"Client {clientIndex} not found");
+        }
+
+        var client = _snapDogConfig.Clients[clientIndex - 1]; // 0-based array access
+        return Ok(client.Icon);
     }
 
     /// <summary>
