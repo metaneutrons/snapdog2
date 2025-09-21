@@ -21,7 +21,7 @@ public record ClientState
     /// <summary>
     /// Gets the client Index.
     /// </summary>
-    public required int Id { get; init; }
+    public required int Index { get; init; }
 
     /// <summary>
     /// Gets the client name.
@@ -34,7 +34,7 @@ public record ClientState
     public required string Mac { get; init; }
 
     /// <summary>
-    /// Gets the Snapcast client Index (UUID from Snapcast server).
+    /// Gets the Snapcast client Id (UUID from Snapcast server).
     /// </summary>
     public required string SnapcastId { get; init; }
 

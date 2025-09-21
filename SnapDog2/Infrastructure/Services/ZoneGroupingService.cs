@@ -191,7 +191,7 @@ public partial class ZoneGroupingService(
             foreach (var clientState in zoneClientStates)
             {
                 // Find client in cached data
-                var liveClient = allClients.FirstOrDefault(c => c.Id == clientState.Id);
+                var liveClient = allClients.FirstOrDefault(c => c.Index == clientState.Index);
                 if (liveClient != null && !string.IsNullOrEmpty(liveClient.SnapcastId))
                 {
                     clientIndexs.Add(liveClient.SnapcastId);

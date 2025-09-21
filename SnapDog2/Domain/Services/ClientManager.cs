@@ -187,7 +187,7 @@ public partial class ClientManager : IClientManager
             // Initialize default client state
             var defaultState = new ClientState
             {
-                Id = clientIndex,
+                Index = clientIndex,
                 Name = clientConfig.Name,
                 Mac = clientConfig.Mac ?? "00:00:00:00:00:00",
                 SnapcastId = string.Empty, // Will be updated when Snapcast client is discovered
@@ -269,7 +269,7 @@ public partial class ClientManager : IClientManager
 
         var state = new ClientState
         {
-            Id = clientIndex,
+            Index = clientIndex,
             SnapcastId = snapDogClient._snapcastClient.Id,
             Name = client.Name,
             Mac = snapDogClient.MacAddress,
@@ -388,7 +388,7 @@ public partial class ClientManager : IClientManager
                             var clientConfig = this._clientConfigs[clientIndex - 1]; // 0-based array access
                             var defaultState = new ClientState
                             {
-                                Id = clientIndex,
+                                Index = clientIndex,
                                 SnapcastId = string.Empty,
                                 Name = clientConfig.Name,
                                 Mac = string.Empty,
