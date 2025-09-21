@@ -26,6 +26,11 @@ public record ZoneState
     public required string Name { get; init; }
 
     /// <summary>
+    /// Gets the zone icon character.
+    /// </summary>
+    public string Icon { get; init; } = string.Empty;
+
+    /// <summary>
     /// Gets the current playback state.
     /// </summary>
     public required PlaybackState PlaybackState { get; init; }

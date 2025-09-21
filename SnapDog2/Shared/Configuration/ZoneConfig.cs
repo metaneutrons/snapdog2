@@ -42,8 +42,8 @@ public class ZoneConfig
     /// Optional UTF-8 icon character for the zone (single character).
     /// Maps to: SNAPDOG_ZONE_X_ICON
     /// </summary>
-    [Env(Key = "ICON")]
-    public string Icon { get; set; } = string.Empty;
+    [Env(Key = "ICON", Default = "🎵")]
+    public string Icon { get; set; } = "🎵";
 
     /// <summary>
     /// KNX configuration for this zone.

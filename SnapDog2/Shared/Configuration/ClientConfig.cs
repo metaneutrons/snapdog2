@@ -53,8 +53,8 @@ public class ClientConfig
     /// Optional UTF-8 icon character for the client (single character).
     /// Maps to: SNAPDOG_CLIENT_X_ICON
     /// </summary>
-    [Env(Key = "ICON")]
-    public string Icon { get; set; } = string.Empty;
+    [Env(Key = "ICON", Default = "🎵")]
+    public string Icon { get; set; } = "🎵";
 
     /// <summary>
     /// KNX configuration for this client.

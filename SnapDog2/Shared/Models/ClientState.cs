@@ -29,6 +29,11 @@ public record ClientState
     public required string Name { get; init; }
 
     /// <summary>
+    /// Gets the client icon character.
+    /// </summary>
+    public string Icon { get; init; } = string.Empty;
+
+    /// <summary>
     /// Gets the client MAC address.
     /// </summary>
     public required string Mac { get; init; }

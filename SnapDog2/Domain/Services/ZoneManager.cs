@@ -1342,6 +1342,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         return new ZoneState
         {
             Name = this._config.Name,
+            Icon = this._config.Icon,
             PlaybackState = PlaybackState.Stopped,
             Volume = 50,
             Mute = false,

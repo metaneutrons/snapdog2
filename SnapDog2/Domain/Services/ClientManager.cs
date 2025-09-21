@@ -189,6 +189,7 @@ public partial class ClientManager : IClientManager
             {
                 Index = clientIndex,
                 Name = clientConfig.Name,
+                Icon = clientConfig.Icon,
                 Mac = clientConfig.Mac ?? "00:00:00:00:00:00",
                 SnapcastId = string.Empty, // Will be updated when Snapcast client is discovered
                 Volume = 50, // Default volume
@@ -272,6 +273,7 @@ public partial class ClientManager : IClientManager
             Index = clientIndex,
             SnapcastId = snapDogClient._snapcastClient.Id,
             Name = client.Name,
+            Icon = this._clientConfigs[clientIndex - 1].Icon,
             Mac = snapDogClient.MacAddress,
             Connected = snapDogClient.Connected,
             Volume = snapDogClient.Volume,
@@ -391,6 +393,7 @@ public partial class ClientManager : IClientManager
                                 Index = clientIndex,
                                 SnapcastId = string.Empty,
                                 Name = clientConfig.Name,
+                                Icon = clientConfig.Icon,
                                 Mac = string.Empty,
                                 Connected = false,
                                 Volume = 50,
