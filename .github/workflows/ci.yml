@@ -144,7 +144,7 @@ jobs:
             --logger "trx;LogFileName=test-results.trx"
 
       - name: Publish Test Results
-        uses: dorny/test-reporter@v1.9.1
+        uses: dorny/test-reporter@v2.1.1
         if: always()
         with:
           name: Test Results (${{ matrix.os }})
