@@ -35,8 +35,11 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
 
         var webSocketUrl = configuration.Value.Services.Snapcast.WebSocketUrl;
         var jsonRpcLogger = serviceProvider.GetRequiredService<ILogger<SnapcastJsonRpcClient>>();
-        _jsonRpcClient = new SnapcastJsonRpcClient(webSocketUrl, jsonRpcLogger);
+        var resilience = configuration.Value.Services.Snapcast.Resilience;
+        _jsonRpcClient = new SnapcastJsonRpcClient(webSocketUrl, jsonRpcLogger, resilience);
         _jsonRpcClient.NotificationReceived += HandleNotification;
+        _jsonRpcClient.ConnectionLost += () => LogConnectionLost();
+        _jsonRpcClient.ConnectionRestored += () => LogConnectionRestored();
 
         _healthCheckTimer = new Timer(PerformHealthCheck, null, 30000, 30000); // 30 seconds in milliseconds
     }
@@ -888,4 +891,10 @@ public partial class CustomSnapcastService : ISnapcastService, IDisposable
 
     [LoggerMessage(EventId = 15074, Level = LogLevel.Warning, Message = "Snapcast service health check failed - not connected")]
     private partial void LogHealthCheckFailed();
+
+    [LoggerMessage(EventId = 15075, Level = LogLevel.Warning, Message = "Snapcast connection lost - automatic reconnection in progress")]
+    private partial void LogConnectionLost();
+
+    [LoggerMessage(EventId = 15076, Level = LogLevel.Information, Message = "Snapcast connection restored")]
+    private partial void LogConnectionRestored();
 }
