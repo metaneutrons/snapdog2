@@ -17,6 +17,7 @@
     <PackageReference Include="StackExchange.Redis" />
     <PackageReference Include="Swashbuckle.AspNetCore" />
     <PackageReference Include="EnvoyConfig" />
+    <PackageReference Include="SignalRSwaggerGen" />
     <PackageReference Include="Serilog.AspNetCore" />
     <PackageReference Include="Serilog.Sinks.Console" />
     <PackageReference Include="Serilog.Sinks.File" />
@@ -49,9 +50,9 @@
 
   <!-- Auto-generate swagger.json when API changes -->
   <Target Name="GenerateSwaggerJson" AfterTargets="Build" Condition="'$(Configuration)' == 'Debug'">
-    <Message Text="🔄 Generating swagger.json..." Importance="high" />
+    <Message Text="🔄 Generating OpenAPI specifications..." Importance="high" />
     <Exec Command="dotnet run --project $(MSBuildProjectDirectory)/../SnapDog2.SwaggerGen/SnapDog2.SwaggerGen.csproj -- $(MSBuildProjectDirectory)/swagger.json" ContinueOnError="false" WorkingDirectory="$(MSBuildProjectDirectory)" />
-    <Message Text="✅ swagger.json generated successfully" Importance="high" />
+    <Message Text="✅ OpenAPI specifications generated successfully" Importance="high" />
   </Target>
 
 </Project>

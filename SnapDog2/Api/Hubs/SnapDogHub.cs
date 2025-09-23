@@ -2,8 +2,10 @@ namespace SnapDog2.Api.Hubs;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using SignalRSwaggerGen.Attributes;
 
 [Authorize]
+[SignalRHub]
 public partial class SnapDogHub : Hub
 {
     private readonly ILogger<SnapDogHub> _logger;

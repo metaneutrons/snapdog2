@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -12,6 +13,7 @@ using Swashbuckle.AspNetCore.Swagger;
 
 // Parse command line arguments
 var outputPath = Path.Combine(Directory.GetCurrentDirectory(), "swagger.json");
+var signalrOutputPath = Path.Combine(Directory.GetCurrentDirectory(), "signalr-swagger.json");
 var verbose = false;
 var showHelp = false;
 
@@ -34,6 +36,7 @@ for (var i = 0; i < args.Length; i++)
             if (i + 1 < args.Length)
             {
                 outputPath = args[++i];
+                signalrOutputPath = Path.ChangeExtension(outputPath, null) + "-signalr.json";
             }
             else
             {
@@ -46,6 +49,7 @@ for (var i = 0; i < args.Length; i++)
             {
                 // First non-flag argument is the output path
                 outputPath = arg;
+                signalrOutputPath = Path.ChangeExtension(outputPath, null) + "-signalr.json";
             }
             else
             {
@@ -71,9 +75,9 @@ if (showHelp)
     Console.WriteLine("  -h, --help                  Show this help message");
     Console.WriteLine();
     Console.WriteLine("Examples:");
-    Console.WriteLine("  dotnet run                           # Generate swagger.json");
-    Console.WriteLine("  dotnet run api-spec.json             # Generate api-spec.json");
-    Console.WriteLine("  dotnet run -o docs/openapi.json      # Generate docs/openapi.json");
+    Console.WriteLine("  dotnet run                           # Generate swagger.json & signalr-swagger.json");
+    Console.WriteLine("  dotnet run api-spec.json             # Generate api-spec.json & api-spec-signalr.json");
+    Console.WriteLine("  dotnet run -o docs/openapi.json      # Generate docs/openapi.json & docs/openapi-signalr.json");
     Console.WriteLine("  dotnet run --verbose                 # Generate with verbose output");
     Environment.Exit(0);
 }
@@ -90,11 +94,12 @@ var stopwatch = Stopwatch.StartNew();
 
 try
 {
-    Console.WriteLine($"{CYAN}SnapDog swagger-gen{RESET} {DIM}Generating OpenAPI specification{RESET}");
+    Console.WriteLine($"{CYAN}SnapDog swagger-gen{RESET} {DIM}Generating OpenAPI specifications{RESET}");
     Console.WriteLine();
 
-    // Validate and resolve output path
+    // Validate and resolve output paths
     var fullOutputPath = Path.GetFullPath(outputPath);
+    var fullSignalrOutputPath = Path.GetFullPath(signalrOutputPath);
     var outputDir = Path.GetDirectoryName(fullOutputPath);
 
     if (!string.IsNullOrEmpty(outputDir) && !Directory.Exists(outputDir))
@@ -109,7 +114,8 @@ try
 
     if (verbose)
     {
-        Console.WriteLine($"{DIM}→ Output path: {fullOutputPath}{RESET}");
+        Console.WriteLine($"{DIM}→ API output path: {fullOutputPath}{RESET}");
+        Console.WriteLine($"{DIM}→ SignalR output path: {fullSignalrOutputPath}{RESET}");
     }
 
     // Locate SnapDog2 assembly with fallback paths
@@ -173,6 +179,7 @@ try
     // Configure services
     builder.Services.AddControllers()
         .AddApplicationPart(snapDogAssembly);
+    builder.Services.AddSignalR();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(options =>
     {
@@ -181,6 +188,12 @@ try
         {
             Title = "SnapDog2 API",
             Version = "v1"
+        });
+
+        // Add SignalR swagger generation
+        options.AddSignalRSwaggerGen(ssgOptions =>
+        {
+            ssgOptions.ScanAssemblies(snapDogAssembly);
         });
     });
 
@@ -191,9 +204,18 @@ try
 
     var app = builder.Build();
 
+    // Configure SignalR hub
+    var hubType = snapDogAssembly.GetTypes()
+        .FirstOrDefault(t => t.Name == "SnapDogHub");
+
+    if (hubType != null && verbose)
+    {
+        Console.WriteLine($"{DIM}→ Found SignalR hub: {hubType.Name}{RESET}");
+    }
+
     if (verbose)
     {
-        Console.WriteLine($"{DIM}→ Generating OpenAPI specification...{RESET}");
+        Console.WriteLine($"{DIM}→ Generating API specification...{RESET}");
     }
 
     // Generate swagger document with error handling
@@ -221,41 +243,39 @@ try
     if (verbose && swagger.Paths != null)
     {
         Console.WriteLine($"{DIM}→ Found {swagger.Paths.Count} API paths{RESET}");
-    }
 
-    // Write swagger.json with atomic operation
-    var tempPath = fullOutputPath + ".tmp";
-    try
-    {
-        await using var writer = File.CreateText(tempPath);
-        swagger.SerializeAsV3(new OpenApiJsonWriter(writer));
-        await writer.FlushAsync();
-    }
-    catch (Exception ex)
-    {
-        if (File.Exists(tempPath))
+        // Count SignalR paths
+        var signalrPaths = swagger.Paths.Keys.Where(k => k.Contains("signalr", StringComparison.OrdinalIgnoreCase)).Count();
+        if (signalrPaths > 0)
         {
-            File.Delete(tempPath);
+            Console.WriteLine($"{DIM}→ Found {signalrPaths} SignalR hub methods{RESET}");
         }
-        throw new IOException($"Failed to write OpenAPI specification to '{tempPath}': {ex.Message}", ex);
     }
 
-    // Atomic move
-    if (File.Exists(fullOutputPath))
+    // Write combined swagger.json (API + SignalR)
+    await WriteSwaggerFile(swagger, fullOutputPath, "Combined API + SignalR", verbose);
+
+    // Also create separate SignalR-only documentation
+    if (hubType != null)
     {
-        File.Delete(fullOutputPath);
+        if (verbose)
+        {
+            Console.WriteLine($"{DIM}→ Extracting SignalR-only specification...{RESET}");
+        }
+
+        try
+        {
+            var signalrOnlySwagger = CreateSignalROnlySwagger(swagger);
+            await WriteSwaggerFile(signalrOnlySwagger, fullSignalrOutputPath, "SignalR Hub", verbose);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"{YELLOW}⚠ Warning: Failed to create SignalR-only specification: {ex.Message}{RESET}");
+        }
     }
-    File.Move(tempPath, fullOutputPath);
 
     stopwatch.Stop();
-
-    var fileInfo = new FileInfo(fullOutputPath);
-    Console.WriteLine($"{GREEN}✓{RESET} Generated {Path.GetFileName(fullOutputPath)} ({FormatFileSize(fileInfo.Length)}) in {stopwatch.ElapsedMilliseconds}ms");
-
-    if (verbose)
-    {
-        Console.WriteLine($"{DIM}  {fullOutputPath}{RESET}");
-    }
+    Console.WriteLine($"{GREEN}✓{RESET} Generated OpenAPI specifications in {stopwatch.ElapsedMilliseconds}ms");
 
     Environment.Exit(0);
 }
@@ -284,6 +304,71 @@ catch (Exception ex)
     }
 
     Environment.Exit(1);
+}
+
+static OpenApiDocument CreateSignalROnlySwagger(OpenApiDocument originalSwagger)
+{
+    var signalrSwagger = new OpenApiDocument
+    {
+        Info = new OpenApiInfo
+        {
+            Title = "SnapDog2 SignalR Hub",
+            Version = "v1",
+            Description = "Real-time notifications and hub methods for SnapDog2"
+        },
+        Paths = new OpenApiPaths(),
+        Components = originalSwagger.Components
+    };
+
+    // Filter only SignalR paths
+    foreach (var path in originalSwagger.Paths.Where(p =>
+        p.Key.Contains("signalr", StringComparison.OrdinalIgnoreCase) ||
+        p.Value.Operations.Any(op => op.Value.Tags?.Any(tag =>
+            tag.Name.Contains("SignalR", StringComparison.OrdinalIgnoreCase) ||
+            tag.Name.Contains("Hub", StringComparison.OrdinalIgnoreCase)) == true)))
+    {
+        signalrSwagger.Paths.Add(path.Key, path.Value);
+    }
+
+    return signalrSwagger;
+}
+
+static async Task WriteSwaggerFile(OpenApiDocument swagger, string filePath, string type, bool verbose)
+{
+    const string GREEN = "\u001b[32m";
+    const string RESET = "\u001b[0m";
+    const string DIM = "\u001b[2m";
+
+    var tempPath = filePath + ".tmp";
+    try
+    {
+        await using var writer = File.CreateText(tempPath);
+        swagger.SerializeAsV3(new OpenApiJsonWriter(writer));
+        await writer.FlushAsync();
+    }
+    catch (Exception ex)
+    {
+        if (File.Exists(tempPath))
+        {
+            File.Delete(tempPath);
+        }
+        throw new IOException($"Failed to write {type} specification to '{tempPath}': {ex.Message}", ex);
+    }
+
+    // Atomic move
+    if (File.Exists(filePath))
+    {
+        File.Delete(filePath);
+    }
+    File.Move(tempPath, filePath);
+
+    var fileInfo = new FileInfo(filePath);
+    Console.WriteLine($"{GREEN}✓{RESET} Generated {type} {Path.GetFileName(filePath)} ({FormatFileSize(fileInfo.Length)})");
+
+    if (verbose)
+    {
+        Console.WriteLine($"{DIM}  {filePath}{RESET}");
+    }
 }
 
 static string FormatFileSize(long bytes)
