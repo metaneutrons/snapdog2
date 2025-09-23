@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Shared.Attributes;
+using Swashbuckle.AspNetCore.Annotations;
 
 /// <summary>
 /// Media status controller for blueprint compliance.
@@ -31,6 +32,7 @@ public partial class MediaController : ControllerBase
     /// </summary>
     [HttpGet("playlists")]
     [StatusId("MEDIA_PLAYLISTS")]
+    [SwaggerOperation(OperationId = "getPlaylists")]
     [ProducesResponseType<object[]>(StatusCodes.Status200OK)]
     public async Task<ActionResult<object[]>> GetPlaylists()
     {
@@ -47,6 +49,7 @@ public partial class MediaController : ControllerBase
     /// </summary>
     [HttpGet("playlists/{playlistIndex}")]
     [StatusId("MEDIA_PLAYLIST_INFO")]
+    [SwaggerOperation(OperationId = "getPlaylist")]
     [ProducesResponseType<object>(StatusCodes.Status200OK)]
     public async Task<ActionResult<object>> GetPlaylistInfo(string playlistIndex)
     {
@@ -79,6 +82,7 @@ public partial class MediaController : ControllerBase
     /// </summary>
     [HttpGet("playlists/{playlistIndex}/tracks")]
     [StatusId("MEDIA_PLAYLIST_TRACKS")]
+    [SwaggerOperation(OperationId = "getPlaylistTracks")]
     [ProducesResponseType<object[]>(StatusCodes.Status200OK)]
     public async Task<ActionResult<object[]>> GetPlaylistTracks(string playlistIndex)
     {
@@ -129,6 +133,7 @@ public partial class MediaController : ControllerBase
     /// </summary>
     [HttpGet("tracks/{trackIndex}")]
     [StatusId("MEDIA_TRACK_INFO")]
+    [SwaggerOperation(OperationId = "getTrack")]
     [ProducesResponseType<object>(StatusCodes.Status200OK)]
     public async Task<ActionResult<object>> GetTrackInfo(string trackIndex)
     {

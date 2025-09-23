@@ -22,6 +22,7 @@ using SnapDog2.Shared.Attributes;
 using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Constants;
 using SnapDog2.Shared.Models;
+using Swashbuckle.AspNetCore.Annotations;
 
 /// <summary>
 /// Modern API controller for Snapcast client management.
@@ -111,6 +112,8 @@ public partial class ClientsController(IClientService clientService, IOptions<Sn
     /// </summary>
     /// <returns>List of all clients</returns>
     [HttpGet("count")]
+
+    [SwaggerOperation(OperationId = "getClientCount")]
     [StatusId("CLIENT_COUNT")]
     [ProducesResponseType<int>(StatusCodes.Status200OK)]
     public async Task<ActionResult<int>> GetClientsCount()
@@ -126,6 +129,9 @@ public partial class ClientsController(IClientService clientService, IOptions<Sn
     }
 
     [HttpGet]
+
+
+    [SwaggerOperation(OperationId = "getClients")]
     [StatusId("CLIENT_STATES")]
     [ProducesResponseType<Page<ClientState>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
@@ -165,6 +171,8 @@ public partial class ClientsController(IClientService clientService, IOptions<Sn
     /// <param name="clientIndex">Client Index</param>
     /// <returns>Client state information</returns>
     [HttpGet("{clientIndex:int}")]
+
+    [SwaggerOperation(OperationId = "getClient")]
     [StatusId("CLIENT_STATE")]
     [ProducesResponseType<ClientState>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -188,6 +196,8 @@ public partial class ClientsController(IClientService clientService, IOptions<Sn
     /// <param name="volume">Volume level (0-100)</param>
     /// <returns>New volume level</returns>
     [HttpPut("{clientIndex:int}/volume")]
+
+    [SwaggerOperation(OperationId = "setClientVolume")]
     [CommandId(CommandIds.ClientVolume)]
     [ProducesResponseType<int>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
@@ -216,6 +226,8 @@ public partial class ClientsController(IClientService clientService, IOptions<Sn
     /// <param name="clientIndex">Client Index</param>
     /// <returns>Current volume level (0-100)</returns>
     [HttpGet("{clientIndex:int}/volume")]
+
+    [SwaggerOperation(OperationId = "getClientVolume")]
     [ProducesResponseType<int>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<int>> GetVolume(int clientIndex)
@@ -238,6 +250,8 @@ public partial class ClientsController(IClientService clientService, IOptions<Sn
     /// <param name="step">Volume increase step (default: 5)</param>
     /// <returns>New volume level</returns>
     [HttpPost("{clientIndex:int}/volume/up")]
+
+    [SwaggerOperation(OperationId = "clientVolumeUp")]
     [CommandId(CommandIds.ClientVolumeUp)]
     [ProducesResponseType<int>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
@@ -267,6 +281,8 @@ public partial class ClientsController(IClientService clientService, IOptions<Sn
     /// <param name="step">Volume decrease step (default: 5)</param>
     /// <returns>New volume level</returns>
     [HttpPost("{clientIndex:int}/volume/down")]
+
+    [SwaggerOperation(OperationId = "clientVolumeDown")]
     [CommandId(CommandIds.ClientVolumeDown)]
     [ProducesResponseType<int>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
@@ -296,6 +312,8 @@ public partial class ClientsController(IClientService clientService, IOptions<Sn
     /// <param name="muted">Mute state (true = muted, false = unmuted)</param>
     /// <returns>New mute state</returns>
     [HttpPut("{clientIndex:int}/mute")]
+
+    [SwaggerOperation(OperationId = "setClientMute")]
     [CommandId(CommandIds.ClientMute)]
     [ProducesResponseType<bool>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -318,6 +336,8 @@ public partial class ClientsController(IClientService clientService, IOptions<Sn
     /// <param name="clientIndex">Client Index</param>
     /// <returns>Current mute state</returns>
     [HttpGet("{clientIndex:int}/mute")]
+
+    [SwaggerOperation(OperationId = "getClientMute")]
     [ProducesResponseType<bool>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<bool>> GetMute(int clientIndex)
@@ -339,6 +359,8 @@ public partial class ClientsController(IClientService clientService, IOptions<Sn
     /// <param name="clientIndex">Client Index</param>
     /// <returns>New mute state</returns>
     [HttpPost("{clientIndex:int}/mute/toggle")]
+
+    [SwaggerOperation(OperationId = "toggleClientMute")]
     [CommandId(CommandIds.ClientMuteToggle)]
     [ProducesResponseType<bool>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -362,6 +384,8 @@ public partial class ClientsController(IClientService clientService, IOptions<Sn
     /// <param name="latency">Latency in milliseconds</param>
     /// <returns>New latency value</returns>
     [HttpPut("{clientIndex:int}/latency")]
+
+    [SwaggerOperation(OperationId = "setClientLatency")]
     [CommandId(CommandIds.ClientLatency)]
     [ProducesResponseType<int>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
@@ -390,6 +414,8 @@ public partial class ClientsController(IClientService clientService, IOptions<Sn
     /// <param name="clientIndex">Client Index</param>
     /// <returns>Current latency in milliseconds</returns>
     [HttpGet("{clientIndex:int}/latency")]
+
+    [SwaggerOperation(OperationId = "getClientLatency")]
     [ProducesResponseType<int>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<int>> GetLatency(int clientIndex)
@@ -412,6 +438,8 @@ public partial class ClientsController(IClientService clientService, IOptions<Sn
     /// <param name="zoneIndex">Zone ID (1-based)</param>
     /// <returns>No content on success</returns>
     [HttpPut("{clientIndex:int}/zone")]
+
+    [SwaggerOperation(OperationId = "setClientZone")]
     [CommandId(CommandIds.ClientZone)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
@@ -440,6 +468,8 @@ public partial class ClientsController(IClientService clientService, IOptions<Sn
     /// <param name="clientIndex">Client Index</param>
     /// <returns>Zone ID if assigned, null if unassigned</returns>
     [HttpGet("{clientIndex:int}/zone")]
+
+    [SwaggerOperation(OperationId = "getClientZone")]
     [ProducesResponseType<int?>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<int?>> GetZoneAssignment(int clientIndex)
@@ -462,6 +492,8 @@ public partial class ClientsController(IClientService clientService, IOptions<Sn
     /// <param name="name">New client name</param>
     /// <returns>Updated client name</returns>
     [HttpPut("{clientIndex:int}/name")]
+
+    [SwaggerOperation(OperationId = "setClientName")]
     [CommandId(CommandIds.ClientName)]
     [ProducesResponseType<string>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
@@ -496,6 +528,8 @@ public partial class ClientsController(IClientService clientService, IOptions<Sn
     /// <param name="clientIndex">Client Index</param>
     /// <returns>Client connection status</returns>
     [HttpGet("{clientIndex:int}/connected")]
+
+    [SwaggerOperation(OperationId = "getClientConnected")]
     [ProducesResponseType<bool>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<bool>> GetClientConnected(int clientIndex)
@@ -517,6 +551,8 @@ public partial class ClientsController(IClientService clientService, IOptions<Sn
     /// <param name="clientIndex">Client Index</param>
     /// <returns>Client icon character or empty string</returns>
     [HttpGet("{clientIndex:int}/icon")]
+
+    [SwaggerOperation(OperationId = "getClientIcon")]
     [ProducesResponseType<string>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public ActionResult<string> GetClientIcon(int clientIndex)
@@ -536,6 +572,8 @@ public partial class ClientsController(IClientService clientService, IOptions<Sn
     /// <param name="clientIndex">Client Index</param>
     /// <returns>Client name</returns>
     [HttpGet("{clientIndex:int}/name")]
+
+    [SwaggerOperation(OperationId = "getClientName")]
     [ProducesResponseType<string>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<string>> GetClientName(int clientIndex)

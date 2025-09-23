@@ -520,7 +520,15 @@ static WebApplication CreateWebApplication(string[] args)
     {
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+        builder.Services.AddSwaggerGen(c =>
+        {
+            c.EnableAnnotations();
+            c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+            {
+                Title = "SnapDog2 API",
+                Version = "v1"
+            });
+        });
 
         // Add SignalR
         builder.Services.AddSignalR();

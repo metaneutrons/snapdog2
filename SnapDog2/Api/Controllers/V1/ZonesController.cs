@@ -23,6 +23,7 @@ using SnapDog2.Shared.Attributes;
 using SnapDog2.Shared.Configuration;
 using SnapDog2.Shared.Enums;
 using SnapDog2.Shared.Models;
+using Swashbuckle.AspNetCore.Annotations;
 
 /// <summary>
 /// Modern zones controller with direct service calls.
@@ -48,6 +49,9 @@ public partial class ZonesController(
     // ZONE LISTING - Direct service calls
 
     [HttpGet("count")]
+
+
+    [SwaggerOperation(OperationId = "getZoneCount")]
     [StatusId("ZONE_COUNT")]
     [ProducesResponseType<int>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
@@ -62,6 +66,9 @@ public partial class ZonesController(
     }
 
     [HttpGet]
+
+
+    [SwaggerOperation(OperationId = "getZones")]
     [StatusId("ZONE_STATES")]
     [ProducesResponseType<Page<ZoneState>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
@@ -91,6 +98,9 @@ public partial class ZonesController(
     }
 
     [HttpGet("{zoneIndex:int}")]
+
+
+    [SwaggerOperation(OperationId = "getZone")]
     [StatusId("ZONE_STATE")]
     [ProducesResponseType<ZoneState>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -108,6 +118,9 @@ public partial class ZonesController(
     // VOLUME CONTROL - Direct service calls
 
     [HttpPut("{zoneIndex:int}/volume")]
+
+
+    [SwaggerOperation(OperationId = "setZoneVolume")]
     [CommandId("VOLUME")]
     [ProducesResponseType<int>(StatusCodes.Status202Accepted)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
@@ -135,6 +148,9 @@ public partial class ZonesController(
     }
 
     [HttpGet("{zoneIndex:int}/volume")]
+
+
+    [SwaggerOperation(OperationId = "getZoneVolume")]
     [StatusId("VOLUME_STATUS")]
     [ProducesResponseType<int>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -150,6 +166,9 @@ public partial class ZonesController(
     }
 
     [HttpPost("{zoneIndex:int}/volume/up")]
+
+
+    [SwaggerOperation(OperationId = "volumeUp")]
     [CommandId("VOLUME_UP")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -166,6 +185,9 @@ public partial class ZonesController(
     }
 
     [HttpPost("{zoneIndex:int}/volume/down")]
+
+
+    [SwaggerOperation(OperationId = "volumeDown")]
     [CommandId("VOLUME_DOWN")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -185,6 +207,9 @@ public partial class ZonesController(
     // MUTE CONTROL - Direct service calls
 
     [HttpPut("{zoneIndex:int}/mute")]
+
+
+    [SwaggerOperation(OperationId = "setZoneMute")]
     [CommandId("MUTE")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -201,6 +226,9 @@ public partial class ZonesController(
     }
 
     [HttpGet("{zoneIndex:int}/mute")]
+
+
+    [SwaggerOperation(OperationId = "getZoneMute")]
     [StatusId("MUTE_STATUS")]
     [ProducesResponseType<bool>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -216,6 +244,9 @@ public partial class ZonesController(
     }
 
     [HttpPost("{zoneIndex:int}/mute/toggle")]
+
+
+    [SwaggerOperation(OperationId = "toggleMute")]
     [CommandId("MUTE_TOGGLE")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -235,6 +266,9 @@ public partial class ZonesController(
     // PLAYBACK CONTROL - Direct service calls
 
     [HttpPost("{zoneIndex:int}/play")]
+
+
+    [SwaggerOperation(OperationId = "playZone")]
     [CommandId("PLAY")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -255,6 +289,9 @@ public partial class ZonesController(
     }
 
     [HttpPost("{zoneIndex:int}/pause")]
+
+
+    [SwaggerOperation(OperationId = "pauseZone")]
     [CommandId("PAUSE")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -275,6 +312,9 @@ public partial class ZonesController(
     }
 
     [HttpPost("{zoneIndex:int}/stop")]
+
+
+    [SwaggerOperation(OperationId = "stopZone")]
     [CommandId("STOP")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -298,6 +338,9 @@ public partial class ZonesController(
     // PLAYLIST CONTROL - Direct service calls
 
     [HttpPut("{zoneIndex:int}/playlist")]
+
+
+    [SwaggerOperation(OperationId = "setZonePlaylist")]
     [CommandId("PLAYLIST")]
     [ProducesResponseType<int>(StatusCodes.Status202Accepted)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
@@ -329,6 +372,9 @@ public partial class ZonesController(
     }
 
     [HttpPost("{zoneIndex:int}/next/playlist")]
+
+
+    [SwaggerOperation(OperationId = "nextPlaylist")]
     [CommandId("PLAYLIST_NEXT")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -345,6 +391,9 @@ public partial class ZonesController(
     }
 
     [HttpPost("{zoneIndex:int}/previous/playlist")]
+
+
+    [SwaggerOperation(OperationId = "previousPlaylist")]
     [CommandId("PLAYLIST_PREVIOUS")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -364,6 +413,9 @@ public partial class ZonesController(
     // TRACK CONTROL - Direct service calls
 
     [HttpPut("{zoneIndex:int}/track")]
+
+
+    [SwaggerOperation(OperationId = "setZoneTrack")]
     [CommandId("TRACK")]
     [ProducesResponseType<int>(StatusCodes.Status202Accepted)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
@@ -386,6 +438,9 @@ public partial class ZonesController(
     }
 
     [HttpPost("{zoneIndex:int}/next")]
+
+
+    [SwaggerOperation(OperationId = "nextTrack")]
     [CommandId("TRACK_NEXT")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -402,6 +457,9 @@ public partial class ZonesController(
     }
 
     [HttpPost("{zoneIndex:int}/previous")]
+
+
+    [SwaggerOperation(OperationId = "previousTrack")]
     [CommandId("TRACK_PREVIOUS")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -418,6 +476,9 @@ public partial class ZonesController(
     }
 
     [HttpPost("{zoneIndex:int}/play/track")]
+
+
+    [SwaggerOperation(OperationId = "playTrack")]
     [CommandId("TRACK_PLAY_INDEX")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -438,6 +499,9 @@ public partial class ZonesController(
     }
 
     [HttpPost("{zoneIndex:int}/play/url")]
+
+
+    [SwaggerOperation(OperationId = "playUrl")]
     [CommandId("TRACK_PLAY_URL")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -482,6 +546,9 @@ public partial class ZonesController(
     }
 
     [HttpPut("{zoneIndex:int}/track/position")]
+
+
+    [SwaggerOperation(OperationId = "setTrackPosition")]
     [CommandId("TRACK_POSITION")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -498,6 +565,9 @@ public partial class ZonesController(
     }
 
     [HttpPut("{zoneIndex:int}/track/progress")]
+
+
+    [SwaggerOperation(OperationId = "setTrackProgress")]
     [CommandId("TRACK_PROGRESS")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -514,6 +584,9 @@ public partial class ZonesController(
     }
 
     [HttpPut("{zoneIndex:int}/repeat/track")]
+
+
+    [SwaggerOperation(OperationId = "setTrackRepeat")]
     [CommandId("TRACK_REPEAT")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -534,6 +607,9 @@ public partial class ZonesController(
     }
 
     [HttpPost("{zoneIndex:int}/repeat/track/toggle")]
+
+
+    [SwaggerOperation(OperationId = "toggleTrackRepeat")]
     [CommandId("TRACK_REPEAT_TOGGLE")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -554,6 +630,9 @@ public partial class ZonesController(
     }
 
     [HttpPut("{zoneIndex:int}/shuffle")]
+
+
+    [SwaggerOperation(OperationId = "setZoneShuffle")]
     [CommandId("PLAYLIST_SHUFFLE")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -570,6 +649,9 @@ public partial class ZonesController(
     }
 
     [HttpPost("{zoneIndex:int}/shuffle/toggle")]
+
+
+    [SwaggerOperation(OperationId = "toggleShuffle")]
     [CommandId("PLAYLIST_SHUFFLE_TOGGLE")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -586,6 +668,9 @@ public partial class ZonesController(
     }
 
     [HttpPut("{zoneIndex:int}/repeat")]
+
+
+    [SwaggerOperation(OperationId = "setZoneRepeat")]
     [CommandId("PLAYLIST_REPEAT")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -606,6 +691,9 @@ public partial class ZonesController(
     }
 
     [HttpPost("{zoneIndex:int}/repeat/toggle")]
+
+
+    [SwaggerOperation(OperationId = "toggleRepeat")]
     [CommandId("PLAYLIST_REPEAT_TOGGLE")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -626,6 +714,9 @@ public partial class ZonesController(
     }
 
     [HttpPost("{zoneIndex:int}/control")]
+
+
+    [SwaggerOperation(OperationId = "controlZone")]
     [CommandId("CONTROL")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -646,6 +737,9 @@ public partial class ZonesController(
     // STATUS ENDPOINTS - Blueprint compliance
 
     [HttpGet("{zoneIndex:int}/icon")]
+
+
+    [SwaggerOperation(OperationId = "getZoneIcon")]
     [StatusId("ZONE_ICON_STATUS")]
     [ProducesResponseType<string>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
@@ -661,6 +755,9 @@ public partial class ZonesController(
     }
 
     [HttpGet("{zoneIndex:int}/name")]
+
+
+    [SwaggerOperation(OperationId = "getZoneName")]
     [StatusId("ZONE_NAME_STATUS")]
     [ProducesResponseType<string>(StatusCodes.Status200OK)]
     public async Task<ActionResult<string>> GetZoneName(int zoneIndex)
@@ -674,6 +771,9 @@ public partial class ZonesController(
     }
 
     [HttpGet("{zoneIndex:int}/track/title")]
+
+
+    [SwaggerOperation(OperationId = "getTrackTitle")]
     [StatusId("TRACK_METADATA_TITLE")]
     [ProducesResponseType<string>(StatusCodes.Status200OK)]
     public async Task<ActionResult<string>> GetTrackTitle(int zoneIndex)
@@ -687,6 +787,9 @@ public partial class ZonesController(
     }
 
     [HttpGet("{zoneIndex:int}/track/playing")]
+
+
+    [SwaggerOperation(OperationId = "getTrackPlaying")]
     [StatusId("TRACK_PLAYING_STATUS")]
     [ProducesResponseType<bool>(StatusCodes.Status200OK)]
     public async Task<ActionResult<bool>> GetTrackPlayingStatus(int zoneIndex)
@@ -700,6 +803,9 @@ public partial class ZonesController(
     }
 
     [HttpGet("{zoneIndex:int}/playlist/name")]
+
+
+    [SwaggerOperation(OperationId = "getPlaylistName")]
     [StatusId("PLAYLIST_NAME_STATUS")]
     [ProducesResponseType<string>(StatusCodes.Status200OK)]
     public async Task<ActionResult<string>> GetPlaylistName(int zoneIndex)
@@ -713,6 +819,9 @@ public partial class ZonesController(
     }
 
     [HttpGet("{zoneIndex:int}/playback")]
+
+
+    [SwaggerOperation(OperationId = "getZonePlayback")]
     [StatusId("PLAYBACK_STATE")]
     [ProducesResponseType<string>(StatusCodes.Status200OK)]
     public async Task<ActionResult<string>> GetPlaybackState(int zoneIndex)
@@ -726,6 +835,9 @@ public partial class ZonesController(
     }
 
     [HttpGet("{zoneIndex:int}/track")]
+
+
+    [SwaggerOperation(OperationId = "getZoneTrack")]
     [StatusId("TRACK_STATUS")]
     [ProducesResponseType<object>(StatusCodes.Status200OK)]
     public async Task<ActionResult<object>> GetTrackStatus(int zoneIndex)
@@ -739,6 +851,9 @@ public partial class ZonesController(
     }
 
     [HttpGet("{zoneIndex:int}/track/metadata")]
+
+
+    [SwaggerOperation(OperationId = "getTrackMetadata")]
     [StatusId("TRACK_METADATA")]
     [ProducesResponseType<object>(StatusCodes.Status200OK)]
     public async Task<ActionResult<object>> GetTrackMetadata(int zoneIndex)
@@ -752,6 +867,9 @@ public partial class ZonesController(
     }
 
     [HttpGet("{zoneIndex:int}/track/duration")]
+
+
+    [SwaggerOperation(OperationId = "getTrackDuration")]
     [StatusId("TRACK_METADATA_DURATION")]
     [ProducesResponseType<long>(StatusCodes.Status200OK)]
     public async Task<ActionResult<long>> GetTrackDuration(int zoneIndex)
@@ -765,6 +883,9 @@ public partial class ZonesController(
     }
 
     [HttpGet("{zoneIndex:int}/track/artist")]
+
+
+    [SwaggerOperation(OperationId = "getTrackArtist")]
     [StatusId("TRACK_METADATA_ARTIST")]
     [ProducesResponseType<string>(StatusCodes.Status200OK)]
     public async Task<ActionResult<string>> GetTrackArtist(int zoneIndex)
@@ -778,6 +899,9 @@ public partial class ZonesController(
     }
 
     [HttpGet("{zoneIndex:int}/track/album")]
+
+
+    [SwaggerOperation(OperationId = "getTrackAlbum")]
     [StatusId("TRACK_METADATA_ALBUM")]
     [ProducesResponseType<string>(StatusCodes.Status200OK)]
     public async Task<ActionResult<string>> GetTrackAlbum(int zoneIndex)
@@ -791,6 +915,9 @@ public partial class ZonesController(
     }
 
     [HttpGet("{zoneIndex:int}/track/cover")]
+
+
+    [SwaggerOperation(OperationId = "getTrackCover")]
     [StatusId("TRACK_METADATA_COVER")]
     [ProducesResponseType<string>(StatusCodes.Status200OK)]
     public async Task<ActionResult<string>> GetTrackCover(int zoneIndex)
@@ -804,6 +931,9 @@ public partial class ZonesController(
     }
 
     [HttpGet("{zoneIndex:int}/track/position")]
+
+
+    [SwaggerOperation(OperationId = "getTrackPosition")]
     [StatusId("TRACK_POSITION_STATUS")]
     [ProducesResponseType<long>(StatusCodes.Status200OK)]
     public async Task<ActionResult<long>> GetTrackPosition(int zoneIndex)
@@ -817,6 +947,9 @@ public partial class ZonesController(
     }
 
     [HttpGet("{zoneIndex:int}/track/progress")]
+
+
+    [SwaggerOperation(OperationId = "getTrackProgress")]
     [StatusId("TRACK_PROGRESS_STATUS")]
     [ProducesResponseType<float>(StatusCodes.Status200OK)]
     public async Task<ActionResult<float>> GetTrackProgress(int zoneIndex)
@@ -830,6 +963,9 @@ public partial class ZonesController(
     }
 
     [HttpGet("{zoneIndex:int}/repeat/track")]
+
+
+    [SwaggerOperation(OperationId = "getTrackRepeat")]
     [StatusId("TRACK_REPEAT_STATUS")]
     [ProducesResponseType<bool>(StatusCodes.Status200OK)]
     public async Task<ActionResult<bool>> GetTrackRepeat(int zoneIndex)
@@ -843,6 +979,9 @@ public partial class ZonesController(
     }
 
     [HttpGet("{zoneIndex:int}/playlist")]
+
+
+    [SwaggerOperation(OperationId = "getZonePlaylist")]
     [StatusId("PLAYLIST_STATUS")]
     [ProducesResponseType<object>(StatusCodes.Status200OK)]
     public async Task<ActionResult<object>> GetPlaylistStatus(int zoneIndex)
@@ -856,6 +995,9 @@ public partial class ZonesController(
     }
 
     [HttpGet("{zoneIndex:int}/playlist/info")]
+
+
+    [SwaggerOperation(OperationId = "getPlaylistInfo")]
     [StatusId("PLAYLIST_INFO")]
     [ProducesResponseType<object>(StatusCodes.Status200OK)]
     public async Task<ActionResult<object>> GetPlaylistInfo(int zoneIndex)
@@ -869,6 +1011,9 @@ public partial class ZonesController(
     }
 
     [HttpGet("{zoneIndex:int}/playlist/count")]
+
+
+    [SwaggerOperation(OperationId = "getPlaylistCount")]
     [StatusId("PLAYLIST_COUNT_STATUS")]
     [ProducesResponseType<int>(StatusCodes.Status200OK)]
     public async Task<ActionResult<int>> GetPlaylistCount(int zoneIndex)
@@ -882,6 +1027,9 @@ public partial class ZonesController(
     }
 
     [HttpGet("{zoneIndex:int}/shuffle")]
+
+
+    [SwaggerOperation(OperationId = "getZoneShuffle")]
     [StatusId("PLAYLIST_SHUFFLE_STATUS")]
     [ProducesResponseType<bool>(StatusCodes.Status200OK)]
     public async Task<ActionResult<bool>> GetPlaylistShuffle(int zoneIndex)
@@ -895,6 +1043,9 @@ public partial class ZonesController(
     }
 
     [HttpGet("{zoneIndex:int}/repeat")]
+
+
+    [SwaggerOperation(OperationId = "getZoneRepeat")]
     [StatusId("PLAYLIST_REPEAT_STATUS")]
     [ProducesResponseType<string>(StatusCodes.Status200OK)]
     public async Task<ActionResult<string>> GetPlaylistRepeat(int zoneIndex)

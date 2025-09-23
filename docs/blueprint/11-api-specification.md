@@ -58,22 +58,22 @@ Endpoints for accessing system-wide information.
 
 **Modern Design Philosophy:** Returns primitive values and structured objects directly without wrapper objects.
 
-| Method | Path                   | Command/Status ID | Description                      | Success Response (Direct)       | HTTP Status |
-| :----- | :--------------------- | :---------------- | :------------------------------- | :------------------------------ | :---------- |
-| `GET`  | `/system/status`       | `SYSTEM_STATUS`   | Get system online status         | `SystemStatusDto`               | 200 OK      |
-| `GET`  | `/system/errors`       | `ERROR_STATUS`    | Get recent system errors         | `List<ErrorDetails>`            | 200 OK      |
-| `GET`  | `/system/version`      | `VERSION_INFO`    | Get software version             | `VersionDetails`                | 200 OK      |
-| `GET`  | `/system/stats`        | `SERVER_STATS`    | Get server performance statistics| `ServerStats`                   | 200 OK      |
-| `GET`  | `/system/commands/status` | `COMMAND_STATUS` | Get command processing status    | `string` ("idle", "processing", "error") | 200 OK |
-| `GET`  | `/system/commands/errors` | `COMMAND_ERROR`  | Get recent command errors        | `string[]` (error messages)     | 200 OK      |
+| Method | Path                   | Command/Status ID | OperationId | Description                      | Success Response (Direct)       | HTTP Status |
+| :----- | :--------------------- | :---------------- | :---------- | :------------------------------- | :------------------------------ | :---------- |
+| `GET`  | `/system/status`       | `SYSTEM_STATUS`   | `getSystemStatus` | Get system online status         | `SystemStatusDto`               | 200 OK      |
+| `GET`  | `/system/errors`       | `ERROR_STATUS`    | `getSystemErrors` | Get recent system errors         | `List<ErrorDetails>`            | 200 OK      |
+| `GET`  | `/system/version`      | `VERSION_INFO`    | `getSystemVersion` | Get software version             | `VersionDetails`                | 200 OK      |
+| `GET`  | `/system/stats`        | `SERVER_STATS`    | `getSystemStats` | Get server performance statistics| `ServerStats`                   | 200 OK      |
+| `GET`  | `/system/commands/status` | `COMMAND_STATUS` | `getCommandStatus` | Get command processing status    | `string` ("idle", "processing", "error") | 200 OK |
+| `GET`  | `/system/commands/errors` | `COMMAND_ERROR`  | `getCommandErrors` | Get recent command errors        | `string[]` (error messages)     | 200 OK      |
 
 #### 10.4.1.1. **Health Endpoints:**
 
-| Method | Path                   | Description                      | Success Response (Direct)       | HTTP Status |
-| :----- | :--------------------- | :------------------------------- | :------------------------------ | :---------- |
-| `GET`  | `/health`              | Basic health check               | `string` ("Healthy")            | 200 OK      |
-| `GET`  | `/health/ready`        | Readiness probe                  | `string` ("Ready")              | 200 OK      |
-| `GET`  | `/health/live`         | Liveness probe                   | `string` ("Live")               | 200 OK      |
+| Method | Path                   | OperationId | Description                      | Success Response (Direct)       | HTTP Status |
+| :----- | :--------------------- | :---------- | :------------------------------- | :------------------------------ | :---------- |
+| `GET`  | `/health`              | `getHealth` | Basic health check               | `string` ("Healthy")            | 200 OK      |
+| `GET`  | `/health/ready`        | `getHealthReady` | Readiness probe                  | `string` ("Ready")              | 200 OK      |
+| `GET`  | `/health/live`         | `getHealthLive` | Liveness probe                   | `string` ("Live")               | 200 OK      |
 
 ### 10.4.2. Zone Endpoints
 
@@ -81,47 +81,47 @@ Endpoints for interacting with configured audio zones. **Zone creation/deletion/
 
 **Modern Design Philosophy:** Returns primitive values directly (int, bool, string) instead of wrapper objects for maximum simplicity and better developer experience.
 
-| Method | Path                                       | Command/Status ID         | Description                          | Request Body / Params                           | Success Response (Direct Primitive)  | HTTP Status |
-| :----- | :----------------------------------------- | :------------------------ | :----------------------------------- | :---------------------------------------------- | :----------------------------------- | :---------- |
-| `GET`  | `/zones`                                   | `ZONE_STATES`              | List configured zones                | Query: `?page=1&size=20`                       | `Page<Zone>`                         | 200 OK      |
-| `GET`  | `/zones/count`                             | `ZONE_COUNT`             | Get total configured zones count     | None                                            | `int` (count)                        | 200 OK      |
-| `GET`  | `/zones/{zoneIndex}`                       | `ZONE_STATE`              | Get details & full state for zone   | Path: `{zoneIndex}`                             | `ZoneState`                          | 200 OK      |
-| `POST` | `/zones/{zoneIndex}/play`                  | `PLAY`                    | Start/resume playback                | Path: `{zoneIndex}`                             | No content                           | 204 No Content|
-| `POST` | `/zones/{zoneIndex}/pause`                 | `PAUSE`                   | Pause playback                       | Path: `{zoneIndex}`                             | No content                           | 204 No Content|
-| `POST` | `/zones/{zoneIndex}/stop`                  | `STOP`                    | Stop playback                        | Path: `{zoneIndex}`                             | No content                           | 204 No Content|
-| `POST` | `/zones/{zoneIndex}/next`                  | `TRACK_NEXT`              | Play next track                      | Path: `{zoneIndex}`                             | `int` (new track index)              | 200 OK      |
-| `POST` | `/zones/{zoneIndex}/previous`              | `TRACK_PREVIOUS`          | Play previous track                  | Path: `{zoneIndex}`                             | `int` (new track index)              | 200 OK      |
-| `GET`  | `/zones/{zoneIndex}/track`                 | `TRACK_STATUS`             | Get current track **1-based index** | Path: `{zoneIndex}`                             | `int` (track index)                  | 200 OK      |
-| `PUT`  | `/zones/{zoneIndex}/track`                 | `TRACK`                   | Set track by **1-based** index      | Path: `{zoneIndex}`; Body: `int` (track index) | No content                           | 204 No Content|
-| `GET`  | `/zones/{zoneIndex}/track/metadata`        | `TRACK_METADATA`          | Get current track metadata           | Path: `{zoneIndex}`                             | `TrackInfo`                          | 200 OK      |
-| `GET`  | `/zones/{zoneIndex}/track/playing`         | `TRACK_PLAYING_STATUS`    | Get current playing state            | Path: `{zoneIndex}`                             | `bool` (is playing)                  | 200 OK      |
-| `GET`  | `/zones/{zoneIndex}/track/position`        | `TRACK_POSITION_STATUS`   | Get current track position           | Path: `{zoneIndex}`                             | `long` (position in ms)              | 200 OK      |
-| `PUT`  | `/zones/{zoneIndex}/track/position`        | `TRACK_POSITION`          | Seek to position in track            | Path: `{zoneIndex}`; Body: `long` (position ms) | `long` (new position)               | 200 OK      |
-| `GET`  | `/zones/{zoneIndex}/track/progress`        | `TRACK_PROGRESS_STATUS`   | Get current track progress           | Path: `{zoneIndex}`                             | `float` (progress 0.0-1.0)           | 200 OK      |
-| `PUT`  | `/zones/{zoneIndex}/track/progress`        | `TRACK_PROGRESS`          | Seek to progress percentage          | Path: `{zoneIndex}`; Body: `float` (0.0-1.0)   | `float` (new progress)               | 200 OK      |
-| `POST` | `/zones/{zoneIndex}/play/track`            | `TRACK_PLAY_INDEX`        | Play specific track by index         | Path: `{zoneIndex}`; Body: `int` (track index) | `int` (track index)                  | 200 OK      |
-| `POST` | `/zones/{zoneIndex}/play/url`              | `TRACK_PLAY_URL`          | Play direct URL stream               | Path: `{zoneIndex}`; Body: `string` (URL)      | `string` (URL)                       | 200 OK      |
-| `POST` | `/zones/{zoneIndex}/play/playlist/{playlistIndex}/track` | `TRACK_PLAY_PLAYLIST` | Play specific track from specific playlist | Path: `{zoneIndex}`, `{playlistIndex}`; Body: `int` (track index) | `int` (track index) | 200 OK |
-| `PUT`  | `/zones/{zoneIndex}/playlist`              | `PLAYLIST`                | Set playlist by **1-based** index   | Path: `{zoneIndex}`; Body: `int` (playlist index) | No content                        | 204 No Content|
-| `GET`  | `/zones/{zoneIndex}/playlist`              | `PLAYLIST_STATUS`          | Get current playlist index           | Path: `{zoneIndex}`                             | `int` (playlist index)               | 200 OK      |
-| `POST` | `/zones/{zoneIndex}/next/playlist`         | `PLAYLIST_NEXT`           | Play next playlist                   | Path: `{zoneIndex}`                             | `string` (new playlist name)         | 200 OK      |
-| `POST` | `/zones/{zoneIndex}/previous/playlist`     | `PLAYLIST_PREVIOUS`       | Play previous playlist               | Path: `{zoneIndex}`                             | `string` (new playlist name)         | 200 OK      |
-| `PUT`  | `/zones/{zoneIndex}/volume`                | `VOLUME`                  | Set zone volume                      | Path: `{zoneIndex}`; Body: `int` (0-100)       | `int` (volume level)                 | 200 OK      |
-| `GET`  | `/zones/{zoneIndex}/volume`                | `VOLUME_STATUS`           | Get current zone volume              | Path: `{zoneIndex}`                             | `int` (volume level)                 | 200 OK      |
-| `POST` | `/zones/{zoneIndex}/volume/up`             | `VOLUME_UP`               | Increase volume                      | Path: `{zoneIndex}`; Query: `?step=5`          | `int` (new volume)                   | 200 OK      |
-| `POST` | `/zones/{zoneIndex}/volume/down`           | `VOLUME_DOWN`             | Decrease volume                      | Path: `{zoneIndex}`; Query: `?step=5`          | `int` (new volume)                   | 200 OK      |
-| `PUT`  | `/zones/{zoneIndex}/mute`                  | `MUTE`                    | Set mute state                       | Path: `{zoneIndex}`; Body: `bool` (muted)       | `bool` (mute state)                  | 200 OK      |
-| `GET`  | `/zones/{zoneIndex}/mute`                  | `MUTE_STATUS`             | Get current mute state               | Path: `{zoneIndex}`                             | `bool` (mute state)                  | 200 OK      |
-| `POST` | `/zones/{zoneIndex}/mute/toggle`           | `MUTE_TOGGLE`             | Toggle mute state                    | Path: `{zoneIndex}`                             | `bool` (new mute state)              | 200 OK      |
-| `GET`  | `/zones/{zoneIndex}/repeat/track`          | `TRACK_REPEAT_STATUS`     | Get track repeat mode                | Path: `{zoneIndex}`                             | `bool` (repeat enabled)              | 200 OK      |
-| `PUT`  | `/zones/{zoneIndex}/repeat/track`          | `TRACK_REPEAT`            | Set track repeat mode                | Path: `{zoneIndex}`; Body: `bool` (enabled)     | `bool` (repeat enabled)              | 200 OK      |
-| `POST` | `/zones/{zoneIndex}/repeat/track/toggle`   | `TRACK_REPEAT_TOGGLE`     | Toggle track repeat mode             | Path: `{zoneIndex}`                             | `bool` (new repeat state)            | 200 OK      |
-| `GET`  | `/zones/{zoneIndex}/repeat`                | `PLAYLIST_REPEAT_STATUS`  | Get playlist repeat mode             | Path: `{zoneIndex}`                             | `bool` (repeat enabled)              | 200 OK      |
-| `PUT`  | `/zones/{zoneIndex}/repeat`                | `PLAYLIST_REPEAT`         | Set playlist repeat mode             | Path: `{zoneIndex}`; Body: `bool` (enabled)     | `bool` (repeat enabled)              | 200 OK      |
-| `POST` | `/zones/{zoneIndex}/repeat/toggle`         | `PLAYLIST_REPEAT_TOGGLE`  | Toggle playlist repeat mode          | Path: `{zoneIndex}`                             | `bool` (new repeat state)            | 200 OK      |
-| `GET`  | `/zones/{zoneIndex}/shuffle`               | `PLAYLIST_SHUFFLE_STATUS` | Get playlist shuffle mode            | Path: `{zoneIndex}`                             | `bool` (shuffle enabled)             | 200 OK      |
-| `PUT`  | `/zones/{zoneIndex}/shuffle`               | `PLAYLIST_SHUFFLE`        | Set playlist shuffle mode            | Path: `{zoneIndex}`; Body: `bool` (enabled)     | `bool` (shuffle enabled)             | 200 OK      |
-| `POST` | `/zones/{zoneIndex}/shuffle/toggle`        | `PLAYLIST_SHUFFLE_TOGGLE` | Toggle playlist shuffle mode         | Path: `{zoneIndex}`                             | `bool` (new shuffle state)           | 200 OK      |
+| Method | Path                                       | Command/Status ID         | OperationId | Description                          | Request Body / Params                           | Success Response (Direct Primitive)  | HTTP Status |
+| :----- | :----------------------------------------- | :------------------------ | :---------- | :----------------------------------- | :---------------------------------------------- | :----------------------------------- | :---------- |
+| `GET`  | `/zones`                                   | `ZONE_STATES`              | `getZones` | List configured zones                | Query: `?page=1&size=20`                       | `Page<Zone>`                         | 200 OK      |
+| `GET`  | `/zones/count`                             | `ZONE_COUNT`             | `getZoneCount` | Get total configured zones count     | None                                            | `int` (count)                        | 200 OK      |
+| `GET`  | `/zones/{zoneIndex}`                       | `ZONE_STATE`              | `getZone` | Get details & full state for zone   | Path: `{zoneIndex}`                             | `ZoneState`                          | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/play`                  | `PLAY`                    | `playZone` | Start/resume playback                | Path: `{zoneIndex}`                             | No content                           | 204 No Content|
+| `POST` | `/zones/{zoneIndex}/pause`                 | `PAUSE`                   | `pauseZone` | Pause playback                       | Path: `{zoneIndex}`                             | No content                           | 204 No Content|
+| `POST` | `/zones/{zoneIndex}/stop`                  | `STOP`                    | `stopZone` | Stop playback                        | Path: `{zoneIndex}`                             | No content                           | 204 No Content|
+| `POST` | `/zones/{zoneIndex}/next`                  | `TRACK_NEXT`              | `nextTrack` | Play next track                      | Path: `{zoneIndex}`                             | `int` (new track index)              | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/previous`              | `TRACK_PREVIOUS`          | `previousTrack` | Play previous track                  | Path: `{zoneIndex}`                             | `int` (new track index)              | 200 OK      |
+| `GET`  | `/zones/{zoneIndex}/track`                 | `TRACK_STATUS`             | `getZoneTrack` | Get current track **1-based index** | Path: `{zoneIndex}`                             | `int` (track index)                  | 200 OK      |
+| `PUT`  | `/zones/{zoneIndex}/track`                 | `TRACK`                   | `setZoneTrack` | Set track by **1-based** index      | Path: `{zoneIndex}`; Body: `int` (track index) | No content                           | 204 No Content|
+| `GET`  | `/zones/{zoneIndex}/track/metadata`        | `TRACK_METADATA`          | `getTrackMetadata` | Get current track metadata           | Path: `{zoneIndex}`                             | `TrackInfo`                          | 200 OK      |
+| `GET`  | `/zones/{zoneIndex}/track/playing`         | `TRACK_PLAYING_STATUS`    | `getTrackPlaying` | Get current playing state            | Path: `{zoneIndex}`                             | `bool` (is playing)                  | 200 OK      |
+| `GET`  | `/zones/{zoneIndex}/track/position`        | `TRACK_POSITION_STATUS`   | `getTrackPosition` | Get current track position           | Path: `{zoneIndex}`                             | `long` (position in ms)              | 200 OK      |
+| `PUT`  | `/zones/{zoneIndex}/track/position`        | `TRACK_POSITION`          | `setTrackPosition` | Seek to position in track            | Path: `{zoneIndex}`; Body: `long` (position ms) | `long` (new position)               | 200 OK      |
+| `GET`  | `/zones/{zoneIndex}/track/progress`        | `TRACK_PROGRESS_STATUS`   | `getTrackProgress` | Get current track progress           | Path: `{zoneIndex}`                             | `float` (progress 0.0-1.0)           | 200 OK      |
+| `PUT`  | `/zones/{zoneIndex}/track/progress`        | `TRACK_PROGRESS`          | `setTrackProgress` | Seek to progress percentage          | Path: `{zoneIndex}`; Body: `float` (0.0-1.0)   | `float` (new progress)               | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/play/track`            | `TRACK_PLAY_INDEX`        | `playTrack` | Play specific track by index         | Path: `{zoneIndex}`; Body: `int` (track index) | `int` (track index)                  | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/play/url`              | `TRACK_PLAY_URL`          | `playUrl` | Play direct URL stream               | Path: `{zoneIndex}`; Body: `string` (URL)      | `string` (URL)                       | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/play/playlist/{playlistIndex}/track` | `TRACK_PLAY_PLAYLIST` | `playPlaylistTrack` | Play specific track from specific playlist | Path: `{zoneIndex}`, `{playlistIndex}`; Body: `int` (track index) | `int` (track index) | 200 OK |
+| `PUT`  | `/zones/{zoneIndex}/playlist`              | `PLAYLIST`                | `setZonePlaylist` | Set playlist by **1-based** index   | Path: `{zoneIndex}`; Body: `int` (playlist index) | No content                        | 204 No Content|
+| `GET`  | `/zones/{zoneIndex}/playlist`              | `PLAYLIST_STATUS`          | `getZonePlaylist` | Get current playlist index           | Path: `{zoneIndex}`                             | `int` (playlist index)               | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/next/playlist`         | `PLAYLIST_NEXT`           | `nextPlaylist` | Play next playlist                   | Path: `{zoneIndex}`                             | `string` (new playlist name)         | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/previous/playlist`     | `PLAYLIST_PREVIOUS`       | `previousPlaylist` | Play previous playlist               | Path: `{zoneIndex}`                             | `string` (new playlist name)         | 200 OK      |
+| `PUT`  | `/zones/{zoneIndex}/volume`                | `VOLUME`                  | `setZoneVolume` | Set zone volume                      | Path: `{zoneIndex}`; Body: `int` (0-100)       | `int` (volume level)                 | 200 OK      |
+| `GET`  | `/zones/{zoneIndex}/volume`                | `VOLUME_STATUS`           | `getZoneVolume` | Get current zone volume              | Path: `{zoneIndex}`                             | `int` (volume level)                 | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/volume/up`             | `VOLUME_UP`               | `volumeUp` | Increase volume                      | Path: `{zoneIndex}`; Query: `?step=5`          | `int` (new volume)                   | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/volume/down`           | `VOLUME_DOWN`             | `volumeDown` | Decrease volume                      | Path: `{zoneIndex}`; Query: `?step=5`          | `int` (new volume)                   | 200 OK      |
+| `PUT`  | `/zones/{zoneIndex}/mute`                  | `MUTE`                    | `setZoneMute` | Set mute state                       | Path: `{zoneIndex}`; Body: `bool` (muted)       | `bool` (mute state)                  | 200 OK      |
+| `GET`  | `/zones/{zoneIndex}/mute`                  | `MUTE_STATUS`             | `getZoneMute` | Get current mute state               | Path: `{zoneIndex}`                             | `bool` (mute state)                  | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/mute/toggle`           | `MUTE_TOGGLE`             | `toggleMute` | Toggle mute state                    | Path: `{zoneIndex}`                             | `bool` (new mute state)              | 200 OK      |
+| `GET`  | `/zones/{zoneIndex}/repeat/track`          | `TRACK_REPEAT_STATUS`     | `getTrackRepeat` | Get track repeat mode                | Path: `{zoneIndex}`                             | `bool` (repeat enabled)              | 200 OK      |
+| `PUT`  | `/zones/{zoneIndex}/repeat/track`          | `TRACK_REPEAT`            | `setTrackRepeat` | Set track repeat mode                | Path: `{zoneIndex}`; Body: `bool` (enabled)     | `bool` (repeat enabled)              | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/repeat/track/toggle`   | `TRACK_REPEAT_TOGGLE`     | `toggleTrackRepeat` | Toggle track repeat mode             | Path: `{zoneIndex}`                             | `bool` (new repeat state)            | 200 OK      |
+| `GET`  | `/zones/{zoneIndex}/repeat`                | `PLAYLIST_REPEAT_STATUS`  | `getZoneRepeat` | Get playlist repeat mode             | Path: `{zoneIndex}`                             | `bool` (repeat enabled)              | 200 OK      |
+| `PUT`  | `/zones/{zoneIndex}/repeat`                | `PLAYLIST_REPEAT`         | `setZoneRepeat` | Set playlist repeat mode             | Path: `{zoneIndex}`; Body: `bool` (enabled)     | `bool` (repeat enabled)              | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/repeat/toggle`         | `PLAYLIST_REPEAT_TOGGLE`  | `toggleRepeat` | Toggle playlist repeat mode          | Path: `{zoneIndex}`                             | `bool` (new repeat state)            | 200 OK      |
+| `GET`  | `/zones/{zoneIndex}/shuffle`               | `PLAYLIST_SHUFFLE_STATUS` | `getZoneShuffle` | Get playlist shuffle mode            | Path: `{zoneIndex}`                             | `bool` (shuffle enabled)             | 200 OK      |
+| `PUT`  | `/zones/{zoneIndex}/shuffle`               | `PLAYLIST_SHUFFLE`        | `setZoneShuffle` | Set playlist shuffle mode            | Path: `{zoneIndex}`; Body: `bool` (enabled)     | `bool` (shuffle enabled)             | 200 OK      |
+| `POST` | `/zones/{zoneIndex}/shuffle/toggle`        | `PLAYLIST_SHUFFLE_TOGGLE` | `toggleShuffle` | Toggle playlist shuffle mode         | Path: `{zoneIndex}`                             | `bool` (new shuffle state)           | 200 OK      |
 
 **Modern API Benefits:**
 
@@ -182,24 +182,24 @@ Endpoints for interacting with discovered Snapcast clients.
 
 **Modern Design Philosophy:** Matches zones endpoints with direct primitive responses and zero request objects for maximum consistency and simplicity.
 
-| Method | Path                                    | Command/Status ID      | Description                | Request Body / Params           | Success Response (Direct Primitive) | HTTP Status |
-| :----- | :-------------------------------------- | :--------------------- | :------------------------- | :------------------------------ | :----------------------------------- | :---------- |
-| `GET`  | `/clients`                              | -                      | List discovered clients    | Query: `?page=1&size=20`        | `Page<Client>`                       | 200 OK      |
-| `GET`  | `/clients/count`                        | `CLIENT_COUNT`        | Get total configured clients count | None                        | `int` (count)                        | 200 OK      |
-| `GET`  | `/clients/{clientIndex}`                | `CLIENT_STATE`         | Get details for a client   | Path: `{clientIndex}` (int)      | `ClientState`                        | 200 OK      |
-| `PUT`  | `/clients/{clientIndex}/volume`         | `CLIENT_VOLUME`        | Set client volume          | Path: `{clientIndex}`; Body: `int` (0-100) | `int` (volume level)              | 200 OK      |
-| `GET`  | `/clients/{clientIndex}/volume`         | `CLIENT_VOLUME_STATUS` | Get client volume          | Path: `{clientIndex}`            | `int` (volume level)                 | 200 OK      |
-| `POST` | `/clients/{clientIndex}/volume/up`      | `CLIENT_VOLUME_UP`     | Increase client volume     | Path: `{clientIndex}`; Query: `?step=5` | `int` (new volume)            | 200 OK      |
-| `POST` | `/clients/{clientIndex}/volume/down`    | `CLIENT_VOLUME_DOWN`   | Decrease client volume     | Path: `{clientIndex}`; Query: `?step=5` | `int` (new volume)            | 200 OK      |
-| `PUT`  | `/clients/{clientIndex}/mute`           | `CLIENT_MUTE`          | Set client mute state      | Path: `{clientIndex}`; Body: `bool` | `bool` (mute state)                  | 200 OK      |
-| `GET`  | `/clients/{clientIndex}/mute`           | `CLIENT_MUTE_STATUS`   | Get client mute state      | Path: `{clientIndex}`            | `bool` (mute state)                  | 200 OK      |
-| `POST` | `/clients/{clientIndex}/mute/toggle`    | `CLIENT_MUTE_TOGGLE`   | Toggle client mute state   | Path: `{clientIndex}`            | `bool` (new mute state)              | 200 OK      |
-| `PUT`  | `/clients/{clientIndex}/latency`        | `CLIENT_LATENCY`       | Set client latency         | Path: `{clientIndex}`; Body: `int` (ms) | `int` (latency)                  | 200 OK      |
-| `GET`  | `/clients/{clientIndex}/latency`        | `CLIENT_LATENCY_STATUS`| Get client latency         | Path: `{clientIndex}`            | `int` (latency)                      | 200 OK      |
-| `PUT`  | `/clients/{clientIndex}/zone`           | `CLIENT_ZONE`          | Assign client to zone      | Path: `{clientIndex}`; Body: `int` (zoneIndex, 1-based) | No content                     | 204 No Content |
-| `GET`  | `/clients/{clientIndex}/zone`           | `CLIENT_ZONE_STATUS`   | Get client assigned zone   | Path: `{clientIndex}`            | `int?` (zoneIndex)                   | 200 OK      |
-| `PUT`  | `/clients/{clientIndex}/name`           | `CLIENT_NAME`          | Rename client in Snapcast  | Path: `{clientIndex}`; Body: `string` (name) | `string` (name)                | 200 OK      |
-| `GET`  | `/clients/{clientIndex}/connected`      | `CLIENT_CONNECTED`     | Get client connection status | Path: `{clientIndex}`          | `bool` (is connected)                | 200 OK      |
+| Method | Path                                    | Command/Status ID      | OperationId | Description                | Request Body / Params           | Success Response (Direct Primitive) | HTTP Status |
+| :----- | :-------------------------------------- | :--------------------- | :---------- | :------------------------- | :------------------------------ | :----------------------------------- | :---------- |
+| `GET`  | `/clients`                              | -                      | `getClients` | List discovered clients    | Query: `?page=1&size=20`        | `Page<Client>`                       | 200 OK      |
+| `GET`  | `/clients/count`                        | `CLIENT_COUNT`        | `getClientCount` | Get total configured clients count | None                        | `int` (count)                        | 200 OK      |
+| `GET`  | `/clients/{clientIndex}`                | `CLIENT_STATE`         | `getClient` | Get details for a client   | Path: `{clientIndex}` (int)      | `ClientState`                        | 200 OK      |
+| `PUT`  | `/clients/{clientIndex}/volume`         | `CLIENT_VOLUME`        | `setClientVolume` | Set client volume          | Path: `{clientIndex}`; Body: `int` (0-100) | `int` (volume level)              | 200 OK      |
+| `GET`  | `/clients/{clientIndex}/volume`         | `CLIENT_VOLUME_STATUS` | `getClientVolume` | Get client volume          | Path: `{clientIndex}`            | `int` (volume level)                 | 200 OK      |
+| `POST` | `/clients/{clientIndex}/volume/up`      | `CLIENT_VOLUME_UP`     | `clientVolumeUp` | Increase client volume     | Path: `{clientIndex}`; Query: `?step=5` | `int` (new volume)            | 200 OK      |
+| `POST` | `/clients/{clientIndex}/volume/down`    | `CLIENT_VOLUME_DOWN`   | `clientVolumeDown` | Decrease client volume     | Path: `{clientIndex}`; Query: `?step=5` | `int` (new volume)            | 200 OK      |
+| `PUT`  | `/clients/{clientIndex}/mute`           | `CLIENT_MUTE`          | `setClientMute` | Set client mute state      | Path: `{clientIndex}`; Body: `bool` | `bool` (mute state)                  | 200 OK      |
+| `GET`  | `/clients/{clientIndex}/mute`           | `CLIENT_MUTE_STATUS`   | `getClientMute` | Get client mute state      | Path: `{clientIndex}`            | `bool` (mute state)                  | 200 OK      |
+| `POST` | `/clients/{clientIndex}/mute/toggle`    | `CLIENT_MUTE_TOGGLE`   | `toggleClientMute` | Toggle client mute state   | Path: `{clientIndex}`            | `bool` (new mute state)              | 200 OK      |
+| `PUT`  | `/clients/{clientIndex}/latency`        | `CLIENT_LATENCY`       | `setClientLatency` | Set client latency         | Path: `{clientIndex}`; Body: `int` (ms) | `int` (latency)                  | 200 OK      |
+| `GET`  | `/clients/{clientIndex}/latency`        | `CLIENT_LATENCY_STATUS`| `getClientLatency` | Get client latency         | Path: `{clientIndex}`            | `int` (latency)                      | 200 OK      |
+| `PUT`  | `/clients/{clientIndex}/zone`           | `CLIENT_ZONE`          | `setClientZone` | Assign client to zone      | Path: `{clientIndex}`; Body: `int` (zoneIndex, 1-based) | No content                     | 204 No Content |
+| `GET`  | `/clients/{clientIndex}/zone`           | `CLIENT_ZONE_STATUS`   | `getClientZone` | Get client assigned zone   | Path: `{clientIndex}`            | `int?` (zoneIndex)                   | 200 OK      |
+| `PUT`  | `/clients/{clientIndex}/name`           | `CLIENT_NAME`          | `setClientName` | Rename client in Snapcast  | Path: `{clientIndex}`; Body: `string` (name) | `string` (name)                | 200 OK      |
+| `GET`  | `/clients/{clientIndex}/connected`      | `CLIENT_CONNECTED`     | `getClientConnected` | Get client connection status | Path: `{clientIndex}`          | `bool` (is connected)                | 200 OK      |
 
 **Modern API Benefits:**
 
@@ -213,21 +213,21 @@ Endpoints for interacting with discovered Snapcast clients.
 
 Endpoints for browsing available media sources (initially Subsonic and Radio).
 
-| Method | Path                                    | Description                    | Success Response (`Data` field)     |
-| :----- | :-------------------------------------- | :----------------------------- | :-------------------------------- |
-| `GET`  | `/media/sources`                        | List configured media sources  | `List<MediaSourceInfo>` { string Id, string Type, string Name } |
-| `GET`  | `/media/playlists`                      | List all available playlists   | Paginated `List<PlaylistInfo>`    |
-| `GET`  | `/media/playlists/{playlistIndex}`  | Get details for a playlist     | `PlaylistWithTracks` { PlaylistInfo Info, List<TrackInfo> Tracks } |
-| `GET`  | `/media/playlists/{playlistIndex}/tracks` | List tracks in a playlist    | Paginated `List<TrackInfo>`       |
-| `GET`  | `/media/tracks/{trackIndex}`               | Get details for a track        | `TrackInfo`                       |
+| Method | Path                                    | OperationId | Description                    | Success Response (`Data` field)     |
+| :----- | :-------------------------------------- | :---------- | :----------------------------- | :-------------------------------- |
+| `GET`  | `/media/sources`                        | `getMediaSources` | List configured media sources  | `List<MediaSourceInfo>` { string Id, string Type, string Name } |
+| `GET`  | `/media/playlists`                      | `getPlaylists` | List all available playlists   | Paginated `List<PlaylistInfo>`    |
+| `GET`  | `/media/playlists/{playlistIndex}`  | `getPlaylist` | Get details for a playlist     | `PlaylistWithTracks` { PlaylistInfo Info, List<TrackInfo> Tracks } |
+| `GET`  | `/media/playlists/{playlistIndex}/tracks` | `getPlaylistTracks` | List tracks in a playlist    | Paginated `List<TrackInfo>`       |
+| `GET`  | `/media/tracks/{trackIndex}`               | `getTrack` | Get details for a track        | `TrackInfo`                       |
 
 ### 10.4.5. Cover Art Endpoints
 
 Endpoints for retrieving cover art images from media sources.
 
-| Method | Path                                    | Status ID              | Description                    | Success Response                    | HTTP Status |
-| :----- | :-------------------------------------- | :--------------------- | :----------------------------- | :---------------------------------- | :---------- |
-| `GET`  | `/cover/{coverId}`                      | `COVER`                | Get cover art image            | Binary image data (JPEG/PNG)       | 200 OK      |
+| Method | Path                                    | Status ID              | OperationId | Description                    | Success Response                    | HTTP Status |
+| :----- | :-------------------------------------- | :--------------------- | :---------- | :----------------------------- | :---------------------------------- | :---------- |
+| `GET`  | `/cover/{coverId}`                      | `COVER`                | `getCover` | Get cover art image            | Binary image data (JPEG/PNG)       | 200 OK      |
 
 **Cover Art Endpoint Details:**
 

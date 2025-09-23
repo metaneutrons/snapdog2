@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Shared.Attributes;
 using SnapDog2.Shared.Models;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace SnapDog2.Api.Controllers.V1;
 
@@ -41,6 +42,7 @@ public partial class CoverController : ControllerBase
     /// <response code="500">Internal server error.</response>
     [HttpGet("{coverId}")]
     [StatusId("COVER")]
+    [SwaggerOperation(OperationId = "getCover")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]

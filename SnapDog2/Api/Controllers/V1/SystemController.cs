@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SnapDog2.Domain.Abstractions;
 using SnapDog2.Shared.Attributes;
+using Swashbuckle.AspNetCore.Annotations;
 
 /// <summary>
 /// System status controller for blueprint compliance.
@@ -50,6 +51,7 @@ public class SystemController : ControllerBase
     /// </summary>
     [HttpGet("commands/status")]
     [StatusId("COMMAND_STATUS")]
+    [SwaggerOperation(OperationId = "getCommandStatus")]
     [ProducesResponseType<object>(StatusCodes.Status200OK)]
     public async Task<ActionResult<object>> GetCommandStatus()
     {
@@ -70,6 +72,7 @@ public class SystemController : ControllerBase
     /// </summary>
     [HttpGet("commands/errors")]
     [StatusId("COMMAND_ERROR")]
+    [SwaggerOperation(OperationId = "getCommandErrors")]
     [ProducesResponseType<object>(StatusCodes.Status200OK)]
     public async Task<ActionResult<object>> GetCommandError()
     {
@@ -90,6 +93,7 @@ public class SystemController : ControllerBase
     /// </summary>
     [HttpGet("errors")]
     [StatusId("SYSTEM_ERROR")]
+    [SwaggerOperation(OperationId = "getSystemErrors")]
     [ProducesResponseType<object>(StatusCodes.Status200OK)]
     public async Task<ActionResult<object>> GetSystemError()
     {
@@ -111,6 +115,7 @@ public class SystemController : ControllerBase
     /// </summary>
     [HttpGet("status")]
     [StatusId("SYSTEM_STATUS")]
+    [SwaggerOperation(OperationId = "getSystemStatus")]
     [ProducesResponseType<object>(StatusCodes.Status200OK)]
     public async Task<ActionResult<object>> GetSystemStatus()
     {
@@ -129,6 +134,7 @@ public class SystemController : ControllerBase
     /// </summary>
     [HttpGet("version")]
     [StatusId("VERSION_INFO")]
+    [SwaggerOperation(OperationId = "getSystemVersion")]
     [ProducesResponseType<object>(StatusCodes.Status200OK)]
     public async Task<ActionResult<object>> GetVersionInfo()
     {
@@ -148,6 +154,7 @@ public class SystemController : ControllerBase
     /// </summary>
     [HttpGet("stats")]
     [StatusId("SERVER_STATS")]
+    [SwaggerOperation(OperationId = "getSystemStats")]
     [ProducesResponseType<object>(StatusCodes.Status200OK)]
     public async Task<ActionResult<object>> GetServerStats()
     {
