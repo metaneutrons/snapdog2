@@ -269,48 +269,48 @@ public partial class KnxService : IKnxService
         }
     }
 
-    [LoggerMessage(EventId = 15151, Level = LogLevel.Information, Message = "KNX service disabled in configuration")]
+    [LoggerMessage(EventId = 15157, Level = LogLevel.Information, Message = "KNX service disabled in configuration")]
     private partial void LogKnxDisabled();
 
-    [LoggerMessage(EventId = 15152, Level = LogLevel.Information, Message = "KNX connected to {Host}:{Port} using {ConnectionType}")]
+    [LoggerMessage(EventId = 15158, Level = LogLevel.Information, Message = "KNX connected to {Host}:{Port} using {ConnectionType}")]
     private partial void LogKnxConnected(string Host, int Port, string ConnectionType);
 
-    [LoggerMessage(EventId = 15153, Level = LogLevel.Error, Message = "KNX connection failed: {Error}")]
+    [LoggerMessage(EventId = 15159, Level = LogLevel.Error, Message = "KNX connection failed: {Error}")]
     private partial void LogKnxConnectionFailed(string Error);
 
-    [LoggerMessage(EventId = 15154, Level = LogLevel.Information, Message = "KNX disconnected")]
+    [LoggerMessage(EventId = 15160, Level = LogLevel.Information, Message = "KNX disconnected")]
     private partial void LogKnxDisconnected();
 
-    [LoggerMessage(EventId = 15155, Level = LogLevel.Error, Message = "KNX disconnection failed: {Error}")]
+    [LoggerMessage(EventId = 15161, Level = LogLevel.Error, Message = "KNX disconnection failed: {Error}")]
     private partial void LogKnxDisconnectionFailed(string Error);
 
-    [LoggerMessage(EventId = 15156, Level = LogLevel.Debug, Message = "KNX group value received: {GroupAddress} = {Value}")]
+    [LoggerMessage(EventId = 15162, Level = LogLevel.Debug, Message = "KNX group value received: {GroupAddress} = {Value}")]
     private partial void LogKnxGroupValueReceived(string GroupAddress, string Value);
 
-    [LoggerMessage(EventId = 15157, Level = LogLevel.Debug, Message = "KNX status sent: {StatusId} for target {TargetId} with value {Value}")]
+    [LoggerMessage(EventId = 15163, Level = LogLevel.Debug, Message = "KNX status sent: {StatusId} for target {TargetId} with value {Value}")]
     private partial void LogKnxStatusSent(string StatusId, int TargetId, string Value);
 
-    [LoggerMessage(EventId = 15158, Level = LogLevel.Error, Message = "KNX status send failed: {StatusId} for target {TargetId} - {Error}")]
+    [LoggerMessage(EventId = 15164, Level = LogLevel.Error, Message = "KNX status send failed: {StatusId} for target {TargetId} - {Error}")]
     private partial void LogKnxStatusSendFailed(string StatusId, int TargetId, string Error);
 
-    [LoggerMessage(EventId = 15159, Level = LogLevel.Debug, Message = "KNX group value written: {GroupAddress} = {Value}")]
+    [LoggerMessage(EventId = 15165, Level = LogLevel.Debug, Message = "KNX group value written: {GroupAddress} = {Value}")]
     private partial void LogKnxGroupValueWritten(string GroupAddress, string Value);
 
-    [LoggerMessage(EventId = 15160, Level = LogLevel.Error, Message = "KNX group value write failed: {GroupAddress} - {Error}")]
+    [LoggerMessage(EventId = 15166, Level = LogLevel.Error, Message = "KNX group value write failed: {GroupAddress} - {Error}")]
     private partial void LogKnxGroupValueWriteFailed(string GroupAddress, string Error);
 
-    [LoggerMessage(EventId = 15161, Level = LogLevel.Debug, Message = "KNX group value read: {GroupAddress}")]
+    [LoggerMessage(EventId = 15167, Level = LogLevel.Debug, Message = "KNX group value read: {GroupAddress}")]
     private partial void LogKnxGroupValueRead(string GroupAddress);
 
-    [LoggerMessage(EventId = 15162, Level = LogLevel.Error, Message = "KNX group value read failed: {GroupAddress} - {Error}")]
+    [LoggerMessage(EventId = 15168, Level = LogLevel.Error, Message = "KNX group value read failed: {GroupAddress} - {Error}")]
     private partial void LogKnxGroupValueReadFailed(string GroupAddress, string Error);
 
-    [LoggerMessage(EventId = 15163, Level = LogLevel.Debug, Message = "KNX client status published: {ClientIndex} - {EventType}")]
+    [LoggerMessage(EventId = 15169, Level = LogLevel.Debug, Message = "KNX client status published: {ClientIndex} - {EventType}")]
     private partial void LogKnxClientStatusPublished(string ClientIndex, string EventType);
 
-    [LoggerMessage(EventId = 15164, Level = LogLevel.Debug, Message = "KNX zone status published: {ZoneIndex} - {EventType}")]
+    [LoggerMessage(EventId = 15170, Level = LogLevel.Debug, Message = "KNX zone status published: {ZoneIndex} - {EventType}")]
     private partial void LogKnxZoneStatusPublished(int ZoneIndex, string EventType);
 
-    [LoggerMessage(EventId = 15165, Level = LogLevel.Debug, Message = "KNX global status published: {EventType}")]
+    [LoggerMessage(EventId = 15171, Level = LogLevel.Debug, Message = "KNX global status published: {EventType}")]
     private partial void LogKnxGlobalStatusPublished(string EventType);
 }

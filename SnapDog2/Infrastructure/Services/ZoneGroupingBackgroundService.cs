@@ -43,23 +43,23 @@ public partial class ZoneGroupingBackgroundService : BackgroundService
         _reconciliationInterval = TimeSpan.FromMilliseconds(config.Value.ZoneGroupingIntervalMs);
     }
 
-    [LoggerMessage(EventId = 14188, Level = LogLevel.Information, Message = "Zone grouping service starting with interval {IntervalMs}ms"
+    [LoggerMessage(EventId = 14203, Level = LogLevel.Information, Message = "Zone grouping service starting with interval {IntervalMs}ms"
 )]
     private partial void LogServiceStarting(double intervalMs);
 
-    [LoggerMessage(EventId = 14189, Level = LogLevel.Information, Message = "Zone grouping service stopping"
+    [LoggerMessage(EventId = 14204, Level = LogLevel.Information, Message = "Zone grouping service stopping"
 )]
     private partial void LogServiceStopping();
 
-    [LoggerMessage(EventId = 14190, Level = LogLevel.Error, Message = "Error during periodic zone grouping check"
+    [LoggerMessage(EventId = 14205, Level = LogLevel.Error, Message = "Error during periodic zone grouping check"
 )]
     private partial void LogPeriodicCheckError(Exception ex);
 
-    [LoggerMessage(EventId = 14191, Level = LogLevel.Debug, Message = "Zone grouping check completed successfully"
+    [LoggerMessage(EventId = 14206, Level = LogLevel.Debug, Message = "Zone grouping check completed successfully"
 )]
     private partial void LogCheckCompleted();
 
-    [LoggerMessage(EventId = 14192, Level = LogLevel.Warning, Message = "Zone grouping check failed"
+    [LoggerMessage(EventId = 14207, Level = LogLevel.Warning, Message = "Zone grouping check failed"
 )]
     private partial void LogCheckFailed();
 

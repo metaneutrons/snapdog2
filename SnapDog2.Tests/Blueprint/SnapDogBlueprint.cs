@@ -439,6 +439,15 @@ public static class SnapDogBlueprint
         .ApiReturns<string>()
         .Description("Zone name")
         //
+        .Status("ZONE_ICON_STATUS")
+        .Zone()
+        .Get("/api/v1/zones/{zoneIndex:int}/icon")
+        .ApiReturns<string>()
+        .Description("Zone icon character")
+        .Exclude(Protocol.Mqtt, "Static configuration data")
+        .Exclude(Protocol.SignalR, "Static configuration data")
+        .Exclude(Protocol.Knx, "Static configuration data")
+        //
         .Status("VOLUME_STATUS")
         .Zone()
         .Mqtt("snapdog/zones/{zoneIndex}/volume")
@@ -672,6 +681,15 @@ public static class SnapDogBlueprint
         .SignalR("ClientConnected")
         .ApiReturns<bool>()
         .Description("Client connection status")
+        //
+        .Status("CLIENT_ICON_STATUS")
+        .Client()
+        .Get("/api/v1/clients/{clientIndex:int}/icon")
+        .ApiReturns<string>()
+        .Description("Client icon character")
+        .Exclude(Protocol.Mqtt, "Static configuration data")
+        .Exclude(Protocol.SignalR, "Static configuration data")
+        .Exclude(Protocol.Knx, "Static configuration data")
         //
         // === MQTT-ONLY STATUS ===
         //

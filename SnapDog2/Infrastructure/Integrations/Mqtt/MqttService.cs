@@ -794,66 +794,66 @@ public sealed partial class MqttService : IMqttService
     }
 
     // High-performance logging with LoggerMessage
-    [LoggerMessage(EventId = 15188, Level = LogLevel.Information, Message = "MQTT service initialized successfully")]
+    [LoggerMessage(EventId = 15194, Level = LogLevel.Information, Message = "MQTT service initialized successfully")]
     private partial void LogMqttServiceInitialized();
 
-    [LoggerMessage(EventId = 15189, Level = LogLevel.Debug, Message = "Published zone {ZoneIndex} state to MQTT")]
+    [LoggerMessage(EventId = 15195, Level = LogLevel.Debug, Message = "Published zone {ZoneIndex} state to MQTT")]
     private partial void LogZoneStatePublished(int ZoneIndex);
 
-    [LoggerMessage(EventId = 15190, Level = LogLevel.Error, Message = "Failed to publish zone {ZoneIndex} state")]
+    [LoggerMessage(EventId = 15196, Level = LogLevel.Error, Message = "Failed to publish zone {ZoneIndex} state")]
     private partial void LogZoneStatePublishFailed(int ZoneIndex, Exception ex);
 
-    [LoggerMessage(EventId = 15191, Level = LogLevel.Debug, Message = "Published client {ClientIndex} state to MQTT")]
+    [LoggerMessage(EventId = 15197, Level = LogLevel.Debug, Message = "Published client {ClientIndex} state to MQTT")]
     private partial void LogClientStatePublished(string ClientIndex);
 
-    [LoggerMessage(EventId = 15192, Level = LogLevel.Error, Message = "Failed to publish client {ClientIndex} state")]
+    [LoggerMessage(EventId = 15198, Level = LogLevel.Error, Message = "Failed to publish client {ClientIndex} state")]
     private partial void LogClientStatePublishFailed(string ClientIndex, Exception ex);
 
-    [LoggerMessage(EventId = 15193, Level = LogLevel.Debug, Message = "Published message to topic {Topic} - Size: {PayloadSize} bytes, Retain: {Retain}")]
+    [LoggerMessage(EventId = 15199, Level = LogLevel.Debug, Message = "Published message to topic {Topic} - Size: {PayloadSize} bytes, Retain: {Retain}")]
     private partial void LogMessagePublished(string Topic, int PayloadSize, bool Retain);
 
-    [LoggerMessage(EventId = 15194, Level = LogLevel.Error, Message = "Failed to publish message to topic {Topic}")]
+    [LoggerMessage(EventId = 15200, Level = LogLevel.Error, Message = "Failed to publish message to topic {Topic}")]
     private partial void LogMessagePublishFailed(string Topic, Exception ex);
 
-    [LoggerMessage(EventId = 15195, Level = LogLevel.Debug, Message = "Subscribed to {TopicCount} MQTT topics")]
+    [LoggerMessage(EventId = 15201, Level = LogLevel.Debug, Message = "Subscribed to {TopicCount} MQTT topics")]
     private partial void LogTopicsSubscribed(int TopicCount);
 
-    [LoggerMessage(EventId = 15196, Level = LogLevel.Debug, Message = "Unsubscribed from {TopicCount} MQTT topics")]
+    [LoggerMessage(EventId = 15202, Level = LogLevel.Debug, Message = "Unsubscribed from {TopicCount} MQTT topics")]
     private partial void LogTopicsUnsubscribed(int TopicCount);
 
-    [LoggerMessage(EventId = 15197, Level = LogLevel.Information, Message = "MQTT service disposed")]
+    [LoggerMessage(EventId = 15203, Level = LogLevel.Information, Message = "MQTT service disposed")]
     private partial void LogMqttServiceDisposed();
 
-    [LoggerMessage(EventId = 15198, Level = LogLevel.Debug, Message = "MQTT: {Topic} -> {Payload}")]
+    [LoggerMessage(EventId = 15204, Level = LogLevel.Debug, Message = "MQTT: {Topic} -> {Payload}")]
     private partial void LogMqttMessagePublished(string Topic, string Payload);
 
-    [LoggerMessage(EventId = 15199, Level = LogLevel.Warning, Message = "MQTT not connected, skipping: {Topic} -> {Payload}")]
+    [LoggerMessage(EventId = 15205, Level = LogLevel.Warning, Message = "MQTT not connected, skipping: {Topic} -> {Payload}")]
     private partial void LogMqttNotConnected(string Topic, string Payload);
 
-    [LoggerMessage(EventId = 15200, Level = LogLevel.Error, Message = "MQTT connection failed")]
+    [LoggerMessage(EventId = 15206, Level = LogLevel.Error, Message = "MQTT connection failed")]
     private partial void LogMqttConnectionFailed(Exception ex);
 
-    [LoggerMessage(EventId = 15201, Level = LogLevel.Error, Message = "MQTT disconnect error")]
+    [LoggerMessage(EventId = 15207, Level = LogLevel.Error, Message = "MQTT disconnect error")]
     private partial void LogMqttDisconnectError(Exception ex);
 
-    [LoggerMessage(EventId = 15202, Level = LogLevel.Information, Message = "Subscribed to {TopicCount} MQTT command topics")]
+    [LoggerMessage(EventId = 15208, Level = LogLevel.Information, Message = "Subscribed to {TopicCount} MQTT command topics")]
     private partial void LogMqttCommandTopicsSubscribed(int TopicCount);
 
-    [LoggerMessage(EventId = 15203, Level = LogLevel.Debug, Message = "MQTT command received: {Topic} -> {Payload}")]
+    [LoggerMessage(EventId = 15209, Level = LogLevel.Debug, Message = "MQTT command received: {Topic} -> {Payload}")]
     private partial void LogMqttCommandReceived(string Topic, string Payload);
 
-    [LoggerMessage(EventId = 15204, Level = LogLevel.Error, Message = "Error processing MQTT command")]
+    [LoggerMessage(EventId = 15210, Level = LogLevel.Error, Message = "Error processing MQTT command")]
     private partial void LogMqttCommandProcessingError(Exception ex);
 
-    [LoggerMessage(EventId = 15205, Level = LogLevel.Error, Message = "Error executing MQTT command for topic {Topic}")]
+    [LoggerMessage(EventId = 15211, Level = LogLevel.Error, Message = "Error executing MQTT command for topic {Topic}")]
     private partial void LogMqttCommandExecutionError(string Topic, Exception ex);
 
-    [LoggerMessage(EventId = 15206, Level = LogLevel.Debug, Message = "MQTT command executed: {Command} via {Method}")]
+    [LoggerMessage(EventId = 15212, Level = LogLevel.Debug, Message = "MQTT command executed: {Command} via {Method}")]
     private partial void LogMqttCommandExecuted(string Command, string Method);
 
-    [LoggerMessage(EventId = 15207, Level = LogLevel.Error, Message = "Error executing MQTT command for {Command}")]
+    [LoggerMessage(EventId = 15213, Level = LogLevel.Error, Message = "Error executing MQTT command for {Command}")]
     private partial void LogMqttCommandHttpError(string Command, Exception ex);
 
-    [LoggerMessage(EventId = 15208, Level = LogLevel.Error, Message = "Error publishing MQTT {Topic}")]
+    [LoggerMessage(EventId = 15214, Level = LogLevel.Error, Message = "Error publishing MQTT {Topic}")]
     private partial void LogMqttPublishError(string Topic, Exception ex);
 }

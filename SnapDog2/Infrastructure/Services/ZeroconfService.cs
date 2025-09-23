@@ -127,19 +127,19 @@ public partial class ZeroconfService : IHostedService, IDisposable
 
     #region LoggerMessage Methods
 
-    [LoggerMessage(EventId = 18001, Level = LogLevel.Information, Message = "Zeroconf service advertisement disabled")]
+    [LoggerMessage(EventId = 14188, Level = LogLevel.Information, Message = "Zeroconf service advertisement disabled")]
     private partial void LogZeroconfDisabled();
 
-    [LoggerMessage(EventId = 18002, Level = LogLevel.Information, Message = "Zeroconf started - advertising as '{InstanceName}'")]
+    [LoggerMessage(EventId = 14189, Level = LogLevel.Information, Message = "Zeroconf started - advertising as '{InstanceName}'")]
     private partial void LogZeroconfStarted(string instanceName);
 
-    [LoggerMessage(EventId = 18003, Level = LogLevel.Information, Message = "Advertising {ServiceType} service '{ServiceName}' on port {Port}")]
+    [LoggerMessage(EventId = 14190, Level = LogLevel.Information, Message = "Advertising {ServiceType} service '{ServiceName}' on port {Port}")]
     private partial void LogServiceAdvertised(string serviceType, string serviceName, int port);
 
-    [LoggerMessage(EventId = 18004, Level = LogLevel.Information, Message = "Zeroconf service advertisement stopped")]
+    [LoggerMessage(EventId = 14191, Level = LogLevel.Information, Message = "Zeroconf service advertisement stopped")]
     private partial void LogZeroconfStopped();
 
-    [LoggerMessage(EventId = 18005, Level = LogLevel.Error, Message = "Failed to start Zeroconf service advertisement")]
+    [LoggerMessage(EventId = 14192, Level = LogLevel.Error, Message = "Failed to start Zeroconf service advertisement")]
     private partial void LogZeroconfStartFailed(Exception ex);
 
     #endregion

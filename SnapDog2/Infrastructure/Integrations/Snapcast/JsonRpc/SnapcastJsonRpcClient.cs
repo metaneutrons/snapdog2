@@ -310,30 +310,30 @@ public partial class SnapcastJsonRpcClient : IDisposable
     }
 
     // LoggerMessage patterns
-    [LoggerMessage(EventId = 15110, Level = LogLevel.Debug, Message = "Connecting to Snapcast WebSocket: {Url}")]
+    [LoggerMessage(EventId = 15113, Level = LogLevel.Debug, Message = "Connecting to Snapcast WebSocket: {Url}")]
     private partial void LogConnecting(string url);
 
-    [LoggerMessage(EventId = 15111, Level = LogLevel.Information, Message = "Connected → Snapcast WebSocket: {Url}")]
+    [LoggerMessage(EventId = 15114, Level = LogLevel.Information, Message = "Connected → Snapcast WebSocket: {Url}")]
     private partial void LogConnected(string url);
 
-    [LoggerMessage(EventId = 15112, Level = LogLevel.Debug, Message = "Sent request: {Method} with ID: {RequestId}")]
+    [LoggerMessage(EventId = 15115, Level = LogLevel.Debug, Message = "Sent request: {Method} with ID: {RequestId}")]
     private partial void LogRequestSent(string method, string requestId);
 
-    [LoggerMessage(EventId = 15113, Level = LogLevel.Warning, Message = "Connection lost, attempting reconnection")]
+    [LoggerMessage(EventId = 15116, Level = LogLevel.Warning, Message = "Connection lost, attempting reconnection")]
     private partial void LogConnectionLost(Exception ex);
 
-    [LoggerMessage(EventId = 15114, Level = LogLevel.Debug, Message = "Received notification: {Method}")]
+    [LoggerMessage(EventId = 15117, Level = LogLevel.Debug, Message = "Received notification: {Method}")]
     private partial void LogNotificationReceived(string method);
 
-    [LoggerMessage(EventId = 15115, Level = LogLevel.Error, Message = "Error processing message: {Message}")]
+    [LoggerMessage(EventId = 15118, Level = LogLevel.Error, Message = "Error processing message: {Message}")]
     private partial void LogMessageProcessingError(Exception ex, string message);
 
-    [LoggerMessage(EventId = 15116, Level = LogLevel.Error, Message = "WebSocket error during {Method}")]
+    [LoggerMessage(EventId = 15119, Level = LogLevel.Error, Message = "WebSocket error during {Method}")]
     private partial void LogWebSocketError(Exception ex, string method);
 
-    [LoggerMessage(EventId = 15117, Level = LogLevel.Warning, Message = "Connection closed: {CloseStatus} - {CloseDescription}")]
+    [LoggerMessage(EventId = 15120, Level = LogLevel.Warning, Message = "Connection closed: {CloseStatus} - {CloseDescription}")]
     private partial void LogConnectionClosed(WebSocketCloseStatus? closeStatus, string? closeDescription);
 
-    [LoggerMessage(EventId = 15118, Level = LogLevel.Error, Message = "Reconnection attempt failed")]
+    [LoggerMessage(EventId = 15121, Level = LogLevel.Error, Message = "Reconnection attempt failed")]
     private partial void LogReconnectionFailed(Exception ex);
 }

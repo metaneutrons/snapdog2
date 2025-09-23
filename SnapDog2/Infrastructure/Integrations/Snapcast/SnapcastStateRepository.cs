@@ -37,47 +37,47 @@ public partial class SnapcastStateRepository(
 
     #region Logging
 
-    [LoggerMessage(EventId = 15085, Level = LogLevel.Debug, Message = "Updating full Snapcast server state. Groups: {GroupCount}, Clients: {ClientCount}, Streams: {StreamCount}"
+    [LoggerMessage(EventId = 15087, Level = LogLevel.Debug, Message = "Updating full Snapcast server state. Groups: {GroupCount}, Clients: {ClientCount}, Streams: {StreamCount}"
 )]
     private partial void LogUpdatingServerState(int groupCount, int clientCount, int streamCount);
 
-    [LoggerMessage(EventId = 15086, Level = LogLevel.Debug, Message = "Updating Snapcast client {ClientIndex}"
+    [LoggerMessage(EventId = 15088, Level = LogLevel.Debug, Message = "Updating Snapcast client {ClientIndex}"
 )]
     private partial void LogUpdatingClient(string clientIndex);
 
-    [LoggerMessage(EventId = 15087, Level = LogLevel.Debug, Message = "Removing Snapcast client {ClientIndex}"
+    [LoggerMessage(EventId = 15089, Level = LogLevel.Debug, Message = "Removing Snapcast client {ClientIndex}"
 )]
     private partial void LogRemovingClient(string clientIndex);
 
-    [LoggerMessage(EventId = 15088, Level = LogLevel.Debug, Message = "Updating Snapcast group {GroupId}"
+    [LoggerMessage(EventId = 15090, Level = LogLevel.Debug, Message = "Updating Snapcast group {GroupId}"
 )]
     private partial void LogUpdatingGroup(string groupId);
 
-    [LoggerMessage(EventId = 15089, Level = LogLevel.Debug, Message = "Removing Snapcast group {GroupId}"
+    [LoggerMessage(EventId = 15091, Level = LogLevel.Debug, Message = "Removing Snapcast group {GroupId}"
 )]
     private partial void LogRemovingGroup(string groupId);
 
-    [LoggerMessage(EventId = 15090, Level = LogLevel.Debug, Message = "Updating Snapcast stream {StreamId}"
+    [LoggerMessage(EventId = 15092, Level = LogLevel.Debug, Message = "Updating Snapcast stream {StreamId}"
 )]
     private partial void LogUpdatingStream(string streamId);
 
-    [LoggerMessage(EventId = 15091, Level = LogLevel.Debug, Message = "Removing Snapcast stream {StreamId}"
+    [LoggerMessage(EventId = 15093, Level = LogLevel.Debug, Message = "Removing Snapcast stream {StreamId}"
 )]
     private partial void LogRemovingStream(string streamId);
 
-    [LoggerMessage(EventId = 15092, Level = LogLevel.Warning, Message = "Client index {ClientIndex} is out of range. Valid range: 1-{MaxClients}"
+    [LoggerMessage(EventId = 15094, Level = LogLevel.Warning, Message = "Client index {ClientIndex} is out of range. Valid range: 1-{MaxClients}"
 )]
     private partial void LogClientIndexOutOfRange(int clientIndex, int maxClients);
 
-    [LoggerMessage(EventId = 15093, Level = LogLevel.Warning, Message = "Client {ClientIndex} ({ClientName}) has no MAC address configured"
+    [LoggerMessage(EventId = 15095, Level = LogLevel.Warning, Message = "Client {ClientIndex} ({ClientName}) has no MAC address configured"
 )]
     private partial void LogClientMacNotConfigured(int clientIndex, string clientName);
 
-    [LoggerMessage(EventId = 15094, Level = LogLevel.Warning, Message = "Client {ClientIndex} ({ClientName}) with MAC {MacAddress} not found in Snapcast"
+    [LoggerMessage(EventId = 15096, Level = LogLevel.Warning, Message = "Client {ClientIndex} ({ClientName}) with MAC {MacAddress} not found in Snapcast"
 )]
     private partial void LogClientNotFoundByMac(int clientIndex, string clientName, string macAddress);
 
-    [LoggerMessage(EventId = 15095, Level = LogLevel.Debug, Message = "Client {ClientIndex} ({ClientName}) with MAC {MacAddress} found as Snapcast client {SnapcastClientId}"
+    [LoggerMessage(EventId = 15097, Level = LogLevel.Debug, Message = "Client {ClientIndex} ({ClientName}) with MAC {MacAddress} found as Snapcast client {SnapcastClientId}"
 )]
     private partial void LogClientFoundByMac(
         int clientIndex,
@@ -86,23 +86,23 @@ public partial class SnapcastStateRepository(
         string snapcastClientId
     );
 
-    [LoggerMessage(EventId = 15096, Level = LogLevel.Debug, Message = "Available Snapcast clients: {AvailableClients}"
+    [LoggerMessage(EventId = 15098, Level = LogLevel.Debug, Message = "Available Snapcast clients: {AvailableClients}"
 )]
     private partial void LogAvailableClients(string availableClients);
 
-    [LoggerMessage(EventId = 15097, Level = LogLevel.Debug, Message = "Total Snapcast clients in repository: {ClientCount}"
+    [LoggerMessage(EventId = 15099, Level = LogLevel.Debug, Message = "Total Snapcast clients in repository: {ClientCount}"
 )]
     private partial void LogTotalClientCount(int clientCount);
 
-    [LoggerMessage(EventId = 15098, Level = LogLevel.Debug, Message = "UpdateServerState called with {GroupCount} groups"
+    [LoggerMessage(EventId = 15100, Level = LogLevel.Debug, Message = "UpdateServerState called with {GroupCount} groups"
 )]
     private partial void LogUpdateServerStateCalled(int groupCount);
 
-    [LoggerMessage(EventId = 15099, Level = LogLevel.Debug, Message = "Processing group {GroupId} with {ClientCount} clients"
+    [LoggerMessage(EventId = 15101, Level = LogLevel.Debug, Message = "Processing group {GroupId} with {ClientCount} clients"
 )]
     private partial void LogProcessingGroup(string groupId, int clientCount);
 
-    [LoggerMessage(EventId = 15100, Level = LogLevel.Debug, Message = "Adding/updating client {ClientIndex} (MAC: {MacAddress})"
+    [LoggerMessage(EventId = 15102, Level = LogLevel.Debug, Message = "Adding/updating client {ClientIndex} (MAC: {MacAddress})"
 )]
     private partial void LogAddingClient(string clientIndex, string macAddress);
 
