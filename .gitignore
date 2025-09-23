@@ -238,4 +238,5 @@ docs/FalconExamples
 eventid-mappings.txt
 
 swagger.json
+signalr-swagger.json
 swagger-signalr.json
