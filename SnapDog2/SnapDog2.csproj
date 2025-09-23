@@ -44,9 +44,6 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
   </ItemGroup>
-  <ItemGroup>
-    <Analyzer Include="..\SnapDog.Analyzers\bin\Debug\netstandard2.0\SnapDog.Analyzers.dll" />
-  </ItemGroup>
 
   <!-- Auto-generate swagger.json when API changes -->
   <Target Name="GenerateSwaggerJson" AfterTargets="Build" Condition="'$(Configuration)' == 'Debug'">
