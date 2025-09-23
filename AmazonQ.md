@@ -49,7 +49,7 @@ public partial class MyService
 
 ### Conversion Rules
 
-1. **Template matching**: `{ZoneId}` requires parameter named `ZoneId` (exact case)
+1. **Template matching**: `{zoneIndex}` requires parameter named `zoneIndex` (exact case)
 2. **EventId**: Sequential per class (1, 2, 3...)
 3. **Nullable parameters**: Use `string?` for nullable values
 4. **LogLevel conflicts**: Use `Microsoft.Extensions.Logging.LogLevel`
@@ -58,11 +58,11 @@ public partial class MyService
 
 ```csharp
 // Before
-_logger.LogInformation("Zone {ZoneId} failed: {Error}", zoneIndex, error);
+_logger.LogInformation("Zone {zoneIndex} failed: {Error}", zoneIndex, error);
 
 // After
-[LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Zone {ZoneId} failed: {Error}")]
-private partial void LogZoneFailed(int ZoneId, string? Error);
+[LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "Zone {zoneIndex} failed: {Error}")]
+private partial void LogZoneFailed(int zoneIndex, string? Error);
 
 LogZoneFailed(zoneIndex, error);
 ```
