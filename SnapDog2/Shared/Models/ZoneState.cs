@@ -85,8 +85,5 @@ public record ZoneState
     /// </summary>
     public required int[] Clients { get; init; }
 
-    /// <summary>
-    /// Gets the UTC timestamp when the zone state was recorded.
-    /// </summary>
-    public DateTime TimestampUtc { get; init; } = DateTime.UtcNow;
+
 }

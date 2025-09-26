@@ -185,8 +185,7 @@ public partial class StateRestorationService(
 
                 Playlist = null, // Will be loaded when playlist is actually loaded
                 Track = null, // Will be loaded when track is actually loaded
-                Clients = Array.Empty<int>(), // Will be populated by client management
-                TimestampUtc = DateTime.UtcNow
+                Clients = Array.Empty<int>() // Will be populated by client management
             };
 
             zoneStateStore.SetZoneState(zoneIndex, initialState);
@@ -286,8 +285,7 @@ public partial class StateRestorationService(
             {
                 var updatedState = currentState.Value with
                 {
-                    Track = noTitleTrack,
-                    TimestampUtc = DateTime.UtcNow
+                    Track = noTitleTrack
                 };
 
                 zoneStateStore.SetZoneState(zoneIndex, updatedState);

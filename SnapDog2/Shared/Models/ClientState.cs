@@ -108,8 +108,5 @@ public record ClientState
     /// </summary>
     public string? SnapClientProtocolVersion { get; init; }
 
-    /// <summary>
-    /// Gets the UTC timestamp when the client state was recorded.
-    /// </summary>
-    public DateTime TimestampUtc { get; init; } = DateTime.UtcNow;
+
 }

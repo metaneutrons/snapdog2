@@ -150,7 +150,6 @@ public record TrackInfo
 
     public required string Source { get; init; }
     public required string Url { get; init; }
-    public DateTime TimestampUtc { get; init; } = DateTime.UtcNow;
 }
 ```
 

@@ -202,8 +202,7 @@ public partial class ClientManager : IClientManager
                 HostIpAddress = string.Empty,
                 HostName = string.Empty,
                 HostOs = string.Empty,
-                HostArch = string.Empty,
-                TimestampUtc = DateTime.UtcNow
+                HostArch = string.Empty
             };
 
             this._clientStateStore.InitializeClientState(clientIndex, defaultState);
@@ -405,8 +404,7 @@ public partial class ClientManager : IClientManager
                                 HostIpAddress = string.Empty,
                                 HostName = string.Empty,
                                 HostOs = string.Empty,
-                                HostArch = string.Empty,
-                                TimestampUtc = DateTime.UtcNow
+                                HostArch = string.Empty
                             };
                             this._clientStateStore.SetClientState(clientIndex, defaultState);
                             currentState = defaultState;
@@ -712,9 +710,8 @@ public partial class ClientManager : IClientManager
             HostIpAddress = client.Host.Ip,
             HostName = client.Host.Name,
             HostOs = client.Host.Os,
-            HostArch = client.Host.Arch,
+            HostArch = client.Host.Arch
             // ZoneIndex is determined by group assignment - will be updated by zone assignment logic
-            TimestampUtc = DateTime.UtcNow
         };
 
         this._clientStateStore.SetClientState(clientIndex, updatedState);

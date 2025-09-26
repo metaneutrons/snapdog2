@@ -64,7 +64,6 @@ public record ClientVolumeChangedNotification : INotification
 {
     public required int ClientIndex { get; init; }
     public required int Volume { get; init; }
-    public DateTime TimestampUtc { get; init; } = DateTime.UtcNow;
 }
 
 // Usage in handlers
@@ -461,8 +460,7 @@ public class StatusFactory : IStatusFactory
         return new ZonePlaybackStateChangedNotification
         {
             ZoneIndex = zoneIndex,
-            PlaybackState = state,
-            TimestampUtc = DateTime.UtcNow
+            PlaybackState = state
         };
     }
 
@@ -471,8 +469,7 @@ public class StatusFactory : IStatusFactory
         return new ClientVolumeChangedNotification
         {
             ClientIndex = clientIndex,
-            Volume = volume,
-            TimestampUtc = DateTime.UtcNow
+            Volume = volume
         };
     }
 }
@@ -544,7 +541,6 @@ public record NewFeatureStatusChangedNotification : INotification
 {
     public required string FeatureId { get; init; }
     public required string Status { get; init; }
-    public DateTime TimestampUtc { get; init; } = DateTime.UtcNow;
 }
 ```
 

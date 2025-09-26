@@ -382,8 +382,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
             return Result<ZoneState>.Success(this._currentState with
             {
-                Clients = zoneClients,
-                TimestampUtc = DateTime.UtcNow
+                Clients = zoneClients
             });
         }
         catch (OperationCanceledException)
@@ -1369,8 +1368,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 Name = "Radio Stations",
                 TrackCount = 0,
             },
-            Clients = Array.Empty<int>(),
-            TimestampUtc = DateTime.UtcNow,
+            Clients = Array.Empty<int>()
         };
     }
 
