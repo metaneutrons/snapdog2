@@ -31,9 +31,9 @@ public record ZoneState
     public string Icon { get; init; } = string.Empty;
 
     /// <summary>
-    /// Gets the current playback state.
+    /// Gets the current playback state (true = playing, false = paused/stopped).
     /// </summary>
-    public required PlaybackState PlaybackState { get; init; }
+    public required bool PlaybackState { get; init; }
 
     /// <summary>
     /// Gets the zone volume (0-100).

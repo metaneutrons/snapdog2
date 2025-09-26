@@ -134,7 +134,7 @@ sequenceDiagram
     SnapSvcImpl-->>MediaSvcImpl: Result.Success()
     MediaSvcImpl->>MediaSvcImpl: (LibVLC call to play track URL to /snapsinks/zone1)
     MediaSvcImpl-->>ZoneSvc: Result.Success()
-    ZoneSvc->>ZoneSvc: Update internal ZoneState record (Status=Playing)
+    ZoneSvc->>ZoneSvc: Update internal ZoneState record (PlaybackState=true)
     ZoneSvc->>Med: mediator.Publish(PlaybackStateChangedNotification(...)) ## Publishes state change event
     ZoneSvc-->>PlayCmdH: Result.Success()
     PlayCmdH-->>ValidationBh: Result.Success()

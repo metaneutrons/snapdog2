@@ -799,7 +799,7 @@ public partial class ZonesController(
         {
             return NotFound($"Zone {zoneIndex} not found");
         }
-        return Ok(zoneResult.Value?.PlaybackState == PlaybackState.Playing);
+        return Ok(zoneResult.Value?.PlaybackState == true);
     }
 
     [HttpGet("{zoneIndex:int}/playlist/name")]
@@ -831,7 +831,7 @@ public partial class ZonesController(
         {
             return NotFound($"Zone {zoneIndex} not found");
         }
-        return Ok(zoneResult.Value?.PlaybackState.ToString() ?? "Unknown");
+        return Ok(zoneResult.Value?.PlaybackState.ToString() ?? "False");
     }
 
     [HttpGet("{zoneIndex:int}/track")]

@@ -427,7 +427,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             // Update state
             this._currentState = this._currentState with
             {
-                PlaybackState = PlaybackState.Playing,
+                PlaybackState = true,
             };
 
             // Start position update timer for reliable MQTT updates + subscribe to events for immediate updates
@@ -437,7 +437,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             this._zoneStateStore.SetZoneState(this._zoneIndex, this._currentState);
 
             // Publish status notification for blueprint compliance
-            await this.PublishPlaybackStateStatusAsync(PlaybackState.Playing);
+            await this.PublishPlaybackStateStatusAsync(true);
 
             return Result.Success();
         }
@@ -496,7 +496,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             // Update state
             this._currentState = this._currentState with
             {
-                PlaybackState = PlaybackState.Playing,
+                PlaybackState = true,
                 Track = targetTrack,
             };
 
@@ -539,7 +539,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
             this._currentState = this._currentState with
             {
-                PlaybackState = PlaybackState.Playing,
+                PlaybackState = true,
                 Track = streamTrack,
             };
 
@@ -568,7 +568,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 return pauseResult;
             }
 
-            this._currentState = this._currentState with { PlaybackState = PlaybackState.Paused };
+            this._currentState = this._currentState with { PlaybackState = false };
 
             // Stop timer and unsubscribe from events when not playing
             this.UnsubscribeFromMediaPlayerEvents();
@@ -595,7 +595,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 return stopResult;
             }
 
-            this._currentState = this._currentState with { PlaybackState = PlaybackState.Stopped };
+            this._currentState = this._currentState with { PlaybackState = false };
 
             // Stop timer and unsubscribe from events when not playing
             this.UnsubscribeFromMediaPlayerEvents();
@@ -884,7 +884,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             var nextIndex = currentIndex + 1;
 
             // Check if we're currently playing
-            var wasPlaying = this._currentState.PlaybackState == PlaybackState.Playing;
+            var wasPlaying = this._currentState.PlaybackState == true;
 
             // Set the track (inline implementation to avoid nested lock)
             var setResult = await this.SetTrackInternalAsync(nextIndex).ConfigureAwait(false);
@@ -906,7 +906,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 // Update state to playing
                 this._currentState = this._currentState with
                 {
-                    PlaybackState = PlaybackState.Playing
+                    PlaybackState = true
                 };
 
                 // Start timer for reliable updates + events for immediate updates
@@ -989,7 +989,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
             var previousIndex = Math.Max(1, currentIndex - 1);
 
             // Check if we're currently playing
-            var wasPlaying = this._currentState.PlaybackState == PlaybackState.Playing;
+            var wasPlaying = this._currentState.PlaybackState == true;
 
             // Set the track (inline implementation to avoid nested lock)
             var setResult = await this.SetTrackInternalAsync(previousIndex).ConfigureAwait(false);
@@ -1011,7 +1011,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 // Update state to playing
                 this._currentState = this._currentState with
                 {
-                    PlaybackState = PlaybackState.Playing
+                    PlaybackState = true
                 };
 
                 // Start timer for reliable updates + events for immediate updates
@@ -1343,7 +1343,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         {
             Name = this._config.Name,
             Icon = this._config.Icon,
-            PlaybackState = PlaybackState.Stopped,
+            PlaybackState = false,
             Volume = 50,
             Mute = false,
             TrackRepeat = false,
@@ -1474,7 +1474,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         {
             this.LogPositionChangedForZone(this._zoneIndex, e.PositionMs, e.Progress);
 
-            if (this._disposed || this._currentState.PlaybackState != PlaybackState.Playing)
+            if (this._disposed || this._currentState.PlaybackState != true)
             {
                 this.LogSkippingPositionUpdate(this._disposed, this._currentState.PlaybackState.ToString());
                 return;
@@ -1563,9 +1563,9 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
             // Update playback state based on LibVLC state
             var newPlaybackState =
-                e.IsPlaying ? PlaybackState.Playing
-                : e.State == LibVLC.VLCState.Paused ? PlaybackState.Paused
-                : PlaybackState.Stopped;
+                e.IsPlaying ? true
+                : e.State == LibVLC.VLCState.Paused ? false
+                : false;
 
             if (this._currentState.PlaybackState != newPlaybackState)
             {
@@ -1580,7 +1580,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                         var playingStatusNotification = new
                         {
                             ZoneIndex = this._zoneIndex,
-                            IsPlaying = newPlaybackState == PlaybackState.Playing
+                            IsPlaying = newPlaybackState == true
                         };
                         await this._hubContext.Clients.All.SendAsync("ZonePlaybackChanged", playingStatusNotification).ConfigureAwait(false);
                     }
@@ -1606,8 +1606,8 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
         try
         {
             // Update state to stopped first
-            this._currentState = this._currentState with { PlaybackState = PlaybackState.Stopped };
-            this._zoneStateStore.UpdatePlaybackState(this._zoneIndex, PlaybackState.Stopped);
+            this._currentState = this._currentState with { PlaybackState = false };
+            this._zoneStateStore.UpdatePlaybackState(this._zoneIndex, false);
 
             // Check track repeat first (highest priority)
             if (this._currentState.TrackRepeat)
@@ -1738,7 +1738,7 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
 
     #region Status Publishing Methods (Blueprint Compliance)
 
-    public async Task PublishPlaybackStateStatusAsync(PlaybackState playbackState)
+    public async Task PublishPlaybackStateStatusAsync(bool playbackState)
     {
         await this._hubContext.Clients.All.SendAsync("ZonePlaybackStateChanged", this._zoneIndex, playbackState).ConfigureAwait(false);
     }
@@ -1791,13 +1791,11 @@ public partial class ZoneService : IZoneService, IAsyncDisposable
                 DurationMs = track.DurationMs,
                 PositionMs = track.PositionMs,
                 Progress = track.Progress,
-                IsPlaying = track.IsPlaying,
                 CoverArtUrl = track.CoverArtUrl,
                 Genre = track.Genre,
                 TrackNumber = track.TrackNumber,
                 Year = track.Year,
-                Rating = track.Rating,
-                TimestampUtc = track.TimestampUtc
+                Rating = track.Rating
             };
             await this._hubContext.Clients.All.SendAsync("ZoneTrackMetadataChanged", this._zoneIndex, trackInfo).ConfigureAwait(false);
 

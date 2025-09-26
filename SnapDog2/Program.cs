@@ -41,6 +41,7 @@ using SnapDog2.Infrastructure.Integrations.SignalR;
 using SnapDog2.Infrastructure.Integrations.Subsonic;
 using SnapDog2.Infrastructure.Metrics;
 using SnapDog2.Infrastructure.Notifications;
+using SnapDog2.Infrastructure.Serialization;
 using SnapDog2.Infrastructure.Services;
 using SnapDog2.Infrastructure.Storage;
 using SnapDog2.Shared.Configuration;
@@ -518,7 +519,17 @@ static WebApplication CreateWebApplication(string[] args)
     // Add services to the container (conditionally based on API configuration)
     if (snapDogConfig.Http.ApiEnabled)
     {
-        builder.Services.AddControllers();
+        builder.Services.AddControllers()
+            .AddJsonOptions(options =>
+            {
+                // Configure DateTime serialization to use standard ISO8601 format (3 decimal places)
+                // This ensures compatibility with Swift's ISO8601DateFormatter
+                options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+                options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+
+                // Custom DateTime converter for standard ISO8601 format
+                options.JsonSerializerOptions.Converters.Add(new Iso8601DateTimeConverter());
+            });
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(c =>
         {

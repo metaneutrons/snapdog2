@@ -147,7 +147,7 @@ public record TrackInfo
     public int? TrackNumber { get; init; }
     public int? Year { get; init; }
     public float? Rating { get; init; }
-    public bool IsPlaying { get; init; }
+
     public required string Source { get; init; }
     public required string Url { get; init; }
     public DateTime TimestampUtc { get; init; } = DateTime.UtcNow;
@@ -591,7 +591,7 @@ export interface TrackInfo {
   positionMs?: number;
   progress?: number;
   coverArtUrl?: string;
-  isPlaying: boolean;
+
   source: string;
   url: string;
 }

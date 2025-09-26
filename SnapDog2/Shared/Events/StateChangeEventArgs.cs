@@ -79,8 +79,8 @@ public record ZonePositionChangedEventArgs(
 [StatusId("PLAYBACK_STATE")]
 public record ZonePlaybackStateChangedEventArgs(
     int ZoneIndex,
-    PlaybackState OldPlaybackState,
-    PlaybackState NewPlaybackState,
+    bool OldPlaybackState,
+    bool NewPlaybackState,
     DateTime Timestamp = default
 ) : ZoneStateChangedEventArgs(ZoneIndex, null, null!, Timestamp);
 

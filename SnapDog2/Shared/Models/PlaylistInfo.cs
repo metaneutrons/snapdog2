@@ -64,8 +64,5 @@ public record PlaylistInfo
     /// </summary>
     public required string Source { get; init; }
 
-    /// <summary>
-    /// Gets the UTC timestamp when the playlist info was recorded.
-    /// </summary>
-    public DateTime TimestampUtc { get; init; } = DateTime.UtcNow;
+
 }

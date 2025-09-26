@@ -349,7 +349,6 @@ public sealed partial class MediaPlayer(
             // Update track with real-time position information from LibVLC
             currentTrack = currentTrack with
             {
-                IsPlaying = isPlaying,
                 PositionMs = this._processingContext.PositionMs,
                 Progress = this._processingContext.Progress,
                 DurationMs =

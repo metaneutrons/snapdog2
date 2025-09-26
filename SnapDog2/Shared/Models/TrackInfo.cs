@@ -94,11 +94,7 @@ public record TrackInfo
     /// </summary>
     public float? Rating { get; init; }
 
-    /// <summary>
-    /// Gets whether the track is currently playing.
-    /// Maps to TRACK_PLAYING_STATUS from MediaPlayer state.
-    /// </summary>
-    public bool IsPlaying { get; init; }
+
 
     /// <summary>
     /// Gets the source type ("subsonic", "radio", "stream").
@@ -112,8 +108,5 @@ public record TrackInfo
     /// </summary>
     public required string Url { get; init; }
 
-    /// <summary>
-    /// Gets the UTC timestamp when the track info was recorded.
-    /// </summary>
-    public DateTime TimestampUtc { get; init; } = DateTime.UtcNow;
+
 }

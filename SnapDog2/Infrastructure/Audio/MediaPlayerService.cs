@@ -131,7 +131,7 @@ public sealed partial class MediaPlayerService(
                 player.SetMetadataDuration(trackInfo.DurationMs);
 
                 // Update zone state to Playing
-                _zoneStateStore.UpdatePlaybackState(zoneIndex, PlaybackState.Playing);
+                _zoneStateStore.UpdatePlaybackState(zoneIndex, true);
 
                 LogPlayingTrack(_logger, trackInfo.Title, zoneIndex, streamUrl);
 
@@ -166,7 +166,7 @@ public sealed partial class MediaPlayerService(
                 await player.DisposeAsync();
 
                 // Update zone state to Stopped
-                _zoneStateStore.UpdatePlaybackState(zoneIndex, PlaybackState.Stopped);
+                _zoneStateStore.UpdatePlaybackState(zoneIndex, false);
 
                 LogPlaybackStoppedInfo(_logger, zoneIndex);
 
@@ -197,7 +197,7 @@ public sealed partial class MediaPlayerService(
             if (result.IsSuccess)
             {
                 // Update zone state to Paused
-                _zoneStateStore.UpdatePlaybackState(zoneIndex, PlaybackState.Paused);
+                _zoneStateStore.UpdatePlaybackState(zoneIndex, false);
 
                 LogPlaybackPausedInfo(_logger, zoneIndex);
 

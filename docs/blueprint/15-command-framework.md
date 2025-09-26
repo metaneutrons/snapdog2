@@ -75,7 +75,7 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 | `PLAY`            | Start/resume playback  | `ZoneIndex` (int), Optional `TrackIndex`/`MediaUrl`   | Command (Set)      | Action: Tell zone to play       |
 | `PAUSE`           | Pause playback         | `ZoneIndex` (int)                                     | Command (Set)      | Action: Tell zone to pause      |
 | `STOP`            | Stop playback          | `ZoneIndex` (int)                                     | Command (Set)      | Action: Tell zone to stop       |
-| `PLAYBACK_STATE`  | Current playback state | `ZoneIndex` (int), `Status` (`PlaybackStatus` enum)   | Status (Publish)   | State: Stopped, Playing, Paused |
+| `PLAYBACK_STATE`  | Current playback state | `ZoneIndex` (int), `Status` (bool)   | Status (Publish)   | State: true=Playing, false=Paused/Stopped |
 
 > **Important Distinction: Track Metadata vs. Playback State**
 >
@@ -116,7 +116,7 @@ Base topic: `SNAPDOG_SYSTEM_MQTT_BASE_TOPIC` (default: `snapdog`). System topics
 
 | Command/Status ID         | Description                 | Essential Information / Type                   | Direction        | Notes / Comments                    |
 | :------------------------ | :-------------------------- | :--------------------------------------------- | :--------------- | :---------------------------------- |
-| `TRACK_PLAYING_STATUS`    | Current playing state       | `ZoneIndex` (int), `IsPlaying` (bool)          | Status (Publish) | State: Track is playing/paused      |
+
 | `TRACK_POSITION`          | Seek to position in track   | `ZoneIndex` (int), `Position` (long, ms)       | Command (Set)    | Action: Seek to position            |
 | `TRACK_PROGRESS`          | Seek to progress percentage | `ZoneIndex` (int), `Progress` (float, 0.0-1.0) | Command (Set)    | Action: Seek to progress %          |
 | `TRACK_POSITION_STATUS`   | Track position              | `ZoneIndex` (int), `Position` (long, ms)       | Status (Publish) | State: Position in current track    |
@@ -424,7 +424,7 @@ The following commands are **intentionally not implemented** in KNX due to proto
 
 | Status ID        | DPT     | Env Var Suffix         | Notes                  |
 | :--------------- | :------ | :--------------------- | :--------------------- |
-| `TRACK_PLAYING_STATUS` | 1.001   | `_KNX_TRACK_PLAYING_STATUS` | Send 1=Playing, 0=Not Playing |
+| `PLAYBACK_STATE` | 1.001   | `_KNX_PLAYBACK_STATUS` | Send 1=Playing, 0=Paused/Stopped |
 
 > **Note:** Replaced `PLAYBACK_STATE` with `TRACK_PLAYING_STATUS` for better KNX protocol alignment. Simple boolean vs complex state enum.
 

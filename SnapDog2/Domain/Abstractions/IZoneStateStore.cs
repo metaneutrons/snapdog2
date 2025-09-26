@@ -78,7 +78,7 @@ public interface IZoneStateStore
     /// </summary>
     void UpdateTrack(int zoneIndex, TrackInfo track);
     void UpdateVolume(int zoneIndex, int volume);
-    void UpdatePlaybackState(int zoneIndex, PlaybackState state);
+    void UpdatePlaybackState(int zoneIndex, bool state);
     void UpdatePlaylist(int zoneIndex, PlaylistInfo playlist);
     void UpdatePosition(int zoneIndex, int positionMs, double progress);
     void UpdateMute(int zoneIndex, bool mute);

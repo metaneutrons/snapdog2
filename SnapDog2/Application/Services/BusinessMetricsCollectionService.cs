@@ -136,7 +136,7 @@ public partial class BusinessMetricsCollectionService(
             }
 
             // Count zones that are not stopped (playing or paused)
-            return result.Value.Count(zone => zone.PlaybackState != PlaybackState.Stopped);
+            return result.Value.Count(zone => zone.PlaybackState == true);
         }
         catch
         {
@@ -190,7 +190,7 @@ public partial class BusinessMetricsCollectionService(
             }
 
             // Count zones that are currently playing
-            return result.Value.Count(zone => zone.PlaybackState == PlaybackState.Playing);
+            return result.Value.Count(zone => zone.PlaybackState == true);
         }
         catch
         {

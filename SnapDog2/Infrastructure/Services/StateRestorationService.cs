@@ -107,7 +107,7 @@ public partial class StateRestorationService(
                     this.LogZoneStateRestored(zoneIndex, persistedState.Name);
 
                     // Track zones that were playing for later resumption
-                    if (persistedState.PlaybackState == PlaybackState.Playing)
+                    if (persistedState.PlaybackState == true)
                     {
                         zonesToResumePlayback.Add((zoneIndex, persistedState));
                         this.LogZonePlaybackWillResume(zoneIndex, persistedState.Name);
@@ -176,7 +176,7 @@ public partial class StateRestorationService(
                 Name = zoneConfig.Name,
                 Volume = 50, // Default volume
                 Mute = false,
-                PlaybackState = PlaybackState.Stopped,
+                PlaybackState = false,
                 TrackRepeat = false,
                 PlaylistRepeat = false,
                 PlaylistShuffle = false,
@@ -273,13 +273,11 @@ public partial class StateRestorationService(
                 DurationMs = 0,
                 PositionMs = 0,
                 Progress = 0,
-                IsPlaying = false,
                 CoverArtUrl = "data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2272%22%20height%3D%2272%22%20fill%3D%22none%22%20viewBox%3D%220%200%2072%2072%22%3E%3Crect%20width%3D%2272%22%20height%3D%2271.998%22%20fill%3D%22%23198AFF%22%20rx%3D%222.8%22%2F%3E%3Cpath%20fill%3D%22%23fff%22%20d%3D%22M59.0409%2031.8969H15.8403V41.1881H59.0409V31.8969ZM15.8403%2027.2031H54.967V21.216H15.8403V27.2031ZM15.8403%2016.9585H44.2502V12.9609H15.8403V16.9585ZM52.2316%2045.8849H15.8374V51.3643H52.2316V45.8849ZM44.248%2059.0426H15.8374V55.6189H44.248V59.0426Z%22%2F%3E%3C%2Fsvg%3E",
                 Genre = "",
                 TrackNumber = 1,
                 Year = null,
-                Rating = null,
-                TimestampUtc = DateTime.UtcNow
+                Rating = null
             };
 
             // Update zone state with the No Title track

@@ -133,7 +133,7 @@ public class InMemoryZoneStateStore : IZoneStateStore
         }
     }
 
-    public void UpdatePlaybackState(int zoneIndex, PlaybackState state)
+    public void UpdatePlaybackState(int zoneIndex, bool state)
     {
         var currentState = GetZoneState(zoneIndex);
         if (currentState == null)
@@ -296,7 +296,7 @@ public class InMemoryZoneStateStore : IZoneStateStore
                 => new ZoneVolumeChangedEventArgs(zoneIndex, 0, currentState.Volume),
 
             "ZonePlaybackStateChanged"
-                => new ZonePlaybackStateChangedEventArgs(zoneIndex, PlaybackState.Stopped, currentState.PlaybackState),
+                => new ZonePlaybackStateChangedEventArgs(zoneIndex, false, currentState.PlaybackState),
 
             _ => null // Skip unknown or conditional events
         };
@@ -397,7 +397,7 @@ public class InMemoryZoneStateStore : IZoneStateStore
         if (oldState?.PlaybackState != newState.PlaybackState)
         {
             ZonePlaybackStateChanged?.Invoke(this, new ZonePlaybackStateChangedEventArgs(
-                zoneIndex, oldState?.PlaybackState ?? Shared.Enums.PlaybackState.Stopped, newState.PlaybackState));
+                zoneIndex, oldState?.PlaybackState ?? false, newState.PlaybackState));
         }
     }
 }

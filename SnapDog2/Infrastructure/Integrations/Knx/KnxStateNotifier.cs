@@ -117,7 +117,7 @@ public partial class KnxStateNotifier : IHostedService
         var knxService = scope.ServiceProvider.GetService<IKnxService>();
         if (knxService != null)
         {
-            var isPlaying = e.NewPlaybackState == PlaybackState.Playing ? 1 : 0;
+            var isPlaying = e.NewPlaybackState ? 1 : 0;
             await knxService.WriteGroupValueAsync(knxConfig.TrackPlayingStatus, isPlaying);
         }
     }

@@ -128,7 +128,7 @@ This section summarizes the mapping between SnapDog2 internal values/states and 
   * Specifics:
     * `PLAY`/`PAUSE` Command via `_KNX_PLAY` GA: Send `1` to Play, `0` to Pause.
     * `STOP` Command via `_KNX_STOP` GA: Send `1` to Stop.
-    * `PLAYBACK_STATE` Status via `_KNX_PLAYBACK_STATUS` GA: Send `1` if state is `Playing`, otherwise send `0`.
+    * `PLAYBACK_STATE` Status via `_KNX_PLAYBACK_STATUS` GA: Send `1` if state is `true` (playing), otherwise send `0` (paused/stopped).
     * Toggle Commands: Receiving `1` triggers the toggle action.
 
 * **DPT 3.007 (Dimming Control):**

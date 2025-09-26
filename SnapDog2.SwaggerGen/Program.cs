@@ -252,10 +252,11 @@ try
         }
     }
 
-    // Write combined swagger.json (API + SignalR)
-    await WriteSwaggerFile(swagger, fullOutputPath, "Combined API + SignalR", verbose);
+    // Write REST API only (exclude SignalR paths)
+    var restOnlySwagger = CreateRestOnlySwagger(swagger);
+    await WriteSwaggerFile(restOnlySwagger, fullOutputPath, "REST API", verbose);
 
-    // Also create separate SignalR-only documentation
+    // Write SignalR-only specification
     if (hubType != null)
     {
         if (verbose)
@@ -306,6 +307,30 @@ catch (Exception ex)
     Environment.Exit(1);
 }
 
+static OpenApiDocument CreateRestOnlySwagger(OpenApiDocument originalSwagger)
+{
+    var restSwagger = new OpenApiDocument
+    {
+        Info = new OpenApiInfo
+        {
+            Title = "SnapDog2 API",
+            Version = "v1",
+            Description = "REST API for SnapDog2 audio streaming control"
+        },
+        Paths = new OpenApiPaths(),
+        Components = originalSwagger.Components
+    };
+
+    // Filter only REST API paths (exclude SignalR hub paths)
+    foreach (var path in originalSwagger.Paths.Where(p =>
+        !p.Key.Contains("/hubs/", StringComparison.OrdinalIgnoreCase)))
+    {
+        restSwagger.Paths.Add(path.Key, path.Value);
+    }
+
+    return restSwagger;
+}
+
 static OpenApiDocument CreateSignalROnlySwagger(OpenApiDocument originalSwagger)
 {
     var signalrSwagger = new OpenApiDocument
@@ -320,12 +345,9 @@ static OpenApiDocument CreateSignalROnlySwagger(OpenApiDocument originalSwagger)
         Components = originalSwagger.Components
     };
 
-    // Filter only SignalR paths
+    // Filter only SignalR hub paths
     foreach (var path in originalSwagger.Paths.Where(p =>
-        p.Key.Contains("signalr", StringComparison.OrdinalIgnoreCase) ||
-        p.Value.Operations.Any(op => op.Value.Tags?.Any(tag =>
-            tag.Name.Contains("SignalR", StringComparison.OrdinalIgnoreCase) ||
-            tag.Name.Contains("Hub", StringComparison.OrdinalIgnoreCase)) == true)))
+        p.Key.Contains("/hubs/", StringComparison.OrdinalIgnoreCase)))
     {
         signalrSwagger.Paths.Add(path.Key, path.Value);
     }

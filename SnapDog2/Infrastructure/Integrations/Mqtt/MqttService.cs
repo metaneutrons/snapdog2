@@ -467,7 +467,7 @@ public sealed partial class MqttService : IMqttService
         var tasks = new List<Task>();
 
         // Publish all current state - store already detected changes
-        tasks.Add(PublishMessage($"{baseTopic}/playing", (state.PlaybackState == PlaybackState.Playing).ToString().ToLowerInvariant()));
+        tasks.Add(PublishMessage($"{baseTopic}/playing", state.PlaybackState.ToString().ToLowerInvariant()));
         tasks.Add(PublishMessage($"{baseTopic}/volume", state.Volume.ToString()));
 
         // Track data is published via OnZoneTrackChanged event handler to avoid race conditions
