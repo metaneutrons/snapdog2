@@ -15,6 +15,7 @@
         not path /swagger*
         not path /webui*
         not path /hubs*
+        not path /assets*
     }
 
     handle @not_server {
@@ -64,6 +65,11 @@
             header_up Connection {>Connection}
             header_up Upgrade {>Upgrade}
         }
+    }
+
+    # SnapDog static assets (cover art, etc.)
+    handle /assets/* {
+        reverse_proxy http://app:5555
     }
 
     # SnapDog API

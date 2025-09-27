@@ -75,7 +75,8 @@ public partial class PlaylistManager : IPlaylistManager
                     Index = 1,
                     Name = "Radio Stations",
                     TrackCount = this._configuration.RadioStations.Count,
-                    Source = "radio"
+                    Source = "radio",
+                    CoverArtUrl = $"{this._configuration.Http.BaseUrl}/assets/radio-stations-coverart.webp"
                 };
                 playlists.Add(radioPlaylist);
             }
@@ -195,7 +196,8 @@ public partial class PlaylistManager : IPlaylistManager
                         Index = 1,
                         Name = "Radio Stations",
                         TrackCount = this._configuration.RadioStations.Count,
-                        Source = "radio"
+                        Source = "radio",
+                        CoverArtUrl = $"{this._configuration.Http.BaseUrl}/assets/radio-stations-coverart.webp"
                     };
                     return Result<PlaylistInfo>.Success(radioPlaylist);
                 }

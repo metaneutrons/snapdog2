@@ -669,8 +669,21 @@ static WebApplication CreateWebApplication(string[] args)
         // Add WebUI fallback routing (conditionally based on configuration)
         if (snapDogConfig.Http.WebUiEnabled)
         {
-            app.MapFallbackToFile("index.html");
-            Log.Information("WebUI fallback routing enabled - SPA routing to index.html");
+            // Only fallback for non-asset requests
+            app.MapFallback(async context =>
+            {
+                // Don't handle requests to /assets/ or /api/
+                if (context.Request.Path.StartsWithSegments("/assets") ||
+                    context.Request.Path.StartsWithSegments("/api"))
+                {
+                    context.Response.StatusCode = 404;
+                    return;
+                }
+
+                context.Response.ContentType = "text/html";
+                await context.Response.SendFileAsync("wwwroot/index.html");
+            });
+            Log.Information("WebUI fallback routing enabled - SPA routing to index.html (excluding /assets/ and /api/)");
         }
 
         // Map health check endpoints

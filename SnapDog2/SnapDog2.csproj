@@ -8,6 +8,11 @@
     <GenerateStaticWebAssetsManifest>false</GenerateStaticWebAssetsManifest>
   </PropertyGroup>
   <ItemGroup>
+    <!-- Static web assets -->
+    <Content Include="wwwroot\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
 
     <PackageReference Include="dotenv.net" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
